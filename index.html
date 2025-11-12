@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="robots" content="index, follow" />
+    <title>SAA Homes - Northern Colorado Real Estate Experts</title>
+    <meta name="description" content="Schwartz and Associates at Coldwell Banker Realty. Your Northern Colorado real estate experts for Fort Collins, Loveland, Windsor, Greeley, and beyond." />
+    
+    <!-- Preconnect to external domains for performance -->
+    <link rel="preconnect" href="https://em.realscout.com" />
+    
+    <!-- RealScout Web Components - Load in head for better compatibility -->
+    <script src="https://em.realscout.com/widgets/realscout-web-components.umd.js" type="module"></script>
+    
+    <!-- RealScout Widget Customization Styles -->
+    <style>
+      /* Simple Search Widget Styles */
+      realscout-simple-search {
+        --rs-ss-font-primary-color: #6a6d72;
+        --rs-ss-searchbar-border-color: hsl(0, 0%, 80%);
+        --rs-ss-box-shadow: 0 10px 15px -3px #0000001a;
+        --rs-ss-widget-width: 500px !important;
+      }
+      
+      /* Advanced Search Widget Styles */
+      realscout-advanced-search {
+        --rs-as-button-text-color: #ffffff;
+        --rs-as-background-color: #ffffff;
+        --rs-as-button-color: rgb(35, 93, 137);
+        --rs-as-widget-width: 500px !important;
+      }
+      
+      /* Home Value Widget Styles */
+      realscout-home-value {
+        --rs-hvw-background-color: #ffffff;
+        --rs-hvw-title-color: #000000;
+        --rs-hvw-subtitle-color: rgba(28, 30, 38, 0.5);
+        --rs-hvw-primary-button-text-color: #ffffff;
+        --rs-hvw-primary-button-color: rgb(35, 93, 137);
+        --rs-hvw-secondary-button-text-color: rgb(35, 93, 137);
+        --rs-hvw-secondary-button-color: #ffffff;
+        --rs-hvw-widget-width: auto;
+      }
+    </style>
+  </head>
+  <body class="bg-white text-gray-900">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
