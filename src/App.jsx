@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
 import Breadcrumbs from "./components/Breadcrumbs.jsx";
@@ -27,6 +27,26 @@ import MortgageCalculatorPage from "./pages/MortgageCalculatorPage.jsx";
 import AdminPage from "./pages/AdminPage.jsx";
 import { loadRealScoutScript } from "./utils/realscout.js";
 
+function AppLayout({ children }) {
+  const location = useLocation();
+  const isAdminPage = location.pathname.startsWith('/admin');
+  
+  if (isAdminPage) {
+    return <>{children}</>;
+  }
+  
+  return (
+    <>
+      <Header />
+      <Breadcrumbs />
+      <main id="page-container" className="w-full">
+        {children}
+      </main>
+      <Footer />
+    </>
+  );
+}
+
 export default function App() {
   useEffect(() => {
     // Load RealScout script when app mounts
@@ -34,74 +54,68 @@ export default function App() {
       console.error('Error loading RealScout script:', error);
     });
   }, []);
+  
   return (
     <div className="min-h-screen w-full bg-white text-gray-900">
-      <Header />
-      <Breadcrumbs />
-      <main id="page-container" className="w-full">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/about-us" element={<AboutPage />} />
-          <Route path="/about-us/" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/contact/" element={<ContactPage />} />
-          <Route path="/for-buyers" element={<ForBuyersPage />} />
-          <Route path="/for-buyers/" element={<ForBuyersPage />} />
-          <Route path="/for-sellers" element={<ForSellersPage />} />
-          <Route path="/for-sellers/" element={<ForSellersPage />} />
-          <Route path="/featured-areas" element={<FeaturedAreasPage />} />
-          <Route path="/featured-areas/" element={<FeaturedAreasPage />} />
-          <Route path="/northern-colorado-areas" element={<FeaturedAreasPage />} />
-          <Route path="/northern-colorado-areas/" element={<FeaturedAreasPage />} />
-          
-          {/* Area Pages */}
-          <Route path="/northern-colorado-areas/fort-collins" element={<FortCollinsPage />} />
-          <Route path="/northern-colorado-areas/fort-collins/" element={<FortCollinsPage />} />
-          <Route path="/northern-colorado-areas/loveland" element={<LovelandPage />} />
-          <Route path="/northern-colorado-areas/loveland/" element={<LovelandPage />} />
-          <Route path="/northern-colorado-areas/mead" element={<MeadPage />} />
-          <Route path="/northern-colorado-areas/mead/" element={<MeadPage />} />
-          <Route path="/northern-colorado-areas/longmont" element={<LongmontPage />} />
-          <Route path="/northern-colorado-areas/longmont/" element={<LongmontPage />} />
-          <Route path="/northern-colorado-areas/boulder" element={<BoulderPage />} />
-          <Route path="/northern-colorado-areas/boulder/" element={<BoulderPage />} />
-          <Route path="/northern-colorado-areas/windsor" element={<WindsorPage />} />
-          <Route path="/northern-colorado-areas/windsor/" element={<WindsorPage />} />
-          <Route path="/northern-colorado-areas/greeley" element={<GreeleyPage />} />
-          <Route path="/northern-colorado-areas/greeley/" element={<GreeleyPage />} />
-          <Route path="/northern-colorado-areas/timnath" element={<TimnathPage />} />
-          <Route path="/northern-colorado-areas/timnath/" element={<TimnathPage />} />
-          <Route path="/northern-colorado-areas/wellington" element={<WellingtonPage />} />
-          <Route path="/northern-colorado-areas/wellington/" element={<WellingtonPage />} />
-          <Route path="/northern-colorado-areas/johnstown" element={<JohnstownPage />} />
-          <Route path="/northern-colorado-areas/johnstown/" element={<JohnstownPage />} />
-          <Route path="/northern-colorado-areas/eaton" element={<EatonPage />} />
-          <Route path="/northern-colorado-areas/eaton/" element={<EatonPage />} />
-          <Route path="/northern-colorado-areas/milliken" element={<MillikenPage />} />
-          <Route path="/northern-colorado-areas/milliken/" element={<MillikenPage />} />
-          <Route path="/northern-colorado-areas/la-salle" element={<LaSallePage />} />
-          <Route path="/northern-colorado-areas/la-salle/" element={<LaSallePage />} />
-          
-          {/* Property Search Page */}
-          <Route path="/properties" element={<PropertiesPage />} />
-          <Route path="/properties/" element={<PropertiesPage />} />
-          <Route path="/home-valuation" element={<ForSellersPage />} />
-          <Route path="/home-valuation/" element={<ForSellersPage />} />
-          <Route path="/whats-my-home-worth" element={<ForSellersPage />} />
-          <Route path="/whats-my-home-worth/" element={<ForSellersPage />} />
-          <Route path="/sellers" element={<ForSellersPage />} />
-          <Route path="/sellers/" element={<ForSellersPage />} />
-          
-          {/* Mortgage Calculator */}
-          <Route path="/mortgage-calculator" element={<MortgageCalculatorPage />} />
-          <Route path="/mortgage-calculator/" element={<MortgageCalculatorPage />} />
-          
-          {/* Admin Panel */}
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/admin/" element={<AdminPage />} />
-        </Routes>
-      </main>
-      <Footer />
+      <Routes>
+        <Route path="/admin" element={<AppLayout><AdminPage /></AppLayout>} />
+        <Route path="/admin/" element={<AppLayout><AdminPage /></AppLayout>} />
+        <Route path="/" element={<AppLayout><HomePage /></AppLayout>} />
+        <Route path="/about-us" element={<AppLayout><AboutPage /></AppLayout>} />
+        <Route path="/about-us/" element={<AppLayout><AboutPage /></AppLayout>} />
+        <Route path="/contact" element={<AppLayout><ContactPage /></AppLayout>} />
+        <Route path="/contact/" element={<AppLayout><ContactPage /></AppLayout>} />
+        <Route path="/for-buyers" element={<AppLayout><ForBuyersPage /></AppLayout>} />
+        <Route path="/for-buyers/" element={<AppLayout><ForBuyersPage /></AppLayout>} />
+        <Route path="/for-sellers" element={<AppLayout><ForSellersPage /></AppLayout>} />
+        <Route path="/for-sellers/" element={<AppLayout><ForSellersPage /></AppLayout>} />
+        <Route path="/featured-areas" element={<AppLayout><FeaturedAreasPage /></AppLayout>} />
+        <Route path="/featured-areas/" element={<AppLayout><FeaturedAreasPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas" element={<AppLayout><FeaturedAreasPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/" element={<AppLayout><FeaturedAreasPage /></AppLayout>} />
+        
+        {/* Area Pages */}
+        <Route path="/northern-colorado-areas/fort-collins" element={<AppLayout><FortCollinsPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/fort-collins/" element={<AppLayout><FortCollinsPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/loveland" element={<AppLayout><LovelandPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/loveland/" element={<AppLayout><LovelandPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/mead" element={<AppLayout><MeadPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/mead/" element={<AppLayout><MeadPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/longmont" element={<AppLayout><LongmontPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/longmont/" element={<AppLayout><LongmontPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/boulder" element={<AppLayout><BoulderPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/boulder/" element={<AppLayout><BoulderPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/windsor" element={<AppLayout><WindsorPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/windsor/" element={<AppLayout><WindsorPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/greeley" element={<AppLayout><GreeleyPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/greeley/" element={<AppLayout><GreeleyPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/timnath" element={<AppLayout><TimnathPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/timnath/" element={<AppLayout><TimnathPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/wellington" element={<AppLayout><WellingtonPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/wellington/" element={<AppLayout><WellingtonPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/johnstown" element={<AppLayout><JohnstownPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/johnstown/" element={<AppLayout><JohnstownPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/eaton" element={<AppLayout><EatonPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/eaton/" element={<AppLayout><EatonPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/milliken" element={<AppLayout><MillikenPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/milliken/" element={<AppLayout><MillikenPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/la-salle" element={<AppLayout><LaSallePage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/la-salle/" element={<AppLayout><LaSallePage /></AppLayout>} />
+        
+        {/* Property Search Page */}
+        <Route path="/properties" element={<AppLayout><PropertiesPage /></AppLayout>} />
+        <Route path="/properties/" element={<AppLayout><PropertiesPage /></AppLayout>} />
+        <Route path="/home-valuation" element={<AppLayout><ForSellersPage /></AppLayout>} />
+        <Route path="/home-valuation/" element={<AppLayout><ForSellersPage /></AppLayout>} />
+        <Route path="/whats-my-home-worth" element={<AppLayout><ForSellersPage /></AppLayout>} />
+        <Route path="/whats-my-home-worth/" element={<AppLayout><ForSellersPage /></AppLayout>} />
+        <Route path="/sellers" element={<AppLayout><ForSellersPage /></AppLayout>} />
+        <Route path="/sellers/" element={<AppLayout><ForSellersPage /></AppLayout>} />
+        
+        {/* Mortgage Calculator */}
+        <Route path="/mortgage-calculator" element={<AppLayout><MortgageCalculatorPage /></AppLayout>} />
+        <Route path="/mortgage-calculator/" element={<AppLayout><MortgageCalculatorPage /></AppLayout>} />
+      </Routes>
     </div>
   );
 }
