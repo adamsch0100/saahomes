@@ -65,9 +65,10 @@ export default function Footer() {
 
         <div className="pt-8 border-t border-gray-700 text-sm text-gray-400 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p>© {new Date().getFullYear()} Schwartz and Associates. All rights reserved.</p>
-          <div className="flex gap-6">
+          <div className="flex gap-6 items-center">
             <a href="/about-us/" className="hover:text-white transition-colors">About</a>
             <a href="/contact/" className="hover:text-white transition-colors">Contact</a>
+            <Link to="/admin" className="text-gray-600 hover:text-gray-500 transition-colors text-xs opacity-50">Admin</Link>
           </div>
         </div>
       </div>

@@ -47,21 +47,6 @@ export default function Hero() {
           </div>
         </div>
       </div>
-
-      {/* Search Widgets at Bottom */}
-      <div className="relative z-20 pb-8 px-6">
-        <div className="max-w-6xl mx-auto space-y-4">
-          {/* Property Search Widget */}
-          <div className="bg-white/95 backdrop-blur rounded-lg shadow-xl overflow-hidden">
-            <realscout-simple-search agent-encoded-id="QWdlbnQtMjUxOTI5"></realscout-simple-search>
-          </div>
-          
-          {/* Home Value Widget */}
-          <div className="bg-white/95 backdrop-blur rounded-lg shadow-xl overflow-hidden">
-            <realscout-home-value agent-encoded-id="QWdlbnQtMjUxOTI5"></realscout-home-value>
-          </div>
-        </div>
-      </div>
     </section>
   );
 }
