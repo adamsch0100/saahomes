@@ -48,12 +48,21 @@ function AppLayout({ children }) {
 }
 
 export default function App() {
+  const location = useLocation();
+
   useEffect(() => {
     // Load RealScout script when app mounts
     loadRealScoutScript().catch((error) => {
       console.error('Error loading RealScout script:', error);
     });
   }, []);
+
+  // Scroll to top when navigating to properties page
+  useEffect(() => {
+    if (location.pathname === '/properties' || location.pathname === '/properties/') {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [location.pathname]);
   
   return (
     <div className="min-h-screen w-full bg-white text-gray-900">

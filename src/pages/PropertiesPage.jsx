@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import SEO from "../components/SEO";
 import PropertySearchEmbed from "../components/PropertySearchEmbed";
@@ -6,6 +6,22 @@ import PropertySearchEmbed from "../components/PropertySearchEmbed";
 export default function PropertiesPage() {
   const [searchParams] = useSearchParams();
   const location = searchParams.get('location') || '';
+
+  // Scroll to top when component mounts or location changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    
+    // Also try to scroll the iframe content if possible
+    // Note: This may not work due to cross-origin restrictions, but we'll try
+    const iframe = document.querySelector('iframe[title="Property Search"]');
+    if (iframe && iframe.contentWindow) {
+      try {
+        iframe.contentWindow.scrollTo(0, 0);
+      } catch (e) {
+        // Cross-origin restriction - this is expected for external iframes
+      }
+    }
+  }, [location]);
 
   // Build SEO title and description based on location
   const locationText = location ? ` in ${location}` : '';

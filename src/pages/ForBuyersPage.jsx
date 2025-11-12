@@ -13,7 +13,7 @@ export default function ForBuyersPage() {
 
       {/* Hero Section */}
       <section className="relative h-[600px] bg-cover bg-center flex items-center justify-center pt-32" 
-        style={{backgroundImage: "url('/images/Buyers-CTA-1.jpg')"}}>
+        style={{backgroundImage: "url('/images/buyers-hero.jpg')"}}>
         <div className="absolute inset-0 bg-black/60"></div>
         <div className="relative z-10 text-center text-white px-6">
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold font-serif">For Buyers</h1>
