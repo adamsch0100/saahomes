@@ -38,10 +38,10 @@ export default function ContactPage() {
 
   return (
     <>
-      <SEO 
-        title="Contact Us"
-        description="Contact Schwartz And Associates for all your Northern Colorado real estate needs. Call (970) 999-1407 or email info@saahomes.com. We're here to help with buying, selling, or relocating."
-        keywords="contact realtor Fort Collins, Colorado real estate contact, Schwartz and Associates contact, real estate inquiry"
+      <SEO
+        exactTitle="Contact SAA Homes | Northern Colorado Real Estate Agents"
+        description="Contact SAA Homes — Northern Colorado real estate agents. Call (970) 999-1407 or email info@saahomes.com. We help buyers and sellers in Fort Collins, Loveland, Windsor, Greeley, and beyond."
+        keywords="contact SAA Homes, contact realtor Fort Collins, Northern Colorado real estate contact, Schwartz and Associates phone, real estate inquiry Fort Collins"
         canonical="https://saahomes.com/contact/"
       />
 

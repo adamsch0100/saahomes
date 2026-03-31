@@ -12,10 +12,10 @@ import ContactCTA from "../components/ContactCTA";
 export default function HomePage() {
   return (
     <>
-      <SEO 
-        title="Northern Colorado Real Estate Experts"
-        description="Schwartz And Associates at Coldwell Banker Realty. Your trusted Northern Colorado real estate experts for Fort Collins, Loveland, Windsor, Greeley and beyond. Expert buyers and sellers agents."
-        keywords="Northern Colorado real estate, Fort Collins real estate, Loveland realtor, Windsor homes, Greeley property, Colorado real estate agents, Schwartz and Associates, Coldwell Banker"
+      <SEO
+        exactTitle="Fort Collins Real Estate Agents | SAA Homes - Schwartz and Associates"
+        description="Schwartz and Associates at Coldwell Banker Realty — your trusted Fort Collins real estate agents serving Northern Colorado. Expert buyers and sellers agents in Fort Collins, Loveland, Windsor, and Greeley."
+        keywords="Fort Collins real estate agents, SAA Homes, Schwartz and Associates, Northern Colorado real estate, Loveland realtor, Windsor homes, Greeley property, Coldwell Banker Fort Collins"
         canonical="https://saahomes.com/"
       />
       <Hero />

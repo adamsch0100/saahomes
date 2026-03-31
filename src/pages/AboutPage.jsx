@@ -4,10 +4,10 @@ import SEO from "../components/SEO";
 export default function AboutPage() {
   return (
     <>
-      <SEO 
-        title="Meet Adam & Mandi - Your Local Real Estate Experts"
-        description="Get to know Adam and Mandi Schwartz, your Northern Colorado real estate experts. With 20 years of combined experience, we provide white-glove service rooted in honesty, strong work ethics, and genuine care."
-        keywords="Adam Schwartz realtor, Mandi Schwartz, Colorado real estate team, experienced realtors Fort Collins, Coldwell Banker agents"
+      <SEO
+        exactTitle="About SAA Homes | Fort Collins Real Estate Experts | 20+ Years Experience"
+        description="Meet Adam and Mandi Schwartz of SAA Homes — Fort Collins real estate experts with 20+ years of combined experience. Trusted Coldwell Banker agents serving all of Northern Colorado."
+        keywords="about SAA Homes, Adam Schwartz realtor, Mandi Schwartz, Fort Collins real estate experts, experienced realtors Fort Collins, Coldwell Banker agents, 20 years experience"
         canonical="https://saahomes.com/about-us/"
       />
       
