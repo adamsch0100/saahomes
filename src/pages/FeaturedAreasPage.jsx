@@ -99,11 +99,11 @@ export default function FeaturedAreasPage() {
 
   return (
     <>
-      <SEO 
-        title="Featured Areas - Explore Northern Colorado Neighborhoods"
-        description="Explore Northern Colorado's best neighborhoods including Fort Collins, Loveland, Windsor, Greeley, and more. Find market insights, demographics, and lifestyle information for each area."
-        keywords="Fort Collins neighborhoods, Loveland areas, Windsor CO, Greeley communities, Northern Colorado towns, Colorado real estate areas"
-        canonical="https://saahomes.com/featured-areas/"
+      <SEO
+        exactTitle="Northern Colorado Neighborhoods | Fort Collins, Loveland, Windsor Real Estate"
+        description="Explore Northern Colorado neighborhoods including Fort Collins, Loveland, Windsor, Greeley, and more. Get market insights, lifestyle guides, and real estate data for every community."
+        keywords="Northern Colorado neighborhoods, Fort Collins real estate, Loveland CO areas, Windsor CO homes, Greeley communities, Northern Colorado towns"
+        canonical="https://saahomes.com/northern-colorado-areas/"
       />
 
       {/* Hero Section */}

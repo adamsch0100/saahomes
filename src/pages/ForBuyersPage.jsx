@@ -4,10 +4,10 @@ import SEO from "../components/SEO";
 export default function ForBuyersPage() {
   return (
     <>
-      <SEO 
-        title="For Buyers - Find Your Dream Home in Northern Colorado"
-        description="Looking to buy a home in Northern Colorado? Schwartz And Associates offers expert buyer representation, exclusive property access, and personalized home search services in Fort Collins, Loveland, Windsor, and Greeley."
-        keywords="buy home Fort Collins, Northern Colorado homes for sale, first time home buyer, property search Colorado, buyer agent Fort Collins"
+      <SEO
+        exactTitle="Homes for Sale in Fort Collins, Loveland &amp; Windsor | SAA Homes"
+        description="Search homes for sale in Fort Collins, Loveland, Windsor, and across Northern Colorado. SAA Homes offers expert buyer representation, exclusive listings, and personalized home search services."
+        keywords="homes for sale Fort Collins, Loveland homes for sale, Windsor CO real estate, buy home Northern Colorado, first time home buyer Colorado, buyer agent Fort Collins"
         canonical="https://saahomes.com/for-buyers/"
       />
 

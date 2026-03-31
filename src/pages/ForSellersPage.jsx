@@ -19,10 +19,10 @@ export default function ForSellersPage() {
 
   return (
     <>
-      <SEO 
-        title="For Sellers - Get Top Dollar for Your Northern Colorado Home"
-        description="Selling your home in Northern Colorado? Schwartz And Associates provides expert pricing strategies, professional marketing, and skilled negotiation to get you the best price. Free home valuation available."
-        keywords="sell home Fort Collins, Northern Colorado real estate listing, home value Colorado, listing agent Fort Collins, sell house Loveland"
+      <SEO
+        exactTitle="Sell Your Home in Northern Colorado | Free Market Analysis | SAA Homes"
+        description="Sell your home in Northern Colorado with SAA Homes. Get a free market analysis, professional marketing, and expert negotiation to maximize your sale price in Fort Collins, Loveland, Windsor, and beyond."
+        keywords="sell home Fort Collins, free market analysis Northern Colorado, home value Colorado, listing agent Fort Collins, sell house Loveland, SAA Homes seller services"
         canonical="https://saahomes.com/for-sellers/"
       />
 

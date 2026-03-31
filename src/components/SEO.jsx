@@ -1,9 +1,10 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 
-export default function SEO({ 
-  title, 
-  description, 
+export default function SEO({
+  title,
+  exactTitle,
+  description,
   keywords,
   canonical,
   ogTitle,
@@ -14,10 +15,11 @@ export default function SEO({
   image = "/images/White-Logo-AUTOx110.fit.png"
 }) {
   const siteTitle = "Schwartz And Associates | Northern Colorado Real Estate";
-  const fullTitle = title ? `${title} | ${siteTitle}` : siteTitle;
+  const fullTitle = exactTitle || (title ? `${title} | ${siteTitle}` : siteTitle);
   const finalOgTitle = ogTitle || fullTitle;
   const finalOgDescription = ogDescription || description;
   const finalOgImage = ogImage || image;
+  const finalOgUrl = ogUrl || canonical;
   
   return (
     <Helmet>
@@ -28,10 +30,11 @@ export default function SEO({
       
       {/* Open Graph / Facebook */}
       <meta property="og:type" content={type} />
+      <meta property="og:site_name" content="SAA Homes" />
       <meta property="og:title" content={finalOgTitle} />
       <meta property="og:description" content={finalOgDescription} />
       {finalOgImage && <meta property="og:image" content={finalOgImage} />}
-      {ogUrl && <meta property="og:url" content={ogUrl} />}
+      {finalOgUrl && <meta property="og:url" content={finalOgUrl} />}
       
       {/* Twitter */}
       <meta property="twitter:card" content="summary_large_image" />

@@ -25,6 +25,8 @@ import MillikenPage from "./pages/areas/MillikenPage.jsx";
 import LaSallePage from "./pages/areas/LaSallePage.jsx";
 import MortgageCalculatorPage from "./pages/MortgageCalculatorPage.jsx";
 import AdminPage from "./pages/AdminPage.jsx";
+import TestimonialsPage from "./pages/TestimonialsPage.jsx";
+import BlogPage from "./pages/BlogPage.jsx";
 import { loadRealScoutScript } from "./utils/realscout.js";
 
 function AppLayout({ children }) {
@@ -124,6 +126,14 @@ export default function App() {
         {/* Mortgage Calculator */}
         <Route path="/mortgage-calculator" element={<AppLayout><MortgageCalculatorPage /></AppLayout>} />
         <Route path="/mortgage-calculator/" element={<AppLayout><MortgageCalculatorPage /></AppLayout>} />
+
+        {/* Testimonials */}
+        <Route path="/testimonials" element={<AppLayout><TestimonialsPage /></AppLayout>} />
+        <Route path="/testimonials/" element={<AppLayout><TestimonialsPage /></AppLayout>} />
+
+        {/* Blog */}
+        <Route path="/blog" element={<AppLayout><BlogPage /></AppLayout>} />
+        <Route path="/blog/" element={<AppLayout><BlogPage /></AppLayout>} />
       </Routes>
     </div>
   );
