@@ -78,6 +78,8 @@ export default function App() {
         <Route path="/contact/" element={<AppLayout><ContactPage /></AppLayout>} />
         <Route path="/for-buyers" element={<AppLayout><ForBuyersPage /></AppLayout>} />
         <Route path="/for-buyers/" element={<AppLayout><ForBuyersPage /></AppLayout>} />
+        <Route path="/buyers" element={<AppLayout><ForBuyersPage /></AppLayout>} />
+        <Route path="/buyers/" element={<AppLayout><ForBuyersPage /></AppLayout>} />
         <Route path="/for-sellers" element={<AppLayout><ForSellersPage /></AppLayout>} />
         <Route path="/for-sellers/" element={<AppLayout><ForSellersPage /></AppLayout>} />
         <Route path="/featured-areas" element={<AppLayout><FeaturedAreasPage /></AppLayout>} />
@@ -134,6 +136,8 @@ export default function App() {
         {/* Blog */}
         <Route path="/blog" element={<AppLayout><BlogPage /></AppLayout>} />
         <Route path="/blog/" element={<AppLayout><BlogPage /></AppLayout>} />
+        <Route path="/helpful-guides" element={<AppLayout><BlogPage /></AppLayout>} />
+        <Route path="/helpful-guides/" element={<AppLayout><BlogPage /></AppLayout>} />
       </Routes>
     </div>
   );
