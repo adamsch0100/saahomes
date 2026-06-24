@@ -5,9 +5,9 @@ export default function ForBuyersPage() {
   return (
     <>
       <SEO
-        exactTitle="Homes for Sale in Fort Collins, Loveland &amp; Windsor | SAA Homes"
-        description="Search homes for sale in Fort Collins, Loveland, Windsor, and across Northern Colorado. SAA Homes offers expert buyer representation, exclusive listings, and personalized home search services."
-        keywords="homes for sale Fort Collins, Loveland homes for sale, Windsor CO real estate, buy home Northern Colorado, first time home buyer Colorado, buyer agent Fort Collins"
+        exactTitle="Homes for Sale in Fort Collins, Loveland &amp; Windsor | Colorado Home Buyers | SAA Homes"
+        description="Search homes for sale in Fort Collins, Loveland, Windsor, and across Northern Colorado. SAA Homes offers expert buyer representation, down payment program guidance including CHFA Schools To Home, and personalized home search services."
+        keywords="homes for sale Fort Collins, Colorado home buyers, Loveland homes for sale, Windsor CO real estate, buy home Northern Colorado, first time home buyer Colorado, buyer agent Fort Collins, CHFA down payment assistance"
         canonical="https://saahomes.com/for-buyers/"
       />
 
@@ -59,6 +59,14 @@ export default function ForBuyersPage() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+              <h3 className="text-2xl font-bold mb-4 font-serif">CHFA Schools To Home</h3>
+              <p className="text-gray-700 mb-4">
+                Full-time Colorado public school employees may qualify for up to 25% down payment assistance through CHFA's new Schools To Home program.
+              </p>
+              <a href="/chfa-schools-to-home/" className="text-black font-semibold hover:underline">Learn More →</a>
+            </div>
+
             <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
               <h3 className="text-2xl font-bold mb-4 font-serif">First-Time Homebuyers</h3>
               <p className="text-gray-700 mb-4">

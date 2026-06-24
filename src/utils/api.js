@@ -1,8 +1,10 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD ? 'https://saahomes-production.up.railway.app' : 'http://localhost:3000');
 
 export const apiRequest = async (endpoint, options = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
   const config = {
     headers: {
       'Content-Type': 'application/json',
@@ -16,6 +18,9 @@ export const apiRequest = async (endpoint, options = {}) => {
     const data = await response.json();
 
     if (!response.ok) {
+      if (data.errors?.length) {
+        throw new Error(data.errors.map((e) => e.msg).join(', '));
+      }
       throw new Error(data.error || `HTTP error! status: ${response.status}`);
     }
 
@@ -35,6 +40,13 @@ export const submitContactForm = async (formData) => {
 
 export const submitMarketReportForm = async (formData) => {
   return apiRequest('/api/market-report', {
+    method: 'POST',
+    body: JSON.stringify(formData),
+  });
+};
+
+export const submitChfaLeadForm = async (formData) => {
+  return apiRequest('/api/chfa-lead', {
     method: 'POST',
     body: JSON.stringify(formData),
   });

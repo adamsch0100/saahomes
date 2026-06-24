@@ -6,7 +6,7 @@
   "main": "src/server.js",
   "scripts": {
     "dev": "node --watch src/server.js",
-    "start": "node src/server.js",
+    "start": "node src/config/migrate.js && node src/server.js",
     "migrate": "node src/config/migrate.js"
   },
   "keywords": [],
