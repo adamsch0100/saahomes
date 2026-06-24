@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { submitMarketReportForm } from '../utils/api.js';
+import { withLeadMetadata } from '../utils/leadTracking.js';
 
 export default function MarketReportForm({ areaName }) {
   const [formData, setFormData] = useState({
@@ -25,7 +26,7 @@ export default function MarketReportForm({ areaName }) {
     setSubmitStatus(null);
 
     try {
-      await submitMarketReportForm(formData);
+      await submitMarketReportForm(withLeadMetadata(formData, window.location.pathname));
       setSubmitStatus({ type: 'success', message: "Thank you! We'll send you the market report shortly." });
       setFormData({ firstName: '', lastName: '', email: '', phone: '', area: areaName || '' });
     } catch (error) {

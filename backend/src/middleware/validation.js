@@ -1,5 +1,14 @@
 import { body, validationResult } from 'express-validator';
 
+const leadMetadataFields = [
+  body('sourcePage').optional().trim().isLength({ max: 255 }),
+  body('utmSource').optional().trim().isLength({ max: 100 }),
+  body('utmMedium').optional().trim().isLength({ max: 100 }),
+  body('utmCampaign').optional().trim().isLength({ max: 100 }),
+  body('landingPage').optional().trim().isLength({ max: 255 }),
+  body('referrer').optional().trim().isLength({ max: 500 }),
+];
+
 export const validateContactSubmission = [
   body('name')
     .trim()
@@ -7,36 +16,38 @@ export const validateContactSubmission = [
     .withMessage('Name is required')
     .isLength({ max: 255 })
     .withMessage('Name must be less than 255 characters'),
-  
+
   body('email')
     .trim()
     .isEmail()
     .withMessage('Valid email is required')
     .normalizeEmail(),
-  
+
   body('phone')
     .optional()
     .trim()
     .isLength({ max: 50 })
     .withMessage('Phone must be less than 50 characters'),
-  
+
   body('interest')
     .optional()
     .trim()
     .isLength({ max: 100 })
     .withMessage('Interest must be less than 100 characters'),
-  
+
   body('message')
     .optional()
     .trim()
     .isLength({ max: 5000 })
     .withMessage('Message must be less than 5000 characters'),
-  
+
   body('area')
     .optional()
     .trim()
     .isLength({ max: 100 })
     .withMessage('Area must be less than 100 characters'),
+
+  ...leadMetadataFields,
 ];
 
 export const validateMarketReportSubmission = [
@@ -46,31 +57,33 @@ export const validateMarketReportSubmission = [
     .withMessage('First name is required')
     .isLength({ max: 255 })
     .withMessage('First name must be less than 255 characters'),
-  
+
   body('lastName')
     .trim()
     .notEmpty()
     .withMessage('Last name is required')
     .isLength({ max: 255 })
     .withMessage('Last name must be less than 255 characters'),
-  
+
   body('email')
     .trim()
     .isEmail()
     .withMessage('Valid email is required')
     .normalizeEmail(),
-  
+
   body('phone')
     .optional()
     .trim()
     .isLength({ max: 50 })
     .withMessage('Phone must be less than 50 characters'),
-  
+
   body('area')
     .optional()
     .trim()
     .isLength({ max: 100 })
     .withMessage('Area must be less than 100 characters'),
+
+  ...leadMetadataFields,
 ];
 
 export const validateChfaLeadSubmission = [
@@ -119,6 +132,8 @@ export const validateChfaLeadSubmission = [
     .trim()
     .isLength({ max: 5000 })
     .withMessage('Message must be less than 5000 characters'),
+
+  ...leadMetadataFields,
 ];
 
 export const handleValidationErrors = (req, res, next) => {
@@ -128,4 +143,3 @@ export const handleValidationErrors = (req, res, next) => {
   }
   next();
 };
-

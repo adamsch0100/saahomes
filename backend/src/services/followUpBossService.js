@@ -11,6 +11,24 @@ const getAuthHeader = (apiKey) => {
   return `Basic ${encoded}`;
 };
 
+const buildAttributionLines = (submission) => {
+  const lines = [];
+  const sourcePage = submission.source_page || submission.sourcePage;
+  const landingPage = submission.landing_page || submission.landingPage;
+  const utmSource = submission.utm_source || submission.utmSource;
+  const utmMedium = submission.utm_medium || submission.utmMedium;
+  const utmCampaign = submission.utm_campaign || submission.utmCampaign;
+  const referrer = submission.referrer;
+
+  if (sourcePage) lines.push(`Source page: ${sourcePage}`);
+  if (landingPage) lines.push(`Landing page: ${landingPage}`);
+  if (utmSource) lines.push(`UTM source: ${utmSource}`);
+  if (utmMedium) lines.push(`UTM medium: ${utmMedium}`);
+  if (utmCampaign) lines.push(`UTM campaign: ${utmCampaign}`);
+  if (referrer) lines.push(`Referrer: ${referrer}`);
+  return lines;
+};
+
 const postFollowUpBossEvent = async (eventData) => {
   let response;
 
@@ -59,6 +77,7 @@ export const forwardContactToFollowUpBoss = async (submission) => {
     interest ? `Interest: ${interest}` : null,
     area ? `Area: ${area}` : null,
     message || null,
+    ...buildAttributionLines(submission),
   ].filter(Boolean);
 
   const eventData = {
@@ -98,6 +117,7 @@ export const forwardChfaLeadToFollowUpBoss = async (submission) => {
     school_employer ? `School/District: ${school_employer}` : null,
     buying_timeline ? `Buying timeline: ${buying_timeline}` : null,
     message ? `Comments: ${message}` : null,
+    ...buildAttributionLines(submission),
   ].filter(Boolean);
 
   const eventData = {
@@ -130,16 +150,23 @@ export const forwardMarketReportToFollowUpBoss = async (submission) => {
     return { success: false, reason: 'not_configured' };
   }
 
-  const { firstName, lastName, email, phone, area } = submission;
+  const { firstName, lastName, email, phone, area, first_name, last_name } = submission;
+  const resolvedFirstName = firstName || first_name;
+  const resolvedLastName = lastName || last_name;
+
+  const messageLines = [
+    area ? `Market report requested for: ${area}` : 'Market report requested',
+    ...buildAttributionLines(submission),
+  ].filter(Boolean);
 
   const eventData = {
     source: 'Website Market Report Request',
     system: 'SAA Homes Website',
     type: 'Property Inquiry',
-    message: area ? `Market report requested for: ${area}` : 'Market report requested',
+    message: messageLines.join('\n'),
     person: {
-      firstName,
-      lastName,
+      firstName: resolvedFirstName,
+      lastName: resolvedLastName,
       emails: email ? [{ value: email, type: 'work' }] : [],
       phones: phone ? [{ value: phone.replace(/\D/g, ''), type: 'mobile' }] : [],
       tags: ['Market Report Request'],

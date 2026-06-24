@@ -3,7 +3,10 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import App from "./App.jsx";
+import { captureLeadAttribution } from "./utils/leadTracking.js";
 import "./index.css";
+
+captureLeadAttribution();
 
 const container = document.getElementById("root");
 const root = createRoot(container);

@@ -1,12 +1,12 @@
-import pool from './database.js';
+import getPool from './database.js';
 
-const createTables = async () => {
+export const runMigrations = async () => {
+  const pool = getPool();
   const client = await pool.connect();
-  
+
   try {
     await client.query('BEGIN');
 
-    // Create contact_submissions table
     await client.query(`
       CREATE TABLE IF NOT EXISTS contact_submissions (
         id SERIAL PRIMARY KEY,
@@ -16,11 +16,14 @@ const createTables = async () => {
         interest VARCHAR(100),
         message TEXT,
         area VARCHAR(100),
+        source_page VARCHAR(255),
+        utm_source VARCHAR(100),
+        utm_medium VARCHAR(100),
+        utm_campaign VARCHAR(100),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
-    // Create market_report_submissions table
     await client.query(`
       CREATE TABLE IF NOT EXISTS market_report_submissions (
         id SERIAL PRIMARY KEY,
@@ -29,11 +32,14 @@ const createTables = async () => {
         email VARCHAR(255) NOT NULL,
         phone VARCHAR(50),
         area VARCHAR(100),
+        source_page VARCHAR(255),
+        utm_source VARCHAR(100),
+        utm_medium VARCHAR(100),
+        utm_campaign VARCHAR(100),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
-    // Create chfa_lead_submissions table
     await client.query(`
       CREATE TABLE IF NOT EXISTS chfa_lead_submissions (
         id SERIAL PRIMARY KEY,
@@ -44,11 +50,29 @@ const createTables = async () => {
         school_employer VARCHAR(255),
         buying_timeline VARCHAR(100),
         message TEXT,
+        source_page VARCHAR(255),
+        utm_source VARCHAR(100),
+        utm_medium VARCHAR(100),
+        utm_campaign VARCHAR(100),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
-    // Create indexes for better query performance
+    await client.query(`
+      ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS source_page VARCHAR(255);
+      ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS utm_source VARCHAR(100);
+      ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS utm_medium VARCHAR(100);
+      ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS utm_campaign VARCHAR(100);
+      ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS source_page VARCHAR(255);
+      ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS utm_source VARCHAR(100);
+      ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS utm_medium VARCHAR(100);
+      ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS utm_campaign VARCHAR(100);
+      ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS source_page VARCHAR(255);
+      ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS utm_source VARCHAR(100);
+      ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS utm_medium VARCHAR(100);
+      ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS utm_campaign VARCHAR(100);
+    `);
+
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_contact_submissions_email ON contact_submissions(email);
       CREATE INDEX IF NOT EXISTS idx_contact_submissions_created_at ON contact_submissions(created_at);
@@ -59,24 +83,20 @@ const createTables = async () => {
     `);
 
     await client.query('COMMIT');
-    console.log('Database tables created successfully');
+    console.log('Database migrations completed');
   } catch (error) {
     await client.query('ROLLBACK');
-    console.error('Error creating tables:', error);
+    console.error('Migration failed:', error);
     throw error;
   } finally {
     client.release();
   }
 };
 
-// Run migrations
-createTables()
-  .then(() => {
-    console.log('Migration completed');
-    process.exit(0);
-  })
-  .catch((error) => {
-    console.error('Migration failed:', error);
-    process.exit(1);
-  });
+const isDirectRun = process.argv[1]?.includes('migrate.js');
 
+if (isDirectRun) {
+  runMigrations()
+    .then(() => process.exit(0))
+    .catch(() => process.exit(1));
+}

@@ -51,3 +51,8 @@ export const toAbsoluteUrl = (path) => {
   if (path.startsWith('http')) return path;
   return `${SITE_URL}${path.startsWith('/') ? path : `/${path}`}`;
 };
+
+export const formatBusinessAddress = () => {
+  const { streetAddress, addressLocality, addressRegion, postalCode } = BUSINESS.address;
+  return `${streetAddress}, ${addressLocality}, ${addressRegion} ${postalCode}`;
+};

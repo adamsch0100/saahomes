@@ -1,6 +1,14 @@
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL ||
-  (import.meta.env.PROD ? 'https://saahomes-production.up.railway.app' : 'http://localhost:3000');
+const PRODUCTION_API_URL = 'https://saahomes-production.up.railway.app';
+
+const API_BASE_URL = (() => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL.replace(/\/$/, '');
+  }
+  if (import.meta.env.DEV) {
+    return 'http://localhost:3000';
+  }
+  return PRODUCTION_API_URL;
+})();
 
 export const apiRequest = async (endpoint, options = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
@@ -15,17 +23,26 @@ export const apiRequest = async (endpoint, options = {}) => {
 
   try {
     const response = await fetch(url, config);
-    const data = await response.json();
+    let data = null;
+
+    try {
+      data = await response.json();
+    } catch {
+      data = null;
+    }
 
     if (!response.ok) {
-      if (data.errors?.length) {
+      if (data?.errors?.length) {
         throw new Error(data.errors.map((e) => e.msg).join(', '));
       }
-      throw new Error(data.error || `HTTP error! status: ${response.status}`);
+      throw new Error(data?.error || `Request failed (${response.status}). Please call (970) 999-1407.`);
     }
 
     return data;
   } catch (error) {
+    if (error.name === 'TypeError') {
+      throw new Error('Unable to reach our servers. Please call (970) 999-1407 or email info@saahomes.com.');
+    }
     console.error('API request failed:', error);
     throw error;
   }
@@ -83,4 +100,3 @@ export const getStats = async (token) => {
     },
   });
 };
-

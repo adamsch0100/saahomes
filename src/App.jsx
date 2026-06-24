@@ -27,7 +27,9 @@ import MortgageCalculatorPage from "./pages/MortgageCalculatorPage.jsx";
 import AdminPage from "./pages/AdminPage.jsx";
 import TestimonialsPage from "./pages/TestimonialsPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
+import BlogPostPage from "./pages/BlogPostPage.jsx";
 import ChfaSchoolsToHomePage from "./pages/ChfaSchoolsToHomePage.jsx";
+import FloatingContactBar from "./components/FloatingContactBar.jsx";
 import { loadRealScoutScript } from "./utils/realscout.js";
 
 function AppLayout({ children }) {
@@ -42,9 +44,10 @@ function AppLayout({ children }) {
     <>
       <Header />
       <Breadcrumbs />
-      <main id="page-container" className="w-full">
+      <main id="page-container" className="w-full pb-20 md:pb-0">
         {children}
       </main>
+      <FloatingContactBar />
       <Footer />
     </>
   );
@@ -143,6 +146,8 @@ export default function App() {
         {/* Blog */}
         <Route path="/blog" element={<AppLayout><BlogPage /></AppLayout>} />
         <Route path="/blog/" element={<AppLayout><BlogPage /></AppLayout>} />
+        <Route path="/blog/:slug" element={<AppLayout><BlogPostPage /></AppLayout>} />
+        <Route path="/blog/:slug/" element={<AppLayout><BlogPostPage /></AppLayout>} />
         <Route path="/helpful-guides" element={<AppLayout><BlogPage /></AppLayout>} />
         <Route path="/helpful-guides/" element={<AppLayout><BlogPage /></AppLayout>} />
       </Routes>
