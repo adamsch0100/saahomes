@@ -45,6 +45,11 @@ const staticRoutes = [
     description: 'Explore Northern Colorado communities including Fort Collins, Loveland, Windsor, Greeley, and more with SAA Homes area guides.',
   },
   {
+    path: '/chfa-down-payment-assistance/',
+    title: 'CHFA Down Payment Assistance Colorado | First-Time Homebuyer Programs 2026 | SAA Homes',
+    description: 'Complete guide to CHFA down payment assistance in Colorado. Grants up to $25K, SmartStep, Preferred, FirstStep & FirstGeneration programs for Northern Colorado buyers.',
+  },
+  {
     path: '/chfa-schools-to-home/',
     title: 'CHFA Schools To Home | Colorado Teacher Down Payment Assistance | SAA Homes',
     description: 'CHFA Schools To Home helps Colorado public school employees with up to 25% down payment assistance. Free consultation from SAA Homes.',

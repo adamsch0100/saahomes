@@ -59,6 +59,14 @@ export default function ForBuyersPage() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow border-2 border-black/5">
+              <h3 className="text-2xl font-bold mb-4 font-serif">CHFA Down Payment Assistance</h3>
+              <p className="text-gray-700 mb-4">
+                Colorado&apos;s primary first-time homebuyer program — grants and deferred loans up to $25,000 for down payment and closing costs through CHFA participating lenders.
+              </p>
+              <a href="/chfa-down-payment-assistance/" className="text-black font-semibold hover:underline">Learn More →</a>
+            </div>
+
             <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
               <h3 className="text-2xl font-bold mb-4 font-serif">Champions Home Loan</h3>
               <p className="text-gray-700 mb-4">

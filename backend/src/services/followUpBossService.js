@@ -192,6 +192,54 @@ export const forwardChampionsLeadToFollowUpBoss = async (submission) => {
   }
 };
 
+export const forwardChfaDpaLeadToFollowUpBoss = async (submission) => {
+  if (!FOLLOW_UP_BOSS_API_KEY && !FOLLOW_UP_BOSS_WEBHOOK_URL) {
+    logger.info('Follow Up Boss not configured, skipping lead forwarding');
+    return { success: false, reason: 'not_configured' };
+  }
+
+  const {
+    first_name, last_name, email, phone, buyer_status, target_county, buying_timeline, message,
+    buyerStatus, targetCounty, buyingTimeline,
+  } = submission;
+
+  const resolvedStatus = buyer_status || buyerStatus;
+  const resolvedCounty = target_county || targetCounty;
+  const resolvedTimeline = buying_timeline || buyingTimeline;
+
+  const messageLines = [
+    'CHFA Down Payment Assistance lead from website',
+    resolvedStatus ? `Buyer status: ${resolvedStatus}` : null,
+    resolvedCounty ? `Target county: ${resolvedCounty}` : null,
+    resolvedTimeline ? `Buying timeline: ${resolvedTimeline}` : null,
+    message ? `Comments: ${message}` : null,
+    ...buildAttributionLines(submission),
+  ].filter(Boolean);
+
+  const eventData = {
+    source: 'CHFA Down Payment Assistance Landing Page',
+    system: 'SAA Homes Website',
+    type: 'Registration',
+    message: messageLines.join('\n'),
+    person: {
+      firstName: first_name,
+      lastName: last_name,
+      emails: email ? [{ value: email, type: 'work' }] : [],
+      phones: phone ? [{ value: phone.replace(/\D/g, ''), type: 'mobile' }] : [],
+      tags: ['CHFA Down Payment Assistance', 'First Time Homebuyer Lead', 'Website Lead'],
+    },
+  };
+
+  try {
+    const result = await postFollowUpBossEvent(eventData);
+    logger.info('CHFA DPA lead forwarded to Follow Up Boss', { eventId: result.id });
+    return { success: true, eventId: result.id };
+  } catch (error) {
+    logger.error('Failed to forward CHFA DPA lead to Follow Up Boss', error);
+    return { success: false, error: error.message };
+  }
+};
+
 export const forwardMarketReportToFollowUpBoss = async (submission) => {
   if (!FOLLOW_UP_BOSS_API_KEY && !FOLLOW_UP_BOSS_WEBHOOK_URL) {
     logger.info('Follow Up Boss not configured, skipping lead forwarding');

@@ -4,11 +4,13 @@ import { submitContactForm } from '../controllers/contactController.js';
 import { submitMarketReportForm } from '../controllers/marketReportController.js';
 import { submitChfaLeadForm } from '../controllers/chfaLeadController.js';
 import { submitChampionsLeadForm } from '../controllers/championsLeadController.js';
+import { submitChfaDpaLeadForm } from '../controllers/chfaDpaLeadController.js';
 import {
   validateContactSubmission,
   validateMarketReportSubmission,
   validateChfaLeadSubmission,
   validateChampionsLeadSubmission,
+  validateChfaDpaLeadSubmission,
   handleValidationErrors,
 } from '../middleware/validation.js';
 
@@ -52,6 +54,14 @@ router.post(
   validateChampionsLeadSubmission,
   handleValidationErrors,
   submitChampionsLeadForm
+);
+
+router.post(
+  '/chfa-dpa-lead',
+  formLimiter,
+  validateChfaDpaLeadSubmission,
+  handleValidationErrors,
+  submitChfaDpaLeadForm
 );
 
 export default router;

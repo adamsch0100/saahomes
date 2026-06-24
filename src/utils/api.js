@@ -77,6 +77,13 @@ export const submitChampionsLeadForm = async (formData) => {
   });
 };
 
+export const submitChfaDpaLeadForm = async (formData) => {
+  return apiRequest('/api/chfa-dpa-lead', {
+    method: 'POST',
+    body: JSON.stringify(formData),
+  });
+};
+
 export const adminLogin = async (email, password) => {
   return apiRequest('/api/admin/login', {
     method: 'POST',

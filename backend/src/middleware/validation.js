@@ -185,6 +185,55 @@ export const validateChampionsLeadSubmission = [
   ...leadMetadataFields,
 ];
 
+export const validateChfaDpaLeadSubmission = [
+  body('firstName')
+    .trim()
+    .notEmpty()
+    .withMessage('First name is required')
+    .isLength({ max: 255 }),
+
+  body('lastName')
+    .trim()
+    .notEmpty()
+    .withMessage('Last name is required')
+    .isLength({ max: 255 }),
+
+  body('email')
+    .trim()
+    .isEmail()
+    .withMessage('Valid email is required')
+    .normalizeEmail(),
+
+  body('phone')
+    .trim()
+    .notEmpty()
+    .withMessage('Phone is required')
+    .isLength({ max: 50 }),
+
+  body('buyerStatus')
+    .trim()
+    .notEmpty()
+    .withMessage('Buyer status is required')
+    .isLength({ max: 255 }),
+
+  body('targetCounty')
+    .optional()
+    .trim()
+    .isLength({ max: 255 }),
+
+  body('buyingTimeline')
+    .optional()
+    .trim()
+    .isLength({ max: 100 }),
+
+  body('message')
+    .optional()
+    .trim()
+    .isLength({ max: 5000 }),
+
+  ...leadMetadataFields,
+];
+
 export const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {

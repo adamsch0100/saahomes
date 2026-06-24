@@ -561,9 +561,15 @@ export default function ChfaSchoolsToHomePage() {
             </ul>
             <Link
               to="/for-buyers/"
-              className="inline-block px-6 py-3 border-2 border-black text-black font-semibold rounded hover:bg-black hover:text-white transition-colors"
+              className="inline-block px-6 py-3 border-2 border-black text-black font-semibold rounded hover:bg-black hover:text-white transition-colors mr-3 mb-3"
             >
               Explore Buyer Services
+            </Link>
+            <Link
+              to="/chfa-down-payment-assistance/"
+              className="inline-block px-6 py-3 text-black font-semibold hover:underline mb-3"
+            >
+              General CHFA down payment assistance →
             </Link>
           </div>
         </div>

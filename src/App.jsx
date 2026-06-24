@@ -30,6 +30,7 @@ import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
 import ChfaSchoolsToHomePage from "./pages/ChfaSchoolsToHomePage.jsx";
 import ChampionsHomeLoanPage from "./pages/ChampionsHomeLoanPage.jsx";
+import ChfaDownPaymentAssistancePage from "./pages/ChfaDownPaymentAssistancePage.jsx";
 import FloatingContactBar from "./components/FloatingContactBar.jsx";
 import { loadRealScoutScript } from "./utils/realscout.js";
 
@@ -133,6 +134,14 @@ export default function App() {
         {/* Mortgage Calculator */}
         <Route path="/mortgage-calculator" element={<AppLayout><MortgageCalculatorPage /></AppLayout>} />
         <Route path="/mortgage-calculator/" element={<AppLayout><MortgageCalculatorPage /></AppLayout>} />
+
+        {/* CHFA Down Payment Assistance */}
+        <Route path="/chfa-down-payment-assistance" element={<AppLayout><ChfaDownPaymentAssistancePage /></AppLayout>} />
+        <Route path="/chfa-down-payment-assistance/" element={<AppLayout><ChfaDownPaymentAssistancePage /></AppLayout>} />
+        <Route path="/colorado-chfa-down-payment-assistance" element={<AppLayout><ChfaDownPaymentAssistancePage /></AppLayout>} />
+        <Route path="/colorado-chfa-down-payment-assistance/" element={<AppLayout><ChfaDownPaymentAssistancePage /></AppLayout>} />
+        <Route path="/chfa-dpa" element={<AppLayout><ChfaDownPaymentAssistancePage /></AppLayout>} />
+        <Route path="/chfa-dpa/" element={<AppLayout><ChfaDownPaymentAssistancePage /></AppLayout>} />
 
         {/* CHFA Schools To Home */}
         <Route path="/chfa-schools-to-home" element={<AppLayout><ChfaSchoolsToHomePage /></AppLayout>} />

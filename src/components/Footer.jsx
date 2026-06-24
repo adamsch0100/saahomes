@@ -24,6 +24,7 @@ export default function Footer() {
               <li><Link to="/for-sellers/" className="hover:text-white transition-colors">Sell Your Home</Link></li>
               <li><Link to="/properties/" className="hover:text-white transition-colors">Homes for Sale</Link></li>
               <li><Link to="/northern-colorado-areas/" className="hover:text-white transition-colors">Northern Colorado Areas</Link></li>
+              <li><Link to="/chfa-down-payment-assistance/" className="hover:text-white transition-colors">CHFA Down Payment Assistance</Link></li>
               <li><Link to="/chfa-schools-to-home/" className="hover:text-white transition-colors">CHFA Schools To Home</Link></li>
               <li><Link to="/colorado-champions-home-loan-program/" className="hover:text-white transition-colors">Champions Home Loan</Link></li>
             </ul>
