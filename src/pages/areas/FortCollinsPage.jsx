@@ -1,20 +1,12 @@
 import React from "react";
-import SEO from "../../components/SEO.jsx";
+import AreaSEO from "../../components/AreaSEO.jsx";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 
 export default function FortCollinsPage() {
   return (
     <>
-      <SEO
-        title="Moving to Fort Collins Colorado? Ultimate Guide | Schwartz And Associates"
-        description="Discover Fort Collins, CO - a vibrant city with CSU, craft breweries, and stunning mountain views. Your complete guide to living in Fort Collins."
-        keywords="Fort Collins Colorado, Fort Collins CO real estate, moving to Fort Collins, Fort Collins homes for sale, CSU, Colorado State University, living in Fort Collins, Fort Collins lifestyle"
-        canonical="https://saahomes.com/northern-colorado-areas/fort-collins/"
-        ogTitle="Moving to Fort Collins Colorado? Ultimate Guide"
-        ogDescription="Fort Collins is a vibrant and diverse city. From the breathtaking Rocky Mountains to the bustling downtown area, Fort Collins is the perfect destination for anyone looking to experience the best of Colorado living."
-        ogUrl="https://saahomes.com/northern-colorado-areas/fort-collins/"
-      />
+      <AreaSEO slug="fort-collins" />
       
       {/* Hero Section */}
       <section className="relative h-96 bg-cover bg-center flex items-center justify-center pt-32" 
@@ -280,56 +272,6 @@ export default function FortCollinsPage() {
         </section>
       </article>
 
-      {/* Structured Data for SEO */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "City",
-          "name": "Fort Collins",
-          "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Fort Collins",
-            "addressRegion": "CO",
-            "addressCountry": "US"
-          },
-          "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": "40.5853",
-            "longitude": "-105.0844"
-          },
-          "description": "Fort Collins is a vibrant and diverse city. From the breathtaking Rocky Mountains to the bustling downtown area, Fort Collins is the perfect destination for anyone looking to experience the best of Colorado living.",
-          "image": "/images/Fort-Collins-CO-Area-Guide.jpg",
-          "url": "https://saahomes.com/northern-colorado-areas/fort-collins/"
-        })}
-      </script>
-
-      {/* Breadcrumbs Structured Data */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          "itemListElement": [
-            {
-              "@type": "ListItem",
-              "position": 1,
-              "name": "Home",
-              "item": "https://saahomes.com/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 2,
-              "name": "Featured Areas",
-              "item": "https://saahomes.com/northern-colorado-areas/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 3,
-              "name": "Fort Collins",
-              "item": "https://saahomes.com/northern-colorado-areas/fort-collins/"
-            }
-          ]
-        })}
-      </script>
     </>
   );
 }

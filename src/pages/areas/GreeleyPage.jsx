@@ -1,17 +1,12 @@
 import React from "react";
-import SEO from "../../components/SEO";
+import AreaSEO from "../../components/AreaSEO.jsx";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 
 export default function GreeleyPage() {
   return (
     <>
-      <SEO 
-        title="Greeley, CO Real Estate | Homes for Sale in Greeley | Schwartz And Associates"
-        description="Discover Greeley, CO real estate with Schwartz and Associates. Home to UNC, rich agricultural heritage, and vibrant downtown. Find your perfect Greeley home today."
-        keywords="Greeley CO real estate, Greeley homes for sale, Greeley Colorado, UNC, Greeley neighborhoods, Weld County homes"
-        canonical="https://saahomes.com/northern-colorado-areas/greeley/"
-      />
+      <AreaSEO slug="greeley" />
 
       {/* Hero Section */}
       <section className="relative h-96 bg-cover bg-center flex items-center justify-center pt-32" 
@@ -249,56 +244,6 @@ export default function GreeleyPage() {
           </div>
         </div>
       </section>
-      {/* Structured Data for SEO */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "City",
-          "name": "Greeley",
-          "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Greeley",
-            "addressRegion": "CO",
-            "addressCountry": "US"
-          },
-          "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": "40.4233",
-            "longitude": "-104.7091"
-          },
-          "description": "Greeley, Colorado is a vibrant city with a rich agricultural heritage and a thriving cultural scene. Home to the University of Northern Colorado, Greeley offers a unique blend of small-town charm and big-city amenities.",
-          "image": "/images/Area-Guide-for-Greeley-CO.jpg",
-          "url": "https://saahomes.com/northern-colorado-areas/greeley/"
-        })}
-      </script>
-
-      {/* Breadcrumbs Structured Data */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          "itemListElement": [
-            {
-              "@type": "ListItem",
-              "position": 1,
-              "name": "Home",
-              "item": "https://saahomes.com/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 2,
-              "name": "Featured Areas",
-              "item": "https://saahomes.com/northern-colorado-areas/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 3,
-              "name": "Greeley",
-              "item": "https://saahomes.com/northern-colorado-areas/greeley/"
-            }
-          ]
-        })}
-      </script>
     </>
   );
 }

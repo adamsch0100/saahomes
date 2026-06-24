@@ -1,17 +1,12 @@
 import React from "react";
-import SEO from "../../components/SEO";
+import AreaSEO from "../../components/AreaSEO.jsx";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 
 export default function MillikenPage() {
   return (
     <>
-      <SEO 
-        title="Milliken, CO Real Estate | Homes for Sale in Milliken | Schwartz And Associates"
-        description="Discover Milliken, CO real estate with Schwartz and Associates. Small town with affordable housing, friendly community, and easy access to larger cities."
-        keywords="Milliken CO real estate, Milliken homes for sale, Milliken Colorado, Weld County homes, affordable living"
-        canonical="https://saahomes.com/northern-colorado-areas/milliken/"
-      />
+      <AreaSEO slug="milliken" />
 
       {/* Hero Section */}
       <section className="relative h-96 bg-cover bg-center flex items-center justify-center pt-32" 
@@ -249,57 +244,6 @@ export default function MillikenPage() {
           </div>
         </div>
       </section>
-
-      {/* Structured Data for SEO */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "City",
-          "name": "Milliken",
-          "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Milliken",
-            "addressRegion": "CO",
-            "addressCountry": "US"
-          },
-          "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": "40.3294",
-            "longitude": "-104.8544"
-          },
-          "description": "Milliken offers a quiet, small-town lifestyle with friendly neighbors and a strong sense of community. Residents appreciate the slower pace and personal connections.",
-          "image": "/images/milliken.png",
-          "url": "https://saahomes.com/northern-colorado-areas/milliken/"
-        })}
-      </script>
-
-      {/* Breadcrumbs Structured Data */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          "itemListElement": [
-            {
-              "@type": "ListItem",
-              "position": 1,
-              "name": "Home",
-              "item": "https://saahomes.com/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 2,
-              "name": "Featured Areas",
-              "item": "https://saahomes.com/northern-colorado-areas/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 3,
-              "name": "Milliken",
-              "item": "https://saahomes.com/northern-colorado-areas/milliken/"
-            }
-          ]
-        })}
-      </script>
     </>
   );
 }

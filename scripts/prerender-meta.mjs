@@ -2,16 +2,22 @@ import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { blogPosts } from '../src/data/blogPosts.js';
+import { areaSeoPages } from '../src/data/areaSeo.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const distDir = join(__dirname, '../dist');
 const indexPath = join(distDir, 'index.html');
 
-const routes = [
+const staticRoutes = [
   {
     path: '/',
     title: 'Fort Collins Real Estate Agents | SAA Homes - Northern Colorado',
     description: 'Schwartz and Associates — trusted Northern Colorado real estate agents in Fort Collins, Loveland, Windsor, Greeley, and across Colorado.',
+  },
+  {
+    path: '/about-us/',
+    title: 'About SAA Homes | Fort Collins Real Estate Experts | 20+ Years Experience',
+    description: 'Meet Adam and Mandi Schwartz of SAA Homes — Fort Collins real estate experts with 20+ years of combined experience serving Northern Colorado.',
   },
   {
     path: '/for-buyers/',
@@ -36,12 +42,12 @@ const routes = [
   {
     path: '/northern-colorado-areas/',
     title: 'Northern Colorado Communities & Neighborhoods | SAA Homes',
-    description: 'Explore Northern Colorado communities including Fort Collins, Loveland, Windsor, Greeley, and more.',
+    description: 'Explore Northern Colorado communities including Fort Collins, Loveland, Windsor, Greeley, and more with SAA Homes area guides.',
   },
   {
     path: '/chfa-schools-to-home/',
     title: 'CHFA Schools To Home | Colorado Teacher Down Payment Assistance | SAA Homes',
-    description: 'CHFA Schools To Home helps Colorado public school employees with up to 25% down payment assistance.',
+    description: 'CHFA Schools To Home helps Colorado public school employees with up to 25% down payment assistance. Free consultation from SAA Homes.',
   },
   {
     path: '/mortgage-calculator/',
@@ -58,12 +64,19 @@ const routes = [
     title: 'Client Reviews | SAA Homes Fort Collins Real Estate',
     description: 'Read client reviews for SAA Homes — Northern Colorado real estate agents Adam and Mandi Schwartz.',
   },
+  ...areaSeoPages.map((area) => ({
+    path: `/northern-colorado-areas/${area.slug}/`,
+    title: area.exactTitle,
+    description: area.description,
+  })),
   ...blogPosts.map((post) => ({
     path: `/blog/${post.slug}/`,
     title: `${post.title} | SAA Homes`,
     description: post.excerpt,
   })),
 ];
+
+const routes = staticRoutes;
 
 function injectMeta(html, { title, description, canonical }) {
   let output = html;

@@ -1,17 +1,12 @@
 import React from "react";
-import SEO from "../../components/SEO";
+import AreaSEO from "../../components/AreaSEO.jsx";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 
 export default function WellingtonPage() {
   return (
     <>
-      <SEO 
-        title="Wellington, CO Real Estate | Homes for Sale in Wellington | Schwartz And Associates"
-        description="Discover Wellington, CO real estate with Schwartz and Associates. Charming small-town atmosphere with agricultural roots, great schools, and affordable housing."
-        keywords="Wellington CO real estate, Wellington homes for sale, Wellington Colorado, Larimer County homes, rural living"
-        canonical="https://saahomes.com/northern-colorado-areas/wellington/"
-      />
+      <AreaSEO slug="wellington" />
 
       {/* Hero Section */}
       <section className="relative h-96 bg-cover bg-center flex items-center justify-center pt-32" 
@@ -249,57 +244,6 @@ export default function WellingtonPage() {
           </div>
         </div>
       </section>
-
-      {/* Structured Data for SEO */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "City",
-          "name": "Wellington",
-          "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Wellington",
-            "addressRegion": "CO",
-            "addressCountry": "US"
-          },
-          "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": "40.7031",
-            "longitude": "-105.0086"
-          },
-          "description": "Wellington offers a peaceful, rural lifestyle with friendly neighbors and a strong sense of community. Residents enjoy the slower pace and personal connections.",
-          "image": "/images/wellington.png",
-          "url": "https://saahomes.com/northern-colorado-areas/wellington/"
-        })}
-      </script>
-
-      {/* Breadcrumbs Structured Data */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          "itemListElement": [
-            {
-              "@type": "ListItem",
-              "position": 1,
-              "name": "Home",
-              "item": "https://saahomes.com/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 2,
-              "name": "Featured Areas",
-              "item": "https://saahomes.com/northern-colorado-areas/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 3,
-              "name": "Wellington",
-              "item": "https://saahomes.com/northern-colorado-areas/wellington/"
-            }
-          ]
-        })}
-      </script>
     </>
   );
 }

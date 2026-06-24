@@ -1,20 +1,12 @@
 import React from "react";
-import SEO from "../../components/SEO.jsx";
+import AreaSEO from "../../components/AreaSEO.jsx";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 
 export default function LongmontPage() {
   return (
     <>
-      <SEO
-        title="Moving to Longmont Colorado? Ultimate Guide | Schwartz And Associates"
-        description="Discover Longmont, CO - a vibrant city in Boulder County with excellent schools, thriving economy, and abundant outdoor recreation. Your complete guide to living in Longmont."
-        keywords="Longmont Colorado, Longmont CO real estate, moving to Longmont, Longmont homes for sale, Boulder County, Longmont schools, living in Longmont"
-        canonical="https://saahomes.com/northern-colorado-areas/longmont/"
-        ogTitle="Moving to Longmont Colorado? Ultimate Guide"
-        ogDescription="Discover Longmont, CO - a thriving city with tech innovation, craft breweries, and mountain access."
-        ogUrl="https://saahomes.com/northern-colorado-areas/longmont/"
-      />
+      <AreaSEO slug="longmont" />
       
       {/* Hero Section */}
       <section className="relative h-96 bg-cover bg-center flex items-center justify-center pt-32" 
@@ -194,57 +186,6 @@ export default function LongmontPage() {
         </section>
 
       </article>
-
-      {/* Structured Data for SEO */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "City",
-          "name": "Longmont",
-          "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Longmont",
-            "addressRegion": "CO",
-            "addressCountry": "US"
-          },
-          "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": "40.1672",
-            "longitude": "-105.1019"
-          },
-          "description": "Longmont is a vibrant city in Boulder County with excellent schools, thriving economy, and abundant outdoor recreation.",
-          "image": "https://saahomes.com/images/Longmont.jpg",
-          "url": "https://saahomes.com/northern-colorado-areas/longmont/"
-        })}
-      </script>
-
-      {/* Breadcrumbs Structured Data */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          "itemListElement": [
-            {
-              "@type": "ListItem",
-              "position": 1,
-              "name": "Home",
-              "item": "https://saahomes.com/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 2,
-              "name": "Featured Areas",
-              "item": "https://saahomes.com/northern-colorado-areas/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 3,
-              "name": "Longmont",
-              "item": "https://saahomes.com/northern-colorado-areas/longmont/"
-            }
-          ]
-        })}
-      </script>
     </>
   );
 }

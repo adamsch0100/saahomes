@@ -1,17 +1,12 @@
 import React from "react";
-import SEO from "../../components/SEO";
+import AreaSEO from "../../components/AreaSEO.jsx";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 
 export default function EatonPage() {
   return (
     <>
-      <SEO 
-        title="Eaton, CO Real Estate | Homes for Sale in Eaton | Schwartz And Associates"
-        description="Discover Eaton, CO real estate with Schwartz and Associates. Agricultural community with a strong sense of tradition, excellent schools, and peaceful rural setting."
-        keywords="Eaton CO real estate, Eaton homes for sale, Eaton Colorado, Weld County homes, rural living"
-        canonical="https://saahomes.com/northern-colorado-areas/eaton/"
-      />
+      <AreaSEO slug="eaton" />
 
       {/* Hero Section */}
       <section className="relative h-96 bg-cover bg-center flex items-center justify-center pt-32" 
@@ -249,57 +244,6 @@ export default function EatonPage() {
           </div>
         </div>
       </section>
-
-      {/* Structured Data for SEO */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "City",
-          "name": "Eaton",
-          "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Eaton",
-            "addressRegion": "CO",
-            "addressCountry": "US"
-          },
-          "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": "40.5308",
-            "longitude": "-104.7147"
-          },
-          "description": "Eaton offers a peaceful rural lifestyle with open spaces, agricultural land, and beautiful views. Residents enjoy the slower pace and connection to the land.",
-          "image": "/images/Eaton-CO-Area-Guide.jpg",
-          "url": "https://saahomes.com/northern-colorado-areas/eaton/"
-        })}
-      </script>
-
-      {/* Breadcrumbs Structured Data */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          "itemListElement": [
-            {
-              "@type": "ListItem",
-              "position": 1,
-              "name": "Home",
-              "item": "https://saahomes.com/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 2,
-              "name": "Featured Areas",
-              "item": "https://saahomes.com/northern-colorado-areas/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 3,
-              "name": "Eaton",
-              "item": "https://saahomes.com/northern-colorado-areas/eaton/"
-            }
-          ]
-        })}
-      </script>
     </>
   );
 }
