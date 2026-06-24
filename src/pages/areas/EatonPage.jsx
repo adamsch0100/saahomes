@@ -10,7 +10,7 @@ export default function EatonPage() {
         title="Eaton, CO Real Estate | Homes for Sale in Eaton | Schwartz And Associates"
         description="Discover Eaton, CO real estate with Schwartz and Associates. Agricultural community with a strong sense of tradition, excellent schools, and peaceful rural setting."
         keywords="Eaton CO real estate, Eaton homes for sale, Eaton Colorado, Weld County homes, rural living"
-        canonical="https://saahomes.com/our-areas/eaton/"
+        canonical="https://saahomes.com/northern-colorado-areas/eaton/"
       />
 
       {/* Hero Section */}

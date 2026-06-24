@@ -96,7 +96,7 @@ export default function ForBuyersPage() {
               <p className="text-gray-700 mb-4">
                 Explore detailed guides for Fort Collins, Loveland, Windsor, Greeley, and other Northern Colorado communities.
               </p>
-              <a href="/featured-areas/" className="text-black font-semibold hover:underline">Explore →</a>
+              <a href="/northern-colorado-areas/" className="text-black font-semibold hover:underline">Explore →</a>
             </div>
           </div>
         </div>

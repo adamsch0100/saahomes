@@ -8,15 +8,50 @@ import MapSection from "../components/MapSection";
 import Testimonials from "../components/Testimonials";
 import SocialSection from "../components/SocialSection";
 import ContactCTA from "../components/ContactCTA";
+import { BUSINESS } from "../utils/seoConstants.js";
+
+const homePageSchema = {
+  "@context": "https://schema.org",
+  "@type": "RealEstateAgent",
+  "name": BUSINESS.name,
+  "image": BUSINESS.logo,
+  "@id": BUSINESS.url,
+  "url": BUSINESS.url,
+  "telephone": BUSINESS.telephone,
+  "email": BUSINESS.email,
+  "address": {
+    "@type": "PostalAddress",
+    ...BUSINESS.address,
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    ...BUSINESS.geo,
+  },
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    "opens": "09:00",
+    "closes": "17:00",
+  },
+  "priceRange": BUSINESS.priceRange,
+  "areaServed": BUSINESS.areaServed.map((name) => ({
+    "@type": name.includes("Colorado") ? "AdministrativeArea" : "City",
+    "name": name.replace(", CO", ""),
+  })),
+  "sameAs": BUSINESS.sameAs,
+};
 
 export default function HomePage() {
   return (
     <>
       <SEO
-        exactTitle="Fort Collins Real Estate Agents | SAA Homes - Schwartz and Associates"
-        description="Schwartz and Associates at Coldwell Banker Realty — your trusted Fort Collins real estate agents serving Northern Colorado. Expert buyers and sellers agents in Fort Collins, Loveland, Windsor, and Greeley."
-        keywords="Fort Collins real estate agents, SAA Homes, Schwartz and Associates, Northern Colorado real estate, Loveland realtor, Windsor homes, Greeley property, Coldwell Banker Fort Collins"
+        exactTitle="Fort Collins Real Estate Agents | SAA Homes - Northern Colorado"
+        description="Schwartz and Associates — trusted Northern Colorado real estate agents in Fort Collins, Loveland, Windsor, Greeley, and across Colorado. Expert buyer and seller representation."
+        keywords="Fort Collins real estate agents, Northern Colorado realtor, SAA Homes, Schwartz and Associates, Loveland homes for sale, Windsor CO real estate, Greeley realtor, Colorado real estate"
         canonical="https://saahomes.com/"
+        ogImage="https://saahomes.com/images/White-Logo-AUTOx110.fit.png"
+        includeWebsite={true}
+        jsonLd={[homePageSchema]}
       />
       <Hero />
       <AboutSection />
@@ -26,77 +61,6 @@ export default function HomePage() {
       <Testimonials />
       <SocialSection />
       <ContactCTA />
-
-      {/* LocalBusiness Structured Data */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "RealEstateAgent",
-          "name": "Schwartz And Associates",
-          "image": "/images/White-Logo-AUTOx110.fit.png",
-          "@id": "https://saahomes.com",
-          "url": "https://saahomes.com",
-          "telephone": "(970) 999-1407",
-          "email": "info@saahomes.com",
-          "address": {
-            "@type": "PostalAddress",
-            "streetAddress": "3665 John F Kennedy Parkway, Suite 210",
-            "addressLocality": "Fort Collins",
-            "addressRegion": "CO",
-            "postalCode": "80525",
-            "addressCountry": "US"
-          },
-          "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": "40.5853",
-            "longitude": "-105.0844"
-          },
-          "openingHoursSpecification": {
-            "@type": "OpeningHoursSpecification",
-            "dayOfWeek": [
-              "Monday",
-              "Tuesday",
-              "Wednesday",
-              "Thursday",
-              "Friday",
-              "Saturday",
-              "Sunday"
-            ],
-            "opens": "09:00",
-            "closes": "17:00"
-          },
-          "priceRange": "$$",
-          "areaServed": [
-            {
-              "@type": "City",
-              "name": "Fort Collins"
-            },
-            {
-              "@type": "City",
-              "name": "Loveland"
-            },
-            {
-              "@type": "City",
-              "name": "Windsor"
-            },
-            {
-              "@type": "City",
-              "name": "Greeley"
-            },
-            {
-              "@type": "City",
-              "name": "Northern Colorado"
-            }
-          ],
-          "sameAs": [
-            "https://www.facebook.com/schwartzandassociateshomes",
-            "https://twitter.com/saahomes",
-            "https://youtube.com/@SAAHomes",
-            "https://www.instagram.com/saa_homes/"
-          ]
-        })}
-      </script>
     </>
   );
 }
-

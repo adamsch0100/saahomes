@@ -10,7 +10,7 @@ export default function JohnstownPage() {
         title="Johnstown, CO Real Estate | Homes for Sale in Johnstown | Schwartz And Associates"
         description="Discover Johnstown, CO real estate with Schwartz and Associates. Historic town with a blend of old and new, offering a quiet lifestyle with convenient access to amenities."
         keywords="Johnstown CO real estate, Johnstown homes for sale, Johnstown Colorado, Weld County homes, affordable living"
-        canonical="https://saahomes.com/our-areas/johnstown/"
+        canonical="https://saahomes.com/northern-colorado-areas/johnstown/"
       />
 
       {/* Hero Section */}

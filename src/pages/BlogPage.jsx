@@ -30,10 +30,22 @@ export default function BlogPage() {
   return (
     <>
       <SEO
-        exactTitle="Northern Colorado Real Estate Blog | SAA Homes"
-        description="Read the SAA Homes blog for real estate tips, market updates, and neighborhood guides for Fort Collins, Loveland, Windsor, and Northern Colorado."
-        keywords="Northern Colorado real estate blog, Fort Collins housing market, home buying tips Colorado, home selling tips, SAA Homes blog"
+        exactTitle="Northern Colorado Real Estate Blog & Guides | Colorado Home Tips | SAA Homes"
+        description="Northern Colorado real estate blog with market updates, home buying and selling tips, and neighborhood guides for Fort Collins, Loveland, Windsor, Greeley, and across Colorado."
+        keywords="Northern Colorado real estate blog, Colorado home buying tips, Fort Collins housing market, Northern Colorado market update, Colorado seller tips, SAA Homes guides"
         canonical="https://saahomes.com/blog/"
+        jsonLd={[{
+          "@context": "https://schema.org",
+          "@type": "Blog",
+          "name": "SAA Homes Northern Colorado Real Estate Blog",
+          "url": "https://saahomes.com/blog/",
+          "description": "Real estate tips, market updates, and guides for Northern Colorado home buyers and sellers.",
+          "publisher": {
+            "@type": "Organization",
+            "name": "Schwartz And Associates",
+            "url": "https://saahomes.com/",
+          },
+        }]}
       />
 
       {/* Hero */}

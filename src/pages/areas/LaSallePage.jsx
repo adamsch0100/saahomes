@@ -10,7 +10,7 @@ export default function LaSallePage() {
         title="La Salle, CO Real Estate | Homes for Sale in La Salle | Schwartz And Associates"
         description="Discover La Salle, CO real estate with Schwartz and Associates. Historic community with small-town feel, strong schools, and affordable cost of living."
         keywords="La Salle CO real estate, La Salle homes for sale, La Salle Colorado, Weld County homes, affordable living"
-        canonical="https://saahomes.com/our-areas/la-salle/"
+        canonical="https://saahomes.com/northern-colorado-areas/la-salle/"
       />
 
       {/* Hero Section */}

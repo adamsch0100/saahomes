@@ -89,10 +89,11 @@ export default function AdminPage() {
   if (!isAuthenticated) {
     return (
       <>
-        <SEO 
+        <SEO
           title="Admin Login"
           description="Admin panel login"
-          canonical="https://saahomes.com/admin"
+          canonical="https://saahomes.com/admin/"
+          robots="noindex, nofollow"
         />
         <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-md w-full space-y-8">
@@ -158,10 +159,11 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen w-full bg-gray-50">
-      <SEO 
+      <SEO
         title="Admin Dashboard"
         description="Admin panel dashboard"
-        canonical="https://saahomes.com/admin"
+        canonical="https://saahomes.com/admin/"
+        robots="noindex, nofollow"
       />
       <div className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">

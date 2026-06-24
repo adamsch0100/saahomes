@@ -23,23 +23,30 @@ export default function PropertiesPage() {
     }
   }, [location]);
 
-  // Build SEO title and description based on location
-  const locationText = location ? ` in ${location}` : '';
-  const title = location 
-    ? `Property Search${locationText} | Schwartz And Associates`
-    : "Property Search - Find Your Perfect Home | Schwartz And Associates";
-  const description = location
-    ? `Search for homes for sale${locationText}. Browse available properties and find your perfect home.`
-    : "Search for homes for sale in Northern Colorado. Browse properties in Fort Collins, Loveland, Windsor, Greeley, and surrounding areas.";
-
   return (
     <>
-      <SEO 
-        title={title}
-        description={description}
-        keywords="property search, homes for sale, Northern Colorado real estate, Fort Collins homes, Loveland properties, real estate search"
+      <SEO
+        exactTitle={location
+          ? `Homes for Sale in ${location} | Northern Colorado | SAA Homes`
+          : "Homes for Sale in Northern Colorado | Fort Collins, Loveland & Windsor | SAA Homes"}
+        description={location
+          ? `Search homes for sale in ${location}, Colorado. Browse Northern Colorado listings with SAA Homes — expert buyer agents serving Fort Collins, Loveland, Windsor, Greeley, and beyond.`
+          : "Search homes for sale across Northern Colorado. Browse Fort Collins, Loveland, Windsor, Greeley, Timnath, and surrounding Colorado communities with SAA Homes."}
+        keywords="homes for sale Northern Colorado, Colorado property search, Fort Collins homes for sale, Loveland real estate listings, Windsor CO homes, Greeley houses for sale, Colorado MLS search"
         canonical="https://saahomes.com/properties/"
+        ogImage="https://saahomes.com/images/buyers-hero.jpg"
       />
+
+      <section className="sr-only">
+        <h1>
+          {location
+            ? `Homes for Sale in ${location}, Colorado`
+            : "Homes for Sale in Northern Colorado"}
+        </h1>
+        <p>
+          Search available homes for sale across Northern Colorado including Fort Collins, Loveland, Windsor, Greeley, and surrounding communities.
+        </p>
+      </section>
       
       {/* Hero Section */}
       <section className="relative h-[120px] bg-black pt-32"></section>

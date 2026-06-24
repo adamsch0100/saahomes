@@ -10,7 +10,7 @@ export default function WellingtonPage() {
         title="Wellington, CO Real Estate | Homes for Sale in Wellington | Schwartz And Associates"
         description="Discover Wellington, CO real estate with Schwartz and Associates. Charming small-town atmosphere with agricultural roots, great schools, and affordable housing."
         keywords="Wellington CO real estate, Wellington homes for sale, Wellington Colorado, Larimer County homes, rural living"
-        canonical="https://saahomes.com/our-areas/wellington/"
+        canonical="https://saahomes.com/northern-colorado-areas/wellington/"
       />
 
       {/* Hero Section */}

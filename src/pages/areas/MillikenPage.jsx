@@ -10,7 +10,7 @@ export default function MillikenPage() {
         title="Milliken, CO Real Estate | Homes for Sale in Milliken | Schwartz And Associates"
         description="Discover Milliken, CO real estate with Schwartz and Associates. Small town with affordable housing, friendly community, and easy access to larger cities."
         keywords="Milliken CO real estate, Milliken homes for sale, Milliken Colorado, Weld County homes, affordable living"
-        canonical="https://saahomes.com/our-areas/milliken/"
+        canonical="https://saahomes.com/northern-colorado-areas/milliken/"
       />
 
       {/* Hero Section */}
