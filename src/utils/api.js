@@ -1,5 +1,3 @@
-const PRODUCTION_API_URL = 'https://saahomes-production.up.railway.app';
-
 const API_BASE_URL = (() => {
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL.replace(/\/$/, '');
@@ -7,7 +5,10 @@ const API_BASE_URL = (() => {
   if (import.meta.env.DEV) {
     return 'http://localhost:3000';
   }
-  return PRODUCTION_API_URL;
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  return 'https://saahomes.com';
 })();
 
 export const apiRequest = async (endpoint, options = {}) => {
