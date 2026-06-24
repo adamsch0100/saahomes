@@ -128,3 +128,49 @@ Submitted at: ${new Date().toLocaleString()}
   }
 };
 
+export const sendChampionsLeadNotification = async (submission) => {
+  const {
+    first_name, last_name, email, phone, responder_type, employer_agency, buying_timeline, message,
+  } = submission;
+
+  const mailOptions = {
+    from: `"SAA Homes Website" <${ADMIN_EMAIL}>`,
+    to: ADMIN_EMAIL,
+    subject: `New Champions Home Loan Lead - ${first_name} ${last_name}`,
+    html: `
+      <h2>New Colorado Champions Home Loan Lead</h2>
+      <p><strong>Name:</strong> ${first_name} ${last_name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
+      ${responder_type ? `<p><strong>Role:</strong> ${responder_type}</p>` : ''}
+      ${employer_agency ? `<p><strong>Employer/Agency:</strong> ${employer_agency}</p>` : ''}
+      ${buying_timeline ? `<p><strong>Buying Timeline:</strong> ${buying_timeline}</p>` : ''}
+      ${message ? `<p><strong>Message:</strong><br>${message.replace(/\n/g, '<br>')}</p>` : ''}
+      <hr>
+      <p><small>Submitted at: ${new Date().toLocaleString()}</small></p>
+    `,
+    text: `
+New Colorado Champions Home Loan Lead
+
+Name: ${first_name} ${last_name}
+Email: ${email}
+${phone ? `Phone: ${phone}` : ''}
+${responder_type ? `Role: ${responder_type}` : ''}
+${employer_agency ? `Employer/Agency: ${employer_agency}` : ''}
+${buying_timeline ? `Buying Timeline: ${buying_timeline}` : ''}
+${message ? `Message:\n${message}` : ''}
+
+Submitted at: ${new Date().toLocaleString()}
+    `.trim(),
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    logger.info('Champions lead notification email sent', { messageId: info.messageId });
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    logger.error('Failed to send Champions lead notification email', error);
+    throw error;
+  }
+};
+

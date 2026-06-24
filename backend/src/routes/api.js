@@ -3,10 +3,12 @@ import rateLimit from 'express-rate-limit';
 import { submitContactForm } from '../controllers/contactController.js';
 import { submitMarketReportForm } from '../controllers/marketReportController.js';
 import { submitChfaLeadForm } from '../controllers/chfaLeadController.js';
+import { submitChampionsLeadForm } from '../controllers/championsLeadController.js';
 import {
   validateContactSubmission,
   validateMarketReportSubmission,
   validateChfaLeadSubmission,
+  validateChampionsLeadSubmission,
   handleValidationErrors,
 } from '../middleware/validation.js';
 
@@ -42,6 +44,14 @@ router.post(
   validateChfaLeadSubmission,
   handleValidationErrors,
   submitChfaLeadForm
+);
+
+router.post(
+  '/champions-lead',
+  formLimiter,
+  validateChampionsLeadSubmission,
+  handleValidationErrors,
+  submitChampionsLeadForm
 );
 
 export default router;

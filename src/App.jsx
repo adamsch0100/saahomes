@@ -29,6 +29,7 @@ import TestimonialsPage from "./pages/TestimonialsPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
 import ChfaSchoolsToHomePage from "./pages/ChfaSchoolsToHomePage.jsx";
+import ChampionsHomeLoanPage from "./pages/ChampionsHomeLoanPage.jsx";
 import FloatingContactBar from "./components/FloatingContactBar.jsx";
 import { loadRealScoutScript } from "./utils/realscout.js";
 
@@ -138,6 +139,12 @@ export default function App() {
         <Route path="/chfa-schools-to-home/" element={<AppLayout><ChfaSchoolsToHomePage /></AppLayout>} />
         <Route path="/chfa" element={<AppLayout><ChfaSchoolsToHomePage /></AppLayout>} />
         <Route path="/chfa/" element={<AppLayout><ChfaSchoolsToHomePage /></AppLayout>} />
+
+        {/* Colorado Champions Home Loan Program */}
+        <Route path="/colorado-champions-home-loan-program" element={<AppLayout><ChampionsHomeLoanPage /></AppLayout>} />
+        <Route path="/colorado-champions-home-loan-program/" element={<AppLayout><ChampionsHomeLoanPage /></AppLayout>} />
+        <Route path="/champions-home-loan" element={<AppLayout><ChampionsHomeLoanPage /></AppLayout>} />
+        <Route path="/champions-home-loan/" element={<AppLayout><ChampionsHomeLoanPage /></AppLayout>} />
 
         {/* Testimonials */}
         <Route path="/testimonials" element={<AppLayout><TestimonialsPage /></AppLayout>} />

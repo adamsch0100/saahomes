@@ -9,8 +9,13 @@ export default function FloatingContactBar() {
   }
 
   const isChfaPage = location.pathname.includes('chfa-schools-to-home') || location.pathname === '/chfa' || location.pathname === '/chfa/';
-  const helpLink = isChfaPage ? '/chfa-schools-to-home/#chfa-lead-form' : '/contact/';
-  const helpLabel = isChfaPage ? 'Free Consultation' : 'Get Help Buying';
+  const isChampionsPage = location.pathname.includes('colorado-champions-home-loan-program') || location.pathname.includes('champions-home-loan');
+  const helpLink = isChfaPage
+    ? '/chfa-schools-to-home/#chfa-lead-form'
+    : isChampionsPage
+      ? '/colorado-champions-home-loan-program/#champions-lead-form'
+      : '/contact/';
+  const helpLabel = isChfaPage || isChampionsPage ? 'Free Consultation' : 'Get Help Buying';
 
   return (
     <div className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">

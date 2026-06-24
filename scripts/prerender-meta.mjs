@@ -50,6 +50,11 @@ const staticRoutes = [
     description: 'CHFA Schools To Home helps Colorado public school employees with up to 25% down payment assistance. Free consultation from SAA Homes.',
   },
   {
+    path: '/colorado-champions-home-loan-program/',
+    title: 'Colorado Champions Home Loan Program | CHFA First Responder Home Loans 2026 | SAA Homes',
+    description: 'Colorado\'s new CHFA Champions Home Loan Program expands eligibility for police, firefighters, EMTs, and 911 dispatchers. 110% income limits, up to $25K down payment help. Expected late 2026.',
+  },
+  {
     path: '/mortgage-calculator/',
     title: 'Colorado Mortgage Calculator | Northern Colorado Home Payments | SAA Homes',
     description: 'Estimate your monthly mortgage payment for Northern Colorado homes with our free calculator.',
