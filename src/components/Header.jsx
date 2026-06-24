@@ -1,9 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
+const buyerProgramLinks = [
+  { label: "CHFA Down Payment Assistance", to: "/chfa-down-payment-assistance/" },
+  { label: "CHFA Schools To Home", to: "/chfa-schools-to-home/" },
+  { label: "Champions Home Loan", to: "/colorado-champions-home-loan-program/" },
+];
+
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [buyersExpanded, setBuyersExpanded] = useState(true);
+
+  const closeMenu = () => setMenuOpen(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -76,7 +85,35 @@ export default function Header() {
 
             <nav className="hidden lg:flex items-center gap-6 text-white text-sm z-30">
               <Link to="/about-us/" className="hover:text-gray-200 transition-colors">About Us</Link>
-              <Link to="/for-buyers/" className="hover:text-gray-200 transition-colors">For Buyers</Link>
+              <div className="relative group">
+                <Link to="/for-buyers/" className="hover:text-gray-200 transition-colors inline-flex items-center gap-1">
+                  For Buyers
+                  <span className="text-xs opacity-70" aria-hidden="true">▾</span>
+                </Link>
+                <div className="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all">
+                  <div className="min-w-[16rem] rounded-lg border border-gray-700 bg-black shadow-xl py-2">
+                    <Link
+                      to="/for-buyers/"
+                      className="block px-4 py-2.5 text-sm text-gray-200 hover:text-white hover:bg-white/10 transition-colors"
+                    >
+                      Buyer Overview
+                    </Link>
+                    <div className="my-1 border-t border-gray-800" />
+                    <p className="px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+                      CHFA Programs
+                    </p>
+                    {buyerProgramLinks.map((item) => (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        className="block px-4 py-2.5 text-sm text-gray-200 hover:text-white hover:bg-white/10 transition-colors"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
               <Link to="/for-sellers/" className="hover:text-gray-200 transition-colors">For Sellers</Link>
               <Link to="/contact/" className="hover:text-gray-200 transition-colors">Contact</Link>
               <Link to="/properties/" className="hover:text-gray-200 transition-colors">Sign In / Sign Up</Link>
@@ -111,19 +148,51 @@ export default function Header() {
           </button>
 
           <nav className="mt-14 space-y-5">
-            <Link onClick={() => setMenuOpen(false)} to="/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Home</Link>
-            <Link onClick={() => setMenuOpen(false)} to="/for-buyers/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">For Buyers</Link>
-            <Link onClick={() => setMenuOpen(false)} to="/for-sellers/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">For Sellers</Link>
-            <Link onClick={() => setMenuOpen(false)} to="/northern-colorado-areas/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Northern Colorado Areas</Link>
-            <Link onClick={() => setMenuOpen(false)} to="/chfa-down-payment-assistance/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">CHFA Down Payment Assistance</Link>
-            <Link onClick={() => setMenuOpen(false)} to="/chfa-schools-to-home/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">CHFA Schools To Home</Link>
-            <Link onClick={() => setMenuOpen(false)} to="/colorado-champions-home-loan-program/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Champions Home Loan</Link>
-            <Link onClick={() => setMenuOpen(false)} to="/testimonials/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Client Reviews</Link>
-            <Link onClick={() => setMenuOpen(false)} to="/blog/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Real Estate Guides</Link>
-            <Link onClick={() => setMenuOpen(false)} to="/properties/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Property Search</Link>
-            <Link onClick={() => setMenuOpen(false)} to="/about-us/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">About Us</Link>
-            <Link onClick={() => setMenuOpen(false)} to="/contact/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Contact</Link>
-            <Link onClick={() => setMenuOpen(false)} to="/properties/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors mt-6 border-t border-gray-700 pt-6">
+            <Link onClick={closeMenu} to="/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Home</Link>
+
+            <div>
+              <div className="flex items-center justify-between gap-3">
+                <Link onClick={closeMenu} to="/for-buyers/" className="text-lg sm:text-xl hover:text-gray-300 transition-colors font-semibold">
+                  For Buyers
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setBuyersExpanded((open) => !open)}
+                  className="text-sm text-gray-400 hover:text-white transition-colors px-2 py-1"
+                  aria-expanded={buyersExpanded}
+                  aria-label={buyersExpanded ? "Collapse buyer programs" : "Expand buyer programs"}
+                >
+                  {buyersExpanded ? "−" : "+"}
+                </button>
+              </div>
+              {buyersExpanded && (
+                <div className="mt-3 ml-3 pl-4 border-l border-gray-700 space-y-3">
+                  <Link onClick={closeMenu} to="/for-buyers/" className="block text-sm text-gray-300 hover:text-white transition-colors">
+                    Buyer Overview
+                  </Link>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 pt-1">CHFA Programs</p>
+                  {buyerProgramLinks.map((item) => (
+                    <Link
+                      key={item.to}
+                      onClick={closeMenu}
+                      to={item.to}
+                      className="block text-sm sm:text-base text-gray-300 hover:text-white transition-colors"
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <Link onClick={closeMenu} to="/for-sellers/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">For Sellers</Link>
+            <Link onClick={closeMenu} to="/northern-colorado-areas/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Northern Colorado Areas</Link>
+            <Link onClick={closeMenu} to="/testimonials/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Client Reviews</Link>
+            <Link onClick={closeMenu} to="/blog/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Real Estate Guides</Link>
+            <Link onClick={closeMenu} to="/properties/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Property Search</Link>
+            <Link onClick={closeMenu} to="/about-us/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">About Us</Link>
+            <Link onClick={closeMenu} to="/contact/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Contact</Link>
+            <Link onClick={closeMenu} to="/properties/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors mt-6 border-t border-gray-700 pt-6">
               Sign In / Sign Up
             </Link>
           </nav>
