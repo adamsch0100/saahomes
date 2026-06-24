@@ -1,20 +1,12 @@
 import React from "react";
-import SEO from "../../components/SEO.jsx";
+import AreaSEO from "../../components/AreaSEO.jsx";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 
 export default function MeadPage() {
   return (
     <>
-      <SEO
-        title="Moving to Mead Colorado? Ultimate Guide | Schwartz And Associates"
-        description="Discover Mead, CO - a charming small town in Northern Colorado. Learn about living in Mead, local schools, economy, activities, and real estate opportunities."
-        keywords="Mead Colorado, Mead CO real estate, moving to Mead, Mead homes for sale, Northern Colorado, Mead schools, living in Mead"
-        canonical="https://saahomes.com/northern-colorado-areas/mead/"
-        ogTitle="Moving to Mead Colorado? Ultimate Guide"
-        ogDescription="Discover Mead, CO - a charming small town in Northern Colorado with excellent schools and community spirit."
-        ogUrl="https://saahomes.com/northern-colorado-areas/mead/"
-      />
+      <AreaSEO slug="mead" />
       
       {/* Hero Section */}
       <section className="relative h-96 bg-cover bg-center flex items-center justify-center pt-32" 
@@ -188,57 +180,6 @@ export default function MeadPage() {
         </section>
 
       </article>
-
-      {/* Structured Data for SEO */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "City",
-          "name": "Mead",
-          "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Mead",
-            "addressRegion": "CO",
-            "addressCountry": "US"
-          },
-          "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": "40.2333",
-            "longitude": "-105.0036"
-          },
-          "description": "Mead is a charming small town in Northern Colorado with excellent schools and community spirit.",
-          "image": "https://saahomes.com/images/Mead.JPG",
-          "url": "https://saahomes.com/northern-colorado-areas/mead/"
-        })}
-      </script>
-
-      {/* Breadcrumbs Structured Data */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          "itemListElement": [
-            {
-              "@type": "ListItem",
-              "position": 1,
-              "name": "Home",
-              "item": "https://saahomes.com/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 2,
-              "name": "Featured Areas",
-              "item": "https://saahomes.com/northern-colorado-areas/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 3,
-              "name": "Mead",
-              "item": "https://saahomes.com/northern-colorado-areas/mead/"
-            }
-          ]
-        })}
-      </script>
     </>
   );
 }

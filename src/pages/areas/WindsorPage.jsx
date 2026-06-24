@@ -1,20 +1,12 @@
 import React from "react";
-import SEO from "../../components/SEO.jsx";
+import AreaSEO from "../../components/AreaSEO.jsx";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 
 export default function WindsorPage() {
   return (
     <>
-      <SEO
-        title="Living in Windsor Colorado - Ultimate Guide | Schwartz And Associates"
-        description="Discover Windsor, CO - a thriving community with excellent schools, family-friendly atmosphere, and easy access to Fort Collins and Loveland. Your complete guide to living in Windsor."
-        keywords="Windsor Colorado, Windsor CO real estate, moving to Windsor, Windsor homes for sale, Northern Colorado, Windsor schools, living in Windsor"
-        canonical="https://saahomes.com/northern-colorado-areas/windsor/"
-        ogTitle="Living in Windsor Colorado - Ultimate Guide"
-        ogDescription="Discover Windsor, CO - a thriving community between Fort Collins and Loveland with excellent quality of life."
-        ogUrl="https://saahomes.com/northern-colorado-areas/windsor/"
-      />
+      <AreaSEO slug="windsor" />
       
       {/* Hero Section */}
       <section className="relative h-96 bg-cover bg-center flex items-center justify-center pt-32" 
@@ -201,57 +193,6 @@ export default function WindsorPage() {
         </section>
 
       </article>
-
-      {/* Structured Data for SEO */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "City",
-          "name": "Windsor",
-          "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Windsor",
-            "addressRegion": "CO",
-            "addressCountry": "US"
-          },
-          "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": "40.4775",
-            "longitude": "-104.9014"
-          },
-          "description": "Windsor is a thriving community of approximately 35,000 residents located in northern Colorado. Situated between Fort Collins and Loveland, Windsor offers the perfect blend of small-town charm and modern amenities.",
-          "image": "/images/Windsor-CO-Area-Guide.jpg",
-          "url": "https://saahomes.com/northern-colorado-areas/windsor/"
-        })}
-      </script>
-
-      {/* Breadcrumbs Structured Data */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          "itemListElement": [
-            {
-              "@type": "ListItem",
-              "position": 1,
-              "name": "Home",
-              "item": "https://saahomes.com/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 2,
-              "name": "Featured Areas",
-              "item": "https://saahomes.com/northern-colorado-areas/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 3,
-              "name": "Windsor",
-              "item": "https://saahomes.com/northern-colorado-areas/windsor/"
-            }
-          ]
-        })}
-      </script>
     </>
   );
 }

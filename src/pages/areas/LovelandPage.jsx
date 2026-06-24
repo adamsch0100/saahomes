@@ -1,20 +1,12 @@
 import React from "react";
-import SEO from "../../components/SEO.jsx";
+import AreaSEO from "../../components/AreaSEO.jsx";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 
 export default function LovelandPage() {
   return (
     <>
-      <SEO
-        title="Moving to Loveland Colorado - Ultimate Guide | Schwartz And Associates"
-        description="Discover Loveland, CO - known as the 'Sweetheart City,' offering art galleries, sculpture parks, and easy access to mountain recreation. Your complete guide to living in Loveland."
-        keywords="Loveland Colorado, Loveland CO real estate, moving to Loveland, Loveland homes for sale, Sweetheart City, Gateway to the Rockies, living in Loveland, Loveland lifestyle"
-        canonical="https://saahomes.com/northern-colorado-areas/loveland/"
-        ogTitle="Moving to Loveland Colorado - Ultimate Guide"
-        ogDescription="Loveland, Colorado is a picturesque city at the base of the Rocky Mountains in Northern Colorado. Its nicknames are 'Sweetheart City' and 'Gateway to the Rockies.'"
-        ogUrl="https://saahomes.com/northern-colorado-areas/loveland/"
-      />
+      <AreaSEO slug="loveland" />
       
       {/* Hero Section */}
       <section className="relative h-96 bg-cover bg-center flex items-center justify-center pt-32" 
@@ -252,58 +244,6 @@ export default function LovelandPage() {
           </div>
         </section>
       </article>
-
-      {/* Structured Data for SEO */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "City",
-          "name": "Loveland",
-          "alternateName": "Sweetheart City",
-          "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Loveland",
-            "addressRegion": "CO",
-            "addressCountry": "US"
-          },
-          "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": "40.3978",
-            "longitude": "-105.0750"
-          },
-          "description": "Loveland, Colorado is a picturesque city at the base of the Rocky Mountains in Northern Colorado. Known as the 'Sweetheart City' and 'Gateway to the Rockies.'",
-          "image": "/images/Loveland-CO-Area-Guide.jpg",
-          "url": "https://saahomes.com/northern-colorado-areas/loveland/"
-        })}
-      </script>
-
-      {/* Breadcrumbs Structured Data */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          "itemListElement": [
-            {
-              "@type": "ListItem",
-              "position": 1,
-              "name": "Home",
-              "item": "https://saahomes.com/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 2,
-              "name": "Featured Areas",
-              "item": "https://saahomes.com/northern-colorado-areas/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 3,
-              "name": "Loveland",
-              "item": "https://saahomes.com/northern-colorado-areas/loveland/"
-            }
-          ]
-        })}
-      </script>
     </>
   );
 }

@@ -1,17 +1,12 @@
 import React from "react";
-import SEO from "../../components/SEO";
+import AreaSEO from "../../components/AreaSEO.jsx";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 
 export default function LaSallePage() {
   return (
     <>
-      <SEO 
-        title="La Salle, CO Real Estate | Homes for Sale in La Salle | Schwartz And Associates"
-        description="Discover La Salle, CO real estate with Schwartz and Associates. Historic community with small-town feel, strong schools, and affordable cost of living."
-        keywords="La Salle CO real estate, La Salle homes for sale, La Salle Colorado, Weld County homes, affordable living"
-        canonical="https://saahomes.com/northern-colorado-areas/la-salle/"
-      />
+      <AreaSEO slug="la-salle" />
 
       {/* Hero Section */}
       <section className="relative h-96 bg-cover bg-center flex items-center justify-center pt-32" 
@@ -249,57 +244,6 @@ export default function LaSallePage() {
           </div>
         </div>
       </section>
-
-      {/* Structured Data for SEO */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "City",
-          "name": "La Salle",
-          "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "La Salle",
-            "addressRegion": "CO",
-            "addressCountry": "US"
-          },
-          "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": "40.3478",
-            "longitude": "-104.7019"
-          },
-          "description": "La Salle's historic character is evident in its architecture and community traditions. Residents take pride in preserving the town's heritage while embracing modern improvements.",
-          "image": "/images/la-salle.png",
-          "url": "https://saahomes.com/northern-colorado-areas/la-salle/"
-        })}
-      </script>
-
-      {/* Breadcrumbs Structured Data */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          "itemListElement": [
-            {
-              "@type": "ListItem",
-              "position": 1,
-              "name": "Home",
-              "item": "https://saahomes.com/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 2,
-              "name": "Featured Areas",
-              "item": "https://saahomes.com/northern-colorado-areas/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 3,
-              "name": "La Salle",
-              "item": "https://saahomes.com/northern-colorado-areas/la-salle/"
-            }
-          ]
-        })}
-      </script>
     </>
   );
 }

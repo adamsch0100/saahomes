@@ -1,17 +1,12 @@
 import React from "react";
-import SEO from "../../components/SEO";
+import AreaSEO from "../../components/AreaSEO.jsx";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 
 export default function JohnstownPage() {
   return (
     <>
-      <SEO 
-        title="Johnstown, CO Real Estate | Homes for Sale in Johnstown | Schwartz And Associates"
-        description="Discover Johnstown, CO real estate with Schwartz and Associates. Historic town with a blend of old and new, offering a quiet lifestyle with convenient access to amenities."
-        keywords="Johnstown CO real estate, Johnstown homes for sale, Johnstown Colorado, Weld County homes, affordable living"
-        canonical="https://saahomes.com/northern-colorado-areas/johnstown/"
-      />
+      <AreaSEO slug="johnstown" />
 
       {/* Hero Section */}
       <section className="relative h-96 bg-cover bg-center flex items-center justify-center pt-32" 
@@ -249,57 +244,6 @@ export default function JohnstownPage() {
           </div>
         </div>
       </section>
-
-      {/* Structured Data for SEO */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "City",
-          "name": "Johnstown",
-          "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Johnstown",
-            "addressRegion": "CO",
-            "addressCountry": "US"
-          },
-          "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": "40.3369",
-            "longitude": "-104.9111"
-          },
-          "description": "Johnstown is a fast-growing community between Greeley and Loveland, offering new construction and family amenities.",
-          "image": "/images/Johnstown-CO-Area-Guide.jpg",
-          "url": "https://saahomes.com/northern-colorado-areas/johnstown/"
-        })}
-      </script>
-
-      {/* Breadcrumbs Structured Data */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          "itemListElement": [
-            {
-              "@type": "ListItem",
-              "position": 1,
-              "name": "Home",
-              "item": "https://saahomes.com/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 2,
-              "name": "Featured Areas",
-              "item": "https://saahomes.com/northern-colorado-areas/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 3,
-              "name": "Johnstown",
-              "item": "https://saahomes.com/northern-colorado-areas/johnstown/"
-            }
-          ]
-        })}
-      </script>
     </>
   );
 }

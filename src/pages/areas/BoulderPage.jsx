@@ -1,20 +1,12 @@
 import React from "react";
-import SEO from "../../components/SEO.jsx";
+import AreaSEO from "../../components/AreaSEO.jsx";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 
 export default function BoulderPage() {
   return (
     <>
-      <SEO
-        title="Moving to Boulder Colorado? Ultimate Guide | Schwartz And Associates"
-        description="Discover Boulder, CO - an iconic city known for world-class outdoor recreation, innovative tech scene, and vibrant culture. Your complete guide to living in Boulder."
-        keywords="Boulder Colorado, Boulder CO real estate, moving to Boulder, Boulder homes for sale, Boulder County, CU Boulder, living in Boulder, Boulder lifestyle"
-        canonical="https://saahomes.com/northern-colorado-areas/boulder/"
-        ogTitle="Moving to Boulder Colorado? Ultimate Guide"
-        ogDescription="Discover Boulder, CO - where the mountains meet innovation and outdoor adventure is a way of life."
-        ogUrl="https://saahomes.com/northern-colorado-areas/boulder/"
-      />
+      <AreaSEO slug="boulder" />
       
       {/* Hero Section */}
       <section className="relative h-96 bg-cover bg-center flex items-center justify-center pt-32" 
@@ -206,57 +198,6 @@ export default function BoulderPage() {
         </section>
 
       </article>
-
-      {/* Structured Data for SEO */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "City",
-          "name": "Boulder",
-          "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Boulder",
-            "addressRegion": "CO",
-            "addressCountry": "US"
-          },
-          "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": "40.0150",
-            "longitude": "-105.2705"
-          },
-          "description": "Boulder is an iconic Colorado city of approximately 108,000 residents, nestled at the base of the Rocky Mountains' Flatirons. Known worldwide for its stunning natural beauty, progressive values, and active lifestyle.",
-          "image": "https://saahomes.com/images/Boulder.jpg",
-          "url": "https://saahomes.com/northern-colorado-areas/boulder/"
-        })}
-      </script>
-
-      {/* Breadcrumbs Structured Data */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          "itemListElement": [
-            {
-              "@type": "ListItem",
-              "position": 1,
-              "name": "Home",
-              "item": "https://saahomes.com/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 2,
-              "name": "Featured Areas",
-              "item": "https://saahomes.com/northern-colorado-areas/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 3,
-              "name": "Boulder",
-              "item": "https://saahomes.com/northern-colorado-areas/boulder/"
-            }
-          ]
-        })}
-      </script>
     </>
   );
 }

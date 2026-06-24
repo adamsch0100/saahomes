@@ -1,17 +1,12 @@
 import React from "react";
-import SEO from "../../components/SEO";
+import AreaSEO from "../../components/AreaSEO.jsx";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 
 export default function TimnathPage() {
   return (
     <>
-      <SEO 
-        title="Timnath, CO Real Estate | Homes for Sale in Timnath | Schwartz And Associates"
-        description="Discover Timnath, CO real estate with Schwartz and Associates. A rapidly growing town with new developments, modern amenities, and strong community spirit."
-        keywords="Timnath CO real estate, Timnath homes for sale, Timnath Colorado, new construction Timnath, Larimer County homes"
-        canonical="https://saahomes.com/northern-colorado-areas/timnath/"
-      />
+      <AreaSEO slug="timnath" />
 
       {/* Hero Section */}
       <section className="relative h-96 bg-cover bg-center flex items-center justify-center pt-32" 
@@ -249,57 +244,6 @@ export default function TimnathPage() {
           </div>
         </div>
       </section>
-
-      {/* Structured Data for SEO */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "City",
-          "name": "Timnath",
-          "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Timnath",
-            "addressRegion": "CO",
-            "addressCountry": "US"
-          },
-          "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": "40.5286",
-            "longitude": "-104.9897"
-          },
-          "description": "Timnath is one of Northern Colorado's fastest-growing communities, offering modern homes, excellent schools, and a strong sense of community.",
-          "image": "/images/timnath.png",
-          "url": "https://saahomes.com/northern-colorado-areas/timnath/"
-        })}
-      </script>
-
-      {/* Breadcrumbs Structured Data */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          "itemListElement": [
-            {
-              "@type": "ListItem",
-              "position": 1,
-              "name": "Home",
-              "item": "https://saahomes.com/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 2,
-              "name": "Featured Areas",
-              "item": "https://saahomes.com/northern-colorado-areas/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 3,
-              "name": "Timnath",
-              "item": "https://saahomes.com/northern-colorado-areas/timnath/"
-            }
-          ]
-        })}
-      </script>
     </>
   );
 }
