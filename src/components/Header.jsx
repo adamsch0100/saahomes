@@ -10,9 +10,12 @@ const buyerProgramLinks = [
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [buyersExpanded, setBuyersExpanded] = useState(true);
+  const [buyersExpanded, setBuyersExpanded] = useState(false);
 
-  const closeMenu = () => setMenuOpen(false);
+  const closeMenu = () => {
+    setMenuOpen(false);
+    setBuyersExpanded(false);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
