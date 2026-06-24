@@ -99,30 +99,6 @@ const customTrails = {
   ],
 };
 
-const areaSlugs = [
-  "fort-collins", "loveland", "windsor", "greeley", "timnath", "wellington",
-  "johnstown", "eaton", "milliken", "la-salle", "mead", "longmont", "boulder",
-];
-
-const visibleBreadcrumbRoutes = new Set([
-  "/chfa-schools-to-home",
-  "/chfa",
-  "/for-buyers",
-  "/buyers",
-  "/for-sellers",
-  "/sellers",
-  "/mortgage-calculator",
-  "/northern-colorado-areas",
-  "/featured-areas",
-  "/properties",
-  "/about-us",
-  "/contact",
-  "/testimonials",
-  "/blog",
-  "/helpful-guides",
-  ...areaSlugs.map((slug) => `/northern-colorado-areas/${slug}`),
-]);
-
 function normalizePath(pathname) {
   if (pathname.length > 1 && pathname.endsWith("/")) {
     return pathname.slice(0, -1);
@@ -197,19 +173,8 @@ export default function Breadcrumbs() {
 
   if (!trail) return null;
 
-  const normalized = normalizePath(location.pathname);
-  const isBlogPost = /^\/blog\/[^/]+$/.test(normalized);
-  const isVisible = visibleBreadcrumbRoutes.has(normalized) || isBlogPost;
-
   return (
-    <nav
-      aria-label="Breadcrumb"
-      className={
-        isVisible
-          ? "w-full bg-gray-50 border-b border-gray-200 pt-28"
-          : "sr-only"
-      }
-    >
+    <nav aria-label="Breadcrumb" className="sr-only">
       <ol
         className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-600 max-w-7xl mx-auto px-6 py-3"
         itemScope

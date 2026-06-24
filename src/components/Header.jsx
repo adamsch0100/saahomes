@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const location = useLocation();
-
-  const isHomePage = location.pathname === "/" || location.pathname === "";
-  const useDarkHeader = !isHomePage && !scrolled;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,40 +13,32 @@ export default function Header() {
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [location.pathname]);
-
-  const headerBg = scrolled
-    ? "bg-black shadow-md"
-    : useDarkHeader
-      ? "bg-white border-b border-gray-200 shadow-sm"
-      : "bg-transparent";
-
-  const navText = useDarkHeader ? "text-gray-900" : "text-white";
-  const navHover = useDarkHeader ? "hover:text-gray-600" : "hover:text-gray-200";
-  const mobileBorder = useDarkHeader ? "border-gray-900" : "border-white";
-  const mobileHover = useDarkHeader ? "hover:bg-gray-100" : "hover:bg-white/10";
-  const barColor = useDarkHeader ? "bg-gray-900" : "bg-white";
+  }, []);
 
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50">
-        <div className={`transition-all duration-300 ${headerBg}`}>
+        <div
+          className={`transition-all duration-300 ${
+            scrolled ? "bg-black shadow-md" : "bg-transparent"
+          }`}
+        >
           <div className="w-full px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between relative min-h-[120px]">
-            <div className={`hidden lg:flex items-center gap-6 ${navText} z-30`}>
+            <div className="hidden lg:flex items-center gap-6 text-white z-30">
               <button
                 onClick={() => setMenuOpen(true)}
-                className={`flex items-center gap-2 ${navHover} transition-colors text-sm`}
+                className="flex items-center gap-2 hover:text-gray-200 transition-colors text-sm"
               >
                 <span className="text-xl">☰</span>
                 <span>Menu</span>
               </button>
-              <Link to="/properties/" className={`${navHover} transition-colors text-sm`}>
+              <Link to="/properties/" className="hover:text-gray-200 transition-colors text-sm">
                 Properties
               </Link>
-              <Link to="/for-sellers/#home-valuation" className={`${navHover} transition-colors text-sm`}>
+              <Link to="/for-sellers/#home-valuation" className="hover:text-gray-200 transition-colors text-sm">
                 Home Valuation
               </Link>
-              <Link to="/northern-colorado-areas/" className={`${navHover} transition-colors text-sm`}>
+              <Link to="/northern-colorado-areas/" className="hover:text-gray-200 transition-colors text-sm">
                 Northern Colorado Areas
               </Link>
             </div>
@@ -59,29 +47,29 @@ export default function Header() {
               <img
                 src="/images/White-Logo-AUTOx110.fit.png"
                 alt="Schwartz and Associates Logo"
-                className={`w-auto transition-all duration-300 ${useDarkHeader ? "brightness-0" : ""}`}
+                className="w-auto"
                 style={{ height: "110px" }}
               />
             </Link>
 
-            <nav className={`hidden lg:flex items-center gap-6 ${navText} text-sm z-30`}>
-              <Link to="/about-us/" className={`${navHover} transition-colors`}>About Us</Link>
-              <Link to="/for-buyers/" className={`${navHover} transition-colors`}>For Buyers</Link>
-              <Link to="/for-sellers/" className={`${navHover} transition-colors`}>For Sellers</Link>
-              <Link to="/contact/" className={`${navHover} transition-colors`}>Contact</Link>
-              <Link to="/properties/" className={`${navHover} transition-colors`}>Sign In / Sign Up</Link>
+            <nav className="hidden lg:flex items-center gap-6 text-white text-sm z-30">
+              <Link to="/about-us/" className="hover:text-gray-200 transition-colors">About Us</Link>
+              <Link to="/for-buyers/" className="hover:text-gray-200 transition-colors">For Buyers</Link>
+              <Link to="/for-sellers/" className="hover:text-gray-200 transition-colors">For Sellers</Link>
+              <Link to="/contact/" className="hover:text-gray-200 transition-colors">Contact</Link>
+              <Link to="/properties/" className="hover:text-gray-200 transition-colors">Sign In / Sign Up</Link>
             </nav>
 
             <button
               aria-label="Toggle menu"
-              className={`lg:hidden inline-flex items-center justify-center p-2 rounded-md border ${mobileBorder} ${navText} ${mobileHover} transition-colors z-30`}
+              className="lg:hidden inline-flex items-center justify-center p-2 rounded-md border border-white text-white hover:bg-white/10 transition-colors z-30"
               onClick={() => setMenuOpen(true)}
             >
               <span className="sr-only">Menu</span>
               <div className="flex flex-col gap-1.5">
-                <span className={`h-0.5 w-6 ${barColor} rounded`}></span>
-                <span className={`h-0.5 w-6 ${barColor} rounded`}></span>
-                <span className={`h-0.5 w-6 ${barColor} rounded`}></span>
+                <span className="h-0.5 w-6 bg-white rounded"></span>
+                <span className="h-0.5 w-6 bg-white rounded"></span>
+                <span className="h-0.5 w-6 bg-white rounded"></span>
               </div>
             </button>
           </div>
