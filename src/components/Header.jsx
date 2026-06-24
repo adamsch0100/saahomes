@@ -116,6 +116,7 @@ export default function Header() {
             <Link onClick={() => setMenuOpen(false)} to="/for-sellers/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">For Sellers</Link>
             <Link onClick={() => setMenuOpen(false)} to="/northern-colorado-areas/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Northern Colorado Areas</Link>
             <Link onClick={() => setMenuOpen(false)} to="/chfa-schools-to-home/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">CHFA Schools To Home</Link>
+            <Link onClick={() => setMenuOpen(false)} to="/colorado-champions-home-loan-program/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Champions Home Loan</Link>
             <Link onClick={() => setMenuOpen(false)} to="/testimonials/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Client Reviews</Link>
             <Link onClick={() => setMenuOpen(false)} to="/blog/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Real Estate Guides</Link>
             <Link onClick={() => setMenuOpen(false)} to="/properties/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Property Search</Link>

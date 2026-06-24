@@ -28,6 +28,8 @@ const breadcrumbMap = {
   "helpful-guides": "Colorado Real Estate Guides",
   "chfa-schools-to-home": "CHFA Schools To Home Program",
   chfa: "CHFA Schools To Home Program",
+  "colorado-champions-home-loan-program": "Colorado Champions Home Loan Program",
+  "champions-home-loan": "Colorado Champions Home Loan Program",
   properties: "Homes for Sale in Colorado",
   buyers: "Colorado Home Buyers",
   sellers: "Sell Your Northern Colorado Home",
@@ -43,6 +45,16 @@ const customTrails = {
     { path: "/", label: "Home" },
     { path: "/for-buyers/", label: "Colorado Home Buyers" },
     { path: "/chfa-schools-to-home/", label: "CHFA Schools To Home Program" },
+  ],
+  "/colorado-champions-home-loan-program": [
+    { path: "/", label: "Home" },
+    { path: "/for-buyers/", label: "Colorado Home Buyers" },
+    { path: "/colorado-champions-home-loan-program/", label: "Colorado Champions Home Loan Program" },
+  ],
+  "/champions-home-loan": [
+    { path: "/", label: "Home" },
+    { path: "/for-buyers/", label: "Colorado Home Buyers" },
+    { path: "/colorado-champions-home-loan-program/", label: "Colorado Champions Home Loan Program" },
   ],
   "/for-buyers": [
     { path: "/", label: "Home" },

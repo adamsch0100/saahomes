@@ -60,6 +60,14 @@ export default function ForBuyersPage() {
 
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+              <h3 className="text-2xl font-bold mb-4 font-serif">Champions Home Loan</h3>
+              <p className="text-gray-700 mb-4">
+                Colorado&apos;s new CHFA program for first responders — expanded income eligibility and down payment assistance. Expected late 2026.
+              </p>
+              <a href="/colorado-champions-home-loan-program/" className="text-black font-semibold hover:underline">Learn More →</a>
+            </div>
+
+            <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
               <h3 className="text-2xl font-bold mb-4 font-serif">CHFA Schools To Home</h3>
               <p className="text-gray-700 mb-4">
                 Full-time Colorado public school employees may qualify for up to 25% down payment assistance through CHFA's new Schools To Home program.

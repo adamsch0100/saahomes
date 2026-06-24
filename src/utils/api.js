@@ -70,6 +70,13 @@ export const submitChfaLeadForm = async (formData) => {
   });
 };
 
+export const submitChampionsLeadForm = async (formData) => {
+  return apiRequest('/api/champions-lead', {
+    method: 'POST',
+    body: JSON.stringify(formData),
+  });
+};
+
 export const adminLogin = async (email, password) => {
   return apiRequest('/api/admin/login', {
     method: 'POST',

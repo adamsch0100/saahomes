@@ -144,6 +144,54 @@ export const forwardChfaLeadToFollowUpBoss = async (submission) => {
   }
 };
 
+export const forwardChampionsLeadToFollowUpBoss = async (submission) => {
+  if (!FOLLOW_UP_BOSS_API_KEY && !FOLLOW_UP_BOSS_WEBHOOK_URL) {
+    logger.info('Follow Up Boss not configured, skipping lead forwarding');
+    return { success: false, reason: 'not_configured' };
+  }
+
+  const {
+    first_name, last_name, email, phone, responder_type, employer_agency, buying_timeline, message,
+    responderType, employerAgency, buyingTimeline,
+  } = submission;
+
+  const resolvedType = responder_type || responderType;
+  const resolvedAgency = employer_agency || employerAgency;
+  const resolvedTimeline = buying_timeline || buyingTimeline;
+
+  const messageLines = [
+    'Colorado Champions Home Loan Program lead from website',
+    resolvedType ? `Role: ${resolvedType}` : null,
+    resolvedAgency ? `Employer/Agency: ${resolvedAgency}` : null,
+    resolvedTimeline ? `Buying timeline: ${resolvedTimeline}` : null,
+    message ? `Comments: ${message}` : null,
+    ...buildAttributionLines(submission),
+  ].filter(Boolean);
+
+  const eventData = {
+    source: 'Champions Home Loan Landing Page',
+    system: 'SAA Homes Website',
+    type: 'Registration',
+    message: messageLines.join('\n'),
+    person: {
+      firstName: first_name,
+      lastName: last_name,
+      emails: email ? [{ value: email, type: 'work' }] : [],
+      phones: phone ? [{ value: phone.replace(/\D/g, ''), type: 'mobile' }] : [],
+      tags: ['Champions Home Loan', 'First Responder Lead', 'Website Lead'],
+    },
+  };
+
+  try {
+    const result = await postFollowUpBossEvent(eventData);
+    logger.info('Champions lead forwarded to Follow Up Boss', { eventId: result.id });
+    return { success: true, eventId: result.id };
+  } catch (error) {
+    logger.error('Failed to forward Champions lead to Follow Up Boss', error);
+    return { success: false, error: error.message };
+  }
+};
+
 export const forwardMarketReportToFollowUpBoss = async (submission) => {
   if (!FOLLOW_UP_BOSS_API_KEY && !FOLLOW_UP_BOSS_WEBHOOK_URL) {
     logger.info('Follow Up Boss not configured, skipping lead forwarding');
