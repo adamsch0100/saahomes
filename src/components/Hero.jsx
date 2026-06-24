@@ -19,9 +19,9 @@ export default function Hero() {
       <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/70 via-black/40 to-black/60" aria-hidden="true" />
 
       {/* Hero Content */}
-      <div className="relative z-20 flex-1 flex items-center justify-center pt-40 pb-8 px-6">
+      <div className="relative z-20 flex-1 flex items-center justify-center pt-28 sm:pt-36 lg:pt-40 pb-8 px-4 sm:px-6">
         <div className="text-center text-white max-w-5xl mx-auto">
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight font-serif">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight font-serif">
             Schwartz And Associates
           </h1>
           <p className="mt-4 text-base sm:text-lg lg:text-xl font-sans font-normal">

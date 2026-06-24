@@ -27,7 +27,7 @@ export default function ForSellersPage() {
       />
 
       {/* Hero Section */}
-      <section className="relative h-[600px] bg-cover bg-center flex items-center justify-center pt-32" 
+      <section className="relative min-h-[420px] sm:h-[600px] bg-cover bg-center flex items-center justify-center pt-28 sm:pt-32 pb-12" 
         style={{backgroundImage: "url('/images/sell-hero-1.jpg')"}}>
         <div className="absolute inset-0 bg-black/60"></div>
         <div className="relative z-10 text-center text-white px-6 max-w-4xl mx-auto">

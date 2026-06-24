@@ -49,11 +49,11 @@ export default function ContactPage() {
       />
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-16 px-6 bg-cover bg-center" 
+      <section className="relative pt-28 sm:pt-32 pb-12 sm:pb-16 px-4 sm:px-6 bg-cover bg-center min-h-[16rem] sm:min-h-[20rem]" 
         style={{backgroundImage: "url('/images/6-1.jpg')"}}>
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="relative z-10 max-w-4xl mx-auto text-center text-white">
-          <h1 className="text-5xl sm:text-6xl font-bold mb-6">Our doors are always open!</h1>
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold mb-4 sm:mb-6">Our doors are always open!</h1>
           <p className="text-xl">
             To make the real estate process more pleasurable, Adam and Mandi strive to project positive energy and love to their friends, family, business partners, and clients. We look forward to putting our expertise into action for you!
           </p>

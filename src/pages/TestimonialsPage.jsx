@@ -96,7 +96,7 @@ export default function TestimonialsPage() {
       {/* Hero */}
       <section className="relative h-80 bg-gray-900 flex items-center justify-center pt-24">
         <div className="relative z-10 text-center text-white px-6">
-          <h1 className="text-5xl sm:text-6xl font-bold">Client Reviews</h1>
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">Client Reviews</h1>
           <p className="mt-4 text-xl text-gray-300">What our clients say about working with SAA Homes</p>
         </div>
       </section>

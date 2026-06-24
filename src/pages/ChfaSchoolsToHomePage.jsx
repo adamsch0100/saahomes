@@ -236,30 +236,30 @@ export default function ChfaSchoolsToHomePage() {
 
       {/* Hero */}
       <section
-        className="relative min-h-[520px] bg-cover bg-center flex items-center justify-center pt-8 pb-16"
+        className="relative min-h-[min(100svh,680px)] sm:min-h-[520px] bg-cover bg-center flex items-center justify-center pt-28 sm:pt-32 pb-24 sm:pb-16"
         style={{ backgroundImage: "url('/images/buyers-hero.jpg')" }}
       >
         <div className="absolute inset-0 bg-black/65" />
-        <div className="relative z-10 max-w-5xl mx-auto text-center text-white px-6">
-          <span className="inline-block mb-4 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide uppercase" style={{ backgroundColor: "#CFB36E", color: "#1a1a1a" }}>
+        <div className="relative z-10 max-w-5xl mx-auto text-center text-white px-4 sm:px-6">
+          <span className="inline-block mb-4 px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold tracking-wide uppercase" style={{ backgroundColor: "#CFB36E", color: "#1a1a1a" }}>
             Launching July 2026
           </span>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-serif leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-serif leading-tight">
             CHFA Schools To Home
           </h1>
-          <p className="mt-5 text-xl sm:text-2xl font-sans max-w-3xl mx-auto text-gray-100">
+          <p className="mt-4 sm:mt-5 text-lg sm:text-xl md:text-2xl font-sans max-w-3xl mx-auto text-gray-100 leading-relaxed">
             Down payment assistance for full-time Colorado public school employees — so you can live in the community you serve.
           </p>
-          <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center max-w-md sm:max-w-none mx-auto">
             <a
               href="#chfa-lead-form"
-              className="inline-block px-8 py-3 bg-white text-black font-semibold rounded hover:bg-gray-100 transition-colors"
+              className="inline-flex items-center justify-center px-6 sm:px-8 py-3.5 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors touch-manipulation"
             >
               Get Free Consultation
             </a>
             <a
               href="#how-it-works"
-              className="inline-block px-8 py-3 border-2 border-white text-white font-semibold rounded hover:bg-white hover:text-black transition-colors"
+              className="inline-flex items-center justify-center px-6 sm:px-8 py-3.5 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors touch-manipulation"
             >
               How It Works
             </a>
@@ -292,7 +292,7 @@ export default function ChfaSchoolsToHomePage() {
               </div>
             </div>
           </div>
-          <div className="lg:col-span-2 lg:sticky lg:top-28">
+          <div className="lg:col-span-2 lg:sticky lg:top-28 scroll-mt-28">
             <ChfaLeadForm compact />
           </div>
         </div>

@@ -8,20 +8,24 @@ export default function FloatingContactBar() {
     return null;
   }
 
+  const isChfaPage = location.pathname.includes('chfa-schools-to-home') || location.pathname === '/chfa' || location.pathname === '/chfa/';
+  const helpLink = isChfaPage ? '/chfa-schools-to-home/#chfa-lead-form' : '/contact/';
+  const helpLabel = isChfaPage ? 'Free Consultation' : 'Get Help Buying';
+
   return (
-    <div className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-4 py-3">
+    <div className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
       <div className="flex gap-3">
         <a
           href="tel:(970) 999-1407"
-          className="flex-1 inline-flex items-center justify-center px-4 py-3 bg-black text-white font-semibold rounded-lg text-sm"
+          className="flex-1 inline-flex items-center justify-center px-3 py-3.5 bg-black text-white font-semibold rounded-lg text-sm touch-manipulation"
         >
           Call Now
         </a>
         <Link
-          to="/contact/"
-          className="flex-1 inline-flex items-center justify-center px-4 py-3 border-2 border-black text-black font-semibold rounded-lg text-sm"
+          to={helpLink}
+          className="flex-1 inline-flex items-center justify-center px-3 py-3.5 border-2 border-black text-black font-semibold rounded-lg text-sm text-center leading-tight touch-manipulation"
         >
-          Get Help Buying
+          {helpLabel}
         </Link>
       </div>
     </div>

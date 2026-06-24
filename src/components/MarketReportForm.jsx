@@ -47,7 +47,7 @@ export default function MarketReportForm({ areaName }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-xl p-8">
+    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-xl p-4 sm:p-6 md:p-8">
       {submitStatus?.type === 'error' && (
         <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-800 text-sm">{submitStatus.message}</p>
