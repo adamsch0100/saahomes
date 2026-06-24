@@ -5,7 +5,12 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vite build && node scripts/prerender-meta.mjs",
+    "postbuild": "npm ci --prefix backend --omit=dev",
+    "start": "npm start --prefix backend",
     "preview": "vite preview"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "dependencies": {
     "react": "^18.2.0",
