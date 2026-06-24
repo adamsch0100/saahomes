@@ -33,12 +33,29 @@ const createTables = async () => {
       )
     `);
 
+    // Create chfa_lead_submissions table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS chfa_lead_submissions (
+        id SERIAL PRIMARY KEY,
+        first_name VARCHAR(255) NOT NULL,
+        last_name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        phone VARCHAR(50),
+        school_employer VARCHAR(255),
+        buying_timeline VARCHAR(100),
+        message TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     // Create indexes for better query performance
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_contact_submissions_email ON contact_submissions(email);
       CREATE INDEX IF NOT EXISTS idx_contact_submissions_created_at ON contact_submissions(created_at);
       CREATE INDEX IF NOT EXISTS idx_market_report_submissions_email ON market_report_submissions(email);
       CREATE INDEX IF NOT EXISTS idx_market_report_submissions_created_at ON market_report_submissions(created_at);
+      CREATE INDEX IF NOT EXISTS idx_chfa_lead_submissions_email ON chfa_lead_submissions(email);
+      CREATE INDEX IF NOT EXISTS idx_chfa_lead_submissions_created_at ON chfa_lead_submissions(created_at);
     `);
 
     await client.query('COMMIT');

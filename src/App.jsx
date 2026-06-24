@@ -27,6 +27,7 @@ import MortgageCalculatorPage from "./pages/MortgageCalculatorPage.jsx";
 import AdminPage from "./pages/AdminPage.jsx";
 import TestimonialsPage from "./pages/TestimonialsPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
+import ChfaSchoolsToHomePage from "./pages/ChfaSchoolsToHomePage.jsx";
 import { loadRealScoutScript } from "./utils/realscout.js";
 
 function AppLayout({ children }) {
@@ -128,6 +129,12 @@ export default function App() {
         {/* Mortgage Calculator */}
         <Route path="/mortgage-calculator" element={<AppLayout><MortgageCalculatorPage /></AppLayout>} />
         <Route path="/mortgage-calculator/" element={<AppLayout><MortgageCalculatorPage /></AppLayout>} />
+
+        {/* CHFA Schools To Home */}
+        <Route path="/chfa-schools-to-home" element={<AppLayout><ChfaSchoolsToHomePage /></AppLayout>} />
+        <Route path="/chfa-schools-to-home/" element={<AppLayout><ChfaSchoolsToHomePage /></AppLayout>} />
+        <Route path="/chfa" element={<AppLayout><ChfaSchoolsToHomePage /></AppLayout>} />
+        <Route path="/chfa/" element={<AppLayout><ChfaSchoolsToHomePage /></AppLayout>} />
 
         {/* Testimonials */}
         <Route path="/testimonials" element={<AppLayout><TestimonialsPage /></AppLayout>} />

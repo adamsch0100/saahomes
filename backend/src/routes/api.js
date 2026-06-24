@@ -2,7 +2,13 @@ import express from 'express';
 import rateLimit from 'express-rate-limit';
 import { submitContactForm } from '../controllers/contactController.js';
 import { submitMarketReportForm } from '../controllers/marketReportController.js';
-import { validateContactSubmission, validateMarketReportSubmission, handleValidationErrors } from '../middleware/validation.js';
+import { submitChfaLeadForm } from '../controllers/chfaLeadController.js';
+import {
+  validateContactSubmission,
+  validateMarketReportSubmission,
+  validateChfaLeadSubmission,
+  handleValidationErrors,
+} from '../middleware/validation.js';
 
 const router = express.Router();
 
@@ -28,6 +34,14 @@ router.post(
   validateMarketReportSubmission,
   handleValidationErrors,
   submitMarketReportForm
+);
+
+router.post(
+  '/chfa-lead',
+  formLimiter,
+  validateChfaLeadSubmission,
+  handleValidationErrors,
+  submitChfaLeadForm
 );
 
 export default router;
