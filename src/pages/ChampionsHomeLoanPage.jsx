@@ -494,10 +494,16 @@ export default function ChampionsHomeLoanPage() {
               Find a Participating Lender
             </a>
             <Link
+              to="/chfa-down-payment-assistance/"
+              className="inline-flex items-center px-6 py-3 text-black font-semibold hover:underline"
+            >
+              General CHFA down payment assistance →
+            </Link>
+            <Link
               to="/chfa-schools-to-home/"
               className="inline-flex items-center px-6 py-3 text-black font-semibold hover:underline"
             >
-              Also see: CHFA Schools To Home for educators →
+              CHFA Schools To Home for educators →
             </Link>
           </div>
         </div>

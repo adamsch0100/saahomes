@@ -30,6 +30,9 @@ const breadcrumbMap = {
   chfa: "CHFA Schools To Home Program",
   "colorado-champions-home-loan-program": "Colorado Champions Home Loan Program",
   "champions-home-loan": "Colorado Champions Home Loan Program",
+  "chfa-down-payment-assistance": "CHFA Down Payment Assistance",
+  "colorado-chfa-down-payment-assistance": "CHFA Down Payment Assistance",
+  "chfa-dpa": "CHFA Down Payment Assistance",
   properties: "Homes for Sale in Colorado",
   buyers: "Colorado Home Buyers",
   sellers: "Sell Your Northern Colorado Home",
@@ -55,6 +58,21 @@ const customTrails = {
     { path: "/", label: "Home" },
     { path: "/for-buyers/", label: "Colorado Home Buyers" },
     { path: "/colorado-champions-home-loan-program/", label: "Colorado Champions Home Loan Program" },
+  ],
+  "/chfa-down-payment-assistance": [
+    { path: "/", label: "Home" },
+    { path: "/for-buyers/", label: "Colorado Home Buyers" },
+    { path: "/chfa-down-payment-assistance/", label: "CHFA Down Payment Assistance" },
+  ],
+  "/colorado-chfa-down-payment-assistance": [
+    { path: "/", label: "Home" },
+    { path: "/for-buyers/", label: "Colorado Home Buyers" },
+    { path: "/chfa-down-payment-assistance/", label: "CHFA Down Payment Assistance" },
+  ],
+  "/chfa-dpa": [
+    { path: "/", label: "Home" },
+    { path: "/for-buyers/", label: "Colorado Home Buyers" },
+    { path: "/chfa-down-payment-assistance/", label: "CHFA Down Payment Assistance" },
   ],
   "/for-buyers": [
     { path: "/", label: "Home" },

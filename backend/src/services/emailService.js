@@ -174,3 +174,49 @@ Submitted at: ${new Date().toLocaleString()}
   }
 };
 
+export const sendChfaDpaLeadNotification = async (submission) => {
+  const {
+    first_name, last_name, email, phone, buyer_status, target_county, buying_timeline, message,
+  } = submission;
+
+  const mailOptions = {
+    from: `"SAA Homes Website" <${ADMIN_EMAIL}>`,
+    to: ADMIN_EMAIL,
+    subject: `New CHFA DPA Lead - ${first_name} ${last_name}`,
+    html: `
+      <h2>New CHFA Down Payment Assistance Lead</h2>
+      <p><strong>Name:</strong> ${first_name} ${last_name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
+      ${buyer_status ? `<p><strong>Buyer Status:</strong> ${buyer_status}</p>` : ''}
+      ${target_county ? `<p><strong>Target County:</strong> ${target_county}</p>` : ''}
+      ${buying_timeline ? `<p><strong>Buying Timeline:</strong> ${buying_timeline}</p>` : ''}
+      ${message ? `<p><strong>Message:</strong><br>${message.replace(/\n/g, '<br>')}</p>` : ''}
+      <hr>
+      <p><small>Submitted at: ${new Date().toLocaleString()}</small></p>
+    `,
+    text: `
+New CHFA Down Payment Assistance Lead
+
+Name: ${first_name} ${last_name}
+Email: ${email}
+${phone ? `Phone: ${phone}` : ''}
+${buyer_status ? `Buyer Status: ${buyer_status}` : ''}
+${target_county ? `Target County: ${target_county}` : ''}
+${buying_timeline ? `Buying Timeline: ${buying_timeline}` : ''}
+${message ? `Message:\n${message}` : ''}
+
+Submitted at: ${new Date().toLocaleString()}
+    `.trim(),
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    logger.info('CHFA DPA lead notification email sent', { messageId: info.messageId });
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    logger.error('Failed to send CHFA DPA lead notification email', error);
+    throw error;
+  }
+};
+
