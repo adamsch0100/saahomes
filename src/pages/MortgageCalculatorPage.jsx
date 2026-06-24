@@ -5,7 +5,7 @@ export default function MortgageCalculatorPage() {
   return (
     <>
       <SEO 
-        title="Mortgage Calculator - Calculate Your Monthly Payments | Schwartz And Associates"
+        exactTitle="Colorado Mortgage Calculator | Northern Colorado Home Payments | SAA Homes"
         description="Use our free mortgage calculator to estimate your monthly payments, understand how much home you can afford, and plan your home purchase in Northern Colorado."
         keywords="mortgage calculator, monthly payment calculator, home affordability calculator, Colorado mortgage calculator, real estate calculator"
         canonical="https://saahomes.com/mortgage-calculator/"

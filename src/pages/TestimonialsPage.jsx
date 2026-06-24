@@ -1,6 +1,7 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import SEO from "../components/SEO";
+import { BUSINESS } from "../utils/seoConstants.js";
 
 const testimonials = [
   {
@@ -49,11 +50,11 @@ const reviewSchema = {
   "telephone": "(970) 999-1407",
   "address": {
     "@type": "PostalAddress",
-    "streetAddress": "300 S Howes Street",
-    "addressLocality": "Fort Collins",
-    "addressRegion": "CO",
-    "postalCode": "80521",
-    "addressCountry": "US"
+    "streetAddress": BUSINESS.address.streetAddress,
+    "addressLocality": BUSINESS.address.addressLocality,
+    "addressRegion": BUSINESS.address.addressRegion,
+    "postalCode": BUSINESS.address.postalCode,
+    "addressCountry": BUSINESS.address.addressCountry
   },
   "aggregateRating": {
     "@type": "AggregateRating",

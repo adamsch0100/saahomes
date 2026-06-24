@@ -10,7 +10,7 @@ export default function TimnathPage() {
         title="Timnath, CO Real Estate | Homes for Sale in Timnath | Schwartz And Associates"
         description="Discover Timnath, CO real estate with Schwartz and Associates. A rapidly growing town with new developments, modern amenities, and strong community spirit."
         keywords="Timnath CO real estate, Timnath homes for sale, Timnath Colorado, new construction Timnath, Larimer County homes"
-        canonical="https://saahomes.com/our-areas/timnath/"
+        canonical="https://saahomes.com/northern-colorado-areas/timnath/"
       />
 
       {/* Hero Section */}

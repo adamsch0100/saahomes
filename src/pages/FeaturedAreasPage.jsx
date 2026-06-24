@@ -100,10 +100,18 @@ export default function FeaturedAreasPage() {
   return (
     <>
       <SEO
-        exactTitle="Northern Colorado Neighborhoods | Fort Collins, Loveland, Windsor Real Estate"
-        description="Explore Northern Colorado neighborhoods including Fort Collins, Loveland, Windsor, Greeley, and more. Get market insights, lifestyle guides, and real estate data for every community."
-        keywords="Northern Colorado neighborhoods, Fort Collins real estate, Loveland CO areas, Windsor CO homes, Greeley communities, Northern Colorado towns"
+        exactTitle="Northern Colorado Communities & Neighborhoods | Fort Collins to Greeley | SAA Homes"
+        description="Explore Northern Colorado communities including Fort Collins, Loveland, Windsor, Greeley, Timnath, and more. Local real estate guides, lifestyle info, and homes for sale across Colorado's Front Range."
+        keywords="Northern Colorado neighborhoods, Fort Collins communities, Loveland CO areas, Windsor CO homes, Greeley real estate, Colorado Front Range towns, Northern Colorado area guide"
         canonical="https://saahomes.com/northern-colorado-areas/"
+        ogImage="https://saahomes.com/images/Northern Colorado.webp"
+        jsonLd={[{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "Northern Colorado Communities",
+          "description": "Real estate guides and community information for Northern Colorado cities and towns.",
+          "url": "https://saahomes.com/northern-colorado-areas/",
+        }]}
       />
 
       {/* Hero Section */}

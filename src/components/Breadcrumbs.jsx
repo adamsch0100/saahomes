@@ -2,12 +2,12 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 
 const breadcrumbMap = {
-  "about-us": "About Us",
+  "about-us": "About SAA Homes",
   "for-buyers": "Colorado Home Buyers",
-  "for-sellers": "Sell Your Colorado Home",
-  contact: "Contact",
+  "for-sellers": "Sell Your Northern Colorado Home",
+  contact: "Contact Northern Colorado Realtors",
   "featured-areas": "Northern Colorado Communities",
-  "northern-colorado-areas": "Northern Colorado Areas",
+  "northern-colorado-areas": "Northern Colorado Communities",
   "fort-collins": "Fort Collins",
   loveland: "Loveland",
   windsor: "Windsor",
@@ -22,12 +22,14 @@ const breadcrumbMap = {
   longmont: "Longmont",
   boulder: "Boulder",
   "mortgage-calculator": "Colorado Mortgage Calculator",
-  testimonials: "Client Testimonials",
+  testimonials: "Client Reviews",
   blog: "Colorado Real Estate Guides",
   "helpful-guides": "Colorado Real Estate Guides",
   "chfa-schools-to-home": "CHFA Schools To Home Program",
   chfa: "CHFA Schools To Home Program",
   properties: "Homes for Sale in Colorado",
+  buyers: "Colorado Home Buyers",
+  sellers: "Sell Your Northern Colorado Home",
 };
 
 const customTrails = {
@@ -45,18 +47,79 @@ const customTrails = {
     { path: "/", label: "Home" },
     { path: "/for-buyers/", label: "Colorado Home Buyers" },
   ],
+  "/buyers": [
+    { path: "/", label: "Home" },
+    { path: "/for-buyers/", label: "Colorado Home Buyers" },
+  ],
+  "/for-sellers": [
+    { path: "/", label: "Home" },
+    { path: "/for-sellers/", label: "Sell Your Northern Colorado Home" },
+  ],
+  "/sellers": [
+    { path: "/", label: "Home" },
+    { path: "/for-sellers/", label: "Sell Your Northern Colorado Home" },
+  ],
   "/mortgage-calculator": [
     { path: "/", label: "Home" },
     { path: "/for-buyers/", label: "Colorado Home Buyers" },
     { path: "/mortgage-calculator/", label: "Colorado Mortgage Calculator" },
   ],
+  "/northern-colorado-areas": [
+    { path: "/", label: "Home" },
+    { path: "/northern-colorado-areas/", label: "Northern Colorado Communities" },
+  ],
+  "/featured-areas": [
+    { path: "/", label: "Home" },
+    { path: "/northern-colorado-areas/", label: "Northern Colorado Communities" },
+  ],
+  "/properties": [
+    { path: "/", label: "Home" },
+    { path: "/properties/", label: "Homes for Sale in Colorado" },
+  ],
+  "/testimonials": [
+    { path: "/", label: "Home" },
+    { path: "/testimonials/", label: "Client Reviews" },
+  ],
+  "/blog": [
+    { path: "/", label: "Home" },
+    { path: "/blog/", label: "Colorado Real Estate Guides" },
+  ],
+  "/helpful-guides": [
+    { path: "/", label: "Home" },
+    { path: "/blog/", label: "Colorado Real Estate Guides" },
+  ],
+  "/about-us": [
+    { path: "/", label: "Home" },
+    { path: "/about-us/", label: "About SAA Homes" },
+  ],
+  "/contact": [
+    { path: "/", label: "Home" },
+    { path: "/contact/", label: "Contact Northern Colorado Realtors" },
+  ],
 };
+
+const areaSlugs = [
+  "fort-collins", "loveland", "windsor", "greeley", "timnath", "wellington",
+  "johnstown", "eaton", "milliken", "la-salle", "mead", "longmont", "boulder",
+];
 
 const visibleBreadcrumbRoutes = new Set([
   "/chfa-schools-to-home",
   "/chfa",
   "/for-buyers",
+  "/buyers",
+  "/for-sellers",
+  "/sellers",
   "/mortgage-calculator",
+  "/northern-colorado-areas",
+  "/featured-areas",
+  "/properties",
+  "/about-us",
+  "/contact",
+  "/testimonials",
+  "/blog",
+  "/helpful-guides",
+  ...areaSlugs.map((slug) => `/northern-colorado-areas/${slug}`),
 ]);
 
 function normalizePath(pathname) {
@@ -66,15 +129,35 @@ function normalizePath(pathname) {
   return pathname;
 }
 
+function getAreaTrail(pathname) {
+  const match = pathname.match(/^\/northern-colorado-areas\/([^/]+)$/);
+  if (!match) return null;
+
+  const slug = match[1];
+  const cityLabel = breadcrumbMap[slug] || slug
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
+  return [
+    { path: "/", label: "Home" },
+    { path: "/northern-colorado-areas/", label: "Northern Colorado Communities" },
+    { path: `/northern-colorado-areas/${slug}/`, label: `${cityLabel}, CO` },
+  ];
+}
+
 function getTrail(pathname) {
   const normalized = normalizePath(pathname);
+  if (normalized === "" || normalized === "/") return null;
+
   if (customTrails[normalized]) {
     return customTrails[normalized];
   }
 
-  const pathnames = normalized.split("/").filter(Boolean);
-  if (pathnames.length === 0) return null;
+  const areaTrail = getAreaTrail(normalized);
+  if (areaTrail) return areaTrail;
 
+  const pathnames = normalized.split("/").filter(Boolean);
   return [
     { path: "/", label: "Home" },
     ...pathnames.map((segment, index) => {

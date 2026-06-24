@@ -48,7 +48,12 @@ export default function MapSection() {
       if (!window.mapboxgl || !mapContainer.current || map.current) return;
 
       const mapboxgl = window.mapboxgl;
-      mapboxgl.accessToken = 'pk.eyJ1IjoiYWdlbnRmaXJlY29ycCIsImEiOiJjamp5Y3RkaWIwMDVrM2pvdHVzcmxvdXd1In0.0mhs52YCgV45qwNh9f7qpw';
+      const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
+      if (!mapboxToken) {
+        console.warn('Mapbox token not configured');
+        return;
+      }
+      mapboxgl.accessToken = mapboxToken;
 
       // Initialize map
       map.current = new mapboxgl.Map({
@@ -200,7 +205,7 @@ export default function MapSection() {
           {/* CTA Button */}
           <div className="text-center">
             <a
-              href="/featured-areas/"
+              href="/northern-colorado-areas/"
               className="inline-flex items-center justify-center px-10 py-4 bg-gray-900 text-white font-semibold rounded-lg shadow-lg hover:bg-gray-800 transform hover:scale-105 transition-all"
             >
               Explore All Areas

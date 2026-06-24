@@ -10,7 +10,7 @@ export default function GreeleyPage() {
         title="Greeley, CO Real Estate | Homes for Sale in Greeley | Schwartz And Associates"
         description="Discover Greeley, CO real estate with Schwartz and Associates. Home to UNC, rich agricultural heritage, and vibrant downtown. Find your perfect Greeley home today."
         keywords="Greeley CO real estate, Greeley homes for sale, Greeley Colorado, UNC, Greeley neighborhoods, Weld County homes"
-        canonical="https://saahomes.com/our-areas/greeley/"
+        canonical="https://saahomes.com/northern-colorado-areas/greeley/"
       />
 
       {/* Hero Section */}

@@ -9,6 +9,7 @@ export default function AboutPage() {
         description="Meet Adam and Mandi Schwartz of SAA Homes — Fort Collins real estate experts with 20+ years of combined experience. Trusted Coldwell Banker agents serving all of Northern Colorado."
         keywords="about SAA Homes, Adam Schwartz realtor, Mandi Schwartz, Fort Collins real estate experts, experienced realtors Fort Collins, Coldwell Banker agents, 20 years experience"
         canonical="https://saahomes.com/about-us/"
+        includeLocalBusiness={true}
       />
       
       {/* Hero Section */}
@@ -85,7 +86,7 @@ export default function AboutPage() {
           <p className="text-lg text-gray-700 mb-8 max-w-3xl mx-auto">
             With all of the beauty that Colorado area has to offer, it's hard to find the perfect place to call home. Our area guides simplify that process by giving you unique market, lifestyle, and demographic insights into each area!
           </p>
-          <a href="/featured-areas/" className="inline-block px-8 py-3 bg-black text-white font-semibold rounded hover:bg-gray-800 transition-colors">
+          <a href="/northern-colorado-areas/" className="inline-block px-8 py-3 bg-black text-white font-semibold rounded hover:bg-gray-800 transition-colors">
             Explore The Area
           </a>
         </div>

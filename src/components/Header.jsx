@@ -42,8 +42,8 @@ export default function Header() {
               <Link to="/for-sellers/#home-valuation" className="hover:text-gray-200 transition-colors text-sm">
                 Home Valuation
               </Link>
-              <Link to="/featured-areas/" className="hover:text-gray-200 transition-colors text-sm">
-                Featured Areas
+              <Link to="/northern-colorado-areas/" className="hover:text-gray-200 transition-colors text-sm">
+                Northern Colorado Areas
               </Link>
             </div>
 
@@ -112,7 +112,10 @@ export default function Header() {
             <Link onClick={() => setMenuOpen(false)} to="/" className="block text-xl hover:text-gray-300 transition-colors">Home</Link>
             <Link onClick={() => setMenuOpen(false)} to="/for-buyers/" className="block text-xl hover:text-gray-300 transition-colors">For Buyers</Link>
             <Link onClick={() => setMenuOpen(false)} to="/for-sellers/" className="block text-xl hover:text-gray-300 transition-colors">For Sellers</Link>
-            <Link onClick={() => setMenuOpen(false)} to="/featured-areas/" className="block text-xl hover:text-gray-300 transition-colors">Featured Areas</Link>
+            <Link onClick={() => setMenuOpen(false)} to="/northern-colorado-areas/" className="block text-xl hover:text-gray-300 transition-colors">Northern Colorado Areas</Link>
+            <Link onClick={() => setMenuOpen(false)} to="/chfa-schools-to-home/" className="block text-xl hover:text-gray-300 transition-colors">CHFA Schools To Home</Link>
+            <Link onClick={() => setMenuOpen(false)} to="/testimonials/" className="block text-xl hover:text-gray-300 transition-colors">Client Reviews</Link>
+            <Link onClick={() => setMenuOpen(false)} to="/blog/" className="block text-xl hover:text-gray-300 transition-colors">Real Estate Guides</Link>
             <Link onClick={() => setMenuOpen(false)} to="/properties/" className="block text-xl hover:text-gray-300 transition-colors">Property Search</Link>
             <Link onClick={() => setMenuOpen(false)} to="/about-us/" className="block text-xl hover:text-gray-300 transition-colors">About Us</Link>
             <Link onClick={() => setMenuOpen(false)} to="/contact/" className="block text-xl hover:text-gray-300 transition-colors">Contact</Link>
