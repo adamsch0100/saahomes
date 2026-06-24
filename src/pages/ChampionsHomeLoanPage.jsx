@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
 import ChampionsLeadForm from "../components/ChampionsLeadForm";
+import ChfaResourceHub from "../components/ChfaResourceHub";
 
 const GOLD = "#CFB36E";
 
@@ -666,6 +667,8 @@ export default function ChampionsHomeLoanPage() {
           <ChampionsLeadForm />
         </div>
       </section>
+
+      <ChfaResourceHub />
 
       {/* Disclaimer */}
       <section className="py-12 px-6 bg-gray-100 border-t border-gray-200">

@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
 import ChfaLeadForm from "../components/ChfaLeadForm";
+import ChfaResourceHub from "../components/ChfaResourceHub";
 
 const eligibilityItems = [
   "Public school",
@@ -629,6 +630,8 @@ export default function ChfaSchoolsToHomePage() {
           <ChfaLeadForm />
         </div>
       </section>
+
+      <ChfaResourceHub />
 
       {/* Disclaimer */}
       <section className="py-8 px-6 border-t border-gray-200">
