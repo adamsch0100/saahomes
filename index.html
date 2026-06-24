@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#000000" />
     <meta name="robots" content="index, follow" />
     <title>Fort Collins Real Estate Agents | SAA Homes - Northern Colorado</title>
@@ -23,15 +23,18 @@
         --rs-ss-font-primary-color: #6a6d72;
         --rs-ss-searchbar-border-color: hsl(0, 0%, 80%);
         --rs-ss-box-shadow: 0 10px 15px -3px #0000001a;
-        --rs-ss-widget-width: 500px !important;
+        --rs-ss-widget-width: 100% !important;
+        max-width: 100%;
+        width: 100%;
       }
       
-      /* Advanced Search Widget Styles */
       realscout-advanced-search {
         --rs-as-button-text-color: #ffffff;
         --rs-as-background-color: #ffffff;
         --rs-as-button-color: rgb(35, 93, 137);
-        --rs-as-widget-width: 500px !important;
+        --rs-as-widget-width: 100% !important;
+        max-width: 100%;
+        width: 100%;
       }
       
       /* Home Value Widget Styles */
@@ -44,6 +47,14 @@
         --rs-hvw-secondary-button-text-color: rgb(35, 93, 137);
         --rs-hvw-secondary-button-color: #ffffff;
         --rs-hvw-widget-width: auto;
+      }
+      @media (min-width: 640px) {
+        realscout-simple-search {
+          --rs-ss-widget-width: 500px !important;
+        }
+        realscout-advanced-search {
+          --rs-as-widget-width: 500px !important;
+        }
       }
     </style>
   </head>

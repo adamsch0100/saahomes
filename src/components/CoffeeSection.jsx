@@ -4,7 +4,7 @@ export default function CoffeeSection() {
   return (
     <section className="w-full bg-white py-16">
       <div className="w-full px-6 md:px-12">
-        <div className="max-w-4xl mx-auto bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl shadow-xl p-12 text-center relative overflow-hidden">
+        <div className="max-w-4xl mx-auto bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl shadow-xl p-6 sm:p-10 md:p-12 text-center relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 opacity-10">
             <img 
               src="/images/Cooffee-2-120xAUTO.fit.png" 

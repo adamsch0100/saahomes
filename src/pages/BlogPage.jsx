@@ -33,7 +33,7 @@ export default function BlogPage() {
 
       <section className="relative h-80 bg-gray-900 flex items-center justify-center pt-24">
         <div className="relative z-10 text-center text-white px-6">
-          <h1 className="text-5xl sm:text-6xl font-bold">Real Estate Blog</h1>
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">Real Estate Blog</h1>
           <p className="mt-4 text-xl text-gray-300">Tips, market updates, and guides for Northern Colorado</p>
         </div>
       </section>

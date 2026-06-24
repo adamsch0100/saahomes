@@ -35,8 +35,8 @@ export default function ContactCTA() {
   };
 
   return (
-    <section id="contact" className="w-full bg-gradient-to-br from-gray-900 to-gray-800 text-white py-20">
-      <div className="w-full px-6 md:px-12">
+    <section id="contact" className="w-full bg-gradient-to-br from-gray-900 to-gray-800 text-white py-12 sm:py-20">
+      <div className="w-full px-4 sm:px-6 md:px-12">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-4xl sm:text-5xl font-bold mb-4">Ready To Tour Or List A Home?</h2>
@@ -58,7 +58,7 @@ export default function ContactCTA() {
           )}
 
           <form
-            className="bg-white/10 backdrop-blur rounded-2xl p-8 md:p-10 shadow-2xl"
+            className="bg-white/10 backdrop-blur rounded-2xl p-5 sm:p-8 md:p-10 shadow-2xl"
             onSubmit={handleSubmit}
           >
             <div className="grid md:grid-cols-2 gap-6">

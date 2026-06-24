@@ -13,11 +13,11 @@ export default function AboutPage() {
       />
       
       {/* Hero Section */}
-      <section className="relative h-96 bg-cover bg-center flex items-center justify-center pt-32" 
+      <section className="relative min-h-[18rem] sm:h-96 bg-cover bg-center flex items-center justify-center pt-28 sm:pt-32 pb-8" 
         style={{backgroundImage: "url('/images/About-Hero.jpg')"}}>
         <div className="absolute inset-0 bg-black/50"></div>
         <div className="relative z-10 text-center text-white px-6">
-          <h1 className="text-5xl sm:text-6xl font-bold">About Us</h1>
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">About Us</h1>
           <p className="mt-4 text-xl">Your Colorado Real Estate Experts.</p>
         </div>
       </section>

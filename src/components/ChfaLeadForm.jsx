@@ -76,10 +76,10 @@ export default function ChfaLeadForm({ compact = false }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className={`bg-white rounded-lg shadow-xl ${compact ? 'p-6' : 'p-8'}`}
+      className={`bg-white rounded-lg shadow-xl scroll-mt-28 ${compact ? 'p-4 sm:p-6' : 'p-6 sm:p-8'}`}
       id="chfa-lead-form"
     >
-      <h3 className={`font-bold font-serif text-gray-900 ${compact ? 'text-2xl mb-4' : 'text-3xl mb-2'}`}>
+      <h3 className={`font-bold font-serif text-gray-900 ${compact ? 'text-xl sm:text-2xl mb-4' : 'text-2xl sm:text-3xl mb-2'}`}>
         Get Started with CHFA Schools To Home
       </h3>
       {!compact && (

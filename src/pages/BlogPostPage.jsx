@@ -74,7 +74,7 @@ export default function BlogPostPage() {
 
       <article className="pb-16">
         <section
-          className="relative min-h-[360px] bg-cover bg-center flex items-end pt-28 pb-12"
+          className="relative min-h-[360px] sm:min-h-[420px] bg-cover bg-center flex items-end pt-28 sm:pt-32 pb-10 sm:pb-12"
           style={{ backgroundImage: `url('${post.image}')` }}
         >
           <div className="absolute inset-0 bg-black/60" />
