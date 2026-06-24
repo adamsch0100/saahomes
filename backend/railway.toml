@@ -1,8 +1,10 @@
-# Set Root Directory to /backend in Railway dashboard for this service.
+# Railway service settings (set Root Directory to "backend" in the dashboard)
 [build]
-builder = "nixpacks"
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "npm start"
+healthcheckPath = "/health"
+healthcheckTimeout = 120
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
