@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { submitChfaLeadForm } from '../utils/api.js';
+import { withLeadMetadata } from '../utils/leadTracking.js';
 
 export default function ChfaLeadForm({ compact = false }) {
   const [formData, setFormData] = useState({
@@ -24,7 +25,7 @@ export default function ChfaLeadForm({ compact = false }) {
     setSubmitStatus(null);
 
     try {
-      await submitChfaLeadForm(formData);
+      await submitChfaLeadForm(withLeadMetadata(formData, '/chfa-schools-to-home/'));
       setSubmitStatus({
         type: 'success',
         message: "Thank you! We'll reach out shortly to help you explore CHFA Schools To Home.",

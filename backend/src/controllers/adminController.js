@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import pool from '../config/database.js';
+import getPool from '../config/database.js';
 import { generateToken } from '../middleware/auth.js';
 import logger from '../utils/logger.js';
 import dotenv from 'dotenv';
@@ -88,6 +88,7 @@ export const getSubmissions = async (req, res) => {
       `;
     }
 
+    const pool = getPool();
     const [results, countResult] = await Promise.all([
       pool.query(query, [limitNum, offsetNum]),
       pool.query(countQuery),
@@ -122,7 +123,7 @@ export const getSubmission = async (req, res) => {
       query = 'SELECT * FROM contact_submissions WHERE id = $1';
     }
 
-    const result = await pool.query(query, [id]);
+    const result = await getPool().query(query, [id]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Submission not found' });
@@ -137,6 +138,7 @@ export const getSubmission = async (req, res) => {
 
 export const getStats = async (req, res) => {
   try {
+    const pool = getPool();
     const [contactCount, marketReportCount, recentContacts, recentMarketReports] = await Promise.all([
       pool.query('SELECT COUNT(*) FROM contact_submissions'),
       pool.query('SELECT COUNT(*) FROM market_report_submissions'),

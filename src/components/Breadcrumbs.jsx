@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { getBlogPost } from "../data/blogPosts";
 
 const breadcrumbMap = {
   "about-us": "About SAA Homes",
@@ -146,6 +147,20 @@ function getAreaTrail(pathname) {
   ];
 }
 
+function getBlogTrail(pathname) {
+  const match = pathname.match(/^\/blog\/([^/]+)$/);
+  if (!match) return null;
+
+  const slug = match[1];
+  const post = getBlogPost(slug);
+
+  return [
+    { path: "/", label: "Home" },
+    { path: "/blog/", label: "Blog" },
+    { path: `/blog/${slug}/`, label: post?.title || slug },
+  ];
+}
+
 function getTrail(pathname) {
   const normalized = normalizePath(pathname);
   if (normalized === "" || normalized === "/") return null;
@@ -156,6 +171,9 @@ function getTrail(pathname) {
 
   const areaTrail = getAreaTrail(normalized);
   if (areaTrail) return areaTrail;
+
+  const blogTrail = getBlogTrail(normalized);
+  if (blogTrail) return blogTrail;
 
   const pathnames = normalized.split("/").filter(Boolean);
   return [
@@ -180,7 +198,8 @@ export default function Breadcrumbs() {
   if (!trail) return null;
 
   const normalized = normalizePath(location.pathname);
-  const isVisible = visibleBreadcrumbRoutes.has(normalized);
+  const isBlogPost = /^\/blog\/[^/]+$/.test(normalized);
+  const isVisible = visibleBreadcrumbRoutes.has(normalized) || isBlogPost;
 
   return (
     <nav

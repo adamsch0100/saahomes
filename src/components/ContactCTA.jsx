@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { submitContactForm } from "../utils/api.js";
+import { withLeadMetadata } from "../utils/leadTracking.js";
 
 export default function ContactCTA() {
   const [formData, setFormData] = useState({
@@ -23,7 +24,7 @@ export default function ContactCTA() {
     setSubmitStatus(null);
 
     try {
-      await submitContactForm(formData);
+      await submitContactForm(withLeadMetadata(formData));
       setSubmitStatus({ type: 'success', message: 'Thank you! We will contact you soon.' });
       setFormData({ name: "", email: "", phone: "", interest: "", message: "" });
     } catch (error) {

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import SEO from "../components/SEO";
 import { submitContactForm } from "../utils/api.js";
+import { withLeadMetadata } from "../utils/leadTracking.js";
+import { BUSINESS } from "../utils/seoConstants.js";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -19,7 +21,7 @@ export default function ContactPage() {
     setSubmitStatus(null);
 
     try {
-      await submitContactForm(formData);
+      await submitContactForm(withLeadMetadata(formData));
       setSubmitStatus({ type: 'success', message: 'Thank you! We will contact you soon.' });
       setFormData({ name: "", email: "", phone: "", interest: "", message: "" });
     } catch (error) {
@@ -83,8 +85,8 @@ export default function ContactPage() {
               <div>
                 <h3 className="font-semibold text-lg mb-2">Address:</h3>
                 <address className="text-lg not-italic">
-                  300 S Howes Street<br />
-                  Fort Collins, CO 80521
+                  {BUSINESS.address.streetAddress}<br />
+                  {BUSINESS.address.addressLocality}, {BUSINESS.address.addressRegion} {BUSINESS.address.postalCode}
                 </address>
               </div>
 
