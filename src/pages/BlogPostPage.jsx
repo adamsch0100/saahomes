@@ -2,8 +2,31 @@ import React from "react";
 import { Link, useParams, Navigate } from "react-router-dom";
 import SEO from "../components/SEO";
 import MarketReportForm from "../components/MarketReportForm";
-import { getBlogPost, getBlogPostUrl } from "../data/blogPosts";
+import ChfaResourceHub from "../components/ChfaResourceHub";
+import { blogPosts, getBlogPost, getBlogPostUrl } from "../data/blogPosts";
 import { BUSINESS } from "../utils/seoConstants";
+
+function RelatedLinksBox({ links, title = "Related resources" }) {
+  if (!links?.length) return null;
+
+  return (
+    <div className="my-8 p-6 bg-amber-50 border border-amber-100 rounded-xl">
+      <h3 className="font-bold font-serif text-lg mb-4">{title}</h3>
+      <ul className="space-y-4">
+        {links.map((link) => (
+          <li key={link.href}>
+            <Link to={link.href} className="font-semibold text-gray-900 hover:underline">
+              {link.title} →
+            </Link>
+            {link.description && (
+              <p className="text-sm text-gray-600 mt-1">{link.description}</p>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export default function BlogPostPage() {
   const { slug } = useParams();
@@ -19,6 +42,12 @@ export default function BlogPostPage() {
     month: "long",
     day: "numeric",
   });
+
+  const isChfaPost = post.category?.includes("CHFA");
+
+  const relatedPosts = blogPosts
+    .filter((p) => p.slug !== post.slug && p.category === post.category)
+    .slice(0, 3);
 
   const articleSchema = {
     "@context": "https://schema.org",
@@ -47,6 +76,7 @@ export default function BlogPostPage() {
       "@id": canonical,
     },
     articleSection: post.category,
+    keywords: post.keywords,
   };
 
   const breadcrumbSchema = {
@@ -59,17 +89,40 @@ export default function BlogPostPage() {
     ],
   };
 
+  const faqSchema = post.faqs?.length
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: post.faqs.map((faq) => ({
+          "@type": "Question",
+          name: faq.q,
+          acceptedAnswer: { "@type": "Answer", text: faq.a },
+        })),
+      }
+    : null;
+
+  const jsonLd = [articleSchema, breadcrumbSchema, ...(faqSchema ? [faqSchema] : [])];
+
+  const cta = post.cta || {
+    title: "Ready for personalized guidance?",
+    description: "Adam and Mandi Schwartz help buyers and sellers across Northern Colorado. Tell us what you are looking for and we will follow up quickly.",
+    primaryHref: "/contact/",
+    primaryText: "Contact SAA Homes",
+    secondaryHref: "/properties/",
+    secondaryText: "Search Homes",
+  };
+
   return (
     <>
       <SEO
         exactTitle={`${post.title} | SAA Homes`}
         description={post.excerpt}
-        keywords={`${post.category}, Northern Colorado real estate, Colorado home buying, Fort Collins real estate, SAA Homes blog`}
+        keywords={post.keywords || `${post.category}, Northern Colorado real estate, Colorado home buying, Fort Collins real estate, SAA Homes blog`}
         canonical={canonical}
         ogImage={`https://saahomes.com${post.image}`}
         ogUrl={canonical}
         type="article"
-        jsonLd={[articleSchema, breadcrumbSchema]}
+        jsonLd={jsonLd}
       />
 
       <article className="pb-16">
@@ -95,6 +148,8 @@ export default function BlogPostPage() {
         <div className="max-w-3xl mx-auto px-6 py-12">
           <p className="text-xl text-gray-700 leading-relaxed mb-10">{post.excerpt}</p>
 
+          {post.relatedLinks && <RelatedLinksBox links={post.relatedLinks} title="Jump to program guides" />}
+
           {post.sections.map((section) => (
             <section key={section.heading} className="mb-10">
               <h2 className="text-2xl sm:text-3xl font-bold font-serif mb-4">{section.heading}</h2>
@@ -104,36 +159,70 @@ export default function BlogPostPage() {
                 </p>
               ))}
               {section.list && (
-                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                <ul className="list-disc pl-6 space-y-2 text-gray-700 mb-4">
                   {section.list.map((item) => (
                     <li key={item}>{item}</li>
                   ))}
                 </ul>
               )}
+              {section.relatedLinks && (
+                <RelatedLinksBox links={section.relatedLinks} title="Helpful links" />
+              )}
             </section>
           ))}
 
+          {post.faqs && (
+            <section className="mb-10">
+              <h2 className="text-2xl sm:text-3xl font-bold font-serif mb-6">Quick answers</h2>
+              <div className="space-y-4">
+                {post.faqs.map((faq) => (
+                  <div key={faq.q} className="bg-gray-50 rounded-lg p-5 border border-gray-100">
+                    <h3 className="font-bold font-serif mb-2">{faq.q}</h3>
+                    <p className="text-gray-700 leading-relaxed">{faq.a}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           <div className="mt-12 p-8 bg-gray-50 rounded-xl border border-gray-100">
-            <h2 className="text-2xl font-bold font-serif mb-3">Ready for personalized guidance?</h2>
-            <p className="text-gray-700 mb-6">
-              Adam and Mandi Schwartz help buyers and sellers across Northern Colorado. Tell us what you are looking for and we will follow up quickly.
-            </p>
+            <h2 className="text-2xl font-bold font-serif mb-3">{cta.title}</h2>
+            <p className="text-gray-700 mb-6">{cta.description}</p>
             <div className="flex flex-wrap gap-4">
               <Link
-                to="/contact/"
+                to={cta.primaryHref}
                 className="inline-block px-6 py-3 bg-black text-white font-semibold rounded hover:bg-gray-800 transition-colors"
               >
-                Contact SAA Homes
+                {cta.primaryText}
               </Link>
-              <Link
-                to="/properties/"
-                className="inline-block px-6 py-3 border-2 border-black text-black font-semibold rounded hover:bg-black hover:text-white transition-colors"
-              >
-                Search Homes
-              </Link>
+              {cta.secondaryHref && (
+                <Link
+                  to={cta.secondaryHref}
+                  className="inline-block px-6 py-3 border-2 border-black text-black font-semibold rounded hover:bg-black hover:text-white transition-colors"
+                >
+                  {cta.secondaryText}
+                </Link>
+              )}
             </div>
           </div>
+
+          {relatedPosts.length > 0 && (
+            <section className="mt-12 pt-8 border-t border-gray-200">
+              <h2 className="text-xl font-bold font-serif mb-4">More in {post.category}</h2>
+              <ul className="space-y-3">
+                {relatedPosts.map((related) => (
+                  <li key={related.slug}>
+                    <Link to={`/blog/${related.slug}/`} className="font-semibold hover:underline">
+                      {related.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
         </div>
+
+        {isChfaPost && <ChfaResourceHub />}
 
         <section className="py-16 px-6 bg-gray-50">
           <div className="max-w-3xl mx-auto">

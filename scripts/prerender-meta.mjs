@@ -66,8 +66,8 @@ const staticRoutes = [
   },
   {
     path: '/blog/',
-    title: 'Northern Colorado Real Estate Blog & Guides | SAA Homes',
-    description: 'Real estate tips, market updates, and neighborhood guides for Northern Colorado buyers and sellers.',
+    title: 'Northern Colorado Real Estate Blog & CHFA Homebuyer Guides | SAA Homes',
+    description: 'CHFA down payment assistance guides, market updates, and home buying tips for Fort Collins, Loveland, Windsor, Greeley, and Northern Colorado.',
   },
   {
     path: '/testimonials/',
