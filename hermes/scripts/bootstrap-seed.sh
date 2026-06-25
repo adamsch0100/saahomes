@@ -16,6 +16,13 @@ mkdir -p "$WORKSPACE_DIR/context"
 mkdir -p "$WORKSPACE_DIR/outreach/pending"
 mkdir -p "$WORKSPACE_DIR/outreach/sent"
 mkdir -p "$WORKSPACE_DIR/outreach/skipped"
+mkdir -p "$DATA_DIR/browser-sessions/gbp"
+mkdir -p "$DATA_DIR/browser-sessions/meta"
+mkdir -p "$DATA_DIR/browser-sessions/youtube"
+mkdir -p "$DATA_DIR/browser-sessions/x"
+if id hermes >/dev/null 2>&1; then
+  chown -R hermes:hermes "$DATA_DIR/browser-sessions" 2>/dev/null || true
+fi
 
 if [ -f "$DATA_DIR/AGENTS.md" ] && [ ! -f "$WORKSPACE_DIR/AGENTS.md" ]; then
   cp "$DATA_DIR/AGENTS.md" "$WORKSPACE_DIR/AGENTS.md"
@@ -23,6 +30,18 @@ fi
 
 if [ -f "$SEED_DIR/workspace/saahomes/context/automation-registry.md" ] && [ ! -f "$WORKSPACE_DIR/context/automation-registry.md" ]; then
   cp -R "$SEED_DIR/workspace/saahomes/." "$WORKSPACE_DIR/"
+fi
+
+# Keep repo-shipped context docs current on every deploy (does not touch MEMORY.md).
+if [ -d "$SEED_DIR/workspace/saahomes/context" ]; then
+  cp -R "$SEED_DIR/workspace/saahomes/context/." "$WORKSPACE_DIR/context/"
+fi
+if [ -f "$SEED_DIR/USER.md" ]; then
+  cp "$SEED_DIR/USER.md" "$DATA_DIR/USER.md"
+fi
+if [ -f "$SEED_DIR/AGENTS.md" ]; then
+  cp "$SEED_DIR/AGENTS.md" "$DATA_DIR/AGENTS.md"
+  cp "$SEED_DIR/AGENTS.md" "$WORKSPACE_DIR/AGENTS.md"
 fi
 
 if [ ! -f "$DATA_DIR/.saahomes-bootstrapped" ]; then
@@ -83,6 +102,12 @@ upsert_env "RAILWAY_SERVICE_ID" "${RAILWAY_SERVICE_ID:-}"
 append_env "GA4_PROPERTY_ID" "${GA4_PROPERTY_ID:-G-CB5GL0P3EZ}"
 append_env "OUTREACH_APPROVAL_REQUIRED" "${OUTREACH_APPROVAL_REQUIRED:-true}"
 append_env "AUTO_MERGE_SEO_PRS" "${AUTO_MERGE_SEO_PRS:-true}"
+upsert_env "BROWSERBASE_API_KEY" "${BROWSERBASE_API_KEY:-}"
+upsert_env "BROWSERBASE_PROJECT_ID" "${BROWSERBASE_PROJECT_ID:-}"
+append_env "BROWSER_INACTIVITY_TIMEOUT" "${BROWSER_INACTIVITY_TIMEOUT:-300}"
+upsert_env "OUTREACH_SMTP_HOST" "${OUTREACH_SMTP_HOST:-}"
+upsert_env "OUTREACH_SMTP_USER" "${OUTREACH_SMTP_USER:-}"
+upsert_env "OUTREACH_SMTP_PASSWORD" "${OUTREACH_SMTP_PASSWORD:-}"
 
 CREDENTIALS_DIR="$DATA_DIR/credentials"
 mkdir -p "$CREDENTIALS_DIR"
@@ -133,4 +158,7 @@ if command -v hermes >/dev/null 2>&1; then
   if [ -n "${TELEGRAM_ALLOWED_USERS:-}" ]; then
     hermes config set gateway.platforms.telegram.extra.allow_from "[\"${TELEGRAM_ALLOWED_USERS}\"]" 2>/dev/null || true
   fi
+  hermes config set browser.cloud_provider browserbase 2>/dev/null || true
+  hermes config set browser.inactivity_timeout 300 2>/dev/null || true
+  hermes config set 'tools.toolsets' '["web","terminal","files","browser"]' 2>/dev/null || true
 fi

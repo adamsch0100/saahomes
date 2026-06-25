@@ -51,29 +51,37 @@ Docs: [Hermes Skills System](https://hermes-agent.nousresearch.com/docs/user-gui
 
 ## browse.sh — when we use it
 
-[browse.sh](https://browse.sh/) is Browserbase's open catalog of **site-specific browser automation skills** — pre-built playbooks for Zillow, Realtor.com, Redfin, Walk Score, YouTube, etc. Hermes natively integrates via source id `browse-sh`.
+[browse.sh](https://browse.sh/) is Browserbase's **free skill catalog** — pre-built playbooks for Zillow, Realtor.com, Redfin, Walk Score, YouTube, etc. Hermes installs via `--source browse-sh`.
 
-**Use for:**
+**browse.sh is not a separate subscription.** It is skill files only. **Browserbase** is the cloud browser engine that runs them on Railway (and for GBP/social posting). Same env vars for both.
+
+**Use browse.sh for:**
 - Competitor/market data (listings, comps, days on market) to enrich area pages + seller content
 - School ratings for area guide FAQs (GEO + local authority)
 - Walk Score / neighborhood data for city pages
 - YouTube transcript extraction for @SAAHomes → blog/GEO repurposing
-- Sites with no public API where Hermes browser tools need a playbook
 
-**Install CLI (optional, on host/container):**
+**Use Hermes browser tools (Browserbase) for:**
+- GBP + social posting — see `context/social-channels.md`
+- Any site needing authenticated sessions (Google, Meta, YouTube, X)
+
+**Required env (Railway Hermes service):**
+```
+BROWSERBASE_API_KEY=
+BROWSERBASE_PROJECT_ID=
+```
+
+Optional: `BROWSER_INACTIVITY_TIMEOUT=300`
+
+Free tier: ~1 browser hour/month, 15 min max per session. See [Browserbase plans](https://docs.browserbase.com/account/plans).
+
+**Install CLI (optional, on Adam's PC for cookie-sync):**
 ```bash
 npm i -g browse
 browse skills add zillow.com
-browse skills add realtor.com
 ```
 
-On Railway, prefer **Browserbase cloud sessions** when local Chromium isn't available:
-```bash
-browse cloud sessions create
-browse cloud fetch "https://..."
-```
-
-Set `BROWSERBASE_API_KEY` in Railway if using cloud browser (see browse.sh docs).
+On Railway, Hermes uses Browserbase automatically when `BROWSERBASE_*` is set — no local Chromium required.
 
 ---
 

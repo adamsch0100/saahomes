@@ -7,6 +7,8 @@ backend/node_modules/
 backend/.env
 hermes/.env
 hermes/.gsc-b64.tmp
+hermes/.gsc-railway-var.txt
+hermes/.gsc-console-upload.sh
 hermes/.credentials/
 .env.local
 .env.production

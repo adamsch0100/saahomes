@@ -153,7 +153,7 @@ Schedule: 0 11 1 * *  (1st of month, 11:00 AM MT)
 Skill: local-pack-gbp-audit
 Model: kimi-k2.6
 Provider: opencode-go
-Prompt: GBP/NAP/local pack audit. Post to GBP if API connected (auto). Notify Adam with post link or fix list.
+Prompt: GBP/NAP/local pack audit. Draft GBP post for Adam POST REVIEW. Publish via browser after approved. Notify with post link or fix list.
 ```
 
 ### 15. `blog-content-calendar`
@@ -188,6 +188,16 @@ Prompt: Quarterly market dominance review vs market-dominance-strategy.md succes
 
 ---
 
+### 18. `social-crosspost`
+```
+Schedule: 0 10 * * 3  (Wed 10:00 AM MT)
+Model: deepseek-v4-flash
+Provider: opencode-go
+Prompt: Read context/social-channels.md. If new blog/area content shipped this week, draft GBP + Facebook + Instagram posts (reuse site hero images). Send POST REVIEW to Adam. Publish via browser after approved. Update YouTube description if related @SAAHomes video exists. Log in MEMORY.
+```
+
+---
+
 ## Install verification
 
 After creating all jobs, run:
@@ -195,6 +205,6 @@ After creating all jobs, run:
 /cron list
 ```
 
-Confirm 18 jobs active. Log completion in MEMORY.md under "Automation installed: [date]".
+Confirm **19 jobs** active. Log completion in MEMORY.md under "Automation installed: [date]".
 
 If GSC/GA4 not yet connected, jobs still run public-only checks and note missing integrations in every report.
