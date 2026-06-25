@@ -4,6 +4,8 @@
 
 Adam wants Hermes to **run the program end-to-end**. Set it up correctly once; Adam should not have to manage day-to-day SEO.
 
+**Master process:** `context/operator-playbook.md` — weekly rhythm, manual social checklist, lead capture, Browserbase scope.
+
 **Default:** Execute → notify → move on.  
 **Exceptions:** (1) Backlink outreach emails — draft → `approved` → send via SMTP. (2) GBP + social — Hermes emails a post pack; Adam publishes manually (no auto-post).
 

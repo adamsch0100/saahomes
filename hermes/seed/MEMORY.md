@@ -1,7 +1,7 @@
 # Strategic memory — Hermes updates this as the program compounds
 
 ## Operator mode
-**Full automation** — execute, deploy, notify. Backlink outreach emails require Adam `approved` before send. See `context/automation-policy.md`.
+**Full automation** — execute, deploy, notify. Adam: outreach `approved` before send · social paste from email packs · FUB lead follow-up. Master process: `context/operator-playbook.md`.
 
 ## Current strategic priorities (Q2 2026)
 1. Defend and grow **seller intent** — `/for-sellers/` + market report funnel + `{city} sell home` queries

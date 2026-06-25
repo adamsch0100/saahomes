@@ -3,7 +3,8 @@
 **Scope:** https://saahomes.com only. **Goal:** Own Northern Colorado buyer + seller search demand for Schwartz and Associates.
 
 Read these context files every week:
-- `context/automation-policy.md` — **full autopilot rules (read first)**
+- `context/operator-playbook.md` — **Adam + Hermes master process (read first)**
+- `context/automation-policy.md` — full autopilot rules
 - `context/social-channels.md` — **GBP + social email post pack (Adam publishes manually)**
 - `context/skills-registry.md` — **Skills Hub + browse.sh catalog reference**
 - `context/keyword-universe.md` — every city × intent we must win
