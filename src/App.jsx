@@ -72,6 +72,14 @@ export default function App() {
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (typeof window.gtag === 'function') {
+      window.gtag('config', 'G-CB5GL0P3EZ', {
+        page_path: location.pathname + location.search,
+      });
+    }
+  }, [location.pathname, location.search]);
   
   return (
     <div className="min-h-screen w-full bg-white text-gray-900">
