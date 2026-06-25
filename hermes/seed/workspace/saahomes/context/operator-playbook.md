@@ -43,7 +43,8 @@ Full strategy: `market-dominance-strategy.md` · Autopilot rules: `automation-po
 | When | What | Time |
 |------|------|------|
 | **Daily** | Skim Telegram only if digest or ✅ DONE | 0–2 min |
-| **When email arrives** | Social post pack → paste to Meta + GBP | 5 min |
+| **When email arrives** | Social post pack → Meta + GBP + X | 5 min |
+| **Every Wednesday** | Weekly social email (market, tip, event, or seasonal) | 5 min |
 | **Thursday** | Approve 0–2 outreach drafts (`approved` / `edit:` / `skip`) | 5–10 min |
 | **Monday (optional)** | Read weekly war room — rankings, leads, blockers | 10 min |
 | **Ongoing** | Follow Up Boss — call/text **form leads** (Hermes does not) | Your core job |

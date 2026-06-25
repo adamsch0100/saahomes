@@ -8,6 +8,8 @@ description: Generate monthly content calendar and outlines for SAA Homes blog t
 ## Goal
 2–4 posts/month that capture Tier B/C queries and internal-link to area pages + money pages.
 
+**Master calendar:** `context/content-calendar.md` — pillars, blog vs social matrix, monthly market snapshot spec.
+
 ## Step 1 — Gap identification
 Sources:
 - GSC queries with impressions >50, position >10, no dedicated page
@@ -48,7 +50,10 @@ For each post provide:
 
 ### Program + local
 - CHFA eligibility by Weld vs Larimer income limits
-- Monthly Northern Colorado market snapshot (recurring)
+- **Monthly Northern Colorado market snapshot** (required 1×/month — see content-calendar.md)
+
+### Social-only topics (do NOT blog unless major news)
+- Local events, holidays, weekly market pulse one-liners → `social-post-pack` on Wed cron only
 
 ### Comparison / long-tail
 - Wellington vs Fort Collins affordability
@@ -66,10 +71,15 @@ Week 2: ...
 
 Backlog: [5 ideas]
 
-Repo action: Add to blogPosts.js on approved branch
+Repo action: Add to blogPosts.js, ship via autonomous-execute, notify Adam with live URL, then **email social-post-pack** same week.
 ```
+
+## After publish
+1. ✅ DONE Telegram with URL
+2. Run `social-post-pack` + `send-social-post-pack.py`
+3. Update MEMORY `## Content calendar state`
 
 ## Constraints
 - Fair Housing compliant
 - Cite CHFA/HUD for program claims with year
-- No publish without Adam approval — deliver outlines/PRs only
+- Publish per USER.md (autonomous when in calendar) — no thin posts

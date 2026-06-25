@@ -16,12 +16,29 @@ Adam publishes manually in Meta Business Suite + GBP (phone or desktop).
 ---
 
 ## When to run
-- New blog or area page shipped
-- Weekly `social-crosspost` cron
+- New blog or area page shipped (**always** same week)
+- Weekly **`social-weekly-content`** cron (Wed) — even without new blog
+- Monthly market blog published
 - CHFA/program updates (seasonal)
 - After Adam requests a post pack
 
-See `context/social-channels.md` for channels, media rules, triggers.
+**Calendar:** `context/content-calendar.md` — pillars, Wed rotation, holidays, blog vs social matrix.
+
+---
+
+## Content types (set `"content_type"` in JSON subject line)
+
+| Type | Example subject prefix |
+|------|------------------------|
+| `new-content` | New blog/area live |
+| `market-pulse` | Weekly stat / trend |
+| `seller-tip` / `buyer-tip` | Actionable advice |
+| `community` | Local event, city spotlight |
+| `seasonal` / `holiday` | Memorial Day, spring market |
+| `program` | CHFA reminder |
+| `news-react` | Rates, Colorado housing news |
+
+**Always include X block.** Vary hooks vs last 3 in MEMORY `## Content calendar state`.
 
 ---
 
@@ -29,7 +46,7 @@ See `context/social-channels.md` for channels, media rules, triggers.
 
 1. Identify promoted URL on https://saahomes.com
 2. Pick hero/OG image from `public/images/` in the repo (or live `https://saahomes.com/...` URL)
-3. Write platform-specific captions (GBP, Facebook, Instagram minimum; YouTube/X when relevant)
+3. Write platform-specific captions: **GBP, Facebook, Instagram, X** (required every pack)
 4. Instagram **must** include an image URL
 5. **No new video production** — if no video, omit or set `video_note: "No video — image + link post only"`
 
@@ -104,7 +121,7 @@ Publish in Meta Business Suite + GBP when ready.
 Reply "posted" on Telegram when live (optional).
 ```
 
-3. Log in MEMORY.md
+3. Log in MEMORY.md `## Content calendar state`
 
 ---
 
