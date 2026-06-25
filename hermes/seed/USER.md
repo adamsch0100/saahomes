@@ -5,7 +5,7 @@
 Adam wants Hermes to **run the program end-to-end**. Set it up correctly once; Adam should not have to manage day-to-day SEO.
 
 **Default:** Execute → notify → move on.  
-**Exception:** Backlink outreach emails/messages — **draft and send to Adam for approval before any send.**
+**Exceptions:** (1) Backlink outreach emails — draft → `approved` → send via SMTP. (2) GBP + social posts — draft → `approved` → publish via browser.
 
 ---
 
@@ -16,23 +16,25 @@ Adam wants Hermes to **run the program end-to-end**. Set it up correctly once; A
 | Monitoring, audits, cron reports | ✅ Auto | ✅ Daily/weekly summary |
 | SEO fixes (meta, schema, internal links, area page copy) | ✅ Auto via PR → merge → deploy | ✅ With live link after deploy |
 | Blog posts (write + publish) | ✅ Auto when in content calendar | ✅ With published URL |
-| GBP posts | ✅ Auto when API connected | ✅ With post link |
-| Social (Facebook, Instagram, YouTube descriptions) | ✅ Auto when API connected | ✅ With post link |
-| Local citations / directory NAP fixes | ✅ Auto where API allows | ✅ With list of changes |
+| GBP posts | ✅ After Adam `approved` | ✅ POST REVIEW → then ✅ DONE with link |
+| Social (Facebook, Instagram, X, YouTube metadata) | ✅ After Adam `approved` | ✅ POST REVIEW → then ✅ DONE with link |
+| Local citations / directory NAP fixes | ✅ Auto where possible | ✅ With list of changes |
 | Competitor response content | ✅ Auto | ✅ With links |
 | Git deploy to production | ✅ Auto after CI passes | ✅ Deploy confirmation + URLs |
-| **Backlink outreach email/DM** | ⛔ **Draft only** | ✅ Send draft for Adam approval; send after "approved" |
+| **Backlink outreach email/DM** | ⛔ **Draft only** | ✅ OUTREACH REVIEW → send after `approved` |
 | Lead follow-up emails (form submissions) | ⛔ Never — Adam/Mandi handle | — |
 | Follow Up Boss / CRM changes | ⛔ Never | — |
 | Paid links / PBN / spam tactics | ⛔ Never | — |
+
+**Publishing method:** GBP + social use **Browserbase cloud browser** — no Meta/GBP API keys. Requires `BROWSERBASE_API_KEY` + `BROWSERBASE_PROJECT_ID`. See `context/social-channels.md`.
 
 ---
 
 ## How Adam wants to be involved
 
-1. **Passive by default** — Telegram (or Slack) updates when work is **done**, with links
+1. **Passive by default** — Telegram updates when work is **done**, with links
 2. **Jump in when he wants** — reply to adjust, pause, or rollback
-3. **Active only for outreach** — review outreach drafts before send; reply "approved" or edit
+3. **Approve before external publish** — outreach emails + GBP/social posts; reply `approved` or `edit:`
 
 ---
 
@@ -55,6 +57,17 @@ Subject: [subject]
 [full draft]
 ---
 Reply "approved" to send, or paste edits.
+```
+
+For GBP/social post pending approval:
+```
+📋 POST REVIEW — [GBP | Facebook | Instagram | YouTube | X]
+Promoting: [page title + URL]
+Image: [path on site or "link preview only"]
+---
+[caption / post text]
+---
+Reply "approved" to publish, "edit: …" to revise, or "skip".
 ```
 
 ---

@@ -62,15 +62,21 @@ Optional but recommended:
 
 ---
 
-## Phase 4 — Later (not needed for launch)
+## Phase 4 — Browser + outreach (when ready)
+
+| # | You provide | Enables |
+|---|-------------|---------|
+| 12 | **Browserbase API key + project ID** | GBP/social browser posting + browse.sh market intel on Railway |
+| 13 | **Outreach SMTP** (Gmail app password) | Send approved backlink emails |
+
+Browserbase free tier: ~1 browser hour/month, 15 min/session — enough for login setup + weekly posts. See `context/social-channels.md`.
+
+## Phase 5 — Later
 
 | Item | When |
 |------|------|
 | Follow Up Boss + visitor chat AI | After Hermes + GEO running |
-| GBP API credentials | Auto local posts |
-| Meta/IG tokens | Auto social |
-| SerpAPI key | Deeper SERP/competitor intel |
-| Outreach SMTP (Gmail app password) | Send approved backlink emails |
+| SerpAPI / Serper key | Deeper SERP/competitor intel |
 
 Follow Up Boss is already on your **backend** (`FOLLOW_UP_BOSS_API_KEY`) for form leads — Hermes won't touch CRM until we build visitor chat.
 

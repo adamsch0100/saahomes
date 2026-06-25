@@ -42,12 +42,18 @@ Every SEO/content action follows this loop:
 - Sitemap/prerender updates via build scripts
 - CRO tweaks (CTA copy, placement) in repo
 
-### Off-site (when credentials connected)
-- GBP posts (market tips, new blog links, CHFA reminders)
-- Facebook/Instagram posts pointing to saahomes.com pages
-- YouTube video description/tag updates for @SAAHomes
-- Local citation corrections (NAP consistency on directories with API access)
+### Off-site (Browserbase cloud browser — no Meta/GBP API keys)
+
+See `context/social-channels.md` for channel list, Browserbase login, media rules, and cadence.
+
+- **GBP** — market tips, new blog/area page links, CHFA reminders (image when available)
+- **Facebook + Instagram** — same promotions via Meta Business Suite; IG requires an image from site assets
+- **YouTube @SAAHomes** — update descriptions/tags/links on existing videos when related content publishes; do not create new videos
+- **X @saahomes** — text + link when P0 content ships (P2 rotation)
+- Local citation corrections (NAP) where browser or form access allows
 - Indexation requests in GSC for new/updated URLs
+
+**All GBP/social publishes:** draft → Telegram POST REVIEW → Adam `approved` → browser publish → ✅ DONE
 
 ### Technical
 - Fix broken internal links
@@ -58,14 +64,19 @@ Every SEO/content action follows this loop:
 
 ## Approval required BEFORE action
 
-### Backlink outreach (ONLY pre-approval category)
+### Backlink outreach
 - Cold emails to local blogs, news sites, partners
 - Guest post pitches
 - HARO/journalist responses
 - Partnership/link exchange proposals
 - Any external email or DM sent as Adam/SAA Homes
 
-**Workflow:** draft → Telegram review → send only on explicit `approved`
+**Workflow:** draft → Telegram OUTREACH REVIEW → send only on explicit `approved` (via SMTP)
+
+### GBP + social posts
+- Any post to Google Business Profile, Facebook, Instagram, YouTube (Community/metadata), or X
+
+**Workflow:** draft → Telegram POST REVIEW → browser publish only on explicit `approved`
 
 ### Never autonomous (hard stops)
 - Replying to website lead form submissions
@@ -125,12 +136,11 @@ Adam does not need "permission to proceed" messages — only **completion** and 
 |-------------|---------|
 | `GITHUB_TOKEN` | Auto PR, merge, content publish |
 | Railway deploy hook / `RAILWAY_TOKEN` | Live deploy after merge |
-| `TELEGRAM_BOT_TOKEN` | Done notifications + outreach review |
-| GSC credentials | Smarter execution triggers |
-| GBP API | Auto local posts |
-| Meta/social API | Auto social posts |
-| `SERPAPI` / Ahrefs | Backlink prospect research |
-| Email send (SMTP/API) | Outreach after Adam approves |
+| `TELEGRAM_BOT_TOKEN` | Done notifications + review gates |
+| GSC credentials JSON on volume | Smarter execution triggers |
+| `BROWSERBASE_API_KEY` + `BROWSERBASE_PROJECT_ID` | GBP/social publish + browse.sh market intel |
+| `OUTREACH_SMTP_*` | Outreach email after Adam approves |
+| `SERPAPI` / Serper (optional) | Backlink prospect research |
 
 Track status in MEMORY.md `## Integration status`.
 

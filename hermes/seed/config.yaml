@@ -41,8 +41,13 @@ gateway:
 cron:
   enabled: true
 
+browser:
+  cloud_provider: browserbase
+  inactivity_timeout: 300
+
 tools:
   toolsets:
     - web
     - terminal
     - files
+    - browser
