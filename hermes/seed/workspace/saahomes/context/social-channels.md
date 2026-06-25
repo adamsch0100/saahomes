@@ -1,130 +1,91 @@
-# Social & Local Channels — Browserbase Posting (No Meta/GBP API Keys)
+# Social & Local Channels — Email Post Pack (Adam publishes manually)
 
-Hermes publishes via **Browserbase cloud browser** + Hermes browser tools.  
-No Meta/GBP API tokens. No passwords in env vars or Google Docs.
+Hermes **drafts** GBP + social content and **emails Adam** a ready-to-publish pack (captions, links, images attached).  
+Adam copies into **Meta Business Suite** (FB + IG) and **Google Business Profile**. No Browserbase, no platform API keys.
 
-**browse.sh** = free skill playbooks (Zillow, Realtor, etc.). **Browserbase** = cloud browser runtime. Both use the same `BROWSERBASE_*` env vars.
-
-Adam approves **every external post** (GBP + social) before publish — reply `approved`.
+Use skill: **`social-post-pack`** · script: `send-social-post-pack.py`
 
 ---
 
 ## Channels (from site `seoConstants.js`)
 
-| Channel | URL / handle | Priority | Post via browser |
-|---------|----------------|----------|------------------|
-| **Google Business Profile** | [GBP listing](https://www.google.com/maps/place/Schwartz+and+Associates,+Coldwell+Banker+Realty/@40.5377165,-105.0741491,17z) | P0 | business.google.com |
+| Channel | Handle | Priority | Adam publishes via |
+|---------|--------|----------|-------------------|
+| **Google Business Profile** | Schwartz and Associates listing | P0 | business.google.com or GBP app |
 | **Facebook** | facebook.com/schwartzandassociateshomes | P0 | Meta Business Suite |
-| **Instagram** | @saa_homes | P0 | Meta Business Suite (linked to FB) |
-| **YouTube** | @SAAHomes | P1 | Studio — descriptions/tags/Community; not new video production |
-| **X (Twitter)** | @saahomes | P2 | x.com — text + link when active |
+| **Instagram** | @saa_homes | P0 | Meta Business Suite (same post as FB) |
+| **YouTube** | @SAAHomes | P1 | Studio — description/tags only; no new videos |
+| **X** | @saahomes | P2 | x.com — optional |
 
-Post on **GBP + Facebook + Instagram** every cycle. YouTube + X on rotation when there is new site content to promote.
-
----
-
-## Media rules (what to attach)
-
-| Platform | Image required? | Video required? | Source |
-|----------|-----------------|-----------------|--------|
-| GBP Update | Recommended | No | Blog hero, area page image, or branded link card |
-| Facebook | Optional (link preview often enough) | No | Same as GBP |
-| Instagram feed | **Yes** | Reels optional P2 | Reuse blog/area hero from `public/images/` — never AI-fake homes |
-| YouTube | N/A for posts | **Do not create new videos** | Update descriptions/tags on existing @SAAHomes uploads |
-| X | Optional | No | Text + saahomes.com link |
-
-**Default:** When a blog or area page ships, attach its existing OG/hero image. No synthetic listing photos. No Fair Housing violations.
-
-**Videos:** Hermes does not film or generate video. Repurpose existing @SAAHomes content (transcripts → blog/GEO). Short-form Reels only if Adam provides source video.
+Post on **GBP + Facebook + Instagram** every cycle. YouTube + X when relevant.
 
 ---
 
-## Post triggers (what to promote)
+## Media rules
 
-1. New blog live → all P0 channels
+| Platform | Image | Video |
+|----------|-------|-------|
+| GBP | Recommended — attached in email | No |
+| Facebook | Optional — attached or link preview | No |
+| Instagram | **Required** — attached in email | Reels only if Adam supplies source file |
+| YouTube | N/A | **Do not create new videos** — description text only |
+| X | Optional | No |
+
+Reuse blog/area hero from `public/images/` → live URL `https://saahomes.com/images/...`  
+Never AI-fake listing photos. Fair Housing safe copy only.
+
+---
+
+## Post triggers
+
+1. New blog live → GBP + FB + IG (+ YouTube/X if relevant)
 2. New/updated area page → GBP + FB + IG
-3. CHFA/program page updates → GBP + FB (seasonal)
-4. Weekly market tip (no new page) → GBP + FB text post
-5. YouTube: refresh description + tags + link when related blog publishes
+3. CHFA/program updates → GBP + FB (seasonal)
+4. Weekly market tip → GBP + FB text post
+5. YouTube: include description/tag block in email when related @SAAHomes video exists
 
 ---
 
-## Approval workflow
+## Workflow
 
-1. Draft caption + target URL + chosen image path
-2. Telegram **POST REVIEW** (see USER.md)
-3. Adam: `approved` | `edit: …` | `skip`
-4. Browserbase publish → ✅ DONE with live post link
-5. Log in MEMORY.md
+1. Hermes drafts captions + picks image(s)
+2. Saves JSON pack → `outreach/pending/social-{date}-{slug}.json`
+3. Runs `send-social-post-pack.py` → **email to Adam** (HTML + image attachments)
+4. Short **Telegram** notice: “📧 Social post pack sent — check email”
+5. Adam publishes manually (5 min)
+6. Optional: Adam replies `posted` on Telegram
+7. Log in MEMORY.md
 
----
-
-## Browserbase setup (Adam one-time)
-
-### Railway env vars (required)
-
-```
-BROWSERBASE_API_KEY=<from browserbase.com → Settings → API Keys>
-BROWSERBASE_PROJECT_ID=<from browserbase.com → Settings → Project ID>
-```
-
-Optional (recommended):
-
-```
-BROWSER_INACTIVITY_TIMEOUT=300
-```
-
-Get keys at [browserbase.com](https://www.browserbase.com) → **Settings**. Free tier: ~1 browser hour/month, 15 min max per session — enough for one-time logins + a few posts/week. Close sessions when done.
-
-### One-time login (per platform)
-
-There is **no browser panel in the Hermes dashboard**. Use Browserbase live view:
-
-1. Message Hermes on Telegram:
-
-```
-Browserbase is configured. Set up authenticated sessions for:
-1) Google Business Profile (business.google.com)
-2) Meta Business Suite — FB + IG (business.facebook.com)
-3) YouTube Studio (studio.youtube.com)
-4) X (x.com)
-
-For each: open a Browserbase session, send me the live view / debug URL, wait while I log in with 2FA, then save the session/context for reuse. Stay within 15 min per session (free tier).
-```
-
-2. Hermes opens a Browserbase session and sends you a **live view link** (or link to the session in [Browserbase dashboard](https://www.browserbase.com/sessions)).
-3. You log in manually (2FA on your phone).
-4. Reply `done` when finished on that platform.
-5. Repeat for each platform. Meta Business Suite covers both Facebook and Instagram.
-
-### Cookie refresh (when sessions expire)
-
-Option A — ask Hermes to open a new Browserbase live view and log in again.
-
-Option B — **cookie-sync** from home Chrome (run on your PC, not Railway):
-
-```bash
-npm install -g browse
-export BROWSERBASE_API_KEY=your_key
-# Install cookie-sync skill from browserbase/skills, then:
-node path/to/cookie-sync.mjs --domains google.com,facebook.com,youtube.com,x.com
-```
-
-Save the context ID Hermes prints; reuse with `browse open --context-id <id> --persist`.
-
-Log context IDs in MEMORY.md under `## Browserbase contexts`.
+**No Browserbase. No auto-publish. No `approved` gate required** — email is the handoff.
 
 ---
 
-## Free tier budget tips
+## Email setup (Railway)
 
-- One login session per platform (~5–10 min each) = ~30–40 min once
-- Each approved post = ~2–5 min — batch GBP + FB + IG in one Meta session when possible
-- Close browser sessions immediately after posting
-- Do not leave sessions idle — free tier counts browser minutes
+Same SMTP as outreach (already configured):
+
+```
+OUTREACH_SMTP_HOST=smtp.gmail.com
+OUTREACH_SMTP_USER=adam@saahomes.com
+OUTREACH_SMTP_PASSWORD=<app password>
+SOCIAL_POST_EMAIL_TO=adam@saahomes.com
+```
+
+Optional: `SOCIAL_POST_EMAIL_TO` for a different inbox (defaults to SMTP user).
 
 ---
 
-## SMTP (separate)
+## What the email contains
 
-Backlink outreach email uses `OUTREACH_SMTP_*` — not used for social posting.
+- Subject: `SAA Homes — Social posts | [page title]`
+- Promoted page link
+- Section per platform with caption (copy-paste ready)
+- Image preview in HTML + **image file attached** when available
+- YouTube description / X caption blocks when included
+- Note if no video this cycle
+
+---
+
+## Browserbase (optional — not for social)
+
+Browserbase + browse.sh remain **optional** for market intel (Zillow, Realtor) only. Do not use for GBP/Meta login or posting.

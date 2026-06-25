@@ -4,7 +4,7 @@
 
 Read these context files every week:
 - `context/automation-policy.md` — **full autopilot rules (read first)**
-- `context/social-channels.md` — **GBP + social Browserbase posting (no API keys)**
+- `context/social-channels.md` — **GBP + social email post pack (Adam publishes manually)**
 - `context/skills-registry.md` — **Skills Hub + browse.sh catalog reference**
 - `context/keyword-universe.md` — every city × intent we must win
 - `context/automation-registry.md` — cron jobs that must stay running
@@ -26,7 +26,7 @@ When integrations are available, execute in order:
 6. **Save baseline** to memory: current top queries, indexation status, competitor top 3 per city
 7. **Verify Browserbase** — confirm `BROWSERBASE_API_KEY` + `BROWSERBASE_PROJECT_ID` in env; run a test `browser_navigate` to https://example.com; log pass/fail in MEMORY.md
 8. **Install browse.sh skills** from `context/skills-registry.md` (Zillow, Realtor, Walk Score, YouTube transcript)
-9. **Social login setup** — if Adam requests: follow `context/social-channels.md` Browserbase live-view login flow
+9. **Social login setup** — not required; social uses email post packs (see `social-post-pack` skill)
 10. **Report readiness** to Adam: what's automated, what's blocked, top 5 immediate wins
 
 Re-run checklist item 5 monthly (full 19-city rotation via delegation batches of 4–5).

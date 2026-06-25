@@ -152,6 +152,7 @@ append_env "BROWSER_INACTIVITY_TIMEOUT" "${BROWSER_INACTIVITY_TIMEOUT:-300}"
 upsert_env "OUTREACH_SMTP_HOST" "${OUTREACH_SMTP_HOST:-}"
 upsert_env "OUTREACH_SMTP_USER" "${OUTREACH_SMTP_USER:-}"
 upsert_env "OUTREACH_SMTP_PASSWORD" "${OUTREACH_SMTP_PASSWORD:-}"
+append_env "SOCIAL_POST_EMAIL_TO" "${SOCIAL_POST_EMAIL_TO:-adam@saahomes.com}"
 
 if id hermes >/dev/null 2>&1; then
   chown hermes:hermes "$ENV_FILE" 2>/dev/null || true

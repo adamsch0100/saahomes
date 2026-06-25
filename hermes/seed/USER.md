@@ -5,7 +5,7 @@
 Adam wants Hermes to **run the program end-to-end**. Set it up correctly once; Adam should not have to manage day-to-day SEO.
 
 **Default:** Execute → notify → move on.  
-**Exceptions:** (1) Backlink outreach emails — draft → `approved` → send via SMTP. (2) GBP + social posts — draft → `approved` → publish via browser.
+**Exceptions:** (1) Backlink outreach emails — draft → `approved` → send via SMTP. (2) GBP + social — Hermes emails a post pack; Adam publishes manually (no auto-post).
 
 ---
 
@@ -16,8 +16,7 @@ Adam wants Hermes to **run the program end-to-end**. Set it up correctly once; A
 | Monitoring, audits, cron reports | ✅ Auto | ✅ Daily/weekly summary |
 | SEO fixes (meta, schema, internal links, area page copy) | ✅ Auto via PR → merge → deploy | ✅ With live link after deploy |
 | Blog posts (write + publish) | ✅ Auto when in content calendar | ✅ With published URL |
-| GBP posts | ✅ After Adam `approved` | ✅ POST REVIEW → then ✅ DONE with link |
-| Social (Facebook, Instagram, X, YouTube metadata) | ✅ After Adam `approved` | ✅ POST REVIEW → then ✅ DONE with link |
+| GBP + social posts | ✅ Draft + **email post pack** | ✅ Email + Telegram “check inbox” |
 | Local citations / directory NAP fixes | ✅ Auto where possible | ✅ With list of changes |
 | Competitor response content | ✅ Auto | ✅ With links |
 | Git deploy to production | ✅ Auto after CI passes | ✅ Deploy confirmation + URLs |
@@ -26,7 +25,7 @@ Adam wants Hermes to **run the program end-to-end**. Set it up correctly once; A
 | Follow Up Boss / CRM changes | ⛔ Never | — |
 | Paid links / PBN / spam tactics | ⛔ Never | — |
 
-**Publishing method:** GBP + social use **Browserbase cloud browser** — no Meta/GBP API keys. Requires `BROWSERBASE_API_KEY` + `BROWSERBASE_PROJECT_ID`. See `context/social-channels.md`.
+**Social publishing:** Hermes emails captions + image attachments to **adam@saahomes.com** via SMTP. Adam posts in Meta Business Suite + GBP. See `context/social-channels.md` and `social-post-pack` skill. **No Browserbase for social.**
 
 ---
 
@@ -34,7 +33,8 @@ Adam wants Hermes to **run the program end-to-end**. Set it up correctly once; A
 
 1. **Passive by default** — Telegram updates when work is **done**, with links
 2. **Jump in when he wants** — reply to adjust, pause, or rollback
-3. **Approve before external publish** — outreach emails + GBP/social posts; reply `approved` or `edit:`
+3. **Social:** check email, paste posts (~5 min) — reply `posted` optional
+4. **Outreach:** reply `approved` or `edit:` before external send
 
 ---
 
@@ -59,24 +59,25 @@ Subject: [subject]
 Reply "approved" to send, or paste edits.
 ```
 
-For GBP/social post pending approval:
+For social post pack sent:
 ```
-📋 POST REVIEW — [GBP | Facebook | Instagram | YouTube | X]
-Promoting: [page title + URL]
-Image: [path on site or "link preview only"]
+📧 SOCIAL POST PACK — [page title]
+Email sent to adam@saahomes.com
+Promoting: [url]
+Platforms: GBP · Facebook · Instagram [+ YouTube/X if included]
+Image attached: yes/no
 ---
-[caption / post text]
----
-Reply "approved" to publish, "edit: …" to revise, or "skip".
+Publish in Meta Business Suite + GBP when ready.
+Reply "posted" when live (optional).
 ```
 
 ---
 
 ## Delivery preferences
 
-- **Channel:** Telegram (primary)
+- **Channel:** Telegram (primary) + **email for social post packs**
 - **Daily digest:** 7:30 AM MT — only if something was executed yesterday (not noise)
-- **Immediate:** P0 regressions, deploy failures, outreach drafts ready
+- **Immediate:** P0 regressions, deploy failures, outreach drafts ready, social post pack emailed
 - **Weekly war room:** Monday 8 AM MT — full picture even if quiet week
 
 ---
