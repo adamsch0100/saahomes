@@ -67,6 +67,7 @@ append_env() {
 upsert_env() {
   key="$1"
   value="$2"
+  value="$(printf '%s' "$value" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'$//")"
   if [ -z "$value" ]; then
     return 0
   fi
@@ -108,6 +109,17 @@ append_env "BROWSER_INACTIVITY_TIMEOUT" "${BROWSER_INACTIVITY_TIMEOUT:-300}"
 upsert_env "OUTREACH_SMTP_HOST" "${OUTREACH_SMTP_HOST:-}"
 upsert_env "OUTREACH_SMTP_USER" "${OUTREACH_SMTP_USER:-}"
 upsert_env "OUTREACH_SMTP_PASSWORD" "${OUTREACH_SMTP_PASSWORD:-}"
+
+if id hermes >/dev/null 2>&1; then
+  chown hermes:hermes "$ENV_FILE" 2>/dev/null || true
+  chmod 600 "$ENV_FILE" 2>/dev/null || true
+fi
+
+if [ -n "${BROWSERBASE_API_KEY:-}" ] && [ -n "${BROWSERBASE_PROJECT_ID:-}" ]; then
+  echo "Browserbase: Railway env detected — synced to /opt/data/.env"
+else
+  echo "Browserbase: BROWSERBASE_API_KEY or BROWSERBASE_PROJECT_ID missing in Railway env (add vars on Hermes service, then redeploy)"
+fi
 
 CREDENTIALS_DIR="$DATA_DIR/credentials"
 mkdir -p "$CREDENTIALS_DIR"
