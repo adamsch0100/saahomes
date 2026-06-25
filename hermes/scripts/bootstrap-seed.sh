@@ -79,8 +79,11 @@ append_env "GA4_PROPERTY_ID" "${GA4_PROPERTY_ID:-G-CB5GL0P3EZ}"
 append_env "OUTREACH_APPROVAL_REQUIRED" "${OUTREACH_APPROVAL_REQUIRED:-true}"
 append_env "AUTO_MERGE_SEO_PRS" "${AUTO_MERGE_SEO_PRS:-true}"
 
-# Volume seeded on first boot may predate platforms.telegram in config.yaml.
+# Volume seeded on first boot may predate gateway.platforms.telegram in config.yaml.
 export HERMES_HOME="$DATA_DIR"
 if command -v hermes >/dev/null 2>&1; then
-  hermes config set platforms.telegram.enabled true 2>/dev/null || true
+  hermes config set gateway.platforms.telegram.enabled true 2>/dev/null || true
+  if [ -n "${TELEGRAM_ALLOWED_USERS:-}" ]; then
+    hermes config set gateway.platforms.telegram.extra.allow_from "[\"${TELEGRAM_ALLOWED_USERS}\"]" 2>/dev/null || true
+  fi
 fi
