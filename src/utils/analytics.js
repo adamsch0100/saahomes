@@ -1,4 +1,4 @@
-export const GA4_MEASUREMENT_ID = 'G-CB5GL0P3EZ';
+export const GA4_MEASUREMENT_ID = 'G-TSHFHCL0LL';
 
 export function trackLeadConversion(leadType, metadata = {}) {
   if (typeof window === 'undefined' || typeof window.gtag !== 'function') {
