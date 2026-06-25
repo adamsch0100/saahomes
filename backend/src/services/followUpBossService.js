@@ -240,6 +240,54 @@ export const forwardChfaDpaLeadToFollowUpBoss = async (submission) => {
   }
 };
 
+export const forwardGhopeLeadToFollowUpBoss = async (submission) => {
+  if (!FOLLOW_UP_BOSS_API_KEY && !FOLLOW_UP_BOSS_WEBHOOK_URL) {
+    logger.info('Follow Up Boss not configured, skipping lead forwarding');
+    return { success: false, reason: 'not_configured' };
+  }
+
+  const {
+    first_name, last_name, email, phone, employer_name, target_zone, buying_timeline, message,
+    employerName, targetZone, buyingTimeline,
+  } = submission;
+
+  const resolvedEmployer = employer_name || employerName;
+  const resolvedZone = target_zone || targetZone;
+  const resolvedTimeline = buying_timeline || buyingTimeline;
+
+  const messageLines = [
+    'G-HOPE Greeley down payment assistance lead from website',
+    resolvedEmployer ? `Employer: ${resolvedEmployer}` : null,
+    resolvedZone ? `Target zone: ${resolvedZone}` : null,
+    resolvedTimeline ? `Buying timeline: ${resolvedTimeline}` : null,
+    message ? `Comments: ${message}` : null,
+    ...buildAttributionLines(submission),
+  ].filter(Boolean);
+
+  const eventData = {
+    source: 'G-HOPE Greeley Landing Page',
+    system: 'SAA Homes Website',
+    type: 'Registration',
+    message: messageLines.join('\n'),
+    person: {
+      firstName: first_name,
+      lastName: last_name,
+      emails: email ? [{ value: email, type: 'work' }] : [],
+      phones: phone ? [{ value: phone.replace(/\D/g, ''), type: 'mobile' }] : [],
+      tags: ['G-HOPE Greeley', 'Greeley Down Payment Assistance', 'Website Lead'],
+    },
+  };
+
+  try {
+    const result = await postFollowUpBossEvent(eventData);
+    logger.info('G-HOPE lead forwarded to Follow Up Boss', { eventId: result.id });
+    return { success: true, eventId: result.id };
+  } catch (error) {
+    logger.error('Failed to forward G-HOPE lead to Follow Up Boss', error);
+    return { success: false, error: error.message };
+  }
+};
+
 export const forwardMarketReportToFollowUpBoss = async (submission) => {
   if (!FOLLOW_UP_BOSS_API_KEY && !FOLLOW_UP_BOSS_WEBHOOK_URL) {
     logger.info('Follow Up Boss not configured, skipping lead forwarding');

@@ -207,6 +207,21 @@ export default function GreeleyPage() {
         </div>
       </section>
 
+      <section className="py-16 px-6" style={{ backgroundColor: "#CFB36E" }}>
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold font-serif text-gray-900 mb-3">Work in Greeley? Explore G-HOPE</h2>
+          <p className="text-gray-800 mb-6">
+            The City of Greeley&apos;s G-HOPE program offers up to $8,000 in forgivable down payment assistance for full-time employees buying east of 35th Avenue — no first-time buyer requirement.
+          </p>
+          <Link
+            to="/greeley-g-hope-down-payment-assistance/"
+            className="inline-flex px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            G-HOPE program guide →
+          </Link>
+        </div>
+      </section>
+
       {/* Market Report CTA */}
       <section className="py-16 px-6 bg-gray-50">
         <div className="max-w-2xl mx-auto">

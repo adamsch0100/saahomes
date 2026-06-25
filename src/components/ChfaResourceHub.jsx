@@ -9,6 +9,12 @@ const hubLinks = [
     badge: "Most popular",
   },
   {
+    title: "G-HOPE Greeley",
+    href: "/greeley-g-hope-down-payment-assistance/",
+    description: "Up to $8K for Greeley-area employees",
+    badge: "Greeley workforce",
+  },
+  {
     title: "CHFA Schools To Home",
     href: "/chfa-schools-to-home/",
     description: "Up to 25% DPA for Colorado educators",
@@ -45,7 +51,7 @@ export default function ChfaResourceHub({ compact = false }) {
   if (compact) {
     return (
       <div className="bg-gray-50 rounded-xl border border-gray-100 p-6">
-        <h3 className="font-bold font-serif text-lg mb-4">Explore CHFA programs</h3>
+        <h3 className="font-bold font-serif text-lg mb-4">Explore buyer programs</h3>
         <div className="space-y-3">
           {hubLinks.map((link) => (
             <Link key={link.href} to={link.href} className="block group">
@@ -65,13 +71,13 @@ export default function ChfaResourceHub({ compact = false }) {
           <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: "#CFB36E" }}>
             Colorado Homebuyer Resources
           </p>
-          <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4">Your CHFA program hub</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4">Your homebuyer program hub</h2>
           <p className="text-gray-300 max-w-2xl mx-auto">
-            SAA Homes publishes in-depth guides on every major CHFA program. Start with the overview, then dive into the program that fits your situation.
+            SAA Homes publishes in-depth guides on CHFA, G-HOPE, and other Northern Colorado down payment programs. Start with the overview that fits your situation.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 mb-10">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           {hubLinks.map((link) => (
             <Link
               key={link.href}

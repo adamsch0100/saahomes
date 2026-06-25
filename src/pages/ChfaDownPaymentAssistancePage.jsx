@@ -94,6 +94,13 @@ const northernColoradoLimits = [
 
 const specialtyPrograms = [
   {
+    title: "G-HOPE Greeley (City Employees)",
+    audience: "Full-time employees with Greeley-area employers",
+    benefit: "Up to $8,000 forgivable down payment loan",
+    link: "/greeley-g-hope-down-payment-assistance/",
+    status: "Active now",
+  },
+  {
     title: "CHFA Schools To Home",
     audience: "Full-time Colorado public school employees",
     benefit: "Up to 25% down payment assistance",
