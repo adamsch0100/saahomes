@@ -53,7 +53,7 @@ Docs: [Hermes Skills System](https://hermes-agent.nousresearch.com/docs/user-gui
 
 [browse.sh](https://browse.sh/) is Browserbase's **free skill catalog** — pre-built playbooks for Zillow, Realtor.com, Redfin, Walk Score, YouTube, etc. Hermes installs via `--source browse-sh`.
 
-**browse.sh is not a separate subscription.** It is skill files only. **Browserbase** is the cloud browser engine that runs them on Railway (and for GBP/social posting). Same env vars for both.
+**browse.sh is not a separate subscription.** Skill files only. **Browserbase** runs browse.sh on Railway for **market intel** — never for social posting.
 
 **Use browse.sh for:**
 - Competitor/market data (listings, comps, days on market) to enrich area pages + seller content

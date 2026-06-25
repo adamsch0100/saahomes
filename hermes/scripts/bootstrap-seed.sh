@@ -87,6 +87,17 @@ if [ -f "$SEED_DIR/AGENTS.md" ]; then
   cp "$SEED_DIR/AGENTS.md" "$DATA_DIR/AGENTS.md"
   cp "$SEED_DIR/AGENTS.md" "$WORKSPACE_DIR/AGENTS.md"
 fi
+if [ -f "$SEED_DIR/SOUL.md" ]; then
+  cp "$SEED_DIR/SOUL.md" "$DATA_DIR/SOUL.md"
+fi
+# Append canonical integration status if volume MEMORY predates email-only social policy.
+if [ -f "$DATA_DIR/MEMORY.md" ]; then
+  if ! grep -q "Never Browserbase for social" "$DATA_DIR/MEMORY.md" 2>/dev/null; then
+    printf '\n## Integration status (canonical — updated %s)\n' "$(date -u +%Y-%m-%d)" >> "$DATA_DIR/MEMORY.md"
+    printf '%s\n' "- **Social posting:** SMTP email packs via social-post-pack → adam@saahomes.com. **Never Browserbase for social.**" >> "$DATA_DIR/MEMORY.md"
+    printf '%s\n' "- **Browserbase:** Optional. browse.sh market intel only." >> "$DATA_DIR/MEMORY.md"
+  fi
+fi
 
 if [ ! -f "$DATA_DIR/.saahomes-bootstrapped" ]; then
   date -u +"%Y-%m-%dT%H:%M:%SZ" > "$DATA_DIR/.saahomes-bootstrapped"
@@ -160,17 +171,12 @@ if id hermes >/dev/null 2>&1; then
 fi
 
 if browserbase_ready; then
-  echo "Browserbase: credentials present — synced to /opt/data/.env"
+  echo "Browserbase: credentials present — market intel / browse.sh only (NOT social posting)"
 else
-  echo "Browserbase: BROWSERBASE_API_KEY or BROWSERBASE_PROJECT_ID not found in Railway/s6 env or /opt/data/.env"
-  browser_keys="$(env | grep -i '^BROWSER' | cut -d= -f1 | tr '\n' ' ')"
-  if [ -n "$browser_keys" ]; then
-    echo "Browserbase: env keys seen at boot (names only): $browser_keys"
-  else
-    echo "Browserbase: no BROWSER* env keys at boot — confirm vars are on the Hermes service (not main site), exact names, no quotes"
-  fi
-  echo "Browserbase: workaround — run repair-browserbase.sh in Railway Console, then redeploy"
+  echo "Browserbase: not configured — optional for browse.sh market intel; social uses SMTP email packs"
 fi
+
+echo "Social policy: SMTP email post packs ONLY (social-post-pack). No Browserbase for GBP/Meta/X."
 
 CREDENTIALS_DIR="$DATA_DIR/credentials"
 mkdir -p "$CREDENTIALS_DIR"

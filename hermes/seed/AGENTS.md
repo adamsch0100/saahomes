@@ -3,7 +3,8 @@
 **Scope:** https://saahomes.com only. **Goal:** Own Northern Colorado buyer + seller search demand for Schwartz and Associates.
 
 Read these context files every week:
-- `context/operator-playbook.md` — **Adam + Hermes master process (read first)**
+- `context/hard-rules.md` — **social = email only; Browserbase = intel only (NON-NEGOTIABLE)**
+- `context/operator-playbook.md` — Adam + Hermes master process
 - `context/automation-policy.md` — full autopilot rules
 - `context/social-channels.md` — **GBP + social email post pack (Adam publishes manually)**
 - `context/skills-registry.md` — **Skills Hub + browse.sh catalog reference**
@@ -25,7 +26,7 @@ When integrations are available, execute in order:
 4. **Set delivery** to Telegram (or Slack) for all cron outputs
 5. **Run baseline audit** — spawn 4 parallel subagents (delegation) for Fort Collins, Loveland, Windsor, Greeley using `/local-market-audit` skill
 6. **Save baseline** to memory: current top queries, indexation status, competitor top 3 per city
-7. **Verify Browserbase** — confirm `BROWSERBASE_API_KEY` + `BROWSERBASE_PROJECT_ID` in env; run a test `browser_navigate` to https://example.com; log pass/fail in MEMORY.md
+7. **Verify Browserbase** (optional) — market intel only; test `browser_navigate` to https://example.com; **do not** set up GBP/Meta login sessions
 8. **Install browse.sh skills** from `context/skills-registry.md` (Zillow, Realtor, Walk Score, YouTube transcript)
 9. **Social login setup** — not required; social uses email post packs (see `social-post-pack` skill)
 10. **Report readiness** to Adam: what's automated, what's blocked, top 5 immediate wins

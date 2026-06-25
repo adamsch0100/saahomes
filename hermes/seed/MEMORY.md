@@ -22,7 +22,12 @@ Maintain per city (update weekly):
 (Hermes: append dated wins here — ranking improvements, new indexation, PRs merged, lead page CRO fixes)
 
 ## Open blockers
-(Hermes: list integration gaps preventing full automation)
+(Hermes: list integration gaps preventing full automation — do NOT list Browserbase missing as blocker for social; social uses SMTP email packs)
+
+## Integration status (canonical — update when changes)
+- **Social posting:** SMTP email packs via `social-post-pack` skill → adam@saahomes.com. Adam publishes manually. **Never Browserbase for social.**
+- **Browserbase:** Optional. browse.sh market intel only (Zillow, Realtor, Walk Score).
+- **Outreach:** SMTP; Adam `approved` before send.
 
 ## Competitor watch
 (Hermes: top 3 local broker competitors per major city — update monthly)
