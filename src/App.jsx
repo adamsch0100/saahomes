@@ -34,6 +34,7 @@ import ChfaDownPaymentAssistancePage from "./pages/ChfaDownPaymentAssistancePage
 import AreaGuidePage from "./pages/AreaGuidePage.jsx";
 import FloatingContactBar from "./components/FloatingContactBar.jsx";
 import { loadRealScoutScript } from "./utils/realscout.js";
+import { GA4_MEASUREMENT_ID } from "./utils/analytics.js";
 
 function AppLayout({ children }) {
   const location = useLocation();
@@ -75,7 +76,7 @@ export default function App() {
 
   useEffect(() => {
     if (typeof window.gtag === 'function') {
-      window.gtag('config', 'G-CB5GL0P3EZ', {
+      window.gtag('config', GA4_MEASUREMENT_ID, {
         page_path: location.pathname + location.search,
       });
     }
