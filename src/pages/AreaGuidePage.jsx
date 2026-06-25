@@ -2,7 +2,9 @@ import React from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import AreaSEO from "../components/AreaSEO.jsx";
 import MarketReportForm from "../components/MarketReportForm.jsx";
+import AreaFAQSection from "../components/AreaFAQSection.jsx";
 import { getAreaSeo } from "../data/areaSeo.js";
+import { AREA_FAQS } from "../data/areaFaqs.js";
 
 const GOLD = "#CFB36E";
 
@@ -169,6 +171,8 @@ export default function AreaGuidePage() {
           </div>
         </section>
       )}
+
+      <AreaFAQSection faqs={AREA_FAQS[area.slug]} city={area.city} />
 
       <section className="py-16 px-6 bg-black text-white">
         <div className="max-w-4xl mx-auto text-center">

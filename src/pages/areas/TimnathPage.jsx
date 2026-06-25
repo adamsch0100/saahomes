@@ -244,6 +244,9 @@ export default function TimnathPage() {
           </div>
         </div>
       </section>
+
+      <AreaFAQSection faqs={AREA_FAQS['timnath']} city="Timnath" />
+
     </>
   );
 }

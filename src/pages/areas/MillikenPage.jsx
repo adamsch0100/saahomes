@@ -244,6 +244,9 @@ export default function MillikenPage() {
           </div>
         </div>
       </section>
+
+      <AreaFAQSection faqs={AREA_FAQS['milliken']} city="Milliken" />
+
     </>
   );
 }

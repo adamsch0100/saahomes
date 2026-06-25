@@ -244,6 +244,9 @@ export default function WellingtonPage() {
           </div>
         </div>
       </section>
+
+      <AreaFAQSection faqs={AREA_FAQS['wellington']} city="Wellington" />
+
     </>
   );
 }
