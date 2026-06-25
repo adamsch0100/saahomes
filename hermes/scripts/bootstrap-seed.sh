@@ -6,6 +6,50 @@ SEED_DIR="/seed"
 
 mkdir -p "$DATA_DIR"
 
+# s6 cont-init scripts may not inherit Railway env directly. Import from s6's
+# container_environment store (same vars the main process receives).
+import_s6_container_env() {
+  env_dir="/var/run/s6/container_environment"
+  [ -d "$env_dir" ] || return 0
+  for key_path in "$env_dir"/*; do
+    [ -f "$key_path" ] || continue
+    key="$(basename "$key_path")"
+    val="$(cat "$key_path")"
+    export "${key}=${val}"
+  done
+}
+
+import_s6_container_env
+
+ENV_FILE="$DATA_DIR/.env"
+if [ -f "$ENV_FILE" ]; then
+  set -a
+  # shellcheck disable=SC1091
+  . "$ENV_FILE"
+  set +a
+  import_s6_container_env
+fi
+
+env_key_set() {
+  key="$1"
+  eval "val=\${${key}:-}"
+  [ -n "$val" ]
+}
+
+env_file_key_set() {
+  key="$1"
+  [ -f "$ENV_FILE" ] && grep -q "^${key}=" "$ENV_FILE" 2>/dev/null || return 1
+  val="$(grep "^${key}=" "$ENV_FILE" | tail -1 | cut -d= -f2-)"
+  [ -n "$val" ]
+}
+
+browserbase_ready() {
+  if env_key_set BROWSERBASE_API_KEY && env_key_set BROWSERBASE_PROJECT_ID; then
+    return 0
+  fi
+  env_file_key_set BROWSERBASE_API_KEY && env_file_key_set BROWSERBASE_PROJECT_ID
+}
+
 if [ ! -f "$DATA_DIR/config.yaml" ] && [ -f "$SEED_DIR/config.yaml" ]; then
   echo "Seeding Hermes data directory at $DATA_DIR"
   cp -R "$SEED_DIR/." "$DATA_DIR/"
@@ -49,7 +93,6 @@ if [ ! -f "$DATA_DIR/.saahomes-bootstrapped" ]; then
   echo "First boot: run AGENTS.md first-boot checklist and install cron jobs from automation-registry.md"
 fi
 
-ENV_FILE="$DATA_DIR/.env"
 touch "$ENV_FILE"
 
 append_env() {
@@ -115,10 +158,17 @@ if id hermes >/dev/null 2>&1; then
   chmod 600 "$ENV_FILE" 2>/dev/null || true
 fi
 
-if [ -n "${BROWSERBASE_API_KEY:-}" ] && [ -n "${BROWSERBASE_PROJECT_ID:-}" ]; then
-  echo "Browserbase: Railway env detected — synced to /opt/data/.env"
+if browserbase_ready; then
+  echo "Browserbase: credentials present — synced to /opt/data/.env"
 else
-  echo "Browserbase: BROWSERBASE_API_KEY or BROWSERBASE_PROJECT_ID missing in Railway env (add vars on Hermes service, then redeploy)"
+  echo "Browserbase: BROWSERBASE_API_KEY or BROWSERBASE_PROJECT_ID not found in Railway/s6 env or /opt/data/.env"
+  browser_keys="$(env | grep -i '^BROWSER' | cut -d= -f1 | tr '\n' ' ')"
+  if [ -n "$browser_keys" ]; then
+    echo "Browserbase: env keys seen at boot (names only): $browser_keys"
+  else
+    echo "Browserbase: no BROWSER* env keys at boot — confirm vars are on the Hermes service (not main site), exact names, no quotes"
+  fi
+  echo "Browserbase: workaround — run repair-browserbase.sh in Railway Console, then redeploy"
 fi
 
 CREDENTIALS_DIR="$DATA_DIR/credentials"
