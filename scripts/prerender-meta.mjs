@@ -113,20 +113,18 @@ function matchBlogPost(path) {
   return blogPosts.find((p) => p.slug === match[1]) || null;
 }
 
-function getOgImageForRoute(path) {
-  // Area pages use their hero image
-  const area = matchAreaPage(path);
-  if (area && area.heroImage) {
+function getOgImageForRoute(route) {
+  if (route.ogImage) return route.ogImage;
+  const area = matchAreaPage(route.path);
+  if (area?.heroImage) {
     return area.heroImage.startsWith('http')
       ? area.heroImage
       : `${SITE_URL}${area.heroImage}`;
   }
-  // Blog posts use their featured image
-  const post = matchBlogPost(path);
-  if (post && post.image) {
+  const post = matchBlogPost(route.path);
+  if (post?.image) {
     return post.image.startsWith('http') ? post.image : `${SITE_URL}${post.image}`;
   }
-  // Default to business logo (BUSINESS.logo is already absolute)
   return BUSINESS.logo || undefined;
 }
 
@@ -253,7 +251,8 @@ function buildRouteSchemas(route) {
     path.startsWith('/chfa-') ||
     path === '/chfa-down-payment-assistance/' ||
     path === '/chfa-schools-to-home/' ||
-    path === '/colorado-champions-home-loan-program/'
+    path === '/colorado-champions-home-loan-program/' ||
+    path === '/greeley-g-hope-down-payment-assistance/'
   ) {
     const aboutSchema = schemas.find((s) => s['@type'] === 'WebPage');
     if (aboutSchema) {
@@ -269,7 +268,10 @@ function buildRouteMetaTags(route) {
   const canonical = `${SITE_URL}${path}`;
   const tags = [];
 
-  const ogImage = getOgImageForRoute(path);
+  const ogTitle = route.ogTitle || title;
+  const ogDescription = route.ogDescription || description;
+  const ogImage = getOgImageForRoute(route);
+  const ogImageAlt = route.ogImageAlt || ogTitle;
   const keywords = getKeywordsForRoute(path);
 
   // Standard meta
@@ -280,29 +282,36 @@ function buildRouteMetaTags(route) {
   tags.push(`<meta name="geo.region" content="US-CO" />`);
   tags.push(`<meta name="geo.placename" content="Fort Collins, Colorado" />`);
 
-  // Open Graph
+  // Open Graph — iMessage, Facebook, LinkedIn read these from static HTML
   tags.push(`<meta property="og:type" content="website" />`);
-  tags.push(`<meta property="og:site_name" content="SAA Homes" />`);
+  tags.push(`<meta property="og:site_name" content="Schwartz and Associates" />`);
   tags.push(`<meta property="og:locale" content="en_US" />`);
-  tags.push(`<meta property="og:title" content="${escapeAttr(title)}" />`);
+  tags.push(`<meta property="og:title" content="${escapeAttr(ogTitle)}" />`);
   tags.push(
-    `<meta property="og:description" content="${escapeAttr(description)}" />`
+    `<meta property="og:description" content="${escapeAttr(ogDescription)}" />`
   );
   if (ogImage) {
     tags.push(`<meta property="og:image" content="${escapeAttr(ogImage)}" />`);
+    tags.push(`<meta property="og:image:secure_url" content="${escapeAttr(ogImage)}" />`);
+    tags.push(`<meta property="og:image:alt" content="${escapeAttr(ogImageAlt)}" />`);
+    tags.push(`<meta property="og:image:width" content="1200" />`);
+    tags.push(`<meta property="og:image:height" content="630" />`);
   }
   tags.push(`<meta property="og:url" content="${escapeAttr(canonical)}" />`);
 
   // Twitter Card
   tags.push(`<meta name="twitter:card" content="summary_large_image" />`);
   tags.push(`<meta name="twitter:site" content="@saahomes" />`);
-  tags.push(`<meta name="twitter:title" content="${escapeAttr(title)}" />`);
+  tags.push(`<meta name="twitter:title" content="${escapeAttr(ogTitle)}" />`);
   tags.push(
-    `<meta name="twitter:description" content="${escapeAttr(description)}" />`
+    `<meta name="twitter:description" content="${escapeAttr(ogDescription)}" />`
   );
   if (ogImage) {
     tags.push(
       `<meta name="twitter:image" content="${escapeAttr(ogImage)}" />`
+    );
+    tags.push(
+      `<meta name="twitter:image:alt" content="${escapeAttr(ogImageAlt)}" />`
     );
   }
   tags.push(`<meta name="twitter:url" content="${escapeAttr(canonical)}" />`);

@@ -73,6 +73,7 @@ export default function SEO({
   ogDescription,
   ogImage,
   ogUrl,
+  ogImageAlt,
   type = "website",
   image = "/images/White-Logo-AUTOx110.fit.png",
   robots,
@@ -85,6 +86,7 @@ export default function SEO({
   const finalOgDescription = ogDescription || description;
   const finalOgImage = toAbsoluteUrl(ogImage || image);
   const finalOgUrl = ogUrl || canonical;
+  const finalOgImageAlt = ogImageAlt || finalOgTitle;
   const robotsContent = robots || "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
 
   const schemas = [
@@ -105,11 +107,15 @@ export default function SEO({
       {canonical && <link rel="canonical" href={canonical} />}
 
       <meta property="og:type" content={type} />
-      <meta property="og:site_name" content="SAA Homes" />
+      <meta property="og:site_name" content="Schwartz and Associates" />
       <meta property="og:locale" content="en_US" />
       <meta property="og:title" content={finalOgTitle} />
       <meta property="og:description" content={finalOgDescription} />
       {finalOgImage && <meta property="og:image" content={finalOgImage} />}
+      {finalOgImage && <meta property="og:image:secure_url" content={finalOgImage} />}
+      {finalOgImage && <meta property="og:image:alt" content={finalOgImageAlt} />}
+      {finalOgImage && <meta property="og:image:width" content="1200" />}
+      {finalOgImage && <meta property="og:image:height" content="630" />}
       {finalOgUrl && <meta property="og:url" content={finalOgUrl} />}
 
       <meta name="twitter:card" content="summary_large_image" />
@@ -117,6 +123,7 @@ export default function SEO({
       <meta name="twitter:title" content={finalOgTitle} />
       <meta name="twitter:description" content={finalOgDescription} />
       {finalOgImage && <meta name="twitter:image" content={finalOgImage} />}
+      {finalOgImage && <meta name="twitter:image:alt" content={finalOgImageAlt} />}
       {finalOgUrl && <meta name="twitter:url" content={finalOgUrl} />}
 
       {schemas.map((schema, index) => (
