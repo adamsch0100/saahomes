@@ -20,8 +20,8 @@ Not "rank for some keywords." **Own the full demand capture system** for Larimer
 - NAP consistency with `seoConstants.js` everywhere (site, GBP, directories)
 - GBP categories: Real Estate Agent, Real Estate Agency
 - Review velocity + response (Adam/Mandi — Hermes monitors and prompts)
-- GBP posts when approved — market updates, new listings angle, CHFA reminders
-- Photos + video tied to YouTube @SAAHomes
+- GBP posts when content ships — Hermes emails post pack; Adam publishes manually
+- Photos tied to site/blog heroes + YouTube @SAAHomes
 
 ### Pillar 3 — On-site conversion (where traffic becomes leads)
 - Every high-intent page has **above-the-fold CTA** matched to intent:
@@ -112,7 +112,8 @@ Informational queries that internal-link to Tier S/A pages.
 - Keyword stuff meta tags or H1s
 - Fake urgency on market stats
 - Steer by protected class (Fair Housing)
-- Auto-publish without Adam review
+- Auto-publish outreach without Adam `approved`
+- Use Browserbase for social posting (email post packs only)
 - Buy links or use PBNs
 
 ---

@@ -1,6 +1,6 @@
 # Automation Policy — Full Autopilot with Outreach Gate
 
-Adam's directive: **automate everything correctly; notify as work completes; only pause for backlink outreach review.**
+Adam's directive: **automate everything correctly; notify as work completes.** Adam's manual touchpoints: **outreach approval**, **social paste from email packs**, **lead follow-up**. See `context/operator-playbook.md`.
 
 ---
 

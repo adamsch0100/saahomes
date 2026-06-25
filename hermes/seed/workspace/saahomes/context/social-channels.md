@@ -86,6 +86,6 @@ Optional: `SOCIAL_POST_EMAIL_TO` for a different inbox (defaults to SMTP user).
 
 ---
 
-## Browserbase (optional — not for social)
+## Browserbase (optional — market intel only)
 
-Browserbase + browse.sh remain **optional** for market intel (Zillow, Realtor) only. Do not use for GBP/Meta login or posting.
+Keep `BROWSERBASE_API_KEY` + `BROWSERBASE_PROJECT_ID` configured for browse.sh skills (Zillow, Realtor, Walk Score). **Not used for social posting.** See `operator-playbook.md` Layer 4.

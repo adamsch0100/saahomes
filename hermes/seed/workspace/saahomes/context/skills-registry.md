@@ -62,8 +62,12 @@ Docs: [Hermes Skills System](https://hermes-agent.nousresearch.com/docs/user-gui
 - YouTube transcript extraction for @SAAHomes → blog/GEO repurposing
 
 **Use Hermes browser tools (Browserbase) for:**
-- GBP + social posting — see `context/social-channels.md`
-- Any site needing authenticated sessions (Google, Meta, YouTube, X)
+- browse.sh market intel — Zillow, Realtor, Walk Score, YouTube transcripts → area pages & blogs
+- Read-only competitor/market data when public API or web_extract is insufficient
+
+**Do NOT use Browserbase for:**
+- GBP, Facebook, Instagram, YouTube, or X posting (use `social-post-pack` email workflow)
+- Logging into Google/Meta as Adam
 
 **Required env (Railway Hermes service):**
 ```
@@ -81,7 +85,7 @@ npm i -g browse
 browse skills add zillow.com
 ```
 
-On Railway, Hermes uses Browserbase automatically when `BROWSERBASE_*` is set — no local Chromium required.
+On Railway, Hermes uses Browserbase for **browse.sh market intel only** when `BROWSERBASE_*` is set. Social posting uses SMTP email packs — see `operator-playbook.md`.
 
 ---
 
