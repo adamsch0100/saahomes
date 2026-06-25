@@ -33,7 +33,9 @@ function buildLocalBusinessSchema(description) {
     },
     "areaServed": BUSINESS.areaServed,
     "priceRange": BUSINESS.priceRange,
+    "alternateName": BUSINESS.alternateName,
     "sameAs": BUSINESS.sameAs,
+    ...(BUSINESS.googleBusinessProfile ? { hasMap: BUSINESS.googleBusinessProfile } : {}),
   };
 }
 

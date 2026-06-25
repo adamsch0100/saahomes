@@ -1,10 +1,10 @@
 import { blogPosts } from './blogPosts.js';
-import { areaSeoPages } from './areaSeo.js';
+import { areaSeoPages, getAreaExactTitle } from './areaSeo.js';
 
 export const SITE_URL = 'https://saahomes.com';
 
 const staticPages = [
-  { path: '/', priority: '1.0', changefreq: 'weekly', title: 'Fort Collins Real Estate Agents | SAA Homes - Northern Colorado', description: 'Schwartz and Associates — trusted Northern Colorado real estate agents in Fort Collins, Loveland, Windsor, Greeley, and across Colorado.' },
+  { path: '/', priority: '1.0', changefreq: 'weekly', title: 'Schwartz and Associates | Northern Colorado Real Estate | Fort Collins, Loveland & Greeley', description: 'Schwartz and Associates, Coldwell Banker Realty — Northern Colorado real estate agents serving Fort Collins, Loveland, Windsor, Greeley, and 19+ Front Range communities.' },
   { path: '/about-us/', priority: '0.8', changefreq: 'monthly', title: 'About SAA Homes | Fort Collins Real Estate Experts | 20+ Years Experience', description: 'Meet Adam and Mandi Schwartz of SAA Homes — Fort Collins real estate experts with 20+ years of combined experience serving Northern Colorado.' },
   { path: '/for-buyers/', priority: '0.8', changefreq: 'monthly', title: 'Colorado Home Buyers | Homes for Sale in Northern Colorado | SAA Homes', description: 'Search homes for sale in Fort Collins, Loveland, Windsor, and across Northern Colorado with expert buyer representation from SAA Homes.' },
   { path: '/for-sellers/', priority: '0.8', changefreq: 'monthly', title: 'Sell Your Home in Northern Colorado | Free Market Analysis | SAA Homes', description: 'Sell your Northern Colorado home with expert marketing, pricing strategy, and negotiation from SAA Homes.' },
@@ -34,7 +34,7 @@ export function getSitemapEntries(lastmod) {
       priority: area.sitemapPriority || '0.8',
       changefreq: 'monthly',
       lastmod: date,
-      title: area.exactTitle,
+      title: getAreaExactTitle(area),
       description: area.description,
     })),
     ...blogPosts.map((post) => ({

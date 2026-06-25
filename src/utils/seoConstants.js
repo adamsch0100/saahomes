@@ -1,14 +1,15 @@
 export const SITE_URL = 'https://saahomes.com';
 export const SITE_NAME = 'SAA Homes';
-export const SITE_TITLE_SUFFIX = 'SAA Homes | Northern Colorado Real Estate';
+export const SITE_TITLE_SUFFIX = 'Schwartz and Associates | Northern Colorado Real Estate';
 
 export const BUSINESS = {
-  name: 'Schwartz And Associates',
-  legalName: 'Schwartz and Associates',
+  name: 'Schwartz and Associates',
+  legalName: 'Schwartz and Associates, Coldwell Banker Realty',
   url: SITE_URL,
   telephone: '(970) 999-1407',
   email: 'info@saahomes.com',
   logo: `${SITE_URL}/images/White-Logo-AUTOx110.fit.png`,
+  googleBusinessProfile: 'https://www.google.com/maps/place/Schwartz+and+Associates,+Coldwell+Banker+Realty/@40.5377165,-105.0741491,17z/data=!3m1!4b1!4m6!3m5!1s0x876eaddc6066cca7:0x835527dd833bac8c!8m2!3d40.5377165!4d-105.0741491!16s%2Fg%2F11h_7vxx81',
   address: {
     streetAddress: '3665 John F Kennedy Parkway, Suite 210',
     addressLocality: 'Fort Collins',
@@ -17,8 +18,8 @@ export const BUSINESS = {
     addressCountry: 'US',
   },
   geo: {
-    latitude: '40.5853',
-    longitude: '-105.0844',
+    latitude: '40.5377165',
+    longitude: '-105.0741491',
   },
   areaServed: [
     'Fort Collins, CO',
@@ -44,10 +45,16 @@ export const BUSINESS = {
     'Colorado',
   ],
   sameAs: [
+    'https://www.google.com/maps/place/Schwartz+and+Associates,+Coldwell+Banker+Realty/@40.5377165,-105.0741491,17z/data=!3m1!4b1!4m6!3m5!1s0x876eaddc6066cca7:0x835527dd833bac8c!8m2!3d40.5377165!4d-105.0741491!16s%2Fg%2F11h_7vxx81',
     'https://www.facebook.com/schwartzandassociateshomes',
     'https://www.instagram.com/saa_homes/',
     'https://youtube.com/@SAAHomes',
     'https://twitter.com/saahomes',
+  ],
+  alternateName: [
+    'SAA Homes',
+    'Schwartz and Associates, Coldwell Banker Realty',
+    'Schwartz And Associates',
   ],
   priceRange: '$$',
 };

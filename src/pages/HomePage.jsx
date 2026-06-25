@@ -34,6 +34,7 @@ const homePageSchema = {
     "closes": "17:00",
   },
   "priceRange": BUSINESS.priceRange,
+  "alternateName": BUSINESS.alternateName,
   "areaServed": BUSINESS.areaServed.map((name) => ({
     "@type": name.includes("Colorado") ? "AdministrativeArea" : "City",
     "name": name.replace(", CO", ""),
@@ -45,9 +46,9 @@ export default function HomePage() {
   return (
     <>
       <SEO
-        exactTitle="Fort Collins Real Estate Agents | SAA Homes - Northern Colorado"
-        description="Schwartz and Associates — trusted Northern Colorado real estate agents in Fort Collins, Loveland, Windsor, Greeley, and across Colorado. Expert buyer and seller representation."
-        keywords="Fort Collins real estate agents, Northern Colorado realtor, SAA Homes, Schwartz and Associates, Loveland homes for sale, Windsor CO real estate, Greeley realtor, Colorado real estate"
+        exactTitle="Schwartz and Associates | Northern Colorado Real Estate | Fort Collins, Loveland & Greeley"
+        description="Schwartz and Associates, Coldwell Banker Realty — Northern Colorado real estate agents serving Fort Collins, Loveland, Windsor, Greeley, and 19+ Front Range communities. Expert buyer and seller representation."
+        keywords="Schwartz and Associates, Northern Colorado real estate, Fort Collins real estate, Loveland real estate, Greeley real estate, Windsor real estate, Northern Colorado realtor, Coldwell Banker Fort Collins, SAA Homes, Colorado homes for sale"
         canonical="https://saahomes.com/"
         ogImage="https://saahomes.com/images/White-Logo-AUTOx110.fit.png"
         includeWebsite={true}

@@ -306,6 +306,23 @@ export function getAreaSeo(slug) {
   return areaSeoPages.find((area) => area.slug === slug);
 }
 
+export function getAreaExactTitle(area) {
+  return `${area.city} Real Estate | Homes for Sale in ${area.city}, CO | Schwartz and Associates`;
+}
+
+export function getAreaKeywords(area) {
+  const core = [
+    `${area.city} real estate`,
+    `${area.city} realtor`,
+    `${area.city} real estate agent`,
+    `${area.city} CO homes for sale`,
+    `${area.city} Colorado real estate`,
+    `Schwartz and Associates ${area.city}`,
+    'Northern Colorado real estate',
+  ].join(', ');
+  return area.keywords ? `${core}, ${area.keywords}` : core;
+}
+
 export function getAreaPageUrl(slug) {
   return `${SITE_URL}/northern-colorado-areas/${slug}/`;
 }
@@ -318,7 +335,7 @@ export function buildAreaPageSchemas(area) {
     {
       '@context': 'https://schema.org',
       '@type': 'WebPage',
-      name: `${area.city}, CO Real Estate Guide`,
+      name: `${area.city} Real Estate | Homes for Sale in ${area.city}, CO`,
       description: area.description,
       url: pageUrl,
       inLanguage: 'en-US',
@@ -360,9 +377,11 @@ export function buildAreaPageSchemas(area) {
       '@context': 'https://schema.org',
       '@type': 'RealEstateAgent',
       name: BUSINESS.name,
+      alternateName: BUSINESS.alternateName,
       url: SITE_URL,
       telephone: BUSINESS.telephone,
       email: BUSINESS.email,
+      sameAs: BUSINESS.sameAs,
       address: {
         '@type': 'PostalAddress',
         ...BUSINESS.address,

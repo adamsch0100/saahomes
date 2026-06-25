@@ -1,6 +1,6 @@
 import React from 'react';
 import SEO from './SEO.jsx';
-import { buildAreaPageSchemas, getAreaPageUrl, getAreaSeo } from '../data/areaSeo.js';
+import { buildAreaPageSchemas, getAreaExactTitle, getAreaKeywords, getAreaPageUrl, getAreaSeo } from '../data/areaSeo.js';
 
 export default function AreaSEO({ slug }) {
   const area = getAreaSeo(slug);
@@ -12,11 +12,11 @@ export default function AreaSEO({ slug }) {
 
   return (
     <SEO
-      exactTitle={area.exactTitle}
+      exactTitle={getAreaExactTitle(area)}
       description={area.description}
-      keywords={area.keywords}
+      keywords={getAreaKeywords(area)}
       canonical={pageUrl}
-      ogTitle={`${area.city}, CO Real Estate Guide | SAA Homes`}
+      ogTitle={`${area.city} Real Estate | Schwartz and Associates`}
       ogDescription={area.description}
       ogImage={imageUrl}
       ogUrl={pageUrl}
