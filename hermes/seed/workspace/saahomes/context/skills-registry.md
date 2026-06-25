@@ -124,6 +124,7 @@ Install on first boot after Hermes is live (`hermes skills install ...`):
 | `schema-technical-audit` | Technical SEO |
 | `internal-link-architecture` | Link equity |
 | `local-pack-gbp-audit` | GBP/local pack |
+| `social-post-pack` | Email GBP + social captions/images to Adam |
 | `indexation-rescue` | Indexation patrol |
 
 ---

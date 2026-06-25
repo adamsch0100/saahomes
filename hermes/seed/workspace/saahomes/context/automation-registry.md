@@ -153,7 +153,7 @@ Schedule: 0 11 1 * *  (1st of month, 11:00 AM MT)
 Skill: local-pack-gbp-audit
 Model: kimi-k2.6
 Provider: opencode-go
-Prompt: GBP/NAP/local pack audit. Draft GBP post for Adam POST REVIEW. Publish via browser after approved. Notify with post link or fix list.
+Prompt: GBP/NAP/local pack audit. Draft GBP post, build social-post-pack JSON, email Adam via send-social-post-pack.py. Notify on Telegram when email sent.
 ```
 
 ### 15. `blog-content-calendar`
@@ -193,7 +193,7 @@ Prompt: Quarterly market dominance review vs market-dominance-strategy.md succes
 Schedule: 0 10 * * 3  (Wed 10:00 AM MT)
 Model: deepseek-v4-flash
 Provider: opencode-go
-Prompt: Read context/social-channels.md. If new blog/area content shipped this week, draft GBP + Facebook + Instagram posts (reuse site hero images). Send POST REVIEW to Adam. Publish via browser after approved. Update YouTube description if related @SAAHomes video exists. Log in MEMORY.
+Prompt: Read context/social-channels.md. If new blog/area content shipped this week, draft GBP + Facebook + Instagram posts (reuse site hero images). Build JSON pack, run send-social-post-pack.py, Telegram Adam. Log in MEMORY.
 ```
 
 ---

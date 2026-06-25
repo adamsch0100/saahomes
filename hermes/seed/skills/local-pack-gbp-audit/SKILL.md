@@ -61,6 +61,6 @@ Suggested GBP post draft (for Adam approval)
 ```
 
 ## Constraints
-- Do not post to GBP without Adam `approved` (POST REVIEW workflow)
-- Publish via Browserbase browser session — no GBP API required
+- Do not post to GBP automatically — email post pack to Adam
+- Publish via Meta Business Suite + GBP manually — no Browserbase for social
 - Do not solicit fake reviews
