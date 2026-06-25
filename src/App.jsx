@@ -31,6 +31,7 @@ import BlogPostPage from "./pages/BlogPostPage.jsx";
 import ChfaSchoolsToHomePage from "./pages/ChfaSchoolsToHomePage.jsx";
 import ChampionsHomeLoanPage from "./pages/ChampionsHomeLoanPage.jsx";
 import ChfaDownPaymentAssistancePage from "./pages/ChfaDownPaymentAssistancePage.jsx";
+import AreaGuidePage from "./pages/AreaGuidePage.jsx";
 import FloatingContactBar from "./components/FloatingContactBar.jsx";
 import { loadRealScoutScript } from "./utils/realscout.js";
 
@@ -120,6 +121,8 @@ export default function App() {
         <Route path="/northern-colorado-areas/milliken/" element={<AppLayout><MillikenPage /></AppLayout>} />
         <Route path="/northern-colorado-areas/la-salle" element={<AppLayout><LaSallePage /></AppLayout>} />
         <Route path="/northern-colorado-areas/la-salle/" element={<AppLayout><LaSallePage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/:slug" element={<AppLayout><AreaGuidePage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/:slug/" element={<AppLayout><AreaGuidePage /></AppLayout>} />
         
         {/* Property Search Page */}
         <Route path="/properties" element={<AppLayout><PropertiesPage /></AppLayout>} />

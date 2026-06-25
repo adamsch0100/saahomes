@@ -204,7 +204,8 @@ export default function ContactPage() {
           <div className="h-96 bg-gray-300 rounded-lg">
             {/* Map iframe would go here */}
             <iframe 
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3032.123456789!2d-105.0764!3d40.5853!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDDCsDM1JzA3LjEiTiAxMDXCsDA0JzM1LjAiVw!5e0!3m2!1sen!2sus!4v1234567890"
+              title="SAA Homes office location — Fort Collins, Colorado"
+              src="https://www.google.com/maps?q=3665+John+F+Kennedy+Parkway+Suite+210,+Fort+Collins,+CO+80525&output=embed"
               width="100%"
               height="100%"
               style={{border: 0}}
@@ -214,9 +215,9 @@ export default function ContactPage() {
             ></iframe>
           </div>
           <div>
-            <h2 className="text-4xl font-bold mb-4">We're Proud to be your Colorado real estate experts.</h2>
+            <h2 className="text-4xl font-bold mb-4">We're proud to be your Northern Colorado real estate experts.</h2>
             <p className="text-lg text-gray-700 mb-6">
-              Our Fort Collins office, located in the heart of the old town, is leading the local property market. Our team of real estate professionals is always ready to help you.
+              Visit us at our Fort Collins office on John F. Kennedy Parkway — or reach out anytime. Adam and Mandi serve buyers and sellers across Fort Collins, Loveland, Windsor, Greeley, and the entire Northern Colorado corridor.
             </p>
             <a href="/about-us/" className="inline-block px-8 py-3 bg-black text-white font-semibold rounded hover:bg-gray-800 transition-colors">
               Get to know us

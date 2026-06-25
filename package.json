@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "vite build && node scripts/prerender-meta.mjs",
+    "build": "vite build && node scripts/generate-sitemap.mjs && node scripts/prerender-meta.mjs",
+    "sitemap": "node scripts/generate-sitemap.mjs",
     "postbuild": "npm ci --prefix backend --omit=dev",
     "start": "npm start --prefix backend",
     "preview": "vite preview"

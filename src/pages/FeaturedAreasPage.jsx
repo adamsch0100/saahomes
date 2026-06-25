@@ -1,108 +1,43 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
+import { areaSeoPages } from "../data/areaSeo.js";
+
+const cardDescriptions = {
+  "fort-collins": "A vibrant city with CSU, craft breweries, and stunning mountain views. Perfect blend of outdoor recreation and urban amenities.",
+  loveland: "Known as the 'Sweetheart City,' Loveland offers art galleries, sculpture parks, and easy access to mountain recreation.",
+  windsor: "A growing community with excellent schools, family-friendly atmosphere, and small-town charm close to Fort Collins.",
+  greeley: "Home to the University of Northern Colorado, with a rich agricultural heritage and vibrant downtown district.",
+  timnath: "A rapidly growing town with new developments, modern amenities, and a strong sense of community.",
+  wellington: "Charming small-town atmosphere with agricultural roots, great schools, and affordable housing options.",
+  johnstown: "Fast-growing community between Greeley and Loveland, offering new construction and family amenities.",
+  eaton: "Peaceful rural community with strong agricultural heritage and close-knit neighborhoods.",
+  milliken: "Small town with affordable housing, friendly community, and easy access to larger cities.",
+  "la-salle": "Historic community with small-town feel, strong schools, and affordable cost of living.",
+  mead: "Small-town charm with excellent schools, family-friendly atmosphere, and easy access to larger cities.",
+  longmont: "Thriving tech hub with vibrant downtown, craft breweries, and exceptional quality of life in Boulder County.",
+  boulder: "Iconic mountain city with world-class outdoor recreation, CU Boulder, and a vibrant cultural scene.",
+};
+
+function getRealScoutLink(city) {
+  return `https://www.realscout.com/search?agent_id=251929&location=${encodeURIComponent(`${city}, CO`)}`;
+}
 
 export default function FeaturedAreasPage() {
-  const areas = [
-    { 
-      name: "Fort Collins", 
-      image: "/images/Fort-Collins-CO-Area-Guide.jpg", 
-      url: "/northern-colorado-areas/fort-collins/",
-      realscoutLink: "https://www.realscout.com/search?agent_id=251929&location=Fort%20Collins,%20CO",
-      description: "A vibrant city with CSU, craft breweries, and stunning mountain views. Perfect blend of outdoor recreation and urban amenities."
-    },
-    { 
-      name: "Loveland", 
-      image: "/images/Loveland-CO-Area-Guide.jpg", 
-      url: "/northern-colorado-areas/loveland/",
-      realscoutLink: "https://www.realscout.com/search?agent_id=251929&location=Loveland,%20CO",
-      description: "Known as the 'Sweetheart City,' Loveland offers art galleries, sculpture parks, and easy access to mountain recreation."
-    },
-    { 
-      name: "Windsor", 
-      image: "/images/Windsor-CO-Area-Guide.jpg", 
-      url: "/northern-colorado-areas/windsor/",
-      realscoutLink: "https://www.realscout.com/search?agent_id=251929&location=Windsor,%20CO",
-      description: "A growing community with excellent schools, family-friendly atmosphere, and small-town charm close to Fort Collins."
-    },
-    { 
-      name: "Greeley", 
-      image: "/images/Area-Guide-for-Greeley-CO.jpg", 
-      url: "/northern-colorado-areas/greeley/",
-      realscoutLink: "https://www.realscout.com/search?agent_id=251929&location=Greeley,%20CO",
-      description: "Home to the University of Northern Colorado, with a rich agricultural heritage and vibrant downtown district."
-    },
-    { 
-      name: "Timnath", 
-      image: "/images/timnath.png", 
-      url: "/northern-colorado-areas/timnath/",
-      realscoutLink: "https://www.realscout.com/search?agent_id=251929&location=Timnath,%20CO",
-      description: "A rapidly growing town with new developments, modern amenities, and a strong sense of community."
-    },
-    { 
-      name: "Wellington", 
-      image: "/images/wellington.png", 
-      url: "/northern-colorado-areas/wellington/",
-      realscoutLink: "https://www.realscout.com/search?agent_id=251929&location=Wellington,%20CO",
-      description: "Charming small-town atmosphere with agricultural roots, great schools, and affordable housing options."
-    },
-    { 
-      name: "Johnstown", 
-      image: "/images/Johnstown-CO-Area-Guide.jpg", 
-      url: "/northern-colorado-areas/johnstown/",
-      realscoutLink: "https://www.realscout.com/search?agent_id=251929&location=Johnstown,%20CO",
-      description: "Fast-growing community between Greeley and Loveland, offering new construction and family amenities."
-    },
-    { 
-      name: "Eaton", 
-      image: "/images/Eaton-CO-Area-Guide.jpg", 
-      url: "/northern-colorado-areas/eaton/",
-      realscoutLink: "https://www.realscout.com/search?agent_id=251929&location=Eaton,%20CO",
-      description: "Peaceful rural community with strong agricultural heritage and close-knit neighborhoods."
-    },
-    { 
-      name: "Milliken", 
-      image: "/images/milliken.png", 
-      url: "/northern-colorado-areas/milliken/",
-      realscoutLink: "https://www.realscout.com/search?agent_id=251929&location=Milliken,%20CO",
-      description: "Small town with affordable housing, friendly community, and easy access to larger cities."
-    },
-    { 
-      name: "La Salle", 
-      image: "/images/la-salle.png", 
-      url: "/northern-colorado-areas/la-salle/",
-      realscoutLink: "https://www.realscout.com/search?agent_id=251929&location=LaSalle,%20CO",
-      description: "Historic community with small-town feel, strong schools, and affordable cost of living."
-    },
-    { 
-      name: "Mead", 
-      image: "/images/Mead.JPG", 
-      url: "/northern-colorado-areas/mead/",
-      realscoutLink: "https://www.realscout.com/search?agent_id=251929&location=Mead,%20CO",
-      description: "Small-town charm with excellent schools, family-friendly atmosphere, and easy access to larger cities."
-    },
-    { 
-      name: "Longmont", 
-      image: "/images/Longmont.jpg", 
-      url: "/northern-colorado-areas/longmont/",
-      realscoutLink: "https://www.realscout.com/search?agent_id=251929&location=Longmont,%20CO",
-      description: "Thriving tech hub with vibrant downtown, craft breweries, and exceptional quality of life in Boulder County."
-    },
-    { 
-      name: "Boulder", 
-      image: "/images/Boulder.jpg", 
-      url: "/northern-colorado-areas/boulder/",
-      realscoutLink: "https://www.realscout.com/search?agent_id=251929&location=Boulder,%20CO",
-      description: "Iconic mountain city with world-class outdoor recreation, CU Boulder, and a vibrant cultural scene."
-    },
-  ];
+  const areas = areaSeoPages.map((area) => ({
+    name: area.city,
+    image: area.heroImage,
+    url: `/northern-colorado-areas/${area.slug}/`,
+    realscoutLink: getRealScoutLink(area.city),
+    description: cardDescriptions[area.slug] || area.tagline,
+  }));
 
   return (
     <>
       <SEO
         exactTitle="Northern Colorado Communities & Neighborhoods | Fort Collins to Greeley | SAA Homes"
-        description="Explore Northern Colorado communities including Fort Collins, Loveland, Windsor, Greeley, Timnath, and more. Local real estate guides, lifestyle info, and homes for sale across Colorado's Front Range."
-        keywords="Northern Colorado neighborhoods, Fort Collins communities, Loveland CO areas, Windsor CO homes, Greeley real estate, Colorado Front Range towns, Northern Colorado area guide"
+        description="Explore Northern Colorado communities including Fort Collins, Loveland, Windsor, Greeley, Berthoud, Firestone, Severance, and more. Local real estate guides, lifestyle info, and homes for sale across Colorado's Front Range."
+        keywords="Northern Colorado neighborhoods, Fort Collins communities, Loveland CO areas, Windsor CO homes, Greeley real estate, Berthoud Firestone Severance homes, Colorado Front Range towns, Northern Colorado area guide"
         canonical="https://saahomes.com/northern-colorado-areas/"
         ogImage="https://saahomes.com/images/Northern Colorado.webp"
         jsonLd={[{
@@ -138,9 +73,9 @@ export default function FeaturedAreasPage() {
       <section className="py-16 px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {areas.map((area, index) => (
+            {areas.map((area) => (
               <div 
-                key={index}
+                key={area.url}
                 className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group"
               >
                 {/* Area Image - Clickable */}
