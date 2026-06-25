@@ -6,6 +6,8 @@ backend/node_modules/
 .env
 backend/.env
 hermes/.env
+hermes/.gsc-b64.tmp
+hermes/.credentials/
 .env.local
 .env.production
 

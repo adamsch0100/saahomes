@@ -84,6 +84,21 @@ append_env "GA4_PROPERTY_ID" "${GA4_PROPERTY_ID:-G-CB5GL0P3EZ}"
 append_env "OUTREACH_APPROVAL_REQUIRED" "${OUTREACH_APPROVAL_REQUIRED:-true}"
 append_env "AUTO_MERGE_SEO_PRS" "${AUTO_MERGE_SEO_PRS:-true}"
 
+CREDENTIALS_DIR="$DATA_DIR/credentials"
+mkdir -p "$CREDENTIALS_DIR"
+chmod 700 "$CREDENTIALS_DIR"
+GSC_KEY_FILE="$CREDENTIALS_DIR/gsc-service-account.json"
+
+if [ -n "${GSC_SERVICE_ACCOUNT_JSON_B64:-}" ]; then
+  echo "Writing GSC service account key from GSC_SERVICE_ACCOUNT_JSON_B64"
+  printf '%s' "$GSC_SERVICE_ACCOUNT_JSON_B64" | base64 -d > "$GSC_KEY_FILE"
+  chmod 600 "$GSC_KEY_FILE"
+elif [ -n "${GSC_SERVICE_ACCOUNT_JSON:-}" ]; then
+  echo "Writing GSC service account key from GSC_SERVICE_ACCOUNT_JSON"
+  printf '%s' "$GSC_SERVICE_ACCOUNT_JSON" > "$GSC_KEY_FILE"
+  chmod 600 "$GSC_KEY_FILE"
+fi
+
 # Hermes agent reads git credentials from /opt/data/.env — sync from Railway on every boot.
 if [ -n "${GITHUB_TOKEN:-}" ] && [ ! -d "$WORKSPACE_DIR/.git" ]; then
   REPO="${GITHUB_REPO:-adamsch0100/saahomes}"
