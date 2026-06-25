@@ -1,0 +1,45 @@
+model:
+  default: kimi-k2.6
+  provider: opencode-go
+
+providers:
+  opencode-go:
+    base_url: https://opencode.ai/zen/go/v1
+
+auxiliary:
+  compression:
+    provider: opencode-go
+    model: deepseek-v4-flash
+  web_extract:
+    provider: opencode-go
+    model: deepseek-v4-flash
+  vision:
+    provider: opencode-go
+    model: kimi-k2.6
+
+delegation:
+  provider: opencode-go
+  model: deepseek-v4-pro
+  max_concurrent_children: 5
+  max_spawn_depth: 2
+
+compression:
+  enabled: true
+  threshold: 0.50
+
+security:
+  command_approval:
+    enabled: true
+    mode: destructive
+
+gateway:
+  working_directory: /opt/data/workspace/saahomes
+
+cron:
+  enabled: true
+
+tools:
+  toolsets:
+    - web
+    - terminal
+    - files
