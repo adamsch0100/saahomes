@@ -11,7 +11,7 @@ const hubLinks = [
   {
     title: "G-HOPE Greeley",
     href: "/greeley-g-hope-down-payment-assistance/",
-    description: "Up to $8K for Greeley-area employees",
+    description: "Up to $8K by zone — Greeley employees",
     badge: "Greeley workforce",
   },
   {

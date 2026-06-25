@@ -2,12 +2,37 @@ import React, { useState } from 'react';
 import { submitGhopeLeadForm } from '../utils/api.js';
 import { withLeadMetadata } from '../utils/leadTracking.js';
 
-const targetZones = [
-  'Zone 1 — East of 8th Avenue (up to $8,000)',
-  'Zone 2 — 14th–17th & 8th Avenues area (up to $6,000)',
-  'Zone 3 — West of 14th & 17th Avenues (up to $4,000)',
-  'Zone 4 — Eligible area (up to $2,500)',
-  'Not sure yet — east of 35th Avenue in Greeley',
+export const GHOPE_ZONES = [
+  {
+    id: 'zone-1',
+    label: 'Zone 1 — East of 8th Avenue',
+    amount: '$8,000',
+    formValue: 'Zone 1 — East of 8th Avenue ($8,000)',
+  },
+  {
+    id: 'zone-2',
+    label: 'Zone 2 — Between 8th & 14th Avenues',
+    amount: '$6,000',
+    formValue: 'Zone 2 — Between 8th & 14th Avenues ($6,000)',
+  },
+  {
+    id: 'zone-3',
+    label: 'Zone 3 — West of 14th Avenue (to 23rd)',
+    amount: '$4,000',
+    formValue: 'Zone 3 — West of 14th Avenue ($4,000)',
+  },
+  {
+    id: 'zone-4',
+    label: 'Zone 4 — Outlying eligible areas',
+    amount: '$2,500',
+    formValue: 'Zone 4 — Outlying eligible areas ($2,500)',
+  },
+  {
+    id: 'unsure',
+    label: 'Not sure yet — east of 35th Avenue in Greeley',
+    amount: '',
+    formValue: 'Not sure yet — east of 35th Avenue in Greeley',
+  },
 ];
 
 export default function GHopeLeadForm({ compact = false, sourcePage = '/greeley-g-hope-down-payment-assistance/' }) {
@@ -64,7 +89,9 @@ export default function GHopeLeadForm({ compact = false, sourcePage = '/greeley-
       <div className="bg-green-50 border border-green-200 rounded-lg p-6 sm:p-8 text-center">
         <p className="text-green-800 text-lg font-semibold">{submitStatus.message}</p>
         <p className="text-green-700 mt-2 text-sm">
-          Final G-HOPE eligibility is determined by the City of Greeley Housing Solutions team. We can help you find qualifying homes and navigate the purchase alongside your lender.
+          Final G-HOPE eligibility is determined by the City of Greeley Housing Solutions team at{' '}
+          <a href="mailto:housinginfo@greeleygov.com" className="underline">housinginfo@greeleygov.com</a>.
+          We can help you find qualifying homes and navigate the purchase alongside your lender.
         </p>
       </div>
     );
@@ -85,7 +112,7 @@ export default function GHopeLeadForm({ compact = false, sourcePage = '/greeley-
       </h3>
       {!compact && (
         <p className="text-gray-600 mb-6">
-          Work full-time for a Greeley-area employer? Tell us about your goals. Adam and Mandi Schwartz help employees navigate Greeley purchases and down payment programs.
+          Work full-time for a Greeley-area employer? Tell us your target zone and timeline. Adam and Mandi Schwartz help employees find qualifying homes and coordinate with lenders.
         </p>
       )}
 
@@ -124,7 +151,7 @@ export default function GHopeLeadForm({ compact = false, sourcePage = '/greeley-
           id="ghope-employerName"
           name="employerName"
           required
-          placeholder="e.g. City of Greeley, UNC, local business in Greeley"
+          placeholder="e.g. City of Greeley, UNC, North Colorado Medical Center"
           value={formData.employerName}
           onChange={handleChange}
           className={inputClass}
@@ -132,11 +159,11 @@ export default function GHopeLeadForm({ compact = false, sourcePage = '/greeley-
       </div>
 
       <div className="mb-4">
-        <label htmlFor="ghope-targetZone" className={labelClass}>Target purchase area in Greeley</label>
+        <label htmlFor="ghope-targetZone" className={labelClass}>Target G-HOPE zone</label>
         <select id="ghope-targetZone" name="targetZone" value={formData.targetZone} onChange={handleChange} className={inputClass}>
           <option value="">Select a zone (if known)</option>
-          {targetZones.map((zone) => (
-            <option key={zone} value={zone}>{zone}</option>
+          {GHOPE_ZONES.map((zone) => (
+            <option key={zone.id} value={zone.formValue}>{zone.formValue}</option>
           ))}
         </select>
       </div>
@@ -158,7 +185,7 @@ export default function GHopeLeadForm({ compact = false, sourcePage = '/greeley-
           id="ghope-message"
           name="message"
           rows="3"
-          placeholder="Tell us about neighborhoods you are considering in Greeley..."
+          placeholder="Which Greeley neighborhoods or streets are you considering?"
           value={formData.message}
           onChange={handleChange}
           className={inputClass}
