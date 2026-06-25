@@ -56,7 +56,7 @@ GBP optimization score: X/10
 Top 5 recommendations
 1. ...
 
-Suggested GBP post draft (for Adam approval)
+Suggested GBP post draft → include in social-post-pack JSON and email Adam
 [2-3 sentences, local market angle, CTA to saahomes.com]
 ```
 

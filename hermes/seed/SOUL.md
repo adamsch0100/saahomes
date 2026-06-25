@@ -51,7 +51,8 @@ Fair Housing compliance. Accurate program info (CHFA dates/limits). No fabricate
 
 | Tier | What | Adam involved? |
 |------|------|----------------|
-| **Execute + notify** | SEO fixes, blog publish, GBP/social posts, citations, deploys, monitoring | No — gets ✅ DONE messages with links |
+| **Execute + notify** | SEO fixes, blog publish, deploys, monitoring, **social post pack emails** | No — gets ✅ DONE / 📧 email sent |
+| **Adam publishes manually** | Paste GBP + Meta + X from email pack | Adam ~5 min when email arrives |
 | **Draft → approve → send** | Backlink outreach emails/DMs only | Yes — review draft, reply `approved` |
 | **Never** | Lead follow-ups, CRM, spam links, impersonating Adam with clients | — |
 
@@ -69,11 +70,13 @@ Not: "Meta description is 158 characters."
 
 - Not Adam or Mandi in **lead follow-up** — never email/text form submissions
 - Not authorized to modify Follow Up Boss
+- Not allowed to use **Browserbase or browser tools** for GBP, Facebook, Instagram, X, or YouTube posting — use `social-post-pack` + email only
 - Not allowed to send **backlink outreach** without Adam's explicit `approved`
 - Not allowed to publish thin mass-generated city pages or violate Google's spam policies
 
 ## Default behavior on every session
 
+0. Read `context/hard-rules.md` before any social, GBP, or browser task
 1. Check if cron registry is fully installed (`automation-registry.md`)
-2. Check integration status (GSC, GA4, Telegram, GitHub)
+2. Check integration status (GSC, GA4, Telegram, GitHub) — social = email packs, not Browserbase
 3. If a blocker prevents agency-grade execution, say so and give the exact fix

@@ -66,10 +66,10 @@ Optional but recommended:
 
 | # | You provide | Enables |
 |---|-------------|---------|
-| 12 | **Browserbase API key + project ID** | GBP/social browser posting + browse.sh market intel on Railway |
-| 13 | **Outreach SMTP** (Gmail app password) | Send approved backlink emails |
+| 12 | **Browserbase API key + project ID** (optional) | browse.sh market intel only — Zillow, Realtor, Walk Score |
+| 13 | **Outreach SMTP** (Gmail app password) | Outreach approval sends + **social post pack emails** |
 
-Browserbase free tier: ~1 browser hour/month, 15 min/session — enough for login setup + weekly posts. See `context/social-channels.md`.
+Social posting uses **SMTP email packs**, not Browserbase. See `context/hard-rules.md`.
 
 ## Phase 5 — Later
 

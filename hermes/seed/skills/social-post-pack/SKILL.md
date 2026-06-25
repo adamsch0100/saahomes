@@ -109,7 +109,7 @@ Reply "posted" on Telegram when live (optional).
 ---
 
 ## On failure
-- If SMTP missing → Telegram error + save JSON to `outreach/pending/` with POST REVIEW text fallback
+- If SMTP missing → Telegram error + save JSON to `outreach/pending/` with caption text for manual forward
 - If image download fails → still send email with URL links in HTML body
 
 ---

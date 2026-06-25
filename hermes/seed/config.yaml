@@ -44,6 +44,8 @@ cron:
 browser:
   cloud_provider: browserbase
   inactivity_timeout: 300
+  # Policy: Browserbase for browse.sh market intel ONLY — never GBP/Meta/social posting.
+  # Social: social-post-pack skill + send-social-post-pack.py → see context/hard-rules.md
 
 tools:
   toolsets:
