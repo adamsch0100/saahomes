@@ -45,9 +45,22 @@ append_env() {
   printf '%s=%s\n' "$key" "$value" >> "$ENV_FILE"
 }
 
-append_env "OPENCODE_GO_API_KEY" "${OPENCODE_GO_API_KEY:-}"
-append_env "TELEGRAM_BOT_TOKEN" "${TELEGRAM_BOT_TOKEN:-}"
-append_env "TELEGRAM_ALLOWED_USERS" "${TELEGRAM_ALLOWED_USERS:-}"
+upsert_env() {
+  key="$1"
+  value="$2"
+  if [ -z "$value" ]; then
+    return 0
+  fi
+  if grep -q "^${key}=" "$ENV_FILE" 2>/dev/null; then
+    sed -i "s|^${key}=.*|${key}=${value}|" "$ENV_FILE"
+  else
+    printf '%s=%s\n' "$key" "$value" >> "$ENV_FILE"
+  fi
+}
+
+upsert_env "OPENCODE_GO_API_KEY" "${OPENCODE_GO_API_KEY:-}"
+upsert_env "TELEGRAM_BOT_TOKEN" "${TELEGRAM_BOT_TOKEN:-}"
+upsert_env "TELEGRAM_ALLOWED_USERS" "${TELEGRAM_ALLOWED_USERS:-}"
 append_env "API_SERVER_KEY" "${API_SERVER_KEY:-}"
 append_env "API_SERVER_ENABLED" "${API_SERVER_ENABLED:-true}"
 append_env "API_SERVER_HOST" "${API_SERVER_HOST:-0.0.0.0}"
@@ -65,3 +78,9 @@ append_env "GITHUB_REPO" "${GITHUB_REPO:-adamsch0100/saahomes}"
 append_env "GA4_PROPERTY_ID" "${GA4_PROPERTY_ID:-G-CB5GL0P3EZ}"
 append_env "OUTREACH_APPROVAL_REQUIRED" "${OUTREACH_APPROVAL_REQUIRED:-true}"
 append_env "AUTO_MERGE_SEO_PRS" "${AUTO_MERGE_SEO_PRS:-true}"
+
+# Volume seeded on first boot may predate platforms.telegram in config.yaml.
+export HERMES_HOME="$DATA_DIR"
+if command -v hermes >/dev/null 2>&1; then
+  hermes config set platforms.telegram.enabled true 2>/dev/null || true
+fi
