@@ -1,6 +1,7 @@
 import React from 'react';
 import SEO from './SEO.jsx';
 import { buildAreaPageSchemas, getAreaExactTitle, getAreaKeywords, getAreaPageUrl, getAreaSeo } from '../data/areaSeo.js';
+import { getShareMetaForPath } from '../data/siteRoutes.js';
 
 export default function AreaSEO({ slug }) {
   const area = getAreaSeo(slug);
@@ -9,6 +10,7 @@ export default function AreaSEO({ slug }) {
 
   const pageUrl = getAreaPageUrl(slug);
   const imageUrl = area.heroImage.startsWith('http') ? area.heroImage : `https://saahomes.com${area.heroImage}`;
+  const shareMeta = getShareMetaForPath(pageUrl);
 
   return (
     <SEO
@@ -16,9 +18,10 @@ export default function AreaSEO({ slug }) {
       description={area.description}
       keywords={getAreaKeywords(area)}
       canonical={pageUrl}
-      ogTitle={`${area.city} Real Estate | Schwartz and Associates`}
-      ogDescription={area.description}
-      ogImage={imageUrl}
+      ogTitle={shareMeta?.ogTitle || `${area.city} Real Estate | Schwartz and Associates`}
+      ogDescription={shareMeta?.ogDescription || area.description}
+      ogImage={shareMeta?.ogImage || imageUrl}
+      ogImageAlt={shareMeta?.ogImageAlt || `${area.city}, Colorado real estate guide`}
       ogUrl={pageUrl}
       jsonLd={buildAreaPageSchemas(area)}
     />

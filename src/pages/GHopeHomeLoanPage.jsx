@@ -178,7 +178,10 @@ export default function GHopeHomeLoanPage() {
         description="Complete G-HOPE guide for Greeley employees: zone map with $8K, $6K, $4K & $2,500 incentives east of 35th Avenue. No income limits, no first-time buyer requirement. Free consultation from Schwartz and Associates."
         keywords="G-HOPE Greeley, G-HOPE zone map, Greeley down payment assistance, Greeley employee homebuyer program, Zone 1 8th Avenue Greeley, UNC employee home buying, Greeley Housing Solutions, City of Greeley G-HOPE, Weld County down payment help"
         canonical={PAGE_URL}
+        ogTitle="G-HOPE Greeley | Up to $8,000 Down Payment Help"
+        ogDescription="City of Greeley employee program with zone map. $8K–$2.5K forgivable down payment loans east of 35th Ave. No income limits."
         ogImage={`https://saahomes.com${ZONE_MAP}`}
+        ogImageAlt="G-HOPE geographic zone map — Greeley, Colorado down payment assistance"
         ogUrl={PAGE_URL}
         includeLocalBusiness={true}
         jsonLd={[

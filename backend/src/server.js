@@ -52,7 +52,31 @@ app.get('/health', (req, res) => {
 app.use('/api', apiRoutes);
 app.use('/api/admin', adminRoutes);
 
+const canonicalRedirects = {
+  '/g-hope-greeley': '/greeley-g-hope-down-payment-assistance/',
+  '/chfa-dpa': '/chfa-down-payment-assistance/',
+  '/colorado-chfa-down-payment-assistance': '/chfa-down-payment-assistance/',
+  '/champions-home-loan': '/colorado-champions-home-loan-program/',
+  '/chfa': '/chfa-schools-to-home/',
+  '/buyers': '/for-buyers/',
+  '/sellers': '/for-sellers/',
+  '/featured-areas': '/northern-colorado-areas/',
+  '/helpful-guides': '/blog/',
+  '/home-valuation': '/for-sellers/',
+  '/whats-my-home-worth': '/for-sellers/',
+};
+
 if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
+  app.use((req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    const key = req.path.replace(/\/$/, '') || '/';
+    const target = canonicalRedirects[key];
+    if (target) {
+      return res.redirect(301, target);
+    }
+    return next();
+  });
+
   app.use(express.static(distPath, { index: false }));
 
   app.get('*', (req, res, next) => {
