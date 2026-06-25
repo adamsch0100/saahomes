@@ -1,0 +1,22 @@
+# Deploy as a SECOND Railway service in the same project as saahomes.com.
+# Root directory: hermes
+# Mount a Railway Volume at /opt/data (required for memory, skills, cron jobs).
+#
+# Public port: 9119 (dashboard). Gateway API runs on 8642 inside the container.
+
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10
+numReplicas = 1
+
+[deploy.healthcheck]
+path = "/"
+timeout = 180
+
+[deploy.public]
+# Set in Railway dashboard: Networking → Public → Port 9119
+# HERMES_DASHBOARD_PORT=9119 must match

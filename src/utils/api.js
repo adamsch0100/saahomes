@@ -1,3 +1,5 @@
+import { trackLeadConversion } from './analytics.js';
+
 const API_BASE_URL = (() => {
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL.replace(/\/$/, '');
@@ -10,6 +12,16 @@ const API_BASE_URL = (() => {
   }
   return 'https://saahomes.com';
 })();
+
+function trackSuccessfulLead(leadType, formData) {
+  trackLeadConversion(leadType, {
+    sourcePage: formData?.sourcePage,
+    landingPage: formData?.landingPage,
+    utmSource: formData?.utmSource,
+    utmMedium: formData?.utmMedium,
+    utmCampaign: formData?.utmCampaign,
+  });
+}
 
 export const apiRequest = async (endpoint, options = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
@@ -50,38 +62,48 @@ export const apiRequest = async (endpoint, options = {}) => {
 };
 
 export const submitContactForm = async (formData) => {
-  return apiRequest('/api/contact', {
+  const result = await apiRequest('/api/contact', {
     method: 'POST',
     body: JSON.stringify(formData),
   });
+  trackSuccessfulLead('contact', formData);
+  return result;
 };
 
 export const submitMarketReportForm = async (formData) => {
-  return apiRequest('/api/market-report', {
+  const result = await apiRequest('/api/market-report', {
     method: 'POST',
     body: JSON.stringify(formData),
   });
+  trackSuccessfulLead('market_report', formData);
+  return result;
 };
 
 export const submitChfaLeadForm = async (formData) => {
-  return apiRequest('/api/chfa-lead', {
+  const result = await apiRequest('/api/chfa-lead', {
     method: 'POST',
     body: JSON.stringify(formData),
   });
+  trackSuccessfulLead('chfa_schools_to_home', formData);
+  return result;
 };
 
 export const submitChampionsLeadForm = async (formData) => {
-  return apiRequest('/api/champions-lead', {
+  const result = await apiRequest('/api/champions-lead', {
     method: 'POST',
     body: JSON.stringify(formData),
   });
+  trackSuccessfulLead('champions_home_loan', formData);
+  return result;
 };
 
 export const submitChfaDpaLeadForm = async (formData) => {
-  return apiRequest('/api/chfa-dpa-lead', {
+  const result = await apiRequest('/api/chfa-dpa-lead', {
     method: 'POST',
     body: JSON.stringify(formData),
   });
+  trackSuccessfulLead('chfa_dpa', formData);
+  return result;
 };
 
 export const adminLogin = async (email, password) => {
