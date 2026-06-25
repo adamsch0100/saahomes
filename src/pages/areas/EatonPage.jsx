@@ -244,6 +244,9 @@ export default function EatonPage() {
           </div>
         </div>
       </section>
+
+      <AreaFAQSection faqs={AREA_FAQS['eaton']} city="Eaton" />
+
     </>
   );
 }

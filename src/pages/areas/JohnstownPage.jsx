@@ -244,6 +244,9 @@ export default function JohnstownPage() {
           </div>
         </div>
       </section>
+
+      <AreaFAQSection faqs={AREA_FAQS['johnstown']} city="Johnstown" />
+
     </>
   );
 }

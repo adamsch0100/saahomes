@@ -244,6 +244,9 @@ export default function LaSallePage() {
           </div>
         </div>
       </section>
+
+      <AreaFAQSection faqs={AREA_FAQS['la-salle']} city="La Salle" />
+
     </>
   );
 }

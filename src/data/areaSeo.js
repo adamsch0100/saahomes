@@ -1,4 +1,5 @@
 import { BUSINESS, SITE_URL } from '../utils/seoConstants.js';
+import { AREA_FAQS } from './areaFaqs.js';
 
 export const areaSeoPages = [
   {
@@ -331,7 +332,7 @@ export function buildAreaPageSchemas(area) {
   const pageUrl = getAreaPageUrl(area.slug);
   const imageUrl = area.heroImage.startsWith('http') ? area.heroImage : `${SITE_URL}${area.heroImage}`;
 
-  return [
+  const schemas = [
     {
       '@context': 'https://schema.org',
       '@type': 'WebPage',
@@ -392,4 +393,23 @@ export function buildAreaPageSchemas(area) {
       },
     },
   ];
+
+  // Add FAQPage schema if area has FAQ data
+  const areaFaqs = AREA_FAQS[area.slug];
+  if (areaFaqs && areaFaqs.length > 0) {
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: areaFaqs.map((faq) => ({
+        '@type': 'Question',
+        name: faq.q,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: faq.a,
+        },
+      })),
+    });
+  }
+
+  return schemas;
 }
