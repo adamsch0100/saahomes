@@ -18,7 +18,21 @@ What Adam provides → what gets enabled → order of operations.
 - Root directory: `hermes`
 - Add **Volume** mounted at `/opt/data`
 - Public port: **9119** (dashboard)
-- Env vars from `hermes/.env.example` (minimum: rows 1–2 above + `API_SERVER_KEY` random string)
+- Env vars from `hermes/.env.example` (minimum: OpenCode key, Telegram, `API_SERVER_KEY`, and **dashboard login** vars below)
+
+**Dashboard login (required for the public URL to work):**
+Hermes binds the dashboard to `0.0.0.0` on Railway. Without username/password auth, the dashboard **refuses to start** and the URL shows "Application failed to respond."
+
+```
+HERMES_DASHBOARD=1
+HERMES_DASHBOARD_HOST=0.0.0.0
+HERMES_DASHBOARD_PORT=9119
+HERMES_DASHBOARD_BASIC_AUTH_USERNAME=admin
+HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=<strong password>
+HERMES_DASHBOARD_BASIC_AUTH_SECRET=<openssl rand -base64 32>
+```
+
+Networking → Public → port **9119** (not Railway's default `$PORT`).
 
 ---
 

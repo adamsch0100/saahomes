@@ -35,6 +35,10 @@ security:
 gateway:
   working_directory: /opt/data/workspace/saahomes
 
+platforms:
+  telegram:
+    enabled: true
+
 cron:
   enabled: true
 
