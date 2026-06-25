@@ -73,11 +73,36 @@ append_env "HERMES_DASHBOARD_BASIC_AUTH_USERNAME" "${HERMES_DASHBOARD_BASIC_AUTH
 append_env "HERMES_DASHBOARD_BASIC_AUTH_PASSWORD" "${HERMES_DASHBOARD_BASIC_AUTH_PASSWORD:-}"
 append_env "HERMES_DASHBOARD_BASIC_AUTH_SECRET" "${HERMES_DASHBOARD_BASIC_AUTH_SECRET:-}"
 append_env "SERPAPI_API_KEY" "${SERPAPI_API_KEY:-}"
-append_env "GITHUB_TOKEN" "${GITHUB_TOKEN:-}"
-append_env "GITHUB_REPO" "${GITHUB_REPO:-adamsch0100/saahomes}"
+upsert_env "GITHUB_TOKEN" "${GITHUB_TOKEN:-}"
+upsert_env "GITHUB_REPO" "${GITHUB_REPO:-adamsch0100/saahomes}"
+if [ -n "${GITHUB_TOKEN:-}" ]; then
+  upsert_env "GH_TOKEN" "${GITHUB_TOKEN}"
+fi
+upsert_env "RAILWAY_TOKEN" "${RAILWAY_TOKEN:-}"
+upsert_env "RAILWAY_SERVICE_ID" "${RAILWAY_SERVICE_ID:-}"
 append_env "GA4_PROPERTY_ID" "${GA4_PROPERTY_ID:-G-CB5GL0P3EZ}"
 append_env "OUTREACH_APPROVAL_REQUIRED" "${OUTREACH_APPROVAL_REQUIRED:-true}"
 append_env "AUTO_MERGE_SEO_PRS" "${AUTO_MERGE_SEO_PRS:-true}"
+
+# Hermes agent reads git credentials from /opt/data/.env — sync from Railway on every boot.
+if [ -n "${GITHUB_TOKEN:-}" ] && [ ! -d "$WORKSPACE_DIR/.git" ]; then
+  REPO="${GITHUB_REPO:-adamsch0100/saahomes}"
+  echo "Cloning github.com/${REPO} for autonomous SEO work"
+  CLONE_TMP="$(mktemp -d)"
+  git clone --depth 1 "https://x-access-token:${GITHUB_TOKEN}@github.com/${REPO}.git" "$CLONE_TMP"
+  if [ -d "$WORKSPACE_DIR/context" ]; then
+    mkdir -p "$CLONE_TMP/context"
+    cp -R "$WORKSPACE_DIR/context/." "$CLONE_TMP/context/"
+  fi
+  rm -rf "$WORKSPACE_DIR"
+  mv "$CLONE_TMP" "$WORKSPACE_DIR"
+  mkdir -p "$WORKSPACE_DIR/context"
+  if [ -d "$SEED_DIR/workspace/saahomes/context" ]; then
+    cp -R "$SEED_DIR/workspace/saahomes/context/." "$WORKSPACE_DIR/context/"
+  fi
+  git -C "$WORKSPACE_DIR" config user.email "hermes@saahomes.com"
+  git -C "$WORKSPACE_DIR" config user.name "SAA Homes Hermes"
+fi
 
 # Volume seeded on first boot may predate gateway.platforms.telegram in config.yaml.
 export HERMES_HOME="$DATA_DIR"
