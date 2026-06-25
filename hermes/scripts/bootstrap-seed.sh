@@ -99,6 +99,13 @@ elif [ -n "${GSC_SERVICE_ACCOUNT_JSON:-}" ]; then
   chmod 600 "$GSC_KEY_FILE"
 fi
 
+# Bootstrap and manual Console uploads run as root; gateway runs as hermes.
+if [ -f "$GSC_KEY_FILE" ] && id hermes >/dev/null 2>&1; then
+  chown hermes:hermes "$CREDENTIALS_DIR" "$GSC_KEY_FILE"
+  chmod 700 "$CREDENTIALS_DIR"
+  chmod 600 "$GSC_KEY_FILE"
+fi
+
 # Hermes agent reads git credentials from /opt/data/.env — sync from Railway on every boot.
 if [ -n "${GITHUB_TOKEN:-}" ] && [ ! -d "$WORKSPACE_DIR/.git" ]; then
   REPO="${GITHUB_REPO:-adamsch0100/saahomes}"
