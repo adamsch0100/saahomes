@@ -96,7 +96,7 @@ Reply "posted" when live (optional).
 
 - Voice: Adam & Mandi — local Northern Colorado experts, warm and professional
 - CHFA/program pages: current year + official source links
-- Blog: 2–4 posts/month from blog-pipeline calendar — **publish without asking**
+- Blog posts from content calendar (`content-calendar.md`) — **publish without asking**
 - Fair Housing always; never guarantee outcomes
 
 ---

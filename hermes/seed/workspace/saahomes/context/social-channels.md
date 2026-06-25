@@ -15,9 +15,11 @@ Use skill: **`social-post-pack`** · script: `send-social-post-pack.py`
 | **Facebook** | facebook.com/schwartzandassociateshomes | P0 | Meta Business Suite |
 | **Instagram** | @saa_homes | P0 | Meta Business Suite (same post as FB) |
 | **YouTube** | @SAAHomes | P1 | Studio — description/tags only; no new videos |
-| **X** | @saahomes | P2 | x.com — optional |
+| **X** | @saahomes | P0 | x.com — every post pack |
 
-Post on **GBP + Facebook + Instagram** every cycle. YouTube + X when relevant.
+Post on **GBP + Facebook + Instagram + X** every pack. YouTube description when related video exists.
+
+**Strategy:** `context/content-calendar.md`
 
 ---
 
@@ -38,11 +40,14 @@ Never AI-fake listing photos. Fair Housing safe copy only.
 
 ## Post triggers
 
-1. New blog live → GBP + FB + IG (+ YouTube/X if relevant)
-2. New/updated area page → GBP + FB + IG
-3. CHFA/program updates → GBP + FB (seasonal)
-4. Weekly market tip → GBP + FB text post
-5. YouTube: include description/tag block in email when related @SAAHomes video exists
+See **`content-calendar.md`** for pillars, Wed rotation, holidays.
+
+1. New blog live → email pack same week
+2. New/updated area page → email pack
+3. **Every Wednesday** → weekly rotation (market / tip / community / seasonal)
+4. **Monthly market blog** (3rd of month) → email pack
+5. CHFA/program + holidays → seasonal packs
+6. YouTube description block when related @SAAHomes video exists
 
 ---
 

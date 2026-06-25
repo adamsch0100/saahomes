@@ -188,12 +188,22 @@ Prompt: Quarterly market dominance review vs market-dominance-strategy.md succes
 
 ---
 
-### 18. `social-crosspost`
+### 18. `social-weekly-content`
 ```
 Schedule: 0 10 * * 3  (Wed 10:00 AM MT)
+Skills: social-post-pack
 Model: deepseek-v4-flash
 Provider: opencode-go
-Prompt: Read context/social-channels.md. If new blog/area content shipped this week, draft GBP + Facebook + Instagram posts (reuse site hero images). Build JSON pack, run send-social-post-pack.py, Telegram Adam. Log in MEMORY.
+Prompt: Read context/content-calendar.md and context/social-channels.md. Follow Wednesday rotation (market pulse / tip / community / seasonal). If new blog or area page shipped this week, prioritize that in the pack. Always email Adam via send-social-post-pack.py (GBP + FB + IG + X). Update MEMORY ## Content calendar state. Never use Browserbase for social.
+```
+
+### 19. `monthly-market-blog`
+```
+Schedule: 0 9 3 * *  (3rd of month, 9:00 AM MT)
+Skills: blog-pipeline, autonomous-execute, social-post-pack
+Model: kimi-k2.6
+Provider: opencode-go
+Prompt: Read context/content-calendar.md. Publish Northern Colorado Market Update blog for current month (if not already live). Ship via PR/deploy. Email social-post-pack same day. Log monthly_market_blog_url in MEMORY.
 ```
 
 ---
@@ -205,6 +215,6 @@ After creating all jobs, run:
 /cron list
 ```
 
-Confirm **19 jobs** active. Log completion in MEMORY.md under "Automation installed: [date]".
+Confirm **20 jobs** active. Log completion in MEMORY.md under "Automation installed: [date]".
 
 If GSC/GA4 not yet connected, jobs still run public-only checks and note missing integrations in every report.
