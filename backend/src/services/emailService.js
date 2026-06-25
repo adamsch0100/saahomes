@@ -220,3 +220,49 @@ Submitted at: ${new Date().toLocaleString()}
   }
 };
 
+export const sendGhopeLeadNotification = async (submission) => {
+  const {
+    first_name, last_name, email, phone, employer_name, target_zone, buying_timeline, message,
+  } = submission;
+
+  const mailOptions = {
+    from: `"SAA Homes Website" <${ADMIN_EMAIL}>`,
+    to: ADMIN_EMAIL,
+    subject: `New G-HOPE Greeley Lead - ${first_name} ${last_name}`,
+    html: `
+      <h2>New G-HOPE Greeley Lead</h2>
+      <p><strong>Name:</strong> ${first_name} ${last_name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
+      ${employer_name ? `<p><strong>Employer:</strong> ${employer_name}</p>` : ''}
+      ${target_zone ? `<p><strong>Target Zone:</strong> ${target_zone}</p>` : ''}
+      ${buying_timeline ? `<p><strong>Buying Timeline:</strong> ${buying_timeline}</p>` : ''}
+      ${message ? `<p><strong>Message:</strong><br>${message.replace(/\n/g, '<br>')}</p>` : ''}
+      <hr>
+      <p><small>Submitted at: ${new Date().toLocaleString()}</small></p>
+    `,
+    text: `
+New G-HOPE Greeley Lead
+
+Name: ${first_name} ${last_name}
+Email: ${email}
+${phone ? `Phone: ${phone}` : ''}
+${employer_name ? `Employer: ${employer_name}` : ''}
+${target_zone ? `Target Zone: ${target_zone}` : ''}
+${buying_timeline ? `Buying Timeline: ${buying_timeline}` : ''}
+${message ? `Message:\n${message}` : ''}
+
+Submitted at: ${new Date().toLocaleString()}
+    `.trim(),
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    logger.info('G-HOPE lead notification email sent', { messageId: info.messageId });
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    logger.error('Failed to send G-HOPE lead notification email', error);
+    throw error;
+  }
+};
+

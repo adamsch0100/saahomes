@@ -22,6 +22,8 @@ export default function AreaGuidePage() {
   const whyChoose = area.whyChoose || [];
   const highlights = area.highlights || { neighborhoods: [], attractions: [] };
 
+  const isGreeleyArea = area.slug === 'greeley' || area.slug === 'evans';
+
   return (
     <>
       <AreaSEO slug={area.slug} />
@@ -112,6 +114,7 @@ export default function AreaGuidePage() {
           </h2>
           <p className="text-gray-800 mb-6">
             Many {area.city} buyers qualify for CHFA down payment assistance — grants and deferred loans up to $25,000.
+            {isGreeleyArea && " Greeley-area employees may also qualify for the city G-HOPE program (up to $8,000)."}
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link
@@ -120,6 +123,14 @@ export default function AreaGuidePage() {
             >
               Free CHFA Consultation
             </Link>
+            {isGreeleyArea && (
+              <Link
+                to="/greeley-g-hope-down-payment-assistance/#g-hope-lead-form"
+                className="inline-flex px-6 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+              >
+                G-HOPE for Greeley employees
+              </Link>
+            )}
             <Link to="/chfa-down-payment-assistance/" className="inline-flex px-6 py-3 font-semibold hover:underline">
               CHFA program guide →
             </Link>

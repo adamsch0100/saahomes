@@ -39,6 +39,8 @@ const breadcrumbMap = {
   "chfa-down-payment-assistance": "CHFA Down Payment Assistance",
   "colorado-chfa-down-payment-assistance": "CHFA Down Payment Assistance",
   "chfa-dpa": "CHFA Down Payment Assistance",
+  "greeley-g-hope-down-payment-assistance": "G-HOPE Greeley Down Payment Assistance",
+  "g-hope-greeley": "G-HOPE Greeley Down Payment Assistance",
   properties: "Homes for Sale in Colorado",
   buyers: "Colorado Home Buyers",
   sellers: "Sell Your Northern Colorado Home",
@@ -79,6 +81,18 @@ const customTrails = {
     { path: "/", label: "Home" },
     { path: "/for-buyers/", label: "Colorado Home Buyers" },
     { path: "/chfa-down-payment-assistance/", label: "CHFA Down Payment Assistance" },
+  ],
+  "/greeley-g-hope-down-payment-assistance": [
+    { path: "/", label: "Home" },
+    { path: "/for-buyers/", label: "Colorado Home Buyers" },
+    { path: "/northern-colorado-areas/greeley/", label: "Greeley, CO" },
+    { path: "/greeley-g-hope-down-payment-assistance/", label: "G-HOPE Down Payment Assistance" },
+  ],
+  "/g-hope-greeley": [
+    { path: "/", label: "Home" },
+    { path: "/for-buyers/", label: "Colorado Home Buyers" },
+    { path: "/northern-colorado-areas/greeley/", label: "Greeley, CO" },
+    { path: "/greeley-g-hope-down-payment-assistance/", label: "G-HOPE Down Payment Assistance" },
   ],
   "/for-buyers": [
     { path: "/", label: "Home" },

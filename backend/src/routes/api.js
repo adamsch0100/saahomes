@@ -5,12 +5,14 @@ import { submitMarketReportForm } from '../controllers/marketReportController.js
 import { submitChfaLeadForm } from '../controllers/chfaLeadController.js';
 import { submitChampionsLeadForm } from '../controllers/championsLeadController.js';
 import { submitChfaDpaLeadForm } from '../controllers/chfaDpaLeadController.js';
+import { submitGhopeLeadForm } from '../controllers/ghopeLeadController.js';
 import {
   validateContactSubmission,
   validateMarketReportSubmission,
   validateChfaLeadSubmission,
   validateChampionsLeadSubmission,
   validateChfaDpaLeadSubmission,
+  validateGhopeLeadSubmission,
   handleValidationErrors,
 } from '../middleware/validation.js';
 
@@ -62,6 +64,14 @@ router.post(
   validateChfaDpaLeadSubmission,
   handleValidationErrors,
   submitChfaDpaLeadForm
+);
+
+router.post(
+  '/g-hope-lead',
+  formLimiter,
+  validateGhopeLeadSubmission,
+  handleValidationErrors,
+  submitGhopeLeadForm
 );
 
 export default router;

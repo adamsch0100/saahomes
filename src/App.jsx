@@ -31,6 +31,7 @@ import BlogPostPage from "./pages/BlogPostPage.jsx";
 import ChfaSchoolsToHomePage from "./pages/ChfaSchoolsToHomePage.jsx";
 import ChampionsHomeLoanPage from "./pages/ChampionsHomeLoanPage.jsx";
 import ChfaDownPaymentAssistancePage from "./pages/ChfaDownPaymentAssistancePage.jsx";
+import GHopeHomeLoanPage from "./pages/GHopeHomeLoanPage.jsx";
 import AreaGuidePage from "./pages/AreaGuidePage.jsx";
 import FloatingContactBar from "./components/FloatingContactBar.jsx";
 import { loadRealScoutScript } from "./utils/realscout.js";
@@ -154,6 +155,12 @@ export default function App() {
         <Route path="/colorado-chfa-down-payment-assistance/" element={<AppLayout><ChfaDownPaymentAssistancePage /></AppLayout>} />
         <Route path="/chfa-dpa" element={<AppLayout><ChfaDownPaymentAssistancePage /></AppLayout>} />
         <Route path="/chfa-dpa/" element={<AppLayout><ChfaDownPaymentAssistancePage /></AppLayout>} />
+
+        {/* G-HOPE Greeley Down Payment Assistance */}
+        <Route path="/greeley-g-hope-down-payment-assistance" element={<AppLayout><GHopeHomeLoanPage /></AppLayout>} />
+        <Route path="/greeley-g-hope-down-payment-assistance/" element={<AppLayout><GHopeHomeLoanPage /></AppLayout>} />
+        <Route path="/g-hope-greeley" element={<AppLayout><GHopeHomeLoanPage /></AppLayout>} />
+        <Route path="/g-hope-greeley/" element={<AppLayout><GHopeHomeLoanPage /></AppLayout>} />
 
         {/* CHFA Schools To Home */}
         <Route path="/chfa-schools-to-home" element={<AppLayout><ChfaSchoolsToHomePage /></AppLayout>} />

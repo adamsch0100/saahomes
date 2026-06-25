@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 const buyerProgramLinks = [
   { label: "CHFA Down Payment Assistance", to: "/chfa-down-payment-assistance/" },
+  { label: "G-HOPE Greeley (City Employees)", to: "/greeley-g-hope-down-payment-assistance/" },
   { label: "CHFA Schools To Home", to: "/chfa-schools-to-home/" },
   { label: "Champions Home Loan", to: "/colorado-champions-home-loan-program/" },
 ];
@@ -103,7 +104,7 @@ export default function Header() {
                     </Link>
                     <div className="my-1 border-t border-gray-800" />
                     <p className="px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
-                      CHFA Programs
+                      Buyer Programs
                     </p>
                     {buyerProgramLinks.map((item) => (
                       <Link
@@ -173,7 +174,7 @@ export default function Header() {
                   <Link onClick={closeMenu} to="/for-buyers/" className="block text-sm text-gray-300 hover:text-white transition-colors">
                     Buyer Overview
                   </Link>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 pt-1">CHFA Programs</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 pt-1">Buyer Programs</p>
                   {buyerProgramLinks.map((item) => (
                     <Link
                       key={item.to}

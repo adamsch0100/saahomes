@@ -106,6 +106,15 @@ export const submitChfaDpaLeadForm = async (formData) => {
   return result;
 };
 
+export const submitGhopeLeadForm = async (formData) => {
+  const result = await apiRequest('/api/g-hope-lead', {
+    method: 'POST',
+    body: JSON.stringify(formData),
+  });
+  trackSuccessfulLead('g_hope_greeley', formData);
+  return result;
+};
+
 export const adminLogin = async (email, password) => {
   return apiRequest('/api/admin/login', {
     method: 'POST',
