@@ -18,6 +18,14 @@ export default function ForBuyersPage() {
         <div className="relative z-10 text-center text-white px-6">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-serif">For Buyers</h1>
           <p className="mt-4 text-xl sm:text-2xl font-sans">Your Guide to Finding the Perfect Home in Northern Colorado</p>
+          <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/properties/" className="inline-flex items-center justify-center px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+              Search Homes
+            </a>
+            <a href="/contact/" className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
+              Get Free Buyer Consultation
+            </a>
+          </div>
         </div>
       </section>
 
@@ -197,8 +205,11 @@ export default function ForBuyersPage() {
             <div className="order-1 md:order-2" style={{backgroundColor: '#CFB36E'}}>
               <div className="p-8 md:p-12 text-center md:text-left">
                 <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4 text-gray-900">Get Pre-Approved</h2>
-                <p className="text-lg text-gray-800 mb-8">
+                <p className="text-lg text-gray-800 mb-4">
                   Getting pre-approved for a mortgage is one of the first steps in your home buying journey. It shows sellers you're serious and helps you understand your budget. Connect with our trusted lending partners today.
+                </p>
+                <p className="text-gray-800 mb-6">
+                  Questions? Call us at <a href="tel:(970) 999-1407" className="font-bold hover:underline">(970) 999-1407</a>
                 </p>
                 <a href="/contact/" className="inline-block px-8 py-3 bg-gray-900 text-white font-semibold rounded hover:bg-gray-800 transition-colors">
                   Apply Now
