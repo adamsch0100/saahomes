@@ -1,0 +1,233 @@
+{
+  "date": "2026-06-26",
+  "gsc_period": {
+    "start": "2026-06-18",
+    "end": "2026-06-24"
+  },
+  "total_urls": 15,
+  "ok": 15,
+  "problems": 0,
+  "results": [
+    {
+      "path": "/",
+      "url": "https://saahomes.com/",
+      "http_status": 200,
+      "http_error": null,
+      "meta_noindex": false,
+      "canonical": "https://saahomes.com/",
+      "canonical_mismatch": false,
+      "in_sitemap": true,
+      "gsc": {
+        "impressions": 17,
+        "clicks": 1,
+        "position": 9.352941176470589,
+        "ctr": 0.058823529411764705
+      },
+      "issues": [],
+      "ok": true
+    },
+    {
+      "path": "/for-buyers/",
+      "url": "https://saahomes.com/for-buyers/",
+      "http_status": 200,
+      "http_error": null,
+      "meta_noindex": false,
+      "canonical": "https://saahomes.com/for-buyers/",
+      "canonical_mismatch": false,
+      "in_sitemap": true,
+      "gsc": null,
+      "issues": [],
+      "ok": true
+    },
+    {
+      "path": "/for-sellers/",
+      "url": "https://saahomes.com/for-sellers/",
+      "http_status": 200,
+      "http_error": null,
+      "meta_noindex": false,
+      "canonical": "https://saahomes.com/for-sellers/",
+      "canonical_mismatch": false,
+      "in_sitemap": true,
+      "gsc": {
+        "impressions": 1,
+        "clicks": 0,
+        "position": 63,
+        "ctr": 0
+      },
+      "issues": [],
+      "ok": true
+    },
+    {
+      "path": "/contact/",
+      "url": "https://saahomes.com/contact/",
+      "http_status": 200,
+      "http_error": null,
+      "meta_noindex": false,
+      "canonical": "https://saahomes.com/contact/",
+      "canonical_mismatch": false,
+      "in_sitemap": true,
+      "gsc": {
+        "impressions": 3,
+        "clicks": 0,
+        "position": 159,
+        "ctr": 0
+      },
+      "issues": [],
+      "ok": true
+    },
+    {
+      "path": "/properties/",
+      "url": "https://saahomes.com/properties/",
+      "http_status": 200,
+      "http_error": null,
+      "meta_noindex": false,
+      "canonical": "https://saahomes.com/properties/",
+      "canonical_mismatch": false,
+      "in_sitemap": true,
+      "gsc": null,
+      "issues": [],
+      "ok": true
+    },
+    {
+      "path": "/chfa-down-payment-assistance/",
+      "url": "https://saahomes.com/chfa-down-payment-assistance/",
+      "http_status": 200,
+      "http_error": null,
+      "meta_noindex": false,
+      "canonical": "https://saahomes.com/chfa-down-payment-assistance/",
+      "canonical_mismatch": false,
+      "in_sitemap": true,
+      "gsc": null,
+      "issues": [],
+      "ok": true
+    },
+    {
+      "path": "/chfa-schools-to-home/",
+      "url": "https://saahomes.com/chfa-schools-to-home/",
+      "http_status": 200,
+      "http_error": null,
+      "meta_noindex": false,
+      "canonical": "https://saahomes.com/chfa-schools-to-home/",
+      "canonical_mismatch": false,
+      "in_sitemap": true,
+      "gsc": null,
+      "issues": [],
+      "ok": true
+    },
+    {
+      "path": "/colorado-champions-home-loan-program/",
+      "url": "https://saahomes.com/colorado-champions-home-loan-program/",
+      "http_status": 200,
+      "http_error": null,
+      "meta_noindex": false,
+      "canonical": "https://saahomes.com/colorado-champions-home-loan-program/",
+      "canonical_mismatch": false,
+      "in_sitemap": true,
+      "gsc": null,
+      "issues": [],
+      "ok": true
+    },
+    {
+      "path": "/northern-colorado-areas/fort-collins/",
+      "url": "https://saahomes.com/northern-colorado-areas/fort-collins/",
+      "http_status": 200,
+      "http_error": null,
+      "meta_noindex": false,
+      "canonical": "https://saahomes.com/northern-colorado-areas/fort-collins/",
+      "canonical_mismatch": false,
+      "in_sitemap": true,
+      "gsc": null,
+      "issues": [],
+      "ok": true
+    },
+    {
+      "path": "/northern-colorado-areas/loveland/",
+      "url": "https://saahomes.com/northern-colorado-areas/loveland/",
+      "http_status": 200,
+      "http_error": null,
+      "meta_noindex": false,
+      "canonical": "https://saahomes.com/northern-colorado-areas/loveland/",
+      "canonical_mismatch": false,
+      "in_sitemap": true,
+      "gsc": {
+        "impressions": 60,
+        "clicks": 0,
+        "position": 42.733333333333334,
+        "ctr": 0
+      },
+      "issues": [],
+      "ok": true
+    },
+    {
+      "path": "/northern-colorado-areas/windsor/",
+      "url": "https://saahomes.com/northern-colorado-areas/windsor/",
+      "http_status": 200,
+      "http_error": null,
+      "meta_noindex": false,
+      "canonical": "https://saahomes.com/northern-colorado-areas/windsor/",
+      "canonical_mismatch": false,
+      "in_sitemap": true,
+      "gsc": {
+        "impressions": 63,
+        "clicks": 0,
+        "position": 30.11111111111111,
+        "ctr": 0
+      },
+      "issues": [],
+      "ok": true
+    },
+    {
+      "path": "/northern-colorado-areas/greeley/",
+      "url": "https://saahomes.com/northern-colorado-areas/greeley/",
+      "http_status": 200,
+      "http_error": null,
+      "meta_noindex": false,
+      "canonical": "https://saahomes.com/northern-colorado-areas/greeley/",
+      "canonical_mismatch": false,
+      "in_sitemap": true,
+      "gsc": null,
+      "issues": [],
+      "ok": true
+    },
+    {
+      "path": "/northern-colorado-areas/timnath/",
+      "url": "https://saahomes.com/northern-colorado-areas/timnath/",
+      "http_status": 200,
+      "http_error": null,
+      "meta_noindex": false,
+      "canonical": "https://saahomes.com/northern-colorado-areas/timnath/",
+      "canonical_mismatch": false,
+      "in_sitemap": true,
+      "gsc": null,
+      "issues": [],
+      "ok": true
+    },
+    {
+      "path": "/northern-colorado-areas/berthoud/",
+      "url": "https://saahomes.com/northern-colorado-areas/berthoud/",
+      "http_status": 200,
+      "http_error": null,
+      "meta_noindex": false,
+      "canonical": "https://saahomes.com/northern-colorado-areas/berthoud/",
+      "canonical_mismatch": false,
+      "in_sitemap": true,
+      "gsc": null,
+      "issues": [],
+      "ok": true
+    },
+    {
+      "path": "/northern-colorado-areas/severance/",
+      "url": "https://saahomes.com/northern-colorado-areas/severance/",
+      "http_status": 200,
+      "http_error": null,
+      "meta_noindex": false,
+      "canonical": "https://saahomes.com/northern-colorado-areas/severance/",
+      "canonical_mismatch": false,
+      "in_sitemap": true,
+      "gsc": null,
+      "issues": [],
+      "ok": true
+    }
+  ],
+  "has_issues": false
+}
