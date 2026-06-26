@@ -5,6 +5,7 @@ import { getPrerenderRoutes, SITE_URL } from '../src/data/siteRoutes.js';
 import { BUSINESS } from '../src/utils/seoConstants.js';
 import { areaSeoPages, buildAreaPageSchemas } from '../src/data/areaSeo.js';
 import { blogPosts } from '../src/data/blogPosts.js';
+import { AREA_FAQS } from '../src/data/areaFaqs.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const distDir = join(__dirname, '../dist');
@@ -198,7 +199,218 @@ function injectMetaTags(html, tags) {
 }
 
 // ---------------------------------------------------------------------------
-// Per-route schema & meta computation
+// Body content injection for crawlers (visible content in <div id="root">)
+// ---------------------------------------------------------------------------
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+const NEARBY_COMMUNITIES = {
+  'fort-collins': [
+    { name: 'Loveland', slug: 'loveland' },
+    { name: 'Timnath', slug: 'timnath' },
+    { name: 'Windsor', slug: 'windsor' },
+    { name: 'Wellington', slug: 'wellington' },
+  ],
+  'loveland': [
+    { name: 'Fort Collins', slug: 'fort-collins' },
+    { name: 'Berthoud', slug: 'berthoud' },
+    { name: 'Johnstown', slug: 'johnstown' },
+    { name: 'Windsor', slug: 'windsor' },
+  ],
+  'windsor': [
+    { name: 'Fort Collins', slug: 'fort-collins' },
+    { name: 'Severance', slug: 'severance' },
+    { name: 'Greeley', slug: 'greeley' },
+    { name: 'Loveland', slug: 'loveland' },
+  ],
+  'greeley': [
+    { name: 'Evans', slug: 'evans' },
+    { name: 'Windsor', slug: 'windsor' },
+    { name: 'Milliken', slug: 'milliken' },
+    { name: 'Eaton', slug: 'eaton' },
+  ],
+  'timnath': [
+    { name: 'Fort Collins', slug: 'fort-collins' },
+    { name: 'Severance', slug: 'severance' },
+    { name: 'Windsor', slug: 'windsor' },
+    { name: 'Wellington', slug: 'wellington' },
+  ],
+  'wellington': [
+    { name: 'Fort Collins', slug: 'fort-collins' },
+    { name: 'Timnath', slug: 'timnath' },
+    { name: 'Windsor', slug: 'windsor' },
+  ],
+  'johnstown': [
+    { name: 'Milliken', slug: 'milliken' },
+    { name: 'Loveland', slug: 'loveland' },
+    { name: 'Mead', slug: 'mead' },
+    { name: 'Berthoud', slug: 'berthoud' },
+  ],
+  'eaton': [
+    { name: 'Greeley', slug: 'greeley' },
+    { name: 'Windsor', slug: 'windsor' },
+    { name: 'Severance', slug: 'severance' },
+  ],
+  'milliken': [
+    { name: 'Johnstown', slug: 'johnstown' },
+    { name: 'Evans', slug: 'evans' },
+    { name: 'Greeley', slug: 'greeley' },
+    { name: 'La Salle', slug: 'la-salle' },
+  ],
+  'la-salle': [
+    { name: 'Evans', slug: 'evans' },
+    { name: 'Greeley', slug: 'greeley' },
+    { name: 'Milliken', slug: 'milliken' },
+  ],
+  'mead': [
+    { name: 'Longmont', slug: 'longmont' },
+    { name: 'Johnstown', slug: 'johnstown' },
+    { name: 'Firestone', slug: 'firestone' },
+    { name: 'Berthoud', slug: 'berthoud' },
+  ],
+  'longmont': [
+    { name: 'Mead', slug: 'mead' },
+    { name: 'Berthoud', slug: 'berthoud' },
+    { name: 'Niwot', slug: 'niwot' },
+    { name: 'Firestone', slug: 'firestone' },
+  ],
+  'boulder': [
+    { name: 'Niwot', slug: 'niwot' },
+    { name: 'Longmont', slug: 'longmont' },
+    { name: 'Berthoud', slug: 'berthoud' },
+  ],
+  'berthoud': [
+    { name: 'Longmont', slug: 'longmont' },
+    { name: 'Loveland', slug: 'loveland' },
+    { name: 'Mead', slug: 'mead' },
+    { name: 'Johnstown', slug: 'johnstown' },
+  ],
+  'firestone': [
+    { name: 'Frederick', slug: 'frederick' },
+    { name: 'Mead', slug: 'mead' },
+    { name: 'Longmont', slug: 'longmont' },
+  ],
+  'frederick': [
+    { name: 'Firestone', slug: 'firestone' },
+    { name: 'Longmont', slug: 'longmont' },
+    { name: 'Mead', slug: 'mead' },
+  ],
+  'evans': [
+    { name: 'Greeley', slug: 'greeley' },
+    { name: 'La Salle', slug: 'la-salle' },
+    { name: 'Milliken', slug: 'milliken' },
+    { name: 'Windsor', slug: 'windsor' },
+  ],
+  'severance': [
+    { name: 'Windsor', slug: 'windsor' },
+    { name: 'Fort Collins', slug: 'fort-collins' },
+    { name: 'Greeley', slug: 'greeley' },
+    { name: 'Timnath', slug: 'timnath' },
+  ],
+  'niwot': [
+    { name: 'Boulder', slug: 'boulder' },
+    { name: 'Longmont', slug: 'longmont' },
+  ],
+};
+
+function injectAreaBody(html, area) {
+  const city = escapeHtml(area.city);
+  const tagline = escapeHtml(area.tagline || '');
+  const county = escapeHtml(area.county || '');
+  const faqs = AREA_FAQS[area.slug] || [];
+  const nearby = NEARBY_COMMUNITIES[area.slug] || [];
+
+  // Build intro content
+  let introHtml = '';
+  if (area.introParagraphs && area.introParagraphs.length > 0) {
+    introHtml = area.introParagraphs
+      .map((p) => `      <p class="prerendered-intro">${escapeHtml(p)}</p>`)
+      .join('\n');
+  } else {
+    introHtml = `      <p class="prerendered-intro">${escapeHtml(area.description)}</p>`;
+  }
+
+  // Build FAQ section — complements FAQPage JSON-LD and provides visible content
+  let faqHtml = '';
+  if (faqs.length > 0) {
+    faqHtml =
+      `      <section class="prerendered-faq">\n` +
+      `        <h2>Frequently Asked Questions About ${city}, Colorado</h2>\n` +
+      faqs
+        .map(
+          (faq) =>
+            `        <div itemscope="" itemprop="mainEntity" itemtype="https://schema.org/Question">\n` +
+            `          <h3 itemprop="name">${escapeHtml(faq.q)}</h3>\n` +
+            `          <div itemscope="" itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">\n` +
+            `            <p itemprop="text">${escapeHtml(faq.a)}</p>\n` +
+            `          </div>\n` +
+            `        </div>`
+        )
+        .join('\n') +
+      `\n      </section>`;
+  }
+
+  // Build nearby communities cross-links
+  let nearbyHtml = '';
+  const validNearby = nearby.filter((c) => c.slug);
+  if (validNearby.length > 0) {
+    nearbyHtml =
+      `      <section class="prerendered-nearby">\n` +
+      `        <h2>Nearby Northern Colorado Communities</h2>\n` +
+      `        <p>Explore real estate in the ${city} area:</p>\n` +
+      `        <ul>\n` +
+      validNearby
+        .map(
+          (c) =>
+            `          <li><a href="${SITE_URL}/northern-colorado-areas/${c.slug}/">${escapeHtml(c.name)}, CO Real Estate</a></li>`
+        )
+        .join('\n') +
+      `\n        </ul>\n` +
+      `      </section>`;
+  }
+
+  // CTA with phone number
+  const ctaHtml =
+    `      <section class="prerendered-cta">\n` +
+    `        <h2>Work With Schwartz and Associates in ${city}</h2>\n` +
+    `        <p>Ready to buy or sell in ${city}? Contact SAA Homes today at <strong>(970) 999-1407</strong> or visit our office at 3665 John F Kennedy Parkway, Suite 210, Fort Collins, CO 80525. Let our local experts guide you through every step of your real estate journey in Northern Colorado.</p>\n` +
+    `        <p>Schwartz and Associates, Coldwell Banker Realty — serving home buyers and sellers across all 19 Northern Colorado communities including Fort Collins, Loveland, Windsor, Greeley, Timnath, Wellington, Johnstown, Eaton, Milliken, La Salle, Mead, Longmont, Boulder, Berthoud, Firestone, Frederick, Evans, Severance, and Niwot.</p>\n` +
+    `      </section>`;
+
+  const bodyContent =
+    `\n` +
+    `    <div class="prerendered-area-content">\n` +
+    `      <h1>${city}, Colorado Real Estate & Neighborhood Guide</h1>\n` +
+    `      ${tagline ? `<p class="prerendered-tagline"><strong>${tagline}</strong></p>\n` : ''}` +
+    `      ${county ? `<p class="prerendered-county">Serving ${county}</p>\n` : ''}` +
+    `${introHtml}\n` +
+    `${faqHtml}\n` +
+    `${nearbyHtml}\n` +
+    `${ctaHtml}\n` +
+    `    </div>\n  `;
+
+  // Inject into <div id="root"> — visible to crawlers that do not execute JS
+  return html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+}
+
+function injectGenericBody(html, { title }) {
+  const pageTitle = escapeHtml(title || '');
+  const bodyContent =
+    `\n` +
+    `    <div class="prerendered-generic-content">\n` +
+    `      <h1>${pageTitle}</h1>\n` +
+    `    </div>\n  `;
+  return html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+}
+
 // ---------------------------------------------------------------------------
 
 function buildRouteSchemas(route) {
@@ -347,6 +559,17 @@ for (const route of routes) {
   // 3. Inject OG / Twitter / meta tags
   const metaTags = buildRouteMetaTags(route);
   html = injectMetaTags(html, metaTags);
+
+  // 4. Inject visible body content into <div id="root"> for crawlers
+  const area = matchAreaPage(route.path);
+  if (area) {
+    html = injectAreaBody(html, area);
+    console.log(
+      `  Body: injected ${AREA_FAQS[area.slug]?.length || 0} FAQ items + nearby communities + CTA`
+    );
+  } else {
+    html = injectGenericBody(html, route);
+  }
 
   // Write out
   const routeDir = join(
