@@ -17,6 +17,14 @@ export default function FortCollinsPage() {
         <div className="relative z-10 text-center text-white px-6">
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">Fort Collins, CO</h1>
           <p className="mt-4 text-xl">A vibrant city with CSU, craft breweries, and stunning mountain views</p>
+          <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/properties/?location=Fort Collins, CO" className="inline-flex items-center justify-center px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+              Search Fort Collins Homes
+            </a>
+            <a href="/contact/" className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
+              Talk to an Agent
+            </a>
+          </div>
         </div>
       </section>
 
@@ -45,7 +53,7 @@ export default function FortCollinsPage() {
             </p>
             <Link
               to="/properties/?location=Fort Collins, CO"
-              className="inline-flex items-center justify-center px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
             >
               Search Fort Collins Homes
             </Link>
@@ -176,6 +184,9 @@ export default function FortCollinsPage() {
               We want to ensure that you have all the information needed to make the best decisions when it comes to your home goals. When you enter your info below you will get instant access to the area's latest market report, complete with sales and demographic trends.
             </p>
             <MarketReportForm areaName="Fort Collins, CO" />
+            <p className="text-center text-gray-500 text-sm mt-4">
+              Or call us at <a href="tel:(970) 999-1407" className="text-black font-semibold hover:underline">(970) 999-1407</a> for a personalized market report
+            </p>
           </div>
         </section>
 

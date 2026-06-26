@@ -57,6 +57,14 @@ export default function ContactPage() {
           <p className="text-xl">
             To make the real estate process more pleasurable, Adam and Mandi strive to project positive energy and love to their friends, family, business partners, and clients. We look forward to putting our expertise into action for you!
           </p>
+          <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="tel:(970) 999-1407" className="inline-flex items-center justify-center px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+              Call (970) 999-1407
+            </a>
+            <a href="#contact-form" className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
+              Send a Message
+            </a>
+          </div>
         </div>
       </section>
 
@@ -105,7 +113,7 @@ export default function ContactPage() {
           </div>
 
           {/* Contact Form */}
-          <div>
+          <div id="contact-form">
             <h2 className="text-3xl font-bold mb-4">Send us a message</h2>
             <p className="text-gray-700 mb-6">
               Fill out your information so we can reach out for a quick discovery call to learn how we can best service your needs.
