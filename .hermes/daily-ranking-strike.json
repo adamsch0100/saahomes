@@ -1,0 +1,20 @@
+{
+  "date": "2026-06-26",
+  "current_period": {
+    "start": "2026-06-18",
+    "end": "2026-06-24"
+  },
+  "previous_period": {
+    "start": "2026-06-11",
+    "end": "2026-06-17"
+  },
+  "current_rows": 59,
+  "previous_rows": 64,
+  "alerts": [],
+  "p0_regressions": [],
+  "has_issues": false,
+  "total_current_impressions": 174,
+  "total_current_clicks": 0,
+  "total_previous_impressions": 125,
+  "total_previous_clicks": 0
+}

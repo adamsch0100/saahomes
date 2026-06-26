@@ -35,7 +35,15 @@ export default function ForSellersPage() {
           <p className="text-lg sm:text-xl font-sans max-w-3xl mx-auto">
             Get proven results and streamlined service from start to finish. Scroll down to learn more about how we can get you results with our record-setting sales strategies.
           </p>
-          <div className="mt-8 flex justify-center">
+          <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/home-valuation/" className="inline-flex items-center justify-center px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+              Get Your Home Value
+            </a>
+            <a href="/contact/" className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
+              Contact Us
+            </a>
+          </div>
+          <div className="mt-4 flex justify-center">
             <button 
               onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
               className="w-12 h-12 flex items-center justify-center"
@@ -77,6 +85,9 @@ export default function ForSellersPage() {
                 Contact Us
               </a>
             </div>
+            <p className="mt-4 text-gray-600">
+              Or call <a href="tel:(970) 999-1407" className="text-black font-semibold hover:underline">(970) 999-1407</a> for an instant home valuation estimate
+            </p>
           </div>
         </div>
       </section>
