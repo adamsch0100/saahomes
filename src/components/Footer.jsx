@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { getEventsGuidePath } from "../data/localEvents.js";
 
 export default function Footer() {
   return (
@@ -41,6 +42,7 @@ export default function Footer() {
               <li><Link to="/mortgage-calculator/" className="hover:text-white transition-colors">Mortgage Calculator</Link></li>
               <li><Link to="/testimonials/" className="hover:text-white transition-colors">Client Reviews</Link></li>
               <li><Link to="/blog/" className="hover:text-white transition-colors">Real Estate Guides</Link></li>
+              <li><Link to={getEventsGuidePath()} className="hover:text-white transition-colors">NOCO Events Guide</Link></li>
               <li><Link to="/about-us/" className="hover:text-white transition-colors">About Us</Link></li>
               <li><Link to="/contact/" className="hover:text-white transition-colors">Contact</Link></li>
             </ul>

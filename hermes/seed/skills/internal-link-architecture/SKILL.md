@@ -15,10 +15,11 @@ Every page should link to money pages within 3 clicks. Area pages, blog, and pro
    - Identify orphan pages (no internal links in)
 
 2. **Equity map**
-   - Homepage → should link to: top 6 cities, /for-sellers/, /for-buyers/, CHFA hub
-   - Each area page → should link to: /for-buyers/, /for-sellers/, 2–3 nearby cities
+   - Homepage → should link to: top 6 cities, /for-sellers/, /for-buyers/, CHFA hub, latest market via `LatestMarketUpdateBanner`
+   - Each area page → should link to: /for-buyers/, /for-sellers/, 2–3 nearby cities, latest market via `LatestMarketUpdateBanner` (compact)
    - Each blog → should link to: 1 relevant area page + 1 money page minimum
    - CHFA cluster → cross-link each program + link to Fort Collins/Windsor area pages
+   - **`LATEST_MARKET_UPDATE_SLUG`** in `blogPosts.js` must match newest Market Update — see `repo-maintenance-checklist.md`
 
 3. **Anchor text plan**
    - Use natural varied anchors: "{city} homes for sale", "sell your home in {city}", "Northern Colorado buyer guide"

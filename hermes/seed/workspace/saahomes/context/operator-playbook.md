@@ -42,12 +42,17 @@ Full strategy: `market-dominance-strategy.md` · Autopilot rules: `automation-po
 
 | When | What | Time |
 |------|------|------|
+| **Monday email** | Hermes sends **weekly operator schedule** — day-by-day checklist for the week | 1 min read |
 | **Daily** | Skim Telegram only if digest or ✅ DONE | 0–2 min |
-| **When email arrives** | Social post pack → Meta + GBP + X | 5 min |
-| **Every Wednesday** | Weekly social email (market, tip, event, or seasonal) | 5 min |
+| **When email arrives** | Social post pack → Meta + GBP + X (within 48h) | 5 min |
+| **Every Wednesday** | Weekly social post pack email — **post same day if possible** | 5 min |
 | **Thursday** | Approve 0–2 outreach drafts (`approved` / `edit:` / `skip`) | 5–10 min |
-| **Monday (optional)** | Read weekly war room — rankings, leads, blockers | 10 min |
+| **Monday (optional)** | Read weekly war room on Telegram — rankings, leads, blockers | 10 min |
 | **Ongoing** | Follow Up Boss — call/text **form leads** (Hermes does not) | Your core job |
+
+**Two email types from Hermes:**
+1. **Monday — "Your week"** schedule (when to do what)
+2. **On deploy + Wednesday — "Social posts"** pack (copy-paste captions + images)
 
 If you're spending more than ~30 min/week on Hermes ops, something is wrong — tell Hermes to fix the process.
 
@@ -180,14 +185,16 @@ If 5+ are yes → system is working. If leads flat but rankings up → CRO pass 
 ## Tell Hermes (copy/paste after redeploy)
 
 ```
-Read context/operator-playbook.md. This is our master process.
+Read context/operator-playbook.md and context/repo-maintenance-checklist.md. This is our master process.
 
-Social: email post packs only — no Browserbase for GBP/Meta.
+Social: email post packs only — no Browserbase for GBP/Meta. Include post_by + operator_schedule in every pack.
+Weekly: email operator schedule every Monday via send-operator-weekly-email.py.
+Market updates: update LATEST_MARKET_UPDATE_SLUG + supersededBy on old posts every month.
 Browserbase + browse.sh: market intel for content only.
 Outreach: OUTREACH REVIEW → I reply approved before send.
 Leads: I handle FUB — you never contact form submitters.
 
-Execute the machine. Notify on ✅ DONE. Email social packs when content ships.
+Install all 21 cron jobs from automation-registry.md. Execute the machine. Notify on ✅ DONE.
 ```
 
 ---

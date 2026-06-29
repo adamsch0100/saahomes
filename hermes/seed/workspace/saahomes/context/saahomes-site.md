@@ -38,3 +38,41 @@ URL: `https://saahomes.com/northern-colorado-areas/{slug}/`
 ## Content guardrails
 
 - Year on CHFA/program pages · official source links · Fair Housing · no thin AI city spam
+
+## Blog & content hub
+
+**Hub URL:** https://saahomes.com/blog/ (UI label: "Real Estate Guides")
+
+| Path | Role |
+|------|------|
+| `src/data/blogPosts.js` | All blog content + `LATEST_MARKET_UPDATE_SLUG` |
+| `src/components/LatestMarketUpdateBanner.jsx` | Auto-links homepage, for-sellers, area pages to latest market post |
+| `src/pages/BlogPostPage.jsx` | Renders `supersededBy` banner on outdated market posts |
+| `src/components/Header.jsx` | Desktop + mobile nav → `/blog/` |
+
+**Hermes maintenance:** See `context/repo-maintenance-checklist.md` — required reading after every blog/market ship.
+
+When publishing a new **monthly market update**, Hermes MUST:
+1. Update `LATEST_MARKET_UPDATE_SLUG` in `blogPosts.js`
+2. Set `supersededBy` on all prior Market Update posts
+3. Email social post pack same day
+4. Update MEMORY `monthly_market_blog_url` + `latest_market_update_slug`
+
+## Operator email scripts (Railway)
+
+| Script | Purpose |
+|--------|---------|
+| `send-social-post-pack.py` | Captions + images for Meta, GBP, X |
+| `send-operator-weekly-email.py` | Monday day-by-day schedule for Adam |
+
+Skills: `social-post-pack`, `operator-weekly-email`, `local-events-curation`
+
+## Local events hub
+
+| URL | Role |
+|-----|------|
+| `/blog/northern-colorado-events-guide-2026/` | Flagship events guide (SEO) |
+| `/northern-colorado-areas/{city}/` | Per-city events section via `AreaEventsSection` |
+| `src/data/localEvents.js` | Hermes-maintained curated data |
+
+Hermes: monthly check + quarterly refresh — `context/local-events-sources.md`

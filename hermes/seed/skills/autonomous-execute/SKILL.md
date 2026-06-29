@@ -52,6 +52,18 @@ Next: [optional — e.g. monitor ranking in 2 weeks]
 ### 6. Log
 Append to MEMORY.md wins log with date + URL.
 
+### 7. Post-ship maintenance (blog / market / nav)
+
+If the change was a **blog post**, **market update**, or **nav link**, follow `context/repo-maintenance-checklist.md`:
+
+| Ship type | Hermes must also |
+|-----------|------------------|
+| Any blog | Email social post pack same day |
+| Market Update | Update `LATEST_MARKET_UPDATE_SLUG` + `supersededBy` on old market posts |
+| Any deploy Adam should share | Include `operator_schedule` in social pack JSON |
+
+Do not ask Adam to update repo files manually.
+
 ---
 
 ## Change types & auto-ship rules

@@ -31,6 +31,21 @@ Complete query map for Schwartz and Associates market ownership.
 
 ---
 
+## Lifestyle / community queries (→ events guide + area pages)
+
+| Query cluster | Target |
+|---------------|--------|
+| Northern Colorado events | /blog/northern-colorado-events-guide-2026/ |
+| Fort Collins events / festivals | Events guide + /northern-colorado-areas/fort-collins/ |
+| things to do Fort Collins | Events guide + Fort Collins area |
+| Greeley Stampede | Events guide + Greeley area |
+| moving to {city} things to do | Area page + events guide |
+| Loveland events / Sculpture in the Park | Events guide + Loveland area |
+
+Hermes refreshes via `local-events-curation` skill — not live calendar SEO.
+
+---
+
 ## Per-city query templates (track in GSC)
 
 For each `{city}` above, monitor these query patterns:
@@ -103,7 +118,8 @@ Cross-link these cities in blog posts and area page "Nearby communities" section
 - `chfa-down-payment-assistance-colorado-2026`
 - `chfa-first-time-homebuyer-northern-colorado`
 - `chfa-schools-to-home-colorado-teachers`
-- `colorado-champions-home-loan-first-responders`
+- `northern-colorado-events-guide-2026` — **events hub; link from area pages**
+- `northern-colorado-market-update-june-2026`
 
 **Gap topics to pipeline** (blog-pipeline skill):
 - Selling in Windsor / Loveland / Greeley (city-specific seller guides)

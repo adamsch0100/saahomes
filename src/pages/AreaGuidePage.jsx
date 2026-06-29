@@ -5,6 +5,8 @@ import MarketReportForm from "../components/MarketReportForm.jsx";
 import AreaFAQSection from "../components/AreaFAQSection.jsx";
 import { getAreaSeo } from "../data/areaSeo.js";
 import { AREA_FAQS } from "../data/areaFaqs.js";
+import LatestMarketUpdateBanner from "../components/LatestMarketUpdateBanner.jsx";
+import AreaEventsSection from "../components/AreaEventsSection.jsx";
 
 const GOLD = "#CFB36E";
 
@@ -50,6 +52,7 @@ export default function AreaGuidePage() {
               {paragraph}
             </p>
           ))}
+          <LatestMarketUpdateBanner variant="compact" cityName={area.city} />
         </div>
       </section>
 
@@ -149,6 +152,8 @@ export default function AreaGuidePage() {
           <MarketReportForm areaName={`${area.city}, CO`} />
         </div>
       </section>
+
+      <AreaEventsSection city={area.city} slug={area.slug} />
 
       {(highlights.neighborhoods?.length > 0 || highlights.attractions?.length > 0) && (
         <section className="py-16 px-6 bg-gray-50">

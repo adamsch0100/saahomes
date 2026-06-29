@@ -46,7 +46,7 @@ See **`content-calendar.md`** for pillars, Wed rotation, holidays.
 2. New/updated area page → email pack
 3. **Every Wednesday** → weekly rotation (market / tip / community / seasonal)
 4. **Monthly market blog** (3rd of month) → email pack
-5. CHFA/program + holidays → seasonal packs
+5. CHFA/program + **approved holidays only** (`holiday-calendar.md`) → seasonal packs
 6. YouTube description block when related @SAAHomes video exists
 
 ---

@@ -44,6 +44,7 @@ export default function BlogPostPage() {
   });
 
   const isChfaPost = post.category?.includes("CHFA");
+  const supersededPost = post.supersededBy ? getBlogPost(post.supersededBy) : null;
 
   const relatedPosts = blogPosts
     .filter((p) => p.slug !== post.slug && p.category === post.category)
@@ -146,6 +147,21 @@ export default function BlogPostPage() {
         </section>
 
         <div className="max-w-3xl mx-auto px-6 py-12">
+          {supersededPost && (
+            <div className="mb-8 p-5 bg-amber-50 border border-amber-200 rounded-xl">
+              <p className="text-sm font-semibold uppercase tracking-wide text-amber-800 mb-2">Updated report available</p>
+              <p className="text-gray-700 mb-3">
+                This article was published {formattedDate}. For current Northern Colorado market data, read our latest update.
+              </p>
+              <Link
+                to={`/blog/${supersededPost.slug}/`}
+                className="font-bold font-serif text-gray-900 hover:underline"
+              >
+                {supersededPost.title} →
+              </Link>
+            </div>
+          )}
+
           <p className="text-xl text-gray-700 leading-relaxed mb-10">{post.excerpt}</p>
 
           {post.relatedLinks && <RelatedLinksBox links={post.relatedLinks} title="Jump to program guides" />}

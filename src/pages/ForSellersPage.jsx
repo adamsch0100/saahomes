@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import SEO from "../components/SEO";
+import LatestMarketUpdateBanner from "../components/LatestMarketUpdateBanner.jsx";
 
 export default function ForSellersPage() {
   useEffect(() => {
@@ -91,6 +92,8 @@ export default function ForSellersPage() {
           </div>
         </div>
       </section>
+
+      <LatestMarketUpdateBanner />
 
       {/* Seller Services Section */}
       <section className="py-16 px-6 bg-gray-50">

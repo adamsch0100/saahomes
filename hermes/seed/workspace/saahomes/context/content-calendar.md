@@ -36,8 +36,8 @@ Read with: `social-channels.md`, `social-post-pack` skill, `blog-pipeline` skill
 | **Seller / buyer guides** | ✅ 1–2×/month | ✅ on publish | Deep SEO; social pulls one insight |
 | **CHFA / program changes** | ✅ when material | ✅ seasonal reminders | Cite official sources + year |
 | **Weekly market pulse** | ❌ | ✅ Wed cron | 2–3 sentences + one stat + link to for-sellers or latest market blog |
-| **Local events** (FoCo parade, farmers market, CSU, etc.) | ❌ usually | ✅ 2×/month when relevant | Community tie-in; optional link to area page |
-| **Holidays** (Memorial Day, July 4, Thanksgiving, NY, etc.) | ❌ | ✅ | Warm, local, helpful (e.g. “thinking of selling this fall?”) |
+| **Local events** (FoCo parade, farmers market, CSU, etc.) | ✅ quarterly guide refresh | ✅ 1×/month if notable event | `local-events-curation` skill · see `local-events-sources.md` |
+| **Holidays** (see **`holiday-calendar.md`** — approved list only) | ❌ | ✅ 7–8/year max | Gratitude/patriotic; no sales pitch on military holidays |
 | **Rate / news react** | ⚠️ only if major | ✅ same week | Social hot take; blog optional 800-word explainer |
 | **Quick tips** (staging, inspection, winter prep) | ❌ | ✅ weekly rotation | Link to relevant blog or money page if exists |
 | **Testimonials / wins** | ❌ | ✅ 1×/month max | Use real review language; no fabricated stories |
@@ -71,7 +71,7 @@ Use `week_of_month = (day_of_month - 1) // 7 + 1` or track index in MEMORY.
 | **3** | Community / city | Local event, neighborhood shoutout, or city spotlight | Relevant `/northern-colorado-areas/{city}/` |
 | **4** | Program / seasonal | CHFA reminder, season (spring market, winter prep), or holiday tie-in | Program page or seasonal blog |
 
-**Also check each Wednesday:** Any holiday within 7 days? → prepend holiday-appropriate opener (see seasonal table).
+**Also check each Wednesday:** Any **approved** holiday within 7 days? → see **`holiday-calendar.md`** (replace rotation opener or email Mon/Tue if holiday is not Wed).
 
 **If new blog/area shipped since last Wednesday:** prioritize **that** in the pack; still include rotation item if not redundant.
 
@@ -79,16 +79,18 @@ Use `week_of_month = (day_of_month - 1) // 7 + 1` or track index in MEMORY.
 
 ## Seasonal & holidays (social-first)
 
+**Holiday posts:** Full rules + approved list in **`holiday-calendar.md`**. Only: New Year's, Memorial Day, July 4, Labor Day, Veterans Day, Thanksgiving, Christmas.
+
 | When | Angle | CTA |
 |------|-------|-----|
-| Jan | New year goals, spring market preview | Market report |
+| Jan | New year (if on approved list) + spring market preview in rotation | Market report |
 | Feb–Mar | Spring prep for sellers, buyer tax timing | for-sellers / for-buyers |
-| Memorial Day / July 4 | Gratitude + community; soft “summer move” | contact |
+| Memorial Day / July 4 / Labor Day | Per holiday-calendar — patriotic, community | contact (optional) |
 | Aug–Sep | Back to school (Weld/Larimer schools link to area FAQs) | area pages |
 | Oct | Fall market, winterization tips | for-sellers |
-| Nov–Dec | Thanksgiving gratitude; year-end tax/deadline tips (accurate only) | market report |
+| Veterans Day / Thanksgiving / Christmas | Per holiday-calendar — gratitude, no hard sell | optional soft |
 
-Never exploit tragedy or disasters for leads.
+Never exploit tragedy or disasters for leads. **Never post DEI, political, or awareness-day content** — see holiday-calendar do-not list.
 
 ---
 
@@ -145,6 +147,10 @@ Hermes: coordinate `blog-content-calendar` (15th plans ahead) and publish market
 ### Monthly (15th)
 1. **`blog-pipeline`** → 2–4 posts including market snapshot for next month
 2. Publish via autonomous-execute per USER.md
+3. When market post ships: update `LATEST_MARKET_UPDATE_SLUG` per **`repo-maintenance-checklist.md` section B**
+
+### Hermes post-ship reference
+All blog, market, nav, and email maintenance steps: **`context/repo-maintenance-checklist.md`**
 
 ### Data sources for market content
 - GSC, public listing trends, browse.sh Zillow/Realtor **intel** (Browserbase optional)
@@ -161,10 +167,12 @@ last_social_pillar:
 rotation_week_index: 1-4
 last_3_social_hooks: []
 monthly_market_blog_url:
+latest_market_update_slug: northern-colorado-market-update-june-2026
 blogs_published_this_month:
+pending_social_packs: []
 ```
 
-Hermes maintains this section.
+Hermes maintains this section. **`latest_market_update_slug` must match `LATEST_MARKET_UPDATE_SLUG` in `src/data/blogPosts.js`** after every market update ship.
 
 ---
 
