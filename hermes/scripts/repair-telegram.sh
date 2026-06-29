@@ -22,31 +22,6 @@ resolve_telegram_allowed_users() {
   return 1
 }
 
-telegram_allow_from_json() {
-  allowed_csv="$(normalize_env_value "$1")"
-  [ -n "$allowed_csv" ] || return 1
-  json='['
-  first=1
-  old_ifs="$IFS"
-  IFS=','
-  # shellcheck disable=SC2086
-  set -- $allowed_csv
-  IFS="$old_ifs"
-  for user_id in "$@"; do
-    user_id="$(normalize_env_value "$user_id")"
-    [ -n "$user_id" ] || continue
-    if [ "$first" -eq 1 ]; then
-      first=0
-    else
-      json="${json},"
-    fi
-    json="${json}\"${user_id}\""
-  done
-  json="${json}]"
-  [ "$first" -eq 1 ] && return 1
-  printf '%s' "$json"
-}
-
 echo "=== Hermes Telegram diagnostics ==="
 echo "HERMES_HOME=$HERMES_HOME"
 echo "TELEGRAM_ALLOWED_USERS (shell)=${TELEGRAM_ALLOWED_USERS:-<unset>}"
@@ -92,21 +67,18 @@ fi
 
 echo ""
 echo "=== Applying repair ==="
-if command -v hermes >/dev/null 2>&1; then
-  hermes config set gateway.platforms.telegram.enabled true
-  if telegram_allowed="$(resolve_telegram_allowed_users)"; then
-    if allow_from_json="$(telegram_allow_from_json "$telegram_allowed")"; then
-      hermes config set gateway.platforms.telegram.extra.allow_from "$allow_from_json"
-      echo "Set allow_from to: $allow_from_json"
-    fi
-  else
-    echo "ERROR: TELEGRAM_ALLOWED_USERS not found in shell env or $ENV_FILE"
-    echo "Set TELEGRAM_ALLOWED_USERS=6320126021 in Railway Variables, then rerun this script."
-    exit 1
-  fi
-  echo ""
-  echo "Config updated. Restart the Hermes service in Railway (Redeploy)."
-  echo "After restart, message the bot and confirm the log does NOT show 'Blocked unauthorized user'."
+if [ -x /usr/local/bin/sync-telegram-auth.sh ]; then
+  /usr/local/bin/sync-telegram-auth.sh
+elif [ -f "$(dirname "$0")/sync-telegram-auth.sh" ]; then
+  sh "$(dirname "$0")/sync-telegram-auth.sh"
 else
-  echo "hermes CLI not found — redeploy latest image, then run this script again."
+  echo "ERROR: sync-telegram-auth.sh not found — redeploy latest Hermes image"
+  exit 1
 fi
+
+echo ""
+echo "Verify allow_from is a YAML list (not a quoted JSON string):"
+grep -A3 'allow_from' "$DATA_DIR/config.yaml" | tail -10 || true
+echo ""
+echo "Restart the Hermes service in Railway (Redeploy), then message the bot."
+echo "Log must NOT show: Blocked unauthorized user 6320126021"
