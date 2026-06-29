@@ -60,8 +60,6 @@ fi
 
 if command -v hermes >/dev/null 2>&1; then
   hermes config set gateway.platforms.telegram.enabled true 2>/dev/null || true
-  hermes config unset gateway.platforms.telegram.extra.allow_from 2>/dev/null || true
-  hermes config unset platforms.telegram.extra.allow_from 2>/dev/null || true
 fi
 
 python3 "$SCRIPT_DIR/sync-telegram-auth.py"
