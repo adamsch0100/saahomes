@@ -401,6 +401,119 @@ function injectAreaBody(html, area) {
   return html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
 }
 
+function injectBlogBody(html, post) {
+  const title = escapeHtml(post.title || '');
+  const date = post.date || '';
+  const category = escapeHtml(post.category || '');
+  const readTime = post.readTime || '';
+  const keywords = post.keywords || '';
+  const faqs = post.faqs || [];
+
+  // Build article header
+  let headerHtml = `      <p class="prerendered-blog-meta">`;
+  if (category) headerHtml += `<strong>${category}</strong>`;
+  if (date) headerHtml += ` &mdash; ${date}`;
+  if (readTime) headerHtml += ` &middot; ${readTime}`;
+  headerHtml += `</p>\n`;
+
+  // Build sections
+  let sectionsHtml = '';
+  if (post.sections && post.sections.length > 0) {
+    sectionsHtml = post.sections.map((section) => {
+      let html = `      <section class="prerendered-blog-section">\n`;
+      if (section.heading) {
+        html += `        <h2>${escapeHtml(section.heading)}</h2>\n`;
+      }
+      if (section.paragraphs) {
+        html += section.paragraphs
+          .map((p) => `        <p>${escapeHtml(p)}</p>`)
+          .join('\n') + '\n';
+      }
+      if (section.list) {
+        html += `        <ul>\n`;
+        html += section.list
+          .map((item) => `          <li>${escapeHtml(item)}</li>`)
+          .join('\n') + '\n';
+        html += `        </ul>\n`;
+      }
+      if (section.relatedLinks) {
+        html += `        <ul class="prerendered-blog-links">\n`;
+        html += section.relatedLinks
+          .map((link) =>
+            `          <li><a href="${escapeAttr(link.href)}">${escapeHtml(link.title)}</a>${link.description ? ` &mdash; ${escapeHtml(link.description)}` : ''}</li>`
+          )
+          .join('\n') + '\n';
+        html += `        </ul>\n`;
+      }
+      html += `      </section>\n`;
+      return html;
+    }).join('');
+  }
+
+  // Build FAQ section
+  let faqHtml = '';
+  if (faqs.length > 0) {
+    faqHtml =
+      `      <section class="prerendered-faq">\n` +
+      `        <h2>Frequently Asked Questions</h2>\n` +
+      faqs.map((faq) =>
+        `        <div itemscope="" itemprop="mainEntity" itemtype="https://schema.org/Question">\n` +
+        `          <h3 itemprop="name">${escapeHtml(faq.q)}</h3>\n` +
+        `          <div itemscope="" itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">\n` +
+        `            <p itemprop="text">${escapeHtml(faq.a)}</p>\n` +
+        `          </div>\n` +
+        `        </div>`
+      ).join('\n') + `\n      </section>\n`;
+  }
+
+  // Build related links section
+  let relatedHtml = '';
+  if (post.relatedLinks && post.relatedLinks.length > 0) {
+    relatedHtml =
+      `      <section class="prerendered-blog-related">\n` +
+      `        <h3>Related Resources</h3>\n` +
+      `        <ul>\n` +
+      post.relatedLinks.map((link) =>
+        `          <li><a href="${escapeAttr(link.href)}">${escapeHtml(link.title)}</a>${link.description ? ` &mdash; ${escapeHtml(link.description)}` : ''}</li>`
+      ).join('\n') + `\n        </ul>\n` +
+      `      </section>\n`;
+  }
+
+  // Build CTA section
+  let ctaHtml = '';
+  if (post.cta) {
+    ctaHtml =
+      `      <section class="prerendered-blog-cta">\n` +
+      `        <h3>${escapeHtml(post.cta.title || '')}</h3>\n` +
+      `        <p>${escapeHtml(post.cta.description || '')}</p>\n` +
+      `        <p><a href="${escapeAttr(post.cta.primaryHref || '#')}" class="prerendered-cta-button">${escapeHtml(post.cta.primaryText || 'Learn More')}</a>` +
+      (post.cta.secondaryHref ? ` | <a href="${escapeAttr(post.cta.secondaryHref)}">${escapeHtml(post.cta.secondaryText || '')}</a>` : '') +
+      `</p>\n` +
+      `      </section>\n`;
+  }
+
+  // Final CTA with phone
+  const phoneCta =
+    `      <section class="prerendered-cta">\n` +
+    `        <h3>Work With Schwartz and Associates</h3>\n` +
+    `        <p>Ready to buy or sell in Northern Colorado? Contact SAA Homes at <strong>(970) 999-1407</strong> or visit us at 3665 John F Kennedy Parkway, Suite 210, Fort Collins, CO 80525. Let our local experts guide you through every step of your real estate journey.</p>\n` +
+    `      </section>`;
+
+  const bodyContent =
+    `\n` +
+    `    <article class="prerendered-blog-content">\n` +
+    `      <h1>${title}</h1>\n` +
+    `${headerHtml}` +
+    `${sectionsHtml}` +
+    `${faqHtml}` +
+    `${relatedHtml}` +
+    `${ctaHtml}` +
+    `${phoneCta}` +
+    `    </article>\n  `;
+
+  return html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+}
+
 function injectGenericBody(html, { title }) {
   const pageTitle = escapeHtml(title || '');
   const bodyContent =
@@ -562,10 +675,16 @@ for (const route of routes) {
 
   // 4. Inject visible body content into <div id="root"> for crawlers
   const area = matchAreaPage(route.path);
+  const blogPost = matchBlogPost(route.path);
   if (area) {
     html = injectAreaBody(html, area);
     console.log(
       `  Body: injected ${AREA_FAQS[area.slug]?.length || 0} FAQ items + nearby communities + CTA`
+    );
+  } else if (blogPost) {
+    html = injectBlogBody(html, blogPost);
+    console.log(
+      `  Body: injected blog "${blogPost.slug}" with ${blogPost.sections?.length || 0} sections + ${blogPost.faqs?.length || 0} FAQs + CTA`
     );
   } else {
     html = injectGenericBody(html, route);
