@@ -530,6 +530,206 @@ function injectGenericBody(html, { title }) {
 }
 
 // ---------------------------------------------------------------------------
+// Money page (P0) body content injection
+// ---------------------------------------------------------------------------
+
+const MONEY_PAGE_CONTENT = {
+  '/for-sellers/': {
+    sections: [
+      {
+        heading: 'Sell Your Northern Colorado Home With Confidence',
+        paragraphs: [
+          'Selling your home in Northern Colorado requires local market knowledge, strategic pricing, and a marketing plan that reaches the right buyers. Schwartz and Associates brings years of experience across Fort Collins, Loveland, Windsor, Greeley, and all 19 communities in our service area.',
+          'From first-time sellers to those who have sold multiple properties, our team provides a comprehensive process: a free market analysis using current Northern Colorado comps, professional staging guidance, premium photography and virtual tours, MLS and digital marketing, and skilled negotiation through closing.',
+        ],
+      },
+      {
+        heading: 'Our Seller Process',
+        paragraphs: [
+          'Every Northern Colorado home sale starts with a no-obligation consultation where we review your home, discuss your timeline, and create a customized marketing plan. We price your home competitively based on real-time market data from your specific neighborhood and comparable recent sales.',
+          'Once listed, your home reaches buyers through MLS syndication, social media campaigns, targeted digital advertising, and our network of real estate professionals. We hold open houses, provide regular market feedback, and guide you through offers, inspections, and closing with clarity and communication.',
+        ],
+      },
+      {
+        heading: 'Marketing That Gets Results',
+        list: [
+          'Professional photography and virtual tours for every listing',
+          'MLS syndication to 500+ real estate websites including Zillow, Realtor.com, and Redfin',
+          'Social media marketing across Facebook, Instagram, and YouTube',
+          'Targeted digital advertising to Northern Colorado home buyers',
+          'Email campaigns to our network of qualified buyer agents',
+        ],
+      },
+    ],
+    cta: {
+      title: 'Start Your Home Sale Today',
+      text: 'Contact SAA Homes at (970) 999-1407 for your free, no-obligation home valuation. Let us show you how we maximize value and minimize stress when selling your Northern Colorado home.',
+    },
+  },
+  '/for-buyers/': {
+    sections: [
+      {
+        heading: 'Buy Your Dream Home in Northern Colorado',
+        paragraphs: [
+          'Whether you are searching for a starter home in Fort Collins, a family house in Windsor, new construction in Timnath, or an affordable property in Greeley, Schwartz and Associates helps buyers navigate the Northern Colorado market with confidence.',
+          'Our buyer representation includes personalized home searches, neighborhood guidance, school district research, and expert negotiation. We also guide qualified buyers through CHFA down payment assistance programs that can make homeownership more accessible with grants up to $25,000 or deferred loans at 0% interest.',
+        ],
+      },
+      {
+        heading: 'How We Help You Buy',
+        paragraphs: [
+          'The home buying process starts with understanding your needs, budget, and timeline. We pre-approve you with trusted local lenders who know Northern Colorado programs including CHFA, FHA, VA, and conventional financing options. Then we search active listings across all 19 communities to find homes that match your criteria.',
+          'When we find the right home, we conduct a comparative market analysis to determine a strong offer price, guide you through the negotiation and inspection process, and stay with you through closing. Our goal is a smooth, transparent experience from first showing to keys in hand.',
+        ],
+      },
+      {
+        heading: 'Popular Buyer Programs',
+        list: [
+          'CHFA down payment assistance — grants and deferred loans for qualified first-time buyers',
+          'CHFA Schools To Home — up to 25% down payment help for Colorado public school employees',
+          'Colorado Champions Home Loan — expanded CHFA eligibility for first responders (police, firefighters, EMTs)',
+          'FHA and VA loans with low down payment options',
+          'Conventional financing with competitive rates from local lenders',
+        ],
+      },
+    ],
+    cta: {
+      title: 'Start Your Home Search',
+      text: 'Contact SAA Homes at (970) 999-1407 or visit our office at 3665 John F Kennedy Parkway, Suite 210, Fort Collins, CO 80525. Let us help you find the perfect home in Northern Colorado.',
+    },
+  },
+  '/contact/': {
+    sections: [
+      {
+        heading: 'Get In Touch With Schwartz and Associates',
+        paragraphs: [
+          'Ready to buy or sell a home in Northern Colorado? We are here to help. Whether you have questions about the market, want to schedule a consultation, or need guidance on CHFA programs, our team is just a phone call or message away.',
+          'We serve buyers and sellers across all 19 Northern Colorado communities: Fort Collins, Loveland, Windsor, Greeley, Timnath, Severance, Wellington, Berthoud, Johnstown, Milliken, Eaton, La Salle, Mead, Longmont, Boulder, Firestone, Frederick, Evans, and Niwot.',
+        ],
+      },
+    ],
+    cta: {
+      title: 'We Look Forward To Hearing From You',
+      text: 'Call (970) 999-1407, email us, or stop by 3665 John F Kennedy Parkway, Suite 210, Fort Collins, CO 80525. Let Schwartz and Associates guide your Northern Colorado real estate journey.',
+    },
+  },
+  '/properties/': {
+    sections: [
+      {
+        heading: 'Homes for Sale Across Northern Colorado',
+        paragraphs: [
+          'Browse active listings across Fort Collins, Loveland, Windsor, Greeley, and all 19 communities we serve. Our property search includes homes for sale in every price range — from starter homes and townhomes to luxury properties and new construction.',
+          'Use the search tools below to filter by city, price, bedrooms, and property type. Each listing includes detailed information, professional photos, and direct contact options to schedule a showing with a Schwartz and Associates agent.',
+        ],
+      },
+    ],
+    cta: {
+      title: 'Need Help Finding Your Perfect Home?',
+      text: 'Contact SAA Homes at (970) 999-1407 for personalized home search assistance. Let our local experts help you find the right property in the right Northern Colorado neighborhood.',
+    },
+  },
+  '/mortgage-calculator/': {
+    sections: [
+      {
+        heading: 'Estimate Your Northern Colorado Mortgage Payment',
+        paragraphs: [
+          'Use our mortgage calculator to estimate monthly payments for homes in Fort Collins, Loveland, Windsor, and across Northern Colorado. Enter the home price, down payment, interest rate, and loan term to see your estimated principal, interest, taxes, and insurance costs.',
+          'Keep in mind that Northern Colorado buyers may qualify for CHFA down payment assistance programs that reduce the upfront costs of homeownership. Contact SAA Homes to learn more about your financing options.',
+        ],
+      },
+    ],
+    cta: {
+      title: 'Ready To Explore Your Options?',
+      text: 'Call (970) 999-1407 to speak with a Schwartz and Associates agent about financing, CHFA programs, and finding the right home for your budget in Northern Colorado.',
+    },
+  },
+  '/about-us/': {
+    sections: [
+      {
+        heading: 'Meet Adam and Mandi Schwartz',
+        paragraphs: [
+          'Schwartz and Associates (SAA Homes) is a Northern Colorado real estate team serving home buyers and sellers under Coldwell Banker Realty in Fort Collins. With years of combined experience, Adam and Mandi Schwartz bring deep local market knowledge, integrity, and a client-first approach to every transaction.',
+          'Our team covers all 19 Northern Colorado communities — from Fort Collins and Loveland to Windsor, Greeley, Timnath, Berthoud, and beyond. We specialize in first-time homebuyers, CHFA program guidance, move-up buyers, sellers preparing for their next chapter, and new construction in growing communities.',
+        ],
+      },
+    ],
+    cta: {
+      title: 'Work With Schwartz and Associates',
+      text: 'Contact us at (970) 999-1407 or visit 3665 John F Kennedy Parkway, Suite 210, Fort Collins, CO 80525. Let us put our Northern Colorado real estate expertise to work for you.',
+    },
+  },
+  '/': {
+    sections: [
+      {
+        heading: 'Your Northern Colorado Real Estate Experts',
+        paragraphs: [
+          'Schwartz and Associates (SAA Homes) is a trusted Northern Colorado real estate team serving home buyers and sellers across all 19 communities in Larimer and Weld counties. From Fort Collins and Loveland to Windsor, Greeley, Timnath, and beyond, our local expertise helps clients make confident real estate decisions.',
+          'Whether you are buying your first home, selling to move up or downsize, or exploring CHFA down payment assistance programs, Adam and Mandi Schwartz bring personalized service, market knowledge, and a commitment to your success. We represent clients under Coldwell Banker Realty from our Fort Collins office at 3665 John F Kennedy Parkway, Suite 210.',
+        ],
+      },
+      {
+        heading: 'Explore Northern Colorado Communities',
+        paragraphs: [
+          'Each Northern Colorado community offers a unique lifestyle — from Fort Collins\' craft breweries and CSU culture to Loveland\'s arts scene, Windsor\'s family neighborhoods, Greeley\'s affordable value, and Timnath\'s new construction. Our area guides help you find the perfect place to call home.',
+        ],
+      },
+    ],
+    cta: {
+      title: 'Start Your Northern Colorado Real Estate Journey',
+      text: 'Contact SAA Homes at (970) 999-1407 for expert buyer and seller representation across all 19 Northern Colorado communities.',
+    },
+  },
+};
+
+function matchMoneyPage(path) {
+  return MONEY_PAGE_CONTENT[path] || null;
+}
+
+function injectMoneyPageBody(html, route, content) {
+  const pageTitle = escapeHtml(route.title || '');
+  const phoneHtml = '<strong>(970) 999-1407</strong>';
+
+  let sectionsHtml = '';
+  if (content.sections) {
+    sectionsHtml = content.sections.map((section) => {
+      let html = `      <section class="prerendered-money-section">\n`;
+      if (section.heading) {
+        html += `        <h2>${escapeHtml(section.heading)}</h2>\n`;
+      }
+      if (section.paragraphs) {
+        html += section.paragraphs.map((p) => `        <p>${escapeHtml(p)}</p>`).join('\n') + '\n';
+      }
+      if (section.list) {
+        html += `        <ul>\n`;
+        html += section.list.map((item) => `          <li>${escapeHtml(item)}</li>`).join('\n') + '\n';
+        html += `        </ul>\n`;
+      }
+      html += `      </section>\n`;
+      return html;
+    }).join('');
+  }
+
+  let ctaHtml = '';
+  if (content.cta) {
+    ctaHtml =
+      `      <section class="prerendered-cta">\n` +
+      `        <h2>${escapeHtml(content.cta.title)}</h2>\n` +
+      `        <p>${escapeHtml(content.cta.text).replace('(970) 999-1407', phoneHtml)}</p>\n` +
+      `      </section>\n`;
+  }
+
+  const bodyContent =
+    `\n` +
+    `    <div class="prerendered-money-content">\n` +
+    `      <h1>${pageTitle}</h1>\n` +
+    `${sectionsHtml}` +
+    `${ctaHtml}` +
+    `    </div>\n  `;
+
+  return html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+}
+
+// ---------------------------------------------------------------------------
 // CHFA body content injection
 // ---------------------------------------------------------------------------
 
@@ -816,6 +1016,7 @@ for (const route of routes) {
   const area = matchAreaPage(route.path);
   const blogPost = matchBlogPost(route.path);
   const chfaPage = matchChfaPage(route.path);
+  const moneyPage = matchMoneyPage(route.path);
   if (area) {
     html = injectAreaBody(html, area);
     console.log(
@@ -830,6 +1031,11 @@ for (const route of routes) {
     html = injectChfaBody(html, chfaPage);
     console.log(
       `  Body: injected CHFA page "${chfaPage.slug}" with ${chfaPage.faqs?.length || 0} FAQs + programs + requirements + CTA`
+    );
+  } else if (moneyPage) {
+    html = injectMoneyPageBody(html, route, moneyPage);
+    console.log(
+      `  Body: injected money page "${route.path}" with ${moneyPage.sections?.length || 0} content sections + CTA`
     );
   } else {
     html = injectGenericBody(html, route);
