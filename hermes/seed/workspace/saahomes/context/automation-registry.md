@@ -194,7 +194,7 @@ Schedule: 0 10 * * 3  (Wed 10:00 AM MT)
 Skills: social-post-pack
 Model: deepseek-v4-flash
 Provider: opencode-go
-Prompt: Read context/content-calendar.md and context/social-channels.md. Follow Wednesday rotation (market pulse / tip / community / seasonal). If new blog or area page shipped this week, prioritize that in the pack. Always email Adam via send-social-post-pack.py (GBP + FB + IG + X). Update MEMORY ## Content calendar state. Never use Browserbase for social.
+Prompt: Read context/content-calendar.md, context/holiday-calendar.md, and context/social-channels.md. Follow Wednesday rotation (market pulse / tip / community / seasonal). If an approved holiday is within 7 days, use holiday-calendar rules instead of generic seasonal. If new blog or area page shipped this week, prioritize that in the pack. Always email Adam via send-social-post-pack.py (GBP + FB + IG + X). Update MEMORY ## Content calendar state. Never use Browserbase for social.
 ```
 
 ### 19. `monthly-market-blog`
@@ -203,7 +203,34 @@ Schedule: 0 9 3 * *  (3rd of month, 9:00 AM MT)
 Skills: blog-pipeline, autonomous-execute, social-post-pack
 Model: kimi-k2.6
 Provider: opencode-go
-Prompt: Read context/content-calendar.md. Publish Northern Colorado Market Update blog for current month (if not already live). Ship via PR/deploy. Email social-post-pack same day. Log monthly_market_blog_url in MEMORY.
+Prompt: Read context/content-calendar.md and context/repo-maintenance-checklist.md section B. Publish Northern Colorado Market Update blog for current month (if not already live). Update LATEST_MARKET_UPDATE_SLUG + supersededBy on prior market posts. Ship via PR/deploy. Email social-post-pack same day with operator_schedule. Log monthly_market_blog_url + latest_market_update_slug in MEMORY.
+```
+
+### 21. `weekly-operator-schedule`
+```
+Schedule: 15 7 * * 1  (Mon 7:15 AM MT)
+Skills: operator-weekly-email
+Model: deepseek-v4-flash
+Provider: opencode-go
+Prompt: Read context/operator-playbook.md, context/content-calendar.md, and MEMORY ## Content calendar state. Build day-by-day operator schedule JSON for Adam (social Wed, outreach Thu, FUB leads daily). Include any pending social packs from last week. Email via send-operator-weekly-email.py. Telegram: "Weekly operator schedule emailed."
+```
+
+### 22. `local-events-monthly`
+```
+Schedule: 0 9 1 * *  (1st of month, 9:00 AM MT)
+Skills: local-events-curation, social-post-pack
+Model: deepseek-v4-flash
+Provider: opencode-go
+Prompt: Run monthly local events check per context/local-events-sources.md. Scan Tier S cities for flagship events in next 30 days. If notable, email social-post-pack (community). Update MEMORY last_events_check_date. Skip email if nothing notable.
+```
+
+### 23. `local-events-quarterly`
+```
+Schedule: 0 10 1 1,4,7,10 *  (1st of Jan/Apr/Jul/Oct, 10:00 AM MT)
+Skills: local-events-curation, autonomous-execute, social-post-pack
+Model: kimi-k2.6
+Provider: opencode-go
+Prompt: Quarterly refresh per local-events-sources.md. Update src/data/localEvents.js + events guide in blogPosts.js. Set EVENTS_DATA_LAST_REVIEWED. Ship via PR/deploy. Email social-post-pack. Update MEMORY events_guide_last_refresh. Notify Adam with ✅ DONE + blog URL.
 ```
 
 ---
@@ -215,6 +242,6 @@ After creating all jobs, run:
 /cron list
 ```
 
-Confirm **20 jobs** active. Log completion in MEMORY.md under "Automation installed: [date]".
+Confirm **23 jobs** active. Log completion in MEMORY.md under "Automation installed: [date]".
 
 If GSC/GA4 not yet connected, jobs still run public-only checks and note missing integrations in every report.

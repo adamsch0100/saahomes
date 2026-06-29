@@ -112,6 +112,8 @@ Install on first boot after Hermes is live (`hermes skills install ...`):
 
 ## Custom SAA Homes skills (repo seed — always active)
 
+**Post-ship maintenance:** `context/repo-maintenance-checklist.md` (market slug, social emails, MEMORY)
+
 | Skill | Purpose |
 |-------|---------|
 | `daily-ranking-strike` | GSC ranking deltas |
@@ -129,6 +131,8 @@ Install on first boot after Hermes is live (`hermes skills install ...`):
 | `internal-link-architecture` | Link equity |
 | `local-pack-gbp-audit` | GBP/local pack |
 | `social-post-pack` | Email GBP + social captions/images to Adam |
+| `operator-weekly-email` | Monday day-by-day operator schedule email to Adam |
+| `local-events-curation` | Monthly event check + quarterly guide refresh |
 | `blog-pipeline` | Monthly blog calendar + market snapshot |
 | `indexation-rescue` | Indexation patrol |
 

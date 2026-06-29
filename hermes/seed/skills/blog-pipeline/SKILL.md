@@ -75,9 +75,23 @@ Repo action: Add to blogPosts.js, ship via autonomous-execute, notify Adam with 
 ```
 
 ## After publish
+
+**Full checklist:** `context/repo-maintenance-checklist.md` sections A + B (market) + C (social).
+
+### All blog posts
 1. ✅ DONE Telegram with URL
-2. Run `social-post-pack` + `send-social-post-pack.py`
-3. Update MEMORY `## Content calendar state`
+2. `social-post-pack` → include `post_by` + `operator_schedule` → `send-social-post-pack.py`
+3. Update MEMORY `## Content calendar state` (dates, pillar, hooks)
+
+### Monthly market update posts (category: Market Update)
+4. Set `export const LATEST_MARKET_UPDATE_SLUG = '{new-slug}'` at top of `blogPosts.js`
+5. Add `supersededBy: LATEST_MARKET_UPDATE_SLUG` to **every** older Market Update post
+6. Add `relatedLinks` on superseded posts pointing to the new URL
+7. Update MEMORY: `monthly_market_blog_url`, `latest_market_update_slug`
+8. No edits needed to `LatestMarketUpdateBanner.jsx` — it reads the slug constant automatically
+
+### Slug naming for market posts
+`northern-colorado-market-update-{month}-{year}` (e.g. `northern-colorado-market-update-july-2026`)
 
 ## Constraints
 - Fair Housing compliant

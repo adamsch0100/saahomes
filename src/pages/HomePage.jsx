@@ -8,6 +8,7 @@ import MapSection from "../components/MapSection";
 import Testimonials from "../components/Testimonials";
 import SocialSection from "../components/SocialSection";
 import ContactCTA from "../components/ContactCTA";
+import LatestMarketUpdateBanner from "../components/LatestMarketUpdateBanner.jsx";
 import { BUSINESS } from "../utils/seoConstants.js";
 
 const homePageSchema = {
@@ -58,6 +59,7 @@ export default function HomePage() {
       <AboutSection />
       <CoffeeSection />
       <ServiceSection />
+      <LatestMarketUpdateBanner />
       <MapSection />
       <Testimonials />
       <SocialSection />

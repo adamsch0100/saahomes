@@ -67,6 +67,24 @@ def build_html(pack: dict[str, Any]) -> str:
     title = esc(promoting.get("title", pack.get("title", "SAA Homes content")))
     url = esc(promoting.get("url", pack.get("url", "https://saahomes.com")))
     intro = esc(pack.get("intro", "Copy each section below into the matching platform."))
+    post_by = pack.get("post_by")
+    post_by_html = ""
+    if post_by:
+        post_by_html = (
+            f'<p style="background:#fef3c7;border:1px solid #fcd34d;padding:12px;border-radius:8px;">'
+            f"<strong>Post by:</strong> {esc(post_by)} — Meta Business Suite (FB + IG) · Google Business Profile · X</p>"
+        )
+
+    operator_schedule = pack.get("operator_schedule", [])
+    schedule_html = ""
+    if operator_schedule:
+        items = "".join(f"<li>{esc(item)}</li>" for item in operator_schedule)
+        schedule_html = f"""
+        <section style="margin:16px 0;padding:16px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;">
+          <h2 style="margin:0 0 10px;font-size:17px;">What to do (step by step)</h2>
+          <ol style="margin:0;padding-left:20px;line-height:1.6;">{items}</ol>
+        </section>
+        """
 
     platforms_html = "".join(platform_block(p) for p in pack.get("platforms", []))
 
@@ -93,7 +111,9 @@ def build_html(pack: dict[str, Any]) -> str:
   <h1 style="font-size:22px;">📋 Social post pack — ready to publish</h1>
   <p><strong>Promoting:</strong> <a href="{url}">{title}</a></p>
   <p>{intro}</p>
-  <p><strong>Publish in:</strong> Meta Business Suite (FB + IG) · Google Business Profile · optional YouTube/X below</p>
+  {post_by_html}
+  {schedule_html}
+  <p><strong>Publish in:</strong> Meta Business Suite (FB + IG) · Google Business Profile · X below</p>
   {platforms_html}
   {''.join(extras)}
   <hr />

@@ -1,5 +1,7 @@
 import { SITE_URL } from '../utils/seoConstants.js';
 
+export const LATEST_MARKET_UPDATE_SLUG = 'northern-colorado-market-update-june-2026';
+
 export const blogPosts = [
   {
     slug: 'buying-a-home-in-fort-collins',
@@ -58,6 +60,14 @@ export const blogPosts = [
     category: 'Market Update',
     image: '/images/Northern Colorado.webp',
     readTime: '6 min read',
+    supersededBy: LATEST_MARKET_UPDATE_SLUG,
+    relatedLinks: [
+      {
+        title: 'Northern Colorado Market Update — June 2026',
+        href: '/blog/northern-colorado-market-update-june-2026/',
+        description: 'Latest Fort Collins, Loveland, Windsor & Greeley prices, inventory, and trends',
+      },
+    ],
     sections: [
       {
         heading: 'Northern Colorado remains a high-demand market',
@@ -499,10 +509,129 @@ export const blogPosts = [
       },
     ],
   },
+  {
+    slug: 'northern-colorado-events-guide-2026',
+    title: 'Northern Colorado Events & Happenings Guide — 2026',
+    excerpt: 'A curated guide to festivals, farmers markets, and community events across Fort Collins, Loveland, Windsor, Greeley, Longmont, and Northern Colorado — for locals and anyone considering a move.',
+    date: '2026-06-29',
+    category: 'Local Guide',
+    image: '/images/Northern Colorado.webp',
+    readTime: '10 min read',
+    keywords: 'Northern Colorado events 2026, Fort Collins festivals, Loveland events, Greeley Stampede, things to do Northern Colorado, moving to Fort Collins events, Windsor Harvest Festival, Longmont farmers market',
+    relatedLinks: [
+      { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & homes for sale' },
+      { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Sweetheart City living' },
+      { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Family communities' },
+      { title: 'Greeley Area Guide', href: '/northern-colorado-areas/greeley/', description: 'Weld County value & lifestyle' },
+      { title: 'Longmont Area Guide', href: '/northern-colorado-areas/longmont/', description: 'Boulder County access' },
+    ],
+    cta: {
+      title: 'Thinking about making Northern Colorado home?',
+      description: 'Adam and Mandi Schwartz help buyers and sellers across Fort Collins, Loveland, Windsor, Greeley, and all 19 Northern Colorado communities. Explore neighborhoods, get a market report, or ask us what life is really like here.',
+      primaryHref: '/contact/',
+      primaryText: 'Contact SAA Homes',
+      secondaryHref: '/for-buyers/',
+      secondaryText: 'Start Your Home Search',
+    },
+    sections: [
+      {
+        heading: 'Why community events matter when you\'re buying a home',
+        paragraphs: [
+          'Choosing where to live is about more than square footage and interest rates. Farmers markets, summer concerts, rodeos, and downtown festivals shape how you experience a city — and they are often what relocators ask about first.',
+          'This guide highlights flagship annual events across Northern Colorado. It is curated for home buyers, sellers, and new residents — not a live calendar. For the latest dates, we link to official city and tourism sources. Updated periodically by the SAA Homes team.',
+        ],
+      },
+      {
+        heading: 'Fort Collins events & festivals',
+        paragraphs: [
+          'Fort Collins blends a walkable Old Town, Colorado State University energy, and one of the country\'s best craft beer scenes. Summer is especially active downtown.',
+          'FoCo Beer Week and Taste of Fort Collins bring thousands to Civic Center Park and Old Town each June. Bohemian Nights at NewWestFest (August) is a free multi-day music festival on Mountain Avenue. The CSU Lagoon Concert Series offers free outdoor shows on campus in June and July.',
+          'Year-round, the Fort Collins Farmers Market at Old Town Square is a Saturday staple for local produce and artisans. Visit Fort Collins maintains the most complete community events calendar for the city.',
+        ],
+        relatedLinks: [
+          { title: 'Fort Collins homes & neighborhoods', href: '/northern-colorado-areas/fort-collins/', description: 'Area guide + market data' },
+        ],
+      },
+      {
+        heading: 'Loveland & Larimer County events',
+        paragraphs: [
+          'Loveland — the Sweetheart City — is known for Valentine re-mailing, public art, and summer festivals. Sculpture in the Park (August) at Benson Sculpture Garden is one of the largest outdoor sculpture shows in the U.S.',
+          'The Corn Roast Festival brings downtown Loveland to life each August. Rhythm on the River offers free summer concerts along the recreation trail. Larimer County Fair at The Ranch in Loveland rounds out the summer with rodeo, carnival, and livestock shows.',
+        ],
+        relatedLinks: [
+          { title: 'Loveland area guide', href: '/northern-colorado-areas/loveland/', description: 'Homes for sale in Loveland' },
+        ],
+      },
+      {
+        heading: 'Windsor, Timnath & northern Weld-Larimer growth',
+        paragraphs: [
+          'Windsor\'s Harvest Festival (September) is the town\'s signature celebration — parade, carnival, and community gathering. Windsor Lake hosts summer paddleboarding, concerts, and outdoor recreation.',
+          'Timnath and Severance continue to grow as master-planned communities; both host seasonal town concerts and holiday events. Buyers relocating for newer construction often ask about these events when comparing Windsor vs Timnath.',
+        ],
+        relatedLinks: [
+          { title: 'Windsor area guide', href: '/northern-colorado-areas/windsor/', description: 'Weld-Larimer border communities' },
+          { title: 'Timnath area guide', href: '/northern-colorado-areas/timnath/', description: 'New construction & growth' },
+        ],
+      },
+      {
+        heading: 'Greeley, Evans & Weld County',
+        paragraphs: [
+          'The Greeley Stampede (June–July) at Island Grove Regional Park is Colorado\'s legendary rodeo and entertainment festival — PRCA rodeo, national concerts, carnival, and weeks of Weld County celebration.',
+          'Greeley Arts Picnic fills Lincoln Park in July. Friday Fest brings downtown Greeley to life on summer Fridays. The University of Northern Colorado adds concerts, athletics, and cultural programming year-round.',
+          'Smaller Weld communities — Evans, Eaton, Milliken, La Salle — host their own parades and town days while staying minutes from Stampede and Greeley amenities.',
+        ],
+        relatedLinks: [
+          { title: 'Greeley area guide', href: '/northern-colorado-areas/greeley/', description: 'Affordable Weld County living' },
+        ],
+      },
+      {
+        heading: 'Longmont, Boulder County & the Carbon Valley',
+        paragraphs: [
+          'Longmont\'s Farmers Market (April–November) is one of Colorado\'s largest. Rhythm on the River and Longmont Oktoberfest draw Boulder County residents and Front Range visitors.',
+          'Boulder Creek Festival (Memorial Day weekend) and the Colorado Shakespeare Festival on the CU campus are regional draws. Niwot\'s Jazz Festival and Sunday farmers market offer small-town charm between Boulder and Longmont.',
+          'Firestone and Frederick in the Carbon Valley host summer concerts and community celebrations with easy access to Longmont and the I-25 corridor.',
+        ],
+        relatedLinks: [
+          { title: 'Longmont area guide', href: '/northern-colorado-areas/longmont/', description: 'Boulder County value' },
+          { title: 'Firestone area guide', href: '/northern-colorado-areas/firestone/', description: 'Carbon Valley growth' },
+        ],
+      },
+      {
+        heading: 'Seasonal snapshot — when to visit or explore',
+        paragraphs: [
+          'Spring (March–May): Farmers markets reopen; Boulder Creek Festival; spring seller prep season in real estate.',
+          'Summer (June–August): Peak festival season — Stampede, NewWestFest, Sculpture in the Park, beer weeks, and outdoor concerts.',
+          'Fall (September–October): Harvest festivals, Oktoberfest events, and a strong fall housing market in Northern Colorado.',
+          'Winter (November–February): Holiday events, Loveland Valentine re-mailing, and indoor cultural programming at museums and universities.',
+        ],
+        list: [
+          'Visit official city calendars before planning around specific dates',
+          'Explore neighborhoods near event venues if you are house hunting',
+          'Ask a local agent how event traffic and seasonality affect each area',
+        ],
+      },
+      {
+        heading: 'Official sources for current event dates',
+        paragraphs: [
+          'Event dates change year to year. For the latest schedules, use official sources: Visit Fort Collins (visitftcollins.com/events), City of Loveland events calendar (lovgov.org), City of Fort Collins events, Visit Greeley, and regional listings such as This is NOCO.',
+          'Schwartz and Associates updates this guide periodically — not daily. We focus on flagship events that define community life for buyers considering a move to Northern Colorado.',
+        ],
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug) {
   return blogPosts.find((post) => post.slug === slug);
+}
+
+export function getLatestMarketUpdatePost() {
+  const latest = getBlogPost(LATEST_MARKET_UPDATE_SLUG);
+  if (latest) return latest;
+
+  return [...blogPosts]
+    .filter((post) => post.category === 'Market Update')
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 }
 
 export function getBlogPostUrl(slug) {

@@ -22,7 +22,7 @@ Maintain per city (update weekly):
 (Hermes: append dated wins here — ranking improvements, new indexation, PRs merged, lead page CRO fixes)
 
 ## Content calendar state
-(Hermes: maintain per content-calendar.md — rotation_week_index, last_social_pillar, last_3_social_hooks, monthly_market_blog_url)
+(Hermes: maintain per content-calendar.md — rotation_week_index, last_social_pillar, last_3_social_hooks, monthly_market_blog_url, latest_market_update_slug. See repo-maintenance-checklist.md when shipping market updates.)
 
 ## Open blockers
 (Hermes: list integration gaps preventing full automation — do NOT list Browserbase missing as blocker for social; social uses SMTP email packs)

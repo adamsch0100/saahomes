@@ -22,7 +22,7 @@ Adam publishes manually in Meta Business Suite + GBP (phone or desktop).
 - CHFA/program updates (seasonal)
 - After Adam requests a post pack
 
-**Calendar:** `context/content-calendar.md` — pillars, Wed rotation, holidays, blog vs social matrix.
+**Calendar:** `context/content-calendar.md` + **`context/holiday-calendar.md`** (approved holidays only)
 
 ---
 
@@ -34,7 +34,7 @@ Adam publishes manually in Meta Business Suite + GBP (phone or desktop).
 | `market-pulse` | Weekly stat / trend |
 | `seller-tip` / `buyer-tip` | Actionable advice |
 | `community` | Local event, city spotlight |
-| `seasonal` / `holiday` | Memorial Day, spring market |
+| `seasonal` / `holiday` | Approved holidays only — see `holiday-calendar.md` |
 | `program` | CHFA reminder |
 | `news-react` | Rates, Colorado housing news |
 
@@ -49,6 +49,7 @@ Adam publishes manually in Meta Business Suite + GBP (phone or desktop).
 3. Write platform-specific captions: **GBP, Facebook, Instagram, X** (required every pack)
 4. Instagram **must** include an image URL
 5. **No new video production** — if no video, omit or set `video_note: "No video — image + link post only"`
+6. Set **`post_by`** (e.g. `"Wednesday — within 48 hours"`) and **`operator_schedule`** step list so Adam knows exactly what to do when he opens the email
 
 ---
 
@@ -60,6 +61,14 @@ Save to `outreach/pending/social-{date}-{slug}.json`:
 {
   "subject": "SAA Homes — Social posts | [page title]",
   "intro": "New content is live. Copy each block into Meta Business Suite (FB+IG) and GBP.",
+  "post_by": "Today or Wednesday — within 48 hours",
+  "operator_schedule": [
+    "Open the promoted URL below and confirm the page looks good live",
+    "Meta Business Suite: create post for Facebook + @saa_homes Instagram — upload attached image, paste IG caption, add link",
+    "Google Business Profile: new update — paste GBP caption, add same image, set link button to promoted URL",
+    "X (@saahomes): paste X caption with link",
+    "Optional: reply posted on Telegram"
+  ],
   "promoting": {
     "title": "Page title",
     "url": "https://saahomes.com/..."

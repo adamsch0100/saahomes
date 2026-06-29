@@ -119,6 +119,7 @@ export default function Header() {
                 </div>
               </div>
               <Link to="/for-sellers/" className="hover:text-gray-200 transition-colors">For Sellers</Link>
+              <Link to="/blog/" className="hover:text-gray-200 transition-colors">Real Estate Guides</Link>
               <Link to="/contact/" className="hover:text-gray-200 transition-colors">Contact</Link>
               <Link to="/properties/" className="hover:text-gray-200 transition-colors">Sign In / Sign Up</Link>
             </nav>

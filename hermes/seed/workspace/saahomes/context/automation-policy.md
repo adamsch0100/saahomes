@@ -74,8 +74,11 @@ See `context/social-channels.md` and `social-post-pack` skill.
 
 ### GBP + social posts
 - Email post pack to Adam (captions + images) — Adam publishes manually in Meta Business Suite + GBP
+- Email weekly operator schedule every Monday — Adam's day-by-day checklist
 
-**Workflow:** draft → `send-social-post-pack.py` → email + Telegram notice. No auto-publish.
+**Workflow:** draft → `send-social-post-pack.py` or `send-operator-weekly-email.py` → email + Telegram notice. No auto-publish.
+
+**Post-ship maintenance:** `context/repo-maintenance-checklist.md` (market slug, supersededBy, MEMORY)
 
 ### Never autonomous (hard stops)
 - Replying to website lead form submissions

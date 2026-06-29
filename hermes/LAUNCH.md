@@ -111,7 +111,7 @@ LAUNCH PACKAGE:
 
 ### Step 2 — First boot (Hermes)
 Send to Hermes (dashboard or Telegram once paired):
-> Run AGENTS.md first-boot checklist. Install all cron jobs from automation-registry.md. Install browse.sh skills from skills-registry.md (Zillow, Realtor, Walk Score). Pin models. Run baseline GEO audit on 5 Tier S questions. Report readiness.
+> Run AGENTS.md first-boot checklist. Read context/repo-maintenance-checklist.md and context/local-events-sources.md. Install all 23 cron jobs from automation-registry.md (including weekly-operator-schedule, local-events-monthly, local-events-quarterly). Install browse.sh skills from skills-registry.md (Zillow, Realtor, Walk Score). Pin models. Run baseline GEO audit on 5 Tier S questions. Report readiness.
 
 ### Step 3 — Conversion instrumentation (me)
 1. Add GA4 to `index.html`

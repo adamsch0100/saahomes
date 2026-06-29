@@ -66,11 +66,21 @@ For social post pack sent:
 📧 SOCIAL POST PACK — [page title]
 Email sent to adam@saahomes.com
 Promoting: [url]
-Platforms: GBP · Facebook · Instagram [+ YouTube/X if included]
+Post by: [post_by from pack]
+Platforms: GBP · Facebook · Instagram · X
 Image attached: yes/no
 ---
 Publish in Meta Business Suite + GBP when ready.
 Reply "posted" when live (optional).
+```
+
+For weekly operator schedule sent:
+```
+📧 WEEKLY OPERATOR SCHEDULE — [week_label]
+Email sent to adam@saahomes.com
+Wednesday: social post pack expected
+Thursday: outreach review on Telegram
+Pending packs: [count or none]
 ```
 
 ---
@@ -79,6 +89,8 @@ Reply "posted" when live (optional).
 
 - **Channel:** Telegram (primary) + **email for social post packs**
 - **Daily digest:** 7:30 AM MT — only if something was executed yesterday (not noise)
+- **Monday 7:15 AM MT:** Weekly operator schedule email (day-by-day tasks)
+- **Wednesday 10 AM MT:** Weekly social post pack email
 - **Immediate:** P0 regressions, deploy failures, outreach drafts ready, social post pack emailed
 - **Weekly war room:** Monday 8 AM MT — full picture even if quiet week
 
@@ -98,6 +110,7 @@ Reply "posted" when live (optional).
 - CHFA/program pages: current year + official source links
 - Blog posts from content calendar (`content-calendar.md`) — **publish without asking**
 - Fair Housing always; never guarantee outcomes
+- **Holiday social:** approved list only in `holiday-calendar.md` — no DEI, political, or awareness-day posts
 
 ---
 

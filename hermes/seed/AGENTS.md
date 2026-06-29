@@ -3,6 +3,9 @@
 **Scope:** https://saahomes.com only. **Goal:** Own Northern Colorado buyer + seller search demand for Schwartz and Associates.
 
 Read these context files every week:
+- `context/local-events-sources.md` — **monthly/quarterly events curation, sources, SEO**
+- `context/holiday-calendar.md` — **approved holidays only; no awareness/DEI/political posts**
+- `context/repo-maintenance-checklist.md` — **blog/market slug updates, social emails, post-ship checklist**
 - `context/content-calendar.md` — **blog + social pillars, weekly rotation, quality bar**
 - `context/hard-rules.md` — **social = email only; Browserbase = intel only (NON-NEGOTIABLE)**
 - `context/operator-playbook.md` — Adam + Hermes master process
@@ -42,7 +45,12 @@ Re-run checklist item 5 monthly (full 19-city rotation via delegation batches of
 |------|-----------------|
 | `src/data/areaSeo.js` | 19 city landing pages — primary local SEO weapon |
 | `src/data/siteRoutes.js` | Sitemap + prerender registry |
-| `src/data/blogPosts.js` | Topical authority + long-tail |
+| `src/data/blogPosts.js` | Topical authority + long-tail + **`LATEST_MARKET_UPDATE_SLUG`** |
+| `src/components/LatestMarketUpdateBanner.jsx` | Homepage, for-sellers, area pages → latest market report |
+| `src/data/localEvents.js` | Curated per-city events + `LATEST_EVENTS_GUIDE_SLUG` |
+| `src/components/AreaEventsSection.jsx` | Events block on all area pages |
+| `hermes/scripts/send-social-post-pack.py` | Email Adam social captions (deployed to `/usr/local/bin/`) |
+| `hermes/scripts/send-operator-weekly-email.py` | Email Adam Monday weekly schedule |
 | `src/utils/seoConstants.js` | NAP, schema, business entity |
 | `src/components/SEO.jsx` | Meta + JSON-LD |
 | `src/components/AreaSEO.jsx` | Per-city schema |
