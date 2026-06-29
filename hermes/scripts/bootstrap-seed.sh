@@ -43,6 +43,53 @@ env_file_key_set() {
   [ -n "$val" ]
 }
 
+env_file_get() {
+  key="$1"
+  env_file_key_set "$key" || return 1
+  grep "^${key}=" "$ENV_FILE" | tail -1 | cut -d= -f2-
+}
+
+normalize_env_value() {
+  printf '%s' "$1" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'$//"
+}
+
+resolve_telegram_allowed_users() {
+  if env_key_set TELEGRAM_ALLOWED_USERS; then
+    normalize_env_value "${TELEGRAM_ALLOWED_USERS}"
+    return 0
+  fi
+  if env_file_key_set TELEGRAM_ALLOWED_USERS; then
+    normalize_env_value "$(env_file_get TELEGRAM_ALLOWED_USERS)"
+    return 0
+  fi
+  return 1
+}
+
+telegram_allow_from_json() {
+  allowed_csv="$(normalize_env_value "$1")"
+  [ -n "$allowed_csv" ] || return 1
+  json='['
+  first=1
+  old_ifs="$IFS"
+  IFS=','
+  # shellcheck disable=SC2086
+  set -- $allowed_csv
+  IFS="$old_ifs"
+  for user_id in "$@"; do
+    user_id="$(normalize_env_value "$user_id")"
+    [ -n "$user_id" ] || continue
+    if [ "$first" -eq 1 ]; then
+      first=0
+    else
+      json="${json},"
+    fi
+    json="${json}\"${user_id}\""
+  done
+  json="${json}]"
+  [ "$first" -eq 1 ] && return 1
+  printf '%s' "$json"
+}
+
 browserbase_ready() {
   if env_key_set BROWSERBASE_API_KEY && env_key_set BROWSERBASE_PROJECT_ID; then
     return 0
@@ -121,7 +168,7 @@ append_env() {
 upsert_env() {
   key="$1"
   value="$2"
-  value="$(printf '%s' "$value" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'$//")"
+  value="$(normalize_env_value "$value")"
   if [ -z "$value" ]; then
     return 0
   fi
@@ -224,8 +271,17 @@ fi
 export HERMES_HOME="$DATA_DIR"
 if command -v hermes >/dev/null 2>&1; then
   hermes config set gateway.platforms.telegram.enabled true 2>/dev/null || true
-  if [ -n "${TELEGRAM_ALLOWED_USERS:-}" ]; then
-    hermes config set gateway.platforms.telegram.extra.allow_from "[\"${TELEGRAM_ALLOWED_USERS}\"]" 2>/dev/null || true
+  if telegram_allowed="$(resolve_telegram_allowed_users)"; then
+    upsert_env "TELEGRAM_ALLOWED_USERS" "$telegram_allowed"
+    export TELEGRAM_ALLOWED_USERS="$telegram_allowed"
+    if allow_from_json="$(telegram_allow_from_json "$telegram_allowed")"; then
+      hermes config set gateway.platforms.telegram.extra.allow_from "$allow_from_json" 2>/dev/null || true
+      echo "Telegram allowlist synced: ${allow_from_json}"
+    else
+      echo "WARNING: TELEGRAM_ALLOWED_USERS is set but could not build allow_from JSON"
+    fi
+  else
+    echo "WARNING: Telegram enabled but TELEGRAM_ALLOWED_USERS is unset — DMs will be blocked until you set it in Railway or run repair-telegram.sh"
   fi
   hermes config set browser.cloud_provider browserbase 2>/dev/null || true
   hermes config set browser.inactivity_timeout 300 2>/dev/null || true
