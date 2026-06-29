@@ -65,31 +65,6 @@ resolve_telegram_allowed_users() {
   return 1
 }
 
-telegram_allow_from_json() {
-  allowed_csv="$(normalize_env_value "$1")"
-  [ -n "$allowed_csv" ] || return 1
-  json='['
-  first=1
-  old_ifs="$IFS"
-  IFS=','
-  # shellcheck disable=SC2086
-  set -- $allowed_csv
-  IFS="$old_ifs"
-  for user_id in "$@"; do
-    user_id="$(normalize_env_value "$user_id")"
-    [ -n "$user_id" ] || continue
-    if [ "$first" -eq 1 ]; then
-      first=0
-    else
-      json="${json},"
-    fi
-    json="${json}\"${user_id}\""
-  done
-  json="${json}]"
-  [ "$first" -eq 1 ] && return 1
-  printf '%s' "$json"
-}
-
 browserbase_ready() {
   if env_key_set BROWSERBASE_API_KEY && env_key_set BROWSERBASE_PROJECT_ID; then
     return 0
@@ -270,15 +245,15 @@ fi
 # Volume seeded on first boot may predate gateway.platforms.telegram in config.yaml.
 export HERMES_HOME="$DATA_DIR"
 if command -v hermes >/dev/null 2>&1; then
-  hermes config set gateway.platforms.telegram.enabled true 2>/dev/null || true
   if telegram_allowed="$(resolve_telegram_allowed_users)"; then
     upsert_env "TELEGRAM_ALLOWED_USERS" "$telegram_allowed"
     export TELEGRAM_ALLOWED_USERS="$telegram_allowed"
-    if allow_from_json="$(telegram_allow_from_json "$telegram_allowed")"; then
-      hermes config set gateway.platforms.telegram.extra.allow_from "$allow_from_json" 2>/dev/null || true
-      echo "Telegram allowlist synced: ${allow_from_json}"
+    if [ -x /usr/local/bin/sync-telegram-auth.sh ]; then
+      /usr/local/bin/sync-telegram-auth.sh || echo "WARNING: sync-telegram-auth.sh failed"
+    elif [ -f /seed/scripts/sync-telegram-auth.sh ]; then
+      sh /seed/scripts/sync-telegram-auth.sh || echo "WARNING: sync-telegram-auth.sh failed"
     else
-      echo "WARNING: TELEGRAM_ALLOWED_USERS is set but could not build allow_from JSON"
+      echo "WARNING: sync-telegram-auth.sh not found — Telegram may block DMs"
     fi
   else
     echo "WARNING: Telegram enabled but TELEGRAM_ALLOWED_USERS is unset — DMs will be blocked until you set it in Railway or run repair-telegram.sh"
