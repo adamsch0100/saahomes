@@ -6,6 +6,7 @@ import { BUSINESS } from '../src/utils/seoConstants.js';
 import { areaSeoPages, buildAreaPageSchemas } from '../src/data/areaSeo.js';
 import { blogPosts } from '../src/data/blogPosts.js';
 import { AREA_FAQS } from '../src/data/areaFaqs.js';
+import { CHFA_PAGE_CONFIGS, CHFA_PROGRAMS, CHFA_DPA_OPTIONS, CHFA_REQUIREMENTS, CHFA_COUNTY_LIMITS, CHFA_SPECIALTY_PROGRAMS } from '../src/data/chfaData.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const distDir = join(__dirname, '../dist');
@@ -112,6 +113,10 @@ function matchBlogPost(path) {
   const match = path.match(/^\/blog\/([^/]+)\/$/);
   if (!match) return null;
   return blogPosts.find((p) => p.slug === match[1]) || null;
+}
+
+function matchChfaPage(path) {
+  return CHFA_PAGE_CONFIGS[path] || null;
 }
 
 function getOgImageForRoute(route) {
@@ -525,6 +530,140 @@ function injectGenericBody(html, { title }) {
 }
 
 // ---------------------------------------------------------------------------
+// CHFA body content injection
+// ---------------------------------------------------------------------------
+
+function injectChfaBody(html, config) {
+  const title = escapeHtml(config.title || '');
+  const tagline = escapeHtml(config.tagline || '');
+  const introHtml = (config.introParagraphs || [])
+    .map((p) => `      <p class="prerendered-intro">${escapeHtml(p)}</p>`)
+    .join('\n');
+
+  // CHFA Programs table
+  let programsHtml = '';
+  if (config.programs && CHFA_PROGRAMS && CHFA_PROGRAMS.length > 0) {
+    programsHtml =
+      `      <section class="prerendered-chfa-section">\n` +
+      `        <h2>CHFA Loan Programs at a Glance</h2>\n` +
+      `        <p>CHFA offers multiple first mortgage programs. The right one depends on your buyer status, loan type preference, and income.</p>\n` +
+      `        <table class="prerendered-table">\n` +
+      `          <thead><tr><th>Program</th><th>Loan type</th><th>DPA options</th><th>Best for</th></tr></thead>\n` +
+      `          <tbody>\n` +
+      CHFA_PROGRAMS.map((p) =>
+        `            <tr><td><strong>${escapeHtml(p.name)}</strong></td><td>${escapeHtml(p.loanType)}</td><td>${escapeHtml(p.dpa)}</td><td>${escapeHtml(p.bestFor)}</td></tr>`
+      ).join('\n') +
+      `\n          </tbody>\n` +
+      `        </table>\n` +
+      `      </section>\n`;
+  }
+
+  // DPA Options
+  let dpaHtml = '';
+  if (config.dpaOptions) {
+    dpaHtml =
+      `      <section class="prerendered-chfa-section">\n` +
+      `        <h2>Two Ways CHFA Helps With Your Down Payment</h2>\n` +
+      `        <div class="prerendered-dpa-grid">\n` +
+      (CHFA_DPA_OPTIONS || []).map((opt) =>
+        `          <div class="prerendered-dpa-card">\n` +
+        `            <h3>${escapeHtml(opt.title)}</h3>\n` +
+        `            <p><strong>${escapeHtml(opt.amount)}</strong></p>\n` +
+        `            <p>${escapeHtml(opt.detail)}</p>\n` +
+        `          </div>`
+      ).join('\n') +
+      `\n        </div>\n` +
+      `      </section>\n`;
+  }
+
+  // Requirements
+  let reqHtml = '';
+  if (config.requirements) {
+    reqHtml =
+      `      <section class="prerendered-chfa-section">\n` +
+      `        <h2>General CHFA Requirements</h2>\n` +
+      `        <ul>\n` +
+      (CHFA_REQUIREMENTS || []).map((r) =>
+        `          <li><strong>${escapeHtml(r.label)}:</strong> ${escapeHtml(r.value)}</li>`
+      ).join('\n') +
+      `\n        </ul>\n` +
+      `      </section>\n`;
+  }
+
+  // County limits
+  let countyHtml = '';
+  if (config.countyLimits) {
+    countyHtml =
+      `      <section class="prerendered-chfa-section">\n` +
+      `        <h2>Northern Colorado CHFA Income & Price Limits</h2>\n` +
+      `        <table class="prerendered-table">\n` +
+      `          <thead><tr><th>County</th><th>Communities</th><th>Income range</th><th>Price limit</th></tr></thead>\n` +
+      `          <tbody>\n` +
+      (CHFA_COUNTY_LIMITS || []).map((c) =>
+        `            <tr><td><strong>${escapeHtml(c.county)}</strong></td><td>${escapeHtml(c.cities)}</td><td>${escapeHtml(c.incomeRange)}</td><td>${escapeHtml(c.priceRange)}</td></tr>`
+      ).join('\n') +
+      `\n          </tbody>\n` +
+      `        </table>\n` +
+      `      </section>\n`;
+  }
+
+  // Specialty programs
+  let specialtyHtml = '';
+  if (config.specialtyPrograms) {
+    specialtyHtml =
+      `      <section class="prerendered-chfa-section">\n` +
+      `        <h2>Specialty CHFA Programs</h2>\n` +
+      `        <ul>\n` +
+      (CHFA_SPECIALTY_PROGRAMS || []).map((s) =>
+        `          <li><strong>${escapeHtml(s.title)}</strong> — ${escapeHtml(s.audience)}: ${escapeHtml(s.benefit)}</li>`
+      ).join('\n') +
+      `\n        </ul>\n` +
+      `      </section>\n`;
+  }
+
+  // FAQ section
+  let faqHtml = '';
+  if (config.faqs && config.faqs.length > 0) {
+    faqHtml =
+      `      <section class="prerendered-faq">\n` +
+      `        <h2>Frequently Asked Questions About CHFA Down Payment Assistance</h2>\n` +
+      config.faqs.map((faq) =>
+        `        <div itemscope="" itemprop="mainEntity" itemtype="https://schema.org/Question">\n` +
+        `          <h3 itemprop="name">${escapeHtml(faq.q)}</h3>\n` +
+        `          <div itemscope="" itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">\n` +
+        `            <p itemprop="text">${escapeHtml(faq.a)}</p>\n` +
+        `          </div>\n` +
+        `        </div>`
+      ).join('\n') +
+      `\n      </section>\n`;
+  }
+
+  // CTA
+  const ctaHtml =
+    `      <section class="prerendered-cta">\n` +
+    `        <h2>Work With Schwartz and Associates</h2>\n` +
+    `        <p>${escapeHtml(config.contactCta || '')}</p>\n` +
+    `      </section>\n`;
+
+  const bodyContent =
+    `\n` +
+    `    <div class="prerendered-chfa-content">\n` +
+    `      <h1>${title}</h1>\n` +
+    `      ${tagline ? `<p class="prerendered-tagline"><strong>${tagline}</strong></p>\n` : ''}` +
+    `${introHtml}\n` +
+    `${programsHtml}` +
+    `${dpaHtml}` +
+    `${reqHtml}` +
+    `${countyHtml}` +
+    `${specialtyHtml}` +
+    `${faqHtml}` +
+    `${ctaHtml}` +
+    `    </div>\n  `;
+
+  return html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+}
+
+// ---------------------------------------------------------------------------
 
 function buildRouteSchemas(route) {
   const { path, title, description } = route;
@@ -676,6 +815,7 @@ for (const route of routes) {
   // 4. Inject visible body content into <div id="root"> for crawlers
   const area = matchAreaPage(route.path);
   const blogPost = matchBlogPost(route.path);
+  const chfaPage = matchChfaPage(route.path);
   if (area) {
     html = injectAreaBody(html, area);
     console.log(
@@ -685,6 +825,11 @@ for (const route of routes) {
     html = injectBlogBody(html, blogPost);
     console.log(
       `  Body: injected blog "${blogPost.slug}" with ${blogPost.sections?.length || 0} sections + ${blogPost.faqs?.length || 0} FAQs + CTA`
+    );
+  } else if (chfaPage) {
+    html = injectChfaBody(html, chfaPage);
+    console.log(
+      `  Body: injected CHFA page "${chfaPage.slug}" with ${chfaPage.faqs?.length || 0} FAQs + programs + requirements + CTA`
     );
   } else {
     html = injectGenericBody(html, route);
