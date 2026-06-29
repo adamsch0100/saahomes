@@ -58,7 +58,7 @@ Optional but recommended:
 | 11 | **GA4 service account** (optional) | Admin → Property access for Hermes service account email | Hermes reads conversion reports |
 | 12 | **List of conversion events you care about** | contact submit, market report, CHFA forms | Hermes optimizes for leads not clicks |
 
-**Note:** Site currently has **no GA4 installed** — we will add gtag + form events when you send measurement ID.
+**Note:** Site uses Google tag `G-CB5GL0P3EZ` (stream `G-BVWCZE025P` for saahomes.com) in `index.html` + `generate_lead` on all form submits. Hermes still needs a **GA4 service account** (optional env) to read reports autonomously.
 
 ---
 

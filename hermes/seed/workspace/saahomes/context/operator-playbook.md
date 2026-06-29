@@ -157,7 +157,7 @@ Hermes installs browse.sh skills on first boot (`skills-registry.md`). Browserba
 | Telegram | ✅ DONE messages arrive |
 | GitHub + Railway | SEO PRs merge → saahomes.com updates |
 | GSC service account | Hermes ranking reports mention GSC data |
-| GA4 `G-CB5GL0P3EZ` | Realtime + generate_lead events |
+| GA4 `G-CB5GL0P3EZ` (stream `G-BVWCZE025P`) | Realtime + generate_lead events |
 | SMTP `OUTREACH_SMTP_*` | Outreach + social post pack emails arrive |
 | Browserbase (optional) | Boot log or `repair-browserbase.sh` OK |
 | Follow Up Boss | Backend env — form test hits FUB |
