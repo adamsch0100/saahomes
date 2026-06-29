@@ -1,4 +1,5 @@
-export const GA4_MEASUREMENT_ID = 'G-TSHFHCL0LL';
+/** Google tag ID (install snippet). Stream measurement ID: G-BVWCZE025P */
+export const GA4_MEASUREMENT_ID = 'G-CB5GL0P3EZ';
 
 export function trackLeadConversion(leadType, metadata = {}) {
   if (typeof window === 'undefined' || typeof window.gtag !== 'function') {
