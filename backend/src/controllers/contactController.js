@@ -1,6 +1,7 @@
 import getPool from '../config/database.js';
 import { sendContactNotification } from '../services/emailService.js';
 import { forwardContactToFollowUpBoss } from '../services/followUpBossService.js';
+import { recordLeadConversion } from '../services/ga4MeasurementService.js';
 import logger from '../utils/logger.js';
 
 export const submitContactForm = async (req, res) => {
@@ -35,6 +36,10 @@ export const submitContactForm = async (req, res) => {
 
     forwardContactToFollowUpBoss(submission).catch((err) => {
       logger.error('Follow Up Boss forwarding failed (non-blocking)', err);
+    });
+
+    recordLeadConversion('contact', req.body).catch((err) => {
+      logger.warn('GA4 lead event failed (non-blocking)', { message: err.message });
     });
 
     logger.info('Contact form submitted', { id: submission.id, email, sourcePage });

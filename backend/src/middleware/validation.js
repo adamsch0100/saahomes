@@ -7,6 +7,7 @@ const leadMetadataFields = [
   body('utmCampaign').optional().trim().isLength({ max: 100 }),
   body('landingPage').optional().trim().isLength({ max: 255 }),
   body('referrer').optional().trim().isLength({ max: 500 }),
+  body('gaClientId').optional().trim().isLength({ max: 64 }),
 ];
 
 export const validateContactSubmission = [

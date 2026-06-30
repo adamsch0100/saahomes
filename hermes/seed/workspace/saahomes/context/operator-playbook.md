@@ -119,7 +119,7 @@ This is the revenue layer. Hermes optimizes pages; **you close leads**.
 | CHFA / program forms | Buyer nurture — program accuracy matters |
 | Phone (970) 999-1407 | Always answer or callback fast |
 
-**Verify once (you):** GA4 Admin → `generate_lead` marked as **key event**. Check Realtime after a test form submit.
+**Verify once (you):** GA4 Admin → Key events → New key event → type **`saa_lead_submit`** (or `generate_lead`). If neither appears in dropdown yet, pre-register the name anyway — it will apply once events arrive. After form submit, URL gains `?lead_submitted=contact` for Admin → Events → Create event fallback. Use **DebugView** with `?ga_debug=1` on any page URL.
 
 Hermes crons watch form API health — if you see a Telegram alert, treat as P0.
 
@@ -157,7 +157,8 @@ Hermes installs browse.sh skills on first boot (`skills-registry.md`). Browserba
 | Telegram | ✅ DONE messages arrive |
 | GitHub + Railway | SEO PRs merge → saahomes.com updates |
 | GSC service account | Hermes ranking reports mention GSC data |
-| GA4 `G-CB5GL0P3EZ` (stream `G-BVWCZE025P`) | Realtime + generate_lead events |
+| GA4 `G-CB5GL0P3EZ` (stream `G-BVWCZE025P`) | Realtime + `generate_lead` + `saa_lead_submit` events |
+| GA4 Measurement Protocol secret on **backend** | Server-side lead events when browser tag blocked |
 | SMTP `OUTREACH_SMTP_*` | Outreach + social post pack emails arrive |
 | Browserbase (optional) | Boot log or `repair-browserbase.sh` OK |
 | Follow Up Boss | Backend env — form test hits FUB |

@@ -35,7 +35,7 @@ import GHopeHomeLoanPage from "./pages/GHopeHomeLoanPage.jsx";
 import AreaGuidePage from "./pages/AreaGuidePage.jsx";
 import FloatingContactBar from "./components/FloatingContactBar.jsx";
 import { loadRealScoutScript } from "./utils/realscout.js";
-import { GA4_MEASUREMENT_ID } from "./utils/analytics.js";
+import { GA4_MEASUREMENT_ID, initGaDebugMode } from "./utils/analytics.js";
 
 function AppLayout({ children }) {
   const location = useLocation();
@@ -76,6 +76,9 @@ export default function App() {
   }, [location.pathname]);
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    initGaDebugMode(searchParams);
+
     if (typeof window.gtag === 'function') {
       window.gtag('config', GA4_MEASUREMENT_ID, {
         page_path: location.pathname + location.search,
