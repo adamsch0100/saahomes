@@ -1,6 +1,7 @@
 import getPool from '../config/database.js';
 import { sendGhopeLeadNotification } from '../services/emailService.js';
 import { forwardGhopeLeadToFollowUpBoss } from '../services/followUpBossService.js';
+import { recordLeadConversion } from '../services/ga4MeasurementService.js';
 import logger from '../utils/logger.js';
 
 export const submitGhopeLeadForm = async (req, res) => {
@@ -36,6 +37,10 @@ export const submitGhopeLeadForm = async (req, res) => {
 
     forwardGhopeLeadToFollowUpBoss(submission).catch((err) => {
       logger.error('Follow Up Boss forwarding failed (non-blocking)', err);
+    });
+
+    recordLeadConversion('g_hope_greeley', req.body).catch((err) => {
+      logger.warn('GA4 lead event failed (non-blocking)', { message: err.message });
     });
 
     logger.info('G-HOPE lead form submitted', { id: submission.id, email, sourcePage });

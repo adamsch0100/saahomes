@@ -1,6 +1,7 @@
 import getPool from '../config/database.js';
 import { sendChfaLeadNotification } from '../services/emailService.js';
 import { forwardChfaLeadToFollowUpBoss } from '../services/followUpBossService.js';
+import { recordLeadConversion } from '../services/ga4MeasurementService.js';
 import logger from '../utils/logger.js';
 
 export const submitChfaLeadForm = async (req, res) => {
@@ -36,6 +37,10 @@ export const submitChfaLeadForm = async (req, res) => {
 
     forwardChfaLeadToFollowUpBoss(submission).catch((err) => {
       logger.error('Follow Up Boss forwarding failed (non-blocking)', err);
+    });
+
+    recordLeadConversion('chfa_schools_to_home', req.body).catch((err) => {
+      logger.warn('GA4 lead event failed (non-blocking)', { message: err.message });
     });
 
     logger.info('CHFA lead form submitted', { id: submission.id, email, sourcePage });

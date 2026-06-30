@@ -1,3 +1,5 @@
+import { getGaClientId } from './analytics.js';
+
 const STORAGE_KEY = 'saa_lead_attribution';
 
 export function captureLeadAttribution() {
@@ -28,6 +30,7 @@ export function getLeadMetadata(sourcePage = '') {
     utmCampaign: attribution.utmCampaign,
     landingPage: attribution.landingPage,
     referrer: attribution.referrer,
+    gaClientId: getGaClientId(),
   };
 }
 
