@@ -1,5 +1,5 @@
-/** Google tag ID (install snippet). Stream measurement ID: G-BVWCZE025P */
-export const GA4_MEASUREMENT_ID = 'G-CB5GL0P3EZ';
+/** GA4 web stream measurement ID for saahomes.com (Admin → Data streams) */
+export const GA4_MEASUREMENT_ID = 'G-BVWCZE025P';
 
 /** Custom event name — often registers in GA4 Admin faster than generate_lead alone */
 export const SAA_LEAD_EVENT = 'saa_lead_submit';
@@ -33,7 +33,6 @@ function sendGaEvent(eventName, params = {}) {
   }
 
   window.gtag('event', eventName, {
-    send_to: GA4_MEASUREMENT_ID,
     transport_type: 'beacon',
     ...params,
   });

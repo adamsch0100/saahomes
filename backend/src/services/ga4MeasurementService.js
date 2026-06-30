@@ -1,6 +1,6 @@
 import logger from '../utils/logger.js';
 
-const MEASUREMENT_ID = process.env.GA4_MEASUREMENT_ID || 'G-CB5GL0P3EZ';
+const MEASUREMENT_ID = process.env.GA4_MEASUREMENT_ID || 'G-BVWCZE025P';
 const API_SECRET = process.env.GA4_MEASUREMENT_API_SECRET;
 
 function buildClientId(gaClientId) {
