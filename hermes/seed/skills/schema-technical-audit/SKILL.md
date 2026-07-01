@@ -23,6 +23,8 @@ Full site technical health for Schwartz and Associates lead generation.
 - [ ] No JSON-LD syntax errors (validate structure)
 - [ ] NAP matches seoConstants.js exactly
 
+**Cron-safe live checks:** `python3 /usr/local/bin/fetch-page-audit.py <url> --pretty` — never `curl | python3`.
+
 ### Prerender / SPA
 - [ ] View source on 3 pages — meta title/description in static HTML (not JS-only)
 - [ ] og: tags present

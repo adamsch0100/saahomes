@@ -31,6 +31,18 @@ If Adam asks about social: **email the pack**, not Browserbase.
 
 ---
 
+## Cron / unattended command safety
+
+| DO | DO NOT |
+|----|--------|
+| `python3 /usr/local/bin/fetch-page-audit.py https://saahomes.com/...` | `curl ... \| python3` (tirith blocks → Broken pipe in cron) |
+| `python3 /usr/local/bin/send-social-post-pack.py pack.json` | Shell pipes from curl/wget into python/bash/jq |
+| Read repo files for pre-deploy schema/meta checks | Wait for command approval in cron (no user present) |
+
+See `autonomous-execute` skill § Verify live.
+
+---
+
 ## If MEMORY or old messages say otherwise
 
 **This file wins.** Update MEMORY.md `## Integration status` to match and delete stale Browserbase social blockers.

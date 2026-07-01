@@ -49,4 +49,5 @@ Hub pages needing more inbound links
 
 ## Constraints
 - Max 8–12 internal links added per page (don't overload)
-- User approval before PR merge
+- Ship via `autonomous-execute` (auto PR + merge per `automation-policy.md`) — do not stop at a plan-only report in cron runs
+- Verify targets with `python3 /usr/local/bin/fetch-page-audit.py` — never `curl | python3` (cron security block)

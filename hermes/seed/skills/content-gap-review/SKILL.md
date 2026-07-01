@@ -53,3 +53,4 @@ Estimated effort: [S/M/L] — PR to [file]
 ## Constraints
 - Fair Housing compliant
 - Do not copy competitor prose
+- Live page checks in cron: use `python3 /usr/local/bin/fetch-page-audit.py URL` — never `curl | python3` (tirith security block → Broken pipe)

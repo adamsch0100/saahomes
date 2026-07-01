@@ -115,6 +115,8 @@ Requires `OUTREACH_SMTP_*` (same Gmail app password as outreach). Optional `SOCI
 python3 /usr/local/bin/send-social-post-pack.py outreach/pending/social-{date}-{slug}.json
 ```
 
+**Cron note:** This command is safe unattended (no shell pipes). If SMTP env is missing, still write the JSON pack and Telegram the error — do not abort before saving captions.
+
 On success:
 1. Move JSON to `outreach/sent/` or note `emailed` in filename
 2. Telegram Adam:
