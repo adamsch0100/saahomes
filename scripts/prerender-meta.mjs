@@ -384,18 +384,22 @@ function injectAreaBody(html, area) {
 
   // Build city-specific guide links (internal links to relevant blog posts)
   const CITY_BLOG_GUIDES = {
-    'fort-collins': { title: 'Selling Your Home in Fort Collins', slug: 'selling-your-home-in-fort-collins' },
+    'fort-collins': { title: 'Selling Your Home in Fort Collins', slug: 'selling-your-home-in-fort-collins', guideTitle: 'Fort Collins Realtor Guide', guideSlug: 'fort-collins-realtor' },
     'windsor': { title: 'Selling Your Home in Windsor, Colorado', slug: 'selling-your-home-in-windsor-colorado' },
   };
   let guidesHtml = '';
   const cityGuide = CITY_BLOG_GUIDES[area.slug];
   if (cityGuide) {
+    let guideItems = `          <li><a href="${SITE_URL}/blog/${cityGuide.slug}/">${escapeHtml(cityGuide.title)}</a> &mdash; Pricing strategy, preparation tips & local market insights</li>\n`;
+    if (cityGuide.guideSlug) {
+      guideItems += `          <li><a href="${SITE_URL}/blog/${cityGuide.guideSlug}/">${escapeHtml(cityGuide.guideTitle)}</a> &mdash; Expert real estate guidance for ${city} buyers and sellers</li>\n`;
+    }
     guidesHtml =
       `      <section class="prerendered-city-guides">\n` +
       `        <h2>${city} Real Estate Guides</h2>\n` +
       `        <p>Explore our detailed guides for ${city} home buyers and sellers:</p>\n` +
       `        <ul>\n` +
-      `          <li><a href="${SITE_URL}/blog/${cityGuide.slug}/">${escapeHtml(cityGuide.title)}</a> &mdash; Pricing strategy, preparation tips & local market insights</li>\n` +
+      guideItems +
       `        </ul>\n` +
       `      </section>`;
   }

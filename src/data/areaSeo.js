@@ -8,7 +8,7 @@ export const areaSeoPages = [
     county: 'Larimer County',
     exactTitle: 'Fort Collins CO Real Estate | Homes for Sale & Neighborhood Guide | SAA Homes',
     description: 'Fort Collins, Colorado real estate guide from SAA Homes. Explore neighborhoods, homes for sale, market trends, and expert buyer and seller representation in Northern Colorado\'s top city.',
-    keywords: 'Fort Collins CO real estate, Fort Collins homes for sale, Fort Collins realtor, moving to Fort Collins Colorado, Fort Collins neighborhoods, Larimer County homes, CSU area real estate, Northern Colorado real estate',
+    keywords: 'Fort Collins CO real estate, Fort Collins homes for sale, Fort Collins realtor, Fort Collins real estate agent, best realtor in Fort Collins, moving to Fort Collins Colorado, Fort Collins neighborhoods, Larimer County homes, CSU area real estate, Northern Colorado real estate',
     heroImage: '/images/Fort-Collins-CO-Area-Guide.jpg',
     tagline: 'CSU, craft breweries, and Front Range living',
     geo: { latitude: '40.5853', longitude: '-105.0844' },
