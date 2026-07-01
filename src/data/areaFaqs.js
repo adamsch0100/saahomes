@@ -19,6 +19,10 @@ const AREA_FAQS = {
     {
       q: 'What is the commute like from Fort Collins to Denver?',
       a: 'The drive from Fort Collins to downtown Denver is approximately 60 miles via I-25, typically taking 60–75 minutes without traffic. Rush hour can extend this to 90 minutes or more. Many Fort Collins residents work locally at CSU, medical centers, or tech companies, but the Bustang bus service and regional ride-shares provide commuter options for Denver workers.'
+    },
+    {
+      q: 'Why choose Schwartz and Associates as your Fort Collins realtor?',
+      a: 'Schwartz and Associates (SAA Homes) brings over 20 years of combined Fort Collins and Northern Colorado real estate experience as a Coldwell Banker Realty team. As local Fort Collins residents, we offer deep neighborhood knowledge across Old Town, south Fort Collins, the CSU area, and all Larimer County communities. Our services include professional photography and videography, data-driven pricing, aggressive digital marketing, CHFA financing guidance, and responsive communication from start to closing. Call (970) 999-1407 to schedule a free consultation.'
     }
   ],
   'loveland': [

@@ -296,6 +296,56 @@ export default function FortCollinsPage() {
         </div>
       </section>
 
+      {/* Why Work With Us — Fort Collins Realtor Section */}
+        <section className="mb-12 bg-blue-50 p-8 rounded-lg">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-3xl font-bold mb-6 text-center">Your Trusted Fort Collins Realtors</h2>
+            <p className="text-lg text-gray-700 mb-4">
+              Looking for a <strong>Fort Collins realtor</strong> who knows the local market inside and out? Schwartz and Associates (SAA Homes) — a top Coldwell Banker Realty team — has been helping buyers and sellers across Fort Collins, Loveland, Windsor, and all of Northern Colorado for over 20 combined years. We are not just real estate agents — we are Fort Collins residents who live, work, and invest in this community.
+            </p>
+            <p className="text-lg text-gray-700 mb-4">
+              From Old Town condos to south Fort Collins family homes and executive properties near Horsetooth Reservoir, our team brings data-driven pricing, professional marketing, and responsive service to every transaction. Whether you are buying your first home with CHFA down payment assistance, upgrading to more space, or selling your property for top dollar, we provide the expertise and local knowledge you need.
+            </p>
+            <div className="grid sm:grid-cols-2 gap-4 mb-6">
+              <div className="bg-white p-4 rounded-lg border border-gray-200">
+                <h3 className="font-bold text-xl mb-2">For Buyers</h3>
+                <p className="text-gray-600">Custom home search, neighborhood guidance, lender referrals including CHFA participating lenders, and skilled negotiation from offer to closing.</p>
+              </div>
+              <div className="bg-white p-4 rounded-lg border border-gray-200">
+                <h3 className="font-bold text-xl mb-2">For Sellers</h3>
+                <p className="text-gray-600">Professional photography and videography, aggressive digital marketing, data-driven pricing strategy, and continuous communication throughout the selling process.</p>
+              </div>
+            </div>
+            <div className="text-center">
+              <p className="text-lg mb-4">
+                Call us today at <a href="tel:(970) 999-1407" className="text-blue-700 font-bold hover:underline">(970) 999-1407</a> or visit our office at 3665 John F Kennedy Parkway, Suite 210, Fort Collins, CO 80525.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  to="/blog/fort-collins-realtor/"
+                  className="inline-flex items-center justify-center px-8 py-3 bg-blue-700 text-white font-semibold rounded-lg hover:bg-blue-800 transition-colors"
+                >
+                  Fort Collins Realtor Guide
+                </Link>
+                <Link
+                  to="/contact/"
+                  className="inline-flex items-center justify-center px-8 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+                >
+                  Schedule a Consultation
+                </Link>
+                <a
+                  href="https://www.realscout.com/search?agent_id=251929&location=Fort%20Collins,%20CO"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center px-8 py-3 border-2 border-gray-900 text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  Search Fort Collins Homes
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
       {/* CTA */}
         <section className="text-center bg-gray-900 text-white p-12 rounded-lg">
           <h2 className="text-3xl font-bold mb-4">Ready to Explore Fort Collins?</h2>
