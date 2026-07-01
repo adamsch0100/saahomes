@@ -43,7 +43,7 @@ Schedule: 0 14 * * 1-5  (2:00 PM MT Mon–Fri)
 Skills: autonomous-execute, content-gap-review
 Model: kimi-k2.6
 Provider: opencode-go
-Prompt: Execute top SEO/content fix from this week's priorities. Ship via PR merge deploy. Notify Adam with ✅ DONE + live links. Do NOT ask permission first. See automation-policy.md.
+Prompt: Execute top SEO/content fix from this week's priorities. Ship via PR merge deploy. Notify Adam with ✅ DONE + live links. Do NOT ask permission first. Verify live with fetch-page-audit.py only — never curl|python pipes. See automation-policy.md.
 ```
 
 ### 5. `daily-done-digest`
@@ -61,10 +61,10 @@ Prompt: If any actions were executed yesterday, send Adam a digest of completed 
 ### 6. `weekly-war-room`
 ```
 Schedule: 0 8 * * 1  (Monday 8:00 AM MT)
-Skills: weekly-seo-brief, lead-funnel-audit
+Skills: weekly-seo-brief, lead-funnel-audit, lead-attribution-brief
 Model: kimi-k2.6
 Provider: opencode-go
-Prompt: Full weekly war room report — rankings, leads, funnel, top 5 actions for Schwartz and Associates this week.
+Prompt: Full weekly war room report — rankings, leads, funnel, lead attribution (GSC query → landing page → GA4 generate_lead), top 5 actions for Schwartz and Associates this week.
 ```
 
 ### 7. `geo-citation-audit`
@@ -109,11 +109,11 @@ Prompt: Deep audit for this week's rotation city (rotate through 19 cities, trac
 
 ### 11. `content-gap-offense`
 ```
-Schedule: 0 10 1,15 * *  (1st and 15th, 10:00 AM MT)
+Schedule: 0 30 11 1,15 * *  (1st and 15th, 11:30 AM MT — staggered vs Wed social + monthly link audit)
 Skills: content-gap-review, autonomous-execute
 Model: kimi-k2.6
 Provider: opencode-go
-Prompt: Run content gap on 3 Tier S queries we don't rank top 5 for. Execute best fix (blog or area expansion). Ship and notify Adam with live links.
+Prompt: Run content gap on 3 Tier S queries we don't rank top 5 for. Execute best fix (blog or area expansion). Ship and notify Adam with live links. Verify live pages with fetch-page-audit.py only — never curl|python pipes.
 ```
 
 ### 12. `backlink-outreach-research`
@@ -135,19 +135,19 @@ Schedule: 0 9 1 * *  (1st of month, 9:00 AM MT)
 Skill: schema-technical-audit
 Model: deepseek-v4-flash
 Provider: opencode-go
-Prompt: Full schema + technical SEO audit. JSON-LD, canonicals, sitemap, robots, prerender coverage.
+Prompt: Full schema + technical SEO audit. JSON-LD, canonicals, sitemap, robots, prerender coverage. Use fetch-page-audit.py for live checks — never curl|python pipes.
 ```
 
-### 13. `internal-link-architecture`
+### 14. `internal-link-architecture`
 ```
-Schedule: 0 10 1 * *  (1st of month, 10:00 AM MT)
+Schedule: 30 10 1 * *  (1st of month, 10:30 AM MT — after Wed social when both fall on the 1st)
 Skill: internal-link-architecture
 Model: kimi-k2.6
 Provider: opencode-go
-Prompt: Map internal link equity flow to money pages. Implement link additions via autonomous-execute. Notify Adam with PR + live URLs.
+Prompt: Map internal link equity flow to money pages. Implement link additions via autonomous-execute. Notify Adam with PR + live URLs. Verify with fetch-page-audit.py — never curl|python pipes.
 ```
 
-### 14. `gbp-local-pack-audit`
+### 15. `gbp-local-pack-audit`
 ```
 Schedule: 0 11 1 * *  (1st of month, 11:00 AM MT)
 Skill: local-pack-gbp-audit
@@ -156,7 +156,7 @@ Provider: opencode-go
 Prompt: GBP/NAP/local pack audit. Draft GBP post, build social-post-pack JSON, email Adam via send-social-post-pack.py. Notify on Telegram when email sent.
 ```
 
-### 15. `blog-content-calendar`
+### 16. `blog-content-calendar`
 ```
 Schedule: 0 9 15 * *  (15th of month, 9:00 AM MT)
 Skill: blog-pipeline
@@ -165,7 +165,7 @@ Provider: opencode-go
 Prompt: Generate and publish next month's blog posts (2-4) from keyword gaps. Use autonomous-execute to ship. Notify Adam with each live URL.
 ```
 
-### 16. `nineteen-city-scorecard`
+### 17. `nineteen-city-scorecard`
 ```
 Schedule: 0 8 1 * *  (1st of month, 8:00 AM MT)
 Skill: local-market-audit
@@ -178,9 +178,9 @@ Prompt: Spawn subagents to audit 5 cities in parallel (batch 1 of 4). Update MEM
 
 ## Quarterly
 
-### 17. `market-dominance-review`
+### 18. `market-dominance-review`
 ```
-Schedule: 0 9 1 1,4,7,10 *  (1st of Jan/Apr/Jul/Oct, 9:00 AM MT)
+Schedule: 15 9 1 1,4,7,10 *  (1st of Jan/Apr/Jul/Oct, 9:15 AM MT — staggered vs other 9 AM jobs)
 Model: kimi-k2.6
 Provider: opencode-go
 Prompt: Quarterly market dominance review vs market-dominance-strategy.md success metrics. Reset 90-day priorities. Report to Adam.
@@ -188,16 +188,16 @@ Prompt: Quarterly market dominance review vs market-dominance-strategy.md succes
 
 ---
 
-### 18. `social-weekly-content`
+### 19. `social-weekly-content`
 ```
-Schedule: 0 10 * * 3  (Wed 10:00 AM MT)
+Schedule: 0 10 * * 3  (Wed 10:00 AM MT — runs first on 1st-of-month Wednesdays)
 Skills: social-post-pack
 Model: deepseek-v4-flash
 Provider: opencode-go
-Prompt: Read context/content-calendar.md, context/holiday-calendar.md, and context/social-channels.md. Follow Wednesday rotation (market pulse / tip / community / seasonal). If an approved holiday is within 7 days, use holiday-calendar rules instead of generic seasonal. If new blog or area page shipped this week, prioritize that in the pack. Always email Adam via send-social-post-pack.py (GBP + FB + IG + X). Update MEMORY ## Content calendar state. Never use Browserbase for social.
+Prompt: Read context/content-calendar.md, context/holiday-calendar.md, and context/social-channels.md. Follow Wednesday rotation (market pulse / tip / community / seasonal). If an approved holiday is within 7 days, use holiday-calendar rules instead of generic seasonal. If new blog or area page shipped this week, prioritize that in the pack. Always email Adam via send-social-post-pack.py (GBP + FB + IG + X). Update MEMORY ## Content calendar state. Never use Browserbase for social. Complete even if other crons ran earlier today — do not skip for gateway restarts.
 ```
 
-### 19. `monthly-market-blog`
+### 20. `monthly-market-blog`
 ```
 Schedule: 0 9 3 * *  (3rd of month, 9:00 AM MT)
 Skills: blog-pipeline, autonomous-execute, social-post-pack
@@ -217,7 +217,7 @@ Prompt: Read context/operator-playbook.md, context/content-calendar.md, and MEMO
 
 ### 22. `local-events-monthly`
 ```
-Schedule: 0 9 1 * *  (1st of month, 9:00 AM MT)
+Schedule: 30 9 1 * *  (1st of month, 9:30 AM MT — staggered vs schema audit on the 1st)
 Skills: local-events-curation, social-post-pack
 Model: deepseek-v4-flash
 Provider: opencode-go
@@ -233,6 +233,15 @@ Provider: opencode-go
 Prompt: Quarterly refresh per local-events-sources.md. Update src/data/localEvents.js + events guide in blogPosts.js. Set EVENTS_DATA_LAST_REVIEWED. Ship via PR/deploy. Email social-post-pack. Update MEMORY events_guide_last_refresh. Notify Adam with ✅ DONE + blog URL.
 ```
 
+### 24. `lead-attribution-brief`
+```
+Schedule: 30 8 * * 1  (Monday 8:30 AM MT)
+Skill: lead-attribution-brief
+Model: kimi-k2.6
+Provider: opencode-go
+Prompt: Run weekly lead attribution brief — connect GSC top queries and landing pages to GA4 generate_lead events. Flag high-impression/low-lead pages for CRO. Append summary to MEMORY ## Lead attribution log. Telegram brief to Adam.
+```
+
 ---
 
 ## Install verification
@@ -242,6 +251,6 @@ After creating all jobs, run:
 /cron list
 ```
 
-Confirm **23 jobs** active. Log completion in MEMORY.md under "Automation installed: [date]".
+Confirm **24 jobs** active. Log completion in MEMORY.md under "Automation installed: [date]".
 
 If GSC/GA4 not yet connected, jobs still run public-only checks and note missing integrations in every report.

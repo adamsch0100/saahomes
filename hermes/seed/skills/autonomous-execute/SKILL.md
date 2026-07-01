@@ -33,7 +33,25 @@ Adam's rule: **execute and notify; don't ask permission first** (except backlink
 - If no deploy access: merge to main and notify Adam deploy may be pending
 
 ### 4. Verify live
-- Fetch live URL — 200 status
+
+**Cron-safe verification (required in cron / unattended runs)**
+
+Hermes `security.command_approval` + tirith scan **blocks** shell pipes like `curl | python3` or `curl | bash`. In cron there is no user to approve → process dies with `RuntimeError: [Errno 32] Broken pipe`.
+
+| DO | DO NOT |
+|----|--------|
+| `python3 /usr/local/bin/fetch-page-audit.py https://saahomes.com/...` | `curl ... \| python3 -c "..."` |
+| Read repo source (`src/components/SEO.jsx`, prerender output) before deploy | Pipe downloaded HTML into an interpreter |
+| Built-in `web_fetch` / fetch tool when available | `curl \| jq`, `curl \| grep`, `wget -O- \| python` |
+
+Example (status, title, meta, JSON-LD types):
+
+```bash
+python3 /usr/local/bin/fetch-page-audit.py https://saahomes.com/for-sellers/ --pretty
+```
+
+Checks:
+- Live URL returns 200
 - Title/meta correct in HTML source
 - New blog in sitemap.xml if applicable
 - Request GSC indexing if credentials available
