@@ -755,6 +755,105 @@ export const blogPosts = [
       },
     ],
   },
+  {
+    slug: 'selling-your-home-in-fort-collins',
+    title: 'Selling Your Home in Fort Collins: A Complete 2026 Guide for Home Sellers',
+    excerpt: 'Everything Fort Collins home sellers need to know in 2026 — pricing strategy, home preparation, marketing, and why choosing the right local realtor matters for selling your Fort Collins home.',
+    date: '2026-07-01',
+    category: 'Seller Tips',
+    image: '/images/6-1.jpg',
+    readTime: '10 min read',
+    keywords: 'sell my home fort collins, fort collins realtor, fort collins real estate agent, selling a house in fort collins, fort collins home selling guide, how to sell a home in fort collins, listing agent fort collins, fort collins home value',
+    relatedLinks: [
+      { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Expert seller representation & free market analysis' },
+      { title: 'Fort Collins Homes for Sale', href: '/properties/?location=Fort Collins, CO', description: 'Browse current Fort Collins listings' },
+      { title: 'Northern Colorado Market Update — July 2026', href: '/blog/northern-colorado-market-update-july-2026/', description: 'Mid-year pricing, inventory & trends' },
+    ],
+    cta: {
+      title: 'Ready to sell your Fort Collins home?',
+      description: 'Adam and Mandi Schwartz provide expert Fort Collins real estate guidance — from pre-listing preparation to closing. Get a free, no-obligation market analysis for your home today.',
+      primaryHref: '/for-sellers/#market-report-form',
+      primaryText: 'Get a Free Market Analysis',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to a Fort Collins Realtor',
+    },
+    faqs: [
+      { q: 'How much is my Fort Collins home worth in 2026?', a: 'Fort Collins home values vary significantly by neighborhood and condition. As of mid-2026, the median single-family home price is approximately $612,000. Factors like proximity to Old Town, school boundaries, updates, and lot size all affect your specific home value. Request a free comparative market analysis from a local Fort Collins realtor for a personalized estimate.' },
+      { q: 'What is the best time of year to sell a home in Fort Collins?', a: 'Spring and early summer (April through July) are traditionally the strongest selling seasons in Fort Collins, when inventory is highest and buyer activity peaks. However, well-priced homes sell year-round in Northern Colorado. The key is pricing right and presenting your home well, regardless of the season.' },
+      { q: 'How much are closing costs for sellers in Fort Collins?', a: 'Fort Collins home sellers typically pay 6–8% of the sale price in total closing costs, which includes the real estate commission (usually 5–6% split between buyer and seller agents), title insurance, transfer taxes, and prorated property taxes. Your Fort Collins listing agent will provide a detailed net sheet before you list.' },
+      { q: 'Do I need to make repairs before selling my Fort Collins home?', a: 'Not necessarily, but strategic updates can significantly impact your sale price and days on market. Focus on curb appeal, fresh paint, decluttering, and addressing obvious issues buyers and appraisers will spot. A pre-listing inspection can help you decide which repairs are worth making and which to disclose.' },
+      { q: 'How long does it take to sell a home in Fort Collins?', a: 'As of mid-2026, the average days on market for Fort Collins single-family homes is approximately 38 days. Well-priced homes under $600,000 often receive offers within two weeks, while homes above $700,000 may take 45–60+ days. Your timeline depends heavily on pricing strategy and home condition.' },
+    ],
+    sections: [
+      {
+        heading: 'Why selling in Fort Collins in 2026 requires a different approach',
+        paragraphs: [
+          'The Fort Collins housing market has evolved significantly from the pandemic-era frenzy. While Northern Colorado remains a high-demand region, buyers in 2026 are more deliberate — they are comparing more options, negotiating on terms, and expecting move-in ready homes. Sellers who adapt to this balanced market by pricing realistically and presenting their homes well are achieving strong results.',
+          'Fort Collins remains one of the most desirable cities in Colorado, anchored by Colorado State University, a thriving craft brewery scene, and the outdoor lifestyle along the Poudre River and Horsetooth Reservoir. The city\'s economic fundamentals — diverse employment in tech, healthcare, education, and manufacturing — continue to attract buyers from across the country. This intrinsic demand means a well-executed selling strategy still commands premium prices in the right neighborhoods.',
+          'Working with a Fort Collins realtor who understands the local market is your single biggest advantage. A local listing agent provides granular knowledge of which streets command premiums, how school zones affect pricing, and which buyer segments are active in your price range.',
+        ],
+        relatedLinks: [
+          { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, market data & lifestyle' },
+        ],
+      },
+      {
+        heading: 'Understanding your Fort Collins home value',
+        paragraphs: [
+          'Pricing your Fort Collins home correctly from day one is the most important decision you will make. Overpricing leads to days on market, price reductions, and ultimately a lower sale price than if you had priced strategically at launch. Homes that go under contract in their first two weeks in Fort Collins typically sell for 97–100% of asking price.',
+          'A comparative market analysis (CMA) from an experienced Fort Collins listing agent is far more accurate than an online Zestimate. Your agent will compare recent sold listings — not active or pending — from your specific neighborhood, adjusting for square footage, updates, lot size, and seasonality. In Fort Collins, a home in Old Town commands different pricing than a comparable property in south Fort Collins or near CSU.',
+          'Key factors that affect your Fort Collins home value include: proximity to Old Town and CSU, Poudre School District boundaries, recent renovations and updates, lot size and outdoor space, and views (mountain views add measurable value in Fort Collins).',
+        ],
+      },
+      {
+        heading: 'Preparing your Fort Collins home for sale',
+        paragraphs: [
+          'First impressions matter more than ever in the 2026 Fort Collins market. Most buyers start their search online, and your listing photos and virtual tour are often the deciding factor in whether they schedule a showing. Professional photography is no longer optional — homes with professional photos sell 32% faster on average.',
+          'Focus your preparation efforts on the changes with the highest return: declutter every room to create a clean, spacious feel; deep clean carpets, windows, and surfaces; refresh paint in neutral colors throughout; improve curb appeal with landscaping, fresh mulch, and a clean entryway; and stage key rooms to help buyers visualize the space.',
+          'In Fort Collins\' outdoor-focused market, highlight your home\'s outdoor living spaces — patios, decks, yards, and proximity to trails or parks are major selling points. A well-maintained backyard with seating areas can be the feature that sets your listing apart from others in the same price range.',
+        ],
+        list: [
+          'Professional photography and twilight shots',
+          'Declutter and depersonalize all rooms',
+          'Deep clean carpets, windows, and surfaces',
+          'Neutral paint refresh where needed',
+          'Landscape and improve curb appeal',
+          'Stage high-impact rooms (living, kitchen, primary)',
+        ],
+      },
+      {
+        heading: 'Marketing your Fort Collins listing effectively',
+        paragraphs: [
+          'Your Fort Collins listing agent should have a comprehensive marketing plan that includes placement on the MLS, major portals like Zillow and Realtor.com, social media promotion, email campaigns to active buyer networks, and targeted digital advertising. In a competitive market like Fort Collins, maximum exposure from day one is critical.',
+          'Professional video tours, including drone footage of the property and surrounding neighborhood, are increasingly expected by out-of-state buyers relocating to Fort Collins. Many of the buyers viewing your home will be moving from higher-cost markets like California, Texas, or the East Coast — they want to see the full picture before making an offer.',
+          'Strategic pricing is itself a marketing tool. A well-priced home generates early showing activity and can create competition among buyers, driving the final sale price above expectations. Your Fort Collins realtor should help you find the launch price that balances your goals with current market conditions.',
+        ],
+        relatedLinks: [
+          { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Professional marketing & expert pricing strategy' },
+        ],
+      },
+      {
+        heading: 'Navigating offers, negotiations, and closing in Fort Collins',
+        paragraphs: [
+          'When offers come in, your Fort Collins listing agent should help you evaluate more than just the price. Compare financing strength (conventional vs. FHA/VA), contingency terms (inspection, appraisal, sale of buyer\'s home), proposed closing timeline, and earnest money deposit. Sometimes a slightly lower offer with stronger financing and fewer contingencies is better than a higher offer that carries closing risk.',
+          'Home inspections are standard in Fort Collins. Be prepared for buyers to request repairs or credits after their inspection. Having a pre-listing inspection done before going to market can reduce surprises and streamline negotiations. In multiple-offer situations, you can choose to waive or limit repair requests to strengthen your buyer\'s offer while protecting your sale price.',
+          'The closing process in Colorado typically takes 30–45 days from accepted offer to closing. Your agent coordinates with the title company, buyer\'s agent, and your attorney (if applicable) to keep everything on track. The seller typically pays title insurance, owner\'s title policy, and commission fees — your net sheet will detail every cost before you accept an offer.',
+        ],
+      },
+      {
+        heading: 'Why choose Schwartz and Associates as your Fort Collins listing agent?',
+        paragraphs: [
+          'Adam and Mandi Schwartz bring over 20 years of combined experience serving Fort Collins and Northern Colorado home sellers. As a Coldwell Banker Realty team, SAA Homes has access to the industry\'s most powerful marketing platform, while maintaining the personalized attention that only a local team can provide.',
+          'We do not just list your home and wait. Our Fort Collins seller process includes professional photography and videography, strategic pricing based on real-time market data, aggressive digital marketing targeting active buyers, open houses and broker tours, and continuous communication from listing to closing.',
+          'Located at 3665 John F Kennedy Parkway, Suite 210, Fort Collins, CO 80525, our team is deeply connected to the Fort Collins community. We know the neighborhoods — from Old Town to south Fort Collins — and we understand what buyers in each area expect. When you work with SAA Homes, you get more than a sign in the yard; you get a complete selling system designed for Northern Colorado\'s unique market.',
+        ],
+        relatedLinks: [
+          { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market insights' },
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407 to discuss your home' },
+        ],
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug) {
