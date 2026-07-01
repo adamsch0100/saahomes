@@ -196,6 +196,42 @@ export default function WindsorPage() {
 
       </article>
 
+      {/* Nearby Northern Colorado Communities */}
+      <section className="py-8 px-6 bg-gray-50">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold mb-4 text-center">Nearby Northern Colorado Communities</h2>
+          <p className="text-gray-700 text-center mb-6">
+            Windsor straddles the Larimer-Weld county line, surrounded by communities that offer different lifestyles and price points.
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Link to="/northern-colorado-areas/fort-collins/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Fort Collins →</h3>
+              <p className="text-sm text-gray-600">CSU and breweries, 15 min west</p>
+            </Link>
+            <Link to="/northern-colorado-areas/loveland/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Loveland →</h3>
+              <p className="text-sm text-gray-600">Lake living and arts, 15 min south</p>
+            </Link>
+            <Link to="/northern-colorado-areas/greeley/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Greeley →</h3>
+              <p className="text-sm text-gray-600">Affordable Weld County, 15 min east</p>
+            </Link>
+            <Link to="/northern-colorado-areas/timnath/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Timnath →</h3>
+              <p className="text-sm text-gray-600">New construction hub, 8 min west</p>
+            </Link>
+            <Link to="/northern-colorado-areas/severance/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Severance →</h3>
+              <p className="text-sm text-gray-600">Fast-growing Weld town, 5 min north</p>
+            </Link>
+            <Link to="/northern-colorado-areas/eaton/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Eaton →</h3>
+              <p className="text-sm text-gray-600">Top-rated schools, 12 min northeast</p>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <AreaFAQSection faqs={AREA_FAQS['windsor']} city="Windsor" />
 
     </>
