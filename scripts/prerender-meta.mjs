@@ -382,6 +382,24 @@ function injectAreaBody(html, area) {
       `      </section>`;
   }
 
+  // Build city-specific guide links (internal links to relevant blog posts)
+  const CITY_BLOG_GUIDES = {
+    'fort-collins': { title: 'Selling Your Home in Fort Collins', slug: 'selling-your-home-in-fort-collins' },
+    'windsor': { title: 'Selling Your Home in Windsor, Colorado', slug: 'selling-your-home-in-windsor-colorado' },
+  };
+  let guidesHtml = '';
+  const cityGuide = CITY_BLOG_GUIDES[area.slug];
+  if (cityGuide) {
+    guidesHtml =
+      `      <section class="prerendered-city-guides">\n` +
+      `        <h2>${city} Real Estate Guides</h2>\n` +
+      `        <p>Explore our detailed guides for ${city} home buyers and sellers:</p>\n` +
+      `        <ul>\n` +
+      `          <li><a href="${SITE_URL}/blog/${cityGuide.slug}/">${escapeHtml(cityGuide.title)}</a> &mdash; Pricing strategy, preparation tips & local market insights</li>\n` +
+      `        </ul>\n` +
+      `      </section>`;
+  }
+
   // CTA with phone number
   const ctaHtml =
     `      <section class="prerendered-cta">\n` +
@@ -398,6 +416,7 @@ function injectAreaBody(html, area) {
     `      ${county ? `<p class="prerendered-county">Serving ${county}</p>\n` : ''}` +
     `${introHtml}\n` +
     `${faqHtml}\n` +
+    `${guidesHtml}\n` +
     `${nearbyHtml}\n` +
     `${ctaHtml}\n` +
     `    </div>\n  `;
