@@ -222,6 +222,30 @@ export default function GreeleyPage() {
         </div>
       </section>
 
+      {/* Sell Your Home in Greeley CTA */}
+      <section className="py-16 px-6 bg-gray-50">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-3">Sell Your Home in Greeley</h2>
+          <p className="text-gray-700 mb-6">
+            Ready to sell your Greeley home? Our team provides expert seller representation, professional marketing, and a free market analysis tailored to Weld County and your specific neighborhood.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              to="/for-sellers/#market-report-form"
+              className="inline-flex px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Free Market Analysis
+            </Link>
+            <Link
+              to="/blog/selling-your-home-in-greeley/"
+              className="inline-flex px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors"
+            >
+              Read the selling guide
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Market Report CTA */}
       <section className="py-16 px-6 bg-gray-50">
         <div className="max-w-2xl mx-auto">
