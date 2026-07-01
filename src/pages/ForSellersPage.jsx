@@ -157,6 +157,39 @@ export default function ForSellersPage() {
         </div>
       </section>
 
+      {/* Area Guides */}
+      <section className="py-16 px-6 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4">Northern Colorado Area Guides</h2>
+            <p className="text-lg text-gray-700 max-w-3xl mx-auto">
+              Explore market insights and neighborhood guides for your selling area.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <a href="/northern-colorado-areas/fort-collins/" className="block bg-gray-50 p-6 rounded-lg hover:shadow-lg transition-shadow border border-gray-100">
+              <h3 className="text-xl font-bold mb-2">Fort Collins</h3>
+              <p className="text-gray-600 text-sm">CSU, breweries, and mountain views</p>
+            </a>
+            <a href="/northern-colorado-areas/loveland/" className="block bg-gray-50 p-6 rounded-lg hover:shadow-lg transition-shadow border border-gray-100">
+              <h3 className="text-xl font-bold mb-2">Loveland</h3>
+              <p className="text-gray-600 text-sm">Arts, lakes, and I-25 corridor</p>
+            </a>
+            <a href="/northern-colorado-areas/windsor/" className="block bg-gray-50 p-6 rounded-lg hover:shadow-lg transition-shadow border border-gray-100">
+              <h3 className="text-xl font-bold mb-2">Windsor</h3>
+              <p className="text-gray-600 text-sm">Family communities, top schools</p>
+            </a>
+            <a href="/northern-colorado-areas/greeley/" className="block bg-gray-50 p-6 rounded-lg hover:shadow-lg transition-shadow border border-gray-100">
+              <h3 className="text-xl font-bold mb-2">Greeley</h3>
+              <p className="text-gray-600 text-sm">Weld County value and growth</p>
+            </a>
+          </div>
+          <div className="text-center mt-8">
+            <a href="/northern-colorado-areas/" className="text-black font-semibold hover:underline">View All 19 Northern Colorado Communities →</a>
+          </div>
+        </div>
+      </section>
+
       {/* Home Valuation Widget Section */}
       <section id="home-valuation" className="py-16 px-6 bg-gray-50">
         <div className="max-w-6xl mx-auto">
