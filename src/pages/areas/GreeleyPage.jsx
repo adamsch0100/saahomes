@@ -262,6 +262,42 @@ export default function GreeleyPage() {
         </div>
       </section>
 
+      {/* Nearby Northern Colorado Communities */}
+      <section className="py-8 px-6 bg-gray-50">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold mb-4 text-center">Nearby Northern Colorado Communities</h2>
+          <p className="text-gray-700 text-center mb-6">
+            Greeley is the largest city in Weld County, surrounded by smaller communities that offer different lifestyles and price points along the Highway 85 corridor.
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Link to="/northern-colorado-areas/windsor/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Windsor →</h3>
+              <p className="text-sm text-gray-600">Family communities, 15 min west</p>
+            </Link>
+            <Link to="/northern-colorado-areas/evans/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Evans →</h3>
+              <p className="text-sm text-gray-600">Adjacent to Greeley, affordable</p>
+            </Link>
+            <Link to="/northern-colorado-areas/eaton/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Eaton →</h3>
+              <p className="text-sm text-gray-600">Top-rated schools, 10 min north</p>
+            </Link>
+            <Link to="/northern-colorado-areas/la-salle/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">La Salle →</h3>
+              <p className="text-sm text-gray-600">Historic community, 8 min south</p>
+            </Link>
+            <Link to="/northern-colorado-areas/milliken/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Milliken →</h3>
+              <p className="text-sm text-gray-600">Affordable living, 15 min southwest</p>
+            </Link>
+            <Link to="/northern-colorado-areas/johnstown/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Johnstown →</h3>
+              <p className="text-sm text-gray-600">I-25 corridor, 15 min south</p>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <AreaFAQSection faqs={AREA_FAQS['greeley']} city="Greeley" />
 
     </>

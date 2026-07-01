@@ -10,6 +10,45 @@ import AreaEventsSection from "../components/AreaEventsSection.jsx";
 
 const GOLD = "#CFB36E";
 
+const nearbyCommunities = {
+  berthoud: [
+    { name: 'Loveland', slug: 'loveland', description: '8 miles north of Berthoud' },
+    { name: 'Longmont', slug: 'longmont', description: '10 miles south of Berthoud' },
+    { name: 'Fort Collins', slug: 'fort-collins', description: '22 miles north of Berthoud' },
+    { name: 'Firestone', slug: 'firestone', description: '12 miles east of Berthoud' },
+  ],
+  firestone: [
+    { name: 'Longmont', slug: 'longmont', description: '8 miles west of Firestone' },
+    { name: 'Frederick', slug: 'frederick', description: 'Adjacent to Firestone' },
+    { name: 'Mead', slug: 'mead', description: '5 miles north of Firestone' },
+    { name: 'Fort Collins', slug: 'fort-collins', description: '30 miles north on I-25' },
+  ],
+  frederick: [
+    { name: 'Firestone', slug: 'firestone', description: 'Adjacent to Frederick' },
+    { name: 'Longmont', slug: 'longmont', description: '10 miles west of Frederick' },
+    { name: 'Mead', slug: 'mead', description: '6 miles north of Frederick' },
+    { name: 'Fort Collins', slug: 'fort-collins', description: '30 miles north on I-25' },
+  ],
+  evans: [
+    { name: 'Greeley', slug: 'greeley', description: 'Immediately adjacent to Evans' },
+    { name: 'La Salle', slug: 'la-salle', description: '4 miles south of Evans' },
+    { name: 'Windsor', slug: 'windsor', description: '10 miles west of Evans' },
+    { name: 'Milliken', slug: 'milliken', description: '8 miles southwest of Evans' },
+  ],
+  severance: [
+    { name: 'Windsor', slug: 'windsor', description: '5 miles west of Severance' },
+    { name: 'Greeley', slug: 'greeley', description: '8 miles east of Severance' },
+    { name: 'Eaton', slug: 'eaton', description: '5 miles north of Severance' },
+    { name: 'Fort Collins', slug: 'fort-collins', description: '15 miles west via Weld County Road' },
+  ],
+  niwot: [
+    { name: 'Longmont', slug: 'longmont', description: '4 miles east of Niwot' },
+    { name: 'Boulder', slug: 'boulder', description: '10 miles south of Niwot' },
+    { name: 'Fort Collins', slug: 'fort-collins', description: '40 miles north on I-25' },
+    { name: 'Mead', slug: 'mead', description: '12 miles northeast of Niwot' },
+  ],
+};
+
 export default function AreaGuidePage() {
   const { slug } = useParams();
   const area = getAreaSeo(slug);
@@ -25,6 +64,7 @@ export default function AreaGuidePage() {
   const highlights = area.highlights || { neighborhoods: [], attractions: [] };
 
   const isGreeleyArea = area.slug === 'greeley' || area.slug === 'evans';
+  const nearby = nearbyCommunities[area.slug];
 
   return (
     <>
@@ -140,6 +180,34 @@ export default function AreaGuidePage() {
           </div>
         </div>
       </section>
+
+      {nearby && (
+        <section className="py-16 px-6 bg-white">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl font-bold font-serif mb-6 text-center">
+              Nearby Northern Colorado Communities
+            </h2>
+            <p className="text-gray-700 text-center mb-8 max-w-2xl mx-auto">
+              {area.city} is part of a network of Northern Colorado communities along the I-25 and Highway 85 corridors. Each nearby city offers its own lifestyle, pricing, and market conditions — explore what fits your home search.
+            </p>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {nearby.map((community) => (
+                <Link
+                  key={community.slug}
+                  to={`/northern-colorado-areas/${community.slug}/`}
+                  className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-100 hover:border-gray-300 hover:bg-gray-100 transition-all group"
+                >
+                  <div className="flex-1">
+                    <h3 className="font-bold text-gray-900 group-hover:underline">{community.name}</h3>
+                    <p className="text-sm text-gray-600">{community.description}</p>
+                  </div>
+                  <span className="text-gray-400 group-hover:text-gray-700">→</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="py-16 px-6 bg-white">
         <div className="max-w-2xl mx-auto">

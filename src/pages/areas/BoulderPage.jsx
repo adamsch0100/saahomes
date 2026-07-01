@@ -201,6 +201,42 @@ export default function BoulderPage() {
 
       </article>
 
+      {/* Nearby Northern Colorado Communities */}
+      <section className="py-8 px-6 bg-gray-50">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold mb-4 text-center">Nearby Northern Colorado Communities</h2>
+          <p className="text-gray-700 text-center mb-6">
+            Boulder is an iconic Colorado city at the foot of the Flatirons, with access to many Front Range communities.
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Link to="/northern-colorado-areas/longmont/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Longmont →</h3>
+              <p className="text-sm text-gray-600">Boulder County value, 15 min north</p>
+            </Link>
+            <Link to="/northern-colorado-areas/niwot/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Niwot →</h3>
+              <p className="text-sm text-gray-600">Historic Left Hand Valley, 10 min north</p>
+            </Link>
+            <Link to="/northern-colorado-areas/fort-collins/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Fort Collins →</h3>
+              <p className="text-sm text-gray-600">CSU and breweries, 45 min north</p>
+            </Link>
+            <Link to="/northern-colorado-areas/loveland/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Loveland →</h3>
+              <p className="text-sm text-gray-600">Lake living and arts, 35 min north</p>
+            </Link>
+            <Link to="/northern-colorado-areas/mead/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Mead →</h3>
+              <p className="text-sm text-gray-600">Quiet country living, 25 min north</p>
+            </Link>
+            <Link to="/northern-colorado-areas/firestone/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Firestone →</h3>
+              <p className="text-sm text-gray-600">Carbon Valley growth, 25 min east</p>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <AreaFAQSection faqs={AREA_FAQS['boulder']} city="Boulder" />
 
     </>

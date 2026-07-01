@@ -245,6 +245,42 @@ export default function WellingtonPage() {
         </div>
       </section>
 
+      {/* Nearby Northern Colorado Communities */}
+      <section className="py-8 px-6 bg-gray-50">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold mb-4 text-center">Nearby Northern Colorado Communities</h2>
+          <p className="text-gray-700 text-center mb-6">
+            Wellington offers small-town living just minutes from Fort Collins. Explore the surrounding communities.
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Link to="/northern-colorado-areas/fort-collins/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Fort Collins →</h3>
+              <p className="text-sm text-gray-600">CSU and downtown, 10 min south</p>
+            </Link>
+            <Link to="/northern-colorado-areas/windsor/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Windsor →</h3>
+              <p className="text-sm text-gray-600">Family communities, 15 min east</p>
+            </Link>
+            <Link to="/northern-colorado-areas/timnath/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Timnath →</h3>
+              <p className="text-sm text-gray-600">New construction hub, 12 min southeast</p>
+            </Link>
+            <Link to="/northern-colorado-areas/loveland/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Loveland →</h3>
+              <p className="text-sm text-gray-600">Lake living and arts, 20 min south</p>
+            </Link>
+            <Link to="/northern-colorado-areas/greeley/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Greeley →</h3>
+              <p className="text-sm text-gray-600">Weld County value, 25 min east</p>
+            </Link>
+            <Link to="/northern-colorado-areas/johnstown/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Johnstown →</h3>
+              <p className="text-sm text-gray-600">I-25 corridor, 25 min south</p>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <AreaFAQSection faqs={AREA_FAQS['wellington']} city="Wellington" />
 
     </>

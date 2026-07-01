@@ -189,6 +189,42 @@ export default function LongmontPage() {
 
       </article>
 
+      {/* Nearby Northern Colorado Communities */}
+      <section className="py-8 px-6 bg-gray-50">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold mb-4 text-center">Nearby Northern Colorado Communities</h2>
+          <p className="text-gray-700 text-center mb-6">
+            Longmont is the largest city in Boulder County outside of Boulder itself, with great access to surrounding communities.
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Link to="/northern-colorado-areas/boulder/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Boulder →</h3>
+              <p className="text-sm text-gray-600">CU Boulder and Flatirons, 15 min west</p>
+            </Link>
+            <Link to="/northern-colorado-areas/firestone/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Firestone →</h3>
+              <p className="text-sm text-gray-600">Carbon Valley growth, 8 min east</p>
+            </Link>
+            <Link to="/northern-colorado-areas/mead/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Mead →</h3>
+              <p className="text-sm text-gray-600">Quiet Weld County living, 8 min north</p>
+            </Link>
+            <Link to="/northern-colorado-areas/loveland/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Loveland →</h3>
+              <p className="text-sm text-gray-600">Lake living and arts, 18 min north</p>
+            </Link>
+            <Link to="/northern-colorado-areas/frederick/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Frederick →</h3>
+              <p className="text-sm text-gray-600">Carbon Valley value, 10 min east</p>
+            </Link>
+            <Link to="/northern-colorado-areas/fort-collins/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Fort Collins →</h3>
+              <p className="text-sm text-gray-600">CSU and breweries, 25 min north</p>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <AreaFAQSection faqs={AREA_FAQS['longmont']} city="Longmont" />
 
     </>
