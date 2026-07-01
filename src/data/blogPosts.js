@@ -1,6 +1,6 @@
 import { SITE_URL } from '../utils/seoConstants.js';
 
-export const LATEST_MARKET_UPDATE_SLUG = 'northern-colorado-market-update-june-2026';
+export const LATEST_MARKET_UPDATE_SLUG = 'northern-colorado-market-update-july-2026';
 
 export const blogPosts = [
   {
@@ -63,8 +63,8 @@ export const blogPosts = [
     supersededBy: LATEST_MARKET_UPDATE_SLUG,
     relatedLinks: [
       {
-        title: 'Northern Colorado Market Update — June 2026',
-        href: '/blog/northern-colorado-market-update-june-2026/',
+        title: 'Northern Colorado Market Update — July 2026',
+        href: '/blog/northern-colorado-market-update-july-2026/',
         description: 'Latest Fort Collins, Loveland, Windsor & Greeley prices, inventory, and trends',
       },
     ],
@@ -413,6 +413,107 @@ export const blogPosts = [
     ],
   },
   {
+    slug: 'northern-colorado-market-update-july-2026',
+    title: 'Northern Colorado Market Update — July 2026: Home Prices, Inventory & Mid-Year Trends',
+    excerpt: 'A mid-year look at home prices, inventory trends, and days on market across Fort Collins, Loveland, Windsor, and Greeley — plus what the summer market means for buyers and sellers in Northern Colorado.',
+    date: '2026-07-01',
+    category: 'Market Update',
+    image: '/images/Northern Colorado.webp',
+    readTime: '7 min read',
+    keywords: 'Northern Colorado housing market July 2026, Fort Collins home prices summer 2026, Loveland real estate trends, Windsor CO housing market, Greeley home prices, Larimer County market update mid-year 2026',
+    relatedLinks: [
+      { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
+      { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities' },
+      { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Weld/Larimer border growth' },
+      { title: 'Greeley Area Guide', href: '/northern-colorado-areas/greeley/', description: 'Weld County affordability' },
+      { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Grants up to $25K for qualified buyers' },
+    ],
+    cta: {
+      title: 'Ready to make your move in Northern Colorado this summer?',
+      description: 'Adam and Mandi Schwartz help buyers and sellers across Fort Collins, Loveland, Windsor, and Greeley navigate today\'s market with clarity and confidence. Request a free consultation or market report tailored to your city and price range.',
+      primaryHref: '/contact/',
+      primaryText: 'Contact SAA Homes',
+      secondaryHref: '/for-sellers/',
+      secondaryText: 'Get a Free Market Report',
+    },
+    sections: [
+      {
+        heading: 'Northern Colorado enters mid-2026 with balanced market conditions',
+        paragraphs: [
+          'As Northern Colorado moves through the summer of 2026, housing market conditions continue to evolve from the post-pandemic frenzy into a more sustainable, balanced environment. Statewide, the Colorado Association of REALTORS® reported that pending home sales in May 2026 rose 3.8% year-over-year, while closed sales increased 1.5%. The statewide median price held at $548,000 — essentially flat year-over-year but up slightly from April, signaling that the market has found a floor after two years of adjustment.',
+          'Locally, each of Northern Colorado\'s major cities — Fort Collins, Loveland, Windsor, and Greeley — is following its own trajectory. Inventory has generally expanded compared to summer 2025, giving buyers more choices, but well-priced, well-located homes in good condition continue to attract strong interest. Days on market are trending higher in the upper price tiers, while entry-level and mid-range homes below $550,000 still see relatively quick sales. The common thread across all four markets is that pricing accuracy and home condition have become the primary drivers of sale outcomes.',
+        ],
+      },
+      {
+        heading: 'Fort Collins: stabilization after a soft spring',
+        paragraphs: [
+          'Following a slower-than-expected April, Fort Collins showed signs of stabilization through May and June 2026. The median single-family home price edged back up to approximately $612,000 — a modest 0.7% recovery from April\'s dip, though still about 2% below the mid-2025 peak. The condo and townhome segment, which saw a sharp 8.6% decline in April, regained some ground with a median of approximately $388,000 as more attached-home transactions closed during May and June.',
+          'Days on market in Fort Collins averaged 38 days for single-family homes — up from 32 days a year ago — but well-priced homes under $600,000 continue to receive offers within the first two weeks. The biggest change from spring is that sellers have become more realistic about pricing expectations, and buyers who were waiting on the sidelines are beginning to re-enter the market as rate expectations stabilize. Inventory remains constrained relative to historical norms, which continues to provide a floor under prices.',
+          'For Fort Collins buyers, the summer window is favorable: more listings are available than a year ago, and motivated sellers are more willing to negotiate on repairs, closing costs, or rate buydowns. Sellers should price within 2–3% of the most recent comparable sales and invest heavily in curb appeal and interior presentation to maximize early showing activity.',
+        ],
+      },
+      {
+        heading: 'Loveland: steady gains in a family-friendly market',
+        paragraphs: [
+          'Loveland continues to be one of Northern Colorado\'s most balanced and consistent markets. The median sale price reached approximately $507,000 in June 2026, up 3.4% year-over-year, reflecting steady demand from buyers who are priced out of Fort Collins but want Larimer County schools and a shorter commute to Denver than Windsor or Greeley. Loveland\'s inventory has grown 12% compared to June 2025, giving buyers meaningful options across most price ranges.',
+          'The sweet spot in Loveland remains $400,000 to $550,000, where well-maintained homes typically go under contract within 18–25 days. Homes priced above $650,000 — particularly on larger lots or with significant acreage — are taking 45–60 days on average, with more frequent price adjustments before finding a buyer. Loveland\'s balanced conditions make it an excellent market for first-time buyers using CHFA assistance, as the median price sits comfortably within Larimer County CHFA limits.',
+        ],
+      },
+      {
+        heading: 'Windsor: premium positioning with more buyer leverage',
+        paragraphs: [
+          'Windsor remains the most expensive of the four major Northern Colorado markets tracked in this update, with a June 2026 median sale price of approximately $585,000 (up 1.9% year-over-year). The median listing price continues to hover near $640,000, reflecting seller expectations that still exceed where most transactions ultimately close. Days on market have extended to an average of 42 days across all price points — up from 33 days a year ago — and homes above $700,000 routinely take 60+ days to sell.',
+          'The Windsor market is increasingly bifurcated: the entry-level and mid-range segments ($450K–$600K) remain relatively active, while premium properties above $700K face the softest conditions in years. Buyers looking in Windsor\'s higher price brackets have significant negotiating room and should not hesitate to request seller concessions. Sellers, particularly those in the luxury segment, need to be patient and prepared for multiple price reductions if the initial launch strategy does not generate adequate showing traffic within the first three weeks.',
+          'Windsor\'s unique position straddling the Weld-Larimer county line continues to create nuances for CHFA buyers — purchase price limits and school boundaries differ by county. Buyers should confirm which county their target property falls in early in the search process.',
+        ],
+      },
+      {
+        heading: 'Greeley: Northern Colorado\'s affordability anchor',
+        paragraphs: [
+          'Greeley remains the most affordable entry point to Northern Colorado, with a June 2026 median sale price of approximately $430,000 — essentially flat compared to a year ago, recovering slightly from the $425,000 seen in April. Weld County overall saw a 4.2% year-over-year increase in closed sales in May, and Greeley\'s market activity reflects that momentum. Homes are averaging 45 days on market, with properties priced under $400,000 — especially those in move-in condition — often attracting multiple showings within the first week.',
+          'Weld County\'s median price of $499,000 (down 2.9% year-over-year for May) tells a story of normalization rather than decline. Sellers are receiving approximately 99.2% of list price on average, and the share of homes with price reductions has stabilized. For buyers, Greeley offers the best value proposition in Northern Colorado, with the potential for CHFA or G-HOPE down payment assistance substantially expanding purchasing power. G-HOPE Greeley remains available for employees of qualifying businesses east of 35th Avenue, offering up to $8,000 in forgivable down payment loans depending on zone.',
+          'Greeley\'s new construction segment continues to be active, particularly in west Greeley near the Weld-Larimer county line, where builders are offering competitive incentives including rate buydowns and upgraded finishes to move inventory.',
+        ],
+      },
+      {
+        heading: 'What this means for Northern Colorado buyers this summer',
+        paragraphs: [
+          'The mid-2026 market offers more opportunity for buyers than any summer since 2022. Inventory is up across all four cities, days on market have extended, and sellers are increasingly offering concessions such as rate buydowns, closing cost assistance, and repair credits. Buyers who are pre-approved, clear on their target price range and neighborhood, and ready to move quickly on the right property are in an excellent position.',
+          'Mortgage rates have stabilized in the mid-6% to low-7% range through the first half of 2026, and while affordability remains a challenge compared to the sub-4% era, the absence of further rate spikes has allowed buyers to plan with more confidence. For buyers using CHFA down payment assistance — with grants up to $25,000 through SmartStep Plus — the combination of stabilized rates and increased inventory creates a rare window of opportunity.',
+        ],
+        list: [
+          'Secure pre-approval and understand your all-in monthly payment at current rates',
+          'Explore CHFA down payment assistance programs early — education course can take 4–6 hours',
+          'Compare homes in multiple Northern Colorado cities to maximize value',
+          'Request seller concessions — rate buydowns and closing help are increasingly common',
+          'Work with a local buyer\'s agent who knows neighborhood-level market conditions',
+        ],
+      },
+      {
+        heading: 'What this means for Northern Colorado sellers',
+        paragraphs: [
+          'The summer 2026 market rewards sellers who price strategically and present their homes exceptionally well from day one. The automatic multiple-offer scenarios of 2021–2022 are no longer the norm, but well-executed listings in desirable neighborhoods still attract competitive interest. The key difference today is that buyers have more options and less urgency — so a home needs to stand out on its merits.',
+          'Pricing within 2% of the most recent comparable sales, professional photography (including video or 3D tours if possible), and a clean, decluttered presentation are table stakes. Sellers should also be prepared for longer marketing timelines — 30–45 days is typical in most segments — and should budget for potential concessions such as rate buydowns, home warranty, or closing cost contributions. Homes that launch at realistic prices are still achieving 97–100% of list price; overpriced listings frequently end up selling for less after accumulating days on market and one or two price reductions.',
+        ],
+        list: [
+          'Price based on the most recent 90 days of comparable sales — not outdated comps',
+          'Invest in professional photography, video, and staging',
+          'Be prepared for 30–45 day marketing timelines',
+          'Consider offering a rate buydown or closing cost concession to attract qualified buyers',
+          'Price reductions become more damaging the longer you wait — price right from the start',
+        ],
+      },
+      {
+        heading: 'CHFA and Colorado homebuyer programs: mid-year 2026 update',
+        paragraphs: [
+          'CHFA down payment assistance continues to provide critical support for Colorado homebuyers. SmartStep Plus pairs an FHA, VA, or USDA first mortgage with a grant of up to $25,000 or 3% of the first mortgage amount — no repayment required. Preferred Plus offers a deferred second mortgage of up to $25,000 or 4% using conventional financing. Both require a minimum 620 credit score and a $1,000 borrower contribution. First-generation buyers — those whose parents have never owned a home — may qualify for up to $25,000 through CHFA FirstGeneration Plus, regardless of loan size.',
+          'Two new programs launched in mid-2026 that expand opportunities for specific groups: CHFA Schools To Home (July 2026) provides up to 25% down payment assistance for full-time Colorado public school employees through a shared appreciation second mortgage. The Colorado Champions Home Loan Program for first responders — peace officers, firefighters, EMTs, and 911 dispatchers — takes effect August 12, 2026, raising income eligibility to 110% of standard CHFA limits. Both programs represent meaningful new pathways to homeownership for educators and public safety professionals in Northern Colorado.',
+          'All program details on this page reference 2026 guidelines. Official CHFA program information, income limits, and purchase price limits are available at chfainfo.com. Speak with a CHFA Participating Lender to confirm your specific eligibility and program fit. Northern Colorado buyers can also explore city-specific programs like G-HOPE Greeley, which provides forgivable down payment loans of up to $8,000 for employees of qualifying Greeley businesses.',
+        ],
+      },
+    ],
+  },
+  {
     slug: 'northern-colorado-market-update-june-2026',
     title: 'Northern Colorado Market Update — June 2026: Home Prices, Inventory & Trends',
     excerpt: 'A practical look at home prices, inventory trends, and days on market across Fort Collins, Loveland, Windsor, and Greeley — plus what buyers and sellers should know this spring.',
@@ -420,6 +521,7 @@ export const blogPosts = [
     category: 'Market Update',
     image: '/images/Northern Colorado.webp',
     readTime: '7 min read',
+    supersededBy: LATEST_MARKET_UPDATE_SLUG,
     keywords: 'Northern Colorado housing market 2026, Fort Collins home prices June 2026, Loveland real estate trends, Windsor CO housing market, Greeley home prices, Larimer County market update',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
