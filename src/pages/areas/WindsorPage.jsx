@@ -171,6 +171,22 @@ export default function WindsorPage() {
           </div>
         </section>
 
+        {/* Seller Guide Internal Link */}
+        <section className="mb-12 bg-blue-50 p-8 rounded-lg border border-blue-200">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-3xl font-bold mb-4">Selling Your Home in Windsor?</h2>
+            <p className="text-lg mb-6 text-gray-700">
+              Get the complete guide to selling your Windsor home in 2026 — pricing strategy, home preparation, market trends, and expert tips from SAA Homes.
+            </p>
+            <Link
+              to="/blog/selling-your-home-in-windsor-colorado/"
+              className="inline-flex items-center justify-center px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Read the Windsor Seller Guide
+            </Link>
+          </div>
+        </section>
+
         {/* Area Highlights */}
         <section className="mb-12">
           <h2 className="text-3xl font-bold mb-6">Windsor Area Highlights</h2>

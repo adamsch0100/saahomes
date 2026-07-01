@@ -620,6 +620,14 @@ export function getAreaSeo(slug) {
 }
 
 export function getAreaExactTitle(area) {
+  // City-specific title overrides for key Tier S keyword targeting
+  const cityTitles = {
+    'fort-collins': 'Fort Collins Realtor | Fort Collins Real Estate Agents & Homes for Sale | SAA Homes',
+    'loveland': 'Loveland Homes for Sale | Loveland CO Real Estate & Neighborhood Guide | SAA Homes',
+    'windsor': 'Windsor Colorado Homes for Sale | Windsor CO Real Estate & Community Guide | SAA Homes',
+    'greeley': 'Greeley Homes for Sale | Greeley CO Real Estate & Neighborhood Guide | SAA Homes',
+  };
+  if (cityTitles[area.slug]) return cityTitles[area.slug];
   return `${area.city} Real Estate | Homes for Sale in ${area.city}, CO | Schwartz and Associates`;
 }
 
