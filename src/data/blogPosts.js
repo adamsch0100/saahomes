@@ -11,6 +11,15 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Fort-Collins-CO-Area-Guide.jpg',
     readTime: '8 min read',
+    relatedLinks: [
+      { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & homes for sale' },
+      { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities & pricing' },
+      { title: 'Fort Collins Homes for Sale', href: '/properties/?location=Fort Collins, CO', description: 'Search current Fort Collins listings' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & resources' },
+      { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'SmartStep, Preferred, FirstStep & more' },
+      { title: 'CHFA for Northern Colorado Buyers', href: '/blog/chfa-first-time-homebuyer-northern-colorado/', description: 'Fort Collins, Greeley & Larimer County limits' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
+    ],
     sections: [
       {
         heading: 'Why buyers choose Fort Collins',
@@ -117,6 +126,9 @@ export const blogPosts = [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
       { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities & pricing' },
       { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Expert seller representation in Northern Colorado' },
+      { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Weld-Larimer border family communities' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & CHFA guidance' },
+      { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Grants up to $25K for qualified buyers' },
     ],
     sections: [
       {
@@ -177,6 +189,9 @@ export const blogPosts = [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
       { title: 'Greeley Area Guide', href: '/northern-colorado-areas/greeley/', description: 'Weld County affordability & communities' },
       { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & CHFA guidance' },
+      { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities & pricing' },
+      { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Weld-Larimer border family communities' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
     ],
     cta: {
       title: 'Ready to explore CHFA programs?',
@@ -263,6 +278,9 @@ export const blogPosts = [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market insights' },
       { title: 'Greeley Area Guide', href: '/northern-colorado-areas/greeley/', description: 'Weld County communities & pricing' },
       { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & CHFA guidance' },
+      { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities & pricing' },
+      { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Weld-Larimer border family communities' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
     ],
     cta: {
       title: 'Buying in Northern Colorado with CHFA?',
@@ -332,6 +350,9 @@ export const blogPosts = [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Schools & neighborhoods for educators' },
       { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities & schools' },
       { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & CHFA guidance' },
+      { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Weld-Larimer border family communities' },
+      { title: 'Greeley Area Guide', href: '/northern-colorado-areas/greeley/', description: 'Affordable Weld County home options' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
     ],
     cta: {
       title: 'Colorado educator ready to buy?',
@@ -394,6 +415,9 @@ export const blogPosts = [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Larimer County communities & first responder resources' },
       { title: 'Greeley Area Guide', href: '/northern-colorado-areas/greeley/', description: 'Weld County affordable home options' },
       { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & CHFA guidance' },
+      { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities & pricing' },
+      { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Weld-Larimer border family communities' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
     ],
     cta: {
       title: 'First responder looking to buy in Northern Colorado?',
@@ -660,6 +684,9 @@ export const blogPosts = [
       { title: 'Greeley Area Guide', href: '/northern-colorado-areas/greeley/', description: 'Weld County value & lifestyle' },
       { title: 'Longmont Area Guide', href: '/northern-colorado-areas/longmont/', description: 'Boulder County access' },
       { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & area insights' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
+      { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Grants up to $25K for qualified buyers' },
+      { title: 'Timnath Area Guide', href: '/northern-colorado-areas/timnath/', description: 'New construction & growth' },
     ],
     cta: {
       title: 'Thinking about making Northern Colorado home?',
@@ -769,6 +796,9 @@ export const blogPosts = [
       { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Expert seller representation & free market analysis' },
       { title: 'Fort Collins Homes for Sale', href: '/properties/?location=Fort Collins, CO', description: 'Browse current Fort Collins listings' },
       { title: 'Northern Colorado Market Update — July 2026', href: '/blog/northern-colorado-market-update-july-2026/', description: 'Mid-year pricing, inventory & trends' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & CHFA guidance' },
+      { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Grants up to $25K for qualified buyers' },
+      { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities & pricing' },
     ],
     cta: {
       title: 'Ready to sell your Fort Collins home?',
@@ -869,6 +899,10 @@ export const blogPosts = [
       { title: 'Windsor Homes for Sale', href: '/properties/?location=Windsor, CO', description: 'Browse current Windsor listings' },
       { title: 'Northern Colorado Market Update — July 2026', href: '/blog/northern-colorado-market-update-july-2026/', description: 'Mid-year pricing, inventory & trends' },
       { title: 'Fort Collins Seller Guide', href: '/blog/selling-your-home-in-fort-collins/', description: 'Selling tips for Northern Colorado\'s largest city' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & CHFA guidance' },
+      { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Grants up to $25K for qualified buyers' },
+      { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities & pricing' },
+      { title: 'Greeley Area Guide', href: '/northern-colorado-areas/greeley/', description: 'Affordable Weld County home options' },
     ],
     cta: {
       title: 'Ready to sell your Windsor home?',
@@ -965,9 +999,13 @@ export const blogPosts = [
     keywords: 'fort collins realtor, fort collins real estate agent, best realtor fort collins, fort collins real estate team, schwartz and associates fort collins, northern colorado realtor, fort collins co realtor, coldwell banker fort collins, fort collins home buying, fort collins home selling',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
+      { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Art, lakes & Larimer County living' },
+      { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Family communities between Fort Collins and Greeley' },
+      { title: 'Greeley Area Guide', href: '/northern-colorado-areas/greeley/', description: 'Weld County affordable home options' },
       { title: 'Fort Collins Home Selling Guide', href: '/blog/selling-your-home-in-fort-collins/', description: 'Complete seller guide for Fort Collins' },
       { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation in Northern Colorado' },
       { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
+      { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Grants up to $25K for qualified buyers' },
     ],
     cta: {
       title: 'Ready to work with a Fort Collins realtor you can trust?',
@@ -1106,8 +1144,12 @@ export const blogPosts = [
     keywords: 'loveland homes for sale, loveland colorado homes for sale, loveland co real estate, buying a home in loveland colorado, homes for sale in loveland co, moving to loveland colorado, loveland neighborhoods, loveland co realtor',
     relatedLinks: [
       { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Neighborhoods, schools and homes for sale' },
+      { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
+      { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Weld-Larimer border family communities' },
       { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation and resources' },
-      { title: 'Northern Colorado Market Update -- July 2026', href: '/blog/northern-colorado-market-update-july-2026/', description: 'Mid-year pricing, inventory and trends' },
+      { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'SmartStep, Preferred, FirstStep & more' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
+      { title: 'Northern Colorado Market Update — July 2026', href: '/blog/northern-colorado-market-update-july-2026/', description: 'Mid-year pricing, inventory and trends' },
     ],
     cta: {
       title: 'Ready to find your home in Loveland?',
@@ -1214,7 +1256,11 @@ export const blogPosts = [
     keywords: 'greeley homes for sale, greeley colorado homes for sale, greeley co real estate, buying a home in greeley colorado, homes for sale in greeley co, moving to greeley colorado, greeley neighborhoods, greeley co realtor, greeley colorado real estate agent',
     relatedLinks: [
       { title: 'Greeley Area Guide', href: '/northern-colorado-areas/greeley/', description: 'Neighborhoods, schools and homes for sale' },
+      { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
+      { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Weld-Larimer border family communities' },
       { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation and resources' },
+      { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'SmartStep, Preferred, FirstStep & more' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
       { title: 'Northern Colorado Market Update — July 2026', href: '/blog/northern-colorado-market-update-july-2026/', description: 'Mid-year pricing, inventory and trends' },
     ],
     cta: {
@@ -1321,7 +1367,11 @@ export const blogPosts = [
     keywords: 'sell my home loveland colorado, loveland co real estate agent, loveland colorado homes for sale, selling a house in loveland co, loveland home selling guide, how to sell a home in loveland colorado, listing agent loveland co, loveland co home value, sell house loveland',
     relatedLinks: [
       { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Neighborhoods, schools and market data' },
+      { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
+      { title: 'Greeley Area Guide', href: '/northern-colorado-areas/greeley/', description: 'Affordable Weld County home options' },
       { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Expert seller representation and free market analysis' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation and CHFA guidance' },
+      { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Grants up to $25K for qualified buyers' },
       { title: 'Loveland Homes for Sale', href: '/properties/?location=Loveland, CO', description: 'Browse current Loveland listings' },
       { title: 'Northern Colorado Market Update — July 2026', href: '/blog/northern-colorado-market-update-july-2026/', description: 'Mid-year pricing, inventory and trends' },
       { title: 'Fort Collins Seller Guide', href: '/blog/selling-your-home-in-fort-collins/', description: 'Selling tips for Northern Colorado largest city' },
@@ -1421,7 +1471,11 @@ export const blogPosts = [
     keywords: 'timnath homes for sale, timnath colorado homes for sale, timnath co real estate, buying a home in timnath colorado, homes for sale in timnath co, moving to timnath colorado, timnath new construction, timnath co realtor, timnath neighborhoods',
     relatedLinks: [
       { title: 'Timnath Area Guide', href: '/northern-colorado-areas/timnath/', description: 'New construction communities and homes for sale' },
+      { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
+      { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Weld-Larimer border family communities' },
       { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation and resources' },
+      { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Grants up to $25K for qualified buyers' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
       { title: 'Northern Colorado Market Update — July 2026', href: '/blog/northern-colorado-market-update-july-2026/', description: 'Mid-year pricing, inventory and trends' },
     ],
     cta: {
@@ -1529,7 +1583,11 @@ export const blogPosts = [
     keywords: 'windsor colorado homes for sale, windsor co homes for sale, windsor colorado real estate, buying a home in windsor colorado, homes for sale in windsor co, moving to windsor colorado, windsor co neighborhoods, windsor co realtor, windsor colorado real estate agent',
     relatedLinks: [
       { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Neighborhoods, schools and homes for sale' },
+      { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
+      { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities & pricing' },
       { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation and resources' },
+      { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Grants up to $25K for qualified buyers' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
       { title: 'Northern Colorado Market Update — July 2026', href: '/blog/northern-colorado-market-update-july-2026/', description: 'Mid-year pricing, inventory and trends' },
     ],
     cta: {
