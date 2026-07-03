@@ -84,7 +84,7 @@ function FeatureList({ features }) {
   );
 }
 
-function SchoolTable({ schools }) {
+function SchoolTable({ schools, neighborhood }) {
   if (!schools?.length) return null;
   return (
     <section className="mb-12">
