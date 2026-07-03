@@ -1,5 +1,6 @@
 import { blogPosts } from './blogPosts.js';
 import { areaSeoPages, getAreaExactTitle } from './areaSeo.js';
+import { neighborhoods } from './neighborhoods.js';
 
 export const SITE_URL = 'https://saahomes.com';
 
@@ -214,6 +215,20 @@ export function getSitemapEntries(lastmod) {
         ogDescription: post.excerpt,
         ogImage: post.image,
         ogImageAlt: post.title,
+      })
+    ),
+    ...neighborhoods.map((n) =>
+      withShareMeta({
+        path: `/northern-colorado-areas/${n.citySlug}/${n.slug}/`,
+        priority: '0.7',
+        changefreq: 'monthly',
+        lastmod: date,
+        title: `${n.name}, ${n.cityDisplay} — Neighborhood Guide | SAA Homes`,
+        description: n.description,
+        ogTitle: `${n.name} ${n.cityDisplay} Neighborhood Guide`,
+        ogDescription: n.description,
+        ogImage: n.image || '/images/Northern Colorado.webp',
+        ogImageAlt: `${n.name} neighborhood in ${n.cityDisplay}, Colorado`,
       })
     ),
   ];

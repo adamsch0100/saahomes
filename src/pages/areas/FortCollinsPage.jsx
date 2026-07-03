@@ -190,6 +190,36 @@ export default function FortCollinsPage() {
           </div>
         </section>
 
+        {/* Fort Collins Neighborhoods */}
+        <section className="mb-12">
+          <h2 className="text-3xl font-bold mb-6">Fort Collins Neighborhoods & Subdivisions</h2>
+          <p className="text-lg leading-relaxed mb-6 text-gray-700">
+            Fort Collins is made up of distinct neighborhoods, each with its own character, architecture, and amenities. Explore our detailed guides to find the right fit for your lifestyle.
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Link to="/northern-colorado-areas/fort-collins/old-town/" className="block p-5 rounded-xl border border-gray-200 hover:border-[#CFB36E] hover:shadow-md transition-all bg-white">
+              <h3 className="font-bold font-serif text-lg mb-1">Old Town</h3>
+              <p className="text-sm text-gray-600">Historic Victorians, walkable, breweries & dining</p>
+            </Link>
+            <Link to="/northern-colorado-areas/fort-collins/midtown/" className="block p-5 rounded-xl border border-gray-200 hover:border-[#CFB36E] hover:shadow-md transition-all bg-white">
+              <h3 className="font-bold font-serif text-lg mb-1">Midtown</h3>
+              <p className="text-sm text-gray-600">Central location, ranch homes, shopping corridor</p>
+            </Link>
+            <Link to="/northern-colorado-areas/fort-collins/south-fort-collins/" className="block p-5 rounded-xl border border-gray-200 hover:border-[#CFB36E] hover:shadow-md transition-all bg-white">
+              <h3 className="font-bold font-serif text-lg mb-1">South Fort Collins</h3>
+              <p className="text-sm text-gray-600">New construction, top schools, family-friendly</p>
+            </Link>
+            <Link to="/northern-colorado-areas/fort-collins/northwest-fort-collins/" className="block p-5 rounded-xl border border-gray-200 hover:border-[#CFB36E] hover:shadow-md transition-all bg-white">
+              <h3 className="font-bold font-serif text-lg mb-1">Northwest Fort Collins</h3>
+              <p className="text-sm text-gray-600">Executive homes, mountain views, larger lots</p>
+            </Link>
+            <Link to="/northern-colorado-areas/fort-collins/university-area/" className="block p-5 rounded-xl border border-gray-200 hover:border-[#CFB36E] hover:shadow-md transition-all bg-white">
+              <h3 className="font-bold font-serif text-lg mb-1">University Area / CSU</h3>
+              <p className="text-sm text-gray-600">CSU campus area, investment properties, historic homes</p>
+            </Link>
+          </div>
+        </section>
+
         {/* Area Highlights */}
         <section className="mb-12">
           <h2 className="text-3xl font-bold mb-6">Area Highlights</h2>
