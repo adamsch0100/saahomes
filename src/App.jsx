@@ -33,6 +33,7 @@ import ChampionsHomeLoanPage from "./pages/ChampionsHomeLoanPage.jsx";
 import ChfaDownPaymentAssistancePage from "./pages/ChfaDownPaymentAssistancePage.jsx";
 import GHopeHomeLoanPage from "./pages/GHopeHomeLoanPage.jsx";
 import AreaGuidePage from "./pages/AreaGuidePage.jsx";
+import NeighborhoodPage from "./pages/NeighborhoodPage.jsx";
 import FloatingContactBar from "./components/FloatingContactBar.jsx";
 import { loadRealScoutScript } from "./utils/realscout.js";
 import { GA4_MEASUREMENT_ID, initGaDebugMode } from "./utils/analytics.js";
@@ -134,6 +135,11 @@ export default function App() {
         <Route path="/northern-colorado-areas/milliken/" element={<AppLayout><MillikenPage /></AppLayout>} />
         <Route path="/northern-colorado-areas/la-salle" element={<AppLayout><LaSallePage /></AppLayout>} />
         <Route path="/northern-colorado-areas/la-salle/" element={<AppLayout><LaSallePage /></AppLayout>} />
+        
+        {/* Neighborhood Pages (3-level path, must come before 2-level :slug fallback) */}
+        <Route path="/northern-colorado-areas/:city/:neighborhood" element={<AppLayout><NeighborhoodPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/:city/:neighborhood/" element={<AppLayout><NeighborhoodPage /></AppLayout>} />
+        
         <Route path="/northern-colorado-areas/:slug" element={<AppLayout><AreaGuidePage /></AppLayout>} />
         <Route path="/northern-colorado-areas/:slug/" element={<AppLayout><AreaGuidePage /></AppLayout>} />
         
