@@ -2,83 +2,9 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 import SEO from "../components/SEO";
 import { BUSINESS } from "../utils/seoConstants.js";
+import { reviews, reviewStats, getReviewSchema } from "../data/reviews.js";
 
-const testimonials = [
-  {
-    name: "Andy Witt",
-    text: "Adam and Mandi were absolutely phenomenal! Would definitely recommend them if you're a first time buyer. Walked me through every step of the process and constantly checked in! You should definitely give them a shout if you're thinking of purchasing a home!",
-    rating: 5,
-    date: "2024-06-01"
-  },
-  {
-    name: "Kevin Freestone",
-    text: "The right people to help you get a home. Very responsive, respectful, and professional. Although I may not have been the easiest customer due to unforeseen circumstances, they stuck through it with me. Thank you so much for helping me find my dream home!",
-    rating: 5,
-    date: "2024-05-15"
-  },
-  {
-    name: "Josh Sorensen",
-    text: "Adam is friendly, professional and easy to talk to. I highly recommend Adam if you're selling/buying your home. You won't be disappointed!",
-    rating: 5,
-    date: "2024-04-20"
-  },
-  {
-    name: "Daen Manriquez",
-    text: "Adam is a pleasure to work with. His friendly demeanor and dedication to client satisfaction set him apart. Adam's outstanding service made the home-buying experience a positive one!",
-    rating: 5,
-    date: "2024-03-10"
-  },
-  {
-    name: "Kylie Graff",
-    text: "My husband and I just bought our first home, and couldn't have done it without the knowledge and guidance from the Schwartz team. They were always available to answer any questions, and every house we wanted to look at they made sure we got in. They were very patient and helped us look through many homes before we found the perfect one.",
-    rating: 5,
-    date: "2024-02-28"
-  },
-  {
-    name: "Ana Ssenz",
-    text: "Very honest and trustworthy agents. Made our home buying experience smooth and stress-free.",
-    rating: 5,
-    date: "2024-01-15"
-  }
-];
-
-const reviewSchema = {
-  "@context": "https://schema.org",
-  "@type": "RealEstateAgent",
-  "name": "SAA Homes - Schwartz and Associates",
-  "url": "https://saahomes.com",
-  "telephone": "(970) 999-1407",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": BUSINESS.address.streetAddress,
-    "addressLocality": BUSINESS.address.addressLocality,
-    "addressRegion": BUSINESS.address.addressRegion,
-    "postalCode": BUSINESS.address.postalCode,
-    "addressCountry": BUSINESS.address.addressCountry
-  },
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "5",
-    "reviewCount": testimonials.length.toString(),
-    "bestRating": "5",
-    "worstRating": "1"
-  },
-  "review": testimonials.map((t) => ({
-    "@type": "Review",
-    "author": {
-      "@type": "Person",
-      "name": t.name
-    },
-    "reviewRating": {
-      "@type": "Rating",
-      "ratingValue": t.rating.toString(),
-      "bestRating": "5",
-      "worstRating": "1"
-    },
-    "reviewBody": t.text,
-    "datePublished": t.date
-  }))
-};
+const reviewSchema = getReviewSchema();
 
 export default function TestimonialsPage() {
   return (
@@ -112,15 +38,15 @@ export default function TestimonialsPage() {
                 </svg>
               ))}
             </div>
-            <p className="text-2xl font-bold text-gray-900">5.0 out of 5 — {testimonials.length} reviews</p>
+            <p className="text-2xl font-bold text-gray-900">5.0 out of 5 — {reviews.length} reviews</p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, idx) => (
+            {reviews.map((review, idx) => (
               <div key={idx} className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
                 <div className="flex items-center mb-4">
                   <div className="flex">
-                    {[...Array(testimonial.rating)].map((_, i) => (
+                    {[...Array(review.rating)].map((_, i) => (
                       <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
                         <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
                       </svg>
@@ -128,9 +54,9 @@ export default function TestimonialsPage() {
                   </div>
                 </div>
                 <p className="text-gray-700 text-base mb-4 leading-relaxed">
-                  "{testimonial.text}"
+                  "{review.text}"
                 </p>
-                <p className="font-semibold text-gray-900">— {testimonial.name}</p>
+                <p className="font-semibold text-gray-900">— {review.name}</p>
               </div>
             ))}
           </div>
