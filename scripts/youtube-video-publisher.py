@@ -1003,6 +1003,90 @@ def get_blog_post_by_slug(slug):
     return None
 
 
+def get_neighborhood_by_slug(slug):
+    """
+    Load neighborhood data from src/data/neighborhoods.js by slug.
+    Returns a dict with neighborhood info or None.
+    """
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    js_path = os.path.join(repo_root, "src", "data", "neighborhoods.js")
+
+    if not os.path.exists(js_path):
+        return None
+
+    try:
+        with open(js_path, "r") as f:
+            content = f.read()
+
+        # Find the opening brace for this neighborhood entry
+        idx = content.find(f"slug: '{slug}'")
+        if idx == -1:
+            return None
+        brace_start = content.rfind('{', 0, idx)
+        if brace_start == -1:
+            return None
+
+        # Match braces to find block boundaries
+        depth = 0
+        in_str = False
+        str_char = None
+        i = brace_start
+        while i < len(content):
+            ch = content[i]
+            prev = content[i-1] if i > 0 else ''
+            if in_str:
+                if ch == str_char and prev != '\\':
+                    in_str = False
+            else:
+                if ch in ("'", '"'):
+                    in_str = True
+                    str_char = ch
+                elif ch == '{':
+                    depth += 1
+                elif ch == '}':
+                    depth -= 1
+                    if depth == 0:
+                        block = content[brace_start:i+1]
+                        break
+            i += 1
+        else:
+            return None
+
+        def extract(field):
+            m = re.search(rf"{field}:\s*'([^']*)'", block)
+            if m:
+                return m.group(1)
+            m = re.search(rf"{field}:\s*\[([^\]]+)\]", block)
+            if m:
+                items = re.findall(r"'([^']*)'", m.group(1))
+                return items
+            return None
+
+        nh = re.findall(r"\{ title:\s*'([^']*)', description:\s*'([^']*)'", block)
+        highlights = [{"title": h[0], "description": h[1]} for h in nh]
+
+        schools_raw = re.findall(r"\{\s*name:\s*'([^']*)',\s*type:\s*'([^']*)',\s*level:\s*'([^']*)'", block)
+        schools = [{"name": s[0], "type": s[1], "level": s[2]} for s in schools_raw]
+
+        city_slug_match = re.search(r"citySlug:\s*'([^']*)'", block)
+
+        return {
+            "name": extract("name"),
+            "slug": slug,
+            "citySlug": city_slug_match.group(1) if city_slug_match else "",
+            "description": extract("description"),
+            "features": extract("features") or [],
+            "neighborhoodHighlights": highlights,
+            "schools": schools,
+            "priceRangeDescription": extract("priceRangeDescription"),
+            "hoaDescription": extract("hoaDescription"),
+            "schoolDistrict": extract("schoolDistrict"),
+        }
+    except Exception as e:
+        print(f"Warning: Could not parse neighborhoods.js: {e}", file=sys.stderr)
+        return None
+
+
 def extract_key_points(post, max_points=6):
     """
     Extract key talking points from a blog post.
@@ -1169,6 +1253,65 @@ def build_market_update_slides(post, renderer, key_points=None):
 
     # CTA slide
     slides.append(lambda: renderer.render_cta_slide())
+
+    return slides
+
+
+def build_neighborhood_slides(neighborhood, renderer):
+    """
+    Build slides for a neighborhood overview video (~30-45 seconds).
+    """
+    slides = []
+    name = neighborhood.get("name", "Neighborhood Guide")
+    city = neighborhood.get("citySlug", "").replace("-", " ").title()
+    description = neighborhood.get("description", "")
+    features = neighborhood.get("features", [])
+    highlights = neighborhood.get("neighborhoodHighlights", [])
+
+    # 1. Title slide
+    slides.append(
+        lambda n=name, c=city: renderer.render_title_slide(
+            title=n,
+            subtitle=f"{c} | Schwartz and Associates",
+            date_str="Neighborhood Guide",
+        )
+    )
+
+    # 2. Description slide
+    if description:
+        slides.append(
+            lambda d=description, n=name, c=city: renderer.render_content_slide(
+                heading=f"About {n}",
+                body=d,
+                slide_number=2, total_slides=5,
+            )
+        )
+
+    # 3. Highlight slides (up to 3)
+    for i, h in enumerate(highlights[:3]):
+        slides.append(
+            lambda h=h, n=i+1: renderer.render_insight_slide(
+                heading=h.get("title", ""),
+                body=h.get("description", ""),
+                slide_number=3+n, total_slides=5,
+            )
+        )
+
+    # 4. Features slide
+    if features:
+        feat_text = " · ".join(features[:5])
+        slides.append(
+            lambda f=feat_text, n=name: renderer.render_content_slide(
+                heading=f"What makes {n} special",
+                body=f,
+                slide_number=4, total_slides=5,
+            )
+        )
+
+    # 5. CTA slide
+    slides.append(
+        lambda: renderer.render_cta_slide()
+    )
 
     return slides
 
@@ -1464,6 +1607,86 @@ def cmd_publish(args):
     return output_path
 
 
+def cmd_neighborhood_video(args):
+    """
+    Generate and optionally upload a 30-45s video for a neighborhood guide.
+    """
+    slug = args.neighborhood_slug
+    output_dir = args.output_dir
+    publish = args.publish
+    credentials = args.credentials
+
+    print(f"Loading neighborhood: {slug}")
+    neighborhood = get_neighborhood_by_slug(slug)
+    if not neighborhood:
+        print(f"ERROR: Neighborhood '{slug}' not found in src/data/neighborhoods.js")
+        sys.exit(1)
+
+    name = neighborhood.get("name", slug)
+    city = neighborhood.get("citySlug", "")
+    print(f"  Name: {name}")
+    print(f"  City: {city}")
+
+    # 1. Generate slides
+    renderer = SlideRenderer()
+    slide_fns = build_neighborhood_slides(neighborhood, renderer)
+    slides = [fn() for fn in slide_fns]
+
+    output_filename = f"{slug}.mp4"
+    output_path = os.path.join(output_dir, output_filename)
+
+    sd = BRAND["slide_duration"]
+    n = len(slides)
+    total_duration = sd * n
+    music_path = os.path.join(output_dir, f"{slug}_audio.m4a")
+    print(f"\nGenerating background audio ({total_duration:.1f}s)...")
+    create_background_audio(total_duration, music_path)
+
+    print(f"Assembling video with {n} slides...")
+    assemble_video(slides, output_path, music_path=music_path)
+
+    if os.path.exists(music_path):
+        os.remove(music_path)
+
+    mins, secs = divmod(int(total_duration), 60)
+    print(f"\n✅ Video generated: {output_path} ({mins}:{secs:02d})")
+
+    # 2. Upload
+    if credentials and os.path.exists(credentials):
+        print(f"\nAuthenticating with YouTube API...")
+        youtube = get_authenticated_service(credentials)
+
+        title = f"{name} - {city.replace('-', ' ').title()}, CO | Neighborhood Guide | SAA Homes"
+        blog_url = f"https://saahomes.com/northern-colorado-areas/{city}/{slug}/"
+        description = (
+            f"🔗 {blog_url}\n\n"
+            f"📖 Read the full neighborhood guide ↑\n\n"
+            f"───\n\n"
+            f"Explore {name} in {city.replace('-', ' ').title()}, Colorado. "
+            f"Learn about homes, schools, amenities, and what makes this neighborhood special.\n\n"
+            f"───\n\n"
+            f"Schwartz and Associates | SAA Homes\n"
+            f"📞 (970) 999-1407\n"
+            f"🏠 https://saahomes.com\n\n"
+            f"#NorthernColoradoRealEstate #{name.replace(' ', '')} #{city.replace('-', ' ').title().replace(' ', '')} #SAAHomes"
+        )
+        tags = [name, f"{name} {city.replace('-', ' ').title()}", "Northern Colorado real estate", "SAA Homes", "neighborhood guide"]
+        privacy = "public" if publish else "unlisted"
+
+        print(f"Uploading: {title}")
+        video_id = upload_video(
+            youtube, output_path, title, description,
+            tags=tags, privacy_status=privacy,
+        )
+
+        youtube_url = f"https://youtu.be/{video_id}"
+        print(f"\n✅ Published: {youtube_url}")
+    else:
+        print(f"\n⚠️  Video saved at: {output_path}")
+
+    return output_path
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="SAA Homes — YouTube Video Publisher",
@@ -1500,6 +1723,14 @@ def main():
     pub.add_argument("--output-dir", default="./video-output", help="Output directory")
     pub.add_argument("--publish", action="store_true", help="Set to public (default: unlisted)")
     pub.set_defaults(func=cmd_publish)
+
+    # ── neighborhood-video ──
+    nh = sub.add_parser("neighborhood-video", help="Generate + optionally upload a neighborhood overview video")
+    nh.add_argument("--neighborhood-slug", required=True, help="Neighborhood slug from neighborhoods.js")
+    nh.add_argument("--credentials", default="", help="Path to client_secret.json")
+    nh.add_argument("--output-dir", default="./video-output", help="Output directory")
+    nh.add_argument("--publish", action="store_true", help="Set to public (default: unlisted)")
+    nh.set_defaults(func=cmd_neighborhood_video)
 
     args = parser.parse_args()
     args.func(args)
