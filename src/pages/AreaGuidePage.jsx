@@ -3,6 +3,7 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import AreaSEO from "../components/AreaSEO.jsx";
 import MarketReportForm from "../components/MarketReportForm.jsx";
 import AreaFAQSection from "../components/AreaFAQSection.jsx";
+import NeighborhoodLinks from "../components/NeighborhoodLinks.jsx";
 import { getAreaSeo } from "../data/areaSeo.js";
 import { AREA_FAQS } from "../data/areaFaqs.js";
 import LatestMarketUpdateBanner from "../components/LatestMarketUpdateBanner.jsx";
@@ -178,6 +179,13 @@ export default function AreaGuidePage() {
               CHFA program guide →
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Neighborhood Guides */}
+      <section className="py-12 px-6 bg-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <NeighborhoodLinks citySlug={area.slug} cityName={area.city} />
         </div>
       </section>
 
