@@ -4,6 +4,7 @@ import AreaFAQSection from "../../components/AreaFAQSection.jsx";
 import { AREA_FAQS } from "../../data/areaFaqs.js";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
+import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
 
 export default function MeadPage() {
   return (
@@ -182,6 +183,13 @@ export default function MeadPage() {
         </section>
 
       </article>
+
+      {/* Neighborhood Guides */}
+      <section className="py-12 px-6 bg-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <NeighborhoodLinks citySlug="mead" cityName="Mead" />
+        </div>
+      </section>
 
       <AreaFAQSection faqs={AREA_FAQS['mead']} city="Mead" />
 

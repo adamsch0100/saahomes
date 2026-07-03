@@ -2,6 +2,7 @@ import React from "react";
 import AreaSEO from "../../components/AreaSEO.jsx";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
+import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
 
 export default function EatonPage() {
   return (
@@ -217,7 +218,14 @@ export default function EatonPage() {
       </section>
 
       {/* Area Highlights */}
-      <section className="py-16 px-6 bg-white">
+            {/* Neighborhood Guides */}
+      <section className="py-12 px-6 bg-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <NeighborhoodLinks citySlug="eaton" cityName="Eaton" />
+        </div>
+      </section>
+
+<section className="py-16 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-8 text-center">Eaton Highlights</h2>
           <div className="grid md:grid-cols-2 gap-8">

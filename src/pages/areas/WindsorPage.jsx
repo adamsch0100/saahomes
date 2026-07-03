@@ -4,6 +4,7 @@ import AreaFAQSection from "../../components/AreaFAQSection.jsx";
 import { AREA_FAQS } from "../../data/areaFaqs.js";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
+import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
 
 export default function WindsorPage() {
   return (
@@ -188,7 +189,14 @@ export default function WindsorPage() {
         </section>
 
         {/* Area Highlights */}
-        <section className="mb-12">
+              {/* Neighborhood Guides */}
+      <section className="py-12 px-6 bg-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <NeighborhoodLinks citySlug="windsor" cityName="Windsor" />
+        </div>
+      </section>
+
+<section className="mb-12">
           <h2 className="text-3xl font-bold mb-6">Windsor Area Highlights</h2>
           <p className="text-lg mb-6">A quick view of the most influential metrics in Windsor, CO.</p>
           <div className="grid md:grid-cols-3 gap-6">
