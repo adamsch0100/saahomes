@@ -1,0 +1,101 @@
+{
+  "discovery": {
+    "total": 33,
+    "cities_covered": 9,
+    "total_cities": 19,
+    "underserved": [
+      [
+        "fort-collins",
+        15
+      ],
+      [
+        "loveland",
+        15
+      ],
+      [
+        "windsor",
+        15
+      ],
+      [
+        "greeley",
+        15
+      ],
+      [
+        "timnath",
+        5
+      ],
+      [
+        "berthoud",
+        5
+      ],
+      [
+        "severance",
+        5
+      ],
+      [
+        "johnstown",
+        5
+      ],
+      [
+        "wellington",
+        5
+      ],
+      [
+        "eaton",
+        3
+      ],
+      [
+        "milliken",
+        3
+      ],
+      [
+        "evans",
+        3
+      ],
+      [
+        "firestone",
+        5
+      ],
+      [
+        "frederick",
+        5
+      ],
+      [
+        "longmont",
+        5
+      ],
+      [
+        "boulder",
+        5
+      ],
+      [
+        "mead",
+        3
+      ],
+      [
+        "la-salle",
+        3
+      ],
+      [
+        "niwot",
+        3
+      ]
+    ],
+    "zero_coverage": [
+      "Eaton",
+      "Milliken",
+      "Evans",
+      "Firestone",
+      "Frederick",
+      "Longmont",
+      "Boulder",
+      "Mead",
+      "La Salle",
+      "Niwot"
+    ]
+  },
+  "accuracy": {
+    "issues_found": 286,
+    "neighborhoods_audited": 33
+  }
+}
