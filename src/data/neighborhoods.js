@@ -485,6 +485,181 @@ export const neighborhoods = [
       { title: 'Denver access', description: 'Convenient Highway 34 commute — downtown Denver in under an hour, Denver airport in 50 minutes.' },
     ],
   },
+
+  // ═══════════════════════════════════════════════════════════════
+  // TIMNATH
+  // ═══════════════════════════════════════════════════════════════
+  {
+    slug: 'timnath-ranch',
+    citySlug: 'timnath',
+    type: 'subdivision',
+    name: 'Timnath Ranch',
+    county: 'Larimer County',
+    alsoKnownAs: ['Timnath Ranch Community', 'Timnath Ranch HOA'],
+    description:
+      'Timnath Ranch is a master-planned community in the heart of Timnath, offering new construction homes on larger lots with mountain views. The neighborhood features a mix of estate homes, ranch-style residences, and planned community amenities.',
+    homeStyles: ['Contemporary Farmhouse', 'Ranch', 'Two-Story Traditional', 'Estate Home'],
+    yearBuiltRange: { min: 2015, max: 2025 },
+    priceRangeDescription: '$550K to $1.2M+',
+    schoolDistrict: 'Poudre School District',
+    schools: [
+      { name: 'Timnath Elementary', type: 'elementary', level: 'K–5', rating: 9 },
+      { name: 'Preston Middle School', type: 'middle', level: '6–8', rating: 8 },
+      { name: 'Fossil Ridge High School', type: 'high', level: '9–12', rating: 9 },
+    ],
+    hoaDescription: 'Mandatory HOA ($150–$250/month) covers common areas, landscaping, snow removal',
+    features: ['Newer homes with mountain views', 'Larger lots — many 0.25–0.5 acres', 'Close to I-25 for Denver commute', 'Top-rated Fossil Ridge schools', 'Minutes to Windsor and Fort Collins', 'Quiet, rural feel with city amenities nearby'],
+    parks: ['Timnath Community Park', 'Timnath Reservoir', 'Poudre River Trail'],
+    boundaries: 'I-25 to Larimer County Road 5, Harmony Road to Timnath Road',
+    coordinates: { latitude: '40.5300', longitude: '-104.9700' },
+    metaDescription: 'Timnath Ranch homes for sale in Timnath, CO — new construction, mountain views, larger lots, top-rated Fossil Ridge schools. Expert local agents from SAA Homes.',
+    keywords: 'Timnath Ranch real estate, Timnath Colorado homes, Timnath Ranch HOA, new construction Timnath, Fossil Ridge homes, Timnath Ranch subdivision',
+    neighborhoodHighlights: [
+      { title: 'Mountain views', description: 'Many homes offer panoramic views of Longs Peak and the Front Range from elevated lots.' },
+      { title: 'Top schools', description: 'Timnath Elementary (9/10) and Fossil Ridge High School (9/10) serve the community.' },
+      { title: 'Rural-feel location', description: 'Larger lots with space between homes while still being minutes from Fort Collins and I-25.' },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // BERTHOUD
+  // ═══════════════════════════════════════════════════════════════
+  {
+    slug: 'downtown-berthoud',
+    citySlug: 'berthoud',
+    type: 'neighborhood',
+    name: 'Downtown Berthoud',
+    county: 'Larimer County',
+    alsoKnownAs: ['Historic Berthoud', 'Berthoud Downtown District'],
+    description:
+      'Downtown Berthoud is the historic heart of this growing Northern Colorado community, centered around Mountain Avenue and Massachusetts Street. The area offers small-town charm with tree-lined streets, early-1900s homes, and a walkable main street with locally owned shops and restaurants.',
+    homeStyles: ['Victorian', 'Craftsman Bungalow', 'Mid-Century Ranch', 'Modern Townhome'],
+    yearBuiltRange: { min: 1900, max: 2025 },
+    priceRangeDescription: '$350K to $700K',
+    schoolDistrict: 'Thompson School District',
+    schools: [
+      { name: 'Berthoud Elementary', type: 'elementary', level: 'K–5', rating: 7 },
+      { name: 'Turner Middle School', type: 'middle', level: '6–8', rating: 7 },
+      { name: 'Berthoud High School', type: 'high', level: '9–12', rating: 7 },
+    ],
+    hoaDescription: 'No HOA in most of downtown; select newer developments may have HOAs',
+    features: ['Walkable main street with local dining and shopping', 'Historic homes with character', 'Berthoud Recreation Trail access', 'Close to Carter Lake for boating and fishing', 'Annual Berthoud Day celebration', 'Growing restaurant and brewery scene'],
+    parks: ['Fickel Park', 'Berthoud Recreation Trail', 'Carter Lake'],
+    boundaries: 'Mountain Avenue to Bunyan Avenue, 1st Street to 8th Street',
+    coordinates: { latitude: '40.3083', longitude: '-105.0800' },
+    metaDescription: 'Downtown Berthoud real estate guide — historic homes, small-town charm, and walkable main street. Buy or sell with SAA Homes, your Northern Colorado real estate experts.',
+    keywords: 'Downtown Berthoud real estate, Berthoud Colorado homes, historic Berthoud, Berthoud main street, Berthoud bungalows, Berthoud walkable neighborhoods',
+    neighborhoodHighlights: [
+      { title: 'Small-town charm', description: 'Tree-lined streets, historic architecture, and a welcoming main street with local businesses.' },
+      { title: 'Growing community', description: 'Berthoud is one of Northern Colorado\'s fastest-growing towns with new amenities arriving regularly.' },
+      { title: 'Outdoor access', description: 'Minutes from Carter Lake for boating, fishing, and hiking — and the Berthoud Recreation Trail connects the town.' },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // SEVERANCE
+  // ═══════════════════════════════════════════════════════════════
+  {
+    slug: 'severance-commons',
+    citySlug: 'severance',
+    type: 'neighborhood',
+    name: 'Severance Commons',
+    county: 'Weld County',
+    alsoKnownAs: ['Severance Town Center', 'Severance'],
+    description:
+      'Severance has emerged as one of Northern Colorado\'s fastest-growing communities, with Severance Commons serving as the town\'s central residential and commercial core. New construction homes, an expanding town center, and easy access to Windsor and Greeley make this an attractive option for buyers seeking newer homes at more accessible price points.',
+    homeStyles: ['Contemporary', 'Farmhouse Modern', 'Ranch', 'Townhome', 'Patio Home'],
+    yearBuiltRange: { min: 2018, max: 2025 },
+    priceRangeDescription: '$350K (townhomes) to $650K+ (single-family)',
+    schoolDistrict: 'Weld RE-4 School District',
+    schools: [
+      { name: 'Range View Elementary', type: 'elementary', level: 'K–5', rating: 8 },
+      { name: 'Severance Middle School', type: 'middle', level: '6–8', rating: 'New school' },
+      { name: 'Severance High School', type: 'high', level: '9–12', rating: 'New school' },
+    ],
+    hoaDescription: 'Mandatory HOAs in most subdivisions ($75–$175/month)',
+    features: ['Newer construction — most homes built after 2018', 'More affordable than Fort Collins and Loveland', 'New Severance High School and Middle School', 'Rapidly expanding retail and dining', 'Close to Windsor Lake and Eastman Park', 'Growing community with new amenities'],
+    parks: ['Severance Community Park', 'Hidden Lake Park', 'Eastman Park (Windsor)'],
+    boundaries: 'Weld County Road 23 to 27, Highway 392 to County Road 74',
+    coordinates: { latitude: '40.5500', longitude: '-104.8550' },
+    metaDescription: 'Severance Colorado real estate guide — new construction homes in one of Northern Colorado\'s fastest-growing towns. Affordable pricing, new schools, and expert guidance from SAA Homes.',
+    keywords: 'Severance Colorado homes, Severance new construction, Severance Commons, Severance real estate, fastest growing Northern Colorado towns, Severance CO subdivisions',
+    neighborhoodHighlights: [
+      { title: 'Best value', description: 'Among the most affordable new construction in Northern Colorado — more square footage for your dollar.' },
+      { title: 'Brand-new schools', description: 'New Severance High School and Middle School serve the community with modern facilities.' },
+      { title: 'Fastest-growing', description: 'Severance is consistently ranked among Colorado\'s fastest-growing towns — new amenities arriving with every phase.' },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // JOHNSTOWN
+  // ═══════════════════════════════════════════════════════════════
+  {
+    slug: 'johnstown-commons',
+    citySlug: 'johnstown',
+    type: 'neighborhood',
+    name: 'Johnstown Commons',
+    county: 'Weld County',
+    alsoKnownAs: ['Johnstown Town Center', 'Johnstown'],
+    description:
+      'Johnstown Commons is the heart of this growing Weld County community, featuring newer subdivisions, a walkable town center with retail and dining, and convenient access to I-25. Johnstown offers a small-town feel with big-city connectivity — located midway between Fort Collins and Denver.',
+    homeStyles: ['Contemporary', 'Ranch', 'Two-Story', 'Townhome', 'Patio Home'],
+    yearBuiltRange: { min: 2000, max: 2025 },
+    priceRangeDescription: '$325K (townhomes) to $700K (single-family)',
+    schoolDistrict: 'Weld RE-5J School District',
+    schools: [
+      { name: 'Johnstown Elementary', type: 'elementary', level: 'K–5', rating: 7 },
+      { name: 'Milliken Middle School', type: 'middle', level: '6–8', rating: 6 },
+      { name: 'Roosevelt High School', type: 'high', level: '9–12', rating: 7 },
+    ],
+    hoaDescription: 'Most subdivisions have HOAs ($50–$150/month)',
+    features: ['I-25 frontage — easy Denver commute (45 min)', 'Johnstown Town Center with retail and dining', 'Newer housing stock', 'Thompson River recreation access', 'Growing commercial corridor', 'More affordable than Larimer County alternatives'],
+    parks: ['Johnstown Community Park', 'Thompson River Recreation Area', 'Boomtown Park'],
+    boundaries: 'I-25 to Weld County Road 19, Highway 60 to Highway 119',
+    coordinates: { latitude: '40.3450', longitude: '-104.9100' },
+    metaDescription: 'Johnstown Colorado real estate guide — affordable homes near I-25, growing town center, and small-town community feel. Expert agents from SAA Homes.',
+    keywords: 'Johnstown Colorado homes, Johnstown real estate, Johnstown Commons, Johnstown town center, I-25 homes Colorado, Weld County real estate',
+    neighborhoodHighlights: [
+      { title: 'I-25 access', description: 'Located right on I-25 — 45 minutes to downtown Denver, 15 minutes to Fort Collins.' },
+      { title: 'Affordable entry', description: 'One of Northern Colorado\'s most affordable markets — get more home for your budget.' },
+      { title: 'Growing community', description: 'New retail, dining, and parks arriving with every new phase of development.' },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // WELLINGTON
+  // ═══════════════════════════════════════════════════════════════
+  {
+    slug: 'wellington-commons',
+    citySlug: 'wellington',
+    type: 'neighborhood',
+    name: 'Wellington Commons',
+    county: 'Larimer County',
+    alsoKnownAs: ['Wellington Town Center', 'Wellington'],
+    description:
+      'Wellington is a growing community just north of Fort Collins along I-25, offering a small-town atmosphere with convenient access to Larimer County\'s largest city. Wellington Commons represents the town\'s central residential and commercial core, with newer subdivisions and an expanding retail scene.',
+    homeStyles: ['Contemporary', 'Ranch', 'Two-Story', 'Townhome', 'Patio Home'],
+    yearBuiltRange: { min: 2005, max: 2025 },
+    priceRangeDescription: '$350K (townhomes) to $650K (single-family)',
+    schoolDistrict: 'Poudre School District',
+    schools: [
+      { name: 'Rice Elementary', type: 'elementary', level: 'K–5', rating: 7 },
+      { name: 'Wellington Middle School', type: 'middle', level: '6–8', rating: 7 },
+      { name: 'Poudre High School', type: 'high', level: '9–12', rating: 8 },
+    ],
+    hoaDescription: 'Most newer subdivisions have HOAs ($50–$150/month)',
+    features: ['North Fort Collins proximity (10 minutes)', 'I-25 access for commuting', 'More affordable than Fort Collins proper', 'Growing retail and dining options', 'Poudre School District schools', 'Quiet, small-town atmosphere'],
+    parks: ['Wellington Community Park', 'Cathy Fromme Prairie Natural Area', 'Poudre River Trail'],
+    boundaries: 'I-25 to Larimer County Road 7, Highway 1 to County Road 70',
+    coordinates: { latitude: '40.6450', longitude: '-105.0050' },
+    metaDescription: 'Wellington Colorado real estate guide — affordable homes north of Fort Collins with I-25 access and Poudre School District schools. SAA Homes — your local experts.',
+    keywords: 'Wellington Colorado homes, Wellington Commons, Wellington real estate, north Fort Collins homes, Wellington CO subdivisions, Poudre School District homes',
+    neighborhoodHighlights: [
+      { title: 'Fort Collins proximity', description: 'Just 10 minutes north of Fort Collins — enjoy small-town living with big-city access.' },
+      { title: 'Affordable option', description: 'Wellington offers more home for your money than Fort Collins, with the same school district.' },
+      { title: 'Growing community', description: 'New developments, expanding retail, and a community-focused atmosphere make Wellington a smart choice.' },
+    ],
+  },
 ]
 
 // ── Helper Functions ──
