@@ -4,6 +4,7 @@ import AreaFAQSection from "../../components/AreaFAQSection.jsx";
 import { AREA_FAQS } from "../../data/areaFaqs.js";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
+import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
 
 export default function LovelandPage() {
   return (
@@ -223,7 +224,14 @@ export default function LovelandPage() {
         </section>
 
         {/* CTA */}
-        <section className="text-center bg-gray-900 text-white p-12 rounded-lg">
+              {/* Neighborhood Guides */}
+      <section className="py-12 px-6 bg-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <NeighborhoodLinks citySlug="loveland" cityName="Loveland" />
+        </div>
+      </section>
+
+<section className="text-center bg-gray-900 text-white p-12 rounded-lg">
           <h2 className="text-3xl font-bold mb-4">Ready to Explore Loveland?</h2>
           <p className="text-xl mb-6">
             This isn't just a job, it's what we love to do. We wake up in the morning focused on your real estate goals, eager to help our clients succeed.
