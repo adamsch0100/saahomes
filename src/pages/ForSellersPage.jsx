@@ -1,6 +1,9 @@
 import React, { useEffect } from "react";
 import SEO from "../components/SEO";
 import LatestMarketUpdateBanner from "../components/LatestMarketUpdateBanner.jsx";
+import AreaFAQSection from "../components/AreaFAQSection.jsx";
+import Testimonials from "../components/Testimonials.jsx";
+import { SELLER_FAQS } from "../data/buyerSellerFaqs.js";
 
 export default function ForSellersPage() {
   useEffect(() => {
@@ -25,6 +28,20 @@ export default function ForSellersPage() {
         description="Sell your home in Northern Colorado with SAA Homes. Get a free market analysis, professional marketing, and expert negotiation to maximize your sale price in Fort Collins, Loveland, Windsor, and beyond."
         keywords="sell home Fort Collins, free market analysis Northern Colorado, home value Colorado, listing agent Fort Collins, sell house Loveland, SAA Homes seller services"
         canonical="https://saahomes.com/for-sellers/"
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: SELLER_FAQS.map((faq) => ({
+              "@type": "Question",
+              name: faq.q,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: faq.a,
+              },
+            })),
+          },
+        ]}
       />
 
       {/* Hero Section */}
@@ -41,7 +58,7 @@ export default function ForSellersPage() {
               Get Your Home Value
             </a>
             <a href="/contact/" className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
-              Contact Us
+              Get a Customized Selling Plan
             </a>
           </div>
           <div className="mt-4 flex justify-center">
@@ -265,6 +282,10 @@ export default function ForSellersPage() {
           </div>
         </div>
       </section>
+
+      <AreaFAQSection faqs={SELLER_FAQS} city="Northern Colorado" />
+
+      <Testimonials />
 
       {/* CTA Section */}
       <section className="py-16 px-6 bg-black text-white">

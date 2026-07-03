@@ -6,6 +6,7 @@ import { BUSINESS } from '../src/utils/seoConstants.js';
 import { areaSeoPages, buildAreaPageSchemas } from '../src/data/areaSeo.js';
 import { blogPosts } from '../src/data/blogPosts.js';
 import { AREA_FAQS } from '../src/data/areaFaqs.js';
+import { BUYER_FAQS, SELLER_FAQS } from '../src/data/buyerSellerFaqs.js';
 import { CHFA_PAGE_CONFIGS, CHFA_PROGRAMS, CHFA_DPA_OPTIONS, CHFA_REQUIREMENTS, CHFA_COUNTY_LIMITS, CHFA_SPECIALTY_PROGRAMS } from '../src/data/chfaData.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -588,6 +589,12 @@ const MONEY_PAGE_CONTENT = {
       title: 'Start Your Home Sale Today',
       text: 'Contact SAA Homes at (970) 999-1407 for your free, no-obligation home valuation. Let us show you how we maximize value and minimize stress when selling your Northern Colorado home.',
     },
+    faqs: SELLER_FAQS,
+    testimonials: [
+      { name: 'Andy Witt', text: 'Adam and Mandi were absolutely phenomenal! Walked me through every step of the process and constantly checked in.', rating: 5 },
+      { name: 'Kylie Graff', text: 'We just bought our first home, and could not have done it without the knowledge and guidance from the Schwartz team.', rating: 5 },
+      { name: 'Kevin Freestone', text: 'The right people to help you get a home. Very responsive, respectful, and professional.', rating: 5 },
+    ],
   },
   '/for-buyers/': {
     sections: [
@@ -620,6 +627,12 @@ const MONEY_PAGE_CONTENT = {
       title: 'Start Your Home Search',
       text: 'Contact SAA Homes at (970) 999-1407 or visit our office at 3665 John F Kennedy Parkway, Suite 210, Fort Collins, CO 80525. Let us help you find the perfect home in Northern Colorado.',
     },
+    faqs: BUYER_FAQS,
+    testimonials: [
+      { name: 'Andy Witt', text: 'Adam and Mandi were absolutely phenomenal! Walked me through every step of the process and constantly checked in.', rating: 5 },
+      { name: 'Kylie Graff', text: 'We just bought our first home, and could not have done it without the knowledge and guidance from the Schwartz team.', rating: 5 },
+      { name: 'Daen Manriquez', text: 'Adam is a pleasure to work with. His friendly demeanor and dedication to client satisfaction set him apart.', rating: 5 },
+    ],
   },
   '/contact/': {
     sections: [
@@ -732,6 +745,36 @@ function injectMoneyPageBody(html, route, content) {
     }).join('');
   }
 
+  // Build FAQ section for money pages with FAQ data
+  let faqHtml = '';
+  if (content.faqs && content.faqs.length > 0) {
+    faqHtml =
+      `      <section class="prerendered-faq">\n` +
+      `        <h2>Frequently Asked Questions</h2>\n` +
+      content.faqs.map((faq) =>
+        `        <div itemscope="" itemprop="mainEntity" itemtype="https://schema.org/Question">\n` +
+        `          <h3 itemprop="name">${escapeHtml(faq.q)}</h3>\n` +
+        `          <div itemscope="" itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">\n` +
+        `            <p itemprop="text">${escapeHtml(faq.a)}</p>\n` +
+        `          </div>\n` +
+        `        </div>`
+      ).join('\n') + `\n      </section>\n`;
+  }
+
+  // Build testimonials section for money pages
+  let testimonialsHtml = '';
+  if (content.testimonials && content.testimonials.length > 0) {
+    testimonialsHtml =
+      `      <section class="prerendered-testimonials">\n` +
+      `        <h2>Success Stories</h2>\n` +
+      content.testimonials.map((t) =>
+        `        <div class="prerendered-testimonial">\n` +
+        `          <p>"${escapeHtml(t.text)}"</p>\n` +
+        `          <p>— ${escapeHtml(t.name)}</p>\n` +
+        `        </div>`
+      ).join('\n') + `\n      </section>\n`;
+  }
+
   let ctaHtml = '';
   if (content.cta) {
     ctaHtml =
@@ -746,6 +789,8 @@ function injectMoneyPageBody(html, route, content) {
     `    <div class="prerendered-money-content">\n` +
     `      <h1>${pageTitle}</h1>\n` +
     `${sectionsHtml}` +
+    `${faqHtml}` +
+    `${testimonialsHtml}` +
     `${ctaHtml}` +
     `    </div>\n  `;
 
@@ -945,6 +990,23 @@ function buildRouteSchemas(route) {
     if (aboutSchema) {
       aboutSchema['@type'] = 'AboutPage';
     }
+  }
+
+  // Money pages with FAQ data – add FAQPage schema
+  const moneyPage = matchMoneyPage(path);
+  if (moneyPage && moneyPage.faqs && moneyPage.faqs.length > 0) {
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: moneyPage.faqs.map((faq) => ({
+        '@type': 'Question',
+        name: faq.q,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: faq.a,
+        },
+      })),
+    });
   }
 
   return schemas;
