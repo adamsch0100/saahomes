@@ -1,5 +1,8 @@
 import React from "react";
 import SEO from "../components/SEO";
+import AreaFAQSection from "../components/AreaFAQSection.jsx";
+import Testimonials from "../components/Testimonials.jsx";
+import { BUYER_FAQS } from "../data/buyerSellerFaqs.js";
 
 export default function ForBuyersPage() {
   return (
@@ -9,6 +12,20 @@ export default function ForBuyersPage() {
         description="Search homes for sale in Fort Collins, Loveland, Windsor, and across Northern Colorado. SAA Homes offers expert buyer representation, down payment program guidance including CHFA Schools To Home, and personalized home search services."
         keywords="homes for sale Fort Collins, Colorado home buyers, Loveland homes for sale, Windsor CO real estate, buy home Northern Colorado, first time home buyer Colorado, buyer agent Fort Collins, CHFA down payment assistance"
         canonical="https://saahomes.com/for-buyers/"
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: BUYER_FAQS.map((faq) => ({
+              "@type": "Question",
+              name: faq.q,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: faq.a,
+              },
+            })),
+          },
+        ]}
       />
 
       {/* Hero Section */}
@@ -225,6 +242,10 @@ export default function ForBuyersPage() {
           </div>
         </div>
       </section>
+
+      <AreaFAQSection faqs={BUYER_FAQS} city="Northern Colorado" />
+
+      <Testimonials />
 
       {/* CTA Section */}
       <section className="py-16 px-6 bg-black text-white">
