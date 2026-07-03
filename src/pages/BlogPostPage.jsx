@@ -164,6 +164,21 @@ export default function BlogPostPage() {
 
           <p className="text-xl text-gray-700 leading-relaxed mb-10">{post.excerpt}</p>
 
+          {post.youtubeId && (
+            <div className="mb-10 aspect-video rounded-xl overflow-hidden shadow-lg">
+              <iframe
+                width="100%"
+                height="100%"
+                src={`https://www.youtube.com/embed/${post.youtubeId}`}
+                title={post.title}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+              />
+            </div>
+          )}
+
           {post.relatedLinks && <RelatedLinksBox links={post.relatedLinks} title="Jump to program guides" />}
 
           {post.sections.map((section) => (

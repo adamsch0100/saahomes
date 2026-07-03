@@ -1,8 +1,8 @@
 {
-  "date": "2026-06-26",
+  "date": "2026-07-03",
   "gsc_period": {
-    "start": "2026-06-18",
-    "end": "2026-06-24"
+    "start": "2026-06-25",
+    "end": "2026-07-01"
   },
   "total_urls": 15,
   "ok": 15,
@@ -18,10 +18,10 @@
       "canonical_mismatch": false,
       "in_sitemap": true,
       "gsc": {
-        "impressions": 17,
-        "clicks": 1,
-        "position": 9.352941176470589,
-        "ctr": 0.058823529411764705
+        "impressions": 39,
+        "clicks": 0,
+        "position": 5.487179487179487,
+        "ctr": 0
       },
       "issues": [],
       "ok": true
@@ -35,7 +35,12 @@
       "canonical": "https://saahomes.com/for-buyers/",
       "canonical_mismatch": false,
       "in_sitemap": true,
-      "gsc": null,
+      "gsc": {
+        "impressions": 9,
+        "clicks": 0,
+        "position": 2.888888888888889,
+        "ctr": 0
+      },
       "issues": [],
       "ok": true
     },
@@ -49,9 +54,9 @@
       "canonical_mismatch": false,
       "in_sitemap": true,
       "gsc": {
-        "impressions": 1,
+        "impressions": 6,
         "clicks": 0,
-        "position": 63,
+        "position": 1.8333333333333335,
         "ctr": 0
       },
       "issues": [],
@@ -67,9 +72,9 @@
       "canonical_mismatch": false,
       "in_sitemap": true,
       "gsc": {
-        "impressions": 3,
+        "impressions": 7,
         "clicks": 0,
-        "position": 159,
+        "position": 2,
         "ctr": 0
       },
       "issues": [],
@@ -97,7 +102,12 @@
       "canonical": "https://saahomes.com/chfa-down-payment-assistance/",
       "canonical_mismatch": false,
       "in_sitemap": true,
-      "gsc": null,
+      "gsc": {
+        "impressions": 644,
+        "clicks": 2,
+        "position": 61.68633540372671,
+        "ctr": 0.003105590062111801
+      },
       "issues": [],
       "ok": true
     },
@@ -110,7 +120,12 @@
       "canonical": "https://saahomes.com/chfa-schools-to-home/",
       "canonical_mismatch": false,
       "in_sitemap": true,
-      "gsc": null,
+      "gsc": {
+        "impressions": 177,
+        "clicks": 3,
+        "position": 7.338983050847458,
+        "ctr": 0.01694915254237288
+      },
       "issues": [],
       "ok": true
     },
@@ -123,7 +138,12 @@
       "canonical": "https://saahomes.com/colorado-champions-home-loan-program/",
       "canonical_mismatch": false,
       "in_sitemap": true,
-      "gsc": null,
+      "gsc": {
+        "impressions": 24,
+        "clicks": 1,
+        "position": 35.541666666666664,
+        "ctr": 0.041666666666666664
+      },
       "issues": [],
       "ok": true
     },
@@ -150,9 +170,9 @@
       "canonical_mismatch": false,
       "in_sitemap": true,
       "gsc": {
-        "impressions": 60,
+        "impressions": 11,
         "clicks": 0,
-        "position": 42.733333333333334,
+        "position": 37.09090909090909,
         "ctr": 0
       },
       "issues": [],
@@ -168,9 +188,9 @@
       "canonical_mismatch": false,
       "in_sitemap": true,
       "gsc": {
-        "impressions": 63,
+        "impressions": 77,
         "clicks": 0,
-        "position": 30.11111111111111,
+        "position": 28.844155844155843,
         "ctr": 0
       },
       "issues": [],
@@ -211,7 +231,12 @@
       "canonical": "https://saahomes.com/northern-colorado-areas/berthoud/",
       "canonical_mismatch": false,
       "in_sitemap": true,
-      "gsc": null,
+      "gsc": {
+        "impressions": 1,
+        "clicks": 0,
+        "position": 9,
+        "ctr": 0
+      },
       "issues": [],
       "ok": true
     },

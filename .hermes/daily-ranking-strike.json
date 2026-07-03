@@ -1,20 +1,20 @@
 {
-  "date": "2026-06-26",
+  "date": "2026-07-02",
   "current_period": {
-    "start": "2026-06-18",
-    "end": "2026-06-24"
+    "start": "2026-06-24",
+    "end": "2026-06-30"
   },
   "previous_period": {
-    "start": "2026-06-11",
-    "end": "2026-06-17"
+    "start": "2026-06-17",
+    "end": "2026-06-23"
   },
-  "current_rows": 59,
-  "previous_rows": 64,
+  "current_rows": 225,
+  "previous_rows": 58,
   "alerts": [],
   "p0_regressions": [],
   "has_issues": false,
-  "total_current_impressions": 174,
-  "total_current_clicks": 0,
-  "total_previous_impressions": 125,
+  "total_current_impressions": 715,
+  "total_current_clicks": 2,
+  "total_previous_impressions": 178,
   "total_previous_clicks": 0
 }
