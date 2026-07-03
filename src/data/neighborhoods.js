@@ -436,53 +436,110 @@ export const neighborhoods = [
     ],
   },
 
+  // ── Old Town Windsor ──
+  {
+    slug: 'old-town-windsor',
+    citySlug: 'windsor',
+    cityDisplay: 'Windsor',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Old Town Windsor',
+    alsoKnownAs: ['Downtown Windsor', 'Historic Windsor', 'Windsor downtown district'],
+    description:
+      'Old Town Windsor is the historic heart of Windsor, centered around Main Street and the iconic Windsor Train Depot. This walkable district features locally owned shops, restaurants, and community spaces, surrounded by tree-lined streets with well-preserved early-1900s homes and newer infill development.',
+    homeStyles: ['Victorian', 'Craftsman Bungalow', 'Mid-Century Ranch', 'Modern Townhome'],
+    yearBuiltRange: { min: 1900, max: 2025 },
+    priceRangeDescription: '$325K to $600K',
+    schoolDistrict: 'Windsor School District RE-4',
+    schools: [
+      { name: 'Tozer Elementary', type: 'elementary', level: 'K–5', rating: 7 },
+      { name: 'Windsor Middle School', type: 'middle', level: '6–8', rating: 7 },
+      { name: 'Windsor High School', type: 'high', level: '9–12', rating: 8 },
+    ],
+    hoaDescription: 'No HOA in most of Old Town; select new developments may have HOAs',
+    features: ['Historic Main Street with local shops and dining', 'Windsor Train Depot and museum', 'Farmers Market on Main (Saturdays)', 'Windsor Community Recreation Center nearby', 'Boardwalk Park and Windsor Lake access', 'Annual Windsor Harvest Festival'],
+    parks: ['Boardwalk Park', 'Windsor Lake', 'Windsor Community Park'],
+    boundaries: 'Main Street corridor, Walnut Street to 3rd Street, Birch Street to Ash Street',
+    coordinates: { latitude: '40.4780', longitude: '-104.9010' },
+    walkScore: 58,
+    metaDescription: 'Old Town Windsor real estate guide — historic homes, walkable Main Street, and small-town charm in downtown Windsor. Expert buyer and seller agents from SAA Homes.',
+    keywords: 'Old Town Windsor, downtown Windsor Colorado, historic Windsor homes, Main Street Windsor, Windsor CO real estate, walkable neighborhoods Windsor',
+    neighborhoodHighlights: [
+      { title: 'Historic Main Street', description: 'Windsor\'s historic Main Street offers local dining, shopping, and the iconic Train Depot — the heart of the community.' },
+      { title: 'Community events', description: 'From the Harvest Festival to the Farmers Market on Main, Old Town Windsor has year-round community gatherings.' },
+      { title: 'Walkable lifestyle', description: 'Walk to coffee shops, restaurants, Boardwalk Park, and Windsor Lake from almost anywhere in Old Town.' },
+    ],
+  },
+
   // ═══════════════════════════════════════════════════════════════
   // GREELEY
   // ═══════════════════════════════════════════════════════════════
 
-  // ── West Greeley ──
+  // ── Mountain Shadows ──
   {
-    slug: 'west-greeley',
+    slug: 'mountain-shadows',
     citySlug: 'greeley',
     cityDisplay: 'Greeley',
     county: 'Weld County',
-    type: 'neighborhood',
-    name: 'West Greeley',
-    alsoKnownAs: ['West Greeley neighborhoods', 'Greeley west side'],
+    type: 'subdivision',
+    name: 'Mountain Shadows',
+    alsoKnownAs: ['Mountain Shadows Greeley', 'Mountain Shadows subdivision'],
     description:
-      'West Greeley is the city\'s most desirable residential area, featuring newer subdivisions, top-rated schools, and convenient access to shopping along 47th Avenue. The area has seen significant growth and offers a range of housing options from entry-level to executive.',
-    longDescription:
-      'West Greeley has emerged as the premier residential corridor in Greeley, stretching from 47th Avenue west toward Windsor. The area features master-planned communities like Westridge and Buckstone Ranch alongside established subdivisions with mature landscaping. West Greeley is home to the city\'s best schools, including the highly regarded University Schools (K–12), and Denver-based commuters appreciate the proximity to Highway 34 for the drive to Denver. The 47th Avenue shopping corridor provides access to major retailers, grocery stores, and dining. The Poudre River Trail system extends into West Greeley, connecting residents to the broader regional trail network.',
-    homeStyles: ['Contemporary', 'Ranch', 'Two-Story Traditional', 'Patio Home', 'Townhome'],
-    yearBuiltRange: { min: 1995, max: 2025 },
-    priceRangeDescription: '$300K (townhomes) to $800K+ (executive homes)',
+      'Mountain Shadows is a well-established residential subdivision in west Greeley, known for its mature landscaping, spacious lots, and family-friendly atmosphere. The neighborhood offers a mix of ranch-style and two-story homes with convenient access to the 47th Avenue shopping corridor and University Schools.',
+    homeStyles: ['Ranch', 'Two-Story Traditional', 'Split-Level', 'Patio Home'],
+    yearBuiltRange: { min: 1990, max: 2015 },
+    priceRangeDescription: '$350K to $600K',
     schoolDistrict: 'Greeley-Evans School District 6',
     schools: [
       { name: 'West Ridge Elementary', type: 'elementary', level: 'K–5', rating: 8 },
       { name: 'Heath Middle School', type: 'middle', level: '6–8', rating: 7 },
       { name: 'University Schools (K–12)', type: 'charter', level: 'K–12', rating: 9 },
     ],
-    hoaDescription: 'Most subdivisions have mandatory HOAs ($75–$200/month)',
-    features: [
-      'Newer subdivisions with modern floor plans',
-      'Close to 47th Avenue shopping corridor',
-      'University Schools — top-rated K–12 charter',
-      'Highway 34 access for Denver commute',
-      'Poudre River Trail connectivity',
-      'Variety of price points from starter to executive',
-    ],
+    hoaDescription: 'Mandatory HOA ($75–$150/month) covers common areas and snow removal',
+    features: ['Mature trees and landscaping', 'Close to University Schools (K–12 charter)', '47th Avenue shopping nearby', 'Highway 34 access', 'Family-friendly streets', 'Poudre River Trail access'],
     parks: ['Sanborn Park', 'Bittersweet Park', 'Poudre River Trail'],
-    boundaries: '47th Avenue to 65th Avenue, US 34 to O Street',
+    boundaries: '47th Avenue to 55th Avenue, 16th Street to 20th Street',
     coordinates: { latitude: '40.4230', longitude: '-104.7650' },
-    walkScore: 30,
-    metaDescription:
-      'West Greeley real estate guide — new homes, top-rated schools, and master-planned communities in Greeley\'s most desirable corridor. Expert buyer and seller agents from SAA Homes.',
-    keywords:
-      'West Greeley homes, West Greeley new construction, Greeley west side real estate, Westridge Greeley, Buckstone Ranch, University Schools Greeley, 47th Avenue Greeley',
+    metaDescription: 'Mountain Shadows Greeley real estate guide — established homes near University Schools and 47th Avenue shopping. Family-friendly subdivision with mature landscaping. SAA Homes.',
+    keywords: 'Mountain Shadows Greeley, Mountain Shadows subdivision Greeley, west Greeley homes, University Schools Greeley, Greeley real estate, Mountain Shadows HOA',
     neighborhoodHighlights: [
-      { title: 'Top schools', description: 'University Schools (9/10 K–12 charter), West Ridge Elementary, and close to UNC make this a family magnet.' },
-      { title: 'Newer housing', description: 'Most homes built after 1995 with modern open floor plans and energy-efficient features.' },
-      { title: 'Denver access', description: 'Convenient Highway 34 commute — downtown Denver in under an hour, Denver airport in 50 minutes.' },
+      { title: 'Established community', description: 'Mature trees and established landscaping give Mountain Shadows a welcoming, settled feel.' },
+      { title: 'University Schools', description: 'One of Greeley\'s top-rated K–12 charter schools is minutes away — a major draw for families.' },
+      { title: 'Central west-side location', description: 'Close to 47th Avenue shopping, Highway 34, and the Poudre River Trail system.' },
+    ],
+  },
+
+  // ── Glenmere ──
+  {
+    slug: 'glenmere',
+    citySlug: 'greeley',
+    cityDisplay: 'Greeley',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Glenmere',
+    alsoKnownAs: ['Glenmere Park', 'Glenmere Historic District', 'Glenmere neighborhood'],
+    description:
+      'Glenmere is one of Greeley\'s most historic and beloved neighborhoods, centered around the scenic Glenmere Park with its lake and walking paths. The area features early-1900s homes, tree-lined streets, and a strong sense of community — all within walking distance of downtown Greeley and the University of Northern Colorado campus.',
+    homeStyles: ['Victorian', 'Craftsman Bungalow', 'Tudor Revival', 'Mid-Century Ranch'],
+    yearBuiltRange: { min: 1900, max: 1960 },
+    priceRangeDescription: '$275K (fixer) to $700K+ (restored historic)',
+    schoolDistrict: 'Greeley-Evans School District 6',
+    schools: [
+      { name: 'Greeley/Evans Early Childhood Center', type: 'elementary', level: 'PK–K', rating: null },
+      { name: 'Greeley Central High School', type: 'high', level: '9–12', rating: 6 },
+    ],
+    hoaDescription: 'No HOA — Glenmere is a historic district with voluntary neighborhood association',
+    features: ['Glenmere Park with lake, walking paths, and pavilion', 'Historic homes with character and craftsmanship', 'Walkable to downtown Greeley', 'Steps from UNC campus', 'Annual Glenmere Park events and concerts', 'Mature tree canopy'],
+    parks: ['Glenmere Park', 'Downtown Greeley', 'UNC Campus'],
+    boundaries: '10th Street to 16th Street, 8th Avenue to 23rd Avenue',
+    coordinates: { latitude: '40.4220', longitude: '-104.7000' },
+    walkScore: 62,
+    metaDescription: 'Glenmere Greeley real estate guide — historic homes around Glenmere Park near downtown and UNC. Victorian, Craftsman, and Tudor homes. Expert agents from SAA Homes.',
+    keywords: 'Glenmere Greeley, Glenmere Park Greeley, historic Greeley homes, downtown Greeley real estate, UNC Greeley homes, Glenmere historic district',
+    neighborhoodHighlights: [
+      { title: 'Historic character', description: 'Glenmere is one of Greeley\'s oldest neighborhoods, with early-1900s homes featuring original craftsmanship and architectural detail.' },
+      { title: 'Glenmere Park', description: 'The neighborhood centers on Glenmere Park — a 25-acre park with a lake, walking paths, pavilion, and year-round community events.' },
+      { title: 'Walkable location', description: 'Walk to downtown Greeley restaurants, the UNC campus, and the Greeley Recreation Center from almost any home in Glenmere.' },
     ],
   },
 
