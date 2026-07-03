@@ -1,6 +1,7 @@
 import React from "react";
 import AreaSEO from "../../components/AreaSEO.jsx";
 import AreaFAQSection from "../../components/AreaFAQSection.jsx";
+import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
 import { AREA_FAQS } from "../../data/areaFaqs.js";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
@@ -264,13 +265,7 @@ export default function GreeleyPage() {
           <div className="grid md:grid-cols-2 gap-8">
             <div>
               <h3 className="text-2xl font-bold mb-4">Popular Neighborhoods</h3>
-              <ul className="space-y-2 text-gray-700">
-                <li>• West Greeley - Family-friendly with newer developments</li>
-                <li>• Downtown Greeley - Historic charm and urban living</li>
-                <li>• Bella Romero - Established community with mature trees</li>
-                <li>• Centennial - Mix of residential and commercial areas</li>
-                <li>• Garden City - Affordable homes and convenient location</li>
-              </ul>
+              <NeighborhoodLinks citySlug="greeley" cityName="Greeley" />
             </div>
             <div>
               <h3 className="text-2xl font-bold mb-4">Local Attractions</h3>
