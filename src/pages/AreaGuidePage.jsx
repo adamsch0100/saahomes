@@ -189,29 +189,6 @@ export default function AreaGuidePage() {
         </div>
       </section>
 
-      {/* City Video */}
-      {area.youtubeId && (
-        <section className="py-12 px-6 bg-white">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl font-bold font-serif mb-6 text-center">
-              {area.city} Video Guide
-            </h2>
-            <div className="aspect-video rounded-xl overflow-hidden shadow-lg">
-              <iframe
-                width="100%"
-                height="100%"
-                src={`https://www.youtube.com/embed/${area.youtubeId}`}
-                title={`${area.city} real estate guide - SAA Homes`}
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full"
-              />
-            </div>
-          </div>
-        </section>
-      )}
-
       {nearby && (
         <section className="py-16 px-6 bg-white">
           <div className="max-w-4xl mx-auto">
@@ -305,6 +282,29 @@ export default function AreaGuidePage() {
           </div>
         </div>
       </section>
+
+      {/* City Video at bottom */}
+      {area.youtubeId && (
+        <section className="py-12 px-6 bg-white">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl font-bold font-serif mb-6 text-center">
+              {area.city} Video Guide
+            </h2>
+            <div className="aspect-video rounded-xl overflow-hidden shadow-lg">
+              <iframe
+                width="100%"
+                height="100%"
+                src={`https://www.youtube.com/embed/${area.youtubeId}`}
+                title={`${area.city} real estate guide - SAA Homes`}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+              />
+            </div>
+          </div>
+        </section>
+      )}
     </>
   );
 }
