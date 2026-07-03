@@ -937,35 +937,66 @@ def get_blog_post_by_slug(slug):
         with open(js_path, "r") as f:
             content = f.read()
 
-        # Find the blog post with matching slug
-        # This is a simple regex-based extraction
+        # Find the blog post array
         posts_text = re.search(r'export const blogPosts\s*=\s*\[(.*?)\];', content, re.DOTALL)
         if not posts_text:
             return None
 
         # Find the specific post by slug
-        slug_pattern = rf"slug:\s*'{slug}'"
+        slug_pattern = rf"slug:\s*'{re.escape(slug)}'"
         match = re.search(slug_pattern, posts_text.group(1))
         if not match:
             return None
 
-        # Extract title
-        title_match = re.search(r"title:\s*'([^']*)'", posts_text.group(1)[:match.start()])
-        title = title_match.group(1) if title_match else slug.replace("-", " ").title()
+        # Get everything from the start of this post object to the slug
+        # Find the opening brace closest to and before the slug
+        post_start = posts_text.group(1).rfind("{", 0, match.start())
+        if post_start == -1:
+            return None
 
-        # Extract excerpt
-        # Find which post object contains our slug, then find its excerpt
-        excerpt = ""
-        # Split into individual post objects and find ours
-        post_objects = re.findall(r'\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}', posts_text.group(1))
-        for obj_text in post_objects:
-            if f"slug: '{slug}'" in obj_text or f'slug: "{slug}"' in obj_text:
-                excerpt_match = re.search(r"excerpt:\s*'([^']*)'", obj_text)
-                if excerpt_match:
-                    excerpt = excerpt_match.group(1)
-                break
+        post_text = posts_text.group(1)[post_start:]
 
-        return {"slug": slug, "title": title, "excerpt": excerpt}
+        # Extract fields from the post text
+        def extract_field(name, text):
+            """Extract a single-quoted field value, handling escaped quotes."""
+            p = re.search(rf"{name}:\s*'((?:[^'\\]|\\.)*)'", text)
+            return p.group(1) if p else ""
+
+        title = extract_field("title", post_text)
+        excerpt = extract_field("excerpt", post_text)
+        post_date = extract_field("date", post_text)
+
+        # Check for youtubeId
+        yt_id = extract_field("youtubeId", post_text)
+
+        # Extract sections (headings + first paragraph of each)
+        sections = []
+        # Find all section blocks within this post
+        section_pattern = r"\{\s*heading:\s*'([^']*)'[\s\S]*?paragraphs:\s*\[([^\]]*)\]"
+        for sec_match in re.finditer(section_pattern, post_text):
+            heading = sec_match.group(1)
+            para_text = sec_match.group(2)
+            # Get first paragraph
+            first_para = ""
+            para_match = re.search(r"'((?:[^'\\]|\\.)*)'", para_text)
+            if para_match:
+                first_para = para_match.group(1)[:200]
+            if heading:
+                sections.append({"heading": heading, "paragraphs": [first_para] if first_para else []})
+
+        # Build a post dict with what we can parse
+        post: dict = {
+            "slug": slug,
+            "title": title or slug.replace("-", " ").title(),
+            "excerpt": excerpt or "",
+            "date": post_date or "",
+        }
+        if sections:
+            post["sections"] = sections
+        if yt_id:
+            post["youtubeId"] = yt_id
+
+        return post
     except Exception as e:
         print(f"Warning: Could not parse blogPosts.js: {e}", file=sys.stderr)
 
@@ -1154,7 +1185,9 @@ def build_description(post, video_url=""):
     phone = "(970) 999-1407"
 
     lines = [
-        f"📖 Full article + market data → {blog_url}",
+        f"🔗 {blog_url}",
+        "",
+        f"📖 Read the full article ↑",
         "",
         "───",
         "",

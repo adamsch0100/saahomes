@@ -181,6 +181,7 @@ export const blogPosts = [
     category: 'CHFA & Homebuyer Programs',
     image: '/images/Buyers-img-2.jpg',
     readTime: '12 min read',
+    youtubeId: 'BdayAY93GXo',
     keywords: 'CHFA down payment assistance, Colorado first time home buyer 2026, CHFA grant Colorado, CHFA SmartStep, CHFA Preferred, CHFA FirstStep, down payment help Colorado',
     relatedLinks: [
       { title: 'CHFA Down Payment Assistance Landing Page', href: '/chfa-down-payment-assistance/', description: 'Full program comparison, limits table & free consultation' },
@@ -272,6 +273,7 @@ export const blogPosts = [
     category: 'CHFA & Homebuyer Programs',
     image: '/images/Fort-Collins-CO-Area-Guide.jpg',
     readTime: '10 min read',
+    youtubeId: '1rDTgZRO5gA',
     keywords: 'CHFA Fort Collins, CHFA Greeley, Larimer County first time home buyer, Weld County down payment assistance, Northern Colorado CHFA income limits, Loveland CHFA',
     relatedLinks: [
       { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'All programs, requirements & DPA options' },
@@ -343,6 +345,7 @@ export const blogPosts = [
     category: 'CHFA & Homebuyer Programs',
     image: '/images/buyers-hero.jpg',
     readTime: '9 min read',
+    youtubeId: 'OWjpvkzFFJc',
     keywords: 'CHFA Schools To Home, Colorado teacher home loan, educator down payment assistance, public school employee home buying, teacher mortgage Fort Collins, CHFA educator program 2026',
     relatedLinks: [
       { title: 'CHFA Schools To Home Program Page', href: '/chfa-schools-to-home/', description: 'Full eligibility, examples & free consultation' },
@@ -473,7 +476,7 @@ export const blogPosts = [
     category: 'Market Update',
     image: '/images/Northern Colorado.webp',
     readTime: '7 min read',
-    youtubeId: 's7F06nQRH98',
+        youtubeId: 's7F06nQRH98',
     keywords: 'Northern Colorado housing market July 2026, Fort Collins home prices summer 2026, Loveland real estate trends, Windsor CO housing market, Greeley home prices, Larimer County market update mid-year 2026',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
@@ -579,6 +582,7 @@ export const blogPosts = [
     image: '/images/Northern Colorado.webp',
     readTime: '7 min read',
     supersededBy: LATEST_MARKET_UPDATE_SLUG,
+    youtubeId: 'daBlxFfJ0iA',
     keywords: 'Northern Colorado housing market 2026, Fort Collins home prices June 2026, Loveland real estate trends, Windsor CO housing market, Greeley home prices, Larimer County market update',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
