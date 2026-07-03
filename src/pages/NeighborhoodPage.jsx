@@ -182,22 +182,6 @@ export default function NeighborhoodPage() {
         {/* Features */}
         <FeatureList features={neighborhood.features} />
 
-        {/* Neighborhood Video */}
-        {neighborhood.youtubeId && (
-          <div className="mb-10 aspect-video rounded-xl overflow-hidden shadow-lg max-w-4xl mx-auto">
-            <iframe
-              width="100%"
-              height="100%"
-              src={`https://www.youtube.com/embed/${neighborhood.youtubeId}`}
-              title={`${neighborhood.name} neighborhood guide - SAA Homes`}
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="w-full h-full"
-            />
-          </div>
-        )}
-
         {/* Schools */}
         <SchoolTable schools={neighborhood.schools} neighborhood={neighborhood} />
 
@@ -233,6 +217,22 @@ export default function NeighborhoodPage() {
           </p>
           <MarketReportForm areaName={`${neighborhood.name}, ${neighborhood.cityDisplay}`} />
         </section>
+
+        {/* Neighborhood Video at bottom */}
+        {neighborhood.youtubeId && (
+          <div className="mb-10 aspect-video rounded-xl overflow-hidden shadow-lg max-w-4xl mx-auto">
+            <iframe
+              width="100%"
+              height="100%"
+              src={`https://www.youtube.com/embed/${neighborhood.youtubeId}`}
+              title={`${neighborhood.name} neighborhood guide - SAA Homes`}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full"
+            />
+          </div>
+        )}
 
       </article>
     </>
