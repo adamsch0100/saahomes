@@ -1808,6 +1808,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/wellington.png',
     readTime: '7 min read',
+    youtubeId: 'Am-WOOoB8dk',
     keywords: 'wellington colorado homes for sale, wellington co homes for sale, wellington colorado real estate, buying a home in wellington colorado, homes for sale in wellington co, moving to wellington colorado, wellington co neighborhoods, wellington co realtor, wellington colorado real estate agent',
     relatedLinks: [
       { title: 'Wellington Area Guide', href: '/northern-colorado-areas/wellington/', description: 'Neighborhoods, schools and homes for sale' },
