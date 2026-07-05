@@ -56,7 +56,8 @@ export const neighborhoods = [
     neighborhoodHighlights: [
       { title: 'Walk to everything', description: 'Old Town has a Walk Score of 92 — errands, dining, and entertainment are within walking distance.' },
       { title: 'Historic architecture', description: 'Victorian and Queen Anne homes from the 1880s–1920s, many on the National Register of Historic Places.' },
-      { title: 'Brewery epicenter', description: 'Fort Collins is "The Napa Valley of Beer," and Old Town is home to the original New Belgium Brewery and a dozen more.' },
+      { title: 'Brewery epicenter', description: 'Fort Collins is "The Napa Valley of Beer," and Old Town is home to the original New Belgium Brewery and a dozen more.'
+    youtubeId: 'bQpFilu05jo', },
     ],
   },
 
@@ -102,7 +103,8 @@ export const neighborhoods = [
     neighborhoodHighlights: [
       { title: 'Central location', description: 'Minutes from Old Town, CSU, and Harmony Road — the most convenient commute in Fort Collins.' },
       { title: 'Diverse housing', description: '1950s ranches, mid-century homes, and new infill townhomes at varied price points.' },
-      { title: 'Top-rated schools', description: 'Rocky Mountain High School (rated 9/10) and Olander Elementary serve most of Midtown.' },
+      { title: 'Top-rated schools', description: 'Rocky Mountain High School (rated 9/10) and Olander Elementary serve most of Midtown.'
+    youtubeId: 'ytdgQ8nTKEs', },
     ],
   },
 
