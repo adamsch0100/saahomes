@@ -1003,6 +1003,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/Shwartz-CTA-Buyers.jpg',
     readTime: '8 min read',
+    youtubeId: 'X9XFaaMjCGQ',
     keywords: 'fort collins realtor, fort collins real estate agent, best realtor fort collins, fort collins real estate team, schwartz and associates fort collins, northern colorado realtor, fort collins co realtor, coldwell banker fort collins, fort collins home buying, fort collins home selling',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
@@ -1476,6 +1477,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/timnath.png',
     readTime: '8 min read',
+    youtubeId: 'Aj-U5azJfEA',
     keywords: 'timnath homes for sale, timnath colorado homes for sale, timnath co real estate, buying a home in timnath colorado, homes for sale in timnath co, moving to timnath colorado, timnath new construction, timnath co realtor, timnath neighborhoods',
     relatedLinks: [
       { title: 'Timnath Area Guide', href: '/northern-colorado-areas/timnath/', description: 'New construction communities and homes for sale' },
@@ -1588,6 +1590,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Windsor-CO-Area-Guide.jpg',
     readTime: '8 min read',
+    youtubeId: 'tMeya8iBE5U',
     keywords: 'windsor colorado homes for sale, windsor co homes for sale, windsor colorado real estate, buying a home in windsor colorado, homes for sale in windsor co, moving to windsor colorado, windsor co neighborhoods, windsor co realtor, windsor colorado real estate agent',
     relatedLinks: [
       { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Neighborhoods, schools and homes for sale' },
@@ -1705,6 +1708,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/Area-Guide-for-Greeley-CO.jpg',
     readTime: '10 min read',
+    youtubeId: '8pIqSmbbjVg',
     keywords: 'sell my home greeley colorado, greeley co real estate agent, greeley colorado homes for sale, selling a house in greeley co, greeley home selling guide, how to sell a home in greeley colorado, listing agent greeley co, greeley co home value',
     relatedLinks: [
       { title: 'Greeley Area Guide', href: '/northern-colorado-areas/greeley/', description: 'Neighborhoods, schools & market data' },
@@ -1808,6 +1812,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/wellington.png',
     readTime: '7 min read',
+    youtubeId: 'Am-WOOoB8dk',
     keywords: 'wellington colorado homes for sale, wellington co homes for sale, wellington colorado real estate, buying a home in wellington colorado, homes for sale in wellington co, moving to wellington colorado, wellington co neighborhoods, wellington co realtor, wellington colorado real estate agent',
     relatedLinks: [
       { title: 'Wellington Area Guide', href: '/northern-colorado-areas/wellington/', description: 'Neighborhoods, schools and homes for sale' },
