@@ -1003,6 +1003,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/Shwartz-CTA-Buyers.jpg',
     readTime: '8 min read',
+    youtubeId: 'X9XFaaMjCGQ',
     keywords: 'fort collins realtor, fort collins real estate agent, best realtor fort collins, fort collins real estate team, schwartz and associates fort collins, northern colorado realtor, fort collins co realtor, coldwell banker fort collins, fort collins home buying, fort collins home selling',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
