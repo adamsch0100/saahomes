@@ -1589,6 +1589,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Windsor-CO-Area-Guide.jpg',
     readTime: '8 min read',
+    youtubeId: 'tMeya8iBE5U',
     keywords: 'windsor colorado homes for sale, windsor co homes for sale, windsor colorado real estate, buying a home in windsor colorado, homes for sale in windsor co, moving to windsor colorado, windsor co neighborhoods, windsor co realtor, windsor colorado real estate agent',
     relatedLinks: [
       { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Neighborhoods, schools and homes for sale' },
