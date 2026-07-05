@@ -1477,6 +1477,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/timnath.png',
     readTime: '8 min read',
+    youtubeId: 'Aj-U5azJfEA',
     keywords: 'timnath homes for sale, timnath colorado homes for sale, timnath co real estate, buying a home in timnath colorado, homes for sale in timnath co, moving to timnath colorado, timnath new construction, timnath co realtor, timnath neighborhoods',
     relatedLinks: [
       { title: 'Timnath Area Guide', href: '/northern-colorado-areas/timnath/', description: 'New construction communities and homes for sale' },
