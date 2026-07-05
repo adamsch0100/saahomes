@@ -53,11 +53,11 @@ export const neighborhoods = [
       'Old Town Fort Collins real estate guide — historic Victorians, modern condos, and townhomes for sale in Fort Collins\' most walkable neighborhood. Expert buyer and seller representation from SAA Homes.',
     keywords:
       'Old Town Fort Collins homes, Old Town Fort Collins real estate, downtown Fort Collins condos, historic homes Fort Collins, Old Town Fort Collins HOA, walkable neighborhoods Fort Collins',
+    youtubeId: 'YadhIocOi5k',
     neighborhoodHighlights: [
       { title: 'Walk to everything', description: 'Old Town has a Walk Score of 92 — errands, dining, and entertainment are within walking distance.' },
       { title: 'Historic architecture', description: 'Victorian and Queen Anne homes from the 1880s–1920s, many on the National Register of Historic Places.' },
-      { title: 'Brewery epicenter', description: 'Fort Collins is "The Napa Valley of Beer," and Old Town is home to the original New Belgium Brewery and a dozen more.'
-    youtubeId: 'bQpFilu05jo', },
+      { title: 'Brewery epicenter', description: 'Fort Collins is "The Napa Valley of Beer," and Old Town is home to the original New Belgium Brewery and a dozen more.' },
     ],
   },
 
@@ -100,11 +100,11 @@ export const neighborhoods = [
       'Midtown Fort Collins real estate guide — centrally located homes near shopping, dining, and top-rated schools. Ranch-style homes, townhomes, and new construction from SAA Homes.',
     keywords:
       'Midtown Fort Collins real estate, Midtown Fort Collins homes for sale, South College Avenue Fort Collins, Fort Collins Midtown living, central Fort Collins neighborhoods',
+    youtubeId: 'bQpFilu05jo',
     neighborhoodHighlights: [
       { title: 'Central location', description: 'Minutes from Old Town, CSU, and Harmony Road — the most convenient commute in Fort Collins.' },
       { title: 'Diverse housing', description: '1950s ranches, mid-century homes, and new infill townhomes at varied price points.' },
-      { title: 'Top-rated schools', description: 'Rocky Mountain High School (rated 9/10) and Olander Elementary serve most of Midtown.'
-    youtubeId: 'ytdgQ8nTKEs', },
+      { title: 'Top-rated schools', description: 'Rocky Mountain High School (rated 9/10) and Olander Elementary serve most of Midtown.' },
     ],
   },
 
