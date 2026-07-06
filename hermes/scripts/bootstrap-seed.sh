@@ -82,6 +82,13 @@ mkdir -p "$WORKSPACE_DIR/context"
 mkdir -p "$WORKSPACE_DIR/outreach/pending"
 mkdir -p "$WORKSPACE_DIR/outreach/sent"
 mkdir -p "$WORKSPACE_DIR/outreach/skipped"
+mkdir -p "$WORKSPACE_DIR/videos/projects"
+mkdir -p "$WORKSPACE_DIR/videos/output"
+mkdir -p "$WORKSPACE_DIR/videos/pending-upload"
+mkdir -p "$WORKSPACE_DIR/assets/music"
+if [ -d "$SEED_DIR/assets/music" ]; then
+  cp -R "$SEED_DIR/assets/music/." "$WORKSPACE_DIR/assets/music/" 2>/dev/null || true
+fi
 mkdir -p "$DATA_DIR/browser-sessions/gbp"
 mkdir -p "$DATA_DIR/browser-sessions/meta"
 mkdir -p "$DATA_DIR/browser-sessions/youtube"
@@ -186,6 +193,11 @@ upsert_env "OUTREACH_SMTP_HOST" "${OUTREACH_SMTP_HOST:-}"
 upsert_env "OUTREACH_SMTP_USER" "${OUTREACH_SMTP_USER:-}"
 upsert_env "OUTREACH_SMTP_PASSWORD" "${OUTREACH_SMTP_PASSWORD:-}"
 append_env "SOCIAL_POST_EMAIL_TO" "${SOCIAL_POST_EMAIL_TO:-adam@saahomes.com}"
+upsert_env "YOUTUBE_CLIENT_ID" "${YOUTUBE_CLIENT_ID:-}"
+upsert_env "YOUTUBE_CLIENT_SECRET" "${YOUTUBE_CLIENT_SECRET:-}"
+upsert_env "YOUTUBE_REFRESH_TOKEN" "${YOUTUBE_REFRESH_TOKEN:-}"
+append_env "YOUTUBE_OAUTH_CREDENTIALS" "${YOUTUBE_OAUTH_CREDENTIALS:-}"
+append_env "YOUTUBE_REMEDIATION_ON_DEPLOY" "${YOUTUBE_REMEDIATION_ON_DEPLOY:-}"
 
 if id hermes >/dev/null 2>&1; then
   chown hermes:hermes "$ENV_FILE" 2>/dev/null || true
@@ -220,6 +232,18 @@ if [ -f "$GSC_KEY_FILE" ] && id hermes >/dev/null 2>&1; then
   chown hermes:hermes "$CREDENTIALS_DIR" "$GSC_KEY_FILE"
   chmod 700 "$CREDENTIALS_DIR"
   chmod 600 "$GSC_KEY_FILE"
+fi
+
+YOUTUBE_OAUTH_FILE="$CREDENTIALS_DIR/youtube-oauth.json"
+if [ -n "${YOUTUBE_OAUTH_JSON_B64:-}" ]; then
+  echo "Writing YouTube OAuth token from YOUTUBE_OAUTH_JSON_B64"
+  printf '%s' "$YOUTUBE_OAUTH_JSON_B64" | base64 -d > "$YOUTUBE_OAUTH_FILE"
+  chmod 600 "$YOUTUBE_OAUTH_FILE"
+fi
+
+if [ -f "$YOUTUBE_OAUTH_FILE" ] && id hermes >/dev/null 2>&1; then
+  chown hermes:hermes "$YOUTUBE_OAUTH_FILE" 2>/dev/null || true
+  chmod 600 "$YOUTUBE_OAUTH_FILE"
 fi
 
 # Hermes agent reads git credentials from /opt/data/.env — sync from Railway on every boot.
@@ -261,4 +285,11 @@ if command -v hermes >/dev/null 2>&1; then
   hermes config set browser.cloud_provider browserbase 2>/dev/null || true
   hermes config set browser.inactivity_timeout 300 2>/dev/null || true
   hermes config set 'tools.toolsets' '["web","terminal","files","browser"]' 2>/dev/null || true
+fi
+
+if [ "${YOUTUBE_REMEDIATION_ON_DEPLOY:-}" = "1" ]; then
+  echo "YOUTUBE_REMEDIATION_ON_DEPLOY=1 — starting live YouTube remediation in background"
+  if [ -x /usr/local/bin/run-live-youtube-remediation.sh ]; then
+    /usr/local/bin/run-live-youtube-remediation.sh &
+  fi
 fi

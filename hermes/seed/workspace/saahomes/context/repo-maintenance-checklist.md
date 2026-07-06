@@ -15,6 +15,7 @@ Adam does not maintain these files — **Hermes owns all updates going forward.*
 | Nav / footer link | `src/components/Header.jsx`, `Footer.jsx` | — |
 | Area page content | `src/data/areaSeo.js`, `AreaGuidePage.jsx` | sitemap |
 | Social email to Adam | JSON pack → `send-social-post-pack.py` | — |
+| YouTube video upload | `article-youtube-video` → `run-video-music-remediation.py` | `video-inventory.json` |
 | Weekly Adam schedule | JSON → `send-operator-weekly-email.py` | — |
 | Operator state | `MEMORY.md` → `## Content calendar state` | — |
 
@@ -29,7 +30,8 @@ Adam does not maintain these files — **Hermes owns all updates going forward.*
 3. Run `npm run build` — confirm sitemap includes `/blog/{slug}/`
 4. Ship via `autonomous-execute` (PR → merge → deploy)
 5. **Same day:** `social-post-pack` → `send-social-post-pack.py` with `post_by` + `operator_schedule`
-6. Update MEMORY:
+6. **Optional:** `article-youtube-video` if explainer video needed — see `video-inventory.json`
+7. Update MEMORY:
    ```
    blogs_published_this_month: +1
    last_social_pack_date: [date]
@@ -182,7 +184,7 @@ Set `latest_market_update_slug` whenever `LATEST_MARKET_UPDATE_SLUG` changes in 
 
 ## H. Cron jobs Hermes must keep installed
 
-From `automation-registry.md` — **23 jobs**, including:
+From `automation-registry.md` — **24 jobs**, including:
 
 | Job | Purpose |
 |-----|---------|
@@ -193,7 +195,7 @@ From `automation-registry.md` — **23 jobs**, including:
 | `local-events-monthly` | 1st of month — upcoming events check + social |
 | `local-events-quarterly` | Jan/Apr/Jul/Oct 1st — refresh events data + guide blog |
 
-After Hermes redeploy, verify `/cron list` shows all 23 jobs.
+After Hermes redeploy, verify `/cron list` shows all 24 jobs.
 
 ---
 

@@ -47,7 +47,7 @@ Every SEO/content action follows this loop:
 See `context/social-channels.md` and `social-post-pack` skill.
 
 - **GBP + Facebook + Instagram** — draft captions + hero image → email Adam → Adam posts in Business Suite + GBP
-- **YouTube @SAAHomes** — description/tag updates in email when relevant; no new videos
+- **YouTube @SAAHomes** — `article-youtube-video` remux + API upload; `social-post-pack` includes description when video exists
 - **X @saahomes** — optional caption in email pack
 - Local citation corrections (NAP) where possible without impersonation
 - Indexation requests in GSC for new/updated URLs
