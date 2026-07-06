@@ -796,6 +796,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/6-1.jpg',
     readTime: '10 min read',
+    youtubeId: 'x30AIAzqeI8',
     keywords: 'sell my home fort collins, fort collins realtor, fort collins real estate agent, selling a house in fort collins, fort collins home selling guide, how to sell a home in fort collins, listing agent fort collins, fort collins home value',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
