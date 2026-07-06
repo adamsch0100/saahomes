@@ -147,10 +147,12 @@ export const neighborhoods = [
       'South Fort Collins real estate guide — new construction homes, master-planned communities, and excellent schools near Fossil Ridge High. Expert local agents from SAA Homes.',
     keywords:
       'South Fort Collins homes, South Fort Collins new construction, Fossil Creek Fort Collins, Ridgewood Hills Fort Collins, Harmony Road Fort Collins real estate, SE Fort Collins subdivisions',
+    youtubeId: 'OV_SfHGy48U',
     neighborhoodHighlights: [
       { title: 'Top schools', description: 'Fossil Ridge High School (9/10) and Ridgeview Elementary (9/10) make this a magnet for families.' },
       { title: 'New construction', description: 'Most homes built after 2000 — modern floor plans, energy-efficient construction, and contemporary finishes.' },
-      { title: 'Employment hub', description: 'Minutes from Harmony Technology Park and major employers like Broadcom, Woodward, and Otter Products.' },
+      { title: 'Employment hub', description: 'Minutes from Harmony Technology Park and major employers like Broadcom, Woodward, and Otter Products.'
+    youtubeId: 'Tb_5M4Xl4qY', },
     ],
   },
 
@@ -196,7 +198,8 @@ export const neighborhoods = [
     neighborhoodHighlights: [
       { title: 'Mountain lifestyle', description: 'Minutes from Horsetooth Reservoir, Lory State Park, and miles of hiking and biking trails at your doorstep.' },
       { title: 'Executive homes', description: 'Custom-built homes on 0.5–2 acre lots with premium finishes, many with mountain and city views.' },
-      { title: 'Top schools', description: 'Bailey Elementary (9/10) and Webber Middle School serve Northwest Fort Collins families.' },
+      { title: 'Top schools', description: 'Bailey Elementary (9/10) and Webber Middle School serve Northwest Fort Collins families.'
+    youtubeId: 'OA85a4pBFzo', },
     ],
   },
 
