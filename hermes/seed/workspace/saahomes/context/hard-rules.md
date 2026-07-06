@@ -8,7 +8,8 @@
 
 | DO | DO NOT |
 |----|--------|
-| Use **`social-post-pack`** skill | Use Browserbase for GBP/Meta/X/YouTube posting |
+| Use **`social-post-pack`** skill | Use Browserbase for GBP/Meta/X posting |
+| Use **`article-youtube-video`** + `upload-youtube-video.py` for @SAAHomes | Use Browserbase for YouTube upload |
 | Email Adam via **`send-social-post-pack.py`** | `browser_navigate` to business.google.com, facebook.com, instagram.com, x.com to post |
 | Include GBP, Facebook, Instagram, X in every pack when content ships | Ask Adam to log in via Browserbase live view |
 | Telegram: `📧 SOCIAL POST PACK sent` | Telegram: `POST REVIEW` + "publish via browser" |
@@ -52,7 +53,8 @@ See `autonomous-execute` skill § Verify live.
 ## Integration status (canonical)
 
 ```
-Social posting:     ✅ SMTP email packs (social-post-pack) — Adam publishes manually
+Social posting:     ✅ SMTP email packs (social-post-pack) — Adam publishes GBP/Meta manually
+YouTube uploads:    ✅ YouTube Data API (article-youtube-video) — OAuth on volume or YOUTUBE_* env
 Browserbase:        ✅ Optional — browse.sh market intel ONLY
 GBP/Meta API keys:  ❌ Not used
 Browser social:     ❌ DEPRECATED — never suggest

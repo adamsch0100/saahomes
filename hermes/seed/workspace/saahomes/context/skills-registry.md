@@ -66,7 +66,8 @@ Docs: [Hermes Skills System](https://hermes-agent.nousresearch.com/docs/user-gui
 - Read-only competitor/market data when public API or web_extract is insufficient
 
 **Do NOT use Browserbase for:**
-- GBP, Facebook, Instagram, YouTube, or X posting (use `social-post-pack` email workflow)
+- GBP, Facebook, Instagram, or X posting (use `social-post-pack` email workflow)
+- YouTube posting via Browserbase (use `article-youtube-video` + YouTube Data API)
 - Logging into Google/Meta as Adam
 
 **Required env (Railway Hermes service):**
@@ -126,11 +127,13 @@ Install on first boot after Hermes is live (`hermes skills install ...`):
 | `conversion-surge` | CRO |
 | `weekly-seo-brief` | Monday war room |
 | `lead-funnel-audit` | Form/funnel health |
+| `lead-attribution-brief` | GSC query → landing page → GA4 generate_lead weekly |
 | `competitor-content-watch` | Competitor new content |
 | `schema-technical-audit` | Technical SEO |
 | `internal-link-architecture` | Link equity |
 | `local-pack-gbp-audit` | GBP/local pack |
 | `social-post-pack` | Email GBP + social captions/images to Adam |
+| `article-youtube-video` | Remux + YouTube Data API upload for @SAAHomes article videos |
 | `operator-weekly-email` | Monday day-by-day operator schedule email to Adam |
 | `local-events-curation` | Monthly event check + quarterly guide refresh |
 | `blog-pipeline` | Monthly blog calendar + market snapshot |
