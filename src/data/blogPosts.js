@@ -900,6 +900,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/Windsor-CO-Area-Guide.jpg',
     readTime: '10 min read',
+    youtubeId: 'Xc7TbfyUi3c',
     keywords: 'sell my home windsor colorado, windsor co real estate agent, windsor colorado homes for sale, selling a house in windsor co, windsor home selling guide, how to sell a home in windsor colorado, listing agent windsor co, windsor co home value',
     relatedLinks: [
       { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Neighborhoods, schools & market data' },
