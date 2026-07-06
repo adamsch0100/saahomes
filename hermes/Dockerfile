@@ -4,8 +4,8 @@ ENV HERMES_HOME=/opt/data
 ENV PYTHONPATH=/usr/local/bin
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ffmpeg nodejs \
-    && pip3 install --no-cache-dir \
+    && apt-get install -y --no-install-recommends ffmpeg nodejs python3-pip \
+    && python3 -m pip install --no-cache-dir --break-system-packages \
         google-api-python-client \
         google-auth-oauthlib \
         google-auth-httplib2 \
