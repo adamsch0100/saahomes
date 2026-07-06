@@ -3,14 +3,20 @@ FROM nousresearch/hermes-agent:latest
 ENV HERMES_HOME=/opt/data
 ENV PYTHONPATH=/usr/local/bin
 
+# Use a dedicated venv — base image has no pip3 on PATH (Railway build 2026-07-06).
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ffmpeg nodejs python3-pip \
-    && python3 -m pip install --no-cache-dir --break-system-packages \
+    && apt-get install -y --no-install-recommends ffmpeg nodejs python3 python3-venv python3-pip \
+    && python3 -m venv /opt/saahomes-venv \
+    && /opt/saahomes-venv/bin/pip install --no-cache-dir \
         google-api-python-client \
         google-auth-oauthlib \
         google-auth-httplib2 \
         yt-dlp \
+    && ln -sf /opt/saahomes-venv/bin/python3 /usr/local/bin/saahomes-python3 \
+    && ln -sf /opt/saahomes-venv/bin/yt-dlp /usr/local/bin/yt-dlp \
     && rm -rf /var/lib/apt/lists/*
+
+ENV PATH="/opt/saahomes-venv/bin:${PATH}"
 
 COPY seed/ /seed/
 COPY assets/ /seed/assets/
