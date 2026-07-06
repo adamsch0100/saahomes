@@ -151,8 +151,7 @@ export const neighborhoods = [
     neighborhoodHighlights: [
       { title: 'Top schools', description: 'Fossil Ridge High School (9/10) and Ridgeview Elementary (9/10) make this a magnet for families.' },
       { title: 'New construction', description: 'Most homes built after 2000 — modern floor plans, energy-efficient construction, and contemporary finishes.' },
-      { title: 'Employment hub', description: 'Minutes from Harmony Technology Park and major employers like Broadcom, Woodward, and Otter Products.'
-    youtubeId: 'Tb_5M4Xl4qY', },
+      { title: 'Employment hub', description: 'Minutes from Harmony Technology Park and major employers like Broadcom, Woodward, and Otter Products.' },
     ],
   },
 
@@ -195,11 +194,11 @@ export const neighborhoods = [
       'Northwest Fort Collins executive homes with mountain views — custom estates, golf course properties, and Horsetooth-area luxury real estate. SAA Homes — your local experts.',
     keywords:
       'Northwest Fort Collins homes, NW Fort Collins luxury real estate, Horsetooth Reservoir homes, Fort Collins executive homes, custom homes Fort Collins, mountain view homes Fort Collins',
+    youtubeId: 'Tb_5M4Xl4qY',
     neighborhoodHighlights: [
       { title: 'Mountain lifestyle', description: 'Minutes from Horsetooth Reservoir, Lory State Park, and miles of hiking and biking trails at your doorstep.' },
       { title: 'Executive homes', description: 'Custom-built homes on 0.5–2 acre lots with premium finishes, many with mountain and city views.' },
-      { title: 'Top schools', description: 'Bailey Elementary (9/10) and Webber Middle School serve Northwest Fort Collins families.'
-    youtubeId: 'OA85a4pBFzo', },
+      { title: 'Top schools', description: 'Bailey Elementary (9/10) and Webber Middle School serve Northwest Fort Collins families.' },
     ],
   },
 
@@ -242,6 +241,7 @@ export const neighborhoods = [
       'CSU area Fort Collins real estate — investment properties, student housing, and historic homes near Colorado State University. Buy, sell, or invest with SAA Homes.',
     keywords:
       'CSU area real estate, Fort Collins student housing, University Park Fort Collins, CSU rental property, investment properties Fort Collins, Colorado State University homes',
+    youtubeId: 'OA85a4pBFzo',
     neighborhoodHighlights: [
       { title: 'Investment opportunity', description: '33,000+ CSU students create year-round rental demand. Duplexes and triplexes offer strong ROI.' },
       { title: 'Walk to campus', description: 'Walk or bike to CSU in under 10 minutes from most properties in the University Area.' },
