@@ -81,21 +81,29 @@ def get_neighborhoods_without_youtube_id():
     with open(NEIGHBORHOODS_JS, "r") as f:
         content = f.read()
 
-    # Find all slug declarations
+    # Find all slug declarations with their positions
+    slug_positions = [(m.group(1), m.start()) for m in re.finditer(r"slug:\s*'([^']+)'", content)]
+
     slugs = []
-    for m in re.finditer(r"slug:\s*'([^']+)'", content):
-        slug = m.group(1)
-        # Check if this entry already has a youtubeId
-        entry_start = content.rfind("{", 0, m.start())
-        entry_end = content.find("}", m.end())
-        entry = content[entry_start:entry_end]
-        if "youtubeId" not in entry:
+    for i, (slug, pos) in enumerate(slug_positions):
+        # Get the end of this entry - either the next slug's position or end of file
+        if i + 1 < len(slug_positions):
+            next_pos = slug_positions[i + 1][1]
+        else:
+            next_pos = len(content)
+        
+        segment = content[pos:next_pos]
+        if "youtubeId" not in segment:
             slugs.append(slug)
     return slugs
 
 
 def add_youtube_id_to_neighborhood(slug, video_id):
-    """Add youtubeId to the neighborhood entry in neighborhoods.js."""
+    """Add youtubeId to the neighborhood entry in neighborhoods.js.
+    
+    Inserts youtubeId between the 'keywords' line and 'neighborhoodHighlights' array
+    at the top level of the neighborhood object.
+    """
     with open(NEIGHBORHOODS_JS, "r") as f:
         content = f.read()
 
@@ -106,46 +114,71 @@ def add_youtube_id_to_neighborhood(slug, video_id):
         print(f"  WARNING: Could not find slug '{slug}' in neighborhoods.js")
         return False
 
-    # Find the name or description field before the highlights
-    before_slug = content[:slug_match.start()]
-    # Find the most recent field line before the slug that could serve as anchor
-    # Look for the description field or name field
-    field_pattern = r"(description:|name:)\s*'[^']*'"
-    matches = list(re.finditer(field_pattern, before_slug))
-
-    if not matches:
-        # Try features field
-        field_pattern = r"features:\s*\["
-        matches = list(re.finditer(field_pattern, before_slug))
-
-    if not matches:
-        print(f"  WARNING: Could not find anchor field before slug '{slug}'")
+    slug_start = slug_match.start()
+    
+    # Find the opening brace of this neighborhood object
+    # Walk backwards from the slug to find the matching '{'
+    # The neighborhood object starts with "  {" or "{\n" before the slug
+    brace_pos = content.rfind("{\n", 0, slug_start)
+    if brace_pos == -1:
+        brace_pos = content.rfind("{", 0, slug_start)
+    # Use the content from the opening brace onwards
+    entry_start = brace_pos
+    
+    # Now within this entry, find the keywords line
+    # We look for 'keywords:' between the entry start and next slug (or end)
+    after_slug = content[slug_match.end():]
+    # Find where this neighborhood entry ends - look for the next slug or end of file
+    next_slug_pos = content.find("\n  {\n    slug:", slug_match.end())
+    if next_slug_pos == -1:
+        next_slug_pos = content.find("\n{\n    slug:", slug_match.end())
+    if next_slug_pos == -1:
+        next_slug_pos = len(content)
+    
+    entry_content = content[entry_start:next_slug_pos]
+    
+    # Check if youtubeId already exists in this entry
+    if "youtubeId" in entry_content:
+        print(f"  ⏭️  '{slug}' already has youtubeId, skipping")
+        return True
+    
+    # Find the keywords: line in the entry and the neighborhoodHighlights: line
+    kw_match = re.search(r"keywords:\s*\n\s+'[^']*'", entry_content)
+    nh_match = re.search(r"neighborhoodHighlights:\s*\[", entry_content)
+    
+    if not kw_match:
+        # Try single-line keywords
+        kw_match = re.search(r"keywords:\s*'[^']*'", entry_content)
+    
+    if not kw_match or not nh_match:
+        print(f"  WARNING: Could not find keywords or neighborhoodHighlights for '{slug}'")
         return False
-
-    anchor_match = matches[-1]
-    insert_pos = anchor_match.end()
-
-    # Check if youtubeId already exists
-    after_anchor = content[insert_pos:slug_match.start()]
-    if "youtubeId" in after_anchor:
-        # Replace existing youtubeId
-        old_match = re.search(r"youtubeId:\s*'[^']*',?\n?", after_anchor)
-        if old_match:
-            start = insert_pos + old_match.start()
-            end = insert_pos + old_match.end()
-            content = content[:start] + f"    youtubeId: '{video_id}',\n" + content[end:]
-            print(f"  ✅ Replaced youtubeId '{video_id}' for '{slug}'")
+    
+    # Ensure we insert before neighborhoodHighlights
+    insert_before_nh = nh_match.start() < kw_match.end()
+    if insert_before_nh:
+        # keywords comes after neighborhoodHighlights (unusual), insert before nh
+        insert_pos = entry_start + nh_match.start()
     else:
-        # Insert after the anchor field
-        content = content[:insert_pos] + f"\n    youtubeId: '{video_id}'," + content[insert_pos:]
-        print(f"  ✅ Added youtubeId '{video_id}' to neighborhood '{slug}'")
-
+        # Normal case: keywords before neighborhoodHighlights
+        # Insert after keywords line
+        insert_pos = entry_start + kw_match.end()
+    
+    # Check again: make sure youtubeId doesn't already exist in the insertion region
+    if "youtubeId" in entry_content[:insert_pos - entry_start + 50]:
+        print(f"  ⏭️  '{slug}' already has youtubeId, skipping")
+        return True
+    
+    # Insert youtubeId
+    content = content[:insert_pos] + f"\n    youtubeId: '{video_id}'," + content[insert_pos:]
+    print(f"  ✅ Added youtubeId '{video_id}' to neighborhood '{slug}'")
+    
     with open(NEIGHBORHOODS_JS, "w") as f:
         f.write(content)
     return True
 
 
-def generate_and_upload(slug, credentials, output_dir, no_upload=False, upload_only=False):
+def generate_and_upload(slug, credentials, output_dir, no_upload=False, upload_only=False, publish=True):
     """Generate and/or upload a neighborhood video."""
     cmd = [VENV_PYTHON, PUBLISHER, "neighborhood-video",
            "--neighborhood-slug", slug,
@@ -154,11 +187,14 @@ def generate_and_upload(slug, credentials, output_dir, no_upload=False, upload_o
     if credentials:
         cmd.extend(["--credentials", credentials])
 
+    if publish and not no_upload:
+        cmd.append("--publish")
+
     if no_upload:
         # Can't use --publish with no-upload, just generate
         pass
     elif not upload_only:
-        # Upload as unlisted (default, no --publish flag)
+        # Upload with publish flag if set
         pass
 
     if upload_only:

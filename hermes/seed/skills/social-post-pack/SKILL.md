@@ -48,7 +48,7 @@ Adam publishes manually in Meta Business Suite + GBP (phone or desktop).
 2. Pick hero/OG image from `public/images/` in the repo (or live `https://saahomes.com/...` URL)
 3. Write platform-specific captions: **GBP, Facebook, Instagram, X** (required every pack)
 4. Instagram **must** include an image URL
-5. **No new video production** — if no video, omit or set `video_note: "No video — image + link post only"`
+5. **No new video production** in social packs — video upload is handled by `article-youtube-video` skill separately. If no video, omit or set `video_note: "No video — image + link post only"`
 6. Set **`post_by`** (e.g. `"Wednesday — within 48 hours"`) and **`operator_schedule`** step list so Adam knows exactly what to do when he opens the email
 
 ---
