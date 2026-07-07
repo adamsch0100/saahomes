@@ -1151,6 +1151,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Loveland-CO-Area-Guide.jpg',
     readTime: '8 min read',
+    youtubeId: 'kIwLICrH9rw',
     keywords: 'loveland homes for sale, loveland colorado homes for sale, loveland co real estate, buying a home in loveland colorado, homes for sale in loveland co, moving to loveland colorado, loveland neighborhoods, loveland co realtor',
     relatedLinks: [
       { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Neighborhoods, schools and homes for sale' },
@@ -1263,6 +1264,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Area-Guide-for-Greeley-CO.jpg',
     readTime: '8 min read',
+    youtubeId: '-QH0MqSSS7A',
     keywords: 'greeley homes for sale, greeley colorado homes for sale, greeley co real estate, buying a home in greeley colorado, homes for sale in greeley co, moving to greeley colorado, greeley neighborhoods, greeley co realtor, greeley colorado real estate agent',
     relatedLinks: [
       { title: 'Greeley Area Guide', href: '/northern-colorado-areas/greeley/', description: 'Neighborhoods, schools and homes for sale' },
@@ -1375,6 +1377,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/Loveland-CO-Area-Guide.jpg',
     readTime: '10 min read',
+    youtubeId: '8sR3GlX1Mw4',
     keywords: 'sell my home loveland colorado, loveland co real estate agent, loveland colorado homes for sale, selling a house in loveland co, loveland home selling guide, how to sell a home in loveland colorado, listing agent loveland co, loveland co home value, sell house loveland',
     relatedLinks: [
       { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Neighborhoods, schools and market data' },
