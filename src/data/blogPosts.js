@@ -1151,7 +1151,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Loveland-CO-Area-Guide.jpg',
     readTime: '8 min read',
-    youtubeId: 'kIwLICrH9rw',
+    youtubeId: '7PmIJykx0GI',
     keywords: 'loveland homes for sale, loveland colorado homes for sale, loveland co real estate, buying a home in loveland colorado, homes for sale in loveland co, moving to loveland colorado, loveland neighborhoods, loveland co realtor',
     relatedLinks: [
       { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Neighborhoods, schools and homes for sale' },
@@ -1482,7 +1482,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/timnath.png',
     readTime: '8 min read',
-    youtubeId: 'Aj-U5azJfEA',
+    youtubeId: 'Ll3HHb2Lg2g',
     keywords: 'timnath homes for sale, timnath colorado homes for sale, timnath co real estate, buying a home in timnath colorado, homes for sale in timnath co, moving to timnath colorado, timnath new construction, timnath co realtor, timnath neighborhoods',
     relatedLinks: [
       { title: 'Timnath Area Guide', href: '/northern-colorado-areas/timnath/', description: 'New construction communities and homes for sale' },
@@ -1595,7 +1595,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Windsor-CO-Area-Guide.jpg',
     readTime: '8 min read',
-    youtubeId: 'tMeya8iBE5U',
+    youtubeId: '8c-d7JPi3d0',
     keywords: 'windsor colorado homes for sale, windsor co homes for sale, windsor colorado real estate, buying a home in windsor colorado, homes for sale in windsor co, moving to windsor colorado, windsor co neighborhoods, windsor co realtor, windsor colorado real estate agent',
     relatedLinks: [
       { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Neighborhoods, schools and homes for sale' },
