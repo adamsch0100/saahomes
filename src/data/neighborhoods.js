@@ -273,6 +273,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.52', longitude: '-105.04' },
     metaDescription: 'Ridgewood Hills Fort Collins real estate - executive homes near Fossil Ridge schools in southeast Fort Collins premier master-planned community. SAA Homes - your local experts.',
     keywords: 'Ridgewood Hills Fort Collins, Ridgewood Hills subdivision, southeast Fort Collins homes, Fossil Ridge homes, Fort Collins master-planned community, executive homes Fort Collins',
+    youtubeId: 'BzvVglSqHmg',
     neighborhoodHighlights: [
       { title: 'Top-rated schools', description: 'Ridgeview Elementary (9/10) and Fossil Ridge High School (9/10) - one of the best school clusters in Northern Colorado.' },
       { title: 'Executive homes', description: 'Custom-built homes with premium finishes on generous lots, many with mountain and city views.' },
@@ -304,6 +305,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.515', longitude: '-105.05' },
     metaDescription: 'Fossil Creek Fort Collins real estate - family-friendly homes near Fossil Creek Park with top-rated schools and Harmony Road access. SAA Homes.',
     keywords: 'Fossil Creek Fort Collins, Fossil Creek Park, Fossil Creek homes, south Fort Collins real estate, Fossil Ridge schools, Fort Collins family neighborhoods',
+    youtubeId: 'suVUl2FkaSQ',
     neighborhoodHighlights: [
       { title: 'Fossil Creek Park', description: '90+ acre park with a lake, fishing pier, walking trails, playgrounds, and sports fields - one of Fort Collins best parks.' },
       { title: 'Top school cluster', description: 'Ridgeview Elementary (9/10) and Fossil Ridge High School (9/10) serve the Fossil Creek area.' },
@@ -335,6 +337,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.555', longitude: '-105.1' },
     metaDescription: 'Indian Hills Fort Collins real estate - mid-century ranch homes on tree-lined streets near Horsetooth Reservoir. Established northwest Fort Collins neighborhood. SAA Homes.',
     keywords: 'Indian Hills Fort Collins, Indian Hills neighborhood, northwest Fort Collins homes, mid-century homes Fort Collins, Bailey Elementary Fort Collins, Fort Collins foothills homes',
+    youtubeId: 'Xkyms5Bn4JM',
     neighborhoodHighlights: [
       { title: 'Mature character', description: 'Winding tree-lined streets with mid-century ranch homes and mature landscaping - a quiet, established feel.' },
       { title: 'Bailey Elementary (9/10)', description: 'Served by one of Fort Collins top-rated elementary schools.' },
