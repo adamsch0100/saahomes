@@ -38,7 +38,7 @@ Maintain per city (update weekly):
 | 3 | `TELEGRAM_BOT_TOKEN` + `TELEGRAM_ALLOWED_USERS` | ❓ verify | Notifications + outreach review |
 | 4 | Dashboard auth vars (`HERMES_DASHBOARD_*`) | ❓ verify | Public URL works |
 | 5 | `API_SERVER_KEY` | ❓ verify | Dashboard API |
-| 6 | 23 cron jobs installed (first-boot prompt) | ❓ verify | Autonomous monitoring + shipping |
+| 6 | 24 cron jobs installed (first-boot prompt) | ❓ verify | Autonomous monitoring + shipping |
 | 7 | `GITHUB_TOKEN` + `GITHUB_REPO=adamsch0100/saahomes` | ❓ verify | Auto PR + merge SEO/content |
 | 8 | `RAILWAY_TOKEN` + `RAILWAY_SERVICE_ID` (**website** service, not Hermes) | ❓ verify | Live deploy after merge |
 | 9 | GSC service account (`GSC_SERVICE_ACCOUNT_JSON_B64` or JSON file) | ❓ verify | Precise keyword ranking data |
@@ -49,11 +49,27 @@ Maintain per city (update weekly):
 | 14 | Browserbase (optional) | optional | browse.sh market intel only |
 | 15 | SerpAPI (optional) | optional | Deeper SERP intel |
 
-**Site-side (repo — done):** GA4 Google tag `G-CB5GL0P3EZ` (stream `G-BVWCZE025P`) + form `generate_lead` events · 19 area pages · lead APIs · keyword universe · 23 cron definitions · skills bundled.
+**Site-side (repo — done):** GA4 Google tag `G-CB5GL0P3EZ` (stream `G-BVWCZE025P`) + form `generate_lead` events · 19 area pages · lead APIs · keyword universe · **24 cron definitions** · skills bundled · `public/llms.txt` · FAQ schema on `/for-sellers/` + `/for-buyers/` · Person schema on `/about-us/` · FUB tags (`saahomes-organic`, `market-report`, `chfa`) · 6 keyword-gap blog posts queued in repo · Carbon Valley area depth (Firestone/Frederick).
 
-**Adam manual (ongoing):** paste social packs · approve outreach · FUB speed-to-lead.
+**Adam manual (ongoing):** paste social packs · approve outreach · FUB speed-to-lead when Conversion Hermes hands off.
 
-- **Social posting:** SMTP email packs via `social-post-pack` skill → adam@saahomes.com. Adam publishes manually. **Never Browserbase for social.**
+**Demand Hermes repo work: COMPLETE (2026-06-30).** Remaining: Railway `/cron list` → 24 jobs after redeploy; Adam confirms integration checklist rows in table below.
+
+## Lead attribution log
+(Hermes: append weekly summaries from `lead-attribution-brief` cron — GSC query → landing page → GA4 generate_lead)
+
+## Content backlog (shipped in repo)
+- [x] Windsor seller guide — `/blog/selling-a-home-in-windsor-colorado/`
+- [x] Loveland seller guide — `/blog/selling-a-home-in-loveland-colorado/`
+- [x] Greeley seller guide — `/blog/selling-a-home-in-greeley-colorado/`
+- [x] Timnath + Severance new construction buyer guide
+- [x] Carbon Valley affordability guide (Firestone/Frederick)
+- [x] Fort Collins vs Loveland vs Windsor comparison
+- [x] Weld County vs Larimer County buyer guide
+- [ ] Monthly market snapshot — recurring via `blog-pipeline` cron (template exists)
+
+- **Social posting:** SMTP email packs via `social-post-pack` skill → adam@saahomes.com. Adam publishes GBP/Meta manually. **Never Browserbase for social.**
+- **YouTube uploads:** `article-youtube-video` skill + `upload-youtube-video.py` (Data API). OAuth on `/opt/data/credentials/` or `YOUTUBE_*` env.
 - **Browserbase:** Optional. browse.sh market intel only (Zillow, Realtor, Walk Score).
 - **Outreach:** SMTP; Adam `approved` before send.
 

@@ -796,7 +796,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/6-1.jpg',
     readTime: '10 min read',
-    youtubeId: 'F9pQkezxX0c',
+    youtubeId: 'x30AIAzqeI8',
     keywords: 'sell my home fort collins, fort collins realtor, fort collins real estate agent, selling a house in fort collins, fort collins home selling guide, how to sell a home in fort collins, listing agent fort collins, fort collins home value',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
@@ -900,7 +900,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/Windsor-CO-Area-Guide.jpg',
     readTime: '10 min read',
-    youtubeId: 'lhT7rzul3DA',
+    youtubeId: 'Xc7TbfyUi3c',
     keywords: 'sell my home windsor colorado, windsor co real estate agent, windsor colorado homes for sale, selling a house in windsor co, windsor home selling guide, how to sell a home in windsor colorado, listing agent windsor co, windsor co home value',
     relatedLinks: [
       { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Neighborhoods, schools & market data' },

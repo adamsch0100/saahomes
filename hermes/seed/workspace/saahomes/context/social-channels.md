@@ -14,7 +14,7 @@ Use skill: **`social-post-pack`** · script: `send-social-post-pack.py`
 | **Google Business Profile** | Schwartz and Associates listing | P0 | business.google.com or GBP app |
 | **Facebook** | facebook.com/schwartzandassociateshomes | P0 | Meta Business Suite |
 | **Instagram** | @saa_homes | P0 | Meta Business Suite (same post as FB) |
-| **YouTube** | @SAAHomes | P1 | Studio — description/tags only; no new videos |
+| **YouTube** | @SAAHomes | P1 | Hermes uploads via Data API (`article-youtube-video`); OAuth on Railway volume |
 | **X** | @saahomes | P0 | x.com — every post pack |
 
 Post on **GBP + Facebook + Instagram + X** every pack. YouTube description when related video exists.
@@ -30,7 +30,7 @@ Post on **GBP + Facebook + Instagram + X** every pack. YouTube description when 
 | GBP | Recommended — attached in email | No |
 | Facebook | Optional — attached or link preview | No |
 | Instagram | **Required** — attached in email | Reels only if Adam supplies source file |
-| YouTube | N/A | **Do not create new videos** — description text only |
+| YouTube | N/A | Hermes remux + API upload — approved music only (`youtube-music-policy.md`) |
 | X | Optional | No |
 
 Reuse blog/area hero from `public/images/` → live URL `https://saahomes.com/images/...`  
