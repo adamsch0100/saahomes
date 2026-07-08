@@ -1931,6 +1931,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/Northern Colorado.webp',
     readTime: '10 min read',
+    youtubeId: 'MXf6EHNcHQM',
     keywords: 'fort collins vs loveland vs windsor, fort collins vs loveland, best northern colorado city to live, fort collins or windsor, loveland vs fort collins, where to live in northern colorado, northern colorado city comparison',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
