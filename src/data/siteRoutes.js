@@ -68,6 +68,17 @@ const staticPages = [
     ogImageAlt: 'Sell your home in Northern Colorado',
   },
   {
+    path: '/luxury-real-estate/',
+    priority: '0.8',
+    changefreq: 'weekly',
+    title: 'Luxury Real Estate in Northern Colorado | High-End Homes | SAA Homes',
+    description: 'Discover luxury properties across Fort Collins, Loveland, Windsor, and Greeley. Private white-glove service from Schwartz and Associates.',
+    ogTitle: 'Luxury Real Estate Northern Colorado | Premium Homes',
+    ogDescription: "Exclusive luxury listings and private client services across Northern Colorado's finest communities.",
+    ogImage: '/images/Northern Colorado.webp',
+    ogImageAlt: 'Luxury real estate in Northern Colorado',
+  },
+  {
     path: '/contact/',
     priority: '0.7',
     changefreq: 'monthly',

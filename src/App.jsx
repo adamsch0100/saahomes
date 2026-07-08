@@ -8,6 +8,7 @@ import AboutPage from "./pages/AboutPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
 import ForBuyersPage from "./pages/ForBuyersPage.jsx";
 import ForSellersPage from "./pages/ForSellersPage.jsx";
+import LuxuryRealEstatePage from "./pages/LuxuryRealEstatePage.jsx";
 import FeaturedAreasPage from "./pages/FeaturedAreasPage.jsx";
 import PropertiesPage from "./pages/PropertiesPage.jsx";
 import FortCollinsPage from "./pages/areas/FortCollinsPage.jsx";
@@ -103,6 +104,8 @@ export default function App() {
         <Route path="/buyers/" element={<AppLayout><ForBuyersPage /></AppLayout>} />
         <Route path="/for-sellers" element={<AppLayout><ForSellersPage /></AppLayout>} />
         <Route path="/for-sellers/" element={<AppLayout><ForSellersPage /></AppLayout>} />
+        <Route path="/luxury-real-estate" element={<AppLayout><LuxuryRealEstatePage /></AppLayout>} />
+        <Route path="/luxury-real-estate/" element={<AppLayout><LuxuryRealEstatePage /></AppLayout>} />
         <Route path="/featured-areas" element={<AppLayout><FeaturedAreasPage /></AppLayout>} />
         <Route path="/featured-areas/" element={<AppLayout><FeaturedAreasPage /></AppLayout>} />
         <Route path="/northern-colorado-areas" element={<AppLayout><FeaturedAreasPage /></AppLayout>} />
