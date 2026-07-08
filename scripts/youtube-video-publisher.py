@@ -439,20 +439,33 @@ class SlideRenderer:
 
 # ─── Audio Generation (Python + FFmpeg) ──────────────────────────────────────
 
-def create_background_audio(duration_seconds, output_path, sample_rate=44100):
+def create_background_audio(duration_seconds, output_path, slug=None, sample_rate=44100):
     """
     Generate background music for the video.
 
-    Checks for background-music-1.mp3 through -4.mp3 in video-assets/
-    and picks one at random each time (with basic dedup from last pick).
-    Falls back to Python-generated lo-fi beats if no music files found.
+    Priority:
+    1. Per-slug clean music at /seed/assets/music/{slug}.mp3
+    2. background-music-1.mp3 through -4.mp3 in video-assets/
+    3. Legacy background-music.mp3
+    4. Generated lo-fi beats (fallback)
     """
     import random
     script_dir = os.path.dirname(os.path.abspath(__file__))
     assets_dir = os.path.join(script_dir, "video-assets")
 
-    # Find available background tracks (1-4)
-    music_files = []
+    # Priority 1: Per-slug clean music from seed assets
+    if slug:
+        seed_path = f"/seed/assets/music/{slug}.mp3"
+        if os.path.exists(seed_path):
+            music_files = [str(seed_path)]
+            print(f"  Background music: {slug}.mp3 (seed clean track)")
+            # Fall through to the shared processing below
+        else:
+            music_files = []
+    else:
+        music_files = []
+
+    # Find available background tracks (1-4) if no seed music
     for i in range(1, 5):
         path = os.path.join(assets_dir, f"background-music-{i}.mp3")
         if os.path.exists(path):
@@ -1459,7 +1472,7 @@ def cmd_generate(args):
     total_duration = sd * n
     music_path = os.path.join(output_dir, f"{slug}_audio.m4a")
     print(f"Generating background audio ({total_duration:.1f}s)...")
-    create_background_audio(total_duration, music_path)
+    create_background_audio(total_duration, music_path, slug=slug)
 
     # Assemble video
     print(f"Assembling video with {n} slides...")
