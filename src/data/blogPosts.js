@@ -2060,6 +2060,131 @@ export const blogPosts = [
       },
     ],
   },
+  {
+    slug: 'buying-a-home-in-severance-colorado',
+    title: 'Your Complete Guide to Buying a Home in Severance, Colorado',
+    excerpt: 'Severance is one of Weld County\'s fastest-growing towns, offering new construction homes, larger lots, and affordable pricing between Windsor and Greeley. Here is what buyers need to know about Severance neighborhoods, pricing, new construction communities, and the home buying process in 2026.',
+    date: '2026-07-08',
+    category: 'Buyer Tips',
+    image: '/images/Windsor-CO-Area-Guide.jpg',
+    readTime: '7 min read',
+    keywords: 'severance colorado homes for sale, severance co homes for sale, severance colorado real estate, buying a home in severance colorado, homes for sale in severance co, moving to severance colorado, severance co neighborhoods, severance co realtor, severance colorado real estate agent, severance new construction',
+    relatedLinks: [
+      { title: 'Severance Area Guide', href: '/northern-colorado-areas/severance/', description: 'Neighborhoods, new construction and homes for sale' },
+      { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Weld-Larimer border family communities' },
+      { title: 'Greeley Area Guide', href: '/northern-colorado-areas/greeley/', description: 'Weld County neighborhoods and pricing' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation and resources' },
+      { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Grants up to $25K for qualified buyers' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
+      { title: 'Northern Colorado Market Update — July 2026', href: '/blog/northern-colorado-market-update-july-2026/', description: 'Mid-year pricing, inventory and trends' },
+    ],
+    cta: {
+      title: 'Ready to find your home in Severance?',
+      description: 'Adam and Mandi Schwartz help buyers across Severance, Windsor, Greeley, and all of Northern Colorado navigate the market with clarity and confidence. Contact SAA Homes to start your Severance home search today.',
+      primaryHref: '/contact/',
+      primaryText: 'Contact SAA Homes',
+      secondaryHref: '/northern-colorado-areas/severance/',
+      secondaryText: 'Explore the Severance Area Guide',
+    },
+    faqs: [
+      { q: 'What is the average home price in Severance, Colorado?', a: 'As of mid-2026, the median home price in Severance is approximately $585,000, with most homes ranging from $475,000 to $700,000. New construction communities like Severance Ranch and The Ridge drive much of the inventory. The town has transformed from a quiet agricultural community into one of Weld County\'s fastest-growing towns, with home prices that remain more accessible than nearby Fort Collins and Loveland.' },
+      { q: 'What are the best neighborhoods in Severance?', a: 'Popular Severance neighborhoods include new master-planned communities with modern floor plans and community amenities, established Severance neighborhoods offering more mature landscaping and larger lots, country properties with acreage for buyers seeking rural living, and homes in the Windsor school district areas near the Larimer-Weld border. Each area offers a different lifestyle, so touring multiple communities is recommended to find the right fit.' },
+      { q: 'How does Severance compare to Windsor and Greeley?', a: 'Severance offers notably more home for your money than Windsor (median ~$585K vs Windsor at ~$585K — comparable pricing) with larger lots and a more rural feel, while being closer to Greeley\'s amenities and employment base than many parts of Windsor. The trade-off is fewer immediate retail options compared to Windsor\'s established downtown, though Greeley\'s commercial corridors are just minutes away. For buyers who value space, newer construction, and growth potential, Severance delivers strong value.' },
+      { q: 'Is Severance a good investment?', a: 'Severance has shown strong appreciation as one of Weld County\'s fastest-growing communities, with continued residential and commercial development planned. Its location between Windsor and Greeley along the US-34 corridor positions it well for sustained growth as Northern Colorado expands eastward. Buyers who get in during early development phases of new master-planned communities often benefit from the most appreciation over time.' },
+      { q: 'Can I use CHFA down payment assistance in Severance?', a: 'Yes, Severance is in Weld County where CHFA programs are available. Weld County income limits for CHFA programs are generally favorable for moderate-income buyers, with purchase price limits that accommodate the median Severance home price. Buyers may qualify for CHFA SmartStep, FirstStep, or Preferred programs, including down payment assistance grants of up to $25,000. Check current CHFA limits with a participating lender to confirm eligibility based on the specific property and program terms.' },
+    ],
+    sections: [
+      {
+        heading: 'Why buyers choose Severance, Colorado',
+        paragraphs: [
+          'Severance has rapidly transformed from a quiet agricultural town into one of Weld County\'s fastest-growing communities, attracting buyers who want newer homes, larger lots, and a blend of rural character with suburban convenience. Located between Windsor and Greeley along the US-34 corridor, Severance offers easy access to both Larimer and Weld County employment centers while maintaining its own community identity.',
+          'What sets Severance apart is its combination of new construction inventory and generous lot sizes. Many homes in Severance sit on larger parcels than comparable new builds in Windsor or Fort Collins, giving buyers more yard space for gardening, recreation, or simply enjoying open Colorado views. The town\'s rapid growth has brought improved services, schools, and community infrastructure while preserving the small-town feel that attracted many early residents.',
+          'Severance\'s location is strategically positioned for growth. The town sits along the US-34 corridor — the major east-west artery connecting Greeley to Loveland and I-25 — making it convenient for commuters who work in Greeley, Loveland, Fort Collins, or Windsor. As Weld County continues its rapid expansion, Severance is well-positioned to benefit from continued development and appreciation.',
+        ],
+      },
+      {
+        heading: 'Popular Severance neighborhoods and communities',
+        paragraphs: [
+          'Severance\'s housing market offers options ranging from active new construction communities to established neighborhoods and country properties. Understanding the different areas helps buyers find the right fit for their lifestyle and budget.',
+          'New master-planned communities dominate Severance\'s current inventory, with builders like Richmond American Homes, KB Home, and Lennar offering modern floor plans, energy-efficient construction, and community amenities including parks and trails. Severance Ranch is one of the most active communities, offering a range of home sizes and price points popular with families and first-time buyers.',
+          'Established Severance neighborhoods offer mature landscaping, larger lots established trees, and a more settled feel. These areas appeal to buyers who prefer avoiding construction dust and want a home that is already move-in ready with established landscaping and neighborhood character.',
+          'Country properties with acreage surround Severance on its rural edges, offering space for horses, gardens, or simply privacy. These properties attract buyers seeking a homestead lifestyle while remaining minutes from Severance\'s town center and a short drive to Greeley and Windsor amenities.',
+        ],
+        relatedLinks: [
+          { title: 'Severance Area Guide', href: '/northern-colorado-areas/severance/', description: 'New construction neighborhoods and homes for sale' },
+          { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Family communities between Fort Collins and Greeley' },
+        ],
+      },
+      {
+        heading: 'Steps to buy a home in Severance',
+        paragraphs: [
+          'Buying a home in Severance follows a similar process to other Northern Colorado communities, with a few local considerations. Start by getting pre-approved with a lender to understand your budget and strengthen your offer position. Given the high volume of new construction, consider whether you prefer a quick move-in resale home or a new build with customization options.',
+          'If you are buying new construction in Severance, work with a buyer agent who has experience with builder contracts and negotiations. Builder contracts are designed to protect the builder first, and experienced representation can help you negotiate upgrade credits, closing cost assistance, and timeline protections. An agent who works regularly in Severance and Weld County will know which builders have the best reputations, how to evaluate community amenities, and what lenders are experienced with new construction financing.',
+          'For resale homes, be aware that well-priced Severance properties in desirable communities can attract multiple offers. Having your financing pre-approved and being ready to move quickly gives you an advantage in this competitive market for Weld County real estate.',
+        ],
+        relatedLinks: [
+          { title: 'Severance Homes for Sale', href: '/properties/?location=Severance, CO', description: 'Search current Severance listings' },
+          { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation and resources' },
+        ],
+        list: [
+          'Get pre-approved with a local lender who understands Weld County and new construction financing',
+          'Decide between new construction and resale based on timeline and budget',
+          'Research builders and communities online and tour model homes',
+          'Work with a buyer agent experienced with Severance and Weld County real estate',
+          'Make a competitive offer with appropriate contingencies',
+          'Complete inspections, appraisal, and closing',
+        ],
+      },
+      {
+        heading: 'Severance housing market overview for 2026',
+        paragraphs: [
+          'Severance\'s real estate market in 2026 continues to offer strong value relative to Larimer County, with a median home price around $585,000. The market is characterized by active new construction with builders releasing inventory in phases, supplemented by resale homes in established neighborhoods. Inventory levels have improved compared to previous years as new communities continue to deliver phases.',
+          'The town\'s growth trajectory is supported by its strategic location on the US-34 corridor between Windsor and Greeley, its reputation as a family-friendly community with space to grow, and its position as one of Weld County\'s fastest-growing municipalities. As Larimer County home prices continue to climb, more buyers are discovering Severance as a value alternative that does not require sacrificing quality or convenience.',
+          'Severance\'s market dynamics favor buyers who are pre-approved and ready to act, particularly in popular new construction communities where desirable floor plans and lot locations go quickly. For patient buyers willing to build from the ground up, the ability to customize finishes and layout often outweighs the longer timeline.',
+        ],
+        relatedLinks: [
+          { title: 'Greeley Area Guide', href: '/northern-colorado-areas/greeley/', description: 'Weld County market insights and neighborhoods' },
+          { title: 'Northern Colorado Market Update — July 2026', href: '/blog/northern-colorado-market-update-july-2026/', description: 'Mid-year pricing, inventory and trends' },
+        ],
+      },
+      {
+        heading: 'New construction considerations for Severance buyers',
+        paragraphs: [
+          'Buying new construction in Severance requires a different approach than buying an existing home. Builder contracts typically use their own forms, which may limit your ability to negotiate on price but often allow for upgrade credits and closing cost assistance. Always have your own agent review the contract — the builder\'s on-site agent represents the builder\'s interest, not yours.',
+          'Timeline is a key consideration. New construction homes typically take 6 to 12 months from contract to completion, depending on the builder, floor plan complexity, and current construction schedule. If you have a specific move-in deadline, ask about quick-move-in homes or spec homes that are nearing completion.',
+          'Be aware of HOA fees in Severance\'s new communities, which cover amenities like parks, trails, and common area maintenance. These fees vary significantly by community and builder and should be factored into your total monthly housing cost. Your buyer agent should provide a complete cost comparison across your target communities.',
+        ],
+        relatedLinks: [
+          { title: 'Severance Area Guide', href: '/northern-colorado-areas/severance/', description: 'New construction communities and market insights' },
+          { title: 'Mortgage Calculator', href: '/mortgage-calculator/', description: 'Estimate your monthly payment including HOA' },
+        ],
+      },
+      {
+        heading: 'Financing and CHFA assistance for Severance buyers',
+        paragraphs: [
+          'Severance is in Weld County, where CHFA programs are available for qualified buyers. CHFA offers down payment assistance grants up to $25,000, competitive interest rates, and programs tailored for first-time homebuyers, educators, and first responders. The median home price around $585,000 generally falls within Weld County CHFA purchase price limits, making these programs accessible to many Severance buyers.',
+          'In addition to CHFA, conventional and FHA loan options are widely available for Severance properties. For buyers considering new construction, many builders have preferred lender relationships that offer closing cost incentives, though it is always worth comparing the builder\'s lender against your own to ensure you are getting the best rate and terms.',
+          'Working with a lender experienced in Weld County financing is essential. They can help you compare CHFA programs against conventional options, understand the down payment requirements for each, and determine which program offers the best combination of rate, payment, and assistance for your specific situation.',
+        ],
+        relatedLinks: [
+          { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'SmartStep, FirstStep, Preferred & more' },
+          { title: 'CHFA for Northern Colorado Buyers', href: '/blog/chfa-first-time-homebuyer-northern-colorado/', description: 'Weld County limits and programs' },
+        ],
+      },
+      {
+        heading: 'Why choose Schwartz and Associates for your Severance home search?',
+        paragraphs: [
+          'Adam and Mandi Schwartz bring over 20 years of combined Northern Colorado real estate experience, including deep knowledge of Weld County communities like Severance, Windsor, and Greeley. As a Coldwell Banker Realty team, SAA Homes has the resources to market your search effectively while providing the personalized attention that only a local team can deliver.',
+          'Our buyer process includes helping you evaluate Severance against other Northern Colorado communities — Windsor, Greeley, Fort Collins, and Timnath — to make sure you find the right fit for your lifestyle, budget, and goals. We connect you with trusted local lenders experienced with Weld County financing and new construction, tour model homes together, and negotiate builder contracts with your best interests in mind.',
+          'Located at 3665 John F. Kennedy Parkway, Suite 210, Fort Collins, CO 80525, we serve Severance buyers throughout the entire home buying journey. Call (970) 999-1407 or visit our contact page to schedule a free consultation.',
+        ],
+        relatedLinks: [
+          { title: 'Severance Area Guide', href: '/northern-colorado-areas/severance/', description: 'Neighborhoods and market insights' },
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407 to discuss your home buying goals' },
+        ],
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug) {
