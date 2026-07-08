@@ -11,6 +11,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Fort-Collins-CO-Area-Guide.jpg',
     readTime: '8 min read',
+    youtubeId: 'C5q4hYvXvas',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & homes for sale' },
       { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities & pricing' },
