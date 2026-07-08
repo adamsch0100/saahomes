@@ -103,28 +103,28 @@ const LUXURY_CITIES = [
     slug: "fort-collins",
     description: "Exclusive estates in Old Town, custom mountain-view homes west of town, and gated communities along the foothills.",
     price: "$1M – $3M+",
-    image: "/images/Shwartz-CTA-Buyers.jpg",
+    image: "/images/Fort-Collins-CO-Area-Guide.jpg",
   },
   {
     name: "Loveland",
     slug: "loveland",
     description: "Lakefront estates on Lake Loveland, custom homes in Mariana Butte, and luxury properties backing to open space.",
     price: "$850K – $2.5M+",
-    image: "/images/Shwartz-CTA-Buyers.jpg",
+    image: "/images/Loveland-CO-Area-Guide.jpg",
   },
   {
     name: "Windsor",
     slug: "windsor",
     description: "Premier golf course communities, sprawling horse properties, and new custom construction in Windsor's finest neighborhoods.",
     price: "$750K – $2M+",
-    image: "/images/Shwartz-CTA-Buyers.jpg",
+    image: "/images/Windsor-CO-Area-Guide.jpg",
   },
   {
     name: "Greeley",
     slug: "greeley",
     description: "Executive estates on acreage, historic properties, and newer custom homes in Greeley's most prestigious addresses.",
     price: "$650K – $1.5M+",
-    image: "/images/Shwartz-CTA-Buyers.jpg",
+    image: "/images/Area-Guide-for-Greeley-CO.jpg",
   },
 ];
 
@@ -133,8 +133,8 @@ export default function LuxuryRealEstatePage() {
     <>
       <SEO
         exactTitle="Luxury Real Estate in Northern Colorado | SAA Homes — Schwartz and Associates"
-        description="Discover exceptional luxury properties across Fort Collins, Loveland, Windsor, and Greeley. Private consultations, white-glove service, and exclusive listings from Schwartz and Associates."
-        keywords="luxury real estate Northern Colorado, luxury homes Fort Collins, high-end real estate Loveland, luxury properties Windsor CO, luxury realtor Northern Colorado, premium homes Colorado, estate properties Fort Collins"
+        description="Discover exceptional luxury properties across Fort Collins, Loveland, Windsor, and Greeley. Private consultations, white-glove service, and exclusive listings from Schwartz and Associates. Your trusted luxury real estate agent for high-end homes, estate properties, custom homes, horse properties, acreage, and golf course communities throughout Northern Colorado."
+        keywords="luxury real estate Northern Colorado, luxury homes Fort Collins, high-end real estate Loveland, luxury properties Windsor CO, luxury realtor Northern Colorado, premium homes Colorado, estate properties Fort Collins, luxury real estate agent, million dollar homes Fort Collins, custom homes Northern Colorado, horse properties Colorado, acreage homes Colorado, golf course homes Windsor, lakefront homes Loveland, gated communities Fort Collins, executive homes Colorado, luxury listing agent, concierge real estate services, luxury home builder Fort Collins, waterfront homes Colorado, luxury mountain view homes, private estates Colorado, high-end real estate agent Colorado, luxury real estate Colorado Front Range
         canonical="https://saahomes.com/luxury-real-estate/"
         ogImage="https://saahomes.com/images/Northern Colorado.webp"
         jsonLd={[{
