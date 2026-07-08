@@ -411,6 +411,7 @@ export const blogPosts = [
     category: 'CHFA & Homebuyer Programs',
     image: '/images/Shwartz-CTA-Buyers.jpg',
     readTime: '8 min read',
+    youtubeId: 'OAFkvsbPgjc',
     keywords: 'Colorado Champions Home Loan, CHFA first responders, police officer home loan Colorado, firefighter mortgage Greeley, EMT home buying Fort Collins, first responder housing Colorado',
     relatedLinks: [
       { title: 'Champions Home Loan Program Page', href: '/colorado-champions-home-loan-program/', description: 'Timeline, eligibility & sign up for updates' },
