@@ -17,6 +17,12 @@ const cardDescriptions = {
   mead: "Small-town charm with excellent schools, family-friendly atmosphere, and easy access to larger cities.",
   longmont: "Thriving tech hub with vibrant downtown, craft breweries, and exceptional quality of life in Boulder County.",
   boulder: "Iconic mountain city with world-class outdoor recreation, CU Boulder, and a vibrant cultural scene.",
+  berthoud: "Quiet small-town charm with a historic downtown, excellent schools, and easy access to both Fort Collins and Loveland.",
+  firestone: "Growing Carbon Valley community with new construction, family-friendly parks, and convenient access to I-25.",
+  frederick: "Affordable Carbon Valley town with small-town feel, new developments, and quick commutes to Denver and Boulder.",
+  evans: "Close-knit community bordering Greeley with affordable homes, community events, and a strong local identity.",
+  severance: "Peaceful semi-rural town with spacious lots, new construction, and a quiet atmosphere near Windsor.",
+  niwot: "Historic small town near Boulder with charming downtown, top-rated schools, and a strong arts community.",
 };
 
 function getRealScoutLink(city) {
@@ -35,9 +41,9 @@ export default function FeaturedAreasPage() {
   return (
     <>
       <SEO
-        exactTitle="Northern Colorado Communities & Neighborhoods | Fort Collins to Greeley | SAA Homes"
-        description="Explore Northern Colorado communities including Fort Collins, Loveland, Windsor, Greeley, Berthoud, Firestone, Severance, and more. Local real estate guides, lifestyle info, and homes for sale across Colorado's Front Range."
-        keywords="Northern Colorado neighborhoods, Fort Collins communities, Loveland CO areas, Windsor CO homes, Greeley real estate, Berthoud Firestone Severance homes, Colorado Front Range towns, Northern Colorado area guide"
+        exactTitle="Northern Colorado Communities & Area Guides | Fort Collins to Greeley | SAA Homes"
+        description="Explore all 19 Northern Colorado communities from Fort Collins to Greeley. Area guides, neighborhood info, luxury real estate, and homes for sale across Colorado's Front Range. Your complete guide to finding the perfect Colorado community."
+        keywords="Northern Colorado area guide, Fort Collins neighborhoods, Loveland CO communities, Windsor CO real estate, Greeley area guide, Berthoud Firestone Severance homes, Carbon Valley real estate, Colorado Front Range towns, Northern Colorado communities, luxury real estate Northern Colorado, Niwot homes, Evans CO living, Frederick CO real estate, Northern Colorado relocation guide"
         canonical="https://saahomes.com/northern-colorado-areas/"
         ogImage="https://saahomes.com/images/Northern Colorado.webp"
         jsonLd={[{
@@ -127,6 +133,24 @@ export default function FeaturedAreasPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Luxury Real Estate CTA */}
+      <section className="py-16 px-6 bg-gray-950 text-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="text-[#CFB36E] tracking-[0.2em] text-sm font-semibold uppercase mb-4">Premium Properties</p>
+          <h2 className="text-4xl font-bold mb-4">Luxury Real Estate in Northern Colorado</h2>
+          <p className="text-gray-400 mb-8 max-w-2xl mx-auto">
+            Discover exceptional high-end properties across Fort Collins, Loveland, Windsor, and Greeley. 
+            Private white-glove service for discerning buyers and sellers.
+          </p>
+          <Link 
+            to="/luxury-real-estate/"
+            className="inline-block px-8 py-3 border-2 border-[#CFB36E] text-[#CFB36E] font-bold hover:bg-[#CFB36E] hover:text-black transition-colors"
+          >
+            EXPLORE LUXURY HOMES
+          </Link>
         </div>
       </section>
 
