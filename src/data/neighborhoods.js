@@ -369,6 +369,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.56', longitude: '-105.07' },
     metaDescription: 'Sheely Addition Fort Collins - historic post-war cottages near CSU and City Park. Affordable entry to central Fort Collins. SAA Homes.',
     keywords: 'Sheely Addition Fort Collins, Sheely Addition homes, historic Fort Collins neighborhoods, CSU area homes, post-war homes Fort Collins, central Fort Collins real estate',
+    youtubeId: 'MYp3AlhA2FU',
     neighborhoodHighlights: [
       { title: 'Historic charm', description: 'Post-war cottage and Cape Cod homes with original character - one of Fort Collins most charming older neighborhoods.' },
       { title: 'Walk to CSU', description: 'Located between CSU and the Gardens on Spring Creek - walk to campus, parks, and shopping.' },
@@ -400,6 +401,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.565', longitude: '-105.07' },
     metaDescription: 'City Park Fort Collins real estate - historic bungalows and craftsman homes near Old Town. One of Fort Collins most beloved neighborhoods. SAA Homes.',
     keywords: 'City Park Fort Collins, Fort Collins City Park area, historic Fort Collins homes, homes near Old Town Fort Collins, central Fort Collins real estate, Mulberry Street Fort Collins',
+    youtubeId: 'FiOPgyeB55E',
     neighborhoodHighlights: [
       { title: 'City Park lifestyle', description: '32-acre park with pool, lake, walking paths, sports fields - the heart of the neighborhood.' },
       { title: 'Historic architecture', description: 'Bungalows, Craftsman, and Colonial Revival homes from the 1910s-1950s on tree-lined streets.' },
@@ -431,6 +433,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.56', longitude: '-105.14' },
     metaDescription: 'Horsetooth area Fort Collins real estate - acreage, custom homes, equestrian properties near Horsetooth Reservoir. SAA Homes.',
     keywords: 'Horsetooth Fort Collins homes, Horsetooth Reservoir real estate, west Fort Collins acreage, equestrian properties Fort Collins, custom homes Fort Collins, foothills living Fort Collins',
+    youtubeId: '4JgIRAPkLkw',
     neighborhoodHighlights: [
       { title: 'Outdoor paradise', description: 'Horsetooth Reservoir, Lory State Park, and miles of trails are literally steps from your front door.' },
       { title: 'Space and privacy', description: 'Larger lots from 1 to 5 acres offer room for gardens, animals, and space between neighbors.' },
