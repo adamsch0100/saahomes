@@ -100,6 +100,33 @@ For each `{city}` above, monitor these query patterns:
 
 ---
 
+## Luxury queries (Tier A — high-value leads, → /luxury-real-estate/)
+
+| Query | Target |
+|-------|--------|
+| luxury real estate Northern Colorado | /luxury-real-estate/ |
+| luxury homes Fort Collins | /luxury-real-estate/ + /northern-colorado-areas/fort-collins/ |
+| luxury realtor Fort Collins | /luxury-real-estate/ |
+| high-end real estate Loveland | /luxury-real-estate/ + /northern-colorado-areas/loveland/ |
+| luxury properties Windsor CO | /luxury-real-estate/ + /northern-colorado-areas/windsor/ |
+| luxury homes for sale Greeley | /luxury-real-estate/ + /northern-colorado-areas/greeley/ |
+| million dollar homes Fort Collins | /luxury-real-estate/ |
+| custom homes Northern Colorado | /luxury-real-estate/ |
+| estate properties Colorado | /luxury-real-estate/ |
+| horse properties Northern Colorado | /luxury-real-estate/ |
+| acreage homes Colorado | /luxury-real-estate/ |
+| golf course homes Windsor | /luxury-real-estate/ + /northern-colorado-areas/windsor/ |
+| lakefront homes Loveland | /luxury-real-estate/ + /northern-colorado-areas/loveland/ |
+| gated communities Fort Collins | /luxury-real-estate/ |
+| luxury real estate Colorado Front Range | /luxury-real-estate/ |
+| luxury real estate agent Northern Colorado | /luxury-real-estate/ |
+| concierge real estate services | /luxury-real-estate/ |
+| private estates Colorado | /luxury-real-estate/ |
+| luxury home builder Fort Collins | /luxury-real-estate/ |
+| high-end homes for sale Colorado | /luxury-real-estate/ |
+
+---
+
 ## Growth corridor cluster (prioritize content + links)
 
 **Carbon Valley:** Firestone, Frederick, (+ Dacono if we add later)  
@@ -128,13 +155,16 @@ Cross-link these cities in blog posts and area page "Nearby communities" section
 - Fort Collins vs Loveland vs Windsor comparison
 - Weld County vs Larimer County buyer guide
 - Monthly market snapshot (recurring template)
+- Luxury home buying guide Northern Colorado
+- Fort Collins luxury neighborhoods guide
+- Luxury vs standard real estate Northern Colorado
 
 ---
 
 ## GSC monitoring filters (cron)
 
 When GSC connected, pull weekly for property `https://saahomes.com/`:
-- Queries containing: `fort collins`, `loveland`, `windsor`, `greeley`, `weld`, `larimer`, `northern colorado`, `chfa`, `schwartz`, `saa homes`
-- Pages under `/northern-colorado-areas/`, `/for-sellers/`, `/for-buyers/`, `/chfa-`, `/blog/`
+- Queries containing: `fort collins`, `loveland`, `windsor`, `greeley`, `weld`, `larimer`, `northern colorado`, `chfa`, `schwartz`, `saa homes`, `luxury`
+- Pages under `/northern-colorado-areas/`, `/for-sellers/`, `/for-buyers/`, `/chfa-`, `/blog/`, `/luxury-real-estate/`
 - Alert: position drop ≥8 positions AND impressions ≥10 (week over week)
 - Alert: page indexed → not indexed on any P0 URL
