@@ -77,6 +77,7 @@ export const blogPosts = [
     category: 'Market Update',
     image: '/images/Northern Colorado.webp',
     readTime: '6 min read',
+    youtubeId: 'Z0sxD4Z2yXI',
     supersededBy: LATEST_MARKET_UPDATE_SLUG,
     relatedLinks: [
       {
