@@ -682,6 +682,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/Northern Colorado.webp',
     readTime: '10 min read',
+    youtubeId: 'yCQQymVAdu4',
     keywords: 'Northern Colorado events 2026, Fort Collins festivals, Loveland events, Greeley Stampede, things to do Northern Colorado, moving to Fort Collins events, Windsor Harvest Festival, Longmont farmers market',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & homes for sale' },
