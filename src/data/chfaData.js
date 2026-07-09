@@ -213,4 +213,82 @@ export const CHFA_PAGE_CONFIGS = {
     ],
     contactCta: 'Are you a Colorado educator looking to buy a home? Contact SAA Homes at (970) 999-1407 for guidance on the CHFA Schools To Home program and Northern Colorado real estate.',
   },
+  '/colorado-champions-home-loan-program/': {
+    slug: 'colorado-champions-home-loan-program',
+    title: 'Colorado Champions Home Loan Program — First Responder Home Loans',
+    tagline: 'Expanded CHFA eligibility at 110% income limits for Colorado first responders and their households',
+    introParagraphs: [
+      'The Colorado Champions Home Loan Program is a CHFA initiative created by SB26-053 that expands access to affordable home financing for Colorado first responders and their households by raising income eligibility to 110% of standard CHFA limits and pairing with down payment assistance up to $25,000 or 3–4% of the loan amount.',
+      'First responders in Larimer County (Fort Collins, Loveland, Wellington) and Weld County (Greeley, Windsor) can access the program through CHFA participating lenders. The program is expected to launch in late 2026 — sign up for updates on this page.',
+    ],
+    stats: false,
+    programs: false,
+    dpaOptions: false,
+    requirements: true,
+    countyLimits: false,
+    specialtyPrograms: false,
+    steps: false,
+    faqs: [
+      {
+        q: 'What is the Colorado Champions Home Loan Program?',
+        a: 'It is a CHFA initiative created by SB26-053 that expands access to affordable home financing for Colorado first responders and their households by raising income eligibility to 110% of standard CHFA limits and pairing with down payment assistance.',
+      },
+      {
+        q: 'Is this a brand-new loan product?',
+        a: 'No. The program expands eligibility within CHFA\'s existing first mortgage and down payment assistance programs — it does not create an entirely separate loan product.',
+      },
+      {
+        q: 'Does the program offer zero-down financing?',
+        a: 'Down payment assistance grants can make upfront costs very low or zero in many cases, depending on loan size, purchase price, and other factors. Standard CHFA requirements still apply, including a minimum $1,000 borrower contribution.',
+      },
+      {
+        q: 'Who counts as a first responder under SB26-053?',
+        a: 'Peace officers (including corrections officers, 911 specialists, wildlife officers, and more), firefighters, and EMTs — plus their households. The bill includes a broad definition of peace officer beyond sworn patrol roles.',
+      },
+      {
+        q: 'When will I be able to apply for CHFA Champions in Colorado?',
+        a: 'CHFA anticipates launching the program in late 2026. The law is effective August 12, 2026, but final guidelines and lender availability are still being developed. Sign up on this page for updates.',
+      },
+      {
+        q: 'Can Fort Collins and Greeley first responders apply?',
+        a: 'Yes. The program is statewide. First responders in Larimer County (Fort Collins, Loveland, Wellington) and Weld County (Greeley, Windsor) will access it through CHFA participating lenders serving Northern Colorado.',
+      },
+    ],
+    contactCta: 'Are you a Colorado first responder looking to buy a home? Contact SAA Homes at (970) 999-1407 for guidance on the Champions Home Loan program and Northern Colorado real estate.',
+  },
+  '/greeley-g-hope-down-payment-assistance/': {
+    slug: 'greeley-g-hope-down-payment-assistance',
+    title: 'G-HOPE Greeley Down Payment Assistance for Employees',
+    tagline: 'Up to $8,000 in forgivable down payment help for full-time Greeley-area employees buying east of 35th Avenue',
+    introParagraphs: [
+      'G-HOPE (Greeley Home Ownership Program for Employees) is a City of Greeley down payment assistance program for full-time employees whose employer is based within the program area. Assistance ranges from $2,500 to $8,000 depending on which of four geographic zones you purchase in — all east of 35th Avenue within Greeley.',
+      'The program offers forgivable deferred loans — each year you occupy the home as your primary residence, 20% of the loan is forgiven, reaching full forgiveness after five years. No first-time buyer requirement and no income limits make this one of the most accessible down payment programs in Northern Colorado.',
+    ],
+    stats: false,
+    programs: false,
+    dpaOptions: false,
+    requirements: true,
+    countyLimits: false,
+    specialtyPrograms: false,
+    steps: false,
+    faqs: [
+      {
+        q: 'What is the G-HOPE program in Greeley?',
+        a: 'G-HOPE (Greeley Home Ownership Program for Employees) is a City of Greeley down payment assistance program for full-time employees whose employer is based within the program area. Assistance ranges from $2,500 to $8,000 depending on which of four geographic zones you purchase in — all east of 35th Avenue within Greeley.',
+      },
+      {
+        q: 'How much down payment help can I get in each zone?',
+        a: 'Zone 1 (east of 8th Avenue): up to $8,000. Zone 2 (between 8th and 14th Avenues): up to $6,000. Zone 3 (west of 14th Avenue): up to $4,000. Zone 4 (outlying eligible areas): up to $2,500. The city confirms your exact amount based on the property address.',
+      },
+      {
+        q: 'How does the 5-year loan forgiveness work?',
+        a: 'G-HOPE provides a deferred down payment loan, not a grant. Each full year you occupy the home as your primary residence, 20% of the loan is forgiven. After five years, the entire assistance amount is forgiven if you remain eligible.',
+      },
+      {
+        q: 'Can I combine G-HOPE with CHFA down payment assistance?',
+        a: 'Program stacking depends on lender guidelines and city rules. Many buyers explore G-HOPE, CHFA, or both with their loan officer. SAA Homes can help you understand options — final eligibility is determined by the city and your lender.',
+      },
+    ],
+    contactCta: 'Are you a Greeley-area employee looking to buy a home? Contact SAA Homes at (970) 999-1407 for guidance on the G-HOPE program and Northern Colorado real estate.',
+  },
 };

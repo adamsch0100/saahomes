@@ -1009,6 +1009,23 @@ function buildRouteSchemas(route) {
     });
   }
 
+  // CHFA pages with FAQ data – add FAQPage schema (for AI answer visibility)
+  const chfaConfig = matchChfaPage(path);
+  if (chfaConfig && chfaConfig.faqs && chfaConfig.faqs.length > 0) {
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: chfaConfig.faqs.map((faq) => ({
+        '@type': 'Question',
+        name: faq.q,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: faq.a,
+        },
+      })),
+    });
+  }
+
   return schemas;
 }
 
