@@ -2068,6 +2068,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Windsor-CO-Area-Guide.jpg',
     readTime: '7 min read',
+    youtubeId: 'rZLKyW809i8',
     keywords: 'severance colorado homes for sale, severance co homes for sale, severance colorado real estate, buying a home in severance colorado, homes for sale in severance co, moving to severance colorado, severance co neighborhoods, severance co realtor, severance colorado real estate agent, severance new construction',
     relatedLinks: [
       { title: 'Severance Area Guide', href: '/northern-colorado-areas/severance/', description: 'Neighborhoods, new construction and homes for sale' },
