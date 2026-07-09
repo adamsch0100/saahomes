@@ -124,6 +124,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/sell-hero-1.jpg',
     readTime: '7 min read',
+    youtubeId: 'aJhQ8Xn-Ek8',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
       { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities & pricing' },
