@@ -76,6 +76,28 @@ export default function ForSellersPage() {
         </div>
       </section>
 
+      {/* Trust Badges Section */}
+      <section className="py-8 px-6 border-b border-gray-100" style={{backgroundColor: '#fafafa'}}>
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          <div>
+            <p className="text-2xl font-bold text-gray-900 font-serif">20+</p>
+            <p className="text-xs text-gray-600 mt-1 uppercase tracking-wide font-semibold">Years Experience</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-gray-900 font-serif">Zillow</p>
+            <p className="text-xs text-gray-600 mt-1 uppercase tracking-wide font-semibold">Premier Agent</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-gray-900 font-serif">5-Star</p>
+            <p className="text-xs text-gray-600 mt-1 uppercase tracking-wide font-semibold">Client Reviews</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-gray-900 font-serif">🏡</p>
+            <p className="text-xs text-gray-600 mt-1 uppercase tracking-wide font-semibold">Full-Service Marketing</p>
+          </div>
+        </div>
+      </section>
+
       {/* For Sellers / Sell With The Best Team Section */}
       <section className="py-16 px-6">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
