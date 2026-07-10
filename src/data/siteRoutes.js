@@ -79,6 +79,17 @@ const staticPages = [
     ogImageAlt: 'Luxury real estate in Northern Colorado',
   },
   {
+    path: '/cash-home-buyers/',
+    priority: '0.8',
+    changefreq: 'weekly',
+    title: 'Cash Home Buyers Northern Colorado | Sell Your House Fast for Cash | SAA Homes',
+    description: 'Sell your Northern Colorado home for cash — close in as little as 7 days, no repairs, no commissions. Also serving cash buyers and investors looking for flip properties in Fort Collins, Loveland, Windsor, and Greeley.',
+    ogTitle: 'Cash Home Buyers Northern Colorado | Fast Cash Offers',
+    ogDescription: 'Sell your home for cash in 7-14 days as-is, or connect with Northern Colorado investment opportunities. SAA Homes serves both sellers and cash buyers.',
+    ogImage: DEFAULT_OG_IMAGE,
+    ogImageAlt: 'Cash home buyers in Northern Colorado',
+  },
+  {
     path: '/contact/',
     priority: '0.7',
     changefreq: 'monthly',
