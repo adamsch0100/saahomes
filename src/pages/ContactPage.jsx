@@ -199,9 +199,12 @@ export default function ContactPage() {
                 disabled={isSubmitting}
                 className="w-full px-8 py-3 bg-black text-white font-semibold rounded hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? 'Submitting...' : 'Submit'}
+                {isSubmitting ? 'Sending...' : 'Send Message'}
               </button>
             </form>
+            <p className="text-sm text-gray-500 mt-4 text-center">
+              Prefer to talk? Call us at <a href="tel:(970) 999-1407" className="text-black font-semibold hover:underline">(970) 999-1407</a> — we're here to help. Your information is always kept confidential.
+            </p>
           </div>
         </div>
       </section>

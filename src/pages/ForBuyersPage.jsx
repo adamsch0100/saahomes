@@ -33,8 +33,8 @@ export default function ForBuyersPage() {
         style={{backgroundImage: "url('/images/buyers-hero.jpg')"}}>
         <div className="absolute inset-0 bg-black/60"></div>
         <div className="relative z-10 text-center text-white px-6">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-serif">For Buyers</h1>
-          <p className="mt-4 text-xl sm:text-2xl font-sans">Your Guide to Finding the Perfect Home in Northern Colorado</p>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-serif">Your Northern Colorado Home Search Starts Here</h1>
+          <p className="mt-4 text-xl sm:text-2xl font-sans">Expert buyer representation, CHFA down payment assistance, and personalized home searches across Fort Collins, Loveland &amp; Windsor.</p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <a href="/properties/" className="inline-flex items-center justify-center px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
               Search Homes
