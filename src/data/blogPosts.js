@@ -2195,6 +2195,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Northern Colorado.webp',
     readTime: '8 min read',
+    youtubeId: 'WZYB_bmfLxQ',
     keywords: 'carbon valley colorado homes for sale, firestone co homes for sale, frederick co homes for sale, affordable northern colorado homes, carbon valley real estate, firestone colorado realtor, frederick colorado homes, carbon valley new construction, most affordable northern colorado towns, weld county affordable homes, firestone co real estate agent, frederick co realtor, carbon valley first-time home buyer',
     relatedLinks: [
       { title: 'Firestone Area Guide', href: '/northern-colorado-areas/firestone/', description: 'Carbon Valley neighborhoods & homes for sale' },
