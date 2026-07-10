@@ -127,26 +127,35 @@ For each `{city}` above, monitor these query patterns:
 
 ---
 
-## Cash buyer queries  (Tier B — new vertical, two-sided funnel)
+## Cash buyer queries (Tier B — new vertical, two-sided funnel)
+
+**Target pattern:** `sell house fast {city}`, `cash offer for home {city}`, `sell my house {city}`, `we buy houses {city}`
 
 | Query cluster | Target page |
 |---------------|-------------|
-| cash home buyers Northern Colorado | /cash-home-buyers/ |
-| cash home buyers Fort Collins | /cash-home-buyers/ + /northern-colorado-areas/fort-collins/ |
-| cash home buyers Loveland | /cash-home-buyers/ + /northern-colorado-areas/loveland/ |
-| cash home buyers Greeley | /cash-home-buyers/ + /northern-colorado-areas/greeley/ |
-| cash home buyers Windsor | /cash-home-buyers/ + /northern-colorado-areas/windsor/ |
-| we buy houses Fort Collins | /cash-home-buyers/ + /for-sellers/ |
+| sell my house fast Fort Collins | /cash-home-buyers/ + /for-sellers/ + /northern-colorado-areas/fort-collins/ |
+| sell my house fast Loveland | /cash-home-buyers/ + /for-sellers/ + /northern-colorado-areas/loveland/ |
+| sell my house fast Windsor | /cash-home-buyers/ + /for-sellers/ + /northern-colorado-areas/windsor/ |
+| sell my house fast Greeley | /cash-home-buyers/ + /for-sellers/ + /northern-colorado-areas/greeley/ |
+| sell my house fast Timnath | /cash-home-buyers/ + /for-sellers/ + /northern-colorado-areas/timnath/ |
+| sell my house fast Berthoud | /cash-home-buyers/ + /for-sellers/ + /northern-colorado-areas/berthoud/ |
+| sell my house fast Johnstown | /cash-home-buyers/ + /for-sellers/ + /northern-colorado-areas/johnstown/ |
+| sell my house fast Longmont | /cash-home-buyers/ + /for-sellers/ + /northern-colorado-areas/longmont/ |
+| cash offer for home Fort Collins | /cash-home-buyers/ + /for-sellers/ |
+| cash offer for home Loveland | /cash-home-buyers/ + /for-sellers/ |
+| cash offer for home Windsor | /cash-home-buyers/ + /for-sellers/ |
+| cash offer for home Greeley | /cash-home-buyers/ + /for-sellers/ |
+| we buy houses Fort Collins | /cash-home-buyers/ + /for-sellers/ + /northern-colorado-areas/fort-collins/ |
+| we buy houses Loveland | /cash-home-buyers/ + /for-sellers/ |
+| we buy houses Windsor | /cash-home-buyers/ + /for-sellers/ |
+| we buy houses Greeley | /cash-home-buyers/ + /for-sellers/ |
 | we buy houses Northern Colorado | /cash-home-buyers/ |
-| sell my house fast Fort Collins | /cash-home-buyers/ + /for-sellers/ |
-| sell my house fast for cash | /cash-home-buyers/ |
 | sell house for cash Colorado | /cash-home-buyers/ |
+| sell as-is home Fort Collins | /cash-home-buyers/ + /for-sellers/ |
+| cash home buyers Northern Colorado | /cash-home-buyers/ |
 | cash for homes Northern Colorado | /cash-home-buyers/ |
 | house flippers Fort Collins | /cash-home-buyers/ |
 | real estate investors Northern Colorado | /cash-home-buyers/ |
-| sell as-is home Fort Collins | /cash-home-buyers/ + /for-sellers/ |
-| cash offer on house Colorado | /cash-home-buyers/ |
-| we buy ugly houses Northern Colorado | /cash-home-buyers/ |
 | fix and flip Colorado | /cash-home-buyers/ |
 | investment properties Northern Colorado | /cash-home-buyers/ |
 
