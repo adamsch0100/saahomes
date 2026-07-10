@@ -161,8 +161,13 @@ def add_youtube_id_to_neighborhood(slug, video_id):
         insert_pos = entry_start + nh_match.start()
     else:
         # Normal case: keywords before neighborhoodHighlights
-        # Insert after keywords line
-        insert_pos = entry_start + kw_match.end()
+        # Insert after keywords line, AFTER any trailing comma
+        kw_end = entry_start + kw_match.end()
+        # Skip past any trailing comma/whitespace so we don't orphan a comma
+        after_text = content[kw_end:entry_start + kw_match.end() + 10]
+        if after_text.startswith(','):
+            kw_end += 1
+        insert_pos = kw_end
     
     # Check again: make sure youtubeId doesn't already exist in the insertion region
     if "youtubeId" in entry_content[:insert_pos - entry_start + 50]:
