@@ -464,8 +464,8 @@ export const neighborhoods = [
     boundaries: 'Drake Road to Horsetooth Road, Shields Street to Lemay Avenue',
     coordinates: { latitude: '40.548', longitude: '-105.09' },
     metaDescription: 'Buckingham Fort Collins real estate - central Fort Collins homes with Rocky Mountain High School access. SAA Homes.',
-    keywords: 'Buckingham Fort Collins, Buckingham neighborhood, central Fort Collins homes, Drake Road Fort Collins, Rocky Mountain High School area, Spring Creek Trail homes'
-    youtubeId: '5rEs7FLk77s',,
+    keywords: 'Buckingham Fort Collins, Buckingham neighborhood, central Fort Collins homes, Drake Road Fort Collins, Rocky Mountain High School area, Spring Creek Trail homes',
+    youtubeId: '5rEs7FLk77s',
     neighborhoodHighlights: [
       { title: 'Central location', description: 'At Drake and Shields - the geographic center of Fort Collins, minutes from anywhere in the city.' },
       { title: 'Rocky Mountain High (9/10)', description: 'One of Fort Collins top-rated high schools serves the Buckingham area.' },
@@ -496,8 +496,8 @@ export const neighborhoods = [
     boundaries: 'Harmony Road to Trilby Road, Lemay Ave to Timberline Rd',
     coordinates: { latitude: '40.51', longitude: '-105.05' },
     metaDescription: 'Waterglen Fort Collins real estate - family-friendly subdivision with top Fossil Ridge schools. SAA Homes.',
-    keywords: 'Waterglen Fort Collins, Waterglen subdivision, south Fort Collins homes, Fossil Ridge schools'
-    youtubeId: 'HEvkyhDAJBs',,
+    keywords: 'Waterglen Fort Collins, Waterglen subdivision, south Fort Collins homes, Fossil Ridge schools',
+    youtubeId: 'HEvkyhDAJBs',
     neighborhoodHighlights: [
       { title: 'Top school cluster', description: 'Ridgeview Elementary (9/10) through Fossil Ridge High School (9/10) - one of FC best school ladders.' },
       { title: 'Community amenities', description: 'Neighborhood pool, parks, and walking trails - designed for families.' },
@@ -528,8 +528,8 @@ export const neighborhoods = [
     boundaries: 'Harmony Road to Fossil Creek Parkway, Lemay Avenue to Timberline Road',
     coordinates: { latitude: '40.51', longitude: '-105.045' },
     metaDescription: 'Collindale Fort Collins real estate - executive homes on Collindale Golf Course with top-rated Fossil Ridge schools. SAA Homes.',
-    keywords: 'Collindale Fort Collins, Collindale golf course homes, south Fort Collins executive homes, Fossil Ridge schools Fort Collins'
-    youtubeId: 'd7-sb0rfnYA',,
+    keywords: 'Collindale Fort Collins, Collindale golf course homes, south Fort Collins executive homes, Fossil Ridge schools Fort Collins',
+    youtubeId: 'd7-sb0rfnYA',
     neighborhoodHighlights: [
       { title: 'Golf course living', description: 'Homes line the Collindale Golf Course fairways with direct access to one of Fort Collins premier public courses.' },
       { title: 'Established community', description: 'Mature trees, manicured landscaping, and an established feel with newer amenities nearby.' },
