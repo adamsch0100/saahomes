@@ -277,6 +277,62 @@ export default function ForSellersPage() {
         </div>
       </section>
 
+      {/* Cash Buyer Alternative Section */}
+      <section className="py-16 px-6 bg-gray-50">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <span className="inline-block bg-yellow-100 text-yellow-800 text-xs uppercase tracking-widest px-3 py-1 rounded-full mb-4 font-semibold">Alternative Option</span>
+            <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4">Need to Sell Faster? Consider a Cash Offer</h2>
+            <p className="text-lg text-gray-700 max-w-3xl mx-auto">
+              Not every situation calls for a traditional listing. If you need to sell quickly,
+              avoid repairs, or prefer a guaranteed close — a cash offer might be the right path.
+              We help you compare both options so you can choose with confidence.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+              <div className="text-3xl mb-3">📋</div>
+              <h3 className="text-xl font-bold mb-3">Traditional Listing</h3>
+              <p className="text-gray-600 text-sm mb-4">Best for maximizing sale price</p>
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li className="flex items-start gap-2">✓ Full market value pricing</li>
+                <li className="flex items-start gap-2">✓ Professional marketing + photography</li>
+                <li className="flex items-start gap-2">✓ Showings and open houses</li>
+                <li className="flex items-start gap-2">✓ 30&ndash;60 day typical timeline</li>
+                <li className="flex items-start gap-2">✓ Expert negotiation and representation</li>
+              </ul>
+            </div>
+
+            <div className="bg-white p-8 rounded-xl shadow-lg border border-yellow-200 relative">
+              <div className="absolute -top-3 -right-3 bg-yellow-400 text-black text-xs font-bold px-3 py-1 rounded-full">Also Available</div>
+              <div className="text-3xl mb-3">💰</div>
+              <h3 className="text-xl font-bold mb-3">Cash Sale Option</h3>
+              <p className="text-gray-600 text-sm mb-4">Best for speed and certainty</p>
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li className="flex items-start gap-2">✓ Close in 7&ndash;14 days</li>
+                <li className="flex items-start gap-2">✓ No repairs, cleaning, or staging</li>
+                <li className="flex items-start gap-2">✓ No showings or open houses</li>
+                <li className="flex items-start gap-2">✓ No agent commission out of pocket</li>
+                <li className="flex items-start gap-2">✓ Guaranteed close — no financing contingencies</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="text-center mt-10">
+            <a
+              href="/cash-home-buyers/"
+              className="inline-block px-8 py-3 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded transition-colors"
+            >
+              Learn More About Cash Offers →
+            </a>
+            <p className="text-sm text-gray-500 mt-3">
+              Or call <a href="tel:(970) 999-1407" className="text-black font-semibold hover:underline">(970) 999-1407</a> to discuss your options
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Expert Advice Section with Family Image */}
       <section className="py-16 px-6">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">

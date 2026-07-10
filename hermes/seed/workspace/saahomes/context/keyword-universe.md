@@ -127,6 +127,31 @@ For each `{city}` above, monitor these query patterns:
 
 ---
 
+## Cash buyer queries  (Tier B — new vertical, two-sided funnel)
+
+| Query cluster | Target page |
+|---------------|-------------|
+| cash home buyers Northern Colorado | /cash-home-buyers/ |
+| cash home buyers Fort Collins | /cash-home-buyers/ + /northern-colorado-areas/fort-collins/ |
+| cash home buyers Loveland | /cash-home-buyers/ + /northern-colorado-areas/loveland/ |
+| cash home buyers Greeley | /cash-home-buyers/ + /northern-colorado-areas/greeley/ |
+| cash home buyers Windsor | /cash-home-buyers/ + /northern-colorado-areas/windsor/ |
+| we buy houses Fort Collins | /cash-home-buyers/ + /for-sellers/ |
+| we buy houses Northern Colorado | /cash-home-buyers/ |
+| sell my house fast Fort Collins | /cash-home-buyers/ + /for-sellers/ |
+| sell my house fast for cash | /cash-home-buyers/ |
+| sell house for cash Colorado | /cash-home-buyers/ |
+| cash for homes Northern Colorado | /cash-home-buyers/ |
+| house flippers Fort Collins | /cash-home-buyers/ |
+| real estate investors Northern Colorado | /cash-home-buyers/ |
+| sell as-is home Fort Collins | /cash-home-buyers/ + /for-sellers/ |
+| cash offer on house Colorado | /cash-home-buyers/ |
+| we buy ugly houses Northern Colorado | /cash-home-buyers/ |
+| fix and flip Colorado | /cash-home-buyers/ |
+| investment properties Northern Colorado | /cash-home-buyers/ |
+
+---
+
 ## Growth corridor cluster (prioritize content + links)
 
 **Carbon Valley:** Firestone, Frederick, (+ Dacono if we add later)  
@@ -164,7 +189,7 @@ Cross-link these cities in blog posts and area page "Nearby communities" section
 ## GSC monitoring filters (cron)
 
 When GSC connected, pull weekly for property `https://saahomes.com/`:
-- Queries containing: `fort collins`, `loveland`, `windsor`, `greeley`, `weld`, `larimer`, `northern colorado`, `chfa`, `schwartz`, `saa homes`, `luxury`
-- Pages under `/northern-colorado-areas/`, `/for-sellers/`, `/for-buyers/`, `/chfa-`, `/blog/`, `/luxury-real-estate/`
+- Queries containing: `fort collins`, `loveland`, `windsor`, `greeley`, `weld`, `larimer`, `northern colorado`, `chfa`, `schwartz`, `saa homes`, `luxury`, `cash buyer`, `we buy`, `sell.*fast`, `cash for homes`, `sell.*cash`
+- Pages under `/northern-colorado-areas/`, `/for-sellers/`, `/for-buyers/`, `/chfa-`, `/blog/`, `/luxury-real-estate/`, `/cash-home-buyers/`
 - Alert: position drop ≥8 positions AND impressions ≥10 (week over week)
 - Alert: page indexed → not indexed on any P0 URL
