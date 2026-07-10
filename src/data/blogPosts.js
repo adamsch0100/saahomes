@@ -184,7 +184,7 @@ export const blogPosts = [
     category: 'CHFA & Homebuyer Programs',
     image: '/images/Buyers-img-2.jpg',
     readTime: '12 min read',
-    youtubeId: 'zCUZL4qJCKA',
+    youtubeId: 'RF1C-bQas2U',
     keywords: 'CHFA down payment assistance, Colorado first time home buyer 2026, CHFA grant Colorado, CHFA SmartStep, CHFA Preferred, CHFA FirstStep, down payment help Colorado',
     relatedLinks: [
       { title: 'CHFA Down Payment Assistance Landing Page', href: '/chfa-down-payment-assistance/', description: 'Full program comparison, limits table & free consultation' },
@@ -276,7 +276,7 @@ export const blogPosts = [
     category: 'CHFA & Homebuyer Programs',
     image: '/images/Fort-Collins-CO-Area-Guide.jpg',
     readTime: '10 min read',
-    youtubeId: 'qgoLb9jebHc',
+    youtubeId: 'feMj8CDlSio',
     keywords: 'CHFA Fort Collins, CHFA Greeley, Larimer County first time home buyer, Weld County down payment assistance, Northern Colorado CHFA income limits, Loveland CHFA',
     relatedLinks: [
       { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'All programs, requirements & DPA options' },
@@ -1156,7 +1156,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Loveland-CO-Area-Guide.jpg',
     readTime: '8 min read',
-    youtubeId: 'kIwLICrH9rw',
+    youtubeId: 'K-rJl7HjUvg',
     keywords: 'loveland homes for sale, loveland colorado homes for sale, loveland co real estate, buying a home in loveland colorado, homes for sale in loveland co, moving to loveland colorado, loveland neighborhoods, loveland co realtor',
     relatedLinks: [
       { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Neighborhoods, schools and homes for sale' },
