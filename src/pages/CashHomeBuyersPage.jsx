@@ -478,6 +478,100 @@ export default function CashHomeBuyersPage() {
         </div>
       </section>
 
+      {/* Foreclosure & Short Sale Help Section */}
+      <section className="py-16 bg-gray-800 border-t border-gray-700">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="text-center mb-10">
+            <span className="inline-block bg-red-900/30 text-red-400 text-xs uppercase tracking-widest px-3 py-1 rounded-full mb-4 font-semibold">Distressed Seller Help</span>
+            <h2 className="text-3xl md:text-4xl font-serif font-bold mb-4">
+              Facing Foreclosure or Need a Short Sale?
+            </h2>
+            <p className="text-gray-400 max-w-3xl mx-auto text-lg">
+              If you&rsquo;re behind on payments, facing a notice of default, or owe more than your
+              home is worth — you have options. SAA Homes helps Northern Colorado homeowners
+              navigate foreclosures, short sales, and pre-foreclosure sales so you can protect
+              your credit and move forward.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="bg-gray-900 rounded-xl p-6 border border-gray-700">
+              <div className="text-red-400 text-3xl mb-3">⚖️</div>
+              <h3 className="text-xl font-bold mb-3">Pre-Foreclosure Sale</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Selling before the foreclosure auction gives you control. You set the terms,
+                avoid a public trustee sale on your record, and may preserve some equity.
+                We work with lenders to negotiate payoff amounts and timeline.
+              </p>
+            </div>
+            <div className="bg-gray-900 rounded-xl p-6 border border-gray-700">
+              <div className="text-red-400 text-3xl mb-3">📄</div>
+              <h3 className="text-xl font-bold mb-3">Short Sale Assistance</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Owe more than the home is worth? A short sale lets you sell for less than
+                the mortgage balance with the lender&rsquo;s approval. It&rsquo;s less damaging
+                to your credit than a foreclosure, and we handle the lender negotiations.
+              </p>
+            </div>
+            <div className="bg-gray-900 rounded-xl p-6 border border-gray-700">
+              <div className="text-red-400 text-3xl mb-3">🏠</div>
+              <h3 className="text-xl font-bold mb-3">Cash Offer Backup</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                If you need to sell fast to avoid foreclosure, a cash buyer can close in
+                7&ndash;14 days — often faster than the foreclosure timeline. Cash buyers
+                purchase as-is, meaning no repair costs before sale.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-10 bg-gray-900 rounded-xl p-6 md:p-8 border border-gray-700">
+            <h3 className="text-xl font-bold mb-4 text-center">Colorado Foreclosure Timeline — What to Expect</h3>
+            <div className="space-y-4 text-sm text-gray-400">
+              <div className="flex items-start gap-4">
+                <span className="bg-red-900/40 text-red-400 font-bold rounded-full w-8 h-8 flex items-center justify-center shrink-0 mt-0.5">1</span>
+                <div>
+                  <span className="text-white font-semibold">Notice of Filing (Rule 120)</span>
+                  <p>The lender files a public notice with the county public trustee. You&rsquo;ll receive a summons. You have 20 days to respond.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <span className="bg-red-900/40 text-red-400 font-bold rounded-full w-8 h-8 flex items-center justify-center shrink-0 mt-0.5">2</span>
+                <div>
+                  <span className="text-white font-semibold">Notice of Sale</span>
+                  <p>The public trustee records a sale date — typically 110-125 days after the initial filing. This notice is published in local newspapers.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <span className="bg-red-900/40 text-red-400 font-bold rounded-full w-8 h-8 flex items-center justify-center shrink-0 mt-0.5">3</span>
+                <div>
+                  <span className="text-white font-semibold">Public Trustee Sale (Auction)</span>
+                  <p>If no resolution is reached, the property is auctioned at the county courthouse. The property can still be sold up to the day before the sale.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <span className="bg-green-500/40 text-green-400 font-bold rounded-full w-8 h-8 flex items-center justify-center shrink-0 mt-0.5">✓</span>
+                <div>
+                  <span className="text-white font-semibold">You have options at every stage</span>
+                  <p>Whether you&rsquo;re at the first notice or days before auction, selling your home or negotiating a short sale can stop the process. Contact us — we&rsquo;ll walk through what&rsquo;s possible for your situation.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center mt-8">
+            <a
+              href="#cash-offer-form"
+              className="inline-block px-8 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded transition-colors"
+            >
+              Get Help — Free Consultation
+            </a>
+            <p className="text-gray-500 text-sm mt-3">
+              No judgment. No obligation. Just straight talk about your options.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* About / Credentials */}
       <section className="py-16 bg-gray-900 border-t border-gray-800">
         <div className="max-w-4xl mx-auto px-4 text-center">

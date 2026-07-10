@@ -2436,6 +2436,106 @@ export const blogPosts = [
       },
     ],
   },
+  {
+    slug: 'foreclosure-short-sale-northern-colorado-guide',
+    title: 'Foreclosure & Short Sale Guide for Northern Colorado Homeowners | SAA Homes',
+    excerpt: 'Facing foreclosure in Northern Colorado? Learn about the Colorado foreclosure timeline, short sale alternatives, and how SAA Homes helps distressed sellers protect their credit and find a path forward.',
+    date: '2026-07-10',
+    category: 'Seller Tips',
+    image: '/images/Northern Colorado.webp',
+    readTime: '8 min read',
+    relatedLinks: [
+      { title: 'Cash Home Buyers & Foreclosure Help', href: '/cash-home-buyers/', description: 'Free consultation for distressed sellers' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Full-service listing & short sale expertise' },
+      { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Market insights & pricing data' },
+      { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Larimer County real estate' },
+      { title: 'Free Home Valuation', href: '/for-sellers/#home-valuation', description: 'See what your home is worth today' },
+    ],
+    sections: [
+      {
+        heading: 'Understanding foreclosure in Colorado',
+        paragraphs: [
+          'Foreclosure is a legal process that allows a lender to take possession of a property when the homeowner falls behind on mortgage payments. Colorado is a non-judicial foreclosure state, meaning the process is handled through the public trustee in each county rather than through the court system. This makes Colorado foreclosures faster than in judicial states, but it also means homeowners have less time to act.',
+          'If you are a Northern Colorado homeowner facing financial difficulty — whether due to job loss, medical bills, divorce, or an adjustable-rate mortgage reset — it is important to understand your options before the process begins. The earlier you act, the more options you have.',
+          'At SAA Homes, we have helped homeowners across Fort Collins, Loveland, Windsor, Greeley, and all 19 Northern Colorado communities navigate foreclosure avoidance strategies. You do not have to go through this alone.',
+        ],
+        relatedLinks: [
+          { title: 'Free Consultation - Foreclosure Help', href: '/cash-home-buyers/#cash-offer-form', description: 'No-obligation, confidential' },
+        ],
+      },
+      {
+        heading: 'The Colorado foreclosure timeline: what to expect',
+        paragraphs: [
+          'The Colorado foreclosure process follows a specific timeline set by state law. Knowing what to expect at each stage can help you make informed decisions before it is too late.',
+          'Stage 1 — Notice of Filing (Rule 120): The lender files a notice with the county public trustee. The borrower receives a summons and has 20 days to respond. This is the earliest warning sign — if you respond at this stage, you may be able to negotiate a loan modification or arrange a pre-foreclosure sale.',
+          'Stage 2 — Notice of Sale: The public trustee sets a sale date, typically 110 to 125 days after the initial filing. The notice is published in local newspapers and posted at the county courthouse. At this point, the clock is ticking, but you still have options: a short sale, a deed in lieu of foreclosure, or a cash sale to an investor can stop the auction.',
+          'Stage 3 — Public Trustee Sale (Auction): The property is auctioned to the highest bidder at the county courthouse. The lender typically bids the amount owed. If no third party outbids them, the lender takes ownership and the property becomes REO (Real Estate Owned).',
+          'The key takeaway: you can sell your home at any point up to the day before the auction. Many homeowners do not realize they can still sell during the foreclosure process and avoid the credit damage of a completed foreclosure.',
+        ],
+        list: [
+          'Notice of Filing (Rule 120): You have 20 days to respond — act now',
+          'Notice of Sale: Published 110-125 days before auction — still time for a short sale',
+          'Public Trustee Sale: Property auctioned at courthouse — last chance to sell',
+          'Post-Foreclosure (REO): Bank-owned — no longer your property',
+        ],
+      },
+      {
+        heading: 'Short sale: how it works and who qualifies',
+        paragraphs: [
+          'A short sale occurs when the lender agrees to accept less than the full mortgage balance to release their lien on the property. This option is available when the home is worth less than what the homeowner owes (an "underwater" mortgage) and the homeowner cannot continue making payments.',
+          'The short sale process involves listing the property, finding a buyer, and then negotiating with the lender to approve the sale price. The lender reviews the offer, orders a Broker Price Opinion (BPO) to verify the propertys value, and either approves or counters the offer. The entire process typically takes 60 to 120 days.',
+          'For homeowners, a short sale is generally less damaging to credit than a foreclosure. While both negatively impact credit scores, the gap is meaningful: a foreclosure can drop a credit score by 200 to 300 points and remain on the credit report for 7 years, while a short sale typically causes a smaller drop and may allow for FHA-backed homeownership again in as little as 2 to 3 years.',
+        ],
+        relatedLinks: [
+          { title: 'Short Sale Assistance', href: '/cash-home-buyers/', description: 'We handle lender negotiations' },
+        ],
+      },
+      {
+        heading: 'Pre-foreclosure sale: selling before the auction',
+        paragraphs: [
+          'Selling your home before the foreclosure auction — known as a pre-foreclosure sale — is often the best option for homeowners who have equity in the property but cannot afford to keep up with payments. You sell the home on the open market, pay off the mortgage from the proceeds, and keep any remaining equity.',
+          'If you owe approximately what the home is worth, a pre-foreclosure sale may still be possible with lender cooperation. The lender may agree to extend the timeline to allow the sale to close, especially if the alternative is a more costly foreclosure process for them.',
+          'For homeowners with very little or negative equity, a short sale combined with a pre-foreclosure timeline may be the best path. SAA Homes can help you evaluate which option fits your specific financial situation and coordinate with your lender throughout the process.',
+        ],
+        relatedLinks: [
+          { title: 'Free Home Valuation', href: '/for-sellers/#home-valuation', description: 'See your homes current market value' },
+        ],
+      },
+      {
+        heading: 'Cash buyers as a foreclosure solution',
+        paragraphs: [
+          'Cash buyers can be a powerful tool for homeowners facing foreclosure. Because cash transactions close in 7 to 14 days — often faster than the foreclosure timeline — a cash sale can stop the auction and allow you to walk away without a foreclosure on your record.',
+          'Cash buyers purchase homes as-is, meaning no repair costs, no cleaning, no staging, and no showings. This is particularly valuable for distressed homeowners who may not have the resources or emotional energy to prepare a home for the traditional market.',
+          'While cash offers are typically below full market value, the trade-off needs to be weighed against the cost of a completed foreclosure: the credit damage, the inability to qualify for a new mortgage for years, and in some cases, a deficiency judgment for the difference between the sale price and the loan balance. In many situations, a discounted cash sale is financially superior to letting the property go to auction.',
+        ],
+        relatedLinks: [
+          { title: 'Get a Cash Offer', href: '/cash-home-buyers/#cash-offer-form', description: 'No-obligation offer in 24 hours' },
+          { title: 'Cash Home Buyers Hub', href: '/cash-home-buyers/', description: 'Compare cash offer vs. foreclosure costs' },
+        ],
+      },
+      {
+        heading: 'Deed in lieu of foreclosure',
+        paragraphs: [
+          'A deed in lieu of foreclosure is an arrangement where the homeowner voluntarily transfers the property deed to the lender in exchange for being released from the mortgage obligation. This option is typically available when the homeowner cannot sell the property and wants to avoid the public auction process.',
+          'The advantage of a deed in lieu is that it avoids the foreclosure auction and may be less damaging to credit than a completed foreclosure. The disadvantage is that the lender must agree to accept the deed, and not all lenders will cooperate. It also requires the homeowner to vacate the property.',
+          'A deed in lieu is generally a last-resort option when selling the home — either through a traditional listing, a short sale, or a cash sale — is not feasible. SAA Homes can help you determine whether selling is still possible before considering a deed in lieu.',
+        ],
+      },
+      {
+        heading: 'Why SAA Homes for distressed seller representation?',
+        paragraphs: [
+          'Selling a home under financial pressure is different from a traditional real estate transaction. The stakes are higher, the timeline is tighter, and the negotiation dynamics with lenders are more complex. Having an experienced agent who understands both the real estate market and the foreclosure process makes a meaningful difference.',
+          'Adam and Mandi Schwartz bring over 20 years of combined Northern Colorado real estate experience, including helping homeowners navigate short sales, pre-foreclosure sales, and cash buyer solutions. We serve all 19 Northern Colorado communities from Fort Collins to Greeley, Loveland to Longmont.',
+          'Our process starts with a confidential, no-obligation consultation. We review your situation, explain the timeline, and outline your options — short sale, pre-foreclosure sale, cash sale, or traditional listing. There is no judgment, no pressure, and no cost to learn what is possible.',
+          'Call (970) 999-1407 or visit our cash home buyers page to start the conversation. The earlier you reach out, the more options you have.',
+        ],
+        relatedLinks: [
+          { title: 'Get Help Now - Free Consultation', href: '/cash-home-buyers/#cash-offer-form', description: 'Confidential' },
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
+        ],
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug) {

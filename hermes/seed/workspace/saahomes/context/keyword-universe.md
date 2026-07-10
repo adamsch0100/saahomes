@@ -161,6 +161,34 @@ For each `{city}` above, monitor these query patterns:
 
 ---
 
+## Foreclosure / short sale queries (Tier B — distressed seller vertical)
+
+**Target pattern:** `foreclosures {city}`, `short sale {city}`, `pre-foreclosure {city}`, `bank owned homes {city}`
+
+| Query cluster | Target page |
+|---------------|-------------|
+| foreclosures Fort Collins | /cash-home-buyers/ + /for-sellers/ |
+| foreclosures Loveland | /cash-home-buyers/ + /for-sellers/ |
+| foreclosures Windsor | /cash-home-buyers/ + /for-sellers/ |
+| foreclosures Greeley | /cash-home-buyers/ + /for-sellers/ |
+| foreclosures Larimer County | /cash-home-buyers/ + /for-sellers/ |
+| foreclosures Weld County | /cash-home-buyers/ + /for-sellers/ |
+| short sale Fort Collins | /cash-home-buyers/ + /for-sellers/ |
+| short sale Loveland | /cash-home-buyers/ + /for-sellers/ |
+| short sale Windsor | /cash-home-buyers/ + /for-sellers/ |
+| short sale Greeley | /cash-home-buyers/ + /for-sellers/ |
+| pre-foreclosure homes Colorado | /cash-home-buyers/ |
+| bank owned homes Fort Collins | /cash-home-buyers/ |
+| REO homes Northern Colorado | /cash-home-buyers/ |
+| distressed property sales Colorado | /cash-home-buyers/ + /for-sellers/ |
+| stop foreclosure Colorado | /cash-home-buyers/ |
+| avoid foreclosure Northern Colorado | /cash-home-buyers/ |
+| Colorado foreclosure timeline | /cash-home-buyers/ |
+| Rule 120 Colorado foreclosure | /cash-home-buyers/ |
+| short sale vs foreclosure Colorado | /cash-home-buyers/ |
+| how to short sale my home Colorado | /cash-home-buyers/ |
+| sell house before foreclosure auction | /cash-home-buyers/ |
+
 ## Growth corridor cluster (prioritize content + links)
 
 **Carbon Valley:** Firestone, Frederick, (+ Dacono if we add later)  
@@ -198,7 +226,7 @@ Cross-link these cities in blog posts and area page "Nearby communities" section
 ## GSC monitoring filters (cron)
 
 When GSC connected, pull weekly for property `https://saahomes.com/`:
-- Queries containing: `fort collins`, `loveland`, `windsor`, `greeley`, `weld`, `larimer`, `northern colorado`, `chfa`, `schwartz`, `saa homes`, `luxury`, `cash buyer`, `we buy`, `sell.*fast`, `cash for homes`, `sell.*cash`
+- Queries containing: `fort collins`, `loveland`, `windsor`, `greeley`, `weld`, `larimer`, `northern colorado`, `chfa`, `schwartz`, `saa homes`, `luxury`, `cash buyer`, `we buy`, `sell.*fast`, `cash for homes`, `sell.*cash`, `foreclosure`, `short sale`, `pre-foreclosure`, `bank owned`, `REO`
 - Pages under `/northern-colorado-areas/`, `/for-sellers/`, `/for-buyers/`, `/chfa-`, `/blog/`, `/luxury-real-estate/`, `/cash-home-buyers/`
 - Alert: position drop ≥8 positions AND impressions ≥10 (week over week)
 - Alert: page indexed → not indexed on any P0 URL
