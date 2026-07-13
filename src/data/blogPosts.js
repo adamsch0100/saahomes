@@ -2536,8 +2536,149 @@ export const blogPosts = [
       },
     ],
   },
+  {
+    slug: 'weld-county-vs-larimer-county-buyer-guide',
+    title: 'Weld County vs Larimer County: Which Northern Colorado County Is Best for Home Buyers in 2026?',
+    excerpt: 'Comparing Weld County and Larimer County — Northern Colorado\'s two largest counties for home buyers. Housing markets, property taxes, school districts, CHFA limits, lifestyle, and how to choose the best county for your family in 2026.',
+    date: '2026-07-13',
+    category: 'Local Guide',
+    image: '/images/Northern Colorado.webp',
+    readTime: '10 min read',
+    keywords: 'weld county vs larimer county, weld county colorado, larimer county colorado, best county in northern colorado, weld county homes for sale, larimer county homes for sale, northern colorado county comparison, greeley vs fort collins, living in weld county colorado, living in larimer county colorado, northern colorado home buyer guide',
+    relatedLinks: [
+      { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Larimer County neighborhoods, schools & market data' },
+      { title: 'Greeley Area Guide', href: '/northern-colorado-areas/greeley/', description: 'Weld County communities & affordability' },
+      { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Larimer County arts & recreation living' },
+      { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Weld-Larimer border family communities' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & CHFA guidance' },
+      { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Grants up to $25K for qualified buyers' },
+      { title: 'Northern Colorado Market Update — July 2026', href: '/blog/northern-colorado-market-update-july-2026/', description: 'Mid-year pricing, inventory & trends' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
+    ],
+    cta: {
+      title: 'Not sure which Northern Colorado county fits your home search?',
+      description: 'Adam and Mandi Schwartz help buyers explore homes in all 19 communities across Weld and Larimer Counties. Whether you are looking at Greeley starter homes, Fort Collins family neighborhoods, or Loveland lake properties, we can help you find the right city and county for your lifestyle and budget.',
+      primaryHref: '/contact/',
+      primaryText: 'Contact SAA Homes',
+      secondaryHref: '/northern-colorado-areas/',
+      secondaryText: 'Explore All 19 Area Guides',
+    },
+    faqs: [
+      { q: 'Which Northern Colorado county is more affordable — Weld or Larimer?', a: 'Weld County is generally more affordable than Larimer County for home buyers. The median home price in Weld County is approximately $430,000, compared to Larimer County\'s median of approximately $565,000 (June 2026). Greeley — the Weld County seat — offers the most affordable entry point at approximately $390,000 median, while Fort Collins in Larimer County sits at approximately $612,000. Weld County also offers lower property tax rates, making monthly homeownership costs more accessible for first-time buyers and families on a budget.' },
+      { q: 'Which county has better schools — Larimer or Weld?', a: 'Both counties offer excellent school options at different scales. Larimer County is home to Poudre School District (Fort Collins area, ranked 13th in Colorado) and Thompson School District (Loveland), both offering strong academic programs, extensive extracurriculars, and choice enrollment options. Weld County features Weld RE-4 School District (Windsor/Severance), one of the highest-rated small districts in Colorado, and Greeley-Evans School District 6, which has invested heavily in facilities and programs in recent years. The right choice depends on whether your family prefers large resource-rich districts (Larimer) or smaller high-performing districts (Weld).' },
+      { q: 'How do property taxes compare between Weld and Larimer counties?', a: 'Property tax rates in Weld County are generally lower than in Larimer County. Weld County\'s mill levy typically ranges from approximately 50-65 mills depending on the specific city and school district, while Larimer County ranges from approximately 65-80 mills. On a $500,000 home, this difference translates to roughly $750-$1,200 less per year in property taxes in Weld County. However, home prices in Larimer County are higher, so the effective tax burden depends on the purchase price. Buyers should factor both price and tax rate into their monthly payment calculations.' },
+      { q: 'What are the CHFA income and purchase price limits for each county?', a: 'CHFA (Colorado Housing and Finance Authority) limits differ between the two counties. In Larimer County, income limits for CHFA programs typically range from $130,000 to $156,000+ for 1-2 person households, with purchase price limits up to approximately $664,000-$812,000 depending on the program and area designation. Weld County generally offers higher income limits — approximately $153,600 to $179,200 for 1-2 person households — reflecting its broader range of targeted areas. Purchase price limits in Weld County are approximately $735,000 for many programs. Both counties offer down payment assistance of up to $25,000 or more through programs like FirstStep and SmartStep.' },
+      { q: 'Which Northern Colorado county is better for commuting to Denver?', a: 'Weld County has an advantage for Denver commuting because several Weld communities — particularly Firestone, Frederick, and Mead — sit closer to the Denver metro area along I-25. Southern Larimer County (Loveland and Berthoud) also offers reasonable commutes of 50-60 minutes to downtown Denver. For buyers who commute to Denver regularly, southern Weld County communities like Firestone and Frederick offer the shortest drive times, typically 35-45 minutes to northern Denver suburbs and 50-60 minutes to downtown. Northern Larimer County communities like Fort Collins require 60-75 minutes to downtown Denver.' },
+    ],
+    sections: [
+      {
+        heading: 'Weld County vs Larimer County: comparing Northern Colorado home markets',
+        paragraphs: [
+          'Weld County and Larimer County are the two anchors of Northern Colorado real estate, yet they offer distinctly different home-buying experiences. Larimer County — anchored by Fort Collins, Loveland, and Wellington — is the region\'s lifestyle and economic hub, with higher home prices, more urban amenities, and proximity to Rocky Mountain National Park. Weld County — led by Greeley, Firestone, Frederick, and Eaton — offers lower home prices, more affordable property taxes, and faster population growth driven by new construction and expanding employment centers.',
+          'For home buyers evaluating these two counties, the choice often comes down to trade-offs between price and lifestyle, commute convenience and community character, school district size and property tax burden. This guide provides a direct comparison of both counties across the factors that matter most: housing market data, property taxes, schools, CHFA financing, commute patterns, and community character.',
+        ],
+      },
+      {
+        heading: 'Housing market comparison: price, inventory, and value',
+        paragraphs: [
+          'The most immediate difference between Weld and Larimer counties is price. Larimer County homes command a significant premium, with a median sale price of approximately $565,000 versus Weld County\'s $430,000 median (June 2026). That $135,000 gap is driven largely by Fort Collins — where the median price reaches $612,000 — compared to Greeley\'s $390,000 median, the most affordable city in either county.',
+          'Inventory dynamics differ meaningfully between the two counties. Larimer County is the tighter market, with approximately 2.5 months of supply (slightly below the balanced market threshold of 4-6 months). Fort Collins and Loveland see well-priced homes under $600,000 typically going under contract within 2-4 weeks. Weld County offers more breathing room for buyers, with approximately 3.5-4 months of supply and more new construction options in communities like Firestone, Frederick, and Severance.',
+          'For first-time buyers and those seeking the best value, Weld County is the clear choice. The $135,000 price gap translates to approximately $800-$950 less per month in mortgage payments at current rates, or the ability to qualify for a larger home at the same monthly payment. Buyers in Larimer County pay a premium for the Fort Collins lifestyle, proximity to CSU, and access to Old Town and Horsetooth Reservoir.',
+        ],
+        list: [
+          'Larimer County: $565K median sale price, 2.5 months supply, most competitive in Fort Collins',
+          'Weld County: $430K median, 3.5-4 months supply, more new construction options',
+          'Price gap: $135K median difference = $800-$950 less monthly payment in Weld County',
+        ],
+      },
+      {
+        heading: 'Property taxes: a meaningful cost difference',
+        paragraphs: [
+          'Property taxes in Weld County are notably lower than in Larimer County, adding another monthly cost advantage for Weld buyers. Weld County mill levies typically run 50-65 mills depending on the city and school district, while Larimer County is in the 65-80 mill range. On a median-priced home in each county, the annual property tax bill in Weld County would be approximately $2,800-$3,600, compared to $4,200-$5,200 in Larimer County.',
+          'This tax difference matters most for long-term homeowners. Over a 10-year period, the property tax savings in Weld County can total $14,000-$20,000. For buyers stretching their budget, the lower tax burden in Weld County provides meaningful monthly relief — roughly $100-$150 less per month in property taxes alone, in addition to the lower mortgage payment from lower home prices.',
+        ],
+        list: [
+          'Larimer County: 65-80 mills | $4,200-$5,200/yr on $565K home',
+          'Weld County: 50-65 mills | $2,800-$3,600/yr on $430K home',
+          '10-year savings in Weld: approximately $14,000-$20,000 in property taxes',
+        ],
+      },
+      {
+        heading: 'Schools and education across both counties',
+        paragraphs: [
+          'Each county offers distinctly different school district landscapes. Larimer County features Poudre School District (PSD), one of Colorado\'s largest and most comprehensive districts, serving over 30,000 students across Fort Collins and surrounding communities. PSD consistently ranks in the top 15-20 Colorado school districts and offers choice enrollment, meaning families can apply for schools outside their boundary area. Thompson School District in Loveland serves approximately 15,000 students with solid academic programs and multiple charter options including Loveland Classical School and New Vision Charter School.',
+          'Weld County school districts tend to be smaller and more localized. Weld RE-4 (Windsor and Severance) is consistently one of the highest-rated districts in Northern Colorado, offering personalized attention and strong community involvement. Greeley-Evans School District 6 — the largest in Weld County — serves approximately 22,000 students and has invested heavily in facilities upgrades, STEM programs, and early college pathways. Smaller Weld districts like Eaton RE-2 and Johnstown RE-5J offer highly personalized education in tight-knit communities.',
+          'For families deciding between the two counties, the choice often comes down to district size and philosophy. Larimer County\'s larger districts offer more resources, more extracurricular options, and choice enrollment. Weld County\'s smaller districts offer personal attention, strong community ties, in several cases top statewide academic rankings. Visiting specific schools within your target attendance area is the best way to decide which environment fits your family.',
+        ],
+        relatedLinks: [
+          { title: 'Windsor Area Guide — Schools', href: '/northern-colorado-areas/windsor/', description: 'Weld RE-4 School District overview' },
+          { title: 'Greeley Area Guide — Schools', href: '/northern-colorado-areas/greeley/', description: 'Greeley-Evans School District 6' },
+          { title: 'Fort Collins Area Guide — Schools', href: '/northern-colorado-areas/fort-collins/', description: 'Poudre School District information' },
+          { title: 'Loveland Area Guide — Schools', href: '/northern-colorado-areas/loveland/', description: 'Thompson School District overview' },
+        ],
+      },
+      {
+        heading: 'Commute and transportation access',
+        paragraphs: [
+          'Commute patterns differ substantially between the two counties, particularly for buyers who work in or regularly visit the Denver metro area. Weld County has a geographic advantage: its southern communities — Firestone, Frederick, and Mead — lie closer to Denver along I-25, offering commute times of approximately 35-45 minutes to northern Denver suburbs and 50-60 minutes to downtown Denver. This proximity makes southern Weld County increasingly popular for Denver-commuting buyers who want more space and lower home prices than what the Denver metro offers.',
+          'Larimer County commutes to Denver are longer. Loveland, the southernmost major Larimer city, sits approximately 50-60 minutes from downtown Denver, while Fort Collins requires 60-75 minutes. However, Larimer County offers stronger local employment options, particularly in Fort Collins — home to Colorado State University, UCHealth Poudre Valley Hospital, Woodward Inc., OtterBox, and numerous tech and manufacturing companies. For buyers who work in Northern Colorado rather than commuting to Denver, Larimer County offers the most diverse local job market.',
+          'For intra-county commuting, both counties are well-connected by I-25 (runs through both), US-34 (connects Loveland to Greeley), and CO-402/CO-392 (east-west connectors). Windsor sits at the Weld-Larimer border, making it a strategic choice for buyers who work in Fort Collins but want Weld County taxes and pricing, or vice versa.',
+        ],
+        list: [
+          'Larimer County: 50-75 min to Denver, strongest local job market in Fort Collins',
+          'Weld County: 35-60 min to Denver (southern communities), shorter commute advantage',
+          'Windsor border location: strategic choice for working in either county',
+        ],
+      },
+      {
+        heading: 'CHFA and first-time buyer programs by county',
+        paragraphs: [
+          'CHFA (Colorado Housing and Finance Authority) offers first-time home buyer programs in both counties, but the specific limits and incentives differ. Larimer County CHFA income limits for 1-2 person households generally range from $130,000 to $156,000, with purchase price limits of approximately $664,000 to $812,000 depending on the specific program and whether the property sits in a targeted or non-targeted area. Several Fort Collins and Loveland neighborhoods qualify as targeted areas, which can mean higher income limits and even allowing non-first-time buyers to participate.',
+          'Weld County CHFA limits tend to be more generous — income limits of approximately $153,600 to $179,200 for 1-2 person households — reflecting the county\'s broader range of targeted area designations. Purchase price limits reach approximately $735,000 for many programs. The combination of lower home prices and higher CHFA limits makes Weld County particularly attractive for first-time buyers using CHFA financing.',
+          'Both counties offer the full suite of CHFA programs including FirstStep (down payment assistance up to $25,000 or more), SmartStep (HFA Preferred with reduced mortgage insurance), and Preferred (conventional financing with CHFA assistance). Buyers in either county should work with a CHFA Participating Lender to confirm exact limits based on their household size, income, and specific property location.',
+        ],
+        relatedLinks: [
+          { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'SmartStep, Preferred, FirstStep & more' },
+          { title: 'CHFA for Northern Colorado Buyers', href: '/blog/chfa-first-time-homebuyer-northern-colorado/', description: 'Fort Collins, Greeley & Larimer County limits' },
+          { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & CHFA guidance' },
+          { title: 'How to Buy a Home in Greeley', href: '/blog/buying-a-home-in-greeley/', description: 'Complete buyer guide for Weld County purchases' },
+          { title: 'How to Buy a Home in Fort Collins', href: '/blog/buying-a-home-in-fort-collins/', description: 'Complete buyer guide for Larimer County purchases' },
+        ],
+      },
+      {
+        heading: 'Lifestyle and community character: county-by-county',
+        paragraphs: [
+          'Larimer County and Weld County offer distinctly different lifestyles that appeal to different buyer types. Larimer County is Northern Colorado\'s lifestyle destination — Fort Collins offers a nationally recognized craft beer scene, Colorado State University events, walkable Old Town, Horsetooth Reservoir recreation, and the nearby gateway to Rocky Mountain National Park via Estes Park. Loveland adds art galleries, sculpture gardens, and lakefront living at Boyd Lake. Larimer County appeals to buyers who want urban energy, outdoor recreation, and cultural amenities.',
+          'Weld County offers a more relaxed, family-oriented lifestyle at a more affordable price point. Greeley is a growing regional hub with its own University of Northern Colorado, Greeley Stampede (Colorado\'s largest outdoor rodeo), and expanding dining and arts scene. Southern Weld communities like Firestone and Frederick offer master-planned neighborhoods with community pools, parks, and trails — ideal for young families seeking suburban comfort. Windsor (on the Weld-Larimer border) combines Weld County pricing with access to Larimer County amenities.',
+          'For buyers who prioritize affordability, space, and new construction over urban amenities, Weld County is the natural choice. For those who want walkable downtowns, craft breweries, cultural events, and mountain proximity, Larimer County commands a premium that many buyers consider worth the cost. The two counties are complementary — each serves different buyer priorities — which is why many Northern Colorado buyers explore both before making a decision.',
+        ],
+        relatedLinks: [
+          { title: 'Fort Collins vs Loveland vs Windsor', href: '/blog/fort-collins-vs-loveland-vs-windsor/', description: 'City comparison for Northern Colorado buyers' },
+          { title: 'Northern Colorado Events Guide 2026', href: '/blog/northern-colorado-events-guide-2026/', description: 'Festivals and community events across both counties' },
+          { title: 'See All 19 Area Guides', href: '/northern-colorado-areas/', description: 'Explore every community in Weld and Larimer Counties' },
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407 to discuss your search' },
+        ],
+      },
+      {
+        heading: 'Making your choice: which county is right for you?',
+        paragraphs: [
+          'Choosing between Weld County and Larimer County ultimately comes down to your budget and lifestyle priorities. If affordability, lower taxes, newer construction, and shorter Denver commutes matter most, Weld County offers the best value in Northern Colorado with a $430,000 median home price, lower mill levies, and expanding communities that still feel suburban and family-oriented.',
+          'If urban amenities, outdoor recreation access, a walkable downtown lifestyle, and top-tier dining and entertainment are worth a higher housing budget, Larimer County delivers an unmatched lifestyle with its $565,000 median — but also stronger local job opportunities, CSU resources, and the cultural and recreational assets that come with Northern Colorado\'s premier city.',
+          'The good news is that you do not have to choose solely on paper. All Weld and Larimer communities are within 30-45 minutes of each other, giving buyers the flexibility to explore neighborhoods across both counties before deciding. Many buyers find that the right home in a specific neighborhood matters more than the county line. SAA Homes serves buyers across all 19 Northern Colorado communities in both counties — so whether you end up in a Fort Collins bungalow, a Greeley starter home, or a Firestone new build, we can help you find the right fit.',
+          'Call (970) 999-1407 to discuss your Northern Colorado home search with Adam or Mandi Schwartz.',
+        ],
+        relatedLinks: [
+          { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Larimer County neighborhoods & market data' },
+          { title: 'Greeley Area Guide', href: '/northern-colorado-areas/greeley/', description: 'Weld County communities & affordability' },
+          { title: 'Loveland Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Larimer County arts & lake living' },
+          { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Weld-Larimer border family lifestyle' },
+          { title: 'See All 19 Area Guides', href: '/northern-colorado-areas/', description: 'Explore Weld and Larimer County communities' },
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407 to discuss your search' },
+        ],
+      },
+    ],
+  },
 ];
-
 export function getBlogPost(slug) {
   return blogPosts.find((post) => post.slug === slug);
 }
