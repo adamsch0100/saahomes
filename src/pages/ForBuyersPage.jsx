@@ -139,7 +139,7 @@ export default function ForBuyersPage() {
               </p>
               <div className="flex flex-col gap-1.5">
                 <a href="/northern-colorado-areas/fort-collins/" className="text-black font-semibold hover:underline">Fort Collins Area Guide →</a>
-                <a href="/northern-colorado-areas/loveland/" className="text-black font-semibold hover:underline">Loveland Area Guide →</a>
+                <a href="/northern-colorado-areas/loveland/" className="text-black font-semibold hover:underline">Loveland, Colorado Area Guide →</a>
                 <a href="/northern-colorado-areas/windsor/" className="text-black font-semibold hover:underline">Windsor Area Guide →</a>
                 <a href="/northern-colorado-areas/greeley/" className="text-black font-semibold hover:underline">Greeley Area Guide →</a>
                 <a href="/northern-colorado-areas/" className="text-sm text-gray-600 font-semibold hover:underline mt-2">View All 19 Communities →</a>
