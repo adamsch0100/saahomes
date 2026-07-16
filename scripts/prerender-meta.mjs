@@ -9,6 +9,34 @@ import { AREA_FAQS } from '../src/data/areaFaqs.js';
 import { BUYER_FAQS, SELLER_FAQS } from '../src/data/buyerSellerFaqs.js';
 import { CHFA_PAGE_CONFIGS, CHFA_PROGRAMS, CHFA_DPA_OPTIONS, CHFA_REQUIREMENTS, CHFA_COUNTY_LIMITS, CHFA_SPECIALTY_PROGRAMS } from '../src/data/chfaData.js';
 
+// FAQ data for pages not covered by existing FAQ data modules
+// Used for GEO — FAQPage schema + visible FAQ body content
+const CASH_BUYER_FAQS = [
+  { q: 'How does selling my home for cash work?',
+    a: 'You submit your property details, receive a no-obligation cash offer within 24 hours, and can close in as little as 7–14 days. No repairs, no showings, no agent commissions. SAA Homes connects you with vetted cash buyers or helps you evaluate whether a traditional listing would net you more.' },
+  { q: 'Will I get less selling for cash vs listing traditionally?',
+    a: 'Cash offers are typically below full market value because the buyer takes on the risk and convenience of an as-is, no-contingency purchase. However, when you factor in avoided repairs, no carrying costs during a 30–60 day listing period, and zero commission, the net difference is often smaller than sellers expect. SAA Homes will show you both paths so you can choose what is right for your situation.' },
+  { q: 'What cities do you cover for cash home buying?',
+    a: 'We serve all of Northern Colorado including Fort Collins, Loveland, Windsor, Greeley, Timnath, Wellington, Berthoud, Johnstown, Severance, Firestone, Frederick, Longmont, Boulder, Eaton, Evans, Milliken, Mead, La Salle, and Niwot. Each area has its own market dynamics and cash buyer demand.' },
+  { q: 'Can SAA Homes help cash buyers find flip properties?',
+    a: 'Yes. SAA Homes works with cash buyers, real estate investors, and house flippers across Northern Colorado. We can set you up with off-market leads, connect you with fix-and-flip opportunities, and help you build a portfolio in all 19 Front Range communities we serve.' },
+  { q: 'Do I have to sell for cash, or can I list with SAA Homes instead?',
+    a: 'Both options are available. Many sellers come to us for a quick cash offer and end up choosing a traditional listing once they see what their home could command on the open market. There is no obligation either way — we will give you honest advice based on your home\'s condition, your timeline, and your financial goals.' },
+];
+
+const LUXURY_FAQS = [
+  { q: 'What qualifies as a luxury home in Northern Colorado?',
+    a: 'In Northern Colorado, luxury homes generally start around $750,000 to $1 million and include premium features such as custom architectural details, high-end finishes, acreage or horse property, golf course or lakefront locations, and exclusive gated communities. Fort Collins west side estates, Windsor lakefront properties, and Loveland foothills ranches are all considered luxury.' },
+  { q: 'What areas in Northern Colorado have luxury properties?',
+    a: 'Luxury homes are concentrated in Fort Collins\' west side and south-central neighborhoods, Windsor\'s golf course communities (RainDance, Pelican Lakes), Loveland\'s Mariana Butte area, Timnath\'s new construction estates, and Greeley\'s west-side executive homes. Horse properties with acreage are found throughout Larimer and Weld counties.' },
+  { q: 'How does SAA Homes market luxury properties differently?',
+    a: 'Our luxury marketing includes professional architectural photography, aerial drone videography, virtual 3D tours, targeted digital advertising to high-net-worth buyers, and exclusive network syndication. We provide white-glove service from pre-listing consultation through closing, with discretion and personalized attention for every seller.' },
+  { q: 'Do you offer private consultations for luxury buyers?',
+    a: 'Yes. We provide confidential one-on-one consultations for luxury buyers, including off-market property access, pre-qualification coordination with specialized lenders, neighborhood and school research, and bespoke search strategies tailored to your lifestyle requirements and timeline.' },
+  { q: 'What is the average price per square foot for luxury homes in Northern Colorado?',
+    a: 'Price per square foot for luxury homes varies significantly by location and property type. Fort Collins west side luxury estates typically range from $350–$500+/sq ft, while newer luxury construction in Windsor and Timnath averages $300–$400/sq ft. Acreage and horse properties vary widely based on land value and improvements.' },
+];
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const distDir = join(__dirname, '../dist');
 const indexPath = join(distDir, 'index.html');
@@ -715,6 +743,52 @@ const MONEY_PAGE_CONTENT = {
       text: 'Contact SAA Homes at (970) 999-1407 for expert buyer and seller representation across all 19 Northern Colorado communities.',
     },
   },
+  '/cash-home-buyers/': {
+    sections: [
+      {
+        heading: 'Sell Your Home Fast for Cash in Northern Colorado',
+        paragraphs: [
+          'If you need to sell your home quickly in Northern Colorado, a cash sale can close in as little as 7-14 days with no repairs, no showings, and no agent commissions. SAA Homes connects sellers with vetted cash buyers or helps you evaluate whether a traditional listing would net you more.',
+          'Cash buyers purchase properties as-is — meaning you do not need to make any repairs, upgrades, or even clean out the property. This makes cash sales ideal for distressed properties, inherited homes, relocations, or any situation where speed and certainty matter more than maximizing the sale price.',
+        ],
+      },
+      {
+        heading: 'Cash Home Buying vs. Traditional Listing',
+        paragraphs: [
+          'Cash offers are typically below full market value because the buyer takes on the risk and convenience of an as-is, no-contingency purchase. However, when you factor in avoided repairs, no carrying costs during a 30-60 day listing period, and zero commission, the net difference is often smaller than sellers expect.',
+          'SAA Homes will show you both paths with a free consultation so you can choose what is right for your situation. We represent sellers across all 19 Northern Colorado communities including Fort Collins, Loveland, Windsor, Greeley, Timnath, Berthoud, and more.',
+        ],
+      },
+    ],
+    cta: {
+      title: 'Get Your Cash Offer Today',
+      text: 'Contact SAA Homes at (970) 999-1407 for a no-obligation cash offer on your Northern Colorado home. Whether you sell for cash or list traditionally, we will help you find the right path forward.',
+    },
+    faqs: CASH_BUYER_FAQS,
+  },
+  '/luxury-real-estate/': {
+    sections: [
+      {
+        heading: 'Luxury Real Estate in Northern Colorado',
+        paragraphs: [
+          'Schwartz and Associates brings white-glove service to every luxury transaction in Northern Colorado. From Fort Collins west side estates to Windsor lakefront properties and Loveland foothills ranches, our team provides discreet, personalized representation for discerning buyers and sellers.',
+          'Our luxury marketing program includes professional architectural photography, aerial drone videography, virtual 3D tours, targeted digital advertising to high-net-worth buyers, and exclusive network syndication. We understand that luxury transactions require a higher level of service, confidentiality, and market expertise.',
+        ],
+      },
+      {
+        heading: 'Luxury Communities We Serve',
+        paragraphs: [
+          'Luxury homes are concentrated in Fort Collins\' west side and south-central neighborhoods, Windsor\'s golf course communities including RainDance and Pelican Lakes, Loveland\'s Mariana Butte area, Timnath\'s new construction estates, and Greeley\'s west-side executive homes. Horse properties with acreage are found throughout Larimer and Weld counties.',
+          'Each community offers a distinct lifestyle. Fort Collins provides craft breweries and CSU culture minutes from mountain views. Windsor offers family-friendly lakefront living. Loveland combines arts and natural beauty. We help each client find the right location, property type, and investment for their lifestyle.',
+        ],
+      },
+    ],
+    cta: {
+      title: 'Schedule a Private Luxury Consultation',
+      text: 'Contact Schwartz and Associates at (970) 999-1407 for a confidential consultation about luxury real estate in Northern Colorado. Whether buying, selling, or both, our white-glove service exceeds expectations.',
+    },
+    faqs: LUXURY_FAQS,
+  },
 };
 
 function matchMoneyPage(path) {
@@ -1025,6 +1099,25 @@ function buildRouteSchemas(route) {
       })),
     });
   }
+
+  // Blog posts with FAQ data – add FAQPage schema for AI answer visibility
+  const blogPost = matchBlogPost(path);
+  if (blogPost && blogPost.faqs && blogPost.faqs.length > 0) {
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: blogPost.faqs.map((faq) => ({
+        '@type': 'Question',
+        name: faq.q,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: faq.a,
+        },
+      })),
+    });
+  }
+
+  // Cash Home Buyers and Luxury pages are handled via MONEY_PAGE_CONTENT faqs above
 
   return schemas;
 }
