@@ -1,0 +1,255 @@
+date,method,url,anchor_text,target_page,keyword_targeted,status
+2026-07-06,Web 2.0 Blog (Medium),medium.com/@saahomes (content ready),SAA Homes,/chfa-down-payment-assistance/,CHFA down payment assistance Colorado + Colorado first time homebuyer,content_ready
+2026-07-06,Web 2.0 Blog (Blogger),blogger.com @saahomes (content ready),Schwartz and Associates,/,Northern Colorado real estate,content_ready
+2026-07-06,Web 2.0 Blog (Medium),medium.com/@saahomes (content ready),Northern Colorado real estate experts,/northern-colorado-areas/fort-collins/,Fort Collins neighborhoods + moving to Fort Collins Colorado,content_ready
+2026-07-06,Web 2.0 Blog (WordPress.com),wordpress.com @saahomes (content ready),SAA Homes,/for-sellers/,sell my home Fort Collins,content_ready
+2026-07-06,Social Profile (About.me),about.me/saahomes (content ready),saahomes.com,/about-us/,Fort Collins Loveland Windsor realtor,content_ready
+2026-07-06,Social Profile (Gravatar),gravatar.com/saahomes (content ready),Schwartz and Associates,/,Northern Colorado real estate,content_ready
+2026-07-06,Document Sharing (SlideShare),slideshare.net/saahomes (content ready),learn more about CHFA programs,/chfa-down-payment-assistance/,CHFA down payment assistance Colorado + down payment help Colorado,content_ready
+2026-07-06,Document Sharing (Scribd),scribd.com/saahomes (content ready),Northern Colorado real estate market,/,Northern Colorado real estate,content_ready
+2026-07-06,Q&A Platform (Quora),quora.com (content ready),SAA Homes' guide,/chfa-schools-to-home/,teacher home loan Colorado,content_ready
+2026-07-06,Q&A Platform (Reddit),reddit.com/r/RealEstate (content ready),Northern Colorado community guides,/northern-colorado-areas/,Northern Colorado real estate,content_ready
+2026-07-06,Local Citation (Yelp),yelp.com (content ready),Schwartz and Associates,/,Fort Collins real estate agent,content_ready
+2026-07-06,Local Citation (Manta),manta.com (content ready),https://saahomes.com,/about-us/,Fort Collins realtor,content_ready
+2026-07-06,HARO/Connectively,helpareporter.com,blocked,/,Colorado real estate HARO queries,blocked_vercel_security_checkpoint
+2026-07-06,Document Sharing (PDF Created),hermes/chfa-guide-summary.pdf,ready for upload,/chfa-down-payment-assistance/,CHFA down payment assistance Colorado,content_ready
+2026-07-06,Document Sharing (SlideShare),slideshare.net,blocked,/,CHFA down payment assistance,blocked_client_challenge
+2026-07-06,Document Sharing (Scribd),scribd.com,blocked,/,Northern Colorado real estate,blocked_login_required
+2026-07-06,Document Sharing (Issuu),issuu.com,blocked,/,Northern Colorado real estate,blocked_403
+2026-07-06,Business Directory (EZlocal),ezlocal.com,submitted_attempted,/about-us/,Fort Collins real estate agent,submitted_error_retry_needed
+2026-07-06,Business Directory (Cylex),cylex.us.com,blocked,/,Northern Colorado real estate,blocked_403
+2026-07-06,Business Directory (CitySquares),citysquares.com,blocked,/,Northern Colorado real estate,blocked_403
+2026-07-06,Business Directory (ShowMeLocal),showmelocal.com,blocked,/,Northern Colorado real estate,blocked_bot_detection
+2026-07-06,Business Directory (Tupalo),tupalo.com,blocked,/,Northern Colorado real estate,blocked_spa_404
+2026-07-06,Business Directory (Bizcommunity),bizcommunity.com,form_accessible,/,Fort Collins real estate agent,needs_manual_submission
+2026-07-06,Q&A Platform (Quora),quora.com,blocked,/,Colorado home buying,blocked_cloudflare_challenge
+2026-07-06,Q&A Platform (Reddit),reddit.com/r/FortCollins,blocked,/,Fort Collins real estate,blocked_empty_response
+2026-07-06,HARO Alternative (SourceBottle),sourcebottle.com,accessible,/,Colorado real estate queries,needs_signup
+2026-07-06,HARO Alternative (Qwoted),qwoted.com,accessible,/,Colorado real estate queries,needs_signup
+2026-07-06,Social Directory (Foursquare),foursquare.com,accessible,/,Fort Collins real estate,needs_login
+2026-07-06,Social Directory (Brownbook),brownbook.net,blocked,/,Northern Colorado real estate,blocked_403
+2026-07-06,Email Outreach,SMTP via Gmail,smtp.gmail.com,/,Colorado real estate blogs,approval_required_not_sent
+2026-07-06,Code Repository (GitHub),https://github.com/adamsch0100/northern-colorado-real-estate-data,SAA Homes,/,Northern Colorado real estate Fort Collins,built
+2026-07-06,Anonymous Blog (Telegraph),https://telegra.ph/Northern-Colorado-Real-Estate-Market-Guide-2026--SAA-Homes-07-06,"SAA Homes, Fort Collins Guide, CHFA Guide, Sellers Guide","/, /northern-colorado-areas/fort-collins/, /chfa-down-payment-assistance/, /for-sellers/",Northern Colorado real estate CHFA down payment,built
+2026-07-06,Anonymous Blog (Telegraph),https://telegra.ph/Colorado-First-Time-Homebuyer-Guide-CHFA-Down-Payment-Assistance--SAA-Homes-07-06,"SAA Homes, CHFA Guide, Fort Collins Guide, About","/chfa-down-payment-assistance/, /chfa-schools-to-home/, /northern-colorado-areas/fort-collins/, /about-us/",Colorado first time homebuyer CHFA down payment,built
+2026-07-06,Web Archive (Archive.org),https://web.archive.org/web/20260706225653/https://saahomes.com/,saahomes.com,/,Northern Colorado real estate,built
+2026-07-06,Web Archive (Archive.org),https://web.archive.org/web/20260706225734/https://saahomes.com/chfa-down-payment-assistance/,CHFA down payment assistance,/chfa-down-payment-assistance/,CHFA Colorado down payment help,built
+2026-07-06,Web Archive (Archive.org),https://web.archive.org/web/20260706225752/https://saahomes.com/northern-colorado-areas/fort-collins/,Fort Collins neighborhoods,/northern-colorado-areas/fort-collins/,Fort Collins real estate neighborhoods,built
+2026-07-06,Web Archive (Archive.org),https://web.archive.org/web/20260706225845/https://saahomes.com/for-sellers/,sell my home Fort Collins,/for-sellers/,sell home Northern Colorado,built
+2026-07-06,Web Archive (Archive.org),https://web.archive.org/web/20260706230512/https://saahomes.com/about-us/,Schwartz and Associates,/about-us/,Fort Collins real estate agent,built
+2026-07-06,Web Archive (Archive.org),https://web.archive.org/web/20260706230720/https://saahomes.com/blog/,Northern Colorado real estate blog,/blog/,Colorado real estate market update,built
+2026-07-06,Web Archive (Archive.org),https://web.archive.org/web/20260706230825/https://saahomes.com/chfa-schools-to-home/,teacher home loan Colorado,/chfa-schools-to-home/,CHFA schools to home program,built
+2026-07-06,Web Archive (Archive.org),https://web.archive.org/web/20260706230843/https://saahomes.com/contact/,contact SAA Homes,/contact/,Fort Collins realtor contact,built
+2026-07-06,Business Directory (BizHwy),https://www.bizhwy.com/,SAA Homes - Schwartz and Associates,/,Fort Collins real estate agent,needs_manual_step2_js_city_select
+2026-07-07,Telegraph Blog,https://telegra.ph/How-to-Sell-Your-Home-in-Fort-Collins-Colorado--2026-Sellers-Guide-07-07,SAA Homes — Schwartz and Associates,/for-sellers/,sell my home Fort Collins,built
+2026-07-07,Telegraph Blog,https://telegra.ph/CHFA-Schools-to-Home--Colorado-Teacher-Home-Loan-Program-Guide-07-07,SAA Homes,/chfa-schools-to-home/,teacher home loan Colorado,built
+2026-07-07,Telegraph Blog,https://telegra.ph/Buying-a-Home-in-Loveland-Colorado--Complete-2026-Guide-07-07,SAA Homes,/northern-colorado-areas/loveland/,Loveland Colorado home buying,built
+2026-07-07,Telegraph Blog,https://telegra.ph/Buying-a-Home-in-Windsor-Colorado--2026-Market-Guide-07-07,SAA Homes,/,Windsor Colorado real estate,built
+2026-07-07,Telegraph Blog,https://telegra.ph/Buying-a-Home-in-Greeley-Colorado--2026-Market-Guide-07-07,SAA Homes,/,Greeley Colorado home buying,built
+2026-07-07,Telegraph Blog,https://telegra.ph/About-SAA-Homes--Northern-Colorado-Real-Estate-Experts-Since-2001-07-07,SAA Homes,/about-us/,Northern Colorado real estate experts,built
+2026-07-07,GitHub Issue,https://github.com/adamsch0100/saahomes/issues/28,SAA Homes — Schwartz and Associates,/,Northern Colorado real estate market data,built
+2026-07-07,GitHub Issue,https://github.com/adamsch0100/saahomes/issues/29,SAA Homes,/,Northern Colorado real estate market July 2026,built
+2026-07-07,GitHub File,https://github.com/adamsch0100/saahomes/blob/main/data/noco-market-data-july-2026.md,SAA Homes — Schwartz and Associates,/,Northern Colorado real estate market data,built
+2026-07-07,GitHub File,https://github.com/adamsch0100/saahomes/blob/main/data/sell-your-home-noco-guide.md,SAA Homes,/for-sellers/,sell home Northern Colorado guide,built
+2026-07-07,Pastebin (Rentry),https://rentry.co/saahomes-noco-market-guide-2026,SAA Homes,/,Northern Colorado real estate guide,built
+2026-07-07,Pastebin (Rentry),https://rentry.co/colorado-chfa-down-payment-help-2026,SAA Homes,/chfa-down-payment-assistance/,CHFA down payment Colorado,built
+2026-07-07,Pastebin (Rentry),https://rentry.co/moving-to-fort-collins-colorado-guide-2026,SAA Homes,/northern-colorado-areas/fort-collins/,moving to Fort Collins Colorado,built
+2026-07-07,Archive.org,https://web.archive.org/web/20260707170346/https://saahomes.com/chfa-schools-to-home/,SAA Homes,/chfa-schools-to-home/,CHFA teacher home loan,built
+2026-07-07,SMTP Outreach,smtp.gmail.com (adam@saahomes.com),SAA Homes,/,Colorado real estate blog outreach,capability_verified
+2026-07-07,Pastebin (Paste.ee),paste.ee,blocked,/,Northern Colorado real estate,blocked_api_key_required
+2026-07-07,npm Registry,npmjs.com,blocked,/,Northern Colorado real estate data,blocked_login_required
+2026-07-07,Archive.org (bulk),web.archive.org,rate_limited,/,additional pages,rate_limited_5_pages_attempted
+2026-07-07,JustPaste.it,justpaste.it,blocked,/,Northern Colorado real estate,blocked_api_404
+2026-07-07,GitHub Repo Update,github.com/adamsch0100/northern-colorado-real-estate-data,blocked,/,repo README update,blocked_token_scope_403
+2026-07-08,Telegraph Blog,https://telegra.ph/Greeley-Colorado-Neighborhood-Guide-2026--SAA-Homes-07-08,SAA Homes,/northern-colorado-areas/,Greeley Colorado neighborhoods real estate,built
+2026-07-08,Telegraph Blog,https://telegra.ph/Best-Time-to-Sell-a-Home-in-Northern-Colorado-2026--SAA-Homes-07-08,SAA Homes,/for-sellers/,best time to sell home Northern Colorado,built
+2026-07-08,Telegraph Blog,https://telegra.ph/CHFA-Schools-to-Home--Colorado-Teacher-Home-Loans-2026--SAA-Homes-07-08,SAA Homes,/chfa-schools-to-home/,CHFA teacher home loan Colorado,built
+2026-07-08,Pastebin (Rentry),https://rentry.co/d3si77uf,SAA Homes,/northern-colorado-areas/loveland/,moving to Loveland Colorado,built
+2026-07-08,Pastebin (Rentry),https://rentry.co/f7672fxv,SAA Homes,/northern-colorado-areas/windsor/,Windsor Colorado real estate guide,built
+2026-07-08,Pastebin (Rentry),https://rentry.co/48qvpzff,SAA Homes,/chfa-down-payment-assistance/,CHFA down payment Colorado,built
+2026-07-08,Pastebin (Rentry),https://rentry.co/6vm99hrt,SAA Homes,/chfa-down-payment-assistance/,Fort Collins first-time homebuyer,built
+2026-07-08,Pastebin (Rentry),https://rentry.co/whave39r,SAA Homes,/northern-colorado-areas/,buy vs rent Northern Colorado,built
+2026-07-08,Pastebin (Rentry),https://rentry.co/vkchqtw4,SAA Homes,/chfa-down-payment-assistance/,Colorado home buying programs 2026,built
+2026-07-08,Anonymous Blog (Write.as),https://write.as/e2cc589rwjche/,SAA Homes,/,Northern Colorado real estate market 2026,built
+2026-07-08,Anonymous Blog (Write.as),https://write.as/0ydv4ehk988xv/,SAA Homes,/northern-colorado-areas/fort-collins/,Fort Collins neighborhood guide 2026,built
+2026-07-08,Anonymous Blog (Write.as),https://write.as/8pyscbpzwnyzq/,SAA Homes,/for-sellers/,sell home Northern Colorado 2026,built
+2026-07-08,Email Outreach,smtp.gmail.com,SAA Homes,/,Colorado real estate blog guest post pitch,sent_recolorado
+2026-07-08,GitLab Snippet,https://gitlab.com/-/snippets (recent),SAA Homes,/,Northern Colorado real estate market data,attempted_auth_unknown
+2026-07-08,Archive.org Save,web.archive.org/save,blocked,/,multiple pages,blocked_timeout_throttled
+2026-07-08,GitHub Gists,api.github.com/gists,blocked,/,market data,blocked_auth_required_401
+2026-07-08,CodePen,codepen.io,blocked,/,market dashboard,blocked_cloudflare_403
+2026-07-08,Pastebin.com,pastebin.com,blocked,/,market guide,blocked_api_key_required
+2026-07-08,BiggerPockets,biggerpockets.com,blocked,/,Colorado real estate forum,blocked_cloudflare
+2026-07-08,Reddit,reddit.com,blocked,/,real estate questions,blocked_403
+2026-07-08,OpenStreetMap,openstreetmap.org,manual_only,/,business listing,needs_manual_interactive
+2026-07-08,Business Directories,hotfrog.com/2findlocal.com,blocked,/,directory submissions,blocked_js_form_yext_redirect
+2026-07-09,Anonymous Blog (Telegraph),https://telegra.ph/Timnath-Colorado-Real-Estate-Market-Guide-2026--SAA-Homes-07-09,"SAA Homes, Timnath Guide",/northern-colorado-areas/timnath/,Timnath Colorado real estate market,built
+2026-07-09,Anonymous Blog (Telegraph),https://telegra.ph/CHFA-Schools-to-Home-Colorado-Teacher-Home-Loan-Program-2026-07-09,"SAA Homes, complete CHFA guide",/chfa-schools-to-home/,Colorado teacher home loan CHFA,built
+2026-07-09,Anonymous Blog (Telegraph),https://telegra.ph/Wellington-Colorado-Real-Estate-2026-Home-Buying-Guide-07-09,"SAA Homes Wellington Guide",/northern-colorado-areas/wellington/,Wellington Colorado real estate,built
+2026-07-09,Anonymous Blog (Telegraph),https://telegra.ph/Colorado-Champions-Home-Loan-Program-Benefits-for-First-Responders-2026-07-09,"Colorado Champions Home Loan Guide — SAA Homes",/colorado-champions-home-loan-program/,Colorado first responder home loan,built
+2026-07-09,Anonymous Blog (Telegraph),https://telegra.ph/How-to-Sell-Your-Home-in-Northern-Colorado-2026-Sellers-Guide-07-09,"SAA Homes Seller Resources",/for-sellers/,sell home Northern Colorado 2026,built
+2026-07-09,Anonymous Blog (Telegraph),https://telegra.ph/About-SAA-Homes--Northern-Colorado-Real-Estate-Experts-Since-2001-07-09,"saahomes.com, Learn more about SAA Homes",/about-us/,Northern Colorado real estate experts,built
+2026-07-09,Anonymous Blog (Telegraph),https://telegra.ph/Complete-Guide-to-Buying-a-Home-in-Northern-Colorado--2026-07-09,"SAA Homes Buyer Resources, Explore all 19 cities",/for-buyers/ and /northern-colorado-areas/,buying home Northern Colorado 2026,built
+2026-07-09,Pastebin (Rentry),https://rentry.co/5vvecya6,"SAA Homes Timnath guide",/northern-colorado-areas/timnath/,Timnath CO real estate,built
+2026-07-09,Pastebin (Rentry),https://rentry.co/xb8kyapc,"SAA Homes Wellington guide",/northern-colorado-areas/wellington/,Wellington CO real estate,built
+2026-07-09,Pastebin (Rentry),https://rentry.co/av3hh54u,"SAA Homes area guide, CHFA programs",/northern-colorado-areas/ and /chfa-down-payment-assistance/,Johnstown Eaton CO home buying,built
+2026-07-09,Pastebin (Rentry),https://rentry.co/chfa-down-payment-assistance-2026,"SAA Homes CHFA guide",/chfa-down-payment-assistance/,CHFA down payment Colorado 2026,built
+2026-07-09,Pastebin (Rentry),https://rentry.co/fort-collins-first-time-homebuyer-2026,"SAA Homes Fort Collins guide",/northern-colorado-areas/fort-collins/,Fort Collins first time homebuyer,built
+2026-07-09,Pastebin (Rentry),https://rentry.co/loveland-co-home-buying-guide-2026,"SAA Homes Loveland guide",/northern-colorado-areas/loveland/,Loveland CO home buying,built
+2026-07-09,Pastebin (Rentry),https://rentry.co/windsor-co-real-estate-guide-2026,"SAA Homes Windsor guide",/northern-colorado-areas/windsor/,Windsor CO real estate,built
+2026-07-09,Document Sharing (DocDroid),docdroid.net,accessible,/,PDF upload,needs_pdf_creation_no_external_pkgs
+2026-07-09,Code Repository (Codeberg),codeberg.org,blocked,/,repo creation,blocked_auth_required
+2026-07-09,Code Repository (GitLab),gitlab.com,blocked,/,snippet creation,blocked_auth_required
+2026-07-09,Social Bookmarking (Diigo),diigo.com,blocked,/,bookmark save,blocked_auth_required
+2026-07-09,Social Bookmarking (Pinboard),pinboard.in,blocked,/,bookmark save,blocked_auth_required
+2026-07-09,Visual Bookmarking (Are.na),are.na,blocked,/,channel creation,blocked_auth_required
+2026-07-09,Anonymous Blog (Write.as),write.as,blocked,/,post creation,blocked_content_moderation
+2026-07-09,Web Archive (Archive.org),web.archive.org,timeout,/,3 new pages,blocked_timeout_rate_limited
+2026-07-09,Free Wiki (Miraheze),miraheze.org,blocked,/,wiki creation,blocked_403
+2026-07-09,Free Wiki (Fandom),fandom.com,blocked,/,wiki page,blocked_403
+2026-07-09,Document Sharing (SpeakerDeck),speakerdeck.com,blocked,/,PDF upload,blocked_404_upload_endpoint
+2026-07-09,Blogging (WordPress.com),wordpress.com,blocked,/,site creation,blocked_oauth_client_id_required
+2026-07-09,Pastebin (0bin),0bin.net,no_json_response,/,paste creation,failed
+2026-07-09,Pastebin (envs.net),envs.net,blocked,/,paste creation,blocked_404
+2026-07-09,Code (GitHub Gist),gist.github.com,blocked,/,gist creation,blocked_auth_required
+2026-07-10,Telegraph Blog,telegra.ph,SAA Homes,/,Northern Colorado real estate,failed_api
+2026-07-10,Telegraph Blog,telegra.ph,SAA Homes,/,Northern Colorado real estate,failed_api
+2026-07-10,Telegraph Blog,telegra.ph,SAA Homes,/,Northern Colorado real estate,failed_api
+2026-07-10,Pastebin (Rentry),rentry.co,SAA Homes,/,Northern Colorado real estate,failed_api
+2026-07-10,Pastebin (Rentry),rentry.co,SAA Homes,/,Northern Colorado real estate,failed_api
+2026-07-10,Pastebin (Rentry),rentry.co,SAA Homes,/,Northern Colorado real estate,failed_api
+2026-07-10,Telegraph Blog,https://telegra.ph/Northern-Colorado-Housing-Market-Fall-2026-Forecast--SAA-Homes-07-10,SAA Homes,/blog/northern-colorado-market-update-july-2026/,Northern Colorado real estate market forecast 2026,built
+2026-07-10,Telegraph Blog,https://telegra.ph/CHFA-Down-Payment-Assistance-Colorado--Complete-2026-Guide-07-10,SAA Homes,/chfa-down-payment-assistance/,CHFA down payment assistance Colorado 2026,built
+2026-07-10,Telegraph Blog,https://telegra.ph/Fort-Collins-Home-Buying-Guide-2026--Neighborhoods-Prices-Tips-07-10,SAA Homes,/blog/buying-a-home-in-fort-collins/,Fort Collins home buying guide neighborhoods,built
+2026-07-10,Telegraph Blog,https://telegra.ph/Best-Neighborhoods-in-Loveland-Colorado-for-Home-Buyers-2026-07-10,SAA Homes,/northern-colorado-areas/loveland/,Loveland Colorado neighborhoods home buyers,built
+2026-07-10,Telegraph Blog,https://telegra.ph/How-to-Sell-Your-Home-in-Northern-Colorado--2026-Seller-Strategy-Guide-07-10,SAA Homes,/for-sellers/,sell home Northern Colorado 2026 guide,built
+2026-07-10,Write.as Blog,https://write.as/yyqiy293me3xt.md,SAA Homes,/blog/northern-colorado-market-update-july-2026/,Northern Colorado real estate market July 2026,built
+2026-07-10,Write.as Blog,https://write.as/glsd0jh018w18.md,SAA Homes,/chfa-down-payment-assistance/,CHFA down payment assistance Colorado,built
+2026-07-10,Write.as Blog,write.as,SAA Homes,/blog/buying-a-home-in-fort-collins/,buying home Fort Collins Colorado guide,failed
+2026-07-10,Write.as Blog,write.as,SAA Homes,/for-sellers/,sell home Northern Colorado 2026,failed
+2026-07-10,Write.as Blog,write.as,SAA Homes,/northern-colorado-areas/,Northern Colorado communities real estate,failed
+2026-07-10,Pastebin (Rentry),rentry.co,SAA Homes,/,Northern Colorado real estate,failed_api
+2026-07-10,Pastebin (JustPaste.it),justpaste.it,SAA Homes,/,Northern Colorado,failed_no_api
+2026-07-10,GitHub Repo,github.com/adamsch0100/northern-colorado-real-estate-data,SAA Homes,/,Northern Colorado real estate data,repo_accessible_no_push_auth
+2026-07-10,Archive.org,web.archive.org,SAA Homes,/for-buyers/,Northern Colorado real estate,failed_The read operation timed out
+2026-07-10,Archive.org,web.archive.org,SAA Homes,/northern-colorado-areas/greeley/,Northern Colorado real estate,failed_The read operation timed out
+2026-07-10,Archive.org,web.archive.org,SAA Homes,/northern-colorado-areas/windsor/,Northern Colorado real estate,failed_The read operation timed out
+2026-07-10,Pastebin (Rentry),https://rentry.co/i9fu479m,SAA Homes,/,Northern Colorado real estate,built
+2026-07-10,Pastebin (Rentry),https://rentry.co/c47bpii6,SAA Homes,/chfa-down-payment-assistance/,CHFA down payment assistance Colorado,built
+2026-07-10,Pastebin (Rentry),https://rentry.co/kvx4o8pw,SAA Homes,/northern-colorado-areas/fort-collins/,Fort Collins neighborhoods real estate,built
+2026-07-10,Write.as Blog,https://write.as/2lj8e3irhk02k.md,SAA Homes,/northern-colorado-areas/,moving to Northern Colorado relocation,built
+2026-07-10,Write.as Blog,https://write.as/5g77xsbcfvgkr.md,SAA Homes,/for-sellers/,best time to sell home Northern Colorado,built
+2026-07-10,GitHub Repo Page,https://github.com/adamsch0100/saahomes/blob/main/data/backlinks/noco-real-estate-guide-2026.md,SAA Homes,/,Northern Colorado real estate guide,built
+2026-07-10,Telegraph Blog,https://telegra.ph/Windsor-Colorado-Real-Estate--2026-Home-Buying-Market-Guide-07-10,SAA Homes,/northern-colorado-areas/windsor/,Windsor Colorado real estate,built
+2026-07-10,Write.as Blog,https://write.as/pbal6xm1o2b5q.md,SAA Homes,/chfa-schools-to-home/,CHFA teacher home loan Colorado,built
+2026-07-10,Write.as Blog,https://write.as/2ibknyh6znk9t.md,SAA Homes,/colorado-champions-home-loan-program/,Colorado first responder home loan,built
+2026-07-13,Telegraph Blog,https://telegra.ph/Best-Schools-in-Windsor-Colorado--A-Realtors-Guide-for-Homebuyers-2026-07-13,SAA Homes — Windsor Colorado real estate experts,/northern-colorado-areas/windsor/,,built
+2026-07-13,Write.as Blog,https://write.as/o3njv4c33k2e1.md,SAA Homes — Windsor Colorado real estate experts,/northern-colorado-areas/windsor/,,built
+2026-07-13,Pastebin (Rentry),https://rentry.co/7233b4q2,SAA Homes — Windsor Colorado real estate experts,/northern-colorado-areas/windsor/,,built
+2026-07-13,Telegraph Blog,https://telegra.ph/Why-Summer-2026-Is-the-Best-Time-to-Sell-Your-Home-in-Northern-Colorado-07-13,SAA Homes — Northern Colorado's trusted seller resource,/for-sellers/,,built
+2026-07-13,Write.as Blog,write.as,SAA Homes — Northern Colorado's trusted seller resource,/for-sellers/,,failed
+2026-07-13,Pastebin (Rentry),https://rentry.co/yiyf5sxr,SAA Homes — Northern Colorado's trusted seller resource,/for-sellers/,,built
+2026-07-13,Telegraph Blog,https://telegra.ph/CHFA-Down-Payment-Assistance-2026--Updated-Program-Guide-for-Colorado-Homebuyers-07-13,SAA Homes — your CHFA program experts in Northern Colorado,/chfa-down-payment-assistance/,,built
+2026-07-13,Write.as Blog,write.as,SAA Homes — your CHFA program experts in Northern Colorado,/chfa-down-payment-assistance/,,failed
+2026-07-13,Pastebin (Rentry),https://rentry.co/vskkpdka,SAA Homes — your CHFA program experts in Northern Colorado,/chfa-down-payment-assistance/,,built
+2026-07-13,Write.as Blog,write.as,SAA Homes — Northern Colorado real estate investment experts,/for-buyers/,,failed
+2026-07-13,Write.as Blog,write.as,SAA Homes — Colorado Champions program specialists,/colorado-champions-home-loan-program/,,failed
+2026-07-13,Write.as Blog,write.as,SAA Homes — Fort Collins real estate experts,/northern-colorado-areas/fort-collins/,,failed
+2026-07-13,HackMD Note,hackmd.io,SAA Homes,/,,failed_auth_or_blocked
+2026-07-13,Pastebin (ix.io),ix.io,SAA Homes,/,,failed
+2026-07-13,Email Outreach,smtp to info@coloradorealestateblog.com,SAA Homes,/,,sent
+2026-07-13,Write.as Blog,https://write.as/m2qy5z4f2uqc7.md,SAA Homes — Northern Colorado seller services,/for-sellers/,,built
+2026-07-13,Write.as Blog,https://write.as/21ih08v7qkbvf.md,SAA Homes — CHFA down payment assistance guide,/chfa-down-payment-assistance/,,built
+2026-07-13,Write.as Blog,write.as,SAA Homes — Northern Colorado investment guide,/for-buyers/,,failed
+2026-07-13,Write.as Blog,write.as,SAA Homes — Colorado Champions program guide,/colorado-champions-home-loan-program/,,failed
+2026-07-13,Write.as Blog,write.as,SAA Homes — Fort Collins HOA guide,/northern-colorado-areas/fort-collins/,,failed
+2026-07-13,Pastebin (dpaste.org),dpaste.org,SAA Homes,/,,failed
+2026-07-13,Pastebin (bpa.st),bpa.st,SAA Homes,/,,failed
+2026-07-13,Archive.org,https://web.archive.org/web/20260713171134/https://saahomes.com/for-buyers/,SAA Homes buyer resources,/for-buyers/,,built
+2026-07-13,Archive.org,https://web.archive.org/web/20260713171229/https://saahomes.com/colorado-champions-home-loan-program/,Colorado Champions program,/colorado-champions-home-loan-program/,,built
+2026-07-13,Email Outreach,smtp to hello@coloradorealestatediaries.com,SAA Homes,/,,sent
+2026-07-13,Telegraph Blog,https://telegra.ph/Colorado-Champions-Home-Loan-Program--First-Responder-Benefits-2026-Guide-07-13,SAA Homes,/,,built
+2026-07-13,Telegraph Blog,https://telegra.ph/Fort-Collins-Homeowners-Associations--Complete-2026-Buyer-Guide-07-13,SAA Homes,/,,built
+2026-07-13,Pastebin (PrivateBin),privatebin.net,SAA Homes,/,,failed
+2026-07-14,Telegraph Blog,https://telegra.ph/Greeley-Colorado-Neighborhood-Guide--Best-Areas-for-Homebuyers-in-2026-07-14,SAA Homes — Greeley Colorado real estate experts,/northern-colorado-areas/greeley/,Greeley Colorado neighborhoods home buying,built
+2026-07-14,Telegraph Blog,https://telegra.ph/Johnstown-and-Milliken-Colorado--2026-Home-Buying-Guide-for-Small-Town-Living-07-14,SAA Homes — Johnstown Milliken real estate guide,/northern-colorado-areas/,Johnstown Milliken Colorado homes for sale 2026,built
+2026-07-14,Telegraph Blog,https://telegra.ph/5-Costly-Mistakes-First-Time-Homebuyers-Make-in-Northern-Colorado--And-How-to-Avoid-Them-07-14,SAA Homes — Northern Colorado buyer resources,/for-buyers/,first time homebuyer mistakes Northern Colorado,built
+2026-07-14,Telegraph Blog,https://telegra.ph/7-Home-Selling-Mistakes-That-Cost-Northern-Colorado-Sellers-Thousands-in-2026-07-14,SAA Homes — expert Northern Colorado seller services,/for-sellers/,home selling mistakes Northern Colorado 2026,built
+2026-07-14,Write.as Blog,write.as,SAA Homes — Greeley Colorado real estate experts,/northern-colorado-areas/greeley/,Greeley Colorado neighborhoods home buying,failed
+2026-07-14,Write.as Blog,write.as,SAA Homes — Northern Colorado buyer resources,/for-buyers/,first time homebuyer mistakes Northern Colorado,failed
+2026-07-14,Write.as Blog,write.as,SAA Homes — expert Northern Colorado seller services,/for-sellers/,home selling mistakes Northern Colorado 2026,failed
+2026-07-14,Pastebin (Rentry),https://rentry.co/q5zrm5wr,SAA Homes — Johnstown Milliken real estate guide,/northern-colorado-areas/,Johnstown Milliken Colorado homes for sale 2026,built
+2026-07-14,Pastebin (Rentry),https://rentry.co/2cymz3na,SAA Homes — Northern Colorado buyer resources,/for-buyers/,first time homebuyer mistakes Northern Colorado,built
+2026-07-14,GitHub Issue,github.com,SAA Homes,/,,failed_no_auth
+2026-07-14,GitHub Issue,github.com,SAA Homes,/,,failed_no_auth
+2026-07-14,Archive.org,https://web.archive.org/web/20260714170547/https://saahomes.com/for-buyers/,SAA Homes buyer resources,/for-buyers/,Northern Colorado home buying,built
+2026-07-14,Archive.org,https://web.archive.org/web/20260714170608/https://saahomes.com/northern-colorado-areas/greeley/,Greeley area guide,/northern-colorado-areas/greeley/,Greeley Colorado real estate,built
+2026-07-14,Archive.org,web.archive.org,Windsor area guide,/northern-colorado-areas/windsor/,Windsor Colorado real estate,"failed:HTTPSConnectionPool(host='web.archive.org', port=443): Read timed out. (read tim"
+2026-07-14,Document Sharing (DocDroid),docdroid.net,SAA Homes — Northern Colorado buyer resources,/for-buyers/,first time homebuyer mistakes Northern Colorado,failed
+2026-07-14,HARO Alternative (SourceBottle),sourcebottle.com,SAA Homes,/,Colorado real estate,accessible_needs_signup
+2026-07-14,Business Directory (LinkCentre),linkcentre.com,SAA Homes,/,,submitted_attempted
+2026-07-14,Business Directory (StartUs),startus.cc,SAA Homes,/,,"failed:HTTPSConnectionPool(host='www.startus.cc', port=443): Max retries exceeded with url: /company/add (Caused by NameResolutionError(""HTTPSConnection(host='www.startus.cc', port=443): Failed to resolve 'www.startus.cc' ([Errno -2] Name or service not known)""))"
+2026-07-14,GitHub Repo Check,github.com/adamsch0100/saahomes,SAA Homes,/,,repo_accessible_read_only
+2026-07-14,Email Outreach,smtp to info@nocostyle.com,SAA Homes,/,,sent
+2026-07-14,Email Outreach,smtp to hello@northfortynews.com,SAA Homes,/,,sent
+2026-07-15,Telegraph Blog,https://telegra.ph/Eaton-Colorado-Real-Estate--Small-Town-Charm-Near-Greeley-2026-Guide-07-15,SAA Homes — Eaton Colorado real estate guide,/northern-colorado-areas/eaton/,,built
+2026-07-15,Telegraph Blog,https://telegra.ph/La-Salle-Colorado-Real-Estate-Guide--Affordable-Living-in-Weld-County-2026-07-15,SAA Homes — La Salle Colorado real estate experts,/northern-colorado-areas/la-salle/,,built
+2026-07-15,Telegraph Blog,https://telegra.ph/Colorado-First-Time-Homebuyer-Programs--Beyond-CHFA-in-2026-07-15,SAA Homes — Colorado first-time homebuyer resource,/chfa-down-payment-assistance/,,built
+2026-07-15,Pastebin (Rentry),https://rentry.co/9a2cu6vk,SAA Homes — Eaton Colorado real estate,/northern-colorado-areas/eaton/,,built
+2026-07-15,Pastebin (Rentry),https://rentry.co/7pfzecsa,SAA Homes — La Salle Colorado guide,/northern-colorado-areas/la-salle/,,built
+2026-07-15,Pastebin (Rentry),https://rentry.co/9zvvphth,SAA Homes — Northern Colorado relocation experts,/northern-colorado-areas/,,built
+2026-07-15,Write.as Blog,write.as,SAA Homes — Eaton Colorado guide,/northern-colorado-areas/eaton/,,failed
+2026-07-15,Write.as Blog,write.as,SAA Homes — La Salle Colorado guide,/northern-colorado-areas/la-salle/,,failed
+2026-07-15,Archive.org,https://web.archive.org/web/20260715170835/https://saahomes.com/northern-colorado-areas/eaton/,SAA Homes Eaton,/northern-colorado-areas/eaton/,,built
+2026-07-15,Archive.org,https://web.archive.org/web/20260715170912/https://saahomes.com/northern-colorado-areas/la-salle/,SAA Homes La Salle,/northern-colorado-areas/la-salle/,,built
+2026-07-15,Archive.org,https://web.archive.org/web/20260715170930/https://saahomes.com/northern-colorado-areas/timnath/,SAA Homes Timnath,/northern-colorado-areas/timnath/,,built
+2026-07-15,Email Outreach,smtp to info@nocostyle.com,SAA Homes,/,,sent
+2026-07-15,Email Outreach,smtp to hello@northfortynews.com,SAA Homes,/,,sent
+2026-07-15,Email Outreach,smtp to hello@coloradorealestatediaries.com,SAA Homes,/,,sent
+2026-07-15,GitHub File,github.com,SAA Homes,/,,failed_no_token
+2026-07-15,HARO Alternative (SourceBottle),sourcebottle.com,SAA Homes,/,,accessible_no_obvious_queries
+2026-07-15,Pastebin (ControlC),controlc.com,SAA Homes,/,,http_403
+2026-07-15,Pastebin (JustPaste.it),justpaste.it,SAA Homes,/,,http_404
+2026-07-15,Free Hosting (Neocities),neocities.org,SAA Homes,/,,create_attempt_404
+2026-07-15,Write.as Blog,https://write.as/2nbq40l3d2478.md,SAA Homes — Eaton Colorado guide,/northern-colorado-areas/eaton/,,built
+2026-07-15,Write.as Blog,https://write.as/e2u9pnjdddzv3.md,SAA Homes — Eaton Colorado guide,/northern-colorado-areas/eaton/,,built
+2026-07-15,GitHub File,https://github.com/adamsch0100/saahomes/blob/main/data/backlinks/weld-county-small-towns-guide-2026.md,SAA Homes — Eaton La Salle guide,/,,built
+2026-07-15,Archive.org,https://web.archive.org/web/20260715181245/https://saahomes.com/northern-colorado-areas/wellington/,SAA Homes Wellington,/northern-colorado-areas/wellington/,wellington Colorado real estate,built
+2026-07-15,Archive.org,https://web.archive.org/web/20260715181327/https://saahomes.com/northern-colorado-areas/johnstown/,SAA Homes Johnstown,/northern-colorado-areas/johnstown/,johnstown Colorado real estate,built
+2026-07-15,Archive.org,https://web.archive.org/web/20260715181440/https://saahomes.com/northern-colorado-areas/milliken/,SAA Homes Milliken,/northern-colorado-areas/milliken/,milliken Colorado real estate,built
+2026-07-15,Archive.org,https://web.archive.org/web/20260715181502/https://saahomes.com/northern-colorado-areas/berthoud/,SAA Homes Berthoud,/northern-colorado-areas/berthoud/,berthoud Colorado real estate,built
+2026-07-15,Archive.org,https://web.archive.org/web/20260715181528/https://saahomes.com/northern-colorado-areas/severance/,SAA Homes Severance,/northern-colorado-areas/severance/,severance Colorado real estate,built
+2026-07-15,Archive.org,https://web.archive.org/web/20260715181245/https://saahomes.com/northern-colorado-areas/wellington/,SAA Homes Wellington,/northern-colorado-areas/wellington/,wellington Colorado real estate,built
+2026-07-15,Archive.org,https://web.archive.org/web/20260715181327/https://saahomes.com/northern-colorado-areas/johnstown/,SAA Homes Johnstown,/northern-colorado-areas/johnstown/,johnstown Colorado real estate,built
+2026-07-15,Archive.org,https://web.archive.org/web/20260715181440/https://saahomes.com/northern-colorado-areas/milliken/,SAA Homes Milliken,/northern-colorado-areas/milliken/,milliken Colorado real estate,built
+2026-07-15,Archive.org,https://web.archive.org/web/20260715181502/https://saahomes.com/northern-colorado-areas/berthoud/,SAA Homes Berthoud,/northern-colorado-areas/berthoud/,berthoud Colorado real estate,built
+2026-07-15,Archive.org,https://web.archive.org/web/20260715181528/https://saahomes.com/northern-colorado-areas/severance/,SAA Homes Severance,/northern-colorado-areas/severance/,severance Colorado real estate,built
+2026-07-15,Document Sharing (DocDroid),docdroid.net,SAA Homes — CHFA down payment guide,/chfa-down-payment-assistance/,CHFA down payment assistance,failed
+2026-07-15,Pastebin (Paste.rs),https://paste.rs/8oonh,SAA Homes — Northern Colorado small towns guide,/northern-colorado-areas/,Northern Colorado small towns real estate,built
+2026-07-15,Blog (Medium),medium.com,SAA Homes,/,Northern Colorado real estate,failed_auth_or_blocked
+2026-07-15,Email Outreach,smtp to editor@coloradohomesmag.com,SAA Homes,/,Colorado real estate blog guest post,sent
+2026-07-15,Email Outreach,smtp to marketing@thegroupinc.com,SAA Homes,/,Colorado real estate blog guest post,sent
+2026-07-15,Email Outreach,smtp to business@coloradoan.com,SAA Homes,/,Colorado real estate blog guest post,sent
+2026-07-15,Notion Page,notion.so,SAA Homes,/,Northern Colorado real estate guide,failed_auth_required
+2026-07-15,OpenStreetMap,openstreetmap.org,SAA Homes — Schwartz and Associates,/about-us/,Fort Collins real estate agent,checked_not_yet_listed
+2026-07-15,GitHub File,github.com/adamsch0100/saahomes/blob/main/data/backlinks/noco-small-towns-market-data-july-2026.md,SAA Homes,/,Northern Colorado real estate market data,pushed
+2026-07-16,Telegraph Blog,https://telegra.ph/Cost-of-Living-Comparison--Northern-Colorado-Cities-2026-07-16,SAA Homes,/northern-colorado-areas/,cost of living Northern Colorado cities comparison 2026,built
+2026-07-16,Telegraph Blog,https://telegra.ph/Northern-Colorado-New-Construction-Communities--2026-Homebuyer-Guide-07-16,SAA Homes,/for-buyers/,Northern Colorado new construction homes 2026,built
+2026-07-16,Telegraph Blog,https://telegra.ph/VA-Home-Loan-Guide-for-Northern-Colorado-Veterans-and-Military-2026-07-16,SAA Homes,/for-buyers/,VA home loan Northern Colorado 2026 guide,built
+2026-07-16,Telegraph Blog,https://telegra.ph/Moving-from-Denver-to-Northern-Colorado--Complete-Relocation-Guide-2026-07-16,SAA Homes,/northern-colorado-areas/,moving from Denver to Northern Colorado relocation guide,built
+2026-07-16,Telegraph Blog,https://telegra.ph/Northern-Colorado-Real-Estate-Investing--Rental-Property-Guide-2026-07-16,SAA Homes,/for-buyers/,Northern Colorado real estate investing rental property 2026,built
+2026-07-16,Pastebin (Rentry),rentry.co,SAA Homes,/,Northern Colorado real estate,failed_api
+2026-07-16,Pastebin (Rentry),rentry.co,SAA Homes,/,Northern Colorado real estate,failed_api
+2026-07-16,Pastebin (Rentry),rentry.co,SAA Homes,/,Northern Colorado real estate,failed_api
+2026-07-16,Write.as Blog,write.as,SAA Homes,/,Northern Colorado real estate,failed_no_response
+2026-07-16,Write.as Blog,write.as,SAA Homes,/,Northern Colorado real estate,failed_no_response
+2026-07-16,Archive.org,https://web.archive.org/web/20260716170717/https://saahomes.com/for-buyers/,SAA Homes buyer resources,/for-buyers/,Northern Colorado home buying,built
+2026-07-16,Archive.org,https://web.archive.org/web/20260716170734/https://saahomes.com/northern-colorado-areas/,SAA Homes area guides,/northern-colorado-areas/,Northern Colorado communities,built
+2026-07-16,Archive.org,web.archive.org,Loveland area guide,/northern-colorado-areas/loveland/,Loveland Colorado real estate,failed_error
+2026-07-16,Paste.rs,https://paste.rs/OACic,SAA Homes,/,Northern Colorado real estate,built
+2026-07-16,Paste.rs,https://paste.rs/mIjoz,SAA Homes,/,Northern Colorado real estate,built
+2026-07-16,Pastebin (Rentry),https://rentry.co/oi7dntes,SAA Homes,/,property tax Northern Colorado 2026,built
+2026-07-16,Pastebin (Rentry),https://rentry.co/k5bbp8f2,SAA Homes,/,Northern Colorado school districts homebuyers 2026,built
+2026-07-16,Pastebin (Rentry),https://rentry.co/oqemd4sp,SAA Homes,/,Northern Colorado condos townhomes 2026,built
+2026-07-16,Write.as Blog,https://write.as/None.md,SAA Homes,/,Northern Colorado real estate investing 2026,built
+2026-07-16,Write.as Blog,https://write.as/None.md,SAA Homes,/,Northern Colorado property taxes 2026,built
