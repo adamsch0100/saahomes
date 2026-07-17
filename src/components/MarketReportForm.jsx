@@ -117,7 +117,7 @@ export default function MarketReportForm({ areaName }) {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-black text-white font-semibold py-3 px-6 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isSubmitting ? 'Submitting...' : 'Get Market Report'}
       </button>
