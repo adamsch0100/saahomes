@@ -175,8 +175,16 @@ const faqs = [
     a: "Yes. CHFA DPA funds can be used toward down payment, closing costs, prepaids, and in some cases principal reduction — depending on the program and lender approval.",
   },
   {
+    q: "What is the difference between CHFA and CHAC in Colorado?",
+    a: "CHFA (Colorado Housing and Finance Authority) and CHAC (Colorado Housing Assistance Corporation) are separate organizations serving Colorado homebuyers. CHFA is the state housing authority that sets program guidelines and provides first mortgage and down payment assistance programs like SmartStep, Preferred, and FirstStep. CHAC primarily offers down payment assistance grants (up to $17,500 in some counties) but does not originate first mortgages — you bring your own first mortgage from any lender. Many buyers compare CHFA vs CHAC to find the best down payment option for their situation. SAA Homes can help Northern Colorado buyers evaluate both programs and connect with lenders who participate in each. Call (970) 999-1407 for guidance.",
+  },
+  {
     q: "Can I combine multiple CHFA programs?",
     a: "Generally no. You typically use one CHFA first mortgage program paired with one DPA option. Specialty programs like Schools To Home and Champions cannot be combined with other CHFA programs. Your lender helps identify the best single program for your situation.",
+  },
+  {
+    q: "What are the CHFA income limits for Colorado in 2026?",
+    a: "CHFA income limits vary by county and household size. For Larimer County (Fort Collins, Loveland) the 2026 non-targeted income limit is approximately $130,000-$156,000 depending on household size, with higher limits in designated targeted areas. Weld County (Greeley, Windsor) limits are approximately $153,600-$179,200. Purchase price limits also apply: up to approximately $664,000-$812,000 in Larimer and $735,000 in Weld County. These limits are updated annually by CHFA. Contact SAA Homes at (970) 999-1407 for current limits specific to your situation.",
   },
   {
     q: "How do I apply for CHFA down payment assistance?",
