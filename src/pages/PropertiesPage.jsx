@@ -4,16 +4,16 @@ import SEO from "../components/SEO";
 import PropertySearchEmbed from "../components/PropertySearchEmbed";
 
 const CITIES = [
-  { name: "Fort Collins", slug: "fort-collins", description: "Colorado State University's home, craft breweries, and mountain views — median ~$612K" },
-  { name: "Loveland", slug: "loveland", description: "Lakefront living, sculpture parks, and easy I-25 access — median ~$507K" },
-  { name: "Windsor", slug: "windsor", description: "Top-rated schools, new construction, Pelican Lakes — median ~$585K" },
-  { name: "Greeley", slug: "greeley", description: "Most affordable entry point, growing job base, UNC — median ~$430K" },
-  { name: "Timnath", slug: "timnath", description: "Newest master-planned communities on the I-25 corridor — median ~$625K" },
-  { name: "Severance", slug: "severance", description: "Small-town feel with new construction — median ~$520K" },
-  { name: "Berthoud", slug: "berthoud", description: "Historic charm at the foot of the mountains — median ~$575K" },
-  { name: "Johnstown", slug: "johnstown", description: "Affordable I-25 corridor access — median ~$495K" },
-  { name: "Wellington", slug: "wellington", description: "Quiet northern Larimer County living — median ~$510K" },
-  { name: "Eaton", slug: "eaton", description: "Weld County small-town value — median ~$450K" },
+  { name: "Fort Collins", slug: "fort-collins", description: "CSU, craft breweries, mountain views", price: "~$612K", label: "Median" },
+  { name: "Loveland", slug: "loveland", description: "Lakefront living, arts scene, I-25 access", price: "~$507K", label: "Median" },
+  { name: "Windsor", slug: "windsor", description: "Top schools, new construction, golf", price: "~$585K", label: "Median" },
+  { name: "Greeley", slug: "greeley", description: "Most affordable, growing job base", price: "~$430K", label: "Median" },
+  { name: "Timnath", slug: "timnath", description: "New master-planned I-25 corridor", price: "~$625K", label: "Median" },
+  { name: "Severance", slug: "severance", description: "Small-town feel, new construction", price: "~$520K", label: "Median" },
+  { name: "Berthoud", slug: "berthoud", description: "Historic charm at the foothills", price: "~$575K", label: "Median" },
+  { name: "Johnstown", slug: "johnstown", description: "Affordable I-25 corridor access", price: "~$495K", label: "Median" },
+  { name: "Wellington", slug: "wellington", description: "Quiet Larimer County living", price: "~$510K", label: "Median" },
+  { name: "Eaton", slug: "eaton", description: "Weld County small-town value", price: "~$450K", label: "Median" },
 ];
 
 export default function PropertiesPage() {
@@ -87,92 +87,101 @@ export default function PropertiesPage() {
         jsonLd={[faqSchema]}
       />
 
-      {/* Visible heading for accessibility and search engines */}
-      <section className="max-w-6xl mx-auto px-4 pt-8 pb-4">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-          {location
-            ? `Homes for Sale in ${location}, Colorado`
-            : "Homes for Sale in Northern Colorado — MLS Search"}
-        </h1>
-        <p className="text-lg text-gray-600 max-w-4xl">
-          {location
-            ? `Browse every active listing in ${location} directly from IRES MLS. Updated in real time — find your perfect home with Schwartz and Associates at SAA Homes.`
-            : "Search every active listing across Fort Collins, Loveland, Windsor, Greeley, Timnath, and all Northern Colorado communities. Data feeds directly from IRES MLS — the same database local real estate agents use. Updated in real time."}
-        </p>
-
-        {/* City quick links */}
-        <div className="flex flex-wrap gap-2 mt-4">
-          {CITIES.map((city) => (
-            <Link
-              key={city.slug}
-              to={`/northern-colorado-areas/${city.slug}/`}
-              className="text-sm bg-gray-100 hover:bg-brand-gold hover:text-white px-3 py-1.5 rounded-full transition-colors text-gray-700"
-            >
-              {city.name}
-            </Link>
-          ))}
+      {/* Hero Section */}
+      <section
+        className="relative min-h-[360px] sm:min-h-[460px] bg-cover bg-center flex items-center justify-center pt-28 sm:pt-32 pb-12"
+        style={{ backgroundImage: "url('/images/buyers-hero.jpg')" }}
+      >
+        <div className="absolute inset-0 bg-black/65"></div>
+        <div className="relative z-10 text-center text-white px-6 max-w-4xl">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-serif leading-tight">
+            {location ? `Homes for Sale in ${location}, Colorado` : "Homes for Sale in Northern Colorado"}
+          </h1>
+          <p className="mt-4 text-lg sm:text-xl text-gray-200 max-w-3xl mx-auto">
+            {location
+              ? `Browse every active listing in ${location} directly from IRES MLS.`
+              : "Search every active listing across Fort Collins, Loveland, Windsor, Greeley, Timnath, and all Northern Colorado communities — direct from IRES MLS."}
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3 justify-center">
+            <a href="#search-tool" className="inline-flex items-center px-6 py-3 bg-[#CFB36E] text-black font-semibold rounded-lg hover:bg-[#bd9f5a] transition-colors">
+              Search Now
+            </a>
+            <a href="#cities" className="inline-flex items-center px-6 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
+              Browse by City
+            </a>
+          </div>
         </div>
       </section>
 
       {/* MLS Search Iframe */}
-      <section className="w-full px-4 pb-4">
-        <div className="max-w-7xl mx-auto border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-          <div className="bg-gray-50 px-4 py-2 border-b border-gray-200 flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-red-400"></span>
-            <span className="w-3 h-3 rounded-full bg-yellow-400"></span>
-            <span className="w-3 h-3 rounded-full bg-green-400"></span>
-            <span className="ml-3 text-sm text-gray-500 font-mono">
-              IRES MLS — Real-time Listings
-            </span>
-          </div>
-          <div className="bg-white" style={{ minHeight: '700px' }}>
-            <PropertySearchEmbed location={location} height="700px" />
+      <section id="search-tool" className="w-full px-4 pt-8 pb-4 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-2xl font-bold text-gray-900 mb-1">Search Northern Colorado MLS Listings</h2>
+          <p className="text-gray-600 mb-4">Use the tool below to filter by city, price, bedrooms, and more. Data updates in real time from IRES MLS.</p>
+          <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm bg-white">
+            <div className="bg-gray-800 px-4 py-2.5 flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-red-400"></span>
+              <span className="w-3 h-3 rounded-full bg-yellow-400"></span>
+              <span className="w-3 h-3 rounded-full bg-green-400"></span>
+              <span className="ml-3 text-sm text-gray-300 font-mono">IRES MLS — Real-time Listings</span>
+            </div>
+            <div style={{ minHeight: '700px' }}>
+              <PropertySearchEmbed location={location} height="700px" />
+            </div>
           </div>
         </div>
       </section>
 
       {/* City-by-city guide */}
-      <section className="max-w-6xl mx-auto px-4 py-12">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Northern Colorado Real Estate by City</h2>
+      <section id="cities" className="max-w-7xl mx-auto px-4 py-16">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Northern Colorado Communities</h2>
         <p className="text-gray-600 mb-8 max-w-3xl">
-          Each Northern Colorado community offers a distinct lifestyle, price point, and market dynamic.
-          Click any city below for a detailed neighborhood guide with schools, market data, and available listings.
+          Each community offers a distinct lifestyle and price point. Click any city below for a detailed
+          neighborhood guide with schools, market data, and available listings.
         </p>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {CITIES.map((city) => (
             <Link
               key={city.slug}
               to={`/northern-colorado-areas/${city.slug}/`}
-              className="block p-5 border border-gray-200 rounded-lg hover:border-brand-gold hover:shadow-md transition-all"
+              className="block p-5 border border-gray-200 rounded-lg hover:border-[#CFB36E] hover:shadow-md transition-all bg-white"
             >
-              <h3 className="font-semibold text-gray-900 text-lg">{city.name}</h3>
-              <p className="text-gray-600 text-sm mt-1">{city.description}</p>
-              <span className="text-brand-gold text-sm font-medium mt-2 inline-block">
-                Browse homes →</span>
+              <h3 className="font-semibold text-gray-900">{city.name}</h3>
+              <p className="text-gray-500 text-sm mt-1 leading-snug">{city.description}</p>
+              <div className="mt-3 flex items-baseline gap-1">
+                <span className="text-lg font-bold text-gray-900">{city.price}</span>
+                <span className="text-xs text-gray-400">{city.label}</span>
+              </div>
+              <span className="text-[#CFB36E] text-sm font-medium mt-2 inline-block hover:underline">
+                Browse homes &rarr;
+              </span>
             </Link>
           ))}
         </div>
       </section>
 
       {/* Buyer resources */}
-      <section className="bg-gray-50 py-12">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Northern Colorado Home Buyer Resources</h2>
+      <section className="bg-gray-50 py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Home Buyer Resources</h2>
           <p className="text-gray-600 mb-8 max-w-3xl">
             Buying a home in Northern Colorado? We've got you covered with expert guides, CHFA programs, and
             personalized support from Adam and Mandi Schwartz.
           </p>
-          <div className="grid md:grid-cols-3 gap-6">
-            <Link to="/for-buyers/" className="block p-5 bg-white border border-gray-200 rounded-lg hover:border-brand-gold transition-all">
-              <h3 className="font-semibold text-gray-900">📖 Complete Buyer Guide</h3>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Link to="/for-buyers/" className="block p-6 bg-white border border-gray-200 rounded-lg hover:border-[#CFB36E] hover:shadow-md transition-all">
+              <div className="text-3xl mb-3">📖</div>
+              <h3 className="font-semibold text-gray-900 text-lg">Complete Buyer Guide</h3>
               <p className="text-gray-600 text-sm mt-2">Step-by-step guide to buying a home in Northern Colorado — from pre-approval to closing.</p>
             </Link>
-            <Link to="/chfa-down-payment-assistance/" className="block p-5 bg-white border border-gray-200 rounded-lg hover:border-brand-gold transition-all">
-              <h3 className="font-semibold text-gray-900">💰 CHFA Down Payment Help</h3>
+            <Link to="/chfa-down-payment-assistance/" className="block p-6 bg-white border border-gray-200 rounded-lg hover:border-[#CFB36E] hover:shadow-md transition-all">
+              <div className="text-3xl mb-3">💰</div>
+              <h3 className="font-semibold text-gray-900 text-lg">CHFA Down Payment Help</h3>
               <p className="text-gray-600 text-sm mt-2">Up to $25,000+ in down payment assistance for qualified Northern Colorado buyers.</p>
             </Link>
-            <Link to="/contact/" className="block p-5 bg-white border border-gray-200 rounded-lg hover:border-brand-gold transition-all">
-              <h3 className="font-semibold text-gray-900">📞 Talk to an Agent</h3>
+            <Link to="/contact/" className="block p-6 bg-white border border-gray-200 rounded-lg hover:border-[#CFB36E] hover:shadow-md transition-all">
+              <div className="text-3xl mb-3">📞</div>
+              <h3 className="font-semibold text-gray-900 text-lg">Talk to an Agent</h3>
               <p className="text-gray-600 text-sm mt-2">Call (970) 999-1407 for a free consultation with Adam or Mandi Schwartz.</p>
             </Link>
           </div>
@@ -180,35 +189,34 @@ export default function PropertiesPage() {
       </section>
 
       {/* SEO body text */}
-      <section className="max-w-4xl mx-auto px-4 py-12 text-gray-700 leading-relaxed">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">About This Northern Colorado MLS Property Search</h2>
+      <section className="max-w-4xl mx-auto px-4 py-16 text-gray-700 leading-relaxed">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">About This Northern Colorado MLS Property Search</h2>
         <p className="mb-4">
-          The property search tool above connects directly to IRES MLS — the same multiple listing service that
+          The property search tool on this page connects directly to <strong>IRES MLS</strong> — the same multiple listing service that
           real estate agents across Northern Colorado use to list and find homes. This means you are seeing the
           most accurate, up-to-date listing information available anywhere, including properties that may not
           appear on Zillow or Realtor.com for several hours.
         </p>
         <p className="mb-4">
-          SAA Homes (Schwartz and Associates) serves home buyers and sellers across all of Northern Colorado,
-          including <Link to="/northern-colorado-areas/fort-collins/" className="text-brand-gold hover:underline">Fort Collins</Link>,
-          <Link to="/northern-colorado-areas/loveland/" className="text-brand-gold hover:underline"> Loveland</Link>,
-          <Link to="/northern-colorado-areas/windsor/" className="text-brand-gold hover:underline"> Windsor</Link>,
-          <Link to="/northern-colorado-areas/greeley/" className="text-brand-gold hover:underline"> Greeley</Link>,
-          <Link to="/northern-colorado-areas/timnath/" className="text-brand-gold hover:underline"> Timnath</Link>, and all surrounding communities.
+          <strong>SAA Homes (Schwartz and Associates)</strong> serves home buyers and sellers across all of Northern Colorado,
+          including{" "}
+          <Link to="/northern-colorado-areas/fort-collins/" className="text-[#CFB36E] hover:underline">Fort Collins</Link>,{" "}
+          <Link to="/northern-colorado-areas/loveland/" className="text-[#CFB36E] hover:underline">Loveland</Link>,{" "}
+          <Link to="/northern-colorado-areas/windsor/" className="text-[#CFB36E] hover:underline">Windsor</Link>,{" "}
+          <Link to="/northern-colorado-areas/greeley/" className="text-[#CFB36E] hover:underline">Greeley</Link>,{" "}
+          <Link to="/northern-colorado-areas/timnath/" className="text-[#CFB36E] hover:underline">Timnath</Link>, and all surrounding communities.
           Whether you are searching for a starter home, a luxury estate, a lakefront property, or a new-build
           in a master-planned community, our team has the local expertise to guide you.
         </p>
         <p>
           Call <strong className="text-gray-900">(970) 999-1407</strong> or visit our{" "}
-          <Link to="/contact/" className="text-brand-gold hover:underline">contact page</Link> to schedule a
-          confidential consultation with Adam or Mandi Schwartz. With over 20 years of combined experience
-          in Northern Colorado real estate, we help buyers and sellers achieve their goals with integrity,
-          market insight, and world-class service.
+          <Link to="/contact/" className="text-[#CFB36E] hover:underline">contact page</Link> to schedule a
+          confidential consultation with Adam or Mandi Schwartz.
         </p>
       </section>
 
       {/* Disclaimer */}
-      <section className="max-w-4xl mx-auto px-4 pb-12">
+      <section className="max-w-4xl mx-auto px-4 pb-16">
         <p className="text-xs text-gray-400 leading-relaxed">
           IDX information is provided exclusively for personal, non-commercial use and may not be used for
           any purpose other than to identify prospective properties consumers may be interested in purchasing.
