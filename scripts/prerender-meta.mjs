@@ -11,6 +11,18 @@ import { CHFA_PAGE_CONFIGS, CHFA_PROGRAMS, CHFA_DPA_OPTIONS, CHFA_REQUIREMENTS, 
 
 // FAQ data for pages not covered by existing FAQ data modules
 // Used for GEO — FAQPage schema + visible FAQ body content
+const PROPERTIES_FAQS = [
+  { q: 'How can I search for homes for sale in Northern Colorado?',
+    a: 'Use the MLS search tool on this page to browse all active listings across Northern Colorado. You can filter by city (Fort Collins, Loveland, Windsor, Greeley, Timnath, and more), price range, bedrooms, property type, and other features. The data comes directly from IRES MLS — the same database local real estate agents use — and updates in real time.' },
+  { q: 'What is the average home price in Northern Colorado?',
+    a: 'Northern Colorado home prices vary significantly by city. As of mid-2026, the median home price in Fort Collins is approximately $612,000, Loveland around $507,000, Windsor near $585,000, and Greeley at roughly $430,000. Newer communities like Timnath and Severance range from $520,000 to $625,000. Contact SAA Homes at (970) 999-1407 for current market data.' },
+  { q: 'Which Northern Colorado city is best for home buyers?',
+    a: 'The best city depends on your budget, commute needs, and lifestyle preferences. Fort Collins offers the most amenities and job opportunities with CSU and UCHealth. Loveland provides lakefront living at a lower cost. Windsor has top-rated schools and family neighborhoods. Greeley offers the most affordable entry point for first-time buyers. Timnath features brand-new construction. Contact Schwartz and Associates for personalized advice.' },
+  { q: 'Does SAA Homes help with CHFA down payment assistance?',
+    a: 'Yes. Schwartz and Associates helps Northern Colorado buyers navigate CHFA down payment assistance programs including FirstStep, SmartStep, Preferred, Schools To Home for educators, and the Colorado Champions program for first responders and veterans. Call (970) 999-1407 to speak with Adam or Mandi Schwartz about your eligibility.' },
+  { q: 'How often are the MLS listings on this page updated?',
+    a: 'The property search on this page is powered by IRES MLS and updates in real time. As soon as a listing is added, updated, or goes under contract in the MLS, it appears here. For the most accurate and current information, use the MLS search tool above or call SAA Homes at (970) 999-1407.' },
+];
 const CASH_BUYER_FAQS = [
   { q: 'How does selling my home for cash work?',
     a: 'You submit your property details, receive a no-obligation cash offer within 24 hours, and can close in as little as 7–14 days. No repairs, no showings, no agent commissions. SAA Homes connects you with vetted cash buyers or helps you evaluate whether a traditional listing would net you more.' },
@@ -691,6 +703,7 @@ const MONEY_PAGE_CONTENT = {
       title: 'Need Help Finding Your Perfect Home?',
       text: 'Contact SAA Homes at (970) 999-1407 for personalized home search assistance. Let our local experts help you find the right property in the right Northern Colorado neighborhood.',
     },
+    faqs: PROPERTIES_FAQS,
   },
   '/mortgage-calculator/': {
     sections: [
