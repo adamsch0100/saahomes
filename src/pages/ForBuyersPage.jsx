@@ -249,7 +249,7 @@ export default function ForBuyersPage() {
 
       {/* CTA Section */}
       <section className="py-16 px-6 bg-black text-white">
-        <div className="max-w-4xl mx-auto text-center -mt-8 mb-[20px]">
+        <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4">Ready to Find Your Dream Home?</h2>
           <p className="text-xl mb-8">
             Let's start your home buying journey together. Contact us today for a free consultation.
