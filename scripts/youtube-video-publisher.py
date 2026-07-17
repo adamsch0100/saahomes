@@ -1329,10 +1329,31 @@ def build_neighborhood_slides(neighborhood, renderer):
     return slides
 
 
+def get_attribution_for_slug(slug):
+    """
+    Read music manifest and find the CC-BY attribution block for a given slug.
+    Returns None if no matching track or manifest missing.
+    Every track in /seed/assets/music/ requires attribution in the video description.
+    """
+    manifest_path = "/seed/assets/music/manifest.json"
+    if not os.path.exists(manifest_path):
+        return None
+    try:
+        with open(manifest_path) as f:
+            manifest = json.load(f)
+        for track in manifest.get("tracks", []):
+            if track.get("assigned_slug") == slug:
+                return track.get("attribution_block")
+    except Exception:
+        pass
+    return None
+
+
 def build_description(post, video_url=""):
     """
     Build a YouTube description with links back to the source.
     URL is placed FIRST so it's visible in the collapsed view.
+    Includes CC-BY music attribution when applicable.
     """
     title = post.get("title", "Northern Colorado Real Estate")
     excerpt = post.get("excerpt", "")
@@ -1369,6 +1390,16 @@ def build_description(post, video_url=""):
         "#NorthernColoradoRealEstate #FortCollins #Loveland #Windsor #Greeley "
         "#ColoradoRealEstate #SAAHomes #SchwartzAndAssociates",
     ]
+
+    # Append CC-BY music attribution if available
+    attribution = get_attribution_for_slug(slug)
+    if attribution:
+        lines.extend([
+            "",
+            "───",
+            "",
+            attribution,
+        ])
 
     return "\n".join(lines)
 
