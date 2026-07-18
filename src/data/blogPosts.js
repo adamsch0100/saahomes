@@ -3107,6 +3107,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/Northern Colorado.webp',
     readTime: '10 min read',
+    youtubeId: '7O8zsioIejY',
     keywords: 'is windsor colorado expensive to live, windsor colorado cost of living 2026, windsor co real estate 2026, windsor colorado homes for sale, why move to windsor colorado, windsor colorado snow, windsor colorado schools, windsor co median home price, living in windsor colorado pros and cons, windsor colorado population 2026, windsor colorado housing market 2026, windsor colorado vs fort collins cost of living, northern colorado family communities',
     relatedLinks: [
       { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Neighborhoods, schools & market data' },
