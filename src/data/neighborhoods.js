@@ -561,6 +561,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.555', longitude: '-105.07' },
     metaDescription: 'Spring Creek Fort Collins real estate - central location along Spring Creek Trail with mid-century homes and access to City Park. SAA Homes.',
     keywords: 'Spring Creek Fort Collins, Spring Creek Trail homes, central Fort Collins real estate, mid-century homes Fort Collins',
+    youtubeId: 'TdpS4ozn8jU',
     neighborhoodHighlights: [
       { title: 'Trail access', description: 'Spring Creek Trail provides miles of paved pathways for walking, running, and biking right outside your door.' },
       { title: 'Central location', description: 'Minutes from Old Town, CSU, and south Fort Collins shopping - one of the most central neighborhoods.' },
@@ -1121,6 +1122,7 @@ export const neighborhoods = [
       'Downtown Loveland real estate guide — historic bungalows, artist lofts, and townhomes in the heart of Loveland\'s vibrant arts district. Expert local agents from SAA Homes.',
     keywords:
       'Downtown Loveland real estate, Downtown Loveland homes, Loveland arts district, Fourth Street Loveland, historic Loveland homes, Loveland bungalows, walkable Loveland neighborhoods',
+    youtubeId: 'r3HRpCucY4w',
     neighborhoodHighlights: [
       { title: 'Arts & culture', description: 'Home to Chapungu Sculpture Park, the Loveland Museum, and over a dozen art galleries within walking distance.' },
       { title: 'Walkable lifestyle', description: 'Walk Score of 78 — errands, dining, and entertainment accessible without a car.' },
@@ -1167,6 +1169,7 @@ export const neighborhoods = [
       'Centerra Loveland real estate guide — master-planned lakefront and golf course homes near the Promenade Shops. New construction, patio homes, and luxury properties from SAA Homes.',
     keywords:
       'Centerra Loveland homes, Centerra real estate, Promenade Shops at Centerra, Mariana Butte Loveland, The Lakes at Centerra, Southwest Loveland homes, master-planned community Loveland',
+    youtubeId: '7IrgoU8_y8c',
     neighborhoodHighlights: [
       { title: 'Shopping destination', description: 'The Promenade Shops at Centerra features 60+ retailers, restaurants, and entertainment venues.' },
       { title: 'Lake & golf living', description: 'Choose from lakefront homes with private docks, golf course lots at Mariana Butte, or low-maintenance patio homes.' },
