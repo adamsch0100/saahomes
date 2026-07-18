@@ -2800,6 +2800,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Northern Colorado.webp',
     readTime: '9 min read',
+    youtubeId: 'HksZd6e34AU',
     keywords: 'luxury real estate Northern Colorado, luxury homes Fort Collins, luxury realtor Fort Collins, luxury properties Windsor CO, luxury homes for sale Greeley, high-end real estate Loveland, million dollar homes Fort Collins, luxury real estate agent Northern Colorado, custom homes Northern Colorado, luxury home buying guide Colorado',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Luxury neighborhoods & homes for sale' },
