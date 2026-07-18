@@ -274,8 +274,7 @@ export const blogPosts = [
     excerpt: 'Local guide to CHFA income limits, purchase price caps, and down payment assistance for buyers in Larimer County, Weld County, and across Northern Colorado.',
     date: '2026-06-22',
     category: 'CHFA & Homebuyer Programs',
-    image: '/images/Fort-Collins-CO-Area-Guide.jpg',
-    readTime: '10 min read',
+    image: '/images/Fort-Collins-COyoutubeId: 'uKMeLblu4UQ'adTime: '10 min read',
     youtubeId: 'K3NkQWuxTes',
     keywords: 'CHFA Fort Collins, CHFA Greeley, Larimer County first time home buyer, Weld County down payment assistance, Northern Colorado CHFA income limits, Loveland CHFA',
     relatedLinks: [
