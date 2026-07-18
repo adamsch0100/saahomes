@@ -2897,6 +2897,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Fort-Collins-CO-Area-Guide.jpg',
     readTime: '8 min read',
+    youtubeId: 'xUMU8alOx18',
     keywords: 'Fort Collins luxury neighborhoods, luxury homes Fort Collins, million dollar homes Fort Collins, gated communities Fort Collins, luxury realtor Fort Collins, custom homes Fort Collins, Fort Collins estate properties, luxury neighborhoods Fort Collins Colorado',
     relatedLinks: [
       { title: 'Luxury Home Buying Guide NC', href: '/blog/luxury-home-buying-guide-northern-colorado/', description: 'Complete luxury real estate guide for Northern Colorado' },
