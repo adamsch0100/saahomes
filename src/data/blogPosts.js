@@ -2445,6 +2445,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/Northern Colorado.webp',
     readTime: '8 min read',
+    youtubeId: 'ZQ8-NLEQU78',
     relatedLinks: [
       { title: 'Cash Home Buyers & Foreclosure Help', href: '/cash-home-buyers/', description: 'Free consultation for distressed sellers' },
       { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Full-service listing & short sale expertise' },
