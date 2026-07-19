@@ -1201,6 +1201,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.408', longitude: '-105.02' },
     metaDescription: 'Mariana Butte Loveland real estate - golf course homes near Centerra in southwest Loveland. Patio homes, single-family, and townhomes. SAA Homes.',
     keywords: 'Mariana Butte Loveland, Mariana Butte golf course homes, southwest Loveland real estate, patio homes Loveland, golf course community Loveland, Centerra area homes',
+    youtubeId: '-usDDixp3aQ',
     neighborhoodHighlights: [
       { title: 'Golf course living', description: 'Live on or overlooking the Mariana Butte 18-hole public golf course - one of Northern Colorado most scenic courses.' },
       { title: 'Centerra proximity', description: 'Minutes from the Promenade Shops at Centerra, Medical Center of the Rockies, and I-25.' },
@@ -1232,6 +1233,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.4', longitude: '-105.01' },
     metaDescription: 'High Plains Loveland real estate - newer homes with mountain views in southwest Loveland near Centerra and I-25. SAA Homes.',
     keywords: 'High Plains Loveland, High Plains subdivision, southwest Loveland homes, Centerra area real estate, new construction Loveland, mountain view homes Loveland',
+    youtubeId: 'czf09j5ZOFE',
     neighborhoodHighlights: [
       { title: 'Newer construction', description: 'Most homes built after 2005 with modern open floor plans, energy-efficient features, and contemporary finishes.' },
       { title: 'Community pool', description: 'The neighborhood pool and parks make High Plains a popular choice for families.' },
@@ -1263,6 +1265,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.42', longitude: '-105.03' },
     metaDescription: 'Lake Loveland real estate - lakefront homes, mid-century ranches, and newer subdivisions around Loveland premier lake. SAA Homes.',
     keywords: 'Lake Loveland homes, Lake Loveland real estate, north Loveland homes, lakefront Loveland, Lake Loveland trail, Loveland Colorado lake living',
+    youtubeId: '3Cp9vPOuHYc',
     neighborhoodHighlights: [
       { title: 'Lakefront lifestyle', description: '450-acre Lake Loveland offers fishing, boating, paddleboarding, and a 3-mile paved trail around the shoreline.' },
       { title: 'Diverse housing', description: 'Find everything from mid-century ranches to lakefront estates and newer subdivisions.' },
