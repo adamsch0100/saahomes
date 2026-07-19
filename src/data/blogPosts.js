@@ -2993,6 +2993,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Buyers-img-2.jpg',
     readTime: '12 min read',
+    youtubeId: 'WZTl_uc1DA0',
     keywords: 'first time home buyer Colorado 2026, Colorado first time home buyer programs, down payment assistance Colorado, CHFA Colorado first home, buy first home Colorado, first home buyer tips Colorado, Colorado home buying guide, Fort Collins first time home buyer, Northern Colorado real estate first time buyer, Colorado mortgage pre approval, first time buyer Colorado grants, Colorado housing assistance first time buyer',
     relatedLinks: [
       { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & CHFA guidance' },
