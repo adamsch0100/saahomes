@@ -2341,6 +2341,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/Northern Colorado.webp',
     readTime: '7 min read',
+    youtubeId: 'ppibH9GQHkg',
     relatedLinks: [
       { title: 'Cash Home Buyers Hub', href: '/cash-home-buyers/', description: 'Sell for cash or invest in Northern Colorado' },
       { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Full-service listing & marketing' },
