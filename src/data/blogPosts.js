@@ -2544,6 +2544,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/Northern Colorado.webp',
     readTime: '10 min read',
+    youtubeId: 'DMuD6WlxufQ',
     keywords: 'weld county vs larimer county, weld county colorado, larimer county colorado, best county in northern colorado, weld county homes for sale, larimer county homes for sale, northern colorado county comparison, greeley vs fort collins, living in weld county colorado, living in larimer county colorado, northern colorado home buyer guide',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Larimer County neighborhoods, schools & market data' },
