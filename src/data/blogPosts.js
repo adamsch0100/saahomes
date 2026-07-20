@@ -3254,7 +3254,134 @@ export const blogPosts = [
       },
     ],
   },
+  {
+    slug: 'best-neighborhoods-fort-collins-2026',
+    title: 'Best Neighborhoods in Fort Collins, Colorado 2026: A Complete Guide',
+    excerpt: 'From Old Town to Waterglen, discover Fort Collins best neighborhoods for every buyer — rankings, price ranges, schools, and lifestyle for each of our 30+ Fort Collins neighborhoods.',
+    date: '2026-07-20',
+    category: 'Buyer Tips',
+    image: '/images/Fort-Collins-CO-Area-Guide.jpg',
+    readTime: '12 min read',
+    relatedLinks: [
+      { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & homes for sale' },
+      { title: 'Fort Collins Homes for Sale', href: '/properties/?location=Fort Collins, CO', description: 'Search current Fort Collins listings' },
+      { title: 'Fort Collins vs Loveland vs Windsor Comparison', href: '/blog/fort-collins-vs-loveland-vs-windsor/', description: 'Side-by-side city comparison for buyers' },
+      { title: 'Fort Collins Luxury Neighborhoods Guide', href: '/blog/fort-collins-luxury-neighborhoods-guide/', description: 'Premium homes and exclusive communities' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation' },
+      { title: 'Buying a Home in Fort Collins', href: '/blog/buying-a-home-in-fort-collins/', description: 'Complete buyer guide for Fort Collins' },
+    ],
+    sections: [
+      {
+        heading: 'Why Fort Collins has the best neighborhoods in Northern Colorado',
+        paragraphs: [
+          'Fort Collins consistently ranks as one of the best places to live in Colorado — and for good reason. With over 30 distinct neighborhoods, the city offers everything from historic Victorian districts with tree-lined streets to brand-new master-planned communities with resort-style amenities.',
+          'What makes Fort Collins neighborhoods special is their diversity. Old Town delivers walkability, breweries, and century-old architecture. Midtown offers central convenience and established family streets. South Fort Collins and the Waterglen area provide newer construction near parks and trails. Northwest Fort Collins gives you foothills access, larger lots, and views of Horsetooth Mountain.',
+          'This guide covers every major Fort Collins neighborhood — real names, real data, and honest pros and cons. Use it to narrow your search, then visit our full Fort Collins Area Guide for homes currently for sale in each neighborhood.',
+        ],
+      },
+      {
+        heading: 'Old Town — Fort Collins most walkable neighborhood',
+        paragraphs: [
+          'Old Town Fort Collins is the heart of the city — a vibrant, pedestrian-friendly district where Victorian and Craftsman homes line tree-shaded streets steps from Colorado finest craft brewery block. If walkability is your priority, no neighborhood in Northern Colorado compares.',
+          'Home styles range from restored Queen Anne Victorians (1890-1920) to Craftsman bungalows and modern infill townhomes. Price range: $500K to $1.2M+. Old Town commands a premium for its location.',
+          'Best for: professionals, empty nesters, and anyone who wants a true walkable urban lifestyle in a mid-sized Colorado city.',
+        ],
+        relatedLinks: [
+          { title: 'Old Town Fort Collins Neighborhood Guide', href: '/northern-colorado-areas/fort-collins/old-town/', description: 'Full Old Town details, schools and pricing' },
+        ],
+      },
+      {
+        heading: 'Midtown — Central convenience at the best value',
+        paragraphs: [
+          'Midtown Fort Collins sits between Old Town and South Fort Collins, centered along College Avenue. This is Fort Collins most accessible neighborhood — close to everything, with a mix of established ranch homes and newer townhome developments at more moderate price points.',
+          'Midtown features ranch, split-level, and mid-century homes built primarily in the 1960s-1980s, making it one of the most affordable inner-ring neighborhoods. Price range: $400K to $700K.',
+          'Best for: first-time buyers, families seeking central location without Old Town pricing, and investors looking for established neighborhoods with good rental demand.',
+        ],
+        relatedLinks: [
+          { title: 'Midtown Fort Collins Guide', href: '/northern-colorado-areas/fort-collins/midtown/', description: 'Midtown homes, schools and market data' },
+        ],
+      },
+      {
+        heading: 'South Fort Collins — New construction and family favorites',
+        paragraphs: [
+          'South Fort Collins has seen the most new development of any Fort Collins area over the past decade. Neighborhoods like Waterglen, Tapestry, and Trailhead offer modern floor plans, community pools, parks, and proximity to the Fossil Creek Reservoir natural area.',
+          'Home styles are predominantly contemporary and modern farmhouse. Price range: $500K to $900K+ for single-family homes. Townhomes and patio homes available from $350K.',
+          'Best for: families seeking newer construction, buyers who want move-in-ready homes, and those who commute to Denver or Loveland via I-25.',
+        ],
+        relatedLinks: [
+          { title: 'Waterglen Fort Collins Guide', href: '/northern-colorado-areas/fort-collins/waterglen-fc/', description: 'South Fort Collins master-planned community' },
+          { title: 'Tapestry Fort Collins Guide', href: '/northern-colorado-areas/fort-collins/tapestry/', description: 'New construction homes in South Fort Collins' },
+        ],
+      },
+      {
+        heading: 'Northwest Fort Collins — Foothills living with mountain views',
+        paragraphs: [
+          'Northwest Fort Collins is where the city meets the foothills. This area offers larger lots, custom homes, and panoramic views of Horsetooth Mountain and Longs Peak.',
+          'Home styles range from custom contemporary estates to mid-century ranches on acreage. Price range: $600K to $1.5M+. Lots of 0.5 to 5 acres are common.',
+          'Best for: buyers seeking acreage, mountain views, and outdoor recreation access.',
+        ],
+        relatedLinks: [
+          { title: 'Horsetooth West Guide', href: '/northern-colorado-areas/fort-collins/horsetooth-west/', description: 'Fort Collins foothills neighborhood' },
+        ],
+      },
+      {
+        heading: 'University Area — CSU-adjacent investment opportunity',
+        paragraphs: [
+          'The University Area encompasses neighborhoods surrounding Colorado State University. This area is a mix of historic homes, student housing, and investment properties with strong rental demand.',
+          'Price range: $350K to $600K. The area offers the most affordable entry point into Fort Collins real estate.',
+          'Best for: real estate investors, CSU faculty and staff, and first-time buyers willing to take on home improvement projects.',
+        ],
+        relatedLinks: [
+          { title: 'University Area Guide', href: '/northern-colorado-areas/fort-collins/university-area/', description: 'CSU-area neighborhoods and investment properties' },
+        ],
+      },
+      {
+        heading: 'Northeast Fort Collins — Established character, park access',
+        paragraphs: [
+          'Northeast Fort Collins includes neighborhoods like City Park FC, Sheely Addition, and Rigden Farm — established communities centered around the historic City Park and the Poudre River Trail.',
+          'Home styles include craftsman bungalows, mid-century ranches, and late-20th-century two-story homes. Price range: $400K to $750K.',
+          'Best for: families seeking established neighborhoods with park access.',
+        ],
+        relatedLinks: [
+          { title: 'City Park Fort Collins Guide', href: '/northern-colorado-areas/fort-collins/city-park-fc/', description: 'Historic northeast Fort Collins neighborhood' },
+          { title: 'Rigden Farm Fort Collins Guide', href: '/northern-colorado-areas/fort-collins/rigden-farm/', description: 'Family-friendly Fort Collins neighborhood' },
+        ],
+      },
+      {
+        heading: 'Luxury and estate neighborhoods',
+        paragraphs: [
+          'For buyers seeking the highest-end Fort Collins real estate, neighborhoods like Buckingham, Collindale, and Prospectors Ridge offer luxury homes with premium finishes, golf course access, and commanding views.',
+          'Price range: $800K to $2.5M+. Collindale features golf course living. Buckingham offers equestrian potential.',
+          'Best for: high-net-worth buyers and luxury relocations.',
+        ],
+        relatedLinks: [
+          { title: 'Fort Collins Luxury Neighborhoods Guide', href: '/blog/fort-collins-luxury-neighborhoods-guide/', description: 'Complete guide to premium Fort Collins communities' },
+          { title: 'Buckingham Fort Collins Guide', href: '/northern-colorado-areas/fort-collins/buckingham-fc/', description: 'Equestrian estates and luxury homes' },
+          { title: 'Collindale Fort Collins Guide', href: '/northern-colorado-areas/fort-collins/collindale-fc/', description: 'Golf course living in Fort Collins' },
+        ],
+      },
+      {
+        heading: 'Find your perfect Fort Collins neighborhood with SAA Homes',
+        paragraphs: [
+          'With 30+ neighborhoods spanning every price point and lifestyle, Fort Collins offers more choice than any other Northern Colorado city. Adam and Mandi Schwartz have helped hundreds of Northern Colorado families buy and sell homes.',
+          'Call (970) 999-1407 or explore our Fort Collins Area Guide to browse current listings and neighborhood data.',
+        ],
+        relatedLinks: [
+          { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Everything you need to know about Fort Collins' },
+          { title: 'Search Fort Collins Homes for Sale', href: '/properties/?location=Fort Collins, CO', description: 'Current Fort Collins listings' },
+          { title: 'Free Buyer Consultation', href: '/for-buyers/', description: 'Start your home search with SAA Homes' },
+        ],
+      },
+    ],
+    faqs: [
+      { q: 'What is the best neighborhood in Fort Collins for first-time homebuyers?', a: 'Midtown and the University Area offer the most affordable entry points into Fort Collins real estate, with home prices starting around $400K. For the best balance of affordability and quality, consider Sheely Addition or Rigden Farm in northeast Fort Collins.' },
+      { q: 'What is the most walkable neighborhood in Fort Collins?', a: 'Old Town Fort Collins has a Walk Score of 92 — you can walk to over 20 restaurants and breweries, the Farmers Market, and boutique shopping without needing a car.' },
+      { q: 'Which Fort Collins neighborhood has the best schools?', a: 'South Fort Collins neighborhoods like Waterglen, Tapestry, and Fossil Creek are served by top-rated schools including Werner Elementary (9/10) and Fossil Ridge High School.' },
+      { q: 'What is the newest neighborhood in Fort Collins?', a: 'Waterglen (2018-2026) and Tapestry (2020-2026) are the newest master-planned communities in south Fort Collins, featuring modern floor plans, energy-efficient construction, and community amenities.' },
+    ],
+  },
 ];
+
 export function getBlogPost(slug) {
   return blogPosts.find((post) => post.slug === slug);
 }
