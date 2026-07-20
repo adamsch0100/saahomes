@@ -6,6 +6,7 @@ import { submitChfaLeadForm } from '../controllers/chfaLeadController.js';
 import { submitChampionsLeadForm } from '../controllers/championsLeadController.js';
 import { submitChfaDpaLeadForm } from '../controllers/chfaDpaLeadController.js';
 import { submitGhopeLeadForm } from '../controllers/ghopeLeadController.js';
+import { handleChatMessage } from '../controllers/chatController.js';
 import {
   validateContactSubmission,
   validateMarketReportSubmission,
@@ -73,6 +74,15 @@ router.post(
   handleValidationErrors,
   submitGhopeLeadForm
 );
+
+// AI Chat — lighter rate limit for conversation flow
+const chatLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 20, // Allow 20 messages per minute per IP
+  message: 'Too many messages. Please slow down.',
+});
+
+router.post('/chat', chatLimiter, handleChatMessage);
 
 export default router;
 
