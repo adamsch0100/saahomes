@@ -37,6 +37,7 @@ import GHopeHomeLoanPage from "./pages/GHopeHomeLoanPage.jsx";
 import AreaGuidePage from "./pages/AreaGuidePage.jsx";
 import NeighborhoodPage from "./pages/NeighborhoodPage.jsx";
 import FloatingContactBar from "./components/FloatingContactBar.jsx";
+import LeadCaptureChat from "./components/LeadCaptureChat.jsx";
 import { loadRealScoutScript } from "./utils/realscout.js";
 import { GA4_MEASUREMENT_ID, initGaDebugMode } from "./utils/analytics.js";
 
@@ -56,6 +57,7 @@ function AppLayout({ children }) {
         {children}
       </main>
       <FloatingContactBar />
+      <LeadCaptureChat />
       <Footer />
     </>
   );
