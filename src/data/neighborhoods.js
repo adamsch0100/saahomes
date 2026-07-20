@@ -1297,6 +1297,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.415', longitude: '-105.05' },
     metaDescription: 'North Loveland real estate - established homes near Lake Loveland. SAA Homes.',
     keywords: 'North Loveland homes, north Loveland real estate, Lincoln Avenue Loveland, Lake Loveland area',
+    youtubeId: 'Yho9A3094ac',
     neighborhoodHighlights: [
       { title: 'Established character', description: 'Mature trees and mid-century architecture give north Loveland a settled, welcoming feel.' },
       { title: 'Lake access', description: 'Minutes from Lake Loveland and North Lake Park.' },
@@ -1328,6 +1329,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.38', longitude: '-105.03' },
     metaDescription: 'South Loveland real estate - convenient I-25 access near The Ranch. SAA Homes.',
     keywords: 'South Loveland homes, south Loveland real estate, I-25 Loveland, The Ranch Loveland',
+    youtubeId: 'WLfwBmhOxWk',
     neighborhoodHighlights: [
       { title: 'Commuter hub', description: 'Seconds from the I-25/US 34 interchange - best commute location in Northern Colorado.' },
       { title: 'The Ranch', description: 'Close to The Ranch events complex for concerts, rodeos, and trade shows.' },
@@ -1359,6 +1361,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.395', longitude: '-105.1' },
     metaDescription: 'West Loveland foothills real estate - larger lots, mountain views, Devils Backbone. SAA Homes.',
     keywords: 'West Loveland homes, Loveland foothills real estate, Devils Backbone area',
+    youtubeId: 'uzFtqMev5iE',
     neighborhoodHighlights: [
       { title: 'Foothills lifestyle', description: 'Devils Backbone Open Space with hiking trails and iconic rock formations is minutes away.' },
       { title: 'Larger properties', description: 'Find acreage, custom homes, and equestrian properties with mountain views.' },
@@ -7082,6 +7085,1934 @@ export const neighborhoods = [
       { title: 'Central Weld County', description: 'Convenient location between Greeley and Johnstown with easy access to both.' },
     ],
   },
+
+  {
+    slug: 'woodridge-evans',
+    citySlug: 'evans',
+    cityDisplay: 'Evans',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Woodridge at Evans',
+    alsoKnownAs: [
+      'Woodridge'
+    ],
+    description: 'Woodridge is an established Evans subdivision offering affordable ranch and two-story homes on quiet streets with mature trees near the South Platte River.',
+    longDescription: 'Woodridge at Evans is a well-established residential neighborhood located on the west side of Evans, near the intersection of 37th Street and Woodridge Drive. Developed in the 1990s and early 2000s, this neighborhood features ranch, split-level, and two-story traditional homes on landscaped lots with mature trees. The neighborhood offers an established atmosphere with a family-friendly environment. Its west Evans location provides convenient access to US 34 and US 85 for commuting throughout Weld County. Woodridge is close to the South Platte River corridor and Bittersweet Park in Greeley. The neighborhood offers affordable home prices compared to Greeley proper while providing easy access to all Greeley amenities.',
+    homeStyles: ['Ranch', 'Two-Story Traditional', 'Split-Level', 'Bungalow'],
+    yearBuiltRange: { min: 1990, max: 2005 },
+    priceRangeDescription: '$300K to $450K',
+    schoolDistrict: 'Greeley-Evans School District 6',
+    schools: [
+      { name: 'Heiman Elementary', type: 'elementary', level: 'K-5', rating: '7' },
+      { name: 'Brentwood Middle School', type: 'middle', level: '6-8', rating: '6' },
+      { name: 'Greeley West High School', type: 'high', level: '9-12', rating: '7' }
+    ],
+    hoaDescription: 'Minimal HOA ($25-$40/month) or no HOA in most sections',
+    features: [
+      'Established with mature trees',
+      'Affordable home prices',
+      'Quiet family streets',
+      'Near South Platte River',
+      'Minutes to Greeley amenities',
+      'US 34 access nearby'
+    ],
+    parks: [
+      'Bittersweet Park',
+      'Evans Community Park',
+      'South Platte River'
+    ],
+    boundaries: '37th Street to 42nd Street, Woodridge Drive to US 85',
+    coordinates: { latitude: '40.365', longitude: '-104.735' },
+    walkScore: 28,
+    metaDescription: 'Woodridge at Evans real estate - affordable established homes near Greeley. SAA Homes.',
+    keywords: 'Woodridge Evans, Evans Colorado affordable homes, established Evans neighborhood, Greeley area real estate, South Platte River homes, Weld County affordable homes, Evans real estate, Woodridge subdivision',
+    neighborhoodHighlights: [
+      { title: 'Affordable option', description: 'One of the most affordable established neighborhoods in the Greeley-Evans area.' },
+      { title: 'River access', description: 'Close to the South Platte River and Bittersweet Park for outdoor recreation.' },
+      { title: 'Established charm', description: 'Mature trees and established landscaping in a quiet, family-friendly setting.' }
+    ],
+  },
+
+  {
+    slug: 'masters-evans',
+    citySlug: 'evans',
+    cityDisplay: 'Evans',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'The Masters at Evans',
+    alsoKnownAs: [
+      'The Masters'
+    ],
+    description: 'The Masters is a newer Evans neighborhood near Highland Hills Golf Course, featuring contemporary homes with golf course views and convenient access to US 34.',
+    longDescription: 'The Masters at Evans is a newer residential development located on the south side of Evans, near the intersection of US 34 and Weld County Road 41. Developed from 2015 onward, this neighborhood features contemporary ranch and two-story homes near the Highland Hills Golf Course and Event Center. The location offers views of the golf course and open agricultural land to the south. The neighborhood is popular with golfers and those seeking newer construction in Evans. Its location provides easy access to US 34 for commuting to Greeley and Loveland. The Masters represents the newer wave of Evans growth, offering modern homes at more affordable prices than many Greeley neighborhoods.',
+    homeStyles: ['Contemporary', 'Ranch', 'Two-Story', 'Craftsman'],
+    yearBuiltRange: { min: 2015, max: 2025 },
+    priceRangeDescription: '$350K to $500K',
+    schoolDistrict: 'Greeley-Evans School District 6',
+    schools: [
+      { name: 'Heiman Elementary', type: 'elementary', level: 'K-5', rating: '7' },
+      { name: 'Brentwood Middle School', type: 'middle', level: '6-8', rating: '6' },
+      { name: 'Greeley West High School', type: 'high', level: '9-12', rating: '7' }
+    ],
+    hoaDescription: 'Mandatory HOA ($50-$80/month) covers common areas',
+    features: [
+      'Newer construction homes',
+      'Near Highland Hills Golf Course',
+      'US 34 access',
+      'Affordable vs Greeley',
+      'Quiet south Evans location',
+      'Growing area with new amenities'
+    ],
+    parks: [
+      'Evans Community Park',
+      'Bittersweet Park',
+      'Highland Hills Golf Course'
+    ],
+    boundaries: 'US 34 to CR 44, CR 39 to CR 41',
+    coordinates: { latitude: '40.355', longitude: '-104.750' },
+    walkScore: 22,
+    metaDescription: 'The Masters at Evans real estate - newer homes near Highland Hills Golf Course in south Evans. SAA Homes.',
+    keywords: 'Masters Evans, Evans Colorado golf course homes, new construction Evans, Highland Hills Golf Course, Evans real estate, Greeley area homes, south Evans neighborhoods, US 34 corridor homes',
+    neighborhoodHighlights: [
+      { title: 'Golf course living', description: 'Located near Highland Hills Golf Course with select homes offering golf course views.' },
+      { title: 'New construction', description: 'Modern homes with contemporary finishes at affordable prices compared to Greeley.' },
+      { title: 'South Evans growth', description: 'Part of Evans growing south side with new development and convenient US 34 access.' }
+    ],
+  },
+
+  {
+    slug: 'poudre-crest-evans',
+    citySlug: 'evans',
+    cityDisplay: 'Evans',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Poudre Crest at Evans',
+    alsoKnownAs: [
+      'Poudre Crest'
+    ],
+    description: 'Poudre Crest is a newer master-planned community on Evans north side near the Poudre River, featuring modern homes with river access and proximity to Greeley.',
+    longDescription: 'Poudre Crest at Evans is a growing residential community located on the north side of Evans, near the Cache la Poudre River and Weld County Road 49. Developed from 2018 onward, this neighborhood features contemporary two-story and ranch homes with modern finishes and energy-efficient features. The neighborhood is named for its proximity to the Poudre River, with the Poudre River Trail accessible nearby for walking, biking, and fishing. Its north Evans location provides excellent access to US 85 and downtown Greeley (just 5 minutes). Poudre Crest represents the newer standard of Evans living, combining modern construction with convenient access to the Poudre River recreation corridor.',
+    homeStyles: ['Contemporary', 'Two-Story', 'Ranch', 'Modern Farmhouse'],
+    yearBuiltRange: { min: 2018, max: 2025 },
+    priceRangeDescription: '$350K to $500K',
+    schoolDistrict: 'Greeley-Evans School District 6',
+    schools: [
+      { name: 'Dos Rios Elementary', type: 'elementary', level: 'K-5', rating: '6' },
+      { name: 'Brentwood Middle School', type: 'middle', level: '6-8', rating: '6' },
+      { name: 'Greeley West High School', type: 'high', level: '9-12', rating: '7' }
+    ],
+    hoaDescription: 'Mandatory HOA ($55-$85/month) covers common areas and trail maintenance',
+    features: [
+      'Poudre River Trail access',
+      'Newer construction (2018+)',
+      'Minutes to downtown Greeley',
+      'Affordable new homes',
+      'River recreation nearby',
+      'US 85 access'
+    ],
+    parks: [
+      'Poudre River Trail',
+      'Evans Community Park',
+      'Glenmere Park'
+    ],
+    boundaries: 'US 85 to WCR 49, Poudre River to 37th Street',
+    coordinates: { latitude: '40.375', longitude: '-104.720' },
+    walkScore: 24,
+    metaDescription: 'Poudre Crest at Evans real estate - new homes with Poudre River Trail access near Greeley. SAA Homes.',
+    keywords: 'Poudre Crest Evans, Evans Colorado new homes, Poudre River Trail Evans, new construction Greeley area, Evans Colorado real estate, affordable new homes Weld County, north Evans neighborhoods',
+    neighborhoodHighlights: [
+      { title: 'River trail', description: 'Direct access to the Poudre River Trail for walking, biking, and fishing along the Cache la Poudre.' },
+      { title: 'Newer community', description: 'Modern homes built from 2018 with open floor plans and energy-efficient features.' },
+      { title: 'Quick commute', description: 'Minutes from downtown Greeley via US 85 with convenient access to all Weld County.' }
+    ],
+  },
+
+  {
+    slug: 'ridge-milliken',
+    citySlug: 'milliken',
+    cityDisplay: 'Milliken',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'The Ridge at Milliken',
+    alsoKnownAs: [
+      'The Ridge at Milliken'
+    ],
+    description: 'The Ridge at Milliken is a newer subdivision on Millikens elevated west side, offering contemporary homes with sweeping views of the Front Range and the Thompson River valley.',
+    longDescription: 'The Ridge at Milliken is a growing residential community located on the elevated west side of Milliken, near Weld County Road 39 and Weld County Road 36. Developed from 2019 onward, this neighborhood features contemporary two-story, ranch, and modern farmhouse-style homes from regional builders. The ridge location provides sweeping views of the Front Range mountains and the Thompson River valley below. The neighborhood elevated position sets it apart from other Milliken subdivisions. Residents enjoy proximity to Johnstown retail corridor along WCR 17, Milliken community parks, and easy access to US 85 for commuting. The Ridge at Milliken represents the premium end of Milliken housing market.',
+    homeStyles: ['Contemporary', 'Modern Farmhouse', 'Two-Story', 'Ranch', 'Craftsman'],
+    yearBuiltRange: { min: 2019, max: 2025 },
+    priceRangeDescription: '$400K to $575K',
+    schoolDistrict: 'Johnstown-Milliken School District RE-5J',
+    schools: [
+      { name: 'Milliken Elementary', type: 'elementary', level: 'K-5', rating: '7' },
+      { name: 'Milliken Middle School', type: 'middle', level: '6-8', rating: '7' },
+      { name: 'Roosevelt High School', type: 'high', level: '9-12', rating: '8' }
+    ],
+    hoaDescription: 'Mandatory HOA ($60-$90/month) covers common areas',
+    features: [
+      'Elevated ridge location with views',
+      'Newer construction (2019+)',
+      'Mountain and valley views',
+      'Close to Johnstown retail',
+      'US 85 access',
+      'Family-friendly community'
+    ],
+    parks: [
+      'Milliken Community Park',
+      'Johnstown Community Park',
+      'Thompson River Open Space'
+    ],
+    boundaries: 'WCR 39 to WCR 41, WCR 34 to WCR 36',
+    coordinates: { latitude: '40.322', longitude: '-104.880' },
+    walkScore: 18,
+    metaDescription: 'The Ridge at Milliken real estate - elevated new homes with mountain views in Milliken Colorado. SAA Homes.',
+    keywords: 'Ridge Milliken, Milliken Colorado new homes, mountain view homes Milliken, Johnstown Milliken real estate, new construction Weld County, Milliken subdivisions',
+    neighborhoodHighlights: [
+      { title: 'Scenic views', description: 'Elevated ridge location with sweeping views of the Front Range and Thompson River valley.' },
+      { title: 'New construction', description: 'Modern homes from regional builders with the latest floor plans and energy-efficient features.' },
+      { title: 'Growing area', description: 'Milliken is experiencing steady growth with new retail and amenities arriving regularly.' }
+    ],
+  },
+
+  {
+    slug: 'ponds-milliken',
+    citySlug: 'milliken',
+    cityDisplay: 'Milliken',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'The Ponds at Milliken',
+    alsoKnownAs: [
+      'The Ponds at Milliken'
+    ],
+    description: 'The Ponds at Milliken is a newer community centered around ponds and green spaces, offering affordable contemporary homes in a family-friendly setting.',
+    longDescription: 'The Ponds at Milliken is a newer residential subdivision located on the south side of Milliken, near Weld County Road 36 and Weld County Road 37. Developed from 2020 onward, this neighborhood features affordable contemporary and ranch-style homes, with several models designed for first-time buyers and young families. The community is designed around a series of ponds and green spaces, with walking paths connecting the neighborhood. Its south Milliken location provides convenient access to US 85 and the Johnstown retail corridor. The Ponds at Milliken offers one of the most affordable entry points into the Johnstown-Milliken market for new home buyers.',
+    homeStyles: ['Contemporary', 'Ranch', 'Two-Story', 'Townhome'],
+    yearBuiltRange: { min: 2020, max: 2025 },
+    priceRangeDescription: '$325K to $450K',
+    schoolDistrict: 'Johnstown-Milliken School District RE-5J',
+    schools: [
+      { name: 'Milliken Elementary', type: 'elementary', level: 'K-5', rating: '7' },
+      { name: 'Milliken Middle School', type: 'middle', level: '6-8', rating: '7' },
+      { name: 'Roosevelt High School', type: 'high', level: '9-12', rating: '8' }
+    ],
+    hoaDescription: 'Mandatory HOA ($50-$75/month) covers pond maintenance and common areas',
+    features: [
+      'Affordable new construction',
+      'Pond views and water features',
+      'Walking paths throughout',
+      'First-time buyer friendly',
+      'US 85 access',
+      'Close to Johnstown shopping'
+    ],
+    parks: [
+      'Milliken Community Park',
+      'Ponds Park',
+      'Thompson River Open Space'
+    ],
+    boundaries: 'WCR 36 to WCR 38, WCR 35 to WCR 37',
+    coordinates: { latitude: '40.315', longitude: '-104.870' },
+    walkScore: 25,
+    metaDescription: 'The Ponds at Milliken real estate - affordable new homes with pond views near Johnstown. SAA Homes.',
+    keywords: 'Ponds Milliken, affordable new homes Milliken, Milliken Colorado real estate, first-time buyer Milliken, pond view homes Johnstown, new construction Weld County',
+    neighborhoodHighlights: [
+      { title: 'Affordable pricing', description: 'Some of the most affordable new construction homes in the Johnstown-Milliken area.' },
+      { title: 'Water features', description: 'Scenic ponds and green spaces with walking paths throughout the community.' },
+      { title: 'First-time buyers', description: 'Purpose-built for entry-level buyers with townhomes and smaller single-family homes.' }
+    ],
+  },
+
+  {
+    slug: 'oxford-heights-mead',
+    citySlug: 'mead',
+    cityDisplay: 'Mead',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Oxford Heights at Mead',
+    alsoKnownAs: [
+      'Oxford Heights'
+    ],
+    description: 'Oxford Heights is a newer Mead subdivision on the west side, offering contemporary homes with mountain views and convenient access to Longmont and I-25.',
+    longDescription: 'Oxford Heights at Mead is a growing residential community located on the west side of Mead, near Weld County Road 7 and Weld County Road 38. Developed from 2018 onward, this neighborhood features contemporary two-story and ranch homes with Craftsman and modern farmhouse styling. The west Mead location provides excellent views of the Rocky Mountains and convenient access to Longmont (10 minutes) and I-25 (5 minutes). Oxford Heights represents Mead growth as a commuter town between Longmont and the I-25 corridor. The neighborhood offers new construction at more affordable prices than neighboring Longmont, appealing to buyers seeking value and mountain views.',
+    homeStyles: ['Contemporary', 'Two-Story', 'Ranch', 'Craftsman', 'Modern Farmhouse'],
+    yearBuiltRange: { min: 2018, max: 2025 },
+    priceRangeDescription: '$400K to $575K',
+    schoolDistrict: 'St. Vrain Valley School District',
+    schools: [
+      { name: 'Mead Elementary', type: 'elementary', level: 'K-5', rating: '8' },
+      { name: 'Mead Middle School', type: 'middle', level: '6-8', rating: '8' },
+      { name: 'Mead High School', type: 'high', level: '9-12', rating: '8' }
+    ],
+    hoaDescription: 'Mandatory HOA ($50-$80/month) covers common areas',
+    features: [
+      'Mountain views to the west',
+      'Newer construction (2018+)',
+      'Close to Longmont and I-25',
+      'Affordable vs Longmont',
+      'St. Vrain Valley schools',
+      'Growing Mead community'
+    ],
+    parks: [
+      'Mead Community Park',
+      'Mead Open Space',
+      'Sandstone Ranch Open Space'
+    ],
+    boundaries: 'WCR 7 to WCR 9, WCR 36 to WCR 38',
+    coordinates: { latitude: '40.232', longitude: '-104.998' },
+    walkScore: 20,
+    metaDescription: 'Oxford Heights at Mead real estate - new homes with mountain views near Longmont. SAA Homes.',
+    keywords: 'Oxford Heights Mead, Mead Colorado new homes, Mead real estate, Longmont area homes, St Vrain Valley schools, Weld County new construction, Mead subdivisions',
+    neighborhoodHighlights: [
+      { title: 'Mountain views', description: 'West Mead location provides stunning Front Range and Longs Peak views.' },
+      { title: 'Commuter friendly', description: 'Minutes to I-25 and Longmont with easy commuting to Boulder, Denver, and Fort Collins.' },
+      { title: 'Newer community', description: 'Modern homes built from 2018 in one of Mead newest subdivisions.' }
+    ],
+  },
+
+  {
+    slug: 'prairie-view-mead',
+    citySlug: 'mead',
+    cityDisplay: 'Mead',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Prairie View at Mead',
+    alsoKnownAs: [
+      'Prairie View'
+    ],
+    description: 'Prairie View at Mead is an established neighborhood on Mead south side, featuring ranch and two-story homes on larger lots with a quiet country atmosphere.',
+    longDescription: 'Prairie View at Mead is a well-established residential neighborhood located on the south side of Mead, near Weld County Road 36 and Weld County Road 5. Developed in the early 2000s, this neighborhood features ranch, split-level, and two-story traditional homes on generous lots with mature landscaping. The neighborhood offers a peaceful, semi-rural atmosphere while being within the Mead town limits. Residents enjoy views of the surrounding agricultural land and the Front Range. Its south Mead location provides easy access to I-25 and the growing commercial corridor along WCR 7. Prairie View appeals to buyers seeking larger lots and an established neighborhood with no HOA in many sections.',
+    homeStyles: ['Ranch', 'Two-Story Traditional', 'Split-Level', 'Bungalow'],
+    yearBuiltRange: { min: 2000, max: 2010 },
+    priceRangeDescription: '$400K to $550K',
+    schoolDistrict: 'St. Vrain Valley School District',
+    schools: [
+      { name: 'Mead Elementary', type: 'elementary', level: 'K-5', rating: '8' },
+      { name: 'Mead Middle School', type: 'middle', level: '6-8', rating: '8' },
+      { name: 'Mead High School', type: 'high', level: '9-12', rating: '8' }
+    ],
+    hoaDescription: 'No HOA in most of Prairie View',
+    features: [
+      'Larger lot sizes',
+      'Established with mature trees',
+      'Quiet country atmosphere',
+      'No HOA in most areas',
+      'View of farmlands and mountains',
+      'Close to I-25'
+    ],
+    parks: [
+      'Mead Community Park',
+      'Sandstone Ranch Open Space',
+      'Mead Open Space'
+    ],
+    boundaries: 'WCR 5 to WCR 7, WCR 34 to WCR 36',
+    coordinates: { latitude: '40.228', longitude: '-104.985' },
+    walkScore: 18,
+    metaDescription: 'Prairie View at Mead real estate - established homes on large lots with mountain views. SAA Homes.',
+    keywords: 'Prairie View Mead, established homes Mead, large lot homes Mead, Mead Colorado real estate, no HOA Weld County, St Vrain Valley schools, Mead neighborhood',
+    neighborhoodHighlights: [
+      { title: 'Spacious lots', description: 'Generous lot sizes with room for gardens, pets, and outdoor activities.' },
+      { title: 'Country setting', description: 'Quiet semi-rural atmosphere with views of agricultural land and the Front Range.' },
+      { title: 'Established trees', description: 'Mature landscaping and established trees create a settled, welcoming environment.' }
+    ],
+  },
+
+  {
+    slug: 'glenwood-eaton',
+    citySlug: 'eaton',
+    cityDisplay: 'Eaton',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Glenwood at Eaton',
+    alsoKnownAs: [
+      'Glenwood'
+    ],
+    description: 'Glenwood at Eaton is an established subdivision on the east side of Eaton, offering ranch and split-level homes on tree-lined streets with a quiet family atmosphere.',
+    longDescription: 'Glenwood at Eaton is a well-established residential neighborhood on the east side of Eaton, located near Weld County Road 47 and Weld County Road 74. Developed primarily in the 1990s and early 2000s, this neighborhood features ranch, split-level, and two-story traditional homes on landscaped lots with mature trees. The neighborhood offers a quiet, family-friendly atmosphere with well-maintained homes and sidewalks. Its east Eaton location provides easy access to the Eaton town center and schools. Glenwood is served by the highly-rated Eaton School District (RE-2), which is one of the top-performing districts in Weld County. The neighborhood appeals to families seeking established homes in a top school district.',
+    homeStyles: ['Ranch', 'Two-Story Traditional', 'Split-Level', 'Bungalow'],
+    yearBuiltRange: { min: 1990, max: 2005 },
+    priceRangeDescription: '$325K to $475K',
+    schoolDistrict: 'Eaton School District RE-2',
+    schools: [
+      { name: 'Eaton Elementary', type: 'elementary', level: 'K-5', rating: '8' },
+      { name: 'Eaton Middle School', type: 'middle', level: '6-8', rating: '8' },
+      { name: 'Eaton High School', type: 'high', level: '9-12', rating: '9' }
+    ],
+    hoaDescription: 'No HOA in most of Glenwood',
+    features: [
+      'Top-rated Eaton schools (9/10 high school)',
+      'Established with mature trees',
+      'Quiet family-friendly streets',
+      'No HOA',
+      'East Eaton location',
+      'Minutes to Greeley'
+    ],
+    parks: [
+      'Eaton Community Park',
+      'Eaton Pool',
+      'Poudre River Trail'
+    ],
+    boundaries: 'WCR 47 to WCR 51, CR 70 to CR 74',
+    coordinates: { latitude: '40.528', longitude: '-104.705' },
+    walkScore: 22,
+    metaDescription: 'Glenwood at Eaton real estate - established family homes in top-rated Eaton School District. SAA Homes.',
+    keywords: 'Glenwood Eaton, Eaton Colorado established homes, Eaton School District RE-2, Eaton family homes, Eaton real estate, no HOA Eaton, Weld County homes near Greeley',
+    neighborhoodHighlights: [
+      { title: 'Top schools', description: 'Eaton School District is one of the highest-rated in Weld County with Eaton High School (9/10).' },
+      { title: 'Established community', description: 'Mature trees and well-maintained homes in an established, family-friendly neighborhood.' },
+      { title: 'No HOA', description: 'Most of Glenwood has no HOA, providing lower monthly costs and more homeowner freedom.' }
+    ],
+  },
+
+  {
+    slug: 'heather-place-eaton',
+    citySlug: 'eaton',
+    cityDisplay: 'Eaton',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Heather Place at Eaton',
+    alsoKnownAs: [
+      'Heather Place'
+    ],
+    description: 'Heather Place is a newer Eaton subdivision on the south side, featuring contemporary homes with modern finishes in an affordable, family-oriented setting.',
+    longDescription: 'Heather Place at Eaton is a newer residential subdivision located on the south side of Eaton, near Weld County Road 72 and Weld County Road 47. Developed from 2015 onward, this neighborhood features contemporary ranch and two-story homes with Craftsman and modern farmhouse influences. The neighborhood offers a mix of standard and premium lots, with some homes backing to open space or agricultural land. Its south Eaton location provides convenient access to US 85 for commuting to Greeley (10 minutes) and Fort Collins. Heather Place is served by the top-rated Eaton School District, making it popular with families who want new construction combined with excellent schools.',
+    homeStyles: ['Contemporary', 'Two-Story', 'Ranch', 'Craftsman', 'Modern Farmhouse'],
+    yearBuiltRange: { min: 2015, max: 2025 },
+    priceRangeDescription: '$350K to $500K',
+    schoolDistrict: 'Eaton School District RE-2',
+    schools: [
+      { name: 'Eaton Elementary', type: 'elementary', level: 'K-5', rating: '8' },
+      { name: 'Eaton Middle School', type: 'middle', level: '6-8', rating: '8' },
+      { name: 'Eaton High School', type: 'high', level: '9-12', rating: '9' }
+    ],
+    hoaDescription: 'Mandatory HOA ($40-$70/month) covers common areas',
+    features: [
+      'Newer construction (2015+)',
+      'Top-rated Eaton schools',
+      'Affordable pricing',
+      'South Eaton location',
+      'US 85 access',
+      'Quiet family neighborhood'
+    ],
+    parks: [
+      'Eaton Community Park',
+      'Eaton Pool',
+      'Poudre River Trail'
+    ],
+    boundaries: 'WCR 72 to WCR 74, WCR 45 to WCR 47',
+    coordinates: { latitude: '40.520', longitude: '-104.710' },
+    walkScore: 20,
+    metaDescription: 'Heather Place at Eaton real estate - new homes in top-rated Eaton School District. SAA Homes.',
+    keywords: 'Heather Place Eaton, new construction Eaton Colorado, Eaton School District, Eaton new homes, Greeley area new construction, Eaton Colorado real estate',
+    neighborhoodHighlights: [
+      { title: 'School excellence', description: 'Eaton High School (9/10) is one of the top-rated high schools in Weld County.' },
+      { title: 'Newer homes', description: 'Modern construction with open floor plans, energy efficiency, and contemporary finishes.' },
+      { title: 'Small-town values', description: 'Eaton offers a family-friendly community with strong values and the annual Eaton Days celebration.' }
+    ],
+  },
+
+  {
+    slug: 'eaton-estates',
+    citySlug: 'eaton',
+    cityDisplay: 'Eaton',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Eaton Estates',
+    alsoKnownAs: [
+      'Eaton Estates'
+    ],
+    description: 'Eaton Estates is a newer master-planned community on Eaton expanding north side, offering modern homes on larger lots with mountain views.',
+    longDescription: 'Eaton Estates is a growing residential community on the north side of Eaton, located near Weld County Road 66 and Weld County Road 49. Developed from 2018 onward, this neighborhood features contemporary and modern farmhouse-style homes on generous lots, with many properties backing to agricultural land providing privacy and open views. The neighborhood north side position provides views of the mountains to the west and the rolling plains to the east. Residents enjoy the quiet semi-rural feel while being just minutes from US 85 and downtown Eaton. Eaton Estates is served by the highly-rated Eaton School District and offers buyers newer construction at competitive prices compared to Greeley and Fort Collins.',
+    homeStyles: ['Modern Farmhouse', 'Contemporary', 'Two-Story', 'Ranch', 'Craftsman'],
+    yearBuiltRange: { min: 2018, max: 2025 },
+    priceRangeDescription: '$375K to $550K',
+    schoolDistrict: 'Eaton School District RE-2',
+    schools: [
+      { name: 'Eaton Elementary', type: 'elementary', level: 'K-5', rating: '8' },
+      { name: 'Eaton Middle School', type: 'middle', level: '6-8', rating: '8' },
+      { name: 'Eaton High School', type: 'high', level: '9-12', rating: '9' }
+    ],
+    hoaDescription: 'Mandatory HOA ($50-$80/month) covers common area maintenance',
+    features: [
+      'Newer construction homes',
+      'Larger lot sizes available',
+      'Mountain and prairie views',
+      'Quiet semi-rural setting',
+      'Top-rated Eaton schools',
+      'Minutes to Greeley'
+    ],
+    parks: [
+      'Eaton Community Park',
+      'Eaton Pool',
+      'Poudre River Trail'
+    ],
+    boundaries: 'WCR 66 to WCR 70, WCR 47 to WCR 49',
+    coordinates: { latitude: '40.535', longitude: '-104.715' },
+    walkScore: 15,
+    metaDescription: 'Eaton Estates real estate - newer homes on larger lots in top Eaton School District. SAA Homes.',
+    keywords: 'Eaton Estates, Eaton Colorado new homes, large lot homes Eaton, Eaton School District, Eaton Colorado real estate, north Eaton development, Weld County new construction',
+    neighborhoodHighlights: [
+      { title: 'Spacious lots', description: 'Generous lot sizes with privacy and views - more space than typical new subdivisions.' },
+      { title: 'Top-rated schools', description: 'Eaton School District (RE-2) is among the highest-rated in Weld County with a 9/10 high school.' },
+      { title: 'Peaceful setting', description: 'Quiet semi-rural atmosphere with mountain views and the conveniences of Eaton just minutes away.' }
+    ],
+  },
+
+  {
+    slug: 'riverstone-la-salle',
+    citySlug: 'la-salle',
+    cityDisplay: 'La Salle',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Riverstone at La Salle',
+    alsoKnownAs: [
+      'Riverstone'
+    ],
+    description: 'Riverstone at La Salle is a newer subdivision on La Salle west side, offering affordable new construction homes near the South Platte River with easy access to Greeley.',
+    longDescription: 'Riverstone at La Salle is a newer residential development on the west side of La Salle, located near Weld County Road 51 and O Street. Developed from 2018 onward, this neighborhood features affordable ranch and two-story homes designed for first-time buyers and families. The neighborhood is named for its proximity to the South Platte River corridor, which provides natural open space and recreational opportunities. Its west La Salle location provides convenient access to US 85 for commuting to Greeley (10 minutes) and Fort Collins. Riverstone offers one of the most affordable new construction options in Northern Colorado, making it a popular choice for first-time buyers and investors.',
+    homeStyles: ['Ranch', 'Two-Story', 'Contemporary', 'Townhome'],
+    yearBuiltRange: { min: 2018, max: 2025 },
+    priceRangeDescription: '$275K to $400K',
+    schoolDistrict: 'Greeley-Evans School District 6',
+    schools: [
+      { name: 'Martinez Elementary', type: 'elementary', level: 'K-5', rating: '6' },
+      { name: 'Franklin Middle School', type: 'middle', level: '6-8', rating: '6' },
+      { name: 'Greeley Central High School', type: 'high', level: '9-12', rating: '6' }
+    ],
+    hoaDescription: 'Mandatory HOA ($40-$60/month) covers common areas',
+    features: [
+      'Affordable new construction',
+      'Near South Platte River',
+      'First-time buyer friendly',
+      'US 85 access',
+      'Minutes to Greeley',
+      'Lowest price range in Northern Colorado'
+    ],
+    parks: [
+      'La Salle Community Park',
+      'South Platte River',
+      'Greeley Recreation Center'
+    ],
+    boundaries: 'WCR 51 to WCR 53, O Street to CR 42',
+    coordinates: { latitude: '40.340', longitude: '-104.710' },
+    walkScore: 20,
+    metaDescription: 'Riverstone at La Salle real estate - affordable new homes near South Platte River. SAA Homes.',
+    keywords: 'Riverstone La Salle, La Salle Colorado new homes, affordable Weld County homes, La Salle real estate, first-time buyer Colorado, South Platte River homes',
+    neighborhoodHighlights: [
+      { title: 'Most affordable', description: 'Some of the most affordable new construction home prices in all of Northern Colorado.' },
+      { title: 'River proximity', description: 'Located near the South Platte River corridor with natural open space and recreation.' },
+      { title: 'Greeley close by', description: 'Just 10 minutes to Greeley with access to all shopping, dining, and employment.' }
+    ],
+  },
+
+  {
+    slug: 'sunset-ridge-la-salle',
+    citySlug: 'la-salle',
+    cityDisplay: 'La Salle',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Sunset Ridge at La Salle',
+    alsoKnownAs: [
+      'Sunset Ridge'
+    ],
+    description: 'Sunset Ridge is a newer neighborhood on La Salle southern edge, offering affordable contemporary homes with sunset views over the Front Range and quick access to Greeley.',
+    longDescription: 'Sunset Ridge at La Salle is a growing residential community on the south side of La Salle, near Weld County Road 44 and Weld County Road 53. Developed from 2020 onward, this neighborhood features affordable contemporary ranch and two-story homes on modest lots. The neighborhood location on La Salle southern edge provides open views to the west, with spectacular sunset vistas over the Front Range (giving the neighborhood its name). The location offers easy access to US 85 for commuting to Greeley, Evans, and the broader Weld County area. Sunset Ridge represents the newest phase of La Salle residential growth, offering budget-friendly new homes in a growing community.',
+    homeStyles: ['Contemporary', 'Ranch', 'Two-Story', 'Bungalow'],
+    yearBuiltRange: { min: 2020, max: 2025 },
+    priceRangeDescription: '$275K to $375K',
+    schoolDistrict: 'Greeley-Evans School District 6',
+    schools: [
+      { name: 'Martinez Elementary', type: 'elementary', level: 'K-5', rating: '6' },
+      { name: 'Franklin Middle School', type: 'middle', level: '6-8', rating: '6' },
+      { name: 'Greeley Central High School', type: 'high', level: '9-12', rating: '6' }
+    ],
+    hoaDescription: 'Mandatory HOA ($35-$55/month) covers common areas',
+    features: [
+      'Very affordable pricing',
+      'Sunset mountain views',
+      'Newest La Salle development',
+      'First-time buyer friendly',
+      'US 85 access',
+      'Minutes to Greeley'
+    ],
+    parks: [
+      'La Salle Community Park',
+      'Evans Community Park',
+      'South Platte River'
+    ],
+    boundaries: 'WCR 44 to WCR 46, WCR 51 to WCR 53',
+    coordinates: { latitude: '40.332', longitude: '-104.705' },
+    walkScore: 18,
+    metaDescription: 'Sunset Ridge at La Salle real estate - affordable new homes with sunset views in La Salle. SAA Homes.',
+    keywords: 'Sunset Ridge La Salle, La Salle Colorado affordable homes, La Salle new construction, cheapest homes Northern Colorado, Weld County affordable housing',
+    neighborhoodHighlights: [
+      { title: 'Best value', description: 'Among the lowest-priced new construction homes available anywhere in Northern Colorado.' },
+      { title: 'Sunset views', description: 'Open western views provide spectacular sunset vistas over the Front Range.' },
+      { title: 'Newest development', description: 'La Salle newest residential area with modern, efficient home designs at budget-friendly prices.' }
+    ],
+  },
+
+  {
+    slug: 'prairie-meadows-severance',
+    citySlug: 'severance',
+    cityDisplay: 'Severance',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Prairie Meadows at Severance',
+    alsoKnownAs: [
+      'Prairie Meadows'
+    ],
+    description: 'Prairie Meadows is a newer Severance subdivision offering modern farmhouse and contemporary homes on large lots with mountain views and a quiet rural setting minutes from Windsor.',
+    longDescription: 'Prairie Meadows at Severance is a growing residential subdivision located on the south side of Severance, near the intersection of Weld County Road 74 and Weld County Road 23. Developed primarily from 2018 onward, this neighborhood features new construction homes from several regional builders, with architectural styles ranging from modern farmhouse to contemporary two-story designs on generous lots. The area offers wide-open views of the Rocky Mountains to the west and the Severance countryside. Residents enjoy proximity to Windsor shopping and dining, Severance community parks, and easy access to Highway 392 for commuting to Fort Collins and Greeley. Prairie Meadows represents the newer wave of Severance growth, appealing to families seeking new construction with a semi-rural feel.',
+    homeStyles: ['Modern Farmhouse', 'Contemporary', 'Two-Story', 'Ranch'],
+    yearBuiltRange: { min: 2018, max: 2025 },
+    priceRangeDescription: '$450K to $650K',
+    schoolDistrict: 'Weld County School District RE-4 (Windsor)',
+    schools: [
+      { name: 'Range View Elementary', type: 'elementary', level: 'K-5', rating: '9' },
+      { name: 'Severance Middle School', type: 'middle', level: '6-8', rating: '8' },
+      { name: 'Windsor High School', type: 'high', level: '9-12', rating: '9' }
+    ],
+    hoaDescription: 'Mandatory HOA ($60-$100/month) covers common areas and snow removal',
+    features: [
+      'New construction homes with modern floor plans',
+      'Mountain views to the west',
+      'Large lot sizes',
+      'Quiet semi-rural setting',
+      'Close to Windsor shopping and dining',
+      'Minutes to Fort Collins'
+    ],
+    parks: [
+      'Severance Community Park',
+      'Windsor Lake',
+      'Eastman Park'
+    ],
+    boundaries: 'WCR 74 to WCR 23, CR 64 to CR 66',
+    coordinates: { latitude: '40.522', longitude: '-104.865' },
+    walkScore: 20,
+    metaDescription: 'Prairie Meadows at Severance real estate - new construction homes on large lots with mountain views. SAA Homes.',
+    keywords: 'Prairie Meadows Severance, new construction Severance homes, Severance Colorado subdivisions, new homes Weld County, Severance real estate',
+    neighborhoodHighlights: [
+      { title: 'New construction', description: 'Brand-new homes from regional builders with modern floor plans and energy-efficient features.' },
+      { title: 'Mountain views', description: 'Panoramic views of the Rocky Mountains from this elevated Severance location.' },
+      { title: 'Growing community', description: 'Severance is one of the fastest-growing towns in Weld County with new amenities arriving regularly.' }
+    ],
+  },
+
+  {
+    slug: 'severance-heights',
+    citySlug: 'severance',
+    cityDisplay: 'Severance',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Severance Heights',
+    alsoKnownAs: [
+      'Severance Heights'
+    ],
+    description: 'Severance Heights is a well-established neighborhood near downtown Severance, offering ranch and two-story homes with mature trees and easy access to Severance community amenities.',
+    longDescription: 'Severance Heights is an established residential area in central Severance, located near the intersection of Weld County Road 74 and Weld County Road 23, close to the original Severance town center. Developed in the 1990s and 2000s, this neighborhood features a mix of ranch, split-level, and two-story traditional homes on tree-lined streets. The area benefits from its proximity to the Severance Community Park, the Severance Town Hall, and local churches. Residents enjoy the small-town atmosphere while being just 10 minutes from Windsor shopping corridor and 20 minutes from Fort Collins. Severance Heights offers a balanced lifestyle with the peace of country living and the convenience of nearby urban amenities.',
+    homeStyles: ['Ranch', 'Two-Story Traditional', 'Split-Level', 'Bungalow'],
+    yearBuiltRange: { min: 1990, max: 2015 },
+    priceRangeDescription: '$400K to $575K',
+    schoolDistrict: 'Weld County School District RE-4 (Windsor)',
+    schools: [
+      { name: 'Range View Elementary', type: 'elementary', level: 'K-5', rating: '9' },
+      { name: 'Severance Middle School', type: 'middle', level: '6-8', rating: '8' },
+      { name: 'Windsor High School', type: 'high', level: '9-12', rating: '9' }
+    ],
+    hoaDescription: 'Most areas have no HOA; select sections have minimal HOAs',
+    features: [
+      'Established neighborhood with mature trees',
+      'Central Severance location',
+      'Walking distance to community park',
+      'No HOA in most areas',
+      'Quiet family atmosphere',
+      'Minutes to Windsor amenities'
+    ],
+    parks: [
+      'Severance Community Park',
+      'Windsor Lake',
+      'Poudre River Trail'
+    ],
+    boundaries: 'WCR 74 to WCR 23, CR 64 to CR 66',
+    coordinates: { latitude: '40.526', longitude: '-104.858' },
+    walkScore: 28,
+    metaDescription: 'Severance Heights real estate - established central Severance neighborhood with mature trees and family homes. SAA Homes.',
+    keywords: 'Severance Heights, Severance Colorado homes, established Severance neighborhood, Severance real estate, mature trees Severance, family homes Severance',
+    neighborhoodHighlights: [
+      { title: 'Central location', description: 'Located in the heart of Severance near the town center, community park, and Town Hall.' },
+      { title: 'Established setting', description: 'Mature trees and well-maintained homes in an established neighborhood with no HOA in most areas.' },
+      { title: 'Small-town lifestyle', description: 'Enjoy the quiet, safe atmosphere of Severance while being minutes from Windsor and Fort Collins.' }
+    ],
+  },
+
+  {
+    slug: 'castle-rock-severance',
+    citySlug: 'severance',
+    cityDisplay: 'Severance',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Castle Rock at Severance',
+    alsoKnownAs: [
+      'Castle Rock'
+    ],
+    description: 'Castle Rock at Severance is a newer luxury-oriented subdivision on the west side of Severance, featuring upscale homes with mountain views and premium lot sizes.',
+    longDescription: 'Castle Rock at Severance is a premier residential subdivision located on the western edge of Severance, offering some of the most desirable homes in the area. Developed from 2020 onward, this neighborhood features larger custom and semi-custom homes on premium lots with stunning views of Longs Peak and the Front Range. The architectural styles range from modern farmhouse to Craftsman and contemporary designs. The neighborhood elevated position provides panoramic mountain views that are highly sought after. Residents enjoy proximity to Windsor Kegler amenities, the Poudre River Trail, and easy access to Fort Collins via Highway 392. Castle Rock represents the top end of Severance housing market.',
+    homeStyles: ['Modern Farmhouse', 'Craftsman', 'Contemporary', 'Custom Home', 'Ranch'],
+    yearBuiltRange: { min: 2020, max: 2025 },
+    priceRangeDescription: '$550K to $850K+',
+    schoolDistrict: 'Weld County School District RE-4 (Windsor)',
+    schools: [
+      { name: 'Range View Elementary', type: 'elementary', level: 'K-5', rating: '9' },
+      { name: 'Severance Middle School', type: 'middle', level: '6-8', rating: '8' },
+      { name: 'Windsor High School', type: 'high', level: '9-12', rating: '9' }
+    ],
+    hoaDescription: 'Mandatory HOA ($75-$125/month) covers common areas and landscaping',
+    features: [
+      'Premium mountain views',
+      'Larger custom and semi-custom homes',
+      'Newer construction (2020+)',
+      'Quiet cul-de-sac streets',
+      'Close to Windsor and Fort Collins',
+      'Top-rated Windsor schools'
+    ],
+    parks: [
+      'Severance Community Park',
+      'Windsor Lake',
+      'Poudre River Trail'
+    ],
+    boundaries: 'WCR 23 to WCR 19, CR 66 to CR 68',
+    coordinates: { latitude: '40.530', longitude: '-104.880' },
+    walkScore: 15,
+    metaDescription: 'Castle Rock at Severance real estate - luxury homes with mountain views in premier Severance subdivision. SAA Homes.',
+    keywords: 'Castle Rock Severance, luxury homes Severance, mountain view homes Severance, new construction Severance, custom homes Severance, Windsor school district',
+    neighborhoodHighlights: [
+      { title: 'Mountain views', description: 'Elevated lots with some of the best mountain views in Severance, including Longs Peak and the Front Range.' },
+      { title: 'Premium homes', description: 'Custom and semi-custom homes with high-end finishes on generous lots.' },
+      { title: 'Top-rated schools', description: 'Served by the highly-rated Windsor RE-4 school district (Range View Elementary, Severance Middle, Windsor High).' }
+    ],
+  },
+
+  {
+    slug: 'somerset-johnstown',
+    citySlug: 'johnstown',
+    cityDisplay: 'Johnstown',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Somerset at Johnstown',
+    alsoKnownAs: [
+      'Somerset'
+    ],
+    description: 'Somerset at Johnstown is a popular newer subdivision offering contemporary homes with front-range views, family-oriented streets, and convenient access to I-25 and the Thompson River corridor.',
+    longDescription: 'Somerset at Johnstown is a master-planned residential community located on the east side of Johnstown, near the intersection of Weld County Road 17 and Weld County Road 48. Developed primarily from 2015 onward, this neighborhood features modern homes from multiple builders, with architectural styles ranging from Craftsman to contemporary two-story designs and ranch-style homes. Somerset offers a mix of standard and premium lots with mountain views in select locations. Residents benefit from proximity to the Thompson River, Johnstown growing retail corridor (including the new Buc-ee), and easy I-25 access for commuting to Greeley, Fort Collins, and Denver. The neighborhood has a strong family focus with parks, sidewalks, and a community pool.',
+    homeStyles: ['Craftsman', 'Contemporary', 'Two-Story', 'Ranch', 'Modern Farmhouse'],
+    yearBuiltRange: { min: 2015, max: 2025 },
+    priceRangeDescription: '$425K to $650K',
+    schoolDistrict: 'Johnstown-Milliken School District RE-5J',
+    schools: [
+      { name: 'Letford Elementary', type: 'elementary', level: 'K-5', rating: '8' },
+      { name: 'Milliken Middle School', type: 'middle', level: '6-8', rating: '7' },
+      { name: 'Roosevelt High School', type: 'high', level: '9-12', rating: '8' }
+    ],
+    hoaDescription: 'Mandatory HOA ($60-$100/month) covers common areas, pool, and landscaping',
+    features: [
+      'Newer construction (2015+)',
+      'Family-friendly with parks and pool',
+      'Mountain views available',
+      'I-25 access - 5 minutes',
+      'Growing retail corridor nearby',
+      'Community amenities including pool'
+    ],
+    parks: [
+      'Somerset Park',
+      'Thompson River Open Space',
+      'Johnstown Community Park'
+    ],
+    boundaries: 'WCR 17 to I-25, WCR 48 to WCR 50',
+    coordinates: { latitude: '40.335', longitude: '-104.900' },
+    walkScore: 25,
+    metaDescription: 'Somerset at Johnstown real estate - new homes with mountain views near I-25 in growing Johnstown Colorado. SAA Homes.',
+    keywords: 'Somerset Johnstown, Johnstown Colorado new homes, Somerset subdivision, Johnstown real estate, I-25 corridor homes, Roosevelt High School area, Johnstown family neighborhoods',
+    neighborhoodHighlights: [
+      { title: 'I-25 access', description: 'Minutes from I-25 with easy commuting to Greeley (15 min), Fort Collins (20 min), and Denver (45 min).' },
+      { title: 'Community amenities', description: 'Neighborhood parks, walking trails, and a community pool for residents.' },
+      { title: 'Growing area', description: 'Johnstown is one of the fastest-growing towns in Colorado with new retail and dining arriving regularly.' }
+    ],
+  },
+
+  {
+    slug: 'hidden-valley-johnstown',
+    citySlug: 'johnstown',
+    cityDisplay: 'Johnstown',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Hidden Valley at Johnstown',
+    alsoKnownAs: [
+      'Hidden Valley'
+    ],
+    description: 'Hidden Valley is an established Johnstown neighborhood on the west side, featuring ranch and two-story homes on spacious lots with a quiet country feel near the Thompson River.',
+    longDescription: 'Hidden Valley at Johnstown is an established residential area located on the west side of Johnstown, near Weld County Road 15 and Weld County Road 48. Developed in the 1990s and 2000s, this neighborhood offers a mix of ranch, split-level, and two-story traditional homes on larger lots with mature landscaping. The neighborhood sits near the Thompson River corridor, providing a natural setting with mature cottonwood trees and open space. Residents enjoy the quiet, semi-rural atmosphere while being just minutes from Johnstown shopping along Weld County Road 17 and the I-25 corridor. The location provides easy access to both Greeley and Loveland. Hidden Valley appeals to buyers seeking more space and privacy than newer subdivisions offer.',
+    homeStyles: ['Ranch', 'Two-Story Traditional', 'Split-Level', 'Bungalow'],
+    yearBuiltRange: { min: 1990, max: 2010 },
+    priceRangeDescription: '$375K to $525K',
+    schoolDistrict: 'Johnstown-Milliken School District RE-5J',
+    schools: [
+      { name: 'Letford Elementary', type: 'elementary', level: 'K-5', rating: '8' },
+      { name: 'Milliken Middle School', type: 'middle', level: '6-8', rating: '7' },
+      { name: 'Roosevelt High School', type: 'high', level: '9-12', rating: '8' }
+    ],
+    hoaDescription: 'No HOA in most of Hidden Valley',
+    features: [
+      'Established with mature trees',
+      'Larger lot sizes',
+      'Quiet country atmosphere',
+      'Near Thompson River',
+      'No HOA',
+      'Minutes to I-25 and shopping'
+    ],
+    parks: [
+      'Thompson River Open Space',
+      'Johnstown Community Park',
+      'Hidden Valley Park'
+    ],
+    boundaries: 'WCR 15 to WCR 17, WCR 48 to WCR 50',
+    coordinates: { latitude: '40.330', longitude: '-104.930' },
+    walkScore: 20,
+    metaDescription: 'Hidden Valley at Johnstown real estate - established homes on large lots near the Thompson River. SAA Homes.',
+    keywords: 'Hidden Valley Johnstown, established homes Johnstown, large lot homes Johnstown, Thompson River homes, no HOA Johnstown, Johnstown Colorado real estate',
+    neighborhoodHighlights: [
+      { title: 'Large lots', description: 'Spacious lots with room for gardens, pets, and outdoor living - more space than newer subdivisions.' },
+      { title: 'Natural setting', description: 'Mature cottonwood trees and proximity to the Thompson River corridor provide a natural environment.' },
+      { title: 'No HOA', description: 'Most areas of Hidden Valley have no HOA, offering more freedom and lower monthly costs.' }
+    ],
+  },
+
+  {
+    slug: 'fairfield-johnstown',
+    citySlug: 'johnstown',
+    cityDisplay: 'Johnstown',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Fairfield at Johnstown',
+    alsoKnownAs: [
+      'Fairfield'
+    ],
+    description: 'Fairfield at Johnstown is a family-oriented newer subdivision on the north side, featuring affordable new construction homes with playgrounds and community gathering spaces.',
+    longDescription: 'Fairfield at Johnstown is a growing residential community located on the north side of Johnstown, near Weld County Road 50 and Weld County Road 17. Developed from 2018 onward, Fairfield offers affordable new construction homes from regional builders, with ranch, two-story, and townhome styles available. The neighborhood features pocket parks, a community playground, and wide sidewalks for walking and biking. Its location provides convenient access to Johnstown retail corridor along WCR 17, including grocery, dining, and the new Buc-ee travel center. I-25 is just 5 minutes away for commuting. Fairfield represents one of the more affordable entry points into the Johnstown market for first-time homebuyers and young families.',
+    homeStyles: ['Ranch', 'Two-Story', 'Townhome', 'Contemporary'],
+    yearBuiltRange: { min: 2018, max: 2025 },
+    priceRangeDescription: '$350K to $500K',
+    schoolDistrict: 'Johnstown-Milliken School District RE-5J',
+    schools: [
+      { name: 'Letford Elementary', type: 'elementary', level: 'K-5', rating: '8' },
+      { name: 'Milliken Middle School', type: 'middle', level: '6-8', rating: '7' },
+      { name: 'Roosevelt High School', type: 'high', level: '9-12', rating: '8' }
+    ],
+    hoaDescription: 'Mandatory HOA ($50-$80/month) covers common areas and playground maintenance',
+    features: [
+      'Affordable new construction',
+      'Family-friendly with playgrounds',
+      'Wide sidewalks and walking paths',
+      'Close to Johnstown retail',
+      'I-25 access - 5 minutes',
+      'First-time buyer friendly'
+    ],
+    parks: [
+      'Fairfield Park',
+      'Johnstown Community Park',
+      'Thompson River Open Space'
+    ],
+    boundaries: 'WCR 50 to WCR 52, WCR 17 to I-25',
+    coordinates: { latitude: '40.345', longitude: '-104.905' },
+    walkScore: 22,
+    metaDescription: 'Fairfield at Johnstown real estate - affordable new homes near I-25 in growing Johnstown Colorado. SAA Homes.',
+    keywords: 'Fairfield Johnstown, affordable new homes Johnstown, first-time buyer Johnstown, new construction Johnstown Colorado, Johnstown real estate, I-25 corridor homes',
+    neighborhoodHighlights: [
+      { title: 'Affordable entry', description: 'Fairfield offers some of the most affordable new construction homes in the Johnstown area.' },
+      { title: 'Family design', description: 'Purpose-built family neighborhood with playgrounds, sidewalks, and safe streets for children.' },
+      { title: 'Convenient location', description: 'Minutes from I-25, Johnstown shopping, and the new Buc-ee travel center.' }
+    ],
+  },
+
+  {
+    slug: 'prairie-springs-johnstown',
+    citySlug: 'johnstown',
+    cityDisplay: 'Johnstown',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Prairie Springs at Johnstown',
+    alsoKnownAs: [
+      'Prairie Springs'
+    ],
+    description: 'Prairie Springs is a newer master-planned community on the south side of Johnstown, offering contemporary homes with scenic views and access to the Thompson River greenway.',
+    longDescription: 'Prairie Springs at Johnstown is a master-planned community located on the south side of Johnstown, near Weld County Road 46 and the Thompson River corridor. Developed from 2019 onward, this growing neighborhood features contemporary and Craftsman-style homes from multiple builders, with a range of floor plans from ranch-style to two-story family homes. The community is designed around open spaces and the natural Thompson River corridor, with walking trails and pocket parks throughout. Its location offers easy access to I-25, the Thompson River recreational area, and Johnstown expanding retail sector. Prairie Springs appeals to families and professionals seeking a newer community with a connection to nature.',
+    homeStyles: ['Contemporary', 'Craftsman', 'Two-Story', 'Ranch', 'Modern Farmhouse'],
+    yearBuiltRange: { min: 2019, max: 2025 },
+    priceRangeDescription: '$400K to $600K',
+    schoolDistrict: 'Johnstown-Milliken School District RE-5J',
+    schools: [
+      { name: 'Letford Elementary', type: 'elementary', level: 'K-5', rating: '8' },
+      { name: 'Milliken Middle School', type: 'middle', level: '6-8', rating: '7' },
+      { name: 'Roosevelt High School', type: 'high', level: '9-12', rating: '8' }
+    ],
+    hoaDescription: 'Mandatory HOA ($65-$95/month) covers common areas, trails, and landscaping',
+    features: [
+      'Newer construction (2019+)',
+      'Thompson River greenway access',
+      'Walking trails throughout',
+      'Open space and pocket parks',
+      'I-25 access - 3 minutes',
+      'Growing retail nearby'
+    ],
+    parks: [
+      'Prairie Springs Park',
+      'Thompson River Greenway',
+      'Johnstown Community Park'
+    ],
+    boundaries: 'WCR 46 to WCR 48, WCR 13 to WCR 17',
+    coordinates: { latitude: '40.320', longitude: '-104.910' },
+    walkScore: 22,
+    metaDescription: 'Prairie Springs at Johnstown real estate - new homes near Thompson River greenway with I-25 access. SAA Homes.',
+    keywords: 'Prairie Springs Johnstown, new homes Johnstown, Thompson River homes, Johnstown Colorado real estate, master-planned community Johnstown',
+    neighborhoodHighlights: [
+      { title: 'River greenway', description: 'Direct access to the Thompson River corridor with walking trails and natural open space.' },
+      { title: 'Master-planned', description: 'Thoughtfully designed community with parks, trails, and gathering spaces throughout.' },
+      { title: 'Quick commute', description: 'Just 3 minutes to I-25 with easy access to Greeley, Fort Collins, and Denver.' }
+    ],
+  },
+
+  {
+    slug: 'alpine-park-wellington',
+    citySlug: 'wellington',
+    cityDisplay: 'Wellington',
+    county: 'Larimer County',
+    type: 'neighborhood',
+    name: 'Alpine Park at Wellington',
+    alsoKnownAs: [
+      'Alpine Park'
+    ],
+    description: 'Alpine Park is a family-friendly Wellington subdivision offering newer construction homes with mountain views, parks, and easy access to Fort Collins via I-25.',
+    longDescription: 'Alpine Park at Wellington is a modern residential subdivision located on the east side of Wellington, near the intersection of Cleveland Avenue and 3rd Street. Developed from 2015 onward, this neighborhood features contemporary two-story and ranch-style homes from multiple builders. The community is designed with family living in mind, featuring pocket parks, wide sidewalks, and a central park area. Its location provides excellent access to I-25 (5 minutes) for commuting to Fort Collins (15 minutes) and Denver (60 minutes). Wellington downtown restaurants and shops are within walking distance or a short drive. Alpine Park offers the charm of small-town Wellington with the convenience of Fort Collins proximity.',
+    homeStyles: ['Contemporary', 'Two-Story', 'Ranch', 'Craftsman'],
+    yearBuiltRange: { min: 2015, max: 2025 },
+    priceRangeDescription: '$400K to $550K',
+    schoolDistrict: 'Poudre School District',
+    schools: [
+      { name: 'Rice Elementary', type: 'elementary', level: 'K-5', rating: '8' },
+      { name: 'Wellington Middle School', type: 'middle', level: '6-8', rating: '7' },
+      { name: 'Poudre High School', type: 'high', level: '9-12', rating: '9' }
+    ],
+    hoaDescription: 'Mandatory HOA ($50-$80/month) covers common area maintenance',
+    features: [
+      'Newer construction homes',
+      'Family-friendly with parks',
+      'Walkable to downtown Wellington',
+      'I-25 access - 5 minutes',
+      'Poudre School District',
+      'Mountain views'
+    ],
+    parks: [
+      'Alpine Park',
+      'Wellington Community Park',
+      'North Shields Ponds Open Space'
+    ],
+    boundaries: 'Cleveland Avenue to 3rd Street, Grant Avenue to I-25',
+    coordinates: { latitude: '40.700', longitude: '-105.000' },
+    walkScore: 32,
+    metaDescription: 'Alpine Park at Wellington real estate - new homes near Fort Collins in growing Wellington Colorado. SAA Homes.',
+    keywords: 'Alpine Park Wellington, Wellington Colorado new homes, Wellington real estate, Fort Collins bedroom communities, Poudre School District Wellington, new construction Larimer County',
+    neighborhoodHighlights: [
+      { title: 'Fort Collins nearby', description: 'Just 15 minutes to Fort Collins via I-25 - enjoy small-town living with big-city access.' },
+      { title: 'Top schools', description: 'Served by Poudre School District, including Poudre High School (9/10 rating).' },
+      { title: 'Walkable downtown', description: 'Walking distance to Wellington historic downtown with restaurants, shops, and community events.' }
+    ],
+  },
+
+  {
+    slug: 'mountain-shadows-wellington',
+    citySlug: 'wellington',
+    cityDisplay: 'Wellington',
+    county: 'Larimer County',
+    type: 'neighborhood',
+    name: 'Mountain Shadows at Wellington',
+    alsoKnownAs: [
+      'Mountain Shadows'
+    ],
+    description: 'Mountain Shadows is an established Wellington neighborhood offering ranch and split-level homes on larger lots with mature trees and panoramic views of the Rocky Mountains.',
+    longDescription: 'Mountain Shadows at Wellington is a well-established residential area located on the west side of Wellington, near the intersection of County Road 5 and Cleveland Avenue. Developed in the 1990s and early 2000s, this neighborhood features ranch, split-level, and two-story homes on generous lots with mature landscaping. The neighborhood elevated western position provides excellent mountain views, particularly of the Mummy Range and Longs Peak. Mountain Shadows appeals to buyers seeking more space, established landscaping, and a quiet atmosphere. The location provides easy access to Wellington downtown area and I-25 for commuting. Many homes in Mountain Shadows have no HOA, offering additional flexibility.',
+    homeStyles: ['Ranch', 'Split-Level', 'Two-Story Traditional', 'Bungalow'],
+    yearBuiltRange: { min: 1990, max: 2005 },
+    priceRangeDescription: '$425K to $600K',
+    schoolDistrict: 'Poudre School District',
+    schools: [
+      { name: 'Rice Elementary', type: 'elementary', level: 'K-5', rating: '8' },
+      { name: 'Wellington Middle School', type: 'middle', level: '6-8', rating: '7' },
+      { name: 'Poudre High School', type: 'high', level: '9-12', rating: '9' }
+    ],
+    hoaDescription: 'No HOA in most of Mountain Shadows',
+    features: [
+      'Mountain views to the west',
+      'Larger lot sizes',
+      'Established with mature trees',
+      'No HOA in most areas',
+      'Quiet family atmosphere',
+      'Minutes to I-25'
+    ],
+    parks: [
+      'Wellington Community Park',
+      'North Shields Ponds',
+      'Reservoir Park'
+    ],
+    boundaries: 'CR 5 to Cleveland Avenue, 1st Street to 5th Street',
+    coordinates: { latitude: '40.700', longitude: '-105.020' },
+    walkScore: 25,
+    metaDescription: 'Mountain Shadows at Wellington real estate - established homes with mountain views on large lots. SAA Homes.',
+    keywords: 'Mountain Shadows Wellington, Wellington Colorado mountain view homes, established Wellington neighborhood, large lot homes Wellington, no HOA Wellington, Poudre School District',
+    neighborhoodHighlights: [
+      { title: 'Mountain panoramas', description: 'Elevated position provides stunning views of the Rocky Mountains, including Longs Peak.' },
+      { title: 'Spacious lots', description: 'Larger lot sizes with mature trees and established landscaping throughout the neighborhood.' },
+      { title: 'No HOA option', description: 'Most of Mountain Shadows has no HOA, offering homeowners more freedom and lower monthly expenses.' }
+    ],
+  },
+
+  {
+    slug: 'timber-ridge-wellington',
+    citySlug: 'wellington',
+    cityDisplay: 'Wellington',
+    county: 'Larimer County',
+    type: 'neighborhood',
+    name: 'Timber Ridge at Wellington',
+    alsoKnownAs: [
+      'Timber Ridge'
+    ],
+    description: 'Timber Ridge is a newer Wellington subdivision on the north side offering contemporary homes, neighborhood parks, and quick access to I-25 for Fort Collins commuters.',
+    longDescription: 'Timber Ridge at Wellington is a growing residential community located on the north side of Wellington, near the intersection of County Road 66 and 1st Street. Developed from 2017 onward, this neighborhood features modern two-story and ranch homes with Craftsman and contemporary architectural details. The community includes pocket parks, walking paths, and a centrally-located playground. Its north Wellington location provides quick access to I-25 (just 3 minutes to the interchange) for commuting to Fort Collins, Loveland, and beyond. Timber Ridge represents Wellington continued growth as a popular Fort Collins bedroom community, offering newer homes at more affordable prices than Fort Collins proper.',
+    homeStyles: ['Contemporary', 'Two-Story', 'Ranch', 'Craftsman'],
+    yearBuiltRange: { min: 2017, max: 2025 },
+    priceRangeDescription: '$400K to $550K',
+    schoolDistrict: 'Poudre School District',
+    schools: [
+      { name: 'Rice Elementary', type: 'elementary', level: 'K-5', rating: '8' },
+      { name: 'Wellington Middle School', type: 'middle', level: '6-8', rating: '7' },
+      { name: 'Poudre High School', type: 'high', level: '9-12', rating: '9' }
+    ],
+    hoaDescription: 'Mandatory HOA ($55-$85/month) covers common areas and snow removal',
+    features: [
+      'Newer construction homes',
+      'North Wellington location',
+      'Quick I-25 access',
+      'Family-friendly with parks',
+      'Poudre School District',
+      'Affordable vs Fort Collins'
+    ],
+    parks: [
+      'Timber Ridge Park',
+      'Wellington Community Park',
+      'Reservoir Park'
+    ],
+    boundaries: 'CR 66 to CR 68, 1st Street to Cleveland Avenue',
+    coordinates: { latitude: '40.710', longitude: '-105.005' },
+    walkScore: 28,
+    metaDescription: 'Timber Ridge at Wellington real estate - new homes near I-25 with quick commute to Fort Collins. SAA Homes.',
+    keywords: 'Timber Ridge Wellington, new construction Wellington, Wellington Colorado real estate, Fort Collins commute Wellington, Poudre School District Wellington',
+    neighborhoodHighlights: [
+      { title: 'Commuter friendly', description: 'Just 3 minutes to I-25 for a quick 15-minute commute to Fort Collins.' },
+      { title: 'Newer construction', description: 'Modern open-concept homes from 2017 onward with energy-efficient features and contemporary finishes.' },
+      { title: 'Top-rated district', description: 'Served by Poudre School District, consistently one of the highest-rated districts in Northern Colorado.' }
+    ],
+  },
+
+  {
+    slug: 'cottonwood-wellington',
+    citySlug: 'wellington',
+    cityDisplay: 'Wellington',
+    county: 'Larimer County',
+    type: 'neighborhood',
+    name: 'Cottonwood at Wellington',
+    alsoKnownAs: [
+      'Cottonwood'
+    ],
+    description: 'Cottonwood at Wellington is an established neighborhood on Wellington south side, featuring ranch and traditional homes on tree-lined streets with proximity to schools and parks.',
+    longDescription: 'Cottonwood at Wellington is a well-established residential area on the south side of Wellington, located near Cleveland Avenue and 5th Street. Developed primarily in the 2000s, this neighborhood features ranch, two-story traditional, and Craftsman-style homes on landscaped lots with mature cottonwood trees. The neighborhood is popular with families due to its proximity to Rice Elementary School and Wellington Middle School, both within walking distance for many residents. The Wellington Community Park and Reservoir Park are nearby for recreation. Cottonwood southside location provides convenient access to I-25 and Fort Collins. The neighborhood offers an established alternative to newer developments with mature landscaping and a sense of community.',
+    homeStyles: ['Ranch', 'Two-Story Traditional', 'Craftsman', 'Bungalow'],
+    yearBuiltRange: { min: 2000, max: 2015 },
+    priceRangeDescription: '$400K to $550K',
+    schoolDistrict: 'Poudre School District',
+    schools: [
+      { name: 'Rice Elementary', type: 'elementary', level: 'K-5', rating: '8' },
+      { name: 'Wellington Middle School', type: 'middle', level: '6-8', rating: '7' },
+      { name: 'Poudre High School', type: 'high', level: '9-12', rating: '9' }
+    ],
+    hoaDescription: 'Some sections have HOAs ($30-$60/month); others have no HOA',
+    features: [
+      'Established tree-lined streets',
+      'Walking distance to schools',
+      'Family-friendly atmosphere',
+      'Close to parks and recreation',
+      'I-25 access nearby',
+      'Mature landscaping'
+    ],
+    parks: [
+      'Wellington Community Park',
+      'Reservoir Park',
+      'North Shields Ponds'
+    ],
+    boundaries: 'Cleveland Avenue to 5th Street, CR 64 to CR 66',
+    coordinates: { latitude: '40.695', longitude: '-105.010' },
+    walkScore: 30,
+    metaDescription: 'Cottonwood at Wellington real estate - established homes near schools and parks in family-friendly Wellington. SAA Homes.',
+    keywords: 'Cottonwood Wellington, established Wellington neighborhood, Wellington Colorado homes near schools, Poudre School District, Wellington real estate',
+    neighborhoodHighlights: [
+      { title: 'Walk to school', description: 'Walking distance to Rice Elementary and Wellington Middle School for most residents.' },
+      { title: 'Established charm', description: 'Mature cottonwood trees and developed landscaping create an established neighborhood feel.' },
+      { title: 'Southside convenience', description: 'South Wellington location provides quick access to I-25 and a short commute to Fort Collins.' }
+    ],
+  },
+
+  {
+    slug: 'spring-brook-niwot',
+    citySlug: 'niwot',
+    cityDisplay: 'Niwot',
+    county: 'Boulder County',
+    type: 'neighborhood',
+    name: 'Spring Brook at Niwot',
+    alsoKnownAs: [
+      'Spring Brook'
+    ],
+    description: 'Spring Brook is a peaceful Niwot neighborhood featuring newer custom homes on larger lots near the Boulder County countryside, with mountain views and access to Niwot historic downtown.',
+    longDescription: 'Spring Brook at Niwot is an established residential neighborhood located on the eastern edge of Niwot, near the intersection of Niwot Road and 73rd Street. Developed from the 1990s through the 2010s, this neighborhood features custom and semi-custom homes on generous lots, with architectural styles ranging from Craftsman to contemporary and ranch designs. The area offers a semi-rural feel while being part of the Niwot community. Many lots back to open space or agricultural land, providing privacy and views of the Front Range. Residents enjoy proximity to Niwot historic downtown with its restaurants, shops, and the famous Niwot Market. Spring Brook is served by the highly-rated St. Vrain Valley School District and is convenient to both Boulder and Longmont.',
+    homeStyles: ['Custom Home', 'Craftsman', 'Contemporary', 'Ranch', 'Tuscan'],
+    yearBuiltRange: { min: 1995, max: 2020 },
+    priceRangeDescription: '$600K to $1.2M+',
+    schoolDistrict: 'St. Vrain Valley School District',
+    schools: [
+      { name: 'Niwot Elementary', type: 'elementary', level: 'K-5', rating: '10' },
+      { name: 'Sunset Middle School', type: 'middle', level: '6-8', rating: '9' },
+      { name: 'Niwot High School', type: 'high', level: '9-12', rating: '9' }
+    ],
+    hoaDescription: 'Mandatory HOA ($75-$150/month) covers common areas and open space',
+    features: [
+      'Custom homes on large lots',
+      'Mountain and open space views',
+      'Quiet semi-rural setting',
+      'Top-rated Niwot schools',
+      'Minutes to Niwot downtown',
+      'Close to Boulder and Longmont'
+    ],
+    parks: [
+      'Niwot Community Park',
+      'Boulder County Open Space',
+      'Twin Lakes Open Space'
+    ],
+    boundaries: 'Niwot Road to CR 34, 73rd Street to 79th Street',
+    coordinates: { latitude: '40.102', longitude: '-105.155' },
+    walkScore: 22,
+    metaDescription: 'Spring Brook at Niwot real estate - custom homes on large lots with top-rated Niwot schools. SAA Homes.',
+    keywords: 'Spring Brook Niwot, Niwot Colorado custom homes, large lot homes Niwot, Niwot real estate, St Vrain Valley schools, Boulder County homes',
+    neighborhoodHighlights: [
+      { title: 'Premium schools', description: 'Niwot Elementary (10/10) and Niwot High School (9/10) - among the best in Colorado.' },
+      { title: 'Custom homes', description: 'Distinctive custom-built homes on generous lots, many with mountain and open space views.' },
+      { title: 'Historic Niwot', description: 'Minutes from Niwot charming historic downtown with the famous Niwot Market and local dining.' }
+    ],
+  },
+
+  {
+    slug: 'ponderosa-niwot',
+    citySlug: 'niwot',
+    cityDisplay: 'Niwot',
+    county: 'Boulder County',
+    type: 'neighborhood',
+    name: 'Ponderosa at Niwot',
+    alsoKnownAs: [
+      'Ponderosa'
+    ],
+    description: 'Ponderosa at Niwot is a mature neighborhood on the west side of Niwot, featuring ranch and split-level homes on wooded lots with mature Ponderosa pines and mountain views.',
+    longDescription: 'Ponderosa at Niwot is a well-established neighborhood located on the west side of Niwot, near Niwot Road and 67th Street. Developed primarily in the 1970s through 1990s, this neighborhood is characterized by its mature Ponderosa pine forest setting, with homes nestled among the trees on larger lots. Architectural styles include ranch, split-level, and custom contemporary designs that take advantage of the wooded terrain. The neighborhood enjoys a unique natural setting that feels like mountain living while being minutes from Niwot amenities. The elevation provides filtered views of Longs Peak and the Indian Peaks. Ponderosa at Niwot is one of Niwot most distinctive neighborhoods, offering privacy, natural beauty, and proximity to Boulder.',
+    homeStyles: ['Ranch', 'Split-Level', 'Custom Contemporary', 'Mid-Century Modern'],
+    yearBuiltRange: { min: 1970, max: 2000 },
+    priceRangeDescription: '$550K to $950K',
+    schoolDistrict: 'St. Vrain Valley School District',
+    schools: [
+      { name: 'Niwot Elementary', type: 'elementary', level: 'K-5', rating: '10' },
+      { name: 'Sunset Middle School', type: 'middle', level: '6-8', rating: '9' },
+      { name: 'Niwot High School', type: 'high', level: '9-12', rating: '9' }
+    ],
+    hoaDescription: 'Minimal HOA ($25-$50/month) covers road maintenance',
+    features: [
+      'Wooded lots with Ponderosa pines',
+      'Privacy and natural setting',
+      'Mountain views',
+      'Top-rated Niwot schools',
+      'Minutes to Boulder',
+      'Unique architectural character'
+    ],
+    parks: [
+      'Niwot Community Park',
+      'Boulder County Open Space',
+      'Heil Valley Ranch'
+    ],
+    boundaries: 'Niwot Road to Neva Road, 63rd Street to 67th Street',
+    coordinates: { latitude: '40.098', longitude: '-105.180' },
+    walkScore: 18,
+    metaDescription: 'Ponderosa at Niwot real estate - unique wooded neighborhood with Ponderosa pines near Boulder. SAA Homes.',
+    keywords: 'Ponderosa Niwot, Niwot wooded lots, Niwot pine forest homes, Niwot Colorado mountain homes, Niwot real estate, Boulder County wooded properties',
+    neighborhoodHighlights: [
+      { title: 'Wooded setting', description: 'Homes nestled among mature Ponderosa pines on larger lots with natural terrain and privacy.' },
+      { title: 'Mountain proximity', description: 'Minutes from Boulder County open space, Heil Valley Ranch, and trailheads for hiking and biking.' },
+      { title: 'Distinctive character', description: 'Unique architectural styles that complement the natural setting - unlike typical subdivisions.' }
+    ],
+  },
+
+  {
+    slug: 'east-niwot',
+    citySlug: 'niwot',
+    cityDisplay: 'Niwot',
+    county: 'Boulder County',
+    type: 'neighborhood',
+    name: 'East Niwot',
+    alsoKnownAs: [
+      'East Niwot'
+    ],
+    description: 'East Niwot is a historic residential area on Niwot eastern side, featuring charming older homes, tree-lined streets, and walking distance to Niwot historic downtown district.',
+    longDescription: 'East Niwot is the historic eastern section of Niwot, stretching east of Main Street toward 79th Street and Boulder County open space. This area features Niwot original residential core, with homes ranging from early 1900s cottages and bungalows to mid-century ranches and newer infill construction. The tree-lined streets, sidewalks, and historic character make East Niwot one of the most walkable parts of town, with easy access to Niwot historic downtown, the Niwot Market, and local restaurants. The neighborhood borders agricultural land and open space, providing a rural backdrop. East Niwot mix of historic charm and modern updates, combined with the top-rated St. Vrain Valley schools, makes it a highly sought-after area for those who value character and community.',
+    homeStyles: ['Victorian', 'Craftsman Bungalow', 'Mid-Century Ranch', 'Contemporary', 'Cottage'],
+    yearBuiltRange: { min: 1900, max: 2025 },
+    priceRangeDescription: '$500K to $900K',
+    schoolDistrict: 'St. Vrain Valley School District',
+    schools: [
+      { name: 'Niwot Elementary', type: 'elementary', level: 'K-5', rating: '10' },
+      { name: 'Sunset Middle School', type: 'middle', level: '6-8', rating: '9' },
+      { name: 'Niwot High School', type: 'high', level: '9-12', rating: '9' }
+    ],
+    hoaDescription: 'No HOA',
+    features: [
+      'Historic homes and character',
+      'Walkable to downtown Niwot',
+      'Tree-lined streets',
+      'Top-rated schools',
+      'No HOA',
+      'Borders open space'
+    ],
+    parks: [
+      'Niwot Community Park',
+      'Boulder County Open Space',
+      'Twin Lakes Open Space'
+    ],
+    boundaries: 'Main Street to 79th Street, Niwot Road to CR 32',
+    coordinates: { latitude: '40.100', longitude: '-105.160' },
+    walkScore: 45,
+    metaDescription: 'East Niwot real estate - historic homes in walkable Niwot near top-rated schools and downtown. SAA Homes.',
+    keywords: 'East Niwot, historic Niwot Colorado, Niwot downtown homes, Niwot real estate, walkable Niwot neighborhoods, St Vrain Valley schools',
+    neighborhoodHighlights: [
+      { title: 'Walkable location', description: 'Walk to Niwot Market, local restaurants, coffee shops, and the historic downtown district.' },
+      { title: 'Historic charm', description: 'Character-rich homes from the early 1900s to mid-century, many with modern updates.' },
+      { title: 'Top schools', description: 'Niwot Elementary (10/10) and Niwot High School (9/10) - among Colorado best schools.' }
+    ],
+  },
+
+  {
+    slug: 'niwot-heights',
+    citySlug: 'niwot',
+    cityDisplay: 'Niwot',
+    county: 'Boulder County',
+    type: 'neighborhood',
+    name: 'Niwot Heights',
+    alsoKnownAs: [
+      'Niwot Heights'
+    ],
+    description: 'Niwot Heights is a newer custom-home neighborhood on the northern edge of Niwot, featuring elevated lots with panoramic Front Range and Longs Peak views.',
+    longDescription: 'Niwot Heights is a newer residential area on the northern edge of Niwot, located north of Niwot Road near the intersection with 73rd Street. Developed from 2005 onward, this neighborhood offers larger custom and semi-custom homes on elevated lots with some of the best mountain views in the Niwot area. The homes feature contemporary, Craftsman, and Tuscan architectural styles, many with walkout basements taking advantage of the terrain. The neighborhood elevated position provides sweeping views of Longs Peak, the Indian Peaks, and the Boulder Valley. Residents enjoy the peace of a semi-rural setting while being just minutes from Niwot downtown and 15 minutes from Boulder. Niwot Heights represents the premium end of the Niwot housing market.',
+    homeStyles: ['Custom Home', 'Contemporary', 'Craftsman', 'Tuscan', 'Ranch'],
+    yearBuiltRange: { min: 2005, max: 2025 },
+    priceRangeDescription: '$700K to $1.5M+',
+    schoolDistrict: 'St. Vrain Valley School District',
+    schools: [
+      { name: 'Niwot Elementary', type: 'elementary', level: 'K-5', rating: '10' },
+      { name: 'Sunset Middle School', type: 'middle', level: '6-8', rating: '9' },
+      { name: 'Niwot High School', type: 'high', level: '9-12', rating: '9' }
+    ],
+    hoaDescription: 'Mandatory HOA ($100-$200/month) covers common area and open space maintenance',
+    features: [
+      'Panoramic mountain views',
+      'Custom and luxury homes',
+      'Elevated building sites',
+      'Quiet private setting',
+      'Top-rated Niwot schools',
+      'Close to Boulder'
+    ],
+    parks: [
+      'Niwot Community Park',
+      'Boulder County Open Space',
+      'Heil Valley Ranch'
+    ],
+    boundaries: 'Niwot Road to CR 36, 73rd Street to 79th Street',
+    coordinates: { latitude: '40.108', longitude: '-105.165' },
+    walkScore: 15,
+    metaDescription: 'Niwot Heights real estate - luxury custom homes with panoramic mountain views in Niwot Colorado. SAA Homes.',
+    keywords: 'Niwot Heights, Niwot luxury homes, custom homes Niwot, mountain view homes Niwot, Niwot Colorado luxury real estate, Boulder County custom homes',
+    neighborhoodHighlights: [
+      { title: 'Panoramic views', description: 'Elevated lots provide sweeping views of Longs Peak, Indian Peaks, and the entire Boulder Valley.' },
+      { title: 'Custom luxury', description: 'Premium custom-built homes with high-end finishes, walkout basements, and architectural distinction.' },
+      { title: 'Boulder proximity', description: 'Just 15 minutes to Boulder and 10 minutes to Longmont with top-rated Niwot schools.' }
+    ],
+  },
+
+  {
+    slug: 'twin-peaks-berthoud',
+    citySlug: 'berthoud',
+    cityDisplay: 'Berthoud',
+    county: 'Larimer County',
+    type: 'neighborhood',
+    name: 'Twin Peaks at Berthoud',
+    alsoKnownAs: [
+      'Twin Peaks'
+    ],
+    description: 'Twin Peaks is a newer Berthoud subdivision on the west side offering modern farmhouse and contemporary homes with mountain views and easy access to US 287.',
+    longDescription: 'Twin Peaks at Berthoud is a growing residential subdivision located on the west side of Berthoud, near the intersection of US 287 and Weld County Road 8. Developed from 2018 onward, this neighborhood features new construction homes with Craftsman, modern farmhouse, and contemporary architectural styles. The elevated western location provides excellent views of Longs Peak and the Twin Peaks (Mount Meeker and Longs Peak) that give the neighborhood its name. Residents enjoy Berthoud small-town charm while having convenient access to US 287 for commuting to Loveland (10 minutes) and Fort Collins (20 minutes). The Berthoud Community Park and Lake Park are nearby for recreation.',
+    homeStyles: ['Modern Farmhouse', 'Craftsman', 'Contemporary', 'Two-Story', 'Ranch'],
+    yearBuiltRange: { min: 2018, max: 2025 },
+    priceRangeDescription: '$450K to $650K',
+    schoolDistrict: 'Thompson School District',
+    schools: [
+      { name: 'Berthoud Elementary', type: 'elementary', level: 'K-5', rating: '8' },
+      { name: 'Turner Middle School', type: 'middle', level: '6-8', rating: '7' },
+      { name: 'Berthoud High School', type: 'high', level: '9-12', rating: '8' }
+    ],
+    hoaDescription: 'Mandatory HOA ($60-$90/month) covers common areas and snow removal',
+    features: [
+      'New construction homes',
+      'Mountain views to the west',
+      'West Berthoud location',
+      'US 287 access for commuting',
+      'Close to Berthoud parks',
+      'Growing community'
+    ],
+    parks: [
+      'Berthoud Community Park',
+      'Lake Park',
+      'Foothills Park'
+    ],
+    boundaries: 'US 287 to CR 9, CR 8 to CR 10',
+    coordinates: { latitude: '40.300', longitude: '-105.080' },
+    walkScore: 22,
+    metaDescription: 'Twin Peaks at Berthoud real estate - new homes with mountain views in west Berthoud. SAA Homes.',
+    keywords: 'Twin Peaks Berthoud, new construction Berthoud, Berthoud Colorado homes, west Berthoud real estate, mountain view homes Berthoud, Thompson School District',
+    neighborhoodHighlights: [
+      { title: 'Mountain views', description: 'West Berthoud elevation provides stunning views of Longs Peak and the Twin Peaks massif.' },
+      { title: 'New construction', description: 'Modern open-concept homes with energy-efficient features and contemporary finishes.' },
+      { title: 'Small-town lifestyle', description: 'Berthoud offers historic small-town charm with easy access to Loveland and Fort Collins.' }
+    ],
+  },
+
+  {
+    slug: 'lake-park-berthoud',
+    citySlug: 'berthoud',
+    cityDisplay: 'Berthoud',
+    county: 'Larimer County',
+    type: 'neighborhood',
+    name: 'Lake Park at Berthoud',
+    alsoKnownAs: [
+      'Lake Park'
+    ],
+    description: 'Lake Park is a family-friendly Berthoud neighborhood near Berthoud Community Park and Lake Park, featuring a mix of established homes and newer construction in a park-like setting.',
+    longDescription: 'Lake Park at Berthoud is a residential area located in central Berthoud, centered around the Berthoud Community Park and Lake Park on Massachusetts Avenue and 7th Street. This area encompasses several subdivisions built from the 1990s through the present, offering a diverse mix of housing options including ranch homes, two-story traditional houses, and newer infill construction. The neighborhood is defined by its proximity to Lake Park, which features a fishing lake, playground, sports fields, and walking trails. Residents enjoy walking distance to Berthoud historic downtown and its shops, restaurants, and breweries. The neighborhood central location provides easy access to US 287 and Berthoud schools.',
+    homeStyles: ['Ranch', 'Two-Story Traditional', 'Contemporary', 'Bungalow', 'Craftsman'],
+    yearBuiltRange: { min: 1990, max: 2025 },
+    priceRangeDescription: '$375K to $550K',
+    schoolDistrict: 'Thompson School District',
+    schools: [
+      { name: 'Berthoud Elementary', type: 'elementary', level: 'K-5', rating: '8' },
+      { name: 'Turner Middle School', type: 'middle', level: '6-8', rating: '7' },
+      { name: 'Berthoud High School', type: 'high', level: '9-12', rating: '8' }
+    ],
+    hoaDescription: 'Some areas have HOAs ($25-$60/month); older sections have no HOA',
+    features: [
+      'Lake Park with fishing and trails',
+      'Walking distance to downtown',
+      'Mix of home styles and eras',
+      'Central Berthoud location',
+      'Family-friendly atmosphere',
+      'Near schools'
+    ],
+    parks: [
+      'Berthoud Community Park',
+      'Lake Park',
+      'Foothills Park'
+    ],
+    boundaries: 'Massachusetts Avenue to 7th Street, CR 6 to CR 8',
+    coordinates: { latitude: '40.305', longitude: '-105.070' },
+    walkScore: 40,
+    metaDescription: 'Lake Park at Berthoud real estate - homes near Berthoud Lake Park and historic downtown. SAA Homes.',
+    keywords: 'Lake Park Berthoud, Berthoud Colorado homes near park, Berthoud downtown neighborhood, Berthoud real estate, Thompson School District, walkable Berthoud neighborhoods',
+    neighborhoodHighlights: [
+      { title: 'Lake Park access', description: 'Walking distance to Lake Park with fishing, playgrounds, sports fields, and walking trails.' },
+      { title: 'Downtown nearby', description: 'Walk to Berthoud historic downtown with restaurants, breweries, and unique shops.' },
+      { title: 'Central location', description: 'Central Berthoud location with easy access to schools, US 287, and community amenities.' }
+    ],
+  },
+
+  {
+    slug: 'cimarron-berthoud',
+    citySlug: 'berthoud',
+    cityDisplay: 'Berthoud',
+    county: 'Larimer County',
+    type: 'neighborhood',
+    name: 'Cimarron at Berthoud',
+    alsoKnownAs: [
+      'Cimarron'
+    ],
+    description: 'Cimarron is an established Berthoud subdivision on the south side featuring ranch and two-story homes on landscaped lots with a quiet family atmosphere and mountain views.',
+    longDescription: 'Cimarron at Berthoud is a well-established residential subdivision on the south side of Berthoud, located near Weld County Road 6 and Weld County Road 21. Developed in the 1990s and early 2000s, this neighborhood features ranch, split-level, and two-story traditional homes on nicely landscaped lots. The neighborhood offers a quiet, family-friendly atmosphere with tree-lined streets and community green spaces. Many homes in Cimarron have upgraded kitchens, finished basements, and mature landscaping. The south Berthoud location provides easy access to US 287 for commuting to Loveland, Longmont, and Fort Collins. The neighborhood is served by Berthoud schools and is close to Berthoud Community Park.',
+    homeStyles: ['Ranch', 'Two-Story Traditional', 'Split-Level', 'Bungalow'],
+    yearBuiltRange: { min: 1995, max: 2010 },
+    priceRangeDescription: '$400K to $550K',
+    schoolDistrict: 'Thompson School District',
+    schools: [
+      { name: 'Berthoud Elementary', type: 'elementary', level: 'K-5', rating: '8' },
+      { name: 'Turner Middle School', type: 'middle', level: '6-8', rating: '7' },
+      { name: 'Berthoud High School', type: 'high', level: '9-12', rating: '8' }
+    ],
+    hoaDescription: 'Mandatory HOA ($35-$60/month) covers common area maintenance',
+    features: [
+      'Established with mature landscaping',
+      'Quiet family-friendly streets',
+      'Mountain views available',
+      'Central to Berthoud amenities',
+      'US 287 access',
+      'South Berthoud location'
+    ],
+    parks: [
+      'Berthoud Community Park',
+      'Lake Park',
+      'Foothills Park'
+    ],
+    boundaries: 'CR 6 to CR 8, CR 19 to CR 21',
+    coordinates: { latitude: '40.295', longitude: '-105.065' },
+    walkScore: 25,
+    metaDescription: 'Cimarron at Berthoud real estate - established Berthoud subdivision with family homes near schools. SAA Homes.',
+    keywords: 'Cimarron Berthoud, Berthoud Colorado established neighborhood, Berthoud family homes, south Berthoud real estate, Thompson School District Berthoud',
+    neighborhoodHighlights: [
+      { title: 'Established setting', description: 'Mature landscaping and established trees create an inviting, settled neighborhood atmosphere.' },
+      { title: 'Community feel', description: 'Quiet streets, family-friendly environment with parks and green spaces throughout.' },
+      { title: 'Convenient access', description: 'Easy access to US 287 for commuting to Loveland, Fort Collins, and Longmont.' }
+    ],
+  },
+
+  {
+    slug: 'foothills-berthoud',
+    citySlug: 'berthoud',
+    cityDisplay: 'Berthoud',
+    county: 'Larimer County',
+    type: 'neighborhood',
+    name: 'Foothills at Berthoud',
+    alsoKnownAs: [
+      'Foothills'
+    ],
+    description: 'Foothills at Berthoud is a newer development on Berthoud west side, offering modern homes on the edge of the Rocky Mountain foothills with direct access to hiking and biking trails.',
+    longDescription: 'Foothills at Berthoud is a recently developed residential area on the far west side of Berthoud, located near the intersection of Weld County Road 10 and Weld County Road 15. Built from 2019 onward, this neighborhood represents Berthoud westward expansion toward the foothills. The homes feature contemporary, Craftsman, and modern farmhouse architectural styles on lots that back to natural open space and agricultural land. The neighborhood western position provides immediate access to the Berthoud foothills trail system and panoramic mountain views. Residents enjoy proximity to US 287 while being situated in a peaceful rural setting. Foothills at Berthoud appeals to those who want new construction with direct access to the outdoors.',
+    homeStyles: ['Contemporary', 'Modern Farmhouse', 'Craftsman', 'Ranch', 'Two-Story'],
+    yearBuiltRange: { min: 2019, max: 2025 },
+    priceRangeDescription: '$475K to $700K',
+    schoolDistrict: 'Thompson School District',
+    schools: [
+      { name: 'Berthoud Elementary', type: 'elementary', level: 'K-5', rating: '8' },
+      { name: 'Turner Middle School', type: 'middle', level: '6-8', rating: '7' },
+      { name: 'Berthoud High School', type: 'high', level: '9-12', rating: '8' }
+    ],
+    hoaDescription: 'Mandatory HOA ($75-$110/month) covers open space and trail maintenance',
+    features: [
+      'Foothills location with views',
+      'Direct trail access',
+      'New construction homes',
+      'Open space adjacent',
+      'Quiet rural setting',
+      'US 287 access nearby'
+    ],
+    parks: [
+      'Berthoud Community Park',
+      'Foothills Trail System',
+      'Lake Park'
+    ],
+    boundaries: 'CR 10 to CR 12, CR 13 to CR 15',
+    coordinates: { latitude: '40.308', longitude: '-105.100' },
+    walkScore: 15,
+    metaDescription: 'Foothills at Berthoud real estate - new foothills homes with trail access in west Berthoud. SAA Homes.',
+    keywords: 'Foothills Berthoud, west Berthoud new homes, Berthoud foothills real estate, trail access homes Berthoud, new construction Larimer County',
+    neighborhoodHighlights: [
+      { title: 'Trail access', description: 'Direct access to foothills trail system for hiking, biking, and exploring the outdoors.' },
+      { title: 'Mountain views', description: 'Panoramic views of the Rocky Mountain foothills and Longs Peak from this elevated location.' },
+      { title: 'New construction', description: 'Energy-efficient new homes with modern open floor plans and premium finishes.' }
+    ],
+  },
+
+  {
+    slug: 'fields-at-timnath',
+    citySlug: 'timnath',
+    cityDisplay: 'Timnath',
+    county: 'Larimer County',
+    type: 'neighborhood',
+    name: 'The Fields at Timnath',
+    alsoKnownAs: [
+      'The Fields at Timnath'
+    ],
+    description: 'The Fields at Timnath is a premier master-planned community in Timnath offering luxury new construction homes, community parks, and easy access to Fort Collins and I-25.',
+    longDescription: 'The Fields at Timnath is a master-planned residential community located on the north side of Timnath, near the intersection of Harmony Road and I-25. This upscale development features luxury new construction homes from top regional builders, with architectural styles including modern farmhouse, Craftsman, contemporary, and Tuscan designs. The community is built around a central park and green space, with walking trails, pocket parks, and a neighborhood pool. Its location at the Harmony Road and I-25 interchange provides unparalleled access to Fort Collins (5 minutes), Windsor, and Loveland. The Fields at Timnath represents the premier address in Timnath, appealing to professionals and families seeking luxury new construction in a convenient location.',
+    homeStyles: ['Modern Farmhouse', 'Craftsman', 'Contemporary', 'Tuscan', 'Ranch'],
+    yearBuiltRange: { min: 2018, max: 2025 },
+    priceRangeDescription: '$550K to $900K+',
+    schoolDistrict: 'Poudre School District',
+    schools: [
+      { name: 'Timnath Elementary', type: 'elementary', level: 'K-5', rating: '9' },
+      { name: 'Preston Middle School', type: 'middle', level: '6-8', rating: '9' },
+      { name: 'Fossil Ridge High School', type: 'high', level: '9-12', rating: '9' }
+    ],
+    hoaDescription: 'Mandatory HOA ($100-$150/month) covers common areas, pool, and landscaping',
+    features: [
+      'Luxury new construction homes',
+      'Community pool and parks',
+      'Walking trails throughout',
+      'Harmony Road / I-25 location',
+      'Top-rated Poudre schools',
+      'Minutes to Fort Collins'
+    ],
+    parks: [
+      'The Fields Community Park',
+      'Timnath Community Park',
+      'Running Deer Open Space'
+    ],
+    boundaries: 'Harmony Road to Timnath Boulevard, I-25 to CR 5',
+    coordinates: { latitude: '40.530', longitude: '-104.975' },
+    walkScore: 25,
+    metaDescription: 'The Fields at Timnath real estate - luxury new homes near I-25 in premier Timnath community. SAA Homes.',
+    keywords: 'Fields Timnath, Timnath Colorado luxury homes, new construction Timnath, Harmony Road homes, I-25 corridor homes, Poudre School District',
+    neighborhoodHighlights: [
+      { title: 'Premier location', description: 'At the Harmony Road and I-25 interchange - the best access in Northern Colorado to Fort Collins, Windsor, and Loveland.' },
+      { title: 'Top schools', description: 'Served by Poudre School District with Timnath Elementary (9/10), Preston Middle (9/10), and Fossil Ridge High (9/10).' },
+      { title: 'Community amenities', description: 'Neighborhood pool, parks, walking trails, and meticulously maintained common areas.' }
+    ],
+  },
+
+  {
+    slug: 'iron-horse-timnath',
+    citySlug: 'timnath',
+    cityDisplay: 'Timnath',
+    county: 'Larimer County',
+    type: 'neighborhood',
+    name: 'Iron Horse at Timnath',
+    alsoKnownAs: [
+      'Iron Horse'
+    ],
+    description: 'Iron Horse at Timnath is a newer subdivision on Timnath southern edge, offering contemporary homes with mountain views near the Poudre River and Timnath growing amenities.',
+    longDescription: 'Iron Horse at Timnath is a residential subdivision located on the south side of Timnath, near the intersection of Timnath Boulevard and Weld County Road 7. Developed from 2020 onward, this neighborhood features contemporary two-story and ranch-style homes from regional builders. The neighborhood is situated near the Cache la Poudre River corridor, offering scenic river access and proximity to the Poudre River Trail. Iron Horse southern Timnath location provides easy access to the Harmony Road commercial corridor and I-25. The neighborhood appeals to families and professionals seeking newer construction in Timnath rapidly developing southern sector.',
+    homeStyles: ['Contemporary', 'Two-Story', 'Ranch', 'Craftsman'],
+    yearBuiltRange: { min: 2020, max: 2025 },
+    priceRangeDescription: '$475K to $700K',
+    schoolDistrict: 'Poudre School District',
+    schools: [
+      { name: 'Timnath Elementary', type: 'elementary', level: 'K-5', rating: '9' },
+      { name: 'Preston Middle School', type: 'middle', level: '6-8', rating: '9' },
+      { name: 'Fossil Ridge High School', type: 'high', level: '9-12', rating: '9' }
+    ],
+    hoaDescription: 'Mandatory HOA ($65-$95/month) covers common areas',
+    features: [
+      'Newer construction (2020+)',
+      'Near Poudre River Trail',
+      'Mountain views available',
+      'Close to Harmony Road retail',
+      'I-25 access',
+      'Top-rated schools'
+    ],
+    parks: [
+      'Timnath Community Park',
+      'Poudre River Trail',
+      'Running Deer Open Space'
+    ],
+    boundaries: 'Timnath Boulevard to CR 7, CR 5 to CR 7',
+    coordinates: { latitude: '40.518', longitude: '-104.968' },
+    walkScore: 20,
+    metaDescription: 'Iron Horse at Timnath real estate - new homes near Poudre River Trail in south Timnath. SAA Homes.',
+    keywords: 'Iron Horse Timnath, Timnath Colorado new homes, south Timnath real estate, Poudre River Trail Timnath, Timnath subdivisions, Harmony Road Timnath',
+    neighborhoodHighlights: [
+      { title: 'River trail access', description: 'Near the Cache la Poudre River and Poudre River Trail for walking, biking, and nature.' },
+      { title: 'South Timnath growth', description: 'Located in Timnath rapidly developing south side with new retail and dining nearby.' },
+      { title: 'Excellent schools', description: 'Top-rated Poudre School District with 9/10 rated elementary, middle, and high schools.' }
+    ],
+  },
+
+  {
+    slug: 'bridle-ridge-timnath',
+    citySlug: 'timnath',
+    cityDisplay: 'Timnath',
+    county: 'Larimer County',
+    type: 'neighborhood',
+    name: 'Bridle Ridge at Timnath',
+    alsoKnownAs: [
+      'Bridle Ridge'
+    ],
+    description: 'Bridle Ridge at Timnath is an established neighborhood on Timnath west side, featuring luxury homes on larger lots with equestrian-friendly zoning and panoramic mountain views.',
+    longDescription: 'Bridle Ridge at Timnath is a prestigious residential neighborhood on the west side of Timnath, located near Timnath Boulevard and Weld County Road 5. Developed from 2010 onward, this neighborhood features larger custom and semi-custom homes on premium lots, many with horse-friendly zoning and direct access to Bridle Ridge Trail. The architectural styles range from modern farmhouse to Tuscan and contemporary designs. The elevated western position provides panoramic views of the Rocky Mountains, including Longs Peak. Many lots back to open space or have direct trail access. Bridle Ridge offers a unique combination of luxury living and equestrian lifestyle within minutes of Fort Collins, appealing to horse owners and those seeking acreage with a luxury home.',
+    homeStyles: ['Custom Home', 'Modern Farmhouse', 'Tuscan', 'Contemporary', 'Ranch'],
+    yearBuiltRange: { min: 2010, max: 2025 },
+    priceRangeDescription: '$700K to $1.5M+',
+    schoolDistrict: 'Poudre School District',
+    schools: [
+      { name: 'Timnath Elementary', type: 'elementary', level: 'K-5', rating: '9' },
+      { name: 'Preston Middle School', type: 'middle', level: '6-8', rating: '9' },
+      { name: 'Fossil Ridge High School', type: 'high', level: '9-12', rating: '9' }
+    ],
+    hoaDescription: 'Mandatory HOA ($100-$200/month) covers trail and open space maintenance',
+    features: [
+      'Luxury custom homes',
+      'Horse-friendly zoning available',
+      'Panoramic mountain views',
+      'Direct trail access',
+      'Large premium lots',
+      'Minutes to Fort Collins'
+    ],
+    parks: [
+      'Timnath Community Park',
+      'Bridle Ridge Trail',
+      'Running Deer Open Space'
+    ],
+    boundaries: 'Timnath Boulevard to CR 5, CR 7 to CR 9',
+    coordinates: { latitude: '40.528', longitude: '-104.990' },
+    walkScore: 12,
+    metaDescription: 'Bridle Ridge at Timnath real estate - luxury equestrian estates with mountain views near Fort Collins. SAA Homes.',
+    keywords: 'Bridle Ridge Timnath, luxury homes Timnath, equestrian properties Timnath, mountain view estates Timnath, custom homes Larimer County',
+    neighborhoodHighlights: [
+      { title: 'Equestrian lifestyle', description: 'Horse-friendly lots with trail access - bring your horses to this premium Timnath community.' },
+      { title: 'Luxury living', description: 'Custom-built luxury homes on generously sized lots with high-end finishes throughout.' },
+      { title: 'Stunning views', description: 'Panoramic mountain views from this elevated west Timnath location.' }
+    ],
+  },
+
+  {
+    slug: 'westchester-timnath',
+    citySlug: 'timnath',
+    cityDisplay: 'Timnath',
+    county: 'Larimer County',
+    type: 'neighborhood',
+    name: 'Westchester at Timnath',
+    alsoKnownAs: [
+      'Westchester'
+    ],
+    description: 'Westchester at Timnath is an established family neighborhood in central Timnath, offering well-maintained ranch and two-story homes on quiet streets near Timnath Elementary.',
+    longDescription: 'Westchester at Timnath is an established residential area in central Timnath, located near the intersection of Timnath Boulevard and Main Street. Developed primarily in the 2000s and early 2010s, this neighborhood features well-maintained ranch, two-story, and split-level homes on landscaped lots with mature trees. The neighborhood is popular with families due to its proximity to Timnath Elementary School and Timnath Community Park. Westchester central location provides convenient access to the Harmony Road commercial district and I-25. The neighborhood offers an established alternative to Timnath newer developments, with mature landscaping and a strong sense of community.',
+    homeStyles: ['Ranch', 'Two-Story Traditional', 'Split-Level', 'Craftsman'],
+    yearBuiltRange: { min: 2000, max: 2012 },
+    priceRangeDescription: '$450K to $625K',
+    schoolDistrict: 'Poudre School District',
+    schools: [
+      { name: 'Timnath Elementary', type: 'elementary', level: 'K-5', rating: '9' },
+      { name: 'Preston Middle School', type: 'middle', level: '6-8', rating: '9' },
+      { name: 'Fossil Ridge High School', type: 'high', level: '9-12', rating: '9' }
+    ],
+    hoaDescription: 'Mandatory HOA ($40-$70/month) covers common areas',
+    features: [
+      'Established with mature landscaping',
+      'Walk to Timnath Elementary',
+      'Central Timnath location',
+      'Quiet tree-lined streets',
+      'Family-friendly atmosphere',
+      'Close to I-25 and shopping'
+    ],
+    parks: [
+      'Timnath Community Park',
+      'The Fields Community Park',
+      'Running Deer Open Space'
+    ],
+    boundaries: 'Timnath Boulevard to Main Street, CR 5 to CR 7',
+    coordinates: { latitude: '40.525', longitude: '-104.975' },
+    walkScore: 30,
+    metaDescription: 'Westchester at Timnath real estate - established family homes near Timnath Elementary. SAA Homes.',
+    keywords: 'Westchester Timnath, established Timnath neighborhood, Timnath Colorado homes near school, Timnath Central real estate, Poudre School District Timnath',
+    neighborhoodHighlights: [
+      { title: 'Walk to school', description: 'Walking distance to Timnath Elementary School (9/10) - ideal for families with young children.' },
+      { title: 'Established setting', description: 'Mature trees and established landscaping create a welcoming neighborhood atmosphere.' },
+      { title: 'Central location', description: 'Central Timnath location close to parks, dining, and I-25 for easy commuting.' }
+    ],
+  },
+
+  {
+    slug: 'barefoot-lakes-firestone',
+    citySlug: 'firestone',
+    cityDisplay: 'Firestone',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Barefoot Lakes at Firestone',
+    alsoKnownAs: [
+      'Barefoot Lakes'
+    ],
+    description: 'Barefoot Lakes is Firestone premier master-planned community, centered around lakes, beaches, and parks with resort-style amenities and luxury new construction homes.',
+    longDescription: 'Barefoot Lakes at Firestone is the premier master-planned community in Firestone, located on the south side of town near I-25 and Weld County Road 18. This expansive development is centered around a series of man-made lakes with a sand beach, swimming area, and water sports. The community features luxury new construction homes from top regional builders, with architectural styles ranging from modern farmhouse to Craftsman, contemporary, and Tuscan designs. Amenities include the Beach Club with pool and fitness center, miles of walking trails, parks, playgrounds, and fishing piers. Its location at I-25 and Firestone Boulevard provides excellent access to Longmont and Denver. Barefoot Lakes represents the highest standard of master-planned living in Weld County.',
+    homeStyles: ['Modern Farmhouse', 'Craftsman', 'Contemporary', 'Tuscan', 'Ranch'],
+    yearBuiltRange: { min: 2017, max: 2025 },
+    priceRangeDescription: '$500K to $900K+',
+    schoolDistrict: 'St. Vrain Valley School District',
+    schools: [
+      { name: 'Prairie Ridge Elementary', type: 'elementary', level: 'K-5', rating: '9' },
+      { name: 'Mead Middle School', type: 'middle', level: '6-8', rating: '8' },
+      { name: 'Mead High School', type: 'high', level: '9-12', rating: '8' }
+    ],
+    hoaDescription: 'Mandatory HOA ($150-$200/month) covers Beach Club, lakes, parks, and landscaping',
+    features: [
+      'Lakes with beach and water sports',
+      'Resort-style Beach Club with pool',
+      'Walking and biking trails',
+      'Fishing piers and parks',
+      'Top-rated St. Vrain schools',
+      'I-25 access at Firestone Blvd'
+    ],
+    parks: [
+      'Barefoot Lakes Beach',
+      'Firestone Community Park',
+      'St. Vrain Greenway'
+    ],
+    boundaries: 'I-25 to WCR 3, WCR 18 to WCR 20',
+    coordinates: { latitude: '40.130', longitude: '-104.955' },
+    walkScore: 25,
+    metaDescription: 'Barefoot Lakes at Firestone real estate - premier lakefront community with resort amenities. SAA Homes.',
+    keywords: 'Barefoot Lakes Firestone, Firestone Colorado lake homes, master-planned community Firestone, luxury homes Weld County, Firestone real estate, St Vrain Valley schools',
+    neighborhoodHighlights: [
+      { title: 'Lake resort lifestyle', description: 'Swim, kayak, fish, and relax on the sandy beach at the community lakes - resort living every day.' },
+      { title: 'Beach Club amenities', description: 'Pool, fitness center, clubhouse, and social events at the Barefoot Lakes Beach Club.' },
+      { title: 'I-25 connection', description: 'Direct access to I-25 at Firestone Boulevard for quick commutes to Longmont (10 min) and Denver (40 min).' }
+    ],
+  },
+
+  {
+    slug: 'homestead-firestone',
+    citySlug: 'firestone',
+    cityDisplay: 'Firestone',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Homestead at Firestone',
+    alsoKnownAs: [
+      'Homestead'
+    ],
+    description: 'Homestead at Firestone is an established neighborhood in central Firestone, offering ranch and two-story homes on quiet streets near Firestone Community Park and the St. Vrain Greenway.',
+    longDescription: 'Homestead at Firestone is a well-established residential neighborhood in central Firestone, located near Firestone Boulevard and Weld County Road 19. Developed in the 2000s, this neighborhood features ranch, split-level, and two-story traditional homes on landscaped lots with mature trees. The neighborhood is popular with families due to its proximity to Firestone Community Park, which features sports fields, playgrounds, and picnic areas. The St. Vrain Greenway is nearby for walking and biking. Homestead central Firestone location provides convenient access to Firestone Boulevard and I-25. The neighborhood offers an established alternative to Firestone newer developments, with mature landscaping and a settled community feel.',
+    homeStyles: ['Ranch', 'Two-Story Traditional', 'Split-Level', 'Bungalow'],
+    yearBuiltRange: { min: 2000, max: 2010 },
+    priceRangeDescription: '$375K to $500K',
+    schoolDistrict: 'St. Vrain Valley School District',
+    schools: [
+      { name: 'Prairie Ridge Elementary', type: 'elementary', level: 'K-5', rating: '9' },
+      { name: 'Coal Ridge Middle School', type: 'middle', level: '6-8', rating: '8' },
+      { name: 'Mead High School', type: 'high', level: '9-12', rating: '8' }
+    ],
+    hoaDescription: 'Minimal HOA ($25-$50/month) covers common areas',
+    features: [
+      'Established with mature trees',
+      'Near Firestone Community Park',
+      'Central Firestone location',
+      'Family-friendly atmosphere',
+      'Close to St. Vrain Greenway',
+      'I-25 access nearby'
+    ],
+    parks: [
+      'Firestone Community Park',
+      'St. Vrain Greenway',
+      'Barefoot Lakes Beach'
+    ],
+    boundaries: 'Firestone Blvd to WCR 20, WCR 19 to WCR 21',
+    coordinates: { latitude: '40.140', longitude: '-104.940' },
+    walkScore: 30,
+    metaDescription: 'Homestead at Firestone real estate - established central Firestone homes near parks and schools. SAA Homes.',
+    keywords: 'Homestead Firestone, established Firestone neighborhood, Firestone Colorado homes, Firestone Community Park, central Firestone real estate, St Vrain Valley schools',
+    neighborhoodHighlights: [
+      { title: 'Park access', description: 'Walking distance to Firestone Community Park with sports fields, playgrounds, and picnic areas.' },
+      { title: 'Established trees', description: 'Mature landscaping and established trees provide shade and character throughout the neighborhood.' },
+      { title: 'Central location', description: 'Located in the heart of Firestone with easy access to schools, shopping, and I-25.' }
+    ],
+  },
+
+  {
+    slug: 'sierra-vista-firestone',
+    citySlug: 'firestone',
+    cityDisplay: 'Firestone',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Sierra Vista at Firestone',
+    alsoKnownAs: [
+      'Sierra Vista'
+    ],
+    description: 'Sierra Vista is a newer subdivision on Firestone west side, offering affordable contemporary homes with mountain views and proximity to the St. Vrain Greenway.',
+    longDescription: 'Sierra Vista at Firestone is a newer residential subdivision on the west side of Firestone, located near Weld County Road 13 and Weld County Road 20. Developed from 2019 onward, this neighborhood features affordable contemporary and Craftsman-style homes with ranch and two-story floor plans. The west Firestone location provides excellent views of the Rocky Mountains, particularly Longs Peak and the Indian Peaks. The neighborhood is close to the St. Vrain Greenway trail system and Firestone developing commercial corridor along WCR 13. Sierra Vista offers a more affordable entry point than neighboring Barefoot Lakes while still providing mountain views and access to the highly-rated St. Vrain Valley School District.',
+    homeStyles: ['Contemporary', 'Craftsman', 'Two-Story', 'Ranch'],
+    yearBuiltRange: { min: 2019, max: 2025 },
+    priceRangeDescription: '$400K to $550K',
+    schoolDistrict: 'St. Vrain Valley School District',
+    schools: [
+      { name: 'Prairie Ridge Elementary', type: 'elementary', level: 'K-5', rating: '9' },
+      { name: 'Coal Ridge Middle School', type: 'middle', level: '6-8', rating: '8' },
+      { name: 'Mead High School', type: 'high', level: '9-12', rating: '8' }
+    ],
+    hoaDescription: 'Mandatory HOA ($50-$75/month) covers common areas',
+    features: [
+      'Mountain views to the west',
+      'Affordable new construction',
+      'Near St. Vrain Greenway',
+      'Top-rated schools',
+      'West Firestone location',
+      'I-25 access nearby'
+    ],
+    parks: [
+      'St. Vrain Greenway',
+      'Firestone Community Park',
+      'Barefoot Lakes Beach'
+    ],
+    boundaries: 'WCR 13 to WCR 15, WCR 18 to WCR 20',
+    coordinates: { latitude: '40.138', longitude: '-104.975' },
+    walkScore: 20,
+    metaDescription: 'Sierra Vista at Firestone real estate - affordable new homes with mountain views in west Firestone. SAA Homes.',
+    keywords: 'Sierra Vista Firestone, new construction Firestone, Firestone Colorado affordable homes, mountain view homes Firestone, St Vrain Valley schools',
+    neighborhoodHighlights: [
+      { title: 'Mountain panorama', description: 'West Firestone location provides beautiful Front Range views from many homes.' },
+      { title: 'Affordable entry', description: 'More affordable than nearby Barefoot Lakes while still in top St. Vrain Valley schools.' },
+      { title: 'Greenway access', description: 'Close to the St. Vrain Greenway trail system for walking, biking, and nature.' }
+    ],
+  },
+
+  {
+    slug: 'carter-lake-frederick',
+    citySlug: 'frederick',
+    cityDisplay: 'Frederick',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Carter Lake at Frederick',
+    alsoKnownAs: [
+      'Carter Lake'
+    ],
+    description: 'Carter Lake is a newer Frederick subdivision with lake-inspired streetscapes, offering contemporary homes with mountain views and easy access to I-25.',
+    longDescription: 'Carter Lake at Frederick is a newer residential community located on the west side of Frederick, near Weld County Road 15 and Weld County Road 26. Developed from 2018 onward, this neighborhood features contemporary and Craftsman-style homes from regional builders, with ranch and two-story floor plans. The neighborhood is named after nearby Carter Lake (a popular Front Range reservoir), with lake-themed street names and landscaping. The west Frederick location provides excellent views of Longs Peak and the Indian Peaks. Residents enjoy proximity to Frederick growing retail corridor along WCR 19 and easy I-25 access. Carter Lake offers newer construction in one of Frederick most sought-after locations.',
+    homeStyles: ['Contemporary', 'Craftsman', 'Two-Story', 'Ranch', 'Modern Farmhouse'],
+    yearBuiltRange: { min: 2018, max: 2025 },
+    priceRangeDescription: '$425K to $600K',
+    schoolDistrict: 'St. Vrain Valley School District',
+    schools: [
+      { name: 'Frederick Elementary', type: 'elementary', level: 'K-5', rating: '7' },
+      { name: 'Coal Ridge Middle School', type: 'middle', level: '6-8', rating: '8' },
+      { name: 'Frederick High School', type: 'high', level: '9-12', rating: '7' }
+    ],
+    hoaDescription: 'Mandatory HOA ($50-$80/month) covers common areas',
+    features: [
+      'New construction (2018+)',
+      'Mountain views to the west',
+      'Lake-themed neighborhood design',
+      'Close to Frederick retail',
+      'I-25 access',
+      'Growing community'
+    ],
+    parks: [
+      'Frederick Community Park',
+      'Carter Lake - nearby',
+      'St. Vrain Greenway'
+    ],
+    boundaries: 'WCR 15 to WCR 17, WCR 24 to WCR 26',
+    coordinates: { latitude: '40.110', longitude: '-104.970' },
+    walkScore: 22,
+    metaDescription: 'Carter Lake at Frederick real estate - new homes with mountain views near I-25. SAA Homes.',
+    keywords: 'Carter Lake Frederick, Frederick Colorado new homes, Frederick real estate, mountain view homes Frederick, St Vrain Valley schools',
+    neighborhoodHighlights: [
+      { title: 'Mountain views', description: 'West Frederick location provides excellent views of Longs Peak and the Indian Peaks.' },
+      { title: 'New construction', description: 'Modern homes from 2018 with open floor plans, energy efficiency, and contemporary finishes.' },
+      { title: 'Lake proximity', description: 'Named after nearby Carter Lake - a popular Front Range reservoir for boating, fishing, and camping.' }
+    ],
+  },
+
+  {
+    slug: 'camino-frederick',
+    citySlug: 'frederick',
+    cityDisplay: 'Frederick',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Camino at Frederick',
+    alsoKnownAs: [
+      'Camino'
+    ],
+    description: 'Camino at Frederick is a newer residential development on Frederick east side, offering affordable contemporary homes with convenient access to the growing retail corridor.',
+    longDescription: 'Camino at Frederick is a newer residential neighborhood located on the east side of Frederick, near Weld County Road 19 and Weld County Road 26. Developed from 2019 onward, this neighborhood features affordable ranch and two-story contemporary homes designed for first-time buyers and growing families. The neighborhood east side location provides convenient access to the Frederick commercial corridor along WCR 19, with grocery, dining, and retail options. I-25 is just 5 minutes away for commuting to Longmont (10 minutes) and Denver (35 minutes). Camino at Frederick offers one of the more affordable new construction options in the Frederick-Firestone area, appealing to value-conscious buyers.',
+    homeStyles: ['Contemporary', 'Ranch', 'Two-Story', 'Townhome'],
+    yearBuiltRange: { min: 2019, max: 2025 },
+    priceRangeDescription: '$375K to $500K',
+    schoolDistrict: 'St. Vrain Valley School District',
+    schools: [
+      { name: 'Frederick Elementary', type: 'elementary', level: 'K-5', rating: '7' },
+      { name: 'Coal Ridge Middle School', type: 'middle', level: '6-8', rating: '8' },
+      { name: 'Frederick High School', type: 'high', level: '9-12', rating: '7' }
+    ],
+    hoaDescription: 'Mandatory HOA ($45-$70/month) covers common areas',
+    features: [
+      'Affordable new construction',
+      'Close to Frederick retail',
+      'I-25 access - 5 minutes',
+      'First-time buyer friendly',
+      'Growing commercial corridor',
+      'Longmont and Denver commute'
+    ],
+    parks: [
+      'Frederick Community Park',
+      'Frederick Recreation Area',
+      'St. Vrain Greenway'
+    ],
+    boundaries: 'WCR 19 to WCR 21, WCR 24 to WCR 26',
+    coordinates: { latitude: '40.112', longitude: '-104.948' },
+    walkScore: 28,
+    metaDescription: 'Camino at Frederick real estate - affordable new homes near I-25 in growing Frederick. SAA Homes.',
+    keywords: 'Camino Frederick, Frederick Colorado affordable homes, new construction Frederick, Frederick real estate, first-time buyer Frederick, I-25 corridor Frederick',
+    neighborhoodHighlights: [
+      { title: 'Affordable pricing', description: 'Competitive pricing for new construction in the Frederick-Firestone market.' },
+      { title: 'Retail nearby', description: 'Walking distance to Frederick growing commercial corridor with grocery, dining, and shopping.' },
+      { title: 'Commuter location', description: 'Just 5 minutes to I-25 for quick access to Longmont (10 min), Boulder (25 min), and Denver (35 min).' }
+    ],
+  },
+
+  {
+    slug: 'prairie-ridge-frederick',
+    citySlug: 'frederick',
+    cityDisplay: 'Frederick',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Prairie Ridge at Frederick',
+    alsoKnownAs: [
+      'Prairie Ridge'
+    ],
+    description: 'Prairie Ridge is an established Frederick neighborhood offering ranch and two-story homes on spacious lots with mountain views and mature landscaping.',
+    longDescription: 'Prairie Ridge at Frederick is a well-established residential neighborhood on the south side of Frederick, located near Weld County Road 24 and Weld County Road 19. Developed in the late 1990s and 2000s, this neighborhood features ranch, split-level, and two-story traditional homes on generous lots with mature trees and established landscaping. The neighborhood offers quiet streets and a family-friendly atmosphere. Its south Frederick location provides excellent views of the Front Range and convenient access to Firestone Boulevard and I-25. Prairie Ridge appeals to buyers seeking an established neighborhood with larger lots and a sense of community in the Frederick-Firestone area.',
+    homeStyles: ['Ranch', 'Two-Story Traditional', 'Split-Level', 'Bungalow'],
+    yearBuiltRange: { min: 1998, max: 2008 },
+    priceRangeDescription: '$400K to $550K',
+    schoolDistrict: 'St. Vrain Valley School District',
+    schools: [
+      { name: 'Frederick Elementary', type: 'elementary', level: 'K-5', rating: '7' },
+      { name: 'Coal Ridge Middle School', type: 'middle', level: '6-8', rating: '8' },
+      { name: 'Frederick High School', type: 'high', level: '9-12', rating: '7' }
+    ],
+    hoaDescription: 'Minimal HOA ($20-$40/month) or no HOA',
+    features: [
+      'Established with mature trees',
+      'Larger lot sizes',
+      'Mountain views available',
+      'Quiet family streets',
+      'South Frederick location',
+      'I-25 access nearby'
+    ],
+    parks: [
+      'Frederick Community Park',
+      'Frederick Recreation Area',
+      'St. Vrain Greenway'
+    ],
+    boundaries: 'WCR 22 to WCR 24, WCR 17 to WCR 19',
+    coordinates: { latitude: '40.105', longitude: '-104.955' },
+    walkScore: 22,
+    metaDescription: 'Prairie Ridge at Frederick real estate - established Frederick homes on larger lots. SAA Homes.',
+    keywords: 'Prairie Ridge Frederick, established Frederick neighborhood, Frederick Colorado homes, large lot homes Frederick, St Vrain Valley schools, Frederick real estate',
+    neighborhoodHighlights: [
+      { title: 'Spacious lots', description: 'Generous lot sizes with room for gardens, play equipment, and outdoor entertaining.' },
+      { title: 'Mature setting', description: 'Established trees and landscaping create a welcoming, settled neighborhood atmosphere.' },
+      { title: 'South Frederick', description: 'Quiet south Frederick location with excellent I-25 access and mountain views.' }
+    ],
+  },
+
 
 ]
 
