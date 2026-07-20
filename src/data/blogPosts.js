@@ -802,7 +802,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/6-1.jpg',
     readTime: '10 min read',
-    youtubeId: 'x30AIAzqeI8',
+    youtubeId: 'lD9igbYAu5Q',
     keywords: 'sell my home fort collins, fort collins realtor, fort collins real estate agent, selling a house in fort collins, fort collins home selling guide, how to sell a home in fort collins, listing agent fort collins, fort collins home value',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
@@ -1011,7 +1011,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/Shwartz-CTA-Buyers.jpg',
     readTime: '8 min read',
-    youtubeId: 'X9XFaaMjCGQ',
+    youtubeId: 'OmoQc2k_bxQ',
     keywords: 'fort collins realtor, fort collins real estate agent, best realtor fort collins, fort collins real estate team, schwartz and associates fort collins, northern colorado realtor, fort collins co realtor, coldwell banker fort collins, fort collins home buying, fort collins home selling',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
@@ -1488,7 +1488,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/timnath.png',
     readTime: '8 min read',
-    youtubeId: 'Aj-U5azJfEA',
+    youtubeId: 'qkaQriUV-GA',
     keywords: 'timnath homes for sale, timnath colorado homes for sale, timnath co real estate, buying a home in timnath colorado, homes for sale in timnath co, moving to timnath colorado, timnath new construction, timnath co realtor, timnath neighborhoods',
     relatedLinks: [
       { title: 'Timnath Area Guide', href: '/northern-colorado-areas/timnath/', description: 'New construction communities and homes for sale' },
