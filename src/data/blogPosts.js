@@ -187,7 +187,7 @@ export const blogPosts = [
     youtubeId: 'tMaZ5RTz6bs',
     keywords: 'CHFA down payment assistance, Colorado first time home buyer 2026, CHFA grant Colorado, CHFA SmartStep, CHFA Preferred, CHFA FirstStep, down payment help Colorado',
     relatedLinks: [
-      { title: 'CHFA Down Payment Assistance Landing Page', href: '/chfa-down-payment-assistance/', description: 'Full program comparisonyoutubeId: '6-Bq6U-VNAU'nsultation' },
+      { title: 'CHFA Down Payment Assistance Landing Page', href: '/chfa-down-payment-assistance/', description: 'Full program comparison and consultation' },
       { title: 'CHFA for Fort Collins & Greeley Buyers', href: '/blog/chfa-first-time-homebuyer-northern-colorado/', description: 'Northern Colorado income and purchase price limits' },
       { title: 'Mortgage Calculator', href: '/mortgage-calculator/', description: 'Estimate your monthly payment' },
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
@@ -352,7 +352,7 @@ export const blogPosts = [
     keywords: 'CHFA Schools To Home, Colorado teacher home loan, educator down payment assistance, public school employee home buying, teacher mortgage Fort Collins, CHFA educator program 2026',
     relatedLinks: [
       { title: 'CHFA Schools To Home Program Page', href: '/chfa-schools-to-home/', description: 'Full eligibility, examples & free consultation' },
-      { title: 'youtubeId: 'POBrNlWSTNg't Guide', href: '/chfa-down-payment-assistance/', description: 'Standard CHFA programs available now' },
+      { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Standard CHFA programs available now' },
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Schools & neighborhoods for educators' },
       { title: 'Loveland, Colorado Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities & schools' },
       { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & CHFA guidance' },

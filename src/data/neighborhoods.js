@@ -3211,7 +3211,7 @@ export const neighborhoods = [
   },
 
   {
-    slug: 'cranford-greeley',
+    slug: 'cranford-west-greeley',
     citySlug: 'greeley',
     cityDisplay: 'Greeley',
     county: 'Weld County',
@@ -4478,37 +4478,6 @@ export const neighborhoods = [
   },
 
   {
-    slug: 'prospect-longmont',
-    citySlug: 'longmont',
-    cityDisplay: 'Longmont',
-    county: 'Boulder County',
-    type: 'neighborhood',
-    name: 'Prospect New Town',
-    description: 'Prospect New Town is Longmont award-winning New Urbanist community designed by Duany Plater-Zyberk. Pedestrian-friendly streets, diverse architecture, and a town center with shops and dining define this nationally recognized neighborhood.',
-    homeStyles: ['Craftsman', 'Victorian', 'Colonial Revival', 'Contemporary', 'Townhome', 'Carriage House'],
-    yearBuiltRange: { min: 2001, max: 2025 },
-    priceRangeDescription: '$500K to $1M+',
-    schoolDistrict: 'St. Vrain Valley School District',
-    schools: [
-      { name: 'Central Elementary', type: 'elementary', level: 'K-5', rating: '8' },
-      { name: 'Westview Middle School', type: 'middle', level: '6-8', rating: '7' },
-      { name: 'Longmont High School', type: 'high', level: '9-12', rating: '8' },
-    ],
-    hoaDescription: 'Mandatory HOA ($100-$200/month) covers common areas and landscaping',
-    features: ['New Urbanist design - walkable and pedestrian-friendly', 'Town center with coffee shops, restaurant, and market', 'Diverse architectural styles on every block', 'Community pool, parks, and gardens', 'Alley-loaded garages - front porches on every home', 'Nationally recognized community design'],
-    parks: ['Prospect Town Center', 'Roosevelt Park', 'McIntosh Lake'],
-    boundaries: 'Longs Peak Ave to 9th Ave, Pratt St to Martin St',
-    coordinates: { latitude: '40.165', longitude: '-105.115' },
-    metaDescription: 'Prospect New Town Longmont - nationally acclaimed New Urbanist community with walkable town center. SAA Homes.',
-    keywords: 'Prospect New Town Longmont, Prospect Longmont real estate, New Urbanist Longmont, walkable Longmont neighborhoods, Prospect town center',
-    neighborhoodHighlights: [
-      { title: 'Award-winning design', description: 'Prospect New Town is one of the most acclaimed New Urbanist communities in the country - featured in architectural publications nationwide.' },
-      { title: 'Walkable lifestyle', description: 'Front porches, tree-lined streets, and a town center with coffee shop, market, and restaurant all within walking distance.' },
-      { title: 'Architectural diversity', description: 'No two homes are alike - Craftsman, Victorian, Contemporary, and more on every street.' },
-    ],
-  },
-
-  {
     slug: 'longmont-estates',
     citySlug: 'longmont',
     cityDisplay: 'Longmont',
@@ -4540,7 +4509,7 @@ export const neighborhoods = [
   },
 
   {
-    slug: 'lagoon-longmont',
+    slug: 'lagoon-west-longmont',
     citySlug: 'longmont',
     cityDisplay: 'Longmont',
     county: 'Boulder County',
@@ -4571,7 +4540,7 @@ export const neighborhoods = [
   },
 
   {
-    slug: 'fox-hill-longmont',
+    slug: 'fox-hill-farm-longmont',
     citySlug: 'longmont',
     cityDisplay: 'Longmont',
     county: 'Boulder County',
@@ -5685,7 +5654,7 @@ export const neighborhoods = [
   },
 
   {
-    slug: 'wyatt-frederick',
+    slug: 'wyatt-addition-frederick',
     citySlug: 'frederick',
     cityDisplay: 'Frederick',
     county: 'Weld County',
