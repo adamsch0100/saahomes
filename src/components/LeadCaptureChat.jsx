@@ -2,47 +2,58 @@ import React, { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { submitContactForm } from "../utils/api.js";
 
+const CHAT_NAME = "Mandi"; // Real team member — builds authentic connection
+const CHAT_TITLE = "Your NoCo Agent";
+
 const PAGE_CONTEXTS = [
   { pattern: /chfa-schools-to-home|chfa-dpa|chfa-down-payment|colorado-champions|champions-home-loan|greeley-g-hope|g-hope/,
-    greeting: "Looking into down payment assistance? I can help explain your options.",
-    agentLabel: "Talk to a CHFA Specialist",
+    greeting: `I can help with down payment assistance! CHFA, teacher programs, first responder loans — just tell me what you're interested in.`,
+    formLabel: "Get CHFA Help",
     leadType: "chfa_interest" },
-  { pattern: /for-buyers|buying|for-sellers|sell(ing|er)/,
-    greeting: "Thinking about buying or selling in Northern Colorado? Let's chat about your goals.",
-    agentLabel: "Talk to an Agent Now",
-    leadType: "buy_sell_inquiry" },
+  { pattern: /for-buyers|buying/,
+    greeting: `Looking for your first home? Upgrading? I'd love to help you find the right place in Northern Colorado.`,
+    formLabel: "Start Home Search",
+    leadType: "buyer_inquiry" },
+  { pattern: /for-sellers|sell(ing|er)/,
+    greeting: `Thinking of selling? I can pull recent sales in your neighborhood and give you a clear picture of what your home is worth.`,
+    formLabel: "Get a Market Report",
+    leadType: "seller_inquiry" },
   { pattern: /northern-colorado-areas\/\w+\/\w+/,
-    greeting: "Great neighborhood choice! Want details on homes for sale here?",
-    agentLabel: "See Available Homes",
+    greeting: `Great choice! I know this neighborhood well. Want me to send you listings that match what you're looking for?`,
+    formLabel: "Send Me Listings",
     leadType: "neighborhood_interest" },
   { pattern: /northern-colorado-areas/,
-    greeting: "Exploring Northern Colorado cities? I can help compare neighborhoods and prices.",
-    agentLabel: "Compare Cities",
+    greeting: `Trying to decide between cities? I've helped families in all 19 Northern Colorado communities — happy to compare them for you.`,
+    formLabel: "Compare Cities",
     leadType: "area_interest" },
   { pattern: /properties|home-valuation|whats-my-home/,
-    greeting: "Searching for your next home? Tell me what you're looking for.",
-    agentLabel: "Start Your Search",
+    greeting: `Found something you like? Or want me to set up a custom search so new listings come straight to you?`,
+    formLabel: "Set Up Alerts",
     leadType: "property_search" },
   { pattern: /mortgage-calculator/,
-    greeting: "Crunching numbers? I can help connect you with a lender to get pre-approved.",
-    agentLabel: "Connect With a Lender",
+    greeting: `Crunching numbers? I can connect you with a trusted lender who knows CHFA programs inside out.`,
+    formLabel: "Connect With a Lender",
     leadType: "mortgage_help" },
   { pattern: /luxury/,
-    greeting: "Interested in luxury properties? We specialize in premium Northern Colorado homes.",
-    agentLabel: "Explore Luxury Listings",
+    greeting: `Looking for premium properties? We specialize in luxury homes across Northern Colorado.`,
+    formLabel: "Browse Luxury Homes",
     leadType: "luxury_interest" },
   { pattern: /cash-home-buyers/,
-    greeting: "Need to sell quickly? We can discuss your options for a cash offer.",
-    agentLabel: "Get a Cash Offer",
+    greeting: `Need to sell fast? We work with cash buyers and can discuss your options — no obligation.`,
+    formLabel: "Get a Cash Offer",
     leadType: "cash_buyer" },
   { pattern: /blog\/./,
-    greeting: "Great article! Want to chat more about this topic?",
-    agentLabel: "Ask a Question",
+    greeting: `Great read! If you have questions about this topic or want to chat more, I'm here.`,
+    formLabel: "Ask a Question",
     leadType: "blog_question" },
+  { pattern: /contact/,
+    greeting: `Hi there! Fill this out and I'll get back to you ASAP. Or call us direct at (970) 999-1407.`,
+    formLabel: "Send Message",
+    leadType: "contact_page" },
 ];
 
-const DEFAULT_GREETING = "Hi! How can we help you with your Northern Colorado real estate journey?";
-const DEFAULT_LABEL = "Talk to an Agent";
+const DEFAULT_GREETING = `Hi! I'm ${CHAT_NAME}. Whether you're buying, selling, or just exploring Northern Colorado — I'm here to help.`;
+const DEFAULT_LABEL = "Chat With Me";
 const DEFAULT_LEAD_TYPE = "general_chat";
 
 export default function LeadCaptureChat() {
@@ -53,13 +64,41 @@ export default function LeadCaptureChat() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [hasInteracted, setHasInteracted] = useState(false);
+  const [showNudge, setShowNudge] = useState(false);
   const chatRef = useRef(null);
+  const nudgeTimer = useRef(null);
+  const scrollTimer = useRef(null);
 
   const matchedContext = PAGE_CONTEXTS.find((ctx) => ctx.pattern.test(location.pathname));
   const greeting = matchedContext?.greeting || DEFAULT_GREETING;
-  const agentLabel = matchedContext?.agentLabel || DEFAULT_LABEL;
+  const formLabel = matchedContext?.formLabel || DEFAULT_LABEL;
   const leadType = matchedContext?.leadType || DEFAULT_LEAD_TYPE;
 
+  // Smart trigger: show nudge after 20s on page OR 40% scroll depth
+  useEffect(() => {
+    if (hasInteracted) return;
+
+    // Time-based trigger (20s)
+    nudgeTimer.current = setTimeout(() => {
+      if (!hasInteracted) setShowNudge(true);
+    }, 20000);
+
+    // Scroll-based trigger (40% depth)
+    const handleScroll = () => {
+      const scrollPercent = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+      if (scrollPercent > 0.4 && !hasInteracted) {
+        setShowNudge(true);
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      clearTimeout(nudgeTimer.current);
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [hasInteracted, location.pathname]);
+
+  // Close on outside click
   useEffect(() => {
     function handleClick(e) {
       if (chatRef.current && !chatRef.current.contains(e.target)) {
@@ -70,10 +109,12 @@ export default function LeadCaptureChat() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [isOpen]);
 
+  // Reset on page nav
   useEffect(() => {
     setStep("greeting");
     setFormData({ name: "", email: "", phone: "", message: "" });
     setError(null);
+    setShowNudge(false);
   }, [location.pathname]);
 
   const handleChange = (e) => {
@@ -87,10 +128,12 @@ export default function LeadCaptureChat() {
     setError(null);
     try {
       await submitContactForm({
-        ...formData,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || null,
+        interest: leadType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+        message: formData.message || `Chat from ${location.pathname}`,
         sourcePage: window.location.pathname,
-        leadType,
-        message: formData.message || `Chat inquiry from ${location.pathname}`,
       });
       setStep("submitted");
       if (typeof window.gtag === "function") {
@@ -100,7 +143,7 @@ export default function LeadCaptureChat() {
         });
       }
     } catch (err) {
-      setError("Couldn't send. Call (970) 999-1407 and we'll help right away.");
+      setError("Couldn't send. Call (970) 999-1407 and I'll help right away.");
     } finally {
       setIsSubmitting(false);
     }
@@ -108,6 +151,7 @@ export default function LeadCaptureChat() {
 
   const handleOpen = () => {
     setIsOpen(true);
+    setShowNudge(false);
     if (!hasInteracted) {
       setHasInteracted(true);
       if (typeof window.gtag === "function") {
@@ -125,7 +169,6 @@ export default function LeadCaptureChat() {
 
   return (
     <div ref={chatRef} className="fixed bottom-28 right-4 sm:bottom-8 sm:right-8 z-50 flex flex-col items-end">
-      {/* Inline animation keyframes */}
       <style>{`
         @keyframes chatSlideUp {
           from { opacity: 0; transform: translateY(16px) scale(0.96); }
@@ -135,9 +178,40 @@ export default function LeadCaptureChat() {
           from { opacity: 0; transform: translateY(8px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes chatPulse {
+          0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+          50% { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
+        }
+        @keyframes chatNudgeDot {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.7; transform: scale(1.1); }
+        }
+        @keyframes chatPreviewSlide {
+          from { opacity: 0; transform: translateX(12px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
       `}</style>
 
-      {/* Chat Card */}
+      {/* Preview bubble (appears before they click — shows the greeting teaser) */}
+      {!isOpen && showNudge && (
+        <button
+          onClick={handleOpen}
+          className="mb-3 bg-white rounded-2xl shadow-xl border border-gray-100 px-5 py-3 max-w-[260px] text-left hover:shadow-2xl transition-shadow cursor-pointer"
+          style={{ animation: 'chatPreviewSlide 0.35s ease-out' }}
+        >
+          <div className="flex items-start gap-2">
+            <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white text-xs flex-shrink-0 mt-0.5">
+              {CHAT_NAME[0]}
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-gray-900">{CHAT_NAME}</p>
+              <p className="text-sm text-gray-600 leading-snug mt-0.5">{greeting.length > 90 ? greeting.slice(0, 90) + "…" : greeting}</p>
+            </div>
+          </div>
+        </button>
+      )}
+
+      {/* Expanded Chat Card */}
       {isOpen && (
         <div
           className="mb-3 w-[340px] sm:w-[380px] bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden"
@@ -146,43 +220,54 @@ export default function LeadCaptureChat() {
           {/* Header */}
           <div className="bg-black text-white px-5 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-lg text-white">&#x1F3E0;</div>
+              <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white text-sm font-semibold">
+                {CHAT_NAME[0]}
+              </div>
               <div>
-                <p className="font-semibold text-sm">SAA Homes</p>
-                <p className="text-xs text-gray-400">Usually replies in minutes</p>
+                <p className="font-semibold text-sm">{CHAT_NAME} — {CHAT_TITLE}</p>
+                <p className="text-xs text-gray-400 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-green-400 inline-block" />
+                  Online — replies in minutes
+                </p>
               </div>
             </div>
             <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-white text-xl leading-none p-1">&times;</button>
           </div>
 
-          {/* Body */}
-          <div className="px-5 py-4 min-h-[200px]">
+          {/* Messages Area */}
+          <div className="px-5 py-4 min-h-[220px] max-h-[400px] overflow-y-auto">
+            {/* Agent message bubble */}
+            <div className="flex items-start gap-2.5 mb-4" style={{ animation: 'chatFadeIn 0.3s ease-out' }}>
+              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 text-xs font-semibold flex-shrink-0 mt-0.5">
+                {CHAT_NAME[0]}
+              </div>
+              <div className="bg-gray-50 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%]">
+                <p className="text-gray-800 text-sm leading-relaxed">{greeting}</p>
+              </div>
+            </div>
+
+            {/* Action buttons or form */}
             {step === "greeting" && (
-              <div style={{ animation: 'chatFadeIn 0.3s ease-out' }}>
-                <div className="bg-gray-50 rounded-2xl rounded-tl-sm px-4 py-3 mb-4 inline-block max-w-[90%]">
-                  <p className="text-gray-800 text-sm leading-relaxed">{greeting}</p>
-                </div>
-                <div className="space-y-2">
-                  <button
-                    onClick={() => setStep("form")}
-                    className="w-full px-4 py-3 bg-black text-white font-semibold rounded-xl text-sm hover:bg-gray-800 transition-colors"
-                  >
-                    {agentLabel}
-                  </button>
-                  <a
-                    href="tel:(970) 999-1407"
-                    className="block w-full px-4 py-3 border-2 border-black text-black font-semibold rounded-xl text-sm text-center hover:bg-gray-50 transition-colors"
-                  >
-                    Call (970) 999-1407
-                  </a>
-                </div>
+              <div className="space-y-2 ml-10" style={{ animation: 'chatFadeIn 0.3s ease-out' }}>
+                <button
+                  onClick={() => setStep("form")}
+                  className="w-full px-4 py-3 bg-black text-white font-semibold rounded-xl text-sm hover:bg-gray-800 transition-colors"
+                >
+                  {formLabel}
+                </button>
+                <a
+                  href="tel:(970) 999-1407"
+                  className="block w-full px-4 py-3 border-2 border-black text-black font-semibold rounded-xl text-sm text-center hover:bg-gray-50 transition-colors"
+                >
+                  Call (970) 999-1407
+                </a>
               </div>
             )}
 
             {step === "form" && (
-              <form onSubmit={handleSubmit} style={{ animation: 'chatFadeIn 0.3s ease-out' }}>
-                <p className="text-sm text-gray-600 mb-4">Leave your info and we'll reach out soon.</p>
-                <div className="space-y-3">
+              <form onSubmit={handleSubmit} className="ml-10" style={{ animation: 'chatFadeIn 0.3s ease-out' }}>
+                <p className="text-xs text-gray-500 mb-3">Leave your info and I'll reach out soon.</p>
+                <div className="space-y-2.5">
                   <input
                     name="name" required placeholder="Your name *"
                     value={formData.name} onChange={handleChange}
@@ -208,7 +293,7 @@ export default function LeadCaptureChat() {
                     type="submit" disabled={isSubmitting}
                     className="w-full px-4 py-3 bg-black text-white font-semibold rounded-xl text-sm hover:bg-gray-800 transition-colors disabled:opacity-50"
                   >
-                    {isSubmitting ? "Sending..." : "Send Message"}
+                    {isSubmitting ? "Sending..." : formLabel}
                   </button>
                 </div>
               </form>
@@ -216,14 +301,16 @@ export default function LeadCaptureChat() {
 
             {step === "submitted" && (
               <div className="text-center py-6" style={{ animation: 'chatFadeIn 0.3s ease-out' }}>
-                <div className="text-4xl mb-3">&#x2705;</div>
-                <p className="font-semibold text-gray-900 mb-1">Message sent!</p>
-                <p className="text-sm text-gray-600 mb-4">Adam or Mandi will reach out shortly.</p>
+                <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-3">
+                  <span className="text-2xl">&#x2705;</span>
+                </div>
+                <p className="font-semibold text-gray-900 mb-1">Thanks {formData.name.split(" ")[0]}!</p>
+                <p className="text-sm text-gray-600 mb-4">I'll get back to you as soon as possible. In the meantime, feel free to call.</p>
                 <a
                   href="tel:(970) 999-1407"
                   className="inline-block px-6 py-3 bg-black text-white font-semibold rounded-xl text-sm hover:bg-gray-800 transition-colors"
                 >
-                  Need immediate help? Call Now
+                  Call (970) 999-1407
                 </a>
               </div>
             )}
@@ -234,12 +321,19 @@ export default function LeadCaptureChat() {
       {/* Chat Bubble Button */}
       <button
         onClick={isOpen ? () => setIsOpen(false) : handleOpen}
-        className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-white text-2xl transition-all duration-200 hover:scale-105 active:scale-95 ${
-          isOpen ? "bg-gray-800 rotate-45" : "bg-black"
+        className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-white text-xl transition-all duration-200 hover:scale-105 active:scale-95 ${
+          isOpen ? "bg-gray-800 rotate-45" : showNudge ? "bg-black" : "bg-black/80 hover:bg-black"
         }`}
-        aria-label="Chat with SAA Homes"
+        style={!isOpen && showNudge ? { animation: 'chatPulse 2s ease-in-out infinite' } : {}}
+        aria-label={`Chat with ${CHAT_NAME}`}
       >
-        {isOpen ? "+" : "\uD83D\uDCAC"}
+        {isOpen ? (
+          <span className="text-2xl font-light">&times;</span>
+        ) : (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        )}
       </button>
     </div>
   );
