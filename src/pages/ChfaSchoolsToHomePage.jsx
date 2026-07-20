@@ -114,7 +114,7 @@ export default function ChfaSchoolsToHomePage() {
     <>
       <SEO
         exactTitle="CHFA Schools To Home | Colorado Teacher & Educator Down Payment Assistance 2026"
-        description="Colorado public school employees: get up to 25% down payment assistance with CHFA Schools To Home. Eligibility, income limits, shared appreciation explained. Free consultation from Northern Colorado buyer agents at SAA Homes."
+        description="Colorado teachers & public school employees: qualify for up to 25% down payment assistance through CHFA Schools To Home. Check eligibility, income limits & how much you could receive toward your home purchase. Free consultation with SAA Homes today."
         keywords="CHFA Schools To Home, Colorado teacher home loan, educator down payment assistance Colorado, CHFA DPA Colorado, public school employee home buying, Colorado first time home buyer program, teacher mortgage Colorado, Fort Collins teacher home loan, Denver educator homeownership, CHFA down payment assistance 2026, shared appreciation mortgage Colorado"
         canonical="https://saahomes.com/chfa-schools-to-home/"
         ogTitle="CHFA Schools To Home — Colorado Educator Down Payment Assistance"
