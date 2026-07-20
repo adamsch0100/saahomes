@@ -195,7 +195,7 @@ const faqs = [
 const PAGE_URL = "https://saahomes.com/chfa-down-payment-assistance/";
 const PAGE_TITLE = "CHFA Down Payment Assistance Colorado | First-Time Homebuyer Programs 2026 | SAA Homes";
 const PAGE_DESCRIPTION =
-  "Complete guide to CHFA down payment assistance in Colorado. Grants up to $25K, SmartStep, Preferred, FirstStep & FirstGeneration programs. Income limits for Fort Collins, Greeley & Northern Colorado. Free consultation.";
+  "Looking for CHFA down payment assistance in Colorado? Compare SmartStep, Preferred, FirstStep & FirstGeneration programs. Get up to $25K grants or 4% DPA second mortgage. Check your income limits & get started with SAA Homes.";
 
 export default function ChfaDownPaymentAssistancePage() {
   return (

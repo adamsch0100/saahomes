@@ -77,7 +77,7 @@ export const areaSeoPages = [
     city: 'Windsor',
     county: 'Weld & Larimer Counties',
     exactTitle: 'Windsor CO Real Estate | Homes for Sale in Windsor Colorado | SAA Homes',
-    description: 'Windsor, Colorado real estate guide from SAA Homes. Family-friendly neighborhoods, strong schools, and homes for sale between Fort Collins and Greeley in Northern Colorado.',
+    description: 'Explore Windsor, Colorado\'s best neighborhoods near Windsor Lake — top-rated schools, homes for sale, and family-friendly communities between Fort Collins and Greeley. Your Windsor real estate guide from SAA Homes.',
     keywords: 'Windsor CO real estate, Windsor homes for sale, Windsor Colorado realtor, Northern Colorado family homes, Weld County real estate, Windsor neighborhoods, sell my house fast Windsor, cash home buyers Windsor, we buy houses Windsor, cash offer for home Windsor, foreclosures Windsor, short sale Windsor, Weld County foreclosures',
     heroImage: '/images/Windsor-CO-Area-Guide.jpg',
     tagline: 'Family communities between Fort Collins and Greeley',
