@@ -94,19 +94,21 @@ export default function ChfaLeadForm({ compact = false }) {
         </div>
       )}
 
-      <div className="grid md:grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 gap-4 mb-4">
         <div>
-          <label htmlFor="chfa-firstName" className={labelClass}>First Name *</label>
+          <label htmlFor="chfa-firstName" className={labelClass}>Full Name *</label>
           <input
             type="text"
             id="chfa-firstName"
             name="firstName"
             required
+            placeholder="Your full name"
             value={formData.firstName}
             onChange={handleChange}
             className={inputClass}
           />
         </div>
+        {!compact && (
         <div>
           <label htmlFor="chfa-lastName" className={labelClass}>Last Name *</label>
           <input
@@ -119,9 +121,10 @@ export default function ChfaLeadForm({ compact = false }) {
             className={inputClass}
           />
         </div>
+        )}
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 gap-4 mb-4">
         <div>
           <label htmlFor="chfa-email" className={labelClass}>Email *</label>
           <input
@@ -129,6 +132,7 @@ export default function ChfaLeadForm({ compact = false }) {
             id="chfa-email"
             name="email"
             required
+            placeholder="your@email.com"
             value={formData.email}
             onChange={handleChange}
             className={inputClass}
@@ -141,6 +145,7 @@ export default function ChfaLeadForm({ compact = false }) {
             id="chfa-phone"
             name="phone"
             required
+            placeholder="(970) 555-0123"
             value={formData.phone}
             onChange={handleChange}
             className={inputClass}
@@ -148,6 +153,8 @@ export default function ChfaLeadForm({ compact = false }) {
         </div>
       </div>
 
+      {!compact && (
+      <>
       <div className="mb-4">
         <label htmlFor="chfa-schoolEmployer" className={labelClass}>
           School or District Employer *
@@ -193,6 +200,7 @@ export default function ChfaLeadForm({ compact = false }) {
           className={inputClass}
         />
       </div>
+      </>)}
 
       <button
         type="submit"
