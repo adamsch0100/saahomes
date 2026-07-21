@@ -2159,12 +2159,12 @@ export const neighborhoods = [
     name: 'RainDance',
     alsoKnownAs: ['RainDance Windsor', 'RainDance Community'],
     description:
-      'RainDance is one of Windsor\'s most exciting new communities, featuring Northern Colorado\'s first indoor surf park and a planned resort-style amenity center. This growing master-planned community offers new homes with future plans for retail, dining, and entertainment.',
+      'RainDance is one of Windsor&#39;s premier master-planned communities, featuring Northern Colorado&#39;s first indoor surf park and a resort-style amenity center. Now nearly built out with only a few new homes remaining, this established community offers resort living in a prime Windsor location.',
     longDescription:
-      'RainDance is a large-scale master-planned community on Windsor\'s east side that is redefining suburban living in Northern Colorado. The centerpiece of the community is the planned RainDance Surf Park — an indoor surf facility that will be the first of its kind in the region. The community also plans a resort-style amenity center with pools, fitness facilities, and event spaces. Current home construction includes single-family homes, townhomes, and patio homes from multiple builders. As the community grows, plans include retail village centers, restaurants, office space, and additional parks.',
+      'RainDance on Windsor&#39;s east side has grown from one of Northern Colorado&#39;s most anticipated new communities into a nearly complete residential destination. The centerpiece RainDance Surf Park — the first indoor surf facility in the region — is operational, complemented by a resort-style amenity center with pools, fitness facilities, and event spaces. The community features single-family homes, townhomes, and patio homes from multiple builders, with limited remaining inventory from builders and resale opportunities available. Nearby retail and dining are accessible at Windsor&#39;s growing commercial corridor along Crossroads Boulevard.',
     homeStyles: ['Contemporary', 'Farmhouse', 'Ranch', 'Townhome', 'Patio Home'],
-    yearBuiltRange: { min: 2020, max: 2025 },
-    priceRangeDescription: '$375K (townhomes) to $700K+ (single-family)',
+    yearBuiltRange: { min: 2020, max: 2026 },
+    priceRangeDescription: '$400K (townhomes) to $750K+ (single-family)',
     schoolDistrict: 'Windsor School District RE-4',
     schools: [
       { name: 'Mountain View Elementary', type: 'elementary', level: 'K–5', rating: 'New school' },
@@ -2173,10 +2173,10 @@ export const neighborhoods = [
     ],
     hoaDescription: 'Mandatory HOA ($120–$200/month) covers amenity center, parks, common areas',
     features: [
-      'Planned indoor surf park — first in Northern Colorado',
+      'Indoor surf park — first in Northern Colorado',
       'Resort-style amenity center with pools and fitness',
-      'New construction with multiple builders',
-      'Future retail and dining village',
+      'Nearly built out — limited new construction remaining',
+      'Resale opportunities available',
       'Community parks and trail system',
       'Adjacent to Windsor Lake and Eastman Park',
     ],
@@ -2189,9 +2189,9 @@ export const neighborhoods = [
     keywords:
       'RainDance Windsor, RainDance community, Windsor new construction, RainDance surf park, new homes Windsor Colorado, master-planned community Windsor CO',
     neighborhoodHighlights: [
-      { title: 'Surf park centerpiece', description: 'RainDance will feature Northern Colorado\'s first indoor surf park — a game-changing amenity for the region.' },
-      { title: 'Master-planned living', description: 'Future plans include retail, dining, and entertainment — walkable from your front door.' },
-      { title: 'New construction', description: 'Active building with multiple homebuilders offering single-family, townhome, and patio home options.' },
+      { title: 'Surf park centerpiece', description: 'RainDance features Northern Colorado\'s first indoor surf park — a game-changing amenity that\'s now operational.' },
+      { title: 'Nearly built out', description: 'With most homes sold and occupied, RainDance offers limited remaining new construction plus resale opportunities.' },
+      { title: 'Resort amenities', description: 'Resort-style amenity center with pools, fitness, parks, and trail system — all walkable from your front door.' },
     ],
   },
 
