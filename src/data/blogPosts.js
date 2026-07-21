@@ -11,7 +11,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Fort-Collins-CO-Area-Guide.jpg',
     readTime: '8 min read',
-    youtubeId: 'C5q4hYvXvas',
+    youtubeId: '-Tz6Zj6D3IY',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & homes for sale' },
       { title: 'Loveland, Colorado Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities & pricing' },
@@ -348,7 +348,7 @@ export const blogPosts = [
     category: 'CHFA & Homebuyer Programs',
     image: '/images/buyers-hero.jpg',
     readTime: '9 min read',
-    youtubeId: 'kvSjcpgKeF8',
+    youtubeId: 'YqY1pl4epIo',
     keywords: 'CHFA Schools To Home, Colorado teacher home loan, educator down payment assistance, public school employee home buying, teacher mortgage Fort Collins, CHFA educator program 2026',
     relatedLinks: [
       { title: 'CHFA Schools To Home Program Page', href: '/chfa-schools-to-home/', description: 'Full eligibility, examples & free consultation' },
@@ -414,7 +414,7 @@ export const blogPosts = [
     category: 'CHFA & Homebuyer Programs',
     image: '/images/Shwartz-CTA-Buyers.jpg',
     readTime: '8 min read',
-    youtubeId: 'OAFkvsbPgjc',
+    youtubeId: 'AWrb6S7B9c8',
     keywords: 'Colorado Champions Home Loan, CHFA first responders, police officer home loan Colorado, firefighter mortgage Greeley, EMT home buying Fort Collins, first responder housing Colorado',
     relatedLinks: [
       { title: 'Champions Home Loan Program Page', href: '/colorado-champions-home-loan-program/', description: 'Timeline, eligibility & sign up for updates' },
