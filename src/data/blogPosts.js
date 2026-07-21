@@ -3262,6 +3262,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Fort-Collins-CO-Area-Guide.jpg',
     readTime: '12 min read',
+    youtubeId: 'KwNsik2BFPw',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & homes for sale' },
       { title: 'Fort Collins Homes for Sale', href: '/properties/?location=Fort Collins, CO', description: 'Search current Fort Collins listings' },
