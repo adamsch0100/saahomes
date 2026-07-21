@@ -1393,6 +1393,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.39', longitude: '-105.075' },
     metaDescription: 'Sculpture Park Loveland real estate - historic homes and lofts in the downtown arts district. SAA Homes.',
     keywords: 'Sculpture Park Loveland, Benson Sculpture Garden homes, downtown Loveland real estate, historic Loveland homes, Loveland arts district',
+    youtubeId: 'cTSSzMChQkI',
     neighborhoodHighlights: [
       { title: 'Arts district', description: 'Benson Sculpture Garden features 160+ sculptures in a 10-acre park - the heart of Loveland arts and culture.' },
       { title: 'Walkable downtown', description: 'Walk to Loveland restaurants, breweries, the museum, and year-round community events.' },
@@ -1424,6 +1425,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.385', longitude: '-104.985' },
     metaDescription: 'The Orchards Loveland real estate - newer construction near The Ranch with I-25 access. SAA Homes.',
     keywords: 'The Orchards Loveland, south Loveland new homes, The Ranch Loveland area, Loveland subdivisions',
+    youtubeId: 'TS3wfdhvx3g',
     neighborhoodHighlights: [
       { title: 'Newer construction', description: 'Modern open floor plans with energy-efficient features in a master-planned setting.' },
       { title: 'The Ranch proximity', description: 'Minutes from The Ranch events complex - concerts, rodeos, and trade shows year-round.' },
@@ -1455,6 +1457,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.375', longitude: '-104.97' },
     metaDescription: 'Gateway Loveland real estate - I-25 corridor homes near Centerra and Medical Center of the Rockies. SAA Homes.',
     keywords: 'Gateway Loveland, I-25 corridor Loveland, Centerra area homes, medical center of the rockies real estate',
+    youtubeId: 'WSCIIo6s1ec',
     neighborhoodHighlights: [
       { title: 'I-25 access', description: 'Located directly off I-25 - the most convenient location for commuters to Denver, Fort Collins, and Boulder.' },
       { title: 'Centerra lifestyle', description: 'Minutes from The Promenade Shops at Centerra with premier shopping, dining, and entertainment.' },
