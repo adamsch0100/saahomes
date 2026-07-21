@@ -1,5 +1,6 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
+import { useLocation } from "react-router-dom";
 import { BUSINESS, SITE_TITLE_SUFFIX, toAbsoluteUrl } from "../utils/seoConstants.js";
 
 const BRAND_MARKERS = ['SAA Homes', 'Schwartz And Associates', 'Schwartz and Associates'];
@@ -81,6 +82,7 @@ export default function SEO({
   includeWebsite = false,
   jsonLd = [],
 }) {
+  const location = useLocation();
   const fullTitle = buildTitle(title, exactTitle);
   const finalOgTitle = ogTitle || fullTitle;
   const finalOgDescription = ogDescription || description;
@@ -127,7 +129,7 @@ export default function SEO({
       {finalOgUrl && <meta name="twitter:url" content={finalOgUrl} />}
 
       {schemas.map((schema, index) => (
-        <script key={index} type="application/ld+json">
+        <script key={`${location.pathname}-${schema['@type']}-${index}`} type="application/ld+json">
           {JSON.stringify(schema)}
         </script>
       ))}

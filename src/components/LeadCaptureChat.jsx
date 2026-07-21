@@ -8,8 +8,9 @@ const API_BASE = (() => {
   return '';
 })();
 
-const CHAT_NAME = "Mandi";
-const CHAT_TITLE = "Your NoCo Agent";
+const CHAT_NAME = "Nadia";
+const CHAT_TITLE = "Real Estate Assistant";
+const AVATAR_PATH = "/images/nadia-avatar.jpg";
 
 export default function LeadCaptureChat() {
   const location = useLocation();
@@ -20,8 +21,9 @@ export default function LeadCaptureChat() {
   const [hasInteracted, setHasInteracted] = useState(false);
   const [showNudge, setShowNudge] = useState(false);
   const [handoffStep, setHandoffStep] = useState(null); // null | 'collecting' | 'submitted'
-  const [leadInfo, setLeadInfo] = useState({ name: "", email: "", phone: "" });
+  const [leadInfo, setLeadInfo] = useState({ name: "", email: "", phone: "", contactMethod: "email" });
   const [leadError, setLeadError] = useState(null);
+  const [showTransferOption, setShowTransferOption] = useState(false);
   const chatRef = useRef(null);
   const messagesEndRef = useRef(null);
   const nudgeTimer = useRef(null);
@@ -63,16 +65,17 @@ export default function LeadCaptureChat() {
     setInput("");
     setHandoffStep(null);
     setShowNudge(false);
+    setShowTransferOption(false);
   }, [location.pathname]);
 
   // Send initial greeting when chat opens
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       const greetings = {
-        chfa: "Hey there! 👋 Looking into down payment assistance? I'd love to help you figure out which program fits your situation — CHFA, teacher programs, first responder loans, I know them all. What brings you here today?",
-        buyer: "Hi! 🏡 Thinking about buying a home in Northern Colorado? Whether you're just starting to explore or ready to look at listings, I'm happy to help. What are you looking for?",
-        seller: "Hey! 📈 Thinking of selling? I can help you understand what your home might be worth in today's market. What's your timeline looking like?",
-        default: "Hi there! 👋 I'm Mandi from SAA Homes. Whether you're buying, selling, or just curious about Northern Colorado real estate — I'd love to help. What can I answer for you?",
+        chfa: "Hi! 👋 I'm Nadia, your SAA Homes real estate assistant. Looking into down payment assistance? I can help you figure out which CHFA program fits your situation — SmartStep, Schools to Home, Champions, or G-HOPE. What questions can I answer?",
+        buyer: "Hey there! 🏡 Thinking about buying a home in Northern Colorado? Whether you're just starting to explore or ready to look at specific neighborhoods, I'm here to help. What are you looking for?",
+        seller: "Hi! 📈 Thinking of selling? I can walk you through what your home might be worth in today's market and how our team approaches marketing. What's your timeline looking like?",
+        default: "Hi there! 👋 I'm Nadia, your personal real estate assistant at SAA Homes. Whether you're buying, selling, or just curious about Northern Colorado real estate — I'd love to help point you in the right direction. What can I answer for you?",
       };
       const path = location.pathname;
       let greeting = greetings.default;
@@ -105,7 +108,23 @@ export default function LeadCaptureChat() {
       }
 
       const data = await res.json();
-      setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
+      const reply = data.reply || "";
+
+      // Strip control tags from displayed content
+      const displayReply = reply
+        .replace(/^\[\[HANDOFF\]\]\s*\n?/m, '')
+        .replace(/^\[\[TRANSFER\]\]\s*\n?/m, '');
+
+      // Check if the AI triggered a handoff or transfer
+      if (reply.includes("[[TRANSFER]]")) {
+        setShowTransferOption(true);
+        setMessages((prev) => [...prev, { role: "assistant", content: displayReply }]);
+      } else if (reply.includes("[[HANDOFF]]")) {
+        setHandoffStep("collecting");
+        setMessages((prev) => [...prev, { role: "assistant", content: displayReply }]);
+      } else {
+        setMessages((prev) => [...prev, { role: "assistant", content: displayReply }]);
+      }
     } catch (err) {
       setMessages((prev) => [...prev, {
         role: "assistant",
@@ -133,18 +152,25 @@ export default function LeadCaptureChat() {
         email: leadInfo.email,
         phone: leadInfo.phone || null,
         interest: "Chat Conversation Lead",
-        message: `Lead from AI chat with Mandi.\nPage: ${location.pathname}\n---\n${messages.map((m) => `${m.role === 'assistant' ? 'Mandi' : 'Visitor'}: ${m.content}`).join('\n')}`,
+        contactMethod: leadInfo.contactMethod || "email",
+        message: `Lead from Nadia chat. Page: ${location.pathname}\nPreferred contact: ${leadInfo.contactMethod}\n---\n${messages.map((m) => `${m.role === 'assistant' ? 'Nadia' : 'Visitor'}: ${m.content}`).join('\n')}`,
         sourcePage: location.pathname,
       });
       setHandoffStep("submitted");
       if (typeof window.gtag === "function") {
-        window.gtag("event", "generate_lead", { lead_type: "chat_handoff", page: location.pathname });
+        window.gtag("event", "generate_lead", { lead_type: "chat_handoff_nadia", page: location.pathname });
       }
     } catch (err) {
       setLeadError("Couldn't send. Call (970) 999-1407 and we'll help right away.");
     } finally {
       setIsTyping(false);
     }
+  };
+
+  const handleTransferToAgent = () => {
+    setShowTransferOption(false);
+    setHandoffStep("collecting");
+    setMessages((prev) => [...prev, { role: "assistant", content: "I've got you! Let me grab a few details so Adam or Mandi can jump in and help you directly." }]);
   };
 
   const handleOpen = () => {
@@ -176,6 +202,8 @@ export default function LeadCaptureChat() {
         @keyframes chatPreviewSlide { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes chatTyping { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
         @keyframes chatBounceIn { 0% { opacity: 0; transform: translateY(8px) scale(0.96); } 60% { transform: translateY(-2px) scale(1.01); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+        .nadia-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+        .nadia-avatar-sm { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
       `}</style>
 
       {/* Preview bubble */}
@@ -186,10 +214,8 @@ export default function LeadCaptureChat() {
           style={{ animation: 'chatPreviewSlide 0.35s ease-out' }}
         >
           <div className="flex items-start gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white text-xs font-semibold flex-shrink-0 mt-0.5">
-              {CHAT_NAME[0]}
-            </div>
-            <p className="text-sm text-gray-600 leading-snug">Got questions about Northern Colorado real estate? Happy to help! 🏔️</p>
+            <img src={AVATAR_PATH} alt="Nadia" className="nadia-avatar mt-0.5" />
+            <p className="text-sm text-gray-600 leading-snug">Got questions about Northern Colorado real estate? I can help! 🏔️</p>
           </div>
         </button>
       )}
@@ -203,9 +229,7 @@ export default function LeadCaptureChat() {
           {/* Header */}
           <div className="bg-black text-white px-5 py-3.5 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white text-sm font-semibold">
-                {CHAT_NAME[0]}
-              </div>
+              <img src={AVATAR_PATH} alt={CHAT_NAME} className="nadia-avatar" />
               <div>
                 <p className="font-semibold text-sm">{CHAT_NAME} — {CHAT_TITLE}</p>
                 <p className="text-xs text-gray-400 flex items-center gap-1.5">
@@ -226,9 +250,7 @@ export default function LeadCaptureChat() {
                 style={{ animation: 'chatBounceIn 0.25s ease-out' }}
               >
                 {msg.role === "assistant" && (
-                  <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 text-[10px] font-semibold flex-shrink-0 mt-1">
-                    {CHAT_NAME[0]}
-                  </div>
+                  <img src={AVATAR_PATH} alt={CHAT_NAME} className="nadia-avatar-sm mt-1" />
                 )}
                 <div
                   className={`max-w-[80%] px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
@@ -245,9 +267,7 @@ export default function LeadCaptureChat() {
             {/* Typing indicator */}
             {isTyping && (
               <div className="flex items-start gap-2.5">
-                <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 text-[10px] font-semibold flex-shrink-0 mt-1">
-                  {CHAT_NAME[0]}
-                </div>
+                <img src={AVATAR_PATH} alt={CHAT_NAME} className="nadia-avatar-sm mt-1" />
                 <div className="bg-gray-50 rounded-2xl rounded-tl-sm px-4 py-3">
                   <div className="flex gap-1.5">
                     <span className="w-2 h-2 bg-gray-400 rounded-full" style={{ animation: 'chatTyping 1.2s ease-in-out infinite' }} />
@@ -258,17 +278,58 @@ export default function LeadCaptureChat() {
               </div>
             )}
 
+            {/* Live transfer option */}
+            {showTransferOption && handoffStep === null && (
+              <div className="bg-blue-50 rounded-2xl p-4 text-center" style={{ animation: 'chatFadeIn 0.3s ease-out' }}>
+                <p className="text-sm font-semibold text-gray-900 mb-2">Want to talk to Adam or Mandi directly?</p>
+                <div className="flex gap-2">
+                  <button onClick={handleTransferToAgent} className="flex-1 py-2.5 bg-black text-white font-semibold rounded-xl text-sm hover:bg-gray-800 transition-colors">
+                    Yes, connect me 🤝
+                  </button>
+                  <button onClick={() => setShowTransferOption(false)} className="flex-1 py-2.5 border border-gray-300 text-gray-700 font-semibold rounded-xl text-sm hover:bg-gray-50 transition-colors">
+                    No, keep chatting
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Handoff form */}
             {handoffStep === "collecting" && (
               <div className="bg-blue-50 rounded-2xl p-4" style={{ animation: 'chatFadeIn 0.3s ease-out' }}>
-                <p className="text-sm font-semibold text-gray-900 mb-3">Great! How can Adam or Mandi reach you?</p>
+                <p className="text-sm font-semibold text-gray-900 mb-3">Great! How should Adam or Mandi reach you?</p>
                 <form onSubmit={handleHandoffSubmit} className="space-y-2">
                   <input required placeholder="Your name *" value={leadInfo.name} onChange={(e) => setLeadInfo({ ...leadInfo, name: e.target.value })}
                     className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black" />
                   <input required type="email" placeholder="your@email.com *" value={leadInfo.email} onChange={(e) => setLeadInfo({ ...leadInfo, email: e.target.value })}
                     className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black" />
-                  <input type="tel" placeholder="(970) 555-0123" value={leadInfo.phone} onChange={(e) => setLeadInfo({ ...leadInfo, phone: e.target.value })}
+                  <input type="tel" placeholder="Phone (optional)" value={leadInfo.phone} onChange={(e) => setLeadInfo({ ...leadInfo, phone: e.target.value })}
                     className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black" />
+                  
+                  {/* Contact preference */}
+                  <div className="pt-1">
+                    <p className="text-xs font-medium text-gray-500 mb-1.5">Preferred contact method:</p>
+                    <div className="flex gap-2">
+                      {[
+                        { value: "email", label: "📧 Email" },
+                        { value: "phone", label: "📞 Phone" },
+                        { value: "text", label: "💬 Text" },
+                      ].map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => setLeadInfo({ ...leadInfo, contactMethod: opt.value })}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                            leadInfo.contactMethod === opt.value
+                              ? "bg-black text-white"
+                              : "bg-white border border-gray-200 text-gray-600 hover:border-gray-400"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   {leadError && <p className="text-red-600 text-xs">{leadError}</p>}
                   <button type="submit" className="w-full py-2.5 bg-black text-white font-semibold rounded-xl text-sm hover:bg-gray-800 transition-colors">
                     Connect Me With Adam & Mandi
@@ -280,8 +341,9 @@ export default function LeadCaptureChat() {
             {handoffStep === "submitted" && (
               <div className="bg-green-50 rounded-2xl p-4 text-center" style={{ animation: 'chatFadeIn 0.3s ease-out' }}>
                 <p className="font-semibold text-gray-900">You're all set, {leadInfo.name.split(" ")[0]}! 🎉</p>
-                <p className="text-sm text-gray-600 mt-1">Adam or Mandi will reach out soon. Need immediate help?</p>
-                <a href="tel:(970) 999-1407" className="inline-block mt-3 px-5 py-2.5 bg-black text-white font-semibold rounded-xl text-sm hover:bg-gray-800 transition-colors">
+                <p className="text-sm text-gray-600 mt-1">Adam or Mandi will reach out via {leadInfo.contactMethod} shortly.</p>
+                <p className="text-xs text-gray-400 mt-1">Need immediate help?</p>
+                <a href="tel:(970) 999-1407" className="inline-block mt-2 px-5 py-2.5 bg-black text-white font-semibold rounded-xl text-sm hover:bg-gray-800 transition-colors">
                   Call (970) 999-1407
                 </a>
               </div>
@@ -292,7 +354,7 @@ export default function LeadCaptureChat() {
 
           {/* Input */}
           <div className="border-t border-gray-100 px-4 py-3 flex-shrink-0">
-            {handoffStep === null && (
+            {handoffStep === null && !showTransferOption && (
               <form onSubmit={handleSubmit} className="flex gap-2">
                 <input
                   value={input} onChange={(e) => setInput(e.target.value)}
