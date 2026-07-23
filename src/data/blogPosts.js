@@ -906,7 +906,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/Windsor-CO-Area-Guide.jpg',
     readTime: '10 min read',
-    youtubeId: 'Xc7TbfyUi3c',
+    youtubeId: 'S5I7otGPcHA',
     keywords: 'sell my home windsor colorado, windsor co real estate agent, windsor colorado homes for sale, selling a house in windsor co, windsor home selling guide, how to sell a home in windsor colorado, listing agent windsor co, windsor co home value',
     relatedLinks: [
       { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Neighborhoods, schools & market data' },
@@ -1601,7 +1601,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Windsor-CO-Area-Guide.jpg',
     readTime: '8 min read',
-    youtubeId: 'tMeya8iBE5U',
+    youtubeId: '8S9mdqLQTJo',
     keywords: 'windsor colorado homes for sale, windsor co homes for sale, windsor colorado real estate, buying a home in windsor colorado, homes for sale in windsor co, moving to windsor colorado, windsor co neighborhoods, windsor co realtor, windsor colorado real estate agent',
     relatedLinks: [
       { title: 'Windsor Area Guide', href: '/northern-colorado-areas/windsor/', description: 'Neighborhoods, schools and homes for sale' },
@@ -1823,7 +1823,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/wellington.png',
     readTime: '7 min read',
-    youtubeId: 'Am-WOOoB8dk',
+    youtubeId: 'nxViqLJD7ng',
     keywords: 'wellington colorado homes for sale, wellington co homes for sale, wellington colorado real estate, buying a home in wellington colorado, homes for sale in wellington co, moving to wellington colorado, wellington co neighborhoods, wellington co realtor, wellington colorado real estate agent',
     relatedLinks: [
       { title: 'Wellington Area Guide', href: '/northern-colorado-areas/wellington/', description: 'Neighborhoods, schools and homes for sale' },
