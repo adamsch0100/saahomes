@@ -596,6 +596,7 @@ export const neighborhoods = [
     walkScore: 30,
     metaDescription: 'Tapestry Fort Collins real estate - new construction master-planned community with top Fossil Ridge schools in southeast Fort Collins. SAA Homes.',
     keywords: 'Tapestry Fort Collins, southeast Fort Collins new homes, Fossil Ridge schools Fort Collins, master-planned community Fort Collins, new construction Fort Collins, Harmony Road Fort Collins',
+    youtubeId: 'tVVKJTx-_M4',
     neighborhoodHighlights: [
       { title: 'Newest community', description: 'Fort Collins newest master-planned community with modern homes built 2020-present - the latest in energy-efficient design.' },
       { title: 'Top school cluster', description: 'Ridgeview Elementary (9/10) through Fossil Ridge High School (9/10) - the best school ladder in Northern Colorado.' },
@@ -630,6 +631,7 @@ export const neighborhoods = [
     walkScore: 30,
     metaDescription: 'Trailhead Fort Collins real estate - new homes on Trilby Road with trail access and top Fossil Ridge schools. SAA Homes.',
     keywords: 'Trailhead Fort Collins, Trilby Road Fort Collins homes, southeast Fort Collins real estate, Fossil Creek Trail homes, new construction Fort Collins, FortCollins subdivisions',
+    youtubeId: 'n15b2uyVhoE',
     neighborhoodHighlights: [
       { title: 'Trail network', description: 'Direct access to Fossil Creek Trail connecting to over 30 miles of paved pathways across Fort Collins.' },
       { title: 'Fossil Ridge schools', description: 'Ridgeview Elementary (9/10), Preston Middle (8/10), and Fossil Ridge High (9/10) serve the community.' },
@@ -664,6 +666,7 @@ export const neighborhoods = [
     walkScore: 25,
     metaDescription: 'Stuart Place Fort Collins real estate - custom homes on large lots near Horsetooth Reservoir with top-rated Bailey Elementary. SAA Homes.',
     keywords: 'Stuart Place Fort Collins, northwest Fort Collins homes, Horsetooth Reservoir real estate, custom homes Fort Collins, large lot Fort Collins, Bailey Elementary homes',
+    youtubeId: 'Vc4NsUszAo0',
     neighborhoodHighlights: [
       { title: 'Foothills living', description: 'Custom homes on large wooded lots with mountain views - a private, natural setting minutes from town.' },
       { title: 'Outdoor recreation', description: 'Horsetooth Reservoir, Lory State Park, and miles of trails are steps from your front door.' },
