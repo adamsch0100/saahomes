@@ -22,6 +22,10 @@ const BUYER_FAQS = [
     q: 'Do I need a real estate agent to buy a home in Northern Colorado?',
     a: 'While you can buy a home without an agent, working with a professional buyer agent costs you nothing (the seller pays both commissions) and provides critical advantages: access to all MLS listings, neighborhood market data, professional negotiation, CHFA program guidance, and protection through the transaction. Schwartz and Associates at Coldwell Banker Realty offers comprehensive buyer representation across all 19 Northern Colorado communities.'
   },
+  {
+    q: 'What should I know about relocating to Northern Colorado?',
+    a: 'Relocating to Northern Colorado offers access to outdoor recreation, strong schools, growing job markets, and a high quality of life across 19 distinct communities. Start by researching cities that match your lifestyle — Fort Collins for urban amenities and CSU culture, Loveland for arts and affordability, Windsor for family-friendly neighborhoods with top schools, and Greeley for more affordable options near UNC. The housing market is competitive in desirable areas, so getting pre-approved before your search is essential. CHFA down payment assistance programs are available statewide for qualified buyers. Schwartz and Associates can help you compare cities, find neighborhoods that fit your budget and commute needs, and coordinate with lenders who understand relocation timelines. Call (970) 999-1407 for personalized guidance.'
+  },
 ];
 
 const SELLER_FAQS = [
@@ -44,6 +48,10 @@ const SELLER_FAQS = [
   {
     q: 'How long does it take to sell a home in Fort Collins or Northern Colorado?',
     a: 'Days on market vary by city, price point, and season. In 2026, well-priced homes in desirable Northern Colorado neighborhoods typically sell within 14–45 days. Premium properties and homes in higher price brackets may take longer. Key factors affecting time-to-sale include pricing strategy, condition, location, marketing reach, and current inventory levels. Your SAA Homes agent provides a customized timeline based on your specific property and market conditions.'
+  },
+  {
+    q: 'Can I sell my house fast in Northern Colorado?',
+    a: 'Yes. Homes in desirable Northern Colorado neighborhoods that are priced correctly and well-presented often sell within 14–30 days, especially in Fort Collins, Loveland, and Windsor. To sell quickly: price competitively based on a Comparative Market Analysis, declutter and stage your home, make minor repairs, and use professional photography. If you need to sell immediately — due to relocation, financial pressure, or an inherited property — ask about our cash buyer network which can close in as little as 7–14 days with no repairs or showings required. Schwartz and Associates provides honest guidance on whether a fast cash sale or traditional listing will net you more. Call (970) 999-1407 for a free consultation.'
   },
 ];
 

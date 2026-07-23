@@ -11,7 +11,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Fort-Collins-CO-Area-Guide.jpg',
     readTime: '8 min read',
-    youtubeId: '-Tz6Zj6D3IY',
+    youtubeId: 'C5q4hYvXvas',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & homes for sale' },
       { title: 'Loveland, Colorado Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities & pricing' },
@@ -184,10 +184,10 @@ export const blogPosts = [
     category: 'CHFA & Homebuyer Programs',
     image: '/images/Buyers-img-2.jpg',
     readTime: '12 min read',
-    youtubeId: 'E0dZw7_szIg',
+    youtubeId: 'RF1C-bQas2U',
     keywords: 'CHFA down payment assistance, Colorado first time home buyer 2026, CHFA grant Colorado, CHFA SmartStep, CHFA Preferred, CHFA FirstStep, down payment help Colorado',
     relatedLinks: [
-      { title: 'CHFA Down Payment Assistance Landing Page', href: '/chfa-down-payment-assistance/', description: 'Full program comparison and consultation' },
+      { title: 'CHFA Down Payment Assistance Landing Page', href: '/chfa-down-payment-assistance/', description: 'Full program comparison, limits table & free consultation' },
       { title: 'CHFA for Fort Collins & Greeley Buyers', href: '/blog/chfa-first-time-homebuyer-northern-colorado/', description: 'Northern Colorado income and purchase price limits' },
       { title: 'Mortgage Calculator', href: '/mortgage-calculator/', description: 'Estimate your monthly payment' },
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
@@ -274,9 +274,9 @@ export const blogPosts = [
     excerpt: 'Local guide to CHFA income limits, purchase price caps, and down payment assistance for buyers in Larimer County, Weld County, and across Northern Colorado.',
     date: '2026-06-22',
     category: 'CHFA & Homebuyer Programs',
-    image: '/images/Fort-Collins-CO',
+    image: '/images/Fort-Collins-CO-Area-Guide.jpg',
     readTime: '10 min read',
-    youtubeId: 'xD8l53iHIbM',
+    youtubeId: 'feMj8CDlSio',
     keywords: 'CHFA Fort Collins, CHFA Greeley, Larimer County first time home buyer, Weld County down payment assistance, Northern Colorado CHFA income limits, Loveland CHFA',
     relatedLinks: [
       { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'All programs, requirements & DPA options' },
@@ -348,7 +348,7 @@ export const blogPosts = [
     category: 'CHFA & Homebuyer Programs',
     image: '/images/buyers-hero.jpg',
     readTime: '9 min read',
-    youtubeId: 'ZfAzWPCsQiM',
+    youtubeId: 'B5umjC9TbAA',
     keywords: 'CHFA Schools To Home, Colorado teacher home loan, educator down payment assistance, public school employee home buying, teacher mortgage Fort Collins, CHFA educator program 2026',
     relatedLinks: [
       { title: 'CHFA Schools To Home Program Page', href: '/chfa-schools-to-home/', description: 'Full eligibility, examples & free consultation' },
@@ -414,7 +414,7 @@ export const blogPosts = [
     category: 'CHFA & Homebuyer Programs',
     image: '/images/Shwartz-CTA-Buyers.jpg',
     readTime: '8 min read',
-    youtubeId: 'AWrb6S7B9c8',
+    youtubeId: 'OAFkvsbPgjc',
     keywords: 'Colorado Champions Home Loan, CHFA first responders, police officer home loan Colorado, firefighter mortgage Greeley, EMT home buying Fort Collins, first responder housing Colorado',
     relatedLinks: [
       { title: 'Champions Home Loan Program Page', href: '/colorado-champions-home-loan-program/', description: 'Timeline, eligibility & sign up for updates' },
@@ -802,7 +802,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/6-1.jpg',
     readTime: '10 min read',
-    youtubeId: 'lD9igbYAu5Q',
+    youtubeId: 'x30AIAzqeI8',
     keywords: 'sell my home fort collins, fort collins realtor, fort collins real estate agent, selling a house in fort collins, fort collins home selling guide, how to sell a home in fort collins, listing agent fort collins, fort collins home value',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
@@ -1011,7 +1011,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/Shwartz-CTA-Buyers.jpg',
     readTime: '8 min read',
-    youtubeId: 'OmoQc2k_bxQ',
+    youtubeId: 'X9XFaaMjCGQ',
     keywords: 'fort collins realtor, fort collins real estate agent, best realtor fort collins, fort collins real estate team, schwartz and associates fort collins, northern colorado realtor, fort collins co realtor, coldwell banker fort collins, fort collins home buying, fort collins home selling',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
@@ -1157,7 +1157,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Loveland-CO-Area-Guide.jpg',
     readTime: '8 min read',
-    youtubeId: 'YBC31tjO5QY',
+    youtubeId: 'K-rJl7HjUvg',
     keywords: 'loveland homes for sale, loveland colorado homes for sale, loveland co real estate, buying a home in loveland colorado, homes for sale in loveland co, moving to loveland colorado, loveland neighborhoods, loveland co realtor',
     relatedLinks: [
       { title: 'Loveland, Colorado Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Neighborhoods, schools and homes for sale' },
@@ -1488,7 +1488,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/timnath.png',
     readTime: '8 min read',
-    youtubeId: 'qkaQriUV-GA',
+    youtubeId: 'Aj-U5azJfEA',
     keywords: 'timnath homes for sale, timnath colorado homes for sale, timnath co real estate, buying a home in timnath colorado, homes for sale in timnath co, moving to timnath colorado, timnath new construction, timnath co realtor, timnath neighborhoods',
     relatedLinks: [
       { title: 'Timnath Area Guide', href: '/northern-colorado-areas/timnath/', description: 'New construction communities and homes for sale' },
