@@ -3643,6 +3643,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/Northern Colorado.webp',
     readTime: '12 min read',
+    youtubeId: 'r_-3dBNFDwU',
     keywords: 'senior downsizing Northern Colorado, downsizing homes Fort Collins, 55+ housing Loveland, retiree relocation NoCo, downsizing to a smaller home Colorado, senior move management Fort Collins, low maintenance homes Windsor, retirement communities Greeley, selling large home Colorado empty nesters',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & homes for sale' },
