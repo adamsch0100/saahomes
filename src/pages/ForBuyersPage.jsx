@@ -117,6 +117,14 @@ export default function ForBuyersPage() {
             </div>
 
             <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+              <h3 className="text-2xl font-bold mb-4 font-serif">Ask for Seller Concessions</h3>
+              <p className="text-gray-700 mb-4">
+                Save thousands at closing — seller concessions can cover your closing costs, prepaid items, and rate buydowns. Understand the limits by loan type and negotiate with confidence.
+              </p>
+              <a href="/blog/seller-concession-cheat-sheet-northern-colorado/" className="text-black font-semibold hover:underline">Seller Concession Cheat Sheet →</a>
+            </div>
+
+            <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
               <h3 className="text-2xl font-bold mb-4 font-serif">Relocation Guide</h3>
               <p className="text-gray-700 mb-4">
                 Moving to Northern Colorado? Get insider knowledge about neighborhoods, schools, and local amenities to find your perfect community.
