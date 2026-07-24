@@ -3389,6 +3389,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Northern Colorado.webp',
     readTime: '12 min read',
+    youtubeId: 'R-jhx281dfY',
     keywords: 'multigenerational homes Northern Colorado, multigenerational housing Fort Collins, multi-gen homes Loveland, homes with mother-in-law suite Windsor, accessory dwelling unit Greeley, multigenerational living Colorado, houses for multigenerational family, two-kitchen homes Fort Collins, main floor primary suite NoCo',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & homes for sale' },
