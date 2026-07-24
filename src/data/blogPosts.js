@@ -3539,6 +3539,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/timnath.png',
     readTime: '10 min read',
+    youtubeId: 'EbgQY8X7uRA',
     keywords: 'sell my home timnath colorado, timnath co real estate agent, timnath colorado homes for sale, selling a house in timnath co, timnath home selling guide, how to sell a home in timnath colorado, listing agent timnath co, timnath co home value, timnath housing market',
     relatedLinks: [
       { title: 'Timnath Area Guide', href: '/northern-colorado-areas/timnath/', description: 'Neighborhoods, schools & market data' },
