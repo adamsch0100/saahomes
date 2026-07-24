@@ -158,7 +158,8 @@ export default function ContactPage() {
                 <input
                   type="tel"
                   name="phone"
-                  placeholder="Your phone number"
+                  placeholder="Your phone number *"
+                  required
                   value={formData.phone}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
@@ -175,6 +176,9 @@ export default function ContactPage() {
                   <option value="">Select an interest</option>
                   <option value="Buying a home">Buying a home</option>
                   <option value="Selling a home">Selling a home</option>
+                  <option value="CHFA down payment assistance">CHFA down payment assistance</option>
+                  <option value="First-time homebuyer">First-time homebuyer</option>
+                  <option value="Cash home buyer">Cash home buyer</option>
                   <option value="Relocating to the area">Relocating to the area</option>
                   <option value="Media">Media</option>
                   <option value="Area information">Area information</option>
@@ -199,7 +203,7 @@ export default function ContactPage() {
                 disabled={isSubmitting}
                 className="w-full px-8 py-3 bg-black text-white font-semibold rounded hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? 'Sending...' : 'Send Message'}
+                {isSubmitting ? 'Sending...' : 'Get My Free Consultation'}
               </button>
               <p className="text-xs text-gray-500 mt-2 text-center">
                 <span className="font-semibold text-gray-700">✓</span> Adam and Mandi Schwartz typically respond within 2 hours during business hours
