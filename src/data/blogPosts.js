@@ -587,7 +587,7 @@ export const blogPosts = [
     image: '/images/Northern Colorado.webp',
     readTime: '7 min read',
     supersededBy: LATEST_MARKET_UPDATE_SLUG,
-    youtubeId: 'daBlxFfJ0iA',
+    youtubeId: 'udLeeAWka2o',
     keywords: 'Northern Colorado housing market 2026, Fort Collins home prices June 2026, Loveland real estate trends, Windsor CO housing market, Greeley home prices, Larimer County market update',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
@@ -802,7 +802,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/6-1.jpg',
     readTime: '10 min read',
-    youtubeId: 'x30AIAzqeI8',
+    youtubeId: '24-qv0hrS1g',
     keywords: 'sell my home fort collins, fort collins realtor, fort collins real estate agent, selling a house in fort collins, fort collins home selling guide, how to sell a home in fort collins, listing agent fort collins, fort collins home value',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
@@ -1011,7 +1011,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/Shwartz-CTA-Buyers.jpg',
     readTime: '8 min read',
-    youtubeId: 'X9XFaaMjCGQ',
+    youtubeId: 'F_V3oZS9_VE',
     keywords: 'fort collins realtor, fort collins real estate agent, best realtor fort collins, fort collins real estate team, schwartz and associates fort collins, northern colorado realtor, fort collins co realtor, coldwell banker fort collins, fort collins home buying, fort collins home selling',
     relatedLinks: [
       { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
