@@ -235,7 +235,7 @@ export default function ForBuyersPage() {
                   Questions? Call us at <a href="tel:(970) 999-1407" className="font-bold hover:underline">(970) 999-1407</a>
                 </p>
                 <a href="/contact/" className="inline-block px-8 py-3 bg-gray-900 text-white font-semibold rounded hover:bg-gray-800 transition-colors">
-                  Apply Now
+                  Get Started
                 </a>
               </div>
             </div>
