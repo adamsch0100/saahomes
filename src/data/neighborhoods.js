@@ -701,6 +701,7 @@ export const neighborhoods = [
     walkScore: 15,
     metaDescription: 'Red Fox Hills Fort Collins real estate - estate homes with mountain views on large lots in northwest Fort Collins. SAA Homes.',
     keywords: 'Red Fox Hills Fort Collins, northwest Fort Collins estate homes, mountain view homes Fort Collins, large lot homes Fort Collins, Fort Collins luxury real estate, Horsetooth area homes',
+    youtubeId: 'PsIej1GIIEM',
     neighborhoodHighlights: [
       { title: 'Estate living', description: 'Custom estate homes on 1+ acre lots with panoramic Front Range views - the pinnacle of Fort Collins luxury living.' },
       { title: 'Natural setting', description: 'Many properties back to open space with direct access to foothills trails and wildlife viewing.' },
@@ -735,6 +736,7 @@ export const neighborhoods = [
     walkScore: 50,
     metaDescription: 'Braiden Fort Collins real estate - centrally located mid-century homes near City Park and Spring Creek Trail. SAA Homes.',
     keywords: 'Braiden Fort Collins, central Fort Collins homes, mid-century homes Fort Collins, City Park Fort Collins real estate, Spring Creek Fort Collins, Fort Collins ranch homes',
+    youtubeId: 'WQSZ_RJrA-w',
     neighborhoodHighlights: [
       { title: 'Central location', description: 'Braiden\'s central location puts you minutes from Old Town, CSU, and Midtown - the most convenient commute in FC.' },
       { title: 'Mid-century charm', description: 'Classic 1960s ranch and split-level homes with mature trees and established character.' },
@@ -769,6 +771,7 @@ export const neighborhoods = [
     walkScore: 72,
     metaDescription: 'Swan Addition Fort Collins real estate - historic bungalows and craftsman homes near City Park and Old Town. SAA Homes.',
     keywords: 'Swan Addition Fort Collins, historic homes Fort Collins, City Park Fort Collins real estate, Fort Collins bungalows, Old Town Fort Collins homes, architecturally significant homes Fort Collins',
+    youtubeId: 'ky8jThnMj1E',
     neighborhoodHighlights: [
       { title: 'Historic character', description: 'Early-1900s Craftsman bungalows and Queen Annes - some of Fort Collins\' oldest and most architecturally significant homes.' },
       { title: 'City Park lifestyle', description: 'Fort Collins\' original park with pool, gardens, tennis courts, and community events is your backyard.' },
