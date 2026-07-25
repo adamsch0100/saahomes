@@ -3765,6 +3765,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/seller-concession-cheat-sheet-northern-colorado.jpg',
     readTime: '5 min read',
+    youtubeId: 'FHOUYRwBHMQ',
     relatedLinks: [
       { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
       { title: 'Fort Collins Home Selling Guide', href: '/blog/selling-your-home-in-fort-collins/', description: 'Complete Fort Collins seller resource' },
