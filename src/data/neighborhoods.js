@@ -806,6 +806,7 @@ export const neighborhoods = [
     walkScore: 32,
     metaDescription: 'The Homestead Fort Collins real estate - family-friendly subdivision with top Fossil Ridge schools in southeast Fort Collins. SAA Homes.',
     keywords: 'The Homestead Fort Collins, southeast Fort Collins subdivisions, Fossil Ridge homes Fort Collins, family neighborhoods Fort Collins, Ridgeview Elementary Fort Collins, Harmony Road homes',
+    youtubeId: 'pUySzodPjDs',
     neighborhoodHighlights: [
       { title: 'Family-focused', description: 'Community pool, parks, and walkable streets make The Homestead one of Fort Collins\' top family neighborhoods.' },
       { title: 'Top schools', description: 'Ridgeview Elementary (9/10), Preston Middle (8/10), and Fossil Ridge High (9/10) serve the community.' },
@@ -840,6 +841,7 @@ export const neighborhoods = [
     walkScore: 65,
     metaDescription: 'McMurry Addition Fort Collins real estate - historic homes and investment properties near CSU campus. SAA Homes.',
     keywords: 'McMurry Addition Fort Collins, CSU area real estate, Fort Collins investment properties, historic homes near CSU Fort Collins, student housing Fort Collins, University area Fort Collins',
+    youtubeId: 'YAqPgJKwyAc',
     neighborhoodHighlights: [
       { title: 'CSU proximity', description: 'Located directly adjacent to the CSU campus - a 5-minute walk to the Lory Student Center.' },
       { title: 'Investment opportunity', description: 'Strong rental market with steady demand from 33,000+ CSU students seeking housing near campus.' },
@@ -874,6 +876,7 @@ export const neighborhoods = [
     walkScore: 48,
     metaDescription: 'Lesatz Addition Fort Collins real estate - mid-century homes in central Fort Collins near Midtown and CSU. SAA Homes.',
     keywords: 'Lesatz Addition Fort Collins, central Fort Collins homes, mid-century Fort Collins, Blevins Middle School Fort Collins, Rocky Mountain High School homes, Fort Collins ranch homes',
+    youtubeId: 'r-bqDY5UuPw',
     neighborhoodHighlights: [
       { title: 'Central convenience', description: 'Lesatz Addition offers one of Fort Collins\' most central locations, minutes from everything.' },
       { title: 'Rocky Mountain schools', description: 'Served by Rocky Mountain High School (9/10) - one of the top high schools in Northern Colorado.' },
