@@ -169,6 +169,14 @@ export default function BlogPostPage() {
           {post.sections.map((section) => (
             <section key={section.heading} className="mb-10">
               <h2 className="text-2xl sm:text-3xl font-bold font-serif mb-4">{section.heading}</h2>
+              {section.image && (
+                <img
+                  src={section.image}
+                  alt={section.imageAlt || `${section.heading} — SAA Homes Northern Colorado`}
+                  className="w-full h-auto rounded-xl shadow-md mb-6"
+                  loading="lazy"
+                />
+              )}
               {section.paragraphs.map((paragraph) => (
                 <p key={paragraph.slice(0, 40)} className="text-lg text-gray-700 leading-relaxed mb-4">
                   {paragraph}
