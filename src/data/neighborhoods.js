@@ -146,7 +146,8 @@ export const neighborhoods = [
     metaDescription:
       'South Fort Collins real estate guide — new construction homes, master-planned communities, and excellent schools near Fossil Ridge High. Expert local agents from SAA Homes.',
     keywords:
-      'South Fort Collins homes, South Fort Collins new construction, Fossil Creek Fort Collins, Ridgewood Hills Fort Collins, Harmony Road Fort Collins real estate, SE Fort CyoutubeId: 'zRPk65HkgAk'  youtubeId: 'OV_SfHGy48U',
+      'South Fort Collins homes, South Fort Collins new construction, Fossil Creek Fort Collins, Ridgewood Hills Fort Collins, Harmony Road Fort Collins real estate, SE Fort Collins',
+    youtubeId: 'zRPk65HkgAk',
     neighborhoodHighlights: [
       { title: 'Top schools', description: 'Fossil Ridge High School (9/10) and Ridgeview Elementary (9/10) make this a magnet for families.' },
       { title: 'New construction', description: 'Most homes built after 2000 — modern floor plans, energy-efficient construction, and contemporary finishes.' },
