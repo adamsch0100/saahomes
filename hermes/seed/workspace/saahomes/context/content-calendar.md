@@ -14,6 +14,8 @@ Read with: `social-channels.md`, `social-post-pack` skill, `blog-pipeline` skill
 | **Market intelligence** | Expert authority | Blog monthly + social weekly | Market report · area pages |
 | **Seller education** | Capture listing intent | Blog + social teaser | `/for-sellers/` |
 | **Buyer education** | Capture search intent | Blog + area pages + social | `/for-buyers/` · areas |
+| **Buyer concessions** | Capture buyer closing-cost intent | Blog cheat sheet + body infographic | `/for-buyers/` · CHFA programs |
+
 | **Programs (CHFA, etc.)** | Unique Colorado moat | Blog/area updates + seasonal social | CHFA forms |
 | **City / neighborhood** | Local pack + long-tail | Area page (site) + social spotlight | Area URLs |
 | **Local community** | Trust, not spam | Social-first | Soft CTA contact |
@@ -170,6 +172,14 @@ monthly_market_blog_url:
 latest_market_update_slug: northern-colorado-market-update-june-2026
 blogs_published_this_month:
 pending_social_packs: []
+next_up:
+  - title: 'Buyer Concession Cheat Sheet for Northern Colorado Home Buyers'
+    slug: buyer-concession-cheat-sheet-northern-colorado
+    pillar: Buyer concessions
+    hero: all-black (blog-default-black.jpg)
+    body_image: buyer-oriented infographic with loan-type table + CHFA stacking
+    target_keyword: buyer concessions northern colorado, seller concessions for buyers, closing cost assistance colorado
+    status: planned
 ```
 
 Hermes maintains this section. **`latest_market_update_slug` must match `LATEST_MARKET_UPDATE_SLUG` in `src/data/blogPosts.js`** after every market update ship.
