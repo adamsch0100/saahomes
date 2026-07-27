@@ -911,6 +911,7 @@ export const neighborhoods = [
     walkScore: 35,
     metaDescription: 'Willow Springs Fort Collins real estate - family-friendly subdivision with Fossil Ridge schools near Harmony Road. SAA Homes.',
     keywords: 'Willow Springs Fort Collins, south Fort Collins homes, Fossil Ridge school homes, Fort Collins subdivisions, Harmony Road Fort Collins, Fossil Creek Park homes',
+    youtubeId: '-1VKRscvLwc',
     neighborhoodHighlights: [
       { title: 'Established community', description: 'Willow Springs offers a rare combination of mature trees and modern homes - the best of both worlds in south Fort Collins.' },
       { title: 'Fossil Ridge package', description: 'The complete Fossil Ridge school ladder from Ridgeview Elementary (9/10) through Fossil Ridge High (9/10).' },
@@ -945,6 +946,7 @@ export const neighborhoods = [
     walkScore: 35,
     metaDescription: 'Waverly Fort Collins real estate - family-friendly south Fort Collins subdivision with Fossil Ridge schools and community pool. SAA Homes.',
     keywords: 'Waverly Fort Collins, south Fort Collins subdivisions, Fossil Ridge schools Fort Collins, Waverly community Fort Collins, family neighborhoods Fort Collins, Harmony Road Fort Collins',
+    youtubeId: 'KfBk49r-80o',
     neighborhoodHighlights: [
       { title: 'Community pool', description: 'The Waverly community pool and clubhouse are the heart of the neighborhood during summer months.' },
       { title: 'Fossil Ridge schools', description: 'Ridgeview Elementary (9/10) through Fossil Ridge High (9/10) - an unmatched school cluster.' },
@@ -979,6 +981,7 @@ export const neighborhoods = [
     walkScore: 10,
     metaDescription: 'Foothills area Fort Collins real estate - custom estate homes with mountain views on large lots near Horsetooth Reservoir. SAA Homes.',
     keywords: 'Foothills Fort Collins, west Fort Collins acreage, Horsetooth Mountain homes, custom estate Fort Collins, equestrian properties Fort Collins, mountain view homes Fort Collins, luxury real estate Fort Collins',
+    youtubeId: '3QIPAV84XeM',
     neighborhoodHighlights: [
       { title: 'Acreage lifestyle', description: 'Large custom homes on 1-5 acre lots with no HOA - room for horses, gardens, workshops, and privacy.' },
       { title: 'World-class recreation', description: 'Horsetooth Mountain, Lory State Park, and miles of trails are steps from your front door.' },
