@@ -3785,25 +3785,10 @@ export const blogPosts = [
         heading: 'Maximum seller concessions by loan type',
         paragraphs: [
           'The maximum allowable seller contribution depends on the loan type, whether the buyer will occupy the home as their primary residence, and — for Conventional loans — the size of the down payment. Here is the complete breakdown as of July 2026:',
+          'These limits apply to the total seller contribution, including any closing cost assistance, discount points, and prepaid items combined. Exceeding these caps can result in the lender reducing the loan amount or requiring price adjustments — so knowing your buyer\'s loan type during negotiations is essential.',
         ],
         image: '/images/seller-concession-limits-table.jpg',
         imageAlt: 'Seller concession cheat sheet — maximum contributions by Conventional, FHA, VA, and USDA loan types — SAA Homes Northern Colorado',
-        table: {
-          headers: ['Loan Type', 'Property Type', 'Down Payment', 'Max Seller Contribution'],
-          rows: [
-            ['Conventional', 'Primary Residence (Owner-Occupied)', 'Less than 10%', '3%'],
-            ['Conventional', 'Primary Residence (Owner-Occupied)', '10% to 24%', '6%'],
-            ['Conventional', 'Primary Residence (Owner-Occupied)', '25% or more', '6%'],
-            ['Conventional', 'Second Home', 'Any', '2%'],
-            ['Conventional', 'Investment Property', '15% or more', '2%'],
-            ['FHA', 'Primary Residence', '3.5% or more', '6%'],
-            ['VA', 'Primary Residence', 'N/A (0% down)', '4%'],
-            ['USDA', 'Primary Residence', 'N/A (0% down)', '6%'],
-          ],
-        },
-        paragraphs: [
-          'These limits apply to the total seller contribution, including any closing cost assistance, discount points, and prepaid items combined. Exceeding these caps can result in the lender reducing the loan amount or requiring price adjustments \u2014 so knowing your buyer\u2019s loan type during negotiations is essential.',
-        ],
       },
       {
         heading: 'Why seller concessions matter in Northern Colorado right now',
