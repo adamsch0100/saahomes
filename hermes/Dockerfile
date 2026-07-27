@@ -1,4 +1,6 @@
-FROM nousresearch/hermes-agent:latest
+# Pin: :latest has NameError (_history_media_paths undefined) on Telegram streamed replies.
+# Upstream fix: https://github.com/NousResearch/hermes-agent/pull/72341 (not merged yet).
+FROM nousresearch/hermes-agent:v2026.7.20
 
 ENV HERMES_HOME=/opt/data
 ENV PYTHONPATH=/usr/local/bin
