@@ -3846,6 +3846,7 @@ export const blogPosts = [
     category: 'Market Update',
     image: '/images/fort-collins-housing-market-mid-2026.jpg',
     readTime: '5 min read',
+    youtubeId: 'CtKgdgYwfJI',
     relatedLinks: [
       { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & homes for sale' },
       { title: 'Fort Collins Home Selling Guide', href: '/blog/selling-your-home-in-fort-collins/', description: 'Complete Fort Collins seller resource' },
