@@ -1718,7 +1718,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/Area-Guide-for-Greeley-CO.jpg',
     readTime: '10 min read',
-    youtubeId: '5eZACulVH9c',
+    youtubeId: 'oZLKBKixb54',
     keywords: 'sell my home greeley colorado, greeley co real estate agent, greeley colorado homes for sale, selling a house in greeley co, greeley home selling guide, how to sell a home in greeley colorado, listing agent greeley co, greeley co home value',
     relatedLinks: [
       { title: 'sell your home in Greeley', href: '/northern-colorado-areas/greeley/', description: 'Neighborhoods, schools & market data' },
