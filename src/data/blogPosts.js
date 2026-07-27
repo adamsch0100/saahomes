@@ -3784,8 +3784,10 @@ export const blogPosts = [
       {
         heading: 'Maximum seller concessions by loan type',
         paragraphs: [
-          'The maximum allowable seller contribution depends on the loan type, whether the buyer will occupy the home as their primary residence, and \u2014 for Conventional loans \u2014 the size of the down payment. Here is the complete breakdown as of July 2026:',
+          'The maximum allowable seller contribution depends on the loan type, whether the buyer will occupy the home as their primary residence, and — for Conventional loans — the size of the down payment. Here is the complete breakdown as of July 2026:',
         ],
+        image: '/images/seller-concession-limits-table.jpg',
+        imageAlt: 'Seller concession cheat sheet — maximum contributions by Conventional, FHA, VA, and USDA loan types — SAA Homes Northern Colorado',
         table: {
           headers: ['Loan Type', 'Property Type', 'Down Payment', 'Max Seller Contribution'],
           rows: [
