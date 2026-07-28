@@ -241,7 +241,7 @@ export const neighborhoods = [
       'CSU area Fort Collins real estate — investment properties, student housing, and historic homes near Colorado State University. Buy, sell, or invest with SAA Homes.',
     keywords:
       'CSU area real estate, Fort Collins student housing, University Park Fort Collins, CSU rental property, investment properties Fort Collins, Colorado State University homes',
-    youtubeId: 'OA85a4pBFzo',
+    youtubeId: 'w0M3dBE557M',
     neighborhoodHighlights: [
       { title: 'Investment opportunity', description: '33,000+ CSU students create year-round rental demand. Duplexes and triplexes offer strong ROI.' },
       { title: 'Walk to campus', description: 'Walk or bike to CSU in under 10 minutes from most properties in the University Area.' },
