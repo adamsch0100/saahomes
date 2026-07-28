@@ -3892,6 +3892,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/blog-default-black.jpg',
     readTime: '6 min read',
+    youtubeId: 'UpsH-QWPcYc',
     relatedLinks: [
       { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Family neighborhoods, schools & listings' },
       { title: 'Loveland homes for sale', href: '/northern-colorado-areas/loveland/', description: 'Larimer County family communities' },
