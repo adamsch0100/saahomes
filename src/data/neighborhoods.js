@@ -1015,7 +1015,8 @@ export const neighborhoods = [
     coordinates: { latitude: '40.565', longitude: '-105.125' },
     walkScore: 15,
     metaDescription: 'Prospector\'s Ridge Fort Collins real estate - luxury custom homes with mountain views in northwest Fort Collins foothills. SAA Homes.',
-    keywords: 'Prospector\'s Ridge Fort Collins, northwest Fort Collins luxury homes, Horsetooth Reservoir homes, custom estate Fort Collins, Fort Collins foothills homes, executive homes Fort Collins, mountain view luxury Fort Collins',
+    keywords: 'Prospector\'
+    youtubeId: '84mqBnJErmg',s Ridge Fort Collins, northwest Fort Collins luxury homes, Horsetooth Reservoir homes, custom estate Fort Collins, Fort Collins foothills homes, executive homes Fort Collins, mountain view luxury Fort Collins',
     neighborhoodHighlights: [
       { title: 'Panoramic views', description: 'Elevated lots provide sweeping, unobstructed views of the Front Range, Horsetooth Rock, and Horsetooth Reservoir.' },
       { title: 'Custom luxury', description: 'Executive custom homes with premium finishes, designed for the highest standard of foothills living.' },
@@ -1050,6 +1051,7 @@ export const neighborhoods = [
     walkScore: 35,
     metaDescription: 'Greenbriar Fort Collins real estate - established family subdivision with Fossil Ridge schools near Harmony Road shopping. SAA Homes.',
     keywords: 'Greenbriar Fort Collins, south Fort Collins subdivisions, Fossil Ridge schools Fort Collins, established Fort Collins neighborhoods, family homes Fort Collins, Harmony Road Fort Collins real estate',
+    youtubeId: '0qm5cp0mqV4',
     neighborhoodHighlights: [
       { title: 'Family-focused', description: 'Community pool, parks, and quiet streets create a classic family-friendly atmosphere in south Fort Collins.' },
       { title: 'Fossil Ridge package', description: 'The complete Fossil Ridge school ladder (9/10 across all three levels) is a major draw for families.' },
@@ -1084,6 +1086,7 @@ export const neighborhoods = [
     walkScore: 38,
     metaDescription: 'The Cottages at Rigden Farm Fort Collins real estate - unique cottage-style homes with community garden near Fossil Ridge schools. SAA Homes.',
     keywords: 'Rigden Farm Fort Collins, Cottages at Rigden Farm, Fort Collins cottage homes, New Urbanist Fort Collins, community garden Fort Collins, south Fort Collins unique homes, Fossil Ridge homes Fort Collins',
+    youtubeId: 'iecD6gj1394',
     neighborhoodHighlights: [
       { title: 'Unique architecture', description: 'Cottage and farmhouse-style homes with front porches create a charming, walkable neighborhood - unique in Fort Collins.' },
       { title: 'Community garden', description: 'A vibrant community garden on the historic Rigden Farm site brings neighbors together.' },
