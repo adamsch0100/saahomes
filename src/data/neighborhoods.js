@@ -1015,8 +1015,8 @@ export const neighborhoods = [
     coordinates: { latitude: '40.565', longitude: '-105.125' },
     walkScore: 15,
     metaDescription: 'Prospector\'s Ridge Fort Collins real estate - luxury custom homes with mountain views in northwest Fort Collins foothills. SAA Homes.',
-    keywords: 'Prospector\'
-    youtubeId: '84mqBnJErmg',s Ridge Fort Collins, northwest Fort Collins luxury homes, Horsetooth Reservoir homes, custom estate Fort Collins, Fort Collins foothills homes, executive homes Fort Collins, mountain view luxury Fort Collins',
+    keywords: 'Prospector\'s Ridge Fort Collins, northwest Fort Collins luxury homes, Horsetooth Reservoir homes, custom estate Fort Collins, Fort Collins foothills homes, executive homes Fort Collins, mountain view luxury Fort Collins',
+    youtubeId: '84mqBnJErmg',
     neighborhoodHighlights: [
       { title: 'Panoramic views', description: 'Elevated lots provide sweeping, unobstructed views of the Front Range, Horsetooth Rock, and Horsetooth Reservoir.' },
       { title: 'Custom luxury', description: 'Executive custom homes with premium finishes, designed for the highest standard of foothills living.' },
