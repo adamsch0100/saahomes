@@ -1,7 +1,7 @@
 {
   "channel": "https://www.youtube.com/channel/UCCgkJ1fymEPI5hdBH2SNvrg",
   "listing_channel": "https://youtube.com/@SAAHomes",
-  "last_updated": "2026-07-27",
+  "last_updated": "2026-07-28",
   "notes": "Article explainer videos are on the Adam Schwartz channel (UCCgkJ1fymEPI5hdBH2SNvrg). @SAAHomes is listing tours only. All Hermes article videos assumed freetouse.com/Limujii risk until remuxed. Run audit-youtube-channel.py to refresh.",
   "videos": [
     {
@@ -200,9 +200,9 @@
       "music_assigned": true
     },
     {
-      "slug": "selling-your-home-in-greeley",
+      "slug": "selling-your-home-in-greeley-colorado",
       "title": "Selling Your Home in Greeley, Colorado: A Complete 2026 Guide",
-      "youtube_id": "oZLKBKixb54",
+      "youtube_id": "74ecbsHffj8",
       "status": "live",
       "copyright_risk": false,
       "urgent_unlist": true,
@@ -215,9 +215,9 @@
     {
       "slug": "fort-collins-realtor",
       "title": "Fort Collins Realtor: Your Trusted Real Estate Team for Buying and Selling in Northern Colorado",
-      "youtube_id": "MLFe0-Paol0",
+      "youtube_id": "X9XFaaMjCGQ",
       "status": "live",
-      "copyright_risk": false,
+      "copyright_risk": true,
       "urgent_unlist": true,
       "delete_after_upload": true,
       "project_path": "/opt/data/workspace/saahomes/videos/projects/fort-collins-realtor",
@@ -228,9 +228,9 @@
     {
       "slug": "neighborhood-south-fort-collins",
       "title": "South Fort Collins - Fort Collins, CO | Neighborhood Guide | SAA Homes",
-      "youtube_id": "zRPk65HkgAk",
+      "youtube_id": "OV_SfHGy48U",
       "status": "live",
-      "copyright_risk": false,
+      "copyright_risk": true,
       "urgent_unlist": true,
       "delete_after_upload": true,
       "project_path": "/opt/data/workspace/saahomes/videos/projects/neighborhood-south-fort-collins",
@@ -241,9 +241,9 @@
     {
       "slug": "neighborhood-northwest-fort-collins",
       "title": "Northwest Fort Collins - Fort Collins, CO | Neighborhood Guide | SAA Homes",
-      "youtube_id": "Tb_5M4Xl4qY",
+      "youtube_id": "BHEhPKXCzNw",
       "status": "live",
-      "copyright_risk": true,
+      "copyright_risk": false,
       "urgent_unlist": true,
       "delete_after_upload": true,
       "project_path": "/opt/data/workspace/saahomes/videos/projects/neighborhood-northwest-fort-collins",
@@ -254,9 +254,9 @@
     {
       "slug": "neighborhood-university-area-fort-collins",
       "title": "University Area / CSU - Fort Collins, CO | Neighborhood Guide | SAA Homes",
-      "youtube_id": "OA85a4pBFzo",
+      "youtube_id": "w0M3dBE557M",
       "status": "live",
-      "copyright_risk": true,
+      "copyright_risk": false,
       "urgent_unlist": true,
       "delete_after_upload": true,
       "project_path": "/opt/data/workspace/saahomes/videos/projects/neighborhood-university-area-fort-collins",
