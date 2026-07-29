@@ -3956,6 +3956,7 @@ export const blogPosts = [
     category: 'Market Update',
     image: '/images/blog-default-black.jpg',
     readTime: '5 min read',
+    youtubeId: 'SGeL-omsABg',
     relatedLinks: [
       { title: 'Greeley homes for sale', href: '/northern-colorado-areas/greeley/', description: 'Greeley neighborhoods, schools & listings' },
       { title: 'Greeley Home Selling Guide', href: '/blog/selling-your-home-in-greeley/', description: 'Complete Greeley seller resource' },
