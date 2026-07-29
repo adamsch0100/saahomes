@@ -4154,6 +4154,260 @@ export const blogPosts = [
       },
     ],
   },
+  {
+    slug: 'equestrian-properties-northern-colorado-wyoming',
+    title: 'Equestrian Properties in Northern Colorado and Wyoming: Your Complete Guide to Horse Property in the Front Range',
+    excerpt: 'From Fort Collins to Cheyenne, discover the best equestrian properties, horse-friendly neighborhoods, and acreage for sale in Northern Colorado and Wyoming. Complete guide with pricing, zoning, and horse amenities.',
+    date: '2026-07-29',
+    category: 'Buyer Tips',
+    image: '/images/blog-default-black.jpg',
+    readTime: '8 min read',
+    relatedLinks: [
+      { title: 'Horsetooth area Fort Collins', href: '/northern-colorado-areas/fort-collins/horsetooth/', description: 'Acreage & equestrian properties near Horsetooth Reservoir' },
+      { title: 'Severance Farms homes', href: '/northern-colorado-areas/severance/severance-farms/', description: 'Equestrian lots in rural Severance' },
+      { title: 'Bridle Ridge Timnath', href: '/northern-colorado-areas/timnath/bridle-ridge-at-timnath/', description: 'Luxury equestrian estates' },
+      { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Family & horse-friendly neighborhoods' },
+    ],
+    sections: [
+      {
+        heading: 'Why Northern Colorado and Wyoming for equestrian living',
+        paragraphs: [
+          'Northern Colorado and Southeast Wyoming offer some of the best equestrian property opportunities in the Rocky Mountain region. With over 300 days of sunshine annually, miles of public trails, and a strong Western heritage, the area attracts horse owners from across the country looking for affordable acreage with mountain views.',
+          'What sets this region apart is the diversity of options. You can find a 5-acre horse property with a barn and arena in Weld County for under $700,000, a luxury equestrian estate in Larimer County with direct trail access for $1.5M+, or a working ranch in Southeast Wyoming with irrigation rights for a fraction of Colorado prices. The Colorado-Wyoming border region specifically offers Colorado lifestyle access with Wyoming property tax advantages, making it an increasingly popular choice for serious equestrian buyers.',
+          'The mid-2026 market has brought more inventory for horse properties than we have seen in three years. Sellers are motivated, and buyers who are pre-approved can find excellent value in neighborhoods that were bid up significantly in 2021-2022.',
+        ],
+      },
+      {
+        heading: 'Top equestrian communities in Northern Colorado',
+        paragraphs: [
+          'Fort Collins — Horsetooth Area: The premier equestrian address in Northern Colorado. Properties along Horsetooth Road, Michaud Lane, and Centennial Drive offer direct access to Lory State Park and Horsetooth Mountain trails. Custom homes on 1-5 acre lots with detached barns and indoor arenas. Expect to pay $1.2M to $3M+ for improved horse properties. The Foothills area west of Taft Hill Road offers similar acreage at slightly lower price points ($900K-$2M) with more land and fewer restrictions.',
+          'Loveland — Mariana Butte and Boyd Lake areas: Southwest Loveland and the area around Boyd Lake offer larger lots with equestrian zoning. The Big Thompson River corridor provides natural riding trails. Properties here typically range from $650K to $1.5M for 1-3 acre parcels with established horse facilities.',
+          'Windsor — Pelican Lakes and surrounding rural areas: The rural pockets between Windsor and Severance are a sweet spot for equestrian buyers. Horse-friendly zoning, larger lots (2-10 acres), and proximity to Windsor Lake and the Poudre Trail system. Prices range $600K to $1.2M for properties with existing barns or room to build. Weld County property taxes are significantly lower than Larimer County.',
+          'Severance — Severance Farms: An established agricultural-residential area on the north edge of Severance. Properties feature larger lots (0.5-5 acres), equestrian facilities, and a quiet rural atmosphere minutes from Severance\'s new town amenities. Prices range $550K to $900K.',
+          'Timnath — Bridle Ridge: The neighborhood name says it all. This upscale community on Timnath\'s west side offers luxury homes on premium lots with equestrian-friendly zoning, direct trail access, and panoramic mountain views. Custom estates range from $1M to $2.5M+.',
+        ],
+        relatedLinks: [
+          { title: 'Fort Collins horse properties', href: '/northern-colorado-areas/fort-collins/', description: 'Equestrian homes for sale in Fort Collins' },
+          { title: 'Loveland equestrian living', href: '/northern-colorado-areas/loveland/', description: 'Horse property near Loveland' },
+        ],
+      },
+      {
+        heading: 'Equestrian opportunities in Southeast Wyoming',
+        paragraphs: [
+          'For buyers willing to cross the Colorado-Wyoming border, Southeast Wyoming offers exceptional value. Cheyenne, Laramie, and the surrounding areas provide larger acreage at 40-60% less than comparable Larimer County properties. The trade-off: longer commutes to Fort Collins and Denver, fewer luxury amenities, and significant weather considerations (higher winds, colder winters).',
+          'Cheyenne\'s Horse Gulch area and the rural parcels along Happy Jack Road are popular for buyers who want Colorado commuting access with Wyoming tax benefits. Wyoming has no state income tax, significantly lower property taxes, and more permissive land-use regulations for horse owners. Properties with 10-40 acres, barns, and irrigation rights can be found for $300K to $800K.',
+          'All Avenue Real Estate has started targeting this niche with their recent post "Equestrian Properties in Northern Colorado and Wyoming." At SAA Homes, we bring deeper local knowledge of both sides of the border, with agents who understand Larimer County zoning, Weld County land use, and Wyoming agricultural tax exemptions.',
+        ],
+      },
+      {
+        heading: 'What to look for in an equestrian property',
+        paragraphs: [
+          'Zoning: Not all large lots allow horses. In Larimer County, look for properties zoned FA-1 (Farm and Agriculture) or O-1 (Open). In Weld County, agricultural zoning is more common, but always verify with the county planning department. Homeowner associations can also restrict horse ownership regardless of zoning.',
+          'Barn and facility quality: A well-maintained barn with proper ventilation, adequate stalls (at least 12x12), and safe electrical is worth $50K-$150K compared to building new. Indoor arenas add significant value but also property tax implications. Check for water access — hydrants and troughs versus hauling water.',
+          'Trail access: Properties adjacent to Larimer County open space, the Poudre River Trail, or the Bridle Ridge Trail system offer built-in riding without trailering. Check whether county open space allows horses — some permit hiking only.',
+          'Water rights: In Colorado, water rights are a critical consideration. Senior water rights on a property with irrigation can increase value dramatically and provide hay-growing capability. Wyoming properties often have more generous water allocations.',
+        ],
+        list: [
+          'Verify zoning allows horses (county level, not just parcel size)',
+          'Check HOA covenants for equestrian restrictions',
+          'Inspect barn condition, arenas, fencing',
+          'Confirm water rights and irrigation availability',
+          'Test well water quality and flow rate',
+          'Review trail access and riding options',
+          'Check flood zone and drainage (arenas need good drainage)',
+          'Evaluate pasture quality and weed management history',
+        ],
+      },
+      {
+        heading: 'Financing equestrian properties',
+        paragraphs: [
+          'Financing horse properties differs from standard home purchases. Many lenders limit loans on properties over 10 acres or with agricultural income potential. Specialized agricultural lenders or portfolio lenders who understand equestrian property values are often better choices than national mortgage banks.',
+          'CHFA loans have acreage and property type restrictions. Properties over 5 acres or with agricultural structures may not qualify. Conventional and USDA loans are more flexible for larger parcels. USDA loans are particularly attractive for rural equestrian properties and can offer 100% financing in eligible areas of Weld County and Southeast Wyoming.',
+          'For properties with hay fields or boarding income, lenders will want to see agricultural income projections and may require a larger down payment (20-25% minimum for non-owner-occupied horse properties). A local lender with agricultural lending experience is essential.',
+        ],
+      },
+      {
+        heading: 'Find your equestrian property with SAA Homes',
+        paragraphs: [
+          'Whether you are looking for a weekend horse property in the Foothills, a working ranch in Weld County, or a Wyoming spread with Colorado commute access, Adam and Mandi Schwartz at SAA Homes have the local expertise to guide you. We know the equestrian communities, the zoning quirks, and the lenders who understand horse property financing.',
+          'Call (970) 999-1407 to discuss your equestrian property needs, or browse our current listings in Northern Colorado\'s premier horse-friendly neighborhoods.',
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'selling-inherited-home-colorado-guide',
+    title: 'Selling an Inherited Home in Colorado: A Complete Guide for Heirs & Executors',
+    excerpt: 'Step-by-step guide to selling inherited property in Colorado. Covers probate, tax implications, step-up basis, capital gains, and how to sell an inherited home in Fort Collins, Loveland, and Northern Colorado.',
+    date: '2026-07-29',
+    category: 'Seller Tips',
+    image: '/images/blog-default-black.jpg',
+    readTime: '8 min read',
+    relatedLinks: [
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
+      { title: 'Cash Home Buyers for Northern Colorado', href: '/blog/cash-home-buyers-fort-collins-northern-colorado/', description: 'Quick sale options for inherited properties' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & resources' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
+    ],
+    sections: [
+      {
+        heading: 'Inheriting a home in Colorado: first steps',
+        paragraphs: [
+          'Inheriting a home brings a mix of emotions — and a set of legal and financial decisions that can feel overwhelming. Whether you are the executor of an estate or a family member who has inherited a property in Northern Colorado, this guide walks through exactly what to do, when to do it, and how to handle the sale for maximum value and minimum stress.',
+          'The good news: Colorado has no estate tax and no inheritance tax. This significantly simplifies the process compared to states like Pennsylvania or New Jersey. However, federal capital gains tax, probate procedures, and property maintenance decisions still require careful planning.',
+        ],
+      },
+      {
+        heading: 'Step 1: Understand the legal picture',
+        paragraphs: [
+          'Before you can sell an inherited home in Colorado, you need legal authority to transfer ownership. This depends on how the property was held and whether the estate goes through probate.',
+          'If the deceased had a living trust: The property may pass outside of probate entirely. The successor trustee can typically sell the property without court involvement. This is the fastest path to sale.',
+          'If the property was jointly owned with right of survivorship: Ownership passes directly to the surviving owner without probate. Common for married couples.',
+          'If the property was owned solely by the deceased: Formal probate in Colorado district court is typically required. For estates under $82,000 (as of 2026), Colorado offers a simplified "small estate" procedure. For larger estates, full probate is needed. The executor or personal representative must be appointed by the court before they can list the property.',
+          'Colorado probate typically takes 4-6 months from filing to closing, though the property can often be listed during probate with court approval. Consult with a Colorado probate attorney early in the process.',
+        ],
+        list: [
+          'Locate the will or trust document',
+          'Determine if probate is required',
+          'File probate paperwork with the district court in the county where the deceased lived',
+          'Obtain Letters Testamentary (for executors) or Letters of Administration (for administrators)',
+          'Notify creditors and beneficiaries',
+        ],
+      },
+      {
+        heading: 'Step 2: Assess the property and its carrying costs',
+        paragraphs: [
+          'Once you have legal authority to act, assess the property objectively. This is often the hardest step emotionally, but the most important financially.',
+          'Get a Comparative Market Analysis (CMA) from a local real estate agent. This tells you what the home is worth in today\'s market — not what it was worth when purchased or what family memories might suggest. In 2026, Northern Colorado homes that are well-maintained and priced correctly typically sell within 14-45 days. Homes needing significant repairs may sit longer.',
+          'Calculate carrying costs: mortgage payments (if any), property taxes, insurance, utilities, HOA fees, and maintenance. An inherited home that sits vacant for 6-12 months can easily accumulate $20,000-$50,000 in costs before you sell.',
+          'Check for outstanding liens, reverse mortgage balances, or property tax delinquencies. These must be paid from sale proceeds before beneficiaries receive anything.',
+        ],
+      },
+      {
+        heading: 'Step 3: Tax implications (the part most people miss)',
+        paragraphs: [
+          'Colorado has no state inheritance or estate tax. At the federal level, the estate tax exemption is approximately $13.61 million per individual (as of 2026), so very few estates trigger federal estate taxes.',
+          'The most important tax concept for heirs is the "step-up in basis." When you inherit a home, its tax basis is "stepped up" to its fair market value on the date of the deceased\'s death. This means if you sell the home soon after inheriting for around its appraised value, you owe little to no capital gains tax.',
+          'Example: If the deceased paid $150,000 for the home in 1995, but it is worth $500,000 when you inherit it, your basis is $500,000. If you sell for $510,000, you only pay capital gains on the $10,000 gain — not on the $350,000 gain from 1995. This is a massive tax benefit for heirs.',
+          'If you hold the property and it appreciates further before you sell, you will owe capital gains on the appreciation that occurs after the inheritance date. If you move into the home as your primary residence for two years, you may qualify for the Section 121 exclusion (up to $250,000 for single filers, $500,000 for married couples).',
+        ],
+      },
+      {
+        heading: 'Step 4: Should you sell as-is or renovate?',
+        paragraphs: [
+          'For inherited homes, the as-is sale often makes more financial sense than renovating, for several reasons:',
+          'No capital gains on the stepped-up basis means the full sale price goes to beneficiaries without significant tax erosion',
+          'You avoid the stress and cost of managing a renovation from out of state (many heirs do not live near the inherited property)',
+          'The mid-2026 Northern Colorado market accepts as-is properties when priced correctly, especially in competitive areas like Fort Collins and Windsor',
+          'Renovation timelines of 3-6 months add carrying costs that can eat up any potential gain',
+          'If the home is in good condition and in a desirable neighborhood (Old Town Fort Collins, Centerra Loveland, Water Valley Windsor), investing in paint, flooring, and staging before listing can increase the sale price significantly. A local agent can help you decide which path makes sense for your specific property.',
+        ],
+      },
+      {
+        heading: 'Step 5: Choosing the right sale path',
+        paragraphs: [
+          'You have three main options for selling an inherited home in Northern Colorado:',
+          'Traditional listing (recommended for homes in good condition): List with an experienced agent, make minor repairs and stage the home, market to qualified buyers. This typically yields the highest sale price. Timeline: 30-90 days from listing to closing.',
+          'Cash buyer network (good for distressed or occupied-by-heirs properties): If the home needs significant repairs, is occupied by a family member who needs time to move, or you want a guaranteed closing date, our cash buyer network can close in 7-21 days with no repairs required.',
+          'Auction or wholesaling (use with caution): These options typically sell for 30-50% below market value but offer the fastest close. Best reserved for properties with title issues, significant code violations, or when heirs cannot agree.',
+        ],
+      },
+      {
+        heading: 'Handling family dynamics',
+        paragraphs: [
+          'Selling an inherited home is as much an emotional process as a financial one. When multiple siblings inherit a property, disagreements about timing, pricing, and whether to sell at all can strain relationships.',
+          'Tips for managing family dynamics: Appoint one person as the decision-maker (the executor or a designated family lead). Get two independent appraisals to establish objective value. Set a firm timeline for decision-making. Consider buying out a sibling who wants to keep the property. Communicate regularly with written updates to avoid miscommunication.',
+          'If the estate is complex or family dynamics are difficult, a mediator who understands Colorado probate can help facilitate decisions without burning relationships.',
+        ],
+      },
+      {
+        heading: 'Working with SAA Homes on your inherited property sale',
+        paragraphs: [
+          'At SAA Homes, Adam and Mandi Schwartz have helped Northern Colorado families navigate inherited property sales in Fort Collins, Loveland, Windsor, Greeley, and throughout the region. We understand probate timelines, can recommend trusted probate attorneys, and know which properties benefit from traditional listing versus cash sale.',
+          'Call (970) 999-1407 for a free, no-obligation consultation about selling your inherited property. We can provide a CMA, discuss your options, and help you choose the path that maximizes value while minimizing stress.',
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'closing-day-colorado-guide',
+    title: 'Closing Day in Colorado: What Actually Happens (And What to Bring) — A First-Time Buyer\'s Checklist',
+    excerpt: 'Your complete closing day checklist for Colorado real estate. What documents to bring, what to expect at the title company, and how to prepare for a smooth closing in Fort Collins, Loveland, and Northern Colorado.',
+    date: '2026-07-29',
+    category: 'Buyer Tips',
+    image: '/images/blog-default-black.jpg',
+    readTime: '6 min read',
+    relatedLinks: [
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & resources' },
+      { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Grants up to $25,000 for Colorado buyers' },
+      { title: 'First-Time Home Buyer Colorado 2026', href: '/blog/first-time-home-buyer-colorado-2026/', description: 'Complete guide for first-time buyers' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
+    ],
+    sections: [
+      {
+        heading: 'What happens on closing day in Colorado',
+        paragraphs: [
+          'Closing day (also called "settlement") is the final step in your home purchase. It is the day ownership officially transfers from the seller to you, the buyer. In Colorado, closings typically happen at a title company, not at a law office or real estate brokerage. The title company acts as a neutral third party, coordinating funds, documents, and the recording of the deed.',
+          'A typical closing takes 60-90 minutes. You will sign a stack of documents, wire or bring your closing funds, and receive the keys to your new home. Yes — you walk out of closing as the owner.',
+        ],
+      },
+      {
+        heading: 'What to bring to closing',
+        paragraphs: [
+          'Colorado closings are document-heavy but physically minimal. Here is exactly what you need to bring:',
+        ],
+        list: [
+          'Valid government-issued photo ID (driver\'s license or passport — this is absolutely required)',
+          'Certified or cashier\'s check for closing costs and down payment (or confirmation of wire transfer) — personal checks are generally not accepted',
+          'Your Closing Disclosure (the final 5-page document your lender sent 3 business days before closing — bring the digital or paper copy)',
+          'Proof of homeowner\'s insurance (your insurance agent should have sent this to the lender and title company, but bring a copy just in case)',
+          'A checkbook (some title companies require additional small payments that can only be made by check)',
+          'Your phone (to wire funds if needed and to take photos of your new home after closing)',
+        ],
+      },
+      {
+        heading: 'What NOT to bring',
+        paragraphs: [
+          'Do not bring cash (large amounts of cash create regulatory issues for title companies). Do not bring family members who are not on the mortgage or the deed (closing rooms are small and the process is personal). Do not bring the moving truck to closing (you cannot move in until the deed is recorded, which can take several hours after signing).',
+        ],
+      },
+      {
+        heading: 'The closing process step by step',
+        paragraphs: [
+          'Step 1 — Review and sign the Closing Disclosure: This document summarizes your loan terms, monthly payment, closing costs, and cash required. You should have received this three business days before closing — review it carefully for any last-minute changes. If numbers changed since your initial estimate, ask your closer to explain before signing.',
+          'Step 2 — Sign the mortgage note: This is your promise to repay the loan. It includes the loan amount, interest rate, payment schedule, and late payment penalties. For Colorado buyers, the note also includes the "statutory foreclosure" notice — Colorado is a non-judicial foreclosure state, meaning the lender can foreclose without going to court if you default.',
+          'Step 3 — Sign the Deed of Trust: This document pledges the property as collateral for the loan. It is recorded with the county clerk in the county where the property is located (Larimer County, Weld County, etc.).',
+          'Step 4 — Review and sign the settlement statement: This shows all debits and credits to both buyer and seller — prorated property taxes, HOA fees, title insurance, recording fees, and agent commissions.',
+          'Step 5 — Pay closing costs: You will wire funds or deliver a certified check for your down payment and closing costs. In 2026, typical closing costs in Northern Colorado range from 2% to 5% of the purchase price, which can be partially offset by seller concessions or CHFA down payment assistance.',
+          'Step 6 — Receive the keys: Once all documents are signed and funds are verified, the title company releases the keys. In most Colorado closings, you get the keys at the closing table — not at 5 PM or after recording.',
+          'Step 7 — Recording: The title company records the deed and Deed of Trust with the county. This can take 2-24 hours depending on the county\'s recording queue. Your ownership is effective as of the recording timestamp.',
+        ],
+      },
+      {
+        heading: 'Common closing delays and how to avoid them',
+        paragraphs: [
+          'Wire fraud is the #1 cause of closing stress in Colorado. Scammers impersonate title companies and send fake wiring instructions. Always verify wire instructions by phone using a number you independently looked up (not the number in the email). In 2025, Colorado reported over $50 million in real estate wire fraud losses.',
+          'Other common delays include: last-minute appraisal issues, title problems discovered during final title search, seller delays in completing agreed repairs, and lender funding delays. Most of these can be avoided by working with a responsive local lender and staying on top of deadlines before closing day.',
+        ],
+      },
+      {
+        heading: 'Colorado-specific closing facts',
+        paragraphs: [
+          'Colorado is an "attorney state" for some aspects of closing — the deed must be properly notarized and prepared by a licensed professional. However, buyer and seller are typically not required to have their own attorneys at closing (unlike states like New York).',
+          'Colorado does not charge a real estate transfer tax (also called a "stamp tax") at closing, unlike 33 other states. This saves buyers approximately $1,000-$3,000 per transaction.',
+          'Colorado requires the buyer to sign a "Lead-Based Paint Disclosure" form for homes built before 1978. Sellers must provide any known lead paint reports.',
+          'The Colorado Common Interest Ownership Act (CCIOA) governs HOA disclosures. Your title company will provide the HOA resale certificate showing fees, reserves, and any pending special assessments.',
+        ],
+      },
+      {
+        heading: 'Your closing day with SAA Homes',
+        paragraphs: [
+          'Adam and Mandi Schwartz guide their clients through every step of the closing process. We attend closing with you (unless you prefer to go solo), we review your Closing Disclosure before the signing date, and we coordinate with the title company to ensure everything is ready. Our goal is a 60-minute closing where you understand every document you sign.',
+          'Call (970) 999-1407 or contact us to start your home buying journey in Fort Collins, Loveland, Windsor, Greeley, or anywhere in Northern Colorado.',
+        ],
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug) {
