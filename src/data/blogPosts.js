@@ -4016,6 +4016,7 @@ export const blogPosts = [
     category: 'Market Update',
     image: '/images/blog-default-black.jpg',
     readTime: '7 min read',
+    youtubeId: '4krnHONK5EM',
     relatedLinks: [
       { title: 'Compare all Northern Colorado cities', href: '/northern-colorado-areas/', description: '19-city coverage area guides' },
       { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & homes for sale' },
