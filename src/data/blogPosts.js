@@ -4093,6 +4093,7 @@ export const blogPosts = [
     category: 'Market Update',
     image: '/images/blog-default-black.jpg',
     readTime: '5 min read',
+    youtubeId: 'KqPtiK3LEwU',
     relatedLinks: [
       { title: 'Loveland homes for sale', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities & pricing' },
       { title: 'Loveland Home Selling Guide', href: '/blog/selling-your-home-in-loveland/', description: 'Complete Loveland seller resource' },
