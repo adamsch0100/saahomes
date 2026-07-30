@@ -4416,6 +4416,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/blog-default-black.jpg',
     readTime: '10 min read',
+    youtubeId: 'bqfCkG1jQJ0',
     keywords: 'divorce home sale Northern Colorado, selling house during divorce Colorado, divorce real estate Fort Collins, divorce property division Colorado, sell home after divorce Greeley, divorce realtor Northern Colorado, Colorado divorce real estate specialist, selling marital home Windsor CO',
     relatedLinks: [
       { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
