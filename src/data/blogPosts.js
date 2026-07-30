@@ -4162,6 +4162,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/blog-default-black.jpg',
     readTime: '8 min read',
+    youtubeId: '9OGV7pPnaGs',
     relatedLinks: [
       { title: 'Horsetooth area Fort Collins', href: '/northern-colorado-areas/fort-collins/horsetooth/', description: 'Acreage & equestrian properties near Horsetooth Reservoir' },
       { title: 'Severance Farms homes', href: '/northern-colorado-areas/severance/severance-farms/', description: 'Equestrian lots in rural Severance' },
