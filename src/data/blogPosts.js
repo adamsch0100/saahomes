@@ -4408,6 +4408,124 @@ export const blogPosts = [
       },
     ],
   },
+  {
+    slug: 'divorce-home-sale-northern-colorado-guide',
+    title: 'Selling a Home During Divorce in Northern Colorado: A Complete 2026 Guide',
+    excerpt: 'Going through a divorce and need to sell your Northern Colorado home? Our comprehensive guide covers Colorado divorce property laws, equity division, tax implications, and finding new housing \u2014 with expert help from Schwartz and Associates.',
+    date: '2026-07-30',
+    category: 'Seller Tips',
+    image: '/images/blog-default-black.jpg',
+    readTime: '10 min read',
+    keywords: 'divorce home sale Northern Colorado, selling house during divorce Colorado, divorce real estate Fort Collins, divorce property division Colorado, sell home after divorce Greeley, divorce realtor Northern Colorado, Colorado divorce real estate specialist, selling marital home Windsor CO',
+    relatedLinks: [
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
+      { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & homes for sale' },
+      { title: 'Loveland homes for sale', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities & pricing' },
+      { title: 'Windsor homes for sale', href: '/northern-colorado-areas/windsor/', description: 'Water Valley, RainDance & master-planned communities' },
+      { title: 'Greeley homes for sale', href: '/northern-colorado-areas/greeley/', description: 'Weld County affordability & value' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & CHFA guidance' },
+      { title: 'Free Home Valuation', href: '/for-sellers/#home-valuation', description: 'See what your home is worth today' },
+    ],
+    cta: {
+      title: 'Navigating a divorce and a home sale in Northern Colorado?',
+      description: 'Adam and Mandi Schwartz have helped divorcing homeowners across Fort Collins, Loveland, Windsor, and Greeley sell their homes, divide equity, and find their next chapter. Call (970) 999-1407 or schedule a confidential consultation today.',
+      primaryHref: '/contact/',
+      primaryText: 'Schedule a Confidential Consultation',
+      secondaryHref: '/for-sellers/',
+      secondaryText: 'Get a Free Market Analysis',
+    },
+    sections: [
+      {
+        heading: 'Understanding divorce and your Northern Colorado home',
+        paragraphs: [
+          'For most married couples in Northern Colorado, the family home is their largest single asset. When a marriage ends, deciding what to do with that home \u2014 sell it, buy out one spouse, or continue co-owning \u2014 is often the most emotionally and financially complex decision in the divorce process. The outcome affects both parties\u2019 credit, liquidity, housing stability, and tax situation for years to come.',
+          'In Colorado, the home is treated as marital property if it was purchased during the marriage, regardless of whose name is on the title or mortgage. Even if one spouse owned the home before the marriage, any increase in value during the marriage may be considered marital property subject to division. Understanding how Colorado\u2019s equitable distribution laws apply to real estate is the first step toward making an informed decision.',
+          'At Schwartz and Associates, we bring more than 20 years of Northern Colorado real estate experience to divorcing homeowners. We understand the unique pressures of selling a home under these circumstances: the need for discretion, the importance of maximizing sale proceeds for both parties, and the reality that one or both spouses will need to find new housing. Our role is to provide clear, objective market data and professional representation that serves both parties\u2019 financial interests while navigating the emotional dynamics of a divorce.',
+        ],
+      },
+      {
+        heading: 'Colorado divorce property laws: what happens to the house',
+        paragraphs: [
+          'Colorado is an equitable distribution state, not a community property state. This means that marital assets \u2014 including the family home \u2014 are divided fairly, but not necessarily equally. The court considers factors including each spouse\u2019s financial situation, the length of the marriage, contributions to the marriage (including non-financial contributions like homemaking and childcare), and the economic circumstances of each spouse after the divorce.',
+          'If the home was purchased during the marriage with marital funds, it is generally classified as marital property. If one spouse owned the home before the marriage, the initial equity may be considered separate property, but any appreciation during the marriage \u2014 especially if marital funds were used for mortgage payments, improvements, or maintenance \u2014 may be considered marital property. This is called commingling, and it can convert separate property into marital property in whole or in part.',
+          'The court does not automatically order the sale of the home. Instead, the divorcing couple typically decides (through negotiation, mediation, or court order) among three options: sell the home and divide the net proceeds, one spouse buys out the other\u2019s equity and keeps the home, or both spouses continue co-owning the home (less common, and usually temporary). Each option has distinct financial, tax, and practical implications that a divorce-experienced real estate agent can help you evaluate.',
+        ],
+        list: [
+          'Sell the home and divide net proceeds according to the divorce settlement',
+          'One spouse buys out the other\u2019s equity interest (requires refinancing or cash payment)',
+          'Continue co-owning temporarily (typically until children finish school or market conditions improve)',
+        ],
+      },
+      {
+        heading: 'Your options: sell, buy out, or co-own',
+        paragraphs: [
+          'Selling the home is the most common outcome in a Northern Colorado divorce. It provides a clean financial break for both parties, converts the equity to liquid assets that can be divided, and allows each spouse to move forward with their own housing plans. In Fort Collins, where the median home price is approximately $612,000, a couple with 20% equity in a typical home is splitting roughly $120,000 in proceeds. Getting an accurate, objective market valuation is critical \u2014 the sale price directly determines how much each spouse walks away with.',
+          'A buyout occurs when one spouse wants to keep the home and has the financial capacity to do so. This requires refinancing the mortgage into the keeping spouse\u2019s name alone (to release the departing spouse from liability) and paying the departing spouse their share of the equity. In Northern Colorado\u2019s 2026 interest rate environment, the keeping spouse needs to qualify for the refinance at current rates, which may be higher than the existing mortgage rate. A home valuation and a net equity calculation \u2014 accounting for selling costs that would be incurred in an actual sale \u2014 are essential to determine a fair buyout amount.',
+          'Temporary co-ownership is less common but can be appropriate when neither spouse can afford to buy a new home immediately, when children need stability through a school year, or when market conditions make selling unfavorable. This arrangement requires a detailed written agreement covering mortgage payments, maintenance costs, tax treatment, and a timeline for eventual sale. It is almost always a short-term bridge, not a permanent solution.',
+          'In all three scenarios, working with a real estate agent who understands divorce dynamics is essential. The agent provides the objective market data both parties need, helps structure the transaction to serve both parties\u2019 interests, and ensures the sale or buyout is executed in a way that complies with the divorce decree or separation agreement.',
+        ],
+      },
+      {
+        heading: 'How to sell your home during a divorce: a step-by-step timeline',
+        paragraphs: [
+          'Selling a home during a divorce in Northern Colorado requires coordination between your real estate agent, your divorce attorneys, and possibly a mediator. Here\u2019s the typical timeline from decision to closing.',
+          'Step 1 \u2014 Agree on representation (Week 1-2): Both spouses should agree on a listing agent. The agent represents the sale of the property, not either spouse individually, and has a fiduciary duty to maximize the sale price. If the divorce is contentious, the agent may communicate through attorneys rather than directly with both parties. SAA Homes has experience working with divorcing couples across the cooperation spectrum.',
+          'Step 2 \u2014 Get an accurate market valuation (Week 1-2): Your agent provides a Comparative Market Analysis (CMA) showing recent sales of comparable homes in your Northern Colorado neighborhood. This is not a formal appraisal but is used to set the list price. If spouses disagree on pricing, a formal appraisal (costing $500-$700 in Larimer and Weld Counties) can provide an independent third-party valuation.',
+          'Step 3 \u2014 Prepare the home for market (Week 2-4): This can be the most challenging phase. Both spouses need to cooperate on decluttering, repairs, and staging decisions. Your agent can recommend neutral third-party professionals \u2014 stagers, handymen, cleaners \u2014 to reduce conflict. The goal is to present the home at its best to maximize sale proceeds for both parties.',
+          'Step 4 \u2014 List, market, and negotiate offers (Week 4-8): With professional photography, a strategic list price, and marketing across Northern Colorado channels, the home typically goes under contract within 30-45 days. All offers are presented to both parties (or their attorneys), and the decision to accept is governed by the divorce agreement or court order.',
+          'Step 5 \u2014 Close and disburse proceeds (Week 8-12): At closing, the net proceeds (sale price minus mortgage payoff, closing costs, and agent commissions) are disbursed according to the divorce decree or separation agreement. The funds are typically wired to each party\u2019s attorney\u2019s trust account or directly to the parties as specified in the settlement.',
+        ],
+        relatedLinks: [
+          { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Full-service listing & professional marketing' },
+          { title: 'Free Home Valuation', href: '/for-sellers/#home-valuation', description: 'See what your home is worth today' },
+        ],
+      },
+      {
+        heading: 'Tax implications of selling a home during divorce',
+        paragraphs: [
+          'The IRS Section 121 exclusion \u2014 which allows single filers to exclude up to $250,000 and married couples up to $500,000 in capital gains on the sale of a primary residence \u2014 applies to divorcing homeowners with some important nuances. If the home is sold while the couple is still legally married (before the divorce is finalized), they can file a joint return and claim the full $500,000 exclusion, provided they meet the two-out-of-five-year residency requirement.',
+          'If the sale occurs after the divorce, each former spouse can claim up to $250,000 on their individual tax return. However, the spouse who moved out before the sale may face a challenge: the residency test requires living in the home for two of the past five years. If one spouse moved out more than three years before the sale, they may not qualify. This is why timing the sale relative to the divorce finalization date matters \u2014 a few months can make the difference between a tax-free sale and a taxable one.',
+          'For buyout scenarios, the departing spouse who receives cash for their equity interest generally does not owe capital gains tax at the time of the buyout (the transfer is treated as part of the property settlement, not a taxable sale). However, the keeping spouse assumes the original cost basis, which may result in a larger taxable gain when they eventually sell. Both parties should consult with a CPA or tax professional familiar with Colorado real estate transactions before finalizing the divorce settlement.',
+          'A critical point for Northern Colorado homeowners: with home values having appreciated substantially over the past decade, a couple who purchased a Fort Collins home for $350,000 in 2015 and sells it for $650,000 in 2026 has a $300,000 gain \u2014 entirely within the $500,000 married exclusion if they sell while still married. Waiting until after the divorce could expose each spouse to a taxable event if they don\u2019t meet the individual residency requirements.',
+        ],
+      },
+      {
+        heading: 'Finding your next home in Northern Colorado after divorce',
+        paragraphs: [
+          'After the marital home sells, both spouses face the challenge of securing new housing. For the spouse who plans to buy, qualifying for a new mortgage as a single-income borrower is often the biggest hurdle. Your lender will evaluate your income, credit score, and debt-to-income ratio based on your post-divorce financial picture. Alimony and child support can be counted as income for mortgage qualification if they are documented in the divorce decree and have at least a three-year history or expectation.',
+          'If you are the spouse receiving a significant equity payout from the home sale, you may be in a strong position to purchase. A 20% down payment on a $450,000 home in Loveland or Windsor is $90,000 \u2014 an amount that may be covered by your share of the equity. Combined with CHFA down payment assistance programs (which provide up to $25,000 in grants for first-time and repeat homebuyers in targeted areas), your cash to close can be minimal.',
+          'For the spouse with more constrained finances, Northern Colorado offers paths to homeownership at various price points. Greeley (median $430,000) and Evans ($385,000) provide Weld County affordability. Timnath and Severance offer new construction with builder incentives. Wellington and Mead offer space and lot sizes that are harder to find in Fort Collins. Renting for 12-24 months while rebuilding credit and savings is also a practical strategy that we help clients evaluate honestly.',
+          'Your SAA Homes agent can help you assess what you qualify for, where your budget fits in Northern Colorado\u2019s 19-city market, and whether buying or renting makes more sense in your specific post-divorce situation. We provide this analysis confidentially and separately for each spouse if needed.',
+        ],
+        relatedLinks: [
+          { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & CHFA guidance' },
+          { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'SmartStep, Preferred, FirstStep & more' },
+          { title: 'Compare all Northern Colorado cities', href: '/northern-colorado-areas/', description: '19-city coverage area guides' },
+        ],
+      },
+      {
+        heading: 'Why work with a divorce-experienced agent at SAA Homes',
+        paragraphs: [
+          'Selling a home during a divorce is fundamentally different from a standard real estate transaction. It requires an agent who can remain neutral, communicate clearly with both parties (or their attorneys), and keep the transaction focused on maximizing financial outcomes rather than getting pulled into emotional dynamics. Adam and Mandi Schwartz have guided Northern Colorado homeowners through this process, and we understand what works.',
+          'We provide a single, objective market valuation that both parties and their attorneys can rely on. We recommend pricing strategies based on data, not opinion. We coordinate showings, open houses, and offer negotiations in a way that respects both spouses\u2019 privacy and schedules. And we work closely with divorce attorneys and mediators to ensure the real estate transaction complies with the terms of the separation agreement or court order.',
+          'When one or both spouses need to find new housing after the sale, we provide the same professional buyer representation we offer all our Northern Colorado clients: market analysis, neighborhood guidance, mortgage pre-approval connections, CHFA program expertise, and skilled negotiation. We serve all 19 Northern Colorado communities from Fort Collins to Greeley, Loveland to Longmont, and everywhere in between.',
+          'If you are facing a divorce and need to sell your Northern Colorado home \u2014 or if you are a divorce attorney seeking a reliable real estate professional for your client \u2014 contact SAA Homes at (970) 999-1407. Your initial consultation is confidential, objective, and focused on finding the right path forward.',
+        ],
+        relatedLinks: [
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407 for a confidential consultation' },
+          { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Full-service listing & divorce sale expertise' },
+        ],
+      },
+    ],
+    faqs: [
+      { q: 'Can we sell our house before the divorce is finalized in Colorado?', a: 'Yes \u2014 and in many cases, it is the smartest financial move. Selling while still legally married allows you to file a joint tax return and claim the full $500,000 capital gains exclusion (vs. $250,000 per individual after divorce). The proceeds are typically held in escrow or a trust account and disbursed according to the divorce settlement once it is finalized. Both parties must agree to the sale (or a court order must authorize it). Work with your divorce attorney and real estate agent to coordinate the sale timeline with your legal proceedings.' },
+      { q: 'Who gets the house in a Colorado divorce?', a: 'Colorado is an equitable distribution state, meaning the court divides marital property fairly \u2014 not necessarily 50/50. If the home was purchased during the marriage, it is marital property regardless of whose name is on the title. The court considers factors including each spouse\u2019s financial situation, contributions to the marriage, and the best interests of any children. The most common outcomes are selling the home and splitting proceeds, one spouse buying out the other, or temporary co-ownership with a plan for future sale.' },
+      { q: 'Can my ex force me to sell our house in a Colorado divorce?', a: 'In most cases, yes \u2014 if the court orders the sale as part of the property division. Colorado courts generally prefer to divide assets in a way that allows both parties to move forward, and selling the home is often the cleanest path. However, the court will consider factors such as whether children are involved and whether one spouse can afford to buy out the other. If you are concerned about being forced to sell, discuss your specific situation with your divorce attorney early in the process.' },
+      { q: 'How long after a divorce can I sell the house?', a: 'There is no waiting period. You can sell the home before, during, or after the divorce process. In fact, many couples choose to list the home during the divorce so that the sale closes shortly after the decree is finalized. If the divorce decree orders the sale, it will typically specify a timeline (e.g., \u201cthe home shall be listed for sale within 60 days of the decree\u201d). If the decree is silent on timing, you and your ex-spouse should agree on a timeline in writing, ideally with guidance from your real estate agent on current market conditions.' },
+      { q: 'Does a divorce affect my ability to qualify for a new mortgage?', a: 'Yes \u2014 divorce can impact mortgage qualification in several ways. Your debt-to-income ratio may change if you receive (or pay) alimony and child support. Alimony and child support can be counted as qualifying income if documented and expected to continue for at least three years. If you are keeping the marital home and refinancing, the lender will require the divorce decree showing you are awarded the property. If you are buying a new home after the divorce, your lender will evaluate you as a single-income borrower unless you are purchasing with a new co-borrower. Working with a lender who understands divorce-related qualification is essential \u2014 your SAA Homes agent can connect you with trusted local lenders.' },
+      { q: 'Should I use the same real estate agent for selling the marital home and buying my new home?', a: 'It depends on the circumstances of your divorce and your relationship with your ex-spouse. If the divorce is cooperative and both parties agree, using the same agent for the marital home sale and one spouse\u2019s purchase can streamline the process and keep everyone informed. However, in contentious divorces, it may be better for each spouse to have separate buyer\u2019s agents for their individual purchases while sharing one listing agent for the marital home sale. SAA Homes can accommodate either arrangement and will recommend the approach that best serves both parties\u2019 interests.' },
+    ],
+  },
 ];
 
 export function getBlogPost(slug) {
