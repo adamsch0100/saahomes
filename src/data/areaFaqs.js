@@ -23,6 +23,10 @@ const AREA_FAQS = {
     {
       q: 'Why choose Schwartz and Associates as your Fort Collins realtor?',
       a: 'Schwartz and Associates (SAA Homes) brings over 20 years of combined Fort Collins and Northern Colorado real estate experience as a Coldwell Banker Realty team. As local Fort Collins residents, we offer deep neighborhood knowledge across Old Town, south Fort Collins, the CSU area, and all Larimer County communities. Our services include professional photography and videography, data-driven pricing, aggressive digital marketing, CHFA financing guidance, and responsive communication from start to closing. Call (970) 999-1407 to schedule a free consultation.'
+    },
+    {
+      q: 'Is it better to live in Fort Collins or Loveland?',
+      a: 'Fort Collins offers a vibrant downtown, Colorado State University, a renowned craft brewery scene, and walkable neighborhoods like Old Town, making it ideal for those who want urban amenities, nightlife, and cultural attractions. Loveland offers better home value (5-15% lower price per square foot), a thriving arts scene with Benson Sculpture Garden, Boyd Lake recreation, and a quieter lifestyle while staying just 15 minutes from Fort Collins. Families often choose Loveland for more space per dollar, while young professionals and CSU-affiliated buyers gravitate toward Fort Collins. Both are excellent choices — let your commute, budget, and lifestyle preferences guide the decision. Schwartz and Associates can help you compare communities and find the right fit.'
     }
   ],
   'loveland': [
@@ -89,6 +93,10 @@ const AREA_FAQS = {
     {
       q: 'What is the commute like from Greeley to Denver?',
       a: 'The drive from Greeley to downtown Denver is approximately 55–65 miles, taking about 60–75 minutes via U.S. 85 and I-25. Commute times are comparable to Fort Collins but generally less congested on the Greeley side. Many residents work locally at UNC, Banner Health, JBS, or in the growing Weld County employment base.'
+    },
+    {
+      q: 'Who is the best real estate agent in Greeley?',
+      a: 'Schwartz and Associates (SAA Homes) at Coldwell Banker Realty serves Greeley home buyers and sellers with expert knowledge of Weld County real estate, including Greeley neighborhoods, the University of Northern Colorado area, and the growing U.S. 34 corridor. As a locally-owned Northern Colorado team, we help buyers navigate CHFA down payment assistance programs and help sellers price and market their homes for the best results. Call (970) 999-1407 for a free consultation with Adam or Mandi Schwartz.'
     }
   ],
   'timnath': [
