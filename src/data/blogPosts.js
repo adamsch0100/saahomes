@@ -4528,6 +4528,91 @@ export const blogPosts = [
       { q: 'Should I use the same real estate agent for selling the marital home and buying my new home?', a: 'It depends on the circumstances of your divorce and your relationship with your ex-spouse. If the divorce is cooperative and both parties agree, using the same agent for the marital home sale and one spouse\u2019s purchase can streamline the process and keep everyone informed. However, in contentious divorces, it may be better for each spouse to have separate buyer\u2019s agents for their individual purchases while sharing one listing agent for the marital home sale. SAA Homes can accommodate either arrangement and will recommend the approach that best serves both parties\u2019 interests.' },
     ],
   },
+  {
+    slug: 'buyer-concession-cheat-sheet-northern-colorado',
+    title: 'Buyer Concession Cheat Sheet for Northern Colorado Home Buyers',
+    excerpt: 'Everything Northern Colorado home buyers need to know about buyer concessions — maximum seller contributions by loan type, how to ask for closing cost assistance, and how to stack CHFA down payment assistance with seller concessions in Fort Collins, Loveland, Windsor, and Greeley.',
+    date: '2026-07-29',
+    category: 'Buyer Tips',
+    image: '/images/blog-default-black.jpg',
+    readTime: '6 min read',
+    relatedLinks: [
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & resources' },
+      { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Grants up to $25,000 for Colorado buyers' },
+      { title: 'Seller Concession Cheat Sheet', href: '/blog/seller-concession-cheat-sheet-northern-colorado/', description: 'Seller-side limits & strategy' },
+      { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & listings' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407 for buyer representation' },
+    ],
+    sections: [
+      {
+        heading: 'What are buyer concessions?',
+        paragraphs: [
+          "A buyer concession — more accurately called a seller concession to the buyer — is a contribution the home seller makes toward your closing costs, prepaid items, or discount points at closing. It is essentially a credit from the seller that reduces the amount of cash you need to bring to the closing table. In Northern Colorado's 2026 market, buyer concessions are becoming one of the most common negotiation tools in purchase contracts.",
+          'Concessions can cover your closing costs (title insurance, lender fees, escrow fees, recording fees, survey costs), prepaid items (property taxes, homeowners insurance, mortgage insurance premiums), and discount points that permanently reduce your interest rate. For VA loans only, concessions may also be applied to paying off the buyer\u2019s existing debt. Understanding what can be covered — and the maximum allowed — gives you a significant advantage in negotiations.',
+          'The key distinction: a seller concession does NOT reduce the purchase price. The sale price stays the same, but the seller contributes cash at closing to offset your costs. This is important because it means the seller preserves their recorded sale price while you preserve your cash reserves.',
+        ],
+      },
+      {
+        heading: 'Maximum seller contributions by loan type',
+        paragraphs: [
+          'The amount a seller can contribute toward your costs depends entirely on the loan type you are using. These caps are set by federal guidelines (Fannie Mae, Freddie Mac, FHA, VA, USDA) and cannot be exceeded regardless of what the seller agrees to. Here is the complete breakdown as of July 2026:',
+          'Conventional loans (Fannie Mae / Freddie Mac): Up to 3% of the purchase price if your down payment is less than 10%. Up to 6% if your down payment is 10% to 25%. Up to 9% if your down payment is more than 25% or the property is a second home or investment. For primary residences, these limits apply to owner-occupied purchases only.',
+          'FHA loans: Up to 6% of the purchase price for all FHA loans regardless of down payment amount (minimum 3.5% down). The 6% cap applies to the total seller contribution toward closing costs, prepaids, and discount points combined.',
+          'VA loans: Up to 4% of the purchase price for VA loans with zero down. VA concessions are more flexible in what they can cover — they can also be applied to the buyer\u2019s debt payoff, which is unique among loan types.',
+          'USDA loans: Up to 6% of the purchase price for USDA Rural Development loans. USDA requires a 1% upfront guarantee fee that can be financed into the loan, and the seller concession can cover this fee along with other closing costs.',
+          'These limits apply to the total seller contribution, including any closing cost credits, discount points, and prepaid items combined. Your lender will verify the cap during the loan approval process.',
+        ],
+        image: '/images/seller-concession-limits-table.jpg',
+        imageAlt: 'Buyer concession cheat sheet — maximum seller contributions by Conventional, FHA, VA, and USDA loan types — SAA Homes Northern Colorado',
+      },
+      {
+        heading: 'Why buyer concessions matter in Northern Colorado right now',
+        paragraphs: [
+          "Northern Colorado's mid-2026 market has shifted in favor of buyers compared to 2021-2022. Inventory is up across the region, days on market have extended, and more sellers are open to concessions — especially when they realize a $15,000 concession can be more attractive than a $15,000 price reduction.",
+          'According to recent market data, roughly 50% of home sales in Fort Collins and Loveland now include some form of seller concession, with median contributions around $6,000-$8,000. In Windsor and Greeley, the percentage is similar, though the dollar amounts tend to be slightly lower. For first-time buyers using CHFA down payment assistance — which provides up to $25,000 in grants — stacking a seller concession on top can significantly reduce your upfront cash requirement.',
+          'The most common concessions we see at SAA Homes include: 2-1 temporary rate buydowns (reducing the rate 2% in year one and 1% in year two), full or partial closing cost coverage, prepaid property tax credits, and discount points that permanently bring down the interest rate. Each of these stays within the loan-type limits above.',
+        ],
+      },
+      {
+        heading: 'How to ask for buyer concessions when making an offer',
+        paragraphs: [
+          'The most important rule: know your loan type and its concession cap before writing the offer. If you are using an FHA loan, you know the cap is 6%. If you are using a Conventional loan with 5% down, the cap is 3%. This knowledge lets you negotiate with confidence rather than guessing what is possible.',
+          'Work with your SAA Homes agent and lender to determine exactly what concession amount will be most valuable to you. For some buyers, closing cost coverage is the priority — it reduces the cash needed at closing. For others, a rate buydown that lowers the monthly payment by $200-$400 per month is more valuable over the life of the loan. Your agent will help you frame the request in the purchase offer so the seller understands the specific benefit.',
+          'The concession request is written into the purchase agreement as a seller credit. In competitive situations, a moderate concession request paired with a strong offer price can be more attractive to sellers than a lowball offer. Your SAA Homes agent will help you find the right balance.',
+        ],
+      },
+      {
+        heading: 'Stacking seller concessions with CHFA down payment assistance',
+        paragraphs: [
+          'One of the most powerful strategies for Northern Colorado first-time buyers is combining CHFA down payment assistance with seller-paid closing costs. CHFA programs like SmartStep Plus provide up to $25,000 in down payment assistance through a grant or forgivable loan, and this assistance is entirely separate from seller concessions.',
+          'Here is how it works: CHFA covers your down payment (up to $25,000). The seller concession covers your closing costs, prepaids, and possibly discount points (within the loan-type cap). Together, these two sources of assistance can reduce your total cash to close to as little as the earnest money deposit plus inspection fees — in some cases less than $5,000 total out of pocket.',
+          'The key requirement: your loan must be a CHFA-approved first mortgage (typically a Conventional, FHA, or USDA loan originated by a CHFA-approved lender). The seller concession must stay within the loan-type caps above. Your SAA Homes agent and lender will coordinate both sources to maximize your savings.',
+          'For buyers in Fort Collins, Loveland, Windsor, Greeley, and all 19 Northern Colorado cities we serve, this stacking strategy is the single most effective way to buy a home with minimal cash outlay.',
+        ],
+        relatedLinks: [
+          { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Complete program details & eligibility' },
+          { title: 'CHFA Schools to Home for Teachers', href: '/chfa-schools-to-home/', description: 'CHFA program for Colorado educators' },
+          { title: 'Colorado Champions for First Responders', href: '/colorado-champions-home-loan-program/', description: 'Home loan program for first responders' },
+        ],
+      },
+      {
+        heading: 'Buyer concessions vs. price reductions: which helps you more?',
+        paragraphs: [
+          'A $15,000 price reduction lowers your purchase price by $15,000 and reduces your monthly payment slightly (about $80-$90 per month at current rates). A $15,000 seller concession toward closing costs and a rate buydown might save you $3,000-$5,000 upfront on closing costs plus $200-$400 per month in mortgage payments if used to buy down the rate.',
+          'For most buyers, the concession is more valuable than an equivalent price reduction — especially if you are concerned about upfront cash. A rate buydown through a seller concession can make the difference between qualifying for the payment and being stretched too thin.',
+          'That said, price reductions have their place. They permanently reduce the purchase price and property taxes (since taxes are based on sale price). They are simpler to document. And they attract more buyers in the listing search because the list price is lower. Your SAA Homes agent will help you evaluate which approach — or which combination — serves your situation best.',
+        ],
+      },
+    ],
+    faqs: [
+      { q: 'Can I ask for seller concessions with an FHA loan?', a: 'Yes. FHA loans allow seller contributions of up to 6% of the purchase price toward your closing costs, prepaid items, and discount points. This is one of the more generous limits, making FHA a popular choice for first-time buyers in Northern Colorado who want to minimize their cash to close. The 6% cap is fixed regardless of down payment size.' },
+      { q: 'Do seller concessions affect the appraisal?', a: 'Generally, no. The appraisal is based on the market value of the property, not the specific terms of your contract including concessions. However, if the concession amount is unusually high (more than typical for your market), the lender may require a concession-adjusted appraisal. In Northern Colorado, standard concessions of 3-6% do not typically trigger appraisal adjustments. Your lender will flag this if it becomes an issue.' },
+      { q: 'Can I use CHFA down payment assistance AND ask for seller concessions?', a: 'Yes — and this is one of the most powerful strategies for Northern Colorado buyers. CHFA down payment assistance covers the down payment, while seller concessions cover closing costs and prepaids. The two are separate and stackable. Your loan must be a CHFA-approved mortgage, and the seller concession must stay within your loan type\u2019s cap, but there is no rule preventing you from using both. Many of our Fort Collins and Loveland first-time buyers use this combination to buy with as little as $3,000-$5,000 out of pocket.' },
+      { q: 'What closing costs can a seller credit cover?', a: 'Seller credits can cover virtually all buyer closing costs including: lender origination fees, appraisal fees, credit report fees, title insurance (lender\u2019s and owner\u2019s), escrow/settlement fees, recording fees, survey costs, transfer taxes (Colorado has no real estate transfer tax), prepaid property taxes, prepaid homeowners insurance, mortgage insurance premiums, and discount points. The only items they typically cannot cover are down payment requirements (use CHFA for that) and earnest money deposits.' },
+      { q: 'Is there a difference between a seller concession and a seller credit?', a: 'No — they are the same thing. The terms are used interchangeably. A seller concession (or credit) is a specific dollar amount the seller agrees to pay toward your costs at closing. It is written into the purchase agreement and paid from the seller\u2019s proceeds. Some lenders use the term \u201cseller concession\u201d in their guidelines and \u201cseller credit\u201d in closing documents, but they refer to the same contribution.' },
+      { q: 'How do I know if a seller will agree to concessions?', a: 'The likelihood of getting a seller concession depends on the market, the seller\u2019s situation, and how you frame the request. In the current Northern Colorado market — where roughly 50% of sales include concessions — sellers are more open to them than they were in 2021-2022. Sellers who are motivated (already moved out, have owned the home for years with high equity, or have been on the market for 30+ days) are the most likely to agree. Your SAA Homes agent will advise on the best approach for each specific property.' },
+    ],
+  },
 ];
 
 export function getBlogPost(slug) {
