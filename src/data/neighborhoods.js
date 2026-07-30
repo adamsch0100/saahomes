@@ -1504,6 +1504,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.375', longitude: '-104.965' },
     metaDescription: 'High Plains Village Loveland - new construction in master-planned south Loveland community near I-25. SAA Homes.',
     keywords: 'High Plains Village Loveland, south Loveland new construction, Loveland master-planned communities, new homes Loveland CO',
+    youtubeId: 'I3zoPeu90QU',
     neighborhoodHighlights: [
       { title: 'Brand new', description: 'Some of the newest construction in Loveland - modern floor plans and energy-efficient features.' },
       { title: 'Master-planned', description: 'Designed as a complete community with parks, trails, and future retail and school sites.' },
@@ -1535,6 +1536,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.4', longitude: '-104.96' },
     metaDescription: 'Loveland Airpark real estate - unique hangar homes near Northern Colorado Regional Airport with runway access. SAA Homes.',
     keywords: 'Loveland Airpark, hangar homes Loveland, Northern Colorado Regional Airport homes, airpark community Colorado',
+    youtubeId: 'KpSGGPDR3WU',
     neighborhoodHighlights: [
       { title: 'Fly-in community', description: 'Unique hangar-home lifestyle with direct taxiway access to the Northern Colorado Regional Airport runway.' },
       { title: 'Custom homes', description: 'Premium custom-built homes with attached hangars - a rare and desirable property type.' },
@@ -1566,6 +1568,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.41', longitude: '-104.94' },
     metaDescription: 'Campion Loveland real estate - affordable homes near Boyd Lake with I-25 access. SAA Homes.',
     keywords: 'Campion Loveland, east Loveland homes, Boyd Lake real estate, affordable Loveland homes',
+    youtubeId: 'IS6JWNogYFk',
     neighborhoodHighlights: [
       { title: 'Boyd Lake', description: 'Minutes from Boyd Lake State Park - boating, fishing, camping, and water sports all year.' },
       { title: 'Affordable option', description: 'One of the most affordable areas in Loveland with easy access to all city amenities.' },
