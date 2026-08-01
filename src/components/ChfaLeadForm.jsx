@@ -143,12 +143,11 @@ export default function ChfaLeadForm({ compact = false }) {
           />
         </div>
         <div>
-          <label htmlFor="chfa-phone" className={labelClass}>Phone *</label>
+          <label htmlFor="chfa-phone" className={labelClass}>Phone (optional)</label>
           <input
             type="tel"
             id="chfa-phone"
             name="phone"
-            required
             autoComplete="tel"
             inputMode="tel"
             placeholder="(970) 555-0123"
@@ -219,6 +218,9 @@ export default function ChfaLeadForm({ compact = false }) {
 
       <p className="text-xs text-gray-500 mt-4 text-center">
         By submitting, you agree to be contacted about CHFA Schools To Home and home buying services.
+      </p>
+      <p className="text-xs text-gray-500 mt-2 text-center">
+        Prefer to talk? Call <a href="tel:(970) 999-1407" className="font-semibold text-gray-700 hover:underline">(970) 999-1407</a> — we're here to help.
       </p>
     </form>
   );
