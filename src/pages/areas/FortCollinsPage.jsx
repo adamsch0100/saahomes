@@ -22,8 +22,8 @@ export default function FortCollinsPage() {
             <a href="/properties/?location=Fort Collins, CO" className="inline-flex items-center justify-center px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
               Search Fort Collins Homes
             </a>
-            <a href="/contact/" className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
-              Talk to an Agent
+            <a href="#market-report" className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
+              Get Market Report
             </a>
           </div>
         </div>
@@ -178,7 +178,7 @@ export default function FortCollinsPage() {
         </section>
 
         {/* Market Report CTA */}
-        <section className="mb-12 bg-gray-50 p-8 rounded-lg">
+        <section id="market-report" className="mb-12 bg-gray-50 p-8 rounded-lg scroll-mt-28">
           <div className="max-w-2xl mx-auto">
             <h2 className="text-3xl font-bold mb-4 text-center">Want the full market report for Fort Collins, CO?</h2>
             <p className="text-lg mb-6 text-center text-gray-700">
