@@ -102,6 +102,7 @@ export default function ChfaLeadForm({ compact = false }) {
             id="chfa-firstName"
             name="firstName"
             required
+            autoComplete="name"
             placeholder="Your full name"
             value={formData.firstName}
             onChange={handleChange}
@@ -116,6 +117,7 @@ export default function ChfaLeadForm({ compact = false }) {
             id="chfa-lastName"
             name="lastName"
             required
+            autoComplete="family-name"
             value={formData.lastName}
             onChange={handleChange}
             className={inputClass}
@@ -132,6 +134,8 @@ export default function ChfaLeadForm({ compact = false }) {
             id="chfa-email"
             name="email"
             required
+            autoComplete="email"
+            inputMode="email"
             placeholder="your@email.com"
             value={formData.email}
             onChange={handleChange}
@@ -145,6 +149,8 @@ export default function ChfaLeadForm({ compact = false }) {
             id="chfa-phone"
             name="phone"
             required
+            autoComplete="tel"
+            inputMode="tel"
             placeholder="(970) 555-0123"
             value={formData.phone}
             onChange={handleChange}
@@ -164,6 +170,7 @@ export default function ChfaLeadForm({ compact = false }) {
           id="chfa-schoolEmployer"
           name="schoolEmployer"
           required
+          autoComplete="organization"
           placeholder="e.g. Poudre School District, Rocky Mountain High School"
           value={formData.schoolEmployer}
           onChange={handleChange}
