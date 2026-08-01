@@ -576,6 +576,36 @@ export default function ChfaSchoolsToHomePage() {
         </div>
       </section>
 
+      {/* Northern Colorado Communities */}
+      <section className="py-16 px-6 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-6 text-center">
+            Where can CHFA Schools To Home buyers shop?
+          </h2>
+          <p className="text-center text-gray-600 mb-10 max-w-3xl mx-auto">
+            Teachers can use Schools To Home assistance in any qualifying Colorado community. These Northern Colorado area guides show the neighborhoods, schools, and price ranges where educators are finding homes within CHFA limits.
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { name: 'Fort Collins', href: '/northern-colorado-areas/fort-collins/', blurb: 'Poudre & Thompson school districts, CSU area' },
+              { name: 'Loveland', href: '/northern-colorado-areas/loveland/', blurb: 'Thompson School District & lakefront living' },
+              { name: 'Windsor', href: '/northern-colorado-areas/windsor/', blurb: 'Weld RE-4 schools & new construction' },
+              { name: 'Greeley', href: '/northern-colorado-areas/greeley/', blurb: 'Greeley-Evans District 6 & affordable prices' },
+            ].map((area) => (
+              <Link
+                key={area.name}
+                to={area.href}
+                className="block bg-gray-50 rounded-lg p-6 border border-gray-100 hover:border-black hover:shadow-md transition-all"
+              >
+                <h3 className="text-xl font-bold font-serif mb-2">{area.name}</h3>
+                <p className="text-gray-600 text-sm mb-4">{area.blurb}</p>
+                <span className="text-black font-semibold text-sm">Explore the area guide →</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* FAQ Section */}
       <section className="py-16 px-6 bg-white">
         <div className="max-w-4xl mx-auto">
