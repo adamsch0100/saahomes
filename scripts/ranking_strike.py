@@ -138,7 +138,7 @@ def check_tier_s_queries(current_rows, previous_rows, cities, templates):
         
         # Check position drop alert
         if prev_pos is not None and cur_pos is not None:
-            drop = prev_pos - cur_pos
+            drop = cur_pos - prev_pos  # positive = position got worse (lower rank = higher number)
             if drop >= ALERT_THRESHOLD_POSITION_DROP and cur_imp >= ALERT_THRESHOLD_IMPRESSIONS:
                 alerts.append({
                     'type': 'rank_drop',
@@ -213,7 +213,10 @@ def log_to_memory(alerts, disappeared_pages):
             entry += "| Query | Previous Pos | Current Pos | Drop | Impressions |\n"
             entry += "|-------|-------------|-------------|------|-------------|\n"
             for a in alerts:
-                entry += f"| {a['query']} | {a['previous_position']} | {a['current_position']} | {a['drop']} | {a['current_impressions']} |\n"
+                if a['type'] == 'disappeared':
+                    entry += f"| {a['query']} | {a['previous_position']} | DISAPPEARED | - | {a['current_impressions']} |\n"
+                else:
+                    entry += f"| {a['query']} | {a['previous_position']} | {a['current_position']} | {a['drop']} | {a['current_impressions']} |\n"
             entry += "\n"
         
         if disappeared_pages:
@@ -273,7 +276,10 @@ def print_summary(current_rows, previous_rows, alerts, disappeared_pages,
             print("-" * 60)
             for a in alerts:
                 print(f"  {a['query']}")
-                print(f"    Position: {a['previous_position']} → {a['current_position']} (drop: {a['drop']})")
+                if a['type'] == 'disappeared':
+                    print(f"    DISAPPEARED from results — was pos {a['previous_position']}, {a['previous_impressions']} impressions")
+                else:
+                    print(f"    Position: {a['previous_position']} → {a['current_position']} (drop: {a['drop']})")
                 print(f"    Impressions: {a['current_impressions']} (prev: {a['previous_impressions']})")
                 print()
         
