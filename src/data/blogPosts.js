@@ -4197,7 +4197,7 @@ export const blogPosts = [
     relatedLinks: [
       { title: 'Horsetooth area Fort Collins', href: '/northern-colorado-areas/fort-collins/horsetooth/', description: 'Acreage & equestrian properties near Horsetooth Reservoir' },
       { title: 'Severance Farms homes', href: '/northern-colorado-areas/severance/severance-farms/', description: 'Equestrian lots in rural Severance' },
-      { title: 'Bridle Ridge Timnath', href: '/northern-colorado-areas/timnath/bridle-ridge-at-timnath/', description: 'Luxury equestrian estates' },
+      { title: 'Bridle Ridge Timnath', href: '/northern-colorado-areas/timnath/bridle-ridge-timnath/', description: 'Luxury equestrian estates' },
       { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Family & horse-friendly neighborhoods' },
     
       { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & resources' },
@@ -4278,6 +4278,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/blog-default-black.jpg',
     readTime: '8 min read',
+    youtubeId: 'VhW1dHBtKOA',
     relatedLinks: [
       { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
       { title: 'Cash Home Buyers for Northern Colorado', href: '/blog/cash-home-buyers-fort-collins-northern-colorado/', description: 'Quick sale options for inherited properties' },
