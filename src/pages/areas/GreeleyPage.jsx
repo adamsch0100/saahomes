@@ -18,6 +18,14 @@ export default function GreeleyPage() {
         <div className="relative z-10 text-center text-white px-6">
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">Greeley, Colorado</h1>
           <p className="mt-4 text-xl">Home to the University of Northern Colorado</p>
+          <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/properties/?location=Greeley, CO" className="inline-flex items-center justify-center px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+              Search Greeley Homes
+            </a>
+            <a href="#market-report" className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
+              Get Market Report
+            </a>
+          </div>
         </div>
       </section>
 
@@ -43,7 +51,7 @@ export default function GreeleyPage() {
           </p>
           <Link
             to="/properties/?location=Greeley, CO"
-            className="inline-flex items-center justify-center px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
           >
             Search Greeley Homes
           </Link>
@@ -233,7 +241,7 @@ export default function GreeleyPage() {
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               to="/for-sellers/#market-report-form"
-              className="inline-flex px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
             >
               Free Market Analysis
             </Link>
@@ -248,7 +256,7 @@ export default function GreeleyPage() {
       </section>
 
       {/* Market Report CTA */}
-      <section className="py-16 px-6 bg-gray-50">
+      <section id="market-report" className="py-16 px-6 bg-gray-50 scroll-mt-28">
         <div className="max-w-2xl mx-auto">
           <h2 className="text-3xl font-bold mb-4 text-center">Want the full market report for Greeley, CO?</h2>
           <p className="text-lg mb-6 text-center text-gray-700">
