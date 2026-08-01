@@ -41,7 +41,7 @@ export default function EatonPage() {
           </p>
           <Link
             to="/properties/?location=Eaton, CO"
-            className="inline-flex items-center justify-center px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
           >
             Search Eaton Homes
           </Link>
