@@ -4669,6 +4669,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/blog-default-black.jpg',
     readTime: '9 min read',
+    youtubeId: 'G2Yc_aKZYts',
     keywords: 'windsor colorado realtor, windsor real estate agent, windsor co realtor, best realtor in windsor colorado, real estate agent windsor co, schwartz and associates windsor, northern colorado realtor, windsor colorado homes for sale, windsor co real estate, realtor near windsor colorado',
     relatedLinks: [
       { title: 'Windsor Colorado real estate', href: '/northern-colorado-areas/windsor/', description: 'Neighborhoods, schools & market data' },
