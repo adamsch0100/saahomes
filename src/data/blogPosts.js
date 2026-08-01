@@ -377,7 +377,7 @@ export const blogPosts = [
       {
         heading: 'What is CHFA Schools To Home?',
         paragraphs: [
-          'CHFA Schools To Home is a new shared appreciation down payment assistance program for full-time Colorado public school employees, funded by the Public School Permanent Fund. Expected to launch in July 2026, it offers up to 25% of your first mortgage as a second mortgage for down payment, closing costs, prepaids, or principal reduction.',
+          'CHFA Schools To Home is a new shared appreciation down payment assistance program for full-time Colorado public school employees, funded by the Public School Permanent Fund. Now available in 2026, it offers up to 25% of your first mortgage as a second mortgage for down payment, closing costs, prepaids, or principal reduction.',
           'Unlike standard CHFA DPA capped at $25,000 or 3–4%, Schools To Home scales with your loan size — on a $400,000 mortgage, 25% assistance equals $100,000 in help. This makes it one of the most generous educator housing programs in the country.',
         ],
       },
@@ -678,7 +678,7 @@ export const blogPosts = [
         heading: 'CHFA and homebuyer program reminders for summer 2026',
         paragraphs: [
           'Colorado buyers should be aware of several programs available this summer. CHFA SmartStep Plus offers first mortgages paired with a down payment grant of up to $25,000 or 3% of the loan amount — no repayment required. CHFA Preferred Plus uses conventional financing for buyers with stronger credit, with deferred second mortgage DPA up to $25,000 or 4%. Both programs require a minimum 620 credit score, $1,000 borrower contribution, and completion of CHFA-approved homebuyer education before closing.',
-          'The CHFA Schools To Home program is expected to launch in July 2026 for full-time Colorado public school employees, offering up to 25% down payment assistance through a shared appreciation second mortgage. The Colorado Champions Home Loan Program for first responders — peace officers, firefighters, EMTs, 911 dispatchers — takes effect August 12, 2026, raising income eligibility to 110% of standard CHFA limits. Both programs represent significant new opportunities for educators and public safety professionals in Northern Colorado.',
+          'The CHFA Schools To Home program is now available for full-time Colorado public school employees, offering up to 25% down payment assistance through a shared appreciation second mortgage. The Colorado Champions Home Loan Program for first responders — peace officers, firefighters, EMTs, 911 dispatchers — takes effect August 12, 2026, raising income eligibility to 110% of standard CHFA limits. Both programs represent significant new opportunities for educators and public safety professionals in Northern Colorado.',
           'All program details on this page reference 2026 guidelines. Official CHFA program information and income and price limit tables are available at chfainfo.com. Speak with a CHFA Participating Lender to confirm your specific eligibility.',
         ],
       },

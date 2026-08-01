@@ -8,7 +8,8 @@ import { SELLER_FAQS } from "../data/buyerSellerFaqs.js";
 export default function ForSellersPage() {
   useEffect(() => {
     // Check if there's a hash in the URL and scroll to that section
-    if (window.location.hash === '#home-valuation') {
+    const path = window.location.pathname.replace(/\/+$/, '');
+    if (window.location.hash === '#home-valuation' || path === '/home-valuation') {
       setTimeout(() => {
         const element = document.getElementById('home-valuation');
         if (element) {
@@ -54,7 +55,7 @@ export default function ForSellersPage() {
             Get proven results and streamlined service from start to finish. Scroll down to learn more about how we can get you results with our record-setting sales strategies.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="/home-valuation/" className="inline-flex items-center justify-center px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+            <a href="#home-valuation" className="inline-flex items-center justify-center px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
               Get Your Home Value
             </a>
             <a href="/contact/" className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
@@ -118,7 +119,7 @@ export default function ForSellersPage() {
               We combine data-driven pricing strategies with aggressive marketing campaigns to create maximum demand for your property. Our goal is to generate multiple offers and create a competitive bidding environment that works in your favor.
             </p>
             <div className="flex gap-4 flex-wrap">
-              <a href="/home-valuation/" className="inline-block px-6 py-3 bg-black text-white font-semibold rounded hover:bg-gray-800 transition-colors">
+              <a href="#home-valuation" className="inline-block px-6 py-3 bg-black text-white font-semibold rounded hover:bg-gray-800 transition-colors">
                 Get Your Home Value
               </a>
               <a href="/contact/" className="inline-block px-6 py-3 border-2 border-black text-black font-semibold rounded hover:bg-black hover:text-white transition-colors">
@@ -376,7 +377,7 @@ export default function ForSellersPage() {
             <a href="/contact/" className="inline-block px-8 py-3 bg-white text-black font-semibold rounded hover:bg-gray-100 transition-colors">
               Get Started
             </a>
-            <a href="/home-valuation/" className="inline-block px-8 py-3 border-2 border-white text-white font-semibold rounded hover:bg-white hover:text-black transition-colors">
+            <a href="#home-valuation" className="inline-block px-8 py-3 border-2 border-white text-white font-semibold rounded hover:bg-white hover:text-black transition-colors">
               Free Home Valuation
             </a>
           </div>

@@ -136,6 +136,7 @@ export default function ContactPage() {
                   name="name"
                   placeholder="Your name *"
                   required
+                  autoComplete="name"
                   value={formData.name}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
@@ -148,6 +149,8 @@ export default function ContactPage() {
                   name="email"
                   placeholder="Your email address *"
                   required
+                  autoComplete="email"
+                  inputMode="email"
                   value={formData.email}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
@@ -160,6 +163,8 @@ export default function ContactPage() {
                   name="phone"
                   placeholder="Your phone number *"
                   required
+                  autoComplete="tel"
+                  inputMode="tel"
                   value={formData.phone}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
