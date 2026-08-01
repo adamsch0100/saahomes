@@ -28,6 +28,7 @@ import LaSallePage from "./pages/areas/LaSallePage.jsx";
 import MortgageCalculatorPage from "./pages/MortgageCalculatorPage.jsx";
 import AdminPage from "./pages/AdminPage.jsx";
 import TestimonialsPage from "./pages/TestimonialsPage.jsx";
+import EventsCalendarPage from "./pages/EventsCalendarPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
 import ChfaSchoolsToHomePage from "./pages/ChfaSchoolsToHomePage.jsx";
@@ -194,6 +195,8 @@ export default function App() {
         {/* Testimonials */}
         <Route path="/testimonials" element={<AppLayout><TestimonialsPage /></AppLayout>} />
         <Route path="/testimonials/" element={<AppLayout><TestimonialsPage /></AppLayout>} />
+        <Route path="/events" element={<AppLayout><EventsCalendarPage /></AppLayout>} />
+        <Route path="/events/" element={<AppLayout><EventsCalendarPage /></AppLayout>} />
 
         {/* Blog */}
         <Route path="/blog" element={<AppLayout><BlogPage /></AppLayout>} />

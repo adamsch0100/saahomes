@@ -1,11 +1,11 @@
 /**
  * Curated Northern Colorado events — flagship annual happenings only.
  * Hermes updates via local-events-curation skill (monthly check, quarterly refresh).
- * Last reviewed: 2026-06-29
+ * Last reviewed: 2026-08-01 (Larimer County Fair Jul 31–Aug 4, Sculpture in the Park Aug 7–9 verified)
  */
 
 export const LATEST_EVENTS_GUIDE_SLUG = 'northern-colorado-events-guide-2026';
-export const EVENTS_DATA_LAST_REVIEWED = '2026-06-29';
+export const EVENTS_DATA_LAST_REVIEWED = '2026-08-01';
 
 /** @typedef {{ name: string; season: string; description: string; officialUrl?: string; typicalMonths?: string }} LocalEvent */
 
@@ -361,4 +361,115 @@ export function hasCityEvents(slug) {
 
 export function getEventsGuidePath() {
   return `/blog/${LATEST_EVENTS_GUIDE_SLUG}/`;
+}
+
+/**
+ * City display names keyed by area slug — mirrors areaSeo.js city names.
+ */
+const CITY_DISPLAY = {
+  'fort-collins': 'Fort Collins',
+  loveland: 'Loveland',
+  windsor: 'Windsor',
+  greeley: 'Greeley',
+  timnath: 'Timnath',
+  wellington: 'Wellington',
+  johnstown: 'Johnstown',
+  eaton: 'Eaton',
+  milliken: 'Milliken',
+  'la-salle': 'La Salle',
+  mead: 'Mead',
+  longmont: 'Longmont',
+  boulder: 'Boulder',
+  berthoud: 'Berthoud',
+  firestone: 'Firestone',
+  frederick: 'Frederick',
+  evans: 'Evans',
+  severance: 'Severance',
+  niwot: 'Niwot',
+};
+
+export function getCityDisplayName(slug) {
+  return CITY_DISPLAY[slug] || slug;
+}
+
+const MONTH_ALIASES = {
+  jan: 0, january: 0,
+  feb: 1, february: 1,
+  mar: 2, march: 2,
+  apr: 3, april: 3,
+  may: 4,
+  jun: 5, june: 5,
+  jul: 6, july: 6,
+  aug: 7, august: 7,
+  sep: 8, september: 8,
+  oct: 9, october: 9,
+  nov: 10, november: 10,
+  dec: 11, december: 11,
+};
+
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+/**
+ * Parse a typicalMonths string like "June–July", "May–October", "August",
+ * "June–August", "Varies", "Year-round" into an array of month indexes.
+ * Returns [] when the string can't be mapped (Varies/Year-round).
+ */
+export function parseTypicalMonths(typicalMonths) {
+  if (!typicalMonths) return [];
+  const normalized = typicalMonths.toLowerCase().replace(/\s+/g, '');
+  // "Varies" or "Year-round" → all 12 months (they recur all year)
+  if (normalized.includes('varies') || normalized.includes('year-round') || normalized.includes('yearround')) {
+    return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+  }
+  // Split on en-dash / hyphen / slash
+  const parts = normalized.split(/[–\-/]/);
+  const months = [];
+  for (const part of parts) {
+    const idx = MONTH_ALIASES[part.replace(/[^a-z]/g, '')];
+    if (idx !== undefined) months.push(idx);
+  }
+  if (months.length === 2 && parts.length === 2) {
+    // Range like June–August → all months in between (inclusive)
+    const [a, b] = months.sort((x, y) => x - y);
+    const range = [];
+    for (let i = a; i <= b; i++) range.push(i);
+    return range;
+  }
+  return months;
+}
+
+/**
+ * Flatten every curated event (city + regional) into a single list with
+ * city slug/name and parsed month indexes for filtering.
+ */
+export function getAllEvents() {
+  const all = [];
+  for (const [slug, events] of Object.entries(cityEvents)) {
+    for (const event of events) {
+      all.push({
+        ...event,
+        citySlug: slug,
+        cityName: getCityDisplayName(slug),
+        months: parseTypicalMonths(event.typicalMonths),
+        isRegional: false,
+      });
+    }
+  }
+  for (const event of regionalEvents) {
+    all.push({
+      ...event,
+      citySlug: 'regional',
+      cityName: 'Northern Colorado',
+      months: parseTypicalMonths(event.typicalMonths),
+      isRegional: true,
+    });
+  }
+  return all;
+}
+
+export function getMonthNames() {
+  return MONTH_NAMES;
 }
