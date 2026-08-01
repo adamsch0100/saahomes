@@ -73,7 +73,10 @@ export default function EventsCalendarPage() {
   }, [allEvents, month, city]);
 
   const visible = showAll ? filtered : filtered.slice(0, 12);
-  const reviewed = new Date(EVENTS_DATA_LAST_REVIEWED).toLocaleDateString('en-US', {
+  // Parse as local date to avoid UTC-to-local month drift (new Date("2026-08-01")
+  // is Aug 1 UTC, which reads as July 31 in US timezones → wrong "reviewed" label).
+  const [yr, mo] = EVENTS_DATA_LAST_REVIEWED.split('-').map(Number);
+  const reviewed = new Date(yr, mo - 1, 1).toLocaleDateString('en-US', {
     year: 'numeric', month: 'long',
   });
 
@@ -110,10 +113,10 @@ export default function EventsCalendarPage() {
       />
 
       {/* Hero */}
-      <section className="relative bg-black text-white">
-        <div className="absolute inset-0 bg-cover bg-center opacity-40" style={{ backgroundImage: "url('/images/Northern Colorado.webp')" }}></div>
+      <section className="relative min-h-[18rem] sm:h-96 bg-cover bg-center flex items-center justify-center pt-28 sm:pt-32 pb-8"
+        style={{ backgroundImage: "url('/images/Northern Colorado.webp')" }}>
         <div className="absolute inset-0 bg-black/60"></div>
-        <div className="relative z-10 max-w-6xl mx-auto px-6 py-20 text-center">
+        <div className="relative z-10 max-w-6xl mx-auto px-6 py-8 text-center">
           <p className="text-sm font-semibold uppercase tracking-widest mb-3" style={{ color: GOLD }}>
             Northern Colorado community life
           </p>
@@ -194,8 +197,8 @@ export default function EventsCalendarPage() {
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${seasonBadge(event.season)}`}>
                     {event.season}
                   </span>
-                  <span className="text-xs text-gray-500">
-                    {formatMonths(event.months, event.typicalMonths)}
+                  <span className={`text-xs ${event.dates ? 'font-bold text-gray-900' : 'text-gray-500'}`}>
+                    {event.dates || formatMonths(event.months, event.typicalMonths)}
                   </span>
                 </div>
                 <h3 className="text-xl font-bold font-serif text-gray-900 mb-2">{event.name}</h3>

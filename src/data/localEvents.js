@@ -7,7 +7,7 @@
 export const LATEST_EVENTS_GUIDE_SLUG = 'northern-colorado-events-guide-2026';
 export const EVENTS_DATA_LAST_REVIEWED = '2026-08-01';
 
-/** @typedef {{ name: string; season: string; description: string; officialUrl?: string; typicalMonths?: string }} LocalEvent */
+/** @typedef {{ name: string; season: string; description: string; officialUrl?: string; typicalMonths?: string; dates?: string }} LocalEvent */
 
 /** @type {LocalEvent[]} */
 export const regionalEvents = [
@@ -15,6 +15,7 @@ export const regionalEvents = [
     name: 'Larimer County Fair',
     season: 'Summer',
     typicalMonths: 'August',
+    dates: 'Jul 31 – Aug 4, 2026',
     description: 'Rodeo, carnival, livestock shows, and live music at The Ranch in Loveland — a Northern Colorado tradition for families.',
     officialUrl: 'https://www.larimerfair.com/',
   },
@@ -71,6 +72,7 @@ export const cityEvents = {
       name: 'Sculpture in the Park',
       season: 'Summer',
       typicalMonths: 'August',
+      dates: 'Aug 7–9, 2026',
       description: 'One of the largest outdoor sculpture shows in the country, at Benson Sculpture Garden and Chapungu Sculpture Park.',
       officialUrl: 'https://www.lovgov.org/community/events-calendar',
     },

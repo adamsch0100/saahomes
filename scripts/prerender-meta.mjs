@@ -1221,10 +1221,11 @@ function injectEventsBody(html) {
         const official = e.officialUrl
           ? ` <a href="${escapeHtml(e.officialUrl)}" rel="noopener">official site</a>`
           : '';
+        const when = e.dates || e.typicalMonths || 'Dates vary';
         return (
           `          <li class="prerendered-event">` +
           `<strong>${escapeHtml(e.name)}</strong> &mdash; ${escapeHtml(e.cityName)} &middot; ${escapeHtml(e.season)}` +
-          ` &middot; ${escapeHtml(e.typicalMonths || 'Dates vary')}. ${escapeHtml(e.description)} ${cityLink}.${official}</li>`
+          ` &middot; <strong>${escapeHtml(when)}</strong>. ${escapeHtml(e.description)} ${cityLink}.${official}</li>`
         );
       })
       .join('\n');
