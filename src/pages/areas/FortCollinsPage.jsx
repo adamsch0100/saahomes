@@ -191,6 +191,32 @@ export default function FortCollinsPage() {
           </div>
         </section>
 
+        {/* CHFA First-Time Buyer Banner */}
+        <section className="mb-12 py-12 px-6 rounded-lg" style={{ backgroundColor: "#CFB36E" }}>
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-2xl sm:text-3xl font-bold font-serif text-gray-900 mb-3">
+              First-time buyer in Fort Collins?
+            </h2>
+            <p className="text-gray-800 mb-6">
+              Many Fort Collins buyers qualify for CHFA down payment assistance — grants and deferred loans up to $25,000 for down payment and closing costs.
+            </p>
+            <div className="flex flex-wrap gap-4 justify-center">
+              <Link
+                to="/chfa-down-payment-assistance/#chfa-dpa-lead-form"
+                className="inline-flex px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                Free CHFA Consultation
+              </Link>
+              <Link
+                to="/chfa-down-payment-assistance/"
+                className="inline-flex px-6 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+              >
+                CHFA program guide →
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* Fort Collins Neighborhoods */}
         <NeighborhoodLinks citySlug="fort-collins" cityName="Fort Collins" />
 
