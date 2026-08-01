@@ -105,7 +105,7 @@ const specialtyPrograms = [
     audience: "Full-time Colorado public school employees",
     benefit: "Up to 25% down payment assistance",
     link: "/chfa-schools-to-home/",
-    status: "Launching July 2026",
+    status: "Now available",
   },
   {
     title: "Colorado Champions Home Loan",

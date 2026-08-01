@@ -57,18 +57,18 @@ const exampleScenarios = [
     dpaAmount: "$87,500",
     homeValue: "$480,000",
     appreciation: "$42,500",
-    sharedAppreciation: "$8,500",
-    totalOwed: "$96,000",
-    remainingEquity: "$34,000",
+    sharedAppreciation: "$10,625",
+    totalOwed: "$98,125",
+    remainingEquity: "$31,875",
   },
   {
     dpa: "15%",
     dpaAmount: "$52,500",
     homeValue: "$500,000",
     appreciation: "$62,500",
-    sharedAppreciation: "$7,500",
-    totalOwed: "$60,000",
-    remainingEquity: "$90,000",
+    sharedAppreciation: "$9,375",
+    totalOwed: "$61,875",
+    remainingEquity: "$88,125",
   },
   {
     dpa: "20%",
@@ -204,15 +204,15 @@ export default function ChfaSchoolsToHomePage() {
               "name": "What is shared appreciation in CHFA Schools To Home?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "When you sell, refinance, pay off the loan, or no longer use the home as your primary residence, you repay the DPA plus a share of any home appreciation. The share is calculated by dividing the original DPA amount by the original purchase price, then multiplying by the appreciation amount."
+                "text": "When you sell, refinance, pay off the loan, or no longer use the home as your primary residence, you repay the DPA plus a share of any home appreciation. The share is calculated by dividing the original DPA amount by the first mortgage loan amount, then multiplying by the appreciation amount."
               }
             },
             {
               "@type": "Question",
-              "name": "When does the CHFA Schools To Home program launch?",
+              "name": "Is the CHFA Schools To Home program available now?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "CHFA Schools To Home is expected to launch in July 2026. Program details are subject to change; refer to CHFA's official program page for the latest information."
+                "text": "Yes. CHFA Schools To Home is now available to eligible full-time Colorado public school employees. Program details are subject to change; refer to CHFA's official program page for the latest information."
               }
             },
             {
@@ -243,7 +243,7 @@ export default function ChfaSchoolsToHomePage() {
         <div className="absolute inset-0 bg-black/65" />
         <div className="relative z-10 max-w-5xl mx-auto text-center text-white px-4 sm:px-6">
           <span className="inline-block mb-4 px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold tracking-wide uppercase" style={{ backgroundColor: "#CFB36E", color: "#1a1a1a" }}>
-            Launching July 2026
+            Now Available
           </span>
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-serif leading-tight">
             CHFA Schools To Home
@@ -379,7 +379,7 @@ export default function ChfaSchoolsToHomePage() {
                 </li>
                 <li className="flex gap-3">
                   <span className="font-bold text-white">2.</span>
-                  <span><strong className="text-white">Calculate your share percentage:</strong> DPA loan amount ÷ original purchase price.</span>
+                  <span><strong className="text-white">Calculate your share percentage:</strong> DPA loan amount ÷ first mortgage loan amount.</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="font-bold text-white">3.</span>
@@ -417,20 +417,20 @@ export default function ChfaSchoolsToHomePage() {
                   <span>$42,500</span>
                 </div>
                 <div className="flex justify-between border-b border-gray-700 pb-2">
-                  <span className="text-gray-400">Share percentage (87,500 ÷ 437,500)</span>
-                  <span>20%</span>
+                  <span className="text-gray-400">Share percentage (87,500 ÷ 350,000)</span>
+                  <span>25%</span>
                 </div>
                 <div className="flex justify-between border-b border-gray-700 pb-2">
                   <span className="text-gray-400">Shared appreciation owed</span>
-                  <span>$8,500</span>
+                  <span>$10,625</span>
                 </div>
                 <div className="flex justify-between pt-2 font-bold text-lg">
                   <span>Total owed at repayment</span>
-                  <span style={{ color: "#CFB36E" }}>$96,000</span>
+                  <span style={{ color: "#CFB36E" }}>$98,125</span>
                 </div>
                 <div className="flex justify-between text-gray-400">
                   <span>Remaining borrower equity</span>
-                  <span>$34,000</span>
+                  <span>$31,875</span>
                 </div>
               </div>
             </div>
@@ -667,7 +667,7 @@ export default function ChfaSchoolsToHomePage() {
       <section className="py-8 px-6 border-t border-gray-200">
         <div className="max-w-4xl mx-auto text-xs text-gray-500 leading-relaxed">
           <p className="mb-2">
-            <strong>Disclaimer:</strong> Information on this page is for educational purposes and based on CHFA program materials. Program details, income limits, and availability are subject to change. CHFA Schools To Home is expected to launch in July 2026. For official program guidelines, visit{" "}
+            <strong>Disclaimer:</strong> Information on this page is for educational purposes and based on CHFA program materials. Program details, income limits, and availability are subject to change. CHFA Schools To Home is now available for eligible borrowers. For official program guidelines, visit{" "}
             <a
               href="https://www.chfainfo.com/single-family-participating-lenders/chfa-schools-to-home-program"
               target="_blank"

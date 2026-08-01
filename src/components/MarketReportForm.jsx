@@ -121,6 +121,10 @@ export default function MarketReportForm({ areaName }) {
       >
         {isSubmitting ? 'Submitting...' : 'Get Market Report'}
       </button>
+      <p className="text-xs text-gray-500 mt-4 text-center">
+        No spam — just your personalized market report. Prefer to talk? Call{" "}
+        <a href="tel:(970) 999-1407" className="text-gray-700 font-semibold hover:underline">(970) 999-1407</a>.
+      </p>
     </form>
   );
 }
