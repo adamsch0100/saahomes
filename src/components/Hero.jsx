@@ -33,18 +33,22 @@ export default function Hero() {
 
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="/contact/"
+              href="/properties/"
               className="inline-flex items-center justify-center px-8 py-3 bg-white text-gray-900 font-semibold rounded hover:bg-gray-100 transition-colors"
             >
-              Contact Us
+              Search Homes
             </a>
             <a
-              href="/about-us/"
+              href="/for-sellers/#home-valuation"
               className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded hover:bg-white/10 transition-colors"
             >
-              About Us
+              Get My Home Value
             </a>
           </div>
+          <p className="mt-4 text-sm sm:text-base text-white/80">
+            Serving Fort Collins, Loveland, Windsor &amp; all of Northern Colorado — call{" "}
+            <a href="tel:(970) 999-1407" className="font-semibold text-white underline hover:text-white/90">(970) 999-1407</a>
+          </p>
         </div>
       </div>
     </section>

@@ -105,22 +105,22 @@ export default function ChfaDpaLeadForm({ compact = false, sourcePage = '/chfa-d
       <div className="grid md:grid-cols-2 gap-4 mb-4">
         <div>
           <label htmlFor="chfa-dpa-firstName" className={labelClass}>First Name *</label>
-          <input type="text" id="chfa-dpa-firstName" name="firstName" required value={formData.firstName} onChange={handleChange} className={inputClass} />
+          <input type="text" id="chfa-dpa-firstName" name="firstName" required autoComplete="given-name" value={formData.firstName} onChange={handleChange} className={inputClass} />
         </div>
         <div>
           <label htmlFor="chfa-dpa-lastName" className={labelClass}>Last Name *</label>
-          <input type="text" id="chfa-dpa-lastName" name="lastName" required value={formData.lastName} onChange={handleChange} className={inputClass} />
+          <input type="text" id="chfa-dpa-lastName" name="lastName" required autoComplete="family-name" value={formData.lastName} onChange={handleChange} className={inputClass} />
         </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-4 mb-4">
         <div>
           <label htmlFor="chfa-dpa-email" className={labelClass}>Email *</label>
-          <input type="email" id="chfa-dpa-email" name="email" required value={formData.email} onChange={handleChange} className={inputClass} />
+          <input type="email" id="chfa-dpa-email" name="email" required autoComplete="email" inputMode="email" value={formData.email} onChange={handleChange} className={inputClass} />
         </div>
         <div>
           <label htmlFor="chfa-dpa-phone" className={labelClass}>Phone *</label>
-          <input type="tel" id="chfa-dpa-phone" name="phone" required value={formData.phone} onChange={handleChange} className={inputClass} />
+          <input type="tel" id="chfa-dpa-phone" name="phone" required autoComplete="tel" inputMode="tel" value={formData.phone} onChange={handleChange} className={inputClass} />
         </div>
       </div>
 
