@@ -63,6 +63,7 @@ export default function MarketReportForm({ areaName }) {
             id="firstName"
             name="firstName"
             required
+            autoComplete="given-name"
             value={formData.firstName}
             onChange={handleChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -77,6 +78,7 @@ export default function MarketReportForm({ areaName }) {
             id="lastName"
             name="lastName"
             required
+            autoComplete="family-name"
             value={formData.lastName}
             onChange={handleChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -94,6 +96,8 @@ export default function MarketReportForm({ areaName }) {
             id="email"
             name="email"
             required
+            autoComplete="email"
+            inputMode="email"
             value={formData.email}
             onChange={handleChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -107,6 +111,8 @@ export default function MarketReportForm({ areaName }) {
             type="tel"
             id="phone"
             name="phone"
+            autoComplete="tel"
+            inputMode="tel"
             value={formData.phone}
             onChange={handleChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
