@@ -114,15 +114,16 @@ def get_org_id():
     print("ERROR: No organization found")
     sys.exit(1)
 
-def create_post(channel_id, text, image_url=None, scheduled_at=None):
+def create_post(channel_id, text, image_url=None, scheduled_at=None, link_url=None):
     """
     Create a post in Buffer for a specific channel.
-    
+
     Args:
         channel_id: Buffer channel ID
         text: Post caption/text
         image_url: Optional image URL
         scheduled_at: Optional ISO 8601 datetime for scheduling
+        link_url: Optional CTA link for GBP posts (from pack's promoting.url)
     """
     variables = {
         "input": {
@@ -153,7 +154,7 @@ def create_post(channel_id, text, image_url=None, scheduled_at=None):
                 "type": "whats_new",
                 "detailsWhatsNew": {
                     "button": "learn_more",
-                    "link": "https://saahomes.com/blog/fort-collins-housing-market-mid-2026/"
+                    "link": link_url or "https://saahomes.com/blog/fort-collins-housing-market-mid-2026/"
                 }
             }
         }
@@ -216,6 +217,8 @@ def post_from_file(filepath):
     
     platforms = pack.get("platforms", [])
     results = []
+    promoting = pack.get("promoting", {})
+    link_url = promoting.get("url", "") if promoting else ""
     
     for plat in platforms:
         name = plat["name"].lower()
@@ -236,7 +239,7 @@ def post_from_file(filepath):
             continue
         
         print(f"  📤 Posting to {plat['name']}...")
-        result = create_post(channel_id, caption, image_url)
+        result = create_post(channel_id, caption, image_url, link_url=link_url)
         if result:
             results.append({"platform": plat["name"], "status": "posted", "id": result["id"]})
     
