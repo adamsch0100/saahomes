@@ -48,6 +48,18 @@ function seasonBadge(season) {
   return map[season] || 'bg-gray-100 text-gray-700';
 }
 
+// Sort key: events with exact dates sort chronologically first within a month,
+// then recurring series (June-August type) by their range, then by city.
+function dateSortValue(event, monthIdx) {
+  if (event.dates) {
+    // "Aug 7–9, 2026" → extract the day
+    const dayMatch = event.dates.match(/(\d{1,2})/);
+    return dayMatch ? parseInt(dayMatch[1], 10) : 0;
+  }
+  // Recurring: use range start month as tiebreak within the month section
+  return 0.5 + (event.months[0] || 0) / 100;
+}
+
 export default function EventsCalendarPage() {
   const [month, setMonth] = useState('all');
   const [city, setCity] = useState('all');
@@ -55,32 +67,34 @@ export default function EventsCalendarPage() {
 
   const allEvents = useMemo(() => getAllEvents(), []);
 
-  const filtered = useMemo(() => {
-    const monthIdx = month === 'all' ? null : parseInt(month, 10);
+  // Events matching the active city filter (month handled per-section)
+  const cityFiltered = useMemo(() => {
     return allEvents
-      .filter((e) => {
-        if (city !== 'all' && e.citySlug !== city) return false;
-        if (monthIdx !== null && !e.months.includes(monthIdx)) return false;
-        return true;
-      })
-      .sort((a, b) => {
-        // Events with an explicit upcoming month sort first, then by city
-        const am = a.months.length ? a.months[0] : 99;
-        const bm = b.months.length ? b.months[0] : 99;
-        if (am !== bm) return am - bm;
-        return a.cityName.localeCompare(b.cityName);
-      });
-  }, [allEvents, month, city]);
+      .filter((e) => city === 'all' || e.citySlug === city)
+      .sort((a, b) => a.cityName.localeCompare(b.cityName));
+  }, [allEvents, city]);
 
-  const visible = showAll ? filtered : filtered.slice(0, 12);
-  // Parse as local date to avoid UTC-to-local month drift (new Date("2026-08-01")
-  // is Aug 1 UTC, which reads as July 31 in US timezones → wrong "reviewed" label).
-  const [yr, mo] = EVENTS_DATA_LAST_REVIEWED.split('-').map(Number);
-  const reviewed = new Date(yr, mo - 1, 1).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'long',
-  });
+  // Month sections: for each month, events that happen then, date-sorted
+  const monthSections = useMemo(() => {
+    return MONTH_NAMES.map((name, idx) => {
+      const events = cityFiltered
+        .filter((e) => e.months.includes(idx))
+        .sort((a, b) => dateSortValue(a, idx) - dateSortValue(b, idx));
+      return { idx, name, events };
+    });
+  }, [cityFiltered]);
 
-  // Show a "this month" default hint when no filter is applied
+  const activeMonthIdx = month === 'all' ? null : parseInt(month, 10);
+  const visibleSections = activeMonthIdx === null
+    ? monthSections
+    : monthSections.filter((s) => s.idx === activeMonthIdx);
+
+  const totalShown = visibleSections.reduce((sum, s) => sum + s.events.length, 0);
+  const reviewed = useMemo(() => {
+    const [yr, mo] = EVENTS_DATA_LAST_REVIEWED.split('-').map(Number);
+    return new Date(yr, mo - 1, 1).toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+  }, []);
+
   const currentMonth = new Date().getMonth();
   const currentMonthName = MONTH_NAMES[currentMonth];
   const thisMonthCount = allEvents.filter((e) => e.months.includes(currentMonth)).length;
@@ -123,18 +137,18 @@ export default function EventsCalendarPage() {
           <h1 className="text-4xl sm:text-5xl font-bold font-serif mb-4">Events &amp; Happenings Calendar</h1>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
             Festivals, farmers markets, rodeos, and community celebrations across {CITY_OPTIONS.length} Front Range
-            cities — filter by month or city to see what's happening near you.
+            cities — browse by month to see what's happening and when.
           </p>
         </div>
       </section>
 
       <article className="max-w-6xl mx-auto px-6 py-14">
         {/* Filters */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-8">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
           <div className="grid sm:grid-cols-2 gap-6">
             <div>
               <label htmlFor="month-filter" className="block text-sm font-semibold text-gray-700 mb-2">
-                Filter by month
+                Jump to month
               </label>
               <select
                 id="month-filter"
@@ -149,7 +163,7 @@ export default function EventsCalendarPage() {
               </select>
               {month === 'all' && (
                 <p className="text-sm text-gray-500 mt-2">
-                  🗓️ {thisMonthCount} event{thisMonthCount === 1 ? '' : 's'} happening in {currentMonthName} — pick a month to narrow it down.
+                  🗓️ {thisMonthCount} event{thisMonthCount === 1 ? '' : 's'} happening in {currentMonthName} — use the month nav below to jump around.
                 </p>
               )}
             </div>
@@ -179,77 +193,111 @@ export default function EventsCalendarPage() {
           </div>
         </div>
 
+        {/* Sticky month navigation */}
+        {month === 'all' && (
+          <nav className="sticky top-24 z-30 -mx-2 mb-8 px-2 py-3 overflow-x-auto bg-white/95 backdrop-blur rounded-xl border border-gray-200 shadow-sm">
+            <div className="flex gap-1.5 min-w-max">
+              {monthSections.map((s) => (
+                <a
+                  key={s.idx}
+                  href={`#month-${s.idx}`}
+                  className={`px-3 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${
+                    s.events.length
+                      ? 'text-gray-800 hover:bg-black hover:text-white'
+                      : 'text-gray-300 hover:bg-gray-100 cursor-not-allowed'
+                  }`}
+                  onClick={(e) => { if (!s.events.length) e.preventDefault(); }}
+                >
+                  {s.name.slice(0, 3)}
+                  {s.events.length > 0 && <span className="ml-1 text-xs opacity-60">({s.events.length})</span>}
+                </a>
+              ))}
+            </div>
+          </nav>
+        )}
+
         {/* Lead-in line */}
         <p className="text-center text-gray-600 mb-8">
-          {filtered.length === 0
-            ? 'No flagship events match that filter yet — try another month or city.'
-            : `${filtered.length} flagship event${filtered.length === 1 ? '' : 's'} found.`
+          {totalShown === 0
+            ? 'No events match that filter yet — try another month or city.'
+            : `${totalShown} event${totalShown === 1 ? '' : 's'} found.`
           }{' '}
           <span className="text-gray-400">Data reviewed {reviewed}.</span>
         </p>
 
-        {/* Event grid */}
-        {visible.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {visible.map((event) => (
-              <div key={`${event.citySlug}-${event.name}`} className="flex flex-col rounded-xl border border-gray-200 bg-white p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${seasonBadge(event.season)}`}>
-                    {event.season}
-                  </span>
-                  <span className={`text-xs ${event.dates ? 'font-bold text-gray-900' : 'text-gray-500'}`}>
-                    {event.dates || formatMonths(event.months, event.typicalMonths)}
-                  </span>
-                </div>
-                <h3 className="text-xl font-bold font-serif text-gray-900 mb-2">{event.name}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed mb-4 flex-1">{event.description}</p>
-                <div className="flex flex-wrap items-center gap-3 text-sm">
-                  {event.citySlug !== 'regional' ? (
-                    <Link
-                      to={`/northern-colorado-areas/${event.citySlug}/`}
-                      className="font-semibold hover:underline"
-                    >
-                      {event.cityName} area guide →
-                    </Link>
-                  ) : (
-                    <span className="font-semibold text-gray-700">{event.cityName}</span>
-                  )}
-                  {event.officialUrl && (
-                    <a
-                      href={event.officialUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-500 hover:text-gray-800 hover:underline"
-                    >
-                      Official site ↗
-                    </a>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12 bg-gray-50 rounded-xl">
-            <p className="text-gray-600 mb-4">No flagship events match that filter.</p>
-            <button
-              onClick={() => { setMonth('all'); setCity('all'); setShowAll(false); }}
-              className="inline-flex px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              Show all events
-            </button>
-          </div>
-        )}
+        {/* Calendar sections — one per month, date-ordered */}
+        {visibleSections.map((section) => (
+          <section key={section.idx} id={`month-${section.idx}`} className="mb-12 scroll-mt-36">
+            <div className="flex items-baseline gap-4 mb-5 border-b-2 border-gray-900 pb-3">
+              <h2 className="text-3xl font-bold font-serif">{section.name}</h2>
+              <span className="text-sm text-gray-500">
+                {section.events.length === 0
+                  ? 'No flagship events listed'
+                  : `${section.events.length} event${section.events.length === 1 ? '' : 's'}`}
+              </span>
+            </div>
 
-        {!showAll && filtered.length > 12 && (
-          <div className="text-center mt-10">
-            <button
-              onClick={() => setShowAll(true)}
-              className="inline-flex px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
-            >
-              Show all {filtered.length} events
-            </button>
-          </div>
-        )}
+            {section.events.length === 0 ? (
+              <p className="text-gray-400 italic text-sm pl-1">
+                No flagship events listed for {section.name}. Check back — we refresh this calendar regularly.
+              </p>
+            ) : (
+              <ol className="space-y-3">
+                {section.events.map((event) => (
+                  <li
+                    key={`${event.citySlug}-${event.name}-${section.idx}`}
+                    className="flex flex-col sm:flex-row sm:items-start gap-4 p-5 rounded-xl border border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm transition-all"
+                  >
+                    {/* Date block */}
+                    <div className="shrink-0 sm:w-24 sm:text-center">
+                      {event.dates ? (
+                        <div className="inline-flex sm:flex flex-col items-center px-3 py-2 rounded-lg bg-gray-900 text-white">
+                          <span className="text-xs uppercase tracking-wider opacity-70">Dates</span>
+                          <span className="text-sm font-bold leading-tight mt-0.5">{event.dates}</span>
+                        </div>
+                      ) : (
+                        <div className="inline-flex sm:flex flex-col items-center px-3 py-2 rounded-lg bg-gray-100 text-gray-700">
+                          <span className="text-xs uppercase tracking-wider opacity-70">Typically</span>
+                          <span className="text-sm font-semibold leading-tight mt-0.5">
+                            {formatMonths(event.months, event.typicalMonths)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Event info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                        <h3 className="text-lg font-bold font-serif text-gray-900">{event.name}</h3>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${seasonBadge(event.season)}`}>
+                          {event.season}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 leading-relaxed mb-3">{event.description}</p>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm">
+                        {event.citySlug !== 'regional' ? (
+                          <Link to={`/northern-colorado-areas/${event.citySlug}/`} className="font-semibold hover:underline">
+                            {event.cityName} area guide →
+                          </Link>
+                        ) : (
+                          <span className="font-semibold text-gray-700">{event.cityName}</span>
+                        )}
+                        {event.officialUrl && (
+                          <a href={event.officialUrl} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-gray-800 hover:underline">
+                            Official site ↗
+                          </a>
+                        )}
+                        <span className="text-gray-400 text-xs">
+                          {event.typicalMonths && formatMonths(event.months, event.typicalMonths)}
+                        </span>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </section>
+        ))}
 
         {/* Real estate CTA — the point of the page */}
         <section className="mt-16 rounded-xl overflow-hidden border border-gray-200">
