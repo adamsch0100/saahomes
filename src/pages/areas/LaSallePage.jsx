@@ -41,7 +41,7 @@ export default function LaSallePage() {
           </p>
           <Link
             to="/properties/?location=La Salle, CO"
-            className="inline-flex items-center justify-center px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
           >
             Search La Salle Homes
           </Link>
