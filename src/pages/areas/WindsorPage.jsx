@@ -17,7 +17,7 @@ export default function WindsorPage() {
         <div className="absolute inset-0 bg-black/60"></div>
         <div className="relative z-10 text-center text-white px-6">
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">Windsor, CO</h1>
-          <p className="mt-4 text-xl">Small Town Charm, Big City Convenience</p>
+          <p className="mt-4 text-xl">Family communities between Fort Collins and Greeley</p>
           <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
             <a href="/properties/?location=Windsor, CO" className="inline-flex items-center justify-center px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
               Search Windsor Homes
@@ -197,6 +197,29 @@ export default function WindsorPage() {
         </section>
 
         {/* Area Highlights */}
+      {/* CHFA First-Time Buyer Banner */}
+      <section className="py-12 px-6" style={{ backgroundColor: "#CFB36E" }}>
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold font-serif text-gray-900 mb-3">
+            First-time buyer in Windsor?
+          </h2>
+          <p className="text-gray-800 mb-6">
+            Many Windsor buyers qualify for CHFA down payment assistance — grants and deferred loans up to $25,000.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link
+              to="/chfa-down-payment-assistance/#chfa-dpa-lead-form"
+              className="inline-flex px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Free CHFA Consultation
+            </Link>
+            <Link to="/chfa-down-payment-assistance/" className="inline-flex px-6 py-3 font-semibold hover:underline">
+              CHFA program guide →
+            </Link>
+          </div>
+        </div>
+      </section>
+
               {/* Neighborhood Guides */}
       <section className="py-12 px-6 bg-gray-50">
         <div className="max-w-6xl mx-auto">
@@ -265,6 +288,24 @@ export default function WindsorPage() {
       </section>
 
       <AreaFAQSection faqs={AREA_FAQS['windsor']} city="Windsor" />
+
+      {/* Final CTA */}
+      <section className="py-16 px-6 bg-black text-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold font-serif mb-4">Ready to buy or sell in Windsor?</h2>
+          <p className="text-gray-300 mb-8">
+            Adam and Mandi Schwartz help buyers and sellers across Windsor and all of Northern Colorado.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link to="/contact/" className="inline-block px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+              Contact SAA Homes
+            </Link>
+            <a href="tel:(970) 999-1407" className="inline-block px-8 py-3 border-2 border-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
+              Call (970) 999-1407
+            </a>
+          </div>
+        </div>
+      </section>
 
     </>
   );
