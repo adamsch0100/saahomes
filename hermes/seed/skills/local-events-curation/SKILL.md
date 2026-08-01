@@ -32,7 +32,14 @@ Curate flagship community events to support **relocating buyers**, **local E-E-A
    - `social-post-pack` JSON with `content_type: community`
    - Promote: `https://saahomes.com/blog/{LATEST_EVENTS_GUIDE_SLUG}/` or `/northern-colorado-areas/{city}/`
    - Include `post_by` + `operator_schedule`
-   - `send-social-post-pack.py`
+   - **AUTO-POST to Buffer (mandatory — do not just email):**
+     `cd /opt/data/workspace/saahomes-repo && source .env && python3 hermes/scripts/buffer-post.py --file outreach/pending/social-YYYY-MM-DD-events-{slug}.json`
+   - Platforms: Google Business Profile + Facebook + X (NO Instagram — not on Buffer free plan)
+   - GBP caption: no phone, no URL in text (CTA button carries the link via promoting.url), end with "Click the button to learn more."
+   - X caption: ≤280 chars
+   - Handle failures: GBP phone/URL rejection → fix caption + re-post via `--channel --post --link`; X 280-char → truncate + re-post; duplicate → skip (already queued)
+   - Move pack `outreach/pending/` → `outreach/sent/`
+   - Then ALSO email pack to adam@saahomes.com as notification/backup via `send-social-post-pack.py`
 5. Update MEMORY `last_events_check_date`, `next_notable_event`
 6. If nothing notable → log "no event social this month" in Telegram (brief, no email spam)
 
@@ -99,5 +106,5 @@ Social pack emailed: yes
 
 - Official source links only for event URLs — no Eventbrite scrape
 - Fair Housing safe — community tone, no steering
-- Max 1 event-focused social pack per month (avoid noise)
+- Max 1-3 event-focused social packs per month (all flagship events in the 30-day window, including any currently running — post each; avoid noise but don't miss major events)
 - Do not duplicate Wednesday community rotation in same week unless blog also shipped
