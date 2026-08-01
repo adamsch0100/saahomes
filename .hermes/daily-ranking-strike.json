@@ -1,20 +1,28 @@
 {
-  "date": "2026-07-02",
+  "date": "2026-08-01",
   "current_period": {
-    "start": "2026-06-24",
-    "end": "2026-06-30"
+    "start": "2026-07-24",
+    "end": "2026-07-30"
   },
   "previous_period": {
-    "start": "2026-06-17",
-    "end": "2026-06-23"
+    "start": "2026-07-17",
+    "end": "2026-07-23"
   },
-  "current_rows": 225,
-  "previous_rows": 58,
-  "alerts": [],
+  "current_rows": 251,
+  "previous_rows": 175,
+  "alerts": [
+    {
+      "type": "disappeared",
+      "query": "johnstown CO real estate",
+      "previous_position": 13.5,
+      "previous_impressions": 2,
+      "current_impressions": 0
+    }
+  ],
   "p0_regressions": [],
-  "has_issues": false,
-  "total_current_impressions": 715,
-  "total_current_clicks": 2,
-  "total_previous_impressions": 178,
-  "total_previous_clicks": 0
+  "has_issues": true,
+  "total_current_impressions": 765,
+  "total_current_clicks": 0,
+  "total_previous_impressions": 456,
+  "total_previous_clicks": 2
 }
