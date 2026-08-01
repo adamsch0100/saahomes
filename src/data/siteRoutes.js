@@ -199,6 +199,17 @@ const staticPages = [
     ogImage: DEFAULT_OG_IMAGE,
     ogImageAlt: 'SAA Homes client reviews',
   },
+  {
+    path: '/events/',
+    priority: '0.8',
+    changefreq: 'monthly',
+    title: 'Northern Colorado Events Calendar 2026 | Festivals & Things to Do | SAA Homes',
+    description: 'Browse Northern Colorado events by month or city — festivals, farmers markets, rodeos, and community celebrations across Fort Collins, Loveland, Windsor, Greeley, and 19+ Front Range communities.',
+    ogTitle: 'Northern Colorado Events Calendar | SAA Homes',
+    ogDescription: 'Find festivals, farmers markets, and community events across Northern Colorado — filter by month or city.',
+    ogImage: '/images/Northern Colorado.webp',
+    ogImageAlt: 'Northern Colorado events calendar',
+  },
 ].map(withShareMeta);
 
 function blogPriority(slug) {
