@@ -8,6 +8,7 @@ import { blogPosts } from '../src/data/blogPosts.js';
 import { AREA_FAQS } from '../src/data/areaFaqs.js';
 import { BUYER_FAQS, SELLER_FAQS } from '../src/data/buyerSellerFaqs.js';
 import { CHFA_PAGE_CONFIGS, CHFA_PROGRAMS, CHFA_DPA_OPTIONS, CHFA_REQUIREMENTS, CHFA_COUNTY_LIMITS, CHFA_SPECIALTY_PROGRAMS } from '../src/data/chfaData.js';
+import { getAllEvents, getCityDisplayName, getMonthNames, getEventsGuidePath, EVENTS_DATA_LAST_REVIEWED } from '../src/data/localEvents.js';
 
 // FAQ data for pages not covered by existing FAQ data modules
 // Used for GEO — FAQPage schema + visible FAQ body content
@@ -1192,6 +1193,66 @@ function buildRouteMetaTags(route) {
 }
 
 // ---------------------------------------------------------------------------
+// Events calendar page body (crawler-visible events list)
+// ---------------------------------------------------------------------------
+
+function injectEventsBody(html) {
+  const events = getAllEvents();
+  const monthNames = getMonthNames();
+  const reviewedLabel = new Date(EVENTS_DATA_LAST_REVIEWED).toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+
+  // Group events by month so crawlers see a real calendar structure
+  const byMonth = monthNames.map((_, idx) => ({
+    idx,
+    name: monthNames[idx],
+    events: events
+      .filter((e) => e.months.includes(idx))
+      .sort((a, b) => a.cityName.localeCompare(b.cityName)),
+  }));
+
+  let bodyHtml = '';
+  for (const group of byMonth) {
+    if (!group.events.length) continue;
+    const items = group.events
+      .map((e) => {
+        const cityLink = e.isRegional
+          ? `<span class="prerendered-event-city">${escapeHtml(e.cityName)}</span>`
+          : `<a href="${SITE_URL}/northern-colorado-areas/${e.citySlug}/">${escapeHtml(e.cityName)} area guide</a>`;
+        const official = e.officialUrl
+          ? ` <a href="${escapeHtml(e.officialUrl)}" rel="noopener">official site</a>`
+          : '';
+        return (
+          `          <li class="prerendered-event">` +
+          `<strong>${escapeHtml(e.name)}</strong> &mdash; ${escapeHtml(e.cityName)} &middot; ${escapeHtml(e.season)}` +
+          ` &middot; ${escapeHtml(e.typicalMonths || 'Dates vary')}. ${escapeHtml(e.description)} ${cityLink}.${official}</li>`
+        );
+      })
+      .join('\n');
+    bodyHtml +=
+      `      <section class="prerendered-events-month">\n` +
+      `        <h2>${group.name} Events in Northern Colorado</h2>\n` +
+      `        <ul>\n${items}\n        </ul>\n` +
+      `      </section>\n`;
+  }
+
+  const guidePath = getEventsGuidePath();
+  const bodyContent =
+    `\n` +
+    `    <div class="prerendered-events-content">\n` +
+    `      <h1>Northern Colorado Events & Happenings Calendar</h1>\n` +
+    `      <p>Browse festivals, farmers markets, rodeos, and community celebrations across 19 Front Range communities — Fort Collins, Loveland, Windsor, Greeley, Timnath, Wellington, Johnstown, Eaton, Milliken, La Salle, Mead, Longmont, Boulder, Berthoud, Firestone, Frederick, Evans, Severance, and Niwot. Filter the interactive calendar by month or city on this page. Data reviewed ${escapeHtml(reviewedLabel)}.</p>\n` +
+    `      ${bodyHtml}\n` +
+    `      <section class="prerendered-events-cta">\n` +
+    `        <h2>Find a Home Near the Events You Love</h2>\n` +
+    `        <p>Northern Colorado community events are a big part of why buyers choose this area. Explore homes for sale in any of our 19 communities, or get a free home valuation. Contact Schwartz and Associates at <strong>(970) 999-1407</strong>.</p>\n` +
+    `        <p><a href="${SITE_URL}/properties/">Search Northern Colorado Homes</a> &middot; <a href="${SITE_URL}/for-buyers/">Buyers Guide</a> &middot; <a href="${SITE_URL}/for-sellers/">Get My Home Value</a> &middot; <a href="${SITE_URL}${guidePath}">Read the Full Events Guide</a></p>\n` +
+    `      </section>\n` +
+    `    </div>\n  `;
+
+  return html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+}
+
+// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 
@@ -1225,7 +1286,10 @@ for (const route of routes) {
   const blogPost = matchBlogPost(route.path);
   const chfaPage = matchChfaPage(route.path);
   const moneyPage = matchMoneyPage(route.path);
-  if (area) {
+  if (route.path === '/events/' || route.path === '/events') {
+    html = injectEventsBody(html);
+    console.log('  Body: injected events calendar with monthly groupings + CTA');
+  } else if (area) {
     html = injectAreaBody(html, area);
     console.log(
       `  Body: injected ${AREA_FAQS[area.slug]?.length || 0} FAQ items + nearby communities + CTA`
