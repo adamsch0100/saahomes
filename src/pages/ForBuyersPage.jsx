@@ -39,7 +39,7 @@ export default function ForBuyersPage() {
             <a href="/properties/" className="inline-flex items-center justify-center px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
               Search Homes
             </a>
-            <a href="/contact/" className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
+            <a href="/contact/?interest=Buying a home" className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
               Get Free Buyer Consultation
             </a>
           </div>
@@ -242,7 +242,7 @@ export default function ForBuyersPage() {
                 <p className="text-gray-800 mb-6">
                   Questions? Call us at <a href="tel:(970) 999-1407" className="font-bold hover:underline">(970) 999-1407</a>
                 </p>
-                <a href="/contact/" className="inline-block px-8 py-3 bg-gray-900 text-white font-semibold rounded hover:bg-gray-800 transition-colors">
+                <a href="/contact/?interest=Buying a home" className="inline-block px-8 py-3 bg-gray-900 text-white font-semibold rounded hover:bg-gray-800 transition-colors">
                   Get Started
                 </a>
               </div>
@@ -263,7 +263,7 @@ export default function ForBuyersPage() {
             Let's start your home buying journey together. Contact us today for a free consultation.
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
-            <a href="/contact/" className="inline-block px-8 py-3 bg-white text-black font-semibold rounded hover:bg-gray-100 transition-colors">
+            <a href="/contact/?interest=Buying a home" className="inline-block px-8 py-3 bg-white text-black font-semibold rounded hover:bg-gray-100 transition-colors">
               Contact Us
             </a>
             <a href="/properties/" className="inline-block px-8 py-3 border-2 border-white text-white font-semibold rounded hover:bg-white hover:text-black transition-colors">

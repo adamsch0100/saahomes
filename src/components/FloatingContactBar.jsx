@@ -23,7 +23,7 @@ export default function FloatingContactBar() {
       ? '/colorado-champions-home-loan-program/#champions-lead-form'
       : isChfaDpaPage
         ? '/chfa-down-payment-assistance/#chfa-dpa-lead-form'
-        : '/contact/';
+        : '/contact/?interest=Buying a home';
   const helpLabel = isSellerPage
     ? 'Get My Home Value'
     : isChfaPage || isChampionsPage || isChfaDpaPage || isGhopePage ? 'Free Consultation' : 'Get Help Buying';

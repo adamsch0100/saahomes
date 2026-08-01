@@ -1,15 +1,18 @@
 import React, { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import SEO from "../components/SEO";
 import { submitContactForm } from "../utils/api.js";
 import { withLeadMetadata } from "../utils/leadTracking.js";
 import { BUSINESS } from "../utils/seoConstants.js";
 
 export default function ContactPage() {
+  const [searchParams] = useSearchParams();
+  const urlInterest = searchParams.get('interest') || '';
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
-    interest: "",
+    interest: urlInterest,
     message: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,7 +26,7 @@ export default function ContactPage() {
     try {
       await submitContactForm(withLeadMetadata(formData));
       setSubmitStatus({ type: 'success', message: 'Thank you! We will contact you soon.' });
-      setFormData({ name: "", email: "", phone: "", interest: "", message: "" });
+      setFormData({ name: "", email: "", phone: "", interest: urlInterest, message: "" });
     } catch (error) {
       setSubmitStatus({ type: 'error', message: error.message || 'Failed to send message. Please try again.' });
     } finally {
@@ -161,8 +164,7 @@ export default function ContactPage() {
                 <input
                   type="tel"
                   name="phone"
-                  placeholder="Your phone number *"
-                  required
+                  placeholder="Your phone number (optional)"
                   autoComplete="tel"
                   inputMode="tel"
                   value={formData.phone}
