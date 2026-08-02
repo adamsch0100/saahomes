@@ -194,7 +194,7 @@ export const neighborhoods = [
       'Northwest Fort Collins executive homes with mountain views — custom estates, golf course properties, and Horsetooth-area luxury real estate. SAA Homes — your local experts.',
     keywords:
       'Northwest Fort Collins homes, NW Fort Collins luxury real estate, Horsetooth Reservoir homes, Fort Collins executive homes, custom homes Fort Collins, mountain views',
-    youtubeId: 'Tb_5M4Xl4qY',
+    youtubeId: 'BHEhPKXCzNw',
     neighborhoodHighlights: [
       { title: 'Mountain lifestyle', description: 'Minutes from Horsetooth Reservoir, Lory State Park, and miles of hiking and biking trails at your doorstep.' },
       { title: 'Executive homes', description: 'Custom-built homes on 0.5–2 acre lots with premium finishes, many with mountain and city views.' },
