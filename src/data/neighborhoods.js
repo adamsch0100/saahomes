@@ -1600,6 +1600,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.395', longitude: '-105.078' },
     metaDescription: 'Booth Park Loveland - historic homes near downtown with walkable access to parks and arts. SAA Homes.',
     keywords: 'Booth Park Loveland, historic Loveland homes, downtown Loveland real estate, Booth Park neighborhood',
+    youtubeId: 'uTQGHM7P0B8',
     neighborhoodHighlights: [
       { title: 'Historic character', description: 'One of Loveland oldest and most charming neighborhoods with Victorian and Craftsman homes.' },
       { title: 'Booth Park', description: '8-acre park with pool, tennis courts, playground, and walking paths - the heart of the neighborhood.' },
@@ -1634,6 +1635,7 @@ export const neighborhoods = [
     walkScore: 40,
     metaDescription: 'Willow Bend Loveland real estate - established west Loveland subdivision with mature trees near Lake Loveland. SAA Homes.',
     keywords: 'Willow Bend Loveland, west Loveland homes, established Loveland neighborhoods, Lake Loveland area homes, Taft Avenue Loveland, Loveland subdivisions',
+    youtubeId: 'mPBHaTH-NzQ',
     neighborhoodHighlights: [
       { title: 'Established setting', description: 'Mature trees and well-maintained homes in one of west Loveland\'s most established subdivisions.' },
       { title: 'Lake proximity', description: 'Minutes from Lake Loveland with fishing, boating, and the 3-mile Lake Loveland Trail.' },
@@ -1668,6 +1670,7 @@ export const neighborhoods = [
     walkScore: 25,
     metaDescription: 'Namaqua Loveland real estate - riverfront homes and acreage properties in historic north Loveland. SAA Homes.',
     keywords: 'Namaqua Loveland, north Loveland real estate, Big Thompson River homes, Loveland acreage properties, historic Loveland neighborhoods, riverfront Loveland',
+    youtubeId: 'tX38YvY0YpQ',
     neighborhoodHighlights: [
       { title: 'Riverfront setting', description: 'Properties along the Big Thompson River offer scenic views, wildlife, and a peaceful natural setting.' },
       { title: 'Larger lots', description: 'Namaqua offers some of Loveland\'s largest in-town lots - many 0.5+ acres with mature trees.' },
