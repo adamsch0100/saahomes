@@ -4378,6 +4378,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/blog-default-black.jpg',
     readTime: '6 min read',
+    youtubeId: '2PAv4hZ5pbQ',
     relatedLinks: [
       { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & resources' },
       { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Grants up to $25,000 for Colorado buyers' },
