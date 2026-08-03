@@ -1,19 +1,24 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
+import ListingMap from "./ListingMap";
 
 /**
- * ListingSearch — powers the /properties/ page and city-level search.
- * Calls GET /api/listings with filters. Renders a clean empty state until
- * the IRES feed is connected and synced.
- *
- * Map: designed to mount a Mapbox GL map via a thin wrapper so the provider
- * can be swapped (Mapbox free tier → Leaflet/OSM) without touching this file.
+ * ListingSearch — Zillow-style split-view search powering /properties/.
+ * Left: Mapbox cluster map. Right: filterable listing cards. Hover a card →
+ * map flies to it. Click a marker → popup with photo + price.
+ * Renders clean empty states until the IRES feed is connected.
  */
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
   if (import.meta.env.DEV) return "http://localhost:3000";
   return "";
 })();
+
+const CITIES = [
+  "Fort Collins", "Loveland", "Windsor", "Greeley", "Timnath", "Severance",
+  "Wellington", "Johnstown", "Longmont", "Boulder", "Berthoud", "Firestone",
+  "Frederick", "Evans", "Mead", "Milliken", "La Salle", "Eaton", "Niwot",
+];
 
 const PRICE_OPTIONS = [
   { label: "Any price", value: "" },
@@ -25,27 +30,24 @@ const PRICE_OPTIONS = [
 ];
 
 const BED_OPTIONS = [
-  { label: "Any beds", value: "" },
-  { label: "1+", value: "1" },
-  { label: "2+", value: "2" },
-  { label: "3+", value: "3" },
-  { label: "4+", value: "4" },
-  { label: "5+", value: "5" },
+  { label: "Any beds", value: "" }, { label: "1+", value: "1" }, { label: "2+", value: "2" },
+  { label: "3+", value: "3" }, { label: "4+", value: "4" }, { label: "5+", value: "5" },
 ];
+
+const formatPrice = (n) =>
+  n == null ? "—" : `$${Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 
 export default function ListingSearch({ location, height = "700px" }) {
   const [searchParams] = useSearchParams();
   const urlLocation = searchParams.get("location") || location || "";
-  const [filters, setFilters] = useState({
-    city: urlLocation,
-    price: "",
-    beds: "",
-    sort: "newest",
-  });
+  const [filters, setFilters] = useState({ city: urlLocation, price: "", beds: "", sort: "newest" });
   const [results, setResults] = useState([]);
   const [meta, setMeta] = useState({ total: 0, pages: 0, page: 1 });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedId, setSelectedId] = useState(null);
+  const [view, setView] = useState("map"); // map | list (mobile toggle)
+  const resultsRef = useRef(null);
 
   const fetchListings = useCallback(async (override = {}) => {
     const params = new URLSearchParams();
@@ -58,7 +60,7 @@ export default function ListingSearch({ location, height = "700px" }) {
     }
     if (f.beds) params.set("beds", f.beds);
     if (f.sort) params.set("sort", f.sort);
-    params.set("limit", "24");
+    params.set("limit", "50");
 
     setLoading(true);
     setError(null);
@@ -76,143 +78,161 @@ export default function ListingSearch({ location, height = "700px" }) {
     }
   }, [filters]);
 
-  useEffect(() => {
-    fetchListings();
-  }, [fetchListings]);
+  useEffect(() => { fetchListings(); }, [fetchListings]);
 
-  const setFilter = (key, value) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+  const setFilter = (key, value) => setFilters((prev) => ({ ...prev, [key]: value }));
+
+  const selectCard = (id) => {
+    setSelectedId(id);
+    const el = document.getElementById(`listing-card-${id}`);
+    if (el && resultsRef.current) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
   };
 
-  const formatPrice = (n) =>
-    n == null ? "—" : `$${Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+  // ── Empty/loading states ─────────────────────────────────────────────
+  const EmptyState = () => (
+    <div className="flex flex-col items-center justify-center text-center h-full min-h-[400px] px-6">
+      <p className="text-gray-700 font-semibold text-lg">Search is warming up</p>
+      <p className="text-gray-500 mt-2 max-w-md">
+        The MLS feed is being connected. In the meantime, browse our{" "}
+        <a href="/northern-colorado-areas/" className="underline text-black">city guides</a>{" "}
+        or call <a href="tel:+19709991407" className="underline">(970) 999-1407</a>.
+      </p>
+    </div>
+  );
 
-  return (
-    <div className="p-4 sm:p-6">
-      {/* Filter bar */}
-      <div className="flex flex-wrap gap-3 mb-5">
-        <select
-          value={filters.city}
-          onChange={(e) => setFilter("city", e.target.value)}
-          className="px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black bg-white"
-          aria-label="City"
-        >
-          <option value="">All cities</option>
-          {["Fort Collins", "Loveland", "Windsor", "Greeley", "Timnath", "Severance", "Wellington", "Johnstown", "Longmont", "Boulder", "Berthoud", "Firestone", "Frederick", "Evans", "Mead", "Milliken", "La Salle", "Eaton", "Niwot"].map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
-        <select
-          value={filters.price}
-          onChange={(e) => setFilter("price", e.target.value)}
-          className="px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black bg-white"
-          aria-label="Price range"
-        >
-          {PRICE_OPTIONS.map((o) => (
-            <option key={o.value || "any"} value={o.value}>{o.label}</option>
-          ))}
-        </select>
-        <select
-          value={filters.beds}
-          onChange={(e) => setFilter("beds", e.target.value)}
-          className="px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black bg-white"
-          aria-label="Bedrooms"
-        >
-          {BED_OPTIONS.map((o) => (
-            <option key={o.value || "any"} value={o.value}>{o.label}</option>
-          ))}
-        </select>
-        <select
-          value={filters.sort}
-          onChange={(e) => setFilter("sort", e.target.value)}
-          className="px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black bg-white"
-          aria-label="Sort"
-        >
-          <option value="newest">Newest first</option>
-          <option value="price-asc">Price: low to high</option>
-          <option value="price-desc">Price: high to low</option>
-        </select>
-        {meta.total > 0 && (
-          <span className="ml-auto self-center text-sm text-gray-500">
-            {meta.total.toLocaleString()} listing{meta.total === 1 ? "" : "s"}
-          </span>
+  const NoResults = () => (
+    <div className="flex flex-col items-center justify-center text-center h-full min-h-[400px] px-6">
+      <p className="text-gray-700 font-semibold text-lg">
+        No active listings found{filters.city ? ` in ${filters.city}` : ""}
+      </p>
+      <p className="text-gray-500 mt-2 max-w-md">
+        Try widening your filters, or explore our{" "}
+        <a href="/northern-colorado-areas/" className="underline text-black">area guides</a>{" "}
+        — we can help you find the right home. <a href="tel:+19709991407" className="underline">(970) 999-1407</a>
+      </p>
+    </div>
+  );
+
+  // ── Filter bar (shared) ──────────────────────────────────────────────
+  const FilterBar = () => (
+    <div className="flex flex-wrap gap-3 p-4 border-b border-gray-200 bg-white">
+      <select value={filters.city} onChange={(e) => setFilter("city", e.target.value)}
+        className="px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-black" aria-label="City">
+        <option value="">All cities</option>
+        {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
+      </select>
+      <select value={filters.price} onChange={(e) => setFilter("price", e.target.value)}
+        className="px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-black" aria-label="Price">
+        {PRICE_OPTIONS.map((o) => <option key={o.value || "any"} value={o.value}>{o.label}</option>)}
+      </select>
+      <select value={filters.beds} onChange={(e) => setFilter("beds", e.target.value)}
+        className="px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-black" aria-label="Beds">
+        {BED_OPTIONS.map((o) => <option key={o.value || "any"} value={o.value}>{o.label}</option>)}
+      </select>
+      <select value={filters.sort} onChange={(e) => setFilter("sort", e.target.value)}
+        className="px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-black" aria-label="Sort">
+        <option value="newest">Newest first</option>
+        <option value="price-asc">Price: low to high</option>
+        <option value="price-desc">Price: high to low</option>
+      </select>
+      {meta.total > 0 && (
+        <span className="ml-auto self-center text-sm text-gray-500">
+          {meta.total.toLocaleString()} listing{meta.total === 1 ? "" : "s"}
+        </span>
+      )}
+    </div>
+  );
+
+  // ── Result card ──────────────────────────────────────────────────────
+  const Card = ({ listing }) => (
+    <article
+      id={`listing-card-${listing.id}`}
+      onMouseEnter={() => setSelectedId(listing.id)}
+      className={`border rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-lg transition-all flex flex-col scroll-mt-24 ${
+        selectedId === listing.id ? "border-[#CFB36E] ring-2 ring-[#CFB36E]/40" : "border-gray-200"
+      }`}
+    >
+      <a href={`/homes-for-sale/${listing.slug}/`} className="block relative aspect-[4/3] bg-gray-100">
+        {listing.photos?.length > 0 ? (
+          <img src={listing.photos[0]} alt={`${listing.street_number || ""} ${listing.street_name || ""} ${listing.city || ""}`}
+            className="w-full h-full object-cover" loading="lazy" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+            {listing.city || "Northern Colorado"} listing
+          </div>
         )}
+        <span className="absolute bottom-2 left-2 bg-black/80 text-white text-sm font-semibold px-3 py-1 rounded-md">
+          {formatPrice(listing.list_price)}
+        </span>
+        <span className="absolute top-2 right-2 bg-white/90 text-black text-xs font-semibold px-2 py-1 rounded">
+          {listing.status || "Active"}
+        </span>
+      </a>
+      <div className="p-4 flex flex-col gap-1.5 flex-1">
+        <h3 className="font-semibold text-gray-900 leading-snug">
+          <a href={`/homes-for-sale/${listing.slug}/`} className="hover:underline">
+            {listing.street_number || ""} {listing.street_name || "Home"}{listing.unit ? ` #${listing.unit}` : ""}
+          </a>
+        </h3>
+        <p className="text-sm text-gray-500">{listing.city}, {listing.state} {listing.postal_code || ""}</p>
+        <p className="text-sm text-gray-700 mt-1">
+          {listing.beds != null && <span><strong>{listing.beds}</strong> bd </span>}
+          {listing.baths != null && <span><strong>{listing.baths}</strong> ba </span>}
+          {listing.living_area != null && <span><strong>{Number(listing.living_area).toLocaleString()}</strong> sqft</span>}
+        </p>
+        <a href={`/homes-for-sale/${listing.slug}/`}
+          className="mt-auto pt-3 inline-flex items-center justify-center px-4 py-2.5 bg-black text-white text-sm font-semibold rounded-lg hover:bg-gray-800 transition-colors">
+          View Details
+        </a>
+      </div>
+    </article>
+  );
+
+  // ── Desktop split view ───────────────────────────────────────────────
+  return (
+    <div className="flex flex-col" style={{ height }}>
+      <FilterBar />
+
+      {/* Mobile view toggle */}
+      <div className="flex lg:hidden border-b border-gray-200 bg-gray-50">
+        <button onClick={() => setView("map")}
+          className={`flex-1 py-2.5 text-sm font-semibold ${view === "map" ? "bg-black text-white" : "text-gray-600"}`}>
+          Map
+        </button>
+        <button onClick={() => setView("list")}
+          className={`flex-1 py-2.5 text-sm font-semibold ${view === "list" ? "bg-black text-white" : "text-gray-600"}`}>
+          List ({meta.total.toLocaleString()})
+        </button>
       </div>
 
-      {/* Results / empty state */}
-      {loading ? (
-        <div className="flex items-center justify-center" style={{ minHeight: height }}>
-          <div className="text-gray-500">Loading listings…</div>
-        </div>
-      ) : error ? (
-        <div className="flex flex-col items-center justify-center text-center" style={{ minHeight: height }}>
-          <p className="text-gray-700 font-semibold text-lg">Search is warming up</p>
-          <p className="text-gray-500 mt-2 max-w-md">
-            The MLS feed is being connected. In the meantime, browse our{" "}
-            <a href="/northern-colorado-areas/" className="underline text-black">city guides</a>{" "}
-            or call us at <a href="tel:+19709991407" className="underline">(970) 999-1407</a>.
-          </p>
-        </div>
-      ) : results.length === 0 ? (
-        <div className="flex flex-col items-center justify-center text-center" style={{ minHeight: height }}>
-          <p className="text-gray-700 font-semibold text-lg">No active listings found{urlLocation ? ` in ${urlLocation}` : ""}</p>
-          <p className="text-gray-500 mt-2 max-w-md">
-            Try widening your filters, or explore our{" "}
-            <a href="/northern-colorado-areas/" className="underline text-black">area guides</a>{" "}
-            and reach out — we can find the right home for you.{" "}
-            <a href="tel:+19709991407" className="underline">(970) 999-1407</a>
-          </p>
-        </div>
-      ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4" style={{ minHeight: height }}>
-          {results.map((listing) => (
-            <article
-              key={listing.id}
-              className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow flex flex-col"
-            >
-              <a href={`/homes-for-sale/${listing.slug}/`} className="block relative aspect-[4/3] bg-gray-100">
-                {listing.photos && listing.photos.length > 0 ? (
-                  <img
-                    src={listing.photos[0]}
-                    alt={`${listing.street_number || ""} ${listing.street_name || ""} ${listing.city || ""}`}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
-                    {listing.city || "Northern Colorado"} listing
-                  </div>
-                )}
-                <span className="absolute bottom-2 left-2 bg-black/80 text-white text-sm font-semibold px-3 py-1 rounded-md">
-                  {formatPrice(listing.list_price)}
-                </span>
-              </a>
-              <div className="p-4 flex flex-col gap-1.5 flex-1">
-                <h3 className="font-semibold text-gray-900 leading-snug">
-                  <a href={`/homes-for-sale/${listing.slug}/`} className="hover:underline">
-                    {listing.street_number || ""} {listing.street_name || "Home"}
-                    {listing.unit ? ` #${listing.unit}` : ""}
-                  </a>
-                </h3>
-                <p className="text-sm text-gray-500">
-                  {listing.city}, {listing.state} {listing.postal_code || ""}
-                </p>
-                <p className="text-sm text-gray-700 mt-1">
-                  {listing.beds != null && <span><strong>{listing.beds}</strong> bd </span>}
-                  {listing.baths != null && <span><strong>{listing.baths}</strong> ba </span>}
-                  {listing.living_area != null && (
-                    <span><strong>{Number(listing.living_area).toLocaleString()}</strong> sqft</span>
-                  )}
-                </p>
-                <a
-                  href={`/homes-for-sale/${listing.slug}/`}
-                  className="mt-auto pt-3 inline-flex items-center justify-center px-4 py-2.5 bg-black text-white text-sm font-semibold rounded-lg hover:bg-gray-800 transition-colors"
-                >
-                  View Details
-                </a>
-              </div>
-            </article>
-          ))}
+      {/* Loading */}
+      {loading && (
+        <div className="flex items-center justify-center flex-1 text-gray-500">Loading listings…</div>
+      )}
+
+      {/* Error / empty */}
+      {!loading && error && <div className="flex-1"><EmptyState /></div>}
+      {!loading && !error && results.length === 0 && <div className="flex-1"><NoResults /></div>}
+
+      {/* Split view */}
+      {!loading && !error && results.length > 0 && (
+        <div className="flex flex-1 overflow-hidden">
+          {/* Map — hidden on mobile list view */}
+          <div className={`lg:block lg:w-[52%] ${view === "map" ? "block flex-1" : "hidden"}`}>
+            <ListingMap listings={results} selectedId={selectedId} onSelect={selectCard} />
+          </div>
+          {/* Results — scrollable */}
+          <div
+            ref={resultsRef}
+            className={`overflow-y-auto p-4 space-y-4 ${view === "list" ? "flex-1" : "hidden lg:block lg:w-[48%]"}`}
+          >
+            <p className="text-sm text-gray-600 font-medium mb-3">
+              {meta.total.toLocaleString()} homes in Northern Colorado
+            </p>
+            {results.map((listing) => <Card key={listing.id} listing={listing} />)}
+          </div>
         </div>
       )}
     </div>
