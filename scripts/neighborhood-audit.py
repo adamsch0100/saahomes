@@ -189,10 +189,28 @@ def run_accuracy_audit():
         if idx == -1:
             continue
         
-        # Get surrounding text (the object)
+        # Get surrounding text (the object) — walk brace depth from the
+        # opening "{" of this object so nested objects (yearBuiltRange,
+        # coordinates) don't truncate the block early.
         obj_start = content.rfind("{", idx - 200, idx)
-        obj_end = content.find("},", idx)
-        obj_text = content[obj_start:obj_end + 2] if obj_start >= 0 and obj_end >= 0 else ""
+        obj_text = ""
+        if obj_start >= 0:
+            depth = 0
+            i = obj_start
+            while i < len(content):
+                ch = content[i]
+                if ch == "{":
+                    depth += 1
+                elif ch == "}":
+                    depth -= 1
+                    if depth == 0:
+                        # include the closing brace and any trailing comma
+                        j = i + 1
+                        if j < len(content) and content[j] == ",":
+                            j += 1
+                        obj_text = content[obj_start:j]
+                        break
+                i += 1
         
         for field in required:
             if field not in obj_text:

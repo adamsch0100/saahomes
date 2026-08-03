@@ -2472,37 +2472,6 @@ export const neighborhoods = [
   },
 
   {
-    slug: 'rain-dance-windsor',
-    citySlug: 'windsor',
-    cityDisplay: 'Windsor',
-    county: 'Weld County',
-    type: 'subdivision',
-    name: 'RainDance',
-    description: 'RainDance is a master-planned community in northeast Windsor featuring unique modern architecture, an 18-hole championship golf course, and the RainDance National Resort. One of Northern Colorado most ambitious new communities.',
-    homeStyles: ['Contemporary', 'Modern Farmhouse', 'Mountain Contemporary', 'Ranch', 'Patio Home'],
-    yearBuiltRange: { min: 2018, max: 2025 },
-    priceRangeDescription: '$450K to $1.5M+',
-    schoolDistrict: 'Windsor School District RE-4',
-    schools: [
-      { name: 'Range View Elementary', type: 'elementary', level: 'K-5', rating: '8' },
-      { name: 'Windsor Middle School', type: 'middle', level: '6-8', rating: '7' },
-      { name: 'Windsor High School', type: 'high', level: '9-12', rating: '8' },
-    ],
-    hoaDescription: 'Mandatory HOA ($100-$300/month) covers common areas, landscaping, and amenities',
-    features: ['RainDance National Golf Course - 18-hole championship', 'Modern Colorado-style architecture', 'Resort-style amenities and pool', 'RainDance National Resort and event venue', 'Hiking and biking trail system', 'Master-planned with retail and dining planned'],
-    parks: ['RainDance Golf Course', 'Eastman Park', 'Windsor Lake'],
-    boundaries: 'Weld CR 13 to CR 17, Crossroads Blvd to Main St',
-    coordinates: { latitude: '40.485', longitude: '-104.89' },
-    metaDescription: 'RainDance Windsor - master-planned community with championship golf and resort amenities. SAA Homes.',
-    keywords: 'RainDance Windsor, RainDance National, Windsor golf course homes, RainDance master-planned community, modern homes Windsor CO',
-    neighborhoodHighlights: [
-      { title: 'RainDance National', description: 'Championship 18-hole golf course, resort event venue, and a distinctive Colorado-modern architectural style.' },
-      { title: 'Master-planned', description: 'One of Northern Colorado most ambitious new communities with resort pool, trails, and planned retail.' },
-      { title: 'Modern design', description: 'Contemporary Colorado architecture with clean lines, metal roofs, and natural materials.' },
-    ],
-  },
-
-  {
     slug: 'saddleback-windsor',
     citySlug: 'windsor',
     cityDisplay: 'Windsor',
@@ -2530,37 +2499,6 @@ export const neighborhoods = [
       { title: 'Established setting', description: 'Mature trees and established homes create a welcoming family neighborhood in central Windsor.' },
       { title: 'Walk to schools', description: 'Walking distance to Windsor Middle School and Windsor High School - a true family location.' },
       { title: 'Central Windsor', description: 'Minutes from downtown Windsor, Windsor Lake, and Boardwalk Park.' },
-    ],
-  },
-
-  {
-    slug: 'granby-ranch-windsor',
-    citySlug: 'windsor',
-    cityDisplay: 'Windsor',
-    county: 'Weld County',
-    type: 'subdivision',
-    name: 'Granby Ranch at Windsor',
-    description: 'Granby Ranch is a newer Windsor subdivision offering semi-custom and production homes on larger lots. Located in west Windsor near Fort Collins with mountain views and easy access to both communities.',
-    homeStyles: ['Contemporary', 'Ranch', 'Two-Story', 'Farmhouse', 'Patio Home'],
-    yearBuiltRange: { min: 2018, max: 2025 },
-    priceRangeDescription: '$425K to $700K',
-    schoolDistrict: 'Windsor School District RE-4',
-    schools: [
-      { name: 'Tozer Elementary', type: 'elementary', level: 'K-5', rating: '7' },
-      { name: 'Windsor Middle School', type: 'middle', level: '6-8', rating: '7' },
-      { name: 'Windsor High School', type: 'high', level: '9-12', rating: '8' },
-    ],
-    hoaDescription: 'Mandatory HOA ($100-$200/month) covers common areas and landscaping',
-    features: ['Newer construction homes', 'Larger lot options available', 'Mountain views from west Windsor', 'Close to Fort Collins (10 minutes)', 'Community parks and open space', 'Growing retail corridor nearby'],
-    parks: ['Granby Ranch Park', 'Windsor Community Park', 'Boardwalk Park'],
-    boundaries: 'Weld CR 13 to CR 15, Crossroads Blvd to Main St',
-    coordinates: { latitude: '40.49', longitude: '-104.93' },
-    metaDescription: 'Granby Ranch Windsor - newer homes on larger lots in west Windsor near Fort Collins. SAA Homes.',
-    keywords: 'Granby Ranch Windsor, west Windsor homes, larger lot homes Windsor, Windsor near Fort Collins',
-    neighborhoodHighlights: [
-      { title: 'West Windsor', description: 'Located on Windsor west side - just 10 minutes to Fort Collins and I-25.' },
-      { title: 'Larger lots', description: 'Generous lot sizes with space for outdoor living, gardens, and room to breathe.' },
-      { title: 'Newer construction', description: 'Modern homes with contemporary finishes and energy-efficient features.' },
     ],
   },
 
@@ -3268,6 +3206,52 @@ export const neighborhoods = [
       { title: 'Established community', description: 'Mature trees, established landscaping, and quality-built homes in one of west Greeley\'s most established subdivisions.' },
       { title: 'UNC proximity', description: 'Minutes from the University of Northern Colorado - popular with faculty, staff, and families.' },
       { title: 'Neighborhood park', description: 'Cranford Park with playgrounds provides a central gathering space for the community.' },
+    ],
+  },
+
+  // ── Shawsheen ──
+  {
+    slug: 'shawsheen-greeley',
+    citySlug: 'greeley',
+    cityDisplay: 'Greeley',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Shawsheen',
+    alsoKnownAs: ['Shawsheen Neighborhood', 'Shawsheen Area'],
+    description:
+      'Shawsheen is an established east Greeley neighborhood named for Shawsheen Elementary, one of the city\'s longtime neighborhood schools. Mid-century ranches and split-levels on quiet, tree-lined streets sit close to the 16th Street corridor, the Poudre River Trail, and downtown Greeley.',
+    longDescription:
+      'Shawsheen is a residential area of east-central Greeley anchored by Shawsheen Elementary, one of the Greeley-Evans School District\'s longest-serving neighborhood schools. The area developed in the mid-20th century with ranch homes, split-levels, and bi-levels on generous lots, and it remains a quiet, family-oriented part of the city. The 16th Street corridor provides quick access to downtown Greeley, the University of Northern Colorado, and the Poudre River Trail system to the east. Heath Middle School and Greeley Central High School serve the area, and residents are minutes from the Greeley Recreation Center, Glenmere Park, and the shops and services along 16th and 23rd Avenues. With affordable prices and a central east-side location, Shawsheen is a popular choice for first-time buyers and families.',
+    homeStyles: ['Ranch', 'Split-Level', 'Mid-Century Modern', 'Contemporary', 'Bi-Level'],
+    yearBuiltRange: { min: 1950, max: 2025 },
+    priceRangeDescription: '$300K to $500K',
+    schoolDistrict: 'Greeley-Evans School District 6',
+    schools: [
+      { name: 'Shawsheen Elementary', type: 'elementary', level: 'K-5', rating: 6 },
+      { name: 'Heath Middle School', type: 'middle', level: '6-8', rating: 7 },
+      { name: 'Greeley Central High School', type: 'high', level: '9-12', rating: 7 },
+    ],
+    hoaDescription: 'No HOA in most of the Shawsheen area',
+    features: [
+      'Shawsheen Elementary at the neighborhood\'s heart',
+      'Mid-century ranches and split-levels on established streets',
+      'Poudre River Trail access to the east',
+      'Minutes to downtown Greeley and UNC',
+      '16th Street corridor shopping and services',
+      'Greeley Recreation Center nearby',
+    ],
+    parks: ['Poudre River Trail', 'Glenmere Park'],
+    boundaries: 'Roughly along the 16th Street corridor east of downtown, centered on Shawsheen Elementary',
+    coordinates: { latitude: '40.416', longitude: '-104.705' },
+    walkScore: 45,
+    metaDescription:
+      'Shawsheen Greeley real estate — established east Greeley neighborhood around Shawsheen Elementary with mid-century homes near the Poudre River Trail. SAA Homes.',
+    keywords:
+      'Shawsheen Greeley, Shawsheen Elementary Greeley, east Greeley neighborhoods, Greeley mid-century homes, Greeley homes for sale, Greeley school neighborhoods',
+    neighborhoodHighlights: [
+      { title: 'Neighborhood school', description: 'Shawsheen Elementary anchors the area — one of Greeley\'s longtime neighborhood schools.' },
+      { title: 'Mid-century homes', description: 'Ranch, split-level, and bi-level homes from the 1950s-70s on established, tree-lined streets.' },
+      { title: 'East Greeley convenience', description: 'Close to the Poudre River Trail, downtown Greeley, and the 16th Street corridor.' },
     ],
   },
 
@@ -4968,6 +4952,99 @@ export const neighborhoods = [
       { title: 'Affordable entry', description: 'The Lagoon area offers some of the most affordable home prices in Boulder County - ideal for first-time buyers.' },
       { title: 'Union Reservoir', description: 'Minutes from Union Reservoir with boating, fishing, swimming, and a sandy beach.' },
       { title: 'Waterfront setting', description: 'Canal-side properties with water views and a tranquil atmosphere in an east Longmont setting.' },
+    ],
+  },
+
+
+  // ── McIntosh Lake ──
+  {
+    slug: 'mcintosh-lake-longmont',
+    citySlug: 'longmont',
+    cityDisplay: 'Longmont',
+    county: 'Boulder County',
+    type: 'neighborhood',
+    name: 'McIntosh Lake',
+    alsoKnownAs: ['McIntosh Lake Area', 'McIntosh Lake Neighborhood'],
+    description:
+      'The McIntosh Lake neighborhood wraps around an 88-acre reservoir in northwest Longmont, offering water views, a popular walking trail around the lake, and a mix of mid-century and newer homes. One of Longmont\'s most scenic residential settings, minutes from Westview Middle School and the St. Vrain Greenway.',
+    longDescription:
+      'McIntosh Lake is a reservoir and surrounding residential area in northwest Longmont, west of Airport Road. The paved trail circling the lake is a favorite for joggers, dog walkers, and birders, with open views of Longs Peak and the Front Range from the west shore. Housing ranges from established mid-century ranches to newer single-family homes on the lake\'s east and south shores, with a handful of true waterfront properties. Longmont Estates Elementary and Westview Middle School are within a few minutes\' drive, and the St. Vrain Greenway, Sandstone Ranch open space, and downtown Longmont are all a short trip away. The neighborhood pairs a lakefront, semi-rural feel with the convenience of an established city school district.',
+    homeStyles: ['Ranch', 'Mid-Century Modern', 'Contemporary', 'Split-Level', 'Cape Cod'],
+    yearBuiltRange: { min: 1960, max: 2025 },
+    priceRangeDescription: '$450K to $900K (waterfront higher)',
+    schoolDistrict: 'St. Vrain Valley School District',
+    schools: [
+      { name: 'Longmont Estates Elementary', type: 'elementary', level: 'K-5', rating: 8 },
+      { name: 'Westview Middle School', type: 'middle', level: '6-8', rating: 7 },
+      { name: 'Longmont High School', type: 'high', level: '9-12', rating: 8 },
+    ],
+    hoaDescription: 'No HOA in most of the McIntosh Lake area',
+    features: [
+      'Paved walking trail around an 88-acre lake',
+      'Fishing, birding, and water views from home',
+      'Longmont Estates Elementary and Westview Middle nearby',
+      'Longs Peak and Front Range views from the west shore',
+      'St. Vrain Greenway and Sandstone Ranch close by',
+      'Mix of mid-century ranches and newer homes',
+    ],
+    parks: ['McIntosh Lake', 'Sandstone Ranch', 'St. Vrain Greenway'],
+    boundaries: 'West of Airport Road, surrounding McIntosh Lake in northwest Longmont',
+    coordinates: { latitude: '40.1943', longitude: '-105.1526' },
+    walkScore: 30,
+    metaDescription:
+      'McIntosh Lake Longmont real estate — lakefront and lake-view homes in northwest Longmont with a walking trail, fishing, and mountain views. SAA Homes.',
+    keywords:
+      'McIntosh Lake Longmont, McIntosh Lake homes, Longmont lake real estate, northwest Longmont neighborhoods, Longmont waterfront homes, lake view homes Longmont',
+    neighborhoodHighlights: [
+      { title: 'Lake living', description: 'An 88-acre lake with a paved walking trail, fishing, and birding right outside your door.' },
+      { title: 'Mountain views', description: 'Longs Peak and the Front Range rise to the west — visible from much of the neighborhood.' },
+      { title: 'Nearby schools', description: 'Longmont Estates Elementary and Westview Middle School are minutes away.' },
+    ],
+  },
+
+  // ── Old North Longmont ──
+  {
+    slug: 'old-north-longmont',
+    citySlug: 'longmont',
+    cityDisplay: 'Longmont',
+    county: 'Boulder County',
+    type: 'neighborhood',
+    name: 'Old North Longmont',
+    alsoKnownAs: ['Old North Longmont Historic District'],
+    description:
+      'Old North Longmont is the historic residential district just north of downtown, with brick Victorians, Queen Annes, and Craftsman bungalows from Longmont\'s founding era. Tree-lined streets, an active neighborhood association, and walkable access to Main Street make it one of Longmont\'s most character-rich addresses.',
+    longDescription:
+      'Old North Longmont occupies the blocks immediately north of downtown, roughly between 9th and 13th Avenues from Main Street east toward Emery Street. The area was developed in the late 1800s and early 1900s as Longmont grew beyond its founding grid, and it is known for its brick and frame Victorians, Queen Anne homes, and Craftsman bungalows, many lovingly restored. Tree-lined streets and original alleys retain the district\'s turn-of-the-century character, and an active neighborhood association works to preserve it and host community events. Residents walk south to Main Street\'s restaurants, breweries, and shops, and the St. Vrain Greenway provides trail access across the city. Longmont High School, Westview Middle, and Central Elementary serve the area, and downtown Boulder is about 20 minutes away via Highway 119.',
+    homeStyles: ['Victorian', 'Queen Anne', 'Craftsman Bungalow', 'Brick Four Square', 'Modern Infill'],
+    yearBuiltRange: { min: 1880, max: 2025 },
+    priceRangeDescription: '$450K to $950K',
+    schoolDistrict: 'St. Vrain Valley School District',
+    schools: [
+      { name: 'Central Elementary', type: 'elementary', level: 'K-5', rating: 8 },
+      { name: 'Westview Middle School', type: 'middle', level: '6-8', rating: 7 },
+      { name: 'Longmont High School', type: 'high', level: '9-12', rating: 8 },
+    ],
+    hoaDescription: 'No HOA — historic district guidelines apply to eligible properties',
+    features: [
+      'Brick Victorians and Queen Annes from Longmont\'s founding era',
+      'Walk to Main Street dining, breweries, and shops',
+      'St. Vrain Greenway trail access',
+      'Active neighborhood association and preservation efforts',
+      'Longmont High School attendance area',
+      '20 minutes to Boulder via Highway 119',
+    ],
+    parks: ['Roosevelt Park', 'St. Vrain Greenway', 'Kanemoto Park'],
+    boundaries: 'Roughly between 9th Avenue and 13th Avenue, Main Street to Emery Street',
+    coordinates: { latitude: '40.1740', longitude: '-105.0980' },
+    walkScore: 68,
+    metaDescription:
+      'Old North Longmont real estate — historic Victorians and Craftsman bungalows north of downtown, walkable to Main Street dining and shops. SAA Homes.',
+    keywords:
+      'Old North Longmont, Old North Longmont Historic District, historic Longmont homes, Longmont Victorian homes, downtown Longmont neighborhoods, Longmont Craftsman bungalows',
+    neighborhoodHighlights: [
+      { title: 'Historic character', description: 'Brick Victorians, Queen Annes, and Craftsman bungalows from Longmont\'s founding era, many restored.' },
+      { title: 'Walk to Main Street', description: 'Downtown Longmont\'s restaurants, breweries, and shops are a short stroll south.' },
+      { title: 'Community spirit', description: 'An active neighborhood association keeps the district\'s character and hosts community events.' },
     ],
   },
 
