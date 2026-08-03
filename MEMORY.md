@@ -386,3 +386,20 @@ Week of 2026-07-27:
 | https://saahomes.com/northern-colorado-areas/mead/mead-crossing/ | 8 | 0 | mead crossing homes, mead crossing |
 
 *Report generated: 2026-08-03T18:26:00.013084*
+
+---
+
+## Resolved flags (verified 2026-08-03 — DO NOT re-flag)
+
+- ✅ **Schema duplication: FIXED** — live FC page verified 5 JSON-LD blocks / 5 unique types (RealEstateAgent, WebSite, WebPage, BreadcrumbList, FAQPage). Jul 13 fix holds. Only flag if a NEW duplicate appears.
+- ✅ **CHFA sections: PRESENT on all cities** — Loveland 15 refs, Windsor 16, Timnath 14 (verified live Aug 3). The Aug 1 scorecard "missing CHFA" flags were stale.
+- ✅ **Timnath FAQ crash: FIXED** on main (imports present). Verified live.
+- ✅ **Orphaned bridle-ridge link: GONE** — no reference in src/ (verified Aug 3).
+- ✅ **Tagline divergence: FIXED** — areaSeo.js synced with live hero taglines for Loveland/Windsor/Greeley (Aug 3).
+- ✅ **GSC totals now accurate** — page-dimension query (query+page redacts ~80%). Real numbers: 28-day 6,344 imp / 46 clicks; 90-day 10,264 / 70.
+- ✅ **GA4 lead query fixed** — queries both generate_lead + saa_lead_submit.
+
+## Competitor intel (2026-08-03)
+
+- **Kittle Real Estate** = volume threat: 10,246 URLs (~8,900 IDX listing shells + 190 blog posts), ~2 posts/day, farming "best realtor {city}" for Timnath/Johnstown/Berthoud. We lack those pages — content gap to counter. Full profile in competitor-content-watch skill references.
+- **All Avenue** = content cadence threat (3-4 posts/mo), publishing Jul 30 Timnath + Jul 28 closing day + Jul 23 school relocation.
