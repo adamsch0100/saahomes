@@ -45,7 +45,12 @@ def get_gsc_service():
     return build('searchconsole', 'v1', credentials=creds)
 
 def fetch_gsc_data(service, start_date, end_date, row_limit=500):
-    """Fetch GSC performance data for sc-domain:saahomes.com."""
+    """Fetch GSC performance data for sc-domain:saahomes.com.
+
+    Kept at query+page for regression ALERT logic (relative drops between
+    periods are still valid under consistent redaction). Headline totals
+    come from fetch_page_totals() — page-only, which is accurate.
+    """
     site_url = 'sc-domain:saahomes.com'
     request = {
         'startDate': start_date,
@@ -67,6 +72,27 @@ def fetch_gsc_query_aggregate(service, start_date, end_date, row_limit=500):
     }
     response = service.searchanalytics().query(siteUrl=site_url, body=request).execute()
     return response.get('rows', [])
+
+def fetch_page_totals(service, start_date, end_date):
+    """Fetch accurate aggregate totals using PAGE dimension only.
+
+    query+page redacts ~80% of GSC data (often showing 0 clicks). Page
+    dimension returns the true impression/click totals.
+    """
+    site_url = 'sc-domain:saahomes.com'
+    request = {
+        'startDate': start_date,
+        'endDate': end_date,
+        'dimensions': ['page'],
+        'rowLimit': 25000,
+    }
+    response = service.searchanalytics().query(siteUrl=site_url, body=request).execute()
+    rows = response.get('rows', [])
+    return {
+        'impressions': sum(r['impressions'] for r in rows),
+        'clicks': sum(r['clicks'] for r in rows),
+        'pages': len(rows),
+    }
 
 def fetch_current_vs_previous(service, days=7):
     """Fetch current period and previous period data."""
@@ -241,7 +267,8 @@ def log_to_memory(alerts, disappeared_pages):
     return entry
 
 def print_summary(current_rows, previous_rows, alerts, disappeared_pages, 
-                  current_start, current_end, previous_start, previous_end):
+                  current_start, current_end, previous_start, previous_end,
+                  current_totals=None, previous_totals=None):
     """Print a human-readable summary."""
     print("=" * 70)
     print(f"  DAILY RANKING STRIKE — saahomes.com")
@@ -257,14 +284,23 @@ def print_summary(current_rows, previous_rows, alerts, disappeared_pages,
     print(f"Rows in previous period: {len(previous_rows)}")
     print()
     
-    # Compute aggregates
-    total_cur_imp = sum(r['impressions'] for r in current_rows)
-    total_cur_clicks = sum(r['clicks'] for r in current_rows)
-    total_prev_imp = sum(r['impressions'] for r in previous_rows)
-    total_prev_clicks = sum(r['clicks'] for r in previous_rows)
+    # Accurate aggregates from page-dimension query (query+page redacts ~80%).
+    if current_totals:
+        total_cur_imp = current_totals['impressions']
+        total_cur_clicks = current_totals['clicks']
+    else:
+        total_cur_imp = sum(r['impressions'] for r in current_rows)
+        total_cur_clicks = sum(r['clicks'] for r in current_rows)
+    if previous_totals:
+        total_prev_imp = previous_totals['impressions']
+        total_prev_clicks = previous_totals['clicks']
+    else:
+        total_prev_imp = sum(r['impressions'] for r in previous_rows)
+        total_prev_clicks = sum(r['clicks'] for r in previous_rows)
     
     print(f"Impressions:     {total_cur_imp:>6} (prev: {total_prev_imp})")
     print(f"Clicks:          {total_cur_clicks:>6} (prev: {total_prev_clicks})")
+    print(f"(page-dimension totals — accurate; query+page redacts ~80% of data)")
     print()
     
     if not alerts and not disappeared_pages:
@@ -330,6 +366,10 @@ def main():
     # Fetch 7-day windows (week over week comparison)
     current_rows, previous_rows, current_start, current_end, previous_start, previous_end = \
         fetch_current_vs_previous(service, days=7)
+
+    # Accurate totals via page dimension (query+page redacts ~80% of GSC data)
+    current_totals = fetch_page_totals(service, str(current_start), str(current_end))
+    previous_totals = fetch_page_totals(service, str(previous_start), str(previous_end))
     
     # Check Tier S queries
     alerts = check_tier_s_queries(current_rows, previous_rows, TIER_S_CITIES, QUERY_TEMPLATES)
@@ -339,7 +379,8 @@ def main():
     
     # Print summary
     print_summary(current_rows, previous_rows, alerts, disappeared_pages,
-                  current_start, current_end, previous_start, previous_end)
+                  current_start, current_end, previous_start, previous_end,
+                  current_totals, previous_totals)
     
     # Log to MEMORY.md
     log_entry = log_to_memory(alerts, disappeared_pages)
@@ -357,10 +398,11 @@ def main():
         'alerts': alerts,
         'p0_regressions': disappeared_pages,
         'has_issues': has_issues,
-        'total_current_impressions': sum(r['impressions'] for r in current_rows),
-        'total_current_clicks': sum(r['clicks'] for r in current_rows),
-        'total_previous_impressions': sum(r['impressions'] for r in previous_rows),
-        'total_previous_clicks': sum(r['clicks'] for r in previous_rows),
+        'total_current_impressions': current_totals['impressions'],
+        'total_current_clicks': current_totals['clicks'],
+        'total_previous_impressions': previous_totals['impressions'],
+        'total_previous_clicks': previous_totals['clicks'],
+        'totals_source': 'page-dimension (accurate) — query+page redacts ~80% of GSC data',
     }
     
     print("\n--- JSON REPORT ---")

@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
 import ChfaLeadForm from "../components/ChfaLeadForm";
+import QualifyCta from "../components/QualifyCta";
 import ChfaResourceHub from "../components/ChfaResourceHub";
 
 const eligibilityItems = [
@@ -267,6 +268,14 @@ export default function ChfaSchoolsToHomePage() {
           </div>
         </div>
       </section>
+
+      {/* Qualify CTA — conversational lead capture */}
+      <QualifyCta
+        program="the CHFA Schools To Home program"
+        chatQuestion="Hi! I'm a Colorado public school employee and I'd like to know if I qualify for the Schools To Home program. Can you walk me through it?"
+        formAnchor="#chfa-lead-form"
+        formLabel="Skip to the consultation form"
+      />
 
       {/* Intro + Lead Form */}
       <section className="py-16 px-6">

@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
 import ChampionsLeadForm from "../components/ChampionsLeadForm";
+import QualifyCta from "../components/QualifyCta";
 import ChfaResourceHub from "../components/ChfaResourceHub";
 
 const GOLD = "#CFB36E";
@@ -274,6 +275,14 @@ export default function ChampionsHomeLoanPage() {
           </div>
         </div>
       </section>
+
+      {/* Qualify CTA — conversational lead capture */}
+      <QualifyCta
+        program="the Colorado Champions Home Loan program"
+        chatQuestion="Hi! I'm a first responder (police/fire/EMS) and I'd like to know if I'll qualify for the Colorado Champions Home Loan program. Can you walk me through it?"
+        formAnchor="#champions-lead-form"
+        formLabel="Get program updates instead"
+      />
 
       {/* Stats bar */}
       <section className="bg-black text-white py-8 px-6 border-b border-gray-800">

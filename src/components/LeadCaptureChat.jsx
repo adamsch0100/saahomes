@@ -43,7 +43,26 @@ export default function LeadCaptureChat() {
       clearTimeout(nudgeTimer.current);
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [hasInteracted, location.pathname]);
+  }, [hasInteracted]);
+
+  // Open chat programmatically from any CTA via window event.
+  // detail: { message: "pre-seeded visitor question" } — optional.
+  // Uses a ref so the listener always calls the latest sendMessage closure.
+  const sendMessageRef = useRef(null);
+  sendMessageRef.current = sendMessage;
+  useEffect(() => {
+    const openChat = (e) => {
+      const seed = e?.detail?.message;
+      setIsOpen(true);
+      setShowNudge(false);
+      setHasInteracted(true);
+      if (seed && seed.trim()) {
+        sendMessageRef.current?.(seed.trim());
+      }
+    };
+    window.addEventListener("open-nadia-chat", openChat);
+    return () => window.removeEventListener("open-nadia-chat", openChat);
+  }, []);
 
   // Auto-scroll messages
   useEffect(() => {
