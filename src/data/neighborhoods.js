@@ -1705,6 +1705,7 @@ export const neighborhoods = [
     walkScore: 20,
     metaDescription: 'Buckskin Heights Loveland real estate - foothills homes with mountain views near Devils Backbone Open Space. SAA Homes.',
     keywords: 'Buckskin Heights Loveland, west Loveland foothills homes, Devils Backbone real estate, mountain view homes Loveland, Loveland foothills neighborhoods, custom homes Loveland',
+    youtubeId: 'jHqmYObJOLg',
     neighborhoodHighlights: [
       { title: 'Foothills living', description: 'Custom homes in a stunning foothills setting with direct access to Devils Backbone hiking trails.' },
       { title: 'Mountain views', description: 'Panoramic views of the Rocky Mountains, Devils Backbone, and the Front Range from elevated lots.' },
@@ -1739,6 +1740,7 @@ export const neighborhoods = [
     walkScore: 20,
     metaDescription: 'Big Thompson Acres Loveland real estate - large lot homes with semi-rural feel near I-25 in east Loveland. SAA Homes.',
     keywords: 'Big Thompson Acres Loveland, east Loveland acreage, large lot homes Loveland, I-25 Loveland real estate, semi-rural Loveland, Loveland no HOA properties',
+    youtubeId: 'suBocgbxVFQ',
     neighborhoodHighlights: [
       { title: 'Space and privacy', description: 'Generous 0.5 to 2 acre lots offer space, privacy, and room for gardens, shops, or animals.' },
       { title: 'No HOA freedom', description: 'Most properties in Big Thompson Acres have no HOA restrictions - ideal for those seeking flexibility.' },
@@ -1773,6 +1775,7 @@ export const neighborhoods = [
     walkScore: 28,
     metaDescription: 'Fox Run Loveland real estate - newer construction homes near The Ranch with I-25 access in south Loveland. SAA Homes.',
     keywords: 'Fox Run Loveland, south Loveland new homes, The Ranch Loveland real estate, I-25 Loveland subdivisions, new construction Loveland, Centennial Elementary Loveland',
+    youtubeId: 'NaZcuCla-u8',
     neighborhoodHighlights: [
       { title: 'Newer homes', description: 'Most homes built since 2015 with modern open floor plans and energy-efficient features.' },
       { title: 'The Ranch nearby', description: 'Minutes from The Ranch - Loveland\'s premier entertainment complex with concerts and events year-round.' },
