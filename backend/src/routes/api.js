@@ -7,6 +7,7 @@ import { submitChampionsLeadForm } from '../controllers/championsLeadController.
 import { submitChfaDpaLeadForm } from '../controllers/chfaDpaLeadController.js';
 import { submitGhopeLeadForm } from '../controllers/ghopeLeadController.js';
 import { handleChatMessage } from '../controllers/chatController.js';
+import { searchListings, getListingBySlug } from '../controllers/listingController.js';
 import {
   validateContactSubmission,
   validateMarketReportSubmission,
@@ -83,6 +84,16 @@ const chatLimiter = rateLimit({
 });
 
 router.post('/chat', chatLimiter, handleChatMessage);
+
+// ── IDX listing search (IRES feed) ────────────────────────────────────────
+const listingLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  message: 'Too many requests.',
+});
+
+router.get('/listings', listingLimiter, searchListings);
+router.get('/listings/:slug', listingLimiter, getListingBySlug);
 
 export default router;
 

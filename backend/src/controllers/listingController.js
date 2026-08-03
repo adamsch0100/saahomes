@@ -1,0 +1,103 @@
+import getPool from '../config/database.js';
+
+/**
+ * Listing search + detail API — powers /properties/ search and
+ * /homes-for-sale/{slug}/ detail pages.
+ */
+
+const FILTER_ALIASES = {
+  city: 'city',
+  minPrice: 'list_price',
+  maxPrice: 'list_price',
+  beds: 'beds',
+  baths: 'baths',
+  type: 'property_type',
+  status: 'status',
+};
+
+export const searchListings = async (req, res) => {
+  try {
+    const pool = getPool();
+    const {
+      city, minPrice, maxPrice, beds, baths, type, status = 'Active',
+      q, page = 1, limit = 24, sort = 'newest',
+    } = req.query;
+
+    const where = [];
+    const params = [];
+    let i = 1;
+
+    where.push(`is_active = TRUE`);
+    if (status) { where.push(`status = $${i++}`); params.push(status); }
+    if (city) { where.push(`LOWER(city) = LOWER($${i++})`); params.push(city); }
+    if (minPrice) { where.push(`list_price >= $${i++}`); params.push(Number(minPrice)); }
+    if (maxPrice) { where.push(`list_price <= $${i++}`); params.push(Number(maxPrice)); }
+    if (beds) { where.push(`beds >= $${i++}`); params.push(Number(beds)); }
+    if (baths) { where.push(`baths >= $${i++}`); params.push(Number(baths)); }
+    if (type) { where.push(`property_type = $${i++}`); params.push(type); }
+    if (q) {
+      where.push(`(LOWER(city) LIKE $${i} OR LOWER(street_name) LIKE $${i} OR LOWER(description) LIKE $${i})`);
+      params.push(`%${q.toLowerCase()}%`);
+      i += 1;
+    }
+
+    const whereSql = where.join(' AND ');
+    const offset = (Math.max(1, Number(page)) - 1) * Number(limit);
+
+    const orderSql = sort === 'price-asc' ? 'list_price ASC'
+      : sort === 'price-desc' ? 'list_price DESC'
+      : 'updated_at DESC';
+
+    const countRes = await pool.query(`SELECT COUNT(*) FROM listings WHERE ${whereSql}`, params);
+    const total = parseInt(countRes.rows[0].count, 10);
+
+    const dataRes = await pool.query(
+      `SELECT id, listing_id, status, property_type, street_number, street_name, unit,
+         city, state, postal_code, list_price, beds, baths, living_area, lot_size,
+         year_built, description, photos, latitude, longitude, slug, updated_at
+       FROM listings WHERE ${whereSql} ORDER BY ${orderSql} LIMIT $${i} OFFSET $${i + 1}`,
+      [...params, Number(limit), offset]
+    );
+
+    // City facet counts for filter chips
+    const facetRes = await pool.query(
+      `SELECT city, COUNT(*) AS cnt FROM listings
+       WHERE ${whereSql.replace(/LOWER\(city\) = LOWER\(\$\d+\)/i, 'TRUE')} AND city IS NOT NULL
+       GROUP BY city ORDER BY cnt DESC LIMIT 20`,
+      params
+    );
+
+    res.json({
+      success: true,
+      data: dataRes.rows,
+      facets: facetRes.rows,
+      meta: { total, page: Number(page), limit: Number(limit), pages: Math.ceil(total / Number(limit)) },
+    });
+  } catch (error) {
+    console.error('Listing search failed:', error);
+    res.status(500).json({ success: false, error: 'Search failed' });
+  }
+};
+
+export const getListingBySlug = async (req, res) => {
+  try {
+    const pool = getPool();
+    const { slug } = req.params;
+    const result = await pool.query(
+      `SELECT * FROM listings WHERE slug = $1 OR listing_id = $2`,
+      [slug, slug]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Listing not found' });
+    }
+    const listing = result.rows[0];
+    if (listing.raw) {
+      // Expose normalized shape; raw kept for debug only
+      delete listing.raw;
+    }
+    res.json({ success: true, data: listing });
+  } catch (error) {
+    console.error('Listing fetch failed:', error);
+    res.status(500).json({ success: false, error: 'Fetch failed' });
+  }
+};

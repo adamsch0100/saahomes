@@ -1,7 +1,7 @@
 import React from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import SEO from "../components/SEO";
-import PropertySearchEmbed from "../components/PropertySearchEmbed";
+import ListingSearch from "../components/ListingSearch";
 
 const CITIES = [
   { name: "Fort Collins", slug: "fort-collins", description: "CSU, craft breweries, mountain views", price: "~$612K", label: "Median" },
@@ -126,7 +126,7 @@ export default function PropertiesPage() {
               <span className="ml-3 text-sm text-gray-300 font-mono">IRES MLS — Real-time Listings</span>
             </div>
             <div style={{ minHeight: '700px' }}>
-              <PropertySearchEmbed location={location} height="700px" />
+              <ListingSearch location={location} height="700px" />
             </div>
           </div>
         </div>
