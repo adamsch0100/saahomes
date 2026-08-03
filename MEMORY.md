@@ -15,14 +15,14 @@
 
 ## Content calendar state
 
-last_social_pack_date: 2026-08-01
-last_social_pillar: community
-rotation_week_index: 1
+last_social_pack_date: 2026-08-03
+last_social_pillar: market-intelligence
+rotation_week_index: 2
 last_3_social_hooks: ["Sculpture in the Park returns to Loveland Aug 7–9 — one of the largest outdoor sculpture shows in the country. Great weekend to explore the Sweetheart City."]
-monthly_market_blog_url: https://saahomes.com/blog/northern-colorado-market-update-july-2026/
-blogs_published_this_month: 0
-pending_social_packs: []
-latest_market_update_slug: northern-colorado-market-update-july-2026
+monthly_market_blog_url: https://saahomes.com/blog/northern-colorado-market-update-august-2026/
+blogs_published_this_month: 1 (windsor-colorado-real-estate-agent)
+pending_social_packs: 19 (see operator-week-2026-08-03.json for full list)
+latest_market_update_slug: northern-colorado-market-update-august-2026
 last_events_check_date: 2026-08-01
 next_notable_event: Larimer County Fair (Jul 31-Aug 4) + Sculpture in the Park (Aug 7-9) — both posted to Buffer 2026-08-01
 events_guide_last_refresh: 2026-06-29
@@ -137,3 +137,78 @@ Week of 2026-07-25:
 - **/blog/chfa-down-payment-assistance-colorado-2026/**: "chfa first gen grant amount 2025" (2)
 - **/blog/chfa-schools-to-home-colorado-teachers/**: "closing cost help for teachers colorado" (4)
 *Report generated: 2026-08-01T18:09:09.582765*
+
+## Daily Ranking Strike — 2026-08-03
+
+### Rank Drop Alerts
+
+| Query | Previous Pos | Current Pos | Drop | Impressions |
+|-------|-------------|-------------|------|-------------|
+| johnstown CO real estate | 13.5 | DISAPPEARED | - | 0 |
+
+### ⚠️ P0 — Pages No Longer Indexed
+
+| Page | Previous Impressions | Previous Clicks | Top Queries |
+|------|---------------------|-----------------|-------------|
+| https://saahomes.com/northern-colorado-areas/wellington/wellington-village/ | 21 | 1 | sage meadows wellington, wellington village, wellington village home policy |
+| https://saahomes.com/northern-colorado-areas/loveland/sculpture-park-loveland/ | 12 | 0 | loveland colorado sculpture park, loveland sculpture park, benson sculpture garden |
+| https://saahomes.com/northern-colorado-areas/mead/mead-crossing/ | 8 | 0 | mead crossing homes, mead crossing |
+
+*Report generated: 2026-08-03T13:08:31.283057*
+
+## Daily Ranking Strike — 2026-08-03
+
+### Rank Drop Alerts
+
+| Query | Previous Pos | Current Pos | Drop | Impressions |
+|-------|-------------|-------------|------|-------------|
+| johnstown CO real estate | 13.5 | DISAPPEARED | - | 0 |
+
+### ⚠️ P0 — Pages No Longer Indexed
+
+| Page | Previous Impressions | Previous Clicks | Top Queries |
+|------|---------------------|-----------------|-------------|
+| https://saahomes.com/northern-colorado-areas/wellington/wellington-village/ | 21 | 1 | wellington village home policy, wellington heights, wellington village |
+| https://saahomes.com/northern-colorado-areas/loveland/sculpture-park-loveland/ | 12 | 0 | loveland colorado sculpture park, loveland sculpture garden, loveland co sculpture park |
+| https://saahomes.com/northern-colorado-areas/mead/mead-crossing/ | 8 | 0 | mead crossing homes, mead crossing |
+
+*Report generated: 2026-08-03T13:10:29.946932*
+
+## Lead attribution log
+
+Week of 2026-07-27:
+
+| Landing Page | GSC Impressions | Position | GA4 Leads | Gap? | CRO Action |
+|---|---|---|---|---|---|
+| /chfa-schools-to-home/ | 268 | 8.9 | 0 | ⚠️ | Add program-specific lead form CTA after hero; tighten form fields |
+| /blog/cash-home-buyers-fort-collins-northern-colorado/ | 117 | 18.0 | 0 | ⚠️ | Add inline CTA + end-of-post lead magnet (market report / buyer guide) |
+| /colorado-champions-home-loan-program/ | 66 | 34.5 | 0 | ⚠️ | Add prominent CTA section + exit-intent popup |
+| /blog/best-neighborhoods-fort-collins-2026/ | 58 | 30.1 | 0 | ⚠️ | Add inline CTA + end-of-post lead magnet (market report / buyer guide) |
+| /blog/seller-concession-cheat-sheet-northern-colorado/ | 50 | 13.2 | 0 | ⚠️ | Add inline CTA + end-of-post lead magnet (market report / buyer guide) |
+| /blog/fort-collins-vs-loveland-vs-windsor/ | 42 | 9.2 | 0 | ⚠️ | Add inline CTA + end-of-post lead magnet (market report / buyer guide) |
+| /blog/fort-collins-housing-market-mid-2026/ | 40 | 8.2 | 0 | ⚠️ | Add inline CTA + end-of-post lead magnet (market report / buyer guide) |
+| /blog/multigenerational-homes-northern-colorado-guide/ | 29 | 9.1 | 0 | ⚠️ | Add inline CTA + end-of-post lead magnet (market report / buyer guide) |
+| /chfa-down-payment-assistance/ | 26 | 57.2 | 0 | ⚠️ | Add program-specific lead form CTA after hero; tighten form fields |
+| /blog/is-windsor-colorado-expensive-to-live/ | 26 | 7.1 | 0 | ⚠️ | Add inline CTA + end-of-post lead magnet (market report / buyer guide) |
+| /blog/weld-county-vs-larimer-county-buyer-guide/ | 26 | 9.8 | 0 | ⚠️ | Add inline CTA + end-of-post lead magnet (market report / buyer guide) |
+| /blog/northern-colorado-market-update-august-2026/ | 23 | 8.3 | 0 | ⚠️ | Add inline CTA + end-of-post lead magnet (market report / buyer guide) |
+| /blog/senior-downsizing-northern-colorado-guide/ | 21 | 16.1 | 0 | ⚠️ | Add inline CTA + end-of-post lead magnet (market report / buyer guide) |
+| /blog/loveland-housing-market-mid-2026/ | 20 | 7.0 | 0 | ⚠️ | Add inline CTA + end-of-post lead magnet (market report / buyer guide) |
+| /northern-colorado-areas/longmont/st-vrain-village/ | 19 | 12.9 | 0 | ⚠️ | Add city-specific market report CTA + neighborhood guide signup |
+| / | 17 | 3.9 | 0 | ⚠️ | Review content-to-offer match; add contextual CTA |
+| /northern-colorado-areas/loveland/mariana-butte/ | 16 | 11.4 | 0 | ⚠️ | Add city-specific market report CTA + neighborhood guide signup |
+| /blog/chfa-down-payment-assistance-colorado-2026/ | 12 | 19.2 | 0 | ⚠️ | Add program-specific lead form CTA after hero; tighten form fields |
+| /cash-home-buyers/ | 10 | 67.8 | 0 | ⚠️ | Review content-to-offer match; add contextual CTA |
+| /blog/northern-colorado-19-cities-market-guide/ | 10 | 13.6 | 0 | ⚠️ | Add inline CTA + end-of-post lead magnet (market report / buyer guide) |
+
+### Top queries by page
+
+- **/chfa-schools-to-home/**: "chfa schools to home program" (45), "chfa schools to home" (35), "closing cost help for teachers colorado" (8)
+- **/blog/cash-home-buyers-fort-collins-northern-colorado/**: "cash home buyers in fort collins" (4), "cash home buyer" (2), "cash home buyers" (2)
+- **/colorado-champions-home-loan-program/**: "chfa approved lender colorado" (4), "chfa first generation program colorado" (2), "colorado champions home loan program" (2)
+- **/blog/best-neighborhoods-fort-collins-2026/**: "best neighborhoods in fort collins" (8), "best neighborhoods fort collins" (4), "best places to live in fort collins" (3)
+- **/blog/fort-collins-housing-market-mid-2026/**: "colorado" (1)
+- **/chfa-down-payment-assistance/**: "chfa program colorado 2025" (8), "chfa first-time homebuyer colorado" (7), "chfa disability down payment colorado" (1)
+- **/blog/weld-county-vs-larimer-county-buyer-guide/**: "buyers perspective" (1)
+- **/cash-home-buyers/**: "cash offer homes littleton colorado" (3), "cash home buyers in colorado" (1), "colorado cash for keys colorado" (1)
+*Report generated: 2026-08-03T14:31:25.426060*
