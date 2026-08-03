@@ -506,6 +506,7 @@ def create_background_audio(duration_seconds, output_path, slug=None, sample_rat
             cmd = [
                 "ffmpeg", "-y",
                 "-i", music_file,
+                "-map", "0:a:0",
                 "-t", str(duration_seconds),
                 "-af", "loudnorm=I=-14:LRA=4:TP=-2",
                 "-c:a", "aac",
@@ -529,6 +530,7 @@ def create_background_audio(duration_seconds, output_path, slug=None, sample_rat
                     "ffmpeg", "-y",
                     "-f", "concat", "-safe", "0",
                     "-i", concat_file,
+                    "-map", "0:a:0",
                     "-t", str(duration_seconds),
                     "-af", "loudnorm=I=-14:LRA=4:TP=-2",
                     "-c:a", "aac",
@@ -1351,18 +1353,30 @@ def get_attribution_for_slug(slug):
 
 def build_description(post, video_url=""):
     """
-    Build a YouTube description with links back to the source.
-    URL is placed FIRST so it's visible in the collapsed view.
-    Includes CC-BY music attribution when applicable.
+    Build the YouTube description for a blog-post video.
+
+    Format is the canonical SAA Homes template:
+        https://saahomes.com/blog/{slug}/
+
+        📖 Read the full article ↑
+
+        ───
+
+        {title}
+
+        Schwartz and Associates | SAA Homes
+        Northern Colorado Real Estate
+
+        📞 (970) 999-1407
+        🏠 https://saahomes.com
     """
     title = post.get("title", "Northern Colorado Real Estate")
-    excerpt = post.get("excerpt", "")
     slug = post.get("slug", "")
     blog_url = f"https://saahomes.com/blog/{slug}/"
     phone = "(970) 999-1407"
 
     lines = [
-        f"🔗 {blog_url}",
+        blog_url,
         "",
         f"📖 Read the full article ↑",
         "",
@@ -1370,36 +1384,12 @@ def build_description(post, video_url=""):
         "",
         title,
         "",
-        excerpt,
-        "",
-        "───",
-        "",
         "Schwartz and Associates | SAA Homes",
         "Northern Colorado Real Estate",
         "",
         f"📞 {phone}",
         "🏠 https://saahomes.com",
-        "",
-        "Follow us:",
-        "Facebook: https://www.facebook.com/schwartzandassociateshomes",
-        "Instagram: https://www.instagram.com/saa_homes/",
-        "YouTube: https://youtube.com/@SAAHomes",
-        "",
-        "───",
-        "",
-        "#NorthernColoradoRealEstate #FortCollins #Loveland #Windsor #Greeley "
-        "#ColoradoRealEstate #SAAHomes #SchwartzAndAssociates",
     ]
-
-    # Append CC-BY music attribution if available
-    attribution = get_attribution_for_slug(slug)
-    if attribution:
-        lines.extend([
-            "",
-            "───",
-            "",
-            attribution,
-        ])
 
     return "\n".join(lines)
 

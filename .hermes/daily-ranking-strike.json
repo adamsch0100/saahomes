@@ -1,15 +1,15 @@
 {
-  "date": "2026-08-01",
+  "date": "2026-08-03",
   "current_period": {
-    "start": "2026-07-24",
-    "end": "2026-07-30"
+    "start": "2026-07-26",
+    "end": "2026-08-01"
   },
   "previous_period": {
-    "start": "2026-07-17",
-    "end": "2026-07-23"
+    "start": "2026-07-19",
+    "end": "2026-07-25"
   },
-  "current_rows": 251,
-  "previous_rows": 175,
+  "current_rows": 243,
+  "previous_rows": 220,
   "alerts": [
     {
       "type": "disappeared",
@@ -19,10 +19,45 @@
       "current_impressions": 0
     }
   ],
-  "p0_regressions": [],
+  "p0_regressions": [
+    {
+      "page": "https://saahomes.com/northern-colorado-areas/wellington/wellington-village/",
+      "previous_impressions": 21,
+      "previous_clicks": 1,
+      "top_queries": [
+        "wellington village home coverage",
+        "wellington village home policy",
+        "wellington village",
+        "sage meadows wellington",
+        "wellington neighborhood"
+      ]
+    },
+    {
+      "page": "https://saahomes.com/northern-colorado-areas/loveland/sculpture-park-loveland/",
+      "previous_impressions": 12,
+      "previous_clicks": 0,
+      "top_queries": [
+        "benson sculpture garden",
+        "garden loveland co",
+        "loveland colorado sculpture park",
+        "sculpture garden loveland co",
+        "loveland co sculpture park"
+      ]
+    },
+    {
+      "page": "https://saahomes.com/northern-colorado-areas/mead/mead-crossing/",
+      "previous_impressions": 8,
+      "previous_clicks": 0,
+      "top_queries": [
+        "mead crossing homes",
+        "mead crossing"
+      ]
+    }
+  ],
   "has_issues": true,
-  "total_current_impressions": 765,
-  "total_current_clicks": 0,
-  "total_previous_impressions": 456,
-  "total_previous_clicks": 2
+  "total_current_impressions": 1998,
+  "total_current_clicks": 18,
+  "total_previous_impressions": 1403,
+  "total_previous_clicks": 13,
+  "totals_source": "page-dimension (accurate) \u2014 query+page redacts ~80% of GSC data"
 }
