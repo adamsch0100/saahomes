@@ -46,7 +46,7 @@ export const areaSeoPages = [
     description: 'Loveland, Colorado real estate with SAA Homes. Discover the Sweetheart City — homes for sale, lifestyle guide, and local market insights between Fort Collins and Denver.',
     keywords: 'Loveland CO real estate, Loveland homes for sale, Loveland Colorado realtor, Sweetheart City homes, Larimer County real estate, Northern Colorado homes, sell my house fast Loveland, cash home buyers Loveland, we buy houses Loveland, cash offer for home Loveland, foreclosures Loveland, short sale Loveland, Larimer County foreclosures',
     heroImage: '/images/Loveland-CO-Area-Guide.jpg',
-    tagline: 'Art, outdoor recreation, and mountain views',
+    tagline: 'Sweetheart City - Gateway to the Rockies',
     geo: { latitude: '40.3978', longitude: '-105.0750' },
     introParagraphs: [
       'Loveland — the Sweetheart City — sits between Fort Collins and Denver along the I-25 corridor, offering residents art galleries, lakefront recreation, and mountain views. From Lake Loveland and Boyd Lake State Park to the historic downtown sculpture tour, Loveland delivers a balanced lifestyle that appeals to families, retirees, and outdoor enthusiasts.',
@@ -82,7 +82,7 @@ export const areaSeoPages = [
     description: 'Explore Windsor, Colorado\'s best neighborhoods near Windsor Lake — top-rated schools, homes for sale, and family-friendly communities between Fort Collins and Greeley. Your Windsor real estate guide from SAA Homes.',
     keywords: 'Windsor CO real estate, Windsor homes for sale, Windsor Colorado realtor, Northern Colorado family homes, Weld County real estate, Windsor neighborhoods, sell my house fast Windsor, cash home buyers Windsor, we buy houses Windsor, cash offer for home Windsor, foreclosures Windsor, short sale Windsor, Weld County foreclosures',
     heroImage: '/images/Windsor-CO-Area-Guide.jpg',
-    tagline: 'Family communities between Fort Collins and Greeley',
+    tagline: 'Small Town Charm, Big City Convenience',
     geo: { latitude: '40.4775', longitude: '-104.9016' },
     introParagraphs: [
       'Windsor is one of Northern Colorado\'s most sought-after family communities, situated between Fort Collins and Greeley with top-rated schools, extensive trail systems, and a charming downtown. The town\'s mix of established neighborhoods, new construction, and lake-access properties along Windsor Lake attracts buyers seeking community-oriented living.',
@@ -118,7 +118,7 @@ export const areaSeoPages = [
     description: 'Greeley, Colorado real estate with SAA Homes. Explore homes for sale, UNC-area neighborhoods, and market insights in one of Northern Colorado\'s fastest-growing cities.',
     keywords: 'Greeley CO real estate, Greeley homes for sale, Greeley Colorado realtor, Weld County homes, UNC Greeley area, Northern Colorado real estate, sell my house fast Greeley, cash home buyers Greeley, we buy houses Greeley, cash offer for home Greeley, foreclosures Greeley, short sale Greeley, Weld County foreclosures',
     heroImage: '/images/Area-Guide-for-Greeley-CO.jpg',
-    tagline: 'UNC, agriculture, and growing Front Range value',
+    tagline: 'Home to the University of Northern Colorado',
     geo: { latitude: '40.4233', longitude: '-104.7091' },
     introParagraphs: [
       'Greeley is the largest city in Weld County and one of Northern Colorado\'s fastest-growing urban centers, anchored by the University of Northern Colorado and a strong agricultural and energy economy. The city\'s affordable home prices, diverse neighborhoods, and expanding amenities make it a smart choice for first-time buyers, investors, and families seeking value.',
