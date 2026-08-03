@@ -15,6 +15,7 @@ export const areaSeoPages = [
     introParagraphs: [
       'Fort Collins is Northern Colorado\'s premier city — home to Colorado State University, a thriving craft brewery scene, and endless outdoor recreation along the Poudre River and Horsetooth Reservoir. The city\'s mix of historic Old Town character, established family neighborhoods, and new communities makes it a top choice for buyers across every stage of life.',
       'SAA Homes provides expert guidance for Fort Collins buyers and sellers, from Old Town condos and CSU-area rentals to executive homes in coveted neighborhoods. Our team knows Larimer County market trends, pricing, and financing options including CHFA programs for qualified first-time buyers exploring Fort Collins homeownership.',
+      'Fort Collins\'s market has settled into a stable pattern through summer 2026. The median single-family home price held at approximately $610,000 in July, with condos and townhomes near $385,000. Inventory has grown roughly 15% compared to July 2025, and single-family homes average about 40 days on market — well-priced properties in the $500,000–$650,000 range still attract offers within three weeks, while homes above $750,000 typically take 55–70 days.',
     ],
     whyChoose: [
       { title: 'CSU and education hub', description: 'Home to Colorado State University with excellent K-12 schools across Poudre School District.' },
@@ -50,6 +51,7 @@ export const areaSeoPages = [
     introParagraphs: [
       'Loveland — the Sweetheart City — sits between Fort Collins and Denver along the I-25 corridor, offering residents art galleries, lakefront recreation, and mountain views. From Lake Loveland and Boyd Lake State Park to the historic downtown sculpture tour, Loveland delivers a balanced lifestyle that appeals to families, retirees, and outdoor enthusiasts.',
       'SAA Homes helps Loveland buyers and sellers navigate neighborhoods ranging from established mature-tree communities to new construction along the northern and eastern edges of the city. Our team covers Larimer County market trends and financing solutions including CHFA down payment assistance for those who qualify.',
+      'Loveland is one of Northern Colorado\'s most balanced markets. The July 2026 median sale price was approximately $510,000, up 3.6% year-over-year, with inventory up 14% compared to July 2025. Homes in the $400,000–$550,000 sweet spot typically go under contract in about 22 days, while properties above $675,000 average 55 days on market with more frequent price adjustments. The median price sits comfortably within Larimer County CHFA purchase price limits — and several Loveland neighborhoods qualify as CHFA targeted areas — making the Sweetheart City a strong fit for first-time buyers using down payment assistance.',
     ],
     whyChoose: [
       { title: 'Arts and culture hub', description: 'Home to the Loveland Sculpture Tour, art galleries, and cultural festivals year-round.' },
@@ -85,6 +87,7 @@ export const areaSeoPages = [
     introParagraphs: [
       'Windsor is one of Northern Colorado\'s most sought-after family communities, situated between Fort Collins and Greeley with top-rated schools, extensive trail systems, and a charming downtown. The town\'s mix of established neighborhoods, new construction, and lake-access properties along Windsor Lake attracts buyers seeking community-oriented living.',
       'SAA Homes guides Windsor buyers through the town\'s diverse housing market — from historic downtown bungalows to new master-planned communities in the growing eastern corridor. Many Windsor buyers explore CHFA financing programs to make their move to this Larimer-Weld border community more accessible.',
+      'Windsor\'s market commands the highest median home price among Northern Colorado\'s major cities — approximately $588,000 as of July 2026, up 2.1% year-over-year. The $450K–$600K segment remains the most active with homes selling in 25–35 days, and the town\'s position on the Weld-Larimer county line means buyers can choose between lower Weld County property taxes and Larimer County\'s school and service footprint. Active listings have grown compared to 2025, giving buyers more options across Windsor\'s neighborhoods.',
     ],
     whyChoose: [
       { title: 'Top-rated schools', description: 'Weld RE-4 School District consistently earns high marks for academics and activities.' },
@@ -120,6 +123,7 @@ export const areaSeoPages = [
     introParagraphs: [
       'Greeley is the largest city in Weld County and one of Northern Colorado\'s fastest-growing urban centers, anchored by the University of Northern Colorado and a strong agricultural and energy economy. The city\'s affordable home prices, diverse neighborhoods, and expanding amenities make it a smart choice for first-time buyers, investors, and families seeking value.',
       'SAA Homes provides Greeley real estate expertise across established neighborhoods, new developments, and communities near UNC and the Greeley medical corridor. Many Greeley buyers qualify for CHFA down payment assistance programs, making homeownership achievable in one of the region\'s most affordable major markets.',
+      'Greeley remains Northern Colorado\'s most affordable major market, with a July 2026 median sale price of approximately $432,000 — essentially flat year-over-year. Move-in-ready homes under $400,000 are the fastest-moving segment in the region, often going under contract within 10–14 days, and west Greeley new construction continues to offer builder incentives. The G-HOPE program adds forgivable down payment loans of up to $8,000 for qualifying employees, giving Greeley the strongest price-to-value entry point in Northern Colorado.',
     ],
     whyChoose: [
       { title: 'Affordable pricing', description: 'The most accessible home prices among Northern Colorado major cities.' },

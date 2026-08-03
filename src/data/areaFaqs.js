@@ -49,6 +49,18 @@ const AREA_FAQS = {
     {
       q: 'How are the schools in Loveland?',
       a: 'Loveland is served by the Thompson School District, the 17th largest in Colorado, serving approximately 15,000 students across 362 square miles. The district earns a B rating with Niche. Families also have options including Loveland Classical School (K-12 charter) and New Vision Charter School (K-8), plus 31 private schools in the area.'
+    },
+    {
+      q: 'Is Loveland, CO expensive to live in?',
+      a: 'Loveland is more affordable than Fort Collins while staying slightly above the national average overall, with housing costs driving most of the difference. The July 2026 median home price was approximately $510,000 — up 3.6% year-over-year but still below Fort Collins, and buyers typically find 5–15% lower price per square foot than comparable homes to the north. Everyday costs like groceries and utilities run close to national averages, and Colorado has no state sales tax on groceries. For buyers, Loveland delivers more space per dollar than Fort Collins while keeping Larimer County schools and a shorter I-25 commute toward Denver.'
+    },
+    {
+      q: 'Is Fort Collins or Loveland better?',
+      a: 'Both are excellent Northern Colorado cities, but they suit different lifestyles. Loveland offers better home value — typically 5–15% lower price per square foot — along with a thriving arts scene (Benson Sculpture Garden, the Loveland Sculpture Tour), Boyd Lake and Devil\'s Backbone recreation, and a quieter pace of life just 15 minutes from Fort Collins. Fort Collins brings CSU energy, a larger downtown, and more nightlife. Families and buyers seeking space per dollar often choose Loveland, while young professionals and CSU-affiliated buyers often gravitate to Fort Collins. Schwartz and Associates can help you compare both markets side by side — call (970) 999-1407 for a free consultation.'
+    },
+    {
+      q: 'Are house prices dropping in Loveland?',
+      a: 'No — Loveland prices are still rising, just far more slowly than the post-pandemic years. The July 2026 median sale price was approximately $510,000, up 3.6% year-over-year, and inventory has grown 14% compared to July 2025, giving buyers more negotiating room. The market has cooled from its peak: homes above $675,000 now average about 55 days on market with more frequent price adjustments, while the active $400,000–$550,000 segment typically sells in about 22 days. For buyers this means more choice and leverage; for sellers it means realistic pricing and presentation matter more than ever.'
     }
   ],
   'windsor': [
@@ -71,6 +83,14 @@ const AREA_FAQS = {
     {
       q: 'What is there to do in Windsor, Colorado?',
       a: 'Windsor offers a wide range of activities including the Windsor Lake area with paddleboarding and walking trails, the Pelican Lakes golf course, a charming downtown with local restaurants and breweries, and community events throughout the year. The town also has extensive trail systems, multiple parks, and the Windsor Community Recreation Center.'
+    },
+    {
+      q: 'Are house prices dropping in Windsor, Colorado?',
+      a: 'No — Windsor home prices are holding steady, not dropping. The July 2026 median sale price was approximately $588,000, up 2.1% year-over-year, the highest median among Northern Colorado\'s four major markets. The market has cooled from its peak: sellers now receive about 97.8% of list price (down from 99% a year ago) and days on market have extended to about 45 days across all price points. The $450K–$600K segment remains the most active, with homes typically selling in 25–35 days, while properties above $750,000 routinely take 65+ days. For buyers this means more negotiating room than in recent years; for sellers it means realistic pricing and upfront concessions matter more than ever.'
+    },
+    {
+      q: 'Should I buy on the Weld or Larimer County side of Windsor?',
+      a: 'Windsor straddles the Weld-Larimer county line, and the choice can affect your property taxes for as long as you own the home. Properties on the Weld County side are taxed at roughly 50–65 mills versus 65–80 mills in Larimer County, a difference that can save owners approximately $1,500–$3,000 per year depending on home value. The Weld County side also follows Weld County CHFA income limits and programs, while the Larimer side follows Larimer County\'s. School assignments, services, and resale demand differ by side as well — a local agent who knows the boundary can show you exactly how each listing compares.'
     }
   ],
   'greeley': [

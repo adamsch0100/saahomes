@@ -48,6 +48,14 @@ const nearbyCommunities = {
     { name: 'Fort Collins', slug: 'fort-collins', description: '40 miles north on I-25' },
     { name: 'Mead', slug: 'mead', description: '12 miles northeast of Niwot' },
   ],
+  windsor: [
+    { name: 'Fort Collins', slug: 'fort-collins', description: '10 miles west via CO-392' },
+    { name: 'Loveland', slug: 'loveland', description: '8 miles south via I-25' },
+    { name: 'Greeley', slug: 'greeley', description: '12 miles east via US-85' },
+    { name: 'Timnath', slug: 'timnath', description: '5 miles south via I-25' },
+    { name: 'Severance', slug: 'severance', description: '5 miles east of Windsor' },
+    { name: 'Johnstown', slug: 'johnstown', description: '8 miles south via I-25' },
+  ],
 };
 
 export default function AreaGuidePage() {
