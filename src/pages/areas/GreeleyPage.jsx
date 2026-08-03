@@ -17,7 +17,7 @@ export default function GreeleyPage() {
         <div className="absolute inset-0 bg-black/60"></div>
         <div className="relative z-10 text-center text-white px-6">
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">Greeley, Colorado</h1>
-          <p className="mt-4 text-xl">UNC, agriculture, and growing Front Range value</p>
+          <p className="mt-4 text-xl">Home to the University of Northern Colorado</p>
           <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
             <a href="/properties/?location=Greeley, CO" className="inline-flex items-center justify-center px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
               Search Greeley Homes
@@ -231,33 +231,6 @@ export default function GreeleyPage() {
         </div>
       </section>
 
-      {/* CHFA First-Time Buyer Banner */}
-      <section className="py-16 px-6 bg-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold font-serif text-gray-900 mb-3">First-time buyer in Greeley?</h2>
-          <p className="text-gray-800 mb-6">
-            Many Greeley buyers qualify for CHFA down payment assistance — grants and deferred loans up to $25,000. Greeley-area employees may also qualify for the city G-HOPE program (up to $8,000).
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Link
-              to="/chfa-down-payment-assistance/#chfa-dpa-lead-form"
-              className="inline-flex px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              Free CHFA Consultation
-            </Link>
-            <Link
-              to="/greeley-g-hope-down-payment-assistance/#g-hope-lead-form"
-              className="inline-flex px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
-            >
-              G-HOPE for Greeley employees
-            </Link>
-            <Link to="/chfa-down-payment-assistance/" className="inline-flex px-8 py-3 font-semibold hover:underline">
-              CHFA program guide →
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* Sell Your Home in Greeley CTA */}
       <section className="py-16 px-6 bg-gray-50">
         <div className="max-w-4xl mx-auto text-center">
@@ -353,24 +326,6 @@ export default function GreeleyPage() {
       </section>
 
       <AreaFAQSection faqs={AREA_FAQS['greeley']} city="Greeley" />
-
-      {/* Final CTA */}
-      <section className="py-16 px-6 bg-black text-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold font-serif mb-4">Ready to buy or sell in Greeley?</h2>
-          <p className="text-gray-300 mb-8">
-            Adam and Mandi Schwartz help buyers and sellers across Greeley and all of Northern Colorado.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Link to="/contact/" className="inline-block px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
-              Contact SAA Homes
-            </Link>
-            <a href="tel:(970) 999-1407" className="inline-block px-8 py-3 border-2 border-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
-              Call (970) 999-1407
-            </a>
-          </div>
-        </div>
-      </section>
 
     </>
   );
