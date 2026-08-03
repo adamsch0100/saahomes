@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
 import GHopeLeadForm from "../components/GHopeLeadForm";
+import QualifyCta from "../components/QualifyCta";
 import ChfaResourceHub from "../components/ChfaResourceHub";
 
 const GOLD = "#CFB36E";
@@ -270,6 +271,14 @@ export default function GHopeHomeLoanPage() {
           </div>
         </div>
       </section>
+
+      {/* Qualify CTA — conversational lead capture */}
+      <QualifyCta
+        program="the Greeley G-HOPE program"
+        chatQuestion="Hi! I work in the Greeley area and I'd like to know if I qualify for the G-HOPE down payment assistance program. Can you walk me through it?"
+        formAnchor="#g-hope-lead-form"
+        formLabel="Skip to the consultation form"
+      />
 
       {/* Stats bar */}
       <section className="bg-black text-white py-8 px-6 border-b border-gray-800">

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
 import ChfaDpaLeadForm from "../components/ChfaDpaLeadForm";
 import ChfaResourceHub from "../components/ChfaResourceHub";
+import QualifyCta from "../components/QualifyCta";
 
 const GOLD = "#CFB36E";
 
@@ -321,6 +322,13 @@ export default function ChfaDownPaymentAssistancePage() {
           </div>
         </div>
       </section>
+
+      {/* Qualify CTA — conversational lead capture */}
+      <QualifyCta
+        program="CHFA down payment assistance"
+        formAnchor="#chfa-dpa-lead-form"
+        formLabel="Skip to the consultation form"
+      />
 
       {/* Stats bar */}
       <section className="bg-black text-white py-8 px-6 border-b border-gray-800">
