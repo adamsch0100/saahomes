@@ -17,7 +17,7 @@ export default function LovelandPage() {
         <div className="absolute inset-0 bg-black/60"></div>
         <div className="relative z-10 text-center text-white px-6">
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">Loveland, CO</h1>
-          <p className="mt-4 text-xl">Art, outdoor recreation, and mountain views</p>
+          <p className="mt-4 text-xl">Sweetheart City - Gateway to the Rockies</p>
           <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
             <a href="/properties/?location=Loveland, CO" className="inline-flex items-center justify-center px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
               Search Loveland Homes
@@ -232,29 +232,6 @@ export default function LovelandPage() {
         </section>
 
         {/* CTA */}
-      {/* CHFA First-Time Buyer Banner */}
-      <section className="py-12 px-6" style={{ backgroundColor: "#CFB36E" }}>
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold font-serif text-gray-900 mb-3">
-            First-time buyer in Loveland?
-          </h2>
-          <p className="text-gray-800 mb-6">
-            Many Loveland buyers qualify for CHFA down payment assistance — grants and deferred loans up to $25,000.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Link
-              to="/chfa-down-payment-assistance/#chfa-dpa-lead-form"
-              className="inline-flex px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              Free CHFA Consultation
-            </Link>
-            <Link to="/chfa-down-payment-assistance/" className="inline-flex px-6 py-3 font-semibold hover:underline">
-              CHFA program guide →
-            </Link>
-          </div>
-        </div>
-      </section>
-
               {/* Neighborhood Guides */}
       <section className="py-12 px-6 bg-gray-50">
         <div className="max-w-6xl mx-auto">
