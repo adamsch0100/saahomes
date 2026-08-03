@@ -145,6 +145,52 @@ export const runMigrations = async () => {
       CREATE INDEX IF NOT EXISTS idx_ghope_lead_submissions_created_at ON ghope_lead_submissions(created_at);
     `);
 
+    // ── IDX listings (IRES feed) ──────────────────────────────────────────
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS listings (
+        id SERIAL PRIMARY KEY,
+        listing_id VARCHAR(64) NOT NULL UNIQUE,
+        status VARCHAR(32) NOT NULL DEFAULT 'Active',
+        property_type VARCHAR(64),
+        street_number VARCHAR(32),
+        street_name VARCHAR(255),
+        unit VARCHAR(32),
+        city VARCHAR(100),
+        state VARCHAR(2),
+        postal_code VARCHAR(16),
+        county VARCHAR(100),
+        list_price NUMERIC(12,2),
+        beds NUMERIC(4,1),
+        baths NUMERIC(4,1),
+        living_area NUMERIC(10,1),
+        lot_size NUMERIC(12,1),
+        year_built INTEGER,
+        garage_spaces NUMERIC(4,1),
+        hoa_fee NUMERIC(10,2),
+        description TEXT,
+        photos JSONB NOT NULL DEFAULT '[]'::jsonb,
+        latitude NUMERIC(10,7),
+        longitude NUMERIC(10,7),
+        listing_url TEXT,
+        mls_source VARCHAR(32) DEFAULT 'IRES',
+        raw JSONB,
+        slug VARCHAR(255),
+        is_active BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        last_seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_listings_status ON listings(status);
+      CREATE INDEX IF NOT EXISTS idx_listings_city ON listings(city);
+      CREATE INDEX IF NOT EXISTS idx_listings_price ON listings(list_price);
+      CREATE INDEX IF NOT EXISTS idx_listings_status_city ON listings(status, city);
+      CREATE INDEX IF NOT EXISTS idx_listings_updated_at ON listings(updated_at);
+      CREATE INDEX IF NOT EXISTS idx_listings_slug ON listings(slug);
+    `);
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {
