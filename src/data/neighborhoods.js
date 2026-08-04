@@ -1810,6 +1810,7 @@ export const neighborhoods = [
     walkScore: 32,
     metaDescription: 'The Vineyard Loveland real estate - newer homes near Centerra with pond and mountain views in southwest Loveland. SAA Homes.',
     keywords: 'The Vineyard Loveland, southwest Loveland homes, Centerra area homes, patio homes Loveland, new construction Loveland, Mountain View High School Loveland',
+    youtubeId: 'Tc1qq4TGGnI',
     neighborhoodHighlights: [
       { title: 'Centerra lifestyle', description: 'Minutes from the Promenade Shops at Centerra - Northern Colorado\'s premier shopping and dining destination.' },
       { title: 'Patio home options', description: 'Low-maintenance patio homes make The Vineyard popular with empty-nesters and lock-and-leave buyers.' },
@@ -1844,6 +1845,7 @@ export const neighborhoods = [
     walkScore: 38,
     metaDescription: 'Northgate Loveland real estate - established north Loveland homes near Fort Collins with US 287 access. SAA Homes.',
     keywords: 'Northgate Loveland, north Loveland real estate, Loveland Fort Collins border homes, Lincoln Avenue Loveland, established Loveland neighborhoods, affordable Loveland homes',
+    youtubeId: 'cPiehdYlLtI',
     neighborhoodHighlights: [
       { title: 'Two-city location', description: 'Located on the Loveland-Fort Collins border, offering access to both cities\' amenities and employment.' },
       { title: 'Affordable options', description: 'Northgate offers some of the best value in the Loveland-Fort Collins corridor.' },
@@ -1878,6 +1880,7 @@ export const neighborhoods = [
     walkScore: 30,
     metaDescription: 'Winona Loveland real estate - newer subdivision near Centerra with modern homes and great I-25 access. SAA Homes.',
     keywords: 'Winona Loveland, southwest Loveland new homes, Centerra area subdivisions, new construction Loveland, Denver Avenue Loveland, Mountain View High School Loveland',
+    youtubeId: '0pNz8jzcU28',
     neighborhoodHighlights: [
       { title: 'New construction', description: 'All homes built 2018 or later with modern open layouts, smart home features, and energy-efficient construction.' },
       { title: 'Centerra convenience', description: 'Located near the Promenade Shops at Centerra with world-class shopping, dining, and entertainment.' },
