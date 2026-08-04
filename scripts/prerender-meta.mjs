@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { getPrerenderRoutes, SITE_URL } from '../src/data/siteRoutes.js';
 import { BUSINESS } from '../src/utils/seoConstants.js';
 import { areaSeoPages, buildAreaPageSchemas } from '../src/data/areaSeo.js';
+import { neighborhoods } from '../src/data/neighborhoods.js';
 import { blogPosts } from '../src/data/blogPosts.js';
 import { AREA_FAQS } from '../src/data/areaFaqs.js';
 import { BUYER_FAQS, SELLER_FAQS } from '../src/data/buyerSellerFaqs.js';
@@ -151,6 +152,16 @@ function matchAreaPage(path) {
   return areaSeoPages.find((a) => a.slug === match[1]) || null;
 }
 
+function matchNeighborhoodPage(path) {
+  // /northern-colorado-areas/{city}/{neighborhood}/
+  const match = path.match(/^\/northern-colorado-areas\/([^/]+)\/([^/]+)\/$/);
+  if (!match) return null;
+  return (
+    neighborhoods.find((n) => n.slug === match[2] && n.citySlug === match[1]) ||
+    null
+  );
+}
+
 function matchBlogPost(path) {
   const match = path.match(/^\/blog\/([^/]+)\/$/);
   if (!match) return null;
@@ -248,6 +259,65 @@ function injectMetaTags(html, tags) {
 // ---------------------------------------------------------------------------
 // Body content injection for crawlers (visible content in <div id="root">)
 // ---------------------------------------------------------------------------
+
+// All 19 Northern Colorado city pages + key money pages — used to build a
+// crawlable sitewide link graph. The React header/footer nav is rendered
+// client-side, so without this block Google's crawler sees almost no internal
+// links (homepage had 0 area links, city pages ~5). Injecting a static nav
+// block into every prerendered page gives each page crawlable inbound/outbound
+// link equity — the hub-and-spoke architecture the strategy requires.
+const SITE_AREA_PAGES = [
+  ['fort-collins', 'Fort Collins'],
+  ['loveland', 'Loveland'],
+  ['windsor', 'Windsor'],
+  ['greeley', 'Greeley'],
+  ['timnath', 'Timnath'],
+  ['wellington', 'Wellington'],
+  ['johnstown', 'Johnstown'],
+  ['eaton', 'Eaton'],
+  ['milliken', 'Milliken'],
+  ['la-salle', 'La Salle'],
+  ['mead', 'Mead'],
+  ['longmont', 'Longmont'],
+  ['boulder', 'Boulder'],
+  ['berthoud', 'Berthoud'],
+  ['firestone', 'Firestone'],
+  ['frederick', 'Frederick'],
+  ['evans', 'Evans'],
+  ['severance', 'Severance'],
+  ['niwot', 'Niwot'],
+];
+
+const SITE_MONEY_PAGES = [
+  ['/', 'SAA Homes'],
+  ['/for-buyers/', 'Colorado Home Buyers'],
+  ['/for-sellers/', 'Sell Your Home'],
+  ['/properties/', 'Homes for Sale'],
+  ['/chfa-down-payment-assistance/', 'CHFA Down Payment Assistance'],
+  ['/chfa-schools-to-home/', 'CHFA Schools to Home'],
+  ['/colorado-champions-home-loan-program/', 'Colorado Champions Home Loan'],
+  ['/contact/', 'Contact SAA Homes'],
+];
+
+function buildSitewideLinksHtml(currentPath) {
+  const areaLinks = SITE_AREA_PAGES.map(
+    ([slug, name]) =>
+      `            <li><a href="${SITE_URL}/northern-colorado-areas/${slug}/">${name}, CO Real Estate</a></li>`
+  ).join('\n');
+
+  const moneyLinks = SITE_MONEY_PAGES.map(
+    ([path, label]) =>
+      `            <li><a href="${SITE_URL}${path}">${label}</a></li>`
+  ).join('\n');
+
+  return `\n  <nav class="prerendered-site-links" aria-label="Northern Colorado Communities">\n    <div class="prerendered-site-links-inner">\n      <h2>Explore Northern Colorado Real Estate</h2>\n      <p>Schwartz and Associates serves home buyers and sellers across all 19 Northern Colorado communities. Choose a city to explore local real estate, neighborhoods, and market insights.</p>\n      <div class="prerendered-site-links-columns">\n        <div>\n          <h3>Cities We Serve</h3>\n          <ul>\n${areaLinks}\n          </ul>\n        </div>\n        <div>\n          <h3>Buying & Selling Resources</h3>\n          <ul>\n${moneyLinks}\n          </ul>\n        </div>\n      </div>\n      <p class="prerendered-site-links-cta">Ready to talk? Call <a href="tel:9709991407">(970) 999-1407</a> or <a href="${SITE_URL}/contact/">contact us</a>.</p>\n    </div>\n  </nav>\n`;
+}
+
+function injectSitewideLinks(html, currentPath) {
+  const block = buildSitewideLinksHtml(currentPath);
+  // Insert before </body> so it appears after the app root for crawlers
+  return html.replace('</body>', `${block}\n  </body>`);
+}
 
 function escapeHtml(str) {
   if (!str) return '';
@@ -464,6 +534,155 @@ function injectAreaBody(html, area) {
     `${faqHtml}\n` +
     `${guidesHtml}\n` +
     `${nearbyHtml}\n` +
+    `${ctaHtml}\n` +
+    `    </div>\n  `;
+
+  // Inject into <div id="root"> — visible to crawlers that do not execute JS
+  return html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+}
+
+function injectNeighborhoodBody(html, neighborhood) {
+  const name = escapeHtml(neighborhood.name || '');
+  const cityDisplay = escapeHtml(neighborhood.cityDisplay || '');
+  const citySlug = neighborhood.citySlug || '';
+  const county = escapeHtml(neighborhood.county || '');
+  const type = escapeHtml(neighborhood.type || 'neighborhood');
+  const description = neighborhood.description || '';
+  const longDescription = neighborhood.longDescription || '';
+  const priceRange = escapeHtml(neighborhood.priceRangeDescription || '');
+  const schoolDistrict = escapeHtml(neighborhood.schoolDistrict || '');
+  const homeStyles = neighborhood.homeStyles || [];
+  const schools = neighborhood.schools || [];
+  const features = neighborhood.features || [];
+  const parks = neighborhood.parks || [];
+  const hoa = escapeHtml(neighborhood.hoaDescription || '');
+  const highlights = neighborhood.neighborhoodHighlights || [];
+  const boundaries = escapeHtml(neighborhood.boundaries || '');
+
+  // Intro paragraphs — longDescription first (richer), fall back to description
+  const introParagraphs = [longDescription || description, description && longDescription ? description : null]
+    .filter(Boolean);
+
+  let introHtml = introParagraphs
+    .map((p) => `      <p class="prerendered-intro">${escapeHtml(p)}</p>`)
+    .join('\n');
+
+  // Highlights grid
+  let highlightsHtml = '';
+  if (highlights.length > 0) {
+    highlightsHtml =
+      `      <section class="prerendered-highlights">\n` +
+      `        <h2>Why Buyers Choose ${name}</h2>\n` +
+      highlights
+        .map(
+          (h) =>
+            `        <div class="prerendered-highlight">\n` +
+            `          <h3>${escapeHtml(h.title)}</h3>\n` +
+            `          <p>${escapeHtml(h.description)}</p>\n` +
+            `        </div>`
+        )
+        .join('\n') +
+      `\n      </section>`;
+  }
+
+  // Key facts list
+  let factsHtml =
+    `      <section class="prerendered-facts">\n` +
+    `        <h2>${name} ${cityDisplay} Real Estate Facts</h2>\n` +
+    `        <ul>\n` +
+    (priceRange
+      ? `          <li><strong>Price range:</strong> ${priceRange}</li>\n`
+      : '') +
+    (schoolDistrict
+      ? `          <li><strong>School district:</strong> ${schoolDistrict}</li>\n`
+      : '') +
+    (boundaries
+      ? `          <li><strong>Boundaries:</strong> ${boundaries}</li>\n`
+      : '') +
+    (hoa ? `          <li><strong>HOA:</strong> ${hoa}</li>\n` : '') +
+    `        </ul>\n` +
+    `      </section>`;
+
+  // Home styles
+  let stylesHtml = '';
+  if (homeStyles.length > 0) {
+    stylesHtml =
+      `      <section class="prerendered-styles">\n` +
+      `        <h2>Home Styles in ${name}</h2>\n` +
+      `        <p>${homeStyles.map(escapeHtml).join(', ')}</p>\n` +
+      `      </section>`;
+  }
+
+  // Schools
+  let schoolsHtml = '';
+  if (schools.length > 0) {
+    schoolsHtml =
+      `      <section class="prerendered-schools">\n` +
+      `        <h2>Schools Serving ${name}</h2>\n` +
+      `        <ul>\n` +
+      schools
+        .map(
+          (s) =>
+            `          <li>${escapeHtml(s.name)} (${escapeHtml(s.type)}${s.rating != null ? ', rating ' + escapeHtml(String(s.rating)) : ''})</li>`
+        )
+        .join('\n') +
+      `\n        </ul>\n` +
+      `      </section>`;
+  }
+
+  // Features
+  let featuresHtml = '';
+  if (features.length > 0) {
+    featuresHtml =
+      `      <section class="prerendered-features">\n` +
+      `        <h2>What ${name} Offers</h2>\n` +
+      `        <ul>\n` +
+      features.map((f) => `          <li>${escapeHtml(f)}</li>`).join('\n') +
+      `\n        </ul>\n` +
+      `      </section>`;
+  }
+
+  // Parks
+  let parksHtml = '';
+  if (parks.length > 0) {
+    parksHtml =
+      `      <section class="prerendered-parks">\n` +
+      `        <h2>Parks & Outdoor Spaces Near ${name}</h2>\n` +
+      `        <ul>\n` +
+      parks.map((p) => `          <li>${escapeHtml(p)}</li>`).join('\n') +
+      `\n        </ul>\n` +
+      `      </section>`;
+  }
+
+  // Nearby communities cross-link to the parent city page
+  const cityLinkHtml = citySlug
+    ? `      <section class="prerendered-city-link">\n` +
+      `        <h2>${cityDisplay}, Colorado Real Estate</h2>\n` +
+      `        <p><a href="${SITE_URL}/northern-colorado-areas/${citySlug}/">Explore homes for sale and the full neighborhood guide for ${cityDisplay}, Colorado</a> — including market trends, schools, and community information for the entire ${cityDisplay} area.</p>\n` +
+      `      </section>`
+    : '';
+
+  // CTA with phone number
+  const ctaHtml =
+    `      <section class="prerendered-cta">\n` +
+    `        <h2>Work With Schwartz and Associates in ${name}</h2>\n` +
+    `        <p>Ready to buy or sell in ${name}? Contact SAA Homes today at <strong>(970) 999-1407</strong> or visit our office at 3665 John F Kennedy Parkway, Suite 210, Fort Collins, CO 80525. Our local experts know ${name} and every neighborhood in Northern Colorado.</p>\n` +
+    `        <p>Schwartz and Associates, Coldwell Banker Realty — serving home buyers and sellers across Fort Collins, Loveland, Windsor, Greeley, and all of Northern Colorado.</p>\n` +
+    `      </section>`;
+
+  const bodyContent =
+    `\n` +
+    `    <div class="prerendered-neighborhood-content">\n` +
+    `      <h1>${name} — ${cityDisplay}, Colorado ${type === 'subdivision' ? 'Subdivision' : 'Neighborhood'} Guide</h1>\n` +
+    `      ${county ? `<p class="prerendered-county">Serving ${county}</p>\n` : ''}` +
+    `${introHtml}\n` +
+    `${highlightsHtml}\n` +
+    `${factsHtml}\n` +
+    `${stylesHtml}\n` +
+    `${schoolsHtml}\n` +
+    `${featuresHtml}\n` +
+    `${parksHtml}\n` +
+    `${cityLinkHtml}\n` +
     `${ctaHtml}\n` +
     `    </div>\n  `;
 
@@ -1284,6 +1503,7 @@ for (const route of routes) {
 
   // 4. Inject visible body content into <div id="root"> for crawlers
   const area = matchAreaPage(route.path);
+  const neighborhoodPage = matchNeighborhoodPage(route.path);
   const blogPost = matchBlogPost(route.path);
   const chfaPage = matchChfaPage(route.path);
   const moneyPage = matchMoneyPage(route.path);
@@ -1294,6 +1514,11 @@ for (const route of routes) {
     html = injectAreaBody(html, area);
     console.log(
       `  Body: injected ${AREA_FAQS[area.slug]?.length || 0} FAQ items + nearby communities + CTA`
+    );
+  } else if (neighborhoodPage) {
+    html = injectNeighborhoodBody(html, neighborhoodPage);
+    console.log(
+      `  Body: injected neighborhood "${neighborhoodPage.slug}" with highlights + schools + features + CTA`
     );
   } else if (blogPost) {
     html = injectBlogBody(html, blogPost);
@@ -1313,6 +1538,12 @@ for (const route of routes) {
   } else {
     html = injectGenericBody(html, route);
   }
+
+  // 5. Inject crawlable sitewide links block (all 19 cities + money pages) —
+  //    the React nav/footer is client-side rendered, so without this the
+  //    crawler sees almost no internal links. This builds the hub-and-spoke
+  //    link graph on every page.
+  html = injectSitewideLinks(html, route.path);
 
   // Write out
   const routeDir = join(
