@@ -7,7 +7,7 @@ import { submitChampionsLeadForm } from '../controllers/championsLeadController.
 import { submitChfaDpaLeadForm } from '../controllers/chfaDpaLeadController.js';
 import { submitGhopeLeadForm } from '../controllers/ghopeLeadController.js';
 import { handleChatMessage } from '../controllers/chatController.js';
-import { searchListings, getListingBySlug } from '../controllers/listingController.js';
+import { searchListings, getListingBySlug, getListingStats } from '../controllers/listingController.js';
 import {
   validateContactSubmission,
   validateMarketReportSubmission,
@@ -93,6 +93,7 @@ const listingLimiter = rateLimit({
 });
 
 router.get('/listings', listingLimiter, searchListings);
+router.get('/listings/stats', listingLimiter, getListingStats);
 router.get('/listings/:slug', listingLimiter, getListingBySlug);
 
 export default router;

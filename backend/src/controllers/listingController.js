@@ -96,6 +96,48 @@ export const searchListings = async (req, res) => {
   }
 };
 
+export const getListingStats = async (req, res) => {
+  try {
+    const pool = getPool();
+    const { city } = req.query;
+    const params = [];
+    let where = 'is_active = TRUE AND status = \'Active\'';
+    if (city) {
+      params.push(city);
+      where += ` AND LOWER(city) = LOWER($${params.length})`;
+    }
+    const r = await pool.query(
+      `SELECT COUNT(*) AS total,
+              PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY list_price) AS median_price,
+              MIN(list_price) AS min_price,
+              MAX(list_price) AS max_price,
+              ROUND(AVG(list_price)) AS avg_price,
+              COUNT(*) FILTER (WHERE property_type ILIKE '%residential%' OR property_type = 'Residential') AS residential,
+              COUNT(*) FILTER (WHERE property_type ILIKE '%condo%' OR property_type ILIKE '%townhouse%' OR property_type ILIKE '%townhome%') AS condo_townhome,
+              COUNT(*) FILTER (WHERE property_type ILIKE '%land%' OR property_type ILIKE '%lot%') AS land
+       FROM listings WHERE ${where}`,
+      params
+    );
+    const row = r.rows[0] || {};
+    res.json({
+      success: true,
+      data: {
+        total: parseInt(row.total || 0, 10),
+        median_price: row.median_price != null ? Math.round(Number(row.median_price)) : null,
+        min_price: row.min_price != null ? Math.round(Number(row.min_price)) : null,
+        max_price: row.max_price != null ? Math.round(Number(row.max_price)) : null,
+        avg_price: row.avg_price != null ? Math.round(Number(row.avg_price)) : null,
+        residential: parseInt(row.residential || 0, 10),
+        condo_townhome: parseInt(row.condo_townhome || 0, 10),
+        land: parseInt(row.land || 0, 10),
+      },
+    });
+  } catch (error) {
+    console.error('Listing stats failed:', error);
+    res.status(500).json({ success: false, error: 'Stats failed' });
+  }
+};
+
 export const getListingBySlug = async (req, res) => {
   try {
     const pool = getPool();

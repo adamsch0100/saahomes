@@ -1,6 +1,7 @@
 import { blogPosts } from './blogPosts.js';
 import { areaSeoPages, getAreaExactTitle } from './areaSeo.js';
 import { neighborhoods } from './neighborhoods.js';
+import { CITY_HOMES, getCityHomesPath } from './cityHomesData.js';
 
 export const SITE_URL = 'https://saahomes.com';
 
@@ -262,6 +263,21 @@ export function getSitemapEntries(lastmod) {
         ogDescription: n.description,
         ogImage: n.image || '/images/Northern Colorado.webp',
         ogImageAlt: `${n.name} neighborhood in ${n.cityDisplay}, Colorado`,
+      })
+    ),
+    // City "homes for sale" pages — Tier S money pages (daily freshness)
+    ...CITY_HOMES.map((c) =>
+      withShareMeta({
+        path: getCityHomesPath(c.slug),
+        priority: '0.9',
+        changefreq: 'daily',
+        lastmod: date,
+        title: `${c.city} Homes for Sale | Live IRES MLS Listings | SAA Homes`,
+        description: `Browse every active home for sale in ${c.city}, ${c.county}. Live IRES MLS listings — houses, condos, townhomes & new construction. Schwartz and Associates at SAA Homes. Call (970) 999-1407.`,
+        ogTitle: `${c.city} Homes for Sale | SAA Homes`,
+        ogDescription: `Live IRES MLS listings in ${c.city}, Colorado — updated daily.`,
+        ogImage: '/images/buyers-hero.jpg',
+        ogImageAlt: `${c.city}, Colorado homes for sale`,
       })
     ),
   ];
