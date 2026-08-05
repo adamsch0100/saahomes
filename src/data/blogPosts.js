@@ -3779,7 +3779,7 @@ export const blogPosts = [
     excerpt: 'Everything Northern Colorado home sellers need to know about seller concessions \u2014 maximum allowable contributions by loan type (Conventional, FHA, VA, USDA), what they can cover, and how to structure them in your listing strategy.',
     date: '2026-07-24',
     category: 'Seller Tips',
-    image: '/images/blog-default-black.jpg',
+    image: '/images/seller-concession-cheat-sheet-northern-colorado.jpg',
     readTime: '5 min read',
     youtubeId: 'FHOUYRwBHMQ',
     relatedLinks: [
@@ -4580,7 +4580,7 @@ export const blogPosts = [
     excerpt: 'Everything Northern Colorado home buyers need to know about buyer concessions — maximum seller contributions by loan type, how to ask for closing cost assistance, and how to stack CHFA down payment assistance with seller concessions in Fort Collins, Loveland, Windsor, and Greeley.',
     date: '2026-07-29',
     category: 'Buyer Tips',
-    image: '/images/blog-default-black.jpg',
+    image: '/images/buyer-concession-cheat-sheet-northern-colorado.jpg',
     readTime: '6 min read',
     youtubeId: 'Jum48IbsO3s',
     relatedLinks: [
