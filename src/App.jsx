@@ -13,6 +13,8 @@ import CashHomeBuyersPage from "./pages/CashHomeBuyersPage.jsx";
 import FeaturedAreasPage from "./pages/FeaturedAreasPage.jsx";
 import PropertiesPage from "./pages/PropertiesPage.jsx";
 import ListingDetailPage from "./pages/ListingDetailPage.jsx";
+import CityHomesForSalePage from "./pages/CityHomesForSalePage.jsx";
+import { CITY_HOMES } from "./data/cityHomesData.js";
 import FortCollinsPage from "./pages/areas/FortCollinsPage.jsx";
 import LovelandPage from "./pages/areas/LovelandPage.jsx";
 import MeadPage from "./pages/areas/MeadPage.jsx";
@@ -157,6 +159,14 @@ export default function App() {
         <Route path="/properties" element={<AppLayout><PropertiesPage /></AppLayout>} />
         <Route path="/properties/" element={<AppLayout><PropertiesPage /></AppLayout>} />
         <Route path="/homes-for-sale/:slug" element={<AppLayout><ListingDetailPage /></AppLayout>} />
+
+        {/* City homes-for-sale SEO pages */}
+        {CITY_HOMES.map((c) => (
+          <React.Fragment key={c.slug}>
+            <Route path={`/${c.slug}-homes-for-sale`} element={<AppLayout><CityHomesForSalePage /></AppLayout>} />
+            <Route path={`/${c.slug}-homes-for-sale/`} element={<AppLayout><CityHomesForSalePage /></AppLayout>} />
+          </React.Fragment>
+        ))}
         <Route path="/homes-for-sale/:slug/" element={<AppLayout><ListingDetailPage /></AppLayout>} />
         <Route path="/home-valuation" element={<AppLayout><ForSellersPage /></AppLayout>} />
         <Route path="/home-valuation/" element={<AppLayout><ForSellersPage /></AppLayout>} />

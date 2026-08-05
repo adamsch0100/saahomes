@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { getPrerenderRoutes, SITE_URL } from '../src/data/siteRoutes.js';
 import { BUSINESS } from '../src/utils/seoConstants.js';
 import { areaSeoPages, buildAreaPageSchemas } from '../src/data/areaSeo.js';
+import { CITY_HOMES, getCityHomes, getCityHomesPath } from '../src/data/cityHomesData.js';
 import { neighborhoods } from '../src/data/neighborhoods.js';
 import { blogPosts } from '../src/data/blogPosts.js';
 import { AREA_FAQS } from '../src/data/areaFaqs.js';
@@ -814,6 +815,38 @@ function injectGenericBody(html, { title }) {
 }
 
 // ---------------------------------------------------------------------------
+// City "homes for sale" pages — /{slug}-homes-for-sale/ (Tier S money pages)
+// ---------------------------------------------------------------------------
+function matchCityHomesPage(path) {
+  const normalized = path.replace(/\/$/, '');
+  if (!normalized.endsWith('-homes-for-sale')) return null;
+  const slug = normalized.slice(0, -'-homes-for-sale'.length).split('/').pop();
+  return getCityHomes(slug) || null;
+}
+
+function injectCityHomesBody(html, city) {
+  const otherCities = CITY_HOMES.filter((c) => c.slug !== city.slug)
+    .map((c) => `<a href="${SITE_URL}${getCityHomesPath(c.slug)}">${escapeHtml(c.city)} homes for sale</a>`)
+    .join(' · ');
+  const bodyContent =
+    `\n` +
+    `    <div class="prerendered-city-homes">\n` +
+    `      <h1>${escapeHtml(city.city)} Homes for Sale</h1>\n` +
+    `      <p>${escapeHtml(city.intro)}</p>\n` +
+    `      <p><a href="${SITE_URL}/properties/?location=${encodeURIComponent(city.search)}">Open the full ${escapeHtml(city.city)} search with map</a> — live IRES MLS data, updated daily.</p>\n` +
+    `      <h2>${escapeHtml(city.city)} Home Buying Resources</h2>\n` +
+    `      <ul>\n` +
+    `        <li><a href="${SITE_URL}${city.areaPath}">${escapeHtml(city.city)} Neighborhood Guide</a></li>\n` +
+    `        <li><a href="${SITE_URL}/chfa-down-payment-assistance/">CHFA Down Payment Assistance</a></li>\n` +
+    `        <li><a href="${SITE_URL}/for-buyers/">Northern Colorado Buyer Guide</a></li>\n` +
+    `      </ul>\n` +
+    `      <p>IDX information provided by IRES. ${escapeHtml(city.city)} listings update daily. Contact Schwartz and Associates at (970) 999-1407.</p>\n` +
+    `      <p>${otherCities}</p>\n` +
+    `    </div>\n  `;
+  return html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+}
+
+// ---------------------------------------------------------------------------
 // Money page (P0) body content injection
 // ---------------------------------------------------------------------------
 
@@ -1495,6 +1528,18 @@ for (const route of routes) {
 
   // 2. Inject JSON-LD schemas
   const schemas = buildRouteSchemas(route);
+  const cityHomes = matchCityHomesPage(route.path);
+  if (cityHomes) {
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
+        { '@type': 'ListItem', position: 2, name: 'Homes for Sale', item: `${SITE_URL}/properties/` },
+        { '@type': 'ListItem', position: 3, name: `${cityHomes.city} Homes for Sale`, item: canonical },
+      ],
+    });
+  }
   html = injectJsonLd(html, schemas);
 
   // 3. Inject OG / Twitter / meta tags
@@ -1535,6 +1580,9 @@ for (const route of routes) {
     console.log(
       `  Body: injected money page "${route.path}" with ${moneyPage.sections?.length || 0} content sections + CTA`
     );
+  } else if (cityHomes) {
+    html = injectCityHomesBody(html, cityHomes);
+    console.log(`  Body: injected city homes-for-sale page "${cityHomes.city}" with intro + links + attribution`);
   } else {
     html = injectGenericBody(html, route);
   }
