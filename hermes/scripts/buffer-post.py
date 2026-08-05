@@ -175,6 +175,7 @@ def create_post(channel_id, text, image_url=None, scheduled_at=None, link_url=No
                         status
                         text
                         createdAt
+                        dueAt
                     }
                 }
                 ... on MutationError {
@@ -192,6 +193,8 @@ def create_post(channel_id, text, image_url=None, scheduled_at=None, link_url=No
         print(f"   Text preview: {post.get('text', '')[:60]}...")
         if post.get("createdAt"):
             print(f"   Created: {post['createdAt']}")
+        if post.get("dueAt"):
+            print(f"   Scheduled for: {post['dueAt']}")
         return post
     else:
         print(f"❌ Failed: {post_result.get('message', 'Unknown error')}")
@@ -241,7 +244,28 @@ def post_from_file(filepath):
         print(f"  📤 Posting to {plat['name']}...")
         result = create_post(channel_id, caption, image_url, link_url=link_url)
         if result:
-            results.append({"platform": plat["name"], "status": "posted", "id": result["id"]})
+            results.append({
+                "platform": plat["name"],
+                "status": result.get("status", "posted"),
+                "scheduled_at": result.get("dueAt"),
+                "buffer_id": result["id"],
+            })
+    
+    # Write scheduled_posts back into the pack so the email script can show
+    # real per-platform times instead of a vague "post by" deadline.
+    if results:
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                pack_data = json.load(f)
+            pack_data["scheduled_posts"] = [
+                {"platform": r["platform"], "status": r["status"], "scheduled_at": r["scheduled_at"]}
+                for r in results if r.get("scheduled_at")
+            ]
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(pack_data, f, indent=2, ensure_ascii=False)
+            print(f"📝 Wrote scheduled_posts with {len(pack_data['scheduled_posts'])} entries to {filepath}")
+        except OSError as err:
+            print(f"⚠️ Could not write scheduled_posts to pack: {err}", file=sys.stderr)
     
     return results
 
