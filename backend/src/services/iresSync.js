@@ -1,17 +1,15 @@
 import getPool from '../config/database.js';
 
 /**
- * IRES IDX feed sync — RESO Web API (JSON) with RETS fallback note.
+ * IRES IDX feed sync — RESO Web API (JSON) via MLS Grid.
  *
- * Expected env vars (added when Adam provides feed credentials):
- *   IRES_API_URL      — RESO Web API base URL (e.g. https://feed.ires-mls.com/reso)
- *   IRES_CLIENT_ID    — OAuth client id (RESO Web API)
- *   IRES_CLIENT_SECRET— OAuth client secret
- *   IRES_USERNAME     — feed username
- *   IRES_PASSWORD     — feed password
+ * Env vars:
+ *   IRES_API_URL       — RESO Web API base URL (https://api.mlsgrid.com/v2)
+ *   IRES_ACCESS_TOKEN  — static bearer token (MLS Grid IDX token) — preferred
+ *   — OR OAuth credentials (only if no static token):
+ *   IRES_CLIENT_ID / IRES_CLIENT_SECRET / IRES_USERNAME / IRES_PASSWORD
  *
- * Runs via:  node backend/src/services/iresSync.js
- * Or triggered from a cron:  npm run sync-listings
+ * Runs via:  npm run sync-listings
  */
 
 const MLS_FIELDS = [
@@ -20,7 +18,7 @@ const MLS_FIELDS = [
   'PostalCode', 'CountyOrParish', 'ListPrice', 'BedroomsTotal',
   'BathroomsTotalInteger', 'BathroomsFull', 'LivingArea', 'LotSizeArea',
   'YearBuilt', 'GarageSpaces', 'AssociationFee', 'PublicRemarks',
-  'Latitude', 'Longitude', 'ListingURL', 'Media',
+  'Latitude', 'Longitude',
 ];
 
 const STATUS_MAP = {
@@ -37,13 +35,22 @@ const STATUS_MAP = {
 function normalizeListing(raw) {
   const media = Array.isArray(raw.Media) ? raw.Media : [];
   const photos = media
-    .filter((m) => m?.MediaCategory === 'Photo' || m?.MediaType === 'Image')
-    .map((m) => m.MediaURL || m.URL)
+    .filter((m) => typeof m?.MediaURL === 'string' && /\.(jpe?g|png|webp)(\?|$)/i.test(m.MediaURL))
+    .sort((a, b) => (a.Order ?? 0) - (b.Order ?? 0))
+    .map((m) => m.MediaURL)
     .filter(Boolean);
 
   const street = [raw.StreetNumber, raw.StreetName].filter(Boolean).join(' ');
   const city = raw.City || '';
   const state = raw.StateOrProvince || 'CO';
+
+  // Data sanitization: MLS feeds contain garbage values (e.g. HOA fee $9.7B).
+  // Store null rather than absurd numbers — never ship junk to the site.
+  const num = (v, max) => {
+    if (v === null || v === undefined || v === '') return null;
+    const n = Number(v);
+    return Number.isFinite(n) && n > 0 && n <= max ? n : null;
+  };
 
   const slugBase = `${street || 'home'} ${city} ${state} ${raw.ListPrice || ''}`
     .toLowerCase()
@@ -61,21 +68,19 @@ function normalizeListing(raw) {
     state,
     postal_code: raw.PostalCode ? String(raw.PostalCode) : null,
     county: raw.CountyOrParish || null,
-    list_price: raw.ListPrice != null ? raw.ListPrice : null,
-    beds: raw.BedroomsTotal != null ? raw.BedroomsTotal : null,
-    baths: raw.BathroomsTotalInteger != null
-      ? raw.BathroomsTotalInteger
-      : raw.BathroomsFull != null ? raw.BathroomsFull : null,
-    living_area: raw.LivingArea != null ? raw.LivingArea : null,
-    lot_size: raw.LotSizeArea != null ? raw.LotSizeArea : null,
-    year_built: raw.YearBuilt || null,
-    garage_spaces: raw.GarageSpaces != null ? raw.GarageSpaces : null,
-    hoa_fee: raw.AssociationFee != null ? raw.AssociationFee : null,
+    list_price: num(raw.ListPrice, 1e9),
+    beds: num(raw.BedroomsTotal, 100),
+    baths: num(raw.BathroomsTotalInteger, 50) ?? num(raw.BathroomsFull, 50),
+    living_area: num(raw.LivingArea, 1e7),
+    lot_size: num(raw.LotSizeArea, 1e12),
+    year_built: num(raw.YearBuilt, 2100),
+    garage_spaces: num(raw.GarageSpaces, 100),
+    hoa_fee: num(raw.AssociationFee, 1e6),
     description: raw.PublicRemarks || null,
     photos,
-    latitude: raw.Latitude || null,
-    longitude: raw.Longitude || null,
-    listing_url: raw.ListingURL || null,
+    latitude: num(raw.Latitude, 90),
+    longitude: num(raw.Longitude, 180),
+    listing_url: null,
     mls_source: 'IRES',
     raw,
     slug: `${slugBase}-${String(raw.ListingId || raw.ListingKey).slice(-6)}`,
@@ -88,11 +93,13 @@ async function fetchPage(authToken, offset) {
   url.searchParams.set('$skip', String(offset));
   url.searchParams.set('$filter', "StandardStatus eq 'Active'");
   url.searchParams.set('$select', MLS_FIELDS.join(','));
+  url.searchParams.set('$expand', 'Media');
 
   const res = await fetch(url, {
     headers: {
       Authorization: `Bearer ${authToken}`,
       Accept: 'application/json',
+      'Accept-Encoding': 'gzip',
       'User-Agent': 'saahomes-idx/1.0 (Schwartz and Associates)',
     },
     signal: AbortSignal.timeout(60000),
@@ -104,6 +111,10 @@ async function fetchPage(authToken, offset) {
 }
 
 async function getToken() {
+  // Static token mode (MLS Grid IDX token) — no OAuth needed.
+  if (process.env.IRES_ACCESS_TOKEN) {
+    return process.env.IRES_ACCESS_TOKEN;
+  }
   const tokenUrl = new URL('/oauth2/token', process.env.IRES_API_URL);
   const body = new URLSearchParams({
     grant_type: 'password',
@@ -124,8 +135,13 @@ async function getToken() {
 }
 
 export async function syncListings() {
-  const missing = ['IRES_API_URL', 'IRES_CLIENT_ID', 'IRES_CLIENT_SECRET', 'IRES_USERNAME', 'IRES_PASSWORD']
-    .filter((k) => !process.env[k]);
+  const missing = ['IRES_API_URL'].filter((k) => !process.env[k]);
+  if (process.env.IRES_ACCESS_TOKEN) {
+    // static token mode — nothing else needed
+  } else {
+    missing.push(...['IRES_CLIENT_ID', 'IRES_CLIENT_SECRET', 'IRES_USERNAME', 'IRES_PASSWORD']
+      .filter((k) => !process.env[k]));
+  }
   if (missing.length) {
     console.log(`⏳ IRES feed not configured yet — missing: ${missing.join(', ')}`);
     return { skipped: true, missing };
