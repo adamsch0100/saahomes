@@ -39,6 +39,21 @@ def esc(text: str) -> str:
     )
 
 
+def fmt_mt(iso: str) -> str:
+    """Format an ISO-8601 UTC timestamp as a human-friendly Mountain Time string."""
+    from datetime import datetime, timezone
+    from zoneinfo import ZoneInfo
+
+    try:
+        dt = datetime.fromisoformat(iso.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        mt = dt.astimezone(ZoneInfo("America/Denver"))
+        return mt.strftime("%a %b %-d, %-I:%M %p MT")
+    except Exception:
+        return iso
+
+
 def platform_block(platform: dict[str, Any]) -> str:
     name = esc(platform.get("name", "Platform"))
     caption = esc(platform.get("caption", ""))
@@ -67,19 +82,56 @@ def build_html(pack: dict[str, Any]) -> str:
     title = esc(promoting.get("title", pack.get("title", "SAA Homes content")))
     url = esc(promoting.get("url", pack.get("url", "https://saahomes.com")))
     intro = esc(pack.get("intro", "Copy each section below into the matching platform."))
+    scheduled_posts = pack.get("scheduled_posts", [])
+    schedule_html = ""
+    if scheduled_posts:
+        rows = ""
+        for sp in scheduled_posts:
+            plat = esc(sp.get("platform", "Platform"))
+            due = sp.get("scheduled_at") or sp.get("due_at")
+            status = sp.get("status", "scheduled")
+            if status == "sent":
+                badge = "✅ Posted"
+                when = f"<strong>{fmt_mt(due)}</strong>" if due else "—"
+            elif status == "scheduled":
+                badge = "⏳ Scheduled"
+                when = f"<strong>{fmt_mt(due)}</strong>" if due else "—"
+            else:
+                badge = f"({esc(status)})"
+                when = f"<strong>{fmt_mt(due)}</strong>" if due else "—"
+            rows += (
+                f'<tr style="border-bottom:1px solid #e5e7eb;">'
+                f'<td style="padding:8px 12px;">{badge}</td>'
+                f'<td style="padding:8px 12px;">{plat}</td>'
+                f'<td style="padding:8px 12px;">{when}</td></tr>'
+            )
+        schedule_html = f"""
+        <section style="margin:16px 0;padding:16px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;">
+          <h2 style="margin:0 0 10px;font-size:17px;">🗓️ Post schedule (auto-queued via Buffer)</h2>
+          <table style="border-collapse:collapse;width:100%;">
+            <tr style="background:#dcfce7;">
+              <th style="padding:8px 12px;text-align:left;font-size:13px;">Status</th>
+              <th style="padding:8px 12px;text-align:left;font-size:13px;">Platform</th>
+              <th style="padding:8px 12px;text-align:left;font-size:13px;">Goes live</th>
+            </tr>
+            {rows}
+          </table>
+          <p style="margin:10px 0 0;font-size:13px;color:#166534;">Nothing to do — posts are already queued. Times are Mountain Time.</p>
+        </section>
+        """
     post_by = pack.get("post_by")
     post_by_html = ""
-    if post_by:
+    if post_by and not scheduled_posts:
         post_by_html = (
             f'<p style="background:#fef3c7;border:1px solid #fcd34d;padding:12px;border-radius:8px;">'
             f"<strong>Post by:</strong> {esc(post_by)} — Meta Business Suite (FB + IG) · Google Business Profile · X</p>"
         )
 
     operator_schedule = pack.get("operator_schedule", [])
-    schedule_html = ""
-    if operator_schedule:
+    op_html = ""
+    if operator_schedule and not scheduled_posts:
         items = "".join(f"<li>{esc(item)}</li>" for item in operator_schedule)
-        schedule_html = f"""
+        op_html = f"""
         <section style="margin:16px 0;padding:16px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;">
           <h2 style="margin:0 0 10px;font-size:17px;">What to do (step by step)</h2>
           <ol style="margin:0;padding-left:20px;line-height:1.6;">{items}</ol>
@@ -106,14 +158,15 @@ def build_html(pack: dict[str, Any]) -> str:
     if video_note:
         extras.append(f"<p><strong>Video note:</strong> {esc(video_note)}</p>")
 
+    head_note = "📋 Social post pack — scheduled & queued" if scheduled_posts else "📋 Social post pack — ready to publish"
     return f"""<!DOCTYPE html>
 <html><body style="font-family:Arial,sans-serif;color:#111;max-width:720px;margin:0 auto;padding:16px;">
-  <h1 style="font-size:22px;">📋 Social post pack — ready to publish</h1>
+  <h1 style="font-size:22px;">{esc(head_note)}</h1>
   <p><strong>Promoting:</strong> <a href="{url}">{title}</a></p>
   <p>{intro}</p>
   {post_by_html}
   {schedule_html}
-  <p><strong>Publish in:</strong> Meta Business Suite (FB + IG) · Google Business Profile · X below</p>
+  {op_html}
   {platforms_html}
   {''.join(extras)}
   <hr />

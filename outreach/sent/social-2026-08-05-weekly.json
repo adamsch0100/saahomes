@@ -1,0 +1,38 @@
+{
+  "subject": "SAA Homes — Social posts | Buyer Concession Cheat Sheet (Market Pulse Week)",
+  "promoting": {
+    "title": "Buyer Concession Cheat Sheet for Northern Colorado Home Buyers",
+    "url": "https://saahomes.com/blog/buyer-concession-cheat-sheet-northern-colorado/"
+  },
+  "intro": "Week 1 rotation (Market pulse) + new content promotion. The August market update flagged seller concessions as the defining buyer-friendly trend of 2026 — the new Buyer Concession Cheat Sheet turns that trend into actionable buyer leverage. All three posts are auto-queued via Buffer with the new branded hero image.",
+  "scheduled_posts": [
+    { "platform": "X", "status": "sent", "scheduled_at": "2026-08-05T16:31:00Z" },
+    { "platform": "Google Business Profile", "status": "sent", "scheduled_at": "2026-08-05T17:22:00Z" },
+    { "platform": "Facebook", "status": "scheduled", "scheduled_at": "2026-08-06T14:07:00Z" }
+  ],
+  "operator_schedule": [
+    "Nothing to do — posts are queued via Buffer"
+  ],
+  "rotation_week": 1,
+  "rotation_theme": "Market pulse + new blog promotion",
+  "platforms": [
+    {
+      "name": "Google Business Profile",
+      "caption": "Northern Colorado's market is shifting — and it's buyer-friendly. 🏡\n\nWith more inventory and steady rates, sellers are offering concessions again: covering closing costs, rate buydowns, and more.\n\nOur new Buyer Concession Cheat Sheet breaks down exactly how much sellers can contribute by loan type (conventional, FHA, VA), how to ask for closing-cost help, and how to stack concessions with CHFA down payment assistance in Fort Collins, Loveland, Windsor, and Greeley.\n\nLearn more at the link below.",
+      "image_url": "https://saahomes.com/images/buyer-concession-cheat-sheet-northern-colorado.jpg"
+    },
+    {
+      "name": "Facebook",
+      "caption": "🤝 Buyer concessions are back in Northern Colorado — here's what that means for you.\n\nOur August market update flagged it: with more inventory and steady rates, sellers are increasingly offering concessions to get deals done — covering closing costs, rate buydowns, even prepaids. That's the most buyer-friendly conditions we've seen since 2022.\n\nNew on the blog: the Buyer Concession Cheat Sheet. It breaks down:\n• Maximum seller contributions by loan type — conventional, FHA, VA (yes, the limits differ)\n• How to ask for closing-cost assistance the right way\n• How to stack concessions with CHFA down payment assistance in Fort Collins, Loveland, Windsor & Greeley\n• What counts as a legitimate concession vs. a red flag\n\nWe also refreshed the market data on our Loveland, Fort Collins, Greeley, and Windsor city pages — median prices, inventory, and days on market, updated for mid-2026.\n\nWhether you're a first-time buyer using CHFA or a move-up buyer in the $500K–$650K range, this guide shows you exactly what leverage you have at the negotiating table.\n\nRead the full guide → https://saahomes.com/blog/buyer-concession-cheat-sheet-northern-colorado/\n\nAdam & Mandi Schwartz | SAA Homes\n(970) 999-1407\n\n#NorthernColoradoRealEstate #FortCollinsRealEstate #LovelandRealEstate #WindsorCO #GreeleyCO #BuyerConcessions #CHFA #ColoradoRealEstate #SAAHomes",
+      "image_url": "https://saahomes.com/images/buyer-concession-cheat-sheet-northern-colorado.jpg"
+    },
+    {
+      "name": "X",
+      "caption": "Buyer concessions are back in NoCo 🏡 Sellers are covering closing costs — here's what you can ask for by loan type, and how to stack it with CHFA help. New cheat sheet just published:\nhttps://saahomes.com/blog/buyer-concession-cheat-sheet-northern-colorado/",
+      "image_url": "https://saahomes.com/images/buyer-concession-cheat-sheet-northern-colorado.jpg"
+    }
+  ],
+  "youtube": null,
+  "x": null,
+  "video_note": null
+}
