@@ -51,6 +51,12 @@ function normalizeListing(raw) {
     const n = Number(v);
     return Number.isFinite(n) && n > 0 && n <= max ? n : null;
   };
+  // Signed variant for coordinates — Colorado longitudes are negative (-105°).
+  const numSigned = (v, max) => {
+    if (v === null || v === undefined || v === '') return null;
+    const n = Number(v);
+    return Number.isFinite(n) && n !== 0 && Math.abs(n) <= max ? n : null;
+  };
 
   const slugBase = `${street || 'home'} ${city} ${state} ${raw.ListPrice || ''}`
     .toLowerCase()
@@ -78,8 +84,8 @@ function normalizeListing(raw) {
     hoa_fee: num(raw.AssociationFee, 1e6),
     description: raw.PublicRemarks || null,
     photos,
-    latitude: num(raw.Latitude, 90),
-    longitude: num(raw.Longitude, 180),
+    latitude: numSigned(raw.Latitude, 90),
+    longitude: numSigned(raw.Longitude, 180),
     listing_url: null,
     mls_source: 'IRES',
     raw,
