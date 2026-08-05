@@ -200,6 +200,24 @@ def create_post(channel_id, text, image_url=None, scheduled_at=None, link_url=No
         print(f"❌ Failed: {post_result.get('message', 'Unknown error')}")
         return None
 
+def image_check(url):
+    """Return (ok, message). Empty URL = allowed (text-only). Black placeholder
+    or unreachable/non-image URL = hard fail (Adam: no black images, Aug 2026)."""
+    if not url:
+        return True, "no image (text-only post, allowed)"
+    if "blog-default-black" in url:
+        return False, "uses blog-default-black.jpg placeholder — create a real branded image first"
+    try:
+        req = Request(url, method="HEAD", headers={"User-Agent": "Mozilla/5.0"})
+        with urlopen(req, timeout=15) as resp:
+            ct = resp.headers.get_content_type() or ""
+            if ct.startswith("image/"):
+                return True, f"serves {ct}"
+            return False, f"URL serves {ct or 'unknown content-type'}, not an image"
+    except Exception as e:
+        return False, f"image URL unreachable: {e}"
+
+
 def post_from_file(filepath):
     """Post social content from a JSON pack file."""
     with open(filepath) as f:
@@ -222,6 +240,21 @@ def post_from_file(filepath):
     results = []
     promoting = pack.get("promoting", {})
     link_url = promoting.get("url", "") if promoting else ""
+
+    # HARD IMAGE GATE: refuse the whole pack if any platform's image is the
+    # black placeholder or unreachable — the agent must fix it before posting.
+    image_failures = []
+    for plat in platforms:
+        img = plat.get("image_url") or plat.get("image") or ""
+        ok, msg = image_check(img)
+        if not ok:
+            image_failures.append(f"  - {plat.get('name')}: {msg}")
+    if image_failures:
+        print("❌ IMAGE GATE FAILED — aborting (no posts sent). Fix images first:")
+        for line in image_failures:
+            print(line)
+        return None
+    print("✅ Image gate passed — no black/broken images in this pack.")
     
     for plat in platforms:
         name = plat["name"].lower()
