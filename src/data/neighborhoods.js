@@ -1915,6 +1915,7 @@ export const neighborhoods = [
     walkScore: 35,
     metaDescription: 'Sunset Vista Loveland real estate - established subdivision near Centerra with mountain views and top schools. SAA Homes.',
     keywords: 'Sunset Vista Loveland, 43rd Street Loveland homes, Centerra area real estate, established Loveland subdivisions, Mountain View High School homes, Centennial Elementary Loveland',
+    youtubeId: '4A-hEg10OAc',
     neighborhoodHighlights: [
       { title: 'Established community', description: 'Mature trees, established landscaping, and well-maintained homes in a settled southwest Loveland neighborhood.' },
       { title: 'Top school cluster', description: 'Centennial Elementary (8/10) and Mountain View High School (8/10) serve the community.' },
@@ -1949,6 +1950,7 @@ export const neighborhoods = [
     walkScore: 32,
     metaDescription: 'Cedar Creek Loveland real estate - newer southwest Loveland subdivision near Centerra with contemporary homes. SAA Homes.',
     keywords: 'Cedar Creek Loveland, southwest Loveland new homes, Centerra area subdivisions, new construction Loveland, Centennial Elementary Loveland, Mountain View High School Loveland, patio homes Loveland',
+    youtubeId: 'mQPY3SLVtOU',
     neighborhoodHighlights: [
       { title: 'Newer homes', description: 'All homes built 2015 or later with modern open floor plans, energy efficiency, and contemporary finishes.' },
       { title: 'Centerra access', description: 'Minutes from the Promenade Shops - Northern Colorado\'s premier shopping, dining, and entertainment destination.' },
@@ -1983,6 +1985,7 @@ export const neighborhoods = [
     walkScore: 15,
     metaDescription: 'Eagle Crest Loveland real estate - custom foothills homes with mountain views near Devils Backbone Open Space. SAA Homes.',
     keywords: 'Eagle Crest Loveland, west Loveland foothills, Devils Backbone homes, custom homes Loveland, mountain view homes Loveland, Loveland acreage, foothills real estate Loveland',
+    youtubeId: '4-_40uT9W8U',
     neighborhoodHighlights: [
       { title: 'Devils Backbone access', description: 'The iconic Devils Backbone hiking trail is steps from home - one of Northern Colorado\'s best outdoor destinations.' },
       { title: 'Custom homes', description: 'Individually designed custom homes on large lots with premium finishes and dramatic mountain views.' },
