@@ -49,7 +49,9 @@ export default function LeadCaptureChat() {
   // detail: { message: "pre-seeded visitor question" } — optional.
   // Uses a ref so the listener always calls the latest sendMessage closure.
   const sendMessageRef = useRef(null);
-  sendMessageRef.current = sendMessage;
+  useEffect(() => {
+    sendMessageRef.current = sendMessage;
+  });
   useEffect(() => {
     const openChat = (e) => {
       const seed = e?.detail?.message;
