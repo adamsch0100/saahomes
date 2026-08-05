@@ -34,13 +34,40 @@ const BED_OPTIONS = [
   { label: "3+", value: "3" }, { label: "4+", value: "4" }, { label: "5+", value: "5" },
 ];
 
+const BATH_OPTIONS = [
+  { label: "Any baths", value: "" }, { label: "1+", value: "1" }, { label: "2+", value: "2" },
+  { label: "3+", value: "3" }, { label: "4+", value: "4" },
+];
+
+const TYPE_OPTIONS = [
+  { label: "All types", value: "" },
+  { label: "House", value: "Residential" },
+  { label: "Condo / Townhome", value: "Condominium" },
+  { label: "Townhome", value: "Townhouse" },
+  { label: "Land / Lot", value: "Land" },
+  { label: "Multi-Family", value: "Multi-Family" },
+  { label: "Commercial", value: "Commercial Sale" },
+];
+
 const formatPrice = (n) =>
   n == null ? "—" : `$${Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 
 export default function ListingSearch({ location, height = "700px" }) {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const urlLocation = searchParams.get("location") || location || "";
-  const [filters, setFilters] = useState({ city: urlLocation, price: "", beds: "", sort: "newest" });
+  const urlPrice =
+    searchParams.get("price") ||
+    (searchParams.get("minPrice") || searchParams.get("maxPrice")
+      ? `${searchParams.get("minPrice") || ""}-${searchParams.get("maxPrice") || ""}`
+      : "");
+  const [filters, setFilters] = useState({
+    city: searchParams.get("city") || urlLocation || "",
+    price: urlPrice,
+    beds: searchParams.get("beds") || "",
+    baths: searchParams.get("baths") || "",
+    type: searchParams.get("type") || "",
+    sort: searchParams.get("sort") || "newest",
+  });
   const [results, setResults] = useState([]);
   const [meta, setMeta] = useState({ total: 0, pages: 0, page: 1 });
   const [loading, setLoading] = useState(false);
@@ -59,6 +86,8 @@ export default function ListingSearch({ location, height = "700px" }) {
       if (max) params.set("maxPrice", max);
     }
     if (f.beds) params.set("beds", f.beds);
+    if (f.baths) params.set("baths", f.baths);
+    if (f.type) params.set("type", f.type);
     if (f.sort) params.set("sort", f.sort);
     params.set("limit", "50");
 
@@ -80,7 +109,26 @@ export default function ListingSearch({ location, height = "700px" }) {
 
   useEffect(() => { fetchListings(); }, [fetchListings]);
 
-  const setFilter = (key, value) => setFilters((prev) => ({ ...prev, [key]: value }));
+  const setFilter = (key, value) => {
+    setFilters((prev) => {
+      const next = { ...prev, [key]: value };
+      // Sync filters to the URL so searches are shareable, back-buttonable,
+      // and crawlable (e.g. /properties/?city=Fort+Collins&minPrice=400000&beds=3)
+      const params = new URLSearchParams();
+      if (next.city) params.set("city", next.city);
+      if (next.price) {
+        const [min, max] = next.price.split("-");
+        if (min) params.set("minPrice", min);
+        if (max) params.set("maxPrice", max);
+      }
+      if (next.beds) params.set("beds", next.beds);
+      if (next.baths) params.set("baths", next.baths);
+      if (next.type) params.set("type", next.type);
+      if (next.sort && next.sort !== "newest") params.set("sort", next.sort);
+      setSearchParams(params, { replace: true });
+      return next;
+    });
+  };
 
   const selectCard = (id) => {
     setSelectedId(id);
@@ -130,6 +178,14 @@ export default function ListingSearch({ location, height = "700px" }) {
       <select value={filters.beds} onChange={(e) => setFilter("beds", e.target.value)}
         className="px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-black" aria-label="Beds">
         {BED_OPTIONS.map((o) => <option key={o.value || "any"} value={o.value}>{o.label}</option>)}
+      </select>
+      <select value={filters.baths} onChange={(e) => setFilter("baths", e.target.value)}
+        className="px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-black" aria-label="Baths">
+        {BATH_OPTIONS.map((o) => <option key={o.value || "any"} value={o.value}>{o.label}</option>)}
+      </select>
+      <select value={filters.type} onChange={(e) => setFilter("type", e.target.value)}
+        className="px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-black" aria-label="Property type">
+        {TYPE_OPTIONS.map((o) => <option key={o.value || "any"} value={o.value}>{o.label}</option>)}
       </select>
       <select value={filters.sort} onChange={(e) => setFilter("sort", e.target.value)}
         className="px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-black" aria-label="Sort">
