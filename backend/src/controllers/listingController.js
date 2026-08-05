@@ -59,12 +59,29 @@ export const searchListings = async (req, res) => {
       [...params, Number(limit), offset]
     );
 
-    // City facet counts for filter chips
+    // City facet counts for filter chips — rebuilt with its OWN param list so
+    // placeholder positions stay consistent (the old version stripped the city
+    // clause but kept its param → PG bind-count error → "Search failed").
+    const fWhere = [];
+    const fParams = [];
+    let fi = 1;
+    fWhere.push('is_active = TRUE');
+    if (status) { fWhere.push(`status = $${fi++}`); fParams.push(status); }
+    if (minPrice) { fWhere.push(`list_price >= $${fi++}`); fParams.push(Number(minPrice)); }
+    if (maxPrice) { fWhere.push(`list_price <= $${fi++}`); fParams.push(Number(maxPrice)); }
+    if (beds) { fWhere.push(`beds >= $${fi++}`); fParams.push(Number(beds)); }
+    if (baths) { fWhere.push(`baths >= $${fi++}`); fParams.push(Number(baths)); }
+    if (type) { fWhere.push(`property_type = $${fi++}`); fParams.push(type); }
+    if (q) {
+      fWhere.push(`(LOWER(city) LIKE $${fi} OR LOWER(street_name) LIKE $${fi} OR LOWER(description) LIKE $${fi})`);
+      fParams.push(`%${q.toLowerCase()}%`);
+      fi += 1;
+    }
     const facetRes = await pool.query(
       `SELECT city, COUNT(*) AS cnt FROM listings
-       WHERE ${whereSql.replace(/LOWER\(city\) = LOWER\(\$\d+\)/i, 'TRUE')} AND city IS NOT NULL
+       WHERE ${fWhere.join(' AND ')} AND city IS NOT NULL
        GROUP BY city ORDER BY cnt DESC LIMIT 20`,
-      params
+      fParams
     );
 
     res.json({
