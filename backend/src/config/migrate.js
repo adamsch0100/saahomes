@@ -234,6 +234,18 @@ export const runMigrations = async () => {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
+
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS email_outbox (
+          id SERIAL PRIMARY KEY,
+          to_email VARCHAR(255) NOT NULL,
+          subject TEXT NOT NULL,
+          html TEXT NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          sent_at TIMESTAMP
+        )
+      `);
+
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_contact_submissions_email ON contact_submissions(email);
       CREATE INDEX IF NOT EXISTS idx_contact_submissions_created_at ON contact_submissions(created_at);

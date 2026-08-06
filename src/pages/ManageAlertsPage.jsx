@@ -40,6 +40,10 @@ export default function ManageAlertsPage() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [needsLogin, setNeedsLogin] = useState(false);
+  const [magicEmail, setMagicEmail] = useState("");
+  const [magicSent, setMagicSent] = useState(false);
+  const [magicBusy, setMagicBusy] = useState(false);
   const [busy, setBusy] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editFreq, setEditFreq] = useState("daily");
@@ -48,23 +52,58 @@ export default function ManageAlertsPage() {
   const [unsubscribed, setUnsubscribed] = useState(false);
 
   const load = useCallback(() => {
-    if (!token) {
-      setError("This link is missing its token. Use the link from your alert email.");
-      setLoading(false);
-      return;
-    }
     setLoading(true);
-    fetch(`${API_BASE}/api/alerts/manage?token=${encodeURIComponent(token)}`)
-      .then((r) => r.json())
-      .then((d) => {
-        if (!d.success) throw new Error(d.error || "Could not load your alerts.");
-        setData(d.data);
-      })
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
+    setError(null);
+    if (token) {
+      fetch(`${API_BASE}/api/alerts/manage?token=${encodeURIComponent(token)}`)
+        .then((r) => r.json())
+        .then((d) => {
+          if (!d.success) throw new Error(d.error || "Could not load your alerts.");
+          setData(d.data);
+          setNeedsLogin(false);
+        })
+        .catch((e) => { setError(e.message); setNeedsLogin(true); })
+        .finally(() => setLoading(false));
+    } else {
+      // Signed in via the auto-login cookie? (set when the search was saved)
+      fetch(`${API_BASE}/api/alerts/me`, { credentials: "same-origin" })
+        .then((r) => r.json())
+        .then((d) => {
+          if (!d.success) { setNeedsLogin(true); return; }
+          setData(d.data);
+          setNeedsLogin(false);
+        })
+        .catch(() => setNeedsLogin(true))
+        .finally(() => setLoading(false));
+    }
   }, [token]);
 
   useEffect(() => { load(); }, [load]);
+
+  const sendMagicLink = async (e) => {
+    e.preventDefault();
+    setMagicBusy(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/alerts/magic-link`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: magicEmail.trim() }),
+      });
+      const d = await res.json();
+      if (!d.success) throw new Error(d.error || "Could not send the link.");
+      setMagicSent(true);
+    } catch (err) {
+      setError(err.message);
+    } finally { setMagicBusy(false); }
+  };
+
+  const signOut = async () => {
+    try {
+      await fetch(`${API_BASE}/api/alerts/signout`, { method: "POST", credentials: "same-origin" });
+    } catch { /* noop */ }
+    setData(null);
+    setNeedsLogin(true);
+  };
 
   const toggleSearch = async (id, isActive) => {
     setBusy(id);
@@ -134,6 +173,45 @@ export default function ManageAlertsPage() {
               Browse homes instead
             </Link>
           </div>
+        ) : needsLogin ? (
+          <div className="mt-8 bg-white border border-gray-200 rounded-xl p-8 max-w-md mx-auto">
+            <h2 className="text-xl font-bold text-gray-900">Find your saved searches</h2>
+            <p className="text-gray-500 text-sm mt-2 leading-relaxed">
+              Enter the email you used when you saved a search and we'll email you a secure
+              sign-in link — no password needed.
+            </p>
+            {magicSent ? (
+              <div className="mt-6 bg-emerald-50 border border-emerald-200 rounded-lg p-4 text-center">
+                <p className="text-emerald-700 text-sm font-medium">✅ Link sent!</p>
+                <p className="text-emerald-600 text-xs mt-1">
+                  If we have a saved search for that email, your sign-in link is on its way.
+                  Check your inbox (and spam folder).
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={sendMagicLink} className="mt-6 space-y-3">
+                <input
+                  type="email"
+                  required
+                  value={magicEmail}
+                  onChange={(e) => setMagicEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none text-sm"
+                />
+                <button
+                  type="submit"
+                  disabled={magicBusy}
+                  className="w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 disabled:opacity-50"
+                >
+                  {magicBusy ? "Sending…" : "Email me my sign-in link"}
+                </button>
+                {error && <p className="text-red-600 text-sm">{error}</p>}
+              </form>
+            )}
+            <p className="text-xs text-gray-400 text-center mt-4">
+              Just saved a search? Check your inbox — the confirmation email has your manage link.
+            </p>
+          </div>
         ) : error ? (
           <div className="mt-8 bg-white border border-gray-200 rounded-xl p-8 text-center">
             <p className="text-gray-700">{error}</p>
@@ -146,9 +224,19 @@ export default function ManageAlertsPage() {
           <p className="mt-8 text-gray-500">Loading your alerts…</p>
         ) : (
           <>
-            <p className="text-sm text-gray-600 mt-6">
-              Alerts go to <strong className="text-gray-900">{data.email}</strong>
-            </p>
+            <div className="flex flex-wrap items-center justify-between gap-3 mt-6">
+              <p className="text-sm text-gray-600">
+                Signed in as <strong className="text-gray-900">{data.email}</strong>
+                {data.phone && <span className="text-gray-400"> · {data.phone}</span>}
+              </p>
+              <button
+                type="button"
+                onClick={signOut}
+                className="text-xs text-gray-400 underline hover:text-gray-600"
+              >
+                Sign out
+              </button>
+            </div>
             {data.searches.length === 0 ? (
               <div className="mt-4 bg-white border border-gray-200 rounded-xl p-8 text-center">
                 <p className="text-gray-700">No active saved searches.</p>
