@@ -17,7 +17,6 @@ const fmtCompact = (n) =>
   n == null ? "—" : n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(2).replace(/\.00$/, "")}M` : `$${Math.round(n / 1000)}K`;
 
 function Card({ listing }) {
-  const photo = (listing.photos && listing.photos[0]) || "/images/buyers-hero.jpg";
   return (
     <Link
       to={`/homes-for-sale/${listing.slug}/`}

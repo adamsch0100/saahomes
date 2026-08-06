@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { rememberSavedSearch } from "../utils/listingHelpers.js";
 
 const API_BASE = (() => {
@@ -27,6 +27,11 @@ function filterSummary(filters = {}) {
   return parts.length ? parts.join(" · ") : "All Northern Colorado";
 }
 
+/**
+ * SaveSearchModal — RealScout-style lead capture.
+ * Not logged in: email + phone required → backend creates account + sets saa_user_token cookie.
+ * Logged in (cookie session): pre-fills contact, one-tap save under existing account.
+ */
 export default function SaveSearchModal({
   filters = {},
   buttonLabel = "Save this search",
@@ -44,6 +49,49 @@ export default function SaveSearchModal({
   const [sendDay, setSendDay] = useState("Monday");
   const [state, setState] = useState("idle"); // idle | saving | done | error
   const [error, setError] = useState("");
+  // Session: null = checking, false = guest, object = signed in
+  const [session, setSession] = useState(null);
+  const [wasGuest, setWasGuest] = useState(true);
+
+  // When modal opens, check cookie session via /api/alerts/me
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    setSession(null);
+    fetch(`${API_BASE}/api/alerts/me`, { credentials: "same-origin" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled) return;
+        if (d.success && d.data) {
+          setSession(d.data);
+          setWasGuest(false);
+          if (d.data.email) setEmail(d.data.email);
+          if (d.data.phone) {
+            // Format digits for display if backend stored raw digits
+            const digits = String(d.data.phone).replace(/\D/g, "");
+            if (digits.length === 10) {
+              setPhone(`(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`);
+            } else {
+              setPhone(String(d.data.phone));
+            }
+          }
+          if (d.data.name && !name) setName(d.data.name);
+        } else {
+          setSession(false);
+          setWasGuest(true);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSession(false);
+          setWasGuest(true);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-check when open flips true
+  }, [open]);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -62,6 +110,7 @@ export default function SaveSearchModal({
       const res = await fetch(`${API_BASE}/api/alerts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify({
           email: emailStr,
           phone: phone.trim(),
@@ -88,6 +137,21 @@ export default function SaveSearchModal({
     }
   };
 
+  const resetAndClose = () => {
+    setOpen(false);
+    setState("idle");
+    setError("");
+    setPassword("");
+    // Keep email/phone if they just signed up so re-open feels sticky
+    if (wasGuest && state !== "done") {
+      setEmail("");
+      setPhone("");
+      setName("");
+    }
+  };
+
+  const isSignedIn = session && session.email;
+
   return (
     <>
       <button
@@ -102,32 +166,50 @@ export default function SaveSearchModal({
 
       {open && (
         <div
-          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4"
-          onClick={() => setOpen(false)}
+          className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4"
+          onClick={resetAndClose}
           role="dialog"
           aria-modal="true"
           aria-labelledby="save-search-title"
         >
           <div
-            className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 max-h-[92vh] overflow-y-auto"
+            className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 max-h-[92vh] overflow-y-auto pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]"
             onClick={(e) => e.stopPropagation()}
           >
             {state === "done" ? (
               <div className="text-center py-4">
                 <div className="mx-auto w-14 h-14 rounded-full bg-[#CFB36E]/25 flex items-center justify-center text-2xl mb-3" aria-hidden="true">✓</div>
-                <h3 id="save-search-title" className="text-xl font-bold text-gray-900">Search saved!</h3>
+                <h3 id="save-search-title" className="text-xl font-bold text-gray-900">
+                  {wasGuest ? "You're set up!" : "Search saved!"}
+                </h3>
                 <p className="text-gray-600 mt-2 text-sm leading-relaxed">
                   We&apos;ll email you when new homes match{" "}
                   <span className="font-semibold text-gray-900">{filterSummary(filters)}</span>
                   {" "}— including <strong>price drops</strong> and status changes.
                 </p>
+                {wasGuest ? (
+                  <p className="text-gray-700 mt-3 text-sm leading-relaxed bg-gray-50 border border-gray-100 rounded-lg px-3 py-2.5">
+                    Account created on this device.{" "}
+                    <strong>Manage your alerts anytime</strong> — no password required on this browser.
+                  </p>
+                ) : (
+                  <p className="text-gray-500 mt-3 text-sm">
+                    Added to your account ({session?.email || email}).
+                  </p>
+                )}
+                <a
+                  href="/alerts/manage/"
+                  className="mt-4 inline-flex items-center justify-center w-full py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                >
+                  Manage my alerts
+                </a>
                 <p className="text-gray-500 mt-3 text-xs">
                   Schwartz and Associates · (970) 999-1407 · Unsubscribe anytime from any email.
                 </p>
                 <button
                   type="button"
-                  onClick={() => { setOpen(false); setState("idle"); setEmail(""); setPhone(""); setName(""); }}
-                  className="mt-5 w-full py-3 bg-[#CFB36E] text-black font-semibold rounded-lg hover:bg-[#bd9f5a]"
+                  onClick={resetAndClose}
+                  className="mt-4 w-full py-3 bg-[#CFB36E] text-black font-semibold rounded-lg hover:bg-[#bd9f5a]"
                 >
                   Done
                 </button>
@@ -144,7 +226,7 @@ export default function SaveSearchModal({
                   </div>
                   <button
                     type="button"
-                    onClick={() => setOpen(false)}
+                    onClick={resetAndClose}
                     className="text-gray-400 hover:text-gray-700 text-2xl leading-none p-1"
                     aria-label="Close"
                   >
@@ -152,37 +234,70 @@ export default function SaveSearchModal({
                   </button>
                 </div>
 
-                {/* Value exchange banner */}
-                <div className="mt-4 rounded-lg bg-gray-50 border border-gray-100 px-3.5 py-2.5 text-xs text-gray-600 leading-relaxed">
-                  Email + phone required so we can deliver alerts and reach you when something exceptional lists.{" "}
-                  <strong className="text-gray-800">No spam — unsubscribe in one click.</strong>
-                </div>
+                {/* Session status banner */}
+                {session === null ? (
+                  <div className="mt-4 rounded-lg bg-gray-50 border border-gray-100 px-3.5 py-2.5 text-xs text-gray-500 animate-pulse">
+                    Checking your account…
+                  </div>
+                ) : isSignedIn ? (
+                  <div className="mt-4 rounded-lg bg-emerald-50 border border-emerald-200 px-3.5 py-2.5 text-xs text-emerald-900 leading-relaxed">
+                    <strong>Signed in as {session.email}</strong>
+                    {session.searches?.length > 0 && (
+                      <span className="text-emerald-700">
+                        {" "}· {session.searches.length} saved search{session.searches.length === 1 ? "" : "es"}
+                      </span>
+                    )}
+                    <br />
+                    This alert will be added to your account.{" "}
+                    <a href="/alerts/manage/" className="underline font-semibold">Manage alerts</a>
+                  </div>
+                ) : (
+                  <div className="mt-4 rounded-lg bg-gray-50 border border-gray-100 px-3.5 py-2.5 text-xs text-gray-600 leading-relaxed">
+                    <strong className="text-gray-800">No account needed</strong> — we&apos;ll create yours when you save.
+                    Email + phone required so we can deliver alerts.{" "}
+                    <strong className="text-gray-800">No spam — unsubscribe in one click.</strong>
+                  </div>
+                )}
 
                 <form onSubmit={submit} className="mt-4 space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@example.com"
-                      autoComplete="email"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                    <input
-                      type="tel"
-                      required
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="(970) 555-0123"
-                      autoComplete="tel"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none"
-                    />
-                  </div>
+                  {/* Hide contact fields when signed in and we already have them */}
+                  {!(isSignedIn && session.email) && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                      <input
+                        type="email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="you@example.com"
+                        autoComplete="email"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none"
+                      />
+                    </div>
+                  )}
+                  {!(isSignedIn && session.phone) && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Phone {isSignedIn ? <span className="text-gray-400 font-normal">(required for alerts)</span> : null}
+                      </label>
+                      <input
+                        type="tel"
+                        required
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="(970) 555-0123"
+                        autoComplete="tel"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none"
+                      />
+                    </div>
+                  )}
+                  {/* Signed in with both: still show read-only confirmation */}
+                  {isSignedIn && session.email && (
+                    <div className="rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-700">
+                      Alerts go to <strong>{session.email}</strong>
+                      {phone ? <> · {phone}</> : null}
+                    </div>
+                  )}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Name this search <span className="text-gray-400 font-normal">(optional)</span>
@@ -195,19 +310,25 @@ export default function SaveSearchModal({
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Password <span className="text-gray-400 font-normal">(optional — manage alerts anytime)</span>
-                    </label>
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="At least 8 characters"
-                      autoComplete="new-password"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none"
-                    />
-                  </div>
+                  {/* Optional password only for guests who want email+password login later */}
+                  {!isSignedIn && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Password <span className="text-gray-400 font-normal">(optional — manage from any device)</span>
+                      </label>
+                      <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="At least 8 characters"
+                        autoComplete="new-password"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none"
+                      />
+                      <p className="text-xs text-gray-400 mt-1">
+                        Skip this — you&apos;ll stay signed in on this device automatically.
+                      </p>
+                    </div>
+                  )}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">How often?</label>
                     <div className="grid grid-cols-3 gap-2">
@@ -262,13 +383,19 @@ export default function SaveSearchModal({
                   {error && <p className="text-red-600 text-sm" role="alert">{error}</p>}
                   <button
                     type="submit"
-                    disabled={state === "saving"}
+                    disabled={state === "saving" || session === null}
                     className="w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 disabled:opacity-50"
                   >
-                    {state === "saving" ? "Saving…" : "Save & get alerts"}
+                    {state === "saving"
+                      ? "Saving…"
+                      : isSignedIn
+                        ? "Save to my account"
+                        : "Save & get alerts"}
                   </button>
                   <p className="text-xs text-gray-400 text-center">
-                    No spam. No sharing your info. Unsubscribe with one click.
+                    {isSignedIn
+                      ? "You're signed in — this search is added to your alerts."
+                      : "No spam. No sharing your info. Unsubscribe with one click."}
                   </p>
                 </form>
               </>

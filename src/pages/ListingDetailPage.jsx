@@ -850,6 +850,7 @@ export default function ListingDetailPage() {
               <button
                 type="button"
                 onClick={onToggleSave}
+                title={saved ? "Saved on this device" : "Save on this device"}
                 className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-semibold transition-colors ${
                   saved
                     ? "bg-[#CFB36E] border-[#CFB36E] text-black"

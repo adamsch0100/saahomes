@@ -94,14 +94,14 @@ export default function ScheduleShowingModal({
 
       {open && (
         <div
-          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4 overflow-y-auto"
+          className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4 overflow-y-auto"
           onClick={() => setOpen(false)}
           role="dialog"
           aria-modal="true"
           aria-labelledby="schedule-showing-title"
         >
           <div
-            className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 my-0 sm:my-8 max-h-[92vh] overflow-y-auto"
+            className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 my-0 sm:my-8 max-h-[92vh] overflow-y-auto pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]"
             onClick={(e) => e.stopPropagation()}
           >
             {state === "done" ? (
