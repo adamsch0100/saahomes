@@ -128,6 +128,7 @@ export const runMigrations = async () => {
       ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS utm_source VARCHAR(100);
       ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS utm_medium VARCHAR(100);
       ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS utm_campaign VARCHAR(100);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS property_subtype VARCHAR(128);
     `);
 
     await client.query(`
@@ -152,6 +153,7 @@ export const runMigrations = async () => {
         listing_id VARCHAR(64) NOT NULL UNIQUE,
         status VARCHAR(32) NOT NULL DEFAULT 'Active',
         property_type VARCHAR(64),
+        property_subtype VARCHAR(128),
         street_number VARCHAR(32),
         street_name VARCHAR(255),
         unit VARCHAR(32),
