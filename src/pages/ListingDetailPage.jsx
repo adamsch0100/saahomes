@@ -34,12 +34,112 @@ const HOME_TYPE_LABEL = {
   other: "Property",
 };
 
+/** Grouped feature sections — Zillow/Realtor "All details" pattern */
+const FEATURE_GROUPS = [
+  {
+    title: "Interior",
+    rows: (f) => [
+      ["Architectural Style", f.style],
+      ["Levels / Stories", f.levels],
+      ["Structure Type", f.structure_type],
+      ["Basement", f.basement],
+      ["Interior Features", f.interior],
+      ["Appliances", f.appliances],
+      ["Flooring", f.flooring],
+      ["Cooling", f.cooling],
+      ["Heating", f.heating],
+      ["Fireplace", f.fireplaces],
+      ["Laundry", f.laundry],
+      ["Windows", f.windows],
+      ["Door Features", f.doors],
+      ["Security Features", f.security],
+      ["Other Equipment", f.other_equipment],
+      ["Accessibility", f.accessibility],
+    ],
+  },
+  {
+    title: "Exterior",
+    rows: (f) => [
+      ["Construction", f.construction],
+      ["Roof", f.roof],
+      ["Exterior Features", f.exterior],
+      ["Pool", f.pool],
+      ["Spa / Hot Tub", f.spa],
+      ["Parking", f.parking],
+      ["Total Parking", f.parking_total],
+      ["Other Parking", f.other_parking],
+      ["Fencing", f.fencing],
+      ["Patio & Porch", f.patio],
+      ["Other Structures", f.other_structures],
+      ["View", f.view],
+      ["Waterfront", f.waterfront ? (f.water_body || "Yes") : null],
+      ["Water Body", f.water_body],
+      ["Horse Amenities", f.horse],
+    ],
+  },
+  {
+    title: "Utilities & Lot",
+    rows: (f) => [
+      ["Electric", f.electric],
+      ["Sewer", f.sewer],
+      ["Water Source", f.water_source],
+      ["Utilities", f.utilities],
+      ["Irrigation", f.irrigation],
+      ["Irrigation Water Rights", f.irrigation_rights ? "Yes" : null],
+      ["Zoning", f.zoning],
+      ["Lot Features", f.lot_features],
+    ],
+  },
+  {
+    title: "Community",
+    rows: (f) => [
+      ["Community Features", f.community],
+      ["Pets Allowed", f.pets],
+      ["HOA Name", f.association_name],
+      ["HOA Phone", f.association_phone],
+      ["HOA Includes", f.association_includes],
+      ["MLS Area", f.mls_area],
+    ],
+  },
+  {
+    title: "Build & Programs",
+    rows: (f) => [
+      ["Builder", f.builder],
+      ["Builder Model", f.builder_model],
+      ["New Construction", f.new_construction ? "Yes" : null],
+      ["Energy Efficient", f.green_efficient],
+      ["Green Verification", f.green_verification],
+      ["Listing Terms", f.listing_terms],
+      ["Special Conditions", f.special_conditions],
+      ["Availability", f.availability],
+    ],
+  },
+];
+
+function displayValue(v) {
+  if (v == null || v === "" || v === false) return null;
+  if (typeof v === "string" && !v.trim()) return null;
+  return String(v);
+}
+
 function KeyFact({ label, value }) {
-  if (!value || value === "—" || value === "") return null;
+  const shown = displayValue(value);
+  if (!shown || shown === "—") return null;
   return (
     <div className="bg-gray-50 rounded-lg p-3.5 border border-gray-100">
       <p className="text-[11px] text-gray-500 uppercase tracking-wide font-medium">{label}</p>
-      <p className="font-semibold text-gray-900 mt-0.5 text-sm sm:text-base">{value}</p>
+      <p className="font-semibold text-gray-900 mt-0.5 text-sm sm:text-base">{shown}</p>
+    </div>
+  );
+}
+
+function FactRow({ label, value }) {
+  const shown = displayValue(value);
+  if (!shown) return null;
+  return (
+    <div className="flex justify-between gap-4 border-b border-gray-100 py-2.5">
+      <span className="text-gray-500 text-sm shrink-0">{label}</span>
+      <span className="text-gray-900 text-sm font-medium text-right">{shown}</span>
     </div>
   );
 }
@@ -52,6 +152,30 @@ function HeartIcon({ filled }) {
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
     </svg>
   );
+}
+
+function ShareIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+    </svg>
+  );
+}
+
+function formatDate(iso) {
+  if (!iso) return null;
+  try {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return null;
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  } catch {
+    return null;
+  }
 }
 
 /** Zillow-style photo gallery: main image, thumbs, swipe, counter, fullscreen */
@@ -204,7 +328,6 @@ function PhotoGallery({ listingId, photos, alt }) {
         </button>
       </div>
 
-      {/* Fullscreen lightbox */}
       {fullscreen && (
         <div
           className="fixed inset-0 z-[110] bg-black flex flex-col"
@@ -284,6 +407,62 @@ function DetailSkeleton() {
   );
 }
 
+function AgentCard({ openNadia, listing }) {
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+        <div className="w-16 h-16 rounded-full bg-black flex items-center justify-center shrink-0">
+          <span className="text-[#CFB36E] font-serif font-bold text-lg">SAA</span>
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] uppercase tracking-wide text-gray-500 font-medium">Your local agents</p>
+          <h3 className="text-lg font-bold text-gray-900 font-serif mt-0.5">
+            Adam &amp; Mandi Schwartz
+          </h3>
+          <p className="text-sm text-gray-600 mt-1">
+            Schwartz and Associates · Coldwell Banker Realty
+          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+            <a href="tel:+19709991407" className="font-semibold text-gray-900 hover:text-[#CFB36E]">
+              (970) 999-1407
+            </a>
+            <a href="https://saahomes.com" className="text-gray-600 hover:text-black underline underline-offset-2">
+              saahomes.com
+            </a>
+          </div>
+          <p className="mt-3 text-[11px] text-gray-500 flex items-center gap-1.5">
+            <span aria-hidden="true" className="inline-block w-3.5 h-3.5 border border-gray-400 rounded-sm text-[8px] leading-3.5 text-center font-bold text-gray-500">
+              =
+            </span>
+            Equal Housing Opportunity
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <ScheduleShowingModal
+              listing={listing}
+              buttonLabel="Schedule a Showing"
+              buttonClassName="inline-flex items-center justify-center px-5 py-2.5 font-semibold rounded-lg text-sm"
+              buttonStyle={{ backgroundColor: "#CFB36E", color: "#1a1a1a" }}
+            />
+            <button
+              type="button"
+              onClick={openNadia}
+              className="inline-flex items-center justify-center px-5 py-2.5 border border-gray-300 text-gray-900 font-semibold rounded-lg text-sm hover:border-black"
+            >
+              Ask Nadia
+            </button>
+            <a
+              href="tel:+19709991407"
+              className="inline-flex items-center justify-center px-5 py-2.5 border border-black text-black font-semibold rounded-lg text-sm hover:bg-black hover:text-white"
+            >
+              Call
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ListingDetailPage() {
   const { slug } = useParams();
   const [listing, setListing] = useState(null);
@@ -291,6 +470,8 @@ export default function ListingDetailPage() {
   const [similar, setSimilar] = useState([]);
   const [saved, setSaved] = useState(false);
   const [match, setMatch] = useState({ matches: false, reasons: [] });
+  const [shareCopied, setShareCopied] = useState(false);
+  const [openFeatureGroups, setOpenFeatureGroups] = useState({});
 
   useEffect(() => {
     if (!slug) return;
@@ -322,7 +503,6 @@ export default function ListingDetailPage() {
     setMatch(matchSavedSearch(listing, getSavedSearches()));
   }, [listing]);
 
-  // Hide global floating bar on detail — we own the sticky conversion cluster
   useEffect(() => {
     document.body.classList.add("listing-detail-page");
     return () => document.body.classList.remove("listing-detail-page");
@@ -353,8 +533,54 @@ export default function ListingDetailPage() {
   const sqft = listing.living_area;
   const pricePerSqft = listing.price_per_sqft
     ?? (listing.list_price && sqft ? Math.round(listing.list_price / sqft) : null);
+  const priceChangeDate = formatDate(listing.price_change_timestamp);
+  const lotLabel =
+    listing.lot_size_acres != null
+      ? `${listing.lot_size_acres} acres`
+      : listing.lot_size != null
+        ? fmtSqft(listing.lot_size)
+        : null;
+  const hoaLabel =
+    listing.hoa_fee != null
+      ? `${formatPrice(listing.hoa_fee)}${feats.assoc_fee_freq ? ` / ${String(feats.assoc_fee_freq).toLowerCase()}` : ""}`
+      : null;
+
+  const featureSections = FEATURE_GROUPS.map((g) => ({
+    title: g.title,
+    items: g.rows(feats).filter(([, v]) => displayValue(v)),
+  })).filter((g) => g.items.length > 0);
+
+  const hasFinancial =
+    listing.hoa_fee != null
+    || feats.tax_annual != null
+    || feats.tax_year != null
+    || feats.zoning
+    || feats.parcel
+    || feats.association_name
+    || feats.association_phone
+    || feats.association_includes
+    || feats.disclosures
+    || feats.assoc_fee_freq;
 
   const onToggleSave = () => setSaved(toggleSavedHome(listing.slug));
+
+  const onShare = async () => {
+    const url = typeof window !== "undefined" ? window.location.href : `https://saahomes.com/homes-for-sale/${listing.slug}/`;
+    const text = `${fullAddress} — ${formatPrice(listing.list_price)}`;
+    try {
+      if (typeof navigator !== "undefined" && navigator.share) {
+        await navigator.share({ title: fullAddress, text, url });
+        return;
+      }
+      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+        setShareCopied(true);
+        setTimeout(() => setShareCopied(false), 2000);
+      }
+    } catch {
+      /* user cancelled share */
+    }
+  };
 
   const likeThisFilters = {
     city: listing.city || undefined,
@@ -438,6 +664,20 @@ export default function ListingDetailPage() {
     );
   };
 
+  const toggleGroup = (title) => {
+    setOpenFeatureGroups((prev) => ({
+      ...prev,
+      [title]: prev[title] === false ? true : prev[title] === true ? false : false,
+    }));
+  };
+
+  const isGroupOpen = (title, index) => {
+    if (openFeatureGroups[title] === false) return false;
+    if (openFeatureGroups[title] === true) return true;
+    // First two groups open by default on mobile/desktop
+    return index < 2;
+  };
+
   return (
     <>
       <SEO
@@ -448,10 +688,9 @@ export default function ListingDetailPage() {
         jsonLd={[listingSchema, breadcrumbSchema]}
       />
 
-      {/* ── Hero: price hierarchy + gallery ─────────────────────────── */}
+      {/* ── 1–2. Hero: header block + gallery ───────────────────────── */}
       <section className="bg-black pt-24 sm:pt-28">
         <div className="max-w-7xl mx-auto px-4 pb-4 sm:pb-6">
-          {/* Breadcrumb */}
           <nav className="text-xs text-gray-400 mb-3 flex flex-wrap gap-1.5" aria-label="Breadcrumb">
             <Link to="/properties/" className="hover:text-white">Homes for sale</Link>
             <span>/</span>
@@ -472,7 +711,7 @@ export default function ListingDetailPage() {
                 {fullAddress}
               </h1>
 
-              {/* Price + badges */}
+              {/* Price + status badges */}
               <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mt-2.5">
                 <span className="text-2xl sm:text-3xl font-bold text-[#CFB36E] tracking-tight">
                   {formatPrice(listing.list_price)}
@@ -497,14 +736,17 @@ export default function ListingDetailPage() {
                     New construction
                   </span>
                 )}
-                {listing.status === "Active" && (
-                  <span className="border border-emerald-400/80 text-emerald-400 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
-                    Active
+                {listing.status && (
+                  <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide border ${
+                    listing.status === "Active"
+                      ? "border-emerald-400/80 text-emerald-400"
+                      : "border-white/40 text-gray-300"
+                  }`}>
+                    {listing.status}
                   </span>
                 )}
               </div>
 
-              {/* RealScout price-drop callout */}
               {priceCut && (
                 <div className="mt-3 inline-flex items-start gap-2 rounded-lg bg-emerald-500/15 border border-emerald-500/30 px-3 py-2 max-w-lg">
                   <span className="text-emerald-400 text-sm font-bold shrink-0">↓</span>
@@ -512,15 +754,20 @@ export default function ListingDetailPage() {
                     <strong className="text-white">Price drop:</strong> was{" "}
                     {formatPrice(listing.original_list_price)}
                     {priceCutPct ? ` — now ${priceCutPct}% lower` : ""}.
-                    {dom != null ? ` ${dom} day${dom === 1 ? "" : "s"} on market.` : ""}
+                    {dom != null ? ` ${dom} day${Number(dom) === 1 ? "" : "s"} on market.` : ""}
+                    {priceChangeDate ? ` Changed ${priceChangeDate}.` : ""}
                   </p>
                 </div>
               )}
 
-              {/* Key stats strip */}
+              {/* Quick facts strip under price */}
               <p className="text-gray-300 mt-2.5 text-sm sm:text-base">
-                {listing.beds != null && <span className="font-semibold text-white">{listing.beds}</span>}
-                {listing.beds != null && <span> bd</span>}
+                {listing.beds != null && (
+                  <>
+                    <span className="font-semibold text-white">{listing.beds}</span>
+                    <span> bd</span>
+                  </>
+                )}
                 {listing.baths != null && (
                   <>
                     <span className="text-gray-600 mx-1.5">·</span>
@@ -528,11 +775,18 @@ export default function ListingDetailPage() {
                     <span> ba</span>
                   </>
                 )}
-                {listing.half_baths != null && listing.half_baths > 0 && (
+                {listing.half_baths != null && Number(listing.half_baths) > 0 && (
                   <>
                     <span className="text-gray-600 mx-1.5">·</span>
                     <span className="font-semibold text-white">{listing.half_baths}</span>
                     <span> half-ba</span>
+                  </>
+                )}
+                {listing.three_quarter_baths != null && Number(listing.three_quarter_baths) > 0 && (
+                  <>
+                    <span className="text-gray-600 mx-1.5">·</span>
+                    <span className="font-semibold text-white">{listing.three_quarter_baths}</span>
+                    <span> ¾-ba</span>
                   </>
                 )}
                 {sqft != null && (
@@ -555,7 +809,6 @@ export default function ListingDetailPage() {
                 {listing.school_district && <span> · {listing.school_district}</span>}
               </p>
 
-              {/* Match explanation for savers */}
               {match.matches && (
                 <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#CFB36E]/15 border border-[#CFB36E]/40 px-3 py-1.5">
                   <span className="text-[#CFB36E] text-xs" aria-hidden="true">★</span>
@@ -569,8 +822,8 @@ export default function ListingDetailPage() {
               )}
             </div>
 
-            {/* Desktop action cluster */}
-            <div className="hidden sm:flex items-center gap-2 shrink-0">
+            {/* Desktop: Save + Share + Get alerts */}
+            <div className="hidden sm:flex items-center gap-2 shrink-0 flex-wrap justify-end">
               <button
                 type="button"
                 title="Go back"
@@ -588,6 +841,14 @@ export default function ListingDetailPage() {
               </button>
               <button
                 type="button"
+                onClick={onShare}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-white text-white text-sm font-semibold hover:bg-white hover:text-black transition-colors"
+              >
+                <ShareIcon />
+                {shareCopied ? "Link copied" : "Share"}
+              </button>
+              <button
+                type="button"
                 onClick={onToggleSave}
                 className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-semibold transition-colors ${
                   saved
@@ -598,11 +859,15 @@ export default function ListingDetailPage() {
                 <HeartIcon filled={saved} />
                 {saved ? "Saved" : "Save"}
               </button>
+              <SaveSearchModal
+                filters={likeThisFilters}
+                buttonLabel="Get alerts"
+                buttonClassName="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[#CFB36E] text-[#CFB36E] text-sm font-semibold hover:bg-[#CFB36E] hover:text-black transition-colors"
+              />
             </div>
           </div>
         </div>
 
-        {/* Gallery */}
         <div className="max-w-7xl mx-auto px-4 pb-6">
           <PhotoGallery listingId={listing.id} photos={photos} alt={fullAddress} />
         </div>
@@ -611,28 +876,35 @@ export default function ListingDetailPage() {
       {/* ── Main content ────────────────────────────────────────────── */}
       <section className="max-w-7xl mx-auto px-4 py-8 sm:py-10 grid lg:grid-cols-3 gap-8 pb-28 lg:pb-10">
         <div className="lg:col-span-2 space-y-10">
-          {/* Mobile save + type row */}
+          {/* Mobile action row */}
           <div className="sm:hidden flex gap-2 -mt-2">
             <button
               type="button"
               onClick={onToggleSave}
-              className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-semibold ${
+              className={`flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border text-sm font-semibold ${
                 saved ? "bg-[#CFB36E] border-[#CFB36E] text-black" : "border-gray-300 text-gray-900"
               }`}
             >
               <HeartIcon filled={saved} />
-              {saved ? "Saved" : "Save this home"}
+              {saved ? "Saved" : "Save"}
+            </button>
+            <button
+              type="button"
+              onClick={onShare}
+              className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border border-gray-300 text-sm font-semibold text-gray-900"
+            >
+              <ShareIcon />
+              {shareCopied ? "Copied" : "Share"}
             </button>
             <button
               type="button"
               onClick={openNadia}
-              className="flex-1 inline-flex items-center justify-center px-4 py-2.5 rounded-lg border border-gray-300 text-sm font-semibold text-gray-900"
+              className="flex-1 inline-flex items-center justify-center px-3 py-2.5 rounded-lg border border-gray-300 text-sm font-semibold text-gray-900"
             >
               Ask Nadia
             </button>
           </div>
 
-          {/* Save-search nudge for new visitors */}
           {!hasAnySavedSearch() && !match.matches && (
             <div className="rounded-xl border border-[#CFB36E]/40 bg-[#CFB36E]/10 px-4 py-4 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
               <div>
@@ -649,29 +921,33 @@ export default function ListingDetailPage() {
             </div>
           )}
 
-          {/* Key facts */}
+          {/* 4. Key facts strip */}
           <div>
             <h2 className="text-xl font-bold text-gray-900 mb-4">Key Facts</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <KeyFact label="Price" value={formatPrice(listing.list_price)} />
               <KeyFact label="Price / Sq Ft" value={pricePerSqft != null ? `$${pricePerSqft}` : null} />
+              <KeyFact label="Status" value={listing.status} />
               <KeyFact label="Beds" value={listing.beds != null ? String(listing.beds) : null} />
               <KeyFact label="Baths" value={listing.baths != null ? String(listing.baths) : null} />
+              <KeyFact
+                label="Half Baths"
+                value={listing.half_baths != null && Number(listing.half_baths) > 0 ? String(listing.half_baths) : null}
+              />
+              <KeyFact
+                label="¾ Baths"
+                value={
+                  listing.three_quarter_baths != null && Number(listing.three_quarter_baths) > 0
+                    ? String(listing.three_quarter_baths)
+                    : null
+                }
+              />
               <KeyFact label="Living Area" value={fmtSqft(sqft)} />
               <KeyFact
                 label="Above Grade"
                 value={listing.above_grade_area != null ? fmtSqft(listing.above_grade_area) : null}
               />
-              <KeyFact
-                label="Lot Size"
-                value={
-                  listing.lot_size_acres != null
-                    ? `${listing.lot_size_acres} acres`
-                    : listing.lot_size != null
-                      ? fmtSqft(listing.lot_size)
-                      : null
-                }
-              />
+              <KeyFact label="Lot Size" value={lotLabel} />
               <KeyFact label="Year Built" value={listing.year_built ? String(listing.year_built) : null} />
               <KeyFact label="Days on Market" value={dom != null ? String(dom) : null} />
               <KeyFact label="Property Type" value={listing.property_subtype || listing.property_type} />
@@ -679,13 +955,10 @@ export default function ListingDetailPage() {
                 label="Garage"
                 value={listing.garage_spaces != null ? `${listing.garage_spaces} spaces` : null}
               />
+              <KeyFact label="HOA Fee" value={hoaLabel} />
               <KeyFact
-                label="HOA Fee"
-                value={
-                  listing.hoa_fee != null
-                    ? `${formatPrice(listing.hoa_fee)}${feats.assoc_fee_freq ? ` / ${feats.assoc_fee_freq.toLowerCase()}` : ""}`
-                    : null
-                }
+                label="Units"
+                value={listing.units_total != null && Number(listing.units_total) > 1 ? String(listing.units_total) : null}
               />
               <KeyFact label="County" value={listing.county || null} />
               <KeyFact label="Subdivision" value={listing.subdivision || null} />
@@ -694,88 +967,179 @@ export default function ListingDetailPage() {
             </div>
           </div>
 
-          {/* About */}
+          {/* 5. Description */}
           <div>
             <h2 className="text-xl font-bold text-gray-900 mb-3">About this home</h2>
-            <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-              {listing.description || "Contact us for details about this property."}
-            </p>
+            {listing.description ? (
+              <p className="text-gray-700 leading-relaxed whitespace-pre-line text-[15px] sm:text-base">
+                {listing.description}
+              </p>
+            ) : (
+              <p className="text-gray-500 text-sm">
+                Contact us for details about this property —{" "}
+                <a href="tel:+19709991407" className="underline text-gray-800">(970) 999-1407</a>.
+              </p>
+            )}
           </div>
 
-          {/* Features & amenities */}
-          {(() => {
-            const rows = [
-              ["Architectural Style", feats.style],
-              ["Levels / Stories", feats.levels],
-              ["Structure Type", feats.structure_type],
-              ["Basement", feats.basement],
-              ["Construction", feats.construction],
-              ["Roof", feats.roof],
-              ["Interior Features", feats.interior],
-              ["Exterior Features", feats.exterior],
-              ["Appliances", feats.appliances],
-              ["Flooring", feats.flooring],
-              ["Cooling", feats.cooling],
-              ["Heating", feats.heating],
-              ["Fireplace", feats.fireplaces],
-              ["Pool", feats.pool],
-              ["Spa / Hot Tub", feats.spa],
-              ["Parking", feats.parking],
-              ["Total Parking", feats.parking_total],
-              ["Other Parking", feats.other_parking],
-              ["Fencing", feats.fencing],
-              ["Patio & Porch", feats.patio],
-              ["Windows", feats.windows],
-              ["Security Features", feats.security],
-              ["Door Features", feats.doors],
-              ["Electric", feats.electric],
-              ["Laundry", feats.laundry],
-              ["Other Equipment", feats.other_equipment],
-              ["Other Structures", feats.other_structures],
-              ["Pets Allowed", feats.pets],
-              ["View", feats.view],
-              ["Waterfront", feats.waterfront ? (feats.water_body || "Yes") : null],
-              ["Water Body", feats.water_body],
-              ["Horse Amenities", feats.horse],
-              ["Irrigation", feats.irrigation],
-              ["Irrigation Water Rights", feats.irrigation_rights ? "Yes" : null],
-              ["Sewer", feats.sewer],
-              ["Water Source", feats.water_source],
-              ["Utilities", feats.utilities],
-              ["Zoning", feats.zoning],
-              ["Lot Features", feats.lot_features],
-              ["HOA Name", feats.association_name],
-              ["HOA Includes", feats.association_includes],
-              ["Builder", feats.builder],
-              ["Builder Model", feats.builder_model],
-              ["Listing Terms", feats.listing_terms],
-              ["Special Conditions", feats.special_conditions],
-              ["Energy Efficient", feats.green_efficient],
-              ["Green Verification", feats.green_verification],
-              ["Accessibility", feats.accessibility],
-              ["Community Features", feats.community],
-              ["MLS Area", feats.mls_area],
-              ["Annual Taxes", feats.tax_annual != null ? formatPrice(feats.tax_annual) : null],
-              ["Tax Year", feats.tax_year != null ? String(feats.tax_year) : null],
-              ["Availability", feats.availability],
-            ].filter(([, v]) => v);
-            if (!rows.length) return null;
-            return (
+          {/* 7. Virtual tour (when present) */}
+          {feats.virtual_tour && (
+            <div className="rounded-xl border border-[#CFB36E]/50 bg-[#CFB36E]/10 p-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
               <div>
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Features & Amenities</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2.5">
-                  {rows.map(([label, value]) => (
-                    <div key={label} className="flex justify-between gap-4 border-b border-gray-100 pb-2">
-                      <span className="text-gray-500 text-sm">{label}</span>
-                      <span className="text-gray-900 text-sm font-medium text-right">{value}</span>
-                    </div>
-                  ))}
-                </div>
+                <h2 className="text-lg font-bold text-gray-900">Virtual Tour</h2>
+                <p className="text-sm text-gray-600 mt-0.5">
+                  Walk through this home online before you visit in person.
+                </p>
               </div>
-            );
-          })()}
+              <a
+                href={feats.virtual_tour}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shrink-0 inline-flex items-center justify-center px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-900 text-sm"
+              >
+                Open virtual tour
+              </a>
+            </div>
+          )}
 
-          {/* Schools — local depth */}
+          {/* 6. All details — grouped features */}
+          {featureSections.length > 0 && (
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-1">All Details</h2>
+              <p className="text-sm text-gray-500 mb-4">
+                Property features from the MLS listing. Empty fields are omitted.
+              </p>
+              <div className="space-y-3">
+                {featureSections.map((section, idx) => {
+                  const open = isGroupOpen(section.title, idx);
+                  return (
+                    <div key={section.title} className="border border-gray-200 rounded-xl overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => toggleGroup(section.title)}
+                        className="w-full flex items-center justify-between px-4 sm:px-5 py-3.5 bg-gray-50 hover:bg-gray-100 text-left"
+                        aria-expanded={open}
+                      >
+                        <span className="font-semibold text-gray-900 text-sm sm:text-base">
+                          {section.title}
+                          <span className="ml-2 text-gray-400 font-normal text-xs">
+                            {section.items.length}
+                          </span>
+                        </span>
+                        <span className="text-gray-500 text-lg leading-none" aria-hidden="true">
+                          {open ? "−" : "+"}
+                        </span>
+                      </button>
+                      {open && (
+                        <div className="px-4 sm:px-5 pb-3 grid grid-cols-1 sm:grid-cols-2 gap-x-8">
+                          {section.items.map(([label, value]) => (
+                            <FactRow key={label} label={label} value={value} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* 8. Price history — honest, data-derived */}
+          {(listing.list_price != null || listing.original_list_price != null || dom != null) && (
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Price History</h2>
+              <div className="rounded-xl border border-gray-200 overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-gray-50 text-left text-[11px] uppercase tracking-wide text-gray-500">
+                      <th className="px-4 py-3 font-medium">Event</th>
+                      <th className="px-4 py-3 font-medium">Price</th>
+                      <th className="px-4 py-3 font-medium hidden sm:table-cell">Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    <tr>
+                      <td className="px-4 py-3 text-gray-900 font-medium">
+                        Current list
+                        {priceChangeDate && priceCut ? (
+                          <span className="block text-xs text-gray-500 font-normal sm:hidden mt-0.5">
+                            {priceChangeDate}
+                          </span>
+                        ) : null}
+                      </td>
+                      <td className="px-4 py-3 font-semibold text-gray-900">
+                        {formatPrice(listing.list_price)}
+                        {priceCut && priceCutPct != null && (
+                          <span className="ml-2 text-emerald-600 text-xs font-bold">
+                            −{priceCutPct}%
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">
+                        {[
+                          priceChangeDate && priceCut ? `Changed ${priceChangeDate}` : null,
+                          dom != null ? `${dom} day${Number(dom) === 1 ? "" : "s"} on market` : null,
+                        ].filter(Boolean).join(" · ") || "—"}
+                      </td>
+                    </tr>
+                    {listing.original_list_price != null
+                      && Number(listing.original_list_price) !== Number(listing.list_price) && (
+                      <tr>
+                        <td className="px-4 py-3 text-gray-900 font-medium">Original list</td>
+                        <td className="px-4 py-3 text-gray-700">
+                          {formatPrice(listing.original_list_price)}
+                        </td>
+                        <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">
+                          {priceCut
+                            ? `Difference ${formatPrice(Number(listing.original_list_price) - Number(listing.list_price))}`
+                            : Number(listing.original_list_price) < Number(listing.list_price)
+                              ? "Price increased from original"
+                              : "—"}
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+                {pricePerSqft != null && (
+                  <p className="px-4 py-3 text-xs text-gray-500 border-t border-gray-100 bg-gray-50">
+                    ${pricePerSqft} per sq ft based on current list price
+                    {sqft != null ? ` and ${Number(sqft).toLocaleString()} sq ft living area` : ""}.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* 13 partial: HOA / taxes / zoning / disclosures */}
+          {hasFinancial && (
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">HOA, Taxes &amp; Zoning</h2>
+              <div className="rounded-xl border border-gray-200 px-4 sm:px-5 py-1 grid grid-cols-1 sm:grid-cols-2 gap-x-8">
+                <FactRow label="HOA Fee" value={hoaLabel} />
+                <FactRow label="HOA Name" value={feats.association_name} />
+                <FactRow label="HOA Phone" value={feats.association_phone} />
+                <FactRow label="HOA Includes" value={feats.association_includes} />
+                <FactRow
+                  label="Annual Taxes"
+                  value={feats.tax_annual != null ? formatPrice(feats.tax_annual) : null}
+                />
+                <FactRow
+                  label="Tax Year"
+                  value={feats.tax_year != null ? String(feats.tax_year) : null}
+                />
+                <FactRow label="Zoning" value={feats.zoning} />
+                <FactRow label="Parcel #" value={feats.parcel} />
+              </div>
+              {feats.disclosures && (
+                <div className="mt-4 rounded-lg bg-amber-50 border border-amber-100 px-4 py-3">
+                  <p className="text-[11px] uppercase tracking-wide text-amber-800 font-semibold">Disclosures</p>
+                  <p className="text-sm text-amber-950 mt-1 leading-relaxed">{feats.disclosures}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 9. Schools */}
           {(listing.elementary_school || listing.middle_school || listing.high_school || listing.school_district) && (
             <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
               <h2 className="text-xl font-bold text-gray-900 mb-1">Schools</h2>
@@ -804,34 +1168,10 @@ export default function ListingDetailPage() {
             </div>
           )}
 
-          {/* Area info */}
-          <div className="bg-black text-white rounded-xl p-6">
-            <h2 className="text-xl font-bold font-serif mb-2">About {listing.city}</h2>
-            <p className="text-gray-300 text-sm leading-relaxed mb-4">
-              {cityHomes
-                ? cityHomes.intro
-                : `${listing.city} is one of the Northern Colorado communities served by Schwartz and Associates at SAA Homes.`}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <Link
-                to={`/northern-colorado-areas/${citySlug}/`}
-                className="px-4 py-2 bg-[#CFB36E] text-black text-sm font-semibold rounded-lg hover:bg-[#bd9f5a]"
-              >
-                {listing.city} Neighborhood Guide
-              </Link>
-              <Link
-                to={getCityHomesPath(citySlug)}
-                className="px-4 py-2 border border-white text-white text-sm font-semibold rounded-lg hover:bg-white hover:text-black"
-              >
-                All {listing.city} Homes for Sale
-              </Link>
-            </div>
-          </div>
-
-          {/* Map */}
+          {/* 10. Map + neighborhood */}
           {listing.latitude && listing.longitude && (
             <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-3">Location</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-3">Location &amp; Neighborhood</h2>
               <div className="rounded-xl overflow-hidden border border-gray-200 h-[320px]">
                 <ListingMap
                   listings={[
@@ -856,10 +1196,39 @@ export default function ListingDetailPage() {
               <p className="text-xs text-gray-400 mt-2">
                 Map pin is approximate. Confirm boundaries and floodplain status with surveys and local sources.
               </p>
+              {feats.directions && (
+                <p className="text-sm text-gray-600 mt-3">
+                  <span className="font-semibold text-gray-800">Directions: </span>
+                  {feats.directions}
+                </p>
+              )}
             </div>
           )}
 
-          {/* Similar homes */}
+          <div className="bg-black text-white rounded-xl p-6">
+            <h2 className="text-xl font-bold font-serif mb-2">About {listing.city}</h2>
+            <p className="text-gray-300 text-sm leading-relaxed mb-4">
+              {cityHomes
+                ? cityHomes.intro
+                : `${listing.city} is one of the Northern Colorado communities served by Schwartz and Associates at SAA Homes.`}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                to={`/northern-colorado-areas/${citySlug}/`}
+                className="px-4 py-2 bg-[#CFB36E] text-black text-sm font-semibold rounded-lg hover:bg-[#bd9f5a]"
+              >
+                {listing.city} Neighborhood Guide
+              </Link>
+              <Link
+                to={getCityHomesPath(citySlug)}
+                className="px-4 py-2 border border-white text-white text-sm font-semibold rounded-lg hover:bg-white hover:text-black"
+              >
+                All {listing.city} Homes for Sale
+              </Link>
+            </div>
+          </div>
+
+          {/* 11. Similar homes */}
           {similar.length > 0 && (
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-4">Similar Homes in {listing.city}</h2>
@@ -906,15 +1275,56 @@ export default function ListingDetailPage() {
               </div>
             </div>
           )}
+
+          {/* 12. Agent card */}
+          <AgentCard openNadia={openNadia} listing={listing} />
+
+          {/* 13. IDX disclaimer footer */}
+          <div className="border-t border-gray-200 pt-6 text-xs text-gray-500 leading-relaxed space-y-2">
+            <p>
+              Listing data provided by {listing.mls_source || "IRES"} MLS via IDX. Information is
+              deemed reliable but not guaranteed. All measurements and square footage are approximate.
+              Buyer should verify all information with independent sources before making decisions.
+            </p>
+            {feats.showing_instructions && (
+              <p>
+                <span className="font-semibold text-gray-600">Showing instructions: </span>
+                {feats.showing_instructions}
+              </p>
+            )}
+            <p className="flex items-center gap-1.5">
+              <span aria-hidden="true" className="inline-block w-3.5 h-3.5 border border-gray-400 rounded-sm text-[8px] leading-3.5 text-center font-bold">
+                =
+              </span>
+              Equal Housing Opportunity · Schwartz and Associates, Coldwell Banker Realty ·{" "}
+              <a href="tel:+19709991407" className="underline hover:text-gray-800">(970) 999-1407</a>
+            </p>
+          </div>
         </div>
 
-        {/* Sticky conversion card — desktop */}
+        {/* 3. Sticky conversion card — desktop */}
         <aside className="space-y-4 lg:sticky lg:top-24 h-fit hidden lg:block">
           <div className="bg-black text-white rounded-xl p-6 shadow-xl">
-            <h2 className="text-lg font-bold font-serif">Interested in this home?</h2>
-            <p className="text-gray-300 text-sm mt-2 leading-relaxed">
-              We&apos;ll walk you through pricing, neighborhood details, and whether you qualify for CHFA down payment assistance.
+            <p className="text-2xl font-bold text-[#CFB36E] tracking-tight">
+              {formatPrice(listing.list_price)}
             </p>
+            {priceCut && (
+              <p className="text-sm text-emerald-400 mt-1">
+                Price reduced{priceCutPct ? ` ${priceCutPct}%` : ""}
+                {listing.original_list_price != null && (
+                  <span className="text-gray-400 line-through ml-2">
+                    {formatPrice(listing.original_list_price)}
+                  </span>
+                )}
+              </p>
+            )}
+            <p className="text-gray-300 text-sm mt-2 leading-relaxed">
+              {listing.beds != null ? `${listing.beds} bd` : ""}
+              {listing.baths != null ? ` · ${listing.baths} ba` : ""}
+              {sqft != null ? ` · ${Number(sqft).toLocaleString()} sqft` : ""}
+            </p>
+            <p className="text-gray-400 text-xs mt-1 truncate">{fullAddress}</p>
+
             <div className="mt-5 space-y-3">
               <ScheduleShowingModal
                 listing={listing}
@@ -927,7 +1337,7 @@ export default function ListingDetailPage() {
                 onClick={openNadia}
                 className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors cursor-pointer"
               >
-                Chat about this home
+                Ask Nadia
               </button>
               {feats.virtual_tour && (
                 <a
@@ -939,39 +1349,55 @@ export default function ListingDetailPage() {
                   Virtual Tour
                 </a>
               )}
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={onToggleSave}
+                  className={`inline-flex items-center justify-center gap-1.5 px-3 py-3 rounded-lg border text-sm font-semibold transition-colors ${
+                    saved
+                      ? "bg-[#CFB36E] border-[#CFB36E] text-black"
+                      : "border-white/40 text-white hover:border-white"
+                  }`}
+                >
+                  <HeartIcon filled={saved} />
+                  {saved ? "Saved" : "Save"}
+                </button>
+                <a
+                  href="tel:+19709991407"
+                  className="inline-flex items-center justify-center px-3 py-3 bg-white text-black text-sm font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  Call
+                </a>
+              </div>
               <SaveSearchModal
                 filters={likeThisFilters}
                 buttonLabel="Get alerts for homes like this"
-                buttonClassName="w-full inline-flex items-center justify-center px-6 py-3.5 border border-white/40 text-white text-sm font-semibold rounded-lg hover:border-white transition-colors"
+                buttonClassName="w-full inline-flex items-center justify-center px-6 py-3 border border-white/40 text-white text-sm font-semibold rounded-lg hover:border-white transition-colors"
               />
-              <a
-                href="tel:+19709991407"
-                className="w-full inline-flex items-center justify-center px-6 py-3.5 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                Call (970) 999-1407
-              </a>
-              {listing.hoa_fee != null && (
-                <p className="text-xs text-gray-400 pt-1">
-                  HOA: {formatPrice(listing.hoa_fee)}
-                  {feats.assoc_fee_freq ? ` / ${feats.assoc_fee_freq.toLowerCase()}` : ""}
-                </p>
+              {hoaLabel && (
+                <p className="text-xs text-gray-400 pt-1">HOA: {hoaLabel}</p>
               )}
             </div>
             <p className="text-[11px] text-gray-500 mt-4 leading-relaxed">
-              Listing data from {listing.mls_source || "IRES"} MLS. IDX information provided by IRES.{" "}
-              {feats.showing_instructions ? `Showing instructions: ${feats.showing_instructions}` : ""}
+              Listing data from {listing.mls_source || "IRES"} MLS. IDX information provided by IRES.
             </p>
+          </div>
+
+          {/* Compact agent blurb under sticky card */}
+          <div className="rounded-xl border border-gray-200 bg-white p-4">
+            <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Listed with local experts</p>
+            <p className="font-semibold text-gray-900 mt-1">Adam &amp; Mandi Schwartz</p>
+            <p className="text-sm text-gray-600">SAA Homes · Coldwell Banker Realty</p>
+            <a href="tel:+19709991407" className="text-sm font-semibold text-gray-900 mt-2 inline-block hover:text-[#CFB36E]">
+              (970) 999-1407
+            </a>
           </div>
         </aside>
       </section>
 
-      {/* Mobile sticky conversion bar — Zillow pattern */}
-      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] px-3 pt-2.5 pb-[calc(0.65rem+env(safe-area-inset-bottom,0px))]">
-        <div className="flex items-center gap-2 max-w-lg mx-auto">
-          <div className="min-w-0 flex-1 hidden xs:block sm:block">
-            <p className="text-sm font-bold text-gray-900 truncate">{formatPrice(listing.list_price)}</p>
-            <p className="text-[11px] text-gray-500 truncate">{address}</p>
-          </div>
+      {/* Mobile sticky conversion bar — Schedule primary (gold), Call, Ask Nadia, Save */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] px-2.5 pt-2.5 pb-[calc(0.65rem+env(safe-area-inset-bottom,0px))]">
+        <div className="flex items-center gap-1.5 max-w-lg mx-auto">
           <button
             type="button"
             onClick={onToggleSave}
@@ -982,17 +1408,25 @@ export default function ListingDetailPage() {
           >
             <HeartIcon filled={saved} />
           </button>
+          <button
+            type="button"
+            onClick={openNadia}
+            className="shrink-0 px-2.5 py-2.5 border border-gray-300 text-gray-900 text-xs font-semibold rounded-lg"
+          >
+            Ask Nadia
+          </button>
           <a
             href="tel:+19709991407"
-            className="shrink-0 px-3 py-2.5 border-2 border-black text-black text-sm font-semibold rounded-lg"
+            className="shrink-0 px-2.5 py-2.5 border-2 border-black text-black text-xs font-semibold rounded-lg"
           >
             Call
           </a>
-          <div className="flex-1 min-w-[140px]">
+          <div className="flex-1 min-w-0">
             <ScheduleShowingModal
               listing={listing}
               buttonLabel="Schedule"
-              buttonClassName="w-full inline-flex items-center justify-center px-3 py-2.5 bg-black text-white text-sm font-semibold rounded-lg"
+              buttonClassName="w-full inline-flex items-center justify-center px-3 py-2.5 text-sm font-semibold rounded-lg"
+              buttonStyle={{ backgroundColor: "#CFB36E", color: "#1a1a1a" }}
               hideIcon
             />
           </div>
