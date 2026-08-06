@@ -49,7 +49,10 @@ export const searchListings = async (req, res) => {
     if (beds) { where.push(`beds >= $${i++}`); params.push(Number(beds)); }
     if (baths) { where.push(`baths >= $${i++}`); params.push(Number(baths)); }
     if (type) {
-      if (TYPE_SQL[type]) {
+      if (['detached', 'attached', 'land', 'commercial', 'other'].includes(type)) {
+        where.push(`home_type = $${i++}`);
+        params.push(type);
+      } else if (TYPE_SQL[type]) {
         where.push(TYPE_SQL[type]);
       } else {
         where.push(`property_type = $${i++}`);
@@ -73,9 +76,9 @@ export const searchListings = async (req, res) => {
     const total = parseInt(countRes.rows[0].count, 10);
 
     const dataRes = await pool.query(
-      `SELECT id, listing_id, status, property_type, street_number, street_name, unit,
+      `SELECT id, listing_id, status, property_type, property_subtype, home_type, street_number, street_name, unit,
          city, state, postal_code, list_price, beds, baths, living_area, lot_size,
-         year_built, description, photos, latitude, longitude, slug, updated_at
+         year_built, description, photos, latitude, longitude, slug, updated_at, days_on_market
        FROM listings WHERE ${whereSql} ORDER BY ${orderSql} LIMIT $${i} OFFSET $${i + 1}`,
       [...params, Number(limit), offset]
     );
@@ -93,7 +96,10 @@ export const searchListings = async (req, res) => {
     if (beds) { fWhere.push(`beds >= $${fi++}`); fParams.push(Number(beds)); }
     if (baths) { fWhere.push(`baths >= $${fi++}`); fParams.push(Number(baths)); }
     if (type) {
-      if (TYPE_SQL[type]) {
+      if (['detached', 'attached', 'land', 'commercial', 'other'].includes(type)) {
+        fWhere.push(`home_type = $${fi++}`);
+        fParams.push(type);
+      } else if (TYPE_SQL[type]) {
         fWhere.push(TYPE_SQL[type]);
       } else {
         fWhere.push(`property_type = $${fi++}`);

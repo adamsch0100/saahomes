@@ -129,6 +129,14 @@ export const runMigrations = async () => {
       ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS utm_medium VARCHAR(100);
       ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS utm_campaign VARCHAR(100);
       ALTER TABLE listings ADD COLUMN IF NOT EXISTS property_subtype VARCHAR(128);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS home_type VARCHAR(16) DEFAULT 'other';
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS elementary_school VARCHAR(128);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS middle_school VARCHAR(128);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS high_school VARCHAR(128);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS days_on_market INTEGER;
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS price_per_sqft INTEGER;
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS subdivision VARCHAR(255);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS features JSONB DEFAULT '{}'::jsonb;
     `);
 
     await client.query(`
@@ -154,6 +162,14 @@ export const runMigrations = async () => {
         status VARCHAR(32) NOT NULL DEFAULT 'Active',
         property_type VARCHAR(64),
         property_subtype VARCHAR(128),
+        home_type VARCHAR(16) DEFAULT 'other',
+        elementary_school VARCHAR(128),
+        middle_school VARCHAR(128),
+        high_school VARCHAR(128),
+        days_on_market INTEGER,
+        price_per_sqft INTEGER,
+        subdivision VARCHAR(255),
+        features JSONB DEFAULT '{}'::jsonb,
         street_number VARCHAR(32),
         street_name VARCHAR(255),
         unit VARCHAR(32),
