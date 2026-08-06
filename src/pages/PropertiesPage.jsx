@@ -87,51 +87,24 @@ export default function PropertiesPage() {
         jsonLd={[faqSchema]}
       />
 
-      {/* Hero Section */}
-      <section
-        className="relative min-h-[360px] sm:min-h-[460px] bg-cover bg-center flex items-center justify-center pt-28 sm:pt-32 pb-12"
-        style={{ backgroundImage: "url('/images/buyers-hero.jpg')" }}
-      >
-        <div className="absolute inset-0 bg-black/65"></div>
-        <div className="relative z-10 text-center text-white px-6 max-w-4xl">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-serif leading-tight">
+      {/* Compact title strip — search is the star, H1 stays for SEO */}
+      <section className="bg-white border-b border-gray-200 pt-24 sm:pt-28">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 font-serif">
             {location ? `Homes for Sale in ${location}, Colorado` : "Homes for Sale in Northern Colorado"}
           </h1>
-          <p className="mt-4 text-lg sm:text-xl text-gray-200 max-w-3xl mx-auto">
+          <p className="text-sm text-gray-500 mt-0.5">
             {location
-              ? `Browse every active listing in ${location} directly from IRES MLS.`
-              : "Search every active listing across Fort Collins, Loveland, Windsor, Greeley, Timnath, and all Northern Colorado communities — direct from IRES MLS."}
+              ? `Every active listing in ${location} — live from IRES MLS.`
+              : "Fort Collins · Loveland · Windsor · Greeley · Timnath + all Northern Colorado communities — live from IRES MLS."}
           </p>
-          <div className="mt-6 flex flex-wrap gap-3 justify-center">
-            <a href="#search-tool" className="inline-flex items-center px-6 py-3 bg-[#CFB36E] text-black font-semibold rounded-lg hover:bg-[#bd9f5a] transition-colors">
-              Search Now
-            </a>
-            <a href="#cities" className="inline-flex items-center px-6 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
-              Browse by City
-            </a>
-          </div>
         </div>
       </section>
 
-      {/* MLS Search — immersive Zillow-style split view */}
-      <section id="search-tool" className="w-full bg-white border-b border-gray-200">
+      {/* MLS Search — immersive Zillow-style split view, the whole page */}
+      <section id="search-tool" className="w-full bg-white">
         <div className="max-w-[1600px] mx-auto">
-          <div className="px-4 sm:px-6 pt-6 sm:pt-8 pb-3">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-                  Search Northern Colorado MLS Listings
-                </h2>
-                <p className="text-gray-600 text-sm sm:text-base mt-1 max-w-2xl">
-                  Filter by city, price, and beds. Live IRES MLS data — save a search for new homes and price drops.
-                </p>
-              </div>
-              <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">
-                IRES MLS · Updated daily
-              </p>
-            </div>
-          </div>
-          <div className="border-t border-gray-200" style={{ height: "min(78vh, 820px)", minHeight: "560px" }}>
+          <div className="border-t border-gray-200" style={{ height: "calc(100vh - 130px)", minHeight: "560px" }}>
             <ListingSearch location={location} height="100%" />
           </div>
         </div>
