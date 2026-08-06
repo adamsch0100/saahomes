@@ -137,6 +137,15 @@ export const runMigrations = async () => {
       ALTER TABLE listings ADD COLUMN IF NOT EXISTS price_per_sqft INTEGER;
       ALTER TABLE listings ADD COLUMN IF NOT EXISTS subdivision VARCHAR(255);
       ALTER TABLE listings ADD COLUMN IF NOT EXISTS features JSONB DEFAULT '{}'::jsonb;
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS original_list_price NUMERIC(12,2);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS price_change_timestamp TIMESTAMPTZ;
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS half_baths NUMERIC(4,1);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS three_quarter_baths NUMERIC(4,1);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS above_grade_area NUMERIC(12,1);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS lot_size_acres NUMERIC(12,2);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS units_total INTEGER;
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS photos_count INTEGER;
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS school_district VARCHAR(255);
     `);
 
     await client.query(`
@@ -170,6 +179,15 @@ export const runMigrations = async () => {
         price_per_sqft INTEGER,
         subdivision VARCHAR(255),
         features JSONB DEFAULT '{}'::jsonb,
+        original_list_price NUMERIC(12,2),
+        price_change_timestamp TIMESTAMPTZ,
+        half_baths NUMERIC(4,1),
+        three_quarter_baths NUMERIC(4,1),
+        above_grade_area NUMERIC(12,1),
+        lot_size_acres NUMERIC(12,2),
+        units_total INTEGER,
+        photos_count INTEGER,
+        school_district VARCHAR(255),
         street_number VARCHAR(32),
         street_name VARCHAR(255),
         unit VARCHAR(32),
