@@ -20,13 +20,20 @@ const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: fals
 const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID;
 const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID;
 const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY;
+const R2_API_TOKEN = process.env.R2_API_TOKEN; // Cloudflare REST token (cfut_...) — alternative auth
 const R2_BUCKET = process.env.R2_BUCKET || 'saahomes-photos';
 const R2_PUBLIC_URL = (process.env.R2_PUBLIC_URL || '').replace(/\/$/, '');
 
-const isConfigured = () => !!(R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY && R2_PUBLIC_URL);
+const isConfigured = () =>
+  !!(
+    R2_ACCOUNT_ID &&
+    R2_PUBLIC_URL &&
+    (R2_API_TOKEN || (R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY))
+  );
 
 let s3 = null;
 function getS3() {
+  if (!R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY) return null;
   if (!s3) {
     s3 = new S3Client({
       region: 'auto',
@@ -43,14 +50,25 @@ const THUMB_WIDTH = 400;
 const USER_AGENT = 'saahomes-idx/1.0 (Schwartz and Associates)';
 const REQUEST_DELAY_MS = 1000; // 2 workers × 1s spacing = hard 2 RPS cap
 
-async function downloadPhoto(url, retries = 2) {
+/**
+ * Download a photo. media.mlsgrid.com IP-blocks some networks (this Hermes
+ * box gets 400/429 while Railway's proxy fetches fine), so route MLS CDN
+ * downloads through our own public proxy — it caches + backoffs and works
+ * from any IP. Non-MLS URLs (already-R2, etc.) fetch directly.
+ */
+async function downloadPhoto(url, { listingId, idx, retries = 2 } = {}) {
+  const isMlsCdn = url.includes('media.mlsgrid.com');
+  const SITE = process.env.SITE_URL || 'https://saahomes.com';
+  if (isMlsCdn && listingId) {
+    url = `${SITE}/api/photo/${listingId}/${idx}`;
+  }
   const res = await fetch(url, { headers: { 'User-Agent': USER_AGENT, Accept: 'image/*' }, redirect: 'follow' });
   if (res.status === 429 && retries > 0) {
     // Rate-limited: back off long (10s, 30s) and retry — then give up.
     const wait = 10000 * Math.pow(3, 2 - retries);
     console.log(`  photo 429 — backing off ${wait / 1000}s (${retries} left)`);
     await new Promise((r) => setTimeout(r, wait));
-    return downloadPhoto(url, retries - 1);
+    return downloadPhoto(url, { listingId, idx, retries: retries - 1 });
   }
   if (!res.ok) throw new Error(`HTTP ${res.status} for ${url.slice(0, 80)}`);
   return Buffer.from(await res.arrayBuffer());
@@ -64,7 +82,29 @@ async function processPhoto(buf) {
 }
 
 async function upload(key, body, contentType = 'image/webp') {
-  await getS3().send(new PutObjectCommand({
+  if (R2_API_TOKEN) {
+    // Cloudflare REST API auth (cfut_ token) — no S3 credentials needed.
+    const res = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${R2_ACCOUNT_ID}/r2/buckets/${R2_BUCKET}/objects/${encodeURIComponent(key)}`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${R2_API_TOKEN}`,
+          'Content-Type': contentType,
+          'Cache-Control': 'public, max-age=31536000, immutable',
+        },
+        body,
+      }
+    );
+    if (!res.ok) {
+      const err = await res.text().catch(() => '');
+      throw new Error(`R2 REST upload ${res.status}: ${err.slice(0, 120)}`);
+    }
+    return;
+  }
+  const s3Client = getS3();
+  if (!s3Client) throw new Error('no R2 auth configured');
+  await s3Client.send(new PutObjectCommand({
     Bucket: R2_BUCKET,
     Key: key,
     Body: body,
@@ -98,7 +138,7 @@ export async function syncListingPhotos(listing, photoUrls, { onProgress } = {})
       const i = cursor++;
       const url = urls[i];
       try {
-        const buf = await downloadPhoto(url);
+        const buf = await downloadPhoto(url, { listingId: listing.id, idx: i });
         const { hero, thumb } = await processPhoto(buf);
         const heroKey = keyFor(slug, i + 1, '-hero');
         const thumbKey = keyFor(slug, i + 1, '-400w');
