@@ -30,6 +30,7 @@ export default function SaveSearchModal({ filters = {}, buttonLabel = "Save this
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [frequency, setFrequency] = useState("daily");
   const [sendTime, setSendTime] = useState("06:00");
@@ -50,7 +51,7 @@ export default function SaveSearchModal({ filters = {}, buttonLabel = "Save this
       const res = await fetch(`${API_BASE}/api/alerts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: emailStr, phone: phone.trim(), name: name.trim() || "My Search", frequency, send_time: sendTime, send_day: sendDay, ...filters }),
+        body: JSON.stringify({ email: emailStr, phone: phone.trim(), password: password || undefined, name: name.trim() || "My Search", frequency, send_time: sendTime, send_day: sendDay, ...filters }),
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error || "Could not save");
@@ -135,6 +136,18 @@ export default function SaveSearchModal({ filters = {}, buttonLabel = "Save this
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="e.g. Fort Collins 3-bed"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Create a password <span className="text-gray-400 font-normal">(optional — lets you sign in anytime)</span>
+                    </label>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="At least 8 characters"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none"
                     />
                   </div>
