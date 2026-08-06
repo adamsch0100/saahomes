@@ -58,6 +58,103 @@ body.listing-detail-page {
   /* reserve space handled by listing sticky bar itself */
 }
 
+/* ─────────────────────────────────────────────────────────────
+   Prerendered sitewide links band ("Explore Northern Colorado
+   Real Estate") — injected by scripts/prerender-meta.mjs into
+   every prerendered page so crawlers can reach all 19 city pages
+   + money pages from anywhere. Style it as a branded mega-footer
+   continuation (dark, gold accents) — never hide or remove it:
+   it's an internal-link equity layer for SEO.
+   ───────────────────────────────────────────────────────────── */
+.prerendered-site-links {
+  background: #0b1220; /* deep slate — reads as footer continuation */
+  color: #9ca3af;
+  font-family: 'Open Sans', sans-serif;
+  padding: 3.5rem 1.5rem 4.5rem;
+  border-top: 1px solid #1f2937;
+}
+.prerendered-site-links-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.prerendered-site-links h2 {
+  font-family: 'Lora', serif;
+  font-size: 1.5rem;
+  line-height: 1.3;
+  color: #ffffff;
+  margin: 0 0 0.5rem;
+}
+.prerendered-site-links p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 640px;
+  color: #9ca3af;
+}
+.prerendered-site-links-columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+  margin-top: 2.25rem;
+}
+@media (min-width: 768px) {
+  .prerendered-site-links-columns {
+    grid-template-columns: 1.6fr 1fr;
+  }
+}
+.prerendered-site-links h3 {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #CFB36E; /* brand gold */
+  margin: 0 0 1rem;
+}
+.prerendered-site-links ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  columns: 2;
+  column-gap: 1.5rem;
+}
+@media (min-width: 1024px) {
+  .prerendered-site-links ul {
+    columns: 3;
+  }
+}
+.prerendered-site-links li {
+  margin-bottom: 0.45rem;
+  break-inside: avoid;
+}
+.prerendered-site-links a {
+  color: #d1d5db;
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: color 0.15s ease;
+}
+.prerendered-site-links a:hover {
+  color: #CFB36E;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.prerendered-site-links-cta {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #1f2937;
+  font-size: 0.95rem;
+  color: #d1d5db;
+}
+.prerendered-site-links-cta a {
+  color: #CFB36E;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.prerendered-site-links-cta a:hover {
+  color: #ffffff;
+}
+
 /* Subtle scrollbar for thumbnail strips */
 .scrollbar-thin {
   scrollbar-width: thin;
