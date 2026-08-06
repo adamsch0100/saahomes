@@ -170,8 +170,8 @@ async function sweep({ limit = null } = {}) {
   }
   const base = R2_PUBLIC_URL.replace(/^https?:\/\//, '');
   const q = limit
-    ? `SELECT id, listing_id, slug, photos FROM listings WHERE is_active AND photos::text <> '[]' AND NOT (photos::text LIKE $1) ORDER BY updated_at ASC LIMIT $2`
-    : `SELECT id, listing_id, slug, photos FROM listings WHERE is_active AND photos::text <> '[]' AND NOT (photos::text LIKE $1) ORDER BY updated_at ASC`;
+    ? `SELECT id, listing_id, slug, photos FROM listings WHERE is_active AND photos::text <> '[]' AND NOT (photos::text LIKE $1) ORDER BY updated_at DESC LIMIT $2`
+    : `SELECT id, listing_id, slug, photos FROM listings WHERE is_active AND photos::text <> '[]' AND NOT (photos::text LIKE $1) ORDER BY updated_at DESC`;
   const params = limit ? [`%${base}%`, limit] : [`%${base}%`];
   const res = await pool.query(q, params);
   console.log(`photoSync: ${res.rows.length} listings need photos`);
