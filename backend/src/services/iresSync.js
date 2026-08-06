@@ -13,7 +13,7 @@ import getPool from '../config/database.js';
  */
 
 const MLS_FIELDS = [
-  'ListingKey', 'ListingId', 'StandardStatus', 'PropertyType',
+  'ListingKey', 'ListingId', 'StandardStatus', 'PropertyType', 'PropertySubType',
   'StreetNumber', 'StreetName', 'UnitNumber', 'City', 'StateOrProvince',
   'PostalCode', 'CountyOrParish', 'ListPrice', 'BedroomsTotal',
   'BathroomsTotalInteger', 'BathroomsFull', 'LivingArea', 'LotSizeArea',
@@ -67,6 +67,7 @@ function normalizeListing(raw) {
     listing_id: String(raw.ListingId || raw.ListingKey),
     status: STATUS_MAP[raw.StandardStatus] || String(raw.StandardStatus || 'Active'),
     property_type: raw.PropertyType || null,
+    property_subtype: raw.PropertySubType || null,
     street_number: raw.StreetNumber ? String(raw.StreetNumber) : null,
     street_name: raw.StreetName || null,
     unit: raw.UnitNumber ? String(raw.UnitNumber) : null,
@@ -169,13 +170,14 @@ export async function syncListings() {
       const l = normalizeListing(raw);
       seenIds.push(l.listing_id);
       await pool.query(
-        `INSERT INTO listings (listing_id, status, property_type, street_number, street_name, unit,
+        `INSERT INTO listings (listing_id, status, property_type, property_subtype, street_number, street_name, unit,
            city, state, postal_code, county, list_price, beds, baths, living_area, lot_size,
            year_built, garage_spaces, hoa_fee, description, photos, latitude, longitude,
            listing_url, mls_source, raw, slug, last_seen_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,NOW())
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,NOW())
          ON CONFLICT (listing_id) DO UPDATE SET
            status = EXCLUDED.status, property_type = EXCLUDED.property_type,
+           property_subtype = EXCLUDED.property_subtype,
            street_number = EXCLUDED.street_number, street_name = EXCLUDED.street_name,
            unit = EXCLUDED.unit, city = EXCLUDED.city, state = EXCLUDED.state,
            postal_code = EXCLUDED.postal_code, county = EXCLUDED.county,
@@ -187,7 +189,7 @@ export async function syncListings() {
            longitude = EXCLUDED.longitude, listing_url = EXCLUDED.listing_url,
            mls_source = EXCLUDED.mls_source, raw = EXCLUDED.raw, slug = EXCLUDED.slug,
            is_active = TRUE, updated_at = NOW(), last_seen_at = NOW()`,
-        [l.listing_id, l.status, l.property_type, l.street_number, l.street_name, l.unit,
+        [l.listing_id, l.status, l.property_type, l.property_subtype, l.street_number, l.street_name, l.unit,
          l.city, l.state, l.postal_code, l.county, l.list_price, l.beds, l.baths, l.living_area,
          l.lot_size, l.year_built, l.garage_spaces, l.hoa_fee, l.description,
          JSON.stringify(l.photos), l.latitude, l.longitude, l.listing_url,

@@ -15,6 +15,20 @@ const FILTER_ALIASES = {
   status: 'status',
 };
 
+// Property-type filter → SQL. The IRES feed classifies condos/townhomes under
+// property_type 'Residential' with PropertySubType (Condo/Townhouse/Attached…),
+// so type filters must consult both columns.
+const TYPE_SQL = {
+  Residential: `(property_type = 'Residential' AND (property_subtype IS NULL OR (property_subtype NOT ILIKE '%condo%' AND property_subtype NOT ILIKE '%town%' AND property_subtype NOT ILIKE '%attached%')))`,
+  Condominium: `(property_subtype ILIKE '%condo%' OR property_subtype ILIKE '%town%' OR property_subtype ILIKE '%attached%' OR property_type = 'Condominium')`,
+  Townhouse: `(property_subtype ILIKE '%town%' OR property_type = 'Townhouse')`,
+  Land: `property_type = 'Land'`,
+  'Multi-Family': `property_type = 'Residential Income'`,
+  'Commercial Sale': `(property_type = 'Commercial Sale' OR property_type = 'Commercial Lease')`,
+  Farm: `property_type = 'Farm'`,
+  'Manufactured In Park': `property_type = 'Manufactured In Park'`,
+};
+
 export const searchListings = async (req, res) => {
   try {
     const pool = getPool();
@@ -34,7 +48,14 @@ export const searchListings = async (req, res) => {
     if (maxPrice) { where.push(`list_price <= $${i++}`); params.push(Number(maxPrice)); }
     if (beds) { where.push(`beds >= $${i++}`); params.push(Number(beds)); }
     if (baths) { where.push(`baths >= $${i++}`); params.push(Number(baths)); }
-    if (type) { where.push(`property_type = $${i++}`); params.push(type); }
+    if (type) {
+      if (TYPE_SQL[type]) {
+        where.push(TYPE_SQL[type]);
+      } else {
+        where.push(`property_type = $${i++}`);
+        params.push(type);
+      }
+    }
     if (q) {
       where.push(`(LOWER(city) LIKE $${i} OR LOWER(street_name) LIKE $${i} OR LOWER(description) LIKE $${i})`);
       params.push(`%${q.toLowerCase()}%`);
@@ -71,7 +92,14 @@ export const searchListings = async (req, res) => {
     if (maxPrice) { fWhere.push(`list_price <= $${fi++}`); fParams.push(Number(maxPrice)); }
     if (beds) { fWhere.push(`beds >= $${fi++}`); fParams.push(Number(beds)); }
     if (baths) { fWhere.push(`baths >= $${fi++}`); fParams.push(Number(baths)); }
-    if (type) { fWhere.push(`property_type = $${fi++}`); fParams.push(type); }
+    if (type) {
+      if (TYPE_SQL[type]) {
+        fWhere.push(TYPE_SQL[type]);
+      } else {
+        fWhere.push(`property_type = $${fi++}`);
+        fParams.push(type);
+      }
+    }
     if (q) {
       fWhere.push(`(LOWER(city) LIKE $${fi} OR LOWER(street_name) LIKE $${fi} OR LOWER(description) LIKE $${fi})`);
       fParams.push(`%${q.toLowerCase()}%`);
@@ -113,7 +141,7 @@ export const getListingStats = async (req, res) => {
               MAX(list_price) AS max_price,
               ROUND(AVG(list_price)) AS avg_price,
               COUNT(*) FILTER (WHERE property_type ILIKE '%residential%' OR property_type = 'Residential') AS residential,
-              COUNT(*) FILTER (WHERE property_type ILIKE '%condo%' OR property_type ILIKE '%townhouse%' OR property_type ILIKE '%townhome%') AS condo_townhome,
+              COUNT(*) FILTER (WHERE property_subtype ILIKE '%condo%' OR property_subtype ILIKE '%town%' OR property_subtype ILIKE '%attached%' OR property_type ILIKE '%condo%') AS condo_townhome,
               COUNT(*) FILTER (WHERE property_type ILIKE '%land%' OR property_type ILIKE '%lot%') AS land
        FROM listings WHERE ${where}`,
       params
