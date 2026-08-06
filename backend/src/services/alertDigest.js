@@ -78,7 +78,19 @@ function buildWhere(filters) {
   if (f.q) {
     where.push(`(LOWER(city) LIKE $${i} OR LOWER(street_name) LIKE $${i} OR LOWER(description) LIKE $${i})`);
     params.push(`%${String(f.q).toLowerCase()}%`);
+    i += 1;
   }
+  // Expanded MLS detail filters (parity with the search page)
+  if (f.minSqft) { where.push(`living_area >= $${i++}`); params.push(Number(f.minSqft)); }
+  if (f.minYear) { where.push(`year_built >= $${i++}`); params.push(Number(f.minYear)); }
+  if (f.maxHoa) { where.push(`hoa_fee <= $${i++}`); params.push(Number(f.maxHoa)); }
+  if (f.garage === 'true') where.push('garage_spaces > 0');
+  if (f.basement === 'true') where.push(`COALESCE(features->>'basement','') NOT ILIKE '%none%' AND COALESCE(features->>'basement','') <> ''`);
+  if (f.fireplace === 'true') where.push(`COALESCE(features->>'fireplaces','') <> ''`);
+  if (f.pool === 'true') where.push(`COALESCE(features->>'pool','') NOT ILIKE 'n%' AND COALESCE(features->>'pool','') <> ''`);
+  if (f.newConstruction === 'true') where.push(`features->>'new_construction' = 'true'`);
+  if (f.waterfront === 'true') where.push(`features->>'waterfront' = 'true'`);
+  if (f.newDays) { where.push(`days_on_market <= $${i++}`); params.push(Number(f.newDays)); }
   return { whereSql: where.join(' AND '), params };
 }
 

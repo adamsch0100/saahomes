@@ -43,6 +43,8 @@ export const searchListings = async (req, res) => {
     const {
       city, minPrice, maxPrice, beds, baths, type, status = 'Active',
       q, page = 1, limit = 24, sort = 'newest',
+      minSqft, minYear, maxHoa, garage, basement, fireplace, pool: hasPool,
+      newConstruction, waterfront, newDays,
     } = req.query;
 
     const where = [];
@@ -79,6 +81,17 @@ export const searchListings = async (req, res) => {
       params.push(`%${q.toLowerCase()}%`);
       i += 1;
     }
+    // ── Expanded MLS detail filters ──────────────────────────────────────
+    if (minSqft) { where.push(`living_area >= $${i++}`); params.push(Number(minSqft)); }
+    if (minYear) { where.push(`year_built >= $${i++}`); params.push(Number(minYear)); }
+    if (maxHoa) { where.push(`hoa_fee <= $${i++}`); params.push(Number(maxHoa)); }
+    if (garage === 'true') where.push('garage_spaces > 0');
+    if (basement === 'true') where.push(`COALESCE(features->>'basement','') NOT ILIKE '%none%' AND COALESCE(features->>'basement','') <> ''`);
+    if (fireplace === 'true') where.push(`COALESCE(features->>'fireplaces','') <> ''`);
+    if (hasPool === 'true') where.push(`COALESCE(features->>'pool','') NOT ILIKE 'n%' AND COALESCE(features->>'pool','') <> ''`);
+    if (newConstruction === 'true') where.push(`features->>'new_construction' = 'true'`);
+    if (waterfront === 'true') where.push(`features->>'waterfront' = 'true'`);
+    if (newDays) { where.push(`days_on_market <= $${i++}`); params.push(Number(newDays)); }
 
     const whereSql = where.join(' AND ');
     const offset = (Math.max(1, Number(page)) - 1) * Number(limit);
@@ -135,6 +148,17 @@ export const searchListings = async (req, res) => {
       fParams.push(`%${q.toLowerCase()}%`);
       fi += 1;
     }
+    // ── Expanded MLS detail filters (facet scope parity) ─────────────────
+    if (minSqft) { fWhere.push(`living_area >= $${fi++}`); fParams.push(Number(minSqft)); }
+    if (minYear) { fWhere.push(`year_built >= $${fi++}`); fParams.push(Number(minYear)); }
+    if (maxHoa) { fWhere.push(`hoa_fee <= $${fi++}`); fParams.push(Number(maxHoa)); }
+    if (garage === 'true') fWhere.push('garage_spaces > 0');
+    if (basement === 'true') fWhere.push(`COALESCE(features->>'basement','') NOT ILIKE '%none%' AND COALESCE(features->>'basement','') <> ''`);
+    if (fireplace === 'true') fWhere.push(`COALESCE(features->>'fireplaces','') <> ''`);
+    if (hasPool === 'true') fWhere.push(`COALESCE(features->>'pool','') NOT ILIKE 'n%' AND COALESCE(features->>'pool','') <> ''`);
+    if (newConstruction === 'true') fWhere.push(`features->>'new_construction' = 'true'`);
+    if (waterfront === 'true') fWhere.push(`features->>'waterfront' = 'true'`);
+    if (newDays) { fWhere.push(`days_on_market <= $${fi++}`); fParams.push(Number(newDays)); }
     const facetRes = await pool.query(
       `SELECT city, COUNT(*) AS cnt FROM listings
        WHERE ${fWhere.join(' AND ')} AND city IS NOT NULL

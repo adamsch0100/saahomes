@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { photoUrl } from "../utils/photoUrl.js";
 import { useSearchParams } from "react-router-dom";
 import ListingMap from "./ListingMap";
+import ListingDetailPanel from "./ListingDetailPanel";
 import SaveSearchModal from "./SaveSearchModal";
 import {
   formatPrice,
@@ -108,11 +109,16 @@ function HeartButton({ slug, className = "" }) {
   );
 }
 
-function ListingCard({ listing, selected, onHover, savedSearches }) {
+function ListingCard({ listing, selected, onHover, onOpen, savedSearches }) {
   const { isNew, priceCut, priceCutPct, isNewConstruction } = listingBadges(listing);
   const match = matchSavedSearch(listing, savedSearches);
   const [imgLoaded, setImgLoaded] = useState(false);
   const addr = listingAddress(listing);
+
+  const open = (e) => {
+    e?.preventDefault?.();
+    onOpen?.(listing);
+  };
 
   return (
     <article
@@ -124,7 +130,8 @@ function ListingCard({ listing, selected, onHover, savedSearches }) {
           : "border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300"
       }`}
     >
-      <a href={`/homes-for-sale/${listing.slug}/`} className="block">
+      {/* Click opens Zillow-style detail panel over search (not a full navigation) */}
+      <button type="button" onClick={open} className="block w-full text-left cursor-pointer">
         <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
           {!imgLoaded && (
             <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-100 to-gray-200" />
@@ -215,7 +222,7 @@ function ListingCard({ listing, selected, onHover, savedSearches }) {
             </p>
           )}
         </div>
-      </a>
+      </button>
     </article>
   );
 }
@@ -236,6 +243,16 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     baths: searchParams.get("baths") || "",
     type: searchParams.get("type") || "",
     sort: searchParams.get("sort") || "newest",
+    sqft: searchParams.get("minSqft") || "",
+    year: searchParams.get("minYear") || "",
+    hoa: searchParams.get("maxHoa") || "",
+    garage: searchParams.get("garage") || "",
+    basement: searchParams.get("basement") || "",
+    fireplace: searchParams.get("fireplace") || "",
+    pool: searchParams.get("pool") || "",
+    newcon: searchParams.get("newConstruction") || "",
+    waterfront: searchParams.get("waterfront") || "",
+    newdays: searchParams.get("newDays") || "",
   });
   const [results, setResults] = useState([]);
   const [meta, setMeta] = useState({ total: 0, pages: 0, page: 1 });
@@ -246,9 +263,13 @@ export default function ListingSearch({ location, height = "700px", compact = fa
   const [selectedId, setSelectedId] = useState(null);
   const [view, setView] = useState("list"); // mobile: list default (Zillow-like); map toggle
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [savedSearches, setSavedSearches] = useState(() =>
     typeof window !== "undefined" ? getSavedSearches() : []
   );
+  // Zillow-style detail panel over search (slug open = panel visible)
+  const [panelSlug, setPanelSlug] = useState(null);
+  const panelHistoryPushed = useRef(false);
   const resultsRef = useRef(null);
 
   const buildParams = useCallback((f, pageNum = 1) => {
@@ -263,6 +284,16 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     if (f.baths) params.set("baths", f.baths);
     if (f.type) params.set("type", f.type);
     if (f.sort) params.set("sort", f.sort);
+    if (f.sqft) params.set("minSqft", f.sqft);
+    if (f.year) params.set("minYear", f.year);
+    if (f.hoa) params.set("maxHoa", f.hoa);
+    if (f.garage === "true") params.set("garage", "true");
+    if (f.basement === "true") params.set("basement", "true");
+    if (f.fireplace === "true") params.set("fireplace", "true");
+    if (f.pool === "true") params.set("pool", "true");
+    if (f.newcon === "true") params.set("newConstruction", "true");
+    if (f.waterfront === "true") params.set("waterfront", "true");
+    if (f.newdays) params.set("newDays", f.newdays);
     params.set("limit", String(PAGE_SIZE));
     params.set("page", String(pageNum));
     return params;
@@ -319,6 +350,16 @@ export default function ListingSearch({ location, height = "700px", compact = fa
       if (next.baths) params.set("baths", next.baths);
       if (next.type) params.set("type", next.type);
       if (next.sort && next.sort !== "newest") params.set("sort", next.sort);
+      if (next.sqft) params.set("minSqft", next.sqft);
+      if (next.year) params.set("minYear", next.year);
+      if (next.hoa) params.set("maxHoa", next.hoa);
+      if (next.garage === "true") params.set("garage", "true");
+      if (next.basement === "true") params.set("basement", "true");
+      if (next.fireplace === "true") params.set("fireplace", "true");
+      if (next.pool === "true") params.set("pool", "true");
+      if (next.newcon === "true") params.set("newConstruction", "true");
+      if (next.waterfront === "true") params.set("waterfront", "true");
+      if (next.newdays) params.set("newDays", next.newdays);
       setSearchParams(params, { replace: true });
       return next;
     });
@@ -333,6 +374,8 @@ export default function ListingSearch({ location, height = "700px", compact = fa
       baths: "",
       type: "",
       sort: "newest",
+      sqft: "", year: "", hoa: "", garage: "", basement: "",
+      fireplace: "", pool: "", newcon: "", waterfront: "", newdays: "",
     });
     setSearchParams({}, { replace: true });
   };
@@ -343,6 +386,11 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     filters.beds,
     filters.baths,
     filters.type,
+    filters.sqft, filters.year, filters.hoa,
+    filters.garage === "true", filters.basement === "true",
+    filters.fireplace === "true", filters.pool === "true",
+    filters.newcon === "true", filters.waterfront === "true",
+    filters.newdays,
   ].filter(Boolean).length;
 
   const selectCard = (id) => {
@@ -353,6 +401,65 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     }
   };
 
+  /**
+   * Open listing detail panel over search (Zillow pattern).
+   * Pushes history so browser Back closes the panel; URL shows listing path
+   * (refresh lands on full SEO page). Opening another card replaces content.
+   */
+  const openListingPanel = useCallback((listingOrSlug) => {
+    const slug = typeof listingOrSlug === "string" ? listingOrSlug : listingOrSlug?.slug;
+    if (!slug) return;
+    const listing =
+      typeof listingOrSlug === "object" && listingOrSlug
+        ? listingOrSlug
+        : results.find((l) => l.slug === slug);
+    if (listing?.id) setSelectedId(listing.id);
+
+    if (panelSlug === slug) return;
+
+    if (panelSlug) {
+      // Swap content without stacking history entries
+      window.history.replaceState(
+        { ...(window.history.state || {}), saaListingPanel: slug },
+        "",
+        `/homes-for-sale/${slug}/`
+      );
+      setPanelSlug(slug);
+      return;
+    }
+
+    const returnUrl = `${window.location.pathname}${window.location.search}`;
+    window.history.pushState(
+      { ...(window.history.state || {}), saaListingPanel: slug, saaSearchReturn: returnUrl },
+      "",
+      `/homes-for-sale/${slug}/`
+    );
+    panelHistoryPushed.current = true;
+    setPanelSlug(slug);
+  }, [panelSlug, results]);
+
+  const closeListingPanel = useCallback(() => {
+    if (panelHistoryPushed.current) {
+      panelHistoryPushed.current = false;
+      window.history.back();
+      // popstate handler clears panelSlug
+      return;
+    }
+    setPanelSlug(null);
+  }, []);
+
+  // Browser Back closes the panel (returns to exact search state)
+  useEffect(() => {
+    const onPopState = () => {
+      if (panelSlug) {
+        panelHistoryPushed.current = false;
+        setPanelSlug(null);
+      }
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [panelSlug]);
+
   const saveFilters = {
     city: filters.city && filters.city !== "__noco__" && filters.city !== "__all__" ? filters.city : undefined,
     minPrice: filters.price ? filters.price.split("-")[0] || undefined : undefined,
@@ -360,6 +467,16 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     beds: filters.beds || undefined,
     baths: filters.baths || undefined,
     type: filters.type || undefined,
+    minSqft: filters.sqft || undefined,
+    minYear: filters.year || undefined,
+    maxHoa: filters.hoa || undefined,
+    garage: filters.garage || undefined,
+    basement: filters.basement || undefined,
+    fireplace: filters.fireplace || undefined,
+    pool: filters.pool || undefined,
+    newConstruction: filters.newcon || undefined,
+    waterfront: filters.waterfront || undefined,
+    newDays: filters.newdays || undefined,
   };
 
   const selectClass =
@@ -389,6 +506,80 @@ export default function ListingSearch({ location, height = "700px", compact = fa
         className={selectClass} aria-label="Property type">
         {TYPE_OPTIONS.map((o) => <option key={o.value || "any"} value={o.value}>{o.label}</option>)}
       </select>
+
+      {/* More filters — Zillow-style expandable detail filters */}
+      <button
+        type="button"
+        onClick={() => setMoreOpen(!moreOpen)}
+        className={`inline-flex items-center gap-1.5 px-3 py-2 border rounded-lg text-sm font-medium transition-colors ${
+          moreOpen || activeFilterCount > 5 ? "border-black bg-black text-white" : "border-gray-300 bg-white text-gray-700 hover:border-black"
+        }`}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6" />
+        </svg>
+        More filters{activeFilterCount > 5 ? ` (${activeFilterCount - 5})` : ""}
+      </button>
+      {moreOpen && (
+        <div className={`w-full ${mobile ? "mt-1" : "mt-2"} border border-gray-200 rounded-xl bg-gray-50 p-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3`}>
+          <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
+            Min sq ft
+            <select value={filters.sqft} onChange={(e) => setFilter("sqft", e.target.value)} className={selectClass}>
+              <option value="">Any</option>
+              {["1000", "1500", "2000", "2500", "3000", "4000"].map((v) => (
+                <option key={v} value={v}>{Number(v).toLocaleString()}+</option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
+            Year built
+            <select value={filters.year} onChange={(e) => setFilter("year", e.target.value)} className={selectClass}>
+              <option value="">Any</option>
+              {["1980", "1990", "2000", "2010", "2015", "2020"].map((v) => (
+                <option key={v} value={v}>{v}+</option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
+            Max HOA
+            <select value={filters.hoa} onChange={(e) => setFilter("hoa", e.target.value)} className={selectClass}>
+              <option value="">Any</option>
+              {["100", "200", "300", "500", "1000"].map((v) => (
+                <option key={v} value={v}>≤ ${v}/mo</option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
+            Listed in
+            <select value={filters.newdays} onChange={(e) => setFilter("newdays", e.target.value)} className={selectClass}>
+              <option value="">Anytime</option>
+              <option value="7">Last 7 days</option>
+              <option value="14">Last 14 days</option>
+              <option value="30">Last 30 days</option>
+            </select>
+          </label>
+          <div className="flex flex-wrap content-start gap-x-4 gap-y-2">
+            {[
+              ["garage", "Garage"],
+              ["basement", "Basement"],
+              ["fireplace", "Fireplace"],
+              ["pool", "Pool"],
+              ["newcon", "New construction"],
+              ["waterfront", "Waterfront"],
+            ].map(([key, label]) => (
+              <label key={key} className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={filters[key] === "true"}
+                  onChange={(e) => setFilter(key, e.target.checked ? "true" : "")}
+                  className="w-3.5 h-3.5 accent-black"
+                />
+                {label}
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
       {mobile && (
         <button
           type="button"
@@ -540,6 +731,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
               listings={results}
               selectedId={selectedId}
               onSelect={selectCard}
+              onOpenListing={openListingPanel}
             />
           </div>
           {/* Floating save search on map (desktop) */}
@@ -636,6 +828,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                     listing={listing}
                     selected={selectedId === listing.id}
                     onHover={setSelectedId}
+                    onOpen={openListingPanel}
                     savedSearches={savedSearches}
                   />
                 ))}
@@ -676,6 +869,11 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           )}
         </div>
       </div>
+
+      {/* Zillow-style detail panel: search stays mounted underneath */}
+      {panelSlug && (
+        <ListingDetailPanel slug={panelSlug} onClose={closeListingPanel} />
+      )}
     </div>
   );
 }
