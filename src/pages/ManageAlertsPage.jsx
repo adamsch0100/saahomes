@@ -9,6 +9,19 @@ const API_BASE = (() => {
 })();
 
 const TYPE_LABEL = { detached: "Detached home", attached: "Condo / townhome / attached", land: "Land", commercial: "Commercial" };
+const HOURS = Array.from({ length: 24 }, (_, h) => `${String(h).padStart(2, "0")}:00`);
+const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const FREQ_LABEL = { daily: "Daily", weekly: "Weekly", immediate: "As it happens" };
+
+function scheduleText(s) {
+  if (s.frequency === "immediate") return "As it happens — price drops & new listings email immediately";
+  const time = s.send_time || "06:00";
+  const [hh] = time.split(":");
+  const hour12 = hh % 12 === 0 ? 12 : hh % 12;
+  const ampm = hh < 12 ? "AM" : "PM";
+  if (s.frequency === "weekly") return `Weekly on ${s.send_day || "Monday"}s at ${hour12}:00 ${ampm} MT`;
+  return `Daily at ${hour12}:00 ${ampm} MT`;
+}
 
 function filtersText(filters = {}) {
   const f = (n) => (n ? `$${Number(n).toLocaleString()}` : "Any");
@@ -28,6 +41,10 @@ export default function ManageAlertsPage() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+  const [editFreq, setEditFreq] = useState("daily");
+  const [editTime, setEditTime] = useState("06:00");
+  const [editDay, setEditDay] = useState("Monday");
   const [unsubscribed, setUnsubscribed] = useState(false);
 
   const load = useCallback(() => {
@@ -68,6 +85,19 @@ export default function ManageAlertsPage() {
       await fetch(`${API_BASE}/api/alerts/${id}?token=${encodeURIComponent(token)}`, {
         method: "DELETE",
       });
+      load();
+    } finally { setBusy(null); }
+  };
+
+  const saveSchedule = async (id) => {
+    setBusy(id);
+    try {
+      await fetch(`${API_BASE}/api/alerts/${id}?token=${encodeURIComponent(token)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ frequency: editFreq, send_time: editTime, send_day: editDay }),
+      });
+      setEditingId(null);
       load();
     } finally { setBusy(null); }
   };
@@ -140,6 +170,59 @@ export default function ManageAlertsPage() {
                         )}
                       </p>
                       <p className="text-sm text-gray-500 mt-1">{filtersText(s.filters)}</p>
+                      <p className="text-xs text-gray-400 mt-1">📧 {scheduleText(s)}</p>
+                      {editingId === s.id && (
+                        <div className="mt-3 flex flex-wrap items-center gap-2 bg-gray-50 rounded-lg p-3">
+                          <select
+                            value={editFreq}
+                            onChange={(e) => setEditFreq(e.target.value)}
+                            className="px-2.5 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                            aria-label="Frequency"
+                          >
+                            {Object.entries(FREQ_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                          </select>
+                          {editFreq === "weekly" && (
+                            <select
+                              value={editDay}
+                              onChange={(e) => setEditDay(e.target.value)}
+                              className="px-2.5 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                              aria-label="Day"
+                            >
+                              {DAYS.map((d) => <option key={d} value={d}>{d}</option>)}
+                            </select>
+                          )}
+                          {editFreq !== "immediate" && (
+                            <select
+                              value={editTime}
+                              onChange={(e) => setEditTime(e.target.value)}
+                              className="px-2.5 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                              aria-label="Time"
+                            >
+                              {HOURS.map((h) => {
+                                const [hh] = h.split(":");
+                                const hour12 = hh % 12 === 0 ? 12 : hh % 12;
+                                const ampm = hh < 12 ? "AM" : "PM";
+                                return <option key={h} value={h}>{hour12}:00 {ampm}</option>;
+                              })}
+                            </select>
+                          )}
+                          <button
+                            type="button"
+                            disabled={busy === s.id}
+                            onClick={() => saveSchedule(s.id)}
+                            className="px-3.5 py-2 bg-black text-white rounded-lg text-sm font-medium disabled:opacity-50"
+                          >
+                            Save
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditingId(null)}
+                            className="px-3.5 py-2 border border-gray-300 rounded-lg text-sm font-medium"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      )}
                     </div>
                     <div className="flex gap-2 shrink-0">
                       <button
@@ -149,6 +232,18 @@ export default function ManageAlertsPage() {
                         className="px-3.5 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:border-black disabled:opacity-50"
                       >
                         {s.is_active ? "Pause" : "Resume"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingId(editingId === s.id ? null : s.id);
+                          setEditFreq(s.frequency || "daily");
+                          setEditTime(s.send_time || "06:00");
+                          setEditDay(s.send_day || "Monday");
+                        }}
+                        className="px-3.5 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:border-black disabled:opacity-50"
+                      >
+                        Schedule
                       </button>
                       <button
                         type="button"
