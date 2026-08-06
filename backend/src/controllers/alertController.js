@@ -13,6 +13,19 @@ import { forwardAlertSignupToFollowUpBoss } from '../services/followUpBossServic
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FILTER_KEYS = ['city', 'minPrice', 'maxPrice', 'beds', 'baths', 'type', 'sort', 'q'];
 const TYPE_VALUES = ['detached', 'attached', 'land', 'commercial', 'other', ''];
+const FREQUENCIES = ['immediate', 'daily', 'weekly'];
+const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+function cleanSchedule(body) {
+  const out = {};
+  const freq = body.frequency;
+  if (freq && FREQUENCIES.includes(String(freq))) out.frequency = String(freq);
+  const time = String(body.send_time || '');
+  if (/^\d{2}:\d{2}$/.test(time)) out.send_time = time;
+  const day = String(body.send_day || '');
+  if (DAYS.includes(day)) out.send_day = day;
+  return out;
+}
 
 function cleanFilters(body) {
   const f = {};
@@ -65,10 +78,12 @@ export const createAlert = async (req, res) => {
     const userRow = user.rows[0];
 
     const searchName = String(name || '').trim().slice(0, 255) || 'My Search';
+    const schedule = cleanSchedule(req.body || {});
     const inserted = await pool.query(
-      `INSERT INTO saved_searches (user_id, name, filters, is_active)
-       VALUES ($1, $2, $3, TRUE) RETURNING *`,
-      [userRow.id, searchName, JSON.stringify(filters)]
+      `INSERT INTO saved_searches (user_id, name, filters, is_active, frequency, send_time, send_day)
+       VALUES ($1, $2, $3, TRUE, $4, $5, $6) RETURNING *`,
+      [userRow.id, searchName, JSON.stringify(filters),
+       schedule.frequency || 'daily', schedule.send_time || '06:00', schedule.send_day || 'Monday']
     );
     const searchRow = inserted.rows[0];
 
@@ -96,7 +111,7 @@ export const listAlerts = async (req, res) => {
     const user = await findUserByToken(req.query.token);
     if (!user) return res.status(401).json({ success: false, error: 'Invalid or expired manage link.' });
     const searches = await getPool().query(
-      `SELECT id, name, filters, is_active, created_at, last_email_at
+      `SELECT id, name, filters, is_active, frequency, send_time, send_day, created_at, last_email_at
        FROM saved_searches WHERE user_id = $1 ORDER BY created_at DESC`,
       [user.id]
     );
@@ -122,6 +137,10 @@ export const updateAlert = async (req, res) => {
     let i = 1;
     if (typeof is_active === 'boolean') { updates.push(`is_active = $${i++}`); params.push(is_active); }
     if (name !== undefined) { updates.push(`name = $${i++}`); params.push(String(name).trim().slice(0, 255) || 'My Search'); }
+    const schedule = cleanSchedule(req.body || {});
+    if (schedule.frequency) { updates.push(`frequency = $${i++}`); params.push(schedule.frequency); }
+    if (schedule.send_time) { updates.push(`send_time = $${i++}`); params.push(schedule.send_time); }
+    if (schedule.send_day) { updates.push(`send_day = $${i++}`); params.push(schedule.send_day); }
     if (filterBody && Object.keys(filterBody).length) {
       const filters = cleanFilters(filterBody);
       if (Object.keys(filters).length) { updates.push(`filters = $${i++}`); params.push(JSON.stringify(filters)); }

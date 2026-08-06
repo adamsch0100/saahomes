@@ -8,6 +8,11 @@ const API_BASE = (() => {
 
 const TYPE_LABEL = { detached: "Detached home", attached: "Condo / townhome / attached", land: "Land", commercial: "Commercial" };
 
+const HOURS = Array.from({ length: 24 }, (_, h) => `${String(h).padStart(2, "0")}:00`);
+const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+const FREQ_LABEL = { daily: "Daily", weekly: "Weekly", immediate: "As it happens" };
+
 function filterSummary(filters = {}) {
   const parts = [];
   if (filters.city) parts.push(filters.city);
@@ -25,6 +30,9 @@ export default function SaveSearchModal({ filters = {}, buttonLabel = "Save this
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [frequency, setFrequency] = useState("daily");
+  const [sendTime, setSendTime] = useState("06:00");
+  const [sendDay, setSendDay] = useState("Monday");
   const [state, setState] = useState("idle"); // idle | saving | done | error
   const [error, setError] = useState("");
 
@@ -41,7 +49,7 @@ export default function SaveSearchModal({ filters = {}, buttonLabel = "Save this
       const res = await fetch(`${API_BASE}/api/alerts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: emailStr, name: name.trim() || "My Search", ...filters }),
+        body: JSON.stringify({ email: emailStr, name: name.trim() || "My Search", frequency, send_time: sendTime, send_day: sendDay, ...filters }),
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error || "Could not save");
@@ -116,6 +124,55 @@ export default function SaveSearchModal({ filters = {}, buttonLabel = "Save this
                       placeholder="e.g. Fort Collins 3-bed"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none"
                     />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">How often should we email you?</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {Object.entries(FREQ_LABEL).map(([value, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setFrequency(value)}
+                          className={`px-2 py-2.5 rounded-lg border text-xs font-semibold transition-colors ${
+                            frequency === value ? "bg-black text-white border-black" : "border-gray-300 text-gray-600 hover:border-black"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    {frequency === "weekly" && (
+                      <select
+                        value={sendDay}
+                        onChange={(e) => setSendDay(e.target.value)}
+                        className="mt-2 w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-black outline-none"
+                        aria-label="Day of week"
+                      >
+                        {DAYS.map((d) => <option key={d} value={d}>{d}s</option>)}
+                      </select>
+                    )}
+                    {frequency !== "immediate" && (
+                      <select
+                        value={sendTime}
+                        onChange={(e) => setSendTime(e.target.value)}
+                        className="mt-2 w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-black outline-none"
+                        aria-label="Time of day"
+                      >
+                        {HOURS.map((h) => {
+                          const [hh] = h.split(":");
+                          const hour12 = hh % 12 === 0 ? 12 : hh % 12;
+                          const ampm = hh < 12 ? "AM" : "PM";
+                          return <option key={h} value={h}>{hour12}:00 {ampm} (Mountain)</option>;
+                        })}
+                      </select>
+                    )}
+                    <p className="text-xs text-gray-400 mt-1.5">
+                      {frequency === "immediate"
+                        ? "Price drops & new listings email you the moment they hit."
+                        : frequency === "weekly"
+                        ? `We'll email you every ${sendDay} at the time above.`
+                        : `We'll email you every day at the time above.`}
+                    </p>
                   </div>
                   {error && <p className="text-red-600 text-sm">{error}</p>}
                   <button

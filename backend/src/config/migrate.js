@@ -209,6 +209,11 @@ export const runMigrations = async () => {
         CREATE INDEX IF NOT EXISTS idx_alert_events_search ON alert_events(search_id, created_at);
       `);
 
+      await client.query(`
+        ALTER TABLE saved_searches ADD COLUMN IF NOT EXISTS frequency VARCHAR(16) DEFAULT 'daily';
+        ALTER TABLE saved_searches ADD COLUMN IF NOT EXISTS send_time VARCHAR(5) DEFAULT '06:00';
+        ALTER TABLE saved_searches ADD COLUMN IF NOT EXISTS send_day VARCHAR(10) DEFAULT 'Monday';
+      `);
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_contact_submissions_email ON contact_submissions(email);
       CREATE INDEX IF NOT EXISTS idx_contact_submissions_created_at ON contact_submissions(created_at);
