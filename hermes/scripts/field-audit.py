@@ -12,21 +12,12 @@ for line in open("/opt/data/workspace/saahomes-repo/.env"):
         TOK = line.split("=", 1)[1].strip().strip('"').strip("'")
         break
 
-FIELDS = [
-    "ListingKey", "ListingId", "StandardStatus", "PropertyType", "PropertySubType",
-    "StreetNumber", "StreetName", "UnitNumber", "City", "StateOrProvince",
-    "PostalCode", "CountyOrParish", "ListPrice", "BedroomsTotal",
-    "BathroomsTotalInteger", "BathroomsFull", "LivingArea", "LotSizeArea",
-    "YearBuilt", "GarageSpaces", "AssociationFee", "PublicRemarks",
-    "Latitude", "Longitude", "ElementarySchool", "MiddleOrJuniorSchool",
-    "HighSchool", "DaysOnMarket", "ArchitecturalStyle", "Basement",
-    "FireplacesTotal", "GarageYN", "ParkingFeatures", "PoolYN", "View",
-    "WaterfrontYN", "WaterfrontFeatures", "CoolingYN", "HeatingYN", "Sewer",
-    "WaterSource", "Utilities", "Zoning", "LotFeatures", "NewConstructionYN",
-    "SeniorCommunityYN", "ShowingInstructions", "AssociationFeeFrequency",
-    "AccessibilityFeatures", "CommunityFeatures", "TaxAnnualAmount",
-    "SubdivisionName",
-]
+# Pull the exact field list from iresSync.js so the audit always matches the sync
+import re as _re
+_src = open("/opt/data/workspace/saahomes-repo/backend/src/services/iresSync.js").read()
+_m = _re.search(r"const MLS_FIELDS = \[(.*?)\];", _src, _re.S)
+FIELDS = _re.findall(r"'([^']+)'", _m.group(1)) if _m else []
+print(f"auditing {len(FIELDS)} fields from iresSync.js")
 
 
 def fetch(sel):

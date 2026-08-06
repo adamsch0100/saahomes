@@ -104,6 +104,13 @@ export default function ListingDetailPage() {
   const cityHomes = CITY_HOMES.find((c) => c.slug === citySlug);
   const dom = listing.days_on_market;
   const isNew = dom != null && dom <= 7;
+  const priceCut =
+    listing.original_list_price != null &&
+    listing.list_price != null &&
+    Number(listing.original_list_price) > Number(listing.list_price);
+  const priceCutPct = priceCut
+    ? Math.round((1 - Number(listing.list_price) / Number(listing.original_list_price)) * 100)
+    : null;
   const sqft = listing.living_area;
   const pricePerSqft = listing.price_per_sqft
     ?? (listing.list_price && sqft ? Math.round(listing.list_price / sqft) : null);
@@ -192,6 +199,11 @@ export default function ListingDetailPage() {
                 {isNew && (
                   <span className="bg-[#CFB36E] text-black text-xs font-bold px-2.5 py-1 rounded-full">NEW</span>
                 )}
+                {priceCut && (
+                  <span className="bg-emerald-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                    PRICE REDUCED {priceCutPct}%
+                  </span>
+                )}
                 {feats.new_construction && (
                   <span className="border border-[#CFB36E] text-[#CFB36E] text-xs font-bold px-2.5 py-1 rounded-full">NEW CONSTRUCTION</span>
                 )}
@@ -202,10 +214,19 @@ export default function ListingDetailPage() {
               <p className="text-gray-300 mt-1 text-sm">
                 {listing.beds != null && <span>{listing.beds} bd</span>}
                 {listing.baths != null && <span> · {listing.baths} ba</span>}
+                {listing.half_baths != null && listing.half_baths > 0 && <span> · {listing.half_baths} half-ba</span>}
                 {sqft != null && <span> · {Number(sqft).toLocaleString()} sqft</span>}
                 {pricePerSqft != null && <span> · ${pricePerSqft}/sqft</span>}
                 {listing.subdivision && <span> · {listing.subdivision}</span>}
               </p>
+              {priceCut && (
+                <p className="text-gray-400 text-sm mt-1">
+                  Was {formatPrice(listing.original_list_price)}
+                </p>
+              )}
+              {listing.school_district && (
+                <p className="text-gray-400 text-sm mt-1">🏫 {listing.school_district}</p>
+              )}
             </div>
             <button
               type="button"
@@ -256,13 +277,17 @@ export default function ListingDetailPage() {
               <KeyFact label="Beds" value={listing.beds != null ? String(listing.beds) : null} />
               <KeyFact label="Baths" value={listing.baths != null ? String(listing.baths) : null} />
               <KeyFact label="Living Area" value={fmtSqft(sqft)} />
-              <KeyFact label="Lot Size" value={listing.lot_size != null ? fmtSqft(listing.lot_size) : null} />
+              <KeyFact label="Above Grade" value={listing.above_grade_area != null ? fmtSqft(listing.above_grade_area) : null} />
+              <KeyFact label="Lot Size" value={listing.lot_size_acres != null ? `${listing.lot_size_acres} acres` : listing.lot_size != null ? fmtSqft(listing.lot_size) : null} />
               <KeyFact label="Year Built" value={listing.year_built ? String(listing.year_built) : null} />
               <KeyFact label="Days on Market" value={dom != null ? String(dom) : null} />
               <KeyFact label="Property Type" value={listing.property_subtype || listing.property_type} />
-              <KeyFact label="Garage" value={listing.garage_spaces != null ? `${listing.garage_spaces} spaces` : feats.garage_yn ? "Yes" : null} />
+              <KeyFact label="Garage" value={listing.garage_spaces != null ? `${listing.garage_spaces} spaces` : null} />
               <KeyFact label="HOA Fee" value={listing.hoa_fee != null ? `${formatPrice(listing.hoa_fee)}${feats.assoc_fee_freq ? ` / ${feats.assoc_fee_freq.toLowerCase()}` : ""}` : null} />
               <KeyFact label="County" value={listing.county || null} />
+              <KeyFact label="Subdivision" value={listing.subdivision || null} />
+              <KeyFact label="MLS #" value={listing.listing_id || null} />
+              <KeyFact label="Parcel #" value={feats.parcel || null} />
             </div>
           </div>
 
@@ -278,22 +303,58 @@ export default function ListingDetailPage() {
           {(() => {
             const rows = [
               ["Architectural Style", feats.style],
+              ["Levels / Stories", feats.levels],
+              ["Structure Type", feats.structure_type],
               ["Basement", feats.basement],
-              ["Fireplaces", feats.fireplaces != null ? String(feats.fireplaces) : null],
+              ["Construction", feats.construction],
+              ["Roof", feats.roof],
+              ["Interior Features", feats.interior],
+              ["Exterior Features", feats.exterior],
+              ["Appliances", feats.appliances],
+              ["Flooring", feats.flooring],
+              ["Cooling", feats.cooling],
+              ["Heating", feats.heating],
+              ["Fireplace", feats.fireplaces],
+              ["Pool", feats.pool],
+              ["Spa / Hot Tub", feats.spa],
               ["Parking", feats.parking],
-              ["Pool", feats.pool ? "Yes" : null],
+              ["Total Parking", feats.parking_total],
+              ["Other Parking", feats.other_parking],
+              ["Fencing", feats.fencing],
+              ["Patio & Porch", feats.patio],
+              ["Windows", feats.windows],
+              ["Security Features", feats.security],
+              ["Door Features", feats.doors],
+              ["Electric", feats.electric],
+              ["Laundry", feats.laundry],
+              ["Other Equipment", feats.other_equipment],
+              ["Other Structures", feats.other_structures],
+              ["Pets Allowed", feats.pets],
               ["View", feats.view],
-              ["Waterfront", feats.waterfront ? (feats.waterfront_features || "Yes") : null],
-              ["Cooling", feats.cooling ? "Yes" : null],
-              ["Heating", feats.heating ? "Yes" : null],
+              ["Waterfront", feats.waterfront ? (feats.water_body || "Yes") : null],
+              ["Water Body", feats.water_body],
+              ["Horse Amenities", feats.horse],
+              ["Irrigation", feats.irrigation],
+              ["Irrigation Water Rights", feats.irrigation_rights ? "Yes" : null],
               ["Sewer", feats.sewer],
               ["Water Source", feats.water_source],
               ["Utilities", feats.utilities],
               ["Zoning", feats.zoning],
               ["Lot Features", feats.lot_features],
+              ["HOA Name", feats.association_name],
+              ["HOA Includes", feats.association_includes],
+              ["Builder", feats.builder],
+              ["Builder Model", feats.builder_model],
+              ["Listing Terms", feats.listing_terms],
+              ["Special Conditions", feats.special_conditions],
+              ["Energy Efficient", feats.green_efficient],
+              ["Green Verification", feats.green_verification],
               ["Accessibility", feats.accessibility],
               ["Community Features", feats.community],
+              ["MLS Area", feats.mls_area],
               ["Annual Taxes", feats.tax_annual != null ? formatPrice(feats.tax_annual) : null],
+              ["Tax Year", feats.tax_year != null ? String(feats.tax_year) : null],
+              ["Availability", feats.availability],
             ].filter(([, v]) => v);
             if (!rows.length) return null;
             return (
@@ -415,6 +476,16 @@ export default function ListingDetailPage() {
               >
                 Schedule a Showing
               </a>
+              {feats.virtual_tour && (
+                <a
+                  href={feats.virtual_tour}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex items-center justify-center px-6 py-3.5 border border-[#CFB36E] text-[#CFB36E] font-semibold rounded-lg hover:bg-[#CFB36E] hover:text-black transition-colors"
+                >
+                  ▶ Virtual Tour
+                </a>
+              )}
               <a
                 href="tel:+19709991407"
                 className="w-full inline-flex items-center justify-center px-6 py-3.5 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors"
