@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import SEO from "../components/SEO";
 import QualifyCta from "../components/QualifyCta";
+import ListingMap from "../components/ListingMap";
+import { CITY_HOMES, getCityHomesPath } from "../data/cityHomesData";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -12,16 +14,39 @@ const API_BASE = (() => {
 const formatPrice = (n) =>
   n == null ? "—" : `$${Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 
+const fmtSqft = (n) => (n == null ? "—" : `${Number(n).toLocaleString()} sqft`);
+
+const HOME_TYPE_LABEL = {
+  detached: "Detached Home",
+  attached: "Condo / Townhome / Attached",
+  land: "Land",
+  commercial: "Commercial",
+  other: "Property",
+};
+
+function KeyFact({ label, value }) {
+  if (!value || value === "—" || value === "") return null;
+  return (
+    <div className="bg-gray-50 rounded-lg p-3.5">
+      <p className="text-[11px] text-gray-500 uppercase tracking-wide font-medium">{label}</p>
+      <p className="font-semibold text-gray-900 mt-0.5 text-sm sm:text-base">{value}</p>
+    </div>
+  );
+}
+
 export default function ListingDetailPage() {
   const { slug } = useParams();
   const [listing, setListing] = useState(null);
   const [error, setError] = useState(null);
   const [activePhoto, setActivePhoto] = useState(0);
+  const [similar, setSimilar] = useState([]);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
     setListing(null);
     setError(null);
+    setActivePhoto(0);
     fetch(`${API_BASE}/api/listings/${slug}`)
       .then((res) => {
         if (!res.ok) throw new Error("Listing not found");
@@ -30,6 +55,26 @@ export default function ListingDetailPage() {
       .then((data) => setListing(data.data))
       .catch((err) => setError(err.message));
   }, [slug]);
+
+  useEffect(() => {
+    if (!listing || !listing.city) return;
+    const params = new URLSearchParams({ city: listing.city, limit: "4", sort: "newest" });
+    if (listing.list_price) {
+      const lo = Math.max(0, Number(listing.list_price) * 0.7);
+      const hi = Number(listing.list_price) * 1.3;
+      params.set("minPrice", String(Math.round(lo)));
+      params.set("maxPrice", String(Math.round(hi)));
+    }
+    fetch(`${API_BASE}/api/listings?${params}`)
+      .then((r) => r.json())
+      .then((d) => setSimilar((d.data || []).filter((l) => l.slug !== listing.slug).slice(0, 3)))
+      .catch(() => {});
+    // saved state
+    try {
+      const savedList = JSON.parse(localStorage.getItem("saa-saved-homes") || "[]");
+      setSaved(savedList.includes(listing.slug));
+    } catch { /* noop */ }
+  }, [listing]);
 
   if (error) {
     return (
@@ -46,9 +91,7 @@ export default function ListingDetailPage() {
 
   if (!listing) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-24 text-center text-gray-500">
-        Loading listing…
-      </div>
+      <div className="max-w-3xl mx-auto px-4 py-24 text-center text-gray-500">Loading listing…</div>
     );
   }
 
@@ -56,6 +99,14 @@ export default function ListingDetailPage() {
     .filter(Boolean).join(" ");
   const fullAddress = [address, listing.city, listing.state].filter(Boolean).join(", ");
   const photos = Array.isArray(listing.photos) ? listing.photos : [];
+  const feats = listing.features || {};
+  const citySlug = (listing.city || "").toLowerCase().replace(/\s+/g, "-");
+  const cityHomes = CITY_HOMES.find((c) => c.slug === citySlug);
+  const dom = listing.days_on_market;
+  const isNew = dom != null && dom <= 7;
+  const sqft = listing.living_area;
+  const pricePerSqft = listing.price_per_sqft
+    ?? (listing.list_price && sqft ? Math.round(listing.list_price / sqft) : null);
 
   const listingSchema = {
     "@context": "https://schema.org",
@@ -63,6 +114,7 @@ export default function ListingDetailPage() {
     name: `${fullAddress} — Homes for Sale`,
     url: `https://saahomes.com/homes-for-sale/${listing.slug}/`,
     description: listing.description ? listing.description.slice(0, 250) : `${fullAddress} in ${listing.city}, CO`,
+    image: photos[0] || undefined,
     address: {
       "@type": "PostalAddress",
       streetAddress: address || undefined,
@@ -79,45 +131,99 @@ export default function ListingDetailPage() {
     ...(listing.latitude && listing.longitude
       ? { geo: { "@type": "GeoCoordinates", latitude: Number(listing.latitude), longitude: Number(listing.longitude) } }
       : {}),
+    ...(listing.beds != null ? { numberOfRooms: Number(listing.beds) } : {}),
+    ...(listing.baths != null ? { numberOfBathroomsTotal: Number(listing.baths) } : {}),
+    ...(sqft != null ? { floorSize: { "@type": "QuantitativeValue", value: Number(sqft), unitCode: "FTK" } } : {}),
+    ...(listing.year_built ? { yearBuilt: Number(listing.year_built) } : {}),
+    ...(listing.property_subtype ? { additionalProperty: { "@type": "PropertyValue", name: "PropertySubType", value: listing.property_subtype } } : {}),
   };
+
+  const toggleSave = () => {
+    try {
+      const savedList = JSON.parse(localStorage.getItem("saa-saved-homes") || "[]");
+      const next = savedList.includes(listing.slug)
+        ? savedList.filter((s) => s !== listing.slug)
+        : [...savedList, listing.slug];
+      localStorage.setItem("saa-saved-homes", JSON.stringify(next));
+      setSaved(!savedList.includes(listing.slug));
+    } catch { /* noop */ }
+  };
+
+  const metaDesc = [
+    `${fullAddress} — ${formatPrice(listing.list_price)}`,
+    listing.beds != null ? `${listing.beds} bd` : "",
+    listing.baths != null ? `${listing.baths} ba` : "",
+    sqft != null ? `${Number(sqft).toLocaleString()} sqft` : "",
+    "in",
+    listing.city,
+    "Colorado.",
+    listing.elementary_school ? `Served by ${listing.elementary_school} Elementary.` : "",
+    "Schedule a showing with Schwartz and Associates at SAA Homes — (970) 999-1407.",
+  ].filter(Boolean).join(" ");
 
   return (
     <>
       <SEO
         title={`${fullAddress} | ${listing.city} Real Estate | SAA Homes`}
-        description={
-          listing.description
-            ? listing.description.slice(0, 155)
-            : `${fullAddress} — ${formatPrice(listing.list_price)}. Browse this Northern Colorado listing and contact SAA Homes.`
-        }
+        description={metaDesc.slice(0, 158)}
         canonicalPath={`/homes-for-sale/${listing.slug}/`}
+        ogImage={photos[0] || undefined}
         jsonLd={[listingSchema]}
       />
 
       {/* Hero gallery */}
       <section className="bg-black">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <nav className="text-sm text-gray-400 mb-4">
+          <nav className="text-sm text-gray-400 mb-4 flex flex-wrap gap-x-2 gap-y-1">
             <Link to="/properties/" className="hover:text-white">All Listings</Link>
             {" / "}
-            <Link to={`/northern-colorado-areas/${(listing.city || "").toLowerCase().replace(/\s+/g, "-")}/`} className="hover:text-white">
-              {listing.city} Real Estate
-            </Link>
+            <Link to={getCityHomesPath(citySlug)} className="hover:text-white">{listing.city} Homes for Sale</Link>
             {" / "}
-            <span className="text-white">{fullAddress}</span>
+            <Link to={`/northern-colorado-areas/${citySlug}/`} className="hover:text-white">{listing.city} Real Estate</Link>
+            {" / "}
+            <span className="text-white">{address}</span>
           </nav>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white font-serif">{fullAddress}</h1>
-          <p className="text-gray-300 mt-1">
-            {formatPrice(listing.list_price)}
-            {listing.beds != null && <span> · {listing.beds} beds</span>}
-            {listing.baths != null && <span> · {listing.baths} baths</span>}
-            {listing.living_area != null && <span> · {Number(listing.living_area).toLocaleString()} sqft</span>}
-          </p>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white font-serif">{fullAddress}</h1>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2">
+                <span className="text-2xl font-bold text-[#CFB36E]">{formatPrice(listing.list_price)}</span>
+                <span className="text-gray-300">{HOME_TYPE_LABEL[listing.home_type] || listing.property_subtype || listing.property_type}</span>
+                {isNew && (
+                  <span className="bg-[#CFB36E] text-black text-xs font-bold px-2.5 py-1 rounded-full">NEW</span>
+                )}
+                {feats.new_construction && (
+                  <span className="border border-[#CFB36E] text-[#CFB36E] text-xs font-bold px-2.5 py-1 rounded-full">NEW CONSTRUCTION</span>
+                )}
+                {listing.status === "Active" && (
+                  <span className="border border-emerald-400 text-emerald-400 text-xs font-bold px-2.5 py-1 rounded-full">ACTIVE</span>
+                )}
+              </div>
+              <p className="text-gray-300 mt-1 text-sm">
+                {listing.beds != null && <span>{listing.beds} bd</span>}
+                {listing.baths != null && <span> · {listing.baths} ba</span>}
+                {sqft != null && <span> · {Number(sqft).toLocaleString()} sqft</span>}
+                {pricePerSqft != null && <span> · ${pricePerSqft}/sqft</span>}
+                {listing.subdivision && <span> · {listing.subdivision}</span>}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={toggleSave}
+              className={`shrink-0 px-4 py-2.5 rounded-lg border text-sm font-semibold transition-colors ${
+                saved
+                  ? "bg-[#CFB36E] border-[#CFB36E] text-black"
+                  : "border-white text-white hover:bg-white hover:text-black"
+              }`}
+            >
+              {saved ? "♥ Saved" : "♡ Save this home"}
+            </button>
+          </div>
         </div>
         {photos.length > 0 && (
           <div className="max-w-7xl mx-auto px-4 pb-6">
             <div className="aspect-[16/9] rounded-xl overflow-hidden bg-gray-800">
-              <img src={photos[activePhoto]} alt={fullAddress} className="w-full h-full object-cover" />
+              <img src={photos[activePhoto]} alt={`${fullAddress} — photo ${activePhoto + 1}`} className="w-full h-full object-cover" />
             </div>
             {photos.length > 1 && (
               <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
@@ -140,73 +246,196 @@ export default function ListingDetailPage() {
 
       {/* Main content */}
       <section className="max-w-7xl mx-auto px-4 py-10 grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <h2 className="text-xl font-bold text-gray-900 mb-3">About this home</h2>
-          <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-            {listing.description || "Contact us for details about this property."}
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-8">
-            {[
-              ["Price", formatPrice(listing.list_price)],
-              ["Beds", listing.beds != null ? String(listing.beds) : "—"],
-              ["Baths", listing.baths != null ? String(listing.baths) : "—"],
-              ["Sq Ft", listing.living_area != null ? Number(listing.living_area).toLocaleString() : "—"],
-              ["Year Built", listing.year_built || "—"],
-              ["Lot Size", listing.lot_size != null ? `${Number(listing.lot_size).toLocaleString()} sqft` : "—"],
-            ].map(([label, value]) => (
-              <div key={label} className="bg-gray-50 rounded-lg p-4 text-center">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">{label}</p>
-                <p className="font-semibold text-gray-900 mt-1">{value}</p>
-              </div>
-            ))}
+        <div className="lg:col-span-2 space-y-10">
+          {/* Key facts */}
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Key Facts</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <KeyFact label="Price" value={formatPrice(listing.list_price)} />
+              <KeyFact label="Price / Sq Ft" value={pricePerSqft != null ? `$${pricePerSqft}` : null} />
+              <KeyFact label="Beds" value={listing.beds != null ? String(listing.beds) : null} />
+              <KeyFact label="Baths" value={listing.baths != null ? String(listing.baths) : null} />
+              <KeyFact label="Living Area" value={fmtSqft(sqft)} />
+              <KeyFact label="Lot Size" value={listing.lot_size != null ? fmtSqft(listing.lot_size) : null} />
+              <KeyFact label="Year Built" value={listing.year_built ? String(listing.year_built) : null} />
+              <KeyFact label="Days on Market" value={dom != null ? String(dom) : null} />
+              <KeyFact label="Property Type" value={listing.property_subtype || listing.property_type} />
+              <KeyFact label="Garage" value={listing.garage_spaces != null ? `${listing.garage_spaces} spaces` : feats.garage_yn ? "Yes" : null} />
+              <KeyFact label="HOA Fee" value={listing.hoa_fee != null ? `${formatPrice(listing.hoa_fee)}${feats.assoc_fee_freq ? ` / ${feats.assoc_fee_freq.toLowerCase()}` : ""}` : null} />
+              <KeyFact label="County" value={listing.county || null} />
+            </div>
           </div>
+
+          {/* About */}
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 mb-3">About this home</h2>
+            <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+              {listing.description || "Contact us for details about this property."}
+            </p>
+          </div>
+
+          {/* Features & amenities */}
+          {(() => {
+            const rows = [
+              ["Architectural Style", feats.style],
+              ["Basement", feats.basement],
+              ["Fireplaces", feats.fireplaces != null ? String(feats.fireplaces) : null],
+              ["Parking", feats.parking],
+              ["Pool", feats.pool ? "Yes" : null],
+              ["View", feats.view],
+              ["Waterfront", feats.waterfront ? (feats.waterfront_features || "Yes") : null],
+              ["Cooling", feats.cooling ? "Yes" : null],
+              ["Heating", feats.heating ? "Yes" : null],
+              ["Sewer", feats.sewer],
+              ["Water Source", feats.water_source],
+              ["Utilities", feats.utilities],
+              ["Zoning", feats.zoning],
+              ["Lot Features", feats.lot_features],
+              ["Accessibility", feats.accessibility],
+              ["Community Features", feats.community],
+              ["Annual Taxes", feats.tax_annual != null ? formatPrice(feats.tax_annual) : null],
+            ].filter(([, v]) => v);
+            if (!rows.length) return null;
+            return (
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Features & Amenities</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2.5">
+                  {rows.map(([label, value]) => (
+                    <div key={label} className="flex justify-between gap-4 border-b border-gray-100 pb-2">
+                      <span className="text-gray-500 text-sm">{label}</span>
+                      <span className="text-gray-900 text-sm font-medium text-right">{value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Schools */}
+          {(listing.elementary_school || listing.middle_school || listing.high_school) && (
+            <div className="bg-gray-50 rounded-xl p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-1">Schools</h2>
+              <p className="text-gray-500 text-sm mb-4">
+                School attendance zones are assigned by the district and can change — verify with the district before relying on them.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {[
+                  ["Elementary", listing.elementary_school],
+                  ["Middle School", listing.middle_school],
+                  ["High School", listing.high_school],
+                ].filter(([, v]) => v).map(([label, value]) => (
+                  <div key={label} className="bg-white rounded-lg border border-gray-200 p-4">
+                    <p className="text-[11px] text-gray-500 uppercase tracking-wide">{label}</p>
+                    <p className="font-semibold text-gray-900 mt-1">{value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Area info */}
+          <div className="bg-black text-white rounded-xl p-6">
+            <h2 className="text-xl font-bold font-serif mb-2">About {listing.city}</h2>
+            <p className="text-gray-300 text-sm leading-relaxed mb-4">
+              {cityHomes ? cityHomes.intro : `${listing.city} is one of the Northern Colorado communities served by Schwartz and Associates at SAA Homes.`}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Link to={`/northern-colorado-areas/${citySlug}/`}
+                className="px-4 py-2 bg-[#CFB36E] text-black text-sm font-semibold rounded-lg hover:bg-[#bd9f5a]">
+                {listing.city} Neighborhood Guide
+              </Link>
+              <Link to={getCityHomesPath(citySlug)}
+                className="px-4 py-2 border border-white text-white text-sm font-semibold rounded-lg hover:bg-white hover:text-black">
+                All {listing.city} Homes for Sale
+              </Link>
+            </div>
+          </div>
+
+          {/* Map */}
+          {listing.latitude && listing.longitude && (
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-3">Location</h2>
+              <div className="rounded-xl overflow-hidden border border-gray-200 h-[320px]">
+                <ListingMap
+                  listings={[{ id: listing.id, slug: listing.slug, latitude: Number(listing.latitude), longitude: Number(listing.longitude), list_price: listing.list_price, street_name: listing.street_name, city: listing.city, photos: photos.slice(0, 1) }]}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Similar homes */}
+          {similar.length > 0 && (
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Similar Homes in {listing.city}</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {similar.map((l) => (
+                  <Link key={l.listing_id} to={`/homes-for-sale/${l.slug}/`}
+                    className="group block bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="aspect-[4/3] bg-gray-100 overflow-hidden">
+                      <img src={(l.photos && l.photos[0]) || "/images/buyers-hero.jpg"} alt={`${l.street_name || "Home"} in ${l.city}`}
+                        loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    </div>
+                    <div className="p-3">
+                      <p className="font-bold text-gray-900">{formatPrice(l.list_price)}</p>
+                      <p className="text-xs text-gray-500">
+                        {l.beds != null ? `${l.beds} bd` : ""}{l.baths != null ? ` · ${l.baths} ba` : ""}
+                        {l.living_area != null ? ` · ${Number(l.living_area).toLocaleString()} sqft` : ""}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Contact card */}
-        <aside className="bg-black text-white rounded-xl p-6 h-fit lg:sticky lg:top-24">
-          <h2 className="text-lg font-bold font-serif">Interested in this home?</h2>
-          <p className="text-gray-300 text-sm mt-2 leading-relaxed">
-            Let's talk — we'll walk you through pricing, neighborhood details, and whether
-            you qualify for CHFA down payment assistance.
-          </p>
-          <div className="mt-5 space-y-3">
-            <button
-              type="button"
-              onClick={() =>
-                window.dispatchEvent(new CustomEvent("open-nadia-chat", {
-                  detail: { message: `Hi! I'm interested in ${fullAddress} (${formatPrice(listing.list_price)}). Can you tell me more?` },
-                }))
-              }
-              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 font-semibold rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
-              style={{ backgroundColor: "#CFB36E", color: "#1a1a1a" }}
-            >
-              💬 Chat about this home
-            </button>
-            <a
-              href={`/contact/?interest=${encodeURIComponent(`Listing: ${fullAddress}`)}`}
-              className="w-full inline-flex items-center justify-center px-6 py-3.5 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors"
-            >
-              Request a Showing
-            </a>
-            <a
-              href="tel:+19709991407"
-              className="w-full inline-flex items-center justify-center px-6 py-3.5 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              Call (970) 999-1407
-            </a>
-          </div>
-          {listing.listing_url && (
-            <p className="text-xs text-gray-500 mt-4">
-              Listing data from {listing.mls_source || "IRES"} MLS.{" "}
-              <a href={listing.listing_url} target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-300">
-                View original listing
-              </a>
+        {/* Sticky contact card */}
+        <aside className="space-y-4 lg:sticky lg:top-24 h-fit">
+          <div className="bg-black text-white rounded-xl p-6">
+            <h2 className="text-lg font-bold font-serif">Interested in this home?</h2>
+            <p className="text-gray-300 text-sm mt-2 leading-relaxed">
+              Let's talk — we'll walk you through pricing, neighborhood details, and whether you qualify for CHFA down payment assistance.
             </p>
-          )}
+            <div className="mt-5 space-y-3">
+              <button
+                type="button"
+                onClick={() =>
+                  window.dispatchEvent(new CustomEvent("open-nadia-chat", {
+                    detail: { message: `Hi! I'm interested in ${fullAddress} (${formatPrice(listing.list_price)}). Can you tell me more?` },
+                  }))
+                }
+                className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 font-semibold rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
+                style={{ backgroundColor: "#CFB36E", color: "#1a1a1a" }}
+              >
+                💬 Chat about this home
+              </button>
+              <a
+                href={`/contact/?interest=${encodeURIComponent(`Showing request: ${fullAddress} — ${formatPrice(listing.list_price)}`)}`}
+                className="w-full inline-flex items-center justify-center px-6 py-3.5 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors"
+              >
+                Schedule a Showing
+              </a>
+              <a
+                href="tel:+19709991407"
+                className="w-full inline-flex items-center justify-center px-6 py-3.5 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                Call (970) 999-1407
+              </a>
+              {listing.hoa_fee != null && (
+                <p className="text-xs text-gray-400 pt-1">
+                  HOA: {formatPrice(listing.hoa_fee)}{feats.assoc_fee_freq ? ` / ${feats.assoc_fee_freq.toLowerCase()}` : ""}
+                </p>
+              )}
+            </div>
+            <p className="text-[11px] text-gray-500 mt-4 leading-relaxed">
+              Listing data from {listing.mls_source || "IRES"} MLS. IDX information provided by IRES.{" "}
+              {feats.showing_instructions ? `Showing instructions: ${feats.showing_instructions}` : ""}
+            </p>
+          </div>
         </aside>
       </section>
 
-      {/* Conversational qualify CTA — reuse the lending-page pattern */}
+      {/* Conversational qualify CTA */}
       <QualifyCta
         program={`a home in ${listing.city || "Northern Colorado"}`}
         chatQuestion={`Hi! I'm looking at a home in ${listing.city || "Northern Colorado"} and want to know if I'd qualify for a loan or CHFA assistance. Can you help?`}
