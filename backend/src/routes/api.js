@@ -11,6 +11,7 @@ import { searchListings, getListingBySlug, getListingStats } from '../controller
 import {
   createAlert, listAlerts, getMe, sendMagicLink, signOut, updateAlert, deleteAlert, unsubscribeAll,
 } from '../controllers/alertController.js';
+import { register, login, setPassword } from '../controllers/authController.js';
 import { submitShowingRequest } from '../controllers/showingController.js';
 import {
   validateContactSubmission,
@@ -99,6 +100,11 @@ const listingLimiter = rateLimit({
 router.get('/listings', listingLimiter, searchListings);
 router.get('/listings/stats', listingLimiter, getListingStats);
 router.get('/listings/:slug', listingLimiter, getListingBySlug);
+
+// Client accounts (password login — cookie session)
+router.post('/auth/register', formLimiter, register);
+router.post('/auth/login', formLimiter, login);
+router.post('/auth/password', setPassword);
 
 // Saved-search / follow-up alerts (lead capture → FUB)
 router.post('/alerts', formLimiter, createAlert);
