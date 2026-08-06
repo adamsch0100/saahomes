@@ -4,6 +4,7 @@ import SEO from "../components/SEO";
 import QualifyCta from "../components/QualifyCta";
 import ListingMap from "../components/ListingMap";
 import SaveSearchModal from "../components/SaveSearchModal";
+import ScheduleShowingModal from "../components/ScheduleShowingModal";
 import { CITY_HOMES, getCityHomesPath } from "../data/cityHomesData";
 
 const API_BASE = (() => {
@@ -245,7 +246,9 @@ export default function ListingDetailPage() {
         {photos.length > 0 && (
           <div className="max-w-7xl mx-auto px-4 pb-6">
             <div className="aspect-[16/9] rounded-xl overflow-hidden bg-gray-800">
-              <img src={photos[activePhoto]} alt={`${fullAddress} — photo ${activePhoto + 1}`} className="w-full h-full object-cover" />
+              <img src={photos[activePhoto]} alt={`${fullAddress} — photo ${activePhoto + 1}`}
+                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/buyers-hero.jpg"; }}
+                className="w-full h-full object-cover" />
             </div>
             {photos.length > 1 && (
               <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
@@ -257,7 +260,9 @@ export default function ListingDetailPage() {
                       i === activePhoto ? "border-[#CFB36E]" : "border-transparent opacity-70 hover:opacity-100"
                     }`}
                   >
-                    <img src={p} alt={`${fullAddress} photo ${i + 1}`} className="w-full h-full object-cover" />
+                    <img src={p} alt={`${fullAddress} photo ${i + 1}`}
+                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/buyers-hero.jpg"; }}
+                      className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -435,6 +440,7 @@ export default function ListingDetailPage() {
                     className="group block bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                     <div className="aspect-[4/3] bg-gray-100 overflow-hidden">
                       <img src={(l.photos && l.photos[0]) || "/images/buyers-hero.jpg"} alt={`${l.street_name || "Home"} in ${l.city}`}
+                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/buyers-hero.jpg"; }}
                         loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                     </div>
                     <div className="p-3">
@@ -471,12 +477,11 @@ export default function ListingDetailPage() {
               >
                 💬 Chat about this home
               </button>
-              <a
-                href={`/contact/?interest=${encodeURIComponent(`Showing request: ${fullAddress} — ${formatPrice(listing.list_price)}`)}`}
-                className="w-full inline-flex items-center justify-center px-6 py-3.5 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors"
-              >
-                Schedule a Showing
-              </a>
+              <ScheduleShowingModal
+                listing={listing}
+                buttonLabel="Schedule a Showing"
+                buttonClassName="w-full inline-flex items-center justify-center px-6 py-3.5 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors"
+              />
               {feats.virtual_tour && (
                 <a
                   href={feats.virtual_tour}

@@ -136,10 +136,11 @@ export default function ListingMap({ listings = [], selectedId = null, onSelect 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Rebuild GeoJSON when listings change
+  // Rebuild GeoJSON when listings change (retry once the map source exists —
+  // fixes the race where listings arrive before the map 'load' event).
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.getSource("listings")) return;
+    if (!map) return;
     const features = listings
       .filter((l) => l.latitude != null && l.longitude != null)
       .map((l) => ({
@@ -147,7 +148,16 @@ export default function ListingMap({ listings = [], selectedId = null, onSelect 
         geometry: { type: "Point", coordinates: [Number(l.longitude), Number(l.latitude)] },
         properties: { id: l.id },
       }));
-    map.getSource("listings").setData({ type: "FeatureCollection", features });
+    const apply = () => {
+      if (!map.getSource("listings")) return false;
+      map.getSource("listings").setData({ type: "FeatureCollection", features });
+      return true;
+    };
+    if (apply()) return;
+    const onLoad = () => apply();
+    map.on("load", onLoad);
+    // eslint-disable-next-line consistent-return
+    return () => map.off("load", onLoad);
   }, [listings]);
 
   // Fly-to + highlight on card hover/select

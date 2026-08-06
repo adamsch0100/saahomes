@@ -224,6 +224,7 @@ export default function ListingSearch({ location, height = "700px" }) {
       <a href={`/homes-for-sale/${listing.slug}/`} className="block relative aspect-[4/3] bg-gray-100">
         {listing.photos?.length > 0 ? (
           <img src={listing.photos[0]} alt={`${listing.street_number || ""} ${listing.street_name || ""} ${listing.city || ""}`}
+            onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/buyers-hero.jpg"; }}
             className="w-full h-full object-cover" loading="lazy" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
