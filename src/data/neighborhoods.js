@@ -2020,6 +2020,7 @@ export const neighborhoods = [
     walkScore: 38,
     metaDescription: 'Westhaven Loveland real estate - established west Loveland subdivision with mature trees near Lake Loveland. SAA Homes.',
     keywords: 'Westhaven Loveland, west Loveland homes, established Loveland subdivisions, Lake Loveland area homes, Taft Avenue Loveland, mature landscaping Loveland, Lincoln Avenue Loveland real estate',
+    youtubeId: 'cxZgTeFtZCU',
     neighborhoodHighlights: [
       { title: 'Established character', description: 'Mature trees and well-kept homes in one of west Loveland\'s most established subdivisions.' },
       { title: 'Lake proximity', description: 'Minutes from Lake Loveland with its 3-mile trail, fishing, and boating.' },
@@ -2054,6 +2055,7 @@ export const neighborhoods = [
     walkScore: 30,
     metaDescription: 'Sierra Mesa Loveland real estate - newer southwest Loveland homes with mountain views near Centerra and I-25. SAA Homes.',
     keywords: 'Sierra Mesa Loveland, southwest Loveland new homes, Centerra area real estate, new construction Loveland, mountain view homes Loveland, Centennial Elementary Loveland, Mountain View High School Loveland',
+    youtubeId: 'OzWGTwBURf4',
     neighborhoodHighlights: [
       { title: 'Mountain views', description: 'Elevated lots in Sierra Mesa capture panoramic views of the Rocky Mountains from many homes.' },
       { title: 'Newer construction', description: 'Modern homes built 2017 or later with the latest in open-concept design and energy-efficient features.' },
@@ -2088,6 +2090,7 @@ export const neighborhoods = [
     walkScore: 42,
     metaDescription: 'Fairways at the Olde Course Loveland real estate - low-maintenance golf course patio homes near downtown. SAA Homes.',
     keywords: 'Fairways at the Olde Course Loveland, golf course homes Loveland, patio homes Loveland, low-maintenance living Loveland, Olde Course Loveland, active adult community Loveland, retirement homes Loveland',
+    youtubeId: 'j6o63vkMgks',
     neighborhoodHighlights: [
       { title: 'Golf course setting', description: 'Homes on the Olde Course municipal golf course with fairway views and easy access to the links.' },
       { title: 'Low-maintenance living', description: 'Landscaping and snow removal included in HOA - ideal for empty-nesters and lock-and-leave lifestyle.' },
