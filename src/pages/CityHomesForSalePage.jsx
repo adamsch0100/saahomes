@@ -24,6 +24,7 @@ function Card({ listing }) {
     >
       <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
         <img src={photo} alt={`${listing.street_name || "Home"} in ${listing.city}, CO`} loading="lazy"
+          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/buyers-hero.jpg"; }}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
         <span className="absolute bottom-2 left-2 bg-black/75 text-white text-sm font-bold px-3 py-1 rounded-lg">
           {fmtPrice(listing.list_price)}

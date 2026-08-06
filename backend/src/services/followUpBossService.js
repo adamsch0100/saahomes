@@ -109,6 +109,46 @@ export const forwardAlertSignupToFollowUpBoss = async (user, search) => {
   }
 };
 
+export const forwardShowingRequestToFollowUpBoss = async (showing) => {
+  if (!FOLLOW_UP_BOSS_API_KEY && !FOLLOW_UP_BOSS_WEBHOOK_URL) {
+    logger.info('Follow Up Boss not configured, skipping showing lead forwarding');
+    return { success: false, reason: 'not_configured' };
+  }
+
+  const nameParts = (showing.name || '').trim().split(' ');
+  const firstName = nameParts[0] || 'Home';
+  const lastName = nameParts.slice(1).join(' ') || 'Buyer';
+
+  const eventData = {
+    source: 'Showing Request',
+    system: 'SAA Homes Website',
+    type: 'General Inquiry',
+    message: [
+      'Showing request from website — schedule with the buyer.',
+      `Home: ${showing.listing_address || showing.listing_slug || '—'}`,
+      `Requested: ${showing.showing_date} at ${showing.showing_time}`,
+      showing.message ? `Note: ${showing.message}` : null,
+      showing.listing_slug ? `Listing: https://saahomes.com/homes-for-sale/${showing.listing_slug}/` : null,
+    ].filter(Boolean).join('\n'),
+    person: {
+      firstName,
+      lastName,
+      emails: showing.email ? [{ value: showing.email, type: 'work' }] : [],
+      phones: showing.phone ? [{ value: String(showing.phone).replace(/\D/g, ''), type: 'mobile' }] : [],
+      tags: ['Website Lead', 'Showing Request'],
+    },
+  };
+
+  try {
+    const result = await postFollowUpBossEvent(eventData);
+    logger.info('Showing request forwarded to Follow Up Boss', { eventId: result.id });
+    return { success: true, eventId: result.id };
+  } catch (error) {
+    logger.error('Failed to forward showing request to Follow Up Boss', error);
+    return { success: false, error: error.message };
+  }
+};
+
 export const forwardContactToFollowUpBoss = async (submission) => {
   if (!FOLLOW_UP_BOSS_API_KEY && !FOLLOW_UP_BOSS_WEBHOOK_URL) {
     logger.info('Follow Up Boss not configured, skipping lead forwarding');
