@@ -100,6 +100,10 @@ export const CHFA_FAQS = [
     a: 'Yes. CHFA programs are available statewide, including Larimer County (Fort Collins, Loveland) and Weld County (Greeley, Windsor). Income and purchase price limits vary by county, household size, and whether the property is in a targeted area.',
   },
   {
+    q: 'Is CHFA better than FHA in Colorado?',
+    a: 'They answer different needs. FHA is a federal mortgage insurance program (3.5% minimum down payment) that lenders use for CHFA first mortgages too. CHFA is Colorado\'s state housing authority — it pairs a first mortgage (often FHA, VA, USDA, or conventional) with down payment assistance of up to $25,000 or 3–4% of the loan. Buyers who want the lowest upfront cash often combine an FHA-backed CHFA loan with CHFA down payment assistance. Whether CHFA or FHA alone is better depends on your credit, income, and purchase price — a CHFA participating lender can compare both options for you.',
+  },
+  {
     q: 'Does CHFA down payment assistance cover closing costs?',
     a: 'Yes. CHFA DPA funds can be used toward down payment, closing costs, prepaids, and in some cases principal reduction — depending on the program and lender approval.',
   },

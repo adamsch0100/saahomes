@@ -180,6 +180,10 @@ const faqs = [
     a: "CHFA (Colorado Housing and Finance Authority) and CHAC (Colorado Housing Assistance Corporation) are separate organizations serving Colorado homebuyers. CHFA is the state housing authority that sets program guidelines and provides first mortgage and down payment assistance programs like SmartStep, Preferred, and FirstStep. CHAC primarily offers down payment assistance grants (up to $17,500 in some counties) but does not originate first mortgages — you bring your own first mortgage from any lender. Many buyers compare CHFA vs CHAC to find the best down payment option for their situation. SAA Homes can help Northern Colorado buyers evaluate both programs and connect with lenders who participate in each. Call (970) 999-1407 for guidance.",
   },
   {
+    q: "Is CHFA better than FHA in Colorado?",
+    a: "They answer different needs. FHA is a federal mortgage insurance program (3.5% minimum down payment) that lenders use for CHFA first mortgages too. CHFA is Colorado's state housing authority — it pairs a first mortgage (often FHA, VA, USDA, or conventional) with down payment assistance of up to $25,000 or 3–4% of the loan. Buyers who want the lowest upfront cash often combine an FHA-backed CHFA loan with CHFA down payment assistance. Whether CHFA or FHA alone is better depends on your credit, income, and purchase price — a CHFA participating lender can compare both options for you.",
+  },
+  {
     q: "Can I combine multiple CHFA programs?",
     a: "Generally no. You typically use one CHFA first mortgage program paired with one DPA option. Specialty programs like Schools To Home and Champions cannot be combined with other CHFA programs. Your lender helps identify the best single program for your situation.",
   },
