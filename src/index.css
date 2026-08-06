@@ -35,3 +35,31 @@
     padding-top: env(safe-area-inset-top, 0px);
   }
 }
+
+/* Listing search / detail map popups */
+.saa-mapbox-popup .mapboxgl-popup-content {
+  padding: 0;
+  border-radius: 0.75rem;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+.saa-mapbox-popup .mapboxgl-popup-close-button {
+  font-size: 18px;
+  padding: 4px 8px;
+  color: #111;
+  z-index: 2;
+}
+.saa-mapbox-popup .mapboxgl-popup-tip {
+  border-top-color: #fff;
+}
+
+/* Hide global floating contact bar when listing detail owns sticky CTAs */
+body.listing-detail-page {
+  /* reserve space handled by listing sticky bar itself */
+}
+
+/* Subtle scrollbar for thumbnail strips */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}

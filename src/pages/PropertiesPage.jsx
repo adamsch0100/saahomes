@@ -113,21 +113,26 @@ export default function PropertiesPage() {
         </div>
       </section>
 
-      {/* MLS Search Iframe */}
-      <section id="search-tool" className="w-full px-4 pt-8 pb-4 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl font-bold text-gray-900 mb-1">Search Northern Colorado MLS Listings</h2>
-          <p className="text-gray-600 mb-4">Use the tool below to filter by city, price, bedrooms, and more. Data updates in real time from IRES MLS.</p>
-          <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm bg-white">
-            <div className="bg-gray-800 px-4 py-2.5 flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-red-400"></span>
-              <span className="w-3 h-3 rounded-full bg-yellow-400"></span>
-              <span className="w-3 h-3 rounded-full bg-green-400"></span>
-              <span className="ml-3 text-sm text-gray-300 font-mono">IRES MLS — Real-time Listings</span>
+      {/* MLS Search — immersive Zillow-style split view */}
+      <section id="search-tool" className="w-full bg-white border-b border-gray-200">
+        <div className="max-w-[1600px] mx-auto">
+          <div className="px-4 sm:px-6 pt-6 sm:pt-8 pb-3">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                  Search Northern Colorado MLS Listings
+                </h2>
+                <p className="text-gray-600 text-sm sm:text-base mt-1 max-w-2xl">
+                  Filter by city, price, and beds. Live IRES MLS data — save a search for new homes and price drops.
+                </p>
+              </div>
+              <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">
+                IRES MLS · Updated daily
+              </p>
             </div>
-            <div style={{ minHeight: '700px' }}>
-              <ListingSearch location={location} height="700px" />
-            </div>
+          </div>
+          <div className="border-t border-gray-200" style={{ height: "min(78vh, 820px)", minHeight: "560px" }}>
+            <ListingSearch location={location} height="100%" />
           </div>
         </div>
       </section>
