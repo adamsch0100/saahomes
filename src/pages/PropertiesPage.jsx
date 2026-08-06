@@ -87,13 +87,14 @@ export default function PropertiesPage() {
         jsonLd={[faqSchema]}
       />
 
-      {/* Compact title strip — search is the star, H1 stays for SEO */}
-      <section className="bg-white border-b border-gray-200 pt-24 sm:pt-28">
+      {/* Compact title strip — search is the star, H1 stays for SEO.
+          Black so the transparent fixed header (white text) stays visible. */}
+      <section className="bg-black border-b border-gray-800 pt-24 sm:pt-28">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-4">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 font-serif">
+          <h1 className="text-xl sm:text-2xl font-bold text-white font-serif">
             {location ? `Homes for Sale in ${location}, Colorado` : "Homes for Sale in Northern Colorado"}
           </h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <p className="text-sm text-gray-300 mt-0.5">
             {location
               ? `Every active listing in ${location} — live from IRES MLS.`
               : "Fort Collins · Loveland · Windsor · Greeley · Timnath + all Northern Colorado communities — live from IRES MLS."}
