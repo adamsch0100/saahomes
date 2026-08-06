@@ -24,26 +24,82 @@ export default function LeadCaptureChat() {
   const [leadInfo, setLeadInfo] = useState({ name: "", email: "", phone: "", contactMethod: "email" });
   const [leadError, setLeadError] = useState(null);
   const [showTransferOption, setShowTransferOption] = useState(false);
+  const [hasLead, setHasLead] = useState(false);
+  const [teaserMessage, setTeaserMessage] = useState("");
   const chatRef = useRef(null);
   const messagesEndRef = useRef(null);
   const nudgeTimer = useRef(null);
 
-  // Smart trigger
+  // Lead detection: have we already captured this visitor?
+  // (localStorage flag is instant; the cookie session is authoritative.)
   useEffect(() => {
-    if (hasInteracted) return;
-    nudgeTimer.current = setTimeout(() => {
-      if (!hasInteracted) setShowNudge(true);
-    }, 20000);
-    const handleScroll = () => {
-      const scrollPercent = window.scrollY / (Math.max(document.body.scrollHeight, window.innerHeight) - window.innerHeight);
-      if (scrollPercent > 0.4 && !hasInteracted) setShowNudge(true);
+    if (localStorage.getItem("saa_lead_captured")) { setHasLead(true); return; }
+    fetch(`${API_BASE}/api/alerts/me`, { credentials: "same-origin" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success) {
+          setHasLead(true);
+          localStorage.setItem("saa_lead_captured", "1");
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Smart teaser — world-class rules:
+  //  · Lead captured  → fully passive (launcher only, never pops)
+  //  · Unknown visitor → at most ONE teaser per 15 min, ONLY on high-intent
+  //    pages (listing / search / city / contact / CHFA), referencing the
+  //    listing they're looking at. Never after dismissal or interaction.
+  useEffect(() => {
+    if (hasInteracted || hasLead) return;
+    const path = location.pathname;
+    const isListing = path.includes("/homes-for-sale/");
+    const isSearch = path.startsWith("/properties");
+    const isCity = path.includes("-homes-for-sale/") || path.includes("/northern-colorado-areas/");
+    const isIntent = isListing || isSearch || isCity || /(\/contact|\/for-buyers|\/for-sellers|\/chfa)/.test(path);
+    if (!isIntent) return;
+
+    const now = Date.now();
+    const lastShown = Number(sessionStorage.getItem("nadia_teaser_at") || 0);
+    if (sessionStorage.getItem("nadia_teaser_dismissed") || now - lastShown < 15 * 60 * 1000) return;
+
+    let message = "Buying or selling in Northern Colorado? I can help you find your way.";
+    if (isListing) {
+      const addr = document.querySelector("h1")?.textContent?.trim();
+      message = addr ? `Questions about ${addr}? I know this home — ask me anything.` : "Questions about this home? I can tell you more.";
+    } else if (isSearch || isCity) {
+      const m = document.title.match(/^([A-Za-z ]+?)\s*\|/);
+      const city = m ? m[1].trim() : "";
+      message = city ? `Looking for a place in ${city}? Save your search and new homes come to you.` : "Looking for a place? Save your search and new homes come to you.";
+    }
+    setTeaserMessage(message);
+
+    let fired = false;
+    const fire = () => {
+      if (fired) return;
+      fired = true;
+      sessionStorage.setItem("nadia_teaser_at", String(Date.now()));
+      setShowNudge(true);
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    const timer = setTimeout(fire, 25000);
+    const onScroll = () => {
+      const total = Math.max(document.body.scrollHeight - window.innerHeight, 1);
+      if (window.scrollY / total > 0.5) fire();
+    };
+    const onLeave = (e) => { if (e.clientY <= 0) fire(); }; // exit intent (desktop)
+    window.addEventListener("scroll", onScroll, { passive: true });
+    document.addEventListener("mouseleave", onLeave);
     return () => {
-      clearTimeout(nudgeTimer.current);
-      window.removeEventListener("scroll", handleScroll);
+      clearTimeout(timer);
+      window.removeEventListener("scroll", onScroll);
+      document.removeEventListener("mouseleave", onLeave);
     };
-  }, [hasInteracted]);
+  }, [hasInteracted, hasLead, location.pathname]);
+
+  const dismissTeaser = () => {
+    setShowNudge(false);
+    sessionStorage.setItem("nadia_teaser_dismissed", "1");
+  };
 
   // Open chat programmatically from any CTA via window event.
   // detail: { message: "pre-seeded visitor question" } — optional.
@@ -100,13 +156,15 @@ export default function LeadCaptureChat() {
       };
       const path = location.pathname;
       let greeting = greetings.default;
-      if (/chfa|dpa|champions|g-hope|greeley/.test(path)) greeting = greetings.chfa;
+      if (hasLead) {
+        greeting = "Good to see you again! 👋 I'm Nadia. Want to check on your saved searches, or do you have questions about this area? I can help.";
+      } else if (/chfa|dpa|champions|g-hope|greeley/.test(path)) greeting = greetings.chfa;
       else if (/for-buyers|buying/.test(path)) greeting = greetings.buyer;
       else if (/for-sellers|sell/.test(path)) greeting = greetings.seller;
 
       setMessages([{ role: "assistant", content: greeting }]);
     }
-  }, [isOpen, location.pathname]);
+  }, [isOpen, location.pathname, hasLead]);
 
   const sendMessage = async (text) => {
     const userMsg = { role: "user", content: text };
@@ -178,6 +236,8 @@ export default function LeadCaptureChat() {
         sourcePage: location.pathname,
       });
       setHandoffStep("submitted");
+      localStorage.setItem("saa_lead_captured", "1");
+      setHasLead(true);
       if (typeof window.gtag === "function") {
         window.gtag("event", "generate_lead", { lead_type: "chat_handoff_nadia", page: location.pathname });
       }
@@ -398,6 +458,28 @@ export default function LeadCaptureChat() {
               </a>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Teaser bubble — compact, contextual, one per 15 min max */}
+      {showNudge && !isOpen && (
+        <div
+          className="relative mb-2.5 max-w-[230px] sm:max-w-[290px] bg-white rounded-2xl rounded-br-sm shadow-xl border border-gray-100 p-3.5 pr-8"
+          style={{ animation: "chatBounceIn 0.25s ease-out" }}
+          role="button"
+          tabIndex={0}
+          onClick={handleOpen}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleOpen(); }}
+        >
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); dismissTeaser(); }}
+            aria-label="Dismiss"
+            className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-gray-200 text-gray-500 hover:bg-gray-800 hover:text-white text-[10px] leading-none flex items-center justify-center transition-colors"
+          >
+            ✕
+          </button>
+          <p className="text-xs leading-snug text-gray-700">{teaserMessage}</p>
         </div>
       )}
 

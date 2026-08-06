@@ -55,6 +55,7 @@ export default function SaveSearchModal({ filters = {}, buttonLabel = "Save this
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error || "Could not save");
+      localStorage.setItem("saa_lead_captured", "1");
       setState("done");
     } catch (err) {
       setState("error");

@@ -62,6 +62,7 @@ export default function ScheduleShowingModal({ listing = {}, buttonClassName = "
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error || "Could not submit");
+      localStorage.setItem("saa_lead_captured", "1");
       setState("done");
     } catch (err) {
       setState("error");
