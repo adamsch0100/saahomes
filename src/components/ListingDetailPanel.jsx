@@ -378,24 +378,23 @@ export default function ListingDetailPanel({ slug, onClose }) {
         onClick={onClose}
       />
 
-      {/*
-        Desktop: right slide-over ~520px over the map/list.
-        Mobile: full-screen sheet sliding up.
-      */}
+      {/* Zillow-style central modal:
+        Desktop: large centered dialog (~1024px) over the dimmed search.
+        Mobile: full-screen sheet sliding up. */}
       <div
-        ref={panelRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label={fullAddress || "Listing details"}
-        tabIndex={-1}
-        className={`
-          absolute bg-white shadow-2xl flex flex-col outline-none
-          inset-x-0 bottom-0 top-0
-          md:inset-y-0 md:left-auto md:right-0 md:w-[min(520px,100vw)] md:top-0
-          transition-transform duration-300 ease-out
-          ${entered ? "translate-y-0 md:translate-x-0" : "translate-y-full md:translate-y-0 md:translate-x-full"}
-        `}
-      >
+          ref={panelRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label={fullAddress || "Listing details"}
+          tabIndex={-1}
+          className={`
+            absolute bg-white shadow-2xl flex flex-col outline-none
+            inset-x-0 bottom-0 top-0
+            md:inset-4 md:mx-auto md:max-w-5xl md:rounded-2xl md:overflow-hidden
+            transition-[transform,border-radius] duration-200 ease-out
+            ${entered ? "translate-y-0 scale-100" : "translate-y-full md:translate-y-0 md:scale-[0.97]"}
+          `}
+        >
         {/* Sticky header bar */}
         <div className="shrink-0 flex items-center justify-between gap-2 px-3 py-2.5 border-b border-gray-200 bg-white z-10">
           <button
