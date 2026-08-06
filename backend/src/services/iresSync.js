@@ -13,30 +13,54 @@ import getPool from '../config/database.js';
  */
 
 const MLS_FIELDS = [
+  // Core
   'ListingKey', 'ListingId', 'StandardStatus', 'PropertyType', 'PropertySubType',
   'StreetNumber', 'StreetName', 'UnitNumber', 'City', 'StateOrProvince',
   'PostalCode', 'CountyOrParish', 'ListPrice', 'BedroomsTotal',
   'BathroomsTotalInteger', 'BathroomsFull', 'LivingArea', 'LotSizeArea',
   'YearBuilt', 'GarageSpaces', 'AssociationFee', 'PublicRemarks',
   'Latitude', 'Longitude',
-  // Rich detail fields for world-class listing pages + schools SEO
-  // (field-audit verified against MLS Grid Aug 2026 — 8 RESO fields are NOT
-  // exposed by this feed: FireplacesTotal, GarageYN, PoolYN, WaterfrontFeatures,
-  // CoolingYN, HeatingYN, SeniorCommunityYN, ShowingInstructions)
-  'ElementarySchool', 'MiddleOrJuniorSchool', 'HighSchool', 'DaysOnMarket',
-  'ArchitecturalStyle', 'Basement', 'ParkingFeatures', 'View', 'WaterfrontYN',
-  'Sewer', 'WaterSource', 'Utilities', 'Zoning', 'LotFeatures',
-  'NewConstructionYN', 'AssociationFeeFrequency', 'AccessibilityFeatures',
-  'CommunityFeatures', 'TaxAnnualAmount', 'SubdivisionName',
+  // Schools + market stats
+  'ElementarySchool', 'MiddleOrJuniorSchool', 'HighSchool', 'HighSchoolDistrict',
+  'DaysOnMarket', 'OriginalListPrice', 'PriceChangeTimestamp', 'MlsStatus',
+  'OriginatingSystemName', 'PhotosCount',
+  // Home type / structure
+  'PropertyAttachedYN', 'Levels', 'StructureType', 'BuildingAreaTotal',
+  'AboveGradeFinishedArea', 'BathroomsHalf', 'BathroomsThreeQuarter',
+  'NumberOfUnitsTotal', 'LotSizeAcres', 'ParcelNumber', 'TaxYear', 'TaxAnnualAmount',
+  // Features & amenities
+  'ArchitecturalStyle', 'Basement', 'ConstructionMaterials', 'Roof',
+  'InteriorFeatures', 'ExteriorFeatures', 'Appliances', 'Flooring',
+  'Cooling', 'Heating', 'FireplaceFeatures', 'PoolFeatures', 'SpaFeatures',
+  'ParkingFeatures', 'ParkingTotal', 'OtherParking', 'Fencing',
+  'PatioAndPorchFeatures', 'WindowFeatures', 'SecurityFeatures',
+  'DoorFeatures', 'Electric', 'LaundryFeatures', 'OtherEquipment',
+  'OtherStructures', 'PetsAllowed', 'WaterBodyName', 'HorseAmenities',
+  'IrrigationSource', 'IrrigationWaterRightsYN', 'View', 'WaterfrontYN',
+  // Location / governance
+  'Sewer', 'WaterSource', 'Utilities', 'Zoning', 'LotFeatures', 'SubdivisionName',
+  'Directions', 'Disclosures', 'StreetDirPrefix', 'StreetDirSuffix',
+  'StreetSuffix', 'UnparsedAddress', 'MLSAreaMajor', 'MLSAreaMinor',
+  // Listing terms
+  'ListingTerms', 'SpecialListingConditions', 'NewConstructionYN',
+  'BuilderName', 'BuilderModel', 'AssociationYN', 'AssociationName',
+  'AssociationFeeIncludes', 'AssociationPhone', 'AssociationFeeFrequency',
+  'VirtualTourURLUnbranded', 'ShowingServiceName', 'AvailabilityDate',
+  'ListingContractDate',
+  // Accessibility / community
+  'AccessibilityFeatures', 'CommunityFeatures', 'GreenEnergyEfficient',
+  'GreenBuildingVerificationType', 'DevelopmentStatus',
 ];
 
 // Adam's home-type model (Aug 2026): attached = condos/townhomes/multi-unit,
-// detached = freestanding homes. PropertySubType carries the distinction.
-function classifyHomeType(propertyType, subtype) {
+// detached = freestanding homes. PropertyAttachedYN is the feed's definitive
+// flag; PropertySubType carries the label.
+function classifyHomeType(propertyType, subtype, attachedYn) {
   const s = (subtype || '').toLowerCase();
   const t = (propertyType || '').toLowerCase();
   if (t.includes('land') || s.includes('land') || s.includes('unimproved')) return 'land';
   if (t.includes('commercial') || ['office', 'warehouse', 'retail', 'industrial', 'mixed use', 'mixed-use'].includes(s)) return 'commercial';
+  if (attachedYn === true || attachedYn === 'Y') return 'attached';
   if (s.includes('condo') || s.includes('town') || s.includes('attached') ||
       s.includes('duplex') || s.includes('triplex') || s.includes('multi family') ||
       s.includes('timeshare') || t.includes('residential income') || t.includes('condominium')) return 'attached';
@@ -87,33 +111,74 @@ function normalizeListing(raw) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
 
-  const livingArea = num(raw.LivingArea, 1e7);
+  const livingArea = num(raw.LivingArea, 1e7) ?? num(raw.BuildingAreaTotal, 1e7);
   const listPrice = num(raw.ListPrice, 1e9);
+  const originalPrice = num(raw.OriginalListPrice, 1e9);
+  const str = (v) => (Array.isArray(v) ? v.join(', ') : v);
+  const yn = (v) => v === 'Y' || v === true || v === 'Yes';
   const features = {
-    style: raw.ArchitecturalStyle || null,
-    basement: raw.Basement || null,
-    fireplaces: num(raw.FireplacesTotal, 20),
-    garage_yn: raw.GarageYN === 'Y' || raw.GarageYN === true,
-    parking: raw.ParkingFeatures || null,
-    pool: raw.PoolYN === 'Y' || raw.PoolYN === true,
-    view: raw.View || null,
-    waterfront: raw.WaterfrontYN === 'Y' || raw.WaterfrontYN === true,
-    waterfront_features: raw.WaterfrontFeatures || null,
-    cooling: raw.CoolingYN === 'Y' || raw.CoolingYN === true,
-    heating: raw.HeatingYN === 'Y' || raw.HeatingYN === true,
-    sewer: raw.Sewer || null,
-    water_source: raw.WaterSource || null,
-    utilities: raw.Utilities || null,
-    zoning: raw.Zoning || null,
-    lot_features: raw.LotFeatures || null,
-    new_construction: raw.NewConstructionYN === 'Y' || raw.NewConstructionYN === true,
-    senior_community: raw.SeniorCommunityYN === 'Y' || raw.SeniorCommunityYN === true,
-    showing_instructions: raw.ShowingInstructions || null,
+    style: str(raw.ArchitecturalStyle) || null,
+    levels: str(raw.Levels) || null,
+    structure_type: str(raw.StructureType) || null,
+    basement: str(raw.Basement) || null,
+    construction: str(raw.ConstructionMaterials) || null,
+    roof: str(raw.Roof) || null,
+    interior: str(raw.InteriorFeatures) || null,
+    exterior: str(raw.ExteriorFeatures) || null,
+    appliances: str(raw.Appliances) || null,
+    flooring: str(raw.Flooring) || null,
+    cooling: str(raw.Cooling) || null,
+    heating: str(raw.Heating) || null,
+    fireplaces: str(raw.FireplaceFeatures) || null,
+    pool: str(raw.PoolFeatures) || yn(raw.PoolFeatures) || null,
+    spa: str(raw.SpaFeatures) || null,
+    parking: str(raw.ParkingFeatures) || null,
+    parking_total: raw.ParkingTotal != null ? String(raw.ParkingTotal) : null,
+    other_parking: str(raw.OtherParking) || null,
+    fencing: str(raw.Fencing) || null,
+    patio: str(raw.PatioAndPorchFeatures) || null,
+    windows: str(raw.WindowFeatures) || null,
+    security: str(raw.SecurityFeatures) || null,
+    doors: str(raw.DoorFeatures) || null,
+    electric: str(raw.Electric) || null,
+    laundry: str(raw.LaundryFeatures) || null,
+    other_equipment: str(raw.OtherEquipment) || null,
+    other_structures: str(raw.OtherStructures) || null,
+    pets: str(raw.PetsAllowed) || null,
+    view: str(raw.View) || null,
+    waterfront: yn(raw.WaterfrontYN),
+    water_body: raw.WaterBodyName || null,
+    horse: str(raw.HorseAmenities) || null,
+    irrigation: str(raw.IrrigationSource) || null,
+    irrigation_rights: yn(raw.IrrigationWaterRightsYN),
+    sewer: str(raw.Sewer) || null,
+    water_source: str(raw.WaterSource) || null,
+    utilities: str(raw.Utilities) || null,
+    zoning: str(raw.Zoning) || null,
+    lot_features: str(raw.LotFeatures) || null,
+    directions: raw.Directions || null,
+    disclosures: str(raw.Disclosures) || null,
+    association: yn(raw.AssociationYN),
+    association_name: raw.AssociationName || null,
+    association_includes: str(raw.AssociationFeeIncludes) || null,
+    association_phone: raw.AssociationPhone || null,
     assoc_fee_freq: raw.AssociationFeeFrequency || null,
-    accessibility: raw.AccessibilityFeatures || null,
-    community: raw.CommunityFeatures || null,
+    builder: raw.BuilderName || null,
+    builder_model: raw.BuilderModel || null,
+    new_construction: yn(raw.NewConstructionYN),
+    green_efficient: str(raw.GreenEnergyEfficient) || null,
+    green_verification: str(raw.GreenBuildingVerificationType) || null,
+    accessibility: str(raw.AccessibilityFeatures) || null,
+    community: str(raw.CommunityFeatures) || null,
     tax_annual: num(raw.TaxAnnualAmount, 1e8),
+    tax_year: num(raw.TaxYear, 2100),
+    parcel: raw.ParcelNumber || null,
+    listing_terms: str(raw.ListingTerms) || null,
+    special_conditions: str(raw.SpecialListingConditions) || null,
+    availability: raw.AvailabilityDate || null,
     subdivision: raw.SubdivisionName || null,
+    mls_area: [raw.MLSAreaMajor, raw.MLSAreaMinor].filter(Boolean).join(' / ') || null,
+    virtual_tour: raw.VirtualTourURLUnbranded || null,
   };
 
   return {
@@ -121,31 +186,40 @@ function normalizeListing(raw) {
     status: STATUS_MAP[raw.StandardStatus] || String(raw.StandardStatus || 'Active'),
     property_type: raw.PropertyType || null,
     property_subtype: raw.PropertySubType || null,
-    home_type: classifyHomeType(raw.PropertyType, raw.PropertySubType),
+    home_type: classifyHomeType(raw.PropertyType, raw.PropertySubType, raw.PropertyAttachedYN),
     street_number: raw.StreetNumber ? String(raw.StreetNumber) : null,
-    street_name: raw.StreetName || null,
+    street_name: [raw.StreetDirPrefix, raw.StreetName, raw.StreetSuffix, raw.StreetDirSuffix].filter(Boolean).join(' ') || null,
     unit: raw.UnitNumber ? String(raw.UnitNumber) : null,
     city,
     state,
     postal_code: raw.PostalCode ? String(raw.PostalCode) : null,
     county: raw.CountyOrParish || null,
     list_price: listPrice,
+    original_list_price: originalPrice,
+    price_change_timestamp: raw.PriceChangeTimestamp || null,
     beds: num(raw.BedroomsTotal, 100),
     baths: num(raw.BathroomsTotalInteger, 50) ?? num(raw.BathroomsFull, 50),
+    half_baths: num(raw.BathroomsHalf, 50),
+    three_quarter_baths: num(raw.BathroomsThreeQuarter, 50),
     living_area: livingArea,
+    above_grade_area: num(raw.AboveGradeFinishedArea, 1e7),
     lot_size: num(raw.LotSizeArea, 1e12),
+    lot_size_acres: num(raw.LotSizeAcres, 1e6),
+    units_total: num(raw.NumberOfUnitsTotal, 1000),
     year_built: num(raw.YearBuilt, 2100),
     garage_spaces: num(raw.GarageSpaces, 100),
     hoa_fee: num(raw.AssociationFee, 1e6),
     description: raw.PublicRemarks || null,
     photos,
+    photos_count: num(raw.PhotosCount, 500) ?? photos.length,
     latitude: numSigned(raw.Latitude, 90),
     longitude: numSigned(raw.Longitude, 180),
     listing_url: null,
-    mls_source: 'IRES',
+    mls_source: raw.OriginatingSystemName || 'IRES',
     elementary_school: raw.ElementarySchool || null,
     middle_school: raw.MiddleOrJuniorSchool || null,
     high_school: raw.HighSchool || null,
+    school_district: raw.HighSchoolDistrict || null,
     days_on_market: num(raw.DaysOnMarket, 10000),
     price_per_sqft: livingArea && listPrice ? Math.round(listPrice / livingArea) : null,
     subdivision: raw.SubdivisionName || null,
@@ -232,35 +306,43 @@ export async function syncListings() {
       seenIds.push(l.listing_id);
       await pool.query(
         `INSERT INTO listings (listing_id, status, property_type, property_subtype, home_type, street_number, street_name, unit,
-           city, state, postal_code, county, list_price, beds, baths, living_area, lot_size,
-           year_built, garage_spaces, hoa_fee, description, photos, latitude, longitude,
-           listing_url, mls_source, elementary_school, middle_school, high_school,
+           city, state, postal_code, county, list_price, original_list_price, beds, baths, half_baths,
+           three_quarter_baths, living_area, above_grade_area, lot_size, lot_size_acres, units_total,
+           year_built, garage_spaces, hoa_fee, description, photos, photos_count, latitude, longitude,
+           listing_url, mls_source, elementary_school, middle_school, high_school, school_district,
            days_on_market, price_per_sqft, subdivision, features, raw, slug, last_seen_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,NOW())
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,NOW())
          ON CONFLICT (listing_id) DO UPDATE SET
            status = EXCLUDED.status, property_type = EXCLUDED.property_type,
            property_subtype = EXCLUDED.property_subtype, home_type = EXCLUDED.home_type,
            street_number = EXCLUDED.street_number, street_name = EXCLUDED.street_name,
            unit = EXCLUDED.unit, city = EXCLUDED.city, state = EXCLUDED.state,
            postal_code = EXCLUDED.postal_code, county = EXCLUDED.county,
-           list_price = EXCLUDED.list_price, beds = EXCLUDED.beds, baths = EXCLUDED.baths,
-           living_area = EXCLUDED.living_area, lot_size = EXCLUDED.lot_size,
+           list_price = EXCLUDED.list_price, original_list_price = EXCLUDED.original_list_price,
+           beds = EXCLUDED.beds, baths = EXCLUDED.baths, half_baths = EXCLUDED.half_baths,
+           three_quarter_baths = EXCLUDED.three_quarter_baths,
+           living_area = EXCLUDED.living_area, above_grade_area = EXCLUDED.above_grade_area,
+           lot_size = EXCLUDED.lot_size, lot_size_acres = EXCLUDED.lot_size_acres,
+           units_total = EXCLUDED.units_total,
            year_built = EXCLUDED.year_built, garage_spaces = EXCLUDED.garage_spaces,
            hoa_fee = EXCLUDED.hoa_fee, description = EXCLUDED.description,
-           photos = EXCLUDED.photos, latitude = EXCLUDED.latitude,
-           longitude = EXCLUDED.longitude, listing_url = EXCLUDED.listing_url,
-           mls_source = EXCLUDED.mls_source, elementary_school = EXCLUDED.elementary_school,
-           middle_school = EXCLUDED.middle_school, high_school = EXCLUDED.high_school,
+           photos = EXCLUDED.photos, photos_count = EXCLUDED.photos_count,
+           latitude = EXCLUDED.latitude, longitude = EXCLUDED.longitude,
+           listing_url = EXCLUDED.listing_url, mls_source = EXCLUDED.mls_source,
+           elementary_school = EXCLUDED.elementary_school, middle_school = EXCLUDED.middle_school,
+           high_school = EXCLUDED.high_school, school_district = EXCLUDED.school_district,
            days_on_market = EXCLUDED.days_on_market, price_per_sqft = EXCLUDED.price_per_sqft,
            subdivision = EXCLUDED.subdivision, features = EXCLUDED.features,
            raw = EXCLUDED.raw, slug = EXCLUDED.slug,
            is_active = TRUE, updated_at = NOW(), last_seen_at = NOW()`,
         [l.listing_id, l.status, l.property_type, l.property_subtype, l.home_type,
          l.street_number, l.street_name, l.unit,
-         l.city, l.state, l.postal_code, l.county, l.list_price, l.beds, l.baths, l.living_area,
-         l.lot_size, l.year_built, l.garage_spaces, l.hoa_fee, l.description,
-         JSON.stringify(l.photos), l.latitude, l.longitude, l.listing_url,
-         l.mls_source, l.elementary_school, l.middle_school, l.high_school,
+         l.city, l.state, l.postal_code, l.county, l.list_price, l.original_list_price,
+         l.beds, l.baths, l.half_baths, l.three_quarter_baths, l.living_area, l.above_grade_area,
+         l.lot_size, l.lot_size_acres, l.units_total,
+         l.year_built, l.garage_spaces, l.hoa_fee, l.description,
+         JSON.stringify(l.photos), l.photos_count, l.latitude, l.longitude, l.listing_url,
+         l.mls_source, l.elementary_school, l.middle_school, l.high_school, l.school_district,
          l.days_on_market, l.price_per_sqft, l.subdivision, JSON.stringify(l.features),
          JSON.stringify(l.raw), l.slug]
       );
