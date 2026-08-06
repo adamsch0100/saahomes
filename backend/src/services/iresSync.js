@@ -229,7 +229,44 @@ function normalizeListing(raw) {
   };
 }
 
-async function fetchPage(authToken, offset) {
+// ── MLS Grid rate-limit compliance (suspension Aug 2026: 9 RPS) ──────────
+// Hard ceilings: 4 RPS sustained (warning 2 RPS example), 7200 req/hr,
+// 3072 MB/hr. We target ≤2 RPS with sequential paging + jitter, retry with
+// exponential backoff on 429/5xx, and a lock file so overlapping runs can
+// never multiply the request rate.
+const RATE_LIMIT_MS = 550; // ~1.8 RPS worst case, comfortably under 4 RPS
+const LOCK_FILE = '/tmp/ires-sync.lock';
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function acquireLock() {
+  try {
+    const fs = await import('fs');
+    if (fs.existsSync(LOCK_FILE)) {
+      const info = JSON.parse(fs.readFileSync(LOCK_FILE, 'utf8'));
+      const ageMin = (Date.now() - (info.at || 0)) / 60000;
+      // A stale lock (>90 min) is safe to take over — syncs never run longer.
+      if (ageMin < 90) {
+        console.log(`⏳ Another sync is already running (pid ${info.pid}, started ${Math.round(ageMin)}m ago) — skipping.`);
+        return false;
+      }
+      console.log('⚠️ Stale sync lock detected — taking over.');
+    }
+    fs.writeFileSync(LOCK_FILE, JSON.stringify({ pid: process.pid, at: Date.now() }));
+    return true;
+  } catch {
+    return true; // lock infra unavailable — proceed (single-run envs)
+  }
+}
+
+async function releaseLock() {
+  try {
+    const fs = await import('fs');
+    fs.unlinkSync(LOCK_FILE);
+  } catch { /* noop */ }
+}
+
+async function fetchPage(authToken, offset, retries = 4) {
   const url = new URL(`${process.env.IRES_API_URL}/Property`);
   url.searchParams.set('$top', '100');
   url.searchParams.set('$skip', String(offset));
@@ -237,19 +274,35 @@ async function fetchPage(authToken, offset) {
   url.searchParams.set('$select', MLS_FIELDS.join(','));
   url.searchParams.set('$expand', 'Media');
 
-  const res = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${authToken}`,
-      Accept: 'application/json',
-      'Accept-Encoding': 'gzip',
-      'User-Agent': 'saahomes-idx/1.0 (Schwartz and Associates)',
-    },
-    signal: AbortSignal.timeout(60000),
-  });
-  if (!res.ok) {
-    throw new Error(`IRES fetch failed (${res.status}): ${await res.text()}`);
+  try {
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        Accept: 'application/json',
+        'Accept-Encoding': 'gzip',
+        'User-Agent': 'saahomes-idx/1.0 (Schwartz and Associates)',
+      },
+      signal: AbortSignal.timeout(60000),
+    });
+    if (!res.ok) {
+      if ((res.status === 429 || res.status >= 500) && retries > 0) {
+        // Back off hard: 5s, 15s, 45s, 90s — never hammer a limited token.
+        const wait = [5000, 15000, 45000, 90000][4 - retries] || 90000;
+        console.log(`⚠️ IRES ${res.status} — backing off ${wait / 1000}s (${retries} left)`);
+        await sleep(wait);
+        return fetchPage(authToken, offset, retries - 1);
+      }
+      throw new Error(`IRES fetch failed (${res.status}): ${await res.text()}`);
+    }
+    return res.json();
+  } catch (error) {
+    if (error.name === 'AbortError' && retries > 0) {
+      console.log(`⚠️ IRES page timeout — retrying (${retries} left)`);
+      await sleep(5000);
+      return fetchPage(authToken, offset, retries - 1);
+    }
+    throw error;
   }
-  return res.json();
 }
 
 async function getToken() {
@@ -290,16 +343,20 @@ export async function syncListings() {
   }
 
   const pool = getPool();
+  const gotLock = await acquireLock();
+  if (!gotLock) return { skipped: true, reason: 'lock' };
   const token = await getToken();
 
   let offset = 0;
   let total = 0;
   const seenIds = [];
 
-  while (true) {
-    const page = await fetchPage(token, offset);
-    const records = Array.isArray(page.value) ? page.value : [];
-    if (records.length === 0) break;
+  try {
+    while (true) {
+      await sleep(RATE_LIMIT_MS + Math.random() * 150); // pace: ≤~1.8 RPS
+      const page = await fetchPage(token, offset);
+      const records = Array.isArray(page.value) ? page.value : [];
+      if (records.length === 0) break;
 
     for (const raw of records) {
       const l = normalizeListing(raw);
@@ -363,6 +420,9 @@ export async function syncListings() {
 
   console.log(`✅ IRES sync complete: ${total} active listings processed, ${seenIds.length} unique`);
   return { total, unique: seenIds.length };
+  } finally {
+    await releaseLock();
+  }
 }
 
 // Direct run: node backend/src/services/iresSync.js

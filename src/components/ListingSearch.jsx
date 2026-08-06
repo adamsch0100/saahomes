@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { photoUrl, fmtNum } from "../utils/photoUrl.js";
 import { useSearchParams } from "react-router-dom";
 import ListingMap from "./ListingMap";
 import SaveSearchModal from "./SaveSearchModal";
@@ -60,7 +61,7 @@ export default function ListingSearch({ location, height = "700px" }) {
       ? `${searchParams.get("minPrice") || ""}-${searchParams.get("maxPrice") || ""}`
       : "");
   const [filters, setFilters] = useState({
-    city: searchParams.get("city") || urlLocation || "",
+    city: searchParams.get("city") || urlLocation || "__noco__",
     price: urlPrice,
     beds: searchParams.get("beds") || "",
     baths: searchParams.get("baths") || "",
@@ -114,7 +115,7 @@ export default function ListingSearch({ location, height = "700px" }) {
       // Sync filters to the URL so searches are shareable, back-buttonable,
       // and crawlable (e.g. /properties/?city=Fort+Collins&minPrice=400000&beds=3)
       const params = new URLSearchParams();
-      if (next.city) params.set("city", next.city);
+      if (next.city && next.city !== "__noco__") params.set("city", next.city);
       if (next.price) {
         const [min, max] = next.price.split("-");
         if (min) params.set("minPrice", min);
@@ -167,7 +168,8 @@ export default function ListingSearch({ location, height = "700px" }) {
     <div className="flex flex-wrap gap-3 p-4 border-b border-gray-200 bg-white">
       <select value={filters.city} onChange={(e) => setFilter("city", e.target.value)}
         className="px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-black" aria-label="City">
-        <option value="">All cities</option>
+        <option value="__noco__">All Northern Colorado</option>
+        <option value="__all__">All Colorado</option>
         {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
       </select>
       <select value={filters.price} onChange={(e) => setFilter("price", e.target.value)}
@@ -194,7 +196,7 @@ export default function ListingSearch({ location, height = "700px" }) {
       </select>
       <SaveSearchModal
         filters={{
-          city: filters.city || undefined,
+          city: (filters.city && filters.city !== "__noco__" && filters.city !== "__all__") ? filters.city : undefined,
           minPrice: filters.price ? filters.price.split("-")[0] || undefined : undefined,
           maxPrice: filters.price ? filters.price.split("-")[1] || undefined : undefined,
           beds: filters.beds || undefined,
@@ -223,7 +225,7 @@ export default function ListingSearch({ location, height = "700px" }) {
     >
       <a href={`/homes-for-sale/${listing.slug}/`} className="block relative aspect-[4/3] bg-gray-100">
         {listing.photos?.length > 0 ? (
-          <img src={listing.photos[0]} alt={`${listing.street_number || ""} ${listing.street_name || ""} ${listing.city || ""}`}
+          <img src={photoUrl(listing.id, 0)} alt={`${listing.street_number || ""} ${listing.street_name || ""} ${listing.city || ""}`}
             onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/buyers-hero.jpg"; }}
             className="w-full h-full object-cover" loading="lazy" />
         ) : (
@@ -246,8 +248,8 @@ export default function ListingSearch({ location, height = "700px" }) {
         </h3>
         <p className="text-sm text-gray-500">{listing.city}, {listing.state} {listing.postal_code || ""}</p>
         <p className="text-sm text-gray-700 mt-1">
-          {listing.beds != null && <span><strong>{listing.beds}</strong> bd </span>}
-          {listing.baths != null && <span><strong>{listing.baths}</strong> ba </span>}
+          {listing.beds != null && <span><strong>{fmtNum(listing.beds)}</strong> bd </span>}
+          {listing.baths != null && <span><strong>{fmtNum(listing.baths)}</strong> ba </span>}
           {listing.living_area != null && <span><strong>{Number(listing.living_area).toLocaleString()}</strong> sqft</span>}
         </p>
         <a href={`/homes-for-sale/${listing.slug}/`}

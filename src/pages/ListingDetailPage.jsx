@@ -5,6 +5,7 @@ import QualifyCta from "../components/QualifyCta";
 import ListingMap from "../components/ListingMap";
 import SaveSearchModal from "../components/SaveSearchModal";
 import ScheduleShowingModal from "../components/ScheduleShowingModal";
+import { photoUrl } from "../utils/photoUrl.js";
 import { CITY_HOMES, getCityHomesPath } from "../data/cityHomesData";
 
 const API_BASE = (() => {
@@ -123,7 +124,7 @@ export default function ListingDetailPage() {
     name: `${fullAddress} — Homes for Sale`,
     url: `https://saahomes.com/homes-for-sale/${listing.slug}/`,
     description: listing.description ? listing.description.slice(0, 250) : `${fullAddress} in ${listing.city}, CO`,
-    image: photos[0] || undefined,
+    image: photos.length ? `https://saahomes.com/api/photo/${listing.id}/0` : undefined,
     address: {
       "@type": "PostalAddress",
       streetAddress: address || undefined,
@@ -181,13 +182,15 @@ export default function ListingDetailPage() {
     ],
   };
 
+  const ogImage = photos.length ? `https://saahomes.com/api/photo/${listing.id}/0` : undefined;
+
   return (
     <>
       <SEO
         title={`${fullAddress} | ${listing.city} Real Estate | SAA Homes`}
         description={metaDesc.slice(0, 158)}
         canonicalPath={`/homes-for-sale/${listing.slug}/`}
-        ogImage={photos[0] || undefined}
+        ogImage={ogImage}
         jsonLd={[listingSchema, breadcrumbSchema]}
       />
 
@@ -261,7 +264,7 @@ export default function ListingDetailPage() {
         {photos.length > 0 && (
           <div className="max-w-7xl mx-auto px-4 pb-6">
             <div className="aspect-[16/9] rounded-xl overflow-hidden bg-gray-800">
-              <img src={photos[activePhoto]} alt={`${fullAddress} — photo ${activePhoto + 1}`}
+              <img src={photoUrl(listing.id, activePhoto)} alt={`${fullAddress} — photo ${activePhoto + 1}`}
                 onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/buyers-hero.jpg"; }}
                 className="w-full h-full object-cover" />
             </div>
@@ -275,7 +278,7 @@ export default function ListingDetailPage() {
                       i === activePhoto ? "border-[#CFB36E]" : "border-transparent opacity-70 hover:opacity-100"
                     }`}
                   >
-                    <img src={p} alt={`${fullAddress} photo ${i + 1}`}
+                    <img src={photoUrl(listing.id, i)} alt={`${fullAddress} photo ${i + 1}`}
                       onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/buyers-hero.jpg"; }}
                       className="w-full h-full object-cover" />
                   </button>
@@ -454,7 +457,7 @@ export default function ListingDetailPage() {
                   <Link key={l.listing_id} to={`/homes-for-sale/${l.slug}/`}
                     className="group block bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                     <div className="aspect-[4/3] bg-gray-100 overflow-hidden">
-                      <img src={(l.photos && l.photos[0]) || "/images/buyers-hero.jpg"} alt={`${l.street_name || "Home"} in ${l.city}`}
+                      <img src={(l.photos && l.photos[0]) ? photoUrl(l.id, 0) : "/images/buyers-hero.jpg"} alt={`${l.street_name || "Home"} in ${l.city}`}
                         onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/buyers-hero.jpg"; }}
                         loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                     </div>
