@@ -48,6 +48,28 @@ function HeartIcon({ filled }) {
   );
 }
 
+function ShareIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+    </svg>
+  );
+}
+
 function KeyFact({ label, value }) {
   if (!value || value === "—" || value === "") return null;
   return (
@@ -208,9 +230,9 @@ function PanelSkeleton() {
 }
 
 /**
- * ListingDetailPanel — Zillow-style search → detail overlay.
- * Desktop: fixed right slide-over (~520px) over the map/list.
- * Mobile: full-screen sheet with close at top.
+ * ListingDetailPanel — Zillow-style central search → detail overlay.
+ * Desktop (~md+): centered dialog (~1024px) over dimmed search, scale-in.
+ * Mobile: full-screen sheet with safe-area padding.
  * Search stays mounted underneath; full SEO page remains at /homes-for-sale/:slug.
  */
 export default function ListingDetailPanel({ slug, onClose }) {
@@ -219,6 +241,7 @@ export default function ListingDetailPanel({ slug, onClose }) {
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
   const [match, setMatch] = useState({ matches: false, reasons: [] });
+  const [shareCopied, setShareCopied] = useState(false);
   const [entered, setEntered] = useState(false);
   const scrollRef = useRef(null);
   const panelRef = useRef(null);
@@ -319,6 +342,29 @@ export default function ListingDetailPanel({ slug, onClose }) {
     setSaved(toggleSavedHome(listing.slug));
   };
 
+  const fullPageUrl = listing?.slug
+    ? `${typeof window !== "undefined" ? window.location.origin : "https://saahomes.com"}/homes-for-sale/${listing.slug}/`
+    : "";
+
+  const onShare = async () => {
+    if (!listing?.slug) return;
+    const url = fullPageUrl;
+    const text = `${fullAddress} — ${formatPrice(listing.list_price)}`;
+    try {
+      if (typeof navigator !== "undefined" && navigator.share) {
+        await navigator.share({ title: fullAddress, text, url });
+        return;
+      }
+      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+        setShareCopied(true);
+        setTimeout(() => setShareCopied(false), 2000);
+      }
+    } catch {
+      /* user cancelled share */
+    }
+  };
+
   const openNadia = () => {
     window.dispatchEvent(
       new CustomEvent("open-nadia-chat", {
@@ -372,7 +418,7 @@ export default function ListingDetailPanel({ slug, onClose }) {
       <button
         type="button"
         aria-label="Close listing details"
-        className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${
+        className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${
           entered ? "opacity-100" : "opacity-0"
         }`}
         onClick={onClose}
@@ -380,7 +426,7 @@ export default function ListingDetailPanel({ slug, onClose }) {
 
       {/* Zillow-style central modal:
         Desktop: large centered dialog (~1024px) over the dimmed search.
-        Mobile: full-screen sheet sliding up. */}
+        Mobile: full-screen sheet sliding up + safe-area. */}
       <div
           ref={panelRef}
           role="dialog"
@@ -390,9 +436,12 @@ export default function ListingDetailPanel({ slug, onClose }) {
           className={`
             absolute bg-white shadow-2xl flex flex-col outline-none
             inset-x-0 bottom-0 top-0
-            md:inset-4 md:mx-auto md:max-w-5xl md:rounded-2xl md:overflow-hidden
-            transition-[transform,border-radius] duration-200 ease-out
-            ${entered ? "translate-y-0 scale-100" : "translate-y-full md:translate-y-0 md:scale-[0.97]"}
+            pt-[env(safe-area-inset-top,0px)]
+            md:inset-4 md:pt-0 md:mx-auto md:max-w-5xl md:rounded-2xl md:overflow-hidden
+            transition-[transform,opacity] duration-300 ease-out
+            ${entered
+              ? "translate-y-0 scale-100 opacity-100"
+              : "translate-y-full md:translate-y-0 md:scale-[0.96] opacity-0 md:opacity-100"}
           `}
         >
         {/* Sticky header bar */}
@@ -422,19 +471,30 @@ export default function ListingDetailPanel({ slug, onClose }) {
 
           <div className="flex items-center gap-1.5">
             {listing && (
-              <button
-                type="button"
-                onClick={onToggleSave}
-                className={`inline-flex items-center justify-center w-9 h-9 rounded-full border text-sm transition-colors ${
-                  saved
-                    ? "bg-[#CFB36E] border-[#CFB36E] text-black"
-                    : "border-gray-300 text-gray-800 hover:border-black"
-                }`}
-                aria-label={saved ? "Unsave home" : "Save this home"}
-                title={saved ? "Saved" : "Save this home"}
-              >
-                <HeartIcon filled={saved} />
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={onShare}
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-full border border-gray-300 text-gray-800 hover:border-black transition-colors"
+                  aria-label={shareCopied ? "Link copied" : "Share this home"}
+                  title={shareCopied ? "Link copied" : "Share"}
+                >
+                  <ShareIcon />
+                </button>
+                <button
+                  type="button"
+                  onClick={onToggleSave}
+                  className={`inline-flex items-center justify-center w-9 h-9 rounded-full border text-sm transition-colors ${
+                    saved
+                      ? "bg-[#CFB36E] border-[#CFB36E] text-black"
+                      : "border-gray-300 text-gray-800 hover:border-black"
+                  }`}
+                  aria-label={saved ? "Unsave home" : "Save this home on this device"}
+                  title={saved ? "Saved on this device" : "Save on this device"}
+                >
+                  <HeartIcon filled={saved} />
+                </button>
+              </>
             )}
             <button
               type="button"
@@ -559,35 +619,59 @@ export default function ListingDetailPanel({ slug, onClose }) {
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
+                      onClick={openNadia}
+                      className="inline-flex items-center justify-center px-3 py-2.5 rounded-lg border border-white/40 text-white text-sm font-semibold hover:border-white transition-colors"
+                    >
+                      💬 Ask Nadia
+                    </button>
+                    <button
+                      type="button"
+                      onClick={onShare}
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg border border-white/40 text-white text-sm font-semibold hover:border-white transition-colors"
+                    >
+                      <ShareIcon />
+                      {shareCopied ? "Copied" : "Share"}
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
                       onClick={onToggleSave}
                       className={`inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg border text-sm font-semibold transition-colors ${
                         saved
                           ? "bg-[#CFB36E] border-[#CFB36E] text-black"
                           : "border-white/40 text-white hover:border-white"
                       }`}
+                      title="Saves on this device only"
                     >
                       <HeartIcon filled={saved} />
                       {saved ? "Saved" : "Save"}
                     </button>
-                    <button
-                      type="button"
-                      onClick={openNadia}
-                      className="inline-flex items-center justify-center px-3 py-2.5 rounded-lg border border-white/40 text-white text-sm font-semibold hover:border-white transition-colors"
+                    <a
+                      href="tel:+19709991407"
+                      className="inline-flex items-center justify-center px-3 py-2.5 bg-white text-black text-sm font-semibold rounded-lg hover:bg-gray-100 transition-colors"
                     >
-                      Ask Nadia
-                    </button>
+                      Call
+                    </a>
                   </div>
                   <SaveSearchModal
                     filters={likeThisFilters}
                     buttonLabel="Get alerts for homes like this"
                     buttonClassName="w-full inline-flex items-center justify-center px-4 py-2.5 border border-white/40 text-white text-sm font-semibold rounded-lg hover:border-white transition-colors"
                   />
-                  <a
-                    href="tel:+19709991407"
-                    className="w-full inline-flex items-center justify-center px-4 py-2.5 bg-white text-black text-sm font-semibold rounded-lg hover:bg-gray-100 transition-colors"
-                  >
-                    Call (970) 999-1407
-                  </a>
+                  <p className="text-[11px] text-white/50 text-center leading-snug">
+                    ♡ Save keeps this home on your device. Get alerts creates your account &amp; emails matches.
+                  </p>
+                  {feats.virtual_tour && (
+                    <a
+                      href={feats.virtual_tour}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full inline-flex items-center justify-center px-4 py-2.5 border border-[#CFB36E] text-[#CFB36E] text-sm font-semibold rounded-lg hover:bg-[#CFB36E] hover:text-black transition-colors"
+                    >
+                      Virtual Tour
+                    </a>
+                  )}
                 </div>
 
                 {!hasAnySavedSearch() && !match.matches && (
@@ -737,7 +821,7 @@ export default function ListingDetailPanel({ slug, onClose }) {
                 )}
 
                 {/* Open full page — SEO route preserved */}
-                <div className="rounded-xl border border-gray-200 p-4 text-center">
+                <div className="rounded-xl border border-gray-200 p-4 text-center space-y-2">
                   <a
                     href={`/homes-for-sale/${listing.slug}/`}
                     className="inline-flex items-center justify-center gap-1.5 text-sm font-semibold text-gray-900 underline underline-offset-2 hover:text-black"
@@ -745,9 +829,17 @@ export default function ListingDetailPanel({ slug, onClose }) {
                     Open full page
                     <span aria-hidden="true">↗</span>
                   </a>
-                  <p className="text-xs text-gray-500 mt-1.5">
+                  <p className="text-xs text-gray-500">
                     Shareable link with full details, similar homes, and neighborhood guides.
                   </p>
+                  <button
+                    type="button"
+                    onClick={onShare}
+                    className="inline-flex items-center justify-center gap-1.5 text-xs font-semibold text-gray-600 hover:text-black"
+                  >
+                    <ShareIcon />
+                    {shareCopied ? "Link copied!" : "Copy shareable link"}
+                  </button>
                 </div>
 
                 <p className="text-[10px] text-gray-400 leading-relaxed">
@@ -759,22 +851,42 @@ export default function ListingDetailPanel({ slug, onClose }) {
           )}
         </div>
 
-        {/* Mobile sticky bottom CTA while scrolled */}
+        {/* Mobile sticky bottom CTA — Save · Nadia · Call · Schedule */}
         {!loading && listing && (
-          <div className="shrink-0 md:hidden border-t border-gray-200 bg-white px-3 py-2.5 pb-[calc(0.65rem+env(safe-area-inset-bottom,0px))]">
-            <div className="flex items-center gap-2">
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-gray-900 truncate">
-                  {formatPrice(listing.list_price)}
-                </p>
-                <p className="text-[11px] text-gray-500 truncate">{address}</p>
+          <div className="shrink-0 md:hidden border-t border-gray-200 bg-white px-2.5 pt-2.5 pb-[calc(0.65rem+env(safe-area-inset-bottom,0px))]">
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={onToggleSave}
+                className={`w-11 h-11 shrink-0 rounded-full border flex items-center justify-center ${
+                  saved ? "bg-[#CFB36E] border-[#CFB36E] text-black" : "border-gray-300 text-gray-800"
+                }`}
+                aria-label={saved ? "Unsave home" : "Save home"}
+              >
+                <HeartIcon filled={saved} />
+              </button>
+              <button
+                type="button"
+                onClick={openNadia}
+                className="shrink-0 px-2.5 py-2.5 border border-gray-300 text-gray-900 text-xs font-semibold rounded-lg"
+              >
+                Nadia
+              </button>
+              <a
+                href="tel:+19709991407"
+                className="shrink-0 px-2.5 py-2.5 border-2 border-black text-black text-xs font-semibold rounded-lg"
+              >
+                Call
+              </a>
+              <div className="flex-1 min-w-0">
+                <ScheduleShowingModal
+                  listing={listing}
+                  buttonLabel="Schedule"
+                  buttonClassName="w-full inline-flex items-center justify-center px-3 py-2.5 text-sm font-semibold rounded-lg"
+                  buttonStyle={{ backgroundColor: "#CFB36E", color: "#1a1a1a" }}
+                  hideIcon
+                />
               </div>
-              <ScheduleShowingModal
-                listing={listing}
-                buttonLabel="Schedule"
-                buttonClassName="shrink-0 px-4 py-2.5 bg-black text-white text-sm font-semibold rounded-lg"
-                hideIcon
-              />
             </div>
           </div>
         )}

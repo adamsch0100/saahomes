@@ -222,14 +222,21 @@ export default function LeadCaptureChat() {
 
   const handleHandoffSubmit = async (e) => {
     e.preventDefault();
-    if (!leadInfo.name || !leadInfo.email) return;
+    if (!leadInfo.name || !leadInfo.email) {
+      setLeadError("Name and email are required.");
+      return;
+    }
+    if (!leadInfo.phone || !String(leadInfo.phone).trim()) {
+      setLeadError("Phone is required so Adam or Mandi can reach you.");
+      return;
+    }
     setIsTyping(true);
     setLeadError(null);
     try {
       await submitContactForm({
         name: leadInfo.name,
         email: leadInfo.email,
-        phone: leadInfo.phone || null,
+        phone: leadInfo.phone.trim(),
         interest: "Chat Conversation Lead",
         contactMethod: leadInfo.contactMethod || "email",
         message: `Lead from Nadia chat. Page: ${location.pathname}\nPreferred contact: ${leadInfo.contactMethod}\n---\n${messages.map((m) => `${m.role === 'assistant' ? 'Nadia' : 'Visitor'}: ${m.content}`).join('\n')}`,
@@ -275,7 +282,9 @@ export default function LeadCaptureChat() {
   };
 
   return (
-    <div ref={chatRef} className="fixed bottom-28 right-4 sm:bottom-8 sm:right-8 z-50 flex flex-col items-end">
+    // z-[110]: above ListingDetailPanel (z-90) so "Ask Nadia" from the search modal works;
+    // nested save/schedule modals sit at z-[120] so lead forms still stack above chat.
+    <div ref={chatRef} className="fixed bottom-28 right-4 sm:bottom-8 sm:right-8 z-[110] flex flex-col items-end">
       <style>{`
         @keyframes chatSlideUp { from { opacity: 0; transform: translateY(16px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes chatFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -369,7 +378,7 @@ export default function LeadCaptureChat() {
                     className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black" />
                   <input required type="email" placeholder="your@email.com *" value={leadInfo.email} onChange={(e) => setLeadInfo({ ...leadInfo, email: e.target.value })}
                     className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black" />
-                  <input type="tel" placeholder="Phone (optional)" value={leadInfo.phone} onChange={(e) => setLeadInfo({ ...leadInfo, phone: e.target.value })}
+                  <input required type="tel" placeholder="Phone *" value={leadInfo.phone} onChange={(e) => setLeadInfo({ ...leadInfo, phone: e.target.value })}
                     className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black" />
                   
                   {/* Contact preference */}
