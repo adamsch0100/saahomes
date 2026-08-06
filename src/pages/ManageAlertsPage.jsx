@@ -41,9 +41,13 @@ export default function ManageAlertsPage() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [needsLogin, setNeedsLogin] = useState(false);
+  const [loginMode, setLoginMode] = useState("link"); // link | password
   const [magicEmail, setMagicEmail] = useState("");
   const [magicSent, setMagicSent] = useState(false);
   const [magicBusy, setMagicBusy] = useState(false);
+  const [passEmail, setPassEmail] = useState("");
+  const [passWord, setPassWord] = useState("");
+  const [passBusy, setPassBusy] = useState(false);
   const [busy, setBusy] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editFreq, setEditFreq] = useState("daily");
@@ -103,6 +107,25 @@ export default function ManageAlertsPage() {
     } catch { /* noop */ }
     setData(null);
     setNeedsLogin(true);
+  };
+
+  const loginWithPassword = async (e) => {
+    e.preventDefault();
+    setPassBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: passEmail.trim(), password: passWord }),
+      });
+      const d = await res.json();
+      if (!d.success) throw new Error(d.error || "Could not log in.");
+      setPassWord("");
+      load();
+    } catch (err) {
+      setError(err.message);
+    } finally { setPassBusy(false); }
   };
 
   const toggleSearch = async (id, isActive) => {
@@ -177,10 +200,48 @@ export default function ManageAlertsPage() {
           <div className="mt-8 bg-white border border-gray-200 rounded-xl p-8 max-w-md mx-auto">
             <h2 className="text-xl font-bold text-gray-900">Find your saved searches</h2>
             <p className="text-gray-500 text-sm mt-2 leading-relaxed">
-              Enter the email you used when you saved a search and we'll email you a secure
-              sign-in link — no password needed.
+              Sign in with your password, or we can email you a secure link — no password needed.
             </p>
-            {magicSent ? (
+            <div className="mt-5 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setLoginMode("password")}
+                className={`px-3 py-2.5 rounded-lg border text-sm font-semibold transition-colors ${loginMode === "password" ? "bg-black text-white border-black" : "border-gray-300 text-gray-600 hover:border-black"}`}
+              >
+                Use password
+              </button>
+              <button
+                type="button"
+                onClick={() => setLoginMode("link")}
+                className={`px-3 py-2.5 rounded-lg border text-sm font-semibold transition-colors ${loginMode === "link" ? "bg-black text-white border-black" : "border-gray-300 text-gray-600 hover:border-black"}`}
+              >
+                Email me a link
+              </button>
+            </div>
+            {loginMode === "password" ? (
+              <form onSubmit={loginWithPassword} className="mt-4 space-y-3">
+                <input
+                  type="email" required value={passEmail} onChange={(e) => setPassEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none text-sm"
+                />
+                <input
+                  type="password" required value={passWord} onChange={(e) => setPassWord(e.target.value)}
+                  placeholder="Password"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none text-sm"
+                />
+                <button
+                  type="submit" disabled={passBusy}
+                  className="w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 disabled:opacity-50"
+                >
+                  {passBusy ? "Logging in…" : "Log in"}
+                </button>
+                {error && <p className="text-red-600 text-sm">{error}</p>}
+                <p className="text-xs text-gray-400 text-center">
+                  No password yet? Use "Email me a link" — or create one next time you save a search.
+                </p>
+              </form>
+            ) : magicSent ? (
               <div className="mt-6 bg-emerald-50 border border-emerald-200 rounded-lg p-4 text-center">
                 <p className="text-emerald-700 text-sm font-medium">✅ Link sent!</p>
                 <p className="text-emerald-600 text-xs mt-1">

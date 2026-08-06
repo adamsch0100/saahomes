@@ -7,6 +7,7 @@
  *   POST   /api/alerts/unsubscribe  — {token} → unsubscribe all
  */
 import crypto from 'crypto';
+import bcrypt from 'bcrypt';
 import getPool from '../config/database.js';
 import { forwardAlertSignupToFollowUpBoss } from '../services/followUpBossService.js';
 
@@ -56,7 +57,7 @@ function cleanFilters(body) {
 const COOKIE_NAME = 'saa_user_token';
 const COOKIE_MAX_AGE = 90 * 24 * 60 * 60 * 1000; // 90 days
 
-function setAuthCookie(res, token) {
+export function setAuthCookie(res, token) {
   res.cookie(COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -68,7 +69,7 @@ function setAuthCookie(res, token) {
 
 export const createAlert = async (req, res) => {
   try {
-    const { email, name, phone, ...filterBody } = req.body || {};
+    const { email, name, phone, password, ...filterBody } = req.body || {};
     const emailStr = String(email || '').trim().toLowerCase();
     if (!EMAIL_RE.test(emailStr)) {
       return res.status(400).json({ success: false, error: 'A valid email is required to save a search.' });
@@ -101,6 +102,14 @@ export const createAlert = async (req, res) => {
       );
     }
     const userRow = user.rows[0];
+
+    // Optional: create a password so the client can log in with email+password
+    // (upgrades a magic-link-only account; 8+ chars required)
+    const passStr = String(password || '');
+    if (passStr.length >= 8) {
+      const hash = await bcrypt.hash(passStr, 10);
+      await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, userRow.id]);
+    }
 
     const searchName = String(name || '').trim().slice(0, 255) || 'My Search';
     const schedule = cleanSchedule(req.body || {});
