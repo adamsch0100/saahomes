@@ -53,6 +53,19 @@ function cleanFilters(body) {
   return f;
 }
 
+const COOKIE_NAME = 'saa_user_token';
+const COOKIE_MAX_AGE = 90 * 24 * 60 * 60 * 1000; // 90 days
+
+function setAuthCookie(res, token) {
+  res.cookie(COOKIE_NAME, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: COOKIE_MAX_AGE,
+    path: '/',
+  });
+}
+
 export const createAlert = async (req, res) => {
   try {
     const { email, name, phone, ...filterBody } = req.body || {};
@@ -102,6 +115,10 @@ export const createAlert = async (req, res) => {
     // Lead → Follow Up Boss (fire-and-forget, never block the user)
     forwardAlertSignupToFollowUpBoss(userRow, searchRow).catch(() => {});
 
+    // Auto-login: the manage token becomes a long-lived httpOnly cookie so the
+    // user is signed in on this device without ever entering a password.
+    setAuthCookie(res, userRow.manage_token);
+
     return res.status(201).json({
       success: true,
       data: { id: searchRow.id, name: searchRow.name, filters: searchRow.filters, manageToken: userRow.manage_token },
@@ -132,6 +149,70 @@ export const listAlerts = async (req, res) => {
     console.error('listAlerts error:', error);
     return res.status(500).json({ success: false, error: 'Could not load your searches.' });
   }
+};
+
+/** GET /api/alerts/me — the auth cookie IS the session (no password needed). */
+export const getMe = async (req, res) => {
+  try {
+    const token = req.cookies?.[COOKIE_NAME];
+    if (!token) return res.status(401).json({ success: false, error: 'Not signed in.' });
+    const user = await findUserByToken(token);
+    if (!user) {
+      res.clearCookie(COOKIE_NAME, { path: '/' });
+      return res.status(401).json({ success: false, error: 'Session expired.' });
+    }
+    const searches = await getPool().query(
+      `SELECT id, name, filters, is_active, frequency, send_time, send_day, created_at, last_email_at
+       FROM saved_searches WHERE user_id = $1 ORDER BY created_at DESC`,
+      [user.id]
+    );
+    return res.json({ success: true, data: { email: user.email, name: user.name, phone: user.phone, searches: searches.rows } });
+  } catch (error) {
+    console.error('getMe error:', error);
+    return res.status(500).json({ success: false, error: 'Could not load your account.' });
+  }
+};
+
+/** POST /api/alerts/magic-link — email the user their sign-in link again. */
+export const sendMagicLink = async (req, res) => {
+  try {
+    const email = String(req.body?.email || '').trim().toLowerCase();
+    if (!EMAIL_RE.test(email)) {
+      return res.status(400).json({ success: false, error: 'Please enter a valid email.' });
+    }
+    const user = await getPool().query('SELECT * FROM users WHERE email = $1 AND status = \'active\'', [email]);
+    if (user.rows.length) {
+      const manageUrl = `https://saahomes.com/alerts/manage/?token=${user.rows[0].manage_token}`;
+      const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#111">
+          <tr><td align="center" style="padding:24px 16px">
+            <div style="color:#CFB36E;font-size:20px;font-weight:800">SAA HOMES</div>
+          </td></tr>
+        </table>
+        <div style="max-width:520px;margin:0 auto;padding:24px 16px">
+          <h1 style="font-size:19px;color:#111">Here's your saved searches</h1>
+          <p style="color:#4b5563;font-size:14px;line-height:1.6">Click the button to view and manage your saved searches, alerts, and saved homes.</p>
+          <a href="${manageUrl}" style="display:inline-block;background:#111;color:#fff;font-size:14px;font-weight:700;padding:12px 22px;border-radius:8px;text-decoration:none">Sign in to my saved searches</a>
+          <p style="color:#6b7280;font-size:12px;margin-top:16px">Or copy this link:<br/><span style="color:#111">${manageUrl}</span></p>
+          <p style="color:#9ca3af;font-size:11px;margin-top:20px">Schwartz and Associates · (970) 999-1407 · saahomes.com</p>
+        </div></body></html>`;
+      await getPool().query(
+        `INSERT INTO email_outbox (to_email, subject, html) VALUES ($1, $2, $3)`,
+        [email, 'Your saved searches — SAA Homes', html]
+      );
+    }
+    // Never reveal whether the email exists; always the same friendly reply.
+    return res.json({ success: true, message: 'If we have a saved search for that email, your sign-in link is on its way.' });
+  } catch (error) {
+    console.error('sendMagicLink error:', error);
+    return res.status(500).json({ success: false, error: 'Could not send the link. Please try again.' });
+  }
+};
+
+/** POST /api/alerts/signout — clear the auth cookie. */
+export const signOut = async (req, res) => {
+  res.clearCookie(COOKIE_NAME, { path: '/' });
+  return res.json({ success: true });
 };
 
 export const updateAlert = async (req, res) => {
