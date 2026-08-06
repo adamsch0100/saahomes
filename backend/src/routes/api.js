@@ -9,6 +9,9 @@ import { submitGhopeLeadForm } from '../controllers/ghopeLeadController.js';
 import { handleChatMessage } from '../controllers/chatController.js';
 import { searchListings, getListingBySlug, getListingStats } from '../controllers/listingController.js';
 import {
+  createAlert, listAlerts, updateAlert, deleteAlert, unsubscribeAll,
+} from '../controllers/alertController.js';
+import {
   validateContactSubmission,
   validateMarketReportSubmission,
   validateChfaLeadSubmission,
@@ -95,6 +98,13 @@ const listingLimiter = rateLimit({
 router.get('/listings', listingLimiter, searchListings);
 router.get('/listings/stats', listingLimiter, getListingStats);
 router.get('/listings/:slug', listingLimiter, getListingBySlug);
+
+// Saved-search / follow-up alerts (lead capture → FUB)
+router.post('/alerts', formLimiter, createAlert);
+router.get('/alerts/manage', listAlerts);
+router.patch('/alerts/:id', updateAlert);
+router.delete('/alerts/:id', deleteAlert);
+router.post('/alerts/unsubscribe', formLimiter, unsubscribeAll);
 
 export default router;
 
