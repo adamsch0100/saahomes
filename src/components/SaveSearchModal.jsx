@@ -7,7 +7,17 @@ const API_BASE = (() => {
   return "";
 })();
 
-const TYPE_LABEL = { detached: "Detached home", attached: "Condo / townhome / attached", land: "Land", commercial: "Commercial" };
+const TYPE_LABEL = {
+  detached: "Detached home",
+  attached: "Condo / townhome / attached",
+  land: "Land",
+  commercial: "Commercial",
+  house: "Houses",
+  townhome: "Townhomes",
+  condo: "Condos",
+  multi: "Multi-family",
+  manufactured: "Manufactured",
+};
 
 const HOURS = Array.from({ length: 24 }, (_, h) => `${String(h).padStart(2, "0")}:00`);
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -23,7 +33,24 @@ function filterSummary(filters = {}) {
   }
   if (filters.beds) parts.push(`${filters.beds}+ beds`);
   if (filters.baths) parts.push(`${filters.baths}+ baths`);
-  if (filters.type && TYPE_LABEL[filters.type]) parts.push(TYPE_LABEL[filters.type]);
+  const typeList = filters.types
+    ? String(filters.types).split(",").map((t) => t.trim()).filter(Boolean)
+    : filters.type
+      ? [filters.type]
+      : [];
+  if (typeList.length) {
+    parts.push(typeList.map((t) => TYPE_LABEL[t] || t).join(", "));
+  }
+  if (filters.minSqft) parts.push(`${Number(filters.minSqft).toLocaleString()}+ sqft`);
+  if (filters.garage) parts.push(`${filters.garage}+ garage`);
+  if (filters.pool === "true" || filters.pool === true) parts.push("Pool");
+  if (filters.waterfront === "true" || filters.waterfront === true) parts.push("Waterfront");
+  if (filters.newConstruction === "true" || filters.newConstruction === true) parts.push("New construction");
+  if (filters.listingStatus === "price-drop") parts.push("Price drops");
+  if (filters.listingStatus === "new") parts.push("New listings");
+  if (filters.keywords) parts.push(`“${filters.keywords}”`);
+  if (filters.basement) parts.push(filters.basement === "true" ? "Basement" : `Basement: ${filters.basement}`);
+  if (filters.maxHoa) parts.push(`HOA ≤ $${filters.maxHoa}`);
   return parts.length ? parts.join(" · ") : "All Northern Colorado";
 }
 
