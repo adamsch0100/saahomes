@@ -92,7 +92,7 @@ export const searchListings = async (req, res) => {
 
     const dataRes = await pool.query(
       `SELECT id, listing_id, status, property_type, property_subtype, home_type, street_number, street_name, unit,
-         city, state, postal_code, list_price, beds, baths, living_area, lot_size,
+         city, state, postal_code, list_price, original_list_price, beds, baths, living_area, lot_size,
          year_built, description, photos, latitude, longitude, slug, updated_at, days_on_market
        FROM listings WHERE ${whereSql} ORDER BY ${orderSql} LIMIT $${i} OFFSET $${i + 1}`,
       [...params, Number(limit), offset]

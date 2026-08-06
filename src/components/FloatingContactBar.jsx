@@ -4,7 +4,11 @@ import { Link, useLocation } from "react-router-dom";
 export default function FloatingContactBar() {
   const location = useLocation();
 
-  if (location.pathname.startsWith('/admin')) {
+  // Listing detail owns its own mobile sticky conversion bar
+  if (
+    location.pathname.startsWith('/admin') ||
+    location.pathname.startsWith('/homes-for-sale/')
+  ) {
     return null;
   }
 

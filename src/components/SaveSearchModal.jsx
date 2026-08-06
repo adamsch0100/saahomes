@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { rememberSavedSearch } from "../utils/listingHelpers.js";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -26,7 +27,13 @@ function filterSummary(filters = {}) {
   return parts.length ? parts.join(" · ") : "All Northern Colorado";
 }
 
-export default function SaveSearchModal({ filters = {}, buttonLabel = "Save this search", buttonClassName = "", buttonStyle = {} }) {
+export default function SaveSearchModal({
+  filters = {},
+  buttonLabel = "Save this search",
+  buttonClassName = "",
+  buttonStyle = {},
+  hideIcon = false,
+}) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -45,17 +52,35 @@ export default function SaveSearchModal({ filters = {}, buttonLabel = "Save this
       setError("Please enter a valid email so we can send your alerts.");
       return;
     }
+    if (!phone.trim()) {
+      setError("Phone is required so we can reach you when a great match hits.");
+      return;
+    }
     setState("saving");
     setError("");
     try {
       const res = await fetch(`${API_BASE}/api/alerts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: emailStr, phone: phone.trim(), password: password || undefined, name: name.trim() || "My Search", frequency, send_time: sendTime, send_day: sendDay, ...filters }),
+        body: JSON.stringify({
+          email: emailStr,
+          phone: phone.trim(),
+          password: password || undefined,
+          name: name.trim() || "My Search",
+          frequency,
+          send_time: sendTime,
+          send_day: sendDay,
+          ...filters,
+        }),
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error || "Could not save");
       localStorage.setItem("saa_lead_captured", "1");
+      // RealScout-style: remember criteria so cards/detail can show match chips
+      rememberSavedSearch(filters);
+      try {
+        window.dispatchEvent(new CustomEvent("saa-search-saved", { detail: filters }));
+      } catch { /* noop */ }
       setState("done");
     } catch (err) {
       setState("error");
@@ -71,27 +96,37 @@ export default function SaveSearchModal({ filters = {}, buttonLabel = "Save this
         className={buttonClassName || "px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-semibold hover:border-black transition-colors bg-white text-gray-900"}
         style={buttonStyle}
       >
-        🔔 {buttonLabel}
+        {!hideIcon && <span className="mr-1" aria-hidden="true">🔔</span>}
+        {buttonLabel}
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4" onClick={() => setOpen(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4"
+          onClick={() => setOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="save-search-title"
+        >
+          <div
+            className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 max-h-[92vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             {state === "done" ? (
               <div className="text-center py-4">
-                <div className="text-5xl mb-3">✅</div>
-                <h3 className="text-xl font-bold text-gray-900">Search saved!</h3>
+                <div className="mx-auto w-14 h-14 rounded-full bg-[#CFB36E]/25 flex items-center justify-center text-2xl mb-3" aria-hidden="true">✓</div>
+                <h3 id="save-search-title" className="text-xl font-bold text-gray-900">Search saved!</h3>
                 <p className="text-gray-600 mt-2 text-sm leading-relaxed">
-                  We'll email you when new homes match{" "}
-                  <span className="font-semibold text-gray-900">{filterSummary(filters)}</span> —
-                  including <strong>price drops</strong> and status changes.
+                  We&apos;ll email you when new homes match{" "}
+                  <span className="font-semibold text-gray-900">{filterSummary(filters)}</span>
+                  {" "}— including <strong>price drops</strong> and status changes.
                 </p>
                 <p className="text-gray-500 mt-3 text-xs">
                   Schwartz and Associates · (970) 999-1407 · Unsubscribe anytime from any email.
                 </p>
                 <button
                   type="button"
-                  onClick={() => { setOpen(false); setState("idle"); setEmail(""); setName(""); }}
+                  onClick={() => { setOpen(false); setState("idle"); setEmail(""); setPhone(""); setName(""); }}
                   className="mt-5 w-full py-3 bg-[#CFB36E] text-black font-semibold rounded-lg hover:bg-[#bd9f5a]"
                 >
                   Done
@@ -99,12 +134,31 @@ export default function SaveSearchModal({ filters = {}, buttonLabel = "Save this
               </div>
             ) : (
               <>
-                <h3 className="text-xl font-bold text-gray-900">Save this search</h3>
-                <p className="text-gray-500 text-sm mt-1">
-                  Get emailed when new homes match:{" "}
-                  <span className="font-semibold text-gray-900">{filterSummary(filters)}</span>
-                </p>
-                <form onSubmit={submit} className="mt-5 space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 id="save-search-title" className="text-xl font-bold text-gray-900">Save this search</h3>
+                    <p className="text-gray-500 text-sm mt-1">
+                      New homes + price drops for:{" "}
+                      <span className="font-semibold text-gray-900">{filterSummary(filters)}</span>
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setOpen(false)}
+                    className="text-gray-400 hover:text-gray-700 text-2xl leading-none p-1"
+                    aria-label="Close"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                {/* Value exchange banner */}
+                <div className="mt-4 rounded-lg bg-gray-50 border border-gray-100 px-3.5 py-2.5 text-xs text-gray-600 leading-relaxed">
+                  Email + phone required so we can deliver alerts and reach you when something exceptional lists.{" "}
+                  <strong className="text-gray-800">No spam — unsubscribe in one click.</strong>
+                </div>
+
+                <form onSubmit={submit} className="mt-4 space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                     <input
@@ -113,6 +167,7 @@ export default function SaveSearchModal({ filters = {}, buttonLabel = "Save this
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@example.com"
+                      autoComplete="email"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none"
                     />
                   </div>
@@ -124,9 +179,9 @@ export default function SaveSearchModal({ filters = {}, buttonLabel = "Save this
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="(970) 555-0123"
+                      autoComplete="tel"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none"
                     />
-                    <p className="text-xs text-gray-400 mt-1">So we can reach you when a great match hits the market.</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -142,18 +197,19 @@ export default function SaveSearchModal({ filters = {}, buttonLabel = "Save this
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Create a password <span className="text-gray-400 font-normal">(optional — lets you sign in anytime)</span>
+                      Password <span className="text-gray-400 font-normal">(optional — manage alerts anytime)</span>
                     </label>
                     <input
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="At least 8 characters"
+                      autoComplete="new-password"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">How often should we email you?</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">How often?</label>
                     <div className="grid grid-cols-3 gap-2">
                       {Object.entries(FREQ_LABEL).map(([value, label]) => (
                         <button
@@ -161,7 +217,9 @@ export default function SaveSearchModal({ filters = {}, buttonLabel = "Save this
                           type="button"
                           onClick={() => setFrequency(value)}
                           className={`px-2 py-2.5 rounded-lg border text-xs font-semibold transition-colors ${
-                            frequency === value ? "bg-black text-white border-black" : "border-gray-300 text-gray-600 hover:border-black"
+                            frequency === value
+                              ? "bg-black text-white border-black"
+                              : "border-gray-300 text-gray-600 hover:border-black"
                           }`}
                         >
                           {label}
@@ -187,8 +245,8 @@ export default function SaveSearchModal({ filters = {}, buttonLabel = "Save this
                       >
                         {HOURS.map((h) => {
                           const [hh] = h.split(":");
-                          const hour12 = hh % 12 === 0 ? 12 : hh % 12;
-                          const ampm = hh < 12 ? "AM" : "PM";
+                          const hour12 = Number(hh) % 12 === 0 ? 12 : Number(hh) % 12;
+                          const ampm = Number(hh) < 12 ? "AM" : "PM";
                           return <option key={h} value={h}>{hour12}:00 {ampm} (Mountain)</option>;
                         })}
                       </select>
@@ -197,11 +255,11 @@ export default function SaveSearchModal({ filters = {}, buttonLabel = "Save this
                       {frequency === "immediate"
                         ? "Price drops & new listings email you the moment they hit."
                         : frequency === "weekly"
-                        ? `We'll email you every ${sendDay} at the time above.`
-                        : `We'll email you every day at the time above.`}
+                          ? `We'll email you every ${sendDay} at the time above.`
+                          : "We'll email you every day at the time above."}
                     </p>
                   </div>
-                  {error && <p className="text-red-600 text-sm">{error}</p>}
+                  {error && <p className="text-red-600 text-sm" role="alert">{error}</p>}
                   <button
                     type="submit"
                     disabled={state === "saving"}
