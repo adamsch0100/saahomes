@@ -14,8 +14,12 @@ export const submitShowingRequest = async (req, res) => {
 
     const nameStr = String(name || '').trim();
     const emailStr = String(email || '').trim().toLowerCase();
+    const phoneDigits = String(phone || '').replace(/\D/g, '');
     if (!nameStr) return res.status(400).json({ success: false, error: 'Please enter your name.' });
     if (!EMAIL_RE.test(emailStr)) return res.status(400).json({ success: false, error: 'Please enter a valid email.' });
+    if (phoneDigits.length < 7 || phoneDigits.length > 15) {
+      return res.status(400).json({ success: false, error: 'Please add your phone number so we can confirm your showing.' });
+    }
     if (!date) return res.status(400).json({ success: false, error: 'Please pick a date for your showing.' });
     if (!time) return res.status(400).json({ success: false, error: 'Please pick a time for your showing.' });
 
@@ -38,7 +42,7 @@ export const submitShowingRequest = async (req, res) => {
     );
 
     forwardShowingRequestToFollowUpBoss({
-      name: nameStr, email: emailStr, phone: String(phone || '').trim(),
+      name: nameStr, email: emailStr, phone: phoneDigits,
       showing_date: date, showing_time: time, message: String(message || '').trim(),
       listing_slug: String(listing_slug || '').trim(), listing_address: String(listing_address || '').trim(),
     }).catch(() => {});
