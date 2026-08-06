@@ -11,6 +11,7 @@ import { searchListings, getListingBySlug, getListingStats } from '../controller
 import {
   createAlert, listAlerts, updateAlert, deleteAlert, unsubscribeAll,
 } from '../controllers/alertController.js';
+import { submitShowingRequest } from '../controllers/showingController.js';
 import {
   validateContactSubmission,
   validateMarketReportSubmission,
@@ -105,6 +106,9 @@ router.get('/alerts/manage', listAlerts);
 router.patch('/alerts/:id', updateAlert);
 router.delete('/alerts/:id', deleteAlert);
 router.post('/alerts/unsubscribe', formLimiter, unsubscribeAll);
+
+// Showing requests (listing page modal → lead → FUB)
+router.post('/showing', formLimiter, submitShowingRequest);
 
 export default router;
 
