@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminLogin, getSubmissions, getStats } from '../utils/api.js';
+import ClientSearchesManager from '../components/admin/ClientSearchesManager.jsx';
 import SEO from '../components/SEO';
 
 export default function AdminPage() {
@@ -11,6 +12,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [filterType, setFilterType] = useState('all');
+  const [tab, setTab] = useState('leads'); // leads | searches
 
   useEffect(() => {
     if (token) {
@@ -177,6 +179,27 @@ export default function AdminPage() {
             </button>
           </div>
 
+          <div className="mb-6 flex gap-2">
+            <button
+              type="button"
+              onClick={() => setTab('leads')}
+              className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${tab === 'leads' ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-200 hover:border-black'}`}
+            >
+              Leads
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab('searches')}
+              className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${tab === 'searches' ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-200 hover:border-black'}`}
+            >
+              Client Searches
+            </button>
+          </div>
+
+          {tab === 'searches' ? (
+            <ClientSearchesManager token={token} />
+          ) : (
+          <>
           {stats && (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
               <div className="bg-white p-6 rounded-lg shadow">
@@ -279,6 +302,8 @@ export default function AdminPage() {
               </div>
             )}
           </div>
+          </>
+          )}
         </div>
       </div>
     </div>
