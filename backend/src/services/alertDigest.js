@@ -1,11 +1,7 @@
 /**
  * Nightly saved-search digest engine (RealScout-style follow-up):
- *   For every active saved search:
- *     1. Run the saved filters against the listings table
- *     2. Diff vs the last snapshot → NEW listings
- *     3. Detect price drops (original_list_price > list_price) + status changes
- *     4. Send an HTML digest email with listing cards + match scores
- *     5. Record snapshot + email_log
+ *   Personalized agent-voice emails from Adam & Mandi Schwartz — accurate
+ *   counts, data-derived "why this home" highlights, real listing details.
  *
  * CLI:  node backend/src/services/alertDigest.js          → process everyone
  *       node backend/src/services/alertDigest.js --dry    → print, don't send
@@ -13,7 +9,6 @@
  *       node backend/src/services/alertDigest.js --search N → only that search
  *
  * Env:  DATABASE_URL (repo .env) + OUTREACH_SMTP_HOST/USER/PASSWORD/FROM
- *       (sourced from /opt/data/.env by the wrapper or shell).
  */
 import 'dotenv/config';
 import pg from 'pg';
@@ -23,12 +18,17 @@ const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: fals
 
 const SITE = 'https://saahomes.com';
 const FROM = process.env.OUTREACH_SMTP_FROM || process.env.OUTREACH_SMTP_USER || 'alerts@saahomes.com';
+const AGENT_FROM = 'Adam Schwartz, SAA Homes';
+const AGENT_PHONE = '(970) 999-1407';
 
 const fmtPrice = (n) => (n == null ? '—' : `$${Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`);
+const fmtSqft = (n) => (n == null ? '' : `${Number(n).toLocaleString()} sqft`);
 
-// ---------------------------------------------------------------- filters
 const HOME_TYPE_LABEL = { detached: 'Detached Home', attached: 'Condo / Townhome / Attached', land: 'Land', commercial: 'Commercial', other: 'Property' };
 
+const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// ---------------------------------------------------------------- filters
 function buildWhere(filters) {
   const where = ['is_active = TRUE', 'status = \'Active\''];
   const params = [];
@@ -69,56 +69,115 @@ function matchScore(l, filters) {
   return Math.min(99, score);
 }
 
-function whyLines(l, filters, isNew) {
-  const lines = [];
-  if (isNew) lines.push('New today');
-  if (l.original_list_price && l.list_price && Number(l.original_list_price) > Number(l.list_price)) {
-    lines.push(`Price reduced ${fmtPrice(l.original_list_price)} → ${fmtPrice(l.list_price)}`);
+// ------------------------------------------------- "why this home" facts
+// Every highlight is derived strictly from the listing data we sync — never
+// invented. Picks the most notable facts first, max 4.
+function featureHighlights(l) {
+  const f = l.features || {};
+  const out = [];
+  const price = Number(l.list_price) || 0;
+  if (l.original_list_price && price && Number(l.original_list_price) > price) {
+    const pct = Math.round((1 - price / Number(l.original_list_price)) * 100);
+    out.push(`Price reduced ${pct}% — now ${fmtPrice(price)} (was ${fmtPrice(l.original_list_price)})`);
   }
-  if (filters.maxPrice && l.list_price != null && Number(l.list_price) <= Number(filters.maxPrice)) lines.push('Within your price range');
-  if (filters.minPrice && l.list_price != null && Number(l.list_price) >= Number(filters.minPrice)) lines.push('Meets your minimum budget');
-  if (filters.beds && l.beds != null && l.beds >= Number(filters.beds)) lines.push(`${l.beds}+ beds — matches your search`);
-  return lines.slice(0, 3);
+  if (f.new_construction) out.push('Brand-new construction');
+  if (l.beds != null && l.beds >= 3) out.push(`${l.beds} bedrooms`);
+  if (l.baths != null) out.push(`${l.baths} baths`);
+  if (l.living_area) out.push(`${Number(l.living_area).toLocaleString()} sqft of living space`);
+  if (f.basement) out.push(`Basement: ${f.basement}`);
+  if (l.garage_spaces != null && l.garage_spaces > 0) out.push(`${l.garage_spaces}-car garage`);
+  if (l.lot_size_acres) out.push(`Sits on ${l.lot_size_acres} acre${Number(l.lot_size_acres) === 1 ? '' : 's'}`);
+  if (f.cooling) out.push(`Cooling: ${f.cooling}`);
+  if (f.heating) out.push(`Heat: ${f.heating}`);
+  if (f.fireplaces) out.push(`Fireplace${String(f.fireplaces).includes(',') ? 's' : ''}: ${f.fireplaces}`);
+  if (f.pool) out.push('Pool on site');
+  if (f.spa) out.push('Spa/hot tub');
+  if (f.view) out.push(`Views: ${f.view}`);
+  if (f.waterfront) out.push(`Waterfront${f.water_body ? ` — ${f.water_body}` : ''}`);
+  if (f.exterior) out.push(`Exterior: ${f.exterior}`);
+  if (l.elementary_school) out.push(`Served by ${l.elementary_school} Elementary`);
+  if (l.school_district) out.push(`${l.school_district} schools`);
+  if (l.subdivision) out.push(`In the ${l.subdivision} neighborhood`);
+  if (f.hoa) out.push(`HOA ${fmtPrice(l.hoa_fee)}/${f.assoc_fee_freq || 'mo'}`);
+  if (l.year_built) out.push(`Built ${l.year_built}`);
+  return out.slice(0, 4);
 }
 
-function cardHtml(l, filters, isNew) {
+function descriptionSnippet(l) {
+  if (!l.description) return '';
+  const clean = String(l.description).replace(/\s+/g, ' ').trim();
+  const cut = clean.slice(0, 240);
+  const lastPeriod = cut.lastIndexOf('. ');
+  const end = lastPeriod > 80 ? lastPeriod + 1 : cut.length;
+  return clean.slice(0, end).trim();
+}
+
+// ---------------------------------------------------------------- cards
+function cardHtml(l, filters, isNew, isDrop) {
   const photo = (l.photos && l.photos[0]) || `${SITE}/images/buyers-hero.jpg`;
   const url = `${SITE}/homes-for-sale/${l.slug}/`;
   const score = matchScore(l, filters);
-  const whys = whyLines(l, filters, isNew);
+  const highlights = featureHighlights(l);
+  const snippet = descriptionSnippet(l);
   const address = [l.street_number, l.street_name, l.city].filter(Boolean).join(' ');
+  const badge = isDrop ? 'PRICE DROP' : isNew ? 'NEW' : '';
+  const badgeStyle = isDrop
+    ? 'background:#065f46;color:#fff'
+    : 'background:#CFB36E;color:#1a1a1a';
+
   return `
-    <div style="border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:16px;background:#fff">
+    <div style="border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:18px;background:#fff">
       <a href="${url}" style="display:block;position:relative">
-        <img src="${photo}" alt="${address}" style="width:100%;height:200px;object-fit:cover;display:block" loading="lazy"/>
-        <span style="position:absolute;top:10px;left:10px;background:#CFB36E;color:#1a1a1a;font-weight:700;font-size:13px;padding:4px 10px;border-radius:6px">${score}% match</span>
-        ${isNew ? '<span style="position:absolute;top:10px;right:10px;background:#111;color:#CFB36E;font-weight:700;font-size:11px;padding:4px 8px;border-radius:6px">NEW</span>' : ''}
+        <img src="${photo}" alt="${address}" style="width:100%;height:220px;object-fit:cover;display:block" loading="lazy"/>
+        <span style="position:absolute;top:10px;left:10px;${badgeStyle};font-weight:800;font-size:12px;padding:4px 10px;border-radius:6px">${badge || `${score}% match`}</span>
       </a>
-      <div style="padding:14px 16px">
-        <div style="font-size:20px;font-weight:800;color:#111">${fmtPrice(l.list_price)}</div>
-        <div style="color:#374151;font-size:14px;margin-top:2px">${[l.beds != null ? `${l.beds} bd` : '', l.baths != null ? `${l.baths} ba` : '', l.living_area != null ? `${Number(l.living_area).toLocaleString()} sqft` : '', HOME_TYPE_LABEL[l.home_type] || l.property_subtype].filter(Boolean).join(' · ')}</div>
-        <div style="color:#6b7280;font-size:13px;margin-top:2px">${address}, CO</div>
-        ${whys.length ? `<div style="margin-top:8px;font-size:12.5px;color:#92400e">${whys.map((w) => `✓ ${w}`).join(' &nbsp;·&nbsp; ')}</div>` : ''}
-        <a href="${url}" style="display:inline-block;margin-top:10px;background:#111;color:#fff;font-size:13px;font-weight:600;padding:8px 14px;border-radius:8px;text-decoration:none">View this home</a>
+      <div style="padding:16px 18px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap">
+          <span style="font-size:22px;font-weight:800;color:#111">${fmtPrice(l.list_price)}</span>
+          <span style="color:#6b7280;font-size:12.5px">${score}% match to your search</span>
+        </div>
+        <div style="color:#374151;font-size:14px;margin-top:2px">${[l.beds != null ? `${l.beds} bd` : '', l.baths != null ? `${l.baths} ba` : '', fmtSqft(l.living_area), HOME_TYPE_LABEL[l.home_type] || l.property_subtype].filter(Boolean).join(' · ')}</div>
+        <div style="color:#6b7280;font-size:13px;margin-top:2px">${address}, CO ${l.postal_code || ''}</div>
+        ${highlights.length ? `
+        <div style="margin-top:10px;padding:10px 12px;background:#f9fafb;border-radius:8px;font-size:13px;color:#374151;line-height:1.55">
+          <strong style="color:#111">Why you got this:</strong><br/>${highlights.map((h) => `• ${escapeHtml(h)}`).join('<br/>')}
+        </div>` : ''}
+        ${snippet ? `<div style="margin-top:10px;font-size:13px;color:#4b5563;line-height:1.6;font-style:italic">"${escapeHtml(snippet)}"</div>` : ''}
+        <a href="${url}" style="display:inline-block;margin-top:12px;background:#111;color:#fff;font-size:13px;font-weight:600;padding:9px 16px;border-radius:8px;text-decoration:none">View this home</a>
       </div>
     </div>`;
 }
 
-function digestHtml({ searchName, filterSummary, cards, manageUrl, unsubscribeUrl }) {
+// ---------------------------------------------------------------- email
+function digestHtml({ firstName, searchName, filterSummary, summaryLines, cards, manageUrl, unsubscribeUrl }) {
+  const greeting = firstName ? `Hi ${escapeHtml(firstName)},` : 'Hi there,';
   return `<!DOCTYPE html>
   <html><body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#111">
-    <tr><td align="center" style="padding:24px 16px">
+    <tr><td align="center" style="padding:26px 16px">
       <div style="color:#CFB36E;font-size:22px;font-weight:800;letter-spacing:0.5px">SAA HOMES</div>
       <div style="color:#9ca3af;font-size:13px;margin-top:4px">Schwartz and Associates · Northern Colorado Real Estate</div>
     </td></tr>
   </table>
-  <div style="max-width:560px;margin:0 auto;padding:24px 16px">
-    <h1 style="font-size:20px;color:#111;margin:0 0 6px">New homes match your saved search</h1>
-    <p style="color:#4b5563;font-size:14px;margin:0 0 4px"><strong>${escapeHtml(searchName)}</strong></p>
-    <p style="color:#6b7280;font-size:13px;margin:0 0 20px">${escapeHtml(filterSummary)}</p>
+  <div style="max-width:580px;margin:0 auto;padding:26px 16px">
+    <p style="color:#111;font-size:15px;margin:0 0 4px">${greeting}</p>
+    <p style="color:#4b5563;font-size:14.5px;line-height:1.6;margin:0 0 4px">
+      It's <strong>Adam Schwartz</strong> with SAA Homes. Here's what came in for your
+      <strong>${escapeHtml(searchName)}</strong> search — ${escapeHtml(filterSummary)}:
+    </p>
+    <ul style="color:#374151;font-size:14px;line-height:1.7;margin:8px 0 18px;padding-left:20px">
+      ${summaryLines.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}
+    </ul>
     ${cards}
-    <p style="color:#9ca3af;font-size:12px;margin-top:20px;line-height:1.6">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:22px;background:#111;border-radius:12px">
+      <tr><td style="padding:20px">
+        <p style="color:#fff;font-size:14px;line-height:1.7;margin:0">
+          Any of these catch your eye? <strong style="color:#CFB36E">Just reply to this email</strong> and we'll set up a showing — or call/text <a href="tel:+19709991407" style="color:#CFB36E;text-decoration:none">${AGENT_PHONE}</a>.
+        </p>
+        <p style="color:#9ca3af;font-size:13px;margin:10px 0 0">— Adam &amp; Mandi Schwartz · SAA Homes · saahomes.com</p>
+      </td></tr>
+    </table>
+    <p style="color:#9ca3af;font-size:11.5px;margin-top:18px;line-height:1.6">
       IDX information provided by IRES. Listing data is believed reliable but not guaranteed.<br/>
       <a href="${manageUrl}" style="color:#4b5563">Manage your alerts</a> · <a href="${unsubscribeUrl}" style="color:#4b5563">Unsubscribe</a>
     </p>
@@ -126,16 +185,13 @@ function digestHtml({ searchName, filterSummary, cards, manageUrl, unsubscribeUr
   </body></html>`;
 }
 
-const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-
-// ---------------------------------------------------------------- send
 async function sendEmail(to, subject, html) {
   const host = process.env.OUTREACH_SMTP_HOST;
   const user = process.env.OUTREACH_SMTP_USER;
   const password = process.env.OUTREACH_SMTP_PASSWORD;
   if (!host || !user || !password) throw new Error('OUTREACH_SMTP_* not set');
   const transporter = nodemailer.createTransport({ host, port: 587, secure: false, auth: { user, pass: password } });
-  await transporter.sendMail({ from: `"SAA Homes Alerts" <${FROM}>`, to, subject, html });
+  await transporter.sendMail({ from: `"${AGENT_FROM}" <${FROM}>`, to, subject, html });
 }
 
 // ---------------------------------------------------------------- main
@@ -144,13 +200,14 @@ async function runSearch(search, { dryRun, onlyEmail }) {
   const res = await pool.query(
     `SELECT id, listing_id, slug, street_number, street_name, city, state, postal_code,
             list_price, original_list_price, beds, baths, living_area, home_type,
-            property_subtype, days_on_market, photos, status, price_change_timestamp
+            property_subtype, days_on_market, photos, status, price_change_timestamp,
+            elementary_school, middle_school, high_school, school_district, subdivision,
+            lot_size_acres, garage_spaces, year_built, hoa_fee, features, description
      FROM listings WHERE ${whereSql} ORDER BY updated_at DESC LIMIT 60`,
     params
   );
   const current = res.rows;
 
-  // last snapshot (result_ids)
   const snap = await pool.query(
     'SELECT result_ids FROM search_snapshots WHERE search_id = $1 ORDER BY run_at DESC LIMIT 1',
     [search.id]
@@ -169,15 +226,14 @@ async function runSearch(search, { dryRun, onlyEmail }) {
       events.push({ type: 'price_drop', listing: l });
     }
   }
-  // status changes: listings that were active in the snapshot but now not (closed/pending)
   const statusChanges = [...prevIds].filter((id) => !curIds.has(id)).length;
 
   const fresh = events.filter((e) => e.type === 'new');
   const drops = events.filter((e) => e.type === 'price_drop');
   if (!fresh.length && !drops.length && !statusChanges) return { sent: false, events: 0 };
 
-  const cards = [...fresh.map((e) => cardHtml(e.listing, search.filters, true)),
-    ...drops.map((e) => cardHtml(e.listing, search.filters, false))].join('');
+  const cards = [...fresh.map((e) => cardHtml(e.listing, search.filters, true, false)),
+    ...drops.map((e) => cardHtml(e.listing, search.filters, false, true))].join('');
 
   const filterSummary = [
     search.filters.city ? `in ${search.filters.city}` : '',
@@ -189,31 +245,44 @@ async function runSearch(search, { dryRun, onlyEmail }) {
     search.filters.type ? HOME_TYPE_LABEL[search.filters.type] : '',
   ].filter(Boolean).join(' · ');
 
+  // Accurate, human summary lines (counts always match the cards above)
+  const summaryLines = [];
+  if (fresh.length === 1) summaryLines.push('1 new home hit the market matching your search');
+  if (fresh.length > 1) summaryLines.push(`${fresh.length} new homes hit the market matching your search`);
+  if (drops.length === 1) summaryLines.push('1 price drop on a home you may have seen');
+  if (drops.length > 1) summaryLines.push(`${drops.length} price drops on homes you may have seen`);
+  if (statusChanges === 1) summaryLines.push('1 home from your search went off market');
+  if (statusChanges > 1) summaryLines.push(`${statusChanges} homes from your search went off market`);
+  if (!summaryLines.length) summaryLines.push('New activity matched your search');
+
   const freshText = fresh.length ? `${fresh.length} new` : '';
   const dropText = drops.length ? `${drops.length} price drop${drops.length > 1 ? 's' : ''}` : '';
   const changeText = statusChanges ? `${statusChanges} off market` : '';
   const subjectParts = [freshText, dropText, changeText].filter(Boolean);
   const subject = subjectParts.length
-    ? `${subjectParts.join(', ')} — ${search.filters.city || 'Northern Colorado'} homes match your search`
-    : 'Your saved search update';
+    ? `Adam Schwartz: ${subjectParts.join(', ')} — ${search.filters.city || 'Northern Colorado'}`
+    : 'Adam Schwartz: your saved search update';
 
-  const userRes = await pool.query('SELECT email FROM users WHERE id = $1', [search.user_id]);
-  const to = userRes.rows[0]?.email;
-  if (!to) return { sent: false, events: 0 };
-  if (onlyEmail && !to.toLowerCase().includes(onlyEmail.toLowerCase())) return { sent: false, events: 0 };
+  const userRes = await pool.query('SELECT email, name FROM users WHERE id = $1', [search.user_id]);
+  const userRow = userRes.rows[0];
+  if (!userRow?.email) return { sent: false, events: 0 };
+  if (onlyEmail && !userRow.email.toLowerCase().includes(onlyEmail.toLowerCase())) return { sent: false, events: 0 };
+  const firstName = (userRow.name || '').trim().split(' ')[0] || null;
 
   const manageUrl = `${SITE}/alerts/manage/?token=${search.manage_token}`;
   const unsubscribeUrl = `${SITE}/api/alerts/unsubscribe?token=${search.manage_token}`;
 
   if (dryRun) {
-    console.log(`[dry] → ${to}: "${subject}" (${events.length} events, ${fresh.length} new, ${drops.length} drops, ${statusChanges} status)`);
+    console.log(`[dry] → ${userRow.email}: "${subject}" (${events.length} events: ${fresh.length} new, ${drops.length} drops, ${statusChanges} off-market)`);
     return { sent: false, events: events.length, subject };
   }
 
-  await sendEmail(to, subject, digestHtml({ searchName: search.name, filterSummary, cards, manageUrl, unsubscribeUrl }));
+  await sendEmail(userRow.email, subject, digestHtml({
+    firstName, searchName: search.name, filterSummary, summaryLines, cards, manageUrl, unsubscribeUrl,
+  }));
   await pool.query(
     'INSERT INTO email_log (user_id, search_id, type, to_email, subject, events) VALUES ($1,$2,$3,$4,$5,$6)',
-    [search.user_id, search.id, 'digest', to, subject, events.length]
+    [search.user_id, search.id, 'digest', userRow.email, subject, events.length]
   );
   for (const e of events) {
     await pool.query(
@@ -226,7 +295,7 @@ async function runSearch(search, { dryRun, onlyEmail }) {
     'INSERT INTO search_snapshots (search_id, result_ids) VALUES ($1, $2)',
     [search.id, JSON.stringify([...curIds])]
   );
-  console.log(`✓ ${to}: "${subject}" — ${events.length} events (${fresh.length} new, ${drops.length} drops, ${statusChanges} off-market)`);
+  console.log(`✓ ${userRow.email}: "${subject}" — ${events.length} events (${fresh.length} new, ${drops.length} drops, ${statusChanges} off-market)`);
   return { sent: true, events: events.length, subject };
 }
 
@@ -262,4 +331,4 @@ if (isMain) {
   main().catch((e) => { console.error('alertDigest error:', e); process.exit(1); });
 }
 
-export { buildWhere, matchScore };
+export { buildWhere, matchScore, featureHighlights };
