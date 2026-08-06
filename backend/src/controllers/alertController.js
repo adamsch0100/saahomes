@@ -1,0 +1,178 @@
+/**
+ * Saved-search / follow-up alert API (RealScout-style lead capture):
+ *   POST   /api/alerts              — save a search (email + filters) → lead → FUB
+ *   GET    /api/alerts/manage?token= — list user's searches
+ *   PATCH  /api/alerts/:id?token=   — pause/resume/edit a search
+ *   DELETE /api/alerts/:id?token=   — delete a search
+ *   POST   /api/alerts/unsubscribe  — {token} → unsubscribe all
+ */
+import crypto from 'crypto';
+import getPool from '../config/database.js';
+import { forwardAlertSignupToFollowUpBoss } from '../services/followUpBossService.js';
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const FILTER_KEYS = ['city', 'minPrice', 'maxPrice', 'beds', 'baths', 'type', 'sort', 'q'];
+const TYPE_VALUES = ['detached', 'attached', 'land', 'commercial', 'other', ''];
+
+function cleanFilters(body) {
+  const f = {};
+  for (const key of FILTER_KEYS) {
+    const v = body[key];
+    if (v === undefined || v === null || v === '') continue;
+    if (['minPrice', 'maxPrice', 'beds', 'baths'].includes(key)) {
+      const n = Number(v);
+      if (Number.isFinite(n) && n >= 0 && n < 1e9) f[key] = String(Math.round(n));
+    } else if (key === 'type') {
+      if (TYPE_VALUES.includes(String(v))) f[key] = String(v);
+    } else if (key === 'city' || key === 'q') {
+      const s = String(v).trim();
+      if (s.length <= 100) f[key] = s;
+    } else if (key === 'sort') {
+      f[key] = String(v).slice(0, 20);
+    }
+  }
+  return f;
+}
+
+export const createAlert = async (req, res) => {
+  try {
+    const { email, name, ...filterBody } = req.body || {};
+    const emailStr = String(email || '').trim().toLowerCase();
+    if (!EMAIL_RE.test(emailStr)) {
+      return res.status(400).json({ success: false, error: 'A valid email is required to save a search.' });
+    }
+    const filters = cleanFilters(filterBody);
+    if (Object.keys(filters).length === 0) {
+      return res.status(400).json({ success: false, error: 'Add at least one search criteria (city, price, beds…).' });
+    }
+
+    const pool = getPool();
+    // Upsert user by email
+    let user = await pool.query('SELECT * FROM users WHERE email = $1', [emailStr]);
+    if (!user.rows.length) {
+      const token = crypto.randomBytes(24).toString('hex');
+      const created = await pool.query(
+        'INSERT INTO users (email, name, manage_token) VALUES ($1, $2, $3) RETURNING *',
+        [emailStr, String(name || '').trim().slice(0, 255) || null, token]
+      );
+      user = created;
+    } else {
+      user = await pool.query(
+        'UPDATE users SET status = \'active\', last_active_at = NOW() WHERE id = $1 RETURNING *',
+        [user.rows[0].id]
+      );
+    }
+    const userRow = user.rows[0];
+
+    const searchName = String(name || '').trim().slice(0, 255) || 'My Search';
+    const inserted = await pool.query(
+      `INSERT INTO saved_searches (user_id, name, filters, is_active)
+       VALUES ($1, $2, $3, TRUE) RETURNING *`,
+      [userRow.id, searchName, JSON.stringify(filters)]
+    );
+    const searchRow = inserted.rows[0];
+
+    // Lead → Follow Up Boss (fire-and-forget, never block the user)
+    forwardAlertSignupToFollowUpBoss(userRow, searchRow).catch(() => {});
+
+    return res.status(201).json({
+      success: true,
+      data: { id: searchRow.id, name: searchRow.name, filters: searchRow.filters, manageToken: userRow.manage_token },
+    });
+  } catch (error) {
+    console.error('createAlert error:', error);
+    return res.status(500).json({ success: false, error: 'Could not save your search. Please try again.' });
+  }
+};
+
+const findUserByToken = async (token) => {
+  if (!token || token.length < 16 || token.length > 80) return null;
+  const r = await getPool().query('SELECT * FROM users WHERE manage_token = $1 AND status = \'active\'', [String(token)]);
+  return r.rows[0] || null;
+};
+
+export const listAlerts = async (req, res) => {
+  try {
+    const user = await findUserByToken(req.query.token);
+    if (!user) return res.status(401).json({ success: false, error: 'Invalid or expired manage link.' });
+    const searches = await getPool().query(
+      `SELECT id, name, filters, is_active, created_at, last_email_at
+       FROM saved_searches WHERE user_id = $1 ORDER BY created_at DESC`,
+      [user.id]
+    );
+    return res.json({ success: true, data: { email: user.email, searches: searches.rows } });
+  } catch (error) {
+    console.error('listAlerts error:', error);
+    return res.status(500).json({ success: false, error: 'Could not load your searches.' });
+  }
+};
+
+export const updateAlert = async (req, res) => {
+  try {
+    const user = await findUserByToken(req.query.token);
+    if (!user) return res.status(401).json({ success: false, error: 'Invalid or expired manage link.' });
+    const id = Number(req.params.id);
+    const pool = getPool();
+    const existing = await pool.query('SELECT * FROM saved_searches WHERE id = $1 AND user_id = $2', [id, user.id]);
+    if (!existing.rows.length) return res.status(404).json({ success: false, error: 'Search not found.' });
+
+    const { is_active, name, ...filterBody } = req.body || {};
+    const updates = [];
+    const params = [];
+    let i = 1;
+    if (typeof is_active === 'boolean') { updates.push(`is_active = $${i++}`); params.push(is_active); }
+    if (name !== undefined) { updates.push(`name = $${i++}`); params.push(String(name).trim().slice(0, 255) || 'My Search'); }
+    if (filterBody && Object.keys(filterBody).length) {
+      const filters = cleanFilters(filterBody);
+      if (Object.keys(filters).length) { updates.push(`filters = $${i++}`); params.push(JSON.stringify(filters)); }
+    }
+    if (!updates.length) return res.status(400).json({ success: false, error: 'Nothing to update.' });
+    updates.push('updated_at = NOW()');
+    params.push(id);
+    const updated = await pool.query(
+      `UPDATE saved_searches SET ${updates.join(', ')} WHERE id = $${i} RETURNING id, name, filters, is_active`,
+      params
+    );
+    return res.json({ success: true, data: updated.rows[0] });
+  } catch (error) {
+    console.error('updateAlert error:', error);
+    return res.status(500).json({ success: false, error: 'Could not update your search.' });
+  }
+};
+
+export const deleteAlert = async (req, res) => {
+  try {
+    const user = await findUserByToken(req.query.token);
+    if (!user) return res.status(401).json({ success: false, error: 'Invalid or expired manage link.' });
+    const id = Number(req.params.id);
+    const deleted = await getPool().query(
+      'DELETE FROM saved_searches WHERE id = $1 AND user_id = $2 RETURNING id',
+      [id, user.id]
+    );
+    if (!deleted.rows.length) return res.status(404).json({ success: false, error: 'Search not found.' });
+    return res.json({ success: true });
+  } catch (error) {
+    console.error('deleteAlert error:', error);
+    return res.status(500).json({ success: false, error: 'Could not delete your search.' });
+  }
+};
+
+export const unsubscribeAll = async (req, res) => {
+  try {
+    const { token } = req.body || {};
+    const user = await findUserByToken(token);
+    if (!user) return res.status(401).json({ success: false, error: 'Invalid or expired link.' });
+    await getPool().query(
+      "UPDATE users SET status = 'unsubscribed' WHERE id = $1",
+      [user.id]
+    );
+    await getPool().query(
+      'UPDATE saved_searches SET is_active = FALSE WHERE user_id = $1',
+      [user.id]
+    );
+    return res.json({ success: true });
+  } catch (error) {
+    console.error('unsubscribeAll error:', error);
+    return res.status(500).json({ success: false, error: 'Could not unsubscribe.' });
+  }
+};

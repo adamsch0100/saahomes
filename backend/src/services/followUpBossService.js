@@ -61,6 +61,54 @@ const postFollowUpBossEvent = async (eventData) => {
   return response.json();
 };
 
+export const forwardAlertSignupToFollowUpBoss = async (user, search) => {
+  if (!FOLLOW_UP_BOSS_API_KEY && !FOLLOW_UP_BOSS_WEBHOOK_URL) {
+    logger.info('Follow Up Boss not configured, skipping saved-search lead forwarding');
+    return { success: false, reason: 'not_configured' };
+  }
+
+  const filters = search.filters || {};
+  const parts = [];
+  if (filters.city) parts.push(`City: ${filters.city}`);
+  if (filters.minPrice || filters.maxPrice) {
+    parts.push(`Price: ${filters.minPrice ? `$${Number(filters.minPrice).toLocaleString()}` : '$0'}–${filters.maxPrice ? `$${Number(filters.maxPrice).toLocaleString()}` : 'Any'}`);
+  }
+  if (filters.beds) parts.push(`${filters.beds}+ beds`);
+  if (filters.baths) parts.push(`${filters.baths}+ baths`);
+  if (filters.type) parts.push(`Type: ${filters.type}`);
+  const searchSummary = parts.join(' · ') || 'Anywhere';
+
+  const firstName = (user.name || '').trim().split(' ')[0] || 'Home';
+  const lastName = (user.name || '').trim().split(' ').slice(1).join(' ') || 'Buyer';
+
+  const eventData = {
+    source: 'Saved Search Alert',
+    system: 'SAA Homes Website',
+    type: 'General Inquiry',
+    message: [
+      'New saved search from website — follow-up lead (nurture via nightly listing alerts).',
+      `Search name: ${search.name || 'My Search'}`,
+      `Criteria: ${searchSummary}`,
+      `Manage alerts: https://saahomes.com/alerts/manage/?token=${user.manage_token}`,
+    ].join('\n'),
+    person: {
+      firstName,
+      lastName,
+      emails: user.email ? [{ value: user.email, type: 'work' }] : [],
+      tags: ['Website Lead', 'Saved Search'],
+    },
+  };
+
+  try {
+    const result = await postFollowUpBossEvent(eventData);
+    logger.info('Saved-search lead forwarded to Follow Up Boss', { eventId: result.id });
+    return { success: true, eventId: result.id };
+  } catch (error) {
+    logger.error('Failed to forward saved-search lead to Follow Up Boss', error);
+    return { success: false, error: error.message };
+  }
+};
+
 export const forwardContactToFollowUpBoss = async (submission) => {
   if (!FOLLOW_UP_BOSS_API_KEY && !FOLLOW_UP_BOSS_WEBHOOK_URL) {
     logger.info('Follow Up Boss not configured, skipping lead forwarding');

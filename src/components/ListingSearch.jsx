@@ -1,6 +1,7 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import ListingMap from "./ListingMap";
+import SaveSearchModal from "./SaveSearchModal";
 
 /**
  * ListingSearch — Zillow-style split-view search powering /properties/.
@@ -191,6 +192,18 @@ export default function ListingSearch({ location, height = "700px" }) {
         <option value="price-asc">Price: low to high</option>
         <option value="price-desc">Price: high to low</option>
       </select>
+      <SaveSearchModal
+        filters={{
+          city: filters.city || undefined,
+          minPrice: filters.price ? filters.price.split("-")[0] || undefined : undefined,
+          maxPrice: filters.price ? filters.price.split("-")[1] || undefined : undefined,
+          beds: filters.beds || undefined,
+          baths: filters.baths || undefined,
+          type: filters.type || undefined,
+        }}
+        buttonLabel="Save search"
+        buttonClassName="px-4 py-2.5 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors whitespace-nowrap"
+      />
       {meta.total > 0 && (
         <span className="ml-auto self-center text-sm text-gray-500">
           {meta.total.toLocaleString()} listing{meta.total === 1 ? "" : "s"}
