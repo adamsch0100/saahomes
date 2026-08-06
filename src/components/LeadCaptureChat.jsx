@@ -287,20 +287,6 @@ export default function LeadCaptureChat() {
         .nadia-avatar-sm { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
       `}</style>
 
-      {/* Preview bubble */}
-      {!isOpen && showNudge && (
-        <button
-          onClick={handleOpen}
-          className="mb-3 bg-white rounded-2xl shadow-xl border border-gray-100 px-5 py-3 max-w-[260px] text-left hover:shadow-2xl transition-shadow cursor-pointer"
-          style={{ animation: 'chatPreviewSlide 0.35s ease-out' }}
-        >
-          <div className="flex items-start gap-2.5">
-            <img src={AVATAR_PATH} alt="Nadia" className="nadia-avatar mt-0.5" />
-            <p className="text-sm text-gray-600 leading-snug">Got questions about Northern Colorado real estate? I can help! 🏔️</p>
-          </div>
-        </button>
-      )}
-
       {/* Chat Card */}
       {isOpen && (
         <div
