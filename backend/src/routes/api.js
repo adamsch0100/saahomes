@@ -8,11 +8,13 @@ import { submitChfaDpaLeadForm } from '../controllers/chfaDpaLeadController.js';
 import { submitGhopeLeadForm } from '../controllers/ghopeLeadController.js';
 import { handleChatMessage } from '../controllers/chatController.js';
 import { searchListings, getListingBySlug, getListingStats } from '../controllers/listingController.js';
+import { getListingPhoto } from '../controllers/photoController.js';
 import {
   createAlert, listAlerts, getMe, sendMagicLink, signOut, updateAlert, deleteAlert, unsubscribeAll,
 } from '../controllers/alertController.js';
 import { register, login, setPassword } from '../controllers/authController.js';
 import { submitShowingRequest } from '../controllers/showingController.js';
+import { runCronDigest } from '../controllers/cronController.js';
 import {
   validateContactSubmission,
   validateMarketReportSubmission,
@@ -98,6 +100,9 @@ const listingLimiter = rateLimit({
 });
 
 router.get('/listings', listingLimiter, searchListings);
+// Listing photo proxy (reliable serving despite MLS URL expiry/rate limits)
+router.get('/photo/:listingId/:idx', listingLimiter, getListingPhoto);
+
 router.get('/listings/stats', listingLimiter, getListingStats);
 router.get('/listings/:slug', listingLimiter, getListingBySlug);
 
@@ -115,6 +120,10 @@ router.post('/alerts/signout', signOut);
 router.patch('/alerts/:id', updateAlert);
 router.delete('/alerts/:id', deleteAlert);
 router.post('/alerts/unsubscribe', formLimiter, unsubscribeAll);
+
+// Cron triggers (protected by CRON_SECRET) — scheduler calls the site's own
+// backend so email is sent from saahomes.com, not from Hermes.
+router.post('/cron/digest', runCronDigest);
 
 // Showing requests (listing page modal → lead → FUB)
 router.post('/showing', formLimiter, submitShowingRequest);
