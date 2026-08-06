@@ -1,8 +1,100 @@
 import logger from '../utils/logger.js';
+import getPool from '../config/database.js';
 
 const OPENCODE_API_URL = 'https://opencode.ai/zen/go/v1/chat/completions';
 const OPENCODE_API_KEY = process.env.OPENCODE_GO_API_KEY;
 const OPENCODE_MODEL = process.env.CHAT_MODEL || 'deepseek-v4-flash';
+
+const NCOCITIES = ['Fort Collins', 'Loveland', 'Windsor', 'Greeley', 'Timnath', 'Wellington', 'Johnstown', 'Eaton', 'Milliken', 'La Salle', 'Mead', 'Longmont', 'Boulder', 'Berthoud', 'Firestone', 'Frederick', 'Evans', 'Severance', 'Niwot'];
+
+/** Pull real listing details from our MLS database when the visitor is
+ *  on a listing page or asks about a specific home. Returns a compact,
+ *  factual context block (or null). */
+async function resolveListingContext(page, messages) {
+  try {
+    const pool = getPool();
+    const last = [...(messages || [])].reverse().find((m) => m?.role === 'user')?.content || '';
+
+    // 1) Visitor is on a listing page → exact slug
+    const slugMatch = String(page || '').match(/\/homes-for-sale\/([^\/?#]+)/);
+    if (slugMatch) {
+      const r = await pool.query(
+        `SELECT street_number, street_name, unit, city, state, postal_code, list_price, original_list_price,
+                beds, baths, living_area, lot_size_acres, home_type, property_subtype, year_built,
+                garage_spaces, elementary_school, middle_school, high_school, school_district,
+                subdivision, days_on_market, features, description, slug
+         FROM listings WHERE slug = $1 AND is_active LIMIT 1`,
+        [slugMatch[1]]
+      );
+      if (r.rows[0]) return formatListingContext(r.rows[0]);
+    }
+
+    // 2) Message mentions a street address + city
+    const addrMatch = last.match(/(\d{1,6})\s+([A-Za-z0-9.\- ]{2,50}?)(?:,?\s+|\s+in\s+)(Fort Collins|Loveland|Windsor|Greeley|Timnath|Wellington|Johnstown|Eaton|Milliken|La Salle|Mead|Longmont|Boulder|Berthoud|Firestone|Frederick|Evans|Severance|Niwot)/i);
+    if (addrMatch) {
+      const r = await pool.query(
+        `SELECT street_number, street_name, unit, city, state, postal_code, list_price, original_list_price,
+                beds, baths, living_area, lot_size_acres, home_type, property_subtype, year_built,
+                garage_spaces, elementary_school, middle_school, high_school, school_district,
+                subdivision, days_on_market, features, description, slug
+         FROM listings
+         WHERE is_active AND LOWER(city) = LOWER($1)
+           AND LOWER(street_name) LIKE LOWER($2)
+         ORDER BY updated_at DESC LIMIT 1`,
+        [addrMatch[3], `%${addrMatch[2].trim()}%`]
+      );
+      if (r.rows[0]) return formatListingContext(r.rows[0]);
+    }
+
+    // 3) Message just mentions a city → surface a couple of current homes
+    const cityMention = NCOCITIES.find((c) => last.toLowerCase().includes(c.toLowerCase()));
+    if (cityMention) {
+      const r = await pool.query(
+        `SELECT street_number, street_name, unit, city, state, postal_code, list_price, original_list_price,
+                beds, baths, living_area, lot_size_acres, home_type, property_subtype, year_built,
+                garage_spaces, elementary_school, middle_school, high_school, school_district,
+                subdivision, days_on_market, features, description, slug
+         FROM listings WHERE is_active AND LOWER(city) = LOWER($1)
+         ORDER BY updated_at DESC LIMIT 2`,
+        [cityMention]
+      );
+      if (r.rows.length) return r.rows.map(formatListingContext).join('\n\n');
+    }
+  } catch (error) {
+    logger.warn('Listing context lookup failed', error);
+  }
+  return null;
+}
+
+function formatListingContext(l) {
+  const f = l.features || {};
+  const parts = [
+    `Address: ${[l.street_number, l.street_name, l.unit && `#${l.unit}`, l.city, l.state].filter(Boolean).join(' ')}`,
+    `Price: $${Number(l.list_price || 0).toLocaleString()}${l.original_list_price && Number(l.original_list_price) > Number(l.list_price) ? ` (reduced from $${Number(l.original_list_price).toLocaleString()})` : ''}`,
+    `Type: ${l.home_type || 'property'}${l.property_subtype ? ` (${l.property_subtype})` : ''}`,
+    l.beds != null ? `Beds: ${l.beds}` : null,
+    l.baths != null ? `Baths: ${l.baths}` : null,
+    l.living_area ? `SqFt: ${Number(l.living_area).toLocaleString()}` : null,
+    l.lot_size_acres ? `Lot: ${l.lot_size_acres} acres` : null,
+    l.year_built ? `Year built: ${l.year_built}` : null,
+    l.garage_spaces != null ? `Garage: ${l.garage_spaces} spaces` : null,
+    l.elementary_school ? `Elementary: ${l.elementary_school}` : null,
+    l.middle_school ? `Middle: ${l.middle_school}` : null,
+    l.high_school ? `High: ${l.high_school}` : null,
+    l.school_district ? `District: ${l.school_district}` : null,
+    l.subdivision ? `Subdivision: ${l.subdivision}` : null,
+    l.days_on_market != null ? `Days on market: ${l.days_on_market}` : null,
+    f.basement ? `Basement: ${f.basement}` : null,
+    f.cooling ? `Cooling: ${f.cooling}` : null,
+    f.heating ? `Heating: ${f.heating}` : null,
+    f.fireplaces ? `Fireplace: ${f.fireplaces}` : null,
+    f.pool ? 'Pool: yes' : null,
+    f.view ? `View: ${f.view}` : null,
+    l.description ? `Description: ${String(l.description).replace(/\s+/g, ' ').slice(0, 260)}` : null,
+    `Link: https://saahomes.com/homes-for-sale/${l.slug}/`,
+  ].filter(Boolean);
+  return `LISTING DETAILS (real data from our MLS feed — use these exact facts, never invent others):\n${parts.join('\n')}`;
+}
 
 const SYSTEM_PROMPT = `You are Nadia, a friendly and knowledgeable AI real estate assistant for SAA Homes (Schwartz and Associates) in Northern Colorado. Your job is to help website visitors with their real estate questions and naturally convert them into leads for Adam and Mandi Schwartz.
 
@@ -61,7 +153,8 @@ const SYSTEM_PROMPT = `You are Nadia, a friendly and knowledgeable AI real estat
   [[TRANSFER]]
   Absolutely! I can have Adam or Mandi reach out to you directly. Would you like me to arrange that?
 
-- Do NOT make up specific home listings, prices, or availability. Direct them to saahomes.com/properties/
+- When LISTING DETAILS are included in your context, use those exact verified facts (price, beds, baths, schools, features) to answer questions about the home. Never change or invent numbers. If the visitor asks something not covered by the details, say so and offer to have Adam or Mandi get the full picture.
+- If no listing details are in your context, do NOT make up specific home listings, prices, or availability. Direct them to saahomes.com/properties/ or offer to connect them with Adam or Mandi.
 - Do NOT give legal or tax advice. Recommend they speak with a lender or attorney.
 - Be honest about what you know and humble about what you don't.`;
 
@@ -77,9 +170,11 @@ export const handleChatMessage = async (req, res) => {
     return res.status(503).json({ error: 'Chat AI not configured. Please call (970) 999-1407.' });
   }
 
+  const listingContext = await resolveListingContext(page, messages);
   const apiMessages = [
     { role: 'system', content: SYSTEM_PROMPT },
     ...(page ? [{ role: 'system', content: `The visitor is currently on this page: ${page}` }] : []),
+    ...(listingContext ? [{ role: 'system', content: listingContext }] : []),
     ...messages.slice(-10), // Keep last 10 messages for context window
   ];
 
