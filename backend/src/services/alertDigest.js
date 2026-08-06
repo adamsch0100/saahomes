@@ -28,6 +28,38 @@ const HOME_TYPE_LABEL = { detached: 'Detached Home', attached: 'Condo / Townhome
 
 const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+// ------------------------------------------------- Mountain Time helpers
+const MT_TZ = 'America/Denver';
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+function mtNow() {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: MT_TZ, hour: '2-digit', minute: '2-digit', weekday: 'long', hour12: false,
+  }).formatToParts(new Date());
+  const get = (t) => parts.find((p) => p.type === t)?.value || '';
+  return {
+    hhmm: `${get('hour')}:${get('minute')}`,
+    weekday: get('weekday'),
+    date: new Intl.DateTimeFormat('en-CA', { timeZone: MT_TZ }).format(new Date()),
+  };
+}
+
+/** Is this search due to run right now? frequency × send_time × send_day. */
+function isDue(search) {
+  const now = mtNow();
+  const freq = search.frequency || 'daily';
+  if (freq === 'immediate') return true; // hourly runs catch these
+  const sendTime = search.send_time || '06:00';
+  if (now.hhmm < sendTime) return false;
+  if (freq === 'weekly' && search.send_day && now.weekday !== search.send_day) return false;
+  // Don't re-send on the same day (snapshot-less, low-volume searches)
+  if (search.last_email_at) {
+    const lastDate = new Intl.DateTimeFormat('en-CA', { timeZone: MT_TZ }).format(new Date(search.last_email_at));
+    if (lastDate === now.date) return false;
+  }
+  return true;
+}
+
 // ---------------------------------------------------------------- filters
 function buildWhere(filters) {
   const where = ['is_active = TRUE', 'status = \'Active\''];
@@ -149,7 +181,7 @@ function cardHtml(l, filters, isNew, isDrop) {
 }
 
 // ---------------------------------------------------------------- email
-function digestHtml({ firstName, searchName, filterSummary, summaryLines, cards, manageUrl, unsubscribeUrl }) {
+function digestHtml({ firstName, searchName, filterSummary, summaryLines, standouts, cards, manageUrl, unsubscribeUrl }) {
   const greeting = firstName ? `Hi ${escapeHtml(firstName)},` : 'Hi there,';
   return `<!DOCTYPE html>
   <html><body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
@@ -165,9 +197,14 @@ function digestHtml({ firstName, searchName, filterSummary, summaryLines, cards,
       It's <strong>Adam Schwartz</strong> with SAA Homes. Here's what came in for your
       <strong>${escapeHtml(searchName)}</strong> search — ${escapeHtml(filterSummary)}:
     </p>
-    <ul style="color:#374151;font-size:14px;line-height:1.7;margin:8px 0 18px;padding-left:20px">
+    <ul style="color:#374151;font-size:14px;line-height:1.7;margin:8px 0 14px;padding-left:20px">
       ${summaryLines.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}
     </ul>
+    ${standouts.length ? `
+    <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 20px;background:#f9fafb;border-left:3px solid #CFB36E;padding:12px 14px;border-radius:0 8px 8px 0">
+      <strong style="color:#111">A few worth a look:</strong><br/>
+      ${standouts.map((s) => escapeHtml(s)).join('<br/><br/>')}
+    </p>` : ''}
     ${cards}
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:22px;background:#111;border-radius:12px">
       <tr><td style="padding:20px">
@@ -260,8 +297,25 @@ async function runSearch(search, { dryRun, onlyEmail }) {
   const changeText = statusChanges ? `${statusChanges} off market` : '';
   const subjectParts = [freshText, dropText, changeText].filter(Boolean);
   const subject = subjectParts.length
-    ? `Adam Schwartz: ${subjectParts.join(', ')} — ${search.filters.city || 'Northern Colorado'}`
-    : 'Adam Schwartz: your saved search update';
+    ? `Adam here — ${subjectParts.join(', ')} in ${search.filters.city || 'Northern Colorado'}`
+    : 'Adam here — an update on your saved search';
+
+  // Conversational standouts: 2-3 notable homes with data-derived facts.
+  const standouts = [];
+  const notable = [...drops.slice(0, 2), ...fresh.slice(0, 2)].slice(0, 3);
+  for (const e of notable) {
+    const l = e.listing;
+    const addr = [l.street_number, l.street_name, l.city].filter(Boolean).join(' ');
+    const facts = featureHighlights(l);
+    const factText = facts.slice(0, 2).join(', ');
+    if (e.type === 'price_drop') {
+      const pct = l.list_price && l.original_list_price
+        ? Math.round((1 - Number(l.list_price) / Number(l.original_list_price)) * 100) : null;
+      standouts.push(`The ${l.beds != null ? `${l.beds}-bed ` : ''}home at ${addr} just dropped ${pct ? `${pct}%` : 'in price'} to ${fmtPrice(l.list_price)}${factText ? ` — ${factText}` : ''}.`);
+    } else {
+      standouts.push(`New today: the ${l.beds != null ? `${l.beds}-bed ` : ''}home at ${addr} is listed at ${fmtPrice(l.list_price)}${factText ? ` — ${factText}` : ''}.`);
+    }
+  }
 
   const userRes = await pool.query('SELECT email, name FROM users WHERE id = $1', [search.user_id]);
   const userRow = userRes.rows[0];
@@ -278,7 +332,7 @@ async function runSearch(search, { dryRun, onlyEmail }) {
   }
 
   await sendEmail(userRow.email, subject, digestHtml({
-    firstName, searchName: search.name, filterSummary, summaryLines, cards, manageUrl, unsubscribeUrl,
+    firstName, searchName: search.name, filterSummary, summaryLines, standouts, cards, manageUrl, unsubscribeUrl,
   }));
   await pool.query(
     'INSERT INTO email_log (user_id, search_id, type, to_email, subject, events) VALUES ($1,$2,$3,$4,$5,$6)',
@@ -306,14 +360,21 @@ async function main() {
   const onlySearch = args.find((a) => a.startsWith('--search='))?.split('=')[1];
 
   const q = `
-    SELECT s.id, s.user_id, s.name, s.filters, u.email AS user_email, u.manage_token
+    SELECT s.id, s.user_id, s.name, s.filters, s.frequency, s.send_time, s.send_day, s.last_email_at,
+           u.email AS user_email, u.manage_token
     FROM saved_searches s JOIN users u ON u.id = s.user_id
     WHERE s.is_active = TRUE AND u.status = 'active'
     ${onlySearch ? 'AND s.id = $1' : ''}
     ORDER BY s.id`;
   const params = onlySearch ? [Number(onlySearch)] : [];
-  const searches = (await pool.query(q, params)).rows;
-  console.log(`alertDigest: ${searches.length} active saved searches${dryRun ? ' (DRY RUN)' : ''}`);
+  const allSearches = (await pool.query(q, params)).rows;
+  const force = args.includes('--force');
+  const searches = force ? allSearches : allSearches.filter((s) => isDue(s));
+  if (allSearches.length !== searches.length) {
+    console.log(`alertDigest: ${allSearches.length} active searches, ${searches.length} due now${dryRun ? ' (DRY RUN)' : ''}`);
+  } else {
+    console.log(`alertDigest: ${searches.length} active saved searches${dryRun ? ' (DRY RUN)' : ''}`);
+  }
 
   let sent = 0;
   let totalEvents = 0;
