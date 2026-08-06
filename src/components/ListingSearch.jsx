@@ -41,12 +41,10 @@ const BATH_OPTIONS = [
 
 const TYPE_OPTIONS = [
   { label: "All types", value: "" },
-  { label: "House", value: "Residential" },
-  { label: "Condo / Townhome", value: "Condominium" },
-  { label: "Townhome", value: "Townhouse" },
-  { label: "Land / Lot", value: "Land" },
-  { label: "Multi-Family", value: "Multi-Family" },
-  { label: "Commercial", value: "Commercial Sale" },
+  { label: "Detached home", value: "detached" },
+  { label: "Condo / townhome / attached", value: "attached" },
+  { label: "Land", value: "land" },
+  { label: "Commercial", value: "commercial" },
 ];
 
 const formatPrice = (n) =>
