@@ -13,7 +13,9 @@ import { forwardAlertSignupToFollowUpBoss } from '../services/followUpBossServic
 import { sendEmail, smtpConfigured } from '../services/emailer.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const FILTER_KEYS = ['city', 'minPrice', 'maxPrice', 'beds', 'baths', 'type', 'sort', 'q'];
+const FILTER_KEYS = ['city', 'minPrice', 'maxPrice', 'beds', 'baths', 'type', 'sort', 'q',
+  'minSqft', 'minYear', 'maxHoa', 'garage', 'basement', 'fireplace', 'pool',
+  'newConstruction', 'waterfront', 'newDays'];
 const TYPE_VALUES = ['detached', 'attached', 'land', 'commercial', 'other', ''];
 const FREQUENCIES = ['immediate', 'daily', 'weekly'];
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
