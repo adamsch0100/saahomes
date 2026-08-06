@@ -130,8 +130,20 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches }) {
           : "border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300"
       }`}
     >
-      {/* Click opens Zillow-style detail panel over search (not a full navigation) */}
-      <button type="button" onClick={open} className="block w-full text-left cursor-pointer">
+      {/* Click opens Zillow-style detail panel over search (not a full navigation).
+          Use div+role (not nested buttons) so the heart control stays valid HTML. */}
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={open}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            open(e);
+          }
+        }}
+        className="block w-full text-left cursor-pointer"
+      >
         <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
           {!imgLoaded && (
             <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-100 to-gray-200" />
@@ -174,7 +186,7 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches }) {
             )}
           </div>
 
-          {/* Heart — top right */}
+          {/* Heart — top right (stopPropagation so it doesn't open the panel) */}
           <div className="absolute top-2 right-2 z-10">
             <HeartButton slug={listing.slug} />
           </div>
@@ -222,7 +234,7 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches }) {
             </p>
           )}
         </div>
-      </button>
+      </div>
     </article>
   );
 }
