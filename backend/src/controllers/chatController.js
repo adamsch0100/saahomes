@@ -188,7 +188,12 @@ export const handleChatMessage = async (req, res) => {
       body: JSON.stringify({
         model: OPENCODE_MODEL,
         messages: apiMessages,
-        max_tokens: 500,
+        // Reasoning models (deepseek-v4-flash etc.) spend tokens on
+        // internal reasoning_content BEFORE emitting the answer. A small
+        // max_tokens makes them run out mid-thought and return empty
+        // content → 502 "empty response" (hit in production Aug 2026).
+        // 1500 leaves headroom for both thinking and the visible reply.
+        max_tokens: 1500,
         temperature: 0.7,
       }),
     });
@@ -201,22 +206,26 @@ export const handleChatMessage = async (req, res) => {
 
     const data = await response.json();
     const reply = data.choices?.[0]?.message?.content;
+    // Fallback: some reasoning models put the visible text in
+    // reasoning_content when content comes back empty after truncation.
+    const reasoning = data.choices?.[0]?.message?.reasoning_content;
+    const finalReply = (reply && reply.trim()) ? reply : (reasoning ? reasoning.trim() : '');
 
-    if (!reply) {
+    if (!finalReply) {
       logger.error('OpenCode API returned empty response', { data });
       return res.status(502).json({ error: 'AI service returned empty response.' });
     }
 
     logger.info('Chat message processed', {
       model: OPENCODE_MODEL,
-      hasHandoff: reply.includes('[[HANDOFF]]'),
-      hasTransfer: reply.includes('[[TRANSFER]]'),
+      hasHandoff: finalReply.includes('[[HANDOFF]]'),
+      hasTransfer: finalReply.includes('[[TRANSFER]]'),
       tokensIn: data.usage?.prompt_tokens,
       tokensOut: data.usage?.completion_tokens,
     });
 
     res.json({
-      reply, // forward as-is — frontend detects [[HANDOFF]] / [[TRANSFER]] and strips them
+      reply: finalReply, // forward as-is — frontend detects [[HANDOFF]] / [[TRANSFER]] and strips them
       usage: data.usage,
     });
   } catch (error) {
