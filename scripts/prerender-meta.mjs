@@ -9,7 +9,7 @@ import { neighborhoods } from '../src/data/neighborhoods.js';
 import { blogPosts } from '../src/data/blogPosts.js';
 import { AREA_FAQS } from '../src/data/areaFaqs.js';
 import { BUYER_FAQS, SELLER_FAQS } from '../src/data/buyerSellerFaqs.js';
-import { CHFA_PAGE_CONFIGS, CHFA_PROGRAMS, CHFA_DPA_OPTIONS, CHFA_REQUIREMENTS, CHFA_COUNTY_LIMITS, CHFA_SPECIALTY_PROGRAMS } from '../src/data/chfaData.js';
+import { CHFA_PAGE_CONFIGS, CHFA_PROGRAMS, CHFA_STEPS, CHFA_DPA_OPTIONS, CHFA_REQUIREMENTS, CHFA_COUNTY_LIMITS, CHFA_SPECIALTY_PROGRAMS } from '../src/data/chfaData.js';
 import { getAllEvents, getCityDisplayName, getMonthNames, getEventsGuidePath, EVENTS_DATA_LAST_REVIEWED } from '../src/data/localEvents.js';
 
 // FAQ data for pages not covered by existing FAQ data modules
@@ -1229,6 +1229,20 @@ function injectChfaBody(html, config) {
       `      </section>\n`;
   }
 
+  // Steps (HowTo) — visible steps matching HowTo JSON-LD
+  let stepsHtml = '';
+  if (config.steps && CHFA_STEPS && CHFA_STEPS.length > 0) {
+    stepsHtml =
+      `      <section class="prerendered-chfa-section">\n` +
+      `        <h2>How to Get CHFA Down Payment Assistance</h2>\n` +
+      `        <ol class="prerendered-steps">\n` +
+      CHFA_STEPS.map((s) =>
+        `          <li><strong>${escapeHtml(s.title)}:</strong> ${escapeHtml(s.description)}</li>`
+      ).join('\n') +
+      `\n        </ol>\n` +
+      `      </section>\n`;
+  }
+
   // FAQ section
   let faqHtml = '';
   if (config.faqs && config.faqs.length > 0) {
@@ -1264,6 +1278,7 @@ function injectChfaBody(html, config) {
     `${reqHtml}` +
     `${countyHtml}` +
     `${specialtyHtml}` +
+    `${stepsHtml}` +
     `${faqHtml}` +
     `${ctaHtml}` +
     `    </div>\n  `;
@@ -1362,6 +1377,38 @@ function buildRouteSchemas(route) {
           '@type': 'Answer',
           text: faq.a,
         },
+      })),
+    });
+  }
+
+  // CHFA pages with steps – add HowTo schema (AI uses for step-by-step answers)
+  if (chfaConfig && chfaConfig.steps && CHFA_STEPS && CHFA_STEPS.length > 0) {
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'HowTo',
+      name: 'How to get CHFA down payment assistance in Colorado',
+      description:
+        'Steps for Colorado first-time homebuyers to access CHFA down payment and closing cost assistance.',
+      step: CHFA_STEPS.map((s, i) => ({
+        '@type': 'HowToStep',
+        position: i + 1,
+        name: s.title,
+        text: s.description,
+      })),
+    });
+  }
+
+  // CHFA pages with programs – add ItemList schema (AI uses for list-based comparisons)
+  if (chfaConfig && chfaConfig.programs && CHFA_PROGRAMS && CHFA_PROGRAMS.length > 0) {
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: 'CHFA Home Loan Programs',
+      itemListElement: CHFA_PROGRAMS.map((program, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: program.name,
+        description: `${program.loanType}. ${program.dpa}. Best for: ${program.bestFor}`,
       })),
     });
   }
