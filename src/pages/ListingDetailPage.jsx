@@ -197,9 +197,13 @@ export default function ListingDetailPage() {
           <button
             type="button"
             onClick={() => (window.history.length > 1 ? window.history.back() : (window.location.href = "/properties/"))}
-            className="text-sm text-gray-400 hover:text-white mb-4 inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-sm text-white/80 hover:text-white border border-white/25 hover:border-white rounded-full pl-2 pr-3.5 py-1.5 mb-5 transition-colors cursor-pointer"
+            aria-label="Go back"
           >
-            ← Back
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Back
           </button>
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
