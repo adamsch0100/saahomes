@@ -216,6 +216,10 @@ export const runMigrations = async () => {
       `);
 
       await client.query(`
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(50);
+      `);
+
+      await client.query(`
         CREATE TABLE IF NOT EXISTS showing_requests (
           id SERIAL PRIMARY KEY,
           name VARCHAR(255) NOT NULL,

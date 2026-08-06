@@ -95,6 +95,7 @@ export const forwardAlertSignupToFollowUpBoss = async (user, search) => {
       firstName,
       lastName,
       emails: user.email ? [{ value: user.email, type: 'work' }] : [],
+      phones: user.phone ? [{ value: String(user.phone).replace(/\D/g, ''), type: 'mobile' }] : [],
       tags: ['Website Lead', 'Saved Search'],
     },
   };

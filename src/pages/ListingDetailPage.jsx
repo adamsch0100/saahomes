@@ -170,6 +170,17 @@ export default function ListingDetailPage() {
     "Schedule a showing with Schwartz and Associates at SAA Homes — (970) 999-1407.",
   ].filter(Boolean).join(" ");
 
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://saahomes.com/" },
+      { "@type": "ListItem", position: 2, name: "Homes for Sale", item: "https://saahomes.com/properties/" },
+      ...(listing.city ? [{ "@type": "ListItem", position: 3, name: `${listing.city} Homes for Sale`, item: `https://saahomes.com/${citySlug}-homes-for-sale/` }] : []),
+      { "@type": "ListItem", position: listing.city ? 4 : 3, name: fullAddress, item: `https://saahomes.com/homes-for-sale/${listing.slug}/` },
+    ],
+  };
+
   return (
     <>
       <SEO
@@ -177,21 +188,19 @@ export default function ListingDetailPage() {
         description={metaDesc.slice(0, 158)}
         canonicalPath={`/homes-for-sale/${listing.slug}/`}
         ogImage={photos[0] || undefined}
-        jsonLd={[listingSchema]}
+        jsonLd={[listingSchema, breadcrumbSchema]}
       />
 
       {/* Hero gallery */}
       <section className="bg-black">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <nav className="text-sm text-gray-400 mb-4 flex flex-wrap gap-x-2 gap-y-1">
-            <Link to="/properties/" className="hover:text-white">All Listings</Link>
-            {" / "}
-            <Link to={getCityHomesPath(citySlug)} className="hover:text-white">{listing.city} Homes for Sale</Link>
-            {" / "}
-            <Link to={`/northern-colorado-areas/${citySlug}/`} className="hover:text-white">{listing.city} Real Estate</Link>
-            {" / "}
-            <span className="text-white">{address}</span>
-          </nav>
+          <button
+            type="button"
+            onClick={() => (window.history.length > 1 ? window.history.back() : (window.location.href = "/properties/"))}
+            className="text-sm text-gray-400 hover:text-white mb-4 inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+          >
+            ← Back
+          </button>
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-white font-serif">{fullAddress}</h1>

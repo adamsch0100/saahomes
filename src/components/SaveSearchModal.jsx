@@ -29,6 +29,7 @@ function filterSummary(filters = {}) {
 export default function SaveSearchModal({ filters = {}, buttonLabel = "Save this search", buttonClassName = "", buttonStyle = {} }) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
   const [frequency, setFrequency] = useState("daily");
   const [sendTime, setSendTime] = useState("06:00");
@@ -49,7 +50,7 @@ export default function SaveSearchModal({ filters = {}, buttonLabel = "Save this
       const res = await fetch(`${API_BASE}/api/alerts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: emailStr, name: name.trim() || "My Search", frequency, send_time: sendTime, send_day: sendDay, ...filters }),
+        body: JSON.stringify({ email: emailStr, phone: phone.trim(), name: name.trim() || "My Search", frequency, send_time: sendTime, send_day: sendDay, ...filters }),
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error || "Could not save");
@@ -112,6 +113,18 @@ export default function SaveSearchModal({ filters = {}, buttonLabel = "Save this
                       placeholder="you@example.com"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none"
                     />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <input
+                      type="tel"
+                      required
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="(970) 555-0123"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none"
+                    />
+                    <p className="text-xs text-gray-400 mt-1">So we can reach you when a great match hits the market.</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
