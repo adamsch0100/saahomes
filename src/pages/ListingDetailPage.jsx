@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import SEO from "../components/SEO";
 import QualifyCta from "../components/QualifyCta";
 import ListingMap from "../components/ListingMap";
+import SaveSearchModal from "../components/SaveSearchModal";
 import { CITY_HOMES, getCityHomesPath } from "../data/cityHomesData";
 
 const API_BASE = (() => {
@@ -486,6 +487,18 @@ export default function ListingDetailPage() {
                   ▶ Virtual Tour
                 </a>
               )}
+              <SaveSearchModal
+                filters={{
+                  city: listing.city || undefined,
+                  minPrice: listing.list_price ? String(Math.max(0, Math.round(Number(listing.list_price) * 0.8))) : undefined,
+                  maxPrice: listing.list_price ? String(Math.round(Number(listing.list_price) * 1.2)) : undefined,
+                  beds: listing.beds != null ? String(listing.beds) : undefined,
+                  baths: listing.baths != null ? String(listing.baths) : undefined,
+                  type: listing.home_type || undefined,
+                }}
+                buttonLabel="Get alerts for homes like this"
+                buttonClassName="w-full inline-flex items-center justify-center px-6 py-3.5 border border-white/40 text-white text-sm font-semibold rounded-lg hover:border-white transition-colors"
+              />
               <a
                 href="tel:+19709991407"
                 className="w-full inline-flex items-center justify-center px-6 py-3.5 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors"
