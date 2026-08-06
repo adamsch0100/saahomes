@@ -9,7 +9,7 @@ import { submitGhopeLeadForm } from '../controllers/ghopeLeadController.js';
 import { handleChatMessage } from '../controllers/chatController.js';
 import { searchListings, getListingBySlug, getListingStats } from '../controllers/listingController.js';
 import {
-  createAlert, listAlerts, updateAlert, deleteAlert, unsubscribeAll,
+  createAlert, listAlerts, getMe, sendMagicLink, signOut, updateAlert, deleteAlert, unsubscribeAll,
 } from '../controllers/alertController.js';
 import { submitShowingRequest } from '../controllers/showingController.js';
 import {
@@ -103,6 +103,9 @@ router.get('/listings/:slug', listingLimiter, getListingBySlug);
 // Saved-search / follow-up alerts (lead capture → FUB)
 router.post('/alerts', formLimiter, createAlert);
 router.get('/alerts/manage', listAlerts);
+router.get('/alerts/me', getMe);
+router.post('/alerts/magic-link', formLimiter, sendMagicLink);
+router.post('/alerts/signout', signOut);
 router.patch('/alerts/:id', updateAlert);
 router.delete('/alerts/:id', deleteAlert);
 router.post('/alerts/unsubscribe', formLimiter, unsubscribeAll);

@@ -192,8 +192,8 @@ export default function ListingDetailPage() {
       />
 
       {/* Hero gallery */}
-      <section className="bg-black">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+      <section className="bg-black pt-24 sm:pt-28">
+        <div className="max-w-7xl mx-auto px-4 pb-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-white font-serif">{fullAddress}</h1>

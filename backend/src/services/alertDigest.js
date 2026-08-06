@@ -353,11 +353,37 @@ async function runSearch(search, { dryRun, onlyEmail }) {
   return { sent: true, events: events.length, subject };
 }
 
+/** Send pending email_outbox rows (magic links, transactional emails). */
+async function drainOutbox() {
+  const pending = await pool.query(
+    'SELECT id, to_email, subject, html FROM email_outbox WHERE sent_at IS NULL ORDER BY id LIMIT 50'
+  );
+  if (!pending.rows.length) return 0;
+  let sent = 0;
+  for (const row of pending.rows) {
+    try {
+      await sendEmail(row.to_email, row.subject, row.html);
+      await pool.query('UPDATE email_outbox SET sent_at = NOW() WHERE id = $1', [row.id]);
+      sent += 1;
+    } catch (e) {
+      console.error(`outbox row ${row.id} failed: ${e.message}`);
+    }
+  }
+  console.log(`outbox: ${sent}/${pending.rows.length} pending emails sent`);
+  return sent;
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const dryRun = args.includes('--dry');
   const onlyEmail = args.find((a) => a.startsWith('--email='))?.split('=')[1];
   const onlySearch = args.find((a) => a.startsWith('--search='))?.split('=')[1];
+
+  if (args.includes('--outbox-only')) {
+    await drainOutbox();
+    await pool.end();
+    return;
+  }
 
   const q = `
     SELECT s.id, s.user_id, s.name, s.filters, s.frequency, s.send_time, s.send_day, s.last_email_at,
@@ -384,6 +410,7 @@ async function main() {
     totalEvents += result.events || 0;
   }
   console.log(`alertDigest done: ${sent} emails sent, ${totalEvents} total events.`);
+  await drainOutbox();
   await pool.end();
 }
 
