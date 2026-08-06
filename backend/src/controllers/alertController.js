@@ -10,6 +10,7 @@ import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import getPool from '../config/database.js';
 import { forwardAlertSignupToFollowUpBoss } from '../services/followUpBossService.js';
+import { sendEmail, smtpConfigured } from '../services/emailer.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FILTER_KEYS = ['city', 'minPrice', 'maxPrice', 'beds', 'baths', 'type', 'sort', 'q'];
@@ -205,10 +206,24 @@ export const sendMagicLink = async (req, res) => {
           <p style="color:#6b7280;font-size:12px;margin-top:16px">Or copy this link:<br/><span style="color:#111">${manageUrl}</span></p>
           <p style="color:#9ca3af;font-size:11px;margin-top:20px">Schwartz and Associates · (970) 999-1407 · saahomes.com</p>
         </div></body></html>`;
-      await getPool().query(
-        `INSERT INTO email_outbox (to_email, subject, html) VALUES ($1, $2, $3)`,
-        [email, 'Your saved searches — SAA Homes', html]
-      );
+      // Send instantly when SMTP is configured on this runtime; otherwise
+      // queue it — the outbox cron drains the queue as a fallback.
+      const queueIt = async () => {
+        await getPool().query(
+          `INSERT INTO email_outbox (to_email, subject, html) VALUES ($1, $2, $3)`,
+          [email, 'Your saved searches — SAA Homes', html]
+        );
+      };
+      try {
+        if (smtpConfigured()) {
+          await sendEmail(email, 'Your saved searches — SAA Homes', html, 'Adam Schwartz, SAA Homes');
+        } else {
+          await queueIt();
+        }
+      } catch (e) {
+        console.error('magic link inline send failed, queuing:', e.message);
+        await queueIt();
+      }
     }
     // Never reveal whether the email exists; always the same friendly reply.
     return res.json({ success: true, message: 'If we have a saved search for that email, your sign-in link is on its way.' });

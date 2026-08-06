@@ -373,16 +373,11 @@ async function drainOutbox() {
   return sent;
 }
 
-async function main() {
-  const args = process.argv.slice(2);
-  const dryRun = args.includes('--dry');
-  const onlyEmail = args.find((a) => a.startsWith('--email='))?.split('=')[1];
-  const onlySearch = args.find((a) => a.startsWith('--search='))?.split('=')[1];
-
-  if (args.includes('--outbox-only')) {
-    await drainOutbox();
-    await pool.end();
-    return;
+export async function runDigest({ dryRun = false, onlyEmail = null, onlySearch = null, outboxOnly = false, force = false, closePool = false } = {}) {
+  if (outboxOnly) {
+    const n = await drainOutbox();
+    if (closePool) await pool.end();
+    return { outboxSent: n };
   }
 
   const q = `
@@ -394,7 +389,6 @@ async function main() {
     ORDER BY s.id`;
   const params = onlySearch ? [Number(onlySearch)] : [];
   const allSearches = (await pool.query(q, params)).rows;
-  const force = args.includes('--force');
   const searches = force ? allSearches : allSearches.filter((s) => isDue(s));
   if (allSearches.length !== searches.length) {
     console.log(`alertDigest: ${allSearches.length} active searches, ${searches.length} due now${dryRun ? ' (DRY RUN)' : ''}`);
@@ -410,13 +404,24 @@ async function main() {
     totalEvents += result.events || 0;
   }
   console.log(`alertDigest done: ${sent} emails sent, ${totalEvents} total events.`);
-  await drainOutbox();
-  await pool.end();
+  const outboxSent = await drainOutbox();
+  if (closePool) await pool.end();
+  return { sent, events: totalEvents, outboxSent };
 }
 
 const isMain = process.argv[1]?.endsWith('alertDigest.js');
 if (isMain) {
-  main().catch((e) => { console.error('alertDigest error:', e); process.exit(1); });
+  const args = process.argv.slice(2);
+  runDigest({
+    dryRun: args.includes('--dry'),
+    onlyEmail: args.find((a) => a.startsWith('--email='))?.split('=')[1],
+    onlySearch: args.find((a) => a.startsWith('--search='))?.split('=')[1],
+    outboxOnly: args.includes('--outbox-only'),
+    force: args.includes('--force'),
+    closePool: true,
+  })
+    .then(() => process.exit(0))
+    .catch((e) => { console.error('alertDigest error:', e); process.exit(1); });
 }
 
 export { buildWhere, matchScore, featureHighlights };
