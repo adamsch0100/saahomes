@@ -148,6 +148,67 @@ export const runMigrations = async () => {
       ALTER TABLE listings ADD COLUMN IF NOT EXISTS school_district VARCHAR(255);
     `);
 
+      // ---- Saved-search / follow-up engine (Aug 2026) ----
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS users (
+          id SERIAL PRIMARY KEY,
+          email VARCHAR(255) NOT NULL UNIQUE,
+          name VARCHAR(255),
+          manage_token VARCHAR(64) NOT NULL UNIQUE,
+          status VARCHAR(16) NOT NULL DEFAULT 'active',
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          last_active_at TIMESTAMP
+        )
+      `);
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS saved_searches (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          name VARCHAR(255) NOT NULL DEFAULT 'My Search',
+          filters JSONB NOT NULL DEFAULT '{}'::jsonb,
+          is_active BOOLEAN NOT NULL DEFAULT TRUE,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP,
+          last_run_at TIMESTAMP,
+          last_email_at TIMESTAMP
+        )
+      `);
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS search_snapshots (
+          id SERIAL PRIMARY KEY,
+          search_id INTEGER NOT NULL REFERENCES saved_searches(id) ON DELETE CASCADE,
+          run_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          result_ids JSONB NOT NULL DEFAULT '[]'::jsonb
+        )
+      `);
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS alert_events (
+          id SERIAL PRIMARY KEY,
+          search_id INTEGER NOT NULL REFERENCES saved_searches(id) ON DELETE CASCADE,
+          listing_id VARCHAR(64) NOT NULL,
+          type VARCHAR(32) NOT NULL,
+          detail JSONB,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS email_log (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          search_id INTEGER REFERENCES saved_searches(id) ON DELETE CASCADE,
+          type VARCHAR(32),
+          to_email VARCHAR(255),
+          subject TEXT,
+          events INTEGER DEFAULT 0,
+          sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_saved_searches_user ON saved_searches(user_id);
+        CREATE INDEX IF NOT EXISTS idx_snapshots_search ON search_snapshots(search_id, run_at);
+        CREATE INDEX IF NOT EXISTS idx_alert_events_search ON alert_events(search_id, created_at);
+      `);
+
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_contact_submissions_email ON contact_submissions(email);
       CREATE INDEX IF NOT EXISTS idx_contact_submissions_created_at ON contact_submissions(created_at);
