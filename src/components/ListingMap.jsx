@@ -8,10 +8,11 @@ import { formatPrice, formatPriceCompact, listingAddress } from "../utils/listin
  * on click · fly-to on list-card hover. Degrades if VITE_MAPBOX_TOKEN is unset.
  *
  * Props:
- *   listings   — array of listing rows with lat/lng
- *   selectedId — hovered/selected card id (drives fly-to + highlight)
- *   onSelect   — (id) => {} when a marker is clicked
- *   interactive — default true; set false for static detail-page embed
+ *   listings      — array of listing rows with lat/lng
+ *   selectedId    — hovered/selected card id (drives fly-to + highlight)
+ *   onSelect      — (id) => {} when a marker is clicked
+ *   onOpenListing — (listing) => {} when popup is clicked (opens detail panel)
+ *   interactive   — default true; set false for static detail-page embed
  */
 const TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || "";
 
@@ -19,6 +20,7 @@ export default function ListingMap({
   listings = [],
   selectedId = null,
   onSelect,
+  onOpenListing,
   interactive = true,
 }) {
   const containerRef = useRef(null);
@@ -26,9 +28,11 @@ export default function ListingMap({
   const popupRef = useRef(null);
   const listingsRef = useRef(listings);
   const onSelectRef = useRef(onSelect);
+  const onOpenListingRef = useRef(onOpenListing);
 
   listingsRef.current = listings;
   onSelectRef.current = onSelect;
+  onOpenListingRef.current = onOpenListing;
 
   // Init map once
   useEffect(() => {
@@ -161,8 +165,9 @@ export default function ListingMap({
           const addr = listingAddress(listing);
           const el = document.createElement("div");
           el.className = "saa-map-popup";
+          // Button (not <a>) — opens detail panel over search instead of navigating
           el.innerHTML = `
-            <a href="/homes-for-sale/${listing.slug}/" class="block bg-white rounded-xl overflow-hidden shadow-xl w-60 border border-gray-100 no-underline text-inherit">
+            <button type="button" data-saa-open-listing class="block w-full text-left bg-white rounded-xl overflow-hidden shadow-xl w-60 border border-gray-100 cursor-pointer p-0">
               <div class="aspect-[4/3] bg-gray-100 overflow-hidden relative">
                 <img src="${photoUrl(listing.id, 0)}" alt="${addr || "home"}"
                   class="w-full h-full object-cover"
@@ -174,8 +179,21 @@ export default function ListingMap({
                   ${[listing.beds != null ? `${listing.beds} bd` : "", listing.baths != null ? `${listing.baths} ba` : "", listing.living_area != null ? `${Number(listing.living_area).toLocaleString()} sqft` : ""].filter(Boolean).join(" · ")}
                 </p>
                 <p class="text-xs text-gray-500 mt-1 mb-0 truncate">${addr}${listing.city ? `, ${listing.city}` : ""}</p>
+                <p class="text-xs font-semibold text-[#8a7340] mt-2 mb-0">View details →</p>
               </div>
-            </a>`;
+            </button>`;
+          const btn = el.querySelector("[data-saa-open-listing]");
+          if (btn) {
+            btn.addEventListener("click", (ev) => {
+              ev.preventDefault();
+              ev.stopPropagation();
+              if (onOpenListingRef.current) {
+                onOpenListingRef.current(listing);
+              } else {
+                window.location.href = `/homes-for-sale/${listing.slug}/`;
+              }
+            });
+          }
           popupRef.current = new mapboxgl.Popup({
             offset: 22,
             closeButton: true,
