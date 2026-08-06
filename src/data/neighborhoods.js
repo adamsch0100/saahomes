@@ -4376,6 +4376,8 @@ export const neighborhoods = [
     type: 'neighborhood',
     name: 'Wellington Village',
     description: 'Wellington Village is the established downtown area of Wellington featuring historic and modern homes around the Wellington Community Park and town center. Walkable to local businesses and community events.',
+    longDescription: 'Wellington Village is the heart of Wellington, Larimer County\'s small-town gem located just north of Fort Collins along I-25. The neighborhood centers on the Wellington Community Park and the town\'s main commercial district, where residents walk to local shops, restaurants, the farmers market, and community events throughout the year. Homes range from early-1900s bungalows and Craftsman cottages to contemporary infill construction, giving buyers a mix of historic character and modern finishes at price points that run roughly $325K to $550K. The Village\'s location is its biggest draw: it sits minutes from the I-25 interchange, putting Fort Collins, Loveland, and Windsor within an easy commute while keeping a relaxed small-town pace at home. Families are served by Poudre School District — the same district that serves Fort Collins — with Rice Elementary, Wellington Middle School, and Poudre High School all close by. With no HOA in most areas, tree-lined streets, and access to the Poudre River Trail, Wellington Village appeals to buyers who want affordability, walkability, and genuine community character without giving up Northern Colorado\'s conveniences.',
+
     homeStyles: ['Bungalow', 'Craftsman', 'Ranch', 'Victorian', 'Contemporary'],
     yearBuiltRange: { min: 1900, max: 2025 },
     priceRangeDescription: '$325K to $550K',
