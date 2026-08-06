@@ -194,17 +194,6 @@ export default function ListingDetailPage() {
       {/* Hero gallery */}
       <section className="bg-black">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <button
-            type="button"
-            onClick={() => (window.history.length > 1 ? window.history.back() : (window.location.href = "/properties/"))}
-            className="inline-flex items-center gap-1.5 text-sm text-white/80 hover:text-white border border-white/25 hover:border-white rounded-full pl-2 pr-3.5 py-1.5 mb-5 transition-colors cursor-pointer"
-            aria-label="Go back"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
-            Back
-          </button>
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-white font-serif">{fullAddress}</h1>
@@ -243,17 +232,30 @@ export default function ListingDetailPage() {
                 <p className="text-gray-400 text-sm mt-1">🏫 {listing.school_district}</p>
               )}
             </div>
-            <button
-              type="button"
-              onClick={toggleSave}
-              className={`shrink-0 px-4 py-2.5 rounded-lg border text-sm font-semibold transition-colors ${
-                saved
-                  ? "bg-[#CFB36E] border-[#CFB36E] text-black"
-                  : "border-white text-white hover:bg-white hover:text-black"
-              }`}
-            >
-              {saved ? "♥ Saved" : "♡ Save this home"}
-            </button>
+            <div className="flex items-center gap-3 shrink-0">
+              <button
+                type="button"
+                title="Go back"
+                aria-label="Go back"
+                onClick={() => (window.history.length > 1 ? window.history.back() : (window.location.href = "/properties/"))}
+                className="w-10 h-10 rounded-full border border-white/30 hover:border-white text-white/80 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                onClick={toggleSave}
+                className={`px-4 py-2.5 rounded-lg border text-sm font-semibold transition-colors ${
+                  saved
+                    ? "bg-[#CFB36E] border-[#CFB36E] text-black"
+                    : "border-white text-white hover:bg-white hover:text-black"
+                }`}
+              >
+                {saved ? "♥ Saved" : "♡ Save this home"}
+              </button>
+            </div>
           </div>
         </div>
         {photos.length > 0 && (
