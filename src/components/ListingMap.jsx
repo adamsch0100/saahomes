@@ -151,6 +151,7 @@ export default function ListingMap({ listings = [], selectedId = null, onSelect 
     const apply = () => {
       if (!map.getSource("listings")) return false;
       map.getSource("listings").setData({ type: "FeatureCollection", features });
+      try { window.__saaMapStats = { features: features.length }; } catch { /* noop */ }
       return true;
     };
     if (apply()) return;

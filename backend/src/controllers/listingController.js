@@ -29,6 +29,14 @@ const TYPE_SQL = {
   'Manufactured In Park': `property_type = 'Manufactured In Park'`,
 };
 
+// The 19 Northern Colorado cities we own (market-dominance scope).
+// The search page defaults to these; __all__ opts into the whole state.
+const NOCO_CITIES = [
+  'Fort Collins', 'Loveland', 'Windsor', 'Greeley', 'Timnath', 'Wellington',
+  'Johnstown', 'Eaton', 'Milliken', 'La Salle', 'Mead', 'Longmont', 'Boulder',
+  'Berthoud', 'Firestone', 'Frederick', 'Evans', 'Severance', 'Niwot',
+];
+
 export const searchListings = async (req, res) => {
   try {
     const pool = getPool();
@@ -43,7 +51,14 @@ export const searchListings = async (req, res) => {
 
     where.push(`is_active = TRUE`);
     if (status) { where.push(`status = $${i++}`); params.push(status); }
-    if (city) { where.push(`LOWER(city) = LOWER($${i++})`); params.push(city); }
+    if (city === '__noco__') {
+      // Default scope: our 19 Northern Colorado cities only.
+      where.push(`city = ANY($${i++}::text[])`);
+      params.push(NOCO_CITIES);
+    } else if (city && city !== '__all__') {
+      where.push(`LOWER(city) = LOWER($${i++})`);
+      params.push(city);
+    }
     if (minPrice) { where.push(`list_price >= $${i++}`); params.push(Number(minPrice)); }
     if (maxPrice) { where.push(`list_price <= $${i++}`); params.push(Number(maxPrice)); }
     if (beds) { where.push(`beds >= $${i++}`); params.push(Number(beds)); }
@@ -91,6 +106,15 @@ export const searchListings = async (req, res) => {
     let fi = 1;
     fWhere.push('is_active = TRUE');
     if (status) { fWhere.push(`status = $${fi++}`); fParams.push(status); }
+    if (city === '__noco__') {
+      fWhere.push(`city = ANY($${fi++}::text[])`);
+      fParams.push(NOCO_CITIES);
+    } else if (city && city !== '__all__') {
+      // City facet counts stay scoped to the current city so chips reflect
+      // the visible set (previously stripped the clause → wrong counts).
+      fWhere.push(`LOWER(city) = LOWER($${fi++})`);
+      fParams.push(city);
+    }
     if (minPrice) { fWhere.push(`list_price >= $${fi++}`); fParams.push(Number(minPrice)); }
     if (maxPrice) { fWhere.push(`list_price <= $${fi++}`); fParams.push(Number(maxPrice)); }
     if (beds) { fWhere.push(`beds >= $${fi++}`); fParams.push(Number(beds)); }

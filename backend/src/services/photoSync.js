@@ -37,13 +37,21 @@ function getS3() {
   return s3;
 }
 
-const CONCURRENCY = 6;
+const CONCURRENCY = 2; // MLS media CDN counts toward rate limits — ≤2 RPS
 const HERO_WIDTH = 1600;
 const THUMB_WIDTH = 400;
 const USER_AGENT = 'saahomes-idx/1.0 (Schwartz and Associates)';
+const REQUEST_DELAY_MS = 1000; // 2 workers × 1s spacing = hard 2 RPS cap
 
-async function downloadPhoto(url) {
+async function downloadPhoto(url, retries = 2) {
   const res = await fetch(url, { headers: { 'User-Agent': USER_AGENT, Accept: 'image/*' }, redirect: 'follow' });
+  if (res.status === 429 && retries > 0) {
+    // Rate-limited: back off long (10s, 30s) and retry — then give up.
+    const wait = 10000 * Math.pow(3, 2 - retries);
+    console.log(`  photo 429 — backing off ${wait / 1000}s (${retries} left)`);
+    await new Promise((r) => setTimeout(r, wait));
+    return downloadPhoto(url, retries - 1);
+  }
   if (!res.ok) throw new Error(`HTTP ${res.status} for ${url.slice(0, 80)}`);
   return Buffer.from(await res.arrayBuffer());
 }
@@ -86,6 +94,7 @@ export async function syncListingPhotos(listing, photoUrls, { onProgress } = {})
 
   async function worker() {
     while (cursor < urls.length) {
+      await new Promise((r) => setTimeout(r, REQUEST_DELAY_MS)); // pace the CDN
       const i = cursor++;
       const url = urls[i];
       try {
