@@ -16,6 +16,12 @@ const TYPE_VALUES = ['detached', 'attached', 'land', 'commercial', 'other', ''];
 const FREQUENCIES = ['immediate', 'daily', 'weekly'];
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
+function cleanPhone(v) {
+  const digits = String(v || '').replace(/\D/g, '');
+  if (digits.length >= 7 && digits.length <= 15) return digits;
+  return null;
+}
+
 function cleanSchedule(body) {
   const out = {};
   const freq = body.frequency;
@@ -49,10 +55,14 @@ function cleanFilters(body) {
 
 export const createAlert = async (req, res) => {
   try {
-    const { email, name, ...filterBody } = req.body || {};
+    const { email, name, phone, ...filterBody } = req.body || {};
     const emailStr = String(email || '').trim().toLowerCase();
     if (!EMAIL_RE.test(emailStr)) {
       return res.status(400).json({ success: false, error: 'A valid email is required to save a search.' });
+    }
+    const phoneDigits = cleanPhone(phone);
+    if (!phoneDigits) {
+      return res.status(400).json({ success: false, error: 'Please add your phone number so we can reach you about new listings.' });
     }
     const filters = cleanFilters(filterBody);
     if (Object.keys(filters).length === 0) {
@@ -60,19 +70,21 @@ export const createAlert = async (req, res) => {
     }
 
     const pool = getPool();
-    // Upsert user by email
+    // Upsert user by email (keep existing phone if none provided)
     let user = await pool.query('SELECT * FROM users WHERE email = $1', [emailStr]);
     if (!user.rows.length) {
       const token = crypto.randomBytes(24).toString('hex');
       const created = await pool.query(
-        'INSERT INTO users (email, name, manage_token) VALUES ($1, $2, $3) RETURNING *',
-        [emailStr, String(name || '').trim().slice(0, 255) || null, token]
+        'INSERT INTO users (email, name, manage_token, phone) VALUES ($1, $2, $3, $4) RETURNING *',
+        [emailStr, String(name || '').trim().slice(0, 255) || null, token, phoneDigits]
       );
       user = created;
     } else {
       user = await pool.query(
-        'UPDATE users SET status = \'active\', last_active_at = NOW() WHERE id = $1 RETURNING *',
-        [user.rows[0].id]
+        `UPDATE users SET status = 'active', last_active_at = NOW(),
+           phone = COALESCE(NULLIF($1, ''), phone)
+         WHERE id = $2 RETURNING *`,
+        [phoneDigits, user.rows[0].id]
       );
     }
     const userRow = user.rows[0];
