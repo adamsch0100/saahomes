@@ -202,8 +202,10 @@ const INTERIOR_TOGGLES = [
 
 const LISTING_STATUS_OPTIONS = [
   { label: "For sale", value: "" },
-  { label: "New listings", value: "new" },
-  { label: "Price drops", value: "price-drop" },
+  { label: "Backup offers accepted", value: "Active Under Contract" },
+  { label: "Pending", value: "Pending" },
+  { label: "Recently sold", value: "Sold" },
+  { label: "Withdrawn", value: "Withdrawn" },
 ];
 
 const SORT_OPTIONS = [
@@ -278,6 +280,8 @@ function emptyFilters(overrides = {}) {
     newcon: "",
     listingStatus: "",
     newdays: "",
+    dropdays: "",
+    droppct: "",
     keywords: "",
     keywordMode: "all",
     polygon: "",
@@ -348,6 +352,8 @@ function filtersFromParams(sp) {
     newcon: sp.get("newConstruction") || "",
     listingStatus: sp.get("listingStatus") || "",
     newdays: sp.get("newDays") || "",
+    dropdays: sp.get("dropDays") || "",
+    droppct: sp.get("dropPct") || "",
     keywords: sp.get("keywords") || sp.get("q") || "",
     keywordMode: (() => {
       const m = (sp.get("keywordMode") || sp.get("keyword_mode") || "all").toLowerCase();
@@ -403,6 +409,8 @@ function filtersToParams(f, { forUrl = false, pageNum = 1 } = {}) {
   if (f.newcon === "true") params.set("newConstruction", "true");
   if (f.listingStatus) params.set("listingStatus", f.listingStatus);
   if (f.newdays) params.set("newDays", f.newdays);
+  if (f.dropdays) params.set("dropDays", f.dropdays);
+  if (f.droppct) params.set("dropPct", f.droppct);
   if (f.keywords) {
     params.set("keywords", f.keywords);
     const mode = f.keywordMode || "all";
@@ -441,7 +449,7 @@ function countActiveFilters(f) {
     f.view, f.style, f.community, f.exterior,
     f.interior?.length,
     f.newcon === "true",
-    f.listingStatus, f.newdays,
+    f.listingStatus, f.newdays, f.dropdays, f.droppct,
     f.keywords,
     f.hasImages === "true", f.hasTour === "true",
   ].filter(Boolean).length;
@@ -568,9 +576,13 @@ function buildActiveChips(f) {
     }
   }
   if (f.newcon === "true") chips.push({ id: "newcon", label: "New construction", patch: { newcon: "" } });
-  if (f.listingStatus === "new") chips.push({ id: "listingStatus", label: "New listings", patch: { listingStatus: "" } });
-  if (f.listingStatus === "price-drop") chips.push({ id: "listingStatus", label: "Price drops", patch: { listingStatus: "" } });
-  if (f.newdays) chips.push({ id: "newdays", label: `Listed ≤ ${f.newdays}d`, patch: { newdays: "" } });
+  if (f.listingStatus === "Active Under Contract") chips.push({ id: "listingStatus", label: "Backup offers accepted", patch: { listingStatus: "" } });
+  if (f.listingStatus === "Pending") chips.push({ id: "listingStatus", label: "Pending", patch: { listingStatus: "" } });
+  if (f.listingStatus === "Sold") chips.push({ id: "listingStatus", label: "Recently sold", patch: { listingStatus: "" } });
+  if (f.listingStatus === "Withdrawn") chips.push({ id: "listingStatus", label: "Withdrawn", patch: { listingStatus: "" } });
+  if (f.newdays) chips.push({ id: "newdays", label: `New ≤ ${f.newdays}d`, patch: { newdays: "" } });
+  if (f.dropdays) chips.push({ id: "dropdays", label: `Dropped ≤ ${f.dropdays}d`, patch: { dropdays: "" } });
+  if (f.droppct) chips.push({ id: "droppct", label: `Drop ≥ ${f.droppct}%`, patch: { droppct: "" } });
   if (f.keywords) {
     const mode = KEYWORD_MODE_OPTIONS.find((m) => m.value === (f.keywordMode || "all"));
     const modeTag = mode && mode.value !== "all" ? ` · ${mode.label}` : "";
@@ -966,27 +978,57 @@ function FilterDrawerBody({
           </label>
         </div>
 
-        {/* Listing status */}
+        {/* Listing status — the HOME's status */}
         <div>
-          <SectionLabel>Listing status</SectionLabel>
+          <SectionLabel>Status</SectionLabel>
           <OptionPills
             options={LISTING_STATUS_OPTIONS}
             value={draft.listingStatus}
             onChange={(v) => set("listingStatus", v)}
           />
-          <label className="block mt-3 text-xs font-medium text-gray-600">
-            Listed within
-            <select
-              value={draft.newdays}
-              onChange={(e) => set("newdays", e.target.value)}
-              className={`${selectClass} mt-1`}
-            >
-              <option value="">Anytime</option>
-              <option value="1">Last 24 hours</option>
-              <option value="7">Last 7 days</option>
-              <option value="14">Last 14 days</option>
-              <option value="30">Last 30 days</option>
-            </select>
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <label className="block text-xs font-medium text-gray-600">
+              New listings (listed within)
+              <select
+                value={draft.newdays}
+                onChange={(e) => set("newdays", e.target.value)}
+                className={`${selectClass} mt-1`}
+              >
+                <option value="">Anytime</option>
+                <option value="1">Last 24 hours</option>
+                <option value="7">Last 7 days</option>
+                <option value="14">Last 14 days</option>
+                <option value="30">Last 30 days</option>
+              </select>
+            </label>
+            <label className="block text-xs font-medium text-gray-600">
+              Price dropped within
+              <select
+                value={draft.dropdays}
+                onChange={(e) => set("dropdays", e.target.value)}
+                className={`${selectClass} mt-1`}
+              >
+                <option value="">Anytime</option>
+                <option value="7">Last 7 days</option>
+                <option value="14">Last 14 days</option>
+                <option value="30">Last 30 days</option>
+              </select>
+            </label>
+          </div>
+          <label className="block mt-2 text-xs font-medium text-gray-600">
+            Price drop of at least
+            <span className="mt-1 flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max="50"
+                value={draft.droppct}
+                onChange={(e) => set("droppct", e.target.value)}
+                placeholder="5"
+                className={`${selectClass} flex-1`}
+              />
+              <span className="text-sm text-gray-500">%</span>
+            </span>
           </label>
         </div>
 
@@ -1555,6 +1597,8 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     if (filters.newcon === "true") out.newConstruction = "true";
     if (filters.listingStatus) out.listingStatus = filters.listingStatus;
     if (filters.newdays) out.newDays = filters.newdays;
+    if (filters.dropdays) out.dropDays = filters.dropdays;
+    if (filters.droppct) out.dropPct = filters.droppct;
     if (filters.keywords) {
       out.keywords = filters.keywords;
       if (filters.keywordMode && filters.keywordMode !== "all") {
