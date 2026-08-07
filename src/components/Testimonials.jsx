@@ -47,7 +47,7 @@ export default function Testimonials() {
               <div key={idx} className="bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-shadow">
                 <div className="flex items-center mb-4">
                   <img 
-                    src="https://saahomes.com/wp-content/plugins/agentfire-testimonials-v2/images/source/google-small.png" 
+                    src="/images/google-g.svg" 
                     alt="Google Review"
                     className="w-8 h-8"
                   />
