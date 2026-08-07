@@ -7,7 +7,12 @@ import { submitChampionsLeadForm } from '../controllers/championsLeadController.
 import { submitChfaDpaLeadForm } from '../controllers/chfaDpaLeadController.js';
 import { submitGhopeLeadForm } from '../controllers/ghopeLeadController.js';
 import { handleChatMessage } from '../controllers/chatController.js';
-import { searchListings, getListingBySlug, getListingStats } from '../controllers/listingController.js';
+import {
+  searchListings,
+  getListingBySlug,
+  getListingStats,
+  autocompleteLocations,
+} from '../controllers/listingController.js';
 import { getListingPhoto } from '../controllers/photoController.js';
 import {
   createAlert, listAlerts, getMe, sendMagicLink, signOut, updateAlert, deleteAlert, unsubscribeAll,
@@ -106,6 +111,8 @@ router.get('/listings', listingLimiter, searchListings);
 router.get('/photo/:listingId/:idx', listingLimiter, getListingPhoto);
 
 router.get('/listings/stats', listingLimiter, getListingStats);
+// City/ZIP type-ahead with live counts (must be before /listings/:slug)
+router.get('/listings/locations', listingLimiter, autocompleteLocations);
 router.get('/listings/:slug', listingLimiter, getListingBySlug);
 
 // GreatSchools ratings cache (read-only public API)
