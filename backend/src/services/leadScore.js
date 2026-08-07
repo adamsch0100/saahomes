@@ -18,7 +18,36 @@ export function buildWhere(filters) {
   const params = [];
   let i = 1;
   const f = filters || {};
-  if (f.city) { where.push(`LOWER(city) = LOWER($${i++})`); params.push(String(f.city)); }
+  // Multi-city / multi-zip (parity with listing search + alert digests)
+  const cityRaw = f.city ? String(f.city) : '';
+  const zipRaw = f.postal_code || f.postalCode || f.zip || f.zipCode || f.zips || '';
+  const cityList = cityRaw && cityRaw !== '__noco__' && cityRaw !== '__all__'
+    ? cityRaw.split(',').map((s) => s.trim()).filter(Boolean)
+    : [];
+  const zipList = zipRaw
+    ? String(zipRaw).split(',').map((s) => s.trim()).filter(Boolean)
+    : [];
+  const locParts = [];
+  if (cityList.length === 1) {
+    locParts.push(`LOWER(city) = LOWER($${i})`);
+    params.push(cityList[0]);
+    i += 1;
+  } else if (cityList.length > 1) {
+    locParts.push(`LOWER(city) = ANY($${i}::text[])`);
+    params.push(cityList.map((c) => c.toLowerCase()));
+    i += 1;
+  }
+  if (zipList.length === 1) {
+    locParts.push(`postal_code = $${i}`);
+    params.push(zipList[0]);
+    i += 1;
+  } else if (zipList.length > 1) {
+    locParts.push(`postal_code = ANY($${i}::text[])`);
+    params.push(zipList);
+    i += 1;
+  }
+  if (locParts.length === 1) where.push(locParts[0]);
+  else if (locParts.length > 1) where.push(`(${locParts.join(' OR ')})`);
   if (f.minPrice) { where.push(`list_price >= $${i++}`); params.push(Number(f.minPrice)); }
   if (f.maxPrice) { where.push(`list_price <= $${i++}`); params.push(Number(f.maxPrice)); }
   if (f.beds) { where.push(`beds >= $${i++}`); params.push(Number(f.beds)); }

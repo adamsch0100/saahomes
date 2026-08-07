@@ -67,7 +67,48 @@ function buildWhere(filters) {
   const params = [];
   let i = 1;
   const f = filters || {};
-  if (f.city) { where.push(`LOWER(city) = LOWER($${i++})`); params.push(String(f.city)); }
+  // Location: city may be multi ("Denver,Erie"); postal_code / zip may be multi.
+  // Cities and zips OR within group; groups OR together (union of areas).
+  const cityRaw = f.city ? String(f.city) : '';
+  const zipRaw = f.postal_code || f.postalCode || f.zip || f.zipCode || f.zips || '';
+  const cityList = cityRaw && cityRaw !== '__noco__' && cityRaw !== '__all__'
+    ? cityRaw.split(',').map((s) => s.trim()).filter(Boolean)
+    : [];
+  const zipList = zipRaw
+    ? String(zipRaw).split(',').map((s) => s.trim()).filter(Boolean)
+    : [];
+  const locParts = [];
+  if (cityRaw === '__noco__' && zipList.length === 0) {
+    // NoCO default scope for digests that still store __noco__
+    const NOCO = [
+      'Fort Collins', 'Loveland', 'Windsor', 'Greeley', 'Timnath', 'Wellington',
+      'Johnstown', 'Eaton', 'Milliken', 'La Salle', 'Mead', 'Longmont', 'Boulder',
+      'Berthoud', 'Firestone', 'Frederick', 'Evans', 'Severance', 'Niwot',
+    ];
+    where.push(`city = ANY($${i++}::text[])`);
+    params.push(NOCO);
+  } else {
+    if (cityList.length === 1) {
+      locParts.push(`LOWER(city) = LOWER($${i})`);
+      params.push(cityList[0]);
+      i += 1;
+    } else if (cityList.length > 1) {
+      locParts.push(`LOWER(city) = ANY($${i}::text[])`);
+      params.push(cityList.map((c) => c.toLowerCase()));
+      i += 1;
+    }
+    if (zipList.length === 1) {
+      locParts.push(`postal_code = $${i}`);
+      params.push(zipList[0]);
+      i += 1;
+    } else if (zipList.length > 1) {
+      locParts.push(`postal_code = ANY($${i}::text[])`);
+      params.push(zipList);
+      i += 1;
+    }
+    if (locParts.length === 1) where.push(locParts[0]);
+    else if (locParts.length > 1) where.push(`(${locParts.join(' OR ')})`);
+  }
   if (f.minPrice) { where.push(`list_price >= $${i++}`); params.push(Number(f.minPrice)); }
   if (f.maxPrice) { where.push(`list_price <= $${i++}`); params.push(Number(f.maxPrice)); }
   if (f.beds) { where.push(`beds >= $${i++}`); params.push(Number(f.beds)); }
@@ -316,8 +357,15 @@ async function runSearch(search, { dryRun, onlyEmail }) {
   const cards = [...fresh.map((e) => cardHtml(e.listing, search.filters, true, false)),
     ...drops.map((e) => cardHtml(e.listing, search.filters, false, true))].join('');
 
+  const zipLabel = search.filters.postal_code || search.filters.postalCode || search.filters.zip || '';
+  const locBits = [
+    search.filters.city && search.filters.city !== '__noco__' && search.filters.city !== '__all__'
+      ? String(search.filters.city).replace(/,/g, ', ')
+      : '',
+    zipLabel ? String(zipLabel).replace(/,/g, ', ') : '',
+  ].filter(Boolean);
   const filterSummary = [
-    search.filters.city ? `in ${search.filters.city}` : '',
+    locBits.length ? `in ${locBits.join(' · ')}` : '',
     search.filters.minPrice || search.filters.maxPrice
       ? `${fmtPrice(search.filters.minPrice)} – ${fmtPrice(search.filters.maxPrice)}`
       : '',
@@ -343,7 +391,22 @@ async function runSearch(search, { dryRun, onlyEmail }) {
   const firstName = (userRow.name || '').trim().split(' ')[0] || null;
 
   // Personalized subject: "Adam — 3 new homes in Fort Collins match your search"
-  const cityLabel = search.filters.city || 'Northern Colorado';
+  const cityLabel = (() => {
+    const c = search.filters.city;
+    const z = search.filters.postal_code || search.filters.postalCode || search.filters.zip || '';
+    if (c && c !== '__noco__' && c !== '__all__') {
+      const parts = String(c).split(',').map((s) => s.trim()).filter(Boolean);
+      if (parts.length > 2) return `${parts.slice(0, 2).join(', ')} +${parts.length - 2}`;
+      if (parts.length) return parts.join(', ');
+    }
+    if (z) {
+      const zparts = String(z).split(',').map((s) => s.trim()).filter(Boolean);
+      if (zparts.length > 2) return `ZIP ${zparts.slice(0, 2).join(', ')} +${zparts.length - 2}`;
+      return `ZIP ${zparts.join(', ')}`;
+    }
+    if (c === '__all__') return 'Colorado';
+    return 'Northern Colorado';
+  })();
   const newCount = fresh.length;
   const dropCount = drops.length;
   let subject;

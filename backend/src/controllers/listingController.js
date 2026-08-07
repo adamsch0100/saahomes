@@ -200,9 +200,22 @@ function pushKeywordFilter(where, params, startI, searchText, mode) {
   return i;
 }
 
+/** Split comma-separated location tokens; drop empties / specials. */
+function parseLocationList(raw) {
+  if (raw == null || raw === '') return [];
+  return String(raw)
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s && s !== '__noco__' && s !== '__all__');
+}
+
 /**
  * Build WHERE clause + bind params from req.query.
  * Shared by main search and city facets so they never drift.
+ *
+ * Location params (backward compatible):
+ *   city=__noco__ | __all__ | "Denver" | "Denver,Erie,Windsor"
+ *   postal_code=80521 | postal_code=80521,80525  (also zip / zipCode aliases)
  */
 function buildListingFilters(query = {}) {
   const {
@@ -217,6 +230,8 @@ function buildListingFilters(query = {}) {
     interior, // comma-separated interior feature keywords
     listingStatus, // price-drop | new | active
     hasImages, hasTour, has3d,
+    postal_code: postalCodeSnake,
+    postalCode, zip, zipCode, zips,
   } = query;
 
   const where = [];
@@ -243,13 +258,58 @@ function buildListingFilters(query = {}) {
     push('status = $n', status);
   }
 
-  // Drawn polygon overrides city scope (point-in-polygon replaces city filter).
+  // Drawn polygon overrides city/zip scope (point-in-polygon replaces location).
   const polyRing = parsePolygonRing(polygon ? String(polygon) : '');
+  const zipRaw = postalCodeSnake || postalCode || zip || zipCode || zips || '';
+  const zipList = parseLocationList(zipRaw);
+
   if (!polyRing) {
     if (city === '__noco__') {
-      push('city = ANY($n::text[])', NOCO_CITIES);
-    } else if (city && city !== '__all__') {
-      push('LOWER(city) = LOWER($n)', city);
+      // NoCO default — still allow zip refinement within / outside via OR when zips set
+      if (zipList.length === 0) {
+        push('city = ANY($n::text[])', NOCO_CITIES);
+      } else if (zipList.length === 1) {
+        // Zip alone while city is still the NoCO default: treat as zip-only statewide
+        // (UI clears __noco__ when picking a zip; this is a safety net for direct API use)
+        push('postal_code = $n', zipList[0]);
+      } else {
+        push('postal_code = ANY($n::text[])', zipList);
+      }
+    } else {
+      const cityList = parseLocationList(city);
+      const locationClauses = [];
+
+      if (city && city !== '__all__' && cityList.length === 1) {
+        locationClauses.push({ sql: 'LOWER(city) = LOWER($n)', value: cityList[0] });
+      } else if (cityList.length > 1) {
+        // Case-insensitive multi-city: LOWER(city) = ANY(lowercased array)
+        locationClauses.push({
+          sql: 'LOWER(city) = ANY($n::text[])',
+          value: cityList.map((c) => c.toLowerCase()),
+        });
+      }
+
+      if (zipList.length === 1) {
+        locationClauses.push({ sql: 'postal_code = $n', value: zipList[0] });
+      } else if (zipList.length > 1) {
+        locationClauses.push({ sql: 'postal_code = ANY($n::text[])', value: zipList });
+      }
+
+      // Multiple location chips (cities and/or zips) are OR'd — union of areas.
+      // Single city + single zip without multi intent still works as one clause each
+      // OR'd (homes in those cities OR those zips). When only one group is set, same.
+      if (locationClauses.length === 1) {
+        push(locationClauses[0].sql, locationClauses[0].value);
+      } else if (locationClauses.length > 1) {
+        const parts = [];
+        for (const clause of locationClauses) {
+          parts.push(clause.sql.replace(/\$n/g, () => `$${i}`));
+          params.push(clause.value);
+          i += 1;
+        }
+        pushRaw(`(${parts.join(' OR ')})`);
+      }
+      // city === '__all__' and no zips → no location filter (whole state)
     }
   }
 
@@ -607,5 +667,132 @@ export const getListingBySlug = async (req, res) => {
   } catch (error) {
     console.error('Listing fetch failed:', error);
     res.status(500).json({ success: false, error: 'Fetch failed' });
+  }
+};
+
+/**
+ * GET /api/listings/locations?q=den&limit=15
+ * Type-ahead for city + ZIP with live Active listing counts from the DB.
+ * Counts are never hardcoded (gate 6). Empty q returns top cities by volume.
+ */
+export const autocompleteLocations = async (req, res) => {
+  try {
+    const pool = getPool();
+    const q = String(req.query.q || '').trim();
+    const limit = Math.min(Math.max(1, Number(req.query.limit) || 15), 40);
+    const looksLikeZip = /^\d{1,5}$/.test(q);
+
+    // Special scoped options (always available; counts from live DB)
+    const nocoRes = await pool.query(
+      `SELECT COUNT(*)::int AS cnt FROM listings
+       WHERE is_active = TRUE AND status = 'Active' AND city = ANY($1::text[])`,
+      [NOCO_CITIES]
+    );
+    const allRes = await pool.query(
+      `SELECT COUNT(*)::int AS cnt FROM listings
+       WHERE is_active = TRUE AND status = 'Active'`
+    );
+    const specials = [
+      {
+        type: 'scope',
+        value: '__noco__',
+        label: 'Northern Colorado',
+        count: nocoRes.rows[0]?.cnt || 0,
+      },
+      {
+        type: 'scope',
+        value: '__all__',
+        label: 'All Colorado',
+        count: allRes.rows[0]?.cnt || 0,
+      },
+    ];
+
+    let cities = [];
+    let zips = [];
+
+    if (!q) {
+      const cityRes = await pool.query(
+        `SELECT city AS value, COUNT(*)::int AS cnt
+         FROM listings
+         WHERE is_active = TRUE AND status = 'Active'
+           AND city IS NOT NULL AND BTRIM(city) <> ''
+         GROUP BY city
+         ORDER BY cnt DESC
+         LIMIT $1`,
+        [limit]
+      );
+      cities = cityRes.rows.map((r) => ({
+        type: 'city',
+        value: r.value,
+        label: r.value,
+        count: r.cnt,
+      }));
+    } else if (looksLikeZip) {
+      const zipRes = await pool.query(
+        `SELECT postal_code AS value, COUNT(*)::int AS cnt
+         FROM listings
+         WHERE is_active = TRUE AND status = 'Active'
+           AND postal_code IS NOT NULL AND postal_code LIKE $1
+         GROUP BY postal_code
+         ORDER BY cnt DESC
+         LIMIT $2`,
+        [`${q}%`, limit]
+      );
+      zips = zipRes.rows.map((r) => ({
+        type: 'zip',
+        value: r.value,
+        label: r.value,
+        count: r.cnt,
+      }));
+      // Also surface cities whose names start with digit-less partial? skip.
+      // If full 5-digit yields few zips, still return city name matches for "8" etc. — only digits here.
+    } else {
+      const cityRes = await pool.query(
+        `SELECT city AS value, COUNT(*)::int AS cnt
+         FROM listings
+         WHERE is_active = TRUE AND status = 'Active'
+           AND city IS NOT NULL AND city ILIKE $1
+         GROUP BY city
+         ORDER BY
+           CASE WHEN LOWER(city) = LOWER($2) THEN 0
+                WHEN LOWER(city) LIKE LOWER($3) THEN 1
+                ELSE 2 END,
+           cnt DESC
+         LIMIT $4`,
+        [`%${q}%`, q, `${q}%`, limit]
+      );
+      cities = cityRes.rows.map((r) => ({
+        type: 'city',
+        value: r.value,
+        label: r.value,
+        count: r.cnt,
+      }));
+    }
+
+    // When typing a city-like string, still offer matching zips if query has digits mixed — rare.
+
+    // Filter specials by query (optional type-ahead for "colo", "north")
+    const qLower = q.toLowerCase();
+    const specialFiltered = !q
+      ? specials
+      : specials.filter(
+        (s) =>
+          s.label.toLowerCase().includes(qLower)
+          || s.value.toLowerCase().includes(qLower)
+          || (qLower === 'co' || qLower.startsWith('col') || qLower.includes('colorado'))
+      );
+
+    res.json({
+      success: true,
+      data: {
+        specials: specialFiltered,
+        cities,
+        zips,
+        nocoCities: NOCO_CITIES,
+      },
+    });
+  } catch (error) {
+    console.error('Location autocomplete failed:', error);
+    res.status(500).json({ success: false, error: 'Autocomplete failed' });
   }
 };
