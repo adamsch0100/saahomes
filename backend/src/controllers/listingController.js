@@ -370,9 +370,15 @@ export const getListingStats = async (req, res) => {
       params.push(city);
       where += ` AND LOWER(city) = LOWER($${params.length})`;
     }
+    // All aggregates are computed from live Active listings only — never editorialized.
+    // price_per_sqft median ignores nulls; DOM median ignores nulls.
     const r = await pool.query(
       `SELECT COUNT(*) AS total,
               PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY list_price) AS median_price,
+              PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_per_sqft)
+                FILTER (WHERE price_per_sqft IS NOT NULL AND price_per_sqft > 0) AS median_price_per_sqft,
+              PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY days_on_market)
+                FILTER (WHERE days_on_market IS NOT NULL) AS median_days_on_market,
               MIN(list_price) AS min_price,
               MAX(list_price) AS max_price,
               ROUND(AVG(list_price)) AS avg_price,
@@ -388,12 +394,15 @@ export const getListingStats = async (req, res) => {
       data: {
         total: parseInt(row.total || 0, 10),
         median_price: row.median_price != null ? Math.round(Number(row.median_price)) : null,
+        median_price_per_sqft: row.median_price_per_sqft != null ? Math.round(Number(row.median_price_per_sqft)) : null,
+        median_days_on_market: row.median_days_on_market != null ? Math.round(Number(row.median_days_on_market)) : null,
         min_price: row.min_price != null ? Math.round(Number(row.min_price)) : null,
         max_price: row.max_price != null ? Math.round(Number(row.max_price)) : null,
         avg_price: row.avg_price != null ? Math.round(Number(row.avg_price)) : null,
         residential: parseInt(row.residential || 0, 10),
         condo_townhome: parseInt(row.condo_townhome || 0, 10),
         land: parseInt(row.land || 0, 10),
+        city: city || null,
       },
     });
   } catch (error) {

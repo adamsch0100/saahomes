@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import ListingMap from "./ListingMap";
 import SaveSearchModal from "./SaveSearchModal";
 import ScheduleShowingModal from "./ScheduleShowingModal";
+import PaymentCalculator from "./PaymentCalculator";
+import CityStatsBand from "./CityStatsBand";
 import { photoUrl } from "../utils/photoUrl.js";
 import {
   formatPrice,
@@ -81,11 +83,14 @@ function KeyFact({ label, value }) {
 }
 
 /** Compact gallery for the slide-over panel (Zillow-grade: skeleton → image, counter, thumbs) */
-function PanelGallery({ listingId, photos, alt }) {
+function PanelGallery({ listingId, photos, photosCount, alt }) {
   const [active, setActive] = useState(0);
   const [loaded, setLoaded] = useState({});
   const touchStartX = useRef(null);
-  const total = photos.length;
+  const total = Math.max(
+    Array.isArray(photos) ? photos.length : 0,
+    Number(photosCount) > 0 ? Number(photosCount) : 0
+  );
 
   useEffect(() => {
     setActive(0);
@@ -95,6 +100,7 @@ function PanelGallery({ listingId, photos, alt }) {
   const go = useCallback(
     (dir) => {
       setActive((i) => {
+        if (total <= 0) return 0;
         const next = i + dir;
         if (next < 0) return total - 1;
         if (next >= total) return 0;
@@ -103,6 +109,42 @@ function PanelGallery({ listingId, photos, alt }) {
     },
     [total]
   );
+
+  // Keyboard arrows while panel gallery is mounted (skip when typing)
+  useEffect(() => {
+    if (total <= 1) return undefined;
+    const onKey = (e) => {
+      const tag = (e.target && e.target.tagName) || "";
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || e.target?.isContentEditable) {
+        return;
+      }
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        go(-1);
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        go(1);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [go, total]);
+
+  // Preload neighbors via photoUrl proxy
+  useEffect(() => {
+    if (!listingId || total <= 1) return undefined;
+    const idxs = [(active + 1) % total, (active - 1 + total) % total];
+    const imgs = idxs.map((idx) => {
+      const img = new Image();
+      img.src = photoUrl(listingId, idx);
+      return img;
+    });
+    return () => {
+      imgs.forEach((img) => {
+        img.src = "";
+      });
+    };
+  }, [active, listingId, total]);
 
   if (!total) {
     return (
@@ -123,6 +165,9 @@ function PanelGallery({ listingId, photos, alt }) {
     if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1);
     touchStartX.current = null;
   };
+
+  const thumbIndexes = Array.from({ length: Math.min(total, 12) }, (_, i) => i);
+  const countBadge = `${active + 1}/${total}`;
 
   return (
     <div className="space-y-2">
@@ -147,6 +192,7 @@ function PanelGallery({ listingId, photos, alt }) {
           className={`w-full h-full object-cover transition-opacity duration-300 ${
             loaded[active] ? "opacity-100" : "opacity-0"
           }`}
+          decoding="async"
         />
 
         {total > 1 && (
@@ -171,13 +217,13 @@ function PanelGallery({ listingId, photos, alt }) {
         )}
 
         <span className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/75 text-white text-xs font-medium px-2.5 py-0.5 rounded-full tabular-nums">
-          {active + 1} / {total}
+          {countBadge}
         </span>
       </div>
 
       {total > 1 && (
         <div className="flex gap-1.5 overflow-x-auto px-3 pb-1">
-          {photos.slice(0, 12).map((_, i) => (
+          {thumbIndexes.map((i) => (
             <button
               key={i}
               type="button"
@@ -191,7 +237,8 @@ function PanelGallery({ listingId, photos, alt }) {
               <img
                 src={photoUrl(listingId, i)}
                 alt=""
-                loading="lazy"
+                loading={Math.abs(i - active) <= 2 ? "eager" : "lazy"}
+                decoding="async"
                 onError={(e) => {
                   e.currentTarget.onerror = null;
                   e.currentTarget.src = "/images/buyers-hero.jpg";
@@ -525,7 +572,12 @@ export default function ListingDetailPanel({ slug, onClose }) {
 
           {!loading && !error && listing && (
             <>
-              <PanelGallery listingId={listing.id} photos={photos} alt={fullAddress} />
+              <PanelGallery
+                listingId={listing.id}
+                photos={photos}
+                photosCount={listing.photos_count}
+                alt={fullAddress}
+              />
 
               <div className="p-4 sm:p-5 space-y-6 pb-28">
                 {/* Price + badges */}
@@ -690,6 +742,17 @@ export default function ListingDetailPanel({ slug, onClose }) {
                   </div>
                 )}
 
+                {/* Est. payment calculator */}
+                {listing.list_price != null && Number(listing.list_price) > 0 && (
+                  <PaymentCalculator
+                    listPrice={listing.list_price}
+                    taxAnnual={feats.tax_annual}
+                    hoaFee={listing.hoa_fee}
+                    hoaFreq={feats.assoc_fee_freq}
+                    variant="card"
+                  />
+                )}
+
                 {/* Key facts */}
                 <div>
                   <h3 className="text-base font-bold text-gray-900 mb-2.5">Key Facts</h3>
@@ -738,6 +801,8 @@ export default function ListingDetailPanel({ slug, onClose }) {
                     {listing.description || "Contact us for details about this property."}
                   </p>
                 </div>
+
+                {listing.city && <CityStatsBand city={listing.city} compact />}
 
                 {/* Features */}
                 {featureRows.length > 0 && (

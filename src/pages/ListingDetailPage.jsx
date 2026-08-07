@@ -5,6 +5,8 @@ import QualifyCta from "../components/QualifyCta";
 import ListingMap from "../components/ListingMap";
 import SaveSearchModal from "../components/SaveSearchModal";
 import ScheduleShowingModal from "../components/ScheduleShowingModal";
+import PaymentCalculator from "../components/PaymentCalculator";
+import CityStatsBand from "../components/CityStatsBand";
 import { photoUrl } from "../utils/photoUrl.js";
 import { CITY_HOMES, getCityHomesPath } from "../data/cityHomesData";
 import {
@@ -178,16 +180,27 @@ function formatDate(iso) {
   }
 }
 
-/** Zillow-style photo gallery: main image, thumbs, swipe, counter, fullscreen */
-function PhotoGallery({ listingId, photos, alt }) {
+/** Zillow-style photo gallery: main image, thumbs, swipe, counter, keyboard, fullscreen */
+function PhotoGallery({ listingId, photos, photosCount, alt }) {
   const [active, setActive] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
   const [loaded, setLoaded] = useState({});
   const touchStartX = useRef(null);
-  const total = photos.length;
+  const rootRef = useRef(null);
+  // Prefer photos array length; fall back to photos_count so proxy indices still work
+  const total = Math.max(
+    Array.isArray(photos) ? photos.length : 0,
+    Number(photosCount) > 0 ? Number(photosCount) : 0
+  );
+
+  useEffect(() => {
+    setActive(0);
+    setLoaded({});
+  }, [listingId]);
 
   const go = useCallback((dir) => {
     setActive((i) => {
+      if (total <= 0) return 0;
       const next = i + dir;
       if (next < 0) return total - 1;
       if (next >= total) return 0;
@@ -195,20 +208,53 @@ function PhotoGallery({ listingId, photos, alt }) {
     });
   }, [total]);
 
+  // Keyboard arrows always (when not typing in an input); Escape closes fullscreen
   useEffect(() => {
-    if (!fullscreen) return undefined;
+    if (total <= 1) return undefined;
     const onKey = (e) => {
-      if (e.key === "Escape") setFullscreen(false);
-      if (e.key === "ArrowLeft") go(-1);
-      if (e.key === "ArrowRight") go(1);
+      const tag = (e.target && e.target.tagName) || "";
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || e.target?.isContentEditable) {
+        return;
+      }
+      if (e.key === "Escape" && fullscreen) {
+        setFullscreen(false);
+        return;
+      }
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        go(-1);
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        go(1);
+      }
     };
     window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [go, total, fullscreen]);
+
+  useEffect(() => {
+    if (!fullscreen) return undefined;
     document.body.style.overflow = "hidden";
     return () => {
-      window.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
     };
-  }, [fullscreen, go]);
+  }, [fullscreen]);
+
+  // Preload adjacent images via photoUrl proxy for instant next/prev
+  useEffect(() => {
+    if (!listingId || total <= 1) return undefined;
+    const idxs = [(active + 1) % total, (active - 1 + total) % total];
+    const imgs = idxs.map((idx) => {
+      const img = new Image();
+      img.src = photoUrl(listingId, idx);
+      return img;
+    });
+    return () => {
+      imgs.forEach((img) => {
+        img.src = "";
+      });
+    };
+  }, [active, listingId, total]);
 
   if (!total) {
     return (
@@ -230,6 +276,8 @@ function PhotoGallery({ listingId, photos, alt }) {
     touchStartX.current = null;
   };
 
+  const countBadge = `${active + 1}/${total}`;
+
   const MainImage = ({ className = "", showControls = true }) => (
     <div
       className={`relative bg-gray-900 overflow-hidden ${className}`}
@@ -240,7 +288,7 @@ function PhotoGallery({ listingId, photos, alt }) {
         <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-800 to-gray-700" />
       )}
       <img
-        key={active}
+        key={`${listingId}-${active}`}
         src={photoUrl(listingId, active)}
         alt={`${alt} — photo ${active + 1} of ${total}`}
         onLoad={() => markLoaded(active)}
@@ -250,6 +298,8 @@ function PhotoGallery({ listingId, photos, alt }) {
           markLoaded(active);
         }}
         className={`w-full h-full object-cover transition-opacity duration-300 ${loaded[active] ? "opacity-100" : "opacity-0"}`}
+        decoding="async"
+        fetchPriority={active === 0 ? "high" : "auto"}
       />
 
       {showControls && total > 1 && (
@@ -257,7 +307,7 @@ function PhotoGallery({ listingId, photos, alt }) {
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); go(-1); }}
-            className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center text-gray-900"
+            className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center text-gray-900 text-xl leading-none"
             aria-label="Previous photo"
           >
             ‹
@@ -265,7 +315,7 @@ function PhotoGallery({ listingId, photos, alt }) {
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); go(1); }}
-            className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center text-gray-900"
+            className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center text-gray-900 text-xl leading-none"
             aria-label="Next photo"
           >
             ›
@@ -274,26 +324,32 @@ function PhotoGallery({ listingId, photos, alt }) {
       )}
 
       <span className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/75 text-white text-xs font-medium px-3 py-1 rounded-full tabular-nums">
-        {active + 1} / {total}
+        {countBadge}
       </span>
     </div>
   );
 
+  // Thumbnail strip: use total count so proxy indices work even if photos array is short
+  const thumbIndexes = Array.from({ length: total }, (_, i) => i);
+
   return (
     <>
-      <div className="space-y-3">
-        <button
-          type="button"
-          onClick={() => setFullscreen(true)}
-          className="block w-full text-left rounded-xl overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#CFB36E]"
-          aria-label="Open full-screen photo gallery"
-        >
+      <div ref={rootRef} className="space-y-3" tabIndex={-1}>
+        <div className="relative rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-[#CFB36E]">
           <MainImage className="aspect-[16/10] sm:aspect-[16/9]" />
-        </button>
+          <button
+            type="button"
+            onClick={() => setFullscreen(true)}
+            className="absolute top-3 right-3 z-10 px-3 py-1.5 rounded-full bg-black/70 hover:bg-black text-white text-xs font-semibold"
+            aria-label="Open full-screen photo gallery"
+          >
+            Expand
+          </button>
+        </div>
 
         {total > 1 && (
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
-            {photos.map((_, i) => (
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin" role="listbox" aria-label="Photo thumbnails">
+            {thumbIndexes.map((i) => (
               <button
                 key={i}
                 type="button"
@@ -307,7 +363,8 @@ function PhotoGallery({ listingId, photos, alt }) {
                 <img
                   src={photoUrl(listingId, i)}
                   alt=""
-                  loading="lazy"
+                  loading={Math.abs(i - active) <= 2 ? "eager" : "lazy"}
+                  decoding="async"
                   onError={(e) => {
                     e.currentTarget.onerror = null;
                     e.currentTarget.src = "/images/buyers-hero.jpg";
@@ -336,7 +393,7 @@ function PhotoGallery({ listingId, photos, alt }) {
           aria-label="Photo gallery"
         >
           <div className="flex items-center justify-between px-4 py-3 text-white shrink-0">
-            <span className="text-sm font-medium tabular-nums">{active + 1} / {total}</span>
+            <span className="text-sm font-medium tabular-nums">{countBadge}</span>
             <button
               type="button"
               onClick={() => setFullscreen(false)}
@@ -351,7 +408,7 @@ function PhotoGallery({ listingId, photos, alt }) {
           </div>
           {total > 1 && (
             <div className="shrink-0 flex gap-2 overflow-x-auto px-4 py-3 justify-center">
-              {photos.map((_, i) => (
+              {thumbIndexes.map((i) => (
                 <button
                   key={i}
                   type="button"
@@ -364,6 +421,7 @@ function PhotoGallery({ listingId, photos, alt }) {
                     src={photoUrl(listingId, i)}
                     alt=""
                     className="w-full h-full object-cover"
+                    loading="lazy"
                     onError={(e) => {
                       e.currentTarget.onerror = null;
                       e.currentTarget.src = "/images/buyers-hero.jpg";
@@ -488,17 +546,43 @@ export default function ListingDetailPage() {
 
   useEffect(() => {
     if (!listing || !listing.city) return;
-    const params = new URLSearchParams({ city: listing.city, limit: "4", sort: "newest" });
+    // Similar: same city, same home_type, beds ±1, price ±20%, exclude self, limit 6–8
+    const params = new URLSearchParams({
+      city: listing.city,
+      limit: "16",
+      sort: "newest",
+      status: "Active",
+    });
     if (listing.list_price) {
-      const lo = Math.max(0, Number(listing.list_price) * 0.7);
-      const hi = Number(listing.list_price) * 1.3;
-      params.set("minPrice", String(Math.round(lo)));
-      params.set("maxPrice", String(Math.round(hi)));
+      const price = Number(listing.list_price);
+      params.set("minPrice", String(Math.round(Math.max(0, price * 0.8))));
+      params.set("maxPrice", String(Math.round(price * 1.2)));
+    }
+    if (listing.home_type) {
+      params.set("type", listing.home_type);
+    }
+    const bedsN = listing.beds != null ? Number(listing.beds) : null;
+    if (bedsN != null && Number.isFinite(bedsN)) {
+      // API beds is min; client filters upper bound (beds + 1)
+      params.set("beds", String(Math.max(0, Math.floor(bedsN - 1))));
     }
     fetch(`${API_BASE}/api/listings?${params}`)
       .then((r) => r.json())
-      .then((d) => setSimilar((d.data || []).filter((l) => l.slug !== listing.slug).slice(0, 3)))
-      .catch(() => {});
+      .then((d) => {
+        const rows = d.data || [];
+        const filtered = rows.filter((l) => {
+          if (!l) return false;
+          if (l.slug === listing.slug) return false;
+          if (l.listing_id && listing.listing_id && l.listing_id === listing.listing_id) return false;
+          if (bedsN != null && Number.isFinite(bedsN) && l.beds != null) {
+            const b = Number(l.beds);
+            if (Number.isFinite(b) && (b < bedsN - 1 || b > bedsN + 1)) return false;
+          }
+          return true;
+        });
+        setSimilar(filtered.slice(0, 8));
+      })
+      .catch(() => setSimilar([]));
     setSaved(isHomeSaved(listing.slug));
     setMatch(matchSavedSearch(listing, getSavedSearches()));
   }, [listing]);
@@ -870,7 +954,12 @@ export default function ListingDetailPage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 pb-6">
-          <PhotoGallery listingId={listing.id} photos={photos} alt={fullAddress} />
+          <PhotoGallery
+            listingId={listing.id}
+            photos={photos}
+            photosCount={listing.photos_count}
+            alt={fullAddress}
+          />
         </div>
       </section>
 
@@ -918,6 +1007,19 @@ export default function ListingDetailPage() {
                 filters={likeThisFilters}
                 buttonLabel="Get alerts for homes like this"
                 buttonClassName="shrink-0 px-4 py-2.5 bg-black text-white text-sm font-semibold rounded-lg"
+              />
+            </div>
+          )}
+
+          {/* Est. payment — mobile (desktop lives in sticky sidebar) */}
+          {listing.list_price != null && Number(listing.list_price) > 0 && (
+            <div className="lg:hidden">
+              <PaymentCalculator
+                listPrice={listing.list_price}
+                taxAnnual={feats.tax_annual}
+                hoaFee={listing.hoa_fee}
+                hoaFreq={feats.assoc_fee_freq}
+                variant="card"
               />
             </div>
           )}
@@ -1206,6 +1308,9 @@ export default function ListingDetailPage() {
             </div>
           )}
 
+          {/* City market stats — live from our Active inventory */}
+          {listing.city && <CityStatsBand city={listing.city} />}
+
           <div className="bg-black text-white rounded-xl p-6">
             <h2 className="text-xl font-bold font-serif mb-2">About {listing.city}</h2>
             <p className="text-gray-300 text-sm leading-relaxed mb-4">
@@ -1229,28 +1334,46 @@ export default function ListingDetailPage() {
             </div>
           </div>
 
-          {/* 11. Similar homes */}
+          {/* 11. Similar homes carousel — same city, type, beds ±1, price ±20% */}
           {similar.length > 0 && (
             <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Similar Homes in {listing.city}</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="flex items-end justify-between gap-3 mb-4">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Similar Homes in {listing.city}</h2>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Same area
+                    {listing.home_type ? ` · ${HOME_TYPE_LABEL[listing.home_type] || listing.home_type}` : ""}
+                    {listing.beds != null ? ` · ${listing.beds}±1 beds` : ""}
+                    {listing.list_price != null ? " · price ±20%" : ""}
+                  </p>
+                </div>
+                <Link
+                  to={getCityHomesPath(citySlug)}
+                  className="text-sm font-semibold text-gray-700 underline underline-offset-2 shrink-0"
+                >
+                  See all
+                </Link>
+              </div>
+              <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible sm:pb-0">
                 {similar.map((l) => {
                   const b = listingBadges(l);
+                  const hasPhoto = (Array.isArray(l.photos) && l.photos.length > 0) || Number(l.photos_count) > 0;
                   return (
                     <Link
-                      key={l.listing_id || l.id}
+                      key={l.listing_id || l.id || l.slug}
                       to={`/homes-for-sale/${l.slug}/`}
-                      className="group block bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                      className="group block bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-shadow min-w-[260px] w-[78vw] max-w-sm snap-start sm:min-w-0 sm:w-auto sm:max-w-none"
                     >
                       <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
                         <img
-                          src={l.photos?.length ? photoUrl(l.id, 0) : "/images/buyers-hero.jpg"}
+                          src={hasPhoto ? photoUrl(l.id, 0) : "/images/buyers-hero.jpg"}
                           alt={`${l.street_name || "Home"} in ${l.city}`}
                           onError={(e) => {
                             e.currentTarget.onerror = null;
                             e.currentTarget.src = "/images/buyers-hero.jpg";
                           }}
                           loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                         {b.priceCut && (
@@ -1258,16 +1381,22 @@ export default function ListingDetailPage() {
                             Price reduced
                           </span>
                         )}
+                        {b.isNew && !b.priceCut && (
+                          <span className="absolute top-2 left-2 bg-[#CFB36E] text-black text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+                            New
+                          </span>
+                        )}
                       </div>
                       <div className="p-3">
                         <p className="font-bold text-gray-900">{formatPrice(l.list_price)}</p>
                         <p className="text-xs text-gray-500 mt-0.5">
-                          {l.beds != null ? `${l.beds} bd` : ""}
-                          {l.baths != null ? ` · ${l.baths} ba` : ""}
+                          {l.beds != null ? `${Number(l.beds)} bd` : ""}
+                          {l.baths != null ? ` · ${Number(l.baths)} ba` : ""}
                           {l.living_area != null ? ` · ${Number(l.living_area).toLocaleString()} sqft` : ""}
                         </p>
                         <p className="text-xs text-gray-600 mt-1 truncate">
                           {[l.street_number, l.street_name].filter(Boolean).join(" ")}
+                          {l.city ? `, ${l.city}` : ""}
                         </p>
                       </div>
                     </Link>
@@ -1383,6 +1512,17 @@ export default function ListingDetailPage() {
               Listing data from {listing.mls_source || "IRES"} MLS. IDX information provided by IRES.
             </p>
           </div>
+
+          {/* Est. payment calculator — desktop sticky stack */}
+          {listing.list_price != null && Number(listing.list_price) > 0 && (
+            <PaymentCalculator
+              listPrice={listing.list_price}
+              taxAnnual={feats.tax_annual}
+              hoaFee={listing.hoa_fee}
+              hoaFreq={feats.assoc_fee_freq}
+              variant="card"
+            />
+          )}
 
           {/* Compact agent blurb under sticky card */}
           <div className="rounded-xl border border-gray-200 bg-white p-4">
