@@ -507,6 +507,26 @@ function injectAreaBody(html, area) {
       `      </section>`;
   }
 
+  // Build neighborhood links — mirrors client-side NeighborhoodLinks component
+  // so crawlers see hub → neighborhood internal links (hub-and-spoke architecture)
+  let neighborhoodHtml = '';
+  const cityNeighborhoods = neighborhoods.filter((n) => n.citySlug === area.slug);
+  if (cityNeighborhoods.length > 0) {
+    neighborhoodHtml =
+      `      <section class="prerendered-neighborhoods">\n` +
+      `        <h2>${escapeHtml(area.city)} Neighborhoods & Subdivisions</h2>\n` +
+      `        <p>Explore detailed guides for ${escapeHtml(area.city)} neighborhoods, subdivisions, and communities:</p>\n` +
+      `        <ul>\n` +
+      cityNeighborhoods
+        .map(
+          (n) =>
+            `          <li><a href="${SITE_URL}/northern-colorado-areas/${area.slug}/${n.slug}/">${escapeHtml(n.name)}</a> &mdash; ${escapeHtml((n.description || '').slice(0, 160))}</li>`
+        )
+        .join('\n') +
+      `\n        </ul>\n` +
+      `      </section>`;
+  }
+
   // Build city-specific guide links (internal links to relevant blog posts)
   const CITY_BLOG_GUIDES = {
     'fort-collins': { title: 'Selling Your Home in Fort Collins', slug: 'selling-your-home-in-fort-collins', guideTitle: 'Fort Collins Realtor Guide', guideSlug: 'fort-collins-realtor' },
@@ -545,6 +565,7 @@ function injectAreaBody(html, area) {
     `      ${county ? `<p class="prerendered-county">Serving ${county}</p>\n` : ''}` +
     `${introHtml}\n` +
     `${faqHtml}\n` +
+    `${neighborhoodHtml}\n` +
     `${guidesHtml}\n` +
     `${nearbyHtml}\n` +
     `${ctaHtml}\n` +
