@@ -207,7 +207,7 @@ function escapeAttr(str) {
     .replace(/>/g, '&gt;');
 }
 
-function injectMeta(html, { title, description, canonical }) {
+function injectMeta(html, { title, description, canonical, robots }) {
   let output = html;
 
   // --- Title ---
@@ -221,6 +221,18 @@ function injectMeta(html, { title, description, canonical }) {
     /<meta name="description" content=".*?" \/>/,
     `<meta name="description" content="${escapeAttr(description)}" />`
   );
+
+  // --- Robots (replace shell default so noindex pages aren't dual-tagged) ---
+  if (robots) {
+    if (/<meta name="robots" content=".*?"\s*\/?>/.test(output)) {
+      output = output.replace(
+        /<meta name="robots" content=".*?"\s*\/?>/,
+        `<meta name="robots" content="${escapeAttr(robots)}" />`
+      );
+    } else {
+      output = output.replace('</head>', `  <meta name="robots" content="${escapeAttr(robots)}" />\n  </head>`);
+    }
+  }
 
   // --- Canonical ---
   const canonicalTag = `  <link rel="canonical" href="${escapeAttr(canonical)}" />`;
@@ -1450,6 +1462,7 @@ function buildRouteMetaTags(route) {
   if (keywords) {
     tags.push(`<meta name="keywords" content="${escapeAttr(keywords)}" />`);
   }
+  // robots for noindex pages is applied in injectMeta (replaces shell default)
   tags.push(`<meta name="author" content="${escapeAttr(BUSINESS.name)}" />`);
   tags.push(`<meta name="geo.region" content="US-CO" />`);
   tags.push(`<meta name="geo.placename" content="Fort Collins, Colorado" />`);
@@ -1571,6 +1584,7 @@ for (const route of routes) {
     title: route.title,
     description: route.description,
     canonical,
+    robots: route.robots,
   });
 
   // 2. Inject JSON-LD schemas

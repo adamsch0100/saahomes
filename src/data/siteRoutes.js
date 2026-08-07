@@ -113,6 +113,32 @@ const staticPages = [
     ogImageAlt: 'Homes for sale in Northern Colorado',
   },
   {
+    // Logged-in saved-search dashboard — noindex (session page)
+    path: '/my-saved-searches/',
+    priority: '0.1',
+    changefreq: 'monthly',
+    title: 'My Saved Searches | SAA Homes',
+    description: 'Manage your saved home searches, live match counts, and email alerts for Northern Colorado.',
+    ogTitle: 'My Saved Searches | SAA Homes',
+    ogDescription: 'Manage saved home searches and alerts.',
+    ogImage: DEFAULT_OG_IMAGE,
+    ogImageAlt: 'SAA Homes saved searches',
+    robots: 'noindex, nofollow',
+  },
+  {
+    // Legacy manage URL — same dashboard, noindex
+    path: '/alerts/manage/',
+    priority: '0.1',
+    changefreq: 'monthly',
+    title: 'Manage Home Search Alerts | SAA Homes',
+    description: 'View, pause, or delete your saved home searches and email alerts for Northern Colorado.',
+    ogTitle: 'Manage Alerts | SAA Homes',
+    ogDescription: 'Manage saved home search alerts.',
+    ogImage: DEFAULT_OG_IMAGE,
+    ogImageAlt: 'SAA Homes alerts',
+    robots: 'noindex, nofollow',
+  },
+  {
     path: '/northern-colorado-areas/',
     priority: '0.9',
     changefreq: 'weekly',
@@ -285,7 +311,7 @@ export function getSitemapEntries(lastmod) {
 
 export function getPrerenderRoutes() {
   return getSitemapEntries().map(
-    ({ path, title, description, ogTitle, ogDescription, ogImage, ogImageAlt }) => ({
+    ({ path, title, description, ogTitle, ogDescription, ogImage, ogImageAlt, robots }) => ({
       path,
       title,
       description,
@@ -293,6 +319,7 @@ export function getPrerenderRoutes() {
       ogDescription,
       ogImage,
       ogImageAlt,
+      robots,
     })
   );
 }

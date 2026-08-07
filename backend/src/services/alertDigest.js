@@ -13,6 +13,7 @@
 import 'dotenv/config';
 import pg from 'pg';
 import nodemailer from 'nodemailer';
+import { getRecentViews, filtersToSearchPath } from './leadScore.js';
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: false });
 
@@ -193,7 +194,10 @@ function cardHtml(l, filters, isNew, isDrop) {
 }
 
 // ---------------------------------------------------------------- email
-function digestHtml({ firstName, searchName, filterSummary, summaryLines, standouts, cards, manageUrl, unsubscribeUrl }) {
+function digestHtml({
+  firstName, searchName, filterSummary, summaryLines, standouts, cards,
+  manageUrl, unsubscribeUrl, searchUrl, viewedCallout,
+}) {
   const greeting = firstName ? `Hi ${escapeHtml(firstName)},` : 'Hi there,';
   return `<!DOCTYPE html>
   <html><body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
@@ -212,6 +216,10 @@ function digestHtml({ firstName, searchName, filterSummary, summaryLines, stando
     <ul style="color:#374151;font-size:14px;line-height:1.7;margin:8px 0 14px;padding-left:20px">
       ${summaryLines.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}
     </ul>
+    ${viewedCallout ? `
+    <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 18px;background:#fffbeb;border-left:3px solid #CFB36E;padding:12px 14px;border-radius:0 8px 8px 0">
+      ${viewedCallout}
+    </p>` : ''}
     ${standouts.length ? `
     <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 20px;background:#f9fafb;border-left:3px solid #CFB36E;padding:12px 14px;border-radius:0 8px 8px 0">
       <strong style="color:#111">A few worth a look:</strong><br/>
@@ -219,11 +227,14 @@ function digestHtml({ firstName, searchName, filterSummary, summaryLines, stando
     </p>` : ''}
     ${cards}
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:22px;background:#111;border-radius:12px">
-      <tr><td style="padding:20px">
+      <tr><td style="padding:20px" align="center">
+        <a href="${searchUrl || manageUrl}" style="display:inline-block;background:#CFB36E;color:#1a1a1a;font-size:14px;font-weight:800;padding:12px 22px;border-radius:8px;text-decoration:none;margin-bottom:12px">
+          View all matches for this search
+        </a>
         <p style="color:#fff;font-size:14px;line-height:1.7;margin:0">
           Any of these catch your eye? <strong style="color:#CFB36E">Just reply to this email</strong> and we'll set up a showing — or call/text <a href="tel:+19709991407" style="color:#CFB36E;text-decoration:none">${AGENT_PHONE}</a>.
         </p>
-        <p style="color:#9ca3af;font-size:13px;margin:10px 0 0">— Adam &amp; Mandi Schwartz · SAA Homes · saahomes.com</p>
+        <p style="color:#9ca3af;font-size:13px;margin:10px 0 0">— Adam &amp; Mandi Schwartz · SAA Homes · ${AGENT_PHONE} · saahomes.com</p>
       </td></tr>
     </table>
     <p style="color:#9ca3af;font-size:11.5px;margin-top:18px;line-height:1.6">
@@ -232,6 +243,27 @@ function digestHtml({ firstName, searchName, filterSummary, summaryLines, stando
     </p>
   </div>
   </body></html>`;
+}
+
+/**
+ * Build a "you viewed X — N similar just hit the market" callout from real view data.
+ * Only returns HTML when we have a real viewed address AND fresh matches exist.
+ */
+function buildViewedCallout(recentViews, freshListings) {
+  if (!recentViews?.length || !freshListings?.length) return '';
+  const viewed = recentViews.find((v) => v.street || v.address);
+  if (!viewed) return '';
+  const label = viewed.street || viewed.address;
+  if (!label) return '';
+  // Don't mention a listing if it's already in the fresh cards
+  const freshIds = new Set(freshListings.map((l) => l.listing_id));
+  const similarCount = freshListings.length;
+  if (freshIds.has(viewed.listing_id) && similarCount <= 1) {
+    // They viewed one of the new ones — still useful nudge
+    return `<strong style="color:#111">You recently viewed ${escapeHtml(label)}</strong> — and it's still matching your search. Worth a closer look?`;
+  }
+  const n = similarCount === 1 ? '1 similar home just hit the market' : `${similarCount} similar homes just hit the market`;
+  return `<strong style="color:#111">You viewed ${escapeHtml(label)}</strong> — ${n}. Here are the ones that match your saved search.`;
 }
 
 async function sendEmail(to, subject, html) {
@@ -304,13 +336,34 @@ async function runSearch(search, { dryRun, onlyEmail }) {
   if (statusChanges > 1) summaryLines.push(`${statusChanges} homes from your search went off market`);
   if (!summaryLines.length) summaryLines.push('New activity matched your search');
 
-  const freshText = fresh.length ? `${fresh.length} new` : '';
-  const dropText = drops.length ? `${drops.length} price drop${drops.length > 1 ? 's' : ''}` : '';
-  const changeText = statusChanges ? `${statusChanges} off market` : '';
-  const subjectParts = [freshText, dropText, changeText].filter(Boolean);
-  const subject = subjectParts.length
-    ? `Adam here — ${subjectParts.join(', ')} in ${search.filters.city || 'Northern Colorado'}`
-    : 'Adam here — an update on your saved search';
+  const userRes = await pool.query('SELECT email, name FROM users WHERE id = $1', [search.user_id]);
+  const userRow = userRes.rows[0];
+  if (!userRow?.email) return { sent: false, events: 0 };
+  if (onlyEmail && !userRow.email.toLowerCase().includes(onlyEmail.toLowerCase())) return { sent: false, events: 0 };
+  const firstName = (userRow.name || '').trim().split(' ')[0] || null;
+
+  // Personalized subject: "Adam — 3 new homes in Fort Collins match your search"
+  const cityLabel = search.filters.city || 'Northern Colorado';
+  const newCount = fresh.length;
+  const dropCount = drops.length;
+  let subject;
+  if (newCount > 0 && dropCount === 0) {
+    subject = firstName
+      ? `${firstName} — ${newCount} new home${newCount === 1 ? '' : 's'} in ${cityLabel} match your search`
+      : `${newCount} new home${newCount === 1 ? '' : 's'} in ${cityLabel} match your search`;
+  } else if (dropCount > 0 && newCount === 0) {
+    subject = firstName
+      ? `${firstName} — ${dropCount} price drop${dropCount === 1 ? '' : 's'} in ${cityLabel}`
+      : `${dropCount} price drop${dropCount === 1 ? '' : 's'} in ${cityLabel}`;
+  } else if (newCount > 0 && dropCount > 0) {
+    subject = firstName
+      ? `${firstName} — ${newCount} new, ${dropCount} price drop${dropCount === 1 ? '' : 's'} in ${cityLabel}`
+      : `${newCount} new, ${dropCount} price drop${dropCount === 1 ? '' : 's'} in ${cityLabel}`;
+  } else {
+    subject = firstName
+      ? `${firstName} — an update on your ${cityLabel} home search`
+      : `An update on your ${cityLabel} home search`;
+  }
 
   // Conversational standouts: 2-3 notable homes with data-derived facts.
   const standouts = [];
@@ -329,22 +382,36 @@ async function runSearch(search, { dryRun, onlyEmail }) {
     }
   }
 
-  const userRes = await pool.query('SELECT email, name FROM users WHERE id = $1', [search.user_id]);
-  const userRow = userRes.rows[0];
-  if (!userRow?.email) return { sent: false, events: 0 };
-  if (onlyEmail && !userRow.email.toLowerCase().includes(onlyEmail.toLowerCase())) return { sent: false, events: 0 };
-  const firstName = (userRow.name || '').trim().split(' ')[0] || null;
+  // "You viewed X" personalization from real property_views
+  let recentViews = [];
+  try {
+    recentViews = await getRecentViews(search.user_id, 5, pool);
+  } catch (e) {
+    console.error('recent views lookup failed:', e.message);
+  }
+  const viewedCallout = buildViewedCallout(recentViews, fresh.map((e) => e.listing));
 
-  const manageUrl = `${SITE}/alerts/manage/?token=${search.manage_token}`;
+  const manageUrl = `${SITE}/my-saved-searches/?token=${search.manage_token}`;
   const unsubscribeUrl = `${SITE}/api/alerts/unsubscribe?token=${search.manage_token}`;
+  const searchPath = filtersToSearchPath(search.filters || {});
+  const searchUrl = `${SITE}${searchPath}`;
 
   if (dryRun) {
-    console.log(`[dry] → ${userRow.email}: "${subject}" (${events.length} events: ${fresh.length} new, ${drops.length} drops, ${statusChanges} off-market)`);
-    return { sent: false, events: events.length, subject };
+    console.log(`[dry] → ${userRow.email}: "${subject}" (${events.length} events: ${fresh.length} new, ${drops.length} drops, ${statusChanges} off-market)${viewedCallout ? ' [viewed callout]' : ''}`);
+    return { sent: false, events: events.length, subject, viewedCallout: !!viewedCallout };
   }
 
   await sendEmail(userRow.email, subject, digestHtml({
-    firstName, searchName: search.name, filterSummary, summaryLines, standouts, cards, manageUrl, unsubscribeUrl,
+    firstName,
+    searchName: search.name,
+    filterSummary,
+    summaryLines,
+    standouts,
+    cards,
+    manageUrl,
+    unsubscribeUrl,
+    searchUrl,
+    viewedCallout,
   }));
   await pool.query(
     'INSERT INTO email_log (user_id, search_id, type, to_email, subject, events) VALUES ($1,$2,$3,$4,$5,$6)',

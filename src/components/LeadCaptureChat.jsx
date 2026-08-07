@@ -166,6 +166,17 @@ export default function LeadCaptureChat() {
     }
   }, [isOpen, location.pathname, hasLead]);
 
+  // Lead-score signal: chat opened (session-gated; silent for guests)
+  useEffect(() => {
+    if (!isOpen) return;
+    fetch(`${API_BASE}/api/alerts/event`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ type: "chat_opened" }),
+    }).catch(() => {});
+  }, [isOpen]);
+
   const sendMessage = async (text) => {
     const userMsg = { role: "user", content: text };
     setMessages((prev) => [...prev, userMsg]);
