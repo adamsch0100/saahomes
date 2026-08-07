@@ -1,5 +1,5 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import SEO from "../components/SEO";
 import ChfaDpaLeadForm from "../components/ChfaDpaLeadForm";
 import ChfaResourceHub from "../components/ChfaResourceHub";
@@ -117,6 +117,108 @@ const specialtyPrograms = [
   },
 ];
 
+/** Local city/county DPA — verified Aug 2026 from official sources. CHFA remains statewide primary. */
+const cityPrograms = [
+  {
+    id: "greeley-g-hope",
+    name: "Greeley G-HOPE",
+    where: "Greeley (east of 35th Ave)",
+    who: "Full-time employees of employers based in the program area; SFH; no income limit; no first-time buyer requirement",
+    amount: "$2,500–$8,000 by zone (forgivable 20%/yr over 5 years)",
+    sourceUrl: "https://greeleyco.gov/housing-solutions/homeownership/",
+    sourceLabel: "City of Greeley G-HOPE",
+    areaLink: "/northern-colorado-areas/greeley/",
+    detailLink: "/greeley-g-hope-down-payment-assistance/",
+  },
+  {
+    id: "estes-park-evwha",
+    name: "Estes Park EVWHA",
+    where: "Estes Valley",
+    who: "Working families 81–150% AMI; first-time homebuyers; $3,000 min buyer funds",
+    amount: "Max 3.5% of purchase price ($15,000 cap); 2% interest, 10-year term",
+    sourceUrl: "https://esteshousing.colorado.gov/homeownership/estes-valley-workforce-housing-assistance",
+    sourceLabel: "Estes Park Housing Authority",
+    areaLink: "/northern-colorado-areas/estes-park/",
+  },
+  {
+    id: "boulder-h2o",
+    name: "Boulder H2O (House to Homeownership)",
+    where: "City of Boulder limits",
+    who: "Buyers ≤120% AMI purchasing a market-rate home in city limits",
+    amount: "Shared-appreciation second loan up to $100,000; deferred 30 years, no monthly payments",
+    sourceUrl: "https://bouldercolorado.gov/homeownership",
+    sourceLabel: "City of Boulder homeownership",
+    areaLink: "/northern-colorado-areas/boulder/",
+  },
+  {
+    id: "longmont-ldpap",
+    name: "Longmont LDPAP",
+    where: "City of Longmont",
+    who: "Income-qualified buyers (program tiers ≤80% or ≤120% AMI by funding source); assets ≤$50K; FTHB pathway",
+    amount: "Up to 10% of purchase price / max $40,000 (61–80% AMI: 2% amortized; ≤60% AMI: 0% deferred)",
+    sourceUrl: "https://longmontcolorado.gov/housing-and-community-investment/boulder-county-down-payment-assistance/",
+    sourceLabel: "City of Longmont DPA",
+    areaLink: "/northern-colorado-areas/longmont/",
+  },
+  {
+    id: "broomfield-dpa",
+    name: "Broomfield DPA",
+    where: "City and County of Broomfield",
+    who: "First-time homebuyers; income-qualified; homebuyer education required",
+    amount: "Up to 10% of purchase price; 30-year, 0% interest (covers DP + closing)",
+    sourceUrl: "https://www.broomfield.org/1445/Housing-Programs",
+    sourceLabel: "Broomfield Housing Programs",
+  },
+];
+
+const countyNonprofitPrograms = [
+  {
+    id: "larimer-lhop",
+    name: "Larimer LHoP",
+    where: "Larimer County (any city, incl. Estes Park)",
+    who: "Households ≤80% AMI; homebuyer education; stacks with CHFA",
+    amount: "Up to $15,000 at 1% interest (~20-year term)",
+    sourceUrl: "https://esteshousing.colorado.gov/homeownership-programs/larimer-home-ownership-program",
+    sourceLabel: "Estes Park Housing Authority — LHoP",
+  },
+  {
+    id: "boulder-county-bcdpap",
+    name: "Boulder County BCDPAP",
+    where: "Boulder County outside City of Boulder (admin. by Longmont)",
+    who: "First-time homebuyers ≤80% AMI",
+    amount: "Up to 10% of purchase price / max $40,000",
+    sourceUrl: "https://longmontcolorado.gov/housing-and-community-investment/boulder-county-down-payment-assistance/",
+    sourceLabel: "Longmont — Boulder County DPA",
+  },
+  {
+    id: "noco-foundation-dpa",
+    name: "NoCo Foundation DPA (via IDF)",
+    where: "Larimer & Weld Counties",
+    who: "Nonprofit program — residents who own no other property; primary residence",
+    amount: "Up to 15% of purchase price; max purchase price $650,000",
+    sourceUrl: "https://impactdf.org/larimer-county/",
+    sourceLabel: "Impact Development Fund — Larimer",
+  },
+  {
+    id: "colorado-roots-dpa",
+    name: "Colorado Roots (Prop 123, via IDF)",
+    where: "Eligible Prop 123 communities",
+    who: "First-time homebuyers; nonprofit-administered",
+    amount: "Up to 10% of purchase price / max $50,000",
+    sourceUrl: "https://impactdf.org/larimer-county/",
+    sourceLabel: "Impact Development Fund — Colorado Roots",
+  },
+  {
+    id: "metrodpa",
+    name: "metroDPA (Front Range)",
+    where: "Front Range (Denver-administered)",
+    who: "First-time and repeat buyers; min FICO 620; income limits apply",
+    amount: "0% interest second mortgage for down payment assistance",
+    sourceUrl: "https://www.metro-dpa.com/",
+    sourceLabel: "metroDPA",
+  },
+];
+
 const steps = [
   {
     step: "1",
@@ -195,6 +297,10 @@ const faqs = [
     q: "How do I apply for CHFA down payment assistance?",
     a: "Start by contacting a CHFA Participating Lender — not CHFA directly. Complete homebuyer education, get pre-approved, then work with a REALTOR® to find a home within program limits. SAA Homes can guide your Northern Colorado search while your lender handles CHFA program details.",
   },
+  {
+    q: "Are there city or county down payment programs in Northern Colorado besides CHFA?",
+    a: "Yes — a few cities and counties offer their own programs that apply only where you live or work. Examples include Greeley G-HOPE (employee zone-based loans), Estes Park EVWHA, Boulder H2O, Longmont LDPAP, Larimer LHoP, and Boulder County BCDPAP. CHFA works statewide. Not every buyer needs local DPA — we can help you sort which (if any) fit. See the City & County Programs section on this page for amounts and official sources.",
+  },
 ];
 
 const PAGE_URL = "https://saahomes.com/chfa-down-payment-assistance/";
@@ -202,7 +308,36 @@ const PAGE_TITLE = "CHFA Down Payment Assistance Colorado | First-Time Homebuyer
 const PAGE_DESCRIPTION =
   "Looking for CHFA down payment assistance in Colorado? Compare SmartStep, Preferred, FirstStep & FirstGeneration programs. Get up to $25K grants or 4% DPA second mortgage. Check your income limits & get started with SAA Homes.";
 
+const CITY_PROGRAM_IDS = new Set(cityPrograms.map((p) => p.id));
+const COUNTY_PROGRAM_IDS = new Set(countyNonprofitPrograms.map((p) => p.id));
+
 export default function ChfaDownPaymentAssistancePage() {
+  const location = useLocation();
+
+  // Open the correct accordion and scroll when deep-linked to a program anchor
+  useEffect(() => {
+    const hash = (location.hash || "").replace(/^#/, "");
+    if (!hash) return undefined;
+
+    const openGroup = (groupId) => {
+      const group = document.getElementById(groupId);
+      if (group instanceof HTMLDetailsElement) group.open = true;
+    };
+
+    if (hash === "city-county-programs") {
+      // leave both closed — section heading is enough
+      return undefined;
+    }
+    if (CITY_PROGRAM_IDS.has(hash)) openGroup("city-programs-accordion");
+    if (COUNTY_PROGRAM_IDS.has(hash)) openGroup("county-programs-accordion");
+
+    const t = window.setTimeout(() => {
+      const el = document.getElementById(hash);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 80);
+    return () => window.clearTimeout(t);
+  }, [location.hash]);
+
   return (
     <>
       <SEO
@@ -225,7 +360,7 @@ export default function ChfaDownPaymentAssistancePage() {
           description: PAGE_DESCRIPTION,
           url: PAGE_URL,
           inLanguage: "en-US",
-          dateModified: "2026-06-24",
+          dateModified: "2026-08-07",
           isPartOf: { "@type": "WebSite", name: "SAA Homes", url: "https://saahomes.com/" },
           about: {
             "@type": "GovernmentService",
@@ -377,7 +512,7 @@ export default function ChfaDownPaymentAssistancePage() {
               navigate program limits, find qualifying homes, and coordinate with CHFA lenders.
             </p>
             <p className="text-sm text-gray-500">
-              Page last updated June 24, 2026. Program details subject to change — verify with CHFA or your lender.
+              Page last updated August 7, 2026. Program details subject to change — verify with CHFA or your lender.
             </p>
           </div>
           <div className="lg:col-span-2 lg:sticky lg:top-28 scroll-mt-28">
@@ -590,6 +725,146 @@ export default function ChfaDownPaymentAssistancePage() {
         </div>
       </section>
 
+      {/* City & county programs — compact accordion, closed by default */}
+      <section id="city-county-programs" className="py-16 sm:py-20 px-6 bg-gray-50 scroll-mt-28">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <p className="text-sm font-semibold uppercase tracking-widest mb-3" style={{ color: GOLD }}>
+              Northern Colorado local options
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4">
+              City &amp; County Programs in Northern Colorado
+            </h2>
+            <p className="text-lg text-gray-700 max-w-2xl mx-auto leading-relaxed">
+              City programs apply only where you live or work — <strong>CHFA works statewide</strong>. Not everyone needs
+              local DPA; open a section only if one of these might fit.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <details id="city-programs-accordion" className="group bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+              <summary className="flex items-center justify-between gap-4 cursor-pointer p-5 sm:p-6 font-bold font-serif text-gray-900 list-none [&::-webkit-details-marker]:hidden">
+                <span>
+                  City programs
+                  <span className="block text-sm font-sans font-normal text-gray-500 mt-1">
+                    Greeley · Estes Park · Boulder · Longmont · Broomfield
+                  </span>
+                </span>
+                <span className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 group-open:bg-black group-open:text-white flex items-center justify-center text-lg transition-colors">
+                  +
+                </span>
+              </summary>
+              <div className="px-5 sm:px-6 pb-6 space-y-4 border-t border-gray-100">
+                {cityPrograms.map((program) => (
+                  <article
+                    key={program.id}
+                    id={program.id}
+                    className="pt-4 scroll-mt-28 border-b border-gray-100 last:border-0 last:pb-0 pb-4"
+                  >
+                    <div className="flex flex-wrap items-baseline justify-between gap-2 mb-2">
+                      <h3 className="text-lg font-bold font-serif text-gray-900">{program.name}</h3>
+                      <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">{program.where}</span>
+                    </div>
+                    <dl className="text-sm text-gray-700 space-y-1.5">
+                      <div>
+                        <dt className="inline font-semibold text-gray-900">Who: </dt>
+                        <dd className="inline">{program.who}</dd>
+                      </div>
+                      <div>
+                        <dt className="inline font-semibold text-gray-900">Amount: </dt>
+                        <dd className="inline">{program.amount}</dd>
+                      </div>
+                    </dl>
+                    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+                      <a
+                        href={program.sourceUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-black hover:underline"
+                      >
+                        Official source →
+                      </a>
+                      {program.detailLink && (
+                        <Link to={program.detailLink} className="font-semibold text-black hover:underline">
+                          Full G-HOPE guide →
+                        </Link>
+                      )}
+                      {program.areaLink && (
+                        <Link to={program.areaLink} className="text-gray-600 hover:underline">
+                          {program.where.split("(")[0].trim()} area →
+                        </Link>
+                      )}
+                      <a href="#chfa-dpa-lead-form" className="font-semibold hover:underline" style={{ color: "#1a1a1a" }}>
+                        Talk to us about qualifying →
+                      </a>
+                    </div>
+                    <p className="sr-only">Source: {program.sourceLabel}</p>
+                  </article>
+                ))}
+              </div>
+            </details>
+
+            <details id="county-programs-accordion" className="group bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+              <summary className="flex items-center justify-between gap-4 cursor-pointer p-5 sm:p-6 font-bold font-serif text-gray-900 list-none [&::-webkit-details-marker]:hidden">
+                <span>
+                  County &amp; nonprofit programs
+                  <span className="block text-sm font-sans font-normal text-gray-500 mt-1">
+                    Larimer · Boulder County · NoCo Foundation · Colorado Roots · metroDPA
+                  </span>
+                </span>
+                <span className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 group-open:bg-black group-open:text-white flex items-center justify-center text-lg transition-colors">
+                  +
+                </span>
+              </summary>
+              <div className="px-5 sm:px-6 pb-6 space-y-4 border-t border-gray-100">
+                {countyNonprofitPrograms.map((program) => (
+                  <article
+                    key={program.id}
+                    id={program.id}
+                    className="pt-4 scroll-mt-28 border-b border-gray-100 last:border-0 last:pb-0 pb-4"
+                  >
+                    <div className="flex flex-wrap items-baseline justify-between gap-2 mb-2">
+                      <h3 className="text-lg font-bold font-serif text-gray-900">{program.name}</h3>
+                      <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">{program.where}</span>
+                    </div>
+                    <dl className="text-sm text-gray-700 space-y-1.5">
+                      <div>
+                        <dt className="inline font-semibold text-gray-900">Who: </dt>
+                        <dd className="inline">{program.who}</dd>
+                      </div>
+                      <div>
+                        <dt className="inline font-semibold text-gray-900">Amount: </dt>
+                        <dd className="inline">{program.amount}</dd>
+                      </div>
+                    </dl>
+                    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+                      <a
+                        href={program.sourceUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-black hover:underline"
+                      >
+                        Official source →
+                      </a>
+                      <a href="#chfa-dpa-lead-form" className="font-semibold hover:underline">
+                        Talk to us about qualifying →
+                      </a>
+                    </div>
+                    <p className="sr-only">Source: {program.sourceLabel}</p>
+                  </article>
+                ))}
+              </div>
+            </details>
+          </div>
+
+          <p className="mt-6 text-center text-sm text-gray-600 max-w-2xl mx-auto">
+            Fort Collins, Loveland, Windsor, and most smaller NoCo towns do not run their own city DPA — CHFA and the
+            county/nonprofit options above are usually the path. Always verify current terms on the official source linked
+            above.
+          </p>
+        </div>
+      </section>
+
       {/* Mid-page CTA */}
       <section className="py-12 px-6" style={{ backgroundColor: GOLD }}>
         <div className="max-w-4xl mx-auto text-center">
@@ -713,12 +988,12 @@ export default function ChfaDownPaymentAssistancePage() {
       <section className="py-12 px-6 bg-gray-100 border-t border-gray-200">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-sm text-gray-600 leading-relaxed">
-            This page provides general information about CHFA down payment assistance programs based on publicly available CHFA
-            resources as of June 2026. Program details, income limits, interest rates, and availability are subject to change.
-            Always verify the latest requirements with{" "}
-            <a href="https://www.chfainfo.com/homeownership" target="_blank" rel="noopener noreferrer" className="underline">CHFA</a>{" "}
-            or a participating lender before making financial decisions. Schwartz and Associates is a real estate brokerage, not a
-            lender, and does not originate CHFA loans.
+            This page provides general information about CHFA down payment assistance and selected Northern Colorado city/county
+            programs based on publicly available official sources as of August 2026. Program details, income limits, interest rates,
+            and availability are subject to change. Always verify the latest requirements with{" "}
+            <a href="https://www.chfainfo.com/homeownership" target="_blank" rel="noopener noreferrer" className="underline">CHFA</a>
+            , the linked city/county source, or a participating lender before making financial decisions. Schwartz and Associates is
+            a real estate brokerage, not a lender, and does not originate CHFA or city DPA loans.
           </p>
         </div>
       </section>

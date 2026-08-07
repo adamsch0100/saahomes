@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 
 const buyerProgramLinks = [
   { label: "CHFA Down Payment Assistance", to: "/chfa-down-payment-assistance/" },
+  { label: "Down Payment Assistance", to: "/chfa-down-payment-assistance/#city-county-programs" },
   { label: "G-HOPE Greeley (City Employees)", to: "/greeley-g-hope-down-payment-assistance/" },
   { label: "CHFA Schools To Home", to: "/chfa-schools-to-home/" },
   { label: "Champions Home Loan", to: "/colorado-champions-home-loan-program/" },

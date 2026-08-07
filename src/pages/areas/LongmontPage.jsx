@@ -233,6 +233,21 @@ export default function LongmontPage() {
         </div>
       </section>
 
+      <section className="py-10 px-6" style={{ backgroundColor: "#CFB36E" }}>
+        <div className="max-w-3xl mx-auto text-center">
+          <p className="text-gray-900 text-lg leading-relaxed">
+            Longmont buyers: city <strong>LDPAP</strong> offers up to <strong>10% / $40,000</strong> for income-qualified
+            buyers; Boulder County <strong>BCDPAP</strong> covers homes outside Boulder city. CHFA works statewide.
+          </p>
+          <Link
+            to="/chfa-down-payment-assistance/#longmont-ldpap"
+            className="inline-flex mt-4 px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            Longmont LDPAP &amp; other DPA →
+          </Link>
+        </div>
+      </section>
+
       <AreaFAQSection faqs={AREA_FAQS['longmont']} city="Longmont" />
 
     </>
