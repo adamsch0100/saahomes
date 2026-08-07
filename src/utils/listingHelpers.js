@@ -121,11 +121,32 @@ export function matchSavedSearch(listing, searches = getSavedSearches()) {
     const reasons = [];
     let ok = true;
 
-    if (s.city) {
-      if ((listing.city || "").toLowerCase() !== String(s.city).toLowerCase()) {
+    // Multi-city (comma-separated) and/or multi-zip
+    const cityList = s.city && s.city !== "__noco__" && s.city !== "__all__"
+      ? String(s.city).split(",").map((x) => x.trim().toLowerCase()).filter(Boolean)
+      : [];
+    const zipRaw = s.postal_code || s.postalCode || s.zip || "";
+    const zipList = zipRaw
+      ? String(zipRaw).split(",").map((x) => x.trim()).filter(Boolean)
+      : [];
+    if (cityList.length || zipList.length) {
+      const cityOk = cityList.length
+        ? cityList.includes((listing.city || "").toLowerCase())
+        : false;
+      const zipOk = zipList.length
+        ? zipList.includes(String(listing.postal_code || ""))
+        : false;
+      if (cityList.length && zipList.length) {
+        if (!cityOk && !zipOk) ok = false;
+        else if (cityOk) reasons.push(listing.city);
+        else reasons.push(listing.postal_code);
+      } else if (cityList.length) {
+        if (!cityOk) ok = false;
+        else reasons.push(listing.city || s.city);
+      } else if (!zipOk) {
         ok = false;
       } else {
-        reasons.push(s.city);
+        reasons.push(listing.postal_code || zipRaw);
       }
     }
     if (s.minPrice != null && listing.list_price != null) {

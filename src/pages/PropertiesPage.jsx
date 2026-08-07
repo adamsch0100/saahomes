@@ -154,6 +154,10 @@ export default function PropertiesPage() {
               </li>
             ))}
           </ul>
+          <p>
+            <Link to="/properties/?city=__all__">Search all of Colorado</Link>
+            {" "}— browse live MLS listings statewide (Denver, Aurora, Colorado Springs, and every city in our IRES feed), while our neighborhood guides stay focused on Northern Colorado.
+          </p>
         </section>
 
         <section>
