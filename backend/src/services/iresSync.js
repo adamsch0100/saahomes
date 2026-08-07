@@ -71,6 +71,7 @@ function classifyHomeType(propertyType, subtype, attachedYn) {
 
 const STATUS_MAP = {
   Active: 'Active',
+  'Active Under Contract': 'Active Under Contract', // backup offers accepted
   Pending: 'Pending',
   Contingent: 'Pending',
   Closed: 'Sold',
@@ -78,7 +79,12 @@ const STATUS_MAP = {
   Expired: 'Expired',
   Withdrawn: 'Withdrawn',
   OffMarket: 'Withdrawn',
+  Canceled: 'Canceled',
 };
+
+// Statuses shown as "listed" in search (is_active=TRUE). Sold/Withdrawn/
+// Expired/Canceled are archived (is_active=FALSE but still stored).
+const LISTED_STATUSES = new Set(['Active', 'Active Under Contract', 'Pending']);
 
 function normalizeListing(raw) {
   const media = Array.isArray(raw.Media) ? raw.Media : [];
@@ -184,6 +190,7 @@ function normalizeListing(raw) {
   return {
     listing_id: String(raw.ListingId || raw.ListingKey),
     status: STATUS_MAP[raw.StandardStatus] || String(raw.StandardStatus || 'Active'),
+    is_active: LISTED_STATUSES.has(STATUS_MAP[raw.StandardStatus] || String(raw.StandardStatus || 'Active')),
     property_type: raw.PropertyType || null,
     property_subtype: raw.PropertySubType || null,
     home_type: classifyHomeType(raw.PropertyType, raw.PropertySubType, raw.PropertyAttachedYN),
@@ -270,7 +277,7 @@ async function fetchPage(authToken, offset, retries = 4) {
   const url = new URL(`${process.env.IRES_API_URL}/Property`);
   url.searchParams.set('$top', '100');
   url.searchParams.set('$skip', String(offset));
-  url.searchParams.set('$filter', "StandardStatus eq 'Active'");
+  url.searchParams.set('$filter', "(StandardStatus eq 'Active' or StandardStatus eq 'Active Under Contract' or StandardStatus eq 'Pending' or StandardStatus eq 'Withdrawn' or StandardStatus eq 'Expired')");
   url.searchParams.set('$select', MLS_FIELDS.join(','));
   url.searchParams.set('$expand', 'Media');
 
@@ -362,15 +369,15 @@ export async function syncListings() {
       const l = normalizeListing(raw);
       seenIds.push(l.listing_id);
       await pool.query(
-        `INSERT INTO listings (listing_id, status, property_type, property_subtype, home_type, street_number, street_name, unit,
+        `INSERT INTO listings (listing_id, status, is_active, property_type, property_subtype, home_type, street_number, street_name, unit,
            city, state, postal_code, county, list_price, original_list_price, beds, baths, half_baths,
            three_quarter_baths, living_area, above_grade_area, lot_size, lot_size_acres, units_total,
            year_built, garage_spaces, hoa_fee, description, photos, photos_count, latitude, longitude,
            listing_url, mls_source, elementary_school, middle_school, high_school, school_district,
            days_on_market, price_per_sqft, subdivision, features, raw, slug, last_seen_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,NOW())
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,NOW())
          ON CONFLICT (listing_id) DO UPDATE SET
-           status = EXCLUDED.status, property_type = EXCLUDED.property_type,
+          status = EXCLUDED.status, is_active = EXCLUDED.is_active, property_type = EXCLUDED.property_type,
            property_subtype = EXCLUDED.property_subtype, home_type = EXCLUDED.home_type,
            street_number = EXCLUDED.street_number, street_name = EXCLUDED.street_name,
            unit = EXCLUDED.unit, city = EXCLUDED.city, state = EXCLUDED.state,
@@ -391,8 +398,8 @@ export async function syncListings() {
            days_on_market = EXCLUDED.days_on_market, price_per_sqft = EXCLUDED.price_per_sqft,
            subdivision = EXCLUDED.subdivision, features = EXCLUDED.features,
            raw = EXCLUDED.raw, slug = EXCLUDED.slug,
-           is_active = TRUE, updated_at = NOW(), last_seen_at = NOW()`,
-        [l.listing_id, l.status, l.property_type, l.property_subtype, l.home_type,
+           updated_at = NOW(), last_seen_at = NOW()`,
+        [l.listing_id, l.status, l.is_active, l.property_type, l.property_subtype, l.home_type,
          l.street_number, l.street_name, l.unit,
          l.city, l.state, l.postal_code, l.county, l.list_price, l.original_list_price,
          l.beds, l.baths, l.half_baths, l.three_quarter_baths, l.living_area, l.above_grade_area,

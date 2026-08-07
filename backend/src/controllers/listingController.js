@@ -210,7 +210,7 @@ function buildListingFilters(query = {}) {
     polygon,
     minSqft, maxSqft, minYear, maxYear, maxHoa, minHoa,
     garage, basement, fireplace, pool: hasPool,
-    newConstruction, waterfront, newDays,
+    newConstruction, waterfront, newDays, dropDays, dropPct,
     minLotAcres, maxLotAcres, stories,
     cooling, heating, parking, view, style, community, exterior,
     interior, // comma-separated interior feature keywords
@@ -228,10 +228,16 @@ function buildListingFilters(query = {}) {
   };
   const pushRaw = (sql) => { where.push(sql); };
 
-  pushRaw('is_active = TRUE');
+  // Archived statuses (Sold/Withdrawn/Expired/Canceled) are stored with
+  // is_active=FALSE — searching them drops the is_active guard so their rows
+  // are reachable. Listed statuses (Active/AUC/Pending) keep the guard.
+  const ARCHIVED_STATUSES = ['Sold', 'Withdrawn', 'Expired', 'Canceled'];
+  if (!status || status === 'any' || status === 'all' || !ARCHIVED_STATUSES.includes(status)) {
+    pushRaw('is_active = TRUE');
+  }
 
-  // Status: Active default; listingStatus=price-drop overlays price-cut filter
-  // without changing MLS status unless explicitly non-Active.
+  // Status: the HOME's status (Active | Active Under Contract | Pending |
+  // Sold | Withdrawn | Expired). 'For sale' (default) = Active via frontend "".
   if (status && status !== 'any' && status !== 'all') {
     push('status = $n', status);
   }
@@ -423,7 +429,13 @@ function buildListingFilters(query = {}) {
     }
   }
 
-  // Listing status chips (overlay on Active inventory)
+  // Editable price-drop filter: price changed within dropDays days AND current
+  // list price is at least dropPct% below the original list price.
+  if (dropDays) push('price_change_timestamp >= NOW() - make_interval(days => $n)', Number(dropDays));
+  if (dropPct) push('original_list_price IS NOT NULL AND list_price IS NOT NULL AND list_price <= original_list_price * (1 - $n / 100.0)', Number(dropPct));
+
+  // Legacy listing status chips (overlay on Active inventory) — superseded by
+  // the editable controls above but kept for old URLs.
   if (listingStatus === 'price-drop' || listingStatus === 'price_drop') {
     pushRaw(`original_list_price IS NOT NULL AND list_price IS NOT NULL AND list_price < original_list_price`);
   } else if (listingStatus === 'new') {
