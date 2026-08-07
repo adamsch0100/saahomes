@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useLocation } from "react-router-dom";
 
 const buyerProgramLinks = [
   { label: "CHFA Down Payment Assistance", to: "/chfa-down-payment-assistance/" },
@@ -9,9 +9,15 @@ const buyerProgramLinks = [
 ];
 
 export default function Header() {
+  const location = useLocation();
+  const headerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [buyersExpanded, setBuyersExpanded] = useState(false);
+
+  // Compact always-black header on full-screen search (Zillow-style)
+  const isSearchHeader =
+    location.pathname === "/properties" || location.pathname === "/properties/";
 
   const closeMenu = () => {
     setMenuOpen(false);
@@ -29,21 +35,60 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
-    return () => {
+    // On properties search page body overflow is managed by PropertiesPage;
+    // only lock when opening the menu off that page (or force lock for menu).
+    if (menuOpen) {
+      document.body.style.overflow = "hidden";
+    } else if (!isSearchHeader) {
       document.body.style.overflow = "";
+    }
+    return () => {
+      if (!isSearchHeader) {
+        document.body.style.overflow = "";
+      }
     };
-  }, [menuOpen]);
+  }, [menuOpen, isSearchHeader]);
+
+  // Publish header height so the search app can pin under it (incl. safe-area)
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return undefined;
+
+    const publish = () => {
+      const h = Math.ceil(el.getBoundingClientRect().height);
+      document.documentElement.style.setProperty("--saa-header-h", `${h}px`);
+    };
+
+    publish();
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(publish) : null;
+    if (ro) ro.observe(el);
+    window.addEventListener("resize", publish);
+    return () => {
+      if (ro) ro.disconnect();
+      window.removeEventListener("resize", publish);
+      if (isSearchHeader) {
+        document.documentElement.style.removeProperty("--saa-header-h");
+      }
+    };
+  }, [isSearchHeader]);
+
+  const solidBar = scrolled || isSearchHeader;
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 pt-safe">
+      <header ref={headerRef} className="fixed top-0 left-0 right-0 z-50 pt-safe">
         <div
           className={`transition-all duration-300 ${
-            scrolled ? "bg-black shadow-md" : "bg-transparent"
+            solidBar ? "bg-black shadow-md" : "bg-transparent"
           }`}
         >
-          <div className="w-full px-4 sm:px-6 lg:px-8 py-3 lg:py-6 flex items-center justify-between relative min-h-[72px] sm:min-h-[96px] lg:min-h-[120px]">
+          <div
+            className={`w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between relative ${
+              isSearchHeader
+                ? "py-2 min-h-[56px] sm:min-h-[60px] lg:min-h-[64px]"
+                : "py-3 lg:py-6 min-h-[72px] sm:min-h-[96px] lg:min-h-[120px]"
+            }`}
+          >
             <div className="hidden lg:flex items-center gap-6 text-white z-30">
               <button
                 onClick={() => setMenuOpen(true)}
@@ -83,7 +128,11 @@ export default function Header() {
               <img
                 src="/images/White-Logo-AUTOx110.fit.png"
                 alt="Schwartz and Associates Logo"
-                className="w-auto h-14 sm:h-20 lg:h-[110px]"
+                className={
+                  isSearchHeader
+                    ? "w-auto h-9 sm:h-10 lg:h-11"
+                    : "w-auto h-14 sm:h-20 lg:h-[110px]"
+                }
               />
             </Link>
 

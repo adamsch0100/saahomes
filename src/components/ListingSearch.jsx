@@ -1285,9 +1285,12 @@ export default function ListingSearch({ location, height = "700px", compact = fa
   };
 
   return (
-    <div className="flex flex-col bg-white relative" style={{ height: compact ? height : height }}>
-      {/* Sticky filter bar */}
-      <div className="border-b border-gray-200 bg-white z-20 shrink-0">
+    <div
+      className="flex flex-col bg-white relative h-full min-h-0"
+      style={{ height: height || "100%" }}
+    >
+      {/* Sticky filter bar — never scrolls away */}
+      <div className="border-b border-gray-200 bg-white z-20 shrink-0 sticky top-0">
         {/* Desktop chip bar */}
         <div className="hidden md:flex flex-wrap items-center gap-2 p-3 lg:px-4">
           <select
