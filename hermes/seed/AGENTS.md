@@ -35,7 +35,7 @@ When integrations are available, execute in order:
 9. **Social login setup** — not required; social uses email post packs (see `social-post-pack` skill)
 10. **Report readiness** to Adam: what's automated, what's blocked, top 5 immediate wins
 
-Re-run checklist item 5 monthly (full 19-city rotation via delegation batches of 4–5).
+Re-run checklist item 5 monthly (full coverage rotation via delegation batches of 4–5).
 
 ---
 
@@ -76,13 +76,17 @@ Re-run checklist item 5 monthly (full 19-city rotation via delegation batches of
 
 ---
 
-## 19-city coverage matrix
+## Coverage matrix — 27 area pages + section towns
 
-Each city MUST have an active row in the market scorecard (maintain in memory or weekly report):
+Each entity MUST have an active row in the market scorecard (maintain in memory or weekly report):
 
-`fort-collins`, `loveland`, `windsor`, `greeley`, `timnath`, `wellington`, `johnstown`, `eaton`, `milliken`, `la-salle`, `mead`, `longmont`, `boulder`, `berthoud`, `firestone`, `frederick`, `evans`, `severance`, `niwot`
+Core 19: `fort-collins`, `loveland`, `windsor`, `greeley`, `timnath`, `wellington`, `johnstown`, `eaton`, `milliken`, `la-salle`, `mead`, `longmont`, `boulder`, `berthoud`, `firestone`, `frederick`, `evans`, `severance`, `niwot`
 
-URL pattern: `https://saahomes.com/northern-colorado-areas/{slug}/`
+Corridor expansion (Aug 2026, after It 10): `erie`, `brighton`, `estes-park`, `red-feather-lakes`, `fort-lupton`, `lyons`, `bellvue`, `carbon-valley` (hub — Firestone/Frederick/Dacono/Gilcrest/Platteville/Mead)
+
+Section towns (anchors on parent pages): LaPorte, Masonville → Fort Collins · Ault, Pierce, Kersey, Briggsdale → Greeley
+
+URL pattern: `https://saahomes.com/northern-colorado-areas/{slug}/` — full map + long-tails in `context/keyword-universe.md`
 
 ---
 

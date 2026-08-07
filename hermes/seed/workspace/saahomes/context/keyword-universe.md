@@ -5,7 +5,9 @@ Complete query map for Schwartz and Associates market ownership.
 
 ---
 
-## 19 cities (slug → display name)
+## Coverage map — 27 area pages + section towns
+
+Core 19 (built):
 
 | Slug | City | County | Area URL |
 |------|------|--------|----------|
@@ -28,6 +30,40 @@ Complete query map for Schwartz and Associates market ownership.
 | evans | Evans | Weld | /northern-colorado-areas/evans/ |
 | severance | Severance | Weld | /northern-colorado-areas/severance/ |
 | niwot | Niwot | Boulder | /northern-colorado-areas/niwot/ |
+
+Corridor + expansion (build after It 10 statewide search — live counts Aug 7 2026, IRES):
+
+| Slug | City | County | Area URL | Active | Med $ |
+|------|------|--------|----------|--------|-------|
+| erie | Erie | Weld | /northern-colorado-areas/erie/ | 257 | 714,900 |
+| brighton | Brighton | Adams (I-76 corridor) | /northern-colorado-areas/brighton/ | 367 | 550,000 |
+| estes-park | Estes Park | Larimer | /northern-colorado-areas/estes-park/ | 220 | 709,500 |
+| red-feather-lakes | Red Feather Lakes | Larimer | /northern-colorado-areas/red-feather-lakes/ | 132 | 275,000 |
+| fort-lupton | Fort Lupton | Weld | /northern-colorado-areas/fort-lupton/ | 128 | 494,945 |
+| lyons | Lyons | Boulder | /northern-colorado-areas/lyons/ | 114 | 759,000 |
+| bellvue | Bellvue | Larimer | /northern-colorado-areas/bellvue/ | 86 | 423,750 |
+| carbon-valley | Carbon Valley (hub) | Weld | /northern-colorado-areas/carbon-valley/ | hub | — |
+
+**Carbon Valley hub** = Firestone + Frederick + Dacono (36, $592K) + Gilcrest (5) + Platteville (44, $439K) + Mead — Dacono/Platteville/Gilcrest live as data-rich sections w/ anchors on the hub; links to existing firestone/frederick/fort-lupton/mead pages.
+
+**Section towns** (anchor sections on parent pages, no standalone URL): LaPorte (19) + Masonville (0) → Fort Collins page · Ault (36) + Pierce (23) + Kersey (14) + Briggsdale (11) → Greeley page · Hudson (43, acreage) → Brighton/longmont tie-in.
+
+URL pattern: `https://saahomes.com/northern-colorado-areas/{slug}/`
+
+---
+
+## Corridor long-tails (add to GSC monitoring)
+
+| Query | Target |
+|-------|--------|
+| cabin for sale Red Feather Lakes / Red Feather lakefront / mountain cabin under $300K | red-feather-lakes page |
+| Estes Park cabins for sale / homes near Rocky Mountain National Park / Estes Park second home | estes-park page |
+| Erie CO new construction / moving to Erie Colorado / Erie homes under $600K | erie page |
+| Brighton CO new builds / Brighton to Denver commute | brighton page |
+| Carbon Valley CO real estate / Firestone Frederick Dacono homes / Dacono CO homes for sale | carbon-valley hub |
+| Lyons CO mountain homes / Bellvue CO acreage / Poudre Canyon homes for sale | lyons / bellvue |
+| Fort Lupton CO homes for sale / Fort Lupton new construction | fort-lupton page |
+| Platteville CO homes for sale / Gilcrest CO real estate | carbon-valley sections |
 
 ---
 
