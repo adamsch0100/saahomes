@@ -4,22 +4,75 @@ import { photoUrl } from "../../utils/photoUrl.js";
 /**
  * Zillow-style photo gallery: main image, thumbs, swipe, counter, keyboard, fullscreen.
  * Shared by the full route page and the search detail popup.
+ *
+ * Critical: image UI is NOT a nested React component (that remounts every parent
+ * render and breaks prev/next + causes grey flashes). Loading uses a dual-buffer
+ * (keep last good photo visible) + preload of adjacent indices via photoUrl proxy.
+ *
+ * Arrow UX (Adam Aug 7): mouse clicks must work, not only touch. Do NOT use blanket
+ * onPointerDown stopPropagation — it can break the mouse pointer→click chain on some
+ * browsers. Use onMouseDown stopPropagation instead; main <img> is pointer-events-none.
  */
+
+function preloadImage(url) {
+  return new Promise((resolve) => {
+    if (!url) {
+      resolve(false);
+      return;
+    }
+    const img = new Image();
+    let settled = false;
+    const finish = (ok) => {
+      if (settled) return;
+      settled = true;
+      resolve(ok);
+    };
+    img.onload = () => finish(true);
+    img.onerror = () => finish(false);
+    img.src = url;
+    // Cached images may already be complete before handlers attach
+    if (img.complete && img.naturalWidth > 0) finish(true);
+  });
+}
+
 export default function PhotoGallery({ listingId, photos, photosCount, alt, compact = false }) {
   const [active, setActive] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
-  const [loaded, setLoaded] = useState({});
+  /** index → true once that photo has loaded successfully */
+  const [loaded, setLoaded] = useState(() => ({}));
+  /** last index that fully loaded while it was active — underlay while next loads */
+  const [displayIndex, setDisplayIndex] = useState(0);
   const touchStartX = useRef(null);
   const rootRef = useRef(null);
+  const mainImgRef = useRef(null);
+  const loadedRef = useRef({});
+  const activeRef = useRef(0);
+
   const total = Math.max(
     Array.isArray(photos) ? photos.length : 0,
     Number(photosCount) > 0 ? Number(photosCount) : 0
   );
 
+  activeRef.current = active;
+
   useEffect(() => {
     setActive(0);
+    setDisplayIndex(0);
     setLoaded({});
+    loadedRef.current = {};
   }, [listingId]);
+
+  const markLoaded = useCallback((i) => {
+    if (loadedRef.current[i]) {
+      // Already known good — if it is the active slide, keep underlay in sync
+      if (i === activeRef.current) setDisplayIndex(i);
+      return;
+    }
+    loadedRef.current = { ...loadedRef.current, [i]: true };
+    setLoaded((prev) => (prev[i] ? prev : { ...prev, [i]: true }));
+    // Only advance displayIndex when the *active* photo finishes (preloads must not)
+    if (i === activeRef.current) setDisplayIndex(i);
+  }, []);
 
   const go = useCallback(
     (dir) => {
@@ -34,17 +87,28 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
     [total]
   );
 
+  // When active changes to an already-cached photo, promote underlay immediately
   useEffect(() => {
-    if (total <= 1) return undefined;
+    if (loadedRef.current[active]) {
+      setDisplayIndex(active);
+    }
+  }, [active]);
+
+  // Keyboard: arrows + Escape (capture so fullscreen Escape wins over panel close)
+  useEffect(() => {
+    if (total <= 1 && !fullscreen) return undefined;
     const onKey = (e) => {
       const tag = (e.target && e.target.tagName) || "";
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || e.target?.isContentEditable) {
         return;
       }
       if (e.key === "Escape" && fullscreen) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
         setFullscreen(false);
         return;
       }
+      if (total <= 1) return;
       if (e.key === "ArrowLeft") {
         e.preventDefault();
         go(-1);
@@ -53,46 +117,64 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
         go(1);
       }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
   }, [go, total, fullscreen]);
 
   useEffect(() => {
     if (!fullscreen) return undefined;
+    const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = prev;
     };
   }, [fullscreen]);
 
+  // Preload current + adjacent; mark loaded when ready (avoids grey flash on next)
   useEffect(() => {
-    if (!listingId || total <= 1) return undefined;
-    const idxs = [(active + 1) % total, (active - 1 + total) % total];
-    const imgs = idxs.map((idx) => {
-      const img = new Image();
-      img.src = photoUrl(listingId, idx);
-      return img;
+    if (!listingId || total <= 0) return undefined;
+    let cancelled = false;
+    const idxs = new Set([active]);
+    if (total > 1) {
+      idxs.add((active + 1) % total);
+      idxs.add((active - 1 + total) % total);
+      // Also warm ±2 for smoother scrubbing
+      idxs.add((active + 2) % total);
+      idxs.add((active - 2 + total) % total);
+    }
+    idxs.forEach((idx) => {
+      if (loadedRef.current[idx]) return;
+      const url = photoUrl(listingId, idx);
+      preloadImage(url).then((ok) => {
+        if (cancelled || !ok) return;
+        markLoaded(idx);
+      });
     });
     return () => {
-      imgs.forEach((img) => {
-        img.src = "";
-      });
+      cancelled = true;
     };
-  }, [active, listingId, total]);
+  }, [active, listingId, total, markLoaded]);
+
+  // Handle cached <img> that may already be complete when src is set
+  useEffect(() => {
+    const el = mainImgRef.current;
+    if (!el) return;
+    if (el.complete && el.naturalWidth > 0) {
+      markLoaded(active);
+    }
+  }, [active, listingId, markLoaded]);
 
   if (!total) {
     return (
       <div
         className={`${
-          compact ? "aspect-[4/3]" : "aspect-[16/10] rounded-xl"
+          compact ? "aspect-[16/10]" : "aspect-[16/10] rounded-xl"
         } bg-gray-800 flex items-center justify-center text-gray-400 text-sm`}
       >
         Photos coming soon
       </div>
     );
   }
-
-  const markLoaded = (i) => setLoaded((prev) => ({ ...prev, [i]: true }));
 
   const onTouchStart = (e) => {
     touchStartX.current = e.changedTouches[0].clientX;
@@ -104,19 +186,54 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
     touchStartX.current = null;
   };
 
+  /**
+   * Arrow activation for mouse click, touch tap, and keyboard activation.
+   * stopPropagation on click + mousedown only (not pointerdown) so mouse
+   * click synthesis is not broken on touchscreen laptops / some browsers.
+   */
+  const onArrowClick = (dir) => (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    go(dir);
+  };
+  const onArrowMouseDown = (e) => {
+    // Block parent mousedown (panel/backdrop) without touching pointerdown→click
+    e.stopPropagation();
+  };
+
   const countBadge = `${active + 1}/${total}`;
   const thumbIndexes = Array.from({ length: total }, (_, i) => i);
+  const activeLoaded = !!loaded[active];
+  const showUnderlay = !activeLoaded && displayIndex !== active && !!loaded[displayIndex];
 
-  const MainImage = ({ className = "", showControls = true }) => (
+  const renderMainStage = (stageClassName, { large = false } = {}) => (
     <div
-      className={`relative bg-gray-900 overflow-hidden ${className}`}
+      className={`relative bg-neutral-900 overflow-hidden select-none ${stageClassName}`}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      {!loaded[active] && (
-        <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-800 to-gray-700" />
+      {/* Soft brand-tinted placeholder — never harsh grey */}
+      <div
+        className="absolute inset-0 pointer-events-none bg-gradient-to-br from-neutral-800 via-neutral-900 to-neutral-800"
+        aria-hidden="true"
+      >
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_center,_#CFB36E_0%,_transparent_65%)]" />
+      </div>
+
+      {/* Keep previous photo visible while the next one loads */}
+      {showUnderlay && (
+        <img
+          src={photoUrl(listingId, displayIndex)}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          decoding="async"
+          draggable={false}
+        />
       )}
+
       <img
+        ref={mainImgRef}
         key={`${listingId}-${active}`}
         src={photoUrl(listingId, active)}
         alt={`${alt} — photo ${active + 1} of ${total}`}
@@ -126,33 +243,44 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
           e.currentTarget.src = "/images/buyers-hero.jpg";
           markLoaded(active);
         }}
-        className={`w-full h-full object-cover transition-opacity duration-300 ${
-          loaded[active] ? "opacity-100" : "opacity-0"
+        className={`absolute inset-0 z-[1] w-full h-full object-cover pointer-events-none transition-opacity duration-200 ${
+          activeLoaded ? "opacity-100" : "opacity-0"
         }`}
         decoding="async"
+        // Current (and near-current) photos must load eagerly — lazy causes grey stalls
+        loading="eager"
         fetchPriority={active === 0 ? "high" : "auto"}
+        draggable={false}
       />
 
-      {showControls && total > 1 && (
+      {/* Subtle pulse only while first paint of this index is pending */}
+      {!activeLoaded && (
+        <div
+          className="absolute inset-0 z-[2] pointer-events-none animate-pulse bg-black/20"
+          aria-hidden="true"
+        />
+      )}
+
+      {total > 1 && (
         <>
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              go(-1);
-            }}
-            className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center text-gray-900 text-xl leading-none active:scale-95 transition-transform"
+            onClick={onArrowClick(-1)}
+            onMouseDown={onArrowMouseDown}
+            className={`absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-30 rounded-full bg-white/95 hover:bg-white shadow-lg flex items-center justify-center text-gray-900 leading-none active:scale-95 transition-transform pointer-events-auto touch-manipulation select-none ${
+              large ? "w-12 h-12 text-2xl" : "w-10 h-10 text-xl"
+            }`}
             aria-label="Previous photo"
           >
             ‹
           </button>
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              go(1);
-            }}
-            className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center text-gray-900 text-xl leading-none active:scale-95 transition-transform"
+            onClick={onArrowClick(1)}
+            onMouseDown={onArrowMouseDown}
+            className={`absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-30 rounded-full bg-white/95 hover:bg-white shadow-lg flex items-center justify-center text-gray-900 leading-none active:scale-95 transition-transform pointer-events-auto touch-manipulation select-none ${
+              large ? "w-12 h-12 text-2xl" : "w-10 h-10 text-xl"
+            }`}
             aria-label="Next photo"
           >
             ›
@@ -160,7 +288,7 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
         </>
       )}
 
-      <span className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/75 text-white text-xs font-medium px-3 py-1 rounded-full tabular-nums">
+      <span className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 bg-black/75 text-white text-xs font-medium px-3 py-1 rounded-full tabular-nums pointer-events-none">
         {countBadge}
       </span>
     </div>
@@ -174,11 +302,18 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
             compact ? "" : "rounded-xl"
           }`}
         >
-          <MainImage className={compact ? "aspect-[16/10] sm:aspect-[16/9]" : "aspect-[16/10] sm:aspect-[16/9]"} />
+          {renderMainStage(
+            compact ? "aspect-[16/10] sm:aspect-[16/9]" : "aspect-[16/10] sm:aspect-[16/9]"
+          )}
           <button
             type="button"
-            onClick={() => setFullscreen(true)}
-            className="absolute top-3 right-3 z-10 px-3 py-1.5 rounded-full bg-black/70 hover:bg-black text-white text-xs font-semibold active:scale-95 transition-transform"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setFullscreen(true);
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+            className="absolute top-3 right-3 z-40 px-3 py-1.5 rounded-full bg-black/70 hover:bg-black text-white text-xs font-semibold active:scale-95 transition-transform pointer-events-auto touch-manipulation"
             aria-label="Open full-screen photo gallery"
           >
             Expand
@@ -196,24 +331,27 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
                 key={i}
                 type="button"
                 onClick={() => setActive(i)}
-                className={`relative w-20 h-14 sm:w-24 sm:h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-opacity ${
+                className={`relative w-20 h-14 sm:w-24 sm:h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-opacity touch-manipulation pointer-events-auto ${
                   i === active
                     ? "border-[#CFB36E] opacity-100"
                     : "border-transparent opacity-70 hover:opacity-100"
                 }`}
                 aria-label={`Photo ${i + 1}`}
-                aria-current={i === active}
+                aria-current={i === active ? "true" : undefined}
               >
                 <img
                   src={photoUrl(listingId, i)}
                   alt=""
-                  loading={Math.abs(i - active) <= 2 ? "eager" : "lazy"}
+                  // Eager for near-active; lazy only for far thumbs
+                  loading={Math.abs(i - active) <= 3 || i < 6 ? "eager" : "lazy"}
                   decoding="async"
+                  onLoad={() => markLoaded(i)}
                   onError={(e) => {
                     e.currentTarget.onerror = null;
                     e.currentTarget.src = "/images/buyers-hero.jpg";
                   }}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover pointer-events-none"
+                  draggable={false}
                 />
               </button>
             ))}
@@ -237,20 +375,21 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
           role="dialog"
           aria-modal="true"
           aria-label="Photo gallery"
+          onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between px-4 py-3 text-white shrink-0">
             <span className="text-sm font-medium tabular-nums">{countBadge}</span>
             <button
               type="button"
               onClick={() => setFullscreen(false)}
-              className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center text-2xl"
+              className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center text-2xl touch-manipulation"
               aria-label="Close gallery"
             >
               ×
             </button>
           </div>
           <div className="flex-1 min-h-0 flex items-center justify-center px-2 sm:px-8">
-            <MainImage className="w-full max-h-full max-w-6xl aspect-auto h-full" />
+            {renderMainStage("w-full max-h-full max-w-6xl aspect-auto h-full", { large: true })}
           </div>
           {total > 1 && (
             <div className="shrink-0 flex gap-2 overflow-x-auto px-4 py-3 justify-center">
@@ -259,19 +398,22 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
                   key={i}
                   type="button"
                   onClick={() => setActive(i)}
-                  className={`w-14 h-10 rounded overflow-hidden flex-shrink-0 border-2 ${
+                  className={`w-14 h-10 rounded overflow-hidden flex-shrink-0 border-2 touch-manipulation pointer-events-auto ${
                     i === active ? "border-[#CFB36E]" : "border-transparent opacity-60"
                   }`}
                 >
                   <img
                     src={photoUrl(listingId, i)}
                     alt=""
-                    className="w-full h-full object-cover"
-                    loading="lazy"
+                    className="w-full h-full object-cover pointer-events-none"
+                    loading={Math.abs(i - active) <= 4 ? "eager" : "lazy"}
+                    decoding="async"
+                    onLoad={() => markLoaded(i)}
                     onError={(e) => {
                       e.currentTarget.onerror = null;
                       e.currentTarget.src = "/images/buyers-hero.jpg";
                     }}
+                    draggable={false}
                   />
                 </button>
               ))}

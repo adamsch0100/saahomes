@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { formatPrice } from "../utils/listingHelpers.js";
 
 /**
@@ -61,6 +61,13 @@ export default function PaymentCalculator({
     price > 0 ? Math.round(price * 0.2) : 0
   );
 
+  // Keep down-payment dollars in sync when listing price changes (panel navigation)
+  useEffect(() => {
+    if (price > 0 && downMode === "pct") {
+      setDownDollars(Math.round((price * downPct) / 100));
+    }
+  }, [price]); // eslint-disable-line react-hooks/exhaustive-deps -- only re-sync on price change
+
   const resolvedDownPct = useMemo(() => {
     if (downMode === "dollars" && price > 0) {
       return Math.min(100, Math.max(0, (Number(downDollars) / price) * 100));
@@ -119,6 +126,8 @@ export default function PaymentCalculator({
     if (price > 0) setDownPct(Math.round((n / price) * 1000) / 10);
   };
 
+  const homePriceLabel = formatPrice(price);
+
   return (
     <div
       className={`rounded-xl border border-gray-200 bg-white ${
@@ -140,6 +149,27 @@ export default function PaymentCalculator({
             <span className="text-sm font-semibold text-gray-500">/mo</span>
           </p>
         </div>
+      </div>
+
+      {/* Home price — always shown so the calc is grounded in this listing */}
+      <div
+        className={`mb-3 rounded-lg border border-[#CFB36E]/35 bg-[#CFB36E]/10 ${
+          isCompact ? "px-2.5 py-2" : "px-3 py-2.5"
+        }`}
+      >
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xs font-medium text-gray-700">Home price</span>
+          <span
+            className={`font-bold text-gray-900 tabular-nums ${
+              isCompact ? "text-sm" : "text-base"
+            }`}
+          >
+            {homePriceLabel}
+          </span>
+        </div>
+        <p className="text-[10px] text-gray-500 mt-0.5">
+          Pre-filled from this listing · loan amount {formatUsd(calc.loan)} after down payment
+        </p>
       </div>
 
       {/* Down payment */}
@@ -233,6 +263,20 @@ export default function PaymentCalculator({
       {isCard && (
         <ul className="mt-4 pt-3 border-t border-gray-100 space-y-1.5 text-xs text-gray-600">
           <li className="flex justify-between gap-2">
+            <span>Home price</span>
+            <span className="tabular-nums font-medium text-gray-900">{homePriceLabel}</span>
+          </li>
+          <li className="flex justify-between gap-2">
+            <span>Down payment</span>
+            <span className="tabular-nums font-medium text-gray-900">
+              {formatUsd(calc.downAmount)}
+            </span>
+          </li>
+          <li className="flex justify-between gap-2">
+            <span>Loan amount</span>
+            <span className="tabular-nums font-medium text-gray-900">{formatUsd(calc.loan)}</span>
+          </li>
+          <li className="flex justify-between gap-2 pt-1 border-t border-gray-50">
             <span>Principal &amp; interest</span>
             <span className="tabular-nums font-medium text-gray-900">{formatUsd(calc.pi)}</span>
           </li>
@@ -260,7 +304,7 @@ export default function PaymentCalculator({
       )}
 
       <p className="mt-3 text-[10px] text-gray-400 leading-relaxed">
-        Payment estimate only. Taxes
+        Payment estimate only based on home price {homePriceLabel}. Taxes
         {calc.taxIsEstimate
           ? " use ~1% of list price annually (no tax amount on this listing)"
           : " use the annual tax amount from the MLS listing"}
