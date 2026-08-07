@@ -199,7 +199,17 @@ export default function ListingDetailPage() {
       "@type": "Offer",
       price: listing.list_price != null ? Number(listing.list_price) : undefined,
       priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
+      // Real availability from the MLS status field (GEO review 2026-08-07:
+      // was hardcoded InStock even for Pending/AUC homes — wrong signal to AI)
+      availability:
+        {
+          Active: "https://schema.org/InStock",
+          "Active Under Contract": "https://schema.org/LimitedAvailability",
+          Pending: "https://schema.org/OutOfStock",
+          Sold: "https://schema.org/Discontinued",
+          Withdrawn: "https://schema.org/OutOfStock",
+          Expired: "https://schema.org/OutOfStock",
+        }[listing.status] || "https://schema.org/InStock",
     },
     ...(listing.latitude && listing.longitude
       ? {
