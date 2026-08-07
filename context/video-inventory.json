@@ -1,7 +1,7 @@
 {
   "channel": "https://www.youtube.com/channel/UCCgkJ1fymEPI5hdBH2SNvrg",
   "listing_channel": "https://youtube.com/@SAAHomes",
-  "last_updated": "2026-08-05",
+  "last_updated": "2026-08-07",
   "notes": "Article explainer videos are on the Adam Schwartz channel (UCCgkJ1fymEPI5hdBH2SNvrg). @SAAHomes is listing tours only. All Hermes article videos assumed freetouse.com/Limujii risk until remuxed. Run audit-youtube-channel.py to refresh.",
   "videos": [
     {
