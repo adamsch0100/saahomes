@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { getPrerenderRoutes, SITE_URL } from '../src/data/siteRoutes.js';
 import { BUSINESS } from '../src/utils/seoConstants.js';
 import { areaSeoPages, buildAreaPageSchemas } from '../src/data/areaSeo.js';
+import { getReviewSchema } from '../src/data/reviews.js';
 import { CITY_HOMES, getCityHomes, getCityHomesPath } from '../src/data/cityHomesData.js';
 import { neighborhoods } from '../src/data/neighborhoods.js';
 import { blogPosts } from '../src/data/blogPosts.js';
@@ -323,7 +324,7 @@ function buildSitewideLinksHtml(currentPath) {
       `            <li><a href="${SITE_URL}${path}">${label}</a></li>`
   ).join('\n');
 
-  return `\n  <nav class="prerendered-site-links" aria-label="Northern Colorado Communities">\n    <div class="prerendered-site-links-inner">\n      <h2>Explore Northern Colorado Real Estate</h2>\n      <p>Schwartz and Associates serves home buyers and sellers across all 19 Northern Colorado communities. Choose a city to explore local real estate, neighborhoods, and market insights.</p>\n      <div class="prerendered-site-links-columns">\n        <div>\n          <h3>Cities We Serve</h3>\n          <ul>\n${areaLinks}\n          </ul>\n        </div>\n        <div>\n          <h3>Buying & Selling Resources</h3>\n          <ul>\n${moneyLinks}\n          </ul>\n        </div>\n      </div>\n      <p class="prerendered-site-links-cta">Ready to talk? Call <a href="tel:9709991407">(970) 999-1407</a> or <a href="${SITE_URL}/contact/">contact us</a>.</p>\n    </div>\n  </nav>\n`;
+  return `\n  <nav class="prerendered-site-links" aria-label="Northern Colorado Communities">\n    <div class="prerendered-site-links-inner">\n      <h2>Explore Northern Colorado Real Estate</h2>\n      <p>Schwartz and Associates serves home buyers and sellers across all 27+ Northern Colorado communities. Choose a city to explore local real estate, neighborhoods, and market insights.</p>\n      <div class="prerendered-site-links-columns">\n        <div>\n          <h3>Cities We Serve</h3>\n          <ul>\n${areaLinks}\n          </ul>\n        </div>\n        <div>\n          <h3>Buying & Selling Resources</h3>\n          <ul>\n${moneyLinks}\n          </ul>\n        </div>\n      </div>\n      <p class="prerendered-site-links-cta">Ready to talk? Call <a href="tel:9709991407">(970) 999-1407</a> or <a href="${SITE_URL}/contact/">contact us</a>.</p>\n    </div>\n  </nav>\n`;
 }
 
 function injectSitewideLinks(html, currentPath) {
@@ -554,7 +555,7 @@ function injectAreaBody(html, area) {
     `      <section class="prerendered-cta">\n` +
     `        <h2>Work With Schwartz and Associates in ${city}</h2>\n` +
     `        <p>Ready to buy or sell in ${city}? Contact SAA Homes today at <strong>(970) 999-1407</strong> or visit our office at 3665 John F Kennedy Parkway, Suite 210, Fort Collins, CO 80525. Let our local experts guide you through every step of your real estate journey in Northern Colorado.</p>\n` +
-    `        <p>Schwartz and Associates, Coldwell Banker Realty — serving home buyers and sellers across all 19 Northern Colorado communities including Fort Collins, Loveland, Windsor, Greeley, Timnath, Wellington, Johnstown, Eaton, Milliken, La Salle, Mead, Longmont, Boulder, Berthoud, Firestone, Frederick, Evans, Severance, and Niwot.</p>\n` +
+    `        <p>Schwartz and Associates, Coldwell Banker Realty — serving home buyers and sellers across all 27+ Northern Colorado communities including Fort Collins, Loveland, Windsor, Greeley, Timnath, Wellington, Johnstown, Eaton, Milliken, La Salle, Mead, Longmont, Boulder, Berthoud, Firestone, Frederick, Evans, Severance, Niwot, Erie, Brighton, Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue, and the Carbon Valley region.</p>\n` +
     `      </section>`;
 
   const bodyContent =
@@ -886,6 +887,13 @@ function injectCityHomesBody(html, city) {
 const MONEY_PAGE_CONTENT = {
   '/for-sellers/': {
     sections: [
+      {
+        heading: 'Free Home Valuation — Know What Your Home Is Worth',
+        paragraphs: [
+          'Request a free, no-obligation home valuation for your Northern Colorado home. Our team prepares a detailed market analysis using current MLS comps and recent closed sales in your specific neighborhood.',
+          'Call (970) 999-1407 or submit the home valuation form on this page to get your personalized estimate — no strings attached.',
+        ],
+      },
       {
         heading: 'Sell Your Northern Colorado Home With Confidence',
         paragraphs: [
@@ -1330,6 +1338,13 @@ function buildRouteSchemas(route) {
   schemas.push(buildRealEstateAgentSchema());
   schemas.push(buildWebsiteSchema());
   schemas.push(buildWebPageSchema({ title, description, canonical }));
+
+  // Trust schema — AggregateRating + Review must be crawler-visible on the
+  // trust pages (GEO review 2026-08-07: was Helmet/client-only → invisible).
+  if (['/', '/about-us/', '/testimonials/', '/contact/'].includes(route.path)) {
+    const reviewSchema = getReviewSchema();
+    if (reviewSchema) schemas.push(reviewSchema);
+  }
 
   // Area pages get Place, BreadcrumbList, and full area schemas
   const area = matchAreaPage(path);
