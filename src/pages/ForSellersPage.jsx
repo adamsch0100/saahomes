@@ -226,7 +226,7 @@ export default function ForSellersPage() {
             </a>
           </div>
           <div className="text-center mt-8">
-            <a href="/northern-colorado-areas/" className="text-black font-semibold hover:underline">View All 19 Northern Colorado Communities →</a>
+            <a href="/northern-colorado-areas/" className="text-black font-semibold hover:underline">View All 27+ Northern Colorado Communities →</a>
           </div>
         </div>
       </section>

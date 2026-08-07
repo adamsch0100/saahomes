@@ -23,6 +23,14 @@ const cardDescriptions = {
   evans: "Close-knit community bordering Greeley with affordable homes, community events, and a strong local identity.",
   severance: "Peaceful semi-rural town with spacious lots, new construction, and a quiet atmosphere near Windsor.",
   niwot: "Historic small town near Boulder with charming downtown, top-rated schools, and a strong arts community.",
+  erie: "Denver-exurb growth leader between Boulder and Longmont — new construction, strong schools, and Front Range access.",
+  brighton: "North Denver / I-76 corridor living with deeper inventory and commute-friendly access to the metro and DIA.",
+  "carbon-valley": "One hub for Firestone, Frederick, Dacono, Gilcrest, Platteville, and Mead along the I-25 growth corridor.",
+  "estes-park": "Rocky Mountain National Park gateway — cabins, second homes, and full-time mountain living in Larimer County.",
+  "red-feather-lakes": "Unincorporated cabin and lake niche northwest of Fort Collins — affordable mountain entry and quiet recreation.",
+  "fort-lupton": "Weld County value on the US-85 corridor with new construction and practical access toward Denver and Greeley.",
+  lyons: "Boulder foothills mountain town on the St. Vrain — creative Main Street culture and trail access.",
+  bellvue: "Poudre Canyon gateway and acreage living minutes northwest of Fort Collins.",
 };
 
 function getSearchLink(city) {
@@ -42,8 +50,8 @@ export default function FeaturedAreasPage() {
     <>
       <SEO
         exactTitle="Northern Colorado Communities & Area Guides | Fort Collins to Greeley | SAA Homes"
-        description="Explore all 19 Northern Colorado communities from Fort Collins to Greeley. Area guides, neighborhood info, luxury real estate, and homes for sale across Colorado's Front Range. Your complete guide to finding the perfect Colorado community."
-        keywords="Northern Colorado area guide, Fort Collins neighborhoods, Loveland CO communities, Windsor CO real estate, Greeley area guide, Berthoud Firestone Severance homes, Carbon Valley real estate, Colorado Front Range towns, Northern Colorado communities, luxury real estate Northern Colorado, Niwot homes, Evans CO living, Frederick CO real estate, Northern Colorado relocation guide"
+        description="Explore 27+ Northern Colorado communities from Fort Collins to Greeley, Erie, Brighton, Carbon Valley, Estes Park, and more. Area guides, neighborhood info, luxury real estate, and homes for sale across Colorado's Front Range."
+        keywords="Northern Colorado area guide, Fort Collins neighborhoods, Loveland CO communities, Windsor CO real estate, Greeley area guide, Erie Brighton Carbon Valley homes, Estes Park cabins, Berthoud Firestone Severance homes, Colorado Front Range towns, Northern Colorado communities, Lyons mountain homes, Fort Lupton real estate, Northern Colorado relocation guide"
         canonical="https://saahomes.com/northern-colorado-areas/"
         ogImage="https://saahomes.com/images/Northern Colorado.webp"
         jsonLd={[{
