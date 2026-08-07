@@ -17,13 +17,14 @@ import MapSection from "./MapSection";
 import SchoolsSection from "./SchoolsSection";
 import SimilarHomesSection from "./SimilarHomesSection";
 import ConversionRail from "./ConversionRail";
+import { VirtualTourButton } from "./VirtualTourModal.jsx";
 import { HeartIcon, ShareIcon } from "./icons.jsx";
 import { HOME_TYPE_LABEL, formatDate, pricePerSqftOf } from "./utils.js";
 
 /**
  * Shared two-column body for listing detail:
  * LEFT (scrolls): description → listing details → map → schools → calculator → city stats → similar
- * RIGHT (sticky rail): price, CTAs, agent, compact calculator
+ * RIGHT (sticky rail): price, CTAs, agent, compact est-payment teaser (scrolls to #payment-calculator)
  *
  * @param {"page"|"panel"} variant
  */
@@ -194,23 +195,21 @@ export default function ListingDetailContent({
         {/* 1. Description */}
         <DescriptionSection description={listing.description} />
 
-        {/* Virtual tour when present */}
+        {/* Virtual tour — on-site modal embed (external fallback inside modal) */}
         {feats.virtual_tour && (
           <div className="rounded-xl border border-[#CFB36E]/50 bg-[#CFB36E]/10 p-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
             <div>
               <h2 className="text-lg font-bold text-gray-900 font-serif">Virtual tour</h2>
               <p className="text-sm text-gray-600 mt-0.5">
-                Walk through this home online before you visit in person.
+                Walk through this home online without leaving the listing — open the tour in a
+                full-screen viewer here.
               </p>
             </div>
-            <a
-              href={feats.virtual_tour}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="shrink-0 inline-flex items-center justify-center px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-900 text-sm active:scale-[0.98] transition-transform"
-            >
-              Open virtual tour
-            </a>
+            <VirtualTourButton
+              url={feats.virtual_tour}
+              label="Open virtual tour"
+              className="shrink-0 inline-flex items-center justify-center px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-900 text-sm active:scale-[0.98] transition-transform cursor-pointer"
+            />
           </div>
         )}
 
@@ -300,12 +299,19 @@ export default function ListingDetailContent({
         {/* 4. Schools */}
         <SchoolsSection listing={listing} />
 
-        {/* 5. Est. payment calculator (content flow; rail has compact copy on desktop) */}
+        {/* 5. Est. payment calculator — single full calculator (rail has teaser only) */}
         {listing.list_price != null && Number(listing.list_price) > 0 && (
-          <div>
+          <div id="payment-calculator" className="scroll-mt-24">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 font-serif mb-3">
               Estimated payment
             </h2>
+            <p className="text-sm text-gray-600 mb-3">
+              Based on this home&apos;s list price of{" "}
+              <span className="font-semibold text-gray-900 tabular-nums">
+                {formatPrice(listing.list_price)}
+              </span>
+              . Adjust down payment, rate, and term below.
+            </p>
             <PaymentCalculator
               listPrice={listing.list_price}
               taxAnnual={feats.tax_annual}

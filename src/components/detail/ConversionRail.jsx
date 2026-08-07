@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useMemo } from "react";
 import ScheduleShowingModal from "../ScheduleShowingModal";
 import SaveSearchModal from "../SaveSearchModal";
-import PaymentCalculator from "../PaymentCalculator";
 import {
   formatPrice,
   listingBadges,
@@ -9,10 +8,13 @@ import {
 } from "../../utils/listingHelpers.js";
 import { HeartIcon } from "./icons.jsx";
 import { pricePerSqftOf } from "./utils.js";
+import { VirtualTourButton } from "./VirtualTourModal.jsx";
+import { principalAndInterest, monthlyHoa } from "../PaymentCalculator.jsx";
 
 /**
- * Sticky right conversion rail — price, CTAs, agent, compact payment calculator.
+ * Sticky right conversion rail — price, CTAs, agent, compact est-payment teaser.
  * Desktop only (parent should hide on mobile). Stays visible while left column scrolls.
+ * Full payment calculator lives once in main content (#payment-calculator).
  */
 export default function ConversionRail({
   listing,
@@ -22,9 +24,35 @@ export default function ConversionRail({
   likeThisFilters,
   stickyTopClass = "lg:top-6",
 }) {
+  const feats = listing?.features || {};
+  const listPrice = listing?.list_price;
+  const hoaFee = listing?.hoa_fee;
+  const taxAnnual = feats.tax_annual;
+  const hoaFreq = feats.assoc_fee_freq;
+
+  const estPayment = useMemo(() => {
+    const price = Number(listPrice);
+    if (!Number.isFinite(price) || price <= 0) return null;
+    const downPct = 20;
+    const rate = 6.5;
+    const termYears = 30;
+    const downAmount = (price * downPct) / 100;
+    const loan = Math.max(0, price - downAmount);
+    const pi = principalAndInterest(loan, rate, termYears);
+    const hasTax =
+      taxAnnual != null &&
+      taxAnnual !== "" &&
+      Number.isFinite(Number(taxAnnual)) &&
+      Number(taxAnnual) > 0;
+    const taxMonthly = hasTax ? Number(taxAnnual) / 12 : (price * 0.01) / 12;
+    const insuranceMonthly = (price * 0.0035) / 12;
+    const hoaMonthly = monthlyHoa(hoaFee, hoaFreq);
+    const total = pi + taxMonthly + insuranceMonthly + hoaMonthly;
+    return { total, price, downPct, rate, termYears };
+  }, [listPrice, hoaFee, taxAnnual, hoaFreq]);
+
   if (!listing) return null;
 
-  const feats = listing.features || {};
   const fullAddress = listingFullAddress(listing);
   const { isNew, priceCut, priceCutPct, isNewConstruction, dom } = listingBadges(listing);
   const sqft = listing.living_area;
@@ -35,6 +63,16 @@ export default function ConversionRail({
           feats.assoc_fee_freq ? ` / ${String(feats.assoc_fee_freq).toLowerCase()}` : ""
         }`
       : null;
+
+  const scrollToCalculator = (e) => {
+    e.preventDefault();
+    const el = document.getElementById("payment-calculator");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      el.setAttribute("tabindex", "-1");
+      el.focus({ preventScroll: true });
+    }
+  };
 
   return (
     <aside
@@ -132,14 +170,11 @@ export default function ConversionRail({
             Call (970) 999-1407
           </a>
           {feats.virtual_tour && (
-            <a
-              href={feats.virtual_tour}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full inline-flex items-center justify-center px-6 py-3 border border-[#CFB36E] text-[#CFB36E] font-semibold rounded-lg hover:bg-[#CFB36E] hover:text-black transition-colors text-sm"
-            >
-              Virtual Tour
-            </a>
+            <VirtualTourButton
+              url={feats.virtual_tour}
+              label="Virtual Tour"
+              className="w-full inline-flex items-center justify-center px-6 py-3 border border-[#CFB36E] text-[#CFB36E] font-semibold rounded-lg hover:bg-[#CFB36E] hover:text-black transition-colors text-sm cursor-pointer"
+            />
           )}
           <SaveSearchModal
             filters={likeThisFilters || {}}
@@ -184,15 +219,43 @@ export default function ConversionRail({
         </p>
       </div>
 
-      {/* Compact est. payment — desktop rail only */}
-      {listing.list_price != null && Number(listing.list_price) > 0 && (
-        <PaymentCalculator
-          listPrice={listing.list_price}
-          taxAnnual={feats.tax_annual}
-          hoaFee={listing.hoa_fee}
-          hoaFreq={feats.assoc_fee_freq}
-          variant="compact"
-        />
+      {/* Compact est. payment teaser — scrolls to full calculator in main content */}
+      {estPayment && (
+        <button
+          type="button"
+          onClick={scrollToCalculator}
+          className="w-full text-left rounded-xl border border-gray-200 bg-white p-4 shadow-sm hover:border-[#CFB36E]/60 hover:shadow-md transition-all group"
+          aria-label="View full payment calculator"
+        >
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <p className="text-[10px] uppercase tracking-wide text-gray-500 font-medium">
+                Est. payment
+              </p>
+              <p className="text-xl font-bold text-gray-900 tabular-nums mt-0.5 group-hover:text-black">
+                ${Math.round(estPayment.total).toLocaleString("en-US")}
+                <span className="text-sm font-semibold text-gray-500">/mo</span>
+              </p>
+            </div>
+            <span
+              className="text-[#CFB36E] text-lg font-bold group-hover:translate-x-0.5 transition-transform"
+              aria-hidden="true"
+            >
+              →
+            </span>
+          </div>
+          <p className="text-[11px] text-gray-500 mt-2 leading-snug">
+            Home price{" "}
+            <span className="font-semibold text-gray-700 tabular-nums">
+              {formatPrice(estPayment.price)}
+            </span>
+            {" · "}
+            {estPayment.downPct}% down · {estPayment.rate}% · {estPayment.termYears}-yr
+          </p>
+          <p className="text-[11px] font-semibold text-gray-800 mt-2 underline underline-offset-2 decoration-[#CFB36E]/60 group-hover:decoration-[#CFB36E]">
+            Adjust down payment &amp; rate
+          </p>
+        </button>
       )}
     </aside>
   );

@@ -7,6 +7,7 @@ export { default as SimilarHomesSection } from "./SimilarHomesSection";
 export { default as ConversionRail } from "./ConversionRail";
 export { default as MobileStickyBar } from "./MobileStickyBar";
 export { default as ListingDetailContent } from "./ListingDetailContent";
+export { default as VirtualTourModal, VirtualTourButton, tourEmbedMode } from "./VirtualTourModal";
 export { PageDetailSkeleton, PanelDetailSkeleton } from "./DetailSkeletons";
 export { HeartIcon, ShareIcon } from "./icons";
 export {
