@@ -81,14 +81,35 @@ export default function AreaGuidePage() {
       <AreaSEO slug={area.slug} />
 
       <section
-        className="relative min-h-[18rem] sm:h-96 bg-cover bg-center flex items-center justify-center pt-28 sm:pt-32 pb-8"
+        className="relative min-h-[22rem] sm:h-96 bg-cover bg-center flex items-center justify-center pt-28 sm:pt-32 pb-8"
         style={{ backgroundImage: `url('${area.heroImage}')` }}
       >
         <div className="absolute inset-0 bg-black/60" />
-        <div className="relative z-10 text-center text-white px-6">
+        <div className="relative z-10 text-center text-white px-6 w-full max-w-3xl mx-auto">
           <p className="text-sm uppercase tracking-widest mb-2" style={{ color: GOLD }}>{area.county}</p>
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold font-serif">{area.city}, Colorado</h1>
           <p className="mt-4 text-lg sm:text-xl text-gray-100">{area.tagline}</p>
+          <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            <Link
+              to={searchLink}
+              className="inline-flex items-center justify-center px-8 py-3.5 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors touch-manipulation shadow-lg"
+            >
+              Search {area.city} Homes
+            </Link>
+            <a
+              href="/for-sellers/#home-valuation"
+              className="inline-flex items-center justify-center px-8 py-3.5 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors touch-manipulation"
+            >
+              Get My Home Value
+            </a>
+          </div>
+          <p className="mt-4 text-sm text-gray-200">
+            Questions? Call{" "}
+            <a href="tel:(970) 999-1407" className="font-semibold text-white underline hover:text-gray-100">
+              (970) 999-1407
+            </a>{" "}
+            — Schwartz and Associates, serving {area.city} and all of Northern Colorado
+          </p>
         </div>
       </section>
 
