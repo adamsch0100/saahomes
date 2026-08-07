@@ -8,6 +8,7 @@ import { getAreaSeo } from "../data/areaSeo.js";
 import { AREA_FAQS } from "../data/areaFaqs.js";
 import LatestMarketUpdateBanner from "../components/LatestMarketUpdateBanner.jsx";
 import AreaEventsSection from "../components/AreaEventsSection.jsx";
+import TopRatedSchools from "../components/TopRatedSchools.jsx";
 
 const GOLD = "#CFB36E";
 
@@ -187,6 +188,9 @@ export default function AreaGuidePage() {
           </div>
         </div>
       </section>
+
+      {/* Top-rated schools (GreatSchools Rating 1–10) — hides if cache empty */}
+      <TopRatedSchools city={area.city} citySlug={area.slug} limit={8} />
 
       {/* Neighborhood Guides */}
       <section className="py-12 px-6 bg-gray-50">

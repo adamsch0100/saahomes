@@ -16,6 +16,7 @@ import {
 import { register, login, setPassword } from '../controllers/authController.js';
 import { submitShowingRequest } from '../controllers/showingController.js';
 import { runCronDigest } from '../controllers/cronController.js';
+import { listSchools, runCronSchoolRatings } from '../controllers/schoolController.js';
 import {
   validateContactSubmission,
   validateMarketReportSubmission,
@@ -107,6 +108,9 @@ router.get('/photo/:listingId/:idx', listingLimiter, getListingPhoto);
 router.get('/listings/stats', listingLimiter, getListingStats);
 router.get('/listings/:slug', listingLimiter, getListingBySlug);
 
+// GreatSchools ratings cache (read-only public API)
+router.get('/schools', listingLimiter, listSchools);
+
 // Client accounts (password login — cookie session)
 router.post('/auth/register', formLimiter, register);
 router.post('/auth/login', formLimiter, login);
@@ -127,6 +131,8 @@ router.post('/alerts/unsubscribe', formLimiter, unsubscribeAll);
 // Cron triggers (protected by CRON_SECRET) — scheduler calls the site's own
 // backend so email is sent from saahomes.com, not from Hermes.
 router.post('/cron/digest', runCronDigest);
+// Weekly GreatSchools city-page sync (NOT part of the 2h listings sync)
+router.post('/cron/school-ratings', runCronSchoolRatings);
 
 // Showing requests (listing page modal → lead → FUB)
 router.post('/showing', formLimiter, submitShowingRequest);

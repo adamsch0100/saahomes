@@ -5,6 +5,7 @@ import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
 import { AREA_FAQS } from "../../data/areaFaqs.js";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
+import TopRatedSchools from "../../components/TopRatedSchools.jsx";
 
 export default function FortCollinsPage() {
   return (
@@ -144,6 +145,8 @@ export default function FortCollinsPage() {
             </p>
           </div>
         </section>
+
+        <TopRatedSchools city="Fort Collins" citySlug="fort-collins" limit={8} />
 
         {/* Location and Climate */}
         <section className="mb-12">

@@ -5,6 +5,7 @@ import { AREA_FAQS } from "../../data/areaFaqs.js";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
+import TopRatedSchools from "../../components/TopRatedSchools.jsx";
 
 export default function WindsorPage() {
   return (
@@ -123,6 +124,8 @@ export default function WindsorPage() {
             </p>
           </div>
         </section>
+
+        <TopRatedSchools city="Windsor" citySlug="windsor" limit={8} />
 
         {/* Location and Climate */}
         <section className="mb-12">
