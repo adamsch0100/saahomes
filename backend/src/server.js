@@ -4,7 +4,7 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import apiRoutes from './routes/api.js';
 import adminRoutes from './routes/admin.js';
 import { runMigrations } from './config/migrate.js';
@@ -13,6 +13,15 @@ dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+// Site base URL for canonical/OG links (listing fallback uses it).
+const SITE_URL = process.env.SITE_URL || 'https://saahomes.com';
+
+// Minimal HTML escaping for dynamic prerendered content.
+const escapeHtml = (s) =>
+  String(s ?? '').replace(/[&<>"']/g, (c) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
+  );
 
 const app = express();
 app.set('trust proxy', 1);
@@ -89,7 +98,7 @@ if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
 
   app.use(express.static(distPath, { index: false }));
 
-  app.get('*', (req, res, next) => {
+  app.get('*', async (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
 
     const normalized = req.path.replace(/\/$/, '') || '/';
@@ -99,6 +108,58 @@ if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
 
     if (existsSync(prerenderedPath)) {
       return res.sendFile(prerenderedPath);
+    }
+
+    // Dynamic listing pages (/homes-for-sale/:slug/) have no prerendered
+    // file. Fallback = dist/index.html (homepage copy) — which caused:
+    //  (a) a visible FLASH of homepage text before React hydrates, and
+    //  (b) an SEO bug: every listing page served the HOMEPAGE title +
+    //      canonical to crawlers (29K pages all claiming to be /).
+    // Serve a listing-aware shell instead: real title/canonical/OG from
+    // the DB, minimal crawlable body. Falls back to a neutral generic
+    // shell if the slug isn't found.
+    const listingMatch = normalized.match(/^\/homes-for-sale\/([^/]+)$/);
+    if (listingMatch) {
+      try {
+        const { default: getPool } = await import('./config/database.js');
+        const pool = getPool();
+        const slug = listingMatch[1];
+        const { rows } = await pool.query(
+          `SELECT listing_id, slug, street_number, street_name, unit, city,
+                  list_price, beds, baths, living_area, status
+             FROM listings WHERE slug = $1 OR listing_id = $1 LIMIT 1`,
+          [slug]
+        );
+        const listing = rows[0];
+        const base = readFileSync(join(distPath, 'index.html'), 'utf8');
+        if (listing) {
+          const address = [listing.street_number, listing.street_name, listing.unit]
+            .filter(Boolean).join(' ');
+          const price = listing.list_price
+            ? `$${Number(listing.list_price).toLocaleString('en-US')}` : '';
+          const title = `${address}, ${listing.city} CO — ${price} | SAA Homes`;
+          const description = `${address}, ${listing.city}, CO — ${price || ''} · ${listing.beds ?? '—'} bd / ${listing.baths ?? '—'} ba / ${listing.living_area ? Number(listing.living_area).toLocaleString() + ' sqft' : ''}. Live IRES MLS listing. Adam & Mandi Schwartz — (970) 999-1407.`;
+          const canonical = `${SITE_URL}/homes-for-sale/${listing.slug}/`;
+          let html = base
+            .replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`)
+            .replace(/rel="canonical" href="[^"]*"/, `rel="canonical" href="${canonical}"`)
+            .replace(/name="description" content="[^"]*"/, `name="description" content="${escapeHtml(description)}"`)
+            .replace(/property="og:title" content="[^"]*"/, `property="og:title" content="${escapeHtml(title)}"`)
+            .replace(/property="og:description" content="[^"]*"/, `property="og:description" content="${escapeHtml(description)}"`)
+            .replace(/property="og:url" content="[^"]*"/, `property="og:url" content="${canonical}"`)
+            .replace('<div id="root"></div>', `<div id="root"><div class="prerendered-listing"><h1>${escapeHtml(title)}</h1><p>${escapeHtml(description)}</p></div></div>`);
+          return res.send(html);
+        }
+        // Slug not in DB — neutral generic shell (no homepage copy)
+        let html = base
+          .replace(/<title>[^<]*<\/title>/, '<title>Homes for Sale in Northern Colorado | SAA Homes</title>')
+          .replace(/rel="canonical" href="[^"]*"/, `rel="canonical" href="${SITE_URL}${normalized}/"`)
+          .replace('<div id="root"></div>', '<div id="root"></div>');
+        return res.send(html);
+      } catch (error) {
+        console.error('listing fallback error:', error.message);
+        // fall through to generic shell
+      }
     }
 
     return res.sendFile(join(distPath, 'index.html'));

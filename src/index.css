@@ -119,6 +119,35 @@ body.properties-search-page .prerendered-money-content {
   border: 0 !important;
 }
 
+/* ── Prerendered body content: never flash raw text to humans ──────────
+   The prerender script injects SEO body copy (money pages, blogs, areas,
+   CHFA, generic) into #root for CRAWLERS. Without hiding it, every page
+   flashes unstyled plain text before React hydrates (reported by Adam
+   Aug 2026: "looks like a blog post shows super quick before the page
+   loads" — happened on homepage + listing pages too). The content stays
+   in the DOM (crawlable) but is visually clipped until React replaces
+   #root. The React app renders the real, styled page on mount. */
+.prerendered-money-content,
+.prerendered-area-content,
+.prerendered-neighborhood-content,
+.prerendered-blog-section,
+.prerendered-chfa-content,
+.prerendered-generic-content,
+.prerendered-city-homes,
+.prerendered-events-content,
+.prerendered-listing {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
 /* ─────────────────────────────────────────────────────────────
    Prerendered sitewide links band ("Explore Northern Colorado
    Real Estate") — injected by scripts/prerender-meta.mjs into
