@@ -81,6 +81,47 @@ export default function ChfaDpaLeadForm({ compact = false, sourcePage = '/chfa-d
     'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black';
   const labelClass = 'block text-sm font-medium text-gray-700 mb-2';
 
+  // Optional qualification fields — collapsed behind a toggle in compact mode
+  // to cut perceived form length where quick conversions happen (sticky sidebar,
+  // mid-page CTA). The full form at the bottom of the page shows all fields.
+  const optionalFields = (
+    <>
+      <div className="mb-4">
+        <label htmlFor="chfa-dpa-targetCounty" className={labelClass}>Where are you looking to buy?</label>
+        <select id="chfa-dpa-targetCounty" name="targetCounty" value={formData.targetCounty} onChange={handleChange} className={inputClass}>
+          <option value="">Select a county</option>
+          {targetCounties.map((county) => (
+            <option key={county} value={county}>{county}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="mb-4">
+        <label htmlFor="chfa-dpa-buyingTimeline" className={labelClass}>When are you hoping to buy?</label>
+        <select id="chfa-dpa-buyingTimeline" name="buyingTimeline" value={formData.buyingTimeline} onChange={handleChange} className={inputClass}>
+          <option value="">Select a timeline</option>
+          <option value="Just researching">Just researching</option>
+          <option value="Within 1-3 months">Within 1–3 months</option>
+          <option value="Within 3-6 months">Within 3–6 months</option>
+          <option value="6+ months">6+ months</option>
+        </select>
+      </div>
+
+      <div className="mb-6">
+        <label htmlFor="chfa-dpa-message" className={labelClass}>Questions or comments</label>
+        <textarea
+          id="chfa-dpa-message"
+          name="message"
+          rows="3"
+          placeholder="Tell us about your budget, target areas, or CHFA questions..."
+          value={formData.message}
+          onChange={handleChange}
+          className={inputClass}
+        />
+      </div>
+    </>
+  );
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -134,39 +175,16 @@ export default function ChfaDpaLeadForm({ compact = false, sourcePage = '/chfa-d
         </select>
       </div>
 
-      <div className="mb-4">
-        <label htmlFor="chfa-dpa-targetCounty" className={labelClass}>Where are you looking to buy?</label>
-        <select id="chfa-dpa-targetCounty" name="targetCounty" value={formData.targetCounty} onChange={handleChange} className={inputClass}>
-          <option value="">Select a county</option>
-          {targetCounties.map((county) => (
-            <option key={county} value={county}>{county}</option>
-          ))}
-        </select>
-      </div>
-
-      <div className="mb-4">
-        <label htmlFor="chfa-dpa-buyingTimeline" className={labelClass}>When are you hoping to buy?</label>
-        <select id="chfa-dpa-buyingTimeline" name="buyingTimeline" value={formData.buyingTimeline} onChange={handleChange} className={inputClass}>
-          <option value="">Select a timeline</option>
-          <option value="Just researching">Just researching</option>
-          <option value="Within 1-3 months">Within 1–3 months</option>
-          <option value="Within 3-6 months">Within 3–6 months</option>
-          <option value="6+ months">6+ months</option>
-        </select>
-      </div>
-
-      <div className="mb-6">
-        <label htmlFor="chfa-dpa-message" className={labelClass}>Questions or comments</label>
-        <textarea
-          id="chfa-dpa-message"
-          name="message"
-          rows="3"
-          placeholder="Tell us about your budget, target areas, or CHFA questions..."
-          value={formData.message}
-          onChange={handleChange}
-          className={inputClass}
-        />
-      </div>
+      {compact ? (
+        <details className="mb-4">
+          <summary className="cursor-pointer text-sm font-semibold text-gray-700 hover:text-black select-none">
+            Where and when are you looking? (optional)
+          </summary>
+          <div className="mt-4">{optionalFields}</div>
+        </details>
+      ) : (
+        optionalFields
+      )}
 
       <button
         type="submit"
