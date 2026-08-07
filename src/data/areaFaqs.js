@@ -300,7 +300,119 @@ const AREA_FAQS = {
       q: 'What are the best neighborhoods in Niwot?',
       a: 'Niwot neighborhoods include the historic Old Town area with charming older homes, Left Hand Valley estates with acreage, and newer custom homes in the surrounding hills. The Niwot Hills neighborhood offers modern Boulder County living within walking distance of Old Town amenities.'
     }
-  ]
+  ],
+  'erie': [
+    {
+      q: 'What is the average home price in Erie, CO?',
+      a: 'Erie\'s median list price sits in the upper tier of the Boulder–Weld growth corridor and moves with new construction mix. We show a live median from active IRES listings on the Erie area guide — use that number, not a static blog figure. Townhomes and production single-family homes offer more entry points than custom estate inventory.'
+    },
+    {
+      q: 'Is Erie a good place to move from Denver?',
+      a: 'Many Denver-metro buyers choose Erie for newer homes, strong schools, and a practical commute toward Boulder, Longmont, and the north Denver employment belt. It is a true Denver-exurb growth town rather than a classic Fort Collins suburb. Visit during rush hour, compare builder communities, and talk through CHFA eligibility with SAA Homes at (970) 999-1407.'
+    },
+    {
+      q: 'Does Erie have a lot of new construction?',
+      a: 'Yes. New master-planned neighborhoods and active builders are a major part of Erie\'s inventory. Compare HOA dues, lot premiums, and completion timelines carefully — SAA Homes helps buyers weigh builder incentives against resale options in the same search.'
+    },
+  ],
+  'brighton': [
+    {
+      q: 'What is the average home price in Brighton, CO?',
+      a: 'Brighton typically prices below closer-in Denver suburbs while offering deeper inventory along the I-76 corridor. Live median list price and active counts appear on our Brighton guide from IRES MLS. Product ranges from townhomes and production single-family homes to larger-lot edges near agricultural land.'
+    },
+    {
+      q: 'How is the commute from Brighton to Denver?',
+      a: 'Brighton sits on the Adams County I-76 corridor north of Denver with relatively direct highway access toward downtown, DIA, and Front Range job centers. Actual drive times vary by destination and rush hour — we recommend testing your specific commute before writing an offer.'
+    },
+    {
+      q: 'Is Brighton considered Northern Colorado?',
+      a: 'We frame Brighton as a north Denver / I-76 corridor market, not a strict Northern Colorado city like Fort Collins or Greeley. SAA Homes still serves Brighton buyers who want the same data-driven representation we provide across the Front Range.'
+    },
+  ],
+  'carbon-valley': [
+    {
+      q: 'What towns are in Carbon Valley, Colorado?',
+      a: 'Carbon Valley commonly refers to Firestone, Frederick, and Dacono along the Weld County I-25 growth corridor, with nearby Gilcrest, Platteville, and Mead often included in the same buyer search. SAA Homes publishes full guides for Firestone, Frederick, and Mead, plus this hub page with live market sections for Dacono, Platteville, and Gilcrest.'
+    },
+    {
+      q: 'Is Carbon Valley a good place for first-time buyers?',
+      a: 'Often yes. Carbon Valley price points are frequently more accessible than Boulder County and many close-in Larimer neighborhoods, and many buyers explore CHFA down payment assistance. Compare each town\'s inventory, commute, and HOA costs — call (970) 999-1407 for a corridor-wide search strategy.'
+    },
+    {
+      q: 'Should I buy in Firestone, Frederick, or Dacono?',
+      a: 'They run together geographically but inventory, pricing, and amenities differ. Firestone and Frederick usually offer more listings and established amenities; Dacono is a smaller core-town market. Use the live market lines on our Carbon Valley hub and we will help you tour the right mix.'
+    },
+  ],
+  'estes-park': [
+    {
+      q: 'What is the average home price in Estes Park, CO?',
+      a: 'Estes Park pricing spans condos and cabins through high-end mountain homes near Rocky Mountain National Park. We publish a live median list price from active IRES listings on the Estes Park guide. Second-home and full-time inventory can behave differently seasonally — ask us for a product-type breakdown.'
+    },
+    {
+      q: 'Can I buy a cabin near Rocky Mountain National Park?',
+      a: 'Yes. Estes Park is the primary gateway market for RMNP-area cabins and mountain homes. Review access, HOA rules, short-term rental regulations where relevant, and maintenance budgets carefully. SAA Homes helps buyers compare Estes Park with Lyons and other Larimer mountain options.'
+    },
+    {
+      q: 'Is Estes Park only for second homes?',
+      a: 'No. Many residents live full-time in Estes Park for the mountain lifestyle, while second-home buyers are also a significant share of demand. Your financing, insurance, and intended use should drive the search — we can align listings to either path.'
+    },
+  ],
+  'red-feather-lakes': [
+    {
+      q: 'Are there mountain cabins under $300K near Fort Collins?',
+      a: 'Red Feather Lakes often shows a lower median list price than Estes Park because inventory includes modest cabins and land. Availability under any specific price changes daily — check the live stats on our Red Feather Lakes guide and set a saved search with SAA Homes so you catch the right cabin when it hits the market.'
+    },
+    {
+      q: 'What is it like living in Red Feather Lakes, Colorado?',
+      a: 'Red Feather Lakes is an unincorporated mountain community in northwest Larimer County with small lakes, cabin neighborhoods, and a quiet recreational lifestyle. Expect more remote infrastructure than Fort Collins — wells, septic, access roads, and seasonal conditions are part of due diligence.'
+    },
+    {
+      q: 'Is Red Feather Lakes a good investment?',
+      a: 'It is a niche recreation and cabin market with limited inventory and specialized buyers. Long-term value depends on property type, access, and condition. We help buyers underwrite the practical costs of mountain ownership rather than relying on resort-town hype.'
+    },
+  ],
+  'fort-lupton': [
+    {
+      q: 'What is the average home price in Fort Lupton, CO?',
+      a: 'Fort Lupton generally offers Weld County value on the US-85 corridor, with pricing that often undercuts many Larimer County markets. Live median list price and active counts are shown on the Fort Lupton area guide from IRES MLS.'
+    },
+    {
+      q: 'Is there new construction in Fort Lupton?',
+      a: 'Yes — new construction is part of the Fort Lupton market alongside established neighborhoods. Compare builder warranties, HOA dues, and lot premiums against resale homes. SAA Homes can run both searches at once.'
+    },
+    {
+      q: 'How far is Fort Lupton from Denver and Greeley?',
+      a: 'Fort Lupton sits on US-85 between the Denver metro and Greeley, making it a practical corridor town for north–south commuters. Test your specific work route at rush hour before choosing between Fort Lupton, Brighton, and Carbon Valley.'
+    },
+  ],
+  'lyons': [
+    {
+      q: 'What is the average home price in Lyons, CO?',
+      a: 'Lyons commands a foothills premium reflecting Boulder County location and mountain lifestyle demand. Live median list price from active IRES listings appears on our Lyons guide. Inventory is thinner than Longmont or Boulder, so pricing and condition matter on each listing.'
+    },
+    {
+      q: 'Is Lyons a good place for mountain homes?',
+      a: 'Yes. Lyons offers Boulder foothills living with St. Vrain recreation access and a creative Main Street culture, plus proximity toward Estes Park. Buyers should also review insurance, access, and any floodplain considerations with local experts.'
+    },
+    {
+      q: 'How far is Lyons from Boulder and Estes Park?',
+      a: 'Lyons sits between Boulder County plains communities and the mountain route toward Estes Park. Many residents commute toward Boulder or Longmont while keeping weekend access to Rocky Mountain National Park. SAA Homes can map commute and lifestyle tradeoffs for your household.'
+    },
+  ],
+  'bellvue': [
+    {
+      q: 'What kinds of homes are for sale in Bellvue, CO?',
+      a: 'Bellvue inventory mixes acreage properties, Poudre Canyon homes, and land-heavy listings northwest of Fort Collins. Medians can be influenced by land parcels — use the live stats band and then filter for improved homes or acreage based on your goals.'
+    },
+    {
+      q: 'Can I find acreage near Fort Collins in Bellvue?',
+      a: 'That is one of Bellvue\'s main draws. Buyers seeking horses, shops, river access, or privacy often look at Bellvue and the Poudre Canyon corridor when Fort Collins city lots feel too small. Due diligence on wells, septic, access, and wildfire risk is essential.'
+    },
+    {
+      q: 'Is Bellvue a good alternative to living in Fort Collins?',
+      a: 'For buyers who want mountain-adjacent and rural living with a short drive into Fort Collins services, yes. It is not a substitute for walkable Old Town living — it is a different lifestyle. We help clients compare Bellvue, northwest Fort Collins, and Red Feather Lakes side by side.'
+    },
+  ],
 };
 
 const SITE_URL = 'https://saahomes.com';
