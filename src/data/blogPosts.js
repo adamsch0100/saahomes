@@ -4828,6 +4828,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/Johnstown-CO-Area-Guide.jpg',
     readTime: '8 min read',
+    youtubeId: 'h_3M0-Ri29k',
     keywords: 'best realtor johnstown co, johnstown co realtor, johnstown real estate agent, johnstown colorado real estate, johnstown co homes for sale, real estate agent johnstown co, schwartz and associates johnstown, northern colorado realtor, johnstown colorado realtor, johnstown milliken realtor',
     relatedLinks: [
       { title: 'Johnstown Colorado real estate', href: '/northern-colorado-areas/johnstown/', description: 'Neighborhoods, schools & market data' },
