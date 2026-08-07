@@ -7,6 +7,8 @@ Complete query map for Schwartz and Associates market ownership.
 
 ## Coverage map — 27 area pages + section towns
 
+**Audit requirement (SEO gap review, Aug 7 2026):** every area page must (a) show LIVE median price + days-on-market from the API (CityStatsBand — never stale prose), (b) have ≥3 FAQ pairs incl. seller/home-value + best-realtor + CHFA/schools where relevant, (c) unique prerendered title/H1 (no homepage shell). Thin pages (<3 FAQs or stale stats) = flag + fix queue.
+
 Core 19 (built):
 
 | Slug | City | County | Area URL |
