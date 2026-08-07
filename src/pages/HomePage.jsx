@@ -48,7 +48,7 @@ export default function HomePage() {
     <>
       <SEO
         exactTitle="Schwartz and Associates | Northern Colorado Real Estate | Fort Collins, Loveland & Greeley"
-        description="Schwartz and Associates, Coldwell Banker Realty — Northern Colorado real estate agents serving Fort Collins, Loveland, Windsor, Greeley, and 19+ Front Range communities. Expert buyer and seller representation."
+        description="Schwartz and Associates, Coldwell Banker Realty — Northern Colorado real estate agents serving Fort Collins, Loveland, Windsor, Greeley, and 27+ Front Range communities. Expert buyer and seller representation."
         keywords="Schwartz and Associates, Northern Colorado real estate, Fort Collins real estate, Loveland real estate, Greeley real estate, Windsor real estate, Northern Colorado realtor, Coldwell Banker Fort Collins, SAA Homes, Colorado homes for sale"
         canonical="https://saahomes.com/"
         ogImage="https://saahomes.com/images/White-Logo-AUTOx110.fit.png"

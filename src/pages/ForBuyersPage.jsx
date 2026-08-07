@@ -155,7 +155,7 @@ export default function ForBuyersPage() {
                 <a href="/northern-colorado-areas/loveland/" className="text-black font-semibold hover:underline">Loveland, Colorado Area Guide →</a>
                 <a href="/northern-colorado-areas/windsor/" className="text-black font-semibold hover:underline">Windsor Area Guide →</a>
                 <a href="/northern-colorado-areas/greeley/" className="text-black font-semibold hover:underline">Greeley Area Guide →</a>
-                <a href="/northern-colorado-areas/" className="text-sm text-gray-600 font-semibold hover:underline mt-2">View All 19 Communities →</a>
+                <a href="/northern-colorado-areas/" className="text-sm text-gray-600 font-semibold hover:underline mt-2">View All 27+ Communities →</a>
               </div>
             </div>
           </div>

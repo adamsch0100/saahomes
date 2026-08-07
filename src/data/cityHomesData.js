@@ -177,6 +177,69 @@ export const CITY_HOMES = [
     intro:
       "Niwot is a beloved Boulder County village with tree-lined streets, a historic downtown, and some of the area's most charming homes. Explore every active home for sale in Niwot — from cottages near the train depot to larger foothills properties — updated daily from IRES MLS.",
   },
+  {
+    slug: "erie",
+    city: "Erie",
+    county: "Weld & Boulder Counties",
+    search: "Erie",
+    areaPath: "/northern-colorado-areas/erie/",
+    intro:
+      "Erie is one of the Front Range's fastest-growing Denver-exurb towns on the Boulder–Weld line, with deep new-construction inventory and practical access to Boulder, Longmont, and the north Denver job belt. Browse every active home for sale in Erie — updated daily from IRES MLS.",
+  },
+  {
+    slug: "brighton",
+    city: "Brighton",
+    county: "Adams County",
+    search: "Brighton",
+    areaPath: "/northern-colorado-areas/brighton/",
+    intro:
+      "Brighton sits on the Adams County I-76 corridor north of Denver — a commute-friendly market with deeper inventory than many closer-in suburbs. Explore every active home for sale in Brighton with live IRES MLS data refreshed daily.",
+  },
+  {
+    slug: "estes-park",
+    city: "Estes Park",
+    county: "Larimer County",
+    search: "Estes Park",
+    areaPath: "/northern-colorado-areas/estes-park/",
+    intro:
+      "Estes Park is Larimer County's Rocky Mountain National Park gateway market — cabins, condos, second homes, and full-time mountain residences. See every active home for sale in Estes Park, updated daily from IRES MLS.",
+  },
+  {
+    slug: "red-feather-lakes",
+    city: "Red Feather Lakes",
+    county: "Larimer County",
+    search: "Red Feather Lakes",
+    areaPath: "/northern-colorado-areas/red-feather-lakes/",
+    intro:
+      "Red Feather Lakes is an unincorporated mountain community northwest of Fort Collins known for cabins, small lakes, and more accessible mountain pricing. Browse every active Red Feather Lakes listing — cabins and land — with live IRES data.",
+  },
+  {
+    slug: "fort-lupton",
+    city: "Fort Lupton",
+    county: "Weld County",
+    search: "Fort Lupton",
+    areaPath: "/northern-colorado-areas/fort-lupton/",
+    intro:
+      "Fort Lupton offers Weld County value on the US-85 corridor between the Denver metro and Greeley, including new construction and established neighborhoods. Explore every active home for sale in Fort Lupton — updated daily from IRES MLS.",
+  },
+  {
+    slug: "lyons",
+    city: "Lyons",
+    county: "Boulder County",
+    search: "Lyons",
+    areaPath: "/northern-colorado-areas/lyons/",
+    intro:
+      "Lyons is a Boulder foothills mountain town on the St. Vrain with creative Main Street culture and trail access toward Estes Park. See every active home for sale in Lyons — from in-town cottages to mountain parcels — updated daily from IRES MLS.",
+  },
+  {
+    slug: "bellvue",
+    city: "Bellvue",
+    county: "Larimer County",
+    search: "Bellvue",
+    areaPath: "/northern-colorado-areas/bellvue/",
+    intro:
+      "Bellvue is the unincorporated Poudre Canyon gateway northwest of Fort Collins — acreage, river-adjacent homes, and rural Larimer living. Browse every active Bellvue listing with live IRES MLS data updated daily.",
+  },
 ];
 
 export const getCityHomes = (slug) => CITY_HOMES.find((c) => c.slug === slug);
