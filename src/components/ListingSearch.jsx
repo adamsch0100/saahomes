@@ -4,6 +4,10 @@ import { useSearchParams } from "react-router-dom";
 import ListingMap from "./ListingMap";
 import ListingDetailPanel from "./ListingDetailPanel";
 import SaveSearchModal from "./SaveSearchModal";
+import LocationCombobox, {
+  parseCityList,
+  parseZipList,
+} from "./LocationCombobox";
 import {
   formatPrice,
   fmtNum,
@@ -28,12 +32,6 @@ const API_BASE = (() => {
   if (import.meta.env.DEV) return "http://localhost:3000";
   return "";
 })();
-
-const CITIES = [
-  "Fort Collins", "Loveland", "Windsor", "Greeley", "Timnath", "Severance",
-  "Wellington", "Johnstown", "Longmont", "Boulder", "Berthoud", "Firestone",
-  "Frederick", "Evans", "Mead", "Milliken", "La Salle", "Eaton", "Niwot",
-];
 
 const PRICE_QUICK = [
   { label: "≤ $250K", value: "0-250000" },
@@ -251,6 +249,8 @@ const FILTER_DEBOUNCE_MS = 375;
 function emptyFilters(overrides = {}) {
   return {
     city: "__noco__",
+    // Comma-separated ZIPs (multi); empty = no zip filter
+    postalCode: "",
     minPrice: "",
     maxPrice: "",
     beds: "",
@@ -321,8 +321,14 @@ function filtersFromParams(sp) {
     .map((t) => t.trim())
     .filter(Boolean);
 
+  // city= supports multi ("Denver,Erie"); also accept cities= alias
+  const cityParam = sp.get("city") || sp.get("cities") || sp.get("location") || "__noco__";
+  const postalParam =
+    sp.get("postal_code") || sp.get("postalCode") || sp.get("zip") || sp.get("zips") || "";
+
   return emptyFilters({
-    city: sp.get("city") || sp.get("location") || "__noco__",
+    city: cityParam,
+    postalCode: postalParam,
     minPrice,
     maxPrice,
     beds: sp.get("beds") || "",
@@ -368,13 +374,15 @@ function filtersFromParams(sp) {
 /** Filter state → API / URL params */
 function filtersToParams(f, { forUrl = false, pageNum = 1 } = {}) {
   const params = new URLSearchParams();
-  // Polygon overrides city — don't send city when a custom area is active
+  // Polygon overrides city/zip — don't send location when a custom area is active
   if (!f.polygon) {
     if (f.city && (!forUrl || f.city !== "__noco__")) {
       if (!(forUrl && f.city === "__noco__")) params.set("city", f.city);
     } else if (!forUrl) {
       params.set("city", f.city || "__noco__");
     }
+    // postal_code: multi as comma-separated (shareable, stable)
+    if (f.postalCode) params.set("postal_code", f.postalCode);
   }
   if (f.minPrice) params.set("minPrice", f.minPrice);
   if (f.maxPrice) params.set("maxPrice", f.maxPrice);
@@ -434,8 +442,12 @@ function filtersToParams(f, { forUrl = false, pageNum = 1 } = {}) {
 }
 
 function countActiveFilters(f) {
+  const multiCity = parseCityList(f.city).length > 0;
   return [
-    f.polygon || (f.city && f.city !== "__noco__" && f.city !== "__all__"),
+    f.polygon
+      || multiCity
+      || f.city === "__all__"
+      || f.postalCode,
     f.minPrice, f.maxPrice,
     f.beds, f.baths,
     f.types?.length,
@@ -476,11 +488,43 @@ function formatPriceChip(minPrice, maxPrice) {
 function buildActiveChips(f) {
   const chips = [];
   if (f.polygon) {
-    chips.push({ id: "polygon", label: "Custom area", patch: { polygon: "", city: f.city && f.city !== "__all__" ? f.city : "__noco__" } });
-  } else if (f.city && f.city !== "__noco__" && f.city !== "__all__") {
-    chips.push({ id: "city", label: f.city, patch: { city: "__noco__" } });
-  } else if (f.city === "__all__") {
-    chips.push({ id: "city", label: "All Colorado", patch: { city: "__noco__" } });
+    chips.push({
+      id: "polygon",
+      label: "Custom area",
+      patch: {
+        polygon: "",
+        city: f.city && f.city !== "__all__" ? f.city : "__noco__",
+      },
+    });
+  } else {
+    const cityList = parseCityList(f.city);
+    const zipList = parseZipList(f.postalCode);
+    if (cityList.length) {
+      cityList.forEach((c) => {
+        const remaining = cityList.filter((x) => x.toLowerCase() !== c.toLowerCase());
+        chips.push({
+          id: `city-${c}`,
+          label: c,
+          patch: {
+            city: remaining.length ? remaining.join(",") : (zipList.length ? "__all__" : "__noco__"),
+          },
+        });
+      });
+    } else if (f.city === "__all__" && !zipList.length) {
+      chips.push({ id: "city", label: "All Colorado", patch: { city: "__noco__" } });
+    }
+    zipList.forEach((z) => {
+      const remaining = zipList.filter((x) => x !== z);
+      chips.push({
+        id: `zip-${z}`,
+        label: z,
+        patch: {
+          postalCode: remaining.join(","),
+          // If last zip removed and no cities, return to NoCO default
+          ...(remaining.length === 0 && !cityList.length ? { city: "__noco__" } : {}),
+        },
+      });
+    });
   }
   const priceLabel = formatPriceChip(f.minPrice, f.maxPrice);
   if (priceLabel) {
@@ -855,25 +899,28 @@ function FilterDrawerBody({
   return (
     <div className="flex flex-col h-full min-h-0">
       <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 space-y-6">
-        {/* City */}
+        {/* Location — typed city/ZIP multi-select */}
         <div>
           <SectionLabel>Location</SectionLabel>
-          <select
-            value={draft.polygon ? "__noco__" : draft.city}
-            onChange={(e) => setDraft((d) => ({ ...d, city: e.target.value, polygon: "" }))}
-            className={selectClass}
-            aria-label="City"
+          <LocationCombobox
+            id="filter-drawer-location"
+            city={draft.polygon ? "__noco__" : draft.city}
+            postalCode={draft.polygon ? "" : (draft.postalCode || "")}
             disabled={Boolean(draft.polygon)}
-          >
-            <option value="__noco__">All Northern Colorado</option>
-            <option value="__all__">All Colorado</option>
-            {CITIES.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
+            showQuickPicks
+            inputClassName="!rounded-lg"
+            onChange={({ city: nextCity, postalCode: nextZip }) => {
+              setDraft((d) => ({
+                ...d,
+                city: nextCity,
+                postalCode: nextZip || "",
+                polygon: "",
+              }));
+            }}
+          />
           {draft.polygon ? (
             <p className="text-[11px] text-gray-600 mt-1.5">
-              Custom drawn area is active (overrides city).{" "}
+              Custom drawn area is active (overrides city/ZIP).{" "}
               <button
                 type="button"
                 className="underline font-semibold text-black"
@@ -884,7 +931,7 @@ function FilterDrawerBody({
             </p>
           ) : (
             <p className="text-[11px] text-gray-500 mt-1.5">
-              Or use <strong>Draw area</strong> on the map to search a custom shape.
+              Type any Colorado city or ZIP · multi-select · or use <strong>Draw area</strong> on the map.
             </p>
           )}
         </div>
@@ -1426,13 +1473,28 @@ export default function ListingSearch({ location, height = "700px", compact = fa
   const setFilterInstant = (key, value) => {
     setFilters((prev) => {
       const next = { ...prev, [key]: value };
-      // Drawing a city clears custom polygon (and vice-versa handled on polygon set)
-      if (key === "city" && value) next.polygon = "";
+      // Changing location clears custom polygon (and vice-versa handled on polygon set)
+      if ((key === "city" || key === "postalCode") && value !== undefined) next.polygon = "";
       setDraft(next);
       return next;
     });
     setPage(1);
   };
+
+  /** Location combobox → city + postalCode (clears polygon) */
+  const setLocation = useCallback((patch) => {
+    setFilters((prev) => {
+      const next = {
+        ...prev,
+        city: patch.city !== undefined ? patch.city : prev.city,
+        postalCode: patch.postalCode !== undefined ? patch.postalCode : prev.postalCode,
+        polygon: "",
+      };
+      setDraft(next);
+      return next;
+    });
+    setPage(1);
+  }, []);
 
   const applyFilterPatch = (patch) => {
     setFilters((prev) => {
@@ -1464,8 +1526,9 @@ export default function ListingSearch({ location, height = "700px", compact = fa
       const next = {
         ...prev,
         polygon: ringStr || "",
-        // Polygon overrides city scope
+        // Polygon overrides city/zip scope
         city: ringStr ? "__noco__" : (prev.city || "__noco__"),
+        postalCode: ringStr ? "" : (prev.postalCode || ""),
       };
       setDraft(next);
       return next;
@@ -1566,6 +1629,8 @@ export default function ListingSearch({ location, height = "700px", compact = fa
   const saveFilters = useMemo(() => {
     const out = {};
     if (filters.city && filters.city !== "__noco__" && filters.city !== "__all__") out.city = filters.city;
+    if (filters.city === "__all__" && filters.postalCode) out.city = "__all__";
+    if (filters.postalCode) out.postal_code = filters.postalCode;
     if (filters.minPrice) out.minPrice = filters.minPrice;
     if (filters.maxPrice) out.maxPrice = filters.maxPrice;
     if (filters.beds) out.beds = filters.beds;
@@ -1614,9 +1679,14 @@ export default function ListingSearch({ location, height = "700px", compact = fa
 
   const areaLabel = (() => {
     if (filters.polygon) return "your drawn area";
-    if (filters.city && filters.city !== "__noco__" && filters.city !== "__all__") {
-      return filters.city;
-    }
+    const cityList = parseCityList(filters.city);
+    const zipList = parseZipList(filters.postalCode);
+    const bits = [];
+    if (cityList.length > 2) bits.push(`${cityList.slice(0, 2).join(", ")} +${cityList.length - 2}`);
+    else if (cityList.length) bits.push(cityList.join(", "));
+    if (zipList.length > 2) bits.push(`ZIP ${zipList.slice(0, 2).join(", ")} +${zipList.length - 2}`);
+    else if (zipList.length) bits.push(`ZIP ${zipList.join(", ")}`);
+    if (bits.length) return bits.join(" · ");
     if (filters.city === "__all__") return "Colorado";
     return "Northern Colorado";
   })();
@@ -1647,16 +1717,15 @@ export default function ListingSearch({ location, height = "700px", compact = fa
       <div className="border-b border-gray-200 bg-white z-20 shrink-0 sticky top-0">
         {/* Desktop chip bar */}
         <div className="hidden md:flex flex-wrap items-center gap-2 p-3 lg:px-4">
-          <select
-            value={filters.city}
-            onChange={(e) => setFilterInstant("city", e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-full text-sm bg-white font-medium focus:ring-2 focus:ring-black outline-none"
-            aria-label="City"
-          >
-            <option value="__noco__">Northern Colorado</option>
-            <option value="__all__">All Colorado</option>
-            {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
+          <div className="min-w-[16rem] max-w-md flex-1 basis-[16rem]">
+            <LocationCombobox
+              id="desktop-location"
+              city={filters.city}
+              postalCode={filters.postalCode || ""}
+              onChange={setLocation}
+              showQuickPicks={false}
+            />
+          </div>
 
           <button
             type="button"
@@ -1771,8 +1840,16 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           </div>
         </div>
 
-        {/* Mobile filter trigger */}
-        <div className="md:hidden flex items-center gap-2 p-3">
+        {/* Mobile filter trigger + location */}
+        <div className="md:hidden flex flex-col gap-2 p-3">
+          <LocationCombobox
+            id="mobile-location"
+            city={filters.city}
+            postalCode={filters.postalCode || ""}
+            onChange={setLocation}
+            showQuickPicks={false}
+          />
+          <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={openDrawer}
@@ -1800,6 +1877,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
               <option key={o.value} value={o.value}>{o.label}</option>
             ))}
           </select>
+          </div>
         </div>
 
         {/* Active filter chip strip — co-located with filter trigger + Clear all */}
@@ -2006,8 +2084,8 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                 No homes match these filters
                 {filters.polygon
                   ? " in your drawn area"
-                  : filters.city && filters.city !== "__noco__" && filters.city !== "__all__"
-                    ? ` in ${filters.city}`
+                  : areaLabel && areaLabel !== "Northern Colorado"
+                    ? ` in ${areaLabel}`
                     : ""}
               </p>
               <p className="text-gray-500 mt-2 max-w-md text-sm leading-relaxed">
