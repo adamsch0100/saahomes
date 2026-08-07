@@ -4,10 +4,12 @@ import { Link, useLocation } from "react-router-dom";
 export default function FloatingContactBar() {
   const location = useLocation();
 
-  // Listing detail owns its own mobile sticky conversion bar
+  // Listing detail owns its own sticky CTAs; full-screen search needs the whole viewport
   if (
     location.pathname.startsWith('/admin') ||
-    location.pathname.startsWith('/homes-for-sale/')
+    location.pathname.startsWith('/homes-for-sale/') ||
+    location.pathname === '/properties' ||
+    location.pathname === '/properties/'
   ) {
     return null;
   }

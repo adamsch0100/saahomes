@@ -49,6 +49,9 @@ import { GA4_MEASUREMENT_ID, initGaDebugMode } from "./utils/analytics.js";
 function AppLayout({ children }) {
   const location = useLocation();
   const isAdminPage = location.pathname.startsWith('/admin');
+  // Full-screen Zillow-style search — no page chrome below the header
+  const isPropertiesSearch =
+    location.pathname === '/properties' || location.pathname === '/properties/';
   
   if (isAdminPage) {
     return <>{children}</>;
@@ -58,12 +61,19 @@ function AppLayout({ children }) {
     <>
       <Header />
       <Breadcrumbs />
-      <main id="page-container" className="w-full pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
+      <main
+        id="page-container"
+        className={
+          isPropertiesSearch
+            ? "w-full overflow-hidden"
+            : "w-full pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-0"
+        }
+      >
         {children}
       </main>
-      <FloatingContactBar />
+      {!isPropertiesSearch && <FloatingContactBar />}
       <LeadCaptureChat />
-      <Footer />
+      {!isPropertiesSearch && <Footer />}
     </>
   );
 }

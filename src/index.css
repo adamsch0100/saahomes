@@ -59,6 +59,67 @@ body.listing-detail-page {
 }
 
 /* ─────────────────────────────────────────────────────────────
+   Full-screen property search (/properties/) — Zillow model.
+   Document does not scroll; only the results list / map scroll.
+   SEO content stays in the DOM via .seo-crawl-layer (crawlable).
+   ───────────────────────────────────────────────────────────── */
+html.properties-search-page,
+body.properties-search-page {
+  overflow: hidden !important;
+  height: 100%;
+  height: 100dvh;
+  overscroll-behavior: none;
+}
+
+body.properties-search-page #page-container {
+  overflow: hidden;
+  height: 0; /* children use fixed positioning; main must not expand the page */
+  min-height: 0;
+  padding-bottom: 0 !important;
+}
+
+/* Crawlable SEO layer: in the DOM for Google, zero visual footprint */
+.seo-crawl-layer {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+  /* Keep links/text in the accessibility + crawl tree; just not laid out */
+  pointer-events: none;
+}
+
+/* Full-viewport search shell under the fixed header */
+.properties-search-app {
+  /* top set via --saa-header-h inline; fill remaining viewport */
+  height: auto;
+  max-height: 100dvh;
+  /* iOS safe area: bottom home indicator */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Prerender injects sitewide links outside #root — keep crawlable but
+   hide from layout so they don't create a scrollable page under search */
+body.properties-search-page .prerendered-site-links,
+body.properties-search-page .prerendered-money-content {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
    Prerendered sitewide links band ("Explore Northern Colorado
    Real Estate") — injected by scripts/prerender-meta.mjs into
    every prerendered page so crawlers can reach all 19 city pages
