@@ -245,6 +245,21 @@ export default function BoulderPage() {
         </div>
       </section>
 
+      <section className="py-10 px-6" style={{ backgroundColor: "#CFB36E" }}>
+        <div className="max-w-3xl mx-auto text-center">
+          <p className="text-gray-900 text-lg leading-relaxed">
+            Boulder buyers: the city&apos;s <strong>H2O</strong> program can offer a shared-appreciation second loan up to{" "}
+            <strong>$100,000</strong> (≤120% AMI, market-rate homes in city limits). CHFA also works statewide.
+          </p>
+          <Link
+            to="/chfa-down-payment-assistance/#boulder-h2o"
+            className="inline-flex mt-4 px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            Boulder H2O &amp; other DPA →
+          </Link>
+        </div>
+      </section>
+
       <AreaFAQSection faqs={AREA_FAQS['boulder']} city="Boulder" />
 
     </>

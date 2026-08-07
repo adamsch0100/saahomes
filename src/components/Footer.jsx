@@ -25,7 +25,7 @@ export default function Footer() {
               <li className="pt-2">
                 <span className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">CHFA Programs</span>
                 <ul className="space-y-2 pl-3 border-l border-gray-700">
-                  <li><Link to="/chfa-down-payment-assistance/" className="hover:text-white transition-colors">Down Payment Assistance</Link></li>
+                  <li><Link to="/chfa-down-payment-assistance/#city-county-programs" className="hover:text-white transition-colors">Down Payment Assistance</Link></li>
                   <li><Link to="/chfa-schools-to-home/" className="hover:text-white transition-colors">Schools To Home</Link></li>
                   <li><Link to="/colorado-champions-home-loan-program/" className="hover:text-white transition-colors">Champions Home Loan</Link></li>
                 </ul>

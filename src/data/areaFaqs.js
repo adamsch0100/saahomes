@@ -117,6 +117,10 @@ const AREA_FAQS = {
     {
       q: 'Who is the best real estate agent in Greeley?',
       a: 'Schwartz and Associates (SAA Homes) at Coldwell Banker Realty serves Greeley home buyers and sellers with expert knowledge of Weld County real estate, including Greeley neighborhoods, the University of Northern Colorado area, and the growing U.S. 34 corridor. As a locally-owned Northern Colorado team, we help buyers navigate CHFA down payment assistance programs and help sellers price and market their homes for the best results. Call (970) 999-1407 for a free consultation with Adam or Mandi Schwartz.'
+    },
+    {
+      q: 'Does Greeley have its own down payment assistance program?',
+      a: 'Yes. The City of Greeley G-HOPE program offers $2,500–$8,000 in zone-based forgivable down payment assistance for full-time employees of employers based in the program area (homes east of 35th Avenue). No first-time buyer requirement and no income limit. CHFA also works statewide. See G-HOPE details on our CHFA down payment assistance hub: https://saahomes.com/chfa-down-payment-assistance/#greeley-g-hope'
     }
   ],
   'timnath': [
@@ -205,6 +209,10 @@ const AREA_FAQS = {
     {
       q: 'What are the best neighborhoods in Longmont?',
       a: 'Popular Longmont neighborhoods include Prospect (a New Urbanist community), southwest Longmont near McIntosh Lake, newer developments in north Longmont, and the historic Old Town area. Each area offers different price points and lifestyles, from urban walkability to suburban family living.'
+    },
+    {
+      q: 'Does Longmont have a down payment assistance program?',
+      a: 'Yes. Longmont\'s LDPAP offers up to 10% of the purchase price (max $40,000) for income-qualified buyers inside city limits — terms vary by AMI tier (2% amortized or 0% deferred). Boulder County BCDPAP (also administered by Longmont) covers homes in the county outside Boulder city. CHFA remains available statewide. Program summary: https://saahomes.com/chfa-down-payment-assistance/#longmont-ldpap'
     }
   ],
   'boulder': [
@@ -219,6 +227,10 @@ const AREA_FAQS = {
     {
       q: 'What are the best neighborhoods in Boulder?',
       a: 'Key Boulder neighborhoods include Central Boulder near Pearl Street Mall, North Boulder with newer construction, South Boulder near the foothills, and the University Hill area near CU. Each neighborhood has a distinct character, from historic homes to modern mountain-contemporary designs.'
+    },
+    {
+      q: 'Does Boulder have a down payment assistance program?',
+      a: 'Yes. The City of Boulder H2O (House to Homeownership) program offers a shared-appreciation second loan up to $100,000 for eligible buyers at or below 120% AMI purchasing a market-rate home in city limits. Boulder Housing Partners is rentals only — not DPA. CHFA works statewide as well. Details: https://saahomes.com/chfa-down-payment-assistance/#boulder-h2o'
     }
   ],
   'berthoud': [
@@ -355,6 +367,10 @@ const AREA_FAQS = {
     {
       q: 'Is Estes Park only for second homes?',
       a: 'No. Many residents live full-time in Estes Park for the mountain lifestyle, while second-home buyers are also a significant share of demand. Your financing, insurance, and intended use should drive the search — we can align listings to either path.'
+    },
+    {
+      q: 'Is there down payment assistance for Estes Park homebuyers?',
+      a: 'Yes for qualifying workforce buyers. Estes Valley Workforce Housing Assistance (EVWHA) offers a low-interest loan up to 3.5% of purchase price ($15,000 max) for first-time buyers at 81–150% AMI. Larimer County LHoP ($15,000 at 1%, ≤80% AMI) and statewide CHFA may also apply. Program summary: https://saahomes.com/chfa-down-payment-assistance/#estes-park-evwha'
     },
   ],
   'red-feather-lakes': [

@@ -224,14 +224,22 @@ export default function GreeleyPage() {
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold font-serif text-gray-900 mb-3">Work in Greeley? Explore G-HOPE</h2>
           <p className="text-gray-800 mb-6">
-            The City of Greeley&apos;s G-HOPE program offers up to $8,000 in forgivable down payment assistance for full-time employees buying east of 35th Avenue — no first-time buyer requirement.
+            The City of Greeley&apos;s G-HOPE program offers $2,500–$8,000 in zone-based forgivable down payment assistance for full-time employees buying east of 35th Avenue — no first-time buyer requirement. CHFA also works statewide.
           </p>
-          <Link
-            to="/greeley-g-hope-down-payment-assistance/"
-            className="inline-flex px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            G-HOPE program guide →
-          </Link>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              to="/greeley-g-hope-down-payment-assistance/"
+              className="inline-flex px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              G-HOPE program guide →
+            </Link>
+            <Link
+              to="/chfa-down-payment-assistance/#greeley-g-hope"
+              className="inline-flex px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+            >
+              All DPA programs →
+            </Link>
+          </div>
         </div>
       </section>
 

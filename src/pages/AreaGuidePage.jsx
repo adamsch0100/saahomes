@@ -293,7 +293,8 @@ export default function AreaGuidePage() {
           </h2>
           <p className="text-gray-800 mb-6">
             Many {area.city} buyers qualify for CHFA down payment assistance — grants and deferred loans up to $25,000.
-            {isGreeleyArea && " Greeley-area employees may also qualify for the city G-HOPE program (up to $8,000)."}
+            {isGreeleyArea && " Greeley-area employees may also qualify for the city G-HOPE program ($2,500–$8,000 by zone)."}
+            {area.slug === "estes-park" && " Estes Valley workforce buyers may also qualify for EVWHA (up to 3.5% / $15K)."}
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link
@@ -308,6 +309,14 @@ export default function AreaGuidePage() {
                 className="inline-flex px-6 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
               >
                 G-HOPE for Greeley employees
+              </Link>
+            )}
+            {area.slug === "estes-park" && (
+              <Link
+                to="/chfa-down-payment-assistance/#estes-park-evwha"
+                className="inline-flex px-6 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+              >
+                Estes Park EVWHA →
               </Link>
             )}
             <Link to="/chfa-down-payment-assistance/" className="inline-flex px-6 py-3 font-semibold hover:underline">
