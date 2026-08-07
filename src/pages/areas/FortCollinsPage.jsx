@@ -364,9 +364,7 @@ export default function FortCollinsPage() {
                   Schedule a Consultation
                 </Link>
                 <a
-                  href="https://www.realscout.com/search?agent_id=251929&location=Fort%20Collins,%20CO"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="/properties/?location=Fort%20Collins,%20CO"
                   className="inline-flex items-center justify-center px-8 py-3 border-2 border-gray-900 text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   Search Fort Collins Homes
@@ -384,9 +382,7 @@ export default function FortCollinsPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="https://www.realscout.com/search?agent_id=251929&location=Fort%20Collins,%20CO"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/properties/?location=Fort%20Collins,%20CO"
               className="inline-flex items-center justify-center px-8 py-3 bg-white text-gray-900 font-semibold rounded hover:bg-gray-100 transition-colors"
             >
               Search Homes in Fort Collins

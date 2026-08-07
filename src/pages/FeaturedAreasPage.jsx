@@ -25,8 +25,8 @@ const cardDescriptions = {
   niwot: "Historic small town near Boulder with charming downtown, top-rated schools, and a strong arts community.",
 };
 
-function getRealScoutLink(city) {
-  return `https://www.realscout.com/search?agent_id=251929&location=${encodeURIComponent(`${city}, CO`)}`;
+function getSearchLink(city) {
+  return `/properties/?location=${encodeURIComponent(`${city}, CO`)}`;
 }
 
 export default function FeaturedAreasPage() {
@@ -34,7 +34,7 @@ export default function FeaturedAreasPage() {
     name: area.city,
     image: area.heroImage,
     url: `/northern-colorado-areas/${area.slug}/`,
-    realscoutLink: getRealScoutLink(area.city),
+    searchLink: getSearchLink(area.city),
     description: cardDescriptions[area.slug] || area.tagline,
   }));
 
@@ -113,15 +113,13 @@ export default function FeaturedAreasPage() {
                   
                   {/* Buttons */}
                   <div className="flex gap-3">
-                    <a 
-                      href={area.realscoutLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <Link 
+                      to={area.searchLink}
                       className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-black text-white text-sm font-semibold rounded hover:bg-gray-800 transition-colors"
                       onClick={(e) => e.stopPropagation()}
                     >
                       Search Homes
-                    </a>
+                    </Link>
                     <Link 
                       to={area.url}
                       className="flex-1 inline-flex items-center justify-center px-4 py-2 border-2 border-black text-black text-sm font-semibold rounded hover:bg-black hover:text-white transition-colors"
