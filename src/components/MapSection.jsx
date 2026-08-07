@@ -7,19 +7,19 @@ export default function MapSection() {
   const [hoveredArea, setHoveredArea] = useState(null);
 
   const areas = [
-    { name: "Fort Collins", coords: [-105.0844, 40.5853], link: "https://www.realscout.com/search?agent_id=251929&location=Fort%20Collins,%20CO", url: "/northern-colorado-areas/fort-collins/" },
-    { name: "Loveland", coords: [-105.0750, 40.3978], link: "https://www.realscout.com/search?agent_id=251929&location=Loveland,%20CO", url: "/northern-colorado-areas/loveland/" },
-    { name: "Windsor", coords: [-104.9014, 40.4775], link: "https://www.realscout.com/search?agent_id=251929&location=Windsor,%20CO", url: "/northern-colorado-areas/windsor/" },
-    { name: "Greeley", coords: [-104.7091, 40.4233], link: "https://www.realscout.com/search?agent_id=251929&location=Greeley,%20CO", url: "/northern-colorado-areas/greeley/" },
-    { name: "Timnath", coords: [-104.9897, 40.5286], link: "https://www.realscout.com/search?agent_id=251929&location=Timnath,%20CO", url: "/northern-colorado-areas/timnath/" },
-    { name: "Wellington", coords: [-105.0086, 40.7031], link: "https://www.realscout.com/search?agent_id=251929&location=Wellington,%20CO", url: "/northern-colorado-areas/wellington/" },
-    { name: "Johnstown", coords: [-104.9111, 40.3369], link: "https://www.realscout.com/search?agent_id=251929&location=Johnstown,%20CO", url: "/northern-colorado-areas/johnstown/" },
-    { name: "Eaton", coords: [-104.7147, 40.5308], link: "https://www.realscout.com/search?agent_id=251929&location=Eaton,%20CO", url: "/northern-colorado-areas/eaton/" },
-    { name: "Milliken", coords: [-104.8544, 40.3294], link: "https://www.realscout.com/search?agent_id=251929&location=Milliken,%20CO", url: "/northern-colorado-areas/milliken/" },
-    { name: "La Salle", coords: [-104.7019, 40.3478], link: "https://www.realscout.com/search?agent_id=251929&location=LaSalle,%20CO", url: "/northern-colorado-areas/la-salle/" },
-    { name: "Mead", coords: [-105.0036, 40.2333], link: "https://www.realscout.com/search?agent_id=251929&location=Mead,%20CO", url: "/northern-colorado-areas/mead/" },
-    { name: "Longmont", coords: [-105.1019, 40.1672], link: "https://www.realscout.com/search?agent_id=251929&location=Longmont,%20CO", url: "/northern-colorado-areas/longmont/" },
-    { name: "Boulder", coords: [-105.2705, 40.0150], link: "https://www.realscout.com/search?agent_id=251929&location=Boulder,%20CO", url: "/northern-colorado-areas/boulder/" },
+    { name: "Fort Collins", coords: [-105.0844, 40.5853], link: "/properties/?location=Fort%20Collins,%20CO", url: "/northern-colorado-areas/fort-collins/" },
+    { name: "Loveland", coords: [-105.0750, 40.3978], link: "/properties/?location=Loveland,%20CO", url: "/northern-colorado-areas/loveland/" },
+    { name: "Windsor", coords: [-104.9014, 40.4775], link: "/properties/?location=Windsor,%20CO", url: "/northern-colorado-areas/windsor/" },
+    { name: "Greeley", coords: [-104.7091, 40.4233], link: "/properties/?location=Greeley,%20CO", url: "/northern-colorado-areas/greeley/" },
+    { name: "Timnath", coords: [-104.9897, 40.5286], link: "/properties/?location=Timnath,%20CO", url: "/northern-colorado-areas/timnath/" },
+    { name: "Wellington", coords: [-105.0086, 40.7031], link: "/properties/?location=Wellington,%20CO", url: "/northern-colorado-areas/wellington/" },
+    { name: "Johnstown", coords: [-104.9111, 40.3369], link: "/properties/?location=Johnstown,%20CO", url: "/northern-colorado-areas/johnstown/" },
+    { name: "Eaton", coords: [-104.7147, 40.5308], link: "/properties/?location=Eaton,%20CO", url: "/northern-colorado-areas/eaton/" },
+    { name: "Milliken", coords: [-104.8544, 40.3294], link: "/properties/?location=Milliken,%20CO", url: "/northern-colorado-areas/milliken/" },
+    { name: "La Salle", coords: [-104.7019, 40.3478], link: "/properties/?location=LaSalle,%20CO", url: "/northern-colorado-areas/la-salle/" },
+    { name: "Mead", coords: [-105.0036, 40.2333], link: "/properties/?location=Mead,%20CO", url: "/northern-colorado-areas/mead/" },
+    { name: "Longmont", coords: [-105.1019, 40.1672], link: "/properties/?location=Longmont,%20CO", url: "/northern-colorado-areas/longmont/" },
+    { name: "Boulder", coords: [-105.2705, 40.0150], link: "/properties/?location=Boulder,%20CO", url: "/northern-colorado-areas/boulder/" },
   ];
 
   useEffect(() => {
@@ -92,7 +92,7 @@ export default function MapSection() {
             <div style="padding: 16px; text-align: center;">
               <h3 style="margin: 0 0 12px 0; font-size: 18px; font-weight: 700; color: #000;">${area.name}</h3>
               <div style="display: flex; flex-direction: column; gap: 8px;">
-                <a href="${area.link}" target="_blank" rel="noopener noreferrer" 
+                <a href="${area.link}" 
                    style="padding: 10px 20px; background: #000; color: white; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 600; display: block;">
                   Search Homes
                 </a>
@@ -193,8 +193,6 @@ export default function MapSection() {
               <a
                 key={index}
                 href={area.link}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-center font-semibold text-gray-800 hover:bg-black hover:text-white hover:border-black transition-all text-sm"
               >
                 {area.name}

@@ -644,9 +644,7 @@ export default function GHopeHomeLoanPage() {
           </Link>
           {" · "}
           <a
-            href="https://www.realscout.com/search?agent_id=251929&location=Greeley,%20CO"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/properties/?location=Greeley,%20CO"
             className="font-semibold text-gray-900 hover:underline"
           >
             Search Greeley homes

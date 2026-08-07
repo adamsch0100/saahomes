@@ -170,9 +170,7 @@ export default function WindsorPage() {
               Contact Us
             </Link>
             <a 
-              href="https://www.realscout.com/search?agent_id=251929&location=Windsor,%20CO"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/properties/?location=Windsor,%20CO"
               className="inline-block px-8 py-3 border-2 border-black text-black font-semibold rounded hover:bg-black hover:text-white transition-colors"
             >
               Search Windsor Homes

@@ -67,7 +67,7 @@ export default function AreaGuidePage() {
   }
 
   const searchLocation = encodeURIComponent(`${area.city}, CO`);
-  const realscoutLink = `https://www.realscout.com/search?agent_id=251929&location=${searchLocation}`;
+  const searchLink = `/properties/?location=${searchLocation}`;
   const intro = area.introParagraphs || [area.description];
   const whyChoose = area.whyChoose || [];
   const highlights = area.highlights || { neighborhoods: [], attractions: [] };
@@ -125,14 +125,12 @@ export default function AreaGuidePage() {
           <h2 className="text-3xl font-bold font-serif mb-4">Search Homes in {area.city}</h2>
           <p className="text-lg mb-6 text-gray-700">Explore available properties in {area.city}, Colorado.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href={realscoutLink}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              to={searchLink}
               className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
             >
               Search {area.city} Homes
-            </a>
+            </Link>
             <Link
               to="/contact/"
               className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
