@@ -217,7 +217,33 @@ const SORT_OPTIONS = [
   { label: "Days on market", value: "days-on-market" },
 ];
 
+/** Keyword match modes — backend keywordMode=all|any|exact|comma */
+const KEYWORD_MODE_OPTIONS = [
+  {
+    value: "all",
+    label: "All words",
+    hint: "Every word must appear (e.g. “mountain view corner lot” matches homes mentioning all of them).",
+  },
+  {
+    value: "any",
+    label: "Any word",
+    hint: "Matches if any word appears (broader results).",
+  },
+  {
+    value: "exact",
+    label: "Exact phrase",
+    hint: "The full phrase must appear together as typed.",
+  },
+  {
+    value: "comma",
+    label: "Comma-separated",
+    hint: "Separated by commas = each phrase must match.",
+  },
+];
+
 const PAGE_SIZE = 40;
+/** Debounce filter-driven fetches so typing price/keywords doesn't spam the API */
+const FILTER_DEBOUNCE_MS = 375;
 
 /** Default empty filter state */
 function emptyFilters(overrides = {}) {
@@ -253,6 +279,8 @@ function emptyFilters(overrides = {}) {
     listingStatus: "",
     newdays: "",
     keywords: "",
+    keywordMode: "all",
+    polygon: "",
     hasImages: "",
     hasTour: "",
     ...overrides,
@@ -321,6 +349,11 @@ function filtersFromParams(sp) {
     listingStatus: sp.get("listingStatus") || "",
     newdays: sp.get("newDays") || "",
     keywords: sp.get("keywords") || sp.get("q") || "",
+    keywordMode: (() => {
+      const m = (sp.get("keywordMode") || sp.get("keyword_mode") || "all").toLowerCase();
+      return ["all", "any", "exact", "comma"].includes(m) ? m : "all";
+    })(),
+    polygon: sp.get("polygon") || "",
     hasImages: sp.get("hasImages") || "",
     hasTour: sp.get("hasTour") || sp.get("has3d") || "",
   });
@@ -329,10 +362,13 @@ function filtersFromParams(sp) {
 /** Filter state → API / URL params */
 function filtersToParams(f, { forUrl = false, pageNum = 1 } = {}) {
   const params = new URLSearchParams();
-  if (f.city && (!forUrl || f.city !== "__noco__")) {
-    if (!(forUrl && f.city === "__noco__")) params.set("city", f.city);
-  } else if (!forUrl) {
-    params.set("city", f.city || "__noco__");
+  // Polygon overrides city — don't send city when a custom area is active
+  if (!f.polygon) {
+    if (f.city && (!forUrl || f.city !== "__noco__")) {
+      if (!(forUrl && f.city === "__noco__")) params.set("city", f.city);
+    } else if (!forUrl) {
+      params.set("city", f.city || "__noco__");
+    }
   }
   if (f.minPrice) params.set("minPrice", f.minPrice);
   if (f.maxPrice) params.set("maxPrice", f.maxPrice);
@@ -367,21 +403,31 @@ function filtersToParams(f, { forUrl = false, pageNum = 1 } = {}) {
   if (f.newcon === "true") params.set("newConstruction", "true");
   if (f.listingStatus) params.set("listingStatus", f.listingStatus);
   if (f.newdays) params.set("newDays", f.newdays);
-  if (f.keywords) params.set(forUrl ? "keywords" : "keywords", f.keywords);
+  if (f.keywords) {
+    params.set("keywords", f.keywords);
+    const mode = f.keywordMode || "all";
+    // API always gets mode; URL only when non-default so links stay clean
+    if (!forUrl || mode !== "all") params.set("keywordMode", mode);
+  }
+  if (f.polygon) params.set("polygon", f.polygon);
   if (f.hasImages === "true") params.set("hasImages", "true");
   if (f.hasTour === "true") params.set("hasTour", "true");
   if (!forUrl) {
     params.set("limit", String(PAGE_SIZE));
     params.set("page", String(pageNum));
-    // Always scope API to a city param
-    if (!params.has("city")) params.set("city", f.city || "__noco__");
+    // Polygon overrides city on the backend; still pass city only when no polygon
+    if (f.polygon) {
+      params.delete("city");
+    } else if (!params.has("city")) {
+      params.set("city", f.city || "__noco__");
+    }
   }
   return params;
 }
 
 function countActiveFilters(f) {
   return [
-    f.city && f.city !== "__noco__" && f.city !== "__all__",
+    f.polygon || (f.city && f.city !== "__noco__" && f.city !== "__all__"),
     f.minPrice, f.maxPrice,
     f.beds, f.baths,
     f.types?.length,
@@ -399,6 +445,145 @@ function countActiveFilters(f) {
     f.keywords,
     f.hasImages === "true", f.hasTour === "true",
   ].filter(Boolean).length;
+}
+
+function formatPriceChip(minPrice, maxPrice) {
+  const f = (n) => {
+    if (!n) return "";
+    const num = Number(n);
+    if (num >= 1000000) return `$${(num / 1000000).toFixed(num % 1000000 === 0 ? 0 : 1)}M`;
+    if (num >= 1000) return `$${Math.round(num / 1000)}K`;
+    return `$${num}`;
+  };
+  if (minPrice && maxPrice) return `${f(minPrice)}–${f(maxPrice)}`;
+  if (maxPrice) return `≤ ${f(maxPrice)}`;
+  if (minPrice) return `${f(minPrice)}+`;
+  return "";
+}
+
+/**
+ * Build removable active-filter chips for the summary strip.
+ * Each chip: { id, label, patch } where patch is partial filter updates to apply on remove.
+ */
+function buildActiveChips(f) {
+  const chips = [];
+  if (f.polygon) {
+    chips.push({ id: "polygon", label: "Custom area", patch: { polygon: "", city: f.city && f.city !== "__all__" ? f.city : "__noco__" } });
+  } else if (f.city && f.city !== "__noco__" && f.city !== "__all__") {
+    chips.push({ id: "city", label: f.city, patch: { city: "__noco__" } });
+  } else if (f.city === "__all__") {
+    chips.push({ id: "city", label: "All Colorado", patch: { city: "__noco__" } });
+  }
+  const priceLabel = formatPriceChip(f.minPrice, f.maxPrice);
+  if (priceLabel) {
+    chips.push({ id: "price", label: priceLabel, patch: { minPrice: "", maxPrice: "" } });
+  }
+  if (f.beds) {
+    chips.push({ id: "beds", label: `${f.beds}+ bd`, patch: { beds: "" } });
+  }
+  if (f.baths) {
+    chips.push({ id: "baths", label: `${f.baths}+ ba`, patch: { baths: "" } });
+  }
+  if (f.types?.length) {
+    if (f.types.length === 1) {
+      const lab = HOME_TYPE_OPTIONS.find((o) => o.value === f.types[0])?.label || f.types[0];
+      chips.push({ id: "types", label: lab, patch: { types: [] } });
+    } else {
+      chips.push({ id: "types", label: `${f.types.length} home types`, patch: { types: [] } });
+    }
+  }
+  if (f.minSqft) chips.push({ id: "minSqft", label: `${Number(f.minSqft).toLocaleString()}+ sqft`, patch: { minSqft: "" } });
+  if (f.maxSqft) chips.push({ id: "maxSqft", label: `≤ ${Number(f.maxSqft).toLocaleString()} sqft`, patch: { maxSqft: "" } });
+  if (f.minLotAcres || f.maxLotAcres) {
+    const lot = LOT_OPTIONS.find(
+      (o) => o.min === (f.minLotAcres || "") && o.max === (f.maxLotAcres || "")
+    );
+    chips.push({
+      id: "lot",
+      label: lot?.label || "Lot size",
+      patch: { minLotAcres: "", maxLotAcres: "" },
+    });
+  }
+  if (f.minYear || f.maxYear) {
+    const y = YEAR_OPTIONS.find(
+      (o) => o.min === (f.minYear || "") && o.max === (f.maxYear || "")
+    );
+    chips.push({
+      id: "year",
+      label: y?.label || "Year built",
+      patch: { minYear: "", maxYear: "" },
+    });
+  }
+  if (f.maxHoa) {
+    chips.push({
+      id: "hoa",
+      label: f.maxHoa === "0" ? "No HOA" : `HOA ≤ $${f.maxHoa}`,
+      patch: { maxHoa: "" },
+    });
+  }
+  if (f.garage) chips.push({ id: "garage", label: `${f.garage}+ garage`, patch: { garage: "" } });
+  if (f.stories) chips.push({ id: "stories", label: f.stories === "3" ? "3+ stories" : `${f.stories} story`, patch: { stories: "" } });
+  if (f.basement) {
+    const b = BASEMENT_OPTIONS.find((o) => o.value === f.basement);
+    chips.push({ id: "basement", label: b?.label || "Basement", patch: { basement: "" } });
+  }
+  if (f.cooling) {
+    const c = COOLING_OPTIONS.find((o) => o.value === f.cooling);
+    chips.push({ id: "cooling", label: c?.label || "Cooling", patch: { cooling: "" } });
+  }
+  if (f.heating) {
+    const h = HEATING_OPTIONS.find((o) => o.value === f.heating);
+    chips.push({ id: "heating", label: h?.label || "Heating", patch: { heating: "" } });
+  }
+  if (f.parking) {
+    const p = PARKING_OPTIONS.find((o) => o.value === f.parking);
+    chips.push({ id: "parking", label: p?.label || "Parking", patch: { parking: "" } });
+  }
+  if (f.pool === "true") chips.push({ id: "pool", label: "Pool", patch: { pool: "" } });
+  if (f.waterfront === "true") chips.push({ id: "waterfront", label: "Waterfront", patch: { waterfront: "" } });
+  if (f.view) {
+    const v = VIEW_OPTIONS.find((o) => o.value === f.view);
+    chips.push({ id: "view", label: v ? `${v.label} view` : "View", patch: { view: "" } });
+  }
+  if (f.style) {
+    const s = STYLE_OPTIONS.find((o) => o.value === f.style);
+    chips.push({ id: "style", label: s?.label || "Style", patch: { style: "" } });
+  }
+  if (f.community) {
+    const c = COMMUNITY_OPTIONS.find((o) => o.value === f.community);
+    chips.push({ id: "community", label: c?.label || "Community", patch: { community: "" } });
+  }
+  if (f.exterior) {
+    const e = EXTERIOR_OPTIONS.find((o) => o.value === f.exterior);
+    chips.push({ id: "exterior", label: e?.label || "Exterior", patch: { exterior: "" } });
+  }
+  if (f.interior?.length) {
+    for (const tok of f.interior) {
+      const t = INTERIOR_TOGGLES.find((x) => x.token === tok);
+      chips.push({
+        id: `interior-${tok}`,
+        label: t?.label || tok,
+        patch: { interior: (f.interior || []).filter((x) => x !== tok) },
+      });
+    }
+  }
+  if (f.newcon === "true") chips.push({ id: "newcon", label: "New construction", patch: { newcon: "" } });
+  if (f.listingStatus === "new") chips.push({ id: "listingStatus", label: "New listings", patch: { listingStatus: "" } });
+  if (f.listingStatus === "price-drop") chips.push({ id: "listingStatus", label: "Price drops", patch: { listingStatus: "" } });
+  if (f.newdays) chips.push({ id: "newdays", label: `Listed ≤ ${f.newdays}d`, patch: { newdays: "" } });
+  if (f.keywords) {
+    const mode = KEYWORD_MODE_OPTIONS.find((m) => m.value === (f.keywordMode || "all"));
+    const modeTag = mode && mode.value !== "all" ? ` · ${mode.label}` : "";
+    const short = f.keywords.length > 28 ? `${f.keywords.slice(0, 26)}…` : f.keywords;
+    chips.push({
+      id: "keywords",
+      label: `“${short}”${modeTag}`,
+      patch: { keywords: "", keywordMode: "all" },
+    });
+  }
+  if (f.hasImages === "true") chips.push({ id: "hasImages", label: "Has photos", patch: { hasImages: "" } });
+  if (f.hasTour === "true") chips.push({ id: "hasTour", label: "Virtual tour", patch: { hasTour: "" } });
+  return chips;
 }
 
 function SkeletonCard() {
@@ -662,10 +847,11 @@ function FilterDrawerBody({
         <div>
           <SectionLabel>Location</SectionLabel>
           <select
-            value={draft.city}
-            onChange={(e) => set("city", e.target.value)}
+            value={draft.polygon ? "__noco__" : draft.city}
+            onChange={(e) => setDraft((d) => ({ ...d, city: e.target.value, polygon: "" }))}
             className={selectClass}
             aria-label="City"
+            disabled={Boolean(draft.polygon)}
           >
             <option value="__noco__">All Northern Colorado</option>
             <option value="__all__">All Colorado</option>
@@ -673,6 +859,22 @@ function FilterDrawerBody({
               <option key={c} value={c}>{c}</option>
             ))}
           </select>
+          {draft.polygon ? (
+            <p className="text-[11px] text-gray-600 mt-1.5">
+              Custom drawn area is active (overrides city).{" "}
+              <button
+                type="button"
+                className="underline font-semibold text-black"
+                onClick={() => setDraft((d) => ({ ...d, polygon: "" }))}
+              >
+                Clear shape
+              </button>
+            </p>
+          ) : (
+            <p className="text-[11px] text-gray-500 mt-1.5">
+              Or use <strong>Draw area</strong> on the map to search a custom shape.
+            </p>
+          )}
         </div>
 
         {/* Price */}
@@ -981,7 +1183,7 @@ function FilterDrawerBody({
           </div>
         </div>
 
-        {/* Keywords */}
+        {/* Keywords + match mode */}
         <div>
           <SectionLabel>Keywords</SectionLabel>
           <input
@@ -990,9 +1192,30 @@ function FilterDrawerBody({
             value={draft.keywords}
             onChange={(e) => set("keywords", e.target.value)}
             className={selectClass}
+            aria-label="Keywords"
           />
-          <p className="text-[11px] text-gray-500 mt-1">
-            Matches public remarks, subdivision, and address.
+          <div className="mt-2 flex flex-wrap gap-1.5" role="group" aria-label="Keyword match mode">
+            {KEYWORD_MODE_OPTIONS.map((m) => {
+              const on = (draft.keywordMode || "all") === m.value;
+              return (
+                <button
+                  key={m.value}
+                  type="button"
+                  onClick={() => set("keywordMode", m.value)}
+                  className={on ? pillOn : pillIdle}
+                  aria-pressed={on}
+                >
+                  {m.label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-[11px] text-gray-500 mt-1.5 leading-relaxed">
+            {KEYWORD_MODE_OPTIONS.find((m) => m.value === (draft.keywordMode || "all"))?.hint
+              || "Matches public remarks, subdivision, and address."}
+          </p>
+          <p className="text-[11px] text-gray-400 mt-0.5">
+            Results update as you type — no enter needed.
           </p>
         </div>
 
@@ -1037,8 +1260,10 @@ function FilterDrawerBody({
           className="ml-auto flex-1 sm:flex-none px-6 py-3 bg-black text-white font-semibold rounded-lg text-sm hover:bg-gray-800 transition-colors"
         >
           {loading
-            ? "Searching…"
-            : `Show ${total > 0 ? total.toLocaleString() : ""} homes`}
+            ? "Updating…"
+            : total > 0
+              ? `Done · ${total.toLocaleString()} homes`
+              : "Done · view results"}
         </button>
       </div>
     </div>
@@ -1066,16 +1291,22 @@ export default function ListingSearch({ location, height = "700px", compact = fa
   const [selectedId, setSelectedId] = useState(null);
   const [view, setView] = useState("list");
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [homeTypeOpen, setHomeTypeOpen] = useState(false);
+  const [drawEnabled, setDrawEnabled] = useState(false);
   const [savedSearches, setSavedSearches] = useState(() =>
     typeof window !== "undefined" ? getSavedSearches() : []
   );
   const [panelSlug, setPanelSlug] = useState(null);
   const panelHistoryPushed = useRef(false);
   const resultsRef = useRef(null);
+  const homeTypeRef = useRef(null);
+  const fetchGen = useRef(0);
 
   const activeFilterCount = useMemo(() => countActiveFilters(filters), [filters]);
+  const activeChips = useMemo(() => buildActiveChips(filters), [filters]);
 
   const fetchListings = useCallback(async (f, pageNum = 1, append = false) => {
+    const gen = ++fetchGen.current;
     if (append) setLoadingMore(true);
     else setLoading(true);
     setError(null);
@@ -1084,24 +1315,42 @@ export default function ListingSearch({ location, height = "700px", compact = fa
       const res = await fetch(`${API_BASE}/api/listings?${params}`);
       if (!res.ok) throw new Error("Search failed");
       const data = await res.json();
+      // Drop stale responses (rapid filter changes / debounce races)
+      if (gen !== fetchGen.current) return;
       const rows = data.data || [];
       setResults((prev) => (append ? [...prev, ...rows] : rows));
       setMeta(data.meta || { total: 0, pages: 0, page: pageNum });
       setPage(pageNum);
     } catch (err) {
+      if (gen !== fetchGen.current) return;
       setError(err.message);
       if (!append) setResults([]);
     } finally {
-      setLoading(false);
-      setLoadingMore(false);
+      if (gen === fetchGen.current) {
+        setLoading(false);
+        setLoadingMore(false);
+      }
     }
   }, []);
 
-  // Sync filters → fetch + URL
+  // While the filter drawer is open, stream draft → applied filters so typing
+  // keywords / price updates results without Enter. Fetch itself is debounced below.
   useEffect(() => {
-    fetchListings(filters, 1, false);
-    const urlParams = filtersToParams(filters, { forUrl: true });
-    setSearchParams(urlParams, { replace: true });
+    if (!drawerOpen) return;
+    setFilters((prev) => {
+      if (JSON.stringify(prev) === JSON.stringify(draft)) return prev;
+      return { ...draft };
+    });
+  }, [draft, drawerOpen]);
+
+  // Debounced sync: filters → fetch + URL (live updates without Enter)
+  useEffect(() => {
+    const t = setTimeout(() => {
+      fetchListings(filters, 1, false);
+      const urlParams = filtersToParams(filters, { forUrl: true });
+      setSearchParams(urlParams, { replace: true });
+    }, FILTER_DEBOUNCE_MS);
+    return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- setSearchParams stable-ish; avoid loop
   }, [filters, fetchListings]);
 
@@ -1115,22 +1364,82 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     };
   }, []);
 
+  // Close home-type popover on outside click
+  useEffect(() => {
+    if (!homeTypeOpen) return undefined;
+    const onDoc = (e) => {
+      if (homeTypeRef.current && !homeTypeRef.current.contains(e.target)) {
+        setHomeTypeOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("touchstart", onDoc);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("touchstart", onDoc);
+    };
+  }, [homeTypeOpen]);
+
   // Instant chip filters (city, beds, baths, sort) apply immediately
   const setFilterInstant = (key, value) => {
     setFilters((prev) => {
       const next = { ...prev, [key]: value };
+      // Drawing a city clears custom polygon (and vice-versa handled on polygon set)
+      if (key === "city" && value) next.polygon = "";
       setDraft(next);
       return next;
     });
     setPage(1);
   };
 
+  const applyFilterPatch = (patch) => {
+    setFilters((prev) => {
+      const next = { ...prev, ...patch };
+      setDraft(next);
+      return next;
+    });
+    setPage(1);
+  };
+
+  const removeChip = (chip) => {
+    applyFilterPatch(chip.patch || {});
+  };
+
+  const toggleHomeType = (value) => {
+    setFilters((prev) => {
+      const set = new Set(prev.types || []);
+      if (set.has(value)) set.delete(value);
+      else set.add(value);
+      const next = { ...prev, types: [...set] };
+      setDraft(next);
+      return next;
+    });
+    setPage(1);
+  };
+
+  const handlePolygonChange = useCallback((ringStr) => {
+    setFilters((prev) => {
+      const next = {
+        ...prev,
+        polygon: ringStr || "",
+        // Polygon overrides city scope
+        city: ringStr ? "__noco__" : (prev.city || "__noco__"),
+      };
+      setDraft(next);
+      return next;
+    });
+    if (ringStr) setDrawEnabled(false);
+    setPage(1);
+  }, []);
+
   const openDrawer = () => {
     setDraft(filters);
     setDrawerOpen(true);
+    setHomeTypeOpen(false);
   };
 
   const applyDraft = () => {
+    // Draft already streams into filters while the drawer is open; Apply just commits + closes.
     setFilters({ ...draft });
     setDrawerOpen(false);
     setPage(1);
@@ -1141,6 +1450,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     setFilters(cleared);
     setDraft(cleared);
     setDrawerOpen(false);
+    setDrawEnabled(false);
   };
 
   const selectCard = (id) => {
@@ -1245,35 +1555,35 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     if (filters.newcon === "true") out.newConstruction = "true";
     if (filters.listingStatus) out.listingStatus = filters.listingStatus;
     if (filters.newdays) out.newDays = filters.newdays;
-    if (filters.keywords) out.keywords = filters.keywords;
+    if (filters.keywords) {
+      out.keywords = filters.keywords;
+      if (filters.keywordMode && filters.keywordMode !== "all") {
+        out.keywordMode = filters.keywordMode;
+      }
+    }
+    if (filters.polygon) out.polygon = filters.polygon;
     if (filters.hasImages === "true") out.hasImages = "true";
     if (filters.hasTour === "true") out.hasTour = "true";
     if (filters.sort) out.sort = filters.sort;
     return out;
   }, [filters]);
 
-  const resultLabel = (() => {
+  const areaLabel = (() => {
+    if (filters.polygon) return "your drawn area";
     if (filters.city && filters.city !== "__noco__" && filters.city !== "__all__") {
-      return `${meta.total.toLocaleString()} home${meta.total === 1 ? "" : "s"} in ${filters.city}`;
+      return filters.city;
     }
-    if (filters.city === "__all__") {
-      return `${meta.total.toLocaleString()} home${meta.total === 1 ? "" : "s"} in Colorado`;
-    }
-    return `${meta.total.toLocaleString()} home${meta.total === 1 ? "" : "s"} in Northern Colorado`;
+    if (filters.city === "__all__") return "Colorado";
+    return "Northern Colorado";
   })();
+
+  const resultLabel = loading
+    ? `Updating results…`
+    : `Showing ${meta.total.toLocaleString()} home${meta.total === 1 ? "" : "s"} in ${areaLabel}`;
 
   const priceChipLabel = () => {
     if (!filters.minPrice && !filters.maxPrice) return "Price";
-    const f = (n) => {
-      if (!n) return "";
-      const num = Number(n);
-      if (num >= 1000000) return `$${(num / 1000000).toFixed(num % 1000000 === 0 ? 0 : 1)}M`;
-      if (num >= 1000) return `$${Math.round(num / 1000)}K`;
-      return `$${num}`;
-    };
-    if (filters.minPrice && filters.maxPrice) return `${f(filters.minPrice)}–${f(filters.maxPrice)}`;
-    if (filters.maxPrice) return `≤ ${f(filters.maxPrice)}`;
-    return `${f(filters.minPrice)}+`;
+    return formatPriceChip(filters.minPrice, filters.maxPrice) || "Price";
   };
 
   const typeChipLabel = () => {
@@ -1342,13 +1652,60 @@ export default function ListingSearch({ location, height = "700px", compact = fa
             ))}
           </select>
 
-          <button
-            type="button"
-            onClick={openDrawer}
-            className={filters.types?.length ? chipActive : chipIdle}
-          >
-            {typeChipLabel()}
-          </button>
+          {/* Home type — inline multi-select popover (not full drawer) */}
+          <div className="relative" ref={homeTypeRef}>
+            <button
+              type="button"
+              onClick={() => setHomeTypeOpen((o) => !o)}
+              className={filters.types?.length ? chipActive : chipIdle}
+              aria-expanded={homeTypeOpen}
+              aria-haspopup="listbox"
+            >
+              {typeChipLabel()}
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+            {homeTypeOpen && (
+              <div
+                className="absolute left-0 top-full mt-1.5 z-40 w-56 rounded-xl border border-gray-200 bg-white shadow-xl p-2"
+                role="listbox"
+                aria-label="Home type"
+              >
+                <p className="px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-gray-500">
+                  Home type
+                </p>
+                {HOME_TYPE_OPTIONS.map((o) => {
+                  const on = (filters.types || []).includes(o.value);
+                  return (
+                    <label
+                      key={o.value}
+                      className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm cursor-pointer hover:bg-gray-50 ${
+                        on ? "font-semibold text-gray-900" : "text-gray-700"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={on}
+                        onChange={() => toggleHomeType(o.value)}
+                        className="w-4 h-4 accent-black"
+                      />
+                      {o.label}
+                    </label>
+                  );
+                })}
+                {(filters.types?.length > 0) && (
+                  <button
+                    type="button"
+                    onClick={() => applyFilterPatch({ types: [] })}
+                    className="mt-1 w-full text-left px-2.5 py-1.5 text-xs font-semibold text-gray-500 hover:text-black"
+                  >
+                    Clear types
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
 
           <button
             type="button"
@@ -1358,19 +1715,10 @@ export default function ListingSearch({ location, height = "700px", compact = fa
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6" />
             </svg>
-            More filters{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
+            Filters{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
           </button>
 
           <div className="ml-auto flex items-center gap-2">
-            {activeFilterCount > 0 && (
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="text-sm text-gray-500 hover:text-black underline underline-offset-2"
-              >
-                Clear filters
-              </button>
-            )}
             <SaveSearchModal
               filters={saveFilters}
               buttonLabel="Save search"
@@ -1388,7 +1736,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           >
             Filters
             {activeFilterCount > 0 && (
-              <span className="bg-black text-white text-[10px] font-bold w-5 h-5 rounded-full inline-flex items-center justify-center">
+              <span className="bg-black text-white text-[10px] font-bold min-w-[1.25rem] h-5 px-1 rounded-full inline-flex items-center justify-center">
                 {activeFilterCount}
               </span>
             )}
@@ -1410,10 +1758,48 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           </select>
         </div>
 
-        {/* Results meta + sort (desktop) */}
+        {/* Active filter chip strip — co-located with filter trigger + Clear all */}
+        {activeChips.length > 0 && (
+          <div className="flex items-center gap-2 px-3 lg:px-4 pb-2.5 overflow-x-auto scrollbar-thin">
+            <span className="shrink-0 text-[11px] font-bold uppercase tracking-wide text-gray-500">
+              Active
+            </span>
+            <div className="flex items-center gap-1.5 flex-nowrap min-w-0">
+              {activeChips.map((chip) => (
+                <button
+                  key={chip.id}
+                  type="button"
+                  onClick={() => removeChip(chip)}
+                  className="inline-flex items-center gap-1 pl-2.5 pr-1.5 py-1 rounded-full text-xs font-semibold bg-[#CFB36E]/20 text-gray-900 border border-[#CFB36E]/50 hover:bg-[#CFB36E]/35 whitespace-nowrap"
+                  title={`Remove ${chip.label}`}
+                >
+                  {chip.label}
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full hover:bg-black/10" aria-hidden="true">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                  </span>
+                  <span className="sr-only">Remove {chip.label}</span>
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="shrink-0 text-xs font-semibold text-gray-600 hover:text-black underline underline-offset-2 ml-1"
+            >
+              Clear all
+            </button>
+          </div>
+        )}
+
+        {/* Results meta + sort (desktop) — live count, no Enter needed */}
         <div className="hidden md:flex items-center justify-between px-4 py-2 border-t border-gray-100 bg-gray-50/80">
-          <p className="text-sm font-semibold text-gray-900">
-            {loading ? "Searching…" : resultLabel}
+          <p className={`text-sm font-semibold ${loading ? "text-[#8a7340]" : "text-gray-900"}`} aria-live="polite">
+            {resultLabel}
+            {loading && (
+              <span className="ml-2 inline-block w-3.5 h-3.5 border-2 border-[#CFB36E] border-t-transparent rounded-full animate-spin align-[-2px]" aria-hidden="true" />
+            )}
           </p>
           <div className="flex items-center gap-3">
             {hasAnySavedSearch() && (
@@ -1473,8 +1859,49 @@ export default function ListingSearch({ location, height = "700px", compact = fa
               selectedId={selectedId}
               onSelect={selectCard}
               onOpenListing={openListingPanel}
+              drawEnabled={drawEnabled}
+              polygon={filters.polygon || ""}
+              onPolygonChange={handlePolygonChange}
             />
           </div>
+          {/* Draw-area controls — map mode */}
+          <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setDrawEnabled((d) => !d);
+                // On mobile, ensure map view is active
+                setView("map");
+              }}
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold shadow-md border transition-colors ${
+                drawEnabled
+                  ? "bg-black text-white border-black"
+                  : "bg-white text-gray-900 border-gray-200 hover:border-black"
+              }`}
+              aria-pressed={drawEnabled}
+              title="Draw a shape on the map instead of picking a city"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+              </svg>
+              {drawEnabled ? "Drawing… click to finish" : "Draw area"}
+            </button>
+            {filters.polygon && (
+              <button
+                type="button"
+                onClick={() => handlePolygonChange("")}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold shadow-md bg-white text-gray-700 border border-gray-200 hover:border-black"
+              >
+                Clear shape
+              </button>
+            )}
+          </div>
+          {drawEnabled && (
+            <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-10 max-w-[90%] px-3 py-2 rounded-lg bg-black/85 text-white text-xs font-medium text-center shadow-lg">
+              Click the map to add corners · double-click or click the first point to finish
+            </div>
+          )}
           <div className="hidden lg:block absolute bottom-4 left-1/2 -translate-x-1/2 z-10">
             <SaveSearchModal
               filters={saveFilters}
@@ -1491,16 +1918,24 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           }`}
         >
           <div className="md:hidden px-4 pt-3 pb-1">
-            <p className="text-sm font-semibold text-gray-900">
-              {loading ? "Searching…" : resultLabel}
+            <p className={`text-sm font-semibold ${loading ? "text-[#8a7340]" : "text-gray-900"}`} aria-live="polite">
+              {resultLabel}
             </p>
           </div>
 
-          {loading && (
+          {/* First load or empty: skeleton shimmer. Subsequent: keep cards dimmed + banner */}
+          {loading && results.length === 0 && (
             <div className="p-3 sm:p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
               {Array.from({ length: 6 }).map((_, i) => (
                 <SkeletonCard key={i} />
               ))}
+            </div>
+          )}
+
+          {loading && results.length > 0 && (
+            <div className="mx-3 sm:mx-4 mt-3 mb-1 flex items-center gap-2 px-3 py-2 rounded-lg bg-[#CFB36E]/15 border border-[#CFB36E]/40 text-sm font-semibold text-gray-900">
+              <span className="inline-block w-3.5 h-3.5 border-2 border-[#CFB36E] border-t-transparent rounded-full animate-spin shrink-0" aria-hidden="true" />
+              Updating results as filters change…
             </div>
           )}
 
@@ -1525,9 +1960,11 @@ export default function ListingSearch({ location, height = "700px", compact = fa
             <div className="flex flex-col items-center justify-center text-center min-h-[360px] px-6">
               <p className="text-gray-900 font-semibold text-lg">
                 No homes match these filters
-                {filters.city && filters.city !== "__noco__" && filters.city !== "__all__"
-                  ? ` in ${filters.city}`
-                  : ""}
+                {filters.polygon
+                  ? " in your drawn area"
+                  : filters.city && filters.city !== "__noco__" && filters.city !== "__all__"
+                    ? ` in ${filters.city}`
+                    : ""}
               </p>
               <p className="text-gray-500 mt-2 max-w-md text-sm leading-relaxed">
                 Try widening price or beds, or save this search — we&apos;ll email you when a match hits the market (new homes + price drops, no spam).
@@ -1553,8 +1990,9 @@ export default function ListingSearch({ location, height = "700px", compact = fa
             </div>
           )}
 
-          {!loading && !error && results.length > 0 && (
-            <div className="p-3 sm:p-4">
+          {/* Keep prior cards visible while updating so live filter changes feel instant */}
+          {!error && results.length > 0 && (
+            <div className={`p-3 sm:p-4 ${loading ? "opacity-60 pointer-events-none" : ""}`}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {results.map((listing) => (
                   <ListingCard

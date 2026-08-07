@@ -5,16 +5,43 @@ import { formatPrice, formatPriceCompact, listingAddress } from "../utils/listin
 /**
  * ListingMap — Mapbox GL clustered markers (Zillow-style).
  * Cluster circles with counts · price-pill unclustered points · photo popup
- * on click · fly-to on list-card hover. Degrades if VITE_MAPBOX_TOKEN is unset.
+ * on click · fly-to on list-card hover. Optional polygon draw (mapbox-gl-draw).
  *
  * Props:
- *   listings      — array of listing rows with lat/lng
- *   selectedId    — hovered/selected card id (drives fly-to + highlight)
- *   onSelect      — (id) => {} when a marker is clicked
- *   onOpenListing — (listing) => {} when popup is clicked (opens detail panel)
- *   interactive   — default true; set false for static detail-page embed
+ *   listings        — array of listing rows with lat/lng
+ *   selectedId      — hovered/selected card id (drives fly-to + highlight)
+ *   onSelect        — (id) => {} when a marker is clicked
+ *   onOpenListing   — (listing) => {} when popup is clicked (opens detail panel)
+ *   interactive     — default true; set false for static detail-page embed
+ *   drawEnabled     — when true, user can draw a search polygon
+ *   polygon         — active ring as "lng,lat;lng,lat;..." or empty
+ *   onPolygonChange — (ringString | "") => {} when draw completes / is deleted
  */
+
 const TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || "";
+
+const DRAW_CSS_ID = "mapbox-gl-draw-css";
+const MAPBOX_CSS_ID = "mapbox-gl-css";
+
+/** Serialize ring [[lng,lat],...] → "lng,lat;lng,lat;..." */
+export function ringToParam(ring) {
+  if (!ring?.length) return "";
+  return ring.map(([lng, lat]) => `${lng},${lat}`).join(";");
+}
+
+/** Parse "lng,lat;..." → [[lng,lat],...] */
+export function paramToRing(param) {
+  if (!param || typeof param !== "string") return null;
+  const ring = param
+    .split(";")
+    .map((pair) => {
+      const [a, b] = pair.split(",").map(Number);
+      if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
+      return [a, b];
+    })
+    .filter(Boolean);
+  return ring.length >= 3 ? ring : null;
+}
 
 export default function ListingMap({
   listings = [],
@@ -22,34 +49,56 @@ export default function ListingMap({
   onSelect,
   onOpenListing,
   interactive = true,
+  drawEnabled = false,
+  polygon = "",
+  onPolygonChange,
 }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
+  const drawRef = useRef(null);
   const popupRef = useRef(null);
   const listingsRef = useRef(listings);
   const onSelectRef = useRef(onSelect);
   const onOpenListingRef = useRef(onOpenListing);
+  const onPolygonChangeRef = useRef(onPolygonChange);
+  const drawEnabledRef = useRef(drawEnabled);
+  const polygonRef = useRef(polygon);
+  const suppressDrawEvent = useRef(false);
 
   listingsRef.current = listings;
   onSelectRef.current = onSelect;
   onOpenListingRef.current = onOpenListing;
+  onPolygonChangeRef.current = onPolygonChange;
+  drawEnabledRef.current = drawEnabled;
+  polygonRef.current = polygon;
 
   // Init map once
   useEffect(() => {
     if (!TOKEN || !containerRef.current || mapRef.current) return;
     let cancelled = false;
 
-    // Ensure Mapbox CSS is present
-    if (!document.getElementById("mapbox-gl-css")) {
+    if (!document.getElementById(MAPBOX_CSS_ID)) {
       const link = document.createElement("link");
-      link.id = "mapbox-gl-css";
+      link.id = MAPBOX_CSS_ID;
       link.rel = "stylesheet";
       link.href = "https://api.mapbox.com/mapbox-gl-js/v3.9.0/mapbox-gl.css";
       document.head.appendChild(link);
     }
+    if (!document.getElementById(DRAW_CSS_ID)) {
+      const link = document.createElement("link");
+      link.id = DRAW_CSS_ID;
+      link.rel = "stylesheet";
+      link.href = "https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.3/mapbox-gl-draw.css";
+      document.head.appendChild(link);
+    }
 
-    import("mapbox-gl/dist/mapbox-gl.js").then(({ default: mapboxgl }) => {
+    Promise.all([
+      import("mapbox-gl/dist/mapbox-gl.js"),
+      import("@mapbox/mapbox-gl-draw"),
+    ]).then(([{ default: mapboxgl }, DrawMod]) => {
       if (cancelled || !containerRef.current) return;
+      const MapboxDraw = DrawMod.default || DrawMod;
+
       mapboxgl.accessToken = TOKEN;
       const map = new mapboxgl.Map({
         container: containerRef.current,
@@ -64,6 +113,52 @@ export default function ListingMap({
       }
       mapRef.current = map;
 
+      const draw = new MapboxDraw({
+        displayControlsDefault: false,
+        controls: {},
+        defaultMode: "simple_select",
+        styles: drawStyles(),
+      });
+      map.addControl(draw);
+      drawRef.current = draw;
+
+      const emitPolygon = () => {
+        if (suppressDrawEvent.current || draw.__saaSuppressing) return;
+        const data = draw.getAll();
+        const poly = data.features.find((f) => f.geometry?.type === "Polygon");
+        if (!poly) {
+          onPolygonChangeRef.current?.("");
+          return;
+        }
+        const ring = poly.geometry.coordinates[0];
+        onPolygonChangeRef.current?.(ringToParam(ring));
+      };
+
+      // Shared suppress flag for programmatic polygon sync
+      draw.__saaSuppress = suppressDrawEvent;
+      map.__saaSuppressDraw = suppressDrawEvent;
+
+      map.on("draw.create", (e) => {
+        if (suppressDrawEvent.current) return;
+        // Keep only one polygon — delete older ones
+        const ids = draw.getAll().features
+          .filter((f) => f.geometry?.type === "Polygon")
+          .map((f) => f.id);
+        if (ids.length > 1) {
+          const keep = e.features?.[0]?.id;
+          suppressDrawEvent.current = true;
+          ids.filter((id) => id !== keep).forEach((id) => {
+            try { draw.delete(id); } catch { /* noop */ }
+          });
+          suppressDrawEvent.current = false;
+        }
+        emitPolygon();
+        // Exit draw mode after complete
+        try { draw.changeMode("simple_select"); } catch { /* noop */ }
+      });
+      map.on("draw.update", emitPolygon);
+      map.on("draw.delete", emitPolygon);
+
       map.on("load", () => {
         map.addSource("listings", {
           type: "geojson",
@@ -73,7 +168,6 @@ export default function ListingMap({
           clusterRadius: 48,
         });
 
-        // Cluster circles — black brand
         map.addLayer({
           id: "clusters",
           type: "circle",
@@ -100,7 +194,6 @@ export default function ListingMap({
           paint: { "text-color": "#ffffff" },
         });
 
-        // Unclustered gold dots (fallback under price labels when using circles)
         map.addLayer({
           id: "unclustered-point",
           type: "circle",
@@ -124,7 +217,6 @@ export default function ListingMap({
           },
         });
 
-        // Price labels on unclustered points (Zillow price-pill feel)
         map.addLayer({
           id: "unclustered-price",
           type: "symbol",
@@ -156,6 +248,7 @@ export default function ListingMap({
         });
 
         const openPopup = (e) => {
+          if (drawEnabledRef.current) return; // suppress popup while drawing
           const props = e.features[0].properties;
           const id = props.id;
           const listing = listingsRef.current.find((l) => String(l.id) === String(id));
@@ -165,7 +258,6 @@ export default function ListingMap({
           const addr = listingAddress(listing);
           const el = document.createElement("div");
           el.className = "saa-map-popup";
-          // Button (not <a>) — opens detail panel over search instead of navigating
           el.innerHTML = `
             <button type="button" data-saa-open-listing class="block w-full text-left bg-white rounded-xl overflow-hidden shadow-xl w-60 border border-gray-100 cursor-pointer p-0">
               <div class="aspect-[4/3] bg-gray-100 overflow-hidden relative">
@@ -211,15 +303,22 @@ export default function ListingMap({
 
         ["clusters", "unclustered-point", "unclustered-price"].forEach((layer) => {
           map.on("mouseenter", layer, () => {
-            map.getCanvas().style.cursor = "pointer";
+            map.getCanvas().style.cursor = drawEnabledRef.current ? "crosshair" : "pointer";
           });
           map.on("mouseleave", layer, () => {
-            map.getCanvas().style.cursor = "";
+            map.getCanvas().style.cursor = drawEnabledRef.current ? "crosshair" : "";
           });
         });
 
-        // Apply any listings that arrived before load
         applyListings(map, listingsRef.current);
+        // Hydrate existing polygon from URL/state
+        syncDrawPolygon(draw, polygonRef.current);
+        if (drawEnabledRef.current) {
+          try {
+            draw.changeMode("draw_polygon");
+            map.getCanvas().style.cursor = "crosshair";
+          } catch { /* noop */ }
+        }
       });
     });
 
@@ -233,6 +332,7 @@ export default function ListingMap({
         mapRef.current.remove();
         mapRef.current = null;
       }
+      drawRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -252,7 +352,7 @@ export default function ListingMap({
     return () => map.off("load", onLoad);
   }, [listings]);
 
-  // Highlight selected marker (update paint expression via filter trick)
+  // Highlight selected marker
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !map.getLayer("unclustered-point")) return;
@@ -272,10 +372,10 @@ export default function ListingMap({
     } catch { /* layer not ready */ }
   }, [selectedId]);
 
-  // Fly-to on card hover/select
+  // Fly-to on card hover/select (skip when drawing)
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || selectedId == null || !interactive) return;
+    if (!map || selectedId == null || !interactive || drawEnabled) return;
     const listing = listings.find((l) => String(l.id) === String(selectedId));
     if (listing && listing.latitude != null) {
       map.flyTo({
@@ -284,7 +384,31 @@ export default function ListingMap({
         speed: 1.15,
       });
     }
-  }, [selectedId, listings, interactive]);
+  }, [selectedId, listings, interactive, drawEnabled]);
+
+  // Toggle draw mode
+  useEffect(() => {
+    const draw = drawRef.current;
+    const map = mapRef.current;
+    if (!draw || !map) return;
+    try {
+      if (drawEnabled) {
+        // Clear existing so user starts fresh, unless one already active and we're just re-entering
+        draw.changeMode("draw_polygon");
+        map.getCanvas().style.cursor = "crosshair";
+      } else {
+        draw.changeMode("simple_select");
+        map.getCanvas().style.cursor = "";
+      }
+    } catch { /* draw not ready */ }
+  }, [drawEnabled]);
+
+  // Sync external polygon prop → draw layers (e.g. chip clear, URL load)
+  useEffect(() => {
+    const draw = drawRef.current;
+    if (!draw) return;
+    syncDrawPolygon(draw, polygon);
+  }, [polygon]);
 
   if (!TOKEN) {
     return (
@@ -296,6 +420,60 @@ export default function ListingMap({
   }
 
   return <div ref={containerRef} className="w-full h-full min-h-[240px]" role="img" aria-label="Map of listings" />;
+}
+
+function syncDrawPolygon(draw, polygonParam) {
+  if (!draw) return;
+  const ring = paramToRing(polygonParam);
+  try {
+    const existing = draw.getAll().features.filter((f) => f.geometry?.type === "Polygon");
+    const currentParam = existing[0]
+      ? ringToParam(existing[0].geometry.coordinates[0])
+      : "";
+    // Normalize comparison (closed rings may re-append first vertex)
+    const normalize = (p) => {
+      if (!p) return "";
+      const pts = p.split(";");
+      if (pts.length > 1 && pts[0] === pts[pts.length - 1]) pts.pop();
+      return pts.join(";");
+    };
+    if (normalize(polygonParam || "") === normalize(currentParam)) return;
+
+    // Suppress draw.delete / draw.create callbacks while we replace programmatically
+    const flag = draw._ctx?.map?.__saaSuppressDraw
+      || draw.map?.__saaSuppressDraw
+      || null;
+    // Fallback: walk map from control
+    let suppressRef = flag;
+    if (!suppressRef && typeof draw.getAll === "function") {
+      // Use a module-level pattern via draw instance stash
+      suppressRef = draw.__saaSuppress || null;
+    }
+
+    const setSuppress = (v) => {
+      if (suppressRef && typeof suppressRef === "object" && "current" in suppressRef) {
+        suppressRef.current = v;
+      }
+      draw.__saaSuppressing = v;
+    };
+
+    setSuppress(true);
+    existing.forEach((f) => {
+      try { draw.delete(f.id); } catch { /* noop */ }
+    });
+    if (ring) {
+      const closed = [...ring];
+      const a = closed[0];
+      const b = closed[closed.length - 1];
+      if (a[0] !== b[0] || a[1] !== b[1]) closed.push([...a]);
+      draw.add({
+        type: "Feature",
+        properties: {},
+        geometry: { type: "Polygon", coordinates: [closed] },
+      });
+    }
+    setSuppress(false);
+  } catch { /* draw not ready */ }
 }
 
 function applyListings(map, listings) {
@@ -314,7 +492,6 @@ function applyListings(map, listings) {
     window.__saaMapStats = { features: features.length };
   } catch { /* noop */ }
 
-  // Fit bounds when we have points (gentle, only if multiple)
   if (features.length >= 2) {
     try {
       const bounds = features.reduce(
@@ -340,4 +517,63 @@ function applyListings(map, listings) {
   } else if (features.length === 1) {
     map.easeTo({ center: features[0].geometry.coordinates, zoom: 13, duration: 500 });
   }
+}
+
+/** Brand-tinted draw styles (gold + black) */
+function drawStyles() {
+  return [
+    {
+      id: "gl-draw-polygon-fill",
+      type: "fill",
+      filter: ["all", ["==", "$type", "Polygon"], ["!=", "mode", "static"]],
+      paint: {
+        "fill-color": "#CFB36E",
+        "fill-outline-color": "#111111",
+        "fill-opacity": 0.18,
+      },
+    },
+    {
+      id: "gl-draw-polygon-stroke-active",
+      type: "line",
+      filter: ["all", ["==", "$type", "Polygon"], ["!=", "mode", "static"]],
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: {
+        "line-color": "#111111",
+        "line-width": 2.5,
+      },
+    },
+    {
+      id: "gl-draw-polygon-and-line-vertex-active",
+      type: "circle",
+      filter: ["all", ["==", "meta", "vertex"], ["==", "$type", "Point"], ["!=", "mode", "static"]],
+      paint: {
+        "circle-radius": 5,
+        "circle-color": "#CFB36E",
+        "circle-stroke-color": "#111111",
+        "circle-stroke-width": 1.5,
+      },
+    },
+    {
+      id: "gl-draw-line",
+      type: "line",
+      filter: ["all", ["==", "$type", "LineString"], ["!=", "mode", "static"]],
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: {
+        "line-color": "#111111",
+        "line-width": 2.5,
+        "line-dasharray": [2, 2],
+      },
+    },
+    {
+      id: "gl-draw-point",
+      type: "circle",
+      filter: ["all", ["==", "$type", "Point"], ["==", "meta", "feature"], ["!=", "mode", "static"]],
+      paint: {
+        "circle-radius": 5,
+        "circle-color": "#CFB36E",
+        "circle-stroke-color": "#111111",
+        "circle-stroke-width": 1.5,
+      },
+    },
+  ];
 }
