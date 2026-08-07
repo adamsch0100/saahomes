@@ -224,6 +224,40 @@ export const runMigrations = async () => {
         ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(16) DEFAULT 'client';
       `);
 
+      // Lead score (Scout Score-style) — computed from real engagement signals
+      await client.query(`
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS lead_score INTEGER DEFAULT 0;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS lead_score_updated_at TIMESTAMP;
+      `);
+
+      // Property views for lead scoring + digest personalization
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS property_views (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          listing_id VARCHAR(64) NOT NULL,
+          viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_property_views_user ON property_views(user_id, viewed_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_property_views_user_listing ON property_views(user_id, listing_id);
+      `);
+
+      // Lightweight activity events (chat_opened, etc.) for lead scoring
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS user_events (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          event_type VARCHAR(32) NOT NULL,
+          meta JSONB,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_user_events_user ON user_events(user_id, event_type, created_at DESC);
+      `);
+
       await client.query(`
         CREATE TABLE IF NOT EXISTS showing_requests (
           id SERIAL PRIMARY KEY,

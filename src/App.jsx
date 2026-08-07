@@ -171,6 +171,8 @@ export default function App() {
         <Route path="/properties/" element={<AppLayout><PropertiesPage /></AppLayout>} />
         <Route path="/alerts/manage" element={<AppLayout><ManageAlertsPage /></AppLayout>} />
         <Route path="/alerts/manage/" element={<AppLayout><ManageAlertsPage /></AppLayout>} />
+        <Route path="/my-saved-searches" element={<AppLayout><ManageAlertsPage /></AppLayout>} />
+        <Route path="/my-saved-searches/" element={<AppLayout><ManageAlertsPage /></AppLayout>} />
         <Route path="/homes-for-sale/:slug" element={<AppLayout><ListingDetailPage /></AppLayout>} />
 
         {/* City homes-for-sale SEO pages */}

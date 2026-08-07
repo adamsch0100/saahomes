@@ -89,7 +89,7 @@ export const forwardAlertSignupToFollowUpBoss = async (user, search) => {
       'New saved search from website — follow-up lead (nurture via nightly listing alerts).',
       `Search name: ${search.name || 'My Search'}`,
       `Criteria: ${searchSummary}`,
-      `Manage alerts: https://saahomes.com/alerts/manage/?token=${user.manage_token}`,
+      `Manage alerts: https://saahomes.com/my-saved-searches/?token=${user.manage_token}`,
     ].join('\n'),
     person: {
       firstName,

@@ -544,6 +544,19 @@ export default function ListingDetailPage() {
       .catch((err) => setError(err.message));
   }, [slug]);
 
+  // Property-view tracking for signed-in users (lead score + digest personalization)
+  useEffect(() => {
+    if (!listing) return;
+    const lid = listing.listing_id || listing.id;
+    if (!lid) return;
+    fetch(`${API_BASE}/api/alerts/view`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ listing_id: String(lid) }),
+    }).catch(() => { /* guest or offline — ignore */ });
+  }, [listing]);
+
   useEffect(() => {
     if (!listing || !listing.city) return;
     // Similar: same city, same home_type, beds ±1, price ±20%, exclude self, limit 6–8

@@ -2,6 +2,9 @@
  * Saved-search / follow-up alert API (RealScout-style lead capture):
  *   POST   /api/alerts              — save a search (email + filters) → lead → FUB
  *   GET    /api/alerts/manage?token= — list user's searches
+ *   GET    /api/alerts/me           — session cookie → searches + lead score
+ *   POST   /api/alerts/view         — record property view (session)
+ *   POST   /api/alerts/event        — record activity (chat_opened)
  *   PATCH  /api/alerts/:id?token=   — pause/resume/edit a search
  *   DELETE /api/alerts/:id?token=   — delete a search
  *   POST   /api/alerts/unsubscribe  — {token} → unsubscribe all
@@ -11,6 +14,13 @@ import bcrypt from 'bcrypt';
 import getPool from '../config/database.js';
 import { forwardAlertSignupToFollowUpBoss } from '../services/followUpBossService.js';
 import { sendEmail, smtpConfigured } from '../services/emailer.js';
+import {
+  computeAndStoreLeadScore,
+  getSearchMatchMeta,
+  recordPropertyView,
+  recordUserEvent,
+  filtersToSearchPath,
+} from '../services/leadScore.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FILTER_KEYS = ['city', 'minPrice', 'maxPrice', 'beds', 'baths', 'type', 'sort', 'q',
@@ -39,12 +49,16 @@ function cleanSchedule(body) {
 
 function cleanFilters(body) {
   const f = {};
+  const numKeys = ['minPrice', 'maxPrice', 'beds', 'baths', 'minSqft', 'minYear', 'maxHoa', 'newDays'];
+  const boolKeys = ['garage', 'basement', 'fireplace', 'pool', 'newConstruction', 'waterfront'];
   for (const key of FILTER_KEYS) {
     const v = body[key];
     if (v === undefined || v === null || v === '') continue;
-    if (['minPrice', 'maxPrice', 'beds', 'baths'].includes(key)) {
+    if (numKeys.includes(key)) {
       const n = Number(v);
       if (Number.isFinite(n) && n >= 0 && n < 1e9) f[key] = String(Math.round(n));
+    } else if (boolKeys.includes(key)) {
+      if (v === true || v === 'true' || v === 1 || v === '1') f[key] = 'true';
     } else if (key === 'type') {
       if (TYPE_VALUES.includes(String(v))) f[key] = String(v);
     } else if (key === 'city' || key === 'q') {
@@ -127,13 +141,28 @@ export const createAlert = async (req, res) => {
     // Lead → Follow Up Boss (fire-and-forget, never block the user)
     forwardAlertSignupToFollowUpBoss(userRow, searchRow).catch(() => {});
 
+    // Compute + store lead score from real signals (save-search just landed)
+    let leadScore = 0;
+    try {
+      const scored = await computeAndStoreLeadScore(userRow.id, pool);
+      leadScore = scored.score;
+    } catch (e) {
+      console.error('lead score on save failed:', e.message);
+    }
+
     // Auto-login: the manage token becomes a long-lived httpOnly cookie so the
     // user is signed in on this device without ever entering a password.
     setAuthCookie(res, userRow.manage_token);
 
     return res.status(201).json({
       success: true,
-      data: { id: searchRow.id, name: searchRow.name, filters: searchRow.filters, manageToken: userRow.manage_token },
+      data: {
+        id: searchRow.id,
+        name: searchRow.name,
+        filters: searchRow.filters,
+        manageToken: userRow.manage_token,
+        lead_score: leadScore,
+      },
     });
   } catch (error) {
     console.error('createAlert error:', error);
@@ -147,16 +176,74 @@ const findUserByToken = async (token) => {
   return r.rows[0] || null;
 };
 
+/** Resolve user from query token OR session cookie. */
+async function resolveUser(req) {
+  const qToken = req.query?.token;
+  if (qToken) {
+    const u = await findUserByToken(qToken);
+    if (u) return u;
+  }
+  const cookieToken = req.cookies?.[COOKIE_NAME];
+  if (cookieToken) return findUserByToken(cookieToken);
+  // Body token used by some POSTs
+  const bodyToken = req.body?.token;
+  if (bodyToken) return findUserByToken(bodyToken);
+  return null;
+}
+
+/** Attach live match_count + preview listing to each saved search. */
+async function enrichSearches(rows, pool = getPool()) {
+  const out = [];
+  for (const s of rows) {
+    const filters = typeof s.filters === 'string' ? JSON.parse(s.filters) : (s.filters || {});
+    const meta = await getSearchMatchMeta(filters, pool);
+    out.push({
+      ...s,
+      filters,
+      match_count: meta.match_count,
+      preview: meta.preview,
+      edit_path: filtersToSearchPath(filters),
+    });
+  }
+  return out;
+}
+
+async function buildDashboardPayload(user) {
+  const pool = getPool();
+  const searches = await pool.query(
+    `SELECT id, name, filters, is_active, frequency, send_time, send_day, created_at, last_email_at, last_run_at
+     FROM saved_searches WHERE user_id = $1 ORDER BY created_at DESC`,
+    [user.id]
+  );
+  const enriched = await enrichSearches(searches.rows, pool);
+  // Refresh score from live signals (cheap; writes once)
+  let leadScore = user.lead_score ?? 0;
+  let breakdown = null;
+  try {
+    const scored = await computeAndStoreLeadScore(user.id, pool);
+    leadScore = scored.score;
+    breakdown = scored.breakdown;
+  } catch (e) {
+    console.error('lead score refresh failed:', e.message);
+  }
+  return {
+    email: user.email,
+    name: user.name,
+    phone: user.phone,
+    lead_score: leadScore,
+    lead_score_breakdown: breakdown,
+    lead_score_label: 'Your activity score — helps us match you faster.',
+    searches: enriched,
+  };
+}
+
 export const listAlerts = async (req, res) => {
   try {
-    const user = await findUserByToken(req.query.token);
+    const user = await resolveUser(req);
     if (!user) return res.status(401).json({ success: false, error: 'Invalid or expired manage link.' });
-    const searches = await getPool().query(
-      `SELECT id, name, filters, is_active, frequency, send_time, send_day, created_at, last_email_at
-       FROM saved_searches WHERE user_id = $1 ORDER BY created_at DESC`,
-      [user.id]
-    );
-    return res.json({ success: true, data: { email: user.email, searches: searches.rows } });
+    if (req.query.token) setAuthCookie(res, user.manage_token);
+    const data = await buildDashboardPayload(user);
+    return res.json({ success: true, data });
   } catch (error) {
     console.error('listAlerts error:', error);
     return res.status(500).json({ success: false, error: 'Could not load your searches.' });
@@ -173,15 +260,46 @@ export const getMe = async (req, res) => {
       res.clearCookie(COOKIE_NAME, { path: '/' });
       return res.status(401).json({ success: false, error: 'Session expired.' });
     }
-    const searches = await getPool().query(
-      `SELECT id, name, filters, is_active, frequency, send_time, send_day, created_at, last_email_at
-       FROM saved_searches WHERE user_id = $1 ORDER BY created_at DESC`,
-      [user.id]
-    );
-    return res.json({ success: true, data: { email: user.email, name: user.name, phone: user.phone, searches: searches.rows } });
+    const data = await buildDashboardPayload(user);
+    return res.json({ success: true, data });
   } catch (error) {
     console.error('getMe error:', error);
     return res.status(500).json({ success: false, error: 'Could not load your account.' });
+  }
+};
+
+/** POST /api/alerts/view — { listing_id } record property view for lead score + digest. */
+export const recordView = async (req, res) => {
+  try {
+    const user = await resolveUser(req);
+    if (!user) return res.status(401).json({ success: false, error: 'Not signed in.' });
+    const listingId = req.body?.listing_id || req.body?.listingId || req.body?.id;
+    if (!listingId) return res.status(400).json({ success: false, error: 'listing_id is required.' });
+    const result = await recordPropertyView(user.id, listingId);
+    return res.json({ success: true, data: result });
+  } catch (error) {
+    console.error('recordView error:', error);
+    return res.status(500).json({ success: false, error: 'Could not record view.' });
+  }
+};
+
+/** POST /api/alerts/event — { type: 'chat_opened' } activity signal for lead score. */
+export const recordEvent = async (req, res) => {
+  try {
+    const user = await resolveUser(req);
+    if (!user) return res.status(401).json({ success: false, error: 'Not signed in.' });
+    const type = String(req.body?.type || req.body?.event_type || '').trim();
+    if (!type) return res.status(400).json({ success: false, error: 'event type is required.' });
+    // Only allow known intent signals
+    const allowed = ['chat_opened'];
+    if (!allowed.includes(type)) {
+      return res.status(400).json({ success: false, error: 'Unknown event type.' });
+    }
+    const result = await recordUserEvent(user.id, type, req.body?.meta || null);
+    return res.json({ success: true, data: result });
+  } catch (error) {
+    console.error('recordEvent error:', error);
+    return res.status(500).json({ success: false, error: 'Could not record event.' });
   }
 };
 
@@ -194,7 +312,7 @@ export const sendMagicLink = async (req, res) => {
     }
     const user = await getPool().query('SELECT * FROM users WHERE email = $1 AND status = \'active\'', [email]);
     if (user.rows.length) {
-      const manageUrl = `https://saahomes.com/alerts/manage/?token=${user.rows[0].manage_token}`;
+      const manageUrl = `https://saahomes.com/my-saved-searches/?token=${user.rows[0].manage_token}`;
       const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#111">
           <tr><td align="center" style="padding:24px 16px">
@@ -243,7 +361,7 @@ export const signOut = async (req, res) => {
 
 export const updateAlert = async (req, res) => {
   try {
-    const user = await findUserByToken(req.query.token);
+    const user = await resolveUser(req);
     if (!user) return res.status(401).json({ success: false, error: 'Invalid or expired manage link.' });
     const id = Number(req.params.id);
     const pool = getPool();
@@ -261,16 +379,22 @@ export const updateAlert = async (req, res) => {
     if (schedule.send_time) { updates.push(`send_time = $${i++}`); params.push(schedule.send_time); }
     if (schedule.send_day) { updates.push(`send_day = $${i++}`); params.push(schedule.send_day); }
     if (filterBody && Object.keys(filterBody).length) {
-      const filters = cleanFilters(filterBody);
+      // Accept either nested filters or top-level filter keys
+      const raw = filterBody.filters && typeof filterBody.filters === 'object'
+        ? filterBody.filters
+        : filterBody;
+      const filters = cleanFilters(raw);
       if (Object.keys(filters).length) { updates.push(`filters = $${i++}`); params.push(JSON.stringify(filters)); }
     }
     if (!updates.length) return res.status(400).json({ success: false, error: 'Nothing to update.' });
     updates.push('updated_at = NOW()');
     params.push(id);
     const updated = await pool.query(
-      `UPDATE saved_searches SET ${updates.join(', ')} WHERE id = $${i} RETURNING id, name, filters, is_active`,
+      `UPDATE saved_searches SET ${updates.join(', ')} WHERE id = $${i} RETURNING id, name, filters, is_active, frequency, send_time, send_day`,
       params
     );
+    await pool.query('UPDATE users SET last_active_at = NOW() WHERE id = $1', [user.id]);
+    computeAndStoreLeadScore(user.id, pool).catch(() => {});
     return res.json({ success: true, data: updated.rows[0] });
   } catch (error) {
     console.error('updateAlert error:', error);
@@ -280,7 +404,7 @@ export const updateAlert = async (req, res) => {
 
 export const deleteAlert = async (req, res) => {
   try {
-    const user = await findUserByToken(req.query.token);
+    const user = await resolveUser(req);
     if (!user) return res.status(401).json({ success: false, error: 'Invalid or expired manage link.' });
     const id = Number(req.params.id);
     const deleted = await getPool().query(
@@ -288,6 +412,7 @@ export const deleteAlert = async (req, res) => {
       [id, user.id]
     );
     if (!deleted.rows.length) return res.status(404).json({ success: false, error: 'Search not found.' });
+    computeAndStoreLeadScore(user.id).catch(() => {});
     return res.json({ success: true });
   } catch (error) {
     console.error('deleteAlert error:', error);
@@ -297,8 +422,7 @@ export const deleteAlert = async (req, res) => {
 
 export const unsubscribeAll = async (req, res) => {
   try {
-    const { token } = req.body || {};
-    const user = await findUserByToken(token);
+    const user = await resolveUser(req);
     if (!user) return res.status(401).json({ success: false, error: 'Invalid or expired link.' });
     await getPool().query(
       "UPDATE users SET status = 'unsubscribed' WHERE id = $1",

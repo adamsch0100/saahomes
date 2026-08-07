@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import SEO from "../components/SEO";
+import { photoUrl } from "../utils/photoUrl.js";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -31,7 +32,90 @@ function filtersText(filters = {}) {
   if (filters.beds) parts.push(`${filters.beds}+ beds`);
   if (filters.baths) parts.push(`${filters.baths}+ baths`);
   if (filters.type && TYPE_LABEL[filters.type]) parts.push(TYPE_LABEL[filters.type]);
+  if (filters.minSqft) parts.push(`${Number(filters.minSqft).toLocaleString()}+ sqft`);
   return parts.length ? parts.join(" · ") : "All Northern Colorado";
+}
+
+function fmtPrice(n) {
+  if (n == null || n === "") return "—";
+  return `$${Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+}
+
+function authQuery(token) {
+  return token ? `?token=${encodeURIComponent(token)}` : "";
+}
+
+function LeadScoreBadge({ score, label }) {
+  if (score == null) return null;
+  const n = Number(score) || 0;
+  // Visual only — score itself is never fabricated client-side
+  const ring = n >= 50 ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+    : n >= 25 ? "bg-amber-50 border-amber-200 text-amber-900"
+    : "bg-gray-50 border-gray-200 text-gray-700";
+  return (
+    <div className={`mt-5 rounded-xl border px-4 py-3 flex items-start gap-3 ${ring}`}>
+      <div
+        className="shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg border-2"
+        style={{ borderColor: "#CFB36E", color: "#1a1a1a", background: "#fff" }}
+        aria-label={`Activity score ${n}`}
+      >
+        {n}
+      </div>
+      <div className="min-w-0">
+        <p className="text-sm font-semibold text-gray-900">Activity score: {n}</p>
+        <p className="text-xs text-gray-600 mt-0.5 leading-relaxed">
+          {label || "Your activity score — helps us match you faster."}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function PreviewCard({ preview, matchCount, editPath }) {
+  if (!preview && !matchCount) {
+    return (
+      <div className="mt-3 rounded-lg bg-gray-50 border border-gray-100 px-3 py-2.5 text-xs text-gray-500">
+        No active homes match these filters right now. We&apos;ll email you when something new hits.
+      </div>
+    );
+  }
+  return (
+    <div className="mt-3 flex gap-3 rounded-lg border border-gray-100 bg-gray-50 overflow-hidden">
+      {preview?.id || preview?.listing_id ? (
+        <Link
+          to={preview.slug ? `/homes-for-sale/${preview.slug}/` : editPath || "/properties/"}
+          className="shrink-0 w-24 sm:w-28 h-20 sm:h-24 bg-gray-200"
+        >
+          <img
+            src={photoUrl(preview.id || preview.listing_id, 0)}
+            alt={preview.address || "Matching home"}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        </Link>
+      ) : (
+        <div className="shrink-0 w-24 sm:w-28 h-20 sm:h-24 bg-gray-200" />
+      )}
+      <div className="min-w-0 flex-1 py-2 pr-3 flex flex-col justify-center">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+          {matchCount === 1 ? "1 match live" : `${Number(matchCount || 0).toLocaleString()} matches live`}
+        </p>
+        {preview && (
+          <>
+            <p className="text-sm font-bold text-gray-900 mt-0.5">{fmtPrice(preview.list_price)}</p>
+            <p className="text-xs text-gray-600 truncate">{preview.address || preview.city || "Matching home"}</p>
+            {(preview.beds != null || preview.baths != null) && (
+              <p className="text-[11px] text-gray-400 mt-0.5">
+                {[preview.beds != null ? `${preview.beds} bd` : null, preview.baths != null ? `${preview.baths} ba` : null]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default function ManageAlertsPage() {
@@ -59,7 +143,7 @@ export default function ManageAlertsPage() {
     setLoading(true);
     setError(null);
     if (token) {
-      fetch(`${API_BASE}/api/alerts/manage?token=${encodeURIComponent(token)}`)
+      fetch(`${API_BASE}/api/alerts/manage?token=${encodeURIComponent(token)}`, { credentials: "same-origin" })
         .then((r) => r.json())
         .then((d) => {
           if (!d.success) throw new Error(d.error || "Could not load your alerts.");
@@ -117,6 +201,7 @@ export default function ManageAlertsPage() {
       const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify({ email: passEmail.trim(), password: passWord }),
       });
       const d = await res.json();
@@ -128,69 +213,90 @@ export default function ManageAlertsPage() {
     } finally { setPassBusy(false); }
   };
 
-  const toggleSearch = async (id, isActive) => {
+  const patchSearch = async (id, body) => {
     setBusy(id);
     try {
-      await fetch(`${API_BASE}/api/alerts/${id}?token=${encodeURIComponent(token)}`, {
+      const res = await fetch(`${API_BASE}/api/alerts/${id}${authQuery(token)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ is_active: !isActive }),
+        credentials: "same-origin",
+        body: JSON.stringify(body),
       });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok || d.success === false) throw new Error(d.error || "Could not update.");
       load();
+    } catch (err) {
+      setError(err.message);
     } finally { setBusy(null); }
   };
+
+  const toggleSearch = (id, isActive) => patchSearch(id, { is_active: !isActive });
 
   const deleteSearch = async (id) => {
     if (!window.confirm("Delete this saved search?")) return;
     setBusy(id);
     try {
-      await fetch(`${API_BASE}/api/alerts/${id}?token=${encodeURIComponent(token)}`, {
+      const res = await fetch(`${API_BASE}/api/alerts/${id}${authQuery(token)}`, {
         method: "DELETE",
+        credentials: "same-origin",
       });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok || d.success === false) throw new Error(d.error || "Could not delete.");
       load();
+    } catch (err) {
+      setError(err.message);
     } finally { setBusy(null); }
   };
 
   const saveSchedule = async (id) => {
-    setBusy(id);
-    try {
-      await fetch(`${API_BASE}/api/alerts/${id}?token=${encodeURIComponent(token)}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ frequency: editFreq, send_time: editTime, send_day: editDay }),
-      });
-      setEditingId(null);
-      load();
-    } finally { setBusy(null); }
+    await patchSearch(id, { frequency: editFreq, send_time: editTime, send_day: editDay });
+    setEditingId(null);
   };
 
   const unsubscribe = async () => {
     if (!window.confirm("Unsubscribe from ALL alert emails?")) return;
     try {
-      await fetch(`${API_BASE}/api/alerts/unsubscribe`, {
+      const res = await fetch(`${API_BASE}/api/alerts/unsubscribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token }),
+        credentials: "same-origin",
+        body: JSON.stringify(token ? { token } : {}),
       });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok || d.success === false) throw new Error(d.error || "Could not unsubscribe.");
       setUnsubscribed(true);
-    } catch { /* noop */ }
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
     <>
       <SEO
-        title="Manage Your Home Search Alerts | SAA Homes"
-        description="View, pause, or delete your saved home searches and email alerts for Northern Colorado."
-        canonicalPath="/alerts/manage/"
+        title="My Saved Searches | SAA Homes"
+        description="View match counts, pause, or delete your saved home searches and email alerts for Northern Colorado."
+        canonicalPath="/my-saved-searches/"
         robots="noindex, nofollow"
       />
-      <div className="max-w-3xl mx-auto px-4 py-12 sm:py-16 min-h-[60vh]">
-        <h1 className="text-3xl font-bold font-serif text-gray-900">Your Saved Searches</h1>
-        <p className="text-gray-500 mt-2">Manage the home alerts we email you. Changes apply immediately.</p>
+      <div className="max-w-3xl mx-auto px-4 py-10 sm:py-14 min-h-[60vh]">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-bold font-serif text-gray-900">My Saved Searches</h1>
+            <p className="text-gray-500 mt-2 text-sm sm:text-base">
+              Live match counts, previews, and email alerts — managed in one place.
+            </p>
+          </div>
+          <Link
+            to="/properties/"
+            className="shrink-0 inline-flex items-center px-4 py-2.5 rounded-lg text-sm font-semibold border border-black text-black hover:bg-black hover:text-white transition-colors"
+          >
+            + New search
+          </Link>
+        </div>
 
         {unsubscribed ? (
           <div className="mt-8 bg-white border border-gray-200 rounded-xl p-8 text-center">
-            <p className="text-lg font-semibold text-gray-900">You're unsubscribed.</p>
+            <p className="text-lg font-semibold text-gray-900">You&apos;re unsubscribed.</p>
             <p className="text-gray-500 text-sm mt-2">No more alert emails will be sent.</p>
             <Link to="/properties/" className="inline-block mt-5 px-5 py-2.5 bg-black text-white rounded-lg text-sm font-semibold">
               Browse homes instead
@@ -238,7 +344,7 @@ export default function ManageAlertsPage() {
                 </button>
                 {error && <p className="text-red-600 text-sm">{error}</p>}
                 <p className="text-xs text-gray-400 text-center">
-                  No password yet? Use "Email me a link" — or create one next time you save a search.
+                  No password yet? Use &quot;Email me a link&quot; — or create one next time you save a search.
                 </p>
               </form>
             ) : magicSent ? (
@@ -273,7 +379,7 @@ export default function ManageAlertsPage() {
               Just saved a search? Check your inbox — the confirmation email has your manage link.
             </p>
           </div>
-        ) : error ? (
+        ) : error && !data ? (
           <div className="mt-8 bg-white border border-gray-200 rounded-xl p-8 text-center">
             <p className="text-gray-700">{error}</p>
             <p className="text-gray-400 text-sm mt-2">
@@ -282,7 +388,15 @@ export default function ManageAlertsPage() {
             </p>
           </div>
         ) : loading ? (
-          <p className="mt-8 text-gray-500">Loading your alerts…</p>
+          <div className="mt-8 space-y-3">
+            {[1, 2].map((i) => (
+              <div key={i} className="bg-white border border-gray-200 rounded-xl p-5 animate-pulse">
+                <div className="h-5 bg-gray-100 rounded w-1/3" />
+                <div className="h-4 bg-gray-100 rounded w-2/3 mt-3" />
+                <div className="h-20 bg-gray-100 rounded mt-4" />
+              </div>
+            ))}
+          </div>
         ) : (
           <>
             <div className="flex flex-wrap items-center justify-between gap-3 mt-6">
@@ -298,28 +412,104 @@ export default function ManageAlertsPage() {
                 Sign out
               </button>
             </div>
+
+            <LeadScoreBadge score={data.lead_score} label={data.lead_score_label} />
+
+            {error && (
+              <p className="mt-3 text-sm text-red-600" role="alert">{error}</p>
+            )}
+
             {data.searches.length === 0 ? (
-              <div className="mt-4 bg-white border border-gray-200 rounded-xl p-8 text-center">
-                <p className="text-gray-700">No active saved searches.</p>
-                <Link to="/properties/" className="inline-block mt-4 px-5 py-2.5 bg-black text-white rounded-lg text-sm font-semibold">
-                  Create one — search homes
+              <div className="mt-6 bg-white border border-gray-200 rounded-xl p-8 text-center">
+                <p className="text-lg font-semibold text-gray-900">No saved searches yet</p>
+                <p className="text-gray-500 text-sm mt-2 max-w-sm mx-auto">
+                  Set your filters on the search page and tap &quot;Save this search&quot; — we&apos;ll email you when new homes match.
+                </p>
+                <Link to="/properties/" className="inline-block mt-5 px-5 py-2.5 bg-black text-white rounded-lg text-sm font-semibold">
+                  Search homes
                 </Link>
               </div>
             ) : (
-              <div className="mt-4 space-y-3">
-                {data.searches.map((s) => (
-                  <div key={s.id} className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 flex items-center gap-2">
-                        {s.name}
-                        {s.is_active ? (
-                          <span className="text-[11px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">ACTIVE</span>
-                        ) : (
-                          <span className="text-[11px] font-bold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">PAUSED</span>
+              <div className="mt-5 space-y-4">
+                {data.searches.map((s) => {
+                  const editPath = s.edit_path || "/properties/";
+                  return (
+                    <div key={s.id} className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 shadow-sm">
+                      <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-gray-900 flex flex-wrap items-center gap-2">
+                            <span className="truncate">{s.name}</span>
+                            {s.is_active ? (
+                              <span className="text-[11px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">ACTIVE</span>
+                            ) : (
+                              <span className="text-[11px] font-bold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">PAUSED</span>
+                            )}
+                          </p>
+                          <p className="text-sm text-gray-500 mt-1">{filtersText(s.filters)}</p>
+                          <p className="text-xs text-gray-400 mt-1">📧 {scheduleText(s)}</p>
+                        </div>
+                        <div className="flex flex-wrap gap-2 shrink-0">
+                          <button
+                            type="button"
+                            disabled={busy === s.id}
+                            onClick={() => toggleSearch(s.id, s.is_active)}
+                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:border-black disabled:opacity-50"
+                          >
+                            {s.is_active ? "Pause" : "Resume"}
+                          </button>
+                          <Link
+                            to={editPath}
+                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:border-black inline-flex items-center"
+                          >
+                            Edit filters
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingId(editingId === s.id ? null : s.id);
+                              setEditFreq(s.frequency || "daily");
+                              setEditTime(s.send_time || "06:00");
+                              setEditDay(s.send_day || "Monday");
+                            }}
+                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:border-black disabled:opacity-50"
+                          >
+                            Schedule
+                          </button>
+                          <button
+                            type="button"
+                            disabled={busy === s.id}
+                            onClick={() => deleteSearch(s.id)}
+                            className="px-3 py-2 border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:border-red-400 disabled:opacity-50"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+
+                      <PreviewCard
+                        preview={s.preview}
+                        matchCount={s.match_count}
+                        editPath={editPath}
+                      />
+
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <Link
+                          to={editPath}
+                          className="inline-flex items-center px-3.5 py-2 rounded-lg text-sm font-semibold text-black"
+                          style={{ backgroundColor: "#CFB36E" }}
+                        >
+                          View {s.match_count === 1 ? "1 match" : `${Number(s.match_count || 0).toLocaleString()} matches`}
+                        </Link>
+                        {s.preview?.slug && (
+                          <Link
+                            to={`/homes-for-sale/${s.preview.slug}/`}
+                            className="inline-flex items-center px-3.5 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:border-black"
+                          >
+                            Open latest match
+                          </Link>
                         )}
-                      </p>
-                      <p className="text-sm text-gray-500 mt-1">{filtersText(s.filters)}</p>
-                      <p className="text-xs text-gray-400 mt-1">📧 {scheduleText(s)}</p>
+                      </div>
+
                       {editingId === s.id && (
                         <div className="mt-3 flex flex-wrap items-center gap-2 bg-gray-50 rounded-lg p-3">
                           <select
@@ -373,38 +563,8 @@ export default function ManageAlertsPage() {
                         </div>
                       )}
                     </div>
-                    <div className="flex gap-2 shrink-0">
-                      <button
-                        type="button"
-                        disabled={busy === s.id}
-                        onClick={() => toggleSearch(s.id, s.is_active)}
-                        className="px-3.5 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:border-black disabled:opacity-50"
-                      >
-                        {s.is_active ? "Pause" : "Resume"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingId(editingId === s.id ? null : s.id);
-                          setEditFreq(s.frequency || "daily");
-                          setEditTime(s.send_time || "06:00");
-                          setEditDay(s.send_day || "Monday");
-                        }}
-                        className="px-3.5 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:border-black disabled:opacity-50"
-                      >
-                        Schedule
-                      </button>
-                      <button
-                        type="button"
-                        disabled={busy === s.id}
-                        onClick={() => deleteSearch(s.id)}
-                        className="px-3.5 py-2 border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:border-red-400 disabled:opacity-50"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
             <button
@@ -414,6 +574,11 @@ export default function ManageAlertsPage() {
             >
               Unsubscribe from all alert emails
             </button>
+            <p className="mt-4 text-xs text-gray-400">
+              Questions? Call or text{" "}
+              <a href="tel:+19709991407" className="underline">(970) 999-1407</a>
+              {" "}· Equal Housing Opportunity
+            </p>
           </>
         )}
       </div>

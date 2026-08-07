@@ -333,6 +333,16 @@ export default function ListingDetailPanel({ slug, onClose }) {
     if (!listing) return;
     setSaved(isHomeSaved(listing.slug));
     setMatch(matchSavedSearch(listing, getSavedSearches()));
+    // Property-view tracking for signed-in users (lead score + digest)
+    const lid = listing.listing_id || listing.id;
+    if (lid) {
+      fetch(`${API_BASE}/api/alerts/view`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ listing_id: String(lid) }),
+      }).catch(() => {});
+    }
   }, [listing]);
 
   // ESC closes
