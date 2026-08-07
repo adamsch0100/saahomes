@@ -3,6 +3,7 @@ import SEO from "../components/SEO";
 import LatestMarketUpdateBanner from "../components/LatestMarketUpdateBanner.jsx";
 import AreaFAQSection from "../components/AreaFAQSection.jsx";
 import Testimonials from "../components/Testimonials.jsx";
+import MarketReportForm from "../components/MarketReportForm.jsx";
 import { SELLER_FAQS } from "../data/buyerSellerFaqs.js";
 
 export default function ForSellersPage() {
@@ -230,16 +231,16 @@ export default function ForSellersPage() {
         </div>
       </section>
 
-      {/* Home Valuation Widget Section */}
+      {/* Home Valuation / Free Market Report Section */}
       <section id="home-valuation" className="py-16 px-6 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-3xl mx-auto">
           <div className="text-center mb-8">
-            <h2 className="text-4xl font-bold mb-4">In Depth Market Analysis for Your Home</h2>
+            <h2 className="text-4xl font-bold mb-4">Get Your Free Market Report</h2>
             <p className="text-lg text-gray-700">
-              Get a free, instant estimate of your home's value
+              Get a personalized market analysis for your home — what it's worth today, recent comps in your neighborhood, and a recommended pricing strategy from Adam and Mandi Schwartz.
             </p>
           </div>
-          <realscout-home-value agent-encoded-id="QWdlbnQtMjUxOTI5" include-name include-phone remove-title remove-subtitle></realscout-home-value>
+          <MarketReportForm areaName="Northern Colorado" />
         </div>
       </section>
 
