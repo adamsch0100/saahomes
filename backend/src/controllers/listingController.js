@@ -49,13 +49,165 @@ const HOME_TYPE_SQL = {
 };
 
 /**
+ * Parse polygon query param into a ring of [lng, lat] pairs.
+ * Accepts:
+ *   - "lng,lat;lng,lat;lng,lat" (semicolon-separated vertices)
+ *   - GeoJSON Polygon / Feature string
+ * Returns null if unusable (< 3 vertices).
+ */
+function parsePolygonRing(raw) {
+  if (!raw || typeof raw !== 'string') return null;
+  const s = raw.trim();
+  if (!s) return null;
+
+  // GeoJSON
+  if (s.startsWith('{')) {
+    try {
+      const geo = JSON.parse(s);
+      let coords = null;
+      if (geo.type === 'Polygon' && Array.isArray(geo.coordinates)) {
+        coords = geo.coordinates[0];
+      } else if (geo.type === 'Feature' && geo.geometry?.type === 'Polygon') {
+        coords = geo.geometry.coordinates[0];
+      } else if (geo.type === 'FeatureCollection' && geo.features?.[0]) {
+        const g = geo.features[0].geometry;
+        if (g?.type === 'Polygon') coords = g.coordinates[0];
+      }
+      if (!coords || !Array.isArray(coords)) return null;
+      const ring = coords
+        .map((c) => [Number(c[0]), Number(c[1])])
+        .filter(([lng, lat]) => Number.isFinite(lng) && Number.isFinite(lat));
+      return ring.length >= 3 ? ring : null;
+    } catch {
+      return null;
+    }
+  }
+
+  // "lng,lat;lng,lat;..."
+  const ring = s.split(/[;|]/)
+    .map((pair) => {
+      const parts = pair.split(',').map((x) => Number(String(x).trim()));
+      if (parts.length < 2) return null;
+      const [lng, lat] = parts;
+      if (!Number.isFinite(lng) || !Number.isFinite(lat)) return null;
+      return [lng, lat];
+    })
+    .filter(Boolean);
+  return ring.length >= 3 ? ring : null;
+}
+
+/**
+ * Pure-SQL even-odd ray casting (no PostGIS). True when (longitude, latitude)
+ * falls inside the polygon ring. Vertices bound as float8 arrays of edges.
+ */
+function pushPolygonFilter(where, params, startI, ring) {
+  const pts = ring.map((p) => [p[0], p[1]]);
+  // Close ring if needed
+  const first = pts[0];
+  const last = pts[pts.length - 1];
+  if (first[0] !== last[0] || first[1] !== last[1]) {
+    pts.push([first[0], first[1]]);
+  }
+  if (pts.length < 4) return startI; // need ≥3 edges after close
+
+  const lng1 = [];
+  const lat1 = [];
+  const lng2 = [];
+  const lat2 = [];
+  for (let e = 0; e < pts.length - 1; e += 1) {
+    lng1.push(pts[e][0]);
+    lat1.push(pts[e][1]);
+    lng2.push(pts[e + 1][0]);
+    lat2.push(pts[e + 1][1]);
+  }
+
+  const i = startI;
+  where.push(`(
+    latitude IS NOT NULL AND longitude IS NOT NULL
+    AND (
+      SELECT COALESCE(SUM(
+        CASE
+          WHEN (v.lat1 > latitude) <> (v.lat2 > latitude)
+            AND longitude < ((v.lng2 - v.lng1) * (latitude - v.lat1) / NULLIF(v.lat2 - v.lat1, 0) + v.lng1)
+          THEN 1 ELSE 0
+        END
+      ), 0) % 2 = 1
+      FROM (
+        SELECT
+          unnest($${i}::float8[]) AS lng1,
+          unnest($${i + 1}::float8[]) AS lat1,
+          unnest($${i + 2}::float8[]) AS lng2,
+          unnest($${i + 3}::float8[]) AS lat2
+      ) v
+    )
+  )`);
+  params.push(lng1, lat1, lng2, lat2);
+  return i + 4;
+}
+
+/**
+ * Keyword match modes:
+ *   all   (default) — every whitespace/comma token must match (AND)
+ *   any             — any token may match (OR)
+ *   exact           — full input as one phrase
+ *   comma           — comma-separated tokens, each must match (AND)
+ */
+function pushKeywordFilter(where, params, startI, searchText, mode) {
+  let i = startI;
+  const termClause = (paramIdx) =>
+    `(LOWER(city) LIKE $${paramIdx} OR LOWER(street_name) LIKE $${paramIdx} OR LOWER(COALESCE(description,'')) LIKE $${paramIdx} OR LOWER(COALESCE(subdivision,'')) LIKE $${paramIdx})`;
+
+  const pushTerm = (term) => {
+    where.push(termClause(i));
+    params.push(`%${term.toLowerCase()}%`);
+    i += 1;
+  };
+
+  const m = (mode || 'all').toLowerCase();
+
+  if (m === 'exact') {
+    pushTerm(searchText);
+    return i;
+  }
+
+  if (m === 'any') {
+    const terms = searchText.split(/[\s,]+/).map((t) => t.trim()).filter(Boolean);
+    if (terms.length === 0) return i;
+    if (terms.length === 1) {
+      pushTerm(terms[0]);
+      return i;
+    }
+    const clauses = [];
+    for (const term of terms) {
+      clauses.push(termClause(i));
+      params.push(`%${term.toLowerCase()}%`);
+      i += 1;
+    }
+    where.push(`(${clauses.join(' OR ')})`);
+    return i;
+  }
+
+  if (m === 'comma') {
+    const terms = searchText.split(',').map((t) => t.trim()).filter(Boolean);
+    for (const term of terms) pushTerm(term);
+    return i;
+  }
+
+  // all (default): every word must appear
+  const terms = searchText.split(/[\s,]+/).map((t) => t.trim()).filter(Boolean);
+  for (const term of terms) pushTerm(term);
+  return i;
+}
+
+/**
  * Build WHERE clause + bind params from req.query.
  * Shared by main search and city facets so they never drift.
  */
 function buildListingFilters(query = {}) {
   const {
     city, minPrice, maxPrice, beds, baths, type, types, status = 'Active',
-    q, keywords,
+    q, keywords, keywordMode, keyword_mode: keywordModeSnake,
+    polygon,
     minSqft, maxSqft, minYear, maxYear, maxHoa, minHoa,
     garage, basement, fireplace, pool: hasPool,
     newConstruction, waterfront, newDays,
@@ -84,10 +236,14 @@ function buildListingFilters(query = {}) {
     push('status = $n', status);
   }
 
-  if (city === '__noco__') {
-    push('city = ANY($n::text[])', NOCO_CITIES);
-  } else if (city && city !== '__all__') {
-    push('LOWER(city) = LOWER($n)', city);
+  // Drawn polygon overrides city scope (point-in-polygon replaces city filter).
+  const polyRing = parsePolygonRing(polygon ? String(polygon) : '');
+  if (!polyRing) {
+    if (city === '__noco__') {
+      push('city = ANY($n::text[])', NOCO_CITIES);
+    } else if (city && city !== '__all__') {
+      push('LOWER(city) = LOWER($n)', city);
+    }
   }
 
   if (minPrice) push('list_price >= $n', Number(minPrice));
@@ -126,13 +282,14 @@ function buildListingFilters(query = {}) {
 
   const searchText = (keywords || q || '').trim();
   if (searchText) {
-    // One bind reused across OR clauses (Postgres allows same $n multiple times)
-    const p = `%${searchText.toLowerCase()}%`;
-    where.push(
-      `(LOWER(city) LIKE $${i} OR LOWER(street_name) LIKE $${i} OR LOWER(COALESCE(description,'')) LIKE $${i} OR LOWER(COALESCE(subdivision,'')) LIKE $${i})`
-    );
-    params.push(p);
-    i += 1;
+    // Default "all" (AND words) — least surprising when keywordMode omitted
+    const mode = keywordMode || keywordModeSnake || 'all';
+    i = pushKeywordFilter(where, params, i, searchText, mode);
+  }
+
+  // Custom drawn area (ray-cast, no PostGIS)
+  if (polyRing) {
+    i = pushPolygonFilter(where, params, i, polyRing);
   }
 
   if (minSqft) push('living_area >= $n', Number(minSqft));

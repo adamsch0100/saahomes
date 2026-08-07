@@ -48,7 +48,13 @@ function filterSummary(filters = {}) {
   if (filters.newConstruction === "true" || filters.newConstruction === true) parts.push("New construction");
   if (filters.listingStatus === "price-drop") parts.push("Price drops");
   if (filters.listingStatus === "new") parts.push("New listings");
-  if (filters.keywords) parts.push(`“${filters.keywords}”`);
+  if (filters.keywords) {
+    const mode = filters.keywordMode && filters.keywordMode !== "all"
+      ? ` (${filters.keywordMode})`
+      : "";
+    parts.push(`“${filters.keywords}”${mode}`);
+  }
+  if (filters.polygon) parts.push("Custom map area");
   if (filters.basement) parts.push(filters.basement === "true" ? "Basement" : `Basement: ${filters.basement}`);
   if (filters.maxHoa) parts.push(`HOA ≤ $${filters.maxHoa}`);
   return parts.length ? parts.join(" · ") : "All Northern Colorado";
