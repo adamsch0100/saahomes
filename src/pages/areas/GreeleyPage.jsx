@@ -6,6 +6,7 @@ import { AREA_FAQS } from "../../data/areaFaqs.js";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 import TopRatedSchools from "../../components/TopRatedSchools.jsx";
+import SectionTownsBand from "../../components/SectionTownsBand.jsx";
 
 export default function GreeleyPage() {
   return (
@@ -324,9 +325,57 @@ export default function GreeleyPage() {
               <h3 className="font-bold text-gray-900">Johnstown →</h3>
               <p className="text-sm text-gray-600">I-25 corridor, 15 min south</p>
             </Link>
+            <Link to="/northern-colorado-areas/fort-lupton/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Fort Lupton →</h3>
+              <p className="text-sm text-gray-600">US-85 corridor south of Greeley</p>
+            </Link>
+            <Link to="/northern-colorado-areas/carbon-valley/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Carbon Valley →</h3>
+              <p className="text-sm text-gray-600">Firestone · Frederick · Dacono hub</p>
+            </Link>
           </div>
         </div>
       </section>
+
+      {/* Section towns — Ault, Pierce, Kersey, Briggsdale (live market lines) */}
+      <SectionTownsBand
+        title="Nearby communities: Ault, Pierce, Kersey & Briggsdale"
+        intro="Weld County towns shoppers often pair with a Greeley search. Active counts and median list prices are live from IRES MLS."
+        towns={[
+          {
+            id: 'ault',
+            name: 'Ault',
+            searchCity: 'Ault',
+            description: 'Weld County · north of Greeley on US-85',
+            writeup:
+              'Ault is a classic small Weld County town north of Greeley with a mix of residential homes and some land. Buyers who want quieter streets and a short drive to Greeley employment often include Ault alongside Eaton and Severance. Inventory is modest, so pricing strategy and flexibility on condition matter.',
+          },
+          {
+            id: 'pierce',
+            name: 'Pierce',
+            searchCity: 'Pierce',
+            description: 'Weld County · north of Ault on the US-85 corridor',
+            writeup:
+              'Pierce offers an even smaller-town feel farther north on the Highway 85 corridor, often with more accessible list prices than larger NoCO cities. Expect a thin market — when the right home appears, act with solid pre-approval. SAA Homes can combine Pierce with Ault and Greeley in one search.',
+          },
+          {
+            id: 'kersey',
+            name: 'Kersey',
+            searchCity: 'Kersey',
+            description: 'Weld County · east of Greeley',
+            writeup:
+              'Kersey sits east of Greeley with a rural character and a small active inventory that can include larger properties and land. Medians can swing when high-end or acreage listings dominate a thin market — always read the live line in context and review individual comps with an agent.',
+          },
+          {
+            id: 'briggsdale',
+            name: 'Briggsdale',
+            searchCity: 'Briggsdale',
+            description: 'Weld County · northeast plains community',
+            writeup:
+              'Briggsdale is a remote plains community with very limited inventory and a true rural lifestyle. It is not a suburban substitute for west Greeley — it is for buyers who specifically want open country living. Set alerts early; the right listing may not last long among local farm and ranch buyers.',
+          },
+        ]}
+      />
 
       <AreaFAQSection faqs={AREA_FAQS['greeley']} city="Greeley" />
 

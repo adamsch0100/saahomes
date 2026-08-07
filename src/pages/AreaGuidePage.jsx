@@ -9,6 +9,8 @@ import { AREA_FAQS } from "../data/areaFaqs.js";
 import LatestMarketUpdateBanner from "../components/LatestMarketUpdateBanner.jsx";
 import AreaEventsSection from "../components/AreaEventsSection.jsx";
 import TopRatedSchools from "../components/TopRatedSchools.jsx";
+import CityStatsBand from "../components/CityStatsBand.jsx";
+import SectionTownsBand from "../components/SectionTownsBand.jsx";
 
 const GOLD = "#CFB36E";
 
@@ -23,12 +25,14 @@ const nearbyCommunities = {
     { name: 'Longmont', slug: 'longmont', description: '8 miles west of Firestone' },
     { name: 'Frederick', slug: 'frederick', description: 'Adjacent to Firestone' },
     { name: 'Mead', slug: 'mead', description: '5 miles north of Firestone' },
+    { name: 'Carbon Valley', slug: 'carbon-valley', description: 'Regional hub for Firestone / Frederick / Dacono' },
     { name: 'Fort Collins', slug: 'fort-collins', description: '30 miles north on I-25' },
   ],
   frederick: [
     { name: 'Firestone', slug: 'firestone', description: 'Adjacent to Frederick' },
     { name: 'Longmont', slug: 'longmont', description: '10 miles west of Frederick' },
     { name: 'Mead', slug: 'mead', description: '6 miles north of Frederick' },
+    { name: 'Carbon Valley', slug: 'carbon-valley', description: 'Regional hub for Carbon Valley towns' },
     { name: 'Fort Collins', slug: 'fort-collins', description: '30 miles north on I-25' },
   ],
   evans: [
@@ -46,7 +50,7 @@ const nearbyCommunities = {
   niwot: [
     { name: 'Longmont', slug: 'longmont', description: '4 miles east of Niwot' },
     { name: 'Boulder', slug: 'boulder', description: '10 miles south of Niwot' },
-    { name: 'Fort Collins', slug: 'fort-collins', description: '40 miles north on I-25' },
+    { name: 'Lyons', slug: 'lyons', description: '12 miles northwest of Niwot' },
     { name: 'Mead', slug: 'mead', description: '12 miles northeast of Niwot' },
   ],
   windsor: [
@@ -56,6 +60,57 @@ const nearbyCommunities = {
     { name: 'Timnath', slug: 'timnath', description: '5 miles south via I-25' },
     { name: 'Severance', slug: 'severance', description: '5 miles east of Windsor' },
     { name: 'Johnstown', slug: 'johnstown', description: '8 miles south via I-25' },
+  ],
+  erie: [
+    { name: 'Longmont', slug: 'longmont', description: '10 miles north of Erie' },
+    { name: 'Boulder', slug: 'boulder', description: '15 miles southwest of Erie' },
+    { name: 'Carbon Valley', slug: 'carbon-valley', description: 'Firestone / Frederick / Dacono corridor' },
+    { name: 'Brighton', slug: 'brighton', description: 'I-76 corridor south of Erie' },
+    { name: 'Niwot', slug: 'niwot', description: 'West toward Boulder County' },
+  ],
+  brighton: [
+    { name: 'Fort Lupton', slug: 'fort-lupton', description: 'North on US-85' },
+    { name: 'Erie', slug: 'erie', description: 'Northwest toward Boulder County' },
+    { name: 'Carbon Valley', slug: 'carbon-valley', description: 'I-25 growth corridor north' },
+    { name: 'Greeley', slug: 'greeley', description: 'North on US-85 toward Weld County' },
+  ],
+  'carbon-valley': [
+    { name: 'Firestone', slug: 'firestone', description: 'Carbon Valley family hub' },
+    { name: 'Frederick', slug: 'frederick', description: 'Affordable Carbon Valley living' },
+    { name: 'Mead', slug: 'mead', description: 'North of the valley core' },
+    { name: 'Fort Lupton', slug: 'fort-lupton', description: 'US-85 Weld County value' },
+    { name: 'Erie', slug: 'erie', description: 'Denver-exurb growth west' },
+    { name: 'Longmont', slug: 'longmont', description: 'West toward Boulder County' },
+  ],
+  'estes-park': [
+    { name: 'Lyons', slug: 'lyons', description: 'Foothills gateway south of Estes' },
+    { name: 'Loveland', slug: 'loveland', description: 'US-34 corridor toward the park' },
+    { name: 'Fort Collins', slug: 'fort-collins', description: 'Larimer County base city' },
+    { name: 'Bellvue', slug: 'bellvue', description: 'Poudre Canyon access from Fort Collins' },
+  ],
+  'red-feather-lakes': [
+    { name: 'Fort Collins', slug: 'fort-collins', description: 'Primary services ~45–60 min southeast' },
+    { name: 'Bellvue', slug: 'bellvue', description: 'Poudre Canyon corridor' },
+    { name: 'Wellington', slug: 'wellington', description: 'Northern Larimer plains access' },
+    { name: 'Estes Park', slug: 'estes-park', description: 'RMNP mountain market south' },
+  ],
+  'fort-lupton': [
+    { name: 'Brighton', slug: 'brighton', description: 'South on US-85 / I-76 corridor' },
+    { name: 'Carbon Valley', slug: 'carbon-valley', description: 'West toward Firestone / Frederick' },
+    { name: 'Greeley', slug: 'greeley', description: 'North on US-85' },
+    { name: 'Platteville', slug: 'carbon-valley', description: 'Nearby Weld County small town (hub section)' },
+  ],
+  lyons: [
+    { name: 'Boulder', slug: 'boulder', description: 'South via US-36 corridor' },
+    { name: 'Longmont', slug: 'longmont', description: 'East toward the plains' },
+    { name: 'Estes Park', slug: 'estes-park', description: 'Mountain route via US-36' },
+    { name: 'Niwot', slug: 'niwot', description: 'Southeast Boulder County village' },
+  ],
+  bellvue: [
+    { name: 'Fort Collins', slug: 'fort-collins', description: 'Minutes southeast into town' },
+    { name: 'Red Feather Lakes', slug: 'red-feather-lakes', description: 'Northwest mountain cabin market' },
+    { name: 'Estes Park', slug: 'estes-park', description: 'RMNP via mountain routes' },
+    { name: 'Loveland', slug: 'loveland', description: 'South Larimer County' },
   ],
 };
 
@@ -67,14 +122,18 @@ export default function AreaGuidePage() {
     return <Navigate to="/northern-colorado-areas/" replace />;
   }
 
-  const searchLocation = encodeURIComponent(`${area.city}, CO`);
+  const searchCity = area.searchLocation || `${area.city}, CO`;
+  const searchLocation = encodeURIComponent(searchCity);
   const searchLink = `/properties/?location=${searchLocation}`;
   const intro = area.introParagraphs || [area.description];
   const whyChoose = area.whyChoose || [];
   const highlights = area.highlights || { neighborhoods: [], attractions: [] };
+  const hubSections = area.hubSections || [];
+  const hubCrossLinks = area.hubCrossLinks || [];
 
   const isGreeleyArea = area.slug === 'greeley' || area.slug === 'evans';
   const nearby = nearbyCommunities[area.slug];
+  const statsCity = area.skipCityStats ? null : area.city;
 
   return (
     <>
@@ -123,9 +182,57 @@ export default function AreaGuidePage() {
               {paragraph}
             </p>
           ))}
+          {statsCity && (
+            <div className="mt-8 mb-6">
+              <CityStatsBand city={statsCity} />
+            </div>
+          )}
           <LatestMarketUpdateBanner variant="compact" cityName={area.city} />
         </div>
       </section>
+
+      {hubSections.length > 0 && (
+        <SectionTownsBand
+          title={`${area.city} communities with live market data`}
+          intro="Each section below uses live active-listing counts and median list prices from IRES MLS — never static marketing numbers. Jump to a town or search homes directly."
+          towns={hubSections.map((s) => ({
+            id: s.id,
+            name: s.name,
+            searchCity: s.searchCity || s.name,
+            description: s.description,
+            writeup: s.writeup,
+            href: s.href || undefined,
+          }))}
+        />
+      )}
+
+      {hubCrossLinks.length > 0 && (
+        <section className="py-12 px-6 bg-white">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl font-bold font-serif mb-6 text-center">
+              Full Carbon Valley & corridor guides
+            </h2>
+            <p className="text-gray-700 text-center mb-8 max-w-2xl mx-auto">
+              Dedicated area pages for towns that already have full guides — cross-linked so you can compare the corridor without thin duplicate content.
+            </p>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {hubCrossLinks.map((community) => (
+                <Link
+                  key={community.slug}
+                  to={`/northern-colorado-areas/${community.slug}/`}
+                  className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-100 hover:border-gray-300 hover:bg-gray-100 transition-all group"
+                >
+                  <div className="flex-1">
+                    <h3 className="font-bold text-gray-900 group-hover:underline">{community.name}</h3>
+                    <p className="text-sm text-gray-600">{community.description}</p>
+                  </div>
+                  <span className="text-gray-400 group-hover:text-gray-700">→</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="py-12 px-6 bg-gray-50">
         <div className="max-w-5xl mx-auto grid sm:grid-cols-3 gap-4 text-center">

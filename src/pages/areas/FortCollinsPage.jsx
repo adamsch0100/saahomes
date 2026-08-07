@@ -6,6 +6,7 @@ import { AREA_FAQS } from "../../data/areaFaqs.js";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 import TopRatedSchools from "../../components/TopRatedSchools.jsx";
+import SectionTownsBand from "../../components/SectionTownsBand.jsx";
 
 export default function FortCollinsPage() {
   return (
@@ -325,9 +326,45 @@ export default function FortCollinsPage() {
               <h3 className="font-bold text-gray-900">Johnstown →</h3>
               <p className="text-sm text-gray-600">I-25 corridor growth, 20 min south</p>
             </Link>
+            <Link to="/northern-colorado-areas/bellvue/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Bellvue →</h3>
+              <p className="text-sm text-gray-600">Poudre Canyon acreage, NW of town</p>
+            </Link>
+            <Link to="/northern-colorado-areas/red-feather-lakes/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Red Feather Lakes →</h3>
+              <p className="text-sm text-gray-600">Mountain cabins, NW Larimer</p>
+            </Link>
+            <Link to="/northern-colorado-areas/estes-park/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Estes Park →</h3>
+              <p className="text-sm text-gray-600">RMNP second homes & cabins</p>
+            </Link>
           </div>
         </div>
       </section>
+
+      {/* Section towns — LaPorte + Masonville (live market lines) */}
+      <SectionTownsBand
+        title="Nearby communities: LaPorte & Masonville"
+        intro="Smaller Larimer County communities shoppers often pair with a Fort Collins search. Market lines below are live from active IRES listings — not static snapshots."
+        towns={[
+          {
+            id: 'laporte',
+            name: 'LaPorte',
+            searchCity: 'LaPorte',
+            description: 'Unincorporated Larimer · north-northwest of Fort Collins',
+            writeup:
+              'LaPorte sits just outside Fort Collins toward the Poudre corridor — a small community mix of residential and land listings that appeals to buyers who want more space without a full mountain move. Inventory is limited compared with the city, so well-matched homes can draw attention quickly. Pair a LaPorte search with Fort Collins and Bellvue when you want options across the northwest edge of the market.',
+          },
+          {
+            id: 'masonville',
+            name: 'Masonville',
+            searchCity: 'Masonville',
+            description: 'Larimer foothills · southwest of Fort Collins / west of Loveland',
+            writeup:
+              'Masonville is a foothills hamlet with historically thin MLS inventory — some days there are zero active listings. When homes or land do appear, they tend to attract buyers seeking privacy, mountain access, and a quieter alternative to in-town Fort Collins or Loveland. Set a saved search with SAA Homes so you are notified the moment something hits the market.',
+          },
+        ]}
+      />
 
       {/* Why Work With Us — Fort Collins Realtor Section */}
         <section className="mb-12 bg-blue-50 p-8 rounded-lg">
