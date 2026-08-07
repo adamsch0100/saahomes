@@ -216,6 +216,37 @@ export default function ListingDetailPage() {
       ? { floorSize: { "@type": "QuantitativeValue", value: Number(sqft), unitCode: "FTK" } }
       : {}),
     ...(listing.year_built ? { yearBuilt: Number(listing.year_built) } : {}),
+    // School names from MLS (+ GreatSchools rating when cached). Never invent ratings.
+    ...((() => {
+      const schoolNodes = [];
+      const fromApi = Array.isArray(listing.schools) ? listing.schools : [];
+      if (fromApi.length) {
+        for (const s of fromApi) {
+          if (!s?.name) continue;
+          const node = { "@type": "School", name: s.name };
+          if (s.gsUrl) node.url = s.gsUrl;
+          if (s.gsRating != null && s.gsRating >= 1 && s.gsRating <= 10) {
+            node.additionalProperty = {
+              "@type": "PropertyValue",
+              name: "GreatSchools Rating",
+              value: s.gsRating,
+              minValue: 1,
+              maxValue: 10,
+            };
+          }
+          schoolNodes.push(node);
+        }
+      } else {
+        for (const name of [
+          listing.elementary_school,
+          listing.middle_school,
+          listing.high_school,
+        ]) {
+          if (name) schoolNodes.push({ "@type": "School", name });
+        }
+      }
+      return schoolNodes.length ? { amenityFeature: schoolNodes } : {};
+    })()),
   };
 
   const metaDesc = [

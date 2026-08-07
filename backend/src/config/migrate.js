@@ -364,6 +364,30 @@ export const runMigrations = async () => {
       CREATE INDEX IF NOT EXISTS idx_listings_slug ON listings(slug);
     `);
 
+    // ── GreatSchools ratings cache (weekly sync, not listings sync) ─────
+    // Ratings come ONLY from live JSON-LD on greatschools.org city pages.
+    // Never hardcode/fabricate. Attribution required on every display.
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS school_ratings (
+        id SERIAL PRIMARY KEY,
+        school_name VARCHAR(255) NOT NULL,
+        city VARCHAR(100) NOT NULL,
+        city_slug VARCHAR(100) NOT NULL,
+        rating SMALLINT,
+        review_rating NUMERIC(3,2),
+        review_count INTEGER,
+        url TEXT,
+        level VARCHAR(32),
+        fetched_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        UNIQUE (school_name, city_slug)
+      )
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_school_ratings_city ON school_ratings(city_slug);
+      CREATE INDEX IF NOT EXISTS idx_school_ratings_name ON school_ratings(school_name);
+      CREATE INDEX IF NOT EXISTS idx_school_ratings_rating ON school_ratings(rating DESC NULLS LAST);
+    `);
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {

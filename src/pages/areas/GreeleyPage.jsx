@@ -5,6 +5,7 @@ import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
 import { AREA_FAQS } from "../../data/areaFaqs.js";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
+import TopRatedSchools from "../../components/TopRatedSchools.jsx";
 
 export default function GreeleyPage() {
   return (
@@ -153,6 +154,8 @@ export default function GreeleyPage() {
           </p>
         </div>
       </section>
+
+      <TopRatedSchools city="Greeley" citySlug="greeley" limit={8} />
 
       {/* Location Section */}
       <section className="py-16 px-6 bg-white">

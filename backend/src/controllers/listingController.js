@@ -1,4 +1,5 @@
 import getPool from '../config/database.js';
+import { matchRatingsForListing } from '../services/greatSchoolsSync.js';
 
 /**
  * Listing search + detail API — powers /properties/ search and
@@ -594,6 +595,13 @@ export const getListingBySlug = async (req, res) => {
     const listing = result.rows[0];
     if (listing.raw) {
       delete listing.raw;
+    }
+    // Attach GreatSchools ratings when school fields match the cache (never fabricate)
+    try {
+      listing.schools = await matchRatingsForListing(listing);
+    } catch (schoolErr) {
+      console.warn('school ratings lookup failed:', schoolErr.message);
+      listing.schools = [];
     }
     res.json({ success: true, data: listing });
   } catch (error) {
