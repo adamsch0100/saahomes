@@ -122,6 +122,8 @@ export default function SaveSearchModal({
   const [frequency, setFrequency] = useState("daily");
   const [sendTime, setSendTime] = useState("06:00");
   const [sendDay, setSendDay] = useState("Monday");
+  // Intent routes buyer vs seller nurture track: buying | selling | both
+  const [intent, setIntent] = useState("buying");
   const [state, setState] = useState("idle"); // idle | saving | done | error
   const [error, setError] = useState("");
   // Session: null = checking, false = guest, object = signed in
@@ -194,12 +196,14 @@ export default function SaveSearchModal({
           frequency,
           send_time: sendTime,
           send_day: sendDay,
+          intent: intent || "buying",
           ...filters,
         }),
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error || "Could not save");
       localStorage.setItem("saa_lead_captured", "1");
+      if (intent) localStorage.setItem("saa_intent", intent);
       // RealScout-style: remember criteria so cards/detail can show match chips
       rememberSavedSearch(filters);
       try {
@@ -272,9 +276,17 @@ export default function SaveSearchModal({
                     Added to your account ({session?.email || email}).
                   </p>
                 )}
+                {(intent === "selling" || intent === "both") && (
+                  <a
+                    href="/my-home/"
+                    className="mt-4 inline-flex items-center justify-center w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors text-sm"
+                  >
+                    Track my home&apos;s value →
+                  </a>
+                )}
                 <a
                   href="/my-saved-searches/"
-                  className="mt-4 inline-flex items-center justify-center w-full py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                  className="mt-3 inline-flex items-center justify-center w-full py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-gray-50 transition-colors text-sm"
                 >
                   Manage my alerts
                 </a>
@@ -335,6 +347,41 @@ export default function SaveSearchModal({
                 )}
 
                 <form onSubmit={submit} className="mt-4 space-y-4">
+                  {/* Intent step — routes buyer vs seller nurture */}
+                  {!isSignedIn && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Are you buying, selling, or both?
+                      </label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          { value: "buying", label: "Buying" },
+                          { value: "selling", label: "Selling" },
+                          { value: "both", label: "Both" },
+                        ].map((opt) => (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => setIntent(opt.value)}
+                            className={`px-2 py-2.5 rounded-lg border text-xs font-semibold transition-colors ${
+                              intent === opt.value
+                                ? "bg-black text-white border-black"
+                                : "border-gray-300 text-gray-600 hover:border-black"
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                      {(intent === "selling" || intent === "both") && (
+                        <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">
+                          After saving, you can track your home&apos;s value on{" "}
+                          <span className="font-semibold text-gray-700">My Home</span> —
+                          monthly updates, no pressure.
+                        </p>
+                      )}
+                    </div>
+                  )}
                   {/* Hide contact fields when signed in and we already have them */}
                   {!(isSignedIn && session.email) && (
                     <div>

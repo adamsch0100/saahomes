@@ -44,6 +44,8 @@ const breadcrumbMap = {
   properties: "Homes for Sale in Colorado",
   buyers: "Colorado Home Buyers",
   sellers: "Sell Your Northern Colorado Home",
+  "my-home": "My Home Value",
+  "my-saved-searches": "My Saved Searches",
 };
 
 const customTrails = {

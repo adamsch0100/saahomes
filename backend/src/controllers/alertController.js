@@ -120,6 +120,23 @@ export const createAlert = async (req, res) => {
     }
     const userRow = user.rows[0];
 
+    // Signup intent: buying | selling | both → routes nurture track
+    const intentRaw = String(req.body?.intent || '').trim().toLowerCase();
+    const intent = ['buying', 'selling', 'both'].includes(intentRaw) ? intentRaw : null;
+    if (intent) {
+      await pool.query(
+        `UPDATE users SET intent = CASE
+           WHEN intent IS NULL OR intent = $1 THEN $1
+           WHEN intent = 'buying' AND $1 = 'selling' THEN 'both'
+           WHEN intent = 'selling' AND $1 = 'buying' THEN 'both'
+           ELSE intent
+         END
+         WHERE id = $2`,
+        [intent, userRow.id]
+      );
+      userRow.intent = intent;
+    }
+
     // Optional: create a password so the client can log in with email+password
     // (upgrades a magic-link-only account; 8+ chars required)
     const passStr = String(password || '');
@@ -226,14 +243,31 @@ async function buildDashboardPayload(user) {
   } catch (e) {
     console.error('lead score refresh failed:', e.message);
   }
+  // Seller home profiles (if any) — light summary for account hub
+  let homes = [];
+  try {
+    const hr = await pool.query(
+      `SELECT id, address_line, city, state, postal_code, our_estimate_mid, our_estimate_low,
+              our_estimate_high, market_estimate_mid, value_updates_enabled, seller_heat, updated_at
+       FROM home_profiles WHERE user_id = $1 ORDER BY updated_at DESC LIMIT 10`,
+      [user.id]
+    );
+    homes = hr.rows;
+  } catch {
+    homes = [];
+  }
+
   return {
     email: user.email,
     name: user.name,
     phone: user.phone,
+    intent: user.intent || null,
+    seller_heat: !!user.seller_heat,
     lead_score: leadScore,
     lead_score_breakdown: breakdown,
     lead_score_label: 'Your activity score — helps us match you faster.',
     searches: enriched,
+    homes,
   };
 }
 

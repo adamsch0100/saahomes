@@ -76,6 +76,51 @@ async function fetchWithQueue(url) {
   }
 }
 
+/**
+ * Refresh a listing's photo URLs from the IRES API. MLS signed URLs expire
+ * ~60 min after each sync, so on a cache-miss fetch failure we regenerate
+ * them (same API + token the sync uses), heal the DB photos array, and retry.
+ * Returns the fresh URL array, or null on any failure (caller falls back to
+ * the original error). Verified live 2026-08-08: ListingId filter + $expand=Media.
+ */
+async function refreshMlsUrls(listingId, pool) {
+  const base = process.env.IRES_API_URL;
+  const token = process.env.IRES_ACCESS_TOKEN;
+  if (!base || !token) return null;
+  try {
+    const row = await pool.query('SELECT listing_id FROM listings WHERE id = $1', [listingId]);
+    const lid = row.rows[0]?.listing_id;
+    if (!lid) return null;
+    const url = new URL(`${base}/Property`);
+    url.searchParams.set('$top', '1');
+    url.searchParams.set('$filter', `ListingId eq '${lid}'`);
+    url.searchParams.set('$select', 'ListingKey,ListingId,StandardStatus,StreetNumber,City,PhotosCount');
+    url.searchParams.set('$expand', 'Media');
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+      signal: AbortSignal.timeout(30000),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const media = Array.isArray(data.value?.[0]?.Media) ? data.value[0].Media : [];
+    const photos = media
+      .filter((m) => typeof m?.MediaURL === 'string' && /\.(jpe?g|png|webp)(\?|$)/i.test(m.MediaURL))
+      .sort((a, b) => (a.Order ?? 0) - (b.Order ?? 0))
+      .map((m) => m.MediaURL)
+      .filter(Boolean);
+    if (!photos.length) return null;
+    await pool.query('UPDATE listings SET photos = $1, photos_count = $2 WHERE id = $3', [
+      JSON.stringify(photos),
+      photos.length,
+      listingId,
+    ]);
+    return photos;
+  } catch (error) {
+    logger.error('photo URL refresh failed', error);
+    return null;
+  }
+}
+
 export const getListingPhoto = async (req, res) => {
   try {
     const listingId = Number(req.params.listingId);
@@ -95,7 +140,18 @@ export const getListingPhoto = async (req, res) => {
     const url = photos[idx];
     if (!url) return res.status(404).json({ error: 'Photo not found' });
 
-    const buf = await fetchWithQueue(url);
+    let buf;
+    try {
+      buf = await fetchWithQueue(url);
+    } catch (fetchErr) {
+      // MLS signed URLs expire ~60 min after sync → refresh from IRES and retry
+      // once (heals the DB row too). R2 URLs are durable — never refresh those.
+      if (!url.includes('media.mlsgrid.com')) throw fetchErr;
+      const fresh = await refreshMlsUrls(listingId, pool);
+      const freshUrl = fresh?.[idx];
+      if (!freshUrl) throw fetchErr;
+      buf = await fetchWithQueue(freshUrl);
+    }
     fs.writeFileSync(file, buf);
     trimCache();
     res.set('Content-Type', 'image/jpeg');

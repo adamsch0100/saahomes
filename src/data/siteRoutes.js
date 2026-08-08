@@ -126,6 +126,19 @@ const staticPages = [
     robots: 'noindex, nofollow',
   },
   {
+    // Seller home-value dashboard — noindex (account page)
+    path: '/my-home/',
+    priority: '0.1',
+    changefreq: 'monthly',
+    title: 'My Home Value | SAA Homes',
+    description: 'Private home value dashboard with multi-source estimates and seller tools from SAA Homes.',
+    ogTitle: 'My Home Value | SAA Homes',
+    ogDescription: 'Your home value estimate and seller dashboard.',
+    ogImage: DEFAULT_OG_IMAGE,
+    ogImageAlt: 'SAA Homes my home',
+    robots: 'noindex, nofollow',
+  },
+  {
     // Legacy manage URL — same dashboard, noindex
     path: '/alerts/manage/',
     priority: '0.1',
