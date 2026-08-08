@@ -15,12 +15,11 @@ import {
   listingBadges,
   listingAddress,
   homeTypeLabel,
-  isHomeSaved,
-  toggleSavedHome,
   matchSavedSearch,
   getSavedSearches,
   hasAnySavedSearch,
 } from "../utils/listingHelpers.js";
+import SaveHomeButton, { useSavedHomesStatus } from "./SaveHomeButton";
 import { buildListingsItemListSchema } from "../utils/seoConstants.js";
 
 /**
@@ -738,32 +737,6 @@ function SkeletonCard({ compact = false }) {
   );
 }
 
-function HeartButton({ slug, className = "" }) {
-  const [saved, setSaved] = useState(() => isHomeSaved(slug));
-  useEffect(() => { setSaved(isHomeSaved(slug)); }, [slug]);
-
-  return (
-    <button
-      type="button"
-      aria-label={saved ? "Remove from saved homes" : "Save this home"}
-      title={saved ? "Saved" : "Save home"}
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setSaved(toggleSavedHome(slug));
-      }}
-      className={`inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-white/95 shadow-md border border-black/5 hover:scale-105 active:scale-95 transition-transform touch-manipulation ${className}`}
-    >
-      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"
-        fill={saved ? "#CFB36E" : "none"}
-        stroke={saved ? "#CFB36E" : "#111"}
-        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-      </svg>
-    </button>
-  );
-}
-
 function CardBadges({ listing }) {
   const { isNew, priceCut, priceCutPct, isNewConstruction, hasOpenHouse } = listingBadges(listing);
   if (!isNew && !priceCut && !isNewConstruction && !hasOpenHouse) return null;
@@ -812,12 +785,16 @@ function CardStatsLine({ listing, className = "" }) {
  * Grid card — Zillow-grade 4:3 photo, price + badges on image, type scale below.
  * compact=true → horizontal list row (mobile / dense list).
  */
-function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compact = false }) {
+function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compact = false, savedMap = {} }) {
   const { priceCut } = listingBadges(listing);
   const match = matchSavedSearch(listing, savedSearches);
   const [imgLoaded, setImgLoaded] = useState(false);
   const addr = listingAddress(listing);
   const typeLabel = homeTypeLabel(listing);
+  const isSaved =
+    Boolean(savedMap[listing.listing_id]) ||
+    Boolean(savedMap[listing.slug]) ||
+    Boolean(listing.id != null && savedMap[String(listing.id)]);
 
   const open = (e) => {
     e?.preventDefault?.();
@@ -849,7 +826,11 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
       )}
       <CardBadges listing={listing} />
       <div className={`absolute z-10 ${compact ? "top-1.5 right-1.5" : "top-2 right-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"}`}>
-        <HeartButton slug={listing.slug} className={compact ? "!w-10 !h-10 !min-w-[40px] !min-h-[40px]" : ""} />
+        <SaveHomeButton
+          listing={listing}
+          saved={isSaved}
+          className={compact ? "!w-10 !h-10 !min-w-[40px] !min-h-[40px]" : ""}
+        />
       </div>
       {/* Price overlay — primary focal point on the photo */}
       {!compact && (
@@ -1574,6 +1555,8 @@ export default function ListingSearch({ location, height = "700px", compact = fa
 
   const activeFilterCount = useMemo(() => countActiveFilters(filters), [filters]);
   const activeChips = useMemo(() => buildActiveChips(filters), [filters]);
+  // Batch heart status for visible results (one API call, not N+1)
+  const { savedMap } = useSavedHomesStatus(results);
 
   const fetchListings = useCallback(async (f, pageNum = 1, append = false) => {
     const gen = ++fetchGen.current;
@@ -2511,6 +2494,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                     onOpen={openListingPanel}
                     savedSearches={savedSearches}
                     compact={isNarrow && view === "list"}
+                    savedMap={savedMap}
                   />
                 ))}
               </div>
