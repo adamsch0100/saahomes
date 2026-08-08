@@ -2125,6 +2125,7 @@ export const neighborhoods = [
     walkScore: 35,
     metaDescription: 'Buckskin Village Loveland real estate - mid-century homes with mountain views in west Loveland near Devils Backbone. SAA Homes.',
     keywords: 'Buckskin Village Loveland, west Loveland mid-century homes, mountain view homes Loveland, no HOA Loveland, established Loveland neighborhoods, Devils Backbone area, affordable west Loveland',
+    youtubeId: 'phsUa_n1AT4',
     neighborhoodHighlights: [
       { title: 'Mountain views', description: 'Many homes in Buckskin Village offer stunning views of the Rocky Mountains and Devils Backbone.' },
       { title: 'Mid-century character', description: 'Classic 1970s ranch and split-level homes with character and established landscaping.' },
@@ -2175,6 +2176,7 @@ export const neighborhoods = [
       'Water Valley Windsor real estate guide — lakefront and lake-community homes in Windsor\'s premier master-planned community. Beach, swim club, trails, and new construction from SAA Homes.',
     keywords:
       'Water Valley Windsor, Water Valley real estate, Windsor lake homes, Windsor master-planned community, lakefront Windsor Colorado, Water Valley HOA, Windsor new construction',
+    youtubeId: 'auxLdYMA6K8',
     neighborhoodHighlights: [
       { title: 'Lake lifestyle', description: '100-acre private lake with sandy beach, swim club, fishing, and walking trails — resort living every day.' },
       { title: 'Community amenities', description: 'Homeowners enjoy access to a private beach, community garden, pavilion, and year-round events.' },
@@ -2221,6 +2223,7 @@ export const neighborhoods = [
       'RainDance Windsor real estate — new construction homes in Windsor\'s master-planned community with Northern Colorado\'s first indoor surf park. Explore floor plans and pricing from SAA Homes.',
     keywords:
       'RainDance Windsor, RainDance community, Windsor new construction, RainDance surf park, new homes Windsor Colorado, master-planned community Windsor CO',
+    youtubeId: 'qElBdaDDHd4',
     neighborhoodHighlights: [
       { title: 'Surf park centerpiece', description: 'RainDance features Northern Colorado\'s first indoor surf park — a game-changing amenity that\'s now operational.' },
       { title: 'Nearly built out', description: 'With most homes sold and occupied, RainDance offers limited remaining new construction plus resale opportunities.' },
