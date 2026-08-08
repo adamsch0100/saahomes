@@ -1,5 +1,12 @@
 import logger from '../utils/logger.js';
 import getPool from '../config/database.js';
+import {
+  extractSearchFromMessages,
+  hasSearchIntent,
+  nameFromFilters,
+  summarizeFilters,
+} from '../services/searchIntentParser.js';
+import { createAlert } from './alertController.js';
 
 const OPENCODE_API_URL = 'https://opencode.ai/zen/go/v1/chat/completions';
 const OPENCODE_API_KEY = process.env.OPENCODE_GO_API_KEY;
@@ -134,14 +141,28 @@ const SYSTEM_PROMPT = `You are Nadia, a friendly and knowledgeable AI real estat
 - Longmont: ~$550K median. Boulder County without Boulder prices
 - Boulder: Most expensive ~$950K+ median
 
+## SAVED SEARCH ALERTS (your superpower)
+When a visitor describes what homes they want — city, price, beds/baths, pool, condo, etc. — you can set up a REAL saved search that emails them when matching listings hit the market.
+
+Rules:
+1. NEVER create a search silently. Always ask first.
+2. When PROPOSED SEARCH FILTERS are in your context (or the visitor clearly described criteria), offer alerts and start your reply with [[SAVE_SEARCH]] on its own line, then a short friendly message that restates the criteria and asks if they want alerts. Example:
+   [[SAVE_SEARCH]]
+   I can set up alerts for homes under $400,000 in Windsor with a pool. You'll get an email when new matches hit — want me to turn that on?
+3. The website shows Yes / No buttons under your message — keep the ask short so those buttons make sense.
+4. If they only asked a general question (CHFA, schools, process) with no home criteria, do NOT use [[SAVE_SEARCH]].
+5. Do NOT invent criteria they didn't mention. Only reference filters from PROPOSED SEARCH FILTERS or their exact words.
+6. After they confirm (the site handles creation), you may later point them to https://saahomes.com/my-saved-searches/ to manage alerts.
+
 ## CONVERSATION FLOW
 1. Greet warmly and ask how you can help
 2. Answer questions based on what you know
-3. If you don't know something specific, be honest and offer to connect them with Adam or Mandi
-4. After 2-3 exchanges (or when the visitor shows buying/selling intent), naturally suggest a consultation with Adam or Mandi
-5. When they agree, use [[HANDOFF]] at the START of your reply to trigger the contact form
-6. When they explicitly ask to speak to someone immediately, use [[TRANSFER]] at the START of your reply to give them the live transfer option
-7. NEVER ask for personal info in the chat — the handoff form collects it
+3. If they describe a home search, offer saved-search alerts with [[SAVE_SEARCH]] (see above)
+4. If you don't know something specific, be honest and offer to connect them with Adam or Mandi
+5. After 2-3 exchanges (or when the visitor shows buying/selling intent), naturally suggest a consultation with Adam or Mandi
+6. When they agree, use [[HANDOFF]] at the START of your reply to trigger the contact form
+7. When they explicitly ask to speak to someone immediately, use [[TRANSFER]] at the START of your reply to give them the live transfer option
+8. NEVER ask for personal info in the chat — the handoff / save-search forms collect it
 
 ## HANDOFF RULES
 - When the visitor agrees to connect or wants to move forward, say something like: "I'd love to connect you with Adam or Mandi! They'll be able to walk you through everything in detail. Let me grab your info — how would you like them to reach out?"
@@ -171,10 +192,26 @@ export const handleChatMessage = async (req, res) => {
   }
 
   const listingContext = await resolveListingContext(page, messages);
+  const searchParsed = extractSearchFromMessages(messages);
+  const lastUser = [...messages].reverse().find((m) => m?.role === 'user')?.content || '';
+  const wantSearchOffer = !!(searchParsed && (
+    searchParsed.confidence === 'high'
+    || searchParsed.confidence === 'medium'
+    || hasSearchIntent(lastUser)
+  ));
+
+  const searchContext = wantSearchOffer && searchParsed
+    ? `PROPOSED SEARCH FILTERS (extracted from the visitor's words — use ONLY these; never invent extra criteria):
+${JSON.stringify(searchParsed.filters, null, 2)}
+Summary: ${searchParsed.summary}
+If this looks like a real home search, offer to set up email alerts and start your reply with [[SAVE_SEARCH]] on its own line. The website will show Yes/No buttons — do not ask them to type yes/no.`
+    : null;
+
   const apiMessages = [
     { role: 'system', content: SYSTEM_PROMPT },
     ...(page ? [{ role: 'system', content: `The visitor is currently on this page: ${page}` }] : []),
     ...(listingContext ? [{ role: 'system', content: listingContext }] : []),
+    ...(searchContext ? [{ role: 'system', content: searchContext }] : []),
     ...messages.slice(-10), // Keep last 10 messages for context window
   ];
 
@@ -209,17 +246,38 @@ export const handleChatMessage = async (req, res) => {
     // Fallback: some reasoning models put the visible text in
     // reasoning_content when content comes back empty after truncation.
     const reasoning = data.choices?.[0]?.message?.reasoning_content;
-    const finalReply = (reply && reply.trim()) ? reply : (reasoning ? reasoning.trim() : '');
+    let finalReply = (reply && reply.trim()) ? reply : (reasoning ? reasoning.trim() : '');
 
     if (!finalReply) {
       logger.error('OpenCode API returned empty response', { data });
       return res.status(502).json({ error: 'AI service returned empty response.' });
     }
 
+    // If we have solid search criteria but the model forgot the tag, attach it
+    // so the frontend still shows confirmation buttons (never silent create).
+    const modelTagged = finalReply.includes('[[SAVE_SEARCH]]');
+    if (wantSearchOffer && searchParsed && searchParsed.confidence === 'high' && !modelTagged
+      && !finalReply.includes('[[HANDOFF]]') && !finalReply.includes('[[TRANSFER]]')) {
+      finalReply = `[[SAVE_SEARCH]]\n${finalReply}`;
+    }
+
+    const offerSaveSearch = finalReply.includes('[[SAVE_SEARCH]]') && searchParsed?.filters
+      && Object.keys(searchParsed.filters).length > 0;
+
+    const proposedSearch = offerSaveSearch
+      ? {
+          filters: searchParsed.filters,
+          summary: searchParsed.summary || summarizeFilters(searchParsed.filters),
+          name: nameFromFilters(searchParsed.filters),
+        }
+      : null;
+
     logger.info('Chat message processed', {
       model: OPENCODE_MODEL,
       hasHandoff: finalReply.includes('[[HANDOFF]]'),
       hasTransfer: finalReply.includes('[[TRANSFER]]'),
+      hasSaveSearch: !!proposedSearch,
+      searchSummary: proposedSearch?.summary,
       tokensIn: data.usage?.prompt_tokens,
       tokensOut: data.usage?.completion_tokens,
     });
@@ -230,11 +288,100 @@ export const handleChatMessage = async (req, res) => {
     await new Promise((r) => setTimeout(r, 1200 + Math.random() * 1600));
 
     res.json({
-      reply: finalReply, // forward as-is — frontend detects [[HANDOFF]] / [[TRANSFER]] and strips them
+      reply: finalReply, // forward as-is — frontend strips control tags
+      proposedSearch, // null | { filters, summary, name } — Yes/No UI, never auto-create
       usage: data.usage,
     });
   } catch (error) {
     logger.error('Chat service error', error);
     res.status(500).json({ error: 'Chat service error. Please call (970) 999-1407.' });
+  }
+};
+
+/**
+ * POST /api/chat/create-search
+ * Explicit confirmation from chat UI → create a real saved search (same as
+ * SaveSearchModal / POST /api/alerts). Never silent — frontend only calls after Yes.
+ * Body: { filters, email, phone, name?, frequency? }
+ * Cookie session can supply email/phone if the visitor is already signed in.
+ */
+export const createSearchFromChat = async (req, res) => {
+  try {
+    const body = req.body || {};
+    const filters = (body.filters && typeof body.filters === 'object' && !Array.isArray(body.filters))
+      ? body.filters
+      : {};
+
+    if (Object.keys(filters).length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'No search criteria to save. Describe a city, price, or beds first.',
+      });
+    }
+
+    // Session may already have email + phone
+    let sessionEmail = '';
+    let sessionPhone = '';
+    let sessionName = '';
+    try {
+      const token = req.cookies?.saa_user_token;
+      if (token && token.length >= 16) {
+        const pool = getPool();
+        const r = await pool.query(
+          `SELECT email, phone, name FROM users WHERE manage_token = $1 AND status = 'active' LIMIT 1`,
+          [String(token)]
+        );
+        if (r.rows[0]) {
+          sessionEmail = r.rows[0].email || '';
+          sessionPhone = r.rows[0].phone || '';
+          sessionName = r.rows[0].name || '';
+        }
+      }
+    } catch {
+      /* non-fatal */
+    }
+
+    const email = String(body.email || sessionEmail || '').trim();
+    const phone = String(body.phone || sessionPhone || '').trim();
+    const name = String(body.name || sessionName || nameFromFilters(filters)).trim().slice(0, 255);
+
+    if (!email || !phone) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email and phone are required to set up alerts.',
+        needsContact: true,
+      });
+    }
+
+    // Delegate to the existing alert pipeline (FUB Alert Signup, lead score, cookie).
+    req.body = {
+      email,
+      phone,
+      name,
+      frequency: body.frequency || 'daily',
+      send_time: body.send_time || '06:00',
+      send_day: body.send_day || 'Monday',
+      intent: body.intent || 'buying',
+      ...filters,
+    };
+
+    // createAlert writes the response; enrich with chat-friendly fields via wrapper
+    const originalJson = res.json.bind(res);
+    res.json = (payload) => {
+      if (payload && payload.success && payload.data) {
+        payload.data.summary = summarizeFilters(filters);
+        payload.data.manageUrl = '/my-saved-searches/';
+        payload.data.source = 'nadia_chat';
+      }
+      return originalJson(payload);
+    };
+
+    return createAlert(req, res);
+  } catch (error) {
+    logger.error('createSearchFromChat error', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Could not save your search. Please try again.',
+    });
   }
 };

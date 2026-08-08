@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { submitContactForm } from "../utils/api.js";
+import { rememberSavedSearch } from "../utils/listingHelpers.js";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, '');
@@ -11,6 +12,15 @@ const API_BASE = (() => {
 const CHAT_NAME = "Nadia";
 const CHAT_TITLE = "Your Home Assistant";
 const AVATAR_PATH = "/images/nadia-avatar.jpg";
+
+/** Strip Nadia control tags from displayed assistant text. */
+function stripControlTags(reply = "") {
+  return String(reply)
+    .replace(/^\[\[HANDOFF\]\]\s*\n?/m, "")
+    .replace(/^\[\[TRANSFER\]\]\s*\n?/m, "")
+    .replace(/^\[\[SAVE_SEARCH\]\]\s*\n?/m, "")
+    .trim();
+}
 
 export default function LeadCaptureChat() {
   const location = useLocation();
@@ -26,6 +36,14 @@ export default function LeadCaptureChat() {
   const [showTransferOption, setShowTransferOption] = useState(false);
   const [hasLead, setHasLead] = useState(false);
   const [teaserMessage, setTeaserMessage] = useState("");
+  // Nadia AI Search → saved search flow
+  // pendingSearch: filters proposed by chat (awaiting Yes/No)
+  // searchStep: null | 'confirm' | 'contact' | 'saving' | 'done' | 'declined'
+  const [pendingSearch, setPendingSearch] = useState(null);
+  const [searchStep, setSearchStep] = useState(null);
+  const [searchContact, setSearchContact] = useState({ email: "", phone: "", name: "" });
+  const [searchError, setSearchError] = useState(null);
+  const [sessionContact, setSessionContact] = useState(null); // { email, phone, name } | null
   const chatRef = useRef(null);
   const messagesEndRef = useRef(null);
   const nudgeTimer = useRef(null);
@@ -33,13 +51,23 @@ export default function LeadCaptureChat() {
   // Lead detection: have we already captured this visitor?
   // (localStorage flag is instant; the cookie session is authoritative.)
   useEffect(() => {
-    if (localStorage.getItem("saa_lead_captured")) { setHasLead(true); return; }
+    if (localStorage.getItem("saa_lead_captured")) { setHasLead(true); }
     fetch(`${API_BASE}/api/alerts/me`, { credentials: "same-origin" })
       .then((r) => r.json())
       .then((d) => {
-        if (d.success) {
+        if (d.success && d.data) {
           setHasLead(true);
           localStorage.setItem("saa_lead_captured", "1");
+          setSessionContact({
+            email: d.data.email || "",
+            phone: d.data.phone || "",
+            name: d.data.name || "",
+          });
+          setSearchContact((prev) => ({
+            email: prev.email || d.data.email || "",
+            phone: prev.phone || d.data.phone || "",
+            name: prev.name || d.data.name || "",
+          }));
         }
       })
       .catch(() => {});
@@ -125,7 +153,7 @@ export default function LeadCaptureChat() {
   // Auto-scroll messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isTyping]);
+  }, [messages, isTyping, searchStep, pendingSearch]);
 
   // Close on outside click
   useEffect(() => {
@@ -143,6 +171,9 @@ export default function LeadCaptureChat() {
     setHandoffStep(null);
     setShowNudge(false);
     setShowTransferOption(false);
+    setPendingSearch(null);
+    setSearchStep(null);
+    setSearchError(null);
   }, [location.pathname]);
 
   // Send initial greeting when chat opens
@@ -157,7 +188,7 @@ export default function LeadCaptureChat() {
       const path = location.pathname;
       let greeting = greetings.default;
       if (hasLead) {
-        greeting = "Good to see you again! 👋 I'm Nadia. Want to check on your saved searches, or do you have questions about this area? I can help.";
+        greeting = "Good to see you again! 👋 I'm Nadia. Want to check on your saved searches, or do you have questions about this area? I can help — and I can set up new alerts from chat if you describe what you're looking for.";
       } else if (/chfa|dpa|champions|g-hope|greeley/.test(path)) greeting = greetings.chfa;
       else if (/for-buyers|buying/.test(path)) greeting = greetings.buyer;
       else if (/for-sellers|sell/.test(path)) greeting = greetings.seller;
@@ -182,11 +213,18 @@ export default function LeadCaptureChat() {
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setIsTyping(true);
+    // New user message clears a prior search-confirm UI (unless mid-save)
+    if (searchStep !== "saving" && searchStep !== "done") {
+      setPendingSearch(null);
+      setSearchStep(null);
+      setSearchError(null);
+    }
 
     try {
       const res = await fetch(`${API_BASE}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify({
           messages: [...messages, userMsg].map((m) => ({ role: m.role, content: m.content })),
           page: location.pathname,
@@ -199,13 +237,9 @@ export default function LeadCaptureChat() {
 
       const data = await res.json();
       const reply = data.reply || "";
+      const displayReply = stripControlTags(reply);
 
-      // Strip control tags from displayed content
-      const displayReply = reply
-        .replace(/^\[\[HANDOFF\]\]\s*\n?/m, '')
-        .replace(/^\[\[TRANSFER\]\]\s*\n?/m, '');
-
-      // Check if the AI triggered a handoff or transfer
+      // Check if the AI triggered a handoff, transfer, or save-search offer
       if (reply.includes("[[TRANSFER]]")) {
         setShowTransferOption(true);
         setMessages((prev) => [...prev, { role: "assistant", content: displayReply }]);
@@ -214,6 +248,13 @@ export default function LeadCaptureChat() {
         setMessages((prev) => [...prev, { role: "assistant", content: displayReply }]);
       } else {
         setMessages((prev) => [...prev, { role: "assistant", content: displayReply }]);
+      }
+
+      // Proposed saved search — always require explicit Yes (never silent create)
+      if (data.proposedSearch?.filters && Object.keys(data.proposedSearch.filters).length > 0) {
+        setPendingSearch(data.proposedSearch);
+        setSearchStep("confirm");
+        setSearchError(null);
       }
     } catch (err) {
       setMessages((prev) => [...prev, {
@@ -229,6 +270,108 @@ export default function LeadCaptureChat() {
     e.preventDefault();
     if (!input.trim() || isTyping) return;
     sendMessage(input.trim());
+  };
+
+  /** User tapped "Yes, set it up" — create if we have contact, else collect. */
+  const handleSearchYes = async () => {
+    if (!pendingSearch?.filters) return;
+    setSearchError(null);
+    const email = searchContact.email || sessionContact?.email || "";
+    const phone = searchContact.phone || sessionContact?.phone || "";
+    if (email && phone) {
+      await createSavedSearch({ email, phone, name: searchContact.name || sessionContact?.name || "" });
+    } else {
+      setSearchStep("contact");
+    }
+  };
+
+  const handleSearchNo = () => {
+    setSearchStep("declined");
+    setPendingSearch(null);
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "assistant",
+        content: "No problem — just browsing is fine! You can always ask me later to set up alerts, or browse homes at saahomes.com/properties/. Anything else I can help with?",
+      },
+    ]);
+  };
+
+  const createSavedSearch = async ({ email, phone, name }) => {
+    if (!pendingSearch?.filters) return;
+    setSearchStep("saving");
+    setSearchError(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/chat/create-search`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({
+          filters: pendingSearch.filters,
+          email: String(email || "").trim(),
+          phone: String(phone || "").trim(),
+          name: String(name || pendingSearch.name || "").trim() || undefined,
+          frequency: "daily",
+          intent: "buying",
+        }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        if (data.needsContact) {
+          setSearchStep("contact");
+          setSearchError(data.error || "Email and phone are required.");
+          return;
+        }
+        throw new Error(data.error || "Could not save search");
+      }
+
+      const summary = data.data?.summary || pendingSearch.summary || "your criteria";
+      localStorage.setItem("saa_lead_captured", "1");
+      localStorage.setItem("saa_intent", "buying");
+      setHasLead(true);
+      try {
+        rememberSavedSearch(pendingSearch.filters);
+        window.dispatchEvent(new CustomEvent("saa-search-saved", { detail: pendingSearch.filters }));
+      } catch { /* noop */ }
+      if (typeof window.gtag === "function") {
+        window.gtag("event", "generate_lead", {
+          lead_type: "nadia_saved_search",
+          page: location.pathname,
+        });
+      }
+
+      setSearchStep("done");
+      setPendingSearch(null);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: `✅ Alerts set! You'll get emails when new homes match ${summary}. Manage all your alerts anytime at /my-saved-searches/ — or just ask me to tweak criteria.`,
+        },
+      ]);
+    } catch (err) {
+      setSearchStep("contact");
+      setSearchError(err.message || "Something went wrong — please try again.");
+    }
+  };
+
+  const handleSearchContactSubmit = async (e) => {
+    e.preventDefault();
+    const email = searchContact.email.trim();
+    const phone = searchContact.phone.trim();
+    if (!email || !email.includes("@")) {
+      setSearchError("Please enter a valid email so we can send your alerts.");
+      return;
+    }
+    if (!phone) {
+      setSearchError("Phone is required so we can reach you about great matches.");
+      return;
+    }
+    await createSavedSearch({
+      email,
+      phone,
+      name: searchContact.name.trim(),
+    });
   };
 
   const handleHandoffSubmit = async (e) => {
@@ -286,11 +429,20 @@ export default function LeadCaptureChat() {
       e.preventDefault();
       if (handoffStep === "collecting") {
         handleHandoffSubmit(e);
+      } else if (searchStep === "contact") {
+        handleSearchContactSubmit(e);
       } else {
         handleSubmit(e);
       }
     }
   };
+
+  // Block free-text input while confirming/saving a search (or handoff)
+  const inputBlocked = handoffStep !== null
+    || showTransferOption
+    || searchStep === "confirm"
+    || searchStep === "contact"
+    || searchStep === "saving";
 
   return (
     // z-[110]: above ListingDetailPanel (z-90) so "Ask Nadia" from the search modal works;
@@ -362,6 +514,94 @@ export default function LeadCaptureChat() {
                     <span className="w-2 h-2 bg-gray-400 rounded-full" style={{ animation: 'chatTyping 1.2s ease-in-out infinite 0.4s' }} />
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Save-search confirmation (Yes / No) — never silent create */}
+            {searchStep === "confirm" && pendingSearch && !isTyping && (
+              <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4" style={{ animation: 'chatFadeIn 0.3s ease-out' }}>
+                <p className="text-sm font-semibold text-gray-900 mb-1">Set up email alerts?</p>
+                <p className="text-xs text-gray-600 mb-3 leading-relaxed">
+                  <span className="font-medium text-gray-800">{pendingSearch.summary}</span>
+                  {" "}— we&apos;ll email you when new matches hit.
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleSearchYes}
+                    className="flex-1 py-2.5 bg-black text-white font-semibold rounded-xl text-sm hover:bg-gray-800 transition-colors"
+                  >
+                    Yes, set it up 🔔
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSearchNo}
+                    className="flex-1 py-2.5 border border-gray-300 text-gray-700 font-semibold rounded-xl text-sm hover:bg-gray-50 transition-colors"
+                  >
+                    No, just browsing
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Contact capture before creating search (guests without session) */}
+            {searchStep === "contact" && pendingSearch && (
+              <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4" style={{ animation: 'chatFadeIn 0.3s ease-out' }}>
+                <p className="text-sm font-semibold text-gray-900 mb-1">Almost there</p>
+                <p className="text-xs text-gray-600 mb-3 leading-relaxed">
+                  Email + phone required for alerts on{" "}
+                  <span className="font-medium text-gray-800">{pendingSearch.summary}</span>.
+                  No spam — unsubscribe anytime.
+                </p>
+                <form onSubmit={handleSearchContactSubmit} className="space-y-2">
+                  <input
+                    required
+                    type="email"
+                    placeholder="your@email.com *"
+                    value={searchContact.email}
+                    onChange={(e) => setSearchContact({ ...searchContact, email: e.target.value })}
+                    autoComplete="email"
+                    className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                  />
+                  <input
+                    required
+                    type="tel"
+                    placeholder="Phone *"
+                    value={searchContact.phone}
+                    onChange={(e) => setSearchContact({ ...searchContact, phone: e.target.value })}
+                    autoComplete="tel"
+                    className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Name this search (optional)"
+                    value={searchContact.name}
+                    onChange={(e) => setSearchContact({ ...searchContact, name: e.target.value })}
+                    className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                  />
+                  {searchError && <p className="text-red-600 text-xs" role="alert">{searchError}</p>}
+                  <div className="flex gap-2 pt-0.5">
+                    <button
+                      type="submit"
+                      className="flex-1 py-2.5 bg-black text-white font-semibold rounded-xl text-sm hover:bg-gray-800 transition-colors"
+                    >
+                      Save & get alerts
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSearchNo}
+                      className="px-3 py-2.5 border border-gray-300 text-gray-600 font-semibold rounded-xl text-sm hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {searchStep === "saving" && (
+              <div className="bg-gray-50 rounded-2xl p-3 text-center text-sm text-gray-600" style={{ animation: 'chatFadeIn 0.2s ease-out' }}>
+                Setting up your alerts…
               </div>
             )}
 
@@ -441,7 +681,7 @@ export default function LeadCaptureChat() {
 
           {/* Input */}
           <div className="border-t border-gray-100 px-4 py-3 flex-shrink-0">
-            {handoffStep === null && !showTransferOption && (
+            {!inputBlocked && (
               <form onSubmit={handleSubmit} className="flex gap-2">
                 <input
                   value={input} onChange={(e) => setInput(e.target.value)}
@@ -457,6 +697,14 @@ export default function LeadCaptureChat() {
                   Send
                 </button>
               </form>
+            )}
+            {searchStep === "done" && (
+              <a
+                href="/my-saved-searches/"
+                className="block w-full py-2.5 border-2 border-black text-black font-semibold rounded-xl text-sm text-center hover:bg-gray-50 transition-colors"
+              >
+                Manage my alerts
+              </a>
             )}
             {handoffStep === "submitted" && (
               <a href="tel:(970) 999-1407" className="block w-full py-2.5 border-2 border-black text-black font-semibold rounded-xl text-sm text-center hover:bg-gray-50 transition-colors">

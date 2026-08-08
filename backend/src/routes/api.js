@@ -7,7 +7,7 @@ import { submitChampionsLeadForm } from '../controllers/championsLeadController.
 import { submitChfaDpaLeadForm } from '../controllers/chfaDpaLeadController.js';
 import { submitGhopeLeadForm } from '../controllers/ghopeLeadController.js';
 import { submitCashBuyerLead } from '../controllers/cashBuyerController.js';
-import { handleChatMessage } from '../controllers/chatController.js';
+import { handleChatMessage, createSearchFromChat } from '../controllers/chatController.js';
 import {
   searchListings,
   getListingBySlug,
@@ -110,6 +110,8 @@ const chatLimiter = rateLimit({
 });
 
 router.post('/chat', chatLimiter, handleChatMessage);
+// Nadia AI Search → real saved search (explicit Yes confirmation from chat UI)
+router.post('/chat/create-search', formLimiter, createSearchFromChat);
 
 // ── IDX listing search (IRES feed) ────────────────────────────────────────
 const listingLimiter = rateLimit({
