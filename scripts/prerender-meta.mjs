@@ -2,7 +2,11 @@ import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { getPrerenderRoutes, SITE_URL } from '../src/data/siteRoutes.js';
-import { BUSINESS } from '../src/utils/seoConstants.js';
+import {
+  BUSINESS,
+  buildListingsItemListSchema,
+  buildAreaGuidesItemListSchema,
+} from '../src/utils/seoConstants.js';
 import { areaSeoPages, buildAreaPageSchemas } from '../src/data/areaSeo.js';
 import { getReviewSchema } from '../src/data/reviews.js';
 import { CITY_HOMES, getCityHomes, getCityHomesPath } from '../src/data/cityHomesData.js';
@@ -12,6 +16,14 @@ import { AREA_FAQS } from '../src/data/areaFaqs.js';
 import { BUYER_FAQS, SELLER_FAQS } from '../src/data/buyerSellerFaqs.js';
 import { CHFA_PAGE_CONFIGS, CHFA_PROGRAMS, CHFA_STEPS, CHFA_DPA_OPTIONS, CHFA_REQUIREMENTS, CHFA_COUNTY_LIMITS, CHFA_SPECIALTY_PROGRAMS } from '../src/data/chfaData.js';
 import { getAllEvents, getCityDisplayName, getMonthNames, getEventsGuidePath, EVENTS_DATA_LAST_REVIEWED } from '../src/data/localEvents.js';
+
+// Live listings API for ItemList schema (real active MLS rows only — never fabricate).
+// Prefer LISTINGS_API_BASE / VITE_API_URL when building against a non-prod environment.
+const LISTINGS_API_BASE = (
+  process.env.LISTINGS_API_BASE ||
+  process.env.VITE_API_URL ||
+  'https://saahomes.com'
+).replace(/\/$/, '');
 
 // FAQ data for pages not covered by existing FAQ data modules
 // Used for GEO — FAQPage schema + visible FAQ body content
@@ -58,6 +70,46 @@ const distDir = join(__dirname, '../dist');
 const indexPath = join(distDir, 'index.html');
 
 const routes = getPrerenderRoutes();
+
+// ---------------------------------------------------------------------------
+// Live listing fetch (ItemList GEO/AEO)
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetch real active listings from the live API for ItemList schema.
+ * Returns [] on any failure so prerender never blocks on network.
+ */
+async function fetchListingsForItemList({ city, limit = 24 } = {}) {
+  try {
+    const params = new URLSearchParams({
+      limit: String(limit),
+      sort: 'newest',
+    });
+    if (city) params.set('city', city);
+    const url = `${LISTINGS_API_BASE}/api/listings?${params}`;
+    const res = await fetch(url, {
+      headers: { Accept: 'application/json' },
+      signal: AbortSignal.timeout(20000),
+    });
+    if (!res.ok) {
+      console.warn(`  ItemList fetch ${res.status} for city=${city || '(default)'}`);
+      return [];
+    }
+    const data = await res.json();
+    if (!data?.success || !Array.isArray(data.data)) return [];
+    return data.data;
+  } catch (err) {
+    console.warn(`  ItemList fetch failed (${city || 'default'}): ${err.message}`);
+    return [];
+  }
+}
+
+/** City query for area page featured listings. */
+function areaListingCity(area) {
+  if (!area) return '';
+  const raw = area.searchLocation || area.city || '';
+  return String(raw).replace(/,?\s*CO\s*$/i, '').trim();
+}
 
 // ---------------------------------------------------------------------------
 // Schema builders
@@ -1605,101 +1657,170 @@ function injectEventsBody(html) {
 // Main
 // ---------------------------------------------------------------------------
 
-if (!existsSync(indexPath)) {
-  console.error('dist/index.html not found. Run vite build first.');
-  process.exit(1);
-}
-
-const baseHtml = readFileSync(indexPath, 'utf8');
-
-for (const route of routes) {
-  const canonical = `${SITE_URL}${route.path}`;
-
-  // 1. Start from base (pristine index.html each time)
-  let html = injectMeta(baseHtml, {
-    title: route.title,
-    description: route.description,
-    canonical,
-    robots: route.robots,
-  });
-
-  // 2. Inject JSON-LD schemas
-  const schemas = buildRouteSchemas(route);
-  const cityHomes = matchCityHomesPage(route.path);
-  if (cityHomes) {
-    schemas.push({
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
-        { '@type': 'ListItem', position: 2, name: 'Homes for Sale', item: `${SITE_URL}/properties/` },
-        { '@type': 'ListItem', position: 3, name: `${cityHomes.city} Homes for Sale`, item: canonical },
-      ],
-    });
-  }
-  html = injectJsonLd(html, schemas);
-
-  // 3. Inject OG / Twitter / meta tags
-  const metaTags = buildRouteMetaTags(route);
-  html = injectMetaTags(html, metaTags);
-
-  // 4. Inject visible body content into <div id="root"> for crawlers
-  const area = matchAreaPage(route.path);
-  const neighborhoodPage = matchNeighborhoodPage(route.path);
-  const blogPost = matchBlogPost(route.path);
-  const chfaPage = matchChfaPage(route.path);
-  const moneyPage = matchMoneyPage(route.path);
-  if (route.path === '/events/' || route.path === '/events') {
-    html = injectEventsBody(html);
-    console.log('  Body: injected events calendar with monthly groupings + CTA');
-  } else if (area) {
-    html = injectAreaBody(html, area);
-    console.log(
-      `  Body: injected ${AREA_FAQS[area.slug]?.length || 0} FAQ items + nearby communities + CTA`
-    );
-  } else if (neighborhoodPage) {
-    html = injectNeighborhoodBody(html, neighborhoodPage);
-    console.log(
-      `  Body: injected neighborhood "${neighborhoodPage.slug}" with highlights + schools + features + CTA`
-    );
-  } else if (blogPost) {
-    html = injectBlogBody(html, blogPost);
-    console.log(
-      `  Body: injected blog "${blogPost.slug}" with ${blogPost.sections?.length || 0} sections + ${blogPost.faqs?.length || 0} FAQs + CTA`
-    );
-  } else if (chfaPage) {
-    html = injectChfaBody(html, chfaPage);
-    console.log(
-      `  Body: injected CHFA page "${chfaPage.slug}" with ${chfaPage.faqs?.length || 0} FAQs + programs + requirements + CTA`
-    );
-  } else if (moneyPage) {
-    html = injectMoneyPageBody(html, route, moneyPage);
-    console.log(
-      `  Body: injected money page "${route.path}" with ${moneyPage.sections?.length || 0} content sections + CTA`
-    );
-  } else if (cityHomes) {
-    html = injectCityHomesBody(html, cityHomes);
-    console.log(`  Body: injected city homes-for-sale page "${cityHomes.city}" with intro + links + attribution`);
-  } else {
-    html = injectGenericBody(html, route);
+async function main() {
+  if (!existsSync(indexPath)) {
+    console.error('dist/index.html not found. Run vite build first.');
+    process.exit(1);
   }
 
-  // 5. Inject crawlable sitewide links block (all 19 cities + money pages) —
-  //    the React nav/footer is client-side rendered, so without this the
-  //    crawler sees almost no internal links. This builds the hub-and-spoke
-  //    link graph on every page.
-  html = injectSitewideLinks(html, route.path);
+  const baseHtml = readFileSync(indexPath, 'utf8');
 
-  // Write out
-  const routeDir = join(
-    distDir,
-    route.path.replace(/^\//, '').replace(/\/$/, '')
-  );
-  mkdirSync(routeDir, { recursive: true });
-  writeFileSync(join(routeDir, 'index.html'), html);
+  // Prefetch live listings for ItemList schemas (real MLS data only).
+  // /properties/ → first page of NoCO results (max 24)
+  // each area page → featured listings for that city (max 12)
+  console.log(`Fetching listings for ItemList schema from ${LISTINGS_API_BASE}…`);
+  const [propertiesListings, ...areaListingPairs] = await Promise.all([
+    fetchListingsForItemList({ city: '__noco__', limit: 24 }),
+    ...areaSeoPages.map(async (area) => {
+      const city = areaListingCity(area);
+      if (!city) return [area.slug, []];
+      const rows = await fetchListingsForItemList({ city, limit: 12 });
+      return [area.slug, rows];
+    }),
+  ]);
+  const areaListingsBySlug = Object.fromEntries(areaListingPairs);
   console.log(
-    `Prerendered ${route.path} (${schemas.length} schemas, ${metaTags.length} meta tags)`
+    `  ItemList data: ${propertiesListings.length} properties listings; ` +
+      `${Object.values(areaListingsBySlug).filter((r) => r.length).length}/${areaSeoPages.length} areas with listings`
   );
+
+  for (const route of routes) {
+    const canonical = `${SITE_URL}${route.path}`;
+
+    // 1. Start from base (pristine index.html each time)
+    let html = injectMeta(baseHtml, {
+      title: route.title,
+      description: route.description,
+      canonical,
+      robots: route.robots,
+    });
+
+    // 2. Inject JSON-LD schemas
+    const schemas = buildRouteSchemas(route);
+    const cityHomes = matchCityHomesPage(route.path);
+    if (cityHomes) {
+      schemas.push({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
+          { '@type': 'ListItem', position: 2, name: 'Homes for Sale', item: `${SITE_URL}/properties/` },
+          { '@type': 'ListItem', position: 3, name: `${cityHomes.city} Homes for Sale`, item: canonical },
+        ],
+      });
+    }
+
+    // GEO ItemList: /properties/ first page of NoCO listings (max 24)
+    if (route.path === '/properties/' || route.path === '/properties') {
+      const itemList = buildListingsItemListSchema(propertiesListings, {
+        name: 'Homes for Sale in Northern Colorado',
+        description:
+          'Active IRES MLS listings across Fort Collins, Loveland, Windsor, Greeley, and Northern Colorado.',
+        maxItems: 24,
+      });
+      if (itemList) {
+        schemas.push(itemList);
+        console.log(`  ItemList: ${itemList.itemListElement.length} listings on /properties/`);
+      }
+    }
+
+    // GEO ItemList: area pages — featured active listings for that city (max 12)
+    const area = matchAreaPage(route.path);
+    if (area) {
+      const featured = areaListingsBySlug[area.slug] || [];
+      const itemList = buildListingsItemListSchema(featured, {
+        name: `Homes for Sale in ${area.city}, CO`,
+        description: `Featured active listings in ${area.city}, Colorado from IRES MLS.`,
+        maxItems: 12,
+      });
+      if (itemList) {
+        schemas.push(itemList);
+        console.log(
+          `  ItemList: ${itemList.itemListElement.length} featured listings for ${area.slug}`
+        );
+      }
+    }
+
+    // GEO ItemList: hub page — all area guides (machine-enumerable coverage)
+    if (
+      route.path === '/northern-colorado-areas/' ||
+      route.path === '/northern-colorado-areas'
+    ) {
+      const guidesList = buildAreaGuidesItemListSchema(areaSeoPages);
+      if (guidesList) {
+        schemas.push(guidesList);
+        console.log(`  ItemList: ${guidesList.itemListElement.length} area guides on hub`);
+      }
+    }
+
+    html = injectJsonLd(html, schemas);
+
+    // 3. Inject OG / Twitter / meta tags
+    const metaTags = buildRouteMetaTags(route);
+    html = injectMetaTags(html, metaTags);
+
+    // 4. Inject visible body content into <div id="root"> for crawlers
+    const neighborhoodPage = matchNeighborhoodPage(route.path);
+    const blogPost = matchBlogPost(route.path);
+    const chfaPage = matchChfaPage(route.path);
+    const moneyPage = matchMoneyPage(route.path);
+    if (route.path === '/events/' || route.path === '/events') {
+      html = injectEventsBody(html);
+      console.log('  Body: injected events calendar with monthly groupings + CTA');
+    } else if (area) {
+      html = injectAreaBody(html, area);
+      console.log(
+        `  Body: injected ${AREA_FAQS[area.slug]?.length || 0} FAQ items + nearby communities + CTA`
+      );
+    } else if (neighborhoodPage) {
+      html = injectNeighborhoodBody(html, neighborhoodPage);
+      console.log(
+        `  Body: injected neighborhood "${neighborhoodPage.slug}" with highlights + schools + features + CTA`
+      );
+    } else if (blogPost) {
+      html = injectBlogBody(html, blogPost);
+      console.log(
+        `  Body: injected blog "${blogPost.slug}" with ${blogPost.sections?.length || 0} sections + ${blogPost.faqs?.length || 0} FAQs + CTA`
+      );
+    } else if (chfaPage) {
+      html = injectChfaBody(html, chfaPage);
+      console.log(
+        `  Body: injected CHFA page "${chfaPage.slug}" with ${chfaPage.faqs?.length || 0} FAQs + programs + requirements + CTA`
+      );
+    } else if (moneyPage) {
+      html = injectMoneyPageBody(html, route, moneyPage);
+      console.log(
+        `  Body: injected money page "${route.path}" with ${moneyPage.sections?.length || 0} content sections + CTA`
+      );
+    } else if (cityHomes) {
+      html = injectCityHomesBody(html, cityHomes);
+      console.log(`  Body: injected city homes-for-sale page "${cityHomes.city}" with intro + links + attribution`);
+    } else {
+      html = injectGenericBody(html, route);
+    }
+
+    // 5. Inject crawlable sitewide links block (all 19 cities + money pages) —
+    //    the React nav/footer is client-side rendered, so without this the
+    //    crawler sees almost no internal links. This builds the hub-and-spoke
+    //    link graph on every page.
+    html = injectSitewideLinks(html, route.path);
+
+    // Write out
+    const routeDir = join(
+      distDir,
+      route.path.replace(/^\//, '').replace(/\/$/, '')
+    );
+    mkdirSync(routeDir, { recursive: true });
+    writeFileSync(join(routeDir, 'index.html'), html);
+    console.log(
+      `Prerendered ${route.path} (${schemas.length} schemas, ${metaTags.length} meta tags)`
+    );
+  }
+
+  console.log(`Prerendered ${routes.length} routes with full schema + OG + Twitter.`);
 }
 
-console.log(`Prerendered ${routes.length} routes with full schema + OG + Twitter.`);
+main().catch((err) => {
+  console.error('Prerender failed:', err);
+  process.exit(1);
+});

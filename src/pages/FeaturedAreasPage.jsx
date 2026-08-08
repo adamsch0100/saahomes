@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
 import { areaSeoPages } from "../data/areaSeo.js";
+import { buildAreaGuidesItemListSchema } from "../utils/seoConstants.js";
 
 const cardDescriptions = {
   "fort-collins": "A vibrant city with CSU, craft breweries, and stunning mountain views. Perfect blend of outdoor recreation and urban amenities.",
@@ -46,6 +47,9 @@ export default function FeaturedAreasPage() {
     description: cardDescriptions[area.slug] || area.tagline,
   }));
 
+  // GEO: ItemList of all area guides so AI systems can enumerate coverage
+  const areaGuidesItemList = buildAreaGuidesItemListSchema(areaSeoPages);
+
   return (
     <>
       <SEO
@@ -54,13 +58,16 @@ export default function FeaturedAreasPage() {
         keywords="Northern Colorado area guide, Fort Collins neighborhoods, Loveland CO communities, Windsor CO real estate, Greeley area guide, Erie Brighton Carbon Valley homes, Estes Park cabins, Berthoud Firestone Severance homes, Colorado Front Range towns, Northern Colorado communities, Lyons mountain homes, Fort Lupton real estate, Northern Colorado relocation guide"
         canonical="https://saahomes.com/northern-colorado-areas/"
         ogImage="https://saahomes.com/images/Northern Colorado.webp"
-        jsonLd={[{
-          "@context": "https://schema.org",
-          "@type": "CollectionPage",
-          "name": "Northern Colorado Communities",
-          "description": "Real estate guides and community information for Northern Colorado cities and towns.",
-          "url": "https://saahomes.com/northern-colorado-areas/",
-        }]}
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "name": "Northern Colorado Communities",
+            "description": "Real estate guides and community information for Northern Colorado cities and towns.",
+            "url": "https://saahomes.com/northern-colorado-areas/",
+          },
+          ...(areaGuidesItemList ? [areaGuidesItemList] : []),
+        ]}
       />
 
       {/* Hero Section */}
