@@ -14,6 +14,7 @@ import {
   fmtNum,
   listingBadges,
   listingAddress,
+  homeTypeLabel,
   isHomeSaved,
   toggleSavedHome,
   matchSavedSearch,
@@ -686,14 +687,29 @@ function buildActiveChips(f) {
   return chips;
 }
 
-function SkeletonCard() {
+/** Pulse skeleton matching grid card geometry (4:3 + 3–4 text lines) */
+function SkeletonCard({ compact = false }) {
+  if (compact) {
+    return (
+      <div className="flex gap-3 rounded-xl overflow-hidden border border-gray-200 bg-white animate-pulse p-0 min-h-[112px]">
+        <div className="w-[140px] sm:w-[168px] shrink-0 bg-gray-200" />
+        <div className="flex-1 py-3 pr-3 space-y-2.5">
+          <div className="h-5 w-28 bg-gray-200 rounded" />
+          <div className="h-3.5 w-36 bg-gray-100 rounded" />
+          <div className="h-3 w-44 bg-gray-100 rounded" />
+          <div className="h-3 w-24 bg-gray-100 rounded" />
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className="rounded-xl overflow-hidden border border-gray-200 bg-white animate-pulse">
+    <div className="rounded-[10px] overflow-hidden border border-gray-200 bg-white animate-pulse shadow-sm">
       <div className="aspect-[4/3] bg-gray-200" />
-      <div className="p-3.5 space-y-2.5">
-        <div className="h-5 w-28 bg-gray-200 rounded" />
+      <div className="p-3 space-y-2.5">
+        <div className="h-6 w-32 bg-gray-200 rounded" />
         <div className="h-3.5 w-40 bg-gray-100 rounded" />
-        <div className="h-3.5 w-32 bg-gray-100 rounded" />
+        <div className="h-3.5 w-48 bg-gray-100 rounded" />
+        <div className="h-3 w-20 bg-gray-100 rounded" />
       </div>
     </div>
   );
@@ -713,9 +729,9 @@ function HeartButton({ slug, className = "" }) {
         e.stopPropagation();
         setSaved(toggleSavedHome(slug));
       }}
-      className={`inline-flex items-center justify-center w-9 h-9 rounded-full bg-white/95 shadow-md border border-black/5 hover:scale-105 transition-transform ${className}`}
+      className={`inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-white/95 shadow-md border border-black/5 hover:scale-105 active:scale-95 transition-transform touch-manipulation ${className}`}
     >
-      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"
         fill={saved ? "#CFB36E" : "none"}
         stroke={saved ? "#CFB36E" : "#111"}
         strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -725,25 +741,174 @@ function HeartButton({ slug, className = "" }) {
   );
 }
 
-function ListingCard({ listing, selected, onHover, onOpen, savedSearches }) {
-  const { isNew, priceCut, priceCutPct, isNewConstruction } = listingBadges(listing);
+function CardBadges({ listing }) {
+  const { isNew, priceCut, priceCutPct, isNewConstruction, hasOpenHouse } = listingBadges(listing);
+  if (!isNew && !priceCut && !isNewConstruction && !hasOpenHouse) return null;
+  return (
+    <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5 max-w-[78%] z-[1]">
+      {isNew && (
+        <span className="inline-flex items-center min-h-[24px] bg-[#CFB36E] text-black text-[11px] font-bold tracking-wide uppercase px-2.5 py-1 rounded-md shadow-sm">
+          New
+        </span>
+      )}
+      {priceCut && (
+        <span className="inline-flex items-center min-h-[24px] bg-emerald-600 text-white text-[11px] font-bold tracking-wide uppercase px-2.5 py-1 rounded-md shadow-sm">
+          Price drop{priceCutPct ? ` ${priceCutPct}%` : ""}
+        </span>
+      )}
+      {hasOpenHouse && (
+        <span className="inline-flex items-center min-h-[24px] bg-blue-600 text-white text-[11px] font-bold tracking-wide uppercase px-2.5 py-1 rounded-md shadow-sm">
+          Open house
+        </span>
+      )}
+      {isNewConstruction && (
+        <span className="inline-flex items-center min-h-[24px] bg-black/85 text-white text-[11px] font-bold tracking-wide uppercase px-2.5 py-1 rounded-md shadow-sm">
+          New construction
+        </span>
+      )}
+    </div>
+  );
+}
+
+function CardStatsLine({ listing, className = "" }) {
+  const parts = [];
+  if (listing.beds != null) parts.push(`${fmtNum(listing.beds)} bd`);
+  if (listing.baths != null) parts.push(`${fmtNum(listing.baths)} ba`);
+  if (listing.living_area != null) {
+    parts.push(`${Number(listing.living_area).toLocaleString()} sqft`);
+  }
+  if (!parts.length) return null;
+  return (
+    <p className={`text-[13px] sm:text-sm font-semibold text-gray-800 tracking-tight ${className}`}>
+      {parts.join(" · ")}
+    </p>
+  );
+}
+
+/**
+ * Grid card — Zillow-grade 4:3 photo, price + badges on image, type scale below.
+ * compact=true → horizontal list row (mobile / dense list).
+ */
+function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compact = false }) {
+  const { priceCut } = listingBadges(listing);
   const match = matchSavedSearch(listing, savedSearches);
   const [imgLoaded, setImgLoaded] = useState(false);
   const addr = listingAddress(listing);
+  const typeLabel = homeTypeLabel(listing);
 
   const open = (e) => {
     e?.preventDefault?.();
     onOpen?.(listing);
   };
 
+  const photo = (
+    <>
+      {!imgLoaded && (
+        <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-100 to-gray-200" />
+      )}
+      {listing.photos?.length > 0 ? (
+        <img
+          src={photoUrl(listing.id, 0)}
+          alt={`${addr} ${listing.city || ""}`}
+          onLoad={() => setImgLoaded(true)}
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = "/images/buyers-hero.jpg";
+            setImgLoaded(true);
+          }}
+          className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03] ${imgLoaded ? "opacity-100" : "opacity-0"}`}
+          loading="lazy"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm bg-gray-100">
+          {listing.city || "Northern Colorado"}
+        </div>
+      )}
+      <CardBadges listing={listing} />
+      <div className={`absolute z-10 ${compact ? "top-1.5 right-1.5" : "top-2 right-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"}`}>
+        <HeartButton slug={listing.slug} className={compact ? "!w-10 !h-10 !min-w-[40px] !min-h-[40px]" : ""} />
+      </div>
+      {/* Price overlay — primary focal point on the photo */}
+      {!compact && (
+        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/75 via-black/35 to-transparent pt-10 pb-2.5 px-3">
+          <div className="flex items-end justify-between gap-2">
+            <p className="text-[1.35rem] sm:text-2xl font-bold text-white tracking-tight leading-none drop-shadow-sm">
+              {formatPrice(listing.list_price)}
+            </p>
+            {priceCut && listing.original_list_price != null && (
+              <p className="text-xs text-white/75 line-through mb-0.5">
+                {formatPrice(listing.original_list_price)}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+      {!compact && listing.photos?.length > 1 && (
+        <span className="absolute bottom-2.5 right-2.5 bg-black/65 text-white text-[10px] font-medium px-1.5 py-0.5 rounded z-[1]">
+          1 / {listing.photos.length}
+        </span>
+      )}
+    </>
+  );
+
+  const body = compact ? (
+    <div className="flex-1 min-w-0 py-2.5 pr-2.5 pl-0.5 flex flex-col justify-center gap-0.5">
+      <div className="flex items-baseline gap-2">
+        <p className="text-lg font-bold text-gray-900 tracking-tight leading-none">
+          {formatPrice(listing.list_price)}
+        </p>
+        {priceCut && listing.original_list_price != null && (
+          <p className="text-xs text-gray-400 line-through">
+            {formatPrice(listing.original_list_price)}
+          </p>
+        )}
+      </div>
+      <CardStatsLine listing={listing} className="mt-1" />
+      <p className="text-[13px] text-gray-600 truncate mt-0.5">
+        {addr || "Address available on request"}
+        {listing.city ? `, ${listing.city}` : ""}
+      </p>
+      {typeLabel && (
+        <p className="text-xs text-gray-400 mt-0.5">{typeLabel}</p>
+      )}
+      {match.matches && (
+        <p className="mt-1 inline-flex self-start items-center gap-1 text-[10px] font-semibold text-[#8a7340] bg-[#CFB36E]/15 px-2 py-0.5 rounded-full">
+          <span aria-hidden="true">★</span> Match
+        </p>
+      )}
+    </div>
+  ) : (
+    <div className="px-3 pt-2.5 pb-3">
+      <CardStatsLine listing={listing} />
+      <p className="text-[13px] text-gray-600 mt-1 truncate leading-snug">
+        {addr || "Address available on request"}
+      </p>
+      <p className="text-xs text-gray-400 truncate mt-0.5">
+        {[listing.city, listing.state, listing.postal_code].filter(Boolean).join(", ")}
+        {typeLabel ? ` · ${typeLabel}` : ""}
+      </p>
+      {match.matches && (
+        <p className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-[#8a7340] bg-[#CFB36E]/15 px-2 py-0.5 rounded-full">
+          <span aria-hidden="true">★</span>
+          Matches your saved search
+        </p>
+      )}
+    </div>
+  );
+
   return (
     <article
       id={`listing-card-${listing.id}`}
       onMouseEnter={() => onHover?.(listing.id)}
-      className={`group relative rounded-xl overflow-hidden bg-white border transition-all duration-200 scroll-mt-24 ${
+      onMouseLeave={() => onHover?.(null)}
+      className={`group relative overflow-hidden bg-white border transition-all duration-200 scroll-mt-24 ${
+        compact
+          ? "rounded-[10px] flex flex-row min-h-[112px]"
+          : "rounded-[10px]"
+      } ${
         selected
           ? "border-[#CFB36E] shadow-lg ring-2 ring-[#CFB36E]/35"
-          : "border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300"
+          : "border-gray-200 shadow-sm hover:shadow-lg hover:border-gray-300"
       }`}
     >
       <div
@@ -756,108 +921,32 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches }) {
             open(e);
           }
         }}
-        className="block w-full text-left cursor-pointer"
+        className={`block w-full text-left cursor-pointer ${compact ? "flex flex-row min-h-[112px]" : ""}`}
       >
-        <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
-          {!imgLoaded && (
-            <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-100 to-gray-200" />
-          )}
-          {listing.photos?.length > 0 ? (
-            <img
-              src={photoUrl(listing.id, 0)}
-              alt={`${addr} ${listing.city || ""}`}
-              onLoad={() => setImgLoaded(true)}
-              onError={(e) => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = "/images/buyers-hero.jpg";
-                setImgLoaded(true);
-              }}
-              className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03] ${imgLoaded ? "opacity-100" : "opacity-0"}`}
-              loading="lazy"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
-              {listing.city || "Northern Colorado"}
-            </div>
-          )}
-
-          <div className="absolute top-2 left-2 flex flex-wrap gap-1.5 max-w-[75%]">
-            {isNew && (
-              <span className="bg-[#CFB36E] text-black text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded">
-                New
-              </span>
-            )}
-            {priceCut && (
-              <span className="bg-emerald-600 text-white text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded">
-                Price reduced{priceCutPct ? ` ${priceCutPct}%` : ""}
-              </span>
-            )}
-            {isNewConstruction && (
-              <span className="bg-black/85 text-white text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded">
-                New construction
-              </span>
-            )}
-          </div>
-
-          <div className="absolute top-2 right-2 z-10">
-            <HeartButton slug={listing.slug} />
-          </div>
-
-          {listing.photos?.length > 1 && (
-            <span className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] font-medium px-1.5 py-0.5 rounded">
-              1 / {listing.photos.length}
-            </span>
-          )}
+        <div
+          className={`relative bg-gray-100 overflow-hidden shrink-0 ${
+            compact
+              ? "w-[140px] sm:w-[168px] self-stretch"
+              : "aspect-[4/3] w-full"
+          }`}
+        >
+          {photo}
         </div>
-
-        <div className="p-3.5">
-          <div className="flex items-baseline justify-between gap-2">
-            <p className="text-lg font-bold text-gray-900 tracking-tight">
-              {formatPrice(listing.list_price)}
-            </p>
-            {priceCut && listing.original_list_price != null && (
-              <p className="text-xs text-gray-400 line-through">
-                {formatPrice(listing.original_list_price)}
-              </p>
-            )}
-          </div>
-
-          <p className="text-sm text-gray-700 mt-1 font-medium">
-            {listing.beds != null && <span>{fmtNum(listing.beds)} bd</span>}
-            {listing.baths != null && <span> · {fmtNum(listing.baths)} ba</span>}
-            {listing.living_area != null && (
-              <span> · {Number(listing.living_area).toLocaleString()} sqft</span>
-            )}
-          </p>
-
-          <p className="text-sm text-gray-900 mt-1.5 truncate font-medium">
-            {addr || "Address available on request"}
-          </p>
-          <p className="text-sm text-gray-500 truncate">
-            {[listing.city, listing.state, listing.postal_code].filter(Boolean).join(", ")}
-          </p>
-
-          {match.matches && (
-            <p className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-[#8a7340] bg-[#CFB36E]/15 px-2 py-0.5 rounded-full">
-              <span aria-hidden="true">★</span>
-              Matches your saved search
-            </p>
-          )}
-        </div>
+        {body}
       </div>
     </article>
   );
 }
 
-/* ── Shared form control styles ─────────────────────────────────────── */
+/* ── Shared form control styles — min 44px tap targets on interactive chips ── */
 const selectClass =
-  "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white text-gray-900 focus:ring-2 focus:ring-black focus:border-black outline-none";
+  "w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white text-gray-900 focus:ring-2 focus:ring-black focus:border-black outline-none min-h-[44px]";
 const chipBase =
-  "inline-flex items-center gap-1.5 px-3 py-2 border rounded-full text-sm font-medium transition-colors whitespace-nowrap";
+  "inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 py-2 border rounded-full text-sm font-medium transition-colors whitespace-nowrap touch-manipulation";
 const chipIdle = `${chipBase} border-gray-300 bg-white text-gray-800 hover:border-black`;
 const chipActive = `${chipBase} border-black bg-black text-white`;
 const pillBtn =
-  "px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors";
+  "inline-flex items-center justify-center min-h-[36px] px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors touch-manipulation";
 const pillIdle = `${pillBtn} border-gray-300 bg-white text-gray-700 hover:border-black`;
 const pillOn = `${pillBtn} border-black bg-black text-white`;
 
@@ -1426,6 +1515,12 @@ export default function ListingSearch({ location, height = "700px", compact = fa
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [homeTypeOpen, setHomeTypeOpen] = useState(false);
   const [drawEnabled, setDrawEnabled] = useState(false);
+  /** Color map pins by list_price band (green→yellow→red) — uses real prices only */
+  const [priceHeatmap, setPriceHeatmap] = useState(false);
+  /** true below lg — drives compact horizontal list cards on mobile */
+  const [isNarrow, setIsNarrow] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia("(max-width: 1023px)").matches : false
+  );
   const [savedSearches, setSavedSearches] = useState(() =>
     typeof window !== "undefined" ? getSavedSearches() : []
   );
@@ -1434,6 +1529,15 @@ export default function ListingSearch({ location, height = "700px", compact = fa
   const resultsRef = useRef(null);
   const homeTypeRef = useRef(null);
   const fetchGen = useRef(0);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    const mq = window.matchMedia("(max-width: 1023px)");
+    const onChange = () => setIsNarrow(mq.matches);
+    onChange();
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
 
   const activeFilterCount = useMemo(() => countActiveFilters(filters), [filters]);
   const activeChips = useMemo(() => buildActiveChips(filters), [filters]);
@@ -1780,10 +1884,10 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           <script type="application/ld+json">{JSON.stringify(listingsItemList)}</script>
         </Helmet>
       )}
-      {/* Sticky filter bar — never scrolls away */}
+      {/* Sticky filter bar — never scrolls away; generous spacing, no cramped wrap */}
       <div className="border-b border-gray-200 bg-white z-20 shrink-0 sticky top-0">
         {/* Desktop chip bar */}
-        <div className="hidden md:flex flex-wrap items-center gap-2 p-3 lg:px-4">
+        <div className="hidden md:flex flex-wrap items-center gap-2.5 px-3 py-2.5 lg:px-4 lg:py-3">
           <div className="min-w-[16rem] max-w-md flex-1 basis-[16rem]">
             <LocationCombobox
               id="desktop-location"
@@ -1805,7 +1909,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           <select
             value={filters.beds}
             onChange={(e) => setFilterInstant("beds", e.target.value)}
-            className={`px-3 py-2 border rounded-full text-sm font-medium outline-none ${
+            className={`min-h-[44px] px-3.5 py-2 border rounded-full text-sm font-medium outline-none touch-manipulation ${
               filters.beds ? "border-black bg-black text-white" : "border-gray-300 bg-white"
             }`}
             aria-label="Beds"
@@ -1820,7 +1924,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           <select
             value={filters.baths}
             onChange={(e) => setFilterInstant("baths", e.target.value)}
-            className={`px-3 py-2 border rounded-full text-sm font-medium outline-none ${
+            className={`min-h-[44px] px-3.5 py-2 border rounded-full text-sm font-medium outline-none touch-manipulation ${
               filters.baths ? "border-black bg-black text-white" : "border-gray-300 bg-white"
             }`}
             aria-label="Baths"
@@ -1902,13 +2006,13 @@ export default function ListingSearch({ location, height = "700px", compact = fa
             <SaveSearchModal
               filters={saveFilters}
               buttonLabel="Save search"
-              buttonClassName="inline-flex items-center gap-1.5 px-4 py-2 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors whitespace-nowrap"
+              buttonClassName="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 py-2 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors whitespace-nowrap touch-manipulation"
             />
           </div>
         </div>
 
         {/* Mobile filter trigger + location */}
-        <div className="md:hidden flex flex-col gap-2 p-3">
+        <div className="md:hidden flex flex-col gap-2.5 p-3">
           <LocationCombobox
             id="mobile-location"
             city={filters.city}
@@ -1920,7 +2024,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           <button
             type="button"
             onClick={openDrawer}
-            className="inline-flex items-center gap-1.5 px-3 py-2 border border-gray-300 rounded-full text-sm font-semibold bg-white"
+            className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 py-2 border border-gray-300 rounded-full text-sm font-semibold bg-white touch-manipulation"
           >
             Filters
             {activeFilterCount > 0 && (
@@ -1932,12 +2036,12 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           <SaveSearchModal
             filters={saveFilters}
             buttonLabel="Save"
-            buttonClassName="inline-flex items-center gap-1 px-3 py-2 border border-gray-300 rounded-full text-sm font-semibold bg-white"
+            buttonClassName="inline-flex items-center justify-center gap-1 min-h-[44px] px-3.5 py-2 border border-gray-300 rounded-full text-sm font-semibold bg-white touch-manipulation"
           />
           <select
             value={filters.sort}
             onChange={(e) => setFilterInstant("sort", e.target.value)}
-            className="ml-auto px-2 py-2 border border-gray-300 rounded-lg text-xs bg-white max-w-[140px]"
+            className="ml-auto min-h-[44px] px-2.5 py-2 border border-gray-300 rounded-lg text-xs bg-white max-w-[140px] touch-manipulation"
             aria-label="Sort"
           >
             {SORT_OPTIONS.map((o) => (
@@ -1949,7 +2053,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
 
         {/* Active filter chip strip — co-located with filter trigger + Clear all */}
         {activeChips.length > 0 && (
-          <div className="flex items-center gap-2 px-3 lg:px-4 pb-2.5 overflow-x-auto scrollbar-thin">
+          <div className="flex items-center gap-2 px-3 lg:px-4 pb-3 overflow-x-auto scrollbar-thin">
             <span className="shrink-0 text-[11px] font-bold uppercase tracking-wide text-gray-500">
               Active
             </span>
@@ -1959,11 +2063,11 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                   key={chip.id}
                   type="button"
                   onClick={() => removeChip(chip)}
-                  className="inline-flex items-center gap-1 pl-2.5 pr-1.5 py-1 rounded-full text-xs font-semibold bg-[#CFB36E]/20 text-gray-900 border border-[#CFB36E]/50 hover:bg-[#CFB36E]/35 whitespace-nowrap"
+                  className="inline-flex items-center gap-1 min-h-[32px] pl-2.5 pr-1.5 py-1 rounded-full text-xs font-semibold bg-[#CFB36E]/20 text-gray-900 border border-[#CFB36E]/50 hover:bg-[#CFB36E]/35 whitespace-nowrap touch-manipulation"
                   title={`Remove ${chip.label}`}
                 >
                   {chip.label}
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full hover:bg-black/10" aria-hidden="true">
+                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full hover:bg-black/10" aria-hidden="true">
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
                       <path d="M18 6L6 18M6 6l12 12" />
                     </svg>
@@ -1975,7 +2079,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
             <button
               type="button"
               onClick={clearFilters}
-              className="shrink-0 text-xs font-semibold text-gray-600 hover:text-black underline underline-offset-2 ml-1"
+              className="shrink-0 min-h-[32px] text-xs font-semibold text-gray-600 hover:text-black underline underline-offset-2 ml-1 touch-manipulation"
             >
               Clear all
             </button>
@@ -1983,7 +2087,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
         )}
 
         {/* Results meta + sort (desktop) — live count, no Enter needed */}
-        <div className="hidden md:flex items-center justify-between px-4 py-2 border-t border-gray-100 bg-gray-50/80">
+        <div className="hidden md:flex items-center justify-between px-4 py-2.5 border-t border-gray-100 bg-gray-50/80">
           <p className={`text-sm font-semibold ${loading ? "text-[#8a7340]" : "text-gray-900"}`} aria-live="polite">
             {resultLabel}
             {loading && (
@@ -2001,7 +2105,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
               <select
                 value={filters.sort}
                 onChange={(e) => setFilterInstant("sort", e.target.value)}
-                className="px-2.5 py-1.5 border border-gray-300 rounded-lg text-sm bg-white"
+                className="min-h-[40px] px-2.5 py-1.5 border border-gray-300 rounded-lg text-sm bg-white"
                 aria-label="Sort"
               >
                 {SORT_OPTIONS.map((o) => (
@@ -2013,12 +2117,12 @@ export default function ListingSearch({ location, height = "700px", compact = fa
         </div>
       </div>
 
-      {/* Mobile map | list toggle */}
+      {/* Mobile map | list toggle — 44px tap targets */}
       <div className="flex lg:hidden border-b border-gray-200 bg-white shrink-0">
         <button
           type="button"
           onClick={() => setView("list")}
-          className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
+          className={`flex-1 min-h-[44px] py-2.5 text-sm font-semibold transition-colors touch-manipulation ${
             view === "list" ? "bg-black text-white" : "text-gray-600 hover:bg-gray-50"
           }`}
         >
@@ -2027,7 +2131,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
         <button
           type="button"
           onClick={() => setView("map")}
-          className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
+          className={`flex-1 min-h-[44px] py-2.5 text-sm font-semibold transition-colors touch-manipulation ${
             view === "map" ? "bg-black text-white" : "text-gray-600 hover:bg-gray-50"
           }`}
         >
@@ -2035,10 +2139,10 @@ export default function ListingSearch({ location, height = "700px", compact = fa
         </button>
       </div>
 
-      {/* Body */}
+      {/* Body — map dominant (~58%), list ~42% on desktop */}
       <div className="flex flex-1 overflow-hidden min-h-0">
         <div
-          className={`relative lg:block lg:w-[48%] xl:w-[52%] border-r border-gray-200 ${
+          className={`relative lg:block lg:w-[58%] xl:w-[60%] border-r border-gray-200 ${
             view === "map" ? "block flex-1" : "hidden"
           }`}
         >
@@ -2051,18 +2155,30 @@ export default function ListingSearch({ location, height = "700px", compact = fa
               drawEnabled={drawEnabled}
               polygon={filters.polygon || ""}
               onPolygonChange={handlePolygonChange}
+              priceHeatmap={priceHeatmap}
             />
           </div>
-          {/* Draw-area controls — map mode */}
+
+          {/* Results count chip — floating on map */}
+          {!loading && (
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
+              <span className="inline-flex items-center min-h-[36px] px-3.5 py-1.5 rounded-full bg-white/95 text-gray-900 text-sm font-bold shadow-md border border-gray-200/80 backdrop-blur-sm">
+                {meta.total > 0
+                  ? `${meta.total.toLocaleString()} home${meta.total === 1 ? "" : "s"}`
+                  : "No homes match"}
+              </span>
+            </div>
+          )}
+
+          {/* Map controls — draw + price heatmap */}
           <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
             <button
               type="button"
               onClick={() => {
                 setDrawEnabled((d) => !d);
-                // On mobile, ensure map view is active
                 setView("map");
               }}
-              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold shadow-md border transition-colors ${
+              className={`inline-flex items-center justify-center gap-1.5 min-h-[40px] px-3 py-2 rounded-lg text-xs font-semibold shadow-md border transition-colors touch-manipulation ${
                 drawEnabled
                   ? "bg-black text-white border-black"
                   : "bg-white text-gray-900 border-gray-200 hover:border-black"
@@ -2080,12 +2196,67 @@ export default function ListingSearch({ location, height = "700px", compact = fa
               <button
                 type="button"
                 onClick={() => handlePolygonChange("")}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold shadow-md bg-white text-gray-700 border border-gray-200 hover:border-black"
+                className="inline-flex items-center justify-center gap-1.5 min-h-[40px] px-3 py-2 rounded-lg text-xs font-semibold shadow-md bg-white text-gray-700 border border-gray-200 hover:border-black touch-manipulation"
               >
                 Clear shape
               </button>
             )}
+            <button
+              type="button"
+              onClick={() => setPriceHeatmap((h) => !h)}
+              className={`inline-flex items-center justify-center gap-1.5 min-h-[40px] px-3 py-2 rounded-lg text-xs font-semibold shadow-md border transition-colors touch-manipulation ${
+                priceHeatmap
+                  ? "bg-black text-white border-black"
+                  : "bg-white text-gray-900 border-gray-200 hover:border-black"
+              }`}
+              aria-pressed={priceHeatmap}
+              title="Color pins by list price: green (lower) → yellow → red (higher)"
+            >
+              <span
+                className="inline-block w-3.5 h-3.5 rounded-full shrink-0"
+                style={{
+                  background: priceHeatmap
+                    ? "linear-gradient(90deg, #22c55e, #eab308, #ef4444)"
+                    : "linear-gradient(90deg, #CFB36E, #CFB36E)",
+                }}
+                aria-hidden="true"
+              />
+              {priceHeatmap ? "Price colors on" : "Price heatmap"}
+            </button>
+            {priceHeatmap && (
+              <div className="rounded-lg bg-white/95 border border-gray-200 shadow-md px-2.5 py-2 text-[10px] font-medium text-gray-600 leading-tight">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Low
+                </div>
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="w-2.5 h-2.5 rounded-full bg-yellow-500" /> Mid
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-500" /> High
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* Empty results overlay on map */}
+          {!loading && !error && results.length === 0 && (
+            <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 z-10 flex justify-center pointer-events-none">
+              <div className="pointer-events-auto max-w-sm w-full rounded-xl bg-white/95 backdrop-blur-sm border border-gray-200 shadow-xl px-5 py-4 text-center">
+                <p className="text-sm font-bold text-gray-900">No homes match your filters</p>
+                <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">
+                  Widen price or beds, expand the search area, or clear filters to see more homes.
+                </p>
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="mt-3 min-h-[40px] px-4 py-2 bg-black text-white text-xs font-semibold rounded-lg touch-manipulation"
+                >
+                  Clear all filters
+                </button>
+              </div>
+            </div>
+          )}
+
           {drawEnabled && (
             <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-10 max-w-[90%] px-3 py-2 rounded-lg bg-black/85 text-white text-xs font-medium text-center shadow-lg">
               Click the map to add corners · double-click or click the first point to finish
@@ -2095,15 +2266,15 @@ export default function ListingSearch({ location, height = "700px", compact = fa
             <SaveSearchModal
               filters={saveFilters}
               buttonLabel="Save this search · price drops & new homes"
-              buttonClassName="shadow-lg px-5 py-3 bg-white text-gray-900 border border-gray-200 rounded-full text-sm font-semibold hover:border-black transition-colors"
+              buttonClassName="shadow-lg min-h-[44px] px-5 py-3 bg-white text-gray-900 border border-gray-200 rounded-full text-sm font-semibold hover:border-black transition-colors touch-manipulation"
             />
           </div>
         </div>
 
         <div
           ref={resultsRef}
-          className={`overflow-y-auto overscroll-contain bg-gray-50 ${
-            view === "list" ? "flex-1" : "hidden lg:block lg:w-[52%] xl:w-[48%]"
+          className={`overflow-y-auto overscroll-contain bg-gray-50 @container ${
+            view === "list" ? "flex-1" : "hidden lg:block lg:w-[42%] xl:w-[40%]"
           }`}
         >
           <div className="md:hidden px-4 pt-3 pb-1">
@@ -2112,19 +2283,25 @@ export default function ListingSearch({ location, height = "700px", compact = fa
             </p>
           </div>
 
-          {/* First load or empty: skeleton shimmer. Subsequent: keep cards dimmed + banner */}
+          {/* First load: skeleton shimmer matching card layout */}
           {loading && results.length === 0 && (
-            <div className="p-3 sm:p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div
+              className={
+                isNarrow && view === "list"
+                  ? "p-3 sm:p-4 flex flex-col gap-3"
+                  : "p-3 sm:p-4 grid grid-cols-1 @[560px]:grid-cols-2 gap-3 @[560px]:gap-4"
+              }
+            >
               {Array.from({ length: 6 }).map((_, i) => (
-                <SkeletonCard key={i} />
+                <SkeletonCard key={i} compact={isNarrow && view === "list"} />
               ))}
             </div>
           )}
 
           {loading && results.length > 0 && (
-            <div className="mx-3 sm:mx-4 mt-3 mb-1 flex items-center gap-2 px-3 py-2 rounded-lg bg-[#CFB36E]/15 border border-[#CFB36E]/40 text-sm font-semibold text-gray-900">
+            <div className="mx-3 sm:mx-4 mt-3 mb-1 flex items-center gap-2 px-3 py-2.5 rounded-lg bg-[#CFB36E]/15 border border-[#CFB36E]/40 text-sm font-semibold text-gray-900">
               <span className="inline-block w-3.5 h-3.5 border-2 border-[#CFB36E] border-t-transparent rounded-full animate-spin shrink-0" aria-hidden="true" />
-              Updating results as filters change…
+              Updating results…
             </div>
           )}
 
@@ -2138,7 +2315,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
               <button
                 type="button"
                 onClick={() => fetchListings(filters, 1, false)}
-                className="mt-4 px-5 py-2.5 bg-black text-white text-sm font-semibold rounded-lg"
+                className="mt-4 min-h-[44px] px-5 py-2.5 bg-black text-white text-sm font-semibold rounded-lg touch-manipulation"
               >
                 Retry search
               </button>
@@ -2147,8 +2324,14 @@ export default function ListingSearch({ location, height = "700px", compact = fa
 
           {!loading && !error && results.length === 0 && (
             <div className="flex flex-col items-center justify-center text-center min-h-[360px] px-6">
+              <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-4" aria-hidden="true">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="M21 21l-4.3-4.3" />
+                </svg>
+              </div>
               <p className="text-gray-900 font-semibold text-lg">
-                No homes match these filters
+                We couldn&apos;t find anything for that search
                 {filters.polygon
                   ? " in your drawn area"
                   : areaLabel && areaLabel !== "Northern Colorado"
@@ -2156,20 +2339,20 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                     : ""}
               </p>
               <p className="text-gray-500 mt-2 max-w-md text-sm leading-relaxed">
-                Try widening price or beds, or save this search — we&apos;ll email you when a match hits the market (new homes + price drops, no spam).
+                Try widening price or beds, expand the map area, or clear filters. You can also save this search — we&apos;ll email you when a match hits the market (new homes + price drops, no spam).
               </p>
               <div className="mt-5 flex flex-wrap gap-3 justify-center">
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="px-5 py-2.5 border border-gray-300 rounded-lg text-sm font-semibold hover:border-black"
+                  className="min-h-[44px] px-5 py-2.5 border border-gray-300 rounded-lg text-sm font-semibold hover:border-black touch-manipulation"
                 >
-                  Clear filters
+                  Clear all filters
                 </button>
                 <SaveSearchModal
                   filters={saveFilters}
                   buttonLabel="Alert me when one appears"
-                  buttonClassName="px-5 py-2.5 bg-black text-white rounded-lg text-sm font-semibold"
+                  buttonClassName="min-h-[44px] px-5 py-2.5 bg-black text-white rounded-lg text-sm font-semibold touch-manipulation"
                 />
               </div>
               <p className="text-gray-400 text-xs mt-6">
@@ -2179,10 +2362,17 @@ export default function ListingSearch({ location, height = "700px", compact = fa
             </div>
           )}
 
-          {/* Keep prior cards visible while updating so live filter changes feel instant */}
+          {/* Keep prior cards visible while updating so live filter changes feel instant.
+              Mobile list: compact horizontal. Grid: 2 cols when list panel ≥560px (≈ full width @900+). */}
           {!error && results.length > 0 && (
             <div className={`p-3 sm:p-4 ${loading ? "opacity-60 pointer-events-none" : ""}`}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div
+                className={
+                  isNarrow && view === "list"
+                    ? "flex flex-col gap-3"
+                    : "grid grid-cols-1 @[560px]:grid-cols-2 gap-3 @[560px]:gap-4"
+                }
+              >
                 {results.map((listing) => (
                   <ListingCard
                     key={listing.id}
@@ -2191,6 +2381,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                     onHover={setSelectedId}
                     onOpen={openListingPanel}
                     savedSearches={savedSearches}
+                    compact={isNarrow && view === "list"}
                   />
                 ))}
               </div>
@@ -2201,9 +2392,16 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                     type="button"
                     disabled={loadingMore}
                     onClick={() => fetchListings(filters, page + 1, true)}
-                    className="px-6 py-3 bg-white border-2 border-black text-black font-semibold rounded-lg text-sm hover:bg-black hover:text-white transition-colors disabled:opacity-50"
+                    className="min-h-[48px] px-6 py-3 bg-white border-2 border-black text-black font-semibold rounded-lg text-sm hover:bg-black hover:text-white transition-colors disabled:opacity-50 touch-manipulation"
                   >
-                    {loadingMore ? "Loading…" : `Show more homes (${results.length} of ${meta.total.toLocaleString()})`}
+                    {loadingMore ? (
+                      <span className="inline-flex items-center gap-2">
+                        <span className="inline-block w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+                        Loading more
+                      </span>
+                    ) : (
+                      `Show more homes (${results.length} of ${meta.total.toLocaleString()})`
+                    )}
                   </button>
                 ) : (
                   <p className="text-sm text-gray-500">
@@ -2219,7 +2417,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                     <SaveSearchModal
                       filters={saveFilters}
                       buttonLabel="Save search & get alerts"
-                      buttonClassName="px-4 py-2.5 bg-black text-white rounded-lg text-sm font-semibold"
+                      buttonClassName="min-h-[44px] px-4 py-2.5 bg-black text-white rounded-lg text-sm font-semibold touch-manipulation"
                     />
                   </div>
                 </div>
@@ -2229,7 +2427,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
         </div>
       </div>
 
-      {/* Filter drawer overlay */}
+      {/* Filter drawer overlay — proportional width, not cramped */}
       {drawerOpen && (
         <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label="Filters">
           <button
@@ -2241,18 +2439,18 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           {/* Desktop: right panel · Mobile: bottom sheet */}
           <div
             className="relative z-10 flex flex-col bg-white shadow-2xl
-              w-full md:w-[440px] lg:w-[480px]
+              w-full md:w-[min(520px,92vw)] lg:w-[min(560px,40vw)]
               h-[92vh] md:h-full
               mt-auto md:mt-0
               rounded-t-2xl md:rounded-none
               animate-[slideUp_0.25s_ease-out]"
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 shrink-0">
+            <div className="flex items-center justify-between px-4 py-3.5 border-b border-gray-200 shrink-0">
               <h2 className="text-base font-bold text-gray-900">Filters</h2>
               <button
                 type="button"
                 onClick={() => setDrawerOpen(false)}
-                className="w-9 h-9 inline-flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-600"
+                className="w-11 h-11 min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-600 touch-manipulation"
                 aria-label="Close"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">

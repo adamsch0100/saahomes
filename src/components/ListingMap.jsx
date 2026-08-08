@@ -5,10 +5,11 @@ import { formatPrice, formatPriceCompact, listingAddress } from "../utils/listin
 /**
  * ListingMap — Mapbox GL clustered markers (Zillow-style).
  * Cluster circles with counts · price-pill unclustered points · photo popup
- * on click · fly-to on list-card hover. Optional polygon draw (mapbox-gl-draw).
+ * on click/hover · fly-to on list-card hover. Optional polygon draw.
+ * priceHeatmap colors pins by real list_price (green→yellow→red quantiles).
  *
  * Props:
- *   listings        — array of listing rows with lat/lng
+ *   listings        — array of listing rows with lat/lng + list_price
  *   selectedId      — hovered/selected card id (drives fly-to + highlight)
  *   onSelect        — (id) => {} when a marker is clicked
  *   onOpenListing   — (listing) => {} when popup is clicked (opens detail panel)
@@ -16,6 +17,7 @@ import { formatPrice, formatPriceCompact, listingAddress } from "../utils/listin
  *   drawEnabled     — when true, user can draw a search polygon
  *   polygon         — active ring as "lng,lat;lng,lat;..." or empty
  *   onPolygonChange — (ringString | "") => {} when draw completes / is deleted
+ *   priceHeatmap    — color unclustered pins by list_price band
  */
 
 const TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || "";
@@ -52,18 +54,22 @@ export default function ListingMap({
   drawEnabled = false,
   polygon = "",
   onPolygonChange,
+  priceHeatmap = false,
 }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const drawRef = useRef(null);
   const popupRef = useRef(null);
+  const hoverPopupRef = useRef(null);
   const listingsRef = useRef(listings);
   const onSelectRef = useRef(onSelect);
   const onOpenListingRef = useRef(onOpenListing);
   const onPolygonChangeRef = useRef(onPolygonChange);
   const drawEnabledRef = useRef(drawEnabled);
   const polygonRef = useRef(polygon);
+  const priceHeatmapRef = useRef(priceHeatmap);
   const suppressDrawEvent = useRef(false);
+  const mapboxglRef = useRef(null);
 
   listingsRef.current = listings;
   onSelectRef.current = onSelect;
@@ -71,6 +77,7 @@ export default function ListingMap({
   onPolygonChangeRef.current = onPolygonChange;
   drawEnabledRef.current = drawEnabled;
   polygonRef.current = polygon;
+  priceHeatmapRef.current = priceHeatmap;
 
   // Init map once
   useEffect(() => {
@@ -98,6 +105,7 @@ export default function ListingMap({
     ]).then(([{ default: mapboxgl }, DrawMod]) => {
       if (cancelled || !containerRef.current) return;
       const MapboxDraw = DrawMod.default || DrawMod;
+      mapboxglRef.current = mapboxgl;
 
       mapboxgl.accessToken = TOKEN;
       const map = new mapboxgl.Map({
@@ -200,17 +208,12 @@ export default function ListingMap({
           source: "listings",
           filter: ["!", ["has", "point_count"]],
           paint: {
-            "circle-color": [
-              "case",
-              ["==", ["get", "id"], selectedId ?? ""],
-              "#000000",
-              "#CFB36E",
-            ],
+            "circle-color": pinColorExpression(selectedId, priceHeatmapRef.current),
             "circle-radius": [
               "case",
-              ["==", ["get", "id"], selectedId ?? ""],
-              10,
-              7,
+              ["==", ["to-string", ["get", "id"]], String(selectedId ?? "")],
+              11,
+              8,
             ],
             "circle-stroke-width": 2,
             "circle-stroke-color": "#ffffff",
@@ -225,7 +228,7 @@ export default function ListingMap({
           layout: {
             "text-field": ["get", "priceLabel"],
             "text-size": 11,
-            "text-offset": [0, -1.6],
+            "text-offset": [0, -1.65],
             "text-font": ["DIN Pro Medium", "Arial Unicode MS Bold"],
             "text-allow-overlap": false,
             "text-ignore-placement": false,
@@ -247,45 +250,75 @@ export default function ListingMap({
           });
         });
 
+        const buildPopupEl = (listing, { mini = false } = {}) => {
+          const addr = listingAddress(listing);
+          const el = document.createElement("div");
+          el.className = "saa-map-popup";
+          const stats = [
+            listing.beds != null ? `${listing.beds} bd` : "",
+            listing.baths != null ? `${listing.baths} ba` : "",
+            listing.living_area != null ? `${Number(listing.living_area).toLocaleString()} sqft` : "",
+          ].filter(Boolean).join(" · ");
+          if (mini) {
+            el.innerHTML = `
+              <div class="flex gap-2 bg-white rounded-lg overflow-hidden shadow-lg border border-gray-100 w-[220px] p-0">
+                <div class="w-[72px] h-[72px] shrink-0 bg-gray-100 overflow-hidden">
+                  <img src="${photoUrl(listing.id, 0)}" alt=""
+                    class="w-full h-full object-cover"
+                    onerror="this.onerror=null;this.src='/images/buyers-hero.jpg'" />
+                </div>
+                <div class="py-1.5 pr-2 min-w-0 flex flex-col justify-center">
+                  <p class="font-bold text-sm text-gray-900 m-0 leading-tight">${formatPrice(listing.list_price)}</p>
+                  <p class="text-[11px] font-semibold text-gray-700 mt-0.5 mb-0 truncate">${stats}</p>
+                  <p class="text-[10px] text-gray-500 mt-0.5 mb-0 truncate">${addr}${listing.city ? `, ${listing.city}` : ""}</p>
+                </div>
+              </div>`;
+          } else {
+            el.innerHTML = `
+              <button type="button" data-saa-open-listing class="block w-full text-left bg-white rounded-xl overflow-hidden shadow-xl w-60 border border-gray-100 cursor-pointer p-0">
+                <div class="aspect-[4/3] bg-gray-100 overflow-hidden relative">
+                  <img src="${photoUrl(listing.id, 0)}" alt="${addr || "home"}"
+                    class="w-full h-full object-cover"
+                    onerror="this.onerror=null;this.src='/images/buyers-hero.jpg'" />
+                  <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent px-2.5 pb-2 pt-6">
+                    <p class="font-bold text-base text-white m-0">${formatPrice(listing.list_price)}</p>
+                  </div>
+                </div>
+                <div class="p-3">
+                  <p class="text-xs font-semibold text-gray-800 m-0 truncate">${stats}</p>
+                  <p class="text-xs text-gray-500 mt-1 mb-0 truncate">${addr}${listing.city ? `, ${listing.city}` : ""}</p>
+                  <p class="text-xs font-semibold text-[#8a7340] mt-2 mb-0">View details →</p>
+                </div>
+              </button>`;
+            const btn = el.querySelector("[data-saa-open-listing]");
+            if (btn) {
+              btn.addEventListener("click", (ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                if (onOpenListingRef.current) {
+                  onOpenListingRef.current(listing);
+                } else {
+                  window.location.href = `/homes-for-sale/${listing.slug}/`;
+                }
+              });
+            }
+          }
+          return el;
+        };
+
         const openPopup = (e) => {
-          if (drawEnabledRef.current) return; // suppress popup while drawing
+          if (drawEnabledRef.current) return;
           const props = e.features[0].properties;
           const id = props.id;
           const listing = listingsRef.current.find((l) => String(l.id) === String(id));
           if (!listing) return;
+          if (hoverPopupRef.current) {
+            try { hoverPopupRef.current.remove(); } catch { /* noop */ }
+            hoverPopupRef.current = null;
+          }
           if (popupRef.current) popupRef.current.remove();
 
-          const addr = listingAddress(listing);
-          const el = document.createElement("div");
-          el.className = "saa-map-popup";
-          el.innerHTML = `
-            <button type="button" data-saa-open-listing class="block w-full text-left bg-white rounded-xl overflow-hidden shadow-xl w-60 border border-gray-100 cursor-pointer p-0">
-              <div class="aspect-[4/3] bg-gray-100 overflow-hidden relative">
-                <img src="${photoUrl(listing.id, 0)}" alt="${addr || "home"}"
-                  class="w-full h-full object-cover"
-                  onerror="this.onerror=null;this.src='/images/buyers-hero.jpg'" />
-              </div>
-              <div class="p-3">
-                <p class="font-bold text-sm text-gray-900 m-0">${formatPrice(listing.list_price)}</p>
-                <p class="text-xs text-gray-600 mt-0.5 mb-0 truncate">
-                  ${[listing.beds != null ? `${listing.beds} bd` : "", listing.baths != null ? `${listing.baths} ba` : "", listing.living_area != null ? `${Number(listing.living_area).toLocaleString()} sqft` : ""].filter(Boolean).join(" · ")}
-                </p>
-                <p class="text-xs text-gray-500 mt-1 mb-0 truncate">${addr}${listing.city ? `, ${listing.city}` : ""}</p>
-                <p class="text-xs font-semibold text-[#8a7340] mt-2 mb-0">View details →</p>
-              </div>
-            </button>`;
-          const btn = el.querySelector("[data-saa-open-listing]");
-          if (btn) {
-            btn.addEventListener("click", (ev) => {
-              ev.preventDefault();
-              ev.stopPropagation();
-              if (onOpenListingRef.current) {
-                onOpenListingRef.current(listing);
-              } else {
-                window.location.href = `/homes-for-sale/${listing.slug}/`;
-              }
-            });
-          }
+          const el = buildPopupEl(listing, { mini: false });
           popupRef.current = new mapboxgl.Popup({
             offset: 22,
             closeButton: true,
@@ -298,19 +331,66 @@ export default function ListingMap({
           onSelectRef.current?.(id);
         };
 
+        const showHoverCard = (e) => {
+          if (drawEnabledRef.current) return;
+          if (popupRef.current) return; // sticky click popup wins
+          const props = e.features?.[0]?.properties;
+          if (!props) return;
+          const listing = listingsRef.current.find((l) => String(l.id) === String(props.id));
+          if (!listing) return;
+          const coords = e.features[0].geometry.coordinates;
+          if (hoverPopupRef.current) {
+            try { hoverPopupRef.current.remove(); } catch { /* noop */ }
+          }
+          const el = buildPopupEl(listing, { mini: true });
+          hoverPopupRef.current = new mapboxgl.Popup({
+            offset: 16,
+            closeButton: false,
+            closeOnClick: false,
+            maxWidth: "240px",
+            className: "saa-mapbox-popup saa-mapbox-popup--hover",
+          })
+            .setLngLat(coords)
+            .setDOMContent(el)
+            .addTo(map);
+        };
+
+        const hideHoverCard = () => {
+          if (hoverPopupRef.current) {
+            try { hoverPopupRef.current.remove(); } catch { /* noop */ }
+            hoverPopupRef.current = null;
+          }
+        };
+
         map.on("click", "unclustered-point", openPopup);
         map.on("click", "unclustered-price", openPopup);
 
-        ["clusters", "unclustered-point", "unclustered-price"].forEach((layer) => {
-          map.on("mouseenter", layer, () => {
-            map.getCanvas().style.cursor = drawEnabledRef.current ? "crosshair" : "pointer";
-          });
-          map.on("mouseleave", layer, () => {
-            map.getCanvas().style.cursor = drawEnabledRef.current ? "crosshair" : "";
-          });
+        map.on("mouseenter", "unclustered-point", (e) => {
+          map.getCanvas().style.cursor = drawEnabledRef.current ? "crosshair" : "pointer";
+          showHoverCard(e);
+        });
+        map.on("mouseenter", "unclustered-price", (e) => {
+          map.getCanvas().style.cursor = drawEnabledRef.current ? "crosshair" : "pointer";
+          showHoverCard(e);
+        });
+        map.on("mouseleave", "unclustered-point", () => {
+          map.getCanvas().style.cursor = drawEnabledRef.current ? "crosshair" : "";
+          hideHoverCard();
+        });
+        map.on("mouseleave", "unclustered-price", () => {
+          map.getCanvas().style.cursor = drawEnabledRef.current ? "crosshair" : "";
+          hideHoverCard();
+        });
+
+        map.on("mouseenter", "clusters", () => {
+          map.getCanvas().style.cursor = drawEnabledRef.current ? "crosshair" : "pointer";
+        });
+        map.on("mouseleave", "clusters", () => {
+          map.getCanvas().style.cursor = drawEnabledRef.current ? "crosshair" : "";
         });
 
         applyListings(map, listingsRef.current);
+        applyPinPaint(map, selectedId, priceHeatmapRef.current);
         // Hydrate existing polygon from URL/state
         syncDrawPolygon(draw, polygonRef.current);
         if (drawEnabledRef.current) {
@@ -327,6 +407,10 @@ export default function ListingMap({
       if (popupRef.current) {
         try { popupRef.current.remove(); } catch { /* noop */ }
         popupRef.current = null;
+      }
+      if (hoverPopupRef.current) {
+        try { hoverPopupRef.current.remove(); } catch { /* noop */ }
+        hoverPopupRef.current = null;
       }
       if (mapRef.current) {
         mapRef.current.remove();
@@ -352,25 +436,12 @@ export default function ListingMap({
     return () => map.off("load", onLoad);
   }, [listings]);
 
-  // Highlight selected marker
+  // Highlight selected marker + price heatmap band colors
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !map.getLayer("unclustered-point")) return;
-    try {
-      map.setPaintProperty("unclustered-point", "circle-color", [
-        "case",
-        ["==", ["to-string", ["get", "id"]], String(selectedId ?? "")],
-        "#000000",
-        "#CFB36E",
-      ]);
-      map.setPaintProperty("unclustered-point", "circle-radius", [
-        "case",
-        ["==", ["to-string", ["get", "id"]], String(selectedId ?? "")],
-        11,
-        7,
-      ]);
-    } catch { /* layer not ready */ }
-  }, [selectedId]);
+    applyPinPaint(map, selectedId, priceHeatmap);
+  }, [selectedId, priceHeatmap]);
 
   // Fly-to on card hover/select (skip when drawing)
   useEffect(() => {
@@ -476,17 +547,86 @@ function syncDrawPolygon(draw, polygonParam) {
   } catch { /* draw not ready */ }
 }
 
+/**
+ * Pin color expression from real list_price quantiles on current results.
+ * band 0=low green, 1=mid yellow, 2=high red. Selected always black.
+ * Brand gold when heatmap is off.
+ */
+function pinColorExpression(selectedId, heatmapOn) {
+  const selected = String(selectedId ?? "");
+  if (!heatmapOn) {
+    return [
+      "case",
+      ["==", ["to-string", ["get", "id"]], selected],
+      "#000000",
+      "#CFB36E",
+    ];
+  }
+  return [
+    "case",
+    ["==", ["to-string", ["get", "id"]], selected],
+    "#000000",
+    ["==", ["get", "priceBand"], 0],
+    "#22c55e",
+    ["==", ["get", "priceBand"], 1],
+    "#eab308",
+    ["==", ["get", "priceBand"], 2],
+    "#ef4444",
+    "#CFB36E",
+  ];
+}
+
+function applyPinPaint(map, selectedId, heatmapOn) {
+  try {
+    map.setPaintProperty(
+      "unclustered-point",
+      "circle-color",
+      pinColorExpression(selectedId, heatmapOn)
+    );
+    map.setPaintProperty("unclustered-point", "circle-radius", [
+      "case",
+      ["==", ["to-string", ["get", "id"]], String(selectedId ?? "")],
+      11,
+      8,
+    ]);
+  } catch { /* layer not ready */ }
+}
+
+/** Assign priceBand 0/1/2 from terciles of actual list_price values — never fabricate prices */
+function priceBandsForListings(listings) {
+  const prices = (listings || [])
+    .map((l) => Number(l.list_price))
+    .filter((n) => Number.isFinite(n) && n > 0)
+    .sort((a, b) => a - b);
+  if (prices.length === 0) return { t1: 0, t2: 0 };
+  const t1 = prices[Math.floor(prices.length / 3)] ?? prices[0];
+  const t2 = prices[Math.floor((prices.length * 2) / 3)] ?? prices[prices.length - 1];
+  return { t1, t2 };
+}
+
 function applyListings(map, listings) {
+  const { t1, t2 } = priceBandsForListings(listings);
   const features = (listings || [])
     .filter((l) => l.latitude != null && l.longitude != null)
-    .map((l) => ({
-      type: "Feature",
-      geometry: { type: "Point", coordinates: [Number(l.longitude), Number(l.latitude)] },
-      properties: {
-        id: l.id,
-        priceLabel: formatPriceCompact(l.list_price),
-      },
-    }));
+    .map((l) => {
+      const price = Number(l.list_price);
+      let priceBand = 1;
+      if (Number.isFinite(price) && price > 0) {
+        if (price <= t1) priceBand = 0;
+        else if (price >= t2) priceBand = 2;
+        else priceBand = 1;
+      }
+      return {
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [Number(l.longitude), Number(l.latitude)] },
+        properties: {
+          id: l.id,
+          priceLabel: formatPriceCompact(l.list_price),
+          listPrice: Number.isFinite(price) ? price : 0,
+          priceBand,
+        },
+      };
+    });
   map.getSource("listings").setData({ type: "FeatureCollection", features });
   try {
     window.__saaMapStats = { features: features.length };

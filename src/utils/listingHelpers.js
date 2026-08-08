@@ -38,11 +38,21 @@ export function listingFullAddress(listing) {
   return [street, listing.city, listing.state].filter(Boolean).join(", ");
 }
 
-/** Badge flags derived only from MLS fields */
+/** Badge flags derived only from MLS fields — never invent. NEW = ≤3 DOM. */
 export function listingBadges(listing) {
-  if (!listing) return { isNew: false, priceCut: false, priceCutPct: null, isNewConstruction: false };
+  if (!listing) {
+    return {
+      isNew: false,
+      priceCut: false,
+      priceCutPct: null,
+      isNewConstruction: false,
+      hasOpenHouse: false,
+      dom: null,
+    };
+  }
   const dom = listing.days_on_market;
-  const isNew = dom != null && Number(dom) <= 7;
+  // Zillow-grade "NEW" badge: first 3 days on market only
+  const isNew = dom != null && Number(dom) <= 3;
   const priceCut =
     listing.original_list_price != null &&
     listing.list_price != null &&
@@ -52,7 +62,51 @@ export function listingBadges(listing) {
     : null;
   const feats = listing.features || {};
   const isNewConstruction = Boolean(feats.new_construction);
-  return { isNew, priceCut, priceCutPct, isNewConstruction, dom };
+  // Open house only when feed exposes a real flag/date (never fabricate)
+  const hasOpenHouse = Boolean(
+    listing.open_house === true ||
+      listing.has_open_house === true ||
+      feats.open_house === true ||
+      feats.OpenHouse === true ||
+      (typeof feats.open_house === "string" && feats.open_house.length > 0) ||
+      (typeof listing.open_house_date === "string" && listing.open_house_date.length > 0)
+  );
+  return { isNew, priceCut, priceCutPct, isNewConstruction, hasOpenHouse, dom };
+}
+
+/** Human home-type label from MLS home_type / property_type / subtype — no invention */
+export function homeTypeLabel(listing) {
+  if (!listing) return "";
+  const ht = (listing.home_type || "").toLowerCase();
+  const subtype = (listing.property_subtype || "").toLowerCase();
+  const ptype = (listing.property_type || "").toLowerCase();
+  if (ht === "detached" || subtype.includes("single family") || subtype.includes("single-family")) {
+    return "House";
+  }
+  if (ht === "townhome" || subtype.includes("town") || ptype.includes("townhouse")) return "Townhome";
+  if (ht === "condo" || subtype.includes("condo") || ptype.includes("condo")) return "Condo";
+  if (ht === "land" || ptype.includes("land")) return "Land";
+  if (
+    ht === "multi" ||
+    ptype.includes("income") ||
+    subtype.includes("multi") ||
+    subtype.includes("duplex") ||
+    subtype.includes("triplex")
+  ) {
+    return "Multi-family";
+  }
+  if (
+    ht === "manufactured" ||
+    ptype.includes("manufactured") ||
+    subtype.includes("manufactured") ||
+    subtype.includes("mobile")
+  ) {
+    return "Manufactured";
+  }
+  if (ht === "attached") return "Attached";
+  if (listing.property_subtype) return listing.property_subtype;
+  if (listing.property_type && listing.property_type !== "Residential") return listing.property_type;
+  return "";
 }
 
 // ── Saved homes (local) ────────────────────────────────────────────────

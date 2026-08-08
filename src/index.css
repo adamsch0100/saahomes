@@ -48,9 +48,26 @@
   padding: 4px 8px;
   color: #111;
   z-index: 2;
+  width: 28px;
+  height: 28px;
+  line-height: 1;
 }
 .saa-mapbox-popup .mapboxgl-popup-tip {
   border-top-color: #fff;
+}
+/* Hover mini-card — no close button, lighter shadow */
+.saa-mapbox-popup--hover .mapboxgl-popup-content {
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+  pointer-events: none;
+}
+.saa-mapbox-popup--hover .mapboxgl-popup-tip {
+  border-top-color: #fff;
+}
+
+/* Property search card polish — subtle hover lift */
+.properties-search-app article.group:hover {
+  transform: translateY(-1px);
 }
 
 /* Hide global floating contact bar when listing detail owns sticky CTAs */
