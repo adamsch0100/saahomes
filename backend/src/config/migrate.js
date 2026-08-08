@@ -502,6 +502,30 @@ export const runMigrations = async () => {
         ON users(lifecycle_stage);
     `);
 
+    // ── Account-linked saved homes (It 14a) ──────────────────────────────
+    // Hearts sync server-side so favorites survive devices / incognito.
+    // listing_key = IRES listing_id (stable); denormalized fields for off-market.
+    // user_id is INTEGER to match existing users(id) SERIAL PK.
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS saved_homes (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        listing_key TEXT NOT NULL,
+        property_address TEXT,
+        photo_url TEXT,
+        list_price INTEGER,
+        slug TEXT,
+        saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (user_id, listing_key)
+      )
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_saved_homes_user
+        ON saved_homes(user_id, saved_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_saved_homes_listing_key
+        ON saved_homes(listing_key);
+    `);
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {
