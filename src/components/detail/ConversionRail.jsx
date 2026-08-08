@@ -147,9 +147,12 @@ export default function ConversionRail({
           <button
             type="button"
             onClick={openNadia}
-            className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black active:scale-[0.98] transition-all cursor-pointer"
+            className="w-full inline-flex flex-col items-center justify-center gap-0.5 px-6 py-3 border-2 border-white text-white rounded-lg hover:bg-white hover:text-black active:scale-[0.98] transition-all cursor-pointer"
           >
-            Ask Nadia
+            <span className="font-semibold leading-tight">Ask Nadia</span>
+            <span className="text-[11px] font-medium opacity-80 leading-tight">
+              Your personal assistant
+            </span>
           </button>
           <button
             type="button"
