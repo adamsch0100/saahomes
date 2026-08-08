@@ -23,6 +23,40 @@ const REQUEST_DELAY_MS = 500; // ≤~2 RPS worst case
 let active = 0;
 const queue = [];
 
+// IRES API quota guard — MLS Grid warns at >2 sustained RPS (hourly cap
+// 7,200 req). The photo proxy must NEVER drive IRES usage: cap refreshes at
+// 30/min (0.5 RPS) and degrade to the 502/placeholder path when exhausted.
+// (Adam, 2026-08-08 — 4.0 RPS suspension warning after self-heal went live.)
+const IRES_REFRESH_RATE_PER_MIN = parseInt(process.env.IRES_REFRESH_RATE_PER_MIN || '30', 10);
+let refreshTokens = IRES_REFRESH_RATE_PER_MIN;
+let refreshLastRefill = Date.now();
+let refreshBlockedLogAt = 0;
+const refreshInFlight = new Map(); // listingId -> Promise (dedupe concurrent misses)
+
+function takeRefreshToken() {
+  const now = Date.now();
+  if (now - refreshLastRefill >= 60000) {
+    refreshTokens = IRES_REFRESH_RATE_PER_MIN;
+    refreshLastRefill = now;
+  }
+  if (refreshTokens <= 0) {
+    if (now - refreshBlockedLogAt > 60000) {
+      refreshBlockedLogAt = now;
+      logger.warn('IRES refresh throttled by quota guard (0.5 RPS cap) — serving placeholder instead');
+    }
+    return false;
+  }
+  refreshTokens -= 1;
+  return true;
+}
+
+function refreshWithDedupe(listingId, pool) {
+  if (refreshInFlight.has(listingId)) return refreshInFlight.get(listingId);
+  const p = refreshMlsUrls(listingId, pool).finally(() => refreshInFlight.delete(listingId));
+  refreshInFlight.set(listingId, p);
+  return p;
+}
+
 fs.mkdirSync(CACHE_DIR, { recursive: true });
 
 function cachePath(listingId, idx) {
@@ -146,8 +180,11 @@ export const getListingPhoto = async (req, res) => {
     } catch (fetchErr) {
       // MLS signed URLs expire ~60 min after sync → refresh from IRES and retry
       // once (heals the DB row too). R2 URLs are durable — never refresh those.
+      // Quota guard: skip the refresh when the 0.5 RPS budget is exhausted —
+      // degrade to the placeholder rather than risk IRES suspension.
       if (!url.includes('media.mlsgrid.com')) throw fetchErr;
-      const fresh = await refreshMlsUrls(listingId, pool);
+      if (!takeRefreshToken()) throw fetchErr;
+      const fresh = await refreshWithDedupe(listingId, pool);
       const freshUrl = fresh?.[idx];
       if (!freshUrl) throw fetchErr;
       buf = await fetchWithQueue(freshUrl);
