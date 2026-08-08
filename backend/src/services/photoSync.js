@@ -57,6 +57,7 @@ const REQUEST_DELAY_MS = 1000; // 2 workers × 1s spacing = hard 2 RPS cap
  * from any IP. Non-MLS URLs (already-R2, etc.) fetch directly.
  */
 async function downloadPhoto(url, { listingId, idx, retries = 2 } = {}) {
+  if (!url) throw new Error('photo URL missing from listing row');
   const isMlsCdn = url.includes('media.mlsgrid.com');
   const SITE = process.env.SITE_URL || 'https://saahomes.com';
   if (isMlsCdn && listingId) {

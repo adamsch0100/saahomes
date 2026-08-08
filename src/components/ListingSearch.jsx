@@ -44,6 +44,29 @@ const PRICE_QUICK = [
   { label: "$1M+", value: "1000000-" },
 ];
 
+// Granular ladder for the quick price dropdown (Adam, Aug 8: Price chip = simple
+// min/max dropdown from the top, NOT the full filters drawer).
+const PRICE_STEPS = [
+  { label: "Any", value: "" },
+  { label: "$100K", value: "100000" },
+  { label: "$150K", value: "150000" },
+  { label: "$200K", value: "200000" },
+  { label: "$250K", value: "250000" },
+  { label: "$300K", value: "300000" },
+  { label: "$350K", value: "350000" },
+  { label: "$400K", value: "400000" },
+  { label: "$450K", value: "450000" },
+  { label: "$500K", value: "500000" },
+  { label: "$600K", value: "600000" },
+  { label: "$700K", value: "700000" },
+  { label: "$800K", value: "800000" },
+  { label: "$900K", value: "900000" },
+  { label: "$1M", value: "1000000" },
+  { label: "$1.25M", value: "1250000" },
+  { label: "$1.5M", value: "1500000" },
+  { label: "$2M", value: "2000000" },
+];
+
 const BED_OPTIONS = [
   { label: "Any", value: "" },
   { label: "1+", value: "1" },
@@ -1522,6 +1545,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     }
   });
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [priceOpen, setPriceOpen] = useState(false);
   const [homeTypeOpen, setHomeTypeOpen] = useState(false);
   const [drawEnabled, setDrawEnabled] = useState(false);
   /** Color map pins by list_price band (green→yellow→red) — uses real prices only */
@@ -1914,13 +1938,70 @@ export default function ListingSearch({ location, height = "700px", compact = fa
             />
           </div>
 
-          <button
-            type="button"
-            onClick={openDrawer}
-            className={filters.minPrice || filters.maxPrice ? chipActive : chipIdle}
-          >
-            {priceChipLabel()}
-          </button>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setPriceOpen((o) => !o)}
+              aria-expanded={priceOpen}
+              aria-haspopup="true"
+              className={`${filters.minPrice || filters.maxPrice ? chipActive : chipIdle} ${
+                priceOpen && !filters.minPrice && !filters.maxPrice ? "border-black" : ""
+              }`}
+            >
+              {priceChipLabel()}
+            </button>
+            {priceOpen && (
+              <>
+                {/* Click-away backdrop (below the popover, above the page) */}
+                <div className="fixed inset-0 z-30" onClick={() => setPriceOpen(false)} aria-hidden="true" />
+                {/* Price dropdown — min/max from the top (Adam, Aug 8: quick pick, not the full drawer) */}
+                <div className="absolute left-0 top-[calc(100%+6px)] z-40 w-80 rounded-xl border border-gray-200 bg-white shadow-xl p-4">
+                  <p className="text-xs font-bold text-gray-900 uppercase tracking-wide mb-3">Price range</p>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={filters.minPrice || ""}
+                      onChange={(e) => setFilterInstant("minPrice", e.target.value)}
+                      className="flex-1 min-h-[44px] px-2.5 py-2 border border-gray-300 rounded-lg text-sm bg-white touch-manipulation"
+                      aria-label="Minimum price"
+                    >
+                      {PRICE_STEPS.map((o) => (
+                        <option key={`min-${o.value || "any"}`} value={o.value}>
+                          {o.value ? `${o.label}+` : "Min price"}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="text-gray-400 text-sm shrink-0" aria-hidden="true">
+                      –
+                    </span>
+                    <select
+                      value={filters.maxPrice || ""}
+                      onChange={(e) => setFilterInstant("maxPrice", e.target.value)}
+                      className="flex-1 min-h-[44px] px-2.5 py-2 border border-gray-300 rounded-lg text-sm bg-white touch-manipulation"
+                      aria-label="Maximum price"
+                    >
+                      {PRICE_STEPS.map((o) => (
+                        <option key={`max-${o.value || "any"}`} value={o.value}>
+                          {o.value ? o.label : "Max price"}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {(filters.minPrice || filters.maxPrice) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFilterInstant("minPrice", "");
+                        setFilterInstant("maxPrice", "");
+                      }}
+                      className="mt-3 min-h-[32px] text-xs font-semibold text-gray-500 underline hover:text-black touch-manipulation"
+                    >
+                      Clear price
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
 
           <select
             value={filters.beds}

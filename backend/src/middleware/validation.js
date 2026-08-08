@@ -73,8 +73,9 @@ export const validateMarketReportSubmission = [
     .normalizeEmail(),
 
   body('phone')
-    .optional()
     .trim()
+    .notEmpty()
+    .withMessage('Phone is required')
     .isLength({ max: 50 })
     .withMessage('Phone must be less than 50 characters'),
 
@@ -83,6 +84,17 @@ export const validateMarketReportSubmission = [
     .trim()
     .isLength({ max: 100 })
     .withMessage('Area must be less than 100 characters'),
+
+  // Optional seller-track home address (creates home_profiles on submit)
+  body('address_line').optional().trim().isLength({ max: 255 }),
+  body('address').optional().trim().isLength({ max: 255 }),
+  body('street').optional().trim().isLength({ max: 255 }),
+  body('postal_code').optional().trim().isLength({ max: 16 }),
+  body('zip').optional().trim().isLength({ max: 16 }),
+  body('zipCode').optional().trim().isLength({ max: 16 }),
+  body('city').optional().trim().isLength({ max: 100 }),
+  body('living_area').optional({ values: 'falsy' }).isFloat({ min: 0, max: 50000 }),
+  body('sqft').optional({ values: 'falsy' }).isFloat({ min: 0, max: 50000 }),
 
   ...leadMetadataFields,
 ];

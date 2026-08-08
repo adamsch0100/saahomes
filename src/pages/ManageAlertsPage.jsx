@@ -286,12 +286,20 @@ export default function ManageAlertsPage() {
               Live match counts, previews, and email alerts — managed in one place.
             </p>
           </div>
-          <Link
-            to="/properties/"
-            className="shrink-0 inline-flex items-center px-4 py-2.5 rounded-lg text-sm font-semibold border border-black text-black hover:bg-black hover:text-white transition-colors"
-          >
-            + New search
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              to="/my-home/"
+              className="shrink-0 inline-flex items-center px-4 py-2.5 rounded-lg text-sm font-semibold border border-[#CFB36E] text-gray-900 hover:bg-[#CFB36E]/20 transition-colors"
+            >
+              My home value
+            </Link>
+            <Link
+              to="/properties/"
+              className="shrink-0 inline-flex items-center px-4 py-2.5 rounded-lg text-sm font-semibold border border-black text-black hover:bg-black hover:text-white transition-colors"
+            >
+              + New search
+            </Link>
+          </div>
         </div>
 
         {unsubscribed ? (

@@ -23,6 +23,15 @@ import { submitShowingRequest } from '../controllers/showingController.js';
 import { runCronDigest } from '../controllers/cronController.js';
 import { listSchools, runCronSchoolRatings } from '../controllers/schoolController.js';
 import {
+  listHomes,
+  saveHomeProfile,
+  getHomeValue,
+  postAccuracy,
+  patchHome,
+  postSellerHeat,
+  publicEstimate,
+} from '../controllers/homeController.js';
+import {
   validateContactSubmission,
   validateMarketReportSubmission,
   validateChfaLeadSubmission,
@@ -143,6 +152,20 @@ router.post('/cron/school-ratings', runCronSchoolRatings);
 
 // Showing requests (listing page modal → lead → FUB)
 router.post('/showing', formLimiter, submitShowingRequest);
+
+// ── Seller nurture track (home profiles + multi-source value) ─────────────
+const homeLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 40,
+  message: 'Too many requests.',
+});
+router.get('/home', homeLimiter, listHomes);
+router.post('/home/profile', formLimiter, saveHomeProfile);
+router.post('/home/estimate', formLimiter, publicEstimate);
+router.get('/home/:id/value', homeLimiter, getHomeValue);
+router.post('/home/:id/accuracy', formLimiter, postAccuracy);
+router.post('/home/:id/heat', formLimiter, postSellerHeat);
+router.patch('/home/:id', formLimiter, patchHome);
 
 export default router;
 

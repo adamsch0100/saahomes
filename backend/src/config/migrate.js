@@ -388,6 +388,98 @@ export const runMigrations = async () => {
       CREATE INDEX IF NOT EXISTS idx_school_ratings_rating ON school_ratings(rating DESC NULLS LAST);
     `);
 
+    // ── Seller nurture track (It 11) ─────────────────────────────────────
+    // Intent on signup routes buyers/sellers to the right nurture track
+    await client.query(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS intent VARCHAR(16);
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS seller_heat BOOLEAN DEFAULT FALSE;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS seller_heat_at TIMESTAMP;
+    `);
+
+    // Home profile — one (or more) owned homes for seller value updates
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS home_profiles (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        address_line VARCHAR(255) NOT NULL,
+        unit VARCHAR(32),
+        city VARCHAR(100),
+        state VARCHAR(2) DEFAULT 'CO',
+        postal_code VARCHAR(16),
+        beds NUMERIC(4,1),
+        baths NUMERIC(4,1),
+        living_area NUMERIC(10,1),
+        year_built INTEGER,
+        zpid VARCHAR(32),
+        our_estimate_low INTEGER,
+        our_estimate_mid INTEGER,
+        our_estimate_high INTEGER,
+        our_estimate_label TEXT,
+        our_estimate_at TIMESTAMP,
+        market_estimate_mid INTEGER,
+        market_estimates JSONB DEFAULT '{}'::jsonb,
+        chart_series JSONB,
+        last_value_view_at TIMESTAMP,
+        value_view_count INTEGER NOT NULL DEFAULT 0,
+        accuracy_signal VARCHAR(32),
+        value_updates_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+        last_digest_at TIMESTAMP,
+        last_digest_value INTEGER,
+        seller_heat BOOLEAN NOT NULL DEFAULT FALSE,
+        meta JSONB DEFAULT '{}'::jsonb,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_home_profiles_user ON home_profiles(user_id);
+      CREATE INDEX IF NOT EXISTS idx_home_profiles_zip ON home_profiles(postal_code);
+      CREATE INDEX IF NOT EXISTS idx_home_profiles_digest
+        ON home_profiles(value_updates_enabled, last_digest_at)
+        WHERE value_updates_enabled = TRUE;
+    `);
+
+    // Licensed AVM/API response cache — NEVER call ReefAPI inline without this
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS zillow_api_cache (
+        id SERIAL PRIMARY KEY,
+        provider VARCHAR(32) NOT NULL,
+        endpoint VARCHAR(64) NOT NULL,
+        params_hash VARCHAR(64) NOT NULL,
+        payload JSONB NOT NULL,
+        credits_used INTEGER NOT NULL DEFAULT 0,
+        fetched_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (provider, endpoint, params_hash)
+      )
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_zillow_api_cache_lookup
+        ON zillow_api_cache(provider, endpoint, params_hash);
+      CREATE INDEX IF NOT EXISTS idx_zillow_api_cache_fetched
+        ON zillow_api_cache(fetched_at);
+    `);
+
+    // Monthly credit counter — hard stop at 90% of free allowance (900/1000)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS api_credit_usage (
+        id SERIAL PRIMARY KEY,
+        provider VARCHAR(32) NOT NULL,
+        year_month VARCHAR(7) NOT NULL,
+        credits_used INTEGER NOT NULL DEFAULT 0,
+        last_flagged_at TIMESTAMP,
+        notes TEXT,
+        UNIQUE (provider, year_month)
+      )
+    `);
+
+    // Optional address fields on market report submissions (seller track entry)
+    await client.query(`
+      ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS address_line VARCHAR(255);
+      ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS postal_code VARCHAR(16);
+      ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS living_area NUMERIC(10,1);
+      ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS home_profile_id INTEGER;
+    `);
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {

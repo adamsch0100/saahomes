@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { submitMarketReportForm } from '../utils/api.js';
 import { withLeadMetadata } from '../utils/leadTracking.js';
 
@@ -8,10 +9,14 @@ export default function MarketReportForm({ areaName }) {
     lastName: '',
     email: '',
     phone: '',
-    area: areaName || ''
+    area: areaName || '',
+    address_line: '',
+    postal_code: '',
+    living_area: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
+  const [myHomePath, setMyHomePath] = useState(null);
 
   const handleChange = (e) => {
     setFormData({
@@ -26,9 +31,23 @@ export default function MarketReportForm({ areaName }) {
     setSubmitStatus(null);
 
     try {
-      await submitMarketReportForm(withLeadMetadata(formData, window.location.pathname));
-      setSubmitStatus({ type: 'success', message: "Thank you! We'll send you the market report shortly." });
-      setFormData({ firstName: '', lastName: '', email: '', phone: '', area: areaName || '' });
+      const payload = {
+        ...formData,
+        living_area: formData.living_area ? Number(formData.living_area) : undefined,
+      };
+      const result = await submitMarketReportForm(withLeadMetadata(payload, window.location.pathname));
+      const path = result?.my_home_path || (result?.home_profile_id ? '/my-home/' : null);
+      setMyHomePath(path);
+      setSubmitStatus({
+        type: 'success',
+        message: path
+          ? "Thank you! We'll send your market report shortly — your home is ready on My Home."
+          : "Thank you! We'll send you the market report shortly.",
+      });
+      setFormData({
+        firstName: '', lastName: '', email: '', phone: '', area: areaName || '',
+        address_line: '', postal_code: '', living_area: '',
+      });
     } catch (error) {
       setSubmitStatus({ type: 'error', message: error.message || 'Failed to submit request. Please try again.' });
     } finally {
@@ -42,12 +61,21 @@ export default function MarketReportForm({ areaName }) {
         <p className="text-green-800 text-lg font-semibold">
           {submitStatus.message}
         </p>
+        {myHomePath && (
+          <Link
+            to={myHomePath}
+            className="mt-4 inline-flex items-center justify-center px-5 py-2.5 rounded-lg text-sm font-bold text-black"
+            style={{ background: '#CFB36E' }}
+          >
+            View my home value →
+          </Link>
+        )}
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-xl p-4 sm:p-6 md:p-8">
+    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-xl p-4 sm:p-6 md:p-8" id="market-report">
       {submitStatus?.type === 'error' && (
         <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-800 text-sm">{submitStatus.message}</p>
@@ -105,18 +133,66 @@ export default function MarketReportForm({ areaName }) {
         </div>
         <div>
           <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-            Phone Number
+            Phone Number *
           </label>
           <input
             type="tel"
             id="phone"
             name="phone"
+            required
             autoComplete="tel"
             inputMode="tel"
             value={formData.phone}
             onChange={handleChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
+        </div>
+      </div>
+
+      {/* Optional home address → seller nurture home profile */}
+      <div className="mb-6 rounded-lg border border-gray-100 bg-gray-50 p-4">
+        <p className="text-sm font-semibold text-gray-800">Your home address <span className="font-normal text-gray-400">(optional — unlocks My Home value tracking)</span></p>
+        <div className="mt-3 grid md:grid-cols-2 gap-4">
+          <div className="md:col-span-2">
+            <label htmlFor="address_line" className="block text-xs font-medium text-gray-600 mb-1">Street</label>
+            <input
+              type="text"
+              id="address_line"
+              name="address_line"
+              autoComplete="street-address"
+              value={formData.address_line}
+              onChange={handleChange}
+              placeholder="123 Main St"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent bg-white"
+            />
+          </div>
+          <div>
+            <label htmlFor="postal_code" className="block text-xs font-medium text-gray-600 mb-1">ZIP</label>
+            <input
+              type="text"
+              id="postal_code"
+              name="postal_code"
+              autoComplete="postal-code"
+              value={formData.postal_code}
+              onChange={handleChange}
+              placeholder="80525"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent bg-white"
+            />
+          </div>
+          <div>
+            <label htmlFor="living_area" className="block text-xs font-medium text-gray-600 mb-1">Sqft (optional)</label>
+            <input
+              type="number"
+              id="living_area"
+              name="living_area"
+              min="0"
+              inputMode="numeric"
+              value={formData.living_area}
+              onChange={handleChange}
+              placeholder="e.g. 2100"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent bg-white"
+            />
+          </div>
         </div>
       </div>
 
