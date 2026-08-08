@@ -51,7 +51,7 @@ export default function ForBuyersPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
             <div className="pl-4 md:pl-8">
-              <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-6">Why Choose Us?</h2>
+              <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-6">Why Choose SAA Homes for Your Northern Colorado Home Search?</h2>
               <p className="text-lg text-gray-700 mb-4">
                 We're dedicated to making your home buying experience as smooth and successful as possible. From your first search to closing day, we're with you every step of the way.
               </p>
@@ -77,7 +77,7 @@ export default function ForBuyersPage() {
       <section className="py-16 px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4">Buyer Resources</h2>
+            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4">What Buyer Resources Does SAA Homes Offer?</h2>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto">
               Everything you need to make informed decisions throughout your home buying journey.
             </p>
@@ -166,7 +166,7 @@ export default function ForBuyersPage() {
       <section className="py-16 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4">Our Buyer Services</h2>
+            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4">What Buyer Services Are Included When I Work With SAA Homes?</h2>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto">
               We're dedicated to making your home buying experience as smooth and successful as possible. From your first search to closing day, we're with you every step of the way.
             </p>
@@ -240,7 +240,7 @@ export default function ForBuyersPage() {
             {/* Get Pre-Approved Content */}
             <div className="order-1 md:order-2" style={{backgroundColor: '#CFB36E'}}>
               <div className="p-8 md:p-12 text-center md:text-left">
-                <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4 text-gray-900">Get Pre-Approved</h2>
+                <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4 text-gray-900">How Do I Get Pre-Approved for a Mortgage in Northern Colorado?</h2>
                 <p className="text-lg text-gray-800 mb-4">
                   Getting pre-approved for a mortgage is one of the first steps in your home buying journey. It shows sellers you're serious and helps you understand your budget. Connect with our trusted lending partners today.
                 </p>
@@ -263,7 +263,7 @@ export default function ForBuyersPage() {
       {/* CTA Section */}
       <section className="py-16 px-6 bg-black text-white">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4">Ready to Find Your Dream Home?</h2>
+          <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4">Ready to Start Your Northern Colorado Home Search?</h2>
           <p className="text-xl mb-8">
             Let's start your home buying journey together. Contact us today for a free consultation.
           </p>

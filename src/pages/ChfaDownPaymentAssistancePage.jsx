@@ -525,7 +525,7 @@ export default function ChfaDownPaymentAssistancePage() {
       <section className="py-16 sm:py-20 px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4">Two ways CHFA helps with your down payment</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4">How Does CHFA Help With My Down Payment?</h2>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto">
               Every CHFA buyer uses a participating lender. Your lender determines which DPA option pairs with your first mortgage program.
             </p>
@@ -559,7 +559,7 @@ export default function ChfaDownPaymentAssistancePage() {
       <section id="chfa-programs" className="py-16 sm:py-20 px-6 scroll-mt-28">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4">CHFA loan programs at a glance</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4">Which CHFA Loan Program Is Right for Me?</h2>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto">
               CHFA offers multiple first mortgage programs. The right one depends on your buyer status, loan type preference, and income.
             </p>
@@ -615,7 +615,7 @@ export default function ChfaDownPaymentAssistancePage() {
       <section className="py-16 px-6 bg-black text-white">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-start">
           <div>
-            <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-6">General CHFA requirements</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-6">What Are the General Requirements for CHFA Programs?</h2>
             <p className="text-gray-300 mb-6 leading-relaxed">
               All CHFA purchase programs share core requirements. Individual programs may have additional rules your lender will review.
             </p>
@@ -643,7 +643,7 @@ export default function ChfaDownPaymentAssistancePage() {
       {/* Northern Colorado limits */}
       <section className="py-16 sm:py-20 px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4">Northern Colorado CHFA income &amp; price limits</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4">What Are the CHFA Income and Purchase Price Limits in Northern Colorado?</h2>
           <p className="text-lg text-gray-700 mb-8 max-w-3xl">
             CHFA limits vary by county, household size, program, and targeted vs. non-targeted area. These are representative ranges effective mid-2026 — always confirm current limits for your household.
           </p>
@@ -702,7 +702,7 @@ export default function ChfaDownPaymentAssistancePage() {
       <section className="py-16 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-10">
-            <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4">Specialty CHFA programs</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4">What Specialty CHFA Programs Are Available in Northern Colorado?</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
               In addition to standard programs, Colorado has expanded CHFA access for educators and first responders.
             </p>
@@ -887,7 +887,7 @@ export default function ChfaDownPaymentAssistancePage() {
       <section id="how-it-works" className="py-16 sm:py-20 px-6 bg-gray-50 scroll-mt-28">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4">How to get started with CHFA</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4">How Do I Apply for CHFA Down Payment Assistance?</h2>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto">
               CHFA does not lend directly. Follow these steps with a participating lender and a local buyer agent.
             </p>

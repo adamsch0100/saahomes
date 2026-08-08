@@ -112,7 +112,7 @@ export default function ForSellersPage() {
           </div>
           <div>
             <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-4">For Sellers</p>
-            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-6">Sell With The Best Team</h2>
+            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-6">Why Should I Sell With SAA Homes?</h2>
             <p className="text-lg text-gray-700 mb-4">
               Selling your home is one of the most important financial decisions you'll make. That's why you need a team with proven results, cutting-edge marketing strategies, and a track record of getting top dollar for our clients.
             </p>
@@ -140,7 +140,7 @@ export default function ForSellersPage() {
       <section className="py-16 px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4">Our Seller Services</h2>
+            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4">What Seller Services Does SAA Homes Offer?</h2>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto">
               Selling your home is a significant decision. We leverage cutting-edge marketing, strategic pricing, and expert negotiation to ensure you get the best possible outcome.
             </p>
@@ -235,7 +235,7 @@ export default function ForSellersPage() {
       <section id="home-valuation" className="py-16 px-6 bg-gray-50">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-8">
-            <h2 className="text-4xl font-bold mb-4">Get Your Free Market Report</h2>
+            <h2 className="text-4xl font-bold mb-4">How Much Is My Northern Colorado Home Worth?</h2>
             <p className="text-lg text-gray-700">
               Get a personalized market analysis for your home — what it's worth today, recent comps in your neighborhood, and a recommended pricing strategy from Adam and Mandi Schwartz.
             </p>
@@ -248,7 +248,7 @@ export default function ForSellersPage() {
       <section className="py-16 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">Our Selling Process</h2>
+            <h2 className="text-4xl font-bold mb-4">What Is the SAA Homes Selling Process?</h2>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -284,7 +284,7 @@ export default function ForSellersPage() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-10">
             <span className="inline-block bg-yellow-100 text-yellow-800 text-xs uppercase tracking-widest px-3 py-1 rounded-full mb-4 font-semibold">Alternative Option</span>
-            <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4">Need to Sell Faster? Consider a Cash Offer</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4">Need to Sell Fast? Should I Consider a Cash Offer?</h2>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto">
               Not every situation calls for a traditional listing. If you need to sell quickly,
               avoid repairs, or prefer a guaranteed close — a cash offer might be the right path.
@@ -340,7 +340,7 @@ export default function ForSellersPage() {
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div>
             <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-4">Experience Leads To</p>
-            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-6">Expert Advice</h2>
+            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-6">What Makes SAA Homes' Marketing Different?</h2>
             <p className="text-lg text-gray-700 mb-6">
               We will aggressively market your house to create the highest demand with the aim of creating a bidding war on your home. We will list your house on Zillow, MLS, Realtor.com and all the major home sites. At our own expense, we will have high class, professional photos taken of your home and entire property. We also can do video's and Matterport 3D tour of your home. We will also market your home aggressively on all major social media platforms, to make sure you can get the most money for your home. We are proud to be rated a Zillow 'Premier Agent', so you know we will take care of you from start to finish.
             </p>
@@ -370,7 +370,7 @@ export default function ForSellersPage() {
       {/* CTA Section */}
       <section className="py-16 px-6 bg-black text-white">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-4">Ready to Sell Your Home?</h2>
+          <h2 className="text-4xl font-bold mb-4">Ready to Sell Your Home in Northern Colorado?</h2>
           <p className="text-xl mb-8">
             Let's discuss your selling goals and create a customized marketing plan for your property.
           </p>
