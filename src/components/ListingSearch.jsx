@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { Helmet } from "react-helmet-async";
 import { photoUrl } from "../utils/photoUrl.js";
 import { useSearchParams } from "react-router-dom";
 import ListingMap from "./ListingMap";
@@ -19,6 +20,7 @@ import {
   getSavedSearches,
   hasAnySavedSearch,
 } from "../utils/listingHelpers.js";
+import { buildListingsItemListSchema } from "../utils/seoConstants.js";
 
 /**
  * ListingSearch — Zillow-style split-view search for /properties/.
@@ -1695,6 +1697,18 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     ? `Updating results…`
     : `Showing ${meta.total.toLocaleString()} home${meta.total === 1 ? "" : "s"} in ${areaLabel}`;
 
+  // GEO: ItemList of first page of results (max 24) — list or map mode.
+  // Only real active MLS rows; canonical /homes-for-sale/{slug}/ URLs.
+  const listingsItemList = useMemo(
+    () =>
+      buildListingsItemListSchema(results, {
+        name: `Homes for Sale in ${areaLabel}`,
+        description: `Active IRES MLS listings for sale in ${areaLabel}.`,
+        maxItems: 24,
+      }),
+    [results, areaLabel]
+  );
+
   const priceChipLabel = () => {
     if (!filters.minPrice && !filters.maxPrice) return "Price";
     return formatPriceChip(filters.minPrice, filters.maxPrice) || "Price";
@@ -1713,6 +1727,11 @@ export default function ListingSearch({ location, height = "700px", compact = fa
       className="flex flex-col bg-white relative h-full min-h-0"
       style={{ height: height || "100%" }}
     >
+      {listingsItemList && (
+        <Helmet>
+          <script type="application/ld+json">{JSON.stringify(listingsItemList)}</script>
+        </Helmet>
+      )}
       {/* Sticky filter bar — never scrolls away */}
       <div className="border-b border-gray-200 bg-white z-20 shrink-0 sticky top-0">
         {/* Desktop chip bar */}
