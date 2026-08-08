@@ -115,3 +115,74 @@ export const setPassword = async (req, res) => {
     return res.status(500).json({ success: false, error: 'Could not set your password.' });
   }
 };
+
+/**
+ * POST /api/auth/session — email + phone (required) → upsert user + set cookie.
+ * Used by "Sign in to save homes" modal (no password required — magic-link users pattern).
+ * Optional password: if provided (≥8 chars), set/update password_hash.
+ */
+export const ensureSession = async (req, res) => {
+  try {
+    const { email, name, phone, password } = req.body || {};
+    const emailStr = String(email || '').trim().toLowerCase();
+    if (!EMAIL_RE.test(emailStr)) {
+      return res.status(400).json({ success: false, error: 'Please enter a valid email.' });
+    }
+    const phoneDigits = cleanPhone(phone);
+    if (!phoneDigits) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please add your phone number so we can reach you about saved homes.',
+      });
+    }
+
+    const pool = getPool();
+    let user = await pool.query('SELECT * FROM users WHERE email = $1', [emailStr]);
+    const nameStr = String(name || '').trim().slice(0, 255) || null;
+    const passStr = String(password || '');
+    let hash = null;
+    if (passStr.length >= 8) hash = await bcrypt.hash(passStr, 10);
+
+    if (!user.rows.length) {
+      const token = crypto.randomBytes(24).toString('hex');
+      const created = await pool.query(
+        `INSERT INTO users (email, name, phone, manage_token, password_hash, role, status, last_active_at)
+         VALUES ($1, $2, $3, $4, $5, 'client', 'active', NOW()) RETURNING *`,
+        [emailStr, nameStr, phoneDigits, token, hash]
+      );
+      user = created;
+    } else {
+      const updates = [
+        `status = 'active'`,
+        `last_active_at = NOW()`,
+        `phone = COALESCE(NULLIF($1, ''), phone)`,
+        `name = COALESCE(NULLIF($2, ''), name)`,
+      ];
+      const params = [phoneDigits, nameStr || ''];
+      let i = 3;
+      if (hash) {
+        updates.push(`password_hash = $${i++}`);
+        params.push(hash);
+      }
+      params.push(user.rows[0].id);
+      const updated = await pool.query(
+        `UPDATE users SET ${updates.join(', ')} WHERE id = $${i} RETURNING *`,
+        params
+      );
+      user = updated;
+    }
+
+    setAuthCookie(res, user.rows[0].manage_token);
+    return res.json({
+      success: true,
+      data: {
+        email: user.rows[0].email,
+        name: user.rows[0].name,
+        phone: user.rows[0].phone,
+      },
+    });
+  } catch (error) {
+    console.error('ensureSession error:', error);
+    return res.status(500).json({ success: false, error: 'Could not sign you in. Please try again.' });
+  }
+};

@@ -2,8 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   formatPrice,
   listingFullAddress,
-  isHomeSaved,
-  toggleSavedHome,
   matchSavedSearch,
   getSavedSearches,
 } from "../utils/listingHelpers.js";
@@ -15,6 +13,17 @@ import {
   HeartIcon,
   ShareIcon,
 } from "./detail";
+import SignInToSaveModal from "./SignInToSaveModal";
+import {
+  fetchSessionUser,
+  fetchSavedStatus,
+  listingKeyOf,
+  migrateLocalSavedHomes,
+  notifySavedHomesChanged,
+  saveHomeApi,
+  unsaveHomeApi,
+} from "../utils/savedHomesApi.js";
+import { isHomeSaved as isLocalHomeSaved } from "../utils/listingHelpers.js";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -37,6 +46,8 @@ export default function ListingDetailPanel({ slug, onClose }) {
   const [match, setMatch] = useState({ matches: false, reasons: [] });
   const [shareCopied, setShareCopied] = useState(false);
   const [entered, setEntered] = useState(false);
+  const [showSaveLogin, setShowSaveLogin] = useState(false);
+  const [pendingSaveAfterLogin, setPendingSaveAfterLogin] = useState(false);
   const scrollRef = useRef(null);
   const panelRef = useRef(null);
 
@@ -77,8 +88,26 @@ export default function ListingDetailPanel({ slug, onClose }) {
 
   useEffect(() => {
     if (!listing) return;
-    setSaved(isHomeSaved(listing.slug));
     setMatch(matchSavedSearch(listing, getSavedSearches()));
+    // Heart state: account-linked when signed in, else localStorage fallback
+    let cancelled = false;
+    (async () => {
+      const key = listingKeyOf(listing);
+      const keys = [listing.listing_id, listing.slug, listing.id != null ? String(listing.id) : null]
+        .filter(Boolean)
+        .map(String);
+      const user = await fetchSessionUser();
+      if (cancelled) return;
+      if (!user) {
+        setSaved(isLocalHomeSaved(listing.slug) || keys.some((k) => isLocalHomeSaved(k)));
+        return;
+      }
+      await migrateLocalSavedHomes();
+      if (cancelled) return;
+      const map = await fetchSavedStatus(keys.length ? keys : [key]);
+      if (cancelled) return;
+      setSaved(keys.some((k) => map[k]) || Boolean(map[String(key)]));
+    })();
     const lid = listing.listing_id || listing.id;
     if (lid) {
       fetch(`${API_BASE}/api/alerts/view`, {
@@ -88,6 +117,9 @@ export default function ListingDetailPanel({ slug, onClose }) {
         body: JSON.stringify({ listing_id: String(lid) }),
       }).catch(() => {});
     }
+    return () => {
+      cancelled = true;
+    };
   }, [listing]);
 
   // Similar homes (same city, type, beds ±1, price ±20%)
@@ -178,9 +210,37 @@ export default function ListingDetailPanel({ slug, onClose }) {
       }
     : {};
 
-  const onToggleSave = () => {
-    if (!listing?.slug) return;
-    setSaved(toggleSavedHome(listing.slug));
+  const onToggleSave = async () => {
+    if (!listing) return;
+    const key = listingKeyOf(listing);
+    if (!key) return;
+    const next = !saved;
+    setSaved(next); // optimistic
+    try {
+      if (next) await saveHomeApi(key);
+      else await unsaveHomeApi(key);
+      notifySavedHomesChanged({ listingKey: key, saved: next });
+    } catch (err) {
+      setSaved(!next);
+      if (err?.status === 401) {
+        setPendingSaveAfterLogin(true);
+        setShowSaveLogin(true);
+      }
+    }
+  };
+
+  const afterSaveLogin = async () => {
+    if (!listing || !pendingSaveAfterLogin) return;
+    setPendingSaveAfterLogin(false);
+    const key = listingKeyOf(listing);
+    if (!key) return;
+    setSaved(true);
+    try {
+      await saveHomeApi(key);
+      notifySavedHomesChanged({ listingKey: key, saved: true });
+    } catch {
+      setSaved(false);
+    }
   };
 
   const fullPageUrl = listing?.slug
@@ -294,8 +354,8 @@ export default function ListingDetailPanel({ slug, onClose }) {
                       ? "bg-[#CFB36E] border-[#CFB36E] text-black"
                       : "border-gray-300 text-gray-800 hover:border-black"
                   }`}
-                  aria-label={saved ? "Unsave home" : "Save this home on this device"}
-                  title={saved ? "Saved on this device" : "Save on this device"}
+                  aria-label={saved ? "Remove from saved homes" : "Save this home"}
+                  title={saved ? "Saved" : "Save home"}
                 >
                   <HeartIcon filled={saved} />
                 </button>
@@ -373,6 +433,14 @@ export default function ListingDetailPanel({ slug, onClose }) {
           />
         )}
       </div>
+      <SignInToSaveModal
+        open={showSaveLogin}
+        onClose={() => {
+          setShowSaveLogin(false);
+          setPendingSaveAfterLogin(false);
+        }}
+        onSuccess={afterSaveLogin}
+      />
     </div>
   );
 }
