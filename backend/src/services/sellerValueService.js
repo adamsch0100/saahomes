@@ -669,6 +669,34 @@ export async function recordValueView(profileId, userId, pool = getPool()) {
         [userId, JSON.stringify({ profile_id: profileId, reason: 'value_view_2x' })]
       );
     } catch { /* table may lack event — non-blocking */ }
+    // FUB nurture write-back (It 12) — only on first heat transition
+    try {
+      const userRow = await pool.query(
+        'SELECT email, name, phone FROM users WHERE id = $1',
+        [userId]
+      );
+      const u = userRow.rows[0];
+      if (u?.email) {
+        const { pushNurtureSignalToFollowUpBoss } = await import('./followUpBossService.js');
+        pushNurtureSignalToFollowUpBoss({
+          signal: 'value_view_2x',
+          email: u.email,
+          name: u.name,
+          phone: u.phone,
+          message: `Home value viewed ${profile.value_view_count}× — ${profile.address_line || 'address on file'}`,
+          property: {
+            street: profile.address_line || undefined,
+            city: profile.city || undefined,
+            code: profile.postal_code || undefined,
+            state: profile.state || 'CO',
+          },
+        }).catch(() => {});
+      }
+    } catch { /* FUB non-blocking */ }
+    try {
+      const { refreshLeadLifecycle } = await import('./agentCockpit.js');
+      refreshLeadLifecycle(userId, pool).catch(() => {});
+    } catch { /* noop */ }
   }
   return profile;
 }

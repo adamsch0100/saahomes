@@ -9,7 +9,7 @@ export default function MapSection({ listing, photos = [], interactive = true })
           id="detail-map-heading"
           className="text-xl sm:text-2xl font-bold text-gray-900 font-serif mb-3"
         >
-          Location &amp; neighborhood
+          Location &amp; Neighborhood
         </h2>
         <p className="text-sm text-gray-500">
           Contact us for location details —{" "}
@@ -46,9 +46,9 @@ export default function MapSection({ listing, photos = [], interactive = true })
         id="detail-map-heading"
         className="text-xl sm:text-2xl font-bold text-gray-900 font-serif mb-3"
       >
-        Location &amp; neighborhood
+        Location &amp; Neighborhood
       </h2>
-      <div className="rounded-xl overflow-hidden border border-gray-200 h-[260px] sm:h-[320px]">
+      <div className="rounded-xl overflow-hidden border border-gray-200 h-[300px] sm:h-[360px]">
         <ListingMap listings={mapListings} interactive={interactive} />
       </div>
       <p className="text-xs text-gray-400 mt-2">

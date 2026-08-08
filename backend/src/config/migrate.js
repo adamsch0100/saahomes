@@ -480,6 +480,28 @@ export const runMigrations = async () => {
       ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS home_profile_id INTEGER;
     `);
 
+    // ── Agent cockpit + FUB write-back (It 12) ───────────────────────────
+    // fub_person_id links our users row to Follow Up Boss people.id
+    // lifecycle_stage: new → nurturing → showing → active → closed/lost
+    // next_touch_at drives the "Due today" follow-up queue
+    await client.query(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS fub_person_id INTEGER;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS lifecycle_stage VARCHAR(32) DEFAULT 'new';
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS lifecycle_stage_manual BOOLEAN DEFAULT FALSE;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS next_touch_at TIMESTAMP;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS last_touched_at TIMESTAMP;
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_users_fub_person
+        ON users(fub_person_id) WHERE fub_person_id IS NOT NULL;
+      CREATE INDEX IF NOT EXISTS idx_users_next_touch
+        ON users(next_touch_at) WHERE next_touch_at IS NOT NULL;
+      CREATE INDEX IF NOT EXISTS idx_users_lead_score
+        ON users(lead_score DESC NULLS LAST);
+      CREATE INDEX IF NOT EXISTS idx_users_lifecycle
+        ON users(lifecycle_stage);
+    `);
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {

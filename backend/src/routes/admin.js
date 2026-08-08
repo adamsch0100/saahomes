@@ -1,5 +1,19 @@
 import express from 'express';
-import { login, getSubmissions, getSubmission, getStats, getClientSearches, createClientSearch, updateClientSearch, deleteClientSearch, searchStats } from '../controllers/adminController.js';
+import {
+  login,
+  getSubmissions,
+  getSubmission,
+  getStats,
+  getClientSearches,
+  createClientSearch,
+  updateClientSearch,
+  deleteClientSearch,
+  searchStats,
+  getCockpitLeads,
+  getDueTodayQueue,
+  patchCockpitLead,
+  getFubStatus,
+} from '../controllers/adminController.js';
 import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -18,6 +32,12 @@ router.post('/searches', authenticateToken, createClientSearch);
 router.patch('/searches/:id', authenticateToken, updateClientSearch);
 router.delete('/searches/:id', authenticateToken, deleteClientSearch);
 router.get('/search-stats', authenticateToken, searchStats);
+
+// Agent cockpit (It 12) — score / heat / lifecycle / due-today
+router.get('/cockpit', authenticateToken, getCockpitLeads);
+router.get('/cockpit/due-today', authenticateToken, getDueTodayQueue);
+router.patch('/cockpit/:id', authenticateToken, patchCockpitLead);
+router.get('/fub/status', authenticateToken, getFubStatus);
 
 export default router;
 

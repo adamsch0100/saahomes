@@ -38,6 +38,11 @@ export const submitContactForm = async (req, res) => {
       logger.error('Follow Up Boss forwarding failed (non-blocking)', err);
     });
 
+    // Cockpit lifecycle refresh when contact email maps to a users row
+    import('../services/agentCockpit.js')
+      .then(({ refreshLeadLifecycleByEmail }) => refreshLeadLifecycleByEmail(email))
+      .catch(() => {});
+
     recordLeadConversion('contact', req.body).catch((err) => {
       logger.warn('GA4 lead event failed (non-blocking)', { message: err.message });
     });

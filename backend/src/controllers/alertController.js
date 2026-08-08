@@ -156,6 +156,7 @@ export const createAlert = async (req, res) => {
     const searchRow = inserted.rows[0];
 
     // Lead → Follow Up Boss (fire-and-forget, never block the user)
+    // Captures fub_person_id from the Person response on our users row.
     forwardAlertSignupToFollowUpBoss(userRow, searchRow).catch(() => {});
 
     // Compute + store lead score from real signals (save-search just landed)
@@ -166,6 +167,12 @@ export const createAlert = async (req, res) => {
     } catch (e) {
       console.error('lead score on save failed:', e.message);
     }
+
+    // Lifecycle refresh for agent cockpit (stage + next-touch)
+    try {
+      const { refreshLeadLifecycle } = await import('../services/agentCockpit.js');
+      refreshLeadLifecycle(userRow.id, pool).catch(() => {});
+    } catch { /* noop */ }
 
     // Auto-login: the manage token becomes a long-lived httpOnly cookie so the
     // user is signed in on this device without ever entering a password.

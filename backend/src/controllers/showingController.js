@@ -41,11 +41,18 @@ export const submitShowingRequest = async (req, res) => {
        String(source_page || '').trim().slice(0, 255) || null]
     );
 
+    // FUB lead + person-id capture (fire-and-forget)
     forwardShowingRequestToFollowUpBoss({
       name: nameStr, email: emailStr, phone: phoneDigits,
       showing_date: date, showing_time: time, message: String(message || '').trim(),
       listing_slug: String(listing_slug || '').trim(), listing_address: String(listing_address || '').trim(),
     }).catch(() => {});
+
+    // Cockpit lifecycle: showing stage + next-touch (by email → users row if exists)
+    try {
+      const { refreshLeadLifecycleByEmail } = await import('../services/agentCockpit.js');
+      refreshLeadLifecycleByEmail(emailStr, pool).catch(() => {});
+    } catch { /* noop */ }
 
     return res.status(201).json({
       success: true,

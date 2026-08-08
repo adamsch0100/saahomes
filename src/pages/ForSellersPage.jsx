@@ -4,6 +4,7 @@ import LatestMarketUpdateBanner from "../components/LatestMarketUpdateBanner.jsx
 import AreaFAQSection from "../components/AreaFAQSection.jsx";
 import Testimonials from "../components/Testimonials.jsx";
 import MarketReportForm from "../components/MarketReportForm.jsx";
+import HomeValueCapture from "../components/HomeValueCapture.jsx";
 import { SELLER_FAQS } from "../data/buyerSellerFaqs.js";
 
 export default function ForSellersPage() {
@@ -240,7 +241,16 @@ export default function ForSellersPage() {
               Get a personalized market analysis for your home — what it's worth today, recent comps in your neighborhood, and a recommended pricing strategy from Adam and Mandi Schwartz.
             </p>
           </div>
-          <MarketReportForm areaName="Northern Colorado" />
+          <HomeValueCapture areaName="Northern Colorado" />
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-500">Prefer a written report by email?</p>
+            <a href="#market-report" className="text-sm font-semibold text-black underline underline-offset-2">
+              Request the full market report instead
+            </a>
+          </div>
+          <div className="mt-10">
+            <MarketReportForm areaName="Northern Colorado" />
+          </div>
         </div>
       </section>
 

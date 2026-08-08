@@ -308,7 +308,7 @@ export const patchHome = async (req, res) => {
 
 /**
  * POST /api/home/:id/heat — market-analysis / high-intent signal → SELLER HEAT
- * (FUB write-back is It 12 — we only set the field here.)
+ * + FUB nurture write-back (It 12) so Adam sees activity in CRM.
  */
 export const postSellerHeat = async (req, res) => {
   try {
@@ -318,20 +318,51 @@ export const postSellerHeat = async (req, res) => {
     const id = Number(req.params.id);
     const pool = getPool();
     const r = await pool.query(
-      'SELECT id FROM home_profiles WHERE id = $1 AND user_id = $2',
+      'SELECT id, address_line, city, postal_code FROM home_profiles WHERE id = $1 AND user_id = $2',
       [id, user.id]
     );
     if (!r.rows[0]) {
       return res.status(404).json({ success: false, error: 'Home profile not found.' });
     }
+    const profile = r.rows[0];
+    const reason = req.body?.reason || 'market_analysis_request';
 
     await pool.query(
       `UPDATE home_profiles SET seller_heat = TRUE, updated_at = NOW() WHERE id = $1`,
       [id]
     );
-    await flagSellerHeat(user.id, req.body?.reason || 'market_analysis_request', {
+    await flagSellerHeat(user.id, reason, {
       profile_id: id,
     }, pool);
+
+    // FUB nurture signal (source: saahomes.com) — fire-and-forget
+    try {
+      const { pushNurtureSignalToFollowUpBoss } = await import('../services/followUpBossService.js');
+      const signal = reason === 'value_view_2x' ? 'value_view_2x' : 'market_analysis';
+      pushNurtureSignalToFollowUpBoss({
+        signal,
+        email: user.email,
+        name: user.name,
+        phone: user.phone,
+        message: [
+          `Home: ${profile.address_line || '—'}`,
+          profile.city ? `City: ${profile.city}` : null,
+          profile.postal_code ? `Zip: ${profile.postal_code}` : null,
+          `Reason: ${reason}`,
+        ].filter(Boolean).join('\n'),
+        property: {
+          street: profile.address_line || undefined,
+          city: profile.city || undefined,
+          code: profile.postal_code || undefined,
+          state: 'CO',
+        },
+      }).catch(() => {});
+    } catch { /* noop */ }
+
+    try {
+      const { refreshLeadLifecycle } = await import('../services/agentCockpit.js');
+      refreshLeadLifecycle(user.id, pool).catch(() => {});
+    } catch { /* noop */ }
 
     return res.json({ success: true, data: { seller_heat: true } });
   } catch (error) {
