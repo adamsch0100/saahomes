@@ -27,6 +27,9 @@ const FREQ_LABEL = { daily: "Daily", weekly: "Weekly", immediate: "As it happens
 function filterSummary(filters = {}) {
   const parts = [];
   if (filters.city) parts.push(filters.city);
+  if (filters.postal_code || filters.postalCode) {
+    parts.push(`ZIP ${filters.postal_code || filters.postalCode}`);
+  }
   if (filters.minPrice || filters.maxPrice) {
     const f = (n) => (n ? `$${Number(n).toLocaleString()}` : "Any");
     parts.push(`${f(filters.minPrice)} – ${f(filters.maxPrice)}`);
@@ -42,12 +45,49 @@ function filterSummary(filters = {}) {
     parts.push(typeList.map((t) => TYPE_LABEL[t] || t).join(", "));
   }
   if (filters.minSqft) parts.push(`${Number(filters.minSqft).toLocaleString()}+ sqft`);
+  if (filters.minLotAcres || filters.maxLotAcres) {
+    if (filters.minLotAcres && filters.maxLotAcres) {
+      parts.push(`${filters.minLotAcres}–${filters.maxLotAcres} acres`);
+    } else if (filters.minLotAcres) parts.push(`${filters.minLotAcres}+ acres`);
+    else parts.push(`≤ ${filters.maxLotAcres} acres`);
+  }
+  if (filters.minYear || filters.maxYear) {
+    if (filters.minYear && filters.maxYear) parts.push(`${filters.minYear}–${filters.maxYear}`);
+    else if (filters.minYear) parts.push(`built ${filters.minYear}+`);
+    else parts.push(`built ≤ ${filters.maxYear}`);
+  }
   if (filters.garage) parts.push(`${filters.garage}+ garage`);
+  if (filters.stories) parts.push(filters.stories === "3" ? "3+ stories" : `${filters.stories} story`);
   if (filters.pool === "true" || filters.pool === true) parts.push("Pool");
   if (filters.waterfront === "true" || filters.waterfront === true) parts.push("Waterfront");
   if (filters.newConstruction === "true" || filters.newConstruction === true) parts.push("New construction");
+  if (filters.view) parts.push(`${filters.view} view`);
+  if (filters.style) parts.push(filters.style);
+  if (filters.community) parts.push(filters.community);
+  if (filters.exterior) parts.push(filters.exterior);
+  if (filters.cooling) parts.push(`Cooling: ${filters.cooling}`);
+  if (filters.heating) parts.push(`Heating: ${filters.heating}`);
+  if (filters.parking) parts.push(`Parking: ${filters.parking}`);
+  if (filters.interior) {
+    const toks = String(filters.interior).split(",").map((t) => t.trim()).filter(Boolean);
+    if (toks.length) parts.push(toks.join(", "));
+  }
+  // Home status (status=) or legacy overlay (listingStatus=price-drop|new)
+  const homeStatus = filters.status || (
+    ["Active Under Contract", "Pending", "Sold", "Withdrawn", "Expired"].includes(filters.listingStatus)
+      ? filters.listingStatus
+      : ""
+  );
+  if (homeStatus === "Active Under Contract") parts.push("Backup offers accepted");
+  else if (homeStatus === "Pending") parts.push("Pending");
+  else if (homeStatus === "Sold") parts.push("Recently sold");
+  else if (homeStatus === "Withdrawn") parts.push("Withdrawn");
+  else if (homeStatus === "Expired") parts.push("Expired");
   if (filters.listingStatus === "price-drop") parts.push("Price drops");
   if (filters.listingStatus === "new") parts.push("New listings");
+  if (filters.newDays) parts.push(`New ≤ ${filters.newDays}d`);
+  if (filters.dropDays) parts.push(`Dropped ≤ ${filters.dropDays}d`);
+  if (filters.dropPct) parts.push(`Drop ≥ ${filters.dropPct}%`);
   if (filters.keywords) {
     const mode = filters.keywordMode && filters.keywordMode !== "all"
       ? ` (${filters.keywordMode})`
@@ -56,7 +96,9 @@ function filterSummary(filters = {}) {
   }
   if (filters.polygon) parts.push("Custom map area");
   if (filters.basement) parts.push(filters.basement === "true" ? "Basement" : `Basement: ${filters.basement}`);
-  if (filters.maxHoa) parts.push(`HOA ≤ $${filters.maxHoa}`);
+  if (filters.maxHoa) parts.push(filters.maxHoa === "0" || filters.maxHoa === 0 ? "No HOA" : `HOA ≤ $${filters.maxHoa}`);
+  if (filters.hasImages === "true" || filters.hasImages === true) parts.push("Has photos");
+  if (filters.hasTour === "true" || filters.hasTour === true || filters.has3d === "true") parts.push("Virtual tour");
   return parts.length ? parts.join(" · ") : "All Northern Colorado";
 }
 
