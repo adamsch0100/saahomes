@@ -1512,6 +1512,15 @@ export default function ListingSearch({ location, height = "700px", compact = fa
   const [error, setError] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
   const [view, setView] = useState("list");
+  // Card grid density: 1|2|3 columns on desktop (default 2). Persisted per device.
+  const [density, setDensity] = useState(() => {
+    try {
+      const saved = Number(window.localStorage.getItem("saa-card-density"));
+      return saved === 1 || saved === 2 || saved === 3 ? saved : 2;
+    } catch {
+      return 2;
+    }
+  });
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [homeTypeOpen, setHomeTypeOpen] = useState(false);
   const [drawEnabled, setDrawEnabled] = useState(false);
@@ -1849,6 +1858,13 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     ? `Updating results…`
     : `Showing ${meta.total.toLocaleString()} home${meta.total === 1 ? "" : "s"} in ${areaLabel}`;
 
+  // Card grid columns by density (1/2/3, default 2). Viewport-based md+ so desktop
+  // always shows the chosen density even when the results panel is narrower than
+  // 560px (container-query @[560px] collapsed to 1 col on 1280–1440px laptops — Adam, Aug 8).
+  const cardGridClass = `grid grid-cols-1 gap-3 md:gap-4 ${
+    density === 3 ? "md:grid-cols-3" : density === 1 ? "" : "md:grid-cols-2"
+  }`;
+
   // GEO: ItemList of first page of results (max 24) — list or map mode.
   // Only real active MLS rows; canonical /homes-for-sale/{slug}/ URLs.
   const listingsItemList = useMemo(
@@ -2100,6 +2116,31 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                 ★ Match chips show homes that fit your saved search
               </span>
             )}
+            <div
+              className="flex items-center gap-0.5 rounded-lg border border-gray-200 bg-white p-0.5"
+              role="group"
+              aria-label="Results per row"
+            >
+              {[1, 2, 3].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => {
+                    setDensity(n);
+                    try {
+                      window.localStorage.setItem("saa-card-density", String(n));
+                    } catch {}
+                  }}
+                  aria-pressed={density === n}
+                  title={n === 1 ? "One column" : `${n} columns`}
+                  className={`min-h-[40px] w-9 rounded-md text-xs font-bold touch-manipulation transition-colors ${
+                    density === n ? "bg-black text-white" : "text-gray-500 hover:text-black"
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
             <label className="flex items-center gap-2 text-sm text-gray-600">
               <span className="sr-only sm:not-sr-only">Sort</span>
               <select
@@ -2289,7 +2330,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
               className={
                 isNarrow && view === "list"
                   ? "p-3 sm:p-4 flex flex-col gap-3"
-                  : "p-3 sm:p-4 grid grid-cols-1 @[560px]:grid-cols-2 gap-3 @[560px]:gap-4"
+                  : `p-3 sm:p-4 ${cardGridClass}`
               }
             >
               {Array.from({ length: 6 }).map((_, i) => (
@@ -2370,7 +2411,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                 className={
                   isNarrow && view === "list"
                     ? "flex flex-col gap-3"
-                    : "grid grid-cols-1 @[560px]:grid-cols-2 gap-3 @[560px]:gap-4"
+                    : cardGridClass
                 }
               >
                 {results.map((listing) => (
