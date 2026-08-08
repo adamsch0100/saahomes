@@ -9,7 +9,7 @@ const API_BASE = (() => {
 })();
 
 const CHAT_NAME = "Nadia";
-const CHAT_TITLE = "Real Estate Assistant";
+const CHAT_TITLE = "Your Home Assistant";
 const AVATAR_PATH = "/images/nadia-avatar.jpg";
 
 export default function LeadCaptureChat() {
@@ -321,7 +321,7 @@ export default function LeadCaptureChat() {
                 <p className="font-semibold text-sm">{CHAT_NAME} — {CHAT_TITLE}</p>
                 <p className="text-xs text-gray-400 flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-green-400 inline-block" />
-                  Usually replies in seconds
+                  Ready to help · replies in a moment
                 </p>
               </div>
             </div>
@@ -489,21 +489,20 @@ export default function LeadCaptureChat() {
         </div>
       )}
 
-      {/* Chat Bubble */}
+      {/* Chat Bubble — assistant avatar, ready to help */}
       <button
         onClick={isOpen ? () => setIsOpen(false) : handleOpen}
-        className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-white text-xl transition-all duration-200 hover:scale-105 active:scale-95 ${
-          isOpen ? "bg-gray-800 rotate-45" : showNudge ? "bg-black" : "bg-black/80 hover:bg-black"
+        className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-white transition-all duration-200 hover:scale-105 active:scale-95 overflow-hidden ${
+          isOpen ? "bg-gray-800 rotate-45" : showNudge ? "ring-4 ring-[#CFB36E]/60" : "ring-2 ring-[#CFB36E]/40"
         }`}
         style={!isOpen && showNudge ? { animation: 'chatPulse 2s ease-in-out infinite' } : {}}
-        aria-label={`Chat with ${CHAT_NAME}`}
+        aria-label={`Ask ${CHAT_NAME} — your home assistant`}
+        title={`Ask ${CHAT_NAME}`}
       >
         {isOpen ? (
-          <span className="text-2xl font-light">&times;</span>
+          <span className="text-2xl font-light text-white">&times;</span>
         ) : (
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-          </svg>
+          <img src={AVATAR_PATH} alt={`Ask ${CHAT_NAME}`} className="w-full h-full object-cover" />
         )}
       </button>
     </div>

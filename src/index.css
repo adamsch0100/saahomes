@@ -44,13 +44,27 @@
   overflow: hidden;
 }
 .saa-mapbox-popup .mapboxgl-popup-close-button {
-  font-size: 18px;
-  padding: 4px 8px;
-  color: #111;
-  z-index: 2;
-  width: 28px;
-  height: 28px;
+  font-size: 15px;
+  padding: 0;
+  color: #fff;
+  z-index: 3;
+  width: 26px;
+  height: 26px;
   line-height: 1;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.55);
+  top: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+.saa-mapbox-popup .mapboxgl-popup-close-button:hover {
+  background: rgba(0, 0, 0, 0.85);
+}
+.saa-map-popup img {
+  display: block;
 }
 .saa-mapbox-popup .mapboxgl-popup-tip {
   border-top-color: #fff;

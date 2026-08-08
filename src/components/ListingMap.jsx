@@ -115,6 +115,8 @@ export default function ListingMap({
         zoom: 8.5,
         attributionControl: true,
         interactive,
+        scrollZoom: true,
+        dragPan: true,
       });
       if (interactive) {
         map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "top-right");
@@ -274,25 +276,37 @@ export default function ListingMap({
                 </div>
               </div>`;
           } else {
+            const photoCount =
+              Array.isArray(listing.photos) && listing.photos.length > 0 ? listing.photos.length : 1;
+            let photoIdx = 0;
             el.innerHTML = `
-              <button type="button" data-saa-open-listing class="block w-full text-left bg-white rounded-xl overflow-hidden shadow-xl w-60 border border-gray-100 cursor-pointer p-0">
-                <div class="aspect-[4/3] bg-gray-100 overflow-hidden relative">
-                  <img src="${photoUrl(listing.id, 0)}" alt="${addr || "home"}"
+              <div type="button" data-saa-open-listing class="block w-full text-left bg-white rounded-xl overflow-hidden shadow-xl w-60 border border-gray-100 cursor-pointer p-0">
+                <div class="relative aspect-[4/3] bg-gray-100 overflow-hidden">
+                  <img data-saa-popup-img src="${photoUrl(listing.id, photoIdx)}" alt="${addr || "home"}"
                     class="w-full h-full object-cover"
                     onerror="this.onerror=null;this.src='/images/buyers-hero.jpg'" />
                   <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent px-2.5 pb-2 pt-6">
                     <p class="font-bold text-base text-white m-0">${formatPrice(listing.list_price)}</p>
                   </div>
+                  ${
+                    photoCount > 1
+                      ? `<button type="button" data-saa-prev aria-label="Previous photo"
+                          class="absolute left-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/60 hover:bg-black text-white text-sm font-bold flex items-center justify-center border border-white/30">‹</button>
+                        <button type="button" data-saa-next aria-label="Next photo"
+                          class="absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/60 hover:bg-black text-white text-sm font-bold flex items-center justify-center border border-white/30">›</button>
+                        <span data-saa-counter class="absolute top-9 right-1.5 text-[10px] font-bold text-white bg-black/50 rounded-full px-1.5 py-0.5">1/${photoCount}</span>`
+                      : ""
+                  }
                 </div>
                 <div class="p-3">
                   <p class="text-xs font-semibold text-gray-800 m-0 truncate">${stats}</p>
                   <p class="text-xs text-gray-500 mt-1 mb-0 truncate">${addr}${listing.city ? `, ${listing.city}` : ""}</p>
                   <p class="text-xs font-semibold text-[#8a7340] mt-2 mb-0">View details →</p>
                 </div>
-              </button>`;
-            const btn = el.querySelector("[data-saa-open-listing]");
-            if (btn) {
-              btn.addEventListener("click", (ev) => {
+              </div>`;
+            const card = el.querySelector("[data-saa-open-listing]");
+            if (card) {
+              card.addEventListener("click", (ev) => {
                 ev.preventDefault();
                 ev.stopPropagation();
                 if (onOpenListingRef.current) {
@@ -302,6 +316,26 @@ export default function ListingMap({
                 }
               });
             }
+            // Photo carousel — prev/next cycle through the listing's photos.
+            const img = el.querySelector("[data-saa-popup-img]");
+            const prevBtn = el.querySelector("[data-saa-prev]");
+            const nextBtn = el.querySelector("[data-saa-next]");
+            const counter = el.querySelector("[data-saa-counter]");
+            const setPhoto = (i) => {
+              photoIdx = (i + photoCount) % photoCount;
+              if (img) img.src = photoUrl(listing.id, photoIdx);
+              if (counter) counter.textContent = `${photoIdx + 1}/${photoCount}`;
+            };
+            prevBtn?.addEventListener("click", (ev) => {
+              ev.preventDefault();
+              ev.stopPropagation();
+              setPhoto(photoIdx - 1);
+            });
+            nextBtn?.addEventListener("click", (ev) => {
+              ev.preventDefault();
+              ev.stopPropagation();
+              setPhoto(photoIdx + 1);
+            });
           }
           return el;
         };

@@ -181,7 +181,6 @@ export default function ConversionRail({
             buttonLabel="Get alerts for homes like this"
             buttonClassName="w-full inline-flex items-center justify-center px-6 py-2.5 border border-white/40 text-white text-sm font-semibold rounded-lg hover:border-white transition-colors"
           />
-          {hoaLabel && <p className="text-xs text-gray-400 pt-0.5">HOA: {hoaLabel}</p>}
         </div>
         <p className="text-[11px] text-gray-500 mt-4 leading-relaxed">
           Live IRES MLS data · Updated daily. Listing data from {listing.mls_source || "IRES"} MLS.
@@ -208,15 +207,6 @@ export default function ConversionRail({
         >
           (970) 999-1407
         </a>
-        <p className="mt-2 text-[10px] text-gray-500 flex items-center gap-1.5">
-          <span
-            aria-hidden="true"
-            className="inline-block w-3 h-3 border border-gray-400 rounded-sm text-[7px] leading-3 text-center font-bold text-gray-500"
-          >
-            =
-          </span>
-          Equal Housing Opportunity
-        </p>
       </div>
 
       {/* Compact est. payment teaser — scrolls to full calculator in main content */}

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { rememberSavedSearch } from "../utils/listingHelpers.js";
 
 const API_BASE = (() => {
@@ -243,14 +244,15 @@ export default function SaveSearchModal({
         {buttonLabel}
       </button>
 
-      {open && (
-        <div
-          className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4"
-          onClick={resetAndClose}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="save-search-title"
-        >
+      {open &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4"
+            onClick={resetAndClose}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="save-search-title"
+          >
           <div
             className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 max-h-[92vh] overflow-y-auto pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]"
             onClick={(e) => e.stopPropagation()}
@@ -523,8 +525,9 @@ export default function SaveSearchModal({
               </>
             )}
           </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </>
   );
 }

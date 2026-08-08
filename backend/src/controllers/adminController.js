@@ -181,11 +181,12 @@ export const getClientSearches = async (req, res) => {
     const like = `%${q.trim()}%`;
     const users = await getPool().query(
       `SELECT u.id, u.email, u.name, u.phone, u.role, u.status, u.created_at, u.last_active_at,
+              u.lead_score, u.lifecycle_stage, u.next_touch_at, u.fub_person_id, u.seller_heat,
               (SELECT COUNT(*) FROM saved_searches s WHERE s.user_id = u.id) AS search_count,
               (SELECT COUNT(*) FROM saved_searches s WHERE s.user_id = u.id AND s.is_active) AS active_count
        FROM users u
        WHERE ($1 = '%%' OR u.email ILIKE $1 OR u.name ILIKE $1 OR u.phone ILIKE $1)
-       ORDER BY u.created_at DESC LIMIT $2`,
+       ORDER BY COALESCE(u.lead_score, 0) DESC, u.created_at DESC LIMIT $2`,
       [like, limitNum]
     );
     const ids = users.rows.map((u) => u.id);
@@ -322,5 +323,207 @@ export const searchStats = async (req, res) => {
   } catch (error) {
     logger.error('Error fetching search stats', error);
     res.status(500).json({ error: 'Failed to fetch search stats' });
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Agent cockpit (It 12) — score, heat, lifecycle, next-touch, due-today queue
+// ---------------------------------------------------------------------------
+
+/**
+ * GET /api/admin/cockpit?q=&stage=&due=today&limit=
+ * Lead list with score, heat 🔥, lifecycle stage, next-touch due date.
+ * Derived from real events only.
+ */
+export const getCockpitLeads = async (req, res) => {
+  try {
+    const { q = '', stage = '', due = '', limit = 100 } = req.query;
+    const limitNum = Math.min(parseInt(limit, 10) || 100, 200);
+    const like = `%${String(q).trim()}%`;
+    const pool = getPool();
+
+    // Base user list — prefer scored / recently active
+    const users = await pool.query(
+      `SELECT u.id, u.email, u.name, u.phone, u.role, u.status, u.intent,
+              u.lead_score, u.lead_score_updated_at, u.seller_heat, u.seller_heat_at,
+              u.lifecycle_stage, u.lifecycle_stage_manual, u.next_touch_at, u.last_touched_at,
+              u.fub_person_id, u.created_at, u.last_active_at,
+              (SELECT COUNT(*)::int FROM saved_searches s WHERE s.user_id = u.id) AS search_count,
+              (SELECT COUNT(*)::int FROM home_profiles hp WHERE hp.user_id = u.id) AS home_count
+       FROM users u
+       WHERE u.status IS DISTINCT FROM 'unsubscribed'
+         AND ($1 = '%%' OR u.email ILIKE $1 OR u.name ILIKE $1 OR u.phone ILIKE $1)
+       ORDER BY COALESCE(u.lead_score, 0) DESC, u.last_active_at DESC NULLS LAST, u.created_at DESC
+       LIMIT $2`,
+      [like, limitNum]
+    );
+
+    const { enrichLeadForCockpit } = await import('../services/agentCockpit.js');
+    const enriched = [];
+    for (const row of users.rows) {
+      const lead = await enrichLeadForCockpit(row, { persist: true }, pool);
+      lead.search_count = Number(row.search_count) || 0;
+      lead.home_count = Number(row.home_count) || 0;
+      enriched.push(lead);
+    }
+
+    let filtered = enriched;
+    if (stage && stage !== 'all') {
+      filtered = filtered.filter((l) => l.lifecycle_stage === stage);
+    }
+    if (due === 'today') {
+      filtered = filtered.filter((l) => l.is_due_today);
+      // Due today: sort by score/heat desc
+      filtered.sort((a, b) => {
+        if (a.is_hot !== b.is_hot) return a.is_hot ? -1 : 1;
+        return (b.lead_score || 0) - (a.lead_score || 0);
+      });
+    }
+
+    const dueTodayCount = enriched.filter((l) => l.is_due_today).length;
+    const hotCount = enriched.filter((l) => l.is_hot).length;
+
+    return res.json({
+      success: true,
+      data: filtered,
+      meta: {
+        total: filtered.length,
+        due_today: dueTodayCount,
+        hot: hotCount,
+        fub_configured: !!(process.env.FOLLOW_UP_BOSS_API_KEY || process.env.FOLLOW_UP_BOSS_WEBHOOK_URL),
+      },
+    });
+  } catch (error) {
+    logger.error('Error fetching cockpit leads', error);
+    res.status(500).json({ error: 'Failed to fetch cockpit leads' });
+  }
+};
+
+/**
+ * GET /api/admin/cockpit/due-today
+ * Follow-up queue: who needs contact today, sorted by heat then score.
+ */
+export const getDueTodayQueue = async (req, res) => {
+  try {
+    // Reuse cockpit with due=today filter
+    req.query = { ...req.query, due: 'today', limit: req.query.limit || '50' };
+    return getCockpitLeads(req, res);
+  } catch (error) {
+    logger.error('Error fetching due-today queue', error);
+    res.status(500).json({ error: 'Failed to fetch due-today queue' });
+  }
+};
+
+/**
+ * PATCH /api/admin/cockpit/:id
+ * Manually set lifecycle_stage and/or next_touch_at / last_touched_at.
+ * Body: { lifecycle_stage?, next_touch_at?, mark_touched?: true }
+ */
+export const patchCockpitLead = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0) {
+      return res.status(400).json({ error: 'Invalid lead id' });
+    }
+    const body = req.body || {};
+    const pool = getPool();
+    const existing = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+    if (!existing.rows[0]) {
+      return res.status(404).json({ error: 'Lead not found' });
+    }
+
+    const updates = [];
+    const params = [];
+    let i = 1;
+
+    if (body.lifecycle_stage != null) {
+      const stage = String(body.lifecycle_stage).toLowerCase().trim();
+      const { LIFECYCLE_STAGES } = await import('../services/agentCockpit.js');
+      if (!LIFECYCLE_STAGES.includes(stage)) {
+        return res.status(400).json({
+          error: `lifecycle_stage must be one of: ${LIFECYCLE_STAGES.join(', ')}`,
+        });
+      }
+      updates.push(`lifecycle_stage = $${i++}`);
+      params.push(stage);
+      updates.push(`lifecycle_stage_manual = TRUE`);
+    }
+
+    if (body.next_touch_at !== undefined) {
+      if (body.next_touch_at === null || body.next_touch_at === '') {
+        updates.push('next_touch_at = NULL');
+      } else {
+        const d = new Date(body.next_touch_at);
+        if (Number.isNaN(d.getTime())) {
+          return res.status(400).json({ error: 'Invalid next_touch_at date' });
+        }
+        updates.push(`next_touch_at = $${i++}`);
+        params.push(d);
+      }
+    }
+
+    if (body.mark_touched === true) {
+      updates.push('last_touched_at = NOW()');
+      // Default next touch from stage cadence if not explicitly set
+      if (body.next_touch_at === undefined) {
+        const { deriveNextTouchAt } = await import('../services/agentCockpit.js');
+        const stage = body.lifecycle_stage
+          || existing.rows[0].lifecycle_stage
+          || 'nurturing';
+        const next = deriveNextTouchAt(stage, {
+          lastTouchedAt: new Date(),
+          createdAt: existing.rows[0].created_at,
+          lastActiveAt: existing.rows[0].last_active_at,
+        });
+        if (next) {
+          updates.push(`next_touch_at = $${i++}`);
+          params.push(next);
+        } else {
+          updates.push('next_touch_at = NULL');
+        }
+      }
+    }
+
+    if (!updates.length) {
+      return res.status(400).json({ error: 'Nothing to update' });
+    }
+
+    params.push(id);
+    await pool.query(
+      `UPDATE users SET ${updates.join(', ')} WHERE id = $${i}`,
+      params
+    );
+
+    const refreshed = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+    const { enrichLeadForCockpit } = await import('../services/agentCockpit.js');
+    const lead = await enrichLeadForCockpit(refreshed.rows[0], { persist: false }, pool);
+    return res.json({ success: true, data: lead });
+  } catch (error) {
+    logger.error('Error patching cockpit lead', error);
+    res.status(500).json({ error: 'Failed to update lead' });
+  }
+};
+
+/**
+ * GET /api/admin/fub/status — configured flag + optional live people count (read-only).
+ * Never creates a test person.
+ */
+export const getFubStatus = async (req, res) => {
+  try {
+    const { isFollowUpBossConfigured, getFollowUpBossPeopleCount } = await import(
+      '../services/followUpBossService.js'
+    );
+    const configured = isFollowUpBossConfigured();
+    if (!configured) {
+      return res.json({
+        success: true,
+        data: { configured: false, message: 'FOLLOW_UP_BOSS_API_KEY not set — FUB writes skipped cleanly.' },
+      });
+    }
+    const count = await getFollowUpBossPeopleCount();
+    return res.json({ success: true, data: { configured: true, ...count } });
+  } catch (error) {
+    logger.error('Error checking FUB status', error);
+    res.status(500).json({ error: 'Failed to check FUB status' });
   }
 };

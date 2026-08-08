@@ -1582,7 +1582,13 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     setError(null);
     try {
       const params = filtersToParams(f, { pageNum });
-      const res = await fetch(`${API_BASE}/api/listings?${params}`);
+      const res = await fetch(`${API_BASE}/api/listings?${params}`, {
+        // Deploy rolls swap the backend instance; a fetch that lands mid-swap
+        // can hang indefinitely (no server response, no abort). Timeout +
+        // stale-gen guard turns that into a visible error instead of a
+        // forever "Updating results…" spinner. (Adam, Aug 8)
+        signal: AbortSignal.timeout(15000),
+      });
       if (!res.ok) throw new Error("Search failed");
       const data = await res.json();
       // Drop stale responses (rapid filter changes / debounce races)
@@ -1593,7 +1599,8 @@ export default function ListingSearch({ location, height = "700px", compact = fa
       setPage(pageNum);
     } catch (err) {
       if (gen !== fetchGen.current) return;
-      setError(err.message);
+      const timedOut = err?.name === "TimeoutError" || err?.name === "AbortError";
+      setError(timedOut ? "The search is taking longer than expected. Check your connection and try again." : err.message);
       if (!append) setResults([]);
     } finally {
       if (gen === fetchGen.current) {

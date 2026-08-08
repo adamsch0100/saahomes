@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
-import { BUSINESS } from "../utils/seoConstants";
+import { BUSINESS, formatBusinessAddress } from "../utils/seoConstants";
 
 const CITIES = [
   { name: "Fort Collins", slug: "fort-collins", tag: "CSU and Old Town" },
@@ -473,7 +473,7 @@ export default function CashHomeBuyersPage() {
             <CashBuyerLeadForm />
           </div>
           <p className="text-xs text-gray-500 text-center mt-6">
-            {BUSINESS.name} &bull; {BUSINESS.address} &bull; {BUSINESS.phone} &bull; Fair Housing Equal Opportunity
+            {BUSINESS.name} &bull; {formatBusinessAddress()} &bull; {BUSINESS.phone} &bull; Fair Housing Equal Opportunity
           </p>
         </div>
       </section>

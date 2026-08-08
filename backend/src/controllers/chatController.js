@@ -224,6 +224,11 @@ export const handleChatMessage = async (req, res) => {
       tokensOut: data.usage?.completion_tokens,
     });
 
+    // Human-feeling reply cadence — brief natural delay so replies don't land
+    // instantly like a machine (Adam, Aug 8). The frontend shows a typing
+    // indicator during this window.
+    await new Promise((r) => setTimeout(r, 1200 + Math.random() * 1600));
+
     res.json({
       reply: finalReply, // forward as-is — frontend detects [[HANDOFF]] / [[TRANSFER]] and strips them
       usage: data.usage,

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { adminLogin, getSubmissions, getStats } from '../utils/api.js';
 import ClientSearchesManager from '../components/admin/ClientSearchesManager.jsx';
+import AgentCockpit from '../components/admin/AgentCockpit.jsx';
 import SEO from '../components/SEO';
 
 export default function AdminPage() {
@@ -12,7 +13,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [filterType, setFilterType] = useState('all');
-  const [tab, setTab] = useState('leads'); // leads | searches
+  const [tab, setTab] = useState('cockpit'); // cockpit | leads | searches
 
   useEffect(() => {
     if (token) {
@@ -169,34 +170,46 @@ export default function AdminPage() {
       />
       <div className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8 flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+          <div className="mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Agent Cockpit</h1>
+              <p className="text-sm text-gray-500 mt-1">Scores, heat, stages &amp; follow-ups — FUB stays CRM source of truth.</p>
+            </div>
             <button
               onClick={handleLogout}
-              className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+              className="min-h-[44px] px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 self-start sm:self-auto"
             >
               Logout
             </button>
           </div>
 
-          <div className="mb-6 flex gap-2">
+          <div className="mb-6 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setTab('cockpit')}
+              className={`min-h-[44px] px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${tab === 'cockpit' ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-200 hover:border-black'}`}
+            >
+              Cockpit
+            </button>
             <button
               type="button"
               onClick={() => setTab('leads')}
-              className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${tab === 'leads' ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-200 hover:border-black'}`}
+              className={`min-h-[44px] px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${tab === 'leads' ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-200 hover:border-black'}`}
             >
-              Leads
+              Form Leads
             </button>
             <button
               type="button"
               onClick={() => setTab('searches')}
-              className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${tab === 'searches' ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-200 hover:border-black'}`}
+              className={`min-h-[44px] px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${tab === 'searches' ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-200 hover:border-black'}`}
             >
               Client Searches
             </button>
           </div>
 
-          {tab === 'searches' ? (
+          {tab === 'cockpit' ? (
+            <AgentCockpit token={token} />
+          ) : tab === 'searches' ? (
             <ClientSearchesManager token={token} />
           ) : (
           <>

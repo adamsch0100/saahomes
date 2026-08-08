@@ -270,15 +270,57 @@ export async function recordPropertyView(userId, listingKey, pool = getPool()) {
      LIMIT 1`,
     [userId, listingId]
   );
+  let inserted = false;
   if (!recent.rows.length) {
     await pool.query(
       'INSERT INTO property_views (user_id, listing_id) VALUES ($1, $2)',
       [userId, listingId]
     );
+    inserted = true;
   }
 
   await pool.query('UPDATE users SET last_active_at = NOW() WHERE id = $1', [userId]);
   const { score, breakdown } = await computeAndStoreLeadScore(userId, pool);
+
+  // Nurture signal → FUB when a listing is viewed 2+ times (real signal only)
+  if (inserted) {
+    try {
+      const viewCount = await pool.query(
+        `SELECT COUNT(*)::int AS n FROM property_views
+         WHERE user_id = $1 AND listing_id = $2`,
+        [userId, listingId]
+      );
+      if (viewCount.rows[0]?.n === 2) {
+        const userRow = await pool.query(
+          'SELECT email, name, phone FROM users WHERE id = $1',
+          [userId]
+        );
+        const u = userRow.rows[0];
+        if (u?.email) {
+          const { pushNurtureSignalToFollowUpBoss } = await import('./followUpBossService.js');
+          pushNurtureSignalToFollowUpBoss({
+            signal: 'listing_view_2x',
+            email: u.email,
+            name: u.name,
+            phone: u.phone,
+            message: `Listing: ${listingId}`,
+            property: { mlsNumber: listingId },
+          }).catch(() => {});
+          await pool.query(
+            `INSERT INTO user_events (user_id, event_type, meta) VALUES ($1, 'listing_view_2x', $2::jsonb)`,
+            [userId, JSON.stringify({ listing_id: listingId })]
+          ).catch(() => {});
+        }
+      }
+    } catch {
+      // FUB write-back is non-blocking
+    }
+    try {
+      const { refreshLeadLifecycle } = await import('./agentCockpit.js');
+      refreshLeadLifecycle(userId, pool).catch(() => {});
+    } catch { /* noop */ }
+  }
+
   return { listing_id: listingId, lead_score: score, breakdown };
 }
 

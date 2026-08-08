@@ -146,3 +146,31 @@ export const getStats = async (token) => {
     },
   });
 };
+
+/** Agent cockpit — leads with score / heat / lifecycle / next-touch */
+export const getCockpitLeads = async (token, params = {}) => {
+  const queryString = new URLSearchParams(params).toString();
+  return apiRequest(`/api/admin/cockpit?${queryString}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const patchCockpitLead = async (token, id, body) => {
+  return apiRequest(`/api/admin/cockpit/${id}`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+};
+
+export const getFubStatus = async (token) => {
+  return apiRequest('/api/admin/fub/status', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

@@ -6,6 +6,7 @@ import { submitChfaLeadForm } from '../controllers/chfaLeadController.js';
 import { submitChampionsLeadForm } from '../controllers/championsLeadController.js';
 import { submitChfaDpaLeadForm } from '../controllers/chfaDpaLeadController.js';
 import { submitGhopeLeadForm } from '../controllers/ghopeLeadController.js';
+import { submitCashBuyerLead } from '../controllers/cashBuyerController.js';
 import { handleChatMessage } from '../controllers/chatController.js';
 import {
   searchListings,
@@ -98,6 +99,8 @@ router.post(
   handleValidationErrors,
   submitGhopeLeadForm
 );
+
+router.post('/cash-buyer-lead', formLimiter, submitCashBuyerLead);
 
 // AI Chat — lighter rate limit for conversation flow
 const chatLimiter = rateLimit({

@@ -86,7 +86,7 @@ export default function AllDetailsSection({ listing }) {
           id="detail-listing-details-heading"
           className="text-xl sm:text-2xl font-bold text-gray-900 font-serif mb-4"
         >
-          Listing details
+          Listing Details
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <KeyFact label="Price" value={formatPrice(listing.list_price)} />
