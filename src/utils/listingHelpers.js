@@ -109,7 +109,9 @@ export function homeTypeLabel(listing) {
   return "";
 }
 
-// ── Saved homes (local) ────────────────────────────────────────────────
+// ── Saved homes (legacy localStorage — migrated to account on login) ──
+// Prefer SaveHomeButton + /api/saved-homes for account-linked hearts.
+// These helpers remain for guest fallback + one-time migration only.
 const SAVED_HOMES_KEY = "saa-saved-homes";
 
 export function getSavedHomes() {
@@ -125,6 +127,7 @@ export function isHomeSaved(slug) {
   return getSavedHomes().includes(slug);
 }
 
+/** @deprecated Prefer account-linked SaveHomeButton; kept for guest offline fallback */
 export function toggleSavedHome(slug) {
   if (!slug) return false;
   const list = getSavedHomes();

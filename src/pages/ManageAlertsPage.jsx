@@ -2,6 +2,13 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import SEO from "../components/SEO";
 import { photoUrl } from "../utils/photoUrl.js";
+import ListingDetailPanel from "../components/ListingDetailPanel";
+import {
+  fetchSavedHomes,
+  migrateLocalSavedHomes,
+  unsaveHomeApi,
+  notifySavedHomesChanged,
+} from "../utils/savedHomesApi.js";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -118,9 +125,94 @@ function PreviewCard({ preview, matchCount, editPath }) {
   );
 }
 
+function SavedHomeCard({ home, onUnsave, onOpen, busy }) {
+  const imgSrc = home.listing_db_id
+    ? photoUrl(home.listing_db_id, 0)
+    : home.photo_url?.startsWith("/api/photo/")
+      ? `${API_BASE}${home.photo_url}`
+      : "/images/buyers-hero.jpg";
+  const canOpen = Boolean(home.slug) && !home.off_market;
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm flex flex-col sm:flex-row">
+      <button
+        type="button"
+        onClick={() => canOpen && onOpen?.(home)}
+        disabled={!canOpen}
+        className={`shrink-0 w-full sm:w-40 h-40 sm:h-auto sm:min-h-[140px] bg-gray-100 relative ${canOpen ? "cursor-pointer" : "cursor-default"}`}
+        aria-label={canOpen ? `Open ${home.property_address || "saved home"}` : "Off market home"}
+      >
+        <img
+          src={imgSrc}
+          alt={home.property_address || "Saved home"}
+          className="w-full h-full object-cover"
+          loading="lazy"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = "/images/buyers-hero.jpg";
+          }}
+        />
+        {home.off_market && (
+          <span className="absolute top-2 left-2 text-[11px] font-bold uppercase tracking-wide bg-gray-900/90 text-white px-2 py-1 rounded-md">
+            Off market
+          </span>
+        )}
+      </button>
+      <div className="flex-1 min-w-0 p-4 flex flex-col justify-center gap-1">
+        <p className="text-lg font-bold text-gray-900">{fmtPrice(home.list_price)}</p>
+        <p className="text-sm text-gray-700 leading-snug">{home.property_address || "Saved home"}</p>
+        {(home.beds != null || home.baths != null || home.living_area != null) && (
+          <p className="text-xs text-gray-500">
+            {[
+              home.beds != null ? `${home.beds} bd` : null,
+              home.baths != null ? `${home.baths} ba` : null,
+              home.living_area != null ? `${Number(home.living_area).toLocaleString()} sqft` : null,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </p>
+        )}
+        <div className="mt-3 flex flex-wrap gap-2">
+          {canOpen && (
+            <button
+              type="button"
+              onClick={() => onOpen?.(home)}
+              className="inline-flex items-center min-h-[44px] px-3.5 py-2 rounded-lg text-sm font-semibold text-black touch-manipulation"
+              style={{ backgroundColor: "#CFB36E" }}
+            >
+              View home
+            </button>
+          )}
+          {home.slug && (
+            <Link
+              to={`/homes-for-sale/${home.slug}/`}
+              className="inline-flex items-center min-h-[44px] px-3.5 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:border-black touch-manipulation"
+            >
+              Full page
+            </Link>
+          )}
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => onUnsave?.(home)}
+            className="inline-flex items-center gap-1.5 min-h-[44px] px-3.5 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:border-[#CFB36E] disabled:opacity-50 touch-manipulation"
+            aria-label="Remove from saved homes"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="#CFB36E" stroke="#CFB36E" strokeWidth="2">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+            Unsave
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ManageAlertsPage() {
   const [params] = useSearchParams();
   const token = params.get("token") || "";
+  const tabParam = params.get("tab") || "";
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -138,6 +230,29 @@ export default function ManageAlertsPage() {
   const [editTime, setEditTime] = useState("06:00");
   const [editDay, setEditDay] = useState("Monday");
   const [unsubscribed, setUnsubscribed] = useState(false);
+  const [tab, setTab] = useState(tabParam === "homes" ? "homes" : "searches");
+  const [savedHomes, setSavedHomes] = useState([]);
+  const [homesLoading, setHomesLoading] = useState(false);
+  const [homesError, setHomesError] = useState(null);
+  const [panelSlug, setPanelSlug] = useState(null);
+
+  const loadSavedHomes = useCallback(async () => {
+    setHomesLoading(true);
+    setHomesError(null);
+    try {
+      await migrateLocalSavedHomes();
+      const homes = await fetchSavedHomes();
+      setSavedHomes(homes);
+    } catch (e) {
+      if (e?.status === 401) {
+        setSavedHomes([]);
+      } else {
+        setHomesError(e.message || "Could not load saved homes.");
+      }
+    } finally {
+      setHomesLoading(false);
+    }
+  }, []);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -149,6 +264,7 @@ export default function ManageAlertsPage() {
           if (!d.success) throw new Error(d.error || "Could not load your alerts.");
           setData(d.data);
           setNeedsLogin(false);
+          loadSavedHomes();
         })
         .catch((e) => { setError(e.message); setNeedsLogin(true); })
         .finally(() => setLoading(false));
@@ -160,11 +276,12 @@ export default function ManageAlertsPage() {
           if (!d.success) { setNeedsLogin(true); return; }
           setData(d.data);
           setNeedsLogin(false);
+          loadSavedHomes();
         })
         .catch(() => setNeedsLogin(true))
         .finally(() => setLoading(false));
     }
-  }, [token]);
+  }, [token, loadSavedHomes]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -190,7 +307,22 @@ export default function ManageAlertsPage() {
       await fetch(`${API_BASE}/api/alerts/signout`, { method: "POST", credentials: "same-origin" });
     } catch { /* noop */ }
     setData(null);
+    setSavedHomes([]);
     setNeedsLogin(true);
+  };
+
+  const unsaveHome = async (home) => {
+    if (!home?.listing_key) return;
+    setBusy(`home-${home.listing_key}`);
+    try {
+      await unsaveHomeApi(home.listing_key);
+      setSavedHomes((prev) => prev.filter((h) => h.listing_key !== home.listing_key));
+      notifySavedHomesChanged({ listingKey: home.listing_key, saved: false });
+    } catch (err) {
+      setHomesError(err.message || "Could not unsave.");
+    } finally {
+      setBusy(null);
+    }
   };
 
   const loginWithPassword = async (e) => {
@@ -273,17 +405,17 @@ export default function ManageAlertsPage() {
   return (
     <>
       <SEO
-        title="My Saved Searches | SAA Homes"
-        description="View match counts, pause, or delete your saved home searches and email alerts for Northern Colorado."
+        title="My Account — Saved Searches & Homes | SAA Homes"
+        description="View match counts, pause alerts, and manage saved homes for Northern Colorado."
         canonicalPath="/my-saved-searches/"
         robots="noindex, nofollow"
       />
       <div className="max-w-3xl mx-auto px-4 py-10 sm:py-14 min-h-[60vh]">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-bold font-serif text-gray-900">My Saved Searches</h1>
+            <h1 className="text-3xl font-bold font-serif text-gray-900">My Account</h1>
             <p className="text-gray-500 mt-2 text-sm sm:text-base">
-              Live match counts, previews, and email alerts — managed in one place.
+              Saved searches, email alerts, and favorite homes — synced to your account.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -423,165 +555,250 @@ export default function ManageAlertsPage() {
 
             <LeadScoreBadge score={data.lead_score} label={data.lead_score_label} />
 
+            {/* Tabs: Saved Searches | Saved Homes */}
+            <div
+              className="mt-6 flex border-b border-gray-200 gap-1"
+              role="tablist"
+              aria-label="Account sections"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={tab === "searches"}
+                onClick={() => setTab("searches")}
+                className={`min-h-[44px] px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors touch-manipulation ${
+                  tab === "searches"
+                    ? "border-[#CFB36E] text-gray-900"
+                    : "border-transparent text-gray-500 hover:text-gray-800"
+                }`}
+              >
+                Saved Searches
+                {Array.isArray(data.searches) && data.searches.length > 0 && (
+                  <span className="ml-1.5 text-xs font-bold text-gray-400">({data.searches.length})</span>
+                )}
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={tab === "homes"}
+                onClick={() => setTab("homes")}
+                className={`min-h-[44px] px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors touch-manipulation ${
+                  tab === "homes"
+                    ? "border-[#CFB36E] text-gray-900"
+                    : "border-transparent text-gray-500 hover:text-gray-800"
+                }`}
+              >
+                Saved Homes
+                {savedHomes.length > 0 && (
+                  <span className="ml-1.5 text-xs font-bold text-gray-400">({savedHomes.length})</span>
+                )}
+              </button>
+            </div>
+
             {error && (
               <p className="mt-3 text-sm text-red-600" role="alert">{error}</p>
             )}
 
-            {data.searches.length === 0 ? (
-              <div className="mt-6 bg-white border border-gray-200 rounded-xl p-8 text-center">
-                <p className="text-lg font-semibold text-gray-900">No saved searches yet</p>
-                <p className="text-gray-500 text-sm mt-2 max-w-sm mx-auto">
-                  Set your filters on the search page and tap &quot;Save this search&quot; — we&apos;ll email you when new homes match.
-                </p>
-                <Link to="/properties/" className="inline-block mt-5 px-5 py-2.5 bg-black text-white rounded-lg text-sm font-semibold">
-                  Search homes
-                </Link>
-              </div>
-            ) : (
-              <div className="mt-5 space-y-4">
-                {data.searches.map((s) => {
-                  const editPath = s.edit_path || "/properties/";
-                  return (
-                    <div key={s.id} className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 shadow-sm">
-                      <div className="flex flex-col sm:flex-row sm:items-start gap-3">
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-gray-900 flex flex-wrap items-center gap-2">
-                            <span className="truncate">{s.name}</span>
-                            {s.is_active ? (
-                              <span className="text-[11px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">ACTIVE</span>
-                            ) : (
-                              <span className="text-[11px] font-bold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">PAUSED</span>
+            {tab === "searches" && (
+              <>
+                {data.searches.length === 0 ? (
+                  <div className="mt-6 bg-white border border-gray-200 rounded-xl p-8 text-center">
+                    <p className="text-lg font-semibold text-gray-900">No saved searches yet</p>
+                    <p className="text-gray-500 text-sm mt-2 max-w-sm mx-auto">
+                      Set your filters on the search page and tap &quot;Save this search&quot; — we&apos;ll email you when new homes match.
+                    </p>
+                    <Link to="/properties/" className="inline-block mt-5 px-5 py-2.5 bg-black text-white rounded-lg text-sm font-semibold min-h-[44px]">
+                      Search homes
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="mt-5 space-y-4">
+                    {data.searches.map((s) => {
+                      const editPath = s.edit_path || "/properties/";
+                      return (
+                        <div key={s.id} className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 shadow-sm">
+                          <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-gray-900 flex flex-wrap items-center gap-2">
+                                <span className="truncate">{s.name}</span>
+                                {s.is_active ? (
+                                  <span className="text-[11px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">ACTIVE</span>
+                                ) : (
+                                  <span className="text-[11px] font-bold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">PAUSED</span>
+                                )}
+                              </p>
+                              <p className="text-sm text-gray-500 mt-1">{filtersText(s.filters)}</p>
+                              <p className="text-xs text-gray-400 mt-1">📧 {scheduleText(s)}</p>
+                            </div>
+                            <div className="flex flex-wrap gap-2 shrink-0">
+                              <button
+                                type="button"
+                                disabled={busy === s.id}
+                                onClick={() => toggleSearch(s.id, s.is_active)}
+                                className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:border-black disabled:opacity-50 min-h-[44px]"
+                              >
+                                {s.is_active ? "Pause" : "Resume"}
+                              </button>
+                              <Link
+                                to={editPath}
+                                className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:border-black inline-flex items-center min-h-[44px]"
+                              >
+                                Edit filters
+                              </Link>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingId(editingId === s.id ? null : s.id);
+                                  setEditFreq(s.frequency || "daily");
+                                  setEditTime(s.send_time || "06:00");
+                                  setEditDay(s.send_day || "Monday");
+                                }}
+                                className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:border-black disabled:opacity-50 min-h-[44px]"
+                              >
+                                Schedule
+                              </button>
+                              <button
+                                type="button"
+                                disabled={busy === s.id}
+                                onClick={() => deleteSearch(s.id)}
+                                className="px-3 py-2 border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:border-red-400 disabled:opacity-50 min-h-[44px]"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+
+                          <PreviewCard
+                            preview={s.preview}
+                            matchCount={s.match_count}
+                            editPath={editPath}
+                          />
+
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <Link
+                              to={editPath}
+                              className="inline-flex items-center px-3.5 py-2 rounded-lg text-sm font-semibold text-black min-h-[44px]"
+                              style={{ backgroundColor: "#CFB36E" }}
+                            >
+                              View {s.match_count === 1 ? "1 match" : `${Number(s.match_count || 0).toLocaleString()} matches`}
+                            </Link>
+                            {s.preview?.slug && (
+                              <Link
+                                to={`/homes-for-sale/${s.preview.slug}/`}
+                                className="inline-flex items-center px-3.5 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:border-black min-h-[44px]"
+                              >
+                                Open latest match
+                              </Link>
                             )}
-                          </p>
-                          <p className="text-sm text-gray-500 mt-1">{filtersText(s.filters)}</p>
-                          <p className="text-xs text-gray-400 mt-1">📧 {scheduleText(s)}</p>
-                        </div>
-                        <div className="flex flex-wrap gap-2 shrink-0">
-                          <button
-                            type="button"
-                            disabled={busy === s.id}
-                            onClick={() => toggleSearch(s.id, s.is_active)}
-                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:border-black disabled:opacity-50"
-                          >
-                            {s.is_active ? "Pause" : "Resume"}
-                          </button>
-                          <Link
-                            to={editPath}
-                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:border-black inline-flex items-center"
-                          >
-                            Edit filters
-                          </Link>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditingId(editingId === s.id ? null : s.id);
-                              setEditFreq(s.frequency || "daily");
-                              setEditTime(s.send_time || "06:00");
-                              setEditDay(s.send_day || "Monday");
-                            }}
-                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:border-black disabled:opacity-50"
-                          >
-                            Schedule
-                          </button>
-                          <button
-                            type="button"
-                            disabled={busy === s.id}
-                            onClick={() => deleteSearch(s.id)}
-                            className="px-3 py-2 border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:border-red-400 disabled:opacity-50"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
+                          </div>
 
-                      <PreviewCard
-                        preview={s.preview}
-                        matchCount={s.match_count}
-                        editPath={editPath}
+                          {editingId === s.id && (
+                            <div className="mt-3 flex flex-wrap items-center gap-2 bg-gray-50 rounded-lg p-3">
+                              <select
+                                value={editFreq}
+                                onChange={(e) => setEditFreq(e.target.value)}
+                                className="px-2.5 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                                aria-label="Frequency"
+                              >
+                                {Object.entries(FREQ_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                              </select>
+                              {editFreq === "weekly" && (
+                                <select
+                                  value={editDay}
+                                  onChange={(e) => setEditDay(e.target.value)}
+                                  className="px-2.5 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                                  aria-label="Day"
+                                >
+                                  {DAYS.map((d) => <option key={d} value={d}>{d}</option>)}
+                                </select>
+                              )}
+                              {editFreq !== "immediate" && (
+                                <select
+                                  value={editTime}
+                                  onChange={(e) => setEditTime(e.target.value)}
+                                  className="px-2.5 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                                  aria-label="Time"
+                                >
+                                  {HOURS.map((h) => {
+                                    const [hh] = h.split(":");
+                                    const hour12 = hh % 12 === 0 ? 12 : hh % 12;
+                                    const ampm = hh < 12 ? "AM" : "PM";
+                                    return <option key={h} value={h}>{hour12}:00 {ampm}</option>;
+                                  })}
+                                </select>
+                              )}
+                              <button
+                                type="button"
+                                disabled={busy === s.id}
+                                onClick={() => saveSchedule(s.id)}
+                                className="px-3.5 py-2 bg-black text-white rounded-lg text-sm font-medium disabled:opacity-50 min-h-[44px]"
+                              >
+                                Save
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingId(null)}
+                                className="px-3.5 py-2 border border-gray-300 rounded-lg text-sm font-medium min-h-[44px]"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={unsubscribe}
+                  className="mt-6 text-sm text-gray-400 underline hover:text-gray-600"
+                >
+                  Unsubscribe from all alert emails
+                </button>
+              </>
+            )}
+
+            {tab === "homes" && (
+              <div className="mt-5">
+                {homesError && (
+                  <p className="mb-3 text-sm text-red-600" role="alert">{homesError}</p>
+                )}
+                {homesLoading ? (
+                  <div className="space-y-3">
+                    {[1, 2].map((i) => (
+                      <div key={i} className="bg-white border border-gray-200 rounded-xl h-36 animate-pulse" />
+                    ))}
+                  </div>
+                ) : savedHomes.length === 0 ? (
+                  <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
+                    <p className="text-lg font-semibold text-gray-900">No saved homes yet</p>
+                    <p className="text-gray-500 text-sm mt-2 max-w-sm mx-auto">
+                      No saved homes yet. Start browsing Northern Colorado listings and tap the heart to save your favorites.
+                    </p>
+                    <Link
+                      to="/properties/"
+                      className="inline-block mt-5 px-5 py-2.5 bg-black text-white rounded-lg text-sm font-semibold min-h-[44px]"
+                    >
+                      Browse homes
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {savedHomes.map((home) => (
+                      <SavedHomeCard
+                        key={home.listing_key || home.id}
+                        home={home}
+                        busy={busy === `home-${home.listing_key}`}
+                        onUnsave={unsaveHome}
+                        onOpen={(h) => h.slug && setPanelSlug(h.slug)}
                       />
-
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        <Link
-                          to={editPath}
-                          className="inline-flex items-center px-3.5 py-2 rounded-lg text-sm font-semibold text-black"
-                          style={{ backgroundColor: "#CFB36E" }}
-                        >
-                          View {s.match_count === 1 ? "1 match" : `${Number(s.match_count || 0).toLocaleString()} matches`}
-                        </Link>
-                        {s.preview?.slug && (
-                          <Link
-                            to={`/homes-for-sale/${s.preview.slug}/`}
-                            className="inline-flex items-center px-3.5 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:border-black"
-                          >
-                            Open latest match
-                          </Link>
-                        )}
-                      </div>
-
-                      {editingId === s.id && (
-                        <div className="mt-3 flex flex-wrap items-center gap-2 bg-gray-50 rounded-lg p-3">
-                          <select
-                            value={editFreq}
-                            onChange={(e) => setEditFreq(e.target.value)}
-                            className="px-2.5 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                            aria-label="Frequency"
-                          >
-                            {Object.entries(FREQ_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                          </select>
-                          {editFreq === "weekly" && (
-                            <select
-                              value={editDay}
-                              onChange={(e) => setEditDay(e.target.value)}
-                              className="px-2.5 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                              aria-label="Day"
-                            >
-                              {DAYS.map((d) => <option key={d} value={d}>{d}</option>)}
-                            </select>
-                          )}
-                          {editFreq !== "immediate" && (
-                            <select
-                              value={editTime}
-                              onChange={(e) => setEditTime(e.target.value)}
-                              className="px-2.5 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                              aria-label="Time"
-                            >
-                              {HOURS.map((h) => {
-                                const [hh] = h.split(":");
-                                const hour12 = hh % 12 === 0 ? 12 : hh % 12;
-                                const ampm = hh < 12 ? "AM" : "PM";
-                                return <option key={h} value={h}>{hour12}:00 {ampm}</option>;
-                              })}
-                            </select>
-                          )}
-                          <button
-                            type="button"
-                            disabled={busy === s.id}
-                            onClick={() => saveSchedule(s.id)}
-                            className="px-3.5 py-2 bg-black text-white rounded-lg text-sm font-medium disabled:opacity-50"
-                          >
-                            Save
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setEditingId(null)}
-                            className="px-3.5 py-2 border border-gray-300 rounded-lg text-sm font-medium"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                    ))}
+                  </div>
+                )}
               </div>
             )}
-            <button
-              type="button"
-              onClick={unsubscribe}
-              className="mt-6 text-sm text-gray-400 underline hover:text-gray-600"
-            >
-              Unsubscribe from all alert emails
-            </button>
+
             <p className="mt-4 text-xs text-gray-400">
               Questions? Call or text{" "}
               <a href="tel:+19709991407" className="underline">(970) 999-1407</a>
@@ -590,6 +807,9 @@ export default function ManageAlertsPage() {
           </>
         )}
       </div>
+      {panelSlug && (
+        <ListingDetailPanel slug={panelSlug} onClose={() => setPanelSlug(null)} />
+      )}
     </>
   );
 }

@@ -9,10 +9,9 @@ import {
   listingBadges,
   listingAddress,
   listingFullAddress,
-  isHomeSaved,
-  toggleSavedHome,
   matchSavedSearch,
   getSavedSearches,
+  isHomeSaved as isLocalHomeSaved,
 } from "../utils/listingHelpers.js";
 import {
   PhotoGallery,
@@ -25,6 +24,16 @@ import {
   formatDate,
   pricePerSqftOf,
 } from "../components/detail";
+import SignInToSaveModal from "../components/SignInToSaveModal";
+import {
+  fetchSessionUser,
+  fetchSavedStatus,
+  listingKeyOf,
+  migrateLocalSavedHomes,
+  notifySavedHomesChanged,
+  saveHomeApi,
+  unsaveHomeApi,
+} from "../utils/savedHomesApi.js";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -40,6 +49,8 @@ export default function ListingDetailPage() {
   const [saved, setSaved] = useState(false);
   const [match, setMatch] = useState({ matches: false, reasons: [] });
   const [shareCopied, setShareCopied] = useState(false);
+  const [showSaveLogin, setShowSaveLogin] = useState(false);
+  const [pendingSaveAfterLogin, setPendingSaveAfterLogin] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -103,8 +114,28 @@ export default function ListingDetailPage() {
         setSimilar(filtered.slice(0, 8));
       })
       .catch(() => setSimilar([]));
-    setSaved(isHomeSaved(listing.slug));
     setMatch(matchSavedSearch(listing, getSavedSearches()));
+    let cancelled = false;
+    (async () => {
+      const key = listingKeyOf(listing);
+      const keys = [listing.listing_id, listing.slug, listing.id != null ? String(listing.id) : null]
+        .filter(Boolean)
+        .map(String);
+      const user = await fetchSessionUser();
+      if (cancelled) return;
+      if (!user) {
+        setSaved(isLocalHomeSaved(listing.slug) || keys.some((k) => isLocalHomeSaved(k)));
+        return;
+      }
+      await migrateLocalSavedHomes();
+      if (cancelled) return;
+      const map = await fetchSavedStatus(keys.length ? keys : [key]);
+      if (cancelled) return;
+      setSaved(keys.some((k) => map[k]) || Boolean(map[String(key)]));
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [listing]);
 
   useEffect(() => {
@@ -143,7 +174,38 @@ export default function ListingDetailPage() {
   const pricePerSqft = pricePerSqftOf(listing);
   const priceChangeDate = formatDate(listing.price_change_timestamp);
 
-  const onToggleSave = () => setSaved(toggleSavedHome(listing.slug));
+  const onToggleSave = async () => {
+    if (!listing) return;
+    const key = listingKeyOf(listing);
+    if (!key) return;
+    const next = !saved;
+    setSaved(next);
+    try {
+      if (next) await saveHomeApi(key);
+      else await unsaveHomeApi(key);
+      notifySavedHomesChanged({ listingKey: key, saved: next });
+    } catch (err) {
+      setSaved(!next);
+      if (err?.status === 401) {
+        setPendingSaveAfterLogin(true);
+        setShowSaveLogin(true);
+      }
+    }
+  };
+
+  const afterSaveLogin = async () => {
+    if (!listing || !pendingSaveAfterLogin) return;
+    setPendingSaveAfterLogin(false);
+    const key = listingKeyOf(listing);
+    if (!key) return;
+    setSaved(true);
+    try {
+      await saveHomeApi(key);
+      notifySavedHomesChanged({ listingKey: key, saved: true });
+    } catch {
+      setSaved(false);
+    }
+  };
 
   const onShare = async () => {
     const url =
@@ -509,8 +571,9 @@ export default function ListingDetailPage() {
               <button
                 type="button"
                 onClick={onToggleSave}
-                title={saved ? "Saved on this device" : "Save on this device"}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-semibold transition-colors ${
+                title={saved ? "Saved" : "Save home"}
+                aria-label={saved ? "Remove from saved homes" : "Save this home"}
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-semibold transition-colors min-h-[44px] ${
                   saved
                     ? "bg-[#CFB36E] border-[#CFB36E] text-black"
                     : "border-white text-white hover:bg-white hover:text-black"
@@ -570,6 +633,15 @@ export default function ListingDetailPage() {
         chatQuestion={`Hi! I'm looking at a home in ${listing.city || "Northern Colorado"} and want to know if I'd qualify for a loan or CHFA assistance. Can you help?`}
         formAnchor="/contact/"
         formLabel="Ask a question instead"
+      />
+
+      <SignInToSaveModal
+        open={showSaveLogin}
+        onClose={() => {
+          setShowSaveLogin(false);
+          setPendingSaveAfterLogin(false);
+        }}
+        onSuccess={afterSaveLogin}
       />
     </>
   );
