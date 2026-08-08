@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 
-Sitemap: https://saahomes.com/sitemap.xml
+Sitemap: https://saahomes.com/sitemap-index.xml
