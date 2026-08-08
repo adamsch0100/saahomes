@@ -85,6 +85,47 @@ const canonicalRedirects = {
   '/whats-my-home-worth': '/for-sellers/',
 };
 
+// ---- Listing sitemap (Active-only, generated from DB, cached 15 min) ----
+let listingsSitemapCache = { xml: null, at: 0 };
+const LISTINGS_SITEMAP_TTL = 15 * 60 * 1000;
+
+app.get('/sitemap-listings.xml', async (req, res) => {
+  try {
+    if (!listingsSitemapCache.xml || Date.now() - listingsSitemapCache.at > LISTINGS_SITEMAP_TTL) {
+      const { default: getPool } = await import('./config/database.js');
+      const pool = getPool();
+      const { rows } = await pool.query(
+        `SELECT slug, updated_at FROM listings
+          WHERE status = 'Active' AND slug IS NOT NULL
+          ORDER BY slug`
+      );
+      const urls = rows.map((r) => {
+        const lastmod = r.updated_at
+          ? new Date(r.updated_at).toISOString().slice(0, 10) : undefined;
+        return `  <url><loc>${SITE_URL}/homes-for-sale/${r.slug}/</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ''}</url>`;
+      }).join('\n');
+      listingsSitemapCache = {
+        xml: `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`,
+        at: Date.now(),
+      };
+    }
+    res.type('application/xml').send(listingsSitemapCache.xml);
+  } catch (error) {
+    console.error('sitemap-listings error:', error.message);
+    res.status(500).send('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>');
+  }
+});
+
+// Sitemap index: static build sitemap + dynamic listings sitemap
+app.get('/sitemap-index.xml', (req, res) => {
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap><loc>${SITE_URL}/sitemap.xml</loc></sitemap>
+  <sitemap><loc>${SITE_URL}/sitemap-listings.xml</loc></sitemap>
+</sitemapindex>`;
+  res.type('application/xml').send(xml);
+});
+
 if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
   app.use((req, res, next) => {
     if (req.path.startsWith('/api')) return next();
@@ -126,7 +167,9 @@ if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
         const slug = listingMatch[1];
         const { rows } = await pool.query(
           `SELECT listing_id, slug, street_number, street_name, unit, city,
-                  list_price, beds, baths, living_area, status
+                  list_price, beds, baths, living_area, status,
+                  latitude, longitude, property_type, description,
+                  updated_at
              FROM listings WHERE slug = $1 OR listing_id = $1 LIMIT 1`,
           [slug]
         );
@@ -140,6 +183,43 @@ if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
           const title = `${address}, ${listing.city} CO — ${price} | SAA Homes`;
           const description = `${address}, ${listing.city}, CO — ${price || ''} · ${listing.beds ?? '—'} bd / ${listing.baths ?? '—'} ba / ${listing.living_area ? Number(listing.living_area).toLocaleString() + ' sqft' : ''}. Live IRES MLS listing. Adam & Mandi Schwartz — (970) 999-1407.`;
           const canonical = `${SITE_URL}/homes-for-sale/${listing.slug}/`;
+          // Real availability from MLS status (matches frontend ListingDetailPage)
+          const availabilityByStatus = {
+            Active: 'https://schema.org/InStock',
+            'Active Under Contract': 'https://schema.org/LimitedAvailability',
+            Pending: 'https://schema.org/OutOfStock',
+            Sold: 'https://schema.org/Discontinued',
+            Withdrawn: 'https://schema.org/OutOfStock',
+            Expired: 'https://schema.org/OutOfStock',
+          };
+          const availability = availabilityByStatus[listing.status] || 'https://schema.org/InStock';
+          const listingSchema = {
+            '@context': 'https://schema.org',
+            '@type': 'RealEstateListing',
+            name: title,
+            url: canonical,
+            description: description,
+            ...(listing.updated_at ? { dateModified: listing.updated_at } : {}),
+            image: `https://saahomes.com/api/photo/${listing.listing_id}/0`,
+            address: {
+              '@type': 'PostalAddress',
+              streetAddress: address || undefined,
+              addressLocality: listing.city || undefined,
+              addressRegion: 'CO',
+            },
+            ...(listing.latitude && listing.longitude
+              ? { geo: { '@type': 'GeoCoordinates', latitude: Number(listing.latitude), longitude: Number(listing.longitude) } }
+              : {}),
+            ...(listing.beds != null ? { numberOfRooms: Number(listing.beds) } : {}),
+            ...(listing.baths != null ? { numberOfBathroomsTotal: Number(listing.baths) } : {}),
+            offers: {
+              '@type': 'Offer',
+              price: listing.list_price != null ? Number(listing.list_price) : undefined,
+              priceCurrency: 'USD',
+              availability,
+            },
+          };
+          const schemaHtml = `<script type="application/ld+json">${JSON.stringify(listingSchema)}</script>`;
           let html = base
             .replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`)
             .replace(/rel="canonical" href="[^"]*"/, `rel="canonical" href="${canonical}"`)
@@ -147,7 +227,8 @@ if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
             .replace(/property="og:title" content="[^"]*"/, `property="og:title" content="${escapeHtml(title)}"`)
             .replace(/property="og:description" content="[^"]*"/, `property="og:description" content="${escapeHtml(description)}"`)
             .replace(/property="og:url" content="[^"]*"/, `property="og:url" content="${canonical}"`)
-            .replace('<div id="root"></div>', `<div id="root"><div class="prerendered-listing"><h1>${escapeHtml(title)}</h1><p>${escapeHtml(description)}</p></div></div>`);
+            .replace('<div id="root"></div>', `<div id="root"><div class="prerendered-listing"><h1>${escapeHtml(title)}</h1><p>${escapeHtml(description)}</p></div></div>`)
+            .replace('</head>', `${schemaHtml}</head>`);
           return res.send(html);
         }
         // Slug not in DB — neutral generic shell (no homepage copy)
