@@ -138,6 +138,7 @@ const COOLING_OPTIONS = [
   { label: "Any", value: "" },
   { label: "Central air", value: "central" },
   { label: "Evaporative", value: "evaporative" },
+  { label: "Wall / window unit", value: "wall" },
 ];
 
 const HEATING_OPTIONS = [
@@ -161,17 +162,23 @@ const VIEW_OPTIONS = [
   { label: "Mountain", value: "mountain" },
   { label: "Water", value: "water" },
   { label: "City", value: "city" },
+  { label: "Hills", value: "hills" },
+  { label: "Plains", value: "plains" },
   { label: "Golf", value: "golf" },
   { label: "Park", value: "park" },
 ];
 
+// Style tokens mapped to real IRES ArchitecturalStyle values (verified live).
+// Ranch/craftsman/mid-century are nearly absent in NoCO feed — omit zero-result options.
 const STYLE_OPTIONS = [
   { label: "Any", value: "" },
   { label: "Contemporary", value: "contemporary" },
-  { label: "Craftsman", value: "craftsman" },
-  { label: "Ranch", value: "ranch" },
-  { label: "Mid-century", value: "mid" },
+  { label: "Patio home", value: "patio" },
+  { label: "Cottage", value: "cottage" },
+  { label: "Farmhouse", value: "farmhouse" },
+  { label: "Chalet", value: "chalet" },
   { label: "Victorian", value: "victorian" },
+  { label: "Colonial", value: "colonial" },
   { label: "Tudor", value: "tudor" },
 ];
 
@@ -200,13 +207,25 @@ const INTERIOR_TOGGLES = [
   { key: "office", label: "Home office", token: "office" },
 ];
 
+/** MLS home statuses with live inventory. Sold is omitted — feed has ~0 Closed rows. */
 const LISTING_STATUS_OPTIONS = [
   { label: "For sale", value: "" },
   { label: "Backup offers accepted", value: "Active Under Contract" },
   { label: "Pending", value: "Pending" },
-  { label: "Recently sold", value: "Sold" },
   { label: "Withdrawn", value: "Withdrawn" },
+  { label: "Expired", value: "Expired" },
 ];
+
+/** Home-status tokens sent as API `status=` (not listingStatus overlay). */
+const HOME_STATUS_VALUES = new Set([
+  "Active",
+  "Active Under Contract",
+  "Pending",
+  "Sold",
+  "Withdrawn",
+  "Expired",
+  "Canceled",
+]);
 
 const SORT_OPTIONS = [
   { label: "Recommended", value: "recommended" },
@@ -328,6 +347,19 @@ function filtersFromParams(sp) {
   const postalParam =
     sp.get("postal_code") || sp.get("postalCode") || sp.get("zip") || sp.get("zips") || "";
 
+  // Home status: prefer status=; also accept listingStatus= when it holds a home status
+  // (legacy). "Active" / empty → For sale (default). Overlay chips use listingStatus=price-drop|new.
+  const statusParam = sp.get("status") || "";
+  const lsParam = sp.get("listingStatus") || "";
+  let listingStatus = "";
+  if (statusParam && statusParam !== "Active" && HOME_STATUS_VALUES.has(statusParam)) {
+    listingStatus = statusParam;
+  } else if (lsParam && HOME_STATUS_VALUES.has(lsParam) && lsParam !== "Active") {
+    listingStatus = lsParam;
+  } else if (lsParam === "price-drop" || lsParam === "price_drop" || lsParam === "new") {
+    listingStatus = lsParam === "price_drop" ? "price-drop" : lsParam;
+  }
+
   return emptyFilters({
     city: cityParam,
     postalCode: postalParam,
@@ -358,7 +390,7 @@ function filtersFromParams(sp) {
     exterior: sp.get("exterior") || "",
     interior,
     newcon: sp.get("newConstruction") || "",
-    listingStatus: sp.get("listingStatus") || "",
+    listingStatus,
     newdays: sp.get("newDays") || "",
     dropdays: sp.get("dropDays") || "",
     droppct: sp.get("dropPct") || "",
@@ -417,7 +449,14 @@ function filtersToParams(f, { forUrl = false, pageNum = 1 } = {}) {
   if (f.exterior) params.set("exterior", f.exterior);
   if (f.interior?.length) params.set("interior", f.interior.join(","));
   if (f.newcon === "true") params.set("newConstruction", "true");
-  if (f.listingStatus) params.set("listingStatus", f.listingStatus);
+  // Home status → API `status=`; overlay chips (price-drop/new) stay on listingStatus=
+  if (f.listingStatus) {
+    if (HOME_STATUS_VALUES.has(f.listingStatus)) {
+      params.set("status", f.listingStatus);
+    } else {
+      params.set("listingStatus", f.listingStatus);
+    }
+  }
   if (f.newdays) params.set("newDays", f.newdays);
   if (f.dropdays) params.set("dropDays", f.dropdays);
   if (f.droppct) params.set("dropPct", f.droppct);
@@ -626,6 +665,9 @@ function buildActiveChips(f) {
   if (f.listingStatus === "Pending") chips.push({ id: "listingStatus", label: "Pending", patch: { listingStatus: "" } });
   if (f.listingStatus === "Sold") chips.push({ id: "listingStatus", label: "Recently sold", patch: { listingStatus: "" } });
   if (f.listingStatus === "Withdrawn") chips.push({ id: "listingStatus", label: "Withdrawn", patch: { listingStatus: "" } });
+  if (f.listingStatus === "Expired") chips.push({ id: "listingStatus", label: "Expired", patch: { listingStatus: "" } });
+  if (f.listingStatus === "price-drop") chips.push({ id: "listingStatus", label: "Price drops", patch: { listingStatus: "" } });
+  if (f.listingStatus === "new") chips.push({ id: "listingStatus", label: "New listings", patch: { listingStatus: "" } });
   if (f.newdays) chips.push({ id: "newdays", label: `New ≤ ${f.newdays}d`, patch: { newdays: "" } });
   if (f.dropdays) chips.push({ id: "dropdays", label: `Dropped ≤ ${f.dropdays}d`, patch: { dropdays: "" } });
   if (f.droppct) chips.push({ id: "droppct", label: `Drop ≥ ${f.droppct}%`, patch: { droppct: "" } });
@@ -1662,7 +1704,13 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     if (filters.exterior) out.exterior = filters.exterior;
     if (filters.interior?.length) out.interior = filters.interior.join(",");
     if (filters.newcon === "true") out.newConstruction = "true";
-    if (filters.listingStatus) out.listingStatus = filters.listingStatus;
+    if (filters.listingStatus) {
+      if (HOME_STATUS_VALUES.has(filters.listingStatus)) {
+        out.status = filters.listingStatus;
+      } else {
+        out.listingStatus = filters.listingStatus;
+      }
+    }
     if (filters.newdays) out.newDays = filters.newdays;
     if (filters.dropdays) out.dropDays = filters.dropdays;
     if (filters.droppct) out.dropPct = filters.droppct;

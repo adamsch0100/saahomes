@@ -217,9 +217,21 @@ function parseLocationList(raw) {
  *   city=__noco__ | __all__ | "Denver" | "Denver,Erie,Windsor"
  *   postal_code=80521 | postal_code=80521,80525  (also zip / zipCode aliases)
  */
+/** MLS home-status tokens (as stored in listings.status). */
+const HOME_STATUS_VALUES = new Set([
+  'Active',
+  'Active Under Contract',
+  'Pending',
+  'Sold',
+  'Withdrawn',
+  'Expired',
+  'Canceled',
+]);
+
 function buildListingFilters(query = {}) {
   const {
-    city, minPrice, maxPrice, beds, baths, type, types, status = 'Active',
+    city, minPrice, maxPrice, beds, baths, type, types,
+    status: statusRaw,
     q, keywords, keywordMode, keyword_mode: keywordModeSnake,
     polygon,
     minSqft, maxSqft, minYear, maxYear, maxHoa, minHoa,
@@ -228,11 +240,21 @@ function buildListingFilters(query = {}) {
     minLotAcres, maxLotAcres, stories,
     cooling, heating, parking, view, style, community, exterior,
     interior, // comma-separated interior feature keywords
-    listingStatus, // price-drop | new | active
+    listingStatus, // price-drop | new  OR (legacy) a home status string
     hasImages, hasTour, has3d,
     postal_code: postalCodeSnake,
     postalCode, zip, zipCode, zips,
   } = query;
+
+  // Home status: prefer explicit `status=`. Also accept a home-status value in
+  // `listingStatus=` (older frontend sent Pending/AUC there by mistake).
+  // Default Active when neither is a home status (For sale inventory).
+  let status = 'Active';
+  if (statusRaw != null && String(statusRaw).trim() !== '') {
+    status = String(statusRaw).trim();
+  } else if (listingStatus && HOME_STATUS_VALUES.has(String(listingStatus))) {
+    status = String(listingStatus);
+  }
 
   const where = [];
   const params = [];
@@ -424,6 +446,8 @@ function buildListingFilters(query = {}) {
   if (cooling) {
     if (cooling === 'central') addFeatureMatch('cooling', 'central');
     else if (cooling === 'evaporative' || cooling === 'swamp') addFeatureMatch('cooling', 'evapor');
+    else if (cooling === 'wall' || cooling === 'window') addFeatureMatch('cooling', 'wall');
+    else if (cooling === 'ductless' || cooling === 'mini-split') addFeatureMatch('cooling', 'ductless');
     else if (cooling === 'none') {
       pushRaw(`(COALESCE(features->>'cooling','') = '' OR features->>'cooling' ILIKE '%none%' OR features->>'cooling' ILIKE '%no %')`);
     } else addFeatureMatch('cooling', cooling);
@@ -443,8 +467,36 @@ function buildListingFilters(query = {}) {
       pushRaw(`(COALESCE(features->>'parking','') ILIKE '%none%' OR COALESCE(features->>'parking','') = '' OR features->>'parking' ILIKE '%no garage%')`);
     } else addFeatureMatch('parking', parking);
   }
-  if (view) addFeatureMatch('view', view);
-  if (style) addFeatureMatch('style', style);
+  if (view) {
+    if (view === 'mountain') addFeatureMatch('view', 'mountain');
+    else if (view === 'water') addFeatureMatch('view', 'water');
+    else if (view === 'city') addFeatureMatch('view', 'city');
+    else if (view === 'golf') addFeatureMatch('view', 'golf');
+    else if (view === 'park') addFeatureMatch('view', 'park');
+    else if (view === 'plains' || view === 'plains-view') addFeatureMatch('view', 'plains');
+    else if (view === 'hills') addFeatureMatch('view', 'hills');
+    else addFeatureMatch('view', view);
+  }
+  if (style) {
+    // ArchitecturalStyle values in IRES are sparse (mostly Contemporary).
+    // Map Zillow-style tokens to real substrings; never invent matches.
+    if (style === 'mid' || style === 'mid-century' || style === 'midcentury') {
+      pushRaw(`(features->>'style' ILIKE '%mid%' OR features->>'style' ILIKE '%century%')`);
+    } else if (style === 'ranch') {
+      // Ranch rarely appears as ArchitecturalStyle; also match Levels "Raised Ranch"
+      pushRaw(`(features->>'style' ILIKE '%ranch%' OR features->>'levels' ILIKE '%ranch%')`);
+    } else if (style === 'patio' || style === 'patio-home') {
+      addFeatureMatch('style', 'patio');
+    } else if (style === 'cottage') {
+      addFeatureMatch('style', 'cottage');
+    } else if (style === 'farmhouse') {
+      addFeatureMatch('style', 'farmhouse');
+    } else if (style === 'chalet') {
+      addFeatureMatch('style', 'chalet');
+    } else {
+      addFeatureMatch('style', style);
+    }
+  }
   if (community) {
     if (community === '55+' || community === '55') {
       pushRaw(`(features->>'community' ILIKE '%55%' OR features->>'community' ILIKE '%senior%' OR features->>'community' ILIKE '%adult%' OR COALESCE(description,'') ILIKE '%55+%' OR COALESCE(description,'') ILIKE '%55 +%')`);
@@ -496,7 +548,8 @@ function buildListingFilters(query = {}) {
   if (dropPct) push('original_list_price IS NOT NULL AND list_price IS NOT NULL AND list_price <= original_list_price * (1 - $n / 100.0)', Number(dropPct));
 
   // Legacy listing status chips (overlay on Active inventory) — superseded by
-  // the editable controls above but kept for old URLs.
+  // the editable controls above but kept for old URLs. Home-status values in
+  // listingStatus are already resolved into `status` above.
   if (listingStatus === 'price-drop' || listingStatus === 'price_drop') {
     pushRaw(`original_list_price IS NOT NULL AND list_price IS NOT NULL AND list_price < original_list_price`);
   } else if (listingStatus === 'new') {
