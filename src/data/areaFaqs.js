@@ -27,6 +27,14 @@ const AREA_FAQS = {
     {
       q: 'Is it better to live in Fort Collins or Loveland?',
       a: 'Fort Collins offers a vibrant downtown, Colorado State University, a renowned craft brewery scene, and walkable neighborhoods like Old Town, making it ideal for those who want urban amenities, nightlife, and cultural attractions. Loveland offers better home value (5-15% lower price per square foot), a thriving arts scene with Benson Sculpture Garden, Boyd Lake recreation, and a quieter lifestyle while staying just 15 minutes from Fort Collins. Families often choose Loveland for more space per dollar, while young professionals and CSU-affiliated buyers gravitate toward Fort Collins. Both are excellent choices — let your commute, budget, and lifestyle preferences guide the decision. Schwartz and Associates can help you compare communities and find the right fit.'
+    },
+    {
+      q: 'Is Fort Collins a good place to invest in real estate?',
+      a: 'Fort Collins remains a solid long-term investment market due to Colorado State University enrollment growth, a diversifying tech and healthcare economy, and continued in-migration to Northern Colorado. Rental demand stays strong near campus and in south Fort Collins, while established neighborhoods like Old Town and Buckinghorse retain resale value. Investors should focus on properties within the Poudre School District boundaries and consider CHFA-eligible areas for broader buyer pools at resale. Call (970) 999-1407 to discuss Fort Collins investment strategy with Adam or Mandi Schwartz.'
+    },
+    {
+      q: 'How long does it take to sell a home in Fort Collins?',
+      a: 'Well-priced Fort Collins homes in the $450K–$600K range typically sell within 15–35 days in 2026, while premium properties above $750K may take 50–70 days depending on neighborhood and condition. Homes in south Fort Collins and near Harmony Road tend to move faster due to high buyer demand. Pricing strategy, professional photography, and seasonal timing remain the biggest factors in days on market. SAA Homes provides a free Comparative Market Analysis to help sellers price competitively for a faster sale.'
     }
   ],
   'loveland': [
@@ -61,6 +69,14 @@ const AREA_FAQS = {
     {
       q: 'Are house prices dropping in Loveland?',
       a: 'No — Loveland prices are still rising, just far more slowly than the post-pandemic years. The July 2026 median sale price was approximately $510,000, up 3.6% year-over-year, and inventory has grown 14% compared to July 2025, giving buyers more negotiating room. The market has cooled from its peak: homes above $675,000 now average about 55 days on market with more frequent price adjustments, while the active $400,000–$550,000 segment typically sells in about 22 days. For buyers this means more choice and leverage; for sellers it means realistic pricing and presentation matter more than ever.'
+    },
+    {
+      q: 'Is Loveland a good place to invest in rental property?',
+      a: 'Loveland offers strong rental demand from families and retirees attracted by lower home prices than Fort Collins, the Benson Sculpture Garden arts scene, and Boyd Lake recreation. The Thompson School District boundaries cover most desirable rental neighborhoods, and rental rates have kept pace with rising home values. Investors should look near Centerra for retail-worker tenants and in west Loveland near Devil\'s Backbone for outdoor enthusiasts. Schwartz and Associates tracks Loveland rental market trends and can connect you with property managers. Call (970) 999-1407 for a Loveland investment consultation.'
+    },
+    {
+      q: 'How are the schools in Loveland compared to Fort Collins?',
+      a: 'Loveland is served by the Thompson School District, the 17th largest in Colorado, serving approximately 15,000 students. The district earns a B rating with Niche and includes charter options like Loveland Classical School and New Vision Charter School. Fort Collins\' Poudre School District is larger and ranked higher statewide, but Loveland schools perform well within their peer group and offer smaller class sizes in many neighborhoods. For families, the choice often comes down to commute and housing budget rather than a dramatic school-quality gap. We can help you compare specific school boundaries for any listing.'
     }
   ],
   'windsor': [
@@ -91,6 +107,14 @@ const AREA_FAQS = {
     {
       q: 'Should I buy on the Weld or Larimer County side of Windsor?',
       a: 'Windsor straddles the Weld-Larimer county line, and the choice can affect your property taxes for as long as you own the home. Properties on the Weld County side are taxed at roughly 50–65 mills versus 65–80 mills in Larimer County, a difference that can save owners approximately $1,500–$3,000 per year depending on home value. The Weld County side also follows Weld County CHFA income limits and programs, while the Larimer side follows Larimer County\'s. School assignments, services, and resale demand differ by side as well — a local agent who knows the boundary can show you exactly how each listing compares.'
+    },
+    {
+      q: 'How long does it take to sell a home in Windsor?',
+      a: 'Windsor homes in the $450K–$600K range typically sell within 25–35 days when priced correctly, while premium properties above $750K may take 65+ days. The town\'s family-friendly reputation and newer construction inventory keep buyer demand steady year-round. Water Valley and RainDance communities tend to move faster than homes on larger acreage parcels. SAA Homes provides a free market analysis specific to your Windsor neighborhood and home features — call (970) 999-1407.'
+    },
+    {
+      q: 'Is Windsor a good place to invest in real estate?',
+      a: 'Windsor is attractive for investors focused on family rentals and new-construction appreciation. Master-planned communities like Water Valley and RainDance command premium rents due to amenities and school quality, while the Weld County side offers lower property taxes that improve cash flow. Windsor\'s location between Fort Collins, Loveland, and Greeley gives tenants multiple employment options. Investors should note that HOA fees in newer communities can affect returns — we help you model the full picture before you buy.'
     }
   ],
   'greeley': [
@@ -121,6 +145,18 @@ const AREA_FAQS = {
     {
       q: 'Does Greeley have its own down payment assistance program?',
       a: 'Yes. The City of Greeley G-HOPE program offers $2,500–$8,000 in zone-based forgivable down payment assistance for full-time employees of employers based in the program area (homes east of 35th Avenue). No first-time buyer requirement and no income limit. CHFA also works statewide. See G-HOPE details on our CHFA down payment assistance hub: https://saahomes.com/chfa-down-payment-assistance/#greeley-g-hope'
+    },
+    {
+      q: 'Is Greeley a good place to invest in real estate?',
+      a: 'Greeley offers some of the strongest cash-flow potential in Northern Colorado due to lower entry prices ($375K–$500K typical) and steady rental demand from University of Northern Colorado students, Banner Health employees, and JBS workers. Investors should target neighborhoods near UNC, west Greeley along the Poudre River Trail, and the U.S. 34 corridor for tenant pools. Unlike Fort Collins, Greeley\'s lower price point allows investors to enter with less capital while still benefiting from Weld County growth. Call (970) 999-1407 to review Greeley investment properties.'
+    },
+    {
+      q: 'How are the schools in Greeley compared to Fort Collins and Loveland?',
+      a: 'Greeley is served by Greeley-Evans School District 6, which serves a diverse and growing student population. While test scores and rankings vary by individual school, the district has invested in new facilities and career-focused programs. Weld County families also have access to several charter and private options. Compared to Poudre (Fort Collins) and Thompson (Loveland), Greeley-Evans is larger and more diverse, with strong career and technical education pathways. School choice matters — we can show you which Greeley neighborhoods align with the schools that fit your family\'s priorities.'
+    },
+    {
+      q: 'How long does it take to sell a home in Greeley?',
+      a: 'Greeley homes in the $350K–$500K range typically sell within 20–40 days when priced correctly, making it one of the faster-moving markets in Weld County. The university and healthcare employment base creates consistent buyer demand. Homes near UNC, in west Greeley, and along the U.S. 34 corridor tend to attract more showings. Sellers should budget for modest pre-listing improvements — fresh paint and landscaping deliver strong ROI in this price-conscious market. SAA Homes offers a free Greeley market analysis and staging checklist.'
     }
   ],
   'timnath': [
@@ -135,6 +171,14 @@ const AREA_FAQS = {
     {
       q: 'Is Timnath a good place for families?',
       a: 'Timnath is increasingly popular with families attracted to newer homes, planned communities with parks and trails, and access to Poudre School District schools. The town\'s rapid growth has brought new retail and dining options, though many residents still commute to Fort Collins for major shopping and entertainment.'
+    },
+    {
+      q: 'Should I buy new construction or resale in Timnath?',
+      a: 'Timnath is dominated by new construction — master-planned communities like Timnath Ranch and The Farm offer modern floor plans, energy efficiency, and community amenities. New homes typically carry HOA fees ($50–$150/month) but include builder warranties. Resale inventory is limited and tends to be in older pockets near the original town center. Buyers who value customization and low maintenance often prefer new construction, while those seeking larger lots or no HOA may need to look at resale options in nearby Wellington or Fort Collins. SAA Homes can help you compare new-build incentives versus resale value in Timnath.'
+    },
+    {
+      q: 'How long does it take to sell a home in Timnath?',
+      a: 'New construction homes in Timnath typically sell quickly when priced competitively — the $550K–$750K segment moves within 20–35 days due to high demand for newer homes near Fort Collins. Inventory is tighter than Fort Collins proper, so well-presented listings often receive multiple showings in the first week. Sellers should leverage builder-grade finishes and community amenities in marketing. SAA Homes provides a free Timnath market analysis and professional photography for every listing.'
     }
   ],
   'wellington': [
@@ -145,6 +189,14 @@ const AREA_FAQS = {
     {
       q: 'What is it like living in Wellington, Colorado?',
       a: 'Wellington offers a small-town atmosphere with easy access to Fort Collins amenities. The community is known for its rural character, open spaces, and family-friendly environment. Residents enjoy Wellington\'s parks, local events, and the close-knit community feel while being just a short drive from CSU, shopping, and dining in Fort Collins.'
+    },
+    {
+      q: 'Is Wellington a good place to invest in land or acreage?',
+      a: 'Wellington is one of the best Northern Colorado markets for buyers seeking land and acreage properties, with larger lots available at lower per-acre prices than Fort Collins or Loveland. Investors and equestrian buyers often target Wellington for its agricultural zoning flexibility and proximity to the I-25 corridor. The town\'s growth trajectory suggests long-term appreciation as Fort Collins expands northward. SAA Homes has experience with land transactions and can help you evaluate Wellington acreage for residential or investment use.'
+    },
+    {
+      q: 'How long does it take to sell a home in Wellington?',
+      a: 'Wellington homes in the $400K–$550K range typically sell within 25–45 days when priced correctly, with larger acreage properties taking 50–70 days depending on lot size and outbuildings. The rural character attracts a specific buyer pool — horse enthusiasts, hobby farmers, and families wanting space — so targeted marketing matters. Sellers should highlight barns, fencing, and outdoor amenities. SAA Homes provides a free Wellington market analysis and specialized photography for rural properties.'
     }
   ],
   'johnstown': [
@@ -155,6 +207,18 @@ const AREA_FAQS = {
     {
       q: 'What are the best neighborhoods in Johnstown?',
       a: 'Johnstown features the historic downtown area with older character homes, and newer developments along the I-25 corridor. The town is part of the Thompson School District and offers easy access to both Loveland and Longmont for shopping and employment.'
+    },
+    {
+      q: 'Is Johnstown a good place for first-time buyers?',
+      a: 'Johnstown is increasingly popular with first-time buyers because it offers newer construction at lower prices than Loveland and Longmont, while still providing Thompson School District access and an easy I-25 commute. The mix of historic character homes and modern developments gives buyers choices across price points. CHFA down payment assistance programs work in Johnstown, and the town\'s growth along the corridor suggests continued infrastructure investment. SAA Homes helps first-time buyers navigate Johnstown\'s new construction incentives and resale inventory.'
+    },
+    {
+      q: 'How long does it take to sell a home in Johnstown?',
+      a: 'Johnstown homes in the $450K–$650K range typically sell within 20–40 days when priced correctly, with newer construction along the I-25 corridor moving faster than historic downtown properties. The town\'s growth has attracted consistent buyer demand from buyers priced out of Loveland and Longmont. Sellers should emphasize Thompson School District boundaries and commute access to both cities. SAA Homes offers a free Johnstown market analysis and professional photography to help listings stand out.'
+    },
+    {
+      q: 'Should I buy in Johnstown or Loveland?',
+      a: 'Johnstown offers newer construction at generally lower prices than comparable Loveland homes, plus Thompson School District access and a central location between Loveland and Longmont. Loveland provides more established retail, dining, and arts amenities (Benson Sculpture Garden, Boyd Lake), along with a larger existing home inventory. Buyers prioritizing new homes and commute flexibility often choose Johnstown, while those wanting walkable downtown access and lake recreation prefer Loveland. Both are solid investments — the choice depends on your lifestyle and budget. Call (970) 999-1407 and we\'ll compare specific listings side by side.'
     }
   ],
   'eaton': [
@@ -213,6 +277,18 @@ const AREA_FAQS = {
     {
       q: 'Does Longmont have a down payment assistance program?',
       a: 'Yes. Longmont\'s LDPAP offers up to 10% of the purchase price (max $40,000) for income-qualified buyers inside city limits — terms vary by AMI tier (2% amortized or 0% deferred). Boulder County BCDPAP (also administered by Longmont) covers homes in the county outside Boulder city. CHFA remains available statewide. Program summary: https://saahomes.com/chfa-down-payment-assistance/#longmont-ldpap'
+    },
+    {
+      q: 'Is Longmont a good place to invest in real estate?',
+      a: 'Longmont offers solid investment potential due to its tech sector growth, St. Vrain Valley School District quality, and relative affordability compared to Boulder. The Prospect New Urbanist community and southwest Longmont near McIntosh Lake attract stable family tenants, while the downtown area draws young professionals commuting to Boulder or Denver. Investors should note that Longmont has stricter rental regulations than Weld County, so understanding local landlord requirements is important. SAA Homes can help you evaluate Longmont investment properties and connect you with local property management resources.'
+    },
+    {
+      q: 'How long does it take to sell a home in Longmont?',
+      a: 'Longmont homes in the $500K–$700K range typically sell within 20–40 days when priced correctly, with properties in the Prospect community and near McIntosh Lake moving faster due to high buyer demand. The tech-worker buyer pool and Boulder commuters create steady demand year-round. Sellers should highlight St. Vrain Valley School District assignments and proximity to Boulder/Denver commutes. SAA Homes offers a free Longmont market analysis and professional staging guidance.'
+    },
+    {
+      q: 'Should I buy in Longmont or Boulder?',
+      a: 'Longmont offers significantly better value — typically 30–50% lower price per square foot than Boulder — while keeping Boulder County schools, St. Vrain Valley trails, and a 20-minute commute to Boulder. Longmont also has its own tech employers and a growing downtown. Boulder provides unmatched outdoor access, CU culture, and prestige addresses, but at a steep premium ($900K+ entry point for single-family homes). Buyers who want Boulder County lifestyle without Boulder prices often choose Longmont, while those prioritizing walkable mountain access and CU proximity prefer Boulder. SAA Homes can show you comparable listings in both cities to help you decide.'
     }
   ],
   'boulder': [
