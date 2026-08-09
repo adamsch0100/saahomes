@@ -9,6 +9,7 @@ import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import getPool from '../config/database.js';
 import { setAuthCookie } from './alertController.js';
+import { rejectIfDisposableEmail } from '../utils/emailQuality.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -24,6 +25,7 @@ export const register = async (req, res) => {
     const emailStr = String(email || '').trim().toLowerCase();
     const passStr = String(password || '');
     if (!EMAIL_RE.test(emailStr)) return res.status(400).json({ success: false, error: 'Please enter a valid email.' });
+    if (rejectIfDisposableEmail(emailStr, res, 'signup')) return;
     if (passStr.length < 8) return res.status(400).json({ success: false, error: 'Password must be at least 8 characters.' });
 
     const pool = getPool();
@@ -128,6 +130,7 @@ export const ensureSession = async (req, res) => {
     if (!EMAIL_RE.test(emailStr)) {
       return res.status(400).json({ success: false, error: 'Please enter a valid email.' });
     }
+    if (rejectIfDisposableEmail(emailStr, res, 'signup')) return;
     const phoneDigits = cleanPhone(phone);
     if (!phoneDigits) {
       return res.status(400).json({

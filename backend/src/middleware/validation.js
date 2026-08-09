@@ -1,4 +1,9 @@
 import { body, validationResult } from 'express-validator';
+import {
+  isDisposableEmail,
+  logBlockedEmail,
+  normalizeEmail,
+} from '../utils/emailQuality.js';
 
 const leadMetadataFields = [
   body('sourcePage').optional().trim().isLength({ max: 255 }),
@@ -10,6 +15,31 @@ const leadMetadataFields = [
   body('gaClientId').optional().trim().isLength({ max: 64 }),
 ];
 
+/**
+ * Shared real-email gate for every lead form.
+ * Blocks known disposable domains after express-validator's isEmail/normalizeEmail.
+ * pathName is logged to blocked_email_log when rejected.
+ */
+const emailIsReal = (value, pathName) => {
+  const clean = normalizeEmail(value);
+  if (!clean) return false;
+  if (isDisposableEmail(clean)) {
+    logBlockedEmail(clean, pathName).catch(() => {});
+    return false;
+  }
+  return true;
+};
+
+/** DRY email field used by all 7 lead validators. */
+const validEmailField = (pathName) =>
+  body('email')
+    .trim()
+    .isEmail()
+    .withMessage('Valid email is required')
+    .normalizeEmail()
+    .custom((value) => emailIsReal(value, pathName))
+    .withMessage('Please use a real email address');
+
 export const validateContactSubmission = [
   body('name')
     .trim()
@@ -18,11 +48,7 @@ export const validateContactSubmission = [
     .isLength({ max: 255 })
     .withMessage('Name must be less than 255 characters'),
 
-  body('email')
-    .trim()
-    .isEmail()
-    .withMessage('Valid email is required')
-    .normalizeEmail(),
+  validEmailField('contact'),
 
   body('phone')
     .optional()
@@ -66,11 +92,7 @@ export const validateMarketReportSubmission = [
     .isLength({ max: 255 })
     .withMessage('Last name must be less than 255 characters'),
 
-  body('email')
-    .trim()
-    .isEmail()
-    .withMessage('Valid email is required')
-    .normalizeEmail(),
+  validEmailField('market-report'),
 
   body('phone')
     .trim()
@@ -107,11 +129,7 @@ export const validateCashBuyerLeadSubmission = [
     .isLength({ max: 255 })
     .withMessage('Name must be less than 255 characters'),
 
-  body('email')
-    .trim()
-    .isEmail()
-    .withMessage('Valid email is required')
-    .normalizeEmail(),
+  validEmailField('cash-buyer'),
 
   body('phone')
     .trim()
@@ -155,11 +173,7 @@ export const validateChfaLeadSubmission = [
     .isLength({ max: 255 })
     .withMessage('Last name must be less than 255 characters'),
 
-  body('email')
-    .trim()
-    .isEmail()
-    .withMessage('Valid email is required')
-    .normalizeEmail(),
+  validEmailField('chfa'),
 
   body('phone')
     .trim()
@@ -203,11 +217,7 @@ export const validateChampionsLeadSubmission = [
     .withMessage('Last name is required')
     .isLength({ max: 255 }),
 
-  body('email')
-    .trim()
-    .isEmail()
-    .withMessage('Valid email is required')
-    .normalizeEmail(),
+  validEmailField('champions'),
 
   body('phone')
     .trim()
@@ -252,11 +262,7 @@ export const validateChfaDpaLeadSubmission = [
     .withMessage('Last name is required')
     .isLength({ max: 255 }),
 
-  body('email')
-    .trim()
-    .isEmail()
-    .withMessage('Valid email is required')
-    .normalizeEmail(),
+  validEmailField('chfa-dpa'),
 
   body('phone')
     .trim()
@@ -301,11 +307,7 @@ export const validateGhopeLeadSubmission = [
     .withMessage('Last name is required')
     .isLength({ max: 255 }),
 
-  body('email')
-    .trim()
-    .isEmail()
-    .withMessage('Valid email is required')
-    .normalizeEmail(),
+  validEmailField('ghope'),
 
   body('phone')
     .trim()
