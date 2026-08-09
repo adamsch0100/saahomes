@@ -501,12 +501,15 @@ export const areaSeoPages = [
     introParagraphs: [
       'Firestone is a cornerstone of the Carbon Valley — a rapidly expanding area along the I-25 corridor north of Denver. Families choose Firestone for newer homes, strong schools, and relative affordability compared to Boulder County.',
       'Whether you are buying your first home or upgrading within the Carbon Valley, SAA Homes provides local expertise on Firestone neighborhoods, pricing trends, and financing options including CHFA down payment assistance.',
+      'Typical Firestone home prices run $450,000–$650,000 — often $100K+ below comparable Larimer County inventory. Commute times to Longmont are roughly 15–20 minutes; Fort Collins is about 35–45 minutes via I-25 or US-287 depending on traffic.',
+      'Firestone pairs well with Frederick and Dacono for buyers comparing Carbon Valley options. See our Carbon Valley affordability guide for side-by-side pricing, schools, and new construction timelines.',
     ],
     whyChoose: [
       { title: 'Carbon Valley hub', description: 'Part of a high-growth region with Frederick and Dacono along the I-25 corridor.' },
       { title: 'Family-oriented', description: 'Parks, trails, and community events designed for growing households.' },
       { title: 'Newer housing stock', description: 'Many neighborhoods built within the last two decades with modern floor plans.' },
       { title: 'Commuter friendly', description: 'Access to employment centers in Longmont, Fort Collins, and the Denver metro.' },
+      { title: 'CHFA eligible', description: 'Weld County buyers often qualify for Colorado down payment assistance — popular first-time buyer entry point.' },
     ],
     highlights: {
       neighborhoods: ['Mountain View Estates area', 'Carbon Valley new builds', 'Established Firestone subdivisions', 'Properties near Coal Ridge Middle School corridor'],
@@ -527,6 +530,8 @@ export const areaSeoPages = [
     introParagraphs: [
       'Frederick offers some of the most accessible home prices in the Carbon Valley while still delivering new construction, community amenities, and a family-friendly atmosphere. Located in Weld County between Firestone and Dacono, Frederick continues to draw buyers priced out of Boulder and Larimer counties.',
       'SAA Homes helps Frederick buyers understand neighborhood differences, new development timelines, and CHFA program eligibility — so you can move forward with confidence.',
+      'Frederick medians often land in the $400,000–$575,000 range — among the most affordable Northern Colorado options with full suburban amenities. St. Vrain Valley schools, Milavec Lake recreation, and quick Longmont access make Frederick a practical choice for first-time and move-up buyers.',
+      'Compare Frederick with Firestone and Longmont using our Carbon Valley guide and Weld vs Larimer County buyer guide when deciding where your budget stretches furthest.',
     ],
     whyChoose: [
       { title: 'Value pricing', description: 'Strong affordability relative to Longmont, Boulder, and Fort Collins.' },

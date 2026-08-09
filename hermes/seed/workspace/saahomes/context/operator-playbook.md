@@ -16,9 +16,11 @@ Read weekly. Hermes reads this every Monday war room.
 └─────────────────────────────────────────────────────────────┘
                               ↓ traffic
 ┌─────────────────────────────────────────────────────────────┐
-│  LAYER 2 — CONVERSION (Hermes monitors · Adam/Mandi close)  │
-│  Forms → PostgreSQL → Follow Up Boss · GA4 generate_lead    │
-│  Hermes NEVER emails/texts leads as Adam                    │
+│  LAYER 2 — CONVERSION (Conversion Hermes + Adam/Mandi close) │
+│  Forms → PostgreSQL → Follow Up Boss · GA4 generate_lead     │
+│  **Conversion Hermes** (fub-hermes): welcome SMS from agent  │
+│  FUB number · qualify · schedule · re-engage                 │
+│  **Demand Hermes never contacts leads** — SEO/content only   │
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -48,7 +50,7 @@ Full strategy: `market-dominance-strategy.md` · Autopilot rules: `automation-po
 | **Every Wednesday** | Weekly social post pack email — **post same day if possible** | 5 min |
 | **Thursday** | Approve 0–2 outreach drafts (`approved` / `edit:` / `skip`) | 5–10 min |
 | **Monday (optional)** | Read weekly war room on Telegram — rankings, leads, blockers | 10 min |
-| **Ongoing** | Follow Up Boss — call/text **form leads** (Hermes does not) | Your core job |
+| **Ongoing** | Follow Up Boss — Conversion Hermes first touch; Adam/Mandi close complex deals | Your core job |
 
 **Two email types from Hermes:**
 1. **Monday — "Your week"** schedule (when to do what)
@@ -108,16 +110,18 @@ You are the quality gate for **external email as Adam**. Hermes never sends with
 
 ---
 
-## Lead capture — doing it correctly (Adam/Mandi only)
+## Lead capture — doing it correctly (Conversion Hermes + Adam/Mandi)
 
-This is the revenue layer. Hermes optimizes pages; **you close leads**.
+This is the revenue layer. **Demand Hermes** optimizes pages; **Conversion Hermes** (fub-hermes) sends the first welcome SMS from your native FUB number, qualifies, and schedules. **You** close complex deals and high-intent seller calls.
 
-| Lead source | Your action |
-|-------------|-------------|
-| Contact form | FUB notification → call/text within business hours |
-| Market report | High-intent seller — prioritize same day |
-| CHFA / program forms | Buyer nurture — program accuracy matters |
-| Phone (970) 999-1407 | Always answer or callback fast |
+| Lead source | System action | Your action |
+|-------------|---------------|-------------|
+| Contact form | Conversion Hermes welcome SMS (browser-send from FUB) | Take over when qualified or requested |
+| Market report | Tagged `market-report` in FUB — high-intent seller | Same-day call if Hermes flags hot lead |
+| CHFA / program forms | Tagged `chfa` + program name | Program accuracy on lender handoff |
+| Phone (970) 999-1407 | Always human | Always answer or callback fast |
+
+FUB tags from website: `saahomes-organic`, `market-report`, `chfa`, plus lead type. Hermes SEO agent never texts or emails leads.
 
 **Verify once (you):** GA4 Admin → Key events → New key event → type **`saa_lead_submit`** (or `generate_lead`). If neither appears in dropdown yet, pre-register the name anyway — it will apply once events arrive. After form submit, URL gains `?lead_submitted=contact` for Admin → Events → Create event fallback. Use **DebugView** with `?ga_debug=1` on any page URL.
 
@@ -193,9 +197,9 @@ Weekly: email operator schedule every Monday via send-operator-weekly-email.py.
 Market updates: update LATEST_MARKET_UPDATE_SLUG + supersededBy on old posts every month.
 Browserbase + browse.sh: market intel for content only.
 Outreach: OUTREACH REVIEW → I reply approved before send.
-Leads: I handle FUB — you never contact form submitters.
+Leads: Conversion Hermes (fub-hermes) handles FUB welcome SMS — Demand Hermes never contacts form submitters.
 
-Install all 21 cron jobs from automation-registry.md. Execute the machine. Notify on ✅ DONE.
+Install all 24 cron jobs from automation-registry.md. Execute the machine. Notify on ✅ DONE.
 ```
 
 ---

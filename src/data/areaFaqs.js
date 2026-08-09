@@ -335,6 +335,14 @@ const AREA_FAQS = {
     {
       q: 'Does Firestone have good schools?',
       a: 'Firestone is served by St. Vrain Valley School District, one of Colorado\'s top-rated districts. Schools serving Firestone include Prairie Ridge Elementary, Coal Ridge Middle School, and Frederick High School. The area also has several charter and private school options.'
+    },
+    {
+      q: 'How long is the commute from Firestone to Longmont or Fort Collins?',
+      a: 'Firestone sits along the I-25 corridor in the Carbon Valley. Typical drives are about 15–20 minutes to Longmont and 35–45 minutes to Fort Collins depending on traffic and route (I-25 vs US-287). Many buyers work in Boulder County or Larimer County while living in more affordable Firestone neighborhoods.'
+    },
+    {
+      q: 'Is Firestone good for first-time buyers using CHFA?',
+      a: 'Yes — Firestone and the broader Carbon Valley are popular for CHFA down payment assistance because Weld County price points often fit program limits better than Fort Collins or Boulder. SAA Homes can connect you with a CHFA participating lender and review SmartStep, Preferred, and specialty programs.'
     }
   ],
   'frederick': [
@@ -349,6 +357,14 @@ const AREA_FAQS = {
     {
       q: 'Is Frederick good for first-time homebuyers?',
       a: 'Yes, Frederick is one of the best Northern Colorado towns for first-time buyers, thanks to affordable home prices and CHFA eligibility. Many buyers use CHFA down payment assistance programs to enter the market here. The town\'s continued growth also offers strong resale potential.'
+    },
+    {
+      q: 'How does Frederick compare to Firestone and Longmont?',
+      a: 'Frederick typically offers the lowest entry prices in the Carbon Valley trio, while Firestone has more established subdivisions and Longmont adds Boulder County amenities at higher price points. Buyers often tour all three before deciding — SAA Homes provides side-by-side market data for each.'
+    },
+    {
+      q: 'What new construction is available in Frederick?',
+      a: 'Frederick continues to add master-planned and infill communities along the Carbon Valley growth corridor. New builds often include modern floor plans, energy-efficient standards, and HOA amenities. Timelines vary by builder — ask SAA Homes for current inventory and pre-sale opportunities.'
     }
   ],
   'evans': [

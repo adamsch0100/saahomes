@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { getEventsGuidePath } from "../data/localEvents.js";
+import { LISTLOGIC_URL } from "../utils/seoConstants.js";
 
 export default function Footer() {
   return (
@@ -46,6 +47,16 @@ export default function Footer() {
               <li><Link to={getEventsGuidePath()} className="hover:text-white transition-colors">NOCO Events Guide</Link></li>
               <li><Link to="/about-us/" className="hover:text-white transition-colors">About Us</Link></li>
               <li><Link to="/contact/" className="hover:text-white transition-colors">Contact</Link></li>
+              <li>
+                <a
+                  href={LISTLOGIC_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors"
+                >
+                  ListLogic
+                </a>
+              </li>
             </ul>
           </div>
 
