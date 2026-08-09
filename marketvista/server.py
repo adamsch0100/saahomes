@@ -95,6 +95,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/api/demo-export",
         "/api/login",
         "/api/signup",
+        "/api/auth/magic-link",
+        "/api/auth/verify",
         "/api/logout",
         "/api/auth-status",
         "/api/feedback",
@@ -106,6 +108,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
     OPEN_PREFIXES = (
         "/saas/login.html",
         "/saas/signup.html",
+        "/saas/verify.html",
         "/saas/index.html",
         "/saas/pricing.html",
         "/saas/faq.html",
@@ -131,8 +134,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
         ".svg",
         ".ico",
     )
-    # Runs + sample assets readable so demo/share links work; generate stays gated.
-    OPEN_RUN_PREFIXES = ("/runs/",)
+    # Runs + short share links readable so demo/client links work; generate stays gated.
+    OPEN_RUN_PREFIXES = ("/runs/", "/p/")
 
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
@@ -150,6 +153,13 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 return RedirectResponse(url="/saas/login.html?next=/saas/admin.html", status_code=302)
             return await call_next(request)
         if any(path.startswith(p) for p in self.OPEN_RUN_PREFIXES):
+            return await call_next(request)
+        # Public read APIs so shared/demo presentations can load photos + edits
+        if (
+            request.method == "GET"
+            and path.startswith("/api/runs/")
+            and path.endswith(("/share", "/edits", "/scenarios", "/comp-photos"))
+        ):
             return await call_next(request)
         # Internal cron
         if path.startswith("/api/internal/"):
@@ -266,6 +276,7 @@ def _generate(
     brand_accent: str = "",
     logo_url: str = "",
     market_notes: str = "",
+    force_run_id: Optional[str] = None,
 ) -> dict:
     defaults = dict(SUBJECT_2845_DEFAULTS) if "2845" in (address or "") and "13" in (address or "") else {}
     overrides = {
@@ -311,9 +322,16 @@ def _generate(
     meta["market_notes"] = market_notes or ""
     meta["market_label"] = area_name or ""
 
-    run_id = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}-{_slug(address)}-{uuid.uuid4().hex[:8]}"
-    run_dir = OUTPUT_DIR / run_id
-    run_dir.mkdir(parents=True, exist_ok=True)
+    if force_run_id:
+        run_id = _safe_run_id(force_run_id)
+        run_dir = OUTPUT_DIR / run_id
+        if run_dir.exists():
+            shutil.rmtree(run_dir, ignore_errors=True)
+        run_dir.mkdir(parents=True, exist_ok=True)
+    else:
+        run_id = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}-{_slug(address)}-{uuid.uuid4().hex[:8]}"
+        run_dir = OUTPUT_DIR / run_id
+        run_dir.mkdir(parents=True, exist_ok=True)
 
     # Hosted listing photos: MLS disk cache → download into this run (Reef only on cache miss).
     photo_map: dict = {}
@@ -376,6 +394,13 @@ def _generate(
         story_pdf_url = f"/runs/{run_id}/story.pdf"
     except Exception:
         logger.exception("PDF export failed for run %s", run_id)
+
+    # Refresh sample demo PDFs so /demo always shows the latest packet design.
+    if run_id == SAMPLE_RUN_ID:
+        try:
+            _refresh_sample_pdfs(report, run_dir)
+        except Exception:
+            logger.exception("Sample PDF refresh failed")
 
     positioning = report.get("positioning") or {}
     stats = report.get("stats") or {}
@@ -443,6 +468,7 @@ def auth_status(request: Request):
 
 @app.post("/api/signup")
 async def signup(request: Request):
+    """Legacy password signup — prefer /api/auth/magic-link."""
     import auth_service
     import mailer
 
@@ -459,6 +485,7 @@ async def signup(request: Request):
             brokerage=str(payload.get("brokerage") or ""),
             promo_code=str(payload.get("promo_code") or ""),
             invite_token=str(payload.get("invite") or payload.get("invite_token") or ""),
+            email_verified=False,
         )
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
@@ -474,6 +501,148 @@ async def signup(request: Request):
     })
     _set_session_cookie(resp, request, token)
     return resp
+
+
+@app.post("/api/auth/magic-link")
+async def request_magic_link(request: Request):
+    import auth_service
+    import mailer
+
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(400, "Invalid JSON") from exc
+    email = str(payload.get("email") or "").strip()
+    try:
+        link = auth_service.create_magic_link(
+            email,
+            promo_code=str(payload.get("promo_code") or ""),
+            invite_token=str(payload.get("invite") or payload.get("invite_token") or ""),
+            next_path=str(payload.get("next") or "/saas/app.html"),
+        )
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+
+    sent = False
+    try:
+        sent = mailer.send_magic_link(to=link["email"], url=link["url"], is_new=link["is_new"])
+    except Exception:
+        logger.exception("Magic link email failed")
+
+    # Dev fallback: include URL when SMTP isn't configured
+    out = {
+        "ok": True,
+        "email": link["email"],
+        "sent": sent,
+        "message": (
+            "Check your email for a sign-in link."
+            if sent
+            else "Email delivery isn't configured — use the link below (dev mode)."
+        ),
+    }
+    if not sent:
+        out["dev_url"] = link["url"]
+    return JSONResponse(out)
+
+
+@app.post("/api/auth/verify")
+async def verify_magic_link(request: Request):
+    import auth_service
+    import mailer
+
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(400, "Invalid JSON") from exc
+    token = str(payload.get("token") or "")
+    try:
+        result = auth_service.consume_magic_link(token)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+
+    user = result["user"]
+    if result.get("is_new"):
+        try:
+            mailer.send_welcome(user, auth_service.app_base_url())
+        except Exception:
+            logger.exception("Welcome email failed")
+
+    session = auth_service.create_session(user["id"])
+    resp = JSONResponse({
+        "ok": True,
+        "user": auth_service.public_user(user),
+        "entitlement": auth_service.entitlement(user),
+        "is_new": result.get("is_new"),
+        "needs_onboarding": result.get("needs_onboarding"),
+        "next": result.get("next") or "/saas/app.html",
+    })
+    _set_session_cookie(resp, request, session)
+    return resp
+
+
+@app.post("/api/profile")
+async def save_profile(request: Request):
+    import auth_service
+
+    user = _require_user(request)
+    content_type = (request.headers.get("content-type") or "").lower()
+    logo_url = None
+    password = ""
+    if "multipart/form-data" in content_type:
+        form = await request.form()
+        name = str(form.get("name") or "")
+        phone = str(form.get("phone") or "")
+        brokerage = str(form.get("brokerage") or "")
+        brand_primary = str(form.get("brand_primary") or "")
+        brand_accent = str(form.get("brand_accent") or "")
+        password = str(form.get("password") or "")
+        logo = form.get("logo")
+        if logo and getattr(logo, "filename", None):
+            raw = await logo.read()
+            if len(raw) > 2 * 1024 * 1024:
+                raise HTTPException(400, "Logo must be under 2MB")
+            suffix = Path(logo.filename).suffix.lower()
+            if suffix not in {".png", ".jpg", ".jpeg", ".webp", ".svg"}:
+                raise HTTPException(400, "Logo must be png, jpg, webp, or svg")
+            logo_name = f"{uuid.uuid4().hex}{suffix}"
+            logo_path = BRANDING_DIR / logo_name
+            logo_path.write_bytes(raw)
+            logo_url = f"/branding/{logo_name}"
+    else:
+        try:
+            payload = await request.json()
+        except Exception as exc:
+            raise HTTPException(400, "Invalid JSON") from exc
+        name = str(payload.get("name") or "")
+        phone = str(payload.get("phone") or "")
+        brokerage = str(payload.get("brokerage") or "")
+        brand_primary = str(payload.get("brand_primary") or "")
+        brand_accent = str(payload.get("brand_accent") or "")
+        password = str(payload.get("password") or "")
+        if "logo_url" in payload:
+            logo_url = str(payload.get("logo_url") or "")
+
+    try:
+        if password:
+            auth_service.set_password(user["id"], password)
+        updated = auth_service.update_profile(
+            user["id"],
+            name=name,
+            phone=phone,
+            brokerage=brokerage,
+            brand_primary=brand_primary,
+            brand_accent=brand_accent,
+            logo_url=logo_url,
+            mark_complete=True,
+        )
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+
+    return JSONResponse({
+        "ok": True,
+        "user": auth_service.public_user(updated),
+        "entitlement": auth_service.entitlement(updated),
+    })
 
 
 @app.post("/api/login")
@@ -627,11 +796,90 @@ async def assistant_chat(request: Request):
     return JSONResponse(result)
 
 
+def _refresh_sample_html(run_dir: Path) -> None:
+    """Re-bake sample presentation.html from saved JSON using the current template."""
+    json_path = run_dir / "presentation.json"
+    html_path = run_dir / "presentation.html"
+    if not json_path.exists():
+        return
+    try:
+        # Skip rewrite when sample already has the current Full Market UI markers
+        if html_path.exists():
+            existing = html_path.read_text(encoding="utf-8", errors="ignore")
+            if "btnSortUsed" in existing and "fulldata-body" in existing and "In comps · remove" in existing:
+                return
+        report = json.loads(json_path.read_text(encoding="utf-8"))
+        _save_html(report, html_path)
+        logger.info("Refreshed sample presentation HTML for %s", run_dir.name)
+    except Exception:
+        logger.exception("Failed refreshing sample HTML for %s", run_dir.name)
+
+
+def _refresh_sample_pdfs(report: dict, run_dir: Path) -> None:
+    """Re-bake sample PDFs so the demo always matches the latest packet design."""
+    try:
+        from pdf_export import build_pdf, build_story_pdf
+        meta = report.get("meta") or {}
+        agent_name = meta.get("agent_name") or "Your Agent"
+        brokerage = meta.get("brokerage") or ""
+        build_pdf(report, run_dir / "presentation.pdf", agent_name=agent_name, brokerage=brokerage)
+        build_story_pdf(report, run_dir / "story.pdf", agent_name=agent_name, brokerage=brokerage)
+        logger.info("Refreshed sample PDFs for %s", run_dir.name)
+    except Exception:
+        logger.exception("Failed refreshing sample PDFs for %s", run_dir.name)
+
+
+def _rewrite_run_paths(run_dir: Path, old_id: str, new_id: str) -> None:
+    """Point baked HTML/JSON photo URLs at the stable sample run id after rename."""
+    if not old_id or old_id == new_id or not run_dir.exists():
+        return
+    needle = f"/runs/{old_id}/"
+    repl = f"/runs/{new_id}/"
+    for path in run_dir.rglob("*"):
+        if not path.is_file() or path.suffix.lower() not in {".html", ".json", ".js", ".css", ".txt"}:
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        if needle not in text:
+            continue
+        path.write_text(text.replace(needle, repl), encoding="utf-8")
+
+
+def _repair_sample_run_paths(run_dir: Path) -> bool:
+    """Fix sample HTML that still references a pre-rename /runs/{timestamp-uuid}/ path."""
+    html_path = run_dir / "presentation.html"
+    if not html_path.exists():
+        return False
+    try:
+        text = html_path.read_text(encoding="utf-8")
+    except OSError:
+        return False
+    old_ids = set(re.findall(r"/runs/([A-Za-z0-9_-]{6,120})/", text))
+    old_ids.discard(SAMPLE_RUN_ID)
+    if not old_ids:
+        return False
+    for old_id in old_ids:
+        _rewrite_run_paths(run_dir, old_id, SAMPLE_RUN_ID)
+    return True
+
+
 def _ensure_sample_run() -> str:
     """Build or reuse the public sample listing run (no trial credit)."""
     run_dir = OUTPUT_DIR / SAMPLE_RUN_ID
     html_path = run_dir / "presentation.html"
     if html_path.exists():
+        _repair_sample_run_paths(run_dir)
+        _refresh_sample_html(run_dir)
+        # Keep sample PDFs in sync with the latest packet design.
+        try:
+            json_path = run_dir / "presentation.json"
+            if json_path.exists():
+                report = json.loads(json_path.read_text(encoding="utf-8"))
+                _refresh_sample_pdfs(report, run_dir)
+        except Exception:
+            logger.exception("Sample PDF sync failed for %s", run_dir.name)
         return SAMPLE_RUN_ID
     if not DEMO_EXPORT.exists():
         raise HTTPException(404, "Sample export missing")
@@ -655,14 +903,16 @@ def _ensure_sample_run() -> str:
         brand_primary="#0c3c6e",
         brand_accent="#1a5f9e",
         logo_url="",
+        force_run_id=SAMPLE_RUN_ID,
     )
-    # Normalize to stable sample id
-    src = OUTPUT_DIR / result["run_id"]
-    if src.exists() and src.resolve() != run_dir.resolve():
-        if run_dir.exists():
-            shutil.rmtree(run_dir, ignore_errors=True)
-        src.rename(run_dir)
-        # Fix internal copy of presentation if needed
+    # Normalize in case generate returned a different id
+    if result.get("run_id") != SAMPLE_RUN_ID:
+        src = OUTPUT_DIR / result["run_id"]
+        if src.exists() and src.resolve() != run_dir.resolve():
+            if run_dir.exists():
+                shutil.rmtree(run_dir, ignore_errors=True)
+            src.rename(run_dir)
+            _rewrite_run_paths(run_dir, result["run_id"], SAMPLE_RUN_ID)
     return SAMPLE_RUN_ID
 
 
@@ -879,6 +1129,72 @@ def view_run(run_id: str):
     if not path.exists():
         raise HTTPException(404, "Run not found")
     return FileResponse(path, media_type="text/html")
+
+
+@app.get("/p/{share_token}")
+@app.get("/p/{share_token}/")
+def view_shared_presentation(share_token: str):
+    """Short client share link → live presentation."""
+    import auth_service
+
+    token = (share_token or "").strip()
+    if not re.fullmatch(r"[A-Za-z0-9_-]{6,64}", token):
+        raise HTTPException(404, "Share link not found")
+    row = auth_service.get_presentation_by_share_token(token)
+    if not row or not row.get("run_id"):
+        raise HTTPException(404, "Share link not found")
+    run_id = _safe_run_id(row["run_id"])
+    path = OUTPUT_DIR / run_id / "presentation.html"
+    if not path.exists():
+        raise HTTPException(404, "This presentation is no longer available on the server")
+    return RedirectResponse(url=f"/runs/{run_id}/", status_code=302)
+
+
+@app.get("/api/runs/{run_id}/share")
+def run_share_meta(run_id: str):
+    """Public share URL for a run (used by Share with client)."""
+    import auth_service
+
+    run_id = _safe_run_id(run_id)
+    try:
+        row = auth_service.get_presentation_by_run(run_id)
+    except Exception:
+        logger.exception("Share lookup failed for %s", run_id)
+        row = None
+    if row:
+        return JSONResponse(
+            {
+                "run_id": run_id,
+                "share_url": row.get("share_url"),
+                "url": row.get("url"),
+            }
+        )
+    # Fallback for older runs that were never registered
+    share_path = OUTPUT_DIR / run_id / "share.json"
+    if share_path.exists():
+        try:
+            data = json.loads(share_path.read_text(encoding="utf-8"))
+            token = data.get("share_token")
+            if token:
+                return JSONResponse(
+                    {
+                        "run_id": run_id,
+                        "share_url": f"/p/{token}",
+                        "url": f"/runs/{run_id}/",
+                    }
+                )
+        except Exception:
+            logger.exception("Failed reading share.json for %s", run_id)
+    return JSONResponse({"run_id": run_id, "share_url": f"/runs/{run_id}/", "url": f"/runs/{run_id}/"})
+
+
+@app.get("/api/my-presentations")
+def my_presentations(request: Request):
+    import auth_service
+
+    user = _require_user(request)
+    items = auth_service.list_presentations(user["id"])
+    return JSONResponse({"presentations": items, "count": len(items)})
 
 
 @app.get("/runs/{run_id}/deck.html")
@@ -1372,6 +1688,40 @@ async def generate(
 
     after = auth_service.increment_presentation(user["id"])
     result = dict(result)
+    try:
+        saved = auth_service.save_presentation(
+            user["id"],
+            run_id=result["run_id"],
+            address=address or "",
+            recommended_price=result.get("recommended_price"),
+            months_of_inventory=result.get("months_of_inventory"),
+            active_count=result.get("active_count"),
+            under_contract_count=result.get("under_contract_count"),
+            title=address or "",
+        )
+        result["presentation_id"] = saved.get("id")
+        result["share_url"] = saved.get("share_url") or result.get("share_url")
+        result["share_token"] = saved.get("share_token")
+        result["saved"] = True
+        # Sidecar for public share endpoint / recovery
+        try:
+            run_dir = OUTPUT_DIR / result["run_id"]
+            (run_dir / "share.json").write_text(
+                json.dumps(
+                    {
+                        "share_token": saved.get("share_token"),
+                        "share_url": saved.get("share_url"),
+                        "user_id": user["id"],
+                    },
+                    indent=2,
+                ),
+                encoding="utf-8",
+            )
+        except Exception:
+            logger.exception("Failed to write share.json for %s", result.get("run_id"))
+    except Exception:
+        logger.exception("Failed to save presentation metadata for %s", result.get("run_id"))
+        result["saved"] = False
     result["entitlement"] = after
     result["access_remaining"] = after.get("remaining")
     return JSONResponse(result)

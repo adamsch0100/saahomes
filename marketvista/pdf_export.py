@@ -11,11 +11,15 @@ from reportlab.lib.units import inch
 from reportlab.lib.colors import HexColor, white, black
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
-    HRFlowable, KeepTogether, ListFlowable, ListItem, PageBreak,
+    HRFlowable, KeepTogether, ListFlowable, ListItem, PageBreak, Image,
 )
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
+from reportlab.lib.utils import ImageReader
 from core import create_full_report, SubjectProperty
+
+import io
+import urllib.request
 
 
 NAVY = HexColor("#0c3c6e")
@@ -29,6 +33,8 @@ AMBER = HexColor("#b3541e")
 AMBER_DARK = HexColor("#8a3c10")
 AMBER_BG = HexColor("#fdf3e3")
 AMBER_LINE = HexColor("#ecd9b8")
+GOLD = HexColor("#c9a227")
+DARK = HexColor("#0b1220")
 
 
 def _esc_pdf(text: object) -> str:
@@ -38,6 +44,93 @@ def _esc_pdf(text: object) -> str:
         .replace("<", "&lt;")
         .replace(">", "&gt;")
     )
+
+
+def _photo_bytes(url: str, timeout: int = 20, base_dir: Path | None = None) -> bytes | None:
+    if not url:
+        return None
+    try:
+        if str(url).startswith("http"):
+            req = urllib.request.Request(
+                url,
+                headers={
+                    "User-Agent": "ListLogic/1.0",
+                    "Accept": "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+                    "Referer": "https://www.zillow.com/",
+                },
+            )
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                data = resp.read()
+                ctype = (resp.headers.get("Content-Type") or "").lower()
+            if len(data) < 800:
+                return None
+            if "image" not in ctype and not str(url).lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
+                if not (data[:3] == b"\xff\xd8\xff" or data[:8].startswith(b"\x89PNG") or data[:4] == b"RIFF"):
+                    return None
+            return data
+        # Local relative path (e.g. photos/1058635.jpg)
+        local = Path(url)
+        if not local.is_absolute():
+            candidates = []
+            if base_dir:
+                candidates.append(Path(base_dir) / local)
+            candidates.append(Path(__file__).resolve().parent / local)
+            candidates.append(Path.cwd() / local)
+            for cand in candidates:
+                if cand.exists():
+                    local = cand
+                    break
+            else:
+                return None
+        if not local.exists():
+            return None
+        data = local.read_bytes()
+        if len(data) < 800:
+            return None
+        return data
+    except Exception:
+        return None
+
+
+def _img_flowable(url: str, width: float, height: float, base_dir: Path | None = None) -> Image | None:
+    data = _photo_bytes(url, base_dir=base_dir)
+    if not data:
+        return None
+    try:
+        img = Image(io.BytesIO(data), width=width, height=height)
+        img.hAlign = "CENTER"
+        return img
+    except Exception:
+        return None
+
+
+def _bar_table(labels, values, highlight_idx=None, color=NAVY, highlight_color=GREEN, value_fmt=None, max_rows=8):
+    """Render a simple horizontal bar chart as a ReportLab table."""
+    rows = []
+    max_v = max(values) if values else 1
+    for i, (lab, val) in enumerate(zip(labels[:max_rows], values[:max_rows])):
+        pct = 0 if not max_v else min(1.0, float(val) / float(max_v))
+        bar_w = max(0.05, pct * 3.1) * inch
+        txt = value_fmt(val) if value_fmt else str(val)
+        bar = Table(
+            [[""]],
+            colWidths=[bar_w],
+            rowHeights=[0.16 * inch],
+            style=TableStyle([
+                ("BACKGROUND", (0, 0), (-1, -1), highlight_color if highlight_idx is not None and i == highlight_idx else color),
+                ("BOX", (0, 0), (-1, -1), 0, color),
+            ]),
+        )
+        rows.append([Paragraph(f"<b>{_esc_pdf(lab)}</b>", ParagraphStyle("bl", fontName="Helvetica", fontSize=8, textColor=MUTED)), bar, Paragraph(f"<b>{txt}</b>", ParagraphStyle("bv", fontName="Helvetica-Bold", fontSize=8.5, textColor=NAVY, alignment=TA_RIGHT))])
+    t = Table(rows, colWidths=[1.7 * inch, 3.3 * inch, 1.0 * inch])
+    t.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING", (0, 0), (-1, -1), 3),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+        ("LEFTPADDING", (0, 0), (-1, -1), 4),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+    ]))
+    return t
 
 
 def _styles():
@@ -173,6 +266,7 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
     yoy = report.get("chart_yoy") or {}
     bands = report.get("chart_active_price_bands") or {}
     ask = story.get("seller_questions") or {}
+    base_dir = Path(output_path).resolve().parent
 
     doc = SimpleDocTemplate(
         str(output_path),
@@ -193,6 +287,22 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
         sub += f"  ·  {brokerage}"
     flow.append(Paragraph(sub, styles["subtitle"]))
     flow.append(HRFlowable(width="100%", thickness=1.5, color=NAVY, spaceAfter=8))
+
+    # Cover photo band (subject first, then best comp)
+    subject_photo = subject.get("photo_url") or subject.get("photo") or ""
+    if not subject_photo and subject.get("photos"):
+        subject_photo = (subject.get("photos") or [""])[0]
+    cover_url = subject_photo
+    if not cover_url:
+        for c in (pos.get("closest_comps") or [])[:4]:
+            cover_url = c.get("photo_url") or (c.get("photos") or [""])[0]
+            if cover_url:
+                break
+    if cover_url:
+        img = _img_flowable(cover_url, width=6.9 * inch, height=2.5 * inch, base_dir=base_dir)
+        if img:
+            flow.append(img)
+            flow.append(Spacer(1, 6))
 
     active_n = story.get("active_on_market", report.get("active_count", 0))
     with_yours = story.get("with_your_home", active_n + 1)
@@ -398,31 +508,18 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
             styles["small"],
         ))
         yours_idx = bands.get("subject_band_index")
-        header = ["Price band", "Active homes"]
-        rows = [header]
-        for i, (lab, val) in enumerate(zip(band_labels, band_values)):
-            mark = " ← your list" if yours_idx is not None and i == yours_idx else ""
-            rows.append([f"{lab}{mark}", str(int(val))])
-        bt = Table(rows, colWidths=[4.5 * inch, 2.0 * inch])
-        style_cmds = [
-            ("BACKGROUND", (0, 0), (-1, 0), NAVY),
-            ("TEXTCOLOR", (0, 0), (-1, 0), white),
-            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-            ("FONTSIZE", (0, 0), (-1, -1), 8.5),
-            ("ALIGN", (1, 0), (1, -1), "CENTER"),
-            ("GRID", (0, 0), (-1, -1), 0.4, BORDER),
-            ("TOPPADDING", (0, 0), (-1, -1), 4),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
-            ("LEFTPADDING", (0, 0), (-1, -1), 6),
-            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [white, LIGHT]),
-        ]
-        if yours_idx is not None and 0 <= yours_idx < len(band_labels):
-            style_cmds.append(("BACKGROUND", (0, yours_idx + 1), (-1, yours_idx + 1), RECOMMEND_BG))
-            style_cmds.append(("FONTNAME", (0, yours_idx + 1), (-1, yours_idx + 1), "Helvetica-Bold"))
-        bt.setStyle(TableStyle(style_cmds))
-        flow.append(bt)
+        flow.append(_bar_table(
+            band_labels,
+            band_values,
+            highlight_idx=yours_idx,
+            color=NAVY,
+            highlight_color=GREEN,
+            value_fmt=lambda v: f"{int(v)} homes",
+            max_rows=8,
+        ))
         insight = bands.get("insight") or ""
         if insight:
+            flow.append(Spacer(1, 4))
             flow.append(Paragraph(insight, styles["body"]))
 
     if dns.get("note") or dns.get("true_did_not_sell"):
@@ -675,6 +772,47 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
     comps = pos.get("closest_comps") or []
     if comps:
         flow.append(Paragraph("Most Similar Recent Sales", styles["section"]))
+        flow.append(Paragraph(
+            "Does it look like yours — or nicer / dated — and does the sold price match that story?",
+            styles["small"],
+        ))
+        # Photo cards (up to 4 with images)
+        photo_cards = []
+        for c in comps[:8]:
+            url = c.get("photo_url") or (c.get("photos") or [""])[0]
+            if not url:
+                continue
+            img = _img_flowable(url, width=1.55 * inch, height=1.0 * inch, base_dir=base_dir)
+            if not img:
+                continue
+            card = Table(
+                [
+                    [img],
+                    [Paragraph(f"<b>${c.get('sold_price', 0):,.0f}</b>", ParagraphStyle("cp", fontName="Helvetica-Bold", fontSize=9, textColor=NAVY, alignment=TA_CENTER))],
+                    [Paragraph(_esc_pdf((c.get("address") or "")[:26]), ParagraphStyle("ca", fontName="Helvetica", fontSize=7, textColor=MUTED, alignment=TA_CENTER))],
+                ],
+                colWidths=[1.65 * inch],
+                style=TableStyle([
+                    ("BOX", (0, 0), (-1, -1), 0.5, BORDER),
+                    ("TOPPADDING", (0, 0), (-1, -1), 2),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 2),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 2),
+                ]),
+            )
+            photo_cards.append(card)
+            if len(photo_cards) >= 4:
+                break
+        if photo_cards:
+            pt = Table([photo_cards], colWidths=[1.75 * inch] * len(photo_cards))
+            pt.setStyle(TableStyle([
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ("TOPPADDING", (0, 0), (-1, -1), 2),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
+            ]))
+            flow.append(pt)
+            flow.append(Spacer(1, 6))
         header = ["Address", "Sold", "SqFt", "Bd/Ba", "Year", "DOM", "$/SF"]
         rows = [header]
         for c in comps[:8]:
@@ -707,8 +845,46 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
         flow.append(ct)
 
     yoy_summary = yoy.get("summary") or []
+    yoy_sales = yoy.get("sales") or {}
+    yoy_price = yoy.get("median_price") or {}
     if yoy_summary:
         flow.append(Paragraph("Year Over Year", styles["section"]))
+        flow.append(Paragraph(
+            "Sales count and median sold price by year in this segment.",
+            styles["small"],
+        ))
+        yoy_blocks = []
+        if yoy_sales.get("labels") and yoy_sales.get("values"):
+            yoy_blocks.append([
+                Paragraph("<b>Closed sales</b>", styles["body_bold"]),
+                _bar_table(
+                    yoy_sales.get("labels") or [],
+                    yoy_sales.get("values") or [],
+                    color=BLUE,
+                    value_fmt=lambda v: f"{int(v)}",
+                    max_rows=4,
+                ),
+            ])
+        if yoy_price.get("labels") and yoy_price.get("values"):
+            yoy_blocks.append([
+                Paragraph("<b>Median sold price</b>", styles["body_bold"]),
+                _bar_table(
+                    yoy_price.get("labels") or [],
+                    yoy_price.get("values") or [],
+                    color=NAVY,
+                    value_fmt=lambda v: f"${float(v)/1000:.0f}k",
+                    max_rows=4,
+                ),
+            ])
+        if yoy_blocks:
+            yt = Table(yoy_blocks, colWidths=[1.5 * inch, 5.0 * inch])
+            yt.setStyle(TableStyle([
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                ("LEFTPADDING", (0, 0), (-1, -1), 0),
+            ]))
+            flow.append(yt)
         yrows = [["Year", "Sales", "Median sold", "Median DOM"]]
         for y in yoy_summary:
             yrows.append([
@@ -717,8 +893,8 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
                 f"${(y.get('median_price') or 0):,.0f}",
                 f"{(y.get('median_dom') or 0):.0f}d",
             ])
-        yt = Table(yrows, colWidths=[1.4 * inch, 1.2 * inch, 2.0 * inch, 1.6 * inch])
-        yt.setStyle(TableStyle([
+        yt2 = Table(yrows, colWidths=[1.4 * inch, 1.2 * inch, 2.0 * inch, 1.6 * inch])
+        yt2.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (-1, 0), LIGHT),
             ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
             ("FONTSIZE", (0, 0), (-1, -1), 9),
@@ -727,7 +903,23 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
             ("TOPPADDING", (0, 0), (-1, -1), 5),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
         ]))
-        flow.append(yt)
+        flow.append(Spacer(1, 6))
+        flow.append(yt2)
+
+    dom_chart = report.get("chart_dom") or {}
+    if dom_chart.get("labels") and dom_chart.get("values"):
+        flow.append(Paragraph("Days on Market — Recent Sales", styles["section"]))
+        flow.append(Paragraph(
+            f"Median {float(dom_chart.get('median') or median_dom):.0f} days · mean {float(dom_chart.get('mean') or 0):.0f} days",
+            styles["small"],
+        ))
+        flow.append(_bar_table(
+            dom_chart.get("labels") or [],
+            dom_chart.get("values") or [],
+            color=BLUE,
+            value_fmt=lambda v: f"{int(v)}",
+            max_rows=7,
+        ))
 
     sens = pos.get("price_sensitivity_narrative") or ""
     if sens:

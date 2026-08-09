@@ -145,8 +145,100 @@ def run_migrations() -> None:
         script = script.replace("INTEGER NOT NULL DEFAULT 1", "INTEGER NOT NULL DEFAULT 1")
     executemany_script(script)
     _migrate_presentation_limit_nullable()
+    _ensure_presentations_table()
+    _ensure_magic_auth_schema()
     backend = "postgres" if using_postgres() else f"sqlite:{_sqlite_path()}"
     logger.info("Migrations applied (%s)", backend)
+
+
+def _ensure_magic_auth_schema() -> None:
+    """Magic-link tokens + agent profile fields for branded reports."""
+    execute(
+        """
+        CREATE TABLE IF NOT EXISTS magic_links (
+          id TEXT PRIMARY KEY,
+          email TEXT NOT NULL,
+          token_hash TEXT NOT NULL UNIQUE,
+          purpose TEXT NOT NULL DEFAULT 'auth',
+          promo_code TEXT NOT NULL DEFAULT '',
+          invite_token TEXT NOT NULL DEFAULT '',
+          next_path TEXT NOT NULL DEFAULT '',
+          expires_at TEXT NOT NULL,
+          used_at TEXT,
+          created_at TEXT NOT NULL
+        )
+        """
+    )
+    for idx_sql in (
+        "CREATE INDEX IF NOT EXISTS idx_magic_links_email ON magic_links(email)",
+        "CREATE INDEX IF NOT EXISTS idx_magic_links_token ON magic_links(token_hash)",
+    ):
+        try:
+            execute(idx_sql)
+        except Exception:
+            pass
+
+    for col, typ, default in (
+        ("brand_primary", "TEXT", "'#0c3c6e'"),
+        ("brand_accent", "TEXT", "'#1a5f9e'"),
+        ("logo_url", "TEXT", "''"),
+        ("profile_complete", "INTEGER", "0"),
+        ("email_verified", "INTEGER", "0"),
+    ):
+        try:
+            if using_postgres():
+                execute(f"ALTER TABLE users ADD COLUMN IF NOT EXISTS {col} {typ} DEFAULT {default}")
+            else:
+                execute(f"ALTER TABLE users ADD COLUMN {col} {typ} DEFAULT {default}")
+        except Exception:
+            pass
+
+    # Existing agents with name+brokerage already filled shouldn't be forced through onboarding
+    try:
+        execute(
+            "UPDATE users SET profile_complete = 1 WHERE COALESCE(profile_complete, 0) = 0 "
+            "AND COALESCE(name, '') != '' AND COALESCE(brokerage, '') != ''"
+        )
+    except Exception:
+        pass
+    try:
+        execute(
+            "UPDATE users SET email_verified = 1 WHERE COALESCE(email_verified, 0) = 0 "
+            "AND password_hash IS NOT NULL AND password_hash NOT LIKE 'magic:%'"
+        )
+    except Exception:
+        pass
+
+
+def _ensure_presentations_table() -> None:
+    """Idempotent presentations table for saved reports + share tokens."""
+    execute(
+        """
+        CREATE TABLE IF NOT EXISTS presentations (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL,
+          run_id TEXT NOT NULL UNIQUE,
+          share_token TEXT NOT NULL UNIQUE,
+          address TEXT NOT NULL DEFAULT '',
+          recommended_price REAL,
+          months_of_inventory REAL,
+          active_count INTEGER,
+          under_contract_count INTEGER,
+          title TEXT NOT NULL DEFAULT '',
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        )
+        """
+    )
+    for idx_sql in (
+        "CREATE INDEX IF NOT EXISTS idx_presentations_user ON presentations(user_id)",
+        "CREATE INDEX IF NOT EXISTS idx_presentations_share ON presentations(share_token)",
+        "CREATE INDEX IF NOT EXISTS idx_presentations_run ON presentations(run_id)",
+    ):
+        try:
+            execute(idx_sql)
+        except Exception:
+            pass
 
 
 def _migrate_presentation_limit_nullable() -> None:

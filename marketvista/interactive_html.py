@@ -248,14 +248,9 @@ def render_interactive_html(report: dict) -> str:
         )
         nav = ""
         if len(urls) > 1:
-            dots = "".join(
-                f'<button type="button" class="car-dot{" on" if i == 0 else ""}" data-slide="{i}" aria-label="Photo {i+1}"></button>'
-                for i in range(len(urls))
-            )
             nav = (
                 f'<button type="button" class="car-btn car-prev" aria-label="Previous photo">‹</button>'
                 f'<button type="button" class="car-btn car-next" aria-label="Next photo">›</button>'
-                f'<div class="car-dots">{dots}</div>'
                 f'<div class="car-count">1 / {len(urls)}</div>'
             )
         return (
@@ -685,21 +680,23 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .verdict .eyebrow{{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;opacity:.8;position:relative;z-index:1;margin:0}}
 .verdict .big{{font-family:'Fraunces',Georgia,serif;font-size:clamp(1.9rem,4vw,2.6rem);font-weight:700;line-height:1.05;margin-top:2px;letter-spacing:-.02em;position:relative;z-index:1}}
 .verdict .sub{{margin-top:4px;font-size:.88rem;opacity:.95;position:relative;z-index:1}}
-.verdict .top{{margin-top:6px;font-size:.8rem;color:var(--gold-2);font-weight:600;position:relative;z-index:1}}
-.verdict .pos-bar{{margin-top:10px;margin-bottom:2px}}
-.verdict .pos-labels{{font-size:.62rem;margin-top:4px}}
+.verdict .top{{display:none}}
+.verdict .pos-bar,.verdict .pos-labels{{display:none}}
 #spine-strategy > .sub{{margin-bottom:6px}}
-#spine-strategy .whatif-grid{{margin:6px 0}}
-#spine-strategy .slider-wrap{{margin:6px 0 2px}}
-#spine-strategy .confront-out{{margin-top:6px;padding:10px 12px}}
-#spine-strategy .wyw{{margin-top:8px;padding:12px 14px}}
+#spine-strategy .price-controls{{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px 10px;margin:0 0 10px;box-shadow:0 8px 22px -14px rgba(11,18,32,.18)}}
+#spine-strategy .slider-wrap{{margin:0 0 8px}}
+#spine-strategy .slider-wrap label{{font-size:.72rem;font-weight:700;color:var(--brand-primary);text-transform:uppercase;letter-spacing:.04em}}
+#spine-strategy .whatif-grid{{margin:0}}
+#spine-strategy .confront-out{{margin-top:0;padding:12px;height:100%;box-sizing:border-box}}
+#spine-strategy .wyw{{margin-top:0;padding:12px 14px;height:100%;box-sizing:border-box}}
 #spine-strategy .wyw-grid{{margin:6px 0}}
 #spine-strategy .wyw-sub{{font-size:.72rem}}
-#spine-strategy .custom-toggle{{margin-top:6px}}
+#spine-strategy .response-grid{{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}}
 @media (min-width:900px){{
-  #spine-strategy .price-it-grid{{display:grid;grid-template-columns:1.05fr .95fr;gap:12px;align-items:start}}
-  #spine-strategy .price-it-grid .wyw{{margin-top:0}}
+  #spine-strategy .response-grid{{grid-template-columns:1fr 1.15fr;align-items:stretch}}
 }}
+#spine-strategy .custom-toggle,#spine-strategy .custom-box{{display:none!important}}
+.share-toast{{font-size:.72rem;color:var(--teal);font-weight:700;margin-left:6px}}
 .pos-bar{{position:relative;height:12px;border-radius:6px;margin-top:14px;background:linear-gradient(90deg,#16a34a 0%,#84cc16 30%,#facc15 55%,#f97316 75%,#dc2626 100%)}}
 .pos-marker{{position:absolute;top:-5px;width:4px;height:22px;background:#fff;border-radius:2px;box-shadow:0 0 0 2px rgba(12,60,110,.55);transition:left .5s cubic-bezier(.22,1,.36,1)}}
 .pos-labels{{display:flex;justify-content:space-between;font-size:.62rem;letter-spacing:.05em;text-transform:uppercase;opacity:.75;margin-top:5px}}
@@ -857,13 +854,16 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .wyw-head{{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:4px}}
 .wyw-title{{font-family:'Fraunces',Georgia,serif;font-size:1.05rem;font-weight:700;color:#8a4a12;letter-spacing:-.01em}}
 .wyw-sub{{font-size:.78rem;color:#9a6a3a}}
+.wyw-lede{{font-size:.78rem;color:#7c5426;line-height:1.45;margin:0 0 4px}}
 .wyw-grid{{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}}
-.wyw-cell{{background:#fff;border:1px solid #f0e2c8;border-radius:10px;padding:12px 8px;text-align:center;min-height:78px;display:flex;flex-direction:column;justify-content:center}}
+.wyw-cell{{background:#fff;border:1px solid #f0e2c8;border-radius:10px;padding:12px 8px;text-align:center;min-height:78px;display:flex;flex-direction:column;justify-content:center;cursor:help}}
 .wyw-cell.hot{{background:linear-gradient(160deg,#b3541e,#8a3c10);color:#fff;border-color:transparent}}
 .wyw-cell .wv{{font-size:1.3rem;font-weight:800;color:#8a4a12;line-height:1.1}}
 .wyw-cell.hot .wv{{color:#fff}}
 .wyw-cell .wl{{font-size:.6rem;text-transform:uppercase;letter-spacing:.05em;color:#9a6a3a;font-weight:700;margin-top:4px}}
 .wyw-cell.hot .wl{{color:rgba(255,255,255,.85)}}
+.wyw-tip{{display:inline-block;margin-left:3px;width:14px;height:14px;line-height:14px;border-radius:50%;border:1px solid #d4b896;color:#9a6a3a;font-size:.58rem;font-weight:800;vertical-align:middle;cursor:help}}
+.wyw-cell.hot .wyw-tip{{border-color:rgba(255,255,255,.45);color:rgba(255,255,255,.9)}}
 .wyw-bar-wrap{{margin:6px 0 2px}}
 .wyw-bar-label{{display:flex;justify-content:space-between;font-size:.68rem;font-weight:700;color:#8a4a12;margin-bottom:4px}}
 .wyw-bar{{position:relative;height:14px;border-radius:7px;background:#f3e6cf;overflow:hidden}}
@@ -874,51 +874,55 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .match-pill{{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.65rem;font-weight:700;background:#e8f0fa;color:var(--brand-primary)}}
 .comp-open{{border:1px solid var(--border);background:#fff;color:var(--brand-primary);padding:4px 10px;border-radius:8px;font-size:.72rem;font-weight:700;cursor:pointer}}
 .comp-open:hover{{background:var(--brand-primary);color:#fff}}
-.listing-drawer{{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.96);width:min(1180px,98vw);height:min(96vh,980px);max-height:96vh;background:#fff;z-index:1100;box-shadow:0 28px 70px rgba(0,0,0,.32);border-radius:18px;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;display:flex;flex-direction:column;overflow:hidden}}
+.listing-drawer{{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.96);width:min(1120px,96vw);height:min(88vh,820px);max-height:88vh;background:#fff;z-index:1100;box-shadow:0 28px 70px rgba(0,0,0,.32);border-radius:18px;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;display:flex;flex-direction:column;overflow:hidden}}
 .listing-drawer.open{{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}}
-.listing-drawer .ld-head{{background:var(--panel);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px}}
-.listing-drawer .ld-head strong{{font-size:1.05rem}}
-.listing-drawer .ld-head button{{background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;padding:6px 12px;border-radius:8px;cursor:pointer;font-weight:600}}
-.listing-drawer .ld-body{{padding:0;overflow:auto;flex:1;display:flex;flex-direction:column;background:#f4f7fb}}
-.listing-drawer .ld-addr{{font-size:clamp(1.25rem,2.5vw,1.55rem);font-weight:800;color:var(--brand-primary);margin:0 0 4px;letter-spacing:-.02em}}
-.listing-drawer .ld-meta{{font-size:.88rem;color:var(--muted);margin-bottom:0}}
-.listing-drawer .ld-actions{{display:flex;flex-wrap:wrap;gap:8px;padding:14px 18px 18px}}
-.listing-drawer .ld-actions a,.listing-drawer .ld-actions button{{display:inline-block;text-align:center;padding:12px 16px;border-radius:10px;font-weight:700;text-decoration:none;font-size:.9rem;border:none;cursor:pointer}}
-.ld-primary{{background:var(--brand-primary);color:#fff}}
-.ld-secondary{{background:#fff;color:var(--brand-primary);border:1px solid var(--border)!important}}
-.ld-note{{font-size:.75rem;color:var(--muted);margin:0;line-height:1.4;padding:0 18px 14px}}
-.listing-overlay{{display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:1099}}
-.listing-overlay.open{{display:block}}
-.ld-hero{{position:relative;background:#0b1220;min-height:min(52vh,520px);height:min(52vh,520px)}}
+.listing-drawer .ld-head{{background:var(--panel);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex:none}}
+.listing-drawer .ld-head strong{{font-size:.98rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+.listing-drawer .ld-head-actions{{display:flex;gap:8px;align-items:center;flex:none;flex-wrap:wrap;justify-content:flex-end}}
+.listing-drawer .ld-head a,.listing-drawer .ld-head button{{background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;padding:6px 12px;border-radius:8px;cursor:pointer;font-weight:600;font-size:.78rem;text-decoration:none;display:inline-flex;align-items:center}}
+.listing-drawer .ld-head a:hover,.listing-drawer .ld-head button:hover{{background:rgba(255,255,255,.12)}}
+.listing-drawer .ld-body{{padding:0;overflow:hidden;flex:1;display:grid;grid-template-columns:1.15fr .95fr;background:#fff;min-height:0}}
+@media(max-width:820px){{
+  .listing-drawer{{height:min(94vh,900px);max-height:94vh}}
+  .listing-drawer .ld-body{{grid-template-columns:1fr;overflow:auto}}
+}}
+.ld-gallery{{display:flex;flex-direction:column;min-height:0;background:#0b1220;border-right:1px solid rgba(255,255,255,.08)}}
+@media(max-width:820px){{.ld-gallery{{border-right:none;border-bottom:1px solid var(--border);min-height:280px}}}}
+.ld-hero{{position:relative;flex:1;min-height:220px;background:#0b1220}}
 .ld-hero .comp-carousel{{position:absolute;inset:0}}
 .ld-hero .comp-photo{{object-fit:contain;background:#0b1220}}
-.ld-hero .car-btn{{width:44px;height:44px;font-size:1.5rem;background:rgba(8,20,36,.7)}}
-.ld-hero .car-dots{{bottom:16px}}
-.ld-hero .car-count{{top:14px;right:14px;font-size:.78rem;padding:5px 10px}}
-.ld-hero-empty{{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.75);flex-direction:column;gap:12px;padding:24px;text-align:center}}
-.ld-panel{{padding:18px 20px 8px;background:#fff;border-bottom:1px solid var(--border)}}
-.ld-price-row{{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 16px;margin:10px 0 14px}}
-.ld-price-row .ld-sold{{font-size:clamp(1.6rem,3vw,2.1rem);font-weight:800;color:var(--brand-primary);letter-spacing:-.03em;line-height:1}}
-.ld-facts{{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:0 0 4px}}
-@media(min-width:700px){{.ld-facts{{grid-template-columns:repeat(4,1fr)}}}}
-.ld-fact{{background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:12px 10px;text-align:center;min-height:72px;display:flex;flex-direction:column;justify-content:center}}
-.ld-fact .fv{{font-size:1.05rem;font-weight:800;color:var(--text);line-height:1.15}}
-.ld-fact .fl{{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;margin-top:4px}}
-.ld-compare{{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 4px}}
-@media(max-width:640px){{.ld-compare{{grid-template-columns:1fr}}}}
-.ld-side{{background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:14px}}
-.ld-side .ls-label{{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}}
-.ld-side .ls-price{{font-size:1.4rem;font-weight:800;color:var(--brand-primary);margin:2px 0 8px}}
-.ld-side .ls-row{{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.82rem;padding:5px 0;border-bottom:1px solid #eef2f6}}
-.ld-side .ls-row:last-child{{border-bottom:none}}
-.ld-delta{{font-size:.72rem;font-weight:700}}
+.ld-hero .car-btn{{width:40px;height:40px;font-size:1.4rem;background:rgba(8,20,36,.7)}}
+.ld-hero .car-dots{{bottom:12px}}
+.ld-hero .car-count{{top:12px;right:12px;font-size:.72rem;padding:4px 9px}}
+.ld-hero-empty{{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);padding:24px;text-align:center;font-size:.9rem}}
+.ld-thumbs{{display:flex;gap:6px;overflow-x:auto;padding:10px 12px;background:#0b1220;border-top:1px solid rgba(255,255,255,.08);flex:none;scrollbar-width:thin}}
+.ld-thumbs button{{flex:0 0 58px;height:44px;padding:0;border:2px solid transparent;border-radius:6px;overflow:hidden;cursor:pointer;background:#1a2332;opacity:.65}}
+.ld-thumbs button.on{{border-color:#fde68a;opacity:1}}
+.ld-thumbs img{{width:100%;height:100%;object-fit:cover;display:block}}
+.ld-compare-pane{{padding:18px 20px;overflow:auto;min-height:0;background:#fff}}
+.ld-addr{{font-size:clamp(1.05rem,2vw,1.35rem);font-weight:800;color:var(--brand-primary);margin:0 0 4px;letter-spacing:-.02em;line-height:1.2}}
+.ld-meta{{font-size:.8rem;color:var(--muted);margin:0 0 14px}}
+.ld-sold-line{{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:0 0 16px;padding-bottom:14px;border-bottom:1px solid var(--border)}}
+.ld-sold-line .ld-sold{{font-size:clamp(1.5rem,2.8vw,1.95rem);font-weight:800;color:var(--brand-primary);letter-spacing:-.03em;line-height:1}}
+.ld-sold-line .ld-sold-note{{font-size:.75rem;color:var(--muted);font-weight:600}}
+.ld-vs{{margin:0 0 8px;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:var(--muted)}}
+.ld-vs-table{{width:100%;border-collapse:collapse;font-size:.86rem}}
+.ld-vs-table th{{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;text-align:left;padding:0 8px 8px;border-bottom:1px solid var(--border)}}
+.ld-vs-table th:nth-child(2),.ld-vs-table th:nth-child(3),.ld-vs-table td:nth-child(2),.ld-vs-table td:nth-child(3){{text-align:right}}
+.ld-vs-table th.you{{color:var(--brand-primary)}}
+.ld-vs-table td{{padding:10px 8px;border-bottom:1px solid #eef2f6;vertical-align:middle}}
+.ld-vs-table tr:last-child td{{border-bottom:none}}
+.ld-vs-table .metric{{color:var(--muted);font-weight:600;font-size:.78rem}}
+.ld-vs-table .val{{font-weight:800;color:var(--text)}}
+.ld-vs-table .val.you{{color:var(--brand-primary)}}
+.ld-delta{{display:inline-block;margin-left:6px;font-size:.68rem;font-weight:700}}
 .ld-delta.up{{color:#0d7a4f}}
 .ld-delta.down{{color:#b91c1c}}
 .ld-delta.same{{color:var(--muted)}}
-.ld-thumbs{{display:flex;gap:6px;overflow-x:auto;padding:10px 18px;background:#0b1220;border-top:1px solid rgba(255,255,255,.08)}}
-.ld-thumbs button{{flex:0 0 64px;height:48px;padding:0;border:2px solid transparent;border-radius:6px;overflow:hidden;cursor:pointer;background:#1a2332;opacity:.65}}
-.ld-thumbs button.on{{border-color:#fde68a;opacity:1}}
-.ld-thumbs img{{width:100%;height:100%;object-fit:cover;display:block}}
+.ld-takeaway{{margin-top:14px;padding:12px 14px;border-radius:10px;background:#f8fafc;border:1px solid var(--border);font-size:.82rem;line-height:1.45;color:var(--text)}}
+.ld-takeaway strong{{color:var(--brand-primary)}}
+.listing-overlay{{display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:1099}}
+.listing-overlay.open{{display:block}}
 .comp-subject{{margin:0 0 12px}}
 .comp-subject .comp-card.subject-card{{display:grid;grid-template-columns:minmax(180px,280px) 1fr;cursor:default;outline:2px solid var(--brand-primary);outline-offset:-1px}}
 .comp-subject .comp-card.subject-card:hover{{transform:none;box-shadow:0 4px 14px rgba(15,40,70,.07)}}
@@ -948,6 +952,8 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .car-dots{{position:absolute;left:0;right:0;bottom:56px;z-index:3;display:flex;justify-content:center;gap:5px;pointer-events:auto}}
 .car-dot{{width:7px;height:7px;border-radius:50%;border:none;padding:0;background:rgba(255,255,255,.45);cursor:pointer}}
 .car-dot.on{{background:#fff}}
+/* Comp rail cards: arrows only — no pagination dots */
+.comp-card .car-dots{{display:none!important}}
 .car-count{{position:absolute;top:10px;right:10px;z-index:3;font-size:.68rem;font-weight:700;color:#fff;background:rgba(8,20,36,.55);padding:3px 8px;border-radius:999px}}
 .comp-photo-fade{{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:14px;background:linear-gradient(transparent,rgba(8,20,36,.9));color:#fff;pointer-events:none}}
 .comp-photo-fade .cph-price,.comp-photo-empty .cph-price{{font-size:1.45rem;font-weight:800;letter-spacing:-.02em;line-height:1}}
@@ -987,9 +993,20 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .comp-toolbar strong{{color:var(--brand-primary)}}
 .comp-toolbar button{{border:1px solid var(--border);background:#fff;border-radius:8px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer;color:var(--brand-primary)}}
 .comp-toolbar button:hover{{background:var(--brand-primary);color:#fff}}
-.btn-as-comp{{border:1px solid var(--border);background:#fff;color:var(--brand-primary);border-radius:6px;padding:2px 8px;font-size:.68rem;font-weight:700;cursor:pointer;white-space:nowrap}}
-.btn-as-comp.on{{background:#e8f5e9;border-color:#86efac;color:#0d7a4f}}
+.btn-as-comp{{border:1px solid var(--border);background:#fff;color:var(--brand-primary);border-radius:6px;padding:3px 9px;font-size:.68rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .12s ease,color .12s ease,border-color .12s ease}}
+.btn-as-comp:hover{{background:#f1f5f9}}
+.btn-as-comp.on{{background:#0b1220;border-color:#0b1220;color:#fff;box-shadow:0 1px 0 rgba(0,0,0,.12)}}
+.btn-as-comp.on:hover{{background:#1a2332;border-color:#1a2332;color:#fde68a}}
 .btn-as-comp:disabled{{opacity:.45;cursor:not-allowed}}
+tr.comp-picked{{background:#eef2f7}}
+tr.comp-picked td:first-child{{box-shadow:inset 3px 0 0 var(--brand-primary)}}
+.fulldata-head{{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;cursor:pointer;user-select:none}}
+.fulldata-head h2{{margin:0}}
+.fulldata-toggle{{border:1px solid var(--border);background:#f8fafc;border-radius:8px;padding:6px 12px;font-size:.75rem;font-weight:700;cursor:pointer;color:var(--brand-primary);flex:none}}
+.fulldata-toggle:hover{{background:#fff}}
+.fulldata-body.collapsed{{display:none}}
+.fulldata-sub{{margin:6px 0 0}}
+.data-toolbar .tb-btn.on{{background:var(--brand-primary);color:#fff;border-color:var(--brand-primary)}}
 .comp-table-toggle{{margin-top:8px;font-size:.75rem;font-weight:600;color:var(--brand-primary);background:none;border:none;cursor:pointer}}
 .comp-table-wrap{{display:none;margin-top:8px}}
 .comp-table-wrap.open{{display:block}}
@@ -1044,10 +1061,11 @@ footer{{text-align:center;color:var(--muted);font-size:.72rem;margin-top:20px;pa
 .col-picker.open{{display:block}}
 .col-picker-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:4px}}
 .col-check{{font-size:.72rem;display:flex;align-items:center;gap:4px;cursor:pointer}}
-.data-wrap{{max-height:360px;overflow:auto;border:1px solid var(--border);border-radius:8px}}
+.data-wrap{{max-height:720px;overflow:auto;border:1px solid var(--border);border-radius:8px}}
 .data-wrap th{{position:sticky;top:0;background:#f1f5f9;z-index:1;cursor:pointer;user-select:none}}
 .data-wrap th:hover{{background:#e2e8f0}}
 .data-wrap th .sort-ind{{margin-left:3px;color:var(--brand-primary)}}
+.data-wrap th[data-sort="__comp__"]{{min-width:7.5rem}}
 .yoy-charts{{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}}
 .yoy-charts.stacked{{grid-template-columns:1fr}}
 .yoy-charts.stacked .chart-box.short{{height:300px}}
@@ -1109,7 +1127,7 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
       <a id="pdfLink" href="#" style="display:none">Seller packet</a>
       <a id="storyPdfLink" href="#" style="display:none">Seller packet</a>
       <a id="deckLink" href="#" style="display:none">Listing flipbook</a>
-      <button type="button" class="vm" id="btnCopyShare" style="display:none">Copy link</button>
+      <button type="button" class="vm" id="btnCopyShare" style="display:none">Share with client</button>
       <span class="vm-status" id="shareStatus"></span>
     </div>
   </div>
@@ -1400,7 +1418,7 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
 
   <section class="section" id="spine-strategy">
     <h2><span class="ttl"><span class="step">7</span>Price It — Strategy &amp; Trade-Offs</span></h2>
-    <p class="sub">The list the data supports — then the trade-offs if you go higher or lower.</p>
+    <p class="sub">Set the list with the slider — strategy cards snap you to a lane. Then see market positioning vs. what happens while you wait.</p>
     <section class="verdict" id="spine-verdict">
       <div class="eyebrow">Recommended List Price</div>
       <div class="big" id="dispRec">${rec:,.0f}</div>
@@ -1410,85 +1428,96 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
       <div class="pos-labels"><span>Aggressive</span><span>Heart of market</span><span>Overpriced</span></div>
     </section>
     <div class="bottom-line"><strong>Bottom Line</strong> — <span id="blText">{exec_sum}</span></div>
-    <div class="price-it-grid">
-      <div>
-        <div class="whatif-grid" id="whatIfGrid" style="--whatif-cols:{whatif_n}">{whatif_cards or '<p class="muted">No price scenarios</p>'}</div>
-        <div class="slider-wrap">
-          <label class="muted" for="priceSlider">Or slide between strategies — the line stays on recommended</label>
-          <div class="slider-track-wrap">
-            <div class="rec-tick" id="recTick" style="left:50%" aria-hidden="true">
-              <span class="rec-tick-label" id="recTickLabel">Rec</span>
-              <span class="rec-tick-line"></span>
-            </div>
-            <input type="range" id="priceSlider" min="0" max="100" value="50" step="1" aria-valuetext="Recommended">
+
+    <div class="price-controls">
+      <div class="slider-wrap">
+        <label class="muted" for="priceSlider">Price strategy slider — recommended stays marked</label>
+        <div class="slider-track-wrap">
+          <div class="rec-tick" id="recTick" style="left:50%" aria-hidden="true">
+            <span class="rec-tick-label" id="recTickLabel">Rec</span>
+            <span class="rec-tick-line"></span>
           </div>
-          <div class="slider-scale"><span id="slideMin">—</span><span id="slideMid">Recommended</span><span id="slideMax">—</span></div>
+          <input type="range" id="priceSlider" min="0" max="100" value="50" step="1" aria-valuetext="Recommended">
         </div>
-        <div class="confront-out" id="confrontOut">Pick a price above to see the market response.</div>
-        <button type="button" class="custom-toggle" id="btnCustomPrice">Custom price…</button>
-        <div class="custom-box" id="customBox">
-          <input type="number" id="sellerPrice" step="1000" value="{int(rec)}" placeholder="Enter a custom list price">
-          <div class="scenario-row">
-            <input type="text" id="scenarioName" placeholder="Save this scenario as…">
-            <button type="button" id="btnSaveScenario" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-weight:600">Save</button>
-          </div>
-          <ul class="scenario-list" id="scenarioList"></ul>
-        </div>
+        <div class="slider-scale"><span id="slideMin">—</span><span id="slideMid">Recommended</span><span id="slideMax">—</span></div>
       </div>
+      <div class="whatif-grid" id="whatIfGrid" style="--whatif-cols:{whatif_n}">{whatif_cards or '<p class="muted">No price scenarios</p>'}</div>
+      <input type="hidden" id="sellerPrice" value="{int(rec)}">
+    </div>
+
+    <div class="response-grid">
+      <div class="confront-out" id="confrontOut">Pick a price above to see the market response.</div>
       <div class="wyw" id="wywModule" style="{'display:none' if not show_listing_flow else ''}">
         <div class="wyw-head">
           <span class="wyw-title">While You Wait</span>
-          <span class="wyw-sub">The queue cost of pricing above the market</span>
+          <span class="wyw-sub">Cheaper competition while you sit</span>
         </div>
-        <p class="wyw-sub" style="margin:0 0 2px">Buyers tour the best value first. Homes already cheaper keep selling, and <strong>new</strong> ones keep listing under your price — both cut in line ahead of you.</p>
+        <p class="wyw-lede">Buyers shop value first. Raise the list — more homes sit under you, and more keep listing under you while you wait.</p>
         <div class="wyw-grid">
-          <div class="wyw-cell"><div class="wv" id="wywAhead">{lf_active_below}</div><div class="wl">Ahead of you today</div></div>
-          <div class="wyw-cell"><div class="wv" id="wywArrive">~{lf_below_pm:.1f}/mo</div><div class="wl">New ones list under you</div></div>
-          <div class="wyw-cell hot"><div class="wv" id="wywTotal">~{lf_wait_fresh + lf_active_below:.0f}</div><div class="wl">Pass you while you wait</div></div>
+          <div class="wyw-cell" title="Similar Active homes priced under your list right now.">
+            <div class="wv" id="wywAhead">{lf_active_below}</div>
+            <div class="wl">Already cheaper<span class="wyw-tip" aria-hidden="true">?</span></div>
+          </div>
+          <div class="wyw-cell" title="Average new similar listings per month that come on under your price (last ~6 months).">
+            <div class="wv" id="wywArrive">~{lf_below_pm:.1f}/mo</div>
+            <div class="wl">New under you<span class="wyw-tip" aria-hidden="true">?</span></div>
+          </div>
+          <div class="wyw-cell hot" title="Already cheaper Actives plus new cheaper listings expected during your days-to-contract. Buyer attention diverted — not a closed-sales count.">
+            <div class="wv" id="wywTotal">~{lf_wait_fresh + lf_active_below:.0f}</div>
+            <div class="wl">In your wait<span class="wyw-tip" aria-hidden="true">?</span></div>
+          </div>
         </div>
         <div class="wyw-bar-wrap">
-          <div class="wyw-bar-label"><span>Your place in line at <span id="wywPrice">{int(rec):,}</span></span><span id="wywDom">~{exp_dom:.0f} days to contract</span></div>
+          <div class="wyw-bar-label"><span>At <span id="wywPrice">{int(rec):,}</span></span><span id="wywDom">~{exp_dom:.0f} days to contract</span></div>
           <div class="wyw-bar"><div class="fill" id="wywFill" style="width:35%"></div><div class="marker" id="wywMarker" style="left:35%"></div></div>
         </div>
-        <p class="wyw-note" id="wywNote">At the recommended list, the queue works <b>for</b> you — you're the value buyers find first. Price above the line and every week of waiting hands your buyers to a newer, cheaper listing.</p>
+        <p class="wyw-note" id="wywNote">At the recommended list, the queue works <b>for</b> you. Price above it and buyer attention shifts to cheaper options.</p>
       </div>
     </div>
   </section>
 
   <section class="section" id="spine-fulldata">
-    <h2>Full Market Data <span class="muted" id="includeCount"></span></h2>
-    <p class="sub">Every home in this market · Active = competition · Pending/Backup = under contract · On Sold rows, tap <strong>Use as comp</strong> to adjust Closest Comps above</p>
-    <div class="data-toolbar data-search-bar">
-      <div class="search-wrap">
-        <input type="search" id="dataSearch" placeholder="Search MLS #, address, subdivision, city… (comma for multiple MLS)" autocomplete="off">
-        <button type="button" class="search-clear" id="btnClearSearch" style="display:none">Clear</button>
+    <div class="fulldata-head" id="fulldataHead" role="button" tabindex="0" aria-expanded="true" aria-controls="fulldataBody">
+      <div>
+        <h2>Full Market Data <span class="muted" id="includeCount"></span></h2>
+        <p class="sub fulldata-sub">Every home in this market · Active = competition · Pending/Backup = under contract · Dark <strong>In comps</strong> buttons are selected — click to remove · Sort by Comp to pull used rows to the top</p>
       </div>
-      <select id="statusFilter" title="Status">
-        <option value="">All statuses</option>
-        <option>Sold</option><option>Active</option><option>Pending</option><option>Backup</option><option>Expired</option><option>Withdrawn</option>
-      </select>
-      <select id="bedsFilter" title="Beds">
-        <option value="">Any beds</option>
-        <option value="2">2+ beds</option>
-        <option value="3">3+ beds</option>
-        <option value="4">4+ beds</option>
-        <option value="5">5+ beds</option>
-      </select>
-      <select id="garageFilter" title="Garage">
-        <option value="">Any garage</option>
-        <option value="1">1+ car</option>
-        <option value="2">2+ car</option>
-        <option value="3">3+ car</option>
-      </select>
-      <input type="number" class="price-filter" id="priceMin" placeholder="Min $" min="0" step="1000">
-      <input type="number" class="price-filter" id="priceMax" placeholder="Max $" min="0" step="1000">
-      <button type="button" class="tb-btn" id="btnCols">Columns</button>
-      <button type="button" class="tb-btn" id="checkAll">All on</button>
-      <button type="button" class="tb-btn" id="checkNone">All off</button>
+      <button type="button" class="fulldata-toggle" id="btnToggleFulldata" aria-expanded="true">Collapse</button>
     </div>
-    <p class="data-hint" id="dataHint">Tip: paste one or more MLS numbers separated by commas or spaces.</p>
-    <div class="col-picker" id="colPicker"><div class="col-picker-grid" id="colGrid">{col_checks}</div></div>
-    <div class="data-wrap"><table><thead><tr id="dataHead"></tr></thead><tbody id="dataBody"></tbody></table></div>
+    <div class="fulldata-body" id="fulldataBody">
+      <div class="data-toolbar data-search-bar">
+        <div class="search-wrap">
+          <input type="search" id="dataSearch" placeholder="Search MLS #, address, subdivision, city… (comma for multiple MLS)" autocomplete="off">
+          <button type="button" class="search-clear" id="btnClearSearch" style="display:none">Clear</button>
+        </div>
+        <select id="statusFilter" title="Status">
+          <option value="">All statuses</option>
+          <option>Sold</option><option>Active</option><option>Pending</option><option>Backup</option><option>Expired</option><option>Withdrawn</option>
+        </select>
+        <select id="bedsFilter" title="Beds">
+          <option value="">Any beds</option>
+          <option value="2">2+ beds</option>
+          <option value="3">3+ beds</option>
+          <option value="4">4+ beds</option>
+          <option value="5">5+ beds</option>
+        </select>
+        <select id="garageFilter" title="Garage">
+          <option value="">Any garage</option>
+          <option value="1">1+ car</option>
+          <option value="2">2+ car</option>
+          <option value="3">3+ car</option>
+        </select>
+        <input type="number" class="price-filter" id="priceMin" placeholder="Min $" min="0" step="1000">
+        <input type="number" class="price-filter" id="priceMax" placeholder="Max $" min="0" step="1000">
+        <button type="button" class="tb-btn" id="btnSortUsed" title="Bring selected comps to the top">Used comps first</button>
+        <button type="button" class="tb-btn" id="btnCols">Columns</button>
+        <button type="button" class="tb-btn" id="checkAll">All on</button>
+        <button type="button" class="tb-btn" id="checkNone">All off</button>
+      </div>
+      <p class="data-hint" id="dataHint">Tip: paste one or more MLS numbers separated by commas or spaces.</p>
+      <div class="col-picker" id="colPicker"><div class="col-picker-grid" id="colGrid">{col_checks}</div></div>
+      <div class="data-wrap"><table><thead><tr id="dataHead"></tr></thead><tbody id="dataBody"></tbody></table></div>
+    </div>
   </section>
 
   <footer><strong>ListLogic</strong> — the pricing story, told by the data · Active = available · Under Contract = Pending + Backup · Months of inventory uses Active only · {generated}</footer>
@@ -1590,8 +1619,9 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
 <aside class="listing-drawer" id="listingDrawer" role="dialog" aria-modal="true" aria-label="Compare listing">
   <div class="ld-head">
     <strong id="ldTitle">Compare listing</strong>
-    <div style="display:flex;gap:8px;align-items:center">
-      <button type="button" id="btnOpenPhotos">Open on Zillow</button>
+    <div class="ld-head-actions">
+      <a id="btnOpenZillow" href="#" target="_blank" rel="noopener">Open on Zillow</a>
+      <a id="btnOpenRealtor" href="#" target="_blank" rel="noopener">Realtor.com</a>
       <button type="button" id="closeListing">Close</button>
     </div>
   </div>
@@ -1635,11 +1665,18 @@ const navy = '{brand_primary}', orange = '#c2410c';
     if (copyBtn) {{
       copyBtn.style.display = '';
       copyBtn.onclick = async () => {{
-        const url = location.origin + '/runs/' + RUN_ID + '/';
+        let url = location.origin + '/runs/' + RUN_ID + '/';
+        try {{
+          const metaRes = await fetch('/api/runs/' + RUN_ID + '/share');
+          if (metaRes.ok) {{
+            const meta = await metaRes.json();
+            if (meta.share_url) url = location.origin + meta.share_url;
+          }}
+        }} catch (e) {{}}
         try {{
           await navigator.clipboard.writeText(url);
           const st = document.getElementById('shareStatus');
-          if (st) st.textContent = 'Copied';
+          if (st) st.textContent = 'Link copied — send to your client';
         }} catch (e) {{
           const st = document.getElementById('shareStatus');
           if (st) st.textContent = url;
@@ -2000,6 +2037,7 @@ function renderConfront(price) {{
       lf.supplyPressure.toFixed(2) + '\\u00d7</strong>).';
   }}
   document.getElementById('confrontOut').innerHTML =
+    '<div class="wyw-head" style="margin-bottom:8px"><span class="wyw-title">Market Positioning</span><span class="wyw-sub">Where this list sits vs. similar sales</span></div>' +
     '<div class="co-position">' + money(price) + ' \\u00b7 ' + deltaTxt + '</div>' +
     '<div class="co-stats">' +
       '<div class="co-stat co-' + t + '"><div class="cv">Top ' + top + '%</div><div class="cl">of similar sales</div></div>' +
@@ -2008,20 +2046,18 @@ function renderConfront(price) {{
     '</div>' +
     '<div class="co-position" style="font-size:.84rem">' + out.position + '</div>' +
     '<div class="co-note">' + domNote + '</div>' +
-    (supplyNote ? '<div class="co-note">' + supplyNote + '</div>' : '') +
-    '<div class="co-note" style="opacity:.85">Queue math: cheaper Actives ahead of you now + cheaper new listings that arrive while you wait cut in line. Sales/month clears the line — works both when supply builds and when it drains.</div>';
+    (supplyNote ? '<div class="co-note">' + supplyNote + '</div>' : '');
   renderWhileYouWait(price, out);
 }}
 
 function renderWhileYouWait(price, out) {{
   const mod = document.getElementById('wywModule');
   if (!mod) return;
-  const lf = DATA.listingFlow || {{}};
   const stats = supplyStatsAtPrice(price);
   const ahead = stats.activeBelow || 0;
   const dom = (out && out.expectedDom) || stats.dom || DATA.medianDom || 45;
   const arrivePm = stats.belowPm || 0;
-  const fresh = (out && out.freshBelow) || (arrivePm * dom / 30.44);
+  const fresh = arrivePm * (dom / 30.44);
   const total = ahead + fresh;
   const priceEl = document.getElementById('wywPrice');
   if (priceEl) priceEl.textContent = money(price);
@@ -2032,8 +2068,15 @@ function renderWhileYouWait(price, out) {{
   const arriveEl = document.getElementById('wywArrive');
   if (arriveEl) arriveEl.textContent = '~' + arrivePm.toFixed(1) + '/mo';
   const totalEl = document.getElementById('wywTotal');
-  if (totalEl) totalEl.textContent = '~' + Math.max(0, Math.round(total));
-  // Queue bar: position in line vs homes that pass you. 0% = first out, 100% = buried.
+  if (totalEl) {{
+    totalEl.textContent = '~' + Math.max(0, Math.round(total));
+    const hot = totalEl.closest('.wyw-cell');
+    if (hot) {{
+      hot.title = ahead + ' already cheaper + ~' + (Math.round(fresh * 10) / 10) +
+        ' new under your price during ~' + Math.round(dom) +
+        ' days. Buyer attention diverted — not a closed-sales count.';
+    }}
+  }}
   const deltaPct = currentRec ? (price - currentRec) / currentRec : 0;
   const fillPct = Math.min(96, Math.max(6, 35 + deltaPct * 520));
   const fill = document.getElementById('wywFill');
@@ -2043,13 +2086,12 @@ function renderWhileYouWait(price, out) {{
   const note = document.getElementById('wywNote');
   if (note) {{
     if (deltaPct > 0.03) {{
-      note.innerHTML = 'At <b>' + money(price) + '</b>, about <b>' + Math.max(0, Math.round(total)) +
-        '</b> similar homes sell or list ahead of you during a ~' + Math.round(dom) +
-        '-day wait — and each one makes yours look more expensive by comparison.';
+      note.innerHTML = 'At <b>' + money(price) + '</b>, ~<b>' + Math.max(0, Math.round(total)) +
+        '</b> similar homes under your price compete for buyers during a ~' + Math.round(dom) + '-day wait.';
     }} else if (deltaPct < -0.02) {{
-      note.innerHTML = 'At <b>' + money(price) + '</b> you jump the queue — buyers see you as the value pick, and the homes above you sit instead.';
+      note.innerHTML = 'At <b>' + money(price) + '</b> you jump the queue — buyers see yours as the value pick first.';
     }} else {{
-      note.innerHTML = 'At the recommended list, the queue works <b>for</b> you — you\\u2019re the value buyers find first. Price above the line and every week of waiting hands your buyers to a newer, cheaper listing.';
+      note.innerHTML = 'At the recommended list, the queue works <b>for</b> you. Price above it and buyer attention shifts to cheaper options.';
     }}
   }}
 }}
@@ -2134,15 +2176,6 @@ document.getElementById('whatIfGrid').addEventListener('click', e => {{
 document.getElementById('priceSlider').addEventListener('input', () => {{
   const price = priceFromSlider();
   document.getElementById('sellerPrice').value = price;
-  syncWhatIfCards(price);
-  renderConfront(price);
-}});
-document.getElementById('btnCustomPrice').onclick = () => {{
-  document.getElementById('customBox').classList.toggle('open');
-}};
-document.getElementById('sellerPrice').addEventListener('change', e => {{
-  const price = +e.target.value;
-  setupPriceSlider(currentRec, price);
   syncWhatIfCards(price);
   renderConfront(price);
 }});
@@ -2751,7 +2784,6 @@ function buildSubjectCardHtml() {{
     if (photos.length > 1) {{
       nav = '<button type="button" class="car-btn car-prev" aria-label="Previous photo">‹</button>' +
         '<button type="button" class="car-btn car-next" aria-label="Next photo">›</button>' +
-        '<div class="car-dots">' + photos.map((_, i) => '<button type="button" class="car-dot' + (i === 0 ? ' on' : '') + '" data-slide="' + i + '"></button>').join('') + '</div>' +
         '<div class="car-count">1 / ' + photos.length + '</div>';
     }}
     visual = '<div class="comp-visual has-photo"><div class="comp-carousel" data-slide="0">' + slides + nav + '</div><div class="comp-photo-fade">' + fade + '</div></div>';
@@ -2795,7 +2827,6 @@ function buildCompCardHtml(i, c) {{
     if (photos.length > 1) {{
       nav = '<button type="button" class="car-btn car-prev" aria-label="Previous photo">‹</button>' +
         '<button type="button" class="car-btn car-next" aria-label="Next photo">›</button>' +
-        '<div class="car-dots">' + photos.map((_, si) => '<button type="button" class="car-dot' + (si === 0 ? ' on' : '') + '" data-slide="' + si + '"></button>').join('') + '</div>' +
         '<div class="car-count">1 / ' + photos.length + '</div>';
     }}
     visual = '<div class="comp-visual has-photo"><div class="comp-carousel" data-slide="0">' + slides + nav + '</div><div class="comp-photo-fade">' + fade + '</div></div>';
@@ -2925,14 +2956,19 @@ function openCompListing(idx) {{
   if (!c) return;
   const sub = DATA.subjectSnap || {{}};
   const zillow = c.zillow || ('https://www.zillow.com/homes/' + encodeURIComponent((c.address || '') + ' ' + (c.city || LINK_CITY) + ' ' + (LINK_STATE || 'CO')) + '_rb/');
-  const realtor = c.realtor || '#';
+  const realtor = c.realtor || ('https://www.realtor.com/realestateandhomes-search/' + encodeURIComponent((c.address || '') + ' ' + (c.city || LINK_CITY) + ' ' + (LINK_STATE || 'CO')));
   currentListingUrl = zillow;
   const photos = (c.photos && c.photos.length)
     ? c.photos.filter(Boolean)
     : ((c.photo || photoMap[String(c.mls || '')]) ? [c.photo || photoMap[String(c.mls || '')]] : []);
   const title = document.getElementById('ldTitle');
   if (title) {{ title.textContent = (c.address || 'Comp').slice(0, 56); delete title.dataset.hinted; }}
-  let hero = '';
+  const zBtn = document.getElementById('btnOpenZillow');
+  const rBtn = document.getElementById('btnOpenRealtor');
+  if (zBtn) {{ zBtn.href = zillow; }}
+  if (rBtn) {{ rBtn.href = realtor; }}
+
+  let gallery = '';
   if (photos.length) {{
     const slides = photos.map((u, i) =>
       '<img class="comp-photo' + (i === 0 ? ' is-on' : '') + '" src="' + escapeHtml(u) + '" alt="Listing photo ' + (i + 1) + '" loading="' + (i === 0 ? 'eager' : 'lazy') + '" data-slide="' + i + '">'
@@ -2941,7 +2977,6 @@ function openCompListing(idx) {{
     if (photos.length > 1) {{
       nav = '<button type="button" class="car-btn car-prev" aria-label="Previous photo">‹</button>' +
         '<button type="button" class="car-btn car-next" aria-label="Next photo">›</button>' +
-        '<div class="car-dots">' + photos.map((_, i) => '<button type="button" class="car-dot' + (i === 0 ? ' on' : '') + '" data-slide="' + i + '"></button>').join('') + '</div>' +
         '<div class="car-count">1 / ' + photos.length + '</div>';
     }}
     const thumbs = photos.length > 1
@@ -2950,53 +2985,56 @@ function openCompListing(idx) {{
           '<img src="' + escapeHtml(u) + '" alt="" loading="lazy"></button>'
         ).join('') + '</div>'
       : '';
-    hero = '<div class="ld-hero"><div class="comp-carousel" id="ldCarousel" data-slide="0">' + slides + nav + '</div></div>' + thumbs;
+    gallery = '<div class="ld-gallery"><div class="ld-hero"><div class="comp-carousel" id="ldCarousel" data-slide="0">' + slides + nav + '</div></div>' + thumbs + '</div>';
   }} else {{
-    hero = '<div class="ld-hero"><div class="ld-hero-empty"><div>No listing photos yet</div>' +
-      '<button type="button" class="ld-primary comp-photo-btn" data-mls="' + escapeHtml(String(c.mls || '')) + '" data-comp-idx="' + idx + '">Add listing photo</button></div></div>';
+    gallery = '<div class="ld-gallery"><div class="ld-hero"><div class="ld-hero-empty">No listing photos for this sale</div></div></div>';
   }}
+
   const sold = Number(c.sold_price || 0);
   const sqft = Math.round(Number(c.living_area || 0));
+  const subSqft = Math.round(Number(sub.living_area || 0));
   const ppsf = Math.round(Number(c.ppsf || (sqft ? sold / sqft : 0)));
+  const rec = Number(sub.rec || currentRec || 0);
+  const priceDelta = sold && rec ? sold - rec : 0;
+  let takeaway = 'Use this sale as a visual and price check against your home\\u2019s specs.';
+  if (sold && rec) {{
+    if (Math.abs(priceDelta) < 2500) takeaway = 'Sold right around your recommended list — a strong visual comps check.';
+    else if (priceDelta > 0) takeaway = 'Sold <strong>' + money(priceDelta) + ' above</strong> your recommended list. Ask: does this home look better than yours?';
+    else takeaway = 'Sold <strong>' + money(Math.abs(priceDelta)) + ' below</strong> your recommended list. Ask: does yours look stronger than this sale?';
+  }}
+
+  function vsRow(label, youVal, saleVal, deltaMarkup) {{
+    return '<tr><td class="metric">' + label + '</td>' +
+      '<td class="val you">' + youVal + '</td>' +
+      '<td class="val">' + saleVal + (deltaMarkup || '') + '</td></tr>';
+  }}
+
   document.getElementById('listingBody').innerHTML =
-    hero +
-    '<div class="ld-panel">' +
+    gallery +
+    '<div class="ld-compare-pane">' +
       '<div class="ld-addr">' + escapeHtml(c.address || 'Comp') + '</div>' +
       '<div class="ld-meta">Sold ' + escapeHtml(c.sold_date || '\\u2014') +
         (c.mls ? ' \\u00b7 MLS ' + escapeHtml(String(c.mls)) : '') +
         (c.subdivision ? ' \\u00b7 ' + escapeHtml(c.subdivision) : '') +
         (c.city ? ' \\u00b7 ' + escapeHtml(c.city) : '') + '</div>' +
-      '<div class="ld-price-row"><div class="ld-sold">' + money(sold) + '</div></div>' +
-      '<div class="ld-facts">' +
-        '<div class="ld-fact"><div class="fv">' + sqft.toLocaleString() + '</div><div class="fl">Sq ft</div></div>' +
-        '<div class="ld-fact"><div class="fv">' + (c.beds || 0) + ' / ' + (c.baths || 0) + '</div><div class="fl">Beds / Baths</div></div>' +
-        '<div class="ld-fact"><div class="fv">' + (c.year_built || '—') + '</div><div class="fl">Year built</div></div>' +
-        '<div class="ld-fact"><div class="fv">' + (c.garage || 0) + '-car</div><div class="fl">Garage</div></div>' +
-        '<div class="ld-fact"><div class="fv">' + Math.round(c.dom || 0) + ' days</div><div class="fl">Days on market</div></div>' +
-        '<div class="ld-fact"><div class="fv">$' + ppsf + '</div><div class="fl">Price / sq ft</div></div>' +
-        '<div class="ld-fact"><div class="fv">' + money(sold) + '</div><div class="fl">Sold price</div></div>' +
-        '<div class="ld-fact"><div class="fv">' + escapeHtml(c.sold_date || '—') + '</div><div class="fl">Sold date</div></div>' +
+      '<div class="ld-sold-line">' +
+        '<div class="ld-sold">' + money(sold) + '</div>' +
+        '<div class="ld-sold-note">' + (rec ? 'vs your list ' + money(rec) + ' ' + deltaHtml(sold, rec, false) : 'Sold price') + '</div>' +
       '</div>' +
-      '<div class="ld-compare">' +
-        '<div class="ld-side"><div class="ls-label">Your home (specs)</div>' +
-          '<div class="ls-price" style="font-size:1.1rem">Compare the sale</div>' +
-          '<div class="ls-row"><span>Sq ft</span><strong>' + Math.round(sub.living_area || 0).toLocaleString() + '</strong></div>' +
-          '<div class="ls-row"><span>Beds / Baths</span><strong>' + (sub.beds || 0) + ' / ' + (sub.baths || 0) + '</strong></div>' +
-          '<div class="ls-row"><span>Year · Garage</span><strong>' + (sub.year_built || '—') + ' · ' + (sub.garage || 0) + '</strong></div>' +
-        '</div>' +
-        '<div class="ld-side"><div class="ls-label">This sale</div>' +
-          '<div class="ls-price">' + money(sold) + '</div>' +
-          '<div class="ls-row"><span>Sq ft</span><strong>' + sqft.toLocaleString() + '</strong> ' + deltaHtml(c.living_area, sub.living_area, false) + '</div>' +
-          '<div class="ls-row"><span>Beds / Baths</span><strong>' + (c.beds || 0) + ' / ' + (c.baths || 0) + '</strong></div>' +
-          '<div class="ls-row"><span>Year · Garage</span><strong>' + (c.year_built || '—') + ' · ' + (c.garage || 0) + '</strong></div>' +
-          '<div class="ls-row"><span>$ / sq ft</span><strong>$' + ppsf + '</strong></div>' +
-        '</div>' +
-      '</div>' +
-    '</div>' +
-    '<div class="ld-actions">' +
-      '<button type="button" class="ld-primary comp-photo-btn" data-mls="' + escapeHtml(String(c.mls || '')) + '" data-comp-idx="' + idx + '">' + (photos.length ? 'Replace / add photo' : 'Add listing photo') + '</button>' +
-      '<a class="ld-secondary" href="' + realtor + '" target="_blank" rel="noopener">Realtor.com</a>' +
-      '<a class="ld-secondary" href="' + zillow + '" target="_blank" rel="noopener">Zillow</a>' +
+      '<div class="ld-vs">Side-by-side</div>' +
+      '<table class="ld-vs-table">' +
+        '<thead><tr><th>Fact</th><th class="you">Your home</th><th>This sale</th></tr></thead>' +
+        '<tbody>' +
+          vsRow('Sold / list', rec ? money(rec) : '—', money(sold), rec ? ' ' + deltaHtml(sold, rec, false) : '') +
+          vsRow('Sq ft', subSqft ? subSqft.toLocaleString() : '—', sqft ? sqft.toLocaleString() : '—', deltaHtml(c.living_area, sub.living_area, false)) +
+          vsRow('Beds / Baths', (sub.beds || 0) + ' / ' + (sub.baths || 0), (c.beds || 0) + ' / ' + (c.baths || 0), '') +
+          vsRow('Year built', sub.year_built || '—', c.year_built || '—', '') +
+          vsRow('Garage', (sub.garage || 0) + '-car', (c.garage || 0) + '-car', '') +
+          vsRow('DOM', '—', Math.round(c.dom || 0) + ' days', '') +
+          vsRow('$ / sq ft', '—', ppsf ? ('$' + ppsf) : '—', '') +
+        '</tbody>' +
+      '</table>' +
+      '<div class="ld-takeaway">' + takeaway + '</div>' +
     '</div>';
   document.getElementById('listingDrawer').classList.add('open');
   document.getElementById('listingOverlay').classList.add('open');
@@ -3008,12 +3046,6 @@ function closeCompListing() {{
 }}
 document.getElementById('closeListing').onclick = closeCompListing;
 document.getElementById('listingOverlay').onclick = closeCompListing;
-const btnOpenPhotos = document.getElementById('btnOpenPhotos');
-if (btnOpenPhotos) {{
-  btnOpenPhotos.onclick = () => {{
-    if (currentListingUrl) window.open(currentListingUrl, 'listlogic_photos', 'noopener,noreferrer,width=1100,height=800');
-  }};
-}}
 document.addEventListener('click', e => {{
   const thumb = e.target.closest('#ldThumbs button[data-slide]');
   if (thumb) {{
@@ -3172,6 +3204,7 @@ if (btnCompFind) btnCompFind.onclick = runCompFind;
 if (compFindInput) {{
   compFindInput.addEventListener('keydown', e => {{ if (e.key === 'Enter') {{ e.preventDefault(); runCompFind(); }} }});
 }}
+let sortCol = null, sortDir = 1;
 function propLinks(row) {{
   const addr = encodeURIComponent((row.Address||'') + ' ' + LINK_CITY + ' ' + LINK_STATE);
   return '<a class="link" href="https://www.zillow.com/homes/'+addr+'_rb/" target="_blank" rel="noopener">Z</a>'+
@@ -3188,7 +3221,6 @@ function fmtCell(col,row) {{
   if (['LivingArea','DOM','YearBuilt','Garage','Beds','Baths'].includes(col) && !isNaN(v)) return Number(v).toLocaleString(undefined,{{maximumFractionDigits:1}});
   return String(v).slice(0,40);
 }}
-let sortCol = null, sortDir = 1;
 function rowBlob(row) {{
   return [
     row.MLSNumber, row.Address, row.Subdivision, row.City, row.Status, row.StatusNorm,
@@ -3216,8 +3248,19 @@ function rowPrice(row) {{
   const n = Number(row.DisplayPrice != null ? row.DisplayPrice : (row.SoldPrice != null ? row.SoldPrice : row.Price));
   return isFinite(n) ? n : null;
 }}
+function setUsedSortActive(on) {{
+  const btn = document.getElementById('btnSortUsed');
+  if (btn) btn.classList.toggle('on', !!on);
+}}
+function sortUsedCompsFirst() {{
+  sortCol = '__comp__';
+  sortDir = -1; // picked first
+  setUsedSortActive(true);
+  renderTable();
+}}
 function renderTable() {{
   const head = document.getElementById('dataHead'), body = document.getElementById('dataBody');
+  if (!head || !body) return;
   const searchEl = document.getElementById('dataSearch');
   const clearBtn = document.getElementById('btnClearSearch');
   const qRaw = searchEl ? searchEl.value : '';
@@ -3232,13 +3275,22 @@ function renderTable() {{
   const garMin = +(garEl && garEl.value || 0);
   const pMin = +(pMinEl && pMinEl.value || 0);
   const pMax = +(pMaxEl && pMaxEl.value || 0);
-  head.innerHTML = '<th></th><th>Comp</th>' + visibleCols.map(c => {{
+  const picked = new Set(selectedCompMls.map(String));
+  setUsedSortActive(sortCol === '__comp__');
+  const compInd = sortCol === '__comp__' ? '<span class="sort-ind">' + (sortDir === 1 ? '\\u25b2' : '\\u25bc') + '</span>' : '';
+  head.innerHTML = '<th></th><th data-sort="__comp__" title="Click to sort used comps to the top">Comp' + compInd + '</th>' + visibleCols.map(c => {{
     const ind = c === sortCol ? '<span class="sort-ind">' + (sortDir === 1 ? '\\u25b2' : '\\u25bc') + '</span>' : '';
     return '<th data-sort="'+c+'">'+c+ind+'</th>';
   }}).join('');
   let rows = TABLE.map((row, i) => [row, i]);
   if (sortCol) {{
     rows.sort((a, b) => {{
+      if (sortCol === '__comp__') {{
+        const pa = picked.has(String(a[0].MLSNumber || '')) ? 1 : 0;
+        const pb = picked.has(String(b[0].MLSNumber || '')) ? 1 : 0;
+        if (pa !== pb) return (pa - pb) * sortDir;
+        return 0;
+      }}
       const va = a[0][sortCol], vb = b[0][sortCol];
       const ea = va===null||va===undefined||va==='', eb = vb===null||vb===undefined||vb==='';
       if (ea && eb) return 0; if (ea) return 1; if (eb) return -1;
@@ -3248,7 +3300,6 @@ function renderTable() {{
     }});
   }}
   let html='', shown=0, on=0;
-  const picked = new Set(selectedCompMls.map(String));
   rows.forEach(([row, i]) => {{
     if (st && row.Status!==st && row.StatusNorm!==st) return;
     if (!rowMatchesSearch(row, parsed)) return;
@@ -3263,28 +3314,69 @@ function renderTable() {{
     const isSold = (row.StatusNorm || row.Status) === 'Sold';
     const isPick = picked.has(mls);
     const pickBtn = isSold && mls
-      ? '<button type="button" class="btn-as-comp' + (isPick ? ' on' : '') + '" data-mls="' + escapeHtml(mls) + '">' + (isPick ? 'In comps' : 'Use as comp') + '</button>'
+      ? '<button type="button" class="btn-as-comp' + (isPick ? ' on' : '') + '" data-mls="' + escapeHtml(mls) + '" title="' + (isPick ? 'Remove from comps' : 'Add to Closest comps') + '">' + (isPick ? 'In comps · remove' : 'Use as comp') + '</button>'
       : '<span class="muted">—</span>';
     html += '<tr class="'+(isEx?'excluded':'')+(isPick?' comp-picked':'')+'" data-idx="'+i+'"><td><input type="checkbox" class="comp-check" data-idx="'+i+'" '+(isEx?'':'checked')+'></td>'+
       '<td>'+pickBtn+'</td>'+
       visibleCols.map(c => '<td>'+fmtCell(c,row)+'</td>').join('')+'</tr>';
   }});
   body.innerHTML = html || '<tr><td colspan="'+(visibleCols.length+2)+'" style="padding:18px;color:#5a6a7c">No homes match that search. Clear filters or try MLS # / address.</td></tr>';
-  document.getElementById('includeCount').textContent = shown + ' shown · ' + on + ' included · ' + TABLE.length + ' total';
+  document.getElementById('includeCount').textContent = shown + ' shown · ' + on + ' included · ' + TABLE.length + ' total' + (picked.size ? (' · ' + picked.size + ' comps') : '');
   const hint = document.getElementById('dataHint');
   if (hint) {{
     hint.innerHTML = shown === TABLE.length
-      ? 'Tip: paste one or more MLS numbers separated by commas or spaces.'
-      : 'Showing <strong>' + shown + '</strong> of ' + TABLE.length + ' homes' + (parsed.mlsList.length ? ' · MLS match' : '');
+      ? 'Tip: paste one or more MLS numbers separated by commas or spaces. Dark buttons = currently used as comps (click to remove).'
+      : 'Showing <strong>' + shown + '</strong> of ' + TABLE.length + ' homes' + (parsed.mlsList.length ? ' · MLS match' : '') + (picked.size ? ' · <strong>' + picked.size + '</strong> used as comps' : '');
   }}
-  document.getElementById('exclCount').textContent = excluded.size;
+  const excl = document.getElementById('exclCount');
+  if (excl) excl.textContent = excluded.size;
 }}
+function setFulldataCollapsed(collapsed) {{
+  const body = document.getElementById('fulldataBody');
+  const btn = document.getElementById('btnToggleFulldata');
+  const head = document.getElementById('fulldataHead');
+  if (!body) return;
+  body.classList.toggle('collapsed', !!collapsed);
+  if (btn) {{
+    btn.textContent = collapsed ? 'Expand' : 'Collapse';
+    btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+  }}
+  if (head) head.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+}}
+(function wireFulldataCollapse() {{
+  const btn = document.getElementById('btnToggleFulldata');
+  const head = document.getElementById('fulldataHead');
+  if (btn) {{
+    btn.addEventListener('click', e => {{
+      e.stopPropagation();
+      const body = document.getElementById('fulldataBody');
+      setFulldataCollapsed(!(body && body.classList.contains('collapsed')));
+    }});
+  }}
+  if (head) {{
+    head.addEventListener('click', e => {{
+      if (e.target.closest('button, a, input, select, label')) return;
+      const body = document.getElementById('fulldataBody');
+      setFulldataCollapsed(!(body && body.classList.contains('collapsed')));
+    }});
+    head.addEventListener('keydown', e => {{
+      if (e.key === 'Enter' || e.key === ' ') {{
+        e.preventDefault();
+        const body = document.getElementById('fulldataBody');
+        setFulldataCollapsed(!(body && body.classList.contains('collapsed')));
+      }}
+    }});
+  }}
+  const sortUsed = document.getElementById('btnSortUsed');
+  if (sortUsed) sortUsed.addEventListener('click', sortUsedCompsFirst);
+}})();
 document.getElementById('dataHead').addEventListener('click', e => {{
   const th = e.target.closest('th[data-sort]');
   if (!th) return;
   const col = th.dataset.sort;
   if (sortCol === col) {{ sortDir = -sortDir; }}
-  else {{ sortCol = col; sortDir = 1; }}
+  else {{ sortCol = col; sortDir = (col === '__comp__') ? -1 : 1; }}
+  setUsedSortActive(sortCol === '__comp__');
   renderTable();
 }});
 document.getElementById('colGrid').addEventListener('change', e => {{
@@ -3414,47 +3506,6 @@ async function loadSavedEdits() {{
   renderTable(); applyEdits();
 }}
 loadSavedEdits();
-
-async function loadScenarios() {{
-  if (!RUN_ID) return;
-  try {{
-    const res = await fetch('/api/runs/'+RUN_ID+'/scenarios');
-    if (!res.ok) return;
-    const data = await res.json();
-    const list = document.getElementById('scenarioList');
-    list.innerHTML = (data.scenarios || []).map(sc =>
-      '<li><span><strong>'+escapeHtml(sc.name||'Scenario')+'</strong> · '+money(sc.price)+' · rating '+(sc.rating||'—')+'</span>'+
-      '<button type="button" data-price="'+sc.price+'" data-rating="'+(sc.rating||5)+'" class="load-sc">Load</button></li>'
-    ).join('');
-  }} catch(e) {{}}
-}}
-document.getElementById('scenarioList').addEventListener('click', e => {{
-  const btn = e.target.closest('.load-sc');
-  if (!btn) return;
-  if (btn.dataset.rating) applyRating(+btn.dataset.rating);
-  document.getElementById('sellerPrice').value = btn.dataset.price;
-  renderConfront(btn.dataset.price);
-}});
-document.getElementById('btnSaveScenario').onclick = async () => {{
-  const name = (document.getElementById('scenarioName').value || '').trim() || ('Scenario ' + new Date().toLocaleTimeString());
-  const price = +document.getElementById('sellerPrice').value || currentRec;
-  const payload = {{ name, price, rating: currentRating, rec: currentRec, low: currentLow, high: currentHigh, dom: currentDom, saved_at: new Date().toISOString() }};
-  if (!RUN_ID) {{
-    const key = 'listlogic_scenarios_local';
-    const all = JSON.parse(localStorage.getItem(key) || '{{"scenarios":[]}}');
-    all.scenarios = all.scenarios || [];
-    all.scenarios.unshift(payload);
-    localStorage.setItem(key, JSON.stringify(all));
-    document.getElementById('scenarioList').innerHTML = all.scenarios.slice(0,8).map(sc =>
-      '<li><span><strong>'+escapeHtml(sc.name)+'</strong> · '+money(sc.price)+'</span><button type="button" data-price="'+sc.price+'" data-rating="'+(sc.rating||5)+'" class="load-sc">Load</button></li>'
-    ).join('');
-    return;
-  }}
-  await fetch('/api/runs/'+RUN_ID+'/scenarios', {{ method:'POST', headers:{{'Content-Type':'application/json'}}, body: JSON.stringify(payload) }});
-  document.getElementById('scenarioName').value = '';
-  loadScenarios();
-}};
-loadScenarios();
 </script>
 <script src="/saas/assistant.js"></script>
 </body>
