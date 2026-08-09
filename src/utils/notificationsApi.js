@@ -109,6 +109,79 @@ export async function dismissAllNotifications() {
   return d.data;
 }
 
+/**
+ * Cadence preferences (It 18).
+ * Each pref: { type, frequency, is_default, updated_at }
+ * is_default true = no saved row; code default applies (honest).
+ */
+export async function fetchNotificationPrefs() {
+  const res = await fetch(`${API_BASE}/api/notifications/prefs`, {
+    credentials: "same-origin",
+  });
+  const d = await parseJson(res);
+  if (res.status === 401) throw authError(401);
+  if (!d?.success) throw new Error(d?.error || "Could not load preferences.");
+  return d.data;
+}
+
+/**
+ * @param {{ type: string, frequency: string }[]} prefs
+ */
+export async function saveNotificationPrefs(prefs) {
+  const res = await fetch(`${API_BASE}/api/notifications/prefs`, {
+    method: "PUT",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prefs }),
+  });
+  const d = await parseJson(res);
+  if (res.status === 401) throw authError(401);
+  if (!d?.success) throw new Error(d?.error || "Could not save preferences.");
+  return d.data;
+}
+
+/** UI metadata for configurable cadence rows */
+export const CADENCE_PREF_META = {
+  listing_alert: {
+    label: "Listing alerts",
+    description:
+      "Email digests for your saved searches. You can still set Daily / Weekly / As it happens on each saved search.",
+    options: ["immediate", "daily", "weekly", "off"],
+    defaultFreq: "daily",
+  },
+  search_activity: {
+    label: "New matches & activity",
+    description:
+      "In-app notices when a search finds a new home, a saved home drops in price, or goes off market.",
+    options: ["immediate", "daily", "weekly", "off"],
+    defaultFreq: "immediate",
+  },
+  value_update: {
+    label: "Home value updates",
+    description:
+      "Estimated value emails for homes on your dashboard. Our estimates refresh monthly — choosing Daily or Weekly still means one monthly email until more frequent estimates are available.",
+    options: ["monthly", "weekly", "daily", "off"],
+    defaultFreq: "monthly",
+  },
+};
+
+export const CADENCE_FREQ_LABELS = {
+  immediate: "Immediate",
+  daily: "Daily",
+  weekly: "Weekly",
+  monthly: "Monthly",
+  off: "Off",
+};
+
+/** Always-on agent types — not configurable */
+export const CADENCE_ALWAYS_IMMEDIATE = [
+  {
+    key: "agent_messages",
+    label: "Agent messages & shared homes",
+    description: "Showing confirmations and homes Adam & Mandi share with you — always immediate.",
+  },
+];
+
 /** Relative time for notification rows */
 export function relativeTime(iso) {
   if (!iso) return "";

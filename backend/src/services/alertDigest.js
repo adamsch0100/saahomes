@@ -19,6 +19,7 @@ import {
   notifyPriceDrop,
   scanSavedHomesForNotifications,
 } from './notificationService.js';
+import { getPrefFrequency } from './notificationPrefs.js';
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: false });
 
@@ -62,6 +63,25 @@ function isDue(search) {
   if (search.last_email_at) {
     const lastDate = new Intl.DateTimeFormat('en-CA', { timeZone: MT_TZ }).format(new Date(search.last_email_at));
     if (lastDate === now.date) return false;
+  }
+  return true;
+}
+
+/**
+ * Account-level listing_alert pref gate on top of per-search isDue.
+ * - off → never send
+ * - weekly → only on the search's send_day (or Monday if unset), weekly-compatible
+ * - immediate / daily / monthly → per-search isDue remains master
+ * Missing pref row → default 'daily' (does not block).
+ */
+function isDueWithListingPref(search, listingPrefFreq) {
+  const pref = listingPrefFreq || 'daily';
+  if (pref === 'off') return false;
+  if (!isDue(search)) return false;
+  if (pref === 'weekly') {
+    const now = mtNow();
+    const day = search.send_day || 'Monday';
+    if (now.weekday !== day) return false;
   }
   return true;
 }
@@ -523,10 +543,15 @@ async function runSearch(search, { dryRun, onlyEmail }) {
   return { sent: true, events: events.length, subject };
 }
 
-/** Send pending email_outbox rows (magic links, transactional emails). */
+/** Send pending email_outbox rows (magic links, transactional emails).
+ *  Respects due_at when set (cadence-queued rows wait until due). */
 async function drainOutbox() {
   const pending = await pool.query(
-    'SELECT id, to_email, subject, html FROM email_outbox WHERE sent_at IS NULL ORDER BY id LIMIT 50'
+    `SELECT id, to_email, subject, html FROM email_outbox
+     WHERE sent_at IS NULL
+       AND (due_at IS NULL OR due_at <= NOW())
+     ORDER BY id
+     LIMIT 50`
   );
   if (!pending.rows.length) return 0;
   let sent = 0;
@@ -559,7 +584,26 @@ export async function runDigest({ dryRun = false, onlyEmail = null, onlySearch =
     ORDER BY s.id`;
   const params = onlySearch ? [Number(onlySearch)] : [];
   const allSearches = (await pool.query(q, params)).rows;
-  const searches = force ? allSearches : allSearches.filter((s) => isDue(s));
+
+  // Cache listing_alert prefs per user (default daily when no row)
+  const listingPrefByUser = new Map();
+  async function listingPrefFor(userId) {
+    if (listingPrefByUser.has(userId)) return listingPrefByUser.get(userId);
+    const freq = await getPrefFrequency(userId, 'listing_alert', pool);
+    listingPrefByUser.set(userId, freq);
+    return freq;
+  }
+
+  const dueSearches = [];
+  for (const s of allSearches) {
+    if (force) {
+      dueSearches.push(s);
+      continue;
+    }
+    const pref = await listingPrefFor(s.user_id);
+    if (isDueWithListingPref(s, pref)) dueSearches.push(s);
+  }
+  const searches = dueSearches;
   if (allSearches.length !== searches.length) {
     console.log(`alertDigest: ${allSearches.length} active searches, ${searches.length} due now${dryRun ? ' (DRY RUN)' : ''}`);
   } else {
@@ -569,6 +613,12 @@ export async function runDigest({ dryRun = false, onlyEmail = null, onlySearch =
   let sent = 0;
   let totalEvents = 0;
   for (const s of searches) {
+    // Always honor 'off' — even with --force (user explicitly stopped listing emails)
+    const pref = await listingPrefFor(s.user_id);
+    if (pref === 'off') {
+      console.log(`skip search ${s.id}: listing_alert pref is off`);
+      continue;
+    }
     const result = await runSearch({ ...s, manage_token: s.manage_token }, { dryRun, onlyEmail });
     if (result.sent) sent += 1;
     totalEvents += result.events || 0;
