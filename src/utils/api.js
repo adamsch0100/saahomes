@@ -174,3 +174,12 @@ export const getFubStatus = async (token) => {
     },
   });
 };
+
+/** A/B subject-line open rates for nurture digests */
+export const getEmailAbStats = async (token) => {
+  return apiRequest('/api/admin/email-ab-stats', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

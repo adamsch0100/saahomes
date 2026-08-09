@@ -1122,3 +1122,53 @@ export const getLeadQualityStats = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch lead quality stats' });
   }
 };
+
+/**
+ * A/B subject-line open rates (Phase D / It 19a).
+ * Groups email_log by (type, subject_variant) — raw SQL only, no fabricated numbers.
+ */
+export const getEmailAbStats = async (req, res) => {
+  try {
+    const pool = getPool();
+    const result = await pool.query(`
+      SELECT
+        COALESCE(type, 'unknown') AS type,
+        COALESCE(subject_variant, '(none)') AS variant,
+        COUNT(*)::int AS sent,
+        COUNT(*) FILTER (WHERE COALESCE(open_count, 0) > 0)::int AS opened
+      FROM email_log
+      WHERE subject_variant IS NOT NULL
+         OR open_token IS NOT NULL
+         OR type IN ('digest', 'home_value_digest')
+      GROUP BY COALESCE(type, 'unknown'), COALESCE(subject_variant, '(none)')
+      ORDER BY type, variant
+    `).catch(() => ({ rows: [] }));
+
+    const variants = (result.rows || []).map((r) => {
+      const sent = Number(r.sent || 0);
+      const opened = Number(r.opened || 0);
+      return {
+        type: r.type,
+        variant: r.variant,
+        sent,
+        opened,
+        open_rate: sent > 0 ? opened / sent : 0,
+      };
+    });
+
+    const totals = variants.reduce(
+      (acc, v) => {
+        acc.sent += v.sent;
+        acc.opened += v.opened;
+        return acc;
+      },
+      { sent: 0, opened: 0 }
+    );
+    totals.open_rate = totals.sent > 0 ? totals.opened / totals.sent : 0;
+
+    res.json({ variants, totals });
+  } catch (error) {
+    logger.error('Error fetching email A/B stats', error);
+    res.status(500).json({ error: 'Failed to fetch email A/B stats' });
+  }
+};

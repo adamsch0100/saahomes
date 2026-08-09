@@ -16,6 +16,7 @@ import {
   syncFubLifecycle,
   getFubStatus,
   getLeadQualityStats,
+  getEmailAbStats,
 } from '../controllers/adminController.js';
 import { authenticateToken } from '../middleware/auth.js';
 
@@ -29,6 +30,7 @@ router.get('/submissions', authenticateToken, getSubmissions);
 router.get('/submissions/:type/:id', authenticateToken, getSubmission);
 router.get('/stats', authenticateToken, getStats);
 router.get('/lead-quality-stats', authenticateToken, getLeadQualityStats);
+router.get('/email-ab-stats', authenticateToken, getEmailAbStats);
 
 // Client saved-search CRM (agent side)
 router.get('/searches', authenticateToken, getClientSearches);

@@ -1,5 +1,6 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
+import getPool from '../config/database.js';
 import { submitContactForm } from '../controllers/contactController.js';
 import { submitMarketReportForm } from '../controllers/marketReportController.js';
 import { submitChfaLeadForm } from '../controllers/chfaLeadController.js';
@@ -215,6 +216,38 @@ router.post('/notifications/read-all', formLimiter, markAllNotificationsRead);
 router.post('/notifications/dismiss-all', formLimiter, dismissAllNotifications);
 router.post('/notifications/:id/read', formLimiter, markNotificationRead);
 router.delete('/notifications/:id', notificationsLimiter, dismissNotification);
+
+// ── Email open-tracking pixel (public, no auth — email clients hit this) ─
+// 1×1 transparent GIF (43 bytes). Always 200 so clients never retry-storm.
+const PIXEL_GIF = Buffer.from(
+  'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+  'base64'
+);
+router.get('/email/open/:token', async (req, res) => {
+  res.set({
+    'Content-Type': 'image/gif',
+    'Content-Length': String(PIXEL_GIF.length),
+    'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+    Pragma: 'no-cache',
+  });
+  try {
+    const token = String(req.params.token || '').slice(0, 64);
+    if (token && /^[a-f0-9]{16,64}$/i.test(token)) {
+      const pool = getPool();
+      await pool.query(
+        `UPDATE email_log
+         SET open_count = COALESCE(open_count, 0) + 1,
+             first_open_at = COALESCE(first_open_at, NOW()),
+             last_open_at = NOW()
+         WHERE open_token = $1`,
+        [token]
+      );
+    }
+  } catch {
+    // Never fail the pixel — tracking is best-effort
+  }
+  res.status(200).end(PIXEL_GIF);
+});
 
 export default router;
 

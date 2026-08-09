@@ -600,6 +600,23 @@ export const runMigrations = async () => {
         ON blocked_email_log(path);
     `);
 
+    // ── A/B subject lines + open tracking (Phase D / It 19a) ─────────────
+    // Nurture digests pick a deterministic subject variant per user; each
+    // send logs variant + open_token; public 1×1 pixel increments opens.
+    await client.query(`
+      ALTER TABLE email_log ADD COLUMN IF NOT EXISTS subject_variant VARCHAR(32);
+      ALTER TABLE email_log ADD COLUMN IF NOT EXISTS open_token VARCHAR(64);
+      ALTER TABLE email_log ADD COLUMN IF NOT EXISTS open_count INTEGER NOT NULL DEFAULT 0;
+      ALTER TABLE email_log ADD COLUMN IF NOT EXISTS first_open_at TIMESTAMP;
+      ALTER TABLE email_log ADD COLUMN IF NOT EXISTS last_open_at TIMESTAMP;
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_email_log_open_token
+        ON email_log(open_token);
+      CREATE INDEX IF NOT EXISTS idx_email_log_ab_stats
+        ON email_log(type, subject_variant, sent_at);
+    `);
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {

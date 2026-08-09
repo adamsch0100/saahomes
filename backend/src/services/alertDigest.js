@@ -20,6 +20,7 @@ import {
   scanSavedHomesForNotifications,
 } from './notificationService.js';
 import { getPrefFrequency } from './notificationPrefs.js';
+import { pickVariant, openToken, withOpenPixel } from './subjectVariants.js';
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: false });
 
@@ -434,24 +435,13 @@ async function runSearch(search, { dryRun, onlyEmail }) {
   })();
   const newCount = fresh.length;
   const dropCount = drops.length;
-  let subject;
-  if (newCount > 0 && dropCount === 0) {
-    subject = firstName
-      ? `${firstName} — ${newCount} new home${newCount === 1 ? '' : 's'} in ${cityLabel} match your search`
-      : `${newCount} new home${newCount === 1 ? '' : 's'} in ${cityLabel} match your search`;
-  } else if (dropCount > 0 && newCount === 0) {
-    subject = firstName
-      ? `${firstName} — ${dropCount} price drop${dropCount === 1 ? '' : 's'} in ${cityLabel}`
-      : `${dropCount} price drop${dropCount === 1 ? '' : 's'} in ${cityLabel}`;
-  } else if (newCount > 0 && dropCount > 0) {
-    subject = firstName
-      ? `${firstName} — ${newCount} new, ${dropCount} price drop${dropCount === 1 ? '' : 's'} in ${cityLabel}`
-      : `${newCount} new, ${dropCount} price drop${dropCount === 1 ? '' : 's'} in ${cityLabel}`;
-  } else {
-    subject = firstName
-      ? `${firstName} — an update on your ${cityLabel} home search`
-      : `An update on your ${cityLabel} home search`;
-  }
+  // Deterministic A/B subject (same user always gets same variant for digest)
+  const { key: subjectVariant, subject } = pickVariant('digest', search.user_id, {
+    firstName,
+    cityLabel,
+    newCount,
+    dropCount,
+  });
 
   // Conversational standouts: 2-3 notable homes with data-derived facts.
   const standouts = [];
@@ -485,11 +475,12 @@ async function runSearch(search, { dryRun, onlyEmail }) {
   const searchUrl = `${SITE}${searchPath}`;
 
   if (dryRun) {
-    console.log(`[dry] → ${userRow.email}: "${subject}" (${events.length} events: ${fresh.length} new, ${drops.length} drops, ${statusChanges} off-market)${viewedCallout ? ' [viewed callout]' : ''}`);
-    return { sent: false, events: events.length, subject, viewedCallout: !!viewedCallout };
+    console.log(`[dry] → ${userRow.email}: "${subject}" [variant ${subjectVariant}] (${events.length} events: ${fresh.length} new, ${drops.length} drops, ${statusChanges} off-market)${viewedCallout ? ' [viewed callout]' : ''}`);
+    return { sent: false, events: events.length, subject, subjectVariant, viewedCallout: !!viewedCallout };
   }
 
-  await sendEmail(userRow.email, subject, digestHtml({
+  const tok = openToken();
+  const html = withOpenPixel(digestHtml({
     firstName,
     searchName: search.name,
     filterSummary,
@@ -500,10 +491,13 @@ async function runSearch(search, { dryRun, onlyEmail }) {
     unsubscribeUrl,
     searchUrl,
     viewedCallout,
-  }));
+  }), SITE, tok);
+
+  await sendEmail(userRow.email, subject, html);
   await pool.query(
-    'INSERT INTO email_log (user_id, search_id, type, to_email, subject, events) VALUES ($1,$2,$3,$4,$5,$6)',
-    [search.user_id, search.id, 'digest', userRow.email, subject, events.length]
+    `INSERT INTO email_log (user_id, search_id, type, to_email, subject, events, subject_variant, open_token)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+    [search.user_id, search.id, 'digest', userRow.email, subject, events.length, subjectVariant, tok]
   );
   for (const e of events) {
     await pool.query(
