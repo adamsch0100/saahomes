@@ -17,6 +17,7 @@ import { sendEmail, smtpConfigured } from './emailer.js';
 import { computeOurEstimate } from './sellerValueService.js';
 import { notifyValueUpdate } from './notificationService.js';
 import { getPrefFrequency } from './notificationPrefs.js';
+import { pickVariant, openToken, withOpenPixel } from './subjectVariants.js';
 import logger from '../utils/logger.js';
 
 const SITE = 'https://saahomes.com';
@@ -180,22 +181,32 @@ async function sendOne(profile, { dryRun = false } = {}) {
     profile.state || 'CO',
     profile.postal_code,
   ].filter(Boolean).join(', ');
+  const cityLabel = (profile.city || '').trim() || 'Northern Colorado';
+  const midFmt = fmt(our.mid);
+  const deltaFmt =
+    delta != null && delta !== 0 ? fmt(Math.abs(delta)) : '';
 
-  const subject =
-    delta != null && delta !== 0
-      ? `Your home's estimated value: ${fmt(our.mid)} (${delta > 0 ? 'up' : 'down'} ${fmt(Math.abs(delta))} vs last month)`
-      : `Your home's estimated value: ${fmt(our.mid)}`;
+  // Deterministic A/B subject (same user always gets same home_value variant)
+  const { key: subjectVariant, subject } = pickVariant('home_value', profile.user_id, {
+    firstName,
+    cityLabel,
+    mid: our.mid,
+    midFmt,
+    delta,
+    deltaFmt,
+  });
 
   const myHomeUrl = `${SITE}/my-home/?token=${profile.manage_token}`;
   const manageUrl = `${SITE}/my-home/?token=${profile.manage_token}`;
   const unsubscribeUrl = `${SITE}/my-home/?token=${profile.manage_token}&unsubscribe=1`;
 
   if (dryRun) {
-    console.log(`[dry] → ${profile.user_email}: "${subject}"`);
-    return { sent: false, dry: true, subject };
+    console.log(`[dry] → ${profile.user_email}: "${subject}" [variant ${subjectVariant}]`);
+    return { sent: false, dry: true, subject, subjectVariant };
   }
 
-  const html = digestHtml({
+  const tok = openToken();
+  const html = withOpenPixel(digestHtml({
     firstName,
     address,
     mid: our.mid,
@@ -206,7 +217,7 @@ async function sendOne(profile, { dryRun = false } = {}) {
     manageUrl,
     unsubscribeUrl,
     myHomeUrl,
-  });
+  }), SITE, tok);
 
   // Prefer SMTP; fall back to outbox so cron never loses the send
   if (smtpConfigured()) {
@@ -233,9 +244,9 @@ async function sendOne(profile, { dryRun = false } = {}) {
   );
 
   await pool.query(
-    `INSERT INTO email_log (user_id, search_id, type, to_email, subject, events)
-     VALUES ($1, NULL, 'home_value_digest', $2, $3, 0)`,
-    [profile.user_id, profile.user_email, subject]
+    `INSERT INTO email_log (user_id, search_id, type, to_email, subject, events, subject_variant, open_token)
+     VALUES ($1, NULL, 'home_value_digest', $2, $3, 0, $4, $5)`,
+    [profile.user_id, profile.user_email, subject, subjectVariant, tok]
   );
 
   // In-app notification center

@@ -1,8 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { adminLogin, getSubmissions, getStats } from '../utils/api.js';
+import { adminLogin, getSubmissions, getStats, getEmailAbStats } from '../utils/api.js';
 import ClientSearchesManager from '../components/admin/ClientSearchesManager.jsx';
 import AgentCockpit from '../components/admin/AgentCockpit.jsx';
 import SEO from '../components/SEO';
+
+const TYPE_LABELS = {
+  digest: 'Listing digest',
+  home_value_digest: 'Home-value digest',
+};
+
+function formatOpenRate(rate) {
+  if (rate == null || Number.isNaN(rate)) return '—';
+  return `${(Number(rate) * 100).toFixed(1)}%`;
+}
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -13,7 +23,10 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [filterType, setFilterType] = useState('all');
-  const [tab, setTab] = useState('cockpit'); // cockpit | leads | searches
+  const [tab, setTab] = useState('cockpit'); // cockpit | leads | searches | email-ab
+  const [abStats, setAbStats] = useState(null);
+  const [abLoading, setAbLoading] = useState(false);
+  const [abError, setAbError] = useState(null);
 
   useEffect(() => {
     if (token) {
@@ -52,6 +65,29 @@ export default function AdminPage() {
     }
   }, [filterType, isAuthenticated]);
 
+  useEffect(() => {
+    if (!isAuthenticated || !token || tab !== 'email-ab') return;
+    let cancelled = false;
+    (async () => {
+      setAbLoading(true);
+      setAbError(null);
+      try {
+        const data = await getEmailAbStats(token);
+        if (!cancelled) setAbStats(data);
+      } catch (err) {
+        if (!cancelled) {
+          setAbError(err.message || 'Failed to load A/B stats');
+          if (err.message?.includes('token') || err.message?.includes('401') || err.message?.includes('403')) {
+            handleLogout();
+          }
+        }
+      } finally {
+        if (!cancelled) setAbLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [tab, isAuthenticated, token]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -77,6 +113,7 @@ export default function AdminPage() {
     setIsAuthenticated(false);
     setSubmissions([]);
     setStats(null);
+    setAbStats(null);
   };
 
   const formatDate = (dateString) => {
@@ -205,12 +242,114 @@ export default function AdminPage() {
             >
               Client Searches
             </button>
+            <button
+              type="button"
+              onClick={() => setTab('email-ab')}
+              className={`min-h-[44px] px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${tab === 'email-ab' ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-200 hover:border-black'}`}
+            >
+              Email A/B
+            </button>
           </div>
 
           {tab === 'cockpit' ? (
             <AgentCockpit token={token} />
           ) : tab === 'searches' ? (
             <ClientSearchesManager token={token} />
+          ) : tab === 'email-ab' ? (
+            <div className="bg-white rounded-lg shadow">
+              <div className="p-6 border-b border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900">Email A/B subject lines</h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Subject lines are A/B tested; opens tracked via a 1×1 pixel. Variants rotate per user, never per send.
+                </p>
+              </div>
+
+              {abLoading && (
+                <div className="p-8 space-y-3" aria-busy="true">
+                  <div className="h-4 bg-gray-100 rounded w-1/3 animate-pulse" />
+                  <div className="h-10 bg-gray-100 rounded animate-pulse" />
+                  <div className="h-10 bg-gray-50 rounded animate-pulse" />
+                  <div className="h-10 bg-gray-100 rounded animate-pulse" />
+                </div>
+              )}
+
+              {abError && !abLoading && (
+                <div className="p-8 text-center text-red-600">{abError}</div>
+              )}
+
+              {!abLoading && !abError && (!abStats?.variants || abStats.variants.length === 0) && (
+                <div className="p-8 text-center text-gray-500">
+                  No nurture emails sent yet — stats appear after the first digest run
+                </div>
+              )}
+
+              {!abLoading && !abError && abStats?.variants?.length > 0 && (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Email type
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Variant
+                        </th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Sent
+                        </th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Opened
+                        </th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Open rate
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {abStats.variants.map((row) => (
+                        <tr key={`${row.type}-${row.variant}`} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {TYPE_LABELS[row.type] || row.type}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold">
+                            <span className="inline-flex items-center justify-center min-w-[2rem] px-2 py-0.5 rounded bg-black text-white text-xs">
+                              {row.variant}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                            {row.sent}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                            {row.opened}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium" style={{ color: '#CFB36E' }}>
+                            {formatOpenRate(row.open_rate)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    {abStats.totals && (
+                      <tfoot className="bg-gray-50 border-t-2 border-gray-200">
+                        <tr>
+                          <td className="px-6 py-4 text-sm font-semibold text-gray-900" colSpan={2}>
+                            Totals
+                          </td>
+                          <td className="px-6 py-4 text-sm font-semibold text-gray-900 text-right">
+                            {abStats.totals.sent}
+                          </td>
+                          <td className="px-6 py-4 text-sm font-semibold text-gray-900 text-right">
+                            {abStats.totals.opened}
+                          </td>
+                          <td className="px-6 py-4 text-sm font-semibold text-right" style={{ color: '#CFB36E' }}>
+                            {formatOpenRate(abStats.totals.open_rate)}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    )}
+                  </table>
+                </div>
+              )}
+            </div>
           ) : (
           <>
           {stats && (
