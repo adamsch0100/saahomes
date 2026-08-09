@@ -104,9 +104,11 @@ function filterSummary(filters = {}) {
 }
 
 /**
- * SaveSearchModal — RealScout-style lead capture.
+ * SaveSearchModal — RealScout-style lead capture (frequency + intent + filters).
+ * Shares the same session cookie (/api/auth/session via /api/alerts) as AccountModal.
  * Not logged in: email + phone required → backend creates account + sets saa_user_token cookie.
  * Logged in (cookie session): pre-fills contact, one-tap save under existing account.
+ * Heart / header sign-in use AccountModal; this modal owns search-specific fields.
  */
 export default function SaveSearchModal({
   filters = {},
@@ -342,8 +344,8 @@ export default function SaveSearchModal({
                   </div>
                 ) : (
                   <div className="mt-4 rounded-lg bg-gray-50 border border-gray-100 px-3.5 py-2.5 text-xs text-gray-600 leading-relaxed">
-                    <strong className="text-gray-800">No account needed</strong> — we&apos;ll create yours when you save.
-                    Email + phone required so we can deliver alerts.{" "}
+                    <strong className="text-gray-800">One account for hearts + alerts</strong> — we&apos;ll create yours when you save.
+                    Email + phone required.{" "}
                     <strong className="text-gray-800">No spam — unsubscribe in one click.</strong>
                   </div>
                 )}

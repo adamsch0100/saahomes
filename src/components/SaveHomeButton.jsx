@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import SignInToSaveModal from "./SignInToSaveModal";
+import AccountModal from "./AccountModal";
 import {
   fetchSessionUser,
   fetchSavedStatus,
@@ -14,7 +14,7 @@ import { isHomeSaved as isLocalHomeSaved } from "../utils/listingHelpers.js";
 /**
  * Account-linked heart button.
  * Logged in → POST/DELETE /api/saved-homes (optimistic UI).
- * Guest → SignInToSaveModal (email + phone).
+ * Guest → AccountModal (unified signup capture).
  *
  * Props:
  *  - listing: listing object (preferred) OR listingKey / slug
@@ -202,13 +202,16 @@ export default function SaveHomeButton({
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
         </svg>
       </button>
-      <SignInToSaveModal
+      <AccountModal
         open={loginOpen}
         onClose={() => {
           setLoginOpen(false);
           setPendingAfterLogin(false);
         }}
         onSuccess={afterLogin}
+        purpose="save-home"
+        askIntent
+        showSuccess={false}
       />
     </>
   );
