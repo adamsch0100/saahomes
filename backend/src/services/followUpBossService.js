@@ -14,6 +14,10 @@
  */
 import getPool from '../config/database.js';
 import logger from '../utils/logger.js';
+import {
+  enrichSubmissionFromHistory,
+  noteIfDuplicateSubmission,
+} from '../utils/emailQuality.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -203,11 +207,37 @@ function splitName(name) {
 // Lead forwarders (existing 8 + person-ID capture)
 // ---------------------------------------------------------------------------
 
+/**
+ * Best-effort enrich from prior submissions + duplicate observability.
+ * Never blocks or delays the forward on failure.
+ */
+async function enrichForForward(submission, path) {
+  try {
+    const pool = getPool();
+    const email = submission?.email || submission?.user?.email;
+    noteIfDuplicateSubmission(pool, email, path).catch(() => {});
+    return await enrichSubmissionFromHistory(pool, submission);
+  } catch (err) {
+    logger.warn('enrichForForward failed (non-blocking)', { message: err.message, path });
+    return submission;
+  }
+}
+
 export const forwardAlertSignupToFollowUpBoss = async (user, search) => {
   if (!isFollowUpBossConfigured()) {
     logger.info('Follow Up Boss not configured, skipping saved-search lead forwarding');
     return { success: false, reason: 'not_configured' };
   }
+
+  const enrichedUser = await enrichForForward(
+    { email: user.email, name: user.name, phone: user.phone },
+    'alert'
+  );
+  const userForPerson = {
+    ...user,
+    name: enrichedUser.name || user.name,
+    phone: enrichedUser.phone || user.phone,
+  };
 
   const filters = search.filters || {};
   const parts = [];
@@ -220,7 +250,7 @@ export const forwardAlertSignupToFollowUpBoss = async (user, search) => {
   if (filters.type) parts.push(`Type: ${filters.type}`);
   const searchSummary = parts.join(' · ') || 'Anywhere';
 
-  const { firstName, lastName } = splitName(user.name);
+  const { firstName, lastName } = splitName(userForPerson.name);
 
   const eventData = {
     source: 'Saved Search Alert',
@@ -235,8 +265,8 @@ export const forwardAlertSignupToFollowUpBoss = async (user, search) => {
     person: {
       firstName,
       lastName,
-      emails: user.email ? [{ value: user.email, type: 'work' }] : [],
-      phones: user.phone ? [{ value: String(user.phone).replace(/\D/g, ''), type: 'mobile' }] : [],
+      emails: userForPerson.email ? [{ value: userForPerson.email, type: 'work' }] : [],
+      phones: userForPerson.phone ? [{ value: String(userForPerson.phone).replace(/\D/g, ''), type: 'mobile' }] : [],
       tags: ['Website Lead', 'Saved Search', 'saahomes.com'],
     },
     propertySearch: {
@@ -250,7 +280,7 @@ export const forwardAlertSignupToFollowUpBoss = async (user, search) => {
 
   try {
     const result = await postFollowUpBossEvent(eventData);
-    const fubPersonId = await capturePersonIdFromResult(result, user.email);
+    const fubPersonId = await capturePersonIdFromResult(result, userForPerson.email);
     logger.info('Saved-search lead forwarded to Follow Up Boss', {
       eventId: result.id,
       fub_person_id: fubPersonId,
@@ -268,7 +298,8 @@ export const forwardShowingRequestToFollowUpBoss = async (showing) => {
     return { success: false, reason: 'not_configured' };
   }
 
-  const { firstName, lastName } = splitName(showing.name);
+  const submission = await enrichForForward(showing, 'showing');
+  const { firstName, lastName } = splitName(submission.name);
 
   const eventData = {
     source: 'Showing Request',
@@ -276,23 +307,23 @@ export const forwardShowingRequestToFollowUpBoss = async (showing) => {
     type: 'Property Inquiry',
     message: [
       'Showing request from website — schedule with the buyer.',
-      `Home: ${showing.listing_address || showing.listing_slug || '—'}`,
-      `Requested: ${showing.showing_date} at ${showing.showing_time}`,
-      showing.message ? `Note: ${showing.message}` : null,
-      showing.listing_slug ? `Listing: https://saahomes.com/homes-for-sale/${showing.listing_slug}/` : null,
+      `Home: ${submission.listing_address || submission.listing_slug || '—'}`,
+      `Requested: ${submission.showing_date} at ${submission.showing_time}`,
+      submission.message ? `Note: ${submission.message}` : null,
+      submission.listing_slug ? `Listing: https://saahomes.com/homes-for-sale/${submission.listing_slug}/` : null,
     ].filter(Boolean).join('\n'),
     person: {
       firstName,
       lastName,
-      emails: showing.email ? [{ value: showing.email, type: 'work' }] : [],
-      phones: showing.phone ? [{ value: String(showing.phone).replace(/\D/g, ''), type: 'mobile' }] : [],
+      emails: submission.email ? [{ value: submission.email, type: 'work' }] : [],
+      phones: submission.phone ? [{ value: String(submission.phone).replace(/\D/g, ''), type: 'mobile' }] : [],
       tags: ['Website Lead', 'Showing Request', 'saahomes.com'],
     },
   };
 
   try {
     const result = await postFollowUpBossEvent(eventData);
-    const fubPersonId = await capturePersonIdFromResult(result, showing.email);
+    const fubPersonId = await capturePersonIdFromResult(result, submission.email);
     logger.info('Showing request forwarded to Follow Up Boss', {
       eventId: result.id,
       fub_person_id: fubPersonId,
@@ -304,12 +335,13 @@ export const forwardShowingRequestToFollowUpBoss = async (showing) => {
   }
 };
 
-export const forwardContactToFollowUpBoss = async (submission) => {
+export const forwardContactToFollowUpBoss = async (submissionIn) => {
   if (!isFollowUpBossConfigured()) {
     logger.info('Follow Up Boss not configured, skipping lead forwarding');
     return { success: false, reason: 'not_configured' };
   }
 
+  const submission = await enrichForForward(submissionIn, 'contact');
   const { name, email, phone, interest, message, area } = submission;
   const { firstName, lastName } = splitName(name);
 
@@ -345,12 +377,13 @@ export const forwardContactToFollowUpBoss = async (submission) => {
   }
 };
 
-export const forwardChfaLeadToFollowUpBoss = async (submission) => {
+export const forwardChfaLeadToFollowUpBoss = async (submissionIn) => {
   if (!isFollowUpBossConfigured()) {
     logger.info('Follow Up Boss not configured, skipping lead forwarding');
     return { success: false, reason: 'not_configured' };
   }
 
+  const submission = await enrichForForward(submissionIn, 'chfa');
   const { first_name, last_name, email, phone, school_employer, buying_timeline, message } = submission;
 
   const messageLines = [
@@ -386,12 +419,13 @@ export const forwardChfaLeadToFollowUpBoss = async (submission) => {
   }
 };
 
-export const forwardChampionsLeadToFollowUpBoss = async (submission) => {
+export const forwardChampionsLeadToFollowUpBoss = async (submissionIn) => {
   if (!isFollowUpBossConfigured()) {
     logger.info('Follow Up Boss not configured, skipping lead forwarding');
     return { success: false, reason: 'not_configured' };
   }
 
+  const submission = await enrichForForward(submissionIn, 'champions');
   const {
     first_name, last_name, email, phone, responder_type, employer_agency, buying_timeline, message,
     responderType, employerAgency, buyingTimeline,
@@ -435,12 +469,13 @@ export const forwardChampionsLeadToFollowUpBoss = async (submission) => {
   }
 };
 
-export const forwardChfaDpaLeadToFollowUpBoss = async (submission) => {
+export const forwardChfaDpaLeadToFollowUpBoss = async (submissionIn) => {
   if (!isFollowUpBossConfigured()) {
     logger.info('Follow Up Boss not configured, skipping lead forwarding');
     return { success: false, reason: 'not_configured' };
   }
 
+  const submission = await enrichForForward(submissionIn, 'chfa-dpa');
   const {
     first_name, last_name, email, phone, buyer_status, target_county, buying_timeline, message,
     buyerStatus, targetCounty, buyingTimeline,
@@ -484,12 +519,13 @@ export const forwardChfaDpaLeadToFollowUpBoss = async (submission) => {
   }
 };
 
-export const forwardGhopeLeadToFollowUpBoss = async (submission) => {
+export const forwardGhopeLeadToFollowUpBoss = async (submissionIn) => {
   if (!isFollowUpBossConfigured()) {
     logger.info('Follow Up Boss not configured, skipping lead forwarding');
     return { success: false, reason: 'not_configured' };
   }
 
+  const submission = await enrichForForward(submissionIn, 'ghope');
   const {
     first_name, last_name, email, phone, employer_name, target_zone, buying_timeline, message,
     employerName, targetZone, buyingTimeline,
@@ -533,12 +569,13 @@ export const forwardGhopeLeadToFollowUpBoss = async (submission) => {
   }
 };
 
-export const forwardMarketReportToFollowUpBoss = async (submission) => {
+export const forwardMarketReportToFollowUpBoss = async (submissionIn) => {
   if (!isFollowUpBossConfigured()) {
     logger.info('Follow Up Boss not configured, skipping lead forwarding');
     return { success: false, reason: 'not_configured' };
   }
 
+  const submission = await enrichForForward(submissionIn, 'market-report');
   const { firstName, lastName, email, phone, area, first_name, last_name } = submission;
   const resolvedFirstName = firstName || first_name;
   const resolvedLastName = lastName || last_name;

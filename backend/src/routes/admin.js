@@ -13,6 +13,7 @@ import {
   getDueTodayQueue,
   patchCockpitLead,
   getFubStatus,
+  getLeadQualityStats,
 } from '../controllers/adminController.js';
 import { authenticateToken } from '../middleware/auth.js';
 
@@ -25,6 +26,7 @@ router.post('/login', login);
 router.get('/submissions', authenticateToken, getSubmissions);
 router.get('/submissions/:type/:id', authenticateToken, getSubmission);
 router.get('/stats', authenticateToken, getStats);
+router.get('/lead-quality-stats', authenticateToken, getLeadQualityStats);
 
 // Client saved-search CRM (agent side)
 router.get('/searches', authenticateToken, getClientSearches);

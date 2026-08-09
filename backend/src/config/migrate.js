@@ -550,6 +550,27 @@ export const runMigrations = async () => {
         ON notifications(user_id, created_at DESC);
     `);
 
+    // ── Enrich layer: disposable email block log (P4 / RealScout G4) ─────
+    // Fire-and-forget observability when a lead form is rejected for a
+    // known throwaway domain. Never blocks capture paths if insert fails.
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS blocked_email_log (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) NOT NULL,
+        domain VARCHAR(255),
+        path VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_blocked_email_log_created_at
+        ON blocked_email_log(created_at);
+      CREATE INDEX IF NOT EXISTS idx_blocked_email_log_domain
+        ON blocked_email_log(domain);
+      CREATE INDEX IF NOT EXISTS idx_blocked_email_log_path
+        ON blocked_email_log(path);
+    `);
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {
