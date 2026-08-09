@@ -63,6 +63,7 @@ function TypeBadge({ type }) {
     value_update: "bg-sky-50 text-sky-900 border-sky-200",
     off_market: "bg-gray-100 text-gray-700 border-gray-200",
     showing_confirm: "bg-violet-50 text-violet-900 border-violet-200",
+    shared_home: "bg-[#CFB36E]/15 text-[#8a7020] border-[#CFB36E]/40",
   };
   return (
     <span

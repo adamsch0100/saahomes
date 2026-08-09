@@ -650,6 +650,11 @@ const NURTURE_SIGNAL_MAP = {
     type: 'Seller Inquiry',
     label: 'Seller heat signal on saahomes.com',
   },
+  // Agent-initiated share (It 16 / P5) — Adam shares a home + note with a client
+  shared_home: {
+    type: 'Property Inquiry',
+    label: 'Adam shared a home with them on saahomes.com',
+  },
 };
 
 /**
