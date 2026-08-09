@@ -7,6 +7,7 @@ import {
   summarizeFilters,
 } from '../services/searchIntentParser.js';
 import { createAlert } from './alertController.js';
+import { rejectIfDisposableEmail } from '../utils/emailQuality.js';
 
 const OPENCODE_API_URL = 'https://opencode.ai/zen/go/v1/chat/completions';
 const OPENCODE_API_KEY = process.env.OPENCODE_GO_API_KEY;
@@ -352,6 +353,7 @@ export const createSearchFromChat = async (req, res) => {
         needsContact: true,
       });
     }
+    if (rejectIfDisposableEmail(email, res, 'chat')) return;
 
     // Delegate to the existing alert pipeline (FUB Alert Signup, lead score, cookie).
     req.body = {

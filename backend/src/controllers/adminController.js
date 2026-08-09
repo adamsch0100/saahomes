@@ -527,3 +527,121 @@ export const getFubStatus = async (req, res) => {
     res.status(500).json({ error: 'Failed to check FUB status' });
   }
 };
+
+/**
+ * GET /api/admin/lead-quality-stats — deliverability / enrich-layer health (last 30d).
+ * Used for monitoring disposable blocks + submission volume. No frontend page yet.
+ */
+export const getLeadQualityStats = async (req, res) => {
+  try {
+    const pool = getPool();
+
+    const [totals, blocked, topDomains, byPathBlocked, byPathSubmitted] = await Promise.all([
+      pool.query(`
+        SELECT
+          (
+            (SELECT COUNT(*)::int FROM contact_submissions WHERE created_at >= NOW() - INTERVAL '30 days') +
+            (SELECT COUNT(*)::int FROM market_report_submissions WHERE created_at >= NOW() - INTERVAL '30 days') +
+            (SELECT COUNT(*)::int FROM chfa_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days') +
+            (SELECT COUNT(*)::int FROM champions_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days') +
+            (SELECT COUNT(*)::int FROM chfa_dpa_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days') +
+            (SELECT COUNT(*)::int FROM ghope_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days') +
+            (SELECT COUNT(*)::int FROM showing_requests WHERE created_at >= NOW() - INTERVAL '30 days')
+          ) AS total_submissions,
+          (
+            SELECT COUNT(DISTINCT LOWER(email))::int FROM (
+              SELECT email FROM contact_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+              UNION
+              SELECT email FROM market_report_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+              UNION
+              SELECT email FROM chfa_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+              UNION
+              SELECT email FROM champions_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+              UNION
+              SELECT email FROM chfa_dpa_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+              UNION
+              SELECT email FROM ghope_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+              UNION
+              SELECT email FROM showing_requests WHERE created_at >= NOW() - INTERVAL '30 days'
+            ) all_emails
+          ) AS unique_emails
+      `).catch(() => ({ rows: [{ total_submissions: 0, unique_emails: 0 }] })),
+      pool.query(`
+        SELECT COUNT(*)::int AS blocked_disposable
+        FROM blocked_email_log
+        WHERE created_at >= NOW() - INTERVAL '30 days'
+      `).catch(() => ({ rows: [{ blocked_disposable: 0 }] })),
+      pool.query(`
+        SELECT domain, COUNT(*)::int AS count
+        FROM blocked_email_log
+        WHERE created_at >= NOW() - INTERVAL '30 days'
+          AND domain IS NOT NULL
+        GROUP BY domain
+        ORDER BY count DESC
+        LIMIT 10
+      `).catch(() => ({ rows: [] })),
+      pool.query(`
+        SELECT COALESCE(path, 'unknown') AS path, COUNT(*)::int AS blocked
+        FROM blocked_email_log
+        WHERE created_at >= NOW() - INTERVAL '30 days'
+        GROUP BY COALESCE(path, 'unknown')
+      `).catch(() => ({ rows: [] })),
+      pool.query(`
+        SELECT path, COUNT(*)::int AS submitted FROM (
+          SELECT 'contact' AS path FROM contact_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+          UNION ALL
+          SELECT 'market-report' FROM market_report_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+          UNION ALL
+          SELECT 'chfa' FROM chfa_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+          UNION ALL
+          SELECT 'champions' FROM champions_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+          UNION ALL
+          SELECT 'chfa-dpa' FROM chfa_dpa_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+          UNION ALL
+          SELECT 'ghope' FROM ghope_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+          UNION ALL
+          SELECT 'showing' FROM showing_requests WHERE created_at >= NOW() - INTERVAL '30 days'
+        ) s
+        GROUP BY path
+      `).catch(() => ({ rows: [] })),
+    ]);
+
+    const total_submissions = Number(totals.rows[0]?.total_submissions || 0);
+    const unique_emails = Number(totals.rows[0]?.unique_emails || 0);
+    const blocked_disposable = Number(blocked.rows[0]?.blocked_disposable || 0);
+
+    const blockedByPath = Object.fromEntries(
+      (byPathBlocked.rows || []).map((r) => [r.path, Number(r.blocked || 0)])
+    );
+    const submittedByPath = Object.fromEntries(
+      (byPathSubmitted.rows || []).map((r) => [r.path, Number(r.submitted || 0)])
+    );
+    const allPaths = new Set([
+      ...Object.keys(blockedByPath),
+      ...Object.keys(submittedByPath),
+    ]);
+    const by_path = [...allPaths]
+      .map((path) => ({
+        path,
+        blocked: blockedByPath[path] || 0,
+        submitted: submittedByPath[path] || 0,
+      }))
+      .sort((a, b) => (b.submitted + b.blocked) - (a.submitted + a.blocked));
+
+    res.json({
+      last30d: {
+        total_submissions,
+        unique_emails,
+        blocked_disposable,
+      },
+      top_blocked_domains: (topDomains.rows || []).map((r) => ({
+        domain: r.domain,
+        count: Number(r.count || 0),
+      })),
+      by_path,
+    });
+  } catch (error) {
+    logger.error('Error fetching lead quality stats', error);
+    res.status(500).json({ error: 'Failed to fetch lead quality stats' });
+  }
+};

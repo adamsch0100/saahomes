@@ -5,6 +5,7 @@
  */
 import getPool from '../config/database.js';
 import { forwardShowingRequestToFollowUpBoss } from '../services/followUpBossService.js';
+import { rejectIfDisposableEmail } from '../utils/emailQuality.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -17,6 +18,7 @@ export const submitShowingRequest = async (req, res) => {
     const phoneDigits = String(phone || '').replace(/\D/g, '');
     if (!nameStr) return res.status(400).json({ success: false, error: 'Please enter your name.' });
     if (!EMAIL_RE.test(emailStr)) return res.status(400).json({ success: false, error: 'Please enter a valid email.' });
+    if (rejectIfDisposableEmail(emailStr, res, 'showing')) return;
     if (phoneDigits.length < 7 || phoneDigits.length > 15) {
       return res.status(400).json({ success: false, error: 'Please add your phone number so we can confirm your showing.' });
     }

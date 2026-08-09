@@ -21,6 +21,7 @@ import {
   recordUserEvent,
   filtersToSearchPath,
 } from '../services/leadScore.js';
+import { rejectIfDisposableEmail } from '../utils/emailQuality.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FILTER_KEYS = ['city', 'minPrice', 'maxPrice', 'beds', 'baths', 'type', 'sort', 'q',
@@ -91,6 +92,7 @@ export const createAlert = async (req, res) => {
     if (!EMAIL_RE.test(emailStr)) {
       return res.status(400).json({ success: false, error: 'A valid email is required to save a search.' });
     }
+    if (rejectIfDisposableEmail(emailStr, res, 'alert')) return;
     const phoneDigits = cleanPhone(phone);
     if (!phoneDigits) {
       return res.status(400).json({ success: false, error: 'Please add your phone number so we can reach you about new listings.' });
