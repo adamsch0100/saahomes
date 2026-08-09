@@ -46,6 +46,7 @@ const breadcrumbMap = {
   sellers: "Sell Your Northern Colorado Home",
   "my-home": "My Home Value",
   "my-saved-searches": "My Saved Searches",
+  notifications: "Notifications",
 };
 
 const customTrails = {

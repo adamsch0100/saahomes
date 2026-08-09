@@ -39,6 +39,13 @@ import {
   savedHomesStatus,
 } from '../controllers/savedHomesController.js';
 import {
+  listNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+  dismissNotification,
+  dismissAllNotifications,
+} from '../controllers/notificationsController.js';
+import {
   validateContactSubmission,
   validateMarketReportSubmission,
   validateChfaLeadSubmission,
@@ -191,6 +198,19 @@ router.get('/saved-homes/status', savedHomesLimiter, savedHomesStatus);
 router.get('/saved-homes', savedHomesLimiter, listSavedHomes);
 router.post('/saved-homes', formLimiter, saveHome);
 router.delete('/saved-homes/:listing_key', savedHomesLimiter, unsaveHome);
+
+// ── Notification center (in-app nurture events) ───────────────────────────
+const notificationsLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  message: 'Too many requests.',
+});
+// Static paths before :id
+router.get('/notifications', notificationsLimiter, listNotifications);
+router.post('/notifications/read-all', formLimiter, markAllNotificationsRead);
+router.post('/notifications/dismiss-all', formLimiter, dismissAllNotifications);
+router.post('/notifications/:id/read', formLimiter, markNotificationRead);
+router.delete('/notifications/:id', notificationsLimiter, dismissNotification);
 
 export default router;
 
