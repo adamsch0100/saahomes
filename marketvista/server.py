@@ -803,10 +803,15 @@ def _refresh_sample_html(run_dir: Path) -> None:
     if not json_path.exists():
         return
     try:
-        # Skip rewrite when sample already has the current Full Market UI markers
+        # Skip rewrite when sample already has the current UI markers
         if html_path.exists():
             existing = html_path.read_text(encoding="utf-8", errors="ignore")
-            if "btnSortUsed" in existing and "fulldata-body" in existing and "In comps · remove" in existing:
+            if (
+                "btnSortUsed" in existing
+                and "fulldata-body" in existing
+                and "In comps · remove" in existing
+                and "btnPrintLeavebehind" in existing
+            ):
                 return
         report = json.loads(json_path.read_text(encoding="utf-8"))
         _save_html(report, html_path)
