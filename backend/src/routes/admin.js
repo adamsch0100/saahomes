@@ -13,6 +13,7 @@ import {
   getDueTodayQueue,
   patchCockpitLead,
   shareHome,
+  syncFubLifecycle,
   getFubStatus,
   getLeadQualityStats,
 } from '../controllers/adminController.js';
@@ -42,6 +43,8 @@ router.get('/cockpit/due-today', authenticateToken, getDueTodayQueue);
 router.patch('/cockpit/:id', authenticateToken, patchCockpitLead);
 // Agent share-home (It 16 / P5) — home + note → FUB + timeline + client inbox
 router.post('/share-home', authenticateToken, shareHome);
+// FUB two-way read (It 17 / P6) — tags/stage → our lifecycle
+router.post('/sync-fub-lifecycle', authenticateToken, syncFubLifecycle);
 router.get('/fub/status', authenticateToken, getFubStatus);
 
 export default router;
