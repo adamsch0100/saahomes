@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ — ListLogic</title>
+<meta name="description" content="Answers for listing agents: how ListLogic builds a custom-fit market view of each home, pricing, trials, and seller presentations.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/saas/ll.css">
+<style>
+.hero-mini {
+  background: radial-gradient(900px 400px at 20% -20%, #0e7a6d33, transparent 60%),
+              linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; padding: 64px 0 72px;
+}
+.hero-mini h1 { font-family: 'Fraunces', serif; font-size: clamp(1.9rem, 4vw, 2.7rem); letter-spacing: -0.02em; margin-bottom: 12px; }
+.hero-mini h1 em { font-style: normal; color: var(--accent-2); }
+.hero-mini p { color: #c8d2e0; max-width: 560px; font-size: 1.02rem; }
+
+.faq-list { margin: 48px 0; display: grid; gap: 12px; }
+.faq-item {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  overflow: hidden; box-shadow: var(--shadow-sm); transition: box-shadow 0.15s ease;
+}
+.faq-item:hover { box-shadow: var(--shadow); }
+.faq-item summary {
+  list-style: none; cursor: pointer; padding: 20px 24px;
+  font-weight: 600; font-size: 1.02rem; letter-spacing: -0.01em;
+  display: flex; justify-content: space-between; gap: 16px; align-items: center;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  content: "+"; flex: 0 0 28px; height: 28px; border-radius: 50%;
+  background: #eef2f8; color: var(--navy); font-weight: 700; font-size: 1rem;
+  display: grid; place-items: center; transition: transform 0.15s ease;
+}
+.faq-item[open] summary::after { content: "–"; transform: rotate(180deg); }
+.faq-item .body { padding: 0 24px 20px; font-size: 0.94rem; }
+.faq-item .body p { margin-bottom: 10px; color: var(--muted); }
+.faq-item .body p:last-child { margin-bottom: 0; }
+.faq-item .body strong { color: var(--ink); }
+
+.cta-band {
+  background: linear-gradient(150deg, var(--ink), var(--ink-2)); color: #fff;
+  border-radius: 26px; padding: 48px 40px; text-align: center; margin-bottom: 64px;
+  position: relative; overflow: hidden;
+}
+.cta-band::after { content: ""; position: absolute; inset: 0; background: radial-gradient(600px 300px at 85% 0%, rgba(201,162,39,0.2), transparent 60%); }
+.cta-band > * { position: relative; }
+.cta-band h2 { font-family: 'Fraunces', serif; font-size: clamp(1.4rem, 3vw, 2rem); letter-spacing: -0.02em; margin-bottom: 10px; }
+.cta-band p { color: #c8d2e0; margin-bottom: 22px; }
+.cta-band .row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,0.35); color: #fff; }
+.btn-ghost:hover { border-color: rgba(255,255,255,0.75); }
+</style>
+</head>
+<body>
+
+<nav class="ll-nav">
+  <div class="container ll-nav-inner">
+    <a href="index.html" class="ll-brand">
+      <span class="ll-brand-mark">L</span>
+      ListLogic
+      <small>by SAA Homes</small>
+    </a>
+    <div class="ll-nav-links">
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#deliverables">What sellers get</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="faq.html">FAQ</a>
+      <a href="login.html">Sign in</a>
+      <a href="signup.html" class="btn btn-primary">Start free trial</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero-mini">
+  <div class="container narrow">
+    <span class="eyebrow gold">FAQ</span>
+    <h1>Straight answers for <em>listing agents</em>.</h1>
+    <p>What ListLogic does in the appointment, what your sellers walk away with, and how to get started.</p>
+  </div>
+</header>
+
+<div class="container narrow">
+  <div class="faq-list">
+
+  <details class="faq-item" open>
+    <summary>What is ListLogic?</summary>
+    <div class="body">
+      <p>ListLogic builds a <strong>microscope view of how your home's market is actually performing</strong> — a factual, data-backed pricing story on a market customized to that specific home, not the whole city. Sellers see the competitive picture, a recommended list price and range, and clear trade-offs if they go higher or lower — so you can position the home to sell successfully.</p>
+    </div>
+  </details>
+
+  <details class="faq-item">
+    <summary>Who is it for?</summary>
+    <div class="body">
+      <p>Listing agents and teams who want a professional, data-backed story at the listing appointment. Built first for Northern Colorado markets; works anywhere you can pull a comparable market set for the subject home.</p>
+    </div>
+  </details>
+
+  <details class="faq-item">
+    <summary>What does a presentation show the seller?</summary>
+    <div class="body">
+      <p>How their specific market segment is performing — absorption pace, inventory, and buyer demand for homes like theirs — plus a recommended list price and range anchored to what buyers just paid. Live what-if sliders show how timing and odds move with price, so the conversation stays on facts, not opinions.</p>
+    </div>
+  </details>
+
+  <details class="faq-item">
+    <summary>What does the seller walk away with?</summary>
+    <div class="body">
+      <p>A clear recommended list and range, the competition picture, expected timing and odds at different price strategies, and professional printouts: a <strong>seller packet</strong> to leave behind and a <strong>listing flipbook</strong> for binder or table presentations.</p>
+    </div>
+  </details>
+
+  <details class="faq-item">
+    <summary>Can I change the recommended price?</summary>
+    <div class="body">
+      <p>Yes. You stay in control. Adjust the condition/presentation rating, override list price and range, edit advantages and watch-outs, and refine which comps to highlight — then regenerate the packet.</p>
+    </div>
+  </details>
+
+  <details class="faq-item">
+    <summary>How is the market customized to each home?</summary>
+    <div class="body">
+      <p>Instead of city-wide averages, ListLogic filters to the homes a buyer would genuinely cross-shop against the subject — size, garage, area, age, and timeframe — so every number reflects <em>this</em> home's competitive set. It's an apples-to-apples segment, which is what makes the pricing factual.</p>
+    </div>
+  </details>
+
+  <details class="faq-item">
+    <summary>How do you measure inventory and demand?</summary>
+    <div class="body">
+      <p>Months of inventory uses <strong>Active</strong> listings only — homes a buyer can still buy — divided by recent sales pace. Homes already spoken for are counted separately, so sellers see true buyer demand without inflated inventory numbers.</p>
+    </div>
+  </details>
+
+  <details class="faq-item">
+    <summary>Does ListLogic replace my CMA judgment?</summary>
+    <div class="body">
+      <p>No. It organizes the market story so sellers can see what you already know. Your expertise still chooses the comps, the condition call, and the final list recommendation — ListLogic makes the trade-offs visible and presentation-ready.</p>
+    </div>
+  </details>
+
+  <details class="faq-item">
+    <summary>What's interactive vs. the seller packet vs. the listing flipbook?</summary>
+    <div class="body">
+      <p><strong>Interactive</strong> — live on-screen story with charts, what-if pricing, and agent tools.</p>
+      <p><strong>Seller packet</strong> — portrait PDF leave-behind for email or print after the appointment.</p>
+      <p><strong>Listing flipbook</strong> — landscape slides designed for listing presentations and binder printouts.</p>
+    </div>
+  </details>
+
+  <details class="faq-item">
+    <summary>Is my market data kept private?</summary>
+    <div class="body">
+      <p>The data behind each presentation is used to build <em>your</em> presentation for that subject and market cut. We don't sell it or publish seller addresses as marketing content. Use the same care you already use with client data.</p>
+    </div>
+  </details>
+
+  <details class="faq-item">
+    <summary>How does the free trial work?</summary>
+    <div class="body">
+      <p>Sign up with email — no card. You get <strong>3 presentations or 60 days</strong>, whichever comes first. Optional promo codes (like COLDWELL-NOCO) or invite links can set the same terms. When either limit hits, you'll be prompted to pick a paid plan.</p>
+      <p>Want to peek first? <a href="/demo">Try the sample listing</a> — no account required.</p>
+    </div>
+  </details>
+
+  <details class="faq-item">
+    <summary>What's included in monthly vs. one-time?</summary>
+    <div class="body">
+      <p><strong>One-time ($20)</strong> — a single full presentation when you only need one listing.</p>
+      <p><strong>Agent monthly ($39)</strong> — unlimited presentations for one agent, with live what-if pricing and print-ready packets.</p>
+      <p><strong>Annual ($390)</strong> — same as monthly with roughly two months free.</p>
+      <p>Card checkout opens after early access; for now, start a trial or email Adam to convert.</p>
+    </div>
+  </details>
+
+  <details class="faq-item">
+    <summary>Can my office brand it?</summary>
+    <div class="body">
+      <p>Yes. Add agent name, phone, email, brokerage, colors, and logo on generate. Brokerage plans support shared branding defaults across seats.</p>
+    </div>
+  </details>
+
+  <details class="faq-item">
+    <summary>How do I give feedback?</summary>
+    <div class="body">
+      <p>Use the <strong>Send feedback</strong> button in the app and on live presentations (Bug / Suggestion / Other). It emails Adam and lands in the admin inbox. You can also email <a href="mailto:adam@saahomes.com?subject=ListLogic%20feedback">adam@saahomes.com</a>.</p>
+    </div>
+  </details>
+
+  </div>
+
+  <div class="cta-band">
+    <h2>Ready to try it on your next listing appointment?</h2>
+    <p>Sample listing first, free trial when you're ready. No card required.</p>
+    <div class="row">
+      <a href="/demo" class="btn btn-gold">Try the sample</a>
+      <a href="signup.html" class="btn btn-ghost">Start free trial</a>
+      <a href="pricing.html" class="btn btn-ghost">See pricing</a>
+    </div>
+  </div>
+</div>
+
+<footer class="ll-footer">
+  <div class="container">
+    <div><strong>ListLogic</strong> · Data-driven custom pricing strategy</div>
+    <div><a href="https://saahomes.com">SAA Homes</a> · Schwartz and Associates, Coldwell Banker Realty</div>
+    <div><a href="index.html">Home</a> · <a href="pricing.html">Pricing</a> · <a href="mailto:adam@saahomes.com">Contact</a></div>
+  </div>
+</footer>
+
+</body>
+</html>
