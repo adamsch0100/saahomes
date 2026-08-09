@@ -1,8 +1,7 @@
 import React from "react";
 import SEO from "../components/SEO";
 import AreaFAQSection from "../components/AreaFAQSection.jsx";
-import Testimonials from "../components/Testimonials.jsx";
-import { BUYER_FAQS } from "../data/buyerSellerFaqs.js";
+import { FOR_BUYERS_FAQS, buildFaqPageSchema } from "../data/moneyPageFaqs.js";
 
 export default function ForBuyersPage() {
   return (
@@ -12,20 +11,7 @@ export default function ForBuyersPage() {
         description="Search homes for sale in Fort Collins, Loveland, Windsor, and across Northern Colorado. SAA Homes offers expert buyer representation, down payment program guidance including CHFA Schools To Home, and personalized home search services."
         keywords="homes for sale Fort Collins, Colorado home buyers, Loveland homes for sale, Windsor CO real estate, buy home Northern Colorado, first time home buyer Colorado, buyer agent Fort Collins, CHFA down payment assistance"
         canonical="https://saahomes.com/for-buyers/"
-        jsonLd={[
-          {
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            mainEntity: BUYER_FAQS.map((faq) => ({
-              "@type": "Question",
-              name: faq.q,
-              acceptedAnswer: {
-                "@type": "Answer",
-                text: faq.a,
-              },
-            })),
-          },
-        ]}
+        jsonLd={[buildFaqPageSchema(FOR_BUYERS_FAQS)].filter(Boolean)}
       />
 
       {/* Hero Section */}
@@ -33,13 +19,13 @@ export default function ForBuyersPage() {
         style={{backgroundImage: "url('/images/buyers-hero.jpg')"}}>
         <div className="absolute inset-0 bg-black/60"></div>
         <div className="relative z-10 text-center text-white px-6">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-serif">Your Northern Colorado Home Search Starts Here</h1>
-          <p className="mt-4 text-xl sm:text-2xl font-sans">Expert buyer representation, CHFA down payment assistance, and personalized home searches across Fort Collins, Loveland &amp; Windsor.</p>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-serif">For Buyers</h1>
+          <p className="mt-4 text-xl sm:text-2xl font-sans">Your Guide to Finding the Perfect Home in Northern Colorado</p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <a href="/properties/" className="inline-flex items-center justify-center px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
               Search Homes
             </a>
-            <a href="/contact/?interest=Buying a home" className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
+            <a href="/contact/" className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
               Get Free Buyer Consultation
             </a>
           </div>
@@ -51,7 +37,7 @@ export default function ForBuyersPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
             <div className="pl-4 md:pl-8">
-              <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-6">Why Choose SAA Homes for Your Northern Colorado Home Search?</h2>
+              <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-6">Why Choose Us?</h2>
               <p className="text-lg text-gray-700 mb-4">
                 We're dedicated to making your home buying experience as smooth and successful as possible. From your first search to closing day, we're with you every step of the way.
               </p>
@@ -77,24 +63,19 @@ export default function ForBuyersPage() {
       <section className="py-16 px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4">What Buyer Resources Does SAA Homes Offer?</h2>
+            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4">Buyer Resources</h2>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto">
               Everything you need to make informed decisions throughout your home buying journey.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow border-2" style={{ borderColor: '#CFB36E', backgroundColor: '#FDF9EF' }}>
-              <span className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide mb-4" style={{ backgroundColor: '#CFB36E', color: '#1a1a1a' }}>
-                Start Here
-              </span>
+            <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow border-2 border-black/5">
               <h3 className="text-2xl font-bold mb-4 font-serif">CHFA Down Payment Assistance</h3>
               <p className="text-gray-700 mb-4">
                 Colorado&apos;s primary first-time homebuyer program — grants and deferred loans up to $25,000 for down payment and closing costs through CHFA participating lenders.
               </p>
-              <a href="/chfa-down-payment-assistance/#chfa-dpa-lead-form" className="inline-block px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors">
-                Get Free CHFA Consultation
-              </a>
+              <a href="/chfa-down-payment-assistance/" className="text-black font-semibold hover:underline">Learn More →</a>
             </div>
 
             <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
@@ -122,14 +103,6 @@ export default function ForBuyersPage() {
             </div>
 
             <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-              <h3 className="text-2xl font-bold mb-4 font-serif">Ask for Seller Concessions</h3>
-              <p className="text-gray-700 mb-4">
-                Save thousands at closing — seller concessions can cover your closing costs, prepaid items, and rate buydowns. Understand the limits by loan type and negotiate with confidence.
-              </p>
-              <a href="/blog/seller-concession-cheat-sheet-northern-colorado/" className="text-black font-semibold hover:underline">Seller Concession Cheat Sheet →</a>
-            </div>
-
-            <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
               <h3 className="text-2xl font-bold mb-4 font-serif">Relocation Guide</h3>
               <p className="text-gray-700 mb-4">
                 Moving to Northern Colorado? Get insider knowledge about neighborhoods, schools, and local amenities to find your perfect community.
@@ -150,13 +123,7 @@ export default function ForBuyersPage() {
               <p className="text-gray-700 mb-4">
                 Explore detailed guides for Fort Collins, Loveland, Windsor, Greeley, and other Northern Colorado communities.
               </p>
-              <div className="flex flex-col gap-1.5">
-                <a href="/northern-colorado-areas/fort-collins/" className="text-black font-semibold hover:underline">Fort Collins Area Guide →</a>
-                <a href="/northern-colorado-areas/loveland/" className="text-black font-semibold hover:underline">Loveland, Colorado Area Guide →</a>
-                <a href="/northern-colorado-areas/windsor/" className="text-black font-semibold hover:underline">Windsor Area Guide →</a>
-                <a href="/northern-colorado-areas/greeley/" className="text-black font-semibold hover:underline">Greeley Area Guide →</a>
-                <a href="/northern-colorado-areas/" className="text-sm text-gray-600 font-semibold hover:underline mt-2">View All 27+ Communities →</a>
-              </div>
+              <a href="/northern-colorado-areas/" className="text-black font-semibold hover:underline">Explore →</a>
             </div>
           </div>
         </div>
@@ -166,7 +133,7 @@ export default function ForBuyersPage() {
       <section className="py-16 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4">What Buyer Services Are Included When I Work With SAA Homes?</h2>
+            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4">Our Buyer Services</h2>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto">
               We're dedicated to making your home buying experience as smooth and successful as possible. From your first search to closing day, we're with you every step of the way.
             </p>
@@ -240,15 +207,15 @@ export default function ForBuyersPage() {
             {/* Get Pre-Approved Content */}
             <div className="order-1 md:order-2" style={{backgroundColor: '#CFB36E'}}>
               <div className="p-8 md:p-12 text-center md:text-left">
-                <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4 text-gray-900">How Do I Get Pre-Approved for a Mortgage in Northern Colorado?</h2>
+                <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4 text-gray-900">Get Pre-Approved</h2>
                 <p className="text-lg text-gray-800 mb-4">
                   Getting pre-approved for a mortgage is one of the first steps in your home buying journey. It shows sellers you're serious and helps you understand your budget. Connect with our trusted lending partners today.
                 </p>
                 <p className="text-gray-800 mb-6">
                   Questions? Call us at <a href="tel:(970) 999-1407" className="font-bold hover:underline">(970) 999-1407</a>
                 </p>
-                <a href="/contact/?interest=Buying a home" className="inline-block px-8 py-3 bg-gray-900 text-white font-semibold rounded hover:bg-gray-800 transition-colors">
-                  Get Started
+                <a href="/contact/" className="inline-block px-8 py-3 bg-gray-900 text-white font-semibold rounded hover:bg-gray-800 transition-colors">
+                  Apply Now
                 </a>
               </div>
             </div>
@@ -256,19 +223,17 @@ export default function ForBuyersPage() {
         </div>
       </section>
 
-      <AreaFAQSection faqs={BUYER_FAQS} city="Northern Colorado" />
-
-      <Testimonials />
+      <AreaFAQSection faqs={FOR_BUYERS_FAQS} city="Northern Colorado buyers" />
 
       {/* CTA Section */}
       <section className="py-16 px-6 bg-black text-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4">Ready to Start Your Northern Colorado Home Search?</h2>
+        <div className="max-w-4xl mx-auto text-center -mt-8 mb-[20px]">
+          <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4">Ready to Find Your Dream Home?</h2>
           <p className="text-xl mb-8">
             Let's start your home buying journey together. Contact us today for a free consultation.
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
-            <a href="/contact/?interest=Buying a home" className="inline-block px-8 py-3 bg-white text-black font-semibold rounded hover:bg-gray-100 transition-colors">
+            <a href="/contact/" className="inline-block px-8 py-3 bg-white text-black font-semibold rounded hover:bg-gray-100 transition-colors">
               Contact Us
             </a>
             <a href="/properties/" className="inline-block px-8 py-3 border-2 border-white text-white font-semibold rounded hover:bg-white hover:text-black transition-colors">

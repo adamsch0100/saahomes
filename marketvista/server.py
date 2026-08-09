@@ -1,0 +1,1394 @@
+﻿#!/usr/bin/env python
+"""ListLogic web app — upload MLS export, generate presentation."""
+from __future__ import annotations
+
+import html as html_lib
+import json
+import logging
+import os
+import re
+import shutil
+import time
+import uuid
+from collections import defaultdict, deque
+from datetime import datetime
+from pathlib import Path
+from typing import Optional
+
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response
+from fastapi.staticfiles import StaticFiles
+from starlette.middleware.base import BaseHTTPMiddleware
+
+from subject import SUBJECT_2845_DEFAULTS, resolve_subject
+
+ROOT = Path(__file__).resolve().parent
+UPLOAD_DIR = ROOT / "uploads"
+OUTPUT_DIR = ROOT / "output" / "runs"
+DEMO_EXPORT = ROOT / "data" / "export-71.txt"
+BRANDING_DIR = ROOT / "output" / "branding"
+
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+BRANDING_DIR.mkdir(parents=True, exist_ok=True)
+
+MAX_UPLOAD_BYTES = 15 * 1024 * 1024
+RATE_LIMIT_WINDOW_SEC = 60
+RATE_LIMIT_MAX_GENERATE = 10
+SAMPLE_RUN_ID = "sample-2845"
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("ListLogic")
+
+app = FastAPI(title="ListLogic", version="0.3.0")
+
+
+def _current_user(request: Request) -> Optional[dict]:
+    import auth_service
+
+    token = request.cookies.get(auth_service.SESSION_COOKIE)
+    return auth_service.user_from_session_token(token)
+
+
+def _require_user(request: Request) -> dict:
+    user = _current_user(request)
+    if not user:
+        raise HTTPException(401, "Sign in required")
+    return user
+
+
+def _require_admin(request: Request) -> dict:
+    user = _require_user(request)
+    if (user.get("role") or "") != "admin":
+        raise HTTPException(403, "Admin only")
+    return user
+
+
+def _set_session_cookie(resp: Response, request: Request, token: str) -> None:
+    import auth_service
+
+    resp.set_cookie(
+        auth_service.SESSION_COOKIE,
+        token,
+        max_age=auth_service.SESSION_DAYS * 24 * 60 * 60,
+        httponly=True,
+        samesite="lax",
+        secure=request.url.scheme == "https",
+        path="/",
+    )
+
+
+def _clear_session_cookie(resp: Response) -> None:
+    import auth_service
+
+    resp.delete_cookie(auth_service.SESSION_COOKIE, path="/")
+
+
+class AuthMiddleware(BaseHTTPMiddleware):
+    """Session auth. Marketing, demo, signup/login, and feedback stay public."""
+
+    OPEN_EXACT = {
+        "/",
+        "/health",
+        "/demo",
+        "/api/demo",
+        "/api/demo-export",
+        "/api/login",
+        "/api/signup",
+        "/api/logout",
+        "/api/auth-status",
+        "/api/feedback",
+        "/api/invite-info",
+        "/favicon.ico",
+        "/presentation.html",
+        "/deck.html",
+    }
+    OPEN_PREFIXES = (
+        "/saas/login.html",
+        "/saas/signup.html",
+        "/saas/index.html",
+        "/saas/pricing.html",
+        "/saas/faq.html",
+        "/saas/ll.css",
+        "/saas/vendor/",
+        "/saas/feedback.js",
+        "/saas/assistant.js",
+        "/branding/",
+        "/invite/",
+    )
+    # Public static assets under /saas (CSS/JS/fonts/images) — never gate behind login
+    OPEN_STATIC_SUFFIXES = (
+        ".css",
+        ".js",
+        ".map",
+        ".woff",
+        ".woff2",
+        ".ttf",
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".webp",
+        ".svg",
+        ".ico",
+    )
+    # Runs + sample assets readable so demo/share links work; generate stays gated.
+    OPEN_RUN_PREFIXES = ("/runs/",)
+
+    async def dispatch(self, request: Request, call_next):
+        path = request.url.path
+        if path in self.OPEN_EXACT or path in ("/saas", "/saas/"):
+            return await call_next(request)
+        if any(path.startswith(p) for p in self.OPEN_PREFIXES):
+            return await call_next(request)
+        if path.startswith("/saas/") and path.lower().endswith(self.OPEN_STATIC_SUFFIXES):
+            return await call_next(request)
+        if path.startswith("/saas/admin"):
+            user = _current_user(request)
+            if not user or (user.get("role") or "") != "admin":
+                if path.startswith("/api/"):
+                    return JSONResponse({"detail": "Admin only"}, status_code=403)
+                return RedirectResponse(url="/saas/login.html?next=/saas/admin.html", status_code=302)
+            return await call_next(request)
+        if any(path.startswith(p) for p in self.OPEN_RUN_PREFIXES):
+            return await call_next(request)
+        # Internal cron
+        if path.startswith("/api/internal/"):
+            return await call_next(request)
+        user = _current_user(request)
+        if not user:
+            if path.startswith("/api/"):
+                return JSONResponse({"detail": "Sign in required", "reason": "auth"}, status_code=401)
+            return RedirectResponse(url=f"/saas/login.html?next={path}", status_code=302)
+        # App HTML is fine for any signed-in user; entitlement checked on generate
+        return await call_next(request)
+
+
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app):
+        super().__init__(app)
+        self._hits: dict[str, deque] = defaultdict(deque)
+
+    async def dispatch(self, request: Request, call_next):
+        if request.url.path in ("/api/generate", "/api/demo") and request.method in ("POST", "GET"):
+            ip = request.client.host if request.client else "unknown"
+            now = time.time()
+            q = self._hits[ip]
+            while q and now - q[0] > RATE_LIMIT_WINDOW_SEC:
+                q.popleft()
+            if len(q) >= RATE_LIMIT_MAX_GENERATE:
+                return JSONResponse(
+                    {"detail": "Too many requests. Try again in a minute."},
+                    status_code=429,
+                )
+            q.append(now)
+        return await call_next(request)
+
+
+app.add_middleware(RateLimitMiddleware)
+app.add_middleware(AuthMiddleware)
+
+app.mount("/saas", StaticFiles(directory=str(ROOT / "saas"), html=True), name="saas")
+
+
+@app.on_event("startup")
+def _startup():
+    """Migrations/admin seed must not block readiness — Railway healthchecks /health."""
+    import threading
+
+    def _boot():
+        try:
+            import auth_service
+
+            auth_service.bootstrap()
+            logger.info("Auth bootstrap complete")
+        except Exception:
+            logger.exception("Auth bootstrap failed")
+
+    threading.Thread(target=_boot, name="listlogic-bootstrap", daemon=True).start()
+
+
+def _save_html(report: dict, path: Path) -> Path:
+    import importlib
+    import interactive_html
+    import deck_html
+
+    importlib.reload(interactive_html)
+    importlib.reload(deck_html)
+    out = interactive_html.save_interactive_html(report, path)
+    deck_path = path.parent / "deck.html"
+    deck_html.save_deck_html(report, deck_path)
+    return out
+
+
+def _build_presentation(**kwargs):
+    import importlib
+    import presentation
+
+    importlib.reload(presentation)
+    return presentation.build_presentation(**kwargs)
+
+
+def _slug(value: str) -> str:
+    cleaned = re.sub(r"[^a-zA-Z0-9]+", "-", (value or "report").strip().lower()).strip("-")
+    return cleaned[:48] or "report"
+
+
+def _optional_float(value: Optional[str]) -> Optional[float]:
+    if value is None or str(value).strip() == "":
+        return None
+    return float(value)
+
+
+def _safe_run_id(run_id: str) -> str:
+    if not re.fullmatch(r"[A-Za-z0-9_-]{6,120}", run_id or ""):
+        raise HTTPException(404, "Run not found")
+    return run_id
+
+
+def _generate(
+    export_path: Path,
+    *,
+    address: str,
+    living_area: Optional[float],
+    beds: Optional[float],
+    baths: Optional[float],
+    year_built: Optional[int],
+    condition: str,
+    list_price: Optional[float],
+    mls_number: Optional[str],
+    city_filter: str,
+    area_name: str,
+    agent_name: str,
+    agent_phone: str,
+    agent_email: str,
+    brokerage: str,
+    brand_primary: str = "",
+    brand_accent: str = "",
+    logo_url: str = "",
+    market_notes: str = "",
+) -> dict:
+    defaults = dict(SUBJECT_2845_DEFAULTS) if "2845" in (address or "") and "13" in (address or "") else {}
+    overrides = {
+        "condition": condition or "average",
+        "living_area": living_area,
+        "beds": beds,
+        "baths": baths,
+        "year_built": year_built,
+        "list_price": list_price,
+    }
+    overrides = {k: v for k, v in overrides.items() if v is not None}
+
+    subject = resolve_subject(
+        str(export_path),
+        address=address or None,
+        mls_number=mls_number or None,
+        defaults=defaults or None,
+        overrides=overrides,
+    )
+    if living_area:
+        subject.living_area = float(living_area)
+
+    report = _build_presentation(
+        export_path=str(export_path),
+        subject=subject,
+        area_name=area_name or "Custom market",
+        city_filter=city_filter or "",
+        agent_name=agent_name or "Your Agent",
+        agent_phone=agent_phone or "",
+        agent_email=agent_email or "",
+        brokerage=brokerage or "",
+        market_notes=market_notes or "",
+    )
+    meta = report.setdefault("meta", {})
+    if brand_primary:
+        meta["brand_primary"] = brand_primary
+    if brand_accent:
+        meta["brand_accent"] = brand_accent
+    if logo_url:
+        meta["logo_url"] = logo_url
+    meta["city"] = city_filter or meta.get("city") or ""
+    meta["state"] = "CO"
+    meta["market_notes"] = market_notes or ""
+    meta["market_label"] = area_name or ""
+
+    run_id = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}-{_slug(address)}-{uuid.uuid4().hex[:8]}"
+    run_dir = OUTPUT_DIR / run_id
+    run_dir.mkdir(parents=True, exist_ok=True)
+
+    # Hosted listing photos: MLS disk cache → download into this run (Reef only on cache miss).
+    photo_map: dict = {}
+    try:
+        from reef_photos import enrich_report_photos, reef_enabled
+
+        if reef_enabled():
+            photo_map = enrich_report_photos(report, run_dir=run_dir, run_id=run_id)
+            meta["reef_photos"] = len([k for k, v in photo_map.items() if v])
+            meta["photos_hosted"] = True
+    except Exception:
+        logger.exception("ReefAPI photo enrichment failed")
+
+    if photo_map:
+        try:
+            _save_photo_map(run_dir, photo_map)
+        except Exception:
+            logger.exception("Failed to persist comp_photos.json for %s", run_id)
+
+    (run_dir / "presentation.json").write_text(
+        json.dumps(report, indent=2, default=str),
+        encoding="utf-8",
+    )
+    html_path = _save_html(report, run_dir / "presentation.html")
+
+    latest = ROOT / "output" / "presentation.html"
+    latest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(html_path, latest)
+    shutil.copyfile(run_dir / "presentation.json", ROOT / "output" / "presentation.json")
+    shutil.copyfile(html_path, ROOT / "presentation.html")
+    deck_src = run_dir / "deck.html"
+    if deck_src.exists():
+        shutil.copyfile(deck_src, ROOT / "output" / "deck.html")
+        shutil.copyfile(deck_src, ROOT / "deck.html")
+
+    # PDF seller packet (presentation.pdf aliases to same rich packet as story.pdf)
+    pdf_url = None
+    story_pdf_url = None
+    try:
+        from pdf_export import build_pdf, build_story_pdf
+
+        pdf_path = run_dir / "presentation.pdf"
+        build_pdf(
+            report,
+            pdf_path,
+            agent_name=agent_name or "Your Agent",
+            brokerage=brokerage or "",
+        )
+        shutil.copyfile(pdf_path, ROOT / "output" / "presentation.pdf")
+        pdf_url = f"/runs/{run_id}/pdf"
+
+        story_path = run_dir / "story.pdf"
+        build_story_pdf(
+            report,
+            story_path,
+            agent_name=agent_name or "Your Agent",
+            brokerage=brokerage or "",
+        )
+        shutil.copyfile(story_path, ROOT / "output" / "story.pdf")
+        story_pdf_url = f"/runs/{run_id}/story.pdf"
+    except Exception:
+        logger.exception("PDF export failed for run %s", run_id)
+
+    positioning = report.get("positioning") or {}
+    stats = report.get("stats") or {}
+    return {
+        "run_id": run_id,
+        "url": f"/runs/{run_id}/",
+        "share_url": f"/runs/{run_id}/",
+        "pdf_url": pdf_url,
+        "story_pdf_url": story_pdf_url,
+        "deck_url": f"/runs/{run_id}/deck.html",
+        "recommended_price": positioning.get("recommended_price"),
+        "price_low": positioning.get("price_low"),
+        "price_high": positioning.get("price_high"),
+        "months_of_inventory": stats.get("months_of_inventory"),
+        "active_count": report.get("active_count"),
+        "under_contract_count": report.get("under_contract_count"),
+        "subject": {
+            "address": subject.address,
+            "living_area": subject.living_area,
+            "beds": subject.beds,
+            "baths": subject.baths,
+            "year_built": subject.year_built,
+            "source": (subject.extra or {}).get("source"),
+        },
+    }
+
+
+@app.get("/", response_class=HTMLResponse)
+def home():
+    return RedirectResponse(url="/saas/")
+
+
+@app.get("/health")
+def health():
+    import db as database
+
+    return {
+        "ok": True,
+        "product": "ListLogic",
+        "auth": "session",
+        "db": database.health_info(),
+    }
+
+
+@app.get("/api/auth-status")
+def auth_status(request: Request):
+    import auth_service
+
+    user = _current_user(request)
+    if not user:
+        return {
+            "required": True,
+            "authenticated": False,
+            "user": None,
+            "entitlement": None,
+        }
+    ent = auth_service.entitlement(user)
+    return {
+        "required": True,
+        "authenticated": True,
+        "user": auth_service.public_user(user),
+        "entitlement": ent,
+    }
+
+
+@app.post("/api/signup")
+async def signup(request: Request):
+    import auth_service
+    import mailer
+
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(400, "Invalid JSON") from exc
+    try:
+        user = auth_service.create_user(
+            email=str(payload.get("email") or ""),
+            password=str(payload.get("password") or ""),
+            name=str(payload.get("name") or ""),
+            phone=str(payload.get("phone") or ""),
+            brokerage=str(payload.get("brokerage") or ""),
+            promo_code=str(payload.get("promo_code") or ""),
+            invite_token=str(payload.get("invite") or payload.get("invite_token") or ""),
+        )
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    token = auth_service.create_session(user["id"])
+    try:
+        mailer.send_welcome(user, auth_service.app_base_url())
+    except Exception:
+        logger.exception("Welcome email failed")
+    resp = JSONResponse({
+        "ok": True,
+        "user": auth_service.public_user(user),
+        "entitlement": auth_service.entitlement(user),
+    })
+    _set_session_cookie(resp, request, token)
+    return resp
+
+
+@app.post("/api/login")
+async def login(request: Request):
+    import auth_service
+
+    content_type = (request.headers.get("content-type") or "").lower()
+    email = ""
+    password = ""
+    if "application/json" in content_type:
+        try:
+            payload = await request.json()
+        except Exception as exc:
+            raise HTTPException(400, "Invalid JSON") from exc
+        email = str(payload.get("email") or "")
+        password = str(payload.get("password") or "")
+    else:
+        form = await request.form()
+        # Legacy access-code form field "token" no longer supported as primary login
+        email = str(form.get("email") or form.get("token") or "")
+        password = str(form.get("password") or "")
+        if form.get("token") and not form.get("password"):
+            raise HTTPException(
+                400,
+                "Access codes are retired. Create a free trial account or sign in with email.",
+            )
+    try:
+        user = auth_service.login_user(email, password)
+    except ValueError as exc:
+        raise HTTPException(401, str(exc)) from exc
+    token = auth_service.create_session(user["id"])
+    resp = JSONResponse({
+        "ok": True,
+        "user": auth_service.public_user(user),
+        "entitlement": auth_service.entitlement(user),
+    })
+    _set_session_cookie(resp, request, token)
+    return resp
+
+
+@app.post("/api/logout")
+async def logout(request: Request):
+    import auth_service
+
+    token = request.cookies.get(auth_service.SESSION_COOKIE)
+    auth_service.delete_session(token)
+    resp = JSONResponse({"ok": True})
+    _clear_session_cookie(resp)
+    return resp
+
+
+@app.get("/api/invite-info")
+def invite_info(token: str = ""):
+    import auth_service
+
+    if not token:
+        raise HTTPException(400, "Missing invite token")
+    info = auth_service.validate_invite(token)
+    if not info["ok"]:
+        raise HTTPException(404, info.get("error") or "Invite not found")
+    return {
+        "ok": True,
+        "email": info.get("email") or "",
+        "brokerage": info.get("brokerage") or "",
+        "trial_days": info.get("trial_days"),
+        "presentation_limit": info.get("presentation_limit"),
+    }
+
+
+@app.post("/api/feedback")
+async def submit_feedback(request: Request):
+    import auth_service
+    import mailer
+
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(400, "Invalid JSON") from exc
+    user = _current_user(request)
+    email = str(payload.get("email") or (user or {}).get("email") or "")
+    try:
+        result = auth_service.save_feedback(
+            message=str(payload.get("message") or ""),
+            category=str(payload.get("category") or "other"),
+            email=email,
+            user_id=(user or {}).get("id"),
+            page_url=str(payload.get("page_url") or ""),
+            user_agent=request.headers.get("user-agent") or "",
+        )
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    try:
+        mailer.send_feedback_notice({
+            "category": payload.get("category") or "other",
+            "email": email,
+            "user_id": (user or {}).get("id"),
+            "page_url": payload.get("page_url"),
+            "message": payload.get("message"),
+        })
+    except Exception:
+        logger.exception("Feedback email failed")
+    return result
+
+
+@app.post("/api/assistant/chat")
+async def assistant_chat(request: Request):
+    """Logged-in ListLogic AI help + feedback coach (OpenCode)."""
+    import auth_service
+    import assistant as ll_assistant
+
+    user = _require_user(request)
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(400, "Invalid JSON") from exc
+    messages = payload.get("messages") or []
+    if not isinstance(messages, list):
+        raise HTTPException(400, "messages must be a list")
+    result = ll_assistant.chat(
+        messages=messages,
+        user=auth_service.public_user(user),
+        page_url=str(payload.get("page_url") or ""),
+    )
+    # Auto-file feedback if model emitted a draft and client asked to commit
+    if payload.get("file_feedback") and result.get("feedback_draft"):
+        draft = result["feedback_draft"]
+        try:
+            filed = auth_service.save_feedback(
+                message=draft.get("message") or "",
+                category=draft.get("category") or "other",
+                email=user.get("email") or "",
+                user_id=user.get("id"),
+                page_url=str(payload.get("page_url") or ""),
+                user_agent=request.headers.get("user-agent") or "",
+            )
+            result["feedback_filed"] = filed
+            try:
+                import mailer
+
+                mailer.send_feedback_notice({
+                    "category": draft.get("category"),
+                    "email": user.get("email"),
+                    "user_id": user.get("id"),
+                    "page_url": payload.get("page_url"),
+                    "message": draft.get("message"),
+                })
+            except Exception:
+                logger.exception("Assistant feedback email failed")
+        except ValueError as exc:
+            result["feedback_error"] = str(exc)
+    return JSONResponse(result)
+
+
+def _ensure_sample_run() -> str:
+    """Build or reuse the public sample listing run (no trial credit)."""
+    run_dir = OUTPUT_DIR / SAMPLE_RUN_ID
+    html_path = run_dir / "presentation.html"
+    if html_path.exists():
+        return SAMPLE_RUN_ID
+    if not DEMO_EXPORT.exists():
+        raise HTTPException(404, "Sample export missing")
+    result = _generate(
+        DEMO_EXPORT,
+        address="2845 W 13th Street Greeley 80634",
+        living_area=2392.0,
+        beds=4.0,
+        baths=2.0,
+        year_built=1969,
+        condition="average",
+        list_price=None,
+        mls_number="1058539",
+        city_filter="Greeley",
+        area_name="West Greeley · similar homes",
+        market_notes="Public sample listing — start a free trial to run your own MLS export.",
+        agent_name="Adam Schwartz",
+        agent_phone="(970) 533-3990",
+        agent_email="adam@saahomes.com",
+        brokerage="Schwartz and Associates, Coldwell Banker Realty",
+        brand_primary="#0c3c6e",
+        brand_accent="#1a5f9e",
+        logo_url="",
+    )
+    # Normalize to stable sample id
+    src = OUTPUT_DIR / result["run_id"]
+    if src.exists() and src.resolve() != run_dir.resolve():
+        if run_dir.exists():
+            shutil.rmtree(run_dir, ignore_errors=True)
+        src.rename(run_dir)
+        # Fix internal copy of presentation if needed
+    return SAMPLE_RUN_ID
+
+
+@app.get("/demo")
+def demo_redirect():
+    run_id = _ensure_sample_run()
+    return RedirectResponse(url=f"/runs/{run_id}/?sample=1", status_code=302)
+
+
+@app.get("/api/demo")
+def api_demo():
+    run_id = _ensure_sample_run()
+    return {
+        "ok": True,
+        "run_id": run_id,
+        "url": f"/runs/{run_id}/?sample=1",
+        "sample": True,
+    }
+
+
+@app.get("/invite/{token}")
+def invite_redirect(token: str):
+    return RedirectResponse(url=f"/saas/signup.html?invite={token}", status_code=302)
+
+
+# —— Admin APIs ——
+
+@app.get("/api/admin/users")
+def admin_users(request: Request, q: str = ""):
+    import auth_service
+
+    _require_admin(request)
+    return {"users": auth_service.list_users(q=q)}
+
+
+@app.post("/api/admin/users/{user_id}")
+async def admin_user_update(user_id: str, request: Request):
+    import auth_service
+
+    _require_admin(request)
+    payload = await request.json()
+    clear_limit = bool(payload.get("clear_limit")) or (
+        "presentation_limit" in payload and payload.get("presentation_limit") is None and payload.get("status") == "active"
+    )
+    kwargs = {
+        "status": payload.get("status"),
+        "extend_days": payload.get("extend_days"),
+        "presentations_used": payload.get("presentations_used"),
+    }
+    if clear_limit:
+        import db as database
+        from auth_service import _iso
+        database.execute(
+            "UPDATE users SET presentation_limit = NULL, status = COALESCE(?, status), updated_at = ? WHERE id = ?",
+            (payload.get("status"), _iso(), user_id),
+        )
+        user = auth_service.public_user(auth_service.get_user_by_id(user_id))
+    else:
+        if payload.get("presentation_limit") is not None:
+            kwargs["presentation_limit"] = payload.get("presentation_limit")
+        user = auth_service.admin_update_user(user_id, **kwargs)
+    if not user:
+        raise HTTPException(404, "User not found")
+    return {"ok": True, "user": user}
+
+
+@app.get("/api/admin/promo-codes")
+def admin_promo_list(request: Request):
+    import auth_service
+
+    _require_admin(request)
+    return {"promo_codes": auth_service.list_promo_codes()}
+
+
+@app.post("/api/admin/promo-codes")
+async def admin_promo_create(request: Request):
+    import auth_service
+
+    _require_admin(request)
+    payload = await request.json()
+    try:
+        row = auth_service.create_promo_code(
+            code=str(payload.get("code") or ""),
+            label=str(payload.get("label") or ""),
+            trial_days=int(payload.get("trial_days") or auth_service.default_trial_days()),
+            presentation_limit=int(
+                payload.get("presentation_limit")
+                if payload.get("presentation_limit") is not None
+                else auth_service.default_presentation_limit()
+            ),
+            max_redemptions=payload.get("max_redemptions"),
+            notes=str(payload.get("notes") or ""),
+        )
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    return {"ok": True, "promo": row}
+
+
+@app.post("/api/admin/promo-codes/{promo_id}/active")
+async def admin_promo_active(promo_id: str, request: Request):
+    import auth_service
+
+    _require_admin(request)
+    payload = await request.json()
+    auth_service.set_promo_active(promo_id, bool(payload.get("active")))
+    return {"ok": True}
+
+
+@app.get("/api/admin/invites")
+def admin_invites(request: Request):
+    import auth_service
+
+    _require_admin(request)
+    return {"invites": auth_service.list_invites()}
+
+
+@app.post("/api/admin/invites")
+async def admin_invite_create(request: Request):
+    import auth_service
+
+    admin = _require_admin(request)
+    payload = await request.json()
+    row = auth_service.create_invite(
+        email=str(payload.get("email") or ""),
+        trial_days=int(payload.get("trial_days") or auth_service.default_trial_days()),
+        presentation_limit=int(
+            payload.get("presentation_limit")
+            if payload.get("presentation_limit") is not None
+            else auth_service.default_presentation_limit()
+        ),
+        brokerage=str(payload.get("brokerage") or ""),
+        max_uses=int(payload.get("max_uses") or 1),
+        expires_days=int(payload.get("expires_days") or 30),
+        created_by=admin["id"],
+    )
+    return {"ok": True, "invite": row}
+
+
+@app.get("/api/admin/feedback")
+def admin_feedback(request: Request, status: str = ""):
+    import auth_service
+
+    _require_admin(request)
+    return {"feedback": auth_service.list_feedback(status=status)}
+
+
+@app.post("/api/admin/feedback/{feedback_id}")
+async def admin_feedback_update(feedback_id: str, request: Request):
+    import auth_service
+
+    _require_admin(request)
+    payload = await request.json()
+    try:
+        auth_service.set_feedback_status(feedback_id, str(payload.get("status") or "seen"))
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    return {"ok": True}
+
+
+@app.post("/api/internal/trial-reminders")
+def trial_reminders(request: Request):
+    """Cron/manual: send 7-day reminders and expire past-due trials."""
+    import auth_service
+    import mailer
+
+    secret = (os.environ.get("CRON_SECRET") or os.environ.get("SESSION_SECRET") or "").strip()
+    hdr = (request.headers.get("X-Cron-Secret") or "").strip()
+    # Allow local/admin without secret when none configured
+    if secret and hdr != secret:
+        user = _current_user(request)
+        if not user or (user.get("role") or "") != "admin":
+            raise HTTPException(401, "Unauthorized")
+
+    base = auth_service.app_base_url()
+    reminded = 0
+    expired = 0
+    for user in auth_service.users_needing_trial_reminder(7):
+        if auth_service.event_already_sent(user["id"], "trial_reminder_email"):
+            continue
+        mailer.send_trial_reminder(user, base)
+        auth_service.log_event(user["id"], "trial_reminder_email", {})
+        reminded += 1
+    for user in auth_service.users_newly_expired():
+        if auth_service.event_already_sent(user["id"], "trial_expired_email"):
+            continue
+        mailer.send_trial_expired(user, base)
+        auth_service.log_event(user["id"], "trial_expired_email", {})
+        expired += 1
+    return {"ok": True, "reminded": reminded, "expired": expired}
+
+
+@app.get("/presentation.html")
+def demo_presentation(request: Request):
+    path = ROOT / "presentation.html"
+    if not path.exists():
+        raise HTTPException(404, "No presentation yet — generate one from /saas/app.html")
+    return FileResponse(path, media_type="text/html")
+
+
+@app.get("/deck.html")
+def demo_deck(request: Request):
+    path = ROOT / "deck.html"
+    if not path.exists():
+        path = ROOT / "output" / "deck.html"
+    if not path.exists():
+        raise HTTPException(404, "No deck yet — generate a presentation first")
+    return FileResponse(path, media_type="text/html")
+
+
+@app.get("/runs/{run_id}/")
+def view_run(run_id: str):
+    run_id = _safe_run_id(run_id)
+    path = OUTPUT_DIR / run_id / "presentation.html"
+    if not path.exists():
+        raise HTTPException(404, "Run not found")
+    return FileResponse(path, media_type="text/html")
+
+
+@app.get("/runs/{run_id}/deck.html")
+def view_run_deck(run_id: str):
+    run_id = _safe_run_id(run_id)
+    path = OUTPUT_DIR / run_id / "deck.html"
+    if not path.exists():
+        # Rebuild from presentation.json if interactive exists but deck was never saved
+        json_path = OUTPUT_DIR / run_id / "presentation.json"
+        if json_path.exists():
+            try:
+                import deck_html
+
+                report = json.loads(json_path.read_text(encoding="utf-8"))
+                deck_html.save_deck_html(report, path)
+            except Exception:
+                logger.exception("Failed to build deck for %s", run_id)
+        if not path.exists():
+            raise HTTPException(404, "Deck not found")
+    return FileResponse(path, media_type="text/html")
+
+
+@app.get("/runs/{run_id}/pdf")
+def view_run_pdf(run_id: str):
+    run_id = _safe_run_id(run_id)
+    path = OUTPUT_DIR / run_id / "presentation.pdf"
+    if not path.exists():
+        raise HTTPException(404, "PDF not found")
+    return FileResponse(
+        path,
+        media_type="application/pdf",
+        filename=f"ListLogic-{run_id}.pdf",
+    )
+
+
+@app.get("/runs/{run_id}/story.pdf")
+def view_run_story_pdf(run_id: str):
+    run_id = _safe_run_id(run_id)
+    path = OUTPUT_DIR / run_id / "story.pdf"
+    if not path.exists():
+        # Build on demand from saved JSON if missing
+        json_path = OUTPUT_DIR / run_id / "presentation.json"
+        if not json_path.exists():
+            raise HTTPException(404, "Story PDF not found")
+        try:
+            from pdf_export import build_story_pdf
+            report = json.loads(json_path.read_text(encoding="utf-8"))
+            meta = report.get("meta") or {}
+            build_story_pdf(
+                report,
+                path,
+                agent_name=meta.get("agent_name") or "",
+                brokerage=meta.get("brokerage") or "",
+            )
+        except Exception as exc:
+            raise HTTPException(500, "Could not build story PDF") from exc
+    return FileResponse(
+        path,
+        media_type="application/pdf",
+        filename=f"ListLogic-story-{run_id}.pdf",
+    )
+
+
+def _refresh_run_story_pdf(report: dict, run_dir: Path) -> None:
+    try:
+        from pdf_export import build_story_pdf
+        meta = report.get("meta") or {}
+        build_story_pdf(
+            report,
+            run_dir / "story.pdf",
+            agent_name=meta.get("agent_name") or "",
+            brokerage=meta.get("brokerage") or "",
+        )
+    except Exception:
+        logger.exception("story.pdf refresh failed for %s", run_dir.name)
+
+
+@app.post("/api/runs/{run_id}/ai-seller-story")
+def ai_seller_story(run_id: str):
+    """Regenerate seller-facing bottom line + advantages + watch-outs."""
+    run_id = _safe_run_id(run_id)
+    run_dir = OUTPUT_DIR / run_id
+    json_path = run_dir / "presentation.json"
+    if not json_path.exists():
+        raise HTTPException(404, "Run not found")
+    try:
+        report = json.loads(json_path.read_text(encoding="utf-8"))
+        from llm_narrative import NarrativeEngine, regenerate_seller_story
+
+        engine = NarrativeEngine.auto()
+        report = regenerate_seller_story(report, engine)
+        json_path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+        _refresh_run_story_pdf(report, run_dir)
+
+        pos = report.get("positioning") or {}
+        return {
+            "llm_enhanced": bool(report.get("llm_enhanced")),
+            "llm_provider": report.get("llm_provider"),
+            "bl": report.get("executive_summary") or "",
+            "adv": "\n".join(pos.get("advantages") or []),
+            "risk": "\n".join(pos.get("risks") or []),
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(500, f"AI seller story failed: {exc}") from exc
+
+
+@app.post("/api/runs/{run_id}/ai-coach")
+def ai_coach_notes(run_id: str):
+    """Regenerate private coach notes only."""
+    run_id = _safe_run_id(run_id)
+    run_dir = OUTPUT_DIR / run_id
+    json_path = run_dir / "presentation.json"
+    if not json_path.exists():
+        raise HTTPException(404, "Run not found")
+    try:
+        report = json.loads(json_path.read_text(encoding="utf-8"))
+        from llm_narrative import NarrativeEngine, regenerate_coach_notes
+
+        engine = NarrativeEngine.auto()
+        report = regenerate_coach_notes(report, engine)
+        json_path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+
+        cards = (report.get("story") or {}).get("objection_cards") or []
+        obj_lines = []
+        for c in cards:
+            title = str(c.get("title") or "").replace("|", "/")
+            body = str(c.get("body") or "").replace("|", "/")
+            obj_lines.append(f"{title}|{body}")
+        return {
+            "llm_enhanced": bool(report.get("llm_enhanced")),
+            "llm_provider": report.get("llm_provider"),
+            "obj": "\n".join(obj_lines),
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(500, f"AI coach failed: {exc}") from exc
+
+
+@app.get("/runs/{run_id}/json")
+def view_run_json(run_id: str):
+    run_id = _safe_run_id(run_id)
+    path = OUTPUT_DIR / run_id / "presentation.json"
+    if not path.exists():
+        raise HTTPException(404, "Run not found")
+    return FileResponse(path, media_type="application/json")
+
+
+@app.post("/api/runs/{run_id}/edits")
+async def save_run_edits(run_id: str, request: Request):
+    """Persist Agent Tools overrides alongside the run."""
+    run_id = _safe_run_id(run_id)
+    run_dir = OUTPUT_DIR / run_id
+    if not run_dir.exists():
+        raise HTTPException(404, "Run not found")
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(400, "Invalid JSON") from exc
+    # Sanitize free-text fields
+    for key in ("bl", "adv", "risk", "obj", "name"):
+        if key in payload and isinstance(payload[key], str):
+            payload[key] = html_lib.escape(payload[key])
+    if isinstance(payload.get("adv"), list):
+        payload["adv"] = [html_lib.escape(str(x)) for x in payload["adv"]]
+    if isinstance(payload.get("risk"), list):
+        payload["risk"] = [html_lib.escape(str(x)) for x in payload["risk"]]
+    (run_dir / "edits.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    return {"ok": True}
+
+
+@app.get("/api/runs/{run_id}/edits")
+def load_run_edits(run_id: str):
+    run_id = _safe_run_id(run_id)
+    path = OUTPUT_DIR / run_id / "edits.json"
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+@app.post("/api/runs/{run_id}/scenarios")
+async def save_run_scenario(run_id: str, request: Request):
+    """Append a named appointment scenario (seller number / rating snapshot)."""
+    run_id = _safe_run_id(run_id)
+    run_dir = OUTPUT_DIR / run_id
+    if not run_dir.exists():
+        raise HTTPException(404, "Run not found")
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(400, "Invalid JSON") from exc
+    if isinstance(payload.get("name"), str):
+        payload["name"] = html_lib.escape(payload["name"])[:120]
+    path = run_dir / "scenarios.json"
+    data = {"scenarios": []}
+    if path.exists():
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            data = {"scenarios": []}
+    scenarios = data.get("scenarios") or []
+    scenarios.insert(0, payload)
+    data["scenarios"] = scenarios[:40]
+    path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    return {"ok": True, "count": len(data["scenarios"])}
+
+
+@app.get("/api/runs/{run_id}/scenarios")
+def load_run_scenarios(run_id: str):
+    run_id = _safe_run_id(run_id)
+    path = OUTPUT_DIR / run_id / "scenarios.json"
+    if not path.exists():
+        return {"scenarios": []}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _safe_mls(mls: str) -> str:
+    cleaned = re.sub(r"[^A-Za-z0-9_-]+", "", (mls or "").strip())[:40]
+    if not cleaned:
+        raise HTTPException(400, "Invalid MLS number")
+    return cleaned
+
+
+# Allow a reserved key for the subject home photo in the same photo map.
+SUBJECT_PHOTO_MLS = "__subject__"
+
+
+def _photo_map_path(run_dir: Path) -> Path:
+    return run_dir / "comp_photos.json"
+
+
+def _load_photo_map(run_dir: Path) -> dict:
+    path = _photo_map_path(run_dir)
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def _save_photo_map(run_dir: Path, data: dict) -> None:
+    _photo_map_path(run_dir).write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+
+@app.post("/api/runs/{run_id}/comp-photos/fetch")
+def fetch_run_comp_photos(run_id: str):
+    """Backfill Zillow listing photos for an existing run via ReefAPI."""
+    run_id = _safe_run_id(run_id)
+    run_dir = OUTPUT_DIR / run_id
+    json_path = run_dir / "presentation.json"
+    if not json_path.exists():
+        raise HTTPException(404, "Run not found")
+    try:
+        from reef_photos import enrich_report_photos, reef_enabled
+    except Exception as exc:
+        raise HTTPException(500, f"Photo module unavailable: {exc}") from exc
+    if not reef_enabled():
+        raise HTTPException(400, "REEF_API_KEY is not configured on this service")
+    try:
+        report = json.loads(json_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise HTTPException(500, "Invalid presentation.json") from exc
+    existing = _load_photo_map(run_dir)
+    # Only fetch misses — enrich skips /runs/ URLs and uses MLS disk cache.
+    photo_map = enrich_report_photos(report, run_dir=run_dir, run_id=run_id)
+    merged = {**existing, **{k: v for k, v in photo_map.items() if v}}
+    _save_photo_map(run_dir, merged)
+    json_path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+    try:
+        _save_html(report, run_dir / "presentation.html")
+    except Exception:
+        logger.exception("Failed to rewrite HTML after photo fetch for %s", run_id)
+    return {"ok": True, "photos": merged, "count": len([v for v in merged.values() if v])}
+
+
+@app.get("/api/runs/{run_id}/comp-photos")
+def list_comp_photos(run_id: str):
+    run_id = _safe_run_id(run_id)
+    run_dir = OUTPUT_DIR / run_id
+    if not run_dir.exists():
+        raise HTTPException(404, "Run not found")
+    return {"photos": _load_photo_map(run_dir)}
+
+
+@app.post("/api/runs/{run_id}/comp-photos")
+async def set_comp_photo_url(run_id: str, request: Request):
+    """Save a remote/listing photo URL for an MLS number (agent paste from Matrix)."""
+    run_id = _safe_run_id(run_id)
+    run_dir = OUTPUT_DIR / run_id
+    if not run_dir.exists():
+        raise HTTPException(404, "Run not found")
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(400, "Invalid JSON") from exc
+    mls = _safe_mls(str(payload.get("mls") or ""))
+    url = str(payload.get("url") or "").strip()
+    if url and not (url.startswith("http://") or url.startswith("https://") or url.startswith(f"/runs/{run_id}/photos/")):
+        raise HTTPException(400, "Photo URL must be http(s) or a run photo path")
+    photos = _load_photo_map(run_dir)
+    if not url:
+        photos.pop(mls, None)
+    else:
+        photos[mls] = url[:2000]
+    _save_photo_map(run_dir, photos)
+    return {"ok": True, "mls": mls, "url": photos.get(mls, "")}
+
+
+@app.post("/api/runs/{run_id}/comp-photos/{mls}/upload")
+async def upload_comp_photo(run_id: str, mls: str, file: UploadFile = File(...)):
+    """Upload a listing photo file for a comparable (from MLS Matrix download)."""
+    run_id = _safe_run_id(run_id)
+    mls = _safe_mls(mls)
+    run_dir = OUTPUT_DIR / run_id
+    if not run_dir.exists():
+        raise HTTPException(404, "Run not found")
+    content_type = (file.content_type or "").lower()
+    ext = {
+        "image/jpeg": ".jpg",
+        "image/jpg": ".jpg",
+        "image/png": ".png",
+        "image/webp": ".webp",
+        "image/gif": ".gif",
+    }.get(content_type)
+    if not ext:
+        name = (file.filename or "").lower()
+        if name.endswith((".jpg", ".jpeg")):
+            ext = ".jpg"
+        elif name.endswith(".png"):
+            ext = ".png"
+        elif name.endswith(".webp"):
+            ext = ".webp"
+        else:
+            raise HTTPException(400, "Upload a JPG, PNG, or WebP photo")
+    raw = await file.read()
+    if len(raw) > 8 * 1024 * 1024:
+        raise HTTPException(400, "Photo too large (max 8MB)")
+    photos_dir = run_dir / "photos"
+    photos_dir.mkdir(parents=True, exist_ok=True)
+    # Clear prior extensions for this MLS
+    for old in photos_dir.glob(f"{mls}.*"):
+        try:
+            old.unlink()
+        except OSError:
+            pass
+    dest = photos_dir / f"{mls}{ext}"
+    dest.write_bytes(raw)
+    url = f"/runs/{run_id}/photos/{mls}{ext}"
+    photos = _load_photo_map(run_dir)
+    photos[mls] = url
+    _save_photo_map(run_dir, photos)
+    return {"ok": True, "mls": mls, "url": url}
+
+
+@app.get("/runs/{run_id}/photos/{filename}")
+def serve_comp_photo(run_id: str, filename: str):
+    run_id = _safe_run_id(run_id)
+    safe_name = Path(filename).name
+    if not re.match(r"^[A-Za-z0-9_-]+\.(jpg|jpeg|png|webp|gif)$", safe_name, re.I):
+        raise HTTPException(400, "Invalid photo filename")
+    path = OUTPUT_DIR / run_id / "photos" / safe_name
+    if not path.exists():
+        raise HTTPException(404, "Photo not found")
+    return FileResponse(path)
+
+
+@app.get("/api/demo-export")
+def demo_export_info():
+    return {
+        "available": DEMO_EXPORT.exists(),
+        "filename": DEMO_EXPORT.name if DEMO_EXPORT.exists() else None,
+    }
+
+
+@app.post("/api/generate")
+async def generate(
+    request: Request,
+    export_file: Optional[UploadFile] = File(None),
+    use_sample_export: str = Form("false"),
+    address: str = Form(...),
+    living_area: Optional[str] = Form(None),
+    beds: Optional[str] = Form(None),
+    baths: Optional[str] = Form(None),
+    year_built: Optional[str] = Form(None),
+    condition: str = Form("average"),
+    list_price: Optional[str] = Form(None),
+    mls_number: Optional[str] = Form(None),
+    city_filter: str = Form(""),
+    area_name: str = Form("Custom market"),
+    market_notes: str = Form(""),
+    agent_name: str = Form("Adam Schwartz"),
+    agent_phone: str = Form("(970) 533-3990"),
+    agent_email: str = Form("adam@saahomes.com"),
+    brokerage: str = Form("Schwartz and Associates, Coldwell Banker Realty"),
+    brand_primary: str = Form("#0c3c6e"),
+    brand_accent: str = Form("#1a5f9e"),
+    logo: Optional[UploadFile] = File(None),
+):
+    import auth_service
+
+    user = _require_user(request)
+    ent = auth_service.entitlement(user)
+    if not ent["ok"]:
+        raise HTTPException(
+            status_code=402,
+            detail={
+                "message": "Trial ended — pick a plan to keep generating.",
+                "reason": ent.get("reason") or "trial_expired",
+                "entitlement": ent,
+            },
+        )
+
+    use_sample = use_sample_export.lower() in {"1", "true", "yes", "on"}
+    export_path: Path
+    logo_url = ""
+
+    if logo and logo.filename:
+        raw = await logo.read()
+        if len(raw) > 2 * 1024 * 1024:
+            raise HTTPException(400, "Logo must be under 2MB")
+        suffix = Path(logo.filename).suffix.lower()
+        if suffix not in {".png", ".jpg", ".jpeg", ".webp", ".svg"}:
+            raise HTTPException(400, "Logo must be png, jpg, webp, or svg")
+        logo_name = f"{uuid.uuid4().hex}{suffix}"
+        logo_path = BRANDING_DIR / logo_name
+        logo_path.write_bytes(raw)
+        logo_url = f"/branding/{logo_name}"
+
+    if use_sample:
+        if not DEMO_EXPORT.exists():
+            raise HTTPException(400, "Sample export missing")
+        export_path = DEMO_EXPORT
+    else:
+        if not export_file or not export_file.filename:
+            raise HTTPException(400, "Upload an MLS export or enable the sample export")
+        suffix = Path(export_file.filename).suffix.lower() or ".txt"
+        if suffix not in {".txt", ".csv", ".tsv"}:
+            raise HTTPException(400, "Export must be .txt, .csv, or .tsv")
+        content = await export_file.read()
+        if len(content) > MAX_UPLOAD_BYTES:
+            raise HTTPException(400, "Export file must be 15MB or smaller")
+        if not content.strip():
+            raise HTTPException(400, "Uploaded file is empty")
+        # Basic text check
+        try:
+            sample = content[:4000].decode("utf-8", errors="strict")
+        except UnicodeDecodeError as exc:
+            raise HTTPException(400, "Export must be a text file") from exc
+        if "|" not in sample and "\t" not in sample and "," not in sample:
+            raise HTTPException(400, "Export does not look like a delimited MLS file")
+        export_path = UPLOAD_DIR / f"{uuid.uuid4().hex}{suffix}"
+        export_path.write_bytes(content)
+
+    try:
+        result = _generate(
+            export_path,
+            address=address,
+            living_area=_optional_float(living_area),
+            beds=_optional_float(beds),
+            baths=_optional_float(baths),
+            year_built=int(float(year_built)) if year_built not in (None, "") else None,
+            condition=condition,
+            list_price=_optional_float(list_price),
+            mls_number=mls_number.strip() if mls_number else None,
+            city_filter=city_filter,
+            area_name=area_name,
+            market_notes=market_notes,
+            agent_name=agent_name,
+            agent_phone=agent_phone,
+            agent_email=agent_email,
+            brokerage=brokerage,
+            brand_primary=brand_primary.strip(),
+            brand_accent=brand_accent.strip(),
+            logo_url=logo_url,
+        )
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Generation failed")
+        raise HTTPException(status_code=500, detail="Generation failed. Check the export and try again.") from None
+    finally:
+        if not use_sample and export_path.exists() and export_path.parent == UPLOAD_DIR:
+            try:
+                export_path.unlink()
+            except OSError:
+                pass
+
+    after = auth_service.increment_presentation(user["id"])
+    result = dict(result)
+    result["entitlement"] = after
+    result["access_remaining"] = after.get("remaining")
+    return JSONResponse(result)
+
+
+@app.get("/branding/{filename}")
+def branding_file(filename: str):
+    if not re.fullmatch(r"[A-Za-z0-9._-]+", filename or ""):
+        raise HTTPException(404, "Not found")
+    path = BRANDING_DIR / filename
+    if not path.exists():
+        raise HTTPException(404, "Not found")
+    return FileResponse(path)
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    port = int(os.environ.get("PORT", "8787"))
+    uvicorn.run("server:app", host="0.0.0.0", port=port, reload=False)
