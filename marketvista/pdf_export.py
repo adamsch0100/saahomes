@@ -68,12 +68,18 @@ def _photo_bytes(url: str, timeout: int = 20, base_dir: Path | None = None) -> b
                 if not (data[:3] == b"\xff\xd8\xff" or data[:8].startswith(b"\x89PNG") or data[:4] == b"RIFF"):
                     return None
             return data
-        # Local relative path (e.g. photos/1058635.jpg)
+        # Local relative path (e.g. photos/1058635.jpg or /runs/{id}/photos/1058635.jpg)
         local = Path(url)
         if not local.is_absolute():
             candidates = []
             if base_dir:
                 candidates.append(Path(base_dir) / local)
+                # Handle /runs/{run_id}/photos/... style URLs
+                parts = [p for p in local.parts if p not in ("\\", "/")]
+                if len(parts) >= 3 and parts[0] == "runs":
+                    candidates.append(Path(base_dir) / Path(*parts[2:]))
+                elif len(parts) >= 2 and parts[0] == "photos":
+                    candidates.append(Path(base_dir) / Path(*parts))
             candidates.append(Path(__file__).resolve().parent / local)
             candidates.append(Path.cwd() / local)
             for cand in candidates:
