@@ -1106,7 +1106,48 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
   #spine-strategy .co-stats{{grid-template-columns:repeat(3,minmax(0,1fr))}}
   .kpis,.kpis.market-kpis,.kpis.yoy-kpis{{grid-template-columns:repeat(2,1fr)}}
 }}
-@media print{{.fab,.agent-chip,.agent-panel,.panel-overlay,.view-modes,.top-bar,.spine,.listing-drawer,.listing-overlay{{display:none!important}}}}
+@media print{{
+  .fab,.agent-chip,.agent-panel,.panel-overlay,.view-modes,.top-bar,.spine,
+  .listing-drawer,.listing-overlay,.photo-modal,.controls,.scatter-series,
+  #spine-fulldata,.share-bar,.two-col,.price-controls .slider-wrap,
+  .slider-track-wrap,input[type=range],.slider-scale{{display:none!important}}
+  html,body{{background:#fff!important}}
+  .page{{max-width:none;padding:0.35in;margin:0}}
+  .hero{{
+    border-radius:0;box-shadow:none;margin:0 0 12px;page-break-after:always;
+    break-after:page;-webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }}
+  .core-facts,.section{{
+    box-shadow:none!important;border:1px solid #e5e7eb;border-radius:12px;
+    page-break-before:always;break-before:page;page-break-inside:avoid;
+    margin:0 0 10px;padding:18px 20px;
+  }}
+  .core-facts{{page-break-before:auto;break-before:auto}}
+  #spine-supply[style*="display:none"]{{display:none!important;page-break-before:avoid!important}}
+  .section:hover{{box-shadow:none!important}}
+  .chart-box canvas,.chart-box img.print-chart{{max-width:100%!important;height:auto!important}}
+  .chart-box{{height:auto!important;min-height:0!important}}
+  .chart-box.scatter-tall{{min-height:0!important;height:auto!important}}
+  a[href]::after{{content:none!important}}
+  .verdict,.whatif-grid,.comp-grid,.cf-grid,.supply-wait,.market-duo,.wyw{{
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }}
+  .whatif-grid{{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(110px,1fr))!important;overflow:visible!important}}
+  .price-controls{{display:block!important}}
+  #spine-strategy{{page-break-inside:auto}}
+  #spine-strategy .verdict{{page-break-inside:avoid}}
+}}
+body.print-leavebehind .fab,
+body.print-leavebehind .agent-chip,
+body.print-leavebehind .agent-panel,
+body.print-leavebehind .panel-overlay,
+body.print-leavebehind .top-bar,
+body.print-leavebehind .spine,
+body.print-leavebehind .listing-drawer,
+body.print-leavebehind .listing-overlay,
+body.print-leavebehind #spine-fulldata,
+body.print-leavebehind .two-col{{display:none!important}}
+body.print-leavebehind .page{{padding-bottom:24px}}
 </style>
 </head>
 <body>
@@ -1124,9 +1165,10 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
     <div class="view-modes" id="viewModes">
       <span class="vm-label">Presentation</span>
       <span class="vm on">Live story</span>
-      <a id="pdfLink" href="#" style="display:none">Seller packet</a>
-      <a id="storyPdfLink" href="#" style="display:none">Seller packet</a>
-      <a id="deckLink" href="#" style="display:none">Listing flipbook</a>
+      <button type="button" class="vm" id="btnPrintLeavebehind" title="Print the Live Story — one section per page">Print leave-behind</button>
+      <a id="deckLink" href="#" style="display:none">Flipbook</a>
+      <a id="pdfLink" href="#" style="display:none">PDF (legacy)</a>
+      <a id="storyPdfLink" href="#" style="display:none">PDF (legacy)</a>
       <button type="button" class="vm" id="btnCopyShare" style="display:none">Share with client</button>
       <span class="vm-status" id="shareStatus"></span>
     </div>
@@ -1562,7 +1604,7 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
     </div>
     <div class="panel-pane" id="pane-story" role="tabpanel">
       <span class="panel-pill">Seller-facing</span>
-      <p class="pane-lead">Bottom line, advantages, and watch-outs show in Price it and the leave-behind.</p>
+      <p class="pane-lead">Bottom line, advantages, and watch-outs show in Price it. Use <strong>Print leave-behind</strong> for a page-per-section print of this Live Story.</p>
       <div class="field">
         <label for="editBL">Bottom line</label>
         <textarea id="editBL" class="tall">{exec_sum}</textarea>
@@ -1658,9 +1700,56 @@ const navy = '{brand_primary}', orange = '#c2410c';
   const story = document.getElementById('storyPdfLink');
   const deck = document.getElementById('deckLink');
   const copyBtn = document.getElementById('btnCopyShare');
+  const printBtn = document.getElementById('btnPrintLeavebehind');
+
+  function snapshotChartsForPrint() {{
+    document.querySelectorAll('.chart-box canvas').forEach(canvas => {{
+      try {{
+        if (!canvas.width || !canvas.height) return;
+        const existing = canvas.parentNode && canvas.parentNode.querySelector('img.print-chart');
+        if (existing) existing.remove();
+        const img = document.createElement('img');
+        img.className = 'print-chart';
+        img.alt = '';
+        img.src = canvas.toDataURL('image/png');
+        img.style.width = '100%';
+        img.style.height = 'auto';
+        img.style.display = 'none';
+        canvas.parentNode.appendChild(img);
+        canvas.dataset.printHidden = '1';
+        canvas.style.display = 'none';
+        img.style.display = 'block';
+      }} catch (e) {{}}
+    }});
+  }}
+
+  function restoreChartsAfterPrint() {{
+    document.querySelectorAll('.chart-box canvas[data-print-hidden="1"]').forEach(canvas => {{
+      canvas.style.display = '';
+      delete canvas.dataset.printHidden;
+    }});
+    document.querySelectorAll('img.print-chart').forEach(img => img.remove());
+    document.body.classList.remove('print-leavebehind');
+  }}
+
+  function printLeavebehind() {{
+    document.body.classList.add('print-leavebehind');
+    snapshotChartsForPrint();
+    const st = document.getElementById('shareStatus');
+    if (st) st.textContent = 'Printing Live Story…';
+    setTimeout(() => window.print(), 80);
+  }}
+
+  if (printBtn) printBtn.onclick = printLeavebehind;
+  window.addEventListener('beforeprint', () => {{
+    document.body.classList.add('print-leavebehind');
+    snapshotChartsForPrint();
+  }});
+  window.addEventListener('afterprint', restoreChartsAfterPrint);
+
   if (RUN_ID) {{
     if (pdf) pdf.style.display = 'none';
-    if (story) {{ story.href = '/runs/' + RUN_ID + '/story.pdf'; story.style.display = ''; }}
+    if (story) story.style.display = 'none';
     if (deck) {{ deck.href = '/runs/' + RUN_ID + '/deck.html'; deck.style.display = ''; }}
     if (copyBtn) {{
       copyBtn.style.display = '';
@@ -1685,9 +1774,17 @@ const navy = '{brand_primary}', orange = '#c2410c';
     }}
   }} else {{
     if (pdf) pdf.style.display = 'none';
-    if (story) {{ story.href = 'story.pdf'; story.style.display = ''; }}
+    if (story) story.style.display = 'none';
     if (deck) {{ deck.href = 'deck.html'; deck.style.display = ''; }}
   }}
+
+  // Deep-link: ?print=1 opens print dialog for leave-behind
+  try {{
+    const params = new URLSearchParams(location.search);
+    if (params.get('print') === '1' || location.hash === '#print') {{
+      setTimeout(printLeavebehind, 600);
+    }}
+  }} catch (e) {{}}
 }})();
 
 if (RUN_ID) {{
