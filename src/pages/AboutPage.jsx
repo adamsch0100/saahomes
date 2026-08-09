@@ -1,5 +1,6 @@
 import React from "react";
 import SEO from "../components/SEO";
+import { buildPersonSchemas } from "../utils/seoConstants.js";
 
 export default function AboutPage() {
   return (
@@ -10,6 +11,7 @@ export default function AboutPage() {
         keywords="about SAA Homes, Adam Schwartz realtor, Mandi Schwartz, Fort Collins real estate experts, experienced realtors Fort Collins, Coldwell Banker agents, 20 years experience"
         canonical="https://saahomes.com/about-us/"
         includeLocalBusiness={true}
+        jsonLd={buildPersonSchemas()}
       />
       
       {/* Hero Section */}

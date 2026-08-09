@@ -249,12 +249,12 @@ Cross-link these cities in blog posts and area page "Nearby communities" section
 - `northern-colorado-market-update-june-2026`
 
 **Gap topics to pipeline** (blog-pipeline skill):
-- Selling in Windsor / Loveland / Greeley (city-specific seller guides)
-- Timnath + Severance new construction buyer guide
-- Carbon Valley (Firestone/Frederick) affordability guide
-- Fort Collins vs Loveland vs Windsor comparison
-- Weld County vs Larimer County buyer guide
-- Monthly market snapshot (recurring template)
+- ~~Selling in Windsor / Loveland / Greeley (city-specific seller guides)~~ → shipped 2026-06-30
+- ~~Timnath + Severance new construction buyer guide~~ → shipped
+- ~~Carbon Valley (Firestone/Frederick) affordability guide~~ → shipped
+- ~~Fort Collins vs Loveland vs Windsor comparison~~ → shipped
+- ~~Weld County vs Larimer County buyer guide~~ → shipped
+- Monthly market snapshot (recurring template) — `blog-pipeline` cron + `LATEST_MARKET_UPDATE_SLUG`
 - Luxury home buying guide Northern Colorado
 - Fort Collins luxury neighborhoods guide
 - Luxury vs standard real estate Northern Colorado

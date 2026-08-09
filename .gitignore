@@ -47,6 +47,23 @@ coverage/
 *.temp
 .cache/
 
+# MarketVista local Python env / generated output
+marketvista/.venv/
+marketvista/venv/
+marketvista/output/
+marketvista/uploads/
+marketvista/__pycache__/
+marketvista/**/__pycache__/
+marketvista/.env
+marketvista/.beta_token_local.txt
+marketvista/presentation.html
+marketvista/presentation.json
+marketvista/presentation.pdf
+marketvista/presentation_data.json
+marketvista-handoff-extracted/
+marketvista-handoff.zip
+
+
 # Browser logs
 browser-logs/
 

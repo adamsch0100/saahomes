@@ -685,6 +685,261 @@ export const blogPosts = [
     ],
   },
   {
+    slug: 'selling-a-home-in-windsor-colorado',
+    title: 'Selling a Home in Windsor, Colorado: Pricing, Timing, and Marketing Tips',
+    excerpt: 'What Windsor sellers need to know about Northern Colorado pricing, buyer demand, and how to stand out in a competitive Larimer County market.',
+    date: '2026-06-28',
+    category: 'Seller Tips',
+    image: '/images/Windsor-CO-Area-Guide.jpg',
+    readTime: '7 min read',
+    sections: [
+      {
+        heading: 'Why Windsor sellers need a local strategy',
+        paragraphs: [
+          'Windsor sits between Fort Collins and Greeley with strong family demand, newer neighborhoods, and buyers comparing Larimer County schools against Weld County affordability nearby.',
+          'Selling in Windsor is not the same as selling in Fort Collins or Loveland. Neighborhoods near Water Valley, Pelican Lakes, and downtown Windsor each attract different buyer profiles and price sensitivities.',
+        ],
+      },
+      {
+        heading: 'Pricing and preparation',
+        paragraphs: [
+          'Overpricing remains the top reason Windsor listings sit. Use recent comparable sales within your subdivision — not county-wide averages — and launch with professional photos and clean staging.',
+          'Sellers who address inspection items upfront and disclose HOA details clearly reduce renegotiation risk in Windsor\'s balanced market.',
+        ],
+      },
+      {
+        heading: 'Marketing that reaches relocating buyers',
+        paragraphs: [
+          'Many Windsor buyers search from out of state. Strong online presentation, virtual tour options, and clear school and commute information drive showing activity.',
+          'Schwartz and Associates lists Windsor homes with targeted digital marketing and local expertise across Northern Colorado.',
+        ],
+        relatedLinks: [
+          { title: 'Windsor area guide', href: '/northern-colorado-areas/windsor/', description: 'Homes for sale & local info' },
+          { title: 'Free market report', href: '/for-sellers/', description: 'Windsor pricing snapshot' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'selling-a-home-in-loveland-colorado',
+    title: 'Selling a Home in Loveland, Colorado: Market Insights for Larimer County Sellers',
+    excerpt: 'Loveland seller guide — median price trends, buyer demand, and how to maximize net proceeds when listing in Northern Colorado.',
+    date: '2026-06-28',
+    category: 'Seller Tips',
+    image: '/images/Loveland-CO-Area-Guide.jpg',
+    readTime: '7 min read',
+    sections: [
+      {
+        heading: 'Loveland market overview',
+        paragraphs: [
+          'Loveland offers a balanced buyer-seller environment with a median sale price near $500,000 in 2026 — attractive to first-time and move-up buyers who find Fort Collins pricing stretched.',
+          'Inventory varies by price band. Entry-level and well-updated homes often receive multiple offers; luxury and unique properties need sharper pricing and longer marketing timelines.',
+        ],
+      },
+      {
+        heading: 'Neighborhood-level pricing matters',
+        paragraphs: [
+          'West Loveland, Centerra, and established east-side neighborhoods behave differently. Your list price should reflect recent closed sales within a half-mile — not broad Larimer County data.',
+          'Days on market increase quickly when sellers anchor to peak-year Zestimates instead of current buyer appetite.',
+        ],
+      },
+      {
+        heading: 'Next steps for Loveland sellers',
+        paragraphs: [
+          'Request a free Loveland market report from SAA Homes for a customized pricing and marketing plan. We help sellers from list prep through closing across Larimer County.',
+        ],
+        relatedLinks: [
+          { title: 'Loveland area guide', href: '/northern-colorado-areas/loveland/', description: 'Local buyer & seller resource' },
+          { title: 'How to sell fast', href: '/blog/how-to-sell-your-home-fast/', description: 'Northern Colorado seller strategies' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'selling-a-home-in-greeley-colorado',
+    title: 'Selling a Home in Greeley, Colorado: Weld County Seller Guide',
+    excerpt: 'Greeley and Evans sellers: understand Weld County buyer demand, pricing bands, and marketing strategies that reduce days on market.',
+    date: '2026-06-28',
+    category: 'Seller Tips',
+    image: '/images/Area-Guide-for-Greeley-CO.jpg',
+    readTime: '7 min read',
+    sections: [
+      {
+        heading: 'Greeley seller advantages',
+        paragraphs: [
+          'Greeley anchors Weld County with University of Northern Colorado employment, healthcare, and agriculture-adjacent industries. Buyers often choose Greeley and Evans for value relative to Larimer County.',
+          'Affordable price points attract first-time buyers — many using CHFA down payment assistance — which can mean faster absorption for correctly priced starter and move-up homes.',
+        ],
+      },
+      {
+        heading: 'Pricing in Greeley vs Evans',
+        paragraphs: [
+          'Evans and west Greeley neighborhoods may appeal to different buyers than established central Greeley or newer master-planned areas. Comparable sales should match property type and school boundaries.',
+          'Sellers who highlight energy upgrades, lot size, and commute access to I-25 or US-34 often see stronger online engagement.',
+        ],
+      },
+      {
+        heading: 'List with local Weld County expertise',
+        paragraphs: [
+          'SAA Homes serves Greeley, Evans, and the broader Northern Colorado corridor. Request a free market report to see active competition and a recommended launch price.',
+        ],
+        relatedLinks: [
+          { title: 'Greeley area guide', href: '/northern-colorado-areas/greeley/', description: 'Greeley real estate hub' },
+          { title: 'G-HOPE Greeley program', href: '/greeley-g-hope-down-payment-assistance/', description: 'City employee down payment help' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'timnath-severance-new-construction-buyer-guide',
+    title: 'Timnath & Severance New Construction Buyer Guide | Northern Colorado',
+    excerpt: 'Compare master-planned communities, builder timelines, and pricing in Timnath and Severance — two of Northern Colorado\'s fastest-growing new construction markets.',
+    date: '2026-06-29',
+    category: 'Buyer Tips',
+    image: '/images/Timnath-CO-Area-Guide.jpg',
+    readTime: '8 min read',
+    sections: [
+      {
+        heading: 'Why buyers choose Timnath and Severance',
+        paragraphs: [
+          'Timnath and Severance continue to expand as master-planned communities with new schools, parks, and modern floor plans. Buyers relocating from Denver or out of state often compare these towns against Windsor and Fort Collins for newer inventory.',
+          'Both communities sit in high-growth corridors with strong family demand — but builder timelines, HOA structures, and lot premiums vary significantly by phase.',
+        ],
+      },
+      {
+        heading: 'New construction buying process',
+        paragraphs: [
+          'Pre-approval is essential before touring model homes. Builders may require preferred lenders, but you can still compare rates and CHFA eligibility with participating Colorado lenders.',
+          'Review structural warranties, completion dates, and upgrade pricing carefully. Your buyer\'s agent should help evaluate builder reputation and resale comps in the same subdivision.',
+        ],
+        list: [
+          'Get pre-approved and confirm CHFA limits for Larimer/Weld',
+          'Compare builder incentives vs resale value in the same community',
+          'Understand HOA fees and special assessments',
+          'Plan for inspection and walk-through before closing',
+        ],
+      },
+      {
+        heading: 'Explore Timnath and Severance listings',
+        paragraphs: [
+          'SAA Homes helps buyers navigate new construction and resale inventory across Timnath, Severance, and neighboring Windsor.',
+        ],
+        relatedLinks: [
+          { title: 'Timnath area guide', href: '/northern-colorado-areas/timnath/', description: 'Growth corridor overview' },
+          { title: 'Severance area guide', href: '/northern-colorado-areas/severance/', description: 'Family-friendly new builds' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'carbon-valley-affordability-guide-firestone-frederick',
+    title: 'Carbon Valley Affordability Guide: Firestone & Frederick CO Real Estate',
+    excerpt: 'Firestone and Frederick offer some of Northern Colorado\'s best value along the I-25 corridor. Compare prices, commutes, schools, and CHFA eligibility in the Carbon Valley.',
+    date: '2026-06-29',
+    category: 'Buyer Tips',
+    image: '/images/buyers-hero.jpg',
+    readTime: '8 min read',
+    sections: [
+      {
+        heading: 'What is the Carbon Valley?',
+        paragraphs: [
+          'The Carbon Valley includes Firestone, Frederick, and Dacono along the I-25 corridor between Longmont and Fort Collins. Rapid growth has brought new retail, St. Vrain Valley schools, and suburban neighborhoods at price points often below Boulder and Larimer County medians.',
+          'Buyers priced out of Fort Collins or Longmont frequently start their search here — especially first-time buyers using CHFA down payment assistance.',
+        ],
+      },
+      {
+        heading: 'Firestone vs Frederick pricing',
+        paragraphs: [
+          'Firestone homes typically range $450,000–$650,000 with newer subdivisions and strong family amenities. Frederick often lands $400,000–$575,000 — among the most accessible Carbon Valley entry points.',
+          'Commutes to Longmont run roughly 15–25 minutes; Fort Collins is about 35–45 minutes depending on route and traffic.',
+        ],
+      },
+      {
+        heading: 'Programs and next steps',
+        paragraphs: [
+          'Weld County buyers in Firestone and Frederick often qualify for CHFA SmartStep, Preferred, and specialty programs. Pair affordability with a local agent who knows builder phases and resale trends.',
+        ],
+        relatedLinks: [
+          { title: 'Firestone area guide', href: '/northern-colorado-areas/firestone/', description: 'Carbon Valley hub' },
+          { title: 'Frederick area guide', href: '/northern-colorado-areas/frederick/', description: 'Affordable Carbon Valley living' },
+          { title: 'CHFA down payment assistance', href: '/chfa-down-payment-assistance/', description: 'Colorado buyer programs' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'fort-collins-vs-loveland-vs-windsor-home-buying',
+    title: 'Fort Collins vs Loveland vs Windsor: Where Should You Buy in Northern Colorado?',
+    excerpt: 'Compare prices, commutes, schools, and lifestyle across three of Northern Colorado\'s most searched cities for home buyers.',
+    date: '2026-06-30',
+    category: 'Buyer Tips',
+    image: '/images/Fort-Collins-CO-Area-Guide.jpg',
+    readTime: '9 min read',
+    sections: [
+      {
+        heading: 'Three cities, three buyer profiles',
+        paragraphs: [
+          'Fort Collins draws CSU, tech, and outdoor lifestyle buyers with the highest Larimer County price points. Loveland balances value and amenities near $500K medians. Windsor offers family-oriented growth with strong schools and newer neighborhoods between Fort Collins and Greeley.',
+          'There is no universal winner — the right city depends on budget, commute, and school priorities.',
+        ],
+      },
+      {
+        heading: 'Price and inventory snapshot',
+        paragraphs: [
+          'Fort Collins entry-level homes often start above Loveland equivalents for similar square footage. Windsor can offer newer construction at competitive Larimer prices but inventory varies by subdivision.',
+          'Compare monthly payment — not list price alone — especially when CHFA assistance changes your down payment requirement.',
+        ],
+      },
+      {
+        heading: 'How to decide',
+        paragraphs: [
+          'Tour all three cities on the same day if possible. Note commute routes to work, school boundaries, and HOA rules. SAA Homes provides side-by-side market reports for Fort Collins, Loveland, and Windsor buyers.',
+        ],
+        relatedLinks: [
+          { title: 'Fort Collins guide', href: '/northern-colorado-areas/fort-collins/', description: 'CSU & Old Town hub' },
+          { title: 'Loveland guide', href: '/northern-colorado-areas/loveland/', description: 'Balanced Larimer market' },
+          { title: 'Windsor guide', href: '/northern-colorado-areas/windsor/', description: 'Family growth corridor' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'weld-county-vs-larimer-county-buyer-guide',
+    title: 'Weld County vs Larimer County: Northern Colorado Home Buyer Guide',
+    excerpt: 'Should you buy in Weld or Larimer County? Compare Greeley and Evans value against Fort Collins, Loveland, and Windsor — plus CHFA limits and commute tradeoffs.',
+    date: '2026-06-30',
+    category: 'Buyer Tips',
+    image: '/images/Northern Colorado.webp',
+    readTime: '8 min read',
+    sections: [
+      {
+        heading: 'County lines shape budget and lifestyle',
+        paragraphs: [
+          'Larimer County includes Fort Collins, Loveland, Windsor, Timnath, and Berthoud — generally higher price points and Poudre or Thompson school districts depending on location.',
+          'Weld County includes Greeley, Evans, Firestone, Frederick, and Severance — often more affordable with strong growth in the Carbon Valley and Greeley corridor.',
+        ],
+      },
+      {
+        heading: 'CHFA and program differences',
+        paragraphs: [
+          'CHFA income and purchase price limits vary by county and targeted areas. Larimer buyers may hit limits faster in Fort Collins; Weld buyers in Greeley or Carbon Valley often find more headroom.',
+          'Greeley city employees may also qualify for G-HOPE down payment assistance — a Weld-specific advantage.',
+        ],
+      },
+      {
+        heading: 'Making the county choice',
+        paragraphs: [
+          'Start with your maximum comfortable payment and commute radius. Then compare 3–5 neighborhoods in each county with a local agent who knows both sides of the line.',
+        ],
+        relatedLinks: [
+          { title: 'Greeley area guide', href: '/northern-colorado-areas/greeley/', description: 'Weld County hub' },
+          { title: 'Fort Collins area guide', href: '/northern-colorado-areas/fort-collins/', description: 'Larimer County flagship' },
+          { title: 'Carbon Valley guide', href: '/blog/carbon-valley-affordability-guide-firestone-frederick/', description: 'Firestone & Frederick affordability' },
+        ],
+      },
+    ],
+  },
+  {
     slug: 'northern-colorado-events-guide-2026',
     title: 'Northern Colorado Events & Happenings Guide — 2026',
     excerpt: 'A curated guide to festivals, farmers markets, and community events across Fort Collins, Loveland, Windsor, Greeley, Longmont, and Northern Colorado — for locals and anyone considering a move.',
