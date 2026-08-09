@@ -517,6 +517,7 @@ def render_interactive_html(report: dict) -> str:
         "marketOdds": (s.get("odds_of_selling") or 0),
         "medianDom": median_dom,
         "inv": inv,
+        "soldCount": int(s.get("sold_count") or 0),
         "linkCity": link_city,
         "linkState": link_state,
         "scenarios": [
@@ -677,13 +678,28 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .spine a{{font-size:.72rem;font-weight:600;color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:8px}}
 .spine a.active,.spine a:hover{{background:var(--brand-primary);color:#fff}}
 .subject{{background:#e4eef8;border:1px solid #c5d6ea;border-radius:8px;padding:7px 14px;margin-bottom:10px;font-size:.88rem}}
-.bottom-line{{background:var(--card);border-left:4px solid var(--gold);border-radius:12px;padding:14px 18px;margin-bottom:12px;font-size:.92rem;box-shadow:0 8px 24px -12px rgba(11,18,32,.14)}}
-.verdict{{position:relative;overflow:hidden;background:linear-gradient(150deg,#0b1220 0%,var(--brand-primary) 90%,var(--brand-accent) 130%);color:#fff;border-radius:22px;padding:30px 32px;margin:6px 0 16px;box-shadow:0 24px 55px -18px rgba(11,18,32,.5)}}
-.verdict::after{{content:'';position:absolute;inset:0;background:radial-gradient(500px 260px at 88% 0%,rgba(201,162,39,.25),transparent 60%);pointer-events:none}}
-.verdict .eyebrow{{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;opacity:.8;position:relative;z-index:1}}
-.verdict .big{{font-family:'Fraunces',Georgia,serif;font-size:clamp(2.6rem,5.5vw,3.8rem);font-weight:700;line-height:1.02;margin-top:6px;letter-spacing:-.02em;position:relative;z-index:1}}
-.verdict .sub{{margin-top:10px;font-size:1.05rem;opacity:.95;position:relative;z-index:1}}
-.verdict .top{{margin-top:12px;font-size:.95rem;color:var(--gold-2);font-weight:600;position:relative;z-index:1}}
+.bottom-line{{background:transparent;border-left:3px solid var(--gold);border-radius:0;padding:6px 0 6px 12px;margin:4px 0 10px;font-size:.78rem;line-height:1.4;color:var(--muted);box-shadow:none}}
+.bottom-line strong{{color:var(--ink);font-size:.72rem;letter-spacing:.04em;text-transform:uppercase}}
+.verdict{{position:relative;overflow:hidden;background:linear-gradient(150deg,#0b1220 0%,var(--brand-primary) 90%,var(--brand-accent) 130%);color:#fff;border-radius:16px;padding:16px 20px 14px;margin:4px 0 8px;box-shadow:0 16px 40px -16px rgba(11,18,32,.45)}}
+.verdict::after{{content:'';position:absolute;inset:0;background:radial-gradient(420px 200px at 88% 0%,rgba(201,162,39,.22),transparent 60%);pointer-events:none}}
+.verdict .eyebrow{{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;opacity:.8;position:relative;z-index:1;margin:0}}
+.verdict .big{{font-family:'Fraunces',Georgia,serif;font-size:clamp(1.9rem,4vw,2.6rem);font-weight:700;line-height:1.05;margin-top:2px;letter-spacing:-.02em;position:relative;z-index:1}}
+.verdict .sub{{margin-top:4px;font-size:.88rem;opacity:.95;position:relative;z-index:1}}
+.verdict .top{{margin-top:6px;font-size:.8rem;color:var(--gold-2);font-weight:600;position:relative;z-index:1}}
+.verdict .pos-bar{{margin-top:10px;margin-bottom:2px}}
+.verdict .pos-labels{{font-size:.62rem;margin-top:4px}}
+#spine-strategy > .sub{{margin-bottom:6px}}
+#spine-strategy .whatif-grid{{margin:6px 0}}
+#spine-strategy .slider-wrap{{margin:6px 0 2px}}
+#spine-strategy .confront-out{{margin-top:6px;padding:10px 12px}}
+#spine-strategy .wyw{{margin-top:8px;padding:12px 14px}}
+#spine-strategy .wyw-grid{{margin:6px 0}}
+#spine-strategy .wyw-sub{{font-size:.72rem}}
+#spine-strategy .custom-toggle{{margin-top:6px}}
+@media (min-width:900px){{
+  #spine-strategy .price-it-grid{{display:grid;grid-template-columns:1.05fr .95fr;gap:12px;align-items:start}}
+  #spine-strategy .price-it-grid .wyw{{margin-top:0}}
+}}
 .pos-bar{{position:relative;height:12px;border-radius:6px;margin-top:14px;background:linear-gradient(90deg,#16a34a 0%,#84cc16 30%,#facc15 55%,#f97316 75%,#dc2626 100%)}}
 .pos-marker{{position:absolute;top:-5px;width:4px;height:22px;background:#fff;border-radius:2px;box-shadow:0 0 0 2px rgba(12,60,110,.55);transition:left .5s cubic-bezier(.22,1,.36,1)}}
 .pos-labels{{display:flex;justify-content:space-between;font-size:.62rem;letter-spacing:.05em;text-transform:uppercase;opacity:.75;margin-top:5px}}
@@ -1384,7 +1400,7 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
 
   <section class="section" id="spine-strategy">
     <h2><span class="ttl"><span class="step">7</span>Price It — Strategy &amp; Trade-Offs</span></h2>
-    <p class="sub">You&rsquo;ve seen the market, the comps, and your condition. Here&rsquo;s the list the data supports — then the trade-offs if you go higher or lower.</p>
+    <p class="sub">The list the data supports — then the trade-offs if you go higher or lower.</p>
     <section class="verdict" id="spine-verdict">
       <div class="eyebrow">Recommended List Price</div>
       <div class="big" id="dispRec">${rec:,.0f}</div>
@@ -1394,44 +1410,48 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
       <div class="pos-labels"><span>Aggressive</span><span>Heart of market</span><span>Overpriced</span></div>
     </section>
     <div class="bottom-line"><strong>Bottom Line</strong> — <span id="blText">{exec_sum}</span></div>
-    <div class="whatif-grid" id="whatIfGrid" style="--whatif-cols:{whatif_n}">{whatif_cards or '<p class="muted">No price scenarios</p>'}</div>
-    <div class="slider-wrap">
-      <label class="muted" for="priceSlider">Or slide between strategies — the line stays on recommended</label>
-      <div class="slider-track-wrap">
-        <div class="rec-tick" id="recTick" style="left:50%" aria-hidden="true">
-          <span class="rec-tick-label" id="recTickLabel">Rec</span>
-          <span class="rec-tick-line"></span>
+    <div class="price-it-grid">
+      <div>
+        <div class="whatif-grid" id="whatIfGrid" style="--whatif-cols:{whatif_n}">{whatif_cards or '<p class="muted">No price scenarios</p>'}</div>
+        <div class="slider-wrap">
+          <label class="muted" for="priceSlider">Or slide between strategies — the line stays on recommended</label>
+          <div class="slider-track-wrap">
+            <div class="rec-tick" id="recTick" style="left:50%" aria-hidden="true">
+              <span class="rec-tick-label" id="recTickLabel">Rec</span>
+              <span class="rec-tick-line"></span>
+            </div>
+            <input type="range" id="priceSlider" min="0" max="100" value="50" step="1" aria-valuetext="Recommended">
+          </div>
+          <div class="slider-scale"><span id="slideMin">—</span><span id="slideMid">Recommended</span><span id="slideMax">—</span></div>
         </div>
-        <input type="range" id="priceSlider" min="0" max="100" value="50" step="1" aria-valuetext="Recommended">
+        <div class="confront-out" id="confrontOut">Pick a price above to see the market response.</div>
+        <button type="button" class="custom-toggle" id="btnCustomPrice">Custom price…</button>
+        <div class="custom-box" id="customBox">
+          <input type="number" id="sellerPrice" step="1000" value="{int(rec)}" placeholder="Enter a custom list price">
+          <div class="scenario-row">
+            <input type="text" id="scenarioName" placeholder="Save this scenario as…">
+            <button type="button" id="btnSaveScenario" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-weight:600">Save</button>
+          </div>
+          <ul class="scenario-list" id="scenarioList"></ul>
+        </div>
       </div>
-      <div class="slider-scale"><span id="slideMin">—</span><span id="slideMid">Recommended</span><span id="slideMax">—</span></div>
-    </div>
-    <div class="confront-out" id="confrontOut">Pick a price above to see the market response.</div>
-    <div class="wyw" id="wywModule" style="{'display:none' if not show_listing_flow else ''}">
-      <div class="wyw-head">
-        <span class="wyw-title">While You Wait</span>
-        <span class="wyw-sub">The queue cost of pricing above the market</span>
+      <div class="wyw" id="wywModule" style="{'display:none' if not show_listing_flow else ''}">
+        <div class="wyw-head">
+          <span class="wyw-title">While You Wait</span>
+          <span class="wyw-sub">The queue cost of pricing above the market</span>
+        </div>
+        <p class="wyw-sub" style="margin:0 0 2px">Buyers tour the best value first. Homes already cheaper keep selling, and <strong>new</strong> ones keep listing under your price — both cut in line ahead of you.</p>
+        <div class="wyw-grid">
+          <div class="wyw-cell"><div class="wv" id="wywAhead">{lf_active_below}</div><div class="wl">Ahead of you today</div></div>
+          <div class="wyw-cell"><div class="wv" id="wywArrive">~{lf_below_pm:.1f}/mo</div><div class="wl">New ones list under you</div></div>
+          <div class="wyw-cell hot"><div class="wv" id="wywTotal">~{lf_wait_fresh + lf_active_below:.0f}</div><div class="wl">Pass you while you wait</div></div>
+        </div>
+        <div class="wyw-bar-wrap">
+          <div class="wyw-bar-label"><span>Your place in line at <span id="wywPrice">{int(rec):,}</span></span><span id="wywDom">~{exp_dom:.0f} days to contract</span></div>
+          <div class="wyw-bar"><div class="fill" id="wywFill" style="width:35%"></div><div class="marker" id="wywMarker" style="left:35%"></div></div>
+        </div>
+        <p class="wyw-note" id="wywNote">At the recommended list, the queue works <b>for</b> you — you're the value buyers find first. Price above the line and every week of waiting hands your buyers to a newer, cheaper listing.</p>
       </div>
-      <p class="wyw-sub" style="margin:0 0 2px">Buyers tour the best value first. While an overpriced home sits, two things happen: the homes already cheaper than yours keep selling, and <strong>new</strong> homes keep listing under your price. Both cut in line ahead of you.</p>
-      <div class="wyw-grid">
-        <div class="wyw-cell"><div class="wv" id="wywAhead">{lf_active_below}</div><div class="wl">Ahead of you today</div></div>
-        <div class="wyw-cell"><div class="wv" id="wywArrive">~{lf_below_pm:.1f}/mo</div><div class="wl">New ones list under you</div></div>
-        <div class="wyw-cell hot"><div class="wv" id="wywTotal">~{lf_wait_fresh + lf_active_below:.0f}</div><div class="wl">Pass you while you wait</div></div>
-      </div>
-      <div class="wyw-bar-wrap">
-        <div class="wyw-bar-label"><span>Your place in line at <span id="wywPrice">{int(rec):,}</span></span><span id="wywDom">~{exp_dom:.0f} days to contract</span></div>
-        <div class="wyw-bar"><div class="fill" id="wywFill" style="width:35%"></div><div class="marker" id="wywMarker" style="left:35%"></div></div>
-      </div>
-      <p class="wyw-note" id="wywNote">At the recommended list, the queue works <b>for</b> you — you're the value buyers find first. Price above the line and every week of waiting hands your buyers to a newer, cheaper listing.</p>
-    </div>
-    <button type="button" class="custom-toggle" id="btnCustomPrice">Custom price…</button>
-    <div class="custom-box" id="customBox">
-      <input type="number" id="sellerPrice" step="1000" value="{int(rec)}" placeholder="Enter a custom list price">
-      <div class="scenario-row">
-        <input type="text" id="scenarioName" placeholder="Save this scenario as…">
-        <button type="button" id="btnSaveScenario" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-weight:600">Save</button>
-      </div>
-      <ul class="scenario-list" id="scenarioList"></ul>
     </div>
   </section>
 
@@ -1840,6 +1860,26 @@ function refreshWhatIfMetrics(rec) {{
 
 let currentRec = defaults.rec, currentLow = defaults.low, currentHigh = defaults.high, currentDom = defaults.dom, currentRating = 5;
 
+function syncBottomLine(rec, low, high, dom) {{
+  // Keep Bottom Line dollars locked to the live recommended list (rating/slider can change it).
+  const inv = +(DATA.inv || 0);
+  let climate = "a buyer's market";
+  if (inv < 2.5) climate = "a strong seller's market";
+  else if (inv < 4.5) climate = "a seller-favorable market";
+  else if (inv < 7) climate = "a balanced market";
+  const soldN = Math.round(+(DATA.soldCount || 0));
+  const text =
+    'This is ' + climate + ' with ' + inv.toFixed(1) + ' months of inventory. ' +
+    'Based on ' + soldN + ' recent sales, your home is best positioned between ' +
+    money(low) + ' and ' + money(high) + ', with a recommended list price of ' + money(rec) +
+    '. At that level we would expect roughly ' + Math.round(dom) + ' days to contract. ' +
+    'Launch inside the competitive range — that creates the strongest outcome.';
+  const bl = document.getElementById('blText');
+  if (bl) bl.textContent = text;
+  const editBL = document.getElementById('editBL');
+  if (editBL && !editBL.dataset.manual) editBL.value = text;
+}}
+
 function setVerdict(rec, low, high, dom) {{
   currentRec = rec; currentLow = low; currentHigh = high; currentDom = dom;
   const recEl = document.getElementById('dispRec');
@@ -1859,6 +1899,7 @@ function setVerdict(rec, low, high, dom) {{
   if (editHigh) editHigh.value = high;
   const editDom = document.getElementById('editDom');
   if (editDom) editDom.value = dom;
+  syncBottomLine(rec, low, high, dom);
   const top = topPct(rec);
   const topStat = document.getElementById('topStat');
   if (topStat) topStat.textContent = top;
