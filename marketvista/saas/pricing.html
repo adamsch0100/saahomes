@@ -1,0 +1,197 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing — ListLogic</title>
+<meta name="description" content="ListLogic pricing: free trial (3 presentations or 60 days), $20 per report, $39/mo unlimited for agents, annual and brokerage per-seat plans.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/saas/ll.css">
+<style>
+.hero-mini {
+  background: radial-gradient(900px 400px at 80% -20%, #1a5f9e33, transparent 60%),
+              linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; padding: 64px 0 72px; text-align: center;
+}
+.hero-mini h1 { font-family: 'Fraunces', serif; font-size: clamp(1.9rem, 4vw, 2.7rem); letter-spacing: -0.02em; margin-bottom: 12px; }
+.hero-mini h1 em { font-style: normal; color: var(--accent-2); }
+.hero-mini p { color: #c8d2e0; max-width: 560px; margin: 0 auto; font-size: 1.02rem; }
+.hero-mini .eyebrow { justify-content: center; }
+
+.trial-band {
+  margin: -34px auto 0; position: relative; z-index: 2;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 22px 26px;
+  display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap;
+}
+.trial-band strong { font-family: 'Fraunces', serif; font-size: 1.15rem; }
+.trial-band p { color: var(--muted); font-size: 0.9rem; }
+
+.plans { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin: 48px 0 28px; }
+.plan {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 28px 22px; display: flex; flex-direction: column; box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.plan:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.plan.featured { border: 2px solid var(--ink); position: relative; }
+.plan.featured::before {
+  content: "Most popular"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--ink); color: #fff; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 4px 12px; border-radius: 999px;
+}
+.plan .tag { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal); margin-bottom: 8px; }
+.plan h2 { font-family: 'Fraunces', serif; font-size: 1.2rem; letter-spacing: -0.01em; }
+.plan .price { font-family: 'Fraunces', serif; font-size: 2.1rem; font-weight: 700; margin: 10px 0 2px; letter-spacing: -0.02em; }
+.plan .price span { font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 500; color: var(--muted); }
+.plan .desc { font-size: 0.86rem; color: var(--muted); margin-bottom: 16px; flex: 1; }
+.plan ul { list-style: none; font-size: 0.85rem; margin-bottom: 20px; display: grid; gap: 7px; }
+.plan li { padding-left: 22px; position: relative; }
+.plan li::before {
+  content: "✓"; position: absolute; left: 0; top: 1px;
+  color: var(--teal); font-weight: 800; font-size: 0.8rem;
+}
+.plan .btn { width: 100%; }
+
+.annual {
+  background: linear-gradient(150deg, var(--ink), var(--ink-2)); color: #fff;
+  border-radius: var(--radius); padding: 28px 30px; margin-bottom: 28px;
+  display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+  position: relative; overflow: hidden;
+}
+.annual::after { content: ""; position: absolute; inset: 0; background: radial-gradient(500px 240px at 90% 0%, rgba(201,162,39,0.22), transparent 60%); }
+.annual > * { position: relative; }
+.annual strong { font-family: 'Fraunces', serif; font-size: 1.2rem; }
+.annual p { color: #c8d2e0; font-size: 0.9rem; max-width: 560px; margin-top: 4px; }
+
+.fineprint { text-align: center; color: var(--muted); font-size: 0.88rem; max-width: 620px; margin: 0 auto; }
+
+@media (max-width: 980px) { .plans { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .plans { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<nav class="ll-nav">
+  <div class="container ll-nav-inner">
+    <a href="index.html" class="ll-brand">
+      <img src="/saas/listlogic-logo.png" alt="ListLogic" class="ll-brand-logo">
+      <small>by SAA Homes</small>
+    </a>
+    <div class="ll-nav-links">
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#deliverables">What sellers get</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="faq.html">FAQ</a>
+      <a href="login.html">Sign in</a>
+      <a href="signup.html" class="btn btn-primary">Start free trial</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero-mini">
+  <div class="container">
+    <span class="eyebrow gold">Pricing</span>
+    <h1>Priced for agents who <em>list</em>.</h1>
+    <p>Unlimited presentations for less than one coffee per listing appointment. One signed listing pays for years of ListLogic.</p>
+  </div>
+</header>
+
+<div class="container">
+  <div class="trial-band">
+    <div>
+      <strong>Start free — no card required.</strong>
+      <p>3 full presentations or 60 days, whichever comes first. Promo codes (e.g. COLDWELL-NOCO) welcome at signup.</p>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <a href="/demo" class="btn btn-outline">Try the sample</a>
+      <a href="signup.html" class="btn btn-gold">Start free trial</a>
+    </div>
+  </div>
+
+  <div class="plans">
+    <div class="plan">
+      <div class="tag">Try it</div>
+      <h2>Free trial</h2>
+      <div class="price">$0 <span>3 reports / 60 days</span></div>
+      <p class="desc">The full product on real listing appointments — plus one-click in-app feedback.</p>
+      <ul>
+        <li>Full interactive presentations</li>
+        <li>Seller packet + flipbook</li>
+        <li>Agent tools &amp; edits</li>
+        <li>Sample listing included</li>
+      </ul>
+      <a href="signup.html" class="btn btn-outline">Start free trial</a>
+    </div>
+
+    <div class="plan">
+      <div class="tag">Occasional</div>
+      <h2>One-time report</h2>
+      <div class="price">$20 <span>/ report</span></div>
+      <p class="desc">One listing presentation when you don't need a subscription.</p>
+      <ul>
+        <li>One full presentation</li>
+        <li>Seller packet + flipbook</li>
+        <li>Your branding</li>
+        <li>Charts &amp; data table</li>
+      </ul>
+      <a href="mailto:adam@saahomes.com?subject=ListLogic%20one-time%20report" class="btn btn-outline">Request access</a>
+    </div>
+
+    <div class="plan featured">
+      <div class="tag">Best value</div>
+      <h2>Agent monthly</h2>
+      <div class="price">$39 <span>/ month</span></div>
+      <p class="desc">Unlimited presentations for a single agent. Built for active listers.</p>
+      <ul>
+        <li>Unlimited reports</li>
+        <li>Saved branding profile</li>
+        <li>Priority updates</li>
+        <li>Cancel anytime</li>
+      </ul>
+      <a href="mailto:adam@saahomes.com?subject=ListLogic%20agent%20monthly" class="btn btn-primary">Request access</a>
+    </div>
+
+    <div class="plan">
+      <div class="tag">Teams &amp; offices</div>
+      <h2>Brokerage</h2>
+      <div class="price">$29 <span>/ seat / mo</span></div>
+      <p class="desc">Per-agent seats with shared branding. Minimum 5 seats; 10+ at $24/seat.</p>
+      <ul>
+        <li>Min 5 agent seats</li>
+        <li>Shared branding defaults</li>
+        <li>Office-friendly volume</li>
+        <li>White-label on request</li>
+      </ul>
+      <a href="mailto:adam@saahomes.com?subject=ListLogic%20brokerage" class="btn btn-gold">Talk to us</a>
+    </div>
+  </div>
+
+  <div class="annual">
+    <div>
+      <strong>Agent annual — $390/year</strong>
+      <p>About two months free (~$32.50/mo). Brokerage annual seats at $290/seat/year. Card checkout opens after early access — for now, start a trial or email to convert.</p>
+    </div>
+    <a href="mailto:adam@saahomes.com?subject=ListLogic%20annual" class="btn btn-gold">Ask about annual</a>
+  </div>
+
+  <p class="fineprint">
+    Early-access trial users stay free during the beta and get founder-friendly conversion when paid plans open.
+    Questions? See the <a href="faq.html">FAQ</a> or email <a href="mailto:adam@saahomes.com">adam@saahomes.com</a>.
+  </p>
+</div>
+
+<div style="height:64px"></div>
+
+<footer class="ll-footer">
+  <div class="container">
+    <div><strong>ListLogic</strong> · Data-driven custom pricing strategy</div>
+    <div><a href="https://saahomes.com">SAA Homes</a> · Schwartz and Associates, Coldwell Banker Realty</div>
+    <div><a href="index.html">Home</a> · <a href="faq.html">FAQ</a> · <a href="mailto:adam@saahomes.com">Contact</a></div>
+  </div>
+</footer>
+
+</body>
+</html>

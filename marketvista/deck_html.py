@@ -63,7 +63,7 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
 
     brand_primary = meta.get("brand_primary") or "#0c3c6e"
     brand_accent = meta.get("brand_accent") or "#1a5f9e"
-    logo_url = meta.get("logo_url") or ""
+    logo_url = meta.get("logo_url") or "/saas/listlogic-logo.png"
     area = report.get("area") or ""
     generated = meta.get("generated") or report.get("generated_at") or ""
     agent_name = meta.get("agent_name") or ""
@@ -92,9 +92,10 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
     )
 
     logo_html = (
-        f'<img class="logo" src="{_esc(logo_url)}" alt="">'
+        f'<img class="logo" src="{_esc(logo_url)}" alt="ListLogic">'
         if logo_url else ""
     )
+    cover_brand = "" if logo_html else "ListLogic"
     agent_line = " · ".join(x for x in [agent_name, brokerage] if x)
     contact_line = " · ".join(x for x in [agent_phone, agent_email] if x)
 
@@ -467,7 +468,7 @@ body.mode-print .slide {{
   padding: 16px 22px 0; color: var(--muted); font-size: .72rem; font-weight: 700;
   letter-spacing: .08em; text-transform: uppercase;
 }}
-.slide-top .logo {{ height: 22px; background: #fff; border-radius: 4px; padding: 2px 4px; }}
+.slide-top .logo {{ height: 24px; background: #fff; border-radius: 6px; padding: 3px 8px; }}
 .slide-body {{ padding: 12px 28px 8px; overflow: hidden; }}
 .slide-foot {{
   padding: 8px 22px 14px; display: flex; justify-content: space-between; align-items: center;
@@ -719,7 +720,7 @@ body.mode-print .hint {{ display: none; }}
   <div class="deck" id="deck">
 
     <section class="slide slide-cover is-on" data-title="Cover">
-      <div class="slide-top"><span>{logo_html}ListLogic</span><span>Pricing Story</span></div>
+      <div class="slide-top"><span>{logo_html}{cover_brand}</span><span>Pricing Story</span></div>
       <div class="slide-body">
         <div class="cover-grid">
           <div class="cover-copy">

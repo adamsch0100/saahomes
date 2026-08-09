@@ -283,8 +283,17 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
         bottomMargin=0.55 * inch,
     )
     flow = []
+    logo_path = Path(__file__).resolve().parent / "saas" / "listlogic-logo.png"
+    if logo_path.exists():
+        try:
+            logo_img = Image(str(logo_path), width=1.9 * inch, height=1.9 * inch * 287 / 1218)
+            logo_img.hAlign = "LEFT"
+            flow.append(logo_img)
+            flow.append(Spacer(1, 6))
+        except Exception:
+            pass
     addr = (subject.get("address") or "Your home") if subject else "Your home"
-    flow.append(Paragraph("ListLogic · Seller Packet", styles["brand"]))
+    flow.append(Paragraph("Seller Packet", styles["brand"]))
     flow.append(Paragraph(addr, styles["title"]))
     sub = f"{report.get('area', '')}  ·  {meta.get('generated') or datetime.now().strftime('%B %d, %Y')}"
     if agent_name:

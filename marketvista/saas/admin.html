@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — ListLogic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/saas/ll.css">
+<style>
+.page-head { padding: 32px 0 6px; }
+.page-head h1 { font-family: 'Fraunces', serif; font-size: clamp(1.5rem, 3vw, 1.9rem); letter-spacing: -0.02em; margin-bottom: 4px; }
+.sub { color: var(--muted); margin-bottom: 20px; font-size: 0.92rem; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+.tabs button {
+  border: 1px solid var(--line); background: var(--card); border-radius: 999px;
+  padding: 9px 18px; cursor: pointer; font-weight: 600; font-size: 0.86rem; color: var(--ink);
+  font-family: inherit; transition: all 0.15s ease;
+}
+.tabs button:hover { border-color: var(--ink); }
+.tabs button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.panel { display: none; }
+.panel.on { display: block; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+tr:hover td { background: #faf8f3; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 700px) { .row2 { grid-template-columns: 1fr; } }
+.btn-sm { padding: 7px 13px; font-size: 0.78rem; }
+.muted { color: var(--muted); font-size: 0.8rem; }
+.actions button { margin: 2px 4px 2px 0; }
+code { background: #eef2f8; padding: 2px 7px; border-radius: 6px; font-size: 0.78rem; }
+h3.panel-title { font-family: 'Fraunces', serif; font-size: 1.1rem; margin-bottom: 14px; letter-spacing: -0.01em; }
+</style>
+</head>
+<body>
+<nav class="ll-nav">
+  <div class="container ll-nav-inner">
+    <a href="/saas/" class="ll-brand">
+      <img src="/saas/listlogic-logo.png" alt="ListLogic" class="ll-brand-logo">
+      <small>Admin</small>
+    </a>
+    <div class="ll-nav-links">
+      <a href="/saas/app.html">App</a>
+      <a href="/saas/">Site</a>
+      <a href="#" id="logout">Sign out</a>
+    </div>
+  </div>
+</nav>
+<div class="container" style="max-width:1100px">
+  <div class="page-head">
+    <span class="eyebrow">Admin</span>
+    <h1>Trials, codes &amp; feedback</h1>
+    <p class="sub">Default trial: 3 presentations or 60 days, whichever first.</p>
+  </div>
+  <div class="tabs">
+    <button type="button" class="on" data-tab="users">Users</button>
+    <button type="button" data-tab="promos">Promo codes</button>
+    <button type="button" data-tab="invites">Invites</button>
+    <button type="button" data-tab="feedback">Feedback</button>
+  </div>
+  <p class="status" id="status"></p>
+
+  <section class="panel on" id="tab-users">
+    <div class="card">
+    <div class="row2">
+      <input id="userQ" placeholder="Search email, name, brokerage…">
+      <button class="btn btn-soft btn-sm" type="button" id="userSearch" style="align-self:start">Search</button>
+    </div>
+    <div style="overflow:auto"><table>
+      <thead><tr><th>Agent</th><th>Status</th><th>Usage</th><th>Trial ends</th><th>Actions</th></tr></thead>
+      <tbody id="usersBody"></tbody>
+    </table></div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-promos">
+    <div class="card">
+    <h3 class="panel-title">Create promo code</h3>
+    <div class="row2">
+      <div class="field"><label>Code</label><input id="pCode" placeholder="COLDWELL-NOCO"></div>
+      <div class="field"><label>Label</label><input id="pLabel" placeholder="CB NoCo trial"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Trial days</label><input id="pDays" type="number" value="60"></div>
+      <div class="field"><label>Presentation limit</label><input id="pLimit" type="number" value="3"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Max redemptions (blank = unlimited)</label><input id="pMax" type="number" placeholder="200"></div>
+      <div class="field"><label>Notes</label><input id="pNotes"></div>
+    </div>
+    <button class="btn btn-primary btn-sm" type="button" id="pCreate">Create code</button>
+    <div style="overflow:auto;margin-top:18px"><table>
+      <thead><tr><th>Code</th><th>Terms</th><th>Redemptions</th><th>Active</th><th></th></tr></thead>
+      <tbody id="promosBody"></tbody>
+    </table></div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-invites">
+    <div class="card">
+    <h3 class="panel-title">Create invite link</h3>
+    <div class="row2">
+      <div class="field"><label>Email lock (optional)</label><input id="iEmail" type="email"></div>
+      <div class="field"><label>Brokerage</label><input id="iBrokerage"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Trial days</label><input id="iDays" type="number" value="60"></div>
+      <div class="field"><label>Presentation limit</label><input id="iLimit" type="number" value="3"></div>
+    </div>
+    <button class="btn btn-primary btn-sm" type="button" id="iCreate">Create invite</button>
+    <div style="overflow:auto;margin-top:18px"><table>
+      <thead><tr><th>URL</th><th>Terms</th><th>Uses</th><th>Expires</th></tr></thead>
+      <tbody id="invitesBody"></tbody>
+    </table></div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-feedback">
+    <div class="card">
+    <div style="overflow:auto"><table>
+      <thead><tr><th>When</th><th>Category</th><th>From</th><th>Message</th><th>Status</th></tr></thead>
+      <tbody id="fbBody"></tbody>
+    </table></div>
+    </div>
+  </section>
+  <div style="height:56px"></div>
+</div>
+<script>
+const statusEl = document.getElementById('status');
+function setStatus(msg, ok) {
+  statusEl.className = 'status ' + (ok ? 'ok' : 'error');
+  statusEl.textContent = msg || '';
+}
+async function api(path, opts) {
+  const res = await fetch(path, opts);
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401 || res.status === 403) {
+    location.href = '/saas/login.html?next=/saas/admin.html';
+    throw new Error('auth');
+  }
+  if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Request failed');
+  return data;
+}
+
+document.querySelectorAll('.tabs button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('on'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+    btn.classList.add('on');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('on');
+  });
+});
+
+document.getElementById('logout').addEventListener('click', async (e) => {
+  e.preventDefault();
+  await fetch('/api/logout', { method: 'POST' });
+  location.href = '/saas/login.html';
+});
+
+async function loadUsers() {
+  const q = document.getElementById('userQ').value.trim();
+  const data = await api('/api/admin/users?q=' + encodeURIComponent(q));
+  const body = document.getElementById('usersBody');
+  body.innerHTML = (data.users || []).map(u => `
+    <tr>
+      <td><strong>${esc(u.name || '—')}</strong><br><span class="muted">${esc(u.email)}</span><br><span class="muted">${esc(u.brokerage || '')}</span></td>
+      <td>${esc(u.status)} · ${esc(u.role)}</td>
+      <td>${u.presentations_used ?? 0} / ${u.presentation_limit ?? '∞'}</td>
+      <td>${esc((u.trial_ends_at || '').slice(0,10))}</td>
+      <td class="actions">
+        <button class="btn btn-soft btn-sm" data-act="extend" data-id="${u.id}">+14 days</button>
+        <button class="btn btn-soft btn-sm" data-act="bump" data-id="${u.id}">+3 reports</button>
+        <button class="btn btn-soft btn-sm" data-act="active" data-id="${u.id}">Mark active</button>
+        <button class="btn btn-soft btn-sm" data-act="disable" data-id="${u.id}">Disable</button>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="5">No users</td></tr>';
+}
+document.getElementById('usersBody').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-act]');
+  if (!btn) return;
+  const id = btn.dataset.id;
+  const act = btn.dataset.act;
+  const payload = {};
+  if (act === 'extend') payload.extend_days = 14;
+  if (act === 'bump') payload.presentation_limit = null; // set below after fetch? simpler: extend limit by reading
+  if (act === 'bump') {
+    // bump by setting presentations_used unchanged and raising limit via extend_days=0 + presentation_limit override from UI: add 3 to current shown
+    const row = btn.closest('tr');
+    const usedTxt = row.children[2].textContent.split('/')[1].trim();
+    const cur = usedTxt === '∞' ? 3 : parseInt(usedTxt, 10) || 3;
+    payload.presentation_limit = cur + 3;
+    payload.status = 'trial';
+  }
+  if (act === 'active') { payload.status = 'active'; payload.clear_limit = true; }
+  if (act === 'disable') payload.status = 'disabled';
+  try {
+    await api('/api/admin/users/' + id, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    setStatus('Updated user', true);
+    loadUsers();
+  } catch (err) { setStatus(String(err.message || err), false); }
+});
+document.getElementById('userSearch').addEventListener('click', () => loadUsers().catch(e => setStatus(e.message, false)));
+
+async function loadPromos() {
+  const data = await api('/api/admin/promo-codes');
+  document.getElementById('promosBody').innerHTML = (data.promo_codes || []).map(p => `
+    <tr>
+      <td><code>${esc(p.code)}</code><br><span class="muted">${esc(p.label || '')}</span></td>
+      <td>${p.presentation_limit} reports / ${p.trial_days}d</td>
+      <td>${p.redemptions}${p.max_redemptions != null ? ' / ' + p.max_redemptions : ''}</td>
+      <td>${p.active ? 'yes' : 'no'}</td>
+      <td><button class="btn btn-soft btn-sm" data-pid="${p.id}" data-active="${p.active ? 0 : 1}">${p.active ? 'Deactivate' : 'Activate'}</button></td>
+    </tr>`).join('') || '<tr><td colspan="5">None</td></tr>';
+}
+document.getElementById('promosBody').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-pid]');
+  if (!btn) return;
+  await api('/api/admin/promo-codes/' + btn.dataset.pid + '/active', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ active: btn.dataset.active === '1' }),
+  });
+  loadPromos();
+});
+document.getElementById('pCreate').addEventListener('click', async () => {
+  try {
+    const maxRaw = document.getElementById('pMax').value.trim();
+    await api('/api/admin/promo-codes', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code: document.getElementById('pCode').value,
+        label: document.getElementById('pLabel').value,
+        trial_days: +document.getElementById('pDays').value || 60,
+        presentation_limit: +document.getElementById('pLimit').value || 3,
+        max_redemptions: maxRaw === '' ? null : +maxRaw,
+        notes: document.getElementById('pNotes').value,
+      }),
+    });
+    setStatus('Promo created', true);
+    loadPromos();
+  } catch (err) { setStatus(err.message, false); }
+});
+
+async function loadInvites() {
+  const data = await api('/api/admin/invites');
+  document.getElementById('invitesBody').innerHTML = (data.invites || []).map(i => `
+    <tr>
+      <td><code>${esc(i.url || i.token)}</code></td>
+      <td>${i.presentation_limit} / ${i.trial_days}d<br><span class="muted">${esc(i.email || '')} ${esc(i.brokerage || '')}</span></td>
+      <td>${i.uses} / ${i.max_uses}</td>
+      <td>${esc((i.expires_at || '').slice(0,10))}</td>
+    </tr>`).join('') || '<tr><td colspan="4">None</td></tr>';
+}
+document.getElementById('iCreate').addEventListener('click', async () => {
+  try {
+    const data = await api('/api/admin/invites', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: document.getElementById('iEmail').value,
+        brokerage: document.getElementById('iBrokerage').value,
+        trial_days: +document.getElementById('iDays').value || 60,
+        presentation_limit: +document.getElementById('iLimit').value || 3,
+      }),
+    });
+    setStatus('Invite: ' + (data.invite?.url || 'created'), true);
+    loadInvites();
+  } catch (err) { setStatus(err.message, false); }
+});
+
+async function loadFeedback() {
+  const data = await api('/api/admin/feedback');
+  document.getElementById('fbBody').innerHTML = (data.feedback || []).map(f => `
+    <tr>
+      <td>${esc((f.created_at || '').slice(0,16))}</td>
+      <td>${esc(f.category)}</td>
+      <td>${esc(f.email || '—')}</td>
+      <td>${esc(f.message)}<br><span class="muted">${esc(f.page_url || '')}</span></td>
+      <td>
+        <select data-fid="${f.id}">
+          <option value="new" ${f.status==='new'?'selected':''}>new</option>
+          <option value="seen" ${f.status==='seen'?'selected':''}>seen</option>
+          <option value="done" ${f.status==='done'?'selected':''}>done</option>
+        </select>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="5">No feedback yet</td></tr>';
+}
+document.getElementById('fbBody').addEventListener('change', async (e) => {
+  const sel = e.target.closest('select[data-fid]');
+  if (!sel) return;
+  await api('/api/admin/feedback/' + sel.dataset.fid, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: sel.value }),
+  });
+});
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+(async () => {
+  const me = await api('/api/auth-status');
+  if (!me.authenticated || me.user?.role !== 'admin') {
+    location.href = '/saas/login.html?next=/saas/admin.html';
+    return;
+  }
+  await Promise.all([loadUsers(), loadPromos(), loadInvites(), loadFeedback()]);
+})().catch(err => setStatus(String(err.message || err), false));
+</script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verifying — ListLogic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/saas/ll.css">
+<style>
+body {
+  min-height: 100vh; display: grid; place-items: center; padding: 32px 20px;
+  background: radial-gradient(900px 500px at 80% -10%, #1a5f9e33, transparent 60%),
+              radial-gradient(700px 400px at 10% 110%, #c9a22722, transparent 55%),
+              linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+}
+.auth-card {
+  background: var(--card); border-radius: 22px; padding: 36px 32px;
+  width: 100%; max-width: 440px; box-shadow: 0 40px 90px -30px rgba(0,0,0,0.55);
+  text-align: center;
+}
+.auth-brand { display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 800; letter-spacing: -0.02em; font-size: 1.1rem; margin-bottom: 22px; }
+.auth-brand img { height: 42px; width: auto; display: block; }
+h1 { font-family: 'Fraunces', serif; font-size: 1.5rem; letter-spacing: -0.02em; margin-bottom: 8px; }
+.sub { color: var(--muted); font-size: 0.92rem; margin-bottom: 18px; }
+.auth-links { margin-top: 20px; font-size: 0.82rem; }
+.auth-links a { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="auth-card">
+  <a href="/saas/" class="auth-brand" style="text-decoration:none;color:inherit">
+    <img src="/saas/listlogic-logo.png" alt="ListLogic">
+  </a>
+  <h1 id="title">Signing you in…</h1>
+  <p class="sub" id="sub">One moment while we verify your email link.</p>
+  <p class="status" id="status"></p>
+  <div class="auth-links">
+    <a href="login.html">Request a new link</a>
+  </div>
+</div>
+<script>
+const params = new URLSearchParams(location.search);
+const token = params.get('token') || '';
+const status = document.getElementById('status');
+const title = document.getElementById('title');
+const sub = document.getElementById('sub');
+
+(async () => {
+  if (!token) {
+    title.textContent = 'Link missing';
+    sub.textContent = 'Request a new sign-in link from the login page.';
+    status.className = 'status error';
+    status.textContent = 'No token in this URL.';
+    return;
+  }
+  try {
+    const res = await fetch('/api/auth/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Verification failed');
+    title.textContent = data.is_new ? 'You’re in' : 'Welcome back';
+    sub.textContent = data.needs_onboarding
+      ? 'Next: set your password and branding for reports.'
+      : 'Taking you to the app…';
+    status.className = 'status ok';
+    status.textContent = 'Email verified.';
+    location.href = data.next || '/saas/app.html';
+  } catch (err) {
+    title.textContent = 'Link didn’t work';
+    sub.textContent = 'It may have expired or already been used.';
+    status.className = 'status error';
+    status.textContent = String(err.message || err);
+  }
+})();
+</script>
+</body>
+</html>
