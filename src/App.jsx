@@ -16,6 +16,7 @@ import ListingDetailPage from "./pages/ListingDetailPage.jsx";
 import CityHomesForSalePage from "./pages/CityHomesForSalePage.jsx";
 import ManageAlertsPage from "./pages/ManageAlertsPage.jsx";
 import MyHomePage from "./pages/MyHomePage.jsx";
+import NotificationCenterPage from "./pages/NotificationCenterPage.jsx";
 import { CITY_HOMES } from "./data/cityHomesData.js";
 import FortCollinsPage from "./pages/areas/FortCollinsPage.jsx";
 import LovelandPage from "./pages/areas/LovelandPage.jsx";
@@ -176,6 +177,8 @@ export default function App() {
         <Route path="/my-saved-searches/" element={<AppLayout><ManageAlertsPage /></AppLayout>} />
         <Route path="/my-home" element={<AppLayout><MyHomePage /></AppLayout>} />
         <Route path="/my-home/" element={<AppLayout><MyHomePage /></AppLayout>} />
+        <Route path="/notifications" element={<AppLayout><NotificationCenterPage /></AppLayout>} />
+        <Route path="/notifications/" element={<AppLayout><NotificationCenterPage /></AppLayout>} />
         <Route path="/homes-for-sale/:slug" element={<AppLayout><ListingDetailPage /></AppLayout>} />
 
         {/* City homes-for-sale SEO pages */}

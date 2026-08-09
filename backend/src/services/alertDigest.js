@@ -14,6 +14,11 @@ import 'dotenv/config';
 import pg from 'pg';
 import nodemailer from 'nodemailer';
 import { getRecentViews, filtersToSearchPath } from './leadScore.js';
+import {
+  notifyNewMatches,
+  notifyPriceDrop,
+  scanSavedHomesForNotifications,
+} from './notificationService.js';
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: false });
 
@@ -486,6 +491,29 @@ async function runSearch(search, { dryRun, onlyEmail }) {
       [search.id, e.listing.listing_id, e.type, JSON.stringify({ old_price: null, list_price: e.listing.list_price })]
     );
   }
+
+  // In-app notification center (non-blocking — email path already succeeded)
+  try {
+    if (fresh.length) {
+      await notifyNewMatches({
+        userId: search.user_id,
+        searchName: search.name,
+        listings: fresh.map((e) => e.listing),
+        pool,
+      });
+    }
+    for (const e of drops.slice(0, 10)) {
+      await notifyPriceDrop({
+        userId: search.user_id,
+        listing: e.listing,
+        oldPrice: e.listing.original_list_price,
+        pool,
+      });
+    }
+  } catch (notifErr) {
+    console.error('notification insert failed:', notifErr.message);
+  }
+
   await pool.query('UPDATE saved_searches SET last_run_at = NOW(), last_email_at = NOW() WHERE id = $1', [search.id]);
   await pool.query(
     'INSERT INTO search_snapshots (search_id, result_ids) VALUES ($1, $2)',
@@ -546,6 +574,21 @@ export async function runDigest({ dryRun = false, onlyEmail = null, onlySearch =
     totalEvents += result.events || 0;
   }
   console.log(`alertDigest done: ${sent} emails sent, ${totalEvents} total events.`);
+
+  // Saved-home price drops + off-market (independent of search digests)
+  if (!dryRun) {
+    try {
+      const scanned = await scanSavedHomesForNotifications({ pool });
+      if (scanned.priceDrops || scanned.offMarket) {
+        console.log(
+          `saved-homes notifications: ${scanned.priceDrops} price drops, ${scanned.offMarket} off-market`
+        );
+      }
+    } catch (e) {
+      console.error('saved-homes notification scan failed:', e.message);
+    }
+  }
+
   const outboxSent = await drainOutbox();
   if (closePool) await pool.end();
   return { sent, events: totalEvents, outboxSent };

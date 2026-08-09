@@ -526,6 +526,30 @@ export const runMigrations = async () => {
         ON saved_homes(listing_key);
     `);
 
+    // ── Notification center (It 14.1 / RealScout Phase D) ─────────────────
+    // Surfaces nurture events (new matches, price drops, value updates,
+    // off-market) to signed-in users so they have a reason to return.
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS notifications (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        type VARCHAR(32) NOT NULL,
+        title TEXT NOT NULL,
+        body TEXT,
+        link TEXT,
+        image_url TEXT,
+        read_at TIMESTAMP,
+        dismissed_at TIMESTAMP,
+        created_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_notifications_user_unread
+        ON notifications(user_id, read_at) WHERE read_at IS NULL;
+      CREATE INDEX IF NOT EXISTS idx_notifications_user_created
+        ON notifications(user_id, created_at DESC);
+    `);
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {

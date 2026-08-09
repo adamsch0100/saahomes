@@ -1,5 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { fetchSessionUser } from "../utils/savedHomesApi.js";
+import {
+  fetchUnreadSummary,
+  markNotificationRead,
+  markAllNotificationsRead,
+  relativeTime,
+  notificationImageSrc,
+} from "../utils/notificationsApi.js";
 
 const buyerProgramLinks = [
   { label: "CHFA Down Payment Assistance", to: "/chfa-down-payment-assistance/" },
@@ -9,12 +17,71 @@ const buyerProgramLinks = [
   { label: "Champions Home Loan", to: "/colorado-champions-home-loan-program/" },
 ];
 
+const POLL_MS = 60_000;
+
+function BellIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+  );
+}
+
+function NotificationDropdownRow({ item, onOpen }) {
+  const img = notificationImageSrc(item.image_url);
+  const unread = item.unread || !item.read_at;
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(item)}
+      className={`w-full text-left flex gap-3 px-3 py-2.5 hover:bg-white/10 transition-colors ${
+        unread ? "border-l-2 border-[#CFB36E]" : "border-l-2 border-transparent"
+      }`}
+    >
+      <div className="w-10 h-10 rounded overflow-hidden bg-gray-800 shrink-0">
+        {img ? (
+          <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-[#CFB36E]">
+            <BellIcon className="w-4 h-4" />
+          </div>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className={`text-sm leading-snug truncate ${unread ? "font-semibold text-white" : "text-gray-200"}`}>
+          {item.title}
+        </p>
+        {item.body ? (
+          <p className="text-xs text-gray-400 mt-0.5 line-clamp-2 leading-snug">{item.body}</p>
+        ) : null}
+        <p className="text-[11px] text-gray-500 mt-1">{relativeTime(item.created_at)}</p>
+      </div>
+    </button>
+  );
+}
+
 export default function Header() {
   const location = useLocation();
   const headerRef = useRef(null);
+  const bellRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [buyersExpanded, setBuyersExpanded] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [previewItems, setPreviewItems] = useState([]);
+  const [bellOpen, setBellOpen] = useState(false);
+  const [markingAll, setMarkingAll] = useState(false);
 
   // Compact always-black header on full-screen search (Zillow-style)
   const isSearchHeader =
@@ -24,6 +91,31 @@ export default function Header() {
     setMenuOpen(false);
     setBuyersExpanded(false);
   };
+
+  const refreshNotifications = useCallback(async () => {
+    const user = await fetchSessionUser();
+    if (!user) {
+      setSignedIn(false);
+      setUnreadCount(0);
+      setPreviewItems([]);
+      return;
+    }
+    setSignedIn(true);
+    const summary = await fetchUnreadSummary();
+    if (!summary) {
+      setUnreadCount(0);
+      setPreviewItems([]);
+      return;
+    }
+    setUnreadCount(summary.unread_count || 0);
+    setPreviewItems(summary.notifications || []);
+  }, []);
+
+  useEffect(() => {
+    refreshNotifications();
+    const id = setInterval(refreshNotifications, POLL_MS);
+    return () => clearInterval(id);
+  }, [refreshNotifications, location.pathname]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -73,7 +165,142 @@ export default function Header() {
     };
   }, [isSearchHeader]);
 
+  // Close dropdown on outside click / Escape
+  useEffect(() => {
+    if (!bellOpen) return undefined;
+    const onDoc = (e) => {
+      if (bellRef.current && !bellRef.current.contains(e.target)) {
+        setBellOpen(false);
+      }
+    };
+    const onKey = (e) => {
+      if (e.key === "Escape") setBellOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [bellOpen]);
+
+  const openNotification = (item) => {
+    setBellOpen(false);
+    // Mark read in background — don't block navigation
+    if (item?.id && (item.unread || !item.read_at)) {
+      markNotificationRead(item.id)
+        .then(() => {
+          setUnreadCount((c) => Math.max(0, c - 1));
+          setPreviewItems((list) =>
+            list.map((n) =>
+              n.id === item.id ? { ...n, read_at: new Date().toISOString(), unread: false } : n
+            )
+          );
+        })
+        .catch(() => {});
+    }
+    const link = item?.link || "/notifications/";
+    if (link.startsWith("http")) {
+      window.location.href = link;
+    } else {
+      window.location.href = link;
+    }
+  };
+
+  const handleMarkAllRead = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (markingAll || unreadCount === 0) return;
+    const prev = unreadCount;
+    const prevItems = previewItems;
+    setMarkingAll(true);
+    setUnreadCount(0);
+    setPreviewItems((list) =>
+      list.map((n) => ({ ...n, read_at: n.read_at || new Date().toISOString(), unread: false }))
+    );
+    try {
+      await markAllNotificationsRead();
+    } catch {
+      setUnreadCount(prev);
+      setPreviewItems(prevItems);
+    } finally {
+      setMarkingAll(false);
+    }
+  };
+
   const solidBar = scrolled || isSearchHeader;
+  const badgeLabel = unreadCount > 9 ? "9+" : String(unreadCount);
+
+  const bellButton = (
+    <div className="relative" ref={bellRef}>
+      <button
+        type="button"
+        onClick={() => {
+          setBellOpen((o) => !o);
+          if (!bellOpen) refreshNotifications();
+        }}
+        className="relative inline-flex items-center justify-center p-2 rounded-md text-white hover:text-gray-200 hover:bg-white/10 transition-colors"
+        aria-label={
+          unreadCount > 0
+            ? `Notifications, ${unreadCount} unread`
+            : "Notifications"
+        }
+        aria-expanded={bellOpen}
+        aria-haspopup="true"
+      >
+        <BellIcon className="w-5 h-5" />
+        {unreadCount > 0 ? (
+          <span
+            className="absolute -top-0.5 -right-0.5 min-w-[1.1rem] h-[1.1rem] px-1 flex items-center justify-center rounded-full bg-red-600 text-white text-[10px] font-bold leading-none"
+            style={unreadCount === 0 ? undefined : undefined}
+          >
+            {badgeLabel}
+          </span>
+        ) : null}
+      </button>
+
+      {bellOpen ? (
+        <div
+          className="absolute right-0 top-full mt-2 w-[min(100vw-1.5rem,22.5rem)] max-w-[360px] rounded-lg border border-gray-700 bg-black shadow-2xl z-[60] overflow-hidden"
+          role="menu"
+        >
+          <div className="flex items-center justify-between px-3 py-2.5 border-b border-gray-800">
+            <span className="text-sm font-semibold text-white">Notifications</span>
+            <button
+              type="button"
+              onClick={handleMarkAllRead}
+              disabled={markingAll || unreadCount === 0}
+              className="text-xs text-[#CFB36E] hover:text-white disabled:opacity-40 disabled:cursor-default transition-colors"
+            >
+              Mark all read
+            </button>
+          </div>
+
+          <div className="max-h-[min(70vh,24rem)] overflow-y-auto">
+            {previewItems.length === 0 ? (
+              <p className="px-4 py-8 text-sm text-gray-400 text-center leading-relaxed">
+                No new notifications. Save a search or a home to get alerts.
+              </p>
+            ) : (
+              previewItems.map((item) => (
+                <NotificationDropdownRow key={item.id} item={item} onOpen={openNotification} />
+              ))
+            )}
+          </div>
+
+          <div className="border-t border-gray-800">
+            <Link
+              to="/notifications/"
+              onClick={() => setBellOpen(false)}
+              className="block text-center text-sm font-medium py-2.5 text-[#CFB36E] hover:bg-white/10 transition-colors"
+            >
+              View all notifications
+            </Link>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
 
   return (
     <>
@@ -171,10 +398,14 @@ export default function Header() {
               <Link to="/for-sellers/" className="hover:text-gray-200 transition-colors">For Sellers</Link>
               <Link to="/blog/" className="hover:text-gray-200 transition-colors">Real Estate Guides</Link>
               <Link to="/contact/" className="hover:text-gray-200 transition-colors">Contact</Link>
+              {signedIn ? bellButton : null}
               <Link to="/properties/" className="hover:text-gray-200 transition-colors">Sign In / Sign Up</Link>
             </nav>
 
-            <div className="lg:hidden w-10 shrink-0" aria-hidden="true" />
+            {/* Mobile: bell next to spacer / right edge when signed in */}
+            <div className="lg:hidden flex items-center justify-end gap-1 z-30 shrink-0 min-w-[2.5rem]">
+              {signedIn ? bellButton : <div className="w-10" aria-hidden="true" />}
+            </div>
           </div>
         </div>
       </header>
@@ -247,6 +478,15 @@ export default function Header() {
             <Link onClick={closeMenu} to="/properties/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Property Search</Link>
             <Link onClick={closeMenu} to="/about-us/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">About Us</Link>
             <Link onClick={closeMenu} to="/contact/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Contact</Link>
+            {signedIn ? (
+              <Link
+                onClick={closeMenu}
+                to="/notifications/"
+                className="block text-lg sm:text-xl hover:text-gray-300 transition-colors"
+              >
+                🔔 Notifications{unreadCount > 0 ? ` (${unreadCount > 9 ? "9+" : unreadCount})` : ""}
+              </Link>
+            ) : null}
             <Link onClick={closeMenu} to="/properties/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors mt-6 border-t border-gray-700 pt-6">
               Sign In / Sign Up
             </Link>
