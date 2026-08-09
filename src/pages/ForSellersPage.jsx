@@ -43,7 +43,7 @@ export default function ForSellersPage() {
             <a href="/home-valuation/" className="inline-flex items-center justify-center px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
               Get Your Home Value
             </a>
-            <a href="/contact/" className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
+            <a href="/contact/?interest=Selling a home" className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
               Contact Us
             </a>
           </div>
@@ -85,7 +85,7 @@ export default function ForSellersPage() {
               <a href="/home-valuation/" className="inline-block px-6 py-3 bg-black text-white font-semibold rounded hover:bg-gray-800 transition-colors">
                 Get Your Home Value
               </a>
-              <a href="/contact/" className="inline-block px-6 py-3 border-2 border-black text-black font-semibold rounded hover:bg-black hover:text-white transition-colors">
+              <a href="/contact/?interest=Selling a home" className="inline-block px-6 py-3 border-2 border-black text-black font-semibold rounded hover:bg-black hover:text-white transition-colors">
                 Contact Us
               </a>
             </div>
@@ -221,7 +221,7 @@ export default function ForSellersPage() {
               <a href="#home-valuation" className="inline-block px-6 py-3 bg-black text-white font-semibold rounded hover:bg-gray-800 transition-colors">
                 Value Your Home
               </a>
-              <a href="/contact/" className="inline-block px-6 py-3 border-2 border-black text-black font-semibold rounded hover:bg-black hover:text-white transition-colors">
+              <a href="/contact/?interest=Selling a home" className="inline-block px-6 py-3 border-2 border-black text-black font-semibold rounded hover:bg-black hover:text-white transition-colors">
                 Get Started
               </a>
             </div>
@@ -246,7 +246,7 @@ export default function ForSellersPage() {
             Let's discuss your selling goals and create a customized marketing plan for your property.
           </p>
           <div className="flex gap-4 justify-center">
-            <a href="/contact/" className="inline-block px-8 py-3 bg-white text-black font-semibold rounded hover:bg-gray-100 transition-colors">
+            <a href="/contact/?interest=Selling a home" className="inline-block px-8 py-3 bg-white text-black font-semibold rounded hover:bg-gray-100 transition-colors">
               Get Started
             </a>
             <a href="/home-valuation/" className="inline-block px-8 py-3 border-2 border-white text-white font-semibold rounded hover:bg-white hover:text-black transition-colors">
