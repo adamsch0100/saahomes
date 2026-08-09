@@ -134,6 +134,7 @@ def render_interactive_html(report: dict) -> str:
     monthly = report.get("chart_monthly_sales") or {"labels": [], "values": []}
     yearly = report.get("chart_yearly_sales") or {"labels": [], "values": []}
     monthly_price = report.get("chart_monthly_price") or {"labels": [], "values": []}
+    monthly_price_bands = report.get("chart_monthly_price_bands") or {}
     monthly_dom = report.get("chart_monthly_dom") or {"labels": [], "values": []}
     dom_dist = report.get("chart_dom") or {"labels": [], "values": [], "median": 0}
     scenarios = pos.get("price_scenarios") or []
@@ -502,6 +503,7 @@ def render_interactive_html(report: dict) -> str:
         "monthlySales": monthly,
         "yearlySales": yearly,
         "monthlyPrice": monthly_price,
+        "monthlyPriceBands": monthly_price_bands,
         "monthlyDom": monthly_dom,
         "domDist": {"labels": dom_dist.get("labels") or [], "values": dom_dist.get("values") or []},
         "yoy": yoy,
@@ -1352,7 +1354,13 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
 
   <div class="two-col">
     <section class="section">
-      <h2><span class="ttl">Median Sold Price by Month</span></h2>
+      <h2><span class="ttl">Median Sold Price by Month</span>
+        <span class="controls" id="priceTrendToggle" style="{'display:none' if not monthly_price_bands.get('labels') else ''}">
+          <button type="button" class="active" data-price-view="all">All sales</button>
+          <button type="button" data-price-view="bands">Vs. your price line</button>
+        </span>
+      </h2>
+      <p class="sub" id="priceTrendSub">Median sold price each month in this segment.</p>
       <div class="chart-box short"><canvas id="priceTrend"></canvas></div>
     </section>
     <section class="section">
@@ -2350,9 +2358,37 @@ if (typeof Chart !== 'undefined') {{
     options:{{ responsive:true, maintainAspectRatio:false, interaction:hoverIndex, plugins:{{ legend:{{ display:false }}, tooltip:tipIndex }}, scales:{{ y:{{ beginAtZero:true }} }} }}
   }});
   const priceTrendVals = DATA.monthlyPrice.values || [];
-  new Chart(document.getElementById('priceTrend'), {{
+  const priceBands = DATA.monthlyPriceBands || {{}};
+  const priceTrendCtx = document.getElementById('priceTrend');
+  const priceTrendSub = document.getElementById('priceTrendSub');
+  const bandSplit = priceBands.split_price || 0;
+  const bandDatasets = () => [
+    {{ label: 'Sold under ' + money(bandSplit), data: priceBands.below || [], borderColor: '#0e7a6d', backgroundColor: 'rgba(14,122,109,0.12)', fill: true, tension: 0.25, pointRadius: 3, spanGaps: true }},
+    {{ label: 'Sold at/above ' + money(bandSplit), data: priceBands.above || [], borderColor: '#b3541e', backgroundColor: 'rgba(179,84,30,0.10)', fill: true, tension: 0.25, pointRadius: 3, spanGaps: true }},
+  ];
+  let priceTrendChart = new Chart(priceTrendCtx, {{
     type:'line', data:{{ labels: DATA.monthlyPrice.labels, datasets:[{{ data: priceTrendVals, borderColor:navy, fill:true, tension:0.25, backgroundColor:'rgba(12,60,110,0.1)', pointRadius:3 }}] }},
-    options:{{ responsive:true, maintainAspectRatio:false, interaction:hoverIndex, plugins:{{ legend:{{ display:false }}, tooltip:{{ ...tipIndex, callbacks:{{ label:c => money(c.raw) }} }} }}, scales:{{ y:{{ ...tightAxis(priceTrendVals, 0.25, false), ticks:{{ callback:v => '$'+(v/1000)+'k' }} }} }} }}
+    options:{{ responsive:true, maintainAspectRatio:false, interaction:hoverIndex, plugins:{{ legend:{{ display:false }}, tooltip:{{ ...tipIndex, callbacks:{{ label:c => (c.dataset.label ? c.dataset.label + ': ' : '') + money(c.raw) }} }} }}, scales:{{ y:{{ ...tightAxis(priceTrendVals, 0.25, false), ticks:{{ callback:v => '$'+(v/1000)+'k' }} }} }} }}
+  }});
+  document.querySelectorAll('#priceTrendToggle [data-price-view]').forEach(btn => {{
+    btn.addEventListener('click', () => {{
+      document.querySelectorAll('#priceTrendToggle [data-price-view]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const view = btn.dataset.priceView;
+      if (view === 'bands' && (priceBands.labels || []).length) {{
+        priceTrendChart.data.labels = priceBands.labels;
+        priceTrendChart.data.datasets = bandDatasets();
+        priceTrendChart.options.plugins.legend.display = true;
+        priceTrendChart.options.plugins.legend.labels = {{ boxWidth: 10, font: {{ size: 10 }} }};
+        if (priceTrendSub) priceTrendSub.innerHTML = 'Median sold price by month, split at your recommended line of <strong>' + money(bandSplit) + '</strong> — are the homes closing the ones priced under it?';
+      }} else {{
+        priceTrendChart.data.labels = DATA.monthlyPrice.labels;
+        priceTrendChart.data.datasets = [{{ data: priceTrendVals, borderColor: navy, fill: true, tension: 0.25, backgroundColor: 'rgba(12,60,110,0.1)', pointRadius: 3 }}];
+        priceTrendChart.options.plugins.legend.display = false;
+        if (priceTrendSub) priceTrendSub.textContent = 'Median sold price each month in this segment.';
+      }}
+      priceTrendChart.update();
+    }});
   }});
   let domChartObj = new Chart(document.getElementById('domChart'), {{
     type:'bar', data:{{ labels: DATA.domDist.labels, datasets:[{{ data: DATA.domDist.values, backgroundColor:'rgba(26,95,158,0.75)', borderRadius:4 }}] }},
