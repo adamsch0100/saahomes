@@ -81,7 +81,7 @@ button.btn { width: 100%; padding: 13px; font-size: 0.95rem; }
 </div>
 <script>
 const params = new URLSearchParams(location.search);
-const next = params.get('next') || '/saas/app.html';
+const next = params.get('next') || '';
 let passwordMode = false;
 const magicForm = document.getElementById('magicForm');
 const passwordForm = document.getElementById('passwordForm');
@@ -139,14 +139,12 @@ passwordForm.addEventListener('submit', async (e) => {
       body: JSON.stringify({
         email: document.getElementById('pwEmail').value.trim(),
         password: document.getElementById('password').value,
+        next,
       }),
     });
     const payload = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(payload.detail || 'Invalid email or password');
-    const dest = payload.user && !payload.user.profile_complete
-      ? '/saas/onboarding.html?next=' + encodeURIComponent(next)
-      : next;
-    location.href = dest;
+    location.href = payload.next || (payload.user?.role === 'admin' ? '/saas/admin.html' : '/saas/app.html');
   } catch (err) {
     status.className = 'status error';
     status.textContent = String(err.message || err);

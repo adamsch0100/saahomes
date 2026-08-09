@@ -206,6 +206,8 @@ def render_interactive_html(report: dict) -> str:
             "baths": c.get("baths") or 0,
             "year_built": c.get("year_built") or "",
             "garage": c.get("garage_spaces") or 0,
+            "lot_size": c.get("lot_size") or 0,
+            "acres": c.get("acres") or 0,
             "dom": c.get("dom") or 0,
             "ppsf": c.get("price_per_sqft") or 0,
             "mls": c.get("mls_number") or "",
@@ -227,6 +229,9 @@ def render_interactive_html(report: dict) -> str:
         "baths": subject.get("baths") or 0,
         "year_built": subject.get("year_built") or "",
         "garage": subject.get("garage_spaces") or 0,
+        "lot_size": subject.get("lot_size") or (subject.get("extra") or {}).get("lot_size") or 0,
+        "acres": subject.get("acres") or (subject.get("extra") or {}).get("acres") or 0,
+        "dom": subject.get("dom") or 0,
         "rec": rec,
         "photo": subject.get("photo_url") or subject.get("photo") or "",
         "photos": subject.get("photos") or (
@@ -572,6 +577,8 @@ def render_interactive_html(report: dict) -> str:
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 {chart_tag}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <style>
 :root {{
   --navy:{brand_primary}; --blue:{brand_accent}; --bg:#f4f1ea; --card:#fff;
@@ -606,17 +613,44 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .view-modes span.vm.on{{background:var(--brand-primary);color:#fff;border-color:var(--brand-primary)}}
 .view-modes a:hover,.view-modes button.vm:hover{{background:#e8f0fa}}
 .view-modes .vm-status{{border:none;background:transparent;padding:0 4px;font-size:.72rem;color:var(--muted);font-weight:600}}
-.agent-chip{{position:fixed;top:16px;right:16px;z-index:90;display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(12,60,110,.12);background:rgba(255,255,255,.97);backdrop-filter:blur(10px);border-radius:999px;padding:5px 12px 5px 5px;cursor:pointer;box-shadow:0 10px 30px rgba(15,40,70,.16);transition:box-shadow .15s ease,border-color .15s ease,transform .15s ease,opacity .15s ease;font:inherit;color:var(--text)}}
-.agent-chip:hover{{border-color:var(--brand-primary);box-shadow:0 12px 34px rgba(12,60,110,.2);transform:translateY(-1px)}}
+.photo-fetch-banner{{
+  display:none;align-items:center;gap:10px;flex-wrap:wrap;
+  margin:0 0 12px;padding:10px 14px;border-radius:12px;
+  background:linear-gradient(90deg,#eef6ff,#f7fafc);border:1px solid #cfe0f5;
+  color:var(--brand-primary);font-size:.86rem;font-weight:600;
+}}
+.photo-fetch-banner.on{{display:flex}}
+.photo-fetch-banner .spin{{
+  width:14px;height:14px;border-radius:50%;
+  border:2px solid #c5d8ef;border-top-color:var(--brand-primary);
+  animation:photoSpin .8s linear infinite;
+}}
+@keyframes photoSpin{{to{{transform:rotate(360deg)}}}}
+.photo-fetch-banner .pf-msg{{flex:1;min-width:160px}}
+.photo-fetch-banner .pf-count{{font-size:.75rem;color:var(--muted);font-weight:700}}
+.agent-menu-wrap{{position:fixed;top:16px;right:16px;z-index:95}}
+.agent-chip{{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(12,60,110,.12);background:rgba(255,255,255,.97);backdrop-filter:blur(10px);border-radius:999px;padding:5px 12px 5px 5px;cursor:pointer;box-shadow:0 10px 30px rgba(15,40,70,.16);transition:box-shadow .15s ease,border-color .15s ease,transform .15s ease,opacity .15s ease;font:inherit;color:var(--text)}}
+.agent-chip:hover,.agent-chip.menu-open{{border-color:var(--brand-primary);box-shadow:0 12px 34px rgba(12,60,110,.2)}}
+.agent-chip:hover{{transform:translateY(-1px)}}
 .agent-chip .agent-avatar{{width:32px;height:32px;border-radius:50%;background:linear-gradient(145deg,var(--brand-primary),var(--brand-accent));color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;letter-spacing:.02em;flex:none}}
 .agent-chip .agent-chip-text{{display:flex;flex-direction:column;align-items:flex-start;line-height:1.1;padding-right:2px}}
 .agent-chip .agent-chip-text strong{{font-size:.76rem;color:var(--brand-primary)}}
 .agent-chip .agent-chip-text span{{font-size:.6rem;color:var(--muted);font-weight:600}}
 .agent-chip .agent-caret{{color:var(--muted);font-size:.8rem;margin-left:2px}}
+.agent-menu{{position:absolute;top:calc(100% + 8px);right:0;min-width:252px;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 18px 40px rgba(15,40,70,.18);padding:8px;display:none;z-index:96}}
+.agent-menu.open{{display:block}}
+.agent-menu a,.agent-menu button.mi{{display:flex;width:100%;align-items:flex-start;gap:10px;text-align:left;border:0;background:transparent;padding:10px 12px;border-radius:10px;cursor:pointer;font:inherit;color:var(--text);text-decoration:none}}
+.agent-menu a:hover,.agent-menu button.mi:hover{{background:#f4f7fb}}
+.agent-menu .mi-ico{{width:28px;height:28px;border-radius:8px;background:#eef3f9;color:var(--brand-primary);display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;flex:none}}
+.agent-menu .mi-copy{{display:flex;flex-direction:column;gap:1px;min-width:0}}
+.agent-menu .mi-copy strong{{font-size:.82rem;color:var(--brand-primary);font-weight:700}}
+.agent-menu .mi-copy span{{font-size:.68rem;color:var(--muted);line-height:1.3}}
+.agent-menu .mi-sep{{height:1px;background:var(--border);margin:6px 4px}}
 @media(max-width:560px){{
-  .agent-chip{{top:auto;bottom:18px;right:14px}}
+  .agent-menu-wrap{{top:auto;bottom:18px;right:14px}}
   .agent-chip .agent-chip-text,.agent-chip .agent-caret{{display:none}}
   .agent-chip{{padding:5px}}
+  .agent-menu{{top:auto;bottom:calc(100% + 8px)}}
 }}
 .fab{{display:none}}
 .panel-overlay{{display:none;position:fixed;inset:0;background:rgba(8,18,32,.48);backdrop-filter:blur(2px);z-index:1001}}
@@ -875,21 +909,21 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .match-pill{{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.65rem;font-weight:700;background:#e8f0fa;color:var(--brand-primary)}}
 .comp-open{{border:1px solid var(--border);background:#fff;color:var(--brand-primary);padding:4px 10px;border-radius:8px;font-size:.72rem;font-weight:700;cursor:pointer}}
 .comp-open:hover{{background:var(--brand-primary);color:#fff}}
-.listing-drawer{{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.96);width:min(1120px,96vw);height:min(88vh,820px);max-height:88vh;background:#fff;z-index:1100;box-shadow:0 28px 70px rgba(0,0,0,.32);border-radius:18px;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;display:flex;flex-direction:column;overflow:hidden}}
+.listing-drawer{{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.96);width:min(1120px,96vw);height:min(90vh,860px);max-height:90vh;background:#fff;z-index:1100;box-shadow:0 28px 70px rgba(0,0,0,.32);border-radius:18px;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;display:flex;flex-direction:column;overflow:hidden}}
 .listing-drawer.open{{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}}
 .listing-drawer .ld-head{{background:var(--panel);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex:none}}
 .listing-drawer .ld-head strong{{font-size:.98rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
 .listing-drawer .ld-head-actions{{display:flex;gap:8px;align-items:center;flex:none;flex-wrap:wrap;justify-content:flex-end}}
 .listing-drawer .ld-head a,.listing-drawer .ld-head button{{background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;padding:6px 12px;border-radius:8px;cursor:pointer;font-weight:600;font-size:.78rem;text-decoration:none;display:inline-flex;align-items:center}}
 .listing-drawer .ld-head a:hover,.listing-drawer .ld-head button:hover{{background:rgba(255,255,255,.12)}}
-.listing-drawer .ld-body{{padding:0;overflow:hidden;flex:1;display:grid;grid-template-columns:1.15fr .95fr;background:#fff;min-height:0}}
+.listing-drawer .ld-body{{padding:0;overflow:hidden;flex:1;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(320px,.95fr);background:#fff;min-height:0}}
 @media(max-width:820px){{
-  .listing-drawer{{height:min(94vh,900px);max-height:94vh}}
+  .listing-drawer{{height:min(96vh,920px);max-height:96vh}}
   .listing-drawer .ld-body{{grid-template-columns:1fr;overflow:auto}}
 }}
-.ld-gallery{{display:flex;flex-direction:column;min-height:0;background:#0b1220;border-right:1px solid rgba(255,255,255,.08)}}
-@media(max-width:820px){{.ld-gallery{{border-right:none;border-bottom:1px solid var(--border);min-height:280px}}}}
-.ld-hero{{position:relative;flex:1;min-height:220px;background:#0b1220}}
+.ld-gallery{{display:flex;flex-direction:column;min-height:0;background:#0b1220;border-right:1px solid rgba(255,255,255,.08);overflow:hidden}}
+@media(max-width:820px){{.ld-gallery{{border-right:none;border-bottom:1px solid var(--border);min-height:260px;max-height:42vh}}}}
+.ld-hero{{position:relative;flex:1;min-height:180px;background:#0b1220}}
 .ld-hero .comp-carousel{{position:absolute;inset:0}}
 .ld-hero .comp-photo{{object-fit:contain;background:#0b1220}}
 .ld-hero .car-btn{{width:40px;height:40px;font-size:1.4rem;background:rgba(8,20,36,.7)}}
@@ -900,27 +934,30 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .ld-thumbs button{{flex:0 0 58px;height:44px;padding:0;border:2px solid transparent;border-radius:6px;overflow:hidden;cursor:pointer;background:#1a2332;opacity:.65}}
 .ld-thumbs button.on{{border-color:#fde68a;opacity:1}}
 .ld-thumbs img{{width:100%;height:100%;object-fit:cover;display:block}}
-.ld-compare-pane{{padding:18px 20px;overflow:auto;min-height:0;background:#fff}}
-.ld-addr{{font-size:clamp(1.05rem,2vw,1.35rem);font-weight:800;color:var(--brand-primary);margin:0 0 4px;letter-spacing:-.02em;line-height:1.2}}
-.ld-meta{{font-size:.8rem;color:var(--muted);margin:0 0 14px}}
-.ld-sold-line{{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:0 0 16px;padding-bottom:14px;border-bottom:1px solid var(--border)}}
-.ld-sold-line .ld-sold{{font-size:clamp(1.5rem,2.8vw,1.95rem);font-weight:800;color:var(--brand-primary);letter-spacing:-.03em;line-height:1}}
-.ld-sold-line .ld-sold-note{{font-size:.75rem;color:var(--muted);font-weight:600}}
-.ld-vs{{margin:0 0 8px;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:var(--muted)}}
-.ld-vs-table{{width:100%;border-collapse:collapse;font-size:.86rem}}
-.ld-vs-table th{{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;text-align:left;padding:0 8px 8px;border-bottom:1px solid var(--border)}}
+.ld-compare-pane{{padding:14px 16px 16px;overflow-x:hidden;overflow-y:auto;min-height:0;min-width:0;background:#fff;display:flex;flex-direction:column}}
+.ld-addr{{font-size:clamp(1rem,1.8vw,1.25rem);font-weight:800;color:var(--brand-primary);margin:0 0 4px;letter-spacing:-.02em;line-height:1.2}}
+.ld-meta{{font-size:.78rem;color:var(--muted);margin:0 0 10px}}
+.ld-sold-line{{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid var(--border);flex:none}}
+.ld-sold-line .ld-sold{{font-size:clamp(1.35rem,2.4vw,1.75rem);font-weight:800;color:var(--brand-primary);letter-spacing:-.03em;line-height:1}}
+.ld-sold-line .ld-sold-note{{font-size:.72rem;color:var(--muted);font-weight:600}}
+.ld-vs{{margin:0 0 6px;font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:var(--muted);flex:none}}
+.ld-vs-table{{width:100%;border-collapse:collapse;font-size:.82rem;table-layout:fixed}}
+.ld-vs-table col.c-metric{{width:26%}}
+.ld-vs-table col.c-you{{width:37%}}
+.ld-vs-table col.c-sale{{width:37%}}
+.ld-vs-table th{{font-size:.6rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;text-align:left;padding:0 6px 6px;border-bottom:1px solid var(--border)}}
 .ld-vs-table th:nth-child(2),.ld-vs-table th:nth-child(3),.ld-vs-table td:nth-child(2),.ld-vs-table td:nth-child(3){{text-align:right}}
 .ld-vs-table th.you{{color:var(--brand-primary)}}
-.ld-vs-table td{{padding:10px 8px;border-bottom:1px solid #eef2f6;vertical-align:middle}}
+.ld-vs-table td{{padding:7px 6px;border-bottom:1px solid #eef2f6;vertical-align:top;word-break:break-word}}
 .ld-vs-table tr:last-child td{{border-bottom:none}}
-.ld-vs-table .metric{{color:var(--muted);font-weight:600;font-size:.78rem}}
-.ld-vs-table .val{{font-weight:800;color:var(--text)}}
+.ld-vs-table .metric{{color:var(--muted);font-weight:600;font-size:.74rem}}
+.ld-vs-table .val{{font-weight:800;color:var(--text);line-height:1.25}}
 .ld-vs-table .val.you{{color:var(--brand-primary)}}
-.ld-delta{{display:inline-block;margin-left:6px;font-size:.68rem;font-weight:700}}
+.ld-delta{{display:block;margin-top:2px;margin-left:0;font-size:.65rem;font-weight:700}}
 .ld-delta.up{{color:#0d7a4f}}
 .ld-delta.down{{color:#b91c1c}}
 .ld-delta.same{{color:var(--muted)}}
-.ld-takeaway{{margin-top:14px;padding:12px 14px;border-radius:10px;background:#f8fafc;border:1px solid var(--border);font-size:.82rem;line-height:1.45;color:var(--text)}}
+.ld-takeaway{{margin-top:10px;padding:10px 12px;border-radius:10px;background:#f8fafc;border:1px solid var(--border);font-size:.78rem;line-height:1.4;color:var(--text);flex:none}}
 .ld-takeaway strong{{color:var(--brand-primary)}}
 .listing-overlay{{display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:1099}}
 .listing-overlay.open{{display:block}}
@@ -937,8 +974,21 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
   .comp-subject .comp-card .cf{{grid-template-columns:1fr 1fr}}
 }}
 .comp-rail{{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:4px 0 10px;overflow:visible}}
+.comp-map-wrap{{margin:8px 0 14px;background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 4px 14px rgba(15,40,70,.06)}}
+.comp-map-head{{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--border)}}
+.comp-map-head strong{{font-size:.82rem;color:var(--brand-primary)}}
+.comp-map-legend{{display:flex;gap:12px;flex-wrap:wrap;font-size:.68rem;color:var(--muted);font-weight:600}}
+.comp-map-legend span{{display:inline-flex;align-items:center;gap:5px}}
+.comp-map-legend i{{width:10px;height:10px;border-radius:50%;display:inline-block}}
+.comp-map-legend i.you{{background:var(--brand-primary);border:2px solid #fde68a;box-sizing:border-box}}
+.comp-map-legend i.comp{{background:#0e7a6d}}
+.comp-map-legend i.sold{{background:#94a3b8}}
+.comp-map-legend i.active{{background:#c9a227}}
+#compMap{{height:min(420px,52vh);width:100%;background:#e8eef5}}
+.leaflet-container{{font:inherit}}
 @media(max-width:980px){{.comp-rail{{grid-template-columns:repeat(2,1fr)}}}}
 @media(max-width:520px){{.comp-rail{{grid-template-columns:1fr}}}}
+@media(max-width:700px){{#compMap{{height:300px}}}}
 .comp-card{{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 4px 14px rgba(15,40,70,.07);cursor:pointer;transition:box-shadow .15s ease,transform .15s ease;min-width:0;width:100%}}
 .comp-card:hover{{box-shadow:0 8px 22px rgba(15,40,70,.14);transform:translateY(-2px)}}
 .comp-card.subject-card{{outline:2px solid var(--brand-primary);outline-offset:-1px;cursor:default}}
@@ -1108,37 +1158,71 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
   .kpis,.kpis.market-kpis,.kpis.yoy-kpis{{grid-template-columns:repeat(2,1fr)}}
 }}
 @media print{{
-  .fab,.agent-chip,.agent-panel,.panel-overlay,.view-modes,.top-bar,.spine,
+  @page{{size:11in 8.5in;margin:0}}
+  *{{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+  .fab,.agent-menu-wrap,.agent-chip,.agent-panel,.panel-overlay,.view-modes,.top-bar,.spine,
   .listing-drawer,.listing-overlay,.photo-modal,.controls,.scatter-series,
-  #spine-fulldata,.share-bar,.two-col,.price-controls .slider-wrap,
-  .slider-track-wrap,input[type=range],.slider-scale{{display:none!important}}
-  html,body{{background:#fff!important}}
-  .page{{max-width:none;padding:0.35in;margin:0}}
-  .hero{{
-    border-radius:0;box-shadow:none;margin:0 0 12px;page-break-after:always;
-    break-after:page;-webkit-print-color-adjust:exact;print-color-adjust:exact;
+  #spine-fulldata,.share-bar,.price-controls .slider-wrap,
+  .slider-track-wrap,input[type=range],.slider-scale,
+  .comp-toolbar,.comp-table-toggle,.comp-table-wrap,.car-btn,.car-count,
+  #confrontOut,.rate-row,.kpi .tip,.comp-photo-fade,.photo-fetch-banner,
+  .page > .two-col,
+  .page > .section:not([id]),
+  #spine-strategy .response-grid .confront-out{{display:none!important}}
+  html,body{{background:#fff!important;margin:0;padding:0}}
+  .page{{max-width:none;width:11in;padding:0;margin:0}}
+
+  /* One landscape sheet per spine section — fixed box so content cannot bleed */
+  /* marker: print-page-spine */
+  .page > .hero,
+  .page > .core-facts,
+  .page > .section[id^="spine-"]:not(#spine-fulldata){{
+    box-sizing:border-box;
+    width:11in;height:8.5in;max-height:8.5in;min-height:8.5in;
+    margin:0;padding:0.38in 0.5in;
+    border:none;border-radius:0;box-shadow:none!important;
+    overflow:hidden;
+    page-break-after:always;break-after:page;
+    page-break-inside:avoid;break-inside:avoid;
   }}
-  .core-facts,.section{{
-    box-shadow:none!important;border:1px solid #e5e7eb;border-radius:12px;
-    page-break-before:always;break-before:page;page-break-inside:avoid;
-    margin:0 0 10px;padding:18px 20px;
+  .page > .hero{{
+    padding:0.7in 0.7in;display:flex;align-items:center;
   }}
-  .core-facts{{page-break-before:auto;break-before:auto}}
-  #spine-supply[style*="display:none"]{{display:none!important;page-break-before:avoid!important}}
+  .page > .core-facts,
+  #spine-rating{{
+    display:flex;flex-direction:column;justify-content:center;
+  }}
+  #spine-supply[style*="display:none"]{{display:none!important}}
   .section:hover{{box-shadow:none!important}}
-  .chart-box canvas,.chart-box img.print-chart{{max-width:100%!important;height:auto!important}}
-  .chart-box{{height:auto!important;min-height:0!important}}
-  .chart-box.scatter-tall{{min-height:0!important;height:auto!important}}
-  a[href]::after{{content:none!important}}
-  .verdict,.whatif-grid,.comp-grid,.cf-grid,.supply-wait,.market-duo,.wyw{{
-    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+
+  /* Nested blocks never become their own print pages */
+  .section .section,
+  .section .verdict,
+  .two-col .section{{
+    height:auto!important;min-height:0!important;max-height:none!important;
+    page-break-after:auto!important;break-after:auto!important;
+    page-break-before:auto!important;break-before:auto!important;
+    overflow:visible;padding:0;margin:0;
   }}
-  .whatif-grid{{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(110px,1fr))!important;overflow:visible!important}}
-  .price-controls{{display:block!important}}
-  #spine-strategy{{page-break-inside:auto}}
-  #spine-strategy .verdict{{page-break-inside:avoid}}
+  #yoyCharts2{{page-break-before:auto!important;break-before:auto!important;padding-top:8px}}
+
+  .chart-box{{height:150px!important;min-height:0!important;max-height:170px!important}}
+  .chart-box.short{{height:130px!important;max-height:140px!important}}
+  .chart-box.scatter-tall{{height:200px!important;max-height:220px!important}}
+  .chart-box canvas,.chart-box img.print-chart{{max-width:100%!important;max-height:100%!important;height:auto!important;width:auto!important}}
+  a[href]::after{{content:none!important}}
+  .whatif-grid{{display:grid!important;grid-template-columns:repeat(var(--whatif-cols,5),minmax(0,1fr))!important;overflow:visible!important;gap:8px}}
+  .price-controls{{display:block!important;margin-top:8px}}
+  .comp-rail{{grid-template-columns:repeat(4,1fr);gap:8px}}
+  .comp-card .comp-photo{{height:88px}}
+  .market-duo,.ask-trio,.supply-wait,.supply-hero,.cf-grid,.comp-card,.verdict,.wyw,.response-grid{{page-break-inside:avoid}}
+  .kpis,.kpis.market-kpis,.kpis.yoy-kpis{{gap:6px}}
+  .kpi{{padding:8px 6px}}
+  h2{{font-size:1.05rem;margin-bottom:6px}}
+  .sub{{font-size:.78rem;margin-bottom:8px}}
 }}
 body.print-leavebehind .fab,
+body.print-leavebehind .agent-menu-wrap,
 body.print-leavebehind .agent-chip,
 body.print-leavebehind .agent-panel,
 body.print-leavebehind .panel-overlay,
@@ -1147,8 +1231,9 @@ body.print-leavebehind .spine,
 body.print-leavebehind .listing-drawer,
 body.print-leavebehind .listing-overlay,
 body.print-leavebehind #spine-fulldata,
-body.print-leavebehind .two-col{{display:none!important}}
-body.print-leavebehind .page{{padding-bottom:24px}}
+body.print-leavebehind .page > .two-col,
+body.print-leavebehind .page > .section:not([id]){{display:none!important}}
+body.print-leavebehind .page{{padding-bottom:0}}
 </style>
 </head>
 <body>
@@ -1174,12 +1259,46 @@ body.print-leavebehind .page{{padding-bottom:24px}}
       <span class="vm-status" id="shareStatus"></span>
     </div>
   </div>
+  <div class="photo-fetch-banner" id="photoFetchBanner" aria-live="polite">
+    <span class="spin" aria-hidden="true"></span>
+    <span class="pf-msg" id="photoFetchMsg">Fetching listing photos…</span>
+    <span class="pf-count" id="photoFetchCount"></span>
+  </div>
 
-  <button type="button" class="agent-chip" id="fab" aria-haspopup="dialog" aria-controls="panel" title="Agent tools">
-    <span class="agent-avatar">{agent_initials}</span>
-    <span class="agent-chip-text"><strong>{agent_name_only}</strong><span>Agent tools</span></span>
-    <span class="agent-caret" aria-hidden="true">▾</span>
-  </button>
+  <div class="agent-menu-wrap" id="agentMenuWrap">
+    <button type="button" class="agent-chip" id="fab" aria-haspopup="menu" aria-expanded="false" aria-controls="agentMenu" title="Account menu">
+      <span class="agent-avatar">{agent_initials}</span>
+      <span class="agent-chip-text"><strong>{agent_name_only}</strong><span>Menu</span></span>
+      <span class="agent-caret" aria-hidden="true">▾</span>
+    </button>
+    <div class="agent-menu" id="agentMenu" role="menu" hidden>
+      <a href="/saas/app.html" role="menuitem">
+        <span class="mi-ico">⌂</span>
+        <span class="mi-copy"><strong>Dashboard</strong><span>Saved reports &amp; new generate</span></span>
+      </a>
+      <a href="/saas/app.html#generate" role="menuitem">
+        <span class="mi-ico">＋</span>
+        <span class="mi-copy"><strong>New presentation</strong><span>Upload MLS &amp; build another</span></span>
+      </a>
+      <button type="button" class="mi" id="menuOpenTools" role="menuitem">
+        <span class="mi-ico">✎</span>
+        <span class="mi-copy"><strong>Edit this report</strong><span>Price, story, coach, photos</span></span>
+      </button>
+      <div class="mi-sep"></div>
+      <a href="/saas/pricing.html" role="menuitem">
+        <span class="mi-ico">$</span>
+        <span class="mi-copy"><strong>Plans &amp; billing</strong><span>Upgrade or manage plan</span></span>
+      </a>
+      <a href="/saas/admin.html" role="menuitem" id="menuAdminLink" hidden>
+        <span class="mi-ico">⚙</span>
+        <span class="mi-copy"><strong>Owner console</strong><span>Users, reports &amp; AI chats</span></span>
+      </a>
+      <button type="button" class="mi" id="menuSignOut" role="menuitem">
+        <span class="mi-ico">⎋</span>
+        <span class="mi-copy"><strong>Sign out</strong><span>End this browser session</span></span>
+      </button>
+    </div>
+  </div>
 
   <nav class="spine" id="spine">
     <a href="#spine-corefacts" data-spine="corefacts">How It Works</a>
@@ -1346,6 +1465,18 @@ body.print-leavebehind .page{{padding-bottom:24px}}
     </div>
     <div class="comp-subject" id="subjectCompSlot">{subject_slot}</div>
     <div class="comp-rail" id="compRail">{comps_cards or '<p class="muted">No close comps</p>'}</div>
+    <div class="comp-map-wrap" id="compMapWrap">
+      <div class="comp-map-head">
+        <strong>Market map</strong>
+        <div class="comp-map-legend">
+          <span><i class="you"></i> Your home</span>
+          <span><i class="comp"></i> Selected comps</span>
+          <span><i class="sold"></i> Other sold</span>
+          <span><i class="active"></i> Active</span>
+        </div>
+      </div>
+      <div id="compMap" role="img" aria-label="Map of comps and market listings"></div>
+    </div>
     <button type="button" class="comp-table-toggle" id="btnCompTable">Show table view</button>
     <div class="comp-table-wrap" id="compTableWrap">
       <div style="overflow:auto">
@@ -1571,7 +1702,7 @@ body.print-leavebehind .page{{padding-bottom:24px}}
   <div class="panel-header">
     <div class="ph-who">
       <span class="ph-avatar">{agent_initials}</span>
-      <div class="ph-copy"><strong>{agent_name_only}</strong><span>Agent tools</span></div>
+      <div class="ph-copy"><strong>{agent_name_only}</strong><span>Edit this report</span></div>
     </div>
     <button type="button" id="closePanel" aria-label="Close">×</button>
   </div>
@@ -2709,26 +2840,76 @@ function applyPhotoMapToComps() {{
     const mls = String(c.mls || '');
     if (mls && photoMap[mls]) {{
       c.photo = photoMap[mls];
-      if (!c.photos || !c.photos.length) c.photos = [photoMap[mls]];
+      const g = galleryMap[mls];
+      if (g && g.length) c.photos = g.slice();
+      else if (!c.photos || !c.photos.length) c.photos = [photoMap[mls]];
     }} else if (!c.photo) c.photo = '';
   }};
   liveComps.forEach(apply);
   (window.__AUTO_COMPS_CACHE || []).forEach(apply);
   if (DATA.subjectSnap) {{
     DATA.subjectSnap.photo = photoMap[SUBJECT_PHOTO_KEY] || DATA.subjectSnap.photo || '';
-    if (DATA.subjectSnap.photo && !(DATA.subjectSnap.photos && DATA.subjectSnap.photos.length)) {{
+    const sg = galleryMap[SUBJECT_PHOTO_KEY];
+    if (sg && sg.length) DATA.subjectSnap.photos = sg.slice();
+    else if (DATA.subjectSnap.photo && !(DATA.subjectSnap.photos && DATA.subjectSnap.photos.length)) {{
       DATA.subjectSnap.photos = [DATA.subjectSnap.photo];
     }}
   }}
 }}
+let galleryMap = {{}};
+let photoPollTimer = null;
+function setPhotoFetchBanner(on, message, done, total) {{
+  const el = document.getElementById('photoFetchBanner');
+  const msg = document.getElementById('photoFetchMsg');
+  const count = document.getElementById('photoFetchCount');
+  if (!el) return;
+  el.classList.toggle('on', !!on);
+  if (msg && message) msg.textContent = message;
+  if (count) {{
+    count.textContent = (total > 0) ? ((done || 0) + ' / ' + total) : '';
+  }}
+}}
 async function fetchPhotoMap() {{
   Object.assign(photoMap, loadLocalPhotoMap());
+  let status = 'ready';
   if (RUN_ID) {{
     try {{
       const res = await fetch('/api/runs/' + RUN_ID + '/comp-photos');
       if (res.ok) {{
         const data = await res.json();
         Object.assign(photoMap, data.photos || {{}});
+        Object.assign(galleryMap, data.galleries || {{}});
+        status = data.status || 'ready';
+        const pending = status === 'pending' || status === 'fetching';
+        setPhotoFetchBanner(
+          pending,
+          data.message || (pending ? 'Fetching listing photos…' : ''),
+          data.done || 0,
+          data.total || 0
+        );
+        if (pending && !photoPollTimer) {{
+          // Kick background fetch if generate left it pending
+          fetch('/api/runs/' + RUN_ID + '/comp-photos/fetch', {{ method: 'POST' }}).catch(() => {{}});
+          photoPollTimer = setInterval(async () => {{
+            try {{
+              const r2 = await fetch('/api/runs/' + RUN_ID + '/comp-photos');
+              if (!r2.ok) return;
+              const d2 = await r2.json();
+              Object.assign(photoMap, d2.photos || {{}});
+              Object.assign(galleryMap, d2.galleries || {{}});
+              applyPhotoMapToComps();
+              renderLiveComps();
+              renderVisualBoard();
+              const st = d2.status || 'ready';
+              const still = st === 'pending' || st === 'fetching';
+              setPhotoFetchBanner(still, d2.message || 'Fetching listing photos…', d2.done || 0, d2.total || 0);
+              if (!still) {{
+                clearInterval(photoPollTimer);
+                photoPollTimer = null;
+              }}
+            }} catch (e) {{}}
+          }}, 2000);
+        }}
       }}
     }} catch (e) {{}}
   }}
@@ -2857,6 +3038,8 @@ function rowToComp(row) {{
     baths: Number(row.Baths || 0),
     year_built: row.YearBuilt || '',
     garage: Number(row.Garage || 0),
+    lot_size: Number(row.LotSize || 0),
+    acres: Number(row.Acres || 0),
     dom: Number(row.DOM || 0),
     ppsf: Number(row.PPSF || (sqft ? sold / sqft : 0)),
     mls: mls,
@@ -2963,6 +3146,7 @@ function renderLiveComps() {{
     rail.innerHTML = '<p class="muted">No comps selected. Use Full Market Data → <strong>Use as comp</strong> on Sold rows.</p>';
     if (tbody) tbody.innerHTML = '<tr><td colspan="9">No comps selected</td></tr>';
     syncCompToolbar();
+    renderMarketMap();
     return;
   }}
   rail.innerHTML = liveComps.map((c, i) => buildCompCardHtml(i, c)).join('');
@@ -2980,6 +3164,104 @@ function renderLiveComps() {{
     ).join('');
   }}
   syncCompToolbar();
+  renderMarketMap();
+}}
+let marketMap = null;
+let marketMapLayer = null;
+function renderMarketMap() {{
+  const el = document.getElementById('compMap');
+  const wrap = document.getElementById('compMapWrap');
+  if (!el || typeof L === 'undefined') {{
+    if (wrap) wrap.style.display = 'none';
+    return;
+  }}
+  const picked = new Set((selectedCompMls || []).map(String));
+  const points = [];
+  (TABLE || []).forEach((row) => {{
+    const lat = Number(row.Latitude), lng = Number(row.Longitude);
+    if (!isFinite(lat) || !isFinite(lng) || (lat === 0 && lng === 0)) return;
+    const mls = String(row.MLSNumber || '');
+    const status = String(row.Status || '');
+    let kind = 'sold';
+    if (picked.has(mls)) kind = 'comp';
+    else if (/active|pending|backup/i.test(status)) kind = 'active';
+    else if (!/sold/i.test(status)) kind = 'active';
+    points.push({{
+      lat, lng, kind, mls,
+      label: String(row.Address || mls || 'Listing'),
+      price: Number(row.DisplayPrice || row.SoldPrice || row.Price || 0),
+      status,
+    }});
+  }});
+  (liveComps || []).forEach((c) => {{
+    const lat = Number(c.lat), lng = Number(c.lng);
+    if (!isFinite(lat) || !isFinite(lng)) return;
+    const mls = String(c.mls || '');
+    if (points.some(p => p.mls === mls)) return;
+    points.push({{
+      lat, lng, kind: 'comp', mls,
+      label: String(c.address || mls || 'Comp'),
+      price: Number(c.sold_price || 0),
+      status: 'Sold',
+    }});
+  }});
+  const sub = DATA.subjectSnap || {{}};
+  let subLat = Number(sub.lat), subLng = Number(sub.lng);
+  if ((!isFinite(subLat) || !isFinite(subLng)) && points.length) {{
+    subLat = points.reduce((s, p) => s + p.lat, 0) / points.length;
+    subLng = points.reduce((s, p) => s + p.lng, 0) / points.length;
+  }}
+  if (isFinite(subLat) && isFinite(subLng)) {{
+    points.push({{
+      lat: subLat, lng: subLng, kind: 'you', mls: 'subject',
+      label: String(sub.address || 'Your home'),
+      price: Number(sub.rec || currentRec || 0),
+      status: 'Subject',
+    }});
+  }}
+  if (!points.length) {{
+    wrap.style.display = 'none';
+    return;
+  }}
+  wrap.style.display = '';
+  if (!marketMap) {{
+    marketMap = L.map(el, {{ scrollWheelZoom: false }});
+    L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {{
+      maxZoom: 18,
+      attribution: '&copy; OpenStreetMap',
+    }}).addTo(marketMap);
+    marketMapLayer = L.layerGroup().addTo(marketMap);
+  }}
+  marketMapLayer.clearLayers();
+  const colors = {{ you: '#0c3c6e', comp: '#0e7a6d', sold: '#94a3b8', active: '#c9a227' }};
+  const bounds = [];
+  points.forEach((p) => {{
+    const r = p.kind === 'you' ? 11 : (p.kind === 'comp' ? 8 : 5);
+    const marker = L.circleMarker([p.lat, p.lng], {{
+      radius: r,
+      color: '#fff',
+      weight: p.kind === 'you' ? 2 : 1,
+      fillColor: colors[p.kind] || '#94a3b8',
+      fillOpacity: p.kind === 'sold' ? 0.55 : 0.92,
+    }});
+    marker.bindPopup(
+      '<strong>' + escapeHtml(p.label) + '</strong><br>' +
+      escapeHtml(p.status) + (p.price ? '<br>' + money(p.price) : '') +
+      (p.mls && p.mls !== 'subject' ? '<br>MLS ' + escapeHtml(p.mls) : '')
+    );
+    if (p.kind === 'comp' && p.mls) {{
+      marker.on('click', () => {{
+        const idx = liveComps.findIndex(c => String(c.mls || '') === p.mls);
+        if (idx >= 0) openCompListing(idx);
+      }});
+    }}
+    marker.addTo(marketMapLayer);
+    bounds.push([p.lat, p.lng]);
+  }});
+  try {{
+    marketMap.fitBounds(bounds, {{ padding: [28, 28], maxZoom: 15 }});
+    setTimeout(() => marketMap.invalidateSize(), 80);
+  }} catch (e) {{}}
 }}
 function setCarouselSlide(carousel, idx) {{
   const slides = [...carousel.querySelectorAll('img.comp-photo')];
@@ -3090,15 +3372,30 @@ function openCompListing(idx) {{
 
   const sold = Number(c.sold_price || 0);
   const sqft = Math.round(Number(c.living_area || 0));
-  const subSqft = Math.round(Number(sub.living_area || 0));
+  const subSqft = Math.round(Number(sub.living_area || (DATA.lf && DATA.lf.subjectSqft) || 0));
   const ppsf = Math.round(Number(c.ppsf || (sqft ? sold / sqft : 0)));
   const rec = Number(sub.rec || currentRec || 0);
+  const subPpsf = Math.round(Number((subSqft && rec) ? (rec / subSqft) : 0));
+  const subDom = Number(sub.dom || 0);
+  const saleLot = Number(c.lot_size || 0);
+  const saleAcres = Number(c.acres || 0);
+  const subLot = Number(sub.lot_size || 0);
+  const subAcres = Number(sub.acres || 0);
   const priceDelta = sold && rec ? sold - rec : 0;
   let takeaway = 'Use this sale as a visual and price check against your home\\u2019s specs.';
   if (sold && rec) {{
     if (Math.abs(priceDelta) < 2500) takeaway = 'Sold right around your recommended list — a strong visual comps check.';
     else if (priceDelta > 0) takeaway = 'Sold <strong>' + money(priceDelta) + ' above</strong> your recommended list. Ask: does this home look better than yours?';
     else takeaway = 'Sold <strong>' + money(Math.abs(priceDelta)) + ' below</strong> your recommended list. Ask: does yours look stronger than this sale?';
+  }}
+
+  function fmtLot(lotSf, acres) {{
+    const sf = Math.round(Number(lotSf) || 0);
+    const ac = Number(acres) || 0;
+    if (sf > 0 && ac > 0) return sf.toLocaleString() + ' sf · ' + ac.toFixed(2) + ' ac';
+    if (sf > 0) return sf.toLocaleString() + ' sf';
+    if (ac > 0) return ac.toFixed(2) + ' ac';
+    return '—';
   }}
 
   function vsRow(label, youVal, saleVal, deltaMarkup) {{
@@ -3121,15 +3418,17 @@ function openCompListing(idx) {{
       '</div>' +
       '<div class="ld-vs">Side-by-side</div>' +
       '<table class="ld-vs-table">' +
-        '<thead><tr><th>Fact</th><th class="you">Your home</th><th>This sale</th></tr></thead>' +
+        '<colgroup><col class="c-metric"><col class="c-you"><col class="c-sale"></colgroup>' +
+        '<thead><tr><th></th><th class="you">Your home</th><th>This sale</th></tr></thead>' +
         '<tbody>' +
-          vsRow('Sold / list', rec ? money(rec) : '—', money(sold), rec ? ' ' + deltaHtml(sold, rec, false) : '') +
-          vsRow('Sq ft', subSqft ? subSqft.toLocaleString() : '—', sqft ? sqft.toLocaleString() : '—', deltaHtml(c.living_area, sub.living_area, false)) +
-          vsRow('Beds / Baths', (sub.beds || 0) + ' / ' + (sub.baths || 0), (c.beds || 0) + ' / ' + (c.baths || 0), '') +
+          vsRow('List / sold', rec ? money(rec) : '—', money(sold), rec ? deltaHtml(sold, rec, false) : '') +
+          vsRow('Sq ft', subSqft ? subSqft.toLocaleString() : '—', sqft ? sqft.toLocaleString() : '—', deltaHtml(c.living_area, subSqft || sub.living_area, false)) +
+          vsRow('$ / sq ft', subPpsf ? ('$' + subPpsf) : '—', ppsf ? ('$' + ppsf) : '—', deltaHtml(ppsf, subPpsf, false)) +
+          vsRow('Beds / baths', (sub.beds || 0) + ' / ' + (sub.baths || 0), (c.beds || 0) + ' / ' + (c.baths || 0), '') +
           vsRow('Year built', sub.year_built || '—', c.year_built || '—', '') +
-          vsRow('Garage', (sub.garage || 0) + '-car', (c.garage || 0) + '-car', '') +
-          vsRow('DOM', '—', Math.round(c.dom || 0) + ' days', '') +
-          vsRow('$ / sq ft', '—', ppsf ? ('$' + ppsf) : '—', '') +
+          vsRow('Garage', (sub.garage || 0) ? ((sub.garage || 0) + '-car') : '—', (c.garage || 0) ? ((c.garage || 0) + '-car') : '—', '') +
+          vsRow('Lot', fmtLot(subLot, subAcres), fmtLot(saleLot, saleAcres), deltaHtml(saleLot || (saleAcres * 43560), subLot || (subAcres * 43560), false)) +
+          vsRow('DOM', subDom ? (Math.round(subDom) + ' days') : '—', Math.round(c.dom || 0) ? (Math.round(c.dom || 0) + ' days') : '—', '') +
         '</tbody>' +
       '</table>' +
       '<div class="ld-takeaway">' + takeaway + '</div>' +
@@ -3537,9 +3836,70 @@ function renderObjections(text) {{
 }}
 
 const panel = document.getElementById('panel'), overlay = document.getElementById('overlay'), fab = document.getElementById('fab');
-function openAgentPanel() {{ panel.classList.add('open'); overlay.classList.add('open'); fab.classList.add('panel-open'); }}
-function closeAgentPanel() {{ panel.classList.remove('open'); overlay.classList.remove('open'); fab.classList.remove('panel-open'); }}
-fab.onclick = openAgentPanel;
+const agentMenu = document.getElementById('agentMenu');
+function closeAgentMenu() {{
+  if (!agentMenu || !fab) return;
+  agentMenu.classList.remove('open');
+  agentMenu.hidden = true;
+  fab.classList.remove('menu-open');
+  fab.setAttribute('aria-expanded', 'false');
+}}
+function toggleAgentMenu() {{
+  if (!agentMenu || !fab) return;
+  const open = !agentMenu.classList.contains('open');
+  if (open) {{
+    agentMenu.hidden = false;
+    agentMenu.classList.add('open');
+    fab.classList.add('menu-open');
+    fab.setAttribute('aria-expanded', 'true');
+  }} else {{
+    closeAgentMenu();
+  }}
+}}
+function openAgentPanel() {{
+  closeAgentMenu();
+  panel.classList.add('open');
+  overlay.classList.add('open');
+  fab.classList.add('panel-open');
+}}
+function closeAgentPanel() {{
+  panel.classList.remove('open');
+  overlay.classList.remove('open');
+  fab.classList.remove('panel-open');
+}}
+fab.onclick = (e) => {{ e.stopPropagation(); toggleAgentMenu(); }};
+document.getElementById('menuOpenTools')?.addEventListener('click', () => openAgentPanel());
+document.getElementById('menuSignOut')?.addEventListener('click', async () => {{
+  try {{ await fetch('/api/logout', {{ method: 'POST', credentials: 'same-origin' }}); }} catch (err) {{}}
+  location.href = '/saas/login.html';
+}});
+fetch('/api/auth-status', {{ credentials: 'same-origin' }})
+  .then(r => r.json())
+  .then(data => {{
+    if (!(data?.authenticated && data?.user?.role === 'admin')) return;
+    let adminLink = document.getElementById('menuAdminLink');
+    if (!adminLink) {{
+      const menu = document.getElementById('agentMenu');
+      const signOut = document.getElementById('menuSignOut');
+      if (menu && signOut) {{
+        adminLink = document.createElement('a');
+        adminLink.href = '/saas/admin.html';
+        adminLink.id = 'menuAdminLink';
+        adminLink.setAttribute('role', 'menuitem');
+        adminLink.innerHTML = '<span class="mi-ico">⚙</span><span class="mi-copy"><strong>Admin</strong><span>Users, reports &amp; feedback</span></span>';
+        menu.insertBefore(adminLink, signOut);
+      }}
+    }}
+    if (adminLink) adminLink.hidden = false;
+  }})
+  .catch(() => {{}});
+document.addEventListener('click', (e) => {{
+  const wrap = document.getElementById('agentMenuWrap');
+  if (wrap && !wrap.contains(e.target)) closeAgentMenu();
+}});
+document.addEventListener('keydown', (e) => {{
+  if (e.key === 'Escape') {{ closeAgentMenu(); closeAgentPanel(); }}
+}});
 document.getElementById('closePanel').onclick = overlay.onclick = closeAgentPanel;
 function applyEdits() {{
   const rec = +document.getElementById('editRec').value;

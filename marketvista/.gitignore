@@ -1,0 +1,5 @@
+# MarketVista — do not commit secrets
+.env
+.env.*
+!.env.example
+output/photo_cache/

@@ -103,7 +103,7 @@
   <div class="trial-band">
     <div>
       <strong>Start free — no card required.</strong>
-      <p>3 full presentations or 60 days, whichever comes first. Promo codes (e.g. COLDWELL-NOCO) welcome at signup.</p>
+      <p>3 full presentations or 60 days, whichever comes first. Promo codes (e.g. CBListLogic) welcome at signup.</p>
     </div>
     <div style="display:flex;gap:12px;flex-wrap:wrap">
       <a href="/demo" class="btn btn-outline">Try the sample</a>
@@ -119,7 +119,7 @@
       <p class="desc">The full product on real listing appointments — plus one-click in-app feedback.</p>
       <ul>
         <li>Full interactive presentations</li>
-        <li>Seller packet + flipbook</li>
+        <li>Print leave-behind + flipbook</li>
         <li>Agent tools &amp; edits</li>
         <li>Sample listing included</li>
       </ul>
@@ -133,11 +133,11 @@
       <p class="desc">One listing presentation when you don't need a subscription.</p>
       <ul>
         <li>One full presentation</li>
-        <li>Seller packet + flipbook</li>
+        <li>Print leave-behind + flipbook</li>
         <li>Your branding</li>
         <li>Charts &amp; data table</li>
       </ul>
-      <a href="mailto:adam@saahomes.com?subject=ListLogic%20one-time%20report" class="btn btn-outline">Request access</a>
+      <button type="button" class="btn btn-outline" data-checkout="one_time">Buy one report</button>
     </div>
 
     <div class="plan featured">
@@ -151,34 +151,34 @@
         <li>Priority updates</li>
         <li>Cancel anytime</li>
       </ul>
-      <a href="mailto:adam@saahomes.com?subject=ListLogic%20agent%20monthly" class="btn btn-primary">Request access</a>
+      <button type="button" class="btn btn-primary" data-checkout="agent_monthly">Subscribe — $39/mo</button>
     </div>
 
     <div class="plan">
       <div class="tag">Teams &amp; offices</div>
       <h2>Brokerage</h2>
       <div class="price">$29 <span>/ seat / mo</span></div>
-      <p class="desc">Per-agent seats with shared branding. Minimum 5 seats; 10+ at $24/seat.</p>
+      <p class="desc">Per-agent seats with shared branding. Minimum 5 seats; annual available at checkout.</p>
       <ul>
         <li>Min 5 agent seats</li>
         <li>Shared branding defaults</li>
         <li>Office-friendly volume</li>
         <li>White-label on request</li>
       </ul>
-      <a href="mailto:adam@saahomes.com?subject=ListLogic%20brokerage" class="btn btn-gold">Talk to us</a>
+      <button type="button" class="btn btn-gold" data-checkout="brokerage_monthly">Checkout seats</button>
     </div>
   </div>
 
   <div class="annual">
     <div>
       <strong>Agent annual — $390/year</strong>
-      <p>About two months free (~$32.50/mo). Brokerage annual seats at $290/seat/year. Card checkout opens after early access — for now, start a trial or email to convert.</p>
+      <p>About two months free (~$32.50/mo). Brokerage annual seats at $290/seat/year. Secure card checkout via Stripe.</p>
     </div>
-    <a href="mailto:adam@saahomes.com?subject=ListLogic%20annual" class="btn btn-gold">Ask about annual</a>
+    <button type="button" class="btn btn-gold" data-checkout="agent_annual">Go annual — $390</button>
   </div>
 
   <p class="fineprint">
-    Early-access trial users stay free during the beta and get founder-friendly conversion when paid plans open.
+    Early-access trial users stay free during the beta. After trial, pick a plan above or manage billing from the app.
     Questions? See the <a href="faq.html">FAQ</a> or email <a href="mailto:adam@saahomes.com">adam@saahomes.com</a>.
   </p>
 </div>
@@ -192,6 +192,54 @@
     <div><a href="index.html">Home</a> · <a href="faq.html">FAQ</a> · <a href="mailto:adam@saahomes.com">Contact</a></div>
   </div>
 </footer>
+
+<script>
+(async function () {
+  const params = new URLSearchParams(location.search);
+  if (params.get('billing') === 'cancel') {
+    const note = document.createElement('p');
+    note.className = 'fineprint';
+    note.style.marginTop = '18px';
+    note.textContent = 'Checkout canceled — no charge. Pick a plan anytime.';
+    document.querySelector('.plans')?.after(note);
+  }
+
+  async function startCheckout(plan) {
+    let quantity = 1;
+    if (plan.startsWith('brokerage')) {
+      const raw = window.prompt('How many seats? (minimum 5)', '5');
+      if (raw == null) return;
+      quantity = Math.max(5, parseInt(raw, 10) || 5);
+    }
+    const res = await fetch('/api/billing/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ plan, quantity }),
+    });
+    if (res.status === 401) {
+      location.href = '/saas/signup.html?next=' + encodeURIComponent('/saas/pricing.html?plan=' + plan);
+      return;
+    }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      alert(data.detail || 'Checkout is unavailable right now. Email adam@saahomes.com.');
+      return;
+    }
+    if (data.url) location.href = data.url;
+  }
+
+  document.querySelectorAll('[data-checkout]').forEach((btn) => {
+    btn.addEventListener('click', () => startCheckout(btn.getAttribute('data-checkout')));
+  });
+
+  const planQ = params.get('plan');
+  if (planQ && ['one_time','agent_monthly','agent_annual','brokerage_monthly','brokerage_annual'].includes(planQ)) {
+    const authed = await fetch('/api/auth-status', { credentials: 'same-origin' }).then(r => r.json()).catch(() => ({}));
+    if (authed.authenticated) startCheckout(planQ);
+  }
+})();
+</script>
 
 </body>
 </html>

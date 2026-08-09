@@ -228,7 +228,7 @@ def build_presentation(
     table_cols = [
         "Status", "MLSNumber", "Address", "DisplayPrice", "SoldPrice", "Price",
         "LivingArea", "Beds", "Baths", "YearBuilt", "DOM", "PPSF", "Subdivision", "Garage",
-        "SoldDate", "City",
+        "LotSize", "Acres", "SoldDate", "City", "Latitude", "Longitude",
     ]
     # Optional listing photo columns if agent included them in the MLS export
     for photo_col in (

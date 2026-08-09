@@ -47,6 +47,7 @@ def _adapt_sql(sql: str) -> str:
 def connect() -> Iterator[Any]:
     if using_postgres():
         import psycopg
+        from psycopg.rows import dict_row
 
         url = database_url()
         # Railway sometimes uses postgres:// — psycopg wants postgresql://
@@ -54,7 +55,9 @@ def connect() -> Iterator[Any]:
             url = "postgresql://" + url[len("postgres://") :]
         # Hard timeout so Railway healthchecks don't hang forever if Postgres
         # is briefly unreachable during a rolling deploy.
-        conn = psycopg.connect(url, connect_timeout=10)
+        # dict_row is required: _row_to_dict expects dict-like rows, and
+        # psycopg3's default tuple rows silently break every auth lookup.
+        conn = psycopg.connect(url, connect_timeout=10, row_factory=dict_row)
         try:
             yield conn
             conn.commit()
@@ -147,8 +150,61 @@ def run_migrations() -> None:
     _migrate_presentation_limit_nullable()
     _ensure_presentations_table()
     _ensure_magic_auth_schema()
+    _ensure_billing_schema()
+    _ensure_assistant_chats_table()
     backend = "postgres" if using_postgres() else f"sqlite:{_sqlite_path()}"
     logger.info("Migrations applied (%s)", backend)
+
+
+def _ensure_assistant_chats_table() -> None:
+    """Persisted ListLogic assistant Q&A for admin review."""
+    execute(
+        """
+        CREATE TABLE IF NOT EXISTS assistant_turns (
+          id TEXT PRIMARY KEY,
+          user_id TEXT,
+          conversation_id TEXT NOT NULL DEFAULT '',
+          page_url TEXT NOT NULL DEFAULT '',
+          user_message TEXT NOT NULL,
+          assistant_reply TEXT NOT NULL DEFAULT '',
+          ok INTEGER NOT NULL DEFAULT 1,
+          model TEXT NOT NULL DEFAULT '',
+          created_at TEXT NOT NULL
+        )
+        """
+    )
+    for idx_sql in (
+        "CREATE INDEX IF NOT EXISTS idx_assistant_turns_created ON assistant_turns(created_at)",
+        "CREATE INDEX IF NOT EXISTS idx_assistant_turns_user ON assistant_turns(user_id)",
+        "CREATE INDEX IF NOT EXISTS idx_assistant_turns_convo ON assistant_turns(conversation_id)",
+    ):
+        try:
+            execute(idx_sql)
+        except Exception:
+            pass
+
+
+def _ensure_billing_schema() -> None:
+    """Stripe customer / subscription columns on users."""
+    for col, typ, default in (
+        ("stripe_customer_id", "TEXT", "''"),
+        ("stripe_subscription_id", "TEXT", "''"),
+        ("plan", "TEXT", "''"),
+    ):
+        try:
+            if using_postgres():
+                execute(f"ALTER TABLE users ADD COLUMN IF NOT EXISTS {col} {typ} DEFAULT {default}")
+            else:
+                execute(f"ALTER TABLE users ADD COLUMN {col} {typ} DEFAULT {default}")
+        except Exception:
+            pass
+    for idx_sql in (
+        "CREATE INDEX IF NOT EXISTS idx_users_stripe_customer ON users(stripe_customer_id)",
+    ):
+        try:
+            execute(idx_sql)
+        except Exception:
+            pass
 
 
 def _ensure_magic_auth_schema() -> None:
@@ -237,6 +293,17 @@ def _ensure_presentations_table() -> None:
     ):
         try:
             execute(idx_sql)
+        except Exception:
+            pass
+    for col, typ, default in (
+        ("presentation_html", "TEXT", "''"),
+        ("deck_html", "TEXT", "''"),
+    ):
+        try:
+            if using_postgres():
+                execute(f"ALTER TABLE presentations ADD COLUMN IF NOT EXISTS {col} {typ} DEFAULT {default}")
+            else:
+                execute(f"ALTER TABLE presentations ADD COLUMN {col} {typ} DEFAULT {default}")
         except Exception:
             pass
 

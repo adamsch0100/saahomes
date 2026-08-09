@@ -1,0 +1,135 @@
+"""Simple SMTP mailer for ListLogic lifecycle + feedback emails."""
+from __future__ import annotations
+
+import logging
+import os
+import smtplib
+from email.message import EmailMessage
+from typing import Optional
+
+logger = logging.getLogger("ListLogic.mail")
+
+
+def _smtp_config() -> Optional[dict]:
+    host = (os.environ.get("SMTP_HOST") or os.environ.get("OUTREACH_SMTP_HOST") or "").strip()
+    user = (os.environ.get("SMTP_USER") or os.environ.get("GMAIL_USER") or os.environ.get("OUTREACH_SMTP_USER") or "").strip()
+    password = (
+        os.environ.get("SMTP_PASSWORD")
+        or os.environ.get("GMAIL_APP_PASSWORD")
+        or os.environ.get("OUTREACH_SMTP_PASSWORD")
+        or ""
+    ).strip()
+    if not host and user and "@gmail.com" in user.lower():
+        host = "smtp.gmail.com"
+    if not host or not user or not password:
+        return None
+    port = int(os.environ.get("SMTP_PORT") or os.environ.get("OUTREACH_SMTP_PORT") or "587")
+    return {"host": host, "port": port, "user": user, "password": password}
+
+
+def feedback_to() -> str:
+    return (os.environ.get("FEEDBACK_TO") or os.environ.get("ADMIN_BOOTSTRAP_EMAIL") or "adam@saahomes.com").strip()
+
+
+def send_email(*, to: str, subject: str, body: str, reply_to: str = "") -> bool:
+    cfg = _smtp_config()
+    if not cfg:
+        logger.info("SMTP not configured — skip email to %s · %s", to, subject)
+        return False
+    msg = EmailMessage()
+    msg["From"] = cfg["user"]
+    msg["To"] = to
+    msg["Subject"] = subject
+    if reply_to:
+        msg["Reply-To"] = reply_to
+    msg.set_content(body)
+    try:
+        with smtplib.SMTP(cfg["host"], cfg["port"], timeout=30) as smtp:
+            smtp.starttls()
+            smtp.login(cfg["user"], cfg["password"])
+            smtp.send_message(msg)
+        logger.info("Email sent to %s · %s", to, subject)
+        return True
+    except Exception:
+        logger.exception("Failed sending email to %s", to)
+        return False
+
+
+def send_magic_link(*, to: str, url: str, is_new: bool = False) -> bool:
+    action = "Start your ListLogic trial" if is_new else "Sign in to ListLogic"
+    body = (
+        f"Hi,\n\n"
+        f"{action} with this one-time link (expires in 30 minutes):\n\n"
+        f"{url}\n\n"
+        f"If you didn't request this, you can ignore this email.\n\n"
+        f"— ListLogic\n"
+    )
+    subject = "Your ListLogic sign-in link" if not is_new else "Your ListLogic trial link"
+    return send_email(to=to, subject=subject, body=body)
+
+
+def send_welcome(user: dict, base_url: str) -> None:
+    days = user.get("trial_ends_at") or ""
+    limit = user.get("presentation_limit")
+    body = (
+        f"Hi {user.get('name') or 'there'},\n\n"
+        f"Welcome to ListLogic — your trial is active.\n\n"
+        f"Trial terms: {limit} presentations OR until {days} — whichever comes first.\n\n"
+        f"Open the app: {base_url}/saas/app.html\n"
+        f"Try the sample listing (no MLS export needed): {base_url}/demo\n\n"
+        f"Questions or bugs? Use Send feedback in the app, or reply to this email.\n\n"
+        f"— ListLogic\n"
+    )
+    send_email(to=user["email"], subject="Welcome to ListLogic — your trial is ready", body=body)
+    send_email(
+        to=feedback_to(),
+        subject=f"ListLogic signup · {user.get('email')}",
+        body=(
+            f"New trial signup\n\n"
+            f"Name: {user.get('name')}\n"
+            f"Email: {user.get('email')}\n"
+            f"Phone: {user.get('phone')}\n"
+            f"Brokerage: {user.get('brokerage')}\n"
+            f"Trial ends: {days}\n"
+            f"Presentation limit: {limit}\n"
+        ),
+    )
+
+
+def send_trial_reminder(user: dict, base_url: str) -> None:
+    body = (
+        f"Hi {user.get('name') or 'there'},\n\n"
+        f"Your ListLogic trial ends on {user.get('trial_ends_at')}.\n"
+        f"Presentations used: {user.get('presentations_used')} / {user.get('presentation_limit')}.\n\n"
+        f"Upgrade / plans: {base_url}/saas/pricing.html\n"
+        f"App: {base_url}/saas/app.html\n\n"
+        f"— ListLogic\n"
+    )
+    send_email(to=user["email"], subject="ListLogic trial ending soon", body=body)
+
+
+def send_trial_expired(user: dict, base_url: str) -> None:
+    body = (
+        f"Hi {user.get('name') or 'there'},\n\n"
+        f"Your ListLogic trial has ended (3 presentations or 60 days — whichever came first).\n\n"
+        f"Ready to keep going? See plans: {base_url}/saas/pricing.html\n"
+        f"Or reply and we’ll get you set up.\n\n"
+        f"— ListLogic\n"
+    )
+    send_email(to=user["email"], subject="Your ListLogic trial ended — keep pricing with data", body=body)
+
+
+def send_feedback_notice(payload: dict) -> None:
+    body = (
+        f"Category: {payload.get('category')}\n"
+        f"From: {payload.get('email')}\n"
+        f"User id: {payload.get('user_id')}\n"
+        f"Page: {payload.get('page_url')}\n\n"
+        f"{payload.get('message')}\n"
+    )
+    send_email(
+        to=feedback_to(),
+        subject=f"ListLogic feedback · {payload.get('category')}",
+        body=body,
+        reply_to=payload.get("email") or "",
+    )

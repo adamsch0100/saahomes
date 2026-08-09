@@ -2,12 +2,14 @@
 """ListLogic web app — upload MLS export, generate presentation."""
 from __future__ import annotations
 
+import asyncio
 import html as html_lib
 import json
 import logging
 import os
 import re
 import shutil
+import threading
 import time
 import uuid
 from collections import defaultdict, deque
@@ -23,10 +25,14 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from subject import SUBJECT_2845_DEFAULTS, resolve_subject
 
 ROOT = Path(__file__).resolve().parent
-UPLOAD_DIR = ROOT / "uploads"
-OUTPUT_DIR = ROOT / "output" / "runs"
+# Prefer Railway volume (/data) so runs survive redeploys. Local/dev falls back to repo paths.
+_DATA_ROOT = Path(os.environ.get("LISTLOGIC_DATA_DIR") or "/data")
+if not _DATA_ROOT.exists():
+    _DATA_ROOT = ROOT
+UPLOAD_DIR = Path(os.environ.get("LISTLOGIC_UPLOAD_DIR") or (_DATA_ROOT / "uploads"))
+OUTPUT_DIR = Path(os.environ.get("LISTLOGIC_OUTPUT_DIR") or (_DATA_ROOT / "output" / "runs"))
 DEMO_EXPORT = ROOT / "data" / "export-71.txt"
-BRANDING_DIR = ROOT / "output" / "branding"
+BRANDING_DIR = Path(os.environ.get("LISTLOGIC_BRANDING_DIR") or (_DATA_ROOT / "output" / "branding"))
 
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -67,13 +73,16 @@ def _require_admin(request: Request) -> dict:
 def _set_session_cookie(resp: Response, request: Request, token: str) -> None:
     import auth_service
 
+    base = (os.environ.get("APP_BASE_URL") or "").lower()
+    # Behind Railway the request scheme is often http even when the public URL is https.
+    secure = base.startswith("https://") or request.url.scheme == "https"
     resp.set_cookie(
         auth_service.SESSION_COOKIE,
         token,
         max_age=auth_service.SESSION_DAYS * 24 * 60 * 60,
         httponly=True,
         samesite="lax",
-        secure=request.url.scheme == "https",
+        secure=secure,
         path="/",
     )
 
@@ -101,6 +110,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/api/auth-status",
         "/api/feedback",
         "/api/invite-info",
+        "/api/billing/config",
+        "/api/billing/webhook",
         "/favicon.ico",
         "/presentation.html",
         "/deck.html",
@@ -333,23 +344,57 @@ def _generate(
         run_dir = OUTPUT_DIR / run_id
         run_dir.mkdir(parents=True, exist_ok=True)
 
-    # Hosted listing photos: MLS disk cache → download into this run (Reef only on cache miss).
+    # Fast path: apply cached listing photos only, then finish generate.
+    # Full Reef fetch continues in the background so the UI can show photos as they arrive.
     photo_map: dict = {}
+    photos_pending = False
     try:
         from reef_photos import enrich_report_photos, reef_enabled
 
         if reef_enabled():
-            photo_map = enrich_report_photos(report, run_dir=run_dir, run_id=run_id)
+            photo_map = enrich_report_photos(
+                report,
+                run_dir=run_dir,
+                run_id=run_id,
+                cache_only=True,
+            )
             meta["reef_photos"] = len([k for k, v in photo_map.items() if v])
             meta["photos_hosted"] = True
+            photos_pending = True
     except Exception:
-        logger.exception("ReefAPI photo enrichment failed")
+        logger.exception("Cached photo apply failed")
 
     if photo_map:
         try:
             _save_photo_map(run_dir, photo_map)
+            galleries: dict = {}
+            for k, v in photo_map.items():
+                if v:
+                    galleries[k] = [v]
+            for c in (report.get("positioning") or {}).get("closest_comps") or []:
+                if isinstance(c, dict) and c.get("mls_number") and c.get("photos"):
+                    galleries[str(c["mls_number"])] = list(c["photos"])
+            sub = report.get("subject") or {}
+            if isinstance(sub, dict) and (sub.get("photos") or sub.get("photo_url") or sub.get("photo")):
+                galleries[SUBJECT_PHOTO_MLS] = list(
+                    sub.get("photos")
+                    or [sub.get("photo_url") or sub.get("photo")]
+                )
+            _save_gallery_map(run_dir, galleries)
         except Exception:
             logger.exception("Failed to persist comp_photos.json for %s", run_id)
+
+    if photos_pending:
+        total = _expected_photo_targets(report)
+        _write_photos_status(
+            run_dir,
+            status="pending",
+            done=len([v for v in photo_map.values() if v]),
+            total=total,
+            message="Fetching listing photos…",
+        )
+    else:
+        _write_photos_status(run_dir, status="ready", done=0, total=0, message="")
 
     (run_dir / "presentation.json").write_text(
         json.dumps(report, indent=2, default=str),
@@ -357,6 +402,11 @@ def _generate(
     )
     html_path = _save_html(report, run_dir / "presentation.html")
 
+    if photos_pending:
+        try:
+            _start_background_photos(run_id, run_dir)
+        except Exception:
+            logger.exception("Failed to start background photo job for %s", run_id)
     latest = ROOT / "output" / "presentation.html"
     latest.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(html_path, latest)
@@ -411,6 +461,7 @@ def _generate(
         "pdf_url": pdf_url,
         "story_pdf_url": story_pdf_url,
         "deck_url": f"/runs/{run_id}/deck.html",
+        "photos_pending": photos_pending,
         "recommended_price": positioning.get("recommended_price"),
         "price_low": positioning.get("price_low"),
         "price_high": positioning.get("price_high"),
@@ -447,7 +498,53 @@ def health():
         "product": "ListLogic",
         "auth": "session",
         "db": database.health_info(),
+        "storage": {
+            "output_dir": str(OUTPUT_DIR),
+            "upload_dir": str(UPLOAD_DIR),
+            "data_root": str(_DATA_ROOT),
+            "persistent": str(_DATA_ROOT).replace("\\", "/").startswith("/data")
+            or bool(os.environ.get("LISTLOGIC_DATA_DIR")),
+        },
     }
+
+
+def _hydrate_run_from_db(run_id: str) -> Optional[Path]:
+    """Restore presentation.html from Postgres if disk was wiped by a redeploy."""
+    import auth_service
+
+    try:
+        row = auth_service.get_presentation_by_run(run_id)
+    except Exception:
+        logger.exception("DB hydrate lookup failed for %s", run_id)
+        return None
+    html = (row or {}).get("presentation_html") or ""
+    if not html:
+        return None
+    run_dir = OUTPUT_DIR / run_id
+    run_dir.mkdir(parents=True, exist_ok=True)
+    path = run_dir / "presentation.html"
+    path.write_text(html, encoding="utf-8")
+    deck_html = (row or {}).get("deck_html") or ""
+    if deck_html:
+        (run_dir / "deck.html").write_text(deck_html, encoding="utf-8")
+    logger.info("Hydrated run %s from database backup", run_id)
+    return path
+
+
+def _missing_run_page(run_id: str) -> HTMLResponse:
+    safe = html_lib.escape(run_id)
+    body = f"""<!DOCTYPE html><html><head><meta charset="utf-8"><title>Presentation unavailable — ListLogic</title>
+<link rel="stylesheet" href="/saas/ll.css">
+<style>body{{font-family:Inter,system-ui,sans-serif;max-width:560px;margin:12vh auto;padding:24px}}
+h1{{font-family:Fraunces,serif;font-size:1.6rem}} .muted{{color:#64748b}}</style></head>
+<body>
+<h1>This presentation isn’t on the server anymore</h1>
+<p class="muted">Run <code>{safe}</code> was lost when the app redeployed before permanent storage was enabled.</p>
+<p>Generate a fresh presentation from the app — new runs are saved on permanent storage.</p>
+<p><a class="btn btn-primary" href="/saas/app.html">Back to ListLogic</a>
+ · <a href="/demo">Try the sample</a></p>
+</body></html>"""
+    return HTMLResponse(body, status_code=404)
 
 
 @app.get("/api/auth-status")
@@ -469,6 +566,72 @@ def auth_status(request: Request):
         "user": auth_service.public_user(user),
         "entitlement": ent,
     }
+
+
+@app.get("/api/billing/config")
+def billing_config():
+    import stripe_billing
+
+    return stripe_billing.public_plans()
+
+
+@app.post("/api/billing/checkout")
+async def billing_checkout(request: Request):
+    import stripe_billing
+
+    user = _require_user(request)
+    if not stripe_billing.stripe_configured():
+        raise HTTPException(503, "Stripe is not configured yet")
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(400, "Invalid JSON") from exc
+    plan = str(payload.get("plan") or "").strip().lower()
+    quantity = int(payload.get("quantity") or payload.get("seats") or 1)
+    try:
+        session = stripe_billing.create_checkout_session(user, plan=plan, quantity=quantity)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    except Exception as exc:
+        logger.exception("Stripe checkout failed")
+        raise HTTPException(502, f"Checkout failed: {exc}") from exc
+    return {"ok": True, **session}
+
+
+@app.post("/api/billing/portal")
+async def billing_portal(request: Request):
+    import stripe_billing
+
+    user = _require_user(request)
+    if not stripe_billing.stripe_configured():
+        raise HTTPException(503, "Stripe is not configured yet")
+    try:
+        portal = stripe_billing.create_billing_portal_session(user)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    except Exception as exc:
+        logger.exception("Stripe portal failed")
+        raise HTTPException(502, f"Billing portal failed: {exc}") from exc
+    return {"ok": True, **portal}
+
+
+@app.post("/api/billing/webhook")
+async def billing_webhook(request: Request):
+    import stripe_billing
+
+    payload = await request.body()
+    sig = request.headers.get("stripe-signature") or ""
+    try:
+        event = stripe_billing.construct_event(payload, sig)
+    except Exception as exc:
+        logger.warning("Stripe webhook signature failed: %s", exc)
+        raise HTTPException(400, "Invalid webhook signature") from exc
+    try:
+        result = stripe_billing.handle_webhook_event(event)
+    except Exception as exc:
+        logger.exception("Stripe webhook handler failed")
+        raise HTTPException(500, "Webhook handler error") from exc
+    return {"received": True, **result}
 
 
 @app.post("/api/signup")
@@ -529,22 +692,31 @@ async def request_magic_link(request: Request):
         raise HTTPException(400, str(exc)) from exc
 
     sent = False
+    send_error = ""
     try:
         sent = mailer.send_magic_link(to=link["email"], url=link["url"], is_new=link["is_new"])
-    except Exception:
+        if not sent and mailer._smtp_config():
+            send_error = "SMTP is configured but the message could not be delivered. Check Railway logs / Gmail app password."
+    except Exception as exc:
         logger.exception("Magic link email failed")
+        send_error = str(exc)[:200]
 
-    # Dev fallback: include URL when SMTP isn't configured
+    # Dev fallback: include URL when SMTP isn't configured OR send failed
+    configured = bool(mailer._smtp_config())
+    if sent:
+        message = "Check your email for a sign-in link."
+    elif not configured:
+        message = "Email delivery isn't configured — use the link below (dev mode)."
+    else:
+        message = "We couldn't send the email right now — use the link below, or try again in a minute."
     out = {
         "ok": True,
         "email": link["email"],
         "sent": sent,
-        "message": (
-            "Check your email for a sign-in link."
-            if sent
-            else "Email delivery isn't configured — use the link below (dev mode)."
-        ),
+        "message": message,
     }
+    if send_error and not sent:
+        out["send_error"] = send_error
     if not sent:
         out["dev_url"] = link["url"]
     return JSONResponse(out)
@@ -657,6 +829,7 @@ async def login(request: Request):
     content_type = (request.headers.get("content-type") or "").lower()
     email = ""
     password = ""
+    requested_next = ""
     if "application/json" in content_type:
         try:
             payload = await request.json()
@@ -664,11 +837,13 @@ async def login(request: Request):
             raise HTTPException(400, "Invalid JSON") from exc
         email = str(payload.get("email") or "")
         password = str(payload.get("password") or "")
+        requested_next = str(payload.get("next") or "")
     else:
         form = await request.form()
         # Legacy access-code form field "token" no longer supported as primary login
         email = str(form.get("email") or form.get("token") or "")
         password = str(form.get("password") or "")
+        requested_next = str(form.get("next") or "")
         if form.get("token") and not form.get("password"):
             raise HTTPException(
                 400,
@@ -679,10 +854,14 @@ async def login(request: Request):
     except ValueError as exc:
         raise HTTPException(401, str(exc)) from exc
     token = auth_service.create_session(user["id"])
+    home = auth_service.resolve_post_auth_next(user, requested_next)
+    if not bool(int(user.get("profile_complete") or 0)):
+        home = "/saas/onboarding.html?next=" + home
     resp = JSONResponse({
         "ok": True,
         "user": auth_service.public_user(user),
         "entitlement": auth_service.entitlement(user),
+        "next": home,
     })
     _set_session_cookie(resp, request, token)
     return resp
@@ -771,6 +950,25 @@ async def assistant_chat(request: Request):
         user=auth_service.public_user(user),
         page_url=str(payload.get("page_url") or ""),
     )
+    # Persist Q&A for admin review (best-effort)
+    try:
+        last_user = ""
+        for m in reversed(messages if isinstance(messages, list) else []):
+            if isinstance(m, dict) and (m.get("role") or "") == "user":
+                last_user = str(m.get("content") or "")
+                break
+        if last_user:
+            auth_service.save_assistant_turn(
+                user_id=user.get("id"),
+                user_message=last_user,
+                assistant_reply=str(result.get("reply") or ""),
+                page_url=str(payload.get("page_url") or ""),
+                conversation_id=str(payload.get("conversation_id") or ""),
+                ok=bool(result.get("ok")),
+                model=str(result.get("model") or ""),
+            )
+    except Exception:
+        logger.exception("Assistant turn persist failed")
     # Auto-file feedback if model emitted a draft and client asked to commit
     if payload.get("file_feedback") and result.get("feedback_draft"):
         draft = result["feedback_draft"]
@@ -817,6 +1015,7 @@ def _refresh_sample_html(run_dir: Path) -> None:
                 and "In comps · remove" in existing
                 and "btnPrintLeavebehind" in existing
                 and "listlogic-logo.png" in existing
+                and "print-page-spine" in existing
             ):
                 return
         report = json.loads(json_path.read_text(encoding="utf-8"))
@@ -959,6 +1158,49 @@ def admin_users(request: Request, q: str = ""):
     return {"users": auth_service.list_users(q=q)}
 
 
+@app.get("/api/admin/presentations")
+def admin_presentations(request: Request, q: str = ""):
+    import auth_service
+
+    _require_admin(request)
+    return {"presentations": auth_service.list_all_presentations(q=q)}
+
+
+@app.get("/api/admin/stats")
+def admin_stats(request: Request):
+    import auth_service
+
+    _require_admin(request)
+    return {"stats": auth_service.admin_stats()}
+
+
+@app.get("/api/admin/assistant-chats")
+def admin_assistant_chats(request: Request, q: str = ""):
+    import auth_service
+
+    _require_admin(request)
+    return {"turns": auth_service.list_assistant_turns(q=q)}
+
+
+@app.get("/api/admin/events")
+def admin_events(request: Request, q: str = "", type: str = ""):
+    import auth_service
+
+    _require_admin(request)
+    return {"events": auth_service.list_events(q=q, event_type=type)}
+
+
+@app.get("/api/admin/users/{user_id}")
+def admin_user_detail(user_id: str, request: Request):
+    import auth_service
+
+    _require_admin(request)
+    detail = auth_service.admin_user_detail(user_id)
+    if not detail:
+        raise HTTPException(404, "User not found")
+    return detail
+
+
 @app.post("/api/admin/users/{user_id}")
 async def admin_user_update(user_id: str, request: Request):
     import auth_service
@@ -1063,11 +1305,11 @@ async def admin_invite_create(request: Request):
 
 
 @app.get("/api/admin/feedback")
-def admin_feedback(request: Request, status: str = ""):
+def admin_feedback(request: Request, status: str = "", category: str = ""):
     import auth_service
 
     _require_admin(request)
-    return {"feedback": auth_service.list_feedback(status=status)}
+    return {"feedback": auth_service.list_feedback(status=status, category=category)}
 
 
 @app.post("/api/admin/feedback/{feedback_id}")
@@ -1138,7 +1380,9 @@ def view_run(run_id: str):
     run_id = _safe_run_id(run_id)
     path = OUTPUT_DIR / run_id / "presentation.html"
     if not path.exists():
-        raise HTTPException(404, "Run not found")
+        path = _hydrate_run_from_db(run_id) or path
+    if not path.exists():
+        return _missing_run_page(run_id)
     return FileResponse(path, media_type="text/html")
 
 
@@ -1157,7 +1401,9 @@ def view_shared_presentation(share_token: str):
     run_id = _safe_run_id(row["run_id"])
     path = OUTPUT_DIR / run_id / "presentation.html"
     if not path.exists():
-        raise HTTPException(404, "This presentation is no longer available on the server")
+        path = _hydrate_run_from_db(run_id) or path
+    if not path.exists():
+        return _missing_run_page(run_id)
     return RedirectResponse(url=f"/runs/{run_id}/", status_code=302)
 
 
@@ -1433,10 +1679,20 @@ def _safe_mls(mls: str) -> str:
 
 # Allow a reserved key for the subject home photo in the same photo map.
 SUBJECT_PHOTO_MLS = "__subject__"
+_photo_jobs: dict[str, threading.Thread] = {}
+_photo_jobs_lock = threading.Lock()
 
 
 def _photo_map_path(run_dir: Path) -> Path:
     return run_dir / "comp_photos.json"
+
+
+def _gallery_map_path(run_dir: Path) -> Path:
+    return run_dir / "comp_galleries.json"
+
+
+def _photos_status_path(run_dir: Path) -> Path:
+    return run_dir / "photos_status.json"
 
 
 def _load_photo_map(run_dir: Path) -> dict:
@@ -1454,35 +1710,176 @@ def _save_photo_map(run_dir: Path, data: dict) -> None:
     _photo_map_path(run_dir).write_text(json.dumps(data, indent=2), encoding="utf-8")
 
 
+def _load_gallery_map(run_dir: Path) -> dict:
+    path = _gallery_map_path(run_dir)
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def _save_gallery_map(run_dir: Path, data: dict) -> None:
+    _gallery_map_path(run_dir).write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+
+def _load_photos_status(run_dir: Path) -> dict:
+    path = _photos_status_path(run_dir)
+    if not path.exists():
+        return {"status": "ready", "done": 0, "total": 0, "message": ""}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {"status": "ready"}
+    except Exception:
+        return {"status": "ready"}
+
+
+def _write_photos_status(run_dir: Path, **fields) -> dict:
+    cur = _load_photos_status(run_dir)
+    cur.update(fields)
+    cur["updated_at"] = time.time()
+    _photos_status_path(run_dir).write_text(json.dumps(cur, indent=2), encoding="utf-8")
+    return cur
+
+
+def _expected_photo_targets(report: dict) -> int:
+    pos = report.get("positioning") or {}
+    comps = list(pos.get("closest_comps") or [])[:8]
+    n = sum(1 for c in comps if isinstance(c, dict) and (c.get("mls_number") or c.get("address")))
+    sub = report.get("subject") or {}
+    if isinstance(sub, dict) and (sub.get("address") or "").strip():
+        n += 1
+    return n
+
+
+def _background_photo_enrich(run_id: str, run_dir: Path) -> None:
+    """Full Reef enrich after generate returns — updates maps as listings finish."""
+    json_path = run_dir / "presentation.json"
+    try:
+        from reef_photos import enrich_report_photos, reef_enabled
+
+        if not reef_enabled() or not json_path.exists():
+            _write_photos_status(run_dir, status="ready", message="Photo fetch skipped")
+            return
+        report = json.loads(json_path.read_text(encoding="utf-8"))
+        total = _expected_photo_targets(report)
+        _write_photos_status(
+            run_dir,
+            status="fetching",
+            done=0,
+            total=total,
+            message="Fetching listing photos…",
+        )
+        existing = _load_photo_map(run_dir)
+        galleries = _load_gallery_map(run_dir)
+        done_box = {"n": len([v for v in existing.values() if v])}
+
+        def on_listing(key: str, primary_url: str, gallery_urls: list) -> None:
+            existing[key] = primary_url
+            if gallery_urls:
+                galleries[key] = gallery_urls
+            _save_photo_map(run_dir, existing)
+            _save_gallery_map(run_dir, galleries)
+            done_box["n"] = len([v for v in existing.values() if v])
+            _write_photos_status(
+                run_dir,
+                status="fetching",
+                done=done_box["n"],
+                total=total,
+                message=f"Fetching listing photos… {done_box['n']}/{total}",
+            )
+
+        photo_map = enrich_report_photos(
+            report,
+            run_dir=run_dir,
+            run_id=run_id,
+            cache_only=False,
+            deadline=time.time() + 240,
+            on_listing=on_listing,
+        )
+        merged = {**existing, **{k: v for k, v in photo_map.items() if v}}
+        _save_photo_map(run_dir, merged)
+        # Galleries from report rows
+        for c in (report.get("positioning") or {}).get("closest_comps") or []:
+            if not isinstance(c, dict):
+                continue
+            mls = str(c.get("mls_number") or "").strip()
+            photos = c.get("photos") or []
+            if mls and photos:
+                galleries[mls] = list(photos)
+        sub = report.get("subject") or {}
+        if isinstance(sub, dict) and (sub.get("photos") or sub.get("photo_url")):
+            galleries[SUBJECT_PHOTO_MLS] = list(sub.get("photos") or [sub.get("photo_url")])
+        _save_gallery_map(run_dir, galleries)
+        json_path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+        try:
+            _save_html(report, run_dir / "presentation.html")
+        except Exception:
+            logger.exception("Failed to rewrite HTML after background photos for %s", run_id)
+        count = len([v for v in merged.values() if v])
+        _write_photos_status(
+            run_dir,
+            status="ready",
+            done=count,
+            total=total,
+            message=f"Photos ready ({count})",
+        )
+        logger.info("Background photo enrich complete for %s (%d photos)", run_id, count)
+    except Exception:
+        logger.exception("Background photo enrich failed for %s", run_id)
+        _write_photos_status(run_dir, status="error", message="Photo fetch failed")
+    finally:
+        with _photo_jobs_lock:
+            _photo_jobs.pop(run_id, None)
+
+
+def _start_background_photos(run_id: str, run_dir: Path) -> bool:
+    with _photo_jobs_lock:
+        existing = _photo_jobs.get(run_id)
+        if existing and existing.is_alive():
+            return False
+        t = threading.Thread(
+            target=_background_photo_enrich,
+            args=(run_id, run_dir),
+            name=f"photos-{run_id[:20]}",
+            daemon=True,
+        )
+        _photo_jobs[run_id] = t
+        t.start()
+        return True
+
+
 @app.post("/api/runs/{run_id}/comp-photos/fetch")
 def fetch_run_comp_photos(run_id: str):
-    """Backfill Zillow listing photos for an existing run via ReefAPI."""
+    """Start (or re-start) background Zillow photo backfill for a run."""
     run_id = _safe_run_id(run_id)
     run_dir = OUTPUT_DIR / run_id
     json_path = run_dir / "presentation.json"
     if not json_path.exists():
         raise HTTPException(404, "Run not found")
     try:
-        from reef_photos import enrich_report_photos, reef_enabled
+        from reef_photos import reef_enabled
     except Exception as exc:
         raise HTTPException(500, f"Photo module unavailable: {exc}") from exc
     if not reef_enabled():
         raise HTTPException(400, "REEF_API_KEY is not configured on this service")
-    try:
-        report = json.loads(json_path.read_text(encoding="utf-8"))
-    except Exception as exc:
-        raise HTTPException(500, "Invalid presentation.json") from exc
-    existing = _load_photo_map(run_dir)
-    # Only fetch misses — enrich skips /runs/ URLs and uses MLS disk cache.
-    photo_map = enrich_report_photos(report, run_dir=run_dir, run_id=run_id)
-    merged = {**existing, **{k: v for k, v in photo_map.items() if v}}
-    _save_photo_map(run_dir, merged)
-    json_path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
-    try:
-        _save_html(report, run_dir / "presentation.html")
-    except Exception:
-        logger.exception("Failed to rewrite HTML after photo fetch for %s", run_id)
-    return {"ok": True, "photos": merged, "count": len([v for v in merged.values() if v])}
+    started = _start_background_photos(run_id, run_dir)
+    status = _load_photos_status(run_dir)
+    if started:
+        _write_photos_status(run_dir, status="fetching", message="Fetching listing photos…")
+        status = _load_photos_status(run_dir)
+    return {
+        "ok": True,
+        "started": started,
+        "status": status.get("status"),
+        "photos": _load_photo_map(run_dir),
+        "galleries": _load_gallery_map(run_dir),
+        "done": status.get("done", 0),
+        "total": status.get("total", 0),
+        "message": status.get("message") or "",
+    }
 
 
 @app.get("/api/runs/{run_id}/comp-photos")
@@ -1491,8 +1888,15 @@ def list_comp_photos(run_id: str):
     run_dir = OUTPUT_DIR / run_id
     if not run_dir.exists():
         raise HTTPException(404, "Run not found")
-    return {"photos": _load_photo_map(run_dir)}
-
+    status = _load_photos_status(run_dir)
+    return {
+        "photos": _load_photo_map(run_dir),
+        "galleries": _load_gallery_map(run_dir),
+        "status": status.get("status") or "ready",
+        "done": status.get("done", 0),
+        "total": status.get("total", 0),
+        "message": status.get("message") or "",
+    }
 
 @app.post("/api/runs/{run_id}/comp-photos")
 async def set_comp_photo_url(run_id: str, request: Request):
@@ -1664,7 +2068,9 @@ async def generate(
         export_path.write_bytes(content)
 
     try:
-        result = _generate(
+        t0 = time.time()
+        result = await asyncio.to_thread(
+            _generate,
             export_path,
             address=address,
             living_area=_optional_float(living_area),
@@ -1685,6 +2091,7 @@ async def generate(
             brand_accent=brand_accent.strip(),
             logo_url=logo_url,
         )
+        logger.info("Generate finished in %.1fs for %s", time.time() - t0, address)
     except HTTPException:
         raise
     except Exception:
@@ -1700,6 +2107,17 @@ async def generate(
     after = auth_service.increment_presentation(user["id"])
     result = dict(result)
     try:
+        run_dir = OUTPUT_DIR / result["run_id"]
+        presentation_html = ""
+        deck_html = ""
+        try:
+            presentation_html = (run_dir / "presentation.html").read_text(encoding="utf-8")
+        except Exception:
+            pass
+        try:
+            deck_html = (run_dir / "deck.html").read_text(encoding="utf-8")
+        except Exception:
+            pass
         saved = auth_service.save_presentation(
             user["id"],
             run_id=result["run_id"],
@@ -1709,6 +2127,8 @@ async def generate(
             active_count=result.get("active_count"),
             under_contract_count=result.get("under_contract_count"),
             title=address or "",
+            presentation_html=presentation_html or None,
+            deck_html=deck_html or None,
         )
         result["presentation_id"] = saved.get("id")
         result["share_url"] = saved.get("share_url") or result.get("share_url")
