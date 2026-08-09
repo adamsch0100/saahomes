@@ -15,6 +15,7 @@ import 'dotenv/config';
 import getPool from '../config/database.js';
 import { sendEmail, smtpConfigured } from './emailer.js';
 import { computeOurEstimate } from './sellerValueService.js';
+import { notifyValueUpdate } from './notificationService.js';
 import logger from '../utils/logger.js';
 
 const SITE = 'https://saahomes.com';
@@ -226,6 +227,19 @@ async function sendOne(profile, { dryRun = false } = {}) {
      VALUES ($1, NULL, 'home_value_digest', $2, $3, 0)`,
     [profile.user_id, profile.user_email, subject]
   );
+
+  // In-app notification center
+  try {
+    await notifyValueUpdate({
+      userId: profile.user_id,
+      address,
+      mid: our.mid,
+      delta,
+      pool,
+    });
+  } catch (e) {
+    logger.warn('homeValueDigest: notification insert failed', { message: e.message });
+  }
 
   console.log(`✓ home-value → ${profile.user_email}: "${subject}"`);
   return { sent: true, subject, mid: our.mid, delta };

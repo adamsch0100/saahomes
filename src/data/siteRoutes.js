@@ -139,6 +139,19 @@ const staticPages = [
     robots: 'noindex, nofollow',
   },
   {
+    // In-app notification center — noindex (session page)
+    path: '/notifications/',
+    priority: '0.1',
+    changefreq: 'monthly',
+    title: 'Notifications | SAA Homes',
+    description: 'Your home search alerts, price drops, and value updates from SAA Homes.',
+    ogTitle: 'Notifications | SAA Homes',
+    ogDescription: 'Home search alerts and price drops.',
+    ogImage: DEFAULT_OG_IMAGE,
+    ogImageAlt: 'SAA Homes notifications',
+    robots: 'noindex, nofollow',
+  },
+  {
     // Legacy manage URL — same dashboard, noindex
     path: '/alerts/manage/',
     priority: '0.1',
