@@ -16,6 +16,44 @@ import pandas as pd
 import numpy as np
 
 
+def _bottom_line_from_report(report: dict) -> str:
+    """Seller bottom-line paragraph locked to the *current* recommended list/range.
+
+    Core + LLM sometimes write this before the presentation opens at a typical 5/10
+    rating (which shifts the recommended dollars). Always rebuild from live positioning
+    so the Price It verdict and Bottom Line never disagree.
+    """
+    s = report.get("stats") or {}
+    pos = report.get("positioning") or {}
+    inv = float(s.get("months_of_inventory") or 0)
+    if inv < 2.5:
+        climate = "a strong seller's market"
+    elif inv < 4.5:
+        climate = "a seller-favorable market"
+    elif inv < 7:
+        climate = "a balanced market"
+    else:
+        climate = "a buyer's market"
+    rec = float(pos.get("recommended_price") or 0)
+    low = float(pos.get("price_low") or 0)
+    high = float(pos.get("price_high") or 0)
+    dom = float(pos.get("expected_dom") or s.get("median_dom") or 0)
+    sold_n = int(s.get("sold_count") or 0)
+    if not rec:
+        return (
+            f"This is {climate} with {inv:.1f} months of inventory and {sold_n} recent sales. "
+            "Price with the comps and launch inside the competitive range."
+        )
+    return (
+        f"This is {climate} with {inv:.1f} months of inventory. "
+        f"Based on {sold_n} recent sales, your home is best positioned "
+        f"between ${low:,.0f} and ${high:,.0f}, "
+        f"with a recommended list price of ${rec:,.0f}. "
+        f"At that level we would expect roughly {dom:.0f} days to contract. "
+        f"Launch inside the competitive range — that creates the strongest outcome."
+    )
+
+
 def build_presentation(
     export_path: str,
     subject: SubjectProperty,
@@ -284,6 +322,9 @@ def build_presentation(
             lp = float(sc.get("list_price") or 0)
             if lp:
                 sc["list_price"] = round(lp * scale / 1000) * 1000
+        # Core executive_summary was written against the pre-5/10 price — rewrite now
+        report["positioning"] = pos
+        report["executive_summary"] = _bottom_line_from_report(report)
 
     sold_band = sold.copy()
     living = float(subj.get("living_area") or 0)
@@ -529,6 +570,8 @@ def build_presentation(
     except Exception as exc:
         print(f"[warn] LLM narrative layer skipped: {exc}")
 
+    # LLM may paraphrase prices — lock Bottom Line to the live recommended list
+    report["executive_summary"] = _bottom_line_from_report(report)
     return report
 
 
