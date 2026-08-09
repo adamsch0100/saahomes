@@ -2259,6 +2259,7 @@ export const neighborhoods = [
     walkScore: 58,
     metaDescription: 'Old Town Windsor real estate guide — historic homes, walkable Main Street, and small-town charm in downtown Windsor. Expert buyer and seller agents from SAA Homes.',
     keywords: 'Old Town Windsor, downtown Windsor Colorado, historic Windsor homes, Main Street Windsor, Windsor CO real estate, walkable neighborhoods Windsor',
+    youtubeId: 'NRCxM9awM6M',
     neighborhoodHighlights: [
       { title: 'Historic Main Street', description: 'Windsor\'s historic Main Street offers local dining, shopping, and the iconic Train Depot — the heart of the community.' },
       { title: 'Community events', description: 'From the Harvest Festival to the Farmers Market on Main, Old Town Windsor has year-round community gatherings.' },
@@ -2290,6 +2291,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.48', longitude: '-104.91' },
     metaDescription: 'Highland Meadows Windsor real estate - established family neighborhood near Windsor schools and Main Street. Affordable homes with HOA. SAA Homes.',
     keywords: 'Highland Meadows Windsor, Highland Meadows subdivision, Windsor family homes, established Windsor neighborhoods, Windsor CO real estate, Main Street Windsor',
+    youtubeId: 'UeZj5VpOqj4',
     neighborhoodHighlights: [
       { title: 'Family-friendly', description: 'Quiet streets, community parks, and walkable access to Windsor Middle and High Schools.' },
       { title: 'Central Windsor', description: 'Minutes from Main Street, Boardwalk Park, and Windsor Lake.' },
@@ -2321,6 +2323,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.47', longitude: '-104.93' },
     metaDescription: 'The Timbers Windsor real estate - newer construction homes in west Windsor near Fort Collins. Modern floor plans with HOA. SAA Homes.',
     keywords: 'The Timbers Windsor, The Timbers subdivision, west Windsor homes, new construction Windsor, Windsor Colorado new homes, Skyview Elementary Windsor',
+    youtubeId: 'm0q2O7uK0OA',
     neighborhoodHighlights: [
       { title: 'Newer homes', description: 'Modern construction with open floor plans, energy efficiency, and contemporary finishes.' },
       { title: 'Fort Collins proximity', description: 'Located on Windsor west side - 10 minutes to south Fort Collins and Harmony Road.' },
