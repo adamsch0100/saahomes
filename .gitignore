@@ -47,7 +47,20 @@ coverage/
 *.temp
 .cache/
 
-# MarketVista local Python env / generated output
+# ListLogic local Python env / generated output
+listlogic/.venv/
+listlogic/venv/
+listlogic/output/
+listlogic/uploads/
+listlogic/__pycache__/
+listlogic/**/__pycache__/
+listlogic/.env
+listlogic/.beta_token_local.txt
+listlogic/presentation.html
+listlogic/presentation.json
+listlogic/presentation.pdf
+listlogic/presentation_data.json
+# Legacy path (pre-rename)
 marketvista/.venv/
 marketvista/venv/
 marketvista/output/

@@ -24,7 +24,7 @@ PRODUCT_KNOWLEDGE = """
 ## What it is
 ListLogic is a SaaS tool for real estate listing agents. Upload an MLS export, set the subject home + branding, and generate an interactive seller pricing presentation (live story), plus a portrait seller packet PDF and a landscape listing flipbook.
 
-Brand domain: listlogic.homes (Railway service may still show as MarketVista until renamed).
+Brand domain: listlogic.homes
 Built for Schwartz and Associates / SAA Homes; sold to agents more broadly.
 
 ## Core pricing ideas (domain rules)

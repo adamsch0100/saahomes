@@ -19,7 +19,7 @@ OPENCODE_DEFAULT_MODEL = "deepseek-v4-flash"
 
 
 def _load_env_file() -> None:
-    """Load marketvista/.env into os.environ (does not override existing vars)."""
+    """Load listlogic/.env into os.environ (does not override existing vars)."""
     env_path = Path(__file__).resolve().parent / ".env"
     if not env_path.exists():
         return

@@ -5,7 +5,7 @@ export const SITE_TITLE_SUFFIX = 'Schwartz and Associates | Northern Colorado Re
 /** ListLogic product app (data-driven custom pricing strategy). */
 export const LISTLOGIC_URL = 'https://listlogic.homes';
 /** @deprecated use LISTLOGIC_URL — Railway fallback while DNS propagates */
-export const LISTLOGIC_RAILWAY_URL = 'https://marketvista-production.up.railway.app';
+export const LISTLOGIC_RAILWAY_URL = 'https://listlogic.homes';
 /** @deprecated use LISTLOGIC_URL */
 export const MARKETVISTA_URL = LISTLOGIC_URL;
 
