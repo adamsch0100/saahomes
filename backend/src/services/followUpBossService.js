@@ -769,3 +769,194 @@ export async function getFollowUpBossPeopleCount() {
     return { configured: true, success: false, error: error.message };
   }
 }
+
+/**
+ * Map FUB free-form tags → our LIFECYCLE_STAGES vocabulary.
+ * Only tags in this map change stage; unknown tags are reported but never force a stage.
+ * Keys are lowercase; matching is case-insensitive.
+ */
+export const FUB_TAG_TO_LIFECYCLE = {
+  'new lead': 'new',
+  'new': 'new',
+  'nurturing': 'nurturing',
+  'nurture': 'nurturing',
+  'showing': 'showing',
+  'active buyer': 'active',
+  'active seller': 'active',
+  'active': 'active',
+  'closed': 'closed',
+  'under contract': 'closed',
+  'sold': 'closed',
+  'lost': 'lost',
+  'do not contact': 'lost',
+  'dnc': 'lost',
+};
+
+/**
+ * Resolve FUB tags array → a single lifecycle stage (or null if none map).
+ * Later tags win when multiple map (agent's most recent tags typically last).
+ * Returns { stage, mappedTags, unmappedTags } — never fabricates a stage.
+ */
+export function mapFubTagsToLifecycle(tags) {
+  const list = Array.isArray(tags) ? tags : [];
+  const mappedTags = [];
+  const unmappedTags = [];
+  let stage = null;
+  for (const raw of list) {
+    const tag = String(raw || '').trim();
+    if (!tag) continue;
+    const key = tag.toLowerCase();
+    const mapped = FUB_TAG_TO_LIFECYCLE[key];
+    if (mapped) {
+      stage = mapped;
+      mappedTags.push(tag);
+    } else {
+      unmappedTags.push(tag);
+    }
+  }
+  return { stage, mappedTags, unmappedTags };
+}
+
+/**
+ * Normalize FUB person payload → { personId, tags } from real API data only.
+ */
+function extractPersonFields(person) {
+  if (!person || typeof person !== 'object') return null;
+  const personId = person.id != null ? String(person.id) : null;
+  const tags = Array.isArray(person.tags)
+    ? person.tags.map((t) => String(t)).filter(Boolean)
+    : [];
+  return { personId, tags, raw: person };
+}
+
+/**
+ * Pull a person from Follow Up Boss (read-only) by fub_person_id or email search.
+ * Clean-skips when API key is missing — never fabricates tags/person.
+ *
+ * @param {object} opts
+ * @param {string} [opts.email]
+ * @param {string|number} [opts.fubPersonId]
+ * @returns {Promise<{configured:boolean, found?:boolean, personId?:string|null, tags?:string[], reason?:string, error?:string}>}
+ */
+export async function pullFollowUpBossPerson({ email, fubPersonId } = {}) {
+  if (!FOLLOW_UP_BOSS_API_KEY) {
+    return { configured: false, reason: 'not_configured' };
+  }
+
+  const id = fubPersonId != null && String(fubPersonId).trim()
+    ? String(fubPersonId).trim()
+    : null;
+  const emailNorm = email != null ? String(email).trim().toLowerCase() : '';
+
+  if (!id && !emailNorm.includes('@')) {
+    return { configured: true, found: false, reason: 'no_lookup_key' };
+  }
+
+  try {
+    let person = null;
+
+    if (id) {
+      const url = `${FUB_PEOPLE_URL}/${encodeURIComponent(id)}`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: getAuthHeader(FOLLOW_UP_BOSS_API_KEY),
+          Accept: 'application/json',
+        },
+      });
+      if (response.status === 404) {
+        // Fall through to email search if we have one
+        person = null;
+        logger.info('FUB person by id not found', { fub_person_id: id });
+      } else if (!response.ok) {
+        const text = await response.text();
+        logger.error('FUB person fetch by id failed', {
+          status: response.status,
+          fub_person_id: id,
+          error: text,
+        });
+        return {
+          configured: true,
+          found: false,
+          success: false,
+          status: response.status,
+          error: `FUB API ${response.status}`,
+        };
+      } else {
+        const data = await response.json();
+        person = data?.person || data;
+      }
+    }
+
+    if (!person && emailNorm.includes('@')) {
+      const url = `${FUB_PEOPLE_URL}?search=${encodeURIComponent(emailNorm)}`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: getAuthHeader(FOLLOW_UP_BOSS_API_KEY),
+          Accept: 'application/json',
+        },
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        logger.error('FUB people search failed', {
+          status: response.status,
+          email: emailNorm,
+          error: text,
+        });
+        return {
+          configured: true,
+          found: false,
+          success: false,
+          status: response.status,
+          error: `FUB API ${response.status}`,
+        };
+      }
+      const data = await response.json();
+      const people = Array.isArray(data?.people)
+        ? data.people
+        : Array.isArray(data)
+          ? data
+          : [];
+      // Prefer exact email match when present; else first result (FUB search order)
+      const lower = emailNorm;
+      person =
+        people.find((p) => {
+          const emails = Array.isArray(p?.emails) ? p.emails : [];
+          return emails.some(
+            (e) => String(e?.value || e || '').trim().toLowerCase() === lower
+          );
+        }) || people[0] || null;
+    }
+
+    if (!person) {
+      return { configured: true, found: false, personId: null, tags: [] };
+    }
+
+    const extracted = extractPersonFields(person);
+    if (!extracted) {
+      return { configured: true, found: false, personId: null, tags: [] };
+    }
+
+    logger.info('FUB person pulled', {
+      personId: extracted.personId,
+      tagCount: extracted.tags.length,
+    });
+
+    return {
+      configured: true,
+      found: true,
+      success: true,
+      personId: extracted.personId,
+      tags: extracted.tags,
+    };
+  } catch (error) {
+    logger.error('FUB person pull error', { message: error.message });
+    return {
+      configured: true,
+      found: false,
+      success: false,
+      error: error.message,
+    };
+  }
+}

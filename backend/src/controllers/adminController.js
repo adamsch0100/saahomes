@@ -771,6 +771,217 @@ export const shareHome = async (req, res) => {
 };
 
 /**
+ * POST /api/admin/sync-fub-lifecycle
+ * Body: { leadId } or { email }
+ *
+ * Pull FUB person tags → map to lifecycle_stage (It 17 / P6).
+ * Never overwrites lifecycle_stage_manual (that flag exists so Adam's manual
+ * stage in the cockpit wins over FUB tag sync).
+ * Honest before/after; no lead-score bump; clean-skip when FUB unconfigured.
+ */
+export const syncFubLifecycle = async (req, res) => {
+  try {
+    const body = req.body || {};
+    const leadIdRaw = body.leadId ?? body.lead_id ?? body.id ?? null;
+    const emailRaw = body.email != null ? String(body.email).trim().toLowerCase() : '';
+
+    if (leadIdRaw == null && !emailRaw.includes('@')) {
+      return res.status(400).json({
+        success: false,
+        error: 'leadId or a valid email is required.',
+      });
+    }
+
+    const pool = getPool();
+    let lead = null;
+
+    if (leadIdRaw != null && String(leadIdRaw).trim() !== '') {
+      const idNum = Number(leadIdRaw);
+      if (!Number.isFinite(idNum)) {
+        return res.status(400).json({ success: false, error: 'leadId must be a number.' });
+      }
+      const r = await pool.query(
+        `SELECT id, email, name, lifecycle_stage, lifecycle_stage_manual, fub_person_id
+         FROM users WHERE id = $1 LIMIT 1`,
+        [idNum]
+      );
+      lead = r.rows[0] || null;
+    } else {
+      const r = await pool.query(
+        `SELECT id, email, name, lifecycle_stage, lifecycle_stage_manual, fub_person_id
+         FROM users WHERE LOWER(email) = $1 LIMIT 1`,
+        [emailRaw]
+      );
+      lead = r.rows[0] || null;
+    }
+
+    if (!lead) {
+      return res.status(404).json({ success: false, error: 'Lead not found.' });
+    }
+
+    const currentStage = lead.lifecycle_stage || 'new';
+    const isManual = !!lead.lifecycle_stage_manual;
+
+    const {
+      pullFollowUpBossPerson,
+      mapFubTagsToLifecycle,
+    } = await import('../services/followUpBossService.js');
+
+    const pulled = await pullFollowUpBossPerson({
+      email: lead.email,
+      fubPersonId: lead.fub_person_id,
+    });
+
+    // Clean-skip when FUB key is missing — not an error
+    if (!pulled.configured || pulled.reason === 'not_configured') {
+      return res.json({
+        success: true,
+        synced: false,
+        reason: 'fub_not_configured',
+        from: currentStage,
+        to: currentStage,
+        tags: [],
+        fubPersonId: lead.fub_person_id || null,
+      });
+    }
+
+    if (pulled.error && !pulled.found) {
+      return res.json({
+        success: true,
+        synced: false,
+        reason: 'fub_error',
+        error: pulled.error,
+        from: currentStage,
+        to: currentStage,
+        tags: [],
+        fubPersonId: lead.fub_person_id || null,
+      });
+    }
+
+    if (!pulled.found) {
+      return res.json({
+        success: true,
+        synced: false,
+        reason: 'person_not_found',
+        from: currentStage,
+        to: currentStage,
+        tags: [],
+        fubPersonId: lead.fub_person_id || null,
+      });
+    }
+
+    const tags = Array.isArray(pulled.tags) ? pulled.tags : [];
+    const fubPersonId = pulled.personId || lead.fub_person_id || null;
+    const { stage: mappedStage, mappedTags, unmappedTags } = mapFubTagsToLifecycle(tags);
+
+    // Manual stage must never be overwritten by FUB sync — that is the point of the flag.
+    if (isManual) {
+      return res.json({
+        success: true,
+        synced: false,
+        reason: 'manual_stage',
+        currentStage,
+        from: currentStage,
+        to: currentStage,
+        tags,
+        mappedTags,
+        unmappedTags,
+        fubPersonId,
+      });
+    }
+
+    // Store fub_person_id if we discovered one and lead didn't have it
+    if (fubPersonId && !lead.fub_person_id) {
+      try {
+        await pool.query(
+          `UPDATE users SET fub_person_id = $1 WHERE id = $2 AND fub_person_id IS NULL`,
+          [String(fubPersonId), lead.id]
+        );
+      } catch (e) {
+        logger.warn('syncFubLifecycle fub_person_id store failed', { message: e.message });
+      }
+    }
+
+    if (!mappedStage) {
+      // Tags present (or empty) but none map to a lifecycle stage — no stage change
+      return res.json({
+        success: true,
+        synced: false,
+        reason: tags.length ? 'no_mapped_tags' : 'no_tags',
+        from: currentStage,
+        to: currentStage,
+        tags,
+        mappedTags,
+        unmappedTags,
+        fubPersonId,
+      });
+    }
+
+    if (mappedStage === currentStage) {
+      return res.json({
+        success: true,
+        synced: false,
+        reason: 'already_current',
+        from: currentStage,
+        to: currentStage,
+        tags,
+        mappedTags,
+        unmappedTags,
+        fubPersonId,
+      });
+    }
+
+    // Update stage only — leave lifecycle_stage_manual FALSE; do not bump lead score
+    await pool.query(
+      `UPDATE users SET lifecycle_stage = $1 WHERE id = $2`,
+      [mappedStage, lead.id]
+    );
+
+    // Timeline event (non-blocking for response honesty if insert fails)
+    try {
+      await pool.query(
+        `INSERT INTO user_events (user_id, event_type, meta) VALUES ($1, 'fub_sync', $2::jsonb)`,
+        [
+          lead.id,
+          JSON.stringify({
+            fub_person_id: fubPersonId,
+            tags,
+            mappedTags,
+            unmappedTags,
+            from: currentStage,
+            to: mappedStage,
+          }),
+        ]
+      );
+    } catch (e) {
+      logger.warn('syncFubLifecycle user_events insert failed', { message: e.message });
+    }
+
+    logger.info('FUB lifecycle sync applied', {
+      leadId: lead.id,
+      from: currentStage,
+      to: mappedStage,
+      fub_person_id: fubPersonId,
+      tags,
+    });
+
+    return res.json({
+      success: true,
+      synced: true,
+      from: currentStage,
+      to: mappedStage,
+      tags,
+      mappedTags,
+      unmappedTags,
+      fubPersonId,
+    });
+  } catch (error) {
+    logger.error('Error in syncFubLifecycle', error);
+    res.status(500).json({ success: false, error: 'Failed to sync lifecycle from FUB' });
+  }
+};
+
+/**
  * GET /api/admin/fub/status — configured flag + optional live people count (read-only).
  * Never creates a test person.
  */

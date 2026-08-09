@@ -72,6 +72,37 @@ function toDateInputValue(iso) {
 
 const GOLD = "#CFB36E";
 
+/** Format FUB lifecycle-sync API result into honest status lines for the agent. */
+function formatFubSyncResult(data) {
+  if (!data) return null;
+  const tags = Array.isArray(data.tags) ? data.tags : [];
+  const tagLabel = tags.length ? tags.join(", ") : "none";
+  if (data.reason === "fub_not_configured") {
+    return "FUB not configured — nothing to sync";
+  }
+  if (data.reason === "manual_stage") {
+    return `Skipped — stage was set manually (FUB tags: ${tagLabel})`;
+  }
+  if (data.reason === "person_not_found") {
+    return "No matching person in FUB for this lead";
+  }
+  if (data.reason === "fub_error") {
+    return `FUB error: ${data.error || "request failed"}`;
+  }
+  if (data.reason === "no_mapped_tags" || data.reason === "no_tags") {
+    return tags.length
+      ? `Lifecycle already ${data.from || "—"} (FUB tags present but unmapped: ${tagLabel})`
+      : `Lifecycle already ${data.from || "—"} (no FUB tags)`;
+  }
+  if (data.synced && data.from != null && data.to != null && data.from !== data.to) {
+    return `Lifecycle: ${data.from} → ${data.to} (tags: ${tagLabel})`;
+  }
+  if (data.reason === "already_current" || (!data.synced && data.from)) {
+    return `Lifecycle already ${data.from} (no FUB change)`;
+  }
+  return data.error || "Sync completed with no stage change";
+}
+
 /** Format share-home API result into honest status lines for the agent. */
 function formatShareResult(data) {
   if (!data) return null;
@@ -230,6 +261,9 @@ export default function AgentCockpit({ token }) {
   const [shareBusy, setShareBusy] = useState(false);
   const [shareError, setShareError] = useState(null);
   const [shareResult, setShareResult] = useState(null);
+  // FUB lifecycle sync (It 17 / P6) — one busy lead at a time
+  const [fubSyncBusyId, setFubSyncBusyId] = useState(null);
+  const [fubSyncByLead, setFubSyncByLead] = useState({}); // leadId → { result?, error? }
 
   const headers = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
 
@@ -294,6 +328,73 @@ export default function AgentCockpit({ token }) {
     onClose: closeShareForm,
     onSubmit: () => submitShareHome(lead),
   });
+
+  const syncFubLifecycle = async (lead) => {
+    setFubSyncBusyId(lead.id);
+    setExpanded(lead.id);
+    setFubSyncByLead((prev) => ({ ...prev, [lead.id]: { result: null, error: null } }));
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/sync-fub-lifecycle`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ leadId: lead.id }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || `Sync failed (${res.status})`);
+      }
+      setFubSyncByLead((prev) => ({ ...prev, [lead.id]: { result: data, error: null } }));
+      // Refresh stage in list when FUB actually changed it
+      if (data.synced && data.to) {
+        setLeads((prev) =>
+          prev.map((l) =>
+            l.id === lead.id
+              ? {
+                  ...l,
+                  lifecycle_stage: data.to,
+                  fub_person_id: data.fubPersonId || l.fub_person_id,
+                }
+              : l
+          )
+        );
+      } else if (data.fubPersonId && !lead.fub_person_id) {
+        setLeads((prev) =>
+          prev.map((l) =>
+            l.id === lead.id ? { ...l, fub_person_id: data.fubPersonId } : l
+          )
+        );
+      }
+    } catch (err) {
+      setFubSyncByLead((prev) => ({
+        ...prev,
+        [lead.id]: { result: null, error: err.message || "Could not sync from FUB" },
+      }));
+    } finally {
+      setFubSyncBusyId(null);
+    }
+  };
+
+  const fubSyncPanel = (lead) => {
+    const entry = fubSyncByLead[lead.id];
+    if (!entry?.result && !entry?.error) return null;
+    const line = entry.error || formatFubSyncResult(entry.result);
+    const ok = !entry.error && entry.result?.success;
+    return (
+      <div
+        className={`mt-3 text-sm rounded-lg border px-3 py-2 ${
+          entry.error
+            ? "text-red-800 bg-red-50 border-red-100"
+            : "text-gray-800 bg-white border-gray-200"
+        }`}
+        style={ok ? { borderColor: `${GOLD}66` } : undefined}
+      >
+        <p className="font-semibold" style={ok ? { color: "#8a7329" } : undefined}>
+          FUB sync
+        </p>
+        <p className="text-xs mt-0.5">{line}</p>
+      </div>
+    );
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -512,6 +613,15 @@ export default function AgentCockpit({ token }) {
                     >
                       Share a home
                     </button>
+                    <button
+                      type="button"
+                      disabled={fubSyncBusyId === lead.id}
+                      onClick={() => syncFubLifecycle(lead)}
+                      className="min-h-[40px] px-3 rounded-lg text-sm font-semibold text-black border disabled:opacity-50"
+                      style={{ borderColor: GOLD, backgroundColor: `${GOLD}22` }}
+                    >
+                      {fubSyncBusyId === lead.id ? "Syncing…" : "Sync from FUB"}
+                    </button>
                   </div>
                   {expanded === lead.id && (
                     <div className="mt-3 text-xs text-gray-600 bg-gray-50 rounded-lg p-3 space-y-1">
@@ -527,6 +637,7 @@ export default function AgentCockpit({ token }) {
                           ))}
                         </ul>
                       )}
+                      {fubSyncPanel(lead)}
                       <ShareHomeForm {...shareFormProps(lead)} />
                     </div>
                   )}
@@ -652,6 +763,15 @@ export default function AgentCockpit({ token }) {
                             >
                               Share a home
                             </button>
+                            <button
+                              type="button"
+                              disabled={fubSyncBusyId === lead.id}
+                              onClick={() => syncFubLifecycle(lead)}
+                              className="min-h-[36px] px-3 rounded-lg text-xs font-semibold text-black border hover:opacity-90 disabled:opacity-50"
+                              style={{ borderColor: GOLD, backgroundColor: `${GOLD}22` }}
+                            >
+                              {fubSyncBusyId === lead.id ? "Syncing…" : "Sync from FUB"}
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -676,6 +796,7 @@ export default function AgentCockpit({ token }) {
                             ) : (
                               <p className="mt-2 text-gray-400">No high-intent events in the last 7 days.</p>
                             )}
+                            {fubSyncPanel(lead)}
                             <ShareHomeForm {...shareFormProps(lead)} />
                           </td>
                         </tr>
@@ -691,7 +812,7 @@ export default function AgentCockpit({ token }) {
 
       <p className="text-xs text-gray-400 text-center px-2">
         Scores and heat are derived from real activity only (saved searches, showings, views, market analysis).
-        FUB is source of truth — nurture signals write back when the API key is configured.
+        FUB is source of truth — nurture signals write back when the API key is configured; use Sync from FUB to refresh lifecycle from FUB tags (manual stages are never overwritten).
       </p>
     </div>
   );
