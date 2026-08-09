@@ -5,11 +5,7 @@ Complete query map for Schwartz and Associates market ownership.
 
 ---
 
-## Coverage map — 27 area pages + section towns
-
-**Audit requirement (SEO gap review, Aug 7 2026):** every area page must (a) show LIVE median price + days-on-market from the API (CityStatsBand — never stale prose), (b) have ≥3 FAQ pairs incl. seller/home-value + best-realtor + CHFA/schools where relevant, (c) unique prerendered title/H1 (no homepage shell). Thin pages (<3 FAQs or stale stats) = flag + fix queue.
-
-Core 19 (built):
+## 19 cities (slug → display name)
 
 | Slug | City | County | Area URL |
 |------|------|--------|----------|
@@ -32,40 +28,6 @@ Core 19 (built):
 | evans | Evans | Weld | /northern-colorado-areas/evans/ |
 | severance | Severance | Weld | /northern-colorado-areas/severance/ |
 | niwot | Niwot | Boulder | /northern-colorado-areas/niwot/ |
-
-Corridor + expansion (build after It 10 statewide search — live counts Aug 7 2026, IRES):
-
-| Slug | City | County | Area URL | Active | Med $ |
-|------|------|--------|----------|--------|-------|
-| erie | Erie | Weld | /northern-colorado-areas/erie/ | 257 | 714,900 |
-| brighton | Brighton | Adams (I-76 corridor) | /northern-colorado-areas/brighton/ | 367 | 550,000 |
-| estes-park | Estes Park | Larimer | /northern-colorado-areas/estes-park/ | 220 | 709,500 |
-| red-feather-lakes | Red Feather Lakes | Larimer | /northern-colorado-areas/red-feather-lakes/ | 132 | 275,000 |
-| fort-lupton | Fort Lupton | Weld | /northern-colorado-areas/fort-lupton/ | 128 | 494,945 |
-| lyons | Lyons | Boulder | /northern-colorado-areas/lyons/ | 114 | 759,000 |
-| bellvue | Bellvue | Larimer | /northern-colorado-areas/bellvue/ | 86 | 423,750 |
-| carbon-valley | Carbon Valley (hub) | Weld | /northern-colorado-areas/carbon-valley/ | hub | — |
-
-**Carbon Valley hub** = Firestone + Frederick + Dacono (36, $592K) + Gilcrest (5) + Platteville (44, $439K) + Mead — Dacono/Platteville/Gilcrest live as data-rich sections w/ anchors on the hub; links to existing firestone/frederick/fort-lupton/mead pages.
-
-**Section towns** (anchor sections on parent pages, no standalone URL): LaPorte (19) + Masonville (0) → Fort Collins page · Ault (36) + Pierce (23) + Kersey (14) + Briggsdale (11) → Greeley page · Hudson (43, acreage) → Brighton/longmont tie-in.
-
-URL pattern: `https://saahomes.com/northern-colorado-areas/{slug}/`
-
----
-
-## Corridor long-tails (add to GSC monitoring)
-
-| Query | Target |
-|-------|--------|
-| cabin for sale Red Feather Lakes / Red Feather lakefront / mountain cabin under $300K | red-feather-lakes page |
-| Estes Park cabins for sale / homes near Rocky Mountain National Park / Estes Park second home | estes-park page |
-| Erie CO new construction / moving to Erie Colorado / Erie homes under $600K | erie page |
-| Brighton CO new builds / Brighton to Denver commute | brighton page |
-| Carbon Valley CO real estate / Firestone Frederick Dacono homes / Dacono CO homes for sale | carbon-valley hub |
-| Lyons CO mountain homes / Bellvue CO acreage / Poudre Canyon homes for sale | lyons / bellvue |
-| Fort Lupton CO homes for sale / Fort Lupton new construction | fort-lupton page |
-| Platteville CO homes for sale / Gilcrest CO real estate | carbon-valley sections |
 
 ---
 
@@ -138,95 +100,6 @@ For each `{city}` above, monitor these query patterns:
 
 ---
 
-## Luxury queries (Tier A — high-value leads, → /luxury-real-estate/)
-
-| Query | Target |
-|-------|--------|
-| luxury real estate Northern Colorado | /luxury-real-estate/ |
-| luxury homes Fort Collins | /luxury-real-estate/ + /northern-colorado-areas/fort-collins/ |
-| luxury realtor Fort Collins | /luxury-real-estate/ |
-| high-end real estate Loveland | /luxury-real-estate/ + /northern-colorado-areas/loveland/ |
-| luxury properties Windsor CO | /luxury-real-estate/ + /northern-colorado-areas/windsor/ |
-| luxury homes for sale Greeley | /luxury-real-estate/ + /northern-colorado-areas/greeley/ |
-| million dollar homes Fort Collins | /luxury-real-estate/ |
-| custom homes Northern Colorado | /luxury-real-estate/ |
-| estate properties Colorado | /luxury-real-estate/ |
-| horse properties Northern Colorado | /luxury-real-estate/ |
-| acreage homes Colorado | /luxury-real-estate/ |
-| golf course homes Windsor | /luxury-real-estate/ + /northern-colorado-areas/windsor/ |
-| lakefront homes Loveland | /luxury-real-estate/ + /northern-colorado-areas/loveland/ |
-| gated communities Fort Collins | /luxury-real-estate/ |
-| luxury real estate Colorado Front Range | /luxury-real-estate/ |
-| luxury real estate agent Northern Colorado | /luxury-real-estate/ |
-| concierge real estate services | /luxury-real-estate/ |
-| private estates Colorado | /luxury-real-estate/ |
-| luxury home builder Fort Collins | /luxury-real-estate/ |
-| high-end homes for sale Colorado | /luxury-real-estate/ |
-
----
-
-## Cash buyer queries (Tier B — new vertical, two-sided funnel)
-
-**Target pattern:** `sell house fast {city}`, `cash offer for home {city}`, `sell my house {city}`, `we buy houses {city}`
-
-| Query cluster | Target page |
-|---------------|-------------|
-| sell my house fast Fort Collins | /cash-home-buyers/ + /for-sellers/ + /northern-colorado-areas/fort-collins/ |
-| sell my house fast Loveland | /cash-home-buyers/ + /for-sellers/ + /northern-colorado-areas/loveland/ |
-| sell my house fast Windsor | /cash-home-buyers/ + /for-sellers/ + /northern-colorado-areas/windsor/ |
-| sell my house fast Greeley | /cash-home-buyers/ + /for-sellers/ + /northern-colorado-areas/greeley/ |
-| sell my house fast Timnath | /cash-home-buyers/ + /for-sellers/ + /northern-colorado-areas/timnath/ |
-| sell my house fast Berthoud | /cash-home-buyers/ + /for-sellers/ + /northern-colorado-areas/berthoud/ |
-| sell my house fast Johnstown | /cash-home-buyers/ + /for-sellers/ + /northern-colorado-areas/johnstown/ |
-| sell my house fast Longmont | /cash-home-buyers/ + /for-sellers/ + /northern-colorado-areas/longmont/ |
-| cash offer for home Fort Collins | /cash-home-buyers/ + /for-sellers/ |
-| cash offer for home Loveland | /cash-home-buyers/ + /for-sellers/ |
-| cash offer for home Windsor | /cash-home-buyers/ + /for-sellers/ |
-| cash offer for home Greeley | /cash-home-buyers/ + /for-sellers/ |
-| we buy houses Fort Collins | /cash-home-buyers/ + /for-sellers/ + /northern-colorado-areas/fort-collins/ |
-| we buy houses Loveland | /cash-home-buyers/ + /for-sellers/ |
-| we buy houses Windsor | /cash-home-buyers/ + /for-sellers/ |
-| we buy houses Greeley | /cash-home-buyers/ + /for-sellers/ |
-| we buy houses Northern Colorado | /cash-home-buyers/ |
-| sell house for cash Colorado | /cash-home-buyers/ |
-| sell as-is home Fort Collins | /cash-home-buyers/ + /for-sellers/ |
-| cash home buyers Northern Colorado | /cash-home-buyers/ |
-| cash for homes Northern Colorado | /cash-home-buyers/ |
-| house flippers Fort Collins | /cash-home-buyers/ |
-| real estate investors Northern Colorado | /cash-home-buyers/ |
-| fix and flip Colorado | /cash-home-buyers/ |
-| investment properties Northern Colorado | /cash-home-buyers/ |
-
----
-
-## Foreclosure / short sale queries (Tier B — distressed seller vertical)
-
-**Target pattern:** `foreclosures {city}`, `short sale {city}`, `pre-foreclosure {city}`, `bank owned homes {city}`
-
-| Query cluster | Target page |
-|---------------|-------------|
-| foreclosures Fort Collins | /cash-home-buyers/ + /for-sellers/ |
-| foreclosures Loveland | /cash-home-buyers/ + /for-sellers/ |
-| foreclosures Windsor | /cash-home-buyers/ + /for-sellers/ |
-| foreclosures Greeley | /cash-home-buyers/ + /for-sellers/ |
-| foreclosures Larimer County | /cash-home-buyers/ + /for-sellers/ |
-| foreclosures Weld County | /cash-home-buyers/ + /for-sellers/ |
-| short sale Fort Collins | /cash-home-buyers/ + /for-sellers/ |
-| short sale Loveland | /cash-home-buyers/ + /for-sellers/ |
-| short sale Windsor | /cash-home-buyers/ + /for-sellers/ |
-| short sale Greeley | /cash-home-buyers/ + /for-sellers/ |
-| pre-foreclosure homes Colorado | /cash-home-buyers/ |
-| bank owned homes Fort Collins | /cash-home-buyers/ |
-| REO homes Northern Colorado | /cash-home-buyers/ |
-| distressed property sales Colorado | /cash-home-buyers/ + /for-sellers/ |
-| stop foreclosure Colorado | /cash-home-buyers/ |
-| avoid foreclosure Northern Colorado | /cash-home-buyers/ |
-| Colorado foreclosure timeline | /cash-home-buyers/ |
-| Rule 120 Colorado foreclosure | /cash-home-buyers/ |
-| short sale vs foreclosure Colorado | /cash-home-buyers/ |
-| how to short sale my home Colorado | /cash-home-buyers/ |
-| sell house before foreclosure auction | /cash-home-buyers/ |
-
 ## Growth corridor cluster (prioritize content + links)
 
 **Carbon Valley:** Firestone, Frederick, (+ Dacono if we add later)  
@@ -255,16 +128,13 @@ Cross-link these cities in blog posts and area page "Nearby communities" section
 - ~~Fort Collins vs Loveland vs Windsor comparison~~ → shipped
 - ~~Weld County vs Larimer County buyer guide~~ → shipped
 - Monthly market snapshot (recurring template) — `blog-pipeline` cron + `LATEST_MARKET_UPDATE_SLUG`
-- Luxury home buying guide Northern Colorado
-- Fort Collins luxury neighborhoods guide
-- Luxury vs standard real estate Northern Colorado
 
 ---
 
 ## GSC monitoring filters (cron)
 
 When GSC connected, pull weekly for property `https://saahomes.com/`:
-- Queries containing: `fort collins`, `loveland`, `windsor`, `greeley`, `weld`, `larimer`, `northern colorado`, `chfa`, `schwartz`, `saa homes`, `luxury`, `cash buyer`, `we buy`, `sell.*fast`, `cash for homes`, `sell.*cash`, `foreclosure`, `short sale`, `pre-foreclosure`, `bank owned`, `REO`
-- Pages under `/northern-colorado-areas/`, `/for-sellers/`, `/for-buyers/`, `/chfa-`, `/blog/`, `/luxury-real-estate/`, `/cash-home-buyers/`
+- Queries containing: `fort collins`, `loveland`, `windsor`, `greeley`, `weld`, `larimer`, `northern colorado`, `chfa`, `schwartz`, `saa homes`
+- Pages under `/northern-colorado-areas/`, `/for-sellers/`, `/for-buyers/`, `/chfa-`, `/blog/`
 - Alert: position drop ≥8 positions AND impressions ≥10 (week over week)
 - Alert: page indexed → not indexed on any P0 URL

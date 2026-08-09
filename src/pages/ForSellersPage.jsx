@@ -2,16 +2,12 @@ import React, { useEffect } from "react";
 import SEO from "../components/SEO";
 import LatestMarketUpdateBanner from "../components/LatestMarketUpdateBanner.jsx";
 import AreaFAQSection from "../components/AreaFAQSection.jsx";
-import Testimonials from "../components/Testimonials.jsx";
-import MarketReportForm from "../components/MarketReportForm.jsx";
-import HomeValueCapture from "../components/HomeValueCapture.jsx";
-import { SELLER_FAQS } from "../data/buyerSellerFaqs.js";
+import { FOR_SELLERS_FAQS, buildFaqPageSchema } from "../data/moneyPageFaqs.js";
 
 export default function ForSellersPage() {
   useEffect(() => {
     // Check if there's a hash in the URL and scroll to that section
-    const path = window.location.pathname.replace(/\/+$/, '');
-    if (window.location.hash === '#home-valuation' || path === '/home-valuation') {
+    if (window.location.hash === '#home-valuation') {
       setTimeout(() => {
         const element = document.getElementById('home-valuation');
         if (element) {
@@ -31,20 +27,7 @@ export default function ForSellersPage() {
         description="Sell your home in Northern Colorado with SAA Homes. Get a free market analysis, professional marketing, and expert negotiation to maximize your sale price in Fort Collins, Loveland, Windsor, and beyond."
         keywords="sell home Fort Collins, free market analysis Northern Colorado, home value Colorado, listing agent Fort Collins, sell house Loveland, SAA Homes seller services"
         canonical="https://saahomes.com/for-sellers/"
-        jsonLd={[
-          {
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            mainEntity: SELLER_FAQS.map((faq) => ({
-              "@type": "Question",
-              name: faq.q,
-              acceptedAnswer: {
-                "@type": "Answer",
-                text: faq.a,
-              },
-            })),
-          },
-        ]}
+        jsonLd={[buildFaqPageSchema(FOR_SELLERS_FAQS)].filter(Boolean)}
       />
 
       {/* Hero Section */}
@@ -57,11 +40,11 @@ export default function ForSellersPage() {
             Get proven results and streamlined service from start to finish. Scroll down to learn more about how we can get you results with our record-setting sales strategies.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="#home-valuation" className="inline-flex items-center justify-center px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+            <a href="/home-valuation/" className="inline-flex items-center justify-center px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
               Get Your Home Value
             </a>
-            <a href="/contact/?interest=Selling a home" className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
-              Get a Customized Selling Plan
+            <a href="/contact/" className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
+              Contact Us
             </a>
           </div>
           <div className="mt-4 flex justify-center">
@@ -79,28 +62,6 @@ export default function ForSellersPage() {
         </div>
       </section>
 
-      {/* Trust Badges Section */}
-      <section className="py-8 px-6 border-b border-gray-100" style={{backgroundColor: '#fafafa'}}>
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          <div>
-            <p className="text-2xl font-bold text-gray-900 font-serif">20+</p>
-            <p className="text-xs text-gray-600 mt-1 uppercase tracking-wide font-semibold">Years Experience</p>
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-gray-900 font-serif">Zillow</p>
-            <p className="text-xs text-gray-600 mt-1 uppercase tracking-wide font-semibold">Premier Agent</p>
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-gray-900 font-serif">5-Star</p>
-            <p className="text-xs text-gray-600 mt-1 uppercase tracking-wide font-semibold">Client Reviews</p>
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-gray-900 font-serif">🏡</p>
-            <p className="text-xs text-gray-600 mt-1 uppercase tracking-wide font-semibold">Full-Service Marketing</p>
-          </div>
-        </div>
-      </section>
-
       {/* For Sellers / Sell With The Best Team Section */}
       <section className="py-16 px-6">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
@@ -113,7 +74,7 @@ export default function ForSellersPage() {
           </div>
           <div>
             <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-4">For Sellers</p>
-            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-6">Why Should I Sell With SAA Homes?</h2>
+            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-6">Sell With The Best Team</h2>
             <p className="text-lg text-gray-700 mb-4">
               Selling your home is one of the most important financial decisions you'll make. That's why you need a team with proven results, cutting-edge marketing strategies, and a track record of getting top dollar for our clients.
             </p>
@@ -121,10 +82,10 @@ export default function ForSellersPage() {
               We combine data-driven pricing strategies with aggressive marketing campaigns to create maximum demand for your property. Our goal is to generate multiple offers and create a competitive bidding environment that works in your favor.
             </p>
             <div className="flex gap-4 flex-wrap">
-              <a href="#home-valuation" className="inline-block px-6 py-3 bg-black text-white font-semibold rounded hover:bg-gray-800 transition-colors">
+              <a href="/home-valuation/" className="inline-block px-6 py-3 bg-black text-white font-semibold rounded hover:bg-gray-800 transition-colors">
                 Get Your Home Value
               </a>
-              <a href="/contact/?interest=Selling a home" className="inline-block px-6 py-3 border-2 border-black text-black font-semibold rounded hover:bg-black hover:text-white transition-colors">
+              <a href="/contact/" className="inline-block px-6 py-3 border-2 border-black text-black font-semibold rounded hover:bg-black hover:text-white transition-colors">
                 Contact Us
               </a>
             </div>
@@ -141,7 +102,7 @@ export default function ForSellersPage() {
       <section className="py-16 px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4">What Seller Services Does SAA Homes Offer?</h2>
+            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4">Our Seller Services</h2>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto">
               Selling your home is a significant decision. We leverage cutting-edge marketing, strategic pricing, and expert negotiation to ensure you get the best possible outcome.
             </p>
@@ -199,58 +160,16 @@ export default function ForSellersPage() {
         </div>
       </section>
 
-      {/* Area Guides */}
-      <section className="py-16 px-6 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4">Northern Colorado Area Guides</h2>
-            <p className="text-lg text-gray-700 max-w-3xl mx-auto">
-              Explore market insights and neighborhood guides for your selling area.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <a href="/northern-colorado-areas/fort-collins/" className="block bg-gray-50 p-6 rounded-lg hover:shadow-lg transition-shadow border border-gray-100">
-              <h3 className="text-xl font-bold mb-2">Fort Collins</h3>
-              <p className="text-gray-600 text-sm">CSU, breweries, and mountain views</p>
-            </a>
-            <a href="/northern-colorado-areas/loveland/" className="block bg-gray-50 p-6 rounded-lg hover:shadow-lg transition-shadow border border-gray-100">
-              <h3 className="text-xl font-bold mb-2">Loveland</h3>
-              <p className="text-gray-600 text-sm">Arts, lakes, and I-25 corridor</p>
-            </a>
-            <a href="/northern-colorado-areas/windsor/" className="block bg-gray-50 p-6 rounded-lg hover:shadow-lg transition-shadow border border-gray-100">
-              <h3 className="text-xl font-bold mb-2">Windsor</h3>
-              <p className="text-gray-600 text-sm">Family communities, top schools</p>
-            </a>
-            <a href="/northern-colorado-areas/greeley/" className="block bg-gray-50 p-6 rounded-lg hover:shadow-lg transition-shadow border border-gray-100">
-              <h3 className="text-xl font-bold mb-2">Greeley</h3>
-              <p className="text-gray-600 text-sm">Weld County value and growth</p>
-            </a>
-          </div>
-          <div className="text-center mt-8">
-            <a href="/northern-colorado-areas/" className="text-black font-semibold hover:underline">View All 27+ Northern Colorado Communities →</a>
-          </div>
-        </div>
-      </section>
-
-      {/* Home Valuation / Free Market Report Section */}
+      {/* Home Valuation Widget Section */}
       <section id="home-valuation" className="py-16 px-6 bg-gray-50">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
-            <h2 className="text-4xl font-bold mb-4">How Much Is My Northern Colorado Home Worth?</h2>
+            <h2 className="text-4xl font-bold mb-4">In Depth Market Analysis for Your Home</h2>
             <p className="text-lg text-gray-700">
-              Get a personalized market analysis for your home — what it's worth today, recent comps in your neighborhood, and a recommended pricing strategy from Adam and Mandi Schwartz.
+              Get a free, instant estimate of your home's value
             </p>
           </div>
-          <HomeValueCapture areaName="Northern Colorado" />
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500">Prefer a written report by email?</p>
-            <a href="#market-report" className="text-sm font-semibold text-black underline underline-offset-2">
-              Request the full market report instead
-            </a>
-          </div>
-          <div className="mt-10">
-            <MarketReportForm areaName="Northern Colorado" />
-          </div>
+          <realscout-home-value agent-encoded-id="QWdlbnQtMjUxOTI5" include-name include-phone remove-title remove-subtitle></realscout-home-value>
         </div>
       </section>
 
@@ -258,7 +177,7 @@ export default function ForSellersPage() {
       <section className="py-16 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">What Is the SAA Homes Selling Process?</h2>
+            <h2 className="text-4xl font-bold mb-4">Our Selling Process</h2>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -289,68 +208,12 @@ export default function ForSellersPage() {
         </div>
       </section>
 
-      {/* Cash Buyer Alternative Section */}
-      <section className="py-16 px-6 bg-gray-50">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-10">
-            <span className="inline-block bg-yellow-100 text-yellow-800 text-xs uppercase tracking-widest px-3 py-1 rounded-full mb-4 font-semibold">Alternative Option</span>
-            <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4">Need to Sell Fast? Should I Consider a Cash Offer?</h2>
-            <p className="text-lg text-gray-700 max-w-3xl mx-auto">
-              Not every situation calls for a traditional listing. If you need to sell quickly,
-              avoid repairs, or prefer a guaranteed close — a cash offer might be the right path.
-              We help you compare both options so you can choose with confidence.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
-              <div className="text-3xl mb-3">📋</div>
-              <h3 className="text-xl font-bold mb-3">Traditional Listing</h3>
-              <p className="text-gray-600 text-sm mb-4">Best for maximizing sale price</p>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex items-start gap-2">✓ Full market value pricing</li>
-                <li className="flex items-start gap-2">✓ Professional marketing + photography</li>
-                <li className="flex items-start gap-2">✓ Showings and open houses</li>
-                <li className="flex items-start gap-2">✓ 30&ndash;60 day typical timeline</li>
-                <li className="flex items-start gap-2">✓ Expert negotiation and representation</li>
-              </ul>
-            </div>
-
-            <div className="bg-white p-8 rounded-xl shadow-lg border border-yellow-200 relative">
-              <div className="absolute -top-3 -right-3 bg-yellow-400 text-black text-xs font-bold px-3 py-1 rounded-full">Also Available</div>
-              <div className="text-3xl mb-3">💰</div>
-              <h3 className="text-xl font-bold mb-3">Cash Sale Option</h3>
-              <p className="text-gray-600 text-sm mb-4">Best for speed and certainty</p>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex items-start gap-2">✓ Close in 7&ndash;14 days</li>
-                <li className="flex items-start gap-2">✓ No repairs, cleaning, or staging</li>
-                <li className="flex items-start gap-2">✓ No showings or open houses</li>
-                <li className="flex items-start gap-2">✓ No agent commission out of pocket</li>
-                <li className="flex items-start gap-2">✓ Guaranteed close — no financing contingencies</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="text-center mt-10">
-            <a
-              href="/cash-home-buyers/"
-              className="inline-block px-8 py-3 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded transition-colors"
-            >
-              Learn More About Cash Offers →
-            </a>
-            <p className="text-sm text-gray-500 mt-3">
-              Or call <a href="tel:(970) 999-1407" className="text-black font-semibold hover:underline">(970) 999-1407</a> to discuss your options
-            </p>
-          </div>
-        </div>
-      </section>
-
       {/* Expert Advice Section with Family Image */}
       <section className="py-16 px-6">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div>
             <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-4">Experience Leads To</p>
-            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-6">What Makes SAA Homes' Marketing Different?</h2>
+            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-6">Expert Advice</h2>
             <p className="text-lg text-gray-700 mb-6">
               We will aggressively market your house to create the highest demand with the aim of creating a bidding war on your home. We will list your house on Zillow, MLS, Realtor.com and all the major home sites. At our own expense, we will have high class, professional photos taken of your home and entire property. We also can do video's and Matterport 3D tour of your home. We will also market your home aggressively on all major social media platforms, to make sure you can get the most money for your home. We are proud to be rated a Zillow 'Premier Agent', so you know we will take care of you from start to finish.
             </p>
@@ -358,7 +221,7 @@ export default function ForSellersPage() {
               <a href="#home-valuation" className="inline-block px-6 py-3 bg-black text-white font-semibold rounded hover:bg-gray-800 transition-colors">
                 Value Your Home
               </a>
-              <a href="/contact/?interest=Selling a home" className="inline-block px-6 py-3 border-2 border-black text-black font-semibold rounded hover:bg-black hover:text-white transition-colors">
+              <a href="/contact/" className="inline-block px-6 py-3 border-2 border-black text-black font-semibold rounded hover:bg-black hover:text-white transition-colors">
                 Get Started
               </a>
             </div>
@@ -373,22 +236,20 @@ export default function ForSellersPage() {
         </div>
       </section>
 
-      <AreaFAQSection faqs={SELLER_FAQS} city="Northern Colorado" />
-
-      <Testimonials />
+      <AreaFAQSection faqs={FOR_SELLERS_FAQS} city="Northern Colorado sellers" />
 
       {/* CTA Section */}
       <section className="py-16 px-6 bg-black text-white">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-4">Ready to Sell Your Home in Northern Colorado?</h2>
+          <h2 className="text-4xl font-bold mb-4">Ready to Sell Your Home?</h2>
           <p className="text-xl mb-8">
             Let's discuss your selling goals and create a customized marketing plan for your property.
           </p>
           <div className="flex gap-4 justify-center">
-            <a href="/contact/?interest=Selling a home" className="inline-block px-8 py-3 bg-white text-black font-semibold rounded hover:bg-gray-100 transition-colors">
+            <a href="/contact/" className="inline-block px-8 py-3 bg-white text-black font-semibold rounded hover:bg-gray-100 transition-colors">
               Get Started
             </a>
-            <a href="#home-valuation" className="inline-block px-8 py-3 border-2 border-white text-white font-semibold rounded hover:bg-white hover:text-black transition-colors">
+            <a href="/home-valuation/" className="inline-block px-8 py-3 border-2 border-white text-white font-semibold rounded hover:bg-white hover:text-black transition-colors">
               Free Home Valuation
             </a>
           </div>
