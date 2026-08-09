@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Start free trial — ListLogic</title>
+<title>Sign in — ListLogic</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -17,28 +17,24 @@ body {
 }
 .auth-card {
   background: var(--card); border-radius: 22px; padding: 36px 32px;
-  width: 100%; max-width: 460px; box-shadow: 0 40px 90px -30px rgba(0,0,0,0.55);
+  width: 100%; max-width: 440px; box-shadow: 0 40px 90px -30px rgba(0,0,0,0.55);
 }
 .auth-brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -0.02em; font-size: 1.1rem; margin-bottom: 22px; }
 .auth-brand img { height: 42px; width: auto; display: block; }
 h1 { font-family: 'Fraunces', serif; font-size: 1.7rem; letter-spacing: -0.02em; margin-bottom: 6px; }
 .sub { color: var(--muted); font-size: 0.92rem; margin-bottom: 20px; }
-.sub strong { color: var(--ink); }
-.perks { display: grid; gap: 8px; margin-bottom: 22px; }
-.perks div { display: flex; gap: 10px; font-size: 0.88rem; align-items: flex-start; }
-.perks div::before {
-  content: "✓"; flex: 0 0 20px; height: 20px; border-radius: 50%;
-  background: #e7f3ef; color: var(--teal); font-weight: 800; font-size: 0.72rem;
-  display: grid; place-items: center; margin-top: 2px;
-}
 .hint-box {
   background: #f7f4ee; border: 1px solid var(--line); border-radius: var(--radius-sm);
-  padding: 13px 15px; font-size: 0.84rem; color: var(--muted); margin-bottom: 18px; line-height: 1.5;
+  padding: 13px 15px; font-size: 0.84rem; color: var(--muted); margin-bottom: 20px; line-height: 1.5;
 }
 button.btn { width: 100%; padding: 13px; font-size: 0.95rem; }
 .auth-links { margin-top: 20px; font-size: 0.82rem; display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
 .auth-links a { color: var(--muted); text-decoration: none; }
 .auth-links a:hover { color: var(--ink); }
+.toggle { margin-top: 14px; text-align: center; font-size: 0.82rem; }
+.toggle button {
+  background: none; border: none; color: var(--navy); font-weight: 700; cursor: pointer; text-decoration: underline;
+}
 .dev-link { word-break: break-all; font-size: 0.78rem; margin-top: 10px; }
 </style>
 </head>
@@ -47,53 +43,61 @@ button.btn { width: 100%; padding: 13px; font-size: 0.95rem; }
   <a href="/saas/" class="auth-brand" style="text-decoration:none;color:inherit">
     <img src="/saas/listlogic-logo.png" alt="ListLogic">
   </a>
-  <h1>Start your free trial</h1>
-  <p class="sub"><strong>3 presentations or 60 days</strong> — whichever comes first. No card required.</p>
-
-  <div class="perks">
-    <div>Email a magic link — no password until you’re ready</div>
-    <div>Customize branding so every report looks like yours</div>
-    <div>Sample listing included before your first appointment</div>
+  <h1>Welcome back</h1>
+  <p class="sub">We’ll email you a one-time sign-in link.</p>
+  <div class="hint-box">
+    New here? <a href="signup.html">Start a free trial</a>
+    · or <a href="/demo">try the sample listing</a> with no signup.
   </div>
 
-  <div class="hint-box" id="inviteHint" style="display:none"></div>
-
-  <form id="form">
+  <form id="magicForm">
     <div class="field">
-      <label for="email">Work email</label>
-      <input id="email" type="email" required autocomplete="email" placeholder="you@brokerage.com">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" autocomplete="username" required>
     </div>
-    <div class="field">
-      <label for="promo">Promo code <span style="font-weight:400;text-transform:none">(optional)</span></label>
-      <input id="promo" placeholder="e.g. COLDWELL-NOCO" spellcheck="false">
-    </div>
-    <button type="submit" class="btn btn-gold">Email me a link</button>
+    <button type="submit" class="btn btn-primary">Email me a link</button>
   </form>
+
+  <form id="passwordForm" style="display:none;margin-top:8px">
+    <div class="field">
+      <label for="pwEmail">Email</label>
+      <input id="pwEmail" type="email" autocomplete="username" required>
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Sign in with password</button>
+  </form>
+
+  <p class="toggle"><button type="button" id="toggleMode">Use password instead</button></p>
   <p class="status" id="status"></p>
   <p class="dev-link" id="devLink" style="display:none"></p>
   <div class="auth-links">
-    <a href="login.html">Already have an account?</a>
-    <a href="/demo">Try sample listing</a>
     <a href="/saas/">Home</a>
+    <a href="/saas/pricing.html">Pricing</a>
+    <a href="/saas/faq.html">FAQ</a>
   </div>
 </div>
 <script>
 const params = new URLSearchParams(location.search);
-const invite = params.get('invite') || '';
 const next = params.get('next') || '/saas/app.html';
-if (params.get('code')) document.getElementById('promo').value = params.get('code');
-if (invite) {
-  fetch('/api/invite-info?token=' + encodeURIComponent(invite))
-    .then(r => r.json())
-    .then(d => {
-      if (!d.ok) return;
-      const hint = document.getElementById('inviteHint');
-      hint.style.display = 'block';
-      hint.textContent = 'Invite applied: ' + (d.presentation_limit || 3) + ' presentations or ' + (d.trial_days || 60) + ' days.';
-      if (d.email) document.getElementById('email').value = d.email;
-    }).catch(() => {});
-}
-document.getElementById('form').addEventListener('submit', async (e) => {
+let passwordMode = false;
+const magicForm = document.getElementById('magicForm');
+const passwordForm = document.getElementById('passwordForm');
+const toggle = document.getElementById('toggleMode');
+
+toggle.addEventListener('click', () => {
+  passwordMode = !passwordMode;
+  magicForm.style.display = passwordMode ? 'none' : 'block';
+  passwordForm.style.display = passwordMode ? 'block' : 'none';
+  toggle.textContent = passwordMode ? 'Use email link instead' : 'Use password instead';
+  if (passwordMode) {
+    document.getElementById('pwEmail').value = document.getElementById('email').value;
+  }
+});
+
+magicForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const status = document.getElementById('status');
   const dev = document.getElementById('devLink');
@@ -106,8 +110,6 @@ document.getElementById('form').addEventListener('submit', async (e) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: document.getElementById('email').value.trim(),
-        promo_code: document.getElementById('promo').value.trim(),
-        invite,
         next,
       }),
     });
@@ -119,6 +121,32 @@ document.getElementById('form').addEventListener('submit', async (e) => {
       dev.style.display = 'block';
       dev.innerHTML = 'Dev link: <a href="' + data.dev_url + '">' + data.dev_url + '</a>';
     }
+  } catch (err) {
+    status.className = 'status error';
+    status.textContent = String(err.message || err);
+  }
+});
+
+passwordForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const status = document.getElementById('status');
+  status.className = 'status';
+  status.textContent = 'Signing in…';
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: document.getElementById('pwEmail').value.trim(),
+        password: document.getElementById('password').value,
+      }),
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(payload.detail || 'Invalid email or password');
+    const dest = payload.user && !payload.user.profile_complete
+      ? '/saas/onboarding.html?next=' + encodeURIComponent(next)
+      : next;
+    location.href = dest;
   } catch (err) {
     status.className = 'status error';
     status.textContent = String(err.message || err);

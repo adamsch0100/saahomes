@@ -1,0 +1,574 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Presentation — ListLogic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/saas/ll.css">
+<style>
+.page-head { padding: 40px 0 8px; }
+.page-head h1 { font-family: 'Fraunces', serif; font-size: clamp(1.6rem, 3vw, 2.1rem); letter-spacing: -0.02em; margin-bottom: 6px; }
+.page-head .sub { color: var(--muted); font-size: 0.95rem; }
+
+.banner {
+  border-radius: var(--radius-sm); padding: 14px 18px; font-size: 0.88rem; margin: 18px 0 22px;
+  background: #e7f3ef; border: 1px solid #cbe5dc; color: var(--ink);
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.banner.warn { background: #fdf3e7; border-color: #f0d9b8; }
+.banner.err { background: #fae8e2; border-color: #ecc5b8; }
+.banner strong { font-weight: 700; }
+
+.step-card { margin-bottom: 18px; }
+.step-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.step-num {
+  flex: 0 0 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--navy), var(--blue)); color: #fff;
+  display: grid; place-items: center; font-weight: 800; font-size: 0.85rem;
+  box-shadow: 0 6px 14px -6px rgba(12, 60, 110, 0.5);
+}
+.step-head h2 { font-family: 'Fraunces', serif; font-size: 1.2rem; letter-spacing: -0.01em; }
+.step-head p { font-size: 0.82rem; color: var(--muted); }
+
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 560px) { .row2 { grid-template-columns: 1fr; } }
+
+.check-row { display: flex; align-items: center; gap: 9px; margin: 6px 0 10px; font-size: 0.9rem; }
+.check-row input { width: auto; margin: 0; }
+
+.howto { margin-top: 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: #f7f4ee; }
+.howto summary {
+  cursor: pointer; list-style: none; padding: 13px 16px; font-weight: 600; color: var(--navy);
+  font-size: 0.88rem; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.howto summary::-webkit-details-marker { display: none; }
+.howto summary::after { content: "Show"; font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.howto[open] summary::after { content: "Hide"; }
+.howto .howto-body { padding: 0 16px 16px; font-size: 0.85rem; }
+.howto ol { margin: 8px 0 0 1.15rem; }
+.howto li { margin: 8px 0; line-height: 1.5; }
+.howto .callout {
+  margin-top: 10px; padding: 11px 13px; border-radius: var(--radius-sm); background: #fdf3e7;
+  border: 1px solid #f0d9b8; font-size: 0.82rem; line-height: 1.45;
+}
+.howto .callout strong { color: #9a5a1e; }
+.howto .goal { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0 6px; }
+@media (max-width: 560px) { .howto .goal { grid-template-columns: 1fr; } }
+.howto .goal div { background: #fff; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px; text-align: center; }
+.howto .goal .gv { font-family: 'Fraunces', serif; font-weight: 700; color: var(--navy); font-size: 1.15rem; }
+.howto .goal .gl { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-top: 2px; font-weight: 700; }
+
+.color-field input[type="color"] { padding: 4px; height: 44px; cursor: pointer; }
+
+.submit-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
+.submit-row .btn { padding: 14px 30px; font-size: 0.98rem; }
+
+.result {
+  display: none; margin-top: 22px;
+  background: linear-gradient(150deg, var(--ink), var(--ink-2)); color: #fff;
+  border-radius: var(--radius); padding: 26px; position: relative; overflow: hidden;
+}
+.result.show { display: block; }
+.result::after { content: ""; position: absolute; inset: 0; background: radial-gradient(500px 240px at 90% 0%, rgba(201,162,39,0.22), transparent 60%); pointer-events: none; }
+.result > * { position: relative; }
+.result h3 { font-family: 'Fraunces', serif; font-size: 1.3rem; margin-bottom: 14px; }
+.result .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
+@media (max-width: 620px) { .result .metrics { grid-template-columns: repeat(2, 1fr); } }
+.result .metric { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius-sm); padding: 12px; text-align: center; }
+.result .metric .v { font-family: 'Fraunces', serif; font-weight: 700; font-size: 1.25rem; }
+.result .metric .l { font-size: 0.64rem; color: #9fb0c6; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; margin-top: 2px; }
+.result .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,0.35); color: #fff; }
+.btn-ghost:hover { border-color: rgba(255,255,255,0.75); }
+.share-row { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.share-row input {
+  flex: 1; min-width: 180px; padding: 10px 12px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.25); background: rgba(0,0,0,0.25); color: #fff; font-size: 0.82rem;
+}
+.reports {
+  margin: 28px 0 8px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 18px 18px 8px;
+}
+.reports h2 { font-family: 'Fraunces', serif; font-size: 1.2rem; margin: 0 0 4px; }
+.reports .sub { color: var(--muted); font-size: 0.82rem; margin-bottom: 12px; }
+.report-row {
+  display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;
+  padding: 12px 0; border-top: 1px solid var(--line);
+}
+.report-row .addr { font-weight: 700; color: var(--navy); font-size: 0.92rem; }
+.report-row .meta { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+.report-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.report-actions .btn { padding: 7px 12px; font-size: 0.75rem; }
+.reports empty, .reports .empty { color: var(--muted); font-size: 0.85rem; padding: 8px 0 16px; }
+@media (max-width: 620px) {
+  .report-row { grid-template-columns: 1fr; }
+  .report-actions { justify-content: flex-start; }
+}</style>
+</head>
+<body>
+
+<nav class="ll-nav">
+  <div class="container ll-nav-inner">
+    <a href="/saas/" class="ll-brand">
+      <img src="/saas/listlogic-logo.png" alt="ListLogic" class="ll-brand-logo">
+      <small>by SAA Homes</small>
+    </a>
+    <div class="ll-nav-links">
+      <a href="/demo">Sample listing</a>
+      <a href="/saas/faq.html">FAQ</a>
+      <a href="/saas/pricing.html">Pricing</a>
+      <a href="#" id="logoutLink">Sign out</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container narrow">
+  <div class="page-head">
+    <span class="eyebrow">New presentation</span>
+    <h1>Build your pricing story.</h1>
+    <p class="sub">Upload market data, set the subject, generate a seller-ready presentation.</p>
+  </div>
+
+  <div class="banner" id="trialBanner">
+    <strong>Trial:</strong> 3 presentations or 60 days — whichever comes first. <span id="trialMeta"></span>
+  </div>
+
+  <div class="reports" id="reportsPanel">
+    <h2>Saved reports</h2>
+    <p class="sub">Every generate is saved to your account. Share the client link when you can’t meet in person.</p>
+    <div id="reportsList"><p class="empty">Loading…</p></div>
+  </div>
+
+  <form id="genForm">
+    <div class="card step-card">
+      <div class="step-head">
+        <span class="step-num">1</span>
+        <div>
+          <h2>Market data</h2>
+          <p>Your MLS export — the custom market you already built in Matrix</p>
+        </div>
+      </div>
+      <div class="field">
+        <label>Upload the 71-field export</label>
+        <input type="file" id="exportFile" name="export_file" accept=".txt,.csv,.tsv">
+      </div>
+      <label class="check-row">
+        <input type="checkbox" id="useSample" checked>
+        Use sample Greeley export (export-71.txt)
+      </label>
+      <p class="hint">That file <strong>is</strong> your market. Name it in step 2 so sellers know what "closed" means. Max 15MB.</p>
+
+      <details class="howto" id="exportHowto">
+        <summary>How to build your custom market in Matrix</summary>
+        <div class="howto-body">
+          <div class="goal">
+            <div><div class="gv">≤ 450</div><div class="gl">Homes in file</div></div>
+            <div><div class="gv">2 years</div><div class="gl">List date lookback</div></div>
+            <div><div class="gv">71 fields</div><div class="gl">Export format</div></div>
+          </div>
+          <p class="hint" style="margin-top:8px">Aim for as many relevant homes as you can <strong>without going over 450</strong>. "71" is the field set — not the home count.</p>
+          <ol>
+            <li>
+              <strong>Start wide on status.</strong> Include every status you'll need for inventory + absorption + "didn't sell":
+              Active, Active Under Contract / Backup, Pending, Sold, Expired, Withdrawn (and First Right if you use it).
+              Sold alone is not enough — ListLogic needs Active for competition and Pending/Backup as under contract.
+            </li>
+            <li>
+              <strong>Pick property type(s) that match the subject.</strong>
+              Detached, Attached / Townhouse, Condo, Farm &amp; Ranch, etc. — only what a buyer would actually cross-shop.
+              Mixing ranch acreage with city ranchers usually muddies the story.
+            </li>
+            <li>
+              <strong>Set geography + time.</strong>
+              City / ZIP / map area for the competitive set.
+              List date: from <strong>2 years ago through today</strong> (listed anytime in that window — solds, actives, and off-markets all stay in the pull).
+            </li>
+            <li>
+              <strong>Narrow toward ~450.</strong>
+              If the result count is high, tighten in this order until you're under 450 but still rich:
+              total / finished sq ft band (often within about <strong>1,000–1,500 sq ft</strong> of the subject),
+              garage spaces, beds, baths, lot size / acres, year built, then subdivision or map if needed.
+            </li>
+            <li>
+              <strong>Sanity-check the set.</strong>
+              Confirm actives, pendings, and recent solds all look like real competition for <em>this</em> home — not the whole city.
+            </li>
+            <li>
+              <strong>Export the 71-field list</strong> from Matrix (pipe-delimited / ListLogic field set), then upload that file here.
+            </li>
+          </ol>
+          <div class="callout">
+            <strong>Why this shape?</strong>
+            Wide statuses + 24 months give absorption, months of inventory, and "left the market" truth.
+            The sq ft / garage / beds cut makes it apples-to-apples.
+            Cap at 450 so the presentation stays fast and the comps stay sharp.
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <div class="card step-card">
+      <div class="step-head">
+        <span class="step-num">2</span>
+        <div>
+          <h2>Subject property</h2>
+          <p>The home you're pricing — and what to call this market</p>
+        </div>
+      </div>
+      <div class="field">
+        <label>Address</label>
+        <input type="text" id="address" name="address" placeholder="2845 W 13th St, Greeley, CO 80634" value="2845 W 13th St, Greeley, CO 80634" required>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>MLS # <span style="font-weight:400;text-transform:none">(optional)</span></label>
+          <input type="text" id="mls" name="mls_number" placeholder="If already in the export">
+        </div>
+        <div class="field">
+          <label>Narrow by city <span style="font-weight:400;text-transform:none">(optional)</span></label>
+          <input type="text" id="city" name="city_filter" value="" placeholder="Blank = full MLS pull">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Square feet (total)</label>
+          <input type="number" id="sqft" name="living_area" value="2392">
+        </div>
+        <div class="field">
+          <label>Year built</label>
+          <input type="number" id="year" name="year_built" value="1969">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Beds</label>
+          <input type="number" id="beds" name="beds" value="4" step="1">
+        </div>
+        <div class="field">
+          <label>Baths</label>
+          <input type="number" id="baths" name="baths" value="2" step="0.25">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Condition</label>
+          <select id="condition" name="condition">
+            <option value="needs_work">Needs work</option>
+            <option value="average" selected>Average</option>
+            <option value="updated">Updated</option>
+            <option value="renovated">Renovated</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>List price <span style="font-weight:400;text-transform:none">(optional)</span></label>
+          <input type="number" id="listPrice" name="list_price" placeholder="Leave blank if not listed">
+        </div>
+      </div>
+      <div class="field">
+        <label>Market name <span style="font-weight:400;text-transform:none">(shown in the presentation)</span></label>
+        <input type="text" id="areaName" name="area_name" value="West Greeley · 1,800–2,800 sq ft · 2-car" placeholder="e.g. West Greeley 1800–2800 sf, 2-car, last 2 years">
+      </div>
+      <div class="field">
+        <label>What did you pull in MLS? <span style="font-weight:400;text-transform:none">(optional — criteria in your words)</span></label>
+        <textarea id="marketNotes" name="market_notes" rows="2" placeholder="Example: Greeley 80634, 1500–2500 sq ft, 2+ car garage, under 0.35 acres, listed/sold last 24 months" style="resize:vertical"></textarea>
+      </div>
+      <p class="hint">Your 71-field export <strong>is</strong> the market. We also auto-read sq ft, garage, dates, and ZIPs from the file so sellers see exactly what "191 closed" means.</p>
+    </div>
+
+    <div class="card step-card">
+      <div class="step-head">
+        <span class="step-num">3</span>
+        <div>
+          <h2>Agent branding</h2>
+          <p>What sellers see on the packet and flipbook</p>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Agent name</label>
+          <input type="text" id="agentName" name="agent_name" placeholder="Your name" value="">
+        </div>
+        <div class="field">
+          <label>Brokerage</label>
+          <input type="text" id="brokerage" name="brokerage" placeholder="Your brokerage" value="">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Phone</label>
+          <input type="text" id="phone" name="agent_phone" placeholder="(970) 555-0100" value="">
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="email" name="agent_email" placeholder="you@brokerage.com" value="">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field color-field">
+          <label>Brand primary</label>
+          <input type="color" id="brandPrimary" name="brand_primary" value="#0c3c6e">
+        </div>
+        <div class="field color-field">
+          <label>Brand accent</label>
+          <input type="color" id="brandAccent" name="brand_accent" value="#1a5f9e">
+        </div>
+      </div>
+      <div class="field">
+        <label>Logo <span style="font-weight:400;text-transform:none">(optional)</span></label>
+        <input type="file" id="logo" name="logo" accept=".png,.jpg,.jpeg,.webp,.svg">
+      </div>
+    </div>
+
+    <div class="submit-row">
+      <button type="submit" class="btn btn-gold" id="generateBtn">Generate presentation</button>
+      <p class="status" id="status" style="margin-top:0">Ready — uses the sample export by default.</p>
+    </div>
+  </form>
+
+  <div class="result" id="result">
+    <h3>Presentation ready</h3>
+    <div class="metrics">
+      <div class="metric"><div class="v" id="mRec">—</div><div class="l">Recommended</div></div>
+      <div class="metric"><div class="v" id="mMoi">—</div><div class="l">Mo Inventory</div></div>
+      <div class="metric"><div class="v" id="mActive">—</div><div class="l">Active</div></div>
+      <div class="metric"><div class="v" id="mUc">—</div><div class="l">Under Contract</div></div>
+    </div>
+    <div class="actions">
+      <a class="btn btn-gold" id="openResult" href="#" target="_blank" rel="noopener">Open presentation</a>
+      <a class="btn btn-ghost" id="openStoryPdf" href="#" target="_blank" rel="noopener" style="display:none">Seller packet</a>
+      <a class="btn btn-ghost" id="openDeck" href="#" target="_blank" rel="noopener" style="display:none">Listing flipbook</a>
+    </div>
+    <div class="share-row">
+      <input type="text" id="shareLink" readonly placeholder="Client share link appears here">
+      <button type="button" class="btn btn-ghost" id="copyShareBtn">Copy client link</button>
+    </div>
+  </div>
+
+  <div style="height:56px"></div>
+</div>
+
+<script>
+const form = document.getElementById('genForm');
+const statusEl = document.getElementById('status');
+const btn = document.getElementById('generateBtn');
+const useSample = document.getElementById('useSample');
+const exportFile = document.getElementById('exportFile');
+const result = document.getElementById('result');
+
+(async () => {
+  try {
+    const res = await fetch('/api/auth-status');
+    const data = await res.json();
+    if (data.required && !data.authenticated) {
+      location.href = '/saas/login.html?next=' + encodeURIComponent('/saas/app.html');
+      return;
+    }
+    const ent = data.entitlement || {};
+    const u = data.user || {};
+    if (u && u.profile_complete === false) {
+      location.href = '/saas/onboarding.html?next=' + encodeURIComponent('/saas/app.html');
+      return;
+    }
+    const banner = document.getElementById('trialBanner');
+    const meta = document.getElementById('trialMeta');
+    if (u.status === 'active') {
+      banner.innerHTML = '<strong>Active account</strong> — generate unlimited presentations on your plan.';
+    } else if (!ent.ok) {
+      banner.classList.add('err');
+      banner.innerHTML =
+        '<strong>Trial ended.</strong> <a href="/saas/pricing.html">See plans</a> or email adam@saahomes.com to continue.';
+    } else {
+      meta.textContent =
+        (ent.remaining != null ? ent.remaining + ' presentation(s) left' : '') +
+        (ent.days_left != null ? ' · ~' + ent.days_left + ' day(s) left' : '') +
+        (u.email ? ' · ' + u.email : '');
+    }
+    // Prefill branding from profile
+    if (u.name) document.getElementById('agentName').value = u.name;
+    if (u.brokerage) document.getElementById('brokerage').value = u.brokerage;
+    if (u.phone) document.getElementById('phone').value = u.phone;
+    if (u.email) document.getElementById('email').value = u.email;
+    if (u.brand_primary) document.getElementById('brandPrimary').value = u.brand_primary;
+    if (u.brand_accent) document.getElementById('brandAccent').value = u.brand_accent;
+  } catch (e) {}
+})();
+
+document.getElementById('logoutLink').addEventListener('click', async (e) => {
+  e.preventDefault();
+  await fetch('/api/logout', { method: 'POST' });
+  location.href = '/saas/login.html';
+});
+
+useSample.addEventListener('change', () => {
+  exportFile.disabled = useSample.checked;
+  statusEl.textContent = useSample.checked
+    ? 'Ready — uses the sample export by default.'
+    : 'Upload your MLS export, then generate.';
+  statusEl.className = 'status';
+});
+exportFile.disabled = useSample.checked;
+
+function money(n) {
+  if (n == null || Number.isNaN(Number(n))) return '—';
+  return '$' + Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 });
+}
+
+function shareAbsolute(pathOrUrl) {
+  if (!pathOrUrl) return '';
+  if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
+  return location.origin + (pathOrUrl.startsWith('/') ? pathOrUrl : '/' + pathOrUrl);
+}
+
+function formatWhen(iso) {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch (e) {
+    return iso;
+  }
+}
+
+async function loadReports() {
+  const list = document.getElementById('reportsList');
+  try {
+    const res = await fetch('/api/my-presentations');
+    if (res.status === 401) return;
+    const data = await res.json();
+    const items = data.presentations || [];
+    if (!items.length) {
+      list.innerHTML = '<p class="empty">No saved reports yet — generate one below and it will show up here.</p>';
+      return;
+    }
+    list.innerHTML = items.map((p) => {
+      const share = shareAbsolute(p.share_url || p.url);
+      const open = shareAbsolute(p.url);
+      return (
+        '<div class="report-row">' +
+          '<div>' +
+            '<div class="addr">' + escapeHtml(p.address || p.title || 'Presentation') + '</div>' +
+            '<div class="meta">' + money(p.recommended_price) +
+              (p.months_of_inventory != null ? ' · ' + Number(p.months_of_inventory).toFixed(1) + ' mo inv' : '') +
+              (p.created_at ? ' · ' + formatWhen(p.created_at) : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="report-actions">' +
+            '<a class="btn btn-gold" href="' + open + '" target="_blank" rel="noopener">Open</a>' +
+            '<button type="button" class="btn" data-share="' + escapeAttr(share) + '">Copy link</button>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+  } catch (e) {
+    list.innerHTML = '<p class="empty">Could not load saved reports.</p>';
+  }
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+function escapeAttr(s) {
+  return escapeHtml(s);
+}
+
+document.getElementById('reportsList').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-share]');
+  if (!btn) return;
+  const url = btn.getAttribute('data-share');
+  try {
+    await navigator.clipboard.writeText(url);
+    btn.textContent = 'Copied';
+    setTimeout(() => { btn.textContent = 'Copy link'; }, 1600);
+  } catch (err) {
+    window.prompt('Copy this client link:', url);
+  }
+});
+
+document.getElementById('copyShareBtn').addEventListener('click', async () => {
+  const input = document.getElementById('shareLink');
+  const url = input.value;
+  if (!url) return;
+  try {
+    await navigator.clipboard.writeText(url);
+    document.getElementById('copyShareBtn').textContent = 'Copied';
+    setTimeout(() => { document.getElementById('copyShareBtn').textContent = 'Copy client link'; }, 1600);
+  } catch (err) {
+    input.select();
+  }
+});
+
+loadReports();
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  result.classList.remove('show');
+  statusEl.className = 'status';
+  statusEl.textContent = 'Running ListLogic engine…';
+  btn.disabled = true;
+
+  const data = new FormData(form);
+  data.set('use_sample_export', useSample.checked ? 'true' : 'false');
+  if (useSample.checked) data.delete('export_file');
+
+  try {
+    const res = await fetch('/api/generate', { method: 'POST', body: data });
+    if (res.status === 401) {
+      location.href = '/saas/login.html?next=' + encodeURIComponent('/saas/app.html');
+      return;
+    }
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(payload.detail || payload.message || ('HTTP ' + res.status));
+    }
+    document.getElementById('mRec').textContent = money(payload.recommended_price);
+    document.getElementById('mMoi').textContent = payload.months_of_inventory != null ? Number(payload.months_of_inventory).toFixed(1) : '—';
+    document.getElementById('mActive').textContent = payload.active_count ?? '—';
+    document.getElementById('mUc').textContent = payload.under_contract_count ?? '—';
+    const open = document.getElementById('openResult');
+    open.href = payload.url;
+    const storyPdf = document.getElementById('openStoryPdf');
+    if (payload.story_pdf_url) {
+      storyPdf.href = payload.story_pdf_url;
+      storyPdf.style.display = 'inline-flex';
+    } else if (payload.pdf_url) {
+      storyPdf.href = payload.pdf_url;
+      storyPdf.style.display = 'inline-flex';
+    } else {
+      storyPdf.style.display = 'none';
+    }
+    const deck = document.getElementById('openDeck');
+    if (payload.deck_url) {
+      deck.href = payload.deck_url;
+      deck.style.display = 'inline-flex';
+    } else if (payload.url) {
+      deck.href = payload.url.replace(/\/?$/, '/') + 'deck.html';
+      deck.style.display = 'inline-flex';
+    } else {
+      deck.style.display = 'none';
+    }
+    const shareInput = document.getElementById('shareLink');
+    shareInput.value = shareAbsolute(payload.share_url || payload.url);
+    result.classList.add('show');
+    statusEl.className = 'status ok';
+    statusEl.textContent = payload.saved
+      ? 'Saved to your reports — open or share the client link below.'
+      : 'Done — open the presentation below.';
+    loadReports();
+    window.open(payload.url, '_blank');
+  } catch (err) {
+    statusEl.className = 'status error';
+    statusEl.textContent = String(err.message || err);
+  } finally {
+    btn.disabled = false;
+  }
+});
+</script>
+<script src="/saas/assistant.js"></script>
+</body>
+</html>

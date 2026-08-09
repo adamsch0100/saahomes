@@ -162,7 +162,7 @@ def render_interactive_html(report: dict) -> str:
 
     brand_primary = meta.get("brand_primary") or "#0c3c6e"
     brand_accent = meta.get("brand_accent") or "#1a5f9e"
-    logo_url = meta.get("logo_url") or ""
+    logo_url = meta.get("logo_url") or "/saas/listlogic-logo.png"
     area = report.get("area") or ""
     link_city = meta.get("city") or (area.split(",")[0].strip() if area else "Greeley")
     link_state = meta.get("state") or "CO"
@@ -482,9 +482,10 @@ def render_interactive_html(report: dict) -> str:
         chart_tag = '<script src="/saas/vendor/chart.umd.min.js"></script>'
 
     logo_html = (
-        f'<img src="{logo_url}" alt="" style="height:28px;margin-right:8px;vertical-align:middle;background:#fff;border-radius:4px;padding:2px 4px">'
+        f'<img src="{logo_url}" alt="ListLogic" style="height:30px;margin-right:10px;vertical-align:middle;background:#fff;border-radius:6px;padding:3px 8px">'
         if logo_url else ""
     )
+    brand_text = "Pricing Story" if logo_html else "ListLogic · Pricing Story"
     meta_html = agent_line
     if agent_contact:
         meta_html += f"<br>{agent_contact}"
@@ -1154,7 +1155,7 @@ body.print-leavebehind .page{{padding-bottom:24px}}
 <div class="page">
   <div class="hero">
     <div>
-      <div class="brand">{logo_html}ListLogic · Pricing Story</div>
+      <div class="brand">{logo_html}{brand_text}</div>
       <h1>{hero_title}</h1>
       <div class="hero-chips">{hero_chips}</div>
     </div>

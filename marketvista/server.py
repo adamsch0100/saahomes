@@ -433,6 +433,11 @@ def home():
     return RedirectResponse(url="/saas/")
 
 
+@app.get("/favicon.ico")
+def favicon():
+    return FileResponse(ROOT / "saas" / "listlogic-logo.png", media_type="image/png")
+
+
 @app.get("/health")
 def health():
     import db as database
@@ -811,6 +816,7 @@ def _refresh_sample_html(run_dir: Path) -> None:
                 and "fulldata-body" in existing
                 and "In comps · remove" in existing
                 and "btnPrintLeavebehind" in existing
+                and "listlogic-logo.png" in existing
             ):
                 return
         report = json.loads(json_path.read_text(encoding="utf-8"))
