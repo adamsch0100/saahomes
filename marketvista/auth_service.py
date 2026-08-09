@@ -81,6 +81,21 @@ def auth_required() -> bool:
     return True
 
 
+def resolve_post_auth_next(user: Optional[dict], requested: str = "") -> str:
+    """Where to send someone after login. Admins land on the owner console by default."""
+    req = (requested or "").strip()
+    if req and not req.startswith("/"):
+        req = ""
+    # Only allow same-origin relative paths
+    if req.startswith("//") or "://" in req:
+        req = ""
+    is_admin = bool(user) and (user.get("role") or "") == "admin"
+    # Bare / marketing paths → role home. Explicit app/admin/deep links are kept.
+    if not req or req in ("/", "/saas/", "/saas/index.html"):
+        return "/saas/admin.html" if is_admin else "/saas/app.html"
+    return req
+
+
 def public_user(row: Optional[dict]) -> Optional[dict]:
     if not row:
         return None
@@ -104,6 +119,9 @@ def public_user(row: Optional[dict]) -> Optional[dict]:
         "profile_complete": bool(int(row.get("profile_complete") or 0)),
         "email_verified": bool(int(row.get("email_verified") or 0)),
         "has_password": has_password,
+        "plan": row.get("plan") or "",
+        "stripe_customer_id": row.get("stripe_customer_id") or "",
+        "has_stripe": bool((row.get("stripe_customer_id") or "").strip()),
     }
 
 
@@ -117,6 +135,111 @@ def get_user_by_email(email: str) -> Optional[dict]:
         (email.strip(),),
         fetch="one",
     )
+
+
+def get_user_by_stripe_customer(customer_id: str) -> Optional[dict]:
+    cid = (customer_id or "").strip()
+    if not cid:
+        return None
+    return database.execute(
+        "SELECT * FROM users WHERE stripe_customer_id = ?",
+        (cid,),
+        fetch="one",
+    )
+
+
+def set_stripe_ids(
+    user_id: str,
+    *,
+    stripe_customer_id: Optional[str] = None,
+    stripe_subscription_id: Optional[str] = None,
+    plan: Optional[str] = None,
+) -> Optional[dict]:
+    fields: list[str] = []
+    params: list[Any] = []
+    if stripe_customer_id is not None:
+        fields.append("stripe_customer_id = ?")
+        params.append(stripe_customer_id)
+    if stripe_subscription_id is not None:
+        fields.append("stripe_subscription_id = ?")
+        params.append(stripe_subscription_id)
+    if plan is not None:
+        fields.append("plan = ?")
+        params.append(plan)
+    if not fields:
+        return get_user_by_id(user_id)
+    fields.append("updated_at = ?")
+    params.append(_iso())
+    params.append(user_id)
+    database.execute(f"UPDATE users SET {', '.join(fields)} WHERE id = ?", tuple(params))
+    return get_user_by_id(user_id)
+
+
+def apply_one_time_purchase(user_id: str, *, quantity: int = 1) -> Optional[dict]:
+    """Grant N additional presentations (status active with a finite limit)."""
+    user = get_user_by_id(user_id)
+    if not user:
+        return None
+    used = int(user.get("presentations_used") or 0)
+    limit = user.get("presentation_limit")
+    qty = max(1, int(quantity or 1))
+    if limit is None and (user.get("status") or "") == "active":
+        # Already unlimited — keep unlimited, just record the purchase event.
+        set_stripe_ids(user_id, plan="one_time")
+        return get_user_by_id(user_id)
+    current_limit = int(limit) if limit is not None else used
+    new_limit = max(current_limit, used) + qty
+    database.execute(
+        "UPDATE users SET status = 'active', presentation_limit = ?, plan = ?, updated_at = ? WHERE id = ?",
+        (new_limit, "one_time", _iso(), user_id),
+    )
+    return get_user_by_id(user_id)
+
+
+def apply_subscription_active(
+    user_id: str,
+    *,
+    plan: str,
+    stripe_subscription_id: Optional[str] = None,
+    seat_quantity: int = 1,
+) -> Optional[dict]:
+    fields = [
+        "status = ?",
+        "presentation_limit = NULL",
+        "plan = ?",
+        "updated_at = ?",
+    ]
+    params: list[Any] = ["active", plan or "agent_monthly", _iso()]
+    if stripe_subscription_id:
+        fields.insert(-1, "stripe_subscription_id = ?")
+        params.insert(-1, stripe_subscription_id)
+    # seat_quantity stored in plan metadata via events; column optional
+    try:
+        database.execute(
+            f"UPDATE users SET {', '.join(fields)} WHERE id = ?",
+            tuple(params + [user_id]),
+        )
+    except Exception:
+        # Retry without subscription id if column missing mid-migrate
+        database.execute(
+            "UPDATE users SET status = 'active', presentation_limit = NULL, plan = ?, updated_at = ? WHERE id = ?",
+            (plan or "agent_monthly", _iso(), user_id),
+        )
+    log_event(
+        user_id,
+        "stripe_subscription_active",
+        {"plan": plan, "seat_quantity": seat_quantity, "subscription_id": stripe_subscription_id},
+    )
+    return get_user_by_id(user_id)
+
+
+def apply_subscription_ended(user_id: str) -> Optional[dict]:
+    database.execute(
+        "UPDATE users SET status = 'expired', presentation_limit = COALESCE(presentation_limit, presentations_used), "
+        "stripe_subscription_id = '', updated_at = ? WHERE id = ?",
+        (_iso(), user_id),
+    )
+    return get_user_by_id(user_id)
 
 
 def log_event(user_id: Optional[str], event_type: str, meta: Optional[dict] = None) -> None:
@@ -178,6 +301,13 @@ def entitlement(user: dict) -> dict:
     if status == "disabled":
         return {"ok": False, "reason": "disabled", "remaining": 0, "days_left": 0}
     if status == "active":
+        if limit_i is not None and used >= limit_i:
+            return {
+                "ok": False,
+                "reason": "limit_reached",
+                "remaining": 0,
+                "days_left": None,
+            }
         return {
             "ok": True,
             "reason": "active",
@@ -251,6 +381,8 @@ def save_presentation(
     active_count: Optional[int] = None,
     under_contract_count: Optional[int] = None,
     title: str = "",
+    presentation_html: Optional[str] = None,
+    deck_html: Optional[str] = None,
 ) -> dict:
     """Persist a generated report for the agent library + client share link."""
     existing = database.execute(
@@ -260,23 +392,34 @@ def save_presentation(
     )
     now = _iso()
     if existing:
+        fields = [
+            "address = ?",
+            "recommended_price = ?",
+            "months_of_inventory = ?",
+            "active_count = ?",
+            "under_contract_count = ?",
+            "title = ?",
+            "updated_at = ?",
+        ]
+        params: list[Any] = [
+            address or existing.get("address") or "",
+            recommended_price if recommended_price is not None else existing.get("recommended_price"),
+            months_of_inventory if months_of_inventory is not None else existing.get("months_of_inventory"),
+            active_count if active_count is not None else existing.get("active_count"),
+            under_contract_count if under_contract_count is not None else existing.get("under_contract_count"),
+            title or existing.get("title") or "",
+            now,
+        ]
+        if presentation_html is not None:
+            fields.append("presentation_html = ?")
+            params.append(presentation_html)
+        if deck_html is not None:
+            fields.append("deck_html = ?")
+            params.append(deck_html)
+        params.append(run_id)
         database.execute(
-            """
-            UPDATE presentations SET
-              address = ?, recommended_price = ?, months_of_inventory = ?,
-              active_count = ?, under_contract_count = ?, title = ?, updated_at = ?
-            WHERE run_id = ?
-            """,
-            (
-                address or existing.get("address") or "",
-                recommended_price if recommended_price is not None else existing.get("recommended_price"),
-                months_of_inventory if months_of_inventory is not None else existing.get("months_of_inventory"),
-                active_count if active_count is not None else existing.get("active_count"),
-                under_contract_count if under_contract_count is not None else existing.get("under_contract_count"),
-                title or existing.get("title") or "",
-                now,
-                run_id,
-            ),
+            f"UPDATE presentations SET {', '.join(fields)} WHERE run_id = ?",
+            tuple(params),
         )
         row = database.execute("SELECT * FROM presentations WHERE run_id = ?", (run_id,), fetch="one") or existing
         return _presentation_public(row)
@@ -298,8 +441,8 @@ def save_presentation(
         INSERT INTO presentations (
           id, user_id, run_id, share_token, address, recommended_price,
           months_of_inventory, active_count, under_contract_count, title,
-          created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          presentation_html, deck_html, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             pres_id,
@@ -312,6 +455,8 @@ def save_presentation(
             active_count,
             under_contract_count,
             title or address or "",
+            presentation_html or "",
+            deck_html or "",
             now,
             now,
         ),
@@ -357,13 +502,309 @@ def list_presentations(user_id: str, *, limit: int = 50) -> list[dict]:
     return [_presentation_public(r) for r in rows]
 
 
+def list_all_presentations(q: str = "", *, limit: int = 100) -> list[dict]:
+    """Admin: all presentations joined to agent identity."""
+    limit_i = max(1, min(int(limit), 300))
+    q = (q or "").strip()
+    if q:
+        like = f"%{q}%"
+        rows = database.execute(
+            """
+            SELECT p.*, u.email AS agent_email, u.name AS agent_name, u.brokerage AS agent_brokerage
+            FROM presentations p
+            LEFT JOIN users u ON u.id = p.user_id
+            WHERE p.address LIKE ? OR p.title LIKE ? OR p.run_id LIKE ?
+               OR u.email LIKE ? OR u.name LIKE ? OR p.share_token LIKE ?
+            ORDER BY p.created_at DESC
+            LIMIT ?
+            """,
+            (like, like, like, like, like, like, limit_i),
+            fetch="all",
+        ) or []
+    else:
+        rows = database.execute(
+            """
+            SELECT p.*, u.email AS agent_email, u.name AS agent_name, u.brokerage AS agent_brokerage
+            FROM presentations p
+            LEFT JOIN users u ON u.id = p.user_id
+            ORDER BY p.created_at DESC
+            LIMIT ?
+            """,
+            (limit_i,),
+            fetch="all",
+        ) or []
+    out = []
+    for r in rows:
+        item = _presentation_public(r)
+        item["user_id"] = r.get("user_id")
+        item["agent_email"] = r.get("agent_email") or ""
+        item["agent_name"] = r.get("agent_name") or ""
+        item["agent_brokerage"] = r.get("agent_brokerage") or ""
+        out.append(item)
+    return out
+
+
+def admin_stats() -> dict:
+    """Lightweight ops snapshot for admin home."""
+    def _count(sql: str, params: tuple = ()) -> int:
+        row = database.execute(sql, params, fetch="one") or {}
+        return int(row.get("n") or row.get("count") or 0)
+
+    users_total = _count("SELECT COUNT(*) AS n FROM users")
+    users_trial = _count("SELECT COUNT(*) AS n FROM users WHERE lower(status) = 'trial'")
+    users_active = _count("SELECT COUNT(*) AS n FROM users WHERE lower(status) = 'active'")
+    users_expired = _count("SELECT COUNT(*) AS n FROM users WHERE lower(status) = 'expired'")
+    users_disabled = _count("SELECT COUNT(*) AS n FROM users WHERE lower(status) = 'disabled'")
+    presentations_total = _count("SELECT COUNT(*) AS n FROM presentations")
+    # ISO week-ish: last 7 days by created_at string compare (ISO timestamps sort lexically)
+    week_ago = _iso(_utcnow() - timedelta(days=7))
+    presentations_week = _count(
+        "SELECT COUNT(*) AS n FROM presentations WHERE created_at >= ?",
+        (week_ago,),
+    )
+    feedback_open = _count(
+        "SELECT COUNT(*) AS n FROM feedback WHERE status IN ('new', 'seen')"
+    )
+    feedback_new = _count("SELECT COUNT(*) AS n FROM feedback WHERE status = 'new'")
+    assistant_week = 0
+    assistant_total = 0
+    try:
+        assistant_week = _count(
+            "SELECT COUNT(*) AS n FROM assistant_turns WHERE created_at >= ?",
+            (week_ago,),
+        )
+        assistant_total = _count("SELECT COUNT(*) AS n FROM assistant_turns")
+    except Exception:
+        pass
+    stripe_on = bool((os.environ.get("STRIPE_SECRET_KEY") or "").strip())
+    stripe_key = (os.environ.get("STRIPE_SECRET_KEY") or "").strip()
+    stripe_mode = "test" if stripe_key.startswith("sk_test") else "live"
+    return {
+        "users_total": users_total,
+        "users_trial": users_trial,
+        "users_active": users_active,
+        "users_expired": users_expired,
+        "users_disabled": users_disabled,
+        "presentations_total": presentations_total,
+        "presentations_week": presentations_week,
+        "feedback_open": feedback_open,
+        "feedback_new": feedback_new,
+        "assistant_week": assistant_week,
+        "assistant_total": assistant_total,
+        "stripe_configured": stripe_on,
+        "stripe_mode": stripe_mode if stripe_on else "",
+    }
+
+
+def save_assistant_turn(
+    *,
+    user_id: Optional[str],
+    user_message: str,
+    assistant_reply: str,
+    page_url: str = "",
+    conversation_id: str = "",
+    ok: bool = True,
+    model: str = "",
+) -> Optional[dict]:
+    msg = (user_message or "").strip()
+    if not msg:
+        return None
+    turn_id = _uid()
+    row = {
+        "id": turn_id,
+        "user_id": user_id,
+        "conversation_id": (conversation_id or "")[:64],
+        "page_url": (page_url or "")[:2000],
+        "user_message": msg[:8000],
+        "assistant_reply": (assistant_reply or "")[:12000],
+        "ok": 1 if ok else 0,
+        "model": (model or "")[:120],
+        "created_at": _iso(),
+    }
+    try:
+        database.execute(
+            """
+            INSERT INTO assistant_turns
+              (id, user_id, conversation_id, page_url, user_message, assistant_reply, ok, model, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                row["id"],
+                row["user_id"],
+                row["conversation_id"],
+                row["page_url"],
+                row["user_message"],
+                row["assistant_reply"],
+                row["ok"],
+                row["model"],
+                row["created_at"],
+            ),
+        )
+        log_event(
+            user_id,
+            "assistant_chat",
+            {"turn_id": turn_id, "ok": bool(ok), "page_url": row["page_url"][:200]},
+        )
+    except Exception:
+        logger.exception("Failed to save assistant turn")
+        return None
+    return row
+
+
+def list_assistant_turns(q: str = "", *, limit: int = 100) -> list[dict]:
+    limit_i = max(1, min(int(limit), 300))
+    q = (q or "").strip()
+    if q:
+        like = f"%{q}%"
+        rows = database.execute(
+            """
+            SELECT t.*, u.email AS agent_email, u.name AS agent_name
+            FROM assistant_turns t
+            LEFT JOIN users u ON u.id = t.user_id
+            WHERE t.user_message LIKE ? OR t.assistant_reply LIKE ?
+               OR u.email LIKE ? OR u.name LIKE ? OR t.page_url LIKE ?
+               OR t.conversation_id LIKE ?
+            ORDER BY t.created_at DESC
+            LIMIT ?
+            """,
+            (like, like, like, like, like, like, limit_i),
+            fetch="all",
+        ) or []
+    else:
+        rows = database.execute(
+            """
+            SELECT t.*, u.email AS agent_email, u.name AS agent_name
+            FROM assistant_turns t
+            LEFT JOIN users u ON u.id = t.user_id
+            ORDER BY t.created_at DESC
+            LIMIT ?
+            """,
+            (limit_i,),
+            fetch="all",
+        ) or []
+    out = []
+    for r in rows:
+        out.append({
+            "id": r.get("id"),
+            "user_id": r.get("user_id"),
+            "conversation_id": r.get("conversation_id") or "",
+            "page_url": r.get("page_url") or "",
+            "user_message": r.get("user_message") or "",
+            "assistant_reply": r.get("assistant_reply") or "",
+            "ok": bool(int(r.get("ok") if r.get("ok") is not None else 1)),
+            "model": r.get("model") or "",
+            "created_at": r.get("created_at"),
+            "agent_email": r.get("agent_email") or "",
+            "agent_name": r.get("agent_name") or "",
+        })
+    return out
+
+
+def list_events(q: str = "", event_type: str = "", *, limit: int = 150) -> list[dict]:
+    limit_i = max(1, min(int(limit), 400))
+    q = (q or "").strip()
+    event_type = (event_type or "").strip()
+    clauses: list[str] = []
+    params: list[Any] = []
+    if event_type:
+        clauses.append("e.type = ?")
+        params.append(event_type)
+    if q:
+        like = f"%{q}%"
+        clauses.append("(e.type LIKE ? OR e.meta LIKE ? OR u.email LIKE ? OR u.name LIKE ?)")
+        params.extend([like, like, like, like])
+    where = (" WHERE " + " AND ".join(clauses)) if clauses else ""
+    params.append(limit_i)
+    rows = database.execute(
+        f"""
+        SELECT e.*, u.email AS agent_email, u.name AS agent_name
+        FROM events e
+        LEFT JOIN users u ON u.id = e.user_id
+        {where}
+        ORDER BY e.created_at DESC
+        LIMIT ?
+        """,
+        tuple(params),
+        fetch="all",
+    ) or []
+    out = []
+    for r in rows:
+        meta_raw = r.get("meta") or "{}"
+        try:
+            meta = json.loads(meta_raw) if isinstance(meta_raw, str) else (meta_raw or {})
+        except Exception:
+            meta = {"raw": str(meta_raw)[:500]}
+        out.append({
+            "id": r.get("id"),
+            "user_id": r.get("user_id"),
+            "type": r.get("type") or "",
+            "meta": meta if isinstance(meta, dict) else {},
+            "created_at": r.get("created_at"),
+            "agent_email": r.get("agent_email") or "",
+            "agent_name": r.get("agent_name") or "",
+        })
+    return out
+
+
+def admin_user_detail(user_id: str) -> Optional[dict]:
+    user = get_user_by_id(user_id)
+    if not user:
+        return None
+    pubs = public_user(user) or {}
+    presentations = list_presentations(user_id, limit=50)
+    turns = []
+    try:
+        turns = database.execute(
+            """
+            SELECT id, conversation_id, page_url, user_message, assistant_reply, ok, created_at
+            FROM assistant_turns WHERE user_id = ?
+            ORDER BY created_at DESC LIMIT 40
+            """,
+            (user_id,),
+            fetch="all",
+        ) or []
+    except Exception:
+        pass
+    stripe_key = (os.environ.get("STRIPE_SECRET_KEY") or "").strip()
+    stripe_mode = "test" if stripe_key.startswith("sk_test") else "live"
+    cid = (pubs.get("stripe_customer_id") or "").strip()
+    stripe_url = ""
+    if cid:
+        base = "https://dashboard.stripe.com/test" if stripe_mode == "test" else "https://dashboard.stripe.com"
+        stripe_url = f"{base}/customers/{cid}"
+    return {
+        "user": pubs,
+        "presentations": presentations,
+        "assistant_turns": [
+            {
+                "id": t.get("id"),
+                "conversation_id": t.get("conversation_id") or "",
+                "page_url": t.get("page_url") or "",
+                "user_message": t.get("user_message") or "",
+                "assistant_reply": t.get("assistant_reply") or "",
+                "ok": bool(int(t.get("ok") if t.get("ok") is not None else 1)),
+                "created_at": t.get("created_at"),
+            }
+            for t in turns
+        ],
+        "stripe_dashboard_url": stripe_url,
+        "stripe_mode": stripe_mode,
+    }
+
+
 def get_presentation_by_run(run_id: str) -> Optional[dict]:
     row = database.execute(
         "SELECT * FROM presentations WHERE run_id = ?",
         (run_id,),
         fetch="one",
     )
-    return _presentation_public(row) if row else None
+    if not row:
+        return None
+    # Include HTML for hydrate; public list omits it via _presentation_public
+    out = _presentation_public(row) or {}
+    out["presentation_html"] = row.get("presentation_html") or ""
+    out["deck_html"] = row.get("deck_html") or ""
+    return out
 
 
 def get_presentation_by_share_token(token: str) -> Optional[dict]:
@@ -752,10 +1193,12 @@ def consume_magic_link(token: str) -> dict:
     entitlement(user)
     user = get_user_by_id(user["id"]) or user
     log_event(user["id"], "magic_login", {"is_new": is_new})
-    next_path = (row.get("next_path") or "").strip() or "/saas/app.html"
+    requested = (row.get("next_path") or "").strip()
+    next_path = resolve_post_auth_next(user, requested)
     needs_onboarding = not bool(int(user.get("profile_complete") or 0))
     if needs_onboarding:
         dest = next_path if next_path.startswith("/") else "/saas/app.html"
+        # After onboarding, send admins to owner console if that was the intended home
         next_path = "/saas/onboarding.html?next=" + dest
     return {
         "user": user,
@@ -951,16 +1394,23 @@ def save_feedback(
     return {"id": fid, "ok": True}
 
 
-def list_feedback(status: str = "", limit: int = 100) -> list[dict]:
-    if status:
-        return database.execute(
-            "SELECT * FROM feedback WHERE status = ? ORDER BY created_at DESC LIMIT ?",
-            (status, limit),
-            fetch="all",
-        ) or []
+def list_feedback(status: str = "", category: str = "", limit: int = 100) -> list[dict]:
+    limit_i = max(1, min(int(limit), 300))
+    status = (status or "").strip().lower()
+    category = (category or "").strip().lower()
+    clauses: list[str] = []
+    params: list[Any] = []
+    if status and status in ("new", "seen", "done"):
+        clauses.append("status = ?")
+        params.append(status)
+    if category and category in ("bug", "suggestion", "other"):
+        clauses.append("category = ?")
+        params.append(category)
+    where = (" WHERE " + " AND ".join(clauses)) if clauses else ""
+    params.append(limit_i)
     return database.execute(
-        "SELECT * FROM feedback ORDER BY created_at DESC LIMIT ?",
-        (limit,),
+        f"SELECT * FROM feedback{where} ORDER BY created_at DESC LIMIT ?",
+        tuple(params),
         fetch="all",
     ) or []
 
@@ -1059,11 +1509,11 @@ def bootstrap() -> None:
             (_iso(), existing["id"]),
         )
 
-    if not get_promo_by_code("COLDWELL-NOCO"):
+    if not get_promo_by_code("CBListLogic"):
         try:
             create_promo_code(
-                code="COLDWELL-NOCO",
-                label="Coldwell Banker Northern Colorado trial",
+                code="CBListLogic",
+                label="Coldwell Banker ListLogic trial",
                 trial_days=DEFAULT_TRIAL_DAYS,
                 presentation_limit=DEFAULT_PRESENTATION_LIMIT,
                 max_redemptions=200,
@@ -1071,5 +1521,13 @@ def bootstrap() -> None:
             )
         except Exception as exc:
             # Another instance may have created it concurrently; log and continue.
-            logger.info("Promo code COLDWELL-NOCO already present: %s", exc)
+            logger.info("Promo code CBListLogic already present: %s", exc)
+    # Retire legacy codes if they still exist from earlier seeds
+    for legacy in ("COLDWELL-NOCO", "LISTLOGIC-BETA"):
+        row = get_promo_by_code(legacy)
+        if row and int(row.get("active") or 0):
+            try:
+                set_promo_active(row["id"], False)
+            except Exception:
+                pass
     logger.info("Auth bootstrap complete")

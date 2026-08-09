@@ -64,9 +64,12 @@ const sub = document.getElementById('sub');
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Verification failed');
     title.textContent = data.is_new ? 'You’re in' : 'Welcome back';
+    const goingAdmin = (data.next || '').includes('admin');
     sub.textContent = data.needs_onboarding
       ? 'Next: set your password and branding for reports.'
-      : 'Taking you to the app…';
+      : goingAdmin
+        ? 'Taking you to the owner console…'
+        : 'Taking you to the app…';
     status.className = 'status ok';
     status.textContent = 'Email verified.';
     location.href = data.next || '/saas/app.html';

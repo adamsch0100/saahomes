@@ -46,6 +46,44 @@ a { color: var(--navy); }
 .ll-nav-links { display: flex; align-items: center; gap: 20px; font-size: 0.9rem; font-weight: 500; flex-wrap: wrap; }
 .ll-nav-links a { color: var(--ink-2); opacity: 0.85; text-decoration: none; }
 .ll-nav-links a:hover { opacity: 1; }
+.ll-nav-links a.ll-nav-active { opacity: 1; font-weight: 700; }
+.ll-nav-links a.ll-nav-pill {
+  background: var(--ink); color: #fff; opacity: 1;
+  padding: 7px 14px; border-radius: 999px; font-weight: 700; font-size: 0.82rem;
+}
+.ll-nav-links a.ll-nav-pill:hover { background: var(--ink-2); color: #fff; }
+.ll-nav-links a.ll-nav-pill-soft {
+  background: #eef2f8; color: var(--navy); opacity: 1;
+  padding: 7px 14px; border-radius: 999px; font-weight: 700; font-size: 0.82rem;
+}
+.owner-switch {
+  display: none;
+  background: linear-gradient(135deg, #0c3c6e, #1a5f9e);
+  color: #fff; padding: 10px 0; font-size: 0.86rem;
+}
+.owner-switch.on { display: block; }
+.owner-switch-inner {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+.owner-switch strong { font-weight: 700; }
+.owner-switch a {
+  color: #fff; font-weight: 700; text-decoration: none;
+  background: rgba(255,255,255,0.16); padding: 6px 12px; border-radius: 999px;
+}
+.owner-switch a:hover { background: rgba(255,255,255,0.28); }
+.owner-quick {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px;
+  margin: 0 0 22px;
+}
+.owner-quick a {
+  display: block; text-decoration: none; color: inherit;
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+  padding: 14px 16px; transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.owner-quick a:hover { border-color: var(--navy); box-shadow: var(--shadow-sm); }
+.owner-quick .oq-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 700; }
+.owner-quick .oq-title { font-weight: 700; margin-top: 4px; font-size: 0.95rem; }
+.owner-quick .oq-hint { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
 
 /* Buttons */
 .btn {

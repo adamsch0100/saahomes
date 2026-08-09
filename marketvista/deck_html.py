@@ -196,11 +196,10 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
     supply_slide = ""
     if show_supply:
         supply_slide = f'''
-    <section class="slide" data-title="Supply">
-      <div class="slide-top"><span>{logo_html}Market</span><span>Supply Stream</span></div>
+    <section class="slide" data-title="2 · Supply">
+      <div class="slide-top"><span>{logo_html}2 · Supply</span><span>Supply Stream</span></div>
       <div class="slide-body">
-        <div class="eyebrow">While a Home Sits</div>
-        <h2>{_esc(supply_headline)}</h2>
+        <h2 class="slide-title"><span class="step-badge">2</span>{_esc(supply_headline)}</h2>
         <p class="lede">New listings keep arriving. Price too high, and fresher, better-value homes get the tours first.</p>
         <div class="kpis" style="margin-top:16px">
           <div class="kpi"><div class="kv">{lf_new:.1f}</div><div class="kl">New / month</div></div>
@@ -214,104 +213,41 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
     </section>
 '''
 
-    # —— While You Wait: the queue cost of overpricing ——
-    wyw_slide = ""
+    # Compact While-You-Wait block (folded into Price It page)
+    wyw_inline = ""
     if show_supply and rec:
         wyw_total = lf_active_below + lf_wait_fresh
-        # Stretch scenario: ~+6% above recommended
-        stretch_price = round(rec * 1.06 / 1000) * 1000
-        stretch_sc = next(
-            (sc for sc in scenarios if "Premium" in (sc.get("label") or "") or "High" in (sc.get("label") or "")),
-            scenarios[-1] if scenarios else None,
-        )
-        stretch_dom = float((stretch_sc or {}).get("expected_dom") or exp_dom * 1.6 or 0)
-        stretch_fresh = lf_below * (stretch_dom / 30.44) if lf_below and stretch_dom else 0
-        stretch_total = lf_active_below + stretch_fresh
-        wyw_slide = f'''
-    <section class="slide slide-wyw" data-title="While You Wait">
-      <div class="slide-top"><span>{logo_html}Price It</span><span>The Cost of Waiting</span></div>
-      <div class="slide-body">
-        <div class="eyebrow">While You Wait</div>
-        <h2>Overpricing Doesn't Pause the Market —<br>It Lets Other Homes Cut in Line.</h2>
-        <p class="lede">Buyers tour the best value first. While a home sits overpriced, the homes already cheaper keep selling — and new ones keep listing under it.</p>
-        <div class="wyw-grid">
-          <div class="wyw-cell">
-            <div class="wyw-v">{lf_active_below}</div>
-            <div class="wyw-l">Already cheaper today</div>
-            <div class="wyw-d">Active homes asking under ${rec:,.0f} — on the tour list first</div>
-          </div>
-          <div class="wyw-cell">
-            <div class="wyw-v">~{lf_below:.1f}<span class="wyw-unit">/mo</span></div>
-            <div class="wyw-l">New ones list under you</div>
-            <div class="wyw-d">Similar homes that come on cheaper every month</div>
-          </div>
-          <div class="wyw-cell wyw-hot">
-            <div class="wyw-v">~{wyw_total:.0f}</div>
-            <div class="wyw-l">Pass you in ~{lf_wait_dom:.0f} days</div>
-            <div class="wyw-d">Homes that sell or list ahead during one typical sale window</div>
-          </div>
-        </div>
-        <div class="wyw-compare">
-          <div class="wyw-row">
-            <span class="wyw-row-label">At recommended <strong>${rec:,.0f}</strong></span>
-            <div class="wyw-track"><div class="wyw-fill good" style="width:{min(92, max(8, 100 * (lf_wait_fresh / max(wyw_total + stretch_total, 1)) * 2)):.0f}%"></div></div>
-            <span class="wyw-row-n">~{lf_wait_fresh:.1f} pass in ~{lf_wait_dom:.0f}d</span>
-          </div>
-          <div class="wyw-row">
-            <span class="wyw-row-label">Stretch <strong>${stretch_price:,.0f}</strong></span>
-            <div class="wyw-track"><div class="wyw-fill bad" style="width:{min(96, max(10, 100 * (stretch_total / max(wyw_total + stretch_total, 1)) * 2)):.0f}%"></div></div>
-            <span class="wyw-row-n">~{stretch_total:.0f} pass in ~{stretch_dom:.0f}d</span>
-          </div>
-        </div>
-        <p class="lede" style="margin-top:12px;max-width:64ch">Every week overpriced, your listing becomes the <strong>comp that sells the newer, cheaper one</strong>. At the recommended list, the queue works for you instead.</p>
-      </div>
-      <div class="slide-foot"><span>Queue math: cheaper Actives now + cheaper arrivals while you wait</span><span>ListLogic</span></div>
-    </section>
+        wyw_inline = f'''
+            <div style="margin-top:12px;padding:10px 12px;border-radius:12px;background:#fdf6ea;border:1px solid #ecdfc2">
+              <div style="font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#9a6a3a">While You Wait</div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;text-align:center">
+                <div><div style="font-family:Fraunces,Georgia,serif;font-size:1.4rem;font-weight:700;color:#8a4a12">{lf_active_below}</div><div style="font-size:.62rem;font-weight:700;color:#9a6a3a;text-transform:uppercase">Already cheaper</div></div>
+                <div><div style="font-family:Fraunces,Georgia,serif;font-size:1.4rem;font-weight:700;color:#8a4a12">~{lf_below:.1f}/mo</div><div style="font-size:.62rem;font-weight:700;color:#9a6a3a;text-transform:uppercase">New under you</div></div>
+                <div><div style="font-family:Fraunces,Georgia,serif;font-size:1.4rem;font-weight:700;color:#8a4a12">~{wyw_total:.0f}</div><div style="font-size:.62rem;font-weight:700;color:#9a6a3a;text-transform:uppercase">In ~{lf_wait_dom:.0f}d wait</div></div>
+              </div>
+            </div>
 '''
 
     ask = story.get("seller_questions") or {}
-    ask_slide = f'''
-    <section class="slide" data-title="Seller Qs">
-      <div class="slide-top"><span>{logo_html}Market</span><span>What Sellers Ask</span></div>
-      <div class="slide-body">
-        <div class="eyebrow">Straight Answers</div>
-        <h2>What Sellers Ask First</h2>
-        <div class="facts-grid" style="margin-top:14px">
-          <div class="fact"><span class="fn">?</span><div><div class="ft">How Long Should It Take?</div><div class="fb">{_plain(ask.get("how_long") or f"About {median_dom:.0f} days when priced well.")}</div></div></div>
-          <div class="fact"><span class="fn">?</span><div><div class="ft">What Are the Odds?</div><div class="fb">{_plain(ask.get("odds") or f"About {odds_pct:.0f}% in ~30 days when priced well.")}</div></div></div>
-          <div class="fact"><span class="fn">?</span><div><div class="ft">When Is the Market Active?</div><div class="fb">{_plain(ask.get("when_active") or f"About {sales_mo:.1f} sales per month.")}</div></div></div>
-          <div class="fact"><span class="fn">?</span><div><div class="ft">New Supply?</div><div class="fb">{_plain(ask.get("new_supply") or "See the supply stream slide.")}</div></div></div>
-        </div>
-      </div>
-      <div class="slide-foot"><span>{_esc(address)}</span><span>ListLogic</span></div>
-    </section>
-'''
 
     bands = report.get("chart_active_price_bands") or {}
     band_labels = bands.get("labels") or []
     band_values = bands.get("values") or []
     yours_idx = bands.get("subject_band_index")
-    bands_slide = ""
+    bands_inline = ""
     if band_labels and band_values:
         band_rows = ""
-        for i, (lab, val) in enumerate(zip(band_labels[:8], band_values[:8])):
+        for i, (lab, val) in enumerate(zip(band_labels[:6], band_values[:6])):
             mark = " yours" if yours_idx is not None and i == yours_idx else ""
             band_rows += (
                 f'<div class="band-row{mark}"><span>{_esc(lab)}</span>'
                 f'<strong>{int(val)}</strong></div>'
             )
-        bands_slide = f'''
-    <section class="slide" data-title="Price Bands">
-      <div class="slide-top"><span>{logo_html}Market</span><span>Active List Bands</span></div>
-      <div class="slide-body">
-        <div class="eyebrow">Where Actives Sit by Ask</div>
-        <h2>Active Competition by List-Price Band</h2>
-        <p class="lede">{_esc(bands.get("insight") or "Highlighted band is the market-supported value line.")}</p>
-        <div class="band-list">{band_rows}</div>
-      </div>
-      <div class="slide-foot"><span>Buyers shop by price first</span><span>ListLogic</span></div>
-    </section>
-'''
+        bands_inline = (
+            f'<div style="margin-top:8px"><div class="eyebrow">Active Competition by List-Price Band</div>'
+            f'<div class="band-list" style="margin-top:6px;max-width:100%;grid-template-columns:1fr 1fr;display:grid;gap:4px">'
+            f'{band_rows}</div></div>'
+        )
 
     rating = int(story.get("home_rating") or 5)
     rating_label = story.get("home_rating_label") or "Average / typical for the area"
@@ -324,23 +260,7 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
             trend_line = "Anchored to closest comparable closes."
     else:
         trend_line = "Anchored to closest comparable closes."
-    position_slide = f'''
-    <section class="slide" data-title="Position">
-      <div class="slide-top"><span>{logo_html}Your Home</span><span>Market Position</span></div>
-      <div class="slide-body">
-        <div class="eyebrow">Where the List Sits</div>
-        <h2>Position in Recent Sales</h2>
-        <p class="lede">{_esc(top_stmt)}</p>
-        <div class="duo" style="margin-top:16px">
-          <div class="d"><div class="n">Top {top_mkt:.0f}%</div><div class="t">of similar sales</div></div>
-          <div class="d yours"><div class="n">{rating}/10</div><div class="t">{_esc(rating_label)}</div></div>
-        </div>
-        <p class="lede" style="margin-top:12px">{_esc(trend_line)}</p>
-        <p class="lede">{_esc(pos.get("competitive_statement") or "")}</p>
-      </div>
-      <div class="slide-foot"><span>Starts at typical 5/10 in live story</span><span>ListLogic</span></div>
-    </section>
-'''
+
     yoy = report.get("chart_yoy") or {}
     yoy_summary = yoy.get("summary") or []
     yoy_slide = ""
@@ -352,35 +272,14 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
             for y in yoy_summary[:4]
         )
         yoy_slide = f'''
-    <section class="slide" data-title="YoY">
-      <div class="slide-top"><span>{logo_html}Market Detail</span><span>Year Over Year</span></div>
+    <section class="slide" data-title="6 · Market Detail">
+      <div class="slide-top"><span>{logo_html}6 · Market Detail</span><span>Year Over Year</span></div>
       <div class="slide-body">
-        <div class="eyebrow">Context Behind the Number</div>
-        <h2>Year-Over-Year Market Detail</h2>
+        <h2 class="slide-title"><span class="step-badge">6</span>Year-Over-Year Market Detail</h2>
         <p class="lede">Sales, median sold price, and DOM by year in this segment.</p>
         <div class="kpis" style="margin-top:18px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr))">{yoy_kpis}</div>
       </div>
       <div class="slide-foot"><span>{_esc(address)}</span><span>ListLogic</span></div>
-    </section>
-'''
-
-    objections = story.get("objection_cards") or []
-    obj_slide = ""
-    if objections:
-        obj_cards = "".join(
-            f'<div class="fact"><span class="fn">!</span><div><div class="ft">{_esc(c.get("title"))}</div>'
-            f'<div class="fb">{_esc(c.get("body"))}</div></div></div>'
-            for c in objections[:4]
-        )
-        obj_slide = f'''
-    <section class="slide" data-title="Watch-Outs">
-      <div class="slide-top"><span>{logo_html}Objections</span><span>What Often Comes Up</span></div>
-      <div class="slide-body">
-        <div class="eyebrow">Honest Conversation</div>
-        <h2>What Often Comes Up at the Table</h2>
-        <div class="facts-grid" style="margin-top:14px">{obj_cards}</div>
-      </div>
-      <div class="slide-foot"><span>Data keeps the talk on the market</span><span>ListLogic</span></div>
     </section>
 '''
 
@@ -459,8 +358,10 @@ body.mode-print .deck {{
 .slide.is-exit {{ opacity: 0; transform: translateX(-24px) scale(.985); z-index: 1; }}
 body.mode-print .slide {{
   position: relative; inset: auto; opacity: 1 !important; pointer-events: auto;
-  transform: none !important; width: 100%; aspect-ratio: 16 / 9;
+  transform: none !important; width: 100%;
+  aspect-ratio: 11 / 8.5; max-height: none;
   break-after: page; page-break-after: always; box-shadow: 0 8px 28px rgba(0,0,0,.25);
+  overflow: hidden;
 }}
 
 .slide-top {{
@@ -683,24 +584,48 @@ body.mode-print .hint {{ display: none; }}
   body:not(.mode-print) .slide:not(.is-on) {{ display: none; }}
 }}
 
+/* Compact layouts for denser spine slides */
+.ask-trio {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }}
+.ask-card {{
+  background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px;
+}}
+.ask-card .aq {{ font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--accent); }}
+.ask-card .aa {{ font-size: .78rem; color: var(--muted); margin-top: 4px; line-height: 1.35; }}
+.price-it-grid {{ display: grid; grid-template-columns: 1.05fr 1fr; gap: 14px; height: 100%; align-items: stretch; }}
+.price-it-left, .price-it-right {{ display: flex; flex-direction: column; justify-content: center; }}
+.step-badge {{
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 50%; background: var(--gold-soft); color: #0f2740;
+  font-size: .72rem; font-weight: 800; margin-right: 8px; vertical-align: middle;
+}}
+.slide-title {{ display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }}
+
 @media print {{
-  @page {{ size: landscape; margin: 0.35in; }}
-  html, body {{ background: #fff !important; }}
+  @page {{ size: 11in 8.5in; margin: 0; }}
+  * {{ -webkit-print-color-adjust: exact; print-color-adjust: exact; }}
+  html, body {{ background: #fff !important; margin: 0; padding: 0; }}
   .deck-chrome, .nav-fab, .hint {{ display: none !important; }}
-  .stage {{ padding: 0 !important; background: #fff !important; }}
-  .deck {{ max-width: none !important; width: 100% !important; gap: 0 !important; }}
+  .stage {{ padding: 0 !important; background: #fff !important; min-height: 0 !important; }}
+  .deck {{
+    max-width: none !important; width: 11in !important; margin: 0 !important; gap: 0 !important;
+    aspect-ratio: auto !important; max-height: none !important;
+  }}
   .slide {{
     position: relative !important; opacity: 1 !important; transform: none !important;
-    box-shadow: none !important; border-radius: 0 !important;
-    width: 100% !important; height: auto !important; min-height: 0 !important;
-    aspect-ratio: 16 / 9; break-after: page; page-break-after: always;
-    border: 1px solid #e5e7eb;
+    box-shadow: none !important; border-radius: 0 !important; border: none !important;
+    box-sizing: border-box;
+    width: 11in !important; height: 8.5in !important; max-height: 8.5in !important;
+    min-height: 8.5in !important; aspect-ratio: auto !important;
+    overflow: hidden !important;
+    break-after: page; page-break-after: always;
+    page-break-inside: avoid; break-inside: avoid;
   }}
   .slide:last-child {{ break-after: auto; page-break-after: auto; }}
+  .slide-body {{ overflow: hidden; }}
 }}
 </style>
 </head>
-<body class="mode-flip">
+<body class="mode-flip" data-deck-spine="v2">
 <header class="deck-chrome">
   <div class="left">
     <span class="brand">ListLogic · Listing flipbook</span>
@@ -719,6 +644,7 @@ body.mode-print .hint {{ display: none; }}
 <main class="stage">
   <div class="deck" id="deck">
 
+    <!-- Cover -->
     <section class="slide slide-cover is-on" data-title="Cover">
       <div class="slide-top"><span>{logo_html}{cover_brand}</span><span>Pricing Story</span></div>
       <div class="slide-body">
@@ -736,8 +662,9 @@ body.mode-print .hint {{ display: none; }}
       <div class="slide-foot"><span>{_esc(generated)}</span><span>Confidential · for sellers</span></div>
     </section>
 
-    <section class="slide" data-title="How We Price">
-      <div class="slide-top"><span>{logo_html}How We Price</span><span>Ground Rules</span></div>
+    <!-- How It Works (matches Live Story core-facts) -->
+    <section class="slide" data-title="How It Works">
+      <div class="slide-top"><span>{logo_html}How It Works</span><span>Ground Rules</span></div>
       <div class="slide-body">
         <div class="eyebrow">Core Facts of ListLogic — Data Driven Pricing</div>
         <h2>Built Around This Home — Not the Citywide Average</h2>
@@ -747,52 +674,50 @@ body.mode-print .hint {{ display: none; }}
       <div class="slide-foot"><span>{_esc(address)}</span><span>ListLogic</span></div>
     </section>
 
-    <section class="slide" data-title="Competition">
-      <div class="slide-top"><span>{logo_html}Market</span><span>Competition</span></div>
+    <!-- 1 · Market -->
+    <section class="slide" data-title="1 · Market">
+      <div class="slide-top"><span>{logo_html}1 · Market</span><span>{_esc(temp_label)} · {inv:.1f} mo inventory</span></div>
       <div class="slide-body">
-        <div class="eyebrow">Your Competitive Market</div>
-        <h2>{_esc(market_label)}</h2>
-        <div class="pills">{chip_html}</div>
-        <p class="lede" style="margin-top:10px">Only <strong>Active</strong> homes compete. Pending + Backup are already spoken for.</p>
+        <h2 class="slide-title"><span class="step-badge">1</span>Homes on the Market</h2>
+        <div class="pills" style="margin-top:6px">{chip_html}</div>
+        <p class="lede" style="margin-top:8px;max-width:58ch">Competition = <strong>Active only</strong>. Pending + Backup are under contract — already spoken for.</p>
         <div class="duo">
           <div class="d"><div class="n">{active_n}</div><div class="t">Active on Market</div></div>
           <div class="d yours"><div class="n">{with_yours}</div><div class="t">With Your Home Included</div></div>
         </div>
+        <div class="ask-trio">
+          <div class="ask-card"><div class="aq">How Long Should It Take?</div><div class="aa">{_plain(ask.get("how_long") or f"About {median_dom:.0f} days when priced well.")}</div></div>
+          <div class="ask-card"><div class="aq">What Are the Odds?</div><div class="aa">{_plain(ask.get("odds") or f"About {odds_pct:.0f}% in ~30 days when priced well.")}</div></div>
+          <div class="ask-card"><div class="aq">When Is the Market Active?</div><div class="aa">{_plain(ask.get("when_active") or f"About {sales_mo:.1f} sales per month.")}</div></div>
+        </div>
+        <div class="kpis" style="margin-top:10px">{kpis_html}</div>
+        {bands_inline}
       </div>
-      <div class="slide-foot"><span>{_esc(temp_label)} · {inv:.1f} mo inventory</span><span>ListLogic</span></div>
+      <div class="slide-foot"><span>{_esc(market_label)}</span><span>ListLogic</span></div>
     </section>
-
-    <section class="slide" data-title="Market Pulse">
-      <div class="slide-top"><span>{logo_html}Market</span><span>Pulse</span></div>
-      <div class="slide-body">
-        <div class="eyebrow">Segment Snapshot</div>
-        <h2>What the Numbers Say Right Now</h2>
-        <p class="lede">Absorption, inventory, and pace — the leverage behind the list.</p>
-        <div class="kpis" style="margin-top:18px">{kpis_html}</div>
-      </div>
-      <div class="slide-foot"><span>{_esc(address)}</span><span>ListLogic</span></div>
-    </section>
-{ask_slide}
 {supply_slide}
-{bands_slide}
-    <section class="slide" data-title="Comps">
-      <div class="slide-top"><span>{logo_html}Comparables</span><span>Closest Sales</span></div>
+    <!-- 3 · Comps -->
+    <section class="slide" data-title="3 · Comps">
+      <div class="slide-top"><span>{logo_html}3 · Comps</span><span>Closest Sales</span></div>
       <div class="slide-body">
-        <div class="eyebrow">Proof on the Ground</div>
-        <h2>Closest Comparable Sales</h2>
+        <h2 class="slide-title"><span class="step-badge">3</span>Closest Comparable Sales</h2>
         <p class="lede">Does it look like yours — or nicer / dated — and does the sold price match that story?</p>
         <div class="comps-grid">{comps_html}</div>
       </div>
       <div class="slide-foot"><span>{len(comps)} close sales</span><span>ListLogic</span></div>
     </section>
 
-    <section class="slide" data-title="Condition">
-      <div class="slide-top"><span>{logo_html}Your Home</span><span>Condition</span></div>
+    <!-- 4 · Your Home -->
+    <section class="slide" data-title="4 · Your Home">
+      <div class="slide-top"><span>{logo_html}4 · Your Home</span><span>Condition</span></div>
       <div class="slide-body">
-        <div class="eyebrow">Location Is Fixed · We Start at Typical 5/10</div>
-        <h2>Condition Moves the Number</h2>
+        <h2 class="slide-title"><span class="step-badge">4</span>Condition Moves the Number</h2>
         <p class="lede">Within your segment, updates and presentation decide where you land. We start at a typical <strong>5/10</strong>, rate together, then lock the list.</p>
-        <div class="facts-grid" style="margin-top:20px">
+        <div class="duo" style="margin-top:14px">
+          <div class="d yours"><div class="n">{rating}/10</div><div class="t">{_esc(rating_label)}</div></div>
+          <div class="d"><div class="n">5/10</div><div class="t">Starting point · typical for set</div></div>
+        </div>
+        <div class="facts-grid" style="margin-top:12px">
           <div class="fact"><span class="fn">1–3</span><div><div class="ft">Needs Work</div><div class="fb">Dated finishes or deferred maintenance vs comps.</div></div></div>
           <div class="fact"><span class="fn">4–6</span><div><div class="ft">Typical</div><div class="fb">5 is average for this set — nothing special, nothing broken.</div></div></div>
           <div class="fact"><span class="fn">7–8</span><div><div class="ft">Strong</div><div class="fb">Updated kitchen/baths — buyers notice.</div></div></div>
@@ -801,39 +726,52 @@ body.mode-print .hint {{ display: none; }}
       </div>
       <div class="slide-foot"><span>Rate together at the table</span><span>ListLogic</span></div>
     </section>
-{position_slide}
-{yoy_slide}
-    <section class="slide slide-verdict" data-title="Recommended">
-      <div class="slide-top"><span>{logo_html}Price It</span><span>Recommendation</span></div>
+
+    <!-- 5 · Position -->
+    <section class="slide" data-title="5 · Position">
+      <div class="slide-top"><span>{logo_html}5 · Position</span><span>Market Position</span></div>
       <div class="slide-body">
-        <div class="verdict-wrap">
-          <div class="eyebrow">Recommended List Price</div>
-          <div class="big">${rec:,.0f}</div>
-          <div class="sub">Range <strong>${low:,.0f} – ${high:,.0f}</strong> · target under contract in ~<strong>{exp_dom:.0f} days</strong></div>
-          <div class="top">Top {top_mkt:.0f}% of similar recent sales</div>
-          <div class="pos-bar"><div class="pos-marker"></div></div>
-          <div class="bl">{_esc(exec_sum)}</div>
+        <h2 class="slide-title"><span class="step-badge">5</span>Position in Recent Sales</h2>
+        <p class="lede">{_esc(top_stmt)}</p>
+        <div class="duo" style="margin-top:16px">
+          <div class="d"><div class="n">Top {top_mkt:.0f}%</div><div class="t">of similar sales</div></div>
+          <div class="d yours"><div class="n">{rating}/10</div><div class="t">{_esc(rating_label)}</div></div>
         </div>
+        <p class="lede" style="margin-top:12px">{_esc(trend_line)}</p>
+        <p class="lede">{_esc(pos.get("competitive_statement") or "")}</p>
       </div>
-      <div class="slide-foot"><span>{_esc(address)}</span><span>ListLogic</span></div>
+      <div class="slide-foot"><span>Starts at typical 5/10 in live story</span><span>ListLogic</span></div>
     </section>
-{wyw_slide}
-    <section class="slide" data-title="Strategy">
-      <div class="slide-top"><span>{logo_html}Strategy</span><span>Trade-Offs</span></div>
+{yoy_slide}
+    <!-- 7 · Price It (recommendation + strategies + while-you-wait on one page) -->
+    <section class="slide" data-title="7 · Price It">
+      <div class="slide-top"><span>{logo_html}7 · Price It</span><span>Strategy &amp; Trade-Offs</span></div>
       <div class="slide-body">
-        <div class="eyebrow">If You Go Higher or Lower</div>
-        <h2>Price Strategies &amp; Trade-Offs</h2>
-        <p class="lede" style="margin-bottom:8px">Buyers choose better value first. Higher list → longer wait and weaker odds as cheaper homes cut in line.</p>
-        <div class="sc-grid">{scenarios_html or '<p class="muted">Strategies available in interactive view</p>'}</div>
-        <div class="split">
-          <div><h3>Advantages</h3><ul>{adv_html}</ul></div>
-          <div><h3>Watch-Outs</h3><ul>{risk_html}</ul></div>
+        <h2 class="slide-title"><span class="step-badge">7</span>Price It — Strategy &amp; Trade-Offs</h2>
+        <div class="price-it-grid" style="margin-top:8px">
+          <div class="price-it-left">
+            <div class="eyebrow">Recommended List Price</div>
+            <div style="font-family:Fraunces,Georgia,serif;font-size:clamp(2.4rem,5vw,3.6rem);font-weight:700;color:var(--navy);letter-spacing:-.03em;line-height:1">${rec:,.0f}</div>
+            <div style="margin-top:8px;font-size:.95rem;color:var(--muted)">Range <strong style="color:var(--navy)">${low:,.0f} – ${high:,.0f}</strong> · ~<strong>{exp_dom:.0f} days</strong> to contract</div>
+            <div style="margin-top:8px;color:var(--accent);font-weight:700">Top {top_mkt:.0f}% of similar recent sales</div>
+            <div class="pos-bar" style="margin-top:14px"><div class="pos-marker"></div></div>
+            <div class="bl" style="color:var(--ink);background:#f0f5fb;border-left-color:var(--accent)">{_esc(exec_sum)}</div>
+            {wyw_inline}
+          </div>
+          <div class="price-it-right">
+            <div class="eyebrow">If You Go Higher or Lower</div>
+            <div class="sc-grid" style="grid-template-columns:repeat(2,1fr)">{scenarios_html or '<p class="muted">Open Live Story for live what-if</p>'}</div>
+            <div class="split" style="margin-top:10px">
+              <div><h3>Advantages</h3><ul>{adv_html}</ul></div>
+              <div><h3>Watch-Outs</h3><ul>{risk_html}</ul></div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="slide-foot"><span>Pick a lane — the market answers</span><span>ListLogic</span></div>
     </section>
-{obj_slide}
 
+    <!-- Close -->
     <section class="slide slide-close" data-title="Next">
       <div class="slide-top"><span>{logo_html}Next Steps</span><span>Let's List It Right</span></div>
       <div class="slide-body">

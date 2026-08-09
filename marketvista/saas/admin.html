@@ -12,6 +12,17 @@
 .page-head { padding: 32px 0 6px; }
 .page-head h1 { font-family: 'Fraunces', serif; font-size: clamp(1.5rem, 3vw, 1.9rem); letter-spacing: -0.02em; margin-bottom: 4px; }
 .sub { color: var(--muted); margin-bottom: 20px; font-size: 0.92rem; }
+.ops-strip {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;
+  margin: 0 0 22px;
+}
+.ops-card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+  padding: 12px 14px;
+}
+.ops-card .label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 700; }
+.ops-card .value { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.02em; margin-top: 4px; }
+.ops-card .hint { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
 .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
 .tabs button {
   border: 1px solid var(--line); background: var(--card); border-radius: 999px;
@@ -30,20 +41,53 @@ tr:hover td { background: #faf8f3; }
 @media (max-width: 700px) { .row2 { grid-template-columns: 1fr; } }
 .btn-sm { padding: 7px 13px; font-size: 0.78rem; }
 .muted { color: var(--muted); font-size: 0.8rem; }
-.actions button { margin: 2px 4px 2px 0; }
+.actions button, .actions a.btn { margin: 2px 4px 2px 0; }
 code { background: #eef2f8; padding: 2px 7px; border-radius: 6px; font-size: 0.78rem; }
 h3.panel-title { font-family: 'Fraunces', serif; font-size: 1.1rem; margin-bottom: 14px; letter-spacing: -0.01em; }
+.filter-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.filter-chips button {
+  border: 1px solid var(--line); background: #fff; border-radius: 999px;
+  padding: 6px 12px; font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: inherit; color: var(--ink);
+}
+.filter-chips button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.page-url { word-break: break-all; max-width: 280px; display: inline-block; }
+a.btn { text-decoration: none; display: inline-block; }
+.chat-bubble {
+  border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px;
+  background: #fff; white-space: pre-wrap; line-height: 1.45; font-size: 0.84rem;
+}
+.chat-bubble.user { background: #f0f5fb; border-color: #d5e2f0; }
+.chat-bubble.bot { background: #faf8f3; }
+.chat-meta { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-bottom: 8px; font-size: 0.78rem; color: var(--muted); }
+.drawer-backdrop {
+  display: none; position: fixed; inset: 0; background: rgba(10, 24, 40, 0.35); z-index: 40;
+}
+.drawer-backdrop.on { display: block; }
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(440px, 100vw); background: #fff;
+  z-index: 50; box-shadow: -12px 0 40px rgba(8, 30, 55, 0.18); transform: translateX(100%);
+  transition: transform 0.2s ease; overflow: auto; padding: 22px 20px 40px;
+}
+.drawer.on { transform: translateX(0); }
+.drawer h2 { font-family: 'Fraunces', serif; font-size: 1.25rem; margin: 0 0 4px; }
+.drawer .close-x { float: right; border: none; background: transparent; font-size: 1.4rem; cursor: pointer; line-height: 1; }
+.user-link { cursor: pointer; color: inherit; text-decoration: underline; text-decoration-color: transparent; }
+.user-link:hover { text-decoration-color: currentColor; }
+.trunc { max-width: 360px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 </style>
 </head>
 <body>
 <nav class="ll-nav">
   <div class="container ll-nav-inner">
-    <a href="/saas/" class="ll-brand">
+    <a href="/saas/admin.html" class="ll-brand">
       <img src="/saas/listlogic-logo.png" alt="ListLogic" class="ll-brand-logo">
-      <small>Admin</small>
+      <small>Owner</small>
     </a>
     <div class="ll-nav-links">
-      <a href="/saas/app.html">App</a>
+      <a href="/saas/admin.html" class="ll-nav-active">Owner console</a>
+      <a href="/saas/app.html" class="ll-nav-pill-soft">Agent dashboard</a>
+      <a href="/saas/app.html#generate">Generate</a>
+      <a href="/demo">Sample</a>
       <a href="/saas/">Site</a>
       <a href="#" id="logout">Sign out</a>
     </div>
@@ -51,15 +95,50 @@ h3.panel-title { font-family: 'Fraunces', serif; font-size: 1.1rem; margin-botto
 </nav>
 <div class="container" style="max-width:1100px">
   <div class="page-head">
-    <span class="eyebrow">Admin</span>
-    <h1>Trials, codes &amp; feedback</h1>
-    <p class="sub">Default trial: 3 presentations or 60 days, whichever first.</p>
+    <span class="eyebrow">Owner console</span>
+    <h1>Manage ListLogic</h1>
+    <p class="sub">Users, every report, AI chats, feedback, and billing at a glance. Jump to the agent dashboard anytime to generate like an agent.</p>
   </div>
+
+  <div class="owner-quick">
+    <a href="/saas/app.html">
+      <div class="oq-label">You as agent</div>
+      <div class="oq-title">Agent dashboard</div>
+      <div class="oq-hint">Your reports &amp; generate</div>
+    </a>
+    <a href="#tabjump-reports" id="jumpReports">
+      <div class="oq-label">Support</div>
+      <div class="oq-title">All reports</div>
+      <div class="oq-hint">Every agent’s presentations</div>
+    </a>
+    <a href="#tabjump-ai" id="jumpAi">
+      <div class="oq-label">Product</div>
+      <div class="oq-title">AI chats</div>
+      <div class="oq-hint">What agents are asking</div>
+    </a>
+    <a href="#tabjump-feedback" id="jumpFeedback">
+      <div class="oq-label">Inbox</div>
+      <div class="oq-title">Feedback</div>
+      <div class="oq-hint">Bugs &amp; suggestions</div>
+    </a>
+  </div>
+
+  <div class="ops-strip" id="opsStrip" aria-live="polite">
+    <div class="ops-card"><div class="label">Users</div><div class="value" id="statUsers">—</div><div class="hint" id="statUsersHint"></div></div>
+    <div class="ops-card"><div class="label">Reports (7d)</div><div class="value" id="statPresWeek">—</div><div class="hint" id="statPresTotal"></div></div>
+    <div class="ops-card"><div class="label">AI chats (7d)</div><div class="value" id="statAiWeek">—</div><div class="hint" id="statAiTotal"></div></div>
+    <div class="ops-card"><div class="label">Open feedback</div><div class="value" id="statFbOpen">—</div><div class="hint" id="statFbNew"></div></div>
+    <div class="ops-card"><div class="label">Stripe</div><div class="value" id="statStripe">—</div><div class="hint">Checkout / portal</div></div>
+  </div>
+
   <div class="tabs">
     <button type="button" class="on" data-tab="users">Users</button>
+    <button type="button" data-tab="reports">Reports</button>
+    <button type="button" data-tab="ai">AI chats</button>
+    <button type="button" data-tab="feedback">Feedback</button>
+    <button type="button" data-tab="events">Events</button>
     <button type="button" data-tab="promos">Promo codes</button>
     <button type="button" data-tab="invites">Invites</button>
-    <button type="button" data-tab="feedback">Feedback</button>
   </div>
   <p class="status" id="status"></p>
 
@@ -70,8 +149,74 @@ h3.panel-title { font-family: 'Fraunces', serif; font-size: 1.1rem; margin-botto
       <button class="btn btn-soft btn-sm" type="button" id="userSearch" style="align-self:start">Search</button>
     </div>
     <div style="overflow:auto"><table>
-      <thead><tr><th>Agent</th><th>Status</th><th>Usage</th><th>Trial ends</th><th>Actions</th></tr></thead>
+      <thead><tr><th>Agent</th><th>Status / plan</th><th>Usage</th><th>Trial ends</th><th>Billing</th><th>Actions</th></tr></thead>
       <tbody id="usersBody"></tbody>
+    </table></div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-reports">
+    <div class="card">
+    <div class="row2">
+      <input id="reportQ" placeholder="Search address, agent email, run id…">
+      <button class="btn btn-soft btn-sm" type="button" id="reportSearch" style="align-self:start">Search</button>
+    </div>
+    <div style="overflow:auto;margin-top:12px"><table>
+      <thead><tr><th>Address</th><th>Agent</th><th>Price</th><th>When</th><th>Actions</th></tr></thead>
+      <tbody id="reportsBody"></tbody>
+    </table></div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-ai">
+    <div class="card">
+    <p class="sub" style="margin-top:0">What agents ask the ListLogic assistant — newest first. Turns start logging after this deploy.</p>
+    <div class="row2">
+      <input id="aiQ" placeholder="Search question, reply, email, page…">
+      <button class="btn btn-soft btn-sm" type="button" id="aiSearch" style="align-self:start">Search</button>
+    </div>
+    <div id="aiList" style="margin-top:14px"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-feedback">
+    <div class="card">
+    <div class="filter-chips" id="fbStatusChips">
+      <button type="button" class="on" data-status="">All status</button>
+      <button type="button" data-status="new">New</button>
+      <button type="button" data-status="seen">Seen</button>
+      <button type="button" data-status="done">Done</button>
+    </div>
+    <div class="filter-chips" id="fbCatChips">
+      <button type="button" class="on" data-cat="">All types</button>
+      <button type="button" data-cat="bug">Bug</button>
+      <button type="button" data-cat="suggestion">Suggestion</button>
+      <button type="button" data-cat="other">Other</button>
+    </div>
+    <div style="overflow:auto"><table>
+      <thead><tr><th>When</th><th>Category</th><th>From</th><th>Message / page</th><th>Status</th><th></th></tr></thead>
+      <tbody id="fbBody"></tbody>
+    </table></div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-events">
+    <div class="card">
+    <div class="filter-chips" id="evTypeChips">
+      <button type="button" class="on" data-type="">All</button>
+      <button type="button" data-type="signup">signup</button>
+      <button type="button" data-type="generate">generate</button>
+      <button type="button" data-type="assistant_chat">assistant</button>
+      <button type="button" data-type="feedback">feedback</button>
+      <button type="button" data-type="login">login</button>
+    </div>
+    <div class="row2">
+      <input id="evQ" placeholder="Search type, email, meta…">
+      <button class="btn btn-soft btn-sm" type="button" id="evSearch" style="align-self:start">Search</button>
+    </div>
+    <div style="overflow:auto;margin-top:12px"><table>
+      <thead><tr><th>When</th><th>Type</th><th>Agent</th><th>Meta</th></tr></thead>
+      <tbody id="eventsBody"></tbody>
     </table></div>
     </div>
   </section>
@@ -80,7 +225,7 @@ h3.panel-title { font-family: 'Fraunces', serif; font-size: 1.1rem; margin-botto
     <div class="card">
     <h3 class="panel-title">Create promo code</h3>
     <div class="row2">
-      <div class="field"><label>Code</label><input id="pCode" placeholder="COLDWELL-NOCO"></div>
+      <div class="field"><label>Code</label><input id="pCode" placeholder="CBListLogic"></div>
       <div class="field"><label>Label</label><input id="pLabel" placeholder="CB NoCo trial"></div>
     </div>
     <div class="row2">
@@ -117,19 +262,22 @@ h3.panel-title { font-family: 'Fraunces', serif; font-size: 1.1rem; margin-botto
     </table></div>
     </div>
   </section>
-
-  <section class="panel" id="tab-feedback">
-    <div class="card">
-    <div style="overflow:auto"><table>
-      <thead><tr><th>When</th><th>Category</th><th>From</th><th>Message</th><th>Status</th></tr></thead>
-      <tbody id="fbBody"></tbody>
-    </table></div>
-    </div>
-  </section>
   <div style="height:56px"></div>
 </div>
+
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+<aside class="drawer" id="userDrawer" aria-label="User detail">
+  <button type="button" class="close-x" id="drawerClose" aria-label="Close">×</button>
+  <div id="drawerBody"></div>
+</aside>
+
 <script>
 const statusEl = document.getElementById('status');
+let fbStatus = '';
+let fbCategory = '';
+let evType = '';
+let stripeMode = 'live';
+
 function setStatus(msg, ok) {
   statusEl.className = 'status ' + (ok ? 'ok' : 'error');
   statusEl.textContent = msg || '';
@@ -144,6 +292,25 @@ async function api(path, opts) {
   if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Request failed');
   return data;
 }
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function money(n) {
+  if (n == null || n === '') return '—';
+  const v = Number(n);
+  if (!Number.isFinite(v)) return esc(String(n));
+  return '$' + Math.round(v).toLocaleString();
+}
+function absUrl(path) {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  return location.origin + path;
+}
+function stripeCustomerUrl(cid) {
+  if (!cid) return '';
+  const base = stripeMode === 'test' ? 'https://dashboard.stripe.com/test' : 'https://dashboard.stripe.com';
+  return base + '/customers/' + encodeURIComponent(cid);
+}
 
 document.querySelectorAll('.tabs button').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -153,6 +320,13 @@ document.querySelectorAll('.tabs button').forEach(btn => {
     document.getElementById('tab-' + btn.dataset.tab).classList.add('on');
   });
 });
+function openTab(name) {
+  const btn = document.querySelector('.tabs button[data-tab="' + name + '"]');
+  if (btn) btn.click();
+}
+document.getElementById('jumpReports')?.addEventListener('click', (e) => { e.preventDefault(); openTab('reports'); });
+document.getElementById('jumpAi')?.addEventListener('click', (e) => { e.preventDefault(); openTab('ai'); });
+document.getElementById('jumpFeedback')?.addEventListener('click', (e) => { e.preventDefault(); openTab('feedback'); });
 
 document.getElementById('logout').addEventListener('click', async (e) => {
   e.preventDefault();
@@ -160,36 +334,101 @@ document.getElementById('logout').addEventListener('click', async (e) => {
   location.href = '/saas/login.html';
 });
 
+function closeDrawer() {
+  document.getElementById('userDrawer').classList.remove('on');
+  document.getElementById('drawerBackdrop').classList.remove('on');
+}
+document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+document.getElementById('drawerBackdrop').addEventListener('click', closeDrawer);
+
+async function openUserDrawer(userId) {
+  const data = await api('/api/admin/users/' + encodeURIComponent(userId));
+  const u = data.user || {};
+  const stripeUrl = data.stripe_dashboard_url || stripeCustomerUrl(u.stripe_customer_id);
+  const reports = (data.presentations || []).map(p =>
+    `<li><a href="${esc(absUrl(p.url))}" target="_blank" rel="noopener">${esc(p.address || p.run_id)}</a>
+     <span class="muted"> · ${esc((p.created_at || '').slice(0,10))}</span></li>`
+  ).join('') || '<li class="muted">No reports</li>';
+  const chats = (data.assistant_turns || []).map(t =>
+    `<div class="chat-bubble user trunc">${esc(t.user_message)}</div>
+     <div class="chat-bubble bot trunc">${esc(t.assistant_reply)}</div>
+     <p class="muted" style="margin:0 0 12px">${esc((t.created_at || '').slice(0,16))}</p>`
+  ).join('') || '<p class="muted">No AI chats yet</p>';
+  document.getElementById('drawerBody').innerHTML = `
+    <h2>${esc(u.name || u.email || 'Agent')}</h2>
+    <p class="muted" style="margin:0 0 14px">${esc(u.email)} · ${esc(u.brokerage || '—')}</p>
+    <p><strong>${esc(u.status)}</strong> · ${esc(u.role)} · plan <code>${esc(u.plan || '—')}</code></p>
+    <p class="muted">${u.presentations_used ?? 0} / ${u.presentation_limit ?? '∞'} reports · trial ends ${esc((u.trial_ends_at || '').slice(0,10) || '—')}</p>
+    ${stripeUrl ? `<p><a class="btn btn-soft btn-sm" href="${esc(stripeUrl)}" target="_blank" rel="noopener">Stripe customer</a></p>` : '<p class="muted">No Stripe customer</p>'}
+    <h3 class="panel-title" style="margin-top:18px">Reports</h3>
+    <ul style="padding-left:18px;margin:0 0 16px">${reports}</ul>
+    <h3 class="panel-title">Recent AI chats</h3>
+    ${chats}
+  `;
+  document.getElementById('drawerBackdrop').classList.add('on');
+  document.getElementById('userDrawer').classList.add('on');
+}
+
+async function loadStats() {
+  const data = await api('/api/admin/stats');
+  const s = data.stats || {};
+  document.getElementById('statUsers').textContent = String(s.users_total ?? '—');
+  document.getElementById('statUsersHint').textContent =
+    `${s.users_trial ?? 0} trial · ${s.users_active ?? 0} active · ${s.users_expired ?? 0} expired`;
+  document.getElementById('statPresWeek').textContent = String(s.presentations_week ?? '—');
+  document.getElementById('statPresTotal').textContent = `${s.presentations_total ?? 0} total`;
+  document.getElementById('statAiWeek').textContent = String(s.assistant_week ?? '—');
+  document.getElementById('statAiTotal').textContent = `${s.assistant_total ?? 0} total`;
+  document.getElementById('statFbOpen').textContent = String(s.feedback_open ?? '—');
+  document.getElementById('statFbNew').textContent = `${s.feedback_new ?? 0} new`;
+  document.getElementById('statStripe').textContent = s.stripe_configured ? 'On' : 'Off';
+  if (s.stripe_mode) stripeMode = s.stripe_mode;
+}
+
 async function loadUsers() {
   const q = document.getElementById('userQ').value.trim();
   const data = await api('/api/admin/users?q=' + encodeURIComponent(q));
   const body = document.getElementById('usersBody');
-  body.innerHTML = (data.users || []).map(u => `
+  body.innerHTML = (data.users || []).map(u => {
+    const stripeUrl = stripeCustomerUrl(u.stripe_customer_id);
+    return `
     <tr>
-      <td><strong>${esc(u.name || '—')}</strong><br><span class="muted">${esc(u.email)}</span><br><span class="muted">${esc(u.brokerage || '')}</span></td>
-      <td>${esc(u.status)} · ${esc(u.role)}</td>
-      <td>${u.presentations_used ?? 0} / ${u.presentation_limit ?? '∞'}</td>
+      <td><a class="user-link" data-uid="${esc(u.id)}"><strong>${esc(u.name || '—')}</strong></a><br><span class="muted">${esc(u.email)}</span><br><span class="muted">${esc(u.brokerage || '')}</span></td>
+      <td>${esc(u.status)} · ${esc(u.role)}<br><span class="muted">${esc(u.plan || 'no plan')}</span></td>
+      <td data-usage>${u.presentations_used ?? 0} / ${u.presentation_limit ?? '∞'}</td>
       <td>${esc((u.trial_ends_at || '').slice(0,10))}</td>
+      <td>${stripeUrl ? `<a href="${esc(stripeUrl)}" target="_blank" rel="noopener">Stripe</a>` : '<span class="muted">—</span>'}</td>
       <td class="actions">
+        <button class="btn btn-soft btn-sm" data-act="detail" data-id="${u.id}">Open</button>
         <button class="btn btn-soft btn-sm" data-act="extend" data-id="${u.id}">+14 days</button>
         <button class="btn btn-soft btn-sm" data-act="bump" data-id="${u.id}">+3 reports</button>
         <button class="btn btn-soft btn-sm" data-act="active" data-id="${u.id}">Mark active</button>
         <button class="btn btn-soft btn-sm" data-act="disable" data-id="${u.id}">Disable</button>
       </td>
-    </tr>`).join('') || '<tr><td colspan="5">No users</td></tr>';
+    </tr>`;
+  }).join('') || '<tr><td colspan="6">No users</td></tr>';
 }
 document.getElementById('usersBody').addEventListener('click', async (e) => {
+  const link = e.target.closest('[data-uid]');
+  if (link) {
+    e.preventDefault();
+    openUserDrawer(link.dataset.uid).catch(err => setStatus(err.message, false));
+    return;
+  }
   const btn = e.target.closest('button[data-act]');
   if (!btn) return;
   const id = btn.dataset.id;
   const act = btn.dataset.act;
+  if (act === 'detail') {
+    openUserDrawer(id).catch(err => setStatus(err.message, false));
+    return;
+  }
   const payload = {};
   if (act === 'extend') payload.extend_days = 14;
-  if (act === 'bump') payload.presentation_limit = null; // set below after fetch? simpler: extend limit by reading
   if (act === 'bump') {
-    // bump by setting presentations_used unchanged and raising limit via extend_days=0 + presentation_limit override from UI: add 3 to current shown
     const row = btn.closest('tr');
-    const usedTxt = row.children[2].textContent.split('/')[1].trim();
+    const usageCell = row.querySelector('[data-usage]');
+    const usedTxt = (usageCell?.textContent || '').split('/')[1]?.trim() || '3';
     const cur = usedTxt === '∞' ? 3 : parseInt(usedTxt, 10) || 3;
     payload.presentation_limit = cur + 3;
     payload.status = 'trial';
@@ -200,9 +439,80 @@ document.getElementById('usersBody').addEventListener('click', async (e) => {
     await api('/api/admin/users/' + id, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     setStatus('Updated user', true);
     loadUsers();
+    loadStats();
   } catch (err) { setStatus(String(err.message || err), false); }
 });
 document.getElementById('userSearch').addEventListener('click', () => loadUsers().catch(e => setStatus(e.message, false)));
+
+async function loadReports() {
+  const q = document.getElementById('reportQ').value.trim();
+  const data = await api('/api/admin/presentations?q=' + encodeURIComponent(q));
+  const body = document.getElementById('reportsBody');
+  body.innerHTML = (data.presentations || []).map(p => {
+    const openUrl = absUrl(p.url || '');
+    const shareUrl = absUrl(p.share_url || p.url || '');
+    return `
+    <tr>
+      <td><strong>${esc(p.address || p.title || '—')}</strong><br><span class="muted"><code>${esc(p.run_id || '')}</code></span></td>
+      <td>${esc(p.agent_name || '—')}<br><span class="muted">${esc(p.agent_email || '')}</span></td>
+      <td>${money(p.recommended_price)}</td>
+      <td>${esc((p.created_at || '').slice(0,16))}</td>
+      <td class="actions">
+        <a class="btn btn-soft btn-sm" href="${esc(openUrl)}" target="_blank" rel="noopener">Open</a>
+        <button type="button" class="btn btn-soft btn-sm" data-copy="${esc(shareUrl)}">Copy share</button>
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="5">No presentations</td></tr>';
+}
+document.getElementById('reportSearch').addEventListener('click', () => loadReports().catch(e => setStatus(e.message, false)));
+document.getElementById('reportQ').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); loadReports().catch(err => setStatus(err.message, false)); }
+});
+document.getElementById('reportsBody').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-copy]');
+  if (!btn) return;
+  const url = btn.dataset.copy || '';
+  try {
+    await navigator.clipboard.writeText(url);
+    setStatus('Share link copied', true);
+  } catch (_) {
+    setStatus(url || 'Nothing to copy', false);
+  }
+});
+
+async function loadAiChats() {
+  const q = document.getElementById('aiQ').value.trim();
+  const data = await api('/api/admin/assistant-chats?q=' + encodeURIComponent(q));
+  const list = document.getElementById('aiList');
+  const turns = data.turns || [];
+  if (!turns.length) {
+    list.innerHTML = '<p class="muted">No assistant chats logged yet. New questions will show here after agents use Ask ListLogic.</p>';
+    return;
+  }
+  list.innerHTML = turns.map(t => `
+    <div style="border-bottom:1px solid var(--line);padding:12px 0 14px">
+      <div class="chat-meta">
+        <span>${esc((t.created_at || '').slice(0,16))}</span>
+        <span>${esc(t.agent_name || '—')} · ${esc(t.agent_email || '')}</span>
+        <span>${t.ok ? 'ok' : 'error'}${t.model ? ' · ' + esc(t.model) : ''}</span>
+        ${t.conversation_id ? `<code>${esc(t.conversation_id.slice(0,10))}</code>` : ''}
+        ${t.user_id ? `<button type="button" class="btn btn-soft btn-sm" data-uid="${esc(t.user_id)}">User</button>` : ''}
+      </div>
+      ${t.page_url ? `<div class="muted page-url" style="margin-bottom:8px">${esc(t.page_url)}</div>` : ''}
+      <div class="chat-bubble user"><strong>Agent</strong><br>${esc(t.user_message)}</div>
+      <div class="chat-bubble bot"><strong>Assistant</strong><br>${esc(t.assistant_reply)}</div>
+    </div>
+  `).join('');
+}
+document.getElementById('aiSearch').addEventListener('click', () => loadAiChats().catch(e => setStatus(e.message, false)));
+document.getElementById('aiQ').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); loadAiChats().catch(err => setStatus(err.message, false)); }
+});
+document.getElementById('aiList').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-uid]');
+  if (!btn) return;
+  openUserDrawer(btn.dataset.uid).catch(err => setStatus(err.message, false));
+});
 
 async function loadPromos() {
   const data = await api('/api/admin/promo-codes');
@@ -270,13 +580,20 @@ document.getElementById('iCreate').addEventListener('click', async () => {
 });
 
 async function loadFeedback() {
-  const data = await api('/api/admin/feedback');
-  document.getElementById('fbBody').innerHTML = (data.feedback || []).map(f => `
+  const qs = new URLSearchParams();
+  if (fbStatus) qs.set('status', fbStatus);
+  if (fbCategory) qs.set('category', fbCategory);
+  const data = await api('/api/admin/feedback?' + qs.toString());
+  document.getElementById('fbBody').innerHTML = (data.feedback || []).map(f => {
+    const mailto = f.email
+      ? `mailto:${encodeURIComponent(f.email)}?subject=${encodeURIComponent('Re: ListLogic ' + (f.category || 'feedback'))}&body=${encodeURIComponent('Hi,\\n\\nThanks for your note about ListLogic.\\n\\n---\\n' + (f.message || ''))}`
+      : '';
+    return `
     <tr>
       <td>${esc((f.created_at || '').slice(0,16))}</td>
       <td>${esc(f.category)}</td>
       <td>${esc(f.email || '—')}</td>
-      <td>${esc(f.message)}<br><span class="muted">${esc(f.page_url || '')}</span></td>
+      <td>${esc(f.message)}${f.page_url ? '<br><span class="muted page-url">' + esc(f.page_url) + '</span>' : ''}</td>
       <td>
         <select data-fid="${f.id}">
           <option value="new" ${f.status==='new'?'selected':''}>new</option>
@@ -284,7 +601,11 @@ async function loadFeedback() {
           <option value="done" ${f.status==='done'?'selected':''}>done</option>
         </select>
       </td>
-    </tr>`).join('') || '<tr><td colspan="5">No feedback yet</td></tr>';
+      <td class="actions">
+        ${mailto ? `<a class="btn btn-soft btn-sm" href="${mailto}">Reply</a>` : '<span class="muted">—</span>'}
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="6">No feedback yet</td></tr>';
 }
 document.getElementById('fbBody').addEventListener('change', async (e) => {
   const sel = e.target.closest('select[data-fid]');
@@ -293,11 +614,37 @@ document.getElementById('fbBody').addEventListener('change', async (e) => {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status: sel.value }),
   });
+  loadStats().catch(() => {});
 });
-
-function esc(s) {
-  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function wireChips(rootId, attr, apply) {
+  document.getElementById(rootId).addEventListener('click', (e) => {
+    const btn = e.target.closest('button[' + attr + ']');
+    if (!btn) return;
+    document.querySelectorAll('#' + rootId + ' button').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    apply(btn.getAttribute(attr) || '');
+  });
 }
+wireChips('fbStatusChips', 'data-status', v => { fbStatus = v; loadFeedback().catch(err => setStatus(err.message, false)); });
+wireChips('fbCatChips', 'data-cat', v => { fbCategory = v; loadFeedback().catch(err => setStatus(err.message, false)); });
+
+async function loadEvents() {
+  const qs = new URLSearchParams();
+  const q = document.getElementById('evQ').value.trim();
+  if (q) qs.set('q', q);
+  if (evType) qs.set('type', evType);
+  const data = await api('/api/admin/events?' + qs.toString());
+  document.getElementById('eventsBody').innerHTML = (data.events || []).map(ev => `
+    <tr>
+      <td>${esc((ev.created_at || '').slice(0,16))}</td>
+      <td><code>${esc(ev.type)}</code></td>
+      <td>${esc(ev.agent_name || '—')}<br><span class="muted">${esc(ev.agent_email || '')}</span></td>
+      <td><code class="trunc" style="display:inline-block;max-width:420px;white-space:pre-wrap">${esc(JSON.stringify(ev.meta || {}))}</code></td>
+    </tr>
+  `).join('') || '<tr><td colspan="4">No events</td></tr>';
+}
+document.getElementById('evSearch').addEventListener('click', () => loadEvents().catch(e => setStatus(e.message, false)));
+wireChips('evTypeChips', 'data-type', v => { evType = v; loadEvents().catch(err => setStatus(err.message, false)); });
 
 (async () => {
   const me = await api('/api/auth-status');
@@ -305,7 +652,10 @@ function esc(s) {
     location.href = '/saas/login.html?next=/saas/admin.html';
     return;
   }
-  await Promise.all([loadUsers(), loadPromos(), loadInvites(), loadFeedback()]);
+  await Promise.all([
+    loadStats(), loadUsers(), loadReports(), loadAiChats(),
+    loadPromos(), loadInvites(), loadFeedback(), loadEvents(),
+  ]);
 })().catch(err => setStatus(String(err.message || err), false));
 </script>
 </body>

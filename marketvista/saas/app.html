@@ -112,24 +112,34 @@
 
 <nav class="ll-nav">
   <div class="container ll-nav-inner">
-    <a href="/saas/" class="ll-brand">
+    <a href="/saas/app.html" class="ll-brand">
       <img src="/saas/listlogic-logo.png" alt="ListLogic" class="ll-brand-logo">
-      <small>by SAA Homes</small>
+      <small id="brandRole">by SAA Homes</small>
     </a>
     <div class="ll-nav-links">
+      <a href="/saas/admin.html" id="adminNavLink" class="ll-nav-pill" hidden>Owner console</a>
+      <a href="/saas/app.html" class="ll-nav-active">Agent dashboard</a>
+      <a href="/saas/app.html#generate">Generate</a>
       <a href="/demo">Sample listing</a>
-      <a href="/saas/faq.html">FAQ</a>
       <a href="/saas/pricing.html">Pricing</a>
+      <a href="/saas/faq.html">FAQ</a>
       <a href="#" id="logoutLink">Sign out</a>
     </div>
   </div>
 </nav>
 
+<div class="owner-switch" id="ownerSwitch">
+  <div class="container owner-switch-inner">
+    <span><strong>Owner mode</strong> — you’re on the agent dashboard (generate &amp; your reports).</span>
+    <a href="/saas/admin.html">Back to owner console</a>
+  </div>
+</div>
+
 <div class="container narrow">
   <div class="page-head">
-    <span class="eyebrow">New presentation</span>
-    <h1>Build your pricing story.</h1>
-    <p class="sub">Upload market data, set the subject, generate a seller-ready presentation.</p>
+    <span class="eyebrow">Agent dashboard</span>
+    <h1>Presentations &amp; generate.</h1>
+    <p class="sub">Open a saved report, or build a new pricing story below. You’re signed in until you sign out (or ~30 days).</p>
   </div>
 
   <div class="banner" id="trialBanner">
@@ -137,13 +147,13 @@
   </div>
 
   <div class="reports" id="reportsPanel">
-    <h2>Saved reports</h2>
-    <p class="sub">Every generate is saved to your account. Share the client link when you can’t meet in person.</p>
+    <h2>Your reports</h2>
+    <p class="sub">Reopen any presentation you’ve generated. Client share links stay on the short /p/… URL.</p>
     <div id="reportsList"><p class="empty">Loading…</p></div>
   </div>
 
   <form id="genForm">
-    <div class="card step-card">
+    <div class="card step-card" id="generate" style="scroll-margin-top:24px">
       <div class="step-head">
         <span class="step-num">1</span>
         <div>
@@ -338,7 +348,7 @@
     </div>
     <div class="actions">
       <a class="btn btn-gold" id="openResult" href="#" target="_blank" rel="noopener">Open presentation</a>
-      <a class="btn btn-ghost" id="openStoryPdf" href="#" target="_blank" rel="noopener" style="display:none">Seller packet</a>
+      <a class="btn btn-ghost" id="openStoryPdf" href="#" target="_blank" rel="noopener" style="display:none">PDF packet</a>
       <a class="btn btn-ghost" id="openDeck" href="#" target="_blank" rel="noopener" style="display:none">Listing flipbook</a>
     </div>
     <div class="share-row">
@@ -368,6 +378,13 @@ const result = document.getElementById('result');
     }
     const ent = data.entitlement || {};
     const u = data.user || {};
+    if (u.role === 'admin') {
+      const adminNav = document.getElementById('adminNavLink');
+      if (adminNav) adminNav.hidden = false;
+      document.getElementById('ownerSwitch')?.classList.add('on');
+      const brandRole = document.getElementById('brandRole');
+      if (brandRole) brandRole.textContent = 'Owner · agent view';
+    }
     if (u && u.profile_complete === false) {
       location.href = '/saas/onboarding.html?next=' + encodeURIComponent('/saas/app.html');
       return;
@@ -375,16 +392,30 @@ const result = document.getElementById('result');
     const banner = document.getElementById('trialBanner');
     const meta = document.getElementById('trialMeta');
     if (u.status === 'active') {
-      banner.innerHTML = '<strong>Active account</strong> — generate unlimited presentations on your plan.';
+      const manage = u.has_stripe
+        ? ' <button type="button" id="manageBilling" class="btn btn-outline" style="margin-left:10px;padding:4px 10px;font-size:0.8rem">Manage billing</button>'
+        : '';
+      banner.innerHTML = '<strong>Active account</strong> — generate unlimited presentations on your plan.' + manage;
+      document.getElementById('manageBilling')?.addEventListener('click', async () => {
+        const r = await fetch('/api/billing/portal', { method: 'POST', credentials: 'same-origin' });
+        const d = await r.json().catch(() => ({}));
+        if (d.url) location.href = d.url;
+        else alert(d.detail || 'Billing portal unavailable');
+      });
     } else if (!ent.ok) {
       banner.classList.add('err');
       banner.innerHTML =
-        '<strong>Trial ended.</strong> <a href="/saas/pricing.html">See plans</a> or email adam@saahomes.com to continue.';
+        '<strong>Trial ended.</strong> <a href="/saas/pricing.html">Choose a plan</a> to keep generating.';
     } else {
       meta.textContent =
         (ent.remaining != null ? ent.remaining + ' presentation(s) left' : '') +
         (ent.days_left != null ? ' · ~' + ent.days_left + ' day(s) left' : '') +
         (u.email ? ' · ' + u.email : '');
+    }
+    const billing = new URLSearchParams(location.search).get('billing');
+    if (billing === 'success') {
+      banner.classList.remove('err');
+      banner.innerHTML = '<strong>Payment received.</strong> Your plan is activating — refresh if generate still looks locked.';
     }
     // Prefill branding from profile
     if (u.name) document.getElementById('agentName').value = u.name;
@@ -509,22 +540,34 @@ form.addEventListener('submit', async (e) => {
   e.preventDefault();
   result.classList.remove('show');
   statusEl.className = 'status';
-  statusEl.textContent = 'Running ListLogic engine…';
+  statusEl.textContent = 'Running ListLogic engine… (first run can take up to a minute while photos load)';
   btn.disabled = true;
+  const started = Date.now();
+  const tick = setInterval(() => {
+    const sec = Math.round((Date.now() - started) / 1000);
+    statusEl.textContent = 'Still generating… ' + sec + 's (building market story + photos)';
+  }, 2500);
 
   const data = new FormData(form);
   data.set('use_sample_export', useSample.checked ? 'true' : 'false');
   if (useSample.checked) data.delete('export_file');
 
+  const controller = new AbortController();
+  const abortTimer = setTimeout(() => controller.abort(), 180000);
+
   try {
-    const res = await fetch('/api/generate', { method: 'POST', body: data });
+    const res = await fetch('/api/generate', { method: 'POST', body: data, signal: controller.signal });
     if (res.status === 401) {
       location.href = '/saas/login.html?next=' + encodeURIComponent('/saas/app.html');
       return;
     }
     const payload = await res.json().catch(() => ({}));
     if (!res.ok) {
-      throw new Error(payload.detail || payload.message || ('HTTP ' + res.status));
+      const detail = payload.detail;
+      const msg = typeof detail === 'string' ? detail
+        : (detail && detail.message) ? detail.message
+        : (payload.message || ('HTTP ' + res.status));
+      throw new Error(msg);
     }
     document.getElementById('mRec').textContent = money(payload.recommended_price);
     document.getElementById('mMoi').textContent = payload.months_of_inventory != null ? Number(payload.months_of_inventory).toFixed(1) : '—';
@@ -555,16 +598,23 @@ form.addEventListener('submit', async (e) => {
     const shareInput = document.getElementById('shareLink');
     shareInput.value = shareAbsolute(payload.share_url || payload.url);
     result.classList.add('show');
+    result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     statusEl.className = 'status ok';
     statusEl.textContent = payload.saved
       ? 'Saved to your reports — open or share the client link below.'
       : 'Done — open the presentation below.';
     loadReports();
-    window.open(payload.url, '_blank');
+    try { window.open(payload.url, '_blank'); } catch (e) {}
   } catch (err) {
     statusEl.className = 'status error';
-    statusEl.textContent = String(err.message || err);
+    if (err && err.name === 'AbortError') {
+      statusEl.textContent = 'Timed out after 3 minutes. Refresh and try again — if it keeps happening, email adam@saahomes.com.';
+    } else {
+      statusEl.textContent = String(err.message || err);
+    }
   } finally {
+    clearInterval(tick);
+    clearTimeout(abortTimer);
     btn.disabled = false;
   }
 });
