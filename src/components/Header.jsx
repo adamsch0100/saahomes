@@ -332,6 +332,13 @@ export default function Header() {
             >
               View all notifications
             </Link>
+            <Link
+              to="/notifications/#notification-settings"
+              onClick={() => setBellOpen(false)}
+              className="block text-center text-xs font-medium py-2 text-gray-400 hover:text-white hover:bg-white/10 transition-colors border-t border-gray-800/80"
+            >
+              Notification settings
+            </Link>
           </div>
         </div>
       ) : null}

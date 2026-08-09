@@ -1,14 +1,25 @@
 /**
- * In-app notification center helpers (It 14.1).
+ * In-app notification center helpers (It 14.1 + It 18 cadence prefs).
  *
  * Creates lightweight rows for signed-in users when nurture events fire:
  * new_match, price_drop, value_update, off_market, showing_confirm.
+ *
+ * Cadence: looks up notification_prefs before insert.
+ *   - frequency 'off' → skip in-app insert ({ skipped: true, reason: 'pref_off' })
+ *   - missing row → default (search_activity/immediate, value_update/monthly)
+ *   - agent types (showing_confirm, shared_home) always insert
+ * In-app is always immediate when not off; email cadence is owned by
+ * alertDigest / homeValueDigest (they honor the same prefs — no double email).
  *
  * Titles/bodies use only verified listing/search data — never fabricated values.
  * image_url is always a photo proxy path (/api/photo/{id}/0), never raw MLS media.
  */
 import getPool from '../config/database.js';
 import logger from '../utils/logger.js';
+import {
+  getPrefFrequency,
+  prefTypeForNotification,
+} from './notificationPrefs.js';
 
 const fmtPrice = (n) =>
   n == null || !Number.isFinite(Number(n))
@@ -39,9 +50,14 @@ function photoProxy(listing) {
  * Insert a single notification. Failures are logged, never thrown —
  * nurture email paths must not break if the notifications table is mid-migrate.
  *
+ * Honors cadence prefs: 'off' skips insert. Callers that only check truthiness
+ * still work (skipped → null-like via skipped flag on object; prefer checking
+ * result?.skipped or result?.id).
+ *
  * @param {object} opts
  * @param {number} [opts.dedupeDays] — if set with link, skip when same user+type+link
  *   already exists within this many days (avoids digest re-run spam)
+ * @param {boolean} [opts.skipPrefCheck] — admin/forced inserts bypass prefs
  */
 export async function createNotification({
   userId,
@@ -52,10 +68,22 @@ export async function createNotification({
   imageUrl = null,
   dedupeDays = null,
   pool = null,
+  skipPrefCheck = false,
 } = {}) {
   if (!userId || !type || !title) return null;
   const db = pool || getPool();
   try {
+    // Cadence gate: configurable types respect 'off'
+    if (!skipPrefCheck) {
+      const prefType = prefTypeForNotification(type);
+      if (prefType) {
+        const freq = await getPrefFrequency(userId, prefType, db);
+        if (freq === 'off') {
+          return { skipped: true, reason: 'pref_off', type: String(type).slice(0, 32) };
+        }
+      }
+    }
+
     if (dedupeDays && link) {
       const days = Math.max(1, Math.min(90, Number(dedupeDays) || 7));
       const existing = await db.query(
@@ -122,7 +150,7 @@ export async function notifyNewMatches({ userId, searchName, listings = [], pool
       dedupeDays: 7,
       pool: db,
     });
-    if (row) created += 1;
+    if (row?.id) created += 1;
   }
   return created;
 }
@@ -289,7 +317,7 @@ export async function scanSavedHomesForNotifications({ pool = null } = {}) {
         );
         if (!recent.rows.length) {
           const n = await notifyOffMarket({ userId: row.user_id, listing, pool: db });
-          if (n) result.offMarket += 1;
+          if (n?.id) result.offMarket += 1;
         }
         continue;
       }
@@ -304,7 +332,7 @@ export async function scanSavedHomesForNotifications({ pool = null } = {}) {
           oldPrice: saved,
           pool: db,
         });
-        if (n) result.priceDrops += 1;
+        if (n?.id) result.priceDrops += 1;
         await db.query(`UPDATE saved_homes SET list_price = $1 WHERE id = $2`, [
           current,
           row.saved_id,

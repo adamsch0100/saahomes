@@ -550,6 +550,35 @@ export const runMigrations = async () => {
         ON notifications(user_id, created_at DESC);
     `);
 
+    // ── Notification cadence prefs (It 18 / Phase D cadence controls) ────
+    // Per-user, per-type frequency. Missing row = code default (not an error).
+    // frequency: immediate | daily | weekly | monthly | off
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS notification_prefs (
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        type VARCHAR(32) NOT NULL,
+        frequency VARCHAR(16) NOT NULL DEFAULT 'immediate',
+        updated_at TIMESTAMP DEFAULT NOW(),
+        PRIMARY KEY (user_id, type)
+      )
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_notification_prefs_user
+        ON notification_prefs(user_id);
+    `);
+
+    // Optional due_at on email_outbox so daily/weekly notification emails
+    // can queue until the next send window (null = send ASAP).
+    await client.query(`
+      ALTER TABLE email_outbox ADD COLUMN IF NOT EXISTS due_at TIMESTAMP;
+      ALTER TABLE email_outbox ADD COLUMN IF NOT EXISTS user_id INTEGER;
+      ALTER TABLE email_outbox ADD COLUMN IF NOT EXISTS notification_type VARCHAR(32);
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_email_outbox_due
+        ON email_outbox(due_at) WHERE sent_at IS NULL;
+    `);
+
     // ── Enrich layer: disposable email block log (P4 / RealScout G4) ─────
     // Fire-and-forget observability when a lead form is rejected for a
     // known throwaway domain. Never blocks capture paths if insert fails.

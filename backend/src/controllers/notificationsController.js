@@ -1,13 +1,17 @@
 /**
- * Notification center API (It 14.1):
+ * Notification center API (It 14.1 + It 18 cadence prefs):
  *   GET    /api/notifications              — list (newest first) + unread_count
  *   POST   /api/notifications/:id/read     — mark one read
  *   POST   /api/notifications/read-all     — mark all read
  *   DELETE /api/notifications/:id          — soft-dismiss (dismissed_at)
+ *   GET    /api/notifications/prefs        — cadence preferences
+ *   PUT    /api/notifications/prefs        — upsert cadence preferences
  *
  * Auth: same cookie / manage_token pattern as savedHomesController.
+ * Pref changes are NOT engagement signals (no lead-score / FUB writes).
  */
 import getPool from '../config/database.js';
+import { getUserPrefs, upsertUserPrefs } from '../services/notificationPrefs.js';
 
 const COOKIE_NAME = 'saa_user_token';
 const PAGE_SIZE = 20;
@@ -226,5 +230,56 @@ export async function dismissAllNotifications(req, res) {
   } catch (e) {
     console.error('dismissAllNotifications:', e.message);
     return res.status(500).json({ success: false, error: 'Could not dismiss all.' });
+  }
+}
+
+/**
+ * GET /api/notifications/prefs
+ * Returns all pref types with frequency. is_default: true when no saved row
+ * (defaults apply; never pretends a default is a user-saved choice).
+ */
+export async function getNotificationPrefs(req, res) {
+  try {
+    const user = await resolveUser(req);
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'Sign in to view notification preferences.' });
+    }
+    const prefs = await getUserPrefs(user.id);
+    return res.json({
+      success: true,
+      data: {
+        prefs,
+        note: 'These controls apply to email and in-app notifications. Missing rows use code defaults.',
+      },
+    });
+  } catch (e) {
+    console.error('getNotificationPrefs:', e.message);
+    return res.status(500).json({ success: false, error: 'Could not load preferences.' });
+  }
+}
+
+/**
+ * PUT /api/notifications/prefs
+ * Body: { prefs: [{ type, frequency }] }
+ * Upserts each valid row; 400 on unknown type or frequency.
+ */
+export async function putNotificationPrefs(req, res) {
+  try {
+    const user = await resolveUser(req);
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'Sign in required.' });
+    }
+    const prefs = req.body?.prefs;
+    const result = await upsertUserPrefs(user.id, prefs);
+    if (!result.ok) {
+      return res.status(400).json({ success: false, error: result.error });
+    }
+    return res.json({
+      success: true,
+      data: { prefs: result.prefs },
+    });
+  } catch (e) {
+    console.error('putNotificationPrefs:', e.message);
+    return res.status(500).json({ success: false, error: 'Could not save preferences.' });
   }
 }

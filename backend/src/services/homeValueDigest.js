@@ -16,6 +16,7 @@ import getPool from '../config/database.js';
 import { sendEmail, smtpConfigured } from './emailer.js';
 import { computeOurEstimate } from './sellerValueService.js';
 import { notifyValueUpdate } from './notificationService.js';
+import { getPrefFrequency } from './notificationPrefs.js';
 import logger from '../utils/logger.js';
 
 const SITE = 'https://saahomes.com';
@@ -155,6 +156,15 @@ async function loadDueProfiles(pool, { onlyEmail = null, force = false } = {}) {
 
 async function sendOne(profile, { dryRun = false } = {}) {
   const pool = getPool();
+
+  // Account-level value_update cadence: 'off' skips entirely.
+  // Digest remains monthly; immediate/daily/weekly/monthly all mean "on"
+  // at the monthly cron cadence (honest — estimates update monthly).
+  const valuePref = await getPrefFrequency(profile.user_id, 'value_update', pool);
+  if (valuePref === 'off') {
+    return { sent: false, skipped: 'pref_off' };
+  }
+
   const our = await computeOurEstimate(profile, pool);
   if (our.mid == null) {
     return { sent: false, skipped: 'no_estimate' };

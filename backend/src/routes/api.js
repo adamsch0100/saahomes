@@ -44,6 +44,8 @@ import {
   markAllNotificationsRead,
   dismissNotification,
   dismissAllNotifications,
+  getNotificationPrefs,
+  putNotificationPrefs,
 } from '../controllers/notificationsController.js';
 import {
   validateContactSubmission,
@@ -199,7 +201,7 @@ router.get('/saved-homes', savedHomesLimiter, listSavedHomes);
 router.post('/saved-homes', formLimiter, saveHome);
 router.delete('/saved-homes/:listing_key', savedHomesLimiter, unsaveHome);
 
-// ── Notification center (in-app nurture events) ───────────────────────────
+// ── Notification center (in-app nurture events + cadence prefs) ───────────
 const notificationsLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 120,
@@ -207,6 +209,8 @@ const notificationsLimiter = rateLimit({
 });
 // Static paths before :id
 router.get('/notifications', notificationsLimiter, listNotifications);
+router.get('/notifications/prefs', notificationsLimiter, getNotificationPrefs);
+router.put('/notifications/prefs', formLimiter, putNotificationPrefs);
 router.post('/notifications/read-all', formLimiter, markAllNotificationsRead);
 router.post('/notifications/dismiss-all', formLimiter, dismissAllNotifications);
 router.post('/notifications/:id/read', formLimiter, markNotificationRead);
