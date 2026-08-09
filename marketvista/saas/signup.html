@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Start free trial — ListLogic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/saas/ll.css">
+<style>
+body {
+  min-height: 100vh; display: grid; place-items: center; padding: 32px 20px;
+  background: radial-gradient(900px 500px at 80% -10%, #1a5f9e33, transparent 60%),
+              radial-gradient(700px 400px at 10% 110%, #c9a22722, transparent 55%),
+              linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+}
+.auth-card {
+  background: var(--card); border-radius: 22px; padding: 36px 32px;
+  width: 100%; max-width: 500px; box-shadow: 0 40px 90px -30px rgba(0,0,0,0.55);
+}
+.auth-brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -0.02em; font-size: 1.1rem; margin-bottom: 22px; }
+.auth-brand .ll-brand-mark { width: 36px; height: 36px; }
+h1 { font-family: 'Fraunces', serif; font-size: 1.7rem; letter-spacing: -0.02em; margin-bottom: 6px; }
+.sub { color: var(--muted); font-size: 0.92rem; margin-bottom: 20px; }
+.sub strong { color: var(--ink); }
+.perks { display: grid; gap: 8px; margin-bottom: 22px; }
+.perks div { display: flex; gap: 10px; font-size: 0.88rem; align-items: flex-start; }
+.perks div::before {
+  content: "✓"; flex: 0 0 20px; height: 20px; border-radius: 50%;
+  background: #e7f3ef; color: var(--teal); font-weight: 800; font-size: 0.72rem;
+  display: grid; place-items: center; margin-top: 2px;
+}
+.hint-box {
+  background: #f7f4ee; border: 1px solid var(--line); border-radius: var(--radius-sm);
+  padding: 13px 15px; font-size: 0.84rem; color: var(--muted); margin-bottom: 18px; line-height: 1.5;
+}
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 520px) { .row2 { grid-template-columns: 1fr; } }
+button.btn { width: 100%; padding: 13px; font-size: 0.95rem; }
+.auth-links { margin-top: 20px; font-size: 0.82rem; display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.auth-links a { color: var(--muted); text-decoration: none; }
+.auth-links a:hover { color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="auth-card">
+  <a href="/saas/" class="auth-brand" style="text-decoration:none;color:inherit">
+    <span class="ll-brand-mark">L</span> ListLogic
+  </a>
+  <h1>Start your free trial</h1>
+  <p class="sub"><strong>3 presentations or 60 days</strong> — whichever comes first. No card required.</p>
+
+  <div class="perks">
+    <div>Full interactive presentations with live what-if pricing</div>
+    <div>Seller packet PDF + listing flipbook with your branding</div>
+    <div>Sample listing included — present it before your first appointment</div>
+  </div>
+
+  <div class="hint-box" id="inviteHint" style="display:none"></div>
+
+  <form id="form">
+    <div class="field">
+      <label for="name">Full name</label>
+      <input id="name" required autocomplete="name">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label for="phone">Phone</label>
+        <input id="phone" type="tel" autocomplete="tel">
+      </div>
+    </div>
+    <div class="field">
+      <label for="brokerage">Brokerage</label>
+      <input id="brokerage" placeholder="Coldwell Banker Realty" autocomplete="organization">
+    </div>
+    <div class="field">
+      <label for="promo">Promo code <span style="font-weight:400;text-transform:none">(optional)</span></label>
+      <input id="promo" placeholder="e.g. COLDWELL-NOCO" spellcheck="false">
+    </div>
+    <div class="field">
+      <label for="password">Password <span style="font-weight:400;text-transform:none">(8+ characters)</span></label>
+      <input id="password" type="password" required minlength="8" autocomplete="new-password">
+    </div>
+    <button type="submit" class="btn btn-gold">Create account</button>
+  </form>
+  <p class="status" id="status"></p>
+  <div class="auth-links">
+    <a href="login.html">Already have an account?</a>
+    <a href="/demo">Try sample listing</a>
+    <a href="/saas/">Home</a>
+  </div>
+</div>
+<script>
+const params = new URLSearchParams(location.search);
+const invite = params.get('invite') || '';
+const next = params.get('next') || '/saas/app.html';
+if (params.get('code')) document.getElementById('promo').value = params.get('code');
+if (invite) {
+  fetch('/api/invite-info?token=' + encodeURIComponent(invite))
+    .then(r => r.json())
+    .then(d => {
+      if (!d.ok) return;
+      const hint = document.getElementById('inviteHint');
+      hint.style.display = 'block';
+      hint.textContent = 'Invite applied: ' + (d.presentation_limit || 3) + ' presentations or ' + (d.trial_days || 60) + ' days.';
+      if (d.email) { document.getElementById('email').value = d.email; }
+      if (d.brokerage) { document.getElementById('brokerage').value = d.brokerage; }
+    }).catch(() => {});
+}
+document.getElementById('form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const status = document.getElementById('status');
+  status.className = 'status';
+  status.textContent = 'Creating account…';
+  try {
+    const res = await fetch('/api/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: document.getElementById('name').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        brokerage: document.getElementById('brokerage').value.trim(),
+        promo_code: document.getElementById('promo').value.trim(),
+        invite,
+        password: document.getElementById('password').value,
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : (data.detail?.message || 'Signup failed'));
+    location.href = next;
+  } catch (err) {
+    status.className = 'status error';
+    status.textContent = String(err.message || err);
+  }
+});
+</script>
+<script src="/saas/assistant.js"></script>
+</body>
+</html>

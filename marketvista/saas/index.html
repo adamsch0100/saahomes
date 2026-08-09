@@ -1,0 +1,487 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ListLogic — Win the Listing With a Pricing Story Sellers Trust</title>
+<meta name="description" content="ListLogic builds a microscope view of how your home's market is actually performing — factual, data-backed pricing on a market customized to the specific home, so you can position it to sell.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0b1220;
+  --ink-2: #16233c;
+  --paper: #f7f4ee;
+  --card: #ffffff;
+  --line: #e6e0d4;
+  --muted: #5c6675;
+  --accent: #c9a227;
+  --accent-2: #e0b83a;
+  --teal: #0e7a6d;
+  --navy: #0c3c6e;
+  --blue: #1a5f9e;
+  --radius: 18px;
+  --shadow: 0 18px 50px -18px rgba(11, 18, 32, 0.22);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+.serif { font-family: 'Fraunces', Georgia, serif; }
+.container { max-width: 1160px; margin: 0 auto; padding: 0 28px; }
+
+/* ---------- Nav ---------- */
+.nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(247, 244, 238, 0.86);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.nav-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 0; gap: 16px; flex-wrap: wrap;
+}
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -0.02em; font-size: 1.15rem; }
+.brand-mark {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--navy), var(--blue));
+  display: grid; place-items: center; color: #fff; font-size: 0.95rem; font-weight: 800;
+  box-shadow: 0 6px 16px -6px rgba(12, 60, 110, 0.5);
+}
+.brand small { font-weight: 600; color: var(--muted); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.nav-links { display: flex; align-items: center; gap: 22px; font-size: 0.92rem; font-weight: 500; }
+.nav-links a { color: var(--ink-2); opacity: 0.85; }
+.nav-links a:hover { opacity: 1; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 22px; border-radius: 999px; font-weight: 600; font-size: 0.92rem;
+  border: 1px solid transparent; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  white-space: nowrap;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn-primary { background: var(--ink); color: #fff; box-shadow: 0 10px 24px -10px rgba(11,18,32,0.5); }
+.btn-primary:hover { background: var(--ink-2); }
+.btn-gold { background: var(--accent); color: #1a1505; box-shadow: 0 10px 24px -10px rgba(201,162,39,0.55); }
+.btn-gold:hover { background: var(--accent-2); }
+.btn-ghost { background: transparent; border-color: rgba(255,255,255,0.35); color: #fff; }
+.btn-ghost:hover { border-color: rgba(255,255,255,0.7); }
+.btn-outline { background: transparent; border-color: var(--line); color: var(--ink); }
+.btn-outline:hover { border-color: var(--ink); }
+
+/* ---------- Hero ---------- */
+.hero {
+  position: relative; overflow: hidden;
+  background: radial-gradient(1200px 600px at 80% -10%, #1a5f9e33, transparent 60%),
+              radial-gradient(900px 500px at 10% 110%, #c9a22722, transparent 55%),
+              linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff;
+  padding: 84px 0 96px;
+}
+.hero-grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 56px; align-items: center; }
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--accent-2); margin-bottom: 20px;
+}
+.eyebrow::before { content: ""; width: 26px; height: 2px; background: var(--accent); display: inline-block; }
+.hero h1 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(2.3rem, 4.6vw, 3.6rem);
+  line-height: 1.08; letter-spacing: -0.02em; font-weight: 700;
+  margin-bottom: 20px;
+}
+.hero h1 em { font-style: normal; color: var(--accent-2); }
+.hero .lead { font-size: 1.12rem; color: #c8d2e0; max-width: 520px; margin-bottom: 32px; }
+.hero-cta { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+.hero-proof { display: flex; gap: 28px; margin-top: 40px; flex-wrap: wrap; }
+.hero-proof div { font-size: 0.82rem; color: #9fb0c6; }
+.hero-proof strong { display: block; font-size: 1.35rem; color: #fff; font-weight: 700; letter-spacing: -0.01em; }
+
+/* ---------- Hero mock (presentation card) ---------- */
+.mock {
+  background: linear-gradient(160deg, #ffffff 0%, #f2f5fa 100%);
+  border-radius: 22px; color: var(--ink);
+  box-shadow: 0 40px 90px -30px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.08);
+  overflow: hidden; transform: rotate(1.2deg);
+}
+.mock-bar { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: #0b1220; }
+.mock-bar i { width: 10px; height: 10px; border-radius: 50%; background: #33415c; display: inline-block; }
+.mock-bar span { margin-left: auto; font-size: 0.7rem; color: #8fa0b8; letter-spacing: 0.04em; }
+.mock-body { padding: 22px 24px 24px; }
+.mock-tag { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--teal); }
+.mock-price { font-family: 'Fraunces', serif; font-size: 2.5rem; font-weight: 700; letter-spacing: -0.02em; margin: 4px 0 2px; }
+.mock-range { font-size: 0.85rem; color: var(--muted); margin-bottom: 16px; }
+.mock-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); font-size: 0.86rem; }
+.mock-row b { font-weight: 700; }
+.mock-row .up { color: var(--teal); font-weight: 700; }
+.mock-row .down { color: #b3541e; font-weight: 700; }
+.mock-track { height: 6px; border-radius: 999px; background: #e6e0d4; margin: 14px 0 6px; position: relative; overflow: hidden; }
+.mock-track i { position: absolute; inset: 0 38% 0 0; background: linear-gradient(90deg, var(--teal), var(--accent)); border-radius: 999px; }
+.mock-foot { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); }
+.mock-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.mock-chips span { font-size: 0.7rem; font-weight: 600; background: #eef2f8; border: 1px solid var(--line); padding: 5px 11px; border-radius: 999px; color: var(--ink-2); }
+
+/* ---------- Sections ---------- */
+.section { padding: 88px 0; }
+.section.tight { padding: 64px 0; }
+.section-head { max-width: 640px; margin-bottom: 48px; }
+.section-head.center { margin-left: auto; margin-right: auto; text-align: center; }
+.section-head .eyebrow { color: var(--teal); }
+.section-head .eyebrow::before { background: var(--teal); }
+.section-head h2 { font-family: 'Fraunces', serif; font-size: clamp(1.7rem, 3.2vw, 2.4rem); letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 14px; }
+.section-head p { color: var(--muted); font-size: 1.02rem; }
+
+/* Pain */
+.pain { background: var(--card); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.pain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.pain-card { border: 1px solid var(--line); border-radius: var(--radius); padding: 26px 24px; background: var(--paper); }
+.pain-card .num { font-family: 'Fraunces', serif; font-size: 0.85rem; color: var(--accent); font-weight: 700; letter-spacing: 0.06em; }
+.pain-card h3 { font-size: 1.06rem; margin: 8px 0 8px; letter-spacing: -0.01em; }
+.pain-card p { font-size: 0.9rem; color: var(--muted); }
+
+/* How it works */
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; counter-reset: step; }
+.step {
+  position: relative; border-radius: var(--radius); padding: 30px 26px 28px;
+  background: var(--card); border: 1px solid var(--line); box-shadow: var(--shadow);
+}
+.step::before {
+  counter-increment: step; content: counter(step, decimal-leading-zero);
+  font-family: 'Fraunces', serif; font-size: 2.2rem; font-weight: 700; color: var(--accent);
+  display: block; margin-bottom: 12px;
+}
+.step h3 { font-size: 1.1rem; margin-bottom: 8px; letter-spacing: -0.01em; }
+.step p { font-size: 0.92rem; color: var(--muted); }
+
+/* Feature split */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+.split + .split { margin-top: 72px; }
+.split.flip > .split-media { order: 2; }
+.split h3 { font-family: 'Fraunces', serif; font-size: 1.6rem; letter-spacing: -0.02em; margin-bottom: 12px; }
+.split p { color: var(--muted); margin-bottom: 16px; }
+.checklist { list-style: none; display: grid; gap: 10px; }
+.checklist li { display: flex; gap: 10px; font-size: 0.94rem; align-items: flex-start; }
+.checklist li::before {
+  content: "✓"; flex: 0 0 22px; height: 22px; border-radius: 50%;
+  background: #e7f3ef; color: var(--teal); font-weight: 800; font-size: 0.75rem;
+  display: grid; place-items: center; margin-top: 1px;
+}
+.split-media {
+  border-radius: var(--radius); background: linear-gradient(150deg, var(--navy), var(--blue));
+  color: #fff; padding: 30px; box-shadow: var(--shadow); min-height: 260px;
+  display: flex; flex-direction: column; justify-content: flex-end; gap: 10px;
+  position: relative; overflow: hidden;
+}
+.split-media::after {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(500px 260px at 85% 0%, rgba(201,162,39,0.28), transparent 60%);
+}
+.split-media .big { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; position: relative; }
+.split-media .meta { font-size: 0.85rem; color: #cdd8e6; position: relative; }
+.split-media .bars { display: grid; gap: 8px; margin-bottom: 14px; position: relative; }
+.split-media .bar { height: 10px; border-radius: 999px; background: rgba(255,255,255,0.16); overflow: hidden; }
+.split-media .bar i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent), #f0d060); }
+
+/* Deliverables */
+.deliver { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.deliver-card {
+  border-radius: var(--radius); border: 1px solid var(--line); background: var(--card);
+  padding: 28px 24px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px;
+}
+.deliver-card .pill {
+  align-self: flex-start; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--navy); background: #eaf1f9; border-radius: 999px; padding: 5px 12px;
+}
+.deliver-card h3 { font-size: 1.12rem; letter-spacing: -0.01em; }
+.deliver-card p { font-size: 0.9rem; color: var(--muted); flex: 1; }
+.deliver-card a { font-weight: 600; font-size: 0.9rem; color: var(--navy); }
+
+/* Quote band */
+.quote-band {
+  background: linear-gradient(150deg, var(--ink), var(--ink-2)); color: #fff;
+  border-radius: 26px; padding: 56px 48px; position: relative; overflow: hidden;
+}
+.quote-band::after {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(600px 300px at 90% 10%, rgba(201,162,39,0.2), transparent 60%);
+}
+.quote-band blockquote { font-family: 'Fraunces', serif; font-size: clamp(1.3rem, 2.6vw, 1.9rem); line-height: 1.3; max-width: 760px; position: relative; }
+.quote-band cite { display: block; margin-top: 18px; font-style: normal; font-size: 0.9rem; color: #9fb0c6; position: relative; }
+
+/* Pricing teaser */
+.pricing-teaser {
+  display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 30px 32px; box-shadow: var(--shadow);
+}
+.pricing-teaser .amount { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; }
+.pricing-teaser p { color: var(--muted); font-size: 0.94rem; max-width: 460px; }
+
+/* Final CTA */
+.final-cta { text-align: center; padding: 96px 0; }
+.final-cta h2 { font-family: 'Fraunces', serif; font-size: clamp(1.9rem, 3.6vw, 2.7rem); letter-spacing: -0.02em; margin-bottom: 14px; }
+.final-cta p { color: var(--muted); max-width: 520px; margin: 0 auto 30px; }
+.final-cta .row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+footer { border-top: 1px solid var(--line); padding: 36px 0; color: var(--muted); font-size: 0.82rem; }
+footer .container { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: center; }
+footer a { color: var(--muted); }
+footer a:hover { color: var(--ink); }
+
+@media (max-width: 900px) {
+  .hero-grid, .split, .split.flip { grid-template-columns: 1fr; }
+  .split.flip > .split-media { order: 0; }
+  .pain-grid, .steps, .deliver { grid-template-columns: 1fr; }
+  .mock { transform: none; }
+  .hero { padding: 64px 0 72px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">L</span>
+      ListLogic
+      <small>by SAA Homes</small>
+    </a>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#deliverables">What sellers get</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="faq.html">FAQ</a>
+      <a href="login.html">Sign in</a>
+      <a href="signup.html" class="btn btn-primary">Start free trial</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container hero-grid">
+    <div>
+      <span class="eyebrow">For listing agents</span>
+      <h1>A microscope view of <em>your home's market</em> — and how to price it to sell.</h1>
+      <p class="lead">
+        ListLogic builds a factual, data-backed pricing story on a market customized to the
+        specific home — not the whole city. Sellers see exactly how their segment is performing
+        and how to position their home to sell successfully.
+      </p>
+      <div class="hero-cta">
+        <a href="/demo" class="btn btn-gold">See a live presentation</a>
+        <a href="signup.html" class="btn btn-ghost">Start free trial</a>
+      </div>
+      <div class="hero-proof">
+        <div><strong>3 free</strong>presentations to start</div>
+        <div><strong>Custom-fit</strong>market for every home</div>
+        <div><strong>2 formats</strong>seller packet + flipbook</div>
+      </div>
+    </div>
+
+    <div class="mock" aria-hidden="true">
+      <div class="mock-bar"><i></i><i></i><i></i><span>listlogic.homes/presentation</span></div>
+      <div class="mock-body">
+        <div class="mock-tag">Recommended list price</div>
+        <div class="mock-price">$410,000</div>
+        <div class="mock-range">Range $396,000 – $426,000 · ~46 days to contract</div>
+        <div class="mock-row"><span>Price at market</span><b>$410,000</b><span class="up">72% odds</span></div>
+        <div class="mock-row"><span>Stretch +4%</span><b>$426,400</b><span class="down">51% odds</span></div>
+        <div class="mock-row"><span>Move fast −3%</span><b>$397,700</b><span class="up">86% odds</span></div>
+        <div class="mock-track"><i></i></div>
+        <div class="mock-foot"><span>Buyer demand</span><span>Market temperature: Warm</span></div>
+        <div class="mock-chips">
+          <span>Absorption rate</span><span>Supply stream</span><span>Comp transparency</span><span>What-if slider</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="section pain">
+  <div class="container">
+    <div class="section-head center">
+      <span class="eyebrow">The problem</span>
+      <h2>Most listing appointments are lost on price — not comps.</h2>
+      <p>You know the market. The seller has a number in their head. If they can't <em>see</em> the trade-off between price, time, and odds, they anchor high and blame you later.</p>
+    </div>
+    <div class="pain-grid">
+      <div class="pain-card">
+        <span class="num">01</span>
+        <h3>Sellers anchor on Zillow</h3>
+        <p>A guess with a nice UI beats a spreadsheet of comps. You need a story that's just as easy to believe — but grounded in real data.</p>
+      </div>
+      <div class="pain-card">
+        <span class="num">02</span>
+        <h3>CMAs don't show trade-offs</h3>
+        <p>Static PDFs can't answer "what if we list $15k higher?" Sellers nod along, then push for the number anyway.</p>
+      </div>
+      <div class="pain-card">
+        <span class="num">03</span>
+        <h3>Overpricing kills momentum</h3>
+        <p>Two price reductions later, the listing is stale and the seller wonders what went wrong. The data was there — it just wasn't visible.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="how">
+  <div class="container">
+    <div class="section-head center">
+      <span class="eyebrow">Why it works</span>
+      <h2>Pricing that's factual because the market is custom-fit.</h2>
+      <p>City-wide stats don't sell a home. ListLogic narrows the lens to the homes a buyer would actually compare against yours — then shows what that market is really doing.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <h3>A market built around the home</h3>
+        <p>Size, garage, area, age, and timeframe are filtered to the homes a buyer would genuinely cross-shop — an apples-to-apples segment, not a zip-code average.</p>
+      </div>
+      <div class="step">
+        <h3>How that market is performing</h3>
+        <p>Absorption pace, months of inventory, and buyer demand for this exact segment — a microscope view of whether sellers or buyers hold the leverage right now.</p>
+      </div>
+      <div class="step">
+        <h3>Positioned to sell</h3>
+        <p>A recommended list price and range anchored to what buyers just paid — with the timing and odds trade-offs of pricing higher or lower made visible.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section tight">
+  <div class="container">
+    <div class="split">
+      <div>
+        <span class="eyebrow">Live in the appointment</span>
+        <h3>Answer "what if we price higher?" in real time.</h3>
+        <p>The interactive presentation puts the trade-off on screen. Move the price slider and watch expected timing and probability of sale respond — calibrated to how this home's specific market is actually absorbing listings.</p>
+        <ul class="checklist">
+          <li>Recommended list, range, and expected timing at a glance</li>
+          <li>What-if slider: aggressive vs. premium pricing, live odds</li>
+          <li>Market temperature: inventory, absorption, buyer demand</li>
+          <li>Adjust condition rating and overrides — you stay in control</li>
+        </ul>
+      </div>
+      <div class="split-media">
+        <div class="bars">
+          <div class="bar"><i style="width:86%"></i></div>
+          <div class="bar"><i style="width:72%"></i></div>
+          <div class="bar"><i style="width:51%"></i></div>
+        </div>
+        <div class="big">86% → 51%</div>
+        <div class="meta">Odds of selling in 60 days as price moves from −3% to +4% of recommendation</div>
+      </div>
+    </div>
+
+    <div class="split flip">
+      <div>
+        <span class="eyebrow">Total transparency</span>
+        <h3>Every comp on the table — ranked by similarity.</h3>
+        <p>Sellers stop arguing when they can see exactly which homes they're competing with. ListLogic ranks the sold, active, and competing listings by similarity to the subject and shows the supply coming to market.</p>
+        <ul class="checklist">
+          <li>Closest comparable sales, ranked and explained</li>
+          <li>Active competition and incoming supply stream</li>
+          <li>Competing listings kept honest and separate</li>
+          <li>Refine which comps to highlight before you print</li>
+        </ul>
+      </div>
+      <div class="split-media" style="background:linear-gradient(150deg,#0e7a6d,#0c3c6e)">
+        <div class="bars">
+          <div class="bar"><i style="width:64%"></i></div>
+          <div class="bar"><i style="width:78%"></i></div>
+          <div class="bar"><i style="width:58%"></i></div>
+        </div>
+        <div class="big">14 similar sales</div>
+        <div class="meta">Ranked by distance, size, age, and condition against the subject</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="deliverables">
+  <div class="container">
+    <div class="section-head center">
+      <span class="eyebrow">What sellers get</span>
+      <h2>Professional enough to leave on the kitchen table.</h2>
+      <p>The appointment ends. The materials keep selling your recommendation.</p>
+    </div>
+    <div class="deliver">
+      <div class="deliver-card">
+        <span class="pill">Interactive</span>
+        <h3>Live presentation</h3>
+        <p>The on-screen story: market temperature, recommended price, what-if sliders, and full comp transparency. Present it live and refine it together.</p>
+        <a href="/demo">Open the sample →</a>
+      </div>
+      <div class="deliver-card">
+        <span class="pill">Leave-behind</span>
+        <h3>Seller packet PDF</h3>
+        <p>A portrait, print-ready packet with your branding — the recommendation, the market evidence, and the strategy in a format sellers actually re-read.</p>
+        <a href="/demo">See it in the demo →</a>
+      </div>
+      <div class="deliver-card">
+        <span class="pill">Presentation</span>
+        <h3>Listing flipbook</h3>
+        <p>Landscape slides built for binders and table presentations — the same data story, paced for a sit-down conversation.</p>
+        <a href="/demo">Preview the flipbook →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section tight">
+  <div class="container">
+    <div class="quote-band">
+      <blockquote>
+        "When sellers understand the data, they stop negotiating against the market —
+        and start partnering with you."
+      </blockquote>
+      <cite>The principle behind every ListLogic presentation</cite>
+    </div>
+  </div>
+</section>
+
+<section class="section tight">
+  <div class="container">
+    <div class="pricing-teaser">
+      <div>
+        <div class="amount">$39<span style="font-size:1rem;color:var(--muted);font-family:Inter">/mo unlimited</span></div>
+        <p>Or $20 for a single report. Free trial includes 3 full presentations or 60 days — no card required. Brokerage seats from $29/seat.</p>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <a href="pricing.html" class="btn btn-outline">View pricing</a>
+        <a href="signup.html" class="btn btn-primary">Start free trial</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="final-cta">
+  <div class="container">
+    <span class="eyebrow" style="justify-content:center;display:inline-flex">Ready when you are</span>
+    <h2>Walk into your next appointment with the market on your side.</h2>
+    <p>Try the sample listing right now — no account needed. When you're ready, your first 3 presentations are free.</p>
+    <div class="row">
+      <a href="/demo" class="btn btn-gold">Try the sample listing</a>
+      <a href="signup.html" class="btn btn-primary">Start free trial</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div><strong>ListLogic</strong> · Data-driven custom pricing strategy</div>
+    <div><a href="https://saahomes.com">SAA Homes</a> · Schwartz and Associates, Coldwell Banker Realty</div>
+    <div><a href="faq.html">FAQ</a> · <a href="pricing.html">Pricing</a> · <a href="mailto:adam@saahomes.com">Contact</a></div>
+  </div>
+</footer>
+
+</body>
+</html>
