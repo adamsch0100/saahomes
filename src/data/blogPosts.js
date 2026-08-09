@@ -875,6 +875,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Fort-Collins-CO-Area-Guide.jpg',
     readTime: '9 min read',
+    youtubeId: 'fv7qzZdzIAE',
     sections: [
       {
         heading: 'Three cities, three buyer profiles',
