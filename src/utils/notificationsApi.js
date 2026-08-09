@@ -145,6 +145,7 @@ export const NOTIFICATION_TYPE_LABELS = {
   value_update: "Value Update",
   off_market: "Off Market",
   showing_confirm: "Showing",
+  shared_home: "Shared Home",
 };
 
 /** Resolve image_url for <img src> — proxy path or absolute API path */

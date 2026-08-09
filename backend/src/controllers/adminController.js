@@ -504,6 +504,272 @@ export const patchCockpitLead = async (req, res) => {
   }
 };
 
+// ---------------------------------------------------------------------------
+// Agent share-home (It 16 / P5) — share a listing + note → FUB + timeline + inbox
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolve agent-supplied listing input (MLS#, slug, serial id, or full URL)
+ * to a key we can look up in the live listings feed.
+ */
+function extractListingKeyOrSlug(input) {
+  const raw = String(input || '').trim();
+  if (!raw || raw.length > 500) return null;
+  try {
+    if (raw.includes('://') || raw.startsWith('/')) {
+      const u = raw.includes('://')
+        ? new URL(raw)
+        : new URL(raw, 'https://saahomes.com');
+      const parts = u.pathname.split('/').filter(Boolean);
+      const hfs = parts.indexOf('homes-for-sale');
+      if (hfs >= 0 && parts[hfs + 1]) return decodeURIComponent(parts[hfs + 1]);
+      const prop = parts.indexOf('properties');
+      if (prop >= 0 && parts[prop + 1]) return decodeURIComponent(parts[prop + 1]);
+      if (parts.length) return decodeURIComponent(parts[parts.length - 1]);
+    }
+  } catch {
+    /* fall through to raw */
+  }
+  return raw;
+}
+
+function formatListingAddress(row) {
+  if (!row) return null;
+  const street = [row.street_number, row.street_name, row.unit ? `#${row.unit}` : null]
+    .filter(Boolean)
+    .join(' ');
+  const cityLine = [row.city, row.state].filter(Boolean).join(', ');
+  if (street && cityLine) return `${street}, ${cityLine}`;
+  return street || cityLine || null;
+}
+
+function isListingOnMarket(listing) {
+  if (!listing) return false;
+  if (listing.is_active === false) return false;
+  const status = String(listing.status || '').toLowerCase();
+  if (['sold', 'withdrawn', 'expired', 'canceled', 'cancelled', 'closed'].includes(status)) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * POST /api/admin/share-home
+ * Body: { email, name?, phone?, listingKeyOrSlug, note? }
+ *
+ * Agent shares a live-feed listing + optional note with a client:
+ *   1. Resolve listing from DB (404 if missing — never fabricate)
+ *   2. FUB nurture event (signal: shared_home, source saahomes.com)
+ *   3. user_events row for cockpit timeline (when recipient has a users row)
+ *   4. In-app notification (only when recipient has an account)
+ *
+ * Do NOT bump lead score here — lead score tracks CLIENT engagement signals;
+ * an agent-initiated share is agent activity (recorded in user_events / FUB only).
+ */
+export const shareHome = async (req, res) => {
+  try {
+    const body = req.body || {};
+    const email = String(body.email || '').trim().toLowerCase();
+    const name = body.name != null ? String(body.name).trim() : '';
+    const phone = body.phone != null ? String(body.phone).trim() : '';
+    const note = body.note != null ? String(body.note).trim().slice(0, 2000) : '';
+    const listingInput =
+      body.listingKeyOrSlug ||
+      body.listing_key ||
+      body.listingKey ||
+      body.listing_id ||
+      body.slug ||
+      '';
+
+    if (!email.includes('@')) {
+      return res.status(400).json({
+        success: false,
+        error: 'A valid recipient email is required.',
+      });
+    }
+
+    const key = extractListingKeyOrSlug(listingInput);
+    if (!key) {
+      return res.status(400).json({
+        success: false,
+        error: 'listingKeyOrSlug is required (MLS#, slug, or listing URL).',
+      });
+    }
+
+    const pool = getPool();
+
+    // Live feed only — never fabricate a home
+    let listing = null;
+    {
+      let r = await pool.query(
+        `SELECT id, listing_id, slug, status, is_active, list_price,
+                street_number, street_name, unit, city, state, postal_code
+         FROM listings WHERE listing_id = $1 LIMIT 1`,
+        [key]
+      );
+      if (r.rows.length) listing = r.rows[0];
+      if (!listing) {
+        r = await pool.query(
+          `SELECT id, listing_id, slug, status, is_active, list_price,
+                  street_number, street_name, unit, city, state, postal_code
+           FROM listings WHERE slug = $1 LIMIT 1`,
+          [key]
+        );
+        if (r.rows.length) listing = r.rows[0];
+      }
+      if (!listing && /^\d+$/.test(key)) {
+        r = await pool.query(
+          `SELECT id, listing_id, slug, status, is_active, list_price,
+                  street_number, street_name, unit, city, state, postal_code
+           FROM listings WHERE id = $1 LIMIT 1`,
+          [Number(key)]
+        );
+        if (r.rows.length) listing = r.rows[0];
+      }
+    }
+
+    if (!listing) {
+      return res.status(404).json({
+        success: false,
+        error: 'Listing not found in the live feed. Check the MLS# or URL and try again.',
+      });
+    }
+
+    const address = formatListingAddress(listing);
+    const price =
+      listing.list_price != null && Number.isFinite(Number(listing.list_price))
+        ? Math.round(Number(listing.list_price))
+        : null;
+    const priceLabel =
+      price != null ? `$${price.toLocaleString('en-US')}` : null;
+    const onMarket = isListingOnMarket(listing);
+    const listingKey = String(listing.listing_id);
+    const slug = listing.slug || null;
+    // Live route for listing detail (not fabricated path)
+    const listingLink = slug ? `/homes-for-sale/${slug}/` : '/properties/';
+    const photoUrl = listing.id ? `/api/photo/${listing.id}/0` : null;
+
+    const messageParts = [
+      address || null,
+      priceLabel,
+      listingKey ? `MLS ${listingKey}` : null,
+      onMarket ? null : 'off market',
+      note || null,
+    ].filter(Boolean);
+    const fubMessage = messageParts.join(' · ');
+
+    // 1) FUB — await so response reports real status (no fake success when unconfigured)
+    let fubStatus = { success: false, reason: 'not_attempted' };
+    try {
+      const { pushNurtureSignalToFollowUpBoss } = await import(
+        '../services/followUpBossService.js'
+      );
+      fubStatus = await pushNurtureSignalToFollowUpBoss({
+        signal: 'shared_home',
+        email,
+        name: name || undefined,
+        phone: phone || undefined,
+        message: fubMessage,
+        property: {
+          street: address || undefined,
+          mlsNumber: listingKey || undefined,
+          price: price != null ? price : undefined,
+        },
+      });
+    } catch (e) {
+      logger.error('shareHome FUB push failed', { message: e.message });
+      fubStatus = { success: false, error: e.message };
+    }
+
+    // Resolve recipient account (optional — FUB still fires without it)
+    const userRes = await pool.query(
+      `SELECT id, email, name FROM users
+       WHERE LOWER(email) = $1 AND status IS DISTINCT FROM 'unsubscribed'
+       LIMIT 1`,
+      [email]
+    );
+    const recipient = userRes.rows[0] || null;
+
+    // 2) user_events for cockpit timeline — only when recipient is a known lead/user.
+    // Do NOT bump lead score (agent activity ≠ client engagement).
+    let eventStatus = 'skipped_no_account';
+    if (recipient) {
+      try {
+        await pool.query(
+          `INSERT INTO user_events (user_id, event_type, meta) VALUES ($1, 'shared_home', $2::jsonb)`,
+          [
+            recipient.id,
+            JSON.stringify({
+              listing_key: listingKey,
+              slug,
+              property_address: address,
+              list_price: price,
+              note: note || null,
+              recipient_email: email,
+              off_market: !onMarket,
+            }),
+          ]
+        );
+        eventStatus = 'recorded';
+      } catch (e) {
+        logger.warn('shareHome user_events insert failed', { message: e.message });
+        eventStatus = 'failed';
+      }
+    }
+
+    // 3) In-app notification — only if users row matches email; skip silently otherwise
+    let notificationStatus = 'skipped_no_account';
+    if (recipient) {
+      try {
+        const { createNotification } = await import('../services/notificationService.js');
+        const bodyText = note
+          ? `${address || 'A home'} — ${note}`
+          : [address, priceLabel].filter(Boolean).join(' — ') || 'A home was shared with you';
+        const created = await createNotification({
+          userId: recipient.id,
+          type: 'shared_home',
+          title: 'Adam shared a home with you',
+          body: bodyText,
+          link: listingLink,
+          imageUrl: photoUrl,
+          pool,
+        });
+        notificationStatus = created ? 'delivered' : 'failed';
+      } catch (e) {
+        logger.warn('shareHome notification failed', { message: e.message });
+        notificationStatus = 'failed';
+      }
+    }
+
+    logger.info('Agent share-home completed', {
+      email,
+      listing_key: listingKey,
+      fub: fubStatus?.success,
+      fub_reason: fubStatus?.reason || null,
+      eventStatus,
+      notificationStatus,
+    });
+
+    return res.json({
+      success: true,
+      fubStatus,
+      notificationStatus,
+      eventStatus,
+      listing: {
+        listing_key: listingKey,
+        property_address: address,
+        list_price: price,
+        slug,
+        off_market: !onMarket,
+        link: listingLink,
+      },
+    });
+  } catch (error) {
+    logger.error('Error in shareHome', error);
+    res.status(500).json({ success: false, error: 'Failed to share home' });
+  }
+};
+
 /**
  * GET /api/admin/fub/status — configured flag + optional live people count (read-only).
  * Never creates a test person.

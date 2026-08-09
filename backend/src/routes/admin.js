@@ -12,6 +12,7 @@ import {
   getCockpitLeads,
   getDueTodayQueue,
   patchCockpitLead,
+  shareHome,
   getFubStatus,
   getLeadQualityStats,
 } from '../controllers/adminController.js';
@@ -39,6 +40,8 @@ router.get('/search-stats', authenticateToken, searchStats);
 router.get('/cockpit', authenticateToken, getCockpitLeads);
 router.get('/cockpit/due-today', authenticateToken, getDueTodayQueue);
 router.patch('/cockpit/:id', authenticateToken, patchCockpitLead);
+// Agent share-home (It 16 / P5) — home + note → FUB + timeline + client inbox
+router.post('/share-home', authenticateToken, shareHome);
 router.get('/fub/status', authenticateToken, getFubStatus);
 
 export default router;

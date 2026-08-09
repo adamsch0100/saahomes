@@ -70,6 +70,147 @@ function toDateInputValue(iso) {
   return `${y}-${m}-${day}`;
 }
 
+const GOLD = "#CFB36E";
+
+/** Format share-home API result into honest status lines for the agent. */
+function formatShareResult(data) {
+  if (!data) return null;
+  const lines = [];
+  const fub = data.fubStatus || {};
+  if (fub.success) {
+    lines.push("FUB event sent (source saahomes.com)");
+  } else if (fub.reason === "not_configured") {
+    lines.push("FUB not configured — event skipped (no fake success)");
+  } else if (fub.reason === "no_email") {
+    lines.push("FUB skipped — invalid email");
+  } else {
+    lines.push(`FUB: ${fub.error || fub.reason || "failed"}`);
+  }
+  if (data.eventStatus === "recorded") {
+    lines.push("Recorded on cockpit timeline");
+  } else if (data.eventStatus === "skipped_no_account") {
+    lines.push("Timeline skipped — no matching account for that email");
+  } else if (data.eventStatus === "failed") {
+    lines.push("Timeline write failed");
+  }
+  if (data.notificationStatus === "delivered") {
+    lines.push("Client notification delivered");
+  } else if (data.notificationStatus === "skipped_no_account") {
+    lines.push("Notification skipped — client has no account");
+  } else if (data.notificationStatus === "failed") {
+    lines.push("Notification create failed");
+  }
+  return lines;
+}
+
+/** Share-home form — module scope so inputs keep focus across re-renders. */
+function ShareHomeForm({
+  lead,
+  open,
+  listing,
+  email,
+  note,
+  busy,
+  error,
+  result,
+  onListingChange,
+  onEmailChange,
+  onNoteChange,
+  onClose,
+  onSubmit,
+}) {
+  if (!open || !lead) return null;
+  const resultLines = formatShareResult(result);
+  return (
+    <div
+      className="mt-3 rounded-lg border p-3 space-y-3"
+      style={{ borderColor: `${GOLD}66`, backgroundColor: `${GOLD}0d` }}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm font-semibold text-gray-900">Share a home</p>
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-xs text-gray-500 hover:text-gray-800 min-h-[36px] px-2"
+        >
+          Close
+        </button>
+      </div>
+      <p className="text-xs text-gray-500">
+        Paste a listing URL, slug, or MLS#. Home facts come from the live feed only.
+      </p>
+      <label className="block">
+        <span className="text-xs font-medium text-gray-600">Listing (URL, slug, or MLS#)</span>
+        <input
+          type="text"
+          value={listing}
+          onChange={(e) => onListingChange(e.target.value)}
+          placeholder="e.g. https://saahomes.com/homes-for-sale/… or MLS#"
+          className="mt-1 w-full min-h-[44px] border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+          disabled={busy}
+        />
+      </label>
+      <label className="block">
+        <span className="text-xs font-medium text-gray-600">Recipient email</span>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => onEmailChange(e.target.value)}
+          className="mt-1 w-full min-h-[44px] border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+          disabled={busy}
+        />
+      </label>
+      <label className="block">
+        <span className="text-xs font-medium text-gray-600">Note (optional)</span>
+        <textarea
+          value={note}
+          onChange={(e) => onNoteChange(e.target.value)}
+          rows={3}
+          maxLength={2000}
+          placeholder="Why this home fits them…"
+          className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-y"
+          disabled={busy}
+        />
+      </label>
+      <button
+        type="button"
+        disabled={busy || !listing.trim() || !email.trim()}
+        onClick={onSubmit}
+        className="w-full min-h-[44px] px-4 rounded-lg text-sm font-semibold text-black disabled:opacity-50"
+        style={{ backgroundColor: GOLD }}
+      >
+        {busy ? "Sending…" : "Send"}
+      </button>
+      {error && (
+        <div className="text-sm text-red-800 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+          {error}
+        </div>
+      )}
+      {result?.success && (
+        <div className="text-sm text-gray-800 bg-white border border-gray-200 rounded-lg px-3 py-2 space-y-1">
+          <p className="font-semibold text-emerald-800">Shared successfully</p>
+          {result.listing?.property_address && (
+            <p className="text-xs text-gray-600">
+              {result.listing.property_address}
+              {result.listing.list_price != null
+                ? ` · $${Number(result.listing.list_price).toLocaleString("en-US")}`
+                : ""}
+              {result.listing.off_market ? " · off market" : ""}
+            </p>
+          )}
+          {resultLines && (
+            <ul className="list-disc pl-4 text-xs text-gray-600 space-y-0.5">
+              {resultLines.map((line, i) => (
+                <li key={i}>{line}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AgentCockpit({ token }) {
   const [leads, setLeads] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -81,8 +222,78 @@ export default function AgentCockpit({ token }) {
   const [fubStatus, setFubStatus] = useState(null);
   const [savingId, setSavingId] = useState(null);
   const [expanded, setExpanded] = useState(null);
+  // Share-home form (It 16 / P5) — one lead at a time
+  const [shareLeadId, setShareLeadId] = useState(null);
+  const [shareListing, setShareListing] = useState("");
+  const [shareEmail, setShareEmail] = useState("");
+  const [shareNote, setShareNote] = useState("");
+  const [shareBusy, setShareBusy] = useState(false);
+  const [shareError, setShareError] = useState(null);
+  const [shareResult, setShareResult] = useState(null);
 
   const headers = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
+
+  const openShareForm = (lead) => {
+    setShareLeadId(lead.id);
+    setShareEmail(lead.email || "");
+    setShareListing("");
+    setShareNote("");
+    setShareError(null);
+    setShareResult(null);
+    setExpanded(lead.id);
+  };
+
+  const closeShareForm = () => {
+    setShareLeadId(null);
+    setShareListing("");
+    setShareNote("");
+    setShareError(null);
+    setShareResult(null);
+  };
+
+  const submitShareHome = async (lead) => {
+    setShareBusy(true);
+    setShareError(null);
+    setShareResult(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/share-home`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          email: (shareEmail || lead.email || "").trim(),
+          name: lead.name || undefined,
+          phone: lead.phone || undefined,
+          listingKeyOrSlug: shareListing.trim(),
+          note: shareNote.trim() || undefined,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || `Share failed (${res.status})`);
+      }
+      setShareResult(data);
+    } catch (err) {
+      setShareError(err.message || "Could not share home");
+    } finally {
+      setShareBusy(false);
+    }
+  };
+
+  const shareFormProps = (lead) => ({
+    lead,
+    open: shareLeadId === lead.id,
+    listing: shareListing,
+    email: shareEmail,
+    note: shareNote,
+    busy: shareBusy,
+    error: shareError,
+    result: shareResult,
+    onListingChange: setShareListing,
+    onEmailChange: setShareEmail,
+    onNoteChange: setShareNote,
+    onClose: closeShareForm,
+    onSubmit: () => submitShareHome(lead),
+  });
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -293,6 +504,14 @@ export default function AgentCockpit({ token }) {
                     >
                       {expanded === lead.id ? "Hide signals" : "Signals"}
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => openShareForm(lead)}
+                      className="min-h-[40px] px-3 rounded-lg text-sm font-semibold text-black border"
+                      style={{ borderColor: GOLD, backgroundColor: `${GOLD}22` }}
+                    >
+                      Share a home
+                    </button>
                   </div>
                   {expanded === lead.id && (
                     <div className="mt-3 text-xs text-gray-600 bg-gray-50 rounded-lg p-3 space-y-1">
@@ -308,6 +527,7 @@ export default function AgentCockpit({ token }) {
                           ))}
                         </ul>
                       )}
+                      <ShareHomeForm {...shareFormProps(lead)} />
                     </div>
                   )}
                 </li>
@@ -424,6 +644,14 @@ export default function AgentCockpit({ token }) {
                             >
                               Signals
                             </button>
+                            <button
+                              type="button"
+                              onClick={() => openShareForm(lead)}
+                              className="min-h-[36px] px-3 rounded-lg text-xs font-semibold text-black border hover:opacity-90"
+                              style={{ borderColor: GOLD, backgroundColor: `${GOLD}22` }}
+                            >
+                              Share a home
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -448,6 +676,7 @@ export default function AgentCockpit({ token }) {
                             ) : (
                               <p className="mt-2 text-gray-400">No high-intent events in the last 7 days.</p>
                             )}
+                            <ShareHomeForm {...shareFormProps(lead)} />
                           </td>
                         </tr>
                       )}
