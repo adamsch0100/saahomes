@@ -189,6 +189,30 @@ export async function loginApi({ email, password } = {}) {
   return d.data;
 }
 
+/** Request passwordless magic-link email (same response whether email exists). */
+export async function requestMagicLinkApi(email) {
+  const res = await fetch(`${API_BASE}/api/alerts/magic-link`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "same-origin",
+    body: JSON.stringify({ email: String(email || "").trim().toLowerCase() }),
+  });
+  const d = await parseJson(res);
+  if (!d?.success) throw new Error(d?.error || "Could not send the link. Please try again.");
+  return d;
+}
+
+/** Clear saa_user_token cookie session. */
+export async function signOutApi() {
+  const res = await fetch(`${API_BASE}/api/alerts/signout`, {
+    method: "POST",
+    credentials: "same-origin",
+  });
+  const d = await parseJson(res);
+  if (!d?.success) throw new Error(d?.error || "Could not sign out.");
+  return d;
+}
+
 export function notifySavedHomesChanged(detail = {}) {
   try {
     window.dispatchEvent(new CustomEvent("saa-saved-homes-changed", { detail }));

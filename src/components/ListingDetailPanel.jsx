@@ -13,7 +13,7 @@ import {
   HeartIcon,
   ShareIcon,
 } from "./detail";
-import SignInToSaveModal from "./SignInToSaveModal";
+import AccountModal from "./AccountModal";
 import {
   fetchSessionUser,
   fetchSavedStatus,
@@ -433,13 +433,16 @@ export default function ListingDetailPanel({ slug, onClose }) {
           />
         )}
       </div>
-      <SignInToSaveModal
+      <AccountModal
         open={showSaveLogin}
         onClose={() => {
           setShowSaveLogin(false);
           setPendingSaveAfterLogin(false);
         }}
         onSuccess={afterSaveLogin}
+        purpose="save-home"
+        askIntent
+        showSuccess={false}
       />
     </div>
   );

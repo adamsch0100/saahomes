@@ -7,9 +7,11 @@
  *
  * Auth required (session cookie or manage token). 401 when signed out.
  * Off-market listings still return denormalized snapshot + off_market flag.
+ * On save: FUB nurture event + lead score bump (non-blocking).
  */
 import getPool from '../config/database.js';
 import { setAuthCookie } from './alertController.js';
+import { computeAndStoreLeadScore } from '../services/leadScore.js';
 
 const COOKIE_NAME = 'saa_user_token';
 
@@ -201,6 +203,14 @@ export const saveHome = async (req, res) => {
     }
 
     const snap = snapshotFromListing(listing);
+
+    // Detect first-time save vs re-save (idempotent heart) for FUB/events
+    const prior = await pool.query(
+      `SELECT id FROM saved_homes WHERE user_id = $1 AND listing_key = $2 LIMIT 1`,
+      [user.id, snap.listing_key]
+    );
+    const isNewSave = !prior.rows.length;
+
     const inserted = await pool.query(
       `INSERT INTO saved_homes (user_id, listing_key, property_address, photo_url, list_price, slug, saved_at)
        VALUES ($1, $2, $3, $4, $5, $6, NOW())
@@ -214,6 +224,65 @@ export const saveHome = async (req, res) => {
     );
 
     await pool.query('UPDATE users SET last_active_at = NOW() WHERE id = $1', [user.id]);
+
+    // Agent cockpit heat: FUB event + lead score + user_events (new saves only)
+    if (isNewSave) {
+      const priceLabel =
+        snap.list_price != null
+          ? `$${Number(snap.list_price).toLocaleString('en-US')}`
+          : null;
+      const detailParts = [
+        snap.property_address || null,
+        priceLabel,
+        snap.listing_key ? `MLS ${snap.listing_key}` : null,
+      ].filter(Boolean);
+
+      // user_events for cockpit timeline
+      pool
+        .query(
+          `INSERT INTO user_events (user_id, event_type, meta) VALUES ($1, 'saved_home', $2::jsonb)`,
+          [
+            user.id,
+            JSON.stringify({
+              listing_key: snap.listing_key,
+              property_address: snap.property_address,
+              list_price: snap.list_price,
+              slug: snap.slug,
+            }),
+          ]
+        )
+        .catch(() => {});
+
+      // Lead score (+20 has-saved-home pattern) — recompute from real signals
+      computeAndStoreLeadScore(user.id, pool).catch((e) => {
+        console.error('lead score on saved home failed:', e.message);
+      });
+
+      // FUB: person + "Saved a home" nurture event (source saahomes.com)
+      import('../services/followUpBossService.js')
+        .then(({ pushNurtureSignalToFollowUpBoss }) =>
+          pushNurtureSignalToFollowUpBoss({
+            signal: 'saved_home',
+            email: user.email,
+            name: user.name,
+            phone: user.phone,
+            message: detailParts.join(' · '),
+            property: {
+              street: snap.property_address || undefined,
+              mlsNumber: snap.listing_key || undefined,
+              price: snap.list_price != null ? Number(snap.list_price) : undefined,
+            },
+          })
+        )
+        .catch(() => {});
+
+      try {
+        const { refreshLeadLifecycle } = await import('../services/agentCockpit.js');
+        refreshLeadLifecycle(user.id, pool).catch(() => {});
+      } catch {
+        /* noop */
+      }
+    }
 
     return res.status(201).json({
       success: true,

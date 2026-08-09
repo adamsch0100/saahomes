@@ -8,6 +8,8 @@ import {
   relativeTime,
   notificationImageSrc,
 } from "../utils/notificationsApi.js";
+import AccountModal from "./AccountModal";
+import AccountMenu from "./AccountMenu";
 
 const buyerProgramLinks = [
   { label: "CHFA Down Payment Assistance", to: "/chfa-down-payment-assistance/" },
@@ -78,6 +80,8 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [buyersExpanded, setBuyersExpanded] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
+  const [sessionEmail, setSessionEmail] = useState(null);
+  const [accountModalOpen, setAccountModalOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [previewItems, setPreviewItems] = useState([]);
   const [bellOpen, setBellOpen] = useState(false);
@@ -96,11 +100,13 @@ export default function Header() {
     const user = await fetchSessionUser();
     if (!user) {
       setSignedIn(false);
+      setSessionEmail(null);
       setUnreadCount(0);
       setPreviewItems([]);
       return;
     }
     setSignedIn(true);
+    setSessionEmail(user.email || null);
     const summary = await fetchUnreadSummary();
     if (!summary) {
       setUnreadCount(0);
@@ -116,6 +122,36 @@ export default function Header() {
     const id = setInterval(refreshNotifications, POLL_MS);
     return () => clearInterval(id);
   }, [refreshNotifications, location.pathname]);
+
+  // Re-check session when hearts/account change elsewhere
+  useEffect(() => {
+    const onChange = (e) => {
+      const d = e?.detail || {};
+      if (d.signedIn === false) {
+        setSignedIn(false);
+        setSessionEmail(null);
+        setUnreadCount(0);
+        setPreviewItems([]);
+        return;
+      }
+      refreshNotifications();
+    };
+    window.addEventListener("saa-saved-homes-changed", onChange);
+    return () => window.removeEventListener("saa-saved-homes-changed", onChange);
+  }, [refreshNotifications]);
+
+  const handleAccountSignedIn = () => {
+    setAccountModalOpen(false);
+    refreshNotifications();
+  };
+
+  const handleSignedOut = () => {
+    setSignedIn(false);
+    setSessionEmail(null);
+    setUnreadCount(0);
+    setPreviewItems([]);
+    closeMenu();
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -399,7 +435,21 @@ export default function Header() {
               <Link to="/blog/" className="hover:text-gray-200 transition-colors">Real Estate Guides</Link>
               <Link to="/contact/" className="hover:text-gray-200 transition-colors">Contact</Link>
               {signedIn ? bellButton : null}
-              <Link to="/properties/" className="hover:text-gray-200 transition-colors">Sign In / Sign Up</Link>
+              {signedIn ? (
+                <AccountMenu
+                  email={sessionEmail}
+                  unreadCount={unreadCount}
+                  onSignOut={handleSignedOut}
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setAccountModalOpen(true)}
+                  className="hover:text-gray-200 transition-colors text-sm text-white min-h-[44px]"
+                >
+                  Sign In / Sign Up
+                </button>
+              )}
             </nav>
 
             {/* Mobile: bell next to spacer / right edge when signed in */}
@@ -479,17 +529,25 @@ export default function Header() {
             <Link onClick={closeMenu} to="/about-us/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">About Us</Link>
             <Link onClick={closeMenu} to="/contact/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Contact</Link>
             {signedIn ? (
-              <Link
-                onClick={closeMenu}
-                to="/notifications/"
-                className="block text-lg sm:text-xl hover:text-gray-300 transition-colors"
+              <AccountMenu
+                email={sessionEmail}
+                unreadCount={unreadCount}
+                onSignOut={handleSignedOut}
+                variant="mobile-inline"
+                onNavigate={closeMenu}
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  closeMenu();
+                  setAccountModalOpen(true);
+                }}
+                className="block text-lg sm:text-xl hover:text-gray-300 transition-colors mt-6 border-t border-gray-700 pt-6 text-left w-full"
               >
-                🔔 Notifications{unreadCount > 0 ? ` (${unreadCount > 9 ? "9+" : unreadCount})` : ""}
-              </Link>
-            ) : null}
-            <Link onClick={closeMenu} to="/properties/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors mt-6 border-t border-gray-700 pt-6">
-              Sign In / Sign Up
-            </Link>
+                Sign In / Sign Up
+              </button>
+            )}
           </nav>
 
           <div className="mt-10 space-y-3 text-sm text-gray-300">
@@ -502,6 +560,15 @@ export default function Header() {
           </div>
         </div>
       </div>
+
+      <AccountModal
+        open={accountModalOpen}
+        onClose={() => setAccountModalOpen(false)}
+        onSuccess={handleAccountSignedIn}
+        purpose="sign-in"
+        askIntent
+        showSuccess
+      />
     </>
   );
 }

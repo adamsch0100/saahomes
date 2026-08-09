@@ -4,6 +4,7 @@
  *
  * Points (capped model):
  *   +20  has at least one saved search
+ *   +20  has at least one saved home (heart)
  *   +25  has scheduled a showing
  *   +15  opened chat (Nadia) while signed in
  *   +10  submitted a contact form
@@ -144,6 +145,7 @@ export async function computeAndStoreLeadScore(userId, pool = getPool()) {
   const email = (user.email || '').toLowerCase();
   const breakdown = {
     saved_search: 0,
+    saved_home: 0,
     showing: 0,
     chat: 0,
     contact: 0,
@@ -164,6 +166,11 @@ export async function computeAndStoreLeadScore(userId, pool = getPool()) {
   // +20 save-search
   if ((await safeCount('SELECT COUNT(*)::int AS n FROM saved_searches WHERE user_id = $1', [userId])) > 0) {
     breakdown.saved_search = 20;
+  }
+
+  // +20 saved home (heart)
+  if ((await safeCount('SELECT COUNT(*)::int AS n FROM saved_homes WHERE user_id = $1', [userId])) > 0) {
+    breakdown.saved_home = 20;
   }
 
   // +25 schedule showing
@@ -212,6 +219,7 @@ export async function computeAndStoreLeadScore(userId, pool = getPool()) {
          (SELECT MAX(updated_at) FROM saved_searches WHERE user_id = $1),
          (SELECT MAX(created_at) FROM saved_searches WHERE user_id = $1),
          (SELECT MAX(last_email_at) FROM saved_searches WHERE user_id = $1),
+         (SELECT MAX(saved_at) FROM saved_homes WHERE user_id = $1),
          $2::timestamp
        ) AS last_at`,
       [userId, user.last_active_at || user.created_at]
@@ -228,6 +236,7 @@ export async function computeAndStoreLeadScore(userId, pool = getPool()) {
   const score = Math.max(
     0,
     breakdown.saved_search +
+      breakdown.saved_home +
       breakdown.showing +
       breakdown.chat +
       breakdown.contact +

@@ -24,7 +24,7 @@ import {
   formatDate,
   pricePerSqftOf,
 } from "../components/detail";
-import SignInToSaveModal from "../components/SignInToSaveModal";
+import AccountModal from "../components/AccountModal";
 import {
   fetchSessionUser,
   fetchSavedStatus,
@@ -635,13 +635,16 @@ export default function ListingDetailPage() {
         formLabel="Ask a question instead"
       />
 
-      <SignInToSaveModal
+      <AccountModal
         open={showSaveLogin}
         onClose={() => {
           setShowSaveLogin(false);
           setPendingSaveAfterLogin(false);
         }}
         onSuccess={afterSaveLogin}
+        purpose="save-home"
+        askIntent
+        showSuccess={false}
       />
     </>
   );
