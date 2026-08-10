@@ -1685,6 +1685,25 @@ def my_presentations(request: Request):
     return JSONResponse({"presentations": items, "count": len(items)})
 
 
+@app.delete("/api/presentations/{presentation_id}")
+def delete_presentation(request: Request, presentation_id: str):
+    import auth_service
+
+    user = _require_user(request)
+    # Users can only delete their own presentations; admins can delete any
+    row = database.execute(
+        "SELECT user_id FROM presentations WHERE id = ?",
+        (presentation_id,),
+        fetch="one",
+    )
+    if not row:
+        raise HTTPException(404, "Presentation not found")
+    if row["user_id"] != user["id"] and (user.get("role") or "") != "admin":
+        raise HTTPException(403, "Cannot delete another user's presentation")
+    database.execute("DELETE FROM presentations WHERE id = ?", (presentation_id,))
+    return JSONResponse({"ok": True, "deleted": presentation_id})
+
+
 @app.get("/runs/{run_id}/deck.html")
 def view_run_deck(run_id: str):
     run_id = _safe_run_id(run_id)
