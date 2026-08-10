@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { adminLogin, getSubmissions, getStats, getEmailAbStats } from '../utils/api.js';
 import ClientSearchesManager from '../components/admin/ClientSearchesManager.jsx';
 import AgentCockpit from '../components/admin/AgentCockpit.jsx';
+import AgentsManager from '../components/admin/AgentsManager.jsx';
 import SEO from '../components/SEO';
 
 const TYPE_LABELS = {
@@ -23,7 +25,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [filterType, setFilterType] = useState('all');
-  const [tab, setTab] = useState('cockpit'); // cockpit | leads | searches | email-ab
+  const [tab, setTab] = useState('cockpit'); // cockpit | leads | searches | agents | email-ab
   const [abStats, setAbStats] = useState(null);
   const [abLoading, setAbLoading] = useState(false);
   const [abError, setAbError] = useState(null);
@@ -212,12 +214,21 @@ export default function AdminPage() {
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Agent Cockpit</h1>
               <p className="text-sm text-gray-500 mt-1">Scores, heat, stages &amp; follow-ups — FUB stays CRM source of truth.</p>
             </div>
-            <button
-              onClick={handleLogout}
-              className="min-h-[44px] px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 self-start sm:self-auto"
-            >
-              Logout
-            </button>
+            <div className="flex flex-wrap gap-2 self-start sm:self-auto">
+              <Link
+                to="/agent/"
+                className="min-h-[44px] px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-lg hover:border-black text-sm font-medium flex items-center"
+              >
+                Agent console
+              </Link>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="min-h-[44px] px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+              >
+                Logout
+              </button>
+            </div>
           </div>
 
           <div className="mb-6 flex flex-wrap gap-2">
@@ -244,6 +255,13 @@ export default function AdminPage() {
             </button>
             <button
               type="button"
+              onClick={() => setTab('agents')}
+              className={`min-h-[44px] px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${tab === 'agents' ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-200 hover:border-black'}`}
+            >
+              Agent seats
+            </button>
+            <button
+              type="button"
               onClick={() => setTab('email-ab')}
               className={`min-h-[44px] px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${tab === 'email-ab' ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-200 hover:border-black'}`}
             >
@@ -255,6 +273,8 @@ export default function AdminPage() {
             <AgentCockpit token={token} />
           ) : tab === 'searches' ? (
             <ClientSearchesManager token={token} />
+          ) : tab === 'agents' ? (
+            <AgentsManager token={token} />
           ) : tab === 'email-ab' ? (
             <div className="bg-white rounded-lg shadow">
               <div className="p-6 border-b border-gray-200">

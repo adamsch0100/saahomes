@@ -40,6 +40,7 @@ const MillikenPage = lazy(() => import("./pages/areas/MillikenPage.jsx"));
 const LaSallePage = lazy(() => import("./pages/areas/LaSallePage.jsx"));
 const MortgageCalculatorPage = lazy(() => import("./pages/MortgageCalculatorPage.jsx"));
 const AdminPage = lazy(() => import("./pages/AdminPage.jsx"));
+const AgentPage = lazy(() => import("./pages/AgentPage.jsx"));
 const TestimonialsPage = lazy(() => import("./pages/TestimonialsPage.jsx"));
 const EventsCalendarPage = lazy(() => import("./pages/EventsCalendarPage.jsx"));
 const BlogPage = lazy(() => import("./pages/BlogPage.jsx"));
@@ -87,11 +88,13 @@ function LazyPage({ children }) {
 function AppLayout({ children }) {
   const location = useLocation();
   const isAdminPage = location.pathname.startsWith('/admin');
+  const isAgentPage = location.pathname.startsWith('/agent');
   // Full-screen Zillow-style search — no page chrome below the header
   const isPropertiesSearch =
     location.pathname === '/properties' || location.pathname === '/properties/';
   
-  if (isAdminPage) {
+  // App consoles (admin + agent) — no marketing chrome
+  if (isAdminPage || isAgentPage) {
     return <>{children}</>;
   }
   
@@ -149,6 +152,8 @@ export default function App() {
       <Routes>
         <Route path="/admin" element={<AppLayout><LazyPage><AdminPage /></LazyPage></AppLayout>} />
         <Route path="/admin/" element={<AppLayout><LazyPage><AdminPage /></LazyPage></AppLayout>} />
+        <Route path="/agent" element={<AppLayout><LazyPage><AgentPage /></LazyPage></AppLayout>} />
+        <Route path="/agent/" element={<AppLayout><LazyPage><AgentPage /></LazyPage></AppLayout>} />
         {/* Critical path — eager */}
         <Route path="/" element={<AppLayout><HomePage /></AppLayout>} />
         <Route path="/about-us" element={<AppLayout><LazyPage><AboutPage /></LazyPage></AppLayout>} />

@@ -242,7 +242,22 @@ function ShareHomeForm({
   );
 }
 
-export default function AgentCockpit({ token }) {
+/**
+ * @param {string} token - Bearer JWT (adminToken or agentToken)
+ * @param {string} [apiPrefix='/api/admin'] - '/api/admin' or '/api/agent'
+ * @param {boolean} [showAdminTools=true] - share-home + FUB sync (admin console only)
+ * @param {boolean} [showAssignment=false] - claim/assign controls (agent seats)
+ * @param {Array} [teammates=[]] - {id,name,email} for assign dropdown
+ * @param {number|null} [currentAgentId=null] - logged-in agent id for "Claim"
+ */
+export default function AgentCockpit({
+  token,
+  apiPrefix = "/api/admin",
+  showAdminTools = true,
+  showAssignment = false,
+  teammates = [],
+  currentAgentId = null,
+}) {
   const [leads, setLeads] = useState([]);
   const [meta, setMeta] = useState(null);
   const [q, setQ] = useState("");
@@ -253,6 +268,7 @@ export default function AgentCockpit({ token }) {
   const [fubStatus, setFubStatus] = useState(null);
   const [savingId, setSavingId] = useState(null);
   const [expanded, setExpanded] = useState(null);
+  const [assignBusyId, setAssignBusyId] = useState(null);
   // Share-home form (It 16 / P5) — one lead at a time
   const [shareLeadId, setShareLeadId] = useState(null);
   const [shareListing, setShareListing] = useState("");
@@ -266,6 +282,7 @@ export default function AgentCockpit({ token }) {
   const [fubSyncByLead, setFubSyncByLead] = useState({}); // leadId → { result?, error? }
 
   const headers = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
+  const cockpitPath = `${apiPrefix}/cockpit`;
 
   const openShareForm = (lead) => {
     setShareLeadId(lead.id);
@@ -286,6 +303,7 @@ export default function AgentCockpit({ token }) {
   };
 
   const submitShareHome = async (lead) => {
+    if (!showAdminTools) return;
     setShareBusy(true);
     setShareError(null);
     setShareResult(null);
@@ -313,6 +331,77 @@ export default function AgentCockpit({ token }) {
     }
   };
 
+  const assignLead = async (lead, assignedAgentId) => {
+    setAssignBusyId(lead.id);
+    setError(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/agent/assign`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          user_id: lead.id,
+          assigned_agent_id: assignedAgentId,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || `Assign failed (${res.status})`);
+      }
+      setLeads((prev) => prev.map((l) => (l.id === lead.id ? { ...l, ...data.data } : l)));
+    } catch (err) {
+      setError(err.message || "Could not assign lead");
+    } finally {
+      setAssignBusyId(null);
+    }
+  };
+
+  const assignmentControls = (lead) => {
+    if (!showAssignment) return null;
+    const busy = assignBusyId === lead.id;
+    const isMine =
+      currentAgentId != null && Number(lead.assigned_agent_id) === Number(currentAgentId);
+    return (
+      <div className="flex flex-wrap items-center gap-2 mt-2">
+        <select
+          value={lead.assigned_agent_id ?? ""}
+          disabled={busy}
+          onChange={(e) => {
+            const v = e.target.value;
+            assignLead(lead, v === "" ? null : Number(v));
+          }}
+          className="min-h-[36px] border border-gray-300 rounded-lg px-2 text-xs bg-white"
+          title="Assigned agent"
+        >
+          <option value="">Team pool (unassigned)</option>
+          {teammates.map((t) => (
+            <option key={t.id} value={t.id}>
+              {t.name || t.email}
+              {t.role === "admin" ? " (admin)" : ""}
+            </option>
+          ))}
+        </select>
+        {!isMine && currentAgentId != null && (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => assignLead(lead, currentAgentId)}
+            className="min-h-[36px] px-3 rounded-lg text-xs font-semibold text-black border disabled:opacity-50"
+            style={{ borderColor: GOLD, backgroundColor: `${GOLD}22` }}
+          >
+            {busy ? "…" : "Claim"}
+          </button>
+        )}
+        {lead.assigned_agent_id != null && (
+          <span className="text-[11px] text-gray-500">
+            {isMine
+              ? "Assigned to you"
+              : `Assigned: ${lead.assigned_agent_name || lead.assigned_agent_email || `#${lead.assigned_agent_id}`}`}
+          </span>
+        )}
+      </div>
+    );
+  };
+
   const shareFormProps = (lead) => ({
     lead,
     open: shareLeadId === lead.id,
@@ -330,6 +419,7 @@ export default function AgentCockpit({ token }) {
   });
 
   const syncFubLifecycle = async (lead) => {
+    if (!showAdminTools) return;
     setFubSyncBusyId(lead.id);
     setExpanded(lead.id);
     setFubSyncByLead((prev) => ({ ...prev, [lead.id]: { result: null, error: null } }));
@@ -406,20 +496,29 @@ export default function AgentCockpit({ token }) {
       if (dueOnly) params.set("due", "today");
       params.set("limit", "100");
 
-      const [cockpitRes, fubRes] = await Promise.all([
-        fetch(`${API_BASE}/api/admin/cockpit?${params}`, { headers }).then((r) => r.json()),
-        fetch(`${API_BASE}/api/admin/fub/status`, { headers }).then((r) => r.json()).catch(() => null),
-      ]);
+      const cockpitPromise = fetch(`${API_BASE}${cockpitPath}?${params}`, { headers }).then((r) =>
+        r.json()
+      );
+      const fubPromise = showAdminTools
+        ? fetch(`${API_BASE}/api/admin/fub/status`, { headers })
+            .then((r) => r.json())
+            .catch(() => null)
+        : Promise.resolve(null);
+
+      const [cockpitRes, fubRes] = await Promise.all([cockpitPromise, fubPromise]);
       if (!cockpitRes.success) throw new Error(cockpitRes.error || "Failed to load cockpit");
       setLeads(cockpitRes.data || []);
       setMeta(cockpitRes.meta || null);
       if (fubRes?.success) setFubStatus(fubRes.data);
+      else if (!showAdminTools && cockpitRes.meta) {
+        setFubStatus({ configured: !!cockpitRes.meta.fub_configured });
+      }
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [q, stage, dueOnly, token]);
+  }, [q, stage, dueOnly, token, cockpitPath, showAdminTools]);
 
   useEffect(() => {
     load();
@@ -429,7 +528,7 @@ export default function AgentCockpit({ token }) {
     setSavingId(id);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/admin/cockpit/${id}`, {
+      const res = await fetch(`${API_BASE}${cockpitPath}/${id}`, {
         method: "PATCH",
         headers,
         body: JSON.stringify(body),
@@ -605,29 +704,41 @@ export default function AgentCockpit({ token }) {
                     >
                       {expanded === lead.id ? "Hide signals" : "Signals"}
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => openShareForm(lead)}
-                      className="min-h-[40px] px-3 rounded-lg text-sm font-semibold text-black border"
-                      style={{ borderColor: GOLD, backgroundColor: `${GOLD}22` }}
-                    >
-                      Share a home
-                    </button>
-                    <button
-                      type="button"
-                      disabled={fubSyncBusyId === lead.id}
-                      onClick={() => syncFubLifecycle(lead)}
-                      className="min-h-[40px] px-3 rounded-lg text-sm font-semibold text-black border disabled:opacity-50"
-                      style={{ borderColor: GOLD, backgroundColor: `${GOLD}22` }}
-                    >
-                      {fubSyncBusyId === lead.id ? "Syncing…" : "Sync from FUB"}
-                    </button>
+                    {showAdminTools && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => openShareForm(lead)}
+                          className="min-h-[40px] px-3 rounded-lg text-sm font-semibold text-black border"
+                          style={{ borderColor: GOLD, backgroundColor: `${GOLD}22` }}
+                        >
+                          Share a home
+                        </button>
+                        <button
+                          type="button"
+                          disabled={fubSyncBusyId === lead.id}
+                          onClick={() => syncFubLifecycle(lead)}
+                          className="min-h-[40px] px-3 rounded-lg text-sm font-semibold text-black border disabled:opacity-50"
+                          style={{ borderColor: GOLD, backgroundColor: `${GOLD}22` }}
+                        >
+                          {fubSyncBusyId === lead.id ? "Syncing…" : "Sync from FUB"}
+                        </button>
+                      </>
+                    )}
                   </div>
+                  {assignmentControls(lead)}
                   {expanded === lead.id && (
                     <div className="mt-3 text-xs text-gray-600 bg-gray-50 rounded-lg p-3 space-y-1">
                       <p>Searches: {lead.search_count ?? 0} · Homes: {lead.home_count ?? 0}</p>
-                      <p>FUB person: {lead.fub_person_id || "not linked yet"}</p>
+                      {showAdminTools && (
+                        <p>FUB person: {lead.fub_person_id || "not linked yet"}</p>
+                      )}
                       <p>Last active: {formatDateTime(lead.last_active_at)}</p>
+                      {lead.assigned_agent_id != null && (
+                        <p>
+                          Assigned: {lead.assigned_agent_name || lead.assigned_agent_email || `#${lead.assigned_agent_id}`}
+                        </p>
+                      )}
                       {(lead.heat_signals || []).length === 0 ? (
                         <p className="text-gray-400">No high-intent events in 7d</p>
                       ) : (
@@ -637,8 +748,8 @@ export default function AgentCockpit({ token }) {
                           ))}
                         </ul>
                       )}
-                      {fubSyncPanel(lead)}
-                      <ShareHomeForm {...shareFormProps(lead)} />
+                      {showAdminTools && fubSyncPanel(lead)}
+                      {showAdminTools && <ShareHomeForm {...shareFormProps(lead)} />}
                     </div>
                   )}
                 </li>
@@ -655,6 +766,9 @@ export default function AgentCockpit({ token }) {
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Heat</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stage</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Next touch</th>
+                    {showAssignment && (
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Assigned</th>
+                    )}
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                   </tr>
                 </thead>
@@ -670,6 +784,11 @@ export default function AgentCockpit({ token }) {
                                 seller
                               </span>
                             )}
+                            {lead.is_due_today && (
+                              <span className="ml-1.5 text-[10px] font-bold uppercase tracking-wide text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded">
+                                due today
+                              </span>
+                            )}
                           </div>
                           <a href={`mailto:${lead.email}`} className="text-blue-700 hover:underline">
                             {lead.email}
@@ -681,7 +800,7 @@ export default function AgentCockpit({ token }) {
                           )}
                           <div className="text-xs text-gray-400 mt-0.5">
                             {lead.search_count ? `${lead.search_count} search${lead.search_count === 1 ? "" : "es"}` : "no searches"}
-                            {lead.fub_person_id ? ` · FUB #${lead.fub_person_id}` : ""}
+                            {showAdminTools && lead.fub_person_id ? ` · FUB #${lead.fub_person_id}` : ""}
                           </div>
                         </td>
                         <td className="px-4 py-3">
@@ -738,6 +857,11 @@ export default function AgentCockpit({ token }) {
                             </div>
                           )}
                         </td>
+                        {showAssignment && (
+                          <td className="px-4 py-3 align-top">
+                            {assignmentControls(lead)}
+                          </td>
+                        )}
                         <td className="px-4 py-3">
                           <div className="flex flex-col gap-1.5">
                             <button
@@ -755,34 +879,43 @@ export default function AgentCockpit({ token }) {
                             >
                               Signals
                             </button>
-                            <button
-                              type="button"
-                              onClick={() => openShareForm(lead)}
-                              className="min-h-[36px] px-3 rounded-lg text-xs font-semibold text-black border hover:opacity-90"
-                              style={{ borderColor: GOLD, backgroundColor: `${GOLD}22` }}
-                            >
-                              Share a home
-                            </button>
-                            <button
-                              type="button"
-                              disabled={fubSyncBusyId === lead.id}
-                              onClick={() => syncFubLifecycle(lead)}
-                              className="min-h-[36px] px-3 rounded-lg text-xs font-semibold text-black border hover:opacity-90 disabled:opacity-50"
-                              style={{ borderColor: GOLD, backgroundColor: `${GOLD}22` }}
-                            >
-                              {fubSyncBusyId === lead.id ? "Syncing…" : "Sync from FUB"}
-                            </button>
+                            {showAdminTools && (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => openShareForm(lead)}
+                                  className="min-h-[36px] px-3 rounded-lg text-xs font-semibold text-black border hover:opacity-90"
+                                  style={{ borderColor: GOLD, backgroundColor: `${GOLD}22` }}
+                                >
+                                  Share a home
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={fubSyncBusyId === lead.id}
+                                  onClick={() => syncFubLifecycle(lead)}
+                                  className="min-h-[36px] px-3 rounded-lg text-xs font-semibold text-black border hover:opacity-90 disabled:opacity-50"
+                                  style={{ borderColor: GOLD, backgroundColor: `${GOLD}22` }}
+                                >
+                                  {fubSyncBusyId === lead.id ? "Syncing…" : "Sync from FUB"}
+                                </button>
+                              </>
+                            )}
                           </div>
                         </td>
                       </tr>
                       {expanded === lead.id && (
                         <tr className="bg-gray-50">
-                          <td colSpan={6} className="px-4 py-3 text-xs text-gray-600">
+                          <td colSpan={showAssignment ? 7 : 6} className="px-4 py-3 text-xs text-gray-600">
                             <div className="flex flex-wrap gap-x-6 gap-y-1">
                               <span>Last active: {formatDateTime(lead.last_active_at)}</span>
                               <span>Last touched: {formatDateTime(lead.last_touched_at)}</span>
                               <span>Joined: {formatDate(lead.created_at)}</span>
                               <span>Intent: {lead.intent || "—"}</span>
+                              {lead.assigned_agent_id != null && (
+                                <span>
+                                  Assigned: {lead.assigned_agent_name || lead.assigned_agent_email || `#${lead.assigned_agent_id}`}
+                                </span>
+                              )}
                             </div>
                             {(lead.heat_signals || []).length > 0 ? (
                               <ul className="mt-2 list-disc pl-5 space-y-0.5">
@@ -796,8 +929,8 @@ export default function AgentCockpit({ token }) {
                             ) : (
                               <p className="mt-2 text-gray-400">No high-intent events in the last 7 days.</p>
                             )}
-                            {fubSyncPanel(lead)}
-                            <ShareHomeForm {...shareFormProps(lead)} />
+                            {showAdminTools && fubSyncPanel(lead)}
+                            {showAdminTools && <ShareHomeForm {...shareFormProps(lead)} />}
                           </td>
                         </tr>
                       )}
@@ -812,7 +945,12 @@ export default function AgentCockpit({ token }) {
 
       <p className="text-xs text-gray-400 text-center px-2">
         Scores and heat are derived from real activity only (saved searches, showings, views, market analysis).
-        FUB is source of truth — nurture signals write back when the API key is configured; use Sync from FUB to refresh lifecycle from FUB tags (manual stages are never overwritten).
+        {showAssignment
+          ? " Team pool: every agent sees all contacts; Claim or Assign tracks who is working the lead."
+          : ""}
+        {showAdminTools
+          ? " FUB is source of truth — nurture signals write back when the API key is configured; use Sync from FUB to refresh lifecycle from FUB tags (manual stages are never overwritten)."
+          : ""}
       </p>
     </div>
   );
