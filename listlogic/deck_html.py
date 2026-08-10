@@ -34,6 +34,16 @@ def _plain(s: Any) -> str:
     return _esc(text)
 
 
+def _md_strip(s: Any) -> str:
+    """Plain-text version of light LLM markdown (**bold**, ## heads, - bullets)."""
+    text = str(s or "")
+    text = re.sub(r"\*\*([^*]+)\*\*", r"\1", text)
+    text = re.sub(r"(?<![\w*])\*([^*\n]+)\*(?![\w*])", r"\1", text)
+    text = re.sub(r"^#{1,4}\s*", "", text, flags=re.M)
+    text = re.sub(r"^\s*[-*]\s+", "• ", text, flags=re.M)
+    return re.sub(r"\n{2,}", "\n", text).strip()
+
+
 def render_deck_html(report: dict, *, interactive_href: str = "presentation.html") -> str:
     report = _clean(report)
     s = report.get("stats") or {}
@@ -55,7 +65,9 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
     sales_mo = float(story.get("sales_per_month") or s.get("absorption_rate") or 0)
     median_dom = float(story.get("median_dom") or s.get("median_dom") or 45)
     top_mkt = float(story.get("top_of_market_pct") or 50)
-    exec_sum = report.get("executive_summary") or ""
+    exec_sum = _md_strip(report.get("executive_summary") or "")
+    if len(exec_sum) > 560:
+        exec_sum = exec_sum[:560].rsplit(" ", 1)[0] + "…"
     advantages = pos.get("advantages") or []
     risks = pos.get("risks") or []
     scenarios = pos.get("price_scenarios") or []
@@ -755,7 +767,7 @@ body.mode-print .hint {{ display: none; }}
             <div style="margin-top:8px;font-size:.95rem;color:var(--muted)">Range <strong style="color:var(--navy)">${low:,.0f} – ${high:,.0f}</strong> · ~<strong>{exp_dom:.0f} days</strong> to contract</div>
             <div style="margin-top:8px;color:var(--accent);font-weight:700">Top {top_mkt:.0f}% of similar recent sales</div>
             <div class="pos-bar" style="margin-top:14px"><div class="pos-marker"></div></div>
-            <div class="bl" style="color:var(--ink);background:#f0f5fb;border-left-color:var(--accent)">{_esc(exec_sum)}</div>
+            <div class="bl" style="color:var(--ink);background:#f0f5fb;border-left-color:var(--accent)">{_esc(exec_sum).replace(chr(10), '<br/>')}</div>
             {wyw_inline}
           </div>
           <div class="price-it-right">

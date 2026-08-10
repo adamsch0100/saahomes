@@ -1121,6 +1121,7 @@ def _refresh_sample_html(run_dir: Path) -> None:
                 and "listlogic-logo.png" in existing
                 and "print-page-spine" in existing
                 and "basemaps.cartocdn.com" in existing
+                and "mapKindVisible" in existing
             ):
                 return
         report = json.loads(json_path.read_text(encoding="utf-8"))
@@ -1576,6 +1577,30 @@ def demo_deck(request: Request):
     return FileResponse(path, media_type="text/html")
 
 
+_PRESENTATION_MARKERS = ("basemaps.cartocdn.com", "mapKindVisible", "data-map-filters")
+
+
+def _rebake_if_stale(run_id: str, html_path: Path) -> Path:
+    """Re-bake baked presentation HTML when it predates the current template
+    (old map tiles, pre-filter map, etc.). Falls back to the existing file."""
+    json_path = html_path.parent / "presentation.json"
+    if not json_path.exists():
+        return html_path
+    try:
+        text = html_path.read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        return html_path
+    if all(marker in text for marker in _PRESENTATION_MARKERS):
+        return html_path
+    try:
+        report = json.loads(json_path.read_text(encoding="utf-8"))
+        _save_html(report, html_path)
+        logger.info("Rebaked stale presentation HTML for %s", run_id)
+    except Exception:
+        logger.exception("Stale rebake failed for %s", run_id)
+    return html_path
+
+
 @app.get("/runs/{run_id}/")
 def view_run(run_id: str):
     run_id = _safe_run_id(run_id)
@@ -1584,6 +1609,7 @@ def view_run(run_id: str):
         path = _hydrate_run_from_db(run_id) or path
     if not path.exists():
         return _missing_run_page(run_id)
+    path = _rebake_if_stale(run_id, path)
     return FileResponse(path, media_type="text/html")
 
 

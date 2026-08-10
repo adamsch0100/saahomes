@@ -977,13 +977,31 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .comp-map-wrap{{margin:8px 0 14px;background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 4px 14px rgba(15,40,70,.06)}}
 .comp-map-head{{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--border)}}
 .comp-map-head strong{{font-size:.82rem;color:var(--brand-primary)}}
-.comp-map-legend{{display:flex;gap:12px;flex-wrap:wrap;font-size:.68rem;color:var(--muted);font-weight:600}}
+.comp-map-legend{{display:flex;gap:8px;flex-wrap:wrap;font-size:.68rem;color:var(--muted);font-weight:600;align-items:center}}
 .comp-map-legend span{{display:inline-flex;align-items:center;gap:5px}}
 .comp-map-legend i{{width:10px;height:10px;border-radius:50%;display:inline-block}}
 .comp-map-legend i.you{{background:var(--brand-primary);border:2px solid #fde68a;box-sizing:border-box}}
 .comp-map-legend i.comp{{background:#0e7a6d}}
 .comp-map-legend i.sold{{background:#94a3b8}}
 .comp-map-legend i.active{{background:#c9a227}}
+.comp-map-legend i.uc{{background:#e65100}}
+.comp-map-legend i.off{{background:#a8a29e}}
+.comp-map-legend .map-kind{{
+  display:inline-flex;align-items:center;gap:5px;font:inherit;font-weight:700;color:var(--ink,#16324f);
+  background:#f4f1ea;border:1px solid var(--border);border-radius:999px;padding:3px 10px;cursor:pointer;
+  transition:opacity .15s ease, background .15s ease;
+}}
+.comp-map-legend .map-kind b{{font-weight:800;color:var(--muted)}}
+.comp-map-legend .map-kind:hover{{background:#eae4d6}}
+.comp-map-legend .map-kind:not(.on){{opacity:.42}}
+.comp-map-legend .map-kind:not(.on) i{{background:transparent;border:2px solid currentColor;box-sizing:border-box}}
+.comp-map-foot{{padding:8px 14px;font-size:.72rem;color:var(--muted);border-top:1px solid var(--border);background:#faf8f3}}
+.map-comp-btn{{
+  display:inline-block;margin:8px 0 2px;font:inherit;font-size:.74rem;font-weight:700;cursor:pointer;
+  color:#0c3c6e;background:#f0f5fb;border:1px solid #d5e2f0;border-radius:999px;padding:4px 12px;
+}}
+.map-comp-btn:hover{{background:#e2ecf7}}
+.map-comp-btn.in{{color:#0e7a6d;border-color:#cde5dd;background:#e7f3ef}}
 #compMap{{height:min(420px,52vh);width:100%;background:#e8eef5}}
 .leaflet-container{{font:inherit}}
 @media(max-width:980px){{.comp-rail{{grid-template-columns:repeat(2,1fr)}}}}
@@ -1210,6 +1228,9 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
   .chart-box.short{{height:130px!important;max-height:140px!important}}
   .chart-box.scatter-tall{{height:200px!important;max-height:220px!important}}
   .chart-box canvas,.chart-box img.print-chart{{max-width:100%!important;max-height:100%!important;height:auto!important;width:auto!important}}
+  #compMap{{height:300px!important}}
+  .comp-map-foot{{display:none!important}}
+  .comp-map-legend .map-kind{{border:none;background:transparent;padding:0;cursor:default}}
   a[href]::after{{content:none!important}}
   .whatif-grid{{display:grid!important;grid-template-columns:repeat(var(--whatif-cols,5),minmax(0,1fr))!important;overflow:visible!important;gap:8px}}
   .price-controls{{display:block!important;margin-top:8px}}
@@ -1468,14 +1489,17 @@ body.print-leavebehind .page{{padding-bottom:0}}
     <div class="comp-map-wrap" id="compMapWrap">
       <div class="comp-map-head">
         <strong>Market map</strong>
-        <div class="comp-map-legend">
-          <span><i class="you"></i> Your home</span>
-          <span><i class="comp"></i> Selected comps</span>
-          <span><i class="sold"></i> Other sold</span>
-          <span><i class="active"></i> Active</span>
+        <div class="comp-map-legend" id="mapKindFilters" data-map-filters="1">
+          <span class="static"><i class="you"></i> Your home</span>
+          <span class="static"><i class="comp"></i> Selected comps</span>
+          <button type="button" class="map-kind on" data-kind="sold"><i class="sold"></i> Sold <b id="mapCountSold"></b></button>
+          <button type="button" class="map-kind on" data-kind="active"><i class="active"></i> Active <b id="mapCountActive"></b></button>
+          <button type="button" class="map-kind on" data-kind="uc"><i class="uc"></i> Under contract <b id="mapCountUc"></b></button>
+          <button type="button" class="map-kind on" data-kind="off"><i class="off"></i> Off-market <b id="mapCountOff"></b></button>
         </div>
       </div>
       <div id="compMap" role="img" aria-label="Map of comps and market listings"></div>
+      <div class="comp-map-foot">Click a sold home to add or remove it as a comp — the map, comp rail, and pricing all update.</div>
     </div>
     <button type="button" class="comp-table-toggle" id="btnCompTable">Show table view</button>
     <div class="comp-table-wrap" id="compTableWrap">
@@ -3168,6 +3192,22 @@ function renderLiveComps() {{
 }}
 let marketMap = null;
 let marketMapLayer = null;
+const mapKindVisible = {{ sold: true, active: true, uc: true, off: true }};
+function mapKindFor(status, isPicked) {{
+  if (isPicked) return 'comp';
+  const st = String(status || '').toLowerCase().replace(/[^a-z]/g, '');
+  if (st === 'active') return 'active';
+  if (st === 'pending' || st === 'backup' || st === 'firstright') return 'uc';
+  if (st === 'sold') return 'sold';
+  return 'off';
+}}
+function toggleMapKind(kind) {{
+  mapKindVisible[kind] = !mapKindVisible[kind];
+  document.querySelectorAll('#mapKindFilters .map-kind').forEach((b) => {{
+    if (b.dataset.kind === kind) b.classList.toggle('on', mapKindVisible[kind]);
+  }});
+  renderMarketMap();
+}}
 function renderMarketMap() {{
   const el = document.getElementById('compMap');
   const wrap = document.getElementById('compMapWrap');
@@ -3176,16 +3216,15 @@ function renderMarketMap() {{
     return;
   }}
   const picked = new Set((selectedCompMls || []).map(String));
+  const counts = {{ sold: 0, active: 0, uc: 0, off: 0 }};
   const points = [];
   (TABLE || []).forEach((row) => {{
     const lat = Number(row.Latitude), lng = Number(row.Longitude);
     if (!isFinite(lat) || !isFinite(lng) || (lat === 0 && lng === 0)) return;
     const mls = String(row.MLSNumber || '');
-    const status = String(row.Status || '');
-    let kind = 'sold';
-    if (picked.has(mls)) kind = 'comp';
-    else if (/active|pending|backup/i.test(status)) kind = 'active';
-    else if (!/sold/i.test(status)) kind = 'active';
+    const status = String(row.Status || row.StatusNorm || '');
+    const kind = mapKindFor(status, picked.has(mls));
+    if (counts[kind] !== undefined) counts[kind]++;
     points.push({{
       lat, lng, kind, mls,
       label: String(row.Address || mls || 'Listing'),
@@ -3224,6 +3263,13 @@ function renderMarketMap() {{
     return;
   }}
   wrap.style.display = '';
+  const cs = document.getElementById('mapCountSold');
+  if (cs) {{
+    cs.textContent = counts.sold;
+    document.getElementById('mapCountActive').textContent = counts.active;
+    document.getElementById('mapCountUc').textContent = counts.uc;
+    document.getElementById('mapCountOff').textContent = counts.off;
+  }}
   if (!marketMap) {{
     marketMap = L.map(el, {{ scrollWheelZoom: false }});
     L.tileLayer('https://{{s}}.basemaps.cartocdn.com/rastertiles/voyager/{{z}}/{{x}}/{{y}}{{r}}.png', {{
@@ -3232,9 +3278,16 @@ function renderMarketMap() {{
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
     }}).addTo(marketMap);
     marketMapLayer = L.layerGroup().addTo(marketMap);
+    el.addEventListener('click', (e) => {{
+      const btn = e.target.closest('.map-comp-btn');
+      if (btn && btn.dataset.mls) toggleCompMls(btn.dataset.mls);
+    }});
+    document.querySelectorAll('#mapKindFilters .map-kind').forEach((b) => {{
+      b.addEventListener('click', () => toggleMapKind(b.dataset.kind));
+    }});
   }}
   marketMapLayer.clearLayers();
-  const colors = {{ you: '#0c3c6e', comp: '#0e7a6d', sold: '#94a3b8', active: '#c9a227' }};
+  const colors = {{ you: '#0c3c6e', comp: '#0e7a6d', sold: '#94a3b8', active: '#c9a227', uc: '#e65100', off: '#a8a29e' }};
   const portalLinks = (p) => {{
     const addr = (p.label || '').trim();
     if (!addr || p.mls === 'subject') return '';
@@ -3249,18 +3302,24 @@ function renderMarketMap() {{
   }};
   const bounds = [];
   points.forEach((p) => {{
+    if (mapKindVisible[p.kind] === false) return;
     const r = p.kind === 'you' ? 11 : (p.kind === 'comp' ? 8 : 5);
     const marker = L.circleMarker([p.lat, p.lng], {{
       radius: r,
       color: '#fff',
       weight: p.kind === 'you' ? 2 : 1,
       fillColor: colors[p.kind] || '#94a3b8',
-      fillOpacity: p.kind === 'sold' ? 0.55 : 0.92,
+      fillOpacity: (p.kind === 'sold' || p.kind === 'off') ? 0.55 : 0.92,
     }});
+    const isPicked = picked.has(p.mls);
+    const compBtn = ((p.kind === 'sold' || p.kind === 'comp') && p.mls && p.mls !== 'subject')
+      ? '<br><button type="button" class="map-comp-btn' + (isPicked ? ' in' : '') + '" data-mls="' + escapeHtml(p.mls) + '">' + (isPicked ? 'In comps · remove' : 'Use as comp') + '</button>'
+      : '';
     marker.bindPopup(
       '<strong>' + escapeHtml(p.label) + '</strong><br>' +
       escapeHtml(p.status) + (p.price ? ' · ' + money(p.price) : '') +
       (p.mls && p.mls !== 'subject' ? '<br>MLS ' + escapeHtml(p.mls) : '') +
+      compBtn +
       portalLinks(p)
     );
     if (p.kind === 'comp' && p.mls) {{
