@@ -10,6 +10,10 @@ import {
   listingAddress,
   listingFullAddress,
   hasAnySavedSearch,
+  listingStatsParts,
+  displayBeds,
+  displayBaths,
+  isLandListing,
 } from "../../utils/listingHelpers.js";
 import DescriptionSection from "./DescriptionSection";
 import AllDetailsSection from "./AllDetailsSection";
@@ -111,13 +115,24 @@ export default function ListingDetailContent({
               </div>
             )}
             <p className="text-sm text-gray-700 mt-2.5 font-medium">
-              {listing.beds != null && <span>{listing.beds} bd</span>}
-              {listing.baths != null && <span> · {listing.baths} ba</span>}
-              {listing.half_baths != null && Number(listing.half_baths) > 0 && (
-                <span> · {listing.half_baths} half-ba</span>
-              )}
-              {sqft != null && <span> · {Number(sqft).toLocaleString()} sqft</span>}
-              {pricePerSqft != null && <span> · ${pricePerSqft}/sqft</span>}
+              {(() => {
+                const beds = displayBeds(listing);
+                const baths = displayBaths(listing);
+                const land = isLandListing(listing);
+                const parts = [];
+                if (land) {
+                  listingStatsParts(listing).forEach((p) => parts.push(p));
+                } else {
+                  if (beds != null) parts.push(`${beds} bd`);
+                  if (baths != null) parts.push(`${baths} ba`);
+                  if (listing.half_baths != null && Number(listing.half_baths) > 0) {
+                    parts.push(`${listing.half_baths} half-ba`);
+                  }
+                  if (sqft != null) parts.push(`${Number(sqft).toLocaleString()} sqft`);
+                  if (pricePerSqft != null) parts.push(`$${pricePerSqft}/sqft`);
+                }
+                return parts.length ? parts.join(" · ") : "—";
+              })()}
             </p>
             <h2 className="text-base sm:text-lg font-bold text-gray-900 mt-2 leading-snug font-serif">
               {address || "Address available on request"}
@@ -148,7 +163,9 @@ export default function ListingDetailContent({
           <button
             type="button"
             onClick={onToggleSave}
-            className={`flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border text-sm font-semibold active:scale-[0.98] transition-transform ${
+            aria-label={saved ? "Remove from saved homes" : "Save this home"}
+            aria-pressed={saved}
+            className={`flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border text-sm font-semibold active:scale-[0.98] transition-transform focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E] ${
               saved
                 ? "bg-[#CFB36E] border-[#CFB36E] text-black"
                 : "border-gray-300 text-gray-900"
@@ -161,7 +178,8 @@ export default function ListingDetailContent({
             <button
               type="button"
               onClick={onShare}
-              className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border border-gray-300 text-sm font-semibold text-gray-900 active:scale-[0.98] transition-transform"
+              aria-label={shareCopied ? "Link copied" : "Share this home"}
+              className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border border-gray-300 text-sm font-semibold text-gray-900 active:scale-[0.98] transition-transform focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
             >
               <ShareIcon />
               {shareCopied ? "Copied" : "Share"}
@@ -170,7 +188,7 @@ export default function ListingDetailContent({
           <button
             type="button"
             onClick={openNadia}
-            className="flex-1 inline-flex items-center justify-center px-3 py-2.5 rounded-lg border border-gray-300 text-sm font-semibold text-gray-900 active:scale-[0.98] transition-transform"
+            className="flex-1 inline-flex items-center justify-center px-3 py-2.5 rounded-lg border border-gray-300 text-sm font-semibold text-gray-900 active:scale-[0.98] transition-transform focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
           >
             Ask Nadia
           </button>

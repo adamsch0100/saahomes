@@ -3,6 +3,12 @@ import { Link, useParams } from "react-router-dom";
 import { photoUrl } from "../utils/photoUrl.js";
 import SEO from "../components/SEO";
 import { CITY_HOMES, getCityHomes, getCityHomesPath } from "../data/cityHomesData";
+import {
+  formatPrice,
+  formatPriceCompact,
+  listingStatsLine,
+} from "../utils/listingHelpers.js";
+import ListingPhotoFallback from "../components/ListingPhotoFallback.jsx";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -10,32 +16,39 @@ const API_BASE = (() => {
   return "";
 })();
 
-const fmtPrice = (n) =>
-  n == null ? "—" : `$${Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
-
-const fmtCompact = (n) =>
-  n == null ? "—" : n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(2).replace(/\.00$/, "")}M` : `$${Math.round(n / 1000)}K`;
-
 function Card({ listing }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const addr = [listing.street_number, listing.street_name].filter(Boolean).join(" ");
+  const alt = addr
+    ? `Photo of ${addr} in ${listing.city || "Colorado"}`
+    : `Home in ${listing.city || "Colorado"}`;
+  const stats = listingStatsLine(listing);
+
   return (
     <Link
       to={`/homes-for-sale/${listing.slug}/`}
       className="group block bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-lg transition-shadow"
     >
-      <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
-        <img src={photoUrl(listing.id, 0)} alt={`${listing.street_name || "Home"} in ${listing.city}, CO`} loading="lazy"
-          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/buyers-hero.jpg"; }}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+      <div className="relative aspect-[4/3] bg-[#1a1a1a] overflow-hidden">
+        {imgFailed ? (
+          <ListingPhotoFallback className="w-full h-full absolute inset-0" />
+        ) : (
+          <img
+            src={photoUrl(listing.id, 0)}
+            alt={alt}
+            loading="lazy"
+            onError={() => setImgFailed(true)}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        )}
         <span className="absolute bottom-2 left-2 bg-black/75 text-white text-sm font-bold px-3 py-1 rounded-lg">
-          {fmtPrice(listing.list_price)}
+          {formatPrice(listing.list_price)}
         </span>
       </div>
       <div className="p-4">
-        <div className="flex items-center gap-3 text-sm text-gray-700 font-medium">
-          <span>{listing.beds != null ? `${listing.beds} bd` : "— bd"}</span>
-          <span>{listing.baths != null ? `${listing.baths} ba` : "— ba"}</span>
-          <span>{listing.living_area != null ? `${Math.round(listing.living_area).toLocaleString()} sqft` : ""}</span>
-        </div>
+        {stats ? (
+          <div className="text-sm text-gray-700 font-medium">{stats}</div>
+        ) : null}
         <p className="mt-1.5 text-gray-900 font-semibold truncate">
           {[listing.street_number, listing.street_name].filter(Boolean).join(" ")}
         </p>
@@ -186,12 +199,12 @@ export default function CityHomesForSalePage() {
               <p className="text-sm text-gray-500">Active listings in {city.city}</p>
             </div>
             <div>
-              <p className="text-2xl sm:text-3xl font-bold text-gray-900">{fmtPrice(stats.median_price)}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900">{formatPrice(stats.median_price)}</p>
               <p className="text-sm text-gray-500">Median list price</p>
             </div>
             <div>
               <p className="text-2xl sm:text-3xl font-bold text-gray-900">
-                {fmtCompact(stats.min_price)} – {fmtCompact(stats.max_price)}
+                {formatPriceCompact(stats.min_price)} – {formatPriceCompact(stats.max_price)}
               </p>
               <p className="text-sm text-gray-500">Price range</p>
             </div>

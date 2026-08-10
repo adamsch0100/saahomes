@@ -24,6 +24,21 @@
   textarea {
     font-size: 16px;
   }
+
+  /* Visible keyboard focus on conversion surfaces (search, detail, modals) */
+  :focus-visible {
+    outline: 2px solid #CFB36E;
+    outline-offset: 2px;
+  }
+
+  button:focus:not(:focus-visible),
+  a:focus:not(:focus-visible),
+  [role="button"]:focus:not(:focus-visible),
+  select:focus:not(:focus-visible),
+  input:focus:not(:focus-visible),
+  textarea:focus:not(:focus-visible) {
+    outline: none;
+  }
 }
 
 @layer utilities {

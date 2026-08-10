@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { photoUrl } from "../utils/photoUrl.js";
-import { formatPrice, formatPriceCompact, listingAddress } from "../utils/listingHelpers.js";
+import { formatPrice, formatPriceCompact, listingAddress, listingStatsLine } from "../utils/listingHelpers.js";
+import { LISTING_PHOTO_FALLBACK_SRC } from "../utils/photoUrl.js";
 
 /**
  * ListingMap — Mapbox GL clustered markers (Zillow-style).
@@ -256,18 +257,26 @@ export default function ListingMap({
           const addr = listingAddress(listing);
           const el = document.createElement("div");
           el.className = "saa-map-popup";
-          const stats = [
-            listing.beds != null ? `${listing.beds} bd` : "",
-            listing.baths != null ? `${listing.baths} ba` : "",
-            listing.living_area != null ? `${Number(listing.living_area).toLocaleString()} sqft` : "",
-          ].filter(Boolean).join(" · ");
+          const stats = listingStatsLine(listing);
+          const photoAlt = (addr || "Listing photo").replace(/"/g, "&quot;");
+          const wirePhotoFallback = (root) => {
+            root.querySelectorAll("img").forEach((img) => {
+              img.addEventListener(
+                "error",
+                () => {
+                  img.onerror = null;
+                  img.src = LISTING_PHOTO_FALLBACK_SRC;
+                },
+                { once: true }
+              );
+            });
+          };
           if (mini) {
             el.innerHTML = `
               <div class="flex gap-2 bg-white rounded-lg overflow-hidden shadow-lg border border-gray-100 w-[220px] p-0">
-                <div class="w-[72px] h-[72px] shrink-0 bg-gray-100 overflow-hidden">
+                <div class="w-[72px] h-[72px] shrink-0 bg-[#1a1a1a] overflow-hidden">
                   <img src="${photoUrl(listing.id, 0)}" alt=""
-                    class="w-full h-full object-cover"
-                    onerror="this.onerror=null;this.src='/images/buyers-hero.jpg'" />
+                    class="w-full h-full object-cover" />
                 </div>
                 <div class="py-1.5 pr-2 min-w-0 flex flex-col justify-center">
                   <p class="font-bold text-sm text-gray-900 m-0 leading-tight">${formatPrice(listing.list_price)}</p>
@@ -275,16 +284,16 @@ export default function ListingMap({
                   <p class="text-[10px] text-gray-500 mt-0.5 mb-0 truncate">${addr}${listing.city ? `, ${listing.city}` : ""}</p>
                 </div>
               </div>`;
+            wirePhotoFallback(el);
           } else {
             const photoCount =
               Array.isArray(listing.photos) && listing.photos.length > 0 ? listing.photos.length : 1;
             let photoIdx = 0;
             el.innerHTML = `
               <div type="button" data-saa-open-listing class="block w-full text-left bg-white rounded-xl overflow-hidden shadow-xl w-60 border border-gray-100 cursor-pointer p-0">
-                <div class="relative aspect-[4/3] bg-gray-100 overflow-hidden">
-                  <img data-saa-popup-img src="${photoUrl(listing.id, photoIdx)}" alt="${addr || "home"}"
-                    class="w-full h-full object-cover"
-                    onerror="this.onerror=null;this.src='/images/buyers-hero.jpg'" />
+                <div class="relative aspect-[4/3] bg-[#1a1a1a] overflow-hidden">
+                  <img data-saa-popup-img src="${photoUrl(listing.id, photoIdx)}" alt="${photoAlt}"
+                    class="w-full h-full object-cover" />
                   <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent px-2.5 pb-2 pt-6">
                     <p class="font-bold text-base text-white m-0">${formatPrice(listing.list_price)}</p>
                   </div>
@@ -304,6 +313,7 @@ export default function ListingMap({
                   <p class="text-xs font-semibold text-[#8a7340] mt-2 mb-0">View details →</p>
                 </div>
               </div>`;
+            wirePhotoFallback(el);
             const card = el.querySelector("[data-saa-open-listing]");
             if (card) {
               card.addEventListener("click", (ev) => {
@@ -323,7 +333,17 @@ export default function ListingMap({
             const counter = el.querySelector("[data-saa-counter]");
             const setPhoto = (i) => {
               photoIdx = (i + photoCount) % photoCount;
-              if (img) img.src = photoUrl(listing.id, photoIdx);
+              if (img) {
+                img.src = photoUrl(listing.id, photoIdx);
+                img.addEventListener(
+                  "error",
+                  () => {
+                    img.onerror = null;
+                    img.src = LISTING_PHOTO_FALLBACK_SRC;
+                  },
+                  { once: true }
+                );
+              }
               if (counter) counter.textContent = `${photoIdx + 1}/${photoCount}`;
             };
             prevBtn?.addEventListener("click", (ev) => {

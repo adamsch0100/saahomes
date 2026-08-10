@@ -5,9 +5,12 @@ import {
   formatPrice,
   listingBadges,
   listingFullAddress,
+  listingStatsParts,
+  isLandListing,
 } from "../../utils/listingHelpers.js";
+import { marketPack } from "../../data/marketPack.js";
 import { HeartIcon } from "./icons.jsx";
-import { pricePerSqftOf } from "./utils.js";
+import { pricePerSqftOf, lotLabel } from "./utils.js";
 import { VirtualTourButton } from "./VirtualTourModal.jsx";
 import { principalAndInterest, monthlyHoa } from "../PaymentCalculator.jsx";
 
@@ -127,10 +130,17 @@ export default function ConversionRail({
         </div>
 
         <p className="text-gray-300 text-sm mt-3 leading-relaxed">
-          {listing.beds != null ? `${listing.beds} bd` : ""}
-          {listing.baths != null ? ` · ${listing.baths} ba` : ""}
-          {sqft != null ? ` · ${Number(sqft).toLocaleString()} sqft` : ""}
-          {pricePerSqft != null ? ` · $${pricePerSqft}/sqft` : ""}
+          {(() => {
+            const parts = listingStatsParts(listing);
+            if (!isLandListing(listing) && pricePerSqft != null && sqft != null) {
+              parts.push(`$${pricePerSqft}/sqft`);
+            }
+            if (isLandListing(listing) && !parts.some((p) => /acre|lot|Land/i.test(p))) {
+              const lot = lotLabel(listing);
+              if (lot) parts.push(lot);
+            }
+            return parts.join(" · ") || "—";
+          })()}
         </p>
         <p className="text-gray-400 text-xs mt-1 truncate" title={fullAddress}>
           {fullAddress}
@@ -157,7 +167,9 @@ export default function ConversionRail({
           <button
             type="button"
             onClick={onToggleSave}
-            className={`w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border text-sm font-semibold active:scale-[0.98] transition-all ${
+            aria-label={saved ? "Remove from saved homes" : "Save this home"}
+            aria-pressed={saved}
+            className={`w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border text-sm font-semibold active:scale-[0.98] transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E] ${
               saved
                 ? "bg-[#CFB36E] border-[#CFB36E] text-black"
                 : "border-white/40 text-white hover:border-white"
@@ -167,10 +179,10 @@ export default function ConversionRail({
             {saved ? "Saved ♥" : "Save"}
           </button>
           <a
-            href="tel:+19709991407"
+            href={marketPack.market.tel}
             className="w-full inline-flex items-center justify-center px-6 py-3 bg-white text-black text-sm font-semibold rounded-lg hover:bg-gray-100 active:scale-[0.98] transition-all"
           >
-            Call (970) 999-1407
+            Call {marketPack.market.phone}
           </a>
           {feats.virtual_tour && (
             <VirtualTourButton
@@ -205,10 +217,10 @@ export default function ConversionRail({
           </div>
         </div>
         <a
-          href="tel:+19709991407"
+          href={marketPack.market.tel}
           className="text-sm font-semibold text-gray-900 mt-3 inline-block hover:text-[#CFB36E]"
         >
-          (970) 999-1407
+          {marketPack.market.phone}
         </a>
       </div>
 

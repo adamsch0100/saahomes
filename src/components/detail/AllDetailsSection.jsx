@@ -3,6 +3,9 @@ import {
   formatPrice,
   fmtSqft,
   listingBadges,
+  displayBeds,
+  displayBaths,
+  isLandListing,
 } from "../../utils/listingHelpers.js";
 import {
   buildFeatureSections,
@@ -90,10 +93,27 @@ export default function AllDetailsSection({ listing }) {
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <KeyFact label="Price" value={formatPrice(listing.list_price)} />
-          <KeyFact label="Price / Sq Ft" value={pricePerSqft != null ? `$${pricePerSqft}` : null} />
+          <KeyFact
+            label="Price / Sq Ft"
+            value={
+              !isLandListing(listing) && pricePerSqft != null ? `$${pricePerSqft}` : null
+            }
+          />
           <KeyFact label="Status" value={listing.status} />
-          <KeyFact label="Beds" value={listing.beds != null ? String(listing.beds) : null} />
-          <KeyFact label="Baths" value={listing.baths != null ? String(listing.baths) : null} />
+          <KeyFact
+            label="Beds"
+            value={(() => {
+              const b = displayBeds(listing);
+              return b != null ? String(b) : null;
+            })()}
+          />
+          <KeyFact
+            label="Baths"
+            value={(() => {
+              const b = displayBaths(listing);
+              return b != null ? String(b) : null;
+            })()}
+          />
           <KeyFact
             label="Half Baths"
             value={
