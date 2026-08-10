@@ -1620,8 +1620,8 @@ def view_run(run_id: str):
 
 @app.get("/p/{share_token}")
 @app.get("/p/{share_token}/")
-def view_shared_presentation(share_token: str):
-    """Short client share link → live presentation."""
+def view_shared_presentation(share_token: str, request: Request):
+    """Short client share link → live presentation (with rich link preview meta)."""
     import auth_service
 
     token = (share_token or "").strip()
@@ -1636,7 +1636,49 @@ def view_shared_presentation(share_token: str):
         path = _hydrate_run_from_db(run_id) or path
     if not path.exists():
         return _missing_run_page(run_id)
-    return RedirectResponse(url=f"/runs/{run_id}/", status_code=302)
+
+    address = (row.get("address") or "this home").strip() or "this home"
+    base = str(request.base_url).rstrip("/")
+    share_url = f"{base}/p/{token}"
+    target_url = f"{base}/runs/{run_id}/"
+    og_image = f"{base}/saas/ll-og-share.png"
+
+    title = f"Pricing story for {address} — ListLogic"
+    desc_bits = []
+    if row.get("recommended_price"):
+        try:
+            desc_bits.append("Recommended list " + "${:,.0f}".format(float(row["recommended_price"])))
+        except (TypeError, ValueError):
+            pass
+    desc_bits.append("Live market position, price-vs-odds trade-offs, and the comps that prove it.")
+    description = " · ".join(desc_bits)
+
+    esc = html_lib.escape
+    meta_block = f"""<meta property="og:type" content="website">
+<meta property="og:site_name" content="ListLogic">
+<meta property="og:url" content="{esc(share_url)}">
+<meta property="og:title" content="{esc(title)}">
+<meta property="og:description" content="{esc(description)}">
+<meta property="og:image" content="{esc(og_image)}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{esc(title)}">
+<meta name="twitter:description" content="{esc(description)}">
+<meta name="twitter:image" content="{esc(og_image)}">
+<meta name="theme-color" content="#0c3c6e">
+"""
+
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return RedirectResponse(url=f"/runs/{run_id}/", status_code=302)
+
+    # Replace <title> and inject social meta right after <head>'s viewport meta
+    text = re.sub(r"<title>[^<]*</title>", f"<title>{esc(title)}</title>", text, count=1)
+    if "</head>" in text:
+        text = text.replace("</head>", meta_block + "</head>", 1)
+    return HTMLResponse(content=text, status_code=200)
 
 
 @app.get("/api/runs/{run_id}/share")
