@@ -2454,6 +2454,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.485', longitude: '-104.925' },
     metaDescription: 'Windsor Highlands real estate - established homes with mountain views near Fort Collins. SAA Homes.',
     keywords: 'Windsor Highlands, established Windsor neighborhoods, mountain view homes Windsor',
+    youtubeId: '8GYrFULIbGo',
     neighborhoodHighlights: [
       { title: 'Established setting', description: 'Well-maintained homes with mature landscaping and settled community feel.' },
       { title: 'Fort Collins access', description: 'Located on Windsor northwest side - 10 minutes to Fort Collins.' },
@@ -2485,6 +2486,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.475', longitude: '-104.94' },
     metaDescription: 'Mountain View Estates Windsor - custom homes with mountain views on large lots. SAA Homes.',
     keywords: 'Mountain View Estates Windsor, west Windsor custom homes, large lot homes Windsor',
+    youtubeId: 'JtQkLLKv2JI',
     neighborhoodHighlights: [
       { title: 'Mountain views', description: 'Panoramic Front Range views from elevated lots.' },
       { title: 'Custom homes', description: 'Larger custom-built homes on generous lots with premium finishes.' },
@@ -2516,6 +2518,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.47', longitude: '-104.915' },
     metaDescription: 'Pelican Lakes Windsor real estate - resort-style living on the golf course with lakes and luxury homes. SAA Homes.',
     keywords: 'Pelican Lakes Windsor, Windsor golf course homes, Pelican Lakes golf course, luxury homes Windsor CO, Pelican Lakes subdivision',
+    youtubeId: 'yMlwPrg9xMQ',
     neighborhoodHighlights: [
       { title: 'Resort lifestyle', description: 'Championship golf, fishing lakes, clubhouse, pool, and tennis - a full resort experience at home.' },
       { title: 'Luxury homes', description: 'Custom-built homes with premium finishes, many with lake or golf course views.' },
