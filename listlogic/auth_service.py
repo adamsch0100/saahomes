@@ -1559,6 +1559,57 @@ def event_already_sent(user_id: str, event_type: str, within_hours: int = 40) ->
     return bool(row)
 
 
+def recent_event_exists(event_type: str, within_hours: int) -> bool:
+    """User-agnostic event check (system cron jobs like the owner digest)."""
+    since = _iso(_utcnow() - timedelta(hours=within_hours))
+    try:
+        row = database.execute(
+            "SELECT id FROM events WHERE type = ? AND created_at >= ? LIMIT 1",
+            (event_type, since),
+            fetch="one",
+        )
+        return bool(row)
+    except Exception:
+        return False
+
+
+def list_recent_signups(days: int = 7) -> list[dict]:
+    since = _iso(_utcnow() - timedelta(days=days))
+    rows = database.execute(
+        "SELECT * FROM users WHERE created_at >= ? ORDER BY created_at DESC LIMIT 50",
+        (since,),
+        fetch="all",
+    ) or []
+    return [public_user(r) for r in rows if r]
+
+
+def list_past_due_users(days: int = 30) -> list[dict]:
+    """Users with a recent stripe_past_due / stripe_payment_failed event."""
+    since = _iso(_utcnow() - timedelta(days=days))
+    try:
+        rows = database.execute(
+            """
+            SELECT DISTINCT user_id FROM events
+            WHERE type IN ('stripe_past_due', 'stripe_payment_failed') AND created_at >= ?
+            """,
+            (since,),
+            fetch="all",
+        ) or []
+    except Exception:
+        return []
+    out = []
+    for r in rows:
+        uid = r.get("user_id")
+        if not uid:
+            continue
+        user = get_user_by_id(uid)
+        if user:
+            pubs = public_user(user) or {}
+            pubs["plan_label"] = plan_label(user.get("plan") or "")
+            out.append(pubs)
+    return out
+
+
 def bootstrap() -> None:
     """Run migrations and seed admin + default promo."""
     database.run_migrations()

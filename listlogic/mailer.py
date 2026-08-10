@@ -133,3 +133,45 @@ def send_feedback_notice(payload: dict) -> None:
         body=body,
         reply_to=payload.get("email") or "",
     )
+
+
+def send_owner_digest(digest: dict) -> bool:
+    """Weekly owner revenue + activity digest."""
+    s = digest.get("stats") or {}
+    b = digest.get("billing") or {}
+    mix = b.get("plan_counts") or {}
+    mix_lines = "\n".join(f"  - {k}: {v}" for k, v in mix.items()) or "  - none yet"
+    past_due = digest.get("past_due") or []
+    past_due_lines = "\n".join(f"  - {p.get('email')} ({p.get('plan_label') or p.get('plan') or 'plan'})" for p in past_due) or "  - none"
+    new_users = digest.get("new_users") or []
+    new_user_lines = "\n".join(f"  - {u.get('email')} · {u.get('brokerage') or '—'}" for u in new_users[:10]) or "  - none"
+    actual = digest.get("stripe_actual") or {}
+    actual_line = ""
+    if actual:
+        actual_line = (
+            f"\nStripe actuals: MRR ${actual.get('mrr', 0):,.0f} · "
+            f"active subs {actual.get('active_subs', 0)} · past due {actual.get('past_due', 0)}\n"
+        )
+    body = (
+        f"ListLogic weekly digest\n"
+        f"{'=' * 40}\n\n"
+        f"REVENUE\n"
+        f"  Paying subscribers: {b.get('paying', 0)}\n"
+        f"  Est. MRR (list prices): ${b.get('mrr', 0):,.0f}\n"
+        f"  Stripe customers: {b.get('with_stripe_customer', 0)}\n"
+        f"  Plan mix:\n{mix_lines}\n"
+        f"{actual_line}\n"
+        f"NEEDS ATTENTION\n"
+        f"  Past-due / failed payments:\n{past_due_lines}\n\n"
+        f"ACTIVITY (7 days)\n"
+        f"  New signups: {len(new_users)}\n{new_user_lines}\n"
+        f"  Reports generated: {s.get('presentations_week', 0)} ({s.get('presentations_total', 0)} total)\n"
+        f"  AI chats: {s.get('assistant_week', 0)} ({s.get('assistant_total', 0)} total)\n"
+        f"  Feedback: {s.get('feedback_new', 0)} new · {s.get('feedback_open', 0)} open\n\n"
+        f"USERS\n"
+        f"  {s.get('users_total', 0)} total · {s.get('users_trial', 0)} trial · "
+        f"{s.get('users_active', 0)} active · {s.get('users_expired', 0)} expired\n\n"
+        f"Owner console: {digest.get('admin_url', '')}\n"
+        f"— ListLogic\n"
+    )
+    return send_email(to=feedback_to(), subject=f"ListLogic weekly · ${b.get('mrr', 0):,.0f} MRR · {b.get('paying', 0)} paying", body=body)
