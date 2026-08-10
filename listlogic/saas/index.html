@@ -165,34 +165,65 @@ a:hover .btn-arrow, button:hover .btn-arrow { transform: translateX(3px); }
 .mock-price { font-family: 'Fraunces', serif; font-size: 2.45rem; font-weight: 700; letter-spacing: -0.02em; margin: 2px 0 2px; }
 .mock-range { font-size: 0.85rem; color: var(--muted); margin-bottom: 18px; }
 
-/* What-if slider block */
-.mock-slider { margin-bottom: 18px; }
-.mock-slider-head { display: flex; justify-content: space-between; font-size: 0.76rem; font-weight: 600; color: var(--ink-2); margin-bottom: 6px; }
+/* What-if slider block (live toy) */
+.mock-live { display: flex; align-items: center; gap: 6px; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--teal); margin-bottom: 10px; }
+.mock-live i { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); animation: ll-pulse 1.6s ease-in-out infinite; }
+@keyframes ll-pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.8); } }
+.mock-price-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.mock-price { font-family: 'Fraunces', serif; font-size: 2.45rem; font-weight: 700; letter-spacing: -0.02em; margin: 2px 0 2px; }
+.mock-delta { font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: #eef2f8; color: var(--ink-2); border: 1px solid var(--line); transition: all 0.15s ease; }
+.mock-delta.above { background: #faeee4; color: #b3541e; border-color: #efd9c4; }
+.mock-delta.below { background: #e7f3ef; color: var(--teal); border-color: #cde5dd; }
+.mock-range { font-size: 0.85rem; color: var(--muted); margin-bottom: 14px; }
+
+.mock-slider { margin-bottom: 16px; background: #faf8f3; border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px 12px; }
+.mock-slider-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.76rem; font-weight: 600; color: var(--ink-2); margin-bottom: 8px; }
 .mock-slider-head b { color: var(--teal); font-weight: 800; }
-.mock-slider-track { position: relative; height: 8px; border-radius: 999px; background: linear-gradient(90deg, #e6e0d4, #d5c48a, #e6e0d4); }
-.mock-slider-handle {
-  position: absolute; top: 50%; left: 62%; transform: translate(-50%, -50%);
-  width: 22px; height: 22px; border-radius: 50%;
-  background: #fff; border: 4px solid var(--accent);
-  box-shadow: 0 4px 10px rgba(11,18,32,0.28);
+.mock-slider input[type=range] {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 8px; border-radius: 999px;
+  background: linear-gradient(90deg, #0e7a6d 0%, #c9a227 55%, #b3541e 100%);
+  outline: none; cursor: grab; margin: 6px 0 4px;
 }
-.mock-slider-legend { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--muted); margin-top: 6px; }
-.mock-slider-meta { font-size: 0.8rem; color: var(--ink-2); margin-top: 8px; }
-.mock-slider-meta b { color: var(--teal); }
+.mock-slider input[type=range]:active { cursor: grabbing; }
+.mock-slider input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%;
+  background: #fff; border: 5px solid var(--ink); box-shadow: 0 4px 12px rgba(11,18,32,0.35);
+  transition: transform 0.12s ease;
+}
+.mock-slider input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.12); }
+.mock-slider input[type=range]::-moz-range-thumb {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; border: 5px solid var(--ink); box-shadow: 0 4px 12px rgba(11,18,32,0.35);
+}
+.mock-slider-legend { display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--muted); margin-top: 4px; }
+.mock-slider-legend .mid { color: var(--teal); font-weight: 700; }
+
+.mock-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.mock-stat { border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; background: #fff; }
+.mock-stat .s-label { font-size: 0.64rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.mock-stat .s-value { font-family: 'Fraunces', serif; font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; transition: color 0.15s ease; }
+.mock-stat .s-value.good { color: var(--teal); }
+.mock-stat .s-value.risky { color: #b3541e; }
+.mock-stat .s-hint { font-size: 0.68rem; color: var(--muted); }
+.mock-odds-track { height: 5px; border-radius: 999px; background: #e6e0d4; margin-top: 6px; overflow: hidden; }
+.mock-odds-track i { display: block; height: 100%; width: 50%; border-radius: 999px; background: linear-gradient(90deg, var(--teal), var(--accent)); transition: width 0.18s ease; }
 
 .mock-rows-title { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
-.mock-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); font-size: 0.86rem; }
+.mock-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 8px; border-top: 1px solid var(--line); font-size: 0.86rem; border-radius: 8px; transition: background 0.15s ease; }
 .mock-row b { font-weight: 700; }
 .mock-row .up { color: var(--teal); font-weight: 700; }
 .mock-row .down { color: #b3541e; font-weight: 700; }
-.mock-row .days { font-size: 0.78rem; color: var(--muted); }
+.mock-row.on { background: #f0f7ff; box-shadow: inset 2px 0 0 var(--navy); }
 
 /* Comps strip */
-.mock-comps { display: flex; gap: 10px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
-.mock-comp { flex: 1; background: #eef2f8; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.mock-comps { display: flex; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+.mock-comp { flex: 1; background: #eef2f8; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; transition: all 0.15s ease; }
+.mock-comp.on { background: #fff; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(201,162,39,0.25); }
 .mock-comp .c-sim { font-family: 'Fraunces', serif; font-size: 1.05rem; font-weight: 700; color: var(--teal); }
 .mock-comp .c-price { font-size: 0.82rem; font-weight: 700; color: var(--ink); }
 .mock-comp .c-meta { font-size: 0.66rem; color: var(--muted); letter-spacing: 0.02em; }
+.mock-caption { margin-top: 14px; font-size: 0.78rem; color: #9fb0c6; text-align: center; }
+.mock-caption a { color: var(--accent-2); font-weight: 600; }
 
 /* ---------- Sections ---------- */
 .section { padding: 88px 0; }
@@ -355,34 +386,54 @@ footer a:hover { color: var(--ink); }
       </div>
     </div>
 
-    <div class="mock" aria-hidden="true">
-      <div class="mock-bar"><i></i><i></i><i></i><span>listlogic.homes/presentation</span></div>
-      <div class="mock-body">
-        <div class="mock-header">
-          <div class="mock-tag">Recommended list price</div>
-          <span class="mock-temp">Market temp: Warm</span>
-        </div>
-        <div class="mock-price">$410,000</div>
-        <div class="mock-range">Range $396,000 – $426,000 · ~46 days to contract</div>
+    <div>
+      <div class="mock" id="toy">
+        <div class="mock-bar"><i></i><i></i><i></i><span>listlogic.homes/presentation</span></div>
+        <div class="mock-body">
+          <div class="mock-live"><i></i> Live sample — drag the slider</div>
+          <div class="mock-header">
+            <div class="mock-tag">Recommended list price</div>
+            <span class="mock-temp">Market temp: Warm</span>
+          </div>
+          <div class="mock-price-row">
+            <div class="mock-price" id="toyPrice">$410,000</div>
+            <span class="mock-delta" id="toyDelta">At recommended</span>
+          </div>
+          <div class="mock-range">Range $396,000 – $426,000 · 14 similar sales in this home's market</div>
 
-        <div class="mock-slider">
-          <div class="mock-slider-head"><span>What-if slider</span><b>+1.5% · $416,150</b></div>
-          <div class="mock-slider-track"><span class="mock-slider-handle"></span></div>
-          <div class="mock-slider-legend"><span>Move fast −3%</span><span>Market</span><span>Stretch +4%</span></div>
-          <div class="mock-slider-meta">≈ <b>64% odds</b> in 60 days · ~55 days to contract</div>
-        </div>
+          <div class="mock-slider">
+            <div class="mock-slider-head"><span>What-if price slider</span><b id="toyHead">Market · $410,000</b></div>
+            <input type="range" id="toyRange" min="-5" max="6" step="0.25" value="0" aria-label="List price adjustment versus recommended">
+            <div class="mock-slider-legend"><span>Move fast −5%</span><span class="mid">Recommended</span><span>Stretch +6%</span></div>
+          </div>
 
-        <div class="mock-rows-title">Price positioning</div>
-        <div class="mock-row"><span>At market</span><b>$410,000</b><span class="up">72% · 46d</span></div>
-        <div class="mock-row"><span>Stretch +4%</span><b>$426,400</b><span class="down">51% · 71d</span></div>
-        <div class="mock-row"><span>Move fast −3%</span><b>$397,700</b><span class="up">86% · 28d</span></div>
+          <div class="mock-stats">
+            <div class="mock-stat">
+              <div class="s-label">Odds of selling</div>
+              <div class="s-value" id="toyOdds">72%</div>
+              <div class="mock-odds-track"><i id="toyOddsBar"></i></div>
+              <div class="s-hint">in 60 days at this price</div>
+            </div>
+            <div class="mock-stat">
+              <div class="s-label">Days to contract</div>
+              <div class="s-value" id="toyDom">~46</div>
+              <div class="s-hint" id="toyDomHint">at market pace</div>
+            </div>
+          </div>
 
-        <div class="mock-comps">
-          <div class="mock-comp"><div class="c-sim">96%</div><div class="c-price">$412,500</div><div class="c-meta">Sold · 0.3 mi</div></div>
-          <div class="mock-comp"><div class="c-sim">93%</div><div class="c-price">$404,900</div><div class="c-meta">Sold · 0.5 mi</div></div>
-          <div class="mock-comp"><div class="c-sim">90%</div><div class="c-price">$419,000</div><div class="c-meta">Active · 0.4 mi</div></div>
+          <div class="mock-rows-title">Price positioning</div>
+          <div class="mock-row" data-anchor="-3"><span>Move fast −3%</span><b>$397,700</b><span class="up" data-row-stat>—</span></div>
+          <div class="mock-row on" data-anchor="0"><span>At market</span><b>$410,000</b><span class="up" data-row-stat>—</span></div>
+          <div class="mock-row" data-anchor="4"><span>Stretch +4%</span><b>$426,400</b><span class="down" data-row-stat>—</span></div>
+
+          <div class="mock-comps">
+            <div class="mock-comp" data-price="404900"><div class="c-sim">96%</div><div class="c-price">$404,900</div><div class="c-meta">Sold · 0.5 mi</div></div>
+            <div class="mock-comp" data-price="412500"><div class="c-sim">94%</div><div class="c-price">$412,500</div><div class="c-meta">Sold · 0.3 mi</div></div>
+            <div class="mock-comp" data-price="419000"><div class="c-sim">90%</div><div class="c-price">$419,000</div><div class="c-meta">Active · 0.4 mi</div></div>
+          </div>
         </div>
       </div>
+      <p class="mock-caption">A real ListLogic pricing model — <a href="/demo">open the full presentation</a></p>
     </div>
   </div>
 </header>
@@ -565,6 +616,86 @@ footer a:hover { color: var(--ink); }
     <div><a href="faq.html">FAQ</a> · <a href="pricing.html">Pricing</a> · <a href="mailto:adam@saahomes.com">Contact</a></div>
   </div>
 </footer>
+
+<script>
+(function () {
+  // Same model shape as the product's estimate_price_outcome: base odds/DOM at the
+  // recommended price, exponential odds decay above it, accelerating DOM past +2%.
+  var REC = 410000, BASE_DOM = 46, BASE_ODDS = 0.72;
+  var clamp = function (v, lo, hi) { return Math.min(hi, Math.max(lo, v)); };
+  function outcome(delta) {
+    var odds = clamp(BASE_ODDS * Math.exp(-8.6 * delta), 0.04, 0.90);
+    var dom = clamp(Math.round(BASE_DOM * (1 + 8 * delta + Math.max(0, delta - 0.02) * 18)), 12, 120);
+    return { odds: odds, dom: dom };
+  }
+  function fmt(price) { return '$' + Math.round(price).toLocaleString(); }
+
+  var range = document.getElementById('toyRange');
+  if (!range) return;
+  var priceEl = document.getElementById('toyPrice');
+  var deltaEl = document.getElementById('toyDelta');
+  var headEl = document.getElementById('toyHead');
+  var oddsEl = document.getElementById('toyOdds');
+  var oddsBar = document.getElementById('toyOddsBar');
+  var domEl = document.getElementById('toyDom');
+  var domHint = document.getElementById('toyDomHint');
+  var rows = Array.prototype.slice.call(document.querySelectorAll('.mock-row[data-anchor]'));
+  var comps = Array.prototype.slice.call(document.querySelectorAll('.mock-comp[data-price]'));
+
+  // Static anchor rows use the same model so every number on the card agrees.
+  rows.forEach(function (row) {
+    var d = parseFloat(row.dataset.anchor) / 100;
+    var o = outcome(d);
+    var stat = row.querySelector('[data-row-stat]');
+    if (stat) stat.textContent = Math.round(o.odds * 100) + '% · ' + o.dom + 'd';
+  });
+
+  function update() {
+    var delta = parseFloat(range.value) / 100;
+    var price = REC * (1 + delta);
+    var o = outcome(delta);
+    priceEl.textContent = fmt(price);
+
+    if (Math.abs(delta) < 0.001) {
+      deltaEl.textContent = 'At recommended';
+      deltaEl.className = 'mock-delta';
+    } else if (delta > 0) {
+      deltaEl.textContent = '+' + delta.toFixed(1).replace(/0$/, '') + '% vs recommended';
+      deltaEl.className = 'mock-delta above';
+    } else {
+      deltaEl.textContent = delta.toFixed(1).replace(/0$/, '') + '% vs recommended';
+      deltaEl.className = 'mock-delta below';
+    }
+
+    var pct = Math.round(o.odds * 100);
+    headEl.textContent = (Math.abs(delta) < 0.001 ? 'Market' : (delta > 0 ? 'Stretch' : 'Move fast')) + ' · ' + fmt(price);
+    oddsEl.textContent = pct + '%';
+    oddsEl.className = 's-value ' + (pct >= 70 ? 'good' : (pct < 58 ? 'risky' : ''));
+    oddsBar.style.width = pct + '%';
+    domEl.textContent = '~' + o.dom;
+    domEl.className = 's-value ' + (o.dom <= 40 ? 'good' : (o.dom > 60 ? 'risky' : ''));
+    domHint.textContent = o.dom <= 35 ? 'well ahead of market pace' : (o.dom >= 65 ? 'well behind market pace' : 'at market pace');
+
+    var nearest = null, best = Infinity;
+    rows.forEach(function (row) {
+      var dist = Math.abs(parseFloat(row.dataset.anchor) - delta * 100);
+      if (dist < best) { best = dist; nearest = row; }
+    });
+    rows.forEach(function (row) { row.classList.toggle('on', row === nearest); });
+
+    // Highlight the comp the current price is competing against.
+    var target = null, bestUp = Infinity, highest = null, hiPrice = -1;
+    comps.forEach(function (c) {
+      var p = parseFloat(c.dataset.price);
+      if (p >= price && p - price < bestUp) { bestUp = p - price; target = c; }
+      if (p > hiPrice) { hiPrice = p; highest = c; }
+    });
+    comps.forEach(function (c) { c.classList.toggle('on', c === (target || highest)); });
+  }
+  range.addEventListener('input', update);
+  update();
+})();
+</script>
 
 </body>
 </html>
