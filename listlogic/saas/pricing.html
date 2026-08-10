@@ -86,7 +86,8 @@
       <img src="/saas/listlogic-logo.png" alt="ListLogic" class="ll-brand-logo">
       <small>by SAA Homes</small>
     </a>
-    <div class="ll-nav-links">
+    <button type="button" class="ll-nav-toggle" id="llNavToggle" aria-label="Menu" aria-expanded="false">☰</button>
+    <div class="ll-nav-links" id="llNavLinks">
       <a href="index.html#how">How it works</a>
       <a href="index.html#deliverables">What sellers get</a>
       <a href="pricing.html">Pricing</a>
@@ -96,6 +97,9 @@
     </div>
   </div>
 </nav>
+<script>
+(function(){var t=document.getElementById('llNavToggle'),l=document.getElementById('llNavLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.setAttribute('aria-expanded',o?'true':'false');t.textContent=o?'✕':'☰';});l.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){l.classList.remove('open');t.setAttribute('aria-expanded','false');t.textContent='☰';});});})();
+</script>
 
 <header class="hero-mini">
   <div class="container">
