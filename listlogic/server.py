@@ -1122,6 +1122,7 @@ def _refresh_sample_html(run_dir: Path) -> None:
                 and "print-page-spine" in existing
                 and "basemaps.cartocdn.com" in existing
                 and "mapKindVisible" in existing
+                and "spine-net" in existing
             ):
                 return
         report = json.loads(json_path.read_text(encoding="utf-8"))
@@ -1577,7 +1578,7 @@ def demo_deck(request: Request):
     return FileResponse(path, media_type="text/html")
 
 
-_PRESENTATION_MARKERS = ("basemaps.cartocdn.com", "mapKindVisible", "data-map-filters")
+_PRESENTATION_MARKERS = ("basemaps.cartocdn.com", "mapKindVisible", "data-map-filters", "spine-net")
 
 
 def _rebake_if_stale(run_id: str, html_path: Path) -> Path:
