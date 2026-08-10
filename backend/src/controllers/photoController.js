@@ -82,7 +82,13 @@ function trimCache() {
 
 async function fetchWithQueue(url) {
   const run = async () => {
-    const res = await fetch(url, { headers: { 'User-Agent': 'saahomes-photo-proxy/1.0' } });
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'saahomes-photo-proxy/1.0' },
+      // Fail fast: expired signed URLs can hang the CDN connection forever.
+      // A 20s cap keeps visitor requests bounded (platform timeout is 40s)
+      // and pushes the request onto the refresh path instead of hanging.
+      signal: AbortSignal.timeout(20000),
+    });
     if (res.status === 429) {
       // Rate-limited: fail fast — the cache miss is retried by the NEXT
       // visitor, so we never pile extra requests onto a limited token.
@@ -155,6 +161,18 @@ async function refreshMlsUrls(listingId, pool) {
   }
 }
 
+/** True when a stored MLS signed URL is already past its expires= epoch.
+ *  Signed URLs die ~60 min after the sync that issued them — fetching one
+ *  is guaranteed to fail (or hang), so skip the doomed fetch entirely and
+ *  go straight to the refresh path. Saves one dead request per healing and
+ *  never hangs a visitor on an expired CDN connection. */
+function isExpiredMlsUrl(u) {
+  if (!u.includes('media.mlsgrid.com')) return false;
+  const m = /[?&]expires=(\d+)/.exec(u);
+  if (!m) return false;
+  return parseInt(m[1], 10) < Date.now() / 1000;
+}
+
 export const getListingPhoto = async (req, res) => {
   try {
     const listingId = Number(req.params.listingId);
@@ -176,6 +194,9 @@ export const getListingPhoto = async (req, res) => {
 
     let buf;
     try {
+      // Expired signed URL → skip the doomed fetch, refresh first (heals the
+      // DB row in one request instead of two, never hangs on a dead CDN).
+      if (isExpiredMlsUrl(url)) throw new Error('photo URL expired (past expires=)');
       buf = await fetchWithQueue(url);
     } catch (fetchErr) {
       // MLS signed URLs expire ~60 min after sync → refresh from IRES and retry

@@ -15,7 +15,12 @@ function getPool() {
   if (!pool) {
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      // Always TLS: the only database in use is the Railway Postgres public
+      // proxy (ballast.proxy.rlwy.net). Local cron runs (MLS sync, digests)
+      // have NODE_ENV unset → ssl:false → plaintext connections that the
+      // proxy resets mid-run ("Connection terminated unexpectedly", Aug 10
+      // 2026 — sync died ~min 2 of a 5-min run).
+      ssl: { rejectUnauthorized: false },
     });
 
     pool.on('connect', () => {
