@@ -109,6 +109,38 @@
 }
 .upsell { margin-top: 14px; background: #fdf6e3; border: 1px solid #e8d9a8; border-radius: 10px; padding: 11px 14px; font-size: 0.86rem; line-height: 1.5; }
 .upsell a { font-weight: 700; }
+.file-list { margin-top: 8px; display: grid; gap: 4px; font-size: 0.8rem; color: var(--muted); }
+.file-list span { background: #f4f1ea; border: 1px solid var(--line); border-radius: 8px; padding: 5px 10px; }
+.dash { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 22px; align-items: start; max-width: 1100px; margin: 0 auto; padding: 24px 20px 56px; }
+.dash-side {
+  position: sticky; top: 78px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 14px 12px; box-shadow: var(--shadow-sm);
+}
+.dash-side .side-label {
+  font-size: 0.66rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted); padding: 4px 10px 10px;
+}
+.dash-side a, .dash-side button.side-link {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  padding: 10px 12px; border-radius: 10px; border: none; background: transparent;
+  color: var(--ink-2); font: inherit; font-weight: 600; font-size: 0.9rem;
+  text-decoration: none; cursor: pointer; margin-bottom: 2px;
+}
+.dash-side a:hover, .dash-side button.side-link:hover { background: #f4f1ea; color: var(--ink); }
+.dash-side a.on, .dash-side button.side-link.on { background: var(--ink); color: #fff; }
+.dash-side .side-ico { width: 1.2em; text-align: center; opacity: 0.85; }
+.dash-side .side-sep { height: 1px; background: var(--line); margin: 10px 4px; }
+.dash-main { min-width: 0; }
+.dash-view { display: none; }
+.dash-view.on { display: block; }
+.dash-main .page-head { padding-top: 4px; }
+.container.narrow { max-width: none; padding: 0; }
+@media (max-width: 820px) {
+  .dash { grid-template-columns: 1fr; padding-top: 12px; }
+  .dash-side { position: static; display: flex; flex-wrap: wrap; gap: 6px; padding: 10px; }
+  .dash-side .side-label, .dash-side .side-sep { display: none; }
+  .dash-side a, .dash-side button.side-link { width: auto; margin: 0; padding: 8px 12px; font-size: 0.82rem; }
+}
 </style>
 </head>
 <body>
@@ -126,30 +158,46 @@
       </div>
     </div>
     <div class="ll-nav-links">
-      <a href="/saas/app.html#generate">Generate</a>
       <a href="/saas/pricing.html">Pricing</a>
       <a href="/saas/faq.html">FAQ</a>
+      <a href="/saas/onboarding.html" id="settingsNavLink">Settings</a>
       <a href="#" id="logoutLink">Sign out</a>
     </div>
   </div>
 </nav>
 
-<div class="container narrow">
-  <div class="page-head">
-    <span class="eyebrow">Agent dashboard</span>
-    <h1>Presentations &amp; generate.</h1>
-    <p class="sub">Open a saved report, or build a new pricing story below. You’re signed in until you sign out (or ~30 days).</p>
-  </div>
+<div class="dash">
+  <aside class="dash-side" aria-label="Dashboard">
+    <div class="side-label">Workspace</div>
+    <button type="button" class="side-link on" data-view="generate" id="navGenerate"><span class="side-ico">＋</span> Generate</button>
+    <button type="button" class="side-link" data-view="reports" id="navReports"><span class="side-ico">▦</span> Reports</button>
+    <a href="/saas/onboarding.html" id="navSettings"><span class="side-ico">◎</span> Settings</a>
+    <div class="side-sep" id="adminSideSep" hidden></div>
+    <a href="/saas/admin.html" id="navOwner" hidden><span class="side-ico">⚙</span> Owner console</a>
+  </aside>
 
+  <div class="dash-main">
   <div class="banner" id="trialBanner">
     <strong>Trial:</strong> 3 presentations or 60 days — whichever comes first. <span id="trialMeta"></span>
   </div>
 
-  <div class="reports" id="reportsPanel">
-    <h2>Your reports</h2>
-    <p class="sub">Reopen any presentation you’ve generated. Client share links stay on the short /p/… URL.</p>
-    <div id="reportsList"><p class="empty">Loading…</p></div>
+  <div class="dash-view" id="view-reports">
+    <div class="page-head">
+      <span class="eyebrow">Library</span>
+      <h1>Your reports</h1>
+      <p class="sub">Reopen any presentation you’ve generated. Client share links stay on the short /p/… URL.</p>
+    </div>
+    <div class="reports" id="reportsPanel" style="margin-top:0">
+      <div id="reportsList"><p class="empty">Loading…</p></div>
+    </div>
   </div>
+
+  <div class="dash-view on" id="view-generate">
+    <div class="page-head">
+      <span class="eyebrow">New presentation</span>
+      <h1>Generate a presentation</h1>
+      <p class="sub">Upload your MLS market, set the subject, and build the pricing story sellers can see.</p>
+    </div>
 
   <form id="genForm">
     <div class="card step-card" id="generate" style="scroll-margin-top:24px">
@@ -161,14 +209,15 @@
         </div>
       </div>
       <div class="field">
-        <label>Upload the 71-field export</label>
-        <input type="file" id="exportFile" name="export_file" accept=".txt,.csv,.tsv">
+        <label>Upload 71-field export(s)</label>
+        <input type="file" id="exportFile" name="export_files" accept=".txt,.csv,.tsv" multiple>
+        <div class="file-list" id="exportFileList" hidden></div>
       </div>
       <label class="check-row">
         <input type="checkbox" id="useSample" checked>
         Use sample Greeley export (export-71.txt)
       </label>
-      <p class="hint">That file <strong>is</strong> your market. Name it in step 2 so sellers know what "closed" means. Max 15MB.</p>
+      <p class="hint">That file <strong>is</strong> your market. Upload up to 3 files (e.g. solds + actives) — we merge and dedupe by MLS #. Max 15MB each.</p>
 
       <details class="howto" id="exportHowto">
         <summary>How to build your custom market in Matrix</summary>
@@ -357,8 +406,9 @@
     <div class="upsell" id="upsellNote" style="display:none"></div>
   </div>
 
-  <div style="height:56px"></div>
-</div>
+  </div><!-- /view-generate -->
+  </div><!-- /dash-main -->
+</div><!-- /dash -->
 
 <script>
 const form = document.getElementById('genForm');
@@ -381,6 +431,10 @@ const result = document.getElementById('result');
     if (u.role === 'admin') {
       const viewSwitch = document.getElementById('viewSwitch');
       if (viewSwitch) viewSwitch.hidden = false;
+      const navOwner = document.getElementById('navOwner');
+      const adminSideSep = document.getElementById('adminSideSep');
+      if (navOwner) navOwner.hidden = false;
+      if (adminSideSep) adminSideSep.hidden = false;
     }
     if (u && u.profile_complete === false) {
       location.href = '/saas/onboarding.html?next=' + encodeURIComponent('/saas/app.html');
@@ -465,10 +519,47 @@ useSample.addEventListener('change', () => {
   exportFile.disabled = useSample.checked;
   statusEl.textContent = useSample.checked
     ? 'Ready — uses the sample export by default.'
-    : 'Upload your MLS export, then generate.';
+    : 'Upload your MLS export(s), then generate.';
   statusEl.className = 'status';
+  refreshExportFileList();
 });
 exportFile.disabled = useSample.checked;
+function refreshExportFileList() {
+  const list = document.getElementById('exportFileList');
+  if (!list) return;
+  const files = [...(exportFile.files || [])];
+  if (!files.length || useSample.checked) {
+    list.hidden = true;
+    list.innerHTML = '';
+    return;
+  }
+  list.hidden = false;
+  list.innerHTML = files.map((f) => '<span>' + escapeHtml(f.name) + ' · ' + Math.round(f.size / 1024) + ' KB</span>').join('');
+}
+exportFile.addEventListener('change', refreshExportFileList);
+
+function showDashView(name) {
+  const views = { generate: 'view-generate', reports: 'view-reports' };
+  const target = views[name] || views.generate;
+  document.querySelectorAll('.dash-view').forEach((el) => el.classList.toggle('on', el.id === target));
+  document.querySelectorAll('.dash-side [data-view]').forEach((el) => {
+    el.classList.toggle('on', el.getAttribute('data-view') === (name === 'reports' ? 'reports' : 'generate'));
+  });
+  if (name === 'reports') loadReports();
+}
+document.querySelectorAll('.dash-side [data-view]').forEach((el) => {
+  el.addEventListener('click', () => {
+    const name = el.getAttribute('data-view') || 'generate';
+    history.replaceState(null, '', '#' + name);
+    showDashView(name);
+  });
+});
+function syncHashView() {
+  const h = (location.hash || '#generate').replace(/^#/, '') || 'generate';
+  showDashView(h === 'reports' ? 'reports' : 'generate');
+}
+window.addEventListener('hashchange', syncHashView);
+syncHashView();
 
 function money(n) {
   if (n == null || Number.isNaN(Number(n))) return '—';
@@ -578,7 +669,26 @@ form.addEventListener('submit', async (e) => {
 
   const data = new FormData(form);
   data.set('use_sample_export', useSample.checked ? 'true' : 'false');
-  if (useSample.checked) data.delete('export_file');
+  data.delete('export_file');
+  data.delete('export_files');
+  if (!useSample.checked) {
+    const files = [...(exportFile.files || [])];
+    if (!files.length) {
+      clearInterval(tick);
+      statusEl.className = 'status error';
+      statusEl.textContent = 'Choose at least one MLS export, or keep the sample checked.';
+      btn.disabled = false;
+      return;
+    }
+    if (files.length > 3) {
+      clearInterval(tick);
+      statusEl.className = 'status error';
+      statusEl.textContent = 'Upload up to 3 export files at a time.';
+      btn.disabled = false;
+      return;
+    }
+    files.forEach((f) => data.append('export_files', f));
+  }
 
   const controller = new AbortController();
   const abortTimer = setTimeout(() => controller.abort(), 180000);

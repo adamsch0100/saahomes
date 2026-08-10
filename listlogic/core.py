@@ -199,6 +199,29 @@ def load_export(path: str | Path) -> pd.DataFrame:
     return df
 
 
+def load_exports(paths: list[str | Path]) -> pd.DataFrame:
+    """Load and merge one or more 71-field MLS exports into a single market frame.
+
+    Dedupes on MLSNumber, keeping the row with the newest LastUpdateDate
+    (falls back to ListDate, then first-seen). Use this when an agent uploads
+    separate solds / actives / off-market pulls for the same competitive set.
+    """
+    frames: list[pd.DataFrame] = []
+    for path in paths:
+        frames.append(load_export(path))
+    if not frames:
+        raise ValueError("No export files to load")
+    if len(frames) == 1:
+        return frames[0]
+    merged = pd.concat(frames, ignore_index=True, sort=False)
+    if "MLSNumber" not in merged.columns:
+        return merged
+    sort_cols = [c for c in ("LastUpdateDate", "ListDate", "SoldDate") if c in merged.columns]
+    if sort_cols:
+        merged = merged.sort_values(sort_cols, ascending=False, na_position="last")
+    return merged.drop_duplicates(subset=["MLSNumber"], keep="first").reset_index(drop=True)
+
+
 def filter_market(
     df: pd.DataFrame,
     city: Optional[str] = None,

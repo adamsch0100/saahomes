@@ -39,8 +39,8 @@ button.btn { width: 100%; padding: 13px; font-size: 0.95rem; margin-top: 8px; }
   <a href="/saas/" class="auth-brand" style="text-decoration:none;color:inherit">
     <img src="/saas/listlogic-logo.png" alt="ListLogic">
   </a>
-  <h1>Make reports yours</h1>
-  <p class="sub">This branding fills every presentation, print leave-behind, and flipbook. Set a password so you can sign in without email next time.</p>
+  <h1 id="settingsTitle">Make reports yours</h1>
+  <p class="sub" id="settingsSub">This branding fills every presentation, print leave-behind, and flipbook. Set a password so you can sign in without email next time.</p>
 
   <form id="form">
     <div class="section-label">Password</div>
@@ -113,6 +113,11 @@ const next = params.get('next') || '/saas/app.html';
       const pw = document.getElementById('password');
       pw.required = false;
       pw.placeholder = 'Leave blank to keep current password';
+      document.getElementById('settingsTitle').textContent = 'Settings';
+      document.getElementById('settingsSub').textContent =
+        'Update your password, brokerage info, and brand colors. Changes apply to new presentations.';
+      document.querySelector('button[type="submit"]').textContent = 'Save settings';
+      document.title = 'Settings — ListLogic';
     }
   } catch (e) {}
 })();

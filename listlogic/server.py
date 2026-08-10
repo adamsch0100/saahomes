@@ -15,7 +15,7 @@ import uuid
 from collections import defaultdict, deque
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response
@@ -1124,6 +1124,8 @@ def _refresh_sample_html(run_dir: Path) -> None:
                 and "mapKindVisible" in existing
                 and "spine-net" in existing
                 and "netSellerFeePct" in existing
+                and "match-badge" in existing
+                and "sectionsModal" in existing
             ):
                 return
         report = json.loads(json_path.read_text(encoding="utf-8"))
@@ -1579,7 +1581,7 @@ def demo_deck(request: Request):
     return FileResponse(path, media_type="text/html")
 
 
-_PRESENTATION_MARKERS = ("basemaps.cartocdn.com", "mapKindVisible", "data-map-filters", "spine-net", "netSellerFeePct")
+_PRESENTATION_MARKERS = ("basemaps.cartocdn.com", "mapKindVisible", "data-map-filters", "spine-net", "netSellerFeePct", "match-badge", "sectionsModal")
 
 
 def _rebake_if_stale(run_id: str, html_path: Path) -> Path:
@@ -2389,6 +2391,7 @@ def demo_export_info():
 async def generate(
     request: Request,
     export_file: Optional[UploadFile] = File(None),
+    export_files: Optional[List[UploadFile]] = File(None),
     use_sample_export: str = Form("false"),
     address: str = Form(...),
     living_area: Optional[str] = Form(None),
@@ -2425,6 +2428,7 @@ async def generate(
 
     use_sample = use_sample_export.lower() in {"1", "true", "yes", "on"}
     export_path: Path
+    cleanup_paths: list[Path] = []
     logo_url = ""
 
     if logo and logo.filename:
@@ -2444,25 +2448,54 @@ async def generate(
             raise HTTPException(400, "Sample export missing")
         export_path = DEMO_EXPORT
     else:
-        if not export_file or not export_file.filename:
+        uploads: list[UploadFile] = []
+        if export_files:
+            uploads.extend([f for f in export_files if f and f.filename])
+        if export_file and export_file.filename:
+            if not any(f.filename == export_file.filename for f in uploads):
+                uploads.append(export_file)
+        if not uploads:
             raise HTTPException(400, "Upload an MLS export or enable the sample export")
-        suffix = Path(export_file.filename).suffix.lower() or ".txt"
-        if suffix not in {".txt", ".csv", ".tsv"}:
-            raise HTTPException(400, "Export must be .txt, .csv, or .tsv")
-        content = await export_file.read()
-        if len(content) > MAX_UPLOAD_BYTES:
-            raise HTTPException(400, "Export file must be 15MB or smaller")
-        if not content.strip():
-            raise HTTPException(400, "Uploaded file is empty")
-        # Basic text check
-        try:
-            sample = content[:4000].decode("utf-8", errors="strict")
-        except UnicodeDecodeError as exc:
-            raise HTTPException(400, "Export must be a text file") from exc
-        if "|" not in sample and "\t" not in sample and "," not in sample:
-            raise HTTPException(400, "Export does not look like a delimited MLS file")
-        export_path = UPLOAD_DIR / f"{uuid.uuid4().hex}{suffix}"
-        export_path.write_bytes(content)
+        if len(uploads) > 3:
+            raise HTTPException(400, "Upload up to 3 export files at a time")
+
+        saved_paths: list[Path] = []
+        total_bytes = 0
+        for upload in uploads:
+            suffix = Path(upload.filename or "export.txt").suffix.lower() or ".txt"
+            if suffix not in {".txt", ".csv", ".tsv"}:
+                raise HTTPException(400, "Export must be .txt, .csv, or .tsv")
+            content = await upload.read()
+            if len(content) > MAX_UPLOAD_BYTES:
+                raise HTTPException(400, "Each export file must be 15MB or smaller")
+            total_bytes += len(content)
+            if total_bytes > MAX_UPLOAD_BYTES * 2:
+                raise HTTPException(400, "Combined exports must be 30MB or smaller")
+            if not content.strip():
+                raise HTTPException(400, f"Uploaded file is empty: {upload.filename}")
+            try:
+                sample = content[:4000].decode("utf-8", errors="strict")
+            except UnicodeDecodeError as exc:
+                raise HTTPException(400, "Export must be a text file") from exc
+            if "|" not in sample and "\t" not in sample and "," not in sample:
+                raise HTTPException(400, "Export does not look like a delimited MLS file")
+            path = UPLOAD_DIR / f"{uuid.uuid4().hex}{suffix}"
+            path.write_bytes(content)
+            saved_paths.append(path)
+            cleanup_paths.append(path)
+
+        if len(saved_paths) == 1:
+            export_path = saved_paths[0]
+        else:
+            from core import load_exports
+
+            try:
+                merged = load_exports(saved_paths)
+            except Exception as exc:
+                raise HTTPException(400, f"Could not merge exports: {exc}") from exc
+            export_path = UPLOAD_DIR / f"{uuid.uuid4().hex}-merged.txt"
+            merged.to_csv(export_path, sep="|", index=False)
+            cleanup_paths.append(export_path)
 
     try:
         t0 = time.time()
@@ -2495,11 +2528,13 @@ async def generate(
         logger.exception("Generation failed")
         raise HTTPException(status_code=500, detail="Generation failed. Check the export and try again.") from None
     finally:
-        if not use_sample and export_path.exists() and export_path.parent == UPLOAD_DIR:
-            try:
-                export_path.unlink()
-            except OSError:
-                pass
+        if not use_sample:
+            for path in cleanup_paths:
+                if path.exists() and path.parent == UPLOAD_DIR:
+                    try:
+                        path.unlink()
+                    except OSError:
+                        pass
 
     after = auth_service.increment_presentation(user["id"])
     result = dict(result)

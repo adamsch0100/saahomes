@@ -192,14 +192,64 @@ def render_interactive_html(report: dict) -> str:
     hero_chips = "".join(f'<span class="chip">{b}</span>' for b in chip_bits)
 
     comps_payload = []
+    sub_sqft = float(subject.get("living_area") or 0)
+    sub_beds = float(subject.get("beds") or 0)
+    sub_baths = float(subject.get("baths") or 0)
+    sub_year = float(subject.get("year_built") or 0) if subject.get("year_built") not in (None, "") else 0
+    sub_gar = float(subject.get("garage_spaces") or 0)
+    raw_scores = [float(c.get("distance_score") or 0) for c in comps]
+    best_score = min(raw_scores) if raw_scores else 0.0
     for c in comps:
         city = c.get("city") or link_city
         addr = c.get("address") or ""
         addr_q = url_quote(f"{addr} {city} {link_state}")
         lat, lng = c.get("latitude"), c.get("longitude")
+        dist = float(c.get("distance_score") or 0)
+        # Lower distance_score = closer match. Best on this report maps to ~99%.
+        if best_score <= 0 and dist <= 0:
+            match_pct = 99
+        else:
+            match_pct = int(max(55, min(99, round(99 * (best_score + 0.08) / (dist + 0.08)))))
+        reasons = []
+        c_sqft = float(c.get("living_area") or 0)
+        if sub_sqft and c_sqft:
+            dsf = int(round(c_sqft - sub_sqft))
+            if abs(dsf) < 50:
+                reasons.append("similar size")
+            else:
+                reasons.append(f"{'+' if dsf > 0 else ''}{dsf} sqft")
+        c_beds = float(c.get("beds") or 0)
+        c_baths = float(c.get("baths") or 0)
+        if sub_beds and c_beds == sub_beds and abs(c_baths - sub_baths) < 0.3:
+            reasons.append("same bed/bath")
+        elif sub_beds:
+            reasons.append(f"{c_beds:.0f}/{c_baths:.0f} bed/bath")
+        c_year = float(c.get("year_built") or 0) if c.get("year_built") not in (None, "") else 0
+        if sub_year and c_year:
+            dy = int(round(c_year - sub_year))
+            if abs(dy) <= 5:
+                reasons.append("same era")
+            else:
+                reasons.append(f"{'+' if dy > 0 else ''}{dy} yrs")
+        c_gar = float(c.get("garage_spaces") or 0)
+        if sub_gar and abs(c_gar - sub_gar) < 0.5:
+            reasons.append("same garage")
+        sold_date = (c.get("sold_date") or "")[:10]
+        if sold_date:
+            try:
+                from datetime import date as _date
+                age = (_date.today() - _date.fromisoformat(sold_date)).days
+                if age <= 45:
+                    reasons.append("sold recently")
+                elif age <= 120:
+                    reasons.append(f"sold {age // 7} wks ago")
+                else:
+                    reasons.append(f"sold {age // 30} mo ago")
+            except Exception:
+                pass
         comps_payload.append({
             "address": addr,
-            "sold_date": (c.get("sold_date") or "")[:10],
+            "sold_date": sold_date,
             "sold_price": c.get("sold_price") or 0,
             "living_area": c.get("living_area") or 0,
             "beds": c.get("beds") or 0,
@@ -220,8 +270,13 @@ def render_interactive_html(report: dict) -> str:
             "photo": c.get("photo_url") or "",
             "photos": c.get("photos") or ([c.get("photo_url")] if c.get("photo_url") else []),
             "auto": True,
+            "score": dist,
+            "match_pct": match_pct,
+            "reasons": reasons[:4],
         })
 
+    # Rank auto comps by similarity (best match first) for the rail order
+    comps_payload.sort(key=lambda row: (row.get("score") if row.get("score") is not None else 99))
     subject_snapshot = {
         "address": subject.get("address") or hero_title,
         "living_area": subject.get("living_area") or 0,
@@ -287,14 +342,19 @@ def render_interactive_html(report: dict) -> str:
             f'{delta_html}'
         )
         visual = _carousel(photos, f'Listing photo of {(c.get("address") or "comp")[:40]}', fade)
+        badge = (
+            f'#{i+1} · {c.get("match_pct") or "—"}% match'
+            if c.get("auto", True) else "Manual pick"
+        )
+        why = " · ".join(c.get("reasons") or [])
+        why_html = f'<div class="match-why">{why}</div>' if why else ""
         return (
             f'<article class="comp-card" data-comp-idx="{i}" data-mls="{c.get("mls") or ""}">'
             f'{visual}'
             f'<div class="cb">'
             f'<div class="ca">{(c.get("address") or "")[:40]}</div>'
-            f'<div class="cm">MLS {c.get("mls") or "—"}'
-            f'{" · agent pick" if not c.get("auto", True) else ""}'
-            f'{" · " + (c.get("subdivision") or "")[:18] if c.get("subdivision") else ""}</div>'
+            f'<div class="cm"><span class="match-badge">{badge}</span> · MLS {c.get("mls") or "—"}</div>'
+            f'{why_html}'
             f'<div class="cf">'
             f'<div><span>Sq ft</span><br><strong>{c.get("living_area", 0):.0f}</strong></div>'
             f'<div><span>Bd / Ba</span><br><strong>{c.get("beds", 0):.0f} / {c.get("baths", 0):.0f}</strong></div>'
@@ -1061,6 +1121,30 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .comp-card .cb{{padding:12px}}
 .comp-card .ca{{font-size:.88rem;font-weight:800;color:var(--brand-primary);line-height:1.25;min-height:2.4em}}
 .comp-card .cm{{font-size:.72rem;color:var(--muted);margin:3px 0 8px}}
+.comp-card .match-badge{{display:inline-block;font-weight:800;color:var(--brand-primary);background:#eef5fb;border-radius:999px;padding:2px 8px;font-size:.68rem}}
+.comp-card .match-why{{font-size:.68rem;color:var(--muted);line-height:1.35;margin:-2px 0 8px}}
+.comp-rank-how{{margin:0 0 12px;border:1px solid var(--border);border-radius:10px;background:#f8fafc;padding:0 12px}}
+.comp-rank-how summary{{cursor:pointer;font-size:.78rem;font-weight:700;color:var(--brand-primary);padding:9px 0;list-style:none}}
+.comp-rank-how summary::-webkit-details-marker{{display:none}}
+.comp-rank-how p{{font-size:.78rem;color:var(--muted);margin:0 0 10px;line-height:1.45}}
+.section-hidden{{display:none!important}}
+#spine a.spine-dim{{opacity:.35;text-decoration:line-through}}
+.sections-modal{{position:fixed;inset:0;z-index:1300;display:none;align-items:center;justify-content:center;padding:16px}}
+.sections-modal.open{{display:flex}}
+.sections-modal .sm-backdrop{{position:absolute;inset:0;background:rgba(15,23,42,.5)}}
+.sections-modal .sm-card{{position:relative;z-index:1;width:min(420px,96vw);background:#fff;border-radius:14px;padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.28)}}
+.sections-modal .sm-head{{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}}
+.sections-modal .sm-head strong{{font-size:1rem;color:var(--brand-primary)}}
+.sections-modal .sm-head button{{border:none;background:transparent;font-size:1.4rem;cursor:pointer;line-height:1;color:var(--muted)}}
+.sections-modal .sm-lead{{font-size:.8rem;color:var(--muted);margin:0 0 12px;line-height:1.4}}
+.sections-modal .sm-list{{display:grid;gap:6px;margin-bottom:14px}}
+.sections-modal .sm-list label{{display:flex;align-items:center;gap:10px;font-size:.88rem;font-weight:600;padding:7px 8px;border-radius:8px;background:#f8fafc;border:1px solid var(--border);cursor:pointer}}
+.sections-modal .sm-list input{{width:auto;margin:0}}
+.sections-modal .sm-reset{{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:#fff;font-weight:700;color:var(--brand-primary);cursor:pointer}}
+@media print{{
+  .section-hidden{{display:none!important}}
+  .sections-modal{{display:none!important}}
+}}
 .comp-card .cf{{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;margin-top:4px;font-size:.72rem}}
 .comp-card .cf span{{color:var(--muted)}}
 .comp-card .cf strong{{color:var(--text)}}
@@ -1337,10 +1421,18 @@ body.print-leavebehind .page{{padding-bottom:0}}
         <span class="mi-ico">✎</span>
         <span class="mi-copy"><strong>Edit this report</strong><span>Price, story, coach, photos</span></span>
       </button>
+      <button type="button" class="mi" id="menuSections" role="menuitem">
+        <span class="mi-ico">☰</span>
+        <span class="mi-copy"><strong>Sections</strong><span>Include or hide report steps</span></span>
+      </button>
       <div class="mi-sep"></div>
       <a href="/saas/pricing.html" role="menuitem">
         <span class="mi-ico">$</span>
         <span class="mi-copy"><strong>Plans &amp; billing</strong><span>Upgrade or manage plan</span></span>
+      </a>
+      <a href="/saas/onboarding.html" role="menuitem">
+        <span class="mi-ico">◎</span>
+        <span class="mi-copy"><strong>Settings</strong><span>Password, branding, brokerage</span></span>
       </a>
       <a href="/saas/admin.html" role="menuitem" id="menuAdminLink" hidden>
         <span class="mi-ico">⚙</span>
@@ -1507,7 +1599,11 @@ body.print-leavebehind .page{{padding-bottom:0}}
 
   <section class="section" id="spine-comps">
     <h2><span class="ttl"><span class="step">3</span>Closest Comparable Sales</span></h2>
-    <p class="sub">Every close sale on one screen. Tap a home for the full gallery and details — does it look like yours, and does the sold price match that story?</p>
+    <p class="sub">Ranked by similarity to your home — size, beds/baths, age, garage, and how recently it sold, inside a comp-supported price band. Tap a home for the full gallery.</p>
+    <details class="comp-rank-how">
+      <summary>How comps are ranked</summary>
+      <p>Auto picks score every sold home in this market against yours. Living area carries the most weight, then beds, year built, baths, and garage. Recent sales beat older ones. Extreme price outliers that match size but not the product get filtered out. The match % is relative to the best comp on <em>this</em> report — #1 is always the closest fit.</p>
+    </details>
     <div class="comp-toolbar" id="compToolbar">
       <span id="compToolbarLabel"><strong>Auto picks</strong> · closest sales for this home</span>
       <div class="comp-find">
@@ -1834,6 +1930,29 @@ body.print-leavebehind .page{{padding-bottom:0}}
   <footer><strong>ListLogic</strong> — the pricing story, told by the data · Active = available · Under Contract = Pending + Backup · Months of inventory uses Active only · {generated}</footer>
 </div>
 
+<div class="sections-modal" id="sectionsModal" hidden>
+  <div class="sm-backdrop" id="sectionsBackdrop"></div>
+  <div class="sm-card" role="dialog" aria-label="Report sections">
+    <div class="sm-head">
+      <strong>Report sections</strong>
+      <button type="button" id="closeSections" aria-label="Close">×</button>
+    </div>
+    <p class="sm-lead">All sections are included by default. Uncheck any you want to hide on this presentation (and in print).</p>
+    <div class="sm-list" id="sectionsList">
+      <label><input type="checkbox" data-section="spine-corefacts" checked> How It Works</label>
+      <label><input type="checkbox" data-section="spine-market" checked> 1 · Market</label>
+      <label><input type="checkbox" data-section="spine-supply" checked> 2 · Supply</label>
+      <label><input type="checkbox" data-section="spine-comps" checked> 3 · Comps</label>
+      <label><input type="checkbox" data-section="spine-rating" checked> 4 · Your Home</label>
+      <label><input type="checkbox" data-section="spine-position" checked> 5 · Position</label>
+      <label><input type="checkbox" data-section="spine-yoy" checked> 6 · Market Detail</label>
+      <label><input type="checkbox" data-section="spine-strategy" checked> 7 · Price It</label>
+      <label><input type="checkbox" data-section="spine-net" checked> 8 · Net Sheet</label>
+      <label><input type="checkbox" data-section="spine-fulldata" checked> Full Market Data</label>
+    </div>
+    <button type="button" class="sm-reset" id="btnResetSections">Include all sections</button>
+  </div>
+</div>
 <div class="panel-overlay" id="overlay"></div>
 <aside class="agent-panel" id="panel" role="dialog" aria-label="Agent tools">
   <div class="panel-header">
@@ -3367,8 +3486,11 @@ function buildCompCardHtml(i, c) {{
     '<article class="comp-card" data-comp-idx="' + i + '" data-mls="' + escapeHtml(String(c.mls || '')) + '">' +
     visual + '<div class="cb">' +
     '<div class="ca">' + escapeHtml(String(c.address || '').slice(0, 40)) + '</div>' +
-    '<div class="cm">MLS ' + escapeHtml(String(c.mls || '—')) + (c.auto === false ? ' · agent pick' : '') +
-      (c.subdivision ? ' · ' + escapeHtml(String(c.subdivision).slice(0, 18)) : '') + '</div>' +
+    '<div class="cm"><span class="match-badge">' +
+      (c.auto === false ? 'Manual pick' : ('#' + (i + 1) + ' · ' + (c.match_pct != null ? c.match_pct + '% match' : 'Match'))) +
+    '</span> · MLS ' + escapeHtml(String(c.mls || '—')) + '</div>' +
+    (Array.isArray(c.reasons) && c.reasons.length
+      ? '<div class="match-why">' + escapeHtml(c.reasons.join(' · ')) + '</div>' : '') +
     '<div class="cf">' +
     '<div><span>Sq ft</span><br><strong>' + Math.round(c.living_area || 0).toLocaleString() + '</strong></div>' +
     '<div><span>Bd / Ba</span><br><strong>' + (c.beds || 0) + ' / ' + (c.baths || 0) + '</strong></div>' +
@@ -4167,6 +4289,60 @@ function closeAgentPanel() {{
 }}
 fab.onclick = (e) => {{ e.stopPropagation(); toggleAgentMenu(); }};
 document.getElementById('menuOpenTools')?.addEventListener('click', () => openAgentPanel());
+document.getElementById('menuSections')?.addEventListener('click', () => {{
+  closeAgentMenu();
+  const modal = document.getElementById('sectionsModal');
+  if (modal) {{ modal.hidden = false; modal.classList.add('open'); }}
+}});
+function closeSectionsModal() {{
+  const modal = document.getElementById('sectionsModal');
+  if (modal) {{ modal.classList.remove('open'); modal.hidden = true; }}
+}}
+document.getElementById('closeSections')?.addEventListener('click', closeSectionsModal);
+document.getElementById('sectionsBackdrop')?.addEventListener('click', closeSectionsModal);
+function applySectionVisibility(hidden) {{
+  const hide = new Set((hidden || []).map(String));
+  document.querySelectorAll('#sectionsList input[data-section]').forEach((inp) => {{
+    const id = inp.dataset.section;
+    const on = !hide.has(id);
+    inp.checked = on;
+    const sec = document.getElementById(id);
+    if (sec) sec.classList.toggle('section-hidden', !on);
+    const spine = document.querySelector('#spine a[href="#' + id + '"]');
+    if (spine) spine.classList.toggle('spine-dim', !on);
+  }});
+}}
+function persistSections() {{
+  const hidden = [...document.querySelectorAll('#sectionsList input[data-section]')]
+    .filter((inp) => !inp.checked).map((inp) => inp.dataset.section);
+  try {{
+    const raw = localStorage.getItem('listlogic_edits_' + (RUN_ID || 'local'));
+    const payload = raw ? JSON.parse(raw) : {{}};
+    payload.hiddenSections = hidden;
+    localStorage.setItem('listlogic_edits_' + (RUN_ID || 'local'), JSON.stringify(payload));
+    if (RUN_ID) {{
+      fetch('/api/runs/' + RUN_ID + '/edits', {{
+        method: 'POST',
+        headers: {{ 'Content-Type': 'application/json' }},
+        body: JSON.stringify(payload),
+      }}).catch(() => {{}});
+    }}
+  }} catch (e) {{}}
+}}
+document.getElementById('sectionsList')?.addEventListener('change', (e) => {{
+  const inp = e.target.closest('input[data-section]');
+  if (!inp) return;
+  const sec = document.getElementById(inp.dataset.section);
+  if (sec) sec.classList.toggle('section-hidden', !inp.checked);
+  const spine = document.querySelector('#spine a[href="#' + inp.dataset.section + '"]');
+  if (spine) spine.classList.toggle('spine-dim', !inp.checked);
+  persistSections();
+}});
+document.getElementById('btnResetSections')?.addEventListener('click', () => {{
+  document.querySelectorAll('#sectionsList input[data-section]').forEach((inp) => {{ inp.checked = true; }});
+  applySectionVisibility([]);
+  persistSections();
+}});
 document.getElementById('menuSignOut')?.addEventListener('click', async () => {{
   try {{ await fetch('/api/logout', {{ method: 'POST', credentials: 'same-origin' }}); }} catch (err) {{}}
   location.href = '/saas/login.html';
@@ -4217,6 +4393,7 @@ function applyEdits() {{
   try {{
     const prev = JSON.parse(localStorage.getItem('listlogic_edits_'+(RUN_ID||'local')) || '{{}}');
     if (prev.netSheet) payload.netSheet = prev.netSheet;
+    if (prev.hiddenSections) payload.hiddenSections = prev.hiddenSections;
   }} catch (e) {{}}
   localStorage.setItem('listlogic_edits_'+(RUN_ID||'local'), JSON.stringify(payload));
   if (RUN_ID) fetch('/api/runs/'+RUN_ID+'/edits', {{ method:'POST', headers:{{'Content-Type':'application/json'}}, body: JSON.stringify(payload) }}).catch(()=>{{}});
@@ -4283,6 +4460,7 @@ async function loadSavedEdits() {{
       if (tag) tag.textContent = 'manual';
     }}
   }}
+  if (Array.isArray(saved.hiddenSections)) applySectionVisibility(saved.hiddenSections);
   renderTable(); applyEdits();
 }}
 loadSavedEdits();
