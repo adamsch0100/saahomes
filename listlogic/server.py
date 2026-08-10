@@ -1174,6 +1174,14 @@ def admin_stats(request: Request):
     return {"stats": auth_service.admin_stats()}
 
 
+@app.get("/api/admin/subscriptions")
+def admin_subscriptions(request: Request):
+    import auth_service
+
+    _require_admin(request)
+    return auth_service.list_subscriptions()
+
+
 @app.get("/api/admin/assistant-chats")
 def admin_assistant_chats(request: Request, q: str = ""):
     import auth_service

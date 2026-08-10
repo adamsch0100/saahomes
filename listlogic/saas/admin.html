@@ -74,6 +74,18 @@ a.btn { text-decoration: none; display: inline-block; }
 .user-link { cursor: pointer; color: inherit; text-decoration: underline; text-decoration-color: transparent; }
 .user-link:hover { text-decoration-color: currentColor; }
 .trunc { max-width: 360px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.plan-badge {
+  display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.02em;
+  padding: 3px 10px; border-radius: 999px; background: #eaf1f9; color: var(--navy, #0c3c6e);
+  border: 1px solid #d5e2f0; white-space: nowrap;
+}
+.plan-badge.paying { background: #e7f3ef; color: #0e7a6d; border-color: #cde5dd; }
+.plan-badge.none { background: #f4f1ea; color: var(--muted); border-color: var(--line); }
+.bill-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.bill-card { background: #faf8f3; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.bill-card .label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 700; }
+.bill-card .value { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; margin-top: 4px; }
+.bill-card .hint { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -111,6 +123,11 @@ a.btn { text-decoration: none; display: inline-block; }
       <div class="oq-title">All reports</div>
       <div class="oq-hint">Every agent’s presentations</div>
     </a>
+    <a href="#tabjump-billing" id="jumpBilling">
+      <div class="oq-label">Revenue</div>
+      <div class="oq-title">Billing</div>
+      <div class="oq-hint">Plans, MRR, Stripe</div>
+    </a>
     <a href="#tabjump-ai" id="jumpAi">
       <div class="oq-label">Product</div>
       <div class="oq-title">AI chats</div>
@@ -125,6 +142,7 @@ a.btn { text-decoration: none; display: inline-block; }
 
   <div class="ops-strip" id="opsStrip" aria-live="polite">
     <div class="ops-card"><div class="label">Users</div><div class="value" id="statUsers">—</div><div class="hint" id="statUsersHint"></div></div>
+    <div class="ops-card"><div class="label">Paying</div><div class="value" id="statPaying">—</div><div class="hint" id="statMrr"></div></div>
     <div class="ops-card"><div class="label">Reports (7d)</div><div class="value" id="statPresWeek">—</div><div class="hint" id="statPresTotal"></div></div>
     <div class="ops-card"><div class="label">AI chats (7d)</div><div class="value" id="statAiWeek">—</div><div class="hint" id="statAiTotal"></div></div>
     <div class="ops-card"><div class="label">Open feedback</div><div class="value" id="statFbOpen">—</div><div class="hint" id="statFbNew"></div></div>
@@ -133,6 +151,7 @@ a.btn { text-decoration: none; display: inline-block; }
 
   <div class="tabs">
     <button type="button" class="on" data-tab="users">Users</button>
+    <button type="button" data-tab="billing">Billing</button>
     <button type="button" data-tab="reports">Reports</button>
     <button type="button" data-tab="ai">AI chats</button>
     <button type="button" data-tab="feedback">Feedback</button>
@@ -151,6 +170,29 @@ a.btn { text-decoration: none; display: inline-block; }
     <div style="overflow:auto"><table>
       <thead><tr><th>Agent</th><th>Status / plan</th><th>Usage</th><th>Trial ends</th><th>Billing</th><th>Actions</th></tr></thead>
       <tbody id="usersBody"></tbody>
+    </table></div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-billing">
+    <div class="card">
+    <h3 class="panel-title">Subscriptions &amp; revenue</h3>
+    <p class="sub" style="margin-top:0">Everyone with a plan, Stripe customer, or subscription. Estimates use list prices — Stripe is the source of truth for actuals.</p>
+    <div class="bill-cards">
+      <div class="bill-card"><div class="label">Paying subscribers</div><div class="value" id="billPaying">—</div><div class="hint">active recurring plans</div></div>
+      <div class="bill-card"><div class="label">Est. MRR</div><div class="value" id="billMrr">—</div><div class="hint">annual plans ÷ 12</div></div>
+      <div class="bill-card"><div class="label">Stripe customers</div><div class="value" id="billCustomers">—</div><div class="hint">incl. one-time buyers</div></div>
+      <div class="bill-card"><div class="label">Plan mix</div><div class="value" id="billMix" style="font-size:0.95rem;font-weight:600;line-height:1.5">—</div><div class="hint">paying by plan</div></div>
+    </div>
+    <div class="filter-chips" id="billChips">
+      <button type="button" class="on" data-bill="">All</button>
+      <button type="button" data-bill="recurring">Recurring</button>
+      <button type="button" data-bill="one_time">One-time</button>
+      <button type="button" data-bill="trial">Still trialing</button>
+    </div>
+    <div style="overflow:auto"><table>
+      <thead><tr><th>Agent</th><th>Plan</th><th>Seats</th><th>Est. value</th><th>Status</th><th>Since</th><th>Stripe</th></tr></thead>
+      <tbody id="billingBody"></tbody>
     </table></div>
     </div>
   </section>
@@ -325,6 +367,7 @@ function openTab(name) {
   if (btn) btn.click();
 }
 document.getElementById('jumpReports')?.addEventListener('click', (e) => { e.preventDefault(); openTab('reports'); });
+document.getElementById('jumpBilling')?.addEventListener('click', (e) => { e.preventDefault(); openTab('billing'); });
 document.getElementById('jumpAi')?.addEventListener('click', (e) => { e.preventDefault(); openTab('ai'); });
 document.getElementById('jumpFeedback')?.addEventListener('click', (e) => { e.preventDefault(); openTab('feedback'); });
 
@@ -357,8 +400,9 @@ async function openUserDrawer(userId) {
   document.getElementById('drawerBody').innerHTML = `
     <h2>${esc(u.name || u.email || 'Agent')}</h2>
     <p class="muted" style="margin:0 0 14px">${esc(u.email)} · ${esc(u.brokerage || '—')}</p>
-    <p><strong>${esc(u.status)}</strong> · ${esc(u.role)} · plan <code>${esc(u.plan || '—')}</code></p>
+    <p><strong>${esc(u.status)}</strong> · ${esc(u.role)} · <span class="plan-badge ${u.plan ? '' : 'none'}">${esc(planLabel(u.plan) || 'no plan')}</span></p>
     <p class="muted">${u.presentations_used ?? 0} / ${u.presentation_limit ?? '∞'} reports · trial ends ${esc((u.trial_ends_at || '').slice(0,10) || '—')}</p>
+    <p class="muted">Joined ${esc((u.created_at || '').slice(0,10))}${u.has_stripe ? ' · Stripe customer' : ''}</p>
     ${stripeUrl ? `<p><a class="btn btn-soft btn-sm" href="${esc(stripeUrl)}" target="_blank" rel="noopener">Stripe customer</a></p>` : '<p class="muted">No Stripe customer</p>'}
     <h3 class="panel-title" style="margin-top:18px">Reports</h3>
     <ul style="padding-left:18px;margin:0 0 16px">${reports}</ul>
@@ -375,6 +419,8 @@ async function loadStats() {
   document.getElementById('statUsers').textContent = String(s.users_total ?? '—');
   document.getElementById('statUsersHint').textContent =
     `${s.users_trial ?? 0} trial · ${s.users_active ?? 0} active · ${s.users_expired ?? 0} expired`;
+  document.getElementById('statPaying').textContent = String(s.users_paying ?? '—');
+  document.getElementById('statMrr').textContent = billSummary.mrr ? `≈ $${Math.round(billSummary.mrr).toLocaleString()}/mo est.` : 'recurring plans';
   document.getElementById('statPresWeek').textContent = String(s.presentations_week ?? '—');
   document.getElementById('statPresTotal').textContent = `${s.presentations_total ?? 0} total`;
   document.getElementById('statAiWeek').textContent = String(s.assistant_week ?? '—');
@@ -385,16 +431,86 @@ async function loadStats() {
   if (s.stripe_mode) stripeMode = s.stripe_mode;
 }
 
+const PLAN_LABELS = {
+  agent_monthly: 'Agent monthly',
+  agent_annual: 'Agent annual',
+  one_time: 'One-time report',
+  brokerage_monthly: 'Brokerage monthly',
+  brokerage_annual: 'Brokerage annual',
+};
+function planLabel(plan) {
+  return PLAN_LABELS[(plan || '').toLowerCase()] || plan || '';
+}
+let billRows = [];
+let billSummary = {};
+let billFilter = '';
+
+async function loadBilling() {
+  const data = await api('/api/admin/subscriptions');
+  billRows = data.subscriptions || [];
+  billSummary = data.summary || {};
+  document.getElementById('billPaying').textContent = String(billSummary.paying ?? 0);
+  document.getElementById('billMrr').textContent = '$' + Math.round(billSummary.mrr || 0).toLocaleString();
+  document.getElementById('billCustomers').textContent = String(billSummary.with_stripe_customer ?? 0);
+  const mix = billSummary.plan_counts || {};
+  document.getElementById('billMix').innerHTML = Object.keys(mix).length
+    ? Object.entries(mix).map(([p, n]) => `${esc(planLabel(p))} × ${n}`).join('<br>')
+    : '—';
+  const mrrEl = document.getElementById('statMrr');
+  if (mrrEl) mrrEl.textContent = billSummary.mrr ? `≈ $${Math.round(billSummary.mrr).toLocaleString()}/mo est.` : 'recurring plans';
+  renderBilling();
+}
+function renderBilling() {
+  const body = document.getElementById('billingBody');
+  const rows = billRows.filter(s => {
+    if (billFilter === 'recurring') return s.recurring;
+    if (billFilter === 'one_time') return s.plan === 'one_time';
+    if (billFilter === 'trial') return (s.user.status || '') === 'trial';
+    return true;
+  });
+  body.innerHTML = rows.map(s => {
+    const u = s.user || {};
+    const stripeUrl = stripeCustomerUrl(u.stripe_customer_id);
+    const subUrl = s.stripe_subscription_id
+      ? (stripeMode === 'test' ? 'https://dashboard.stripe.com/test' : 'https://dashboard.stripe.com') + '/subscriptions/' + encodeURIComponent(s.stripe_subscription_id)
+      : '';
+    const paying = s.monthly_value > 0;
+    return `
+    <tr>
+      <td><a class="user-link" data-uid="${esc(u.id)}"><strong>${esc(u.name || '—')}</strong></a><br><span class="muted">${esc(u.email)}</span></td>
+      <td><span class="plan-badge ${paying ? 'paying' : (s.plan ? '' : 'none')}">${esc(s.plan_label || planLabel(s.plan) || '—')}</span>${s.has_subscription ? '<br><span class="muted">subscription</span>' : ''}</td>
+      <td>${s.per_seat ? esc(String(s.seats)) : '<span class="muted">—</span>'}</td>
+      <td>${paying ? '$' + Math.round(s.monthly_value).toLocaleString() + '<span class="muted">/mo</span>' : (s.plan === 'one_time' ? '$20 <span class="muted">once</span>' : '<span class="muted">—</span>')}</td>
+      <td>${esc(u.status)}</td>
+      <td>${esc((u.created_at || '').slice(0,10))}</td>
+      <td class="actions">
+        ${subUrl ? `<a class="btn btn-soft btn-sm" href="${esc(subUrl)}" target="_blank" rel="noopener">Sub</a>` : ''}
+        ${stripeUrl ? `<a class="btn btn-soft btn-sm" href="${esc(stripeUrl)}" target="_blank" rel="noopener">Customer</a>` : '<span class="muted">—</span>'}
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7">No billing records yet</td></tr>';
+}
+wireChips('billChips', 'data-bill', v => { billFilter = v; renderBilling(); });
+document.getElementById('billingBody').addEventListener('click', (e) => {
+  const link = e.target.closest('[data-uid]');
+  if (link) {
+    e.preventDefault();
+    openUserDrawer(link.dataset.uid).catch(err => setStatus(err.message, false));
+  }
+});
+
 async function loadUsers() {
   const q = document.getElementById('userQ').value.trim();
   const data = await api('/api/admin/users?q=' + encodeURIComponent(q));
   const body = document.getElementById('usersBody');
   body.innerHTML = (data.users || []).map(u => {
     const stripeUrl = stripeCustomerUrl(u.stripe_customer_id);
+    const lbl = planLabel(u.plan);
+    const paying = (u.status || '') === 'active' && !!u.plan;
     return `
     <tr>
       <td><a class="user-link" data-uid="${esc(u.id)}"><strong>${esc(u.name || '—')}</strong></a><br><span class="muted">${esc(u.email)}</span><br><span class="muted">${esc(u.brokerage || '')}</span></td>
-      <td>${esc(u.status)} · ${esc(u.role)}<br><span class="muted">${esc(u.plan || 'no plan')}</span></td>
+      <td>${esc(u.status)} · ${esc(u.role)}<br><span class="plan-badge ${paying ? 'paying' : (lbl ? '' : 'none')}" style="margin-top:4px">${esc(lbl || 'no plan')}</span></td>
       <td data-usage>${u.presentations_used ?? 0} / ${u.presentation_limit ?? '∞'}</td>
       <td>${esc((u.trial_ends_at || '').slice(0,10))}</td>
       <td>${stripeUrl ? `<a href="${esc(stripeUrl)}" target="_blank" rel="noopener">Stripe</a>` : '<span class="muted">—</span>'}</td>
@@ -443,6 +559,9 @@ document.getElementById('usersBody').addEventListener('click', async (e) => {
   } catch (err) { setStatus(String(err.message || err), false); }
 });
 document.getElementById('userSearch').addEventListener('click', () => loadUsers().catch(e => setStatus(e.message, false)));
+document.getElementById('userQ').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); loadUsers().catch(err => setStatus(err.message, false)); }
+});
 
 async function loadReports() {
   const q = document.getElementById('reportQ').value.trim();
@@ -653,7 +772,7 @@ wireChips('evTypeChips', 'data-type', v => { evType = v; loadEvents().catch(err 
     return;
   }
   await Promise.all([
-    loadStats(), loadUsers(), loadReports(), loadAiChats(),
+    loadBilling(), loadStats(), loadUsers(), loadReports(), loadAiChats(),
     loadPromos(), loadInvites(), loadFeedback(), loadEvents(),
   ]);
 })().catch(err => setStatus(String(err.message || err), false));

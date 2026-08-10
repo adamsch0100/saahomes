@@ -125,6 +125,100 @@ def public_user(row: Optional[dict]) -> Optional[dict]:
     }
 
 
+# Plan catalog for owner billing views. Amounts mirror saas/pricing.html.
+PLAN_CATALOG = {
+    "agent_monthly": {"label": "Agent monthly", "monthly": 39.0, "recurring": True},
+    "agent_annual": {"label": "Agent annual", "monthly": 32.5, "recurring": True},
+    "one_time": {"label": "One-time report", "monthly": 0.0, "recurring": False},
+    "brokerage_monthly": {"label": "Brokerage seat (monthly)", "monthly": 29.0, "recurring": True, "per_seat": True},
+    "brokerage_annual": {"label": "Brokerage seat (annual)", "monthly": 24.17, "recurring": True, "per_seat": True},
+}
+
+
+def plan_label(plan: str) -> str:
+    meta = PLAN_CATALOG.get((plan or "").strip().lower())
+    return meta["label"] if meta else ((plan or "").strip() or "No plan")
+
+
+def list_subscriptions() -> dict:
+    """Owner billing view: anyone with a plan, Stripe customer, or subscription."""
+    rows = database.execute(
+        """
+        SELECT * FROM users
+        WHERE COALESCE(plan, '') != ''
+           OR COALESCE(stripe_customer_id, '') != ''
+           OR COALESCE(stripe_subscription_id, '') != ''
+        ORDER BY updated_at DESC LIMIT 500
+        """,
+        fetch="all",
+    ) or []
+
+    seat_by_user: dict[str, int] = {}
+    try:
+        evs = database.execute(
+            """
+            SELECT user_id, meta FROM events
+            WHERE type IN ('stripe_subscription_active', 'stripe_checkout_completed')
+            ORDER BY created_at DESC
+            """,
+            fetch="all",
+        ) or []
+        for ev in evs:
+            uid = ev.get("user_id")
+            if not uid or uid in seat_by_user:
+                continue
+            try:
+                meta = json.loads(ev.get("meta") or "{}")
+            except Exception:
+                meta = {}
+            qty = meta.get("seat_quantity") or meta.get("quantity")
+            if qty:
+                seat_by_user[uid] = max(1, int(qty))
+    except Exception:
+        pass
+
+    subs: list[dict] = []
+    plan_counts: dict[str, int] = {}
+    mrr = 0.0
+    paying = 0
+    for r in rows:
+        pubs = public_user(r) or {}
+        plan = (r.get("plan") or "").strip().lower()
+        meta = PLAN_CATALOG.get(plan, {})
+        seats = seat_by_user.get(r["id"], 1)
+        is_sub = bool((r.get("stripe_subscription_id") or "").strip())
+        status = (r.get("status") or "").lower()
+        active_paying = status == "active" and (is_sub or bool(meta.get("recurring")))
+        monthly_value = 0.0
+        if active_paying and meta.get("recurring"):
+            monthly_value = float(meta.get("monthly") or 0) * (seats if meta.get("per_seat") else 1)
+            paying += 1
+            mrr += monthly_value
+            plan_counts[plan or "unknown"] = plan_counts.get(plan or "unknown", 0) + 1
+        subs.append({
+            "user": pubs,
+            "plan": plan,
+            "plan_label": plan_label(plan),
+            "seats": seats,
+            "per_seat": bool(meta.get("per_seat")),
+            "recurring": bool(meta.get("recurring")),
+            "has_subscription": is_sub,
+            "monthly_value": round(monthly_value, 2),
+            "stripe_subscription_id": (r.get("stripe_subscription_id") or "").strip(),
+            "updated_at": r.get("updated_at"),
+        })
+    subs.sort(key=lambda s: (not s["recurring"], -(s["monthly_value"] or 0), s["updated_at"] or ""))
+    return {
+        "subscriptions": subs,
+        "summary": {
+            "paying": paying,
+            "mrr": round(mrr, 2),
+            "plan_counts": plan_counts,
+            "with_stripe_customer": sum(1 for s in subs if s["user"].get("has_stripe")),
+        },
+    }
+
+
 def get_user_by_id(user_id: str) -> Optional[dict]:
     return database.execute("SELECT * FROM users WHERE id = ?", (user_id,), fetch="one")
 
@@ -555,6 +649,11 @@ def admin_stats() -> dict:
     users_active = _count("SELECT COUNT(*) AS n FROM users WHERE lower(status) = 'active'")
     users_expired = _count("SELECT COUNT(*) AS n FROM users WHERE lower(status) = 'expired'")
     users_disabled = _count("SELECT COUNT(*) AS n FROM users WHERE lower(status) = 'disabled'")
+    users_paying = _count(
+        "SELECT COUNT(*) AS n FROM users WHERE lower(status) = 'active' "
+        "AND (COALESCE(stripe_subscription_id, '') != '' OR lower(COALESCE(plan, '')) LIKE '%monthly%' "
+        "OR lower(COALESCE(plan, '')) LIKE '%annual%')"
+    )
     presentations_total = _count("SELECT COUNT(*) AS n FROM presentations")
     # ISO week-ish: last 7 days by created_at string compare (ISO timestamps sort lexically)
     week_ago = _iso(_utcnow() - timedelta(days=7))
@@ -585,6 +684,7 @@ def admin_stats() -> dict:
         "users_active": users_active,
         "users_expired": users_expired,
         "users_disabled": users_disabled,
+        "users_paying": users_paying,
         "presentations_total": presentations_total,
         "presentations_week": presentations_week,
         "feedback_open": feedback_open,
