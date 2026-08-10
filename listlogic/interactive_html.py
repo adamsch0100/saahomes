@@ -1090,6 +1090,14 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .map-comp-btn.in{{color:#0e7a6d;border-color:#cde5dd;background:#e7f3ef}}
 #compMap{{height:min(420px,52vh);width:100%;background:#e8eef5}}
 .leaflet-container{{font:inherit}}
+.leaflet-tooltip.map-hover-tip{{
+  background:#0f2740;color:#fff;border:0;border-radius:10px;padding:8px 10px;box-shadow:0 10px 24px rgba(8,30,55,.28);
+  font-size:.74rem;line-height:1.25;white-space:nowrap;max-width:260px;
+}}
+.leaflet-tooltip.map-hover-tip::before{{border-top-color:#0f2740}}
+.leaflet-tooltip.map-hover-tip .mt-addr{{font-weight:700;display:block;max-width:240px;overflow:hidden;text-overflow:ellipsis}}
+.leaflet-tooltip.map-hover-tip .mt-meta{{opacity:.88;font-size:.68rem;margin-top:2px;display:block}}
+.listing-overlay{{cursor:pointer}}
 @media(max-width:980px){{.comp-rail{{grid-template-columns:repeat(2,1fr)}}}}
 @media(max-width:520px){{.comp-rail{{grid-template-columns:1fr}}}}
 @media(max-width:700px){{#compMap{{height:300px}}}}
@@ -1624,11 +1632,11 @@ body.print-leavebehind .page{{padding-bottom:0}}
           <button type="button" class="map-kind on" data-kind="sold"><i class="sold"></i> Sold <b id="mapCountSold"></b></button>
           <button type="button" class="map-kind on" data-kind="active"><i class="active"></i> Active <b id="mapCountActive"></b></button>
           <button type="button" class="map-kind on" data-kind="uc"><i class="uc"></i> Under contract <b id="mapCountUc"></b></button>
-          <button type="button" class="map-kind on" data-kind="off"><i class="off"></i> Off-market <b id="mapCountOff"></b></button>
+          <button type="button" class="map-kind" data-kind="off"><i class="off"></i> Off-market <b id="mapCountOff"></b></button>
         </div>
       </div>
       <div id="compMap" role="img" aria-label="Map of comps and market listings"></div>
-      <div class="comp-map-foot">Click a sold home to add or remove it as a comp — the map, comp rail, and pricing all update.</div>
+      <div class="comp-map-foot">Hover a pin for a quick peek. Click a sold home to add or remove it as a comp.</div>
     </div>
     <button type="button" class="comp-table-toggle" id="btnCompTable">Show table view</button>
     <div class="comp-table-wrap" id="compTableWrap">
@@ -3572,7 +3580,9 @@ function renderLiveComps() {{
 }}
 let marketMap = null;
 let marketMapLayer = null;
-const mapKindVisible = {{ sold: true, active: true, uc: true, off: true }};
+let marketMapFitted = false;
+let marketMapCanvas = null;
+const mapKindVisible = {{ sold: true, active: true, uc: true, off: false }};
 function mapKindFor(status, isPicked) {{
   if (isPicked) return 'comp';
   const st = String(status || '').toLowerCase().replace(/[^a-z]/g, '');
@@ -3586,9 +3596,10 @@ function toggleMapKind(kind) {{
   document.querySelectorAll('#mapKindFilters .map-kind').forEach((b) => {{
     if (b.dataset.kind === kind) b.classList.toggle('on', mapKindVisible[kind]);
   }});
-  renderMarketMap();
+  renderMarketMap({{ fit: false }});
 }}
-function renderMarketMap() {{
+function renderMarketMap(opts) {{
+  opts = opts || {{}};
   const el = document.getElementById('compMap');
   const wrap = document.getElementById('compMapWrap');
   if (!el || typeof L === 'undefined') {{
@@ -3650,12 +3661,22 @@ function renderMarketMap() {{
     document.getElementById('mapCountUc').textContent = counts.uc;
     document.getElementById('mapCountOff').textContent = counts.off;
   }}
+  document.querySelectorAll('#mapKindFilters .map-kind').forEach((b) => {{
+    const k = b.dataset.kind;
+    if (k in mapKindVisible) b.classList.toggle('on', !!mapKindVisible[k]);
+  }});
   if (!marketMap) {{
-    marketMap = L.map(el, {{ scrollWheelZoom: false }});
-    L.tileLayer('https://{{s}}.basemaps.cartocdn.com/rastertiles/voyager/{{z}}/{{x}}/{{y}}{{r}}.png', {{
+    marketMapCanvas = L.canvas({{ padding: 0.5 }});
+    marketMap = L.map(el, {{
+      scrollWheelZoom: false,
+      preferCanvas: true,
+      zoomControl: true,
+      attributionControl: true,
+    }});
+    // Esri World Street Map — commercial street basemap (not default OSM tiles)
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{{z}}/{{y}}/{{x}}', {{
       maxZoom: 19,
-      subdomains: 'abcd',
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, TomTom, Garmin, FAO, NOAA, USGS',
     }}).addTo(marketMap);
     marketMapLayer = L.layerGroup().addTo(marketMap);
     el.addEventListener('click', (e) => {{
@@ -3665,6 +3686,7 @@ function renderMarketMap() {{
     document.querySelectorAll('#mapKindFilters .map-kind').forEach((b) => {{
       b.addEventListener('click', () => toggleMapKind(b.dataset.kind));
     }});
+    marketMapFitted = false;
   }}
   marketMapLayer.clearLayers();
   const colors = {{ you: '#0c3c6e', comp: '#0e7a6d', sold: '#94a3b8', active: '#c9a227', uc: '#e65100', off: '#a8a29e' }};
@@ -3690,18 +3712,28 @@ function renderMarketMap() {{
       weight: p.kind === 'you' ? 2 : 1,
       fillColor: colors[p.kind] || '#94a3b8',
       fillOpacity: (p.kind === 'sold' || p.kind === 'off') ? 0.55 : 0.92,
+      renderer: marketMapCanvas,
+      bubblingMouseEvents: false,
     }});
+    const tipMeta = escapeHtml(p.status) + (p.price ? ' · ' + money(p.price) : '');
+    marker.bindTooltip(
+      '<span class="mt-addr">' + escapeHtml(p.label) + '</span><span class="mt-meta">' + tipMeta + '</span>',
+      {{ direction: 'top', offset: [0, -6], opacity: 1, className: 'map-hover-tip', sticky: true }}
+    );
     const isPicked = picked.has(p.mls);
     const compBtn = ((p.kind === 'sold' || p.kind === 'comp') && p.mls && p.mls !== 'subject')
       ? '<br><button type="button" class="map-comp-btn' + (isPicked ? ' in' : '') + '" data-mls="' + escapeHtml(p.mls) + '">' + (isPicked ? 'In comps · remove' : 'Use as comp') + '</button>'
       : '';
-    marker.bindPopup(
-      '<strong>' + escapeHtml(p.label) + '</strong><br>' +
-      escapeHtml(p.status) + (p.price ? ' · ' + money(p.price) : '') +
-      (p.mls && p.mls !== 'subject' ? '<br>MLS ' + escapeHtml(p.mls) : '') +
-      compBtn +
-      portalLinks(p)
-    );
+    if ((p.kind === 'sold' || p.kind === 'comp') && p.mls && p.mls !== 'subject') {{
+      marker.bindPopup(
+        '<strong>' + escapeHtml(p.label) + '</strong><br>' +
+        tipMeta +
+        (p.mls ? '<br>MLS ' + escapeHtml(p.mls) : '') +
+        compBtn +
+        portalLinks(p),
+        {{ maxWidth: 260, autoPan: true }}
+      );
+    }}
     if (p.kind === 'comp' && p.mls) {{
       marker.on('click', () => {{
         const idx = liveComps.findIndex(c => String(c.mls || '') === p.mls);
@@ -3712,8 +3744,12 @@ function renderMarketMap() {{
     bounds.push([p.lat, p.lng]);
   }});
   try {{
-    marketMap.fitBounds(bounds, {{ padding: [28, 28], maxZoom: 15 }});
-    setTimeout(() => marketMap.invalidateSize(), 80);
+    const shouldFit = opts.fit === true || (!marketMapFitted && opts.fit !== false);
+    if (shouldFit && bounds.length) {{
+      marketMap.fitBounds(bounds, {{ padding: [28, 28], maxZoom: 15, animate: false }});
+      marketMapFitted = true;
+      setTimeout(() => {{ try {{ marketMap.invalidateSize({{ animate: false }}); }} catch (e) {{}} }}, 60);
+    }}
   }} catch (e) {{}}
 }}
 function setCarouselSlide(carousel, idx) {{
@@ -3896,6 +3932,15 @@ function closeCompListing() {{
 }}
 document.getElementById('closeListing').onclick = closeCompListing;
 document.getElementById('listingOverlay').onclick = closeCompListing;
+document.addEventListener('mousedown', (e) => {{
+  const drawer = document.getElementById('listingDrawer');
+  if (!drawer || !drawer.classList.contains('open')) return;
+  if (e.target.closest('#listingDrawer')) return;
+  closeCompListing();
+}});
+document.addEventListener('keydown', (e) => {{
+  if (e.key === 'Escape') closeCompListing();
+}});
 document.addEventListener('click', e => {{
   const thumb = e.target.closest('#ldThumbs button[data-slide]');
   if (thumb) {{
