@@ -25,7 +25,13 @@ from typing import Any
 logger = logging.getLogger("ListLogic.reef")
 
 ROOT = Path(__file__).resolve().parent
-CACHE_DIR = ROOT / "output" / "photo_cache"
+# Photo cache lives on the Railway volume (/data) so it survives redeploys —
+# no re-downloading (or re-spending Reef credits) after each deploy.
+_DATA_ROOT = Path(os.environ.get("LISTLOGIC_DATA_DIR") or "/data")
+if not _DATA_ROOT.exists():
+    _DATA_ROOT = ROOT
+CACHE_DIR = _DATA_ROOT / "output" / "photo_cache"
+_LEGACY_CACHE_DIR = ROOT / "output" / "photo_cache"
 REEF_BASE = "https://api.reefapi.com/zillow/v1"
 
 DEFAULT_TIMEOUT_SEC = 35
@@ -86,8 +92,16 @@ def _cache_meta_path(cache_key: str) -> Path:
     return CACHE_DIR / cache_key / "meta.json"
 
 
+def _legacy_meta_path(cache_key: str) -> Path:
+    return _LEGACY_CACHE_DIR / cache_key / "meta.json"
+
+
 def _read_cache(cache_key: str) -> dict | None:
     path = _cache_meta_path(cache_key)
+    legacy = False
+    if not path.exists() and _LEGACY_CACHE_DIR != CACHE_DIR:
+        path = _legacy_meta_path(cache_key)
+        legacy = path.exists()
     if not path.exists():
         return None
     try:
@@ -103,10 +117,21 @@ def _read_cache(cache_key: str) -> dict | None:
         return data
     primary = data.get("primary_path") or ""
     if primary and not Path(primary).exists():
-        local = CACHE_DIR / cache_key / "primary.jpg"
-        if local.exists():
-            data["primary_path"] = str(local)
+        for base in ([CACHE_DIR, _LEGACY_CACHE_DIR] if legacy else [CACHE_DIR]):
+            local = base / cache_key / "primary.jpg"
+            if local.exists():
+                data["primary_path"] = str(local)
+                break
     data["gallery_paths"] = [p for p in (data.get("gallery_paths") or []) if Path(p).exists()]
+    if legacy:
+        # First read migrates the entry onto the volume so later hits are local.
+        try:
+            new_folder = CACHE_DIR / cache_key
+            if not new_folder.exists():
+                shutil.copytree(_LEGACY_CACHE_DIR / cache_key, new_folder)
+            data = _read_cache(cache_key) or data
+        except OSError:
+            pass
     return data
 
 
