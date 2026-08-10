@@ -321,6 +321,12 @@ def _start_scheduler() -> None:
                     logger.info("Owner digest sent")
             except Exception:
                 logger.exception("Owner digest failed")
+            try:
+                sweep = _photo_maintenance_sweep()
+                if sweep.get("rehosted") or sweep.get("enriched"):
+                    logger.info("Photo maintenance: %s", sweep)
+            except Exception:
+                logger.exception("Photo maintenance sweep failed")
             time.sleep(6 * 3600)
 
     threading.Thread(target=_loop, name="listlogic-scheduler", daemon=True).start()
@@ -1114,6 +1120,7 @@ def _refresh_sample_html(run_dir: Path) -> None:
                 and "btnPrintLeavebehind" in existing
                 and "listlogic-logo.png" in existing
                 and "print-page-spine" in existing
+                and "basemaps.cartocdn.com" in existing
             ):
                 return
         report = json.loads(json_path.read_text(encoding="utf-8"))
@@ -1180,6 +1187,15 @@ def _ensure_sample_run() -> str:
     if html_path.exists():
         _repair_sample_run_paths(run_dir)
         _refresh_sample_html(run_dir)
+        # Sample photos must be volume-local, not expiring CDN links.
+        try:
+            remote, missing = _run_photo_health(run_dir)
+            if remote:
+                _start_rehost(SAMPLE_RUN_ID, run_dir)
+            elif missing:
+                _start_background_photos(SAMPLE_RUN_ID, run_dir)
+        except Exception:
+            logger.exception("Sample photo health check failed")
         # Keep sample PDFs in sync with the latest packet design.
         try:
             json_path = run_dir / "presentation.json"
@@ -1908,6 +1924,174 @@ def _load_gallery_map(run_dir: Path) -> dict:
 
 def _save_gallery_map(run_dir: Path, data: dict) -> None:
     _gallery_map_path(run_dir).write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+
+_REMOTE_PHOTO_RE = re.compile(r"^https?://", re.I)
+
+
+def _run_photo_health(run_dir: Path) -> tuple[int, int]:
+    """(remote_photo_urls, missing_local_files) for a run's baked artifacts."""
+    remote = 0
+    missing = 0
+    json_path = run_dir / "presentation.json"
+    if not json_path.exists():
+        return 0, 0
+    try:
+        report = json.loads(json_path.read_text(encoding="utf-8"))
+    except Exception:
+        return 0, 0
+
+    def _check_url(url: object) -> None:
+        nonlocal remote, missing
+        if not isinstance(url, str) or not url:
+            return
+        if _REMOTE_PHOTO_RE.match(url):
+            remote += 1
+        elif url.startswith(f"/runs/{run_dir.name}/photos/"):
+            if not (run_dir / "photos" / url.rsplit("/", 1)[-1]).exists():
+                missing += 1
+
+    def _walk_row(row: object) -> None:
+        if not isinstance(row, dict):
+            return
+        for key in ("photo", "photo_url"):
+            _check_url(row.get(key))
+        for url in row.get("photos") or []:
+            _check_url(url)
+
+    _walk_row(report.get("subject"))
+    for comp in (report.get("positioning") or {}).get("closest_comps") or []:
+        _walk_row(comp)
+    for url in _load_photo_map(run_dir).values():
+        _check_url(url)
+    for gallery in _load_gallery_map(run_dir).values():
+        for url in gallery or []:
+            _check_url(url)
+    return remote, missing
+
+
+def _rehost_remote_photos(run_id: str, run_dir: Path) -> int:
+    """Download http(s) photo URLs into the run's photos dir and re-point JSON/HTML.
+
+    Runs are self-contained after this: no dependence on Zillow/MLS CDN links that
+    expire. No Reef credits spent — only URLs already on the report are fetched.
+    """
+    json_path = run_dir / "presentation.json"
+    if not json_path.exists():
+        return 0
+    try:
+        from reef_photos import _download_image
+    except Exception:
+        logger.exception("Photo module unavailable for rehost on %s", run_id)
+        return 0
+    try:
+        report = json.loads(json_path.read_text(encoding="utf-8"))
+    except Exception:
+        return 0
+
+    photos_dir = run_dir / "photos"
+    photos_dir.mkdir(parents=True, exist_ok=True)
+    hosted = 0
+    url_cache: dict[str, str] = {}
+
+    def _host(url: object, key: str, idx: int) -> object:
+        nonlocal hosted
+        if not isinstance(url, str) or not url or not _REMOTE_PHOTO_RE.match(url):
+            return url
+        if url in url_cache:
+            return url_cache[url]
+        safe = re.sub(r"[^A-Za-z0-9_-]+", "", key)[:48] or "photo"
+        ext = ".jpg"
+        low = url.lower().split("?")[0]
+        for cand in (".png", ".webp", ".jpeg", ".jpg"):
+            if low.endswith(cand):
+                ext = ".jpg" if cand == ".jpeg" else cand
+                break
+        name = f"{safe}.jpg" if idx == 0 and ext == ".jpg" else f"{safe}_{idx:02d}{ext}"
+        dest = photos_dir / name
+        local_url = f"/runs/{run_id}/photos/{name}"
+        ok = dest.exists() and dest.stat().st_size > 800
+        if not ok:
+            ok = _download_image(url, dest)
+        if ok:
+            hosted += 1
+            url_cache[url] = local_url
+            return local_url
+        return url
+
+    def _fix_row(row: object, key: str) -> None:
+        if not isinstance(row, dict):
+            return
+        for field in ("photo", "photo_url"):
+            if row.get(field):
+                row[field] = _host(row[field], key, 0)
+        if isinstance(row.get("photos"), list):
+            row["photos"] = [_host(u, key, i) for i, u in enumerate(row["photos"])]
+
+    _fix_row(report.get("subject"), SUBJECT_PHOTO_MLS)
+    for comp in (report.get("positioning") or {}).get("closest_comps") or []:
+        if isinstance(comp, dict):
+            _fix_row(comp, str(comp.get("mls_number") or comp.get("address") or "comp"))
+
+    photos = _load_photo_map(run_dir)
+    if photos:
+        photos = {k: _host(v, k, 0) for k, v in photos.items()}
+        _save_photo_map(run_dir, photos)
+    galleries = _load_gallery_map(run_dir)
+    if galleries:
+        galleries = {k: [_host(u, k, i) for i, u in enumerate(gallery or [])] for k, gallery in galleries.items()}
+        _save_gallery_map(run_dir, galleries)
+
+    if hosted:
+        json_path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+        try:
+            _save_html(report, run_dir / "presentation.html")
+        except Exception:
+            logger.exception("Rehost rebake failed for %s", run_id)
+        logger.info("Rehosted %d remote photos for %s", hosted, run_id)
+    return hosted
+
+
+_rehost_jobs: dict[str, threading.Thread] = {}
+_rehost_lock = threading.Lock()
+
+
+def _start_rehost(run_id: str, run_dir: Path) -> bool:
+    with _rehost_lock:
+        existing = _rehost_jobs.get(run_id)
+        if existing and existing.is_alive():
+            return False
+        t = threading.Thread(target=_rehost_remote_photos, args=(run_id, run_dir), name=f"rehost-{run_id[:20]}", daemon=True)
+        _rehost_jobs[run_id] = t
+        t.start()
+        return True
+
+
+def _photo_maintenance_sweep(max_rehost: int = 3, max_enrich: int = 1) -> dict:
+    """Keep every saved report self-contained: re-host remote photo URLs, refill
+    missing local photo files from the volume cache. Sample run goes first."""
+    rehosted = 0
+    enriched = 0
+    scanned = 0
+    try:
+        run_dirs = sorted(
+            (d for d in OUTPUT_DIR.iterdir() if d.is_dir() and (d / "presentation.json").exists()),
+            key=lambda d: d.stat().st_mtime,
+            reverse=True,
+        )[:60]
+    except OSError:
+        return {"scanned": 0, "rehosted": 0, "enriched": 0}
+    run_dirs.sort(key=lambda d: 0 if d.name == SAMPLE_RUN_ID else 1)
+    for run_dir in run_dirs:
+        scanned += 1
+        remote, missing = _run_photo_health(run_dir)
+        if remote and rehosted < max_rehost:
+            if _start_rehost(run_dir.name, run_dir):
+                rehosted += 1
+        elif missing and enriched < max_enrich:
+            if _start_background_photos(run_dir.name, run_dir):
+                enriched += 1
+    return {"scanned": scanned, "rehosted": rehosted, "enriched": enriched}
 
 
 def _load_photos_status(run_dir: Path) -> dict:
