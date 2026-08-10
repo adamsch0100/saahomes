@@ -3417,7 +3417,39 @@ function rowToComp(row) {{
     realtor: 'https://www.realtor.com/realestateandhomes-search/' + addrQ,
     photo: photoMap[mls] || extractRowPhoto(row) || '',
     auto: false,
+    match_pct: null,
+    reasons: [],
   }};
+}}
+function compReasons(c, sub) {{
+  // Mirror of server-side ranking reasons for live-added comps.
+  sub = sub || {{}};
+  const reasons = [];
+  const sqft = Number(c.living_area || 0), ssq = Number(sub.living_area || 0);
+  if (sqft && ssq) {{
+    const d = Math.round(sqft - ssq);
+    reasons.push(Math.abs(d) < 50 ? 'similar size' : ((d > 0 ? '+' : '') + d + ' sqft'));
+  }}
+  const beds = Number(c.beds || 0), baths = Number(c.baths || 0);
+  const sbeds = Number(sub.beds || 0), sbaths = Number(sub.baths || 0);
+  if (sbeds && beds === sbeds && Math.abs(baths - sbaths) < 0.3) reasons.push('same bed/bath');
+  else if (sbeds) reasons.push(beds + '/' + baths + ' bed/bath');
+  const yr = Number(c.year_built || 0), syr = Number(sub.year_built || 0);
+  if (yr && syr) {{
+    const dy = Math.round(yr - syr);
+    reasons.push(Math.abs(dy) <= 5 ? 'same era' : ((dy > 0 ? '+' : '') + dy + ' yrs'));
+  }}
+  if (Number(sub.garage || 0) && Math.abs(Number(c.garage || 0) - Number(sub.garage || 0)) < 0.5) reasons.push('same garage');
+  const sd = String(c.sold_date || '').slice(0, 10);
+  if (sd) {{
+    const age = Math.floor((Date.now() - new Date(sd + 'T12:00:00').getTime()) / 864e5);
+    if (!isNaN(age) && age >= 0) {{
+      if (age <= 45) reasons.push('sold recently');
+      else if (age <= 120) reasons.push('sold ' + Math.floor(age / 7) + ' wks ago');
+      else reasons.push('sold ' + Math.floor(age / 30) + ' mo ago');
+    }}
+  }}
+  return reasons.slice(0, 4);
 }}
 function buildSubjectCardHtml() {{
   const sub = DATA.subjectSnap || {{}};
@@ -3490,7 +3522,8 @@ function buildCompCardHtml(i, c) {{
       (c.auto === false ? 'Manual pick' : ('#' + (i + 1) + ' · ' + (c.match_pct != null ? c.match_pct + '% match' : 'Match'))) +
     '</span> · MLS ' + escapeHtml(String(c.mls || '—')) + '</div>' +
     (Array.isArray(c.reasons) && c.reasons.length
-      ? '<div class="match-why">' + escapeHtml(c.reasons.join(' · ')) + '</div>' : '') +
+      ? '<div class="match-why">' + escapeHtml(c.reasons.join(' · ')) + '</div>'
+      : (c.auto === false ? '<div class="match-why">' + escapeHtml(compReasons(c, DATA.subjectSnap || {{}}).join(' · ')) + '</div>' : '')) +
     '<div class="cf">' +
     '<div><span>Sq ft</span><br><strong>' + Math.round(c.living_area || 0).toLocaleString() + '</strong></div>' +
     '<div><span>Bd / Ba</span><br><strong>' + (c.beds || 0) + ' / ' + (c.baths || 0) + '</strong></div>' +
