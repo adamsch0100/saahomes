@@ -21,13 +21,14 @@ import {
 } from './notificationService.js';
 import { getPrefFrequency } from './notificationPrefs.js';
 import { pickVariant, openToken, withOpenPixel } from './subjectVariants.js';
+import { marketPack } from '../config/marketPack.js';
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: false });
 
-const SITE = 'https://saahomes.com';
+const SITE = marketPack.market.siteUrl || 'https://saahomes.com';
 const FROM = process.env.OUTREACH_SMTP_FROM || process.env.OUTREACH_SMTP_USER || 'alerts@saahomes.com';
-const AGENT_FROM = 'Adam Schwartz, SAA Homes';
-const AGENT_PHONE = '(970) 999-1407';
+const AGENT_FROM = `Adam Schwartz, ${marketPack.market.brand}`;
+const AGENT_PHONE = marketPack.market.phone;
 
 const fmtPrice = (n) => (n == null ? '—' : `$${Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`);
 const fmtSqft = (n) => (n == null ? '' : `${Number(n).toLocaleString()} sqft`);
@@ -266,18 +267,20 @@ function digestHtml({
   manageUrl, unsubscribeUrl, searchUrl, viewedCallout,
 }) {
   const greeting = firstName ? `Hi ${escapeHtml(firstName)},` : 'Hi there,';
+  const { market, sources, dpa, fairHousing, footer, honestLabels } = marketPack;
+  const brandUpper = String(market.brand || 'SAA Homes').toUpperCase();
   return `<!DOCTYPE html>
   <html><body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#111">
     <tr><td align="center" style="padding:26px 16px">
-      <div style="color:#CFB36E;font-size:22px;font-weight:800;letter-spacing:0.5px">SAA HOMES</div>
-      <div style="color:#9ca3af;font-size:13px;margin-top:4px">Schwartz and Associates · Northern Colorado Real Estate</div>
+      <div style="color:#CFB36E;font-size:22px;font-weight:800;letter-spacing:0.5px">${escapeHtml(brandUpper)}</div>
+      <div style="color:#9ca3af;font-size:13px;margin-top:4px">${escapeHtml(footer.headerSubline)}</div>
     </td></tr>
   </table>
   <div style="max-width:580px;margin:0 auto;padding:26px 16px">
     <p style="color:#111;font-size:15px;margin:0 0 4px">${greeting}</p>
     <p style="color:#4b5563;font-size:14.5px;line-height:1.6;margin:0 0 4px">
-      It's <strong>Adam Schwartz</strong> with SAA Homes. Here's what came in for your
+      It's <strong>Adam Schwartz</strong> with ${escapeHtml(market.brand)}. Here's what came in for your
       <strong>${escapeHtml(searchName)}</strong> search — ${escapeHtml(filterSummary)}:
     </p>
     <ul style="color:#374151;font-size:14px;line-height:1.7;margin:8px 0 14px;padding-left:20px">
@@ -299,15 +302,24 @@ function digestHtml({
           View all matches for this search
         </a>
         <p style="color:#fff;font-size:14px;line-height:1.7;margin:0">
-          Any of these catch your eye? <strong style="color:#CFB36E">Just reply to this email</strong> and we'll set up a showing — or call/text <a href="tel:+19709991407" style="color:#CFB36E;text-decoration:none">${AGENT_PHONE}</a>.
+          Any of these catch your eye? <strong style="color:#CFB36E">Just reply to this email</strong> and we'll set up a showing — or call/text <a href="${market.tel}" style="color:#CFB36E;text-decoration:none">${escapeHtml(AGENT_PHONE)}</a>.
         </p>
-        <p style="color:#9ca3af;font-size:13px;margin:10px 0 0">— Adam &amp; Mandi Schwartz · SAA Homes · ${AGENT_PHONE} · saahomes.com</p>
+        <p style="color:#9ca3af;font-size:13px;margin:10px 0 0">— Adam &amp; Mandi Schwartz · ${escapeHtml(market.brand)} · ${escapeHtml(AGENT_PHONE)} · saahomes.com</p>
       </td></tr>
     </table>
-    <p style="color:#9ca3af;font-size:11.5px;margin-top:18px;line-height:1.6">
-      IDX information provided by IRES. Listing data is believed reliable but not guaranteed.<br/>
-      <a href="${manageUrl}" style="color:#4b5563">Manage your alerts</a> · <a href="${unsubscribeUrl}" style="color:#4b5563">Unsubscribe</a>
-    </p>
+    <div style="color:#9ca3af;font-size:11.5px;margin-top:18px;line-height:1.65">
+      <p style="margin:0 0 8px">${escapeHtml(sources.iresIdx)}</p>
+      <p style="margin:0 0 8px">${escapeHtml(footer.depthLine)}</p>
+      <p style="margin:0 0 8px">
+        ${escapeHtml(dpa.chfaLine)}
+        <a href="${dpa.hubUrl}" style="color:#6b7280">${escapeHtml(dpa.hubPath)}</a>
+      </p>
+      <p style="margin:0 0 8px">${escapeHtml(fairHousing)} · ${escapeHtml(honestLabels.notAppraisal)}</p>
+      <p style="margin:0">
+        <a href="${manageUrl}" style="color:#4b5563">Manage your alerts</a> · <a href="${unsubscribeUrl}" style="color:#4b5563">Unsubscribe</a>
+        <br/>${escapeHtml(footer.brandLine)} · ${escapeHtml(AGENT_PHONE)}
+      </p>
+    </div>
   </div>
   </body></html>`;
 }
@@ -431,7 +443,7 @@ async function runSearch(search, { dryRun, onlyEmail }) {
       return `ZIP ${zparts.join(', ')}`;
     }
     if (c === '__all__') return 'Colorado';
-    return 'Northern Colorado';
+    return marketPack.market.name;
   })();
   const newCount = fresh.length;
   const dropCount = drops.length;

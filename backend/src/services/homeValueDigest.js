@@ -18,10 +18,11 @@ import { computeOurEstimate } from './sellerValueService.js';
 import { notifyValueUpdate } from './notificationService.js';
 import { getPrefFrequency } from './notificationPrefs.js';
 import { pickVariant, openToken, withOpenPixel } from './subjectVariants.js';
+import { marketPack } from '../config/marketPack.js';
 import logger from '../utils/logger.js';
 
-const SITE = 'https://saahomes.com';
-const AGENT_PHONE = '(970) 999-1407';
+const SITE = marketPack.market.siteUrl || 'https://saahomes.com';
+const AGENT_PHONE = marketPack.market.phone;
 const GOLD = '#CFB36E';
 
 const fmt = (n) =>
@@ -52,12 +53,16 @@ function digestHtml({
       : `<span style="color:#6b7280">first monthly update</span>`;
 
   const greeting = firstName ? `Hi ${escapeHtml(firstName)},` : 'Hi there,';
+  const { market, sources, dpa, fairHousing, footer, honestLabels } = marketPack;
+  const brandUpper = String(market.brand || 'SAA Homes').toUpperCase();
+  const estimateLabel =
+    label || honestLabels.estimateFallback;
 
   return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:#111">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#111">
     <tr><td align="center" style="padding:24px 16px">
-      <div style="color:${GOLD};font-size:20px;font-weight:800;letter-spacing:0.04em">SAA HOMES</div>
-      <div style="color:#9ca3af;font-size:12px;margin-top:4px">Schwartz and Associates · Northern Colorado</div>
+      <div style="color:${GOLD};font-size:20px;font-weight:800;letter-spacing:0.04em">${escapeHtml(brandUpper)}</div>
+      <div style="color:#9ca3af;font-size:12px;margin-top:4px">${escapeHtml(footer.headerSubline)}</div>
     </td></tr>
   </table>
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
@@ -78,7 +83,10 @@ function digestHtml({
             <div style="margin-top:10px;font-size:13px">${deltaLine}</div>
           </div>
           <p style="margin:14px 0 0;font-size:12px;color:#6b7280;line-height:1.5">
-            ${escapeHtml(label || 'Estimated range based on local sales data. Updated monthly. Not an appraisal.')}
+            ${escapeHtml(estimateLabel)}
+          </p>
+          <p style="margin:6px 0 0;font-size:11px;color:#9ca3af;line-height:1.5">
+            Source: ${escapeHtml(sources.saaMls)} · ${escapeHtml(honestLabels.estimate)}
           </p>
         </td></tr>
         <tr><td style="padding:4px 24px 8px">
@@ -100,8 +108,8 @@ function digestHtml({
               </a>
             </td></tr>
             <tr><td style="padding:0 0 10px">
-              <a href="tel:9709991407" style="display:block;border:1px solid #d1d5db;color:#111;text-decoration:none;font-weight:600;font-size:13px;padding:12px 16px;border-radius:8px;text-align:center">
-                Talk to Adam &amp; Mandi — Free, No Pressure · ${AGENT_PHONE}
+              <a href="${market.tel}" style="display:block;border:1px solid #d1d5db;color:#111;text-decoration:none;font-weight:600;font-size:13px;padding:12px 16px;border-radius:8px;text-align:center">
+                Talk to Adam &amp; Mandi — Free, No Pressure · ${escapeHtml(AGENT_PHONE)}
               </a>
             </td></tr>
           </table>
@@ -109,13 +117,21 @@ function digestHtml({
         <tr><td style="padding:16px 24px 28px;border-top:1px solid #f3f4f6">
           <p style="margin:0;font-size:12px;color:#6b7280;line-height:1.5">
             Refinance curiosity? We&rsquo;ll connect you with a great local lender — we never advise rates.
-            Questions about this home? Reply to this email or call ${AGENT_PHONE}.
+            Questions about this home? Reply to this email or call ${escapeHtml(AGENT_PHONE)}.
+          </p>
+          <p style="margin:12px 0 0;font-size:12px;color:#6b7280;line-height:1.55">
+            ${escapeHtml(footer.depthLine)}
+          </p>
+          <p style="margin:8px 0 0;font-size:12px;color:#6b7280;line-height:1.55">
+            ${escapeHtml(dpa.chfaLine)}
+            <a href="${dpa.hubUrl}" style="color:#6b7280">${escapeHtml(dpa.hubPath)}</a>
           </p>
           <p style="margin:14px 0 0;font-size:11px;color:#9ca3af;line-height:1.5">
             <a href="${manageUrl}" style="color:#6b7280">Manage preferences</a>
             &nbsp;·&nbsp;
             <a href="${unsubscribeUrl}" style="color:#6b7280">Unsubscribe from value updates</a>
-            <br/>Schwartz and Associates · Fort Collins, CO · Estimates only, not appraisals.
+            <br/>${escapeHtml(footer.brandLine)} · ${escapeHtml(AGENT_PHONE)}
+            <br/>${escapeHtml(fairHousing)} · ${escapeHtml(honestLabels.notAppraisal)}
           </p>
         </td></tr>
       </table>
@@ -181,7 +197,7 @@ async function sendOne(profile, { dryRun = false } = {}) {
     profile.state || 'CO',
     profile.postal_code,
   ].filter(Boolean).join(', ');
-  const cityLabel = (profile.city || '').trim() || 'Northern Colorado';
+  const cityLabel = (profile.city || '').trim() || marketPack.market.name;
   const midFmt = fmt(our.mid);
   const deltaFmt =
     delta != null && delta !== 0 ? fmt(Math.abs(delta)) : '';
