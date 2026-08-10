@@ -1688,6 +1688,7 @@ def my_presentations(request: Request):
 @app.delete("/api/presentations/{presentation_id}")
 def delete_presentation(request: Request, presentation_id: str):
     import auth_service
+    import database
 
     user = _require_user(request)
     # Users can only delete their own presentations; admins can delete any
