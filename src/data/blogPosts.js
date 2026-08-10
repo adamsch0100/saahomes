@@ -798,6 +798,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Timnath-CO-Area-Guide.jpg',
     readTime: '8 min read',
+    youtubeId: 'V0x7srmh2uk',
     sections: [
       {
         heading: 'Why buyers choose Timnath and Severance',
