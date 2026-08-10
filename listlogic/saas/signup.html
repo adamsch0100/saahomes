@@ -63,10 +63,6 @@ button.btn { width: 100%; padding: 13px; font-size: 0.95rem; }
       <label for="email">Work email</label>
       <input id="email" type="email" required autocomplete="email" placeholder="you@brokerage.com">
     </div>
-    <div class="field">
-      <label for="promo">Promo code <span style="font-weight:400;text-transform:none">(optional)</span></label>
-      <input id="promo" placeholder="e.g. CBListLogic" spellcheck="false">
-    </div>
     <button type="submit" class="btn btn-gold">Email me a link</button>
   </form>
   <p class="status" id="status"></p>
@@ -81,7 +77,6 @@ button.btn { width: 100%; padding: 13px; font-size: 0.95rem; }
 const params = new URLSearchParams(location.search);
 const invite = params.get('invite') || '';
 const next = params.get('next') || '/saas/app.html';
-if (params.get('code')) document.getElementById('promo').value = params.get('code');
 if (invite) {
   fetch('/api/invite-info?token=' + encodeURIComponent(invite))
     .then(r => r.json())
@@ -106,7 +101,6 @@ document.getElementById('form').addEventListener('submit', async (e) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: document.getElementById('email').value.trim(),
-        promo_code: document.getElementById('promo').value.trim(),
         invite,
         next,
       }),

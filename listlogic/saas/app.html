@@ -106,7 +106,10 @@
 @media (max-width: 620px) {
   .report-row { grid-template-columns: 1fr; }
   .report-actions { justify-content: flex-start; }
-}</style>
+}
+.upsell { margin-top: 14px; background: #fdf6e3; border: 1px solid #e8d9a8; border-radius: 10px; padding: 11px 14px; font-size: 0.86rem; line-height: 1.5; }
+.upsell a { font-weight: 700; }
+</style>
 </head>
 <body>
 
@@ -351,6 +354,7 @@
       <input type="text" id="shareLink" readonly placeholder="Client share link appears here">
       <button type="button" class="btn btn-ghost" id="copyShareBtn">Copy client link</button>
     </div>
+    <div class="upsell" id="upsellNote" style="display:none"></div>
   </div>
 
   <div style="height:56px"></div>
@@ -398,12 +402,43 @@ const result = document.getElementById('result');
     } else if (!ent.ok) {
       banner.classList.add('err');
       banner.innerHTML =
-        '<strong>Trial ended.</strong> <a href="/saas/pricing.html">Choose a plan</a> to keep generating.';
+        '<strong>Trial ended.</strong> Your saved reports and share links still work — pick a plan to generate the next one. ' +
+        '<button type="button" id="upgradeBtn" class="btn btn-gold" style="margin-left:10px;padding:5px 14px;font-size:0.82rem">Subscribe — $39/mo</button>' +
+        ' <a href="/saas/pricing.html" style="margin-left:8px">All plans</a>';
+      bindUpgradeButtons();
     } else {
       meta.textContent =
         (ent.remaining != null ? ent.remaining + ' presentation(s) left' : '') +
         (ent.days_left != null ? ' · ~' + ent.days_left + ' day(s) left' : '') +
         (u.email ? ' · ' + u.email : '');
+      if (ent.remaining === 1) {
+        banner.insertAdjacentHTML('beforeend',
+          ' <button type="button" id="upgradeBtn" class="btn btn-gold" style="margin-left:10px;padding:5px 14px;font-size:0.82rem">Upgrade — $39/mo unlimited</button>');
+        bindUpgradeButtons();
+      }
+    }
+    async function bindUpgradeButtons() {
+      document.querySelectorAll('#upgradeBtn, .upgrade-checkout').forEach((b) => {
+        if (b.dataset.bound) return;
+        b.dataset.bound = '1';
+        b.addEventListener('click', async () => {
+          b.disabled = true;
+          b.textContent = 'Opening checkout…';
+          try {
+            const r = await fetch('/api/billing/checkout', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              body: JSON.stringify({ plan: 'agent_monthly', quantity: 1 }),
+            });
+            const d = await r.json().catch(() => ({}));
+            if (d.url) { location.href = d.url; return; }
+            throw new Error(d.detail || 'no url');
+          } catch (e) {
+            location.href = '/saas/pricing.html?plan=agent_monthly';
+          }
+        });
+      });
     }
     const billing = new URLSearchParams(location.search).get('billing');
     if (billing === 'success') {
@@ -560,6 +595,14 @@ form.addEventListener('submit', async (e) => {
       const msg = typeof detail === 'string' ? detail
         : (detail && detail.message) ? detail.message
         : (payload.message || ('HTTP ' + res.status));
+      if (res.status === 402) {
+        statusEl.className = 'status error';
+        statusEl.innerHTML = escapeHtml(msg) +
+          ' <a href="/saas/pricing.html?plan=agent_monthly" style="font-weight:700">Subscribe — $39/mo</a> · ' +
+          '<a href="/saas/pricing.html" style="font-weight:700">all plans</a>';
+        btn.disabled = false;
+        return;
+      }
       throw new Error(msg);
     }
     document.getElementById('mRec').textContent = money(payload.recommended_price);
@@ -591,6 +634,20 @@ form.addEventListener('submit', async (e) => {
     const shareInput = document.getElementById('shareLink');
     shareInput.value = shareAbsolute(payload.share_url || payload.url);
     result.classList.add('show');
+    const entAfter = payload.entitlement || {};
+    const upsell = document.getElementById('upsellNote');
+    if (entAfter.just_exhausted || entAfter.remaining === 0) {
+      upsell.innerHTML = '<strong>That was your last free presentation.</strong> ' +
+        '<a href="/saas/pricing.html?plan=agent_monthly">Upgrade — $39/mo unlimited</a> or ' +
+        '<a href="/saas/pricing.html?plan=one_time">$20 for a single report</a>. Saved reports and share links keep working.';
+      upsell.style.display = 'block';
+    } else if (entAfter.remaining === 1) {
+      upsell.innerHTML = '<strong>Heads-up — 1 free presentation left.</strong> ' +
+        '<a href="/saas/pricing.html?plan=agent_monthly">Upgrade now — $39/mo unlimited</a> and never think about it again.';
+      upsell.style.display = 'block';
+    } else {
+      upsell.style.display = 'none';
+    }
     result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     statusEl.className = 'status ok';
     statusEl.textContent = payload.saved

@@ -456,8 +456,30 @@ def increment_presentation(user_id: str) -> dict:
     log_event(user_id, "generate", {"presentations_used": used})
     if limit_i is not None and used >= int(limit_i) and (user.get("status") or "") == "trial":
         _mark_expired(user_id, "limit_reached")
+        _notify_conversion_moment(user, "reports_used_up_email")
         return {"ok": False, "reason": "limit_reached", "remaining": 0, "just_exhausted": True}
+    if limit_i is not None and used == int(limit_i) - 1 and (user.get("status") or "") == "trial":
+        _notify_conversion_moment(user, "last_report_email")
     return entitlement(user)
+
+
+def _notify_conversion_moment(user: dict, event_type: str) -> None:
+    """Usage-triggered upgrade emails — fire exactly once per user, at the moment of intent."""
+    if event_already_sent(user["id"], event_type, within_hours=24 * 365 * 10):
+        return
+    try:
+        import mailer
+
+        base = app_base_url()
+        sent = False
+        if event_type == "last_report_email":
+            sent = mailer.send_last_report_notice(user, base)
+        elif event_type == "reports_used_up_email":
+            sent = mailer.send_reports_used_up(user, base)
+        if sent:
+            log_event(user["id"], event_type, {})
+    except Exception:
+        logger.exception("Conversion email %s failed for %s", event_type, user.get("email"))
 
 
 def _new_share_token() -> str:

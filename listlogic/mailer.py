@@ -119,6 +119,35 @@ def send_trial_expired(user: dict, base_url: str) -> None:
     send_email(to=user["email"], subject="Your ListLogic trial ended — keep pricing with data", body=body)
 
 
+def send_last_report_notice(user: dict, base_url: str) -> bool:
+    """Sent the moment a trial user is down to their final presentation."""
+    body = (
+        f"Hi {user.get('name') or 'there'},\n\n"
+        f"Quick heads-up: you have 1 free presentation left on your ListLogic trial.\n\n"
+        f"If ListLogic is already helping you win the room, upgrading is $39/mo — "
+        f"unlimited presentations, and one signed listing pays for years of it:\n"
+        f"{base_url}/saas/pricing.html?plan=agent_monthly\n\n"
+        f"Rather pay per report? Single reports are $20: {base_url}/saas/pricing.html?plan=one_time\n\n"
+        f"— ListLogic\n"
+    )
+    return send_email(to=user["email"], subject="1 presentation left on your ListLogic trial", body=body)
+
+
+def send_reports_used_up(user: dict, base_url: str) -> bool:
+    """Sent the moment a trial user burns their last presentation."""
+    body = (
+        f"Hi {user.get('name') or 'there'},\n\n"
+        f"You've used all {user.get('presentation_limit') or 3} trial presentations — nice work putting them in front of sellers.\n\n"
+        f"To generate the next one, pick a plan (takes about a minute):\n"
+        f"  - Agent monthly, unlimited: $39/mo — {base_url}/saas/pricing.html?plan=agent_monthly\n"
+        f"  - Single report: $20 — {base_url}/saas/pricing.html?plan=one_time\n"
+        f"  - Agent annual (2 months free): $390/yr — {base_url}/saas/pricing.html?plan=agent_annual\n\n"
+        f"Your saved reports and share links keep working either way.\n\n"
+        f"— ListLogic\n"
+    )
+    return send_email(to=user["email"], subject="You're out of trial presentations — upgrade to keep going", body=body)
+
+
 def send_feedback_notice(payload: dict) -> None:
     body = (
         f"Category: {payload.get('category')}\n"
