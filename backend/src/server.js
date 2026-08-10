@@ -8,6 +8,7 @@ import { existsSync, readFileSync } from 'fs';
 import apiRoutes from './routes/api.js';
 import adminRoutes from './routes/admin.js';
 import { runMigrations } from './config/migrate.js';
+import { startIresSyncScheduler } from './jobs/iresScheduler.js';
 
 dotenv.config();
 
@@ -279,6 +280,10 @@ const startServer = async () => {
   } catch (error) {
     console.error('Migration error on startup (API will still run):', error.message);
   }
+
+  // MLS sync lives on the main site now (hourly at :57, advisory-locked) —
+  // no longer a Hermes-box cron dependency.
+  startIresSyncScheduler();
 };
 
 startServer();
