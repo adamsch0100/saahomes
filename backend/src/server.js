@@ -7,6 +7,7 @@ import { dirname, join } from 'path';
 import { existsSync, readFileSync } from 'fs';
 import apiRoutes from './routes/api.js';
 import adminRoutes from './routes/admin.js';
+import agentRoutes from './routes/agent.js';
 import { runMigrations } from './config/migrate.js';
 import { startIresSyncScheduler } from './jobs/iresScheduler.js';
 
@@ -63,6 +64,7 @@ app.get('/health', (req, res) => {
 
 app.use('/api', apiRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/agent', agentRoutes);
 
 const canonicalRedirects = {
   '/g-hope-greeley': '/greeley-g-hope-down-payment-assistance/',
