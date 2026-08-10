@@ -37,9 +37,10 @@ def _sqlite_path() -> Path:
 
 
 def _adapt_sql(sql: str) -> str:
-    """SQLite uses ? placeholders; Postgres uses %s."""
+    """SQLite uses ? placeholders; Postgres uses %s. Literal % (e.g. LIKE patterns)
+    must be escaped to %% for psycopg before the ? -> %s conversion."""
     if using_postgres():
-        return sql.replace("?", "%s")
+        return sql.replace("%", "%%").replace("?", "%s")
     return sql
 
 

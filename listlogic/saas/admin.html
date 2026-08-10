@@ -100,8 +100,10 @@ a.btn { text-decoration: none; display: inline-block; }
       <small>Owner</small>
     </a>
     <div class="ll-nav-links">
-      <a href="/saas/admin.html" class="ll-nav-active">Owner console</a>
-      <a href="/saas/app.html" class="ll-nav-pill-soft">Agent dashboard</a>
+      <div class="ll-view-switch">
+        <a href="/saas/admin.html" class="on">Owner console</a>
+        <a href="/saas/app.html">Agent dashboard</a>
+      </div>
       <a href="/saas/app.html#generate">Generate</a>
       <a href="/demo">Sample</a>
       <a href="/saas/">Site</a>
@@ -113,35 +115,7 @@ a.btn { text-decoration: none; display: inline-block; }
   <div class="page-head">
     <span class="eyebrow">Owner console</span>
     <h1>Manage ListLogic</h1>
-    <p class="sub">Users, every report, AI chats, feedback, and billing at a glance. Jump to the agent dashboard anytime to generate like an agent.</p>
-  </div>
-
-  <div class="owner-quick">
-    <a href="/saas/app.html">
-      <div class="oq-label">You as agent</div>
-      <div class="oq-title">Agent dashboard</div>
-      <div class="oq-hint">Your reports &amp; generate</div>
-    </a>
-    <a href="#tabjump-reports" id="jumpReports">
-      <div class="oq-label">Support</div>
-      <div class="oq-title">All reports</div>
-      <div class="oq-hint">Every agent’s presentations</div>
-    </a>
-    <a href="#tabjump-billing" id="jumpBilling">
-      <div class="oq-label">Revenue</div>
-      <div class="oq-title">Billing</div>
-      <div class="oq-hint">Plans, MRR, Stripe</div>
-    </a>
-    <a href="#tabjump-ai" id="jumpAi">
-      <div class="oq-label">Product</div>
-      <div class="oq-title">AI chats</div>
-      <div class="oq-hint">What agents are asking</div>
-    </a>
-    <a href="#tabjump-feedback" id="jumpFeedback">
-      <div class="oq-label">Inbox</div>
-      <div class="oq-title">Feedback</div>
-      <div class="oq-hint">Bugs &amp; suggestions</div>
-    </a>
+    <p class="sub">Users, every report, AI chats, feedback, and billing at a glance.</p>
   </div>
 
   <div class="ops-strip" id="opsStrip" aria-live="polite">
@@ -378,11 +352,6 @@ function openTab(name) {
   const btn = document.querySelector('.tabs button[data-tab="' + name + '"]');
   if (btn) btn.click();
 }
-document.getElementById('jumpReports')?.addEventListener('click', (e) => { e.preventDefault(); openTab('reports'); });
-document.getElementById('jumpBilling')?.addEventListener('click', (e) => { e.preventDefault(); openTab('billing'); });
-document.getElementById('jumpAi')?.addEventListener('click', (e) => { e.preventDefault(); openTab('ai'); });
-document.getElementById('jumpFeedback')?.addEventListener('click', (e) => { e.preventDefault(); openTab('feedback'); });
-
 document.getElementById('logout').addEventListener('click', async (e) => {
   e.preventDefault();
   await fetch('/api/logout', { method: 'POST' });

@@ -117,8 +117,10 @@
       <small id="brandRole">by SAA Homes</small>
     </a>
     <div class="ll-nav-links">
-      <a href="/saas/admin.html" id="adminNavLink" class="ll-nav-pill" hidden>Owner console</a>
-      <a href="/saas/app.html" class="ll-nav-active">Agent dashboard</a>
+      <div class="ll-view-switch" id="viewSwitch" hidden>
+        <a href="/saas/admin.html">Owner console</a>
+        <a href="/saas/app.html" class="on">Agent dashboard</a>
+      </div>
       <a href="/saas/app.html#generate">Generate</a>
       <a href="/demo">Sample listing</a>
       <a href="/saas/pricing.html">Pricing</a>
@@ -127,13 +129,6 @@
     </div>
   </div>
 </nav>
-
-<div class="owner-switch" id="ownerSwitch">
-  <div class="container owner-switch-inner">
-    <span><strong>Owner mode</strong> — you’re on the agent dashboard (generate &amp; your reports).</span>
-    <a href="/saas/admin.html">Back to owner console</a>
-  </div>
-</div>
 
 <div class="container narrow">
   <div class="page-head">
@@ -379,11 +374,8 @@ const result = document.getElementById('result');
     const ent = data.entitlement || {};
     const u = data.user || {};
     if (u.role === 'admin') {
-      const adminNav = document.getElementById('adminNavLink');
-      if (adminNav) adminNav.hidden = false;
-      document.getElementById('ownerSwitch')?.classList.add('on');
-      const brandRole = document.getElementById('brandRole');
-      if (brandRole) brandRole.textContent = 'Owner · agent view';
+      const viewSwitch = document.getElementById('viewSwitch');
+      if (viewSwitch) viewSwitch.hidden = false;
     }
     if (u && u.profile_complete === false) {
       location.href = '/saas/onboarding.html?next=' + encodeURIComponent('/saas/app.html');
