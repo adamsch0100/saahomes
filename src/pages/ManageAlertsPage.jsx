@@ -3,6 +3,12 @@ import { useSearchParams, Link } from "react-router-dom";
 import SEO from "../components/SEO";
 import { photoUrl } from "../utils/photoUrl.js";
 import ListingDetailPanel from "../components/ListingDetailPanel";
+import ListingPhotoFallback from "../components/ListingPhotoFallback.jsx";
+import {
+  formatPrice,
+  listingStatsLine,
+} from "../utils/listingHelpers.js";
+import { marketPack } from "../data/marketPack.js";
 import {
   fetchSavedHomes,
   migrateLocalSavedHomes,
@@ -43,11 +49,6 @@ function filtersText(filters = {}) {
   return parts.length ? parts.join(" · ") : "All Northern Colorado";
 }
 
-function fmtPrice(n) {
-  if (n == null || n === "") return "—";
-  return `$${Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
-}
-
 function authQuery(token) {
   return token ? `?token=${encodeURIComponent(token)}` : "";
 }
@@ -79,6 +80,7 @@ function LeadScoreBadge({ score, label }) {
 }
 
 function PreviewCard({ preview, matchCount, editPath }) {
+  const [imgFailed, setImgFailed] = useState(false);
   if (!preview && !matchCount) {
     return (
       <div className="mt-3 rounded-lg bg-gray-50 border border-gray-100 px-3 py-2.5 text-xs text-gray-500">
@@ -86,22 +88,34 @@ function PreviewCard({ preview, matchCount, editPath }) {
       </div>
     );
   }
+  const previewStats = preview ? listingStatsLine(preview) : "";
   return (
     <div className="mt-3 flex gap-3 rounded-lg border border-gray-100 bg-gray-50 overflow-hidden">
       {preview?.id || preview?.listing_id ? (
         <Link
           to={preview.slug ? `/homes-for-sale/${preview.slug}/` : editPath || "/properties/"}
-          className="shrink-0 w-24 sm:w-28 h-20 sm:h-24 bg-gray-200"
+          className="shrink-0 w-24 sm:w-28 h-20 sm:h-24 bg-[#1a1a1a] relative overflow-hidden"
         >
-          <img
-            src={photoUrl(preview.id || preview.listing_id, 0)}
-            alt={preview.address || "Matching home"}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
+          {imgFailed ? (
+            <ListingPhotoFallback className="w-full h-full" compact />
+          ) : (
+            <img
+              src={photoUrl(preview.id || preview.listing_id, 0)}
+              alt={
+                preview.address
+                  ? `Photo of ${preview.address}`
+                  : "Matching home"
+              }
+              className="w-full h-full object-cover"
+              loading="lazy"
+              onError={() => setImgFailed(true)}
+            />
+          )}
         </Link>
       ) : (
-        <div className="shrink-0 w-24 sm:w-28 h-20 sm:h-24 bg-gray-200" />
+        <div className="shrink-0 w-24 sm:w-28 h-20 sm:h-24 bg-[#1a1a1a]">
+          <ListingPhotoFallback className="w-full h-full" compact />
+        </div>
       )}
       <div className="min-w-0 flex-1 py-2 pr-3 flex flex-col justify-center">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -109,15 +123,11 @@ function PreviewCard({ preview, matchCount, editPath }) {
         </p>
         {preview && (
           <>
-            <p className="text-sm font-bold text-gray-900 mt-0.5">{fmtPrice(preview.list_price)}</p>
+            <p className="text-sm font-bold text-gray-900 mt-0.5">{formatPrice(preview.list_price)}</p>
             <p className="text-xs text-gray-600 truncate">{preview.address || preview.city || "Matching home"}</p>
-            {(preview.beds != null || preview.baths != null) && (
-              <p className="text-[11px] text-gray-400 mt-0.5">
-                {[preview.beds != null ? `${preview.beds} bd` : null, preview.baths != null ? `${preview.baths} ba` : null]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </p>
-            )}
+            {previewStats ? (
+              <p className="text-[11px] text-gray-400 mt-0.5">{previewStats}</p>
+            ) : null}
           </>
         )}
       </div>
@@ -126,12 +136,23 @@ function PreviewCard({ preview, matchCount, editPath }) {
 }
 
 function SavedHomeCard({ home, onUnsave, onOpen, busy }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const hasProxyPhoto = Boolean(home.listing_db_id) || home.photo_url?.startsWith("/api/photo/");
   const imgSrc = home.listing_db_id
     ? photoUrl(home.listing_db_id, 0)
     : home.photo_url?.startsWith("/api/photo/")
       ? `${API_BASE}${home.photo_url}`
-      : "/images/buyers-hero.jpg";
+      : null;
   const canOpen = Boolean(home.slug) && !home.off_market;
+  const stats = listingStatsLine({
+    beds: home.beds,
+    baths: home.baths,
+    living_area: home.living_area,
+    home_type: home.home_type,
+    property_type: home.property_type,
+    lot_size_acres: home.lot_size_acres,
+    lot_size: home.lot_size,
+  });
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm flex flex-col sm:flex-row">
@@ -139,19 +160,24 @@ function SavedHomeCard({ home, onUnsave, onOpen, busy }) {
         type="button"
         onClick={() => canOpen && onOpen?.(home)}
         disabled={!canOpen}
-        className={`shrink-0 w-full sm:w-40 h-40 sm:h-auto sm:min-h-[140px] bg-gray-100 relative ${canOpen ? "cursor-pointer" : "cursor-default"}`}
+        className={`shrink-0 w-full sm:w-40 h-40 sm:h-auto sm:min-h-[140px] bg-[#1a1a1a] relative ${canOpen ? "cursor-pointer" : "cursor-default"}`}
         aria-label={canOpen ? `Open ${home.property_address || "saved home"}` : "Off market home"}
       >
-        <img
-          src={imgSrc}
-          alt={home.property_address || "Saved home"}
-          className="w-full h-full object-cover"
-          loading="lazy"
-          onError={(e) => {
-            e.currentTarget.onerror = null;
-            e.currentTarget.src = "/images/buyers-hero.jpg";
-          }}
-        />
+        {!imgSrc || imgFailed || !hasProxyPhoto ? (
+          <ListingPhotoFallback className="w-full h-full absolute inset-0" />
+        ) : (
+          <img
+            src={imgSrc}
+            alt={
+              home.property_address
+                ? `Photo of ${home.property_address}`
+                : "Saved home"
+            }
+            className="w-full h-full object-cover"
+            loading="lazy"
+            onError={() => setImgFailed(true)}
+          />
+        )}
         {home.off_market && (
           <span className="absolute top-2 left-2 text-[11px] font-bold uppercase tracking-wide bg-gray-900/90 text-white px-2 py-1 rounded-md">
             Off market
@@ -159,19 +185,9 @@ function SavedHomeCard({ home, onUnsave, onOpen, busy }) {
         )}
       </button>
       <div className="flex-1 min-w-0 p-4 flex flex-col justify-center gap-1">
-        <p className="text-lg font-bold text-gray-900">{fmtPrice(home.list_price)}</p>
+        <p className="text-lg font-bold text-gray-900">{formatPrice(home.list_price)}</p>
         <p className="text-sm text-gray-700 leading-snug">{home.property_address || "Saved home"}</p>
-        {(home.beds != null || home.baths != null || home.living_area != null) && (
-          <p className="text-xs text-gray-500">
-            {[
-              home.beds != null ? `${home.beds} bd` : null,
-              home.baths != null ? `${home.baths} ba` : null,
-              home.living_area != null ? `${Number(home.living_area).toLocaleString()} sqft` : null,
-            ]
-              .filter(Boolean)
-              .join(" · ")}
-          </p>
-        )}
+        {stats ? <p className="text-xs text-gray-500">{stats}</p> : null}
         <div className="mt-3 flex flex-wrap gap-2">
           {canOpen && (
             <button
@@ -524,7 +540,7 @@ export default function ManageAlertsPage() {
             <p className="text-gray-700">{error}</p>
             <p className="text-gray-400 text-sm mt-2">
               If the problem persists, call Schwartz and Associates at{" "}
-              <a href="tel:+19709991407" className="underline">(970) 999-1407</a>.
+              <a href={marketPack.market.tel} className="underline">{marketPack.market.phone}</a>.
             </p>
           </div>
         ) : loading ? (
@@ -774,13 +790,13 @@ export default function ManageAlertsPage() {
                   <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
                     <p className="text-lg font-semibold text-gray-900">No saved homes yet</p>
                     <p className="text-gray-500 text-sm mt-2 max-w-sm mx-auto">
-                      No saved homes yet. Start browsing Northern Colorado listings and tap the heart to save your favorites.
+                      Start browsing {marketPack.market.name} listings and tap the heart to save your favorites.
                     </p>
                     <Link
                       to="/properties/"
                       className="inline-block mt-5 px-5 py-2.5 bg-black text-white rounded-lg text-sm font-semibold min-h-[44px]"
                     >
-                      Browse homes
+                      Browse {marketPack.market.name} homes
                     </Link>
                   </div>
                 ) : (
@@ -801,8 +817,8 @@ export default function ManageAlertsPage() {
 
             <p className="mt-4 text-xs text-gray-400">
               Questions? Call or text{" "}
-              <a href="tel:+19709991407" className="underline">(970) 999-1407</a>
-              {" "}· Equal Housing Opportunity
+              <a href={marketPack.market.tel} className="underline">{marketPack.market.phone}</a>
+              {" "}· {marketPack.fairHousing}
             </p>
           </>
         )}

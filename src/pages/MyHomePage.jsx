@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import SEO from "../components/SEO";
 import HomeValueChart from "../components/HomeValueChart";
 import { marketPack } from "../data/marketPack";
+import { formatPrice } from "../utils/listingHelpers.js";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -14,10 +15,7 @@ const GOLD = "#CFB36E";
 const AGENT_PHONE = marketPack.market.phone;
 const AGENT_TEL = marketPack.market.tel;
 
-function fmt(n) {
-  if (n == null || n === "") return "—";
-  return `$${Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
-}
+const fmt = formatPrice;
 
 function addressLine(h) {
   if (!h) return "";

@@ -11,15 +11,17 @@ import LocationCombobox, {
 } from "./LocationCombobox";
 import {
   formatPrice,
-  fmtNum,
   listingBadges,
   listingAddress,
   homeTypeLabel,
+  listingStatsLine,
   matchSavedSearch,
   getSavedSearches,
   hasAnySavedSearch,
 } from "../utils/listingHelpers.js";
 import SaveHomeButton, { useSavedHomesStatus } from "./SaveHomeButton";
+import ListingPhotoFallback from "./ListingPhotoFallback";
+import { marketPack } from "../data/marketPack.js";
 import { buildListingsItemListSchema } from "../utils/seoConstants.js";
 
 /**
@@ -767,16 +769,11 @@ function CardBadges({ listing }) {
 }
 
 function CardStatsLine({ listing, className = "" }) {
-  const parts = [];
-  if (listing.beds != null) parts.push(`${fmtNum(listing.beds)} bd`);
-  if (listing.baths != null) parts.push(`${fmtNum(listing.baths)} ba`);
-  if (listing.living_area != null) {
-    parts.push(`${Number(listing.living_area).toLocaleString()} sqft`);
-  }
-  if (!parts.length) return null;
+  const line = listingStatsLine(listing);
+  if (!line) return null;
   return (
     <p className={`text-[13px] sm:text-sm font-semibold text-gray-800 tracking-tight ${className}`}>
-      {parts.join(" · ")}
+      {line}
     </p>
   );
 }
@@ -789,8 +786,14 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
   const { priceCut } = listingBadges(listing);
   const match = matchSavedSearch(listing, savedSearches);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgFailed, setImgFailed] = useState(false);
   const addr = listingAddress(listing);
   const typeLabel = homeTypeLabel(listing);
+  const hasPhoto = Array.isArray(listing.photos) && listing.photos.length > 0;
+  const showPhoto = hasPhoto && !imgFailed;
+  const photoAlt = addr
+    ? `Photo of ${addr}${listing.city ? `, ${listing.city}` : ""}`
+    : `Home in ${listing.city || marketPack.market.name}`;
   const isSaved =
     Boolean(savedMap[listing.listing_id]) ||
     Boolean(savedMap[listing.slug]) ||
@@ -803,26 +806,23 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
 
   const photo = (
     <>
-      {!imgLoaded && (
+      {showPhoto && !imgLoaded && (
         <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-100 to-gray-200" />
       )}
-      {listing.photos?.length > 0 ? (
+      {showPhoto ? (
         <img
           src={photoUrl(listing.id, 0)}
-          alt={`${addr} ${listing.city || ""}`}
+          alt={photoAlt}
           onLoad={() => setImgLoaded(true)}
-          onError={(e) => {
-            e.currentTarget.onerror = null;
-            e.currentTarget.src = "/images/buyers-hero.jpg";
+          onError={() => {
+            setImgFailed(true);
             setImgLoaded(true);
           }}
           className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03] ${imgLoaded ? "opacity-100" : "opacity-0"}`}
           loading="lazy"
         />
       ) : (
-        <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm bg-gray-100">
-          {listing.city || "Northern Colorado"}
-        </div>
+        <ListingPhotoFallback className="w-full h-full absolute inset-0" compact={compact} />
       )}
       <CardBadges listing={listing} />
       <div className={`absolute z-10 ${compact ? "top-1.5 right-1.5" : "top-2 right-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"}`}>
@@ -847,7 +847,7 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
           </div>
         </div>
       )}
-      {!compact && listing.photos?.length > 1 && (
+      {!compact && showPhoto && listing.photos?.length > 1 && (
         <span className="absolute bottom-2.5 right-2.5 bg-black/65 text-white text-[10px] font-medium px-1.5 py-0.5 rounded z-[1]">
           1 / {listing.photos.length}
         </span>
@@ -944,13 +944,13 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
 
 /* ── Shared form control styles — min 44px tap targets on interactive chips ── */
 const selectClass =
-  "w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white text-gray-900 focus:ring-2 focus:ring-black focus:border-black outline-none min-h-[44px]";
+  "w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white text-gray-900 focus:ring-2 focus:ring-[#CFB36E] focus:border-[#CFB36E] outline-none min-h-[44px]";
 const chipBase =
-  "inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 py-2 border rounded-full text-sm font-medium transition-colors whitespace-nowrap touch-manipulation";
+  "inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 py-2 border rounded-full text-sm font-medium transition-colors whitespace-nowrap touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]";
 const chipIdle = `${chipBase} border-gray-300 bg-white text-gray-800 hover:border-black`;
 const chipActive = `${chipBase} border-black bg-black text-white`;
 const pillBtn =
-  "inline-flex items-center justify-center min-h-[36px] px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors touch-manipulation";
+  "inline-flex items-center justify-center min-h-[36px] px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]";
 const pillIdle = `${pillBtn} border-gray-300 bg-white text-gray-700 hover:border-black`;
 const pillOn = `${pillBtn} border-black bg-black text-white`;
 
@@ -1996,7 +1996,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           <select
             value={filters.beds}
             onChange={(e) => setFilterInstant("beds", e.target.value)}
-            className={`min-h-[44px] px-3.5 py-2 border rounded-full text-sm font-medium outline-none touch-manipulation ${
+            className={`min-h-[44px] px-3.5 py-2 border rounded-full text-sm font-medium outline-none touch-manipulation focus-visible:ring-2 focus-visible:ring-[#CFB36E] ${
               filters.beds ? "border-black bg-black text-white" : "border-gray-300 bg-white"
             }`}
             aria-label="Beds"
@@ -2011,7 +2011,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           <select
             value={filters.baths}
             onChange={(e) => setFilterInstant("baths", e.target.value)}
-            className={`min-h-[44px] px-3.5 py-2 border rounded-full text-sm font-medium outline-none touch-manipulation ${
+            className={`min-h-[44px] px-3.5 py-2 border rounded-full text-sm font-medium outline-none touch-manipulation focus-visible:ring-2 focus-visible:ring-[#CFB36E] ${
               filters.baths ? "border-black bg-black text-white" : "border-gray-300 bg-white"
             }`}
             aria-label="Baths"
@@ -2082,6 +2082,11 @@ export default function ListingSearch({ location, height = "700px", compact = fa
             type="button"
             onClick={openDrawer}
             className={activeFilterCount > 0 ? chipActive : chipIdle}
+            aria-label={
+              activeFilterCount > 0
+                ? `Open filters, ${activeFilterCount} active`
+                : "Open filters"
+            }
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6" />
@@ -2111,7 +2116,12 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           <button
             type="button"
             onClick={openDrawer}
-            className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 py-2 border border-gray-300 rounded-full text-sm font-semibold bg-white touch-manipulation"
+            className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 py-2 border border-gray-300 rounded-full text-sm font-semibold bg-white touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
+            aria-label={
+              activeFilterCount > 0
+                ? `Open filters, ${activeFilterCount} active`
+                : "Open filters"
+            }
           >
             Filters
             {activeFilterCount > 0 && (
@@ -2150,8 +2160,9 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                   key={chip.id}
                   type="button"
                   onClick={() => removeChip(chip)}
-                  className="inline-flex items-center gap-1 min-h-[32px] pl-2.5 pr-1.5 py-1 rounded-full text-xs font-semibold bg-[#CFB36E]/20 text-gray-900 border border-[#CFB36E]/50 hover:bg-[#CFB36E]/35 whitespace-nowrap touch-manipulation"
+                  className="inline-flex items-center gap-1 min-h-[32px] pl-2.5 pr-1.5 py-1 rounded-full text-xs font-semibold bg-[#CFB36E]/20 text-gray-900 border border-[#CFB36E]/50 hover:bg-[#CFB36E]/35 whitespace-nowrap touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
                   title={`Remove ${chip.label}`}
+                  aria-label={`Remove filter: ${chip.label}`}
                 >
                   {chip.label}
                   <span className="inline-flex items-center justify-center w-5 h-5 rounded-full hover:bg-black/10" aria-hidden="true">
@@ -2355,16 +2366,31 @@ export default function ListingSearch({ location, height = "700px", compact = fa
             <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 z-10 flex justify-center pointer-events-none">
               <div className="pointer-events-auto max-w-sm w-full rounded-xl bg-white/95 backdrop-blur-sm border border-gray-200 shadow-xl px-5 py-4 text-center">
                 <p className="text-sm font-bold text-gray-900">No homes match your filters</p>
+                {activeChips.length > 0 && (
+                  <p className="text-[11px] text-gray-500 mt-2 leading-snug">
+                    Active: {activeChips.map((c) => c.label).join(" · ")}
+                  </p>
+                )}
                 <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">
                   Widen price or beds, expand the search area, or clear filters to see more homes.
                 </p>
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="mt-3 min-h-[40px] px-4 py-2 bg-black text-white text-xs font-semibold rounded-lg touch-manipulation"
+                  className="mt-3 min-h-[40px] px-4 py-2 bg-black text-white text-xs font-semibold rounded-lg touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
                 >
                   Clear all filters
                 </button>
+                <a
+                  href="/properties/"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    clearFilters();
+                  }}
+                  className="mt-2 inline-block text-xs font-semibold text-gray-600 underline underline-offset-2 hover:text-black"
+                >
+                  Browse all {marketPack.market.name} homes
+                </a>
               </div>
             </div>
           )}
@@ -2422,7 +2448,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
               <p className="text-gray-900 font-semibold text-lg">We couldn&apos;t load listings</p>
               <p className="text-gray-500 mt-2 max-w-md text-sm">
                 Please try again in a moment, or call{" "}
-                <a href="tel:+19709991407" className="underline text-black font-medium">(970) 999-1407</a>.
+                <a href={marketPack.market.tel} className="underline text-black font-medium">{marketPack.market.phone}</a>.
               </p>
               <button
                 type="button"
@@ -2443,31 +2469,53 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                 </svg>
               </div>
               <p className="text-gray-900 font-semibold text-lg">
-                We couldn&apos;t find anything for that search
+                No homes match your filters
                 {filters.polygon
                   ? " in your drawn area"
-                  : areaLabel && areaLabel !== "Northern Colorado"
+                  : areaLabel && areaLabel !== marketPack.market.name
                     ? ` in ${areaLabel}`
                     : ""}
               </p>
-              <p className="text-gray-500 mt-2 max-w-md text-sm leading-relaxed">
+              {activeChips.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1.5 justify-center max-w-md">
+                  {activeChips.map((chip) => (
+                    <span
+                      key={chip.id}
+                      className="inline-flex items-center min-h-[28px] px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#CFB36E]/20 text-gray-900 border border-[#CFB36E]/45"
+                    >
+                      {chip.label}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <p className="text-gray-500 mt-3 max-w-md text-sm leading-relaxed">
                 Try widening price or beds, expand the map area, or clear filters. You can also save this search — we&apos;ll email you when a match hits the market (new homes + price drops, no spam).
               </p>
               <div className="mt-5 flex flex-wrap gap-3 justify-center">
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="min-h-[44px] px-5 py-2.5 border border-gray-300 rounded-lg text-sm font-semibold hover:border-black touch-manipulation"
+                  className="min-h-[44px] px-5 py-2.5 bg-black text-white rounded-lg text-sm font-semibold touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
                 >
                   Clear all filters
                 </button>
                 <SaveSearchModal
                   filters={saveFilters}
                   buttonLabel="Alert me when one appears"
-                  buttonClassName="min-h-[44px] px-5 py-2.5 bg-black text-white rounded-lg text-sm font-semibold touch-manipulation"
+                  buttonClassName="min-h-[44px] px-5 py-2.5 border border-gray-300 rounded-lg text-sm font-semibold hover:border-black touch-manipulation"
                 />
               </div>
-              <p className="text-gray-400 text-xs mt-6">
+              <a
+                href="/properties/"
+                onClick={(e) => {
+                  e.preventDefault();
+                  clearFilters();
+                }}
+                className="mt-4 text-sm font-semibold text-gray-700 underline underline-offset-2 hover:text-black"
+              >
+                Browse all {marketPack.market.name} homes
+              </a>
+              <p className="text-gray-400 text-xs mt-4">
                 Or explore our{" "}
                 <a href="/northern-colorado-areas/" className="underline">city guides</a>
               </p>

@@ -12,6 +12,10 @@ import {
   matchSavedSearch,
   getSavedSearches,
   isHomeSaved as isLocalHomeSaved,
+  listingStatsParts,
+  displayBeds,
+  displayBaths,
+  isLandListing,
 } from "../utils/listingHelpers.js";
 import {
   PhotoGallery,
@@ -323,9 +327,7 @@ export default function ListingDetailPage() {
 
   const metaDesc = [
     `${fullAddress} — ${formatPrice(listing.list_price)}`,
-    listing.beds != null ? `${listing.beds} bd` : "",
-    listing.baths != null ? `${listing.baths} ba` : "",
-    sqft != null ? `${Number(sqft).toLocaleString()} sqft` : "",
+    ...listingStatsParts(listing),
     "in",
     listing.city,
     "Colorado.",
@@ -465,49 +467,60 @@ export default function ListingDetailPage() {
               )}
 
               <p className="text-gray-300 mt-2.5 text-sm sm:text-base">
-                {listing.beds != null && (
+                {isLandListing(listing) ? (
+                  listingStatsParts(listing).map((p, i) => (
+                    <React.Fragment key={p}>
+                      {i > 0 && <span className="text-gray-600 mx-1.5">·</span>}
+                      <span className="font-semibold text-white">{p}</span>
+                    </React.Fragment>
+                  ))
+                ) : (
                   <>
-                    <span className="font-semibold text-white">{listing.beds}</span>
-                    <span> bd</span>
-                  </>
-                )}
-                {listing.baths != null && (
-                  <>
-                    <span className="text-gray-600 mx-1.5">·</span>
-                    <span className="font-semibold text-white">{listing.baths}</span>
-                    <span> ba</span>
-                  </>
-                )}
-                {listing.half_baths != null && Number(listing.half_baths) > 0 && (
-                  <>
-                    <span className="text-gray-600 mx-1.5">·</span>
-                    <span className="font-semibold text-white">{listing.half_baths}</span>
-                    <span> half-ba</span>
-                  </>
-                )}
-                {listing.three_quarter_baths != null &&
-                  Number(listing.three_quarter_baths) > 0 && (
-                    <>
-                      <span className="text-gray-600 mx-1.5">·</span>
-                      <span className="font-semibold text-white">
-                        {listing.three_quarter_baths}
-                      </span>
-                      <span> ¾-ba</span>
-                    </>
-                  )}
-                {sqft != null && (
-                  <>
-                    <span className="text-gray-600 mx-1.5">·</span>
-                    <span className="font-semibold text-white">
-                      {Number(sqft).toLocaleString()}
-                    </span>
-                    <span> sqft</span>
-                  </>
-                )}
-                {pricePerSqft != null && (
-                  <>
-                    <span className="text-gray-600 mx-1.5">·</span>
-                    <span>${pricePerSqft}/sqft</span>
+                    {displayBeds(listing) != null && (
+                      <>
+                        <span className="font-semibold text-white">{displayBeds(listing)}</span>
+                        <span> bd</span>
+                      </>
+                    )}
+                    {displayBaths(listing) != null && (
+                      <>
+                        <span className="text-gray-600 mx-1.5">·</span>
+                        <span className="font-semibold text-white">{displayBaths(listing)}</span>
+                        <span> ba</span>
+                      </>
+                    )}
+                    {listing.half_baths != null && Number(listing.half_baths) > 0 && (
+                      <>
+                        <span className="text-gray-600 mx-1.5">·</span>
+                        <span className="font-semibold text-white">{listing.half_baths}</span>
+                        <span> half-ba</span>
+                      </>
+                    )}
+                    {listing.three_quarter_baths != null &&
+                      Number(listing.three_quarter_baths) > 0 && (
+                        <>
+                          <span className="text-gray-600 mx-1.5">·</span>
+                          <span className="font-semibold text-white">
+                            {listing.three_quarter_baths}
+                          </span>
+                          <span> ¾-ba</span>
+                        </>
+                      )}
+                    {sqft != null && (
+                      <>
+                        <span className="text-gray-600 mx-1.5">·</span>
+                        <span className="font-semibold text-white">
+                          {Number(sqft).toLocaleString()}
+                        </span>
+                        <span> sqft</span>
+                      </>
+                    )}
+                    {pricePerSqft != null && (
+                      <>
+                        <span className="text-gray-600 mx-1.5">·</span>
+                        <span>${pricePerSqft}/sqft</span>
+                      </>
+                    )}
                   </>
                 )}
               </p>

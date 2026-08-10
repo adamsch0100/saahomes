@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { photoUrl } from "../../utils/photoUrl.js";
+import ListingPhotoFallback from "../ListingPhotoFallback.jsx";
+import { LISTING_PHOTO_FALLBACK_SRC } from "../../utils/photoUrl.js";
 
 /**
  * Zillow-style photo gallery: main image, thumbs, swipe, counter, keyboard, fullscreen.
@@ -201,10 +203,15 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
     e.stopPropagation();
   };
 
-  const countBadge = `${active + 1}/${total}`;
+  const countBadge = total > 0 ? `${active + 1}/${total}` : "0/0";
   const thumbIndexes = Array.from({ length: total }, (_, i) => i);
   const activeLoaded = !!loaded[active];
   const showUnderlay = !activeLoaded && displayIndex !== active && !!loaded[displayIndex];
+  const mainAlt = alt
+    ? total > 0
+      ? `Photo of ${alt} — photo ${active + 1} of ${total}`
+      : `Photo of ${alt}`
+    : "Listing photo";
 
   const renderMainStage = (stageClassName, { large = false } = {}) => (
     <div
@@ -220,77 +227,83 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_center,_#CFB36E_0%,_transparent_65%)]" />
       </div>
 
-      {/* Keep previous photo visible while the next one loads */}
-      {showUnderlay && (
-        <img
-          src={photoUrl(listingId, displayIndex)}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-          decoding="async"
-          draggable={false}
-        />
-      )}
-
-      <img
-        ref={mainImgRef}
-        key={`${listingId}-${active}`}
-        src={photoUrl(listingId, active)}
-        alt={`${alt} — photo ${active + 1} of ${total}`}
-        onLoad={() => markLoaded(active)}
-        onError={(e) => {
-          e.currentTarget.onerror = null;
-          e.currentTarget.src = "/images/buyers-hero.jpg";
-          markLoaded(active);
-        }}
-        className={`absolute inset-0 z-[1] w-full h-full object-cover pointer-events-none transition-opacity duration-200 ${
-          activeLoaded ? "opacity-100" : "opacity-0"
-        }`}
-        decoding="async"
-        // Current (and near-current) photos must load eagerly — lazy causes grey stalls
-        loading="eager"
-        fetchPriority={active === 0 ? "high" : "auto"}
-        draggable={false}
-      />
-
-      {/* Subtle pulse only while first paint of this index is pending */}
-      {!activeLoaded && (
-        <div
-          className="absolute inset-0 z-[2] pointer-events-none animate-pulse bg-black/20"
-          aria-hidden="true"
-        />
-      )}
-
-      {total > 1 && (
+      {total <= 0 ? (
+        <ListingPhotoFallback className="absolute inset-0 z-[1]" />
+      ) : (
         <>
-          <button
-            type="button"
-            onClick={onArrowClick(-1)}
-            onMouseDown={onArrowMouseDown}
-            className={`absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-30 rounded-full bg-white/95 hover:bg-white shadow-lg flex items-center justify-center text-gray-900 leading-none active:scale-95 transition-transform pointer-events-auto touch-manipulation select-none ${
-              large ? "w-12 h-12 text-2xl" : "w-10 h-10 text-xl"
+          {/* Keep previous photo visible while the next one loads */}
+          {showUnderlay && (
+            <img
+              src={photoUrl(listingId, displayIndex)}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+              decoding="async"
+              draggable={false}
+            />
+          )}
+
+          <img
+            ref={mainImgRef}
+            key={`${listingId}-${active}`}
+            src={photoUrl(listingId, active)}
+            alt={mainAlt}
+            onLoad={() => markLoaded(active)}
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = LISTING_PHOTO_FALLBACK_SRC;
+              markLoaded(active);
+            }}
+            className={`absolute inset-0 z-[1] w-full h-full object-cover pointer-events-none transition-opacity duration-200 ${
+              activeLoaded ? "opacity-100" : "opacity-0"
             }`}
-            aria-label="Previous photo"
-          >
-            ‹
-          </button>
-          <button
-            type="button"
-            onClick={onArrowClick(1)}
-            onMouseDown={onArrowMouseDown}
-            className={`absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-30 rounded-full bg-white/95 hover:bg-white shadow-lg flex items-center justify-center text-gray-900 leading-none active:scale-95 transition-transform pointer-events-auto touch-manipulation select-none ${
-              large ? "w-12 h-12 text-2xl" : "w-10 h-10 text-xl"
-            }`}
-            aria-label="Next photo"
-          >
-            ›
-          </button>
+            decoding="async"
+            // Current (and near-current) photos must load eagerly — lazy causes grey stalls
+            loading="eager"
+            fetchPriority={active === 0 ? "high" : "auto"}
+            draggable={false}
+          />
+
+          {/* Subtle pulse only while first paint of this index is pending */}
+          {!activeLoaded && (
+            <div
+              className="absolute inset-0 z-[2] pointer-events-none animate-pulse bg-black/20"
+              aria-hidden="true"
+            />
+          )}
+
+          {total > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={onArrowClick(-1)}
+                onMouseDown={onArrowMouseDown}
+                className={`absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-30 rounded-full bg-white/95 hover:bg-white shadow-lg flex items-center justify-center text-gray-900 leading-none active:scale-95 transition-transform pointer-events-auto touch-manipulation select-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E] ${
+                  large ? "w-12 h-12 text-2xl" : "w-10 h-10 text-xl"
+                }`}
+                aria-label="Previous photo"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                onClick={onArrowClick(1)}
+                onMouseDown={onArrowMouseDown}
+                className={`absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-30 rounded-full bg-white/95 hover:bg-white shadow-lg flex items-center justify-center text-gray-900 leading-none active:scale-95 transition-transform pointer-events-auto touch-manipulation select-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E] ${
+                  large ? "w-12 h-12 text-2xl" : "w-10 h-10 text-xl"
+                }`}
+                aria-label="Next photo"
+              >
+                ›
+              </button>
+            </>
+          )}
+
+          <span className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 bg-black/75 text-white text-xs font-medium px-3 py-1 rounded-full tabular-nums pointer-events-none">
+            {countBadge}
+          </span>
         </>
       )}
-
-      <span className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 bg-black/75 text-white text-xs font-medium px-3 py-1 rounded-full tabular-nums pointer-events-none">
-        {countBadge}
-      </span>
     </div>
   );
 
@@ -348,7 +361,7 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
                   onLoad={() => markLoaded(i)}
                   onError={(e) => {
                     e.currentTarget.onerror = null;
-                    e.currentTarget.src = "/images/buyers-hero.jpg";
+                    e.currentTarget.src = LISTING_PHOTO_FALLBACK_SRC;
                   }}
                   className="w-full h-full object-cover pointer-events-none"
                   draggable={false}
@@ -358,15 +371,17 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
           </div>
         )}
 
-        <button
-          type="button"
-          onClick={() => setFullscreen(true)}
-          className={`text-sm font-semibold text-gray-700 hover:text-black underline underline-offset-2 ${
-            compact ? "px-3" : ""
-          }`}
-        >
-          View all {total} photos
-        </button>
+        {total > 0 && (
+          <button
+            type="button"
+            onClick={() => setFullscreen(true)}
+            className={`text-sm font-semibold text-gray-700 hover:text-black underline underline-offset-2 ${
+              compact ? "px-3" : ""
+            }`}
+          >
+            View all {total} photos
+          </button>
+        )}
       </div>
 
       {fullscreen && (
@@ -411,7 +426,7 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
                     onLoad={() => markLoaded(i)}
                     onError={(e) => {
                       e.currentTarget.onerror = null;
-                      e.currentTarget.src = "/images/buyers-hero.jpg";
+                      e.currentTarget.src = LISTING_PHOTO_FALLBACK_SRC;
                     }}
                     draggable={false}
                   />

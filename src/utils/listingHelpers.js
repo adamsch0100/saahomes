@@ -25,6 +25,89 @@ export const fmtNum = (v) => {
 
 export const fmtSqft = (n) => (n == null ? "—" : `${Number(n).toLocaleString()} sqft`);
 
+/** True for land / lot / vacant parcels — never invent property type. */
+export function isLandListing(listing) {
+  if (!listing) return false;
+  const ht = (listing.home_type || "").toLowerCase();
+  const ptype = (listing.property_type || "").toLowerCase();
+  const subtype = (listing.property_subtype || "").toLowerCase();
+  if (ht === "land") return true;
+  if (ptype.includes("land") || ptype.includes("lot")) return true;
+  if (
+    subtype.includes("land") ||
+    subtype.includes("vacant lot") ||
+    subtype.includes("unimproved")
+  ) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Card/detail stats segments (beds · baths · sqft / acres).
+ * Land and zero-bed parcels never render "0 bd · 0 ba".
+ */
+export function listingStatsParts(listing, { includeSqft = true, includeLot = true } = {}) {
+  if (!listing) return [];
+  const parts = [];
+
+  if (isLandListing(listing)) {
+    if (includeLot) {
+      if (listing.lot_size_acres != null && listing.lot_size_acres !== "") {
+        parts.push(`${Number(listing.lot_size_acres)} acres`);
+      } else if (listing.lot_size != null && listing.lot_size !== "") {
+        const n = Number(listing.lot_size);
+        if (Number.isFinite(n)) parts.push(`${n.toLocaleString("en-US")} sqft lot`);
+      }
+    }
+    if (!parts.length) parts.push("Land");
+    return parts;
+  }
+
+  const bedsN = listing.beds != null && listing.beds !== "" ? Number(listing.beds) : null;
+  const bathsN = listing.baths != null && listing.baths !== "" ? Number(listing.baths) : null;
+
+  if (bedsN != null && Number.isFinite(bedsN) && bedsN > 0) {
+    parts.push(`${fmtNum(bedsN)} bd`);
+  }
+  if (bathsN != null && Number.isFinite(bathsN) && bathsN > 0) {
+    parts.push(`${fmtNum(bathsN)} ba`);
+  }
+  if (includeSqft && listing.living_area != null && listing.living_area !== "") {
+    const n = Number(listing.living_area);
+    if (Number.isFinite(n) && n > 0) {
+      parts.push(`${n.toLocaleString("en-US")} sqft`);
+    }
+  }
+
+  // Explicit zeros with no other stats → em dash, not "0 bd"
+  if (!parts.length && (bedsN === 0 || bathsN === 0)) {
+    parts.push("—");
+  }
+
+  return parts;
+}
+
+export function listingStatsLine(listing, opts) {
+  return listingStatsParts(listing, opts).join(" · ");
+}
+
+/** Show beds only when > 0 (hides land "0" junk). */
+export function displayBeds(listing) {
+  if (!listing || listing.beds == null || listing.beds === "") return null;
+  const n = Number(listing.beds);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return n;
+}
+
+/** Show baths only when > 0. */
+export function displayBaths(listing) {
+  if (!listing || listing.baths == null || listing.baths === "") return null;
+  const n = Number(listing.baths);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return n;
+}
+
 export function listingAddress(listing) {
   if (!listing) return "";
   return [listing.street_number, listing.street_name, listing.unit && `#${listing.unit}`]
