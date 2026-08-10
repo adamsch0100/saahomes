@@ -18,8 +18,11 @@ import logger from '../utils/logger.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CACHE_DIR = process.env.PHOTO_CACHE_DIR || path.join('/tmp', 'saahomes-photos');
 const MAX_CACHE_FILES = parseInt(process.env.PHOTO_CACHE_MAX || '6000', 10);
-const CONCURRENCY = 2; // serialized + paced — media CDN counts toward MLS limits
-const REQUEST_DELAY_MS = 500; // ≤~2 RPS worst case
+const CONCURRENCY = 1; // serialized + paced — media CDN fetches count toward
+// MLS Grid limits (2 RPS sustained / 4 RPS burst, Aug 2026 suspension
+// warning). 1 concurrent + 700ms pacing ≈ ≤1.4 RPS worst case: never bursts
+// the cap even while the hourly IRES sync is running on the same host.
+const REQUEST_DELAY_MS = 700;
 let active = 0;
 const queue = [];
 
