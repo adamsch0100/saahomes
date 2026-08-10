@@ -43,6 +43,8 @@ export default function MortgageCalculatorPage() {
                     alt="MortgageCalculator.org" 
                     className="max-w-full h-auto mx-auto"
                     style={{maxWidth: '100%'}}
+                    loading="lazy"
+                    decoding="async"
                   />
                 </a>
               </p>

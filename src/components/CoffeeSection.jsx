@@ -10,6 +10,8 @@ export default function CoffeeSection() {
               src="/images/Cooffee-2-120xAUTO.fit.png" 
               alt="Coffee"
               className="w-full h-full object-contain"
+              loading="lazy"
+              decoding="async"
             />
           </div>
           

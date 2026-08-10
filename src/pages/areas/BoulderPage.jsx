@@ -94,7 +94,7 @@ export default function BoulderPage() {
                 src="/images/Boulder.jpg" 
                 alt="Boulder Colorado Flatirons and mountain views" 
                 className="w-full rounded-lg shadow-lg"
-                loading="lazy"
+                loading="lazy" decoding="async"
               />
             </div>
             <p className="text-lg leading-relaxed mb-4">

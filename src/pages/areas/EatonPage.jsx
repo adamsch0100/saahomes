@@ -104,7 +104,7 @@ export default function EatonPage() {
               src="/images/Eaton-CO-Area-Guide.jpg" 
               alt="Eaton Colorado rural community and agricultural heritage" 
               className="w-full rounded-lg shadow-lg"
-              loading="lazy"
+              loading="lazy" decoding="async"
             />
           </div>
           <div className="grid md:grid-cols-3 gap-8">

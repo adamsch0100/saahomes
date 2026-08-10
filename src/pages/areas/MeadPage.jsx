@@ -85,7 +85,7 @@ export default function MeadPage() {
                 src="/images/Mead.JPG" 
                 alt="Mead Colorado community and Rocky Mountain views" 
                 className="w-full rounded-lg shadow-lg"
-                loading="lazy"
+                loading="lazy" decoding="async"
               />
             </div>
             <p className="text-lg leading-relaxed mb-4">

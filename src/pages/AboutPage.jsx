@@ -32,6 +32,8 @@ export default function AboutPage() {
               src="/images/About-Img-1-1-1.jpg" 
               alt="Adam and Mandi Schwartz"
               className="rounded-lg shadow-xl w-full"
+              loading="lazy"
+              decoding="async"
             />
           </div>
           <div>
@@ -75,6 +77,8 @@ export default function AboutPage() {
               src="/images/About-new-image-1-1.jpg" 
               alt="Premium Service"
               className="rounded-lg shadow-xl w-full"
+              loading="lazy"
+              decoding="async"
             />
           </div>
         </div>

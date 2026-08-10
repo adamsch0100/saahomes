@@ -53,6 +53,8 @@ export default function ForBuyersPage() {
                 src="/images/Buyers-CTA-1.jpg" 
                 alt="Adam and Mandi Schwartz - Real Estate Agents"
                 className="rounded-lg shadow-xl w-full max-w-lg"
+                loading="lazy"
+                decoding="async"
               />
             </div>
           </div>
@@ -201,6 +203,8 @@ export default function ForBuyersPage() {
                 src="/images/Buyers-img-2.jpg" 
                 alt="Modern Kitchen"
                 className="w-full h-auto rounded-lg shadow-xl"
+                loading="lazy"
+                decoding="async"
               />
             </div>
             

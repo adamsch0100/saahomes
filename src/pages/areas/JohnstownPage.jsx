@@ -104,7 +104,7 @@ export default function JohnstownPage() {
               src="/images/Johnstown-CO-Area-Guide.jpg" 
               alt="Johnstown Colorado historic downtown and community" 
               className="w-full rounded-lg shadow-lg"
-              loading="lazy"
+              loading="lazy" decoding="async"
             />
           </div>
           <div className="grid md:grid-cols-3 gap-8">

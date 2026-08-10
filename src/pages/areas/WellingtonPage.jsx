@@ -104,7 +104,7 @@ export default function WellingtonPage() {
               src="/images/wellington.png" 
               alt="Wellington Colorado small town and agricultural landscape" 
               className="w-full rounded-lg shadow-lg"
-              loading="lazy"
+              loading="lazy" decoding="async"
             />
           </div>
           <div className="grid md:grid-cols-3 gap-8">
