@@ -226,6 +226,104 @@ def _startup():
             logger.exception("Auth bootstrap failed")
 
     threading.Thread(target=_boot, name="listlogic-bootstrap", daemon=True).start()
+    _start_scheduler()
+
+
+def _run_lifecycle_sweep() -> dict:
+    """Trial reminders + expirations (same logic as /api/internal/trial-reminders)."""
+    import auth_service
+    import mailer
+
+    base = auth_service.app_base_url()
+    reminded = 0
+    expired = 0
+    for user in auth_service.users_needing_trial_reminder(7):
+        if auth_service.event_already_sent(user["id"], "trial_reminder_email"):
+            continue
+        mailer.send_trial_reminder(user, base)
+        auth_service.log_event(user["id"], "trial_reminder_email", {})
+        reminded += 1
+    for user in auth_service.users_newly_expired():
+        if auth_service.event_already_sent(user["id"], "trial_expired_email"):
+            continue
+        mailer.send_trial_expired(user, base)
+        auth_service.log_event(user["id"], "trial_expired_email", {})
+        expired += 1
+    return {"reminded": reminded, "expired": expired}
+
+
+def _run_owner_digest() -> bool:
+    """Weekly owner email; self-dedupes via the events table."""
+    import auth_service
+    import mailer
+    import stripe_billing
+
+    if auth_service.recent_event_exists("owner_digest_email", within_hours=144):
+        return False
+    stats = auth_service.admin_stats()
+    subs_data = auth_service.list_subscriptions()
+    billing = subs_data.get("summary", {})
+    stripe_actual = None
+    if stripe_billing.stripe_configured():
+        mrr = 0.0
+        active = 0
+        past_due_ct = 0
+        for s in subs_data.get("subscriptions", []):
+            user = s.get("user") or {}
+            if not user.get("has_stripe"):
+                continue
+            snap = stripe_billing.subscription_snapshot(user)
+            if not snap:
+                continue
+            status = snap.get("subscription_status") or ""
+            if status in ("active", "trialing"):
+                active += 1
+                mrr += float(snap.get("monthly_amount") or 0)
+            elif status == "past_due":
+                past_due_ct += 1
+        stripe_actual = {"mrr": round(mrr, 2), "active_subs": active, "past_due": past_due_ct}
+    sent = mailer.send_owner_digest({
+        "stats": stats,
+        "billing": billing,
+        "past_due": auth_service.list_past_due_users(days=30),
+        "new_users": auth_service.list_recent_signups(days=7),
+        "stripe_actual": stripe_actual,
+        "admin_url": auth_service.app_base_url() + "/saas/admin.html",
+    })
+    auth_service.log_event(None, "owner_digest_email", {"sent": bool(sent), "paying": billing.get("paying", 0)})
+    return bool(sent)
+
+
+def _start_scheduler() -> None:
+    """In-process cron: lifecycle sweep every 6h, owner digest weekly.
+
+    Single uvicorn worker (see Dockerfile) makes a thread safe here; the digest
+    dedupes via the events table so a restart never double-sends.
+    """
+    import threading
+    import time
+
+    if getattr(app.state, "scheduler_started", False):
+        return
+    app.state.scheduler_started = True
+
+    def _loop():
+        time.sleep(180)  # let bootstrap/migrations settle first
+        while True:
+            try:
+                result = _run_lifecycle_sweep()
+                if result.get("reminded") or result.get("expired"):
+                    logger.info("Lifecycle sweep: %s", result)
+            except Exception:
+                logger.exception("Lifecycle sweep failed")
+            try:
+                if _run_owner_digest():
+                    logger.info("Owner digest sent")
+            except Exception:
+                logger.exception("Owner digest failed")
+            time.sleep(6 * 3600)
+
+    threading.Thread(target=_loop, name="listlogic-scheduler", daemon=True).start()
 
 
 def _save_html(report: dict, path: Path) -> Path:
@@ -1180,6 +1278,85 @@ def admin_subscriptions(request: Request):
 
     _require_admin(request)
     return auth_service.list_subscriptions()
+
+
+@app.get("/api/admin/billing-live")
+def admin_billing_live(request: Request):
+    """Live Stripe pull: subscription status, last payment, next renewal per user."""
+    import auth_service
+    import stripe_billing
+
+    _require_admin(request)
+    if not stripe_billing.stripe_configured():
+        return {"configured": False, "snapshots": {}, "totals": {}}
+    subs = auth_service.list_subscriptions().get("subscriptions", [])
+    snapshots: dict[str, dict] = {}
+    mrr = 0.0
+    active_subs = 0
+    past_due = 0
+    for s in subs:
+        user = s.get("user") or {}
+        if not user.get("has_stripe"):
+            continue
+        snap = stripe_billing.subscription_snapshot(user)
+        if not snap:
+            continue
+        snapshots[user["id"]] = snap
+        status = snap.get("subscription_status") or ""
+        if status in ("active", "trialing"):
+            active_subs += 1
+            mrr += float(snap.get("monthly_amount") or 0)
+        elif status == "past_due":
+            past_due += 1
+    return {
+        "configured": True,
+        "snapshots": snapshots,
+        "totals": {"mrr": round(mrr, 2), "active_subs": active_subs, "past_due": past_due},
+    }
+
+
+@app.post("/api/internal/owner-digest")
+def owner_digest(request: Request):
+    """Cron/manual: email Adam the weekly revenue + activity digest."""
+    import auth_service
+    import mailer
+
+    secret = (os.environ.get("CRON_SECRET") or os.environ.get("SESSION_SECRET") or "").strip()
+    hdr = (request.headers.get("X-Cron-Secret") or "").strip()
+    force = (request.headers.get("X-Digest-Force") or "").strip() == "1"
+    if secret and hdr != secret:
+        user = _current_user(request)
+        if not user or (user.get("role") or "") != "admin":
+            raise HTTPException(401, "Unauthorized")
+        force = True  # admin clicking the button always sends
+
+    if not force and auth_service.recent_event_exists("owner_digest_email", within_hours=144):
+        return {"ok": True, "skipped": "digest already sent this week"}
+
+    stats = auth_service.admin_stats()
+    billing = auth_service.list_subscriptions().get("summary", {})
+    past_due = auth_service.list_past_due_users(days=30)
+    new_users = auth_service.list_recent_signups(days=7)
+
+    stripe_actual = None
+    try:
+        live = admin_billing_live(request)
+        if live.get("configured"):
+            t = live.get("totals") or {}
+            stripe_actual = {"mrr": t.get("mrr", 0), "active_subs": t.get("active_subs", 0), "past_due": t.get("past_due", 0)}
+    except Exception:
+        logger.exception("Owner digest: live Stripe totals failed")
+
+    sent = mailer.send_owner_digest({
+        "stats": stats,
+        "billing": billing,
+        "past_due": past_due,
+        "new_users": new_users,
+        "stripe_actual": stripe_actual,
+        "admin_url": auth_service.app_base_url() + "/saas/admin.html",
+    })
+    auth_service.log_event(None, "owner_digest_email", {"sent": bool(sent), "paying": billing.get("paying", 0)})
+    return {"ok": True, "sent": bool(sent), "paying": billing.get("paying", 0)}
 
 
 @app.get("/api/admin/assistant-chats")

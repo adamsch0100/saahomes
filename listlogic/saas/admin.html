@@ -81,6 +81,10 @@ a.btn { text-decoration: none; display: inline-block; }
 }
 .plan-badge.paying { background: #e7f3ef; color: #0e7a6d; border-color: #cde5dd; }
 .plan-badge.none { background: #f4f1ea; color: var(--muted); border-color: var(--line); }
+.sub-status { display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: #f4f1ea; color: var(--muted); border: 1px solid var(--line); white-space: nowrap; }
+.sub-status.active, .sub-status.trialing { background: #e7f3ef; color: #0e7a6d; border-color: #cde5dd; }
+.sub-status.past_due, .sub-status.unpaid { background: #faeee4; color: #b3541e; border-color: #efd9c4; }
+.sub-status.canceled { background: #f8e3e3; color: #9b2c2c; border-color: #ecc9c9; }
 .bill-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 16px; }
 .bill-card { background: #faf8f3; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
 .bill-card .label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 700; }
@@ -176,11 +180,18 @@ a.btn { text-decoration: none; display: inline-block; }
 
   <section class="panel" id="tab-billing">
     <div class="card">
-    <h3 class="panel-title">Subscriptions &amp; revenue</h3>
-    <p class="sub" style="margin-top:0">Everyone with a plan, Stripe customer, or subscription. Estimates use list prices — Stripe is the source of truth for actuals.</p>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <h3 class="panel-title" style="margin:0">Subscriptions &amp; revenue</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-soft btn-sm" type="button" id="billSync">Sync Stripe</button>
+        <button class="btn btn-soft btn-sm" type="button" id="billDigest">Email me the weekly digest</button>
+      </div>
+    </div>
+    <p class="sub" style="margin-top:8px">Everyone with a plan, Stripe customer, or subscription. Sync pulls live status, last payment, and next renewal from Stripe.</p>
+    <div id="billAlert" style="display:none;background:#faeee4;border:1px solid #efd9c4;color:#8a3d12;border-radius:12px;padding:10px 14px;font-size:0.85rem;font-weight:600;margin-bottom:14px"></div>
     <div class="bill-cards">
       <div class="bill-card"><div class="label">Paying subscribers</div><div class="value" id="billPaying">—</div><div class="hint">active recurring plans</div></div>
-      <div class="bill-card"><div class="label">Est. MRR</div><div class="value" id="billMrr">—</div><div class="hint">annual plans ÷ 12</div></div>
+      <div class="bill-card"><div class="label">Est. MRR</div><div class="value" id="billMrr">—</div><div class="hint" id="billMrrHint">annual plans ÷ 12</div></div>
       <div class="bill-card"><div class="label">Stripe customers</div><div class="value" id="billCustomers">—</div><div class="hint">incl. one-time buyers</div></div>
       <div class="bill-card"><div class="label">Plan mix</div><div class="value" id="billMix" style="font-size:0.95rem;font-weight:600;line-height:1.5">—</div><div class="hint">paying by plan</div></div>
     </div>
@@ -191,7 +202,7 @@ a.btn { text-decoration: none; display: inline-block; }
       <button type="button" data-bill="trial">Still trialing</button>
     </div>
     <div style="overflow:auto"><table>
-      <thead><tr><th>Agent</th><th>Plan</th><th>Seats</th><th>Est. value</th><th>Status</th><th>Since</th><th>Stripe</th></tr></thead>
+      <thead><tr><th>Agent</th><th>Plan</th><th>Stripe status</th><th>Est. value</th><th>Last payment</th><th>Next renewal</th><th>Stripe</th></tr></thead>
       <tbody id="billingBody"></tbody>
     </table></div>
     </div>
@@ -360,6 +371,7 @@ document.querySelectorAll('.tabs button').forEach(btn => {
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
     btn.classList.add('on');
     document.getElementById('tab-' + btn.dataset.tab).classList.add('on');
+    if (btn.dataset.tab === 'billing') loadBillingLive(false);
   });
 });
 function openTab(name) {
@@ -444,6 +456,8 @@ function planLabel(plan) {
 let billRows = [];
 let billSummary = {};
 let billFilter = '';
+let billLive = {};
+let billLiveLoaded = false;
 
 async function loadBilling() {
   const data = await api('/api/admin/subscriptions');
@@ -460,6 +474,55 @@ async function loadBilling() {
   if (mrrEl) mrrEl.textContent = billSummary.mrr ? `≈ $${Math.round(billSummary.mrr).toLocaleString()}/mo est.` : 'recurring plans';
   renderBilling();
 }
+
+async function loadBillingLive(force) {
+  if (billLiveLoaded && !force) return;
+  const btn = document.getElementById('billSync');
+  if (btn) { btn.disabled = true; btn.textContent = 'Syncing…'; }
+  try {
+    const data = await api('/api/admin/billing-live');
+    if (data.configured) {
+      billLive = data.snapshots || {};
+      billLiveLoaded = true;
+      const t = data.totals || {};
+      if (t.mrr != null) {
+        document.getElementById('billMrr').textContent = '$' + Math.round(t.mrr).toLocaleString();
+        document.getElementById('billMrrHint').textContent = 'Stripe actual · ' + (t.active_subs ?? 0) + ' active subs';
+        const mrrEl = document.getElementById('statMrr');
+        if (mrrEl) mrrEl.textContent = `≈ $${Math.round(t.mrr).toLocaleString()}/mo Stripe`;
+      }
+      const pastDueRows = billRows.filter(s => (billLive[s.user.id] || {}).subscription_status === 'past_due');
+      const alert = document.getElementById('billAlert');
+      if (pastDueRows.length) {
+        alert.style.display = 'block';
+        alert.textContent = '⚠ ' + pastDueRows.length + ' past-due subscription' + (pastDueRows.length > 1 ? 's' : '') + ': ' +
+          pastDueRows.map(s => s.user.email).join(', ') + ' — follow up before Stripe cancels.';
+      } else {
+        alert.style.display = 'none';
+      }
+      renderBilling();
+      if (force) setStatus('Stripe synced', true);
+    } else if (force) {
+      setStatus('Stripe is not configured on this server', false);
+    }
+  } catch (err) {
+    if (force) setStatus(err.message, false);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Sync Stripe'; }
+  }
+}
+document.getElementById('billSync').addEventListener('click', () => loadBillingLive(true));
+document.getElementById('billDigest').addEventListener('click', async () => {
+  const btn = document.getElementById('billDigest');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    const data = await api('/api/internal/owner-digest', { method: 'POST' });
+    setStatus(data.sent ? 'Digest sent to your inbox' : 'Digest logged (SMTP not configured)', !!data.sent);
+  } catch (err) { setStatus(err.message, false); }
+  finally { btn.disabled = false; btn.textContent = 'Email me the weekly digest'; }
+});
+
+function fmtDate(iso) { return (iso || '').slice(0, 10) || '—'; }
 function renderBilling() {
   const body = document.getElementById('billingBody');
   const rows = billRows.filter(s => {
@@ -474,15 +537,20 @@ function renderBilling() {
     const subUrl = s.stripe_subscription_id
       ? (stripeMode === 'test' ? 'https://dashboard.stripe.com/test' : 'https://dashboard.stripe.com') + '/subscriptions/' + encodeURIComponent(s.stripe_subscription_id)
       : '';
-    const paying = s.monthly_value > 0;
+    const live = billLive[u.id] || null;
+    const paying = live ? (live.monthly_amount || 0) > 0 && ['active', 'trialing'].includes(live.subscription_status || '') : s.monthly_value > 0;
+    const value = live && live.monthly_amount ? live.monthly_amount : s.monthly_value;
+    const statusBadge = live && live.subscription_status
+      ? `<span class="sub-status ${esc(live.subscription_status)}">${esc(live.subscription_status.replace('_', ' '))}${live.cancel_at_period_end ? ' · cancels' : ''}</span>`
+      : `<span class="muted">${esc(u.status)}</span>`;
     return `
     <tr>
       <td><a class="user-link" data-uid="${esc(u.id)}"><strong>${esc(u.name || '—')}</strong></a><br><span class="muted">${esc(u.email)}</span></td>
-      <td><span class="plan-badge ${paying ? 'paying' : (s.plan ? '' : 'none')}">${esc(s.plan_label || planLabel(s.plan) || '—')}</span>${s.has_subscription ? '<br><span class="muted">subscription</span>' : ''}</td>
-      <td>${s.per_seat ? esc(String(s.seats)) : '<span class="muted">—</span>'}</td>
-      <td>${paying ? '$' + Math.round(s.monthly_value).toLocaleString() + '<span class="muted">/mo</span>' : (s.plan === 'one_time' ? '$20 <span class="muted">once</span>' : '<span class="muted">—</span>')}</td>
-      <td>${esc(u.status)}</td>
-      <td>${esc((u.created_at || '').slice(0,10))}</td>
+      <td><span class="plan-badge ${paying ? 'paying' : (s.plan ? '' : 'none')}">${esc(s.plan_label || planLabel(s.plan) || '—')}</span>${s.per_seat ? `<br><span class="muted">${esc(String((live && live.seats) || s.seats))} seats</span>` : ''}</td>
+      <td>${statusBadge}</td>
+      <td>${paying ? '$' + Math.round(value).toLocaleString() + '<span class="muted">/mo</span>' : (s.plan === 'one_time' ? '$20 <span class="muted">once</span>' : '<span class="muted">—</span>')}</td>
+      <td>${live && live.last_payment_amount ? '$' + Math.round(live.last_payment_amount).toLocaleString() + '<br><span class="muted">' + esc(fmtDate(live.last_payment_at)) + '</span>' : '<span class="muted">—</span>'}</td>
+      <td>${live && live.next_renewal ? esc(fmtDate(live.next_renewal)) : '<span class="muted">—</span>'}</td>
       <td class="actions">
         ${subUrl ? `<a class="btn btn-soft btn-sm" href="${esc(subUrl)}" target="_blank" rel="noopener">Sub</a>` : ''}
         ${stripeUrl ? `<a class="btn btn-soft btn-sm" href="${esc(stripeUrl)}" target="_blank" rel="noopener">Customer</a>` : '<span class="muted">—</span>'}

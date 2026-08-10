@@ -290,3 +290,87 @@ def _on_payment_failed(auth_service, invoice: dict) -> dict[str, Any]:
             {"invoice": invoice.get("id")},
         )
     return {"ok": True}
+
+
+# ---------- Owner console: live Stripe snapshots ----------
+
+_SNAPSHOT_CACHE: dict[str, tuple[float, dict]] = {}
+_SNAPSHOT_TTL = 600  # seconds
+
+
+def _cents(value: Any) -> float:
+    try:
+        return round(float(value or 0) / 100.0, 2)
+    except Exception:
+        return 0.0
+
+
+def _ts(value: Any) -> str:
+    if not value:
+        return ""
+    try:
+        from datetime import datetime, timezone
+
+        return datetime.fromtimestamp(int(value), tz=timezone.utc).isoformat()
+    except Exception:
+        return ""
+
+
+def subscription_snapshot(user: dict) -> Optional[dict]:
+    """Live Stripe state for one user: sub status, last payment, next renewal.
+
+    Cached per customer for _SNAPSHOT_TTL seconds so dashboard refreshes don't
+    fan out into Stripe rate limits.
+    """
+    cid = (user.get("stripe_customer_id") or "").strip()
+    sub_id = (user.get("stripe_subscription_id") or "").strip()
+    if not cid or not stripe_configured():
+        return None
+
+    cache_key = f"{cid}:{sub_id}"
+    import time
+
+    hit = _SNAPSHOT_CACHE.get(cache_key)
+    if hit and (time.time() - hit[0]) < _SNAPSHOT_TTL:
+        return hit[1]
+
+    stripe = get_stripe()
+    snap: dict[str, Any] = {
+        "subscription_status": "",
+        "cancel_at_period_end": False,
+        "next_renewal": "",
+        "seats": 0,
+        "monthly_amount": 0.0,
+        "last_payment_amount": 0.0,
+        "last_payment_at": "",
+    }
+    try:
+        if sub_id:
+            sub = stripe.Subscription.retrieve(sub_id)
+            snap["subscription_status"] = (sub.get("status") or "").lower()
+            snap["cancel_at_period_end"] = bool(sub.get("cancel_at_period_end"))
+            snap["next_renewal"] = _ts(sub.get("current_period_end"))
+            items = ((sub.get("items") or {}).get("data") or [])
+            if items:
+                item = items[0]
+                qty = int(item.get("quantity") or sub.get("quantity") or 1)
+                snap["seats"] = qty
+                price = item.get("price") or {}
+                unit = _cents(price.get("unit_amount"))
+                interval = (price.get("recurring") or {}).get("interval") or "month"
+                monthly = unit * qty
+                if interval == "year":
+                    monthly = monthly / 12.0
+                snap["monthly_amount"] = round(monthly, 2)
+        invoice_iter = stripe.Invoice.list(customer=cid, status="paid", limit=1)
+        paid = (invoice_iter.get("data") or [])
+        if paid:
+            inv = paid[0]
+            snap["last_payment_amount"] = _cents(inv.get("amount_paid"))
+            snap["last_payment_at"] = _ts(inv.get("status_transitions", {}).get("paid_at") or inv.get("created"))
+    except Exception:
+        logger.exception("Stripe snapshot failed for customer %s", cid)
+        return None
+
+    _SNAPSHOT_CACHE[cache_key] = (time.time(), snap)
+    return snap
