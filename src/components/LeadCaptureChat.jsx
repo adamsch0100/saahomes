@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { submitContactForm } from "../utils/api.js";
 import { rememberSavedSearch } from "../utils/listingHelpers.js";
+import { areaSeoPages } from "../data/areaSeo.js";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, '');
@@ -12,6 +13,42 @@ const API_BASE = (() => {
 const CHAT_NAME = "Nadia";
 const CHAT_TITLE = "Your Home Assistant";
 const AVATAR_PATH = "/images/nadia-avatar.jpg";
+
+// Slug → display name for the 27 known area pages (never guess from <title> —
+// titles carry boilerplate like "Homes for Sale in ..." that reads wrong when
+// quoted back at a visitor).
+const AREA_BY_SLUG = new Map(areaSeoPages.map((a) => [a.slug, a.city]));
+
+function humanizeSlug(slug) {
+  if (!slug) return "";
+  return slug
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+/** Best-known location label for the current page + query string. */
+function pageLocationLabel(path, search = "") {
+  // Area hub pages: /northern-colorado-areas/{slug}/
+  const areaMatch = path.match(/\/northern-colorado-areas\/([a-z0-9-]+)\/?$/);
+  if (areaMatch) return AREA_BY_SLUG.get(areaMatch[1]) || humanizeSlug(areaMatch[1]) || "";
+  // Legacy city landing pages: /{slug}-homes-for-sale/
+  const cityMatch = path.match(/\/([a-z0-9-]+?)-(?:homes-for-sale|real-estate)\//);
+  if (cityMatch) return AREA_BY_SLUG.get(cityMatch[1]) || humanizeSlug(cityMatch[1]) || "";
+  // Search page: honor the visitor's active location filter (city= can be
+  // multi: "Denver,Erie"; __noco__ is the statewide default).
+  if (path.startsWith("/properties")) {
+    const sp = new URLSearchParams(search.replace(/^\?/, ""));
+    const cityParam =
+      sp.get("city") || sp.get("cities") || sp.get("location") || "";
+    if (cityParam && cityParam !== "__noco__") {
+      const first = cityParam.split(",")[0].trim();
+      if (first) return AREA_BY_SLUG.get(first) || humanizeSlug(first) || "";
+    }
+    return "Northern Colorado";
+  }
+  return "";
+}
 
 /** Strip Nadia control tags from displayed assistant text. */
 function stripControlTags(reply = "") {
@@ -96,9 +133,10 @@ export default function LeadCaptureChat() {
       const addr = document.querySelector("h1")?.textContent?.trim();
       message = addr ? `Questions about ${addr}? I know this home — ask me anything.` : "Questions about this home? I can tell you more.";
     } else if (isSearch || isCity) {
-      const m = document.title.match(/^([A-Za-z ]+?)\s*\|/);
-      const city = m ? m[1].trim() : "";
-      message = city ? `Looking for a place in ${city}? Save your search and new homes come to you.` : "Looking for a place? Save your search and new homes come to you.";
+      const place = pageLocationLabel(path, location.search);
+      message = place
+        ? `Looking for a place in ${place}? I can set up alerts so new homes come to you — want me to save this search?`
+        : "Looking for a place? Save your search and new homes come to you.";
     }
     setTeaserMessage(message);
 
@@ -122,7 +160,7 @@ export default function LeadCaptureChat() {
       window.removeEventListener("scroll", onScroll);
       document.removeEventListener("mouseleave", onLeave);
     };
-  }, [hasInteracted, hasLead, location.pathname]);
+  }, [hasInteracted, hasLead, location.pathname, location.search]);
 
   const dismissTeaser = () => {
     setShowNudge(false);
@@ -192,6 +230,14 @@ export default function LeadCaptureChat() {
       } else if (/chfa|dpa|champions|g-hope|greeley/.test(path)) greeting = greetings.chfa;
       else if (/for-buyers|buying/.test(path)) greeting = greetings.buyer;
       else if (/for-sellers|sell/.test(path)) greeting = greetings.seller;
+      else {
+        // Area hub + search pages: greet with the place they're actually
+        // looking in (same structured lookup as the teaser — never <title>).
+        const place = pageLocationLabel(path, location.search);
+        greeting = place
+          ? `Hi! 👋 I'm Nadia, your SAA Homes assistant. Looking in ${place}? I can help you find homes, compare neighborhoods, or set up alerts so new listings come to you. What are you hoping to find?`
+          : greetings.default;
+      }
 
       setMessages([{ role: "assistant", content: greeting }]);
     }
