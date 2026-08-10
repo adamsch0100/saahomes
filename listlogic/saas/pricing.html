@@ -55,16 +55,22 @@
 }
 .plan .btn { width: 100%; }
 
-.annual {
-  background: linear-gradient(150deg, var(--ink), var(--ink-2)); color: #fff;
-  border-radius: var(--radius); padding: 28px 30px; margin-bottom: 28px;
-  display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
-  position: relative; overflow: hidden;
+.billing-toggle {
+  display: inline-flex; align-items: center; gap: 2px; margin: 36px auto 0;
+  background: #e9e3d7; border: 1px solid var(--line); border-radius: 999px; padding: 4px;
+  position: relative; left: 50%; transform: translateX(-50%);
 }
-.annual::after { content: ""; position: absolute; inset: 0; background: radial-gradient(500px 240px at 90% 0%, rgba(201,162,39,0.22), transparent 60%); }
-.annual > * { position: relative; }
-.annual strong { font-family: 'Fraunces', serif; font-size: 1.2rem; }
-.annual p { color: #c8d2e0; font-size: 0.9rem; max-width: 560px; margin-top: 4px; }
+.billing-toggle button {
+  border: none; background: transparent; padding: 8px 18px; border-radius: 999px;
+  font: inherit; font-size: 0.86rem; font-weight: 700; color: var(--ink-2); cursor: pointer;
+}
+.billing-toggle button.on { background: var(--ink); color: #fff; }
+.billing-toggle .save {
+  display: inline-block; margin-left: 6px; font-size: 0.64rem; font-weight: 800;
+  letter-spacing: 0.04em; text-transform: uppercase; background: #e9c46a; color: #1a1200;
+  padding: 2px 7px; border-radius: 999px; vertical-align: middle;
+}
+.billing-toggle button.on .save { background: #f5d76e; }
 
 .fineprint { text-align: center; color: var(--muted); font-size: 0.88rem; max-width: 620px; margin: 0 auto; }
 
@@ -111,6 +117,11 @@
     </div>
   </div>
 
+  <div class="billing-toggle" id="billingToggle" role="tablist" aria-label="Billing period">
+    <button type="button" data-period="monthly" role="tab">Monthly</button>
+    <button type="button" data-period="annual" class="on" role="tab" aria-selected="true">Annual <span class="save">save ~2 mo</span></button>
+  </div>
+
   <div class="plans">
     <div class="plan">
       <div class="tag">Try it</div>
@@ -140,10 +151,10 @@
       <button type="button" class="btn btn-outline" data-checkout="one_time">Buy one report</button>
     </div>
 
-    <div class="plan featured">
+    <div class="plan featured" id="agentPlan">
       <div class="tag">Best value</div>
-      <h2>Agent monthly</h2>
-      <div class="price">$39 <span>/ month</span></div>
+      <h2 id="agentPlanTitle">Agent annual</h2>
+      <div class="price" id="agentPrice">$32.50 <span id="agentPriceSpan">/ mo · billed $390/yr</span></div>
       <p class="desc">Unlimited presentations for a single agent. Built for active listers.</p>
       <ul>
         <li>Unlimited reports</li>
@@ -151,35 +162,27 @@
         <li>Priority updates</li>
         <li>Cancel anytime</li>
       </ul>
-      <button type="button" class="btn btn-primary" data-checkout="agent_monthly">Subscribe — $39/mo</button>
+      <button type="button" class="btn btn-primary" id="agentCheckout" data-checkout="agent_annual">Go annual — $390</button>
     </div>
 
-    <div class="plan">
+    <div class="plan" id="brokeragePlan">
       <div class="tag">Teams &amp; offices</div>
-      <h2>Brokerage</h2>
-      <div class="price">$29 <span>/ seat / mo</span></div>
-      <p class="desc">Per-agent seats with shared branding. Minimum 5 seats; annual available at checkout.</p>
+      <h2 id="brokeragePlanTitle">Brokerage annual</h2>
+      <div class="price" id="brokeragePrice">$24 <span id="brokeragePriceSpan">/ seat / mo · billed $290/yr</span></div>
+      <p class="desc">Per-agent seats with shared branding. Minimum 5 seats.</p>
       <ul>
         <li>Min 5 agent seats</li>
         <li>Shared branding defaults</li>
         <li>Office-friendly volume</li>
         <li>White-label on request</li>
       </ul>
-      <button type="button" class="btn btn-gold" data-checkout="brokerage_monthly">Checkout seats</button>
+      <button type="button" class="btn btn-gold" id="brokerageCheckout" data-checkout="brokerage_annual">Checkout seats</button>
     </div>
-  </div>
-
-  <div class="annual">
-    <div>
-      <strong>Agent annual — $390/year</strong>
-      <p>About two months free (~$32.50/mo). Brokerage annual seats at $290/seat/year. Secure card checkout via Stripe.</p>
-    </div>
-    <button type="button" class="btn btn-gold" data-checkout="agent_annual">Go annual — $390</button>
   </div>
 
   <p class="fineprint">
     Early-access trial users stay free during the beta. After trial, pick a plan above or manage billing from the app.
-    Questions? See the <a href="faq.html">FAQ</a> or email <a href="mailto:adam@saahomes.com">adam@saahomes.com</a>.
+    Annual is the best value — about two months free. Questions? See the <a href="faq.html">FAQ</a> or email <a href="mailto:adam@saahomes.com">adam@saahomes.com</a>.
   </p>
 </div>
 
@@ -203,6 +206,34 @@
     note.textContent = 'Checkout canceled — no charge. Pick a plan anytime.';
     document.querySelector('.plans')?.after(note);
   }
+
+  function setPeriod(period) {
+    const annual = period === 'annual';
+    document.querySelectorAll('#billingToggle button').forEach((b) => {
+      const on = b.dataset.period === period;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    document.getElementById('agentPlanTitle').textContent = annual ? 'Agent annual' : 'Agent monthly';
+    document.getElementById('agentPrice').innerHTML = annual
+      ? '$32.50 <span id="agentPriceSpan">/ mo · billed $390/yr</span>'
+      : '$39 <span id="agentPriceSpan">/ month</span>';
+    const agentBtn = document.getElementById('agentCheckout');
+    agentBtn.dataset.checkout = annual ? 'agent_annual' : 'agent_monthly';
+    agentBtn.textContent = annual ? 'Go annual — $390' : 'Subscribe — $39/mo';
+
+    document.getElementById('brokeragePlanTitle').textContent = annual ? 'Brokerage annual' : 'Brokerage monthly';
+    document.getElementById('brokeragePrice').innerHTML = annual
+      ? '$24 <span id="brokeragePriceSpan">/ seat / mo · billed $290/yr</span>'
+      : '$29 <span id="brokeragePriceSpan">/ seat / mo</span>';
+    document.getElementById('brokerageCheckout').dataset.checkout = annual ? 'brokerage_annual' : 'brokerage_monthly';
+  }
+  document.querySelectorAll('#billingToggle button').forEach((b) => {
+    b.addEventListener('click', () => setPeriod(b.dataset.period));
+  });
+  const periodQ = params.get('period');
+  if (periodQ === 'monthly') setPeriod('monthly');
+  else setPeriod('annual');
 
   async function startCheckout(plan) {
     let quantity = 1;
@@ -235,6 +266,8 @@
 
   const planQ = params.get('plan');
   if (planQ && ['one_time','agent_monthly','agent_annual','brokerage_monthly','brokerage_annual'].includes(planQ)) {
+    if (planQ.includes('monthly')) setPeriod('monthly');
+    if (planQ.includes('annual')) setPeriod('annual');
     const authed = await fetch('/api/auth-status', { credentials: 'same-origin' }).then(r => r.json()).catch(() => ({}));
     if (authed.authenticated) startCheckout(planQ);
   }
