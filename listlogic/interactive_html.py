@@ -853,6 +853,28 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .whatif-card.active .wf-label{{color:var(--brand-primary)}}
 .whatif-card .wf-price{{font-size:1.05rem;font-weight:800;margin:2px 0;color:var(--brand-primary);line-height:1.1;white-space:nowrap}}
 .whatif-card .wf-meta{{font-size:.6rem;color:var(--muted);white-space:nowrap;line-height:1.2}}
+.net-grid{{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;margin-top:14px;align-items:stretch}}
+@media(max-width:900px){{.net-grid{{grid-template-columns:1fr}}}}
+.net-lines{{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden}}
+.net-row{{display:grid;grid-template-columns:1fr 118px 108px;gap:10px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border);font-size:.86rem}}
+.net-row:last-child{{border-bottom:none}}
+.net-row .nl{{font-weight:600;color:var(--ink);line-height:1.25}}
+.net-row .nl small{{display:block;font-weight:400;color:var(--muted);font-size:.68rem;margin-top:1px}}
+.net-row .ni{{position:relative}}
+.net-row .ni input{{width:100%;padding:6px 20px 6px 8px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:.84rem;text-align:right;background:#fff}}
+.net-row .ni input:focus{{outline:2px solid rgba(12,60,110,.25);border-color:var(--brand-primary)}}
+.net-row .nu{{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:.72rem;color:var(--muted);pointer-events:none}}
+.net-row .nv{{text-align:right;font-weight:700;color:var(--brand-primary);font-variant-numeric:tabular-nums;white-space:nowrap}}
+.net-row.net-total{{background:#f4f1ea}}
+.net-row.net-total .nl,.net-row.net-total .nv{{font-weight:800;color:var(--ink)}}
+.net-summary{{background:linear-gradient(150deg,var(--brand-primary),var(--brand-accent));color:#fff;border-radius:14px;padding:22px 20px;display:flex;flex-direction:column;justify-content:center;gap:7px;text-align:center}}
+.net-summary .ns-eyebrow{{font-size:.66rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.85}}
+.net-summary .ns-big{{font-family:'Fraunces',serif;font-size:2.5rem;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums;white-space:nowrap}}
+.net-summary .ns-sub{{font-size:.86rem;opacity:.92}}
+.net-summary .ns-bar{{height:8px;border-radius:99px;background:rgba(255,255,255,.25);overflow:hidden;margin:4px 0}}
+.net-summary .ns-fill{{height:100%;background:#e9c46a;border-radius:99px;transition:width .3s ease}}
+.net-summary .ns-note{{font-size:.8rem;font-weight:600}}
+.net-summary .ns-fine{{font-size:.68rem;opacity:.75;line-height:1.45;margin-top:4px}}
 .price-row{{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}}
 .price-block{{background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:14px 11px;text-align:center;min-height:84px;display:flex;flex-direction:column;justify-content:center}}
 .price-block.main{{background:var(--brand-primary);color:#fff;border-color:var(--brand-primary)}}
@@ -1231,6 +1253,12 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
   #compMap{{height:300px!important}}
   .comp-map-foot{{display:none!important}}
   .comp-map-legend .map-kind{{border:none;background:transparent;padding:0;cursor:default}}
+  .net-grid{{grid-template-columns:1.15fr .85fr;gap:10px}}
+  .net-row{{padding:5px 10px;font-size:.78rem}}
+  .net-row .ni input{{border:none;background:transparent;padding:0 14px 0 0;font-size:.78rem}}
+  .net-summary{{padding:12px;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+  .net-summary .ns-big{{font-size:1.7rem}}
+  .net-summary .ns-fine{{display:none}}
   a[href]::after{{content:none!important}}
   .whatif-grid{{display:grid!important;grid-template-columns:repeat(var(--whatif-cols,5),minmax(0,1fr))!important;overflow:visible!important;gap:8px}}
   .price-controls{{display:block!important;margin-top:8px}}
@@ -1330,6 +1358,7 @@ body.print-leavebehind .page{{padding-bottom:0}}
     <a href="#spine-position" data-spine="position">5 · Position</a>
     <a href="#spine-yoy" data-spine="yoy">6 · Market Detail</a>
     <a href="#spine-strategy" data-spine="strategy">7 · Price It</a>
+    <a href="#spine-net" data-spine="net">8 · Net Sheet</a>
   </nav>
 
   <section class="core-facts" id="spine-corefacts">
@@ -1670,6 +1699,63 @@ body.print-leavebehind .page{{padding-bottom:0}}
           <div class="wyw-bar"><div class="fill" id="wywFill" style="width:35%"></div><div class="marker" id="wywMarker" style="left:35%"></div></div>
         </div>
         <p class="wyw-note" id="wywNote">At the recommended list, the queue works <b>for</b> you. Price above it and buyer attention shifts to cheaper options.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="spine-net">
+    <h2><span class="ttl"><span class="step">8</span>Net Sheet — What You Walk Away With</span></h2>
+    <p class="sub">Estimated proceeds at the price on the slider — move it and this sheet updates. Tap any line to adjust to your situation. Estimates only, not a closing statement.</p>
+    <div class="net-grid">
+      <div class="net-lines" id="netLines">
+        <div class="net-row">
+          <div class="nl">Commission <small>listing + buyer side, combined</small></div>
+          <div class="ni"><input type="number" id="netCommPct" min="0" max="15" step="0.1" value="5.5"><span class="nu">%</span></div>
+          <div class="nv" id="netCommVal">—</div>
+        </div>
+        <div class="net-row">
+          <div class="nl">Mortgage payoff <small>current loan balance(s)</small></div>
+          <div class="ni"><input type="number" id="netPayoff" min="0" step="500" value="0"><span class="nu">$</span></div>
+          <div class="nv" id="netPayoffVal">—</div>
+        </div>
+        <div class="net-row">
+          <div class="nl">Owner's title policy <small id="netTitleTag">auto · ≈0.15% of price</small></div>
+          <div class="ni"><input type="number" id="netTitle" min="0" step="50" value="0" data-auto="1"><span class="nu">$</span></div>
+          <div class="nv" id="netTitleVal">—</div>
+        </div>
+        <div class="net-row">
+          <div class="nl">Closing / escrow fee <small>title company charge</small></div>
+          <div class="ni"><input type="number" id="netClosing" min="0" step="50" value="1200"><span class="nu">$</span></div>
+          <div class="nv" id="netClosingVal">—</div>
+        </div>
+        <div class="net-row">
+          <div class="nl">Colorado transfer tax <small id="netTransferTag">auto · 0.01% of price</small></div>
+          <div class="ni"><input type="number" id="netTransfer" min="0" step="10" value="0" data-auto="1"><span class="nu">$</span></div>
+          <div class="nv" id="netTransferVal">—</div>
+        </div>
+        <div class="net-row">
+          <div class="nl">Concessions / repair credits <small>anything you’ve offered the buyer</small></div>
+          <div class="ni"><input type="number" id="netConcessions" min="0" step="100" value="0"><span class="nu">$</span></div>
+          <div class="nv" id="netConcessionsVal">—</div>
+        </div>
+        <div class="net-row">
+          <div class="nl">HOA / misc <small>transfer fees, warranty, other liens</small></div>
+          <div class="ni"><input type="number" id="netHoa" min="0" step="50" value="0"><span class="nu">$</span></div>
+          <div class="nv" id="netHoaVal">—</div>
+        </div>
+        <div class="net-row net-total">
+          <div class="nl">Total selling costs</div>
+          <div></div>
+          <div class="nv" id="netCostsVal">—</div>
+        </div>
+      </div>
+      <div class="net-summary">
+        <div class="ns-eyebrow">Estimated net to seller</div>
+        <div class="ns-big" id="netBig">—</div>
+        <div class="ns-sub">at <strong id="netPrice">—</strong> · <span id="netPct">—</span> of list</div>
+        <div class="ns-bar"><div class="ns-fill" id="netFill"></div></div>
+        <div class="ns-note" id="netRecNote">—</div>
+        <div class="ns-fine">Estimates only — your closer issues the official figures. Payoff, concessions, and HOA change this the most.</div>
       </div>
     </div>
   </section>
@@ -2301,7 +2387,89 @@ function renderConfront(price) {{
     '<div class="co-note">' + domNote + '</div>' +
     (supplyNote ? '<div class="co-note">' + supplyNote + '</div>' : '');
   renderWhileYouWait(price, out);
+  renderNetSheet(price);
 }}
+
+function netAutoTitle(p) {{ return Math.max(0, Math.round(p * 0.0015 / 50) * 50); }}
+function netAutoTransfer(p) {{ return Math.max(0, Math.round(p * 0.0001)); }}
+function renderNetSheet(price) {{
+  if (!document.getElementById('netLines')) return;
+  price = +price || currentRec || 0;
+  if (!price) return;
+  const titleEl = document.getElementById('netTitle');
+  const transferEl = document.getElementById('netTransfer');
+  if (titleEl.dataset.auto === '1') titleEl.value = netAutoTitle(price);
+  if (transferEl.dataset.auto === '1') transferEl.value = netAutoTransfer(price);
+  const num = (id) => Math.max(0, parseFloat(document.getElementById(id).value) || 0);
+  const commPct = Math.min(15, Math.max(0, parseFloat(document.getElementById('netCommPct').value) || 0));
+  const comm = price * commPct / 100;
+  const payoff = num('netPayoff');
+  const title = num('netTitle');
+  const closing = num('netClosing');
+  const transfer = num('netTransfer');
+  const concessions = num('netConcessions');
+  const hoa = num('netHoa');
+  const costs = comm + payoff + title + closing + transfer + concessions + hoa;
+  const net = price - costs;
+  document.getElementById('netCommVal').textContent = '\\u2212' + money(comm);
+  document.getElementById('netPayoffVal').textContent = payoff ? '\\u2212' + money(payoff) : '\\u2014';
+  document.getElementById('netTitleVal').textContent = '\\u2212' + money(title);
+  document.getElementById('netClosingVal').textContent = '\\u2212' + money(closing);
+  document.getElementById('netTransferVal').textContent = '\\u2212' + money(transfer);
+  document.getElementById('netConcessionsVal').textContent = concessions ? '\\u2212' + money(concessions) : '\\u2014';
+  document.getElementById('netHoaVal').textContent = hoa ? '\\u2212' + money(hoa) : '\\u2014';
+  document.getElementById('netCostsVal').textContent = '\\u2212' + money(costs);
+  document.getElementById('netBig').textContent = money(net);
+  document.getElementById('netPrice').textContent = money(price);
+  const pct = Math.max(0, Math.min(100, Math.round(net / price * 1000) / 10));
+  document.getElementById('netPct').textContent = pct.toFixed(1) + '%';
+  document.getElementById('netFill').style.width = pct + '%';
+  const note = document.getElementById('netRecNote');
+  if (Math.abs(price - currentRec) > 500) {{
+    const recCosts = currentRec * commPct / 100 + payoff +
+      (titleEl.dataset.auto === '1' ? netAutoTitle(currentRec) : title) + closing +
+      (transferEl.dataset.auto === '1' ? netAutoTransfer(currentRec) : transfer) + concessions + hoa;
+    note.textContent = 'At the recommended ' + money(currentRec) + ' you\\u2019d net \\u2248 ' + money(currentRec - recCosts);
+  }} else {{
+    note.textContent = 'Showing the recommended price';
+  }}
+}}
+function persistNetSheet() {{
+  try {{
+    const raw = localStorage.getItem('listlogic_edits_' + (RUN_ID || 'local'));
+    const payload = raw ? JSON.parse(raw) : {{}};
+    payload.netSheet = {{
+      commPct: document.getElementById('netCommPct').value,
+      payoff: document.getElementById('netPayoff').value,
+      title: document.getElementById('netTitle').value,
+      titleAuto: document.getElementById('netTitle').dataset.auto === '1',
+      closing: document.getElementById('netClosing').value,
+      transfer: document.getElementById('netTransfer').value,
+      transferAuto: document.getElementById('netTransfer').dataset.auto === '1',
+      concessions: document.getElementById('netConcessions').value,
+      hoa: document.getElementById('netHoa').value,
+    }};
+    localStorage.setItem('listlogic_edits_' + (RUN_ID || 'local'), JSON.stringify(payload));
+    if (RUN_ID) {{
+      fetch('/api/runs/' + RUN_ID + '/edits', {{
+        method: 'POST',
+        headers: {{ 'Content-Type': 'application/json' }},
+        body: JSON.stringify(payload),
+      }}).catch(() => {{}});
+    }}
+  }} catch (e) {{}}
+}}
+document.querySelectorAll('#netLines input').forEach((inp) => {{
+  inp.addEventListener('input', () => {{
+    if (inp.dataset.auto === '1') {{
+      delete inp.dataset.auto;
+      const tag = document.getElementById(inp.id === 'netTitle' ? 'netTitleTag' : 'netTransferTag');
+      if (tag) tag.textContent = 'manual';
+    }}
+    renderNetSheet(+document.getElementById('sellerPrice').value || currentRec);
+    persistNetSheet();
+  }});
+}});
 
 function renderWhileYouWait(price, out) {{
   const mod = document.getElementById('wywModule');
@@ -2435,6 +2603,7 @@ document.getElementById('priceSlider').addEventListener('input', () => {{
 setupPriceSlider(currentRec);
 applyRating(5);
 renderConfront(currentRec);
+renderNetSheet(currentRec);
 syncWhatIfCards(currentRec);
 updateSupplyAtPrice(currentRec);
 refreshWhatIfMetrics(currentRec);
@@ -3989,6 +4158,10 @@ function applyEdits() {{
   document.getElementById('riskList').innerHTML = risk.map(r => '<li>'+escapeHtml(r)+'</li>').join('');
   renderObjections(obj);
   const payload = {{ rec, low, high, dom, bl, adv: adv.join('\\n'), risk: risk.join('\\n'), obj, rating: currentRating, excluded:[...excluded], selectedComps: selectedCompMls.slice() }};
+  try {{
+    const prev = JSON.parse(localStorage.getItem('listlogic_edits_'+(RUN_ID||'local')) || '{{}}');
+    if (prev.netSheet) payload.netSheet = prev.netSheet;
+  }} catch (e) {{}}
   localStorage.setItem('listlogic_edits_'+(RUN_ID||'local'), JSON.stringify(payload));
   if (RUN_ID) fetch('/api/runs/'+RUN_ID+'/edits', {{ method:'POST', headers:{{'Content-Type':'application/json'}}, body: JSON.stringify(payload) }}).catch(()=>{{}});
   closeAgentPanel();
@@ -4034,6 +4207,27 @@ async function loadSavedEdits() {{
     rebuildCompsFromSelection();
   }}
   if (saved.rating!=null) applyRating(+saved.rating);
+  if (saved.netSheet && typeof saved.netSheet === 'object') {{
+    const ns = saved.netSheet;
+    const setNet = (id, v) => {{ if (v != null && v !== '') document.getElementById(id).value = v; }};
+    setNet('netCommPct', ns.commPct);
+    setNet('netPayoff', ns.payoff);
+    setNet('netClosing', ns.closing);
+    setNet('netConcessions', ns.concessions);
+    setNet('netHoa', ns.hoa);
+    if (ns.titleAuto === false) {{
+      setNet('netTitle', ns.title);
+      delete document.getElementById('netTitle').dataset.auto;
+      const tag = document.getElementById('netTitleTag');
+      if (tag) tag.textContent = 'manual';
+    }}
+    if (ns.transferAuto === false) {{
+      setNet('netTransfer', ns.transfer);
+      delete document.getElementById('netTransfer').dataset.auto;
+      const tag = document.getElementById('netTransferTag');
+      if (tag) tag.textContent = 'manual';
+    }}
+  }}
   renderTable(); applyEdits();
 }}
 loadSavedEdits();
