@@ -3,154 +3,355 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Set up your profile — ListLogic</title>
+<title>Settings — ListLogic</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/saas/ll.css">
 <style>
-body {
-  min-height: 100vh; display: grid; place-items: center; padding: 32px 20px;
-  background: radial-gradient(900px 500px at 80% -10%, #1a5f9e33, transparent 60%),
-              radial-gradient(700px 400px at 10% 110%, #c9a22722, transparent 55%),
-              linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+body { background: var(--paper); }
+.set-wrap { max-width: 1120px; margin: 0 auto; padding: 22px 20px 64px; }
+.page-head { padding: 22px 0 10px; }
+.page-head h1 { font-family: 'Fraunces', serif; font-size: clamp(1.5rem, 3vw, 2.05rem); letter-spacing: -0.02em; }
+.page-head .sub { color: var(--muted); font-size: 0.95rem; }
+
+.set-grid { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 22px; align-items: start; }
+@media (max-width: 920px) { .set-grid { grid-template-columns: 1fr; } }
+
+.set-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 20px; margin-bottom: 18px; }
+.set-card h2 { font-family: 'Fraunces', serif; font-size: 1.2rem; margin-bottom: 4px; }
+.set-card .sub { color: var(--muted); font-size: 0.86rem; margin-bottom: 16px; }
+
+.set-row { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+.set-row:first-of-type { border-top: 0; }
+.set-row label { font-size: 0.86rem; font-weight: 600; color: var(--ink-2); }
+.set-row .help { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+.set-row input[type="text"], .set-row input[type="email"], .set-row input[type="tel"], .set-row input[type="password"], .set-row input[type="file"] {
+  width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fbfaf7; font-size: 0.9rem; color: var(--ink);
 }
-.auth-card {
-  background: var(--card); border-radius: 22px; padding: 36px 32px;
-  width: 100%; max-width: 520px; box-shadow: 0 40px 90px -30px rgba(0,0,0,0.55);
-}
-.auth-brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -0.02em; font-size: 1.1rem; margin-bottom: 22px; }
-.auth-brand img { height: 42px; width: auto; display: block; }
-h1 { font-family: 'Fraunces', serif; font-size: 1.6rem; letter-spacing: -0.02em; margin-bottom: 6px; }
-.sub { color: var(--muted); font-size: 0.92rem; margin-bottom: 20px; }
-.section-label {
-  font-size: 0.72rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
-  color: var(--navy); margin: 18px 0 10px;
-}
-.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-@media (max-width: 520px) { .row2 { grid-template-columns: 1fr; } }
-.color-field input[type="color"] { padding: 4px; height: 44px; cursor: pointer; }
-button.btn { width: 100%; padding: 13px; font-size: 0.95rem; margin-top: 8px; }
-.hint { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
+.set-row input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26, 95, 158, 0.12); }
+.set-row input[readonly] { background: #f1eee7; color: var(--muted); }
+.set-row .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: #f4f1ea; }
+.set-row .seg button { border: 0; background: transparent; padding: 7px 12px; font-size: 0.8rem; font-weight: 700; border-radius: 999px; cursor: pointer; color: var(--ink-2); }
+.set-row .seg button.on { background: var(--ink); color: #fff; }
+
+.color-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 560px) { .color-row { grid-template-columns: 1fr; } }
+.color-field input[type="color"] { width: 100%; height: 44px; padding: 4px; border-radius: 10px; border: 1px solid var(--line); background: #fbfaf7; cursor: pointer; }
+
+.set-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
+.set-actions .btn { padding: 12px 24px; }
+
+.set-side { position: sticky; top: 78px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; }
+.side-head { padding: 14px 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.side-head strong { font-family: 'Fraunces', serif; font-size: 1.02rem; }
+.side-head span { font-size: 0.74rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800; }
+.side-body { padding: 16px; }
+.brand-preview { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.brand-hero { padding: 16px 14px; color: #fff; position: relative; overflow: hidden; }
+.brand-hero::after { content: ""; position: absolute; inset: 0; background: radial-gradient(520px 220px at 90% 0%, rgba(255,255,255,0.14), transparent 60%); pointer-events: none; }
+.brand-hero > * { position: relative; }
+.brand-hero .brow { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800; opacity: 0.9; }
+.brand-hero .bname { font-family: 'Fraunces', serif; font-size: 1.15rem; margin-top: 4px; letter-spacing: -0.01em; }
+.brand-hero .bline { font-size: 0.8rem; opacity: 0.92; margin-top: 4px; }
+.brand-meta { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); }
+.brand-meta div { padding: 10px 12px; font-size: 0.8rem; }
+.brand-meta div + div { border-left: 1px solid var(--line); }
+.brand-meta .k { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 800; color: var(--muted); }
+.brand-meta .v { margin-top: 2px; font-weight: 600; color: var(--ink); }
+
+.pw-toggle { display: inline-flex; align-items: center; gap: 10px; margin: 6px 0 12px; font-size: 0.86rem; font-weight: 600; color: var(--ink-2); }
+.pw-toggle input { width: auto; margin: 0; }
+.pw-panel { border: 1px dashed var(--line); border-radius: 12px; padding: 14px; background: #fbfaf7; }
+.pw-panel[hidden] { display: none; }
+.pw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 560px) { .pw-grid { grid-template-columns: 1fr; } }
+.pw-grid input { padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-size: 0.9rem; }
+.pw-grid input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26, 95, 158, 0.12); }
+
+.status-note { font-size: 0.86rem; margin-top: 12px; min-height: 1.2em; }
+.status-note.error { color: var(--danger); }
+.status-note.ok { color: var(--ok); }
+
+.set-foot { margin-top: 6px; font-size: 0.8rem; color: var(--muted); }
+.set-foot a { font-weight: 700; }
 </style>
 </head>
 <body>
-<div class="auth-card">
-  <a href="/saas/" class="auth-brand" style="text-decoration:none;color:inherit">
-    <img src="/saas/listlogic-logo.png" alt="ListLogic">
-  </a>
-  <h1 id="settingsTitle">Make reports yours</h1>
-  <p class="sub" id="settingsSub">This branding fills every presentation, print leave-behind, and flipbook. Set a password so you can sign in without email next time.</p>
+<nav class="ll-nav">
+  <div class="container ll-nav-inner">
+    <div class="ll-nav-left">
+      <a href="/saas/" class="ll-brand"><img src="/saas/listlogic-logo.png" alt="ListLogic" class="ll-brand-logo"></a>
+      <span class="ll-view-switch" id="viewSwitch" hidden>
+        <a href="/saas/app.html" id="switchAgent">Agent</a>
+        <a href="/saas/admin.html" id="switchOwner">Owner</a>
+      </span>
+    </div>
+    <div class="ll-nav-links">
+      <a href="/saas/app.html#generate">Generate</a>
+      <a href="/saas/app.html#reports">Reports</a>
+      <a href="/saas/onboarding.html" class="ll-nav-pill-soft">Settings</a>
+      <a href="/saas/admin.html" id="adminLink" hidden>Owner console</a>
+    </div>
+  </div>
+</nav>
 
-  <form id="form">
-    <div class="section-label">Password</div>
-    <div class="field">
-      <label for="password">Create a password <span style="font-weight:400;text-transform:none">(8+ characters)</span></label>
-      <input id="password" type="password" minlength="8" autocomplete="new-password" required>
-    </div>
-    <p class="hint">You’ll still be able to use a magic link anytime.</p>
+<div class="set-wrap">
+  <header class="page-head">
+    <h1 id="settingsTitle">Settings</h1>
+    <p class="sub" id="settingsSub">Branding, brokerage, and account defaults for every presentation.</p>
+  </header>
 
-    <div class="section-label">Agent profile</div>
-    <div class="field">
-      <label for="name">Full name</label>
-      <input id="name" required autocomplete="name">
-    </div>
-    <div class="row2">
-      <div class="field">
-        <label for="phone">Phone</label>
-        <input id="phone" type="tel" autocomplete="tel">
+  <form id="form" class="set-grid" novalidate>
+    <div>
+      <div class="set-card">
+        <h2>Profile</h2>
+        <p class="sub">Shows on every report and share page. Email is tied to sign-in and cannot be changed here.</p>
+
+        <div class="set-row">
+          <label for="name">Full name</label>
+          <div>
+            <input id="name" type="text" required autocomplete="name">
+            <div class="help">Used in the header and on comps.</div>
+          </div>
+        </div>
+
+        <div class="set-row">
+          <label for="phone">Phone</label>
+          <div>
+            <input id="phone" type="tel" autocomplete="tel" placeholder="(970) 555-1234">
+            <div class="help">Call-to-action on your presentations.</div>
+          </div>
+        </div>
+
+        <div class="set-row">
+          <label for="email">Email on reports</label>
+          <div>
+            <input id="email" type="email" readonly>
+            <div class="help">Sign-in + report email. Contact support to change it.</div>
+          </div>
+        </div>
+
+        <div class="set-row">
+          <label for="brokerage">Brokerage</label>
+          <div>
+            <input id="brokerage" type="text" required autocomplete="organization" placeholder="Coldwell Banker Realty">
+            <div class="help">Appears on the header and print leave-behind.</div>
+          </div>
+        </div>
       </div>
-      <div class="field">
-        <label for="email">Email on reports</label>
-        <input id="email" type="email" readonly>
+
+      <div class="set-card">
+        <h2>Brand</h2>
+        <p class="sub">Pick colors that match your brokerage. Logo is optional; initials show if you skip it.</p>
+
+        <div class="set-row">
+          <label>Brand colors</label>
+          <div class="color-row">
+            <div class="color-field">
+              <input type="color" id="brandPrimary" value="#0c3c6e">
+              <div class="help">Primary</div>
+            </div>
+            <div class="color-field">
+              <input type="color" id="brandAccent" value="#1a5f9e">
+              <div class="help">Accent</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="set-row">
+          <label for="logo">Logo</label>
+          <div>
+            <input type="file" id="logo" accept=".png,.jpg,.jpeg,.webp,.svg">
+            <div class="help">PNG/JPG/WebP/SVG, under 2MB. Optional — leave blank to keep current.</div>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="field">
-      <label for="brokerage">Brokerage</label>
-      <input id="brokerage" required placeholder="Coldwell Banker Realty" autocomplete="organization">
+
+      <div class="set-card">
+        <h2>Password</h2>
+        <p class="sub" id="pwSub">Set a password so you can sign in without a magic link.</p>
+
+        <div class="pw-toggle" id="pwToggleWrap">
+          <input type="checkbox" id="pwToggle" checked>
+          <label for="pwToggle" id="pwToggleLabel">Change password</label>
+        </div>
+
+        <div class="pw-panel" id="pwPanel">
+          <div class="pw-grid">
+            <input id="password" type="password" autocomplete="new-password" placeholder="New password (8+ chars)">
+            <input id="password2" type="password" autocomplete="new-password" placeholder="Confirm new password">
+          </div>
+          <div class="help" id="pwHelp" style="margin-top:8px">Leave both blank to keep your current password.</div>
+        </div>
+      </div>
+
+      <div class="set-actions">
+        <button type="submit" class="btn btn-gold" id="saveBtn">Save settings</button>
+        <a class="btn" href="/saas/app.html">Back to dashboard</a>
+      </div>
+      <div class="status-note" id="status"></div>
+      <p class="set-foot">Need a new email? <a href="/saas/login.html">Use a magic link</a> and it’ll carry your settings forward.</p>
     </div>
 
-    <div class="section-label">Brand colors</div>
-    <div class="row2">
-      <div class="field color-field">
-        <label for="brandPrimary">Primary</label>
-        <input type="color" id="brandPrimary" value="#0c3c6e">
+    <aside class="set-side" aria-label="Brand preview">
+      <div class="side-head">
+        <strong>Preview</strong>
+        <span>Live</span>
       </div>
-      <div class="field color-field">
-        <label for="brandAccent">Accent</label>
-        <input type="color" id="brandAccent" value="#1a5f9e">
+      <div class="side-body">
+        <div class="brand-preview" id="brandPreview">
+          <div class="brand-hero" id="brandHero">
+            <div class="brow" id="pvBrokerage">Coldwell Banker Realty</div>
+            <div class="bname" id="pvName">Agent Name</div>
+            <div class="bline" id="pvContact">(970) 555-1234 · you@yourbrokerage.com</div>
+          </div>
+          <div class="brand-meta">
+            <div>
+              <div class="k">Primary</div>
+              <div class="v" id="pvPrimary">#0c3c6e</div>
+            </div>
+            <div>
+              <div class="k">Accent</div>
+              <div class="v" id="pvAccent">#1a5f9e</div>
+            </div>
+          </div>
+        </div>
+        <div class="help" style="margin-top:10px">This is what sellers see at the top of every report.</div>
       </div>
-    </div>
-    <div class="field">
-      <label for="logo">Logo <span style="font-weight:400;text-transform:none">(optional)</span></label>
-      <input type="file" id="logo" accept=".png,.jpg,.jpeg,.webp,.svg">
-    </div>
-
-    <button type="submit" class="btn btn-gold">Save &amp; continue</button>
+    </aside>
   </form>
-  <p class="status" id="status"></p>
 </div>
+
 <script>
-const params = new URLSearchParams(location.search);
-const next = params.get('next') || '/saas/app.html';
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const statusEl = $('status');
+  const form = $('form');
 
-(async () => {
-  try {
-    const res = await fetch('/api/auth-status');
-    const data = await res.json();
-    if (data.required && !data.authenticated) {
-      location.href = '/saas/login.html?next=' + encodeURIComponent('/saas/onboarding.html');
-      return;
-    }
-    const u = data.user || {};
-    document.getElementById('name').value = u.name || '';
-    document.getElementById('phone').value = u.phone || '';
-    document.getElementById('email').value = u.email || '';
-    document.getElementById('brokerage').value = u.brokerage || '';
-    document.getElementById('brandPrimary').value = u.brand_primary || '#0c3c6e';
-    document.getElementById('brandAccent').value = u.brand_accent || '#1a5f9e';
-    if (u.has_password) {
-      const pw = document.getElementById('password');
-      pw.required = false;
-      pw.placeholder = 'Leave blank to keep current password';
-      document.getElementById('settingsTitle').textContent = 'Settings';
-      document.getElementById('settingsSub').textContent =
-        'Update your password, brokerage info, and brand colors. Changes apply to new presentations.';
-      document.querySelector('button[type="submit"]').textContent = 'Save settings';
-      document.title = 'Settings — ListLogic';
-    }
-  } catch (e) {}
-})();
+  const pwPanel = $('pwPanel');
+  const pwToggle = $('pwToggle');
+  const pwToggleLabel = $('pwToggleLabel');
+  const pwInput = $('password');
+  const pwInput2 = $('password2');
+  const pwHelp = $('pwHelp');
+  const pwSub = $('pwSub');
 
-document.getElementById('form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const status = document.getElementById('status');
-  status.className = 'status';
-  status.textContent = 'Saving…';
-  const fd = new FormData();
-  fd.set('name', document.getElementById('name').value.trim());
-  fd.set('phone', document.getElementById('phone').value.trim());
-  fd.set('brokerage', document.getElementById('brokerage').value.trim());
-  fd.set('brand_primary', document.getElementById('brandPrimary').value);
-  fd.set('brand_accent', document.getElementById('brandAccent').value);
-  const pw = document.getElementById('password').value;
-  if (pw) fd.set('password', pw);
-  const logo = document.getElementById('logo').files[0];
-  if (logo) fd.set('logo', logo);
-  try {
-    if (document.getElementById('password').required && pw.length < 8) {
-      throw new Error('Password must be at least 8 characters');
-    }
-    const res = await fetch('/api/profile', { method: 'POST', body: fd });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Could not save profile');
-    location.href = next.startsWith('/') ? next : '/saas/app.html';
-  } catch (err) {
-    status.className = 'status error';
-    status.textContent = String(err.message || err);
+  const preview = {
+    brokerage: $('pvBrokerage'),
+    name: $('pvName'),
+    contact: $('pvContact'),
+    primary: $('pvPrimary'),
+    accent: $('pvAccent'),
+    hero: $('brandHero'),
+  };
+
+  function setStatus(text, kind) {
+    statusEl.textContent = text || '';
+    statusEl.className = 'status-note' + (kind ? ' ' + kind : '');
   }
-});
+
+  function refreshPreview() {
+    preview.brokerage.textContent = $('brokerage').value.trim() || 'Coldwell Banker Realty';
+    preview.name.textContent = $('name').value.trim() || 'Agent Name';
+    const phone = $('phone').value.trim();
+    const email = $('email').value.trim();
+    preview.contact.textContent = [phone || '(970) 555-1234', email || 'you@yourbrokerage.com'].join(' · ');
+    preview.primary.textContent = $('brandPrimary').value;
+    preview.accent.textContent = $('brandAccent').value;
+    preview.hero.style.background = 'linear-gradient(135deg, ' + $('brandPrimary').value + ', ' + $('brandAccent').value + ')';
+  }
+
+  function syncPwMode() {
+    const want = pwToggle.checked;
+    pwPanel.hidden = !want;
+    pwInput.required = want;
+    pwInput2.required = want;
+    if (!want) { pwInput.value = ''; pwInput2.value = ''; }
+  }
+
+  function setPwState(hasPassword) {
+    if (hasPassword) {
+      pwToggle.checked = false;
+      pwToggleLabel.textContent = 'Change password';
+      pwSub.textContent = 'Change it only when you want a new one. Magic link still works anytime.';
+      pwInput.placeholder = 'Leave blank to keep current password';
+      pwInput2.placeholder = 'Confirm new password';
+      pwHelp.textContent = 'Leave both blank to keep your current password.';
+    } else {
+      pwToggle.checked = true;
+      pwToggleLabel.textContent = 'Set a password';
+      pwSub.textContent = 'Set a password so you can sign in without a magic link.';
+      pwInput.placeholder = 'New password (8+ characters)';
+      pwInput2.placeholder = 'Confirm new password';
+      pwHelp.textContent = 'Required the first time. You can still use a magic link later.';
+    }
+    syncPwMode();
+  }
+
+  async function loadUser() {
+    try {
+      const res = await fetch('/api/auth-status', { credentials: 'same-origin' });
+      const data = await res.json();
+      if (data.required && !data.authenticated) {
+        location.href = '/saas/login.html?next=' + encodeURIComponent('/saas/onboarding.html');
+        return;
+      }
+      const u = data.user || {};
+      if (u.role === 'admin') {
+        $('viewSwitch').hidden = false;
+        $('switchAgent').classList.add('on');
+        $('adminLink').hidden = false;
+      }
+      $('name').value = u.name || '';
+      $('phone').value = u.phone || '';
+      $('email').value = u.email || '';
+      $('brokerage').value = u.brokerage || '';
+      $('brandPrimary').value = u.brand_primary || '#0c3c6e';
+      $('brandAccent').value = u.brand_accent || '#1a5f9e';
+      setPwState(!!u.has_password);
+      refreshPreview();
+    } catch (e) {
+      setStatus('Could not load your profile.', 'error');
+    }
+  }
+
+  form.addEventListener('input', (e) => {
+    if (['name', 'phone', 'email', 'brokerage', 'brandPrimary', 'brandAccent'].includes(e.target.id)) refreshPreview();
+  });
+
+  pwToggle.addEventListener('change', syncPwMode);
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    setStatus('Saving…');
+    const fd = new FormData();
+    fd.set('name', $('name').value.trim());
+    fd.set('phone', $('phone').value.trim());
+    fd.set('brokerage', $('brokerage').value.trim());
+    fd.set('brand_primary', $('brandPrimary').value);
+    fd.set('brand_accent', $('brandAccent').value);
+    if (pwToggle.checked && pwInput.value) {
+      if (pwInput.value.length < 8) { setStatus('Password must be at least 8 characters', 'error'); return; }
+      if (pwInput.value !== pwInput2.value) { setStatus('Passwords do not match', 'error'); return; }
+      fd.set('password', pwInput.value);
+    }
+    const logo = $('logo').files[0];
+    if (logo) fd.set('logo', logo);
+    try {
+      const res = await fetch('/api/profile', { method: 'POST', body: fd, credentials: 'same-origin' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Could not save profile');
+      setStatus('Saved. New reports will use these settings.', 'ok');
+      const next = new URLSearchParams(location.search).get('next');
+      if (next && next.startsWith('/')) location.href = next;
+    } catch (err) {
+      setStatus(String(err.message || err), 'error');
+    }
+  });
+
+  loadUser();
+})();
 </script>
-<script src="/saas/assistant.js"></script>
 </body>
 </html>
