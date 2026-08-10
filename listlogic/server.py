@@ -1120,7 +1120,8 @@ def _refresh_sample_html(run_dir: Path) -> None:
                 and "btnPrintLeavebehind" in existing
                 and "listlogic-logo.png" in existing
                 and "print-page-spine" in existing
-                and "basemaps.cartocdn.com" in existing
+                and "arcgisonline.com" in existing
+                and "map-hover-tip" in existing
                 and "mapKindVisible" in existing
                 and "spine-net" in existing
                 and "netSellerFeePct" in existing
@@ -1581,7 +1582,7 @@ def demo_deck(request: Request):
     return FileResponse(path, media_type="text/html")
 
 
-_PRESENTATION_MARKERS = ("basemaps.cartocdn.com", "mapKindVisible", "data-map-filters", "spine-net", "netSellerFeePct", "match-badge", "sectionsModal")
+_PRESENTATION_MARKERS = ("arcgisonline.com", "map-hover-tip", "mapKindVisible", "data-map-filters", "spine-net", "netSellerFeePct", "match-badge", "sectionsModal")
 
 
 def _rebake_if_stale(run_id: str, html_path: Path) -> Path:
