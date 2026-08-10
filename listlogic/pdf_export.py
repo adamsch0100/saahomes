@@ -19,6 +19,7 @@ from reportlab.lib.utils import ImageReader
 from core import create_full_report, SubjectProperty
 
 import io
+import re
 import urllib.request
 
 
@@ -43,7 +44,22 @@ def _esc_pdf(text: object) -> str:
         .replace("&", "&amp;")
         .replace("<", "&lt;")
         .replace(">", "&gt;")
+
     )
+
+
+def _md(text: object) -> str:
+    """Light markdown (LLM narratives) -> ReportLab paragraph markup.
+
+    Handles **bold**, *italic*, ## headers, and - bullets; escapes HTML first.
+    """
+    t = _esc_pdf(str(text or ""))
+    t = re.sub(r"\*\*([^*]+)\*\*", r"<b>\1</b>", t)
+    t = re.sub(r"(?<![\w*])\*([^*\n]+)\*(?![\w*])", r"<i>\1</i>", t)
+    t = re.sub(r"^#{1,4}\s*(.+?)\s*#*$", r"<b>\1</b>", t, flags=re.M)
+    t = re.sub(r"^\s*[-*]\s+", "• ", t, flags=re.M)
+    return t.replace("\n", "<br/>")
+
 
 
 def _photo_bytes(url: str, timeout: int = 20, base_dir: Path | None = None) -> bytes | None:
@@ -470,6 +486,7 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
 
     lf = report.get("listing_flow") or {}
     if lf.get("new_listings_per_month"):
+        flow.append(PageBreak())
         flow.append(Paragraph("The Supply Stream", styles["section"]))
         flow.append(Paragraph(
             "Active competition is a snapshot. The supply stream is the pipeline — new homes that keep "
@@ -571,7 +588,7 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
         # Keep printable — trim very long markdown-ish narratives
         if len(narr) > 900:
             narr = narr[:900].rsplit(" ", 1)[0] + "…"
-        flow.append(Paragraph(narr.replace("\n", "<br/>"), styles["small"]))
+        flow.append(Paragraph(_md(narr), styles["small"]))
 
     if objections:
         flow.append(Paragraph("What Often Comes Up", styles["section"]))
@@ -630,6 +647,7 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
     lf_wait_fresh = float(lf.get("fresh_during_median_dom") or 0)
     lf_wait_dom = float(lf.get("median_dom_for_wait") or median_dom or 0)
     if lf.get("new_listings_per_month") and rec:
+        flow.append(PageBreak())
         wyw_total = lf_active_below + lf_wait_fresh
         stretch_sc = next(
             (sc for sc in (pos.get("price_scenarios") or [])
@@ -717,7 +735,7 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
     bl = report.get("executive_summary") or ""
     if bl:
         flow.append(Paragraph("Bottom Line", styles["section"]))
-        flow.append(Paragraph(bl.replace("\n", "<br/>"), styles["body"]))
+        flow.append(Paragraph(_md(bl), styles["body"]))
 
     scenarios = pos.get("price_scenarios") or []
     if scenarios:
@@ -863,11 +881,13 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
     yoy_sales = yoy.get("sales") or {}
     yoy_price = yoy.get("median_price") or {}
     if yoy_summary:
-        flow.append(Paragraph("Year Over Year", styles["section"]))
-        flow.append(Paragraph(
-            "Sales count and median sold price by year in this segment.",
-            styles["small"],
-        ))
+        yoy_flow = [
+            Paragraph("Year Over Year", styles["section"]),
+            Paragraph(
+                "Sales count and median sold price by year in this segment.",
+                styles["small"],
+            ),
+        ]
         yoy_blocks = []
         if yoy_sales.get("labels") and yoy_sales.get("values"):
             yoy_blocks.append([
@@ -899,7 +919,7 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
                 ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
                 ("LEFTPADDING", (0, 0), (-1, -1), 0),
             ]))
-            flow.append(yt)
+            yoy_flow.append(yt)
         yrows = [["Year", "Sales", "Median sold", "Median DOM"]]
         for y in yoy_summary:
             yrows.append([
@@ -918,45 +938,53 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
             ("TOPPADDING", (0, 0), (-1, -1), 5),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
         ]))
-        flow.append(Spacer(1, 6))
-        flow.append(yt2)
+        yoy_flow.append(Spacer(1, 6))
+        yoy_flow.append(yt2)
+        flow.append(KeepTogether(yoy_flow))
 
     dom_chart = report.get("chart_dom") or {}
     if dom_chart.get("labels") and dom_chart.get("values"):
-        flow.append(Paragraph("Days on Market — Recent Sales", styles["section"]))
-        flow.append(Paragraph(
-            f"Median {float(dom_chart.get('median') or median_dom):.0f} days · mean {float(dom_chart.get('mean') or 0):.0f} days",
-            styles["small"],
-        ))
-        flow.append(_bar_table(
-            dom_chart.get("labels") or [],
-            dom_chart.get("values") or [],
-            color=BLUE,
-            value_fmt=lambda v: f"{int(v)}",
-            max_rows=7,
-        ))
+        flow.append(KeepTogether([
+            Paragraph("Days on Market — Recent Sales", styles["section"]),
+            Paragraph(
+                f"Median {float(dom_chart.get('median') or median_dom):.0f} days · mean {float(dom_chart.get('mean') or 0):.0f} days",
+                styles["small"],
+            ),
+            _bar_table(
+                dom_chart.get("labels") or [],
+                dom_chart.get("values") or [],
+                color=BLUE,
+                value_fmt=lambda v: f"{int(v)}",
+                max_rows=7,
+            ),
+        ]))
 
     sens = pos.get("price_sensitivity_narrative") or ""
     if sens:
-        flow.append(Paragraph("Pricing Strategy", styles["section"]))
-        flow.append(Paragraph(sens.replace("\n", "<br/>"), styles["body"]))
+        flow.append(KeepTogether([
+            Paragraph("Pricing Strategy", styles["section"]),
+            Paragraph(_md(sens), styles["body"]),
+        ]))
 
-    flow.append(Spacer(1, 14))
-    flow.append(HRFlowable(width="100%", thickness=1, color=NAVY, spaceAfter=8))
-    flow.append(Paragraph(
-        "<b>Recommended Path Forward</b><br/>"
-        "Launch inside the competitive range, present the home at its best, and let the market respond. "
-        "Homes that start at a realistic price create urgency and typically net more than homes that sit and later reduce.",
-        styles["body"],
-    ))
-    flow.append(Spacer(1, 10))
-    flow.append(Paragraph(
-        "ListLogic · The pricing story, told by the data<br/>"
-        "Active = competition · Months of inventory uses Active only · For discussion with your agent",
-        styles["footer"],
-    ))
+    close_flow = [
+        Spacer(1, 14),
+        HRFlowable(width="100%", thickness=1, color=NAVY, spaceAfter=8),
+        Paragraph(
+            "<b>Recommended Path Forward</b><br/>"
+            "Launch inside the competitive range, present the home at its best, and let the market respond. "
+            "Homes that start at a realistic price create urgency and typically net more than homes that sit and later reduce.",
+            styles["body"],
+        ),
+        Spacer(1, 10),
+        Paragraph(
+            "ListLogic · The pricing story, told by the data<br/>"
+            "Active = competition · Months of inventory uses Active only · For discussion with your agent",
+            styles["footer"],
+        ),
+    ]
     if report.get("llm_enhanced"):
-        flow.append(Paragraph("Narratives AI-assisted · numbers from your MLS export", styles["footer"]))
+        close_flow.append(Paragraph("Narratives AI-assisted · numbers from your MLS export", styles["footer"]))
+    flow.append(KeepTogether(close_flow))
 
     doc.build(flow)
     return Path(output_path)
