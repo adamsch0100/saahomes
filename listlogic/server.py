@@ -1688,11 +1688,11 @@ def my_presentations(request: Request):
 @app.delete("/api/presentations/{presentation_id}")
 def delete_presentation(request: Request, presentation_id: str):
     import auth_service
-    import database
+    import db
 
     user = _require_user(request)
     # Users can only delete their own presentations; admins can delete any
-    row = database.execute(
+    row = db.execute(
         "SELECT user_id FROM presentations WHERE id = ?",
         (presentation_id,),
         fetch="one",
@@ -1701,7 +1701,7 @@ def delete_presentation(request: Request, presentation_id: str):
         raise HTTPException(404, "Presentation not found")
     if row["user_id"] != user["id"] and (user.get("role") or "") != "admin":
         raise HTTPException(403, "Cannot delete another user's presentation")
-    database.execute("DELETE FROM presentations WHERE id = ?", (presentation_id,))
+    db.execute("DELETE FROM presentations WHERE id = ?", (presentation_id,))
     return JSONResponse({"ok": True, "deleted": presentation_id})
 
 
