@@ -281,9 +281,13 @@ const startServer = async () => {
     console.error('Migration error on startup (API will still run):', error.message);
   }
 
-  // MLS sync lives on the main site now (hourly at :57, advisory-locked) —
-  // no longer a Hermes-box cron dependency.
-  startIresSyncScheduler();
+  // MLS sync: the web process is NOT the right home for the hourly sync —
+  // every push to main redeploys this service (~10-20 min cadence Aug 10)
+  // and restarts the container, killing any in-process sync mid-run (19:57
+  // run died at 20:05, 74 rows). The Hermes-box cron is the reliable single
+  // source (completes; pacing now 700ms). Enable this ONLY when running as
+  // a dedicated sync service (IRES_SYNC_SCHEDULER=on, no app deploys).
+  if (process.env.IRES_SYNC_SCHEDULER === 'on') startIresSyncScheduler();
 };
 
 startServer();
