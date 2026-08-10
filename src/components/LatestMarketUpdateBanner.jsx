@@ -27,11 +27,16 @@ export default function LatestMarketUpdateBanner({ variant = "default", cityName
     <section className="w-full bg-white py-12 border-y border-gray-100">
       <div className="max-w-5xl mx-auto px-6 md:px-12">
         <div className="rounded-2xl overflow-hidden shadow-lg grid md:grid-cols-2 bg-gray-900 text-white">
-          <div
-            className="min-h-[200px] bg-cover bg-center"
-            style={{ backgroundImage: `url('${post.image}')` }}
-            aria-hidden="true"
-          />
+          <div className="min-h-[200px] bg-gray-800 relative overflow-hidden">
+            <img
+              src={post.image}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
           <div className="p-8 flex flex-col justify-center">
             <p className="text-sm font-semibold uppercase tracking-widest text-[#CFB36E] mb-2">{headline}</p>
             <h2 className="text-2xl sm:text-3xl font-bold font-serif mb-3">{post.title}</h2>

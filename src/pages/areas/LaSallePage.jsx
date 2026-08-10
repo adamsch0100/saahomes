@@ -104,7 +104,7 @@ export default function LaSallePage() {
               src="/images/la-salle.png" 
               alt="La Salle Colorado historic community and small town charm" 
               className="w-full rounded-lg shadow-lg"
-              loading="lazy"
+              loading="lazy" decoding="async"
             />
           </div>
           <div className="grid md:grid-cols-3 gap-8">

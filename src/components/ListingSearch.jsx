@@ -820,6 +820,7 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
           }}
           className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03] ${imgLoaded ? "opacity-100" : "opacity-0"}`}
           loading="lazy"
+          decoding="async"
         />
       ) : (
         <ListingPhotoFallback className="w-full h-full absolute inset-0" compact={compact} />
@@ -1483,7 +1484,7 @@ function FilterDrawerBody({
         <button
           type="button"
           onClick={onApply}
-          className="ml-auto flex-1 sm:flex-none px-6 py-3 bg-black text-white font-semibold rounded-lg text-sm hover:bg-gray-800 transition-colors"
+          className="ml-auto flex-1 sm:flex-none px-6 py-3 bg-black text-white font-semibold rounded-lg text-sm hover:bg-gray-800 active:scale-[0.99] transition-all"
         >
           {loading
             ? "Updating…"
@@ -2098,7 +2099,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
             <SaveSearchModal
               filters={saveFilters}
               buttonLabel="Save search"
-              buttonClassName="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 py-2 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors whitespace-nowrap touch-manipulation"
+              buttonClassName="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 py-2 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-800 active:scale-[0.99] transition-all whitespace-nowrap touch-manipulation"
             />
           </div>
         </div>
@@ -2453,7 +2454,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
               <button
                 type="button"
                 onClick={() => fetchListings(filters, 1, false)}
-                className="mt-4 min-h-[44px] px-5 py-2.5 bg-black text-white text-sm font-semibold rounded-lg touch-manipulation"
+                className="mt-4 min-h-[44px] px-5 py-2.5 bg-black text-white text-sm font-semibold rounded-lg hover:bg-gray-800 active:scale-[0.99] transition-all touch-manipulation"
               >
                 Retry search
               </button>
@@ -2495,7 +2496,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="min-h-[44px] px-5 py-2.5 bg-black text-white rounded-lg text-sm font-semibold touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
+                  className="min-h-[44px] px-5 py-2.5 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-800 active:scale-[0.99] transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
                 >
                   Clear all filters
                 </button>

@@ -84,7 +84,7 @@ export default function LovelandPage() {
                 src="/images/Loveland-CO-Area-Guide.jpg" 
                 alt="Loveland Colorado downtown and mountains" 
                 className="w-full rounded-lg shadow-lg"
-                loading="lazy"
+                loading="lazy" decoding="async"
               />
             </div>
             <p className="text-lg leading-relaxed mb-4">

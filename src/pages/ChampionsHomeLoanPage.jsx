@@ -647,7 +647,7 @@ export default function ChampionsHomeLoanPage() {
                 src="/images/Buyers-CTA-1.jpg"
                 alt="Adam and Mandi Schwartz — Northern Colorado real estate agents"
                 className="rounded-lg w-full max-w-sm mb-4"
-                loading="lazy"
+                loading="lazy" decoding="async"
               />
               <p className="text-gray-700 text-sm">
                 Adam and Mandi Schwartz have helped hundreds of Colorado families buy and sell homes across Fort Collins, Loveland, Windsor, and Greeley.

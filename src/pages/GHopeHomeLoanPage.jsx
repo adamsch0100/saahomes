@@ -369,7 +369,8 @@ export default function GHopeHomeLoanPage() {
                 src={ZONE_MAP}
                 alt="G-HOPE geographic boundaries map showing Zone 1 through Zone 4 incentive areas in Greeley, Colorado east of 35th Avenue"
                 className="w-full h-auto rounded-lg border border-gray-200 shadow-sm"
-                loading="eager"
+                loading="lazy"
+                decoding="async"
               />
             </div>
             <p className="px-6 py-4 text-sm text-gray-600 border-t border-gray-100">

@@ -956,7 +956,7 @@ export default function ChfaDownPaymentAssistancePage() {
                 src="/images/Buyers-CTA-1.jpg"
                 alt="Adam and Mandi Schwartz — Northern Colorado REALTORS"
                 className="rounded-lg w-full max-w-sm mb-4"
-                loading="lazy"
+                loading="lazy" decoding="async"
               />
               <ul className="space-y-2 text-gray-700 text-sm">
                 {[

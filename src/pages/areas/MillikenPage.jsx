@@ -104,7 +104,7 @@ export default function MillikenPage() {
               src="/images/milliken.png" 
               alt="Milliken Colorado small town community and parks" 
               className="w-full rounded-lg shadow-lg"
-              loading="lazy"
+              loading="lazy" decoding="async"
             />
           </div>
           <div className="grid md:grid-cols-3 gap-8">

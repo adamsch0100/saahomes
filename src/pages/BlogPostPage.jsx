@@ -175,6 +175,7 @@ export default function BlogPostPage() {
                   alt={section.imageAlt || `${section.heading} — SAA Homes Northern Colorado`}
                   className="w-full h-auto rounded-xl shadow-md mb-6"
                   loading="lazy"
+                  decoding="async"
                 />
               )}
               {section.paragraphs.map((paragraph) => (
