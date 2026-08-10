@@ -912,6 +912,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Northern Colorado.webp',
     readTime: '8 min read',
+    youtubeId: '0Pm0AsXgNGc',
     sections: [
       {
         heading: 'County lines shape budget and lifestyle',
