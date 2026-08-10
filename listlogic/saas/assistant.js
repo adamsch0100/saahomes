@@ -223,15 +223,33 @@
     }
   });
 
-  // Sample banner (public demo)
+  // Sample banner (public demo) — keep agent chip / sticky spine below it
   if (new URLSearchParams(location.search).get("sample") === "1") {
     const bar = document.createElement("div");
+    bar.id = "llSampleBar";
     bar.style.cssText =
       "position:sticky;top:0;z-index:9000;background:#0c3c6e;color:#fff;padding:10px 14px;font:600 13px/1.35 system-ui,sans-serif;display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between";
     bar.innerHTML =
       '<span>Sample listing — explore freely. Start a free trial to run <em>your</em> MLS data.</span>' +
       '<a href="/saas/signup.html" style="background:#c9a227;color:#0c3c6e;text-decoration:none;padding:8px 12px;border-radius:8px;font-weight:700">Start free trial</a>';
     document.body.prepend(bar);
+    document.body.classList.add("ll-sample");
+
+    const offsetSampleChrome = () => {
+      const h = Math.ceil(bar.getBoundingClientRect().height || 52);
+      document.documentElement.style.setProperty("--ll-sample-bar-h", h + "px");
+    };
+    if (!document.getElementById("llSampleOffsetStyle")) {
+      const style = document.createElement("style");
+      style.id = "llSampleOffsetStyle";
+      style.textContent =
+        "body.ll-sample .agent-menu-wrap{top:calc(var(--ll-sample-bar-h,52px) + 12px)}" +
+        "body.ll-sample .spine{top:var(--ll-sample-bar-h,52px)}" +
+        "@media(max-width:560px){body.ll-sample .agent-menu-wrap{top:auto}}";
+      document.head.appendChild(style);
+    }
+    offsetSampleChrome();
+    window.addEventListener("resize", offsetSampleChrome);
   }
 
   fetch("/api/auth-status")
