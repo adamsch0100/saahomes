@@ -3226,14 +3226,27 @@ function renderMarketMap() {{
   wrap.style.display = '';
   if (!marketMap) {{
     marketMap = L.map(el, {{ scrollWheelZoom: false }});
-    L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {{
-      maxZoom: 18,
-      attribution: '&copy; OpenStreetMap',
+    L.tileLayer('https://{{s}}.basemaps.cartocdn.com/rastertiles/voyager/{{z}}/{{x}}/{{y}}{{r}}.png', {{
+      maxZoom: 19,
+      subdomains: 'abcd',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
     }}).addTo(marketMap);
     marketMapLayer = L.layerGroup().addTo(marketMap);
   }}
   marketMapLayer.clearLayers();
   const colors = {{ you: '#0c3c6e', comp: '#0e7a6d', sold: '#94a3b8', active: '#c9a227' }};
+  const portalLinks = (p) => {{
+    const addr = (p.label || '').trim();
+    if (!addr || p.mls === 'subject') return '';
+    const q = encodeURIComponent(addr);
+    const slug = addr.replace(/[^a-zA-Z0-9\\s-]/g, '').trim().replace(/[\\s_]+/g, '-');
+    const style = 'display:inline-block;margin:6px 8px 2px 0;font-size:.72rem;font-weight:700;color:#0c3c6e;text-decoration:none;border:1px solid #d5e2f0;border-radius:999px;padding:3px 10px;background:#f0f5fb';
+    return '<div style="margin-top:2px">' +
+      '<a style="' + style + '" href="https://www.zillow.com/homes/' + q + '_rb/" target="_blank" rel="noopener">Zillow</a>' +
+      '<a style="' + style + '" href="https://www.realtor.com/realestateandhomes-search/' + encodeURIComponent(slug) + '" target="_blank" rel="noopener">Realtor.com</a>' +
+      '<a style="' + style + '" href="https://www.google.com/maps/search/' + q + '" target="_blank" rel="noopener">Map</a>' +
+      '</div>';
+  }};
   const bounds = [];
   points.forEach((p) => {{
     const r = p.kind === 'you' ? 11 : (p.kind === 'comp' ? 8 : 5);
@@ -3246,8 +3259,9 @@ function renderMarketMap() {{
     }});
     marker.bindPopup(
       '<strong>' + escapeHtml(p.label) + '</strong><br>' +
-      escapeHtml(p.status) + (p.price ? '<br>' + money(p.price) : '') +
-      (p.mls && p.mls !== 'subject' ? '<br>MLS ' + escapeHtml(p.mls) : '')
+      escapeHtml(p.status) + (p.price ? ' · ' + money(p.price) : '') +
+      (p.mls && p.mls !== 'subject' ? '<br>MLS ' + escapeHtml(p.mls) : '') +
+      portalLinks(p)
     );
     if (p.kind === 'comp' && p.mls) {{
       marker.on('click', () => {{

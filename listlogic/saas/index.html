@@ -169,16 +169,16 @@ a:hover .btn-arrow, button:hover .btn-arrow { transform: translateX(3px); }
 .mock-live { display: flex; align-items: center; gap: 6px; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--teal); margin-bottom: 10px; }
 .mock-live i { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); animation: ll-pulse 1.6s ease-in-out infinite; }
 @keyframes ll-pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.8); } }
-.mock-price-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-.mock-price { font-family: 'Fraunces', serif; font-size: 2.45rem; font-weight: 700; letter-spacing: -0.02em; margin: 2px 0 2px; }
-.mock-delta { font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: #eef2f8; color: var(--ink-2); border: 1px solid var(--line); transition: all 0.15s ease; }
+.mock-price-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: nowrap; }
+.mock-price { font-family: 'Fraunces', serif; font-size: 2.45rem; font-weight: 700; letter-spacing: -0.02em; margin: 2px 0 2px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mock-delta { font-size: 0.7rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: #eef2f8; color: var(--ink-2); border: 1px solid var(--line); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .mock-delta.above { background: #faeee4; color: #b3541e; border-color: #efd9c4; }
 .mock-delta.below { background: #e7f3ef; color: var(--teal); border-color: #cde5dd; }
 .mock-range { font-size: 0.85rem; color: var(--muted); margin-bottom: 14px; }
 
 .mock-slider { margin-bottom: 16px; background: #faf8f3; border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px 12px; }
-.mock-slider-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.76rem; font-weight: 600; color: var(--ink-2); margin-bottom: 8px; }
-.mock-slider-head b { color: var(--teal); font-weight: 800; }
+.mock-slider-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 0.76rem; font-weight: 600; color: var(--ink-2); margin-bottom: 8px; white-space: nowrap; }
+.mock-slider-head b { color: var(--teal); font-weight: 800; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; }
 .mock-slider input[type=range] {
   -webkit-appearance: none; appearance: none; width: 100%; height: 8px; border-radius: 999px;
   background: linear-gradient(90deg, #0e7a6d 0%, #c9a227 55%, #b3541e 100%);
@@ -201,7 +201,7 @@ a:hover .btn-arrow, button:hover .btn-arrow { transform: translateX(3px); }
 .mock-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
 .mock-stat { border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; background: #fff; }
 .mock-stat .s-label { font-size: 0.64rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
-.mock-stat .s-value { font-family: 'Fraunces', serif; font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; transition: color 0.15s ease; }
+.mock-stat .s-value { font-family: 'Fraunces', serif; font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; transition: color 0.15s ease; font-variant-numeric: tabular-nums; }
 .mock-stat .s-value.good { color: var(--teal); }
 .mock-stat .s-value.risky { color: #b3541e; }
 .mock-stat .s-hint { font-size: 0.68rem; color: var(--muted); }
@@ -365,7 +365,7 @@ footer a:hover { color: var(--ink); }
   <div class="container hero-grid">
     <div>
       <span class="eyebrow">For listing agents</span>
-      <h1>Win the listing appointment with <span class="h1-keep">a pricing story <em>sellers can see</em>.</span></h1>
+      <h1>Win the listing appointment<br>with a pricing story <em>sellers&nbsp;can&nbsp;see</em>.</h1>
       <p class="lead">
         <span class="lead-accent">A market custom-fit to the home.</span> Defensible list price. Sellers watch the trade-off between price, timing, and odds — live.
       </p>
@@ -654,21 +654,20 @@ footer a:hover { color: var(--ink); }
     var delta = parseFloat(range.value) / 100;
     var price = REC * (1 + delta);
     var o = outcome(delta);
+    var pctDelta = delta * 100;
     priceEl.textContent = fmt(price);
 
-    if (Math.abs(delta) < 0.001) {
+    if (Math.abs(pctDelta) < 0.05) {
       deltaEl.textContent = 'At recommended';
       deltaEl.className = 'mock-delta';
-    } else if (delta > 0) {
-      deltaEl.textContent = '+' + delta.toFixed(1).replace(/0$/, '') + '% vs recommended';
-      deltaEl.className = 'mock-delta above';
     } else {
-      deltaEl.textContent = delta.toFixed(1).replace(/0$/, '') + '% vs recommended';
-      deltaEl.className = 'mock-delta below';
+      var sign = pctDelta > 0 ? '+' : '−';
+      deltaEl.textContent = sign + Math.abs(pctDelta).toFixed(1).replace(/\.0$/, '') + '% vs recommended';
+      deltaEl.className = 'mock-delta ' + (pctDelta > 0 ? 'above' : 'below');
     }
 
     var pct = Math.round(o.odds * 100);
-    headEl.textContent = (Math.abs(delta) < 0.001 ? 'Market' : (delta > 0 ? 'Stretch' : 'Move fast')) + ' · ' + fmt(price);
+    headEl.textContent = (Math.abs(pctDelta) < 0.05 ? 'Market' : (pctDelta > 0 ? 'Stretch' : 'Move fast')) + ' · ' + fmt(price);
     oddsEl.textContent = pct + '%';
     oddsEl.className = 's-value ' + (pct >= 70 ? 'good' : (pct < 58 ? 'risky' : ''));
     oddsBar.style.width = pct + '%';
