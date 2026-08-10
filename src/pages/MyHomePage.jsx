@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import SEO from "../components/SEO";
 import HomeValueChart from "../components/HomeValueChart";
+import { marketPack } from "../data/marketPack";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -10,8 +11,8 @@ const API_BASE = (() => {
 })();
 
 const GOLD = "#CFB36E";
-const AGENT_PHONE = "(970) 999-1407";
-const AGENT_TEL = "tel:9709991407";
+const AGENT_PHONE = marketPack.market.phone;
+const AGENT_TEL = marketPack.market.tel;
 
 function fmt(n) {
   if (n == null || n === "") return "—";
@@ -498,8 +499,9 @@ export default function MyHomePage() {
                 <div className="mt-8 bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 shadow-sm">
                   <h2 className="text-xl font-bold text-gray-900">Add your home</h2>
                   <p className="text-sm text-gray-500 mt-2 leading-relaxed">
-                    We&apos;ll estimate a range from live Northern Colorado MLS sales data (free),
-                    then compare with licensed market services when available.
+                    We&apos;ll estimate a range from live {marketPack.market.name} MLS sales data
+                    ({marketPack.sources.saaMls}, free), then compare with licensed market
+                    services when available. {marketPack.honestLabels.estimate}
                   </p>
                   <form onSubmit={saveProfile} className="mt-5 space-y-3">
                     <input
@@ -589,9 +591,17 @@ export default function MyHomePage() {
                           {market?.mid != null && (
                             <div className="pb-1">
                               <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold">
-                                Market services
+                                Market services (estimate)
                               </p>
                               <p className="text-xl font-bold text-[#CFB36E]">{fmt(market.mid)}</p>
+                              <p className="text-[10px] text-gray-500 mt-0.5 max-w-[12rem] leading-snug">
+                                Source:{" "}
+                                {market.source ||
+                                  marketPack.sources.avmRealtor}
+                                {market.attribution
+                                  ? ` · ${market.attribution}`
+                                  : ` · ${marketPack.honestLabels.notAppraisal}`}
+                              </p>
                             </div>
                           )}
                         </div>
@@ -603,7 +613,13 @@ export default function MyHomePage() {
                         <p className="mt-2 text-xs text-gray-500 leading-relaxed">
                           {our?.label ||
                             activeHome?.our_estimate_label ||
-                            "Estimated range based on local sales data. Not an appraisal."}
+                            marketPack.honestLabels.estimateFallback}
+                        </p>
+                        <p className="mt-1 text-[11px] text-gray-500 leading-relaxed">
+                          Source:{" "}
+                          {our?.source_label ||
+                            marketPack.sources.saaMls}{" "}
+                          · {marketPack.honestLabels.estimate}
                         </p>
                       </>
                     )}
@@ -663,10 +679,22 @@ export default function MyHomePage() {
                         )}
                       </div>
                       <p className="mt-2 text-[11px] text-gray-400">
-                        {cityTrends.attribution || "City-level index — not a per-home appraisal."}
+                        {cityTrends.attribution ||
+                          `City-level index (estimate) · ${marketPack.sources.avmZillow} · not a per-home appraisal.`}
                       </p>
                     </div>
                   )}
+
+                  {/* CHFA / DPA trusted resource (from market pack) */}
+                  <p className="text-xs text-gray-500 leading-relaxed px-0.5">
+                    {marketPack.dpa.chfaLine}{" "}
+                    <Link
+                      to={marketPack.dpa.hubPath}
+                      className="font-semibold text-gray-700 underline underline-offset-2 hover:text-black"
+                    >
+                      Learn about CHFA DPA
+                    </Link>
+                  </p>
 
                   {/* One-two ask */}
                   <div className="rounded-2xl border-2 border-[#CFB36E]/40 bg-[#CFB36E]/08 p-5">
@@ -859,7 +887,8 @@ export default function MyHomePage() {
           )}
 
           <p className="mt-10 text-center text-xs text-gray-400">
-            Schwartz and Associates · {AGENT_PHONE} · Fair Housing · Estimates are not appraisals
+            {marketPack.market.brokerage} · {AGENT_PHONE} · {marketPack.fairHousing} ·{" "}
+            {marketPack.honestLabels.notAppraisal}
           </p>
         </div>
       </div>
