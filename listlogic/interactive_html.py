@@ -867,6 +867,10 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .net-row .nv{{text-align:right;font-weight:700;color:var(--brand-primary);font-variant-numeric:tabular-nums;white-space:nowrap}}
 .net-row.net-total{{background:#f4f1ea}}
 .net-row.net-total .nl,.net-row.net-total .nv{{font-weight:800;color:var(--ink)}}
+.net-subhead{{padding:10px 14px 6px;font-size:.66rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--brand-primary);background:#f8f6f1;border-bottom:1px solid var(--border)}}
+.net-subhead span{{color:var(--muted);font-weight:600;letter-spacing:.02em;text-transform:none}}
+.net-row .ni input[type="date"]{{padding-right:4px;font-size:.8rem}}
+.net-row .nv-days{{font-weight:600;color:var(--muted);font-size:.74rem}}
 .net-summary{{background:linear-gradient(150deg,var(--brand-primary),var(--brand-accent));color:#fff;border-radius:14px;padding:22px 20px;display:flex;flex-direction:column;justify-content:center;gap:7px;text-align:center}}
 .net-summary .ns-eyebrow{{font-size:.66rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.85}}
 .net-summary .ns-big{{font-family:'Fraunces',serif;font-size:2.5rem;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums;white-space:nowrap}}
@@ -1708,40 +1712,63 @@ body.print-leavebehind .page{{padding-bottom:0}}
     <p class="sub">Estimated proceeds at the price on the slider — move it and this sheet updates. Tap any line to adjust to your situation. Estimates only, not a closing statement.</p>
     <div class="net-grid">
       <div class="net-lines" id="netLines">
+        <div class="net-subhead">Brokerage &amp; concessions</div>
         <div class="net-row">
-          <div class="nl">Commission <small>listing + buyer side, combined</small></div>
-          <div class="ni"><input type="number" id="netCommPct" min="0" max="15" step="0.1" value="5.5"><span class="nu">%</span></div>
-          <div class="nv" id="netCommVal">—</div>
+          <div class="nl">Seller broker fee</div>
+          <div class="ni"><input type="number" id="netSellerFeePct" min="0" max="10" step="0.1" value="3"><span class="nu">%</span></div>
+          <div class="nv" id="netSellerFeeVal">—</div>
         </div>
         <div class="net-row">
-          <div class="nl">Mortgage payoff <small>current loan balance(s)</small></div>
+          <div class="nl">Buyer broker fee</div>
+          <div class="ni"><input type="number" id="netBuyerFeePct" min="0" max="10" step="0.1" value="3"><span class="nu">%</span></div>
+          <div class="nv" id="netBuyerFeeVal">—</div>
+        </div>
+        <div class="net-row">
+          <div class="nl">Seller concession <small>credits offered to the buyer</small></div>
+          <div class="ni"><input type="number" id="netConcession" min="0" step="100" value="0"><span class="nu">$</span></div>
+          <div class="nv" id="netConcessionVal">—</div>
+        </div>
+        <div class="net-row">
+          <div class="nl">Misc. — inspection repairs <small>standard allowance</small></div>
+          <div class="ni"><input type="number" id="netRepairs" min="0" step="100" value="2000"><span class="nu">$</span></div>
+          <div class="nv" id="netRepairsVal">—</div>
+        </div>
+        <div class="net-subhead">Taxes &amp; payoff</div>
+        <div class="net-row">
+          <div class="nl">Prop. taxes <small>auto · annual rate prorated to close</small></div>
+          <div class="ni"><input type="number" id="netTaxRate" min="0" max="5" step="0.01" value="0.76"><span class="nu">%</span></div>
+          <div class="nv" id="netTaxVal">—</div>
+        </div>
+        <div class="net-row">
+          <div class="nl">Seller loan balance <small>current mortgage payoff</small></div>
           <div class="ni"><input type="number" id="netPayoff" min="0" step="500" value="0"><span class="nu">$</span></div>
           <div class="nv" id="netPayoffVal">—</div>
         </div>
+        <div class="net-row">
+          <div class="nl">Closing date <small>drives the tax proration</small></div>
+          <div class="ni"><input type="date" id="netCloseDate"></div>
+          <div class="nv nv-days" id="netCloseDays">—</div>
+        </div>
+        <div class="net-subhead">Title fees <span>· seller-paid</span></div>
         <div class="net-row">
           <div class="nl">Owner's title policy <small id="netTitleTag">auto · ≈0.15% of price</small></div>
           <div class="ni"><input type="number" id="netTitle" min="0" step="50" value="0" data-auto="1"><span class="nu">$</span></div>
           <div class="nv" id="netTitleVal">—</div>
         </div>
         <div class="net-row">
-          <div class="nl">Closing / escrow fee <small>title company charge</small></div>
-          <div class="ni"><input type="number" id="netClosing" min="0" step="50" value="1200"><span class="nu">$</span></div>
-          <div class="nv" id="netClosingVal">—</div>
+          <div class="nl">Owner's extended coverage</div>
+          <div class="ni"><input type="number" id="netOec" min="0" step="10" value="150"><span class="nu">$</span></div>
+          <div class="nv" id="netOecVal">—</div>
         </div>
         <div class="net-row">
-          <div class="nl">Colorado transfer tax <small id="netTransferTag">auto · 0.01% of price</small></div>
-          <div class="ni"><input type="number" id="netTransfer" min="0" step="10" value="0" data-auto="1"><span class="nu">$</span></div>
-          <div class="nv" id="netTransferVal">—</div>
+          <div class="nl">Bundled closing fees</div>
+          <div class="ni"><input type="number" id="netBundled" min="0" step="10" value="190"><span class="nu">$</span></div>
+          <div class="nv" id="netBundledVal">—</div>
         </div>
         <div class="net-row">
-          <div class="nl">Concessions / repair credits <small>anything you’ve offered the buyer</small></div>
-          <div class="ni"><input type="number" id="netConcessions" min="0" step="100" value="0"><span class="nu">$</span></div>
-          <div class="nv" id="netConcessionsVal">—</div>
-        </div>
-        <div class="net-row">
-          <div class="nl">HOA / misc <small>transfer fees, warranty, other liens</small></div>
-          <div class="ni"><input type="number" id="netHoa" min="0" step="50" value="0"><span class="nu">$</span></div>
-          <div class="nv" id="netHoaVal">—</div>
+          <div class="nl">Final water <small>final utility reading</small></div>
+          <div class="ni"><input type="number" id="netWater" min="0" step="10" value="200"><span class="nu">$</span></div>
+          <div class="nv" id="netWaterVal">—</div>
         </div>
         <div class="net-row net-total">
           <div class="nl">Total selling costs</div>
@@ -1755,7 +1782,7 @@ body.print-leavebehind .page{{padding-bottom:0}}
         <div class="ns-sub">at <strong id="netPrice">—</strong> · <span id="netPct">—</span> of list</div>
         <div class="ns-bar"><div class="ns-fill" id="netFill"></div></div>
         <div class="ns-note" id="netRecNote">—</div>
-        <div class="ns-fine">Estimates only — your closer issues the official figures. Payoff, concessions, and HOA change this the most.</div>
+        <div class="ns-fine">Estimates only — your closer issues the official figures. Loan balance, concessions, and fees change this the most.</div>
       </div>
     </div>
   </section>
@@ -2391,33 +2418,60 @@ function renderConfront(price) {{
 }}
 
 function netAutoTitle(p) {{ return Math.max(0, Math.round(p * 0.0015 / 50) * 50); }}
-function netAutoTransfer(p) {{ return Math.max(0, Math.round(p * 0.0001)); }}
+function netTaxParts(price) {{
+  const rate = Math.min(5, Math.max(0, parseFloat(document.getElementById('netTaxRate').value) || 0));
+  const annual = price * rate / 100;
+  const dateEl = document.getElementById('netCloseDate');
+  if (dateEl && !dateEl.value) {{
+    dateEl.value = new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10);
+  }}
+  const ds = dateEl ? dateEl.value : '';
+  const close = ds ? new Date(ds + 'T12:00:00') : null;
+  if (!close || isNaN(close)) return {{ amount: Math.round(annual / 12), days: 0, year: 0 }};
+  const jan1 = new Date(close.getFullYear(), 0, 1);
+  const days = Math.max(1, Math.min(365, Math.round((close - jan1) / 864e5) + 1));
+  return {{ amount: Math.round(annual * days / 365), days, year: close.getFullYear() }};
+}}
+function netCostsAt(price) {{
+  price = +price || 0;
+  const num = (id) => Math.max(0, parseFloat(document.getElementById(id).value) || 0);
+  const pct = (id) => Math.min(10, Math.max(0, parseFloat(document.getElementById(id).value) || 0));
+  const titleEl = document.getElementById('netTitle');
+  const title = titleEl.dataset.auto === '1' ? netAutoTitle(price) : num('netTitle');
+  return {{
+    sellerFee: price * pct('netSellerFeePct') / 100,
+    buyerFee: price * pct('netBuyerFeePct') / 100,
+    concession: num('netConcession'),
+    repairs: num('netRepairs'),
+    tax: netTaxParts(price).amount,
+    payoff: num('netPayoff'),
+    title,
+    oec: num('netOec'),
+    bundled: num('netBundled'),
+    water: num('netWater'),
+  }};
+}}
 function renderNetSheet(price) {{
   if (!document.getElementById('netLines')) return;
   price = +price || currentRec || 0;
   if (!price) return;
   const titleEl = document.getElementById('netTitle');
-  const transferEl = document.getElementById('netTransfer');
   if (titleEl.dataset.auto === '1') titleEl.value = netAutoTitle(price);
-  if (transferEl.dataset.auto === '1') transferEl.value = netAutoTransfer(price);
-  const num = (id) => Math.max(0, parseFloat(document.getElementById(id).value) || 0);
-  const commPct = Math.min(15, Math.max(0, parseFloat(document.getElementById('netCommPct').value) || 0));
-  const comm = price * commPct / 100;
-  const payoff = num('netPayoff');
-  const title = num('netTitle');
-  const closing = num('netClosing');
-  const transfer = num('netTransfer');
-  const concessions = num('netConcessions');
-  const hoa = num('netHoa');
-  const costs = comm + payoff + title + closing + transfer + concessions + hoa;
+  const c = netCostsAt(price);
+  const costs = c.sellerFee + c.buyerFee + c.concession + c.repairs + c.tax + c.payoff + c.title + c.oec + c.bundled + c.water;
   const net = price - costs;
-  document.getElementById('netCommVal').textContent = '\\u2212' + money(comm);
-  document.getElementById('netPayoffVal').textContent = payoff ? '\\u2212' + money(payoff) : '\\u2014';
-  document.getElementById('netTitleVal').textContent = '\\u2212' + money(title);
-  document.getElementById('netClosingVal').textContent = '\\u2212' + money(closing);
-  document.getElementById('netTransferVal').textContent = '\\u2212' + money(transfer);
-  document.getElementById('netConcessionsVal').textContent = concessions ? '\\u2212' + money(concessions) : '\\u2014';
-  document.getElementById('netHoaVal').textContent = hoa ? '\\u2212' + money(hoa) : '\\u2014';
+  document.getElementById('netSellerFeeVal').textContent = '\\u2212' + money(c.sellerFee);
+  document.getElementById('netBuyerFeeVal').textContent = '\\u2212' + money(c.buyerFee);
+  document.getElementById('netConcessionVal').textContent = c.concession ? '\\u2212' + money(c.concession) : '\\u2014';
+  document.getElementById('netRepairsVal').textContent = c.repairs ? '\\u2212' + money(c.repairs) : '\\u2014';
+  document.getElementById('netTaxVal').textContent = '\\u2212' + money(c.tax);
+  document.getElementById('netPayoffVal').textContent = c.payoff ? '\\u2212' + money(c.payoff) : '\\u2014';
+  document.getElementById('netTitleVal').textContent = '\\u2212' + money(c.title);
+  document.getElementById('netOecVal').textContent = c.oec ? '\\u2212' + money(c.oec) : '\\u2014';
+  document.getElementById('netBundledVal').textContent = c.bundled ? '\\u2212' + money(c.bundled) : '\\u2014';
+  document.getElementById('netWaterVal').textContent = c.water ? '\\u2212' + money(c.water) : '\\u2014';
+  const tp = netTaxParts(price);
+  document.getElementById('netCloseDays').textContent = tp.days ? 'day ' + tp.days + ' of ' + tp.year : 'set date';
   document.getElementById('netCostsVal').textContent = '\\u2212' + money(costs);
   document.getElementById('netBig').textContent = money(net);
   document.getElementById('netPrice').textContent = money(price);
@@ -2426,9 +2480,8 @@ function renderNetSheet(price) {{
   document.getElementById('netFill').style.width = pct + '%';
   const note = document.getElementById('netRecNote');
   if (Math.abs(price - currentRec) > 500) {{
-    const recCosts = currentRec * commPct / 100 + payoff +
-      (titleEl.dataset.auto === '1' ? netAutoTitle(currentRec) : title) + closing +
-      (transferEl.dataset.auto === '1' ? netAutoTransfer(currentRec) : transfer) + concessions + hoa;
+    const rc = netCostsAt(currentRec);
+    const recCosts = rc.sellerFee + rc.buyerFee + rc.concession + rc.repairs + rc.tax + rc.payoff + rc.title + rc.oec + rc.bundled + rc.water;
     note.textContent = 'At the recommended ' + money(currentRec) + ' you\\u2019d net \\u2248 ' + money(currentRec - recCosts);
   }} else {{
     note.textContent = 'Showing the recommended price';
@@ -2439,15 +2492,18 @@ function persistNetSheet() {{
     const raw = localStorage.getItem('listlogic_edits_' + (RUN_ID || 'local'));
     const payload = raw ? JSON.parse(raw) : {{}};
     payload.netSheet = {{
-      commPct: document.getElementById('netCommPct').value,
+      sellerFeePct: document.getElementById('netSellerFeePct').value,
+      buyerFeePct: document.getElementById('netBuyerFeePct').value,
+      concession: document.getElementById('netConcession').value,
+      repairs: document.getElementById('netRepairs').value,
+      taxRate: document.getElementById('netTaxRate').value,
       payoff: document.getElementById('netPayoff').value,
+      closeDate: document.getElementById('netCloseDate').value,
       title: document.getElementById('netTitle').value,
       titleAuto: document.getElementById('netTitle').dataset.auto === '1',
-      closing: document.getElementById('netClosing').value,
-      transfer: document.getElementById('netTransfer').value,
-      transferAuto: document.getElementById('netTransfer').dataset.auto === '1',
-      concessions: document.getElementById('netConcessions').value,
-      hoa: document.getElementById('netHoa').value,
+      oec: document.getElementById('netOec').value,
+      bundled: document.getElementById('netBundled').value,
+      water: document.getElementById('netWater').value,
     }};
     localStorage.setItem('listlogic_edits_' + (RUN_ID || 'local'), JSON.stringify(payload));
     if (RUN_ID) {{
@@ -2463,7 +2519,7 @@ document.querySelectorAll('#netLines input').forEach((inp) => {{
   inp.addEventListener('input', () => {{
     if (inp.dataset.auto === '1') {{
       delete inp.dataset.auto;
-      const tag = document.getElementById(inp.id === 'netTitle' ? 'netTitleTag' : 'netTransferTag');
+      const tag = document.getElementById('netTitleTag');
       if (tag) tag.textContent = 'manual';
     }}
     renderNetSheet(+document.getElementById('sellerPrice').value || currentRec);
@@ -4210,21 +4266,20 @@ async function loadSavedEdits() {{
   if (saved.netSheet && typeof saved.netSheet === 'object') {{
     const ns = saved.netSheet;
     const setNet = (id, v) => {{ if (v != null && v !== '') document.getElementById(id).value = v; }};
-    setNet('netCommPct', ns.commPct);
+    setNet('netSellerFeePct', ns.sellerFeePct);
+    setNet('netBuyerFeePct', ns.buyerFeePct);
+    setNet('netConcession', ns.concession);
+    setNet('netRepairs', ns.repairs);
+    setNet('netTaxRate', ns.taxRate);
     setNet('netPayoff', ns.payoff);
-    setNet('netClosing', ns.closing);
-    setNet('netConcessions', ns.concessions);
-    setNet('netHoa', ns.hoa);
+    setNet('netCloseDate', ns.closeDate);
+    setNet('netOec', ns.oec);
+    setNet('netBundled', ns.bundled);
+    setNet('netWater', ns.water);
     if (ns.titleAuto === false) {{
       setNet('netTitle', ns.title);
       delete document.getElementById('netTitle').dataset.auto;
       const tag = document.getElementById('netTitleTag');
-      if (tag) tag.textContent = 'manual';
-    }}
-    if (ns.transferAuto === false) {{
-      setNet('netTransfer', ns.transfer);
-      delete document.getElementById('netTransfer').dataset.auto;
-      const tag = document.getElementById('netTransferTag');
       if (tag) tag.textContent = 'manual';
     }}
   }}
