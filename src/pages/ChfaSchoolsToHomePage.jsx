@@ -547,6 +547,8 @@ export default function ChfaSchoolsToHomePage() {
               src="/images/Buyers-CTA-1.jpg"
               alt="Adam and Mandi Schwartz - Northern Colorado Real Estate"
               className="rounded-lg shadow-xl w-full"
+              loading="lazy"
+              decoding="async"
             />
           </div>
           <div>

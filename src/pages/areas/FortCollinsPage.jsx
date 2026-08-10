@@ -95,7 +95,7 @@ export default function FortCollinsPage() {
                 src="/images/Fort-Collins-CO-Area-Guide.jpg" 
                 alt="Fort Collins Colorado downtown and Colorado State University" 
                 className="w-full rounded-lg shadow-lg"
-                loading="lazy"
+                loading="lazy" decoding="async"
               />
             </div>
             <p className="text-lg leading-relaxed mb-4">

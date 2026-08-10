@@ -57,10 +57,13 @@ export default function Explore() {
               href={item.href}
               className="group relative rounded-xl overflow-hidden bg-gray-100 shadow hover:shadow-xl transition-shadow duration-300"
             >
-              <div
-                className="absolute inset-0 bg-center bg-cover"
-                style={{ backgroundImage: `url('${item.image}')` }}
+              <img
+                src={item.image}
+                alt=""
                 aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" aria-hidden="true" />
               <div className="relative p-6 flex flex-col justify-end min-h-[240px]">

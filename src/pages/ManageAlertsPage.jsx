@@ -107,7 +107,7 @@ function PreviewCard({ preview, matchCount, editPath }) {
                   : "Matching home"
               }
               className="w-full h-full object-cover"
-              loading="lazy"
+              loading="lazy" decoding="async"
               onError={() => setImgFailed(true)}
             />
           )}
@@ -174,7 +174,7 @@ function SavedHomeCard({ home, onUnsave, onOpen, busy }) {
                 : "Saved home"
             }
             className="w-full h-full object-cover"
-            loading="lazy"
+            loading="lazy" decoding="async"
             onError={() => setImgFailed(true)}
           />
         )}

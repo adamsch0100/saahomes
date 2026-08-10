@@ -220,9 +220,16 @@ export default function LuxuryRealEstatePage() {
               <Link
                 key={city.slug}
                 to={`/northern-colorado-areas/${city.slug}/`}
-                className="group relative h-80 bg-cover bg-center overflow-hidden"
-                style={{ backgroundImage: `url('${city.image}')` }}
+                className="group relative h-80 overflow-hidden bg-gray-900"
               >
+                <img
+                  src={city.image}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <div className="absolute inset-0 bg-black/50 group-hover:bg-black/40 transition-colors" />
                 <div className="absolute inset-0 p-8 flex flex-col justify-end">
                   <p className="text-[#CFB36E] text-sm font-semibold tracking-widest uppercase mb-1">{city.price}</p>

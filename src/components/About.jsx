@@ -10,6 +10,8 @@ export default function About() {
               src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2069&auto=format&fit=crop"
               alt="Northern Colorado home exterior"
               className="w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
             />
           </div>
 

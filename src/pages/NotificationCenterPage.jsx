@@ -102,7 +102,7 @@ function NotificationRow({ item, onOpen, onMarkRead, onDismiss, busyId }) {
         aria-label={`Open: ${item.title}`}
       >
         {img ? (
-          <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" />
+          <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400 text-lg">🏠</div>
         )}

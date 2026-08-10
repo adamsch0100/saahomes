@@ -15,6 +15,8 @@ export default function AboutSection() {
                 src="/images/About-new-image-1-1.jpg"
                 alt="Adam and Mandi Schwartz"
                 className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
               />
               <div 
                 className="absolute -bottom-10 -right-10 w-40 h-40 opacity-20"

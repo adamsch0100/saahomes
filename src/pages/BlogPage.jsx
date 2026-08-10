@@ -84,10 +84,13 @@ export default function BlogPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {sortedPosts.map((post) => (
               <article key={post.slug} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                <Link to={`/blog/${post.slug}/`}>
-                  <div
-                    className="h-48 bg-cover bg-center"
-                    style={{ backgroundImage: `url('${post.image}')` }}
+                <Link to={`/blog/${post.slug}/`} className="block h-48 overflow-hidden bg-gray-100">
+                  <img
+                    src={post.image}
+                    alt=""
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </Link>
                 <div className="p-6">
