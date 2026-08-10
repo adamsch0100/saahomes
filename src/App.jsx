@@ -1,52 +1,88 @@
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense, lazy } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
 import Breadcrumbs from "./components/Breadcrumbs.jsx";
+// Critical path — keep eager for first paint / search UX (home, search, detail)
 import HomePage from "./pages/HomePage.jsx";
-import AboutPage from "./pages/AboutPage.jsx";
-import ContactPage from "./pages/ContactPage.jsx";
-import ForBuyersPage from "./pages/ForBuyersPage.jsx";
-import ForSellersPage from "./pages/ForSellersPage.jsx";
-import LuxuryRealEstatePage from "./pages/LuxuryRealEstatePage.jsx";
-import CashHomeBuyersPage from "./pages/CashHomeBuyersPage.jsx";
-import FeaturedAreasPage from "./pages/FeaturedAreasPage.jsx";
 import PropertiesPage from "./pages/PropertiesPage.jsx";
 import ListingDetailPage from "./pages/ListingDetailPage.jsx";
-import CityHomesForSalePage from "./pages/CityHomesForSalePage.jsx";
-import ManageAlertsPage from "./pages/ManageAlertsPage.jsx";
-import MyHomePage from "./pages/MyHomePage.jsx";
-import NotificationCenterPage from "./pages/NotificationCenterPage.jsx";
 import { CITY_HOMES } from "./data/cityHomesData.js";
-import FortCollinsPage from "./pages/areas/FortCollinsPage.jsx";
-import LovelandPage from "./pages/areas/LovelandPage.jsx";
-import MeadPage from "./pages/areas/MeadPage.jsx";
-import LongmontPage from "./pages/areas/LongmontPage.jsx";
-import BoulderPage from "./pages/areas/BoulderPage.jsx";
-import WindsorPage from "./pages/areas/WindsorPage.jsx";
-import GreeleyPage from "./pages/areas/GreeleyPage.jsx";
-import TimnathPage from "./pages/areas/TimnathPage.jsx";
-import WellingtonPage from "./pages/areas/WellingtonPage.jsx";
-import JohnstownPage from "./pages/areas/JohnstownPage.jsx";
-import EatonPage from "./pages/areas/EatonPage.jsx";
-import MillikenPage from "./pages/areas/MillikenPage.jsx";
-import LaSallePage from "./pages/areas/LaSallePage.jsx";
-import MortgageCalculatorPage from "./pages/MortgageCalculatorPage.jsx";
-import AdminPage from "./pages/AdminPage.jsx";
-import TestimonialsPage from "./pages/TestimonialsPage.jsx";
-import EventsCalendarPage from "./pages/EventsCalendarPage.jsx";
-import BlogPage from "./pages/BlogPage.jsx";
-import BlogPostPage from "./pages/BlogPostPage.jsx";
-import ChfaSchoolsToHomePage from "./pages/ChfaSchoolsToHomePage.jsx";
-import ChampionsHomeLoanPage from "./pages/ChampionsHomeLoanPage.jsx";
-import ChfaDownPaymentAssistancePage from "./pages/ChfaDownPaymentAssistancePage.jsx";
-import GHopeHomeLoanPage from "./pages/GHopeHomeLoanPage.jsx";
-import AreaGuidePage from "./pages/AreaGuidePage.jsx";
-import NeighborhoodPage from "./pages/NeighborhoodPage.jsx";
 import FloatingContactBar from "./components/FloatingContactBar.jsx";
 import LeadCaptureChat from "./components/LeadCaptureChat.jsx";
 import { loadRealScoutScript } from "./utils/realscout.js";
 import { GA4_MEASUREMENT_ID, initGaDebugMode } from "./utils/analytics.js";
+
+// Route-level code splitting — marketing, area, admin, blog, tools (lazy)
+const AboutPage = lazy(() => import("./pages/AboutPage.jsx"));
+const ContactPage = lazy(() => import("./pages/ContactPage.jsx"));
+const ForBuyersPage = lazy(() => import("./pages/ForBuyersPage.jsx"));
+const ForSellersPage = lazy(() => import("./pages/ForSellersPage.jsx"));
+const LuxuryRealEstatePage = lazy(() => import("./pages/LuxuryRealEstatePage.jsx"));
+const CashHomeBuyersPage = lazy(() => import("./pages/CashHomeBuyersPage.jsx"));
+const FeaturedAreasPage = lazy(() => import("./pages/FeaturedAreasPage.jsx"));
+const CityHomesForSalePage = lazy(() => import("./pages/CityHomesForSalePage.jsx"));
+const ManageAlertsPage = lazy(() => import("./pages/ManageAlertsPage.jsx"));
+const MyHomePage = lazy(() => import("./pages/MyHomePage.jsx"));
+const NotificationCenterPage = lazy(() => import("./pages/NotificationCenterPage.jsx"));
+const FortCollinsPage = lazy(() => import("./pages/areas/FortCollinsPage.jsx"));
+const LovelandPage = lazy(() => import("./pages/areas/LovelandPage.jsx"));
+const MeadPage = lazy(() => import("./pages/areas/MeadPage.jsx"));
+const LongmontPage = lazy(() => import("./pages/areas/LongmontPage.jsx"));
+const BoulderPage = lazy(() => import("./pages/areas/BoulderPage.jsx"));
+const WindsorPage = lazy(() => import("./pages/areas/WindsorPage.jsx"));
+const GreeleyPage = lazy(() => import("./pages/areas/GreeleyPage.jsx"));
+const TimnathPage = lazy(() => import("./pages/areas/TimnathPage.jsx"));
+const WellingtonPage = lazy(() => import("./pages/areas/WellingtonPage.jsx"));
+const JohnstownPage = lazy(() => import("./pages/areas/JohnstownPage.jsx"));
+const EatonPage = lazy(() => import("./pages/areas/EatonPage.jsx"));
+const MillikenPage = lazy(() => import("./pages/areas/MillikenPage.jsx"));
+const LaSallePage = lazy(() => import("./pages/areas/LaSallePage.jsx"));
+const MortgageCalculatorPage = lazy(() => import("./pages/MortgageCalculatorPage.jsx"));
+const AdminPage = lazy(() => import("./pages/AdminPage.jsx"));
+const TestimonialsPage = lazy(() => import("./pages/TestimonialsPage.jsx"));
+const EventsCalendarPage = lazy(() => import("./pages/EventsCalendarPage.jsx"));
+const BlogPage = lazy(() => import("./pages/BlogPage.jsx"));
+const BlogPostPage = lazy(() => import("./pages/BlogPostPage.jsx"));
+const ChfaSchoolsToHomePage = lazy(() => import("./pages/ChfaSchoolsToHomePage.jsx"));
+const ChampionsHomeLoanPage = lazy(() => import("./pages/ChampionsHomeLoanPage.jsx"));
+const ChfaDownPaymentAssistancePage = lazy(() => import("./pages/ChfaDownPaymentAssistancePage.jsx"));
+const GHopeHomeLoanPage = lazy(() => import("./pages/GHopeHomeLoanPage.jsx"));
+const AreaGuidePage = lazy(() => import("./pages/AreaGuidePage.jsx"));
+const NeighborhoodPage = lazy(() => import("./pages/NeighborhoodPage.jsx"));
+
+/** Branded route-load fallback — gold/black skeleton, never blank */
+function PageLoadFallback() {
+  return (
+    <div
+      className="min-h-[50vh] w-full animate-pulse"
+      role="status"
+      aria-live="polite"
+      aria-label="Loading page"
+    >
+      <div className="bg-black pt-28 sm:pt-32 pb-10">
+        <div className="max-w-7xl mx-auto px-6 space-y-4">
+          <div className="h-3 w-24 rounded bg-[#CFB36E]/40" />
+          <div className="h-10 w-2/3 max-w-lg rounded bg-white/10" />
+          <div className="h-4 w-1/2 max-w-md rounded bg-white/10" />
+        </div>
+      </div>
+      <div className="max-w-7xl mx-auto px-6 py-12 space-y-6">
+        <div className="h-40 rounded-xl bg-gray-100" />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-32 rounded-lg bg-gray-100" />
+          ))}
+        </div>
+        <div className="h-24 rounded-lg bg-gray-50" />
+      </div>
+    </div>
+  );
+}
+
+function LazyPage({ children }) {
+  return <Suspense fallback={<PageLoadFallback />}>{children}</Suspense>;
+}
 
 function AppLayout({ children }) {
   const location = useLocation();
@@ -111,134 +147,135 @@ export default function App() {
   return (
     <div className="min-h-screen w-full bg-white text-gray-900">
       <Routes>
-        <Route path="/admin" element={<AppLayout><AdminPage /></AppLayout>} />
-        <Route path="/admin/" element={<AppLayout><AdminPage /></AppLayout>} />
+        <Route path="/admin" element={<AppLayout><LazyPage><AdminPage /></LazyPage></AppLayout>} />
+        <Route path="/admin/" element={<AppLayout><LazyPage><AdminPage /></LazyPage></AppLayout>} />
+        {/* Critical path — eager */}
         <Route path="/" element={<AppLayout><HomePage /></AppLayout>} />
-        <Route path="/about-us" element={<AppLayout><AboutPage /></AppLayout>} />
-        <Route path="/about-us/" element={<AppLayout><AboutPage /></AppLayout>} />
-        <Route path="/contact" element={<AppLayout><ContactPage /></AppLayout>} />
-        <Route path="/contact/" element={<AppLayout><ContactPage /></AppLayout>} />
-        <Route path="/for-buyers" element={<AppLayout><ForBuyersPage /></AppLayout>} />
-        <Route path="/for-buyers/" element={<AppLayout><ForBuyersPage /></AppLayout>} />
-        <Route path="/buyers" element={<AppLayout><ForBuyersPage /></AppLayout>} />
-        <Route path="/buyers/" element={<AppLayout><ForBuyersPage /></AppLayout>} />
-        <Route path="/for-sellers" element={<AppLayout><ForSellersPage /></AppLayout>} />
-        <Route path="/for-sellers/" element={<AppLayout><ForSellersPage /></AppLayout>} />
-        <Route path="/luxury-real-estate" element={<AppLayout><LuxuryRealEstatePage /></AppLayout>} />
-        <Route path="/luxury-real-estate/" element={<AppLayout><LuxuryRealEstatePage /></AppLayout>} />
-        <Route path="/cash-home-buyers" element={<AppLayout><CashHomeBuyersPage /></AppLayout>} />
-        <Route path="/cash-home-buyers/" element={<AppLayout><CashHomeBuyersPage /></AppLayout>} />
-        <Route path="/featured-areas" element={<AppLayout><FeaturedAreasPage /></AppLayout>} />
-        <Route path="/featured-areas/" element={<AppLayout><FeaturedAreasPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas" element={<AppLayout><FeaturedAreasPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/" element={<AppLayout><FeaturedAreasPage /></AppLayout>} />
+        <Route path="/about-us" element={<AppLayout><LazyPage><AboutPage /></LazyPage></AppLayout>} />
+        <Route path="/about-us/" element={<AppLayout><LazyPage><AboutPage /></LazyPage></AppLayout>} />
+        <Route path="/contact" element={<AppLayout><LazyPage><ContactPage /></LazyPage></AppLayout>} />
+        <Route path="/contact/" element={<AppLayout><LazyPage><ContactPage /></LazyPage></AppLayout>} />
+        <Route path="/for-buyers" element={<AppLayout><LazyPage><ForBuyersPage /></LazyPage></AppLayout>} />
+        <Route path="/for-buyers/" element={<AppLayout><LazyPage><ForBuyersPage /></LazyPage></AppLayout>} />
+        <Route path="/buyers" element={<AppLayout><LazyPage><ForBuyersPage /></LazyPage></AppLayout>} />
+        <Route path="/buyers/" element={<AppLayout><LazyPage><ForBuyersPage /></LazyPage></AppLayout>} />
+        <Route path="/for-sellers" element={<AppLayout><LazyPage><ForSellersPage /></LazyPage></AppLayout>} />
+        <Route path="/for-sellers/" element={<AppLayout><LazyPage><ForSellersPage /></LazyPage></AppLayout>} />
+        <Route path="/luxury-real-estate" element={<AppLayout><LazyPage><LuxuryRealEstatePage /></LazyPage></AppLayout>} />
+        <Route path="/luxury-real-estate/" element={<AppLayout><LazyPage><LuxuryRealEstatePage /></LazyPage></AppLayout>} />
+        <Route path="/cash-home-buyers" element={<AppLayout><LazyPage><CashHomeBuyersPage /></LazyPage></AppLayout>} />
+        <Route path="/cash-home-buyers/" element={<AppLayout><LazyPage><CashHomeBuyersPage /></LazyPage></AppLayout>} />
+        <Route path="/featured-areas" element={<AppLayout><LazyPage><FeaturedAreasPage /></LazyPage></AppLayout>} />
+        <Route path="/featured-areas/" element={<AppLayout><LazyPage><FeaturedAreasPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas" element={<AppLayout><LazyPage><FeaturedAreasPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/" element={<AppLayout><LazyPage><FeaturedAreasPage /></LazyPage></AppLayout>} />
         
         {/* Area Pages */}
-        <Route path="/northern-colorado-areas/fort-collins" element={<AppLayout><FortCollinsPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/fort-collins/" element={<AppLayout><FortCollinsPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/loveland" element={<AppLayout><LovelandPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/loveland/" element={<AppLayout><LovelandPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/mead" element={<AppLayout><MeadPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/mead/" element={<AppLayout><MeadPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/longmont" element={<AppLayout><LongmontPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/longmont/" element={<AppLayout><LongmontPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/boulder" element={<AppLayout><BoulderPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/boulder/" element={<AppLayout><BoulderPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/windsor" element={<AppLayout><WindsorPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/windsor/" element={<AppLayout><WindsorPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/greeley" element={<AppLayout><GreeleyPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/greeley/" element={<AppLayout><GreeleyPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/timnath" element={<AppLayout><TimnathPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/timnath/" element={<AppLayout><TimnathPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/wellington" element={<AppLayout><WellingtonPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/wellington/" element={<AppLayout><WellingtonPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/johnstown" element={<AppLayout><JohnstownPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/johnstown/" element={<AppLayout><JohnstownPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/eaton" element={<AppLayout><EatonPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/eaton/" element={<AppLayout><EatonPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/milliken" element={<AppLayout><MillikenPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/milliken/" element={<AppLayout><MillikenPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/la-salle" element={<AppLayout><LaSallePage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/la-salle/" element={<AppLayout><LaSallePage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/fort-collins" element={<AppLayout><LazyPage><FortCollinsPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/fort-collins/" element={<AppLayout><LazyPage><FortCollinsPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/loveland" element={<AppLayout><LazyPage><LovelandPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/loveland/" element={<AppLayout><LazyPage><LovelandPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/mead" element={<AppLayout><LazyPage><MeadPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/mead/" element={<AppLayout><LazyPage><MeadPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/longmont" element={<AppLayout><LazyPage><LongmontPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/longmont/" element={<AppLayout><LazyPage><LongmontPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/boulder" element={<AppLayout><LazyPage><BoulderPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/boulder/" element={<AppLayout><LazyPage><BoulderPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/windsor" element={<AppLayout><LazyPage><WindsorPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/windsor/" element={<AppLayout><LazyPage><WindsorPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/greeley" element={<AppLayout><LazyPage><GreeleyPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/greeley/" element={<AppLayout><LazyPage><GreeleyPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/timnath" element={<AppLayout><LazyPage><TimnathPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/timnath/" element={<AppLayout><LazyPage><TimnathPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/wellington" element={<AppLayout><LazyPage><WellingtonPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/wellington/" element={<AppLayout><LazyPage><WellingtonPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/johnstown" element={<AppLayout><LazyPage><JohnstownPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/johnstown/" element={<AppLayout><LazyPage><JohnstownPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/eaton" element={<AppLayout><LazyPage><EatonPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/eaton/" element={<AppLayout><LazyPage><EatonPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/milliken" element={<AppLayout><LazyPage><MillikenPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/milliken/" element={<AppLayout><LazyPage><MillikenPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/la-salle" element={<AppLayout><LazyPage><LaSallePage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/la-salle/" element={<AppLayout><LazyPage><LaSallePage /></LazyPage></AppLayout>} />
         
         {/* Neighborhood Pages (3-level path, must come before 2-level :slug fallback) */}
-        <Route path="/northern-colorado-areas/:city/:neighborhood" element={<AppLayout><NeighborhoodPage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/:city/:neighborhood/" element={<AppLayout><NeighborhoodPage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/:city/:neighborhood" element={<AppLayout><LazyPage><NeighborhoodPage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/:city/:neighborhood/" element={<AppLayout><LazyPage><NeighborhoodPage /></LazyPage></AppLayout>} />
         
-        <Route path="/northern-colorado-areas/:slug" element={<AppLayout><AreaGuidePage /></AppLayout>} />
-        <Route path="/northern-colorado-areas/:slug/" element={<AppLayout><AreaGuidePage /></AppLayout>} />
+        <Route path="/northern-colorado-areas/:slug" element={<AppLayout><LazyPage><AreaGuidePage /></LazyPage></AppLayout>} />
+        <Route path="/northern-colorado-areas/:slug/" element={<AppLayout><LazyPage><AreaGuidePage /></LazyPage></AppLayout>} />
         
-        {/* Property Search Page */}
+        {/* Property Search Page — critical path, eager */}
         <Route path="/properties" element={<AppLayout><PropertiesPage /></AppLayout>} />
         <Route path="/properties/" element={<AppLayout><PropertiesPage /></AppLayout>} />
-        <Route path="/alerts/manage" element={<AppLayout><ManageAlertsPage /></AppLayout>} />
-        <Route path="/alerts/manage/" element={<AppLayout><ManageAlertsPage /></AppLayout>} />
-        <Route path="/my-saved-searches" element={<AppLayout><ManageAlertsPage /></AppLayout>} />
-        <Route path="/my-saved-searches/" element={<AppLayout><ManageAlertsPage /></AppLayout>} />
-        <Route path="/my-home" element={<AppLayout><MyHomePage /></AppLayout>} />
-        <Route path="/my-home/" element={<AppLayout><MyHomePage /></AppLayout>} />
-        <Route path="/notifications" element={<AppLayout><NotificationCenterPage /></AppLayout>} />
-        <Route path="/notifications/" element={<AppLayout><NotificationCenterPage /></AppLayout>} />
+        <Route path="/alerts/manage" element={<AppLayout><LazyPage><ManageAlertsPage /></LazyPage></AppLayout>} />
+        <Route path="/alerts/manage/" element={<AppLayout><LazyPage><ManageAlertsPage /></LazyPage></AppLayout>} />
+        <Route path="/my-saved-searches" element={<AppLayout><LazyPage><ManageAlertsPage /></LazyPage></AppLayout>} />
+        <Route path="/my-saved-searches/" element={<AppLayout><LazyPage><ManageAlertsPage /></LazyPage></AppLayout>} />
+        <Route path="/my-home" element={<AppLayout><LazyPage><MyHomePage /></LazyPage></AppLayout>} />
+        <Route path="/my-home/" element={<AppLayout><LazyPage><MyHomePage /></LazyPage></AppLayout>} />
+        <Route path="/notifications" element={<AppLayout><LazyPage><NotificationCenterPage /></LazyPage></AppLayout>} />
+        <Route path="/notifications/" element={<AppLayout><LazyPage><NotificationCenterPage /></LazyPage></AppLayout>} />
         <Route path="/homes-for-sale/:slug" element={<AppLayout><ListingDetailPage /></AppLayout>} />
 
         {/* City homes-for-sale SEO pages */}
         {CITY_HOMES.map((c) => (
           <React.Fragment key={c.slug}>
-            <Route path={`/${c.slug}-homes-for-sale`} element={<AppLayout><CityHomesForSalePage /></AppLayout>} />
-            <Route path={`/${c.slug}-homes-for-sale/`} element={<AppLayout><CityHomesForSalePage /></AppLayout>} />
+            <Route path={`/${c.slug}-homes-for-sale`} element={<AppLayout><LazyPage><CityHomesForSalePage /></LazyPage></AppLayout>} />
+            <Route path={`/${c.slug}-homes-for-sale/`} element={<AppLayout><LazyPage><CityHomesForSalePage /></LazyPage></AppLayout>} />
           </React.Fragment>
         ))}
         <Route path="/homes-for-sale/:slug/" element={<AppLayout><ListingDetailPage /></AppLayout>} />
-        <Route path="/home-valuation" element={<AppLayout><ForSellersPage /></AppLayout>} />
-        <Route path="/home-valuation/" element={<AppLayout><ForSellersPage /></AppLayout>} />
-        <Route path="/whats-my-home-worth" element={<AppLayout><ForSellersPage /></AppLayout>} />
-        <Route path="/whats-my-home-worth/" element={<AppLayout><ForSellersPage /></AppLayout>} />
-        <Route path="/sellers" element={<AppLayout><ForSellersPage /></AppLayout>} />
-        <Route path="/sellers/" element={<AppLayout><ForSellersPage /></AppLayout>} />
+        <Route path="/home-valuation" element={<AppLayout><LazyPage><ForSellersPage /></LazyPage></AppLayout>} />
+        <Route path="/home-valuation/" element={<AppLayout><LazyPage><ForSellersPage /></LazyPage></AppLayout>} />
+        <Route path="/whats-my-home-worth" element={<AppLayout><LazyPage><ForSellersPage /></LazyPage></AppLayout>} />
+        <Route path="/whats-my-home-worth/" element={<AppLayout><LazyPage><ForSellersPage /></LazyPage></AppLayout>} />
+        <Route path="/sellers" element={<AppLayout><LazyPage><ForSellersPage /></LazyPage></AppLayout>} />
+        <Route path="/sellers/" element={<AppLayout><LazyPage><ForSellersPage /></LazyPage></AppLayout>} />
         
         {/* Mortgage Calculator */}
-        <Route path="/mortgage-calculator" element={<AppLayout><MortgageCalculatorPage /></AppLayout>} />
-        <Route path="/mortgage-calculator/" element={<AppLayout><MortgageCalculatorPage /></AppLayout>} />
+        <Route path="/mortgage-calculator" element={<AppLayout><LazyPage><MortgageCalculatorPage /></LazyPage></AppLayout>} />
+        <Route path="/mortgage-calculator/" element={<AppLayout><LazyPage><MortgageCalculatorPage /></LazyPage></AppLayout>} />
 
         {/* CHFA Down Payment Assistance */}
-        <Route path="/chfa-down-payment-assistance" element={<AppLayout><ChfaDownPaymentAssistancePage /></AppLayout>} />
-        <Route path="/chfa-down-payment-assistance/" element={<AppLayout><ChfaDownPaymentAssistancePage /></AppLayout>} />
-        <Route path="/colorado-chfa-down-payment-assistance" element={<AppLayout><ChfaDownPaymentAssistancePage /></AppLayout>} />
-        <Route path="/colorado-chfa-down-payment-assistance/" element={<AppLayout><ChfaDownPaymentAssistancePage /></AppLayout>} />
-        <Route path="/chfa-dpa" element={<AppLayout><ChfaDownPaymentAssistancePage /></AppLayout>} />
-        <Route path="/chfa-dpa/" element={<AppLayout><ChfaDownPaymentAssistancePage /></AppLayout>} />
+        <Route path="/chfa-down-payment-assistance" element={<AppLayout><LazyPage><ChfaDownPaymentAssistancePage /></LazyPage></AppLayout>} />
+        <Route path="/chfa-down-payment-assistance/" element={<AppLayout><LazyPage><ChfaDownPaymentAssistancePage /></LazyPage></AppLayout>} />
+        <Route path="/colorado-chfa-down-payment-assistance" element={<AppLayout><LazyPage><ChfaDownPaymentAssistancePage /></LazyPage></AppLayout>} />
+        <Route path="/colorado-chfa-down-payment-assistance/" element={<AppLayout><LazyPage><ChfaDownPaymentAssistancePage /></LazyPage></AppLayout>} />
+        <Route path="/chfa-dpa" element={<AppLayout><LazyPage><ChfaDownPaymentAssistancePage /></LazyPage></AppLayout>} />
+        <Route path="/chfa-dpa/" element={<AppLayout><LazyPage><ChfaDownPaymentAssistancePage /></LazyPage></AppLayout>} />
 
         {/* G-HOPE Greeley Down Payment Assistance */}
-        <Route path="/greeley-g-hope-down-payment-assistance" element={<AppLayout><GHopeHomeLoanPage /></AppLayout>} />
-        <Route path="/greeley-g-hope-down-payment-assistance/" element={<AppLayout><GHopeHomeLoanPage /></AppLayout>} />
-        <Route path="/g-hope-greeley" element={<AppLayout><GHopeHomeLoanPage /></AppLayout>} />
-        <Route path="/g-hope-greeley/" element={<AppLayout><GHopeHomeLoanPage /></AppLayout>} />
+        <Route path="/greeley-g-hope-down-payment-assistance" element={<AppLayout><LazyPage><GHopeHomeLoanPage /></LazyPage></AppLayout>} />
+        <Route path="/greeley-g-hope-down-payment-assistance/" element={<AppLayout><LazyPage><GHopeHomeLoanPage /></LazyPage></AppLayout>} />
+        <Route path="/g-hope-greeley" element={<AppLayout><LazyPage><GHopeHomeLoanPage /></LazyPage></AppLayout>} />
+        <Route path="/g-hope-greeley/" element={<AppLayout><LazyPage><GHopeHomeLoanPage /></LazyPage></AppLayout>} />
 
         {/* CHFA Schools To Home */}
-        <Route path="/chfa-schools-to-home" element={<AppLayout><ChfaSchoolsToHomePage /></AppLayout>} />
-        <Route path="/chfa-schools-to-home/" element={<AppLayout><ChfaSchoolsToHomePage /></AppLayout>} />
-        <Route path="/chfa" element={<AppLayout><ChfaSchoolsToHomePage /></AppLayout>} />
-        <Route path="/chfa/" element={<AppLayout><ChfaSchoolsToHomePage /></AppLayout>} />
+        <Route path="/chfa-schools-to-home" element={<AppLayout><LazyPage><ChfaSchoolsToHomePage /></LazyPage></AppLayout>} />
+        <Route path="/chfa-schools-to-home/" element={<AppLayout><LazyPage><ChfaSchoolsToHomePage /></LazyPage></AppLayout>} />
+        <Route path="/chfa" element={<AppLayout><LazyPage><ChfaSchoolsToHomePage /></LazyPage></AppLayout>} />
+        <Route path="/chfa/" element={<AppLayout><LazyPage><ChfaSchoolsToHomePage /></LazyPage></AppLayout>} />
 
         {/* Colorado Champions Home Loan Program */}
-        <Route path="/colorado-champions-home-loan-program" element={<AppLayout><ChampionsHomeLoanPage /></AppLayout>} />
-        <Route path="/colorado-champions-home-loan-program/" element={<AppLayout><ChampionsHomeLoanPage /></AppLayout>} />
-        <Route path="/champions-home-loan" element={<AppLayout><ChampionsHomeLoanPage /></AppLayout>} />
-        <Route path="/champions-home-loan/" element={<AppLayout><ChampionsHomeLoanPage /></AppLayout>} />
+        <Route path="/colorado-champions-home-loan-program" element={<AppLayout><LazyPage><ChampionsHomeLoanPage /></LazyPage></AppLayout>} />
+        <Route path="/colorado-champions-home-loan-program/" element={<AppLayout><LazyPage><ChampionsHomeLoanPage /></LazyPage></AppLayout>} />
+        <Route path="/champions-home-loan" element={<AppLayout><LazyPage><ChampionsHomeLoanPage /></LazyPage></AppLayout>} />
+        <Route path="/champions-home-loan/" element={<AppLayout><LazyPage><ChampionsHomeLoanPage /></LazyPage></AppLayout>} />
 
         {/* Testimonials */}
-        <Route path="/testimonials" element={<AppLayout><TestimonialsPage /></AppLayout>} />
-        <Route path="/testimonials/" element={<AppLayout><TestimonialsPage /></AppLayout>} />
-        <Route path="/events" element={<AppLayout><EventsCalendarPage /></AppLayout>} />
-        <Route path="/events/" element={<AppLayout><EventsCalendarPage /></AppLayout>} />
+        <Route path="/testimonials" element={<AppLayout><LazyPage><TestimonialsPage /></LazyPage></AppLayout>} />
+        <Route path="/testimonials/" element={<AppLayout><LazyPage><TestimonialsPage /></LazyPage></AppLayout>} />
+        <Route path="/events" element={<AppLayout><LazyPage><EventsCalendarPage /></LazyPage></AppLayout>} />
+        <Route path="/events/" element={<AppLayout><LazyPage><EventsCalendarPage /></LazyPage></AppLayout>} />
 
         {/* Blog */}
-        <Route path="/blog" element={<AppLayout><BlogPage /></AppLayout>} />
-        <Route path="/blog/" element={<AppLayout><BlogPage /></AppLayout>} />
-        <Route path="/blog/:slug" element={<AppLayout><BlogPostPage /></AppLayout>} />
-        <Route path="/blog/:slug/" element={<AppLayout><BlogPostPage /></AppLayout>} />
-        <Route path="/helpful-guides" element={<AppLayout><BlogPage /></AppLayout>} />
-        <Route path="/helpful-guides/" element={<AppLayout><BlogPage /></AppLayout>} />
+        <Route path="/blog" element={<AppLayout><LazyPage><BlogPage /></LazyPage></AppLayout>} />
+        <Route path="/blog/" element={<AppLayout><LazyPage><BlogPage /></LazyPage></AppLayout>} />
+        <Route path="/blog/:slug" element={<AppLayout><LazyPage><BlogPostPage /></LazyPage></AppLayout>} />
+        <Route path="/blog/:slug/" element={<AppLayout><LazyPage><BlogPostPage /></LazyPage></AppLayout>} />
+        <Route path="/helpful-guides" element={<AppLayout><LazyPage><BlogPage /></LazyPage></AppLayout>} />
+        <Route path="/helpful-guides/" element={<AppLayout><LazyPage><BlogPage /></LazyPage></AppLayout>} />
       </Routes>
     </div>
   );

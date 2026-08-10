@@ -104,7 +104,7 @@ export default function TimnathPage() {
               src="/images/timnath.png" 
               alt="Timnath Colorado community and new developments" 
               className="w-full rounded-lg shadow-lg"
-              loading="lazy"
+              loading="lazy" decoding="async"
             />
           </div>
           <div className="grid md:grid-cols-3 gap-8">

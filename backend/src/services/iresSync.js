@@ -241,7 +241,9 @@ function normalizeListing(raw) {
 // 3072 MB/hr. We target ≤2 RPS with sequential paging + jitter, retry with
 // exponential backoff on 429/5xx, and a lock file so overlapping runs can
 // never multiply the request rate.
-const RATE_LIMIT_MS = 550; // ~1.8 RPS worst case, comfortably under 4 RPS
+const RATE_LIMIT_MS = 700; // ~1.2–1.4 RPS worst case; the photo proxy on
+// Railway shares the same MLS budget (CDN fetches count), so the sync must
+// leave headroom — 2 syncs stacked at 550ms caused 429s on Aug 10 2026.
 const LOCK_FILE = '/tmp/ires-sync.lock';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

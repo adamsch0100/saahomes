@@ -52,7 +52,7 @@ function NotificationDropdownRow({ item, onOpen }) {
     >
       <div className="w-10 h-10 rounded overflow-hidden bg-gray-800 shrink-0">
         {img ? (
-          <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" />
+          <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-[#CFB36E]">
             <BellIcon className="w-4 h-4" />

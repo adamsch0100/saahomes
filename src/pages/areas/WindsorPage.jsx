@@ -81,7 +81,7 @@ export default function WindsorPage() {
                 src="/images/Windsor-CO-Area-Guide.jpg" 
                 alt="Windsor Colorado community and Rocky Mountain views" 
                 className="w-full rounded-lg shadow-lg"
-                loading="lazy"
+                loading="lazy" decoding="async"
               />
             </div>
             <p className="text-lg leading-relaxed mb-4">

@@ -68,7 +68,7 @@ export default function GreeleyPage() {
                 src="/images/Area-Guide-for-Greeley-CO.jpg"
               alt="Greeley Colorado downtown and University of Northern Colorado" 
               className="w-full rounded-lg shadow-lg"
-              loading="lazy"
+              loading="lazy" decoding="async"
             />
           </div>
           <div className="grid md:grid-cols-2 gap-12 items-center">

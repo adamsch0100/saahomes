@@ -50,6 +50,8 @@ export default function Testimonials() {
                     src="/images/google-g.svg" 
                     alt="Google Review"
                     className="w-8 h-8"
+                    loading="lazy"
+                    decoding="async"
                   />
                   <div className="ml-3 flex">
                     {[...Array(testimonial.rating)].map((_, i) => (

@@ -70,6 +70,8 @@ export default function ForSellersPage() {
               src="/images/sell-intro-image.jpg" 
               alt="Northern Colorado Real Estate"
               className="rounded-lg shadow-xl w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
             />
           </div>
           <div>
@@ -231,6 +233,8 @@ export default function ForSellersPage() {
               src="/images/sell-cta-1-1-1.jpg" 
               alt="Schwartz and Associates Team"
               className="rounded-lg shadow-xl w-full"
+              loading="lazy"
+              decoding="async"
             />
           </div>
         </div>
