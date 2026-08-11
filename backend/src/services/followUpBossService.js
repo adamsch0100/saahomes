@@ -12,6 +12,7 @@
  * When FOLLOW_UP_BOSS_API_KEY (and webhook) are absent, every call logs cleanly
  * and returns { success: false, reason: 'not_configured' } — never fakes a push.
  */
+import crypto from 'crypto';
 import getPool from '../config/database.js';
 import logger from '../utils/logger.js';
 import {
@@ -739,11 +740,30 @@ export async function pushNurtureSignalToFollowUpBoss(opts = {}) {
 }
 
 /**
+ * Resolve API key: explicit override first, else brokerage env key.
+ * Per-agent keys only power connect/status/import; lead forwarders keep env key.
+ */
+function resolveFubApiKey(override) {
+  const key = override != null ? String(override).trim() : '';
+  if (key) return key;
+  return FOLLOW_UP_BOSS_API_KEY || null;
+}
+
+/** Mask API key for client responses — never return full key. */
+export function maskFubApiKey(apiKey) {
+  const s = String(apiKey || '');
+  if (s.length < 4) return s ? '••••' : null;
+  return `••••${s.slice(-4)}`;
+}
+
+/**
  * Read-only health check: GET /v1/people?limit=1 — never creates a person.
  * Returns count metadata if key is present; soft-fails if not configured.
+ * @param {{ apiKey?: string }} [opts] — optional per-agent key override
  */
-export async function getFollowUpBossPeopleCount() {
-  if (!FOLLOW_UP_BOSS_API_KEY) {
+export async function getFollowUpBossPeopleCount(opts = {}) {
+  const apiKey = resolveFubApiKey(opts.apiKey);
+  if (!apiKey) {
     return { configured: false, reason: 'not_configured' };
   }
   try {
@@ -751,13 +771,13 @@ export async function getFollowUpBossPeopleCount() {
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        Authorization: getAuthHeader(FOLLOW_UP_BOSS_API_KEY),
+        Authorization: getAuthHeader(apiKey),
         Accept: 'application/json',
       },
     });
     if (!response.ok) {
       const text = await response.text();
-      logger.error('FUB people count failed', { status: response.status, error: text });
+      logger.error('FUB people count failed', { status: response.status, error: text?.slice?.(0, 200) || text });
       return { configured: true, success: false, status: response.status };
     }
     const data = await response.json();
@@ -768,6 +788,410 @@ export async function getFollowUpBossPeopleCount() {
     logger.error('FUB people count error', { message: error.message });
     return { configured: true, success: false, error: error.message };
   }
+}
+
+/**
+ * Verify a candidate FUB API key with a read-only people list call.
+ * Never stores the key — caller decides. Never logs the raw key.
+ * @param {string} apiKey
+ * @returns {Promise<{ success: boolean, total?: number|null, status?: number, error?: string }>}
+ */
+export async function verifyFollowUpBossApiKey(apiKey) {
+  const key = String(apiKey || '').trim();
+  if (!key) {
+    return { success: false, error: 'API key is required' };
+  }
+  try {
+    const url = `${FUB_PEOPLE_URL}?limit=1`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: getAuthHeader(key),
+        Accept: 'application/json',
+      },
+    });
+    if (!response.ok) {
+      const status = response.status;
+      logger.warn('FUB API key verify failed', { status });
+      if (status === 401 || status === 403) {
+        return { success: false, status, error: 'Invalid Follow Up Boss API key' };
+      }
+      return { success: false, status, error: `Follow Up Boss rejected the key (HTTP ${status})` };
+    }
+    const data = await response.json();
+    const total = data?._metadata?.total ?? data?.total ?? null;
+    return { success: true, total: total != null ? Number(total) : null };
+  } catch (error) {
+    logger.error('FUB API key verify error', { message: error.message });
+    return { success: false, error: 'Could not reach Follow Up Boss — try again' };
+  }
+}
+
+/**
+ * Paginated people list (read-only). FUB supports limit (max 100) + offset.
+ * @param {{ apiKey?: string, limit?: number, offset?: number }} opts
+ */
+export async function listFollowUpBossPeople(opts = {}) {
+  const apiKey = resolveFubApiKey(opts.apiKey);
+  if (!apiKey) {
+    return { success: false, reason: 'not_configured', people: [], total: null };
+  }
+  const limit = Math.min(Math.max(parseInt(opts.limit, 10) || 100, 1), 100);
+  const offset = Math.max(parseInt(opts.offset, 10) || 0, 0);
+  try {
+    const url = `${FUB_PEOPLE_URL}?limit=${limit}&offset=${offset}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: getAuthHeader(apiKey),
+        Accept: 'application/json',
+      },
+    });
+    if (!response.ok) {
+      const status = response.status;
+      logger.error('FUB people list failed', { status, offset, limit });
+      return {
+        success: false,
+        status,
+        error: status === 401 || status === 403
+          ? 'Follow Up Boss API key is invalid or revoked'
+          : `FUB API ${status}`,
+        people: [],
+        total: null,
+      };
+    }
+    const data = await response.json();
+    const people = Array.isArray(data?.people)
+      ? data.people
+      : Array.isArray(data)
+        ? data
+        : [];
+    const total = data?._metadata?.total ?? data?.total ?? null;
+    return {
+      success: true,
+      people,
+      total: total != null && Number.isFinite(Number(total)) ? Number(total) : null,
+      limit,
+      offset,
+    };
+  } catch (error) {
+    logger.error('FUB people list error', { message: error.message });
+    return { success: false, error: error.message, people: [], total: null };
+  }
+}
+
+/** Digits-only phone for dedupe (empty → null). */
+function normalizePhoneDigits(phone) {
+  const digits = String(phone || '').replace(/\D/g, '');
+  if (!digits) return null;
+  // US: strip leading 1 when 11 digits
+  if (digits.length === 11 && digits.startsWith('1')) return digits.slice(1);
+  return digits;
+}
+
+/**
+ * Extract importable fields from a FUB person payload — real data only.
+ * @returns {{ personId: number|null, email: string|null, phone: string|null, name: string|null, tags: string[] }|null}
+ */
+export function extractFubPersonForImport(person) {
+  if (!person || typeof person !== 'object') return null;
+  const personIdRaw = person.id != null ? Number(person.id) : null;
+  const personId = Number.isFinite(personIdRaw) && personIdRaw > 0 ? personIdRaw : null;
+
+  const emails = Array.isArray(person.emails) ? person.emails : [];
+  let email = null;
+  const primaryEmail = emails.find((e) => e && (e.isPrimary || e.primary));
+  const emailCandidates = primaryEmail ? [primaryEmail, ...emails] : emails;
+  for (const e of emailCandidates) {
+    const v = String(e?.value || e || '').trim().toLowerCase();
+    if (v.includes('@')) {
+      email = v;
+      break;
+    }
+  }
+
+  const phones = Array.isArray(person.phones) ? person.phones : [];
+  let phone = null;
+  const primaryPhone = phones.find((p) => p && (p.isPrimary || p.primary));
+  const phoneCandidates = primaryPhone ? [primaryPhone, ...phones] : phones;
+  for (const p of phoneCandidates) {
+    const digits = normalizePhoneDigits(p?.value || p);
+    if (digits) {
+      phone = digits;
+      break;
+    }
+  }
+
+  let name = null;
+  if (person.name && String(person.name).trim()) {
+    name = String(person.name).trim().slice(0, 255);
+  } else {
+    const parts = [person.firstName, person.lastName]
+      .map((x) => (x != null ? String(x).trim() : ''))
+      .filter(Boolean);
+    if (parts.length) name = parts.join(' ').slice(0, 255);
+  }
+
+  const tags = Array.isArray(person.tags)
+    ? person.tags.map((t) => String(t)).filter(Boolean)
+    : [];
+
+  return { personId, email, phone, name, tags };
+}
+
+/**
+ * Import contacts from FUB into users (clients). Idempotent: re-run adds zero
+ * duplicates (email / phone / fub_person_id). Cap: maxPages × pageSize (default 25×100).
+ * Never clobbers lifecycle_stage_manual. Invalid mid-import key → partial result.
+ *
+ * @param {{ apiKey: string, agentUserId: number, pool?: object, maxPages?: number, pageSize?: number }} opts
+ * @returns {Promise<{ imported: number, duplicates: number, failed: number, total: number|null, pagesFetched: number, truncated: boolean, error?: string }>}
+ */
+export async function importFollowUpBossContacts(opts = {}) {
+  const apiKey = resolveFubApiKey(opts.apiKey);
+  const agentUserId = Number(opts.agentUserId);
+  const pool = opts.pool || getPool();
+  const maxPages = Math.min(Math.max(parseInt(opts.maxPages, 10) || 25, 1), 25);
+  const pageSize = Math.min(Math.max(parseInt(opts.pageSize, 10) || 100, 1), 100);
+
+  if (!apiKey) {
+    return {
+      imported: 0,
+      duplicates: 0,
+      failed: 0,
+      total: null,
+      pagesFetched: 0,
+      truncated: false,
+      error: 'not_configured',
+    };
+  }
+  if (!Number.isFinite(agentUserId) || agentUserId <= 0) {
+    return {
+      imported: 0,
+      duplicates: 0,
+      failed: 0,
+      total: null,
+      pagesFetched: 0,
+      truncated: false,
+      error: 'agent_required',
+    };
+  }
+
+  let imported = 0;
+  let duplicates = 0;
+  let failed = 0;
+  let total = null;
+  let pagesFetched = 0;
+  let offset = 0;
+  let truncated = false;
+  let midError = null;
+
+  while (pagesFetched < maxPages) {
+    const page = await listFollowUpBossPeople({ apiKey, limit: pageSize, offset });
+    if (!page.success) {
+      midError = page.error || page.reason || 'list_failed';
+      // Auth failure on first page = hard fail; mid-import = partial
+      if (pagesFetched === 0) {
+        return {
+          imported: 0,
+          duplicates: 0,
+          failed: 0,
+          total: null,
+          pagesFetched: 0,
+          truncated: false,
+          error: midError,
+        };
+      }
+      break;
+    }
+    if (total == null && page.total != null) total = page.total;
+    const people = page.people || [];
+    if (!people.length) break;
+
+    for (const person of people) {
+      try {
+        const result = await upsertFubImportedContact(person, agentUserId, pool);
+        if (result === 'imported') imported += 1;
+        else if (result === 'duplicate') duplicates += 1;
+        else failed += 1;
+      } catch (err) {
+        failed += 1;
+        logger.warn('FUB import person failed', { message: err.message });
+      }
+    }
+
+    pagesFetched += 1;
+    offset += people.length;
+    if (people.length < pageSize) break;
+    if (total != null && offset >= total) break;
+  }
+
+  if (pagesFetched >= maxPages && total != null && offset < total) {
+    truncated = true;
+  } else if (pagesFetched >= maxPages && total == null) {
+    // Unknown total but hit page cap — may have more
+    truncated = true;
+  }
+
+  try {
+    await pool.query(
+      'UPDATE users SET fub_last_import_at = NOW() WHERE id = $1',
+      [agentUserId]
+    );
+  } catch (err) {
+    logger.warn('fub_last_import_at update failed', { message: err.message });
+  }
+
+  const resultTotal = total != null ? total : imported + duplicates + failed;
+  logger.info('FUB contact import finished', {
+    agentUserId,
+    imported,
+    duplicates,
+    failed,
+    total: resultTotal,
+    pagesFetched,
+    truncated,
+    midError: midError || null,
+  });
+
+  return {
+    imported,
+    duplicates,
+    failed,
+    total: resultTotal,
+    pagesFetched,
+    truncated,
+    ...(midError ? { error: midError, partial: true } : {}),
+  };
+}
+
+/**
+ * Upsert one FUB person into users as a client contact.
+ * @returns {'imported'|'duplicate'|'skipped'}
+ */
+async function upsertFubImportedContact(person, agentUserId, pool) {
+  const fields = extractFubPersonForImport(person);
+  if (!fields) return 'skipped';
+
+  const { personId, email, phone, name, tags } = fields;
+  // Need email or phone to identity-match; prefer email for new rows
+  if (!email && !phone && !personId) return 'skipped';
+
+  // Find existing client by fub_person_id → email → phone (never match agents)
+  let existing = null;
+  if (personId) {
+    const r = await pool.query(
+      `SELECT * FROM users
+       WHERE fub_person_id = $1 AND COALESCE(role, 'client') = 'client'
+       LIMIT 1`,
+      [personId]
+    );
+    existing = r.rows[0] || null;
+  }
+  if (!existing && email) {
+    const r = await pool.query(
+      `SELECT * FROM users
+       WHERE LOWER(email) = $1 AND COALESCE(role, 'client') = 'client'
+       LIMIT 1`,
+      [email]
+    );
+    existing = r.rows[0] || null;
+  }
+  if (!existing && phone) {
+    // Compare digit-normalized phone (stored may have formatting)
+    const r = await pool.query(
+      `SELECT * FROM users
+       WHERE COALESCE(role, 'client') = 'client'
+         AND phone IS NOT NULL AND TRIM(phone) <> ''
+         AND regexp_replace(phone, '\\D', '', 'g') IN ($1, $2)
+       LIMIT 1`,
+      [phone, phone.length === 10 ? `1${phone}` : phone]
+    );
+    existing = r.rows[0] || null;
+  }
+
+  const { stage: mappedStage } = mapFubTagsToLifecycle(tags);
+
+  if (existing) {
+    // Idempotent re-import: enrich missing fields only; never clobber manual lifecycle
+    const updates = [];
+    const params = [];
+    let i = 1;
+
+    if (personId && !existing.fub_person_id) {
+      updates.push(`fub_person_id = $${i++}`);
+      params.push(personId);
+    }
+    if (phone && !existing.phone) {
+      updates.push(`phone = $${i++}`);
+      params.push(phone);
+    }
+    if (name && !existing.name) {
+      updates.push(`name = $${i++}`);
+      params.push(name);
+    }
+    if (!existing.source) {
+      updates.push(`source = $${i++}`);
+      params.push('fub-import');
+    }
+    if (
+      mappedStage &&
+      !existing.lifecycle_stage_manual &&
+      existing.lifecycle_stage !== mappedStage
+    ) {
+      updates.push(`lifecycle_stage = $${i++}`);
+      params.push(mappedStage);
+    }
+    // Claim unassigned pool contact for the importing agent
+    if (existing.assigned_agent_id == null && agentUserId) {
+      updates.push(`assigned_agent_id = $${i++}`);
+      params.push(agentUserId);
+    }
+
+    if (updates.length) {
+      params.push(existing.id);
+      await pool.query(
+        `UPDATE users SET ${updates.join(', ')} WHERE id = $${i}`,
+        params
+      );
+    }
+    return 'duplicate';
+  }
+
+  // New contact — require email (users.email is the identity key for the product)
+  if (!email) return 'skipped';
+
+  // Guard: if email belongs to an agent/admin, never demote
+  const staff = await pool.query(
+    `SELECT id FROM users WHERE LOWER(email) = $1 AND role IN ('agent', 'admin') LIMIT 1`,
+    [email]
+  );
+  if (staff.rows[0]) return 'skipped';
+
+  const manageToken = crypto.randomBytes(24).toString('hex');
+  const lifecycle = mappedStage || 'new';
+
+  await pool.query(
+    `INSERT INTO users (
+       email, name, phone, manage_token, role, status,
+       fub_person_id, source, lifecycle_stage, lifecycle_stage_manual,
+       assigned_agent_id, last_active_at
+     ) VALUES (
+       $1, $2, $3, $4, 'client', 'active',
+       $5, 'fub-import', $6, FALSE,
+       $7, NOW()
+     )`,
+    [
+      email,
+      name || null,
+      phone || null,
+      manageToken,
+      personId,
+      lifecycle,
+      agentUserId,
+    ]
+  );
+  return 'imported';
 }
 
 /**
@@ -836,10 +1260,12 @@ function extractPersonFields(person) {
  * @param {object} opts
  * @param {string} [opts.email]
  * @param {string|number} [opts.fubPersonId]
+ * @param {string} [opts.apiKey] — optional per-agent key; default = env key
  * @returns {Promise<{configured:boolean, found?:boolean, personId?:string|null, tags?:string[], reason?:string, error?:string}>}
  */
-export async function pullFollowUpBossPerson({ email, fubPersonId } = {}) {
-  if (!FOLLOW_UP_BOSS_API_KEY) {
+export async function pullFollowUpBossPerson({ email, fubPersonId, apiKey: apiKeyOverride } = {}) {
+  const apiKey = resolveFubApiKey(apiKeyOverride);
+  if (!apiKey) {
     return { configured: false, reason: 'not_configured' };
   }
 
@@ -860,7 +1286,7 @@ export async function pullFollowUpBossPerson({ email, fubPersonId } = {}) {
       const response = await fetch(url, {
         method: 'GET',
         headers: {
-          Authorization: getAuthHeader(FOLLOW_UP_BOSS_API_KEY),
+          Authorization: getAuthHeader(apiKey),
           Accept: 'application/json',
         },
       });
@@ -873,7 +1299,7 @@ export async function pullFollowUpBossPerson({ email, fubPersonId } = {}) {
         logger.error('FUB person fetch by id failed', {
           status: response.status,
           fub_person_id: id,
-          error: text,
+          error: text?.slice?.(0, 200) || text,
         });
         return {
           configured: true,
@@ -893,7 +1319,7 @@ export async function pullFollowUpBossPerson({ email, fubPersonId } = {}) {
       const response = await fetch(url, {
         method: 'GET',
         headers: {
-          Authorization: getAuthHeader(FOLLOW_UP_BOSS_API_KEY),
+          Authorization: getAuthHeader(apiKey),
           Accept: 'application/json',
         },
       });
@@ -902,7 +1328,7 @@ export async function pullFollowUpBossPerson({ email, fubPersonId } = {}) {
         logger.error('FUB people search failed', {
           status: response.status,
           email: emailNorm,
-          error: text,
+          error: text?.slice?.(0, 200) || text,
         });
         return {
           configured: true,

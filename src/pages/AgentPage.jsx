@@ -1,5 +1,6 @@
 /**
- * Agent console — multi-agent seats (P-1) + white-label brand surface (P-2).
+ * Agent console — multi-agent seats (P-1) + white-label brand surface (P-2)
+ * + Connect CRM / FUB import (P-3a).
  * Login → team-pooled cockpit (all client contacts) with claim/assign.
  * Separate token key (agentToken) from adminToken. No admin suite tools.
  */
@@ -7,7 +8,15 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import AgentCockpit from '../components/admin/AgentCockpit.jsx';
 import SEO from '../components/SEO';
-import { agentLogin, getAgentTeammates, getAgentMe } from '../utils/api.js';
+import {
+  agentLogin,
+  getAgentTeammates,
+  getAgentMe,
+  connectAgentFub,
+  getAgentFubStatus,
+  disconnectAgentFub,
+  importAgentFubContacts,
+} from '../utils/api.js';
 import { marketPack, resolveTenantBrand } from '../data/marketPack.js';
 
 const AGENT_TOKEN_KEY = 'agentToken';
@@ -31,6 +40,17 @@ export default function AgentPage() {
   const [teammates, setTeammates] = useState([]);
   const [showBrandPreview, setShowBrandPreview] = useState(false);
 
+  // Connect CRM (P-3a)
+  const [fubStatus, setFubStatus] = useState(null);
+  const [fubStatusLoading, setFubStatusLoading] = useState(false);
+  const [fubApiKeyInput, setFubApiKeyInput] = useState('');
+  const [fubConnectBusy, setFubConnectBusy] = useState(false);
+  const [fubImportBusy, setFubImportBusy] = useState(false);
+  const [fubDisconnectBusy, setFubDisconnectBusy] = useState(false);
+  const [fubError, setFubError] = useState(null);
+  const [fubImportResult, setFubImportResult] = useState(null);
+  const [cockpitRefreshKey, setCockpitRefreshKey] = useState(0);
+
   const brand = resolveTenantBrand(agentUser);
 
   const handleLogout = useCallback(() => {
@@ -41,6 +61,10 @@ export default function AgentPage() {
     setIsAuthenticated(false);
     setTeammates([]);
     setShowBrandPreview(false);
+    setFubStatus(null);
+    setFubApiKeyInput('');
+    setFubError(null);
+    setFubImportResult(null);
   }, []);
 
   const loadTeammates = useCallback(async (authToken) => {
@@ -82,13 +106,91 @@ export default function AgentPage() {
     }
   }, [handleLogout]);
 
+  const loadFubStatus = useCallback(async (authToken) => {
+    if (!authToken) return;
+    setFubStatusLoading(true);
+    try {
+      const res = await getAgentFubStatus(authToken);
+      setFubStatus(res.data || { connected: false });
+      setFubError(null);
+    } catch (err) {
+      if (
+        err.message?.includes('token') ||
+        err.message?.includes('401') ||
+        err.message?.includes('403') ||
+        err.message?.includes('Invalid') ||
+        err.message?.includes('expired')
+      ) {
+        handleLogout();
+        return;
+      }
+      setFubStatus({ connected: false });
+    } finally {
+      setFubStatusLoading(false);
+    }
+  }, [handleLogout]);
+
   useEffect(() => {
     if (token) {
       setIsAuthenticated(true);
       loadTeammates(token);
       loadMe(token);
+      loadFubStatus(token);
     }
-  }, [token, loadTeammates, loadMe]);
+  }, [token, loadTeammates, loadMe, loadFubStatus]);
+
+  const handleFubConnect = async (e) => {
+    e.preventDefault();
+    if (!token || !fubApiKeyInput.trim()) return;
+    setFubConnectBusy(true);
+    setFubError(null);
+    setFubImportResult(null);
+    try {
+      const res = await connectAgentFub(token, fubApiKeyInput.trim());
+      setFubStatus(res.data || { connected: true });
+      setFubApiKeyInput('');
+    } catch (err) {
+      setFubError(err.message || 'Could not connect Follow Up Boss');
+    } finally {
+      setFubConnectBusy(false);
+    }
+  };
+
+  const handleFubDisconnect = async () => {
+    if (!token) return;
+    if (!window.confirm('Disconnect Follow Up Boss? Your imported contacts stay in the pipeline.')) {
+      return;
+    }
+    setFubDisconnectBusy(true);
+    setFubError(null);
+    setFubImportResult(null);
+    try {
+      const res = await disconnectAgentFub(token);
+      setFubStatus(res.data || { connected: false });
+    } catch (err) {
+      setFubError(err.message || 'Could not disconnect');
+    } finally {
+      setFubDisconnectBusy(false);
+    }
+  };
+
+  const handleFubImport = async () => {
+    if (!token) return;
+    setFubImportBusy(true);
+    setFubError(null);
+    setFubImportResult(null);
+    try {
+      const res = await importAgentFubContacts(token);
+      const data = res.data || {};
+      setFubImportResult(data);
+      if (data.status) setFubStatus(data.status);
+      setCockpitRefreshKey((k) => k + 1);
+    } catch (err) {
+      setFubError(err.message || 'Import failed');
+    } finally {
+      setFubImportBusy(false);
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -310,7 +412,148 @@ export default function AgentPage() {
             </div>
           )}
 
+          {/* Connect CRM (P-3a) — per-agent Follow Up Boss key + contact import */}
+          <div className="mb-6 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-black">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: GOLD }}>
+                  Connect CRM
+                </p>
+                <h2 className="text-base font-semibold text-white">
+                  Follow Up Boss
+                  {brand.brandName ? (
+                    <span className="font-normal text-gray-400"> · {brand.brandName}</span>
+                  ) : null}
+                </h2>
+              </div>
+              <div className="text-xs text-gray-300">
+                {fubStatusLoading && fubStatus == null ? (
+                  <span className="inline-block h-4 w-24 rounded bg-gray-700 animate-pulse" />
+                ) : fubStatus?.connected ? (
+                  <span>
+                    Connected · <span className="font-mono" style={{ color: GOLD }}>{fubStatus.maskedKey}</span>
+                  </span>
+                ) : (
+                  <span>Not connected</span>
+                )}
+              </div>
+            </div>
+
+            <div className="p-4 sm:p-5 space-y-4">
+              {fubStatusLoading && fubStatus == null ? (
+                <div className="space-y-3" aria-busy="true">
+                  <div className="h-10 rounded-lg bg-gray-100 animate-pulse" />
+                  <div className="h-10 w-40 rounded-lg bg-gray-100 animate-pulse" />
+                </div>
+              ) : !fubStatus?.connected ? (
+                <form onSubmit={handleFubConnect} className="space-y-3">
+                  <p className="text-sm text-gray-600">
+                    Paste your Follow Up Boss API key to import contacts into your team pipeline.
+                    The key is verified with a read-only call before it is saved — invalid keys are never stored.
+                  </p>
+                  <label htmlFor="agent-fub-key" className="block text-xs font-medium text-gray-500 uppercase tracking-wide">
+                    API key
+                  </label>
+                  <input
+                    id="agent-fub-key"
+                    type="password"
+                    autoComplete="off"
+                    value={fubApiKeyInput}
+                    onChange={(e) => setFubApiKeyInput(e.target.value)}
+                    placeholder="Follow Up Boss API key"
+                    className="w-full min-h-[44px] border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                  />
+                  <button
+                    type="submit"
+                    disabled={fubConnectBusy || !fubApiKeyInput.trim()}
+                    className="min-h-[44px] px-5 py-2 rounded-lg text-sm font-semibold text-black disabled:opacity-50"
+                    style={{ backgroundColor: GOLD }}
+                  >
+                    {fubConnectBusy ? 'Verifying…' : 'Connect'}
+                  </button>
+                </form>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600">
+                    Key on file: <span className="font-mono text-gray-900">{fubStatus.maskedKey}</span>
+                    {fubStatus.lastImportAt ? (
+                      <span className="text-gray-400">
+                        {' '}
+                        · Last import {new Date(fubStatus.lastImportAt).toLocaleString()}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400"> · No import yet</span>
+                    )}
+                    {typeof fubStatus.importedCount === 'number' ? (
+                      <span className="text-gray-400">
+                        {' '}
+                        · {fubStatus.importedCount} imported contact{fubStatus.importedCount === 1 ? '' : 's'}
+                      </span>
+                    ) : null}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={handleFubImport}
+                      disabled={fubImportBusy || fubDisconnectBusy}
+                      className="min-h-[44px] px-5 py-2 rounded-lg text-sm font-semibold text-black disabled:opacity-50"
+                      style={{ backgroundColor: GOLD }}
+                    >
+                      {fubImportBusy ? 'Importing contacts…' : 'Import contacts'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleFubDisconnect}
+                      disabled={fubDisconnectBusy || fubImportBusy}
+                      className="min-h-[44px] px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:border-black disabled:opacity-50"
+                    >
+                      {fubDisconnectBusy ? 'Disconnecting…' : 'Disconnect'}
+                    </button>
+                  </div>
+                  {fubImportResult && (
+                    <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800">
+                      <p className="font-medium">
+                        Imported {fubImportResult.imported ?? 0}, skipped{' '}
+                        {fubImportResult.duplicates ?? 0} duplicate
+                        {(fubImportResult.duplicates ?? 0) === 1 ? '' : 's'}
+                        {(fubImportResult.failed ?? 0) > 0
+                          ? `, ${fubImportResult.failed} could not import`
+                          : ''}
+                        {fubImportResult.total != null
+                          ? ` (of ${fubImportResult.total} in FUB)`
+                          : ''}
+                        .
+                      </p>
+                      {fubImportResult.truncated && (
+                        <p className="text-xs text-amber-800 mt-1">
+                          Import capped at the first 2,500 contacts — re-run later if you need more.
+                        </p>
+                      )}
+                      {fubImportResult.warning && (
+                        <p className="text-xs text-amber-800 mt-1">
+                          Partial import: {fubImportResult.warning}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {fubError && (
+                <div className="bg-red-50 border border-red-200 text-red-800 px-3 py-2 rounded-lg text-sm">
+                  {fubError}
+                </div>
+              )}
+
+              <p className="text-[11px] text-gray-400">
+                Website form wiring to your CRM is next (P-3b). Your key never appears in full in the
+                browser after connect — only a masked suffix.
+              </p>
+            </div>
+          </div>
+
           <AgentCockpit
+            key={cockpitRefreshKey}
             token={token}
             apiPrefix="/api/agent"
             showAdminTools={false}
