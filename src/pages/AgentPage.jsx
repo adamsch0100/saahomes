@@ -1,6 +1,6 @@
 /**
  * Agent console — multi-agent seats (P-1) + white-label brand surface (P-2)
- * + Connect CRM / FUB import (P-3a).
+ * + Connect CRM / FUB import (P-3a) + Website forms (P-3b).
  * Login → team-pooled cockpit (all client contacts) with claim/assign.
  * Separate token key (agentToken) from adminToken. No admin suite tools.
  */
@@ -16,12 +16,43 @@ import {
   getAgentFubStatus,
   disconnectAgentFub,
   importAgentFubContacts,
+  getAgentWebformSlug,
+  getAgentWebformStats,
+  regenerateAgentWebformSlug,
 } from '../utils/api.js';
 import { marketPack, resolveTenantBrand } from '../data/marketPack.js';
 
 const AGENT_TOKEN_KEY = 'agentToken';
 const AGENT_USER_KEY = 'agentUser';
 const GOLD = '#CFB36E';
+const WEBFORM_ENDPOINT = 'https://saahomes.com/api/webform/lead';
+
+function buildWebformSnippet(slug, agentLabel) {
+  const label = agentLabel || 'your agent';
+  return `<!-- SAA Homes lead form — goes straight to ${label} -->
+<form action="${WEBFORM_ENDPOINT}" method="POST" style="max-width:420px;font-family:system-ui,sans-serif">
+  <input type="hidden" name="slug" value="${slug}" />
+  <p style="font-size:13px;color:#555;margin:0 0 12px">This form goes straight to ${label}</p>
+  <label style="display:block;margin-bottom:8px">Name<br/>
+    <input name="name" required style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px" />
+  </label>
+  <label style="display:block;margin-bottom:8px">Email<br/>
+    <input name="email" type="email" required style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px" />
+  </label>
+  <label style="display:block;margin-bottom:8px">Phone<br/>
+    <input name="phone" type="tel" required style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px" />
+  </label>
+  <label style="display:block;margin-bottom:8px">Interest (optional)<br/>
+    <input name="interest" placeholder="Buying, selling, CHFA…" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px" />
+  </label>
+  <label style="display:block;margin-bottom:12px">Message (optional)<br/>
+    <textarea name="message" rows="3" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px"></textarea>
+  </label>
+  <button type="submit" style="background:#CFB36E;color:#000;font-weight:600;border:0;padding:12px 20px;border-radius:8px;cursor:pointer">
+    Send message
+  </button>
+</form>`;
+}
 
 export default function AgentPage() {
   const [token, setToken] = useState(() => localStorage.getItem(AGENT_TOKEN_KEY));
@@ -51,6 +82,13 @@ export default function AgentPage() {
   const [fubImportResult, setFubImportResult] = useState(null);
   const [cockpitRefreshKey, setCockpitRefreshKey] = useState(0);
 
+  // Website forms (P-3b)
+  const [webformData, setWebformData] = useState(null);
+  const [webformLoading, setWebformLoading] = useState(false);
+  const [webformError, setWebformError] = useState(null);
+  const [webformCopyMsg, setWebformCopyMsg] = useState(null);
+  const [webformRegenBusy, setWebformRegenBusy] = useState(false);
+
   const brand = resolveTenantBrand(agentUser);
 
   const handleLogout = useCallback(() => {
@@ -65,6 +103,9 @@ export default function AgentPage() {
     setFubApiKeyInput('');
     setFubError(null);
     setFubImportResult(null);
+    setWebformData(null);
+    setWebformError(null);
+    setWebformCopyMsg(null);
   }, []);
 
   const loadTeammates = useCallback(async (authToken) => {
@@ -130,14 +171,50 @@ export default function AgentPage() {
     }
   }, [handleLogout]);
 
+  const loadWebform = useCallback(async (authToken) => {
+    if (!authToken) return;
+    setWebformLoading(true);
+    try {
+      const [slugRes, statsRes] = await Promise.all([
+        getAgentWebformSlug(authToken),
+        getAgentWebformStats(authToken),
+      ]);
+      const slugData = slugRes.data || {};
+      const statsData = statsRes.data || {};
+      setWebformData({
+        slug: slugData.slug || statsData.slug || null,
+        endpoint: slugData.endpoint || statsData.endpoint || WEBFORM_ENDPOINT,
+        total: typeof statsData.total === 'number' ? statsData.total : 0,
+        last7Days: typeof statsData.last7Days === 'number' ? statsData.last7Days : 0,
+        lastLeadAt: statsData.lastLeadAt || null,
+      });
+      setWebformError(null);
+    } catch (err) {
+      if (
+        err.message?.includes('token') ||
+        err.message?.includes('401') ||
+        err.message?.includes('403') ||
+        err.message?.includes('Invalid') ||
+        err.message?.includes('expired')
+      ) {
+        handleLogout();
+        return;
+      }
+      setWebformError(err.message || 'Could not load website form settings');
+    } finally {
+      setWebformLoading(false);
+    }
+  }, [handleLogout]);
+
   useEffect(() => {
     if (token) {
       setIsAuthenticated(true);
       loadTeammates(token);
       loadMe(token);
       loadFubStatus(token);
+      loadWebform(token);
     }
-  }, [token, loadTeammates, loadMe, loadFubStatus]);
+  }, [token, loadTeammates, loadMe, loadFubStatus, loadWebform]);
 
   const handleFubConnect = async (e) => {
     e.preventDefault();
@@ -189,6 +266,44 @@ export default function AgentPage() {
       setFubError(err.message || 'Import failed');
     } finally {
       setFubImportBusy(false);
+    }
+  };
+
+  const copyText = async (text, label) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setWebformCopyMsg(label || 'Copied');
+      setTimeout(() => setWebformCopyMsg(null), 2000);
+    } catch {
+      setWebformCopyMsg('Copy failed — select and copy manually');
+      setTimeout(() => setWebformCopyMsg(null), 3000);
+    }
+  };
+
+  const handleWebformRegen = async () => {
+    if (!token) return;
+    if (!window.confirm('Generate a new form link? Your old slug will stop accepting leads.')) {
+      return;
+    }
+    setWebformRegenBusy(true);
+    setWebformError(null);
+    try {
+      const res = await regenerateAgentWebformSlug(token);
+      const data = res.data || {};
+      setWebformData((prev) => ({
+        ...(prev || {}),
+        slug: data.slug,
+        endpoint: data.endpoint || WEBFORM_ENDPOINT,
+        total: prev?.total ?? 0,
+        last7Days: prev?.last7Days ?? 0,
+        lastLeadAt: prev?.lastLeadAt ?? null,
+      }));
+      // Refresh stats so counts stay real
+      loadWebform(token);
+    } catch (err) {
+      setWebformError(err.message || 'Could not regenerate link');
+    } finally {
+      setWebformRegenBusy(false);
     }
   };
 
@@ -546,9 +661,201 @@ export default function AgentPage() {
               )}
 
               <p className="text-[11px] text-gray-400">
-                Website form wiring to your CRM is next (P-3b). Your key never appears in full in the
-                browser after connect — only a masked suffix.
+                Your key never appears in full in the browser after connect — only a masked suffix.
+                Website form leads use this key when connected (see Website forms below).
               </p>
+            </div>
+          </div>
+
+          {/* Website forms (P-3b) — public capture link + embed snippet */}
+          <div className="mb-6 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-black">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: GOLD }}>
+                  Website forms
+                </p>
+                <h2 className="text-base font-semibold text-white">
+                  Capture from your site
+                  {brand.brandName ? (
+                    <span className="font-normal text-gray-400"> · {brand.brandName}</span>
+                  ) : null}
+                </h2>
+              </div>
+              <div className="text-xs text-gray-300">
+                {webformLoading && webformData == null ? (
+                  <span className="inline-block h-4 w-28 rounded bg-gray-700 animate-pulse" />
+                ) : webformData?.slug ? (
+                  <span>
+                    Slug · <span className="font-mono" style={{ color: GOLD }}>{webformData.slug}</span>
+                  </span>
+                ) : (
+                  <span>Loading link…</span>
+                )}
+              </div>
+            </div>
+
+            <div className="p-4 sm:p-5 space-y-4">
+              {webformLoading && webformData == null ? (
+                <div className="space-y-3" aria-busy="true">
+                  <div className="h-10 rounded-lg bg-gray-100 animate-pulse" />
+                  <div className="h-24 rounded-lg bg-gray-100 animate-pulse" />
+                  <div className="h-10 w-48 rounded-lg bg-gray-100 animate-pulse" />
+                </div>
+              ) : (
+                <>
+                  <p className="text-sm text-gray-600">
+                    Wire your own site&apos;s form to this endpoint. Leads land in your pipeline
+                    (assigned to you, source <span className="font-mono text-xs">webform</span>)
+                    {fubStatus?.connected
+                      ? ' and push to your connected Follow Up Boss account.'
+                      : ' and push to the brokerage CRM when FUB is not connected on your seat.'}
+                  </p>
+
+                  {/* Stats — real counts only */}
+                  <div className="flex flex-wrap gap-3">
+                    <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 min-w-[100px]">
+                      <p className="text-[10px] uppercase tracking-wide text-gray-500 font-medium">Total</p>
+                      <p className="text-lg font-semibold text-gray-900">
+                        {typeof webformData?.total === 'number' ? webformData.total : '—'}
+                      </p>
+                    </div>
+                    <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 min-w-[100px]">
+                      <p className="text-[10px] uppercase tracking-wide text-gray-500 font-medium">Last 7 days</p>
+                      <p className="text-lg font-semibold text-gray-900">
+                        {typeof webformData?.last7Days === 'number' ? webformData.last7Days : '—'}
+                      </p>
+                    </div>
+                    {webformData?.lastLeadAt && (
+                      <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 min-w-[140px]">
+                        <p className="text-[10px] uppercase tracking-wide text-gray-500 font-medium">Last lead</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {new Date(webformData.lastLeadAt).toLocaleString()}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Endpoint + slug */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Capture endpoint
+                    </label>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <code className="flex-1 min-h-[44px] flex items-center px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-xs sm:text-sm font-mono text-gray-900 break-all">
+                        {webformData?.endpoint || WEBFORM_ENDPOINT}
+                      </code>
+                      <button
+                        type="button"
+                        onClick={() => copyText(webformData?.endpoint || WEBFORM_ENDPOINT, 'Endpoint copied')}
+                        className="min-h-[44px] px-4 py-2 rounded-lg text-sm font-semibold text-black shrink-0"
+                        style={{ backgroundColor: GOLD }}
+                      >
+                        Copy endpoint
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Your slug (required on every submit)
+                    </label>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <code className="flex-1 min-h-[44px] flex items-center px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-sm font-mono text-gray-900">
+                        {webformData?.slug || '—'}
+                      </code>
+                      <button
+                        type="button"
+                        disabled={!webformData?.slug}
+                        onClick={() => copyText(webformData.slug, 'Slug copied')}
+                        className="min-h-[44px] px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:border-black disabled:opacity-50 shrink-0"
+                      >
+                        Copy slug
+                      </button>
+                      <button
+                        type="button"
+                        disabled={webformRegenBusy || !token}
+                        onClick={handleWebformRegen}
+                        className="min-h-[44px] px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:border-black disabled:opacity-50 shrink-0"
+                      >
+                        {webformRegenBusy ? 'Regenerating…' : 'Regenerate'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* How to wire */}
+                  <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 text-sm text-gray-700 space-y-2">
+                    <p className="font-medium text-gray-900">How to link your form</p>
+                    <ol className="list-decimal list-inside space-y-1 text-gray-600 text-sm">
+                      <li>
+                        <span className="font-medium">POST</span> JSON or form fields to{' '}
+                        <span className="font-mono text-xs">{WEBFORM_ENDPOINT}</span>
+                      </li>
+                      <li>
+                        Required: <span className="font-mono text-xs">slug</span>,{' '}
+                        <span className="font-mono text-xs">email</span>,{' '}
+                        <span className="font-mono text-xs">phone</span>
+                      </li>
+                      <li>
+                        Optional: <span className="font-mono text-xs">name</span>,{' '}
+                        <span className="font-mono text-xs">interest</span>,{' '}
+                        <span className="font-mono text-xs">message</span>,{' '}
+                        <span className="font-mono text-xs">area</span>
+                      </li>
+                      <li>Use your slug above so the lead is assigned to you.</li>
+                    </ol>
+                  </div>
+
+                  {/* HTML snippet */}
+                  {webformData?.slug && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide">
+                          HTML snippet
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            copyText(
+                              buildWebformSnippet(
+                                webformData.slug,
+                                brand.fromName || brand.brandName || agentUser?.name
+                              ),
+                              'Snippet copied'
+                            )
+                          }
+                          className="min-h-[36px] px-3 py-1.5 rounded-lg text-xs font-semibold text-black"
+                          style={{ backgroundColor: GOLD }}
+                        >
+                          Copy snippet
+                        </button>
+                      </div>
+                      <pre className="text-[11px] leading-relaxed p-3 rounded-lg border border-gray-200 bg-gray-900 text-gray-100 overflow-x-auto max-h-48">
+                        {buildWebformSnippet(
+                          webformData.slug,
+                          brand.fromName || brand.brandName || agentUser?.name
+                        )}
+                      </pre>
+                      <p className="text-[11px] text-gray-400">
+                        Paste into any page. Label on the form: &quot;This form goes straight to{' '}
+                        {brand.fromName || brand.brandName || agentUser?.name || 'you'}&quot;.
+                        Email + phone are required.
+                      </p>
+                    </div>
+                  )}
+
+                  {webformCopyMsg && (
+                    <p className="text-sm font-medium" style={{ color: '#8a7020' }}>
+                      {webformCopyMsg}
+                    </p>
+                  )}
+                </>
+              )}
+
+              {webformError && (
+                <div className="bg-red-50 border border-red-200 text-red-800 px-3 py-2 rounded-lg text-sm">
+                  {webformError}
+                </div>
+              )}
             </div>
           </div>
 

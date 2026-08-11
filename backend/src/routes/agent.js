@@ -10,6 +10,9 @@ import {
   getAgentFubStatus,
   disconnectAgentFub,
   importAgentFubContacts,
+  getAgentWebformSlug,
+  regenerateAgentWebformSlug,
+  getAgentWebformStats,
 } from '../controllers/agentController.js';
 import { authenticateToken, requireRole } from '../middleware/auth.js';
 
@@ -32,5 +35,10 @@ router.post('/fub/connect', ...agentOrAdmin, connectAgentFub);
 router.get('/fub/status', ...agentOrAdmin, getAgentFubStatus);
 router.post('/fub/disconnect', ...agentOrAdmin, disconnectAgentFub);
 router.post('/fub/import', ...agentOrAdmin, importAgentFubContacts);
+
+// Website forms (P-3b) — capture slug + lead stats
+router.get('/webform/slug', ...agentOrAdmin, getAgentWebformSlug);
+router.post('/webform/slug/regenerate', ...agentOrAdmin, regenerateAgentWebformSlug);
+router.get('/webform/stats', ...agentOrAdmin, getAgentWebformStats);
 
 export default router;

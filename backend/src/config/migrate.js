@@ -653,6 +653,17 @@ export const runMigrations = async () => {
         ON users(source) WHERE source IS NOT NULL;
     `);
 
+    // ── Wire website forms (P-3b) — per-agent public capture slug ──────────
+    // webform_slug is the public identifier for POST /api/webform/lead.
+    // Unique only when set; never expose fub_api_key via this surface.
+    await client.query(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS webform_slug TEXT;
+    `);
+    await client.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_users_webform_slug
+        ON users(webform_slug) WHERE webform_slug IS NOT NULL;
+    `);
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {
