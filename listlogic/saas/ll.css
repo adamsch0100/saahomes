@@ -29,8 +29,12 @@ body {
 }
 a { color: var(--navy); }
 
+/* ---------- Auth-aware nav: hide guest CTAs until JS resolves ---------- */
+.ll-auth-guest { visibility: hidden !important; }
+body.ll-auth-guest-ready .ll-auth-guest { visibility: visible !important; }
+
 /* ---------- Auth-aware nav account chip ---------- */
-.ll-navacct { position: relative; }
+.ll-navacct { position: relative; display: inline-flex; align-items: center; }
 .ll-navacct-btn {
   display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
   background: #fff; border: 1px solid var(--line); border-radius: 999px;
