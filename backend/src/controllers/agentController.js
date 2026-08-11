@@ -612,3 +612,208 @@ export const importAgentFubContacts = async (req, res) => {
   }
 };
 
+// ── Website forms (P-3b) — public capture slug + stats ─────────────────────
+
+/**
+ * URL-safe slug base from brand_name or email local-part.
+ * Letters/digits/hyphens only; max 48 chars before uniqueness suffix.
+ */
+function slugifyBase(raw) {
+  const s = String(raw || '')
+    .toLowerCase()
+    .trim()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48);
+  return s || 'agent';
+}
+
+/**
+ * Ensure agent has a unique webform_slug. Generates from brand_name → name → email.
+ * Collision-safe loop with numeric suffix. Never fabricates; only persists real unique value.
+ */
+export async function ensureAgentWebformSlug(userId, pool = getPool()) {
+  const row = await pool.query(
+    `SELECT id, email, name, brand_name, webform_slug
+     FROM users
+     WHERE id = $1 AND role IN ('agent', 'admin')`,
+    [userId]
+  );
+  const agent = row.rows[0];
+  if (!agent) return null;
+  if (agent.webform_slug) return agent.webform_slug;
+
+  const emailLocal = String(agent.email || '').split('@')[0] || '';
+  const base = slugifyBase(agent.brand_name || agent.name || emailLocal || `agent-${agent.id}`);
+
+  for (let n = 0; n < 40; n++) {
+    const candidate = n === 0 ? base : `${base}-${n + 1}`;
+    try {
+      const updated = await pool.query(
+        `UPDATE users SET webform_slug = $1
+         WHERE id = $2
+           AND role IN ('agent', 'admin')
+           AND (webform_slug IS NULL OR webform_slug = '')
+         RETURNING webform_slug`,
+        [candidate, userId]
+      );
+      if (updated.rows[0]?.webform_slug) return updated.rows[0].webform_slug;
+      // Another request may have set it concurrently
+      const again = await pool.query(
+        `SELECT webform_slug FROM users WHERE id = $1`,
+        [userId]
+      );
+      if (again.rows[0]?.webform_slug) return again.rows[0].webform_slug;
+    } catch (err) {
+      // Unique violation → try next suffix
+      if (err.code === '23505') continue;
+      throw err;
+    }
+  }
+  // Last resort: id-based unique token
+  const fallback = `agent-${agent.id}-${Date.now().toString(36)}`;
+  const forced = await pool.query(
+    `UPDATE users SET webform_slug = $1 WHERE id = $2 RETURNING webform_slug`,
+    [fallback, userId]
+  );
+  return forced.rows[0]?.webform_slug || null;
+}
+
+/**
+ * GET /api/agent/webform/slug
+ * Ensures slug exists; returns { slug, endpoint, captureUrl }.
+ */
+export const getAgentWebformSlug = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    const pool = getPool();
+    const slug = await ensureAgentWebformSlug(userId, pool);
+    if (!slug) {
+      return res.status(404).json({ error: 'Agent not found' });
+    }
+    const endpoint = 'https://saahomes.com/api/webform/lead';
+    return res.json({
+      success: true,
+      data: {
+        slug,
+        endpoint,
+        captureUrl: `${endpoint}?slug=${encodeURIComponent(slug)}`,
+      },
+    });
+  } catch (error) {
+    logger.error('getAgentWebformSlug error', error);
+    return res.status(500).json({ error: 'Failed to load webform link' });
+  }
+};
+
+/**
+ * POST /api/agent/webform/slug/regenerate
+ * Issue a new unique slug (old link stops working).
+ */
+export const regenerateAgentWebformSlug = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    const pool = getPool();
+    const row = await pool.query(
+      `SELECT id, email, name, brand_name FROM users
+       WHERE id = $1 AND role IN ('agent', 'admin') AND status = 'active'`,
+      [userId]
+    );
+    if (!row.rows[0]) {
+      return res.status(404).json({ error: 'Agent not found' });
+    }
+    const agent = row.rows[0];
+    const emailLocal = String(agent.email || '').split('@')[0] || '';
+    const base = slugifyBase(agent.brand_name || agent.name || emailLocal || `agent-${agent.id}`);
+
+    let newSlug = null;
+    for (let n = 0; n < 40; n++) {
+      const candidate = n === 0
+        ? `${base}-${Date.now().toString(36).slice(-4)}`
+        : `${base}-${Date.now().toString(36).slice(-4)}-${n}`;
+      try {
+        const updated = await pool.query(
+          `UPDATE users SET webform_slug = $1
+           WHERE id = $2 AND role IN ('agent', 'admin')
+           RETURNING webform_slug`,
+          [candidate, userId]
+        );
+        newSlug = updated.rows[0]?.webform_slug || null;
+        if (newSlug) break;
+      } catch (err) {
+        if (err.code === '23505') continue;
+        throw err;
+      }
+    }
+    if (!newSlug) {
+      return res.status(500).json({ error: 'Could not generate a unique slug' });
+    }
+    logger.info('Agent webform slug regenerated', { userId, slug: newSlug });
+    const endpoint = 'https://saahomes.com/api/webform/lead';
+    return res.json({
+      success: true,
+      data: {
+        slug: newSlug,
+        endpoint,
+        captureUrl: `${endpoint}?slug=${encodeURIComponent(newSlug)}`,
+      },
+    });
+  } catch (error) {
+    logger.error('regenerateAgentWebformSlug error', error);
+    return res.status(500).json({ error: 'Failed to regenerate webform link' });
+  }
+};
+
+/**
+ * GET /api/agent/webform/stats
+ * Real counts only: total webform leads assigned to this agent + last 7 days.
+ */
+export const getAgentWebformStats = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    const pool = getPool();
+
+    // Ensure slug exists so the console always has a link
+    const slug = await ensureAgentWebformSlug(userId, pool);
+
+    const totals = await pool.query(
+      `SELECT
+         COUNT(*)::int AS total,
+         COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '7 days')::int AS last_7_days,
+         MAX(created_at) AS last_lead_at
+       FROM users
+       WHERE assigned_agent_id = $1
+         AND COALESCE(role, 'client') = 'client'
+         AND source = 'webform'`,
+      [userId]
+    );
+    const row = totals.rows[0] || {};
+    return res.json({
+      success: true,
+      data: {
+        slug,
+        endpoint: 'https://saahomes.com/api/webform/lead',
+        total: row.total || 0,
+        last7Days: row.last_7_days || 0,
+        lastLeadAt: row.last_lead_at
+          ? new Date(row.last_lead_at).toISOString()
+          : null,
+      },
+    });
+  } catch (error) {
+    logger.error('getAgentWebformStats error', error);
+    return res.status(500).json({ error: 'Failed to load webform stats' });
+  }
+};
+

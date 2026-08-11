@@ -281,6 +281,36 @@ export const importAgentFubContacts = async (token) => {
   });
 };
 
+// ── Website forms (P-3b) — capture slug + stats ───────────────────────────
+
+/** GET /api/agent/webform/slug — ensures slug exists */
+export const getAgentWebformSlug = async (token) => {
+  return apiRequest('/api/agent/webform/slug', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+/** POST /api/agent/webform/slug/regenerate */
+export const regenerateAgentWebformSlug = async (token) => {
+  return apiRequest('/api/agent/webform/slug/regenerate', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+/** GET /api/agent/webform/stats — real webform lead counts */
+export const getAgentWebformStats = async (token) => {
+  return apiRequest('/api/agent/webform/stats', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export const listAgents = async (token) => {
   return apiRequest('/api/admin/agents', {
     headers: {

@@ -8,6 +8,7 @@ import { submitChampionsLeadForm } from '../controllers/championsLeadController.
 import { submitChfaDpaLeadForm } from '../controllers/chfaDpaLeadController.js';
 import { submitGhopeLeadForm } from '../controllers/ghopeLeadController.js';
 import { submitCashBuyerLead } from '../controllers/cashBuyerController.js';
+import { submitWebformLead } from '../controllers/webformController.js';
 import { handleChatMessage, createSearchFromChat } from '../controllers/chatController.js';
 import {
   searchListings,
@@ -67,6 +68,15 @@ const formLimiter = rateLimit({
   message: 'Too many submissions from this IP, please try again later.',
 });
 
+// Agent website form capture (P-3b) — IP rate limit (in-process; embeds may retry)
+const webformLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { ok: false, error: 'Too many submissions from this IP, please try again later.' },
+});
+
 // Public API routes
 router.post(
   '/contact',
@@ -75,6 +85,9 @@ router.post(
   handleValidationErrors,
   submitContactForm
 );
+
+// Public agent webform capture — NO auth (front door for agent sites)
+router.post('/webform/lead', webformLimiter, submitWebformLead);
 
 router.post(
   '/market-report',

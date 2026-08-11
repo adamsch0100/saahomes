@@ -127,9 +127,22 @@ async function attachKnownPersonId(person) {
   return person;
 }
 
-const postFollowUpBossEvent = async (eventData) => {
-  if (!isFollowUpBossConfigured()) {
+/**
+ * POST /v1/events (or brokerage webhook).
+ * @param {object} eventData
+ * @param {{ apiKey?: string }} [opts] — per-agent key override (P-3b webform).
+ *   When set, always hits FUB Events API with that key (not the brokerage webhook).
+ *   Site-native forwarders omit opts → unchanged env/webhook path.
+ */
+const postFollowUpBossEvent = async (eventData, opts = {}) => {
+  const overrideKey = resolveFubApiKey(opts.apiKey);
+  const hasOverride = !!(opts.apiKey != null && String(opts.apiKey).trim());
+
+  if (!hasOverride && !isFollowUpBossConfigured()) {
     throw new Error('Follow Up Boss not configured');
+  }
+  if (hasOverride && !overrideKey) {
+    throw new Error('Follow Up Boss API key missing');
   }
 
   // Prefer linking to known person when possible
@@ -142,7 +155,17 @@ const postFollowUpBossEvent = async (eventData) => {
 
   let response;
 
-  if (FOLLOW_UP_BOSS_WEBHOOK_URL) {
+  if (hasOverride) {
+    // Per-agent key → Events API only (agent's own FUB account)
+    response = await fetch(FUB_EVENTS_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: getAuthHeader(overrideKey),
+      },
+      body: JSON.stringify(eventData),
+    });
+  } else if (FOLLOW_UP_BOSS_WEBHOOK_URL) {
     response = await fetch(FOLLOW_UP_BOSS_WEBHOOK_URL, {
       method: 'POST',
       headers: {
@@ -160,6 +183,10 @@ const postFollowUpBossEvent = async (eventData) => {
       },
       body: JSON.stringify(eventData),
     });
+  }
+
+  if (!response) {
+    throw new Error('Follow Up Boss not configured');
   }
 
   // 204 = lead flow archived/ignored — treat as soft success, no person body
@@ -336,13 +363,24 @@ export const forwardShowingRequestToFollowUpBoss = async (showing) => {
   }
 };
 
-export const forwardContactToFollowUpBoss = async (submissionIn) => {
-  if (!isFollowUpBossConfigured()) {
+/**
+ * Forward a contact / webform lead to FUB.
+ * @param {object} submissionIn
+ * @param {{ apiKey?: string, eventSource?: string, tags?: string[], path?: string }} [opts]
+ *   apiKey — per-agent FUB key (P-3b). When omitted, uses brokerage env/webhook (site-native).
+ */
+export const forwardContactToFollowUpBoss = async (submissionIn, opts = {}) => {
+  const overrideKey = opts.apiKey != null ? String(opts.apiKey).trim() : '';
+  if (!overrideKey && !isFollowUpBossConfigured()) {
     logger.info('Follow Up Boss not configured, skipping lead forwarding');
     return { success: false, reason: 'not_configured' };
   }
+  if (opts.apiKey != null && !overrideKey) {
+    return { success: false, reason: 'not_configured' };
+  }
 
-  const submission = await enrichForForward(submissionIn, 'contact');
+  const path = opts.path || 'contact';
+  const submission = await enrichForForward(submissionIn, path);
   const { name, email, phone, interest, message, area } = submission;
   const { firstName, lastName } = splitName(name);
 
@@ -353,8 +391,12 @@ export const forwardContactToFollowUpBoss = async (submissionIn) => {
     ...buildAttributionLines(submission),
   ].filter(Boolean);
 
+  const tags = Array.isArray(opts.tags) && opts.tags.length
+    ? opts.tags
+    : ['Website Lead', 'saahomes.com'];
+
   const eventData = {
-    source: 'Website Contact Form',
+    source: opts.eventSource || 'Website Contact Form',
     system: SYSTEM_NAME,
     type: 'General Inquiry',
     message: messageLines.join('\n') || 'New website contact form submission',
@@ -363,14 +405,22 @@ export const forwardContactToFollowUpBoss = async (submissionIn) => {
       lastName,
       emails: email ? [{ value: email, type: 'work' }] : [],
       phones: phone ? [{ value: String(phone).replace(/\D/g, ''), type: 'mobile' }] : [],
-      tags: ['Website Lead', 'saahomes.com'],
+      tags,
     },
   };
 
   try {
-    const result = await postFollowUpBossEvent(eventData);
+    const result = await postFollowUpBossEvent(
+      eventData,
+      overrideKey ? { apiKey: overrideKey } : {}
+    );
     const fubPersonId = await capturePersonIdFromResult(result, email);
-    logger.info('Lead forwarded to Follow Up Boss', { eventId: result.id, fub_person_id: fubPersonId });
+    logger.info('Lead forwarded to Follow Up Boss', {
+      eventId: result.id,
+      fub_person_id: fubPersonId,
+      path,
+      perAgentKey: !!overrideKey,
+    });
     return { success: true, eventId: result.id, fubPersonId };
   } catch (error) {
     logger.error('Failed to forward lead to Follow Up Boss', error);
@@ -741,9 +791,10 @@ export async function pushNurtureSignalToFollowUpBoss(opts = {}) {
 
 /**
  * Resolve API key: explicit override first, else brokerage env key.
- * Per-agent keys only power connect/status/import; lead forwarders keep env key.
+ * Site-native forwarders omit override (env only). P-3a import + P-3b webform
+ * pass the agent's connected key when present.
  */
-function resolveFubApiKey(override) {
+export function resolveFubApiKey(override) {
   const key = override != null ? String(override).trim() : '';
   if (key) return key;
   return FOLLOW_UP_BOSS_API_KEY || null;

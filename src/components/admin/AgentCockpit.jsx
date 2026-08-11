@@ -656,6 +656,15 @@ export default function AgentCockpit({
                             FUB
                           </span>
                         )}
+                        {lead.source === "webform" && (
+                          <span
+                            className="ml-1.5 text-[10px] font-bold uppercase tracking-wide text-black px-1.5 py-0.5 rounded align-middle"
+                            style={{ backgroundColor: `${GOLD}55` }}
+                            title="Submitted via agent website form"
+                          >
+                            Webform
+                          </span>
+                        )}
                       </p>
                       <a href={`mailto:${lead.email}`} className="text-sm text-blue-700 break-all">
                         {lead.email}
@@ -795,6 +804,15 @@ export default function AgentCockpit({
                                 title="Imported from Follow Up Boss"
                               >
                                 FUB
+                              </span>
+                            )}
+                            {lead.source === "webform" && (
+                              <span
+                                className="ml-1.5 text-[10px] font-bold uppercase tracking-wide text-black px-1.5 py-0.5 rounded"
+                                style={{ backgroundColor: `${GOLD}55` }}
+                                title="Submitted via agent website form"
+                              >
+                                Webform
                               </span>
                             )}
                             {lead.seller_heat && (
