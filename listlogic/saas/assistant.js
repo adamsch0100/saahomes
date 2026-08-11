@@ -61,8 +61,8 @@
       <div class="ll-as-pane on" id="llAsChatPane">
         <div class="ll-as-chips" id="llAsChips">
           <button type="button" data-q="How does my free trial work?">Trial limits</button>
-          <button type="button" data-q="How do I try the sample listing without an MLS export?">Sample demo</button>
-          <button type="button" data-q="How do I export my market from Matrix / IRES?">MLS export</button>
+          <button type="button" data-q="How do I try the sample listing?">Sample demo</button>
+          <button type="button" data-q="How do I search a market or upload an MLS export?">Search or Upload</button>
           <button type="button" data-q="What's the difference between the live story, seller packet, and flipbook?">Print packs</button>
         </div>
         <div id="llAsMsgs"></div>
@@ -138,7 +138,7 @@
     history = [];
     msgsEl.innerHTML = "";
     statusEl.textContent = "";
-    addMsg("bot", "Hi — I’m the ListLogic assistant. Ask about trials, the sample demo, MLS exports, presentations, or tell me about a bug/suggestion.");
+    addMsg("bot", "Hi — I’m the ListLogic assistant. Ask about trials, the sample demo, Search vs Upload, presentations, or tell me about a bug/suggestion.");
   });
 
   async function sendChat() {
@@ -308,7 +308,7 @@
         "bot",
         "Hi" +
           (data.user && data.user.name ? " " + data.user.name.split(" ")[0] : "") +
-          " — ask me about trials, the sample demo, MLS exports, presentations, or switch to Feedback to send Adam a bug/suggestion."
+          " — ask me about trials, the sample demo, Search vs Upload, presentations, or switch to Feedback to send Adam a bug/suggestion."
       );
     })
     .catch(() => {});

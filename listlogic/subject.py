@@ -95,11 +95,12 @@ def _row_to_dict(r) -> dict:
 
 
 def resolve_subject(
-    export_path: str,
+    export_path: Optional[str] = None,
     address: Optional[str] = None,
     mls_number: Optional[str] = None,
     overrides: Optional[Dict[str, Any]] = None,
     defaults: Optional[Dict[str, Any]] = None,
+    market_df: Optional[pd.DataFrame] = None,
 ) -> SubjectProperty:
     """
     Resolve a subject property with automatic lookup + editable overrides.
@@ -111,8 +112,13 @@ def resolve_subject(
             overrides={"living_area": 2100, "condition": "updated"},
         )
     """
-    df = load_export(export_path)
-    found = find_in_export(df, address=address, mls_number=mls_number)
+    if market_df is not None:
+        df = market_df
+    elif export_path:
+        df = load_export(export_path)
+    else:
+        df = pd.DataFrame()
+    found = find_in_export(df, address=address, mls_number=mls_number) if len(df) else None
 
     data = {}
     if defaults:
