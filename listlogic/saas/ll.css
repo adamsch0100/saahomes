@@ -138,6 +138,17 @@ a { color: var(--navy); }
 .btn-primary:hover { background: var(--ink-2); }
 .btn-gold { background: linear-gradient(160deg, var(--accent-2) 0%, var(--accent) 100%); color: #1a1505; font-weight: 700; box-shadow: 0 10px 24px -10px rgba(201,162,39,0.55), inset 0 1px 0 rgba(255,255,255,0.35); }
 .btn-gold:hover { filter: brightness(1.03); }
+.btn-trial {
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  padding: 15px 26px; border-radius: 999px;
+  background: linear-gradient(160deg, var(--accent-2) 0%, var(--accent) 100%);
+  color: #1a1505; font-weight: 800; font-size: 0.96rem; letter-spacing: -0.01em;
+  border: 1px solid rgba(255,255,255,0.22);
+  box-shadow: 0 16px 36px -12px rgba(201,162,39,0.65), inset 0 1px 0 rgba(255,255,255,0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+.btn-trial:hover { transform: translateY(-2px); filter: brightness(1.03); box-shadow: 0 20px 44px -14px rgba(201,162,39,0.75), inset 0 1px 0 rgba(255,255,255,0.4); }
+.btn-trial .btn-arrow { font-weight: 800; }
 .btn-outline { background: transparent; border-color: var(--line); color: var(--ink); }
 .btn-outline:hover { border-color: var(--ink); }
 .btn-soft { background: #eef2f8; color: var(--navy); }
