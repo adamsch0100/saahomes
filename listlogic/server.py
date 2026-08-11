@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import html as html_lib
 import json
 import logging
@@ -53,7 +54,18 @@ def _current_user(request: Request) -> Optional[dict]:
     import auth_service
 
     token = request.cookies.get(auth_service.SESSION_COOKIE)
-    return auth_service.user_from_session_token(token)
+    user = auth_service.user_from_session_token(token)
+    if user and token:
+        # Throttle last_seen writes to ~once per minute per session token.
+        now_bucket = int(time.time() // 60)
+        cache_key = "_ll_touch_" + hashlib.sha1(token.encode()).hexdigest()[:16]
+        if getattr(_current_user, cache_key, None) != now_bucket:
+            setattr(_current_user, cache_key, now_bucket)
+            try:
+                auth_service.touch_session(token, ip=_client_ip(request))
+            except Exception:
+                pass
+    return user
 
 
 def _require_user(request: Request) -> dict:
@@ -68,6 +80,14 @@ def _require_admin(request: Request) -> dict:
     if (user.get("role") or "") != "admin":
         raise HTTPException(403, "Admin only")
     return user
+
+
+def _client_ip(request: Request) -> str:
+    """Best-effort client IP behind Railway's proxy."""
+    fwd = request.headers.get("x-forwarded-for") or request.headers.get("X-Forwarded-For") or ""
+    if fwd:
+        return fwd.split(",")[0].strip()
+    return (request.client.host if request.client else "") or ""
 
 
 def _set_session_cookie(resp: Response, request: Request, token: str) -> None:
@@ -761,7 +781,9 @@ async def signup(request: Request):
         )
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
-    token = auth_service.create_session(user["id"])
+    token = auth_service.create_session(
+        user["id"], ip=_client_ip(request), user_agent=request.headers.get("user-agent", "")
+    )
     try:
         mailer.send_welcome(user, auth_service.app_base_url())
     except Exception:
@@ -848,7 +870,9 @@ async def verify_magic_link(request: Request):
         except Exception:
             logger.exception("Welcome email failed")
 
-    session = auth_service.create_session(user["id"])
+    session = auth_service.create_session(
+        user["id"], ip=_client_ip(request), user_agent=request.headers.get("user-agent", "")
+    )
     resp = JSONResponse({
         "ok": True,
         "user": auth_service.public_user(user),
@@ -859,6 +883,36 @@ async def verify_magic_link(request: Request):
     })
     _set_session_cookie(resp, request, session)
     return resp
+
+
+@app.get("/api/sessions")
+def list_my_sessions(request: Request):
+    import auth_service
+
+    user = _require_user(request)
+    token = request.cookies.get(auth_service.SESSION_COOKIE)
+    return {"ok": True, "sessions": auth_service.list_sessions(user["id"], current_token=token)}
+
+
+@app.post("/api/sessions/signout-others")
+def signout_other_sessions(request: Request):
+    import auth_service
+
+    user = _require_user(request)
+    token = request.cookies.get(auth_service.SESSION_COOKIE)
+    removed = auth_service.delete_other_sessions(user["id"], token)
+    return {"ok": True, "removed": removed}
+
+
+@app.delete("/api/sessions/{session_id}")
+def delete_my_session(request: Request, session_id: str):
+    import auth_service
+
+    user = _require_user(request)
+    ok = auth_service.delete_session_by_id(user["id"], session_id)
+    if not ok:
+        raise HTTPException(404, "Session not found")
+    return {"ok": True}
 
 
 @app.post("/api/profile")
@@ -957,7 +1011,9 @@ async def login(request: Request):
         user = auth_service.login_user(email, password)
     except ValueError as exc:
         raise HTTPException(401, str(exc)) from exc
-    token = auth_service.create_session(user["id"])
+    token = auth_service.create_session(
+        user["id"], ip=_client_ip(request), user_agent=request.headers.get("user-agent", "")
+    )
     home = auth_service.resolve_post_auth_next(user, requested_next)
     if not bool(int(user.get("profile_complete") or 0)):
         home = "/saas/onboarding.html?next=" + home
@@ -1293,6 +1349,15 @@ def admin_stats(request: Request):
 
     _require_admin(request)
     return {"stats": auth_service.admin_stats()}
+
+
+@app.get("/api/admin/shared-accounts")
+def admin_shared_accounts(request: Request, days: int = 7, min_ips: int = 3):
+    """Accounts active from 3+ distinct IPs in the window — possible credential sharing."""
+    import auth_service
+
+    _require_admin(request)
+    return {"ok": True, "flagged": auth_service.list_shared_account_flags(days=days, min_ips=min_ips)}
 
 
 @app.get("/api/admin/subscriptions")

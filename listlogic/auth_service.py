@@ -19,6 +19,7 @@ logger = logging.getLogger("ListLogic.auth")
 
 SESSION_COOKIE = "ll_session"
 SESSION_DAYS = 30
+MAX_CONCURRENT_SESSIONS = int(os.environ.get("MAX_CONCURRENT_SESSIONS") or "3")
 DEFAULT_TRIAL_DAYS = int(os.environ.get("DEFAULT_TRIAL_DAYS") or "60")
 DEFAULT_PRESENTATION_LIMIT = int(os.environ.get("DEFAULT_PRESENTATION_LIMIT") or "3")
 
@@ -57,11 +58,6 @@ def verify_password(password: str, password_hash: str) -> bool:
         return bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8"))
     except Exception:
         return False
-
-
-def _hash_token(token: str) -> str:
-    secret = (os.environ.get("SESSION_SECRET") or "listlogic-dev-secret").encode("utf-8")
-    return hmac.new(secret, token.encode("utf-8"), hashlib.sha256).hexdigest()
 
 
 def default_trial_days() -> int:
@@ -346,14 +342,116 @@ def log_event(user_id: Optional[str], event_type: str, meta: Optional[dict] = No
         logger.exception("Failed to log event %s", event_type)
 
 
-def create_session(user_id: str) -> str:
+def create_session(user_id: str, ip: str = "", user_agent: str = "") -> str:
     token = secrets.token_urlsafe(32)
     expires = _utcnow() + timedelta(days=SESSION_DAYS)
     database.execute(
-        "INSERT INTO sessions (id, user_id, token_hash, expires_at, created_at) VALUES (?, ?, ?, ?, ?)",
-        (_uid(), user_id, _hash_token(token), _iso(expires), _iso()),
+        "INSERT INTO sessions (id, user_id, token_hash, expires_at, created_at, ip, user_agent, last_seen_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (_uid(), user_id, _hash_token(token), _iso(expires), _iso(), ip or "", user_agent or "", _iso()),
     )
+    _enforce_session_cap(user_id, keep_token=token)
     return token
+
+
+def _enforce_session_cap(user_id: str, keep_token: Optional[str] = None) -> None:
+    """Keep at most MAX_CONCURRENT_SESSIONS newest sessions; drop the oldest beyond the cap.
+    The just-created session (keep_token) is never pruned — created_at has 1s resolution,
+    so ties would otherwise be non-deterministic."""
+    try:
+        rows = database.execute(
+            "SELECT id, token_hash, created_at FROM sessions WHERE user_id = ?",
+            (user_id,),
+            fetch="all",
+        ) or []
+        if len(rows) <= MAX_CONCURRENT_SESSIONS:
+            return
+        keep_hash = _hash_token(keep_token) if keep_token else None
+        keep = [r for r in rows if keep_hash and r.get("token_hash") == keep_hash]
+        others = [r for r in rows if r not in keep]
+        # newest first among the rest
+        others.sort(key=lambda r: (r.get("created_at") or ""), reverse=True)
+        survivors = keep + others[: max(0, MAX_CONCURRENT_SESSIONS - len(keep))]
+        survivor_ids = {r["id"] for r in survivors}
+        stale = [r["id"] for r in rows if r["id"] not in survivor_ids]
+        for sid in stale:
+            database.execute("DELETE FROM sessions WHERE id = ?", (sid,))
+        if stale:
+            logger.info("Session cap: dropped %d oldest session(s) for user %s", len(stale), user_id)
+    except Exception:
+        logger.exception("Failed to enforce session cap for %s", user_id)
+
+
+def touch_session(token: Optional[str], ip: str = "") -> None:
+    """Refresh last_seen_at (+ip) on a session so Settings shows current devices."""
+    if not token:
+        return
+    try:
+        if ip:
+            database.execute(
+                "UPDATE sessions SET last_seen_at = ?, ip = ? WHERE token_hash = ?",
+                (_iso(), ip, _hash_token(token)),
+            )
+        else:
+            database.execute(
+                "UPDATE sessions SET last_seen_at = ? WHERE token_hash = ?",
+                (_iso(), _hash_token(token)),
+            )
+    except Exception:
+        pass
+
+
+def list_sessions(user_id: str, current_token: Optional[str] = None) -> list[dict]:
+    """Active sessions for the Settings panel, newest activity first."""
+    now = _iso()
+    rows = database.execute(
+        "SELECT id, ip, user_agent, created_at, last_seen_at, token_hash FROM sessions "
+        "WHERE user_id = ? AND expires_at > ? ORDER BY COALESCE(last_seen_at, created_at) DESC",
+        (user_id, now),
+        fetch="all",
+    ) or []
+    cur_hash = _hash_token(current_token) if current_token else None
+    out = []
+    for r in rows:
+        out.append({
+            "id": r["id"],
+            "ip": r.get("ip") or "",
+            "user_agent": r.get("user_agent") or "",
+            "created_at": r.get("created_at"),
+            "last_seen_at": r.get("last_seen_at") or r.get("created_at"),
+            "current": bool(cur_hash and r.get("token_hash") == cur_hash),
+        })
+    return out
+
+
+def delete_other_sessions(user_id: str, keep_token: Optional[str]) -> int:
+    """Sign out every session except the current one. Returns count removed."""
+    if not keep_token:
+        return 0
+    try:
+        rows = database.execute(
+            "SELECT id FROM sessions WHERE user_id = ? AND token_hash <> ?",
+            (user_id, _hash_token(keep_token)),
+            fetch="all",
+        ) or []
+        for r in rows:
+            database.execute("DELETE FROM sessions WHERE id = ?", (r["id"],))
+        return len(rows)
+    except Exception:
+        logger.exception("Failed to delete other sessions for %s", user_id)
+        return 0
+
+
+def delete_session_by_id(user_id: str, session_id: str) -> bool:
+    """Remove a single session owned by the user (for the Settings panel)."""
+    try:
+        database.execute(
+            "DELETE FROM sessions WHERE id = ? AND user_id = ?",
+            (session_id, user_id),
+        )
+        return True
+    except Exception:
+        return False
 
 
 def delete_session(token: Optional[str]) -> None:
@@ -1629,6 +1727,44 @@ def list_past_due_users(days: int = 30) -> list[dict]:
             pubs = public_user(user) or {}
             pubs["plan_label"] = plan_label(user.get("plan") or "")
             out.append(pubs)
+    return out
+
+
+def list_shared_account_flags(days: int = 7, min_ips: int = 3) -> list[dict]:
+    """Accounts whose sessions touched `min_ips`+ distinct IPs in the window — possible sharing."""
+    since = _iso(_utcnow() - timedelta(days=days))
+    try:
+        rows = database.execute(
+            """
+            SELECT user_id, COUNT(DISTINCT NULLIF(ip, '')) AS ip_count,
+                   COUNT(*) AS session_count,
+                   MAX(COALESCE(last_seen_at, created_at)) AS last_active
+            FROM sessions
+            WHERE created_at >= ? OR last_seen_at >= ?
+            GROUP BY user_id
+            HAVING COUNT(DISTINCT NULLIF(ip, '')) >= ?
+            ORDER BY ip_count DESC
+            """,
+            (since, since, min_ips),
+            fetch="all",
+        ) or []
+    except Exception:
+        logger.exception("shared-account flag query failed")
+        return []
+    out = []
+    for r in rows:
+        uid = r.get("user_id")
+        if not uid:
+            continue
+        user = get_user_by_id(uid)
+        if not user:
+            continue
+        pub = public_user(user) or {}
+        pub["ip_count"] = int(r.get("ip_count") or 0)
+        pub["session_count"] = int(r.get("session_count") or 0)
+        pub["last_active"] = r.get("last_active")
+        pub["plan_label"] = plan_label(user.get("plan") or "")
+        out.append(pub)
     return out
 
 

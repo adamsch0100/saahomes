@@ -153,8 +153,33 @@ def run_migrations() -> None:
     _ensure_magic_auth_schema()
     _ensure_billing_schema()
     _ensure_assistant_chats_table()
+    _ensure_session_device_schema()
     backend = "postgres" if using_postgres() else f"sqlite:{_sqlite_path()}"
     logger.info("Migrations applied (%s)", backend)
+
+
+def _ensure_session_device_schema() -> None:
+    """Device/IP tracking + last-seen on sessions for the concurrent cap and Settings panel."""
+    for col, typ, default in (
+        ("ip", "TEXT", "''"),
+        ("user_agent", "TEXT", "''"),
+        ("last_seen_at", "TEXT", "''"),
+    ):
+        try:
+            if using_postgres():
+                execute(f"ALTER TABLE sessions ADD COLUMN IF NOT EXISTS {col} {typ} DEFAULT {default}")
+            else:
+                execute(f"ALTER TABLE sessions ADD COLUMN {col} {typ} DEFAULT {default}")
+        except Exception:
+            pass
+    for idx_sql in (
+        "CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id)",
+        "CREATE INDEX IF NOT EXISTS idx_sessions_last_seen ON sessions(last_seen_at)",
+    ):
+        try:
+            execute(idx_sql)
+        except Exception:
+            pass
 
 
 def _ensure_assistant_chats_table() -> None:

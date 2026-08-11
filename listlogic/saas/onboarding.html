@@ -64,6 +64,15 @@ body { background: var(--paper); }
 .pw-toggle input { width: auto; margin: 0; }
 .pw-panel { border: 1px dashed var(--line); border-radius: 12px; padding: 14px; background: #fbfaf7; }
 .pw-panel[hidden] { display: none; }
+.sess-row { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+.sess-row:last-child { border-bottom: 0; }
+.sess-ic { width: 36px; height: 36px; border-radius: 10px; background: #eef2f8; display: grid; place-items: center; font-size: 1rem; flex: none; }
+.sess-meta { flex: 1; min-width: 0; }
+.sess-meta strong { display: block; font-size: 0.88rem; color: var(--ink); }
+.sess-meta span { display: block; font-size: 0.72rem; color: var(--muted); }
+.sess-cur { font-size: 0.66rem; font-weight: 700; color: var(--teal); background: #e7f3ef; padding: 2px 8px; border-radius: 999px; }
+.sess-x { background: transparent; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); font-size: 0.72rem; padding: 5px 9px; cursor: pointer; }
+.sess-x:hover { color: var(--danger, #b3541e); border-color: var(--danger, #b3541e); }
 .pw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (max-width: 560px) { .pw-grid { grid-template-columns: 1fr; } }
 .pw-grid input { padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-size: 0.9rem; }
@@ -192,6 +201,16 @@ body { background: var(--paper); }
       </div>
       <div class="status-note" id="status"></div>
       <p class="set-foot">Need a new email? <a href="/saas/login.html">Use a magic link</a> and it’ll carry your settings forward.</p>
+
+      <div class="set-card" id="sessionsCard">
+        <h2>Active sessions</h2>
+        <p class="sub">Devices currently signed in to your account. Up to 3 at a time — signing in on a 4th signs out the oldest.</p>
+        <div id="sessionsList"><p class="help">Loading…</p></div>
+        <div class="set-actions" style="margin-top:12px">
+          <button type="button" class="btn" id="signoutOthers">Sign out other devices</button>
+        </div>
+        <div class="status-note" id="sessionsStatus"></div>
+      </div>
     </div>
 
     <aside class="set-side" aria-label="Brand preview">
@@ -351,6 +370,85 @@ body { background: var(--paper); }
   });
 
   loadUser();
+
+  // ---- Active sessions panel ----
+  const sessList = $('sessionsList');
+  const sessStatus = $('sessionsStatus');
+
+  function deviceLabel(ua) {
+    ua = (ua || '').toLowerCase();
+    let os = 'Device';
+    if (ua.includes('iphone') || ua.includes('ipad')) os = 'iPhone / iPad';
+    else if (ua.includes('android')) os = 'Android';
+    else if (ua.includes('mac')) os = 'Mac';
+    else if (ua.includes('windows')) os = 'Windows';
+    else if (ua.includes('linux')) os = 'Linux';
+    let br = '';
+    if (ua.includes('edg/')) br = 'Edge';
+    else if (ua.includes('chrome/')) br = 'Chrome';
+    else if (ua.includes('safari/') && !ua.includes('chrome')) br = 'Safari';
+    else if (ua.includes('firefox/')) br = 'Firefox';
+    return (br ? br + ' on ' : '') + os;
+  }
+  function deviceIcon(ua) {
+    ua = (ua || '').toLowerCase();
+    if (ua.includes('mobile') || ua.includes('iphone') || ua.includes('android')) return '📱';
+    return '💻';
+  }
+  function ago(iso) {
+    if (!iso) return '';
+    const t = new Date(iso).getTime();
+    if (!t) return '';
+    const s = Math.max(0, (Date.now() - t) / 1000);
+    if (s < 90) return 'just now';
+    if (s < 3600) return Math.round(s / 60) + 'm ago';
+    if (s < 86400) return Math.round(s / 3600) + 'h ago';
+    return Math.round(s / 86400) + 'd ago';
+  }
+
+  async function loadSessions() {
+    try {
+      const res = await fetch('/api/sessions', { credentials: 'same-origin' });
+      const data = await res.json().catch(() => ({}));
+      const list = data.sessions || [];
+      if (!list.length) { sessList.innerHTML = '<p class="help">No active sessions found.</p>'; return; }
+      sessList.innerHTML = list.map((s) => {
+        const ua = s.user_agent || '';
+        return '<div class="sess-row">' +
+          '<div class="sess-ic">' + deviceIcon(ua) + '</div>' +
+          '<div class="sess-meta"><strong>' + deviceLabel(ua) + (s.current ? ' <span class="sess-cur">This device</span>' : '') + '</strong>' +
+          '<span>' + (s.ip ? s.ip + ' · ' : '') + 'active ' + ago(s.last_seen_at) + '</span></div>' +
+          (s.current ? '' : '<button type="button" class="sess-x" data-sid="' + s.id + '">Sign out</button>') +
+          '</div>';
+      }).join('');
+    } catch (err) {
+      sessList.innerHTML = '<p class="help">Could not load sessions.</p>';
+    }
+  }
+
+  sessList.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.sess-x');
+    if (!btn) return;
+    btn.disabled = true;
+    try {
+      await fetch('/api/sessions/' + encodeURIComponent(btn.dataset.sid), { method: 'DELETE', credentials: 'same-origin' });
+      loadSessions();
+    } catch (_) { btn.disabled = false; }
+  });
+
+  $('signoutOthers').addEventListener('click', async () => {
+    sessStatus.textContent = 'Signing out other devices…';
+    try {
+      const res = await fetch('/api/sessions/signout-others', { method: 'POST', credentials: 'same-origin' });
+      const data = await res.json().catch(() => ({}));
+      sessStatus.textContent = 'Signed out ' + (data.removed || 0) + ' other device' + ((data.removed === 1) ? '' : 's') + '.';
+      loadSessions();
+    } catch (err) {
+      sessStatus.textContent = 'Could not sign out others.';
+    }
+  });
+
+  loadSessions();
 })();
 </script>
 </body>
