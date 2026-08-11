@@ -83,3 +83,7 @@ browser-logs/
 # Test files
 backend/test-*.js
 
+
+# Secrets — never commit real credentials (2026-08-11 security fix)
+RAILWAY_ENV_VARS.txt
+*.env.vars
