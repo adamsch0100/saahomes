@@ -12,7 +12,7 @@ import { marketPack } from "../../data/marketPack.js";
 import { HeartIcon } from "./icons.jsx";
 import { pricePerSqftOf, lotLabel } from "./utils.js";
 import { VirtualTourButton } from "./VirtualTourModal.jsx";
-import { principalAndInterest, monthlyHoa } from "../PaymentCalculator.jsx";
+import { estimateMonthlyPayment } from "../PaymentCalculator.jsx";
 
 /**
  * Sticky right conversion rail — price, CTAs, agent, compact est-payment teaser.
@@ -33,26 +33,15 @@ export default function ConversionRail({
   const taxAnnual = feats.tax_annual;
   const hoaFreq = feats.assoc_fee_freq;
 
-  const estPayment = useMemo(() => {
-    const price = Number(listPrice);
-    if (!Number.isFinite(price) || price <= 0) return null;
-    const downPct = 20;
-    const rate = 6.5;
-    const termYears = 30;
-    const downAmount = (price * downPct) / 100;
-    const loan = Math.max(0, price - downAmount);
-    const pi = principalAndInterest(loan, rate, termYears);
-    const hasTax =
-      taxAnnual != null &&
-      taxAnnual !== "" &&
-      Number.isFinite(Number(taxAnnual)) &&
-      Number(taxAnnual) > 0;
-    const taxMonthly = hasTax ? Number(taxAnnual) / 12 : (price * 0.01) / 12;
-    const insuranceMonthly = (price * 0.0035) / 12;
-    const hoaMonthly = monthlyHoa(hoaFee, hoaFreq);
-    const total = pi + taxMonthly + insuranceMonthly + hoaMonthly;
-    return { total, price, downPct, rate, termYears };
-  }, [listPrice, hoaFee, taxAnnual, hoaFreq]);
+  const estPayment = useMemo(
+    () =>
+      estimateMonthlyPayment(listPrice, {
+        taxAnnual,
+        hoaFee,
+        hoaFreq,
+      }),
+    [listPrice, hoaFee, taxAnnual, hoaFreq]
+  );
 
   if (!listing) return null;
 

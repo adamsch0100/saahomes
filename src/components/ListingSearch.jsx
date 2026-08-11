@@ -18,11 +18,13 @@ import {
   matchSavedSearch,
   getSavedSearches,
   hasAnySavedSearch,
+  isLandListing,
 } from "../utils/listingHelpers.js";
 import SaveHomeButton, { useSavedHomesStatus } from "./SaveHomeButton";
 import ListingPhotoFallback from "./ListingPhotoFallback";
 import { marketPack } from "../data/marketPack.js";
 import { buildListingsItemListSchema } from "../utils/seoConstants.js";
+import { estimateMonthlyPayment } from "./PaymentCalculator.jsx";
 
 /**
  * ListingSearch — Zillow-style split-view search for /properties/.
@@ -781,27 +783,69 @@ function CardStatsLine({ listing, className = "" }) {
 /**
  * Grid card — Zillow-grade 4:3 photo, price + badges on image, type scale below.
  * compact=true → horizontal list row (mobile / dense list).
+ * Photo carousel arrows on multi-photo cards (Zillow §3); est. payment micro-line.
  */
 function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compact = false, savedMap = {} }) {
   const { priceCut } = listingBadges(listing);
   const match = matchSavedSearch(listing, savedSearches);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgFailed, setImgFailed] = useState(false);
+  const [photoIdx, setPhotoIdx] = useState(0);
   const addr = listingAddress(listing);
   const typeLabel = homeTypeLabel(listing);
-  const hasPhoto = Array.isArray(listing.photos) && listing.photos.length > 0;
+  const photoCount = Array.isArray(listing.photos)
+    ? listing.photos.length
+    : Number(listing.photos_count) > 0
+      ? Number(listing.photos_count)
+      : 0;
+  const hasPhoto = photoCount > 0;
   const showPhoto = hasPhoto && !imgFailed;
+  const multiPhoto = showPhoto && photoCount > 1;
+  const safePhotoIdx = multiPhoto ? ((photoIdx % photoCount) + photoCount) % photoCount : 0;
   const photoAlt = addr
-    ? `Photo of ${addr}${listing.city ? `, ${listing.city}` : ""}`
+    ? `Photo of ${addr}${listing.city ? `, ${listing.city}` : ""}${
+        multiPhoto ? ` — photo ${safePhotoIdx + 1} of ${photoCount}` : ""
+      }`
     : `Home in ${listing.city || marketPack.market.name}`;
   const isSaved =
     Boolean(savedMap[listing.listing_id]) ||
     Boolean(savedMap[listing.slug]) ||
     Boolean(listing.id != null && savedMap[String(listing.id)]);
 
+  // Est. payment (same defaults as detail rail) — skip land / missing price
+  const estPay = useMemo(() => {
+    if (isLandListing(listing)) return null;
+    const feats = listing.features || {};
+    return estimateMonthlyPayment(listing.list_price, {
+      taxAnnual: feats.tax_annual,
+      hoaFee: listing.hoa_fee,
+      hoaFreq: feats.assoc_fee_freq,
+    });
+  }, [listing]);
+
+  // Reset photo index when listing identity changes (page reuse)
+  useEffect(() => {
+    setPhotoIdx(0);
+    setImgLoaded(false);
+    setImgFailed(false);
+  }, [listing.id]);
+
   const open = (e) => {
     e?.preventDefault?.();
     onOpen?.(listing);
+  };
+
+  const stepPhoto = (dir, e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    if (!multiPhoto) return;
+    setImgLoaded(false);
+    setPhotoIdx((i) => {
+      const next = i + dir;
+      if (next < 0) return photoCount - 1;
+      if (next >= photoCount) return 0;
+      return next;
+    });
   };
 
   const photo = (
@@ -811,16 +855,24 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
       )}
       {showPhoto ? (
         <img
-          src={photoUrl(listing.id, 0)}
+          key={`${listing.id}-${safePhotoIdx}`}
+          src={photoUrl(listing.id, safePhotoIdx)}
           alt={photoAlt}
           onLoad={() => setImgLoaded(true)}
           onError={() => {
-            setImgFailed(true);
-            setImgLoaded(true);
+            // First photo failure → branded fallback; other indices step back to 0
+            if (safePhotoIdx === 0) {
+              setImgFailed(true);
+              setImgLoaded(true);
+            } else {
+              setPhotoIdx(0);
+              setImgLoaded(false);
+            }
           }}
           className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03] ${imgLoaded ? "opacity-100" : "opacity-0"}`}
-          loading="lazy"
+          loading={safePhotoIdx === 0 ? "lazy" : "eager"}
           decoding="async"
+          draggable={false}
         />
       ) : (
         <ListingPhotoFallback className="w-full h-full absolute inset-0" compact={compact} />
@@ -833,9 +885,40 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
           className={compact ? "!w-10 !h-10 !min-w-[40px] !min-h-[40px]" : ""}
         />
       </div>
+      {/* Zillow §3: left/right photo arrows on hover (desktop) / always on touch */}
+      {multiPhoto && (
+        <>
+          <button
+            type="button"
+            onClick={(e) => stepPhoto(-1, e)}
+            onMouseDown={(e) => e.stopPropagation()}
+            className={`absolute left-1.5 top-1/2 -translate-y-1/2 z-20 rounded-full bg-white/95 hover:bg-white shadow-md flex items-center justify-center text-gray-900 leading-none active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#CFB36E] ${
+              compact
+                ? "w-7 h-7 text-base opacity-100"
+                : "w-8 h-8 text-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+            }`}
+            aria-label="Previous photo"
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            onClick={(e) => stepPhoto(1, e)}
+            onMouseDown={(e) => e.stopPropagation()}
+            className={`absolute right-1.5 top-1/2 -translate-y-1/2 z-20 rounded-full bg-white/95 hover:bg-white shadow-md flex items-center justify-center text-gray-900 leading-none active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#CFB36E] ${
+              compact
+                ? "w-7 h-7 text-base opacity-100"
+                : "w-8 h-8 text-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:right-12"
+            }`}
+            aria-label="Next photo"
+          >
+            ›
+          </button>
+        </>
+      )}
       {/* Price overlay — primary focal point on the photo */}
       {!compact && (
-        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/75 via-black/35 to-transparent pt-10 pb-2.5 px-3">
+        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/75 via-black/35 to-transparent pt-10 pb-2.5 px-3 pointer-events-none">
           <div className="flex items-end justify-between gap-2">
             <p className="text-[1.35rem] sm:text-2xl font-bold text-white tracking-tight leading-none drop-shadow-sm">
               {formatPrice(listing.list_price)}
@@ -848,13 +931,19 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
           </div>
         </div>
       )}
-      {!compact && showPhoto && listing.photos?.length > 1 && (
-        <span className="absolute bottom-2.5 right-2.5 bg-black/65 text-white text-[10px] font-medium px-1.5 py-0.5 rounded z-[1]">
-          1 / {listing.photos.length}
+      {!compact && multiPhoto && (
+        <span className="absolute bottom-2.5 right-2.5 bg-black/65 text-white text-[10px] font-medium px-1.5 py-0.5 rounded z-[1] tabular-nums pointer-events-none">
+          {safePhotoIdx + 1} / {photoCount}
         </span>
       )}
     </>
   );
+
+  const estPayLine = estPay ? (
+    <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5 tabular-nums">
+      Est. {`$${Math.round(estPay.total).toLocaleString("en-US")}`}/mo
+    </p>
+  ) : null;
 
   const body = compact ? (
     <div className="flex-1 min-w-0 py-2.5 pr-2.5 pl-0.5 flex flex-col justify-center gap-0.5">
@@ -868,6 +957,7 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
           </p>
         )}
       </div>
+      {estPayLine}
       <CardStatsLine listing={listing} className="mt-1" />
       <p className="text-[13px] text-gray-600 truncate mt-0.5">
         {addr || "Address available on request"}
@@ -885,6 +975,7 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
   ) : (
     <div className="px-3 pt-2.5 pb-3">
       <CardStatsLine listing={listing} />
+      {estPayLine}
       <p className="text-[13px] text-gray-600 mt-1 truncate leading-snug">
         {addr || "Address available on request"}
       </p>
@@ -926,7 +1017,9 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
             open(e);
           }
         }}
-        className={`block w-full text-left cursor-pointer ${compact ? "flex flex-row min-h-[112px]" : ""}`}
+        className={`block w-full text-left cursor-pointer active:scale-[0.99] transition-transform focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E] ${
+          compact ? "flex flex-row min-h-[112px]" : ""
+        }`}
       >
         <div
           className={`relative bg-gray-100 overflow-hidden shrink-0 ${
@@ -1641,6 +1734,18 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     };
   }, [homeTypeOpen]);
 
+  // Escape closes price / home-type popovers (Zillow-style chip UX)
+  useEffect(() => {
+    if (!priceOpen && !homeTypeOpen) return undefined;
+    const onKey = (e) => {
+      if (e.key !== "Escape") return;
+      setPriceOpen(false);
+      setHomeTypeOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [priceOpen, homeTypeOpen]);
+
   // Instant chip filters (city, beds, baths, sort) apply immediately
   const setFilterInstant = (key, value) => {
     setFilters((prev) => {
@@ -1932,7 +2037,10 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           <div className="relative">
             <button
               type="button"
-              onClick={() => setPriceOpen((o) => !o)}
+              onClick={() => {
+                setPriceOpen((o) => !o);
+                setHomeTypeOpen(false);
+              }}
               aria-expanded={priceOpen}
               aria-haspopup="true"
               className={`${filters.minPrice || filters.maxPrice ? chipActive : chipIdle} ${
@@ -1976,6 +2084,30 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                         </option>
                       ))}
                     </select>
+                  </div>
+                  {/* Zillow §2: quick price ranges on the chip (not only in full drawer) */}
+                  <div className="flex flex-wrap gap-1.5 mt-3">
+                    {PRICE_QUICK.map((o) => {
+                      const [min, max] = o.value.split("-");
+                      const on =
+                        String(filters.minPrice || "") === (min || "") &&
+                        String(filters.maxPrice || "") === (max || "");
+                      return (
+                        <button
+                          key={o.value}
+                          type="button"
+                          className={on ? pillOn : pillIdle}
+                          onClick={() => {
+                            applyFilterPatch({
+                              minPrice: min || "",
+                              maxPrice: max || "",
+                            });
+                          }}
+                        >
+                          {o.label}
+                        </button>
+                      );
+                    })}
                   </div>
                   {(filters.minPrice || filters.maxPrice) && (
                     <button
@@ -2028,7 +2160,10 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           <div className="relative" ref={homeTypeRef}>
             <button
               type="button"
-              onClick={() => setHomeTypeOpen((o) => !o)}
+              onClick={() => {
+                setHomeTypeOpen((o) => !o);
+                setPriceOpen(false);
+              }}
               className={filters.types?.length ? chipActive : chipIdle}
               aria-expanded={homeTypeOpen}
               aria-haspopup="listbox"

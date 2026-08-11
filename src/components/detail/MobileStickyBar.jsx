@@ -20,8 +20,10 @@ export default function MobileStickyBar({
       <button
         type="button"
         onClick={onToggleSave}
-        className={`w-11 h-11 shrink-0 rounded-full border flex items-center justify-center active:scale-95 transition-transform ${
-          saved ? "bg-[#CFB36E] border-[#CFB36E] text-black" : "border-gray-300 text-gray-800"
+        className={`w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full border flex items-center justify-center active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E] ${
+          saved
+            ? "bg-[#CFB36E] border-[#CFB36E] text-black"
+            : "border-gray-300 text-gray-800 hover:border-black"
         }`}
         aria-label={saved ? "Unsave home" : "Save home"}
       >
@@ -30,13 +32,13 @@ export default function MobileStickyBar({
       <button
         type="button"
         onClick={openNadia}
-        className="shrink-0 px-2.5 py-2.5 border border-gray-300 text-gray-900 text-xs font-semibold rounded-lg active:scale-95 transition-transform"
+        className="shrink-0 min-h-[44px] px-2.5 py-2.5 border border-gray-300 text-gray-900 text-xs font-semibold rounded-lg active:scale-95 hover:border-black transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
       >
         Nadia
       </button>
       <a
         href="tel:+19709991407"
-        className="shrink-0 px-2.5 py-2.5 border-2 border-black text-black text-xs font-semibold rounded-lg active:scale-95 transition-transform"
+        className="shrink-0 min-h-[44px] px-2.5 py-2.5 border-2 border-black text-black text-xs font-semibold rounded-lg active:scale-95 hover:bg-black hover:text-white transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
       >
         Call
       </a>
@@ -44,7 +46,7 @@ export default function MobileStickyBar({
         <ScheduleShowingModal
           listing={listing}
           buttonLabel="Schedule"
-          buttonClassName="w-full inline-flex items-center justify-center px-3 py-2.5 text-sm font-semibold rounded-lg active:scale-[0.98] transition-transform"
+          buttonClassName="w-full min-h-[44px] inline-flex items-center justify-center px-3 py-2.5 text-sm font-semibold rounded-lg active:scale-[0.98] hover:opacity-90 transition-all touch-manipulation"
           buttonStyle={{ backgroundColor: "#CFB36E", color: "#1a1a1a" }}
           hideIcon
         />

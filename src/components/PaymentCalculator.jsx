@@ -315,4 +315,38 @@ export default function PaymentCalculator({
   );
 }
 
+/**
+ * Shared est. monthly payment (same defaults as ConversionRail / card micro-line).
+ * 20% down · 6.5% · 30-yr + tax (MLS or ~1%) + insurance ~0.35% + HOA.
+ * Returns null when price is missing/invalid. Never fabricates list prices.
+ */
+export function estimateMonthlyPayment(listPrice, { taxAnnual = null, hoaFee = null, hoaFreq = null } = {}) {
+  const price = Number(listPrice);
+  if (!Number.isFinite(price) || price <= 0) return null;
+  const downPct = 20;
+  const rate = 6.5;
+  const termYears = 30;
+  const downAmount = (price * downPct) / 100;
+  const loan = Math.max(0, price - downAmount);
+  const pi = principalAndInterest(loan, rate, termYears);
+  const hasTax =
+    taxAnnual != null &&
+    taxAnnual !== "" &&
+    Number.isFinite(Number(taxAnnual)) &&
+    Number(taxAnnual) > 0;
+  const taxMonthly = hasTax ? Number(taxAnnual) / 12 : (price * 0.01) / 12;
+  const insuranceMonthly = (price * 0.0035) / 12;
+  const hoaMonthly = monthlyHoa(hoaFee, hoaFreq);
+  const total = pi + taxMonthly + insuranceMonthly + hoaMonthly;
+  return {
+    total,
+    price,
+    downPct,
+    rate,
+    termYears,
+    taxIsEstimate: !hasTax,
+    hoaMonthly,
+  };
+}
+
 export { principalAndInterest, monthlyHoa };

@@ -94,9 +94,15 @@
   border-top-color: #fff;
 }
 
-/* Property search card polish — subtle hover lift */
+/* Property search card polish — subtle hover lift + smooth press */
+.properties-search-app article.group {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
 .properties-search-app article.group:hover {
   transform: translateY(-1px);
+}
+.properties-search-app article.group:active {
+  transform: translateY(0);
 }
 
 /* Hide global floating contact bar when listing detail owns sticky CTAs */

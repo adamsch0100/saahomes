@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { photoUrl } from "../../utils/photoUrl.js";
 import {
@@ -11,6 +11,8 @@ import {
 import { getCityHomesPath } from "../../data/cityHomesData";
 import { HOME_TYPE_LABEL } from "./utils.js";
 import ListingPhotoFallback from "../ListingPhotoFallback.jsx";
+import SaveHomeButton from "../SaveHomeButton.jsx";
+import { estimateMonthlyPayment } from "../PaymentCalculator.jsx";
 
 function SimilarCardPhoto({ listing: l }) {
   const [failed, setFailed] = useState(false);
@@ -33,6 +35,76 @@ function SimilarCardPhoto({ listing: l }) {
       decoding="async"
       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
     />
+  );
+}
+
+function SimilarCard({ listing: l }) {
+  const b = listingBadges(l);
+  const stats = listingStatsLine(l);
+  const estPay = useMemo(() => {
+    if (isLandListing(l)) return null;
+    const feats = l.features || {};
+    return estimateMonthlyPayment(l.list_price, {
+      taxAnnual: feats.tax_annual,
+      hoaFee: l.hoa_fee,
+      hoaFreq: feats.assoc_fee_freq,
+    });
+  }, [l]);
+
+  return (
+    <Link
+      to={`/homes-for-sale/${l.slug}/`}
+      className="group relative block bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 active:scale-[0.99] transition-all min-w-[260px] w-[78vw] max-w-sm snap-start sm:min-w-0 sm:w-auto sm:max-w-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
+    >
+      <div className="relative aspect-[4/3] bg-[#1a1a1a] overflow-hidden">
+        <SimilarCardPhoto listing={l} />
+        {b.priceCut && (
+          <span className="absolute top-2 left-2 z-[1] bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+            Price reduced
+          </span>
+        )}
+        {b.isNew && !b.priceCut && (
+          <span className="absolute top-2 left-2 z-[1] bg-[#CFB36E] text-black text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+            New
+          </span>
+        )}
+        {/* Save heart — stopPropagation handled inside SaveHomeButton */}
+        <div
+          className="absolute top-2 right-2 z-10 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        >
+          <SaveHomeButton listing={l} className="!w-10 !h-10 !min-w-[40px] !min-h-[40px]" size={18} />
+        </div>
+        {/* Price overlay — matches primary search cards (Zillow §3) */}
+        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/75 via-black/35 to-transparent pt-8 pb-2 px-3 pointer-events-none">
+          <div className="flex items-end justify-between gap-2">
+            <p className="text-lg font-bold text-white tracking-tight leading-none drop-shadow-sm">
+              {formatPrice(l.list_price)}
+            </p>
+            {b.priceCut && l.original_list_price != null && (
+              <p className="text-[10px] text-white/75 line-through mb-0.5">
+                {formatPrice(l.original_list_price)}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="p-3">
+        {stats ? <p className="text-xs font-semibold text-gray-800">{stats}</p> : null}
+        {estPay && (
+          <p className="text-[11px] text-gray-500 mt-0.5 tabular-nums">
+            Est. ${Math.round(estPay.total).toLocaleString("en-US")}/mo
+          </p>
+        )}
+        <p className="text-xs text-gray-600 mt-1 truncate">
+          {[l.street_number, l.street_name].filter(Boolean).join(" ")}
+          {l.city ? `, ${l.city}` : ""}
+        </p>
+      </div>
+    </Link>
   );
 }
 
@@ -70,39 +142,9 @@ export default function SimilarHomesSection({ listing, similar = [] }) {
         )}
       </div>
       <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible sm:pb-0">
-        {similar.map((l) => {
-          const b = listingBadges(l);
-          const stats = listingStatsLine(l);
-          return (
-            <Link
-              key={l.listing_id || l.id || l.slug}
-              to={`/homes-for-sale/${l.slug}/`}
-              className="group block bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-shadow min-w-[260px] w-[78vw] max-w-sm snap-start sm:min-w-0 sm:w-auto sm:max-w-none"
-            >
-              <div className="relative aspect-[4/3] bg-[#1a1a1a] overflow-hidden">
-                <SimilarCardPhoto listing={l} />
-                {b.priceCut && (
-                  <span className="absolute top-2 left-2 bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">
-                    Price reduced
-                  </span>
-                )}
-                {b.isNew && !b.priceCut && (
-                  <span className="absolute top-2 left-2 bg-[#CFB36E] text-black text-[10px] font-bold px-2 py-0.5 rounded uppercase">
-                    New
-                  </span>
-                )}
-              </div>
-              <div className="p-3">
-                <p className="font-bold text-gray-900">{formatPrice(l.list_price)}</p>
-                {stats ? <p className="text-xs text-gray-500 mt-0.5">{stats}</p> : null}
-                <p className="text-xs text-gray-600 mt-1 truncate">
-                  {[l.street_number, l.street_name].filter(Boolean).join(" ")}
-                  {l.city ? `, ${l.city}` : ""}
-                </p>
-              </div>
-            </Link>
-          );
-        })}
+        {similar.map((l) => (
+          <SimilarCard key={l.listing_id || l.id || l.slug} listing={l} />
+        ))}
       </div>
     </section>
   );

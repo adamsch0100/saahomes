@@ -340,7 +340,7 @@ export default function ListingDetailPanel({ slug, onClose }) {
                 <button
                   type="button"
                   onClick={onShare}
-                  className="inline-flex items-center justify-center w-9 h-9 rounded-full border border-gray-300 text-gray-800 hover:border-black transition-colors"
+                  className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 rounded-full border border-gray-300 text-gray-800 hover:border-black active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
                   aria-label={shareCopied ? "Link copied" : "Share this home"}
                   title={shareCopied ? "Link copied" : "Share"}
                 >
@@ -349,7 +349,7 @@ export default function ListingDetailPanel({ slug, onClose }) {
                 <button
                   type="button"
                   onClick={onToggleSave}
-                  className={`inline-flex items-center justify-center w-9 h-9 rounded-full border text-sm transition-colors ${
+                  className={`inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 rounded-full border text-sm active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E] ${
                     saved
                       ? "bg-[#CFB36E] border-[#CFB36E] text-black"
                       : "border-gray-300 text-gray-800 hover:border-black"
@@ -364,7 +364,7 @@ export default function ListingDetailPanel({ slug, onClose }) {
             <button
               type="button"
               onClick={onClose}
-              className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center text-2xl text-gray-700 leading-none"
+              className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full hover:bg-gray-100 flex items-center justify-center text-2xl text-gray-700 leading-none active:scale-95 transition-transform touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
               aria-label="Close"
             >
               ×
