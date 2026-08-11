@@ -298,6 +298,68 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
     adv_html = "".join(f"<li>{_esc(a)}</li>" for a in advantages[:4]) or "<li>Solid fundamentals</li>"
     risk_html = "".join(f"<li>{_esc(r)}</li>" for r in risks[:4]) or "<li>Overpricing risk</li>"
 
+    # —— Net Sheet slide (mirrors live spine-net defaults) ——
+    net_slide = ""
+    net_price = rec or float((report.get("subject") or {}).get("list_price") or 0)
+    if net_price:
+        from datetime import date, timedelta
+
+        def _m(v):
+            return f"${float(v):,.0f}"
+
+        seller_fee = net_price * 0.03
+        buyer_fee = net_price * 0.03
+        repairs = 2000.0
+        close = date.today() + timedelta(days=30)
+        jan1 = date(close.year, 1, 1)
+        days = max(1, min(365, (close - jan1).days + 1))
+        tax = round(net_price * 0.76 / 100 * days / 365)
+        title = max(0, round(net_price * 0.0015 / 50) * 50)
+        oec, bundled, water = 150.0, 190.0, 200.0
+        costs = seller_fee + buyer_fee + repairs + tax + title + oec + bundled + water
+        net = net_price - costs
+        pct = max(0.0, min(100.0, round(net / net_price * 1000) / 10))
+
+        def _nrow(label, note, val, total=False):
+            v = _m(val) if val else "—"
+            cls = ' class="ns-total"' if total else ""
+            note_html = f'<span class="ns-note">{_esc(note)}</span>' if note else ""
+            return (f'<div class="ns-row{cls}"><div class="ns-l">{_esc(label)}{note_html}</div>'
+                    f'<div class="ns-v">{v}</div></div>')
+
+        net_rows = (
+            '<div class="ns-subhead">Brokerage &amp; concessions</div>'
+            + _nrow("Seller broker fee", "3.0% of price", seller_fee)
+            + _nrow("Buyer broker fee", "3.0% of price", buyer_fee)
+            + _nrow("Misc. — inspection repairs", "standard allowance", repairs)
+            + '<div class="ns-subhead">Taxes &amp; title · seller-paid</div>'
+            + _nrow("Prop. taxes", f"0.76% annual · prorated to day {days} of {close.year}", tax)
+            + _nrow("Owner's title policy", "auto · ≈0.15% of price", title)
+            + _nrow("Owner's extended coverage", "", oec)
+            + _nrow("Bundled closing fees", "", bundled)
+            + _nrow("Final water", "final utility reading", water)
+            + _nrow("Total selling costs", "", costs, total=True)
+        )
+        net_slide = f'''
+    <section class="slide" data-title="8 · Net Sheet">
+      <div class="slide-top"><span>{logo_html}8 · Net Sheet</span><span>What You Walk Away With</span></div>
+      <div class="slide-body">
+        <h2 class="slide-title"><span class="step-badge">8</span>Net Sheet — What You Walk Away With</h2>
+        <p class="lede">Estimated proceeds at the recommended price. Estimates only — not a closing statement.</p>
+        <div class="net-sheet-wrap">
+          <div class="ns-lines">{net_rows}</div>
+          <div class="ns-summary">
+            <div class="ns-eyebrow">Estimated net to seller</div>
+            <div class="ns-big">{_m(net)}</div>
+            <div class="ns-sub">at {_m(net_price)} · {pct:.1f}% of list</div>
+            <div class="ns-fine">Loan balance, concessions, and fees change this the most. Your closer issues official figures.</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-foot"><span>Estimates only · not a closing statement</span><span>ListLogic</span></div>
+    </section>
+'''
+
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -612,6 +674,23 @@ body.mode-print .hint {{ display: none; }}
 }}
 .slide-title {{ display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }}
 
+/* Net Sheet slide */
+.net-sheet-wrap {{ display: grid; grid-template-columns: 1.5fr 1fr; gap: 18px; margin-top: 14px; align-items: start; }}
+.ns-lines {{ background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 8px 14px; }}
+.ns-subhead {{ font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); padding: 8px 0 3px; }}
+.ns-row {{ display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 4px 0; border-bottom: 1px solid #eef2f8; }}
+.ns-row.ns-total {{ border-bottom: 0; border-top: 2px solid var(--navy); margin-top: 4px; padding-top: 8px; font-weight: 800; }}
+.ns-l {{ font-size: .8rem; color: var(--ink); }}
+.ns-l .ns-note {{ display: block; font-size: .62rem; color: var(--muted); }}
+.ns-v {{ font-size: .8rem; font-weight: 700; color: var(--ink); white-space: nowrap; }}
+.ns-row.ns-total .ns-v {{ color: var(--navy); }}
+.ns-summary {{ background: linear-gradient(160deg, var(--navy), var(--accent)); border-radius: 14px; padding: 20px 18px; color: #fff; }}
+.ns-summary .ns-eyebrow {{ font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; opacity: .8; }}
+.ns-summary .ns-big {{ font-family: 'Fraunces', serif; font-size: 2.2rem; font-weight: 700; margin: 6px 0 2px; }}
+.ns-summary .ns-sub {{ font-size: .8rem; opacity: .9; }}
+.ns-summary .ns-fine {{ font-size: .64rem; opacity: .75; margin-top: 12px; line-height: 1.4; }}
+@media (max-width: 900px) {{ .net-sheet-wrap {{ grid-template-columns: 1fr; }} }}
+
 @media print {{
   @page {{ size: 11in 8.5in; margin: 0; }}
   * {{ -webkit-print-color-adjust: exact; print-color-adjust: exact; }}
@@ -782,6 +861,8 @@ body.mode-print .hint {{ display: none; }}
       </div>
       <div class="slide-foot"><span>Pick a lane — the market answers</span><span>ListLogic</span></div>
     </section>
+
+{net_slide}
 
     <!-- Close -->
     <section class="slide slide-close" data-title="Next">

@@ -156,7 +156,7 @@ a:hover .btn-arrow, button:hover .btn-arrow { transform: translateX(3px); }
 .btn-trial:hover { transform: translateY(-2px); filter: brightness(1.03); box-shadow: 0 20px 44px -14px rgba(201,162,39,0.75), inset 0 1px 0 rgba(255,255,255,0.4); }
 .btn-trial .btn-arrow { font-weight: 800; }
 .trial-sub { font-size: 0.82rem; color: #cdd8e6; margin-top: 4px; }
-.trial-sub b { color: #fff; font-weight: 600; }
+.hero .trial-sub b { color: #fff; font-weight: 600; }
 .hero .trial-sub { margin-top: 16px; }
 .hero-proof { display: flex; gap: 28px; margin-top: 40px; flex-wrap: wrap; }
 .hero-proof div { font-size: 0.82rem; color: #9fb0c6; }
@@ -218,9 +218,14 @@ a:hover .btn-arrow, button:hover .btn-arrow { transform: translateX(3px); }
 .mock-supply-head .ms-live { display: inline-flex; align-items: center; gap: 6px; color: var(--teal); }
 .mock-supply-head .ms-live i { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); animation: ll-pulse 1.6s ease-in-out infinite; }
 .mock-supply-track { display: flex; gap: 6px; margin-top: 8px; }
-.mock-supply-tick { flex: 1; height: 26px; border-radius: 6px; background: #eef2f8; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 0.62rem; font-weight: 700; color: var(--muted); }
-.mock-supply-tick.on { background: #f6edd3; border-color: #e0b83a; color: #9a5a1e; }
-.mock-supply-note { margin-top: 6px; font-size: 0.7rem; color: var(--muted); }
+.mock-supply-tick { flex: 1; border-radius: 8px; background: #eef2f8; border: 1px solid var(--line); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px 2px; gap: 1px; }
+.mock-supply-tick .st-n { font-family: 'Fraunces', serif; font-size: 1.05rem; font-weight: 700; color: var(--ink-2); line-height: 1; }
+.mock-supply-tick .st-w { font-size: 0.56rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
+.mock-supply-tick.on { background: #f6edd3; border-color: #e0b83a; }
+.mock-supply-tick.on .st-n { color: #9a5a1e; }
+.mock-supply-tick.on .st-w { color: #9a5a1e; }
+.mock-supply-note { margin-top: 8px; font-size: 0.72rem; color: var(--ink-2); line-height: 1.4; }
+.mock-supply-note b { color: #9a5a1e; }
 
 .mock-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
 .mock-stat { border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; background: #fff; }
@@ -479,16 +484,16 @@ footer a:hover { color: var(--ink); }
 
           <div class="mock-supply">
             <div class="mock-supply-head">
-              <span>Supply stream</span>
+              <span>Supply stream · new similar listings</span>
               <span class="ms-live"><i></i> While you wait</span>
             </div>
             <div class="mock-supply-track" id="toySupplyTrack">
-              <span class="mock-supply-tick" data-week="1">2</span>
-              <span class="mock-supply-tick" data-week="2">3</span>
-              <span class="mock-supply-tick" data-week="3">2</span>
-              <span class="mock-supply-tick" data-week="4">4</span>
-              <span class="mock-supply-tick" data-week="5">3</span>
-              <span class="mock-supply-tick" data-week="6">5</span>
+              <span class="mock-supply-tick" data-week="1"><span class="st-n">2</span><span class="st-w">Wk 1</span></span>
+              <span class="mock-supply-tick" data-week="2"><span class="st-n">3</span><span class="st-w">Wk 2</span></span>
+              <span class="mock-supply-tick" data-week="3"><span class="st-n">2</span><span class="st-w">Wk 3</span></span>
+              <span class="mock-supply-tick" data-week="4"><span class="st-n">4</span><span class="st-w">Wk 4</span></span>
+              <span class="mock-supply-tick" data-week="5"><span class="st-n">3</span><span class="st-w">Wk 5</span></span>
+              <span class="mock-supply-tick" data-week="6"><span class="st-n">5</span><span class="st-w">Wk 6</span></span>
             </div>
             <div class="mock-supply-note" id="toySupplyNote">New similar homes hitting the market each week.</div>
           </div>
@@ -666,7 +671,7 @@ footer a:hover { color: var(--ink); }
       <a href="/demo" class="btn btn-gold">Try the sample listing</a>
       <a href="signup.html" class="btn btn-trial">Start free trial <span class="btn-arrow">→</span></a>
     </div>
-    <p class="trial-sub" style="color:var(--muted)">3 presentations or 60 days · <b>no card required</b></p>
+    <p class="trial-sub" style="color:var(--muted)">3 presentations or 60 days · <b style="color:var(--ink)">no card required</b></p>
   </div>
 </section>
 
@@ -758,14 +763,15 @@ footer a:hover { color: var(--ink); }
     var weeksWaiting = Math.max(1, Math.round(o.dom / 7));
     var cumulative = 0;
     ticks.forEach(function (tick, i) {
-      var n = parseInt(tick.textContent, 10) || 0;
+      var nEl = tick.querySelector('.st-n');
+      var n = parseInt(nEl ? nEl.textContent : tick.textContent, 10) || 0;
       if (i < Math.min(weeksWaiting, ticks.length)) cumulative += n;
       tick.classList.toggle('on', i < weeksWaiting && i < ticks.length);
     });
     if (supplyNote) {
-      supplyNote.textContent = weeksWaiting <= 1
-        ? 'About 1 week on market at this price — supply is not the problem.'
-        : 'Waiting ~' + weeksWaiting + ' weeks at this price means ~' + cumulative + ' new similar homes hit the market while you wait.';
+      supplyNote.innerHTML = weeksWaiting <= 1
+        ? 'About <b>1 week</b> on market at this price — supply is not the problem.'
+        : 'Waiting ~<b>' + weeksWaiting + ' weeks</b> at this price means ~<b>' + cumulative + ' new similar homes</b> hit the market while you wait.';
     }
   }
   range.addEventListener('input', update);

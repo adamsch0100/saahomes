@@ -246,6 +246,100 @@ def _styles():
     return styles
 
 
+def _net_sheet_flow(price: float, styles):
+    """Static Net Sheet mirroring the live spine-net section (defaults)."""
+    from datetime import date, timedelta
+
+    price = float(price or 0)
+    if not price:
+        return []
+
+    def money(v):
+        return f"${float(v):,.0f}"
+
+    # Defaults matching the live Net Sheet inputs
+    seller_fee = price * 0.03
+    buyer_fee = price * 0.03
+    concession = 0.0
+    repairs = 2000.0
+    tax_rate = 0.76
+    payoff = 0.0
+    title = max(0, round(price * 0.0015 / 50) * 50)
+    oec = 150.0
+    bundled = 190.0
+    water = 200.0
+
+    # Tax proration to a default closing date (~30 days out)
+    close = date.today() + timedelta(days=30)
+    jan1 = date(close.year, 1, 1)
+    days = max(1, min(365, (close - jan1).days + 1))
+    annual_tax = price * tax_rate / 100
+    tax = round(annual_tax * days / 365)
+
+    costs = seller_fee + buyer_fee + concession + repairs + tax + payoff + title + oec + bundled + water
+    net = price - costs
+    pct = max(0.0, min(100.0, round(net / price * 1000) / 10))
+
+    def row(label, note, val, bold=False, total=False):
+        lbl = f"<b>{label}</b>" if bold else label
+        if note:
+            lbl += f'<br/><font size="7.5" color="#5a6b80">{note}</font>'
+        v = money(val) if val else "—"
+        if total:
+            v = f"<b>{money(val)}</b>"
+        return [Paragraph(lbl, styles["body"]), Paragraph(v, styles["body"])]
+
+    def subhead(t):
+        return [Paragraph(f"<b>{t}</b>", styles["small"]), ""]
+
+    rows = [
+        subhead("Brokerage &amp; concessions"),
+        row("Seller broker fee", "3.0% of price", seller_fee),
+        row("Buyer broker fee", "3.0% of price", buyer_fee),
+        row("Seller concession", "credits offered to buyer", concession),
+        row("Misc. — inspection repairs", "standard allowance", repairs),
+        subhead("Taxes &amp; payoff"),
+        row("Prop. taxes", f"{tax_rate}% annual · prorated to day {days} of {close.year}", tax),
+        row("Seller loan balance", "current mortgage payoff", payoff),
+        subhead("Title fees · seller-paid"),
+        row("Owner's title policy", "auto · ≈0.15% of price", title),
+        row("Owner's extended coverage", "", oec),
+        row("Bundled closing fees", "", bundled),
+        row("Final water", "final utility reading", water),
+        row("Total selling costs", "", costs, bold=True, total=True),
+    ]
+
+    tbl = Table(rows, colWidths=[4.7 * inch, 2.2 * inch])
+    tbl.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("ALIGN", (1, 0), (1, -1), "RIGHT"),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ("LEFTPADDING", (0, 0), (-1, -1), 2),
+        ("LINEBELOW", (0, -1), (-1, -1), 0.75, NAVY),
+        ("LINEABOVE", (0, -1), (-1, -1), 0.75, NAVY),
+        ("ROWBACKGROUNDS", (0, 0), (-1, -2), [white, LIGHT]),
+    ]))
+
+    summary = (
+        f"<b>Estimated net to seller: {money(net)}</b> at {money(price)} "
+        f"({pct:.1f}% of list)."
+    )
+
+    return [
+        Paragraph("Net Sheet — What You Walk Away With", styles["section"]),
+        Paragraph(
+            "Estimated proceeds at the recommended price. Estimates only — not a closing statement. "
+            "Your closer issues the official figures; loan balance, concessions, and fees change this the most.",
+            styles["body"],
+        ),
+        Spacer(1, 4),
+        tbl,
+        Spacer(1, 10),
+        Paragraph(summary, styles["body"]),
+    ]
+
+
 def build_pdf(report: dict, output_path: str | Path, agent_name: str = "", brokerage: str = ""):
     """Seller packet — consolidated with build_story_pdf."""
     return build_story_pdf(report, output_path, agent_name=agent_name, brokerage=brokerage)
@@ -965,6 +1059,12 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
             Paragraph("Pricing Strategy", styles["section"]),
             Paragraph(_md(sens), styles["body"]),
         ]))
+
+    # —— Net Sheet page ——
+    net_price = rec or float(subject.get("list_price") or 0)
+    if net_price:
+        flow.append(PageBreak())
+        flow.extend(_net_sheet_flow(net_price, styles))
 
     close_flow = [
         Spacer(1, 14),
