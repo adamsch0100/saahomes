@@ -5358,6 +5358,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/Longmont.jpg',
     readTime: '10 min read',
+    youtubeId: 'ttqYoFnOUNM',
     keywords: 'selling a home in longmont colorado, sell my home longmont co, longmont co real estate agent, longmont colorado homes for sale, how to sell a house in longmont, longmont home selling guide, listing agent longmont co, longmont co home value, longmont housing market 2026',
     relatedLinks: [
       { title: 'Longmont Colorado real estate', href: '/northern-colorado-areas/longmont/', description: 'Neighborhoods, schools & market data' },
