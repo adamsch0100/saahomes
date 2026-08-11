@@ -401,6 +401,9 @@ const NEARBY_COMMUNITIES = {
     { name: 'Timnath', slug: 'timnath' },
     { name: 'Windsor', slug: 'windsor' },
     { name: 'Wellington', slug: 'wellington' },
+    { name: 'Bellvue', slug: 'bellvue' },
+    { name: 'Red Feather Lakes', slug: 'red-feather-lakes' },
+    { name: 'Estes Park', slug: 'estes-park' },
   ],
   'loveland': [
     { name: 'Fort Collins', slug: 'fort-collins' },
@@ -419,6 +422,8 @@ const NEARBY_COMMUNITIES = {
     { name: 'Windsor', slug: 'windsor' },
     { name: 'Milliken', slug: 'milliken' },
     { name: 'Eaton', slug: 'eaton' },
+    { name: 'Fort Lupton', slug: 'fort-lupton' },
+    { name: 'Carbon Valley', slug: 'carbon-valley' },
   ],
   'timnath': [
     { name: 'Fort Collins', slug: 'fort-collins' },
@@ -504,6 +509,64 @@ const NEARBY_COMMUNITIES = {
   ],
 };
 
+// ---------------------------------------------------------------------------
+// Section towns — nearby communities with dedicated writeups rendered on the
+// client by <SectionTownsBand />. Mirrored here so crawlers (which do not
+// execute JS) see the same content on city pages. Keyed by area slug.
+// ---------------------------------------------------------------------------
+const SECTION_TOWNS = {
+  'fort-collins': {
+    title: 'Nearby communities: LaPorte & Masonville',
+    intro:
+      'Smaller Larimer County communities shoppers often pair with a Fort Collins search. Market lines below are live from active IRES listings — not static snapshots.',
+    towns: [
+      {
+        name: 'LaPorte',
+        description: 'Unincorporated Larimer · north-northwest of Fort Collins',
+        writeup:
+          'LaPorte sits just outside Fort Collins toward the Poudre corridor — a small community mix of residential and land listings that appeals to buyers who want more space without a full mountain move. Inventory is limited compared with the city, so well-matched homes can draw attention quickly. Pair a LaPorte search with Fort Collins and Bellvue when you want options across the northwest edge of the market.',
+      },
+      {
+        name: 'Masonville',
+        description: 'Larimer foothills · southwest of Fort Collins / west of Loveland',
+        writeup:
+          'Masonville is a foothills hamlet with historically thin MLS inventory — some days there are zero active listings. When homes or land do appear, they tend to attract buyers seeking privacy, mountain access, and a quieter alternative to in-town Fort Collins or Loveland. Set a saved search with SAA Homes so you are notified the moment something hits the market.',
+      },
+    ],
+  },
+  'greeley': {
+    title: 'Nearby communities: Ault, Pierce, Kersey & Briggsdale',
+    intro:
+      'Weld County towns shoppers often pair with a Greeley search. Active counts and median list prices are live from IRES MLS.',
+    towns: [
+      {
+        name: 'Ault',
+        description: 'Weld County · north of Greeley on US-85',
+        writeup:
+          'Ault is a classic small Weld County town north of Greeley with a mix of residential homes and some land. Buyers who want quieter streets and a short drive to Greeley employment often include Ault alongside Eaton and Severance. Inventory is modest, so pricing strategy and flexibility on condition matter.',
+      },
+      {
+        name: 'Pierce',
+        description: 'Weld County · north of Ault on the US-85 corridor',
+        writeup:
+          'Pierce offers an even smaller-town feel farther north on the Highway 85 corridor, often with more accessible list prices than larger NoCO cities. Expect a thin market — when the right home appears, act with solid pre-approval. SAA Homes can combine Pierce with Ault and Greeley in one search.',
+      },
+      {
+        name: 'Kersey',
+        description: 'Weld County · east of Greeley',
+        writeup:
+          'Kersey sits east of Greeley with a rural character and a small active inventory that can include larger properties and land. Medians can swing when high-end or acreage listings dominate a thin market — always read the live line in context and review individual comps with an agent.',
+      },
+      {
+        name: 'Briggsdale',
+        description: 'Weld County · northeast plains community',
+        writeup:
+          'Briggsdale is a remote plains community with very limited inventory and a true rural lifestyle. It is not a suburban substitute for west Greeley — it is for buyers who specifically want open country living. Set alerts early; the right listing may not last long among local farm and ranch buyers.',
+      },
+    ],
+  },
+};
+
 function injectAreaBody(html, area) {
   const city = escapeHtml(area.city);
   const tagline = escapeHtml(area.tagline || '');
@@ -558,6 +621,29 @@ function injectAreaBody(html, area) {
         .join('\n') +
       `\n        </ul>\n` +
       `      </section>`;
+  }
+
+  // Build section towns — mirrors client-side <SectionTownsBand /> so crawlers
+  // see the same nearby-community writeups without executing JS.
+  let sectionTownsHtml = '';
+  const sectionTowns = SECTION_TOWNS[area.slug];
+  if (sectionTowns && sectionTowns.towns && sectionTowns.towns.length > 0) {
+    sectionTownsHtml =
+      `      <section class="prerendered-section-towns">\n` +
+      `        <h2>${escapeHtml(sectionTowns.title)}</h2>\n` +
+      `        <p>${escapeHtml(sectionTowns.intro || '')}</p>\n` +
+      sectionTowns.towns
+        .map(
+          (t) =>
+            `        <div class="prerendered-section-town">\n` +
+            `          <h3>${escapeHtml(t.name)}</h3>\n` +
+            `          <p><strong>${escapeHtml(t.description || '')}</strong></p>\n` +
+            `          <p>${escapeHtml(t.writeup || '')}</p>\n` +
+            `          <p><a href="${SITE_URL}/properties/?location=${encodeURIComponent(`${t.name}, CO`)}">Search homes for sale in ${escapeHtml(t.name)}, Colorado</a></p>\n` +
+            `        </div>`
+        )
+        .join('\n') +
+      `\n      </section>`;
   }
 
   // Build neighborhood links — mirrors client-side NeighborhoodLinks component
@@ -621,6 +707,7 @@ function injectAreaBody(html, area) {
     `${neighborhoodHtml}\n` +
     `${guidesHtml}\n` +
     `${nearbyHtml}\n` +
+    `${sectionTownsHtml}\n` +
     `${ctaHtml}\n` +
     `    </div>\n  `;
 
