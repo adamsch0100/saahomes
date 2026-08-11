@@ -1127,6 +1127,7 @@ def _refresh_sample_html(run_dir: Path) -> None:
                 and "netSellerFeePct" in existing
                 and "match-badge" in existing
                 and "sectionsModal" in existing
+                and "ll-shown" in existing
             ):
                 return
         report = json.loads(json_path.read_text(encoding="utf-8"))
@@ -1582,7 +1583,7 @@ def demo_deck(request: Request):
     return FileResponse(path, media_type="text/html")
 
 
-_PRESENTATION_MARKERS = ("arcgisonline.com", "map-hover-tip", "mapKindVisible", "data-map-filters", "spine-net", "netSellerFeePct", "match-badge", "sectionsModal")
+_PRESENTATION_MARKERS = ("arcgisonline.com", "map-hover-tip", "mapKindVisible", "data-map-filters", "spine-net", "netSellerFeePct", "match-badge", "sectionsModal", "ll-shown")
 
 
 def _rebake_if_stale(run_id: str, html_path: Path) -> Path:

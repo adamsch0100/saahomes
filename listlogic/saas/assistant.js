@@ -224,14 +224,12 @@
   });
 
   // Sample banner (public demo) — keep agent chip / sticky spine below it
-  if (new URLSearchParams(location.search).get("sample") === "1") {
+  const isSample = new URLSearchParams(location.search).get("sample") === "1";
+  if (isSample) {
     const bar = document.createElement("div");
     bar.id = "llSampleBar";
     bar.style.cssText =
       "position:sticky;top:0;z-index:9000;background:#0c3c6e;color:#fff;padding:10px 14px;font:600 13px/1.35 system-ui,sans-serif;display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between";
-    bar.innerHTML =
-      '<span>Sample listing — explore freely. Start a free trial to run <em>your</em> MLS data.</span>' +
-      '<a href="/saas/signup.html" style="background:#c9a227;color:#0c3c6e;text-decoration:none;padding:8px 12px;border-radius:8px;font-weight:700">Start free trial</a>';
     document.body.prepend(bar);
     document.body.classList.add("ll-sample");
 
@@ -248,6 +246,36 @@
         "@media(max-width:560px){body.ll-sample .agent-menu-wrap{top:auto}}";
       document.head.appendChild(style);
     }
+
+    // Render banner contents based on auth: logged-in users don't need a trial CTA
+    fetch("/api/auth-status", { credentials: "same-origin" })
+      .then((r) => r.json())
+      .then((data) => {
+        const authed = !!(data && data.authenticated && data.user);
+        if (authed) {
+          const name = ((data.user.name || "").split(" ")[0] || "there");
+          bar.innerHTML =
+            "<span>Signed in as <strong>" + name + "</strong> — exploring the sample listing.</span>" +
+            '<a href="/saas/app.html" style="background:#c9a227;color:#0c3c6e;text-decoration:none;padding:8px 12px;border-radius:8px;font-weight:700">Go to my dashboard</a>';
+        } else {
+          bar.innerHTML =
+            "<span>Sample listing — explore freely. Start a free trial to run <em>your</em> MLS data.</span>" +
+            '<a href="/saas/signup.html" style="background:#c9a227;color:#0c3c6e;text-decoration:none;padding:8px 12px;border-radius:8px;font-weight:700">Start free trial</a>';
+          // Hide the floating agent account chip for public sample viewers
+          const chip = document.getElementById("agentMenuWrap");
+          if (chip) chip.style.display = "none";
+        }
+        offsetSampleChrome();
+      })
+      .catch(() => {
+        bar.innerHTML =
+          "<span>Sample listing — explore freely. Start a free trial to run <em>your</em> MLS data.</span>" +
+          '<a href="/saas/signup.html" style="background:#c9a227;color:#0c3c6e;text-decoration:none;padding:8px 12px;border-radius:8px;font-weight:700">Start free trial</a>';
+        const chip = document.getElementById("agentMenuWrap");
+        if (chip) chip.style.display = "none";
+        offsetSampleChrome();
+      });
+
     offsetSampleChrome();
     window.addEventListener("resize", offsetSampleChrome);
   }
