@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useParams, Navigate } from "react-router-dom";
 import SEO from "../components/SEO";
 import MarketReportForm from "../components/MarketReportForm";
@@ -31,6 +31,23 @@ function RelatedLinksBox({ links, title = "Related resources" }) {
 export default function BlogPostPage() {
   const { slug } = useParams();
   const post = getBlogPost(slug);
+  // Inline mid-article CTA (lead capture): appears once the reader passes
+  // ~50% of the post — intent is proven, strike while they're engaged.
+  // (Hooks before the early return — rules of hooks.)
+  const [showInlineCta, setShowInlineCta] = useState(false);
+  const inlineCtaSentinel = useRef(null);
+  useEffect(() => {
+    const node = inlineCtaSentinel.current;
+    if (!node || typeof IntersectionObserver === "undefined") return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) setShowInlineCta(true);
+      },
+      { threshold: 0.1 }
+    );
+    obs.observe(node);
+    return () => obs.disconnect();
+  }, [post?.slug]);
 
   if (!post) {
     return <Navigate to="/blog/" replace />;
@@ -166,34 +183,62 @@ export default function BlogPostPage() {
 
           {post.relatedLinks && <RelatedLinksBox links={post.relatedLinks} title="Jump to program guides" />}
 
-          {post.sections.map((section) => (
-            <section key={section.heading} className="mb-10">
-              <h2 className="text-2xl sm:text-3xl font-bold font-serif mb-4">{section.heading}</h2>
-              {section.image && (
-                <img
-                  src={section.image}
-                  alt={section.imageAlt || `${section.heading} — SAA Homes Northern Colorado`}
-                  className="w-full h-auto rounded-xl shadow-md mb-6"
-                  loading="lazy"
-                  decoding="async"
-                />
+          {post.sections.map((section, index) => (
+            <React.Fragment key={section.heading}>
+              <section className="mb-10">
+                <h2 className="text-2xl sm:text-3xl font-bold font-serif mb-4">{section.heading}</h2>
+                {section.image && (
+                  <img
+                    src={section.image}
+                    alt={section.imageAlt || `${section.heading} — SAA Homes Northern Colorado`}
+                    className="w-full h-auto rounded-xl shadow-md mb-6"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
+                {section.paragraphs.map((paragraph) => (
+                  <p key={paragraph.slice(0, 40)} className="text-lg text-gray-700 leading-relaxed mb-4">
+                    {paragraph}
+                  </p>
+                ))}
+                {section.list && (
+                  <ul className="list-disc pl-6 space-y-2 text-gray-700 mb-4">
+                    {section.list.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                )}
+                {section.relatedLinks && (
+                  <RelatedLinksBox links={section.relatedLinks} title="Helpful links" />
+                )}
+              </section>
+              {index === Math.ceil(post.sections.length / 2) - 1 && (
+                <>
+                  <div ref={inlineCtaSentinel} aria-hidden="true" />
+                  {showInlineCta && (
+                    <div className="my-10 p-7 rounded-2xl border-2 border-[#CFB36E] bg-gradient-to-br from-white to-amber-50 shadow-md text-center">
+                      <h3 className="text-xl font-bold font-serif mb-2">
+                        See what's selling in your city right now
+                      </h3>
+                      <p className="text-gray-700 mb-5">
+                        Get the free Northern Colorado market report — median prices, days on market,
+                        and neighborhood trends, straight from current MLS data.
+                      </p>
+                      <button
+                        onClick={() =>
+                          document
+                            .getElementById("market-report")
+                            ?.scrollIntoView({ behavior: "smooth", block: "center" })
+                        }
+                        className="px-6 py-3 bg-black text-white font-semibold rounded-xl hover:bg-gray-800 transition-colors"
+                      >
+                        Get my free market report →
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
-              {section.paragraphs.map((paragraph) => (
-                <p key={paragraph.slice(0, 40)} className="text-lg text-gray-700 leading-relaxed mb-4">
-                  {paragraph}
-                </p>
-              ))}
-              {section.list && (
-                <ul className="list-disc pl-6 space-y-2 text-gray-700 mb-4">
-                  {section.list.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              )}
-              {section.relatedLinks && (
-                <RelatedLinksBox links={section.relatedLinks} title="Helpful links" />
-              )}
-            </section>
+            </React.Fragment>
           ))}
 
           {post.faqs && (
