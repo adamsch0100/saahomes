@@ -1,7 +1,7 @@
 {
   "channel": "https://www.youtube.com/channel/UCCgkJ1fymEPI5hdBH2SNvrg",
   "listing_channel": "https://youtube.com/@SAAHomes",
-  "last_updated": "2026-08-08",
+  "last_updated": "2026-08-11",
   "notes": "Article explainer videos are on the Adam Schwartz channel (UCCgkJ1fymEPI5hdBH2SNvrg). @SAAHomes is listing tours only. All Hermes article videos assumed freetouse.com/Limujii risk until remuxed. Run audit-youtube-channel.py to refresh.",
   "videos": [
     {
@@ -73,7 +73,7 @@
     {
       "slug": "colorado-champions-home-loan-first-responders",
       "title": "Colorado Champions Home Loan: CHFA Help for First Responders Explained",
-      "status": "not_uploaded",
+      "status": "live",
       "copyright_risk": false,
       "urgent_unlist": false,
       "delete_after_upload": false,
@@ -100,7 +100,7 @@
     {
       "slug": "northern-colorado-market-update-july-2026",
       "title": "Northern Colorado Market Update \u2014 July 2026: Home Prices, Inventory & Mid-Year Trends",
-      "status": "not_uploaded",
+      "status": "live",
       "copyright_risk": false,
       "urgent_unlist": false,
       "delete_after_upload": false,
@@ -114,7 +114,7 @@
     {
       "slug": "buying-a-home-in-fort-collins",
       "title": "Your Complete Guide to Buying a Home in Fort Collins, Colorado",
-      "status": "not_uploaded",
+      "status": "live",
       "copyright_risk": false,
       "urgent_unlist": false,
       "project_path": "/opt/data/workspace/saahomes/videos/projects/buying-a-home-in-fort-collins",
