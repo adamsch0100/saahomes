@@ -5462,6 +5462,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/buyers-hero.jpg',
     readTime: '9 min read',
+    youtubeId: '-VD-RlDctjI',
     keywords: 'new construction homes erie colorado, erie co new construction, erie colorado homes for sale, buying new construction erie co, erie master planned communities, erie co realtor, moving to erie colorado, boulder weld new construction, erie commons homes',
     relatedLinks: [
       { title: 'Erie Colorado real estate', href: '/northern-colorado-areas/erie/', description: 'Area guide with live IRES market stats' },
