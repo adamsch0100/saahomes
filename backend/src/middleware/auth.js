@@ -20,6 +20,21 @@ export const authenticateToken = (req, res, next) => {
   });
 };
 
+/**
+ * Role gate — compose after authenticateToken.
+ * Usage: router.get('/path', authenticateToken, requireRole('agent', 'admin'), handler)
+ */
+export const requireRole = (...roles) => {
+  const allowed = roles.flat().filter(Boolean).map((r) => String(r).toLowerCase());
+  return (req, res, next) => {
+    const role = String(req.user?.role || '').toLowerCase();
+    if (!role || !allowed.includes(role)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+    next();
+  };
+};
+
 export const generateToken = (payload) => {
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '24h' });
 };

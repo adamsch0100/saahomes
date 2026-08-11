@@ -617,6 +617,19 @@ export const runMigrations = async () => {
         ON email_log(type, subject_variant, sent_at);
     `);
 
+    // ── Multi-agent seats (P-1) — lead ownership within team pool ─────────
+    // assigned_agent_id NULL = unassigned / team pool. Agents (role=agent)
+    // share all client contacts; this column only tracks who is working it.
+    await client.query(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS assigned_agent_id INTEGER REFERENCES users(id) ON DELETE SET NULL;
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_users_assigned_agent
+        ON users(assigned_agent_id) WHERE assigned_agent_id IS NOT NULL;
+      CREATE INDEX IF NOT EXISTS idx_users_role
+        ON users(role);
+    `);
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {

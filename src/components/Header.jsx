@@ -86,6 +86,27 @@ export default function Header() {
   const [previewItems, setPreviewItems] = useState([]);
   const [bellOpen, setBellOpen] = useState(false);
   const [markingAll, setMarkingAll] = useState(false);
+  // Multi-agent seats: show console link when agent (or admin) token is present
+  const [hasAgentConsole, setHasAgentConsole] = useState(() => {
+    try {
+      return !!(localStorage.getItem('agentToken') || localStorage.getItem('adminToken'));
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    const refreshConsoleFlag = () => {
+      try {
+        setHasAgentConsole(!!(localStorage.getItem('agentToken') || localStorage.getItem('adminToken')));
+      } catch {
+        setHasAgentConsole(false);
+      }
+    };
+    refreshConsoleFlag();
+    window.addEventListener('storage', refreshConsoleFlag);
+    return () => window.removeEventListener('storage', refreshConsoleFlag);
+  }, [location.pathname]);
 
   // Compact always-black header on full-screen search (Zillow-style)
   const isSearchHeader =
@@ -441,6 +462,15 @@ export default function Header() {
               <Link to="/for-sellers/" className="hover:text-gray-200 transition-colors">For Sellers</Link>
               <Link to="/blog/" className="hover:text-gray-200 transition-colors">Real Estate Guides</Link>
               <Link to="/contact/" className="hover:text-gray-200 transition-colors">Contact</Link>
+              {hasAgentConsole ? (
+                <Link
+                  to="/agent/"
+                  className="hover:text-gray-200 transition-colors font-semibold"
+                  style={{ color: '#CFB36E' }}
+                >
+                  Agent console
+                </Link>
+              ) : null}
               {signedIn ? bellButton : null}
               {signedIn ? (
                 <AccountMenu
@@ -535,6 +565,16 @@ export default function Header() {
             <Link onClick={closeMenu} to="/properties/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Property Search</Link>
             <Link onClick={closeMenu} to="/about-us/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">About Us</Link>
             <Link onClick={closeMenu} to="/contact/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Contact</Link>
+            {hasAgentConsole ? (
+              <Link
+                onClick={closeMenu}
+                to="/agent/"
+                className="block text-lg sm:text-xl font-semibold transition-colors"
+                style={{ color: '#CFB36E' }}
+              >
+                Agent console
+              </Link>
+            ) : null}
             {signedIn ? (
               <AccountMenu
                 email={sessionEmail}
