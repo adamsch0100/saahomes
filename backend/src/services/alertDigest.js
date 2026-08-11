@@ -227,7 +227,14 @@ function descriptionSnippet(l) {
 
 // ---------------------------------------------------------------- cards
 function cardHtml(l, filters, isNew, isDrop) {
-  const photo = (l.photos && l.photos[0]) || `${SITE}/images/buyers-hero.jpg`;
+  // Serve photos through the site's durable proxy (/api/photo) instead of the
+  // raw MLS signed URL — signed URLs expire ~60 min after sync, so direct
+  // links die before the recipient opens the email (photos didn't load).
+  // The proxy caches, heals expired URLs from IRES (rate-capped), and serves
+  // R2 copies when present.
+  const photo = (l.photos && l.photos[0])
+    ? `${SITE}/api/photo/${l.id}/0`
+    : `${SITE}/images/buyers-hero.jpg`;
   const url = `${SITE}/homes-for-sale/${l.slug}/`;
   const score = matchScore(l, filters);
   const highlights = featureHighlights(l);
