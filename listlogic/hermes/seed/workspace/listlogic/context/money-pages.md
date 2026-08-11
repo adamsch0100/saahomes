@@ -7,5 +7,7 @@
 | P0 | `/saas/signup.html` | Account |
 | P0 | `/saas/app.html` | Setup + paywall |
 | P0 | `/saas/pricing.html` | Plans |
-| P1 | `/saas/faq.html` | Objections |
-| P2 | Comparison pages (to ship) | vs Cloud CMA / Saleswise |
+| P1 | `/saas/faq.html` | Objections + unlock funnel |
+| P1 | Comparison pages (ship) | vs Cloud CMA / Saleswise / RPR |
+| P1 | Brokerage pilot CTA | Seats + lunch-and-learn |
+| P2 | Soft-market listing appointment guide | Long-tail → demo |

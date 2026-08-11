@@ -23,6 +23,9 @@ ListLogic turns MLS / market data into a seller-facing **pricing story** (live i
 2. Generate-wall conversion rate (setup → checkout)
 3. Qualified outbound replies → demos → signups
 4. Organic rankings for Tier S product keywords
+5. Brokerage pilots + MLS vendor pipeline (parallel, never blocks agent sales)
+
+Read `context/product-growth-strategy.md` and `context/mls-brokerage-playbook.md` before any GTM work.
 
 ## Autonomy
 

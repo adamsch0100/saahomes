@@ -1,0 +1,3 @@
+# Hermes shell scripts must stay LF for Linux cont-init (CRLF → "not found")
+listlogic/hermes/scripts/*.sh text eol=lf
+listlogic/hermes/scripts/*.py text eol=lf

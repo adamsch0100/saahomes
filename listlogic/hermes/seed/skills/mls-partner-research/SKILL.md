@@ -1,14 +1,23 @@
 ---
 name: mls-partner-research
-description: Research MLS / vendor partnership paths for ListLogic distribution (notes only until Adam decides).
+description: Research MLS / association / brokerage partnership paths; draft pitches from mls-brokerage-playbook; never pause direct agent sales.
 ---
 
 # MLS partner research
 
-## Goal
+Read `context/mls-brokerage-playbook.md` first.
 
-Map how CMA tools get distributed (MLS board, association, vendor marketplace) and note outreach contacts / RFP patterns.
+## Rules
+- Parallel to agent outbound — never block Generate-gated sales waiting on a feed.
+- Do not claim live MLS integration in public copy until Stage 3 contract exists.
+- Binding vendor applications require Adam.
+
+## Execute
+1. Identify 5–10 target MLS/associations (vendor portal / preferred tech list).
+2. Note contact roles (AE, vendor relations, tech committee).
+3. Draft intro using MLS pitch frame → outreach pending pack.
+4. For brokerages: managing broker / trainer list → seat pilot pitch.
+5. Telegram Adam: targets + drafts + ask approve / intro.
 
 ## Output
-
-Markdown notes in `context/` or Telegram brief: opportunity, friction, next ask for Adam. No commitments.
+Short brief: stage on ladder, next ask, blockers.

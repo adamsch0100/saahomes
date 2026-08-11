@@ -2,14 +2,16 @@
 
 ## Integration status
 
-- [ ] OpenCode Go
-- [ ] Telegram bot
-- [ ] GitHub PAT (listlogic deploy)
+- [x] OpenCode Go
+- [x] Telegram bot (@ListLogicbot) — allowlist Adam `6320126021`
+- [ ] GitHub PAT (listlogic deploy / auto PR)
 - [ ] GSC for listlogic.homes
-- [ ] GA4
-- [ ] Stripe live + webhook (product)
-- [ ] SMTP outreach
+- [x] GA4 Measurement ID `G-WHGZQDZ6ZG` (website + Hermes)
+- [x] Stripe live + webhook (product) — Generate-gated trial
+- [ ] SMTP outreach (can reuse Gmail later)
 - [ ] SMS 10DLC (opt-in only)
+- [x] Railway service **ListLogic Hermes** in ListLogic project
+- [x] Volume `/opt/data` · dashboard port 9119
 
 ## Monetization (locked 2026-08)
 
@@ -22,3 +24,8 @@
 ## Geography
 
 Nationwide ICP. No NoCo-only beachhead.
+
+## Ops notes
+
+- Dashboard: https://listlogic-hermes-production.up.railway.app (basic auth)
+- First boot: paste AGENTS.md checklist in Telegram after DM works
