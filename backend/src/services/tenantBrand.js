@@ -1,13 +1,15 @@
 /**
- * White-label / tenant brand resolution (P-2).
+ * White-label / tenant brand resolution (P-2 + P-4 market packs).
  *
- * Resolves per-agent brand fields with marketPack fallbacks.
+ * Resolves per-agent brand fields with market-pack fallbacks.
+ * Pack comes from getMarketPack(user.market_key) — NoCO when null/unknown
+ * so existing SAA agents stay byte-identical.
  * Used by nurture email renderers and /api/agent/me.
  *
- * NULL brand columns on the agent row → SAA market pack defaults (no brand
+ * NULL brand columns on the agent row → market pack defaults (no brand
  * change for our own mail). Never invents phone/stats — only real row values.
  */
-import { marketPack } from '../config/marketPack.js';
+import { getMarketPack, resolveMarketKey } from '../config/marketPacks.js';
 
 export const VOICE_STYLES = ['warm', 'professional', 'short'];
 
@@ -44,11 +46,12 @@ function formatPhoneDisplay(phone) {
 /**
  * tel: href from a display phone string.
  * @param {string|null|undefined} phone
+ * @param {string} [fallbackTel]  market pack tel when no digits
  * @returns {string}
  */
-function telHref(phone) {
+function telHref(phone, fallbackTel = 'tel:+19709991407') {
   const digits = String(phone || '').replace(/\D/g, '');
-  if (!digits) return marketPack.market.tel || 'tel:+19709991407';
+  if (!digits) return fallbackTel || 'tel:+19709991407';
   const e164 = digits.length === 10 ? `+1${digits}` : digits.startsWith('1') ? `+${digits}` : `+${digits}`;
   return `tel:${e164}`;
 }
@@ -69,11 +72,16 @@ function telHref(phone) {
  *   headerSubline: string,
  *   brandLine: string,
  *   isCustom: boolean,
+ *   marketKey: string,
+ *   marketName: string,
+ *   siteUrl: string,
  * }}
  */
 export function getAgentBrand(user) {
-  const market = marketPack.market;
-  const footer = marketPack.footer || {};
+  const marketKey = resolveMarketKey(user?.market_key);
+  const pack = getMarketPack(marketKey);
+  const market = pack.market;
+  const footer = pack.footer || {};
 
   const agentName = user?.name ? String(user.name).trim() : null;
   const agentFirstName = agentName ? agentName.split(/\s+/)[0] : null;
@@ -110,7 +118,7 @@ export function getAgentBrand(user) {
     brandName,
     brokerage,
     phone: phoneDisplay,
-    tel: telHref(phoneDisplay),
+    tel: telHref(phoneDisplay, market.tel || 'tel:+19709991407'),
     voiceStyle,
     agentName,
     agentFirstName,
@@ -118,6 +126,7 @@ export function getAgentBrand(user) {
     headerSubline,
     brandLine,
     isCustom,
+    marketKey,
     // Preserve market pack references for callers that still need site/market
     siteUrl: market.siteUrl || 'https://saahomes.com',
     marketName: market.name || 'Northern Colorado',
@@ -130,19 +139,20 @@ export function getAgentBrand(user) {
  *
  * @param {'digest'|'home_value'} kind
  * @param {'warm'|'professional'|'short'} voiceStyle
- * @param {{ firstName?: string|null, city?: string, searchName?: string, filterSummary?: string, address?: string, agentName?: string|null, brandName?: string }} ctx
+ * @param {{ firstName?: string|null, city?: string, searchName?: string, filterSummary?: string, address?: string, agentName?: string|null, brandName?: string, marketKey?: string|null }} ctx
  * @returns {{ greeting: string, introHtml: string }}
  */
 export function voiceCopy(kind, voiceStyle, ctx = {}) {
   const style = normalizeVoiceStyle(voiceStyle);
+  const pack = getMarketPack(ctx.marketKey);
   const first = (ctx.firstName || '').trim();
   const greeting = first ? `Hi ${first},` : 'Hi there,';
-  const city = (ctx.city || marketPack.market.name || 'Northern Colorado').trim();
+  const city = (ctx.city || pack.market.name || 'Northern Colorado').trim();
   const searchName = (ctx.searchName || 'saved').trim();
   const filterSummary = (ctx.filterSummary || '').trim();
   const address = (ctx.address || 'your home').trim();
   const agentName = (ctx.agentName || '').trim();
-  const brandName = (ctx.brandName || marketPack.market.brand || 'SAA Homes').trim();
+  const brandName = (ctx.brandName || pack.market.brand || 'SAA Homes').trim();
   const agentLabel = agentName || brandName;
 
   if (kind === 'home_value') {
@@ -199,7 +209,7 @@ export async function loadBrandForClientUser(pool, clientUserId) {
   if (!pool || !clientUserId) return null;
   const r = await pool.query(
     `SELECT a.id, a.name, a.email, a.phone, a.brand_name, a.brokerage_name,
-            a.brand_phone, a.voice_style, a.role, a.status
+            a.brand_phone, a.voice_style, a.market_key, a.role, a.status
      FROM users u
      JOIN users a ON a.id = u.assigned_agent_id
      WHERE u.id = $1
@@ -267,10 +277,10 @@ export function parseBrandFields(body = {}, opts = {}) {
 
 /** Agent row columns returned by admin/agent brand-aware endpoints. */
 export const BRAND_SELECT_COLS =
-  'brand_name, brokerage_name, brand_phone, voice_style';
+  'brand_name, brokerage_name, brand_phone, voice_style, market_key';
 
 /**
- * Shape a user row for API responses (brand subset + identity).
+ * Shape a user row for API responses (brand subset + identity + market).
  */
 export function publicAgentPayload(row) {
   if (!row) return null;
@@ -286,6 +296,8 @@ export function publicAgentPayload(row) {
     brokerage_name: row.brokerage_name ?? null,
     brand_phone: row.brand_phone ?? null,
     voice_style: normalizeVoiceStyle(row.voice_style),
+    market_key: brand.marketKey,
+    marketKey: brand.marketKey,
     // Resolved (with marketPack fallbacks) for console / preview
     brand: {
       brandName: brand.brandName,
@@ -297,6 +309,8 @@ export function publicAgentPayload(row) {
       headerSubline: brand.headerSubline,
       brandLine: brand.brandLine,
       isCustom: brand.isCustom,
+      marketKey: brand.marketKey,
+      marketName: brand.marketName,
     },
     created_at: row.created_at,
     last_active_at: row.last_active_at || null,

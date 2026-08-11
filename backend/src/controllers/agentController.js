@@ -373,6 +373,7 @@ export const listTeammates = async (req, res) => {
 /**
  * GET /api/agent/me — authenticated agent + resolved brand config (P-2).
  * Agent/admin only; clients never see this. Read-only — brand edits are admin.
+ * Includes marketKey / marketName from the P-4 content pack registry.
  */
 export const getAgentMe = async (req, res) => {
   try {
@@ -383,7 +384,7 @@ export const getAgentMe = async (req, res) => {
     const pool = getPool();
     const result = await pool.query(
       `SELECT id, email, name, phone, role, status, created_at, last_active_at,
-              brand_name, brokerage_name, brand_phone, voice_style
+              brand_name, brokerage_name, brand_phone, voice_style, market_key
        FROM users
        WHERE id = $1 AND role IN ('agent', 'admin') AND status = 'active'`,
       [userId]
@@ -396,6 +397,41 @@ export const getAgentMe = async (req, res) => {
   } catch (error) {
     logger.error('getAgentMe error', error);
     return res.status(500).json({ error: 'Failed to load agent profile' });
+  }
+};
+
+/**
+ * GET /api/agent/market — agent's market pack key + display name (P-4).
+ * Minimal read-only label for the agent console. agentOrAdmin only.
+ */
+export const getAgentMarket = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    const pool = getPool();
+    const result = await pool.query(
+      `SELECT market_key FROM users
+       WHERE id = $1 AND role IN ('agent', 'admin') AND status = 'active'`,
+      [userId]
+    );
+    if (!result.rows[0]) {
+      return res.status(404).json({ error: 'Agent not found' });
+    }
+    const { getMarketPack, resolveMarketKey } = await import('../config/marketPacks.js');
+    const marketKey = resolveMarketKey(result.rows[0].market_key);
+    const pack = getMarketPack(marketKey);
+    return res.json({
+      success: true,
+      data: {
+        marketKey,
+        marketName: pack.market?.name || 'Northern Colorado',
+      },
+    });
+  } catch (error) {
+    logger.error('getAgentMarket error', error);
+    return res.status(500).json({ error: 'Failed to load market' });
   }
 };
 

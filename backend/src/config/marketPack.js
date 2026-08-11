@@ -7,6 +7,11 @@
  *
  * Productization track P-4: engine = market-agnostic; local depth + brand
  * live here as a swappable content pack.
+ *
+ * Registry: backend/src/config/marketPacks.js registers this pack under
+ * key 'noco' and exports getMarketPack(marketKey). Keep this default
+ * `marketPack` export so existing consumers stay byte-stable on NoCO.
+ * Per-agent resolution lives in tenantBrand.js via getMarketPack.
  */
 export const marketPack = {
   market: {

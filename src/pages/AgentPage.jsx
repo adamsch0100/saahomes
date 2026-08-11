@@ -1,6 +1,7 @@
 /**
  * Agent console — multi-agent seats (P-1) + white-label brand surface (P-2)
- * + Connect CRM / FUB import (P-3a) + Website forms (P-3b).
+ * + Connect CRM / FUB import (P-3a) + Website forms (P-3b)
+ * + Market content pack label (P-4).
  * Login → team-pooled cockpit (all client contacts) with claim/assign.
  * Separate token key (agentToken) from adminToken. No admin suite tools.
  */
@@ -12,6 +13,7 @@ import {
   agentLogin,
   getAgentTeammates,
   getAgentMe,
+  getAgentMarket,
   connectAgentFub,
   getAgentFubStatus,
   disconnectAgentFub,
@@ -89,7 +91,14 @@ export default function AgentPage() {
   const [webformCopyMsg, setWebformCopyMsg] = useState(null);
   const [webformRegenBusy, setWebformRegenBusy] = useState(false);
 
+  // Market pack label (P-4) — read-only; admin assigns market_key
+  const [agentMarket, setAgentMarket] = useState(null);
+
   const brand = resolveTenantBrand(agentUser);
+  const marketLabel =
+    agentMarket?.marketName ||
+    agentUser?.brand?.marketName ||
+    marketPack.market.name;
 
   const handleLogout = useCallback(() => {
     setToken(null);
@@ -106,6 +115,7 @@ export default function AgentPage() {
     setWebformData(null);
     setWebformError(null);
     setWebformCopyMsg(null);
+    setAgentMarket(null);
   }, []);
 
   const loadTeammates = useCallback(async (authToken) => {
@@ -133,6 +143,14 @@ export default function AgentPage() {
       if (res.data) {
         setAgentUser(res.data);
         localStorage.setItem(AGENT_USER_KEY, JSON.stringify(res.data));
+        // Prefer brand.marketName from me payload when present
+        if (res.data.brand?.marketName || res.data.marketKey) {
+          setAgentMarket({
+            marketKey: res.data.marketKey || res.data.brand?.marketKey || 'noco',
+            marketName:
+              res.data.brand?.marketName || marketPack.market.name,
+          });
+        }
       }
     } catch (err) {
       if (
@@ -146,6 +164,18 @@ export default function AgentPage() {
       }
     }
   }, [handleLogout]);
+
+  const loadMarket = useCallback(async (authToken) => {
+    if (!authToken) return;
+    try {
+      const res = await getAgentMarket(authToken);
+      if (res.data) {
+        setAgentMarket(res.data);
+      }
+    } catch {
+      // Non-fatal — fall back to me payload / NoCO label
+    }
+  }, []);
 
   const loadFubStatus = useCallback(async (authToken) => {
     if (!authToken) return;
@@ -211,10 +241,11 @@ export default function AgentPage() {
       setIsAuthenticated(true);
       loadTeammates(token);
       loadMe(token);
+      loadMarket(token);
       loadFubStatus(token);
       loadWebform(token);
     }
-  }, [token, loadTeammates, loadMe, loadFubStatus, loadWebform]);
+  }, [token, loadTeammates, loadMe, loadMarket, loadFubStatus, loadWebform]);
 
   const handleFubConnect = async (e) => {
     e.preventDefault();
@@ -441,8 +472,11 @@ export default function AgentPage() {
                 {brand.phone ? ` · ${brand.phone}` : ''}
               </p>
               <p className="text-xs text-gray-400 mt-0.5">
-                All agents see every contact. Claim to own the follow-up.
+                Market: {marketLabel}
                 {brand.voiceStyle ? ` · Email voice: ${brand.voiceStyle}` : ''}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                All agents see every contact. Claim to own the follow-up.
               </p>
             </div>
             <div className="flex flex-wrap gap-2 self-start sm:self-auto">
@@ -517,6 +551,9 @@ export default function AgentPage() {
                   </span>
                   <span className="inline-flex items-center min-h-[36px] px-3 rounded-lg bg-gray-100 text-xs text-gray-700">
                     Voice: {brand.voiceStyle}
+                  </span>
+                  <span className="inline-flex items-center min-h-[36px] px-3 rounded-lg bg-gray-100 text-xs text-gray-700">
+                    Market: {marketLabel}
                   </span>
                 </div>
                 <p className="mt-3 text-[11px] text-gray-400">

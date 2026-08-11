@@ -230,9 +230,18 @@ export const getAgentTeammates = async (token) => {
   });
 };
 
-/** GET /api/agent/me — agent profile + resolved brand (P-2 white-label). */
+/** GET /api/agent/me — agent profile + resolved brand (P-2) + marketKey (P-4). */
 export const getAgentMe = async (token) => {
   return apiRequest('/api/agent/me', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+/** GET /api/agent/market — agent's market pack key + display name (P-4). */
+export const getAgentMarket = async (token) => {
+  return apiRequest('/api/agent/market', {
     headers: {
       Authorization: `Bearer ${token}`,
     },

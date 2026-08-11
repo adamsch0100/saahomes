@@ -664,6 +664,13 @@ export const runMigrations = async () => {
         ON users(webform_slug) WHERE webform_slug IS NOT NULL;
     `);
 
+    // ── Market content pack (P-4) — per-agent market_key ───────────────────
+    // Sparse enum: 'noco' today; NULL/unknown → getMarketPack falls back to
+    // NoCO. No index (low cardinality / sparse admin writes only).
+    await client.query(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS market_key VARCHAR(32);
+    `);
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {
