@@ -2,9 +2,33 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote as url_quote
+
+ROOT = Path(__file__).resolve().parent
+
+
+def _mapbox_token() -> str:
+    """Public Mapbox token for report maps (pk.*). Prefer env; fall back to .env."""
+    for key in ("MAPBOX_ACCESS_TOKEN", "MAPBOX_TOKEN", "VITE_MAPBOX_TOKEN"):
+        val = (os.environ.get(key) or "").strip()
+        if val:
+            return val
+    env_path = ROOT / ".env"
+    if env_path.exists():
+        try:
+            for line in env_path.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                name, raw = line.split("=", 1)
+                if name.strip() in ("MAPBOX_ACCESS_TOKEN", "MAPBOX_TOKEN", "VITE_MAPBOX_TOKEN"):
+                    return raw.strip().strip('"').strip("'")
+        except OSError:
+            pass
+    return ""
 
 
 def _clean(obj: Any) -> Any:
@@ -637,8 +661,8 @@ def render_interactive_html(report: dict) -> str:
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 {chart_tag}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.9.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.9.0/mapbox-gl.js"></script>
 <style>
 :root {{
   --navy:{brand_primary}; --blue:{brand_accent}; --bg:#f4f1ea; --card:#fff;
@@ -1089,15 +1113,17 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 }}
 .map-comp-btn:hover{{background:#e2ecf7}}
 .map-comp-btn.in{{color:#0e7a6d;border-color:#cde5dd;background:#e7f3ef}}
-#compMap{{height:min(420px,52vh);width:100%;background:#e8eef5}}
-.leaflet-container{{font:inherit}}
-.leaflet-tooltip.map-hover-tip{{
-  background:#0f2740;color:#fff;border:0;border-radius:10px;padding:8px 10px;box-shadow:0 10px 24px rgba(8,30,55,.28);
-  font-size:.74rem;line-height:1.25;white-space:nowrap;max-width:260px;
+#compMap{{height:min(420px,52vh);width:100%;background:#e8eef5;border-radius:0 0 14px 14px}}
+.mapboxgl-map{{font:inherit}}
+.mapboxgl-popup-content{{padding:10px 12px;border-radius:12px;box-shadow:0 12px 28px -10px rgba(8,30,55,.35);font-size:.78rem;line-height:1.35;max-width:260px}}
+.mapboxgl-popup-close-button{{font-size:16px;padding:2px 6px}}
+.map-hover-tip .mapboxgl-popup-content{{
+  background:#0f2740;color:#fff;padding:7px 10px;border-radius:10px;font-size:.72rem;
+  box-shadow:0 10px 24px -8px rgba(8,30,55,.45);pointer-events:none
 }}
-.leaflet-tooltip.map-hover-tip::before{{border-top-color:#0f2740}}
-.leaflet-tooltip.map-hover-tip .mt-addr{{font-weight:700;display:block;max-width:240px;overflow:hidden;text-overflow:ellipsis}}
-.leaflet-tooltip.map-hover-tip .mt-meta{{opacity:.88;font-size:.68rem;margin-top:2px;display:block}}
+.map-hover-tip .mapboxgl-popup-tip{{border-top-color:#0f2740}}
+.map-hover-tip .mt-addr{{font-weight:700;display:block;max-width:240px;overflow:hidden;text-overflow:ellipsis}}
+.map-hover-tip .mt-meta{{opacity:.88;font-size:.68rem;margin-top:2px;display:block}}
 .listing-overlay{{cursor:pointer}}
 @media(max-width:980px){{.comp-rail{{grid-template-columns:repeat(2,1fr)}}}}
 @media(max-width:520px){{.comp-rail{{grid-template-columns:1fr}}}}
@@ -2086,6 +2112,7 @@ body.print-leavebehind .page{{padding-bottom:0}}
 <script>
 const DATA = {json.dumps(payload, allow_nan=False)};
 const TABLE = {json.dumps(full_table, allow_nan=False)};
+const MAPBOX_TOKEN = {json.dumps(_mapbox_token())};
 const DEFAULT_COLS = {json.dumps(default_cols)};
 const defaults = {json.dumps(defaults, allow_nan=False)};
 const RUN_ID = (location.pathname.match(/\\/runs\\/([^\\/]+)/)||[])[1] || '';
@@ -3580,9 +3607,9 @@ function renderLiveComps() {{
   renderMarketMap();
 }}
 let marketMap = null;
-let marketMapLayer = null;
 let marketMapFitted = false;
-let marketMapCanvas = null;
+let marketHoverPopup = null;
+let marketClickPopup = null;
 const mapKindVisible = {{ sold: true, active: true, uc: true, off: false }};
 function mapKindFor(status, isPicked) {{
   if (isPicked) return 'comp';
@@ -3603,7 +3630,7 @@ function renderMarketMap(opts) {{
   opts = opts || {{}};
   const el = document.getElementById('compMap');
   const wrap = document.getElementById('compMapWrap');
-  if (!el || typeof L === 'undefined') {{
+  if (!el || typeof mapboxgl === 'undefined' || !MAPBOX_TOKEN) {{
     if (wrap) wrap.style.display = 'none';
     return;
   }}
@@ -3666,31 +3693,24 @@ function renderMarketMap(opts) {{
     const k = b.dataset.kind;
     if (k in mapKindVisible) b.classList.toggle('on', !!mapKindVisible[k]);
   }});
-  if (!marketMap) {{
-    marketMapCanvas = L.canvas({{ padding: 0.5 }});
-    marketMap = L.map(el, {{
-      scrollWheelZoom: false,
-      preferCanvas: true,
-      zoomControl: true,
-      attributionControl: true,
-    }});
-    // Esri World Street Map — commercial street basemap (not default OSM tiles)
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{{z}}/{{y}}/{{x}}', {{
-      maxZoom: 19,
-      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, TomTom, Garmin, FAO, NOAA, USGS',
-    }}).addTo(marketMap);
-    marketMapLayer = L.layerGroup().addTo(marketMap);
-    el.addEventListener('click', (e) => {{
-      const btn = e.target.closest('.map-comp-btn');
-      if (btn && btn.dataset.mls) toggleCompMls(btn.dataset.mls);
-    }});
-    document.querySelectorAll('#mapKindFilters .map-kind').forEach((b) => {{
-      b.addEventListener('click', () => toggleMapKind(b.dataset.kind));
-    }});
-    marketMapFitted = false;
-  }}
-  marketMapLayer.clearLayers();
+
   const colors = {{ you: '#0c3c6e', comp: '#0e7a6d', sold: '#94a3b8', active: '#c9a227', uc: '#e65100', off: '#a8a29e' }};
+  const radii = {{ you: 11, comp: 8, sold: 5, active: 6, uc: 6, off: 5 }};
+  const visible = points.filter((p) => mapKindVisible[p.kind] !== false);
+  const geojson = {{
+    type: 'FeatureCollection',
+    features: visible.map((p) => ({{
+      type: 'Feature',
+      properties: {{
+        kind: p.kind, mls: p.mls, label: p.label, price: p.price, status: p.status,
+        color: colors[p.kind] || '#94a3b8',
+        radius: radii[p.kind] || 5,
+        opacity: (p.kind === 'sold' || p.kind === 'off') ? 0.55 : 0.92,
+      }},
+      geometry: {{ type: 'Point', coordinates: [p.lng, p.lat] }},
+    }})),
+  }};
+
   const portalLinks = (p) => {{
     const addr = (p.label || '').trim();
     if (!addr || p.mls === 'subject') return '';
@@ -3703,55 +3723,107 @@ function renderMarketMap(opts) {{
       '<a style="' + style + '" href="https://www.google.com/maps/search/' + q + '" target="_blank" rel="noopener">Map</a>' +
       '</div>';
   }};
-  const bounds = [];
-  points.forEach((p) => {{
-    if (mapKindVisible[p.kind] === false) return;
-    const r = p.kind === 'you' ? 11 : (p.kind === 'comp' ? 8 : 5);
-    const marker = L.circleMarker([p.lat, p.lng], {{
-      radius: r,
-      color: '#fff',
-      weight: p.kind === 'you' ? 2 : 1,
-      fillColor: colors[p.kind] || '#94a3b8',
-      fillOpacity: (p.kind === 'sold' || p.kind === 'off') ? 0.55 : 0.92,
-      renderer: marketMapCanvas,
-      bubblingMouseEvents: false,
+
+  const ensureMap = () => {{
+    if (marketMap) return Promise.resolve(marketMap);
+    mapboxgl.accessToken = MAPBOX_TOKEN;
+    marketMap = new mapboxgl.Map({{
+      container: el,
+      style: 'mapbox://styles/mapbox/streets-v12',
+      center: [subLng || -104.77, subLat || 40.42],
+      zoom: 12,
+      attributionControl: true,
+      cooperativeGestures: true,
     }});
-    const tipMeta = escapeHtml(p.status) + (p.price ? ' · ' + money(p.price) : '');
-    marker.bindTooltip(
-      '<span class="mt-addr">' + escapeHtml(p.label) + '</span><span class="mt-meta">' + tipMeta + '</span>',
-      {{ direction: 'top', offset: [0, -6], opacity: 1, className: 'map-hover-tip', sticky: true }}
-    );
-    const isPicked = picked.has(p.mls);
-    const compBtn = ((p.kind === 'sold' || p.kind === 'comp') && p.mls && p.mls !== 'subject')
-      ? '<br><button type="button" class="map-comp-btn' + (isPicked ? ' in' : '') + '" data-mls="' + escapeHtml(p.mls) + '">' + (isPicked ? 'In comps · remove' : 'Use as comp') + '</button>'
-      : '';
-    if ((p.kind === 'sold' || p.kind === 'comp') && p.mls && p.mls !== 'subject') {{
-      marker.bindPopup(
-        '<strong>' + escapeHtml(p.label) + '</strong><br>' +
-        tipMeta +
-        (p.mls ? '<br>MLS ' + escapeHtml(p.mls) : '') +
-        compBtn +
-        portalLinks(p),
-        {{ maxWidth: 260, autoPan: true }}
-      );
-    }}
-    if (p.kind === 'comp' && p.mls) {{
-      marker.on('click', () => {{
-        const idx = liveComps.findIndex(c => String(c.mls || '') === p.mls);
-        if (idx >= 0) openCompListing(idx);
+    marketMap.addControl(new mapboxgl.NavigationControl({{ showCompass: false }}), 'top-right');
+    marketMap.scrollZoom.disable();
+    el.addEventListener('click', (e) => {{
+      const btn = e.target.closest('.map-comp-btn');
+      if (btn && btn.dataset.mls) toggleCompMls(btn.dataset.mls);
+    }});
+    document.querySelectorAll('#mapKindFilters .map-kind').forEach((b) => {{
+      if (!b.dataset.llBound) {{
+        b.dataset.llBound = '1';
+        b.addEventListener('click', () => toggleMapKind(b.dataset.kind));
+      }}
+    }});
+    return new Promise((resolve) => marketMap.on('load', () => resolve(marketMap)));
+  }};
+
+  ensureMap().then((map) => {{
+    if (map.getSource('ll-points')) {{
+      map.getSource('ll-points').setData(geojson);
+    }} else {{
+      map.addSource('ll-points', {{ type: 'geojson', data: geojson }});
+      map.addLayer({{
+        id: 'll-points-circle',
+        type: 'circle',
+        source: 'll-points',
+        paint: {{
+          'circle-radius': ['get', 'radius'],
+          'circle-color': ['get', 'color'],
+          'circle-opacity': ['get', 'opacity'],
+          'circle-stroke-width': [
+            'case', ['==', ['get', 'kind'], 'you'], 2, 1
+          ],
+          'circle-stroke-color': '#ffffff',
+        }},
+      }});
+      map.on('mouseenter', 'll-points-circle', (e) => {{
+        map.getCanvas().style.cursor = 'pointer';
+        const f = e.features && e.features[0];
+        if (!f) return;
+        const p = f.properties || {{}};
+        const tipMeta = escapeHtml(p.status) + (p.price ? ' · ' + money(Number(p.price)) : '');
+        if (marketHoverPopup) marketHoverPopup.remove();
+        marketHoverPopup = new mapboxgl.Popup({{
+          closeButton: false, closeOnClick: false, offset: 12, className: 'map-hover-tip', maxWidth: '260px',
+        }})
+          .setLngLat(f.geometry.coordinates)
+          .setHTML('<span class="mt-addr">' + escapeHtml(p.label) + '</span><span class="mt-meta">' + tipMeta + '</span>')
+          .addTo(map);
+      }});
+      map.on('mouseleave', 'll-points-circle', () => {{
+        map.getCanvas().style.cursor = '';
+        if (marketHoverPopup) {{ marketHoverPopup.remove(); marketHoverPopup = null; }}
+      }});
+      map.on('click', 'll-points-circle', (e) => {{
+        const f = e.features && e.features[0];
+        if (!f) return;
+        const p = f.properties || {{}};
+        if (marketHoverPopup) {{ marketHoverPopup.remove(); marketHoverPopup = null; }}
+        if (p.kind === 'comp' && p.mls) {{
+          const idx = liveComps.findIndex(c => String(c.mls || '') === String(p.mls));
+          if (idx >= 0) {{ openCompListing(idx); return; }}
+        }}
+        if ((p.kind === 'sold' || p.kind === 'comp') && p.mls && p.mls !== 'subject') {{
+          const isPicked = picked.has(String(p.mls));
+          const tipMeta = escapeHtml(p.status) + (p.price ? ' · ' + money(Number(p.price)) : '');
+          const compBtn = '<br><button type="button" class="map-comp-btn' + (isPicked ? ' in' : '') + '" data-mls="' + escapeHtml(p.mls) + '">' + (isPicked ? 'In comps · remove' : 'Use as comp') + '</button>';
+          if (marketClickPopup) marketClickPopup.remove();
+          marketClickPopup = new mapboxgl.Popup({{ maxWidth: '280px', offset: 14 }})
+            .setLngLat(f.geometry.coordinates)
+            .setHTML(
+              '<strong>' + escapeHtml(p.label) + '</strong><br>' + tipMeta +
+              (p.mls ? '<br>MLS ' + escapeHtml(p.mls) : '') +
+              compBtn + portalLinks(p)
+            )
+            .addTo(map);
+        }}
       }});
     }}
-    marker.addTo(marketMapLayer);
-    bounds.push([p.lat, p.lng]);
+
+    try {{
+      const shouldFit = opts.fit === true || (!marketMapFitted && opts.fit !== false);
+      if (shouldFit && visible.length) {{
+        const bounds = new mapboxgl.LngLatBounds();
+        visible.forEach((p) => bounds.extend([p.lng, p.lat]));
+        map.fitBounds(bounds, {{ padding: 36, maxZoom: 15, duration: 0 }});
+        marketMapFitted = true;
+      }}
+      setTimeout(() => {{ try {{ map.resize(); }} catch (err) {{}} }}, 80);
+    }} catch (err) {{}}
   }});
-  try {{
-    const shouldFit = opts.fit === true || (!marketMapFitted && opts.fit !== false);
-    if (shouldFit && bounds.length) {{
-      marketMap.fitBounds(bounds, {{ padding: [28, 28], maxZoom: 15, animate: false }});
-      marketMapFitted = true;
-      setTimeout(() => {{ try {{ marketMap.invalidateSize({{ animate: false }}); }} catch (e) {{}} }}, 60);
-    }}
-  }} catch (e) {{}}
 }}
 function setCarouselSlide(carousel, idx) {{
   const slides = [...carousel.querySelectorAll('img.comp-photo')];
