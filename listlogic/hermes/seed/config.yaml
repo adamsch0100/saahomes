@@ -1,10 +1,18 @@
 model:
-  default: kimi-k2.6
+  # Daily driver — high volume, cheap, strong enough for most Hermes turns
+  default: deepseek-v4-flash
   provider: opencode-go
 
 providers:
   opencode-go:
     base_url: https://opencode.ai/zen/go/v1
+
+# Model routing (Adam lock):
+# - deepseek-v4-flash — main daily / monitoring / harvest / most chat
+# - deepseek-v4-pro — next step (content drafts, competitor deep dives, delegation)
+# - kimi-k3 — super-intelligence only (hard strategy, high-stakes decisions)
+#
+# Cron jobs must pin provider+model explicitly (see automation-registry.md).
 
 auxiliary:
   compression:

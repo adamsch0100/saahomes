@@ -2,7 +2,7 @@
 
 ## Integration status
 
-- [x] OpenCode Go
+- [x] OpenCode Go — default **deepseek-v4-flash**; pro next; **kimi-k3** for super-intelligence
 - [x] Telegram bot (@ListLogicbot) — allowlist Adam `6320126021`
 - [ ] GitHub PAT (listlogic deploy / auto PR)
 - [ ] GSC for listlogic.homes
