@@ -230,6 +230,15 @@ export const getAgentTeammates = async (token) => {
   });
 };
 
+/** GET /api/agent/me — agent profile + resolved brand (P-2 white-label). */
+export const getAgentMe = async (token) => {
+  return apiRequest('/api/agent/me', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export const listAgents = async (token) => {
   return apiRequest('/api/admin/agents', {
     headers: {

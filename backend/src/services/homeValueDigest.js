@@ -19,10 +19,13 @@ import { notifyValueUpdate } from './notificationService.js';
 import { getPrefFrequency } from './notificationPrefs.js';
 import { pickVariant, openToken, withOpenPixel } from './subjectVariants.js';
 import { marketPack } from '../config/marketPack.js';
+import { loadBrandForClientUser, voiceCopy } from './tenantBrand.js';
 import logger from '../utils/logger.js';
 
 const SITE = marketPack.market.siteUrl || 'https://saahomes.com';
 const AGENT_PHONE = marketPack.market.phone;
+const DEFAULT_FROM =
+  marketPack.agentVoice?.defaultFromName || `Adam Schwartz, ${marketPack.market.brand}`;
 const GOLD = '#CFB36E';
 
 const fmt = (n) =>
@@ -33,6 +36,10 @@ const escapeHtml = (s) =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
   );
 
+/**
+ * @param {object} opts
+ * @param {object|null} [opts.brand] assigned-agent brand; null = SAA unassigned copy
+ */
 function digestHtml({
   firstName,
   address,
@@ -44,6 +51,8 @@ function digestHtml({
   manageUrl,
   unsubscribeUrl,
   myHomeUrl,
+  brand = null,
+  cityLabel = '',
 }) {
   const deltaLine =
     delta != null && delta !== 0
@@ -52,13 +61,15 @@ function digestHtml({
         : `<span style="color:#b45309;font-weight:700">down ${fmt(Math.abs(delta))} vs last month</span>`
       : `<span style="color:#6b7280">first monthly update</span>`;
 
-  const greeting = firstName ? `Hi ${escapeHtml(firstName)},` : 'Hi there,';
   const { market, sources, dpa, fairHousing, footer, honestLabels } = marketPack;
-  const brandUpper = String(market.brand || 'SAA Homes').toUpperCase();
   const estimateLabel =
     label || honestLabels.estimateFallback;
 
-  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:#111">
+  // Unassigned path — historical SAA copy (do not change).
+  if (!brand) {
+    const greeting = firstName ? `Hi ${escapeHtml(firstName)},` : 'Hi there,';
+    const brandUpper = String(market.brand || 'SAA Homes').toUpperCase();
+    return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:#111">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#111">
     <tr><td align="center" style="padding:24px 16px">
       <div style="color:${GOLD};font-size:20px;font-weight:800;letter-spacing:0.04em">${escapeHtml(brandUpper)}</div>
@@ -138,6 +149,105 @@ function digestHtml({
     </td></tr>
   </table>
 </body></html>`;
+  }
+
+  // Assigned-agent brand path (P-2)
+  const brandUpper = String(brand.brandName || market.brand || 'SAA Homes').toUpperCase();
+  const phone = brand.phone || AGENT_PHONE;
+  const tel = brand.tel || market.tel;
+  const headerSubline = brand.headerSubline || footer.headerSubline;
+  const brandLine = brand.brandLine || footer.brandLine;
+  const talkLabel = brand.agentName
+    ? `Talk to ${escapeHtml(brand.agentName)} — Free, No Pressure · ${escapeHtml(phone)}`
+    : `Talk to us — Free, No Pressure · ${escapeHtml(phone)}`;
+  const voice = voiceCopy('home_value', brand.voiceStyle, {
+    firstName,
+    city: cityLabel || brand.marketName || market.name,
+    address,
+    agentName: brand.agentName,
+    brandName: brand.brandName,
+  });
+  const greeting = escapeHtml(voice.greeting);
+
+  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:#111">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#111">
+    <tr><td align="center" style="padding:24px 16px">
+      <div style="color:${GOLD};font-size:20px;font-weight:800;letter-spacing:0.04em">${escapeHtml(brandUpper)}</div>
+      <div style="color:#9ca3af;font-size:12px;margin-top:4px">${escapeHtml(headerSubline)}</div>
+    </td></tr>
+  </table>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr><td align="center" style="padding:24px 12px">
+      <table role="presentation" width="100%" style="max-width:560px;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb">
+        <tr><td style="padding:28px 24px 8px">
+          <p style="margin:0 0 12px;font-size:16px;line-height:1.5">${greeting}</p>
+          <p style="margin:0 0 8px;font-size:14px;color:#4b5563;line-height:1.5">
+            ${voice.introHtml}
+          </p>
+        </td></tr>
+        <tr><td style="padding:8px 24px 20px">
+          <div style="background:#111;border-radius:12px;padding:20px 18px;text-align:center">
+            <div style="color:${GOLD};font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase">Estimated value range</div>
+            <div style="color:#fff;font-size:32px;font-weight:800;margin-top:8px;line-height:1.1">${fmt(mid)}</div>
+            <div style="color:#d1d5db;font-size:14px;margin-top:6px">${fmt(low)} – ${fmt(high)}</div>
+            <div style="margin-top:10px;font-size:13px">${deltaLine}</div>
+          </div>
+          <p style="margin:14px 0 0;font-size:12px;color:#6b7280;line-height:1.5">
+            ${escapeHtml(estimateLabel)}
+          </p>
+          <p style="margin:6px 0 0;font-size:11px;color:#9ca3af;line-height:1.5">
+            Source: ${escapeHtml(sources.saaMls)} · ${escapeHtml(honestLabels.estimate)}
+          </p>
+        </td></tr>
+        <tr><td style="padding:4px 24px 8px">
+          <p style="margin:0 0 12px;font-size:14px;font-weight:700;color:#111">What would you like to do next?</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="padding:0 0 10px">
+              <a href="${myHomeUrl}" style="display:block;background:${GOLD};color:#111;text-decoration:none;font-weight:700;font-size:14px;padding:14px 16px;border-radius:8px;text-align:center">
+                View My Home Dashboard
+              </a>
+            </td></tr>
+            <tr><td style="padding:0 0 10px">
+              <a href="${SITE}/for-sellers/#market-report" style="display:block;background:#111;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:14px 16px;border-radius:8px;text-align:center">
+                Get My Full Market Analysis
+              </a>
+            </td></tr>
+            <tr><td style="padding:0 0 10px">
+              <a href="${SITE}/for-sellers/" style="display:block;border:2px solid #111;color:#111;text-decoration:none;font-weight:700;font-size:14px;padding:12px 16px;border-radius:8px;text-align:center">
+                Is Now the Right Time to Sell?
+              </a>
+            </td></tr>
+            <tr><td style="padding:0 0 10px">
+              <a href="${tel}" style="display:block;border:1px solid #d1d5db;color:#111;text-decoration:none;font-weight:600;font-size:13px;padding:12px 16px;border-radius:8px;text-align:center">
+                ${talkLabel}
+              </a>
+            </td></tr>
+          </table>
+        </td></tr>
+        <tr><td style="padding:16px 24px 28px;border-top:1px solid #f3f4f6">
+          <p style="margin:0;font-size:12px;color:#6b7280;line-height:1.5">
+            Refinance curiosity? We&rsquo;ll connect you with a great local lender — we never advise rates.
+            Questions about this home? Reply to this email or call ${escapeHtml(phone)}.
+          </p>
+          <p style="margin:12px 0 0;font-size:12px;color:#6b7280;line-height:1.55">
+            ${escapeHtml(footer.depthLine)}
+          </p>
+          <p style="margin:8px 0 0;font-size:12px;color:#6b7280;line-height:1.55">
+            ${escapeHtml(dpa.chfaLine)}
+            <a href="${dpa.hubUrl}" style="color:#6b7280">${escapeHtml(dpa.hubPath)}</a>
+          </p>
+          <p style="margin:14px 0 0;font-size:11px;color:#9ca3af;line-height:1.5">
+            <a href="${manageUrl}" style="color:#6b7280">Manage preferences</a>
+            &nbsp;·&nbsp;
+            <a href="${unsubscribeUrl}" style="color:#6b7280">Unsubscribe from value updates</a>
+            <br/>${escapeHtml(brandLine)} · ${escapeHtml(phone)}
+            <br/>${escapeHtml(fairHousing)} · ${escapeHtml(honestLabels.notAppraisal)}
+          </p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
 }
 
 /**
@@ -202,8 +312,17 @@ async function sendOne(profile, { dryRun = false } = {}) {
   const deltaFmt =
     delta != null && delta !== 0 ? fmt(Math.abs(delta)) : '';
 
+  // Assigned-agent brand (P-2). Unassigned → null → SAA copy unchanged.
+  let brand = null;
+  try {
+    brand = await loadBrandForClientUser(pool, profile.user_id);
+  } catch (e) {
+    logger.warn('homeValueDigest: brand lookup failed', { message: e.message });
+    brand = null;
+  }
+
   // Deterministic A/B subject (same user always gets same home_value variant)
-  const { key: subjectVariant, subject } = pickVariant('home_value', profile.user_id, {
+  let { key: subjectVariant, subject } = pickVariant('home_value', profile.user_id, {
     firstName,
     cityLabel,
     mid: our.mid,
@@ -211,6 +330,10 @@ async function sendOne(profile, { dryRun = false } = {}) {
     delta,
     deltaFmt,
   });
+  // Optional brand prefix only on variant C when assigned
+  if (brand?.agentFirstName && subjectVariant === 'C') {
+    subject = `${brand.agentFirstName} · ${subject}`;
+  }
 
   const myHomeUrl = `${SITE}/my-home/?token=${profile.manage_token}`;
   const manageUrl = `${SITE}/my-home/?token=${profile.manage_token}`;
@@ -233,11 +356,15 @@ async function sendOne(profile, { dryRun = false } = {}) {
     manageUrl,
     unsubscribeUrl,
     myHomeUrl,
+    brand,
+    cityLabel,
   }), SITE, tok);
+
+  const fromName = brand?.fromName || DEFAULT_FROM;
 
   // Prefer SMTP; fall back to outbox so cron never loses the send
   if (smtpConfigured()) {
-    await sendEmail(profile.user_email, subject, html, 'Adam Schwartz, SAA Homes');
+    await sendEmail(profile.user_email, subject, html, fromName);
   } else {
     await pool.query(
       `INSERT INTO email_outbox (to_email, subject, html) VALUES ($1, $2, $3)`,

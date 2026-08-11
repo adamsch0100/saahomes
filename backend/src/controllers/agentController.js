@@ -370,3 +370,32 @@ export const listTeammates = async (req, res) => {
   }
 };
 
+/**
+ * GET /api/agent/me — authenticated agent + resolved brand config (P-2).
+ * Agent/admin only; clients never see this. Read-only — brand edits are admin.
+ */
+export const getAgentMe = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    const pool = getPool();
+    const result = await pool.query(
+      `SELECT id, email, name, phone, role, status, created_at, last_active_at,
+              brand_name, brokerage_name, brand_phone, voice_style
+       FROM users
+       WHERE id = $1 AND role IN ('agent', 'admin') AND status = 'active'`,
+      [userId]
+    );
+    if (!result.rows[0]) {
+      return res.status(404).json({ error: 'Agent not found' });
+    }
+    const { publicAgentPayload } = await import('../services/tenantBrand.js');
+    return res.json({ success: true, data: publicAgentPayload(result.rows[0]) });
+  } catch (error) {
+    logger.error('getAgentMe error', error);
+    return res.status(500).json({ error: 'Failed to load agent profile' });
+  }
+};
+

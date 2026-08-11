@@ -1187,7 +1187,7 @@ const AGENT_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /**
  * POST /api/admin/agents
  * Create a teammate account with role=agent.
- * Body: { name, email, phone?, password }
+ * Body: { name, email, phone?, password, brand_name?, brokerage_name?, brand_phone?, voice_style? }
  */
 export const createAgent = async (req, res) => {
   try {
@@ -1209,6 +1209,19 @@ export const createAgent = async (req, res) => {
     const phoneDigits = String(phone || '').replace(/\D/g, '');
     const phoneVal =
       phoneDigits.length >= 7 && phoneDigits.length <= 15 ? phoneDigits : null;
+
+    const { parseBrandFields, publicAgentPayload } = await import('../services/tenantBrand.js');
+    const brandParsed = parseBrandFields(req.body || {});
+    if (brandParsed.error) {
+      return res.status(400).json({ error: brandParsed.error });
+    }
+    const brand = brandParsed.fields || {};
+    // brand_name defaults to agent name when omitted (brief P-2)
+    const brandName =
+      brand.brand_name !== undefined ? brand.brand_name : nameStr.slice(0, 120);
+    const brokerageName = brand.brokerage_name !== undefined ? brand.brokerage_name : null;
+    const brandPhone = brand.brand_phone !== undefined ? brand.brand_phone : null;
+    const voiceStyle = brand.voice_style !== undefined ? brand.voice_style : 'warm';
 
     const pool = getPool();
     const existing = await pool.query('SELECT id, role, password_hash FROM users WHERE LOWER(email) = $1', [
@@ -1232,26 +1245,39 @@ export const createAgent = async (req, res) => {
            role = 'agent',
            status = 'active',
            manage_token = COALESCE(manage_token, $4),
+           brand_name = $5,
+           brokerage_name = $6,
+           brand_phone = $7,
+           voice_style = $8,
            last_active_at = NOW()
-         WHERE id = $5
-         RETURNING id, email, name, phone, role, status, created_at, last_active_at`,
-        [hash, nameStr, phoneVal, token, row.id]
+         WHERE id = $9
+         RETURNING id, email, name, phone, role, status, created_at, last_active_at,
+                   brand_name, brokerage_name, brand_phone, voice_style`,
+        [hash, nameStr, phoneVal, token, brandName, brokerageName, brandPhone, voiceStyle, row.id]
       );
       logger.info('Existing user upgraded to agent', { email: emailStr, id: row.id });
-      return res.status(200).json({ success: true, data: updated.rows[0], upgraded: true });
+      return res.status(200).json({
+        success: true,
+        data: publicAgentPayload(updated.rows[0]),
+        upgraded: true,
+      });
     }
 
     const hash = await bcrypt.hash(passStr, 10);
     const manageToken = crypto.randomBytes(24).toString('hex');
     const created = await pool.query(
-      `INSERT INTO users (email, name, phone, manage_token, password_hash, role, status, last_active_at)
-       VALUES ($1, $2, $3, $4, $5, 'agent', 'active', NOW())
-       RETURNING id, email, name, phone, role, status, created_at, last_active_at`,
-      [emailStr, nameStr, phoneVal, manageToken, hash]
+      `INSERT INTO users (
+         email, name, phone, manage_token, password_hash, role, status, last_active_at,
+         brand_name, brokerage_name, brand_phone, voice_style
+       )
+       VALUES ($1, $2, $3, $4, $5, 'agent', 'active', NOW(), $6, $7, $8, $9)
+       RETURNING id, email, name, phone, role, status, created_at, last_active_at,
+                 brand_name, brokerage_name, brand_phone, voice_style`,
+      [emailStr, nameStr, phoneVal, manageToken, hash, brandName, brokerageName, brandPhone, voiceStyle]
     );
 
     logger.info('Agent account created', { email: emailStr, id: created.rows[0].id });
-    return res.status(201).json({ success: true, data: created.rows[0] });
+    return res.status(201).json({ success: true, data: publicAgentPayload(created.rows[0]) });
   } catch (error) {
     logger.error('createAgent error', error);
     return res.status(500).json({ error: 'Failed to create agent' });
@@ -1259,13 +1285,15 @@ export const createAgent = async (req, res) => {
 };
 
 /**
- * GET /api/admin/agents — list agent (+ admin) seats.
+ * GET /api/admin/agents — list agent (+ admin) seats (includes brand config).
  */
 export const listAgents = async (req, res) => {
   try {
+    const { publicAgentPayload } = await import('../services/tenantBrand.js');
     const pool = getPool();
     const result = await pool.query(
       `SELECT id, email, name, phone, role, status, created_at, last_active_at,
+              brand_name, brokerage_name, brand_phone, voice_style,
               (SELECT COUNT(*)::int FROM users c
                WHERE c.assigned_agent_id = users.id
                  AND COALESCE(c.role, 'client') = 'client') AS assigned_lead_count
@@ -1276,7 +1304,11 @@ export const listAgents = async (req, res) => {
          name NULLS LAST,
          email`
     );
-    return res.json({ success: true, data: result.rows });
+    const data = result.rows.map((row) => ({
+      ...publicAgentPayload(row),
+      assigned_lead_count: row.assigned_lead_count,
+    }));
+    return res.json({ success: true, data });
   } catch (error) {
     logger.error('listAgents error', error);
     return res.status(500).json({ error: 'Failed to list agents' });
@@ -1285,8 +1317,8 @@ export const listAgents = async (req, res) => {
 
 /**
  * PATCH /api/admin/agents/:id
- * Activate / deactivate (status) or update name/phone/password.
- * Body: { status?: 'active'|'inactive', name?, phone?, password? }
+ * Activate / deactivate (status) or update name/phone/password/brand fields.
+ * Body: { status?, name?, phone?, password?, brand_name?, brokerage_name?, brand_phone?, voice_style? }
  */
 export const patchAgent = async (req, res) => {
   try {
@@ -1302,6 +1334,12 @@ export const patchAgent = async (req, res) => {
     );
     if (!existing.rows[0]) {
       return res.status(404).json({ error: 'Agent not found' });
+    }
+
+    const { parseBrandFields, publicAgentPayload } = await import('../services/tenantBrand.js');
+    const brandParsed = parseBrandFields(body);
+    if (brandParsed.error) {
+      return res.status(400).json({ error: brandParsed.error });
     }
 
     const updates = [];
@@ -1346,6 +1384,36 @@ export const patchAgent = async (req, res) => {
       params.push(hash);
     }
 
+    const brand = brandParsed.fields || {};
+    if (Object.prototype.hasOwnProperty.call(brand, 'brand_name')) {
+      if (brand.brand_name == null) {
+        updates.push('brand_name = NULL');
+      } else {
+        updates.push(`brand_name = $${i++}`);
+        params.push(brand.brand_name);
+      }
+    }
+    if (Object.prototype.hasOwnProperty.call(brand, 'brokerage_name')) {
+      if (brand.brokerage_name == null) {
+        updates.push('brokerage_name = NULL');
+      } else {
+        updates.push(`brokerage_name = $${i++}`);
+        params.push(brand.brokerage_name);
+      }
+    }
+    if (Object.prototype.hasOwnProperty.call(brand, 'brand_phone')) {
+      if (brand.brand_phone == null) {
+        updates.push('brand_phone = NULL');
+      } else {
+        updates.push(`brand_phone = $${i++}`);
+        params.push(brand.brand_phone);
+      }
+    }
+    if (Object.prototype.hasOwnProperty.call(brand, 'voice_style')) {
+      updates.push(`voice_style = $${i++}`);
+      params.push(brand.voice_style);
+    }
+
     if (!updates.length) {
       return res.status(400).json({ error: 'Nothing to update' });
     }
@@ -1353,12 +1421,13 @@ export const patchAgent = async (req, res) => {
     params.push(id);
     const updated = await pool.query(
       `UPDATE users SET ${updates.join(', ')} WHERE id = $${i}
-       RETURNING id, email, name, phone, role, status, created_at, last_active_at`,
+       RETURNING id, email, name, phone, role, status, created_at, last_active_at,
+                 brand_name, brokerage_name, brand_phone, voice_style`,
       params
     );
 
     logger.info('Agent patched', { id, by: req.user?.email, fields: Object.keys(body) });
-    return res.json({ success: true, data: updated.rows[0] });
+    return res.json({ success: true, data: publicAgentPayload(updated.rows[0]) });
   } catch (error) {
     logger.error('patchAgent error', error);
     return res.status(500).json({ error: 'Failed to update agent' });
