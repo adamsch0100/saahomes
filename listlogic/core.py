@@ -145,58 +145,19 @@ class PositioningResult:
 # Loader & Cleaner
 # ---------------------------------------------------------------------------
 
-def load_export(path: str | Path) -> pd.DataFrame:
-    """Load the 71-field MLS export (pipe-delimited) and normalize."""
-    df = pd.read_csv(path, sep="|", low_memory=False)
+def load_export(path: str | Path, *, rename_overrides: dict | None = None) -> pd.DataFrame:
+    """Load an MLS export (pipe/csv/tsv) via smart header mapping + normalize."""
+    from export_mapper import load_mapped_export
 
-    status_map = {
-        "Sold": "Sold",
-        "Active": "Active",
-        "Pending": "Pending",
-        "Backup": "Pending",
-        "Expired": "Expired",
-        "Withdrawn": "Withdrawn",
-        "FirstRight": "Pending",
-    }
-    df["StatusNorm"] = df["Status"].map(status_map).fillna("Other")
-
-    for col in ["SoldDate", "ListDate", "LastUpdateDate"]:
-        if col in df.columns:
-            df[col] = pd.to_datetime(df[col], errors="coerce")
-
-    numeric_cols = [
-        "Price", "SoldPrice", "TotalSqFt", "FinishedSQFT", "FinishedSQFTincBasement",
-        "Bdrm", "Bath", "YearBuilt", "DOM", "GarSpaces", "Acres", "LotSize",
-        "FullBaths", "HalfBaths", "ThreeQuarterBaths"
-    ]
-    for col in numeric_cols:
-        if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors="coerce")
-
-    # Best available living area
-    df["LivingArea"] = (
-        df["FinishedSQFTincBasement"]
-        .fillna(df["FinishedSQFT"])
-        .fillna(df["TotalSqFt"])
-    )
-
-    df["PricePerSqFt"] = np.where(
-        (df["StatusNorm"] == "Sold") & (df["LivingArea"] > 0),
-        df["SoldPrice"] / df["LivingArea"],
-        np.nan
-    )
-
-    df["DaysToSell"] = (df["SoldDate"] - df["ListDate"]).dt.days
-
-    # Readable address
-    df["Address"] = (
-        df["StNumber"].fillna("").astype(str) + " " +
-        df["StDir"].fillna("").astype(str) + " " +
-        df["StName"].fillna("").astype(str) + " " +
-        df["StType"].fillna("").astype(str)
-    ).str.replace(r"\s+", " ", regex=True).str.strip()
-
+    df, _result = load_mapped_export(path, rename_overrides=rename_overrides)
     return df
+
+
+def load_export_legacy_matrix(path: str | Path) -> pd.DataFrame:
+    """Legacy direct Matrix pipe load (kept for emergency/debug)."""
+    df = pd.read_csv(path, sep="|", low_memory=False)
+    from market_schema import normalize_market_frame
+    return normalize_market_frame(df, source="mls_export")
 
 
 def load_exports(paths: list[str | Path]) -> pd.DataFrame:
@@ -1340,20 +1301,27 @@ The market rewards realistic pricing and strong presentation. Homes that come ou
 # ---------------------------------------------------------------------------
 
 def create_full_report(
-    export_path: str | Path,
+    export_path: str | Path | None = None,
     area_name: str = "Greeley / West Greeley",
     city_filter: str = "",
     lookback_months: Optional[int] = None,
     subject: Optional[SubjectProperty] = None,
     subject_mls: Optional[str] = None,
     market_notes: str = "",
+    market_df: Optional[pd.DataFrame] = None,
+    data_source: str = "",
 ) -> dict:
-    df = load_export(export_path)
+    if market_df is not None:
+        df = market_df.copy()
+    elif export_path is not None:
+        df = load_export(export_path)
+    else:
+        raise ValueError("export_path or market_df required")
     # Blank city_filter = use the uploaded MLS pull as-is (already curated).
-    market_df = filter_market(df, city=city_filter or None)
+    market_df_use = filter_market(df, city=city_filter or None)
 
-    stats = compute_market_stats(market_df, area_name=area_name, lookback_months=lookback_months)
-    scatter = build_scatter_data(market_df)
+    stats = compute_market_stats(market_df_use, area_name=area_name, lookback_months=lookback_months)
+    scatter = build_scatter_data(market_df_use)
     market_narrative = generate_market_narrative(stats)
 
     # Resolve subject
@@ -1362,7 +1330,7 @@ def create_full_report(
 
     positioning = None
     if subject and subject.living_area > 0:
-        positioning = position_subject(market_df, stats, subject)
+        positioning = position_subject(market_df_use, stats, subject)
 
     slope, intercept = linear_trend(
         scatter["LivingArea"].values,
@@ -1373,13 +1341,13 @@ def create_full_report(
     exec_summary = generate_executive_summary(stats, subject, positioning)
 
     market_definition = infer_market_definition(
-        market_df,
+        market_df_use,
         subject=subject,
         agent_label=area_name,
         agent_notes=market_notes,
         area_name=area_name,
     )
-    did_not_sell = analyze_did_not_sell(market_df)
+    did_not_sell = analyze_did_not_sell(market_df_use)
 
     report = {
         "generated_at": datetime.now().isoformat(),
@@ -1393,6 +1361,7 @@ def create_full_report(
         "scatter_points": scatter.head(250).to_dict(orient="records"),
         "subject": asdict(subject) if subject else None,
         "positioning": None,
+        "data_source": data_source or (df.attrs.get("source") if hasattr(df, "attrs") else "") or "",
     }
 
     if positioning:

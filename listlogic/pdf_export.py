@@ -1083,7 +1083,7 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
         ),
     ]
     if report.get("llm_enhanced"):
-        close_flow.append(Paragraph("Narratives AI-assisted · numbers from your MLS export", styles["footer"]))
+        close_flow.append(Paragraph("Narratives AI-assisted · numbers from your market data", styles["footer"]))
     flow.append(KeepTogether(close_flow))
 
     doc.build(flow)

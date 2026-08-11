@@ -55,8 +55,8 @@ def _bottom_line_from_report(report: dict) -> str:
 
 
 def build_presentation(
-    export_path: str,
-    subject: SubjectProperty,
+    export_path: str | None = None,
+    subject: SubjectProperty = None,
     area_name: str = "Greeley, CO",
     city_filter: str = "",
     agent_name: str = "Your Agent",
@@ -65,6 +65,8 @@ def build_presentation(
     brokerage: str = "",
     mode: str = "listing",
     market_notes: str = "",
+    market_df=None,
+    data_source: str = "",
 ) -> dict:
     report = create_full_report(
         export_path,
@@ -72,7 +74,10 @@ def build_presentation(
         city_filter=city_filter or "",
         subject=subject,
         market_notes=market_notes or "",
+        market_df=market_df,
+        data_source=data_source or "",
     )
+    src = data_source or report.get("data_source") or ""
     report["meta"] = {
         "mode": mode,
         "agent_name": agent_name,
@@ -82,9 +87,13 @@ def build_presentation(
         "generated": datetime.now().strftime("%B %d, %Y"),
         "market_notes": market_notes or "",
         "market_label": area_name,
+        "data_source": src,
     }
 
-    df = load_export(export_path)
+    if market_df is not None:
+        df = market_df
+    else:
+        df = load_export(export_path)
     market = filter_market(df, city=city_filter or None)
     sold = market[market["StatusNorm"] == "Sold"].copy()
     active = market[market["StatusNorm"] == "Active"].copy()

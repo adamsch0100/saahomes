@@ -8,6 +8,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/saas/ll.css">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
+<link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.3/mapbox-gl-draw.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.3/mapbox-gl-draw.js"></script>
 <style>
 .page-head { padding: 40px 0 8px; }
 .page-head h1 { font-family: 'Fraunces', serif; font-size: clamp(1.6rem, 3vw, 2.1rem); letter-spacing: -0.02em; margin-bottom: 6px; }
@@ -62,6 +66,40 @@
 .howto .goal .gl { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-top: 2px; font-weight: 700; }
 
 .color-field input[type="color"] { padding: 4px; height: 44px; cursor: pointer; }
+
+.mode-toggle {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px;
+}
+.mode-btn {
+  border: 1px solid var(--line); background: #fff; border-radius: var(--radius-sm);
+  padding: 12px 14px; text-align: left; cursor: pointer; font: inherit;
+}
+.mode-btn strong { display: block; color: var(--navy); font-size: 0.92rem; margin-bottom: 2px; }
+.mode-btn span { display: block; color: var(--muted); font-size: 0.75rem; line-height: 1.35; }
+.mode-btn.on { border-color: var(--navy); background: #eef4fa; box-shadow: inset 0 0 0 1px var(--navy); }
+#portalPanel .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+@media (max-width: 720px) { #portalPanel .row3 { grid-template-columns: 1fr 1fr; } }
+#portalMap {
+  height: 280px; border-radius: var(--radius-sm); border: 1px solid var(--line);
+  margin-top: 8px; background: #e8eef4;
+}
+.portal-preview {
+  margin-top: 10px; padding: 10px 12px; border-radius: var(--radius-sm);
+  background: #eef4fa; border: 1px solid #c9d9ea; font-size: 0.82rem; color: var(--ink);
+  display: none;
+}
+.portal-preview.show { display: block; }
+#mappingReview {
+  display: none; margin-top: 12px; padding: 12px; border: 1px solid var(--line);
+  background: #f7f4ee; border-radius: var(--radius-sm); font-size: 0.82rem;
+}
+#mappingReview.show { display: block; }
+#mappingReview table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+#mappingReview td, #mappingReview th { padding: 4px 6px; text-align: left; border-bottom: 1px solid var(--line); font-size: 0.78rem; }
+#mappingSample table { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
+#mappingSample th, #mappingSample td { padding: 3px 5px; border: 1px solid var(--line); white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
+#mappingConfirmStatus.ok { color: var(--teal); font-weight: 600; }
+#generateBtn:disabled { opacity: 0.55; cursor: not-allowed; }
 
 .submit-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
 .submit-row .btn { padding: 14px 30px; font-size: 0.98rem; }
@@ -196,7 +234,7 @@
     <div class="page-head">
       <span class="eyebrow">New presentation</span>
       <h1>Generate a presentation</h1>
-      <p class="sub">Upload your MLS market, set the subject, and build the pricing story sellers can see.</p>
+      <p class="sub">Search a market nationwide, or upload any MLS export — smart header mapping included.</p>
     </div>
 
   <form id="genForm">
@@ -205,67 +243,137 @@
         <span class="step-num">1</span>
         <div>
           <h2>Market data</h2>
-          <p>Your MLS export — the custom market you already built in Matrix</p>
+          <p>Search the market, or upload your export</p>
         </div>
       </div>
-      <div class="field">
-        <label>Upload 71-field export(s)</label>
-        <input type="file" id="exportFile" name="export_files" accept=".txt,.csv,.tsv" multiple>
-        <div class="file-list" id="exportFileList" hidden></div>
-      </div>
-      <label class="check-row">
-        <input type="checkbox" id="useSample" checked>
-        Use sample Greeley export (export-71.txt)
-      </label>
-      <p class="hint">That file <strong>is</strong> your market. Upload up to 3 files (e.g. solds + actives) — we merge and dedupe by MLS #. Max 15MB each.</p>
 
-      <details class="howto" id="exportHowto">
-        <summary>How to build your custom market in Matrix</summary>
-        <div class="howto-body">
-          <div class="goal">
-            <div><div class="gv">≤ 450</div><div class="gl">Homes in file</div></div>
-            <div><div class="gv">2 years</div><div class="gl">List date lookback</div></div>
-            <div><div class="gv">71 fields</div><div class="gl">Export format</div></div>
-          </div>
-          <p class="hint" style="margin-top:8px">Aim for as many relevant homes as you can <strong>without going over 450</strong>. "71" is the field set — not the home count.</p>
-          <ol>
-            <li>
-              <strong>Start wide on status.</strong> Include every status you'll need for inventory + absorption + "didn't sell":
-              Active, Active Under Contract / Backup, Pending, Sold, Expired, Withdrawn (and First Right if you use it).
-              Sold alone is not enough — ListLogic needs Active for competition and Pending/Backup as under contract.
-            </li>
-            <li>
-              <strong>Pick property type(s) that match the subject.</strong>
-              Detached, Attached / Townhouse, Condo, Farm &amp; Ranch, etc. — only what a buyer would actually cross-shop.
-              Mixing ranch acreage with city ranchers usually muddies the story.
-            </li>
-            <li>
-              <strong>Set geography + time.</strong>
-              City / ZIP / map area for the competitive set.
-              List date: from <strong>2 years ago through today</strong> (listed anytime in that window — solds, actives, and off-markets all stay in the pull).
-            </li>
-            <li>
-              <strong>Narrow toward ~450.</strong>
-              If the result count is high, tighten in this order until you're under 450 but still rich:
-              total / finished sq ft band (often within about <strong>1,000–1,500 sq ft</strong> of the subject),
-              garage spaces, beds, baths, lot size / acres, year built, then subdivision or map if needed.
-            </li>
-            <li>
-              <strong>Sanity-check the set.</strong>
-              Confirm actives, pendings, and recent solds all look like real competition for <em>this</em> home — not the whole city.
-            </li>
-            <li>
-              <strong>Export the 71-field list</strong> from Matrix (pipe-delimited / ListLogic field set), then upload that file here.
-            </li>
-          </ol>
-          <div class="callout">
-            <strong>Why this shape?</strong>
-            Wide statuses + 24 months give absorption, months of inventory, and "left the market" truth.
-            The sq ft / garage / beds cut makes it apples-to-apples.
-            Cap at 450 so the presentation stays fast and the comps stay sharp.
+      <div class="mode-toggle" role="tablist" aria-label="Market mode">
+        <button type="button" class="mode-btn on" id="modePortalBtn" data-mode="portal">
+          <strong>Search</strong>
+          <span>Location + filters + optional map · works nationwide</span>
+        </button>
+        <button type="button" class="mode-btn" id="modeMlsBtn" data-mode="mls">
+          <strong>Upload</strong>
+          <span>CSV/TXT from any MLS · review column mapping before you run</span>
+        </button>
+      </div>
+      <input type="hidden" id="marketSource" name="market_source" value="portal">
+
+      <div id="portalPanel">
+        <div class="field">
+          <label>Market location <span style="font-weight:400;text-transform:none">(city or ZIP)</span></label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <input type="text" id="portalLocation" placeholder="City or ZIP" value="" style="flex:1;min-width:180px">
+            <button type="button" class="btn btn-ghost" id="portalGeocodeBtn" style="border:1px solid var(--line);color:var(--navy)">Center map</button>
           </div>
         </div>
-      </details>
+        <div class="row2">
+          <div class="field">
+            <label>Dwelling</label>
+            <select id="portalDwelling">
+              <option value="detached" selected>House (detached)</option>
+              <option value="attached">Condo + Townhome</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Lookback (days)</label>
+            <input type="number" id="portalLookback" value="730" min="90" max="1100">
+          </div>
+        </div>
+        <div class="row3">
+          <div class="field">
+            <label>Price min</label>
+            <input type="number" id="portalPriceMin" value="300000">
+          </div>
+          <div class="field">
+            <label>Price max</label>
+            <input type="number" id="portalPriceMax" value="450000">
+          </div>
+          <div class="field">
+            <label>Garage min</label>
+            <input type="number" id="portalGarage" value="1" min="0" max="6" step="1">
+          </div>
+        </div>
+        <div class="row3">
+          <div class="field">
+            <label>Beds min–max</label>
+            <div style="display:flex;gap:6px">
+              <input type="number" id="portalBedsMin" value="3" min="0" max="10" style="flex:1">
+              <input type="number" id="portalBedsMax" value="6" min="0" max="20" style="flex:1">
+            </div>
+          </div>
+          <div class="field">
+            <label>Baths min–max</label>
+            <div style="display:flex;gap:6px">
+              <input type="number" id="portalBathsMin" value="2" min="0" max="10" step="0.5" style="flex:1">
+              <input type="number" id="portalBathsMax" value="4" min="0" max="20" step="0.5" style="flex:1">
+            </div>
+          </div>
+          <div class="field">
+            <label>Sqft min–max</label>
+            <div style="display:flex;gap:6px">
+              <input type="number" id="portalSqftMin" value="1700" style="flex:1">
+              <input type="number" id="portalSqftMax" value="2900" style="flex:1">
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Draw market area <span style="font-weight:400;text-transform:none">(optional)</span></label>
+          <p class="hint" style="margin:0 0 6px">Draw a polygon to scope the search. Without a shape, Search uses the location string only — not the current map view.</p>
+          <div id="portalMap"></div>
+          <label class="check-row" style="margin-top:8px">
+            <input type="checkbox" id="portalUseViewport">
+            Limit to current map view (only if you intentionally zoomed the area)
+          </label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+            <button type="button" class="btn btn-ghost" id="portalDrawBtn" style="border:1px solid var(--line);color:var(--navy)">Draw polygon</button>
+            <button type="button" class="btn btn-ghost" id="portalClearDrawBtn" style="border:1px solid var(--line);color:var(--navy)">Clear shape</button>
+            <button type="button" class="btn btn-ghost" id="portalPreviewBtn" style="border:1px solid var(--line);color:var(--navy)">Preview counts</button>
+          </div>
+          <div class="portal-preview" id="portalPreview"></div>
+        </div>
+      </div>
+
+      <div id="mlsPanel" hidden>
+        <div class="field">
+          <label>Upload market export(s)</label>
+          <input type="file" id="exportFile" name="export_files" accept=".txt,.csv,.tsv" multiple>
+          <div class="file-list" id="exportFileList" hidden></div>
+        </div>
+        <label class="check-row">
+          <input type="checkbox" id="useSample">
+          Use sample Greeley export (export-71.txt)
+        </label>
+        <p class="hint">Pipe, comma, or tab files from any MLS. Confirm the column mapping below before you generate.</p>
+        <div id="mappingReview">
+          <strong>Column mapping</strong>
+          <p id="mappingReviewMsg" style="margin:4px 0 0"></p>
+          <div id="mappingReviewTable"></div>
+          <div id="mappingSample" style="margin-top:10px;overflow:auto"></div>
+          <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <button type="button" class="btn" id="confirmMappingBtn" style="background:var(--navy);color:#fff;border:none;padding:10px 16px;border-radius:8px;font-weight:700;cursor:pointer">Confirm mapping</button>
+            <span id="mappingConfirmStatus" style="font-size:0.8rem;color:var(--muted)"></span>
+          </div>
+        </div>
+        <details class="howto" id="exportHowto">
+          <summary>Tips for building a sharp market export</summary>
+          <div class="howto-body">
+            <div class="goal">
+              <div><div class="gv">≤ 450</div><div class="gl">Homes in file</div></div>
+              <div><div class="gv">2 years</div><div class="gl">List date lookback</div></div>
+              <div><div class="gv">Any MLS</div><div class="gl">Smart header map</div></div>
+            </div>
+            <p class="hint" style="margin-top:8px">Aim for as many relevant homes as you can <strong>without going over 450</strong>.</p>
+            <ol>
+              <li><strong>Statuses:</strong> Active, Pending/Backup, Sold, Expired, Withdrawn.</li>
+              <li><strong>Match dwelling</strong> to the subject (House vs Condo/Townhome).</li>
+              <li><strong>Geography + 2 years</strong> list-date lookback.</li>
+              <li><strong>Tighten</strong> with price, Total SF, garage, beds, baths.</li>
+              <li><strong>Export</strong> and upload — confirm columns, then generate.</li>
+            </ol>
+          </div>
+        </details>
+      </div>
     </div>
 
     <div class="card step-card">
@@ -518,10 +626,20 @@ document.getElementById('logoutLink').addEventListener('click', async (e) => {
 useSample.addEventListener('change', () => {
   exportFile.disabled = useSample.checked;
   statusEl.textContent = useSample.checked
-    ? 'Ready — uses the sample export by default.'
-    : 'Upload your MLS export(s), then generate.';
+    ? 'Sample export selected — confirm column mapping below.'
+    : 'Upload your export(s), confirm mapping, then generate.';
   statusEl.className = 'status';
   refreshExportFileList();
+  if (useSample.checked) inspectSampleExport();
+  else {
+    mappingConfirmed = false;
+    syncGenerateEnabled();
+    if ([...(exportFile.files || [])].length) inspectSelectedExport();
+    else {
+      document.getElementById('mappingReview').classList.remove('show');
+      columnMapOverride = null;
+    }
+  }
 });
 exportFile.disabled = useSample.checked;
 function refreshExportFileList() {
@@ -536,7 +654,432 @@ function refreshExportFileList() {
   list.hidden = false;
   list.innerHTML = files.map((f) => '<span>' + escapeHtml(f.name) + ' · ' + Math.round(f.size / 1024) + ' KB</span>').join('');
 }
-exportFile.addEventListener('change', refreshExportFileList);
+
+/* —— Search vs Upload dual mode —— */
+const marketSourceEl = document.getElementById('marketSource');
+const portalPanel = document.getElementById('portalPanel');
+const mlsPanel = document.getElementById('mlsPanel');
+const modePortalBtn = document.getElementById('modePortalBtn');
+const modeMlsBtn = document.getElementById('modeMlsBtn');
+let marketMode = 'portal';
+let mapboxToken = '';
+let portalMap = null;
+let portalDraw = null;
+let lastInspect = null;
+let columnMapOverride = null; // internal -> source
+let mappingConfirmed = false;
+let lastGeocodedQuery = '';
+
+const MAP_REVIEW_FIELDS = [
+  'Status', 'Price', 'SoldPrice', 'Bdrm', 'Bath', 'TotalSqFt', 'FinishedSQFT',
+  'ListDate', 'SoldDate', 'MLSNumber', 'Address', 'GarSpaces', 'YearBuilt',
+  'Latitude', 'Longitude', 'DOM', 'City', 'ZipCode'
+];
+
+function syncGenerateEnabled() {
+  if (marketMode === 'portal') {
+    btn.disabled = false;
+    return;
+  }
+  btn.disabled = !mappingConfirmed;
+}
+
+function setMarketMode(mode) {
+  marketMode = mode === 'mls' ? 'mls' : 'portal';
+  marketSourceEl.value = marketMode;
+  modePortalBtn.classList.toggle('on', marketMode === 'portal');
+  modeMlsBtn.classList.toggle('on', marketMode === 'mls');
+  portalPanel.hidden = marketMode !== 'portal';
+  mlsPanel.hidden = marketMode !== 'mls';
+  statusEl.className = 'status';
+  statusEl.textContent = marketMode === 'portal'
+    ? 'Search — set location, filters, and optional map area.'
+    : 'Upload — confirm column mapping before generate.';
+  if (marketMode === 'portal') {
+    requestAnimationFrame(() => ensurePortalMap());
+  } else if (useSample.checked) {
+    inspectSampleExport();
+  }
+  syncGenerateEnabled();
+}
+modePortalBtn.addEventListener('click', () => setMarketMode('portal'));
+modeMlsBtn.addEventListener('click', () => setMarketMode('mls'));
+
+function numOrNull(id) {
+  const el = document.getElementById(id);
+  if (!el || el.value === '' || el.value == null) return null;
+  const n = Number(el.value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function boundsFromRing(ring) {
+  if (!ring || ring.length < 4) return null;
+  let west = Infinity, east = -Infinity, south = Infinity, north = -Infinity;
+  ring.forEach((pt) => {
+    const lng = pt[0], lat = pt[1];
+    if (lng < west) west = lng;
+    if (lng > east) east = lng;
+    if (lat < south) south = lat;
+    if (lat > north) north = lat;
+  });
+  if (![west, east, south, north].every(Number.isFinite)) return null;
+  return { west, south, east, north };
+}
+
+function collectPortalCriteria() {
+  const loc = (document.getElementById('portalLocation').value || '').trim();
+  const criteria = {
+    location: loc,
+    dwelling: document.getElementById('portalDwelling').value || 'detached',
+    price_min: numOrNull('portalPriceMin'),
+    price_max: numOrNull('portalPriceMax'),
+    min_beds: numOrNull('portalBedsMin'),
+    max_beds: numOrNull('portalBedsMax'),
+    min_baths: numOrNull('portalBathsMin'),
+    max_baths: numOrNull('portalBathsMax'),
+    min_sqft: numOrNull('portalSqftMin'),
+    max_sqft: numOrNull('portalSqftMax'),
+    min_garage: numOrNull('portalGarage'),
+    require_garage_known: false,
+    lookback_days: numOrNull('portalLookback') || 730,
+  };
+  const ring = getDrawnPolygonRing();
+  if (ring && ring.length >= 4) {
+    criteria.polygon_ring = ring;
+    const fromRing = boundsFromRing(ring);
+    if (fromRing) criteria.map_bounds = fromRing;
+  } else if (document.getElementById('portalUseViewport').checked) {
+    const bounds = getMapBounds();
+    if (bounds) criteria.map_bounds = bounds;
+  }
+  return criteria;
+}
+
+function getDrawnPolygonRing() {
+  if (!portalDraw) return null;
+  const data = portalDraw.getAll();
+  const poly = (data.features || []).find((f) => f.geometry && f.geometry.type === 'Polygon');
+  if (!poly) return null;
+  const coords = poly.geometry.coordinates[0];
+  return coords.map((c) => [c[0], c[1]]);
+}
+
+function getMapBounds() {
+  if (!portalMap) return null;
+  try {
+    const b = portalMap.getBounds();
+    return {
+      west: b.getWest(),
+      south: b.getSouth(),
+      east: b.getEast(),
+      north: b.getNorth(),
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
+function ensurePortalMap() {
+  const el = document.getElementById('portalMap');
+  if (!el || portalMap) {
+    if (portalMap) portalMap.resize();
+    return;
+  }
+  if (!mapboxToken || typeof mapboxgl === 'undefined') {
+    el.innerHTML = '<div style="padding:24px;color:#5a6a7a;font-size:0.85rem">Map drawing unavailable (no Mapbox token). Search still works with a city or ZIP — set MAPBOX_ACCESS_TOKEN to enable draw/geocode.</div>';
+    return;
+  }
+  mapboxgl.accessToken = mapboxToken;
+  portalMap = new mapboxgl.Map({
+    container: 'portalMap',
+    style: 'mapbox://styles/mapbox/light-v11',
+    center: [-98.35, 39.5],
+    zoom: 3.5,
+  });
+  portalMap.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
+  if (typeof MapboxDraw !== 'undefined') {
+    portalDraw = new MapboxDraw({
+      displayControlsDefault: false,
+      controls: { polygon: true, trash: true },
+      defaultMode: 'simple_select',
+    });
+    portalMap.addControl(portalDraw, 'top-left');
+  }
+  portalMap.on('load', () => portalMap.resize());
+}
+
+async function geocodeAndCenter(opts) {
+  const silent = !!(opts && opts.silent);
+  const q = (document.getElementById('portalLocation').value || '').trim();
+  if (!q) return null;
+  if (!silent) statusEl.textContent = 'Centering map…';
+  try {
+    const res = await fetch('/api/portal/geocode', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ query: q }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Geocode failed');
+    if (data.location) document.getElementById('portalLocation').value = data.location;
+    lastGeocodedQuery = (document.getElementById('portalLocation').value || '').trim();
+    ensurePortalMap();
+    if (portalMap && data.longitude != null && data.latitude != null) {
+      if (data.bbox && data.bbox.length === 4) {
+        portalMap.fitBounds([[data.bbox[0], data.bbox[1]], [data.bbox[2], data.bbox[3]]], { padding: 40, maxZoom: 13 });
+      } else {
+        portalMap.flyTo({ center: [data.longitude, data.latitude], zoom: 11 });
+      }
+    } else if (!portalMap && !silent) {
+      statusEl.className = 'status';
+      statusEl.textContent = 'Location set. Map drawing needs a Mapbox token.';
+      return data;
+    }
+    if (!silent) {
+      statusEl.className = 'status ok';
+      statusEl.textContent = data.place_name || data.location || 'Centered';
+    }
+    return data;
+  } catch (err) {
+    if (!silent) {
+      statusEl.className = 'status error';
+      statusEl.textContent = String(err.message || err);
+    }
+    return null;
+  }
+}
+
+document.getElementById('portalDrawBtn').addEventListener('click', () => {
+  ensurePortalMap();
+  if (!portalDraw) {
+    statusEl.className = 'status error';
+    statusEl.textContent = 'Map drawing needs a Mapbox token.';
+    return;
+  }
+  portalDraw.changeMode('draw_polygon');
+});
+document.getElementById('portalClearDrawBtn').addEventListener('click', () => {
+  if (portalDraw) portalDraw.deleteAll();
+});
+
+document.getElementById('portalGeocodeBtn').addEventListener('click', () => geocodeAndCenter());
+document.getElementById('portalLocation').addEventListener('blur', () => {
+  const q = (document.getElementById('portalLocation').value || '').trim();
+  if (q && q !== lastGeocodedQuery) geocodeAndCenter({ silent: true });
+});
+
+document.getElementById('portalPreviewBtn').addEventListener('click', async () => {
+  const locEl = document.getElementById('portalLocation');
+  const q = (locEl.value || '').trim();
+  if (!q) {
+    statusEl.className = 'status error';
+    statusEl.textContent = 'Enter a city or ZIP to preview.';
+    return;
+  }
+  if (q !== lastGeocodedQuery) await geocodeAndCenter({ silent: true });
+  const criteria = collectPortalCriteria();
+  const previewEl = document.getElementById('portalPreview');
+  previewEl.classList.add('show');
+  previewEl.textContent = 'Pulling market…';
+  try {
+    const res = await fetch('/api/portal/preview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        criteria,
+        location: criteria.location,
+        map_bounds: criteria.map_bounds,
+        polygon_ring: criteria.polygon_ring,
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : (data.detail && data.detail.message) || 'Preview failed');
+    const p = data.preview || {};
+    const c = data.criteria || criteria;
+    const bits = [];
+    if (c.dwelling) bits.push(c.dwelling === 'attached' ? 'Condo+TH' : 'House');
+    if (c.price_min != null || c.price_max != null) bits.push(money(c.price_min) + '–' + money(c.price_max));
+    if (c.min_beds != null) bits.push(c.min_beds + '+ beds');
+    if (c.min_sqft != null || c.max_sqft != null) bits.push((c.min_sqft || '') + '–' + (c.max_sqft || '') + ' sf');
+    if (c.polygon_ring) bits.push('polygon');
+    else if (c.map_bounds) bits.push('map view');
+    previewEl.innerHTML =
+      '<strong>Preview</strong> — ' +
+      (p.n != null ? p.n + ' homes' : '') +
+      (p.active != null ? ' · ' + p.active + ' active' : '') +
+      (p.pending != null ? ' · ' + p.pending + ' pending' : '') +
+      (p.sold != null ? ' · ' + p.sold + ' sold' : '') +
+      (p.median_sold != null ? ' · median sold ' + money(p.median_sold) : '') +
+      (p.median_list != null ? ' · median list ' + money(p.median_list) : '') +
+      (bits.length ? '<br><span style="color:#5a6a7a">' + escapeHtml(bits.join(' · ')) + '</span>' : '');
+  } catch (err) {
+    previewEl.textContent = String(err.message || err);
+  }
+});
+
+(async () => {
+  try {
+    const res = await fetch('/api/portal/defaults', { credentials: 'same-origin' });
+    if (!res.ok) { setMarketMode('portal'); return; }
+    const data = await res.json();
+    mapboxToken = data.mapbox_token || '';
+    const c = data.criteria || {};
+    if (c.price_min != null) document.getElementById('portalPriceMin').value = c.price_min;
+    if (c.price_max != null) document.getElementById('portalPriceMax').value = c.price_max;
+    if (c.min_beds != null) document.getElementById('portalBedsMin').value = c.min_beds;
+    if (c.max_beds != null) document.getElementById('portalBedsMax').value = c.max_beds;
+    if (c.min_baths != null) document.getElementById('portalBathsMin').value = c.min_baths;
+    if (c.max_baths != null) document.getElementById('portalBathsMax').value = c.max_baths;
+    if (c.min_sqft != null) document.getElementById('portalSqftMin').value = c.min_sqft;
+    if (c.max_sqft != null) document.getElementById('portalSqftMax').value = c.max_sqft;
+    if (c.min_garage != null) document.getElementById('portalGarage').value = c.min_garage;
+    if (c.lookback_days != null) document.getElementById('portalLookback').value = c.lookback_days;
+    if (c.dwelling) document.getElementById('portalDwelling').value = c.dwelling;
+    setMarketMode('portal');
+  } catch (e) {
+    setMarketMode('portal');
+  }
+})();
+
+function collectColumnMapFromTable() {
+  const table = document.getElementById('mappingReviewTable');
+  const map = {};
+  table.querySelectorAll('select[data-internal]').forEach((s) => {
+    if (s.value) map[s.getAttribute('data-internal')] = s.value;
+  });
+  return map;
+}
+
+function setMappingConfirmed(ok) {
+  mappingConfirmed = !!ok;
+  const st = document.getElementById('mappingConfirmStatus');
+  if (ok) {
+    st.textContent = 'Mapping confirmed — ready to generate.';
+    st.className = 'ok';
+  } else {
+    st.textContent = 'Review columns, then confirm mapping.';
+    st.className = '';
+  }
+  syncGenerateEnabled();
+}
+
+function renderMappingReview(inspect) {
+  const box = document.getElementById('mappingReview');
+  const msg = document.getElementById('mappingReviewMsg');
+  const table = document.getElementById('mappingReviewTable');
+  const sampleEl = document.getElementById('mappingSample');
+  if (!inspect) {
+    box.classList.remove('show');
+    setMappingConfirmed(false);
+    return;
+  }
+  lastInspect = inspect;
+  box.classList.add('show');
+  const warn = (inspect.warnings || []).join(' · ');
+  msg.textContent =
+    'Confidence ' + Math.round((inspect.confidence || 0) * 100) + '%' +
+    ((inspect.missing_required || []).length ? ' · needs: ' + inspect.missing_required.join(', ') : '') +
+    (warn ? ' · ' + warn : '') +
+    ' — verify each field, then confirm.';
+  const headers = inspect.headers || [];
+  const rename = Object.assign({}, inspect.rename_map || {});
+  const byInternal = {};
+  const methodByInternal = {};
+  Object.keys(rename).forEach((src) => { byInternal[rename[src]] = src; });
+  (inspect.mappings || []).forEach((m) => {
+    if (m.internal && m.source) byInternal[m.internal] = m.source;
+    if (m.internal) methodByInternal[m.internal] = (m.method || '') + (m.confidence != null ? ' ' + Math.round(m.confidence * 100) + '%' : '');
+  });
+  table.innerHTML =
+    '<table><thead><tr><th>Field</th><th>Your column</th><th>Match</th></tr></thead><tbody>' +
+    MAP_REVIEW_FIELDS.map((field) => {
+      const selected = byInternal[field] || '';
+      const opts = ['<option value="">— skip —</option>']
+        .concat(headers.map((h) =>
+          '<option value="' + escapeAttr(h) + '"' + (h === selected ? ' selected' : '') + '>' + escapeHtml(h) + '</option>'
+        ));
+      return '<tr><td>' + escapeHtml(field) + '</td><td><select data-internal="' + escapeAttr(field) + '">' + opts.join('') + '</select></td><td style="color:#5a6a7a">' + escapeHtml(methodByInternal[field] || '') + '</td></tr>';
+    }).join('') +
+    '</tbody></table>';
+  table.querySelectorAll('select[data-internal]').forEach((sel) => {
+    sel.addEventListener('change', () => {
+      columnMapOverride = collectColumnMapFromTable();
+      setMappingConfirmed(false);
+    });
+  });
+  columnMapOverride = collectColumnMapFromTable();
+  setMappingConfirmed(false);
+
+  const rows = inspect.sample_rows || [];
+  if (rows.length && headers.length) {
+    const showCols = headers.slice(0, 8);
+    sampleEl.innerHTML =
+      '<div style="font-weight:600;margin-bottom:4px">Sample rows</div><table><thead><tr>' +
+      showCols.map((h) => '<th>' + escapeHtml(h) + '</th>').join('') +
+      '</tr></thead><tbody>' +
+      rows.map((r) => '<tr>' + showCols.map((h) => '<td title="' + escapeAttr(r[h] || '') + '">' + escapeHtml(r[h] || '') + '</td>').join('') + '</tr>').join('') +
+      '</tbody></table>';
+  } else {
+    sampleEl.innerHTML = '';
+  }
+}
+
+document.getElementById('confirmMappingBtn').addEventListener('click', () => {
+  columnMapOverride = collectColumnMapFromTable();
+  if (!columnMapOverride.Status && !(lastInspect && lastInspect.rename_map)) {
+    statusEl.className = 'status error';
+    statusEl.textContent = 'Map at least Status (and price / beds / baths / sqft) before confirming.';
+    return;
+  }
+  setMappingConfirmed(true);
+  statusEl.className = 'status ok';
+  statusEl.textContent = 'Mapping confirmed.';
+});
+
+async function inspectSelectedExport() {
+  if (marketMode !== 'mls' || useSample.checked) return;
+  const files = [...(exportFile.files || [])];
+  if (!files.length) {
+    document.getElementById('mappingReview').classList.remove('show');
+    setMappingConfirmed(false);
+    return;
+  }
+  const fd = new FormData();
+  fd.append('export_file', files[0]);
+  try {
+    const res = await fetch('/api/export/inspect', { method: 'POST', body: fd, credentials: 'same-origin' });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Inspect failed');
+    renderMappingReview(data);
+  } catch (err) {
+    statusEl.className = 'status error';
+    statusEl.textContent = String(err.message || err);
+    setMappingConfirmed(false);
+  }
+}
+
+async function inspectSampleExport() {
+  if (marketMode !== 'mls') return;
+  try {
+    const res = await fetch('/api/export/inspect-sample', { credentials: 'same-origin' });
+    if (res.ok) {
+      const data = await res.json();
+      renderMappingReview(data);
+      return;
+    }
+  } catch (e) {}
+  statusEl.className = 'status error';
+  statusEl.textContent = 'Could not load sample mapping — try again or upload a file.';
+  setMappingConfirmed(false);
+}
+
+exportFile.addEventListener('change', () => {
+  refreshExportFileList();
+  mappingConfirmed = false;
+  inspectSelectedExport();
+});
 
 function showDashView(name) {
   const views = { generate: 'view-generate', reports: 'view-reports' };
@@ -659,6 +1202,13 @@ form.addEventListener('submit', async (e) => {
   e.preventDefault();
   result.classList.remove('show');
   statusEl.className = 'status';
+
+  if (marketMode === 'mls' && !mappingConfirmed) {
+    statusEl.className = 'status error';
+    statusEl.textContent = 'Confirm column mapping before generating.';
+    return;
+  }
+
   statusEl.textContent = 'Running ListLogic engine… (first run can take up to a minute while photos load)';
   btn.disabled = true;
   const started = Date.now();
@@ -668,26 +1218,51 @@ form.addEventListener('submit', async (e) => {
   }, 2500);
 
   const data = new FormData(form);
-  data.set('use_sample_export', useSample.checked ? 'true' : 'false');
+  data.set('market_source', marketMode);
   data.delete('export_file');
   data.delete('export_files');
-  if (!useSample.checked) {
-    const files = [...(exportFile.files || [])];
-    if (!files.length) {
+
+  if (marketMode === 'portal') {
+    const q = (document.getElementById('portalLocation').value || '').trim();
+    if (!q) {
       clearInterval(tick);
       statusEl.className = 'status error';
-      statusEl.textContent = 'Choose at least one MLS export, or keep the sample checked.';
-      btn.disabled = false;
+      statusEl.textContent = 'Enter a city or ZIP to search.';
+      syncGenerateEnabled();
       return;
     }
-    if (files.length > 3) {
-      clearInterval(tick);
-      statusEl.className = 'status error';
-      statusEl.textContent = 'Upload up to 3 export files at a time.';
-      btn.disabled = false;
-      return;
+    if (q !== lastGeocodedQuery) await geocodeAndCenter({ silent: true });
+    const criteria = collectPortalCriteria();
+    data.set('portal_criteria', JSON.stringify(criteria));
+    data.set('use_sample_export', 'false');
+    const areaVal = (data.get('area_name') || '').trim();
+    if (!areaVal || areaVal === 'Custom market' || areaVal.indexOf('West Greeley') === 0) {
+      data.set('area_name', criteria.location);
     }
-    files.forEach((f) => data.append('export_files', f));
+  } else {
+    data.set('use_sample_export', useSample.checked ? 'true' : 'false');
+    columnMapOverride = collectColumnMapFromTable();
+    if (columnMapOverride && Object.keys(columnMapOverride).length) {
+      data.set('column_map', JSON.stringify(columnMapOverride));
+    }
+    if (!useSample.checked) {
+      const files = [...(exportFile.files || [])];
+      if (!files.length) {
+        clearInterval(tick);
+        statusEl.className = 'status error';
+        statusEl.textContent = 'Choose at least one export, or use the sample.';
+        syncGenerateEnabled();
+        return;
+      }
+      if (files.length > 3) {
+        clearInterval(tick);
+        statusEl.className = 'status error';
+        statusEl.textContent = 'Upload up to 3 export files at a time.';
+        syncGenerateEnabled();
+        return;
+      }
+      files.forEach((f) => data.append('export_files', f));
+    }
   }
 
   const controller = new AbortController();
@@ -702,6 +1277,10 @@ form.addEventListener('submit', async (e) => {
     const payload = await res.json().catch(() => ({}));
     if (!res.ok) {
       const detail = payload.detail;
+      if (detail && detail.mapping) {
+        renderMappingReview(detail.mapping);
+        setMarketMode('mls');
+      }
       const msg = typeof detail === 'string' ? detail
         : (detail && detail.message) ? detail.message
         : (payload.message || ('HTTP ' + res.status));
@@ -710,7 +1289,7 @@ form.addEventListener('submit', async (e) => {
         statusEl.innerHTML = escapeHtml(msg) +
           ' <a href="/saas/pricing.html?plan=agent_monthly" style="font-weight:700">Subscribe — $39/mo</a> · ' +
           '<a href="/saas/pricing.html" style="font-weight:700">all plans</a>';
-        btn.disabled = false;
+        syncGenerateEnabled();
         return;
       }
       throw new Error(msg);
@@ -775,7 +1354,7 @@ form.addEventListener('submit', async (e) => {
   } finally {
     clearInterval(tick);
     clearTimeout(abortTimer);
-    btn.disabled = false;
+    syncGenerateEnabled();
   }
 });
 </script>

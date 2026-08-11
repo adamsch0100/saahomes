@@ -1,0 +1,3 @@
+ListingId,StandardStatus,ListPrice,ClosePrice,CloseDate,ListingContractDate,BedroomsTotal,BathroomsTotalInteger,LivingArea,GarageSpaces,UnparsedAddress,City,PostalCode,Latitude,Longitude
+A1,Closed,400000,395000,2025-01-15,2024-12-01,3,2,2100,2,123 Main St,Austin,78701,30.27,-97.74
+A2,Active,410000,, ,2026-01-01,4,3,2200,2,456 Oak Ave,Austin,78702,30.28,-97.73

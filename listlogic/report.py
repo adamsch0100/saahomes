@@ -353,7 +353,7 @@ def render_html(report: dict) -> str:
 </div>
 
 <footer>
-  ListLogic · Clarity that wins listings · Data from MLS export · Engine v0.3 · {report['generated_at'][:10]}
+  ListLogic · Clarity that wins listings · Engine v0.3 · {report['generated_at'][:10]}
 </footer>
 
 </div>

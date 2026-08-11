@@ -391,7 +391,7 @@ def _safe_run_id(run_id: str) -> str:
 
 
 def _generate(
-    export_path: Path,
+    export_path: Optional[Path] = None,
     *,
     address: str,
     living_area: Optional[float],
@@ -412,6 +412,8 @@ def _generate(
     logo_url: str = "",
     market_notes: str = "",
     force_run_id: Optional[str] = None,
+    market_df=None,
+    data_source: str = "",
 ) -> dict:
     defaults = dict(SUBJECT_2845_DEFAULTS) if "2845" in (address or "") and "13" in (address or "") else {}
     overrides = {
@@ -425,17 +427,18 @@ def _generate(
     overrides = {k: v for k, v in overrides.items() if v is not None}
 
     subject = resolve_subject(
-        str(export_path),
+        str(export_path) if export_path else None,
         address=address or None,
         mls_number=mls_number or None,
         defaults=defaults or None,
         overrides=overrides,
+        market_df=market_df,
     )
     if living_area:
         subject.living_area = float(living_area)
 
     report = _build_presentation(
-        export_path=str(export_path),
+        export_path=str(export_path) if export_path else None,
         subject=subject,
         area_name=area_name or "Custom market",
         city_filter=city_filter or "",
@@ -444,6 +447,8 @@ def _generate(
         agent_email=agent_email or "",
         brokerage=brokerage or "",
         market_notes=market_notes or "",
+        market_df=market_df,
+        data_source=data_source or "",
     )
     meta = report.setdefault("meta", {})
     if brand_primary:
@@ -2517,12 +2522,118 @@ def demo_export_info():
     }
 
 
+@app.get("/api/portal/defaults")
+def portal_defaults(request: Request):
+    _require_user(request)
+    from portal_market import DEFAULT_PORTAL_CRITERIA, _mapbox_token
+
+    return {
+        "criteria": dict(DEFAULT_PORTAL_CRITERIA),
+        "mapbox_token": _mapbox_token(),
+        "dwelling_options": [
+            {"value": "detached", "label": "House (detached)"},
+            {"value": "attached", "label": "Condo + Townhome (attached)"},
+        ],
+    }
+
+
+@app.post("/api/portal/geocode")
+async def portal_geocode(request: Request):
+    _require_user(request)
+    body = await request.json()
+    query = str((body or {}).get("query") or "").strip()
+    if not query:
+        raise HTTPException(400, "query required")
+    from portal_market import geocode_location
+
+    try:
+        return geocode_location(query)
+    except Exception as exc:
+        raise HTTPException(400, f"Geocode failed: {exc}") from exc
+
+
+@app.post("/api/portal/preview")
+async def portal_preview(request: Request):
+    """Pull portal market for criteria + map; return counts only (no full report)."""
+    _require_user(request)
+    body = await request.json()
+    if not isinstance(body, dict):
+        raise HTTPException(400, "JSON body required")
+    from market_schema import market_preview_stats
+    from portal_market import build_portal_from_criteria, parse_portal_criteria
+
+    criteria = parse_portal_criteria(body.get("criteria") or body)
+    if body.get("location"):
+        criteria["location"] = body["location"]
+    if body.get("map_bounds"):
+        criteria["map_bounds"] = body["map_bounds"]
+    if body.get("polygon_ring"):
+        criteria["polygon_ring"] = body["polygon_ring"]
+    if not str(criteria.get("location") or "").strip():
+        raise HTTPException(400, "location required (city, ZIP, or area)")
+
+    try:
+        df = await asyncio.to_thread(build_portal_from_criteria, criteria)
+    except Exception as exc:
+        logger.exception("Portal preview failed")
+        raise HTTPException(400, f"Portal market pull failed: {exc}") from exc
+
+    stats = market_preview_stats(df)
+    return {
+        "ok": True,
+        "criteria": criteria,
+        "preview": stats,
+    }
+
+
+@app.post("/api/export/inspect")
+async def export_inspect(
+    request: Request,
+    export_file: UploadFile = File(...),
+):
+    """Smart-map an uploaded MLS file and return header mapping + confidence."""
+    _require_user(request)
+    from export_mapper import inspect_export
+
+    suffix = Path(export_file.filename or "export.txt").suffix.lower() or ".txt"
+    if suffix not in {".txt", ".csv", ".tsv"}:
+        raise HTTPException(400, "Export must be .txt, .csv, or .tsv")
+    content = await export_file.read()
+    if not content.strip():
+        raise HTTPException(400, "Uploaded file is empty")
+    path = UPLOAD_DIR / f"{uuid.uuid4().hex}-inspect{suffix}"
+    try:
+        path.write_bytes(content)
+        return inspect_export(path)
+    except Exception as exc:
+        raise HTTPException(400, f"Could not inspect export: {exc}") from exc
+    finally:
+        try:
+            path.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+
+@app.get("/api/export/inspect-sample")
+def export_inspect_sample(request: Request):
+    """Inspect the bundled sample export for mapping review UX."""
+    _require_user(request)
+    if not DEMO_EXPORT.exists():
+        raise HTTPException(400, "Sample export missing")
+    from export_mapper import inspect_export
+
+    return inspect_export(DEMO_EXPORT)
+
+
 @app.post("/api/generate")
 async def generate(
     request: Request,
     export_file: Optional[UploadFile] = File(None),
     export_files: Optional[List[UploadFile]] = File(None),
     use_sample_export: str = Form("false"),
+    market_source: str = Form("mls"),
+    portal_criteria: str = Form(""),
+    column_map: str = Form(""),
     address: str = Form(...),
     living_area: Optional[str] = Form(None),
     beds: Optional[str] = Form(None),
@@ -2557,9 +2668,25 @@ async def generate(
         )
 
     use_sample = use_sample_export.lower() in {"1", "true", "yes", "on"}
-    export_path: Path
+    source = (market_source or "mls").strip().lower()
+    if source in ("portal", "realtor", "public"):
+        source = "portal"
+    else:
+        source = "mls"
+
+    export_path: Optional[Path] = None
     cleanup_paths: list[Path] = []
     logo_url = ""
+    market_df = None
+    data_source = "mls_export"
+    rename_overrides = None
+    if column_map and column_map.strip():
+        try:
+            rename_overrides = json.loads(column_map)
+            if not isinstance(rename_overrides, dict):
+                rename_overrides = None
+        except json.JSONDecodeError:
+            rename_overrides = None
 
     if logo and logo.filename:
         raw = await logo.read()
@@ -2573,10 +2700,39 @@ async def generate(
         logo_path.write_bytes(raw)
         logo_url = f"/branding/{logo_name}"
 
-    if use_sample:
+    if source == "portal":
+        data_source = "realtor"
+        try:
+            criteria_raw = json.loads(portal_criteria) if portal_criteria.strip() else {}
+        except json.JSONDecodeError as exc:
+            raise HTTPException(400, "portal_criteria must be valid JSON") from exc
+        from portal_market import build_portal_from_criteria, parse_portal_criteria
+
+        criteria = parse_portal_criteria(criteria_raw)
+        if not str(criteria.get("location") or "").strip():
+            # Fall back to city_filter or address locality
+            criteria["location"] = (city_filter or address or "").strip()
+        if not str(criteria.get("location") or "").strip():
+            raise HTTPException(400, "Portal mode needs a location (city/ZIP) in criteria")
+        try:
+            market_df = await asyncio.to_thread(build_portal_from_criteria, criteria)
+        except Exception as exc:
+            logger.exception("Portal generate pull failed")
+            raise HTTPException(400, f"Portal market pull failed: {exc}") from exc
+        if market_df is None or len(market_df) == 0:
+            raise HTTPException(400, "No portal listings matched those filters / map")
+        # Persist a pipe snapshot so photo/enrich paths that expect a file still work
+        export_path = UPLOAD_DIR / f"{uuid.uuid4().hex}-portal.txt"
+        market_df.to_csv(export_path, sep="|", index=False)
+        cleanup_paths.append(export_path)
+        if not area_name or area_name == "Custom market":
+            area_name = str(criteria.get("location") or "Search market").strip()
+        # Keep agent market_notes as provided — no source disclosure injected.
+    elif use_sample:
         if not DEMO_EXPORT.exists():
             raise HTTPException(400, "Sample export missing")
         export_path = DEMO_EXPORT
+        data_source = "mls_export"
     else:
         uploads: list[UploadFile] = []
         if export_files:
@@ -2585,7 +2741,7 @@ async def generate(
             if not any(f.filename == export_file.filename for f in uploads):
                 uploads.append(export_file)
         if not uploads:
-            raise HTTPException(400, "Upload an MLS export or enable the sample export")
+            raise HTTPException(400, "Upload a market export, enable sample, or use Search")
         if len(uploads) > 3:
             raise HTTPException(400, "Upload up to 3 export files at a time")
 
@@ -2614,18 +2770,59 @@ async def generate(
             saved_paths.append(path)
             cleanup_paths.append(path)
 
-        if len(saved_paths) == 1:
-            export_path = saved_paths[0]
-        else:
-            from core import load_exports
+        from export_mapper import load_mapped_export
+        from core import load_exports
 
+        if len(saved_paths) == 1:
             try:
-                merged = load_exports(saved_paths)
+                market_df, map_result = load_mapped_export(
+                    saved_paths[0], rename_overrides=rename_overrides
+                )
+            except Exception as exc:
+                raise HTTPException(400, f"Could not map export headers: {exc}") from exc
+            if map_result.missing_required and not rename_overrides:
+                raise HTTPException(
+                    status_code=400,
+                    detail={
+                        "message": "Confirm column mapping for required fields before generating.",
+                        "mapping": map_result.to_dict(),
+                    },
+                )
+            if map_result.needs_review and not rename_overrides and map_result.confidence < 0.85:
+                raise HTTPException(
+                    status_code=400,
+                    detail={
+                        "message": "Please review and confirm column mapping before generating.",
+                        "mapping": map_result.to_dict(),
+                    },
+                )
+            export_path = saved_paths[0]
+            # Write normalized pipe for downstream tools
+            norm_path = UPLOAD_DIR / f"{uuid.uuid4().hex}-mapped.txt"
+            market_df.to_csv(norm_path, sep="|", index=False)
+            cleanup_paths.append(norm_path)
+            export_path = norm_path
+        else:
+            try:
+                frames = []
+                for p in saved_paths:
+                    df_i, _ = load_mapped_export(p, rename_overrides=rename_overrides)
+                    frames.append(df_i)
+                import pandas as pd
+
+                merged = pd.concat(frames, ignore_index=True, sort=False)
+                if "MLSNumber" in merged.columns:
+                    sort_cols = [c for c in ("LastUpdateDate", "ListDate", "SoldDate") if c in merged.columns]
+                    if sort_cols:
+                        merged = merged.sort_values(sort_cols, ascending=False, na_position="last")
+                    merged = merged.drop_duplicates(subset=["MLSNumber"], keep="first")
+                market_df = merged.reset_index(drop=True)
             except Exception as exc:
                 raise HTTPException(400, f"Could not merge exports: {exc}") from exc
             export_path = UPLOAD_DIR / f"{uuid.uuid4().hex}-merged.txt"
-            merged.to_csv(export_path, sep="|", index=False)
+            market_df.to_csv(export_path, sep="|", index=False)
             cleanup_paths.append(export_path)
+        data_source = "mls_export"
 
     try:
         t0 = time.time()
@@ -2650,8 +2847,10 @@ async def generate(
             brand_primary=brand_primary.strip(),
             brand_accent=brand_accent.strip(),
             logo_url=logo_url,
+            market_df=market_df,
+            data_source=data_source,
         )
-        logger.info("Generate finished in %.1fs for %s", time.time() - t0, address)
+        logger.info("Generate finished in %.1fs for %s source=%s", time.time() - t0, address, data_source)
     except HTTPException:
         raise
     except Exception:
