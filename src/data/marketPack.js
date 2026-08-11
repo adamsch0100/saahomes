@@ -60,6 +60,78 @@ export const marketPack = {
     headerSubline: 'Schwartz and Associates · Northern Colorado Real Estate',
     brandLine: 'Schwartz and Associates · Fort Collins, CO',
   },
+
+  /**
+   * Default agent-voice for unassigned nurture (SAA).
+   * Per-agent brand/voice is resolved server-side; this is the console fallback.
+   */
+  agentVoice: {
+    defaultFromName: 'Adam Schwartz, SAA Homes',
+    defaultSignOff: 'Adam & Mandi Schwartz',
+    defaultVoice: 'warm',
+    voiceStyles: ['warm', 'professional', 'short'],
+  },
 };
+
+/**
+ * Resolve tenant brand for UI (agent console / brand preview).
+ * Mirrors backend getAgentBrand fallbacks — no invented data.
+ *
+ * @param {{ brand_name?: string|null, brokerage_name?: string|null, brand_phone?: string|null, phone?: string|null, name?: string|null, voice_style?: string|null, brand?: object }} agent
+ */
+export function resolveTenantBrand(agent) {
+  const market = marketPack.market;
+  const footer = marketPack.footer;
+  if (!agent) {
+    return {
+      brandName: market.brand,
+      brokerage: market.brokerage,
+      phone: market.phone,
+      tel: market.tel,
+      voiceStyle: marketPack.agentVoice.defaultVoice,
+      agentName: null,
+      fromName: marketPack.agentVoice.defaultFromName,
+      headerSubline: footer.headerSubline,
+      brandLine: footer.brandLine,
+      isCustom: false,
+    };
+  }
+  // Prefer server-resolved brand object when present
+  if (agent.brand && agent.brand.brandName) {
+    return {
+      brandName: agent.brand.brandName,
+      brokerage: agent.brand.brokerage,
+      phone: agent.brand.phone,
+      tel: agent.brand.tel || market.tel,
+      voiceStyle: agent.brand.voiceStyle || marketPack.agentVoice.defaultVoice,
+      agentName: agent.name || null,
+      fromName: agent.brand.fromName,
+      headerSubline: agent.brand.headerSubline || footer.headerSubline,
+      brandLine: agent.brand.brandLine || footer.brandLine,
+      isCustom: !!agent.brand.isCustom,
+    };
+  }
+  const brandName = (agent.brand_name || market.brand || '').trim() || market.brand;
+  const brokerage = (agent.brokerage_name || market.brokerage || '').trim() || market.brokerage;
+  const phone = (agent.brand_phone || agent.phone || market.phone || '').trim() || market.phone;
+  const agentName = (agent.name || '').trim() || null;
+  const voiceStyle = ['warm', 'professional', 'short'].includes(
+    String(agent.voice_style || '').toLowerCase()
+  )
+    ? String(agent.voice_style).toLowerCase()
+    : 'warm';
+  return {
+    brandName,
+    brokerage,
+    phone,
+    tel: `tel:${String(phone).replace(/\D/g, '')}`,
+    voiceStyle,
+    agentName,
+    fromName: agentName ? `${agentName} — ${brandName}` : marketPack.agentVoice.defaultFromName,
+    headerSubline: `${brokerage} · ${market.name} Real Estate`,
+    brandLine: `${brokerage} · Fort Collins, CO`,
+    isCustom: !!(agent.brand_name || agent.brokerage_name || agent.brand_phone),
+  };
+}
 
 export default marketPack;
