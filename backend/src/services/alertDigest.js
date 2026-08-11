@@ -355,6 +355,7 @@ function digestHtml({
     filterSummary,
     agentName: brand.agentName,
     brandName: brand.brandName,
+    marketKey: brand.marketKey,
   });
   const greeting = escapeHtml(voice.greeting);
 

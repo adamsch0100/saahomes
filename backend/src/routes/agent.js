@@ -6,6 +6,7 @@ import {
   assignLead,
   listTeammates,
   getAgentMe,
+  getAgentMarket,
   connectAgentFub,
   getAgentFubStatus,
   disconnectAgentFub,
@@ -25,6 +26,7 @@ router.post('/login', agentLogin);
 const agentOrAdmin = [authenticateToken, requireRole('agent', 'admin')];
 
 router.get('/me', ...agentOrAdmin, getAgentMe);
+router.get('/market', ...agentOrAdmin, getAgentMarket);
 router.get('/cockpit', ...agentOrAdmin, getAgentCockpit);
 router.patch('/cockpit/:id', ...agentOrAdmin, patchAgentCockpitLead);
 router.post('/assign', ...agentOrAdmin, assignLead);

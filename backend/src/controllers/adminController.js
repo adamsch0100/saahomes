@@ -1187,7 +1187,7 @@ const AGENT_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /**
  * POST /api/admin/agents
  * Create a teammate account with role=agent.
- * Body: { name, email, phone?, password, brand_name?, brokerage_name?, brand_phone?, voice_style? }
+ * Body: { name, email, phone?, password, brand_name?, brokerage_name?, brand_phone?, voice_style?, marketKey? }
  */
 export const createAgent = async (req, res) => {
   try {
@@ -1223,6 +1223,20 @@ export const createAgent = async (req, res) => {
     const brandPhone = brand.brand_phone !== undefined ? brand.brand_phone : null;
     const voiceStyle = brand.voice_style !== undefined ? brand.voice_style : 'warm';
 
+    // marketKey optional — null/empty → 'noco'; unknown registry key → 400
+    const { normalizeMarketKey } = await import('../config/marketPacks.js');
+    const marketRaw =
+      req.body?.marketKey !== undefined
+        ? req.body.marketKey
+        : req.body?.market_key !== undefined
+          ? req.body.market_key
+          : 'noco';
+    const marketNorm = normalizeMarketKey(marketRaw);
+    if (marketNorm.error) {
+      return res.status(400).json({ error: marketNorm.error });
+    }
+    const marketKey = marketNorm.key;
+
     const pool = getPool();
     const existing = await pool.query('SELECT id, role, password_hash FROM users WHERE LOWER(email) = $1', [
       emailStr,
@@ -1249,11 +1263,12 @@ export const createAgent = async (req, res) => {
            brokerage_name = $6,
            brand_phone = $7,
            voice_style = $8,
+           market_key = $9,
            last_active_at = NOW()
-         WHERE id = $9
+         WHERE id = $10
          RETURNING id, email, name, phone, role, status, created_at, last_active_at,
-                   brand_name, brokerage_name, brand_phone, voice_style`,
-        [hash, nameStr, phoneVal, token, brandName, brokerageName, brandPhone, voiceStyle, row.id]
+                   brand_name, brokerage_name, brand_phone, voice_style, market_key`,
+        [hash, nameStr, phoneVal, token, brandName, brokerageName, brandPhone, voiceStyle, marketKey, row.id]
       );
       logger.info('Existing user upgraded to agent', { email: emailStr, id: row.id });
       return res.status(200).json({
@@ -1268,12 +1283,12 @@ export const createAgent = async (req, res) => {
     const created = await pool.query(
       `INSERT INTO users (
          email, name, phone, manage_token, password_hash, role, status, last_active_at,
-         brand_name, brokerage_name, brand_phone, voice_style
+         brand_name, brokerage_name, brand_phone, voice_style, market_key
        )
-       VALUES ($1, $2, $3, $4, $5, 'agent', 'active', NOW(), $6, $7, $8, $9)
+       VALUES ($1, $2, $3, $4, $5, 'agent', 'active', NOW(), $6, $7, $8, $9, $10)
        RETURNING id, email, name, phone, role, status, created_at, last_active_at,
-                 brand_name, brokerage_name, brand_phone, voice_style`,
-      [emailStr, nameStr, phoneVal, manageToken, hash, brandName, brokerageName, brandPhone, voiceStyle]
+                 brand_name, brokerage_name, brand_phone, voice_style, market_key`,
+      [emailStr, nameStr, phoneVal, manageToken, hash, brandName, brokerageName, brandPhone, voiceStyle, marketKey]
     );
 
     logger.info('Agent account created', { email: emailStr, id: created.rows[0].id });
@@ -1293,7 +1308,7 @@ export const listAgents = async (req, res) => {
     const pool = getPool();
     const result = await pool.query(
       `SELECT id, email, name, phone, role, status, created_at, last_active_at,
-              brand_name, brokerage_name, brand_phone, voice_style,
+              brand_name, brokerage_name, brand_phone, voice_style, market_key,
               (SELECT COUNT(*)::int FROM users c
                WHERE c.assigned_agent_id = users.id
                  AND COALESCE(c.role, 'client') = 'client') AS assigned_lead_count
@@ -1317,8 +1332,8 @@ export const listAgents = async (req, res) => {
 
 /**
  * PATCH /api/admin/agents/:id
- * Activate / deactivate (status) or update name/phone/password/brand fields.
- * Body: { status?, name?, phone?, password?, brand_name?, brokerage_name?, brand_phone?, voice_style? }
+ * Activate / deactivate (status) or update name/phone/password/brand/market fields.
+ * Body: { status?, name?, phone?, password?, brand_name?, brokerage_name?, brand_phone?, voice_style?, marketKey? }
  */
 export const patchAgent = async (req, res) => {
   try {
@@ -1414,6 +1429,19 @@ export const patchAgent = async (req, res) => {
       params.push(brand.voice_style);
     }
 
+    // marketKey optional — null/empty → 'noco'; unknown → 400
+    if (body.marketKey !== undefined || body.market_key !== undefined) {
+      const { normalizeMarketKey } = await import('../config/marketPacks.js');
+      const marketRaw =
+        body.marketKey !== undefined ? body.marketKey : body.market_key;
+      const marketNorm = normalizeMarketKey(marketRaw);
+      if (marketNorm.error) {
+        return res.status(400).json({ error: marketNorm.error });
+      }
+      updates.push(`market_key = $${i++}`);
+      params.push(marketNorm.key);
+    }
+
     if (!updates.length) {
       return res.status(400).json({ error: 'Nothing to update' });
     }
@@ -1422,7 +1450,7 @@ export const patchAgent = async (req, res) => {
     const updated = await pool.query(
       `UPDATE users SET ${updates.join(', ')} WHERE id = $${i}
        RETURNING id, email, name, phone, role, status, created_at, last_active_at,
-                 brand_name, brokerage_name, brand_phone, voice_style`,
+                 brand_name, brokerage_name, brand_phone, voice_style, market_key`,
       params
     );
 

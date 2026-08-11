@@ -7,6 +7,10 @@
  *
  * Derives phone/brand/cities from seoConstants + areaSeo to avoid
  * inventing a second source of truth on the frontend.
+ *
+ * Registry: src/data/marketPacks.js registers this pack under key 'noco'
+ * and exports getMarketPack(marketKey). Keep this default `marketPack`
+ * export so existing consumers stay on NoCO without churn.
  */
 import { BUSINESS, SITE_NAME, SITE_URL } from '../utils/seoConstants.js';
 import { areaSeoPages } from './areaSeo.js';
