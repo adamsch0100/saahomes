@@ -80,9 +80,30 @@
 #portalPanel .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 @media (max-width: 720px) { #portalPanel .row3 { grid-template-columns: 1fr 1fr; } }
 #portalMap {
-  height: 280px; border-radius: var(--radius-sm); border: 1px solid var(--line);
-  margin-top: 8px; background: #e8eef4;
+  height: 460px; border-radius: var(--radius-sm); border: 1px solid var(--line);
+  margin-top: 8px; background: #dce6ef;
 }
+@media (max-width: 720px) { #portalMap { height: 360px; } }
+.suggest-wrap { position: relative; flex: 1; min-width: 180px; }
+.suggest-list {
+  display: none; position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 40;
+  background: #fff; border: 1px solid var(--line); border-radius: var(--radius-sm);
+  box-shadow: 0 12px 28px -12px rgba(12,60,110,0.35); max-height: 240px; overflow: auto;
+}
+.suggest-list.show { display: block; }
+.suggest-list button {
+  display: block; width: 100%; text-align: left; padding: 10px 12px; border: none;
+  background: transparent; font: inherit; font-size: 0.85rem; color: var(--ink); cursor: pointer;
+  border-bottom: 1px solid #f0ebe3;
+}
+.suggest-list button:hover, .suggest-list button.on { background: #eef4fa; }
+.shape-toggle { display: inline-flex; gap: 0; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.shape-toggle button {
+  border: none; background: #fff; padding: 8px 14px; font: inherit; font-size: 0.82rem;
+  font-weight: 600; color: var(--muted); cursor: pointer;
+}
+.shape-toggle button.on { background: var(--navy); color: #fff; }
+.map-toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
 .portal-preview {
   margin-top: 10px; padding: 10px 12px; border-radius: var(--radius-sm);
   background: #eef4fa; border: 1px solid #c9d9ea; font-size: 0.82rem; color: var(--ink);
@@ -242,15 +263,44 @@
       <div class="step-head">
         <span class="step-num">1</span>
         <div>
-          <h2>Market data</h2>
-          <p>Search the market, or upload your export</p>
+          <h2>Subject &amp; market</h2>
+          <p>Start with the home address — Search uses it to center the map</p>
         </div>
       </div>
 
-      <div class="mode-toggle" role="tablist" aria-label="Market mode">
+      <div class="field">
+        <label>Subject address</label>
+        <div class="suggest-wrap">
+          <input type="text" id="address" name="address" placeholder="Start typing an address…" value="2845 W 13th St, Greeley, CO 80634" required autocomplete="off">
+          <div class="suggest-list" id="addressSuggest" role="listbox"></div>
+        </div>
+        <p class="hint" id="addressHint">Pick a suggestion to center the map and draw a 1-mile market area.</p>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Square feet (total)</label>
+          <input type="number" id="sqft" name="living_area" value="2392">
+        </div>
+        <div class="field">
+          <label>Year built</label>
+          <input type="number" id="year" name="year_built" value="1969">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Beds</label>
+          <input type="number" id="beds" name="beds" value="4" step="1">
+        </div>
+        <div class="field">
+          <label>Baths</label>
+          <input type="number" id="baths" name="baths" value="2" step="0.25">
+        </div>
+      </div>
+
+      <div class="mode-toggle" role="tablist" aria-label="Market mode" style="margin-top:14px">
         <button type="button" class="mode-btn on" id="modePortalBtn" data-mode="portal">
           <strong>Search</strong>
-          <span>Location + filters + optional map · works nationwide</span>
+          <span>Map + filters around the subject · works nationwide</span>
         </button>
         <button type="button" class="mode-btn" id="modeMlsBtn" data-mode="mls">
           <strong>Upload</strong>
@@ -258,15 +308,34 @@
         </button>
       </div>
       <input type="hidden" id="marketSource" name="market_source" value="portal">
+      <input type="hidden" id="portalLocation" value="">
 
       <div id="portalPanel">
         <div class="field">
-          <label>Market location <span style="font-weight:400;text-transform:none">(city or ZIP)</span></label>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <input type="text" id="portalLocation" placeholder="City or ZIP" value="" style="flex:1;min-width:180px">
-            <button type="button" class="btn btn-ghost" id="portalGeocodeBtn" style="border:1px solid var(--line);color:var(--navy)">Center map</button>
+          <label>Market area on map</label>
+          <p class="hint" style="margin:0 0 6px">1-mile circle around the subject — switch to rectangle or draw a custom polygon.</p>
+          <div id="portalMap"></div>
+          <div class="map-toolbar">
+            <div class="shape-toggle" role="group" aria-label="Shape">
+              <button type="button" class="on" id="shapeCircleBtn" data-shape="circle">Circle</button>
+              <button type="button" id="shapeRectBtn" data-shape="rectangle">Rectangle</button>
+            </div>
+            <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--muted)">
+              Radius
+              <input type="number" id="portalRadiusMiles" value="1" min="0.25" max="25" step="0.25" style="width:72px;padding:6px 8px">
+              mi
+            </label>
+            <button type="button" class="btn btn-ghost" id="portalDrawBtn" style="border:1px solid var(--line);color:var(--navy)">Draw polygon</button>
+            <button type="button" class="btn btn-ghost" id="portalClearDrawBtn" style="border:1px solid var(--line);color:var(--navy)">Clear shape</button>
+            <button type="button" class="btn btn-ghost" id="portalPreviewBtn" style="border:1px solid var(--line);color:var(--navy)">Preview counts</button>
           </div>
+          <label class="check-row" style="margin-top:8px">
+            <input type="checkbox" id="portalWidenCity">
+            Widen search to whole city (ignore map shape)
+          </label>
+          <div class="portal-preview" id="portalPreview"></div>
         </div>
+
         <div class="row2">
           <div class="field">
             <label>Dwelling</label>
@@ -310,27 +379,32 @@
             </div>
           </div>
           <div class="field">
-            <label>Sqft min–max</label>
+            <label>Living sqft min–max</label>
             <div style="display:flex;gap:6px">
               <input type="number" id="portalSqftMin" value="1700" style="flex:1">
               <input type="number" id="portalSqftMax" value="2900" style="flex:1">
             </div>
           </div>
         </div>
-        <div class="field">
-          <label>Draw market area <span style="font-weight:400;text-transform:none">(optional)</span></label>
-          <p class="hint" style="margin:0 0 6px">Draw a polygon to scope the search. Without a shape, Search uses the location string only — not the current map view.</p>
-          <div id="portalMap"></div>
-          <label class="check-row" style="margin-top:8px">
-            <input type="checkbox" id="portalUseViewport">
-            Limit to current map view (only if you intentionally zoomed the area)
-          </label>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
-            <button type="button" class="btn btn-ghost" id="portalDrawBtn" style="border:1px solid var(--line);color:var(--navy)">Draw polygon</button>
-            <button type="button" class="btn btn-ghost" id="portalClearDrawBtn" style="border:1px solid var(--line);color:var(--navy)">Clear shape</button>
-            <button type="button" class="btn btn-ghost" id="portalPreviewBtn" style="border:1px solid var(--line);color:var(--navy)">Preview counts</button>
+        <div class="row3">
+          <div class="field">
+            <label>Lot acres min–max <span style="font-weight:400;text-transform:none">(optional)</span></label>
+            <div style="display:flex;gap:6px">
+              <input type="number" id="portalLotAcresMin" placeholder="min" min="0" step="0.05" style="flex:1">
+              <input type="number" id="portalLotAcresMax" placeholder="max" min="0" step="0.05" style="flex:1">
+            </div>
           </div>
-          <div class="portal-preview" id="portalPreview"></div>
+          <div class="field">
+            <label>Year built min–max <span style="font-weight:400;text-transform:none">(optional)</span></label>
+            <div style="display:flex;gap:6px">
+              <input type="number" id="portalYearMin" placeholder="min" min="1800" max="2100" style="flex:1">
+              <input type="number" id="portalYearMax" placeholder="max" min="1800" max="2100" style="flex:1">
+            </div>
+          </div>
+          <div class="field">
+            <label>MLS # <span style="font-weight:400;text-transform:none">(optional)</span></label>
+            <input type="text" id="mls" name="mls_number" placeholder="If already listed">
+          </div>
         </div>
       </div>
 
@@ -373,6 +447,16 @@
             </ol>
           </div>
         </details>
+        <div class="row2" style="margin-top:12px">
+          <div class="field">
+            <label>MLS # <span style="font-weight:400;text-transform:none">(optional)</span></label>
+            <input type="text" id="mlsUpload" placeholder="If already in the export">
+          </div>
+          <div class="field">
+            <label>Narrow by city <span style="font-weight:400;text-transform:none">(optional)</span></label>
+            <input type="text" id="city" name="city_filter" value="" placeholder="Blank = full export">
+          </div>
+        </div>
       </div>
     </div>
 
@@ -380,42 +464,8 @@
       <div class="step-head">
         <span class="step-num">2</span>
         <div>
-          <h2>Subject property</h2>
-          <p>The home you're pricing — and what to call this market</p>
-        </div>
-      </div>
-      <div class="field">
-        <label>Address</label>
-        <input type="text" id="address" name="address" placeholder="2845 W 13th St, Greeley, CO 80634" value="2845 W 13th St, Greeley, CO 80634" required>
-      </div>
-      <div class="row2">
-        <div class="field">
-          <label>MLS # <span style="font-weight:400;text-transform:none">(optional)</span></label>
-          <input type="text" id="mls" name="mls_number" placeholder="If already in the export">
-        </div>
-        <div class="field">
-          <label>Narrow by city <span style="font-weight:400;text-transform:none">(optional)</span></label>
-          <input type="text" id="city" name="city_filter" value="" placeholder="Blank = full MLS pull">
-        </div>
-      </div>
-      <div class="row2">
-        <div class="field">
-          <label>Square feet (total)</label>
-          <input type="number" id="sqft" name="living_area" value="2392">
-        </div>
-        <div class="field">
-          <label>Year built</label>
-          <input type="number" id="year" name="year_built" value="1969">
-        </div>
-      </div>
-      <div class="row2">
-        <div class="field">
-          <label>Beds</label>
-          <input type="number" id="beds" name="beds" value="4" step="1">
-        </div>
-        <div class="field">
-          <label>Baths</label>
-          <input type="number" id="baths" name="baths" value="2" step="0.25">
+          <h2>Pricing details</h2>
+          <p>Condition, list price, and how this market is labeled</p>
         </div>
       </div>
       <div class="row2">
@@ -435,13 +485,12 @@
       </div>
       <div class="field">
         <label>Market name <span style="font-weight:400;text-transform:none">(shown in the presentation)</span></label>
-        <input type="text" id="areaName" name="area_name" value="West Greeley · 1,800–2,800 sq ft · 2-car" placeholder="e.g. West Greeley 1800–2800 sf, 2-car, last 2 years">
+        <input type="text" id="areaName" name="area_name" value="" placeholder="Auto-fills from address / filters">
       </div>
       <div class="field">
-        <label>What did you pull in MLS? <span style="font-weight:400;text-transform:none">(optional — criteria in your words)</span></label>
-        <textarea id="marketNotes" name="market_notes" rows="2" placeholder="Example: Greeley 80634, 1500–2500 sq ft, 2+ car garage, under 0.35 acres, listed/sold last 24 months" style="resize:vertical"></textarea>
+        <label>Notes <span style="font-weight:400;text-transform:none">(optional)</span></label>
+        <textarea id="marketNotes" name="market_notes" rows="2" placeholder="Anything you want noted on the presentation" style="resize:vertical"></textarea>
       </div>
-      <p class="hint">Your 71-field export <strong>is</strong> the market. We also auto-read sq ft, garage, dates, and ZIPs from the file so sellers see exactly what "191 closed" means.</p>
     </div>
 
     <div class="card step-card">
@@ -665,10 +714,14 @@ let marketMode = 'portal';
 let mapboxToken = '';
 let portalMap = null;
 let portalDraw = null;
+let subjectMarker = null;
 let lastInspect = null;
-let columnMapOverride = null; // internal -> source
+let columnMapOverride = null;
 let mappingConfirmed = false;
 let lastGeocodedQuery = '';
+let lastGeo = null;
+let shapeMode = 'circle';
+let freehandOverride = false;
 
 const MAP_REVIEW_FIELDS = [
   'Status', 'Price', 'SoldPrice', 'Bdrm', 'Bath', 'TotalSqFt', 'FinishedSQFT',
@@ -693,10 +746,14 @@ function setMarketMode(mode) {
   mlsPanel.hidden = marketMode !== 'mls';
   statusEl.className = 'status';
   statusEl.textContent = marketMode === 'portal'
-    ? 'Search — set location, filters, and optional map area.'
+    ? 'Search — subject address centers the map and draws a 1-mile area.'
     : 'Upload — confirm column mapping before generate.';
   if (marketMode === 'portal') {
-    requestAnimationFrame(() => ensurePortalMap());
+    requestAnimationFrame(() => {
+      ensurePortalMap();
+      const addr = (document.getElementById('address').value || '').trim();
+      if (addr) geocodeSubject({ silent: true, draw: true });
+    });
   } else if (useSample.checked) {
     inspectSampleExport();
   }
@@ -726,8 +783,91 @@ function boundsFromRing(ring) {
   return { west, south, east, north };
 }
 
+function milesToRingCircle(lng, lat, miles, steps) {
+  steps = steps || 64;
+  const R = 3958.7613;
+  const lat1 = lat * Math.PI / 180;
+  const lng1 = lng * Math.PI / 180;
+  const d = miles / R;
+  const ring = [];
+  for (let i = 0; i <= steps; i++) {
+    const brng = (2 * Math.PI * i) / steps;
+    const lat2 = Math.asin(Math.sin(lat1) * Math.cos(d) + Math.cos(lat1) * Math.sin(d) * Math.cos(brng));
+    const lng2 = lng1 + Math.atan2(
+      Math.sin(brng) * Math.sin(d) * Math.cos(lat1),
+      Math.cos(d) - Math.sin(lat1) * Math.sin(lat2)
+    );
+    ring.push([lng2 * 180 / Math.PI, lat2 * 180 / Math.PI]);
+  }
+  return ring;
+}
+
+function milesToRingRect(lng, lat, miles) {
+  const dLat = miles / 69.0;
+  const dLng = miles / (Math.cos(lat * Math.PI / 180) * 69.172);
+  return [
+    [lng - dLng, lat - dLat],
+    [lng + dLng, lat - dLat],
+    [lng + dLng, lat + dLat],
+    [lng - dLng, lat + dLat],
+    [lng - dLng, lat - dLat],
+  ];
+}
+
+function getShapeRadiusMiles() {
+  const n = Number(document.getElementById('portalRadiusMiles').value);
+  return Number.isFinite(n) && n > 0 ? n : 1;
+}
+
+function setShapeMode(mode) {
+  shapeMode = mode === 'rectangle' ? 'rectangle' : 'circle';
+  document.getElementById('shapeCircleBtn').classList.toggle('on', shapeMode === 'circle');
+  document.getElementById('shapeRectBtn').classList.toggle('on', shapeMode === 'rectangle');
+  if (lastGeo && lastGeo.longitude != null && !freehandOverride) {
+    drawAutoShape(lastGeo.longitude, lastGeo.latitude);
+  }
+}
+document.getElementById('shapeCircleBtn').addEventListener('click', () => setShapeMode('circle'));
+document.getElementById('shapeRectBtn').addEventListener('click', () => setShapeMode('rectangle'));
+document.getElementById('portalRadiusMiles').addEventListener('change', () => {
+  freehandOverride = false;
+  if (lastGeo && lastGeo.longitude != null) drawAutoShape(lastGeo.longitude, lastGeo.latitude);
+});
+
+function drawAutoShape(lng, lat) {
+  ensurePortalMap();
+  if (!portalDraw || lng == null || lat == null) return;
+  const miles = getShapeRadiusMiles();
+  const ring = shapeMode === 'rectangle'
+    ? milesToRingRect(lng, lat, miles)
+    : milesToRingCircle(lng, lat, miles, 64);
+  portalDraw.deleteAll();
+  freehandOverride = false;
+  portalDraw.add({
+    type: 'Feature',
+    properties: { auto: true },
+    geometry: { type: 'Polygon', coordinates: [ring] },
+  });
+  const b = boundsFromRing(ring);
+  if (b && portalMap) {
+    portalMap.fitBounds([[b.west, b.south], [b.east, b.north]], { padding: 48, maxZoom: 14 });
+  }
+}
+
+function setSubjectMarker(lng, lat) {
+  if (!portalMap || lng == null || lat == null) return;
+  if (subjectMarker) subjectMarker.remove();
+  subjectMarker = new mapboxgl.Marker({ color: '#0c3c6e' })
+    .setLngLat([lng, lat])
+    .addTo(portalMap);
+}
+
 function collectPortalCriteria() {
-  const loc = (document.getElementById('portalLocation').value || '').trim();
+  const loc = (document.getElementById('portalLocation').value || '').trim()
+    || (lastGeo && lastGeo.location)
+    || (document.getElementById('address').value || '').trim();
+  const acresMin = numOrNull('portalLotAcresMin');
+  const acresMax = numOrNull('portalLotAcresMax');
   const criteria = {
     location: loc,
     dwelling: document.getElementById('portalDwelling').value || 'detached',
@@ -742,15 +882,19 @@ function collectPortalCriteria() {
     min_garage: numOrNull('portalGarage'),
     require_garage_known: false,
     lookback_days: numOrNull('portalLookback') || 730,
+    min_year_built: numOrNull('portalYearMin'),
+    max_year_built: numOrNull('portalYearMax'),
   };
-  const ring = getDrawnPolygonRing();
-  if (ring && ring.length >= 4) {
-    criteria.polygon_ring = ring;
-    const fromRing = boundsFromRing(ring);
-    if (fromRing) criteria.map_bounds = fromRing;
-  } else if (document.getElementById('portalUseViewport').checked) {
-    const bounds = getMapBounds();
-    if (bounds) criteria.map_bounds = bounds;
+  if (acresMin != null) criteria.min_lot_sqft = acresMin * 43560;
+  if (acresMax != null) criteria.max_lot_sqft = acresMax * 43560;
+  const widen = document.getElementById('portalWidenCity').checked;
+  if (!widen) {
+    const ring = getDrawnPolygonRing();
+    if (ring && ring.length >= 4) {
+      criteria.polygon_ring = ring;
+      const fromRing = boundsFromRing(ring);
+      if (fromRing) criteria.map_bounds = fromRing;
+    }
   }
   return criteria;
 }
@@ -764,21 +908,6 @@ function getDrawnPolygonRing() {
   return coords.map((c) => [c[0], c[1]]);
 }
 
-function getMapBounds() {
-  if (!portalMap) return null;
-  try {
-    const b = portalMap.getBounds();
-    return {
-      west: b.getWest(),
-      south: b.getSouth(),
-      east: b.getEast(),
-      north: b.getNorth(),
-    };
-  } catch (e) {
-    return null;
-  }
-}
-
 function ensurePortalMap() {
   const el = document.getElementById('portalMap');
   if (!el || portalMap) {
@@ -786,13 +915,13 @@ function ensurePortalMap() {
     return;
   }
   if (!mapboxToken || typeof mapboxgl === 'undefined') {
-    el.innerHTML = '<div style="padding:24px;color:#5a6a7a;font-size:0.85rem">Map drawing unavailable (no Mapbox token). Search still works with a city or ZIP — set MAPBOX_ACCESS_TOKEN to enable draw/geocode.</div>';
+    el.innerHTML = '<div style="padding:24px;color:#5a6a7a;font-size:0.85rem">Map unavailable (no Mapbox token). Search still works from the subject address — set MAPBOX_ACCESS_TOKEN for map/autocomplete.</div>';
     return;
   }
   mapboxgl.accessToken = mapboxToken;
   portalMap = new mapboxgl.Map({
     container: 'portalMap',
-    style: 'mapbox://styles/mapbox/light-v11',
+    style: 'mapbox://styles/mapbox/streets-v12',
     center: [-98.35, 39.5],
     zoom: 3.5,
   });
@@ -804,15 +933,18 @@ function ensurePortalMap() {
       defaultMode: 'simple_select',
     });
     portalMap.addControl(portalDraw, 'top-left');
+    portalMap.on('draw.create', () => { freehandOverride = true; });
+    portalMap.on('draw.update', () => { freehandOverride = true; });
   }
   portalMap.on('load', () => portalMap.resize());
 }
 
-async function geocodeAndCenter(opts) {
+async function geocodeSubject(opts) {
   const silent = !!(opts && opts.silent);
-  const q = (document.getElementById('portalLocation').value || '').trim();
+  const draw = opts && opts.draw !== false;
+  const q = (document.getElementById('address').value || '').trim();
   if (!q) return null;
-  if (!silent) statusEl.textContent = 'Centering map…';
+  if (!silent) statusEl.textContent = 'Locating address…';
   try {
     const res = await fetch('/api/portal/geocode', {
       method: 'POST',
@@ -822,23 +954,21 @@ async function geocodeAndCenter(opts) {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Geocode failed');
+    if (data.place_name) document.getElementById('address').value = data.place_name;
     if (data.location) document.getElementById('portalLocation').value = data.location;
-    lastGeocodedQuery = (document.getElementById('portalLocation').value || '').trim();
+    lastGeocodedQuery = (document.getElementById('address').value || '').trim();
+    lastGeo = data;
     ensurePortalMap();
     if (portalMap && data.longitude != null && data.latitude != null) {
-      if (data.bbox && data.bbox.length === 4) {
-        portalMap.fitBounds([[data.bbox[0], data.bbox[1]], [data.bbox[2], data.bbox[3]]], { padding: 40, maxZoom: 13 });
-      } else {
-        portalMap.flyTo({ center: [data.longitude, data.latitude], zoom: 11 });
-      }
-    } else if (!portalMap && !silent) {
-      statusEl.className = 'status';
-      statusEl.textContent = 'Location set. Map drawing needs a Mapbox token.';
-      return data;
+      setSubjectMarker(data.longitude, data.latitude);
+      if (draw) drawAutoShape(data.longitude, data.latitude);
+      else portalMap.flyTo({ center: [data.longitude, data.latitude], zoom: 13 });
     }
+    const area = document.getElementById('areaName');
+    if (area && !area.value.trim() && data.location) area.value = data.location;
     if (!silent) {
       statusEl.className = 'status ok';
-      statusEl.textContent = data.place_name || data.location || 'Centered';
+      statusEl.textContent = data.place_name || data.location || 'Located';
     }
     return data;
   } catch (err) {
@@ -850,6 +980,110 @@ async function geocodeAndCenter(opts) {
   }
 }
 
+const addressInput = document.getElementById('address');
+const suggestEl = document.getElementById('addressSuggest');
+let suggestTimer = null;
+let suggestItems = [];
+let suggestIndex = -1;
+
+function hideSuggest() {
+  suggestEl.classList.remove('show');
+  suggestEl.innerHTML = '';
+  suggestItems = [];
+  suggestIndex = -1;
+}
+
+async function fetchAddressSuggestions(q) {
+  if (!mapboxToken || q.length < 3) { hideSuggest(); return; }
+  const url = 'https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(q) +
+    '.json?access_token=' + encodeURIComponent(mapboxToken) +
+    '&autocomplete=true&types=address,place,locality,neighborhood,postcode&country=us&limit=6';
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    suggestItems = data.features || [];
+    if (!suggestItems.length) { hideSuggest(); return; }
+    suggestEl.innerHTML = suggestItems.map((f, i) =>
+      '<button type="button" role="option" data-i="' + i + '">' + escapeHtml(f.place_name || '') + '</button>'
+    ).join('');
+    suggestEl.classList.add('show');
+    suggestEl.querySelectorAll('button').forEach((b) => {
+      b.addEventListener('click', () => applySuggestion(Number(b.getAttribute('data-i'))));
+    });
+  } catch (e) {
+    hideSuggest();
+  }
+}
+
+function applySuggestion(i) {
+  const f = suggestItems[i];
+  if (!f) return;
+  hideSuggest();
+  addressInput.value = f.place_name || '';
+  const center = f.center || [];
+  let city = null, region = null;
+  (f.context || []).forEach((c) => {
+    const id = String(c.id || '');
+    if (id.startsWith('place')) city = c.text;
+    if (id.startsWith('region')) {
+      region = c.short_code || c.text;
+      if (typeof region === 'string' && region.startsWith('US-')) region = region.slice(3);
+    }
+  });
+  const loc = (city && region) ? (city + ', ' + region) : (f.place_name || '').split(',').slice(-2).join(',').trim();
+  document.getElementById('portalLocation').value = loc;
+  lastGeo = {
+    query: addressInput.value,
+    location: loc,
+    longitude: center[0],
+    latitude: center[1],
+    place_name: f.place_name,
+    bbox: f.bbox,
+  };
+  lastGeocodedQuery = addressInput.value;
+  ensurePortalMap();
+  if (portalMap && center[0] != null) {
+    setSubjectMarker(center[0], center[1]);
+    drawAutoShape(center[0], center[1]);
+  }
+  const area = document.getElementById('areaName');
+  if (area && !area.value.trim() && loc) area.value = loc;
+  statusEl.className = 'status ok';
+  statusEl.textContent = f.place_name || 'Located';
+}
+
+addressInput.addEventListener('input', () => {
+  clearTimeout(suggestTimer);
+  const q = addressInput.value.trim();
+  suggestTimer = setTimeout(() => fetchAddressSuggestions(q), 250);
+});
+addressInput.addEventListener('keydown', (e) => {
+  if (!suggestEl.classList.contains('show')) return;
+  const buttons = [...suggestEl.querySelectorAll('button')];
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    suggestIndex = Math.min(suggestIndex + 1, buttons.length - 1);
+    buttons.forEach((b, i) => b.classList.toggle('on', i === suggestIndex));
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    suggestIndex = Math.max(suggestIndex - 1, 0);
+    buttons.forEach((b, i) => b.classList.toggle('on', i === suggestIndex));
+  } else if (e.key === 'Enter' && suggestIndex >= 0) {
+    e.preventDefault();
+    applySuggestion(suggestIndex);
+  } else if (e.key === 'Escape') hideSuggest();
+});
+addressInput.addEventListener('blur', () => {
+  setTimeout(() => {
+    hideSuggest();
+    const q = addressInput.value.trim();
+    if (q && q !== lastGeocodedQuery) geocodeSubject({ silent: true, draw: true });
+  }, 180);
+});
+document.addEventListener('click', (e) => {
+  if (!suggestEl.contains(e.target) && e.target !== addressInput) hideSuggest();
+});
+
 document.getElementById('portalDrawBtn').addEventListener('click', () => {
   ensurePortalMap();
   if (!portalDraw) {
@@ -857,28 +1091,29 @@ document.getElementById('portalDrawBtn').addEventListener('click', () => {
     statusEl.textContent = 'Map drawing needs a Mapbox token.';
     return;
   }
+  freehandOverride = true;
   portalDraw.changeMode('draw_polygon');
 });
 document.getElementById('portalClearDrawBtn').addEventListener('click', () => {
   if (portalDraw) portalDraw.deleteAll();
-});
-
-document.getElementById('portalGeocodeBtn').addEventListener('click', () => geocodeAndCenter());
-document.getElementById('portalLocation').addEventListener('blur', () => {
-  const q = (document.getElementById('portalLocation').value || '').trim();
-  if (q && q !== lastGeocodedQuery) geocodeAndCenter({ silent: true });
+  freehandOverride = false;
+  if (lastGeo && lastGeo.longitude != null) drawAutoShape(lastGeo.longitude, lastGeo.latitude);
 });
 
 document.getElementById('portalPreviewBtn').addEventListener('click', async () => {
-  const locEl = document.getElementById('portalLocation');
-  const q = (locEl.value || '').trim();
-  if (!q) {
+  const addr = (document.getElementById('address').value || '').trim();
+  if (!addr) {
     statusEl.className = 'status error';
-    statusEl.textContent = 'Enter a city or ZIP to preview.';
+    statusEl.textContent = 'Enter the subject address first.';
     return;
   }
-  if (q !== lastGeocodedQuery) await geocodeAndCenter({ silent: true });
+  if (addr !== lastGeocodedQuery) await geocodeSubject({ silent: true, draw: true });
   const criteria = collectPortalCriteria();
+  if (!criteria.location) {
+    statusEl.className = 'status error';
+    statusEl.textContent = 'Could not resolve a market location from the address.';
+    return;
+  }
   const previewEl = document.getElementById('portalPreview');
   previewEl.classList.add('show');
   previewEl.textContent = 'Pulling market…';
@@ -901,10 +1136,10 @@ document.getElementById('portalPreviewBtn').addEventListener('click', async () =
     const bits = [];
     if (c.dwelling) bits.push(c.dwelling === 'attached' ? 'Condo+TH' : 'House');
     if (c.price_min != null || c.price_max != null) bits.push(money(c.price_min) + '–' + money(c.price_max));
-    if (c.min_beds != null) bits.push(c.min_beds + '+ beds');
+    if (c.min_beds != null) bits.push(c.min_beds + (c.max_beds != null ? '–' + c.max_beds : '+') + ' beds');
+    if (c.min_baths != null) bits.push(c.min_baths + (c.max_baths != null ? '–' + c.max_baths : '+') + ' baths');
     if (c.min_sqft != null || c.max_sqft != null) bits.push((c.min_sqft || '') + '–' + (c.max_sqft || '') + ' sf');
-    if (c.polygon_ring) bits.push('polygon');
-    else if (c.map_bounds) bits.push('map view');
+    if (c.polygon_ring) bits.push(shapeMode === 'rectangle' ? 'rectangle' : 'circle');
     previewEl.innerHTML =
       '<strong>Preview</strong> — ' +
       (p.n != null ? p.n + ' homes' : '') +
@@ -1223,16 +1458,23 @@ form.addEventListener('submit', async (e) => {
   data.delete('export_files');
 
   if (marketMode === 'portal') {
-    const q = (document.getElementById('portalLocation').value || '').trim();
-    if (!q) {
+    const addr = (document.getElementById('address').value || '').trim();
+    if (!addr) {
       clearInterval(tick);
       statusEl.className = 'status error';
-      statusEl.textContent = 'Enter a city or ZIP to search.';
+      statusEl.textContent = 'Enter the subject address first.';
       syncGenerateEnabled();
       return;
     }
-    if (q !== lastGeocodedQuery) await geocodeAndCenter({ silent: true });
+    if (addr !== lastGeocodedQuery) await geocodeSubject({ silent: true, draw: true });
     const criteria = collectPortalCriteria();
+    if (!criteria.location) {
+      clearInterval(tick);
+      statusEl.className = 'status error';
+      statusEl.textContent = 'Could not resolve a market location from the address.';
+      syncGenerateEnabled();
+      return;
+    }
     data.set('portal_criteria', JSON.stringify(criteria));
     data.set('use_sample_export', 'false');
     const areaVal = (data.get('area_name') || '').trim();
