@@ -126,6 +126,7 @@ a.btn { text-decoration: none; display: inline-block; }
     <div class="ops-card"><div class="label">AI chats (7d)</div><div class="value" id="statAiWeek">—</div><div class="hint" id="statAiTotal"></div></div>
     <div class="ops-card"><div class="label">Open feedback</div><div class="value" id="statFbOpen">—</div><div class="hint" id="statFbNew"></div></div>
     <div class="ops-card"><div class="label">Stripe</div><div class="value" id="statStripe">—</div><div class="hint">Checkout / portal</div></div>
+    <div class="ops-card"><div class="label">Possible shared accts</div><div class="value" id="statShared">—</div><div class="hint" id="statSharedHint">3+ IPs / 7d</div></div>
   </div>
 
   <div class="tabs">
@@ -411,6 +412,21 @@ async function loadStats() {
   document.getElementById('statFbNew').textContent = `${s.feedback_new ?? 0} new`;
   document.getElementById('statStripe').textContent = s.stripe_configured ? 'On' : 'Off';
   if (s.stripe_mode) stripeMode = s.stripe_mode;
+}
+
+async function loadShared() {
+  try {
+    const data = await api('/api/admin/shared-accounts');
+    const flagged = data.flagged || [];
+    document.getElementById('statShared').textContent = String(flagged.length);
+    const hint = document.getElementById('statSharedHint');
+    if (!flagged.length) { hint.textContent = 'none flagged · 7d'; return; }
+    hint.innerHTML = flagged.slice(0, 4).map(u =>
+      `${esc(u.name || u.email)} · ${u.ip_count} IPs`
+    ).join('<br>') + (flagged.length > 4 ? `<br>+${flagged.length - 4} more` : '');
+  } catch (_) {
+    document.getElementById('statShared').textContent = '—';
+  }
 }
 
 const PLAN_LABELS = {
@@ -810,7 +826,7 @@ wireChips('evTypeChips', 'data-type', v => { evType = v; loadEvents().catch(err 
     return;
   }
   await Promise.all([
-    loadBilling(), loadStats(), loadUsers(), loadReports(), loadAiChats(),
+    loadBilling(), loadStats(), loadShared(), loadUsers(), loadReports(), loadAiChats(),
     loadPromos(), loadInvites(), loadFeedback(), loadEvents(),
   ]);
 })().catch(err => setStatus(String(err.message || err), false));
