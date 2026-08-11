@@ -3,7 +3,7 @@
 ## Integration status
 
 - [x] OpenCode Go — **routing lock:** flash daily · pro next · kimi-k3 super
-- [ ] OpenCode China opt-in for DeepSeek V4 Flash/Pro — https://opencode.ai/workspace (Go settings). Until then daily standby = `mimo-v2.5`
+- [x] OpenCode China opt-in for DeepSeek V4 Flash/Pro — daily = `deepseek-v4-flash`
 - [x] Telegram bot (@ListLogicbot) — allowlist Adam `6320126021`
 - [ ] GitHub PAT (listlogic deploy / auto PR)
 - [ ] GSC for listlogic.homes
