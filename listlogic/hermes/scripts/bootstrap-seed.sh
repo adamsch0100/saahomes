@@ -83,8 +83,10 @@ mkdir -p "$WORKSPACE_DIR/outreach/skipped"
 mkdir -p "$WORKSPACE_DIR/prospects"
 mkdir -p "$DATA_DIR/browser-sessions/intel"
 
+# Hermes gateway runs as user `hermes` — workspace must be writable or CRM/outreach writes fail.
 if id hermes >/dev/null 2>&1; then
-  chown -R hermes:hermes "$DATA_DIR/browser-sessions" 2>/dev/null || true
+  chown -R hermes:hermes "$WORKSPACE_DIR" "$DATA_DIR/browser-sessions" 2>/dev/null || true
+  chmod -R u+rwX "$WORKSPACE_DIR" 2>/dev/null || true
 fi
 
 if [ -f "$DATA_DIR/AGENTS.md" ] && [ ! -f "$WORKSPACE_DIR/AGENTS.md" ]; then

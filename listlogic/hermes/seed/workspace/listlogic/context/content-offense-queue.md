@@ -36,9 +36,9 @@ We win as **seller pricing-decision software**: custom-fit market + live **price
 ## Real product gaps (honest)
 | Gap | Severity | Note |
 |-----|----------|------|
-| No live MLS feed | Medium for MLS-bundled markets | Upload/Search is the workaround; don’t block sales |
+| No live MLS feed | **Not a gap** | Search + upload is intentional. Do not pursue feed as a blocker. |
 | No video proof | High for cold traffic | Record this week |
-| Thin comparison SERP presence | High for SEO | Pages above |
+| Thin comparison SERP presence | High for SEO | Means: Google barely shows listlogic.homes for “CMA software / Cloud CMA alternative” until we publish comparison + pillar pages. Hermes ships those via content-seo-offense — not a product rebuild. |
 | Proof/case studies | Medium | 3 stories |
 | Brokerage pilot packaging | Medium | CTA + kit |
 
