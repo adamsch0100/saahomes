@@ -238,6 +238,19 @@ fi
 
 export HERMES_HOME="$DATA_DIR"
 if command -v hermes >/dev/null 2>&1; then
+  # Pin OpenCode Go models every boot (volume may retain upstream defaults like claude-opus).
+  hermes config set model.provider opencode-go 2>/dev/null || true
+  hermes config set model.default kimi-k2.6 2>/dev/null || true
+  hermes config set auxiliary.compression.provider opencode-go 2>/dev/null || true
+  hermes config set auxiliary.compression.model deepseek-v4-flash 2>/dev/null || true
+  hermes config set auxiliary.web_extract.provider opencode-go 2>/dev/null || true
+  hermes config set auxiliary.web_extract.model deepseek-v4-flash 2>/dev/null || true
+  hermes config set delegation.provider opencode-go 2>/dev/null || true
+  hermes config set delegation.model deepseek-v4-pro 2>/dev/null || true
+  # Prefer seed config model block if present (keeps YAML authoritative).
+  if [ -f "$SEED_DIR/config.yaml" ]; then
+    cp "$SEED_DIR/config.yaml" "$DATA_DIR/config.yaml"
+  fi
   if telegram_allowed="$(resolve_telegram_allowed_users)"; then
     upsert_env "TELEGRAM_ALLOWED_USERS" "$telegram_allowed"
     export TELEGRAM_ALLOWED_USERS="$telegram_allowed"
