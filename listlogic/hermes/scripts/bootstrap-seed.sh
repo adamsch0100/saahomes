@@ -243,8 +243,8 @@ if command -v hermes >/dev/null 2>&1; then
   # Pin OpenCode Go models every boot (volume may retain upstream defaults like claude-opus).
   # Adam lock: flash daily · pro next · kimi-k3 super only.
   hermes config set model.provider opencode-go 2>/dev/null || true
-  hermes config set model.default deepseek-v4-flash 2>/dev/null || true
-  hermes config set auxiliary.compression.provider opencode-go 2>/dev/null || true
+  hermes config set model.default mimo-v2.5 2>/dev/null || true
+  # NOTE: After OpenCode China opt-in for DeepSeek, change seed config + this line to deepseek-v4-flash.  hermes config set auxiliary.compression.provider opencode-go 2>/dev/null || true
   hermes config set auxiliary.compression.model deepseek-v4-flash 2>/dev/null || true
   hermes config set auxiliary.web_extract.provider opencode-go 2>/dev/null || true
   hermes config set auxiliary.web_extract.model deepseek-v4-flash 2>/dev/null || true

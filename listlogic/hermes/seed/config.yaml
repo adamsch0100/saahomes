@@ -1,6 +1,8 @@
 model:
-  # Daily driver — high volume, cheap, strong enough for most Hermes turns
-  default: deepseek-v4-flash
+  # Preferred daily: deepseek-v4-flash (requires OpenCode Go China-hosting opt-in).
+  # Until Adam opts in at OpenCode console, use mimo-v2.5 as daily standby.
+  # After opt-in: set default back to deepseek-v4-flash (bootstrap honors this file).
+  default: mimo-v2.5
   provider: opencode-go
 
 providers:
