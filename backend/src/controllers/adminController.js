@@ -347,7 +347,7 @@ export const getCockpitLeads = async (req, res) => {
       `SELECT u.id, u.email, u.name, u.phone, u.role, u.status, u.intent,
               u.lead_score, u.lead_score_updated_at, u.seller_heat, u.seller_heat_at,
               u.lifecycle_stage, u.lifecycle_stage_manual, u.next_touch_at, u.last_touched_at,
-              u.fub_person_id, u.created_at, u.last_active_at,
+              u.fub_person_id, u.source, u.created_at, u.last_active_at,
               u.assigned_agent_id,
               a.name AS assigned_agent_name,
               a.email AS assigned_agent_email,

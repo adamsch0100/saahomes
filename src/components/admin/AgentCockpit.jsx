@@ -647,6 +647,15 @@ export default function AgentCockpit({
                       <p className="font-semibold text-gray-900 truncate">
                         {lead.is_hot && <span className="mr-1" title={`${lead.heat_count} high-intent events in 7d`}>🔥</span>}
                         {lead.name || "—"}
+                        {lead.source === "fub-import" && (
+                          <span
+                            className="ml-1.5 text-[10px] font-bold uppercase tracking-wide text-black px-1.5 py-0.5 rounded align-middle"
+                            style={{ backgroundColor: `${GOLD}55` }}
+                            title="Imported from Follow Up Boss"
+                          >
+                            FUB
+                          </span>
+                        )}
                       </p>
                       <a href={`mailto:${lead.email}`} className="text-sm text-blue-700 break-all">
                         {lead.email}
@@ -779,6 +788,15 @@ export default function AgentCockpit({
                         <td className="px-4 py-3">
                           <div className="font-semibold text-gray-900">
                             {lead.name || "—"}
+                            {lead.source === "fub-import" && (
+                              <span
+                                className="ml-1.5 text-[10px] font-bold uppercase tracking-wide text-black px-1.5 py-0.5 rounded"
+                                style={{ backgroundColor: `${GOLD}55` }}
+                                title="Imported from Follow Up Boss"
+                              >
+                                FUB
+                              </span>
+                            )}
                             {lead.seller_heat && (
                               <span className="ml-1.5 text-[10px] font-bold uppercase tracking-wide text-orange-700 bg-orange-50 px-1.5 py-0.5 rounded">
                                 seller
