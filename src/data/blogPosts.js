@@ -840,6 +840,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/buyers-hero.jpg',
     readTime: '8 min read',
+    youtubeId: '7E274DfsUek',
     sections: [
       {
         heading: 'What is the Carbon Valley?',
