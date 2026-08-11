@@ -342,16 +342,21 @@ export const getCockpitLeads = async (req, res) => {
     const like = `%${String(q).trim()}%`;
     const pool = getPool();
 
-    // Base user list — prefer scored / recently active
+    // Base user list — client pool only (exclude agent/admin seats), with assignment
     const users = await pool.query(
       `SELECT u.id, u.email, u.name, u.phone, u.role, u.status, u.intent,
               u.lead_score, u.lead_score_updated_at, u.seller_heat, u.seller_heat_at,
               u.lifecycle_stage, u.lifecycle_stage_manual, u.next_touch_at, u.last_touched_at,
               u.fub_person_id, u.created_at, u.last_active_at,
+              u.assigned_agent_id,
+              a.name AS assigned_agent_name,
+              a.email AS assigned_agent_email,
               (SELECT COUNT(*)::int FROM saved_searches s WHERE s.user_id = u.id) AS search_count,
               (SELECT COUNT(*)::int FROM home_profiles hp WHERE hp.user_id = u.id) AS home_count
        FROM users u
+       LEFT JOIN users a ON a.id = u.assigned_agent_id
        WHERE u.status IS DISTINCT FROM 'unsubscribed'
+         AND COALESCE(u.role, 'client') = 'client'
          AND ($1 = '%%' OR u.email ILIKE $1 OR u.name ILIKE $1 OR u.phone ILIKE $1)
        ORDER BY COALESCE(u.lead_score, 0) DESC, u.last_active_at DESC NULLS LAST, u.created_at DESC
        LIMIT $2`,
@@ -1170,5 +1175,192 @@ export const getEmailAbStats = async (req, res) => {
   } catch (error) {
     logger.error('Error fetching email A/B stats', error);
     res.status(500).json({ error: 'Failed to fetch email A/B stats' });
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Multi-agent seats (P-1) — admin creates / lists / activates agents
+// ---------------------------------------------------------------------------
+
+const AGENT_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * POST /api/admin/agents
+ * Create a teammate account with role=agent.
+ * Body: { name, email, phone?, password }
+ */
+export const createAgent = async (req, res) => {
+  try {
+    const { name, email, phone, password } = req.body || {};
+    const emailStr = String(email || '').trim().toLowerCase();
+    const nameStr = String(name || '').trim().slice(0, 255);
+    const passStr = String(password || '');
+
+    if (!AGENT_EMAIL_RE.test(emailStr)) {
+      return res.status(400).json({ error: 'Valid email is required' });
+    }
+    if (!nameStr) {
+      return res.status(400).json({ error: 'Name is required' });
+    }
+    if (passStr.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
+
+    const phoneDigits = String(phone || '').replace(/\D/g, '');
+    const phoneVal =
+      phoneDigits.length >= 7 && phoneDigits.length <= 15 ? phoneDigits : null;
+
+    const pool = getPool();
+    const existing = await pool.query('SELECT id, role, password_hash FROM users WHERE LOWER(email) = $1', [
+      emailStr,
+    ]);
+
+    if (existing.rows.length) {
+      const row = existing.rows[0];
+      const role = String(row.role || '').toLowerCase();
+      // Upgrade existing client → agent if Adam wants this email as an agent seat
+      if (role === 'agent' || role === 'admin') {
+        return res.status(409).json({ error: 'An agent/admin account with that email already exists' });
+      }
+      const hash = await bcrypt.hash(passStr, 10);
+      const token = crypto.randomBytes(24).toString('hex');
+      const updated = await pool.query(
+        `UPDATE users SET
+           password_hash = $1,
+           name = $2,
+           phone = COALESCE($3, phone),
+           role = 'agent',
+           status = 'active',
+           manage_token = COALESCE(manage_token, $4),
+           last_active_at = NOW()
+         WHERE id = $5
+         RETURNING id, email, name, phone, role, status, created_at, last_active_at`,
+        [hash, nameStr, phoneVal, token, row.id]
+      );
+      logger.info('Existing user upgraded to agent', { email: emailStr, id: row.id });
+      return res.status(200).json({ success: true, data: updated.rows[0], upgraded: true });
+    }
+
+    const hash = await bcrypt.hash(passStr, 10);
+    const manageToken = crypto.randomBytes(24).toString('hex');
+    const created = await pool.query(
+      `INSERT INTO users (email, name, phone, manage_token, password_hash, role, status, last_active_at)
+       VALUES ($1, $2, $3, $4, $5, 'agent', 'active', NOW())
+       RETURNING id, email, name, phone, role, status, created_at, last_active_at`,
+      [emailStr, nameStr, phoneVal, manageToken, hash]
+    );
+
+    logger.info('Agent account created', { email: emailStr, id: created.rows[0].id });
+    return res.status(201).json({ success: true, data: created.rows[0] });
+  } catch (error) {
+    logger.error('createAgent error', error);
+    return res.status(500).json({ error: 'Failed to create agent' });
+  }
+};
+
+/**
+ * GET /api/admin/agents — list agent (+ admin) seats.
+ */
+export const listAgents = async (req, res) => {
+  try {
+    const pool = getPool();
+    const result = await pool.query(
+      `SELECT id, email, name, phone, role, status, created_at, last_active_at,
+              (SELECT COUNT(*)::int FROM users c
+               WHERE c.assigned_agent_id = users.id
+                 AND COALESCE(c.role, 'client') = 'client') AS assigned_lead_count
+       FROM users
+       WHERE role IN ('agent', 'admin')
+       ORDER BY
+         CASE status WHEN 'active' THEN 0 ELSE 1 END,
+         name NULLS LAST,
+         email`
+    );
+    return res.json({ success: true, data: result.rows });
+  } catch (error) {
+    logger.error('listAgents error', error);
+    return res.status(500).json({ error: 'Failed to list agents' });
+  }
+};
+
+/**
+ * PATCH /api/admin/agents/:id
+ * Activate / deactivate (status) or update name/phone/password.
+ * Body: { status?: 'active'|'inactive', name?, phone?, password? }
+ */
+export const patchAgent = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0) {
+      return res.status(400).json({ error: 'Invalid agent id' });
+    }
+    const body = req.body || {};
+    const pool = getPool();
+    const existing = await pool.query(
+      `SELECT * FROM users WHERE id = $1 AND role IN ('agent', 'admin')`,
+      [id]
+    );
+    if (!existing.rows[0]) {
+      return res.status(404).json({ error: 'Agent not found' });
+    }
+
+    const updates = [];
+    const params = [];
+    let i = 1;
+
+    if (body.status != null) {
+      const status = String(body.status).toLowerCase().trim();
+      if (!['active', 'inactive'].includes(status)) {
+        return res.status(400).json({ error: "status must be 'active' or 'inactive'" });
+      }
+      updates.push(`status = $${i++}`);
+      params.push(status);
+    }
+
+    if (body.name != null) {
+      const nameStr = String(body.name).trim().slice(0, 255);
+      if (!nameStr) return res.status(400).json({ error: 'Name cannot be empty' });
+      updates.push(`name = $${i++}`);
+      params.push(nameStr);
+    }
+
+    if (body.phone !== undefined) {
+      const phoneDigits = String(body.phone || '').replace(/\D/g, '');
+      if (!phoneDigits) {
+        updates.push('phone = NULL');
+      } else if (phoneDigits.length >= 7 && phoneDigits.length <= 15) {
+        updates.push(`phone = $${i++}`);
+        params.push(phoneDigits);
+      } else {
+        return res.status(400).json({ error: 'Invalid phone' });
+      }
+    }
+
+    if (body.password != null && String(body.password).length > 0) {
+      const passStr = String(body.password);
+      if (passStr.length < 8) {
+        return res.status(400).json({ error: 'Password must be at least 8 characters' });
+      }
+      const hash = await bcrypt.hash(passStr, 10);
+      updates.push(`password_hash = $${i++}`);
+      params.push(hash);
+    }
+
+    if (!updates.length) {
+      return res.status(400).json({ error: 'Nothing to update' });
+    }
+
+    params.push(id);
+    const updated = await pool.query(
+      `UPDATE users SET ${updates.join(', ')} WHERE id = $${i}
+       RETURNING id, email, name, phone, role, status, created_at, last_active_at`,
+      params
+    );
+
+    logger.info('Agent patched', { id, by: req.user?.email, fields: Object.keys(body) });
+    return res.json({ success: true, data: updated.rows[0] });
+  } catch (error) {
+    logger.error('patchAgent error', error);
+    return res.status(500).json({ error: 'Failed to update agent' });
   }
 };

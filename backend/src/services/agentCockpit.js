@@ -307,6 +307,10 @@ export async function enrichLeadForCockpit(user, { persist = false } = {}, pool 
     is_due_today: isDueToday,
     is_overdue: isOverdue,
     search_count: hasSearch ? undefined : 0, // filled by list query when available
+    // Multi-agent seats (P-1) — who is working this lead (nullable = team pool)
+    assigned_agent_id: user.assigned_agent_id != null ? Number(user.assigned_agent_id) : null,
+    assigned_agent_name: user.assigned_agent_name || null,
+    assigned_agent_email: user.assigned_agent_email || null,
   };
 }
 

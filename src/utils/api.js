@@ -183,3 +183,77 @@ export const getEmailAbStats = async (token) => {
     },
   });
 };
+
+// ── Multi-agent seats (P-1) ────────────────────────────────────────────────
+
+export const agentLogin = async (email, password) => {
+  return apiRequest('/api/agent/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+};
+
+export const getAgentCockpitLeads = async (token, params = {}) => {
+  const queryString = new URLSearchParams(params).toString();
+  return apiRequest(`/api/agent/cockpit?${queryString}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const patchAgentCockpitLead = async (token, id, body) => {
+  return apiRequest(`/api/agent/cockpit/${id}`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+};
+
+export const assignAgentLead = async (token, { user_id, assigned_agent_id }) => {
+  return apiRequest('/api/agent/assign', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ user_id, assigned_agent_id }),
+  });
+};
+
+export const getAgentTeammates = async (token) => {
+  return apiRequest('/api/agent/teammates', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const listAgents = async (token) => {
+  return apiRequest('/api/admin/agents', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const createAgent = async (token, body) => {
+  return apiRequest('/api/admin/agents', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+};
+
+export const patchAgent = async (token, id, body) => {
+  return apiRequest(`/api/admin/agents/${id}`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+};
