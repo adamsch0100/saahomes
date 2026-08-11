@@ -5226,6 +5226,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/Northern Colorado.webp',
     readTime: '8 min read',
+    youtubeId: '5E5-MM-Zf60',
     keywords: 'best realtor berthoud co, berthoud co realtor, berthoud real estate agent, berthoud colorado real estate, berthoud co homes for sale, real estate agent berthoud co, schwartz and associates berthoud, northern colorado realtor, berthoud colorado realtor, best real estate agent berthoud colorado',
     relatedLinks: [
       { title: 'Berthoud Colorado real estate', href: '/northern-colorado-areas/berthoud/', description: 'Neighborhoods, schools & market data' },
