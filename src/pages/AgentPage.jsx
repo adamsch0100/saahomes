@@ -1,5 +1,5 @@
 /**
- * Agent console — multi-agent seats (P-1).
+ * Agent console — multi-agent seats (P-1) + white-label brand surface (P-2).
  * Login → team-pooled cockpit (all client contacts) with claim/assign.
  * Separate token key (agentToken) from adminToken. No admin suite tools.
  */
@@ -7,7 +7,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import AgentCockpit from '../components/admin/AgentCockpit.jsx';
 import SEO from '../components/SEO';
-import { agentLogin, getAgentTeammates } from '../utils/api.js';
+import { agentLogin, getAgentTeammates, getAgentMe } from '../utils/api.js';
+import { marketPack, resolveTenantBrand } from '../data/marketPack.js';
 
 const AGENT_TOKEN_KEY = 'agentToken';
 const AGENT_USER_KEY = 'agentUser';
@@ -28,6 +29,9 @@ export default function AgentPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [teammates, setTeammates] = useState([]);
+  const [showBrandPreview, setShowBrandPreview] = useState(false);
+
+  const brand = resolveTenantBrand(agentUser);
 
   const handleLogout = useCallback(() => {
     setToken(null);
@@ -36,6 +40,7 @@ export default function AgentPage() {
     localStorage.removeItem(AGENT_USER_KEY);
     setIsAuthenticated(false);
     setTeammates([]);
+    setShowBrandPreview(false);
   }, []);
 
   const loadTeammates = useCallback(async (authToken) => {
@@ -56,12 +61,34 @@ export default function AgentPage() {
     }
   }, [handleLogout]);
 
+  const loadMe = useCallback(async (authToken) => {
+    if (!authToken) return;
+    try {
+      const res = await getAgentMe(authToken);
+      if (res.data) {
+        setAgentUser(res.data);
+        localStorage.setItem(AGENT_USER_KEY, JSON.stringify(res.data));
+      }
+    } catch (err) {
+      if (
+        err.message?.includes('token') ||
+        err.message?.includes('401') ||
+        err.message?.includes('403') ||
+        err.message?.includes('Invalid') ||
+        err.message?.includes('expired')
+      ) {
+        handleLogout();
+      }
+    }
+  }, [handleLogout]);
+
   useEffect(() => {
     if (token) {
       setIsAuthenticated(true);
       loadTeammates(token);
+      loadMe(token);
     }
-  }, [token, loadTeammates]);
+  }, [token, loadTeammates, loadMe]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -177,26 +204,38 @@ export default function AgentPage() {
       />
       <div className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
+          {/* Brand header (P-2) — resolved tenant brand, not hardcoded SAA-only */}
           <div className="mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <div>
               <p
                 className="text-xs font-bold uppercase tracking-widest"
                 style={{ color: GOLD }}
               >
-                Agent console
+                {brand.brandName}
               </p>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                 Team pipeline
               </h1>
               <p className="text-sm text-gray-500 mt-1">
-                {agentUser?.name || agentUser?.email
-                  ? `Signed in as ${agentUser.name || agentUser.email}`
+                {brand.agentName || agentUser?.email
+                  ? `${brand.agentName || agentUser.email}`
                   : 'Team-pooled contacts'}
-                {' · '}
+                {brand.brokerage ? ` · ${brand.brokerage}` : ''}
+                {brand.phone ? ` · ${brand.phone}` : ''}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">
                 All agents see every contact. Claim to own the follow-up.
+                {brand.voiceStyle ? ` · Email voice: ${brand.voiceStyle}` : ''}
               </p>
             </div>
             <div className="flex flex-wrap gap-2 self-start sm:self-auto">
+              <button
+                type="button"
+                onClick={() => setShowBrandPreview((v) => !v)}
+                className="min-h-[44px] px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-lg hover:border-black text-sm font-medium flex items-center"
+              >
+                {showBrandPreview ? 'Hide brand preview' : 'Branded site'}
+              </button>
               {agentUser?.role === 'admin' && (
                 <Link
                   to="/admin/"
@@ -214,6 +253,62 @@ export default function AgentPage() {
               </button>
             </div>
           </div>
+
+          {/* Lightweight brand chrome preview — name/brokerage/phone swap only (no full search rebuild) */}
+          {showBrandPreview && (
+            <div className="mb-6 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+              <div className="bg-black px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div>
+                  <span className="text-sm font-extrabold tracking-wide" style={{ color: GOLD }}>
+                    {String(brand.brandName || marketPack.market.brand).toUpperCase()}
+                  </span>
+                  <span className="block sm:inline sm:ml-3 text-xs text-gray-400">
+                    {brand.headerSubline}
+                  </span>
+                </div>
+                <div className="text-xs text-gray-300">
+                  {brand.phone ? (
+                    <a href={brand.tel} className="hover:text-white" style={{ color: GOLD }}>
+                      {brand.phone}
+                    </a>
+                  ) : null}
+                  {brand.agentName ? (
+                    <span className="ml-3 text-gray-400">{brand.agentName}</span>
+                  ) : null}
+                </div>
+              </div>
+              <div className="bg-white px-4 py-4">
+                <p className="text-sm font-semibold text-gray-900">
+                  Homes for sale — {marketPack.market.name}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Preview only: search chrome would show your brand name, brokerage, and phone.
+                  Custom domains (P-2b) are not included in this release.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="inline-flex items-center min-h-[36px] px-3 rounded-lg bg-gray-100 text-xs text-gray-700">
+                    Brand: {brand.brandName}
+                  </span>
+                  <span className="inline-flex items-center min-h-[36px] px-3 rounded-lg bg-gray-100 text-xs text-gray-700">
+                    Brokerage: {brand.brokerage}
+                  </span>
+                  <span className="inline-flex items-center min-h-[36px] px-3 rounded-lg bg-gray-100 text-xs text-gray-700">
+                    Phone: {brand.phone}
+                  </span>
+                  <span className="inline-flex items-center min-h-[36px] px-3 rounded-lg bg-gray-100 text-xs text-gray-700">
+                    From-name: {brand.fromName}
+                  </span>
+                  <span className="inline-flex items-center min-h-[36px] px-3 rounded-lg bg-gray-100 text-xs text-gray-700">
+                    Voice: {brand.voiceStyle}
+                  </span>
+                </div>
+                <p className="mt-3 text-[11px] text-gray-400">
+                  {marketPack.fairHousing} · Brand edits: admin → Agents. Emails use this brand only when
+                  a lead is assigned to you.
+                </p>
+              </div>
+            </div>
+          )}
 
           <AgentCockpit
             token={token}

@@ -630,6 +630,16 @@ export const runMigrations = async () => {
         ON users(role);
     `);
 
+    // ── White-label / tenant brand (P-2) — per-agent brand + email voice ──
+    // NULL brand fields → fall back to marketPack (SAA / NoCO defaults).
+    // voice_style: warm | professional | short (fixed email templates only).
+    await client.query(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_name VARCHAR(120);
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS brokerage_name VARCHAR(120);
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_phone VARCHAR(30);
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS voice_style VARCHAR(16) DEFAULT 'warm';
+    `);
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {
