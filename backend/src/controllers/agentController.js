@@ -25,7 +25,7 @@ async function listCockpitLeads(req, res) {
       `SELECT u.id, u.email, u.name, u.phone, u.role, u.status, u.intent,
               u.lead_score, u.lead_score_updated_at, u.seller_heat, u.seller_heat_at,
               u.lifecycle_stage, u.lifecycle_stage_manual, u.next_touch_at, u.last_touched_at,
-              u.fub_person_id, u.created_at, u.last_active_at,
+              u.fub_person_id, u.source, u.created_at, u.last_active_at,
               u.assigned_agent_id,
               a.name AS assigned_agent_name,
               a.email AS assigned_agent_email,
@@ -396,6 +396,219 @@ export const getAgentMe = async (req, res) => {
   } catch (error) {
     logger.error('getAgentMe error', error);
     return res.status(500).json({ error: 'Failed to load agent profile' });
+  }
+};
+
+// ── Connect CRM (P-3a) — per-agent Follow Up Boss key + contact import ─────
+
+/**
+ * Build masked FUB status payload for an agent row. Never includes raw key.
+ */
+async function buildAgentFubStatus(userId, pool = getPool()) {
+  const { maskFubApiKey } = await import('../services/followUpBossService.js');
+  const row = await pool.query(
+    `SELECT fub_api_key, fub_last_import_at
+     FROM users
+     WHERE id = $1 AND role IN ('agent', 'admin')`,
+    [userId]
+  );
+  const agent = row.rows[0];
+  if (!agent) return null;
+
+  const connected = !!(agent.fub_api_key && String(agent.fub_api_key).trim());
+  let importedCount = 0;
+  try {
+    const countRes = await pool.query(
+      `SELECT COUNT(*)::int AS n FROM users
+       WHERE source = 'fub-import'
+         AND COALESCE(role, 'client') = 'client'
+         AND assigned_agent_id = $1`,
+      [userId]
+    );
+    importedCount = countRes.rows[0]?.n || 0;
+  } catch {
+    importedCount = 0;
+  }
+
+  return {
+    connected,
+    maskedKey: connected ? maskFubApiKey(agent.fub_api_key) : null,
+    lastImportAt: agent.fub_last_import_at
+      ? new Date(agent.fub_last_import_at).toISOString()
+      : null,
+    importedCount,
+  };
+}
+
+/**
+ * POST /api/agent/fub/connect  { apiKey }
+ * Verify key with read-only FUB call; only store when valid. Never log raw key.
+ */
+export const connectAgentFub = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    const apiKey = String(req.body?.apiKey || '').trim();
+    if (!apiKey) {
+      return res.status(400).json({ error: 'apiKey is required' });
+    }
+    if (apiKey.length < 8) {
+      return res.status(400).json({ error: 'API key looks too short — paste your full Follow Up Boss key' });
+    }
+
+    const { verifyFollowUpBossApiKey } = await import('../services/followUpBossService.js');
+    const verified = await verifyFollowUpBossApiKey(apiKey);
+    if (!verified.success) {
+      return res.status(400).json({
+        error: verified.error || 'Invalid Follow Up Boss API key',
+      });
+    }
+
+    const pool = getPool();
+    const updated = await pool.query(
+      `UPDATE users SET fub_api_key = $1
+       WHERE id = $2 AND role IN ('agent', 'admin') AND status = 'active'
+       RETURNING id`,
+      [apiKey, userId]
+    );
+    if (!updated.rows[0]) {
+      return res.status(404).json({ error: 'Agent not found' });
+    }
+
+    logger.info('Agent FUB key connected', { userId, peopleTotal: verified.total ?? null });
+    const status = await buildAgentFubStatus(userId, pool);
+    return res.json({ success: true, data: status });
+  } catch (error) {
+    logger.error('connectAgentFub error', error);
+    return res.status(500).json({ error: 'Could not connect Follow Up Boss' });
+  }
+};
+
+/**
+ * GET /api/agent/fub/status
+ * { connected, maskedKey?, lastImportAt?, importedCount? }
+ */
+export const getAgentFubStatus = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    const status = await buildAgentFubStatus(userId);
+    if (!status) {
+      return res.status(404).json({ error: 'Agent not found' });
+    }
+    return res.json({ success: true, data: status });
+  } catch (error) {
+    logger.error('getAgentFubStatus error', error);
+    return res.status(500).json({ error: 'Failed to load CRM status' });
+  }
+};
+
+/**
+ * POST /api/agent/fub/disconnect — null out the per-agent key (env key untouched).
+ */
+export const disconnectAgentFub = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    const pool = getPool();
+    const updated = await pool.query(
+      `UPDATE users SET fub_api_key = NULL
+       WHERE id = $1 AND role IN ('agent', 'admin')
+       RETURNING id`,
+      [userId]
+    );
+    if (!updated.rows[0]) {
+      return res.status(404).json({ error: 'Agent not found' });
+    }
+    logger.info('Agent FUB key disconnected', { userId });
+    // Keep lastImportAt / importedCount honest — disconnect only clears the key
+    const status = await buildAgentFubStatus(userId, pool);
+    return res.json({
+      success: true,
+      data: status || {
+        connected: false,
+        maskedKey: null,
+        lastImportAt: null,
+        importedCount: 0,
+      },
+    });
+  } catch (error) {
+    logger.error('disconnectAgentFub error', error);
+    return res.status(500).json({ error: 'Could not disconnect Follow Up Boss' });
+  }
+};
+
+/**
+ * POST /api/agent/fub/import
+ * Pull paginated people from agent's FUB key; dedupe into users; return counts.
+ */
+export const importAgentFubContacts = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    const pool = getPool();
+    const row = await pool.query(
+      `SELECT id, fub_api_key FROM users
+       WHERE id = $1 AND role IN ('agent', 'admin') AND status = 'active'`,
+      [userId]
+    );
+    const agent = row.rows[0];
+    if (!agent) {
+      return res.status(404).json({ error: 'Agent not found' });
+    }
+    if (!agent.fub_api_key || !String(agent.fub_api_key).trim()) {
+      return res.status(400).json({
+        error: 'Connect Follow Up Boss first — no API key on file',
+      });
+    }
+
+    const { importFollowUpBossContacts } = await import('../services/followUpBossService.js');
+    const result = await importFollowUpBossContacts({
+      apiKey: agent.fub_api_key,
+      agentUserId: userId,
+      pool,
+      maxPages: 25,
+      pageSize: 100,
+    });
+
+    // Hard fail only when nothing ran and key/list failed on page 0
+    if (result.error && result.pagesFetched === 0 && result.imported === 0 && result.duplicates === 0) {
+      return res.status(400).json({
+        error: result.error,
+        data: {
+          imported: 0,
+          duplicates: 0,
+          failed: 0,
+          total: result.total,
+        },
+      });
+    }
+
+    const status = await buildAgentFubStatus(userId, pool);
+    return res.json({
+      success: true,
+      data: {
+        imported: result.imported,
+        duplicates: result.duplicates,
+        failed: result.failed,
+        total: result.total,
+        truncated: !!result.truncated,
+        partial: !!result.partial,
+        ...(result.error ? { warning: result.error } : {}),
+        status,
+      },
+    });
+  } catch (error) {
+    logger.error('importAgentFubContacts error', error);
+    return res.status(500).json({ error: 'Contact import failed' });
   }
 };
 
