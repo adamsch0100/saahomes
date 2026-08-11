@@ -692,6 +692,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/Windsor-CO-Area-Guide.jpg',
     readTime: '7 min read',
+    youtubeId: 'd-EqBbkXIZg',
     sections: [
       {
         heading: 'Why Windsor sellers need a local strategy',
