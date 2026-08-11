@@ -1,5 +1,9 @@
-/** GA4 web stream measurement ID for saahomes.com (Admin → Data streams) */
-export const GA4_MEASUREMENT_ID = 'G-BVWCZE025P';
+/** GA4 web stream measurement ID for saahomes.com (Admin → Data streams).
+ *  REVERTED to G-CB5GL0P3EZ (Aug 10 2026): the June 30 switch to
+ *  G-BVWCZE025P killed ALL tracking — property 356028551 (readable by the
+ *  GSC service account) has zero events since July 1, while G-CB5GL0P3EZ
+ *  demonstrably fed it through June 30 (7 generate_lead events). */
+export const GA4_MEASUREMENT_ID = 'G-CB5GL0P3EZ';
 
 /** Custom event name — often registers in GA4 Admin faster than generate_lead alone */
 export const SAA_LEAD_EVENT = 'saa_lead_submit';
