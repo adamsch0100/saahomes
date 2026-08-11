@@ -304,6 +304,8 @@ export async function enrichLeadForCockpit(user, { persist = false } = {}, pool 
     last_active_at: user.last_active_at || null,
     created_at: user.created_at,
     fub_person_id: user.fub_person_id || null,
+    // P-3a — lead origin (e.g. fub-import); null for site-native leads
+    source: user.source || null,
     is_due_today: isDueToday,
     is_overdue: isOverdue,
     search_count: hasSearch ? undefined : 0, // filled by list query when available

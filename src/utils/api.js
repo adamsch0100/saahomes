@@ -239,6 +239,48 @@ export const getAgentMe = async (token) => {
   });
 };
 
+// ── Connect CRM (P-3a) — per-agent Follow Up Boss ─────────────────────────
+
+/** POST /api/agent/fub/connect { apiKey } — verify + store masked status */
+export const connectAgentFub = async (token, apiKey) => {
+  return apiRequest('/api/agent/fub/connect', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ apiKey }),
+  });
+};
+
+/** GET /api/agent/fub/status */
+export const getAgentFubStatus = async (token) => {
+  return apiRequest('/api/agent/fub/status', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+/** POST /api/agent/fub/disconnect */
+export const disconnectAgentFub = async (token) => {
+  return apiRequest('/api/agent/fub/disconnect', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+/** POST /api/agent/fub/import — pull contacts from connected FUB account */
+export const importAgentFubContacts = async (token) => {
+  return apiRequest('/api/agent/fub/import', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export const listAgents = async (token) => {
   return apiRequest('/api/admin/agents', {
     headers: {

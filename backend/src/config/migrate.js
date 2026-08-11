@@ -640,6 +640,19 @@ export const runMigrations = async () => {
       ALTER TABLE users ADD COLUMN IF NOT EXISTS voice_style VARCHAR(16) DEFAULT 'warm';
     `);
 
+    // ── Connect CRM + contact import (P-3a) — per-agent FUB key + source ──
+    // fub_api_key is NEVER returned in full by any API (mask last 4 only).
+    // source on client rows: e.g. 'fub-import' for CRM-imported contacts.
+    await client.query(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS fub_api_key TEXT;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS fub_last_import_at TIMESTAMP;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS source VARCHAR(64);
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_users_source
+        ON users(source) WHERE source IS NOT NULL;
+    `);
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {
