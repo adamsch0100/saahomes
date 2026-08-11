@@ -82,12 +82,12 @@ mkdir -p "$WORKSPACE_DIR/outreach/sent"
 mkdir -p "$WORKSPACE_DIR/outreach/skipped"
 mkdir -p "$WORKSPACE_DIR/prospects"
 mkdir -p "$DATA_DIR/browser-sessions/intel"
-
-# Hermes gateway runs as user `hermes` — workspace must be writable or CRM/outreach writes fail.
-if id hermes >/dev/null 2>&1; then
-  chown -R hermes:hermes "$WORKSPACE_DIR" "$DATA_DIR/browser-sessions" 2>/dev/null || true
-  chmod -R u+rwX "$WORKSPACE_DIR" 2>/dev/null || true
-fi
+mkdir -p "$DATA_DIR/skills"
+mkdir -p "$DATA_DIR/listlogic/prospects"
+mkdir -p "$DATA_DIR/listlogic/outreach/pending"
+mkdir -p "$DATA_DIR/listlogic/outreach/sent"
+mkdir -p "$DATA_DIR/listlogic/outreach/skipped"
+mkdir -p "$DATA_DIR/listlogic/context"
 
 if [ -f "$DATA_DIR/AGENTS.md" ] && [ ! -f "$WORKSPACE_DIR/AGENTS.md" ]; then
   cp "$DATA_DIR/AGENTS.md" "$WORKSPACE_DIR/AGENTS.md"
@@ -95,6 +95,7 @@ fi
 
 if [ -d "$SEED_DIR/workspace/listlogic/context" ]; then
   cp -R "$SEED_DIR/workspace/listlogic/context/." "$WORKSPACE_DIR/context/"
+  cp -R "$SEED_DIR/workspace/listlogic/context/." "$DATA_DIR/listlogic/context/" 2>/dev/null || true
 fi
 if [ -f "$SEED_DIR/USER.md" ]; then
   cp "$SEED_DIR/USER.md" "$DATA_DIR/USER.md"
@@ -107,13 +108,33 @@ if [ -f "$SEED_DIR/SOUL.md" ]; then
   cp "$SEED_DIR/SOUL.md" "$DATA_DIR/SOUL.md"
 fi
 if [ -d "$SEED_DIR/skills" ]; then
-  mkdir -p "$DATA_DIR/skills"
   cp -R "$SEED_DIR/skills/." "$DATA_DIR/skills/"
+fi
+
+# Gateway runs as user `hermes`. Cont-init copies as root — chown AFTER copies or skills/CRM patches fail.
+if id hermes >/dev/null 2>&1; then
+  chown -R hermes:hermes \
+    "$DATA_DIR/skills" \
+    "$WORKSPACE_DIR" \
+    "$DATA_DIR/listlogic" \
+    "$DATA_DIR/browser-sessions" \
+    2>/dev/null || true
+  # Writable docs Hermes commonly updates
+  for f in AGENTS.md SOUL.md USER.md MEMORY.md config.yaml .env .listlogic-bootstrapped; do
+    if [ -e "$DATA_DIR/$f" ]; then
+      chown hermes:hermes "$DATA_DIR/$f" 2>/dev/null || true
+    fi
+  done
+  chmod -R u+rwX "$DATA_DIR/skills" "$WORKSPACE_DIR" "$DATA_DIR/listlogic" 2>/dev/null || true
+  echo "Ownership: hermes owns skills + workspace + listlogic CRM paths"
 fi
 
 if [ ! -f "$DATA_DIR/.listlogic-bootstrapped" ]; then
   date -u +"%Y-%m-%dT%H:%M:%SZ" > "$DATA_DIR/.listlogic-bootstrapped"
   echo "First boot: run AGENTS.md first-boot checklist and install cron jobs from automation-registry.md"
+  if id hermes >/dev/null 2>&1; then
+    chown hermes:hermes "$DATA_DIR/.listlogic-bootstrapped" 2>/dev/null || true
+  fi
 fi
 
 touch "$ENV_FILE"
