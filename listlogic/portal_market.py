@@ -570,6 +570,10 @@ def build_portal_market(
     dwelling: str = DWELLING_DETACHED,
     map_bounds: dict | None = None,
     polygon_ring: list[list[float]] | None = None,
+    min_lot_sqft: float | None = None,
+    max_lot_sqft: float | None = None,
+    min_year_built: int | None = None,
+    max_year_built: int | None = None,
 ) -> pd.DataFrame:
     """Build market frame from Realtor.com.
 
@@ -639,6 +643,28 @@ def build_portal_market(
         else:
             df = df[gar.isna() | (gar >= float(min_garage))].reset_index(drop=True)
 
+    # Lot size (sqft) — keep unknowns unless a bound is set and value is known out of range.
+    if len(df) and (min_lot_sqft is not None or max_lot_sqft is not None):
+        lot = pd.to_numeric(df.get("LotSize"), errors="coerce")
+        if "Acres" in df.columns:
+            acres = pd.to_numeric(df["Acres"], errors="coerce")
+            lot = lot.fillna(acres * 43560.0)
+        keep = pd.Series(True, index=df.index)
+        if min_lot_sqft is not None:
+            keep &= lot.isna() | (lot >= float(min_lot_sqft))
+        if max_lot_sqft is not None:
+            keep &= lot.isna() | (lot <= float(max_lot_sqft))
+        df = df[keep].reset_index(drop=True)
+
+    if len(df) and (min_year_built is not None or max_year_built is not None):
+        yr = pd.to_numeric(df.get("YearBuilt"), errors="coerce")
+        keep = pd.Series(True, index=df.index)
+        if min_year_built is not None:
+            keep &= yr.isna() | (yr >= int(min_year_built))
+        if max_year_built is not None:
+            keep &= yr.isna() | (yr <= int(max_year_built))
+        df = df[keep].reset_index(drop=True)
+
     df.attrs["source"] = "realtor"
     df.attrs["lookback_days"] = lookback_days
     df.attrs["location"] = location
@@ -701,6 +727,10 @@ DEFAULT_PORTAL_CRITERIA: dict[str, Any] = {
     "min_garage": 1,
     "require_garage_known": False,
     "lookback_days": 730,
+    "min_lot_sqft": None,
+    "max_lot_sqft": None,
+    "min_year_built": None,
+    "max_year_built": None,
 }
 
 
@@ -794,16 +824,20 @@ def parse_portal_criteria(raw: dict | None) -> dict:
             "location", "map_bounds", "polygon_ring", "require_garage_known",
             "price_min", "price_max", "min_beds", "max_beds", "min_baths", "max_baths",
             "min_sqft", "max_sqft", "min_garage", "lookback_days", "dwelling", "home_type",
+            "min_lot_sqft", "max_lot_sqft", "min_year_built", "max_year_built",
         ):
             base[k] = v
     # Coerce numerics
-    for ik in ("price_min", "price_max", "min_beds", "max_beds", "min_sqft", "max_sqft", "lookback_days"):
+    for ik in (
+        "price_min", "price_max", "min_beds", "max_beds", "min_sqft", "max_sqft",
+        "lookback_days", "min_year_built", "max_year_built",
+    ):
         if base.get(ik) is not None:
             try:
                 base[ik] = int(float(base[ik]))
             except (TypeError, ValueError):
                 pass
-    for fk in ("min_baths", "max_baths", "min_garage"):
+    for fk in ("min_baths", "max_baths", "min_garage", "min_lot_sqft", "max_lot_sqft"):
         if base.get(fk) is not None:
             try:
                 base[fk] = float(base[fk])
@@ -845,5 +879,9 @@ def build_portal_from_criteria(criteria: dict) -> pd.DataFrame:
         dwelling=str(c.get("dwelling") or DWELLING_DETACHED),
         map_bounds=bounds,
         polygon_ring=polygon,
+        min_lot_sqft=c.get("min_lot_sqft"),
+        max_lot_sqft=c.get("max_lot_sqft"),
+        min_year_built=c.get("min_year_built"),
+        max_year_built=c.get("max_year_built"),
     )
 
