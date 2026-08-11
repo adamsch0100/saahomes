@@ -48,7 +48,6 @@ export default function BlogPostPage() {
     obs.observe(node);
     return () => obs.disconnect();
   }, [post?.slug]);
-
   if (!post) {
     return <Navigate to="/blog/" replace />;
   }
@@ -214,7 +213,7 @@ export default function BlogPostPage() {
               </section>
               {index === Math.ceil(post.sections.length / 2) - 1 && (
                 <>
-                  <div ref={inlineCtaSentinel} aria-hidden="true" />
+                  <div ref={inlineCtaSentinel} className="h-4" aria-hidden="true" />
                   {showInlineCta && (
                     <div className="my-10 p-7 rounded-2xl border-2 border-[#CFB36E] bg-gradient-to-br from-white to-amber-50 shadow-md text-center">
                       <h3 className="text-xl font-bold font-serif mb-2">
