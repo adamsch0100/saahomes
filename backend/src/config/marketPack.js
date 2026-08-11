@@ -85,6 +85,17 @@ export const marketPack = {
     headerSubline: 'Schwartz and Associates · Northern Colorado Real Estate',
     brandLine: 'Schwartz and Associates · Fort Collins, CO',
   },
+
+  /**
+   * Default agent-voice for unassigned-lead nurture (SAA).
+   * Per-agent voice lives on users.voice_style; templates in tenantBrand.js.
+   * Pack keeps the SAA default sign-off so unassigned copy stays byte-stable.
+   */
+  agentVoice: {
+    defaultFromName: 'Adam Schwartz, SAA Homes',
+    defaultSignOff: 'Adam & Mandi Schwartz',
+    defaultVoice: 'warm',
+  },
 };
 
 export default marketPack;

@@ -22,12 +22,13 @@ import {
 import { getPrefFrequency } from './notificationPrefs.js';
 import { pickVariant, openToken, withOpenPixel } from './subjectVariants.js';
 import { marketPack } from '../config/marketPack.js';
+import { loadBrandForClientUser, voiceCopy } from './tenantBrand.js';
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: false });
 
 const SITE = marketPack.market.siteUrl || 'https://saahomes.com';
 const FROM = process.env.OUTREACH_SMTP_FROM || process.env.OUTREACH_SMTP_USER || 'alerts@saahomes.com';
-const AGENT_FROM = `Adam Schwartz, ${marketPack.market.brand}`;
+const AGENT_FROM = marketPack.agentVoice?.defaultFromName || `Adam Schwartz, ${marketPack.market.brand}`;
 const AGENT_PHONE = marketPack.market.phone;
 
 const fmtPrice = (n) => (n == null ? '—' : `$${Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`);
@@ -269,14 +270,23 @@ function cardHtml(l, filters, isNew, isDrop) {
 }
 
 // ---------------------------------------------------------------- email
+/**
+ * @param {object} opts
+ * @param {import('./tenantBrand.js').getAgentBrand extends Function ? object : object|null} [opts.brand]
+ *   When null/undefined → unassigned SAA copy (byte-stable). When set → assigned agent brand.
+ */
 function digestHtml({
   firstName, searchName, filterSummary, summaryLines, standouts, cards,
-  manageUrl, unsubscribeUrl, searchUrl, viewedCallout,
+  manageUrl, unsubscribeUrl, searchUrl, viewedCallout, brand = null, cityLabel = '',
 }) {
-  const greeting = firstName ? `Hi ${escapeHtml(firstName)},` : 'Hi there,';
   const { market, sources, dpa, fairHousing, footer, honestLabels } = marketPack;
-  const brandUpper = String(market.brand || 'SAA Homes').toUpperCase();
-  return `<!DOCTYPE html>
+  const useBrand = !!brand;
+
+  // Unassigned path: exact historical SAA agent-voice (do not change).
+  if (!useBrand) {
+    const greeting = firstName ? `Hi ${escapeHtml(firstName)},` : 'Hi there,';
+    const brandUpper = String(market.brand || 'SAA Homes').toUpperCase();
+    return `<!DOCTYPE html>
   <html><body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#111">
     <tr><td align="center" style="padding:26px 16px">
@@ -329,6 +339,77 @@ function digestHtml({
     </div>
   </div>
   </body></html>`;
+  }
+
+  // Assigned-agent brand path (P-2)
+  const brandUpper = String(brand.brandName || market.brand || 'SAA Homes').toUpperCase();
+  const phone = brand.phone || AGENT_PHONE;
+  const tel = brand.tel || market.tel;
+  const headerSubline = brand.headerSubline || footer.headerSubline;
+  const brandLine = brand.brandLine || footer.brandLine;
+  const signOffName = brand.agentName || brand.brandName || market.brand;
+  const voice = voiceCopy('digest', brand.voiceStyle, {
+    firstName,
+    city: cityLabel || brand.marketName || market.name,
+    searchName,
+    filterSummary,
+    agentName: brand.agentName,
+    brandName: brand.brandName,
+  });
+  const greeting = escapeHtml(voice.greeting);
+
+  return `<!DOCTYPE html>
+  <html><body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#111">
+    <tr><td align="center" style="padding:26px 16px">
+      <div style="color:#CFB36E;font-size:22px;font-weight:800;letter-spacing:0.5px">${escapeHtml(brandUpper)}</div>
+      <div style="color:#9ca3af;font-size:13px;margin-top:4px">${escapeHtml(headerSubline)}</div>
+    </td></tr>
+  </table>
+  <div style="max-width:580px;margin:0 auto;padding:26px 16px">
+    <p style="color:#111;font-size:15px;margin:0 0 4px">${greeting}</p>
+    <p style="color:#4b5563;font-size:14.5px;line-height:1.6;margin:0 0 4px">
+      ${voice.introHtml}
+    </p>
+    <ul style="color:#374151;font-size:14px;line-height:1.7;margin:8px 0 14px;padding-left:20px">
+      ${summaryLines.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}
+    </ul>
+    ${viewedCallout ? `
+    <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 18px;background:#fffbeb;border-left:3px solid #CFB36E;padding:12px 14px;border-radius:0 8px 8px 0">
+      ${viewedCallout}
+    </p>` : ''}
+    ${standouts.length ? `
+    <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 20px;background:#f9fafb;border-left:3px solid #CFB36E;padding:12px 14px;border-radius:0 8px 8px 0">
+      <strong style="color:#111">A few worth a look:</strong><br/>
+      ${standouts.map((s) => escapeHtml(s)).join('<br/><br/>')}
+    </p>` : ''}
+    ${cards}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:22px;background:#111;border-radius:12px">
+      <tr><td style="padding:20px" align="center">
+        <a href="${searchUrl || manageUrl}" style="display:inline-block;background:#CFB36E;color:#1a1a1a;font-size:14px;font-weight:800;padding:12px 22px;border-radius:8px;text-decoration:none;margin-bottom:12px">
+          View all matches for this search
+        </a>
+        <p style="color:#fff;font-size:14px;line-height:1.7;margin:0">
+          Any of these catch your eye? <strong style="color:#CFB36E">Just reply to this email</strong> and we'll set up a showing — or call/text <a href="${tel}" style="color:#CFB36E;text-decoration:none">${escapeHtml(phone)}</a>.
+        </p>
+        <p style="color:#9ca3af;font-size:13px;margin:10px 0 0">— ${escapeHtml(signOffName)} · ${escapeHtml(brand.brandName)} · ${escapeHtml(phone)} · saahomes.com</p>
+      </td></tr>
+    </table>
+    <div style="color:#9ca3af;font-size:11.5px;margin-top:18px;line-height:1.65">
+      <p style="margin:0 0 8px">${escapeHtml(sources.iresIdx)}</p>
+      <p style="margin:0 0 8px">${escapeHtml(footer.depthLine)}</p>
+      <p style="margin:0 0 8px">
+        ${escapeHtml(dpa.chfaLine)}
+        <a href="${dpa.hubUrl}" style="color:#6b7280">${escapeHtml(dpa.hubPath)}</a>
+      </p>
+      <p style="margin:0 0 8px">${escapeHtml(fairHousing)} · ${escapeHtml(honestLabels.notAppraisal)}</p>
+      <p style="margin:0">
+        <a href="${manageUrl}" style="color:#4b5563">Manage your alerts</a> · <a href="${unsubscribeUrl}" style="color:#4b5563">Unsubscribe</a>
+        <br/>${escapeHtml(brandLine)} · ${escapeHtml(phone)}
+      </p>
+    </div>
+  </div>
+  </body></html>`;
 }
 
 /**
@@ -352,13 +433,13 @@ function buildViewedCallout(recentViews, freshListings) {
   return `<strong style="color:#111">You viewed ${escapeHtml(label)}</strong> — ${n}. Here are the ones that match your saved search.`;
 }
 
-async function sendEmail(to, subject, html) {
+async function sendEmail(to, subject, html, fromName = AGENT_FROM) {
   const host = process.env.OUTREACH_SMTP_HOST;
   const user = process.env.OUTREACH_SMTP_USER;
   const password = process.env.OUTREACH_SMTP_PASSWORD;
   if (!host || !user || !password) throw new Error('OUTREACH_SMTP_* not set');
   const transporter = nodemailer.createTransport({ host, port: 587, secure: false, auth: { user, pass: password } });
-  await transporter.sendMail({ from: `"${AGENT_FROM}" <${FROM}>`, to, subject, html });
+  await transporter.sendMail({ from: `"${fromName || AGENT_FROM}" <${FROM}>`, to, subject, html });
 }
 
 // ---------------------------------------------------------------- main
@@ -454,13 +535,26 @@ async function runSearch(search, { dryRun, onlyEmail }) {
   })();
   const newCount = fresh.length;
   const dropCount = drops.length;
+  // Assigned-agent brand (P-2). Unassigned → null → SAA copy unchanged.
+  let brand = null;
+  try {
+    brand = await loadBrandForClientUser(pool, search.user_id);
+  } catch (e) {
+    console.error('tenant brand lookup failed:', e.message);
+    brand = null;
+  }
+
   // Deterministic A/B subject (same user always gets same variant for digest)
-  const { key: subjectVariant, subject } = pickVariant('digest', search.user_id, {
+  let { key: subjectVariant, subject } = pickVariant('digest', search.user_id, {
     firstName,
     cityLabel,
     newCount,
     dropCount,
   });
+  // Optional brand prefix only on variant C ("market update" slot) when assigned
+  if (brand?.agentFirstName && subjectVariant === 'C') {
+    subject = `${brand.agentFirstName} · ${subject}`;
+  }
 
   // Conversational standouts: 2-3 notable homes with data-derived facts.
   const standouts = [];
@@ -510,9 +604,12 @@ async function runSearch(search, { dryRun, onlyEmail }) {
     unsubscribeUrl,
     searchUrl,
     viewedCallout,
+    brand,
+    cityLabel,
   }), SITE, tok);
 
-  await sendEmail(userRow.email, subject, html);
+  const fromName = brand?.fromName || AGENT_FROM;
+  await sendEmail(userRow.email, subject, html, fromName);
   await pool.query(
     `INSERT INTO email_log (user_id, search_id, type, to_email, subject, events, subject_variant, open_token)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
