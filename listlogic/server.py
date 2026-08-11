@@ -401,6 +401,14 @@ def _generate(
     condition: str,
     list_price: Optional[float],
     mls_number: Optional[str],
+    garage_spaces: Optional[float] = None,
+    lot_size: Optional[float] = None,
+    acres: Optional[float] = None,
+    subdivision: Optional[str] = None,
+    style: Optional[str] = None,
+    photo_url: Optional[str] = None,
+    latitude: Optional[float] = None,
+    longitude: Optional[float] = None,
     city_filter: str,
     area_name: str,
     agent_name: str,
@@ -414,6 +422,8 @@ def _generate(
     force_run_id: Optional[str] = None,
     market_df=None,
     data_source: str = "",
+    subject_photo_bytes: Optional[bytes] = None,
+    subject_photo_ext: str = ".jpg",
 ) -> dict:
     defaults = dict(SUBJECT_2845_DEFAULTS) if "2845" in (address or "") and "13" in (address or "") else {}
     overrides = {
@@ -423,8 +433,17 @@ def _generate(
         "baths": baths,
         "year_built": year_built,
         "list_price": list_price,
+        "garage_spaces": garage_spaces,
+        "lot_size": lot_size,
+        "acres": acres,
+        "subdivision": subdivision,
+        "style": style,
+        "photo_url": photo_url,
+        "latitude": latitude,
+        "longitude": longitude,
+        "mls_number": mls_number,
     }
-    overrides = {k: v for k, v in overrides.items() if v is not None}
+    overrides = {k: v for k, v in overrides.items() if v is not None and v != ""}
 
     subject = resolve_subject(
         str(export_path) if export_path else None,
@@ -436,6 +455,28 @@ def _generate(
     )
     if living_area:
         subject.living_area = float(living_area)
+    if beds is not None:
+        subject.beds = float(beds)
+    if baths is not None:
+        subject.baths = float(baths)
+    if year_built is not None:
+        subject.year_built = int(year_built)
+    if garage_spaces is not None:
+        subject.garage_spaces = float(garage_spaces)
+    if lot_size is not None:
+        subject.lot_size = float(lot_size)
+    if acres is not None:
+        subject.acres = float(acres)
+    if subdivision:
+        subject.subdivision = str(subdivision)
+    if style:
+        subject.style = str(style)
+    if photo_url:
+        subject.photo_url = str(photo_url)
+    if latitude is not None:
+        subject.latitude = float(latitude)
+    if longitude is not None:
+        subject.longitude = float(longitude)
 
     report = _build_presentation(
         export_path=str(export_path) if export_path else None,
@@ -467,11 +508,32 @@ def _generate(
         run_dir = OUTPUT_DIR / run_id
         if run_dir.exists():
             shutil.rmtree(run_dir, ignore_errors=True)
-        run_dir.mkdir(parents=True, exist_ok=True)
     else:
         run_id = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}-{_slug(address)}-{uuid.uuid4().hex[:8]}"
         run_dir = OUTPUT_DIR / run_id
-        run_dir.mkdir(parents=True, exist_ok=True)
+    run_dir.mkdir(parents=True, exist_ok=True)
+
+    # Prefer an uploaded subject photo; else host autofill URL if present (no Reef spend).
+    sub = report.get("subject") if isinstance(report.get("subject"), dict) else None
+    if sub is None and subject:
+        from dataclasses import asdict as _asdict
+        report["subject"] = _asdict(subject)
+        sub = report["subject"]
+    if isinstance(sub, dict):
+        hosted = _host_subject_photo(
+            run_id,
+            run_dir,
+            upload_bytes=subject_photo_bytes,
+            upload_ext=subject_photo_ext,
+            remote_url=str(sub.get("photo_url") or photo_url or ""),
+        )
+        if hosted:
+            sub["photo_url"] = hosted
+            sub["photo"] = hosted
+            sub["photos"] = [hosted]
+            photos = _load_photo_map(run_dir)
+            photos[SUBJECT_PHOTO_MLS] = hosted
+            _save_photo_map(run_dir, photos)
 
     # Fast path: apply cached listing photos only, then finish generate.
     # Full Reef fetch continues in the background so the UI can show photos as they arrive.
@@ -694,6 +756,16 @@ def auth_status(request: Request):
         "authenticated": True,
         "user": auth_service.public_user(user),
         "entitlement": ent,
+    }
+
+
+@app.get("/api/public-config")
+async def public_config():
+    """Non-secret client config (GA4 id, etc.)."""
+    return {
+        "ga4": (os.environ.get("GA4_MEASUREMENT_ID") or os.environ.get("GA4_PROPERTY_ID") or "").strip(),
+        "app_base": (os.environ.get("APP_BASE_URL") or "https://listlogic.homes").rstrip("/"),
+        "stripe_trial_days": int(os.environ.get("STRIPE_TRIAL_DAYS") or "7"),
     }
 
 
@@ -936,6 +1008,9 @@ async def save_profile(request: Request):
         brand_primary = str(form.get("brand_primary") or "")
         brand_accent = str(form.get("brand_accent") or "")
         password = str(form.get("password") or "")
+        listings_year = str(form.get("listings_year") or "")
+        sms_consent_raw = str(form.get("sms_consent") or "").lower()
+        sms_consent = sms_consent_raw in {"1", "true", "yes", "on"}
         logo = form.get("logo")
         if logo and getattr(logo, "filename", None):
             raw = await logo.read()
@@ -959,6 +1034,8 @@ async def save_profile(request: Request):
         brand_primary = str(payload.get("brand_primary") or "")
         brand_accent = str(payload.get("brand_accent") or "")
         password = str(payload.get("password") or "")
+        listings_year = str(payload.get("listings_year") or "")
+        sms_consent = bool(payload.get("sms_consent"))
         if "logo_url" in payload:
             logo_url = str(payload.get("logo_url") or "")
 
@@ -973,6 +1050,8 @@ async def save_profile(request: Request):
             brand_primary=brand_primary,
             brand_accent=brand_accent,
             logo_url=logo_url,
+            listings_year=listings_year,
+            sms_consent=sms_consent,
             mark_complete=True,
         )
     except ValueError as exc:
@@ -1010,7 +1089,7 @@ async def login(request: Request):
         if form.get("token") and not form.get("password"):
             raise HTTPException(
                 400,
-                "Access codes are retired. Create a free trial account or sign in with email.",
+                "Access codes are retired. Create an account or sign in with email.",
             )
     try:
         user = auth_service.login_user(email, password)
@@ -1288,7 +1367,7 @@ def _ensure_sample_run() -> str:
         mls_number="1058539",
         city_filter="Greeley",
         area_name="West Greeley · similar homes",
-        market_notes="Public sample listing — start a free trial to run your own MLS export.",
+        market_notes="Public sample listing — create an account to run your own market; unlock at Generate.",
         agent_name="Adam Schwartz",
         agent_phone="(970) 533-3990",
         agent_email="adam@saahomes.com",
@@ -2049,6 +2128,47 @@ _photo_jobs: dict[str, threading.Thread] = {}
 _photo_jobs_lock = threading.Lock()
 
 
+def _host_subject_photo(
+    run_id: str,
+    run_dir: Path,
+    *,
+    upload_bytes: Optional[bytes] = None,
+    upload_ext: str = ".jpg",
+    remote_url: str = "",
+) -> str:
+    """Save an uploaded subject photo, or download an autofill URL into the run."""
+    photos_dir = run_dir / "photos"
+    photos_dir.mkdir(parents=True, exist_ok=True)
+    ext = (upload_ext or ".jpg").lower()
+    if ext not in {".jpg", ".jpeg", ".png", ".webp"}:
+        ext = ".jpg"
+    if ext == ".jpeg":
+        ext = ".jpg"
+    dest = photos_dir / f"{SUBJECT_PHOTO_MLS}{ext}"
+    local_url = f"/runs/{run_id}/photos/{SUBJECT_PHOTO_MLS}{ext}"
+
+    if upload_bytes:
+        dest.write_bytes(upload_bytes)
+        return local_url
+
+    url = (remote_url or "").strip()
+    if not url:
+        return ""
+    if url.startswith(f"/runs/{run_id}/photos/"):
+        return url
+    if not (url.startswith("http://") or url.startswith("https://")):
+        return ""
+    try:
+        from reef_photos import _download_image
+
+        ok = _download_image(url, dest)
+        if ok and dest.exists():
+            return local_url
+    except Exception:
+        logger.exception("Subject photo download failed")
+    return ""
+
+
 def _photo_map_path(run_dir: Path) -> Path:
     return run_dir / "comp_photos.json"
 
@@ -2552,6 +2672,23 @@ async def portal_geocode(request: Request):
         raise HTTPException(400, f"Geocode failed: {exc}") from exc
 
 
+@app.post("/api/portal/subject")
+async def portal_subject(request: Request):
+    """Autofill subject beds/baths/sqft/year from a typed/selected address."""
+    _require_user(request)
+    body = await request.json()
+    query = str((body or {}).get("query") or (body or {}).get("address") or "").strip()
+    if not query:
+        raise HTTPException(400, "address required")
+    from portal_market import lookup_subject_property
+
+    try:
+        return await asyncio.to_thread(lookup_subject_property, query)
+    except Exception as exc:
+        logger.exception("Subject lookup failed")
+        raise HTTPException(400, f"Subject lookup failed: {exc}") from exc
+
+
 @app.post("/api/portal/preview")
 async def portal_preview(request: Request):
     """Pull portal market for criteria + map; return counts only (no full report)."""
@@ -2573,10 +2710,15 @@ async def portal_preview(request: Request):
         raise HTTPException(400, "location required (city, ZIP, or area)")
 
     try:
+        df = await asyncio.to_thread(build_portal_from_criteria, criteria, mode="preview")
+    except TypeError:
+        # Older signature safety
         df = await asyncio.to_thread(build_portal_from_criteria, criteria)
     except Exception as exc:
+        from portal_market import friendly_portal_error
+
         logger.exception("Portal preview failed")
-        raise HTTPException(400, f"Portal market pull failed: {exc}") from exc
+        raise HTTPException(400, friendly_portal_error(exc)) from exc
 
     stats = market_preview_stats(df)
     return {
@@ -2639,6 +2781,14 @@ async def generate(
     beds: Optional[str] = Form(None),
     baths: Optional[str] = Form(None),
     year_built: Optional[str] = Form(None),
+    garage_spaces: Optional[str] = Form(None),
+    lot_size: Optional[str] = Form(None),
+    acres: Optional[str] = Form(None),
+    subdivision: Optional[str] = Form(None),
+    style: Optional[str] = Form(None),
+    subject_photo_url: Optional[str] = Form(None),
+    subject_lat: Optional[str] = Form(None),
+    subject_lng: Optional[str] = Form(None),
     condition: str = Form("average"),
     list_price: Optional[str] = Form(None),
     mls_number: Optional[str] = Form(None),
@@ -2652,6 +2802,7 @@ async def generate(
     brand_primary: str = Form("#0c3c6e"),
     brand_accent: str = Form("#1a5f9e"),
     logo: Optional[UploadFile] = File(None),
+    subject_photo: Optional[UploadFile] = File(None),
 ):
     import auth_service
 
@@ -2661,8 +2812,8 @@ async def generate(
         raise HTTPException(
             status_code=402,
             detail={
-                "message": "Trial ended — pick a plan to keep generating.",
-                "reason": ent.get("reason") or "trial_expired",
+                "message": "Unlock this presentation — start a 7-day trial ($39/mo after) or buy this report for $20. Sample demo stays free.",
+                "reason": ent.get("reason") or "payment_required",
                 "entitlement": ent,
             },
         )
@@ -2715,10 +2866,14 @@ async def generate(
         if not str(criteria.get("location") or "").strip():
             raise HTTPException(400, "Portal mode needs a location (city/ZIP) in criteria")
         try:
-            market_df = await asyncio.to_thread(build_portal_from_criteria, criteria)
+            market_df = await asyncio.to_thread(
+                build_portal_from_criteria, criteria, mode="generate"
+            )
         except Exception as exc:
+            from portal_market import friendly_portal_error
+
             logger.exception("Portal generate pull failed")
-            raise HTTPException(400, f"Portal market pull failed: {exc}") from exc
+            raise HTTPException(400, friendly_portal_error(exc)) from exc
         if market_df is None or len(market_df) == 0:
             raise HTTPException(400, "No portal listings matched those filters / map")
         # Persist a pipe snapshot so photo/enrich paths that expect a file still work
@@ -2824,6 +2979,25 @@ async def generate(
             cleanup_paths.append(export_path)
         data_source = "mls_export"
 
+    subject_photo_bytes = None
+    subject_photo_ext = ".jpg"
+    if subject_photo and subject_photo.filename:
+        raw_photo = await subject_photo.read()
+        if len(raw_photo) > 8 * 1024 * 1024:
+            raise HTTPException(400, "Subject photo must be under 8MB")
+        suffix = Path(subject_photo.filename).suffix.lower() or ".jpg"
+        if suffix not in {".png", ".jpg", ".jpeg", ".webp"}:
+            raise HTTPException(400, "Subject photo must be png, jpg, or webp")
+        subject_photo_bytes = raw_photo
+        subject_photo_ext = ".jpg" if suffix == ".jpeg" else suffix
+
+    lot_sqft = _optional_float(lot_size)
+    acres_val = _optional_float(acres)
+    if lot_sqft is None and acres_val is not None:
+        lot_sqft = acres_val * 43560.0
+    if acres_val is None and lot_sqft is not None:
+        acres_val = lot_sqft / 43560.0
+
     try:
         t0 = time.time()
         result = await asyncio.to_thread(
@@ -2837,6 +3011,14 @@ async def generate(
             condition=condition,
             list_price=_optional_float(list_price),
             mls_number=mls_number.strip() if mls_number else None,
+            garage_spaces=_optional_float(garage_spaces),
+            lot_size=lot_sqft,
+            acres=acres_val,
+            subdivision=(subdivision or "").strip() or None,
+            style=(style or "").strip() or None,
+            photo_url=(subject_photo_url or "").strip() or None,
+            latitude=_optional_float(subject_lat),
+            longitude=_optional_float(subject_lng),
             city_filter=city_filter,
             area_name=area_name,
             market_notes=market_notes,
@@ -2849,6 +3031,8 @@ async def generate(
             logo_url=logo_url,
             market_df=market_df,
             data_source=data_source,
+            subject_photo_bytes=subject_photo_bytes,
+            subject_photo_ext=subject_photo_ext,
         )
         logger.info("Generate finished in %.1fs for %s source=%s", time.time() - t0, address, data_source)
     except HTTPException:

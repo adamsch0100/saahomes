@@ -134,6 +134,17 @@ def resolve_subject(
     if overrides:
         data.update({k: v for k, v in overrides.items() if v is not None})
 
+    lat = data.get("latitude")
+    lng = data.get("longitude")
+    try:
+        lat_n = float(lat) if lat not in (None, "") else None
+    except (TypeError, ValueError):
+        lat_n = None
+    try:
+        lng_n = float(lng) if lng not in (None, "") else None
+    except (TypeError, ValueError):
+        lng_n = None
+
     return SubjectProperty(
         mls_number=data.get("mls_number"),
         address=data.get("address") or address or "",
@@ -149,10 +160,13 @@ def resolve_subject(
         acres=float(data.get("acres") or 0),
         condition=str(data.get("condition") or "average"),
         dom=data.get("dom"),
+        photo_url=str(data.get("photo_url") or data.get("photo") or ""),
+        latitude=lat_n,
+        longitude=lng_n,
         extra={"source": data.get("source", "manual"), **{k: v for k, v in data.items() if k not in (
             "mls_number", "address", "list_price", "living_area", "beds", "baths",
             "year_built", "style", "subdivision", "garage_spaces", "lot_size", "acres",
-            "condition", "dom"
+            "condition", "dom", "photo_url", "photo", "latitude", "longitude"
         )}},
     )
 

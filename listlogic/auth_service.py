@@ -20,8 +20,11 @@ logger = logging.getLogger("ListLogic.auth")
 SESSION_COOKIE = "ll_session"
 SESSION_DAYS = 30
 MAX_CONCURRENT_SESSIONS = int(os.environ.get("MAX_CONCURRENT_SESSIONS") or "3")
-DEFAULT_TRIAL_DAYS = int(os.environ.get("DEFAULT_TRIAL_DAYS") or "60")
-DEFAULT_PRESENTATION_LIMIT = int(os.environ.get("DEFAULT_PRESENTATION_LIMIT") or "3")
+# Public signup: setup-only (no free custom presentations). Promo/invite may still grant trial credits.
+DEFAULT_TRIAL_DAYS = int(os.environ.get("DEFAULT_TRIAL_DAYS") or "0")
+DEFAULT_PRESENTATION_LIMIT = int(os.environ.get("DEFAULT_PRESENTATION_LIMIT") or "0")
+# Stripe Checkout trial length for agent_monthly (card required up front).
+STRIPE_TRIAL_DAYS = int(os.environ.get("STRIPE_TRIAL_DAYS") or "7")
 
 
 def _utcnow() -> datetime:
@@ -118,6 +121,8 @@ def public_user(row: Optional[dict]) -> Optional[dict]:
         "plan": row.get("plan") or "",
         "stripe_customer_id": row.get("stripe_customer_id") or "",
         "has_stripe": bool((row.get("stripe_customer_id") or "").strip()),
+        "listings_year": row.get("listings_year") or "",
+        "sms_consent": bool(int(row.get("sms_consent") or 0)),
     }
 
 
@@ -481,8 +486,10 @@ def user_from_session_token(token: Optional[str]) -> Optional[dict]:
 
 def entitlement(user: dict) -> dict:
     """
-    Whichever-first trial: entitled while status active OR
-    (status trial AND before trial_ends_at AND under presentation_limit).
+    Generate access: status active (subscription/one-shot credits), or legacy/promo
+    status trial with remaining presentations before trial_ends_at.
+
+    status setup = free signup/setup only — must pay (Stripe 7-day trial or $20) to generate.
     """
     status = (user.get("status") or "").lower()
     used = int(user.get("presentations_used") or 0)
@@ -492,6 +499,14 @@ def entitlement(user: dict) -> dict:
 
     if status == "disabled":
         return {"ok": False, "reason": "disabled", "remaining": 0, "days_left": 0}
+    if status == "setup":
+        return {
+            "ok": False,
+            "reason": "payment_required",
+            "remaining": 0,
+            "days_left": None,
+            "needs_payment": True,
+        }
     if status == "active":
         if limit_i is not None and used >= limit_i:
             return {
@@ -499,6 +514,7 @@ def entitlement(user: dict) -> dict:
                 "reason": "limit_reached",
                 "remaining": 0,
                 "days_left": None,
+                "needs_payment": True,
             }
         return {
             "ok": True,
@@ -515,15 +531,41 @@ def entitlement(user: dict) -> dict:
         reason = "trial_expired"
         if limit_i is not None and used >= limit_i:
             reason = "limit_reached"
-        return {"ok": False, "reason": reason, "remaining": 0, "days_left": days_left or 0}
+        return {
+            "ok": False,
+            "reason": reason,
+            "remaining": 0,
+            "days_left": days_left or 0,
+            "needs_payment": True,
+        }
 
-    # trial
+    # Promo / invite / legacy free trial credits
+    if status == "trial" and (limit_i is None or limit_i <= 0):
+        return {
+            "ok": False,
+            "reason": "payment_required",
+            "remaining": 0,
+            "days_left": days_left,
+            "needs_payment": True,
+        }
     if ends and ends < _utcnow():
         _mark_expired(user["id"], "trial_expired")
-        return {"ok": False, "reason": "trial_expired", "remaining": 0, "days_left": 0}
+        return {
+            "ok": False,
+            "reason": "trial_expired",
+            "remaining": 0,
+            "days_left": 0,
+            "needs_payment": True,
+        }
     if limit_i is not None and used >= limit_i:
         _mark_expired(user["id"], "limit_reached")
-        return {"ok": False, "reason": "limit_reached", "remaining": 0, "days_left": days_left}
+        return {
+            "ok": False,
+            "reason": "limit_reached",
+            "remaining": 0,
+            "days_left": days_left,
+            "needs_payment": True,
+        }
 
     remaining = None if limit_i is None else max(0, limit_i - used)
     return {"ok": True, "reason": "trial", "remaining": remaining, "days_left": days_left}
@@ -1130,6 +1172,7 @@ def create_user(
     presentation_limit = DEFAULT_PRESENTATION_LIMIT
     promo_id = None
     invite_id = None
+    granted_trial = False
 
     if invite_token:
         inv = validate_invite(invite_token)
@@ -1137,6 +1180,7 @@ def create_user(
             raise ValueError(inv["error"])
         trial_days = inv["trial_days"]
         presentation_limit = inv["presentation_limit"]
+        granted_trial = int(presentation_limit or 0) > 0 or int(trial_days or 0) > 0
         if inv.get("brokerage") and not brokerage:
             brokerage = inv["brokerage"]
         invite_id = inv["invite"]["id"]
@@ -1152,10 +1196,19 @@ def create_user(
             raise ValueError(pv["error"])
         trial_days = pv["trial_days"]
         presentation_limit = pv["presentation_limit"]
+        granted_trial = int(presentation_limit or 0) > 0 or int(trial_days or 0) > 0
         promo_id = pv["promo"]["id"]
 
     now = _iso()
-    ends = _iso(_utcnow() + timedelta(days=trial_days))
+    # Public default: setup account (pay at Generate). Promo/invite can still grant trial credits.
+    if granted_trial:
+        status = "trial"
+        ends = _iso(_utcnow() + timedelta(days=max(1, int(trial_days or 7))))
+        presentation_limit = max(1, int(presentation_limit or 1))
+    else:
+        status = "setup"
+        ends = None
+        presentation_limit = 0
     user_id = _uid()
     pw_hash = _hash_password(password) if password else f"magic:{secrets.token_hex(16)}"
     profile_complete = 1 if (name or "").strip() and (brokerage or "").strip() else 0
@@ -1164,7 +1217,7 @@ def create_user(
             "INSERT INTO users (id, email, password_hash, name, phone, brokerage, role, status, "
             "trial_ends_at, presentations_used, presentation_limit, promo_code_id, created_at, updated_at, "
             "brand_primary, brand_accent, logo_url, profile_complete, email_verified) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, 'trial', ?, 0, ?, ?, ?, ?, ?, ?, '', ?, ?)",
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, '', ?, ?)",
             (
                 user_id,
                 email_n,
@@ -1173,6 +1226,7 @@ def create_user(
                 (phone or "").strip()[:40],
                 (brokerage or "").strip()[:120],
                 role if role in ("agent", "admin") else "agent",
+                status,
                 ends,
                 presentation_limit,
                 promo_id,
@@ -1193,7 +1247,7 @@ def create_user(
         database.execute(
             "INSERT INTO users (id, email, password_hash, name, phone, brokerage, role, status, "
             "trial_ends_at, presentations_used, presentation_limit, promo_code_id, created_at, updated_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, 'trial', ?, 0, ?, ?, ?, ?)",
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?)",
             (
                 user_id,
                 email_n,
@@ -1202,6 +1256,7 @@ def create_user(
                 (phone or "").strip()[:40],
                 (brokerage or "").strip()[:120],
                 role if role in ("agent", "admin") else "agent",
+                status,
                 ends,
                 presentation_limit,
                 promo_id,
@@ -1267,6 +1322,8 @@ def update_profile(
     brand_primary: str = "",
     brand_accent: str = "",
     logo_url: Optional[str] = None,
+    listings_year: Optional[str] = None,
+    sms_consent: Optional[bool] = None,
     mark_complete: bool = True,
 ) -> dict:
     user = get_user_by_id(user_id)
@@ -1280,6 +1337,17 @@ def update_profile(
     logo = user.get("logo_url") or ""
     if logo_url is not None:
         logo = (logo_url or "").strip()[:500]
+    listings = user.get("listings_year") or ""
+    if listings_year is not None:
+        allowed = {"", "0-2", "3-5", "6-12", "13+"}
+        listings = (listings_year or "").strip()
+        if listings not in allowed:
+            listings = ""
+    sms = int(user.get("sms_consent") or 0)
+    sms_at = user.get("sms_consent_at") or ""
+    if sms_consent is not None:
+        sms = 1 if sms_consent else 0
+        sms_at = _iso() if sms else ""
     complete = int(user.get("profile_complete") or 0)
     if mark_complete and name_n and brokerage_n:
         complete = 1
@@ -1288,12 +1356,30 @@ def update_profile(
         UPDATE users SET
           name = ?, phone = ?, brokerage = ?,
           brand_primary = ?, brand_accent = ?, logo_url = ?,
+          listings_year = ?, sms_consent = ?, sms_consent_at = ?,
           profile_complete = ?, updated_at = ?
         WHERE id = ?
         """,
-        (name_n, phone_n, brokerage_n, primary, accent, logo, complete, _iso(), user_id),
+        (
+            name_n,
+            phone_n,
+            brokerage_n,
+            primary,
+            accent,
+            logo,
+            listings,
+            sms,
+            sms_at,
+            complete,
+            _iso(),
+            user_id,
+        ),
     )
-    log_event(user_id, "profile_updated", {"profile_complete": complete})
+    log_event(
+        user_id,
+        "profile_updated",
+        {"profile_complete": complete, "listings_year": listings, "sms_consent": bool(sms)},
+    )
     return get_user_by_id(user_id) or user
 
 
@@ -1826,7 +1912,7 @@ def bootstrap() -> None:
                 trial_days=DEFAULT_TRIAL_DAYS,
                 presentation_limit=DEFAULT_PRESENTATION_LIMIT,
                 max_redemptions=200,
-                notes="Default CB outreach code — 3 presentations or 60 days, whichever first",
+                notes="Default CB outreach code — complimentary credits (admin-configured limit/days)",
             )
         except Exception as exc:
             # Another instance may have created it concurrently; log and continue.

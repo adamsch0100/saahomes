@@ -35,18 +35,18 @@ Built for Schwartz and Associates / SAA Homes; sold to agents more broadly.
 - Days to contract / odds include supply-stream awareness: new listings under the tested ask cut in line.
 - Recommended list is anchored to recent comparable closes, not wishful asking prices.
 
-## Funnel: Demo → Trial → Paid
-1. **Sample demo** (`/demo`) — public sample listing (2845 W 13th St, Greeley) using built-in export-71.txt. No account, does NOT burn trial credits. Banner CTA to start trial.
-2. **Free trial** after signup — **3 presentations OR 60 days, whichever comes first**.
-3. Optional **promo codes** (e.g. CBListLogic) or **invite links** set the same trial terms.
-4. When trial ends → upgrade / pricing CTA (Stripe later; mailto / pricing page for now).
-5. Paid plans (marketing): $20 one-time report, $39/mo agent, $390/yr, brokerage $29/seat/mo (min 5; volume discounts).
+## Funnel: Demo → Account → Unlock → Paid
+1. **Sample demo** (`/demo`) — public sample listing (2845 W 13th St, Greeley). No account. Free forever.
+2. **Create account** (email magic link) — no card. Search/Upload, subject, branding allowed (setup).
+3. **Generate** — hard gate. Personalized teaser. Unlock with **7-day Stripe trial** (card required → auto $39/mo) or **$20 one-time** for that report. Or open sample demo.
+4. Optional **promo codes** / **invite links** may still grant complimentary trial credits (admin-controlled).
+5. Paid plans: $20 one-time, $39/mo agent (after 7-day trial), $390/yr, brokerage $29/seat/mo (min 5).
 
 ## Accounts & access
-- Email/password signup at `/saas/signup.html`; login at `/saas/login.html`.
-- Shared ACCESS_CODES / “enter access code” login is retired.
+- Signup at `/saas/signup.html`; login at `/saas/login.html`.
 - Admin at `/saas/admin.html` (role=admin): users, promo codes, invites, feedback inbox.
 - Bootstrap admin via ADMIN_BOOTSTRAP_EMAIL / ADMIN_BOOTSTRAP_PASSWORD.
+- New public signups have status `setup` until they pay — they cannot generate custom presentations for free.
 
 ## How agents use it
 1. Sign in → `/saas/app.html`

@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sign in — ListLogic</title>
+<title>Sign in · ListLogic</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -44,9 +44,9 @@ button.btn { width: 100%; padding: 13px; font-size: 0.95rem; }
     <img src="/saas/listlogic-logo.png" alt="ListLogic">
   </a>
   <h1>Welcome back</h1>
-  <p class="sub">We’ll email you a one-time sign-in link.</p>
+  <p class="sub">We·ll email you a one-time sign-in link.</p>
   <div class="hint-box">
-    New here? <a href="signup.html">Start a free trial</a>
+    New here? <a href="signup.html">Create an account</a>
     · or <a href="/demo">try the sample listing</a> with no signup.
   </div>
 
@@ -102,7 +102,7 @@ magicForm.addEventListener('submit', async (e) => {
   const status = document.getElementById('status');
   const dev = document.getElementById('devLink');
   status.className = 'status';
-  status.textContent = 'Sending link…';
+  status.textContent = 'Sending link·';
   dev.style.display = 'none';
   try {
     const res = await fetch('/api/auth/magic-link', {
@@ -131,7 +131,7 @@ passwordForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const status = document.getElementById('status');
   status.className = 'status';
-  status.textContent = 'Signing in…';
+  status.textContent = 'Signing in·';
   try {
     const res = await fetch('/api/login', {
       method: 'POST',
@@ -151,6 +151,8 @@ passwordForm.addEventListener('submit', async (e) => {
   }
 });
 </script>
+<script src="/saas/analytics.js"></script>
+<script src="/saas/utm.js"></script>
 <script src="/saas/assistant.js"></script>
 </body>
 </html>

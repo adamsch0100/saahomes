@@ -152,10 +152,27 @@ def run_migrations() -> None:
     _ensure_presentations_table()
     _ensure_magic_auth_schema()
     _ensure_billing_schema()
+    _ensure_growth_profile_schema()
     _ensure_assistant_chats_table()
     _ensure_session_device_schema()
     backend = "postgres" if using_postgres() else f"sqlite:{_sqlite_path()}"
     logger.info("Migrations applied (%s)", backend)
+
+
+def _ensure_growth_profile_schema() -> None:
+    """ICP + SMS consent fields for GTM."""
+    for col, typ, default in (
+        ("listings_year", "TEXT", "''"),
+        ("sms_consent", "INTEGER", "0"),
+        ("sms_consent_at", "TEXT", "''"),
+    ):
+        try:
+            if using_postgres():
+                execute(f"ALTER TABLE users ADD COLUMN IF NOT EXISTS {col} {typ} DEFAULT {default}")
+            else:
+                execute(f"ALTER TABLE users ADD COLUMN {col} {typ} DEFAULT {default}")
+        except Exception:
+            pass
 
 
 def _ensure_session_device_schema() -> None:

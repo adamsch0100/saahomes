@@ -568,7 +568,12 @@ def enrich_report_photos(
 ) -> dict[str, str]:
     """Attach hosted photo galleries to comps. Sets row photo_url + photos[].
 
-    cache_only=True — copy from local MLS cache only (no Reef API). Fast path for generate.
+    Priority (credit-aware):
+      1. Existing MLS/portal card URLs already on the row (download, no Reef)
+      2. Local photo cache
+      3. Reef Zillow search only for remaining misses (unless cache_only)
+
+    cache_only=True — MLS/card URLs + local cache only (no Reef API).
     on_listing(public_key, primary_url, gallery_urls) — called as each listing is ready.
     """
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -579,7 +584,7 @@ def enrich_report_photos(
     if deadline is None and not cache_only:
         deadline = time.time() + ENRICH_BUDGET_SEC
 
-    targets: list[dict] = []
+    candidates: list[dict] = []
     for c in comps:
         if not isinstance(c, dict):
             continue
@@ -588,7 +593,7 @@ def enrich_report_photos(
         if not mls and not addr:
             continue
         key = _safe_key(mls or addr)
-        targets.append({
+        candidates.append({
             "key": key,
             "public_key": mls or key,
             "address": ", ".join(
@@ -601,8 +606,11 @@ def enrich_report_photos(
 
     if include_subject and isinstance(subject, dict):
         sub_addr = str(subject.get("address") or "").strip()
-        if sub_addr:
-            targets.append({
+        existing_photo = str(subject.get("photo_url") or subject.get("photo") or "")
+        if existing_photo.startswith("/runs/"):
+            photo_map[SUBJECT_KEY] = existing_photo.split("?")[0]
+        elif sub_addr:
+            candidates.append({
                 "key": SUBJECT_KEY,
                 "public_key": SUBJECT_KEY,
                 "address": sub_addr,
@@ -611,41 +619,87 @@ def enrich_report_photos(
                 "row": subject,
             })
 
-    if cache_only:
-        resolved = {}
-        for t in targets:
-            cached = _read_cache(t["key"])
-            if cached and not cached.get("miss"):
-                resolved[t["key"]] = cached
-    else:
-        resolved = fetch_cluster_photos(targets, deadline=deadline)
+    # 1) Prefer URLs already on the listing/subject (MLS export or portal card).
+    reef_targets: list[dict] = []
+    for t in candidates:
+        row = t.get("row") if isinstance(t.get("row"), dict) else {}
+        existing = str(row.get("photo_url") or row.get("photo") or "").strip()
+        if not existing and isinstance(row.get("photos"), list) and row["photos"]:
+            existing = str(row["photos"][0] or "").strip()
+        if existing.startswith("/runs/"):
+            photo_map[t["public_key"]] = existing.split("?")[0]
+            continue
+        if existing.startswith("http://") or existing.startswith("https://"):
+            if run_dir is not None:
+                photos_dir = run_dir / "photos"
+                photos_dir.mkdir(parents=True, exist_ok=True)
+                dest = photos_dir / f"{_safe_key(t['public_key'])}.jpg"
+                if dest.exists() or _download_image(existing, dest):
+                    local = f"/runs/{run_id}/photos/{dest.name}" if run_id else str(dest)
+                    photo_map[t["public_key"]] = local
+                    row["photo_url"] = local
+                    row["photos"] = [local]
+                    if t["public_key"] == SUBJECT_KEY:
+                        row["photo"] = local
+                    # Seed disk cache so later runs skip Reef
+                    try:
+                        _persist_photos(t["key"], [existing], matched_address=t.get("address") or "")
+                    except Exception:
+                        pass
+                    if callable(on_listing):
+                        try:
+                            on_listing(t["public_key"], local, [local])
+                        except Exception:
+                            logger.exception("on_listing callback failed for %s", t["public_key"])
+                    continue
+        # 2) Local cache hit
+        cached = _read_cache(t["key"])
+        if cached and not cached.get("miss") and (cached.get("primary_path") or cached.get("gallery_paths")):
+            primary_url, gallery_urls = _copy_to_run(cached, run_dir, run_id, t["public_key"])
+            if primary_url:
+                photo_map[t["public_key"]] = primary_url
+                row["photo_url"] = primary_url
+                row["photos"] = gallery_urls or [primary_url]
+                if t["public_key"] == SUBJECT_KEY:
+                    row["photo"] = primary_url
+                if callable(on_listing):
+                    try:
+                        on_listing(t["public_key"], primary_url, gallery_urls or [primary_url])
+                    except Exception:
+                        logger.exception("on_listing callback failed for %s", t["public_key"])
+                continue
+        reef_targets.append(t)
 
-    for t in targets:
-        meta = resolved.get(t["key"]) or _read_cache(t["key"])
-        if not meta or meta.get("miss"):
-            continue
-        primary_url, gallery_urls = _copy_to_run(meta, run_dir, run_id, t["public_key"])
-        if not primary_url:
-            continue
-        photo_map[t["public_key"]] = primary_url
-        row = t.get("row")
-        if isinstance(row, dict):
-            row["photo_url"] = primary_url
-            row["photos"] = gallery_urls or [primary_url]
-            if t["public_key"] == SUBJECT_KEY:
-                row["photo"] = primary_url
-        if callable(on_listing):
-            try:
-                on_listing(t["public_key"], primary_url, gallery_urls or [primary_url])
-            except Exception:
-                logger.exception("on_listing callback failed for %s", t["public_key"])
+    # 3) Reef only for remaining misses (skipped on cache_only / generate fast path)
+    if reef_targets and not cache_only and reef_enabled():
+        resolved = fetch_cluster_photos(reef_targets, deadline=deadline)
+        for t in reef_targets:
+            meta = resolved.get(t["key"]) or _read_cache(t["key"])
+            if not meta or meta.get("miss"):
+                continue
+            primary_url, gallery_urls = _copy_to_run(meta, run_dir, run_id, t["public_key"])
+            if not primary_url:
+                continue
+            photo_map[t["public_key"]] = primary_url
+            row = t.get("row")
+            if isinstance(row, dict):
+                row["photo_url"] = primary_url
+                row["photos"] = gallery_urls or [primary_url]
+                if t["public_key"] == SUBJECT_KEY:
+                    row["photo"] = primary_url
+            if callable(on_listing):
+                try:
+                    on_listing(t["public_key"], primary_url, gallery_urls or [primary_url])
+                except Exception:
+                    logger.exception("on_listing callback failed for %s", t["public_key"])
 
     found = sum(1 for k, v in photo_map.items() if k != SUBJECT_KEY and v)
     logger.info(
-        "Hosted galleries ready: %d/%d comps%s%s",
+        "Hosted galleries ready: %d/%d comps%s%s (reef_targets=%d)",
         found,
         len(comps),
         " + subject" if photo_map.get(SUBJECT_KEY) else "",
         " (cache-only)" if cache_only else "",
+        len(reef_targets),
     )
     return photo_map

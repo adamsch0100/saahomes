@@ -60,7 +60,7 @@
     <div class="ll-as-body" id="llAsBody">
       <div class="ll-as-pane on" id="llAsChatPane">
         <div class="ll-as-chips" id="llAsChips">
-          <button type="button" data-q="How does my free trial work?">Trial limits</button>
+          <button type="button" data-q="How does signup and unlock work?">Signup &amp; unlock</button>
           <button type="button" data-q="How do I try the sample listing?">Sample demo</button>
           <button type="button" data-q="How do I search a market or upload an MLS export?">Search or Upload</button>
           <button type="button" data-q="What's the difference between the live story, seller packet, and flipbook?">Print packs</button>
@@ -259,8 +259,8 @@
             '<a href="/saas/app.html" style="background:#c9a227;color:#0c3c6e;text-decoration:none;padding:8px 12px;border-radius:8px;font-weight:700">Go to my dashboard</a>';
         } else {
           bar.innerHTML =
-            "<span>Sample listing — explore freely. Start a free trial to run <em>your</em> MLS data.</span>" +
-            '<a href="/saas/signup.html" style="background:#c9a227;color:#0c3c6e;text-decoration:none;padding:8px 12px;border-radius:8px;font-weight:700">Start free trial</a>';
+            "<span>Sample listing — free forever. Create an account to build yours; unlock at Generate.</span>" +
+            '<a href="/saas/signup.html" style="background:#c9a227;color:#0c3c6e;text-decoration:none;padding:8px 12px;border-radius:8px;font-weight:700">Create account</a>';
           // Hide the floating agent account chip for public sample viewers
           const chip = document.getElementById("agentMenuWrap");
           if (chip) chip.style.display = "none";
@@ -269,8 +269,8 @@
       })
       .catch(() => {
         bar.innerHTML =
-          "<span>Sample listing — explore freely. Start a free trial to run <em>your</em> MLS data.</span>" +
-          '<a href="/saas/signup.html" style="background:#c9a227;color:#0c3c6e;text-decoration:none;padding:8px 12px;border-radius:8px;font-weight:700">Start free trial</a>';
+          "<span>Sample listing — free forever. Create an account to build yours; unlock at Generate.</span>" +
+          '<a href="/saas/signup.html" style="background:#c9a227;color:#0c3c6e;text-decoration:none;padding:8px 12px;border-radius:8px;font-weight:700">Create account</a>';
         const chip = document.getElementById("agentMenuWrap");
         if (chip) chip.style.display = "none";
         offsetSampleChrome();

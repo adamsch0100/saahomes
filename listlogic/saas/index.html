@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ListLogic — Listing appointments and sales won by data expertise</title>
-<meta name="description" content="Win the listing appointment with a pricing story sellers can see — a custom-fit market, defensible list price, and live price-versus-odds trade-offs.">
+<title>ListLogic · Listing appointments and sales won by data expertise</title>
+<meta name="description" content="Win the listing appointment with a pricing story sellers can see · a custom-fit market, defensible list price, and live price-versus-odds trade-offs.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="ListLogic">
 <meta property="og:url" content="https://listlogic.homes/">
-<meta property="og:title" content="ListLogic — Win the listing appointment with a pricing story sellers can see">
-<meta property="og:description" content="A custom-fit market, defensible list price, and live price-versus-odds trade-offs — search a market nationwide or upload any MLS export in minutes.">
+<meta property="og:title" content="ListLogic · Win the listing appointment with a pricing story sellers can see">
+<meta property="og:description" content="A custom-fit market, defensible list price, and live price-versus-odds trade-offs · search a market nationwide or upload any MLS export in minutes.">
 <meta property="og:image" content="https://listlogic.homes/saas/ll-og-share.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="ListLogic — Pricing stories that win listing appointments">
+<meta name="twitter:title" content="ListLogic · Pricing stories that win listing appointments">
 <meta name="twitter:description" content="Custom-fit market, defensible list price, live price-vs-odds. Search nationwide or upload any MLS export.">
 <meta name="twitter:image" content="https://listlogic.homes/saas/ll-og-share.png">
 <meta name="theme-color" content="#0c3c6e">
@@ -71,7 +71,7 @@ a { color: inherit; text-decoration: none; }
 .nav-links { display: flex; align-items: center; gap: 22px; font-size: 0.92rem; font-weight: 500; }
 .nav-links a { color: var(--ink-2); opacity: 0.85; }
 .nav-links a:hover { opacity: 1; }
-/* Hide Sign in / Trial until nav-auth.js resolves — no flash */
+/* Hide Sign in / Trial until nav-auth.js resolves · no flash */
 .ll-auth-guest { visibility: hidden !important; }
 body.ll-auth-guest-ready .ll-auth-guest { visibility: visible !important; }
 
@@ -140,7 +140,7 @@ body.ll-auth-guest-ready .ll-auth-guest { visibility: visible !important; }
   color: #dbe5f2;
 }
 .hero-chips span::before {
-  content: "✓"; margin-right: 6px; color: var(--accent-2); font-weight: 800;
+  content: "?"; margin-right: 6px; color: var(--accent-2); font-weight: 800;
 }
 .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
 .btn-arrow { display: inline-flex; margin-left: 2px; transition: transform 0.18s ease; }
@@ -298,7 +298,7 @@ a:hover .btn-arrow, button:hover .btn-arrow { transform: translateX(3px); }
 .checklist { list-style: none; display: grid; gap: 10px; }
 .checklist li { display: flex; gap: 10px; font-size: 0.94rem; align-items: flex-start; }
 .checklist li::before {
-  content: "✓"; flex: 0 0 22px; height: 22px; border-radius: 50%;
+  content: "?"; flex: 0 0 22px; height: 22px; border-radius: 50%;
   background: #e7f3ef; color: var(--teal); font-weight: 800; font-size: 0.75rem;
   display: grid; place-items: center; margin-top: 1px;
 }
@@ -358,6 +358,26 @@ a:hover .btn-arrow, button:hover .btn-arrow { transform: translateX(3px); }
 .final-cta h2 { font-family: 'Fraunces', serif; font-size: clamp(1.9rem, 3.6vw, 2.7rem); letter-spacing: -0.02em; margin-bottom: 14px; }
 .final-cta p { color: var(--muted); max-width: 520px; margin: 0 auto 30px; }
 .final-cta .row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.video-demo { padding: 72px 0; background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.video-demo .section-head { margin-bottom: 28px; }
+.video-frame {
+  position: relative;
+  max-width: 880px;
+  margin: 0 auto;
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(145deg, #0c3c6e 0%, #16233c 55%, #0b1220 100%);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.video-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.video-placeholder {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; color: #e8eef6; text-align: center; padding: 24px;
+}
+.video-placeholder strong { font-family: 'Fraunces', serif; font-size: 1.35rem; }
+.video-placeholder span { color: #9fb0c6; font-size: 0.92rem; max-width: 36ch; }
 
 footer { border-top: 1px solid var(--line); padding: 36px 0; color: var(--muted); font-size: 0.82rem; }
 footer .container { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: center; }
@@ -402,14 +422,14 @@ footer a:hover { color: var(--ink); }
       <img src="/saas/listlogic-logo.png" alt="ListLogic" class="brand-logo">
       <small>by SAA Homes</small>
     </a>
-    <button type="button" class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">☰</button>
+    <button type="button" class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">?</button>
     <div class="nav-links" id="navLinks">
       <a href="#how">How it works</a>
       <a href="#deliverables">What sellers get</a>
       <a href="pricing.html">Pricing</a>
       <a href="faq.html">FAQ</a>
       <a href="login.html" class="ll-auth-guest">Sign in</a>
-      <a href="signup.html" class="btn btn-trial ll-auth-guest" style="padding:10px 18px;font-size:0.86rem">Start free trial</a>
+      <a href="signup.html" class="btn btn-trial ll-auth-guest" style="padding:10px 18px;font-size:0.86rem">Create account</a>
     </div>
   </div>
 </nav>
@@ -421,7 +441,7 @@ footer a:hover { color: var(--ink); }
       <span class="eyebrow">For listing agents</span>
       <h1>Win the listing appointment<br>with a pricing story <em>sellers&nbsp;can&nbsp;see</em>.</h1>
       <p class="lead">
-        <span class="lead-accent">A market custom-fit to the home.</span> Sellers watch the trade-off of price and supply — and whether their home is providing value, or <em>is</em> the value, in a buyer's eyes — live.
+        <span class="lead-accent">A market custom-fit to the home.</span> Sellers watch the trade-off of price and supply · and whether their home is providing value, or <em>is</em> the value, in a buyer's eyes · live.
       </p>
       <div class="hero-chips">
         <span>Recommended price &amp; range</span>
@@ -429,10 +449,10 @@ footer a:hover { color: var(--ink); }
         <span>Supply &amp; comp transparency</span>
       </div>
       <div class="hero-cta">
-        <a href="signup.html" class="btn btn-trial">Start free trial <span class="btn-arrow">→</span></a>
-        <a href="/demo" class="btn btn-ghost">See a live presentation</a>
+        <a href="signup.html" class="btn btn-trial" data-ll-utm>Create account <span class="btn-arrow">&rarr;</span></a>
+        <a href="/demo" class="btn btn-ghost" data-ll-utm>See a live presentation</a>
       </div>
-      <p class="trial-sub"><b>3 free presentations or 60 days</b> — no card required.</p>
+      <p class="trial-sub"><b>Sample demo free</b> · create an account to build yours; unlock at Generate.</p>
       <div class="hero-proof">
         <div><strong>Custom-fit</strong>market for every home</div>
         <div><strong>Live odds</strong>at every price point</div>
@@ -444,7 +464,7 @@ footer a:hover { color: var(--ink); }
       <div class="mock" id="toy">
         <div class="mock-bar"><i></i><i></i><i></i><span>listlogic.homes/presentation</span></div>
         <div class="mock-body">
-          <div class="mock-live"><i></i> Live sample — drag the slider</div>
+          <div class="mock-live"><i></i> Live sample · drag the slider</div>
           <div class="mock-header">
             <div class="mock-tag">Recommended list price</div>
             <span class="mock-temp">Market temp: Warm</span>
@@ -453,12 +473,12 @@ footer a:hover { color: var(--ink); }
             <div class="mock-price" id="toyPrice">$410,000</div>
             <span class="mock-delta" id="toyDelta">At recommended</span>
           </div>
-          <div class="mock-range">Range $396,000 – $426,000 · 14 similar sales in this home's market</div>
+          <div class="mock-range">Range $396,000 · $426,000 · 14 similar sales in this home's market</div>
 
           <div class="mock-slider">
             <div class="mock-slider-head"><span>What-if price slider</span><b id="toyHead">Market · $410,000</b></div>
             <input type="range" id="toyRange" min="-5" max="6" step="0.25" value="0" aria-label="List price adjustment versus recommended">
-            <div class="mock-slider-legend"><span>Move fast −5%</span><span class="mid">Recommended</span><span>Stretch +6%</span></div>
+            <div class="mock-slider-legend"><span>Move fast -5%</span><span class="mid">Recommended</span><span>Stretch +6%</span></div>
           </div>
 
           <div class="mock-stats">
@@ -476,9 +496,9 @@ footer a:hover { color: var(--ink); }
           </div>
 
           <div class="mock-rows-title">Price positioning</div>
-          <div class="mock-row" data-anchor="-3"><span>Move fast −3%</span><b>$397,700</b><span class="up" data-row-stat>—</span></div>
-          <div class="mock-row on" data-anchor="0"><span>At market</span><b>$410,000</b><span class="up" data-row-stat>—</span></div>
-          <div class="mock-row" data-anchor="4"><span>Stretch +4%</span><b>$426,400</b><span class="down" data-row-stat>—</span></div>
+          <div class="mock-row" data-anchor="-3"><span>Move fast -3%</span><b>$397,700</b><span class="up" data-row-stat>·</span></div>
+          <div class="mock-row on" data-anchor="0"><span>At market</span><b>$410,000</b><span class="up" data-row-stat>·</span></div>
+          <div class="mock-row" data-anchor="4"><span>Stretch +4%</span><b>$426,400</b><span class="down" data-row-stat>·</span></div>
 
           <div class="mock-comps">
             <div class="mock-comp" data-price="404900"><div class="c-sim">96%</div><div class="c-price">$404,900</div><div class="c-meta">Sold · 0.5 mi</div></div>
@@ -503,23 +523,41 @@ footer a:hover { color: var(--ink); }
           </div>
         </div>
       </div>
-      <p class="mock-caption">A real ListLogic pricing model — <a href="/demo">open the full presentation</a></p>
+      <p class="mock-caption">A real ListLogic pricing model · <a href="/demo">open the full presentation</a></p>
     </div>
   </div>
 </header>
+
+<section class="video-demo" id="product-video">
+  <div class="container">
+    <div class="section-head center">
+      <span class="eyebrow">See it</span>
+      <h2>Two minutes · the listing appointment pricing story</h2>
+      <p>Watch how sellers see price, odds, and supply move together — then try the live demo.</p>
+    </div>
+    <div class="video-frame" data-ll-video-embed>
+      <!-- Replace placeholder: set iframe src to your YouTube/Loom embed URL -->
+      <div class="video-placeholder">
+        <strong>Product video coming soon</strong>
+        <span>Paste your embed URL into this section (id product-video). Until then, open the live demo.</span>
+        <a href="/demo" class="btn btn-trial" data-ll-utm style="margin-top:8px">Open live demo</a>
+      </div>
+    </div>
+  </div>
+</section>
 
 <section class="section pain">
   <div class="container">
     <div class="section-head center">
       <span class="eyebrow">The problem</span>
-      <h2>Overpricing costs more than most agents — and most sellers — ever see.</h2>
-      <p>The seller already knows what it’s worth: they saw it online. Agents and sellers both underweight how hard that anchor hits odds, timeline, and net — until someone makes the trade-off visible.</p>
+      <h2>Overpricing costs more than most agents · and most sellers · ever see.</h2>
+      <p>The seller already knows what it·s worth: they saw it online. Agents and sellers both underweight how hard that anchor hits odds, timeline, and net · until someone makes the trade-off visible.</p>
     </div>
     <div class="pain-grid">
       <div class="pain-card">
         <span class="num">01</span>
         <h3>Sellers anchor on Zillow</h3>
-        <p>A guess with a nice UI beats a spreadsheet of comps. You need a story that's just as easy to believe — but grounded in real data.</p>
+        <p>A guess with a nice UI beats a spreadsheet of comps. You need a story that's just as easy to believe · but grounded in real data.</p>
       </div>
       <div class="pain-card">
         <span class="num">02</span>
@@ -529,7 +567,7 @@ footer a:hover { color: var(--ink); }
       <div class="pain-card">
         <span class="num">03</span>
         <h3>Overpricing kills momentum</h3>
-        <p>Two price reductions later, the listing is stale and the seller wonders what went wrong. The data was there — it just wasn't visible.</p>
+        <p>Two price reductions later, the listing is stale and the seller wonders what went wrong. The data was there · it just wasn't visible.</p>
       </div>
     </div>
   </div>
@@ -540,20 +578,20 @@ footer a:hover { color: var(--ink); }
     <div class="section-head center">
       <span class="eyebrow">Why it works</span>
       <h2>Pricing that's factual because the market is custom-fit.</h2>
-      <p>City-wide stats don't sell a home. ListLogic narrows the lens to the homes a buyer would actually compare against yours — then shows what that market is really doing.</p>
+      <p>City-wide stats don't sell a home. ListLogic narrows the lens to the homes a buyer would actually compare against yours · then shows what that market is really doing.</p>
     </div>
     <div class="steps">
       <div class="step">
         <h3>Search or upload the market</h3>
-        <p>Search a market nationwide with location, filters, and an optional map — or upload a CSV/TXT from any MLS. Smart header mapping lets you confirm columns before you run.</p>
+        <p>Search a market nationwide with location, filters, and an optional map · or upload a CSV/TXT from any MLS. Smart header mapping lets you confirm columns before you run.</p>
       </div>
       <div class="step">
         <h3>A market built around the home</h3>
-        <p>Size, garage, area, age, and timeframe are filtered to the homes a buyer would genuinely cross-shop — an apples-to-apples segment, not a zip-code average.</p>
+        <p>Size, garage, area, age, and timeframe are filtered to the homes a buyer would genuinely cross-shop · an apples-to-apples segment, not a zip-code average.</p>
       </div>
       <div class="step">
         <h3>Positioned to sell</h3>
-        <p>A recommended list price and range anchored to what buyers just paid — with timing and odds trade-offs of pricing higher or lower made visible.</p>
+        <p>A recommended list price and range anchored to what buyers just paid · with timing and odds trade-offs of pricing higher or lower made visible.</p>
       </div>
     </div>
   </div>
@@ -565,12 +603,12 @@ footer a:hover { color: var(--ink); }
       <div>
         <span class="eyebrow">Live in the appointment</span>
         <h3>Answer "what if we price higher?" in real time.</h3>
-        <p>The interactive presentation puts the trade-off on screen. Move the price slider and watch expected timing and probability of sale respond — calibrated to how this home's specific market is actually absorbing listings.</p>
+        <p>The interactive presentation puts the trade-off on screen. Move the price slider and watch expected timing and probability of sale respond · calibrated to how this home's specific market is actually absorbing listings.</p>
         <ul class="checklist">
           <li>Recommended list, range, and expected timing at a glance</li>
           <li>What-if slider: aggressive vs. premium pricing, live odds</li>
           <li>Market temperature: inventory, absorption, buyer demand</li>
-          <li>Adjust condition rating and overrides — you stay in control</li>
+          <li>Adjust condition rating and overrides · you stay in control</li>
         </ul>
       </div>
       <div class="split-media">
@@ -579,15 +617,15 @@ footer a:hover { color: var(--ink); }
           <div class="bar"><i style="width:72%"></i></div>
           <div class="bar"><i style="width:51%"></i></div>
         </div>
-        <div class="big">86% → 51%</div>
-        <div class="meta">Odds of selling in 60 days as price moves from −3% to +4% of recommendation</div>
+        <div class="big">86% ? 51%</div>
+        <div class="meta">Odds of selling in 60 days as price moves from -3% to +4% of recommendation</div>
       </div>
     </div>
 
     <div class="split flip">
       <div>
         <span class="eyebrow">Total transparency</span>
-        <h3>Every comp on the table — ranked by similarity.</h3>
+        <h3>Every comp on the table · ranked by similarity.</h3>
         <p>Sellers stop arguing when they can see exactly which homes they're competing with. ListLogic ranks the sold, active, and competing listings by similarity to the subject and shows the supply coming to market.</p>
         <ul class="checklist">
           <li>Closest comparable sales, ranked and explained</li>
@@ -621,19 +659,19 @@ footer a:hover { color: var(--ink); }
         <span class="pill">Interactive</span>
         <h3>Live presentation</h3>
         <p>The on-screen story: market temperature, recommended price, what-if sliders, and full comp transparency. Present it live and refine it together.</p>
-        <a href="/demo">Open the sample →</a>
+        <a href="/demo">Open the sample ?</a>
       </div>
       <div class="deliver-card">
         <span class="pill">Leave-behind</span>
         <h3>Print leave-behind</h3>
-        <p>The full Live Story, print-ready in landscape — cover, market, comps, and strategy, one section per page with every chart. Print or save to PDF right from the presentation.</p>
-        <a href="/demo">See it in the demo →</a>
+        <p>The full Live Story, print-ready in landscape · cover, market, comps, and strategy, one section per page with every chart. Print or save to PDF right from the presentation.</p>
+        <a href="/demo">See it in the demo ?</a>
       </div>
       <div class="deliver-card">
         <span class="pill">Presentation</span>
         <h3>Listing flipbook</h3>
-        <p>Landscape slides built for binders and table presentations — the same data story, paced for a sit-down conversation.</p>
-        <a href="/demo">Preview the flipbook →</a>
+        <p>Landscape slides built for binders and table presentations · the same data story, paced for a sit-down conversation.</p>
+        <a href="/demo">Preview the flipbook ?</a>
       </div>
     </div>
   </div>
@@ -643,7 +681,7 @@ footer a:hover { color: var(--ink); }
   <div class="container">
     <div class="quote-band">
       <blockquote>
-        "When sellers understand the data, they stop negotiating against the market —
+        "When sellers understand the data, they stop negotiating against the market ·
         and start partnering with you."
       </blockquote>
       <cite>The principle behind every ListLogic presentation</cite>
@@ -656,11 +694,17 @@ footer a:hover { color: var(--ink); }
     <div class="pricing-teaser">
       <div>
         <div class="amount">$39<span style="font-size:1rem;color:var(--muted);font-family:Inter">/mo unlimited</span></div>
-        <p>Or $20 for a single report. Free trial includes 3 full presentations or 60 days — no card required. Brokerage seats from $29/seat.</p>
+        <p>Or $20 for a single report. Sample demo is free. Custom runs unlock with a 7-day trial (then $39/mo) or $20. Brokerage seats from $29/seat.</p>
+        <div class="price-row">
+          <div><strong>$39</strong><span>/mo after 7-day trial</span></div>
+          <div><strong>$20</strong><span>one report</span></div>
+          <div><strong>$390</strong><span>/yr agent</span></div>
+        </div>
+        <a href="signup.html" class="btn btn-trial">Create account <span class="btn-arrow">?</span></a>
       </div>
       <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
         <a href="pricing.html" class="btn btn-outline">View pricing</a>
-        <a href="signup.html" class="btn btn-trial">Start free trial <span class="btn-arrow">→</span></a>
+        <a href="/demo" class="btn btn-trial">Open sample demo <span class="btn-arrow">?</span></a>
       </div>
     </div>
   </div>
@@ -670,12 +714,12 @@ footer a:hover { color: var(--ink); }
   <div class="container">
     <span class="eyebrow" style="justify-content:center;display:inline-flex">Ready when you are</span>
     <h2>Walk into your next appointment with the market on your side.</h2>
-    <p>Try the sample listing right now — no account needed. When you're ready, your first 3 presentations are free.</p>
-    <div class="row">
-      <a href="/demo" class="btn btn-gold">Try the sample listing</a>
-      <a href="signup.html" class="btn btn-trial">Start free trial <span class="btn-arrow">→</span></a>
+    <p>Try the sample listing right now · no account needed. Create an account to build yours; unlock at Generate with a 7-day trial or $20.</p>
+    <div class="cta-row">
+      <a href="/demo" class="btn btn-ghost">See a live presentation</a>
+      <a href="signup.html" class="btn btn-trial">Create account <span class="btn-arrow">?</span></a>
     </div>
-    <p class="trial-sub" style="color:var(--muted)">3 presentations or 60 days · <b style="color:var(--ink)">no card required</b></p>
+    <p class="trial-sub" style="color:var(--muted)">Sample demo free · <b style="color:var(--ink)">card only when you unlock a custom run</b></p>
   </div>
 </section>
 
@@ -731,7 +775,7 @@ footer a:hover { color: var(--ink); }
       deltaEl.textContent = 'At recommended';
       deltaEl.className = 'mock-delta';
     } else {
-      var sign = pctDelta > 0 ? '+' : '−';
+      var sign = pctDelta > 0 ? '+' : '-';
       deltaEl.textContent = sign + Math.abs(pctDelta).toFixed(1).replace(/\.0$/, '') + '% vs recommended';
       deltaEl.className = 'mock-delta ' + (pctDelta > 0 ? 'above' : 'below');
     }
@@ -761,7 +805,7 @@ footer a:hover { color: var(--ink); }
     });
     comps.forEach(function (c) { c.classList.toggle('on', c === (target || highest)); });
 
-    // Supply stream: weeks you wait × incoming competition
+    // Supply stream: weeks you wait · incoming competition
     var supplyNote = document.getElementById('toySupplyNote');
     var ticks = Array.prototype.slice.call(document.querySelectorAll('.mock-supply-tick'));
     var weeksWaiting = Math.max(1, Math.round(o.dom / 7));
@@ -774,7 +818,7 @@ footer a:hover { color: var(--ink); }
     });
     if (supplyNote) {
       supplyNote.innerHTML = weeksWaiting <= 1
-        ? 'About <b>1 week</b> on market at this price — supply is not the problem.'
+        ? 'About <b>1 week</b> on market at this price · supply is not the problem.'
         : 'Waiting ~<b>' + weeksWaiting + ' weeks</b> at this price means ~<b>' + cumulative + ' new similar homes</b> hit the market while you wait.';
     }
   }
@@ -790,16 +834,18 @@ footer a:hover { color: var(--ink); }
   toggle.addEventListener('click', function () {
     var open = links.classList.toggle('open');
     toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    toggle.textContent = open ? '✕' : '☰';
+    toggle.textContent = open ? '?' : '?';
   });
   links.querySelectorAll('a').forEach(function (a) {
     a.addEventListener('click', function () {
       links.classList.remove('open');
       toggle.setAttribute('aria-expanded', 'false');
-      toggle.textContent = '☰';
+      toggle.textContent = '?';
     });
   });
 })();
 </script>
+<script src="/saas/analytics.js"></script>
+<script src="/saas/utm.js"></script>
 </body>
 </html>

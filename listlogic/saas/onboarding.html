@@ -148,6 +148,30 @@ body { background: var(--paper); }
             <div class="help">Appears on the header and print leave-behind.</div>
           </div>
         </div>
+
+        <div class="set-row">
+          <label for="listingsYear">Listings / year</label>
+          <div>
+            <select id="listingsYear" style="width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fbfaf7;font-size:0.9rem">
+              <option value="">Select…</option>
+              <option value="0-2">0–2 (occasional)</option>
+              <option value="3-5">3–5</option>
+              <option value="6-12">6–12 (listing-active)</option>
+              <option value="13+">13+</option>
+            </select>
+            <div class="help">Helps us prioritize support — listing-active agents get the most from ListLogic.</div>
+          </div>
+        </div>
+
+        <div class="set-row">
+          <label for="smsConsent">Text updates</label>
+          <div>
+            <label style="display:flex;gap:10px;align-items:flex-start;font-weight:500">
+              <input id="smsConsent" type="checkbox" style="width:auto;margin-top:3px">
+              <span>I agree to receive automated texts from ListLogic about product tips and demos. Msg &amp; data rates may apply. Reply STOP to opt out. Consent is optional.</span>
+            </label>
+          </div>
+        </div>
       </div>
 
       <div class="set-card">
@@ -326,6 +350,8 @@ body { background: var(--paper); }
       $('phone').value = u.phone || '';
       $('email').value = u.email || '';
       $('brokerage').value = u.brokerage || '';
+      $('listingsYear').value = u.listings_year || '';
+      $('smsConsent').checked = !!u.sms_consent;
       $('brandPrimary').value = u.brand_primary || '#0c3c6e';
       $('brandAccent').value = u.brand_accent || '#1a5f9e';
       setPwState(!!u.has_password);
@@ -348,6 +374,8 @@ body { background: var(--paper); }
     fd.set('name', $('name').value.trim());
     fd.set('phone', $('phone').value.trim());
     fd.set('brokerage', $('brokerage').value.trim());
+    fd.set('listings_year', $('listingsYear').value);
+    if ($('smsConsent').checked) fd.set('sms_consent', '1');
     fd.set('brand_primary', $('brandPrimary').value);
     fd.set('brand_accent', $('brandAccent').value);
     if (pwToggle.checked && pwInput.value) {
@@ -361,6 +389,7 @@ body { background: var(--paper); }
       const res = await fetch('/api/profile', { method: 'POST', body: fd, credentials: 'same-origin' });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Could not save profile');
+      if (window.llTrack) window.llTrack('profile_complete', { listings_year: $('listingsYear').value || '' });
       setStatus('Saved. New reports will use these settings.', 'ok');
       const next = new URLSearchParams(location.search).get('next');
       if (next && next.startsWith('/')) location.href = next;
@@ -451,5 +480,7 @@ body { background: var(--paper); }
   loadSessions();
 })();
 </script>
+<script src="/saas/analytics.js"></script>
+<script src="/saas/utm.js"></script>
 </body>
 </html>

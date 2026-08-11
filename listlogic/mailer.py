@@ -56,42 +56,44 @@ def send_email(*, to: str, subject: str, body: str, reply_to: str = "") -> bool:
 
 
 def send_magic_link(*, to: str, url: str, is_new: bool = False) -> bool:
-    action = "Start your ListLogic trial" if is_new else "Sign in to ListLogic"
+    action = "Create your ListLogic account" if is_new else "Sign in to ListLogic"
     body = (
         f"Hi,\n\n"
         f"{action} with this one-time link (expires in 30 minutes):\n\n"
         f"{url}\n\n"
+        f"Sample demo stays free. Setup is free. You only unlock when you Generate "
+        f"(7-day trial then $39/mo, or $20 for one report).\n\n"
         f"If you didn't request this, you can ignore this email.\n\n"
         f"— ListLogic\n"
     )
-    subject = "Your ListLogic sign-in link" if not is_new else "Your ListLogic trial link"
+    subject = "Your ListLogic sign-in link" if not is_new else "Your ListLogic account link"
     return send_email(to=to, subject=subject, body=body)
 
 
 def send_welcome(user: dict, base_url: str) -> None:
-    days = user.get("trial_ends_at") or ""
-    limit = user.get("presentation_limit")
     body = (
         f"Hi {user.get('name') or 'there'},\n\n"
-        f"Welcome to ListLogic — your trial is active.\n\n"
-        f"Trial terms: {limit} presentations OR until {days} — whichever comes first.\n\n"
-        f"Open the app: {base_url}/saas/app.html\n"
-        f"Try the sample listing (no MLS export needed): {base_url}/demo\n\n"
+        f"Welcome to ListLogic — your account is ready.\n\n"
+        f"Sample demo (free): {base_url}/demo\n"
+        f"App — build your market: {base_url}/saas/app.html\n\n"
+        f"When you click Generate, unlock with a 7-day trial (card required, then $39/mo) "
+        f"or $20 for that one report. Setup and the sample stay free.\n\n"
         f"Questions or bugs? Use Send feedback in the app, or reply to this email.\n\n"
         f"— ListLogic\n"
     )
-    send_email(to=user["email"], subject="Welcome to ListLogic — your trial is ready", body=body)
+    send_email(to=user["email"], subject="Welcome to ListLogic — build yours, unlock at Generate", body=body)
     send_email(
         to=feedback_to(),
         subject=f"ListLogic signup · {user.get('email')}",
         body=(
-            f"New trial signup\n\n"
+            f"New signup\n\n"
             f"Name: {user.get('name')}\n"
             f"Email: {user.get('email')}\n"
             f"Phone: {user.get('phone')}\n"
             f"Brokerage: {user.get('brokerage')}\n"
-            f"Trial ends: {days}\n"
-            f"Presentation limit: {limit}\n"
+            f"Status: {user.get('status')}\n"
+            f"Trial ends: {user.get('trial_ends_at')}\n"
+            f"Presentation limit: {user.get('presentation_limit')}\n"
         ),
     )
 
@@ -99,53 +101,57 @@ def send_welcome(user: dict, base_url: str) -> None:
 def send_trial_reminder(user: dict, base_url: str) -> None:
     body = (
         f"Hi {user.get('name') or 'there'},\n\n"
-        f"Your ListLogic trial ends on {user.get('trial_ends_at')}.\n"
+        f"Your ListLogic promo/trial credits end on {user.get('trial_ends_at')}.\n"
         f"Presentations used: {user.get('presentations_used')} / {user.get('presentation_limit')}.\n\n"
-        f"Upgrade / plans: {base_url}/saas/pricing.html\n"
+        f"After that, unlock at Generate with a 7-day Stripe trial (then $39/mo) or $20 per report:\n"
+        f"{base_url}/saas/pricing.html\n"
         f"App: {base_url}/saas/app.html\n\n"
         f"— ListLogic\n"
     )
-    send_email(to=user["email"], subject="ListLogic trial ending soon", body=body)
+    send_email(to=user["email"], subject="ListLogic promo access ending soon", body=body)
 
 
 def send_trial_expired(user: dict, base_url: str) -> None:
     body = (
         f"Hi {user.get('name') or 'there'},\n\n"
-        f"Your ListLogic trial has ended (3 presentations or 60 days — whichever came first).\n\n"
-        f"Ready to keep going? See plans: {base_url}/saas/pricing.html\n"
+        f"Your complimentary ListLogic credits have ended.\n\n"
+        f"To generate the next custom presentation, unlock with a 7-day trial "
+        f"(card required, then $39/mo) or buy one report for $20:\n"
+        f"{base_url}/saas/pricing.html\n\n"
+        f"Sample demo stays free anytime: {base_url}/demo\n"
         f"Or reply and we’ll get you set up.\n\n"
         f"— ListLogic\n"
     )
-    send_email(to=user["email"], subject="Your ListLogic trial ended — keep pricing with data", body=body)
+    send_email(to=user["email"], subject="Your ListLogic credits ended — unlock to keep going", body=body)
 
 
 def send_last_report_notice(user: dict, base_url: str) -> bool:
-    """Sent the moment a trial user is down to their final presentation."""
+    """Sent when a promo/credit user is down to their final presentation."""
     body = (
         f"Hi {user.get('name') or 'there'},\n\n"
-        f"Quick heads-up: you have 1 free presentation left on your ListLogic trial.\n\n"
-        f"If ListLogic is already helping you win the room, upgrading is $39/mo — "
-        f"unlimited presentations, and one signed listing pays for years of it:\n"
-        f"{base_url}/saas/pricing.html?plan=agent_monthly\n\n"
-        f"Rather pay per report? Single reports are $20: {base_url}/saas/pricing.html?plan=one_time\n\n"
+        f"Quick heads-up: you have 1 complimentary presentation left.\n\n"
+        f"After that, unlock with a 7-day trial (then $39/mo unlimited) or $20 per report:\n"
+        f"{base_url}/saas/pricing.html?plan=agent_monthly\n"
+        f"One-shot: {base_url}/saas/pricing.html?plan=one_time\n\n"
         f"— ListLogic\n"
     )
-    return send_email(to=user["email"], subject="1 presentation left on your ListLogic trial", body=body)
+    return send_email(to=user["email"], subject="1 complimentary presentation left on ListLogic", body=body)
 
 
 def send_reports_used_up(user: dict, base_url: str) -> bool:
-    """Sent the moment a trial user burns their last presentation."""
+    """Sent when a promo/credit user burns their last presentation."""
+    used = user.get("presentation_limit") or user.get("presentations_used") or "your"
     body = (
         f"Hi {user.get('name') or 'there'},\n\n"
-        f"You've used all {user.get('presentation_limit') or 3} trial presentations — nice work putting them in front of sellers.\n\n"
-        f"To generate the next one, pick a plan (takes about a minute):\n"
-        f"  - Agent monthly, unlimited: $39/mo — {base_url}/saas/pricing.html?plan=agent_monthly\n"
+        f"You've used all {used} complimentary presentations — nice work putting them in front of sellers.\n\n"
+        f"To generate the next one, unlock at Generate (takes about a minute):\n"
+        f"  - 7-day trial then $39/mo unlimited — {base_url}/saas/pricing.html?plan=agent_monthly\n"
         f"  - Single report: $20 — {base_url}/saas/pricing.html?plan=one_time\n"
         f"  - Agent annual (2 months free): $390/yr — {base_url}/saas/pricing.html?plan=agent_annual\n\n"
         f"Your saved reports and share links keep working either way.\n\n"
         f"— ListLogic\n"
     )
-    return send_email(to=user["email"], subject="You're out of trial presentations — upgrade to keep going", body=body)
+    return send_email(to=user["email"], subject="Complimentary presentations used — unlock to keep going", body=body)
 
 
 def send_feedback_notice(payload: dict) -> None:

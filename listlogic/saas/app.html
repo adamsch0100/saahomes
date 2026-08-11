@@ -97,6 +97,32 @@
   border-bottom: 1px solid #f0ebe3;
 }
 .suggest-list button:hover, .suggest-list button.on { background: #eef4fa; }
+.subject-tile, .filters-tile {
+  margin-top: 14px; padding: 14px 16px; border-radius: var(--radius);
+  border: 1px solid var(--line);
+}
+.subject-tile {
+  background: linear-gradient(165deg, #f2f7fb 0%, #e8f0f7 100%);
+  border-color: #c5d6e8;
+}
+.filters-tile { background: #faf9f6; }
+.tile-label {
+  font-size: 0.68rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--navy); margin: 0 0 4px;
+}
+.tile-hint { margin: 0 0 12px; font-size: 0.8rem; color: var(--muted); }
+#subjectAutofillStatus { font-size: 0.78rem; color: var(--muted); margin: 0 0 10px; min-height: 1.1em; }
+#subjectAutofillStatus.ok { color: var(--teal); }
+#subjectAutofillStatus.warn { color: #9a6b00; }
+.subject-photo-row {
+  display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap;
+  margin: 0 0 14px; padding: 10px 12px; border: 1px dashed #b7c9db; border-radius: 10px; background: rgba(255,255,255,0.55);
+}
+#subjectPhotoPreview {
+  width: 120px; height: 90px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); background: #dce6ef;
+}
+.subject-photo-controls { flex: 1; min-width: 180px; }
+.subject-photo-controls label { display: block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
 .shape-toggle { display: inline-flex; gap: 0; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
 .shape-toggle button {
   border: none; background: #fff; padding: 8px 14px; font: inherit; font-size: 0.82rem;
@@ -121,6 +147,33 @@
 #mappingSample th, #mappingSample td { padding: 3px 5px; border: 1px solid var(--line); white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
 #mappingConfirmStatus.ok { color: var(--teal); font-weight: 600; }
 #generateBtn:disabled { opacity: 0.55; cursor: not-allowed; }
+.ll-paywall {
+  position: fixed; inset: 0; z-index: 200; background: rgba(11,18,32,0.55);
+  display: grid; place-items: center; padding: 20px;
+}
+.ll-paywall[hidden] { display: none !important; }
+.ll-paywall-card {
+  background: #fff; border-radius: 20px; padding: 28px 26px 24px; max-width: 480px; width: 100%;
+  box-shadow: 0 40px 90px -30px rgba(0,0,0,0.5); position: relative;
+}
+.ll-paywall-close {
+  position: absolute; top: 12px; right: 14px; border: 0; background: transparent;
+  font-size: 1.4rem; cursor: pointer; color: var(--muted); line-height: 1;
+}
+.ll-paywall-teaser {
+  background: #f7f4ee; border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin-bottom: 18px;
+}
+.ll-paywall-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.ll-paywall-chips span {
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; color: var(--ink-2);
+}
+.ll-paywall-blur { margin-top: 12px; filter: blur(5px); user-select: none; pointer-events: none; opacity: 0.85; }
+.ll-paywall-fake { font-family: Fraunces, serif; font-size: 1.8rem; font-weight: 700; }
+.ll-paywall-bar { height: 8px; background: #dde3ec; border-radius: 999px; margin-top: 10px; overflow: hidden; }
+.ll-paywall-bar i { display: block; width: 62%; height: 100%; background: linear-gradient(90deg, var(--navy), var(--teal)); }
+.ll-paywall-actions { display: grid; gap: 10px; }
+.ll-paywall-actions .btn { width: 100%; text-align: center; }
 
 .submit-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
 .submit-row .btn { padding: 14px 30px; font-size: 0.98rem; }
@@ -237,7 +290,36 @@
 
   <div class="dash-main">
   <div class="banner" id="trialBanner">
-    <strong>Trial:</strong> 3 presentations or 60 days — whichever comes first. <span id="trialMeta"></span>
+    <strong>Account ready.</strong> Build your market below — unlock at Generate with a 7-day trial or $20. <span id="trialMeta"></span>
+  </div>
+
+  <div id="paywallModal" class="ll-paywall" hidden>
+    <div class="ll-paywall-card" role="dialog" aria-labelledby="paywallTitle">
+      <button type="button" class="ll-paywall-close" id="paywallClose" aria-label="Close">×</button>
+      <span class="eyebrow" style="color:var(--teal)">Unlock this presentation</span>
+      <h2 id="paywallTitle" style="font-family:Fraunces,serif;font-size:1.55rem;letter-spacing:-0.02em;margin:8px 0 10px">Your market is ready — pick how to open it.</h2>
+      <p id="paywallSubject" style="color:var(--muted);font-size:0.92rem;margin-bottom:16px">Sample demo stays free. Custom runs need a short trial or a one-time report.</p>
+      <div class="ll-paywall-teaser" id="paywallTeaser">
+        <div><strong id="pwAddr">—</strong></div>
+        <div class="ll-paywall-chips">
+          <span id="pwBeds">—</span>
+          <span id="pwMode">—</span>
+        </div>
+        <p style="font-size:0.84rem;color:var(--muted);margin-top:10px">Blurred preview of price · odds · supply — full interactive story unlocks after checkout.</p>
+        <div class="ll-paywall-blur" aria-hidden="true">
+          <div class="ll-paywall-fake">$———</div>
+          <div class="ll-paywall-bar"><i></i></div>
+        </div>
+      </div>
+      <div class="ll-paywall-actions">
+        <button type="button" class="btn btn-gold" id="pwTrialBtn">Start 7-day trial — then $39/mo</button>
+        <button type="button" class="btn btn-outline" id="pwOneBtn">Buy this report — $20</button>
+        <a class="btn btn-ghost" href="/demo" target="_blank" rel="noopener">Open sample demo</a>
+      </div>
+      <p style="font-size:0.78rem;color:var(--muted);margin-top:14px;line-height:1.45">
+        Trial: card required today, <strong>no charge for 7 days</strong>, then $39/mo unless you cancel. Annual $390 available on the <a href="/saas/pricing.html">pricing page</a>.
+      </p>
+    </div>
   </div>
 
   <div class="dash-view" id="view-reports">
@@ -274,27 +356,7 @@
           <input type="text" id="address" name="address" placeholder="Start typing an address…" value="2845 W 13th St, Greeley, CO 80634" required autocomplete="off">
           <div class="suggest-list" id="addressSuggest" role="listbox"></div>
         </div>
-        <p class="hint" id="addressHint">Pick a suggestion to center the map and draw a 1-mile market area.</p>
-      </div>
-      <div class="row2">
-        <div class="field">
-          <label>Square feet (total)</label>
-          <input type="number" id="sqft" name="living_area" value="2392">
-        </div>
-        <div class="field">
-          <label>Year built</label>
-          <input type="number" id="year" name="year_built" value="1969">
-        </div>
-      </div>
-      <div class="row2">
-        <div class="field">
-          <label>Beds</label>
-          <input type="number" id="beds" name="beds" value="4" step="1">
-        </div>
-        <div class="field">
-          <label>Baths</label>
-          <input type="number" id="baths" name="baths" value="2" step="0.25">
-        </div>
+        <p class="hint" id="addressHint">Pick a suggestion to center the map, draw the market area, and auto-fill subject facts.</p>
       </div>
 
       <div class="mode-toggle" role="tablist" aria-label="Market mode" style="margin-top:14px">
@@ -313,9 +375,8 @@
       <div id="portalPanel">
         <div class="field">
           <label>Market area on map</label>
-          <p class="hint" style="margin:0 0 6px">1-mile circle around the subject — switch to rectangle or draw a custom polygon.</p>
-          <div id="portalMap"></div>
-          <div class="map-toolbar">
+          <p class="hint" style="margin:0 0 8px">1-mile circle around the subject — switch to rectangle or draw a custom polygon.</p>
+          <div class="map-toolbar" style="margin:0 0 8px">
             <div class="shape-toggle" role="group" aria-label="Shape">
               <button type="button" class="on" id="shapeCircleBtn" data-shape="circle">Circle</button>
               <button type="button" id="shapeRectBtn" data-shape="rectangle">Rectangle</button>
@@ -329,81 +390,147 @@
             <button type="button" class="btn btn-ghost" id="portalClearDrawBtn" style="border:1px solid var(--line);color:var(--navy)">Clear shape</button>
             <button type="button" class="btn btn-ghost" id="portalPreviewBtn" style="border:1px solid var(--line);color:var(--navy)">Preview counts</button>
           </div>
+          <div id="portalMap"></div>
           <label class="check-row" style="margin-top:8px">
             <input type="checkbox" id="portalWidenCity">
             Widen search to whole city (ignore map shape)
           </label>
           <div class="portal-preview" id="portalPreview"></div>
         </div>
+      </div>
 
+      <div class="subject-tile" id="subjectTile">
+        <div class="tile-label">Subject home</div>
+        <p class="tile-hint">Facts for <em>this</em> property on the presentation and comps — auto-filled when possible. Edit or complete anything missing before you generate.</p>
+        <div id="subjectAutofillStatus"></div>
+        <div class="subject-photo-row" id="subjectPhotoRow">
+          <img id="subjectPhotoPreview" alt="Subject photo preview" hidden>
+          <div class="subject-photo-controls">
+            <label for="subjectPhoto">Subject photo</label>
+            <input type="file" id="subjectPhoto" name="subject_photo" accept="image/png,image/jpeg,image/webp">
+            <input type="hidden" id="subjectPhotoUrl" name="subject_photo_url" value="">
+            <input type="hidden" id="subjectLat" name="subject_lat" value="">
+            <input type="hidden" id="subjectLng" name="subject_lng" value="">
+            <p class="hint" style="margin:6px 0 0">Auto-filled from the listing when available, or upload your own (JPG/PNG/WebP).</p>
+            <button type="button" class="btn btn-ghost" id="subjectPhotoClear" style="margin-top:6px;border:1px solid var(--line);color:var(--navy);padding:6px 10px;font-size:0.78rem">Clear photo</button>
+          </div>
+        </div>
         <div class="row2">
           <div class="field">
-            <label>Dwelling</label>
-            <select id="portalDwelling">
-              <option value="detached" selected>House (detached)</option>
-              <option value="attached">Condo + Townhome</option>
-            </select>
+            <label>Square feet (total)</label>
+            <input type="number" id="sqft" name="living_area" value="2392" placeholder="Required for accurate comps" required>
           </div>
           <div class="field">
-            <label>Lookback (days)</label>
-            <input type="number" id="portalLookback" value="730" min="90" max="1100">
+            <label>Year built</label>
+            <input type="number" id="year" name="year_built" value="1969" placeholder="e.g. 1998">
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>Beds</label>
+            <input type="number" id="beds" name="beds" value="4" step="1" placeholder="e.g. 3" required>
+          </div>
+          <div class="field">
+            <label>Baths</label>
+            <input type="number" id="baths" name="baths" value="2" step="0.25" placeholder="e.g. 2.5" required>
           </div>
         </div>
         <div class="row3">
           <div class="field">
-            <label>Price min</label>
-            <input type="number" id="portalPriceMin" value="300000">
+            <label>Garage spaces</label>
+            <input type="number" id="garageSpaces" name="garage_spaces" value="2" min="0" max="10" step="1" placeholder="e.g. 2">
           </div>
           <div class="field">
-            <label>Price max</label>
-            <input type="number" id="portalPriceMax" value="450000">
-          </div>
-          <div class="field">
-            <label>Garage min</label>
-            <input type="number" id="portalGarage" value="1" min="0" max="6" step="1">
-          </div>
-        </div>
-        <div class="row3">
-          <div class="field">
-            <label>Beds min–max</label>
-            <div style="display:flex;gap:6px">
-              <input type="number" id="portalBedsMin" value="3" min="0" max="10" style="flex:1">
-              <input type="number" id="portalBedsMax" value="6" min="0" max="20" style="flex:1">
-            </div>
-          </div>
-          <div class="field">
-            <label>Baths min–max</label>
-            <div style="display:flex;gap:6px">
-              <input type="number" id="portalBathsMin" value="2" min="0" max="10" step="0.5" style="flex:1">
-              <input type="number" id="portalBathsMax" value="4" min="0" max="20" step="0.5" style="flex:1">
-            </div>
-          </div>
-          <div class="field">
-            <label>Living sqft min–max</label>
-            <div style="display:flex;gap:6px">
-              <input type="number" id="portalSqftMin" value="1700" style="flex:1">
-              <input type="number" id="portalSqftMax" value="2900" style="flex:1">
-            </div>
-          </div>
-        </div>
-        <div class="row3">
-          <div class="field">
-            <label>Lot acres min–max <span style="font-weight:400;text-transform:none">(optional)</span></label>
-            <div style="display:flex;gap:6px">
-              <input type="number" id="portalLotAcresMin" placeholder="min" min="0" step="0.05" style="flex:1">
-              <input type="number" id="portalLotAcresMax" placeholder="max" min="0" step="0.05" style="flex:1">
-            </div>
-          </div>
-          <div class="field">
-            <label>Year built min–max <span style="font-weight:400;text-transform:none">(optional)</span></label>
-            <div style="display:flex;gap:6px">
-              <input type="number" id="portalYearMin" placeholder="min" min="1800" max="2100" style="flex:1">
-              <input type="number" id="portalYearMax" placeholder="max" min="1800" max="2100" style="flex:1">
-            </div>
+            <label>Lot acres</label>
+            <input type="number" id="lotAcres" name="acres" placeholder="e.g. 0.18" min="0" step="0.01">
           </div>
           <div class="field">
             <label>MLS # <span style="font-weight:400;text-transform:none">(optional)</span></label>
             <input type="text" id="mls" name="mls_number" placeholder="If already listed">
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>Subdivision <span style="font-weight:400;text-transform:none">(optional)</span></label>
+            <input type="text" id="subdivision" name="subdivision" placeholder="Neighborhood / subdivision">
+          </div>
+          <div class="field">
+            <label>Style <span style="font-weight:400;text-transform:none">(optional)</span></label>
+            <input type="text" id="style" name="style" placeholder="Ranch, 2-story…">
+          </div>
+        </div>
+      </div>
+
+      <div id="portalFilters">
+        <div class="filters-tile">
+          <div class="tile-label">Market filters</div>
+          <p class="tile-hint">What to pull for comps — separate from the subject home above.</p>
+          <div class="row2">
+            <div class="field">
+              <label>Dwelling</label>
+              <select id="portalDwelling">
+                <option value="detached" selected>House (detached)</option>
+                <option value="attached">Condo + Townhome</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Lookback (days)</label>
+              <input type="number" id="portalLookback" value="730" min="90" max="1100">
+            </div>
+          </div>
+          <div class="row3">
+            <div class="field">
+              <label>Price min</label>
+              <input type="number" id="portalPriceMin" value="300000">
+            </div>
+            <div class="field">
+              <label>Price max</label>
+              <input type="number" id="portalPriceMax" value="450000">
+            </div>
+            <div class="field">
+              <label>Garage min</label>
+              <input type="number" id="portalGarage" value="1" min="0" max="6" step="1">
+            </div>
+          </div>
+          <div class="row3">
+            <div class="field">
+              <label>Beds min–max</label>
+              <div style="display:flex;gap:6px">
+                <input type="number" id="portalBedsMin" value="3" min="0" max="10" style="flex:1">
+                <input type="number" id="portalBedsMax" value="6" min="0" max="20" style="flex:1">
+              </div>
+            </div>
+            <div class="field">
+              <label>Baths min–max</label>
+              <div style="display:flex;gap:6px">
+                <input type="number" id="portalBathsMin" value="2" min="0" max="10" step="0.5" style="flex:1">
+                <input type="number" id="portalBathsMax" value="4" min="0" max="20" step="0.5" style="flex:1">
+              </div>
+            </div>
+            <div class="field">
+              <label>Living sqft min–max</label>
+              <div style="display:flex;gap:6px">
+                <input type="number" id="portalSqftMin" value="1700" style="flex:1">
+                <input type="number" id="portalSqftMax" value="2900" style="flex:1">
+              </div>
+            </div>
+          </div>
+          <div class="row3">
+            <div class="field">
+              <label>Lot acres min–max <span style="font-weight:400;text-transform:none">(optional)</span></label>
+              <div style="display:flex;gap:6px">
+                <input type="number" id="portalLotAcresMin" placeholder="min" min="0" step="0.05" style="flex:1">
+                <input type="number" id="portalLotAcresMax" placeholder="max" min="0" step="0.05" style="flex:1">
+              </div>
+            </div>
+            <div class="field">
+              <label>Year built min–max <span style="font-weight:400;text-transform:none">(optional)</span></label>
+              <div style="display:flex;gap:6px">
+                <input type="number" id="portalYearMin" placeholder="min" min="1800" max="2100" style="flex:1">
+                <input type="number" id="portalYearMax" placeholder="max" min="1800" max="2100" style="flex:1">
+              </div>
+            </div>
+            <div class="field"></div>
           </div>
         </div>
       </div>
@@ -449,13 +576,10 @@
         </details>
         <div class="row2" style="margin-top:12px">
           <div class="field">
-            <label>MLS # <span style="font-weight:400;text-transform:none">(optional)</span></label>
-            <input type="text" id="mlsUpload" placeholder="If already in the export">
-          </div>
-          <div class="field">
             <label>Narrow by city <span style="font-weight:400;text-transform:none">(optional)</span></label>
             <input type="text" id="city" name="city_filter" value="" placeholder="Blank = full export">
           </div>
+          <div class="field"></div>
         </div>
       </div>
     </div>
@@ -599,6 +723,54 @@ const result = document.getElementById('result');
     }
     const banner = document.getElementById('trialBanner');
     const meta = document.getElementById('trialMeta');
+    window.__llEnt = ent;
+    window.__llUser = u;
+    async function startCheckout(plan) {
+      try {
+        const r = await fetch('/api/billing/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ plan: plan, quantity: 1 }),
+        });
+        const d = await r.json().catch(() => ({}));
+        if (d.url) { location.href = d.url; return; }
+        throw new Error(typeof d.detail === 'string' ? d.detail : 'Checkout unavailable');
+      } catch (e) {
+        location.href = '/saas/pricing.html?plan=' + encodeURIComponent(plan);
+      }
+    }
+    window.__llCheckout = startCheckout;
+    document.getElementById('pwTrialBtn')?.addEventListener('click', () => {
+      if (window.llTrack) window.llTrack('begin_checkout', { plan: 'agent_monthly', source: 'paywall' });
+      startCheckout('agent_monthly');
+    });
+    document.getElementById('pwOneBtn')?.addEventListener('click', () => {
+      if (window.llTrack) window.llTrack('begin_checkout', { plan: 'one_time', source: 'paywall' });
+      startCheckout('one_time');
+    });
+    function openPaywall() {
+      if (window.llTrack) window.llTrack('generate_blocked', { reason: (window.__llEnt || {}).reason || 'payment_required' });
+      const addr = (document.getElementById('address')?.value || '').trim() || 'Your subject home';
+      const beds = document.getElementById('beds')?.value;
+      const baths = document.getElementById('baths')?.value;
+      const sqft = document.getElementById('sqft')?.value;
+      document.getElementById('pwAddr').textContent = addr;
+      const bits = [];
+      if (beds) bits.push(beds + ' bd');
+      if (baths) bits.push(baths + ' ba');
+      if (sqft) bits.push(sqft + ' sqft');
+      document.getElementById('pwBeds').textContent = bits.length ? bits.join(' · ') : 'Subject facts set';
+      document.getElementById('pwMode').textContent = marketMode === 'portal' ? 'Search market' : 'MLS upload';
+      document.getElementById('paywallModal').hidden = false;
+    }
+    window.__llOpenPaywall = openPaywall;
+    document.getElementById('paywallClose')?.addEventListener('click', () => {
+      document.getElementById('paywallModal').hidden = true;
+    });
+    document.getElementById('paywallModal')?.addEventListener('click', (ev) => {
+      if (ev.target.id === 'paywallModal') document.getElementById('paywallModal').hidden = true;
+    });
     if (u.status === 'active') {
       const manage = u.has_stripe
         ? ' <button type="button" id="manageBilling" class="btn btn-outline" style="margin-left:10px;padding:4px 10px;font-size:0.8rem">Manage billing</button>'
@@ -612,10 +784,15 @@ const result = document.getElementById('result');
       });
     } else if (!ent.ok) {
       banner.classList.add('err');
+      const setupMsg = (ent.reason === 'payment_required' || u.status === 'setup')
+        ? '<strong>Setup free.</strong> Search or upload below — unlock at Generate with a 7-day trial ($39/mo after) or $20 for this report. '
+        : '<strong>Unlock required.</strong> Sample demo stays free — pick a plan to generate custom presentations. ';
       banner.innerHTML =
-        '<strong>Trial ended.</strong> Your saved reports and share links still work — pick a plan to generate the next one. ' +
-        '<button type="button" id="upgradeBtn" class="btn btn-gold" style="margin-left:10px;padding:5px 14px;font-size:0.82rem">Subscribe — $39/mo</button>' +
-        ' <a href="/saas/pricing.html" style="margin-left:8px">All plans</a>';
+        setupMsg +
+        '<button type="button" id="upgradeBtn" class="btn btn-gold" style="margin-left:10px;padding:5px 14px;font-size:0.82rem">Start 7-day trial</button>' +
+        ' <button type="button" id="oneShotBtn" class="btn btn-outline" style="margin-left:6px;padding:5px 12px;font-size:0.82rem">$20 one report</button>' +
+        ' <a href="/demo" style="margin-left:8px">Sample demo</a>';
+      document.getElementById('oneShotBtn')?.addEventListener('click', () => startCheckout('one_time'));
       bindUpgradeButtons();
     } else {
       meta.textContent =
@@ -635,19 +812,7 @@ const result = document.getElementById('result');
         b.addEventListener('click', async () => {
           b.disabled = true;
           b.textContent = 'Opening checkout…';
-          try {
-            const r = await fetch('/api/billing/checkout', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'same-origin',
-              body: JSON.stringify({ plan: 'agent_monthly', quantity: 1 }),
-            });
-            const d = await r.json().catch(() => ({}));
-            if (d.url) { location.href = d.url; return; }
-            throw new Error(d.detail || 'no url');
-          } catch (e) {
-            location.href = '/saas/pricing.html?plan=agent_monthly';
-          }
+          await startCheckout('agent_monthly');
         });
       });
     }
@@ -707,6 +872,7 @@ function refreshExportFileList() {
 /* —— Search vs Upload dual mode —— */
 const marketSourceEl = document.getElementById('marketSource');
 const portalPanel = document.getElementById('portalPanel');
+const portalFilters = document.getElementById('portalFilters');
 const mlsPanel = document.getElementById('mlsPanel');
 const modePortalBtn = document.getElementById('modePortalBtn');
 const modeMlsBtn = document.getElementById('modeMlsBtn');
@@ -743,6 +909,7 @@ function setMarketMode(mode) {
   modePortalBtn.classList.toggle('on', marketMode === 'portal');
   modeMlsBtn.classList.toggle('on', marketMode === 'mls');
   portalPanel.hidden = marketMode !== 'portal';
+  if (portalFilters) portalFilters.hidden = marketMode !== 'portal';
   mlsPanel.hidden = marketMode !== 'mls';
   statusEl.className = 'status';
   statusEl.textContent = marketMode === 'portal'
@@ -942,6 +1109,7 @@ function ensurePortalMap() {
 async function geocodeSubject(opts) {
   const silent = !!(opts && opts.silent);
   const draw = opts && opts.draw !== false;
+  const skipFacts = !!(opts && opts.skipFacts);
   const q = (document.getElementById('address').value || '').trim();
   if (!q) return null;
   if (!silent) statusEl.textContent = 'Locating address…';
@@ -970,6 +1138,7 @@ async function geocodeSubject(opts) {
       statusEl.className = 'status ok';
       statusEl.textContent = data.place_name || data.location || 'Located';
     }
+    if (!skipFacts) autofillSubjectFacts(lastGeocodedQuery);
     return data;
   } catch (err) {
     if (!silent) {
@@ -977,6 +1146,107 @@ async function geocodeSubject(opts) {
       statusEl.textContent = String(err.message || err);
     }
     return null;
+  }
+}
+
+let lastSubjectLookupQuery = '';
+let subjectLookupSeq = 0;
+
+function setSubjectStatus(msg, kind) {
+  const el = document.getElementById('subjectAutofillStatus');
+  if (!el) return;
+  el.className = kind || '';
+  el.textContent = msg || '';
+}
+
+function fillSubjectField(id, value) {
+  if (value == null || value === '') return;
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.value = value;
+}
+
+function setSubjectPhotoPreview(url) {
+  const img = document.getElementById('subjectPhotoPreview');
+  const hidden = document.getElementById('subjectPhotoUrl');
+  if (!img || !hidden) return;
+  if (url) {
+    hidden.value = url;
+    img.src = url;
+    img.hidden = false;
+  } else {
+    hidden.value = '';
+    img.removeAttribute('src');
+    img.hidden = true;
+  }
+}
+
+document.getElementById('subjectPhoto').addEventListener('change', () => {
+  const fileInput = document.getElementById('subjectPhoto');
+  const file = fileInput.files && fileInput.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  const img = document.getElementById('subjectPhotoPreview');
+  img.src = url;
+  img.hidden = false;
+  document.getElementById('subjectPhotoUrl').value = '';
+  setSubjectStatus('Using your uploaded subject photo.', 'ok');
+});
+document.getElementById('subjectPhotoClear').addEventListener('click', () => {
+  document.getElementById('subjectPhoto').value = '';
+  setSubjectPhotoPreview('');
+  setSubjectStatus('Subject photo cleared — upload one or pick the address again.', 'warn');
+});
+
+async function autofillSubjectFacts(address) {
+  const q = (address || '').trim();
+  if (!q || q === lastSubjectLookupQuery) return;
+  const seq = ++subjectLookupSeq;
+  lastSubjectLookupQuery = q;
+  setSubjectStatus('Looking up subject facts…', '');
+  try {
+    const res = await fetch('/api/portal/subject', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ address: q }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (seq !== subjectLookupSeq) return;
+    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Lookup failed');
+    if (!data.found) {
+      setSubjectStatus('No auto-match — enter beds, baths, sqft, garage, and year built manually so comps stay accurate.', 'warn');
+      return;
+    }
+    fillSubjectField('beds', data.beds);
+    fillSubjectField('baths', data.baths);
+    fillSubjectField('sqft', data.living_area);
+    fillSubjectField('year', data.year_built);
+    fillSubjectField('garageSpaces', data.garage_spaces);
+    fillSubjectField('subdivision', data.subdivision);
+    fillSubjectField('style', data.style);
+    if (data.acres != null) fillSubjectField('lotAcres', data.acres);
+    else if (data.lot_size != null) fillSubjectField('lotAcres', Math.round((Number(data.lot_size) / 43560) * 1000) / 1000);
+    if (data.list_price != null && document.getElementById('listPrice') && !document.getElementById('listPrice').value) {
+      fillSubjectField('listPrice', data.list_price);
+    }
+    if (data.latitude != null) fillSubjectField('subjectLat', data.latitude);
+    if (data.longitude != null) fillSubjectField('subjectLng', data.longitude);
+    const fileInput = document.getElementById('subjectPhoto');
+    const hasUpload = fileInput && fileInput.files && fileInput.files.length;
+    if (data.photo_url && !hasUpload) setSubjectPhotoPreview(data.photo_url);
+    const bits = [];
+    if (data.beds != null) bits.push(data.beds + ' bed');
+    if (data.baths != null) bits.push(data.baths + ' bath');
+    if (data.living_area != null) bits.push(Math.round(data.living_area) + ' sf');
+    if (data.year_built != null) bits.push('built ' + data.year_built);
+    if (data.garage_spaces != null) bits.push(data.garage_spaces + '-car');
+    if (data.photo_url) bits.push('photo');
+    setSubjectStatus('Auto-filled' + (bits.length ? ': ' + bits.join(' · ') : '') + ' — edit if needed.', 'ok');
+  } catch (err) {
+    if (seq !== subjectLookupSeq) return;
+    lastSubjectLookupQuery = '';
+    setSubjectStatus('Could not auto-fill — enter subject facts manually so the report comps stay accurate.', 'warn');
   }
 }
 
@@ -1050,10 +1320,13 @@ function applySuggestion(i) {
   if (area && !area.value.trim() && loc) area.value = loc;
   statusEl.className = 'status ok';
   statusEl.textContent = f.place_name || 'Located';
+  lastSubjectLookupQuery = '';
+  autofillSubjectFacts(addressInput.value);
 }
 
 addressInput.addEventListener('input', () => {
   clearTimeout(suggestTimer);
+  lastSubjectLookupQuery = '';
   const q = addressInput.value.trim();
   suggestTimer = setTimeout(() => fetchAddressSuggestions(q), 250);
 });
@@ -1116,6 +1389,7 @@ document.getElementById('portalPreviewBtn').addEventListener('click', async () =
   }
   const previewEl = document.getElementById('portalPreview');
   previewEl.classList.add('show');
+  previewEl.style.color = '';
   previewEl.textContent = 'Pulling market…';
   try {
     const res = await fetch('/api/portal/preview', {
@@ -1140,6 +1414,7 @@ document.getElementById('portalPreviewBtn').addEventListener('click', async () =
     if (c.min_baths != null) bits.push(c.min_baths + (c.max_baths != null ? '–' + c.max_baths : '+') + ' baths');
     if (c.min_sqft != null || c.max_sqft != null) bits.push((c.min_sqft || '') + '–' + (c.max_sqft || '') + ' sf');
     if (c.polygon_ring) bits.push(shapeMode === 'rectangle' ? 'rectangle' : 'circle');
+    previewEl.style.color = '';
     previewEl.innerHTML =
       '<strong>Preview</strong> — ' +
       (p.n != null ? p.n + ' homes' : '') +
@@ -1150,6 +1425,7 @@ document.getElementById('portalPreviewBtn').addEventListener('click', async () =
       (p.median_list != null ? ' · median list ' + money(p.median_list) : '') +
       (bits.length ? '<br><span style="color:#5a6a7a">' + escapeHtml(bits.join(' · ')) + '</span>' : '');
   } catch (err) {
+    previewEl.style.color = '#8a2b2b';
     previewEl.textContent = String(err.message || err);
   }
 });
@@ -1444,6 +1720,13 @@ form.addEventListener('submit', async (e) => {
     return;
   }
 
+  const entNow = window.__llEnt || {};
+  if (!entNow.ok) {
+    if (typeof window.__llOpenPaywall === 'function') window.__llOpenPaywall();
+    else location.href = '/saas/pricing.html';
+    return;
+  }
+
   statusEl.textContent = 'Running ListLogic engine… (first run can take up to a minute while photos load)';
   btn.disabled = true;
   const started = Date.now();
@@ -1528,9 +1811,9 @@ form.addEventListener('submit', async (e) => {
         : (payload.message || ('HTTP ' + res.status));
       if (res.status === 402) {
         statusEl.className = 'status error';
-        statusEl.innerHTML = escapeHtml(msg) +
-          ' <a href="/saas/pricing.html?plan=agent_monthly" style="font-weight:700">Subscribe — $39/mo</a> · ' +
-          '<a href="/saas/pricing.html" style="font-weight:700">all plans</a>';
+        statusEl.textContent = typeof msg === 'string' ? msg : 'Payment required to unlock this presentation.';
+        if (payload.detail && payload.detail.entitlement) window.__llEnt = payload.detail.entitlement;
+        if (typeof window.__llOpenPaywall === 'function') window.__llOpenPaywall();
         syncGenerateEnabled();
         return;
       }
@@ -1568,13 +1851,13 @@ form.addEventListener('submit', async (e) => {
     const entAfter = payload.entitlement || {};
     const upsell = document.getElementById('upsellNote');
     if (entAfter.just_exhausted || entAfter.remaining === 0) {
-      upsell.innerHTML = '<strong>That was your last free presentation.</strong> ' +
-        '<a href="/saas/pricing.html?plan=agent_monthly">Upgrade — $39/mo unlimited</a> or ' +
+      upsell.innerHTML = '<strong>That was your last complimentary presentation.</strong> ' +
+        'Next unlock: <a href="/saas/pricing.html?plan=agent_monthly">7-day trial → $39/mo</a> or ' +
         '<a href="/saas/pricing.html?plan=one_time">$20 for a single report</a>. Saved reports and share links keep working.';
       upsell.style.display = 'block';
     } else if (entAfter.remaining === 1) {
-      upsell.innerHTML = '<strong>Heads-up — 1 free presentation left.</strong> ' +
-        '<a href="/saas/pricing.html?plan=agent_monthly">Upgrade now — $39/mo unlimited</a> and never think about it again.';
+      upsell.innerHTML = '<strong>Heads-up — 1 complimentary presentation left.</strong> ' +
+        'After that, unlock with a <a href="/saas/pricing.html?plan=agent_monthly">7-day trial → $39/mo</a> or $20 one-shot.';
       upsell.style.display = 'block';
     } else {
       upsell.style.display = 'none';
@@ -1600,6 +1883,8 @@ form.addEventListener('submit', async (e) => {
   }
 });
 </script>
+<script src="/saas/analytics.js"></script>
+<script src="/saas/utm.js"></script>
 <script src="/saas/assistant.js"></script>
 </body>
 </html>

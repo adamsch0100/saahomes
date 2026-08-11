@@ -129,7 +129,7 @@ def create_checkout_session(
         "client_reference_id": user["id"],
         "line_items": [{"price": price_id, "quantity": qty}],
         "success_url": f"{base}/saas/app.html?billing=success&plan={plan}",
-        "cancel_url": f"{base}/saas/pricing.html?billing=cancel",
+        "cancel_url": f"{base}/saas/app.html?billing=cancel",
         "metadata": {
             "app": "listlogic",
             "plan": plan,
@@ -143,7 +143,7 @@ def create_checkout_session(
         },
     }
     if meta["mode"] == "subscription":
-        kwargs["subscription_data"] = {
+        sub_data: dict[str, Any] = {
             "metadata": {
                 "app": "listlogic",
                 "plan": plan,
@@ -151,6 +151,12 @@ def create_checkout_session(
                 "quantity": str(qty),
             }
         }
+        # Card-required 7-day trial on agent monthly (auto-converts to $39/mo).
+        trial_days = int(os.environ.get("STRIPE_TRIAL_DAYS") or "7")
+        if plan == "agent_monthly" and trial_days > 0:
+            sub_data["trial_period_days"] = trial_days
+            kwargs["payment_method_collection"] = "always"
+        kwargs["subscription_data"] = sub_data
     elif meta["mode"] == "payment":
         # One-time: push ListLogic onto the card line when banks use suffix
         kwargs["payment_intent_data"] = {

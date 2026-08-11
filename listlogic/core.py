@@ -76,6 +76,9 @@ class SubjectProperty:
     acres: float = 0
     condition: str = "average"          # needs_work | average | updated | renovated
     dom: Optional[float] = None
+    photo_url: str = ""
+    latitude: float | None = None
+    longitude: float | None = None
     extra: Dict[str, Any] = field(default_factory=dict)
 
 
