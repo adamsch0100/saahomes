@@ -688,7 +688,8 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 @keyframes photoSpin{{to{{transform:rotate(360deg)}}}}
 .photo-fetch-banner .pf-msg{{flex:1;min-width:160px}}
 .photo-fetch-banner .pf-count{{font-size:.75rem;color:var(--muted);font-weight:700}}
-.agent-menu-wrap{{position:fixed;top:16px;right:16px;z-index:95}}
+.agent-menu-wrap{{position:fixed;top:16px;right:16px;z-index:95;visibility:hidden}}
+.agent-menu-wrap.ll-shown{{visibility:visible}}
 .agent-chip{{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(12,60,110,.12);background:rgba(255,255,255,.97);backdrop-filter:blur(10px);border-radius:999px;padding:5px 12px 5px 5px;cursor:pointer;box-shadow:0 10px 30px rgba(15,40,70,.16);transition:box-shadow .15s ease,border-color .15s ease,transform .15s ease,opacity .15s ease;font:inherit;color:var(--text)}}
 .agent-chip:hover,.agent-chip.menu-open{{border-color:var(--brand-primary);box-shadow:0 12px 34px rgba(12,60,110,.2)}}
 .agent-chip:hover{{transform:translateY(-1px)}}
@@ -4428,7 +4429,16 @@ document.getElementById('menuSignOut')?.addEventListener('click', async () => {{
 fetch('/api/auth-status', {{ credentials: 'same-origin' }})
   .then(r => r.json())
   .then(data => {{
-    if (!(data?.authenticated && data?.user?.role === 'admin')) return;
+    // Gate the floating agent account chip: only show it to logged-in users.
+    // Public/shared (seller) viewers should never see edit/sections/sign-out.
+    const menuWrap = document.getElementById('agentMenuWrap');
+    const authed = !!(data && data.authenticated && data.user);
+    if (!authed) {{
+      if (menuWrap) menuWrap.style.display = 'none';
+      return;
+    }}
+    if (menuWrap) menuWrap.classList.add('ll-shown');
+    if (!(data?.user?.role === 'admin')) return;
     let adminLink = document.getElementById('menuAdminLink');
     if (!adminLink) {{
       const menu = document.getElementById('agentMenu');
