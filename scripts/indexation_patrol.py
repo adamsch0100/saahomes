@@ -162,6 +162,34 @@ def fetch_gsc_page_data(service, start_date, end_date):
     return {r['keys'][0].lower(): r for r in response.get('rows', [])}
 
 
+def fetch_gsc_inspection(service, url):
+    """
+    Authoritative indexation check via GSC URL Inspection API.
+    Returns dict with verdict/coverageState, or None if the API call fails.
+    NOTE: 'HTTP 200' alone does NOT prove indexation — Google may have
+    crawled a page and decided not to index it ("Crawled - currently not
+    indexed") or found it via sitemap but never crawled it ("Discovered -
+    currently not indexed"). This API is the source of truth.
+    """
+    if service is None:
+        return None
+    try:
+        body = {'inspectionUrl': url, 'siteUrl': SITE_DOMAIN}
+        resp = service.urlInspection().index().inspect(body=body).execute()
+        res = resp.get('inspectionResult', {})
+        idx = res.get('indexStatusResult', {})
+        return {
+            'verdict': idx.get('verdict'),          # PASS / NEUTRAL / FAIL
+            'coverage_state': idx.get('coverageState'),
+            'last_crawl_time': idx.get('lastCrawlTime'),
+            'page_fetch_state': idx.get('pageFetchState'),
+            'google_canonical': idx.get('googleCanonical'),
+        }
+    except Exception as e:
+        print(f"  ⚠ URL Inspection API error for {url}: {e}")
+        return None
+
+
 def check_all_urls(service, gsc_page_map):
     """Run all checks on every URL."""
     sitemap_urls = fetch_sitemap_urls()
@@ -178,6 +206,9 @@ def check_all_urls(service, gsc_page_map):
 
         # 1. HTTP / meta check
         http_result = check_http_and_meta(path)
+
+        # 1b. Authoritative indexation check (URL Inspection API)
+        inspection = fetch_gsc_inspection(service, full_url)
 
         # 2. GSC check
         gsc_match = None
@@ -198,15 +229,44 @@ def check_all_urls(service, gsc_page_map):
             issues.append(f"HTTP ERROR: {http_result['error']}")
         elif http_result['http_status'] and http_result['http_status'] >= 400:
             issues.append(f"HTTP {http_result['http_status']} — page not reachable")
-        elif http_result['http_status'] and http_result['http_status'] == 200:
+
+        # On-page checks (only meaningful when the page actually returned)
+        if http_result.get('http_status') == 200:
             if http_result['meta_noindex']:
                 issues.append("META ROBOTS NOINDEX — blocked from index")
             if http_result['canonical_mismatch']:
                 issues.append(f"CANONICAL MISMATCH: points to {http_result['canonical']}")
             if not in_sitemap:
                 issues.append("NOT IN SITEMAP")
+
+        # URL Inspection verdict — the authoritative indexation signal.
+        # Google may return NEUTRAL with "Crawled - currently not indexed" or
+        # "Discovered - currently not indexed" even when the page returns 200.
+        # That means the page is NOT in Google's index — flag it.
+        inspection_ok = True
+        if inspection:
+            verdict = inspection.get('verdict')
+            cov = inspection.get('coverage_state', '')
+            if verdict != 'PASS':
+                inspection_ok = False
+                if verdict == 'NEUTRAL':
+                    issues.append(
+                        f"NOT INDEXED — Google: {cov} "
+                        f"(last crawl {inspection.get('last_crawl_time') or 'never'})"
+                    )
+                else:
+                    issues.append(f"INDEXATION {verdict} — Google: {cov}")
+            elif inspection.get('google_canonical') and \
+                    inspection['google_canonical'].rstrip('/').lower() != full_url.rstrip('/').lower():
+                issues.append(
+                    f"GOOGLE CANONICAL MISMATCH: Google sees "
+                    f"{inspection['google_canonical']} as canonical"
+                )
         else:
-            issues.append(f"HTTP {http_result['http_status']} — unexpected status")
+            # No inspection data (API failure) — fall back to HTTP heuristic
+            if not issues and http_result.get('http_status') == 200:
+                print(f"  ⚠ (URL Inspection unavailable — HTTP 200 only)")
+
 
         gsc_status = None
         if gsc_match:
@@ -221,7 +281,7 @@ def check_all_urls(service, gsc_page_map):
                       f"{gsc_match['clicks']} clicks, pos {gsc_match['position']:.1f}")
         else:
             if not issues and http_result.get('http_status') == 200:
-                print(f"  ✅ HTTP 200 — indexed by Google, but no GSC impressions yet "
+                print(f"  ✅ HTTP 200 — indexed (URL Inspection PASS), no GSC impressions "
                       f"(normal for new/low-traffic pages)")
             elif not issues:
                 print(f"  ✅ HTTP {http_result['http_status']} — reachable, no issues")
@@ -242,6 +302,7 @@ def check_all_urls(service, gsc_page_map):
             'meta_noindex': http_result.get('meta_noindex', False),
             'canonical': http_result.get('canonical'),
             'canonical_mismatch': http_result.get('canonical_mismatch', False),
+            'inspection': inspection,
             'in_sitemap': in_sitemap,
             'gsc': gsc_status,
             'issues': issues,
@@ -289,6 +350,10 @@ def generate_report(results, gsc_start_date, gsc_end_date):
         icon = "🟢" if r['ok'] else "🔴"
         print(f"\n  {icon} {r['path']}")
         print(f"     HTTP: {r['http_status']}")
+        insp = r.get('inspection')
+        if insp:
+            print(f"     Google index: {insp.get('verdict')} — {insp.get('coverage_state')}"
+                  f"{' (crawl ' + insp['last_crawl_time'] + ')' if insp.get('last_crawl_time') else ''}")
         if r['gsc']:
             print(f"     GSC:  {r['gsc']['impressions']} impr, {r['gsc']['clicks']} clicks, "
                   f"pos {r['gsc']['position']:.1f}")
