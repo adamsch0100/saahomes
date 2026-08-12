@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WHGZQDZ6ZG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-WHGZQDZ6ZG');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RPR Alternative · ListLogic — Data Tools vs the Pricing Conversation</title>
+<meta name="description" content="RPR gives REALTORS® powerful data — comps, reports, analytics. ListLogic turns market data into an interactive seller pricing story: price × odds × supply. Search any market or upload any MLS export. Demo free.">
+<link rel="canonical" href="https://listlogic.homes/saas/vs-rpr.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/saas/ll.css">
+<style>
+.hero-mini {
+  background: radial-gradient(900px 400px at 80% -20%, #1a5f9e33, transparent 60%),
+              linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; padding: 64px 0 72px; text-align: center;
+}
+.hero-mini h1 { font-family: 'Fraunces', serif; font-size: clamp(1.9rem, 4vw, 2.7rem); letter-spacing: -0.02em; margin-bottom: 12px; }
+.hero-mini h1 em { font-style: normal; color: var(--accent-2); }
+.hero-mini p { color: #c8d2e0; max-width: 620px; margin: 0 auto; font-size: 1.02rem; }
+.hero-mini .eyebrow { justify-content: center; }
+
+.wedge-band {
+  margin: -34px auto 0; position: relative; z-index: 2;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 22px 26px; max-width: 860px;
+}
+.wedge-band strong { font-family: 'Fraunces', serif; font-size: 1.2rem; display: block; margin-bottom: 6px; }
+.wedge-band p { color: var(--muted); font-size: 0.95rem; margin: 0; }
+
+.section { padding: 64px 0 0; }
+.section h2 { font-family: 'Fraunces', serif; font-size: clamp(1.4rem, 2.5vw, 1.9rem); letter-spacing: -0.015em; margin-bottom: 10px; }
+.section .sub { color: var(--muted); max-width: 640px; margin-bottom: 28px; }
+
+.cmp-table-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+table.cmp { width: 100%; border-collapse: collapse; min-width: 640px; }
+table.cmp th, table.cmp td { padding: 14px 18px; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.cmp th { background: #f1ece1; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; }
+table.cmp th.win { background: var(--navy); color: #fff; }
+table.cmp tr:last-child th, table.cmp tr:last-child td { border-bottom: none; }
+table.cmp td.rowhead { font-weight: 700; }
+table.cmp .yes { color: var(--ok); font-weight: 700; }
+table.cmp .no { color: var(--muted); }
+table.cmp .lead { color: var(--navy); font-weight: 800; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow-sm); }
+.card h3 { font-family: 'Fraunces', serif; font-size: 1.15rem; margin-bottom: 8px; }
+.card p { color: var(--muted); font-size: 0.92rem; }
+.card .kicker { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal); margin-bottom: 6px; }
+
+.faq-ll details { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 16px 20px; margin-bottom: 10px; }
+.faq-ll summary { font-weight: 700; cursor: pointer; }
+.faq-ll p { color: var(--muted); font-size: 0.92rem; margin: 10px 0 0; }
+
+.cta-band {
+  background: linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; text-align: center; padding: 64px 0; margin-top: 64px;
+}
+.cta-band h2 { font-family: 'Fraunces', serif; font-size: clamp(1.5rem, 3vw, 2.1rem); margin-bottom: 10px; }
+.cta-band p { color: #c8d2e0; max-width: 560px; margin: 0 auto 26px; }
+.btn-trial { background: var(--accent-2); color: #1a1200; }
+
+.note { font-size: 0.82rem; color: var(--muted); max-width: 720px; margin: 26px auto 0; text-align: center; }
+
+@media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is RPR?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "RPR (REALTORS Property Resource) is a data and analytics platform available to REALTORS® through NAR. It provides property data, comps, reports, and market analytics. It's a powerful data source — the gap is that it gives you data, not a seller-facing pricing conversation."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How is ListLogic different from RPR?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "RPR is a research and analytics tool for the agent. ListLogic is a seller-facing pricing story: a custom-fit competitive set plus interactive price × odds × supply, built for the listing appointment. You can research in RPR and present in ListLogic — they're complementary, and ListLogic is the part the seller actually sees."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use ListLogic with my MLS data like I use RPR?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. ListLogic works by Search on any market, or by uploading any MLS export — so you can bring your own MLS data and get a consistent, seller-ready presentation out the other side."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does ListLogic replace RPR?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Not necessarily — RPR is a great data source for your own research. ListLogic replaces the 'now what?' step: turning that research into an interactive pricing story you can show in the appointment, print, or send as a flipbook. Most agents keep their data sources and add ListLogic for the presentation."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does ListLogic cost?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Start with the free demo, then a 7-day trial, then a flat $39/month plan (annual options available), or a $20 one-shot for a single presentation."
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<nav class="ll-nav">
+  <div class="container ll-nav-inner">
+    <a href="index.html" class="ll-brand">
+      <img src="/saas/listlogic-logo.png" alt="ListLogic" class="ll-brand-logo">
+      <small>by SAA Homes</small>
+    </a>
+    <button type="button" class="ll-nav-toggle" id="llNavToggle" aria-label="Menu" aria-expanded="false">☰</button>
+    <div class="ll-nav-links" id="llNavLinks">
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#deliverables">What sellers get</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="faq.html">FAQ</a>
+      <a href="login.html" class="ll-auth-guest">Sign in</a>
+      <a href="signup.html" class="btn btn-trial ll-auth-guest" style="padding:10px 18px;font-size:0.86rem">Create account</a>
+    </div>
+  </div>
+</nav>
+<script>
+(function(){var t=document.getElementById('llNavToggle'),l=document.getElementById('llNavLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.setAttribute('aria-expanded',o?'true':'false');t.textContent=o?'✕':'☰';});l.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){l.classList.remove('open');t.setAttribute('aria-expanded','false');t.textContent='☰';});});})();
+</script>
+<script src="/saas/nav-auth.js"></script>
+
+<section class="hero-mini">
+  <div class="container">
+    <div class="eyebrow">RPR vs ListLogic</div>
+    <h1>RPR gives you data. ListLogic gives you <em>the conversation.</em></h1>
+    <p>RPR is a phenomenal research tool for agents. But a seller has never changed their price because of a great report — they change it when the market makes sense in front of them. That's the ListLogic difference.</p>
+  </div>
+</section>
+
+<div class="container">
+  <div class="wedge-band">
+    <strong>The pricing-theory wedge</strong>
+    <p>Data tools answer "what did homes sell for?" The listing appointment needs "what should this home be priced at, and what happens to my odds at every other price?" ListLogic turns RPR-grade research into the second question.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <h2>RPR vs ListLogic at a glance</h2>
+    <p class="sub">Honest comparison: RPR has deeper raw data; ListLogic wins where it matters in front of a seller.</p>
+    <div class="cmp-table-wrap">
+      <table class="cmp">
+        <thead>
+          <tr>
+            <th style="width:34%">Capability</th>
+            <th>RPR</th>
+            <th class="win">ListLogic</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td class="rowhead">Raw property data &amp; analytics</td>
+          <td><span class="yes">Deep — best-in-class</span></td>
+          <td><span class="yes">Solid — Search or your MLS upload</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Comparable sales / comps</td>
+          <td><span class="yes">Yes</span></td>
+          <td><span class="yes">Yes — custom-fit competitive set</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Seller-facing interactive price × odds × supply</td>
+          <td><span class="no">No — agent research UI</span></td>
+          <td><span class="lead">Yes — interactive story for the appointment</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Show a seller what happens if they stretch the price</td>
+          <td><span class="no">No</span></td>
+          <td><span class="lead">Yes — odds drop is visible live in the appointment</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Print + flipbook leave-behind</td>
+          <td><span class="no">Reports</span></td>
+          <td><span class="lead">Yes — seller-ready</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Works with any MLS / upload</td>
+          <td><span class="yes">Yes (via MLS feeds)</span></td>
+          <td><span class="lead">Yes — Search or any MLS export</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Availability</td>
+          <td><span class="no">NAR/REALTOR® members</span></td>
+          <td><span class="lead">Any agent, any brokerage</span></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>The real difference: data tools vs. decision tools</h2>
+    <div class="two-col">
+      <div class="card">
+        <div class="kicker">Research</div>
+        <h3>RPR is where you research</h3>
+        <p>Comps, property history, analytics, tax data — RPR is a serious agent-side tool. If you're a REALTOR®, use it. The problem isn't the data; it's that a seller can't follow a dense report in an appointment.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Presentation</div>
+        <h3>ListLogic is where you present</h3>
+        <p>One story: here's your competitive set, here's what sells, and here's what happens to your odds at every price. Interactive, printable, sendable. Built for the person across the table, not the person at the desk.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">The anchor</div>
+        <h3>Data doesn't change minds. Story does.</h3>
+        <p>A seller anchored at Zillow's estimate isn't moved by more comps — they're moved when they see their own odds drop as the price climbs. That's a decision tool, and it's what wins the listing.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">The stack</div>
+        <h3>Use both</h3>
+        <p>There's no loyalty oath. Research in RPR, present in ListLogic. The only thing you're missing by not trying ListLogic is the one slide that closes the appointment.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Fair questions, honest answers</h2>
+    <div class="faq-ll">
+      <details>
+        <summary>Is ListLogic a replacement for RPR?</summary>
+        <p>Not necessarily. RPR is excellent for research. ListLogic is the seller-facing pricing story — the part of your workflow the client actually experiences. Many agents run both: RPR for the deep dive, ListLogic for the appointment.</p>
+      </details>
+      <details>
+        <summary>Does ListLogic have as much data as RPR?</summary>
+        <p>RPR has an enormous national dataset. ListLogic uses Search on any market or your own MLS upload, which means the data is always relevant to the market you're presenting in — and you're never locked to one data vendor.</p>
+      </details>
+      <details>
+        <summary>Will this help me win listings?</summary>
+        <p>That's the point. ListLogic turns pricing from an argument into a shared reading of the market. Agents who show price × odds × supply have a different conversation — one where the seller sees the market's answer, not just your opinion.</p>
+      </details>
+      <details>
+        <summary>What does it cost?</summary>
+        <p>Free demo → 7-day trial → $39/month (annual options available), or a $20 one-shot for a single presentation.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="container">
+    <h2>Research in RPR. Win with ListLogic.</h2>
+    <p>Try the free demo. In two minutes you'll see the interactive price × odds × supply curve on a real market — bring a recent listing and run the same conversation you'd run at the kitchen table.</p>
+    <a href="/demo" class="btn btn-trial btn-lg">Try the free demo</a>
+  </div>
+</section>
+
+<p class="note">RPR is a trademark of the National Association of REALTORS®. This comparison is based on publicly available information and our understanding of the product category; features change — verify what matters to you before switching. ListLogic is built by SAA Homes.</p>
+<p class="note" style="margin-top:8px">Related: <a href="/blog/soft-market-listing-presentation-price-odds-supply.html">Why static CMAs lose appointments when sellers are anchored on Zillow</a></p>
+
+<footer class="ll-footer">
+  <div class="container">
+    <div><strong>ListLogic</strong> · Data-driven custom pricing strategy</div>
+    <div><a href="https://saahomes.com">SAA Homes</a> · Schwartz and Associates, Coldwell Banker Realty</div>
+    <div><a href="index.html">Home</a> · <a href="faq.html">FAQ</a> · <a href="pricing.html">Pricing</a> · <a href="vs-cloud-cma.html">Cloud CMA alternative</a> · <a href="vs-saleswise.html">Saleswise alternative</a> · <a href="mailto:adam@saahomes.com">Contact</a></div>
+  </div>
+</footer>
+</body>
+</html>
