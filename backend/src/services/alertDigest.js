@@ -169,7 +169,9 @@ function matchScore(l, filters) {
   const price = Number(l.list_price) || 0;
   if (filters.minPrice || filters.maxPrice) {
     const min = Number(filters.minPrice) || 0;
-    const max = Number(filters.maxPrice) || Infinity;
+    // No max filter → cap at a huge but FINITE bound so span/mid math never
+    // produces NaN (Infinity - Infinity → NaN rendered "NaN% match" in emails).
+    const max = Number(filters.maxPrice) || 1e12;
     if (price >= min && price <= max) {
       const span = Math.max(1, max - min);
       const mid = min + span / 2;
@@ -180,7 +182,7 @@ function matchScore(l, filters) {
   if (dom != null && dom <= 7) score += 10;
   if (filters.beds && l.beds != null && l.beds >= Number(filters.beds)) score += 5;
   if (filters.baths && l.baths != null && l.baths >= Number(filters.baths)) score += 5;
-  return Math.min(99, score);
+  return Math.min(99, Number.isFinite(score) ? score : 60);
 }
 
 // ------------------------------------------------- "why this home" facts
