@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WHGZQDZ6ZG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-WHGZQDZ6ZG');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moxi Present Alternative · ListLogic — Interactive Price × Odds × Supply, Any MLS</title>
+<meta name="description" content="Looking for a Moxi Present alternative? ListLogic turns MLS data into a seller pricing story: custom-fit competitive set plus interactive price × odds × supply. Search any market or upload any MLS export. Demo free.">
+<link rel="canonical" href="https://listlogic.homes/saas/vs-moxi-present.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/saas/ll.css">
+<style>
+.hero-mini {
+  background: radial-gradient(900px 400px at 80% -20%, #1a5f9e33, transparent 60%),
+              linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; padding: 64px 0 72px; text-align: center;
+}
+.hero-mini h1 { font-family: 'Fraunces', serif; font-size: clamp(1.9rem, 4vw, 2.7rem); letter-spacing: -0.02em; margin-bottom: 12px; }
+.hero-mini h1 em { font-style: normal; color: var(--accent-2); }
+.hero-mini p { color: #c8d2e0; max-width: 620px; margin: 0 auto; font-size: 1.02rem; }
+.hero-mini .eyebrow { justify-content: center; }
+
+.wedge-band {
+  margin: -34px auto 0; position: relative; z-index: 2;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 22px 26px; max-width: 860px;
+}
+.wedge-band strong { font-family: 'Fraunces', serif; font-size: 1.2rem; display: block; margin-bottom: 6px; }
+.wedge-band p { color: var(--muted); font-size: 0.95rem; margin: 0; }
+
+.section { padding: 64px 0 0; }
+.section h2 { font-family: 'Fraunces', serif; font-size: clamp(1.4rem, 2.5vw, 1.9rem); letter-spacing: -0.015em; margin-bottom: 10px; }
+.section .sub { color: var(--muted); max-width: 640px; margin-bottom: 28px; }
+
+.cmp-table-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+table.cmp { width: 100%; border-collapse: collapse; min-width: 640px; }
+table.cmp th, table.cmp td { padding: 14px 18px; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.cmp th { background: #f1ece1; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; }
+table.cmp th.win { background: var(--navy); color: #fff; }
+table.cmp tr:last-child th, table.cmp tr:last-child td { border-bottom: none; }
+table.cmp td.rowhead { font-weight: 700; }
+table.cmp .yes { color: var(--ok); font-weight: 700; }
+table.cmp .no { color: var(--muted); }
+table.cmp .lead { color: var(--navy); font-weight: 800; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow-sm); }
+.card h3 { font-family: 'Fraunces', serif; font-size: 1.15rem; margin-bottom: 8px; }
+.card p { color: var(--muted); font-size: 0.92rem; }
+.card .kicker { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal); margin-bottom: 6px; }
+
+.faq-ll details { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 16px 20px; margin-bottom: 10px; }
+.faq-ll summary { font-weight: 700; cursor: pointer; }
+.faq-ll p { color: var(--muted); font-size: 0.92rem; margin: 10px 0 0; }
+
+.cta-band {
+  background: linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; text-align: center; padding: 64px 0; margin-top: 64px;
+}
+.cta-band h2 { font-family: 'Fraunces', serif; font-size: clamp(1.5rem, 3vw, 2.1rem); margin-bottom: 10px; }
+.cta-band p { color: #c8d2e0; max-width: 560px; margin: 0 auto 26px; }
+.btn-trial { background: var(--accent-2); color: #1a1200; }
+
+.note { font-size: 0.82rem; color: var(--muted); max-width: 720px; margin: 26px auto 0; text-align: center; }
+
+@media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is Moxi Present?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Moxi Present is a listing presentation and CMA tool that is often bundled through brokerages as part of the Moxi Works suite. It helps agents build listing presentations with comps and market data. Like most CMA tools, it shows comparable sales — what ListLogic adds is the interactive pricing decision story: price × odds × supply in the seller's specific competitive set."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How is ListLogic different from Moxi Present?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Moxi Present is built around presentation templates and reports of comparable sales. ListLogic is built around the pricing decision itself: a custom-fit competitive set plus interactive price × odds × supply, so an agent can show a seller what happens to their odds of sale at every stretch price — the conversation that wins listings when a seller is anchored on Zillow."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does ListLogic need to be bundled through my brokerage like Moxi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. ListLogic works for any agent at any brokerage. You can search any market or upload any MLS export — no brokerage approval, no bundle, no lock-in."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use ListLogic with my MLS data like Moxi Present?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. ListLogic works by Search on any market, or by uploading any MLS export — so you can bring your own MLS data and get a consistent, seller-ready presentation out the other side."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does ListLogic cost?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Start with the free demo, then a 7-day trial, then a flat $39/month plan (annual options available), or a $20 one-shot for a single presentation."
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<nav class="ll-nav">
+  <div class="container ll-nav-inner">
+    <a href="index.html" class="ll-brand">
+      <img src="/saas/listlogic-logo.png" alt="ListLogic" class="ll-brand-logo">
+      <small>by SAA Homes</small>
+    </a>
+    <button type="button" class="ll-nav-toggle" id="llNavToggle" aria-label="Menu" aria-expanded="false">☰</button>
+    <div class="ll-nav-links" id="llNavLinks">
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#deliverables">What sellers get</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="faq.html">FAQ</a>
+      <a href="login.html" class="ll-auth-guest">Sign in</a>
+      <a href="signup.html" class="btn btn-trial ll-auth-guest" style="padding:10px 18px;font-size:0.86rem">Create account</a>
+    </div>
+  </div>
+</nav>
+<script>
+(function(){var t=document.getElementById('llNavToggle'),l=document.getElementById('llNavLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.setAttribute('aria-expanded',o?'true':'false');t.textContent=o?'✕':'☰';});l.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){l.classList.remove('open');t.setAttribute('aria-expanded','false');t.textContent='☰';});});})();
+</script>
+<script src="/saas/nav-auth.js"></script>
+
+<section class="hero-mini">
+  <div class="container">
+    <div class="eyebrow">Moxi Present alternative</div>
+    <h1>Moxi Present builds presentations. ListLogic builds <em>the pricing argument.</em></h1>
+    <p>If you're on Moxi because your brokerage bundled it, you know what it does: templates, comps, a deck. Compare listing tools on the thing that actually wins appointments — how clearly you can show a seller the price × odds × supply reality of their market.</p>
+  </div>
+</section>
+
+<div class="container">
+  <div class="wedge-band">
+    <strong>The pricing-theory wedge</strong>
+    <p>Both tools can show comps. ListLogic goes one step further: a custom-fit competitive set and an interactive price × odds × supply story, so overpricing is visible in the appointment — before the seller learns it from 60 quiet days on market.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <h2>Moxi Present vs ListLogic at a glance</h2>
+    <p class="sub">Honest comparison: Moxi Present is a solid presentation tool, especially when it's bundled with your brokerage. The difference is what the appointment is about.</p>
+    <div class="cmp-table-wrap">
+      <table class="cmp">
+        <thead>
+          <tr>
+            <th style="width:34%">Capability</th>
+            <th>Moxi Present</th>
+            <th class="win">ListLogic</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td class="rowhead">Comparable sales / comps</td>
+          <td><span class="yes">Yes</span></td>
+          <td><span class="yes">Yes</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Presentation templates</td>
+          <td><span class="yes">Yes — strong suite</span></td>
+          <td><span class="yes">Yes — pricing-story focused</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Custom-fit competitive set (not just city averages)</td>
+          <td><span class="no">Report-oriented</span></td>
+          <td><span class="lead">Yes — per-property comps built from your market</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Interactive price × odds × supply story</td>
+          <td><span class="no">No — static reports</span></td>
+          <td><span class="lead">Yes — see odds drop at each stretch price</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Works outside your brokerage's bundle</td>
+          <td><span class="no">Often bundled</span></td>
+          <td><span class="lead">Yes — any agent, any brokerage</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Any MLS / upload</td>
+          <td><span class="no">Tied to brokerage data pipeline</span></td>
+          <td><span class="lead">Yes — Search or upload any MLS export</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Flat transparent pricing</td>
+          <td><span class="no">Often via brokerage</span></td>
+          <td><span class="lead">$39/mo · trial · $20 one-shot</span></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="text-align:center;margin-top:26px"><a href="/demo" class="btn btn-trial">Try the free demo</a></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Why agents switch</h2>
+    <div class="two-col">
+      <div class="card">
+        <div class="kicker">The appointment</div>
+        <h3>One conversation, not ten slides</h3>
+        <p>Instead of walking a seller through a template deck they can't follow, you walk them through their own market: here's your competitive set, here's what sells, and here's what happens to your odds at $X, $X+10k, $X+20k.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">The anchor</div>
+        <h3>Beat the Zillow anchor with math, not opinion</h3>
+        <p>Sellers arrive anchored on a number. A static deck is your opinion against theirs. Price × odds × supply is the market talking — it turns a pricing dispute into a shared reading of the data.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">The independence</div>
+        <h3>Not tied to a brokerage bundle</h3>
+        <p>Keep the tools you like, add the one that wins the pricing conversation. No brokerage approval, no bundle, no lock-in. Switch brokerages without losing your presentation stack.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">The close</div>
+        <h3>Leave behind that keeps you hired</h3>
+        <p>Print or flipbook the pricing story for the seller to keep. When the listing comes, your pricing conversation is already on their fridge.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Fair questions, honest answers</h2>
+    <div class="faq-ll">
+      <details>
+        <summary>Does Moxi Present have live MLS data that ListLogic doesn't?</summary>
+        <p>Moxi is typically integrated with a brokerage's MLS data pipeline. ListLogic takes a different route: Search any market or upload any MLS export — which means we aren't limited to one MLS or one data vendor. Different data architecture, same goal: turn market data into a pricing conversation.</p>
+      </details>
+      <details>
+        <summary>Is this just another CMA?</summary>
+        <p>No. A CMA answers "what did similar homes sell for?" ListLogic answers "what should this home be priced at, and what happens to my odds at every other price?" That second question is what listing appointments actually turn on.</p>
+      </details>
+      <details>
+        <summary>How fast can I get a presentation?</summary>
+        <p>The demo is free and instant. Sign up, pick a market or upload an MLS export, and generate an interactive pricing story — no sales call, no onboarding.</p>
+      </details>
+      <details>
+        <summary>What does it cost?</summary>
+        <p>Free demo → 7-day trial → $39/month (annual options available), or a $20 one-shot if you just need a single presentation. No per-report pricing games.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="container">
+    <h2>See the pricing story your CMA is missing</h2>
+    <p>Try the free demo. In two minutes you'll see the interactive price × odds × supply curve on a real market — bring a recent listing and run the same conversation you'd run at the kitchen table.</p>
+    <a href="/demo" class="btn btn-trial btn-lg">Try the free demo</a>
+  </div>
+</section>
+
+<p class="note">Moxi Present and Moxi Works are trademarks of Moxi Works, Inc. This comparison is based on publicly available information and our understanding of the product category; features change — verify what matters to you before switching. ListLogic is built by SAA Homes.</p>
+<p class="note" style="margin-top:8px">Related: <a href="/blog/soft-market-listing-presentation-price-odds-supply.html">Why static CMAs lose appointments when sellers are anchored on Zillow</a></p>
+
+<footer class="ll-footer">
+  <div class="container">
+    <div><strong>ListLogic</strong> · Data-driven custom pricing strategy</div>
+    <div><a href="https://saahomes.com">SAA Homes</a> · Schwartz and Associates, Coldwell Banker Realty</div>
+    <div><a href="index.html">Home</a> · <a href="faq.html">FAQ</a> · <a href="pricing.html">Pricing</a> · <a href="vs-cloud-cma.html">Cloud CMA alternative</a> · <a href="vs-saleswise.html">Saleswise alternative</a> · <a href="vs-rpr.html">RPR alternative</a> · <a href="mailto:adam@saahomes.com">Contact</a></div>
+  </div>
+</footer>
+</body>
+</html>
