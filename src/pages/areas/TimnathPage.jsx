@@ -5,6 +5,7 @@ import { AREA_FAQS } from "../../data/areaFaqs.js";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
+import CityLuxurySection from "../../components/CityLuxurySection.jsx";
 
 export default function TimnathPage() {
   return (
@@ -240,6 +241,13 @@ export default function TimnathPage() {
               CHFA program guide →
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Luxury Homes in Timnath */}
+      <section className="py-8 px-6 bg-white">
+        <div className="max-w-4xl mx-auto">
+          <CityLuxurySection citySlug="timnath" />
         </div>
       </section>
 

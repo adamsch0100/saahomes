@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
 import TopRatedSchools from "../../components/TopRatedSchools.jsx";
+import CityLuxurySection from "../../components/CityLuxurySection.jsx";
 
 export default function WindsorPage() {
   return (
@@ -196,6 +197,9 @@ export default function WindsorPage() {
             </Link>
           </div>
         </section>
+
+        {/* Luxury Homes in Windsor */}
+        <CityLuxurySection citySlug="windsor" />
 
         {/* Area Highlights */}
               {/* Neighborhood Guides */}

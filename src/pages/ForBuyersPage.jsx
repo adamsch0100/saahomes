@@ -127,6 +127,14 @@ export default function ForBuyersPage() {
               </p>
               <a href="/northern-colorado-areas/" className="text-black font-semibold hover:underline">Explore →</a>
             </div>
+
+            <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow border-2 border-[#CFB36E]/30">
+              <h3 className="text-2xl font-bold mb-4 font-serif">Luxury Real Estate</h3>
+              <p className="text-gray-700 mb-4">
+                Private, white-glove search for high-end homes across Boulder, Fort Collins, Loveland, Windsor, Greeley, and Timnath.
+              </p>
+              <a href="/luxury-real-estate/" className="text-black font-semibold hover:underline">Luxury hub →</a>
+            </div>
           </div>
         </div>
       </section>

@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
 import TopRatedSchools from "../../components/TopRatedSchools.jsx";
+import CityLuxurySection from "../../components/CityLuxurySection.jsx";
 
 export default function LovelandPage() {
   return (
@@ -233,6 +234,9 @@ export default function LovelandPage() {
             </p>
           </div>
         </section>
+
+        {/* Luxury Homes in Loveland */}
+        <CityLuxurySection citySlug="loveland" />
 
         {/* CTA */}
               {/* Neighborhood Guides */}

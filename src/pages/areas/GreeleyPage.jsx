@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 import TopRatedSchools from "../../components/TopRatedSchools.jsx";
 import SectionTownsBand from "../../components/SectionTownsBand.jsx";
+import CityLuxurySection from "../../components/CityLuxurySection.jsx";
 
 export default function GreeleyPage() {
   return (
@@ -275,6 +276,13 @@ export default function GreeleyPage() {
             We want to ensure that you have all the information needed to make the best decisions when it comes to your home goals. When you enter your info below you will get instant access to the area's latest market report, complete with sales and demographic trends.
           </p>
           <MarketReportForm areaName="Greeley, CO" />
+        </div>
+      </section>
+
+      {/* Luxury Homes in Greeley */}
+      <section className="py-8 px-6 bg-white">
+        <div className="max-w-4xl mx-auto">
+          <CityLuxurySection citySlug="greeley" />
         </div>
       </section>
 

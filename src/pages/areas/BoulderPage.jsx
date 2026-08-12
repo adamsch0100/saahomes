@@ -5,6 +5,7 @@ import { AREA_FAQS } from "../../data/areaFaqs.js";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
+import CityLuxurySection from "../../components/CityLuxurySection.jsx";
 
 export default function BoulderPage() {
   return (
@@ -49,6 +50,9 @@ export default function BoulderPage() {
             </Link>
           </div>
         </section>
+
+        {/* Luxury Homes — deepest treatment (highest-end inventory in region) */}
+        <CityLuxurySection citySlug="boulder" deep />
 
         {/* Moving to Boulder */}
         <section className="mb-12">

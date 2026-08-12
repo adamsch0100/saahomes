@@ -1,0 +1,287 @@
+/**
+ * Luxury market data for Northern Colorado — sourced only from verified
+ * codebase figures (areaSeo.js, areaFaqs.js, blogPosts.js, neighborhoods.js).
+ * Never invent medians, sales comps, or inventory counts.
+ *
+ * Data notes (as of mid/July 2026 content in repo):
+ * - City medians: areaSeo.js + areaFaqs.js
+ * - Luxury price tiers: blogPosts luxury-home-buying-guide-northern-colorado
+ * - Neighborhood price ranges: neighborhoods.js priceRangeDescription
+ * - DOM for premium bands: areaSeo / areaFaqs city market blurbs
+ */
+
+/** Luxury price thresholds by city (blog luxury guide + area FAQs). */
+export const LUXURY_THRESHOLDS = {
+  boulder: {
+    label: '$900K–$2M+',
+    threshold: 900000,
+    thresholdDisplay: '$900K+',
+    note: 'Boulder single-family homes typically range from $900,000 to well over $2 million (area FAQs). Many Flatirons, Mapleton Hill, and Chautauqua properties list well above $2M.',
+  },
+  'fort-collins': {
+    label: '$750K+',
+    threshold: 750000,
+    thresholdDisplay: '$750K+',
+    note: 'Fort Collins luxury segment generally begins at approximately $750,000 for single-family homes and extends past $2 million for estate properties (luxury home buying guide).',
+  },
+  loveland: {
+    label: '$600K+',
+    threshold: 600000,
+    thresholdDisplay: '$600K+',
+    note: 'Loveland luxury tier starts around $600,000, with lakefront and golf-course properties commanding the highest prices (luxury home buying guide). Homes above $675,000 average about 55 days on market (area FAQs).',
+  },
+  windsor: {
+    label: '$700K+',
+    threshold: 700000,
+    thresholdDisplay: '$700K+',
+    note: 'Windsor luxury threshold is approximately $700,000-plus, driven by Pelican Lakes, Water Valley, and RainDance premium inventory (luxury home buying guide + Windsor market FAQs). Properties above $750,000 routinely take 65+ days on market.',
+  },
+  greeley: {
+    label: '$550K+',
+    threshold: 550000,
+    thresholdDisplay: '$550K+',
+    note: 'Greeley luxury territory starts around $550,000–$600,000, where buyers can expect more square footage and land than comparably priced Larimer County homes (luxury home buying guide).',
+  },
+  timnath: {
+    label: '$700K+',
+    threshold: 700000,
+    thresholdDisplay: '$700K+',
+    note: 'Timnath premium inventory is concentrated in communities like Bridle Ridge ($700K–$1.5M+) and Timnath Ranch executive homes ($550K–$1.2M+) per neighborhoods.js price ranges.',
+  },
+};
+
+/**
+ * Overall market context — citywide medians (NOT luxury medians).
+ * Always label these as citywide medians so we never imply a luxury average.
+ */
+export const CITY_MARKET_CONTEXT = {
+  boulder: {
+    city: 'Boulder',
+    slug: 'boulder',
+    county: 'Boulder County',
+    medianDisplay: '$900K–$2M+',
+    medianSource: 'areaFaqs (typical single-family range; Boulder is the region’s premium market)',
+    premiumDom: 'Varies widely — thin inventory and $2M+ estates often take longer',
+    image: '/images/Boulder.jpg',
+    shortDesc:
+      'Highest-end inventory in the region: Flatirons estates, Mapleton Hill, Chautauqua, Wonderland Lake, and Pine Brook Hills. Many properties list well above $2M.',
+  },
+  'fort-collins': {
+    city: 'Fort Collins',
+    slug: 'fort-collins',
+    county: 'Larimer County',
+    medianDisplay: '~$610K–$636K',
+    medianSource: 'areaSeo.js (July 2026 median ~$610K SFH) / areaFaqs (~$636K average mid-2026)',
+    premiumDom: 'Homes above $750K typically 55–70 days on market (areaSeo)',
+    image: '/images/Fort-Collins-CO-Area-Guide.jpg',
+    shortDesc:
+      'Widest luxury range in Northern Colorado: Horsetooth / northwest estates, Old Town historic prestige, and executive golf-course homes.',
+  },
+  loveland: {
+    city: 'Loveland',
+    slug: 'loveland',
+    county: 'Larimer County',
+    medianDisplay: '~$510K',
+    medianSource: 'areaSeo.js / areaFaqs (July 2026 median sale ~$510K, +3.6% YoY)',
+    premiumDom: 'Homes above $675K average ~55 days on market (areaFaqs)',
+    image: '/images/Loveland-CO-Area-Guide.jpg',
+    shortDesc:
+      'Lakefront and golf-course luxury: Lake Loveland, Centerra, Mariana Butte, and Eagle Crest executive homes.',
+  },
+  windsor: {
+    city: 'Windsor',
+    slug: 'windsor',
+    county: 'Weld / Larimer',
+    medianDisplay: '~$588K',
+    medianSource: 'areaSeo.js / areaFaqs (July 2026 median sale ~$588K — highest among major NoCO cities)',
+    premiumDom: 'Properties above $750K routinely 65+ days on market (areaFaqs)',
+    image: '/images/Windsor-CO-Area-Guide.jpg',
+    shortDesc:
+      'Premier master-planned luxury: Water Valley lakefront, Pelican Lakes golf, and RainDance corridor custom homes.',
+  },
+  greeley: {
+    city: 'Greeley',
+    slug: 'greeley',
+    county: 'Weld County',
+    medianDisplay: '~$432K',
+    medianSource: 'areaSeo.js (July 2026 median sale ~$432K)',
+    premiumDom: 'Luxury acreage inventory moves slower than the $350K–$500K sweet spot',
+    image: '/images/Area-Guide-for-Greeley-CO.jpg',
+    shortDesc:
+      'Best value per square foot in the luxury band: Pine Ridge Estates, west Greeley acreage, and executive custom homes.',
+  },
+  timnath: {
+    city: 'Timnath',
+    slug: 'timnath',
+    county: 'Larimer County',
+    medianDisplay: 'See live IRES stats',
+    medianSource: 'Live listing stats on Timnath area page (no static luxury median fabricated)',
+    premiumDom: 'New-build luxury and Bridle Ridge custom homes — timelines vary by product',
+    image: '/images/Northern Colorado.webp',
+    shortDesc:
+      'New-construction luxury corridor: Bridle Ridge, Timnath Ranch executive homes, and lakeside communities near I-25.',
+  },
+};
+
+/**
+ * Curated luxury neighborhood slugs per city (must exist in neighborhoods.js).
+ * priceHint is the neighborhoods.js priceRangeDescription for that slug.
+ */
+export const LUXURY_NEIGHBORHOOD_SLUGS = {
+  boulder: [
+    { slug: 'boulder-chautauqua', name: 'Chautauqua Park', priceHint: '$1.2M to $4M+' },
+    { slug: 'mapleton-hill-boulder', name: 'Mapleton Hill', priceHint: '$1.2M to $4M+' },
+    { slug: 'wonderland-lake', name: 'Wonderland Lake Area', priceHint: '$800K to $2.5M+' },
+    { slug: 'pine-brook-hills', name: 'Pine Brook Hills', priceHint: '$1.5M to $5M+' },
+    { slug: 'boulder-flatirons', name: 'Flatirons Area', priceHint: '$2M to $6M+' },
+    { slug: 'newlands', name: 'Newlands', priceHint: '$1.2M to $3.5M+' },
+    { slug: 'table-mesa', name: 'Table Mesa', priceHint: '$1M to $2.5M+' },
+    { slug: 'devils-thumb-boulder', name: "Devil's Thumb", priceHint: '$1M to $3M+' },
+  ],
+  'fort-collins': [
+    { slug: 'northwest-fort-collins', name: 'Northwest Fort Collins', priceHint: '$600K (patio homes) to $2M+ (estate properties)' },
+    { slug: 'horsetooth-west', name: 'Horsetooth / West Fort Collins', priceHint: '$500K to $2M+' },
+    { slug: 'foothills-fc', name: 'Foothills Area', priceHint: '$800K to $3M+' },
+    { slug: 'prospectors-ridge', name: "Prospector's Ridge", priceHint: '$900K to $2.5M+' },
+    { slug: 'red-fox-hills', name: 'Red Fox Hills', priceHint: '$700K to $2M+' },
+    { slug: 'old-town', name: 'Old Town', priceHint: '$350K (condos) to $1.5M+ (single-family)' },
+    { slug: 'collindale-fc', name: 'Collindale', priceHint: '$550K to $1.2M+' },
+    { slug: 'stuart-place', name: 'Stuart Place', priceHint: '$600K to $1.5M+' },
+  ],
+  loveland: [
+    { slug: 'centerra', name: 'Centerra / Southwest Loveland', priceHint: '$425K (townhomes) to $1.5M+ (lakefront)' },
+    { slug: 'lake-loveland', name: 'Lake Loveland Area', priceHint: '$350K to $1.2M+' },
+    { slug: 'eagle-crest-loveland', name: 'Eagle Crest', priceHint: '$550K to $1.5M+' },
+    { slug: 'mariana-butte', name: 'Mariana Butte', priceHint: '$400K to $900K+' },
+    { slug: 'west-loveland', name: 'West Loveland / Foothills', priceHint: '$400K to $1M+' },
+    { slug: 'airpark-loveland', name: 'Loveland Airpark', priceHint: '$500K to $1.2M+' },
+  ],
+  windsor: [
+    { slug: 'water-valley', name: 'Water Valley', priceHint: '$400K (townhomes) to $1.2M+ (lakefront)' },
+    { slug: 'pelican-lakes', name: 'Pelican Lakes', priceHint: '$500K to $1.5M+' },
+    { slug: 'windsor-lake-estates', name: 'Windsor Lake Estates', priceHint: '$550K to $1.2M+' },
+    { slug: 'reserve-windsor', name: 'The Reserve at Windsor', priceHint: '$550K to $1M+' },
+    { slug: 'raindance', name: 'RainDance', priceHint: '$400K (townhomes) to $750K+ (single-family)' },
+  ],
+  greeley: [
+    { slug: 'pine-ridge-estates', name: 'Pine Ridge Estates', priceHint: '$600K to $1.2M+' },
+    { slug: 'glenmere', name: 'Glenmere', priceHint: '$275K (fixer) to $700K+ (restored historic)' },
+    { slug: 'westwood-greeley', name: 'Westwood', priceHint: '$375K to $600K' },
+    { slug: 'tamarac-greeley', name: 'Tamarac', priceHint: '$375K to $650K' },
+  ],
+  timnath: [
+    { slug: 'bridle-ridge-timnath', name: 'Bridle Ridge at Timnath', priceHint: '$700K to $1.5M+' },
+    { slug: 'timnath-ranch', name: 'Timnath Ranch', priceHint: '$550K to $1.2M+' },
+    { slug: 'timnath-lakeside', name: 'Timnath Lakeside', priceHint: '$550K to $1M+' },
+    { slug: 'fields-at-timnath', name: 'The Fields at Timnath', priceHint: '$550K to $900K+' },
+  ],
+};
+
+/** Buyer personas for the luxury hub (mirror proven structure; SAA copy). */
+export const LUXURY_BUYER_PERSONAS = [
+  {
+    title: 'Trading up from metro Denver',
+    description:
+      'Buyers leaving Cherry Creek, Highlands, or Boulder County congestion who want more land, mountain views, and a calmer lifestyle — without sacrificing quality finishes or school options. Northern Colorado often delivers more square footage and outdoor access at a lower entry point than comparable Denver metro luxury.',
+  },
+  {
+    title: 'Remote work & corporate relocation',
+    description:
+      'Executives and knowledge workers relocating for CSU, UCHealth, aerospace/tech, or fully remote roles. They prioritize privacy, home offices, outdoor access (Horsetooth, Flatirons, Boyd Lake), and a white-glove search that respects confidentiality.',
+  },
+  {
+    title: 'Retirees near family',
+    description:
+      'Empty-nesters and retirees moving closer to adult children in Fort Collins, Loveland, or Windsor. They value low-maintenance luxury, single-level living, golf or lake amenities, and agents who handle the details from listing coordination to local vendor introductions.',
+  },
+];
+
+/**
+ * Hub + city luxury FAQs. Answers use only verified codebase figures;
+ * when a precise luxury median is not published, we say so honestly.
+ */
+export const LUXURY_HUB_FAQS = [
+  {
+    q: 'What defines luxury real estate in Northern Colorado?',
+    a: 'In Northern Colorado, luxury is defined by both price tier and property character. Regional thresholds from our luxury guide: Fort Collins and Windsor generally from about $750K and $700K respectively; Loveland from about $600K; Greeley from about $550K; and Boulder single-family homes typically $900K to well over $2M. Defining traits include larger lots, custom or high-end construction, premium locations (waterfront, golf, mountain views, open space), and elevated finishes. Exact comps vary by neighborhood — we review live IRES listings for each search.',
+  },
+  {
+    q: 'How much is a luxury home in Fort Collins?',
+    a: 'Fort Collins citywide median single-family prices held near about $610,000 in July 2026, with averages near $636,000 mid-2026. The luxury segment generally starts around $750,000 and extends past $2 million for Horsetooth-area estates, foothills properties, and premier custom homes. Homes above $750,000 typically take 55–70 days on market. Live inventory and asking prices change daily — search Fort Collins listings at $750K+ or schedule a private consultation.',
+  },
+  {
+    q: 'Where are the best luxury neighborhoods in Boulder?',
+    a: 'Boulder holds the region’s highest-end inventory. Verified neighborhood price ranges in our guides include Chautauqua Park ($1.2M–$4M+), Mapleton Hill ($1.2M–$4M+), Wonderland Lake Area ($800K–$2.5M+), Pine Brook Hills ($1.5M–$5M+), Flatirons Area ($2M–$6M+), Newlands ($1.2M–$3.5M+), Table Mesa ($1M–$2.5M+), and Devil’s Thumb ($1M–$3M+). Boulder single-family homes typically range from $900,000 to well over $2 million. We help buyers compare micro-locations, HOAs, and open-space adjacency with discretion.',
+  },
+  {
+    q: 'Is Windsor’s luxury market stronger than Fort Collins?',
+    a: 'They serve different luxury lifestyles. Windsor posts the highest citywide median among major NoCO cities (about $588,000 in July 2026) and concentrates premium inventory in Water Valley, Pelican Lakes, and RainDance. Fort Collins offers broader estate and foothills inventory (Horsetooth, northwest, Old Town historic). Properties above $750K in Windsor often take 65+ days on market — more negotiating room than peak years. We help you compare tax jurisdiction (Weld vs Larimer), amenities, and commute side by side.',
+  },
+  {
+    q: 'Do you offer private / off-market luxury searches?',
+    a: 'Yes. Schwartz and Associates provides discrete market intelligence, curated property searches (not spray-and-pray alerts), and white-glove negotiation for high-end buyers and sellers across Fort Collins, Loveland, Windsor, Greeley, Boulder, Timnath, and the broader Front Range corridor. Call (970) 999-1407 or request a private consultation — email and phone are required so we can respond promptly and confidentially.',
+  },
+  {
+    q: 'Should I buy or sell luxury first if I am trading up?',
+    a: 'It depends on your equity position, rate environment, and how unique your current home is. In cooler premium bands (e.g. homes above $750K often taking 55–70+ days), many sellers prefer a clear pricing and marketing plan before writing a contingent offer. We coordinate both sides — strategy for your current home and a confidential search for your next property — so you are not forced into a double-move or a weak negotiating posture.',
+  },
+];
+
+/** Per-city luxury FAQ snippets to append to areaFaqs. */
+export const CITY_LUXURY_FAQS = {
+  boulder: [
+    {
+      q: 'What defines luxury homes in Boulder, CO?',
+      a: 'Boulder is Northern Colorado’s highest-end market. Single-family homes typically range from $900,000 to well over $2 million. Premier pockets include Chautauqua Park ($1.2M–$4M+), Mapleton Hill ($1.2M–$4M+), Wonderland Lake ($800K–$2.5M+), Pine Brook Hills ($1.5M–$5M+), and Flatirons-area estates ($2M–$6M+) per our neighborhood guides. Luxury here often means Flatirons views, open-space adjacency, historic character, or contemporary mountain architecture. Explore our luxury real estate hub or search live Boulder listings with SAA Homes.',
+    },
+    {
+      q: 'How much do luxury homes cost in Boulder compared to Fort Collins?',
+      a: 'Boulder commands a substantial premium. Boulder single-family homes often start near $900K and frequently exceed $2M, while Fort Collins citywide medians sit near $610K–$636K with a luxury tier generally from about $750K. Many buyers who want Front Range lifestyle without Boulder pricing look at Fort Collins northwest estates, Windsor Water Valley / Pelican Lakes, or Loveland lakefront — we help compare total cost of ownership across counties.',
+    },
+  ],
+  'fort-collins': [
+    {
+      q: 'What are the best luxury neighborhoods in Fort Collins?',
+      a: 'Premier Fort Collins luxury areas include Northwest / Horsetooth foothills estates ($600K–$2M+ and $500K–$2M+ ranges in our neighborhood guides), Foothills Area ($800K–$3M+), Prospector’s Ridge ($900K–$2.5M+), Red Fox Hills ($700K–$2M+), Old Town historic single-family up to $1.5M+, Collindale golf-course homes ($550K–$1.2M+), and Stuart Place custom homes ($600K–$1.5M+). Citywide, luxury generally begins around $750K. See our Fort Collins luxury neighborhoods blog and the Northern Colorado luxury hub for deeper guidance.',
+    },
+    {
+      q: 'How long do luxury homes take to sell in Fort Collins?',
+      a: 'Homes above $750,000 in Fort Collins typically take about 55–70 days on market (area market notes, summer 2026), longer than well-priced homes in the $500K–$650K band. Pricing strategy, presentation, and off-market networking matter more in this tier. SAA Homes provides premium marketing and a confidential consultation for luxury sellers — call (970) 999-1407.',
+    },
+  ],
+  loveland: [
+    {
+      q: 'Where can I find luxury homes in Loveland, CO?',
+      a: 'Loveland luxury focuses on lakefront and executive communities: Centerra / southwest Loveland (up to $1.5M+ lakefront), Lake Loveland Area (to $1.2M+), Eagle Crest ($550K–$1.5M+), Mariana Butte near the golf course ($400K–$900K+), West Loveland / foothills (to $1M+), and Loveland Airpark ($500K–$1.2M+). Regional luxury guidance places Loveland’s premium tier around $600K+. Homes above $675K average about 55 days on market. Browse our luxury hub or live Loveland listings filtered at the premium band.',
+    },
+  ],
+  windsor: [
+    {
+      q: 'What are the luxury neighborhoods in Windsor, CO?',
+      a: 'Windsor’s luxury concentration is among the strongest in Northern Colorado: Water Valley lakefront (to $1.2M+), Pelican Lakes ($500K–$1.5M+), Windsor Lake Estates ($550K–$1.2M+), The Reserve at Windsor ($550K–$1M+), and RainDance premium single-family (to $750K+). Citywide median was about $588,000 in July 2026 — highest among major NoCO cities — with properties above $750K often taking 65+ days. Our luxury real estate page covers private search and concierge service for these communities.',
+    },
+  ],
+  greeley: [
+    {
+      q: 'Are there luxury homes in Greeley, CO?',
+      a: 'Yes. Greeley’s luxury segment offers strong value: Pine Ridge Estates ($600K–$1.2M+), restored historic Glenmere properties (to $700K+), and west Greeley custom / acreage homes. Luxury guidance places Greeley premium roughly from $550K–$600K, often with more land and square footage than similar budgets in Fort Collins or Windsor. Citywide median was about $432,000 in July 2026. Contact SAA Homes for a discreet search of executive and acreage inventory.',
+    },
+  ],
+  timnath: [
+    {
+      q: 'What luxury options exist in Timnath, CO?',
+      a: 'Timnath’s premium inventory includes Bridle Ridge at Timnath ($700K–$1.5M+), Timnath Ranch executive homes ($550K–$1.2M+), Timnath Lakeside ($550K–$1M+), and The Fields at Timnath ($550K–$900K+). The town’s new-construction corridor near I-25 appeals to buyers wanting modern finishes and Fort Collins proximity. Check live IRES stats on our Timnath guide and the Northern Colorado luxury hub for private consultation options.',
+    },
+  ],
+};
+
+export function luxurySearchHref(cityName, minPrice) {
+  const params = new URLSearchParams();
+  params.set('location', `${cityName}, CO`);
+  if (minPrice) params.set('minPrice', String(minPrice));
+  return `/properties/?${params.toString()}`;
+}
+
+export function getLuxuryNeighborhoods(citySlug) {
+  return LUXURY_NEIGHBORHOOD_SLUGS[citySlug] || [];
+}

@@ -35,6 +35,14 @@ const AREA_FAQS = {
     {
       q: 'How long does it take to sell a home in Fort Collins?',
       a: 'Well-priced Fort Collins homes in the $450K–$600K range typically sell within 15–35 days in 2026, while premium properties above $750K may take 50–70 days depending on neighborhood and condition. Homes in south Fort Collins and near Harmony Road tend to move faster due to high buyer demand. Pricing strategy, professional photography, and seasonal timing remain the biggest factors in days on market. SAA Homes provides a free Comparative Market Analysis to help sellers price competitively for a faster sale.'
+    },
+    {
+      q: 'What are the best luxury neighborhoods in Fort Collins?',
+      a: 'Premier Fort Collins luxury areas include Northwest / Horsetooth foothills estates ($600K–$2M+ and $500K–$2M+ ranges in our neighborhood guides), Foothills Area ($800K–$3M+), Prospector\'s Ridge ($900K–$2.5M+), Red Fox Hills ($700K–$2M+), Old Town historic single-family up to $1.5M+, Collindale golf-course homes ($550K–$1.2M+), and Stuart Place custom homes ($600K–$1.5M+). Citywide, luxury generally begins around $750K. See our Fort Collins luxury neighborhoods blog and the Northern Colorado luxury hub for deeper guidance: https://saahomes.com/luxury-real-estate/'
+    },
+    {
+      q: 'How long do luxury homes take to sell in Fort Collins?',
+      a: 'Homes above $750,000 in Fort Collins typically take about 55–70 days on market (area market notes, summer 2026), longer than well-priced homes in the $500K–$650K band. Pricing strategy, presentation, and off-market networking matter more in this tier. SAA Homes provides premium marketing and a confidential consultation for luxury sellers — call (970) 999-1407 or visit https://saahomes.com/luxury-real-estate/'
     }
   ],
   'loveland': [
@@ -77,6 +85,10 @@ const AREA_FAQS = {
     {
       q: 'How are the schools in Loveland compared to Fort Collins?',
       a: 'Loveland is served by the Thompson School District, the 17th largest in Colorado, serving approximately 15,000 students. The district earns a B rating with Niche and includes charter options like Loveland Classical School and New Vision Charter School. Fort Collins\' Poudre School District is larger and ranked higher statewide, but Loveland schools perform well within their peer group and offer smaller class sizes in many neighborhoods. For families, the choice often comes down to commute and housing budget rather than a dramatic school-quality gap. We can help you compare specific school boundaries for any listing.'
+    },
+    {
+      q: 'Where can I find luxury homes in Loveland, CO?',
+      a: 'Loveland luxury focuses on lakefront and executive communities: Centerra / southwest Loveland (up to $1.5M+ lakefront), Lake Loveland Area (to $1.2M+), Eagle Crest ($550K–$1.5M+), Mariana Butte near the golf course ($400K–$900K+), West Loveland / foothills (to $1M+), and Loveland Airpark ($500K–$1.2M+). Regional luxury guidance places Loveland\'s premium tier around $600K+. Homes above $675K average about 55 days on market. Browse our luxury hub at https://saahomes.com/luxury-real-estate/ or live Loveland listings filtered at the premium band.'
     }
   ],
   'windsor': [
@@ -115,6 +127,10 @@ const AREA_FAQS = {
     {
       q: 'Is Windsor a good place to invest in real estate?',
       a: 'Windsor is attractive for investors focused on family rentals and new-construction appreciation. Master-planned communities like Water Valley and RainDance command premium rents due to amenities and school quality, while the Weld County side offers lower property taxes that improve cash flow. Windsor\'s location between Fort Collins, Loveland, and Greeley gives tenants multiple employment options. Investors should note that HOA fees in newer communities can affect returns — we help you model the full picture before you buy.'
+    },
+    {
+      q: 'What are the luxury neighborhoods in Windsor, CO?',
+      a: 'Windsor\'s luxury concentration is among the strongest in Northern Colorado: Water Valley lakefront (to $1.2M+), Pelican Lakes ($500K–$1.5M+), Windsor Lake Estates ($550K–$1.2M+), The Reserve at Windsor ($550K–$1M+), and RainDance premium single-family (to $750K+). Citywide median was about $588,000 in July 2026 — highest among major NoCO cities — with properties above $750K often taking 65+ days. Our luxury real estate page covers private search and concierge service: https://saahomes.com/luxury-real-estate/'
     }
   ],
   'greeley': [
@@ -157,6 +173,10 @@ const AREA_FAQS = {
     {
       q: 'How long does it take to sell a home in Greeley?',
       a: 'Greeley homes in the $350K–$500K range typically sell within 20–40 days when priced correctly, making it one of the faster-moving markets in Weld County. The university and healthcare employment base creates consistent buyer demand. Homes near UNC, in west Greeley, and along the U.S. 34 corridor tend to attract more showings. Sellers should budget for modest pre-listing improvements — fresh paint and landscaping deliver strong ROI in this price-conscious market. SAA Homes offers a free Greeley market analysis and staging checklist.'
+    },
+    {
+      q: 'Are there luxury homes in Greeley, CO?',
+      a: 'Yes. Greeley\'s luxury segment offers strong value: Pine Ridge Estates ($600K–$1.2M+), restored historic Glenmere properties (to $700K+), and west Greeley custom / acreage homes. Luxury guidance places Greeley premium roughly from $550K–$600K, often with more land and square footage than similar budgets in Fort Collins or Windsor. Citywide median was about $432,000 in July 2026. Contact SAA Homes for a discreet search of executive and acreage inventory: https://saahomes.com/luxury-real-estate/'
     }
   ],
   'timnath': [
@@ -179,6 +199,10 @@ const AREA_FAQS = {
     {
       q: 'How long does it take to sell a home in Timnath?',
       a: 'New construction homes in Timnath typically sell quickly when priced competitively — the $550K–$750K segment moves within 20–35 days due to high demand for newer homes near Fort Collins. Inventory is tighter than Fort Collins proper, so well-presented listings often receive multiple showings in the first week. Sellers should leverage builder-grade finishes and community amenities in marketing. SAA Homes provides a free Timnath market analysis and professional photography for every listing.'
+    },
+    {
+      q: 'What luxury options exist in Timnath, CO?',
+      a: 'Timnath\'s premium inventory includes Bridle Ridge at Timnath ($700K–$1.5M+), Timnath Ranch executive homes ($550K–$1.2M+), Timnath Lakeside ($550K–$1M+), and The Fields at Timnath ($550K–$900K+). The town\'s new-construction corridor near I-25 appeals to buyers wanting modern finishes and Fort Collins proximity. Check live IRES stats on our Timnath guide and the Northern Colorado luxury hub for private consultation: https://saahomes.com/luxury-real-estate/'
     }
   ],
   'wellington': [
@@ -307,6 +331,14 @@ const AREA_FAQS = {
     {
       q: 'Does Boulder have a down payment assistance program?',
       a: 'Yes. The City of Boulder H2O (House to Homeownership) program offers a shared-appreciation second loan up to $100,000 for eligible buyers at or below 120% AMI purchasing a market-rate home in city limits. Boulder Housing Partners is rentals only — not DPA. CHFA works statewide as well. Details: https://saahomes.com/chfa-down-payment-assistance/#boulder-h2o'
+    },
+    {
+      q: 'What defines luxury homes in Boulder, CO?',
+      a: 'Boulder is Northern Colorado\'s highest-end market. Single-family homes typically range from $900,000 to well over $2 million. Premier pockets include Chautauqua Park ($1.2M–$4M+), Mapleton Hill ($1.2M–$4M+), Wonderland Lake ($800K–$2.5M+), Pine Brook Hills ($1.5M–$5M+), and Flatirons-area estates ($2M–$6M+) per our neighborhood guides. Luxury here often means Flatirons views, open-space adjacency, historic character, or contemporary mountain architecture. Explore our luxury real estate hub: https://saahomes.com/luxury-real-estate/'
+    },
+    {
+      q: 'How much do luxury homes cost in Boulder compared to Fort Collins?',
+      a: 'Boulder commands a substantial premium. Boulder single-family homes often start near $900K and frequently exceed $2M, while Fort Collins citywide medians sit near $610K–$636K with a luxury tier generally from about $750K. Many buyers who want Front Range lifestyle without Boulder pricing look at Fort Collins northwest estates, Windsor Water Valley / Pelican Lakes, or Loveland lakefront — we help compare total cost of ownership across counties. Call (970) 999-1407.'
     }
   ],
   'berthoud': [

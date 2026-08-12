@@ -242,6 +242,23 @@ export default function ForSellersPage() {
 
       <AreaFAQSection faqs={FOR_SELLERS_FAQS} city="Northern Colorado sellers" />
 
+      {/* Luxury sellers cross-link */}
+      <section className="py-12 px-6 bg-gray-50">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold font-serif mb-3">Selling a luxury property?</h2>
+          <p className="text-gray-700 mb-6">
+            High-end listings need discrete marketing, premium presentation, and buyer networks that portals alone do not reach.
+            Learn about our private client approach across Boulder, Fort Collins, Loveland, Windsor, and beyond.
+          </p>
+          <a
+            href="/luxury-real-estate/#private-consultation"
+            className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            Luxury concierge for sellers →
+          </a>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-16 px-6 bg-black text-white">
         <div className="max-w-4xl mx-auto text-center">

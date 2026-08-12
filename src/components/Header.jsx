@@ -460,6 +460,7 @@ export default function Header() {
                 </div>
               </div>
               <Link to="/for-sellers/" className="hover:text-gray-200 transition-colors">For Sellers</Link>
+              <Link to="/luxury-real-estate/" className="hover:text-gray-200 transition-colors">Luxury</Link>
               <Link to="/blog/" className="hover:text-gray-200 transition-colors">Real Estate Guides</Link>
               <Link to="/contact/" className="hover:text-gray-200 transition-colors">Contact</Link>
               {hasAgentConsole ? (
@@ -559,6 +560,7 @@ export default function Header() {
             </div>
 
             <Link onClick={closeMenu} to="/for-sellers/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">For Sellers</Link>
+            <Link onClick={closeMenu} to="/luxury-real-estate/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Luxury Real Estate</Link>
             <Link onClick={closeMenu} to="/northern-colorado-areas/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Northern Colorado Areas</Link>
             <Link onClick={closeMenu} to="/testimonials/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Client Reviews</Link>
             <Link onClick={closeMenu} to="/blog/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Real Estate Guides</Link>

@@ -32,6 +32,7 @@ export default function Footer() {
                 </ul>
               </li>
               <li><Link to="/for-sellers/" className="hover:text-white transition-colors">Sell Your Home</Link></li>
+              <li><Link to="/luxury-real-estate/" className="hover:text-white transition-colors">Luxury Real Estate</Link></li>
               <li><Link to="/properties/" className="hover:text-white transition-colors">Homes for Sale</Link></li>
               <li><Link to="/northern-colorado-areas/" className="hover:text-white transition-colors">Northern Colorado Areas</Link></li>
             </ul>
