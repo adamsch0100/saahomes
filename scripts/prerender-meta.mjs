@@ -1225,6 +1225,49 @@ const MONEY_PAGE_CONTENT = {
     },
     faqs: LUXURY_FAQS,
   },
+  '/assumable-mortgages/': {
+    sections: [
+      {
+        heading: 'Assumable Mortgages in Colorado — Keep the Seller\'s Lower Rate',
+        paragraphs: [
+          'An assumable mortgage lets a qualified buyer take over the seller\'s existing home loan — including its interest rate, remaining balance, and remaining term — instead of originating a new mortgage. VA and FHA loans are assumable by qualified buyers; most conventional loans are not. In a higher-rate market, assuming a lower-rate VA or FHA loan can mean a meaningfully lower monthly payment.',
+          'Schwartz and Associates flags listings in Fort Collins, Loveland, Windsor, and Greeley where an assumable VA or FHA loan may be in play, connects buyers with lenders who can underwrite the assumption, and negotiates the contract around the assumption timeline. Call (970) 999-1407 to talk through whether assumption makes sense for your purchase.',
+        ],
+      },
+      {
+        heading: 'How VA loan assumption works',
+        paragraphs: [
+          'A buyer assumes the seller\'s VA-backed loan by applying with the lender that services it. The VA charges a one-time assumption funding fee (currently 0.5% of the loan balance for most buyers — confirm the current rate with the VA or the lender, as it can change). The lender reviews the buyer\'s credit and income and must approve the assumption. The seller\'s VA entitlement is typically restored for their next VA loan.',
+          'Any qualified buyer can assume a VA-backed loan — veteran or not — because the VA guarantee stays with the loan. Non-veterans pay the VA assumption fee; veterans with remaining entitlement may have different rules. We never promise a sale will close on assumption alone — the buyer must qualify.',
+        ],
+      },
+      {
+        heading: 'How FHA loan assumption works',
+        paragraphs: [
+          'FHA loans are assumable by qualified buyers who meet FHA credit and income requirements, with lender approval. The buyer steps into the seller\'s FHA rate and remaining term, which can be significantly below today\'s rates. A small processing fee may apply, and the buyer typically pays closing costs unless negotiated otherwise.',
+          'Conventional loans generally contain a due-on-sale clause and cannot be assumed. USDA Rural Development loans can sometimes be assumed with RD approval. We itemize every cost in writing before you commit — we do not invent savings figures, and we confirm all fees with the lender holding the loan before you write an offer.',
+        ],
+      },
+      {
+        heading: 'Buying or selling with an assumable loan in Northern Colorado',
+        paragraphs: [
+          'For buyers, we screen every search for assumable inventory, connect you with VA-approved and FHA-experienced lenders, and run the numbers honestly: assumed rate vs. a new loan at today\'s market. For sellers, a below-market assumable rate can be a genuine marketing advantage — we position it accurately in the listing and qualify interested buyers early so the assumption path is clear.',
+          'We serve buyers and sellers across all 19 Northern Colorado communities, including Fort Collins, Loveland, Windsor, Greeley, Timnath, Severance, and Berthoud. Contact Schwartz and Associates at (970) 999-1407 to check whether an assumable mortgage fits your purchase or sale.',
+        ],
+      },
+    ],
+    cta: {
+      title: 'See If an Assumable Mortgage Fits Your Purchase',
+      text: 'Contact SAA Homes at (970) 999-1407 for assumable-listing screening, lender referrals, and an honest rate comparison. We reply within 24 hours.',
+    },
+    faqs: [
+      { q: 'What is an assumable mortgage in Colorado?', a: 'An assumable mortgage lets a qualified buyer take over the seller\'s existing home loan — including its interest rate, remaining balance, and remaining term — instead of originating a new mortgage. VA and FHA loans are assumable by qualified buyers; most conventional loans are not. The buyer must still qualify with the lender that holds the loan, and the lender must approve the assumption.' },
+      { q: 'How does a VA loan assumption work?', a: 'A buyer assumes the seller\'s VA-backed loan by applying with the lender that services it. The VA charges a one-time assumption funding fee (currently 0.5% of the loan balance for most buyers — confirm the current rate, as it can change). The lender reviews the buyer\'s credit and income and must approve the assumption. The seller\'s VA entitlement is typically restored for their next VA loan.' },
+      { q: 'Do I need to be a veteran to assume a VA loan?', a: 'No. Any qualified buyer can assume a VA-backed loan — veteran or not — because the VA guarantee stays with the loan. Non-veterans pay the VA assumption fee (0.5% of the remaining balance, subject to change), and veterans with remaining entitlement may have different rules. The lender still underwrites the buyer\'s credit and income.' },
+      { q: 'Are FHA loans assumable?', a: 'Yes, FHA loans are assumable by qualified buyers, subject to lender approval. The buyer must meet FHA credit and income requirements, and the lender reviews the assumption like a new application. The interest rate on an assumed FHA loan is the seller\'s original rate, which can be attractive when rates have risen since the loan was originated.' },
+      { q: 'How can SAA Homes help me buy with an assumable mortgage?', a: 'Schwartz and Associates flags listings where an assumable VA or FHA loan may be in play, connects you with VA-approved and FHA-experienced lenders who can underwrite the assumption, and negotiates the contract around the assumption timeline. Call (970) 999-1407.' },
+    ],
+  },
 };
 
 function matchMoneyPage(path) {

@@ -91,6 +91,17 @@ const staticPages = [
     ogImageAlt: 'Veterans real estate in Northern Colorado — VA loans and 0.5% back',
   },
   {
+    path: '/assumable-mortgages/',
+    priority: '0.9',
+    changefreq: 'weekly',
+    title: 'Assumable Mortgages in Colorado | VA & FHA Loan Assumption | SAA Homes',
+    description: 'Learn how assumable mortgages work in Northern Colorado. VA and FHA loan assumption can mean a lower-rate payment for buyers — Schwartz and Associates flags assumable listings in Fort Collins, Loveland, Windsor, and Greeley. Call (970) 999-1407.',
+    ogTitle: 'Assumable Mortgages in Colorado — VA & FHA Loan Assumption',
+    ogDescription: 'How assumable VA and FHA mortgages work for Northern Colorado buyers and sellers. Schwartz and Associates. Call (970) 999-1407.',
+    ogImage: '/images/Fort-Collins-CO-Area-Guide.jpg',
+    ogImageAlt: 'Assumable mortgages in Colorado — VA and FHA loan assumption guide',
+  },
+  {
     path: '/cash-home-buyers/',
     priority: '0.8',
     changefreq: 'weekly',

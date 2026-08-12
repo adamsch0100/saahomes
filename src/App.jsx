@@ -20,6 +20,7 @@ const ForBuyersPage = lazy(() => import("./pages/ForBuyersPage.jsx"));
 const ForSellersPage = lazy(() => import("./pages/ForSellersPage.jsx"));
 const LuxuryRealEstatePage = lazy(() => import("./pages/LuxuryRealEstatePage.jsx"));
 const VeteransPage = lazy(() => import("./pages/VeteransPage.jsx"));
+const AssumableMortgagesPage = lazy(() => import("./pages/AssumableMortgagesPage.jsx"));
 const CashHomeBuyersPage = lazy(() => import("./pages/CashHomeBuyersPage.jsx"));
 const FeaturedAreasPage = lazy(() => import("./pages/FeaturedAreasPage.jsx"));
 const CityHomesForSalePage = lazy(() => import("./pages/CityHomesForSalePage.jsx"));
@@ -171,6 +172,8 @@ export default function App() {
         <Route path="/luxury-real-estate/" element={<AppLayout><LazyPage><LuxuryRealEstatePage /></LazyPage></AppLayout>} />
         <Route path="/veterans" element={<AppLayout><LazyPage><VeteransPage /></LazyPage></AppLayout>} />
         <Route path="/veterans/" element={<AppLayout><LazyPage><VeteransPage /></LazyPage></AppLayout>} />
+        <Route path="/assumable-mortgages" element={<AppLayout><LazyPage><AssumableMortgagesPage /></LazyPage></AppLayout>} />
+        <Route path="/assumable-mortgages/" element={<AppLayout><LazyPage><AssumableMortgagesPage /></LazyPage></AppLayout>} />
         <Route path="/cash-home-buyers" element={<AppLayout><LazyPage><CashHomeBuyersPage /></LazyPage></AppLayout>} />
         <Route path="/cash-home-buyers/" element={<AppLayout><LazyPage><CashHomeBuyersPage /></LazyPage></AppLayout>} />
         <Route path="/featured-areas" element={<AppLayout><LazyPage><FeaturedAreasPage /></LazyPage></AppLayout>} />
