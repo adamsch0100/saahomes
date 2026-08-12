@@ -1,6 +1,15 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WHGZQDZ6ZG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-WHGZQDZ6ZG');
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ListLogic · Listing appointments and sales won by data expertise</title>
@@ -350,8 +359,22 @@ a:hover .btn-arrow, button:hover .btn-arrow { transform: translateX(3px); }
   background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 30px 32px; box-shadow: var(--shadow);
 }
-.pricing-teaser .amount { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; }
-.pricing-teaser p { color: var(--muted); font-size: 0.94rem; max-width: 460px; }
+.pricing-teaser .amount { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; }
+.pricing-teaser .amount span {
+  font-size: 1rem; color: var(--muted); font-family: Inter, sans-serif; font-weight: 600; margin-left: 4px;
+}
+.pricing-teaser p { color: var(--muted); font-size: 0.94rem; max-width: 480px; margin: 10px 0 0; line-height: 1.5; }
+.pricing-teaser .price-row {
+  display: flex; gap: 28px; flex-wrap: wrap; margin: 18px 0 22px;
+}
+.pricing-teaser .price-row > div {
+  display: flex; flex-direction: column; gap: 3px; min-width: 108px;
+}
+.pricing-teaser .price-row strong {
+  font-family: 'Fraunces', serif; font-size: 1.35rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1;
+}
+.pricing-teaser .price-row span { font-size: 0.78rem; color: var(--muted); line-height: 1.3; }
+.pricing-teaser-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
 
 /* Final CTA */
 .final-cta { text-align: center; padding: 96px 0; }
@@ -693,18 +716,18 @@ footer a:hover { color: var(--ink); }
   <div class="container">
     <div class="pricing-teaser">
       <div>
-        <div class="amount">$39<span style="font-size:1rem;color:var(--muted);font-family:Inter">/mo unlimited</span></div>
-        <p>Or $20 for a single report. Sample demo is free. Custom runs unlock with a 7-day trial (then $39/mo) or $20. Brokerage seats from $29/seat.</p>
+        <div class="amount">$39<span>/mo unlimited</span></div>
+        <p>Free for 7 days, then $39/month. Or buy one presentation for $20. Teams from $29/seat.</p>
         <div class="price-row">
-          <div><strong>$39</strong><span>/mo after 7-day trial</span></div>
-          <div><strong>$20</strong><span>one report</span></div>
-          <div><strong>$390</strong><span>/yr agent</span></div>
+          <div><strong>$39</strong><span>per month after trial</span></div>
+          <div><strong>$20</strong><span>one presentation</span></div>
+          <div><strong>$390</strong><span>billed yearly</span></div>
         </div>
-        <a href="signup.html" class="btn btn-trial">Create account <span class="btn-arrow">?</span></a>
+        <a href="signup.html" class="btn btn-trial">Create account <span class="btn-arrow">&rarr;</span></a>
       </div>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+      <div class="pricing-teaser-actions">
         <a href="pricing.html" class="btn btn-outline">View pricing</a>
-        <a href="/demo" class="btn btn-trial">Open sample demo <span class="btn-arrow">?</span></a>
+        <a href="/demo" class="btn btn-ghost">Open sample demo</a>
       </div>
     </div>
   </div>
@@ -714,12 +737,12 @@ footer a:hover { color: var(--ink); }
   <div class="container">
     <span class="eyebrow" style="justify-content:center;display:inline-flex">Ready when you are</span>
     <h2>Walk into your next appointment with the market on your side.</h2>
-    <p>Try the sample listing right now · no account needed. Create an account to build yours; unlock at Generate with a 7-day trial or $20.</p>
+    <p>Try the sample free — no account needed. Sign up when you're ready; you only pay when you need your own presentation.</p>
     <div class="cta-row">
       <a href="/demo" class="btn btn-ghost">See a live presentation</a>
-      <a href="signup.html" class="btn btn-trial">Create account <span class="btn-arrow">?</span></a>
+      <a href="signup.html" class="btn btn-trial">Create account <span class="btn-arrow">&rarr;</span></a>
     </div>
-    <p class="trial-sub" style="color:var(--muted)">Sample demo free · <b style="color:var(--ink)">card only when you unlock a custom run</b></p>
+    <p class="trial-sub" style="color:var(--muted)">Sample demo free · <b style="color:var(--ink)">no card until you subscribe or buy one</b></p>
   </div>
 </section>
 

@@ -766,7 +766,11 @@ def auth_status(request: Request):
 async def public_config():
     """Non-secret client config (GA4 id, etc.)."""
     return {
-        "ga4": (os.environ.get("GA4_MEASUREMENT_ID") or os.environ.get("GA4_PROPERTY_ID") or "").strip(),
+        "ga4": (
+            os.environ.get("GA4_MEASUREMENT_ID")
+            or os.environ.get("GA4_PROPERTY_ID")
+            or "G-WHGZQDZ6ZG"
+        ).strip(),
         "app_base": (os.environ.get("APP_BASE_URL") or "https://listlogic.homes").rstrip("/"),
         "stripe_trial_days": int(os.environ.get("STRIPE_TRIAL_DAYS") or "7"),
     }
