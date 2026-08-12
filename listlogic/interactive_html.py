@@ -1335,21 +1335,23 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
   html,body{{background:#fff!important;margin:0;padding:0}}
   .page{{max-width:none;width:11in;padding:0;margin:0}}
 
-  /* One landscape sheet per spine section — fixed box so content cannot bleed */
+  /* One landscape sheet per spine section — inset box so printer margins cannot clip */
   /* marker: print-page-spine */
+  /* marker: print-fit-v2 */
   .page > .hero,
   .page > .core-facts,
   .page > .section[id^="spine-"]:not(#spine-fulldata){{
     box-sizing:border-box;
-    width:11in;height:8.5in;max-height:8.5in;min-height:8.5in;
-    margin:0;padding:0.38in 0.5in;
+    width:10.5in;height:7.9in;max-height:7.9in;min-height:7.9in;
+    margin:0.3in auto;
+    padding:0.28in 0.4in;
     border:none;border-radius:0;box-shadow:none!important;
     overflow:hidden;
     page-break-after:always;break-after:page;
     page-break-inside:avoid;break-inside:avoid;
   }}
   .page > .hero{{
-    padding:0.7in 0.7in;display:flex;align-items:center;
+    padding:0.55in 0.55in;display:flex;align-items:center;
   }}
   .page > .core-facts,
   #spine-rating{{
@@ -1369,11 +1371,11 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
   }}
   #yoyCharts2{{page-break-before:auto!important;break-before:auto!important;padding-top:8px}}
 
-  .chart-box{{height:150px!important;min-height:0!important;max-height:170px!important}}
-  .chart-box.short{{height:130px!important;max-height:140px!important}}
-  .chart-box.scatter-tall{{height:200px!important;max-height:220px!important}}
+  .chart-box{{height:140px!important;min-height:0!important;max-height:155px!important}}
+  .chart-box.short{{height:120px!important;max-height:130px!important}}
+  .chart-box.scatter-tall{{height:185px!important;max-height:200px!important}}
   .chart-box canvas,.chart-box img.print-chart{{max-width:100%!important;max-height:100%!important;height:auto!important;width:auto!important}}
-  #compMap{{height:300px!important}}
+  #compMap{{height:270px!important}}
   .comp-map-foot{{display:none!important}}
   .comp-map-legend .map-kind{{border:none;background:transparent;padding:0;cursor:default}}
   .net-grid{{grid-template-columns:1.15fr .85fr;gap:10px}}
@@ -1386,12 +1388,12 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
   .whatif-grid{{display:grid!important;grid-template-columns:repeat(var(--whatif-cols,5),minmax(0,1fr))!important;overflow:visible!important;gap:8px}}
   .price-controls{{display:block!important;margin-top:8px}}
   .comp-rail{{grid-template-columns:repeat(4,1fr);gap:8px}}
-  .comp-card .comp-photo{{height:88px}}
+  .comp-card .comp-photo{{height:80px}}
   .market-duo,.ask-trio,.supply-wait,.supply-hero,.cf-grid,.comp-card,.verdict,.wyw,.response-grid{{page-break-inside:avoid}}
   .kpis,.kpis.market-kpis,.kpis.yoy-kpis{{gap:6px}}
   .kpi{{padding:8px 6px}}
-  h2{{font-size:1.05rem;margin-bottom:6px}}
-  .sub{{font-size:.78rem;margin-bottom:8px}}
+  h2{{font-size:1.02rem;margin-bottom:6px}}
+  .sub{{font-size:.76rem;margin-bottom:8px}}
 }}
 body.print-leavebehind .fab,
 body.print-leavebehind .agent-menu-wrap,
@@ -2805,11 +2807,17 @@ document.getElementById('whatIfGrid').addEventListener('click', e => {{
   setupPriceSlider(currentRec, price);
   renderConfront(price);
 }});
+/* marker: demo-ui-snappy */
+let _priceSliderRaf = 0;
 document.getElementById('priceSlider').addEventListener('input', () => {{
-  const price = priceFromSlider();
-  document.getElementById('sellerPrice').value = price;
-  syncWhatIfCards(price);
-  renderConfront(price);
+  if (_priceSliderRaf) cancelAnimationFrame(_priceSliderRaf);
+  _priceSliderRaf = requestAnimationFrame(() => {{
+    _priceSliderRaf = 0;
+    const price = priceFromSlider();
+    document.getElementById('sellerPrice').value = price;
+    syncWhatIfCards(price);
+    renderConfront(price);
+  }});
 }});
 setupPriceSlider(currentRec);
 applyRating(5);
@@ -2840,7 +2848,8 @@ if ('IntersectionObserver' in window) {{
   }});
 }}
 
-if (typeof Chart !== 'undefined') {{
+function bootCharts() {{
+if (typeof Chart === 'undefined') return;
   Chart.defaults.font.family = "'Inter','Segoe UI',system-ui,sans-serif";
   Chart.defaults.color = '#5a6a7c';
   Chart.defaults.borderColor = 'rgba(208,217,228,.45)';
@@ -3171,6 +3180,9 @@ if (typeof Chart !== 'undefined') {{
     }};
   }});
 }}
+}}
+if ('requestIdleCallback' in window) requestIdleCallback(bootCharts, {{ timeout: 1400 }});
+else setTimeout(bootCharts, 60);
 
 document.querySelectorAll('[data-yoy-layout]').forEach(btn => {{
   btn.addEventListener('click', () => {{
@@ -3632,6 +3644,22 @@ function renderMarketMap(opts) {{
   const wrap = document.getElementById('compMapWrap');
   if (!el || typeof mapboxgl === 'undefined' || !MAPBOX_TOKEN) {{
     if (wrap) wrap.style.display = 'none';
+    return;
+  }}
+  // Defer first Mapbox create so condition/slider stay responsive on load.
+  if (!marketMap && !opts.force && !window.__llMapBooted) {{
+    if (window.__llMapBootScheduled) {{
+      window.__llMapPendingOpts = opts;
+      return;
+    }}
+    window.__llMapBootScheduled = true;
+    window.__llMapPendingOpts = opts;
+    const boot = () => {{
+      window.__llMapBooted = true;
+      renderMarketMap(Object.assign({{}}, window.__llMapPendingOpts || {{}}, {{ force: true }}));
+    }};
+    if ('requestIdleCallback' in window) requestIdleCallback(boot, {{ timeout: 1800 }});
+    else setTimeout(boot, 120);
     return;
   }}
   const picked = new Set((selectedCompMls || []).map(String));

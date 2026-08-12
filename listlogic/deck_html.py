@@ -705,14 +705,15 @@ body.mode-print .hint {{ display: none; }}
     position: relative !important; opacity: 1 !important; transform: none !important;
     box-shadow: none !important; border-radius: 0 !important; border: none !important;
     box-sizing: border-box;
-    width: 11in !important; height: 8.5in !important; max-height: 8.5in !important;
-    min-height: 8.5in !important; aspect-ratio: auto !important;
+    width: 10.5in !important; height: 7.9in !important; max-height: 7.9in !important;
+    min-height: 7.9in !important; aspect-ratio: auto !important;
+    margin: 0.3in auto !important;
     overflow: hidden !important;
     break-after: page; page-break-after: always;
     page-break-inside: avoid; break-inside: avoid;
   }}
   .slide:last-child {{ break-after: auto; page-break-after: auto; }}
-  .slide-body {{ overflow: hidden; }}
+  .slide-body {{ overflow: hidden; padding: 10px 22px 6px; }}
 }}
 </style>
 </head>

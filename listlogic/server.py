@@ -1258,12 +1258,15 @@ async def assistant_chat(request: Request):
     return JSONResponse(result)
 
 
-def _refresh_sample_html(run_dir: Path) -> None:
-    """Re-bake sample presentation.html from saved JSON using the current template."""
+def _refresh_sample_html(run_dir: Path) -> bool:
+    """Re-bake sample presentation.html from saved JSON using the current template.
+
+    Returns True when the HTML file was rewritten.
+    """
     json_path = run_dir / "presentation.json"
     html_path = run_dir / "presentation.html"
     if not json_path.exists():
-        return
+        return False
     try:
         # Skip rewrite when sample already has the current UI markers
         if html_path.exists():
@@ -1275,6 +1278,8 @@ def _refresh_sample_html(run_dir: Path) -> None:
                 and "btnPrintLeavebehind" in existing
                 and "listlogic-logo.png" in existing
                 and "print-page-spine" in existing
+                and "print-fit-v2" in existing
+                and "demo-ui-snappy" in existing
                 and "mapboxgl" in existing
                 and "MAPBOX_TOKEN" in existing
                 and "map-hover-tip" in existing
@@ -1285,12 +1290,14 @@ def _refresh_sample_html(run_dir: Path) -> None:
                 and "sectionsModal" in existing
                 and "ll-shown" in existing
             ):
-                return
+                return False
         report = json.loads(json_path.read_text(encoding="utf-8"))
         _save_html(report, html_path)
         logger.info("Refreshed sample presentation HTML for %s", run_dir.name)
+        return True
     except Exception:
         logger.exception("Failed refreshing sample HTML for %s", run_dir.name)
+        return False
 
 
 def _refresh_sample_pdfs(report: dict, run_dir: Path) -> None:
@@ -1349,7 +1356,7 @@ def _ensure_sample_run() -> str:
     html_path = run_dir / "presentation.html"
     if html_path.exists():
         _repair_sample_run_paths(run_dir)
-        _refresh_sample_html(run_dir)
+        html_refreshed = _refresh_sample_html(run_dir)
         # Sample photos must be volume-local, not expiring CDN links.
         try:
             remote, missing = _run_photo_health(run_dir)
@@ -1359,14 +1366,18 @@ def _ensure_sample_run() -> str:
                 _start_background_photos(SAMPLE_RUN_ID, run_dir)
         except Exception:
             logger.exception("Sample photo health check failed")
-        # Keep sample PDFs in sync with the latest packet design.
-        try:
-            json_path = run_dir / "presentation.json"
-            if json_path.exists():
-                report = json.loads(json_path.read_text(encoding="utf-8"))
-                _refresh_sample_pdfs(report, run_dir)
-        except Exception:
-            logger.exception("Sample PDF sync failed for %s", run_dir.name)
+        # PDFs are expensive — only rebuild when HTML template changed or files missing.
+        pdf_path = run_dir / "presentation.pdf"
+        story_path = run_dir / "story.pdf"
+        need_pdfs = html_refreshed or not pdf_path.exists() or not story_path.exists()
+        if need_pdfs:
+            try:
+                json_path = run_dir / "presentation.json"
+                if json_path.exists():
+                    report = json.loads(json_path.read_text(encoding="utf-8"))
+                    _refresh_sample_pdfs(report, run_dir)
+            except Exception:
+                logger.exception("Sample PDF sync failed for %s", run_dir.name)
         return SAMPLE_RUN_ID
     if not DEMO_EXPORT.exists():
         raise HTTPException(404, "Sample export missing")
@@ -1748,7 +1759,20 @@ def demo_deck(request: Request):
     return FileResponse(path, media_type="text/html")
 
 
-_PRESENTATION_MARKERS = ("mapboxgl", "map-hover-tip", "mapKindVisible", "data-map-filters", "spine-net", "netSellerFeePct", "match-badge", "sectionsModal", "ll-shown", "MAPBOX_TOKEN")
+_PRESENTATION_MARKERS = (
+    "mapboxgl",
+    "map-hover-tip",
+    "mapKindVisible",
+    "data-map-filters",
+    "spine-net",
+    "netSellerFeePct",
+    "match-badge",
+    "sectionsModal",
+    "ll-shown",
+    "MAPBOX_TOKEN",
+    "print-fit-v2",
+    "demo-ui-snappy",
+)
 
 
 def _rebake_if_stale(run_id: str, html_path: Path) -> Path:
