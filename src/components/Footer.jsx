@@ -92,6 +92,7 @@ export default function Footer() {
             <Link to="/about-us/" className="hover:text-white transition-colors">About</Link>
             <Link to="/contact/" className="hover:text-white transition-colors">Contact</Link>
             <Link to="/northern-colorado-areas/" className="hover:text-white transition-colors">Areas</Link>
+            <Link to="/admin/" className="hover:text-white transition-colors text-gray-500" aria-label="Admin login">Admin</Link>
           </div>
         </div>
       </div>
