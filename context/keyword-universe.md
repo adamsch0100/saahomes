@@ -152,6 +152,27 @@ Competitive note: assumableguy.com (CO-focused, 1,696 listings, lead firehose), 
 
 ---
 
+## VETERANS cluster (It 35 — Adam: "absolutely dominate this space for our areas", Aug 12 2026; 0.5% back to veterans pledge)
+
+Target page: `/veterans/` (new hub) + veteran sections on FC/Loveland/Windsor/Greeley area pages + VA blogs. Zero footprint today; Veterans United owns national SEO but no local presence. **Adam's real offer: 0.5% of purchase price back to veterans (home warranty / closing costs / price reduction) — disclosed at closing per CO law.**
+
+| Query | Intent | Target |
+|-------|--------|--------|
+| VA loan {Fort Collins/Loveland/Windsor/Greeley} | high-intent | /veterans/ + area sections |
+| VA home loan Colorado | info + leads | /veterans/ + blog |
+| veterans real estate agent {city} | agent-intent (winnable) | /veterans/ |
+| best realtor for veterans {city} | agent-intent | /veterans/ |
+| buying a home with a VA loan | educational | /veterans/ + blog |
+| VA loan no down payment | high-intent | /veterans/ |
+| disabled veteran property tax exemption Colorado | local benefit | /veterans/ + blog |
+| military relocation Northern Colorado / PCS to Fort Collins | relocation | /veterans/ + blog |
+| VA loan assumption | cross-sell (It 32) | /veterans/ ↔ /assumable-mortgages/ |
+| homes for sale VA loan {city} | listings | /properties/ + area sections |
+
+Competitive note: Veterans United (veteransunited.com — national SEO, no local agents), militaryhomesearch.com (thin). Nobody local owns veteran keywords or offers a rebate — the 0.5% pledge is the differentiator.
+
+---
+
 ## Existing blog slugs (extend with internal links)
 
 - `buying-a-home-in-fort-collins`
@@ -176,7 +197,7 @@ Competitive note: assumableguy.com (CO-focused, 1,696 listings, lead firehose), 
 ## GSC monitoring filters (cron)
 
 When GSC connected, pull weekly for property `https://saahomes.com/`:
-- Queries containing: `fort collins`, `loveland`, `windsor`, `greeley`, `weld`, `larimer`, `northern colorado`, `chfa`, `schwartz`, `saa homes`
-- Pages under `/northern-colorado-areas/`, `/for-sellers/`, `/for-buyers/`, `/chfa-`, `/blog/`
+- Queries containing: `fort collins`, `loveland`, `windsor`, `greeley`, `weld`, `larimer`, `northern colorado`, `chfa`, `schwartz`, `saa homes`, **`luxury` (It 31), `assumable` / `assume mortgage` (It 32)**
+- Pages under `/northern-colorado-areas/`, `/for-sellers/`, `/for-buyers/`, `/chfa-`, `/blog/`, **`/luxury-real-estate/` (It 31), `/assumable-mortgages/` (It 32)**
 - Alert: position drop ≥8 positions AND impressions ≥10 (week over week)
 - Alert: page indexed → not indexed on any P0 URL
