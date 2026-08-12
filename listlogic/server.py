@@ -150,6 +150,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/saas/vs-moxi-present.html",
         "/saas/vs-best-cma-software.html",
         "/saas/interactive-cma-software.html",
+        "/saas/changelog.html",
         "/blog/",
         "/saas/ll.css",
         "/saas/analytics.js",
