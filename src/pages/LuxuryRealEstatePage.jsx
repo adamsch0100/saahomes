@@ -49,11 +49,11 @@ const CITY_SLUG_FROM_NAME = {
 };
 
 const NADIA_LUXURY_MESSAGE =
-  "Hi! I'm interested in Northern Colorado luxury properties — can you tell me more about current $1M+ listings?";
+  "Hi! I'm interested in Northern Colorado's luxury market — can you tell me about exceptional properties currently available?";
 const NADIA_LUXURY_BUY =
-  "Hi! I'm looking to acquire a $1M+ home in Northern Colorado — can you tell me about current listings?";
+  "Hi! I'm looking for an exceptional home in Northern Colorado — can you tell me about current luxury listings, including anything off-market?";
 const NADIA_LUXURY_SELL =
-  "Hi! I'm considering selling a $1M+ property in Northern Colorado — can you walk me through a private conversation with Adam or Mandi?";
+  "Hi! I'm considering selling a premium property in Northern Colorado — can you arrange a private conversation with Adam or Mandi?";
 
 function isResidentialMillionPlus(listing) {
   if (!listing) return false;
@@ -541,7 +541,7 @@ export default function LuxuryRealEstatePage() {
           </h2>
           <p className="text-[#6a6a6a] text-center max-w-2xl mx-auto mb-14 text-sm leading-relaxed">
             Citywide medians are not luxury averages. Each line below is the $1M+ reality in that
-            city, drawn from our published market notes. Live asking prices come from IRES.
+            city, drawn from our published market notes. Asking prices are updated as the market moves.
           </p>
           <div className="grid md:grid-cols-2 gap-6">
             {featured.map(({ slug, context, threshold }) => {
@@ -633,9 +633,10 @@ export default function LuxuryRealEstatePage() {
               Live in the market
             </h2>
             <p className="text-gray-400 text-center max-w-2xl mx-auto mb-12 text-sm leading-relaxed">
-              Live IRES inventory across Boulder, Fort Collins, Windsor, Loveland, Longmont, Greeley,
-              and Timnath. Photographs are the listing&apos;s own — served through our photo proxy.
-              Each home below is a distinct listing, not repeated from the city cards.
+              Exceptional homes currently on the market across Boulder, Fort Collins, Windsor,
+              Loveland, Longmont, Greeley, and Timnath. Every photograph is the home itself —
+              what you see is exactly what is for sale. New properties join the market daily,
+              and we can pull a private short list for any city or neighborhood — just ask.
             </p>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {selectedResidences.map((listing) => {

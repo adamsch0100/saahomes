@@ -208,7 +208,7 @@ export const LUXURY_THRESHOLDS = {
     millionPlus: true,
     tier: '$1M+',
     millionPlusReality:
-      'No static citywide median is published. $1M+ lives in Bridle Ridge ($700K–$1.5M+) and Timnath Ranch executive homes ($550K–$1.2M+). Live IRES stats on the Timnath area page supersede any snapshot.',
+      'No static citywide median is published. $1M+ lives in Bridle Ridge ($700K–$1.5M+) and Timnath Ranch executive homes ($550K–$1.2M+). Pricing on the Timnath area page reflects the current market.',
   },
 };
 
@@ -286,7 +286,7 @@ export const CITY_MARKET_CONTEXT = {
     city: 'Timnath',
     slug: 'timnath',
     county: 'Larimer County',
-    medianDisplay: 'See live IRES stats',
+    medianDisplay: 'See current market stats',
     medianSource: 'Live listing stats on Timnath area page (no static luxury median fabricated)',
     premiumDom: 'New-build luxury and Bridle Ridge custom homes — timelines vary by product',
     image: '/api/photo/31824/0',
@@ -378,7 +378,7 @@ export const LUXURY_CLIENT_PROMISES = [
   },
   {
     title: 'Market mastery',
-    desc: 'Verified $1M+ comps from IRES, neighborhood-level depth, and honest pricing. We do not invent a luxury median or dress a $600K market as a $2M one.',
+    desc: 'Verified $1M+ comps, neighborhood-level depth, and honest pricing. We do not invent a luxury median or dress a $600K market as a $2M one.',
   },
   {
     title: 'White-glove execution',
@@ -398,7 +398,7 @@ export const LUXURY_CLIENT_PROMISES = [
 export const LUXURY_HUB_FAQS = [
   {
     q: 'What’s actually happening in the $1M+ Northern Colorado market right now?',
-    a: 'The $1M+ tier is a distinct market from citywide medians. Fort Collins citywide median single-family sat near $610,000 in July 2026 (averages near $636,000 mid-2026); Loveland about $510,000; Windsor about $588,000 — the highest among major NoCO cities; Greeley about $432,000. Boulder single-family typically ranges $900,000 to well over $2 million. We do not publish a fabricated “$1M median.” What we can say: homes above $750,000 in Fort Collins typically take 55–70 days on market; Windsor properties above $750,000 routinely take 65+ days; Loveland homes above $675,000 average about 55 days. Our Fort Collins luxury neighborhoods guide notes homes above $1 million often 90–120 days. Inventory at this level is thin, neighborhood-specific, and priced by comps — not by city averages. Live IRES asking prices always supersede these snapshots.',
+    a: 'The $1M+ tier is a distinct market from citywide medians. Fort Collins citywide median single-family sat near $610,000 in July 2026 (averages near $636,000 mid-2026); Loveland about $510,000; Windsor about $588,000 — the highest among major NoCO cities; Greeley about $432,000. Boulder single-family typically ranges $900,000 to well over $2 million. We do not publish a fabricated “$1M median.” What we can say: homes above $750,000 in Fort Collins typically take 55–70 days on market; Windsor properties above $750,000 routinely take 65+ days; Loveland homes above $675,000 average about 55 days. Our Fort Collins luxury neighborhoods guide notes homes above $1 million often 90–120 days. Inventory at this level is thin, neighborhood-specific, and priced by comps — not by city averages. Current asking prices on our site always reflect the latest market.',
   },
   {
     q: 'How do you sell a $1M+ home discreetly?',
@@ -406,11 +406,11 @@ export const LUXURY_HUB_FAQS = [
   },
   {
     q: 'Do you have access to off-market properties?',
-    a: 'Yes, where they exist. Off-market and quiet listings in this corridor come through relationships with other agents, sellers who prefer not to go fully public, and coming-soon inventory we hear about before it hits the MLS. We do not pretend every $1M+ home is hidden, and we will not invent an off-market catalog. What we do is work both the live IRES inventory and the private network, then show you only what fits. Call (970) 999-1407 if you want that search run confidentially.',
+    a: 'Yes, where they exist. Off-market and quiet listings in this corridor come through relationships with other agents, sellers who prefer not to go fully public, and coming-soon inventory we hear about before it hits the market. We do not pretend every $1M+ home is hidden, and we will not invent an off-market catalog. What we do is work both the current listings and the private network, then show you only what fits. Call (970) 999-1407 if you want that search run confidentially.',
   },
   {
     q: 'How is a $1M+ property priced correctly?',
-    a: 'With neighborhood comps from IRES — not a Zestimate, not a citywide median, and not last year’s peak. Overpricing is how $1M+ listings go stale. In a band already taking 55–70 days above $750,000 (and often 90–120 days above $1 million in Fort Collins), an inflated ask is not a negotiating cushion; it is how a significant home becomes shopworn. We price against recent, relevant sales in the same micro-location — Horsetooth is not Old Town; Water Valley is not RainDance — and we adjust when the market tells us to.',
+    a: 'With neighborhood comps — not a Zestimate, not a citywide median, and not last year’s peak. Overpricing is how $1M+ listings go stale. In a band already taking 55–70 days above $750,000 (and often 90–120 days above $1 million in Fort Collins), an inflated ask is not a negotiating cushion; it is how a significant home becomes shopworn. We price against recent, relevant sales in the same micro-location — Horsetooth is not Old Town; Water Valley is not RainDance — and we adjust when the market tells us to.',
   },
   {
     q: 'What sets Schwartz and Associates apart at this level?',
@@ -425,8 +425,8 @@ export const LUXURY_HUB_FAQS = [
     a: 'Pace and certainty, not theatrics. Inspections are more thorough (systems, roofs, wells, septic, acreage, historic fabric). Contingencies are negotiated with more precision; some sellers want a shorter option period, some will not accept a home-sale contingency. Appraisals on unique properties can lag the contract price — we plan for that instead of discovering it at week five. Because premium bands often sit 55–120 days on market, you usually have time to underwrite the house properly. When the right property appears off-market, the opposite is true: you need to be ready to move. We keep both postures available.',
   },
   {
-    q: 'Where can I see live $1M+ listings in Northern Colorado?',
-    a: 'On this page — current $1M+ inventory — and on our search filtered at $1,000,000. Each city card links to that city’s $1M+ results and to individual listings on the market. Photographs are the listing’s own, served through our photo proxy. Inventory changes daily; live IRES asking prices always supersede any snapshot here. Ask Nadia on this page if you want a short list pulled for a specific city or neighborhood.',
+    q: 'Where can I see current $1M+ listings in Northern Colorado?',
+    a: 'On this page — current $1M+ inventory — and through our full search, which filters at $1,000,000. Each city card links to that city’s premium homes and to individual listings on the market. Pricing shown reflects each home’s current asking price and changes as the market moves. Ask Nadia on this page if you would like a private short list pulled for a specific city or neighborhood.',
   },
 ];
 
@@ -473,7 +473,7 @@ export const CITY_LUXURY_FAQS = {
   timnath: [
     {
       q: 'What luxury options exist in Timnath, CO?',
-      a: 'Timnath’s premium inventory includes Bridle Ridge at Timnath ($700K–$1.5M+), Timnath Ranch executive homes ($550K–$1.2M+), Timnath Lakeside ($550K–$1M+), and The Fields at Timnath ($550K–$900K+). The town’s new-construction corridor near I-25 appeals to buyers wanting modern finishes and Fort Collins proximity. Check live IRES stats on our Timnath guide and the Northern Colorado luxury hub for private consultation options.',
+      a: 'Timnath’s premium inventory includes Bridle Ridge at Timnath ($700K–$1.5M+), Timnath Ranch executive homes ($550K–$1.2M+), Timnath Lakeside ($550K–$1M+), and The Fields at Timnath ($550K–$900K+). The town’s new-construction corridor near I-25 appeals to buyers wanting modern finishes and Fort Collins proximity. See current pricing on our Timnath guide and the Northern Colorado luxury hub for private consultation options.',
     },
   ],
 };
