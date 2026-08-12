@@ -516,7 +516,9 @@ export async function syncListings({ mode = 'incremental' } = {}) {
 
     // Persist the watermark for incremental runs. Only advance when we
     // actually consumed records (so a failed/empty run can't skip data).
-    if (mode === 'incremental' && newWatermark) {
+    // Also persists after the first-run FULL fallback — otherwise the next
+    // hourly run would re-import everything (no watermark → full again).
+    if (newWatermark) {
       await setState(pool, 'ires_last_sync_ts', newWatermark);
     }
 
