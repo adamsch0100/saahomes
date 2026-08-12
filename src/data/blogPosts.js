@@ -729,6 +729,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/Loveland-CO-Area-Guide.jpg',
     readTime: '7 min read',
+    youtubeId: 'iMt-Utr7f_Q',
     sections: [
       {
         heading: 'Loveland market overview',
