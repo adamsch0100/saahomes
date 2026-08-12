@@ -765,6 +765,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/Area-Guide-for-Greeley-CO.jpg',
     readTime: '7 min read',
+    youtubeId: '9Q9neakrgn8',
     sections: [
       {
         heading: 'Greeley seller advantages',
