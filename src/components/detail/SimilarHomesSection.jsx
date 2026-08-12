@@ -76,7 +76,7 @@ function SimilarCard({ listing: l }) {
             e.stopPropagation();
           }}
         >
-          <SaveHomeButton listing={l} className="!w-10 !h-10 !min-w-[40px] !min-h-[40px]" size={18} />
+          <SaveHomeButton listing={l} />
         </div>
         {/* Price overlay — matches primary search cards (Zillow §3) */}
         <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/75 via-black/35 to-transparent pt-8 pb-2 px-3 pointer-events-none">

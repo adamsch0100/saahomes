@@ -122,13 +122,13 @@ function NotificationRow({ item, onOpen, onMarkRead, onDismiss, busyId }) {
           ) : null}
         </button>
 
-        <div className="flex flex-wrap gap-3 mt-2">
+        <div className="flex flex-wrap gap-2 mt-2">
           {unread ? (
             <button
               type="button"
               disabled={busy}
               onClick={() => onMarkRead(item)}
-              className="text-xs font-medium text-gray-600 hover:text-black disabled:opacity-50"
+              className="inline-flex items-center min-h-[44px] px-3 py-2 text-xs font-semibold text-gray-700 hover:text-black hover:bg-gray-100 rounded-lg disabled:opacity-50 touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
             >
               Mark read
             </button>
@@ -137,7 +137,7 @@ function NotificationRow({ item, onOpen, onMarkRead, onDismiss, busyId }) {
             type="button"
             disabled={busy}
             onClick={() => onDismiss(item)}
-            className="text-xs font-medium text-gray-500 hover:text-red-700 disabled:opacity-50"
+            className="inline-flex items-center min-h-[44px] px-3 py-2 text-xs font-semibold text-gray-500 hover:text-red-700 hover:bg-red-50 rounded-lg disabled:opacity-50 touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
           >
             Dismiss
           </button>
@@ -180,7 +180,7 @@ function FrequencySegment({ type, value, options, onChange, disabled, savedFlash
               type="button"
               disabled={disabled}
               onClick={() => onChange(type, freq)}
-              className={`px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors disabled:opacity-50 ${
+              className={`min-h-[40px] px-2.5 sm:px-3 py-2 text-xs sm:text-sm font-semibold rounded-md transition-colors disabled:opacity-50 touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E] ${
                 active
                   ? "bg-black text-white shadow-sm"
                   : "text-gray-700 hover:bg-white hover:text-black"

@@ -791,6 +791,8 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgFailed, setImgFailed] = useState(false);
   const [photoIdx, setPhotoIdx] = useState(0);
+  const touchStartX = useRef(null);
+  const swipedRef = useRef(false);
   const addr = listingAddress(listing);
   const typeLabel = homeTypeLabel(listing);
   const photoCount = Array.isArray(listing.photos)
@@ -828,9 +830,18 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
     setPhotoIdx(0);
     setImgLoaded(false);
     setImgFailed(false);
+    touchStartX.current = null;
+    swipedRef.current = false;
   }, [listing.id]);
 
   const open = (e) => {
+    // Swallow synthetic click after a photo swipe so the card doesn't open
+    if (swipedRef.current) {
+      swipedRef.current = false;
+      e?.preventDefault?.();
+      e?.stopPropagation?.();
+      return;
+    }
     e?.preventDefault?.();
     onOpen?.(listing);
   };
@@ -846,6 +857,26 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
       if (next >= photoCount) return 0;
       return next;
     });
+  };
+
+  // Zillow §3: swipe photo on mobile without opening the card
+  const onPhotoTouchStart = (e) => {
+    if (!multiPhoto) return;
+    touchStartX.current = e.touches?.[0]?.clientX ?? null;
+    swipedRef.current = false;
+  };
+  const onPhotoTouchEnd = (e) => {
+    if (!multiPhoto || touchStartX.current == null) return;
+    const endX = e.changedTouches?.[0]?.clientX;
+    if (endX == null) {
+      touchStartX.current = null;
+      return;
+    }
+    const dx = endX - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(dx) < 40) return;
+    swipedRef.current = true;
+    stepPhoto(dx < 0 ? 1 : -1, e);
   };
 
   const photo = (
@@ -879,23 +910,20 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
       )}
       <CardBadges listing={listing} />
       <div className={`absolute z-10 ${compact ? "top-1.5 right-1.5" : "top-2 right-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"}`}>
-        <SaveHomeButton
-          listing={listing}
-          saved={isSaved}
-          className={compact ? "!w-10 !h-10 !min-w-[40px] !min-h-[40px]" : ""}
-        />
+        {/* Keep default 44px SaveHomeButton — density overrides hurt mobile taps (G-UX2-2) */}
+        <SaveHomeButton listing={listing} saved={isSaved} />
       </div>
-      {/* Zillow §3: left/right photo arrows on hover (desktop) / always on touch */}
+      {/* Zillow §3: left/right photo arrows — ≥40px compact / ≥44px grid (G-UX2-1) */}
       {multiPhoto && (
         <>
           <button
             type="button"
             onClick={(e) => stepPhoto(-1, e)}
             onMouseDown={(e) => e.stopPropagation()}
-            className={`absolute left-1.5 top-1/2 -translate-y-1/2 z-20 rounded-full bg-white/95 hover:bg-white shadow-md flex items-center justify-center text-gray-900 leading-none active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#CFB36E] ${
+            className={`absolute left-1 top-1/2 -translate-y-1/2 z-20 rounded-full bg-white/95 hover:bg-white shadow-md flex items-center justify-center text-gray-900 leading-none active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#CFB36E] ${
               compact
-                ? "w-7 h-7 text-base opacity-100"
-                : "w-8 h-8 text-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                ? "w-10 h-10 min-w-[40px] min-h-[40px] text-lg opacity-100"
+                : "w-11 h-11 min-w-[44px] min-h-[44px] text-xl opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
             }`}
             aria-label="Previous photo"
           >
@@ -905,10 +933,10 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
             type="button"
             onClick={(e) => stepPhoto(1, e)}
             onMouseDown={(e) => e.stopPropagation()}
-            className={`absolute right-1.5 top-1/2 -translate-y-1/2 z-20 rounded-full bg-white/95 hover:bg-white shadow-md flex items-center justify-center text-gray-900 leading-none active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#CFB36E] ${
+            className={`absolute right-1 top-1/2 -translate-y-1/2 z-20 rounded-full bg-white/95 hover:bg-white shadow-md flex items-center justify-center text-gray-900 leading-none active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#CFB36E] ${
               compact
-                ? "w-7 h-7 text-base opacity-100"
-                : "w-8 h-8 text-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:right-12"
+                ? "w-10 h-10 min-w-[40px] min-h-[40px] text-lg opacity-100"
+                : "w-11 h-11 min-w-[44px] min-h-[44px] text-xl opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:right-12"
             }`}
             aria-label="Next photo"
           >
@@ -931,8 +959,15 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
           </div>
         </div>
       )}
-      {!compact && multiPhoto && (
-        <span className="absolute bottom-2.5 right-2.5 bg-black/65 text-white text-[10px] font-medium px-1.5 py-0.5 rounded z-[1] tabular-nums pointer-events-none">
+      {/* Photo counter — grid + compact list (G-UX2-9) */}
+      {multiPhoto && (
+        <span
+          className={`absolute bg-black/65 text-white font-medium rounded z-[1] tabular-nums pointer-events-none ${
+            compact
+              ? "bottom-1.5 left-1.5 text-[9px] px-1 py-0.5"
+              : "bottom-2.5 right-2.5 text-[10px] px-1.5 py-0.5"
+          }`}
+        >
           {safePhotoIdx + 1} / {photoCount}
         </span>
       )}
@@ -1027,6 +1062,8 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
               ? "w-[140px] sm:w-[168px] self-stretch"
               : "aspect-[4/3] w-full"
           }`}
+          onTouchStart={onPhotoTouchStart}
+          onTouchEnd={onPhotoTouchEnd}
         >
           {photo}
         </div>

@@ -326,7 +326,7 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
               setFullscreen(true);
             }}
             onMouseDown={(e) => e.stopPropagation()}
-            className="absolute top-3 right-3 z-40 px-3 py-1.5 rounded-full bg-black/70 hover:bg-black text-white text-xs font-semibold active:scale-95 transition-transform pointer-events-auto touch-manipulation"
+            className="absolute top-3 right-3 z-40 min-h-[44px] px-3.5 py-2 rounded-full bg-black/70 hover:bg-black text-white text-xs font-semibold active:scale-95 transition-transform pointer-events-auto touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
             aria-label="Open full-screen photo gallery"
           >
             Expand
@@ -397,7 +397,7 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
             <button
               type="button"
               onClick={() => setFullscreen(false)}
-              className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center text-2xl touch-manipulation"
+              className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full hover:bg-white/10 flex items-center justify-center text-2xl touch-manipulation active:scale-95 transition-transform focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
               aria-label="Close gallery"
             >
               ×

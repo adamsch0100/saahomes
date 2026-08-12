@@ -314,7 +314,7 @@ export default function ListingDetailPanel({ slug, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-sm font-semibold text-gray-800 hover:bg-gray-100"
+            className="inline-flex items-center gap-1.5 min-h-[44px] px-2.5 py-2 rounded-lg text-sm font-semibold text-gray-800 hover:bg-gray-100 active:scale-95 transition-transform touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
             aria-label="Close and return to search"
           >
             <svg

@@ -173,6 +173,22 @@ export default function SaveSearchModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-check when open flips true
   }, [open]);
 
+  // Escape closes modal (parity with filter popovers / detail panel — G-UX2-4)
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKey = (e) => {
+      if (e.key !== "Escape") return;
+      e.preventDefault();
+      e.stopPropagation();
+      setOpen(false);
+      setState("idle");
+      setError("");
+      setPassword("");
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
   const submit = async (e) => {
     e.preventDefault();
     const emailStr = email.trim();
@@ -318,7 +334,7 @@ export default function SaveSearchModal({
                   <button
                     type="button"
                     onClick={resetAndClose}
-                    className="text-gray-400 hover:text-gray-700 text-2xl leading-none p-1"
+                    className="shrink-0 min-w-[44px] min-h-[44px] w-11 h-11 rounded-full flex items-center justify-center text-2xl leading-none text-gray-400 hover:text-gray-700 hover:bg-gray-100 active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
                     aria-label="Close"
                   >
                     ×
