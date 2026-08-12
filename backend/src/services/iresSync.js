@@ -50,6 +50,9 @@ const MLS_FIELDS = [
   // Accessibility / community
   'AccessibilityFeatures', 'CommunityFeatures', 'GreenEnergyEfficient',
   'GreenBuildingVerificationType', 'DevelopmentStatus',
+  // Incremental replication (MLS Grid v2 docs: filter by ModificationTimestamp
+  // after initial import; gate media on PhotosChangeTimestamp; drop when MlgCanView=false)
+  'ModificationTimestamp', 'PhotosChangeTimestamp', 'MlgCanView',
 ];
 
 // Adam's home-type model (Aug 2026): attached = condos/townhomes/multi-unit,
@@ -190,7 +193,14 @@ function normalizeListing(raw) {
   return {
     listing_id: String(raw.ListingId || raw.ListingKey),
     status: STATUS_MAP[raw.StandardStatus] || String(raw.StandardStatus || 'Active'),
-    is_active: LISTED_STATUSES.has(STATUS_MAP[raw.StandardStatus] || String(raw.StandardStatus || 'Active')),
+    // MlgCanView=false (docs: "record must be removed from your local data
+    // store") → force archived so we never display a listing we're not
+    // licensed to show. True/absent → normal status logic.
+    is_active: (raw.MlgCanView === false || String(raw.MlgCanView).toLowerCase() === 'false')
+      ? false
+      : LISTED_STATUSES.has(STATUS_MAP[raw.StandardStatus] || String(raw.StandardStatus || 'Active')),
+    modification_timestamp: raw.ModificationTimestamp || null,
+    photos_change_timestamp: raw.PhotosChangeTimestamp || null,
     property_type: raw.PropertyType || null,
     property_subtype: raw.PropertySubType || null,
     home_type: classifyHomeType(raw.PropertyType, raw.PropertySubType, raw.PropertyAttachedYN),
@@ -275,11 +285,20 @@ async function releaseLock() {
   } catch { /* noop */ }
 }
 
-async function fetchPage(authToken, offset, retries = 4) {
+async function fetchPage(authToken, offset, { incrementalSince = null, retries = 4 } = {}) {
   const url = new URL(`${process.env.IRES_API_URL}/Property`);
   url.searchParams.set('$top', '100');
   url.searchParams.set('$skip', String(offset));
-  url.searchParams.set('$filter', "(StandardStatus eq 'Active' or StandardStatus eq 'Active Under Contract' or StandardStatus eq 'Pending' or StandardStatus eq 'Withdrawn' or StandardStatus eq 'Expired')");
+  if (incrementalSince) {
+    // MLS Grid v2 incremental replication (docs): after initial import, query
+    // ModificationTimestamp gt {last received}. Responses are ordered by
+    // ModificationTimestamp by default, so paging resumes cleanly. No status
+    // filter needed — status changes (incl. Sold/Withdrawn flips) bump the
+    // ModificationTimestamp, so the change stream carries them.
+    url.searchParams.set('$filter', `ModificationTimestamp gt ${incrementalSince}`);
+  } else {
+    url.searchParams.set('$filter', "(StandardStatus eq 'Active' or StandardStatus eq 'Active Under Contract' or StandardStatus eq 'Pending' or StandardStatus eq 'Withdrawn' or StandardStatus eq 'Expired')");
+  }
   url.searchParams.set('$select', MLS_FIELDS.join(','));
   url.searchParams.set('$expand', 'Media');
 
@@ -338,7 +357,89 @@ async function getToken() {
   return data.access_token;
 }
 
-export async function syncListings() {
+// ── Incremental replication state (MLS Grid v2) ──────────────────────────
+// Watermark = the greatest ModificationTimestamp we've consumed. Stored in
+// the sync_state table so hourly incremental runs resume exactly where the
+// previous run stopped (docs: "responses are ordered by ModificationTimestamp
+// by default, allowing you to pick up where you left off").
+const STATE_TABLE_SQL = `
+  CREATE TABLE IF NOT EXISTS sync_state (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
+
+async function getState(pool, key) {
+  await pool.query(STATE_TABLE_SQL);
+  const r = await pool.query('SELECT value FROM sync_state WHERE key = $1', [key]);
+  return r.rows[0]?.value || null;
+}
+
+async function setState(pool, key, value) {
+  await pool.query(STATE_TABLE_SQL);
+  await pool.query(
+    `INSERT INTO sync_state (key, value, updated_at) VALUES ($1, $2, NOW())
+     ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()`,
+    [key, value]
+  );
+}
+
+// Greatest ModificationTimestamp across a page of records (ISO-8601 sorts
+// lexicographically, so max() is correct for same-format values).
+function maxModificationTimestamp(records) {
+  let maxTs = null;
+  for (const r of records) {
+    const ts = r?.ModificationTimestamp;
+    if (ts && (!maxTs || String(ts) > String(maxTs))) maxTs = ts;
+  }
+  return maxTs;
+}
+
+const LISTING_UPSERT_SQL = `
+  INSERT INTO listings (listing_id, status, is_active, property_type, property_subtype, home_type, street_number, street_name, unit,
+    city, state, postal_code, county, list_price, original_list_price, beds, baths, half_baths,
+    three_quarter_baths, living_area, above_grade_area, lot_size, lot_size_acres, units_total,
+    year_built, garage_spaces, hoa_fee, description, photos, photos_count, latitude, longitude,
+    listing_url, mls_source, elementary_school, middle_school, high_school, school_district,
+    days_on_market, price_per_sqft, subdivision, features, raw, slug, last_seen_at)
+  VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,NOW())
+  ON CONFLICT (listing_id) DO UPDATE SET
+    status = EXCLUDED.status, is_active = EXCLUDED.is_active, property_type = EXCLUDED.property_type,
+    property_subtype = EXCLUDED.property_subtype, home_type = EXCLUDED.home_type,
+    street_number = EXCLUDED.street_number, street_name = EXCLUDED.street_name,
+    unit = EXCLUDED.unit, city = EXCLUDED.city, state = EXCLUDED.state,
+    postal_code = EXCLUDED.postal_code, county = EXCLUDED.county,
+    list_price = EXCLUDED.list_price, original_list_price = EXCLUDED.original_list_price,
+    beds = EXCLUDED.beds, baths = EXCLUDED.baths, half_baths = EXCLUDED.half_baths,
+    three_quarter_baths = EXCLUDED.three_quarter_baths,
+    living_area = EXCLUDED.living_area, above_grade_area = EXCLUDED.above_grade_area,
+    lot_size = EXCLUDED.lot_size, lot_size_acres = EXCLUDED.lot_size_acres,
+    units_total = EXCLUDED.units_total,
+    year_built = EXCLUDED.year_built, garage_spaces = EXCLUDED.garage_spaces,
+    hoa_fee = EXCLUDED.hoa_fee, description = EXCLUDED.description,
+    photos = EXCLUDED.photos, photos_count = EXCLUDED.photos_count,
+    latitude = EXCLUDED.latitude, longitude = EXCLUDED.longitude,
+    listing_url = EXCLUDED.listing_url, mls_source = EXCLUDED.mls_source,
+    elementary_school = EXCLUDED.elementary_school, middle_school = EXCLUDED.middle_school,
+    high_school = EXCLUDED.high_school, school_district = EXCLUDED.school_district,
+    days_on_market = EXCLUDED.days_on_market, price_per_sqft = EXCLUDED.price_per_sqft,
+    subdivision = EXCLUDED.subdivision, features = EXCLUDED.features,
+    raw = EXCLUDED.raw, slug = EXCLUDED.slug,
+    updated_at = NOW(), last_seen_at = NOW()`;
+
+/**
+ * IRES → Postgres sync.
+ *
+ * mode:
+ *   'incremental' (default, hourly cron): pulls only records whose
+ *     ModificationTimestamp gt {last watermark} — the MLS Grid v2 recommended
+ *     replication pattern. Cheap: typically tens-to-hundreds of changed
+ *     records vs 37K full pulls. NEVER runs the archive-unseen sweep (that
+ *     would mark everything not-in-this-batch inactive).
+ *   'full' (daily cron / first run / --full): pulls the whole active set and
+ *     archives anything not seen (sold/expired/removed cleanup).
+ */
+export async function syncListings({ mode = 'incremental' } = {}) {
   const missing = ['IRES_API_URL'].filter((k) => !process.env[k]);
   if (process.env.IRES_ACCESS_TOKEN) {
     // static token mode — nothing else needed
@@ -356,88 +457,81 @@ export async function syncListings() {
   if (!gotLock) return { skipped: true, reason: 'lock' };
   const token = await getToken();
 
+  // Full mode always runs from scratch; incremental resumes from the watermark.
+  const since = mode === 'incremental' ? await getState(pool, 'ires_last_sync_ts') : null;
+  if (mode === 'incremental' && !since) {
+    console.log('⏳ No incremental watermark yet — running FULL initial import.');
+    mode = 'full';
+  }
+
   let offset = 0;
   let total = 0;
+  let newWatermark = null;
   const seenIds = [];
 
   try {
     while (true) {
       await sleep(RATE_LIMIT_MS + Math.random() * 150); // pace: ≤~1.8 RPS
-      const page = await fetchPage(token, offset);
+      const page = await fetchPage(token, offset, { incrementalSince: since });
       const records = Array.isArray(page.value) ? page.value : [];
       if (records.length === 0) break;
 
-    for (const raw of records) {
-      const l = normalizeListing(raw);
-      seenIds.push(l.listing_id);
-      await pool.query(
-        `INSERT INTO listings (listing_id, status, is_active, property_type, property_subtype, home_type, street_number, street_name, unit,
-           city, state, postal_code, county, list_price, original_list_price, beds, baths, half_baths,
-           three_quarter_baths, living_area, above_grade_area, lot_size, lot_size_acres, units_total,
-           year_built, garage_spaces, hoa_fee, description, photos, photos_count, latitude, longitude,
-           listing_url, mls_source, elementary_school, middle_school, high_school, school_district,
-           days_on_market, price_per_sqft, subdivision, features, raw, slug, last_seen_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,NOW())
-         ON CONFLICT (listing_id) DO UPDATE SET
-          status = EXCLUDED.status, is_active = EXCLUDED.is_active, property_type = EXCLUDED.property_type,
-           property_subtype = EXCLUDED.property_subtype, home_type = EXCLUDED.home_type,
-           street_number = EXCLUDED.street_number, street_name = EXCLUDED.street_name,
-           unit = EXCLUDED.unit, city = EXCLUDED.city, state = EXCLUDED.state,
-           postal_code = EXCLUDED.postal_code, county = EXCLUDED.county,
-           list_price = EXCLUDED.list_price, original_list_price = EXCLUDED.original_list_price,
-           beds = EXCLUDED.beds, baths = EXCLUDED.baths, half_baths = EXCLUDED.half_baths,
-           three_quarter_baths = EXCLUDED.three_quarter_baths,
-           living_area = EXCLUDED.living_area, above_grade_area = EXCLUDED.above_grade_area,
-           lot_size = EXCLUDED.lot_size, lot_size_acres = EXCLUDED.lot_size_acres,
-           units_total = EXCLUDED.units_total,
-           year_built = EXCLUDED.year_built, garage_spaces = EXCLUDED.garage_spaces,
-           hoa_fee = EXCLUDED.hoa_fee, description = EXCLUDED.description,
-           photos = EXCLUDED.photos, photos_count = EXCLUDED.photos_count,
-           latitude = EXCLUDED.latitude, longitude = EXCLUDED.longitude,
-           listing_url = EXCLUDED.listing_url, mls_source = EXCLUDED.mls_source,
-           elementary_school = EXCLUDED.elementary_school, middle_school = EXCLUDED.middle_school,
-           high_school = EXCLUDED.high_school, school_district = EXCLUDED.school_district,
-           days_on_market = EXCLUDED.days_on_market, price_per_sqft = EXCLUDED.price_per_sqft,
-           subdivision = EXCLUDED.subdivision, features = EXCLUDED.features,
-           raw = EXCLUDED.raw, slug = EXCLUDED.slug,
-           updated_at = NOW(), last_seen_at = NOW()`,
-        [l.listing_id, l.status, l.is_active, l.property_type, l.property_subtype, l.home_type,
-         l.street_number, l.street_name, l.unit,
-         l.city, l.state, l.postal_code, l.county, l.list_price, l.original_list_price,
-         l.beds, l.baths, l.half_baths, l.three_quarter_baths, l.living_area, l.above_grade_area,
-         l.lot_size, l.lot_size_acres, l.units_total,
-         l.year_built, l.garage_spaces, l.hoa_fee, l.description,
-         JSON.stringify(l.photos), l.photos_count, l.latitude, l.longitude, l.listing_url,
-         l.mls_source, l.elementary_school, l.middle_school, l.high_school, l.school_district,
-         l.days_on_market, l.price_per_sqft, l.subdivision, JSON.stringify(l.features),
-         JSON.stringify(l.raw), l.slug]
-      );
-      total += 1;
+      const pageMaxTs = maxModificationTimestamp(records);
+      if (pageMaxTs && (!newWatermark || String(pageMaxTs) > String(newWatermark))) {
+        newWatermark = pageMaxTs;
+      }
+
+      for (const raw of records) {
+        const l = normalizeListing(raw);
+        seenIds.push(l.listing_id);
+        await pool.query(
+          LISTING_UPSERT_SQL,
+          [l.listing_id, l.status, l.is_active, l.property_type, l.property_subtype, l.home_type,
+           l.street_number, l.street_name, l.unit,
+           l.city, l.state, l.postal_code, l.county, l.list_price, l.original_list_price,
+           l.beds, l.baths, l.half_baths, l.three_quarter_baths, l.living_area, l.above_grade_area,
+           l.lot_size, l.lot_size_acres, l.units_total,
+           l.year_built, l.garage_spaces, l.hoa_fee, l.description,
+           JSON.stringify(l.photos), l.photos_count, l.latitude, l.longitude, l.listing_url,
+           l.mls_source, l.elementary_school, l.middle_school, l.high_school, l.school_district,
+           l.days_on_market, l.price_per_sqft, l.subdivision, JSON.stringify(l.features),
+           JSON.stringify(l.raw), l.slug]
+        );
+        total += 1;
+      }
+      offset += records.length;
+      if (records.length < 100) break;
     }
-    offset += records.length;
-    if (records.length < 100) break;
-  }
 
-  // Archive listings not seen in this sync (sold/expired/removed)
-  if (seenIds.length) {
-    await pool.query(
-      `UPDATE listings SET is_active = FALSE, status = 'Withdrawn', updated_at = NOW()
-       WHERE is_active = TRUE AND listing_id != ALL($1::varchar[])`,
-      [seenIds]
-    );
-  }
+    // Archive listings not seen — FULL mode ONLY. Incremental batches only
+    // contain changed records; running this sweep there would mark the whole
+    // DB inactive. (Status flips come through the change stream instead.)
+    if (mode === 'full' && seenIds.length) {
+      await pool.query(
+        `UPDATE listings SET is_active = FALSE, status = 'Withdrawn', updated_at = NOW()
+         WHERE is_active = TRUE AND listing_id != ALL($1::varchar[])`,
+        [seenIds]
+      );
+    }
 
-  console.log(`✅ IRES sync complete: ${total} active listings processed, ${seenIds.length} unique`);
-  return { total, unique: seenIds.length };
+    // Persist the watermark for incremental runs. Only advance when we
+    // actually consumed records (so a failed/empty run can't skip data).
+    if (mode === 'incremental' && newWatermark) {
+      await setState(pool, 'ires_last_sync_ts', newWatermark);
+    }
+
+    console.log(`✅ IRES sync complete (${mode}): ${total} listings processed, ${seenIds.length} unique${since ? `, since ${since}` : ''}`);
+    return { mode, total, unique: seenIds.length };
   } finally {
     await releaseLock();
   }
 }
 
-// Direct run: node backend/src/services/iresSync.js
+// Direct run: node backend/src/services/iresSync.js [--incremental|--full]
 const isDirectRun = process.argv[1]?.includes('iresSync.js');
 if (isDirectRun) {
-  syncListings()
+  const mode = process.argv.includes('--full') ? 'full' : 'incremental';
+  syncListings({ mode })
     .then((r) => process.exit(r.skipped ? 0 : 0))
     .catch((e) => { console.error('❌ Sync failed:', e.message); process.exit(1); });
 }
