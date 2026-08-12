@@ -148,6 +148,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/saas/vs-saleswise.html",
         "/saas/vs-rpr.html",
         "/saas/vs-moxi-present.html",
+        "/saas/vs-best-cma-software.html",
+        "/saas/interactive-cma-software.html",
         "/blog/",
         "/saas/ll.css",
         "/saas/analytics.js",
