@@ -638,6 +638,8 @@ export default function ListingDetailPage() {
         saved={saved}
         onToggleSave={onToggleSave}
         openNadia={openNadia}
+        onShare={onShare}
+        shareCopied={shareCopied}
         mode="fixed"
       />
 

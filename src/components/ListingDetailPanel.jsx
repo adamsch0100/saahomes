@@ -429,6 +429,8 @@ export default function ListingDetailPanel({ slug, onClose }) {
             saved={saved}
             onToggleSave={onToggleSave}
             openNadia={openNadia}
+            onShare={onShare}
+            shareCopied={shareCopied}
             mode="footer"
           />
         )}
