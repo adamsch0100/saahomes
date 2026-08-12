@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Refer Schwartz and Associates | SAA Homes | Northern Colorado Real Estate</title>
+  <meta name="description" content="A one-page introduction to Adam and Mandi Schwartz of SAA Homes — Schwartz and Associates, Coldwell Banker Realty. For lenders, partners, and anyone referring a Northern Colorado buyer or seller. (970) 999-1407 · saahomes.com" />
+  <link rel="canonical" href="https://saahomes.com/referral-one-pager.html" />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:title" content="Refer Schwartz and Associates | SAA Homes" />
+  <meta property="og:description" content="The team your clients will thank you for. Adam and Mandi Schwartz — Northern Colorado real estate. (970) 999-1407." />
+  <meta property="og:url" content="https://saahomes.com/referral-one-pager.html" />
+  <meta property="og:image" content="https://saahomes.com/images/About-Img-1-1-1.jpg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <style>
+    /* Referral one-pager — US Letter, one page.
+       Brand: gold #CFB36E, charcoal, warm white. NAP from seoConstants.js.
+       Regenerate PDF: python scripts/render-referral-one-pager.py */
+
+    :root {
+      --gold: #CFB36E;
+      --gold-deep: #b8964a;
+      --charcoal: #161513;
+      --ink: #2a2723;
+      --muted: #6a645c;
+      --cream: #f6f1e8;
+      --paper: #fbf8f2;
+      --rule: rgba(207, 179, 110, 0.55);
+      --serif: "Cormorant Garamond", "Lora", "Times New Roman", serif;
+      --sans: "Source Sans 3", "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+
+    @page {
+      size: letter;
+      margin: 0;
+    }
+
+    body {
+      font-family: var(--sans);
+      color: var(--ink);
+      background: #1a1816;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    .sheet {
+      width: 8.5in;
+      height: 11in;
+      margin: 0 auto;
+      background: var(--paper);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .sheet::before {
+      content: "";
+      position: absolute;
+      inset: 0.22in;
+      border: 1px solid var(--rule);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* ----- Header ----- */
+    header.brand {
+      background: var(--charcoal);
+      color: #fff;
+      padding: 0.34in 0.52in 0.28in;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 0.22in;
+      align-items: center;
+      flex: 0 0 auto;
+    }
+
+    header.brand img.logo {
+      height: 58px;
+      width: auto;
+      display: block;
+    }
+
+    .brand-lockup .kicker {
+      font-family: var(--sans);
+      font-size: 9.5px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 600;
+      margin: 0 0 4px;
+    }
+
+    .brand-lockup h1 {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 28px;
+      line-height: 1;
+      margin: 0 0 4px;
+      letter-spacing: 0.01em;
+    }
+
+    .brand-lockup .firm {
+      font-size: 11.5px;
+      color: rgba(255, 255, 255, 0.72);
+      margin: 0;
+      letter-spacing: 0.02em;
+    }
+
+    .nap {
+      text-align: right;
+      font-size: 12px;
+      line-height: 1.45;
+      color: rgba(255, 255, 255, 0.88);
+    }
+
+    .nap a {
+      color: var(--gold);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .nap .phone {
+      font-family: var(--serif);
+      font-size: 20px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.02em;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    /* ----- Main ----- */
+    main {
+      flex: 1 1 auto;
+      padding: 0.28in 0.55in 0.2in;
+      display: flex;
+      flex-direction: column;
+      gap: 0.16in;
+      min-height: 0;
+    }
+
+    main > * {
+      flex: 0 0 auto;
+    }
+
+    .eyebrow {
+      font-size: 10px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--gold-deep);
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .lede {
+      display: grid;
+      grid-template-columns: 1fr 1.85in;
+      gap: 0.28in;
+      align-items: start;
+    }
+
+    .lede h2 {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 28px;
+      line-height: 1.08;
+      margin: 0.04in 0 0.08in;
+      color: var(--charcoal);
+    }
+
+    .lede p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.45;
+      color: var(--ink);
+    }
+
+    .portrait {
+      margin: 0;
+      width: 1.85in;
+      height: 1.55in;
+      overflow: hidden;
+      background: #111;
+      position: relative;
+    }
+
+    .portrait img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 50% 42%;
+      display: block;
+    }
+
+    .portrait figcaption {
+      display: none;
+    }
+
+    /* ----- Service columns ----- */
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.22in;
+    }
+
+    .card {
+      background: var(--cream);
+      padding: 0.16in 0.17in 0.16in;
+      border-top: 2px solid var(--gold);
+    }
+
+    .card h3 {
+      font-family: var(--serif);
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0 0 0.08in;
+      color: var(--charcoal);
+    }
+
+    .card ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .card li {
+      font-size: 12.25px;
+      line-height: 1.38;
+      padding: 0.045in 0 0.045in 0.14in;
+      position: relative;
+      color: var(--ink);
+    }
+
+    .card li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.13in;
+      width: 5px;
+      height: 1px;
+      background: var(--gold);
+    }
+
+    .card li strong {
+      font-weight: 600;
+    }
+
+    /* ----- Why refer ----- */
+    .why {
+      border: 1px solid rgba(207, 179, 110, 0.45);
+      padding: 0.18in 0.18in 0.16in;
+    }
+
+    .why h3 {
+      font-family: var(--serif);
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0 0 0.1in;
+      color: var(--charcoal);
+    }
+
+    .why ol {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.08in 0.22in;
+    }
+
+    .why li {
+      font-size: 12.25px;
+      line-height: 1.35;
+      display: grid;
+      grid-template-columns: 0.22in 1fr;
+      gap: 0.06in;
+      align-items: start;
+    }
+
+    .why .n {
+      font-family: var(--serif);
+      color: var(--gold-deep);
+      font-weight: 700;
+      font-size: 15px;
+      line-height: 1.2;
+    }
+
+    .why strong {
+      font-weight: 600;
+    }
+
+    /* ----- Partner note — pinned to the footer so the page does not look empty ----- */
+    .partner {
+      margin-top: auto;
+      background: var(--cream);
+      color: var(--ink);
+      padding: 0.12in 0.16in;
+      border-left: 2px solid var(--gold);
+      display: block;
+    }
+
+    .partner .label {
+      font-size: 9.5px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold-deep);
+      font-weight: 700;
+      margin: 0 0 3px;
+    }
+
+    .partner h3 {
+      font-family: var(--serif);
+      font-size: 17px;
+      font-weight: 600;
+      margin: 0 0 4px;
+      color: var(--charcoal);
+      line-height: 1.15;
+    }
+
+    .partner p {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.38;
+      color: var(--ink);
+    }
+
+    /* ----- Footer / CTA ----- */
+    footer.cta {
+      background: var(--charcoal);
+      color: #fff;
+      padding: 0.18in 0.52in 0.16in;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.22in;
+      align-items: center;
+      flex: 0 0 auto;
+    }
+
+    footer.cta .cta-copy .ready {
+      font-size: 10px;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 700;
+      margin: 0 0 4px;
+    }
+
+    footer.cta h2 {
+      font-family: var(--serif);
+      font-size: 26px;
+      font-weight: 600;
+      margin: 0 0 6px;
+      line-height: 1;
+    }
+
+    footer.cta .actions {
+      font-size: 14.5px;
+      margin: 0 0 8px;
+    }
+
+    footer.cta .actions a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    footer.cta .actions a:hover {
+      color: var(--gold);
+    }
+
+    footer.cta .legal {
+      font-size: 8.5px;
+      line-height: 1.35;
+      color: rgba(255, 255, 255, 0.5);
+      max-width: 5.8in;
+    }
+
+    .qr-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .qr-block img {
+      width: 0.92in;
+      height: 0.92in;
+      background: #fff;
+      padding: 4px;
+      display: block;
+    }
+
+    .qr-block span {
+      font-size: 8px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    .screen-bar {
+      display: none;
+    }
+
+    /* ----- Screen: sit the letter on a dark desk ----- */
+    @media screen {
+      body {
+        padding: 32px 16px 48px;
+      }
+      .sheet {
+        box-shadow: 0 28px 80px rgba(0, 0, 0, 0.45);
+      }
+      .screen-bar {
+        display: block;
+        max-width: 8.5in;
+        margin: 0 auto 16px;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 13px;
+        text-align: center;
+      }
+      .screen-bar a {
+        color: var(--gold);
+      }
+    }
+
+    /* ----- Phone: stack, keep the same language ----- */
+    @media screen and (max-width: 720px) {
+      body {
+        padding: 0;
+        background: var(--paper);
+      }
+      .sheet {
+        width: 100%;
+        height: auto;
+        overflow: visible;
+        box-shadow: none;
+      }
+      .sheet::before { display: none; }
+      header.brand {
+        grid-template-columns: 1fr;
+        padding: 28px 22px 22px;
+        gap: 16px;
+        text-align: left;
+      }
+      header.brand img.logo { height: 52px; }
+      .nap { text-align: left; }
+      main { padding: 24px 22px 20px; gap: 22px; }
+      .lede { grid-template-columns: 1fr; }
+      .portrait {
+        width: 100%;
+        height: 200px;
+      }
+      .lede h2 { font-size: 30px; }
+      .split, .why ol, .partner, footer.cta {
+        grid-template-columns: 1fr;
+      }
+      footer.cta {
+        padding: 24px 22px 28px;
+      }
+      .qr-block {
+        align-items: flex-start;
+      }
+      .screen-bar {
+        padding: 14px 22px 0;
+        text-align: left;
+        color: var(--muted);
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .sheet {
+        width: 8.5in;
+        height: 11in;
+        box-shadow: none;
+      }
+      .screen-bar { display: none !important; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <p class="screen-bar">
+    Referral one-pager for lenders and partners —
+    <a href="referral-one-pager.pdf">download the PDF</a>
+    or print this page (US Letter, one side).
+  </p>
+  <article class="sheet">
+    <header class="brand">
+      <img
+        class="logo"
+        src="images/White-Logo-AUTOx110.fit.png"
+        alt="Schwartz and Associates"
+        width="110"
+        height="58"
+      />
+      <div class="brand-lockup">
+        <p class="kicker">SAA Homes</p>
+        <h1>Schwartz and Associates</h1>
+        <p class="firm">Coldwell Banker Realty · Northern Colorado</p>
+      </div>
+      <div class="nap">
+        <a class="phone" href="tel:+19709991407">(970) 999-1407</a>
+        <a href="https://saahomes.com">saahomes.com</a><br />
+        3665 John F Kennedy Parkway, Suite 210<br />
+        Fort Collins, CO 80525
+      </div>
+    </header>
+
+    <main>
+      <div>
+        <p class="eyebrow">For lenders, partners &amp; past clients</p>
+        <div class="lede">
+          <div>
+            <h2>The team your clients will thank you for.</h2>
+            <p>
+              Adam Schwartz and his wife Mandi lead SAA Homes — Northern Colorado’s
+              data-driven real estate team. They publish monthly market reports,
+              work the corridor daily, and bring 20+ years of combined experience
+              across Fort Collins, Loveland, Windsor, Greeley, Boulder, and the
+              communities in between.
+            </p>
+          </div>
+          <figure class="portrait">
+            <img
+              src="images/About-Img-1-1-1.jpg"
+              alt="Adam and Mandi Schwartz at work"
+              width="370"
+              height="344"
+            />
+            <figcaption>Adam and Mandi Schwartz</figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="split">
+        <section class="card" aria-labelledby="buyers-h">
+          <h3 id="buyers-h">How we help buyers</h3>
+          <ul>
+            <li><strong>Saved searches &amp; listing alerts</strong> so the right home is not missed</li>
+            <li><strong>Nadia</strong>, our AI assistant, for questions around the clock</li>
+            <li><strong>CHFA &amp; down-payment guidance</strong> with local participating lenders</li>
+            <li><strong>VA loans</strong> plus Adam’s pledge: <strong>0.5% of the purchase price back to veterans</strong></li>
+            <li><strong>Assumable-mortgage expertise</strong> when a lower rate is already in the house</li>
+          </ul>
+        </section>
+        <section class="card" aria-labelledby="sellers-h">
+          <h3 id="sellers-h">How we help sellers</h3>
+          <ul>
+            <li><strong>Free, city-specific market reports</strong> — recent sales, competition, and a recommended launch price</li>
+            <li><strong>Data-driven pricing strategy</strong>, not a Zestimate</li>
+            <li><strong>Professional marketing</strong> — photography, listing exposure, and a campaign built to create demand</li>
+            <li><strong>Luxury division</strong> for $1M+ homes: discretion, neighborhood comps, white-glove execution</li>
+            <li><strong>Pre-listing checklist &amp; staging advice</strong> so the first impression is the one that sells</li>
+          </ul>
+        </section>
+      </div>
+
+      <section class="why" aria-labelledby="why-h">
+        <h3 id="why-h">Why refer to us — and look smart for doing it</h3>
+        <ol>
+          <li><span class="n">01</span><span><strong>They hear back.</strong> Adam and Mandi take the call. No junior handoff after the first meeting.</span></li>
+          <li><span class="n">02</span><span><strong>Verified market data,</strong> updated monthly — not last year’s talking points.</span></li>
+          <li><span class="n">03</span><span><strong>White-glove service</strong> from the first conversation through closing.</span></li>
+          <li><span class="n">04</span><span><strong>Real tools:</strong> Nadia AI, saved searches, and real-time listing alerts.</span></li>
+          <li><span class="n">05</span><span><strong>A real veteran pledge:</strong> 0.5% back, disclosed in writing at closing.</span></li>
+          <li><span class="n">06</span><span><strong>Local reputation</strong> across 27+ Northern Colorado communities.</span></li>
+        </ol>
+      </section>
+
+      <aside class="partner">
+        <div>
+          <p class="label">For the referrer</p>
+          <h3>We take care of our partners.</h3>
+        </div>
+        <p>
+          When you send someone to Schwartz and Associates, they get a named team —
+          and you get a thank-you, handled the way Colorado allows. We do not invent
+          commission promises, and we never put a number on this page we cannot
+          stand behind.
+        </p>
+      </aside>
+    </main>
+
+    <footer class="cta">
+      <div class="cta-copy">
+        <p class="ready">Ready when they are</p>
+        <h2>Call. We will take it from here.</h2>
+        <p class="actions">
+          <a href="tel:+19709991407">(970) 999-1407</a>
+          &nbsp;·&nbsp;
+          <a href="https://saahomes.com">saahomes.com</a>
+          &nbsp;·&nbsp;
+          <a href="mailto:info@saahomes.com">info@saahomes.com</a>
+        </p>
+        <p class="legal">
+          Schwartz and Associates, Coldwell Banker Realty. Equal Housing Opportunity.
+          We serve all buyers and sellers fairly. The 0.5% veteran benefit is a brokerage
+          rebate disclosed in writing at closing, as Colorado requires.
+        </p>
+      </div>
+      <div class="qr-block">
+        <img src="images/referral-qr.svg" alt="QR code to saahomes.com" width="88" height="88" />
+        <span>saahomes.com</span>
+      </div>
+    </footer>
+  </article>
+</body>
+</html>
