@@ -3,11 +3,23 @@ import { useSearchParams } from "react-router-dom";
 import SEO from "../components/SEO";
 import { submitContactForm } from "../utils/api.js";
 import { withLeadMetadata } from "../utils/leadTracking.js";
+import { openNadiaChat } from "../utils/nadiaChat.js";
 import { BUSINESS } from "../utils/seoConstants.js";
+
+const NADIA_CONTACT_MESSAGE =
+  "Hi! I have a question about buying/selling in Northern Colorado — can you help?";
+
+function normalizeContactInterest(raw) {
+  const v = String(raw || "").toLowerCase();
+  if (v === "buying-luxury" || v.includes("buying a $1m")) return "Buying a $1M+ home";
+  if (v === "selling-luxury" || v.includes("selling a $1m")) return "Selling a $1M+ property";
+  if (v === "luxury" || v === "luxury-real-estate") return "luxury";
+  return raw || "";
+}
 
 export default function ContactPage() {
   const [searchParams] = useSearchParams();
-  const urlInterest = searchParams.get('interest') || '';
+  const urlInterest = normalizeContactInterest(searchParams.get('interest') || '');
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -67,6 +79,13 @@ export default function ContactPage() {
             <a href="#contact-form" className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
               Send a Message
             </a>
+            <button
+              type="button"
+              onClick={() => openNadiaChat(NADIA_CONTACT_MESSAGE)}
+              className="inline-flex items-center justify-center px-8 py-3 border-2 border-[#CFB36E] text-[#CFB36E] font-semibold rounded-lg hover:bg-[#CFB36E] hover:text-black transition-colors"
+            >
+              Ask Nadia
+            </button>
           </div>
         </div>
       </section>
@@ -99,6 +118,20 @@ export default function ContactPage() {
                   {BUSINESS.address.streetAddress}<br />
                   {BUSINESS.address.addressLocality}, {BUSINESS.address.addressRegion} {BUSINESS.address.postalCode}
                 </address>
+              </div>
+
+              <div className="pt-6 border-t border-gray-200">
+                <h3 className="font-semibold text-lg mb-2">Prefer to chat?</h3>
+                <p className="text-gray-700 mb-4">
+                  Ask Nadia — our AI assistant. A friendly first step if you are not ready for a call or a form.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => openNadiaChat(NADIA_CONTACT_MESSAGE)}
+                  className="inline-flex items-center justify-center px-6 py-3 bg-[#CFB36E] text-black font-semibold rounded-lg hover:opacity-90 transition-opacity"
+                >
+                  Ask Nadia
+                </button>
               </div>
 
               <div className="pt-4 flex gap-3">
@@ -183,6 +216,9 @@ export default function ContactPage() {
                   <option value="">Select an interest</option>
                   <option value="Buying a home">Buying a home</option>
                   <option value="Selling a home">Selling a home</option>
+                  <option value="luxury">$1M+ / luxury real estate</option>
+                  <option value="Buying a $1M+ home">Buying a $1M+ home</option>
+                  <option value="Selling a $1M+ property">Selling a $1M+ property</option>
                   <option value="CHFA down payment assistance">CHFA down payment assistance</option>
                   <option value="First-time homebuyer">First-time homebuyer</option>
                   <option value="Cash home buyer">Cash home buyer</option>
@@ -217,7 +253,16 @@ export default function ContactPage() {
               </p>
             </form>
             <p className="text-sm text-gray-500 mt-4 text-center">
-              Prefer to talk? Call us at <a href="tel:(970) 999-1407" className="text-black font-semibold hover:underline">(970) 999-1407</a> — we're here to help. Your information is always kept confidential.
+              Prefer to talk? Call us at <a href="tel:(970) 999-1407" className="text-black font-semibold hover:underline">(970) 999-1407</a>
+              {" "}— or{" "}
+              <button
+                type="button"
+                onClick={() => openNadiaChat(NADIA_CONTACT_MESSAGE)}
+                className="text-black font-semibold hover:underline"
+              >
+                Ask Nadia
+              </button>
+              . Your information is always kept confidential.
             </p>
           </div>
         </div>

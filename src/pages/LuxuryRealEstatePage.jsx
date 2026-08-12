@@ -1,9 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import SEO from "../components/SEO";
 import ListingPhotoFallback from "../components/ListingPhotoFallback.jsx";
 import { BUSINESS } from "../utils/seoConstants";
 import { photoUrl } from "../utils/photoUrl.js";
+import { submitLuxuryLeadForm } from "../utils/api.js";
+import { withLeadMetadata } from "../utils/leadTracking.js";
+import { openNadiaChat } from "../utils/nadiaChat.js";
 import {
   formatPrice,
   isLandListing,
@@ -13,7 +16,9 @@ import {
 import {
   CITY_MARKET_CONTEXT,
   LUXURY_CLIENT_PROMISES,
+  LUXURY_GALLERY_FALLBACKS,
   LUXURY_HUB_FAQS,
+  LUXURY_PHOTO_SLOTS,
   MILLION_PLUS_DISPLAY,
   MILLION_PLUS_FEATURED_SLUGS,
   MILLION_PLUS_LABEL,
@@ -21,16 +26,9 @@ import {
   getFeaturedMillionPlusCities,
   getMillionPlusNeighborhoods,
   millionPlusSearchHref,
+  slotToListing,
 } from "../data/luxuryMarket.js";
 import { buildFaqPageSchema } from "../data/moneyPageFaqs.js";
-
-const HERO_FALLBACK = "/images/Boulder.jpg";
-const CITY_FALLBACK = {
-  boulder: "/images/Boulder.jpg",
-  "fort-collins": "/images/buyers-hero.jpg",
-  windsor: "/images/buyers-hero.jpg",
-  loveland: "/images/sell-hero-1.jpg",
-};
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -38,7 +36,24 @@ const API_BASE = (() => {
   return "";
 })();
 
-const FEATURED_CITY_QUERY = "Boulder,Fort Collins,Windsor,Loveland";
+const FEATURED_CITY_QUERY = "Boulder,Fort Collins,Windsor,Loveland,Longmont,Greeley,Timnath";
+
+const CITY_SLUG_FROM_NAME = {
+  "fort collins": "fort-collins",
+  boulder: "boulder",
+  windsor: "windsor",
+  loveland: "loveland",
+  longmont: "longmont",
+  greeley: "greeley",
+  timnath: "timnath",
+};
+
+const NADIA_LUXURY_MESSAGE =
+  "Hi! I'm interested in Northern Colorado luxury properties — can you tell me more about current $1M+ listings?";
+const NADIA_LUXURY_BUY =
+  "Hi! I'm looking to acquire a $1M+ home in Northern Colorado — can you tell me about current listings?";
+const NADIA_LUXURY_SELL =
+  "Hi! I'm considering selling a $1M+ property in Northern Colorado — can you walk me through a private conversation with Adam or Mandi?";
 
 function isResidentialMillionPlus(listing) {
   if (!listing) return false;
@@ -50,36 +65,90 @@ function isResidentialMillionPlus(listing) {
 }
 
 function citySlugFromListing(listing) {
-  const city = (listing?.city || "").toLowerCase();
-  if (city === "fort collins") return "fort-collins";
-  if (city === "boulder") return "boulder";
-  if (city === "windsor") return "windsor";
-  if (city === "loveland") return "loveland";
+  return CITY_SLUG_FROM_NAME[(listing?.city || "").toLowerCase()] || "";
+}
+
+function listingKey(listing) {
+  return String(listing?.id || listing?.slug || "");
+}
+
+function addressKey(listing) {
+  const street = [listing?.street_number, listing?.street_name].filter(Boolean).join(" ").toLowerCase();
+  if (street) return street;
+  return String(listing?.slug || "").replace(/-co-\d+.*$/, "").toLowerCase();
+}
+
+function interestFromPreference(preference) {
+  if (preference === "buying-luxury") return "Buying a $1M+ home";
+  if (preference === "selling-luxury") return "Selling a $1M+ property";
+  if (preference === "both") return "luxury";
+  if (preference === "just-looking") return "luxury";
+  return "luxury";
+}
+
+function preferenceFromInterest(raw) {
+  const v = String(raw || "").toLowerCase();
+  if (v === "buying-luxury" || v.includes("buying a $1m") || v === "buying") return "buying-luxury";
+  if (v === "selling-luxury" || v.includes("selling a $1m") || v === "selling") return "selling-luxury";
+  if (v === "both") return "both";
+  if (v === "luxury" || v === "luxury-real-estate" || v.includes("luxury")) return "";
   return "";
 }
 
+function nadiaMessageForPreference(preference) {
+  if (preference === "buying-luxury") return NADIA_LUXURY_BUY;
+  if (preference === "selling-luxury") return NADIA_LUXURY_SELL;
+  return NADIA_LUXURY_MESSAGE;
+}
+
 function LuxuryLeadForm() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlInterest = searchParams.get("interest") || "";
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
   const [form, setForm] = useState({
     name: "",
     email: "",
     phone: "",
-    preference: "",
+    preference: preferenceFromInterest(urlInterest),
     message: "",
   });
 
-  const handleSubmit = (e) => {
+  const setPreference = (preference) => {
+    setForm((prev) => ({ ...prev, preference }));
+    const next = new URLSearchParams(searchParams);
+    if (preference === "buying-luxury") next.set("interest", "buying-luxury");
+    else if (preference === "selling-luxury") next.set("interest", "selling-luxury");
+    else if (preference) next.set("interest", "luxury");
+    else next.delete("interest");
+    setSearchParams(next, { replace: true });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    fetch("/api/contact", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        interest: "luxury-real-estate",
-        source: "luxury-page",
-      }),
-    }).catch(() => {});
-    setSubmitted(true);
+    setIsSubmitting(true);
+    setSubmitError(null);
+    try {
+      await submitLuxuryLeadForm(
+        withLeadMetadata(
+          {
+            name: form.name,
+            email: form.email,
+            phone: form.phone,
+            interest: interestFromPreference(form.preference),
+            message: form.message,
+            source: "luxury-page",
+          },
+          "/luxury-real-estate/"
+        )
+      );
+      setSubmitted(true);
+    } catch (error) {
+      setSubmitError(error.message || "Unable to send. Please call (970) 999-1407.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -100,9 +169,32 @@ function LuxuryLeadForm() {
 
   const fieldClass =
     "w-full bg-transparent border-b border-white/20 py-3 text-white placeholder-gray-500 focus:border-[#CFB36E] outline-none transition-colors";
+  const intentBtn = (value, label) => {
+    const active = form.preference === value;
+    return (
+      <button
+        type="button"
+        onClick={() => setPreference(value)}
+        className={`flex-1 px-3 py-3 text-[11px] tracking-[0.14em] uppercase border transition-colors ${
+          active
+            ? "border-[#CFB36E] bg-[#CFB36E] text-black"
+            : "border-white/20 text-gray-300 hover:border-[#CFB36E] hover:text-[#CFB36E]"
+        }`}
+      >
+        {label}
+      </button>
+    );
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-5" data-lead-form="luxury">
+      <div>
+        <p className="block text-[11px] uppercase tracking-[0.22em] text-gray-400 mb-3">I am</p>
+        <div className="flex flex-col sm:flex-row gap-2">
+          {intentBtn("buying-luxury", "Buying $1M+")}
+          {intentBtn("selling-luxury", "Selling $1M+")}
+        </div>
+      </div>
       <div>
         <label className="block text-[11px] uppercase tracking-[0.22em] text-gray-400 mb-2">Name</label>
         <input
@@ -140,10 +232,10 @@ function LuxuryLeadForm() {
         />
       </div>
       <div>
-        <label className="block text-[11px] uppercase tracking-[0.22em] text-gray-400 mb-2">I am</label>
+        <label className="block text-[11px] uppercase tracking-[0.22em] text-gray-400 mb-2">More specifically</label>
         <select
           value={form.preference}
-          onChange={(e) => setForm({ ...form, preference: e.target.value })}
+          onChange={(e) => setPreference(e.target.value)}
           className="w-full bg-[#141414] border border-white/15 py-3 px-3 text-white focus:border-[#CFB36E] outline-none"
         >
           <option value="">Select one</option>
@@ -165,42 +257,44 @@ function LuxuryLeadForm() {
           placeholder="Location, property, or timing"
         />
       </div>
+      {submitError ? (
+        <p className="text-sm text-red-300">{submitError}</p>
+      ) : null}
       <button
         type="submit"
-        className="w-full py-3.5 border border-[#CFB36E] text-[#CFB36E] text-sm tracking-[0.22em] uppercase hover:bg-[#CFB36E] hover:text-black transition-colors"
+        disabled={isSubmitting}
+        className="w-full py-3.5 border border-[#CFB36E] text-[#CFB36E] text-sm tracking-[0.22em] uppercase hover:bg-[#CFB36E] hover:text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Enquire
+        {isSubmitting ? "Sending…" : "Enquire in confidence"}
+      </button>
+      <button
+        type="button"
+        onClick={() => openNadiaChat(nadiaMessageForPreference(form.preference))}
+        className="w-full py-3 text-sm text-gray-400 hover:text-[#CFB36E] transition-colors"
+      >
+        Have a question about a $1M+ property? Ask Nadia.
       </button>
       <p className="text-xs text-gray-500 text-center leading-relaxed">
         Private and discreet. Email and phone required. Your information is not shared.
+        Luxury inquiries are tagged for Adam&apos;s personal follow-up.
       </p>
     </form>
   );
 }
 
-function ListingImage({ listingId, alt, className, fallbackSrc }) {
+function ListingImage({ listingId, photoIdx = 0, alt, className, loading = "lazy", fetchPriority }) {
   const [failed, setFailed] = useState(false);
   if (!listingId || failed) {
-    if (fallbackSrc) {
-      return (
-        <img
-          src={fallbackSrc}
-          alt={alt}
-          className={className}
-          loading="lazy"
-          decoding="async"
-        />
-      );
-    }
     return <ListingPhotoFallback className={`${className} absolute inset-0`} />;
   }
   return (
     <img
-      src={photoUrl(listingId, 0)}
+      src={photoUrl(listingId, photoIdx)}
       alt={alt}
       className={className}
-      loading="lazy"
+      loading={loading}
       decoding="async"
+      fetchPriority={fetchPriority}
       onError={() => setFailed(true)}
     />
   );
@@ -216,7 +310,7 @@ export default function LuxuryRealEstatePage() {
       city: FEATURED_CITY_QUERY,
       minPrice: String(MILLION_PLUS_PRICE),
       type: "house",
-      limit: "24",
+      limit: "40",
       sort: "price-desc",
     });
     fetch(`${API_BASE}/api/listings?${params.toString()}`)
@@ -232,27 +326,64 @@ export default function LuxuryRealEstatePage() {
     const map = {};
     for (const listing of listings) {
       const slug = citySlugFromListing(listing);
-      if (!slug || map[slug]) continue;
-      map[slug] = listing;
+      if (!slug) continue;
+      if (!map[slug]) map[slug] = [];
+      if (map[slug].length >= 2) continue;
+      const addr = addressKey(listing);
+      if (map[slug].some((row) => listingKey(row) === listingKey(listing))) continue;
+      if (addr && map[slug].some((row) => addressKey(row) === addr)) continue;
+      map[slug].push(listing);
     }
     return map;
   }, [listings]);
 
   const selectedResidences = useMemo(() => {
-    const seen = new Set();
+    const used = new Set(
+      Object.values(LUXURY_PHOTO_SLOTS).map((slot) => String(slot.id))
+    );
     const picked = [];
-    for (const listing of listings) {
-      const key = listing.id || listing.slug;
-      if (!key || seen.has(key)) continue;
-      if (!listing.slug) continue;
-      seen.add(key);
+    const citySeen = new Set();
+    const take = (listing) => {
+      const key = listingKey(listing);
+      if (!key || used.has(key) || !listing.slug) return false;
+      used.add(key);
       picked.push(listing);
+      return true;
+    };
+    for (const listing of listings) {
+      const city = citySlugFromListing(listing) || listing.city;
+      if (citySeen.has(city)) continue;
+      if (take(listing)) citySeen.add(city);
       if (picked.length >= 6) break;
+    }
+    if (picked.length < 6) {
+      for (const listing of listings) {
+        if (take(listing) && picked.length >= 6) break;
+      }
+    }
+    if (picked.length < 6) {
+      for (const row of LUXURY_GALLERY_FALLBACKS) {
+        if (take(row) && picked.length >= 6) break;
+      }
     }
     return picked;
   }, [listings]);
 
-  const heroListing = listingsByCity.boulder || listings[0] || null;
+  const cityCardLinks = (slug) => {
+    const live = listingsByCity[slug] || [];
+    const curated = slotToListing(LUXURY_PHOTO_SLOTS[slug]);
+    if (!live.length) return curated ? [curated] : [];
+    const curatedId = String(curated?.id || "");
+    const match = live.find((row) => String(row.id) === curatedId);
+    const out = [];
+    if (match || curated) out.push(match || curated);
+    for (const row of live) {
+      if (out.length >= 2) break;
+      if (String(row.id) === curatedId) continue;
+      out.push(row);
+    }
+    return out;
+  };
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -272,9 +403,9 @@ export default function LuxuryRealEstatePage() {
       <SEO
         exactTitle="Luxury Real Estate in Northern Colorado | $1M+ Homes | SAA Homes — Schwartz and Associates"
         description="Private representation for Northern Colorado’s $1 million and above homes — Boulder, Fort Collins, Windsor, and Loveland. Discretion, off-market access, and direct service from Adam and Mandi Schwartz at SAA Homes. Call (970) 999-1407."
-        keywords="luxury real estate Northern Colorado, $1 million homes Fort Collins, million dollar homes Boulder, luxury real estate agent Fort Collins, Boulder luxury homes, Windsor luxury homes, high-end real estate Loveland, luxury realtor Northern Colorado, off-market luxury homes Colorado, private estates Northern Colorado"
+        keywords="luxury real estate Northern Colorado, luxury homes for sale Northern Colorado, $1M+ homes Fort Collins, million dollar homes Boulder, estate homes Fort Collins, luxury real estate agent Fort Collins, Boulder luxury homes, Mapleton Hill luxury homes, Chautauqua luxury homes, Horsetooth luxury homes, Water Valley luxury homes, waterfront homes Windsor, horse properties Timnath, luxury condo Boulder, architect designed homes Boulder, Windsor luxury homes, high-end real estate Loveland, luxury realtor Northern Colorado, off-market luxury homes Colorado, private estates Northern Colorado"
         canonical="https://saahomes.com/luxury-real-estate/"
-        ogImage="https://saahomes.com/images/Boulder.jpg"
+        ogImage="https://saahomes.com/api/photo/4777/0"
         jsonLd={[
           {
             "@context": "https://schema.org",
@@ -304,23 +435,17 @@ export default function LuxuryRealEstatePage() {
         ].filter(Boolean)}
       />
 
-      {/* Hero */}
+      {/* Hero — real Longmont $18.5M estate (id 4777); never reused below */}
       <section className="relative h-[70vh] min-h-[520px] bg-cover bg-center flex items-end overflow-hidden">
         <div className="absolute inset-0 bg-[#111]" aria-hidden="true" />
-        {heroListing ? (
-          <ListingImage
-            listingId={heroListing.id}
-            fallbackSrc={HERO_FALLBACK}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        ) : (
-          <img
-            src={HERO_FALLBACK}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        )}
+        <ListingImage
+          listingId={LUXURY_PHOTO_SLOTS.hero.id}
+          photoIdx={LUXURY_PHOTO_SLOTS.hero.photoIdx}
+          alt=""
+          loading="eager"
+          fetchPriority="high"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/20" />
         <div className="relative z-10 max-w-6xl mx-auto px-5 sm:px-8 pb-16 sm:pb-20 w-full">
           <p className="text-[#CFB36E] tracking-[0.28em] text-[11px] sm:text-xs uppercase mb-5">
@@ -345,6 +470,13 @@ export default function LuxuryRealEstatePage() {
             >
               (970) 999-1407
             </a>
+            <button
+              type="button"
+              onClick={() => openNadiaChat(NADIA_LUXURY_MESSAGE)}
+              className="inline-flex items-center justify-center px-8 py-3.5 text-white/80 text-sm tracking-[0.12em] hover:text-[#CFB36E] transition-colors"
+            >
+              Ask Nadia
+            </button>
           </div>
         </div>
       </section>
@@ -367,8 +499,10 @@ export default function LuxuryRealEstatePage() {
           </p>
           <p className="text-base text-[#5a5a5a] leading-relaxed mb-8">
             Boulder&apos;s true luxury sits well above $2 million. Fort Collins estates run to $2
-            million and beyond. Windsor concentrates much of the region&apos;s {MILLION_PLUS_DISPLAY}{" "}
-            inventory in Water Valley and Pelican Lakes. We work the tier as it actually exists.
+            million and beyond — live inventory currently includes homes above $4 million. Windsor
+            concentrates much of the region&apos;s {MILLION_PLUS_DISPLAY} inventory in Water Valley and
+            Pelican Lakes. Longmont foothills estates currently include properties above $10 million.
+            We work the tier as it actually exists.
           </p>
           <p className="text-sm text-[#6a6a6a]">
             <Link to="/for-buyers/" className="underline underline-offset-4 hover:text-[#1a1a1a]">
@@ -384,6 +518,13 @@ export default function LuxuryRealEstatePage() {
               className="underline underline-offset-4 hover:text-[#1a1a1a]"
             >
               Luxury buying guide
+            </Link>
+            <span className="mx-2 text-[#CFB36E]">·</span>
+            <Link
+              to="/contact/?interest=luxury"
+              className="underline underline-offset-4 hover:text-[#1a1a1a]"
+            >
+              Private consultation
             </Link>
           </p>
         </div>
@@ -404,12 +545,13 @@ export default function LuxuryRealEstatePage() {
           </p>
           <div className="grid md:grid-cols-2 gap-6">
             {featured.map(({ slug, context, threshold }) => {
-              const listing = listingsByCity[slug];
+              const slot = LUXURY_PHOTO_SLOTS[slug];
+              const links = cityCardLinks(slug);
               return (
                 <article key={slug} className="group relative min-h-[22rem] sm:min-h-[26rem] overflow-hidden bg-[#111]">
                   <ListingImage
-                    listingId={listing?.id}
-                    fallbackSrc={CITY_FALLBACK[slug] || HERO_FALLBACK}
+                    listingId={slot?.id}
+                    photoIdx={slot?.photoIdx || 0}
                     alt=""
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                   />
@@ -423,9 +565,9 @@ export default function LuxuryRealEstatePage() {
                       {threshold.millionPlusReality}
                     </p>
                     <p className="text-gray-400 text-xs mb-5">
-                      Citywide median / range: {context.medianDisplay}
+                      Citywide median / range: {context.medianDisplay} — not a luxury average
                     </p>
-                    <div className="flex flex-wrap gap-x-5 gap-y-2">
+                    <div className="flex flex-wrap gap-x-5 gap-y-2 mb-3">
                       <Link
                         to={`/northern-colorado-areas/${slug}/#luxury-homes`}
                         className="text-sm text-white underline underline-offset-4 hover:text-[#CFB36E]"
@@ -439,6 +581,24 @@ export default function LuxuryRealEstatePage() {
                         Live {MILLION_PLUS_DISPLAY} listings
                       </Link>
                     </div>
+                    {links.length > 0 ? (
+                      <div className="flex flex-wrap gap-x-4 gap-y-1">
+                        {links.map((row) => {
+                          const addr = listingAddress(row) || row.city;
+                          if (!row.slug) return null;
+                          return (
+                            <Link
+                              key={listingKey(row)}
+                              to={`/homes-for-sale/${row.slug}/`}
+                              className="text-xs text-white/80 hover:text-[#CFB36E] underline underline-offset-4"
+                            >
+                              {addr}
+                              {row.list_price ? ` · ${formatPrice(row.list_price)}` : ""}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    ) : null}
                   </div>
                 </article>
               );
@@ -453,24 +613,29 @@ export default function LuxuryRealEstatePage() {
             <Link to="/northern-colorado-areas/greeley/#luxury-homes" className="underline hover:text-[#1a1a1a]">
               Greeley
             </Link>{" "}
-            (Pine Ridge Estates, west-side acreage). Citywide medians from mid/July 2026 area notes.
+            (Pine Ridge Estates, west-side acreage) ·{" "}
+            <Link to="/northern-colorado-areas/longmont/" className="underline hover:text-[#1a1a1a]">
+              Longmont
+            </Link>{" "}
+            (foothills estates). Citywide medians from mid/July 2026 area notes.
           </p>
         </div>
       </section>
 
-      {/* Selected residences — live $1M+ via photoUrl proxy */}
+      {/* Selected residences — live $1M+ via photoUrl proxy; no image reused from hero/city cards */}
       {selectedResidences.length > 0 && (
         <section className="py-20 sm:py-24 px-5 sm:px-8 bg-[#111] text-white" id="selected-residences">
           <div className="max-w-6xl mx-auto">
             <p className="text-[#CFB36E] tracking-[0.24em] text-[11px] uppercase mb-4 text-center">
-              Selected residences
+              Current $1M+ inventory
             </p>
             <h2 className="text-3xl sm:text-4xl font-serif font-bold mb-4 text-center">
-              On the market at {MILLION_PLUS_DISPLAY}
+              Live in the market
             </h2>
             <p className="text-gray-400 text-center max-w-2xl mx-auto mb-12 text-sm leading-relaxed">
-              Live IRES inventory in Boulder, Fort Collins, Windsor, and Loveland. Photographs are
-              the listing&apos;s own — served through our photo proxy.
+              Live IRES inventory across Boulder, Fort Collins, Windsor, Loveland, Longmont, Greeley,
+              and Timnath. Photographs are the listing&apos;s own — served through our photo proxy.
+              Each home below is a distinct listing, not repeated from the city cards.
             </p>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {selectedResidences.map((listing) => {
@@ -485,7 +650,6 @@ export default function LuxuryRealEstatePage() {
                     <div className="relative aspect-[4/3] bg-black overflow-hidden">
                       <ListingImage
                         listingId={listing.id}
-                        fallbackSrc={HERO_FALLBACK}
                         alt={addr ? `${addr} in ${listing.city}` : `Residence in ${listing.city}`}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
                       />
@@ -590,7 +754,8 @@ export default function LuxuryRealEstatePage() {
             </p>
             <h3 className="text-2xl font-serif text-white mb-3">Enquire in confidence</h3>
             <p className="text-gray-400 text-sm mb-8 leading-relaxed">
-              A brief note is enough. Adam or Mandi replies personally. Email and phone required.
+              Buying or selling at $1M+ — a brief note is enough. Adam or Mandi replies personally.
+              Email and phone required. Luxury inquiries are routed for private-client follow-up.
             </p>
             <LuxuryLeadForm />
           </div>
@@ -698,8 +863,15 @@ export default function LuxuryRealEstatePage() {
             >
               Private Consultation
             </a>
+            <button
+              type="button"
+              onClick={() => openNadiaChat(NADIA_LUXURY_MESSAGE)}
+              className="inline-block px-8 py-3.5 text-white text-sm tracking-[0.12em] hover:text-[#CFB36E] transition-colors"
+            >
+              Ask Nadia
+            </button>
             <Link
-              to="/contact/"
+              to="/contact/?interest=luxury"
               className="inline-block px-8 py-3.5 text-white text-sm tracking-[0.12em] hover:text-[#CFB36E] transition-colors"
             >
               Write to us

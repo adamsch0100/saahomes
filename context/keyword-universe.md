@@ -110,23 +110,39 @@ Cross-link these cities in blog posts and area page "Nearby communities" section
 
 ---
 
-## LUXURY cluster (It 31 — Adam: "dominate the luxury markets in my areas", Aug 12 2026)
+## LUXURY cluster (It 31 + It 37 — Adam: "dominate the luxury markets" / "amazing keywords… setup for incredible ongoing success", Aug 12 2026)
 
-Target page: `/luxury-real-estate/` (hub) + luxury H2/FAQ sections on area pages. **Boulder = priority** (highest-end inventory). Codebase data only — never invent luxury medians.
+Target pages: **hub `/luxury-real-estate/`** + luxury H2/FAQ on area pages + neighborhood depth (Boulder first: Mapleton Hill, Chautauqua, Flatirons, Pine Brook Hills). Codebase data only — never invent luxury medians.
 
-| Query cluster | Target |
-|---------------|--------|
-| luxury homes for sale Fort Collins CO | hub + Fort Collins area luxury section |
-| luxury real estate Fort Collins | hub |
-| luxury real estate agent Fort Collins | hub (agent-intent = winnable) |
-| luxury homes Loveland CO | hub + Loveland area luxury section |
-| luxury homes Windsor CO | hub + Windsor area luxury section |
-| luxury homes Greeley CO | hub + Greeley area luxury section |
-| luxury homes Boulder CO | hub + Boulder area luxury section (priority) |
-| luxury real estate {city} | hub + area luxury sections |
-| {city} luxury neighborhoods | hub neighborhoods grid + area sections |
-| luxury homes Northern Colorado | hub (luxurync.com ranks #1 — our model) |
-| luxury realtor {city} | hub + area sections |
+**Conversion note (LUXURY):** leads from `/luxury-real-estate/` and `?interest=luxury` (also `buying-luxury` / `selling-luxury`) → tagged `interest=luxury` → Adam follows up personally (private-client standard). Form requires email + phone. Ask Nadia is the conversational capture path on the hub and `/contact/`.
+
+| Query cluster | Intent | Target |
+|---------------|--------|--------|
+| luxury homes for sale Fort Collins CO | listings | hub + Fort Collins area luxury section |
+| luxury homes for sale Northern Colorado | listings | hub |
+| luxury real estate Fort Collins | info | hub |
+| luxury real estate agent {city} | agent (winnable) | hub + area luxury sections |
+| luxury realtor {city} | agent | hub + area sections |
+| luxury homes {Boulder / Loveland / Windsor / Greeley / Longmont / Timnath} CO | listings | hub + area luxury section (Boulder = priority) |
+| luxury real estate {city} | info | hub + area luxury sections |
+| {city} luxury neighborhoods | info | hub neighborhoods grid + area sections |
+| luxury homes Northern Colorado | info | hub (luxurync.com ranks #1 — our model) |
+| $1M+ homes {city} | listings | hub + `/properties/?minPrice=1000000` |
+| million dollar homes {city} | listings | hub + area luxury section |
+| estate homes {city} | listings | hub + Horsetooth / northwest / foothills neighborhoods |
+| {city} estates for sale | listings | hub + area luxury section |
+| horse properties {Timnath / Greeley / Loveland} | listings | Timnath Bridle Ridge + Greeley acreage + Loveland Airpark |
+| waterfront homes {Windsor / Loveland} | listings | Water Valley, Pelican Lakes, Lake Loveland, Centerra |
+| luxury condo {Boulder / Fort Collins} | listings | Boulder + Old Town FC neighborhood pages |
+| architect designed homes {Boulder} | listings | Boulder luxury section + Mapleton Hill / Flatirons |
+| Mapleton Hill luxury homes | neighborhood | `/northern-colorado-areas/boulder/mapleton-hill-boulder/` |
+| Chautauqua luxury homes | neighborhood | `/northern-colorado-areas/boulder/boulder-chautauqua/` |
+| Old Town Fort Collins luxury homes | neighborhood | `/northern-colorado-areas/fort-collins/old-town/` |
+| Horsetooth luxury homes | neighborhood | `/northern-colorado-areas/fort-collins/horsetooth-west/` |
+| Harmony Corridor luxury homes | neighborhood | Fort Collins luxury neighborhoods guide + hub |
+| Water Valley luxury homes | neighborhood | `/northern-colorado-areas/windsor/water-valley/` |
+
+GSC monitor queries (daily-ranking-strike luxury block): `luxury`, `$1M`, `million dollar`, `estate homes`, `horse properties`, `waterfront homes`, plus the city × luxury pairs above.
 
 Competitive benchmark: Kittle `/luxury-dev/` page (structure: neighborhoods → listings → market-at-a-glance → personas → valuation CTA → FAQ) and luxurync.com (dedicated hub ranking #1).
 
@@ -197,7 +213,7 @@ Competitive note: Veterans United (veteransunited.com — national SEO, no local
 ## GSC monitoring filters (cron)
 
 When GSC connected, pull weekly for property `https://saahomes.com/`:
-- Queries containing: `fort collins`, `loveland`, `windsor`, `greeley`, `weld`, `larimer`, `northern colorado`, `chfa`, `schwartz`, `saa homes`, **`luxury` (It 31), `assumable` / `assume mortgage` (It 32), `veteran` / `va loan` / `military` (It 35)**
-- Pages under `/northern-colorado-areas/`, `/for-sellers/`, `/for-buyers/`, `/chfa-`, `/blog/`, **`/luxury-real-estate/` (It 31), `/assumable-mortgages/` (It 32), `/veterans/` (It 35)**
+- Queries containing: `fort collins`, `loveland`, `windsor`, `greeley`, `weld`, `larimer`, `northern colorado`, `chfa`, `schwartz`, `saa homes`, **`luxury` / `$1M` / `million dollar` / `estate homes` / `horse properties` / `waterfront homes` (It 31+37), `assumable` / `assume mortgage` (It 32), `veteran` / `va loan` / `military` (It 35)**
+- Pages under `/northern-colorado-areas/`, `/for-sellers/`, `/for-buyers/`, `/chfa-`, `/blog/`, **`/luxury-real-estate/` (It 31+37), `/assumable-mortgages/` (It 32), `/veterans/` (It 35)**
 - Alert: position drop ≥8 positions AND impressions ≥10 (week over week)
 - Alert: page indexed → not indexed on any P0 URL

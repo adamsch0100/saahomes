@@ -8,8 +8,11 @@ description: Daily GSC ranking delta scan for Northern Colorado real estate quer
 ## Execute every weekday morning
 
 ### Step 1 — Pull data (GSC if connected, else public signals)
-- Last 7 days vs prior 7 days for queries matching: city names, "northern colorado", "chfa", "schwartz", "saa homes", "homes for sale", "realtor", "sell home"
-- Pages: `/northern-colorado-areas/*`, `/for-sellers/`, `/for-buyers/`, `/chfa-*`, `/blog/*`
+- Last 7 days vs prior 7 days for queries matching: city names, "northern colorado", "chfa", "schwartz", "saa homes", "homes for sale", "realtor", "sell home", **"luxury", "$1M", "million dollar", "estate homes", "horse properties", "waterfront homes"**
+- Pages: `/northern-colorado-areas/*`, `/for-sellers/`, `/for-buyers/`, `/chfa-*`, `/blog/*`, **`/luxury-real-estate/`**
+
+### Luxury monitor (It 31 + It 37)
+Pull `/luxury-real-estate/` plus queries containing `luxury`, `$1M`, `million dollar`, `estate homes`, `horse properties`, `waterfront homes`, and `{city} luxury` / `luxury real estate agent {city}`. Alert on position drop ≥8 with ≥10 impressions, same as Tier S. Luxury leads are tagged `interest=luxury` for Adam's personal follow-up.
 
 ### Step 2 — Flag alerts (🔴 P0)
 - Any Tier S query (see keyword-universe.md) drops **≥8 positions** with ≥10 impressions

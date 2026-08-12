@@ -18,6 +18,136 @@ export const MILLION_PLUS_DISPLAY = '$1M+';
 /** Featured $1M+ markets on the luxury hub (4 cities max). */
 export const MILLION_PLUS_FEATURED_SLUGS = ['boulder', 'fort-collins', 'windsor', 'loveland'];
 
+/**
+ * Verified $1M+ NoCO listing photos (IRES, served via /api/photo/{id}/{idx}).
+ * Checked live 2026-08-12. Each id is assigned to one page slot — never reuse.
+ * 3278 (Longmont $22.5M) returned 502 on every photo index that day — do not use.
+ */
+export const LUXURY_PHOTO_SLOTS = {
+  hero: {
+    id: 4777,
+    photoIdx: 0,
+    slug: '6880-saint-vrain-longmont-co-18500000-061671',
+    city: 'Longmont',
+    listPrice: 18500000,
+    street_number: '6880',
+    street_name: 'Saint Vrain',
+  },
+  boulder: {
+    id: 4199,
+    photoIdx: 0,
+    slug: '1750-sunset-boulder-co-16500000-059258',
+    city: 'Boulder',
+    listPrice: 16500000,
+    street_number: '1750',
+    street_name: 'Sunset',
+  },
+  'fort-collins': {
+    id: 15408,
+    photoIdx: 0,
+    slug: '6558-rookery-fort-collins-co-4450000-064114',
+    city: 'Fort Collins',
+    listPrice: 4450000,
+    street_number: '6558',
+    street_name: 'Rookery',
+  },
+  windsor: {
+    id: 34127,
+    photoIdx: 0,
+    slug: '1813-seashell-windsor-co-2900000-065128',
+    city: 'Windsor',
+    listPrice: 2900000,
+    street_number: '1813',
+    street_name: 'Seashell',
+  },
+  loveland: {
+    id: 13206,
+    photoIdx: 0,
+    slug: '1270-57th-loveland-co-4000000-062758',
+    city: 'Loveland',
+    listPrice: 4000000,
+    street_number: '1270',
+    street_name: '57th',
+  },
+};
+
+/** Distinct $1M+ homes for the gallery when live search is thin. Never overlap photo slots. */
+export const LUXURY_GALLERY_FALLBACKS = [
+  {
+    id: 4998,
+    slug: '3621-21st-boulder-co-12000000-051395',
+    city: 'Boulder',
+    list_price: 12000000,
+    street_number: '3621',
+    street_name: '21st',
+    beds: 4,
+  },
+  {
+    id: 18373,
+    slug: '918-cub-fort-collins-co-4190000-059088',
+    city: 'Fort Collins',
+    list_price: 4190000,
+    street_number: '918',
+    street_name: 'Cub',
+    beds: 7,
+  },
+  {
+    id: 90206,
+    slug: '1907-spring-bloom-windsor-co-1999999-062406',
+    city: 'Windsor',
+    list_price: 1999999,
+    street_number: '1907',
+    street_name: 'Spring Bloom',
+    beds: 5,
+  },
+  {
+    id: 14514,
+    slug: '3941-roaring-fork-loveland-co-3995000-063581',
+    city: 'Loveland',
+    list_price: 3995000,
+    street_number: '3941',
+    street_name: 'Roaring Fork',
+    beds: 6,
+  },
+  {
+    id: 32992,
+    slug: '513-59th-greeley-co-3990000-064238',
+    city: 'Greeley',
+    list_price: 3990000,
+    street_number: '513',
+    street_name: '59th',
+    beds: 6,
+  },
+  {
+    id: 31824,
+    slug: '3922-ridgeline-timnath-co-2125000-056274',
+    city: 'Timnath',
+    list_price: 2125000,
+    street_number: '3922',
+    street_name: 'Ridgeline',
+    beds: 4,
+  },
+];
+
+export function luxuryPhotoSrc(slotKey) {
+  const row = LUXURY_PHOTO_SLOTS[slotKey];
+  if (!row) return '';
+  return `/api/photo/${row.id}/${row.photoIdx || 0}`;
+}
+
+export function slotToListing(slot) {
+  if (!slot) return null;
+  return {
+    id: slot.id,
+    slug: slot.slug,
+    city: slot.city,
+    list_price: slot.listPrice ?? slot.list_price,
+    street_number: slot.street_number,
+    street_name: slot.street_name,
+    beds: slot.beds,
+  };
+}
+
 /** Luxury price thresholds by city (blog luxury guide + area FAQs). */
 export const LUXURY_THRESHOLDS = {
   boulder: {
@@ -94,7 +224,7 @@ export const CITY_MARKET_CONTEXT = {
     medianDisplay: '$900K–$2M+',
     medianSource: 'areaFaqs (typical single-family range; Boulder is the region’s premium market)',
     premiumDom: 'Varies widely — thin inventory and $2M+ estates often take longer',
-    image: '/images/Boulder.jpg',
+    image: '/api/photo/4199/0',
     shortDesc:
       'Highest-end inventory in the region: Flatirons estates, Mapleton Hill, Chautauqua, Wonderland Lake, and Pine Brook Hills. Many properties list well above $2M.',
     millionPlusReality:
@@ -107,7 +237,7 @@ export const CITY_MARKET_CONTEXT = {
     medianDisplay: '~$610K–$636K',
     medianSource: 'areaSeo.js (July 2026 median ~$610K SFH) / areaFaqs (~$636K average mid-2026)',
     premiumDom: 'Homes above $750K typically 55–70 days on market (areaSeo)',
-    image: '/images/Fort-Collins-CO-Area-Guide.jpg',
+    image: '/api/photo/15408/0',
     shortDesc:
       'Widest luxury range in Northern Colorado: Horsetooth / northwest estates, Old Town historic prestige, and executive golf-course homes.',
     millionPlusReality:
@@ -120,7 +250,7 @@ export const CITY_MARKET_CONTEXT = {
     medianDisplay: '~$510K',
     medianSource: 'areaSeo.js / areaFaqs (July 2026 median sale ~$510K, +3.6% YoY)',
     premiumDom: 'Homes above $675K average ~55 days on market (areaFaqs)',
-    image: '/images/Loveland-CO-Area-Guide.jpg',
+    image: '/api/photo/13206/0',
     shortDesc:
       'Lakefront and golf-course luxury: Lake Loveland, Centerra, Mariana Butte, and Eagle Crest executive homes.',
     millionPlusReality:
@@ -133,7 +263,7 @@ export const CITY_MARKET_CONTEXT = {
     medianDisplay: '~$588K',
     medianSource: 'areaSeo.js / areaFaqs (July 2026 median sale ~$588K — highest among major NoCO cities)',
     premiumDom: 'Properties above $750K routinely 65+ days on market (areaFaqs)',
-    image: '/images/Windsor-CO-Area-Guide.jpg',
+    image: '/api/photo/34127/0',
     shortDesc:
       'Premier master-planned luxury: Water Valley lakefront, Pelican Lakes golf, and RainDance corridor custom homes.',
     millionPlusReality:
@@ -146,7 +276,7 @@ export const CITY_MARKET_CONTEXT = {
     medianDisplay: '~$432K',
     medianSource: 'areaSeo.js (July 2026 median sale ~$432K)',
     premiumDom: 'Luxury acreage inventory moves slower than the $350K–$500K sweet spot',
-    image: '/images/Area-Guide-for-Greeley-CO.jpg',
+    image: '/api/photo/32992/0',
     shortDesc:
       'Best value per square foot in the luxury band: Pine Ridge Estates, west Greeley acreage, and executive custom homes.',
     millionPlusReality:
@@ -159,7 +289,7 @@ export const CITY_MARKET_CONTEXT = {
     medianDisplay: 'See live IRES stats',
     medianSource: 'Live listing stats on Timnath area page (no static luxury median fabricated)',
     premiumDom: 'New-build luxury and Bridle Ridge custom homes — timelines vary by product',
-    image: '/images/Northern Colorado.webp',
+    image: '/api/photo/31824/0',
     shortDesc:
       'New-construction luxury corridor: Bridle Ridge, Timnath Ranch executive homes, and lakeside communities near I-25.',
     millionPlusReality:
@@ -293,6 +423,10 @@ export const LUXURY_HUB_FAQS = [
   {
     q: 'How does the buying process differ at $1M+?',
     a: 'Pace and certainty, not theatrics. Inspections are more thorough (systems, roofs, wells, septic, acreage, historic fabric). Contingencies are negotiated with more precision; some sellers want a shorter option period, some will not accept a home-sale contingency. Appraisals on unique properties can lag the contract price — we plan for that instead of discovering it at week five. Because premium bands often sit 55–120 days on market, you usually have time to underwrite the house properly. When the right property appears off-market, the opposite is true: you need to be ready to move. We keep both postures available.',
+  },
+  {
+    q: 'Where can I see live $1M+ listings in Northern Colorado?',
+    a: 'On this page — current $1M+ inventory — and on our search filtered at $1,000,000. Each city card links to that city’s $1M+ results and to individual listings on the market. Photographs are the listing’s own, served through our photo proxy. Inventory changes daily; live IRES asking prices always supersede any snapshot here. Ask Nadia on this page if you want a short list pulled for a specific city or neighborhood.',
   },
 ];
 

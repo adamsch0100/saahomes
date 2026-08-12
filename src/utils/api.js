@@ -70,6 +70,16 @@ export const submitContactForm = async (formData) => {
   return result;
 };
 
+/** Luxury hub concierge form — same /api/contact pipe, tagged lead_type=luxury. */
+export const submitLuxuryLeadForm = async (formData) => {
+  const result = await apiRequest('/api/contact', {
+    method: 'POST',
+    body: JSON.stringify(formData),
+  });
+  trackSuccessfulLead('luxury', formData);
+  return result;
+};
+
 export const submitMarketReportForm = async (formData) => {
   const result = await apiRequest('/api/market-report', {
     method: 'POST',

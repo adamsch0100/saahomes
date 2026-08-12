@@ -5,6 +5,7 @@ import {
   LUXURY_THRESHOLDS,
   getLuxuryNeighborhoods,
   luxurySearchHref,
+  millionPlusSearchHref,
 } from "../data/luxuryMarket.js";
 
 const GOLD = "#CFB36E";
@@ -101,7 +102,14 @@ export default function CityLuxurySection({ citySlug, deep = false }) {
             Northern Colorado Luxury Hub
           </Link>
           <Link
-            to="/contact/"
+            to={millionPlusSearchHref(ctx.city)}
+            className="inline-flex items-center justify-center px-6 py-3 border-2 font-semibold rounded-lg transition-colors hover:bg-[#CFB36E]/10"
+            style={{ borderColor: GOLD, color: "#1a1a1a" }}
+          >
+            {ctx.city} $1M+ listings
+          </Link>
+          <Link
+            to="/contact/?interest=luxury"
             className="inline-flex items-center justify-center px-6 py-3 border-2 border-gray-900 text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
           >
             Private Consultation

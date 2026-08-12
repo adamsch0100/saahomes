@@ -121,7 +121,7 @@ export default function LeadCaptureChat() {
     const isListing = path.includes("/homes-for-sale/");
     const isSearch = path.startsWith("/properties");
     const isCity = path.includes("-homes-for-sale/") || path.includes("/northern-colorado-areas/");
-    const isIntent = isListing || isSearch || isCity || /(\/contact|\/for-buyers|\/for-sellers|\/chfa)/.test(path);
+    const isIntent = isListing || isSearch || isCity || /(\/contact|\/for-buyers|\/for-sellers|\/chfa|\/luxury-real-estate)/.test(path);
     if (!isIntent) return;
 
     const now = Date.now();
@@ -129,7 +129,9 @@ export default function LeadCaptureChat() {
     if (sessionStorage.getItem("nadia_teaser_dismissed") || now - lastShown < 15 * 60 * 1000) return;
 
     let message = "Buying or selling in Northern Colorado? I can help you find your way.";
-    if (isListing) {
+    if (/\/luxury-real-estate/.test(path)) {
+      message = "Questions about a $1M+ property? Ask Nadia — I can walk you through current listings or a private conversation with Adam and Mandi.";
+    } else if (isListing) {
       const addr = document.querySelector("h1")?.textContent?.trim();
       message = addr ? `Questions about ${addr}? I know this home — ask me anything.` : "Questions about this home? I can tell you more.";
     } else if (isSearch || isCity) {
@@ -221,13 +223,15 @@ export default function LeadCaptureChat() {
         chfa: "Hi! 👋 I'm Nadia, your SAA Homes real estate assistant. Looking into down payment assistance? I can help you figure out which CHFA program fits your situation — SmartStep, Schools to Home, Champions, or G-HOPE. What questions can I answer?",
         buyer: "Hey there! 🏡 Thinking about buying a home in Northern Colorado? Whether you're just starting to explore or ready to look at specific neighborhoods, I'm here to help. What are you looking for?",
         seller: "Hi! 📈 Thinking of selling? I can walk you through what your home might be worth in today's market and how our team approaches marketing. What's your timeline looking like?",
+        luxury: "Hello — I'm Nadia. I can help with $1M+ homes across Northern Colorado: current listings, neighborhoods, or a private conversation with Adam and Mandi. What would you like to know?",
         default: "Hi there! 👋 I'm Nadia, your personal real estate assistant at SAA Homes. Whether you're buying, selling, or just curious about Northern Colorado real estate — I'd love to help point you in the right direction. What can I answer for you?",
       };
       const path = location.pathname;
       let greeting = greetings.default;
       if (hasLead) {
         greeting = "Good to see you again! 👋 I'm Nadia. Want to check on your saved searches, or do you have questions about this area? I can help — and I can set up new alerts from chat if you describe what you're looking for.";
-      } else if (/chfa|dpa|champions|g-hope|greeley/.test(path)) greeting = greetings.chfa;
+      } else if (/luxury-real-estate/.test(path)) greeting = greetings.luxury;
+      else if (/chfa|dpa|champions|g-hope|greeley/.test(path)) greeting = greetings.chfa;
       else if (/for-buyers|buying/.test(path)) greeting = greetings.buyer;
       else if (/for-sellers|sell/.test(path)) greeting = greetings.seller;
       else {

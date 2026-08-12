@@ -76,7 +76,7 @@ const staticPages = [
     description: 'Private representation for Northern Colorado’s $1 million and above homes — Boulder, Fort Collins, Windsor, and Loveland. Discretion and direct service from Schwartz and Associates.',
     ogTitle: 'The $1M+ Market, Mastered. | Luxury Real Estate Northern Colorado',
     ogDescription: "Private estates, exceptional homes, discreet service across Boulder, Fort Collins, Windsor, and Loveland. Adam and Mandi Schwartz — SAA Homes.",
-    ogImage: '/images/Boulder.jpg',
+    ogImage: '/api/photo/4777/0',
     ogImageAlt: 'Luxury real estate in Northern Colorado — $1M+ homes',
   },
   {
