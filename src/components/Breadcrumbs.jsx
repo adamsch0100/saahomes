@@ -8,6 +8,7 @@ const breadcrumbMap = {
   "for-sellers": "Sell Your Northern Colorado Home",
   contact: "Contact Northern Colorado Realtors",
   "featured-areas": "Northern Colorado Communities",
+  "luxury-real-estate": "Luxury Real Estate",
   "northern-colorado-areas": "Northern Colorado Communities",
   "fort-collins": "Fort Collins",
   loveland: "Loveland",

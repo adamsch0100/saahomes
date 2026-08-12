@@ -10,6 +10,14 @@
  * - DOM for premium bands: areaSeo / areaFaqs city market blurbs
  */
 
+/** Page-level $1M+ framing. City thresholds below this stay as published — we do not invent a $1M city median. */
+export const MILLION_PLUS_PRICE = 1_000_000;
+export const MILLION_PLUS_LABEL = '$1 Million+';
+export const MILLION_PLUS_DISPLAY = '$1M+';
+
+/** Featured $1M+ markets on the luxury hub (4 cities max). */
+export const MILLION_PLUS_FEATURED_SLUGS = ['boulder', 'fort-collins', 'windsor', 'loveland'];
+
 /** Luxury price thresholds by city (blog luxury guide + area FAQs). */
 export const LUXURY_THRESHOLDS = {
   boulder: {
@@ -17,36 +25,60 @@ export const LUXURY_THRESHOLDS = {
     threshold: 900000,
     thresholdDisplay: '$900K+',
     note: 'Boulder single-family homes typically range from $900,000 to well over $2 million (area FAQs). Many Flatirons, Mapleton Hill, and Chautauqua properties list well above $2M.',
+    millionPlus: true,
+    tier: '$1M+',
+    millionPlusReality:
+      'True luxury in Boulder sits $2M and above — Flatirons, Mapleton Hill, Chautauqua, Pine Brook Hills. Single-family typically ranges $900K to well over $2M; $1M+ is the working floor, not the ceiling.',
   },
   'fort-collins': {
     label: '$750K+',
     threshold: 750000,
     thresholdDisplay: '$750K+',
     note: 'Fort Collins luxury segment generally begins at approximately $750,000 for single-family homes and extends past $2 million for estate properties (luxury home buying guide).',
+    millionPlus: true,
+    tier: '$1M+',
+    millionPlusReality:
+      'Citywide median is about $610K (July 2026). $1M+ concentrates in Horsetooth and northwest estates, the Foothills ($800K–$3M+), and Prospector’s Ridge ($900K–$2.5M+). Homes above $750K typically 55–70 days on market.',
   },
   loveland: {
     label: '$600K+',
     threshold: 600000,
     thresholdDisplay: '$600K+',
     note: 'Loveland luxury tier starts around $600,000, with lakefront and golf-course properties commanding the highest prices (luxury home buying guide). Homes above $675,000 average about 55 days on market (area FAQs).',
+    millionPlus: true,
+    tier: '$1M+',
+    millionPlusReality:
+      'Citywide median is about $510K (July 2026). $1M+ is lakefront and golf — Centerra to $1.5M+, Lake Loveland, Eagle Crest. The broader published luxury tier starts around $600K; homes above $675K average about 55 days on market.',
   },
   windsor: {
     label: '$700K+',
     threshold: 700000,
     thresholdDisplay: '$700K+',
     note: 'Windsor luxury threshold is approximately $700,000-plus, driven by Pelican Lakes, Water Valley, and RainDance premium inventory (luxury home buying guide + Windsor market FAQs). Properties above $750,000 routinely take 65+ days on market.',
+    millionPlus: true,
+    tier: '$1M+',
+    millionPlusReality:
+      'Highest citywide median among major NoCO cities (~$588K, July 2026). $1M+ concentrates in Water Valley lakefront, Pelican Lakes, and RainDance custom homes. Properties above $750K routinely take 65+ days on market.',
   },
   greeley: {
     label: '$550K+',
     threshold: 550000,
     thresholdDisplay: '$550K+',
     note: 'Greeley luxury territory starts around $550,000–$600,000, where buyers can expect more square footage and land than comparably priced Larimer County homes (luxury home buying guide).',
+    millionPlus: true,
+    tier: '$1M+',
+    millionPlusReality:
+      'Citywide median is about $432K (July 2026). The published luxury tier starts around $550K–$600K; $1M+ is acreage and custom — Pine Ridge Estates to $1.2M+ and west Greeley executive homes.',
   },
   timnath: {
     label: '$700K+',
     threshold: 700000,
     thresholdDisplay: '$700K+',
     note: 'Timnath premium inventory is concentrated in communities like Bridle Ridge ($700K–$1.5M+) and Timnath Ranch executive homes ($550K–$1.2M+) per neighborhoods.js price ranges.',
+    millionPlus: true,
+    tier: '$1M+',
+    millionPlusReality:
+      'No static citywide median is published. $1M+ lives in Bridle Ridge ($700K–$1.5M+) and Timnath Ranch executive homes ($550K–$1.2M+). Live IRES stats on the Timnath area page supersede any snapshot.',
   },
 };
 
@@ -65,6 +97,8 @@ export const CITY_MARKET_CONTEXT = {
     image: '/images/Boulder.jpg',
     shortDesc:
       'Highest-end inventory in the region: Flatirons estates, Mapleton Hill, Chautauqua, Wonderland Lake, and Pine Brook Hills. Many properties list well above $2M.',
+    millionPlusReality:
+      'True luxury sits $2M+. $1M+ is the working floor across Chautauqua, Mapleton Hill, Flatirons, and Pine Brook Hills.',
   },
   'fort-collins': {
     city: 'Fort Collins',
@@ -76,6 +110,8 @@ export const CITY_MARKET_CONTEXT = {
     image: '/images/Fort-Collins-CO-Area-Guide.jpg',
     shortDesc:
       'Widest luxury range in Northern Colorado: Horsetooth / northwest estates, Old Town historic prestige, and executive golf-course homes.',
+    millionPlusReality:
+      'Citywide median ~$610K. $1M+ concentrates in Horsetooth, northwest estates, Foothills, and Prospector’s Ridge.',
   },
   loveland: {
     city: 'Loveland',
@@ -87,6 +123,8 @@ export const CITY_MARKET_CONTEXT = {
     image: '/images/Loveland-CO-Area-Guide.jpg',
     shortDesc:
       'Lakefront and golf-course luxury: Lake Loveland, Centerra, Mariana Butte, and Eagle Crest executive homes.',
+    millionPlusReality:
+      'Citywide median ~$510K. $1M+ is lakefront and golf — Centerra, Lake Loveland, Eagle Crest.',
   },
   windsor: {
     city: 'Windsor',
@@ -98,6 +136,8 @@ export const CITY_MARKET_CONTEXT = {
     image: '/images/Windsor-CO-Area-Guide.jpg',
     shortDesc:
       'Premier master-planned luxury: Water Valley lakefront, Pelican Lakes golf, and RainDance corridor custom homes.',
+    millionPlusReality:
+      'Highest major-city median (~$588K). $1M+ concentrates in Water Valley, Pelican Lakes, and RainDance custom.',
   },
   greeley: {
     city: 'Greeley',
@@ -109,6 +149,8 @@ export const CITY_MARKET_CONTEXT = {
     image: '/images/Area-Guide-for-Greeley-CO.jpg',
     shortDesc:
       'Best value per square foot in the luxury band: Pine Ridge Estates, west Greeley acreage, and executive custom homes.',
+    millionPlusReality:
+      'Citywide median ~$432K. $1M+ is acreage and custom — Pine Ridge Estates and west Greeley executive homes.',
   },
   timnath: {
     city: 'Timnath',
@@ -120,6 +162,8 @@ export const CITY_MARKET_CONTEXT = {
     image: '/images/Northern Colorado.webp',
     shortDesc:
       'New-construction luxury corridor: Bridle Ridge, Timnath Ranch executive homes, and lakeside communities near I-25.',
+    millionPlusReality:
+      'No static citywide median published. $1M+ lives in Bridle Ridge and Timnath Ranch executive homes.',
   },
 };
 
@@ -182,48 +226,73 @@ export const LUXURY_BUYER_PERSONAS = [
   {
     title: 'Trading up from metro Denver',
     description:
-      'Buyers leaving Cherry Creek, Highlands, or Boulder County congestion who want more land, mountain views, and a calmer lifestyle — without sacrificing quality finishes or school options. Northern Colorado often delivers more square footage and outdoor access at a lower entry point than comparable Denver metro luxury.',
+      'Principals leaving Cherry Creek, Highlands, or Boulder County congestion who want more land, mountain views, and a quieter rhythm — without conceding finishes or school options. Northern Colorado often delivers more square footage and outdoor access at a lower entry than comparable Denver-metro luxury.',
   },
   {
-    title: 'Remote work & corporate relocation',
+    title: 'Confidential relocation',
     description:
-      'Executives and knowledge workers relocating for CSU, UCHealth, aerospace/tech, or fully remote roles. They prioritize privacy, home offices, outdoor access (Horsetooth, Flatirons, Boyd Lake), and a white-glove search that respects confidentiality.',
+      'Executives relocating for CSU, UCHealth, aerospace, or fully remote roles. They want privacy, a home that works as a compound, and a search that never becomes a broadcast. Adam and Mandi handle the file directly.',
   },
   {
-    title: 'Retirees near family',
+    title: 'Selling a significant home',
     description:
-      'Empty-nesters and retirees moving closer to adult children in Fort Collins, Loveland, or Windsor. They value low-maintenance luxury, single-level living, golf or lake amenities, and agents who handle the details from listing coordination to local vendor introductions.',
+      'Owners of $1M+ properties who need the listing priced correctly, shown to the right buyers, and — when desired — kept off the open market. Presentation and who sees it matter more than volume.',
+  },
+];
+
+/** Private-client promise — editorial, not feature-grid marketing. */
+export const LUXURY_CLIENT_PROMISES = [
+  {
+    title: 'Discretion',
+    desc: 'Quiet listings, limited showing lists, and off-market conversations when the property and the seller warrant it. Your name does not become a lead.',
+  },
+  {
+    title: 'Market mastery',
+    desc: 'Verified $1M+ comps from IRES, neighborhood-level depth, and honest pricing. We do not invent a luxury median or dress a $600K market as a $2M one.',
+  },
+  {
+    title: 'White-glove execution',
+    desc: 'Inspection teams, vendors, timing, and the small details that keep a seven-figure file moving. You are not managing the process. We are.',
+  },
+  {
+    title: 'Direct access',
+    desc: 'Adam and Mandi Schwartz. One call. No teams of bots, no junior handoff after the first meeting. (970) 999-1407.',
   },
 ];
 
 /**
- * Hub + city luxury FAQs. Answers use only verified codebase figures;
- * when a precise luxury median is not published, we say so honestly.
+ * Hub FAQs written for the $1M+ buyer and seller.
+ * Answers use only verified codebase figures; when a precise $1M median
+ * is not published, we say so honestly.
  */
 export const LUXURY_HUB_FAQS = [
   {
-    q: 'What defines luxury real estate in Northern Colorado?',
-    a: 'In Northern Colorado, luxury is defined by both price tier and property character. Regional thresholds from our luxury guide: Fort Collins and Windsor generally from about $750K and $700K respectively; Loveland from about $600K; Greeley from about $550K; and Boulder single-family homes typically $900K to well over $2M. Defining traits include larger lots, custom or high-end construction, premium locations (waterfront, golf, mountain views, open space), and elevated finishes. Exact comps vary by neighborhood — we review live IRES listings for each search.',
+    q: 'What’s actually happening in the $1M+ Northern Colorado market right now?',
+    a: 'The $1M+ tier is a distinct market from citywide medians. Fort Collins citywide median single-family sat near $610,000 in July 2026 (averages near $636,000 mid-2026); Loveland about $510,000; Windsor about $588,000 — the highest among major NoCO cities; Greeley about $432,000. Boulder single-family typically ranges $900,000 to well over $2 million. We do not publish a fabricated “$1M median.” What we can say: homes above $750,000 in Fort Collins typically take 55–70 days on market; Windsor properties above $750,000 routinely take 65+ days; Loveland homes above $675,000 average about 55 days. Our Fort Collins luxury neighborhoods guide notes homes above $1 million often 90–120 days. Inventory at this level is thin, neighborhood-specific, and priced by comps — not by city averages. Live IRES asking prices always supersede these snapshots.',
   },
   {
-    q: 'How much is a luxury home in Fort Collins?',
-    a: 'Fort Collins citywide median single-family prices held near about $610,000 in July 2026, with averages near $636,000 mid-2026. The luxury segment generally starts around $750,000 and extends past $2 million for Horsetooth-area estates, foothills properties, and premier custom homes. Homes above $750,000 typically take 55–70 days on market. Live inventory and asking prices change daily — search Fort Collins listings at $750K+ or schedule a private consultation.',
+    q: 'How do you sell a $1M+ home discreetly?',
+    a: 'Quietly, and to the right people. A discreet sale can mean a coming-soon period with a short, named buyer list; a pocket or off-market conversation through our local network; or a public listing with no open houses, no yard sign, and showings by appointment only. We agree the exposure level with you first. Premium presentation still matters — professional photography, measured pricing, and a file that is ready — but the audience is curated. Email and phone are required on every inquiry so we can confirm identity before we discuss a property.',
   },
   {
-    q: 'Where are the best luxury neighborhoods in Boulder?',
-    a: 'Boulder holds the region’s highest-end inventory. Verified neighborhood price ranges in our guides include Chautauqua Park ($1.2M–$4M+), Mapleton Hill ($1.2M–$4M+), Wonderland Lake Area ($800K–$2.5M+), Pine Brook Hills ($1.5M–$5M+), Flatirons Area ($2M–$6M+), Newlands ($1.2M–$3.5M+), Table Mesa ($1M–$2.5M+), and Devil’s Thumb ($1M–$3M+). Boulder single-family homes typically range from $900,000 to well over $2 million. We help buyers compare micro-locations, HOAs, and open-space adjacency with discretion.',
+    q: 'Do you have access to off-market properties?',
+    a: 'Yes, where they exist. Off-market and quiet listings in this corridor come through relationships with other agents, sellers who prefer not to go fully public, and coming-soon inventory we hear about before it hits the MLS. We do not pretend every $1M+ home is hidden, and we will not invent an off-market catalog. What we do is work both the live IRES inventory and the private network, then show you only what fits. Call (970) 999-1407 if you want that search run confidentially.',
   },
   {
-    q: 'Is Windsor’s luxury market stronger than Fort Collins?',
-    a: 'They serve different luxury lifestyles. Windsor posts the highest citywide median among major NoCO cities (about $588,000 in July 2026) and concentrates premium inventory in Water Valley, Pelican Lakes, and RainDance. Fort Collins offers broader estate and foothills inventory (Horsetooth, northwest, Old Town historic). Properties above $750K in Windsor often take 65+ days on market — more negotiating room than peak years. We help you compare tax jurisdiction (Weld vs Larimer), amenities, and commute side by side.',
+    q: 'How is a $1M+ property priced correctly?',
+    a: 'With neighborhood comps from IRES — not a Zestimate, not a citywide median, and not last year’s peak. Overpricing is how $1M+ listings go stale. In a band already taking 55–70 days above $750,000 (and often 90–120 days above $1 million in Fort Collins), an inflated ask is not a negotiating cushion; it is how a significant home becomes shopworn. We price against recent, relevant sales in the same micro-location — Horsetooth is not Old Town; Water Valley is not RainDance — and we adjust when the market tells us to.',
   },
   {
-    q: 'Do you offer private / off-market luxury searches?',
-    a: 'Yes. Schwartz and Associates provides discrete market intelligence, curated property searches (not spray-and-pray alerts), and white-glove negotiation for high-end buyers and sellers across Fort Collins, Loveland, Windsor, Greeley, Boulder, Timnath, and the broader Front Range corridor. Call (970) 999-1407 or request a private consultation — email and phone are required so we can respond promptly and confidentially.',
+    q: 'What sets Schwartz and Associates apart at this level?',
+    a: 'Adam and Mandi Schwartz work the file themselves. Over 20 years in Northern Colorado, Coldwell Banker Realty affiliation, and neighborhood depth across Boulder, Fort Collins, Loveland, Windsor, Greeley, Timnath, and the 19-city corridor we publish. We do not farm $1M+ clients to a team or an ISA. You get market command, discretion, and a single point of contact. Call (970) 999-1407.',
   },
   {
-    q: 'Should I buy or sell luxury first if I am trading up?',
-    a: 'It depends on your equity position, rate environment, and how unique your current home is. In cooler premium bands (e.g. homes above $750K often taking 55–70+ days), many sellers prefer a clear pricing and marketing plan before writing a contingent offer. We coordinate both sides — strategy for your current home and a confidential search for your next property — so you are not forced into a double-move or a weak negotiating posture.',
+    q: 'Should I work with a specialist or a generalist agent?',
+    a: 'A $1M+ home is not a $450,000 listing with a nicer kitchen. The buyer pool is smaller, the comps are thinner, days on market are longer, and a pricing miss is expensive. A generalist who sells volume in the $400K–$600K band will treat your property like inventory. A specialist prices against the right sales, knows which neighborhoods actually clear at $1M+, and has a network that can see a quiet listing. That is the work we do. If your home is not in this tier, we will say so — we would rather send you to the right representation than dress a mid-market sale as luxury.',
+  },
+  {
+    q: 'How does the buying process differ at $1M+?',
+    a: 'Pace and certainty, not theatrics. Inspections are more thorough (systems, roofs, wells, septic, acreage, historic fabric). Contingencies are negotiated with more precision; some sellers want a shorter option period, some will not accept a home-sale contingency. Appraisals on unique properties can lag the contract price — we plan for that instead of discovering it at week five. Because premium bands often sit 55–120 days on market, you usually have time to underwrite the house properly. When the right property appears off-market, the opposite is true: you need to be ready to move. We keep both postures available.',
   },
 ];
 
@@ -277,11 +346,32 @@ export const CITY_LUXURY_FAQS = {
 
 export function luxurySearchHref(cityName, minPrice) {
   const params = new URLSearchParams();
-  params.set('location', `${cityName}, CO`);
+  if (cityName) params.set('location', `${cityName}, CO`);
   if (minPrice) params.set('minPrice', String(minPrice));
   return `/properties/?${params.toString()}`;
 }
 
+export function millionPlusSearchHref(cityName) {
+  return luxurySearchHref(cityName, MILLION_PLUS_PRICE);
+}
+
 export function getLuxuryNeighborhoods(citySlug) {
   return LUXURY_NEIGHBORHOOD_SLUGS[citySlug] || [];
+}
+
+/** Neighborhoods whose published range reaches $1M+ (from priceHint, never invented). */
+export function isMillionPlusNeighborhood(n) {
+  return /\$1(\.\d+)?M|\$[2-9](\.\d+)?M/.test(n?.priceHint || '');
+}
+
+export function getMillionPlusNeighborhoods(citySlug) {
+  return getLuxuryNeighborhoods(citySlug).filter(isMillionPlusNeighborhood);
+}
+
+export function getFeaturedMillionPlusCities() {
+  return MILLION_PLUS_FEATURED_SLUGS.map((slug) => ({
+    slug,
+    context: CITY_MARKET_CONTEXT[slug],
+    threshold: LUXURY_THRESHOLDS[slug],
+  })).filter((row) => row.context && row.threshold);
 }

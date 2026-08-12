@@ -16,6 +16,7 @@ import { AREA_FAQS } from '../src/data/areaFaqs.js';
 import { BUYER_FAQS, SELLER_FAQS } from '../src/data/buyerSellerFaqs.js';
 import { CHFA_PAGE_CONFIGS, CHFA_PROGRAMS, CHFA_STEPS, CHFA_DPA_OPTIONS, CHFA_REQUIREMENTS, CHFA_COUNTY_LIMITS, CHFA_SPECIALTY_PROGRAMS } from '../src/data/chfaData.js';
 import { getAllEvents, getCityDisplayName, getMonthNames, getEventsGuidePath, EVENTS_DATA_LAST_REVIEWED } from '../src/data/localEvents.js';
+import { LUXURY_HUB_FAQS } from '../src/data/luxuryMarket.js';
 
 // Live listings API for ItemList schema (real active MLS rows only — never fabricate).
 // Prefer LISTINGS_API_BASE / VITE_API_URL when building against a non-prod environment.
@@ -52,18 +53,7 @@ const CASH_BUYER_FAQS = [
     a: 'Both options are available. Many sellers come to us for a quick cash offer and end up choosing a traditional listing once they see what their home could command on the open market. There is no obligation either way — we will give you honest advice based on your home\'s condition, your timeline, and your financial goals.' },
 ];
 
-const LUXURY_FAQS = [
-  { q: 'What qualifies as a luxury home in Northern Colorado?',
-    a: 'In Northern Colorado, luxury homes generally start around $750,000 to $1 million and include premium features such as custom architectural details, high-end finishes, acreage or horse property, golf course or lakefront locations, and exclusive gated communities. Fort Collins west side estates, Windsor lakefront properties, and Loveland foothills ranches are all considered luxury.' },
-  { q: 'What areas in Northern Colorado have luxury properties?',
-    a: 'Luxury homes are concentrated in Fort Collins\' west side and south-central neighborhoods, Windsor\'s golf course communities (RainDance, Pelican Lakes), Loveland\'s Mariana Butte area, Timnath\'s new construction estates, and Greeley\'s west-side executive homes. Horse properties with acreage are found throughout Larimer and Weld counties.' },
-  { q: 'How does SAA Homes market luxury properties differently?',
-    a: 'Our luxury marketing includes professional architectural photography, aerial drone videography, virtual 3D tours, targeted digital advertising to high-net-worth buyers, and exclusive network syndication. We provide white-glove service from pre-listing consultation through closing, with discretion and personalized attention for every seller.' },
-  { q: 'Do you offer private consultations for luxury buyers?',
-    a: 'Yes. We provide confidential one-on-one consultations for luxury buyers, including off-market property access, pre-qualification coordination with specialized lenders, neighborhood and school research, and bespoke search strategies tailored to your lifestyle requirements and timeline.' },
-  { q: 'What is the average price per square foot for luxury homes in Northern Colorado?',
-    a: 'Price per square foot for luxury homes varies significantly by location and property type. Fort Collins west side luxury estates typically range from $350–$500+/sq ft, while newer luxury construction in Windsor and Timnath averages $300–$400/sq ft. Acreage and horse properties vary widely based on land value and improvements.' },
-];
+const LUXURY_FAQS = LUXURY_HUB_FAQS;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const distDir = join(__dirname, '../dist');
@@ -1215,23 +1205,23 @@ const MONEY_PAGE_CONTENT = {
   '/luxury-real-estate/': {
     sections: [
       {
-        heading: 'Luxury Real Estate in Northern Colorado',
+        heading: 'The $1M+ Market, Mastered.',
         paragraphs: [
-          'Schwartz and Associates brings white-glove service to every luxury transaction in Northern Colorado. From Fort Collins west side estates to Windsor lakefront properties and Loveland foothills ranches, our team provides discreet, personalized representation for discerning buyers and sellers.',
-          'Our luxury marketing program includes professional architectural photography, aerial drone videography, virtual 3D tours, targeted digital advertising to high-net-worth buyers, and exclusive network syndication. We understand that luxury transactions require a higher level of service, confidentiality, and market expertise.',
+          'For buyers and sellers of Northern Colorado’s most significant homes — the $1 million and above tier — representation is a matter of discretion, market command, and execution. Adam and Mandi Schwartz work this market directly: one call, no handoffs.',
+          'Boulder’s true luxury sits well above $2 million. Fort Collins estates run to $2 million and beyond. Windsor concentrates much of the region’s $1M+ inventory in Water Valley and Pelican Lakes. We work the tier as it actually exists, using published market notes and live IRES listings — never a fabricated luxury median.',
         ],
       },
       {
-        heading: 'Luxury Communities We Serve',
+        heading: 'Where $1 million and above actually lives',
         paragraphs: [
-          'Luxury homes are concentrated in Fort Collins\' west side and south-central neighborhoods, Windsor\'s golf course communities including RainDance and Pelican Lakes, Loveland\'s Mariana Butte area, Timnath\'s new construction estates, and Greeley\'s west-side executive homes. Horse properties with acreage are found throughout Larimer and Weld counties.',
-          'Each community offers a distinct lifestyle. Fort Collins provides craft breweries and CSU culture minutes from mountain views. Windsor offers family-friendly lakefront living. Loveland combines arts and natural beauty. We help each client find the right location, property type, and investment for their lifestyle.',
+          'Citywide medians are not luxury averages. Fort Collins sat near $610,000 in July 2026; Loveland about $510,000; Windsor about $588,000; Greeley about $432,000. Boulder single-family typically ranges $900,000 to well over $2 million. $1M+ concentrates in Horsetooth and the Foothills, Water Valley and Pelican Lakes, Centerra and Lake Loveland, and Boulder’s Flatirons, Mapleton Hill, Chautauqua, and Pine Brook Hills.',
+          'Homes above $750,000 in Fort Collins typically take 55–70 days on market; Windsor properties above $750,000 routinely take 65+ days. Quiet listings, off-market conversations, and correct pricing matter more in this band than volume marketing.',
         ],
       },
     ],
     cta: {
-      title: 'Schedule a Private Luxury Consultation',
-      text: 'Contact Schwartz and Associates at (970) 999-1407 for a confidential consultation about luxury real estate in Northern Colorado. Whether buying, selling, or both, our white-glove service exceeds expectations.',
+      title: 'Private Consultation',
+      text: 'Enquire in confidence. Call Schwartz and Associates at (970) 999-1407 — Adam or Mandi replies personally. Email and phone are required on every inquiry.',
     },
     faqs: LUXURY_FAQS,
   },

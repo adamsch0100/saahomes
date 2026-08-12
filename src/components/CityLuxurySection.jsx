@@ -47,6 +47,12 @@ export default function CityLuxurySection({ citySlug, deep = false }) {
         <p className="text-lg text-gray-700 leading-relaxed mb-4 max-w-3xl">
           {ctx.shortDesc}
         </p>
+        {threshold.millionPlusReality ? (
+          <p className="text-base text-gray-700 leading-relaxed mb-4 max-w-3xl">
+            <strong className="text-gray-900">$1M+ reality:</strong>{" "}
+            {threshold.millionPlusReality}
+          </p>
+        ) : null}
         <p className="text-base text-gray-600 leading-relaxed mb-6 max-w-3xl">
           <strong className="text-gray-900">Price reality:</strong>{" "}
           {threshold.note}{" "}
