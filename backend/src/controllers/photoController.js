@@ -185,6 +185,9 @@ export const getListingPhoto = async (req, res) => {
     }
     const file = cachePath(listingId, idx);
     if (fs.existsSync(file)) {
+      res.set('X-Cache', 'HIT');
+      res.set('Cache-Control', 'public, max-age=31536000, immutable');
+      res.set('Content-Type', 'image/jpeg');
       return res.sendFile(file);
     }
 
@@ -217,6 +220,7 @@ export const getListingPhoto = async (req, res) => {
     trimCache();
     res.set('Content-Type', 'image/jpeg');
     res.set('Cache-Control', 'public, max-age=31536000, immutable');
+    res.set('X-Cache', 'MISS');
     return res.send(buf);
   } catch (error) {
     if (error.status === 404) return res.status(404).json({ error: 'Photo unavailable' });

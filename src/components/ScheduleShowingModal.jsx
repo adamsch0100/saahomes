@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -34,8 +34,24 @@ export default function ScheduleShowingModal({
   buttonLabel = "Schedule a Showing",
   buttonStyle = {},
   hideIcon = false,
+  /** Open immediately (email deep-link ?schedule=1). */
+  autoOpen = false,
+  /** Skip the trigger button — modal-only host for deep-links. */
+  hideTrigger = false,
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(!!autoOpen);
+
+  useEffect(() => {
+    if (autoOpen) setOpen(true);
+  }, [autoOpen]);
+
+  // Only the deep-link host (hideTrigger) listens — avoids dual mobile+desktop overlays.
+  useEffect(() => {
+    if (!hideTrigger) return undefined;
+    const onOpen = () => setOpen(true);
+    window.addEventListener("open-schedule-showing", onOpen);
+    return () => window.removeEventListener("open-schedule-showing", onOpen);
+  }, [hideTrigger]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -82,15 +98,17 @@ export default function ScheduleShowingModal({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className={buttonClassName || "px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"}
-        style={buttonStyle}
-      >
-        {!hideIcon && <span className="mr-1" aria-hidden="true">📅</span>}
-        {buttonLabel}
-      </button>
+      {!hideTrigger && (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className={buttonClassName || "px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"}
+          style={buttonStyle}
+        >
+          {!hideIcon && <span className="mr-1" aria-hidden="true">📅</span>}
+          {buttonLabel}
+        </button>
+      )}
 
       {open && (
         <div

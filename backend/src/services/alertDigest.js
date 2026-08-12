@@ -228,6 +228,124 @@ function descriptionSnippet(l) {
   return clean.slice(0, end).trim();
 }
 
+// ---------------------------------------------------------------- photos
+/** Proxy-only photo URL — never raw media.mlsgrid signed links. */
+function photoUrl(listingId, idx) {
+  return `${SITE}/api/photo/${listingId}/${idx}`;
+}
+
+const PLACEHOLDER_PHOTO = `${SITE}/images/buyers-hero.jpg`;
+const MAX_CARD_PHOTOS = 4; // 1 hero + up to 3 thumbs
+
+/**
+ * Pre-warm the photo proxy disk cache so recipients hit HIT on open.
+ * Fire-and-collect with small concurrency; failures are logged, never abort send.
+ * Worst case 60 listings × 5 = 300 refreshes ≈ 10 min at the proxy's 30/min IRES cap.
+ */
+async function prewarmPhotos(listings, {
+  maxPerListing = MAX_CARD_PHOTOS,
+  concurrency = 3,
+  timeoutMs = 20000,
+} = {}) {
+  const jobs = [];
+  for (const l of listings || []) {
+    if (!l?.id) continue;
+    const count = Array.isArray(l.photos) ? l.photos.length : 0;
+    if (!count) continue;
+    const n = Math.min(count, maxPerListing);
+    for (let idx = 0; idx < n; idx += 1) {
+      jobs.push({ listingId: l.id, idx, url: photoUrl(l.id, idx) });
+    }
+  }
+  if (!jobs.length) return { total: 0, ok: 0, fail: 0 };
+
+  let ok = 0;
+  let fail = 0;
+  let cursor = 0;
+
+  async function worker() {
+    while (cursor < jobs.length) {
+      const i = cursor;
+      cursor += 1;
+      const job = jobs[i];
+      try {
+        const res = await fetch(job.url, {
+          headers: { 'User-Agent': 'saahomes-digest-prewarm/1.0' },
+          signal: AbortSignal.timeout(timeoutMs),
+        });
+        if (res.ok) {
+          ok += 1;
+          // Drain body so the connection can close cleanly
+          await res.arrayBuffer().catch(() => null);
+        } else {
+          fail += 1;
+          console.warn(`prewarm fail ${job.listingId}/${job.idx}: HTTP ${res.status}`);
+        }
+      } catch (e) {
+        fail += 1;
+        console.warn(`prewarm fail ${job.listingId}/${job.idx}: ${e.message}`);
+      }
+    }
+  }
+
+  const workers = Array.from({ length: Math.min(concurrency, jobs.length) }, () => worker());
+  await Promise.all(workers);
+  console.log(`prewarm photos: ${ok}/${jobs.length} ok, ${fail} failed (concurrency=${concurrency})`);
+  return { total: jobs.length, ok, fail };
+}
+
+/**
+ * Audit href/src in built HTML — zero broken links, proxy-only images.
+ * Returns { ok, errors[] }.
+ */
+function auditEmailLinks(html, { site = SITE } = {}) {
+  const errors = [];
+  const hrefs = [...String(html || '').matchAll(/\bhref="([^"]+)"/gi)].map((m) => m[1]);
+  const srcs = [...String(html || '').matchAll(/\bsrc="([^"]+)"/gi)].map((m) => m[1]);
+
+  for (const href of hrefs) {
+    if (!href || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('#')) continue;
+    if (!/^https?:\/\//i.test(href)) {
+      errors.push(`href not absolute: ${href}`);
+      continue;
+    }
+    // Must point at our site (or known external from market pack is ok if absolute)
+    try {
+      const u = new URL(href);
+      if (u.hostname.includes('media.mlsgrid.com')) {
+        errors.push(`href is raw MLS media URL: ${href}`);
+      }
+    } catch {
+      errors.push(`href unparseable: ${href}`);
+    }
+  }
+
+  for (const src of srcs) {
+    if (!src) {
+      errors.push('empty src');
+      continue;
+    }
+    if (src.includes('media.mlsgrid.com')) {
+      errors.push(`src is raw MLS media URL: ${src}`);
+      continue;
+    }
+    // Open pixel + photos + placeholder only
+    const isProxy = src.startsWith(`${site}/api/photo/`);
+    const isPlaceholder = src.startsWith(`${site}/images/`);
+    const isPixel = src.includes('/api/email/open') || src.includes('open-pixel') || src.includes('/o/');
+    // subjectVariants open pixel may use various paths — allow same-origin http(s)
+    let sameOrigin = false;
+    try {
+      sameOrigin = new URL(src).origin === new URL(site).origin;
+    } catch { /* noop */ }
+    if (!isProxy && !isPlaceholder && !isPixel && !sameOrigin) {
+      errors.push(`src not proxy/placeholder/site: ${src}`);
+    }
+  }
+
+  return { ok: errors.length === 0, errors, hrefCount: hrefs.length, srcCount: srcs.length };
+}
+
 // ---------------------------------------------------------------- cards
 function cardHtml(l, filters, isNew, isDrop) {
   // Serve photos through the site's durable proxy (/api/photo) instead of the
@@ -235,38 +353,71 @@ function cardHtml(l, filters, isNew, isDrop) {
   // links die before the recipient opens the email (photos didn't load).
   // The proxy caches, heals expired URLs from IRES (rate-capped), and serves
   // R2 copies when present.
-  const photo = (l.photos && l.photos[0])
-    ? `${SITE}/api/photo/${l.id}/0`
-    : `${SITE}/images/buyers-hero.jpg`;
+  const photos = Array.isArray(l.photos) ? l.photos : [];
+  const photoCount = Math.min(photos.length, MAX_CARD_PHOTOS);
+  const hero = photoCount > 0 ? photoUrl(l.id, 0) : PLACEHOLDER_PHOTO;
   const url = `${SITE}/homes-for-sale/${l.slug}/`;
+  const scheduleUrl = `${url}?schedule=1`;
+  const nadiaUrl = `${url}?nadia=1`;
   const score = matchScore(l, filters);
   const highlights = featureHighlights(l);
   const snippet = descriptionSnippet(l);
   const address = [l.street_number, l.street_name, l.city].filter(Boolean).join(' ');
+  const alt = escapeHtml(address || 'Home');
   const badge = isDrop ? 'PRICE DROP' : isNew ? 'NEW' : '';
   const badgeStyle = isDrop
     ? 'background:#065f46;color:#fff'
     : 'background:#CFB36E;color:#1a1a1a';
 
+  // Thumbnail strip: idx 1..3. Progressive enhancement — swipeable on Apple Mail;
+  // static row elsewhere. All thumbs link to the listing.
+  let thumbStrip = '';
+  if (photoCount >= 2) {
+    const thumbs = [];
+    for (let idx = 1; idx < photoCount; idx += 1) {
+      thumbs.push(
+        `<a href="${url}" style="display:inline-block;margin-right:6px;text-decoration:none;vertical-align:top">` +
+        `<img src="${photoUrl(l.id, idx)}" alt="${alt}" width="96" height="72" ` +
+        `style="width:96px;height:72px;object-fit:cover;border-radius:6px;display:block;border:1px solid #e5e7eb"/>` +
+        `</a>`
+      );
+    }
+    thumbStrip = `
+      <div style="padding:8px 12px 0;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap;max-width:100%">
+        ${thumbs.join('')}
+      </div>`;
+  }
+
   return `
     <div style="border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:18px;background:#fff">
-      <a href="${url}" style="display:block;position:relative">
-        <img src="${photo}" alt="${address}" style="width:100%;height:220px;object-fit:cover;display:block" loading="lazy"/>
+      <a href="${url}" style="display:block;position:relative;text-decoration:none">
+        <img src="${hero}" alt="${alt}" style="width:100%;height:220px;object-fit:cover;display:block"/>
         <span style="position:absolute;top:10px;left:10px;${badgeStyle};font-weight:800;font-size:12px;padding:4px 10px;border-radius:6px">${badge || `${score}% match`}</span>
       </a>
+      ${thumbStrip}
       <div style="padding:16px 18px">
         <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap">
           <span style="font-size:22px;font-weight:800;color:#111">${fmtPrice(l.list_price)}</span>
           <span style="color:#6b7280;font-size:12.5px">${score}% match to your search</span>
         </div>
         <div style="color:#374151;font-size:14px;margin-top:2px">${[l.beds != null ? `${l.beds} bd` : '', l.baths != null ? `${l.baths} ba` : '', fmtSqft(l.living_area), HOME_TYPE_LABEL[l.home_type] || l.property_subtype].filter(Boolean).join(' · ')}</div>
-        <div style="color:#6b7280;font-size:13px;margin-top:2px">${address}, CO ${l.postal_code || ''}</div>
+        <div style="color:#6b7280;font-size:13px;margin-top:2px">${escapeHtml(address)}, CO ${escapeHtml(l.postal_code || '')}</div>
         ${highlights.length ? `
         <div style="margin-top:10px;padding:10px 12px;background:#f9fafb;border-radius:8px;font-size:13px;color:#374151;line-height:1.55">
           <strong style="color:#111">Why you got this:</strong><br/>${highlights.map((h) => `• ${escapeHtml(h)}`).join('<br/>')}
         </div>` : ''}
         ${snippet ? `<div style="margin-top:10px;font-size:13px;color:#4b5563;line-height:1.6;font-style:italic">"${escapeHtml(snippet)}"</div>` : ''}
-        <a href="${url}" style="display:inline-block;margin-top:12px;background:#111;color:#fff;font-size:13px;font-weight:600;padding:9px 16px;border-radius:8px;text-decoration:none">View this home</a>
+        <!-- 2-CTA row: Schedule (primary gold) + Ask Nadia (secondary). Stack on narrow clients. -->
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px">
+          <tr>
+            <td style="padding:0 4px 8px 0;width:50%" valign="top">
+              <a href="${scheduleUrl}" style="display:block;background:#CFB36E;color:#1a1a1a;font-size:13px;font-weight:800;padding:11px 12px;border-radius:8px;text-decoration:none;text-align:center">Schedule a tour</a>
+            </td>
+            <td style="padding:0 0 8px 4px;width:50%" valign="top">
+              <a href="${nadiaUrl}" style="display:block;background:#111;color:#fff;font-size:13px;font-weight:600;padding:11px 12px;border-radius:8px;text-decoration:none;text-align:center">Ask Nadia</a>
+            </td>
+          </tr>
+        </table>
       </div>
     </div>`;
 }
@@ -280,14 +431,19 @@ function cardHtml(l, filters, isNew, isDrop) {
 function digestHtml({
   firstName, searchName, filterSummary, summaryLines, standouts, cards,
   manageUrl, unsubscribeUrl, searchUrl, viewedCallout, brand = null, cityLabel = '',
+  quietSearch = false,
 }) {
   const { market, sources, dpa, fairHousing, footer, honestLabels } = marketPack;
   const useBrand = !!brand;
+  const psLine = "P.S. If any of these feel close, a quick tour is the best next step — happy to set it up. No pressure either way.";
 
-  // Unassigned path: exact historical SAA agent-voice (do not change).
+  // Unassigned path: SAA agent-voice with warmer open + low-pressure P.S.
   if (!useBrand) {
     const greeting = firstName ? `Hi ${escapeHtml(firstName)},` : 'Hi there,';
     const brandUpper = String(market.brand || 'SAA Homes').toUpperCase();
+    const openLine = quietSearch
+      ? `It's <strong>Adam Schwartz</strong> with ${escapeHtml(market.brand)}. It's been a minute since anything new came in for your <strong>${escapeHtml(searchName)}</strong> search — here's what's hitting the market now (${escapeHtml(filterSummary)}):`
+      : `It's <strong>Adam Schwartz</strong> with ${escapeHtml(market.brand)}. Here's what came in for your <strong>${escapeHtml(searchName)}</strong> search — ${escapeHtml(filterSummary)}:`;
     return `<!DOCTYPE html>
   <html><body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#111">
@@ -299,8 +455,7 @@ function digestHtml({
   <div style="max-width:580px;margin:0 auto;padding:26px 16px">
     <p style="color:#111;font-size:15px;margin:0 0 4px">${greeting}</p>
     <p style="color:#4b5563;font-size:14.5px;line-height:1.6;margin:0 0 4px">
-      It's <strong>Adam Schwartz</strong> with ${escapeHtml(market.brand)}. Here's what came in for your
-      <strong>${escapeHtml(searchName)}</strong> search — ${escapeHtml(filterSummary)}:
+      ${openLine}
     </p>
     <ul style="color:#374151;font-size:14px;line-height:1.7;margin:8px 0 14px;padding-left:20px">
       ${summaryLines.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}
@@ -322,6 +477,9 @@ function digestHtml({
         </a>
         <p style="color:#fff;font-size:14px;line-height:1.7;margin:0">
           Any of these catch your eye? <strong style="color:#CFB36E">Just reply to this email</strong> and we'll set up a showing — or call/text <a href="${market.tel}" style="color:#CFB36E;text-decoration:none">${escapeHtml(AGENT_PHONE)}</a>.
+        </p>
+        <p style="color:#d1d5db;font-size:13px;line-height:1.65;margin:14px 0 0;font-style:italic">
+          ${escapeHtml(psLine)}
         </p>
         <p style="color:#9ca3af;font-size:13px;margin:10px 0 0">— Adam &amp; Mandi Schwartz · ${escapeHtml(market.brand)} · ${escapeHtml(AGENT_PHONE)} · saahomes.com</p>
       </td></tr>
@@ -394,6 +552,9 @@ function digestHtml({
         </a>
         <p style="color:#fff;font-size:14px;line-height:1.7;margin:0">
           Any of these catch your eye? <strong style="color:#CFB36E">Just reply to this email</strong> and we'll set up a showing — or call/text <a href="${tel}" style="color:#CFB36E;text-decoration:none">${escapeHtml(phone)}</a>.
+        </p>
+        <p style="color:#d1d5db;font-size:13px;line-height:1.65;margin:14px 0 0;font-style:italic">
+          ${escapeHtml(psLine)}
         </p>
         <p style="color:#9ca3af;font-size:13px;margin:10px 0 0">— ${escapeHtml(signOffName)} · ${escapeHtml(brand.brandName)} · ${escapeHtml(phone)} · saahomes.com</p>
       </td></tr>
@@ -590,13 +751,15 @@ async function runSearch(search, { dryRun, onlyEmail }) {
   const searchPath = filtersToSearchPath(search.filters || {});
   const searchUrl = `${SITE}${searchPath}`;
 
-  if (dryRun) {
-    console.log(`[dry] → ${userRow.email}: "${subject}" [variant ${subjectVariant}] (${events.length} events: ${fresh.length} new, ${drops.length} drops, ${statusChanges} off-market)${viewedCallout ? ' [viewed callout]' : ''}`);
-    return { sent: false, events: events.length, subject, subjectVariant, viewedCallout: !!viewedCallout };
-  }
+  // Quiet search: last digest was 7+ days ago — warmer "it's been a minute" open.
+  // First-ever email (null last_email_at) keeps the standard open line.
+  const quietSearch = (() => {
+    if (!search.last_email_at) return false;
+    const days = (Date.now() - new Date(search.last_email_at).getTime()) / 86400000;
+    return Number.isFinite(days) && days >= 7;
+  })();
 
-  const tok = openToken();
-  const html = withOpenPixel(digestHtml({
+  const digestOpts = {
     firstName,
     searchName: search.name,
     filterSummary,
@@ -609,7 +772,45 @@ async function runSearch(search, { dryRun, onlyEmail }) {
     viewedCallout,
     brand,
     cityLabel,
-  }), SITE, tok);
+    quietSearch,
+  };
+
+  // Build HTML for dry-run link audit and for the real send path.
+  const rawHtml = digestHtml(digestOpts);
+  const audit = auditEmailLinks(rawHtml);
+  if (!audit.ok) {
+    console.warn(`link audit FAIL for search ${search.id}: ${audit.errors.slice(0, 8).join('; ')}`);
+  } else {
+    console.log(`link audit ok: ${audit.hrefCount} hrefs, ${audit.srcCount} srcs (proxy-only photos)`);
+  }
+
+  if (dryRun) {
+    console.log(`[dry] → ${userRow.email}: "${subject}" [variant ${subjectVariant}] (${events.length} events: ${fresh.length} new, ${drops.length} drops, ${statusChanges} off-market)${viewedCallout ? ' [viewed callout]' : ''}${quietSearch ? ' [quiet]' : ''}${audit.ok ? '' : ' [LINK AUDIT FAIL]'}`);
+    return {
+      sent: false,
+      events: events.length,
+      subject,
+      subjectVariant,
+      viewedCallout: !!viewedCallout,
+      quietSearch,
+      audit,
+      html: rawHtml,
+    };
+  }
+
+  // Pre-warm proxy cache for every card photo BEFORE send so recipient opens hit HIT.
+  const cardListings = [
+    ...fresh.map((e) => e.listing),
+    ...drops.map((e) => e.listing),
+  ];
+  try {
+    await prewarmPhotos(cardListings);
+  } catch (e) {
+    console.error('prewarmPhotos failed (continuing send):', e.message);
+  }
+
+  const tok = openToken();
+  const html = withOpenPixel(rawHtml, SITE, tok);
 
   const fromName = brand?.fromName || AGENT_FROM;
   await sendEmail(userRow.email, subject, html, fromName);
@@ -772,4 +973,14 @@ if (isMain) {
     .catch((e) => { console.error('alertDigest error:', e); process.exit(1); });
 }
 
-export { buildWhere, matchScore, featureHighlights };
+export {
+  buildWhere,
+  matchScore,
+  featureHighlights,
+  cardHtml,
+  digestHtml,
+  photoUrl,
+  prewarmPhotos,
+  auditEmailLinks,
+  MAX_CARD_PHOTOS,
+};

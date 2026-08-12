@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import SEO from "../components/SEO";
 import QualifyCta from "../components/QualifyCta";
 import SaveSearchModal from "../components/SaveSearchModal";
+import ScheduleShowingModal from "../components/ScheduleShowingModal";
 import { CITY_HOMES } from "../data/cityHomesData";
 import {
   formatPrice,
@@ -47,6 +48,7 @@ const API_BASE = (() => {
 
 export default function ListingDetailPage() {
   const { slug } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [listing, setListing] = useState(null);
   const [error, setError] = useState(null);
   const [similar, setSimilar] = useState([]);
@@ -55,6 +57,8 @@ export default function ListingDetailPage() {
   const [shareCopied, setShareCopied] = useState(false);
   const [showSaveLogin, setShowSaveLogin] = useState(false);
   const [pendingSaveAfterLogin, setPendingSaveAfterLogin] = useState(false);
+  const [autoOpenSchedule, setAutoOpenSchedule] = useState(false);
+  const deepLinkHandled = useRef(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -146,6 +150,42 @@ export default function ListingDetailPage() {
     document.body.classList.add("listing-detail-page");
     return () => document.body.classList.remove("listing-detail-page");
   }, []);
+
+  // Email deep-links: ?nadia=1 opens chat; ?schedule=1 opens showing modal.
+  // Must run before early returns (rules of hooks). Clears params after handle.
+  useEffect(() => {
+    if (!listing || deepLinkHandled.current) return;
+    const wantNadia = searchParams.get("nadia") === "1";
+    const wantSchedule = searchParams.get("schedule") === "1";
+    if (!wantNadia && !wantSchedule) return;
+    deepLinkHandled.current = true;
+
+    if (wantSchedule) setAutoOpenSchedule(true);
+
+    let t;
+    if (wantNadia) {
+      // Brief delay so LeadCaptureChat mounts its event listener.
+      t = setTimeout(() => {
+        const addr = listingFullAddress(listing);
+        window.dispatchEvent(
+          new CustomEvent("open-nadia-chat", {
+            detail: {
+              message: `Hi! I'm interested in ${addr} (${formatPrice(listing.list_price)}). Can you tell me more?`,
+            },
+          })
+        );
+      }, 450);
+    }
+
+    const next = new URLSearchParams(searchParams);
+    next.delete("nadia");
+    next.delete("schedule");
+    setSearchParams(next, { replace: true });
+
+    return () => {
+      if (t) clearTimeout(t);
+    };
+  }, [listing, searchParams, setSearchParams]);
 
   if (error) {
     return (
@@ -661,6 +701,11 @@ export default function ListingDetailPage() {
         askIntent
         showSuccess={false}
       />
+
+      {/* Email deep-link host for ?schedule=1 (trigger hidden; modal auto-opens). */}
+      {autoOpenSchedule && listing && (
+        <ScheduleShowingModal listing={listing} autoOpen hideTrigger />
+      )}
     </>
   );
 }
