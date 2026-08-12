@@ -17,6 +17,7 @@ const buyerProgramLinks = [
   { label: "G-HOPE Greeley (City Employees)", to: "/greeley-g-hope-down-payment-assistance/" },
   { label: "CHFA Schools To Home", to: "/chfa-schools-to-home/" },
   { label: "Champions Home Loan", to: "/colorado-champions-home-loan-program/" },
+  { label: "Veterans — VA Loans & 0.5% Back", to: "/veterans/" },
 ];
 
 const POLL_MS = 60_000;

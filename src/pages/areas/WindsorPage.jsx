@@ -7,6 +7,7 @@ import MarketReportForm from "../../components/MarketReportForm.jsx";
 import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
 import TopRatedSchools from "../../components/TopRatedSchools.jsx";
 import CityLuxurySection from "../../components/CityLuxurySection.jsx";
+import CityVeteransSection from "../../components/CityVeteransSection.jsx";
 
 export default function WindsorPage() {
   return (
@@ -200,6 +201,8 @@ export default function WindsorPage() {
 
         {/* Luxury Homes in Windsor */}
         <CityLuxurySection citySlug="windsor" />
+
+        <CityVeteransSection citySlug="windsor" />
 
         {/* Area Highlights */}
               {/* Neighborhood Guides */}

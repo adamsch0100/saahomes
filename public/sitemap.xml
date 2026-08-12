@@ -31,6 +31,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://saahomes.com/veterans/</loc>
+    <lastmod>2026-08-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
     <loc>https://saahomes.com/cash-home-buyers/</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>weekly</changefreq>
@@ -287,6 +293,18 @@
     <lastmod>2026-08-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://saahomes.com/blog/va-loan-colorado-guide/</loc>
+    <lastmod>2026-08-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.92</priority>
+  </url>
+  <url>
+    <loc>https://saahomes.com/blog/military-relocation-northern-colorado/</loc>
+    <lastmod>2026-08-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.92</priority>
   </url>
   <url>
     <loc>https://saahomes.com/blog/buying-a-home-in-fort-collins/</loc>

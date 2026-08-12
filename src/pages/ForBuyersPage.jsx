@@ -128,6 +128,14 @@ export default function ForBuyersPage() {
               <a href="/northern-colorado-areas/" className="text-black font-semibold hover:underline">Explore →</a>
             </div>
 
+            <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow border-2 border-[#CFB36E]/40">
+              <h3 className="text-2xl font-bold mb-4 font-serif">Veterans — VA Loans &amp; 0.5% Back</h3>
+              <p className="text-gray-700 mb-4">
+                0.5% of the purchase price back to veterans, plus VA loan guidance and military relocation help across Northern Colorado.
+              </p>
+              <a href="/veterans/" className="text-black font-semibold hover:underline">Veterans hub →</a>
+            </div>
+
             <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow border-2 border-[#CFB36E]/30">
               <h3 className="text-2xl font-bold mb-4 font-serif">Luxury Real Estate</h3>
               <p className="text-gray-700 mb-4">

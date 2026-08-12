@@ -13,7 +13,7 @@ Not "rank for some keywords." **Own the full demand capture system** for Larimer
 ### Pillar 1 — Local organic search (primary)
 - **19 city hub pages** at `/northern-colorado-areas/{slug}/` — each must rank for buyer AND seller intent in that city
 - **Hub-and-spoke internal linking:** every blog post, program page, and area page links to `/for-buyers/`, `/for-sellers/`, or `/contact/`
-- **Program cluster dominance:** CHFA DPA, Schools to Home, Champions — capture first-time and niche buyer searches nationally unique to Colorado
+- **Program cluster dominance:** CHFA DPA, Schools to Home, Champions, Veterans / VA loans (0.5% back) — capture first-time and niche buyer searches nationally unique to Colorado
 - **Long-tail blog offense:** 2–4 posts/month targeting queries competitors rank for that we don't
 
 ### Pillar 2 — Google Business Profile + local pack
@@ -64,7 +64,7 @@ Not "rank for some keywords." **Own the full demand capture system** for Larimer
 | Neighborhood long-tail | Old Town Fort Collins homes |
 | New construction | Timnath new construction homes |
 | Compare cities | Fort Collins vs Loveland cost of living |
-| Program niches | teacher home loan Colorado |
+| Program niches | teacher home loan Colorado, VA loan Fort Collins, veterans realtor Northern Colorado |
 
 ### Tier C — Feed the cluster (blog pipeline)
 Informational queries that internal-link to Tier S/A pages.

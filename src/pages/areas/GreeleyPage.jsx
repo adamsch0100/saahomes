@@ -8,6 +8,7 @@ import MarketReportForm from "../../components/MarketReportForm.jsx";
 import TopRatedSchools from "../../components/TopRatedSchools.jsx";
 import SectionTownsBand from "../../components/SectionTownsBand.jsx";
 import CityLuxurySection from "../../components/CityLuxurySection.jsx";
+import CityVeteransSection from "../../components/CityVeteransSection.jsx";
 
 export default function GreeleyPage() {
   return (
@@ -283,6 +284,12 @@ export default function GreeleyPage() {
       <section className="py-8 px-6 bg-white">
         <div className="max-w-4xl mx-auto">
           <CityLuxurySection citySlug="greeley" />
+        </div>
+      </section>
+
+      <section className="py-8 px-6 bg-white">
+        <div className="max-w-4xl mx-auto">
+          <CityVeteransSection citySlug="greeley" />
         </div>
       </section>
 

@@ -197,7 +197,7 @@ Competitive note: Veterans United (veteransunited.com — national SEO, no local
 ## GSC monitoring filters (cron)
 
 When GSC connected, pull weekly for property `https://saahomes.com/`:
-- Queries containing: `fort collins`, `loveland`, `windsor`, `greeley`, `weld`, `larimer`, `northern colorado`, `chfa`, `schwartz`, `saa homes`, **`luxury` (It 31), `assumable` / `assume mortgage` (It 32)**
-- Pages under `/northern-colorado-areas/`, `/for-sellers/`, `/for-buyers/`, `/chfa-`, `/blog/`, **`/luxury-real-estate/` (It 31), `/assumable-mortgages/` (It 32)**
+- Queries containing: `fort collins`, `loveland`, `windsor`, `greeley`, `weld`, `larimer`, `northern colorado`, `chfa`, `schwartz`, `saa homes`, **`luxury` (It 31), `assumable` / `assume mortgage` (It 32), `veteran` / `va loan` / `military` (It 35)**
+- Pages under `/northern-colorado-areas/`, `/for-sellers/`, `/for-buyers/`, `/chfa-`, `/blog/`, **`/luxury-real-estate/` (It 31), `/assumable-mortgages/` (It 32), `/veterans/` (It 35)**
 - Alert: position drop ≥8 positions AND impressions ≥10 (week over week)
 - Alert: page indexed → not indexed on any P0 URL

@@ -4,6 +4,204 @@ export const LATEST_MARKET_UPDATE_SLUG = 'northern-colorado-market-update-august
 
 export const blogPosts = [
   {
+    slug: 'va-loan-colorado-guide',
+    title: 'VA Loan Colorado Guide: How Veterans Buy in Northern Colorado (2026)',
+    excerpt: 'How VA loans work in Colorado — 0% down, no PMI, funding fee rules, the disabled-veteran property tax exemption, and SAA Homes’ 0.5% back pledge for veterans buying in Fort Collins, Loveland, Windsor, and Greeley.',
+    date: '2026-08-12',
+    category: 'Buyer Tips',
+    image: '/images/buyers-hero.jpg',
+    readTime: '11 min read',
+    keywords: 'VA loan Colorado, VA home loan Fort Collins, VA loan no down payment, buying a home with a VA loan, disabled veteran property tax exemption Colorado, VA loan assumption, veterans real estate agent Fort Collins, VA loan Loveland, VA loan Greeley, VA loan Windsor',
+    relatedLinks: [
+      { title: 'Veterans hub — 0.5% back', href: '/veterans/', description: 'VA loans, military relocation & the 0.5% pledge' },
+      { title: 'Assumable mortgages', href: '/assumable-mortgages/', description: 'VA loans can be assumed — see how it works' },
+      { title: 'Military relocation Northern Colorado', href: '/blog/military-relocation-northern-colorado/', description: 'PCS timelines, VA clinic & city fit' },
+      { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Grants & deferred loans if a VA loan is not the fit' },
+      { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & homes for sale' },
+      { title: 'Loveland homes for sale', href: '/northern-colorado-areas/loveland/', description: 'Home of the Northern Colorado VA Clinic' },
+      { title: 'Windsor homes for sale', href: '/northern-colorado-areas/windsor/', description: 'I-25 corridor family communities' },
+      { title: 'Greeley homes for sale', href: '/northern-colorado-areas/greeley/', description: 'Weld County value & VA 0% down' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Buyer representation & program hub' },
+    ],
+    cta: {
+      title: 'Ready to use a VA loan in Northern Colorado?',
+      description: 'Schwartz and Associates gives 0.5% of the purchase price back to veterans who buy with us — home warranty, closing costs, or a price reduction, disclosed in writing at closing. Call (970) 999-1407.',
+      primaryHref: '/veterans/',
+      primaryText: 'Veterans hub — 0.5% back',
+      secondaryHref: '/veterans/#veterans-lead-form',
+      secondaryText: 'Get VA loan guidance',
+    },
+    sections: [
+      {
+        heading: 'Why a VA loan still matters in Northern Colorado',
+        paragraphs: [
+          'A VA-backed purchase loan is one of the strongest home-buying tools available to people who served. The U.S. Department of Veterans Affairs does not require a down payment, does not require private mortgage insurance, and guarantees a portion of the loan so lenders can offer competitive rates. That combination is especially useful in Fort Collins, Loveland, Windsor, and Greeley, where cash-to-close — not just the list price — is what stops many buyers.',
+          'This guide covers how the loan works, how the funding fee and exemptions work, how a Certificate of Eligibility and a VA appraisal fit the Colorado contract, the state’s disabled-veteran property tax exemption, and the 0.5% benefit Schwartz and Associates gives veterans who buy with us. We cite VA.gov and Colorado veteran sources. We do not invent rates, funding-fee charts, or tax savings.',
+          'Official starting points: VA home loans (va.gov/housing-assistance/home-loans/) and the funding-fee page (va.gov/housing-assistance/home-loans/funding-fee-and-closing-costs/). Your VA-approved lender confirms the numbers on your file.',
+        ],
+        relatedLinks: [
+          { title: 'Veterans hub — 0.5% back', href: '/veterans/', description: 'Full VA + pledge page for Northern Colorado' },
+        ],
+      },
+      {
+        heading: 'How a VA loan works — 0% down, no PMI, occupancy required',
+        paragraphs: [
+          'VA does not require a down payment on a purchase loan. A lender may still ask for one in some cases based on credit, residual income, or the specific file. Ask that question before you write an offer — not after.',
+          'VA-backed loans do not require monthly private mortgage insurance. That is a structural difference from most low-down conventional loans and from FHA, which charges mortgage insurance. You will still have property taxes, homeowners insurance, and any HOA dues.',
+          'You must occupy the home as your primary residence. VA purchase loans are not for pure investment properties. The benefit can be used more than once over a lifetime when entitlement is available — your Certificate of Eligibility shows what you have left.',
+        ],
+        list: [
+          'Get a Certificate of Eligibility (your lender can usually pull it)',
+          'Interview a VA-approved lender and get a written pre-approval',
+          'Tour homes that can meet VA minimum property requirements',
+          'Write an offer with VA financing and the VA escape clause when required',
+          'Complete the VA appraisal plus an independent home inspection',
+          'Close and occupy the home as your primary residence',
+        ],
+      },
+      {
+        heading: 'Certificate of Eligibility, funding fee, and who pays nothing',
+        paragraphs: [
+          'A Certificate of Eligibility (COE) is how the VA shows a lender you have the home-loan benefit. Most VA-approved lenders request it electronically. You can also request one on VA.gov or with help from a county Veterans Service Officer in Fort Collins or Greeley.',
+          'Most borrowers pay a one-time VA funding fee. The percentage depends on whether this is a first use or a subsequent use and how much you put down. We do not publish a fee chart here because VA updates it — verify the current schedule on VA.gov with your lender. The fee can often be financed into the loan.',
+          'You do not pay a VA funding fee if you receive VA compensation for a service-connected disability, if you are eligible for that compensation but receive retirement or active-duty pay instead, or if you receive Dependency and Indemnity Compensation as a surviving spouse. Those exemption rules are from VA.gov, not from us. Any rating that qualifies you for disability compensation is the VA’s call — we will not tell you that you are exempt without the COE and lender confirming it.',
+        ],
+      },
+      {
+        heading: 'VA appraisal vs. a home inspection',
+        paragraphs: [
+          'Your lender orders a VA appraisal. It estimates market value at the time of inspection and checks VA minimum property requirements. It is not a home inspection and it is not a guaranty of value. You should still hire an independent inspector — and in older Northern Colorado housing, a sewer scope and radon test are common add-ons.',
+          'If the notice of value comes in below the contract price, you can renegotiate, bring cash to cover the gap if you choose, or walk. When the contract was signed before the notice of value, VA rules require an escape clause so you are not forced to complete the purchase above appraised value. We write that protection in. We never recommend waiving inspection to “win” a multiple-offer house.',
+        ],
+      },
+      {
+        heading: 'VA loans are assumable — a second way the benefit shows up',
+        paragraphs: [
+          'A qualified buyer can assume a seller’s VA-backed loan instead of originating a new one. In a higher-rate market, taking over a lower-rate VA loan can mean a substantially lower monthly payment than a new loan at today’s rates. The buyer still has to qualify. VA and the existing lender have assumption rules, and the seller should understand what happens to their entitlement after an assumption.',
+          'If you are buying, we will flag listings where an assumable VA (or FHA) loan may be in play. If you are selling a home with a VA loan, assumption can be a marketing advantage. See our assumable mortgages hub for the mechanics — we do not invent monthly savings.',
+        ],
+        relatedLinks: [
+          { title: 'Assumable mortgages', href: '/assumable-mortgages/', description: 'How VA and FHA assumption works in Colorado' },
+        ],
+      },
+      {
+        heading: 'Colorado disabled-veteran property tax exemption',
+        paragraphs: [
+          'Colorado offers a property tax exemption for qualifying disabled veterans and, on the state veterans site, Gold Star spouses. The commonly published rule is a 50% exemption on the first $200,000 of the home’s actual value for a veteran with a 100% permanent and total service-connected disability rating from the VA. That is a reduction in taxable value — not a check from SAA Homes.',
+          'File with your county assessor. Confirm current eligibility, deadlines, and any expansion (including Individual Unemployability, which some counties discuss) with the Colorado Department of Revenue and vets.colorado.gov/property-tax-exemption. We will point you to the county office. We will not invent a dollar savings on your tax bill.',
+        ],
+      },
+      {
+        heading: 'The 0.5% SAA Homes pledge — separate from the VA loan',
+        paragraphs: [
+          'Schwartz and Associates gives 0.5% of the purchase price back to veterans who buy with us. You choose how it is applied: a home warranty, a credit toward closing costs, or a price reduction. On a $500,000 purchase, 0.5% is $2,500. On a $600,000 purchase, 0.5% is $3,000. That is arithmetic of the offer — not a projected market return.',
+          'Colorado allows commission rebates when they are disclosed in writing at closing. We put the 0.5% on the closing statement. It is not an “up to” teaser, it is not a lender credit, and it is not a substitute for the VA funding-fee exemption. Veterans, active-duty service members, and National Guard / Reserve members who buy or sell with us qualify. We ask for straightforward proof of service — typically a DD-214, current LES, or VA COE.',
+        ],
+        relatedLinks: [
+          { title: 'Veterans hub — 0.5% back', href: '/veterans/', description: 'Who qualifies and how the pledge is disclosed' },
+        ],
+      },
+      {
+        heading: 'Using a VA loan in Fort Collins, Loveland, Windsor, and Greeley',
+        paragraphs: [
+          'Yes — you can use a VA loan in Fort Collins and the rest of Northern Colorado on an eligible primary residence. Condos must be on the VA-approved list; your lender checks that. Single-family homes and many townhomes are the more straightforward path.',
+          'Loveland is home to the Northern Colorado VA Clinic at 4575 Byrd Drive (Cheyenne VA Health Care, 970-593-3300). Windsor sits on the I-25 corridor between Fort Collins and Greeley and is a common fit for families who want newer housing and a short drive to that clinic. Greeley often offers a more accessible price point for a 0% down VA purchase, and the Weld County Veterans Service Office is in town (315 N. 11th Avenue, Building B, 970-400-3444). Larimer County’s VSO is in Fort Collins at 200 W. Oak Street, 5th Floor (970-498-7390).',
+          'Call SAA Homes at (970) 999-1407. Adam and Mandi Schwartz will connect you with a VA-approved lender, pull the search around your occupancy and report date, and apply the 0.5% benefit in writing at closing.',
+        ],
+        relatedLinks: [
+          { title: 'Fort Collins area guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods & VA section' },
+          { title: 'Loveland area guide', href: '/northern-colorado-areas/loveland/', description: 'VA Clinic city + homes for sale' },
+          { title: 'Military relocation guide', href: '/blog/military-relocation-northern-colorado/', description: 'PCS process for Northern Colorado' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'military-relocation-northern-colorado',
+    title: 'Military Relocation to Northern Colorado: PCS Guide for Fort Collins, Loveland, Windsor & Greeley',
+    excerpt: 'PCS to Northern Colorado with a local team that works your report date — remote tours, VA loans, the Loveland VA Clinic, county veteran offices, and SAA Homes’ 0.5% back pledge for veterans.',
+    date: '2026-08-12',
+    category: 'Local Guide',
+    image: '/images/moving-to-northern-colorado-with-kids.jpg',
+    readTime: '10 min read',
+    keywords: 'military relocation Northern Colorado, PCS to Fort Collins, moving to Loveland VA clinic, veterans realtor Windsor, PCS Greeley Colorado, VA loan Fort Collins, military family homes Northern Colorado, Northern Colorado VA Clinic',
+    relatedLinks: [
+      { title: 'Veterans hub — 0.5% back', href: '/veterans/', description: 'VA loans, 0.5% pledge & local veteran resources' },
+      { title: 'VA loan Colorado guide', href: '/blog/va-loan-colorado-guide/', description: '0% down, funding fee, COE & appraisal' },
+      { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & homes for sale' },
+      { title: 'Loveland homes for sale', href: '/northern-colorado-areas/loveland/', description: 'VA Clinic city — lakes & Thompson schools' },
+      { title: 'Windsor homes for sale', href: '/northern-colorado-areas/windsor/', description: 'I-25 corridor family communities' },
+      { title: 'Greeley homes for sale', href: '/northern-colorado-areas/greeley/', description: 'Weld County value & VSO in town' },
+      { title: 'Moving to Northern Colorado with kids', href: '/blog/moving-to-northern-colorado-with-kids/', description: 'Schools and family relocation notes' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Buyer representation & programs' },
+    ],
+    cta: {
+      title: 'PCS orders in hand — or still planning?',
+      description: 'SAA Homes works remote-friendly searches around your report date. Veterans who buy with us receive 0.5% of the purchase price back. Call (970) 999-1407.',
+      primaryHref: '/veterans/',
+      primaryText: 'Start with the veterans hub',
+      secondaryHref: '/veterans/#veterans-lead-form',
+      secondaryText: 'Talk through your PCS timeline',
+    },
+    sections: [
+      {
+        heading: 'PCS to the Front Range without buying the wrong house',
+        paragraphs: [
+          'Northern Colorado — Fort Collins, Loveland, Windsor, Greeley, and the I-25 towns between them — draws military families on orders, veterans leaving active duty, and Guard/Reserve households who want Front Range jobs without Denver prices. The mistake we see is treating the whole corridor as one market. School districts, commute, and distance to care are not interchangeable.',
+          'Schwartz and Associates runs a remote-friendly process: video walkthroughs, same-day offer strategy, and a contract calendar built around your report date. You do not have to be in Colorado to start. If renting first is the smarter move for your dates, we will say so.',
+        ],
+        relatedLinks: [
+          { title: 'Veterans hub — 0.5% back', href: '/veterans/', description: 'VA loans + the 0.5% pledge' },
+        ],
+      },
+      {
+        heading: 'A PCS-friendly timeline we can actually keep',
+        paragraphs: [
+          'We cannot promise a seven-day close. A VA purchase often lands in a similar 30–45 day window to other loan types once the Certificate of Eligibility, VA appraisal, and underwriting are in place. Orders, a delayed appraisal, or a condo that is not VA-approved can add time. We build the contract around your report date rather than inventing a number.',
+        ],
+        list: [
+          'Week 0: VA-approved lender pre-approval and COE — before you fly out',
+          'Week 1: Neighborhood shortlist by commute, schools, and VA Clinic distance',
+          'During house-hunting: live or video tours; we write when the right house hits',
+          'Under contract: independent inspection plus the lender-ordered VA appraisal',
+          'Close and occupy as your primary residence — or we help you stage a rent-back if dates slip',
+        ],
+      },
+      {
+        heading: 'Care and claims: clinic and county veteran offices',
+        paragraphs: [
+          'The Northern Colorado VA Clinic is at 4575 Byrd Drive, Loveland, CO 80538. Main phone: (970) 593-3300. It is an outpatient clinic under Cheyenne VA Health Care and serves veterans in Larimer and Weld counties. Confirm hours and services on va.gov before you plan around a specific appointment type — some services listed for other Cheyenne-system sites are not offered at every clinic.',
+          'Larimer County Veterans Service Office: 200 W. Oak Street, 5th Floor / Suite 5000, Fort Collins. Phone (970) 498-7390. Email larimerveterans@larimer.org. County VSOs help with VA claims, a Certificate of Eligibility, and state benefits.',
+          'Weld County Veterans Service Office: 315 N. 11th Avenue, Building B, Greeley, CO 80631. Phone (970) 400-3444. Email VSO@weld.gov. Useful if you are looking in Greeley, Evans, Eaton, or the Weld side of Windsor.',
+        ],
+      },
+      {
+        heading: 'Which city fits a military household',
+        paragraphs: [
+          'Fort Collins is the largest job and university market (Colorado State University, UCHealth, tech). It is often the first name people search. Inventory at the entry of the VA-loan price band can move quickly. South and east Fort Collins trade some Old Town walkability for newer housing and an easier run to I-25.',
+          'Loveland puts you closest to the VA Clinic. Thompson School District, lakes, and a slightly different price band than Fort Collins are the usual reasons families look here after the first weekend of tours.',
+          'Windsor sits on the county line between Larimer and Weld. Newer subdivisions, I-25 access, and a short drive to the Loveland clinic make it a frequent PCS shortlist city. Confirm school district boundaries house by house — they are not uniform across town.',
+          'Greeley often offers more house for the payment, which matters when you are using 0% down and watching residual income. UNC, a growing employment base, and the Weld VSO in town are the practical pluses. Drive it at commute hour before you decide.',
+        ],
+        relatedLinks: [
+          { title: 'Fort Collins vs Loveland vs Windsor', href: '/blog/fort-collins-vs-loveland-vs-windsor/', description: 'City comparison for buyers' },
+          { title: 'Weld vs Larimer County', href: '/blog/weld-county-vs-larimer-county-buyer-guide/', description: 'Taxes, prices & lifestyle' },
+        ],
+      },
+      {
+        heading: 'VA loan + 0.5% back when you buy with us',
+        paragraphs: [
+          'Eligible buyers can finance a Northern Colorado primary residence with a VA loan — typically no VA-required down payment and no monthly PMI. Pair that with a local agent who will not skip the inspection. Read the full VA loan Colorado guide for COE, funding-fee exemptions, and appraisal rules.',
+          'Schwartz and Associates gives 0.5% of the purchase price back to veterans, active-duty, and Guard/Reserve members who buy with us. You choose a home warranty, a credit toward closing costs, or a price reduction. It is disclosed in writing at closing. On a $500,000 purchase, 0.5% is $2,500. Call (970) 999-1407 or start on the veterans hub.',
+        ],
+        relatedLinks: [
+          { title: 'VA loan Colorado guide', href: '/blog/va-loan-colorado-guide/', description: 'Funding fee, COE, appraisal, 0.5% pledge' },
+          { title: 'Veterans hub', href: '/veterans/', description: 'Get your 0.5% veteran benefit' },
+        ],
+      },
+    ],
+  },
+  {
     slug: 'buying-a-home-in-fort-collins',
     title: 'Your Complete Guide to Buying a Home in Fort Collins, Colorado',
     excerpt: 'Fort Collins is one of Northern Colorado\'s most desirable cities. Here\'s what buyers need to know about neighborhoods, pricing, and the home buying process.',

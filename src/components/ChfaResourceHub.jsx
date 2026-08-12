@@ -26,6 +26,12 @@ const hubLinks = [
     description: "Expanded eligibility for first responders",
     badge: "Late 2026",
   },
+  {
+    title: "Veterans — VA Loans",
+    href: "/veterans/",
+    description: "0.5% back + VA loan guidance",
+    badge: "0.5% back",
+  },
 ];
 
 const blogGuides = [
@@ -44,6 +50,10 @@ const blogGuides = [
   {
     title: "Champions Program for First Responders",
     href: "/blog/colorado-champions-home-loan-first-responders/",
+  },
+  {
+    title: "VA Loan Colorado Guide",
+    href: "/blog/va-loan-colorado-guide/",
   },
 ];
 

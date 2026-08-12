@@ -8,6 +8,7 @@ import MarketReportForm from "../../components/MarketReportForm.jsx";
 import TopRatedSchools from "../../components/TopRatedSchools.jsx";
 import SectionTownsBand from "../../components/SectionTownsBand.jsx";
 import CityLuxurySection from "../../components/CityLuxurySection.jsx";
+import CityVeteransSection from "../../components/CityVeteransSection.jsx";
 
 export default function FortCollinsPage() {
   return (
@@ -224,6 +225,8 @@ export default function FortCollinsPage() {
 
         {/* Luxury Homes in Fort Collins */}
         <CityLuxurySection citySlug="fort-collins" />
+
+        <CityVeteransSection citySlug="fort-collins" />
 
         {/* Fort Collins Neighborhoods */}
         <NeighborhoodLinks citySlug="fort-collins" cityName="Fort Collins" />

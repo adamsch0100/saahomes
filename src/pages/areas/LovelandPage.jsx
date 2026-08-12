@@ -7,6 +7,7 @@ import MarketReportForm from "../../components/MarketReportForm.jsx";
 import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
 import TopRatedSchools from "../../components/TopRatedSchools.jsx";
 import CityLuxurySection from "../../components/CityLuxurySection.jsx";
+import CityVeteransSection from "../../components/CityVeteransSection.jsx";
 
 export default function LovelandPage() {
   return (
@@ -237,6 +238,8 @@ export default function LovelandPage() {
 
         {/* Luxury Homes in Loveland */}
         <CityLuxurySection citySlug="loveland" />
+
+        <CityVeteransSection citySlug="loveland" />
 
         {/* CTA */}
               {/* Neighborhood Guides */}

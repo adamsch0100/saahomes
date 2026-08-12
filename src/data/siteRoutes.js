@@ -80,6 +80,17 @@ const staticPages = [
     ogImageAlt: 'Luxury real estate in Northern Colorado — $1M+ homes',
   },
   {
+    path: '/veterans/',
+    priority: '0.95',
+    changefreq: 'weekly',
+    title: 'Veterans Real Estate Northern Colorado | VA Loans & 0.5% Back | SAA Homes',
+    description: 'Schwartz and Associates gives 0.5% of the purchase price back to veterans — home warranty, closing costs, or price reduction. VA loan guidance and military relocation for Fort Collins, Loveland, Windsor, and Greeley.',
+    ogTitle: 'Honoring Those Who Served — 0.5% Back to Every Veteran',
+    ogDescription: 'VA loans, military relocation, and 0.5% back to veterans across Northern Colorado. Schwartz and Associates. Call (970) 999-1407.',
+    ogImage: '/images/Fort-Collins-CO-Area-Guide.jpg',
+    ogImageAlt: 'Veterans real estate in Northern Colorado — VA loans and 0.5% back',
+  },
+  {
     path: '/cash-home-buyers/',
     priority: '0.8',
     changefreq: 'weekly',
@@ -266,7 +277,7 @@ const staticPages = [
 ].map(withShareMeta);
 
 function blogPriority(slug) {
-  if (slug.includes('chfa') || slug.includes('champions')) return '0.92';
+  if (slug.includes('chfa') || slug.includes('champions') || slug.includes('va-loan') || slug.includes('veteran') || slug.includes('military-relocation')) return '0.92';
   return '0.85';
 }
 

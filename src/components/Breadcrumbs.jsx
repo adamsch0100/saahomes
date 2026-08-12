@@ -9,6 +9,7 @@ const breadcrumbMap = {
   contact: "Contact Northern Colorado Realtors",
   "featured-areas": "Northern Colorado Communities",
   "luxury-real-estate": "Luxury Real Estate",
+  veterans: "Veterans Real Estate",
   "northern-colorado-areas": "Northern Colorado Communities",
   "fort-collins": "Fort Collins",
   loveland: "Loveland",
@@ -97,6 +98,11 @@ const customTrails = {
     { path: "/for-buyers/", label: "Colorado Home Buyers" },
     { path: "/northern-colorado-areas/greeley/", label: "Greeley, CO" },
     { path: "/greeley-g-hope-down-payment-assistance/", label: "G-HOPE Down Payment Assistance" },
+  ],
+  "/veterans": [
+    { path: "/", label: "Home" },
+    { path: "/for-buyers/", label: "Colorado Home Buyers" },
+    { path: "/veterans/", label: "Veterans Real Estate" },
   ],
   "/for-buyers": [
     { path: "/", label: "Home" },

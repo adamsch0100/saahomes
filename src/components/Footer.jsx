@@ -29,6 +29,7 @@ export default function Footer() {
                   <li><Link to="/chfa-down-payment-assistance/#city-county-programs" className="hover:text-white transition-colors">Down Payment Assistance</Link></li>
                   <li><Link to="/chfa-schools-to-home/" className="hover:text-white transition-colors">Schools To Home</Link></li>
                   <li><Link to="/colorado-champions-home-loan-program/" className="hover:text-white transition-colors">Champions Home Loan</Link></li>
+                  <li><Link to="/veterans/" className="hover:text-white transition-colors">Veterans — VA Loans & 0.5% Back</Link></li>
                 </ul>
               </li>
               <li><Link to="/for-sellers/" className="hover:text-white transition-colors">Sell Your Home</Link></li>
