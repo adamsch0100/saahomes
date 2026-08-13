@@ -150,6 +150,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/saas/vs-moxi-present.html",
         "/saas/vs-best-cma-software.html",
         "/saas/interactive-cma-software.html",
+        "/saas/cma-software-for-realtors.html",
         "/saas/changelog.html",
         "/blog/",
         "/saas/ll.css",
@@ -240,6 +241,7 @@ app.add_middleware(RateLimitMiddleware)
 app.add_middleware(AuthMiddleware)
 
 app.mount("/saas", StaticFiles(directory=str(ROOT / "saas"), html=True), name="saas")
+app.mount("/blog", StaticFiles(directory=str(ROOT / "blog"), html=True), name="blog")
 
 
 @app.on_event("startup")
