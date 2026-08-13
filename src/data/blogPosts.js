@@ -300,6 +300,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/moving-to-northern-colorado-with-kids.jpg',
     readTime: '10 min read',
+    youtubeId: 'YKFj3OK7VCg',
     keywords: 'military relocation Northern Colorado, PCS to Fort Collins, moving to Loveland VA clinic, veterans realtor Windsor, PCS Greeley Colorado, VA loan Fort Collins, military family homes Northern Colorado, Northern Colorado VA Clinic',
     relatedLinks: [
       { title: 'Veterans hub — 0.5% back', href: '/veterans/', description: 'VA loans, 0.5% pledge & local veteran resources' },
