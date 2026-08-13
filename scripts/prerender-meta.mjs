@@ -1268,6 +1268,38 @@ const MONEY_PAGE_CONTENT = {
       { q: 'How can SAA Homes help me buy with an assumable mortgage?', a: 'Schwartz and Associates flags listings where an assumable VA or FHA loan may be in play, connects you with VA-approved and FHA-experienced lenders who can underwrite the assumption, and negotiates the contract around the assumption timeline. Call (970) 999-1407.' },
     ],
   },
+  '/veterans/': {
+    sections: [
+      {
+        heading: 'Honoring Those Who Served — 0.5% Back to Every Veteran',
+        paragraphs: [
+          'VA loans, military relocation, and local expertise across Fort Collins, Loveland, Windsor, and Greeley.',
+          'Schwartz and Associates gives 0.5% of the purchase price back to veterans, applied however you choose: home warranty, closing costs, or price reduction.',
+          'This is a real offer from Adam and Mandi Schwartz — not an “up to” teaser. On a $500,000 home, 0.5% is $2,500. On a $600,000 home, 0.5% is $3,000. You tell us how to apply it.',
+        ],
+      },
+      {
+        heading: 'How a VA loan actually works',
+        paragraphs: [
+          'Facts from VA.gov. We do not invent rates, funding-fee charts, or closing timelines. Your VA-approved lender confirms the numbers on your file.',
+          'VA does not require a down payment on a purchase loan. A lender may still ask for one in some cases — we help you confirm that with a VA-approved lender before you write an offer.',
+          'VA-backed loans do not require private mortgage insurance. That is a real monthly savings versus most low-down conventional or FHA loans.',
+        ],
+      },
+    ],
+    cta: {
+      title: 'Get your 0.5% veteran benefit + VA loan guidance',
+      text: 'Adam and Mandi Schwartz — Schwartz and Associates, Coldwell Banker Realty. Call (970) 999-1407.',
+    },
+    faqs: [
+      { q: "Can I use a VA loan in Fort Collins?", a: "Yes. A VA-backed purchase loan can be used on an eligible primary residence in Fort Collins and throughout Northern Colorado — including Loveland, Windsor, and Greeley — if you have a Certificate of Eligibility and you and the property meet VA and lender requirements. The home must be your primary residence. Confirm property eligibility (including condos on the VA-approved list) with a VA-approved lender." },
+      { q: "What does 0.5% back actually mean for me?", a: "Schwartz and Associates gives 0.5% of the purchase price back to veterans who buy with us. On a $500,000 purchase, 0.5% is $2,500. On a $600,000 purchase, 0.5% is $3,000. You choose how it is applied: a home warranty, a credit toward closing costs, or a price reduction. It is disclosed in writing at closing, as Colorado requires for commission rebates. It is not an 'up to' offer and it is not a lender credit." },
+      { q: "Do I need a down payment with a VA loan?", a: "VA does not require a down payment. Some lenders may still ask for one depending on credit, residual income, or the specific file. You will usually pay closing costs unless the seller or lender covers some of them. We help you compare a true 0% down path with any lender conditions before you write an offer." },
+      { q: "Can my spouse co-borrow?", a: "A spouse can typically be on a VA loan with you. Adding a non-spouse co-borrower is more limited and depends on VA and lender rules. Surviving spouses may have a separate VA home-loan benefit. Confirm occupancy, entitlement, and who can be on the note with a VA-approved lender — we will introduce you to one." },
+      { q: "What's the Colorado disabled veteran property tax exemption?", a: "Colorado's disabled-veteran property tax exemption typically exempts 50% of the first $200,000 of actual value on a qualifying primary residence. The core eligibility on the state veterans site is a 100% permanent and total service-connected disability rating from the VA; Gold Star spouses may also qualify. File with your county assessor and confirm current rules with the Colorado Department of Revenue or vets.colorado.gov — we do not invent tax numbers or file the exemption for you." },
+      { q: "How fast can I close with a VA loan?", a: "A VA purchase often closes on a similar 30–45 day timeline to other loan types once your Certificate of Eligibility, VA appraisal, and underwriting are in place. PCS orders, a delayed appraisal, or a condo approval can add time. We build the contract around your report date rather than promising a number we cannot control. Confirm current timelines with your lender." },
+    ],
+  },
 };
 
 function matchMoneyPage(path) {
@@ -1650,7 +1682,7 @@ function buildRouteSchemas(route) {
     });
   }
 
-  // Cash Home Buyers and Luxury pages are handled via MONEY_PAGE_CONTENT faqs above
+  // Cash Home Buyers, Luxury, and Veterans pages are handled via MONEY_PAGE_CONTENT faqs above
 
   return schemas;
 }
