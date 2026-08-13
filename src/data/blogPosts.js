@@ -185,6 +185,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/buyers-hero.jpg',
     readTime: '11 min read',
+    youtubeId: '7QaBphDDITc',
     keywords: 'VA loan Colorado, VA home loan Fort Collins, VA loan no down payment, buying a home with a VA loan, disabled veteran property tax exemption Colorado, VA loan assumption, veterans real estate agent Fort Collins, VA loan Loveland, VA loan Greeley, VA loan Windsor',
     relatedLinks: [
       { title: 'Veterans hub — 0.5% back', href: '/veterans/', description: 'VA loans, military relocation & the 0.5% pledge' },
