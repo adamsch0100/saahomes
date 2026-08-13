@@ -1281,6 +1281,121 @@ export const blogPosts = [
     ],
   },
   {
+    slug: 'short-sale-fort-collins-colorado',
+    title: 'Short Sale in Fort Collins, CO: A Complete Guide for Homeowners and Buyers | SAA Homes',
+    excerpt: 'Facing an underwater mortgage in Fort Collins? Learn how a short sale works in Colorado, the short sale timeline, the credit impact, and how SAA Homes helps homeowners and buyers navigate short sales in Larimer County.',
+    date: '2026-08-13',
+    category: 'Seller Tips',
+    image: '/images/foreclosure-short-sale-northern-colorado-guide.jpg',
+    readTime: '9 min read',
+    keywords: 'short sale fort collins, fort collins short sale, how to short sale my home fort collins, short sale vs foreclosure colorado, short sale process colorado, underwater mortgage fort collins, distressed home sale fort collins, cash home buyers fort collins, sell my house fast fort collins',
+    relatedLinks: [
+      { title: 'Foreclosure & Short Sale Guide', href: '/blog/foreclosure-short-sale-northern-colorado-guide/', description: 'The full Northern Colorado process' },
+      { title: 'Cash Home Buyers & Foreclosure Help', href: '/cash-home-buyers/', description: 'Free consultation for distressed sellers' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Full-service listing & short sale expertise' },
+      { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Larimer County neighborhoods, schools & market data' },
+      { title: 'Free Home Valuation', href: '/for-sellers/#home-valuation', description: 'See what your home is worth today' },
+    ],
+    faqs: [
+      { q: 'What is a short sale in real estate?', a: 'A short sale is a home sale where the mortgage lender agrees to accept less than the full amount owed on the loan. It is used when a home is worth less than the remaining mortgage balance and the owner can no longer keep up with the payments.' },
+      { q: 'How long does a short sale take in Colorado?', a: 'Most Colorado short sales take 60 to 120 days from accepted offer to closing, though files with multiple liens or slow lender responses can run longer. Acting early and submitting a complete hardship package speeds up the process.' },
+      { q: 'Is a short sale better than foreclosure for my credit?', a: 'In most cases, yes. A foreclosure can drop a credit score by 200 to 300 points and remain on a credit report for seven years, while a short sale typically causes a smaller drop and may allow a return to homeownership through FHA financing in as little as two to three years.' },
+      { q: 'Do I need to be behind on my mortgage to short sale my home?', a: 'Not always, but most lenders require a demonstrated financial hardship and evidence that you can no longer afford the payments. Some lenders will consider a short sale before you miss a payment if the hardship is documented.' },
+      { q: 'Can I buy a short sale home in Fort Collins?', a: 'Yes. Short sale homes can be a way to buy below market value, but the process is slower and the lender must approve the price. Working with a buyer agent who understands short sales is essential.' },
+      { q: 'What are the tax implications of a short sale in Colorado?', a: 'Forgiven mortgage debt can be treated as taxable income in some cases, though the Mortgage Forgiveness Debt Relief Act and the insolvency exclusion may reduce or eliminate the tax bill. Review your specific situation with a qualified tax professional.' },
+    ],
+    sections: [
+      {
+        heading: 'What is a short sale in Fort Collins?',
+        paragraphs: [
+          'A short sale is a home sale in which the mortgage lender agrees to accept less than the full amount owed on the loan. It is an option when a home is worth less than what the owner still owes — a situation called an underwater mortgage — and the owner can no longer keep up with the payments.',
+          'Fort Collins remains one of the strongest housing markets in Northern Colorado, but financial hardship does not care about ZIP code. Job loss, medical bills, a divorce, the death of a co-borrower, or an adjustable-rate mortgage reset can leave even a well-employed homeowner owing more than the home is worth.',
+          'Colorado is a non-judicial foreclosure state, which means the timeline from missed payment to public auction moves faster than in many other states. If you are a Fort Collins or Larimer County homeowner facing this situation, a short sale may let you sell the home, satisfy the lender, and move forward with far less long-term damage than a completed foreclosure.',
+        ],
+      },
+      {
+        heading: 'Short sale vs foreclosure: what is the difference?',
+        paragraphs: [
+          'The single biggest difference between a short sale and a foreclosure is control. In a short sale, you choose to sell the home and negotiate with the lender to accept the shortfall. In a foreclosure, the lender takes the home back through a public auction after you have already lost the ability to control the outcome.',
+          'A foreclosure can drop a credit score by 200 to 300 points and stays on a credit report for seven years, with a conventional mortgage often unavailable for seven years afterward. A short sale typically causes a smaller credit drop and may allow a return to homeownership through FHA financing in as little as two to three years. A short sale also keeps the process private, while a foreclosure auction is a matter of public record at the Larimer County courthouse.',
+        ],
+        list: [
+          'Short sale: you sell with lender approval, smaller credit hit, may buy again sooner',
+          'Foreclosure: lender takes the home at auction, 200 to 300 point credit drop, seven-year mark on credit',
+          'Deed in lieu: you hand the deed back, lender must agree, generally a last resort',
+        ],
+      },
+      {
+        heading: 'How the short sale process works in Colorado',
+        paragraphs: [
+          'A Colorado short sale generally follows these steps, from listing to closing. The process typically takes 60 to 120 days, though complex files with multiple liens can run longer.',
+        ],
+        list: [
+          'List the home with an agent who has short sale and lender negotiation experience',
+          'Receive and accept an offer from a qualified buyer',
+          'Submit the offer along with a hardship package — proof of income, bank statements, tax returns, and a hardship letter — to the lender',
+          'The lender orders a Broker Price Opinion (BPO) to confirm the current value of the home',
+          'The lender approves the short sale, counters the price, or rejects the offer',
+          'Close the sale and release the lien; any remaining balance is handled per the approval terms',
+        ],
+      },
+      {
+        heading: 'For homeowners: how to short sale your Fort Collins home',
+        paragraphs: [
+          'To qualify for a short sale, most lenders want to see three things: the home is worth less than what is owed, a genuine financial hardship exists, and the hardship is not expected to resolve in the near term. Common qualifying hardships include job loss or reduced income, serious illness or disability, divorce or separation, the death of a co-borrower, and a major increase in expenses such as an adjustable-rate mortgage reset.',
+          'The credit impact of a short sale is real but usually smaller than a foreclosure, and the timeline to buy again is shorter. On the tax side, forgiven mortgage debt can be treated as taxable income in some cases, though the Mortgage Forgiveness Debt Relief Act and the insolvency exclusion may reduce or eliminate the tax bill. SAA Homes always recommends you review your specific situation with a qualified tax professional before committing to a short sale.',
+          'In Fort Collins specifically, strong buyer demand means a well-priced short sale can often find a buyer quickly once the lender approves the terms. Working with an agent who understands both the local market and the lender negotiation process is the single most important step you can take.',
+        ],
+        relatedLinks: [
+          { title: 'Free Consultation - Short Sale Help', href: '/cash-home-buyers/#cash-offer-form', description: 'No-obligation, confidential' },
+        ],
+      },
+      {
+        heading: 'For buyers: how to buy a short sale home in Fort Collins',
+        paragraphs: [
+          'Short sale homes are often priced below comparable market listings, but the process requires patience. Because the lender must approve the price, closing can take 60 to 120 days or more, and the lender may counter the offer even after you and the seller agree.',
+        ],
+        list: [
+          'Get pre-approved before you offer, so the lender sees you as a serious, qualified buyer',
+          'Work with a buyer agent who has short sale experience and can manage lender communication',
+          'Expect a longer timeline and build that into your move schedule',
+          'Still complete a full home inspection and review the title work — short sale homes are sold as-is in most cases',
+          'Be ready for the lender to counter the price or ask you to cover certain fees',
+        ],
+      },
+      {
+        heading: 'The Fort Collins short sale market in 2026',
+        paragraphs: [
+          'Fort Collins short sales are relatively rare compared to other markets because home values here have held up well, but they do occur — most often when an individual home is underwater due to a recent purchase at a market peak or a cash-out refinance. When a Fort Collins short sale does hit the market, buyer interest is usually strong because the city combines CSU energy, top-rated schools, and easy access to the foothills.',
+          'Fort Collins spans a wide range of neighborhoods, from historic Old Town to newer communities along the Harmony Road and I-25 corridors. Home values and buyer demand vary by neighborhood, so an accurate Broker Price Opinion and a realistic list price are essential to getting a short sale approved. Nearby Windsor, Loveland, and Timnath are separate municipalities with their own markets — if you are considering a short sale or a short sale purchase in one of those communities, the same process applies but the local numbers differ.',
+        ],
+        relatedLinks: [
+          { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & pricing' },
+        ],
+      },
+      {
+        heading: 'How Schwartz and Associates helps with Fort Collins short sales',
+        paragraphs: [
+          'Short sales are different from traditional transactions. The stakes are higher, the timeline is tighter, and the lender negotiation is more complex. Having an experienced local agent on your side makes a measurable difference in whether a short sale gets approved and how cleanly it closes.',
+          'Adam and Mandi Schwartz bring more than 20 years of combined Northern Colorado real estate experience, including helping homeowners across all 19 Northern Colorado communities navigate short sales, pre-foreclosure sales, and cash buyer solutions. Our process starts with a confidential, no-obligation consultation. We review your situation, explain the timeline, and outline every option — short sale, pre-foreclosure sale, cash sale, or a traditional listing. There is no judgment, no pressure, and no cost to learn what is possible.',
+          'Call (970) 999-1407 or visit our cash home buyers page to start the conversation. The earlier you reach out, the more options you have.',
+        ],
+        relatedLinks: [
+          { title: 'Get Help Now - Free Consultation', href: '/cash-home-buyers/#cash-offer-form', description: 'Confidential' },
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
+        ],
+      },
+    ],
+    cta: {
+      title: 'Facing a short sale or underwater mortgage in Fort Collins?',
+      description: 'Adam and Mandi Schwartz help Fort Collins homeowners navigate short sales, pre-foreclosure sales, and cash buyer solutions with confidentiality and no judgment. Call (970) 999-1407 for a free, no-obligation consultation.',
+      primaryHref: '/contact/',
+      primaryText: 'Get Short Sale Help',
+      secondaryHref: '/cash-home-buyers/',
+      secondaryText: 'Explore Cash Offer Options',
+    },
+  },
+  {
     slug: 'weld-county-vs-larimer-county-buyer-guide',
     title: 'Weld County vs Larimer County: Northern Colorado Home Buyer Guide',
     excerpt: 'Should you buy in Weld or Larimer County? Compare Greeley and Evans value against Fort Collins, Loveland, and Windsor — plus CHFA limits and commute tradeoffs.',
