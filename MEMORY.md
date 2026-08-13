@@ -453,3 +453,40 @@ Week of 2026-08-03:
 - **/cash-home-buyers/**: "cash for houses arapahoe county co" (1)
 - **/blog/chfa-down-payment-assistance-colorado-2026/**: "chfa first gen grant amount 2025" (1)
 *Report generated: 2026-08-10T14:32:30.529664*
+
+## Daily Ranking Strike — 2026-08-13
+
+### ⚠️ P0 — Pages No Longer Indexed
+
+| Page | Previous Impressions | Previous Clicks | Top Queries |
+|------|---------------------|-----------------|-------------|
+| https://saahomes.com/northern-colorado-areas/firestone/barefoot-lakes-firestone/ | 5 | 0 | barefoot lakes park, barefoot lakes by richmond american homes, barefoot colorado |
+| https://saahomes.com/northern-colorado-areas/loveland/northgate-loveland/ | 5 | 0 | northgate apartments |
+
+*Report generated: 2026-08-13T13:10:16.051979*
+
+## Daily Ranking Strike — 2026-08-13
+
+### ⚠️ P0 — Pages No Longer Indexed
+
+| Page | Previous Impressions | Previous Clicks | Top Queries |
+|------|---------------------|-----------------|-------------|
+| https://saahomes.com/northern-colorado-areas/firestone/barefoot-lakes-firestone/ | 5 | 0 | barefoot colorado, barefoot lakes park, barefoot lakes firestone |
+| https://saahomes.com/northern-colorado-areas/loveland/northgate-loveland/ | 5 | 0 | northgate apartments |
+
+*Report generated: 2026-08-13T13:11:22.491499*
+
+## GEO AUDIT SCORECARD (2026-08-13)
+
+- Area pages with FAQPage schema: 19/19 deployed
+- City FAQ pairs: 19 cities, 2-6 pairs each
+- ForBuyers FAQPage schema: Yes (deployed, 6 FAQ pairs)
+- ForSellers FAQPage schema: Yes (deployed, FAQ pairs)
+- Properties FAQPage + ItemList: Yes (deployed)
+- CHFA page FAQPage + HowTo + ItemList (prerendered): Yes (/chfa-down-payment-assistance/)
+- Veterans / Cash Buyers / Luxury FAQPage: Yes (deployed)
+- Homepage/About/Contact AggregateRating + Review: Yes (6 real Google reviews, 5.0 avg, prerendered)
+- Listing RealEstateListing + availability (MLS status mapping): Yes (InStock/LimitedAvailability/OutOfStock/Discontinued)
+- Blog posts with FAQPage schema: 23/64 before audit -> 31/64 after (8 posts + 36 FAQ pairs added)
+- PR shipped: hermes/seo-2026-08-13-geo-blog-faqs
+- Next gap: 33 blog posts still lack FAQPage schema (older/market-update posts); CHFA SchoolsToHome/Champions/G-Hope FAQPage in prerendered HTML; competitor GEO tracking

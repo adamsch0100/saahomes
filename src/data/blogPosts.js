@@ -30,6 +30,13 @@ export const blogPosts = [
       secondaryHref: '/assumable-mortgages/#assumable-lead-form',
       secondaryText: 'Get assumable mortgage help',
     },
+    faqs: [
+      { q: 'What is an assumable mortgage?', a: 'An assumable mortgage lets a qualified buyer take over the seller’s existing home loan — the interest rate, remaining balance, and remaining term — instead of originating a new mortgage at today’s rates.' },
+      { q: 'Are VA loans assumable?', a: 'Yes. VA-backed loans are assumable by qualified buyers, veteran or not. The VA guarantee stays with the loan. A non-veteran typically pays the VA assumption funding fee (0.5% of the remaining balance for most buyers — confirm the current rate with the lender).' },
+      { q: 'Are FHA loans assumable?', a: 'Yes, with lender approval. The buyer must meet FHA credit and income requirements, then steps into the seller’s FHA rate and remaining term. A small processing fee may apply.' },
+      { q: 'Are conventional loans assumable?', a: 'Generally no. Conventional loans usually carry a due-on-sale clause that requires the loan to be paid off when the property changes hands.' },
+      { q: 'How do I find assumable homes in Northern Colorado?', a: 'Use the Assumable filter on saahomes.com/properties/. The IRES MLS feed has no structured assumable-loan field, so we flag listings whose remarks contain assumable language — every flagged listing still has to be confirmed with the lender.' },
+    ],
     sections: [
       {
         heading: 'What an assumable mortgage actually is',
@@ -206,6 +213,14 @@ export const blogPosts = [
       secondaryHref: '/veterans/#veterans-lead-form',
       secondaryText: 'Get VA loan guidance',
     },
+    faqs: [
+      { q: 'Can I use a VA loan to buy a home in Fort Collins?', a: 'Yes. VA-backed purchase loans work on eligible primary residences throughout Northern Colorado, including Fort Collins, Loveland, Windsor, and Greeley. Condos must be on the VA-approved list — your lender checks that — while single-family homes and most townhomes qualify.' },
+      { q: 'Do VA loans require a down payment in Colorado?', a: 'The VA does not require a down payment on purchase loans. A lender may still ask for one in some cases based on credit, residual income, or the specific file — ask that question before you write an offer, not after.' },
+      { q: 'Do VA loans require PMI?', a: 'No. VA-backed loans do not require monthly private mortgage insurance. That is a structural difference from most low-down conventional loans and from FHA, which charges mortgage insurance.' },
+      { q: 'What is the VA funding fee and who pays it?', a: 'Most borrowers pay a one-time VA funding fee. The percentage depends on whether this is a first or subsequent use and how much you put down. VA updates the fee schedule — verify the current rate with the VA or your lender. Some disabled veterans are exempt.' },
+      { q: 'What is the Colorado disabled-veteran property tax exemption?', a: 'Colorado offers a property tax exemption for qualifying disabled veterans — commonly a 50% exemption on the first $200,000 of the home’s actual value. File with your county assessor and confirm current eligibility with the Colorado Department of Revenue.' },
+      { q: 'Does SAA Homes give veterans anything extra?', a: 'Schwartz and Associates gives 0.5% of the purchase price back to veterans who buy with us — applied as a home warranty, a credit toward closing costs, or a price reduction, disclosed in writing at closing.' },
+    ],
     sections: [
       {
         heading: 'Why a VA loan still matters in Northern Colorado',
@@ -320,6 +335,12 @@ export const blogPosts = [
       secondaryHref: '/veterans/#veterans-lead-form',
       secondaryText: 'Talk through your PCS timeline',
     },
+    faqs: [
+      { q: 'Can I buy a home in Northern Colorado while stationed out of state?', a: 'Yes. Schwartz and Associates runs a remote-friendly process: video walkthroughs, same-day offer strategy, and a contract calendar built around your report date. You do not have to be in Colorado to start.' },
+      { q: 'How long does a VA home purchase take during a PCS?', a: 'A VA purchase often lands in a similar 30–45 day window to other loan types once the Certificate of Eligibility, VA appraisal, and underwriting are in place. Starting pre-approval and the COE early keeps the timeline on track.' },
+      { q: 'Which Northern Colorado city is best for a military family?', a: 'Fort Collins is the largest job and university market. Loveland puts you closest to the Northern Colorado VA Clinic at 4575 Byrd Drive. Windsor and Greeley offer different price bands and commutes. Choose by commute, schools, and VA Clinic distance.' },
+      { q: 'Do veterans get a rebate buying with SAA Homes?', a: 'Yes — Schwartz and Associates gives 0.5% of the purchase price back to veterans, active-duty, and Guard/Reserve members who buy with us. You choose a home warranty, a credit toward closing costs, or a price reduction.' },
+    ],
     sections: [
       {
         heading: 'PCS to the Front Range without buying the wrong house',
@@ -395,6 +416,12 @@ export const blogPosts = [
       { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'SmartStep, Preferred, FirstStep & more' },
       { title: 'CHFA for Northern Colorado Buyers', href: '/blog/chfa-first-time-homebuyer-northern-colorado/', description: 'Fort Collins, Greeley & Larimer County limits' },
       { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
+    ],
+    faqs: [
+      { q: 'What is the first step to buying a home in Fort Collins?', a: 'Start with mortgage pre-approval so you know your budget in today’s rate environment. Then define your must-haves — bedrooms, yard, garage, commute, and timeline — and work with a local buyer’s agent.' },
+      { q: 'What are the best neighborhoods in Fort Collins?', a: 'Old Town Fort Collins offers walkability, restaurants, and historic charm. South Fort Collins provides newer construction and strong school access. Areas near Harmony Road and Timberline attract families looking for space and convenience.' },
+      { q: 'How much do I need for a down payment in Fort Collins?', a: 'Down payment needs vary by loan type and price point. Colorado buyers may qualify for CHFA down payment assistance — including grants up to $25,000, deferred second mortgages, and specialty programs for educators and first responders.' },
+      { q: 'Is Fort Collins competitive for buyers?', a: 'Homes can receive multiple offers quickly in competitive segments. Your agent should help you evaluate comparable sales, inspection contingencies, and appraisal risk before you submit.' },
     ],
     sections: [
       {
@@ -512,6 +539,12 @@ export const blogPosts = [
       { title: 'Windsor homes for sale', href: '/northern-colorado-areas/windsor/', description: 'Weld-Larimer border family communities' },
       { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & CHFA guidance' },
       { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Grants up to $25K for qualified buyers' },
+    ],
+    faqs: [
+      { q: 'How can I sell my home fast in Northern Colorado?', a: 'Price to the current market, not last year. Clean landscaping, fresh paint, decluttered rooms, and professional photos dramatically increase showing activity, and a comparative market analysis from a local agent gives you a realistic launch price.' },
+      { q: 'Should I make repairs before selling?', a: 'Address obvious repair items and gather documents buyers and appraisers may request: HOA info, recent upgrades, and utility averages. Buyers form opinions within seconds of seeing your listing online.' },
+      { q: 'How is my home’s value determined?', a: 'By what buyers are willing to pay today, based on recent comparable sales in your neighborhood. Emotional attachment and outdated Zestimates can lead to costly overpricing.' },
+      { q: 'How do I get multiple offers?', a: 'Multiple offers are possible when pricing, presentation, and timing align. Your agent should compare not just price, but financing strength, contingencies, and closing timeline.' },
     ],
     sections: [
       {
@@ -675,6 +708,12 @@ export const blogPosts = [
       secondaryHref: '/contact/',
       secondaryText: 'Contact SAA Homes',
     },
+    faqs: [
+      { q: 'What are the CHFA income limits in Larimer County?', a: 'Larimer County income limits typically range from approximately $130,000 to $156,000+ for 1–2 person households, depending on the program and whether the property is in a targeted area. Targeted areas offer higher limits.' },
+      { q: 'What are the CHFA income limits in Weld County?', a: 'Weld County generally offers higher income limits — many CHFA programs allow approximately $153,600 to $179,200 for 1–2 person households, with higher limits for larger families.' },
+      { q: 'Which CHFA program is best for first-time buyers in Northern Colorado?', a: 'Most first-time buyers start with CHFA SmartStep Plus (FHA with grant or second DPA) or FirstStep Plus (FHA for first-time buyers). First-generation buyers should ask about FirstGeneration Plus, which can provide up to $25,000 in assistance.' },
+      { q: 'Can I use CHFA in Windsor?', a: 'Yes — Windsor spans both Weld and Larimer counties, so the limits for your purchase depend on the exact property location. Work with a local agent and lender familiar with Northern Colorado CHFA rules.' },
+    ],
     sections: [
       {
         heading: 'Why Northern Colorado buyers use CHFA',
@@ -1256,6 +1295,12 @@ export const blogPosts = [
     image: '/images/Fort-Collins-CO-Area-Guide.jpg',
     readTime: '9 min read',
     youtubeId: 'fv7qzZdzIAE',
+    faqs: [
+      { q: 'Is Fort Collins or Loveland more affordable?', a: 'Fort Collins draws CSU, tech, and outdoor-lifestyle buyers with the highest Larimer County price points. Loveland balances value and amenities near $500K medians. Compare monthly payment — not list price alone — especially when CHFA changes your down payment requirement.' },
+      { q: 'Is Windsor more expensive than Fort Collins?', a: 'Windsor offers family-focused appeal with newer construction at competitive Larimer prices, but inventory varies. The right city depends on budget, commute, and school priorities — there is no universal winner.' },
+      { q: 'Which city has the best schools?', a: 'School priorities differ by family. Tour all three cities on the same day if possible, and note commute routes, school boundaries, and HOA rules. SAA Homes provides side-by-side market reports for Fort Collins, Loveland, and Windsor.' },
+      { q: 'Can I use CHFA in any of these cities?', a: 'Yes — Larimer County (Fort Collins, Loveland) and Weld County (parts of Windsor) have CHFA limits, and some neighborhoods qualify as targeted areas with higher income limits. Compare monthly payment rather than list price alone.' },
+    ],
     sections: [
       {
         heading: 'Three cities, three buyer profiles',
@@ -3470,6 +3515,13 @@ export const blogPosts = [
       secondaryHref: '/for-sellers/',
       secondaryText: 'Download the full report',
     },
+    faqs: [
+      { q: 'What is the median home price in Fort Collins?', a: 'The median single-family home price held at approximately $610,000 in July 2026, with condos and townhomes around $385,000. Days on market averaged 40 days for single-family homes.' },
+      { q: 'What is the median home price in Loveland?', a: 'Loveland’s July 2026 median sale price was approximately $510,000, up 3.6% year-over-year. Homes priced between $400,000 and $550,000 average 22 days on market.' },
+      { q: 'What is the median home price in Windsor?', a: 'Windsor commanded the highest median among the four major Northern Colorado markets at approximately $588,000 in July 2026 (up 2.1% year-over-year). Days on market extended to 45 days.' },
+      { q: 'What is the median home price in Greeley?', a: 'Greeley’s July 2026 median sale price was approximately $432,000 — essentially flat year-over-year. Homes under $400,000 in move-in condition are the fastest-moving segment, often under contract within 10–14 days.' },
+      { q: 'Is it a good time to buy or sell in Northern Colorado?', a: 'The late-summer 2026 market offers the most favorable conditions for buyers since early 2022 — inventory is up and sellers are more willing to negotiate. Sellers who price from the most recent 90 days of comps and present well continue to attract competitive interest.' },
+    ],
     sections: [
       {
         heading: 'Northern Colorado\'s late-summer housing market: stability with growing buyer leverage',
