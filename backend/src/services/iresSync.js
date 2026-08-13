@@ -420,7 +420,12 @@ const LISTING_UPSERT_SQL = `
     year_built = EXCLUDED.year_built, garage_spaces = EXCLUDED.garage_spaces,
     hoa_fee = EXCLUDED.hoa_fee, description = EXCLUDED.description,
     assumable = EXCLUDED.assumable,
-    photos = EXCLUDED.photos, photos_count = EXCLUDED.photos_count,
+    -- Preserve R2-durable photo URLs: the full daily sync re-imports raw
+    -- MLS signed URLs (expire ~60 min). Listings already backfilled to R2
+    -- (photos[1] LIKE '%r2.dev%') must keep their permanent URLs or every
+    -- 03:00 full sync undoes the backfill (Aug 13: 334/39,669 durable).
+    photos = CASE WHEN listings.photos::text LIKE '%r2.dev%' THEN listings.photos ELSE EXCLUDED.photos END,
+    photos_count = CASE WHEN listings.photos::text LIKE '%r2.dev%' THEN listings.photos_count ELSE EXCLUDED.photos_count END,
     latitude = EXCLUDED.latitude, longitude = EXCLUDED.longitude,
     listing_url = EXCLUDED.listing_url, mls_source = EXCLUDED.mls_source,
     elementary_school = EXCLUDED.elementary_school, middle_school = EXCLUDED.middle_school,
