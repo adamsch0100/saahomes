@@ -658,23 +658,36 @@ function injectAreaBody(html, area) {
 
   // Build city-specific guide links (internal links to relevant blog posts)
   const CITY_BLOG_GUIDES = {
-    'fort-collins': { title: 'Selling Your Home in Fort Collins', slug: 'selling-your-home-in-fort-collins', guideTitle: 'Fort Collins Realtor Guide', guideSlug: 'fort-collins-realtor' },
-    'windsor': { title: 'Selling Your Home in Windsor, Colorado', slug: 'selling-your-home-in-windsor-colorado' },
+    'fort-collins': [
+      { title: 'Selling Your Home in Fort Collins', slug: 'selling-your-home-in-fort-collins', blurb: 'Pricing strategy, preparation tips & local market insights' },
+      { title: 'Fort Collins Realtor Guide', slug: 'fort-collins-realtor', blurb: 'Expert real estate guidance for Fort Collins buyers and sellers' },
+      { title: 'Fort Collins Housing Market — Mid-2026 Update', slug: 'fort-collins-housing-market-mid-2026', blurb: 'Median prices, days on market & inventory trends' },
+    ],
+    'greeley': [
+      { title: 'Selling Your Home in Greeley, Colorado', slug: 'selling-a-home-in-greeley-colorado', blurb: 'Pricing strategy, preparation tips & local market insights' },
+      { title: 'Buying a Home in Greeley', slug: 'buying-a-home-in-greeley', blurb: 'Neighborhoods, schools & market data for Greeley buyers' },
+      { title: 'Greeley Housing Market — Mid-2026 Update', slug: 'greeley-housing-market-mid-2026', blurb: 'Median prices, days on market & inventory trends' },
+    ],
+    'windsor': [
+      { title: 'Selling Your Home in Windsor, Colorado', slug: 'selling-your-home-in-windsor-colorado', blurb: 'Pricing strategy, preparation tips & local market insights' },
+    ],
   };
   let guidesHtml = '';
-  const cityGuide = CITY_BLOG_GUIDES[area.slug];
-  if (cityGuide) {
-    let guideItems = `          <li><a href="${SITE_URL}/blog/${cityGuide.slug}/">${escapeHtml(cityGuide.title)}</a> &mdash; Pricing strategy, preparation tips & local market insights</li>\n`;
-    if (cityGuide.guideSlug) {
-      guideItems += `          <li><a href="${SITE_URL}/blog/${cityGuide.guideSlug}/">${escapeHtml(cityGuide.guideTitle)}</a> &mdash; Expert real estate guidance for ${city} buyers and sellers</li>\n`;
-    }
+  const cityGuides = CITY_BLOG_GUIDES[area.slug];
+  if (cityGuides && cityGuides.length > 0) {
+    const guideItems = cityGuides
+      .map(
+        (g) =>
+          `          <li><a href="${SITE_URL}/blog/${g.slug}/">${escapeHtml(g.title)}</a> &mdash; ${escapeHtml(g.blurb)}</li>`
+      )
+      .join('\n');
     guidesHtml =
       `      <section class="prerendered-city-guides">\n` +
       `        <h2>${city} Real Estate Guides</h2>\n` +
       `        <p>Explore our detailed guides for ${city} home buyers and sellers:</p>\n` +
       `        <ul>\n` +
       guideItems +
-      `        </ul>\n` +
+      `\n        </ul>\n` +
       `      </section>`;
   }
 
@@ -1119,6 +1132,20 @@ const MONEY_PAGE_CONTENT = {
         paragraphs: [
           'Browse active listings across Fort Collins, Loveland, Windsor, Greeley, and all 19 communities we serve. Our property search includes homes for sale in every price range — from starter homes and townhomes to luxury properties and new construction.',
           'Use the search tools below to filter by city, price, bedrooms, and property type. Each listing includes detailed information, professional photos, and direct contact options to schedule a showing with a Schwartz and Associates agent.',
+        ],
+      },
+      {
+        heading: 'Homes for Sale by Northern Colorado City',
+        paragraphs: [
+          'Each community offers a distinct lifestyle and price point. Browse the full city guide for market data, neighborhoods, schools, and available listings:',
+        ],
+        list: [
+          'Fort Collins — CSU, Old Town, and the largest housing market in Northern Colorado',
+          'Loveland — the Sweetheart City with lakefront living along I-25',
+          'Windsor — top-rated schools and family neighborhoods near Windsor Lake',
+          'Greeley — the most affordable major market in the region, home to UNC',
+          'Timnath — new construction and master-planned communities',
+          'Wellington, Berthoud, Johnstown, Severance, Eaton, Milliken & more',
         ],
       },
     ],
