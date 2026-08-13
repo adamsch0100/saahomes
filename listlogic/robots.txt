@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /saas/app.html
+Disallow: /saas/admin.html
+Disallow: /saas/login.html
+Disallow: /saas/signup.html
+Disallow: /saas/onboarding.html
+
+Sitemap: https://listlogic.homes/sitemap.xml

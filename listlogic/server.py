@@ -134,6 +134,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/api/billing/webhook",
         "/api/public-config",
         "/favicon.ico",
+        "/robots.txt",
+        "/sitemap.xml",
         "/presentation.html",
         "/deck.html",
     }
@@ -691,6 +693,16 @@ def home():
 @app.get("/favicon.ico")
 def favicon():
     return FileResponse(ROOT / "saas" / "listlogic-logo.png", media_type="image/png")
+
+
+@app.get("/robots.txt")
+def robots():
+    return FileResponse(ROOT / "robots.txt", media_type="text/plain")
+
+
+@app.get("/sitemap.xml")
+def sitemap():
+    return FileResponse(ROOT / "sitemap.xml", media_type="application/xml")
 
 
 @app.get("/health")
