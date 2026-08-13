@@ -11,7 +11,7 @@ Not "rank for some keywords." **Own the full demand capture system** for Larimer
 ## Four pillars
 
 ### Pillar 1 — Local organic search (primary)
-- **19 city hub pages** at `/northern-colorado-areas/{slug}/` — each must rank for buyer AND seller intent in that city
+- **27 city/region hub pages** at `/northern-colorado-areas/{slug}/` (core 19 + corridor expansion) — each must rank for buyer AND seller intent in that city
 - **Hub-and-spoke internal linking:** every blog post, program page, and area page links to `/for-buyers/`, `/for-sellers/`, or `/contact/`
 - **Program cluster dominance:** CHFA DPA, Schools to Home, Champions, Veterans / VA loans (0.5% back) — capture first-time and niche buyer searches nationally unique to Colorado
 - **Long-tail blog offense:** 2–4 posts/month targeting queries competitors rank for that we don't
@@ -76,7 +76,7 @@ Informational queries that internal-link to Tier S/A pages.
 | Competitor type | Their weakness | Our angle |
 |-----------------|----------------|-----------|
 | Zillow/Realtor.com | No local expert, lead reselling | Named agents, local guides, direct contact |
-| National franchises | Generic content | 19 hyper-local area pages + video |
+| National franchises | Generic content | 27 hyper-local area pages + video |
 | Solo agents with weak SEO | Thin sites | Full program cluster + prerender + schema |
 | Teams without CHFA depth | Miss program traffic | Dedicated CHFA hub (already built) |
 
@@ -87,7 +87,7 @@ Informational queries that internal-link to Tier S/A pages.
 ### Days 1–14: Instrument + baseline
 - Install all cron jobs
 - GSC + GA4 connected
-- Baseline scorecard for 19 cities
+- Baseline scorecard for 27 entities (core 19 + corridor)
 - Fix any indexation blockers on P0 pages
 - Form API health verified
 
@@ -122,7 +122,7 @@ Informational queries that internal-link to Tier S/A pages.
 
 | Metric | Target direction |
 |--------|------------------|
-| Tier S queries in top 10 | ↑ count across 19 cities |
+| Tier S queries in top 10 | ↑ count across 27 entities |
 | Organic leads (forms) | ↑ MoM |
 | GSC impressions (non-branded) | ↑ |
 | Indexed money pages | 100% of sitemap P0/P1 |

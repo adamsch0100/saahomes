@@ -49,7 +49,7 @@ Maintain per city (update weekly):
 | 14 | Browserbase (optional) | optional | browse.sh market intel only |
 | 15 | SerpAPI (optional) | optional | Deeper SERP intel |
 
-**Site-side (repo — done):** GA4 Google tag `G-CB5GL0P3EZ` (stream `G-BVWCZE025P`) + form `generate_lead` events · 19 area pages · lead APIs · keyword universe · **24 cron definitions** · skills bundled · `public/llms.txt` · FAQ schema on `/for-sellers/` + `/for-buyers/` · Person schema on `/about-us/` · FUB tags (`saahomes-organic`, `market-report`, `chfa`) · 6 keyword-gap blog posts queued in repo · Carbon Valley area depth (Firestone/Frederick).
+**Site-side (repo — done):** GA4 Google tag `G-CB5GL0P3EZ` (stream `G-BVWCZE025P`) + form `generate_lead` events · 27 area pages · lead APIs · keyword universe · **24 cron definitions** · skills bundled · `public/llms.txt` · FAQ schema on `/for-sellers/` + `/for-buyers/` · Person schema on `/about-us/` · FUB tags (`saahomes-organic`, `market-report`, `chfa`) · 6 keyword-gap blog posts queued in repo · Carbon Valley area depth (Firestone/Frederick).
 
 **Adam manual (ongoing):** paste social packs · approve outreach · FUB speed-to-lead when Conversion Hermes hands off.
 

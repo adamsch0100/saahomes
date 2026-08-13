@@ -1413,8 +1413,11 @@ def build_tags(post):
 
     # Extract city names from title/slug
     cities = ["Fort Collins", "Loveland", "Windsor", "Greeley", "Timnath",
-              "Wellington", "Johnstown", "Eaton", "Berthoud", "Longmont",
-              "Boulder", "Severance", "Evans"]
+              "Wellington", "Johnstown", "Eaton", "Milliken", "La Salle",
+              "Mead", "Longmont", "Boulder", "Berthoud", "Firestone",
+              "Frederick", "Evans", "Severance", "Niwot", "Erie", "Brighton",
+              "Estes Park", "Red Feather Lakes", "Fort Lupton", "Lyons",
+              "Bellvue", "Carbon Valley"]
     for city in cities:
         if city.lower() in title.lower() or city.lower().replace(" ", "-") in slug.lower():
             base_tags.extend([

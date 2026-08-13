@@ -46,7 +46,9 @@ for r in nonbranded_rows[:25]:
 # Tier S queries
 tier_s_cities = ['fort collins', 'loveland', 'windsor', 'greeley', 'timnath', 'wellington', 
                  'johnstown', 'eaton', 'milliken', 'la salle', 'mead', 'longmont', 
-                 'boulder', 'berthoud', 'firestone', 'frederick', 'evans', 'severance', 'niwot']
+                 'boulder', 'berthoud', 'firestone', 'frederick', 'evans', 'severance', 'niwot',
+                 'erie', 'brighton', 'estes park', 'red feather lakes', 'fort lupton',
+                 'lyons', 'bellvue', 'carbon valley']
 tier_s_patterns = ['realtor', 'real estate agent', 'homes for sale', 'sell my home', 'co real estate']
 
 print(f"\n\n=== Tier S Query Performance ===")

@@ -28,7 +28,7 @@
 - https://saahomes.com/home-valuation/
 - Free market report: request via /for-sellers/ or /home-valuation/
 
-## Northern Colorado area guides (19 cities)
+## Northern Colorado area guides (27 entities — core 19 + corridor)
 - https://saahomes.com/northern-colorado-areas/fort-collins/
 - https://saahomes.com/northern-colorado-areas/loveland/
 - https://saahomes.com/northern-colorado-areas/windsor/
@@ -48,6 +48,14 @@
 - https://saahomes.com/northern-colorado-areas/evans/
 - https://saahomes.com/northern-colorado-areas/severance/
 - https://saahomes.com/northern-colorado-areas/niwot/
+- https://saahomes.com/northern-colorado-areas/erie/
+- https://saahomes.com/northern-colorado-areas/brighton/
+- https://saahomes.com/northern-colorado-areas/estes-park/
+- https://saahomes.com/northern-colorado-areas/red-feather-lakes/
+- https://saahomes.com/northern-colorado-areas/fort-lupton/
+- https://saahomes.com/northern-colorado-areas/lyons/
+- https://saahomes.com/northern-colorado-areas/bellvue/
+- https://saahomes.com/northern-colorado-areas/carbon-valley/
 
 ## Market intelligence & blog
 - https://saahomes.com/blog/

@@ -25,6 +25,8 @@ const NOCO_CITIES = [
   'Fort Collins','Loveland','Windsor','Greeley','Timnath','Wellington',
   'Johnstown','Eaton','Milliken','La Salle','Mead','Longmont','Boulder',
   'Berthoud','Firestone','Frederick','Evans','Severance','Niwot',
+  'Erie','Brighton','Estes Park','Red Feather Lakes','Fort Lupton',
+  'Lyons','Bellvue','Carbon Valley',
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

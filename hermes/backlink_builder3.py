@@ -148,7 +148,7 @@ telegraph_posts = [
             {"tag": "h3", "children": ["The Relocation Process"]},
             {"tag": "p", "children": ["SAA Homes coordinates virtual tours, weekend visit schedules, and neighborhood comparisons. We help Denver buyers understand market differences and craft competitive offers."]},
             {"tag": "p", "children": [
-                {"tag": "a", "attrs": {"href": "https://saahomes.com/northern-colorado-areas/"}, "children": ["Compare All 19 Northern Colorado Communities"]},
+                {"tag": "a", "attrs": {"href": "https://saahomes.com/northern-colorado-areas/"}, "children": ["Compare All 27 Northern Colorado Communities"]},
                 " | ",
                 {"tag": "a", "attrs": {"href": "https://saahomes.com/"}, "children": ["saahomes.com"]},
                 " | (970) 999-1407"]}
@@ -479,7 +479,7 @@ Commute: Fort Collins to Denver is ~65 miles. Windsor/Loveland even closer.
 Lifestyle: Access to Horsetooth Reservoir, Poudre Canyon, Rocky Mountain National Park.
 Schools: Poudre, Thompson, and Weld RE-4 districts rated among Colorado's best.
 
-[Compare All 19 Northern Colorado Communities](https://saahomes.com/northern-colorado-areas/)
+[Compare All 27 Northern Colorado Communities](https://saahomes.com/northern-colorado-areas/)
 [Search Properties](https://saahomes.com/properties/)
 
 SAA Homes | (970) 999-1407 | saahomes.com""",

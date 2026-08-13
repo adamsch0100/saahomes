@@ -13,7 +13,7 @@ import { areaSeoPages } from "../data/areaSeo.js";
 const GOLD = "#CFB36E";
 const MONTH_NAMES = getMonthNames();
 
-// All 19 Northern Colorado city slugs (same order as areaSeo.js)
+// All 27 Northern Colorado entity slugs (same order as areaSeo.js)
 const CITY_OPTIONS = areaSeoPages.map((a) => ({ slug: a.slug, name: a.city }));
 
 function formatMonths(months, typicalMonths) {
@@ -103,7 +103,7 @@ export default function EventsCalendarPage() {
     <>
       <SEO
         exactTitle="Northern Colorado Events Calendar 2026 | Festivals & Things to Do | SAA Homes"
-        description="Browse Northern Colorado events by month or city — festivals, farmers markets, rodeos, and community celebrations across Fort Collins, Loveland, Windsor, Greeley, and 19+ Front Range communities."
+        description="Browse Northern Colorado events by month or city — festivals, farmers markets, rodeos, and community celebrations across Fort Collins, Loveland, Windsor, Greeley, and 27 Front Range communities."
         canonical="https://saahomes.com/events/"
         ogTitle="Northern Colorado Events Calendar | SAA Homes"
         ogDescription="Find festivals, farmers markets, and community events across Northern Colorado — filter by month or city."
@@ -309,7 +309,7 @@ export default function EventsCalendarPage() {
               <p className="text-gray-300 mb-6">
                 Events like these are what make Northern Colorado home. Whether you're relocating or looking to
                 settle closer to the festivals, farmers markets, and community life you love — we know the
-                neighborhoods, schools, and markets in all 19 communities.
+                neighborhoods, schools, and markets in all 27 communities.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link

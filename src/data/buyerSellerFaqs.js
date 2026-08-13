@@ -8,7 +8,7 @@ const BUYER_FAQS = [
   },
   {
     q: 'What is the first step to buying a home in Fort Collins or Northern Colorado?',
-    a: 'The first step is getting pre-approved with a local lender who understands Northern Colorado market conditions and Colorado-specific financing programs like CHFA, FHA, and conventional loans. Pre-approval tells you your budget and shows sellers you are a serious buyer. Then, work with a buyer agent to define your must-haves — location, price range, home type — and start exploring neighborhoods across Fort Collins, Loveland, Windsor, Greeley, and all 19 communities we serve.'
+    a: 'The first step is getting pre-approved with a local lender who understands Northern Colorado market conditions and Colorado-specific financing programs like CHFA, FHA, and conventional loans. Pre-approval tells you your budget and shows sellers you are a serious buyer. Then, work with a buyer agent to define your must-haves — location, price range, home type — and start exploring neighborhoods across Fort Collins, Loveland, Windsor, Greeley, and all 27 communities we serve.'
   },
   {
     q: 'What are the best places to buy a home in Northern Colorado?',
@@ -20,11 +20,11 @@ const BUYER_FAQS = [
   },
   {
     q: 'Do I need a real estate agent to buy a home in Northern Colorado?',
-    a: 'While you can buy a home without an agent, working with a professional buyer agent costs you nothing (the seller pays both commissions) and provides critical advantages: access to all MLS listings, neighborhood market data, professional negotiation, CHFA program guidance, and protection through the transaction. Schwartz and Associates at Coldwell Banker Realty offers comprehensive buyer representation across all 19 Northern Colorado communities.'
+    a: 'While you can buy a home without an agent, working with a professional buyer agent costs you nothing (the seller pays both commissions) and provides critical advantages: access to all MLS listings, neighborhood market data, professional negotiation, CHFA program guidance, and protection through the transaction. Schwartz and Associates at Coldwell Banker Realty offers comprehensive buyer representation across all 27 Northern Colorado communities.'
   },
   {
     q: 'What should I know about relocating to Northern Colorado?',
-    a: 'Relocating to Northern Colorado offers access to outdoor recreation, strong schools, growing job markets, and a high quality of life across 19 distinct communities. Start by researching cities that match your lifestyle — Fort Collins for urban amenities and CSU culture, Loveland for arts and affordability, Windsor for family-friendly neighborhoods with top schools, and Greeley for more affordable options near UNC. The housing market is competitive in desirable areas, so getting pre-approved before your search is essential. CHFA down payment assistance programs are available statewide for qualified buyers. Schwartz and Associates can help you compare cities, find neighborhoods that fit your budget and commute needs, and coordinate with lenders who understand relocation timelines. Call (970) 999-1407 for personalized guidance.'
+    a: 'Relocating to Northern Colorado offers access to outdoor recreation, strong schools, growing job markets, and a high quality of life across 27 distinct communities. Start by researching cities that match your lifestyle — Fort Collins for urban amenities and CSU culture, Loveland for arts and affordability, Windsor for family-friendly neighborhoods with top schools, and Greeley for more affordable options near UNC. The housing market is competitive in desirable areas, so getting pre-approved before your search is essential. CHFA down payment assistance programs are available statewide for qualified buyers. Schwartz and Associates can help you compare cities, find neighborhoods that fit your budget and commute needs, and coordinate with lenders who understand relocation timelines. Call (970) 999-1407 for personalized guidance.'
   },
 ];
 

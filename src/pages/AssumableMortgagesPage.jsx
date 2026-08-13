@@ -58,7 +58,7 @@ const assumableFaqs = [
   },
   {
     q: "How can SAA Homes help me buy with an assumable mortgage?",
-    a: "Schwartz and Associates flags listings where an assumable VA or FHA loan may be in play, connects you with VA-approved and FHA-experienced lenders who can underwrite the assumption, and negotiates the contract around the assumption timeline. We serve buyers across Fort Collins, Loveland, Windsor, Greeley, Timnath, and all 19 Northern Colorado communities. Call (970) 999-1407 to talk through whether assumption makes sense for your purchase.",
+    a: "Schwartz and Associates flags listings where an assumable VA or FHA loan may be in play, connects you with VA-approved and FHA-experienced lenders who can underwrite the assumption, and negotiates the contract around the assumption timeline. We serve buyers across Fort Collins, Loveland, Windsor, Greeley, Timnath, and all 27 Northern Colorado communities. Call (970) 999-1407 to talk through whether assumption makes sense for your purchase.",
   },
 ];
 
@@ -387,7 +387,7 @@ export default function AssumableMortgagesPage() {
             Where we flag assumable listings
           </h2>
           <p className="text-lg text-gray-700 max-w-3xl mx-auto text-center mb-12 leading-relaxed">
-            Schwartz and Associates serves buyers and sellers across all 19 Northern Colorado communities. These are the markets where assumable VA and FHA inventory most often appears.
+            Schwartz and Associates serves buyers and sellers across all 27 Northern Colorado communities. These are the markets where assumable VA and FHA inventory most often appears.
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {cities.map((city) => (

@@ -48,7 +48,7 @@ Curate flagship community events to support **relocating buyers**, **local E-E-A
 ## Quarterly refresh (deep)
 
 1. Review all entries in `src/data/localEvents.js` against official sources
-2. Update `cityEvents` for all 19 city slugs (add/remove/edit flagship events)
+2. Update `cityEvents` for all 27 entity slugs (add/remove/edit flagship events)
 3. Set `EVENTS_DATA_LAST_REVIEWED = 'YYYY-MM-DD'`
 4. Update events guide in `src/data/blogPosts.js`:
    - Refresh section copy with current year references
