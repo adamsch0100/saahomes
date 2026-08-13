@@ -43,7 +43,7 @@ Re-run checklist item 5 monthly (full coverage rotation via delegation batches o
 
 | Path | SEO / lead role |
 |------|-----------------|
-| `src/data/areaSeo.js` | 19 city landing pages — primary local SEO weapon |
+| `src/data/areaSeo.js` | 27 city/region landing pages (core 19 + corridor) — primary local SEO weapon |
 | `src/data/siteRoutes.js` | Sitemap + prerender registry |
 | `src/data/blogPosts.js` | Topical authority + long-tail + **`LATEST_MARKET_UPDATE_SLUG`** |
 | `src/components/LatestMarketUpdateBanner.jsx` | Homepage, for-sellers, area pages → latest market report |

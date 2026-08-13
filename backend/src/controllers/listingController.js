@@ -9,12 +9,14 @@ import { matchRatingsForListing } from '../services/greatSchoolsSync.js';
  * Never fabricate a filter that cannot hit live data.
  */
 
-// The 19 Northern Colorado cities we own (market-dominance scope).
+// The 27 Northern Colorado entities we own (core 19 + corridor expansion).
 // The search page defaults to these; __all__ opts into the whole state.
 const NOCO_CITIES = [
   'Fort Collins', 'Loveland', 'Windsor', 'Greeley', 'Timnath', 'Wellington',
   'Johnstown', 'Eaton', 'Milliken', 'La Salle', 'Mead', 'Longmont', 'Boulder',
   'Berthoud', 'Firestone', 'Frederick', 'Evans', 'Severance', 'Niwot',
+  'Erie', 'Brighton', 'Estes Park', 'Red Feather Lakes', 'Fort Lupton',
+  'Lyons', 'Bellvue', 'Carbon Valley',
 ];
 
 // Legacy single-value property_type aliases (still accepted).

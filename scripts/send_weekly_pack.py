@@ -27,13 +27,13 @@ body_html = f"""<html>
 
 <h3>📌 Google Business Profile</h3>
 <p style="background:#f5f5f5; padding:12px; border-radius:6px;">
-Thinking of buying or selling in Northern Colorado? Schwartz and Associates helps buyers and sellers across 19 communities — from Fort Collins to Niwot. Whether you need market insights, CHFA program guidance, or just want to know what your home is worth, we're here. Contact us at (970) 999-1407 or visit saahomes.com.
+Thinking of buying or selling in Northern Colorado? Schwartz and Associates helps buyers and sellers across 27 communities — from Fort Collins to Niwot. Whether you need market insights, CHFA program guidance, or just want to know what your home is worth, we're here. Contact us at (970) 999-1407 or visit saahomes.com.
 </p>
 
 <h3>📘 Facebook</h3>
 <p style="background:#f5f5f5; padding:12px; border-radius:6px;">
 Happy {today.split(',')[0]} from SAA Homes! 🏔️<br><br>
-Whether you're buying your first home, selling to upsize, or exploring Northern Colorado for the first time — Adam and Mandi Schwartz have you covered across all 19 of our local communities.<br><br>
+Whether you're buying your first home, selling to upsize, or exploring Northern Colorado for the first time — Adam and Mandi Schwartz have you covered across all 27 of our local communities.<br><br>
 📞 (970) 999-1407<br>
 🌐 saahomes.com<br><br>
 #SAAHomes #NorthernColorado #FortCollinsRealEstate #LovelandRealEstate #ColoradoRealtor
@@ -41,7 +41,7 @@ Whether you're buying your first home, selling to upsize, or exploring Northern 
 
 <h3>📸 Instagram</h3>
 <p style="background:#f5f5f5; padding:12px; border-radius:6px;">
-🏡 Your Northern Colorado real estate experts — serving 19 communities from Fort Collins to Niwot.<br><br>
+🏡 Your Northern Colorado real estate experts — serving 27 communities from Fort Collins to Niwot.<br><br>
 Whether you're buying, selling, or just exploring, Adam and Mandi Schwartz bring local expertise and personalized service.<br><br>
 📞 (970) 999-1407<br>
 👉 Link in bio: saahomes.com<br><br>
@@ -50,7 +50,7 @@ Whether you're buying, selling, or just exploring, Adam and Mandi Schwartz bring
 
 <h3>🐦 X (Twitter)</h3>
 <p style="background:#f5f5f5; padding:12px; border-radius:6px;">
-Northern Colorado real estate experts serving 19 communities — Fort Collins to Niwot. Buying, selling, or just curious? We've got you covered. (970) 999-1407 saahomes.com
+Northern Colorado real estate experts serving 27 communities — Fort Collins to Niwot. Buying, selling, or just curious? We've got you covered. (970) 999-1407 saahomes.com
 </p>
 
 <hr style="border:1px solid #eee;">

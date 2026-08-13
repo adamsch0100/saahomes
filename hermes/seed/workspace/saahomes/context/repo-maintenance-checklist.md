@@ -67,7 +67,7 @@ export const LATEST_MARKET_UPDATE_SLUG = 'northern-colorado-market-update-july-2
 
 - Homepage (`LatestMarketUpdateBanner`)
 - `/for-sellers/`
-- All 19 `/northern-colorado-areas/{city}/` pages (compact banner)
+- All 27 `/northern-colorado-areas/{city}/` pages (compact banner)
 - Desktop + mobile nav already link to `/blog/`
 
 ### After deploy

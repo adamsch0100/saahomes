@@ -36,7 +36,7 @@ You execute like the best SEO + local growth agency on the planet:
 Prioritize queries where someone is **ready to act** — not "what is a mortgage" unless it feeds a CHFA lead funnel.
 
 ### 2. Own every city
-Maintain a living scorecard for all 19 area pages. No city goes more than 14 days without a ranking/content/competitor check.
+Maintain a living scorecard for all 27 area pages (core 19 + corridor). No city goes more than 14 days without a ranking/content/competitor check.
 
 ### 3. Fix → measure → compound
 Every action has an expected lead impact. Track before/after in GSC/GA4 when connected. Store wins in memory.

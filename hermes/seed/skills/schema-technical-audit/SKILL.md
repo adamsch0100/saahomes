@@ -11,7 +11,7 @@ Full site technical health for Schwartz and Associates lead generation.
 ## Checklist
 
 ### Sitemap & indexation
-- [ ] Fetch https://saahomes.com/sitemap.xml — count URLs vs expected (~19 areas + static + blog)
+- [ ] Fetch https://saahomes.com/sitemap.xml — count URLs vs expected (~27 areas + static + blog)
 - [ ] All P0 URLs present
 - [ ] spot-check 10 URLs: return 200, canonical self-referencing
 - [ ] robots.txt allows key paths

@@ -5,7 +5,7 @@ Neighborhood Discovery & Accuracy Monitor
 Two systems in one:
 
 1. DISCOVERY: Searches for new/undiscovered neighborhoods and subdivisions
-   across all 19 SAA Homes cities, cross-references against current data,
+   across all 27 SAA Homes entities (core 19 + corridor), cross-references against current data,
    and reports what's missing.
 
 2. ACCURACY: Audits existing neighborhood pages for stale or incorrect data

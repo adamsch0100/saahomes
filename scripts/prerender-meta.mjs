@@ -1828,11 +1828,11 @@ function injectEventsBody(html) {
     `\n` +
     `    <div class="prerendered-events-content">\n` +
     `      <h1>Northern Colorado Events & Happenings Calendar</h1>\n` +
-    `      <p>Browse festivals, farmers markets, rodeos, and community celebrations across 19 Front Range communities — Fort Collins, Loveland, Windsor, Greeley, Timnath, Wellington, Johnstown, Eaton, Milliken, La Salle, Mead, Longmont, Boulder, Berthoud, Firestone, Frederick, Evans, Severance, and Niwot. Filter the interactive calendar by month or city on this page. Data reviewed ${escapeHtml(reviewedLabel)}.</p>\n` +
+    `      <p>Browse festivals, farmers markets, rodeos, and community celebrations across 27 Front Range communities — Fort Collins, Loveland, Windsor, Greeley, Timnath, Wellington, Johnstown, Eaton, Milliken, La Salle, Mead, Longmont, Boulder, Berthoud, Firestone, Frederick, Evans, Severance, Niwot, Erie, Brighton, Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue, and Carbon Valley. Filter the interactive calendar by month or city on this page. Data reviewed ${escapeHtml(reviewedLabel)}.</p>\n` +
     `      ${bodyHtml}\n` +
     `      <section class="prerendered-events-cta">\n` +
     `        <h2>Find a Home Near the Events You Love</h2>\n` +
-    `        <p>Northern Colorado community events are a big part of why buyers choose this area. Explore homes for sale in any of our 19 communities, or get a free home valuation. Contact Schwartz and Associates at <strong>(970) 999-1407</strong>.</p>\n` +
+    `        <p>Northern Colorado community events are a big part of why buyers choose this area. Explore homes for sale in any of our 27 communities, or get a free home valuation. Contact Schwartz and Associates at <strong>(970) 999-1407</strong>.</p>\n` +
     `        <p><a href="${SITE_URL}/properties/">Search Northern Colorado Homes</a> &middot; <a href="${SITE_URL}/for-buyers/">Buyers Guide</a> &middot; <a href="${SITE_URL}/for-sellers/">Get My Home Value</a> &middot; <a href="${SITE_URL}${guidePath}">Read the Full Events Guide</a></p>\n` +
     `      </section>\n` +
     `    </div>\n  `;

@@ -34,7 +34,7 @@ Full strategy: `context/market-dominance-strategy.md` — READ IT before executi
 - `context/market-dominance-strategy.md` — THE strategy
 - `context/content-calendar.md` — blog + social pillars, weekly rotation
 - `context/keyword-universe.md` — every city × intent we must win
-- `src/data/areaSeo.js` — 19 city landing pages (primary local SEO weapon)
+- `src/data/areaSeo.js` — 27 city/region landing pages (core 19 + corridor; primary local SEO weapon)
 - `src/utils/seoConstants.js` — NAP, schema, business entity
 
 ## Execution loops (cron)

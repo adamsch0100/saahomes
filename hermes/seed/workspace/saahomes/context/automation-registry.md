@@ -100,7 +100,7 @@ Schedule: 0 9 * * 2  (Tuesday 9:00 AM MT)
 Skill: local-market-audit
 Model: deepseek-v4-pro
 Provider: opencode-go
-Prompt: Deep audit for this week's rotation city (rotate through 19 cities, track in MEMORY.md). Full SERP + content + schema report.
+Prompt: Deep audit for this week's rotation city (rotate through 27 entities — core 19 + corridor — track in MEMORY.md). Full SERP + content + schema report.
 ```
 
 ---

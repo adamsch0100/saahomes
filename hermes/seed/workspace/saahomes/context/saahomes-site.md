@@ -2,13 +2,13 @@
 
 **Canonical URL:** https://saahomes.com  
 **Brand:** SAA Homes · Schwartz and Associates, Coldwell Banker Realty  
-**Market:** Northern Colorado — **mission: own buyer + seller search demand in all 19 cities**
+**Market:** Northern Colorado — **mission: own buyer + seller search demand in all 27 entities (core 19 + corridor)**
 
 See also: `market-dominance-strategy.md`, `keyword-universe.md`
 
-## Service area cities (19 area guide pages)
+## Service area cities (27 area guide pages — core 19 + corridor)
 
-Fort Collins, Loveland, Windsor, Greeley, Timnath, Wellington, Johnstown, Eaton, Milliken, La Salle, Mead, Longmont, Boulder, Berthoud, Firestone, Frederick, Evans, Severance, Niwot
+Fort Collins, Loveland, Windsor, Greeley, Timnath, Wellington, Johnstown, Eaton, Milliken, La Salle, Mead, Longmont, Boulder, Berthoud, Firestone, Frederick, Evans, Severance, Niwot, Erie, Brighton, Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue, Carbon Valley
 
 URL: `https://saahomes.com/northern-colorado-areas/{slug}/`
 

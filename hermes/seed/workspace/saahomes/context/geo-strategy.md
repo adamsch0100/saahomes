@@ -71,7 +71,7 @@ Consistent use of:
 ### 4. `llms.txt` (optional but growing)
 Publish `https://saahomes.com/llms.txt` summarizing:
 - Who SAA Homes is
-- Service area (19 cities)
+- Service area (27 entities — core 19 + corridor)
 - Key URLs for buyers, sellers, CHFA
 - Contact info
 - Last updated date

@@ -4,7 +4,7 @@ A comprehensive resource for home buyers and sellers in Northern Colorado, provi
 
 ## About SAA Homes
 
-SAA Homes serves all 19 Northern Colorado cities: Fort Collins, Loveland, Windsor, Greeley, Timnath, Wellington, Johnstown, Eaton, Milliken, La Salle, Mead, Longmont, Boulder, Berthoud, Firestone, Frederick, Evans, Severance, and Niwot.
+SAA Homes serves all 27 Northern Colorado communities: Fort Collins, Loveland, Windsor, Greeley, Timnath, Wellington, Johnstown, Eaton, Milliken, La Salle, Mead, Longmont, Boulder, Berthoud, Firestone, Frederick, Evans, Severance, Niwot, Erie, Brighton, Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue, and Carbon Valley.
 
 ## Key Resources
 

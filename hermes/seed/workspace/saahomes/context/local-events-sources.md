@@ -82,7 +82,7 @@ When publishing a **new year guide** (e.g. 2027):
 
 **Time budget:** ~45 min Hermes autonomous
 
-1. Re-read official sources for all **19 cities**
+1. Re-read official sources for all **27 entities** (core 19 + corridor)
 2. Update `src/data/localEvents.js`:
    - Add/remove flagship events
    - Update descriptions if venues/names changed
