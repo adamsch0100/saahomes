@@ -2550,6 +2550,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.49', longitude: '-104.919' },
     metaDescription: 'Cornerstone at Windsor real estate - newer affordable homes in north Windsor near Fort Collins. SAA Homes.',
     keywords: 'Cornerstone at Windsor, north Windsor homes, new construction Windsor CO, Windsor townhomes, affordable Windsor homes',
+    youtubeId: 'JiiLW-FNQig',
     neighborhoodHighlights: [
       { title: 'Newer homes', description: 'Modern construction with open floor plans, energy efficiency, and contemporary finishes.' },
       { title: 'Fort Collins proximity', description: 'Located on Windsor north side - just 10 minutes from Fort Collins.' },
@@ -2581,6 +2582,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.475', longitude: '-104.91' },
     metaDescription: 'Windsor Lake Estates - premier lakefront homes on Windsor Lake with Boardwalk Park access. SAA Homes.',
     keywords: 'Windsor Lake Estates, Windsor Lake homes, lakefront homes Windsor CO, Boardwalk Park Windsor',
+    youtubeId: 'YpFH3n3FnRA',
     neighborhoodHighlights: [
       { title: 'Lake living', description: 'Windsor Lake is the crown jewel of Windsor - boating, fishing, walking trails, and a boardwalk with summer concerts.' },
       { title: 'Custom homes', description: 'Premium custom-built homes with lake views, many with private docks and waterfront patios.' },
@@ -2612,6 +2614,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.48', longitude: '-104.9' },
     metaDescription: 'Saddleback at Windsor - established family neighborhood near Windsor schools. SAA Homes.',
     keywords: 'Saddleback Windsor, central Windsor homes, established Windsor neighborhood, Windsor family homes',
+    youtubeId: 'HLGdkQ2LPts',
     neighborhoodHighlights: [
       { title: 'Established setting', description: 'Mature trees and established homes create a welcoming family neighborhood in central Windsor.' },
       { title: 'Walk to schools', description: 'Walking distance to Windsor Middle School and Windsor High School - a true family location.' },
