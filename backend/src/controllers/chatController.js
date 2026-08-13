@@ -122,7 +122,7 @@ const SYSTEM_PROMPT = `You are Nadia, a friendly and knowledgeable AI real estat
 - Phone: (970) 999-1407
 - Website: https://saahomes.com
 - Email: info@saahomes.com
-- Service area: All of Northern Colorado — 19 cities including Fort Collins, Loveland, Windsor, Greeley, Timnath, Wellington, Johnstown, Eaton, Milliken, La Salle, Mead, Longmont, Boulder, Berthoud, Firestone, Frederick, Evans, Severance, Niwot
+- Service area: All of Northern Colorado — 27 communities including Fort Collins, Loveland, Windsor, Greeley, Timnath, Wellington, Johnstown, Eaton, Milliken, La Salle, Mead, Longmont, Boulder, Berthoud, Firestone, Frederick, Evans, Severance, Niwot, Erie, Brighton, Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue, and Carbon Valley
 - Specialties: First-time homebuyers, CHFA programs, VA loans for veterans, luxury homes, seller representation
 
 ## WHAT YOU KNOW ABOUT VETERANS & VA LOANS

@@ -414,7 +414,7 @@ export const LUXURY_HUB_FAQS = [
   },
   {
     q: 'What sets Schwartz and Associates apart at this level?',
-    a: 'Adam and Mandi Schwartz work the file themselves. Over 20 years in Northern Colorado, Coldwell Banker Realty affiliation, and neighborhood depth across Boulder, Fort Collins, Loveland, Windsor, Greeley, Timnath, and the 19-city corridor we publish. We do not farm $1M+ clients to a team or an ISA. You get market command, discretion, and a single point of contact. Call (970) 999-1407.',
+    a: 'Adam and Mandi Schwartz work the file themselves. Over 20 years in Northern Colorado, Coldwell Banker Realty affiliation, and neighborhood depth across Boulder, Fort Collins, Loveland, Windsor, Greeley, Timnath, and the 27-community corridor we publish. We do not farm $1M+ clients to a team or an ISA. You get market command, discretion, and a single point of contact. Call (970) 999-1407.',
   },
   {
     q: 'Should I work with a specialist or a generalist agent?',

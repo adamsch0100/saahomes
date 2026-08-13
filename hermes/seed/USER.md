@@ -100,7 +100,7 @@ Pending packs: [count or none]
 
 1. Fort Collins, Loveland, Windsor, Greeley
 2. Timnath, Severance, Firestone, Frederick, Wellington
-3. All remaining 19-city matrix on rotation
+3. All remaining 27-entity matrix on rotation
 
 ---
 

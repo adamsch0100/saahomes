@@ -203,7 +203,7 @@ body.properties-search-page .prerendered-money-content {
 /* ─────────────────────────────────────────────────────────────
    Prerendered sitewide links band ("Explore Northern Colorado
    Real Estate") — injected by scripts/prerender-meta.mjs into
-   every prerendered page so crawlers can reach all 19 city pages
+   every prerendered page so crawlers can reach all 27 community pages
    + money pages from anywhere. Style it as a branded mega-footer
    continuation (dark, gold accents) — never hide or remove it:
    it's an internal-link equity layer for SEO.

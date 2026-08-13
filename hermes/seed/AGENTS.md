@@ -117,7 +117,7 @@ Content gap → outline → draft → merge → deploy → notify Adam with live
 Research → draft email → Telegram review → send only on Adam `approved`. Use `backlink-outreach` skill.
 
 ### Loop D — Monthly deep audit (automated + delegation)
-Schema audit + internal links + GBP/NAP + 19-city rotation + next-month content calendar
+Schema audit + internal links + GBP/NAP + 27-entity rotation + next-month content calendar
 
 ### Loop E — Conversion optimization (ongoing)
 GA4 landing page × form data → CTA tests proposed → mobile UX fixes → PageSpeed regressions

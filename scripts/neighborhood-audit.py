@@ -29,7 +29,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 NEIGHBORHOODS_FILE = REPO_ROOT / "src" / "data" / "neighborhoods.js"
 BLOG_POSTS_FILE = REPO_ROOT / "src" / "data" / "blogPosts.js"
 
-# All 19 cities we cover
+# All 27 entities we cover (core 19 + corridor expansion)
 CITIES = {
     "fort-collins": {"display": "Fort Collins", "county": "Larimer County"},
     "loveland": {"display": "Loveland", "county": "Larimer County"},
@@ -50,6 +50,14 @@ CITIES = {
     "mead": {"display": "Mead", "county": "Weld County"},
     "la-salle": {"display": "La Salle", "county": "Weld County"},
     "niwot": {"display": "Niwot", "county": "Boulder County"},
+    "erie": {"display": "Erie", "county": "Weld County"},
+    "brighton": {"display": "Brighton", "county": "Adams County"},
+    "estes-park": {"display": "Estes Park", "county": "Larimer County"},
+    "red-feather-lakes": {"display": "Red Feather Lakes", "county": "Larimer County"},
+    "fort-lupton": {"display": "Fort Lupton", "county": "Weld County"},
+    "lyons": {"display": "Lyons", "county": "Boulder County"},
+    "bellvue": {"display": "Bellvue", "county": "Larimer County"},
+    "carbon-valley": {"display": "Carbon Valley", "county": "Weld County"},
 }
 
 

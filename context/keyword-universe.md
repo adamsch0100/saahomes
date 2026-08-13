@@ -5,7 +5,7 @@ Complete query map for Schwartz and Associates market ownership.
 
 ---
 
-## 19 cities (slug → display name)
+## 27 entities (slug → display name) — core 19 + corridor expansion
 
 | Slug | City | County | Area URL |
 |------|------|--------|----------|
@@ -28,6 +28,16 @@ Complete query map for Schwartz and Associates market ownership.
 | evans | Evans | Weld | /northern-colorado-areas/evans/ |
 | severance | Severance | Weld | /northern-colorado-areas/severance/ |
 | niwot | Niwot | Boulder | /northern-colorado-areas/niwot/ |
+| erie | Erie | Weld/Boulder | /northern-colorado-areas/erie/ |
+| brighton | Brighton | Adams/Weld | /northern-colorado-areas/brighton/ |
+| estes-park | Estes Park | Larimer | /northern-colorado-areas/estes-park/ |
+| red-feather-lakes | Red Feather Lakes | Larimer | /northern-colorado-areas/red-feather-lakes/ |
+| fort-lupton | Fort Lupton | Weld | /northern-colorado-areas/fort-lupton/ |
+| lyons | Lyons | Boulder | /northern-colorado-areas/lyons/ |
+| bellvue | Bellvue | Larimer | /northern-colorado-areas/bellvue/ |
+| carbon-valley | Carbon Valley | Weld | /northern-colorado-areas/carbon-valley/ |
+
+**Corridor expansion (Aug 2026):** Erie, Brighton, Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue, Carbon Valley (hub — Firestone/Frederick/Dacono/Gilcrest/Platteville/Mead). Section towns anchored on parent pages: LaPorte, Masonville → Fort Collins; Ault, Pierce, Kersey, Briggsdale → Greeley.
 
 ---
 
