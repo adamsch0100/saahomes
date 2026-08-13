@@ -92,7 +92,7 @@ export const blogPosts = [
         paragraphs: [
           'For buyers: we screen the search with the Assumable filter on saahomes.com/properties/, pull the remarks, and connect you with a VA-approved or FHA-experienced lender who can underwrite the assumption. We put the assumption path in the contract — timeline, financing contingency, and what happens if the servicer declines. Call (970) 999-1407.',
           'For sellers: a below-market assumable VA or FHA rate is a real marketing advantage when it is true. We put it in the remarks accurately, qualify interested buyers early, and do not advertise a savings number we cannot support. If you are selling a home with a VA loan, we will also walk through entitlement restoration with your lender so you are not surprised later.',
-          'Schwartz and Associates serves buyers and sellers across Fort Collins, Loveland, Windsor, Greeley, Timnath, and all 19 Northern Colorado communities. Start with the assumable-mortgages hub or the live search. If you want us to watch new flags as they hit the feed, save the search — email and phone required — and we will alert you.',
+          'Schwartz and Associates serves buyers and sellers across Fort Collins, Loveland, Windsor, Greeley, Timnath, and all 27 Northern Colorado communities. Start with the assumable-mortgages hub or the live search. If you want us to watch new flags as they hit the feed, save the search — email and phone required — and we will alert you.',
         ],
         relatedLinks: [
           { title: 'Contact SAA Homes', href: '/contact/', description: 'Adam and Mandi Schwartz — (970) 999-1407' },
@@ -1427,7 +1427,7 @@ export const blogPosts = [
         heading: 'How Schwartz and Associates helps with Fort Collins short sales',
         paragraphs: [
           'Short sales are different from traditional transactions. The stakes are higher, the timeline is tighter, and the lender negotiation is more complex. Having an experienced local agent on your side makes a measurable difference in whether a short sale gets approved and how cleanly it closes.',
-          'Adam and Mandi Schwartz bring more than 20 years of combined Northern Colorado real estate experience, including helping homeowners across all 19 Northern Colorado communities navigate short sales, pre-foreclosure sales, and cash buyer solutions. Our process starts with a confidential, no-obligation consultation. We review your situation, explain the timeline, and outline every option — short sale, pre-foreclosure sale, cash sale, or a traditional listing. There is no judgment, no pressure, and no cost to learn what is possible.',
+          'Adam and Mandi Schwartz bring more than 20 years of combined Northern Colorado real estate experience, including helping homeowners across all 27 Northern Colorado communities navigate short sales, pre-foreclosure sales, and cash buyer solutions. Our process starts with a confidential, no-obligation consultation. We review your situation, explain the timeline, and outline every option — short sale, pre-foreclosure sale, cash sale, or a traditional listing. There is no judgment, no pressure, and no cost to learn what is possible.',
           'Call (970) 999-1407 or visit our cash home buyers page to start the conversation. The earlier you reach out, the more options you have.',
         ],
         relatedLinks: [
@@ -1505,7 +1505,7 @@ export const blogPosts = [
     ],
     cta: {
       title: 'Thinking about making Northern Colorado home?',
-      description: 'Adam and Mandi Schwartz help buyers and sellers across Fort Collins, Loveland, Windsor, Greeley, and all 19 Northern Colorado communities. Explore neighborhoods, get a market report, or ask us what life is really like here.',
+      description: 'Adam and Mandi Schwartz help buyers and sellers across Fort Collins, Loveland, Windsor, Greeley, and all 27 Northern Colorado communities. Explore neighborhoods, get a market report, or ask us what life is really like here.',
       primaryHref: '/contact/',
       primaryText: 'Start Your Home Search',
       secondaryHref: '/for-buyers/',
@@ -1923,7 +1923,7 @@ export const blogPosts = [
         paragraphs: [
           'While our office is in Fort Collins, SAA Homes serves buyers and sellers across all of Northern Colorado. Whether you are looking at a lakefront property in Loveland, a family home in Windsor, new construction in Timnath, or an affordable entry point in Greeley, our team has the local knowledge to represent you effectively.',
           'Northern Colorado is a diverse region with distinct markets. Fort Collins offers CSU energy and Old Town charm. Loveland blends arts and lake recreation. Windsor provides family-friendly communities with top-rated schools. Greeley delivers affordability and Weld County value. Timnath and Severance offer new construction in growing master-planned communities. Longmont and Berthoud serve the Boulder County and I-25 growth corridors.',
-          'We help clients compare these cities and find the right fit for their lifestyle, budget, and goals. Our team covers all 19 Northern Colorado communities in our service area, giving you access to the entire regional market through one trusted realtor.',
+          'We help clients compare these cities and find the right fit for their lifestyle, budget, and goals. Our team covers all 27 Northern Colorado communities in our service area, giving you access to the entire regional market through one trusted realtor.',
         ],
         relatedLinks: [
           { title: 'Loveland real estate agent', href: '/northern-colorado-areas/loveland/', description: 'Art, lakes & Larimer County living' },
@@ -2755,7 +2755,7 @@ export const blogPosts = [
     ],
     cta: {
       title: 'Not sure which Northern Colorado city fits you best?',
-      description: 'Adam and Mandi Schwartz help buyers compare Fort Collins, Loveland, Windsor, and all 19 Northern Colorado communities. Whether you are relocating from out of state or moving across town, we can help you find the right city and neighborhood for your lifestyle and budget.',
+      description: 'Adam and Mandi Schwartz help buyers compare Fort Collins, Loveland, Windsor, and all 27 Northern Colorado communities. Whether you are relocating from out of state or moving across town, we can help you find the right city and neighborhood for your lifestyle and budget.',
       primaryHref: '/contact/',
       primaryText: 'Compare Your Options',
       secondaryHref: '/northern-colorado-areas/',
@@ -2842,13 +2842,13 @@ export const blogPosts = [
         paragraphs: [
           'Choosing between Fort Collins, Loveland, and Windsor ultimately comes down to your priorities as a buyer. If urban amenities, the most dining and entertainment options, and Colorado State University proximity matter most — and your budget supports the $612,000 median — Fort Collins is the natural choice. First-time buyers and those seeking the best value in Larimer County should start their search in Loveland, where the $507,000 median and balanced market conditions offer the most favorable buying conditions.',
           'Families who prioritize schools, a tight-knit community, and lakefront lifestyle should focus on Windsor, where Weld RE-4 schools, Windsor Lake, and the family-oriented atmosphere create an environment that is hard to match. Windsor premium pricing ($585K median) is offset by strong schools and community amenities that many families find worth the investment.',
-          'The good news is that you do not have to choose sight unseen. All three cities are within 20 minutes of each other, so you can explore neighborhoods in each, compare commute patterns, and visit schools before making your decision. SAA Homes serves buyers across all 19 Northern Colorado communities and can help you evaluate homes in multiple cities simultaneously — so you find the right home regardless of which city ends up being your best fit.',
+          'The good news is that you do not have to choose sight unseen. All three cities are within 20 minutes of each other, so you can explore neighborhoods in each, compare commute patterns, and visit schools before making your decision. SAA Homes serves buyers across all 27 Northern Colorado communities and can help you evaluate homes in multiple cities simultaneously — so you find the right home regardless of which city ends up being your best fit.',
         ],
         relatedLinks: [
           { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
           { title: 'Loveland homes for sale', href: '/northern-colorado-areas/loveland/', description: 'Art, recreation & Larimer County living' },
           { title: 'Windsor homes for sale', href: '/northern-colorado-areas/windsor/', description: 'Family communities & lakefront lifestyle' },
-          { title: 'See All 19 Area Guides', href: '/northern-colorado-areas/', description: 'Explore every Northern Colorado community' },
+          { title: 'See All 27 Area Guides', href: '/northern-colorado-areas/', description: 'Explore every Northern Colorado community' },
           { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407 to discuss your search' },
         ],
       },
@@ -3195,7 +3195,7 @@ export const blogPosts = [
         paragraphs: [
           'The cash buyer market in Northern Colorado includes a mix of national iBuyer platforms, local real estate investors, and regional home-buying companies. National companies like HomeLight, Clever Offers, and HomeGo operate in the Fort Collins and Loveland markets, while local investors — including firms like Expert Cash Buyers, Noco House Buyers, and Colorado Property Partners — focus specifically on Northern Colorado neighborhoods.',
           'What these buyers have in common is the ability to close quickly with cash, purchase properties as-is, and provide a simple, predictable selling experience. What they differ on is offer price, closing timeline, and the types of properties they target. Some focus on move-in ready homes, while others specialize in distressed properties or fix-and-flip opportunities.',
-          'SAA Homes maintains relationships with vetted cash buyers across all 19 Northern Colorado markets we serve. This means we can help you compare multiple cash offers — not just one — and advise which offer is fair and which might be lowballing you, based on our knowledge of local market comps.',
+          'SAA Homes maintains relationships with vetted cash buyers across all 27 Northern Colorado markets we serve. This means we can help you compare multiple cash offers — not just one — and advise which offer is fair and which might be lowballing you, based on our knowledge of local market comps.',
         ],
         list: [
           'National iBuyers: HomeLight Simple Sale, Clever Offers, HomeGo',
@@ -3233,7 +3233,7 @@ export const blogPosts = [
       {
         heading: 'Ready to explore your options?',
         paragraphs: [
-          'Whether you are selling and want to compare a cash offer against market value, or you are a cash buyer looking for your next Northern Colorado investment, SAA Homes can help. We serve all 19 communities across the Front Range from Fort Collins to Greeley, Loveland to Longmont.',
+          'Whether you are selling and want to compare a cash offer against market value, or you are a cash buyer looking for your next Northern Colorado investment, SAA Homes can help. We serve all 27 communities across the Front Range from Fort Collins to Greeley, Loveland to Longmont.',
           'Start by requesting a no-obligation cash offer or a free home valuation through our cash home buyers page. Or call Adam and Mandi Schwartz directly at (970) 999-1407 to discuss your goals. No pressure — just honest guidance based on real market data and over 20 years of Northern Colorado real estate experience.',
         ],
         relatedLinks: [
@@ -3265,7 +3265,7 @@ export const blogPosts = [
         paragraphs: [
           'Foreclosure is a legal process that allows a lender to take possession of a property when the homeowner falls behind on mortgage payments. Colorado is a non-judicial foreclosure state, meaning the process is handled through the public trustee in each county rather than through the court system. This makes Colorado foreclosures faster than in judicial states, but it also means homeowners have less time to act.',
           'If you are a Northern Colorado homeowner facing financial difficulty — whether due to job loss, medical bills, divorce, or an adjustable-rate mortgage reset — it is important to understand your options before the process begins. The earlier you act, the more options you have.',
-          'At SAA Homes, we have helped homeowners across Fort Collins, Loveland, Windsor, Greeley, and all 19 Northern Colorado communities navigate foreclosure avoidance strategies. You do not have to go through this alone.',
+          'At SAA Homes, we have helped homeowners across Fort Collins, Loveland, Windsor, Greeley, and all 27 Northern Colorado communities navigate foreclosure avoidance strategies. You do not have to go through this alone.',
         ],
         relatedLinks: [
           { title: 'Free Consultation - Foreclosure Help', href: '/cash-home-buyers/#cash-offer-form', description: 'No-obligation, confidential' },
@@ -3333,7 +3333,7 @@ export const blogPosts = [
         heading: 'Why SAA Homes for distressed seller representation?',
         paragraphs: [
           'Selling a home under financial pressure is different from a traditional real estate transaction. The stakes are higher, the timeline is tighter, and the negotiation dynamics with lenders are more complex. Having an experienced agent who understands both the real estate market and the foreclosure process makes a meaningful difference.',
-          'Adam and Mandi Schwartz bring over 20 years of combined Northern Colorado real estate experience, including helping homeowners navigate short sales, pre-foreclosure sales, and cash buyer solutions. We serve all 19 Northern Colorado communities from Fort Collins to Greeley, Loveland to Longmont.',
+          'Adam and Mandi Schwartz bring over 20 years of combined Northern Colorado real estate experience, including helping homeowners navigate short sales, pre-foreclosure sales, and cash buyer solutions. We serve all 27 Northern Colorado communities from Fort Collins to Greeley, Loveland to Longmont.',
           'Our process starts with a confidential, no-obligation consultation. We review your situation, explain the timeline, and outline your options — short sale, pre-foreclosure sale, cash sale, or traditional listing. There is no judgment, no pressure, and no cost to learn what is possible.',
           'Call (970) 999-1407 or visit our cash home buyers page to start the conversation. The earlier you reach out, the more options you have.',
         ],
@@ -3366,7 +3366,7 @@ export const blogPosts = [
     ],
     cta: {
       title: 'Not sure which Northern Colorado county fits your home search?',
-      description: 'Adam and Mandi Schwartz help buyers explore homes in all 19 communities across Weld and Larimer Counties. Whether you are looking at Greeley starter homes, Fort Collins family neighborhoods, or Loveland lake properties, we can help you find the right city and county for your lifestyle and budget.',
+      description: 'Adam and Mandi Schwartz help buyers explore homes in all 27 communities across Weld and Larimer Counties. Whether you are looking at Greeley starter homes, Fort Collins family neighborhoods, or Loveland lake properties, we can help you find the right city and county for your lifestyle and budget.',
       primaryHref: '/contact/',
       primaryText: 'Find Your Dream Home',
       secondaryHref: '/northern-colorado-areas/',
@@ -3464,7 +3464,7 @@ export const blogPosts = [
         relatedLinks: [
           { title: 'Fort Collins vs Loveland vs Windsor', href: '/blog/fort-collins-vs-loveland-vs-windsor/', description: 'City comparison for Northern Colorado buyers' },
           { title: 'Northern Colorado Events Guide 2026', href: '/blog/northern-colorado-events-guide-2026/', description: 'Festivals and community events across both counties' },
-          { title: 'See All 19 Area Guides', href: '/northern-colorado-areas/', description: 'Explore every community in Weld and Larimer Counties' },
+          { title: 'See All 27 Area Guides', href: '/northern-colorado-areas/', description: 'Explore every community in Weld and Larimer Counties' },
           { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407 to discuss your search' },
         ],
       },
@@ -3473,7 +3473,7 @@ export const blogPosts = [
         paragraphs: [
           'Choosing between Weld County and Larimer County ultimately comes down to your budget and lifestyle priorities. If affordability, lower taxes, newer construction, and shorter Denver commutes matter most, Weld County offers the best value in Northern Colorado with a $430,000 median home price, lower mill levies, and expanding communities that still feel suburban and family-oriented.',
           'If urban amenities, outdoor recreation access, a walkable downtown lifestyle, and top-tier dining and entertainment are worth a higher housing budget, Larimer County delivers an unmatched lifestyle with its $565,000 median — but also stronger local job opportunities, CSU resources, and the cultural and recreational assets that come with Northern Colorado\'s premier city.',
-          'The good news is that you do not have to choose solely on paper. All Weld and Larimer communities are within 30-45 minutes of each other, giving buyers the flexibility to explore neighborhoods across both counties before deciding. Many buyers find that the right home in a specific neighborhood matters more than the county line. SAA Homes serves buyers across all 19 Northern Colorado communities in both counties — so whether you end up in a Fort Collins bungalow, a Greeley starter home, or a Firestone new build, we can help you find the right fit.',
+          'The good news is that you do not have to choose solely on paper. All Weld and Larimer communities are within 30-45 minutes of each other, giving buyers the flexibility to explore neighborhoods across both counties before deciding. Many buyers find that the right home in a specific neighborhood matters more than the county line. SAA Homes serves buyers across all 27 Northern Colorado communities in both counties — so whether you end up in a Fort Collins bungalow, a Greeley starter home, or a Firestone new build, we can help you find the right fit.',
           'Call (970) 999-1407 to discuss your Northern Colorado home search with Adam or Mandi Schwartz.',
         ],
         relatedLinks: [
@@ -3481,7 +3481,7 @@ export const blogPosts = [
           { title: 'Greeley homes for sale', href: '/northern-colorado-areas/greeley/', description: 'Weld County communities & affordability' },
           { title: 'Loveland homes for sale', href: '/northern-colorado-areas/loveland/', description: 'Larimer County arts & lake living' },
           { title: 'Windsor homes for sale', href: '/northern-colorado-areas/windsor/', description: 'Weld-Larimer border family lifestyle' },
-          { title: 'See All 19 Area Guides', href: '/northern-colorado-areas/', description: 'Explore Weld and Larimer County communities' },
+          { title: 'See All 27 Area Guides', href: '/northern-colorado-areas/', description: 'Explore Weld and Larimer County communities' },
           { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407 to discuss your search' },
         ],
       },
@@ -5361,7 +5361,7 @@ export const blogPosts = [
         paragraphs: [
           'Selling a home during a divorce is fundamentally different from a standard real estate transaction. It requires an agent who can remain neutral, communicate clearly with both parties (or their attorneys), and keep the transaction focused on maximizing financial outcomes rather than getting pulled into emotional dynamics. Adam and Mandi Schwartz have guided Northern Colorado homeowners through this process, and we understand what works.',
           'We provide a single, objective market valuation that both parties and their attorneys can rely on. We recommend pricing strategies based on data, not opinion. We coordinate showings, open houses, and offer negotiations in a way that respects both spouses\u2019 privacy and schedules. And we work closely with divorce attorneys and mediators to ensure the real estate transaction complies with the terms of the separation agreement or court order.',
-          'When one or both spouses need to find new housing after the sale, we provide the same professional buyer representation we offer all our Northern Colorado clients: market analysis, neighborhood guidance, mortgage pre-approval connections, CHFA program expertise, and skilled negotiation. We serve all 19 Northern Colorado communities from Fort Collins to Greeley, Loveland to Longmont, and everywhere in between.',
+          'When one or both spouses need to find new housing after the sale, we provide the same professional buyer representation we offer all our Northern Colorado clients: market analysis, neighborhood guidance, mortgage pre-approval connections, CHFA program expertise, and skilled negotiation. We serve all 27 Northern Colorado communities from Fort Collins to Greeley, Loveland to Longmont, and everywhere in between.',
           'If you are facing a divorce and need to sell your Northern Colorado home \u2014 or if you are a divorce attorney seeking a reliable real estate professional for your client \u2014 contact SAA Homes at (970) 999-1407. Your initial consultation is confidential, objective, and focused on finding the right path forward.',
         ],
         relatedLinks: [
@@ -5443,7 +5443,7 @@ export const blogPosts = [
           'One of the most powerful strategies for Northern Colorado first-time buyers is combining CHFA down payment assistance with seller-paid closing costs. CHFA programs like SmartStep Plus provide up to $25,000 in down payment assistance through a grant or forgivable loan, and this assistance is entirely separate from seller concessions.',
           'Here is how it works: CHFA covers your down payment (up to $25,000). The seller concession covers your closing costs, prepaids, and possibly discount points (within the loan-type cap). Together, these two sources of assistance can reduce your total cash to close to as little as the earnest money deposit plus inspection fees — in some cases less than $5,000 total out of pocket.',
           'The key requirement: your loan must be a CHFA-approved first mortgage (typically a Conventional, FHA, or USDA loan originated by a CHFA-approved lender). The seller concession must stay within the loan-type caps above. Your SAA Homes agent and lender will coordinate both sources to maximize your savings.',
-          'For buyers in Fort Collins, Loveland, Windsor, Greeley, and all 19 Northern Colorado cities we serve, this stacking strategy is the single most effective way to buy a home with minimal cash outlay.',
+          'For buyers in Fort Collins, Loveland, Windsor, Greeley, and all 27 Northern Colorado communities we serve, this stacking strategy is the single most effective way to buy a home with minimal cash outlay.',
         ],
         relatedLinks: [
           { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Complete program details & eligibility' },
@@ -5598,7 +5598,7 @@ export const blogPosts = [
         paragraphs: [
           'While our office is in Fort Collins, SAA Homes serves buyers and sellers across all of Northern Colorado. Whether you are looking at a lakefront property in Loveland, a family home in Windsor, new construction in Timnath, or an affordable entry point in Greeley, our team has the local knowledge to represent you effectively.',
           'Northern Colorado is a diverse region with distinct markets. Windsor offers family-friendly communities with top-rated schools and lake access. Fort Collins delivers CSU energy and Old Town charm. Loveland blends arts and lake recreation. Greeley delivers affordability and Weld County value. Timnath and Severance offer new construction in growing master-planned communities. Longmont and Berthoud serve the Boulder County and I-25 growth corridors.',
-          'We help clients compare these cities and find the right fit for their lifestyle, budget, and goals. Our team covers all 19 Northern Colorado communities in our service area, giving you access to the entire regional market through one trusted Windsor Colorado realtor.',
+          'We help clients compare these cities and find the right fit for their lifestyle, budget, and goals. Our team covers all 27 Northern Colorado communities in our service area, giving you access to the entire regional market through one trusted Windsor Colorado realtor.',
         ],
         relatedLinks: [
           { title: 'Loveland real estate', href: '/northern-colorado-areas/loveland/', description: 'Art, lakes & Larimer County living' },

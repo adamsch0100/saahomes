@@ -257,7 +257,7 @@ export default function CashHomeBuyersPage() {
                 name: "Can SAA Homes help me find flip properties as a cash buyer?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "Yes. SAA Homes works with cash buyers, real estate investors, and house flippers across Northern Colorado. We can set you up with off-market leads, connect you with fix-and-flip opportunities, and help you build a portfolio in Fort Collins, Loveland, Windsor, Greeley, and all 19 Front Range communities we serve.",
+                  text: "Yes. SAA Homes works with cash buyers, real estate investors, and house flippers across Northern Colorado. We can set you up with off-market leads, connect you with fix-and-flip opportunities, and help you build a portfolio in Fort Collins, Loveland, Windsor, Greeley, and all 27 Front Range communities we serve.",
                 },
               },
               {
@@ -265,7 +265,7 @@ export default function CashHomeBuyersPage() {
                 name: "What cities do you cover for cash home buying?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "We serve all of Northern Colorado including Fort Collins, Loveland, Windsor, Greeley, Timnath, Wellington, Berthoud, Johnstown, Severance, Firestone, Frederick, Longmont, Boulder, Eaton, Evans, Milliken, Mead, La Salle, and Niwot. Each area has its own market dynamics and cash buyer demand.",
+                  text: "We serve all of Northern Colorado including Fort Collins, Loveland, Windsor, Greeley, Timnath, Wellington, Berthoud, Johnstown, Severance, Firestone, Frederick, Longmont, Boulder, Eaton, Evans, Milliken, Mead, La Salle, Niwot, Erie, Brighton, Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue, and Carbon Valley. Each area has its own market dynamics and cash buyer demand.",
                 },
               },
               {
@@ -371,7 +371,7 @@ export default function CashHomeBuyersPage() {
               <h3 className="text-2xl font-serif font-bold mb-3">Cash Buyer or Investor?</h3>
               <p className="text-gray-400 mb-6">
                 Looking for flip properties, rentals, or your next deal? SAA Homes has boots
-                on the ground across all 19 Northern Colorado markets. We&rsquo;ll help you
+                on the ground across all 27 Northern Colorado markets. We&rsquo;ll help you
                 find off-market leads, evaluate comps, and move fast when the right property
                 comes up.
               </p>
@@ -590,7 +590,7 @@ export default function CashHomeBuyersPage() {
             </div>
             <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
               <div className="text-[#CFB36E] text-3xl mb-3">02</div>
-              <h3 className="font-bold mb-2">19-City Coverage</h3>
+              <h3 className="font-bold mb-2">27-Community Coverage</h3>
               <p className="text-sm text-gray-400">
                 From Boulder to Greeley, Fort Collins to Firestone — we know the comps,
                 the demand patterns, and the off-market opportunities in every Northern

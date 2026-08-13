@@ -48,7 +48,7 @@ const CASH_BUYER_FAQS = [
   { q: 'What cities do you cover for cash home buying?',
     a: 'We serve all of Northern Colorado including Fort Collins, Loveland, Windsor, Greeley, Timnath, Wellington, Berthoud, Johnstown, Severance, Firestone, Frederick, Longmont, Boulder, Eaton, Evans, Milliken, Mead, La Salle, and Niwot. Each area has its own market dynamics and cash buyer demand.' },
   { q: 'Can SAA Homes help cash buyers find flip properties?',
-    a: 'Yes. SAA Homes works with cash buyers, real estate investors, and house flippers across Northern Colorado. We can set you up with off-market leads, connect you with fix-and-flip opportunities, and help you build a portfolio in all 19 Front Range communities we serve.' },
+    a: 'Yes. SAA Homes works with cash buyers, real estate investors, and house flippers across Northern Colorado. We can set you up with off-market leads, connect you with fix-and-flip opportunities, and help you build a portfolio in all 27 Front Range communities we serve.' },
   { q: 'Do I have to sell for cash, or can I list with SAA Homes instead?',
     a: 'Both options are available. Many sellers come to us for a quick cash offer and end up choosing a traditional listing once they see what their home could command on the open market. There is no obligation either way — we will give you honest advice based on your home\'s condition, your timeline, and your financial goals.' },
 ];
@@ -316,7 +316,7 @@ function injectMetaTags(html, tags) {
 // Body content injection for crawlers (visible content in <div id="root">)
 // ---------------------------------------------------------------------------
 
-// All 19 Northern Colorado city pages + key money pages — used to build a
+// All 27 Northern Colorado entity pages + key money pages — used to build a
 // crawlable sitewide link graph. The React header/footer nav is rendered
 // client-side, so without this block Google's crawler sees almost no internal
 // links (homepage had 0 area links, city pages ~5). Injecting a static nav
@@ -342,6 +342,14 @@ const SITE_AREA_PAGES = [
   ['evans', 'Evans'],
   ['severance', 'Severance'],
   ['niwot', 'Niwot'],
+  ['erie', 'Erie'],
+  ['brighton', 'Brighton'],
+  ['estes-park', 'Estes Park'],
+  ['red-feather-lakes', 'Red Feather Lakes'],
+  ['fort-lupton', 'Fort Lupton'],
+  ['lyons', 'Lyons'],
+  ['bellvue', 'Bellvue'],
+  ['carbon-valley', 'Carbon Valley'],
 ];
 
 const SITE_MONEY_PAGES = [
@@ -1039,7 +1047,7 @@ const MONEY_PAGE_CONTENT = {
       {
         heading: 'Sell Your Northern Colorado Home With Confidence',
         paragraphs: [
-          'Selling your home in Northern Colorado requires local market knowledge, strategic pricing, and a marketing plan that reaches the right buyers. Schwartz and Associates brings years of experience across Fort Collins, Loveland, Windsor, Greeley, and all 19 communities in our service area.',
+          'Selling your home in Northern Colorado requires local market knowledge, strategic pricing, and a marketing plan that reaches the right buyers. Schwartz and Associates brings years of experience across Fort Collins, Loveland, Windsor, Greeley, and all 27 communities in our service area.',
           'From first-time sellers to those who have sold multiple properties, our team provides a comprehensive process: a free market analysis using current Northern Colorado comps, professional staging guidance, premium photography and virtual tours, MLS and digital marketing, and skilled negotiation through closing.',
         ],
       },
@@ -1084,7 +1092,7 @@ const MONEY_PAGE_CONTENT = {
       {
         heading: 'How We Help You Buy',
         paragraphs: [
-          'The home buying process starts with understanding your needs, budget, and timeline. We pre-approve you with trusted local lenders who know Northern Colorado programs including CHFA, FHA, VA, and conventional financing options. Then we search active listings across all 19 communities to find homes that match your criteria.',
+          'The home buying process starts with understanding your needs, budget, and timeline. We pre-approve you with trusted local lenders who know Northern Colorado programs including CHFA, FHA, VA, and conventional financing options. Then we search active listings across all 27 communities to find homes that match your criteria.',
           'When we find the right home, we conduct a comparative market analysis to determine a strong offer price, guide you through the negotiation and inspection process, and stay with you through closing. Our goal is a smooth, transparent experience from first showing to keys in hand.',
         ],
       },
@@ -1116,7 +1124,7 @@ const MONEY_PAGE_CONTENT = {
         heading: 'Get In Touch With Schwartz and Associates',
         paragraphs: [
           'Ready to buy or sell a home in Northern Colorado? We are here to help. Whether you have questions about the market, want to schedule a consultation, or need guidance on CHFA programs, our team is just a phone call or message away.',
-          'We serve buyers and sellers across all 19 Northern Colorado communities: Fort Collins, Loveland, Windsor, Greeley, Timnath, Severance, Wellington, Berthoud, Johnstown, Milliken, Eaton, La Salle, Mead, Longmont, Boulder, Firestone, Frederick, Evans, and Niwot.',
+          'We serve buyers and sellers across all 27 Northern Colorado communities: Fort Collins, Loveland, Windsor, Greeley, Timnath, Severance, Wellington, Berthoud, Johnstown, Milliken, Eaton, La Salle, Mead, Longmont, Boulder, Firestone, Frederick, Evans, Niwot, Erie, Brighton, Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue, and Carbon Valley.',
         ],
       },
     ],
@@ -1130,7 +1138,7 @@ const MONEY_PAGE_CONTENT = {
       {
         heading: 'Homes for Sale Across Northern Colorado',
         paragraphs: [
-          'Browse active listings across Fort Collins, Loveland, Windsor, Greeley, and all 19 communities we serve. Our property search includes homes for sale in every price range — from starter homes and townhomes to luxury properties and new construction.',
+          'Browse active listings across Fort Collins, Loveland, Windsor, Greeley, and all 27 communities we serve. Our property search includes homes for sale in every price range — from starter homes and townhomes to luxury properties and new construction.',
           'Use the search tools below to filter by city, price, bedrooms, and property type. Each listing includes detailed information, professional photos, and direct contact options to schedule a showing with a Schwartz and Associates agent.',
         ],
       },
@@ -1176,7 +1184,7 @@ const MONEY_PAGE_CONTENT = {
         heading: 'Meet Adam and Mandi Schwartz',
         paragraphs: [
           'Schwartz and Associates (SAA Homes) is a Northern Colorado real estate team serving home buyers and sellers under Coldwell Banker Realty in Fort Collins. With years of combined experience, Adam and Mandi Schwartz bring deep local market knowledge, integrity, and a client-first approach to every transaction.',
-          'Our team covers all 19 Northern Colorado communities — from Fort Collins and Loveland to Windsor, Greeley, Timnath, Berthoud, and beyond. We specialize in first-time homebuyers, CHFA program guidance, move-up buyers, sellers preparing for their next chapter, and new construction in growing communities.',
+          'Our team covers all 27 Northern Colorado communities — from Fort Collins and Loveland to Windsor, Greeley, Timnath, Berthoud, Erie, Boulder, and beyond. We specialize in first-time homebuyers, CHFA program guidance, move-up buyers, sellers preparing for their next chapter, and new construction in growing communities.',
         ],
       },
     ],
@@ -1190,7 +1198,7 @@ const MONEY_PAGE_CONTENT = {
       {
         heading: 'Your Northern Colorado Real Estate Experts',
         paragraphs: [
-          'Schwartz and Associates (SAA Homes) is a trusted Northern Colorado real estate team serving home buyers and sellers across all 19 communities in Larimer and Weld counties. From Fort Collins and Loveland to Windsor, Greeley, Timnath, and beyond, our local expertise helps clients make confident real estate decisions.',
+          'Schwartz and Associates (SAA Homes) is a trusted Northern Colorado real estate team serving home buyers and sellers across all 27 communities in Larimer, Weld, and Boulder counties. From Fort Collins and Loveland to Windsor, Greeley, Timnath, Boulder, and beyond, our local expertise helps clients make confident real estate decisions.',
           'Whether you are buying your first home, selling to move up or downsize, or exploring CHFA down payment assistance programs, Adam and Mandi Schwartz bring personalized service, market knowledge, and a commitment to your success. We represent clients under Coldwell Banker Realty from our Fort Collins office at 3665 John F Kennedy Parkway, Suite 210.',
         ],
       },
@@ -1203,7 +1211,7 @@ const MONEY_PAGE_CONTENT = {
     ],
     cta: {
       title: 'Start Your Northern Colorado Real Estate Journey',
-      text: 'Contact SAA Homes at (970) 999-1407 for expert buyer and seller representation across all 19 Northern Colorado communities.',
+      text: 'Contact SAA Homes at (970) 999-1407 for expert buyer and seller representation across all 27 Northern Colorado communities.',
     },
   },
   '/cash-home-buyers/': {
@@ -1219,7 +1227,7 @@ const MONEY_PAGE_CONTENT = {
         heading: 'Cash Home Buying vs. Traditional Listing',
         paragraphs: [
           'Cash offers are typically below full market value because the buyer takes on the risk and convenience of an as-is, no-contingency purchase. However, when you factor in avoided repairs, no carrying costs during a 30-60 day listing period, and zero commission, the net difference is often smaller than sellers expect.',
-          'SAA Homes will show you both paths with a free consultation so you can choose what is right for your situation. We represent sellers across all 19 Northern Colorado communities including Fort Collins, Loveland, Windsor, Greeley, Timnath, Berthoud, and more.',
+          'SAA Homes will show you both paths with a free consultation so you can choose what is right for your situation. We represent sellers across all 27 Northern Colorado communities including Fort Collins, Loveland, Windsor, Greeley, Timnath, Berthoud, and more.',
         ],
       },
     ],
@@ -1279,7 +1287,7 @@ const MONEY_PAGE_CONTENT = {
         heading: 'Buying or selling with an assumable loan in Northern Colorado',
         paragraphs: [
           'For buyers, we screen every search for assumable inventory, connect you with VA-approved and FHA-experienced lenders, and run the numbers honestly: assumed rate vs. a new loan at today\'s market. For sellers, a below-market assumable rate can be a genuine marketing advantage — we position it accurately in the listing and qualify interested buyers early so the assumption path is clear.',
-          'We serve buyers and sellers across all 19 Northern Colorado communities, including Fort Collins, Loveland, Windsor, Greeley, Timnath, Severance, and Berthoud. Contact Schwartz and Associates at (970) 999-1407 to check whether an assumable mortgage fits your purchase or sale.',
+          'We serve buyers and sellers across all 27 Northern Colorado communities, including Fort Collins, Loveland, Windsor, Greeley, Timnath, Severance, and Berthoud. Contact Schwartz and Associates at (970) 999-1407 to check whether an assumable mortgage fits your purchase or sale.',
         ],
       },
     ],
@@ -1978,7 +1986,7 @@ async function main() {
       html = injectGenericBody(html, route);
     }
 
-    // 5. Inject crawlable sitewide links block (all 19 cities + money pages) —
+    // 5. Inject crawlable sitewide links block (all 27 entities + money pages) —
     //    the React nav/footer is client-side rendered, so without this the
     //    crawler sees almost no internal links. This builds the hub-and-spoke
     //    link graph on every page.
