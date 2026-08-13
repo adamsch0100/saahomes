@@ -357,3 +357,31 @@ export const patchAgent = async (token, id, body) => {
     body: JSON.stringify(body),
   });
 };
+
+export const setAgentDomain = async (token, id, custom_domain) => {
+  return apiRequest(`/api/admin/agents/${id}/domain`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ custom_domain }),
+  });
+};
+
+export const verifyAgentDomain = async (token, id) => {
+  return apiRequest(`/api/admin/agents/${id}/domain/verify`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const deleteAgentDomain = async (token, id) => {
+  return apiRequest(`/api/admin/agents/${id}/domain`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

@@ -384,7 +384,8 @@ export const getAgentMe = async (req, res) => {
     const pool = getPool();
     const result = await pool.query(
       `SELECT id, email, name, phone, role, status, created_at, last_active_at,
-              brand_name, brokerage_name, brand_phone, voice_style, market_key
+              brand_name, brokerage_name, brand_phone, voice_style, market_key,
+              custom_domain, domain_verified_at, domain_verify_token
        FROM users
        WHERE id = $1 AND role IN ('agent', 'admin') AND status = 'active'`,
       [userId]

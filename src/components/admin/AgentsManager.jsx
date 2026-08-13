@@ -5,6 +5,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { createAgent, listAgents, patchAgent } from '../../utils/api.js';
 import { marketPack } from '../../data/marketPack.js';
+import AgentDomainControl from './AgentDomainControl.jsx';
 
 const GOLD = '#CFB36E';
 const VOICE_STYLES = marketPack.agentVoice?.voiceStyles || ['warm', 'professional', 'short'];
@@ -99,6 +100,11 @@ export default function AgentsManager({ token }) {
       brand_phone: agent.brand_phone || '',
       voice_style: agent.voice_style || 'warm',
     });
+  };
+
+  const applyAgentUpdate = (updated) => {
+    if (!updated?.id) return;
+    setAgents((list) => list.map((row) => (row.id === updated.id ? { ...row, ...updated } : row)));
   };
 
   const saveBrand = async (agentId) => {
@@ -284,6 +290,7 @@ export default function AgentsManager({ token }) {
                       {' · voice '}
                       <span className="uppercase tracking-wide">{a.voice_style || 'warm'}</span>
                     </p>
+                    <AgentDomainControl token={token} agent={a} onUpdated={applyAgentUpdate} />
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <button

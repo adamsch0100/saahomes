@@ -298,6 +298,9 @@ export function publicAgentPayload(row) {
     voice_style: normalizeVoiceStyle(row.voice_style),
     market_key: brand.marketKey,
     marketKey: brand.marketKey,
+    custom_domain: row.custom_domain ?? null,
+    domain_verified_at: row.domain_verified_at ?? null,
+    domain_verify_token: row.domain_verify_token ?? null,
     // Resolved (with marketPack fallbacks) for console / preview
     brand: {
       brandName: brand.brandName,

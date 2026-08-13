@@ -12,6 +12,7 @@ import FloatingContactBar from "./components/FloatingContactBar.jsx";
 import LeadCaptureChat from "./components/LeadCaptureChat.jsx";
 import { loadRealScoutScript } from "./utils/realscout.js";
 import { GA4_MEASUREMENT_ID, initGaDebugMode } from "./utils/analytics.js";
+import { TenantProvider, TenantDocumentTitle } from "./context/TenantContext.jsx";
 
 // Route-level code splitting — marketing, area, admin, blog, tools (lazy)
 const AboutPage = lazy(() => import("./pages/AboutPage.jsx"));
@@ -150,6 +151,7 @@ export default function App() {
   }, [location.pathname, location.search]);
   
   return (
+    <TenantProvider>
     <div className="min-h-screen w-full bg-white text-gray-900">
       <Routes>
         <Route path="/admin" element={<AppLayout><LazyPage><AdminPage /></LazyPage></AppLayout>} />
@@ -289,5 +291,7 @@ export default function App() {
         <Route path="/helpful-guides/" element={<AppLayout><LazyPage><BlogPage /></LazyPage></AppLayout>} />
       </Routes>
     </div>
+    <TenantDocumentTitle />
+    </TenantProvider>
   );
 }

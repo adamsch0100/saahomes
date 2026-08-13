@@ -1,8 +1,11 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useTenant } from "../context/TenantContext.jsx";
 
 export default function FloatingContactBar() {
   const location = useLocation();
+  const { tenant } = useTenant();
+  const callHref = tenant?.brand?.tel || "tel:(970) 999-1407";
 
   // Listing detail owns its own sticky CTAs; full-screen search needs the whole viewport
   if (
@@ -38,7 +41,7 @@ export default function FloatingContactBar() {
     <div className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
       <div className="flex gap-3">
         <a
-          href="tel:(970) 999-1407"
+          href={callHref}
           className="flex-1 inline-flex items-center justify-center px-3 py-3.5 bg-black text-white font-semibold rounded-lg text-sm touch-manipulation"
         >
           Call Now

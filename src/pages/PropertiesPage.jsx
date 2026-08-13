@@ -1,7 +1,9 @@
 import React, { useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import SEO from "../components/SEO";
 import ListingSearch from "../components/ListingSearch";
+import { useTenant } from "../context/TenantContext.jsx";
 
 const CITIES = [
   { name: "Fort Collins", slug: "fort-collins", description: "CSU, craft breweries, mountain views", price: "~$612K", label: "Median" },
@@ -34,6 +36,12 @@ const CITIES = [
 export default function PropertiesPage() {
   const [searchParams] = useSearchParams();
   const location = searchParams.get("location") || "";
+  const { tenant } = useTenant();
+  const tenantTitle = tenant?.brand?.brandName
+    ? `${tenant.brand.brandName} — ${
+        location ? `Homes for Sale in ${location}` : "Homes for Sale in Northern Colorado"
+      }`
+    : null;
 
   useEffect(() => {
     const html = document.documentElement;
@@ -124,6 +132,11 @@ export default function PropertiesPage() {
         includeWebsite={true}
         jsonLd={[faqSchema]}
       />
+      {tenantTitle ? (
+        <Helmet>
+          <title>{tenantTitle}</title>
+        </Helmet>
+      ) : null}
 
       {/*
         SEO crawl layer — stays in the DOM for Google/Bing (H1, city links,

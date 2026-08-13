@@ -533,8 +533,8 @@ export default function AgentPage() {
                   Homes for sale — {marketPack.market.name}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  Preview only: search chrome would show your brand name, brokerage, and phone.
-                  Custom domains (P-2b) are not included in this release.
+                  Preview only: search chrome shows your brand name, brokerage, and phone.
+                  Custom domains are set in Admin → Agents (DNS TXT verification).
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <span className="inline-flex items-center min-h-[36px] px-3 rounded-lg bg-gray-100 text-xs text-gray-700">

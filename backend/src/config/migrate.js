@@ -696,6 +696,22 @@ export const runMigrations = async () => {
       ALTER TABLE users ADD COLUMN IF NOT EXISTS market_key VARCHAR(32);
     `);
 
+    // ── Custom domains (P-2b) — per-agent branded hostname ─────────────────
+    // custom_domain is a normalized hostname (no scheme/path). Verification
+    // is REAL DNS TXT only (saa-verify=<token>); domain_verified_at is set
+    // solely by a successful lookup. Unique among verified domains so two
+    // agents cannot claim the same host. Unverified rows may collide.
+    await client.query(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS custom_domain VARCHAR(255);
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS domain_verified_at TIMESTAMPTZ;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS domain_verify_token VARCHAR(64);
+    `);
+    await client.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_users_custom_domain_verified
+        ON users (custom_domain)
+        WHERE custom_domain IS NOT NULL AND domain_verified_at IS NOT NULL;
+    `);
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {

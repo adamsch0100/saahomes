@@ -10,6 +10,7 @@ import {
 } from "../utils/notificationsApi.js";
 import AccountModal from "./AccountModal";
 import AccountMenu from "./AccountMenu";
+import { useTenant } from "../context/TenantContext.jsx";
 
 const buyerProgramLinks = [
   { label: "CHFA Down Payment Assistance", to: "/chfa-down-payment-assistance/" },
@@ -75,6 +76,8 @@ function NotificationDropdownRow({ item, onOpen }) {
 
 export default function Header() {
   const location = useLocation();
+  const { tenant } = useTenant();
+  const tenantBrand = tenant?.brand || null;
   const headerRef = useRef(null);
   const bellRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -418,15 +421,35 @@ export default function Header() {
               to="/"
               className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center z-40 pointer-events-auto"
             >
-              <img
-                src="/images/White-Logo-AUTOx110.fit.png"
-                alt="Schwartz and Associates Logo"
-                className={
-                  isSearchHeader
-                    ? "w-auto h-9 sm:h-10 lg:h-11"
-                    : "w-auto h-14 sm:h-20 lg:h-[110px]"
-                }
-              />
+              {tenantBrand?.brandName ? (
+                <span className="flex flex-col items-center text-center px-2">
+                  <span
+                    className={
+                      isSearchHeader
+                        ? "text-sm sm:text-base font-extrabold tracking-wide leading-tight"
+                        : "text-base sm:text-xl lg:text-2xl font-extrabold tracking-wide leading-tight"
+                    }
+                    style={{ color: "#CFB36E" }}
+                  >
+                    {tenantBrand.brandName}
+                  </span>
+                  {(tenantBrand.headerSubline || tenantBrand.brokerage) ? (
+                    <span className="hidden sm:block text-[10px] lg:text-xs text-white/70 mt-0.5 max-w-[16rem] truncate">
+                      {tenantBrand.headerSubline || tenantBrand.brokerage}
+                    </span>
+                  ) : null}
+                </span>
+              ) : (
+                <img
+                  src="/images/White-Logo-AUTOx110.fit.png"
+                  alt="Schwartz and Associates Logo"
+                  className={
+                    isSearchHeader
+                      ? "w-auto h-9 sm:h-10 lg:h-11"
+                      : "w-auto h-14 sm:h-20 lg:h-[110px]"
+                  }
+                />
+              )}
             </Link>
 
             <nav className="hidden lg:flex items-center gap-6 text-white text-sm z-30">
@@ -604,8 +627,11 @@ export default function Header() {
             <a href="mailto:info@saahomes.com" className="block hover:text-white transition-colors">
               ✉ info@saahomes.com
             </a>
-            <a href="tel:(970) 999-1407" className="block hover:text-white transition-colors">
-              ☎ (970) 999-1407
+            <a
+              href={tenantBrand?.tel || "tel:(970) 999-1407"}
+              className="block hover:text-white transition-colors"
+            >
+              ☎ {tenantBrand?.phone || "(970) 999-1407"}
             </a>
           </div>
         </div>

@@ -1267,7 +1267,8 @@ export const createAgent = async (req, res) => {
            last_active_at = NOW()
          WHERE id = $10
          RETURNING id, email, name, phone, role, status, created_at, last_active_at,
-                   brand_name, brokerage_name, brand_phone, voice_style, market_key`,
+                   brand_name, brokerage_name, brand_phone, voice_style, market_key,
+                   custom_domain, domain_verified_at, domain_verify_token`,
         [hash, nameStr, phoneVal, token, brandName, brokerageName, brandPhone, voiceStyle, marketKey, row.id]
       );
       logger.info('Existing user upgraded to agent', { email: emailStr, id: row.id });
@@ -1287,7 +1288,8 @@ export const createAgent = async (req, res) => {
        )
        VALUES ($1, $2, $3, $4, $5, 'agent', 'active', NOW(), $6, $7, $8, $9, $10)
        RETURNING id, email, name, phone, role, status, created_at, last_active_at,
-                 brand_name, brokerage_name, brand_phone, voice_style, market_key`,
+                 brand_name, brokerage_name, brand_phone, voice_style, market_key,
+                 custom_domain, domain_verified_at, domain_verify_token`,
       [emailStr, nameStr, phoneVal, manageToken, hash, brandName, brokerageName, brandPhone, voiceStyle, marketKey]
     );
 
@@ -1309,6 +1311,7 @@ export const listAgents = async (req, res) => {
     const result = await pool.query(
       `SELECT id, email, name, phone, role, status, created_at, last_active_at,
               brand_name, brokerage_name, brand_phone, voice_style, market_key,
+              custom_domain, domain_verified_at, domain_verify_token,
               (SELECT COUNT(*)::int FROM users c
                WHERE c.assigned_agent_id = users.id
                  AND COALESCE(c.role, 'client') = 'client') AS assigned_lead_count
@@ -1450,7 +1453,8 @@ export const patchAgent = async (req, res) => {
     const updated = await pool.query(
       `UPDATE users SET ${updates.join(', ')} WHERE id = $${i}
        RETURNING id, email, name, phone, role, status, created_at, last_active_at,
-                 brand_name, brokerage_name, brand_phone, voice_style, market_key`,
+                 brand_name, brokerage_name, brand_phone, voice_style, market_key,
+                 custom_domain, domain_verified_at, domain_verify_token`,
       params
     );
 

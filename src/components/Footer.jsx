@@ -2,20 +2,41 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { getEventsGuidePath } from "../data/localEvents.js";
 import { LISTLOGIC_URL } from "../utils/seoConstants.js";
+import { useTenant } from "../context/TenantContext.jsx";
 
 export default function Footer() {
+  const { tenant } = useTenant();
+  const tenantBrand = tenant?.brand || null;
+  const brandName = tenantBrand?.brandName || null;
+  const brokerage = tenantBrand?.brokerage || "Schwartz and Associates";
+  const phone = tenantBrand?.phone || "(970) 999-1407";
+  const tel = tenantBrand?.tel || "tel:(970) 999-1407";
+
   return (
     <footer className="w-full bg-gray-900 text-gray-300 relative z-30 md:-mt-14 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
       <div className="w-full px-6 md:px-12 py-12">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div>
-            <img 
-              src="/images/White-Logo-AUTOx110.fit.png" 
-              alt="Schwartz and Associates - Northern Colorado Real Estate"
-              className="h-12 mb-4"
-            />
+            {brandName ? (
+              <>
+                <p className="text-lg font-extrabold tracking-wide mb-1" style={{ color: "#CFB36E" }}>
+                  {brandName}
+                </p>
+                <p className="text-xs text-gray-400 mb-4">
+                  {tenantBrand.headerSubline || brokerage}
+                </p>
+              </>
+            ) : (
+              <img
+                src="/images/White-Logo-AUTOx110.fit.png"
+                alt="Schwartz and Associates - Northern Colorado Real Estate"
+                className="h-12 mb-4"
+              />
+            )}
             <p className="text-sm text-gray-400">
-              Northern Colorado real estate experts helping Colorado home buyers and sellers in Fort Collins, Loveland, Windsor, Greeley, and beyond.
+              {brandName
+                ? `${brokerage} — Northern Colorado real estate.`
+                : "Northern Colorado real estate experts helping Colorado home buyers and sellers in Fort Collins, Loveland, Windsor, Greeley, and beyond."}
             </p>
           </div>
 
@@ -67,7 +88,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li className="text-gray-400">Serving Fort Collins, Loveland, Windsor, Greeley & Northern Colorado</li>
               <li><a href="mailto:info@saahomes.com" className="hover:text-white transition-colors">info@saahomes.com</a></li>
-              <li><a href="tel:(970) 999-1407" className="hover:text-white transition-colors">(970) 999-1407</a></li>
+              <li><a href={tel} className="hover:text-white transition-colors">{phone}</a></li>
             </ul>
             
             <div className="flex gap-4 mt-4">
@@ -88,7 +109,10 @@ export default function Footer() {
         </div>
 
         <div className="pt-8 border-t border-gray-700 text-sm text-gray-400 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p>© {new Date().getFullYear()} Schwartz and Associates. Northern Colorado real estate. All rights reserved.</p>
+          <p>
+            © {new Date().getFullYear()} {brokerage}. Northern Colorado real estate. All rights reserved.
+            {brandName ? " Equal Housing Opportunity." : ""}
+          </p>
           <div className="flex gap-6 items-center">
             <Link to="/about-us/" className="hover:text-white transition-colors">About</Link>
             <Link to="/contact/" className="hover:text-white transition-colors">Contact</Link>

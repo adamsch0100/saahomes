@@ -21,6 +21,11 @@ import {
   listAgents,
   patchAgent,
 } from '../controllers/adminController.js';
+import {
+  setAgentDomain,
+  verifyAgentDomain,
+  deleteAgentDomain,
+} from '../controllers/tenantDomainController.js';
 import { authenticateToken, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -58,5 +63,8 @@ router.get('/fub/status', ...adminOnly, getFubStatus);
 router.get('/agents', ...adminOnly, listAgents);
 router.post('/agents', ...adminOnly, createAgent);
 router.patch('/agents/:id', ...adminOnly, patchAgent);
+router.post('/agents/:id/domain', ...adminOnly, setAgentDomain);
+router.post('/agents/:id/domain/verify', ...adminOnly, verifyAgentDomain);
+router.delete('/agents/:id/domain', ...adminOnly, deleteAgentDomain);
 
 export default router;

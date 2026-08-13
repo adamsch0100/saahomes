@@ -49,6 +49,7 @@ import {
   getNotificationPrefs,
   putNotificationPrefs,
 } from '../controllers/notificationsController.js';
+import { getPublicTenant } from '../controllers/tenantDomainController.js';
 import {
   validateContactSubmission,
   validateMarketReportSubmission,
@@ -76,6 +77,9 @@ const webformLimiter = rateLimit({
   legacyHeaders: false,
   message: { ok: false, error: 'Too many submissions from this IP, please try again later.' },
 });
+
+// Public tenant resolution (P-2b) — Host header → branded payload or null
+router.get('/tenant', getPublicTenant);
 
 // Public API routes
 router.post(
