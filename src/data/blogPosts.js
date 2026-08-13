@@ -1290,6 +1290,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/foreclosure-short-sale-northern-colorado-guide.jpg',
     readTime: '9 min read',
+    youtubeId: 'n736QhMbVN8',
     keywords: 'short sale fort collins, fort collins short sale, how to short sale my home fort collins, short sale vs foreclosure colorado, short sale process colorado, underwater mortgage fort collins, distressed home sale fort collins, cash home buyers fort collins, sell my house fast fort collins',
     relatedLinks: [
       { title: 'Foreclosure & Short Sale Guide', href: '/blog/foreclosure-short-sale-northern-colorado-guide/', description: 'The full Northern Colorado process' },
