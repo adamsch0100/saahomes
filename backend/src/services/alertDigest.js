@@ -160,6 +160,9 @@ function buildWhere(filters) {
   if (f.pool === 'true') where.push(`COALESCE(features->>'pool','') NOT ILIKE 'n%' AND COALESCE(features->>'pool','') <> ''`);
   if (f.newConstruction === 'true') where.push(`features->>'new_construction' = 'true'`);
   if (f.waterfront === 'true') where.push(`features->>'waterfront' = 'true'`);
+  if (f.assumable === 'true' || f.assumable === true || f.assumable === '1') {
+    where.push('assumable = TRUE');
+  }
   if (f.newDays) { where.push(`days_on_market <= $${i++}`); params.push(Number(f.newDays)); }
   return { whereSql: where.join(' AND '), params };
 }

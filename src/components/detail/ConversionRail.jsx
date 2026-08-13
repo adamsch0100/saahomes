@@ -46,7 +46,7 @@ export default function ConversionRail({
   if (!listing) return null;
 
   const fullAddress = listingFullAddress(listing);
-  const { isNew, priceCut, priceCutPct, isNewConstruction, dom } = listingBadges(listing);
+  const { isNew, priceCut, priceCutPct, isNewConstruction, isAssumable, dom } = listingBadges(listing);
   const sqft = listing.living_area;
   const pricePerSqft = pricePerSqftOf(listing);
   const hoaLabel =
@@ -109,6 +109,11 @@ export default function ConversionRail({
           {isNewConstruction && (
             <span className="border border-[#CFB36E] text-[#CFB36E] text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded">
               New construction
+            </span>
+          )}
+          {isAssumable && (
+            <span className="border border-[#CFB36E] text-[#CFB36E] text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded">
+              Assumable loan possible
             </span>
           )}
           {dom != null && (

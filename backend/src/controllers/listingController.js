@@ -242,6 +242,7 @@ function buildListingFilters(query = {}) {
     interior, // comma-separated interior feature keywords
     listingStatus, // price-drop | new  OR (legacy) a home status string
     hasImages, hasTour, has3d,
+    assumable,
     postal_code: postalCodeSnake,
     postalCode, zip, zipCode, zips,
   } = query;
@@ -563,6 +564,12 @@ function buildListingFilters(query = {}) {
     pushRaw(`COALESCE(features->>'virtual_tour','') <> ''`);
   }
 
+  // Assumable VA/FHA/USDA signal — derived at sync from remarks text
+  // (description ILIKE '%assum%'). Combine with city/price/beds like any other filter.
+  if (assumable === 'true' || assumable === true || assumable === '1') {
+    pushRaw('assumable = TRUE');
+  }
+
   return { where, params, i };
 }
 
@@ -617,7 +624,7 @@ export const searchListings = async (req, res) => {
     const dataRes = await pool.query(
       `SELECT id, listing_id, status, property_type, property_subtype, home_type, street_number, street_name, unit,
          city, state, postal_code, list_price, original_list_price, beds, baths, living_area, lot_size, lot_size_acres,
-         year_built, garage_spaces, hoa_fee, description, photos, photos_count, latitude, longitude, slug,
+         year_built, garage_spaces, hoa_fee, description, assumable, photos, photos_count, latitude, longitude, slug,
          updated_at, days_on_market, price_per_sqft, subdivision
        FROM listings WHERE ${whereSql} ORDER BY ${orderSql} LIMIT $${i} OFFSET $${i + 1}`,
       [...params, Number(limit), offset]

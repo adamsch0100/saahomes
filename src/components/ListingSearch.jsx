@@ -335,6 +335,7 @@ function emptyFilters(overrides = {}) {
     polygon: "",
     hasImages: "",
     hasTour: "",
+    assumable: "",
     ...overrides,
   };
 }
@@ -429,6 +430,7 @@ function filtersFromParams(sp) {
     polygon: sp.get("polygon") || "",
     hasImages: sp.get("hasImages") || "",
     hasTour: sp.get("hasTour") || sp.get("has3d") || "",
+    assumable: sp.get("assumable") === "true" ? "true" : "",
   });
 }
 
@@ -496,6 +498,7 @@ function filtersToParams(f, { forUrl = false, pageNum = 1 } = {}) {
   if (f.polygon) params.set("polygon", f.polygon);
   if (f.hasImages === "true") params.set("hasImages", "true");
   if (f.hasTour === "true") params.set("hasTour", "true");
+  if (f.assumable === "true") params.set("assumable", "true");
   if (!forUrl) {
     params.set("limit", String(PAGE_SIZE));
     params.set("page", String(pageNum));
@@ -532,6 +535,7 @@ function countActiveFilters(f) {
     f.listingStatus, f.newdays, f.dropdays, f.droppct,
     f.keywords,
     f.hasImages === "true", f.hasTour === "true",
+    f.assumable === "true",
   ].filter(Boolean).length;
 }
 
@@ -710,6 +714,7 @@ function buildActiveChips(f) {
   }
   if (f.hasImages === "true") chips.push({ id: "hasImages", label: "Has photos", patch: { hasImages: "" } });
   if (f.hasTour === "true") chips.push({ id: "hasTour", label: "Virtual tour", patch: { hasTour: "" } });
+  if (f.assumable === "true") chips.push({ id: "assumable", label: "Assumable", patch: { assumable: "" } });
   return chips;
 }
 
@@ -742,8 +747,8 @@ function SkeletonCard({ compact = false }) {
 }
 
 function CardBadges({ listing }) {
-  const { isNew, priceCut, priceCutPct, isNewConstruction, hasOpenHouse } = listingBadges(listing);
-  if (!isNew && !priceCut && !isNewConstruction && !hasOpenHouse) return null;
+  const { isNew, priceCut, priceCutPct, isNewConstruction, hasOpenHouse, isAssumable } = listingBadges(listing);
+  if (!isNew && !priceCut && !isNewConstruction && !hasOpenHouse && !isAssumable) return null;
   return (
     <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5 max-w-[78%] z-[1]">
       {isNew && (
@@ -764,6 +769,11 @@ function CardBadges({ listing }) {
       {isNewConstruction && (
         <span className="inline-flex items-center min-h-[24px] bg-black/85 text-white text-[11px] font-bold tracking-wide uppercase px-2.5 py-1 rounded-md shadow-sm">
           New construction
+        </span>
+      )}
+      {isAssumable && (
+        <span className="inline-flex items-center min-h-[24px] bg-black/85 text-[#CFB36E] border border-[#CFB36E] text-[11px] font-bold tracking-wide uppercase px-2.5 py-1 rounded-md shadow-sm">
+          Assumable loan possible
         </span>
       )}
     </div>
@@ -1290,6 +1300,15 @@ function FilterDrawerBody({
               className="w-4 h-4 accent-black"
             />
             New construction only
+          </label>
+          <label className="mt-2 ml-4 inline-flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={draft.assumable === "true"}
+              onChange={(e) => set("assumable", e.target.checked ? "true" : "")}
+              className="w-4 h-4 accent-black"
+            />
+            Assumable loan possible
           </label>
         </div>
 
@@ -1993,6 +2012,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     if (filters.polygon) out.polygon = filters.polygon;
     if (filters.hasImages === "true") out.hasImages = "true";
     if (filters.hasTour === "true") out.hasTour = "true";
+    if (filters.assumable === "true") out.assumable = "true";
     if (filters.sort) out.sort = filters.sort;
     return out;
   }, [filters]);
@@ -2253,6 +2273,20 @@ export default function ListingSearch({ location, height = "700px", compact = fa
 
           <button
             type="button"
+            onClick={() => setFilterInstant("assumable", filters.assumable === "true" ? "" : "true")}
+            className={
+              filters.assumable === "true"
+                ? `${chipBase} border-[#CFB36E] bg-[#CFB36E] text-black`
+                : `${chipBase} border-[#CFB36E] bg-white text-gray-900 hover:bg-[#CFB36E]/15`
+            }
+            aria-pressed={filters.assumable === "true"}
+            title="Show listings whose remarks mention an assumable VA or FHA loan"
+          >
+            Assumable
+          </button>
+
+          <button
+            type="button"
             onClick={openDrawer}
             className={activeFilterCount > 0 ? chipActive : chipIdle}
             aria-label={
@@ -2286,6 +2320,18 @@ export default function ListingSearch({ location, height = "700px", compact = fa
             showQuickPicks={false}
           />
           <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setFilterInstant("assumable", filters.assumable === "true" ? "" : "true")}
+            className={`inline-flex items-center justify-center min-h-[44px] px-3.5 py-2 border rounded-full text-sm font-semibold touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E] ${
+              filters.assumable === "true"
+                ? "border-[#CFB36E] bg-[#CFB36E] text-black"
+                : "border-[#CFB36E] bg-white text-gray-900"
+            }`}
+            aria-pressed={filters.assumable === "true"}
+          >
+            Assumable
+          </button>
           <button
             type="button"
             onClick={openDrawer}
@@ -2538,14 +2584,20 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           {!loading && !error && results.length === 0 && (
             <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 z-10 flex justify-center pointer-events-none">
               <div className="pointer-events-auto max-w-sm w-full rounded-xl bg-white/95 backdrop-blur-sm border border-gray-200 shadow-xl px-5 py-4 text-center">
-                <p className="text-sm font-bold text-gray-900">No homes match your filters</p>
+                <p className="text-sm font-bold text-gray-900">
+                  {filters.assumable === "true"
+                    ? `No assumable listings${areaLabel && areaLabel !== marketPack.market.name ? ` in ${areaLabel}` : ""} right now`
+                    : "No homes match your filters"}
+                </p>
                 {activeChips.length > 0 && (
                   <p className="text-[11px] text-gray-500 mt-2 leading-snug">
                     Active: {activeChips.map((c) => c.label).join(" · ")}
                   </p>
                 )}
                 <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">
-                  Widen price or beds, expand the search area, or clear filters to see more homes.
+                  {filters.assumable === "true"
+                    ? "New assumable listings land weekly; we'll alert you. Remarks-text only — confirm the loan with the lender."
+                    : "Widen price or beds, expand the search area, or clear filters to see more homes."}
                 </p>
                 <button
                   type="button"
@@ -2642,12 +2694,21 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                 </svg>
               </div>
               <p className="text-gray-900 font-semibold text-lg">
-                No homes match your filters
-                {filters.polygon
-                  ? " in your drawn area"
-                  : areaLabel && areaLabel !== marketPack.market.name
-                    ? ` in ${areaLabel}`
-                    : ""}
+                {filters.assumable === "true"
+                  ? `No assumable listings${
+                      filters.polygon
+                        ? " in your drawn area"
+                        : areaLabel && areaLabel !== marketPack.market.name
+                          ? ` in ${areaLabel}`
+                          : ""
+                    } right now`
+                  : `No homes match your filters${
+                      filters.polygon
+                        ? " in your drawn area"
+                        : areaLabel && areaLabel !== marketPack.market.name
+                          ? ` in ${areaLabel}`
+                          : ""
+                    }`}
               </p>
               {activeChips.length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-1.5 justify-center max-w-md">
@@ -2662,7 +2723,9 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                 </div>
               )}
               <p className="text-gray-500 mt-3 max-w-md text-sm leading-relaxed">
-                Try widening price or beds, expand the map area, or clear filters. You can also save this search — we&apos;ll email you when a match hits the market (new homes + price drops, no spam).
+                {filters.assumable === "true"
+                  ? "New assumable listings land weekly; we'll alert you. The flag means listing remarks mention an assumable VA or FHA loan — it still has to be confirmed with the lender."
+                  : "Try widening price or beds, expand the map area, or clear filters. You can also save this search — we'll email you when a match hits the market (new homes + price drops, no spam)."}
               </p>
               <div className="mt-5 flex flex-wrap gap-3 justify-center">
                 <button

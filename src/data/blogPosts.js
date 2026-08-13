@@ -4,6 +4,178 @@ export const LATEST_MARKET_UPDATE_SLUG = 'northern-colorado-market-update-august
 
 export const blogPosts = [
   {
+    slug: 'assumable-mortgage-colorado',
+    title: 'How Assumable Mortgages Work in Colorado (2026 Guide)',
+    excerpt: 'An assumable VA or FHA loan lets a qualified buyer take over the seller’s rate and remaining term. How it works in Colorado, what the IRES feed actually tells us, and how to search live assumable listings in Northern Colorado.',
+    date: '2026-08-13',
+    category: 'Buyer Tips',
+    image: '/images/buyers-hero.jpg',
+    readTime: '10 min read',
+    keywords: 'assumable mortgage Colorado, how do assumable mortgages work, assumable VA loan, FHA assumable loan, assumable mortgage requirements Colorado, assumable mortgage homes for sale, assumable homes Fort Collins, assumable mortgage Northern Colorado',
+    relatedLinks: [
+      { title: 'Assumable mortgages hub', href: '/assumable-mortgages/', description: 'VA & FHA assumption — flag listings, lenders, next step' },
+      { title: 'Search assumable homes', href: '/properties/?assumable=true', description: 'Live Northern Colorado listings flagged from remarks' },
+      { title: 'Assumable homes in Fort Collins', href: '/blog/assumable-homes-fort-collins/', description: 'City inventory and a real VA-rate example' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Buyer representation & program hub' },
+      { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & homes for sale' },
+      { title: 'Veterans hub — 0.5% back', href: '/veterans/', description: 'VA loans and the SAA Homes veteran pledge' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Talk through assumption with Adam or Mandi' },
+    ],
+    cta: {
+      title: 'Want us to watch assumable listings for you?',
+      description: 'Schwartz and Associates flags Northern Colorado listings whose remarks mention an assumable VA or FHA loan, connects you with a lender who can underwrite the assumption, and runs assumed rate vs. a new loan at today’s market. Call (970) 999-1407.',
+      primaryHref: '/properties/?assumable=true',
+      primaryText: 'Search assumable homes',
+      secondaryHref: '/assumable-mortgages/#assumable-lead-form',
+      secondaryText: 'Get assumable mortgage help',
+    },
+    sections: [
+      {
+        heading: 'What an assumable mortgage actually is',
+        paragraphs: [
+          'An assumable mortgage lets a qualified buyer take over the seller’s existing home loan — the interest rate, the remaining balance, and the remaining term — instead of originating a new mortgage at today’s rate. VA and FHA loans are assumable by qualified buyers. Most conventional loans are not. USDA loans can be assumable in some cases. The buyer still has to qualify with the lender that holds the loan, and that lender has to approve the assumption.',
+          'That is the entire product. It is not a secret rate from SAA Homes, and it is not a guaranteed monthly savings. Whether assumption beats a new loan depends on the seller’s remaining rate versus what you can get on a new mortgage, plus the cash needed to cover the gap between the purchase price and the remaining loan balance.',
+          'When market rates sit well above a seller’s existing rate — as they have while 30-year purchase rates have been in the mid-6% range and higher — a VA or FHA loan originated a few years earlier can be the difference that makes a payment work. The reverse is also true: if the seller’s rate is close to today’s market, assumption is usually not worth the extra timeline.',
+        ],
+        relatedLinks: [
+          { title: 'Assumable mortgages hub', href: '/assumable-mortgages/', description: 'VA, FHA, USDA, and conventional — what can be assumed' },
+        ],
+      },
+      {
+        heading: 'VA, FHA, USDA, conventional — what can be assumed',
+        paragraphs: [
+          'VA-backed loans are assumable by qualified buyers, veteran or not. The VA guarantee stays with the loan. A non-veteran typically pays the VA assumption funding fee (0.5% of the remaining balance for most buyers — confirm the current rate with the VA or the lender). The lender still underwrites the buyer’s credit and income. The seller should understand what happens to their VA entitlement after an assumption; restoration is not automatic in every case.',
+          'FHA loans are assumable by qualified buyers who meet FHA credit and income requirements, with lender approval. The buyer steps into the seller’s FHA rate and remaining term. A small processing fee may apply. Confirm current FHA assumption requirements with the lender holding the loan — we do not invent them.',
+          'Most conventional loans contain a due-on-sale clause, which means the full balance comes due when the property transfers, so they cannot be assumed. If a listing advertises an assumable conventional mortgage, read the terms and have the lender confirm in writing before you build an offer around it. USDA loans are assumable in some cases; the servicer has to confirm.',
+        ],
+        list: [
+          'VA — assumable by any qualified buyer; veteran status is not required',
+          'FHA — assumable with lender approval and FHA credit/income review',
+          'USDA — assumable in some cases; confirm with the servicer',
+          'Conventional — generally not assumable (due-on-sale clause)',
+        ],
+      },
+      {
+        heading: 'Assumable mortgage requirements in Colorado',
+        paragraphs: [
+          'Colorado does not have a separate “assumable mortgage license.” The rules are the loan’s rules: VA, FHA, or USDA plus the servicer’s underwriting. You still need to qualify. The lender reviews credit, income, and the property the same way they would on a new application. Closing still happens on a Colorado contract, with title, inspection, and appraisal or valuation steps the lender requires.',
+          'Two money facts that catch buyers off guard. First, you usually have to bring cash (or a second loan) for the difference between the purchase price and the remaining loan balance. If the home is $550,000 and $380,000 is left on the assumable loan, the $170,000 gap is yours to fund. Second, assumption timelines are often longer than a standard purchase — the servicer, not your preferred new-purchase lender, is in the driver’s seat. We write the contract around that timeline so you are not guessing.',
+          'We do not publish a savings calculator here. A 2.5% VA loan versus a mid-6% new loan is a different payment than a 4.99% FHA loan versus the same new loan. The listing remarks sometimes quote a monthly range; that is the listing’s estimate, not ours. We run the actual remaining balance, remaining term, and your cash-to-close with a VA-approved or FHA-experienced lender before you write.',
+        ],
+        relatedLinks: [
+          { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'How we represent buyers across Northern Colorado' },
+          { title: 'VA loan Colorado guide', href: '/blog/va-loan-colorado-guide/', description: '0% down, funding fee, COE & assumption' },
+        ],
+      },
+      {
+        heading: 'What the live Colorado inventory actually shows',
+        paragraphs: [
+          'The IRES MLS feed has no structured “assumable loan” field. The only signal in the data is the public remarks. We flag a listing when the description contains assumable-loan language (the same match as description ILIKE \'%assum%\'). That is honest and imperfect: a true “Assumable VA loan at 2.5%” hits, and so can a solar-lease “buyer to assume” sentence. Every flagged listing still has to be confirmed with the lender.',
+          'As of August 13, 2026, our live Active inventory shows 328 Colorado listings whose remarks match that signal, including 52 in the 19 Northern Colorado cities we serve. The largest NoCO counts on that date: Greeley 11, Johnstown 7, Frederick 5, Windsor 4, Milliken 4, Timnath 3, Boulder 3, Fort Collins 2, Loveland 2. Those numbers change as listings come on and off the market — treat them as current, not a forecast.',
+          'A real remarks example from a current Fort Collins Active listing: “Assumable VA loan at 4.99%… Qualified buyers can step into the seller’s existing rate.” That is the listing’s language. Veteran status is often not required on a VA assumption. We will not invent a monthly savings number from it.',
+        ],
+        relatedLinks: [
+          { title: 'Search assumable homes', href: '/properties/?assumable=true', description: 'Live filter — counts change with the feed' },
+          { title: 'Assumable homes in Fort Collins', href: '/blog/assumable-homes-fort-collins/', description: 'City-level inventory and how to confirm a flag' },
+        ],
+      },
+      {
+        heading: 'How SAA Homes helps you buy — or sell — with an assumption',
+        paragraphs: [
+          'For buyers: we screen the search with the Assumable filter on saahomes.com/properties/, pull the remarks, and connect you with a VA-approved or FHA-experienced lender who can underwrite the assumption. We put the assumption path in the contract — timeline, financing contingency, and what happens if the servicer declines. Call (970) 999-1407.',
+          'For sellers: a below-market assumable VA or FHA rate is a real marketing advantage when it is true. We put it in the remarks accurately, qualify interested buyers early, and do not advertise a savings number we cannot support. If you are selling a home with a VA loan, we will also walk through entitlement restoration with your lender so you are not surprised later.',
+          'Schwartz and Associates serves buyers and sellers across Fort Collins, Loveland, Windsor, Greeley, Timnath, and all 19 Northern Colorado communities. Start with the assumable-mortgages hub or the live search. If you want us to watch new flags as they hit the feed, save the search — email and phone required — and we will alert you.',
+        ],
+        relatedLinks: [
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Adam and Mandi Schwartz — (970) 999-1407' },
+          { title: 'Fort Collins area guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods & homes for sale' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'assumable-homes-fort-collins',
+    title: 'Assumable Homes for Sale in Fort Collins, Colorado (2026)',
+    excerpt: 'Live Fort Collins inventory where listing remarks mention an assumable VA or FHA loan — how to search it, what a current 4.99% VA example actually says, and how nearby NoCO cities compare. Counts change with the feed.',
+    date: '2026-08-13',
+    category: 'Local Guide',
+    image: '/images/buying-a-home-in-fort-collins.jpg',
+    readTime: '8 min read',
+    keywords: 'assumable homes Fort Collins, assumable mortgage Fort Collins, assumable VA loan Fort Collins, Fort Collins homes for sale assumable, assumable FHA loan Northern Colorado, assumable mortgage homes for sale',
+    relatedLinks: [
+      { title: 'Assumable mortgages hub', href: '/assumable-mortgages/', description: 'How VA and FHA assumption works in Colorado' },
+      { title: 'How assumable mortgages work', href: '/blog/assumable-mortgage-colorado/', description: 'Statewide explainer + live inventory counts' },
+      { title: 'Fort Collins assumable search', href: '/properties/?city=Fort%20Collins&assumable=true', description: 'Live Fort Collins listings with the assumable flag' },
+      { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & buyer/seller guide' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Buyer representation & program hub' },
+      { title: 'Veterans hub — 0.5% back', href: '/veterans/', description: 'VA loans and military relocation' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
+    ],
+    cta: {
+      title: 'Looking for an assumable loan in Fort Collins?',
+      description: 'Two Fort Collins Active listings currently flag in our assumable search — and nearby cities hold more. We confirm the loan with the lender before you write. Call Schwartz and Associates at (970) 999-1407.',
+      primaryHref: '/properties/?city=Fort%20Collins&assumable=true',
+      primaryText: 'Search Fort Collins assumable homes',
+      secondaryHref: '/assumable-mortgages/#assumable-lead-form',
+      secondaryText: 'Get assumable mortgage help',
+    },
+    sections: [
+      {
+        heading: 'Fort Collins assumable inventory — live, not a brochure',
+        paragraphs: [
+          'As of August 13, 2026, our live Active search shows 2 Fort Collins listings whose public remarks mention assumption language. Across the 19 Northern Colorado cities we serve, the same filter returns 52 listings. Statewide Active inventory matching the signal is 328. Those counts move as homes go pending, withdraw, or new remarks hit the feed — they are current, not a promise of what you will see next week.',
+          'The IRES feed has no structured loan field. We flag a listing when the remarks contain “assum” (assumable, assume, assumption). That is the same rule the Assumable chip on /properties/ uses. It is a screening tool, not a lender confirmation. One of the two current Fort Collins hits is a clear VA-assumption remark; the other mentions a buyer assuming a financed solar system. We leave both in the filter because we will not silently rewrite MLS remarks — and we tell you which is which before you tour.',
+        ],
+        relatedLinks: [
+          { title: 'Search Fort Collins assumable homes', href: '/properties/?city=Fort%20Collins&assumable=true', description: 'Assumable chip + Fort Collins city filter' },
+          { title: 'Fort Collins area guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools, and how we work the city' },
+        ],
+      },
+      {
+        heading: 'A current Fort Collins example — assumable VA at 4.99%',
+        paragraphs: [
+          'A current Active Fort Collins listing in the mid-$500,000s (5 bed / 3 bath, about 2,730 square feet) states in the remarks that qualified buyers can take an assumable VA loan at 4.99%, and that the listing estimates $300 to $500 a month versus a new loan at today’s rates. That monthly range is the listing’s language, not a Schwartz and Associates calculation. Veteran status is not required to assume a VA-backed loan; the buyer still has to qualify with the servicer.',
+          'Whether 4.99% beats the loan you can get tomorrow depends on your credit, down payment, and the remaining balance versus the purchase price. We will not invent a payment. We will put you in front of a VA-approved lender, pull the remaining term and balance, and compare it to a new conventional, FHA, or VA purchase loan on the same house.',
+          'If Fort Collins is thin the week you search, that is the honest market. Save the search (email and phone required) and we will alert you when a new Fort Collins or nearby flag lands. New assumable listings land weekly — they are not a standing inventory of dozens in one city.',
+        ],
+      },
+      {
+        heading: 'Nearby Northern Colorado cities with more flags',
+        paragraphs: [
+          'On August 13, 2026 the same Active filter showed more remarks-matches just outside Fort Collins than inside it: Greeley 11, Johnstown 7, Frederick 5, Windsor 4, Milliken 4, Timnath 3, Loveland 2, Berthoud 2. Commute, school district, and price point are not interchangeable — a Johnstown or Windsor flag is not a Fort Collins substitute unless that is the search you actually want.',
+          'If you are open to the I-25 corridor, start with the statewide assumable search scoped to Northern Colorado, then tighten city by city. If you only want Fort Collins, keep the city chip on and save that search. We would rather email you twice a month than send you a Greeley listing you will not drive to.',
+        ],
+        list: [
+          'Greeley — 11 Active remarks-matches (largest NoCO count on this date)',
+          'Johnstown — 7',
+          'Windsor — 4',
+          'Timnath — 3',
+          'Loveland — 2',
+          'Fort Collins — 2',
+        ],
+        relatedLinks: [
+          { title: 'All NoCO assumable listings', href: '/properties/?assumable=true', description: 'Northern Colorado default + Assumable chip' },
+          { title: 'Windsor area guide', href: '/northern-colorado-areas/windsor/', description: 'I-25 corridor between Fort Collins and Greeley' },
+          { title: 'Loveland area guide', href: '/northern-colorado-areas/loveland/', description: 'Lakes, Thompson schools, VA Clinic city' },
+        ],
+      },
+      {
+        heading: 'How to buy a Fort Collins home with an assumable loan',
+        paragraphs: [
+          'Use the Assumable chip on the search page, keep Fort Collins selected, and read the remarks on every result. If the language is clearly a VA or FHA assumption, we request the remaining balance, remaining term, and servicer name before you write. If the language is solar, HOA, or something else, we say so and you can skip it.',
+          'The contract has to match the assumption timeline. Servicer approval is often slower than a standard purchase loan. We write the financing contingency and closing date around that — not around a 21-day conventional close that the VA or FHA servicer cannot meet. Inspection, title, and (when required) appraisal still happen.',
+          'You will typically need cash or a second loan for the equity gap — purchase price minus the remaining assumable balance. That is the part most “low rate” headlines skip. We run that number first so you know whether assumption is actually cheaper than a new loan plus a normal down payment.',
+          'Call SAA Homes at (970) 999-1407. Adam and Mandi Schwartz will pull the live Fort Collins (or corridor) search, connect you with a lender who can underwrite the assumption, and tell you honestly if the flag is real. Start on the assumable-mortgages hub or the buyer guide if you want the process before the listings.',
+        ],
+        relatedLinks: [
+          { title: 'Assumable mortgages hub', href: '/assumable-mortgages/', description: 'Mechanics, FAQs, and the lead form' },
+          { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'How buyer representation works here' },
+          { title: 'Contact SAA Homes', href: '/contact/', description: '(970) 999-1407 — Fort Collins office' },
+        ],
+      },
+    ],
+  },
+  {
     slug: 'va-loan-colorado-guide',
     title: 'VA Loan Colorado Guide: How Veterans Buy in Northern Colorado (2026)',
     excerpt: 'How VA loans work in Colorado — 0% down, no PMI, funding fee rules, the disabled-veteran property tax exemption, and SAA Homes’ 0.5% back pledge for veterans buying in Fort Collins, Loveland, Windsor, and Greeley.',
@@ -82,6 +254,7 @@ export const blogPosts = [
         ],
         relatedLinks: [
           { title: 'Assumable mortgages', href: '/assumable-mortgages/', description: 'How VA and FHA assumption works in Colorado' },
+          { title: 'How assumable mortgages work in Colorado', href: '/blog/assumable-mortgage-colorado/', description: 'Live inventory, requirements, and the search filter' },
         ],
       },
       {

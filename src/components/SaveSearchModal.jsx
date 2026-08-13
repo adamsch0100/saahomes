@@ -62,6 +62,7 @@ function filterSummary(filters = {}) {
   if (filters.pool === "true" || filters.pool === true) parts.push("Pool");
   if (filters.waterfront === "true" || filters.waterfront === true) parts.push("Waterfront");
   if (filters.newConstruction === "true" || filters.newConstruction === true) parts.push("New construction");
+  if (filters.assumable === "true" || filters.assumable === true) parts.push("Assumable loan");
   if (filters.view) parts.push(`${filters.view} view`);
   if (filters.style) parts.push(filters.style);
   if (filters.community) parts.push(filters.community);

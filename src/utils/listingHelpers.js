@@ -130,6 +130,7 @@ export function listingBadges(listing) {
       priceCutPct: null,
       isNewConstruction: false,
       hasOpenHouse: false,
+      isAssumable: false,
       dom: null,
     };
   }
@@ -154,7 +155,17 @@ export function listingBadges(listing) {
       (typeof feats.open_house === "string" && feats.open_house.length > 0) ||
       (typeof listing.open_house_date === "string" && listing.open_house_date.length > 0)
   );
-  return { isNew, priceCut, priceCutPct, isNewConstruction, hasOpenHouse, dom };
+  // Assumable: prefer the sync-derived column; fall back to remarks text
+  // only when the flag is missing (pre-backfill). Explicit false stays false.
+  const flag = listing.assumable;
+  const isAssumable =
+    flag === true ||
+    flag === "t" ||
+    flag === "true" ||
+    ((flag == null || flag === "") &&
+      typeof listing.description === "string" &&
+      /assum/i.test(listing.description));
+  return { isNew, priceCut, priceCutPct, isNewConstruction, hasOpenHouse, isAssumable, dom };
 }
 
 /** Human home-type label from MLS home_type / property_type / subtype — no invention */

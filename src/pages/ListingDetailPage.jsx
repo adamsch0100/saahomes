@@ -213,7 +213,7 @@ export default function ListingDetailPage() {
   const photos = Array.isArray(listing.photos) ? listing.photos : [];
   const citySlug = (listing.city || "").toLowerCase().replace(/\s+/g, "-");
   const cityHomes = CITY_HOMES.find((c) => c.slug === citySlug);
-  const { isNew, priceCut, priceCutPct, isNewConstruction, dom } = listingBadges(listing);
+  const { isNew, priceCut, priceCutPct, isNewConstruction, isAssumable, dom } = listingBadges(listing);
   const sqft = listing.living_area;
   const pricePerSqft = pricePerSqftOf(listing);
   const priceChangeDate = formatDate(listing.price_change_timestamp);
@@ -476,6 +476,11 @@ export default function ListingDetailPage() {
                 {isNewConstruction && (
                   <span className="border border-[#CFB36E] text-[#CFB36E] text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
                     New construction
+                  </span>
+                )}
+                {isAssumable && (
+                  <span className="bg-black/85 text-[#CFB36E] border border-[#CFB36E] text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
+                    Assumable loan possible
                   </span>
                 )}
                 {listing.status && (

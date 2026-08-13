@@ -54,7 +54,7 @@ export default function ListingDetailContent({
   const address = listingAddress(listing);
   const fullAddress = listingFullAddress(listing);
   const citySlug = (listing.city || "").toLowerCase().replace(/\s+/g, "-");
-  const { isNew, priceCut, priceCutPct, isNewConstruction, dom } = listingBadges(listing);
+  const { isNew, priceCut, priceCutPct, isNewConstruction, isAssumable, dom } = listingBadges(listing);
   const sqft = listing.living_area;
   const pricePerSqft = pricePerSqftOf(listing);
   const priceChangeDate = formatDate(listing.price_change_timestamp);
@@ -95,6 +95,11 @@ export default function ListingDetailContent({
               {isNewConstruction && (
                 <span className="bg-black text-white text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded">
                   New construction
+                </span>
+              )}
+              {isAssumable && (
+                <span className="bg-black text-[#CFB36E] border border-[#CFB36E] text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded">
+                  Assumable loan possible
                 </span>
               )}
               {listing.status === "Active" && (

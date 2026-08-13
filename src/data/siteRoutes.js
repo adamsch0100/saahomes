@@ -288,7 +288,7 @@ const staticPages = [
 ].map(withShareMeta);
 
 function blogPriority(slug) {
-  if (slug.includes('chfa') || slug.includes('champions') || slug.includes('va-loan') || slug.includes('veteran') || slug.includes('military-relocation')) return '0.92';
+  if (slug.includes('chfa') || slug.includes('champions') || slug.includes('va-loan') || slug.includes('veteran') || slug.includes('military-relocation') || slug.includes('assumable')) return '0.92';
   return '0.85';
 }
 

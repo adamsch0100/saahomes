@@ -81,6 +81,9 @@ export function buildWhere(filters) {
   if (f.waterfront === 'true' || f.waterfront === true) {
     where.push(`features->>'waterfront' = 'true'`);
   }
+  if (f.assumable === 'true' || f.assumable === true || f.assumable === '1') {
+    where.push('assumable = TRUE');
+  }
   if (f.newDays) { where.push(`days_on_market <= $${i++}`); params.push(Number(f.newDays)); }
   return { whereSql: where.join(' AND '), params };
 }
@@ -401,7 +404,7 @@ export function filtersToSearchPath(filters = {}) {
   const keys = [
     'city', 'minPrice', 'maxPrice', 'beds', 'baths', 'type', 'sort', 'q',
     'minSqft', 'minYear', 'maxHoa', 'garage', 'basement', 'fireplace', 'pool',
-    'newConstruction', 'waterfront', 'newDays',
+    'newConstruction', 'waterfront', 'newDays', 'assumable',
   ];
   for (const k of keys) {
     if (filters[k] !== undefined && filters[k] !== null && filters[k] !== '') {

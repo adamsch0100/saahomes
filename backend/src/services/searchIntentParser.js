@@ -171,6 +171,9 @@ export function parseSearchIntent(text) {
   if (/\b(with\s+a\s+)?pool\b|\bswimming\s+pool\b/i.test(t)) filters.pool = 'true';
   if (/\b(waterfront|lake\s*front|on\s+the\s+(?:lake|river|water))\b/i.test(t)) filters.waterfront = 'true';
   if (/\b(new\s+construction|brand\s+new|newly\s+built)\b/i.test(t)) filters.newConstruction = 'true';
+  if (/\bassumable\b|\bassume\s+(?:the\s+)?(?:loan|mortgage|va|fha)\b|\bloan\s+assumption\b/i.test(t)) {
+    filters.assumable = 'true';
+  }
   if (/\bbasement\b/i.test(t)) filters.basement = 'true';
   if (/\b(garage|2[\s-]?car|3[\s-]?car)\b/i.test(t)) filters.garage = 'true';
   if (/\bfireplace\b/i.test(t)) filters.fireplace = 'true';
@@ -210,7 +213,7 @@ export function parseSearchIntent(text) {
   const hasLocation = !!(filters.city || (filters.q && /^\d{5}$/.test(String(filters.q))));
   const hasCriteria = !!(filters.minPrice || filters.maxPrice || filters.beds || filters.baths
     || filters.pool || filters.type || filters.minSqft || filters.waterfront
-    || filters.newConstruction);
+    || filters.newConstruction || filters.assumable);
   if (!hasLocation && !hasCriteria) return null;
 
   // Soft gate: phrases that look like search intent (browsing / criteria)
@@ -255,6 +258,7 @@ export function summarizeFilters(filters = {}) {
   if (filters.pool === 'true' || filters.pool === true) parts.push('Pool');
   if (filters.waterfront === 'true' || filters.waterfront === true) parts.push('Waterfront');
   if (filters.newConstruction === 'true' || filters.newConstruction === true) parts.push('New construction');
+  if (filters.assumable === 'true' || filters.assumable === true) parts.push('Assumable loan');
   if (filters.basement === 'true' || filters.basement === true) parts.push('Basement');
   if (filters.garage === 'true' || filters.garage === true) parts.push('Garage');
   if (filters.fireplace === 'true' || filters.fireplace === true) parts.push('Fireplace');
@@ -272,6 +276,7 @@ export function nameFromFilters(filters = {}) {
   if (filters.maxPrice) bits.push(`under $${Number(filters.maxPrice).toLocaleString()}`);
   else if (filters.minPrice) bits.push(`from $${Number(filters.minPrice).toLocaleString()}`);
   if (filters.pool === 'true') bits.push('pool');
+  if (filters.assumable === 'true') bits.push('assumable');
   if (filters.type === 'attached') bits.push('condo/TH');
   if (filters.type === 'land') bits.push('land');
   return bits.length ? bits.join(' · ').slice(0, 80) : 'Nadia chat search';

@@ -26,7 +26,7 @@ import { rejectIfDisposableEmail } from '../utils/emailQuality.js';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FILTER_KEYS = ['city', 'minPrice', 'maxPrice', 'beds', 'baths', 'type', 'sort', 'q',
   'minSqft', 'minYear', 'maxHoa', 'garage', 'basement', 'fireplace', 'pool',
-  'newConstruction', 'waterfront', 'newDays'];
+  'newConstruction', 'waterfront', 'newDays', 'assumable'];
 const TYPE_VALUES = ['detached', 'attached', 'land', 'commercial', 'other', ''];
 const FREQUENCIES = ['immediate', 'daily', 'weekly'];
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -51,7 +51,7 @@ function cleanSchedule(body) {
 function cleanFilters(body) {
   const f = {};
   const numKeys = ['minPrice', 'maxPrice', 'beds', 'baths', 'minSqft', 'minYear', 'maxHoa', 'newDays'];
-  const boolKeys = ['garage', 'basement', 'fireplace', 'pool', 'newConstruction', 'waterfront'];
+  const boolKeys = ['garage', 'basement', 'fireplace', 'pool', 'newConstruction', 'waterfront', 'assumable'];
   for (const key of FILTER_KEYS) {
     const v = body[key];
     if (v === undefined || v === null || v === '') continue;

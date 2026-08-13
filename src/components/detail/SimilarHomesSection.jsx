@@ -58,16 +58,23 @@ function SimilarCard({ listing: l }) {
     >
       <div className="relative aspect-[4/3] bg-[#1a1a1a] overflow-hidden">
         <SimilarCardPhoto listing={l} />
-        {b.priceCut && (
-          <span className="absolute top-2 left-2 z-[1] bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">
-            Price reduced
-          </span>
-        )}
-        {b.isNew && !b.priceCut && (
-          <span className="absolute top-2 left-2 z-[1] bg-[#CFB36E] text-black text-[10px] font-bold px-2 py-0.5 rounded uppercase">
-            New
-          </span>
-        )}
+        <div className="absolute top-2 left-2 z-[1] flex flex-wrap gap-1 max-w-[78%]">
+          {b.priceCut && (
+            <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+              Price reduced
+            </span>
+          )}
+          {b.isNew && !b.priceCut && (
+            <span className="bg-[#CFB36E] text-black text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+              New
+            </span>
+          )}
+          {b.isAssumable && (
+            <span className="bg-black/85 text-[#CFB36E] border border-[#CFB36E] text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+              Assumable loan possible
+            </span>
+          )}
+        </div>
         {/* Save heart — stopPropagation handled inside SaveHomeButton */}
         <div
           className="absolute top-2 right-2 z-10 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"

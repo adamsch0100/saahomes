@@ -364,6 +364,31 @@ export const runMigrations = async () => {
       CREATE INDEX IF NOT EXISTS idx_listings_slug ON listings(slug);
     `);
 
+    // ── Assumable loan flag (It 32b) ─────────────────────────────────────
+    // IRES has no structured loan field. Public remarks text is the signal
+    // (description ILIKE '%assum%'). Guarded + additive so Railway deploys
+    // never fail on the existing table.
+    await client.query('SAVEPOINT assumable_col');
+    try {
+      await client.query(`
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS assumable BOOLEAN;
+      `);
+      await client.query(`
+        UPDATE listings
+           SET assumable = (COALESCE(description, '') ILIKE '%assum%')
+         WHERE assumable IS NULL
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_listings_assumable
+          ON listings (assumable)
+          WHERE assumable IS TRUE
+      `);
+      await client.query('RELEASE SAVEPOINT assumable_col');
+    } catch (assumableErr) {
+      await client.query('ROLLBACK TO SAVEPOINT assumable_col');
+      console.error('assumable column migration skipped:', assumableErr.message);
+    }
+
     // ── GreatSchools ratings cache (weekly sync, not listings sync) ─────
     // Ratings come ONLY from live JSON-LD on greatschools.org city pages.
     // Never hardcode/fabricate. Attribution required on every display.

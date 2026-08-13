@@ -227,6 +227,8 @@ function normalizeListing(raw) {
     garage_spaces: num(raw.GarageSpaces, 100),
     hoa_fee: num(raw.AssociationFee, 1e6),
     description: raw.PublicRemarks || null,
+    // IRES has no structured loan field — remarks text is the only signal.
+    assumable: typeof raw.PublicRemarks === 'string' && /assum/i.test(raw.PublicRemarks),
     photos,
     photos_count: num(raw.PhotosCount, 500) ?? photos.length,
     latitude: numSigned(raw.Latitude, 90),
@@ -399,10 +401,10 @@ const LISTING_UPSERT_SQL = `
   INSERT INTO listings (listing_id, status, is_active, property_type, property_subtype, home_type, street_number, street_name, unit,
     city, state, postal_code, county, list_price, original_list_price, beds, baths, half_baths,
     three_quarter_baths, living_area, above_grade_area, lot_size, lot_size_acres, units_total,
-    year_built, garage_spaces, hoa_fee, description, photos, photos_count, latitude, longitude,
+    year_built, garage_spaces, hoa_fee, description, assumable, photos, photos_count, latitude, longitude,
     listing_url, mls_source, elementary_school, middle_school, high_school, school_district,
     days_on_market, price_per_sqft, subdivision, features, raw, slug, last_seen_at)
-  VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,NOW())
+  VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,NOW())
   ON CONFLICT (listing_id) DO UPDATE SET
     status = EXCLUDED.status, is_active = EXCLUDED.is_active, property_type = EXCLUDED.property_type,
     property_subtype = EXCLUDED.property_subtype, home_type = EXCLUDED.home_type,
@@ -417,6 +419,7 @@ const LISTING_UPSERT_SQL = `
     units_total = EXCLUDED.units_total,
     year_built = EXCLUDED.year_built, garage_spaces = EXCLUDED.garage_spaces,
     hoa_fee = EXCLUDED.hoa_fee, description = EXCLUDED.description,
+    assumable = EXCLUDED.assumable,
     photos = EXCLUDED.photos, photos_count = EXCLUDED.photos_count,
     latitude = EXCLUDED.latitude, longitude = EXCLUDED.longitude,
     listing_url = EXCLUDED.listing_url, mls_source = EXCLUDED.mls_source,
@@ -491,7 +494,7 @@ export async function syncListings({ mode = 'incremental' } = {}) {
            l.city, l.state, l.postal_code, l.county, l.list_price, l.original_list_price,
            l.beds, l.baths, l.half_baths, l.three_quarter_baths, l.living_area, l.above_grade_area,
            l.lot_size, l.lot_size_acres, l.units_total,
-           l.year_built, l.garage_spaces, l.hoa_fee, l.description,
+           l.year_built, l.garage_spaces, l.hoa_fee, l.description, l.assumable,
            JSON.stringify(l.photos), l.photos_count, l.latitude, l.longitude, l.listing_url,
            l.mls_source, l.elementary_school, l.middle_school, l.high_school, l.school_district,
            l.days_on_market, l.price_per_sqft, l.subdivision, JSON.stringify(l.features),
