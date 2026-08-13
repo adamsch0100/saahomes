@@ -1929,7 +1929,7 @@ export const blogPosts = [
           { title: 'Loveland real estate agent', href: '/northern-colorado-areas/loveland/', description: 'Art, lakes & Larimer County living' },
           { title: 'Windsor real estate agent', href: '/northern-colorado-areas/windsor/', description: 'Family communities between Fort Collins and Greeley' },
           { title: 'Greeley real estate agent', href: '/northern-colorado-areas/greeley/', description: 'Weld County affordable home options' },
-          { title: 'See All Northern Colorado Communities', href: '/northern-colorado-areas/', description: '19 city area guides' },
+          { title: 'See All Northern Colorado Communities', href: '/northern-colorado-areas/', description: '27 community area guides' },
         ],
       },
       {
@@ -4709,7 +4709,7 @@ export const blogPosts = [
         ],
         relatedLinks: [
           { title: 'Northern Colorado Market Update — July 2026', href: '/blog/northern-colorado-market-update-july-2026/', description: 'Full monthly data across all NoCO cities' },
-          { title: 'Compare all Northern Colorado cities', href: '/northern-colorado-areas/', description: '19-city coverage area guides' },
+          { title: 'Compare all Northern Colorado cities', href: '/northern-colorado-areas/', description: '27-community area guides' },
         ],
       },
     ],
@@ -4836,7 +4836,7 @@ export const blogPosts = [
           'Greeley\'s role as the region\'s affordability anchor serves a function beyond the city limits. By providing an accessible entry point to homeownership, Greeley absorbs demand that would otherwise push prices higher across the entire Northern Colorado corridor. A healthy Greeley market means a healthier market for everyone — and right now, Greeley\'s market is as healthy as it\'s been in years.',
         ],
         relatedLinks: [
-          { title: 'Compare all Northern Colorado cities', href: '/northern-colorado-areas/', description: '19-city coverage area guides' },
+          { title: 'Compare all Northern Colorado cities', href: '/northern-colorado-areas/', description: '27-community area guides' },
         ],
       },
     ],
@@ -4851,7 +4851,7 @@ export const blogPosts = [
     readTime: '7 min read',
     youtubeId: '4krnHONK5EM',
     relatedLinks: [
-      { title: 'Compare all Northern Colorado cities', href: '/northern-colorado-areas/', description: '19-city coverage area guides' },
+      { title: 'Compare all Northern Colorado cities', href: '/northern-colorado-areas/', description: '27-community area guides' },
       { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & homes for sale' },
       { title: 'Loveland homes for sale', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities & pricing' },
       { title: 'Windsor homes for sale', href: '/northern-colorado-areas/windsor/', description: 'Water Valley, RainDance & master-planned communities' },
@@ -4912,7 +4912,7 @@ export const blogPosts = [
           'Northern Colorado\'s housing market is more accessible and more rational than it has been in years. The frenzy is gone. In its place is something better: a market where data, preparation, and good advice actually matter. Whether you\'re buying your first home in Greeley, trading up in Loveland, or downsizing in Fort Collins, the key is understanding which of the nineteen markets you\'re in — and approaching it on its own terms.',
         ],
         relatedLinks: [
-          { title: 'Compare all Northern Colorado cities', href: '/northern-colorado-areas/', description: '19-city coverage area guides' },
+          { title: 'Compare all Northern Colorado cities', href: '/northern-colorado-areas/', description: '27-community area guides' },
           { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407 to start your home search' },
         ],
       },
@@ -5348,12 +5348,12 @@ export const blogPosts = [
           'After the marital home sells, both spouses face the challenge of securing new housing. For the spouse who plans to buy, qualifying for a new mortgage as a single-income borrower is often the biggest hurdle. Your lender will evaluate your income, credit score, and debt-to-income ratio based on your post-divorce financial picture. Alimony and child support can be counted as income for mortgage qualification if they are documented in the divorce decree and have at least a three-year history or expectation.',
           'If you are the spouse receiving a significant equity payout from the home sale, you may be in a strong position to purchase. A 20% down payment on a $450,000 home in Loveland or Windsor is $90,000 \u2014 an amount that may be covered by your share of the equity. Combined with CHFA down payment assistance programs (which provide up to $25,000 in grants for first-time and repeat homebuyers in targeted areas), your cash to close can be minimal.',
           'For the spouse with more constrained finances, Northern Colorado offers paths to homeownership at various price points. Greeley (median $430,000) and Evans ($385,000) provide Weld County affordability. Timnath and Severance offer new construction with builder incentives. Wellington and Mead offer space and lot sizes that are harder to find in Fort Collins. Renting for 12-24 months while rebuilding credit and savings is also a practical strategy that we help clients evaluate honestly.',
-          'Your SAA Homes agent can help you assess what you qualify for, where your budget fits in Northern Colorado\u2019s 19-city market, and whether buying or renting makes more sense in your specific post-divorce situation. We provide this analysis confidentially and separately for each spouse if needed.',
+          'Your SAA Homes agent can help you assess what you qualify for, where your budget fits in Northern Colorado\u2019s 27-community market, and whether buying or renting makes more sense in your specific post-divorce situation. We provide this analysis confidentially and separately for each spouse if needed.',
         ],
         relatedLinks: [
           { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & CHFA guidance' },
           { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'SmartStep, Preferred, FirstStep & more' },
-          { title: 'Compare all Northern Colorado cities', href: '/northern-colorado-areas/', description: '19-city coverage area guides' },
+          { title: 'Compare all Northern Colorado cities', href: '/northern-colorado-areas/', description: '27-community area guides' },
         ],
       },
       {
@@ -5604,7 +5604,7 @@ export const blogPosts = [
           { title: 'Loveland real estate', href: '/northern-colorado-areas/loveland/', description: 'Art, lakes & Larimer County living' },
           { title: 'Fort Collins real estate', href: '/northern-colorado-areas/fort-collins/', description: 'CSU energy & Old Town charm' },
           { title: 'Greeley real estate', href: '/northern-colorado-areas/greeley/', description: 'Weld County affordable home options' },
-          { title: 'See All Northern Colorado Communities', href: '/northern-colorado-areas/', description: '19 city area guides' },
+          { title: 'See All Northern Colorado Communities', href: '/northern-colorado-areas/', description: '27 community area guides' },
         ],
       },
       {

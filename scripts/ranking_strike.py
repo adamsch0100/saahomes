@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """
 Daily Ranking Strike — GSC ranking delta monitor for saahomes.com.
-Tier S cities: fort collins, loveland, greeley, windsor, johnstown, berthoud, timnath, 
-                wellington, severance, evans, milliken, laporte, ault, frederick,
-                firestone, fort lupton, placerville, estero park, broomfield
+Tier S cities (27 entities): fort collins, loveland, greeley, windsor, johnstown,
+                berthoud, timnath, wellington, severance, evans, milliken, eaton,
+                mead, la salle, frederick, firestone, boulder, longmont, niwot,
+                erie, brighton, estes park, red feather lakes, fort lupton, lyons,
+                bellvue, carbon valley
 Checks query categories: "{city} realtor", "{city} homes for sale", "{city} CO real estate", "sell my home {city}"
 """
 
@@ -22,8 +24,10 @@ MEMORY_PATH = os.path.join(SCRIPT_DIR, '..', 'MEMORY.md')
 TIER_S_CITIES = [
     "fort collins", "loveland", "greeley", "windsor", "johnstown",
     "berthoud", "timnath", "wellington", "severance", "evans",
-    "milliken", "laporte", "ault", "frederick", "firestone",
-    "fort lupton", "placerville", "estero park", "broomfield"
+    "milliken", "eaton", "mead", "la salle", "frederick", "firestone",
+    "boulder", "longmont", "niwot", "erie", "brighton",
+    "estes park", "red feather lakes", "fort lupton", "lyons", "bellvue",
+    "carbon valley"
 ]
 
 QUERY_TEMPLATES = [

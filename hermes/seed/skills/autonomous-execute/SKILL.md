@@ -94,7 +94,7 @@ Do not ask Adam to update repo files manually.
 | New blog post (from calendar) | ✅ |
 | Schema JSON-LD | ✅ |
 | CTA copy/placement | ✅ |
-| New city page (19-city matrix only) | ✅ if unique content |
+| New city page (27-entity matrix only) | ✅ if unique content |
 | Backend/API changes | ⛔ notify Adam — needs review |
 | Dependency upgrades | ⛔ notify Adam |
 | Outreach email | ⛔ use backlink-outreach skill |

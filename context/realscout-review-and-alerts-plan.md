@@ -53,7 +53,7 @@ Their current pitch deck, in one line: *"Automatically nurture contacts 24/7 to 
 
 ### 1.5 Where RealScout is weak (our openings)
 
-1. **Generic national data** — their MLS data is the same 100 fields everyone has. They don't know Fort Collins. We have: 111 fields, schools, floodplain, CHFA, 19-city depth, local market content, actual agents.
+1. **Generic national data** — their MLS data is the same 100 fields everyone has. They don't know Fort Collins. We have: 111 fields, schools, floodplain, CHFA, 27-community depth, local market content, actual agents.
 2. **Expensive** — $100+/agent/mo. A NoCO agent needs: search + alerts + lead capture. We can undercut dramatically and still win.
 3. **Cookie-cutter nurture** — automated drip emails feel robotic. Ours can be genuinely local ("the market moved 2% this month — here's what that means for your search").
 4. **No product for the *buyer* beyond the agent's coat-tails** — their consumer is locked to one agent's brand. We can own the consumer search destination itself (saahomes.com) AND sell the engine to other agents.
