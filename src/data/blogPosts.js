@@ -11,6 +11,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/buyers-hero.jpg',
     readTime: '10 min read',
+    youtubeId: '8nlI9Iw0uGQ',
     keywords: 'assumable mortgage Colorado, how do assumable mortgages work, assumable VA loan, FHA assumable loan, assumable mortgage requirements Colorado, assumable mortgage homes for sale, assumable homes Fort Collins, assumable mortgage Northern Colorado',
     relatedLinks: [
       { title: 'Assumable mortgages hub', href: '/assumable-mortgages/', description: 'VA & FHA assumption — flag listings, lenders, next step' },
