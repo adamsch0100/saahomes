@@ -102,6 +102,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/buying-a-home-in-fort-collins.jpg',
     readTime: '8 min read',
+    youtubeId: 'GhRtBwKDKYA',
     keywords: 'assumable homes Fort Collins, assumable mortgage Fort Collins, assumable VA loan Fort Collins, Fort Collins homes for sale assumable, assumable FHA loan Northern Colorado, assumable mortgage homes for sale',
     relatedLinks: [
       { title: 'Assumable mortgages hub', href: '/assumable-mortgages/', description: 'How VA and FHA assumption works in Colorado' },
