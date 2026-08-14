@@ -6122,6 +6122,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/timnath.png',
     readTime: '9 min read',
+    youtubeId: '2ZkgqlzMEpQ',
     keywords: 'best realtor timnath co, timnath co realtor, timnath real estate agent, timnath colorado realtor, real estate agent timnath co, timnath colorado real estate agent, schwartz and associates timnath, northern colorado realtor, best real estate agent timnath co, timnath co real estate',
     relatedLinks: [
       { title: 'Timnath Colorado real estate', href: '/northern-colorado-areas/timnath/', description: 'Neighborhoods, schools & market data' },
