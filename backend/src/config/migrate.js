@@ -712,6 +712,58 @@ export const runMigrations = async () => {
         WHERE custom_domain IS NOT NULL AND domain_verified_at IS NOT NULL;
     `);
 
+    // ── Sold / closed listings (It 41) ───────────────────────────────────
+    // MLS Grid Closed rows only. Never invent sold_price / closed_date.
+    await client.query('SAVEPOINT sold_listings_table');
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS sold_listings (
+          listing_id VARCHAR(64) PRIMARY KEY,
+          mls_source VARCHAR(32),
+          city VARCHAR(100),
+          county VARCHAR(100),
+          street_number VARCHAR(32),
+          street_name VARCHAR(255),
+          unit VARCHAR(32),
+          address VARCHAR(255),
+          postal_code VARCHAR(16),
+          lat NUMERIC(10,7),
+          lng NUMERIC(10,7),
+          property_type VARCHAR(64),
+          home_type VARCHAR(16),
+          beds NUMERIC(4,1),
+          baths NUMERIC(4,1),
+          living_area NUMERIC(10,1),
+          lot_size NUMERIC(12,1),
+          list_price NUMERIC(12,2),
+          sold_price NUMERIC(12,2),
+          closed_date DATE,
+          days_on_market INTEGER,
+          parcel_number VARCHAR(64),
+          subdivision VARCHAR(255),
+          elementary_school VARCHAR(128),
+          middle_school VARCHAR(128),
+          high_school VARCHAR(128),
+          school_district VARCHAR(255),
+          photos JSONB NOT NULL DEFAULT '[]'::jsonb,
+          photos_count INTEGER,
+          modification_timestamp TIMESTAMPTZ,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_sold_listings_city ON sold_listings(city);
+        CREATE INDEX IF NOT EXISTS idx_sold_listings_closed_date ON sold_listings(closed_date DESC);
+        CREATE INDEX IF NOT EXISTS idx_sold_listings_city_closed
+          ON sold_listings(city, closed_date DESC);
+      `);
+      await client.query('RELEASE SAVEPOINT sold_listings_table');
+    } catch (soldErr) {
+      await client.query('ROLLBACK TO SAVEPOINT sold_listings_table');
+      console.error('sold_listings migration skipped:', soldErr.message);
+    }
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {

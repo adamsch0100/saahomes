@@ -9,6 +9,7 @@
     "start": "node src/server.js",
     "migrate": "node src/config/migrate.js",
     "sync-listings": "node src/services/iresSync.js",
+    "sync-sold-listings": "node src/services/iresSoldSync.js",
     "sync-school-ratings": "node src/services/greatSchoolsSync.js"
   },
   "keywords": [],

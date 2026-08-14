@@ -10,6 +10,8 @@
  *    expiry window).
  *  - At 03:57 daily     → FULL sync (archive-unseen sweep: marks listings
  *    not returned by the full pull as inactive — sold/expired/removed).
+ *  - At 04:57 daily     → SOLD/CLOSED ingest (after the full sync; own lock
+ *    file + slower pace so we never stack with the photo proxy).
  *
  * Safety:
  *  - Postgres advisory lock (session-scoped, same client for lock/unlock)
@@ -22,6 +24,7 @@
  *  - No-op when IRES creds are absent (local dev).
  */
 import { syncListings } from '../services/iresSync.js';
+import { syncSoldListings } from '../services/iresSoldSync.js';
 import getPool from '../config/database.js';
 
 const ADVISORY_LOCK_KEY = 833711; // app-wide constant — must not collide with other locks
@@ -29,6 +32,7 @@ const RUN_MINUTE = 57; // sync at :57 each hour (UTC)
 const TICK_MS = 20000; // check every 20s; fires inside the :57:00–:57:20 window
 const MAX_RUN_HOURS = 1; // guard: never fire twice within the same minute window
 const FULL_SYNC_HOUR = 3; // daily full (archive-unseen) at 03:57 UTC
+const SOLD_SYNC_HOUR = 4; // daily sold ingest at 04:57 UTC (after full sync)
 
 let running = false;
 let started = false;
@@ -48,10 +52,18 @@ async function runSync() {
       return;
     }
     const now = new Date();
-    const mode = now.getUTCHours() === FULL_SYNC_HOUR ? 'full' : 'incremental';
+    const hour = now.getUTCHours();
+    const mode = hour === FULL_SYNC_HOUR ? 'full' : 'incremental';
     console.log(`[ires-sync] ${now.toISOString()} starting ${mode} sync`);
     const result = await syncListings({ mode });
     console.log(`[ires-sync] ${new Date().toISOString()} complete:`, JSON.stringify(result));
+    // Sold ingest runs AFTER the hourly listing tick at 04:57 so the two
+    // never share the MLS Grid budget. Own file lock inside syncSoldListings.
+    if (hour === SOLD_SYNC_HOUR) {
+      console.log(`[ires-sold] ${new Date().toISOString()} starting incremental sold sync`);
+      const sold = await syncSoldListings({ mode: 'incremental' });
+      console.log(`[ires-sold] ${new Date().toISOString()} complete:`, JSON.stringify(sold));
+    }
   } catch (error) {
     console.error(`[ires-sync] ${new Date().toISOString()} FAILED:`, error.message);
   } finally {
@@ -82,5 +94,5 @@ export function startIresSyncScheduler() {
     runSync();
   };
   setInterval(tick, TICK_MS);
-  console.log(`[ires-sync] hourly scheduler started — fires at :${String(RUN_MINUTE).padStart(2, '0')} UTC (daily full at 0${FULL_SYNC_HOUR}:57 UTC), advisory lock key ${ADVISORY_LOCK_KEY}`);
+  console.log(`[ires-sync] hourly scheduler started — fires at :${String(RUN_MINUTE).padStart(2, '0')} UTC (daily full at 0${FULL_SYNC_HOUR}:57 UTC, sold ingest at 0${SOLD_SYNC_HOUR}:57 UTC), advisory lock key ${ADVISORY_LOCK_KEY}`);
 }

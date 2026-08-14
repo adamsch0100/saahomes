@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import SEO from "../components/SEO";
 import LatestMarketUpdateBanner from "../components/LatestMarketUpdateBanner.jsx";
+import RecentlySoldSection from "../components/RecentlySoldSection.jsx";
 import AreaFAQSection from "../components/AreaFAQSection.jsx";
 import { FOR_SELLERS_FAQS, buildFaqPageSchema } from "../data/moneyPageFaqs.js";
 
@@ -99,6 +100,8 @@ export default function ForSellersPage() {
       </section>
 
       <LatestMarketUpdateBanner />
+
+      <RecentlySoldSection />
 
       {/* Seller Services Section */}
       <section className="py-16 px-6 bg-gray-50">

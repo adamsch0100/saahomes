@@ -176,14 +176,33 @@ function isExpiredMlsUrl(u) {
   return parseInt(m[1], 10) < Date.now() / 1000;
 }
 
+async function loadPhotosForProxy(pool, rawId) {
+  const numericId = Number(rawId);
+  const isNumeric = Number.isInteger(numericId) && numericId > 0 && String(numericId) === String(rawId);
+  if (isNumeric) {
+    const byPk = await pool.query('SELECT photos FROM listings WHERE id = $1', [numericId]);
+    if (byPk.rows.length) {
+      return { photos: byPk.rows[0].photos || [], allowIresRefresh: true, refreshKey: numericId };
+    }
+  }
+  const sold = await pool.query('SELECT photos FROM sold_listings WHERE listing_id = $1', [rawId]);
+  if (sold.rows.length) {
+    // Sold photos: serve stored URLs only. Do NOT refresh from IRES — that
+    // would stack Closed-record fetches on the same MLS Grid budget.
+    return { photos: sold.rows[0].photos || [], allowIresRefresh: false, refreshKey: null };
+  }
+  return null;
+}
+
 export const getListingPhoto = async (req, res) => {
   try {
-    const listingId = Number(req.params.listingId);
+    const rawId = String(req.params.listingId || '');
     const idx = Number(req.params.idx);
-    if (!Number.isInteger(listingId) || !Number.isInteger(idx) || idx < 0 || idx > 100) {
+    if (!rawId || rawId.length > 64 || /[^A-Za-z0-9_-]/.test(rawId)
+        || !Number.isInteger(idx) || idx < 0 || idx > 100) {
       return res.status(400).json({ error: 'Invalid photo reference' });
     }
-    const file = cachePath(listingId, idx);
+    const file = cachePath(rawId, idx);
     if (fs.existsSync(file)) {
       res.set('X-Cache', 'HIT');
       res.set('Cache-Control', 'public, max-age=31536000, immutable');
@@ -192,9 +211,9 @@ export const getListingPhoto = async (req, res) => {
     }
 
     const pool = getPool();
-    const result = await pool.query('SELECT photos FROM listings WHERE id = $1', [listingId]);
-    if (!result.rows.length) return res.status(404).json({ error: 'Listing not found' });
-    const photos = result.rows[0].photos || [];
+    const loaded = await loadPhotosForProxy(pool, rawId);
+    if (!loaded) return res.status(404).json({ error: 'Listing not found' });
+    const photos = loaded.photos || [];
     const url = photos[idx];
     if (!url) return res.status(404).json({ error: 'Photo not found' });
 
@@ -209,9 +228,10 @@ export const getListingPhoto = async (req, res) => {
       // once (heals the DB row too). R2 URLs are durable — never refresh those.
       // Quota guard: skip the refresh when the 0.5 RPS budget is exhausted —
       // degrade to the placeholder rather than risk IRES suspension.
-      if (!url.includes('media.mlsgrid.com')) throw fetchErr;
+      // Sold rows skip IRES refresh entirely (rate-limit headroom).
+      if (!loaded.allowIresRefresh || !url.includes('media.mlsgrid.com')) throw fetchErr;
       if (!takeRefreshToken()) throw fetchErr;
-      const fresh = await refreshWithDedupe(listingId, pool);
+      const fresh = await refreshWithDedupe(loaded.refreshKey, pool);
       const freshUrl = fresh?.[idx];
       if (!freshUrl) throw fetchErr;
       buf = await fetchWithQueue(freshUrl);
