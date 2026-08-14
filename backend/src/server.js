@@ -86,6 +86,37 @@ const canonicalRedirects = {
   '/helpful-guides': '/blog/',
   '/home-valuation': '/for-sellers/',
   '/whats-my-home-worth': '/for-sellers/',
+  // Legacy city URLs (pre-June-2026 routing era). These used to serve the
+  // area pages at /{city}/ — now they fall through to the SPA shell with a
+  // homepage canonical, wasting crawl budget and splitting city-page signals.
+  // 301 → canonical /northern-colorado-areas/{slug}/ (all 27 entities).
+  '/fort-collins': '/northern-colorado-areas/fort-collins/',
+  '/loveland': '/northern-colorado-areas/loveland/',
+  '/windsor': '/northern-colorado-areas/windsor/',
+  '/greeley': '/northern-colorado-areas/greeley/',
+  '/timnath': '/northern-colorado-areas/timnath/',
+  '/wellington': '/northern-colorado-areas/wellington/',
+  '/johnstown': '/northern-colorado-areas/johnstown/',
+  '/eaton': '/northern-colorado-areas/eaton/',
+  '/milliken': '/northern-colorado-areas/milliken/',
+  '/la-salle': '/northern-colorado-areas/la-salle/',
+  '/mead': '/northern-colorado-areas/mead/',
+  '/longmont': '/northern-colorado-areas/longmont/',
+  '/boulder': '/northern-colorado-areas/boulder/',
+  '/berthoud': '/northern-colorado-areas/berthoud/',
+  '/firestone': '/northern-colorado-areas/firestone/',
+  '/frederick': '/northern-colorado-areas/frederick/',
+  '/evans': '/northern-colorado-areas/evans/',
+  '/severance': '/northern-colorado-areas/severance/',
+  '/niwot': '/northern-colorado-areas/niwot/',
+  '/erie': '/northern-colorado-areas/erie/',
+  '/brighton': '/northern-colorado-areas/brighton/',
+  '/carbon-valley': '/northern-colorado-areas/carbon-valley/',
+  '/fort-lupton': '/northern-colorado-areas/fort-lupton/',
+  '/estes-park': '/northern-colorado-areas/estes-park/',
+  '/red-feather-lakes': '/northern-colorado-areas/red-feather-lakes/',
+  '/lyons': '/northern-colorado-areas/lyons/',
+  '/bellvue': '/northern-colorado-areas/bellvue/',
 };
 
 // ---- Listing sitemap (Active-only, generated from DB, cached 15 min) ----
