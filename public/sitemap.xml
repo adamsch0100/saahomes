@@ -142,7 +142,7 @@
     <loc>https://saahomes.com/northern-colorado-areas/fort-collins/</loc>
     <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://saahomes.com/northern-colorado-areas/loveland/</loc>
@@ -160,7 +160,7 @@
     <loc>https://saahomes.com/northern-colorado-areas/greeley/</loc>
     <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://saahomes.com/northern-colorado-areas/timnath/</loc>
@@ -681,6 +681,24 @@
   <url>
     <loc>https://saahomes.com/blog/timnath-colorado-real-estate-agent/</loc>
     <lastmod>2026-08-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://saahomes.com/blog/loveland-colorado-real-estate-agent/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://saahomes.com/blog/greeley-colorado-real-estate-agent/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://saahomes.com/blog/longmont-colorado-real-estate-agent/</loc>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
