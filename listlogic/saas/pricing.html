@@ -63,6 +63,21 @@
   color: var(--teal); font-weight: 800; font-size: 0.8rem;
 }
 .plan .btn { width: 100%; }
+.seat-picker {
+  display: grid; gap: 8px; margin: 0 0 14px; padding: 12px 12px 10px;
+  background: #f7f4ee; border: 1px solid var(--line); border-radius: 12px;
+}
+.seat-picker label { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.seat-controls { display: flex; align-items: center; gap: 8px; }
+.seat-controls button {
+  width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--line);
+  background: #fff; font-size: 1.1rem; font-weight: 700; cursor: pointer; color: var(--ink);
+}
+.seat-controls input {
+  flex: 1; height: 36px; border-radius: 10px; border: 1px solid var(--line);
+  text-align: center; font: inherit; font-weight: 700; font-size: 1rem;
+}
+.seat-total { font-size: 0.82rem; font-weight: 700; color: var(--navy); }
 
 .billing-toggle {
   display: inline-flex; align-items: center; gap: 2px; margin: 36px auto 0;
@@ -183,13 +198,22 @@
       <div class="tag">Teams &amp; offices</div>
       <h2 id="brokeragePlanTitle">Brokerage monthly</h2>
       <div class="price" id="brokeragePrice">$29 <span id="brokeragePriceSpan">/ seat / mo</span></div>
-      <p class="desc">Per-agent seats with shared branding. Minimum 5 seats.</p>
+      <p class="desc">Per-agent seats with shared branding. Minimum 5 seats. After checkout, email teammate addresses to <a href="mailto:adam@saahomes.com">adam@saahomes.com</a> for seat invites.</p>
       <ul>
         <li>Min 5 agent seats</li>
         <li>Shared branding defaults</li>
         <li>Office-friendly volume</li>
         <li>White-label on request</li>
       </ul>
+      <div class="seat-picker" id="seatPicker">
+        <label for="brokerageSeats">Seats</label>
+        <div class="seat-controls">
+          <button type="button" id="seatMinus" aria-label="Fewer seats">−</button>
+          <input type="number" id="brokerageSeats" min="5" max="200" value="5" inputmode="numeric">
+          <button type="button" id="seatPlus" aria-label="More seats">+</button>
+        </div>
+        <div class="seat-total" id="brokerageSeatTotal">5 seats · $145/mo</div>
+      </div>
       <button type="button" class="btn btn-gold" id="brokerageCheckout" data-checkout="brokerage_monthly">Checkout seats</button>
     </div>
   </div>
@@ -223,7 +247,25 @@
     document.querySelector('.plans')?.after(note);
   }
 
+  let billingPeriod = 'monthly';
+  function seatQty() {
+    const el = document.getElementById('brokerageSeats');
+    return Math.max(5, Math.min(200, parseInt(el && el.value, 10) || 5));
+  }
+  function refreshSeatTotal() {
+    const qty = seatQty();
+    const el = document.getElementById('brokerageSeats');
+    if (el) el.value = String(qty);
+    const totalEl = document.getElementById('brokerageSeatTotal');
+    if (!totalEl) return;
+    if (billingPeriod === 'annual') {
+      totalEl.textContent = qty + ' seats · $' + (qty * 290).toLocaleString() + '/yr';
+    } else {
+      totalEl.textContent = qty + ' seats · $' + (qty * 29).toLocaleString() + '/mo';
+    }
+  }
   function setPeriod(period) {
+    billingPeriod = period;
     const annual = period === 'annual';
     document.querySelectorAll('#billingToggle button').forEach((b) => {
       const on = b.dataset.period === period;
@@ -243,10 +285,23 @@
       ? '$24 <span id="brokeragePriceSpan">/ seat / mo · billed $290/yr</span>'
       : '$29 <span id="brokeragePriceSpan">/ seat / mo</span>';
     document.getElementById('brokerageCheckout').dataset.checkout = annual ? 'brokerage_annual' : 'brokerage_monthly';
+    refreshSeatTotal();
   }
   document.querySelectorAll('#billingToggle button').forEach((b) => {
     b.addEventListener('click', () => setPeriod(b.dataset.period));
   });
+  const seatInput = document.getElementById('brokerageSeats');
+  document.getElementById('seatMinus')?.addEventListener('click', () => {
+    seatInput.value = String(Math.max(5, seatQty() - 1));
+    refreshSeatTotal();
+  });
+  document.getElementById('seatPlus')?.addEventListener('click', () => {
+    seatInput.value = String(Math.min(200, seatQty() + 1));
+    refreshSeatTotal();
+  });
+  seatInput?.addEventListener('change', refreshSeatTotal);
+  seatInput?.addEventListener('input', refreshSeatTotal);
+
   const periodQ = params.get('period');
   if (periodQ === 'annual') setPeriod('annual');
   else setPeriod('monthly');
@@ -255,9 +310,7 @@
     if (window.llTrack) window.llTrack('begin_checkout', { plan: plan, source: 'pricing' });
     let quantity = 1;
     if (plan.startsWith('brokerage')) {
-      const raw = window.prompt('How many seats? (minimum 5)', '5');
-      if (raw == null) return;
-      quantity = Math.max(5, parseInt(raw, 10) || 5);
+      quantity = seatQty();
     }
     const res = await fetch('/api/billing/checkout', {
       method: 'POST',

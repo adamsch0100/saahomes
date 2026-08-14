@@ -66,8 +66,8 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
     median_dom = float(story.get("median_dom") or s.get("median_dom") or 45)
     top_mkt = float(story.get("top_of_market_pct") or 50)
     exec_sum = _md_strip(report.get("executive_summary") or "")
-    if len(exec_sum) > 560:
-        exec_sum = exec_sum[:560].rsplit(" ", 1)[0] + "…"
+    if len(exec_sum) > 360:
+        exec_sum = exec_sum[:360].rsplit(" ", 1)[0] + "…"
     advantages = pos.get("advantages") or []
     risks = pos.get("risks") or []
     scenarios = pos.get("price_scenarios") or []
@@ -599,14 +599,42 @@ h1, h2, h3 {{ font-family: Fraunces, Georgia, serif; font-weight: 700; letter-sp
 
 /* Market */
 .duo {{ display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0 12px; }}
+.duo.compact {{ gap: 8px; margin: 6px 0; }}
 .duo .d {{
   background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 22px; text-align: center;
 }}
+.duo.compact .d {{ padding: 12px 10px; border-radius: 12px; }}
 .duo .d.yours {{
   background: linear-gradient(145deg, var(--navy), var(--accent)); color: #fff; border: none;
 }}
 .duo .n {{ font-size: clamp(2.4rem, 5vw, 3.4rem); font-weight: 800; letter-spacing: -.03em; line-height: 1; }}
+.duo.compact .n {{ font-size: clamp(1.7rem, 3.2vw, 2.3rem); }}
 .duo .t {{ margin-top: 8px; font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 700; opacity: .85; }}
+.duo.compact .t {{ margin-top: 4px; font-size: .62rem; }}
+.lede.tight {{ font-size: .9rem; max-width: none; margin-top: 4px; }}
+.market-layout {{
+  display: grid; grid-template-columns: 1.05fr 1fr; gap: 14px; min-height: 0; margin-top: 4px;
+}}
+.market-left, .market-right {{ display: flex; flex-direction: column; min-height: 0; gap: 6px; }}
+.market-right .band-chart {{ flex: 1; margin-top: 0; }}
+.market-right .band-bars {{ justify-content: space-evenly; }}
+.ask-card .aa {{
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}}
+.price-rec-bl {{
+  display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden;
+  font-size: .88rem;
+}}
+.net-sheet-wrap {{ min-height: 0; overflow: hidden; }}
+.ns-lines {{ overflow: hidden; max-height: 100%; }}
+.ns-row {{ padding: 3px 0; }}
+.ns-l {{ font-size: .74rem; }}
+.ns-v {{ font-size: .74rem; }}
+.ns-subhead {{ padding: 5px 0 2px; }}
+.ns-summary .ns-big {{ font-size: 1.85rem; }}
+@media (max-width: 900px) {{
+  .market-layout {{ grid-template-columns: 1fr; }}
+}}
 .pills {{ display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }}
 .pill {{
   background: #fff; border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px;
@@ -858,19 +886,28 @@ body.mode-print .hint {{ display: none; }}
   .slide:last-child {{ break-after: auto; page-break-after: auto; }}
   .slide-body {{ overflow: hidden; padding: 10px 22px 6px; display: flex; flex-direction: column; }}
   .comps-grid {{ gap: 8px; margin-top: 8px; flex: 1; align-content: stretch; }}
-  .comps-grid-8 .cc-photo {{ height: auto !important; min-height: 90px !important; flex: 1 1 auto !important; }}
-  .yr-bars {{ min-height: 180px !important; }}
+  .comps-grid-8 .cc-photo {{ height: auto !important; min-height: 72px !important; flex: 1 1 auto !important; }}
+  .yr-bars {{ min-height: 120px !important; }}
   .band-bars {{ flex: 1; }}
   .price-rec-grid {{ grid-template-columns: 1.3fr .9fr; }}
-  .cc-body {{ padding: 7px 9px 9px; }}
-  .cc-price {{ font-size: .95rem; }}
-  .cc-addr {{ font-size: .7rem; }}
-  .slide[data-title^="5 ·"] .lede {{ font-size: .95rem; }}
-  .slide[data-title^="6"] .lede {{ font-size: .95rem; max-width: none; }}
+  .market-layout {{ grid-template-columns: 1.05fr 1fr !important; }}
+  .duo.compact .n {{ font-size: 1.7rem !important; }}
+  .ns-summary .ns-big {{ font-size: 1.6rem !important; }}
+  .ns-row {{ padding: 2px 0 !important; }}
+  .slide-body {{ padding: 8px 18px 4px !important; gap: 4px !important; }}
+  .slide-top {{ padding: 10px 18px 0 !important; }}
+  .slide-foot {{ padding: 4px 18px 8px !important; }}
+  h2, .slide-title {{ font-size: 1.15rem !important; }}
+  .lede {{ font-size: .88rem !important; }}
+  .cc-body {{ padding: 6px 8px 8px; }}
+  .cc-price {{ font-size: .9rem; }}
+  .cc-addr {{ font-size: .66rem; }}
+  .slide[data-title^="5 ·"] .lede {{ font-size: .88rem; }}
+  .slide[data-title^="6"] .lede {{ font-size: .88rem; max-width: none; }}
 }}
 </style>
 </head>
-<body class="mode-flip" data-deck-spine="v4">
+<body class="mode-flip" data-deck-spine="v5">
 <header class="deck-chrome">
   <div class="left">
     <span class="brand">ListLogic · Listing flipbook</span>
@@ -924,19 +961,25 @@ body.mode-print .hint {{ display: none; }}
       <div class="slide-top"><span>{logo_html}1 · Market</span><span>{_esc(temp_label)} · {inv:.1f} mo inventory</span></div>
       <div class="slide-body">
         <h2 class="slide-title"><span class="step-badge">1</span>Homes on the Market</h2>
-        <div class="pills" style="margin-top:6px">{chip_html}</div>
-        <p class="lede" style="margin-top:8px;max-width:58ch">Competition = <strong>Active only</strong>. Pending + Backup are under contract — already spoken for.</p>
-        <div class="duo">
-          <div class="d"><div class="n">{active_n}</div><div class="t">Active on Market</div></div>
-          <div class="d yours"><div class="n">{with_yours}</div><div class="t">With Your Home Included</div></div>
+        <div class="market-layout grow">
+          <div class="market-left">
+            <div class="pills">{chip_html}</div>
+            <p class="lede tight">Competition = <strong>Active only</strong>. Pending + Backup are already under contract.</p>
+            <div class="duo compact">
+              <div class="d"><div class="n">{active_n}</div><div class="t">Active on Market</div></div>
+              <div class="d yours"><div class="n">{with_yours}</div><div class="t">With Your Home</div></div>
+            </div>
+            <div class="ask-trio">
+              <div class="ask-card"><div class="aq">How Long?</div><div class="aa">{_plain(ask.get("how_long") or f"About {median_dom:.0f} days when priced well.")}</div></div>
+              <div class="ask-card"><div class="aq">Odds?</div><div class="aa">{_plain(ask.get("odds") or f"About {odds_pct:.0f}% in ~30 days when priced well.")}</div></div>
+              <div class="ask-card"><div class="aq">Pace?</div><div class="aa">{_plain(ask.get("when_active") or f"About {sales_mo:.1f} sales per month.")}</div></div>
+            </div>
+            <div class="kpis">{kpis_html}</div>
+          </div>
+          <div class="market-right">
+            {bands_inline or '<div class="talk-chip">Open Live Story for the active list-price band chart.</div>'}
+          </div>
         </div>
-        <div class="ask-trio">
-          <div class="ask-card"><div class="aq">How Long Should It Take?</div><div class="aa">{_plain(ask.get("how_long") or f"About {median_dom:.0f} days when priced well.")}</div></div>
-          <div class="ask-card"><div class="aq">What Are the Odds?</div><div class="aa">{_plain(ask.get("odds") or f"About {odds_pct:.0f}% in ~30 days when priced well.")}</div></div>
-          <div class="ask-card"><div class="aq">When Is the Market Active?</div><div class="aa">{_plain(ask.get("when_active") or f"About {sales_mo:.1f} sales per month.")}</div></div>
-        </div>
-        <div class="kpis" style="margin-top:10px">{kpis_html}</div>
-        {bands_inline}
       </div>
       <div class="slide-foot"><span>{_esc(market_label)}</span><span>ListLogic</span></div>
     </section>
@@ -978,12 +1021,12 @@ body.mode-print .hint {{ display: none; }}
       <div class="slide-body">
         <h2 class="slide-title"><span class="step-badge">5</span>Position in Recent Sales</h2>
         <p class="lede">{_esc(top_stmt)}</p>
-        <div class="duo" style="margin-top:16px">
+        <div class="duo compact" style="margin-top:12px">
           <div class="d"><div class="n">Top {top_mkt:.0f}%</div><div class="t">of similar sales</div></div>
           <div class="d yours"><div class="n">{rating}/10</div><div class="t">{_esc(rating_label)}</div></div>
         </div>
-        <p class="lede" style="margin-top:12px">{_esc(trend_line)}</p>
-        <p class="lede">{_esc(pos.get("competitive_statement") or "")}</p>
+        <p class="lede tight">{_esc(trend_line)}</p>
+        <p class="talk-chip">{_esc((pos.get("competitive_statement") or "")[:280])}</p>
       </div>
       <div class="slide-foot"><span>Starts at typical 5/10 in live story</span><span>ListLogic</span></div>
     </section>
@@ -1072,6 +1115,26 @@ body.mode-print .hint {{ display: none; }}
     linkInteractive.href = location.pathname.replace(/deck\\.html$/i, 'presentation.html');
   }}
 
+  function fitBodies() {{
+    document.querySelectorAll('.slide').forEach(slide => {{
+      const body = slide.querySelector('.slide-body');
+      if (!body) return;
+      body.style.transform = '';
+      body.style.width = '';
+      body.style.transformOrigin = '';
+      // Only fit when slide is laid out (on-screen or print mode)
+      if (!slide.classList.contains('is-on') && mode !== 'print') return;
+      const avail = body.clientHeight;
+      const need = body.scrollHeight;
+      if (!avail || need <= avail + 2) return;
+      const scale = Math.max(0.78, Math.min(1, avail / need));
+      body.style.transformOrigin = 'top center';
+      body.style.transform = 'scale(' + scale.toFixed(3) + ')';
+      body.style.width = (100 / scale).toFixed(2) + '%';
+      body.style.marginLeft = ((100 - (100 / scale)) / 2).toFixed(2) + '%';
+    }});
+  }}
+
   function setMode(next) {{
     mode = next;
     document.body.classList.toggle('mode-flip', mode === 'flip');
@@ -1088,6 +1151,7 @@ body.mode-print .hint {{ display: none; }}
     if (mode === 'print') url.searchParams.set('print', '1');
     else url.searchParams.delete('print');
     history.replaceState(null, '', url);
+    requestAnimationFrame(() => requestAnimationFrame(fitBodies));
   }}
 
   function go(n, animate) {{
@@ -1100,6 +1164,7 @@ body.mode-print .hint {{ display: none; }}
       s.classList.toggle('is-exit', animate && idx === prev && idx !== i);
     }});
     prog.textContent = (i + 1) + ' / ' + slides.length;
+    requestAnimationFrame(() => requestAnimationFrame(fitBodies));
   }}
 
   document.getElementById('btnPrev').onclick = () => go(i - 1, true);
@@ -1110,7 +1175,7 @@ body.mode-print .hint {{ display: none; }}
   btnPrintMode.onclick = () => setMode('print');
   document.getElementById('btnPrint').onclick = () => {{
     setMode('print');
-    setTimeout(() => window.print(), 120);
+    setTimeout(() => {{ fitBodies(); window.print(); }}, 160);
   }};
 
   document.addEventListener('keydown', e => {{
@@ -1135,6 +1200,9 @@ body.mode-print .hint {{ display: none; }}
     if (Math.abs(dx) > 50) go(i + (dx < 0 ? 1 : -1), true);
     tx = null;
   }}, {{ passive: true }});
+
+  window.addEventListener('resize', () => requestAnimationFrame(fitBodies));
+  window.addEventListener('beforeprint', fitBodies);
 
   setMode(mode);
 }})();

@@ -1444,14 +1444,14 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
 
   /* One landscape sheet per spine section — inset box so printer margins cannot clip */
   /* marker: print-page-spine */
-  /* marker: print-fit-v4 */
+  /* marker: print-fit-v5 */
   .page > .hero,
   .page > .core-facts,
   .page > .section[id^="spine-"]:not(#spine-fulldata){{
     box-sizing:border-box;
     width:10.5in;height:7.9in;max-height:7.9in;min-height:7.9in;
     margin:0.3in auto;
-    padding:0.26in 0.38in;
+    padding:0.22in 0.34in;
     border:none;border-radius:0;box-shadow:none!important;
     overflow:hidden;
     page-break-after:always;break-after:page;
@@ -1459,7 +1459,7 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
     display:flex;flex-direction:column;
   }}
   .page > .hero{{
-    padding:0.55in 0.55in;display:flex;align-items:center;
+    padding:0.5in 0.5in;display:flex;align-items:center;
   }}
   .page > .core-facts,
   #spine-rating{{
@@ -1479,11 +1479,49 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
     overflow:visible;padding:0;margin:0;
   }}
 
-  /* ——— Fill the sheet: flex children grow into empty space ——— */
+  /* ——— Keep every sheet inside the printable box ——— */
   .section-kicker{{display:none!important}}
   .page > footer{{display:none!important}}
+  h2{{font-size:.98rem!important;margin-bottom:4px!important;line-height:1.2}}
+  .sub{{font-size:.7rem!important;margin-bottom:6px!important;line-height:1.35;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}}
+  .ask-card .aa{{
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+    font-size:.68rem!important;line-height:1.3
+  }}
+  .ask-card .aq{{font-size:.62rem!important}}
+  .ask-trio{{gap:6px!important;margin-bottom:6px!important}}
+  .market-duo .n{{font-size:2rem!important}}
+  .market-duo .duo{{padding:10px 8px!important}}
 
-  /* Comps: all 8 on one landscape page (4×2), compact but complete */
+  /* Market: primary KPIs only + compact band chart */
+  #spine-market .kpis.market-kpis .kpi:nth-child(n+5){{display:none!important}}
+  #spine-market .kpis.market-kpis{{grid-template-columns:repeat(4,1fr)!important;gap:6px!important;flex:none}}
+  #spine-market .band-wrap{{flex:1 1 auto;min-height:0;margin-top:6px!important;display:flex;flex-direction:column}}
+  #spine-market .band-wrap h3{{font-size:.78rem;margin:0 0 2px}}
+  #spine-market .band-wrap > .sub{{display:none!important}}
+  #spine-market .band-insight{{
+    font-size:.68rem!important;margin:4px 0 0;flex:none;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden
+  }}
+  #spine-market .band-wrap .chart-box{{flex:1 1 auto;min-height:120px!important;max-height:none!important}}
+  #spine-market .market-def,#spine-market .mdef{{
+    font-size:.68rem;margin-bottom:4px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden
+  }}
+
+  /* Supply: drop long copy, keep metrics + chart */
+  #spine-supply > .sub{{display:none!important}}
+  #spine-supply .supply-line .sl-d{{
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:.68rem
+  }}
+  #spine-supply .sw-d,#spine-supply .sp-b{{
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:.66rem
+  }}
+  #spine-supply .supply-chart-wrap{{flex:1 1 auto;min-height:0}}
+  #spine-supply .supply-chart-wrap .chart-box{{flex:1 1 auto;min-height:140px!important}}
+
+  /* Comps: all 8 on one landscape page (4×2) */
   #spine-comps .comp-map-wrap,
   #spine-comps .comp-subject,
   #spine-comps .comp-rank-how,
@@ -1496,7 +1534,7 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
     display:grid!important;
     grid-template-columns:repeat(4,1fr);
     grid-template-rows:1fr 1fr;
-    gap:8px;
+    gap:7px;
     padding:0;
     flex:1 1 auto;
     min-height:0;
@@ -1506,54 +1544,58 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
     display:flex!important;flex-direction:column;min-height:0;height:100%;
     box-shadow:none;border-radius:10px;
   }}
-  #spine-comps .comp-visual{{height:78px!important;flex:none}}
-  #spine-comps .comp-card .cb{{padding:6px 8px 8px;flex:1}}
-  #spine-comps .comp-card .ca{{font-size:.72rem;min-height:0;line-height:1.2;margin:0}}
-  #spine-comps .comp-card .cm{{margin:2px 0 4px;font-size:.62rem}}
+  #spine-comps .comp-visual{{height:70px!important;flex:none}}
+  #spine-comps .comp-card .cb{{padding:5px 7px 7px;flex:1}}
+  #spine-comps .comp-card .ca{{font-size:.68rem;min-height:0;line-height:1.15;margin:0}}
+  #spine-comps .comp-card .cm{{margin:2px 0 3px;font-size:.58rem}}
   #spine-comps .comp-card .match-why{{display:none}}
-  #spine-comps .comp-card .cf{{font-size:.6rem;gap:2px 6px;margin-top:2px}}
-  #spine-comps .comp-card .match-badge{{font-size:.58rem;padding:1px 6px}}
-  #spine-comps .cph-price{{font-size:1.05rem!important}}
-  #spine-comps .cph-meta{{font-size:.62rem!important}}
+  #spine-comps .comp-card .cf{{font-size:.56rem;gap:2px 5px;margin-top:2px}}
+  #spine-comps .comp-card .match-badge{{font-size:.54rem;padding:1px 5px}}
+  #spine-comps .cph-price{{font-size:1rem!important}}
+  #spine-comps .cph-meta{{font-size:.58rem!important}}
   #spine-comps .comp-delta{{display:none}}
-  #spine-comps > .sub{{margin-bottom:6px;font-size:.72rem}}
-  #spine-comps > h2{{margin-bottom:4px}}
+  #spine-comps > .sub{{margin-bottom:4px;font-size:.68rem}}
+  #spine-comps > h2{{margin-bottom:2px}}
 
-  /* Charts: fill remaining page height; print snapshots fill the box */
+  /* Charts: fill leftover space without forcing overflow */
   .chart-box{{
-    height:auto!important;min-height:160px!important;max-height:none!important;
+    height:auto!important;min-height:120px!important;max-height:none!important;
     flex:1 1 auto;
   }}
-  .chart-box.short{{height:auto!important;min-height:150px!important;max-height:none!important}}
+  .chart-box.short{{height:auto!important;min-height:110px!important;max-height:none!important}}
   .chart-box canvas,.chart-box img.print-chart{{
     max-width:100%!important;max-height:100%!important;
     width:100%!important;height:100%!important;object-fit:contain!important;
   }}
 
-  /* Position / price vs sqft — hero chart page */
   #spine-position .scatter-series{{display:none!important}}
   #spine-position .chart-box.scatter-tall{{
-    flex:1 1 auto!important;min-height:360px!important;height:auto!important;max-height:none!important;
+    flex:1 1 auto!important;min-height:280px!important;height:auto!important;max-height:none!important;
   }}
-  #spine-position .story-note{{font-size:.88rem;margin-top:10px;flex:none}}
-  #spine-position .sub{{margin-bottom:6px}}
+  #spine-position .story-note{{
+    font-size:.78rem;margin-top:8px;flex:none;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden
+  }}
+  #spine-position .sub{{margin-bottom:4px}}
 
-  /* Market detail panels grow to fill the sheet */
   #spine-yoy .md-panel,
   #spine-prices .md-panel,
   #spine-timing .md-panel{{
     flex:1 1 auto;display:flex;flex-direction:column;min-height:0;
-    margin:4px 0 0;padding:10px 12px;border-radius:10px;background:#fff;
+    margin:2px 0 0;padding:8px 10px;border-radius:10px;background:#fff;
   }}
   #spine-yoy .md-talk,
   #spine-prices .md-talk,
-  #spine-timing .md-talk{{font-size:.8rem;margin-bottom:8px;padding:8px 10px;flex:none}}
+  #spine-timing .md-talk{{
+    font-size:.72rem;margin-bottom:6px;padding:6px 8px;flex:none;
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden
+  }}
   #spine-yoy .md-chart-grid,
   #spine-prices .md-chart-grid,
   #spine-timing .md-chart-grid{{
-    flex:1 1 auto;display:grid;grid-template-columns:1fr 1fr;gap:12px;min-height:0;align-items:stretch;
+    flex:1 1 auto;display:grid;grid-template-columns:1fr 1fr;gap:10px;min-height:0;align-items:stretch;
   }}
-  #spine-timing .md-chart-grid.solo{{grid-template-columns:1fr;margin-top:10px;flex:0.85 1 auto}}
+  #spine-timing .md-chart-grid.solo{{grid-template-columns:1fr;margin-top:8px;flex:0.85 1 auto}}
   #spine-yoy .md-chart-block,
   #spine-prices .md-chart-block,
   #spine-timing .md-chart-block{{
@@ -1568,50 +1610,59 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
   #spine-yoy .md-chart-block .chart-box.feature,
   #spine-prices .md-chart-block .chart-box.feature,
   #spine-timing .md-chart-block .chart-box.feature{{
-    flex:1 1 auto!important;min-height:240px!important;height:auto!important;max-height:none!important;
+    flex:1 1 auto!important;min-height:170px!important;height:auto!important;max-height:none!important;
   }}
   #spine-yoy .yoy-kpis{{display:none!important}}
   #spine-yoy .md-panel-head .md-tag,
   #spine-prices .md-panel-head .md-tag,
   #spine-timing .md-panel-head .md-tag{{display:none}}
 
-  /* Market + supply charts fill leftover space */
-  #spine-market .band-wrap{{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;margin-top:8px}}
-  #spine-market .band-wrap .chart-box{{flex:1 1 auto;min-height:180px!important}}
+  #spine-market .band-wrap{{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;margin-top:6px}}
   #spine-supply .supply-chart-wrap{{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}}
-  #spine-supply .supply-chart-wrap .chart-box{{flex:1 1 auto;min-height:200px!important}}
 
-  /* Rating page — stretch the bands */
   #spine-rating{{justify-content:flex-start!important}}
-  #spine-rating .rate-bands{{flex:1;align-content:center;gap:12px;margin:12px 0}}
-  #spine-rating .rate-band{{min-height:140px;padding:18px 14px}}
+  #spine-rating .rate-bands{{flex:1;align-content:center;gap:10px;margin:8px 0}}
+  #spine-rating .rate-band{{min-height:110px;padding:14px 12px}}
   #spine-rating .rate-live{{margin-top:auto}}
 
-  /* Strategy + net fill */
-  #spine-strategy .verdict{{flex:none}}
-  #spine-strategy .price-controls{{flex:none}}
-  #spine-strategy .response-grid{{flex:1 1 auto;min-height:0}}
-  #spine-net .net-grid{{flex:1 1 auto;align-items:stretch;min-height:0}}
-  #spine-net .net-lines{{overflow:hidden}}
-  #spine-net .net-summary{{display:flex;flex-direction:column;justify-content:center}}
+  /* Strategy: keep recommendation + lanes + while-you-wait inside the sheet */
+  #spine-strategy > .sub{{display:none!important}}
+  #spine-strategy .bottom-line{{
+    font-size:.68rem!important;line-height:1.3;margin:2px 0 6px!important;padding:4px 0 4px 10px!important;
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:none
+  }}
+  #spine-strategy .verdict{{flex:none;padding:10px 14px!important;margin:0 0 6px!important}}
+  #spine-strategy .verdict .big{{font-size:1.85rem!important}}
+  #spine-strategy .verdict .sub{{font-size:.78rem!important;-webkit-line-clamp:2}}
+  #spine-strategy .price-controls{{flex:none;padding:8px 10px!important;margin:0 0 6px!important}}
+  #spine-strategy .slider-wrap{{display:none!important}}
+  #spine-strategy .wyw-lede,#spine-strategy .wyw-note,#spine-strategy .wyw-bar-wrap{{display:none!important}}
+  #spine-strategy .wyw{{padding:8px 10px!important}}
+  #spine-strategy .response-grid{{flex:1 1 auto;min-height:0;margin-top:4px!important}}
+  #spine-strategy .whatif-grid{{gap:6px!important}}
+  #spine-strategy .whatif-card{{padding:6px 4px!important;font-size:.68rem}}
 
-  #compMap{{height:270px!important}}
+  #spine-net > .sub{{display:none!important}}
+  #spine-net .net-grid{{flex:1 1 auto;align-items:stretch;min-height:0;gap:8px!important}}
+  #spine-net .net-lines{{overflow:hidden}}
+  #spine-net .net-summary{{display:flex;flex-direction:column;justify-content:center;padding:10px!important}}
+  #spine-net .net-summary .ns-big{{font-size:1.55rem!important}}
+  #spine-net .net-summary .ns-fine{{display:none}}
+  #spine-net .net-row{{padding:3px 8px!important;font-size:.72rem!important}}
+  #spine-net .net-row .ni input{{border:none;background:transparent;padding:0 12px 0 0;font-size:.72rem}}
+
+  #compMap{{height:240px!important}}
   .comp-map-foot{{display:none!important}}
   .comp-map-legend .map-kind{{border:none;background:transparent;padding:0;cursor:default}}
-  .net-grid{{grid-template-columns:1.15fr .85fr;gap:10px}}
-  .net-row{{padding:5px 10px;font-size:.78rem}}
-  .net-row .ni input{{border:none;background:transparent;padding:0 14px 0 0;font-size:.78rem}}
-  .net-summary{{padding:12px;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
-  .net-summary .ns-big{{font-size:1.7rem}}
-  .net-summary .ns-fine{{display:none}}
+  .net-grid{{grid-template-columns:1.15fr .85fr;gap:8px}}
   a[href]::after{{content:none!important}}
-  .whatif-grid{{display:grid!important;grid-template-columns:repeat(var(--whatif-cols,5),minmax(0,1fr))!important;overflow:visible!important;gap:8px}}
-  .price-controls{{display:block!important;margin-top:8px}}
+  .whatif-grid{{display:grid!important;grid-template-columns:repeat(var(--whatif-cols,5),minmax(0,1fr))!important;overflow:visible!important;gap:6px}}
+  .price-controls{{display:block!important;margin-top:4px}}
   .market-duo,.ask-trio,.supply-wait,.supply-hero,.cf-grid,.comp-card,.verdict,.wyw,.response-grid{{page-break-inside:avoid}}
-  .kpis,.kpis.market-kpis,.kpis.yoy-kpis{{gap:6px}}
-  .kpi{{padding:8px 6px}}
-  h2{{font-size:1.02rem;margin-bottom:6px}}
-  .sub{{font-size:.76rem;margin-bottom:8px}}
+  .kpis,.kpis.market-kpis,.kpis.yoy-kpis{{gap:5px}}
+  .kpi{{padding:6px 4px}}
+  .kpi .v{{font-size:1.05rem}}
+  .kpi .l{{font-size:.55rem}}
 }}
 body.print-leavebehind .fab,
 body.print-leavebehind .agent-menu-wrap,

@@ -1303,7 +1303,7 @@ def _refresh_sample_html(run_dir: Path) -> bool:
                 and "btnPrintLeavebehind" in existing
                 and "listlogic-logo.png" in existing
                 and "print-page-spine" in existing
-                and "print-fit-v4" in existing
+                and "print-fit-v5" in existing
                 and "demo-ui-snappy" in existing
                 and "charts failed to boot" in existing
                 and "/saas/vendor/chart.umd.min.js" in existing
@@ -1322,10 +1322,12 @@ def _refresh_sample_html(run_dir: Path) -> bool:
                 and "sectionsModal" in existing
                 and "ll-shown" in existing
                 and "comps-grid-8" in deck_existing
+                and "market-layout" in deck_existing
                 and "6 · Pace" in deck_existing
                 and "6b · Prices" in deck_existing
                 and "6c · Timing" in deck_existing
-                and "data-deck-spine=\"v3\"" in deck_existing
+                and "data-deck-spine=\"v5\"" in deck_existing
+                and "fitBodies" in deck_existing
             ):
                 return False
         report = json.loads(json_path.read_text(encoding="utf-8"))
