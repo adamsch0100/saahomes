@@ -1297,6 +1297,8 @@ def _refresh_sample_html(run_dir: Path) -> bool:
                 and "print-page-spine" in existing
                 and "print-fit-v2" in existing
                 and "demo-ui-snappy" in existing
+                and "charts failed to boot" in existing
+                and "/saas/vendor/chart.umd.min.js" in existing
                 and "mapboxgl" in existing
                 and "MAPBOX_TOKEN" in existing
                 and "map-hover-tip" in existing
@@ -1789,6 +1791,8 @@ _PRESENTATION_MARKERS = (
     "MAPBOX_TOKEN",
     "print-fit-v2",
     "demo-ui-snappy",
+    "charts failed to boot",
+    "/saas/vendor/chart.umd.min.js",
 )
 
 

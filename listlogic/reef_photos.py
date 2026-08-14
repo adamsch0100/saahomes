@@ -38,6 +38,9 @@ DEFAULT_TIMEOUT_SEC = 35
 # Host this many listing photos per comp (Zillow can return 30+; enough for swipe).
 MAX_GALLERY_PHOTOS = 15
 # Soft budget only for inline/foreground enrich — background jobs run full.
+# Reject Realtor/Zillow thumbnails that are too small to look sharp in the deck.
+MIN_PHOTO_BYTES = 12_000
+PHOTO_CACHE_VERSION = 2
 ENRICH_BUDGET_SEC = 55
 CLUSTER_RADIUS_DEG = 0.006
 CLUSTER_PAD_DEG = 0.002
@@ -115,13 +118,23 @@ def _read_cache(cache_key: str) -> dict | None:
         return None
     if data.get("miss"):
         return data
+    # Drop thumbnail-era cache entries so Search-path blurry s.jpg files get re-fetched.
+    if int(data.get("cache_version") or 1) < PHOTO_CACHE_VERSION:
+        return None
     primary = data.get("primary_path") or ""
     if primary and not Path(primary).exists():
         for base in ([CACHE_DIR, _LEGACY_CACHE_DIR] if legacy else [CACHE_DIR]):
             local = base / cache_key / "primary.jpg"
             if local.exists():
                 data["primary_path"] = str(local)
+                primary = str(local)
                 break
+    if primary:
+        try:
+            if Path(primary).exists() and Path(primary).stat().st_size < MIN_PHOTO_BYTES:
+                return None
+        except OSError:
+            return None
     data["gallery_paths"] = [p for p in (data.get("gallery_paths") or []) if Path(p).exists()]
     if legacy:
         # First read migrates the entry onto the volume so later hits are local.
@@ -206,6 +219,27 @@ def _address_match_score(target: str, candidate: str) -> float:
     return 0.55 + 0.45 * (overlap / max(len(t_tokens), 1))
 
 
+def upgrade_listing_photo_url(url: str) -> str:
+    """Prefer full-size Realtor/Zillow CDN variants over tiny card thumbnails."""
+    u = (url or "").strip()
+    if not u:
+        return u
+    if u.startswith("http://"):
+        u = "https://" + u[7:]
+    low = u.lower()
+    # Realtor CDN: …s.jpg (~4KB thumb) → …od.jpg (full); also bump rd-w sizes.
+    if "rdcpix.com" in low:
+        u = re.sub(r"s\.jpe?g(\?.*)?$", r"od.jpg\1", u, flags=re.I)
+        u = re.sub(r"s\.webp(\?.*)?$", r"od.webp\1", u, flags=re.I)
+        u = re.sub(r"rd-w\d+_h\d+", "rd-w1280_h960", u, flags=re.I)
+    # Zillow static: force larger crop / cc_ft size when present.
+    if "zillowstatic.com" in low or "zillow.com" in low:
+        u = re.sub(r"cc_ft_\d+", "cc_ft_1536", u, flags=re.I)
+        u = re.sub(r"/p_c/", "/p_e/", u)
+        u = re.sub(r"/p_h/", "/p_e/", u)
+    return u
+
+
 def _extract_photo_urls(item: dict, limit: int = MAX_GALLERY_PHOTOS) -> list[str]:
     photos = item.get("photos") or []
     urls: list[str] = []
@@ -218,6 +252,7 @@ def _extract_photo_urls(item: dict, limit: int = MAX_GALLERY_PHOTOS) -> list[str
                 urls.append(str(u))
     cleaned: list[str] = []
     for url in urls:
+        url = upgrade_listing_photo_url(url)
         low = url.lower()
         if not url.startswith("http"):
             continue
@@ -232,29 +267,46 @@ def _extract_photo_urls(item: dict, limit: int = MAX_GALLERY_PHOTOS) -> list[str
 def _download_image(url: str, dest: Path) -> bool:
     if not url or not url.startswith("http"):
         return False
+    candidates = []
+    upgraded = upgrade_listing_photo_url(url)
+    if upgraded and upgraded not in candidates:
+        candidates.append(upgraded)
+    if url.startswith("http://"):
+        https_url = "https://" + url[7:]
+        if https_url not in candidates:
+            candidates.append(https_url)
+    if url not in candidates:
+        candidates.append(url)
+
     dest.parent.mkdir(parents=True, exist_ok=True)
-    req = urllib.request.Request(
-        url,
-        headers={
-            "User-Agent": "ListLogic/1.0",
-            "Accept": "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
-            "Referer": "https://www.zillow.com/",
-        },
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=DOWNLOAD_TIMEOUT_SEC) as resp:
-            data = resp.read()
-            ctype = (resp.headers.get("Content-Type") or "").lower()
-        if len(data) < 800:
-            return False
-        if "image" not in ctype and not url.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
-            if not (data[:3] == b"\xff\xd8\xff" or data[:8].startswith(b"\x89PNG") or data[:4] == b"RIFF"):
-                return False
-        dest.write_bytes(data)
-        return True
-    except Exception as exc:
-        logger.info("Photo download failed (%s): %s", dest.name, exc)
-        return False
+    for candidate in candidates:
+        req = urllib.request.Request(
+            candidate,
+            headers={
+                "User-Agent": "ListLogic/1.0",
+                "Accept": "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+                "Referer": "https://www.realtor.com/",
+            },
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=DOWNLOAD_TIMEOUT_SEC) as resp:
+                data = resp.read()
+                ctype = (resp.headers.get("Content-Type") or "").lower()
+            if len(data) < 800:
+                continue
+            # Skip obvious thumbs when a larger candidate may still succeed.
+            if len(data) < MIN_PHOTO_BYTES and candidate != candidates[-1]:
+                logger.info("Skipping tiny photo (%d bytes): %s", len(data), candidate[-48:])
+                continue
+            if "image" not in ctype and not candidate.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
+                if not (data[:3] == b"\xff\xd8\xff" or data[:8].startswith(b"\x89PNG") or data[:4] == b"RIFF"):
+                    continue
+            dest.write_bytes(data)
+            return True
+        except Exception as exc:
+            logger.info("Photo download failed (%s): %s", dest.name, exc)
+            continue
+    return False
 
 
 def _geocode(address: str) -> tuple[float | None, float | None]:
@@ -353,6 +405,7 @@ def _persist_photos(cache_key: str, urls: list[str], *, zpid: Any = None, matche
     return _write_cache(
         cache_key,
         {
+            "cache_version": PHOTO_CACHE_VERSION,
             "primary_url_source": urls[0],
             "primary_path": str(primary),
             "photos_source": urls[:MAX_GALLERY_PHOTOS],
@@ -623,17 +676,41 @@ def enrich_report_photos(
     reef_targets: list[dict] = []
     for t in candidates:
         row = t.get("row") if isinstance(t.get("row"), dict) else {}
-        existing = str(row.get("photo_url") or row.get("photo") or "").strip()
+        existing = str(
+            row.get("photo_url")
+            or row.get("photo")
+            or row.get("PhotoURL")
+            or row.get("PrimaryPhotoURL")
+            or ""
+        ).strip()
         if not existing and isinstance(row.get("photos"), list) and row["photos"]:
             existing = str(row["photos"][0] or "").strip()
+        if existing.startswith("http://") or existing.startswith("https://"):
+            existing = upgrade_listing_photo_url(existing)
         if existing.startswith("/runs/"):
-            photo_map[t["public_key"]] = existing.split("?")[0]
-            continue
+            # Re-fetch if a prior Search run hosted a tiny thumbnail.
+            try:
+                local_name = existing.rstrip("/").split("/")[-1]
+                local_path = (run_dir / "photos" / local_name) if run_dir else None
+                if local_path and local_path.exists() and local_path.stat().st_size < MIN_PHOTO_BYTES:
+                    existing = ""
+                else:
+                    photo_map[t["public_key"]] = existing.split("?")[0]
+                    continue
+            except OSError:
+                photo_map[t["public_key"]] = existing.split("?")[0]
+                continue
         if existing.startswith("http://") or existing.startswith("https://"):
             if run_dir is not None:
                 photos_dir = run_dir / "photos"
                 photos_dir.mkdir(parents=True, exist_ok=True)
                 dest = photos_dir / f"{_safe_key(t['public_key'])}.jpg"
+                # Replace blurry thumbs that were downloaded before URL upgrade.
+                if dest.exists() and dest.stat().st_size < MIN_PHOTO_BYTES:
+                    try:
+                        dest.unlink()
+                    except OSError:
+                        pass
                 if dest.exists() or _download_image(existing, dest):
                     local = f"/runs/{run_id}/photos/{dest.name}" if run_id else str(dest)
                     photo_map[t["public_key"]] = local

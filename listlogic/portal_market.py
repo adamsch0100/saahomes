@@ -242,6 +242,12 @@ def _realtor_item_to_row(item: dict, *, status_force: str | None = None) -> dict
         photos = item.get("photos") or []
         if isinstance(photos, list) and photos:
             photo = photos[0] if isinstance(photos[0], str) else (photos[0] or {}).get("href") or ""
+    try:
+        from reef_photos import upgrade_listing_photo_url
+        photo = upgrade_listing_photo_url(str(photo or ""))
+    except Exception:
+        if isinstance(photo, str) and photo.startswith("http://"):
+            photo = "https://" + photo[7:]
 
     prop_type = str(item.get("property_type") or item.get("sub_type") or "").lower()
     dwelling = classify_dwelling(item)
@@ -1164,6 +1170,12 @@ def _facts_from_listing_item(item: dict) -> dict[str, Any]:
         if isinstance(photos, list) and photos:
             first = photos[0]
             photo = first if isinstance(first, str) else (first or {}).get("href") or (first or {}).get("url") or ""
+    try:
+        from reef_photos import upgrade_listing_photo_url
+        photo = upgrade_listing_photo_url(str(photo or ""))
+    except Exception:
+        if isinstance(photo, str) and photo.startswith("http://"):
+            photo = "https://" + photo[7:]
     return {
         "beds": beds_n,
         "baths": baths_n,

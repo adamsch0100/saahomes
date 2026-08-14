@@ -565,10 +565,12 @@ def render_interactive_html(report: dict) -> str:
     </div>'''
 
     chart_js_path = Path(__file__).resolve().parent / "saas" / "vendor" / "chart.umd.min.js"
+    # Always load Chart.js from /saas/vendor — never inline. Portal reports embed large
+    # TABLE JSON; inlining ~200KB of Chart.js on top has broken charts/map boot in browsers.
     if chart_js_path.exists():
-        chart_tag = f"<script>{chart_js_path.read_text(encoding='utf-8', errors='replace')}</script>"
-    else:
         chart_tag = '<script src="/saas/vendor/chart.umd.min.js"></script>'
+    else:
+        chart_tag = '<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>'
 
     logo_html = (
         f'<img src="{logo_url}" alt="ListLogic" style="height:30px;margin-right:10px;vertical-align:middle;background:#fff;border-radius:6px;padding:3px 8px">'
@@ -2848,8 +2850,13 @@ if ('IntersectionObserver' in window) {{
   }});
 }}
 
-function bootCharts() {{
-if (typeof Chart === 'undefined') return;
+function bootCharts(attempt) {{
+  attempt = attempt || 0;
+  if (typeof Chart === 'undefined') {{
+    if (attempt < 50) setTimeout(function () {{ bootCharts(attempt + 1); }}, 40);
+    return;
+  }}
+  try {{
   Chart.defaults.font.family = "'Inter','Segoe UI',system-ui,sans-serif";
   Chart.defaults.color = '#5a6a7c';
   Chart.defaults.borderColor = 'rgba(208,217,228,.45)';
@@ -3179,10 +3186,11 @@ if (typeof Chart === 'undefined') return;
       }}
     }};
   }});
+}} catch (err) {{
+  console.error('ListLogic charts failed to boot', err);
 }}
 }}
-if ('requestIdleCallback' in window) requestIdleCallback(bootCharts, {{ timeout: 1400 }});
-else setTimeout(bootCharts, 60);
+setTimeout(function () {{ bootCharts(0); }}, 0);
 
 document.querySelectorAll('[data-yoy-layout]').forEach(btn => {{
   btn.addEventListener('click', () => {{
@@ -3646,7 +3654,20 @@ function renderMarketMap(opts) {{
     if (wrap) wrap.style.display = 'none';
     return;
   }}
-  // Defer first Mapbox create so condition/slider stay responsive on load.
+  // Wait for Mapbox GL + defer first paint so condition/slider stay responsive.
+  if (typeof mapboxgl === 'undefined') {{
+    if (!window.__llMapWaitTries) window.__llMapWaitTries = 0;
+    if (window.__llMapWaitTries < 50) {{
+      window.__llMapWaitTries += 1;
+      window.__llMapPendingOpts = opts;
+      setTimeout(function () {{
+        renderMarketMap(Object.assign({{}}, window.__llMapPendingOpts || {{}}, {{ force: true }}));
+      }}, 80);
+      return;
+    }}
+    if (wrap) wrap.style.display = 'none';
+    return;
+  }}
   if (!marketMap && !opts.force && !window.__llMapBooted) {{
     if (window.__llMapBootScheduled) {{
       window.__llMapPendingOpts = opts;
@@ -3658,8 +3679,7 @@ function renderMarketMap(opts) {{
       window.__llMapBooted = true;
       renderMarketMap(Object.assign({{}}, window.__llMapPendingOpts || {{}}, {{ force: true }}));
     }};
-    if ('requestIdleCallback' in window) requestIdleCallback(boot, {{ timeout: 1800 }});
-    else setTimeout(boot, 120);
+    setTimeout(boot, 60);
     return;
   }}
   const picked = new Set((selectedCompMls || []).map(String));
