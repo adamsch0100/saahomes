@@ -1444,18 +1444,19 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
 
   /* One landscape sheet per spine section — inset box so printer margins cannot clip */
   /* marker: print-page-spine */
-  /* marker: print-fit-v3 */
+  /* marker: print-fit-v4 */
   .page > .hero,
   .page > .core-facts,
   .page > .section[id^="spine-"]:not(#spine-fulldata){{
     box-sizing:border-box;
     width:10.5in;height:7.9in;max-height:7.9in;min-height:7.9in;
     margin:0.3in auto;
-    padding:0.28in 0.4in;
+    padding:0.26in 0.38in;
     border:none;border-radius:0;box-shadow:none!important;
     overflow:hidden;
     page-break-after:always;break-after:page;
     page-break-inside:avoid;break-inside:avoid;
+    display:flex;flex-direction:column;
   }}
   .page > .hero{{
     padding:0.55in 0.55in;display:flex;align-items:center;
@@ -1478,60 +1479,121 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
     overflow:visible;padding:0;margin:0;
   }}
 
-  /* Comps: page 1 = top 4; page 2 = remaining (print-only section) */
+  /* ——— Fill the sheet: flex children grow into empty space ——— */
+  .section-kicker{{display:none!important}}
+  .page > footer{{display:none!important}}
+
+  /* Comps: all 8 on one landscape page (4×2), compact but complete */
   #spine-comps .comp-map-wrap,
   #spine-comps .comp-subject,
   #spine-comps .comp-rank-how,
   #spine-comps .comp-toolbar,
   #spine-comps .comp-table-toggle,
-  #spine-comps .comp-table-wrap{{display:none!important}}
-  #spine-comps .comp-rail .comp-card:nth-child(n+5){{display:none!important}}
-  .print-only{{display:block!important}}
-  #spine-comps-more .comp-rail .comp-card{{display:flex!important}}
-  #spine-comps .comp-rail,
-  #spine-comps-more .comp-rail{{grid-template-columns:repeat(4,1fr);gap:8px;padding:0}}
-  #spine-comps .comp-visual,
-  #spine-comps-more .comp-visual{{height:95px!important}}
-  #spine-comps .comp-card .cb,
-  #spine-comps-more .comp-card .cb{{padding:8px}}
-  #spine-comps .comp-card .ca,
-  #spine-comps-more .comp-card .ca{{font-size:.78rem;min-height:0}}
-  #spine-comps .comp-card .match-why,
-  #spine-comps-more .comp-card .match-why{{display:none}}
-  #spine-comps .comp-card .cf,
-  #spine-comps-more .comp-card .cf{{font-size:.65rem}}
+  #spine-comps .comp-table-wrap,
+  #spine-comps-more,
+  .print-only{{display:none!important}}
+  #spine-comps .comp-rail{{
+    display:grid!important;
+    grid-template-columns:repeat(4,1fr);
+    grid-template-rows:1fr 1fr;
+    gap:8px;
+    padding:0;
+    flex:1 1 auto;
+    min-height:0;
+    align-content:stretch;
+  }}
+  #spine-comps .comp-rail .comp-card{{
+    display:flex!important;flex-direction:column;min-height:0;height:100%;
+    box-shadow:none;border-radius:10px;
+  }}
+  #spine-comps .comp-visual{{height:78px!important;flex:none}}
+  #spine-comps .comp-card .cb{{padding:6px 8px 8px;flex:1}}
+  #spine-comps .comp-card .ca{{font-size:.72rem;min-height:0;line-height:1.2;margin:0}}
+  #spine-comps .comp-card .cm{{margin:2px 0 4px;font-size:.62rem}}
+  #spine-comps .comp-card .match-why{{display:none}}
+  #spine-comps .comp-card .cf{{font-size:.6rem;gap:2px 6px;margin-top:2px}}
+  #spine-comps .comp-card .match-badge{{font-size:.58rem;padding:1px 6px}}
+  #spine-comps .cph-price{{font-size:1.05rem!important}}
+  #spine-comps .cph-meta{{font-size:.62rem!important}}
+  #spine-comps .comp-delta{{display:none}}
+  #spine-comps > .sub{{margin-bottom:6px;font-size:.72rem}}
+  #spine-comps > h2{{margin-bottom:4px}}
 
-  .chart-box{{height:140px!important;min-height:0!important;max-height:155px!important}}
-  .chart-box.short{{height:120px!important;max-height:130px!important}}
-  .chart-box canvas,.chart-box img.print-chart{{max-width:100%!important;max-height:100%!important;height:auto!important;width:auto!important}}
+  /* Charts: fill remaining page height; print snapshots fill the box */
+  .chart-box{{
+    height:auto!important;min-height:160px!important;max-height:none!important;
+    flex:1 1 auto;
+  }}
+  .chart-box.short{{height:auto!important;min-height:150px!important;max-height:none!important}}
+  .chart-box canvas,.chart-box img.print-chart{{
+    max-width:100%!important;max-height:100%!important;
+    width:100%!important;height:100%!important;object-fit:contain!important;
+  }}
 
-  /* Price vs sqft gets the full page — chart must read large */
-  #spine-position .chart-box.scatter-tall{{height:320px!important;max-height:340px!important;min-height:280px!important}}
-  #spine-position .story-note{{font-size:.82rem;margin-top:8px}}
-  #spine-position .sub{{margin-bottom:4px}}
+  /* Position / price vs sqft — hero chart page */
+  #spine-position .scatter-series{{display:none!important}}
+  #spine-position .chart-box.scatter-tall{{
+    flex:1 1 auto!important;min-height:360px!important;height:auto!important;max-height:none!important;
+  }}
+  #spine-position .story-note{{font-size:.88rem;margin-top:10px;flex:none}}
+  #spine-position .sub{{margin-bottom:6px}}
 
-  /* Market detail panels — one topic per page, charts readable */
+  /* Market detail panels grow to fill the sheet */
   #spine-yoy .md-panel,
   #spine-prices .md-panel,
   #spine-timing .md-panel{{
-    margin:6px 0 0;padding:10px 12px;border-radius:10px;background:#fff;
+    flex:1 1 auto;display:flex;flex-direction:column;min-height:0;
+    margin:4px 0 0;padding:10px 12px;border-radius:10px;background:#fff;
   }}
   #spine-yoy .md-talk,
   #spine-prices .md-talk,
-  #spine-timing .md-talk{{font-size:.82rem;margin-bottom:8px;padding:8px 10px}}
-  #spine-yoy .chart-box,
-  #spine-prices .chart-box,
-  #spine-timing .chart-box,
-  #spine-yoy .chart-box.short,
-  #spine-prices .chart-box.short,
-  #spine-timing .chart-box.short,
-  #spine-yoy .chart-box.feature,
-  #spine-prices .chart-box.feature,
-  #spine-timing .chart-box.feature{{
-    height:210px!important;max-height:230px!important;min-height:180px!important
+  #spine-timing .md-talk{{font-size:.8rem;margin-bottom:8px;padding:8px 10px;flex:none}}
+  #spine-yoy .md-chart-grid,
+  #spine-prices .md-chart-grid,
+  #spine-timing .md-chart-grid{{
+    flex:1 1 auto;display:grid;grid-template-columns:1fr 1fr;gap:12px;min-height:0;align-items:stretch;
+  }}
+  #spine-timing .md-chart-grid.solo{{grid-template-columns:1fr;margin-top:10px;flex:0.85 1 auto}}
+  #spine-yoy .md-chart-block,
+  #spine-prices .md-chart-block,
+  #spine-timing .md-chart-block{{
+    display:flex;flex-direction:column;min-height:0;
+  }}
+  #spine-yoy .md-chart-block .chart-box,
+  #spine-prices .md-chart-block .chart-box,
+  #spine-timing .md-chart-block .chart-box,
+  #spine-yoy .md-chart-block .chart-box.short,
+  #spine-prices .md-chart-block .chart-box.short,
+  #spine-timing .md-chart-block .chart-box.short,
+  #spine-yoy .md-chart-block .chart-box.feature,
+  #spine-prices .md-chart-block .chart-box.feature,
+  #spine-timing .md-chart-block .chart-box.feature{{
+    flex:1 1 auto!important;min-height:240px!important;height:auto!important;max-height:none!important;
   }}
   #spine-yoy .yoy-kpis{{display:none!important}}
-  #spine-yoy .md-chart-grid.solo .chart-box{{height:250px!important;max-height:270px!important}}
+  #spine-yoy .md-panel-head .md-tag,
+  #spine-prices .md-panel-head .md-tag,
+  #spine-timing .md-panel-head .md-tag{{display:none}}
+
+  /* Market + supply charts fill leftover space */
+  #spine-market .band-wrap{{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;margin-top:8px}}
+  #spine-market .band-wrap .chart-box{{flex:1 1 auto;min-height:180px!important}}
+  #spine-supply .supply-chart-wrap{{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}}
+  #spine-supply .supply-chart-wrap .chart-box{{flex:1 1 auto;min-height:200px!important}}
+
+  /* Rating page — stretch the bands */
+  #spine-rating{{justify-content:flex-start!important}}
+  #spine-rating .rate-bands{{flex:1;align-content:center;gap:12px;margin:12px 0}}
+  #spine-rating .rate-band{{min-height:140px;padding:18px 14px}}
+  #spine-rating .rate-live{{margin-top:auto}}
+
+  /* Strategy + net fill */
+  #spine-strategy .verdict{{flex:none}}
+  #spine-strategy .price-controls{{flex:none}}
+  #spine-strategy .response-grid{{flex:1 1 auto;min-height:0}}
+  #spine-net .net-grid{{flex:1 1 auto;align-items:stretch;min-height:0}}
+  #spine-net .net-lines{{overflow:hidden}}
+  #spine-net .net-summary{{display:flex;flex-direction:column;justify-content:center}}
 
   #compMap{{height:270px!important}}
   .comp-map-foot{{display:none!important}}
@@ -1562,9 +1624,11 @@ body.print-leavebehind .listing-drawer,
 body.print-leavebehind .listing-overlay,
 body.print-leavebehind #spine-fulldata,
 body.print-leavebehind .page > .two-col,
-body.print-leavebehind .page > .section:not([id]){{display:none!important}}
+body.print-leavebehind .page > .section:not([id]),
+body.print-leavebehind .page > footer,
+body.print-leavebehind #spine-comps-more,
+body.print-leavebehind .print-only{{display:none!important}}
 body.print-leavebehind .page{{padding-bottom:0}}
-body.print-leavebehind .print-only{{display:block!important}}
 </style>
 </head>
 <body>
@@ -2347,7 +2411,8 @@ const navy = '{brand_primary}', orange = '#c2410c';
         img.alt = '';
         img.src = canvas.toDataURL('image/png');
         img.style.width = '100%';
-        img.style.height = 'auto';
+        img.style.height = '100%';
+        img.style.objectFit = 'contain';
         img.style.display = 'none';
         canvas.parentNode.appendChild(img);
         canvas.dataset.printHidden = '1';
@@ -2364,14 +2429,31 @@ const navy = '{brand_primary}', orange = '#c2410c';
     }});
     document.querySelectorAll('img.print-chart').forEach(img => img.remove());
     document.body.classList.remove('print-leavebehind');
+    if (typeof Chart !== 'undefined') {{
+      try {{
+        (Chart.helpers && Chart.helpers.each ? Chart.helpers.each(Chart.instances, c => c.resize()) : Object.values(Chart.instances || {{}}).forEach(c => c && c.resize && c.resize()));
+      }} catch (e) {{}}
+    }}
   }}
 
   function printLeavebehind() {{
     document.body.classList.add('print-leavebehind');
-    snapshotChartsForPrint();
     const st = document.getElementById('shareStatus');
     if (st) st.textContent = 'Printing Live Story…';
-    setTimeout(() => window.print(), 80);
+    // Let print CSS reflow, resize Chart.js into the larger boxes, then snapshot.
+    requestAnimationFrame(() => {{
+      try {{
+        if (typeof Chart !== 'undefined') {{
+          const inst = Chart.instances;
+          if (inst && typeof inst.forEach === 'function') inst.forEach(c => c && c.resize && c.resize());
+          else if (inst) Object.keys(inst).forEach(k => inst[k] && inst[k].resize && inst[k].resize());
+        }}
+      }} catch (e) {{}}
+      setTimeout(() => {{
+        snapshotChartsForPrint();
+        setTimeout(() => window.print(), 60);
+      }}, 120);
+    }});
   }}
 
   if (printBtn) printBtn.onclick = printLeavebehind;

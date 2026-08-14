@@ -72,8 +72,6 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
     risks = pos.get("risks") or []
     scenarios = pos.get("price_scenarios") or []
     comps = (pos.get("closest_comps") or [])[:8]
-    comps_a = comps[:4]
-    comps_b = comps[4:8]
 
     brand_primary = meta.get("brand_primary") or "#0c3c6e"
     brand_accent = meta.get("brand_accent") or "#1a5f9e"
@@ -178,8 +176,7 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
             f'</div></article>'
         )
 
-    comps_html = "".join(_comp_card(c) for c in comps_a) or '<p class="muted">No close comps</p>'
-    comps_html_b = "".join(_comp_card(c) for c in comps_b)
+    comps_html = "".join(_comp_card(c) for c in comps) or '<p class="muted">No close comps</p>'
 
     scenarios_html = "".join(
         f'<div class="sc{" sc-main" if "Balanced" in (sc.get("label") or "") else ""}">'
@@ -602,6 +599,15 @@ h1, h2, h3 {{ font-family: Fraunces, Georgia, serif; font-weight: 700; letter-sp
 .comps-grid {{
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px;
 }}
+.comps-grid-8 {{
+  grid-template-rows: auto auto;
+  gap: 8px;
+}}
+.comps-grid-8 .cc-photo {{ height: 88px; }}
+.comps-grid-8 .cc-body {{ padding: 7px 8px 8px; }}
+.comps-grid-8 .cc-price {{ font-size: .95rem; }}
+.comps-grid-8 .cc-addr {{ font-size: .7rem; }}
+.comps-grid-8 .cc-meta {{ font-size: .6rem; }}
 .cc {{ background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }}
 .cc-photo {{ height: 110px; background-size: cover; background-position: center; background: #1a2332; }}
 .cc-photo.cc-empty {{ background: linear-gradient(135deg, #0f2740, #1a4568); }}
@@ -784,13 +790,14 @@ body.mode-print .hint {{ display: none; }}
     page-break-inside: avoid; break-inside: avoid;
   }}
   .slide:last-child {{ break-after: auto; page-break-after: auto; }}
-  .slide-body {{ overflow: hidden; padding: 10px 22px 6px; }}
-  .comps-grid {{ gap: 8px; margin-top: 8px; }}
-  .cc-photo {{ height: 120px !important; }}
+  .slide-body {{ overflow: hidden; padding: 10px 22px 6px; display: flex; flex-direction: column; }}
+  .comps-grid {{ gap: 8px; margin-top: 8px; flex: 1; align-content: stretch; }}
+  .comps-grid-8 .cc-photo {{ height: 100px !important; }}
   .cc-body {{ padding: 7px 9px 9px; }}
   .cc-price {{ font-size: .95rem; }}
   .cc-addr {{ font-size: .7rem; }}
   .slide[data-title^="5 ·"] .lede {{ font-size: .95rem; }}
+  .slide[data-title^="6"] .lede {{ font-size: .95rem; max-width: none; }}
 }}
 </style>
 </head>
@@ -867,25 +874,14 @@ body.mode-print .hint {{ display: none; }}
 {supply_slide}
     <!-- 3 · Comps -->
     <section class="slide" data-title="3 · Comps">
-      <div class="slide-top"><span>{logo_html}3 · Comps</span><span>Closest Sales · 1–4</span></div>
+      <div class="slide-top"><span>{logo_html}3 · Comps</span><span>Closest Sales</span></div>
       <div class="slide-body">
         <h2 class="slide-title"><span class="step-badge">3</span>Closest Comparable Sales</h2>
         <p class="lede">Does it look like yours — or nicer / dated — and does the sold price match that story?</p>
-        <div class="comps-grid">{comps_html}</div>
+        <div class="comps-grid comps-grid-8">{comps_html}</div>
       </div>
-      <div class="slide-foot"><span>{len(comps_a)} of {len(comps)} close sales</span><span>ListLogic</span></div>
+      <div class="slide-foot"><span>{len(comps)} close sales</span><span>ListLogic</span></div>
     </section>
-    {f'''
-    <section class="slide" data-title="3b · Comps">
-      <div class="slide-top"><span>{logo_html}3b · Comps</span><span>Closest Sales · 5–{len(comps)}</span></div>
-      <div class="slide-body">
-        <h2 class="slide-title"><span class="step-badge">3</span>Closest Comparable Sales · continued</h2>
-        <p class="lede">Same ranking — remaining close sales in this set.</p>
-        <div class="comps-grid">{comps_html_b}</div>
-      </div>
-      <div class="slide-foot"><span>{len(comps_b)} more close sales</span><span>ListLogic</span></div>
-    </section>
-    ''' if comps_html_b else ''}
 
     <!-- 4 · Your Home -->
     <section class="slide" data-title="4 · Your Home">
