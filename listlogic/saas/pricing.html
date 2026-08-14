@@ -59,7 +59,7 @@
 .plan ul { list-style: none; font-size: 0.85rem; margin-bottom: 20px; display: grid; gap: 7px; }
 .plan li { padding-left: 22px; position: relative; }
 .plan li::before {
-  content: "?"; position: absolute; left: 0; top: 1px;
+  content: "✓"; position: absolute; left: 0; top: 1px;
   color: var(--teal); font-weight: 800; font-size: 0.8rem;
 }
 .plan .btn { width: 100%; }
@@ -95,7 +95,7 @@
       <img src="/saas/listlogic-logo.png" alt="ListLogic" class="ll-brand-logo">
       <small>by SAA Homes</small>
     </a>
-    <button type="button" class="ll-nav-toggle" id="llNavToggle" aria-label="Menu" aria-expanded="false">?</button>
+    <button type="button" class="ll-nav-toggle" id="llNavToggle" aria-label="Menu" aria-expanded="false">☰</button>
     <div class="ll-nav-links" id="llNavLinks">
       <a href="index.html#how">How it works</a>
       <a href="index.html#deliverables">What sellers get</a>
@@ -107,7 +107,7 @@
   </div>
 </nav>
 <script>
-(function(){var t=document.getElementById('llNavToggle'),l=document.getElementById('llNavLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.setAttribute('aria-expanded',o?'true':'false');t.textContent=o?'?':'?';});l.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){l.classList.remove('open');t.setAttribute('aria-expanded','false');t.textContent='?';});});})();
+(function(){var t=document.getElementById('llNavToggle'),l=document.getElementById('llNavLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.setAttribute('aria-expanded',o?'true':'false');t.textContent=o?'✕':'☰';});l.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){l.classList.remove('open');t.setAttribute('aria-expanded','false');t.textContent='☰';});});})();
 </script>
 <script src="/saas/nav-auth.js"></script>
 
@@ -132,8 +132,8 @@
   </div>
 
   <div class="billing-toggle" id="billingToggle" role="tablist" aria-label="Billing period">
-    <button type="button" data-period="monthly" role="tab">Monthly</button>
-    <button type="button" data-period="annual" class="on" role="tab" aria-selected="true">Annual <span class="save">save ~2 mo</span></button>
+    <button type="button" data-period="monthly" class="on" role="tab" aria-selected="true">Monthly</button>
+    <button type="button" data-period="annual" role="tab">Annual <span class="save">save ~2 mo</span></button>
   </div>
 
   <div class="plans">
@@ -181,8 +181,8 @@
 
     <div class="plan" id="brokeragePlan">
       <div class="tag">Teams &amp; offices</div>
-      <h2 id="brokeragePlanTitle">Brokerage annual</h2>
-      <div class="price" id="brokeragePrice">$24 <span id="brokeragePriceSpan">/ seat / mo · billed $290/yr</span></div>
+      <h2 id="brokeragePlanTitle">Brokerage monthly</h2>
+      <div class="price" id="brokeragePrice">$29 <span id="brokeragePriceSpan">/ seat / mo</span></div>
       <p class="desc">Per-agent seats with shared branding. Minimum 5 seats.</p>
       <ul>
         <li>Min 5 agent seats</li>
@@ -190,13 +190,14 @@
         <li>Office-friendly volume</li>
         <li>White-label on request</li>
       </ul>
-      <button type="button" class="btn btn-gold" id="brokerageCheckout" data-checkout="brokerage_annual">Checkout seats</button>
+      <button type="button" class="btn btn-gold" id="brokerageCheckout" data-checkout="brokerage_monthly">Checkout seats</button>
     </div>
   </div>
 
   <p class="fineprint">
     Sample demo is free. Custom work: 7-day trial then $39/mo, or $20 per presentation.
     Annual saves about two months. Grandfathered beta accounts stay as configured in admin.
+    See <a href="terms.html">Terms</a>, <a href="privacy.html">Privacy</a>, and <a href="refunds.html">Refunds</a>.
     Questions? See the <a href="faq.html">FAQ</a> or email <a href="mailto:adam@saahomes.com">adam@saahomes.com</a>.
   </p>
 </div>
@@ -207,7 +208,7 @@
   <div class="container">
     <div><strong>ListLogic</strong> · Data-driven custom pricing strategy</div>
     <div><a href="https://saahomes.com">SAA Homes</a> · Schwartz and Associates, Coldwell Banker Realty</div>
-    <div><a href="index.html">Home</a> · <a href="faq.html">FAQ</a> · <a href="mailto:adam@saahomes.com">Contact</a></div>
+    <div><a href="index.html">Home</a> · <a href="faq.html">FAQ</a> · <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a> · <a href="refunds.html">Refunds</a> · <a href="mailto:adam@saahomes.com">Contact</a></div>
   </div>
 </footer>
 
@@ -229,10 +230,10 @@
       b.classList.toggle('on', on);
       b.setAttribute('aria-selected', on ? 'true' : 'false');
     });
-    document.getElementById('agentPlanTitle').textContent = annual ? 'Agent annual' : 'Agent monthly';
+    document.getElementById('agentPlanTitle').textContent = annual ? 'Agent annual' : 'Agent · 7-day trial';
     document.getElementById('agentPrice').innerHTML = annual
       ? '$32.50 <span id="agentPriceSpan">/ mo · billed $390/yr</span>'
-      : '$39 <span id="agentPriceSpan">/ month</span>';
+      : '$39 <span id="agentPriceSpan">/ mo after trial</span>';
     const agentBtn = document.getElementById('agentCheckout');
     agentBtn.dataset.checkout = annual ? 'agent_annual' : 'agent_monthly';
     agentBtn.textContent = annual ? 'Go annual · $390' : 'Start 7-day trial · then $39/mo';
@@ -247,8 +248,8 @@
     b.addEventListener('click', () => setPeriod(b.dataset.period));
   });
   const periodQ = params.get('period');
-  if (periodQ === 'monthly') setPeriod('monthly');
-  else setPeriod('annual');
+  if (periodQ === 'annual') setPeriod('annual');
+  else setPeriod('monthly');
 
   async function startCheckout(plan) {
     if (window.llTrack) window.llTrack('begin_checkout', { plan: plan, source: 'pricing' });

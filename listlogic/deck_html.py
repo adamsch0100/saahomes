@@ -148,10 +148,6 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
         (f"{sales_mo:.1f}", "Sales / Month"),
         (f"{inv:.1f}", "Months Inventory"),
         (f"{odds_pct:.0f}%", "30-Day Odds"),
-        (f"{s.get('sold_count', 0)}", "Recently Closed"),
-        (f"{median_dom:.0f}", "Median DOM"),
-        (f"${(s.get('median_sold_price') or 0)/1000:.0f}k", "Median Sold"),
-        (f"${(s.get('median_price_per_sqft') or 0):.0f}", "Median $/Sf"),
     ]
     kpis_html = "".join(
         f'<div class="kpi"><div class="kv">{_esc(v)}</div><div class="kl">{_esc(l)}</div></div>'
@@ -248,17 +244,19 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
     yours_idx = bands.get("subject_band_index")
     bands_inline = ""
     if band_labels and band_values:
-        band_rows = ""
-        for i, (lab, val) in enumerate(zip(band_labels[:6], band_values[:6])):
+        max_v = max(float(v or 0) for v in band_values[:8]) or 1
+        bars = ""
+        for i, (lab, val) in enumerate(zip(band_labels[:8], band_values[:8])):
+            pct = max(6, round(100 * float(val or 0) / max_v))
             mark = " yours" if yours_idx is not None and i == yours_idx else ""
-            band_rows += (
-                f'<div class="band-row{mark}"><span>{_esc(lab)}</span>'
-                f'<strong>{int(val)}</strong></div>'
+            bars += (
+                f'<div class="band-bar{mark}"><span class="bb-l">{_esc(lab)}</span>'
+                f'<span class="bb-track"><i style="width:{pct}%"></i></span>'
+                f'<span class="bb-n">{int(val)}</span></div>'
             )
         bands_inline = (
-            f'<div style="margin-top:8px"><div class="eyebrow">Active Competition by List-Price Band</div>'
-            f'<div class="band-list" style="margin-top:6px;max-width:100%;grid-template-columns:1fr 1fr;display:grid;gap:4px">'
-            f'{band_rows}</div></div>'
+            f'<div class="band-chart grow"><div class="eyebrow">Active Competition by List-Price Band</div>'
+            f'<div class="band-bars">{bars}</div></div>'
         )
 
     rating = int(story.get("home_rating") or 5)
@@ -310,10 +308,25 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
 
     yoy_slide = ""
     if yoy_summary:
-        yoy_kpis = "".join(
-            f'<div class="kpi"><div class="kv">{_esc(y.get("year"))}</div>'
-            f'<div class="kl">{y.get("sales", 0)} sales · ${(y.get("median_price") or 0)/1000:.0f}k · '
-            f'{(y.get("median_dom") or 0):.0f}d DOM</div></div>'
+        max_sales = max(float(y.get("sales") or 0) for y in yoy_summary[:4]) or 1
+        max_price = max(float(y.get("median_price") or 0) for y in yoy_summary[:4]) or 1
+        max_dom_y = max(float(y.get("median_dom") or 0) for y in yoy_summary[:4]) or 1
+        pace_bars = "".join(
+            f'<div class="yr-bar"><span class="yr-l">{_esc(y.get("year"))}</span>'
+            f'<span class="yr-track"><i style="height:{max(8, round(100 * float(y.get("sales") or 0) / max_sales))}%"></i></span>'
+            f'<span class="yr-n">{int(y.get("sales") or 0)}</span></div>'
+            for y in yoy_summary[:4]
+        )
+        price_bars = "".join(
+            f'<div class="yr-bar"><span class="yr-l">{_esc(y.get("year"))}</span>'
+            f'<span class="yr-track price"><i style="height:{max(8, round(100 * float(y.get("median_price") or 0) / max_price))}%"></i></span>'
+            f'<span class="yr-n">${(y.get("median_price") or 0)/1000:.0f}k</span></div>'
+            for y in yoy_summary[:4]
+        )
+        dom_bars = "".join(
+            f'<div class="yr-bar"><span class="yr-l">{_esc(y.get("year"))}</span>'
+            f'<span class="yr-track timing"><i style="height:{max(8, round(100 * float(y.get("median_dom") or 0) / max_dom_y))}%"></i></span>'
+            f'<span class="yr-n">{(y.get("median_dom") or 0):.0f}d</span></div>'
             for y in yoy_summary[:4]
         )
         yoy_slide = f'''
@@ -322,8 +335,8 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
       <div class="slide-body">
         <h2 class="slide-title"><span class="step-badge">6</span>Pace — Sales Volume</h2>
         <p class="lede">{_esc(talk_pace)}</p>
-        <div class="kpis" style="margin-top:18px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr))">{yoy_kpis}</div>
-        <p class="lede" style="margin-top:16px">More closes = more proof of what buyers will pay. A thinner year means pricing accuracy matters more.</p>
+        <div class="yr-chart grow"><div class="eyebrow">Sales by year</div><div class="yr-bars">{pace_bars}</div></div>
+        <p class="talk-chip">More closes = more proof of what buyers will pay. A thinner year means pricing accuracy matters more.</p>
       </div>
       <div class="slide-foot"><span>{_esc(address)}</span><span>ListLogic</span></div>
     </section>
@@ -332,11 +345,11 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
       <div class="slide-body">
         <h2 class="slide-title"><span class="step-badge">6</span>Prices — What the Market Is Paying</h2>
         <p class="lede">{_esc(talk_price)}</p>
-        <div class="duo" style="margin-top:18px">
+        <div class="duo">
           <div class="d yours"><div class="n">${(yoy_summary[-1].get("median_price") or 0)/1000:.0f}k</div><div class="t">Latest-year median sold</div></div>
           <div class="d"><div class="n">${rec/1000:.0f}k</div><div class="t">Recommended list</div></div>
         </div>
-        <p class="lede" style="margin-top:16px">List with today’s closes — not last year’s memory. Stretch asks stall while better-priced homes move.</p>
+        <div class="yr-chart grow"><div class="eyebrow">Median sold by year</div><div class="yr-bars">{price_bars}</div></div>
       </div>
       <div class="slide-foot"><span>{_esc(address)}</span><span>ListLogic</span></div>
     </section>
@@ -345,11 +358,11 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
       <div class="slide-body">
         <h2 class="slide-title"><span class="step-badge">6</span>Timing — How Long Homes Take</h2>
         <p class="lede">{_esc(talk_timing)}</p>
-        <div class="duo" style="margin-top:18px">
+        <div class="duo">
           <div class="d"><div class="n">{median_dom:.0f}d</div><div class="t">Market median DOM</div></div>
           <div class="d yours"><div class="n">~{exp_dom:.0f}d</div><div class="t">Expected at recommended</div></div>
         </div>
-        <p class="lede" style="margin-top:16px">Overpricing costs weeks — and creates comps that help sell everyone else’s house.</p>
+        <div class="yr-chart grow"><div class="eyebrow">Median DOM by year</div><div class="yr-bars">{dom_bars}</div></div>
       </div>
       <div class="slide-foot"><span>{_esc(address)}</span><span>ListLogic</span></div>
     </section>
@@ -513,14 +526,17 @@ body.mode-print .slide {{
 }}
 .slide-top .logo {{ height: 24px; background: #fff; border-radius: 6px; padding: 3px 8px; }}
 .slide-body {{
-  padding: 12px 28px 8px; overflow: hidden;
-  display: flex; flex-direction: column; flex: 1; min-height: 0;
+  padding: 10px 24px 8px; overflow: hidden;
+  display: flex; flex-direction: column; flex: 1; min-height: 0; gap: 6px;
 }}
+.slide-body > .lede {{ flex: none; max-width: 62ch; }}
 .slide-body > .lede:first-of-type {{ flex: none; }}
 .slide .comps-grid {{ flex: 1 1 auto; align-content: stretch; }}
 .slide .kpis {{ flex: none; }}
-.slide .duo {{ flex: none; }}
-.slide[data-title^="6"] .slide-body > .lede:last-of-type {{ margin-top: auto; }}
+.slide .duo {{ flex: none; margin: 8px 0; }}
+.slide .ask-trio {{ flex: none; }}
+.slide .facts-grid {{ flex: 1 1 auto; align-content: center; }}
+.slide .net-sheet-wrap {{ flex: 1 1 auto; min-height: 0; }}
 .slide-foot {{
   padding: 8px 22px 14px; display: flex; justify-content: space-between; align-items: center;
   color: var(--muted); font-size: .68rem; border-top: 1px solid transparent;
@@ -603,26 +619,68 @@ h1, h2, h3 {{ font-family: Fraunces, Georgia, serif; font-weight: 700; letter-sp
 .kv {{ font-size: 1.25rem; font-weight: 800; color: var(--navy); }}
 .kl {{ font-size: .62rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-top: 4px; font-weight: 700; }}
 
-/* Comps */
+/* Comps — fill slide like leave-behind 4×2 */
 .comps-grid {{
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px;
 }}
 .comps-grid-8 {{
-  grid-template-rows: auto auto;
-  gap: 8px;
+  flex: 1 1 auto; min-height: 0;
+  grid-template-rows: 1fr 1fr;
+  gap: 8px; align-content: stretch;
 }}
-.comps-grid-8 .cc-photo {{ height: 88px; }}
-.comps-grid-8 .cc-body {{ padding: 7px 8px 8px; }}
+.comps-grid-8 .cc {{
+  display: flex; flex-direction: column; min-height: 0; height: 100%;
+}}
+.comps-grid-8 .cc-photo {{
+  flex: 1 1 auto; min-height: 72px; height: auto; max-height: none;
+}}
+.comps-grid-8 .cc-body {{ padding: 7px 8px 8px; flex: none; }}
 .comps-grid-8 .cc-price {{ font-size: .95rem; }}
 .comps-grid-8 .cc-addr {{ font-size: .7rem; }}
 .comps-grid-8 .cc-meta {{ font-size: .6rem; }}
 .cc {{ background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }}
-.cc-photo {{ height: 110px; background-size: cover; background-position: center; background: #1a2332; }}
+.cc-photo {{ height: 110px; background-size: cover; background-position: center; background-color: #1a2332; }}
 .cc-photo.cc-empty {{ background: linear-gradient(135deg, #0f2740, #1a4568); }}
 .cc-body {{ padding: 8px 10px 10px; }}
 .cc-price {{ font-size: 1.05rem; font-weight: 800; color: var(--navy); }}
 .cc-addr {{ font-size: .75rem; font-weight: 700; margin-top: 2px; line-height: 1.25; }}
 .cc-meta {{ font-size: .65rem; color: var(--muted); margin-top: 3px; }}
+
+.grow {{ flex: 1 1 auto; min-height: 0; }}
+.talk-chip {{
+  margin-top: auto; padding: 10px 12px; border-radius: 10px; background: #eef4fb;
+  border-left: 3px solid var(--accent); font-size: .85rem; color: var(--muted); line-height: 1.4;
+}}
+.band-chart {{ display: flex; flex-direction: column; margin-top: 8px; min-height: 0; }}
+.band-bars {{ display: flex; flex-direction: column; gap: 5px; flex: 1; justify-content: center; }}
+.band-bar {{ display: grid; grid-template-columns: 7.5rem 1fr 2rem; gap: 8px; align-items: center; }}
+.band-bar .bb-l {{ font-size: .72rem; font-weight: 700; color: var(--muted); }}
+.band-bar .bb-track {{ height: 12px; border-radius: 6px; background: #e8eef6; overflow: hidden; }}
+.band-bar .bb-track i {{ display: block; height: 100%; background: linear-gradient(90deg, var(--navy), var(--accent)); border-radius: 6px; }}
+.band-bar.yours .bb-track i {{ background: linear-gradient(90deg, #b3541e, #e0a458); }}
+.band-bar .bb-n {{ font-size: .75rem; font-weight: 800; color: var(--navy); text-align: right; }}
+.yr-chart {{ display: flex; flex-direction: column; margin-top: 10px; }}
+.yr-bars {{ display: flex; gap: 14px; align-items: flex-end; flex: 1; min-height: 140px; padding: 8px 4px 0; }}
+.yr-bar {{ flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }}
+.yr-track {{ width: 100%; max-width: 64px; flex: 1; min-height: 80px; border-radius: 10px 10px 4px 4px; background: #e8eef6; display: flex; align-items: flex-end; overflow: hidden; }}
+.yr-track i {{ display: block; width: 100%; background: linear-gradient(180deg, var(--accent), var(--navy)); border-radius: 10px 10px 0 0; }}
+.yr-track.price i {{ background: linear-gradient(180deg, #e0a458, #8a4a12); }}
+.yr-track.timing i {{ background: linear-gradient(180deg, #14b8a6, #0e7a6d); }}
+.yr-l {{ font-size: .72rem; font-weight: 800; color: var(--muted); }}
+.yr-n {{ font-size: .8rem; font-weight: 800; color: var(--navy); }}
+.price-rec-grid {{ display: grid; grid-template-columns: 1.35fr .9fr; gap: 18px; align-items: stretch; margin-top: 8px; flex: 1; min-height: 0; }}
+.price-rec-main {{ display: flex; flex-direction: column; justify-content: center; }}
+.price-rec-num {{ font-family: Fraunces, Georgia, serif; font-size: clamp(2.8rem, 6vw, 4.2rem); font-weight: 700; color: var(--navy); letter-spacing: -.03em; line-height: 1; }}
+.price-rec-range {{ margin-top: 10px; font-size: 1rem; color: var(--muted); }}
+.price-rec-top {{ margin-top: 8px; color: var(--accent); font-weight: 700; }}
+.price-rec-bl {{ color: var(--ink); background: #f0f5fb; border-left-color: var(--accent); }}
+.price-rec-side {{ display: flex; flex-direction: column; justify-content: center; }}
+.sc-grid-fill {{ grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); align-content: stretch; flex: 1; }}
+.sc-grid-fill .sc {{ display: flex; flex-direction: column; justify-content: center; min-height: 88px; }}
+@media (max-width: 900px) {{
+  .price-rec-grid {{ grid-template-columns: 1fr; }}
+  .band-bar {{ grid-template-columns: 5.5rem 1fr 1.5rem; }}
+}}
 
 /* Verdict */
 .slide-verdict {{
@@ -800,7 +858,10 @@ body.mode-print .hint {{ display: none; }}
   .slide:last-child {{ break-after: auto; page-break-after: auto; }}
   .slide-body {{ overflow: hidden; padding: 10px 22px 6px; display: flex; flex-direction: column; }}
   .comps-grid {{ gap: 8px; margin-top: 8px; flex: 1; align-content: stretch; }}
-  .comps-grid-8 .cc-photo {{ height: 100px !important; }}
+  .comps-grid-8 .cc-photo {{ height: auto !important; min-height: 90px !important; flex: 1 1 auto !important; }}
+  .yr-bars {{ min-height: 180px !important; }}
+  .band-bars {{ flex: 1; }}
+  .price-rec-grid {{ grid-template-columns: 1.3fr .9fr; }}
   .cc-body {{ padding: 7px 9px 9px; }}
   .cc-price {{ font-size: .95rem; }}
   .cc-addr {{ font-size: .7rem; }}
@@ -809,7 +870,7 @@ body.mode-print .hint {{ display: none; }}
 }}
 </style>
 </head>
-<body class="mode-flip" data-deck-spine="v3">
+<body class="mode-flip" data-deck-spine="v4">
 <header class="deck-chrome">
   <div class="left">
     <span class="brand">ListLogic · Listing flipbook</span>
@@ -927,29 +988,35 @@ body.mode-print .hint {{ display: none; }}
       <div class="slide-foot"><span>Starts at typical 5/10 in live story</span><span>ListLogic</span></div>
     </section>
 {yoy_slide}
-    <!-- 7 · Price It (recommendation + strategies + while-you-wait on one page) -->
+    <!-- 7 · Recommendation -->
     <section class="slide" data-title="7 · Price It">
-      <div class="slide-top"><span>{logo_html}7 · Price It</span><span>Strategy &amp; Trade-Offs</span></div>
+      <div class="slide-top"><span>{logo_html}7 · Price It</span><span>Recommendation</span></div>
       <div class="slide-body">
-        <h2 class="slide-title"><span class="step-badge">7</span>Price It — Strategy &amp; Trade-Offs</h2>
-        <div class="price-it-grid" style="margin-top:8px">
-          <div class="price-it-left">
-            <div class="eyebrow">Recommended List Price</div>
-            <div style="font-family:Fraunces,Georgia,serif;font-size:clamp(2.4rem,5vw,3.6rem);font-weight:700;color:var(--navy);letter-spacing:-.03em;line-height:1">${rec:,.0f}</div>
-            <div style="margin-top:8px;font-size:.95rem;color:var(--muted)">Range <strong style="color:var(--navy)">${low:,.0f} – ${high:,.0f}</strong> · ~<strong>{exp_dom:.0f} days</strong> to contract</div>
-            <div style="margin-top:8px;color:var(--accent);font-weight:700">Top {top_mkt:.0f}% of similar recent sales</div>
+        <h2 class="slide-title"><span class="step-badge">7</span>Recommended List Price</h2>
+        <div class="price-rec-grid">
+          <div class="price-rec-main">
+            <div class="price-rec-num">${rec:,.0f}</div>
+            <div class="price-rec-range">Range <strong>${low:,.0f} – ${high:,.0f}</strong> · ~<strong>{exp_dom:.0f} days</strong> to contract</div>
+            <div class="price-rec-top">Top {top_mkt:.0f}% of similar recent sales</div>
             <div class="pos-bar" style="margin-top:14px"><div class="pos-marker"></div></div>
-            <div class="bl" style="color:var(--ink);background:#f0f5fb;border-left-color:var(--accent)">{_esc(exec_sum).replace(chr(10), '<br/>')}</div>
-            {wyw_inline}
+            <div class="bl price-rec-bl">{_esc(exec_sum).replace(chr(10), '<br/>')}</div>
           </div>
-          <div class="price-it-right">
-            <div class="eyebrow">If You Go Higher or Lower</div>
-            <div class="sc-grid" style="grid-template-columns:repeat(2,1fr)">{scenarios_html or '<p class="muted">Open Live Story for live what-if</p>'}</div>
-            <div class="split" style="margin-top:10px">
-              <div><h3>Advantages</h3><ul>{adv_html}</ul></div>
-              <div><h3>Watch-Outs</h3><ul>{risk_html}</ul></div>
-            </div>
-          </div>
+          <div class="price-rec-side">{wyw_inline or '<div class="talk-chip">Open Live Story to stress-test higher or lower asks.</div>'}</div>
+        </div>
+      </div>
+      <div class="slide-foot"><span>Then choose a strategy lane</span><span>ListLogic</span></div>
+    </section>
+
+    <!-- 7b · Strategy -->
+    <section class="slide" data-title="7b · Strategy">
+      <div class="slide-top"><span>{logo_html}7b · Strategy</span><span>Trade-Offs</span></div>
+      <div class="slide-body">
+        <h2 class="slide-title"><span class="step-badge">7</span>If You Go Higher or Lower</h2>
+        <p class="lede">Strategy cards snap you to a lane — days and odds respond.</p>
+        <div class="sc-grid sc-grid-fill">{scenarios_html or '<p class="muted">Open Live Story for live what-if</p>'}</div>
+        <div class="split">
+          <div><h3>Advantages</h3><ul>{adv_html}</ul></div>
+          <div><h3>Watch-Outs</h3><ul>{risk_html}</ul></div>
         </div>
       </div>
       <div class="slide-foot"><span>Pick a lane — the market answers</span><span>ListLogic</span></div>

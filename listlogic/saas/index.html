@@ -27,6 +27,7 @@
 <meta name="twitter:description" content="Custom-fit market, defensible list price, live price-vs-odds. Search nationwide or upload any MLS export.">
 <meta name="twitter:image" content="https://listlogic.homes/saas/ll-og-share.png">
 <meta name="theme-color" content="#0c3c6e">
+<link rel="canonical" href="https://listlogic.homes/saas/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -149,7 +150,7 @@ body.ll-auth-guest-ready .ll-auth-guest { visibility: visible !important; }
   color: #dbe5f2;
 }
 .hero-chips span::before {
-  content: "?"; margin-right: 6px; color: var(--accent-2); font-weight: 800;
+  content: "✓"; margin-right: 6px; color: var(--accent-2); font-weight: 800;
 }
 .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
 .btn-arrow { display: inline-flex; margin-left: 2px; transition: transform 0.18s ease; }
@@ -307,7 +308,7 @@ a:hover .btn-arrow, button:hover .btn-arrow { transform: translateX(3px); }
 .checklist { list-style: none; display: grid; gap: 10px; }
 .checklist li { display: flex; gap: 10px; font-size: 0.94rem; align-items: flex-start; }
 .checklist li::before {
-  content: "?"; flex: 0 0 22px; height: 22px; border-radius: 50%;
+  content: "✓"; flex: 0 0 22px; height: 22px; border-radius: 50%;
   background: #e7f3ef; color: var(--teal); font-weight: 800; font-size: 0.75rem;
   display: grid; place-items: center; margin-top: 1px;
 }
@@ -424,7 +425,7 @@ footer a:hover { color: var(--ink); }
       <img src="/saas/listlogic-logo.png" alt="ListLogic" class="brand-logo">
       <small>by SAA Homes</small>
     </a>
-    <button type="button" class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">?</button>
+    <button type="button" class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">☰</button>
     <div class="nav-links" id="navLinks">
       <a href="#how">How it works</a>
       <a href="#deliverables">What sellers get</a>
@@ -619,7 +620,7 @@ footer a:hover { color: var(--ink); }
           <div class="bar"><i style="width:72%"></i></div>
           <div class="bar"><i style="width:51%"></i></div>
         </div>
-        <div class="big">86% ? 51%</div>
+        <div class="big">86% → 51%</div>
         <div class="meta">Odds of selling in 60 days as price moves from -3% to +4% of recommendation</div>
       </div>
     </div>
@@ -661,19 +662,19 @@ footer a:hover { color: var(--ink); }
         <span class="pill">Interactive</span>
         <h3>Live presentation</h3>
         <p>The on-screen story: market temperature, recommended price, what-if sliders, and full comp transparency. Present it live and refine it together.</p>
-        <a href="/demo">Open the sample ?</a>
+        <a href="/demo">Open the sample →</a>
       </div>
       <div class="deliver-card">
         <span class="pill">Leave-behind</span>
         <h3>Print leave-behind</h3>
         <p>The full Live Story, print-ready in landscape · cover, market, comps, and strategy, one section per page with every chart. Print or save to PDF right from the presentation.</p>
-        <a href="/demo">See it in the demo ?</a>
+        <a href="/demo">See it in the demo →</a>
       </div>
       <div class="deliver-card">
         <span class="pill">Presentation</span>
         <h3>Listing flipbook</h3>
         <p>Landscape slides built for binders and table presentations · the same data story, paced for a sit-down conversation.</p>
-        <a href="/demo">Preview the flipbook ?</a>
+        <a href="/demo">Preview the flipbook →</a>
       </div>
     </div>
   </div>
@@ -710,7 +711,7 @@ footer a:hover { color: var(--ink); }
   <div class="container">
     <div><strong>ListLogic</strong> · Data-driven custom pricing strategy</div>
     <div><a href="https://saahomes.com">SAA Homes</a> · Schwartz and Associates, Coldwell Banker Realty</div>
-    <div><a href="faq.html">FAQ</a> · <a href="pricing.html">Pricing</a> · <a href="mailto:adam@saahomes.com">Contact</a></div>
+    <div><a href="faq.html">FAQ</a> · <a href="pricing.html">Pricing</a> · <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a> · <a href="refunds.html">Refunds</a> · <a href="mailto:adam@saahomes.com">Contact</a></div>
   </div>
 </footer>
 
@@ -817,13 +818,13 @@ footer a:hover { color: var(--ink); }
   toggle.addEventListener('click', function () {
     var open = links.classList.toggle('open');
     toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    toggle.textContent = open ? '?' : '?';
+    toggle.textContent = open ? '✕' : '☰';
   });
   links.querySelectorAll('a').forEach(function (a) {
     a.addEventListener('click', function () {
       links.classList.remove('open');
       toggle.setAttribute('aria-expanded', 'false');
-      toggle.textContent = '?';
+      toggle.textContent = '☰';
     });
   });
 })();

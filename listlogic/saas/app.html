@@ -829,6 +829,19 @@ const result = document.getElementById('result');
     if (billing === 'success') {
       banner.classList.remove('err');
       banner.innerHTML = '<strong>Payment received.</strong> Your plan is activating — refresh if generate still looks locked.';
+      try {
+        var planPaid = new URLSearchParams(location.search).get('plan') || 'unknown';
+        if (window.llTrack) {
+          window.llTrack('purchase', {
+            plan: planPaid,
+            currency: 'USD',
+            transaction_id: 'll_' + planPaid + '_' + Date.now(),
+          });
+        }
+      } catch (e) {}
+      try {
+        history.replaceState(null, '', '/saas/app.html');
+      } catch (e2) {}
     }
     // Prefill branding from profile
     if (u.name) document.getElementById('agentName').value = u.name;

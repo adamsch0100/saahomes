@@ -1648,8 +1648,8 @@ body.print-leavebehind .page{{padding-bottom:0}}
       <span class="vm on">Live story</span>
       <button type="button" class="vm" id="btnPrintLeavebehind" title="Print the Live Story — one section per page">Print leave-behind</button>
       <a id="deckLink" href="#" style="display:none">Flipbook</a>
-      <a id="pdfLink" href="#" style="display:none">PDF (legacy)</a>
-      <a id="storyPdfLink" href="#" style="display:none">PDF (legacy)</a>
+      <a id="pdfLink" href="#" style="display:none">Packet PDF</a>
+      <a id="storyPdfLink" href="#" style="display:none">Story PDF</a>
       <button type="button" class="vm" id="btnCopyShare" style="display:none">Share with client</button>
       <span class="vm-status" id="shareStatus"></span>
     </div>

@@ -137,9 +137,14 @@ def create_checkout_session(
             "quantity": str(qty),
         },
         "allow_promotion_codes": True,
-        # Checkout / hosted UI brand (account may still say LeadData until Dashboard rename)
+        # Checkout header / hosted UI — keep ListLogic even if Stripe account legal name differs
         "branding_settings": {
-            "display_name": "Schwartz and Associates",
+            "display_name": "ListLogic",
+        },
+        "custom_text": {
+            "submit": {
+                "message": "By paying you agree to ListLogic Terms, Privacy, and Refunds at listlogic.homes/saas/",
+            },
         },
     }
     if meta["mode"] == "subscription":

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WHGZQDZ6ZG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-WHGZQDZ6ZG');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Refund Policy — ListLogic</title>
+<meta name="description" content="Refund and cancellation policy for ListLogic trials, subscriptions, and one-time reports.">
+<link rel="canonical" href="https://listlogic.homes/saas/refunds.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/saas/ll.css">
+<style>
+.hero-mini {
+  background: radial-gradient(900px 400px at 20% -20%, #0e7a6d33, transparent 60%),
+              linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; padding: 64px 0 72px;
+}
+.hero-mini h1 { font-family: 'Fraunces', serif; font-size: clamp(1.9rem, 4vw, 2.7rem); letter-spacing: -0.02em; margin-bottom: 12px; }
+.hero-mini p { color: #c8d2e0; max-width: 560px; font-size: 1.02rem; }
+.legal { max-width: 720px; margin: 48px auto 64px; }
+.legal h2 { font-family: 'Fraunces', serif; font-size: 1.25rem; margin: 28px 0 10px; letter-spacing: -0.01em; }
+.legal p, .legal li { color: var(--muted); font-size: 0.94rem; line-height: 1.55; margin-bottom: 10px; }
+.legal ul { padding-left: 1.2rem; margin-bottom: 12px; }
+.legal a { color: var(--navy); }
+</style>
+</head>
+<body>
+<nav class="ll-nav">
+  <div class="container ll-nav-inner">
+    <a href="index.html" class="ll-brand">
+      <img src="/saas/listlogic-logo.png" alt="ListLogic" class="ll-brand-logo">
+      <small>by SAA Homes</small>
+    </a>
+    <button type="button" class="ll-nav-toggle" id="llNavToggle" aria-label="Menu" aria-expanded="false">☰</button>
+    <div class="ll-nav-links" id="llNavLinks">
+      <a href="pricing.html">Pricing</a>
+      <a href="faq.html">FAQ</a>
+      <a href="terms.html">Terms</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="signup.html" class="btn btn-trial ll-auth-guest" style="padding:10px 18px;font-size:0.86rem">Create account</a>
+    </div>
+  </div>
+</nav>
+<script src="/saas/nav-auth.js"></script>
+
+<header class="hero-mini">
+  <div class="container">
+    <h1>Refund Policy</h1>
+    <p>Last updated: August 14, 2026. Simple rules for trials, subscriptions, and one-time reports.</p>
+  </div>
+</header>
+
+<div class="container legal">
+  <h2>Sample demo</h2>
+  <p>The public sample at <a href="/demo">/demo</a> is free. No purchase required.</p>
+
+  <h2>7-day agent trial</h2>
+  <p>Agent monthly checkout places a card on file and starts a 7-day trial. Cancel in the billing portal before the trial ends and you will not be charged. After conversion to paid, the first charge is non-refundable except as noted below.</p>
+
+  <h2>Subscriptions (monthly / annual / brokerage)</h2>
+  <ul>
+    <li>Cancel anytime — access continues through the paid period already billed.</li>
+    <li>We do not prorate mid-cycle cancellations by default.</li>
+    <li>If ListLogic is unavailable for a material portion of a paid month due to our outage, email us for a credit or refund review.</li>
+  </ul>
+
+  <h2>One-time report ($20)</h2>
+  <p>One-time unlocks are digital goods delivered immediately when generation succeeds. Refunds are considered only if the product failed to deliver a usable presentation after a good-faith generate attempt — contact us within 7 days with your account email and run link.</p>
+
+  <h2>How to cancel or request a refund</h2>
+  <p>Use <strong>Manage billing</strong> in the app (Stripe Customer Portal), or email <a href="mailto:adam@saahomes.com">adam@saahomes.com</a> with your account email and Stripe receipt. We typically respond within 2 business days.</p>
+
+  <h2>Chargebacks</h2>
+  <p>Please contact us before disputing a charge so we can resolve it quickly. Related: <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a>.</p>
+</div>
+
+<footer class="ll-footer">
+  <div class="container">
+    <div><strong>ListLogic</strong> · Data-driven custom pricing strategy</div>
+    <div><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a> · <a href="refunds.html">Refunds</a> · <a href="mailto:adam@saahomes.com">Contact</a></div>
+  </div>
+</footer>
+<script src="/saas/analytics.js"></script>
+<script>(function(){var t=document.getElementById('llNavToggle'),l=document.getElementById('llNavLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.setAttribute('aria-expanded',o?'true':'false');t.textContent=o?'\u2715':'\u2630';});l.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){l.classList.remove('open');t.setAttribute('aria-expanded','false');t.textContent='\u2630';});});})();</script>
+</body>
+</html>
