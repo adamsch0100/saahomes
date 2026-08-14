@@ -1277,9 +1277,9 @@ async def assistant_chat(request: Request):
 
 
 def _refresh_sample_html(run_dir: Path) -> bool:
-    """Re-bake sample presentation.html from saved JSON using the current template.
+    """Re-bake sample presentation.html + deck.html from saved JSON using current templates.
 
-    Returns True when the HTML file was rewritten.
+    Returns True when the HTML files were rewritten.
     """
     json_path = run_dir / "presentation.json"
     html_path = run_dir / "presentation.html"
@@ -1289,6 +1289,10 @@ def _refresh_sample_html(run_dir: Path) -> bool:
         # Skip rewrite when sample already has the current UI markers
         if html_path.exists():
             existing = html_path.read_text(encoding="utf-8", errors="ignore")
+            deck_existing = ""
+            deck_path = run_dir / "deck.html"
+            if deck_path.exists():
+                deck_existing = deck_path.read_text(encoding="utf-8", errors="ignore")
             if (
                 "btnSortUsed" in existing
                 and "fulldata-body" in existing
@@ -1296,7 +1300,7 @@ def _refresh_sample_html(run_dir: Path) -> bool:
                 and "btnPrintLeavebehind" in existing
                 and "listlogic-logo.png" in existing
                 and "print-page-spine" in existing
-                and "print-fit-v2" in existing
+                and "print-fit-v4" in existing
                 and "demo-ui-snappy" in existing
                 and "charts failed to boot" in existing
                 and "/saas/vendor/chart.umd.min.js" in existing
@@ -1306,14 +1310,37 @@ def _refresh_sample_html(run_dir: Path) -> bool:
                 and "mapKindVisible" in existing
                 and "spine-net" in existing
                 and "netSellerFeePct" in existing
+                and "netSellingVal" in existing
+                and "spine-prices" in existing
+                and "spine-timing" in existing
+                and "md-panel" in existing
+                and "md-talk" in existing
                 and "match-badge" in existing
                 and "sectionsModal" in existing
                 and "ll-shown" in existing
+                and "comps-grid-8" in deck_existing
+                and "6 · Pace" in deck_existing
+                and "6b · Prices" in deck_existing
+                and "6c · Timing" in deck_existing
+                and "data-deck-spine=\"v3\"" in deck_existing
             ):
                 return False
         report = json.loads(json_path.read_text(encoding="utf-8"))
         _save_html(report, html_path)
-        logger.info("Refreshed sample presentation HTML for %s", run_dir.name)
+        # Keep root/latest mirrors in sync for /presentation.html and /deck.html
+        try:
+            latest = ROOT / "output" / "presentation.html"
+            latest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(html_path, latest)
+            shutil.copyfile(html_path, ROOT / "presentation.html")
+            deck_src = run_dir / "deck.html"
+            if deck_src.exists():
+                shutil.copyfile(deck_src, ROOT / "output" / "deck.html")
+                shutil.copyfile(deck_src, ROOT / "deck.html")
+            shutil.copyfile(json_path, ROOT / "output" / "presentation.json")
+        except Exception:
+            logger.exception("Sample HTML mirror copy failed for %s", run_dir.name)
+        logger.info("Refreshed sample presentation + deck HTML for %s", run_dir.name)
         return True
     except Exception:
         logger.exception("Failed refreshing sample HTML for %s", run_dir.name)

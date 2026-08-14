@@ -512,7 +512,15 @@ body.mode-print .slide {{
   letter-spacing: .08em; text-transform: uppercase;
 }}
 .slide-top .logo {{ height: 24px; background: #fff; border-radius: 6px; padding: 3px 8px; }}
-.slide-body {{ padding: 12px 28px 8px; overflow: hidden; }}
+.slide-body {{
+  padding: 12px 28px 8px; overflow: hidden;
+  display: flex; flex-direction: column; flex: 1; min-height: 0;
+}}
+.slide-body > .lede:first-of-type {{ flex: none; }}
+.slide .comps-grid {{ flex: 1 1 auto; align-content: stretch; }}
+.slide .kpis {{ flex: none; }}
+.slide .duo {{ flex: none; }}
+.slide[data-title^="6"] .slide-body > .lede:last-of-type {{ margin-top: auto; }}
 .slide-foot {{
   padding: 8px 22px 14px; display: flex; justify-content: space-between; align-items: center;
   color: var(--muted); font-size: .68rem; border-top: 1px solid transparent;
@@ -801,7 +809,7 @@ body.mode-print .hint {{ display: none; }}
 }}
 </style>
 </head>
-<body class="mode-flip" data-deck-spine="v2">
+<body class="mode-flip" data-deck-spine="v3">
 <header class="deck-chrome">
   <div class="left">
     <span class="brand">ListLogic · Listing flipbook</span>
