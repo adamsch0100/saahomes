@@ -156,6 +156,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/saas/mls-export-cma.html",
         "/saas/any-mls-cma.html",
         "/saas/upload-mls-export.html",
+        "/saas/cma-in-mls.html",
         "/saas/changelog.html",
         "/blog/",
         "/saas/ll.css",
