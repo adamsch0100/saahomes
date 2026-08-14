@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import SEO from "../components/SEO";
 import HomeValueChart from "../components/HomeValueChart";
+import RecentClosedSales from "../components/RecentClosedSales";
 import { marketPack } from "../data/marketPack";
 import { formatPrice } from "../utils/listingHelpers.js";
 
@@ -638,6 +639,11 @@ export default function MyHomePage() {
                           : null
                     }
                     market={market}
+                  />
+
+                  <RecentClosedSales
+                    city={(profile || activeHome)?.city}
+                    postalCode={(profile || activeHome)?.postal_code}
                   />
 
                   {/* City trends (if present) */}

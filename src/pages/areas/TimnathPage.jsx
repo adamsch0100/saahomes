@@ -1,6 +1,7 @@
 import React from "react";
 import AreaSEO from "../../components/AreaSEO.jsx";
 import AreaFAQSection from "../../components/AreaFAQSection.jsx";
+import RecentlySoldSection from "../../components/RecentlySoldSection.jsx";
 import { AREA_FAQS } from "../../data/areaFaqs.js";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
@@ -321,6 +322,8 @@ export default function TimnathPage() {
           </div>
         </div>
       </section>
+
+      <RecentlySoldSection citySlug="timnath" />
 
       <AreaFAQSection faqs={AREA_FAQS['timnath']} city="Timnath" />
 

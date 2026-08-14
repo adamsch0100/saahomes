@@ -3,6 +3,7 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import AreaSEO from "../components/AreaSEO.jsx";
 import MarketReportForm from "../components/MarketReportForm.jsx";
 import AreaFAQSection from "../components/AreaFAQSection.jsx";
+import RecentlySoldSection from "../components/RecentlySoldSection.jsx";
 import NeighborhoodLinks from "../components/NeighborhoodLinks.jsx";
 import { getAreaSeo } from "../data/areaSeo.js";
 import { AREA_FAQS } from "../data/areaFaqs.js";
@@ -410,6 +411,8 @@ export default function AreaGuidePage() {
           </div>
         </section>
       )}
+
+      <RecentlySoldSection citySlug={area.slug} />
 
       <AreaFAQSection faqs={AREA_FAQS[area.slug]} city={area.city} />
 

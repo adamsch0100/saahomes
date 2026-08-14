@@ -108,10 +108,20 @@ function SoldCard({ row }) {
   );
 }
 
-export default function RecentlySoldSection() {
-  const [city, setCity] = useState("");
+function labelForSlug(slug) {
+  if (!slug) return "Northern Colorado";
+  const hit = CITY_OPTIONS.find((o) => o.slug === slug);
+  if (hit) return hit.label;
+  if (slug === "carbon-valley") return "Carbon Valley";
+  return slug;
+}
+
+export default function RecentlySoldSection({ citySlug } = {}) {
+  const locked = Boolean(citySlug);
+  const [selectedCity, setSelectedCity] = useState("");
+  const city = locked ? citySlug : selectedCity;
   const [rows, setRows] = useState([]);
-  const [label, setLabel] = useState("Northern Colorado");
+  const [label, setLabel] = useState(locked ? labelForSlug(citySlug) : "Northern Colorado");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -119,14 +129,14 @@ export default function RecentlySoldSection() {
     let cancelled = false;
     setLoading(true);
     setError(false);
-    const qs = new URLSearchParams({ limit: "12" });
+    const qs = new URLSearchParams({ limit: locked ? "6" : "12" });
     if (city) qs.set("city", city);
     fetch(`${API_BASE}/api/sold-listings?${qs.toString()}`)
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error("sold fetch failed"))))
       .then((data) => {
         if (cancelled) return;
         setRows(Array.isArray(data?.listings) ? data.listings : []);
-        setLabel(data?.city || "Northern Colorado");
+        setLabel(data?.city || (locked ? labelForSlug(city) : "Northern Colorado"));
       })
       .catch(() => {
         if (cancelled) return;
@@ -139,7 +149,9 @@ export default function RecentlySoldSection() {
     return () => {
       cancelled = true;
     };
-  }, [city]);
+  }, [city, locked]);
+
+  const headingCity = locked ? (label && label !== "Northern Colorado" ? label : labelForSlug(citySlug)) : label;
 
   return (
     <section className="py-16 px-6" aria-labelledby="recently-sold-heading">
@@ -148,17 +160,20 @@ export default function RecentlySoldSection() {
           <div>
             <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Market activity</p>
             <h2 id="recently-sold-heading" className="text-4xl sm:text-5xl font-bold font-serif mb-3">
-              Recently Sold
+              {locked ? `Recently Sold in ${headingCity}` : "Recently Sold"}
             </h2>
             <p className="text-lg text-gray-700 max-w-2xl">
-              Closed sales recorded in {label} over the last 12 months. Each price and date comes from the MLS — we do not estimate or fill in missing figures.
+              {locked
+                ? `Recently sold in ${headingCity} · Source: IRES MLS data · we do not estimate or fill in missing figures.`
+                : `Closed sales recorded in ${label} over the last 12 months. Each price and date comes from the MLS — we do not estimate or fill in missing figures.`}
             </p>
           </div>
+          {locked ? null : (
           <label className="block sm:min-w-[220px]">
             <span className="sr-only">Filter recently sold homes by city</span>
             <select
               value={city}
-              onChange={(e) => setCity(e.target.value)}
+              onChange={(e) => setSelectedCity(e.target.value)}
               className="w-full border-2 border-black rounded-lg px-4 py-3 bg-white font-semibold"
             >
               {CITY_OPTIONS.map((opt) => (
@@ -168,6 +183,7 @@ export default function RecentlySoldSection() {
               ))}
             </select>
           </label>
+          )}
         </div>
 
         {loading ? (

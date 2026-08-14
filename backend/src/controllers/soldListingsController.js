@@ -1,14 +1,23 @@
 import getPool from '../config/database.js';
 import { NOCO_CITIES, resolveSoldCity } from '../config/nocoCities.js';
 
+function normalizeZip(raw) {
+  if (raw == null || raw === '') return '';
+  const digits = String(raw).replace(/\D/g, '');
+  return digits.length >= 5 ? digits.slice(0, 5) : '';
+}
+
 /**
- * GET /api/sold-listings?city=<slug>&limit=N
+ * GET /api/sold-listings?city=<slug>&zip=<5-digit>&limit=N
  *
  * Real Closed rows from sold_listings only. Empty array when nothing matches.
  * Never fabricates a price, date, or DOM. Raw MLS photo URLs are never returned.
+ * zip (or postal_code) matches the first 5 digits; when present it is preferred
+ * over city for "near you" honesty. City-only callers are unchanged.
  */
 export async function listSoldListings(req, res) {
   try {
+    const zip = normalizeZip(req.query.zip || req.query.postal_code);
     const resolved = resolveSoldCity(req.query.city);
     const limitRaw = Number(req.query.limit);
     const limit = Number.isFinite(limitRaw)
@@ -23,7 +32,7 @@ export async function listSoldListings(req, res) {
       'sold_price IS NOT NULL',
     ];
 
-    if (resolved.unknown) {
+    if (!zip && resolved.unknown) {
       return res.json({
         success: true,
         city: String(req.query.city).trim(),
@@ -33,7 +42,12 @@ export async function listSoldListings(req, res) {
       });
     }
 
-    if (resolved.city) {
+    if (zip) {
+      params.push(zip);
+      where.push(
+        `LEFT(regexp_replace(COALESCE(postal_code, ''), '[^0-9]', '', 'g'), 5) = $${params.length}`
+      );
+    } else if (resolved.city) {
       params.push(resolved.city);
       where.push(`city = $${params.length}`);
     } else {
@@ -77,13 +91,15 @@ export async function listSoldListings(req, res) {
       };
     });
 
-    return res.json({
+    const payload = {
       success: true,
       city: resolved.label,
       citySlug: resolved.slug,
       count: listings.length,
       listings,
-    });
+    };
+    if (zip) payload.zip = zip;
+    return res.json(payload);
   } catch (error) {
     console.error('sold-listings failed:', error);
     return res.status(500).json({ success: false, error: 'Sold listings unavailable', listings: [] });

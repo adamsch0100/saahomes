@@ -1,6 +1,7 @@
 import React from "react";
 import AreaSEO from "../../components/AreaSEO.jsx";
 import AreaFAQSection from "../../components/AreaFAQSection.jsx";
+import RecentlySoldSection from "../../components/RecentlySoldSection.jsx";
 import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
 import { AREA_FAQS } from "../../data/areaFaqs.js";
 import { Link } from "react-router-dom";
@@ -443,6 +444,8 @@ export default function FortCollinsPage() {
           </div>
         </section>
       </article>
+
+      <RecentlySoldSection citySlug="fort-collins" />
 
       <AreaFAQSection faqs={AREA_FAQS['fort-collins']} city="Fort Collins" />
 
