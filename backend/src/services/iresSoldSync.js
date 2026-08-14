@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import getPool from '../config/database.js';
 import { isNocoCity } from '../config/nocoCities.js';
+import { isConfigured as r2Configured, isR2Hosted, syncSoldListingPhotos } from './photoSync.js';
 
 /**
  * IRES sold/closed ingest — MLS Grid RESO Web API.
@@ -17,9 +18,11 @@ import { isNocoCity } from '../config/nocoCities.js';
  *   - 12-month window: ModificationTimestamp ge {cutoff} + CloseDate client filter.
  *
  * Runs via: npm run sync-sold-listings
- *   --full          12-month ModificationTimestamp window from scratch
- *   --since=ISO     override incremental start
- *   --max-pages=N   safety cap (scheduled default 250)
+ *   --full                 12-month ModificationTimestamp window from scratch
+ *   --since=ISO            override incremental start
+ *   --max-pages=N          safety cap (scheduled default 250)
+ *   --photos-backfill[=N]  re-fetch Media + R2-copy up to N non-R2 rows (default 100)
+ *   --backfill-photos[=N]  alias of --photos-backfill
  */
 
 const SOLD_FIELDS = [
@@ -41,6 +44,9 @@ const LOCK_FILE = '/tmp/ires-sold-sync.lock';
 const LISTING_LOCK_FILE = '/tmp/ires-sync.lock';
 const DEFAULT_MAX_PAGES = 250;
 const WATERMARK_KEY = 'ires_sold_last_sync_ts';
+// Cap inline R2 copies so a large incremental cannot stack photo work
+// into the next hourly listing tick. Remaining rows retry next run / backfill.
+const INGEST_PHOTO_CAP = 20;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -330,7 +336,83 @@ const SOLD_UPSERT_SQL = `
     photos = CASE WHEN sold_listings.photos::text LIKE '%r2.dev%' THEN sold_listings.photos ELSE EXCLUDED.photos END,
     photos_count = CASE WHEN sold_listings.photos::text LIKE '%r2.dev%' THEN sold_listings.photos_count ELSE EXCLUDED.photos_count END,
     modification_timestamp = EXCLUDED.modification_timestamp,
-    updated_at = NOW()`;
+    updated_at = NOW()
+  RETURNING photos`;
+
+function asPhotoList(photos) {
+  return Array.isArray(photos) ? photos.filter((u) => typeof u === 'string' && u.length > 10) : [];
+}
+
+/**
+ * Copy a sold row's photos to R2. Never throws — failure leaves the stored
+ * URLs untouched so the next sync/backfill retries. Returns the number of
+ * durable URLs written, or 0.
+ */
+async function durableCopySoldPhotos(pool, listingId, photos) {
+  if (!r2Configured()) return 0;
+  const urls = asPhotoList(photos);
+  if (!urls.length || isR2Hosted(urls)) return 0;
+  try {
+    const uploaded = await syncSoldListingPhotos(listingId, urls);
+    if (!uploaded?.length) return 0;
+    await pool.query(
+      `UPDATE sold_listings
+          SET photos = $1::jsonb, photos_count = $2, updated_at = NOW()
+        WHERE listing_id = $3
+          AND photos::text NOT LIKE '%r2.dev%'`,
+      [JSON.stringify(uploaded), uploaded.length, listingId]
+    );
+    return uploaded.length;
+  } catch (error) {
+    console.error(`  sold R2 copy failed for ${listingId}: ${error.message}`);
+    return 0;
+  }
+}
+
+function safeListingId(raw) {
+  const id = String(raw || '');
+  return /^[A-Za-z0-9_-]+$/.test(id) ? id : null;
+}
+
+/** Targeted Closed + ListingId Media re-fetch (ListingId IS filterable). */
+async function fetchClosedMedia(authToken, listingId, { retries = 4 } = {}) {
+  const url = new URL(`${process.env.IRES_API_URL}/Property`);
+  url.searchParams.set('$top', '1');
+  url.searchParams.set('$filter', `StandardStatus eq 'Closed' and ListingId eq '${listingId}'`);
+  url.searchParams.set('$select', 'ListingId,PhotosCount');
+  url.searchParams.set('$expand', 'Media');
+
+  try {
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        Accept: 'application/json',
+        'Accept-Encoding': 'gzip',
+        'User-Agent': 'saahomes-idx/1.0 (Schwartz and Associates)',
+      },
+      signal: AbortSignal.timeout(60000),
+    });
+    if (!res.ok) {
+      if ((res.status === 429 || res.status >= 500) && retries > 0) {
+        const wait = [5000, 15000, 45000, 90000][4 - retries] || 90000;
+        console.log(`⚠️ IRES sold media ${res.status} — backing off ${wait / 1000}s (${retries} left)`);
+        await sleep(wait);
+        return fetchClosedMedia(authToken, listingId, { retries: retries - 1 });
+      }
+      const err = new Error(`IRES sold media fetch failed (${res.status})`);
+      err.status = res.status;
+      throw err;
+    }
+    return res.json();
+  } catch (error) {
+    if (error.name === 'AbortError' && retries > 0) {
+      console.log(`⚠️ IRES sold media timeout — retrying (${retries} left)`);
+      await sleep(5000);
+      return fetchClosedMedia(authToken, listingId, { retries: retries - 1 });
+    }
+    throw error;
+  }
+}
 
 /**
  * mode:
@@ -367,7 +449,10 @@ export async function syncSoldListings({
   let scanned = 0;
   let kept = 0;
   let pages = 0;
+  let photosCopied = 0;
+  let photoCopyFailed = 0;
   let newWatermark = since || null;
+  let r2SkipLogged = false;
 
   try {
     while (pages < maxPages) {
@@ -385,7 +470,7 @@ export async function syncSoldListings({
         scanned += 1;
         const row = normalizeSold(raw);
         if (!shouldKeep(row)) continue;
-        await pool.query(SOLD_UPSERT_SQL, [
+        const upserted = await pool.query(SOLD_UPSERT_SQL, [
           row.listing_id, row.mls_source, row.city, row.county,
           row.street_number, row.street_name, row.unit, row.address,
           row.postal_code, row.lat, row.lng, row.property_type, row.home_type,
@@ -396,6 +481,30 @@ export async function syncSoldListings({
           JSON.stringify(row.photos), row.photos_count, row.modification_timestamp,
         ]);
         kept += 1;
+
+        const storedPhotos = upserted.rows[0]?.photos;
+        if (asPhotoList(storedPhotos).length && !isR2Hosted(storedPhotos)) {
+          if (!r2Configured()) {
+            if (!r2SkipLogged) {
+              console.log('⏳ R2 not configured — leaving sold MLS photo URLs in place (retry next sync).');
+              r2SkipLogged = true;
+            }
+          } else if (photosCopied + photoCopyFailed >= INGEST_PHOTO_CAP) {
+            if (!r2SkipLogged) {
+              console.log(`⏳ Ingest photo cap ${INGEST_PHOTO_CAP} reached — remaining rows keep MLS URLs for backfill.`);
+              r2SkipLogged = true;
+            }
+          } else if (listingLockActive()) {
+            if (!r2SkipLogged) {
+              console.log('⏳ Live listing sync lock is held — pausing sold photo copies (retry next run).');
+              r2SkipLogged = true;
+            }
+          } else {
+            const n = await durableCopySoldPhotos(pool, row.listing_id, storedPhotos);
+            if (n > 0) photosCopied += 1;
+            else photoCopyFailed += 1;
+          }
+        }
       }
 
       offset += records.length;
@@ -410,22 +519,153 @@ export async function syncSoldListings({
     const hitCap = pages >= maxPages;
     console.log(
       `✅ IRES sold sync complete (${mode}): scanned ${scanned}, kept ${kept} NoCO/12mo, ${pages} pages` +
-      `${since ? `, since ${since}` : ''}${hitCap ? `, hit max-pages=${maxPages}` : ''}`
+      `${since ? `, since ${since}` : ''}${hitCap ? `, hit max-pages=${maxPages}` : ''}` +
+      `, r2-copied ${photosCopied}, r2-failed ${photoCopyFailed}`
     );
-    return { mode, scanned, kept, pages, watermark: newWatermark, hitCap };
+    return {
+      mode, scanned, kept, pages, watermark: newWatermark, hitCap,
+      photosCopied, photoCopyFailed,
+    };
   } finally {
     await releaseLock();
   }
 }
 
+const DEFAULT_PHOTO_BACKFILL = 100;
+
+/**
+ * Capped backfill for already-ingested sold rows whose photos are still
+ * signed MLS URLs. Re-fetches Media by ListingId (legal filter), writes the
+ * fresh URLs so the photo proxy can serve them, then R2-copies. Rows whose
+ * Media is gone stay on the stored MLS URLs (frontend placeholder).
+ */
+export async function backfillSoldPhotos({ limit = DEFAULT_PHOTO_BACKFILL } = {}) {
+  const cap = Number.isFinite(Number(limit)) ? Math.max(1, Math.trunc(Number(limit))) : DEFAULT_PHOTO_BACKFILL;
+  const missing = ['IRES_API_URL'].filter((k) => !process.env[k]);
+  if (!process.env.IRES_ACCESS_TOKEN) {
+    missing.push(...['IRES_CLIENT_ID', 'IRES_CLIENT_SECRET', 'IRES_USERNAME', 'IRES_PASSWORD']
+      .filter((k) => !process.env[k]));
+  }
+  if (missing.length) {
+    console.log(`⏳ IRES sold feed not configured yet — missing: ${missing.join(', ')}`);
+    return { skipped: true, missing };
+  }
+  if (!r2Configured()) {
+    console.log('⏳ R2 not configured — cannot backfill sold photos.');
+    return { skipped: true, reason: 'r2' };
+  }
+
+  const pool = getPool();
+  const gotLock = await acquireLock();
+  if (!gotLock) return { skipped: true, reason: 'lock' };
+  const token = await getToken();
+
+  let candidates = 0;
+  let copied = 0;
+  let unrecoverable = 0;
+  let failed = 0;
+  let photosWritten = 0;
+
+  try {
+    const pending = await pool.query(
+      `SELECT listing_id, photos
+         FROM sold_listings
+        WHERE photos IS NOT NULL
+          AND jsonb_typeof(photos) = 'array'
+          AND jsonb_array_length(photos) > 0
+          AND photos::text NOT LIKE '%r2.dev%'
+        ORDER BY closed_date DESC NULLS LAST
+        LIMIT $1`,
+      [cap]
+    );
+    candidates = pending.rows.length;
+    console.log(`sold photo backfill: ${candidates} non-R2 rows (cap ${cap})`);
+
+    for (const row of pending.rows) {
+      const listingId = safeListingId(row.listing_id);
+      if (!listingId) {
+        unrecoverable += 1;
+        console.log(`  skip ${row.listing_id}: invalid listing_id`);
+        continue;
+      }
+      await sleep(RATE_LIMIT_MS + Math.random() * 150);
+      let fresh;
+      try {
+        const page = await fetchClosedMedia(token, listingId);
+        const raw = Array.isArray(page.value) ? page.value[0] : null;
+        fresh = raw ? extractPhotos(raw) : [];
+      } catch (error) {
+        if (error.status === 404) {
+          unrecoverable += 1;
+          console.log(`  unrecoverable ${listingId}: media 404`);
+          continue;
+        }
+        failed += 1;
+        console.error(`  media fetch failed for ${listingId}: ${error.message}`);
+        continue;
+      }
+      if (!fresh.length) {
+        unrecoverable += 1;
+        console.log(`  unrecoverable ${listingId}: no Media on Closed row`);
+        continue;
+      }
+      // Write fresh signed URLs first so downloadPhoto → /api/photo can serve them.
+      await pool.query(
+        `UPDATE sold_listings
+            SET photos = $1::jsonb, photos_count = $2, updated_at = NOW()
+          WHERE listing_id = $3
+            AND photos::text NOT LIKE '%r2.dev%'`,
+        [JSON.stringify(fresh), fresh.length, listingId]
+      );
+      const n = await durableCopySoldPhotos(pool, listingId, fresh);
+      if (n > 0) {
+        copied += 1;
+        photosWritten += n;
+        console.log(`  ${listingId}: ${n} photos → R2 (${copied}/${candidates})`);
+      } else {
+        failed += 1;
+        console.log(`  R2 copy failed for ${listingId} — leaving MLS URLs for retry`);
+      }
+    }
+
+    console.log(
+      `✅ sold photo backfill complete: candidates ${candidates}, r2-copied ${copied}` +
+      ` (${photosWritten} photos), unrecoverable ${unrecoverable}, failed ${failed}`
+    );
+    return { candidates, copied, photosWritten, unrecoverable, failed, cap };
+  } finally {
+    await releaseLock();
+  }
+}
+
+function parseBackfillLimit(argv) {
+  const flag = argv.find((a) => a.startsWith('--photos-backfill') || a.startsWith('--backfill-photos'));
+  if (!flag) return null;
+  if (flag.includes('=')) {
+    const n = parseInt(flag.split('=')[1], 10);
+    return Number.isFinite(n) && n > 0 ? n : DEFAULT_PHOTO_BACKFILL;
+  }
+  const idx = argv.indexOf(flag);
+  const next = argv[idx + 1];
+  if (next && /^\d+$/.test(next)) return parseInt(next, 10);
+  return DEFAULT_PHOTO_BACKFILL;
+}
+
 const isDirectRun = process.argv[1]?.includes('iresSoldSync.js');
 if (isDirectRun) {
-  const mode = process.argv.includes('--full') ? 'full' : 'incremental';
-  const sinceArg = process.argv.find((a) => a.startsWith('--since='));
-  const pagesArg = process.argv.find((a) => a.startsWith('--max-pages='));
-  const since = sinceArg ? sinceArg.slice('--since='.length) : null;
-  const maxPages = pagesArg ? Math.max(1, parseInt(pagesArg.slice('--max-pages='.length), 10) || DEFAULT_MAX_PAGES) : DEFAULT_MAX_PAGES;
-  syncSoldListings({ mode, since, maxPages })
-    .then(() => process.exit(0))
-    .catch((e) => { console.error('❌ Sold sync failed:', e.message); process.exit(1); });
+  const backfillLimit = parseBackfillLimit(process.argv);
+  if (backfillLimit != null) {
+    backfillSoldPhotos({ limit: backfillLimit })
+      .then(() => process.exit(0))
+      .catch((e) => { console.error('❌ Sold photo backfill failed:', e.message); process.exit(1); });
+  } else {
+    const mode = process.argv.includes('--full') ? 'full' : 'incremental';
+    const sinceArg = process.argv.find((a) => a.startsWith('--since='));
+    const pagesArg = process.argv.find((a) => a.startsWith('--max-pages='));
+    const since = sinceArg ? sinceArg.slice('--since='.length) : null;
+    const maxPages = pagesArg ? Math.max(1, parseInt(pagesArg.slice('--max-pages='.length), 10) || DEFAULT_MAX_PAGES) : DEFAULT_MAX_PAGES;
+    syncSoldListings({ mode, since, maxPages })
+      .then(() => process.exit(0))
+      .catch((e) => { console.error('❌ Sold sync failed:', e.message); process.exit(1); });
+  }
 }
