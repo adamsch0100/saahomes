@@ -153,6 +153,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/saas/vs-best-cma-software.html",
         "/saas/interactive-cma-software.html",
         "/saas/cma-software-for-realtors.html",
+        "/saas/mls-export-cma.html",
         "/saas/changelog.html",
         "/blog/",
         "/saas/ll.css",
