@@ -897,6 +897,9 @@ let lastGeocodedQuery = '';
 let lastGeo = null;
 let shapeMode = 'circle';
 let freehandOverride = false;
+let constrainingShape = false;
+let autoRectHalfLng = null;
+let autoRectHalfLat = null;
 
 const MAP_REVIEW_FIELDS = [
   'Status', 'Price', 'SoldPrice', 'Bdrm', 'Bath', 'TotalSqFt', 'FinishedSQFT',
@@ -981,18 +984,41 @@ function milesToRingCircle(lng, lat, miles, steps) {
 function milesToRingRect(lng, lat, miles) {
   const dLat = miles / 69.0;
   const dLng = miles / (Math.cos(lat * Math.PI / 180) * 69.172);
+  autoRectHalfLng = dLng;
+  autoRectHalfLat = dLat;
+  return ringFromHalfExtents(lng, lat, dLng, dLat);
+}
+
+function ringFromHalfExtents(lng, lat, halfLng, halfLat) {
   return [
-    [lng - dLng, lat - dLat],
-    [lng + dLng, lat - dLat],
-    [lng + dLng, lat + dLat],
-    [lng - dLng, lat + dLat],
-    [lng - dLng, lat - dLat],
+    [lng - halfLng, lat - halfLat],
+    [lng + halfLng, lat - halfLat],
+    [lng + halfLng, lat + halfLat],
+    [lng - halfLng, lat + halfLat],
+    [lng - halfLng, lat - halfLat],
   ];
+}
+
+function haversineMiles(lng1, lat1, lng2, lat2) {
+  const R = 3958.7613;
+  const toRad = (d) => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
 }
 
 function getShapeRadiusMiles() {
   const n = Number(document.getElementById('portalRadiusMiles').value);
   return Number.isFinite(n) && n > 0 ? n : 1;
+}
+
+function setRadiusMilesInput(miles) {
+  const clamped = Math.max(0.1, Math.min(50, Math.round(miles * 100) / 100));
+  const el = document.getElementById('portalRadiusMiles');
+  if (el) el.value = String(clamped);
+  return clamped;
 }
 
 function setShapeMode(mode) {
@@ -1007,26 +1033,93 @@ document.getElementById('shapeCircleBtn').addEventListener('click', () => setSha
 document.getElementById('shapeRectBtn').addEventListener('click', () => setShapeMode('rectangle'));
 document.getElementById('portalRadiusMiles').addEventListener('change', () => {
   freehandOverride = false;
+  autoRectHalfLng = null;
+  autoRectHalfLat = null;
   if (lastGeo && lastGeo.longitude != null) drawAutoShape(lastGeo.longitude, lastGeo.latitude);
 });
 
-function drawAutoShape(lng, lat) {
+function drawAutoShape(lng, lat, opts) {
+  opts = opts || {};
   ensurePortalMap();
-  if (!portalDraw || lng == null || lat == null) return;
+  if (!portalDraw || lng == null || lat == null) return null;
   const miles = getShapeRadiusMiles();
-  const ring = shapeMode === 'rectangle'
-    ? milesToRingRect(lng, lat, miles)
-    : milesToRingCircle(lng, lat, miles, 64);
+  let ring;
+  if (shapeMode === 'rectangle') {
+    if (opts.halfLng != null && opts.halfLat != null) {
+      autoRectHalfLng = opts.halfLng;
+      autoRectHalfLat = opts.halfLat;
+      ring = ringFromHalfExtents(lng, lat, opts.halfLng, opts.halfLat);
+    } else {
+      ring = milesToRingRect(lng, lat, miles);
+    }
+  } else {
+    autoRectHalfLng = null;
+    autoRectHalfLat = null;
+    ring = milesToRingCircle(lng, lat, miles, 64);
+  }
   portalDraw.deleteAll();
   freehandOverride = false;
-  portalDraw.add({
+  const ids = portalDraw.add({
     type: 'Feature',
-    properties: { auto: true },
+    properties: { auto: true, shape: shapeMode },
     geometry: { type: 'Polygon', coordinates: [ring] },
   });
-  const b = boundsFromRing(ring);
-  if (b && portalMap) {
-    portalMap.fitBounds([[b.west, b.south], [b.east, b.north]], { padding: 48, maxZoom: 14 });
+  const featureId = Array.isArray(ids) ? ids[0] : ids;
+  if (!opts.skipFit) {
+    const b = boundsFromRing(ring);
+    if (b && portalMap) {
+      portalMap.fitBounds([[b.west, b.south], [b.east, b.north]], { padding: 48, maxZoom: 14 });
+    }
+  }
+  if (opts.keepSelected && featureId) {
+    try {
+      portalDraw.changeMode('direct_select', { featureId });
+    } catch (_) { /* ignore */ }
+  }
+  return featureId;
+}
+
+function constrainAutoShapeEdit(feature) {
+  if (!feature || !feature.geometry || feature.geometry.type !== 'Polygon') return;
+  if (!lastGeo || lastGeo.longitude == null || lastGeo.latitude == null) return;
+  const cx = lastGeo.longitude;
+  const cy = lastGeo.latitude;
+  const ring = feature.geometry.coordinates[0] || [];
+  if (ring.length < 4) return;
+
+  constrainingShape = true;
+  try {
+    if (shapeMode === 'circle') {
+      let maxM = 0;
+      ring.forEach((pt) => {
+        const m = haversineMiles(cx, cy, pt[0], pt[1]);
+        if (m > maxM) maxM = m;
+      });
+      setRadiusMilesInput(maxM);
+      drawAutoShape(cx, cy, { skipFit: true, keepSelected: true });
+    } else {
+      let halfLng = 0;
+      let halfLat = 0;
+      ring.forEach((pt) => {
+        halfLng = Math.max(halfLng, Math.abs(pt[0] - cx));
+        halfLat = Math.max(halfLat, Math.abs(pt[1] - cy));
+      });
+      const minHalfLat = 0.1 / 69.0;
+      const minHalfLng = 0.1 / (Math.cos(cy * Math.PI / 180) * 69.172);
+      halfLng = Math.max(halfLng, minHalfLng);
+      halfLat = Math.max(halfLat, minHalfLat);
+      const milesLat = halfLat * 69.0;
+      const milesLng = halfLng * Math.cos(cy * Math.PI / 180) * 69.172;
+      setRadiusMilesInput(Math.max(milesLat, milesLng));
+      drawAutoShape(cx, cy, {
+        skipFit: true,
+        keepSelected: true,
+        halfLng,
+        halfLat,
+      });
+    }
+  } finally {
+    constrainingShape = false;
   }
 }
 
@@ -1110,7 +1203,12 @@ function ensurePortalMap() {
     });
     portalMap.addControl(portalDraw, 'top-left');
     portalMap.on('draw.create', () => { freehandOverride = true; });
-    portalMap.on('draw.update', () => { freehandOverride = true; });
+    portalMap.on('draw.update', (e) => {
+      if (constrainingShape) return;
+      if (freehandOverride) return;
+      const feat = (e.features && e.features[0]) || null;
+      constrainAutoShapeEdit(feat);
+    });
   }
   portalMap.on('load', () => portalMap.resize());
 }

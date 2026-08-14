@@ -72,6 +72,8 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
     risks = pos.get("risks") or []
     scenarios = pos.get("price_scenarios") or []
     comps = (pos.get("closest_comps") or [])[:8]
+    comps_a = comps[:4]
+    comps_b = comps[4:8]
 
     brand_primary = meta.get("brand_primary") or "#0c3c6e"
     brand_accent = meta.get("brand_accent") or "#1a5f9e"
@@ -176,7 +178,8 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
             f'</div></article>'
         )
 
-    comps_html = "".join(_comp_card(c) for c in comps) or '<p class="muted">No close comps</p>'
+    comps_html = "".join(_comp_card(c) for c in comps_a) or '<p class="muted">No close comps</p>'
+    comps_html_b = "".join(_comp_card(c) for c in comps_b)
 
     scenarios_html = "".join(
         f'<div class="sc{" sc-main" if "Balanced" in (sc.get("label") or "") else ""}">'
@@ -275,6 +278,39 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
 
     yoy = report.get("chart_yoy") or {}
     yoy_summary = yoy.get("summary") or []
+
+    def _deck_pct(new, old):
+        try:
+            if old is None or new is None or float(old) == 0:
+                return None
+            return (float(new) - float(old)) / float(old) * 100.0
+        except (TypeError, ValueError, ZeroDivisionError):
+            return None
+
+    talk_pace = "Sales volume shows whether demand is building or thinning in this segment."
+    talk_price = "Median sold price is what buyers actually paid — the facts behind the list."
+    talk_timing = f"Homes here typically go under contract in about {median_dom:.0f} days when priced with the market."
+    if len(yoy_summary) >= 2:
+        prior, latest = yoy_summary[-2], yoy_summary[-1]
+        sd = _deck_pct(latest.get("sales"), prior.get("sales"))
+        pd_ = _deck_pct(latest.get("median_price"), prior.get("median_price"))
+        dd = _deck_pct(latest.get("median_dom"), prior.get("median_dom"))
+        if sd is not None:
+            talk_pace = (
+                f"{latest.get('year')}: {int(latest.get('sales') or 0)} sales "
+                f"({sd:+.0f}% vs {prior.get('year')})."
+            )
+        if pd_ is not None:
+            talk_price = (
+                f"Median sold ${(latest.get('median_price') or 0)/1000:.0f}k "
+                f"({pd_:+.1f}% vs {prior.get('year')})."
+            )
+        if dd is not None and latest.get("median_dom") is not None:
+            talk_timing = (
+                f"Median DOM {latest.get('median_dom'):.0f} days "
+                f"({dd:+.0f}% vs {prior.get('year')})."
+            )
+
     yoy_slide = ""
     if yoy_summary:
         yoy_kpis = "".join(
@@ -284,16 +320,45 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
             for y in yoy_summary[:4]
         )
         yoy_slide = f'''
-    <section class="slide" data-title="6 · Market Detail">
-      <div class="slide-top"><span>{logo_html}6 · Market Detail</span><span>Year Over Year</span></div>
+    <section class="slide" data-title="6 · Pace">
+      <div class="slide-top"><span>{logo_html}6 · Pace</span><span>Market Detail</span></div>
       <div class="slide-body">
-        <h2 class="slide-title"><span class="step-badge">6</span>Year-Over-Year Market Detail</h2>
-        <p class="lede">Sales, median sold price, and DOM by year in this segment.</p>
+        <h2 class="slide-title"><span class="step-badge">6</span>Pace — Sales Volume</h2>
+        <p class="lede">{_esc(talk_pace)}</p>
         <div class="kpis" style="margin-top:18px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr))">{yoy_kpis}</div>
+        <p class="lede" style="margin-top:16px">More closes = more proof of what buyers will pay. A thinner year means pricing accuracy matters more.</p>
+      </div>
+      <div class="slide-foot"><span>{_esc(address)}</span><span>ListLogic</span></div>
+    </section>
+    <section class="slide" data-title="6b · Prices">
+      <div class="slide-top"><span>{logo_html}6b · Prices</span><span>What Buyers Paid</span></div>
+      <div class="slide-body">
+        <h2 class="slide-title"><span class="step-badge">6</span>Prices — What the Market Is Paying</h2>
+        <p class="lede">{_esc(talk_price)}</p>
+        <div class="duo" style="margin-top:18px">
+          <div class="d yours"><div class="n">${(yoy_summary[-1].get("median_price") or 0)/1000:.0f}k</div><div class="t">Latest-year median sold</div></div>
+          <div class="d"><div class="n">${rec/1000:.0f}k</div><div class="t">Recommended list</div></div>
+        </div>
+        <p class="lede" style="margin-top:16px">List with today’s closes — not last year’s memory. Stretch asks stall while better-priced homes move.</p>
+      </div>
+      <div class="slide-foot"><span>{_esc(address)}</span><span>ListLogic</span></div>
+    </section>
+    <section class="slide" data-title="6c · Timing">
+      <div class="slide-top"><span>{logo_html}6c · Timing</span><span>Days on Market</span></div>
+      <div class="slide-body">
+        <h2 class="slide-title"><span class="step-badge">6</span>Timing — How Long Homes Take</h2>
+        <p class="lede">{_esc(talk_timing)}</p>
+        <div class="duo" style="margin-top:18px">
+          <div class="d"><div class="n">{median_dom:.0f}d</div><div class="t">Market median DOM</div></div>
+          <div class="d yours"><div class="n">~{exp_dom:.0f}d</div><div class="t">Expected at recommended</div></div>
+        </div>
+        <p class="lede" style="margin-top:16px">Overpricing costs weeks — and creates comps that help sell everyone else’s house.</p>
       </div>
       <div class="slide-foot"><span>{_esc(address)}</span><span>ListLogic</span></div>
     </section>
 '''
+    else:
+        yoy_slide = ""
 
     adv_html = "".join(f"<li>{_esc(a)}</li>" for a in advantages[:4]) or "<li>Solid fundamentals</li>"
     risk_html = "".join(f"<li>{_esc(r)}</li>" for r in risks[:4]) or "<li>Overpricing risk</li>"
@@ -316,8 +381,10 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
         tax = round(net_price * 0.76 / 100 * days / 365)
         title = max(0, round(net_price * 0.0015 / 50) * 50)
         oec, bundled, water = 150.0, 190.0, 200.0
-        costs = seller_fee + buyer_fee + repairs + tax + title + oec + bundled + water
-        net = net_price - costs
+        selling = seller_fee + buyer_fee + repairs
+        closing = tax + title + oec + bundled + water
+        deductions = selling + closing
+        net = net_price - deductions
         pct = max(0.0, min(100.0, round(net / net_price * 1000) / 10))
 
         def _nrow(label, note, val, total=False):
@@ -328,17 +395,21 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
                     f'<div class="ns-v">{v}</div></div>')
 
         net_rows = (
-            '<div class="ns-subhead">Brokerage &amp; concessions</div>'
+            '<div class="ns-subhead">Selling costs</div>'
             + _nrow("Seller broker fee", "3.0% of price", seller_fee)
             + _nrow("Buyer broker fee", "3.0% of price", buyer_fee)
             + _nrow("Misc. — inspection repairs", "standard allowance", repairs)
-            + '<div class="ns-subhead">Taxes &amp; title · seller-paid</div>'
+            + _nrow("Total selling costs", "", selling, total=True)
+            + '<div class="ns-subhead">Closing expenses · seller-paid</div>'
             + _nrow("Prop. taxes", f"0.76% annual · prorated to day {days} of {close.year}", tax)
             + _nrow("Owner's title policy", "auto · ≈0.15% of price", title)
             + _nrow("Owner's extended coverage", "", oec)
             + _nrow("Bundled closing fees", "", bundled)
             + _nrow("Final water", "final utility reading", water)
-            + _nrow("Total selling costs", "", costs, total=True)
+            + _nrow("Total closing expenses", "", closing, total=True)
+            + '<div class="ns-subhead">Mortgage payoff</div>'
+            + _nrow("Seller loan balance", "enter on live net sheet — not a selling cost", 0)
+            + _nrow("Total deductions", "selling + closing + payoff", deductions, total=True)
         )
         net_slide = f'''
     <section class="slide" data-title="8 · Net Sheet">
@@ -714,6 +785,12 @@ body.mode-print .hint {{ display: none; }}
   }}
   .slide:last-child {{ break-after: auto; page-break-after: auto; }}
   .slide-body {{ overflow: hidden; padding: 10px 22px 6px; }}
+  .comps-grid {{ gap: 8px; margin-top: 8px; }}
+  .cc-photo {{ height: 120px !important; }}
+  .cc-body {{ padding: 7px 9px 9px; }}
+  .cc-price {{ font-size: .95rem; }}
+  .cc-addr {{ font-size: .7rem; }}
+  .slide[data-title^="5 ·"] .lede {{ font-size: .95rem; }}
 }}
 </style>
 </head>
@@ -790,14 +867,25 @@ body.mode-print .hint {{ display: none; }}
 {supply_slide}
     <!-- 3 · Comps -->
     <section class="slide" data-title="3 · Comps">
-      <div class="slide-top"><span>{logo_html}3 · Comps</span><span>Closest Sales</span></div>
+      <div class="slide-top"><span>{logo_html}3 · Comps</span><span>Closest Sales · 1–4</span></div>
       <div class="slide-body">
         <h2 class="slide-title"><span class="step-badge">3</span>Closest Comparable Sales</h2>
         <p class="lede">Does it look like yours — or nicer / dated — and does the sold price match that story?</p>
         <div class="comps-grid">{comps_html}</div>
       </div>
-      <div class="slide-foot"><span>{len(comps)} close sales</span><span>ListLogic</span></div>
+      <div class="slide-foot"><span>{len(comps_a)} of {len(comps)} close sales</span><span>ListLogic</span></div>
     </section>
+    {f'''
+    <section class="slide" data-title="3b · Comps">
+      <div class="slide-top"><span>{logo_html}3b · Comps</span><span>Closest Sales · 5–{len(comps)}</span></div>
+      <div class="slide-body">
+        <h2 class="slide-title"><span class="step-badge">3</span>Closest Comparable Sales · continued</h2>
+        <p class="lede">Same ranking — remaining close sales in this set.</p>
+        <div class="comps-grid">{comps_html_b}</div>
+      </div>
+      <div class="slide-foot"><span>{len(comps_b)} more close sales</span><span>ListLogic</span></div>
+    </section>
+    ''' if comps_html_b else ''}
 
     <!-- 4 · Your Home -->
     <section class="slide" data-title="4 · Your Home">

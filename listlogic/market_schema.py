@@ -147,11 +147,37 @@ def normalize_market_frame(
 
     if "SoldDate" in out.columns and "ListDate" in out.columns:
         try:
-            out["DaysToSell"] = (out["SoldDate"] - out["ListDate"]).dt.days
+            sold_d = out["SoldDate"].dt.normalize()
+            list_d = out["ListDate"].dt.normalize()
+            out["DaysToSell"] = (sold_d - list_d).dt.days
         except Exception:
             out["DaysToSell"] = np.nan
     else:
         out["DaysToSell"] = np.nan
+
+    # Backfill DOM when MLS/portal left it blank but dates exist.
+    _ensure_col(out, "DOM", np.nan)
+    out["DOM"] = pd.to_numeric(out["DOM"], errors="coerce")
+    missing_dom = out["DOM"].isna()
+    if missing_dom.any():
+        sold_dom = pd.to_numeric(out.get("DaysToSell"), errors="coerce")
+        fill_sold = missing_dom & out["StatusNorm"].eq("Sold") & sold_dom.notna() & (sold_dom >= 0)
+        out.loc[fill_sold, "DOM"] = sold_dom.loc[fill_sold]
+        still = out["DOM"].isna()
+        if still.any() and "ListDate" in out.columns:
+            try:
+                today = pd.Timestamp.now(tz="UTC").tz_localize(None).normalize()
+                list_d = out["ListDate"].dt.normalize()
+                active_dom = (today - list_d).dt.days
+                fill_active = (
+                    still
+                    & out["StatusNorm"].isin(["Active", "Pending", "Backup"])
+                    & active_dom.notna()
+                    & (active_dom >= 0)
+                )
+                out.loc[fill_active, "DOM"] = active_dom.loc[fill_active]
+            except Exception:
+                pass
 
     # Address
     if "Address" not in out.columns or out["Address"].isna().all() or (

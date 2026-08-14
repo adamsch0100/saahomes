@@ -222,7 +222,31 @@ def _realtor_item_to_row(item: dict, *, status_force: str | None = None) -> dict
         sold_price = list_price
     price = sold_price if status == "Sold" and sold_price else list_price
     sold_date = item.get("last_sold_date") or item.get("sold_date")
-    list_date = item.get("list_date")
+    list_date = item.get("list_date") or item.get("listed_date") or item.get("on_market_date")
+    # Realtor search/sold cards omit days_on_market; derive from list + sold/today.
+    dom = item.get("days_on_market")
+    if dom is None:
+        dom = item.get("dom") or item.get("daysOnMarket")
+    if dom is None:
+        list_ts = _parse_date(list_date)
+        end_ts = _parse_date(sold_date) if status == "Sold" else pd.Timestamp.now(tz="UTC")
+        if list_ts is not None and end_ts is not None:
+            try:
+                def _as_naive_day(ts):
+                    t = pd.Timestamp(ts)
+                    if getattr(t, "tz", None) is not None:
+                        t = t.tz_convert("UTC").tz_localize(None)
+                    return t.normalize()
+
+                days = int((_as_naive_day(end_ts) - _as_naive_day(list_ts)).days)
+                if days >= 0:
+                    dom = days
+            except Exception:
+                dom = None
+    try:
+        dom = int(dom) if dom is not None and dom != "" else None
+    except (TypeError, ValueError):
+        dom = None
     sqft = item.get("sqft") or item.get("living_area")
     baths = item.get("baths")
     if baths is None:
@@ -272,7 +296,7 @@ def _realtor_item_to_row(item: dict, *, status_force: str | None = None) -> dict
         "Bdrm": item.get("beds"),
         "Bath": baths,
         "YearBuilt": item.get("year_built"),
-        "DOM": item.get("days_on_market"),
+        "DOM": dom,
         "GarSpaces": garage,
         "GarType": "",
         "Acres": None,

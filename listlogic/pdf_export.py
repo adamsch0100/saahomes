@@ -276,8 +276,10 @@ def _net_sheet_flow(price: float, styles):
     annual_tax = price * tax_rate / 100
     tax = round(annual_tax * days / 365)
 
-    costs = seller_fee + buyer_fee + concession + repairs + tax + payoff + title + oec + bundled + water
-    net = price - costs
+    selling = seller_fee + buyer_fee + concession + repairs
+    closing = tax + title + oec + bundled + water
+    deductions = selling + closing + payoff
+    net = price - deductions
     pct = max(0.0, min(100.0, round(net / price * 1000) / 10))
 
     def row(label, note, val, bold=False, total=False):
@@ -293,20 +295,22 @@ def _net_sheet_flow(price: float, styles):
         return [Paragraph(f"<b>{t}</b>", styles["small"]), ""]
 
     rows = [
-        subhead("Brokerage &amp; concessions"),
+        subhead("Selling costs"),
         row("Seller broker fee", "3.0% of price", seller_fee),
         row("Buyer broker fee", "3.0% of price", buyer_fee),
         row("Seller concession", "credits offered to buyer", concession),
         row("Misc. — inspection repairs", "standard allowance", repairs),
-        subhead("Taxes &amp; payoff"),
+        row("Total selling costs", "", selling, bold=True, total=True),
+        subhead("Closing expenses · seller-paid"),
         row("Prop. taxes", f"{tax_rate}% annual · prorated to day {days} of {close.year}", tax),
-        row("Seller loan balance", "current mortgage payoff", payoff),
-        subhead("Title fees · seller-paid"),
         row("Owner's title policy", "auto · ≈0.15% of price", title),
         row("Owner's extended coverage", "", oec),
         row("Bundled closing fees", "", bundled),
         row("Final water", "final utility reading", water),
-        row("Total selling costs", "", costs, bold=True, total=True),
+        row("Total closing expenses", "", closing, bold=True, total=True),
+        subhead("Mortgage payoff"),
+        row("Seller loan balance", "current mortgage payoff — not a selling cost", payoff),
+        row("Total deductions", "selling + closing + payoff", deductions, bold=True, total=True),
     ]
 
     tbl = Table(rows, colWidths=[4.7 * inch, 2.2 * inch])

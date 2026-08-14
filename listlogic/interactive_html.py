@@ -423,6 +423,9 @@ def render_interactive_html(report: dict) -> str:
         )
 
     comps_cards = "".join(_comp_card(i, c) for i, c in enumerate(comps_payload))
+    comps_print_more = "".join(
+        _comp_card(i, c) for i, c in enumerate(comps_payload[4:], start=4)
+    ) if len(comps_payload) > 4 else ""
     subject_slot = subject_card
     comps_rows = "".join(
         f"<tr data-comp-idx=\"{i}\">"
@@ -506,6 +509,86 @@ def render_interactive_html(report: dict) -> str:
     if yoy_summary and len(yoy_summary) % 2:
         yoy_kpi += '<div class="kpi" style="visibility:hidden" aria-hidden="true"><div class="v">—</div><div class="l">—</div></div>'
         yoy_n = len(yoy_summary) + 1
+
+    def _pct_delta(new, old):
+        try:
+            if old is None or new is None or float(old) == 0:
+                return None
+            return (float(new) - float(old)) / float(old) * 100.0
+        except (TypeError, ValueError, ZeroDivisionError):
+            return None
+
+    insight_pace = "Sales volume by year shows whether this segment is heating up or cooling off."
+    insight_price = "Median sold price is what buyers actually paid — the facts behind the recommended list."
+    insight_timing = f"Homes in this set typically go under contract in about <strong>{median_dom:.0f} days</strong> when priced with the market."
+    if len(yoy_summary) >= 2:
+        prior, latest = yoy_summary[-2], yoy_summary[-1]
+        sales_d = _pct_delta(latest.get("sales"), prior.get("sales"))
+        price_d = _pct_delta(latest.get("median_price"), prior.get("median_price"))
+        dom_d = _pct_delta(latest.get("median_dom"), prior.get("median_dom"))
+        y0, y1 = prior.get("year"), latest.get("year")
+        if sales_d is not None:
+            direction = "up" if sales_d > 3 else ("down" if sales_d < -3 else "flat")
+            if direction == "up":
+                insight_pace = (
+                    f"<strong>{y1}</strong> is running <strong>{sales_d:+.0f}%</strong> more sales than {y0} "
+                    f"({int(latest.get('sales') or 0)} vs {int(prior.get('sales') or 0)}). More closes = more proof of what buyers will pay."
+                )
+            elif direction == "down":
+                insight_pace = (
+                    f"<strong>{y1}</strong> sales are <strong>{sales_d:.0f}%</strong> vs {y0} "
+                    f"({int(latest.get('sales') or 0)} vs {int(prior.get('sales') or 0)}). A thinner market means pricing accuracy matters more."
+                )
+            else:
+                insight_pace = (
+                    f"Sales pace is steady {y0} → {y1} "
+                    f"({int(prior.get('sales') or 0)} vs {int(latest.get('sales') or 0)} closes). Consistency favors a clear, market-anchored list."
+                )
+        if price_d is not None:
+            if price_d > 2:
+                insight_price = (
+                    f"Median sold price moved <strong>{price_d:+.1f}%</strong> from {y0} to {y1} "
+                    f"(${(prior.get('median_price') or 0)/1000:.0f}k → ${(latest.get('median_price') or 0)/1000:.0f}k). "
+                    f"List with that momentum — not last year’s memory."
+                )
+            elif price_d < -2:
+                insight_price = (
+                    f"Median sold price eased <strong>{price_d:.1f}%</strong> from {y0} to {y1} "
+                    f"(${(prior.get('median_price') or 0)/1000:.0f}k → ${(latest.get('median_price') or 0)/1000:.0f}k). "
+                    f"Buyers are paying today’s number — stretch asks stall."
+                )
+            else:
+                insight_price = (
+                    f"Median sold price is holding near "
+                    f"<strong>${(latest.get('median_price') or 0)/1000:.0f}k</strong> year over year. "
+                    f"Stability is your friend — price into the heart of recent closes."
+                )
+        if dom_d is not None and latest.get("median_dom") is not None:
+            if dom_d > 8:
+                insight_timing = (
+                    f"Median days on market stretched to <strong>{latest.get('median_dom'):.0f} days</strong> "
+                    f"({dom_d:+.0f}% vs {y0}). Overpricing costs weeks — and creates comps that help sell other homes."
+                )
+            elif dom_d < -8:
+                insight_timing = (
+                    f"Homes are moving faster — median DOM is <strong>{latest.get('median_dom'):.0f} days</strong> "
+                    f"({dom_d:.0f}% vs {y0}). Well-priced listings get attention quickly."
+                )
+            else:
+                insight_timing = (
+                    f"Time-to-contract is steady around <strong>{latest.get('median_dom'):.0f} days</strong>. "
+                    f"Price with the market and you should land near that pace."
+                )
+    ym = yoy.get("monthly_sales") or {}
+    if (ym.get("this_year") or []) and (ym.get("last_year") or []):
+        ty = sum(ym.get("this_year") or [])
+        ly = sum(ym.get("last_year") or [])
+        if ly and ty:
+            md = (ty - ly) / ly * 100
+            insight_pace += (
+                f" Same months YTD: <strong>{ty}</strong> sales this year vs <strong>{ly}</strong> last year "
+                f"({md:+.0f}%)."
+            )
     mdef = report.get("market_definition") or story.get("market_definition") or {}
     dns = report.get("did_not_sell") or story.get("did_not_sell") or {}
     chip_list = [c for c in (mdef.get("chips") or []) if c]
@@ -954,6 +1037,8 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .net-row .nv{{text-align:right;font-weight:700;color:var(--brand-primary);font-variant-numeric:tabular-nums;white-space:nowrap}}
 .net-row.net-total{{background:#f4f1ea}}
 .net-row.net-total .nl,.net-row.net-total .nv{{font-weight:800;color:var(--ink)}}
+.net-row.net-subtotal{{background:#faf9f6}}
+.net-row.net-subtotal .nl,.net-row.net-subtotal .nv{{font-weight:700;color:var(--ink)}}
 .net-subhead{{padding:10px 14px 6px;font-size:.66rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--brand-primary);background:#f8f6f1;border-bottom:1px solid var(--border)}}
 .net-subhead span{{color:var(--muted);font-weight:600;letter-spacing:.02em;text-transform:none}}
 .net-row .ni input[type="date"]{{padding-right:4px;font-size:.8rem}}
@@ -965,6 +1050,7 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .net-summary .ns-bar{{height:8px;border-radius:99px;background:rgba(255,255,255,.25);overflow:hidden;margin:4px 0}}
 .net-summary .ns-fill{{height:100%;background:#e9c46a;border-radius:99px;transition:width .3s ease}}
 .net-summary .ns-note{{font-size:.8rem;font-weight:600}}
+.net-summary .ns-deductions{{font-size:.78rem;opacity:.9;line-height:1.45;margin-top:2px}}
 .net-summary .ns-fine{{font-size:.68rem;opacity:.75;line-height:1.45;margin-top:4px}}
 .price-row{{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}}
 .price-block{{background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:14px 11px;text-align:center;min-height:84px;display:flex;flex-direction:column;justify-content:center}}
@@ -1285,6 +1371,25 @@ footer{{text-align:center;color:var(--muted);font-size:.72rem;margin-top:20px;pa
 .yoy-charts{{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}}
 .yoy-charts.stacked{{grid-template-columns:1fr}}
 .yoy-charts.stacked .chart-box.short{{height:300px}}
+.md-panel{{margin-top:18px;padding:16px 16px 14px;border:1px solid var(--border);border-radius:16px;background:linear-gradient(180deg,#fff,#f8fafc)}}
+.md-panel:first-of-type{{margin-top:12px}}
+.md-panel-head{{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px}}
+.md-panel-head h3{{margin:0;font-size:1.05rem;font-family:'Fraunces',Georgia,serif;font-weight:700;color:var(--ink);letter-spacing:-.01em}}
+.md-panel-head .md-tag{{font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--brand-primary);background:#eef5fb;border-radius:999px;padding:4px 10px}}
+.md-talk{{font-size:.9rem;line-height:1.5;color:var(--text);margin:0 0 12px;padding:10px 12px;border-left:3px solid var(--brand-primary);background:#f4f8fc;border-radius:0 10px 10px 0}}
+.md-talk strong{{color:var(--brand-primary)}}
+.md-chart-grid{{display:grid;grid-template-columns:1fr 1fr;gap:14px}}
+.md-chart-grid.solo{{grid-template-columns:1fr}}
+.md-chart-block h4{{margin:0 0 6px;font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}}
+.md-chart-block .chart-box{{height:280px}}
+.md-chart-block .chart-box.short{{height:240px}}
+.md-chart-block .chart-box.feature{{height:320px}}
+@media(max-width:800px){{
+  .md-chart-grid{{grid-template-columns:1fr}}
+  .md-chart-block .chart-box,.md-chart-block .chart-box.short,.md-chart-block .chart-box.feature{{height:240px}}
+}}
+.print-only{{display:none}}
+.section-kicker{{font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 4px}}
 a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}}
 .status-pill{{display:inline-block;padding:1px 7px;border-radius:10px;font-size:.68rem;font-weight:600}}
 .st-Sold{{background:#e8f5e9;color:#0d7a4f}}
@@ -1339,7 +1444,7 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
 
   /* One landscape sheet per spine section — inset box so printer margins cannot clip */
   /* marker: print-page-spine */
-  /* marker: print-fit-v2 */
+  /* marker: print-fit-v3 */
   .page > .hero,
   .page > .core-facts,
   .page > .section[id^="spine-"]:not(#spine-fulldata){{
@@ -1360,6 +1465,7 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
     display:flex;flex-direction:column;justify-content:center;
   }}
   #spine-supply[style*="display:none"]{{display:none!important}}
+  #spine-comps-more[hidden]{{display:none!important}}
   .section:hover{{box-shadow:none!important}}
 
   /* Nested blocks never become their own print pages */
@@ -1371,12 +1477,62 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
     page-break-before:auto!important;break-before:auto!important;
     overflow:visible;padding:0;margin:0;
   }}
-  #yoyCharts2{{page-break-before:auto!important;break-before:auto!important;padding-top:8px}}
+
+  /* Comps: page 1 = top 4; page 2 = remaining (print-only section) */
+  #spine-comps .comp-map-wrap,
+  #spine-comps .comp-subject,
+  #spine-comps .comp-rank-how,
+  #spine-comps .comp-toolbar,
+  #spine-comps .comp-table-toggle,
+  #spine-comps .comp-table-wrap{{display:none!important}}
+  #spine-comps .comp-rail .comp-card:nth-child(n+5){{display:none!important}}
+  .print-only{{display:block!important}}
+  #spine-comps-more .comp-rail .comp-card{{display:flex!important}}
+  #spine-comps .comp-rail,
+  #spine-comps-more .comp-rail{{grid-template-columns:repeat(4,1fr);gap:8px;padding:0}}
+  #spine-comps .comp-visual,
+  #spine-comps-more .comp-visual{{height:95px!important}}
+  #spine-comps .comp-card .cb,
+  #spine-comps-more .comp-card .cb{{padding:8px}}
+  #spine-comps .comp-card .ca,
+  #spine-comps-more .comp-card .ca{{font-size:.78rem;min-height:0}}
+  #spine-comps .comp-card .match-why,
+  #spine-comps-more .comp-card .match-why{{display:none}}
+  #spine-comps .comp-card .cf,
+  #spine-comps-more .comp-card .cf{{font-size:.65rem}}
 
   .chart-box{{height:140px!important;min-height:0!important;max-height:155px!important}}
   .chart-box.short{{height:120px!important;max-height:130px!important}}
-  .chart-box.scatter-tall{{height:185px!important;max-height:200px!important}}
   .chart-box canvas,.chart-box img.print-chart{{max-width:100%!important;max-height:100%!important;height:auto!important;width:auto!important}}
+
+  /* Price vs sqft gets the full page — chart must read large */
+  #spine-position .chart-box.scatter-tall{{height:320px!important;max-height:340px!important;min-height:280px!important}}
+  #spine-position .story-note{{font-size:.82rem;margin-top:8px}}
+  #spine-position .sub{{margin-bottom:4px}}
+
+  /* Market detail panels — one topic per page, charts readable */
+  #spine-yoy .md-panel,
+  #spine-prices .md-panel,
+  #spine-timing .md-panel{{
+    margin:6px 0 0;padding:10px 12px;border-radius:10px;background:#fff;
+  }}
+  #spine-yoy .md-talk,
+  #spine-prices .md-talk,
+  #spine-timing .md-talk{{font-size:.82rem;margin-bottom:8px;padding:8px 10px}}
+  #spine-yoy .chart-box,
+  #spine-prices .chart-box,
+  #spine-timing .chart-box,
+  #spine-yoy .chart-box.short,
+  #spine-prices .chart-box.short,
+  #spine-timing .chart-box.short,
+  #spine-yoy .chart-box.feature,
+  #spine-prices .chart-box.feature,
+  #spine-timing .chart-box.feature{{
+    height:210px!important;max-height:230px!important;min-height:180px!important
+  }}
+  #spine-yoy .yoy-kpis{{display:none!important}}
+  #spine-yoy .md-chart-grid.solo .chart-box{{height:250px!important;max-height:270px!important}}
+
   #compMap{{height:270px!important}}
   .comp-map-foot{{display:none!important}}
   .comp-map-legend .map-kind{{border:none;background:transparent;padding:0;cursor:default}}
@@ -1389,8 +1545,6 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
   a[href]::after{{content:none!important}}
   .whatif-grid{{display:grid!important;grid-template-columns:repeat(var(--whatif-cols,5),minmax(0,1fr))!important;overflow:visible!important;gap:8px}}
   .price-controls{{display:block!important;margin-top:8px}}
-  .comp-rail{{grid-template-columns:repeat(4,1fr);gap:8px}}
-  .comp-card .comp-photo{{height:80px}}
   .market-duo,.ask-trio,.supply-wait,.supply-hero,.cf-grid,.comp-card,.verdict,.wyw,.response-grid{{page-break-inside:avoid}}
   .kpis,.kpis.market-kpis,.kpis.yoy-kpis{{gap:6px}}
   .kpi{{padding:8px 6px}}
@@ -1410,6 +1564,7 @@ body.print-leavebehind #spine-fulldata,
 body.print-leavebehind .page > .two-col,
 body.print-leavebehind .page > .section:not([id]){{display:none!important}}
 body.print-leavebehind .page{{padding-bottom:0}}
+body.print-leavebehind .print-only{{display:block!important}}
 </style>
 </head>
 <body>
@@ -1491,7 +1646,9 @@ body.print-leavebehind .page{{padding-bottom:0}}
     <a href="#spine-comps" data-spine="comps">3 · Comps</a>
     <a href="#spine-rating" data-spine="rating">4 · Your Home</a>
     <a href="#spine-position" data-spine="position">5 · Position</a>
-    <a href="#spine-yoy" data-spine="yoy">6 · Market Detail</a>
+    <a href="#spine-yoy" data-spine="yoy">6 · Pace</a>
+    <a href="#spine-prices" data-spine="prices">6b · Prices</a>
+    <a href="#spine-timing" data-spine="timing">6c · Timing</a>
     <a href="#spine-strategy" data-spine="strategy">7 · Price It</a>
     <a href="#spine-net" data-spine="net">8 · Net Sheet</a>
   </nav>
@@ -1678,6 +1835,12 @@ body.print-leavebehind .page{{padding-bottom:0}}
     </div>
   </section>
 
+  <section class="section print-only" id="spine-comps-more" {'hidden' if not comps_print_more else ''}>
+    <h2><span class="ttl"><span class="step">3</span>Closest Comparable Sales · continued</span></h2>
+    <p class="sub">Remaining close sales in this set — same ranking as the live presentation.</p>
+    <div class="comp-rail">{comps_print_more}</div>
+  </section>
+
   <section class="section" id="spine-rating">
     <h2><span class="ttl"><span class="step">4</span>How Does Your Home Compare?</span></h2>
     <p class="sub">Look at the comps above. Condition, updates, and curb appeal change what buyers will pay. Lock a band — or fine-tune 1–10 — and we&rsquo;ll apply it when we set the list.</p>
@@ -1696,6 +1859,7 @@ body.print-leavebehind .page{{padding-bottom:0}}
   </section>
 
   <section class="section" id="spine-position">
+    <p class="section-kicker">Step 5 · Where you sit</p>
     <h2><span class="ttl"><span class="step">5</span>Your Home on the Price vs Sq Ft Map</span>
       <span class="controls" id="scatterRange">
         <button type="button" data-scatter-mo="3">3 mo</button>
@@ -1703,7 +1867,7 @@ body.print-leavebehind .page{{padding-bottom:0}}
         <button type="button" data-scatter-mo="0">All sales</button>
       </span>
     </h2>
-    <p class="sub">Trend = orange · Tap layers on/off · <span id="scatterCount">Recent sales</span></p>
+    <p class="sub">Orange line = sold trend · Tap layers on/off · <span id="scatterCount">Recent sales</span></p>
     <div class="controls scatter-series" id="scatterSeries">
       <button type="button" class="active series-sold" data-scatter-series="Sold">Sold</button>
       <button type="button" class="active series-active" data-scatter-series="Active">Active</button>
@@ -1714,66 +1878,95 @@ body.print-leavebehind .page{{padding-bottom:0}}
   </section>
 
   <section class="section" id="spine-yoy">
-    <h2><span class="ttl"><span class="step">6</span>Market Detail</span>
-      <span class="controls">
-        <button type="button" class="active" data-yoy-layout="side">Side by Side</button>
-        <button type="button" data-yoy-layout="stack">Stacked</button>
-      </span>
-    </h2>
-    <p class="sub">Year-over-year and recent trends — the context behind the number.</p>
+    <p class="section-kicker">Step 6 · Market detail</p>
+    <h2><span class="ttl"><span class="step">6</span>Pace — Is the Market Speeding Up or Slowing?</span></h2>
+    <p class="sub">Year-over-year sales tell you whether demand is building or thinning in this exact segment.</p>
     <div class="kpis yoy-kpis" style="--yoy-cols:{yoy_n}">{yoy_kpi or '<div class="kpi"><div class="v">—</div><div class="l">Need dated sales</div></div>'}</div>
-    <div class="yoy-charts" id="yoyCharts1">
-      <div>
-        <h2 style="font-size:.85rem">Sales by Year</h2>
-        <div class="chart-box short"><canvas id="yoySales"></canvas></div>
+    <div class="md-panel">
+      <div class="md-panel-head">
+        <h3>Sales volume</h3>
+        <span class="md-tag">Talking point</span>
       </div>
-      <div>
-        <h2 style="font-size:.85rem">Median Sold Price by Year</h2>
-        <div class="chart-box short"><canvas id="yoyPrice"></canvas></div>
-      </div>
-    </div>
-    <div style="margin-top:10px">
-      <h2 style="font-size:.85rem">Same-Month Sales · Last Year vs This Year</h2>
-      <div class="chart-box"><canvas id="yoyMonthly"></canvas></div>
-    </div>
-    <div class="yoy-charts" id="yoyCharts2">
-      <div>
-        <h2 style="font-size:.85rem">Median DOM by Year</h2>
-        <div class="chart-box short"><canvas id="yoyDom"></canvas></div>
-      </div>
-      <div>
-        <h2 style="font-size:.85rem">Sales Volume Trend</h2>
-        <span class="controls">
-          <button type="button" class="active" data-chart="sales" data-mode="month">Month</button>
-          <button type="button" data-chart="sales" data-mode="year">Year</button>
-        </span>
-        <div class="chart-box short"><canvas id="salesTrend"></canvas></div>
+      <p class="md-talk">{insight_pace}</p>
+      <div class="md-chart-grid">
+        <div class="md-chart-block">
+          <h4>Sales by year</h4>
+          <div class="chart-box short"><canvas id="yoySales"></canvas></div>
+        </div>
+        <div class="md-chart-block">
+          <h4>Same-month · last year vs this year</h4>
+          <div class="chart-box short"><canvas id="yoyMonthly"></canvas></div>
+        </div>
       </div>
     </div>
   </section>
 
-  <div class="two-col">
-    <section class="section">
-      <h2><span class="ttl">Median Sold Price by Month</span>
-        <span class="controls" id="priceTrendToggle" style="{'display:none' if not monthly_price_bands.get('labels') else ''}">
-          <button type="button" class="active" data-price-view="all">All sales</button>
-          <button type="button" data-price-view="bands">Vs. your price line</button>
-        </span>
-      </h2>
-      <p class="sub" id="priceTrendSub">Median sold price each month in this segment.</p>
-      <div class="chart-box short"><canvas id="priceTrend"></canvas></div>
-    </section>
-    <section class="section">
-      <h2><span class="ttl">Days on Market</span>
-        <span class="controls">
-          <button type="button" class="active" data-chart="dom" data-mode="dist">Distribution</button>
-          <button type="button" data-chart="dom" data-mode="trend">By Month</button>
-        </span>
-      </h2>
-      <p class="sub">Median: <strong>{(dom_dist.get("median") or median_dom):.0f} days</strong></p>
-      <div class="chart-box short"><canvas id="domChart"></canvas></div>
-    </section>
-  </div>
+  <section class="section" id="spine-prices">
+    <p class="section-kicker">Step 6b · What buyers paid</p>
+    <h2><span class="ttl">Prices — What the Market Is Actually Paying</span>
+      <span class="controls" id="priceTrendToggle" style="{'display:none' if not monthly_price_bands.get('labels') else ''}">
+        <button type="button" class="active" data-price-view="all">All sales</button>
+        <button type="button" data-price-view="bands">Vs. your price line</button>
+      </span>
+    </h2>
+    <p class="sub" id="priceTrendSub">Median sold price is the clearest signal of buyer willingness to pay in this set.</p>
+    <div class="md-panel">
+      <div class="md-panel-head">
+        <h3>Price movement</h3>
+        <span class="md-tag">Talking point</span>
+      </div>
+      <p class="md-talk">{insight_price}</p>
+      <div class="md-chart-grid">
+        <div class="md-chart-block">
+          <h4>Median sold price by year</h4>
+          <div class="chart-box short"><canvas id="yoyPrice"></canvas></div>
+        </div>
+        <div class="md-chart-block">
+          <h4>Median sold price by month</h4>
+          <div class="chart-box feature"><canvas id="priceTrend"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="spine-timing">
+    <p class="section-kicker">Step 6c · How long it takes</p>
+    <h2><span class="ttl">Timing — Days on Market</span>
+      <span class="controls">
+        <button type="button" class="active" data-chart="dom" data-mode="dist">Distribution</button>
+        <button type="button" data-chart="dom" data-mode="trend">By Month</button>
+      </span>
+    </h2>
+    <p class="sub">Median: <strong>{(dom_dist.get("median") or median_dom):.0f} days</strong> — price with the market and this is the pace to expect.</p>
+    <div class="md-panel">
+      <div class="md-panel-head">
+        <h3>Time to contract</h3>
+        <span class="md-tag">Talking point</span>
+      </div>
+      <p class="md-talk">{insight_timing}</p>
+      <div class="md-chart-grid">
+        <div class="md-chart-block">
+          <h4>Median DOM by year</h4>
+          <div class="chart-box short"><canvas id="yoyDom"></canvas></div>
+        </div>
+        <div class="md-chart-block">
+          <h4>Where sales land</h4>
+          <div class="chart-box feature"><canvas id="domChart"></canvas></div>
+        </div>
+      </div>
+      <div class="md-chart-grid solo" style="margin-top:12px">
+        <div class="md-chart-block">
+          <h4>Sales volume trend
+            <span class="controls" style="float:right">
+              <button type="button" class="active" data-chart="sales" data-mode="month">Month</button>
+              <button type="button" data-chart="sales" data-mode="year">Year</button>
+            </span>
+          </h4>
+          <div class="chart-box short"><canvas id="salesTrend"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <section class="section">
     <div class="split">
@@ -1847,7 +2040,7 @@ body.print-leavebehind .page{{padding-bottom:0}}
     <p class="sub">Estimated proceeds at the price on the slider — move it and this sheet updates. Tap any line to adjust to your situation. Estimates only, not a closing statement.</p>
     <div class="net-grid">
       <div class="net-lines" id="netLines">
-        <div class="net-subhead">Brokerage &amp; concessions</div>
+        <div class="net-subhead">Selling costs</div>
         <div class="net-row">
           <div class="nl">Seller broker fee</div>
           <div class="ni"><input type="number" id="netSellerFeePct" min="0" max="10" step="0.1" value="3"><span class="nu">%</span></div>
@@ -1868,23 +2061,22 @@ body.print-leavebehind .page{{padding-bottom:0}}
           <div class="ni"><input type="number" id="netRepairs" min="0" step="100" value="2000"><span class="nu">$</span></div>
           <div class="nv" id="netRepairsVal">—</div>
         </div>
-        <div class="net-subhead">Taxes &amp; payoff</div>
+        <div class="net-row net-subtotal">
+          <div class="nl">Total selling costs</div>
+          <div></div>
+          <div class="nv" id="netSellingVal">—</div>
+        </div>
+        <div class="net-subhead">Closing expenses <span>· seller-paid</span></div>
         <div class="net-row">
           <div class="nl">Prop. taxes <small>auto · annual rate prorated to close</small></div>
           <div class="ni"><input type="number" id="netTaxRate" min="0" max="5" step="0.01" value="0.76"><span class="nu">%</span></div>
           <div class="nv" id="netTaxVal">—</div>
         </div>
         <div class="net-row">
-          <div class="nl">Seller loan balance <small>current mortgage payoff</small></div>
-          <div class="ni"><input type="number" id="netPayoff" min="0" step="500" value="0"><span class="nu">$</span></div>
-          <div class="nv" id="netPayoffVal">—</div>
-        </div>
-        <div class="net-row">
           <div class="nl">Closing date <small>drives the tax proration</small></div>
           <div class="ni"><input type="date" id="netCloseDate"></div>
           <div class="nv nv-days" id="netCloseDays">—</div>
         </div>
-        <div class="net-subhead">Title fees <span>· seller-paid</span></div>
         <div class="net-row">
           <div class="nl">Owner's title policy <small id="netTitleTag">auto · ≈0.15% of price</small></div>
           <div class="ni"><input type="number" id="netTitle" min="0" step="50" value="0" data-auto="1"><span class="nu">$</span></div>
@@ -1905,8 +2097,19 @@ body.print-leavebehind .page{{padding-bottom:0}}
           <div class="ni"><input type="number" id="netWater" min="0" step="10" value="200"><span class="nu">$</span></div>
           <div class="nv" id="netWaterVal">—</div>
         </div>
+        <div class="net-row net-subtotal">
+          <div class="nl">Total closing expenses</div>
+          <div></div>
+          <div class="nv" id="netClosingVal">—</div>
+        </div>
+        <div class="net-subhead">Mortgage payoff</div>
+        <div class="net-row">
+          <div class="nl">Seller loan balance <small>current mortgage payoff — not a selling cost</small></div>
+          <div class="ni"><input type="number" id="netPayoff" min="0" step="500" value="0"><span class="nu">$</span></div>
+          <div class="nv" id="netPayoffVal">—</div>
+        </div>
         <div class="net-row net-total">
-          <div class="nl">Total selling costs</div>
+          <div class="nl">Total deductions <small>selling + closing + payoff</small></div>
           <div></div>
           <div class="nv" id="netCostsVal">—</div>
         </div>
@@ -1916,6 +2119,7 @@ body.print-leavebehind .page{{padding-bottom:0}}
         <div class="ns-big" id="netBig">—</div>
         <div class="ns-sub">at <strong id="netPrice">—</strong> · <span id="netPct">—</span> of list</div>
         <div class="ns-bar"><div class="ns-fill" id="netFill"></div></div>
+        <div class="ns-deductions" id="netDeductNote">—</div>
         <div class="ns-note" id="netRecNote">—</div>
         <div class="ns-fine">Estimates only — your closer issues the official figures. Loan balance, concessions, and fees change this the most.</div>
       </div>
@@ -1984,7 +2188,9 @@ body.print-leavebehind .page{{padding-bottom:0}}
       <label><input type="checkbox" data-section="spine-comps" checked> 3 · Comps</label>
       <label><input type="checkbox" data-section="spine-rating" checked> 4 · Your Home</label>
       <label><input type="checkbox" data-section="spine-position" checked> 5 · Position</label>
-      <label><input type="checkbox" data-section="spine-yoy" checked> 6 · Market Detail</label>
+      <label><input type="checkbox" data-section="spine-yoy" checked> 6 · Pace</label>
+      <label><input type="checkbox" data-section="spine-prices" checked> 6b · Prices</label>
+      <label><input type="checkbox" data-section="spine-timing" checked> 6c · Timing</label>
       <label><input type="checkbox" data-section="spine-strategy" checked> 7 · Price It</label>
       <label><input type="checkbox" data-section="spine-net" checked> 8 · Net Sheet</label>
       <label><input type="checkbox" data-section="spine-fulldata" checked> Full Market Data</label>
@@ -2617,8 +2823,10 @@ function renderNetSheet(price) {{
   const titleEl = document.getElementById('netTitle');
   if (titleEl.dataset.auto === '1') titleEl.value = netAutoTitle(price);
   const c = netCostsAt(price);
-  const costs = c.sellerFee + c.buyerFee + c.concession + c.repairs + c.tax + c.payoff + c.title + c.oec + c.bundled + c.water;
-  const net = price - costs;
+  const selling = c.sellerFee + c.buyerFee + c.concession + c.repairs;
+  const closing = c.tax + c.title + c.oec + c.bundled + c.water;
+  const deductions = selling + closing + c.payoff;
+  const net = price - deductions;
   document.getElementById('netSellerFeeVal').textContent = '\\u2212' + money(c.sellerFee);
   document.getElementById('netBuyerFeeVal').textContent = '\\u2212' + money(c.buyerFee);
   document.getElementById('netConcessionVal').textContent = c.concession ? '\\u2212' + money(c.concession) : '\\u2014';
@@ -2631,17 +2839,28 @@ function renderNetSheet(price) {{
   document.getElementById('netWaterVal').textContent = c.water ? '\\u2212' + money(c.water) : '\\u2014';
   const tp = netTaxParts(price);
   document.getElementById('netCloseDays').textContent = tp.days ? 'day ' + tp.days + ' of ' + tp.year : 'set date';
-  document.getElementById('netCostsVal').textContent = '\\u2212' + money(costs);
+  const sellEl = document.getElementById('netSellingVal');
+  if (sellEl) sellEl.textContent = '\\u2212' + money(selling);
+  const closeEl = document.getElementById('netClosingVal');
+  if (closeEl) closeEl.textContent = '\\u2212' + money(closing);
+  document.getElementById('netCostsVal').textContent = '\\u2212' + money(deductions);
   document.getElementById('netBig').textContent = money(net);
   document.getElementById('netPrice').textContent = money(price);
   const pct = Math.max(0, Math.min(100, Math.round(net / price * 1000) / 10));
   document.getElementById('netPct').textContent = pct.toFixed(1) + '%';
   document.getElementById('netFill').style.width = pct + '%';
+  const deductNote = document.getElementById('netDeductNote');
+  if (deductNote) {{
+    deductNote.textContent = 'Selling ' + money(selling) + ' · Closing ' + money(closing)
+      + (c.payoff ? ' · Payoff ' + money(c.payoff) : ' · Payoff not entered');
+  }}
   const note = document.getElementById('netRecNote');
   if (Math.abs(price - currentRec) > 500) {{
     const rc = netCostsAt(currentRec);
-    const recCosts = rc.sellerFee + rc.buyerFee + rc.concession + rc.repairs + rc.tax + rc.payoff + rc.title + rc.oec + rc.bundled + rc.water;
-    note.textContent = 'At the recommended ' + money(currentRec) + ' you\\u2019d net \\u2248 ' + money(currentRec - recCosts);
+    const recSell = rc.sellerFee + rc.buyerFee + rc.concession + rc.repairs;
+    const recClose = rc.tax + rc.title + rc.oec + rc.bundled + rc.water;
+    const recDed = recSell + recClose + rc.payoff;
+    note.textContent = 'At the recommended ' + money(currentRec) + ' you\\u2019d net \\u2248 ' + money(currentRec - recDed);
   }} else {{
     note.textContent = 'Showing the recommended price';
   }}
@@ -2857,9 +3076,27 @@ function bootCharts(attempt) {{
     return;
   }}
   try {{
-  Chart.defaults.font.family = "'Inter','Segoe UI',system-ui,sans-serif";
+  Chart.defaults.font.family = "'Source Sans 3','Segoe UI',system-ui,sans-serif";
   Chart.defaults.color = '#5a6a7c';
   Chart.defaults.borderColor = 'rgba(208,217,228,.45)';
+  Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15,39,64,.92)';
+  Chart.defaults.plugins.tooltip.titleFont = {{ weight: '700', size: 12 }};
+  Chart.defaults.plugins.tooltip.bodyFont = {{ size: 12 }};
+  Chart.defaults.plugins.tooltip.padding = 10;
+  Chart.defaults.plugins.tooltip.cornerRadius = 8;
+  Chart.defaults.elements.bar.borderRadius = 5;
+  Chart.defaults.elements.line.borderWidth = 2.5;
+  Chart.defaults.elements.point.hoverRadius = 5;
+
+  function yearBarColors(n, accent) {{
+    const base = accent || '12,60,110';
+    return Array.from({{ length: n }}, (_, i) =>
+      i === n - 1 ? 'rgba(' + base + ',0.92)' : 'rgba(' + base + ',' + (0.38 + i * 0.12) + ')'
+    );
+  }}
+  function softGrid() {{
+    return {{ color: 'rgba(15,40,70,.06)', drawBorder: false }};
+  }}
 
   const crosshairPlugin = {{
     id: 'crosshairLine',
@@ -3077,8 +3314,8 @@ function bootCharts(attempt) {{
     }});
   }})();
   let salesChart = new Chart(document.getElementById('salesTrend'), {{
-    type:'bar', data:{{ labels: DATA.monthlySales.labels, datasets:[{{ data: DATA.monthlySales.values, backgroundColor:'rgba(12,60,110,0.75)', borderRadius:4 }}] }},
-    options:{{ responsive:true, maintainAspectRatio:false, interaction:hoverIndex, plugins:{{ legend:{{ display:false }}, tooltip:tipIndex }}, scales:{{ y:{{ beginAtZero:true }} }} }}
+    type:'bar', data:{{ labels: DATA.monthlySales.labels, datasets:[{{ data: DATA.monthlySales.values, backgroundColor:'rgba(12,60,110,0.75)', borderRadius:5, maxBarThickness:28 }}] }},
+    options:{{ responsive:true, maintainAspectRatio:false, interaction:hoverIndex, plugins:{{ legend:{{ display:false }}, tooltip:tipIndex }}, scales:{{ y:{{ beginAtZero:true, grid: softGrid(), ticks:{{ precision:0 }} }}, x:{{ grid:{{ display:false }} }} }} }}
   }});
   const priceTrendVals = DATA.monthlyPrice.values || [];
   const priceBands = DATA.monthlyPriceBands || {{}};
@@ -3086,12 +3323,12 @@ function bootCharts(attempt) {{
   const priceTrendSub = document.getElementById('priceTrendSub');
   const bandSplit = priceBands.split_price || 0;
   const bandDatasets = () => [
-    {{ label: 'Sold under ' + money(bandSplit), data: priceBands.below || [], borderColor: '#0e7a6d', backgroundColor: 'rgba(14,122,109,0.12)', fill: true, tension: 0.25, pointRadius: 3, spanGaps: true }},
-    {{ label: 'Sold at/above ' + money(bandSplit), data: priceBands.above || [], borderColor: '#b3541e', backgroundColor: 'rgba(179,84,30,0.10)', fill: true, tension: 0.25, pointRadius: 3, spanGaps: true }},
+    {{ label: 'Sold under ' + money(bandSplit), data: priceBands.below || [], borderColor: '#0e7a6d', backgroundColor: 'rgba(14,122,109,0.14)', fill: true, tension: 0.35, pointRadius: 3, pointHoverRadius: 5, spanGaps: true }},
+    {{ label: 'Sold at/above ' + money(bandSplit), data: priceBands.above || [], borderColor: '#b3541e', backgroundColor: 'rgba(179,84,30,0.12)', fill: true, tension: 0.35, pointRadius: 3, pointHoverRadius: 5, spanGaps: true }},
   ];
   let priceTrendChart = new Chart(priceTrendCtx, {{
-    type:'line', data:{{ labels: DATA.monthlyPrice.labels, datasets:[{{ data: priceTrendVals, borderColor:navy, fill:true, tension:0.25, backgroundColor:'rgba(12,60,110,0.1)', pointRadius:3 }}] }},
-    options:{{ responsive:true, maintainAspectRatio:false, interaction:hoverIndex, plugins:{{ legend:{{ display:false }}, tooltip:{{ ...tipIndex, callbacks:{{ label:c => (c.dataset.label ? c.dataset.label + ': ' : '') + money(c.raw) }} }} }}, scales:{{ y:{{ ...tightAxis(priceTrendVals, 0.25, false), ticks:{{ callback:v => '$'+(v/1000)+'k' }} }} }} }}
+    type:'line', data:{{ labels: DATA.monthlyPrice.labels, datasets:[{{ data: priceTrendVals, borderColor:navy, fill:true, tension:0.35, backgroundColor:'rgba(12,60,110,0.12)', pointRadius:3.5, pointHoverRadius:6, pointBackgroundColor:'#fff', pointBorderColor:navy, pointBorderWidth:2 }}] }},
+    options:{{ responsive:true, maintainAspectRatio:false, interaction:hoverIndex, plugins:{{ legend:{{ display:false }}, tooltip:{{ ...tipIndex, callbacks:{{ label:c => (c.dataset.label ? c.dataset.label + ': ' : '') + money(c.raw) }} }} }}, scales:{{ y:{{ ...tightAxis(priceTrendVals, 0.25, false), grid: softGrid(), ticks:{{ callback:v => '$'+(v/1000)+'k' }} }}, x:{{ grid:{{ display:false }} }} }} }}
   }});
   document.querySelectorAll('#priceTrendToggle [data-price-view]').forEach(btn => {{
     btn.addEventListener('click', () => {{
@@ -3106,31 +3343,42 @@ function bootCharts(attempt) {{
         if (priceTrendSub) priceTrendSub.innerHTML = 'Median sold price by month, split at your recommended line of <strong>' + money(bandSplit) + '</strong> — are the homes closing the ones priced under it?';
       }} else {{
         priceTrendChart.data.labels = DATA.monthlyPrice.labels;
-        priceTrendChart.data.datasets = [{{ data: priceTrendVals, borderColor: navy, fill: true, tension: 0.25, backgroundColor: 'rgba(12,60,110,0.1)', pointRadius: 3 }}];
+        priceTrendChart.data.datasets = [{{ data: priceTrendVals, borderColor: navy, fill: true, tension: 0.35, backgroundColor: 'rgba(12,60,110,0.12)', pointRadius: 3.5, pointHoverRadius: 6, pointBackgroundColor: '#fff', pointBorderColor: navy, pointBorderWidth: 2 }}];
         priceTrendChart.options.plugins.legend.display = false;
-        if (priceTrendSub) priceTrendSub.textContent = 'Median sold price each month in this segment.';
+        if (priceTrendSub) priceTrendSub.textContent = 'Median sold price is the clearest signal of buyer willingness to pay in this set.';
       }}
       priceTrendChart.update();
     }});
   }});
+  const domLabels = DATA.domDist.labels || [];
+  const domVals = DATA.domDist.values || [];
+  const domMed = +(DATA.domDist.median || DATA.medianDom || 0);
+  const domBinColors = domLabels.map((lab, i) => {{
+    // Highlight the bin that contains the median
+    const edges = [0, 15, 30, 45, 60, 90, 120, 999];
+    const lo = edges[i], hi = edges[i + 1];
+    const hit = domMed > lo && domMed <= hi;
+    return hit ? 'rgba(194,65,12,0.85)' : 'rgba(26,95,158,0.72)';
+  }});
   let domChartObj = new Chart(document.getElementById('domChart'), {{
-    type:'bar', data:{{ labels: DATA.domDist.labels, datasets:[{{ data: DATA.domDist.values, backgroundColor:'rgba(26,95,158,0.75)', borderRadius:4 }}] }},
-    options:{{ responsive:true, maintainAspectRatio:false, interaction:hoverIndex, plugins:{{ legend:{{ display:false }}, tooltip:tipIndex }} }}
+    type:'bar', data:{{ labels: domLabels, datasets:[{{ data: domVals, backgroundColor: domBinColors, borderRadius:5, maxBarThickness:36 }}] }},
+    options:{{ responsive:true, maintainAspectRatio:false, interaction:hoverIndex, plugins:{{ legend:{{ display:false }}, tooltip:{{ ...tipIndex, callbacks:{{ afterBody:() => domMed ? ['Market median ≈ ' + Math.round(domMed) + ' days'] : [] }} }} }}, scales:{{ y:{{ beginAtZero:true, grid: softGrid(), ticks:{{ precision:0 }} }}, x:{{ grid:{{ display:false }} }} }} }}
   }});
   const yoy = DATA.yoy || {{}};
+  const yoySalesVals = (yoy.sales||{{}}).values||[];
   new Chart(document.getElementById('yoySales'), {{
-    type:'bar', data:{{ labels:(yoy.sales||{{}}).labels||[], datasets:[{{ data:(yoy.sales||{{}}).values||[], backgroundColor:'rgba(12,60,110,0.75)', borderRadius:4 }}] }},
-    options:{{ responsive:true, maintainAspectRatio:false, interaction:hoverIndex, plugins:{{ legend:{{ display:false }}, tooltip:tipIndex }}, scales:{{ y:{{ beginAtZero:true }} }} }}
+    type:'bar', data:{{ labels:(yoy.sales||{{}}).labels||[], datasets:[{{ data:yoySalesVals, backgroundColor: yearBarColors(yoySalesVals.length, '12,60,110'), borderRadius:5, maxBarThickness:42 }}] }},
+    options:{{ responsive:true, maintainAspectRatio:false, interaction:hoverIndex, plugins:{{ legend:{{ display:false }}, tooltip:tipIndex }}, scales:{{ y:{{ beginAtZero:true, grid: softGrid(), ticks:{{ precision:0 }} }}, x:{{ grid:{{ display:false }} }} }} }}
   }});
   const yoyPriceVals = (yoy.median_price||{{}}).values||[];
   new Chart(document.getElementById('yoyPrice'), {{
-    type:'bar', data:{{ labels:(yoy.median_price||{{}}).labels||[], datasets:[{{ data:yoyPriceVals, backgroundColor:'rgba(26,95,158,0.75)', borderRadius:4 }}] }},
-    options:{{ responsive:true, maintainAspectRatio:false, interaction:hoverIndex, plugins:{{ legend:{{ display:false }}, tooltip:{{ ...tipIndex, callbacks:{{ label:c => money(c.raw) }} }} }}, scales:{{ y:{{ ...tightAxis(yoyPriceVals, 0.35, false), ticks:{{ callback:v => '$'+(v/1000)+'k' }} }} }} }}
+    type:'bar', data:{{ labels:(yoy.median_price||{{}}).labels||[], datasets:[{{ data:yoyPriceVals, backgroundColor: yearBarColors(yoyPriceVals.length, '26,95,158'), borderRadius:5, maxBarThickness:42 }}] }},
+    options:{{ responsive:true, maintainAspectRatio:false, interaction:hoverIndex, plugins:{{ legend:{{ display:false }}, tooltip:{{ ...tipIndex, callbacks:{{ label:c => money(c.raw) }} }} }}, scales:{{ y:{{ ...tightAxis(yoyPriceVals, 0.35, false), grid: softGrid(), ticks:{{ callback:v => '$'+(v/1000)+'k' }} }}, x:{{ grid:{{ display:false }} }} }} }}
   }});
   const yoyDomVals = (yoy.median_dom||{{}}).values||[];
   new Chart(document.getElementById('yoyDom'), {{
-    type:'bar', data:{{ labels:(yoy.median_dom||{{}}).labels||[], datasets:[{{ data:yoyDomVals, backgroundColor:'rgba(194,65,12,0.7)', borderRadius:4 }}] }},
-    options:{{ responsive:true, maintainAspectRatio:false, interaction:hoverIndex, plugins:{{ legend:{{ display:false }}, tooltip:{{ ...tipIndex, callbacks:{{ label:c => Math.round(c.raw)+' days' }} }} }}, scales:{{ y:{{ ...tightAxis(yoyDomVals, 0.4, true), ticks:{{ callback:v => Math.round(v)+'d' }} }} }} }}
+    type:'bar', data:{{ labels:(yoy.median_dom||{{}}).labels||[], datasets:[{{ data:yoyDomVals, backgroundColor: yearBarColors(yoyDomVals.length, '194,65,12'), borderRadius:5, maxBarThickness:42 }}] }},
+    options:{{ responsive:true, maintainAspectRatio:false, interaction:hoverIndex, plugins:{{ legend:{{ display:false }}, tooltip:{{ ...tipIndex, callbacks:{{ label:c => Math.round(c.raw)+' days' }} }} }}, scales:{{ y:{{ ...tightAxis(yoyDomVals, 0.4, true), grid: softGrid(), ticks:{{ callback:v => Math.round(v)+'d' }} }}, x:{{ grid:{{ display:false }} }} }} }}
   }});
   const ym = yoy.monthly_sales || {{}};
   new Chart(document.getElementById('yoyMonthly'), {{
@@ -3138,11 +3386,11 @@ function bootCharts(attempt) {{
     data:{{
       labels: ym.labels || [],
       datasets:[
-        {{ label: ym.last_year_label || 'Last year', data: ym.last_year || [], backgroundColor:'rgba(90,106,124,0.55)', borderRadius:3 }},
-        {{ label: ym.this_year_label || 'This year', data: ym.this_year || [], backgroundColor:'rgba(12,60,110,0.8)', borderRadius:3 }},
+        {{ label: ym.last_year_label || 'Last year', data: ym.last_year || [], backgroundColor:'rgba(90,106,124,0.45)', borderRadius:4, maxBarThickness:22 }},
+        {{ label: ym.this_year_label || 'This year', data: ym.this_year || [], backgroundColor:'rgba(12,60,110,0.88)', borderRadius:4, maxBarThickness:22 }},
       ]
     }},
-    options:{{ responsive:true, maintainAspectRatio:false, interaction:hoverIndex, plugins:{{ legend:{{ position:'top' }}, tooltip:tipIndex }}, scales:{{ y:{{ beginAtZero:true }} }} }}
+    options:{{ responsive:true, maintainAspectRatio:false, interaction:hoverIndex, plugins:{{ legend:{{ position:'top', align:'end', labels:{{ boxWidth:10, font:{{ size:11 }} }} }}, tooltip:tipIndex }}, scales:{{ y:{{ beginAtZero:true, grid: softGrid(), ticks:{{ precision:0 }} }}, x:{{ grid:{{ display:false }} }} }} }}
   }});
   document.querySelectorAll('.controls button').forEach(btn => {{
     btn.onclick = () => {{
@@ -3156,6 +3404,7 @@ function bootCharts(attempt) {{
         applyScatterRange(+btn.dataset.scatterMo);
         return;
       }}
+      if (btn.hasAttribute('data-yoy-layout')) return;
       const chart = btn.dataset.chart, mode = btn.dataset.mode;
       if (!chart) return;
       btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
@@ -3170,39 +3419,32 @@ function bootCharts(attempt) {{
           domChartObj.config.type = 'bar';
           domChartObj.data.labels = DATA.domDist.labels;
           domChartObj.data.datasets[0].data = DATA.domDist.values;
+          domChartObj.data.datasets[0].backgroundColor = domBinColors;
           domChartObj.data.datasets[0].borderColor = undefined;
           domChartObj.data.datasets[0].fill = false;
-          domChartObj.options.scales = {{ y: {{ beginAtZero: true }} }};
+          domChartObj.options.scales = {{ y: {{ beginAtZero: true, grid: softGrid(), ticks: {{ precision: 0 }} }}, x: {{ grid: {{ display: false }} }} }};
         }} else {{
           domChartObj.config.type = 'line';
           domChartObj.data.labels = DATA.monthlyDom.labels;
           domChartObj.data.datasets[0].data = DATA.monthlyDom.values;
           domChartObj.data.datasets[0].borderColor = navy;
+          domChartObj.data.datasets[0].backgroundColor = 'rgba(12,60,110,0.12)';
           domChartObj.data.datasets[0].fill = true;
+          domChartObj.data.datasets[0].tension = 0.35;
+          domChartObj.data.datasets[0].pointRadius = 3;
           const ax = tightAxis(DATA.monthlyDom.values || [], 0.35, true);
-          domChartObj.options.scales = {{ y: ax }};
+          domChartObj.options.scales = {{ y: {{ ...ax, grid: softGrid(), ticks: {{ callback: v => Math.round(v) + 'd' }} }}, x: {{ grid: {{ display: false }} }} }};
         }}
         domChartObj.update();
       }}
     }};
   }});
+  /* legacy yoy layout toggle removed — panels are topic-based */
 }} catch (err) {{
   console.error('ListLogic charts failed to boot', err);
 }}
 }}
 setTimeout(function () {{ bootCharts(0); }}, 0);
-
-document.querySelectorAll('[data-yoy-layout]').forEach(btn => {{
-  btn.addEventListener('click', () => {{
-    btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const stacked = btn.dataset.yoyLayout === 'stack';
-    ['yoyCharts1','yoyCharts2'].forEach(id => {{
-      const el = document.getElementById(id);
-      if (el) el.classList.toggle('stacked', stacked);
-    }});
-  }});
-}});
 
 function animateCount(el, target, prefix, dur) {{
   const start = performance.now();
