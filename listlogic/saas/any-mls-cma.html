@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WHGZQDZ6ZG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-WHGZQDZ6ZG');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CMA Software That Works With Any MLS — MLS-Agnostic CMA for Realtors &amp; Agents · ListLogic</title>
+<meta name="description" content="ListLogic is MLS-agnostic CMA software that works with any MLS: search any market nationwide or upload any MLS export (Matrix, Flexmls, Bright, RESO-style CSV/TXT). Interactive price × odds × supply for the listing appointment. Demo free.">
+<link rel="canonical" href="https://listlogic.homes/saas/any-mls-cma.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/saas/ll.css">
+<style>
+.hero-mini {
+  background: radial-gradient(900px 400px at 80% -20%, #0e7a6d33, transparent 60%),
+              linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; padding: 64px 0 72px; text-align: center;
+}
+.hero-mini h1 { font-family: 'Fraunces', serif; font-size: clamp(1.9rem, 4vw, 2.7rem); letter-spacing: -0.02em; margin-bottom: 12px; }
+.hero-mini h1 em { font-style: normal; color: var(--accent-2); }
+.hero-mini p { color: #c8d2e0; max-width: 620px; margin: 0 auto; font-size: 1.02rem; }
+.hero-mini .eyebrow { justify-content: center; }
+
+.wedge-band {
+  margin: -34px auto 0; position: relative; z-index: 2;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 22px 26px; max-width: 860px;
+}
+.wedge-band strong { font-family: 'Fraunces', serif; font-size: 1.2rem; display: block; margin-bottom: 6px; }
+.wedge-band p { color: var(--muted); font-size: 0.95rem; margin: 0; }
+
+.section { padding: 64px 0 0; }
+.section h2 { font-family: 'Fraunces', serif; font-size: clamp(1.4rem, 2.5vw, 1.9rem); letter-spacing: -0.015em; margin-bottom: 10px; }
+.section .sub { color: var(--muted); max-width: 640px; margin-bottom: 28px; }
+
+.checklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+.checklist li { display: flex; gap: 12px; align-items: flex-start; font-size: 0.94rem; }
+.checklist li::before { content: "✓"; flex: 0 0 24px; height: 24px; border-radius: 50%; background: rgba(14,122,109,0.12); color: var(--ok); font-weight: 700; display: grid; place-items: center; font-size: 0.8rem; }
+.checklist p { color: var(--muted); font-size: 0.9rem; margin-top: 2px; }
+
+.cmp-table-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+table.cmp { width: 100%; border-collapse: collapse; min-width: 640px; }
+table.cmp th, table.cmp td { padding: 14px 18px; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.cmp th { background: #f1ece1; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; }
+table.cmp th.win { background: var(--navy); color: #fff; }
+table.cmp tr:last-child th, table.cmp tr:last-child td { border-bottom: none; }
+table.cmp td.rowhead { font-weight: 700; }
+table.cmp .yes { color: var(--ok); font-weight: 700; }
+table.cmp .no { color: var(--muted); }
+table.cmp .lead { color: var(--navy); font-weight: 800; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow-sm); }
+.card h3 { font-family: 'Fraunces', serif; font-size: 1.15rem; margin-bottom: 8px; }
+.card p { color: var(--muted); font-size: 0.92rem; }
+.card .kicker { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal); margin-bottom: 6px; }
+
+.faq-ll details { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 16px 20px; margin-bottom: 10px; }
+.faq-ll summary { font-weight: 700; cursor: pointer; }
+.faq-ll p { color: var(--muted); font-size: 0.92rem; margin: 10px 0 0; }
+
+.cta-band {
+  background: linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; text-align: center; padding: 64px 0; margin-top: 64px;
+}
+.cta-band h2 { font-family: 'Fraunces', serif; font-size: clamp(1.5rem, 3vw, 2.1rem); margin-bottom: 10px; }
+.cta-band p { color: #c8d2e0; max-width: 560px; margin: 0 auto 26px; }
+.btn-trial { background: var(--accent-2); color: #1a1200; }
+
+.note { font-size: 0.82rem; color: var(--muted); max-width: 720px; margin: 26px auto 0; text-align: center; }
+
+@media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What does \"works with any MLS\" actually mean?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It means ListLogic does not depend on any single MLS. You can search a market nationwide, or upload an MLS export as CSV/TXT (Matrix, Flexmls, Bright, RESO-style). Because the data path is Search + Upload — not a live MLS feed — ListLogic works the same no matter which MLS you belong to, or even if you don't belong to one."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is ListLogic a live MLS feed?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. ListLogic is not a live MLS feed and does not connect to any MLS data service. The data path is Search on any market nationwide, or Upload your own MLS export. That is exactly why it works with any MLS without vendor approval or a data contract."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use ListLogic if I don't have MLS access?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. The Search path needs no MLS membership at all — enter the address, set filters, and ListLogic builds the competitive set and market cut from nationwide data. If you do have MLS access, you can also Upload your export. Either way, no live feed is required."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does ListLogic work with Matrix, Flexmls, Bright, and RESO-style files?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Run your comp search in the system you use and export to CSV or TXT (the menu label varies by MLS). Upload the file to ListLogic, confirm the column mapping — Beds, Sq Ft, MLS #, Close Price — with sample rows, and generate. ListLogic builds the price × odds × supply story from your own data."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does MLS-agnostic mean I have to leave my current CMA tools?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. If your MLS bundles a CMA tool, keep it for what it does well. ListLogic is complementary — it is the pricing-decision layer (price × odds × supply) you can run from any market or any export, and it follows you if you change brokerages or markets."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does CMA software that works with any MLS cost?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The sample demo is free — no account required. Create an account to Search or Upload and set branding. Unlock custom presentations with a 7-day trial (then $39/month) or a $20 one-shot per report. Annual and brokerage seat plans are on the pricing page."
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<nav class="ll-nav">
+  <div class="container ll-nav-inner">
+    <a href="index.html" class="ll-brand">
+      <img src="/saas/listlogic-logo.png" alt="ListLogic" class="ll-brand-logo">
+      <small>by SAA Homes</small>
+    </a>
+    <button type="button" class="ll-nav-toggle" id="llNavToggle" aria-label="Menu" aria-expanded="false">☰</button>
+    <div class="ll-nav-links" id="llNavLinks">
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#deliverables">What sellers get</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="faq.html">FAQ</a>
+      <a href="login.html" class="ll-auth-guest">Sign in</a>
+      <a href="signup.html" class="btn btn-trial ll-auth-guest" style="padding:10px 18px;font-size:0.86rem">Create account</a>
+    </div>
+  </div>
+</nav>
+<script>
+(function(){var t=document.getElementById('llNavToggle'),l=document.getElementById('llNavLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.setAttribute('aria-expanded',o?'true':'false');t.textContent=o?'✕':'☰';});l.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){l.classList.remove('open');t.setAttribute('aria-expanded','false');t.textContent='☰';});});})();
+</script>
+<script src="/saas/nav-auth.js"></script>
+
+<header class="hero-mini">
+  <div class="container">
+    <span class="eyebrow gold">MLS-Agnostic CMA</span>
+    <h1>CMA software that works with <em>any MLS</em> — search any market or upload any export.</h1>
+    <p>ListLogic is seller pricing-decision software that's MLS-agnostic by design: search a market nationwide, or upload any MLS export — Matrix, Flexmls, Bright, RESO-style CSV/TXT. No live MLS feed, no vendor approval, no lock-in.</p>
+  </div>
+</header>
+
+<div class="container">
+  <div class="wedge-band">
+    <strong>Most CMA tools are tied to one MLS. Your book of business isn't.</strong>
+    <p>Agents change brokerages, hold licenses in multiple markets, or cover territory split across MLS boundaries. A CMA tool that only works where your current MLS bundle reaches stops working the day you move. ListLogic is built the other way — Search any market or Upload any MLS export — so the tool follows you, not your board.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <h2>What "works with any MLS" actually means here</h2>
+    <p class="sub">Not a marketing phrase. Six concrete things, each one visible in the product.</p>
+    <div class="two-col">
+      <div>
+        <ul class="checklist">
+          <li>
+            <div><strong>No live MLS feed required</strong><p>The data path is Search + Upload — not a connection to your MLS's data service. That's the whole reason there's no vendor contract.</p></div>
+          </li>
+          <li>
+            <div><strong>Search any market nationwide</strong><p>Enter an address, set price/beds/baths/sqft filters, optionally draw a map boundary. ListLogic builds the competitive set for that home — no file needed.</p></div>
+          </li>
+          <li>
+            <div><strong>Upload any MLS export</strong><p>Matrix, Flexmls, Bright, RESO-style files, or everyday headers (Beds, Sq Ft, MLS #, Close Price). You confirm the column mapping before generating.</p></div>
+          </li>
+          <li>
+            <div><strong>No vendor approval, no data contract</strong><p>You pay ListLogic directly and keep your MLS. Nothing to get signed off by your board or brokerage.</p></div>
+          </li>
+          <li>
+            <div><strong>One standard across every market</strong><p>Multi-MLS and multi-market agents run the same presentation everywhere — no re-learning a different tool per board.</p></div>
+          </li>
+          <li>
+            <div><strong>Works without an MLS at all</strong><p>The Search path needs no MLS membership, so newer or portal-only agents can still run a full pricing story.</p></div>
+          </li>
+        </ul>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;">
+        <div class="kicker">See it on a real market</div>
+        <h3 style="margin-bottom:12px">Try the free demo</h3>
+        <p style="margin-bottom:22px">No account required. See the interactive price × odds × supply story in under two minutes — on any market.</p>
+        <a href="/demo" class="btn btn-trial">Try the free demo</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Two paths, same pricing story</h2>
+    <p class="sub">Neither one is a live MLS feed. Pick whichever fits how you work — or use both.</p>
+    <div class="cmp-table-wrap">
+      <table class="cmp">
+        <thead>
+          <tr>
+            <th>What you're comparing</th>
+            <th>Search any market</th>
+            <th class="win">Upload any MLS export</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rowhead">Best when</td>
+            <td>No export handy — you want the market now</td>
+            <td class="lead">You already pulled your comps in Matrix, Flexmls, or Bright</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Data source</td>
+            <td>ListLogic nationwide market data</td>
+            <td class="lead">Your own MLS export (CSV / TXT)</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Needs an MLS membership</td>
+            <td class="yes">No — works for agents without an MLS</td>
+            <td class="yes">Yes — you pull the export</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Control over comps</td>
+            <td>Filters + optional map boundary</td>
+            <td class="lead">Your exact comp selection</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Setup per listing</td>
+            <td>About two minutes</td>
+            <td class="lead">About two minutes</td>
+          </tr>
+          <tr>
+            <td class="rowhead">What comes out</td>
+            <td>Interactive price × odds × supply story</td>
+            <td class="lead">The same story, from your data</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="text-align:center;margin-top:26px"><a href="/demo" class="btn btn-trial">Try the free demo</a></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Built for the exports you already know how to pull</h2>
+    <p class="sub">You don't need new software habits. Export the comps you'd use for a CMA today, upload, confirm the mapping, generate.</p>
+    <div class="two-col">
+      <div class="card">
+        <div class="kicker">Matrix</div>
+        <h3>Run your comp search, export, upload</h3>
+        <p>Run the comp search you'd normally use, export to CSV or TXT (the menu label varies by MLS), upload, and confirm how Beds, Sq Ft, MLS #, and Close Price map. ListLogic builds the story from your own data.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Flexmls</div>
+        <h3>Same workflow, same result</h3>
+        <p>Export your comps from Flexmls as CSV/TXT and upload. ListLogic maps the headers with sample rows before you generate, so you stay in control of what each column means.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Bright MLS</div>
+        <h3>Coverage doesn't matter here</h3>
+        <p>Whether you're on Bright or a smaller regional board, the export is the same story: upload the file, confirm the mapping, and get the interactive price × odds × supply view.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">RESO-style files</div>
+        <h3>The data dictionary maps cleanly</h3>
+        <p>If your MLS exports RESO-style headers, the standard field names map straight through. Everyday headers are covered too — you confirm the mapping with sample rows before anything is generated.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Fair questions, honest answers</h2>
+    <div class="faq-ll">
+      <details open>
+        <summary>What does "works with any MLS" actually mean?</summary>
+        <p>It means ListLogic does not depend on any single MLS. You can search a market nationwide, or upload an MLS export as CSV/TXT (Matrix, Flexmls, Bright, RESO-style). Because the data path is Search + Upload — not a live MLS feed — ListLogic works the same no matter which MLS you belong to, or even if you don't belong to one.</p>
+      </details>
+      <details>
+        <summary>Is ListLogic a live MLS feed?</summary>
+        <p>No. ListLogic is not a live MLS feed and does not connect to any MLS data service. The data path is Search on any market nationwide, or Upload your own MLS export. That is exactly why it works with any MLS without vendor approval or a data contract.</p>
+      </details>
+      <details>
+        <summary>Can I use ListLogic if I don't have MLS access?</summary>
+        <p>Yes. The Search path needs no MLS membership at all — enter the address, set filters, and ListLogic builds the competitive set and market cut from nationwide data. If you do have MLS access, you can also Upload your export. Either way, no live feed is required.</p>
+      </details>
+      <details>
+        <summary>How does ListLogic work with Matrix, Flexmls, Bright, and RESO-style files?</summary>
+        <p>Run your comp search in the system you use and export to CSV or TXT (the menu label varies by MLS). Upload the file to ListLogic, confirm the column mapping — Beds, Sq Ft, MLS #, Close Price — with sample rows, and generate. ListLogic builds the price × odds × supply story from your own data.</p>
+      </details>
+      <details>
+        <summary>Does MLS-agnostic mean I have to leave my current CMA tools?</summary>
+        <p>No. If your MLS bundles a CMA tool, keep it for what it does well. ListLogic is complementary — it's the pricing-decision layer (price × odds × supply) you can run from any market or any export, and it follows you if you change brokerages or markets.</p>
+      </details>
+      <details>
+        <summary>What does CMA software that works with any MLS cost?</summary>
+        <p>The sample demo is free — no account required. Create an account to Search or Upload and set branding. Unlock custom presentations with a 7-day trial (then $39/month) or a $20 one-shot per report. <a href="pricing.html">See pricing</a>.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<div class="cta-band">
+  <div class="container">
+    <h2>One pricing story, every market you serve</h2>
+    <p>The free demo shows live price × odds × supply on a real market. Generate a custom presentation when you're ready — 7-day trial or $20 one-shot.</p>
+    <a href="/demo" class="btn btn-trial" style="margin-right:10px">Try the free demo</a>
+    <a href="signup.html" class="btn" style="background:transparent;border:1px solid #3a4a63;color:#fff">Create account</a>
+  </div>
+</div>
+
+<p class="note">Matrix is a trademark of CoreLogic. Flexmls is a trademark of FBS. Bright MLS and RESO are trademarks of their respective owners. ListLogic is not affiliated with or endorsed by any MLS. This page describes how to bring your own MLS export into ListLogic; we do not connect to any live MLS feed. ListLogic is built by SAA Homes.</p>
+<p class="note" style="margin-top:8px">Related: <a href="mls-export-cma.html">MLS export CMA software</a> · <a href="interactive-cma-software.html">Interactive CMA software</a> · <a href="cma-software-for-realtors.html">CMA software for realtors</a> · <a href="vs-cloud-cma.html">Cloud CMA alternative</a> · <a href="/blog/soft-market-listing-presentation-price-odds-supply.html">Why static CMAs lose appointments when sellers are anchored on Zillow</a></p>
+
+<footer class="ll-footer">
+  <div class="container">
+    <div><strong>ListLogic</strong> · Data-driven custom pricing strategy</div>
+    <div><a href="https://saahomes.com">SAA Homes</a> · Schwartz and Associates, Coldwell Banker Realty</div>
+    <div><a href="index.html">Home</a> · <a href="faq.html">FAQ</a> · <a href="pricing.html">Pricing</a> · <a href="vs-saleswise.html">Saleswise alternative</a> · <a href="vs-rpr.html">RPR alternative</a> · <a href="interactive-cma-software.html">Interactive CMA software</a> · <a href="mailto:adam@saahomes.com">Contact</a></div>
+  </div>
+</footer>
+
+</body>
+</html>
