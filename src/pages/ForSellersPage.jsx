@@ -245,6 +245,25 @@ export default function ForSellersPage() {
 
       <AreaFAQSection faqs={FOR_SELLERS_FAQS} city="Northern Colorado sellers" />
 
+      {/* Selling in a specific city — Tier S seller-intent links */}
+      <section className="py-12 px-6 bg-gray-50">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold font-serif mb-3">Selling in a Specific City?</h2>
+          <p className="text-gray-700 mb-6">
+            Get city-specific market insight, pricing data, and seller strategy for your Northern Colorado community.
+          </p>
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-semibold">
+            <a href="/northern-colorado-areas/fort-collins/" className="text-black hover:underline">Sell a Home in Fort Collins</a>
+            <a href="/northern-colorado-areas/loveland/" className="text-black hover:underline">Sell a Home in Loveland</a>
+            <a href="/northern-colorado-areas/windsor/" className="text-black hover:underline">Sell a Home in Windsor</a>
+            <a href="/northern-colorado-areas/greeley/" className="text-black hover:underline">Sell a Home in Greeley</a>
+            <a href="/northern-colorado-areas/timnath/" className="text-black hover:underline">Sell a Home in Timnath</a>
+            <a href="/northern-colorado-areas/berthoud/" className="text-black hover:underline">Sell a Home in Berthoud</a>
+            <a href="/northern-colorado-areas/severance/" className="text-black hover:underline">Sell a Home in Severance</a>
+          </div>
+        </div>
+      </section>
+
       {/* Luxury sellers cross-link */}
       <section className="py-12 px-6 bg-gray-50">
         <div className="max-w-3xl mx-auto text-center">

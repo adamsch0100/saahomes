@@ -200,6 +200,20 @@ export default function MapSection() {
             ))}
           </div>
 
+          {/* Popular City Guides — static links to area guide money pages */}
+          <div className="mb-8 text-center">
+            <h3 className="text-lg font-bold text-gray-900 mb-3">Popular City Guides</h3>
+            <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
+              <a href="/northern-colorado-areas/fort-collins/" className="text-sm font-semibold text-gray-800 underline underline-offset-2 hover:text-black">Fort Collins Real Estate Guide</a>
+              <a href="/northern-colorado-areas/greeley/" className="text-sm font-semibold text-gray-800 underline underline-offset-2 hover:text-black">Greeley Real Estate Guide</a>
+              <a href="/northern-colorado-areas/loveland/" className="text-sm font-semibold text-gray-800 underline underline-offset-2 hover:text-black">Loveland Real Estate Guide</a>
+              <a href="/northern-colorado-areas/windsor/" className="text-sm font-semibold text-gray-800 underline underline-offset-2 hover:text-black">Windsor Real Estate Guide</a>
+              <a href="/northern-colorado-areas/timnath/" className="text-sm font-semibold text-gray-800 underline underline-offset-2 hover:text-black">Timnath Real Estate Guide</a>
+              <a href="/northern-colorado-areas/berthoud/" className="text-sm font-semibold text-gray-800 underline underline-offset-2 hover:text-black">Berthoud Real Estate Guide</a>
+              <a href="/northern-colorado-areas/severance/" className="text-sm font-semibold text-gray-800 underline underline-offset-2 hover:text-black">Severance Real Estate Guide</a>
+            </div>
+          </div>
+
           {/* CTA Button */}
           <div className="text-center">
             <a

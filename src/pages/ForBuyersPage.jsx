@@ -125,7 +125,14 @@ export default function ForBuyersPage() {
               <p className="text-gray-700 mb-4">
                 Explore detailed guides for Fort Collins, Loveland, Windsor, Greeley, and other Northern Colorado communities.
               </p>
-              <a href="/northern-colorado-areas/" className="text-black font-semibold hover:underline">Explore →</a>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 mb-4 text-sm">
+                <a href="/northern-colorado-areas/fort-collins/" className="text-black font-semibold hover:underline">Fort Collins Guide</a>
+                <a href="/northern-colorado-areas/loveland/" className="text-black font-semibold hover:underline">Loveland Guide</a>
+                <a href="/northern-colorado-areas/windsor/" className="text-black font-semibold hover:underline">Windsor Guide</a>
+                <a href="/northern-colorado-areas/greeley/" className="text-black font-semibold hover:underline">Greeley Guide</a>
+                <a href="/northern-colorado-areas/timnath/" className="text-black font-semibold hover:underline">Timnath Guide</a>
+              </div>
+              <a href="/northern-colorado-areas/" className="text-black font-semibold hover:underline">Explore All Areas →</a>
             </div>
 
             <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow border-2 border-[#CFB36E]/40">
