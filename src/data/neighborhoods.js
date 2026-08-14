@@ -2646,6 +2646,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.478', longitude: '-104.908' },
     metaDescription: 'Windsor Green - low-maintenance patio homes near Windsor Lake in central Windsor. SAA Homes.',
     keywords: 'Windsor Green, Windsor patio homes, low-maintenance homes Windsor, Windsor Lake area homes',
+    youtubeId: 'b8RnJYsfcHM',
     neighborhoodHighlights: [
       { title: 'Low maintenance', description: 'Patio homes and villas with HOA-managed landscaping and snow removal - perfect for active adults.' },
       { title: 'Windsor Lake', description: 'Steps from Windsor Lake, Boardwalk Park, and the walking trail around the lake.' },
@@ -2677,6 +2678,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.478', longitude: '-104.922' },
     metaDescription: 'The Reserve at Windsor - luxury custom homes in prestigious west Windsor. SAA Homes.',
     keywords: 'The Reserve Windsor, luxury homes Windsor CO, west Windsor custom homes, Windsor executive homes',
+    youtubeId: '8bXs6QcJzP0',
     neighborhoodHighlights: [
       { title: 'Custom homes', description: 'Premium custom-built homes with high-end finishes, many designed by renowned architects.' },
       { title: 'Mountain views', description: 'Elevated lots offer spectacular Front Range and Longs Peak views.' },
@@ -2711,6 +2713,7 @@ export const neighborhoods = [
     walkScore: 20,
     metaDescription: 'Seven Lakes Windsor real estate - resort-style lake community with new homes, clubhouse, and walking trails in east Windsor. SAA Homes.',
     keywords: 'Seven Lakes Windsor, Windsor lake community, new homes Windsor, master-planned community Windsor, Windsor new construction, Windsor lakeside homes, Seven Lakes subdivision Windsor, east Windsor real estate',
+    youtubeId: 'qAuBbiPyqgs',
     neighborhoodHighlights: [
       { title: 'Lake lifestyle', description: 'Seven connected lakes with scenic views, fishing, and water access - resort living every day.' },
       { title: 'Resort amenities', description: 'Clubhouse, pool, fitness center, and trails - the best amenity package in Windsor.' },
