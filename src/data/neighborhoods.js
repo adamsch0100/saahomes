@@ -2748,6 +2748,7 @@ export const neighborhoods = [
     walkScore: 35,
     metaDescription: 'Windsor Ridge Windsor real estate - established west Windsor subdivision with mountain views near Main Street. SAA Homes.',
     keywords: 'Windsor Ridge Windsor, west Windsor homes, established Windsor subdivisions, Main Street Windsor area, Windsor family homes, mountain view homes Windsor, Windsor CO real estate',
+    youtubeId: 'M3zuAF4JI2Q',
     neighborhoodHighlights: [
       { title: 'Established character', description: 'Mature trees and well-maintained homes in one of west Windsor\'s most established subdivisions.' },
       { title: 'Mountain views', description: 'West Windsor\'s elevated location provides Front Range views from many homes.' },
@@ -2786,6 +2787,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.4230', longitude: '-104.7650' },
     metaDescription: 'Mountain Shadows Greeley real estate guide — established homes near University Schools and 47th Avenue shopping. Family-friendly subdivision with mature landscaping. SAA Homes.',
     keywords: 'Mountain Shadows Greeley, Mountain Shadows subdivision Greeley, west Greeley homes, University Schools Greeley, Greeley real estate, Mountain Shadows HOA',
+    youtubeId: '4FtkLe0jRnw',
     neighborhoodHighlights: [
       { title: 'Established community', description: 'Mature trees and established landscaping give Mountain Shadows a welcoming, settled feel.' },
       { title: 'University Schools', description: 'One of Greeley\'s top-rated K–12 charter schools is minutes away — a major draw for families.' },
@@ -2820,6 +2822,7 @@ export const neighborhoods = [
     walkScore: 62,
     metaDescription: 'Glenmere Greeley real estate guide — historic homes around Glenmere Park near downtown and UNC. Victorian, Craftsman, and Tudor homes. Expert agents from SAA Homes.',
     keywords: 'Glenmere Greeley, Glenmere Park Greeley, historic Greeley homes, downtown Greeley real estate, UNC Greeley homes, Glenmere historic district',
+    youtubeId: 'dC5MPzyIQ8M',
     neighborhoodHighlights: [
       { title: 'Historic character', description: 'Glenmere is one of Greeley\'s oldest neighborhoods, with early-1900s homes featuring original craftsmanship and architectural detail.' },
       { title: 'Glenmere Park', description: 'The neighborhood centers on Glenmere Park — a 25-acre park with a lake, walking paths, pavilion, and year-round community events.' },
