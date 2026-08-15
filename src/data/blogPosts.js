@@ -900,7 +900,7 @@ export const blogPosts = [
     image: '/images/northern-colorado-market-update-july-2026.jpg',
     readTime: '7 min read',
     supersededBy: LATEST_MARKET_UPDATE_SLUG,
-        youtubeId: 's7F06nQRH98',
+    youtubeId: 's7F06nQRH98',
     keywords: 'Northern Colorado housing market July 2026, Fort Collins home prices summer 2026, Loveland real estate trends, Windsor CO housing market, Greeley home prices, Larimer County market update mid-year 2026',
     relatedLinks: [
       { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
@@ -6264,6 +6264,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/Loveland-CO-Area-Guide.jpg',
     readTime: '9 min read',
+    youtubeId: 'etU5rmM9LlE',
     keywords: 'best realtor loveland, best real estate agent loveland, loveland realtor, loveland real estate agent, loveland co realtor, loveland colorado realtor, schwartz and associates loveland, northern colorado realtor, loveland co real estate agent, best realtor in loveland colorado',
     relatedLinks: [
       { title: 'Loveland homes for sale', href: '/northern-colorado-areas/loveland/', description: 'Sweetheart City neighborhoods, schools & live listings' },
@@ -6393,6 +6394,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/Area-Guide-for-Greeley-CO.jpg',
     readTime: '9 min read',
+    youtubeId: 'njJ_Gdadzrc',
     keywords: 'best realtor greeley, best real estate agent greeley, greeley realtor, greeley real estate agent, greeley co realtor, greeley colorado realtor, schwartz and associates greeley, weld county realtor, greeley co real estate agent, best realtor in greeley colorado',
     relatedLinks: [
       { title: 'Greeley homes for sale', href: '/northern-colorado-areas/greeley/', description: 'UNC-area neighborhoods, schools & live listings' },
@@ -6506,6 +6508,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/Longmont.jpg',
     readTime: '9 min read',
+    youtubeId: 'My8WQvq-Jk0',
     keywords: 'best realtor longmont, best real estate agent longmont, longmont realtor, longmont real estate agent, longmont co realtor, longmont colorado realtor, schwartz and associates longmont, boulder county realtor, longmont co real estate agent, best realtor in longmont colorado',
     relatedLinks: [
       { title: 'Longmont homes for sale', href: '/northern-colorado-areas/longmont/', description: 'Boulder County neighborhoods, schools & live listings' },
