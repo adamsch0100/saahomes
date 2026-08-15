@@ -1592,7 +1592,7 @@ def cmd_publish(args):
     total_duration = sd * n
     music_path = os.path.join(output_dir, f"{slug}_audio.m4a")
     print(f"\nGenerating background audio ({total_duration:.1f}s)...")
-    create_background_audio(total_duration, music_path)
+    create_background_audio(total_duration, music_path, slug=slug)
 
     print(f"Assembling video with {n} slides...")
     assemble_video(slides, output_path, music_path=music_path)
