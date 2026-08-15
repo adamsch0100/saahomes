@@ -271,6 +271,35 @@ export default function AreaGuidePage() {
         </div>
       </section>
 
+      <section className="py-16 px-6 bg-white">
+        <div className="max-w-2xl mx-auto text-center">
+          <h2 className="text-3xl font-bold font-serif mb-4">Selling Your {area.city} Home?</h2>
+          <p className="text-lg mb-6 text-gray-700">
+            Need to sell fast — or want to know what your home is really worth before you decide? Compare a no-obligation cash offer against a full market valuation, and learn exactly how fast homes sell in {area.city}.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/cash-home-buyers/"
+              className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Get a Cash Offer
+            </Link>
+            <Link
+              to="/blog/cash-home-buyers-fort-collins-northern-colorado/"
+              className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+            >
+              Cash Buyer Guide
+            </Link>
+            <Link
+              to="/for-sellers/#home-valuation"
+              className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+            >
+              Free Home Valuation
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {whyChoose.length > 0 && (
         <section className="py-16 px-6 bg-gray-50">
           <div className="max-w-6xl mx-auto">

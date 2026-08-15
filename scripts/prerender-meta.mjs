@@ -670,14 +670,22 @@ function injectAreaBody(html, area) {
       { title: 'Selling Your Home in Fort Collins', slug: 'selling-your-home-in-fort-collins', blurb: 'Pricing strategy, preparation tips & local market insights' },
       { title: 'Fort Collins Realtor Guide', slug: 'fort-collins-realtor', blurb: 'Expert real estate guidance for Fort Collins buyers and sellers' },
       { title: 'Fort Collins Housing Market — Mid-2026 Update', slug: 'fort-collins-housing-market-mid-2026', blurb: 'Median prices, days on market & inventory trends' },
+      { title: 'Cash Home Buyers in Fort Collins & Northern Colorado', slug: 'cash-home-buyers-fort-collins-northern-colorado', blurb: 'Compare cash offers vs. traditional listings & sell fast' },
     ],
     'greeley': [
       { title: 'Selling Your Home in Greeley, Colorado', slug: 'selling-a-home-in-greeley-colorado', blurb: 'Pricing strategy, preparation tips & local market insights' },
       { title: 'Buying a Home in Greeley', slug: 'buying-a-home-in-greeley', blurb: 'Neighborhoods, schools & market data for Greeley buyers' },
       { title: 'Greeley Housing Market — Mid-2026 Update', slug: 'greeley-housing-market-mid-2026', blurb: 'Median prices, days on market & inventory trends' },
+      { title: 'Cash Home Buyers in Fort Collins & Northern Colorado', slug: 'cash-home-buyers-fort-collins-northern-colorado', blurb: 'Sell fast with a cash offer or a marketed listing' },
     ],
     'windsor': [
       { title: 'Selling Your Home in Windsor, Colorado', slug: 'selling-your-home-in-windsor-colorado', blurb: 'Pricing strategy, preparation tips & local market insights' },
+      { title: 'Cash Home Buyers in Fort Collins & Northern Colorado', slug: 'cash-home-buyers-fort-collins-northern-colorado', blurb: 'Sell fast with a cash offer or a marketed listing' },
+    ],
+    'loveland': [
+      { title: 'Selling Your Home in Loveland, Colorado', slug: 'selling-your-home-in-loveland', blurb: 'Pricing strategy, preparation tips & local market insights' },
+      { title: 'Buying a Home in Loveland', slug: 'buying-a-home-in-loveland', blurb: 'Neighborhoods, schools & market data for Loveland buyers' },
+      { title: 'Cash Home Buyers in Fort Collins & Northern Colorado', slug: 'cash-home-buyers-fort-collins-northern-colorado', blurb: 'Sell fast with a cash offer or a marketed listing' },
     ],
   };
   let guidesHtml = '';
