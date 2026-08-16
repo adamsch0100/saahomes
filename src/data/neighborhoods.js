@@ -2854,6 +2854,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.43', longitude: '-104.775' },
     metaDescription: 'Kelly Farm Greeley real estate - newer family homes near University Schools with community parks and shopping access. SAA Homes.',
     keywords: 'Kelly Farm Greeley, Kelly Farm subdivision, west Greeley new construction, University Schools homes, Greeley family subdivisions, 47th Avenue Greeley homes',
+    youtubeId: '29lIyEmU1os',
     neighborhoodHighlights: [
       { title: 'University Schools', description: 'One of Greeley top-rated K-12 charter schools (9/10) is within walking distance - a major draw for families.' },
       { title: 'Newer construction', description: 'Modern floor plans, energy-efficient features, and contemporary finishes throughout.' },
@@ -2885,6 +2886,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.44', longitude: '-104.74' },
     metaDescription: 'Bittersweet Greeley real estate - homes near Bittersweet Park with lake and trails. Family-friendly north Greeley near UNC. SAA Homes.',
     keywords: 'Bittersweet Greeley, Bittersweet Park area, north Greeley homes, 35th Avenue Greeley, Greeley family neighborhoods, Greeley parks real estate',
+    youtubeId: 'JtRFLAhizYk',
     neighborhoodHighlights: [
       { title: 'Bittersweet Park', description: 'Greeley premier park with a lake, walking trails, sports fields, and a pool - the neighborhood backyard.' },
       { title: '35th Avenue corridor', description: 'Shopping, dining, and services along 35th Avenue are just minutes from any home in Bittersweet.' },
@@ -2916,6 +2918,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.425', longitude: '-104.77' },
     metaDescription: 'Covington Knolls Greeley real estate - established west Greeley homes near University Schools with mature landscaping. SAA Homes.',
     keywords: 'Covington Knolls Greeley, Covington Knolls subdivision, west Greeley homes, University Schools area, established Greeley subdivisions, 47th Avenue Greeley',
+    youtubeId: 'Rb37duYzpZA',
     neighborhoodHighlights: [
       { title: 'Established setting', description: 'Mature trees, established landscaping, and a settled neighborhood feel.' },
       { title: 'University Schools', description: 'Close to University Schools (9/10 K-12 charter) - one of Greeley top educational options.' },
