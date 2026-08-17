@@ -1,0 +1,178 @@
+{
+  "subject": "SAA Homes — Your week | Aug 17 – Aug 23",
+  "week_label": "Aug 17 – Aug 23, 2026",
+  "intro": "⚠️ Two pipeline gaps to flag: (1) No operator schedule was emailed last Monday (Aug 10) — the cron missed a week, and (2) no weekly social pack was emailed Wed Aug 12 — the last pack was Aug 5 (Buyer Concession Cheat Sheet, auto-queued in Buffer). This week's email resets the rhythm. BIG content batch shipped since Aug 3 with ZERO social coverage: 49 new neighborhood guides (shipped TODAY Aug 17, covering Erie, Brighton, Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue + Carbon Valley — neighborhoods.js grew to 317), 3 best-realtor posts (Loveland/Greeley/Longmont, Aug 14), Recently Sold data on all 27 area pages (Aug 14), /assumable-mortgages/ hub + 2 posts (Aug 13), /veterans/ hub + VA loan + military relocation posts (Aug 12-13), Fort Collins short-sale guide (Aug 13), Erie new-construction guide (Aug 13), Timnath/Berthoud/Johnstown realtor guides (Aug 6-12), selling-in-Longmont (Aug 12), and 4 CMA software pages (Aug 14). The Wednesday pack will cover the newest items; the 49-neighborhood batch is the #1 priority since it shipped this morning. August market update (pack emailed Aug 3) still worth verifying. Carryover backlog from the Aug 3 schedule remains (~10 items). Expect ~30 min this week.",
+  "pending_social_packs": [
+    {
+      "title": "🆕 49 Neighborhood Guides — Erie, Brighton, Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue, Carbon Valley (shipped TODAY Aug 17)",
+      "url": "https://saahomes.com/northern-colorado-areas/erie/colliers-hill-erie/",
+      "post_by": "Wednesday Aug 19 — priority #1 (shipped this morning, zero coverage). Promote a few flagship neighborhoods, e.g. https://saahomes.com/northern-colorado-areas/erie/colliers-hill-erie/, https://saahomes.com/northern-colorado-areas/brighton/downtown-brighton/, https://saahomes.com/northern-colorado-areas/estes-park/downtown-estes-park/"
+    },
+    {
+      "title": "🆕 3 Best-Realtor Posts — Loveland, Greeley, Longmont (Aug 14, Tier S battle vs Kittle)",
+      "url": "https://saahomes.com/blog/loveland-colorado-real-estate-agent/",
+      "post_by": "Wednesday Aug 19 — priority (newest, zero coverage). Also: /blog/greeley-colorado-real-estate-agent/ and /blog/longmont-colorado-real-estate-agent/"
+    },
+    {
+      "title": "🆕 Recently Sold — live MLS closed data on all 27 area pages + /for-sellers/ (Aug 14)",
+      "url": "https://saahomes.com/for-sellers/",
+      "post_by": "Wednesday Aug 19 — priority (new feature, zero coverage)"
+    },
+    {
+      "title": "🆕 Assumable Mortgages hub + 2 posts (Aug 13) — lower-rate listings",
+      "url": "https://saahomes.com/assumable-mortgages/",
+      "post_by": "Wednesday Aug 19 — priority. Also: /blog/assumable-mortgage-colorado/ and /blog/assumable-homes-fort-collins/"
+    },
+    {
+      "title": "🆕 Veterans hub + 0.5% pledge + VA loan posts (Aug 12–13)",
+      "url": "https://saahomes.com/veterans/",
+      "post_by": "Wednesday Aug 19 — priority. Also: /blog/va-loan-colorado-guide/ and /blog/military-relocation-northern-colorado/"
+    },
+    {
+      "title": "🆕 Fort Collins Short Sale Guide (Aug 13)",
+      "url": "https://saahomes.com/blog/short-sale-fort-collins-colorado/",
+      "post_by": "Thursday Aug 20 — catch-up (newest batch)"
+    },
+    {
+      "title": "🆕 Erie New Construction Buyer Guide (Aug 13)",
+      "url": "https://saahomes.com/blog/erie-colorado-new-construction-buyer-guide/",
+      "post_by": "Thursday Aug 20 — catch-up"
+    },
+    {
+      "title": "🆕 Realtor guides: Timnath (Aug 12), Berthoud (Aug 11), Johnstown (Aug 6), selling-in-Longmont (Aug 12)",
+      "url": "https://saahomes.com/blog/timnath-colorado-real-estate-agent/",
+      "post_by": "Thursday Aug 20 — catch-up. Also: /blog/berthoud-colorado-real-estate-agent/, /blog/johnstown-colorado-real-estate-agent/, /blog/selling-your-home-in-longmont/"
+    },
+    {
+      "title": "🆕 CMA software pages — 4 new hero pages for agents (Aug 14)",
+      "url": "https://saahomes.com/mls-export-cma/",
+      "post_by": "Friday Aug 21 — optional (B2B/agent audience). Also: /any-mls-cma/, /cma-in-mls/, /upload-mls-export/"
+    },
+    {
+      "title": "📊 August 2026 Market Update — current month (pack emailed Aug 3)",
+      "url": "https://saahomes.com/blog/northern-colorado-market-update-august-2026/",
+      "post_by": "Verify posted — if not, Wednesday Aug 19 (still time-sensitive until Sept update)"
+    },
+    {
+      "title": "📅 Events Calendar page — /events/ (Aug 1, 53 verified events)",
+      "url": "https://saahomes.com/events/",
+      "post_by": "Thursday Aug 20 — catch-up (never confirmed posted)"
+    },
+    {
+      "title": "🆕 Divorce Home Sale Guide (Jul 30) + Windsor CO Real Estate Agent Guide (Aug 1)",
+      "url": "https://saahomes.com/blog/divorce-home-sale-northern-colorado-guide/",
+      "post_by": "Thursday Aug 20 — catch-up. Also: /blog/windsor-colorado-real-estate-agent/"
+    },
+    {
+      "title": "🏡 Weld County vs Larimer County buyer guide",
+      "url": "https://saahomes.com/blog/weld-county-vs-larimer-county-buyer-guide/",
+      "post_by": "Friday Aug 21 — catch-up (backlog)"
+    },
+    {
+      "title": "💰 Cash buyer vertical — hub page + blog post",
+      "url": "https://saahomes.com/blog/cash-buyers-northern-colorado/",
+      "post_by": "Friday Aug 21 — catch-up (backlog)"
+    },
+    {
+      "title": "⚠️ Foreclosure & short sale blog post",
+      "url": "https://saahomes.com/blog/foreclosure-short-sale-northern-colorado/",
+      "post_by": "Friday Aug 21 — catch-up (backlog)"
+    },
+    {
+      "title": "🏘️ Luxury home buying guide + Fort Collins luxury neighborhoods + luxury page",
+      "url": "https://saahomes.com/blog/luxury-home-buying-guide-northern-colorado/",
+      "post_by": "Friday Aug 21 — catch-up (backlog). Also: /blog/fort-collins-luxury-neighborhoods-guide/ and /luxury-real-estate/"
+    },
+    {
+      "title": "🏡 Severance buyer guide + Carbon Valley affordable homes guide",
+      "url": "https://saahomes.com/blog/buying-a-home-in-severance-colorado/",
+      "post_by": "End of week if time (backlog). Also: /blog/carbon-valley-affordable-homes-guide/"
+    },
+    {
+      "title": "🏘️ FC vs Loveland vs Windsor comparison + Is Windsor expensive to live?",
+      "url": "https://saahomes.com/blog/fort-collins-vs-loveland-vs-windsor/",
+      "post_by": "End of week if time (backlog). Also: /blog/is-windsor-colorado-expensive-to-live/"
+    }
+  ],
+  "schedule": [
+    {
+      "day": "Monday",
+      "date": "Aug 17",
+      "priority": "optional",
+      "tasks": [
+        "Read this email — your week at a glance (first schedule in 2 weeks)",
+        "Skim Hermes weekly war room on Telegram (rankings + top actions)",
+        "Check Follow Up Boss for weekend form leads — call/text market report leads same day",
+        "Preview today's big ship: 49 neighborhood guides across Erie, Brighton, Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue, Carbon Valley — e.g. https://saahomes.com/northern-colorado-areas/erie/colliers-hill-erie/",
+        "Note: no social pack arrived Wed Aug 12 — expect this week's Wednesday pack to be bigger than usual"
+      ]
+    },
+    {
+      "day": "Tuesday",
+      "date": "Aug 18",
+      "priority": "optional",
+      "tasks": [
+        "Follow Up Boss — speed-to-lead on any new contact or CHFA form submissions",
+        "Preview Wednesday's social pack when it arrives in email",
+        "Optional: post 1-2 of the newest blogs early if you have 5 minutes (best-realtor posts or Veterans hub)"
+      ]
+    },
+    {
+      "day": "Wednesday",
+      "date": "Aug 19",
+      "priority": "high",
+      "tasks": [
+        "📧 Check email for the weekly Social Post Pack (Week 3 — Seller Focus rotation + new content batch)",
+        "Priority 1: 49 Neighborhood Guides (shipped Mon — biggest zero-coverage batch; pick 2-3 flagship neighborhoods)",
+        "Priority 2: 3 best-realtor posts (Loveland/Greeley/Longmont) + Recently Sold on /for-sellers/",
+        "Priority 3: Assumable Mortgages hub + Veterans hub (both brand-new money-adjacent pages)",
+        "Verify: August market update posted (pack emailed Aug 3)",
+        "Meta Business Suite: post to Facebook + Instagram (use attached images + captions from email)",
+        "Google Business Profile: post update with image + link",
+        "X (@saahomes): paste X caption + link",
+        "Buffer: reload queue with Week 3 (Seller Focus) rotation if time permits",
+        "Optional: reply 'posted' on Telegram"
+      ],
+      "notes": "Week 3 — Seller Focus rotation (sell my house fast, concessions, downsizing, city seller guides). Since the Aug 12 pack never went out, Wednesday's email may combine two weeks of content — prioritize the newest items above and treat older rotation posts as Buffer queue filler."
+    },
+    {
+      "day": "Thursday",
+      "date": "Aug 20",
+      "priority": "high",
+      "tasks": [
+        "Telegram: review OUTREACH REVIEW drafts — reply 'approved', 'edit: …', or 'skip'",
+        "Catch-up social: Short Sale guide, Erie new construction, Timnath/Berthoud/Johnstown realtor guides, selling-in-Longmont",
+        "Catch-up: Events Calendar page (/events/), Divorce guide, Windsor realtor guide",
+        "Follow Up Boss — check for mid-week leads",
+        "Priority order: Short sale > Erie new construction > realtor guides > Events page > Divorce/Windsor guides"
+      ]
+    },
+    {
+      "day": "Friday",
+      "date": "Aug 21",
+      "priority": "optional",
+      "tasks": [
+        "Catch-up: clear remaining social packs from pending list if possible",
+        "Priority order for remaining: Weld vs Larimer > Cash buyer > Foreclosure > Luxury guides > Severance > Carbon Valley > FC vs Loveland vs Windsor > Windsor cost-of-living",
+        "Optional: CMA software pages (B2B angle) if time",
+        "Follow Up Boss — close out open leads from the week"
+      ]
+    },
+    {
+      "day": "Weekend",
+      "date": "Aug 22–23",
+      "priority": "optional",
+      "tasks": [
+        "Monitor FUB for new leads only — no social posting required unless a pack arrives"
+      ]
+    }
+  ],
+  "standing_reminders": [
+    "Market report form leads = high intent — call/text same business day",
+    "Post social packs within 48 hours of email arrival (backlog is large after the missed week — chip away daily)",
+    "Never use Browserbase for social — email packs only",
+    "Hermes handles site SEO/blog/deploy — you handle paste + leads + outreach approval",
+    "Catch-up priority: 49 neighborhood guides (Wed) > best-realtor posts (Wed) > Assumable/Veterans hubs (Wed) > Short sale + Erie + realtor guides (Thu) > backlog (Fri)",
+    "Buffer queue: only the Aug 5 Buyer Concession posts are queued — reload with Week 3 (Seller Focus) rotation; focus manual paste on Instagram"
+  ]
+}

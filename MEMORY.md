@@ -15,13 +15,13 @@
 
 ## Content calendar state
 
-last_social_pack_date: 2026-08-03
-last_social_pillar: market-intelligence
-rotation_week_index: 2
-last_3_social_hooks: ["Sculpture in the Park returns to Loveland Aug 7–9 — one of the largest outdoor sculpture shows in the country. Great weekend to explore the Sweetheart City."]
+last_social_pack_date: 2026-08-05
+last_social_pillar: seller-focus
+rotation_week_index: 3
+last_3_social_hooks: ["49 neighborhood guides shipped Aug 17 for Erie, Brighton, Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue + Carbon Valley — biggest zero-coverage batch yet.", "Assumable mortgages are the 2026 low-rate play — /assumable-mortgages/ hub + 2 guides live Aug 13.", "Recently Sold — live MLS closed data now on all 27 area pages + /for-sellers/ (Aug 14)."]
 monthly_market_blog_url: https://saahomes.com/blog/northern-colorado-market-update-august-2026/
-blogs_published_this_month: 1 (windsor-colorado-real-estate-agent)
-pending_social_packs: 19 (see operator-week-2026-08-03.json for full list)
+blogs_published_this_month: 15 (northern-colorado-market-update-august-2026, windsor-colorado-real-estate-agent, johnstown-colorado-real-estate-agent, berthoud-colorado-real-estate-agent, va-loan-colorado-guide, military-relocation-northern-colorado, selling-your-home-in-longmont, timnath-colorado-real-estate-agent, assumable-mortgage-colorado, assumable-homes-fort-collins, short-sale-fort-collins-colorado, erie-colorado-new-construction-buyer-guide, loveland-colorado-real-estate-agent, greeley-colorado-real-estate-agent, longmont-colorado-real-estate-agent)
+pending_social_packs: 18 (see operator-week-2026-08-17.json for full list)
 latest_market_update_slug: northern-colorado-market-update-august-2026
 last_events_check_date: 2026-08-01
 next_notable_event: Larimer County Fair (Jul 31-Aug 4) + Sculpture in the Park (Aug 7-9) — both posted to Buffer 2026-08-01
@@ -478,8 +478,8 @@ Week of 2026-08-03:
 
 ## GEO AUDIT SCORECARD (2026-08-13)
 
-- Area pages with FAQPage schema: 19/19 deployed
-- City FAQ pairs: 19 cities, 2-6 pairs each
+- Area pages with FAQPage schema: 27/27 deployed
+- City FAQ pairs: 27 entities, 2-6 pairs each
 - ForBuyers FAQPage schema: Yes (deployed, 6 FAQ pairs)
 - ForSellers FAQPage schema: Yes (deployed, FAQ pairs)
 - Properties FAQPage + ItemList: Yes (deployed)
@@ -490,3 +490,14 @@ Week of 2026-08-03:
 - Blog posts with FAQPage schema: 23/64 before audit -> 31/64 after (8 posts + 36 FAQ pairs added)
 - PR shipped: hermes/seo-2026-08-13-geo-blog-faqs
 - Next gap: 33 blog posts still lack FAQPage schema (older/market-update posts); CHFA SchoolsToHome/Champions/G-Hope FAQPage in prerendered HTML; competitor GEO tracking
+
+## Daily Ranking Strike — 2026-08-14
+
+### ⚠️ P0 — Pages No Longer Indexed
+
+| Page | Previous Impressions | Previous Clicks | Top Queries |
+|------|---------------------|-----------------|-------------|
+| https://saahomes.com/northern-colorado-areas/firestone/barefoot-lakes-firestone/ | 5 | 0 | barefoot land, barefoot lakes firestone, barefoot colorado |
+| https://saahomes.com/northern-colorado-areas/loveland/northgate-loveland/ | 5 | 0 | northgate apartments |
+
+*Report generated: 2026-08-14T13:10:37.424246*
