@@ -18,6 +18,12 @@ import { CHFA_PAGE_CONFIGS, CHFA_PROGRAMS, CHFA_STEPS, CHFA_DPA_OPTIONS, CHFA_RE
 import { getAllEvents, getCityDisplayName, getMonthNames, getEventsGuidePath, EVENTS_DATA_LAST_REVIEWED } from '../src/data/localEvents.js';
 import { LUXURY_HUB_FAQS } from '../src/data/luxuryMarket.js';
 
+// Freshness signal for E-E-A-T (dated expert content). Keep in sync with
+// AREA_CONTENT_DATE in src/data/areaSeo.js. Bump when content is substantively
+// updated — drives Google re-crawl of pages it previously crawled pre-content
+// (indexation patrol 2026-08-17: /properties/, FC, Greeley "not indexed").
+const CONTENT_DATE = '2026-08-17';
+
 // Live listings API for ItemList schema (real active MLS rows only — never fabricate).
 // Prefer LISTINGS_API_BASE / VITE_API_URL when building against a non-prod environment.
 const LISTINGS_API_BASE = (
@@ -164,6 +170,7 @@ function buildWebPageSchema({ title, description, canonical }) {
     name: title,
     description,
     url: canonical,
+    dateModified: CONTENT_DATE,
     inLanguage: 'en-US',
     isPartOf: {
       '@type': 'WebSite',

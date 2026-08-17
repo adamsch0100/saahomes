@@ -1,6 +1,12 @@
 import { BUSINESS, SITE_URL } from '../utils/seoConstants.js';
 import { AREA_FAQS } from './areaFaqs.js';
 
+// Freshness signal for E-E-A-T (dated expert content). Update this to the date
+// the area page content was last substantively changed. Used in WebPage schema
+// so Google sees current, dated content on re-crawl (indexation patrol 2026-08-17:
+// FC/Greeley/properties crawled before content shipped → dateModified drives re-crawl).
+export const AREA_CONTENT_DATE = '2026-08-17';
+
 export const areaSeoPages = [
   {
     slug: 'fort-collins',
@@ -925,6 +931,7 @@ export function buildAreaPageSchemas(area) {
       name: `${area.city} Real Estate | Homes for Sale in ${area.city}, CO`,
       description: area.description,
       url: pageUrl,
+      dateModified: AREA_CONTENT_DATE,
       inLanguage: 'en-US',
       isPartOf: {
         '@type': 'WebSite',

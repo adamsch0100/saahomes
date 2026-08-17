@@ -295,7 +295,7 @@ function blogPriority(slug) {
 export function getSitemapEntries(lastmod) {
   const date = lastmod || new Date().toISOString().slice(0, 10);
 
-  return [
+  const entries = [
     ...staticPages.map((page) => ({ ...page, lastmod: date })),
     ...areaSeoPages.map((area) =>
       withShareMeta({
@@ -355,6 +355,13 @@ export function getSitemapEntries(lastmod) {
       })
     ),
   ];
+
+  // Exclude noindex session/account pages from the sitemap. Google crawls
+  // sitemap URLs, sees their "noindex, nofollow" meta, and flags them as
+  // "Excluded by noindex tag" — which triggered 4 GSC index-coverage alerts
+  // (Aug 17 2026). /my-home/, /notifications/, /my-saved-searches/ and
+  // /alerts/manage/ are account dashboards that must never appear in sitemaps.
+  return entries.filter((entry) => !entry.robots || !entry.robots.includes('noindex'));
 }
 
 export function getPrerenderRoutes() {
