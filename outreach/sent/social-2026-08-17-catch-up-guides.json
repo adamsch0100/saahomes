@@ -1,0 +1,45 @@
+{
+  "subject": "SAA Homes \u2014 Social posts | More New Guides (Short Sale, Erie, Realtor Tips, Events)",
+  "promoting": {
+    "title": "New Guides: Short Sales, Erie New Construction & More",
+    "url": "https://saahomes.com/blog/short-sale-fort-collins-colorado/"
+  },
+  "intro": "Catch-up batch: Fort Collins short-sale guide, Erie new-construction buyer guide, realtor guides for Timnath/Berthoud/Johnstown, and the 2026 events calendar.",
+  "scheduled_posts": [
+    {
+      "platform": "Google Business Profile",
+      "status": "scheduled",
+      "scheduled_at": "2026-09-02T15:00:00Z"
+    },
+    {
+      "platform": "X",
+      "status": "scheduled",
+      "scheduled_at": "2026-09-03T15:00:00Z"
+    },
+    {
+      "platform": "Facebook",
+      "status": "scheduled",
+      "scheduled_at": "2026-09-04T15:00:00Z"
+    }
+  ],
+  "operator_schedule": [
+    "Posts are queued via Buffer automatically."
+  ],
+  "platforms": [
+    {
+      "name": "Google Business Profile",
+      "caption": "New guides to browse: short sales in Fort Collins, new-construction buying in Erie, realtor tips for Timnath/Berthoud/Johnstown, and the full 2026 Northern Colorado events calendar. Learn more at the link below.",
+      "image_url": "https://saahomes.com/images/foreclosure-short-sale-northern-colorado-guide.jpg"
+    },
+    {
+      "name": "Facebook",
+      "caption": "\ud83d\udcda New on the SAA Homes blog:\n\n\u2022 Short sale in Fort Collins? What sellers should know \u2192 https://saahomes.com/blog/short-sale-fort-collins-colorado/\n\u2022 New-construction buyer guide for Erie \u2192 https://saahomes.com/blog/erie-colorado-new-construction-buyer-guide/\n\u2022 Realtor guides: Timnath \u2192 https://saahomes.com/blog/timnath-colorado-real-estate-agent/ \u00b7 Berthoud \u2192 https://saahomes.com/blog/berthoud-colorado-real-estate-agent/ \u00b7 Johnstown \u2192 https://saahomes.com/blog/johnstown-colorado-real-estate-agent/\n\u2022 2026 events calendar \u2192 https://saahomes.com/events/\n\nAdam & Mandi Schwartz | SAA Homes\n(970) 999-1407\n\n#FortCollins #ErieColorado #Timnath #Berthoud #Johnstown #NorthernColoradoEvents #SAAHomes",
+      "image_url": "https://saahomes.com/images/foreclosure-short-sale-northern-colorado-guide.jpg"
+    },
+    {
+      "name": "X",
+      "caption": "New guides: Fort Collins short sales, Erie new construction, Timnath/Berthoud/Johnstown agent tips + the 2026 events calendar: https://saahomes.com/blog/short-sale-fort-collins-colorado/",
+      "image_url": "https://saahomes.com/images/foreclosure-short-sale-northern-colorado-guide.jpg"
+    }
+  ]
+}

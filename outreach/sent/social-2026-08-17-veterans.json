@@ -1,0 +1,45 @@
+{
+  "subject": "SAA Homes \u2014 Social posts | Veterans Hub + VA Loan Guides",
+  "promoting": {
+    "title": "Veterans Hub \u2014 0.5% Back Pledge + VA Loan Guides",
+    "url": "https://saahomes.com/veterans/"
+  },
+  "intro": "SAA Homes gives back to those who served: 0.5% pledge at closing, VA loan guide, and a military relocation guide.",
+  "scheduled_posts": [
+    {
+      "platform": "Google Business Profile",
+      "status": "scheduled",
+      "scheduled_at": "2026-08-27T15:00:00Z"
+    },
+    {
+      "platform": "X",
+      "status": "scheduled",
+      "scheduled_at": "2026-08-28T15:00:00Z"
+    },
+    {
+      "platform": "Facebook",
+      "status": "scheduled",
+      "scheduled_at": "2026-08-29T15:00:00Z"
+    }
+  ],
+  "operator_schedule": [
+    "Posts are queued via Buffer automatically."
+  ],
+  "platforms": [
+    {
+      "name": "Google Business Profile",
+      "caption": "Serving Northern Colorado veterans: our team pledges 0.5% back at closing (applied to your warranty, closing costs, or price \u2014 whichever helps most). Plus VA loan and relocation guides. Click the button to learn more.",
+      "image_url": "https://saahomes.com/images/veterans-noco-2026.jpg"
+    },
+    {
+      "name": "Facebook",
+      "caption": "\ud83c\uddfa\ud83c\uddf8 To the veterans and military families of Northern Colorado \u2014 thank you.\n\nWe made it official: SAA Homes pledges 0.5% of our commission back to every veteran and active-duty client at closing. You choose how it's applied \u2014 extended warranty, closing costs, or a price reduction.\n\nNew resources to help you buy or sell:\n\u2022 Veterans hub & pledge details \u2192 https://saahomes.com/veterans/\n\u2022 VA loan guide for Colorado \u2192 https://saahomes.com/blog/va-loan-colorado-guide/\n\u2022 Military relocation guide \u2192 https://saahomes.com/blog/military-relocation-northern-colorado/\n\nAdam & Mandi Schwartz | SAA Homes\n(970) 999-1407\n\n#Veterans #MilitaryFriendly #VALoan #NorthernColoradoRealEstate #SAAHomes",
+      "image_url": "https://saahomes.com/images/veterans-noco-2026.jpg"
+    },
+    {
+      "name": "X",
+      "caption": "Veterans & military families: we pledge 0.5% back at closing \u2014 applied to your warranty, costs, or price. VA loan + relocation guides: https://saahomes.com/veterans/",
+      "image_url": "https://saahomes.com/images/veterans-noco-2026.jpg"
+    }
+  ]
+}

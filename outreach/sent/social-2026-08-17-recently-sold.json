@@ -1,0 +1,45 @@
+{
+  "subject": "SAA Homes \u2014 Social posts | Recently Sold Data + August Market Update",
+  "promoting": {
+    "title": "Recently Sold Homes on Every City Page",
+    "url": "https://saahomes.com/for-sellers/"
+  },
+  "intro": "Live MLS closed-sale data is now on all 27 city pages plus the sellers page \u2014 see what homes actually sell for in your neighborhood. The August market update is live too.",
+  "scheduled_posts": [
+    {
+      "platform": "Google Business Profile",
+      "status": "scheduled",
+      "scheduled_at": "2026-08-24T15:00:00Z"
+    },
+    {
+      "platform": "X",
+      "status": "scheduled",
+      "scheduled_at": "2026-08-25T15:00:00Z"
+    },
+    {
+      "platform": "Facebook",
+      "status": "scheduled",
+      "scheduled_at": "2026-08-26T15:00:00Z"
+    }
+  ],
+  "operator_schedule": [
+    "Posts are queued via Buffer automatically."
+  ],
+  "platforms": [
+    {
+      "name": "Google Business Profile",
+      "caption": "Curious what homes are actually selling for in your neighborhood? Live recently-sold data is now on every Northern Colorado city page \u2014 27 communities covered. Learn more at the link below.",
+      "image_url": "https://saahomes.com/images/recently-sold-noco-2026.jpg"
+    },
+    {
+      "name": "Facebook",
+      "caption": "\ud83d\udcca What did homes in YOUR neighborhood actually sell for?\n\nWe just put live recently-sold data on all 27 Northern Colorado city pages \u2014 real MLS closed sales, not estimates. Check your community:\n\nhttps://saahomes.com/for-sellers/\n\nAnd for the big picture, our August market update covers home prices, inventory, and summer trends across Fort Collins, Loveland, Windsor, and Greeley: https://saahomes.com/blog/northern-colorado-market-update-august-2026/\n\nAdam & Mandi Schwartz | SAA Homes\n(970) 999-1407\n\n#NorthernColoradoRealEstate #RecentlySold #FortCollins #Loveland #Windsor #Greeley #SAAHomes",
+      "image_url": "https://saahomes.com/images/recently-sold-noco-2026.jpg"
+    },
+    {
+      "name": "X",
+      "caption": "See what homes actually sell for in your neighborhood \u2014 live closed-sale data now on all 27 NoCo city pages: https://saahomes.com/for-sellers/",
+      "image_url": "https://saahomes.com/images/recently-sold-noco-2026.jpg"
+    }
+  ]
+}

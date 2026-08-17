@@ -1,0 +1,45 @@
+{
+  "subject": "SAA Homes \u2014 Social posts | Assumable Mortgages Hub",
+  "promoting": {
+    "title": "Assumable Mortgages \u2014 Lower-Rate Listings",
+    "url": "https://saahomes.com/assumable-mortgages/"
+  },
+  "intro": "New hub explaining assumable mortgages \u2014 how buyers can take over a seller's low interest rate and what to watch for. Plus two deep-dive posts.",
+  "scheduled_posts": [
+    {
+      "platform": "Google Business Profile",
+      "status": "scheduled",
+      "scheduled_at": "2026-08-30T15:00:00Z"
+    },
+    {
+      "platform": "X",
+      "status": "sent",
+      "scheduled_at": "2026-08-17T14:50:00Z"
+    },
+    {
+      "platform": "Facebook",
+      "status": "scheduled",
+      "scheduled_at": "2026-09-01T15:00:00Z"
+    }
+  ],
+  "operator_schedule": [
+    "Posts are queued via Buffer automatically."
+  ],
+  "platforms": [
+    {
+      "name": "Google Business Profile",
+      "caption": "Buyers can inherit a seller's low interest rate with an assumable mortgage. New hub explains how it works, what it costs, and which loans qualify. Learn more at the link below.",
+      "image_url": "https://saahomes.com/images/assumable-mortgages-noco.jpg"
+    },
+    {
+      "name": "Facebook",
+      "caption": "\ud83d\udd11 Could you take over a 2.5\u20133% mortgage rate?\n\nAssumable mortgages are one of the smartest buyer plays in this market \u2014 you inherit the seller's existing low-rate loan instead of financing at today's rates. Savings can be huge over the life of the loan.\n\nOur new hub breaks down:\n\u2022 How assumability actually works\n\u2022 Which loan types qualify (VA, FHA, USDA, some conventional)\n\u2022 What it costs to assume vs. refinance\n\u2022 The fine print that trips buyers up\n\nStart here: https://saahomes.com/assumable-mortgages/\n\nDeep dives: Colorado assumable guide \u2192 https://saahomes.com/blog/assumable-mortgage-colorado/ and Fort Collins assumable homes \u2192 https://saahomes.com/blog/assumable-homes-fort-collins/\n\nAdam & Mandi Schwartz | SAA Homes\n(970) 999-1407\n\n#AssumableMortgage #LowerRates #NorthernColoradoRealEstate #FortCollins #SAAHomes",
+      "image_url": "https://saahomes.com/images/assumable-mortgages-noco.jpg"
+    },
+    {
+      "name": "X",
+      "caption": "Assumable mortgages = take over a seller's low rate. New hub on how it works, what it costs, and which loans qualify: https://saahomes.com/assumable-mortgages/",
+      "image_url": "https://saahomes.com/images/assumable-mortgages-noco.jpg"
+    }
+  ]
+}

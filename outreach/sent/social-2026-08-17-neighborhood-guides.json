@@ -1,0 +1,47 @@
+{
+  "subject": "SAA Homes \u2014 Social posts | 49 New Neighborhood Guides",
+  "promoting": {
+    "title": "49 New Neighborhood Guides Across Northern Colorado",
+    "url": "https://saahomes.com/northern-colorado-areas/erie/colliers-hill-erie/"
+  },
+  "intro": "49 neighborhood guides shipped this week across 8 communities \u2014 Erie, Brighton, Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue, and Carbon Valley. Every guide has verified schools, home styles, boundaries, and local highlights.",
+  "scheduled_posts": [
+    {
+      "platform": "Google Business Profile",
+      "status": "scheduled",
+      "scheduled_at": "2026-08-18T15:00:00Z"
+    },
+    {
+      "platform": "X",
+      "status": "scheduled",
+      "scheduled_at": "2026-08-19T15:00:00Z"
+    },
+    {
+      "platform": "Facebook",
+      "status": "scheduled",
+      "scheduled_at": "2026-08-20T15:00:00Z"
+    }
+  ],
+  "operator_schedule": [
+    "Posts are queued via Buffer automatically."
+  ],
+  "platforms": [
+    {
+      "name": "Google Business Profile",
+      "caption": "New neighborhood guides are live for Erie, Brighton, Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue, and Carbon Valley. Schools, home styles, boundaries, and local highlights for every area \u2014 49 guides in all. Learn more at the link below.",
+      "image_url": "https://saahomes.com/images/noco-neighborhood-guides-2026.jpg"
+    },
+    {
+      "name": "Facebook",
+      "caption": "\ud83c\udfd8\ufe0f 49 brand-new neighborhood guides just went live across Northern Colorado!\n\nWe added dedicated guides for 8 communities: Erie, Brighton, Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue, and Carbon Valley. Each one breaks down the real details buyers ask us about daily:\n\u2022 Schools & districts\n\u2022 Home styles & price ranges\n\u2022 Neighborhood boundaries\n\u2022 Parks, trails & local highlights\n\nWhether you're scouting Erie's Colliers Hill or dreaming of a cabin near Red Feather Lakes, start here: https://saahomes.com/northern-colorado-areas/erie/colliers-hill-erie/\n\nExplore all guides \u2192 https://saahomes.com/northern-colorado-areas/\n\nAdam & Mandi Schwartz | SAA Homes\n(970) 999-1407\n\n#NorthernColoradoRealEstate #ErieCO #BrightonColorado #EstesPark #FortLupton #LyonsColorado #Bellvue #CarbonValley #SAAHomes",
+      "image_url": "https://saahomes.com/images/noco-neighborhood-guides-2026.jpg"
+    },
+    {
+      "name": "X",
+      "caption": "49 new neighborhood guides just dropped \u2014 Erie, Brighton, Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue & Carbon Valley. Schools, home styles, boundaries, local highlights. Start here: https://saahomes.com/northern-colorado-areas/erie/colliers-hill-erie/",
+      "image_url": "https://saahomes.com/images/noco-neighborhood-guides-2026.jpg"
+    }
+  ],
+  "rotation_week": null,
+  "rotation_theme": "New content megapack \u2014 neighborhood guides"
+}

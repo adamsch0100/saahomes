@@ -1,0 +1,45 @@
+{
+  "subject": "SAA Homes \u2014 Social posts | Best Realtor Guides (Loveland, Greeley, Longmont)",
+  "promoting": {
+    "title": "Best Realtor Guides \u2014 Loveland, Greeley, Longmont",
+    "url": "https://saahomes.com/blog/loveland-colorado-real-estate-agent/"
+  },
+  "intro": "Three new city-by-city guides on finding the right real estate agent in Loveland, Greeley, and Longmont \u2014 what to check, what to ask, and why local expertise matters.",
+  "scheduled_posts": [
+    {
+      "platform": "Google Business Profile",
+      "status": "scheduled",
+      "scheduled_at": "2026-08-21T15:00:00Z"
+    },
+    {
+      "platform": "X",
+      "status": "scheduled",
+      "scheduled_at": "2026-08-22T15:00:00Z"
+    },
+    {
+      "platform": "Facebook",
+      "status": "scheduled",
+      "scheduled_at": "2026-08-23T15:00:00Z"
+    }
+  ],
+  "operator_schedule": [
+    "Posts are queued via Buffer automatically."
+  ],
+  "platforms": [
+    {
+      "name": "Google Business Profile",
+      "caption": "Choosing an agent? New city-by-city guides break down what to look for in Loveland, Greeley, and Longmont \u2014 credentials, local track record, and the right questions to ask. Learn more at the link below.",
+      "image_url": "https://saahomes.com/images/best-realtor-noco-2026.jpg"
+    },
+    {
+      "name": "Facebook",
+      "caption": "\ud83c\udfe1 How do you actually pick the right real estate agent?\n\nWe published three new guides covering exactly that \u2014 one for Loveland, one for Greeley, and one for Longmont. Each walks through:\n\u2022 Credentials & local track record to verify\n\u2022 The questions that separate pros from part-timers\n\u2022 Why neighborhood-level knowledge changes your outcome\n\nStart with your city:\nLoveland \u2192 https://saahomes.com/blog/loveland-colorado-real-estate-agent/\nGreeley \u2192 https://saahomes.com/blog/greeley-colorado-real-estate-agent/\nLongmont \u2192 https://saahomes.com/blog/longmont-colorado-real-estate-agent/\n\nAdam & Mandi Schwartz | SAA Homes\n(970) 999-1407\n\n#LovelandRealEstate #GreeleyRealEstate #LongmontRealEstate #NorthernColorado #SAAHomes",
+      "image_url": "https://saahomes.com/images/best-realtor-noco-2026.jpg"
+    },
+    {
+      "name": "X",
+      "caption": "Picking an agent in Loveland, Greeley, or Longmont? New guides on what to verify, what to ask, and why local knowledge wins: https://saahomes.com/blog/loveland-colorado-real-estate-agent/",
+      "image_url": "https://saahomes.com/images/best-realtor-noco-2026.jpg"
+    }
+  ]
+}
