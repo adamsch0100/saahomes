@@ -30,6 +30,14 @@
     },
     {
       "@type": "Question",
+      "name": "How should I filter my MLS search before I export?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Create your seller's custom market — the homes a buyer will cross-shop against theirs. In Matrix or your MLS: Active, Pending/Backup, Sold, Expired, and Withdrawn; matching property type; the area a buyer would cross-shop; last 2 years; square-footage, beds, baths, garage, and lot-size bands around the subject. Export about 500 homes as CSV or TXT, then upload. ListLogic auto-matches columns and you can correct any field before generating."
+      }
+    },
+    {
+      "@type": "Question",
       "name": "Do I search the market or upload an MLS file?",
       "acceptedAnswer": {
         "@type": "Answer",
@@ -91,6 +99,8 @@
 .faq-item .body p { margin-bottom: 10px; color: var(--muted); }
 .faq-item .body p:last-child { margin-bottom: 0; }
 .faq-item .body strong { color: var(--ink); }
+.faq-item .body ul { margin: 0 0 10px 1.15rem; color: var(--muted); }
+.faq-item .body li { margin: 4px 0; }
 
 .cta-band {
   background: linear-gradient(150deg, var(--ink), var(--ink-2)); color: #fff;
@@ -163,9 +173,25 @@
   </details>
 
   <details class="faq-item">
+    <summary>How should I filter my MLS search before I export?</summary>
+    <div class="body">
+      <p>Create your seller's custom market — the homes a buyer will actually cross-shop against theirs. In Matrix (or your MLS):</p>
+      <ul>
+        <li><strong>Statuses:</strong> Active, Pending / Backup, Sold, Expired, Withdrawn</li>
+        <li><strong>Property type</strong> that matches the subject</li>
+        <li><strong>Area</strong> a buyer would cross-shop</li>
+        <li><strong>Last 2 years</strong> (list date or close date)</li>
+        <li><strong>Square footage, beds, baths, garage spaces, and lot size</strong> in a band around the subject</li>
+      </ul>
+      <p>Export CSV or TXT (Save As CSV if you only get Excel). Aim for about <strong>500</strong> homes.</p>
+      <p>After you upload, ListLogic auto-matches columns (MLS #, price, sold price, beds, baths, sq ft, garage, dates, lot, and more). You can change any dropdown that looks wrong, then confirm mapping and Generate.</p>
+    </div>
+  </details>
+
+  <details class="faq-item">
     <summary>Will my MLS export headers work?</summary>
     <div class="body">
-      <p>Yes for common Matrix, RESO-style, and everyday synonyms (Beds, Sq Ft, MLS #, Close Price, and more). After upload you always review the mapping — with sample rows — and confirm before the report runs.</p>
+      <p>Yes for common Matrix, RESO-style, and everyday synonyms (Beds, Sq Ft, MLS #, Close Price, garage, lot size, and more). After upload you always review the mapping — with sample rows — and can reassign any field before the report runs.</p>
     </div>
   </details>
 

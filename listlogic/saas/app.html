@@ -557,7 +557,7 @@
           <input type="checkbox" id="useSample">
           Use sample Greeley export (export-71.txt)
         </label>
-        <p class="hint">Pipe, comma, or tab files from any MLS. Confirm the column mapping below before you generate.</p>
+        <p class="hint">CSV, TXT, or TSV from any MLS (pipe, comma, or tab). We auto-match columns; you can fix any field before you generate.</p>
         <div id="mappingReview">
           <strong>Column mapping</strong>
           <p id="mappingReviewMsg" style="margin:4px 0 0"></p>
@@ -568,22 +568,28 @@
             <span id="mappingConfirmStatus" style="font-size:0.8rem;color:var(--muted)"></span>
           </div>
         </div>
-        <details class="howto" id="exportHowto">
-          <summary>Tips for building a sharp market export</summary>
+        <details class="howto" id="exportHowto" open>
+          <summary>How to build your seller's custom market</summary>
           <div class="howto-body">
             <div class="goal">
-              <div><div class="gv">≤ 450</div><div class="gl">Homes in file</div></div>
-              <div><div class="gv">2 years</div><div class="gl">List date lookback</div></div>
-              <div><div class="gv">Any MLS</div><div class="gl">Smart header map</div></div>
+              <div><div class="gv">2 years</div><div class="gl">List / close lookback</div></div>
+              <div><div class="gv">Match the home</div><div class="gl">SF · beds · baths · garage · lot</div></div>
+              <div><div class="gv">~500</div><div class="gl">Homes in the file</div></div>
             </div>
-            <p class="hint" style="margin-top:8px">Aim for as many relevant homes as you can <strong>without going over 450</strong>.</p>
+            <p class="hint" style="margin-top:10px">Create your seller's custom market — the homes a buyer will actually cross-shop against theirs. Filter in MLS, export, then upload.</p>
             <ol>
-              <li><strong>Statuses:</strong> Active, Pending/Backup, Sold, Expired, Withdrawn.</li>
-              <li><strong>Match dwelling</strong> to the subject (House vs Condo/Townhome).</li>
-              <li><strong>Geography + 2 years</strong> list-date lookback.</li>
-              <li><strong>Tighten</strong> with price, Total SF, garage, beds, baths.</li>
-              <li><strong>Export</strong> and upload — confirm columns, then generate.</li>
+              <li><strong>Statuses:</strong> Active, Pending / Backup, Sold, Expired, and Withdrawn.</li>
+              <li><strong>Property type</strong> that matches the subject (house vs condo / townhome).</li>
+              <li><strong>Area</strong> a buyer would cross-shop (city, subdivision, or map).</li>
+              <li><strong>Time:</strong> last <strong>2 years</strong> by list date or close date.</li>
+              <li><strong>Size band:</strong> living / total square footage around the subject.</li>
+              <li><strong>Beds, baths, and garage spaces</strong> in a tight range around the subject.</li>
+              <li><strong>Lot size</strong> (acres or sq ft) when lot matters for this home.</li>
+              <li><strong>Export</strong> as CSV or TXT — aim for about <strong>500</strong> homes. If your MLS only offers Excel, Save As CSV.</li>
             </ol>
+            <div class="callout">
+              <strong>Then in ListLogic:</strong> upload the file. We auto-match headers (MLS #, status, price, sold price, beds, baths, sq ft, garage, dates, address, lot, and more). Check the dropdowns — change any that are wrong — then <strong>Confirm mapping</strong> and Generate.
+            </div>
           </div>
         </details>
         <div class="row2" style="margin-top:12px">
@@ -923,8 +929,8 @@ let autoRectHalfLat = null;
 
 const MAP_REVIEW_FIELDS = [
   'Status', 'Price', 'SoldPrice', 'Bdrm', 'Bath', 'TotalSqFt', 'FinishedSQFT',
-  'ListDate', 'SoldDate', 'MLSNumber', 'Address', 'GarSpaces', 'YearBuilt',
-  'Latitude', 'Longitude', 'DOM', 'City', 'ZipCode'
+  'ListDate', 'SoldDate', 'MLSNumber', 'Address', 'GarSpaces', 'Acres', 'LotSize',
+  'YearBuilt', 'Latitude', 'Longitude', 'DOM', 'City', 'ZipCode'
 ];
 
 function syncGenerateEnabled() {
