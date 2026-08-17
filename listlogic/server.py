@@ -812,6 +812,81 @@ def billing_config():
     return stripe_billing.public_plans()
 
 
+@app.get("/api/team")
+def team_get(request: Request):
+    import auth_service
+
+    user = _require_user(request)
+    if not auth_service.is_brokerage_owner(user):
+        raise HTTPException(403, "Team seats are for brokerage plan owners")
+    return {"ok": True, "team": auth_service.team_snapshot(user)}
+
+
+@app.post("/api/team/invite")
+async def team_invite(request: Request):
+    import auth_service
+    import mailer
+
+    user = _require_user(request)
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(400, "Invalid JSON") from exc
+    emails = payload.get("emails") if payload.get("emails") is not None else payload.get("email")
+    try:
+        result = auth_service.invite_team_members(user, emails)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    owner_name = (user.get("name") or "").strip()
+    brokerage = (user.get("brokerage") or "").strip()
+    for item in result.get("invited") or []:
+        url = item.get("url") or ""
+        to = item.get("email") or ""
+        if not url or not to:
+            continue
+        try:
+            sent = mailer.send_team_invite(to=to, url=url, owner_name=owner_name, brokerage=brokerage)
+            item["sent"] = bool(sent)
+        except Exception:
+            logger.exception("Team invite email failed for %s", to)
+            item["sent"] = False
+    return {"ok": True, **result}
+
+
+@app.post("/api/team/invite/revoke")
+async def team_invite_revoke(request: Request):
+    import auth_service
+
+    user = _require_user(request)
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(400, "Invalid JSON") from exc
+    token = str(payload.get("token") or "").strip()
+    try:
+        team = auth_service.revoke_team_invite(user, token)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    return {"ok": True, "team": team}
+
+
+@app.post("/api/team/members/remove")
+async def team_member_remove(request: Request):
+    import auth_service
+
+    user = _require_user(request)
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(400, "Invalid JSON") from exc
+    member_id = str(payload.get("user_id") or payload.get("id") or "").strip()
+    try:
+        team = auth_service.remove_teammate(user, member_id)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    return {"ok": True, "team": team}
+
+
 @app.post("/api/billing/checkout")
 async def billing_checkout(request: Request):
     import stripe_billing
@@ -1167,10 +1242,12 @@ def invite_info(token: str = ""):
     info = auth_service.validate_invite(token)
     if not info["ok"]:
         raise HTTPException(404, info.get("error") or "Invite not found")
+    kind = (info.get("kind") or "").strip()
     return {
         "ok": True,
         "email": info.get("email") or "",
         "brokerage": info.get("brokerage") or "",
+        "kind": kind,
         "trial_days": info.get("trial_days"),
         "presentation_limit": info.get("presentation_limit"),
     }
@@ -1305,6 +1382,7 @@ def _refresh_sample_html(run_dir: Path) -> bool:
                 and "print-page-spine" in existing
                 and "print-fit-v5" in existing
                 and "demo-ui-snappy" in existing
+                and "RUN_ID === 'sample-2845'" in existing
                 and "charts failed to boot" in existing
                 and "/saas/vendor/chart.umd.min.js" in existing
                 and "mapboxgl" in existing
@@ -1416,6 +1494,8 @@ def _ensure_sample_run() -> str:
                 _start_rehost(SAMPLE_RUN_ID, run_dir)
             elif missing:
                 _start_background_photos(SAMPLE_RUN_ID, run_dir)
+            elif _load_photo_map(run_dir):
+                _write_photos_status(run_dir, status="ready", message="")
         except Exception:
             logger.exception("Sample photo health check failed")
         # PDFs are expensive — only rebuild when HTML template changed or files missing.
@@ -2612,6 +2692,20 @@ def fetch_run_comp_photos(run_id: str):
         raise HTTPException(500, f"Photo module unavailable: {exc}") from exc
     if not reef_enabled():
         raise HTTPException(400, "REEF_API_KEY is not configured on this service")
+    photos = _load_photo_map(run_dir)
+    if run_id == SAMPLE_RUN_ID and photos:
+        _write_photos_status(run_dir, status="ready", message="")
+        status = _load_photos_status(run_dir)
+        return {
+            "ok": True,
+            "started": False,
+            "status": "ready",
+            "photos": photos,
+            "galleries": _load_gallery_map(run_dir),
+            "done": status.get("done", 0),
+            "total": status.get("total", 0),
+            "message": "",
+        }
     started = _start_background_photos(run_id, run_dir)
     status = _load_photos_status(run_dir)
     if started:
@@ -2636,13 +2730,17 @@ def list_comp_photos(run_id: str):
     if not run_dir.exists():
         raise HTTPException(404, "Run not found")
     status = _load_photos_status(run_dir)
+    photos = _load_photo_map(run_dir)
+    st = (status.get("status") or "ready").lower()
+    if run_id == SAMPLE_RUN_ID and photos:
+        st = "ready"
     return {
-        "photos": _load_photo_map(run_dir),
+        "photos": photos,
         "galleries": _load_gallery_map(run_dir),
-        "status": status.get("status") or "ready",
+        "status": st or "ready",
         "done": status.get("done", 0),
         "total": status.get("total", 0),
-        "message": status.get("message") or "",
+        "message": "" if st == "ready" else (status.get("message") or ""),
     }
 
 @app.post("/api/runs/{run_id}/comp-photos")

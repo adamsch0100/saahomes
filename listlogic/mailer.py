@@ -55,6 +55,22 @@ def send_email(*, to: str, subject: str, body: str, reply_to: str = "") -> bool:
         return False
 
 
+def send_team_invite(*, to: str, url: str, owner_name: str = "", brokerage: str = "") -> bool:
+    who = (owner_name or "Your team").strip() or "Your team"
+    office = (brokerage or "").strip()
+    office_bit = f" at {office}" if office else ""
+    body = (
+        f"Hi,\n\n"
+        f"{who}{office_bit} added you to ListLogic.\n\n"
+        f"Open this link to join (expires in 30 minutes):\n\n"
+        f"{url}\n\n"
+        f"You'll share the brokerage seat plan — generate presentations with the same branding.\n\n"
+        f"If you didn't expect this, you can ignore the email.\n\n"
+        f"— ListLogic\n"
+    )
+    return send_email(to=to, subject="You're invited to ListLogic", body=body)
+
+
 def send_magic_link(*, to: str, url: str, is_new: bool = False) -> bool:
     action = "Create your ListLogic account" if is_new else "Sign in to ListLogic"
     body = (

@@ -3680,13 +3680,15 @@ async function fetchPhotoMap() {{
         Object.assign(galleryMap, data.galleries || {{}});
         status = data.status || 'ready';
         const pending = status === 'pending' || status === 'fetching';
+        const isSample = RUN_ID === 'sample-2845' || /[?&]sample=1(?:&|$)/.test(location.search);
+        const hasPhotos = Object.keys(photoMap).length > 0;
         setPhotoFetchBanner(
-          pending,
+          pending && !isSample && !hasPhotos,
           data.message || (pending ? 'Fetching listing photos…' : ''),
           data.done || 0,
           data.total || 0
         );
-        if (pending && !photoPollTimer) {{
+        if (pending && !isSample && !photoPollTimer) {{
           // Kick background fetch if generate left it pending
           fetch('/api/runs/' + RUN_ID + '/comp-photos/fetch', {{ method: 'POST' }}).catch(() => {{}});
           photoPollTimer = setInterval(async () => {{
@@ -3700,7 +3702,7 @@ async function fetchPhotoMap() {{
               renderLiveComps();
               renderVisualBoard();
               const st = d2.status || 'ready';
-              const still = st === 'pending' || st === 'fetching';
+              const still = (st === 'pending' || st === 'fetching') && !Object.keys(photoMap).length;
               setPhotoFetchBanner(still, d2.message || 'Fetching listing photos…', d2.done || 0, d2.total || 0);
               if (!still) {{
                 clearInterval(photoPollTimer);

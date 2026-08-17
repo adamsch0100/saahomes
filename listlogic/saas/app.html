@@ -255,6 +255,16 @@
 .dash-view { display: none; }
 .dash-view.on { display: block; }
 .dash-main .page-head { padding-top: 4px; }
+.team-seat-bar { font-size: 0.88rem; color: var(--muted); margin: 0 0 16px; }
+.team-list { display: grid; gap: 8px; margin: 14px 0 22px; }
+.team-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: #fff;
+}
+.team-row strong { display: block; font-size: 0.9rem; }
+.team-row span { font-size: 0.78rem; color: var(--muted); }
+.team-row .btn { padding: 6px 12px; font-size: 0.78rem; }
+#teamEmails { min-height: 92px; resize: vertical; }
 .container.narrow { max-width: none; padding: 0; }
 @media (max-width: 820px) {
   .dash { grid-template-columns: 1fr; padding-top: 12px; }
@@ -292,6 +302,7 @@
     <div class="side-label">Workspace</div>
     <button type="button" class="side-link on" data-view="generate" id="navGenerate"><span class="side-ico">＋</span> Generate</button>
     <button type="button" class="side-link" data-view="reports" id="navReports"><span class="side-ico">▦</span> Reports</button>
+    <button type="button" class="side-link" data-view="team" id="navTeam" hidden><span class="side-ico">☰</span> Team</button>
     <a href="/saas/onboarding.html" id="navSettings"><span class="side-ico">◎</span> Settings</a>
     <div class="side-sep" id="adminSideSep" hidden></div>
     <a href="/saas/admin.html" id="navOwner" hidden><span class="side-ico">⚙</span> Owner console</a>
@@ -340,6 +351,25 @@
     <div class="reports" id="reportsPanel" style="margin-top:0">
       <div id="reportsList"><p class="empty">Loading…</p></div>
     </div>
+  </div>
+
+  <div class="dash-view" id="view-team">
+    <div class="page-head">
+      <span class="eyebrow">Brokerage seats</span>
+      <h1>Invite your team</h1>
+      <p class="sub">Paste teammate emails. They get a sign-in link and use one of your purchased seats. You do not need to email Adam.</p>
+    </div>
+    <p class="team-seat-bar" id="teamSeatBar">Loading seats…</p>
+    <div class="step-card" style="padding:18px;border:1px solid var(--line);border-radius:var(--radius);background:#fff">
+      <label for="teamEmails">Teammate emails</label>
+      <textarea id="teamEmails" placeholder="one@brokerage.com&#10;two@brokerage.com"></textarea>
+      <div class="submit-row">
+        <button type="button" class="btn btn-gold" id="teamInviteBtn">Send invites</button>
+        <span class="status" id="teamStatus"></span>
+      </div>
+    </div>
+    <h2 style="font-family:Fraunces,serif;font-size:1.15rem;margin:22px 0 8px">On this plan</h2>
+    <div class="team-list" id="teamList"><p class="empty">Loading…</p></div>
   </div>
 
   <div class="dash-view on" id="view-generate">
@@ -725,6 +755,10 @@ const result = document.getElementById('result');
       const adminSideSep = document.getElementById('adminSideSep');
       if (navOwner) navOwner.hidden = false;
       if (adminSideSep) adminSideSep.hidden = false;
+    }
+    if (u.is_brokerage_owner) {
+      const navTeam = document.getElementById('navTeam');
+      if (navTeam) navTeam.hidden = false;
     }
     if (u && u.profile_complete === false) {
       location.href = '/saas/onboarding.html?next=' + encodeURIComponent('/saas/app.html');
@@ -1713,13 +1747,14 @@ exportFile.addEventListener('change', () => {
 });
 
 function showDashView(name) {
-  const views = { generate: 'view-generate', reports: 'view-reports' };
+  const views = { generate: 'view-generate', reports: 'view-reports', team: 'view-team' };
   const target = views[name] || views.generate;
   document.querySelectorAll('.dash-view').forEach((el) => el.classList.toggle('on', el.id === target));
   document.querySelectorAll('.dash-side [data-view]').forEach((el) => {
-    el.classList.toggle('on', el.getAttribute('data-view') === (name === 'reports' ? 'reports' : 'generate'));
+    el.classList.toggle('on', el.getAttribute('data-view') === name);
   });
   if (name === 'reports') loadReports();
+  if (name === 'team') loadTeam();
 }
 document.querySelectorAll('.dash-side [data-view]').forEach((el) => {
   el.addEventListener('click', () => {
@@ -1730,7 +1765,7 @@ document.querySelectorAll('.dash-side [data-view]').forEach((el) => {
 });
 function syncHashView() {
   const h = (location.hash || '#generate').replace(/^#/, '') || 'generate';
-  showDashView(h === 'reports' ? 'reports' : 'generate');
+  showDashView(['reports', 'team'].includes(h) ? h : 'generate');
 }
 window.addEventListener('hashchange', syncHashView);
 syncHashView();
@@ -1756,6 +1791,107 @@ function formatWhen(iso) {
     return iso;
   }
 }
+
+async function loadTeam() {
+  const bar = document.getElementById('teamSeatBar');
+  const list = document.getElementById('teamList');
+  if (!bar || !list) return;
+  try {
+    const res = await fetch('/api/team', { credentials: 'same-origin' });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Could not load team');
+    renderTeam(data.team || {});
+  } catch (e) {
+    bar.textContent = String(e.message || e);
+    list.innerHTML = '<p class="empty">Team seats are available after a brokerage checkout.</p>';
+  }
+}
+
+function renderTeam(team) {
+  const bar = document.getElementById('teamSeatBar');
+  const list = document.getElementById('teamList');
+  const purchased = team.purchased || 0;
+  const used = team.used || 0;
+  const remaining = team.remaining || 0;
+  if (bar) bar.textContent = used + ' of ' + purchased + ' seats used · ' + remaining + ' left';
+  const owner = team.owner || {};
+  const rows = [];
+  rows.push(
+    '<div class="team-row"><div><strong>' + escapeHtml(owner.name || owner.email || 'You') +
+    '</strong><span>' + escapeHtml(owner.email || '') + ' · owner</span></div></div>'
+  );
+  (team.members || []).forEach((m) => {
+    rows.push(
+      '<div class="team-row"><div><strong>' + escapeHtml(m.name || m.email || 'Teammate') +
+      '</strong><span>' + escapeHtml(m.email || '') + ' · seat</span></div>' +
+      '<button type="button" class="btn btn-outline" data-remove-member="' + escapeAttr(m.id) + '">Remove</button></div>'
+    );
+  });
+  (team.pending || []).forEach((p) => {
+    rows.push(
+      '<div class="team-row"><div><strong>' + escapeHtml(p.email || 'Pending invite') +
+      '</strong><span>Invite sent — waiting to join</span></div>' +
+      '<button type="button" class="btn btn-outline" data-revoke-invite="' + escapeAttr(p.token || '') + '">Revoke</button></div>'
+    );
+  });
+  if (list) list.innerHTML = rows.join('');
+}
+
+document.getElementById('teamInviteBtn')?.addEventListener('click', async () => {
+  const status = document.getElementById('teamStatus');
+  const btn = document.getElementById('teamInviteBtn');
+  const emails = document.getElementById('teamEmails')?.value || '';
+  if (status) { status.className = 'status'; status.textContent = 'Sending…'; }
+  if (btn) btn.disabled = true;
+  try {
+    const res = await fetch('/api/team/invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ emails }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Invite failed');
+    renderTeam(data.team || {});
+    const invited = (data.invited || []).length;
+    const errors = data.errors || [];
+    const bits = [];
+    if (invited) bits.push(invited + ' invite' + (invited === 1 ? '' : 's') + ' sent');
+    errors.forEach((err) => bits.push((err.email || '') + ': ' + (err.error || 'failed')));
+    if (status) {
+      status.className = errors.length ? 'status error' : 'status';
+      status.textContent = bits.join(' · ') || 'Done';
+    }
+    if (invited && document.getElementById('teamEmails')) document.getElementById('teamEmails').value = '';
+  } catch (e) {
+    if (status) { status.className = 'status error'; status.textContent = String(e.message || e); }
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+});
+
+document.getElementById('teamList')?.addEventListener('click', async (ev) => {
+  const removeId = ev.target?.getAttribute?.('data-remove-member');
+  const revokeTok = ev.target?.getAttribute?.('data-revoke-invite');
+  if (!removeId && !revokeTok) return;
+  const status = document.getElementById('teamStatus');
+  try {
+    const url = removeId ? '/api/team/members/remove' : '/api/team/invite/revoke';
+    const body = removeId ? { user_id: removeId } : { token: revokeTok };
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify(body),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Update failed');
+    renderTeam(data.team || {});
+    if (status) { status.className = 'status'; status.textContent = removeId ? 'Removed.' : 'Invite revoked.'; }
+  } catch (e) {
+    if (status) { status.className = 'status error'; status.textContent = String(e.message || e); }
+  }
+});
 
 async function loadReports() {
   const list = document.getElementById('reportsList');

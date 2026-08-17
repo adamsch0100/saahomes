@@ -152,6 +152,7 @@ def run_migrations() -> None:
     _ensure_presentations_table()
     _ensure_magic_auth_schema()
     _ensure_billing_schema()
+    _ensure_team_schema()
     _ensure_growth_profile_schema()
     _ensure_assistant_chats_table()
     _ensure_session_device_schema()
@@ -220,6 +221,40 @@ def _ensure_assistant_chats_table() -> None:
         "CREATE INDEX IF NOT EXISTS idx_assistant_turns_created ON assistant_turns(created_at)",
         "CREATE INDEX IF NOT EXISTS idx_assistant_turns_user ON assistant_turns(user_id)",
         "CREATE INDEX IF NOT EXISTS idx_assistant_turns_convo ON assistant_turns(conversation_id)",
+    ):
+        try:
+            execute(idx_sql)
+        except Exception:
+            pass
+
+
+def _ensure_team_schema() -> None:
+    """Brokerage seats + self-serve teammate invites."""
+    for col, typ, default in (
+        ("seat_quantity", "INTEGER", "1"),
+        ("team_owner_id", "TEXT", "''"),
+    ):
+        try:
+            if using_postgres():
+                execute(f"ALTER TABLE users ADD COLUMN IF NOT EXISTS {col} {typ} DEFAULT {default}")
+            else:
+                execute(f"ALTER TABLE users ADD COLUMN {col} {typ} DEFAULT {default}")
+        except Exception:
+            pass
+    for col, typ, default in (
+        ("kind", "TEXT", "''"),
+    ):
+        try:
+            if using_postgres():
+                execute(f"ALTER TABLE invites ADD COLUMN IF NOT EXISTS {col} {typ} DEFAULT {default}")
+            else:
+                execute(f"ALTER TABLE invites ADD COLUMN {col} {typ} DEFAULT {default}")
+        except Exception:
+            pass
+    for idx_sql in (
+        "CREATE INDEX IF NOT EXISTS idx_users_team_owner ON users(team_owner_id)",
+        "CREATE INDEX IF NOT EXISTS idx_invites_kind ON invites(kind)",
+        "CREATE INDEX IF NOT EXISTS idx_invites_created_by ON invites(created_by)",
     ):
         try:
             execute(idx_sql)

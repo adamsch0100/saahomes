@@ -6,6 +6,7 @@ import hmac
 import json
 import logging
 import os
+import re
 import secrets
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -80,6 +81,20 @@ def auth_required() -> bool:
     return True
 
 
+def is_brokerage_plan(plan: Optional[str]) -> bool:
+    return (plan or "").strip().lower().startswith("brokerage_")
+
+
+def is_brokerage_owner(user: Optional[dict]) -> bool:
+    if not user:
+        return False
+    if (user.get("team_owner_id") or "").strip():
+        return False
+    if not is_brokerage_plan(user.get("plan")):
+        return False
+    return (user.get("status") or "").lower() == "active"
+
+
 def resolve_post_auth_next(user: Optional[dict], requested: str = "") -> str:
     """Where to send someone after login. Admins land on the owner console by default."""
     req = (requested or "").strip()
@@ -123,6 +138,10 @@ def public_user(row: Optional[dict]) -> Optional[dict]:
         "has_stripe": bool((row.get("stripe_customer_id") or "").strip()),
         "listings_year": row.get("listings_year") or "",
         "sms_consent": bool(int(row.get("sms_consent") or 0)),
+        "seat_quantity": int(row.get("seat_quantity") or 0) or 1,
+        "team_owner_id": (row.get("team_owner_id") or "").strip(),
+        "is_brokerage_owner": is_brokerage_owner(row),
+        "is_teammate": bool((row.get("team_owner_id") or "").strip()),
     }
 
 
@@ -308,14 +327,16 @@ def apply_subscription_active(
     if stripe_subscription_id:
         fields.insert(-1, "stripe_subscription_id = ?")
         params.insert(-1, stripe_subscription_id)
-    # seat_quantity stored in plan metadata via events; column optional
+    qty = max(1, int(seat_quantity or 1))
+    fields.insert(-1, "seat_quantity = ?")
+    params.insert(-1, qty)
     try:
         database.execute(
             f"UPDATE users SET {', '.join(fields)} WHERE id = ?",
             tuple(params + [user_id]),
         )
     except Exception:
-        # Retry without subscription id if column missing mid-migrate
+        # Retry without newer columns if mid-migrate
         database.execute(
             "UPDATE users SET status = 'active', presentation_limit = NULL, plan = ?, updated_at = ? WHERE id = ?",
             (plan or "agent_monthly", _iso(), user_id),
@@ -334,6 +355,14 @@ def apply_subscription_ended(user_id: str) -> Optional[dict]:
         "stripe_subscription_id = '', updated_at = ? WHERE id = ?",
         (_iso(), user_id),
     )
+    try:
+        database.execute(
+            "UPDATE users SET status = 'expired', updated_at = ? "
+            "WHERE team_owner_id = ? AND COALESCE(status, '') != 'disabled'",
+            (_iso(), user_id),
+        )
+    except Exception:
+        pass
     return get_user_by_id(user_id)
 
 
@@ -499,6 +528,22 @@ def entitlement(user: dict) -> dict:
 
     if status == "disabled":
         return {"ok": False, "reason": "disabled", "remaining": 0, "days_left": 0}
+
+    owner_id = (user.get("team_owner_id") or "").strip()
+    if owner_id and owner_id != user.get("id"):
+        owner = get_user_by_id(owner_id)
+        if not owner or (owner.get("status") or "").lower() == "disabled":
+            return {
+                "ok": False,
+                "reason": "payment_required",
+                "remaining": 0,
+                "days_left": None,
+                "needs_payment": True,
+            }
+        inherited = entitlement(owner)
+        inherited["via_team"] = True
+        return inherited
+
     if status == "setup":
         return {
             "ok": False,
@@ -1134,6 +1179,7 @@ def validate_invite(token: str) -> dict:
     return {
         "ok": True,
         "invite": row,
+        "kind": (row.get("kind") or "").strip(),
         "trial_days": int(row.get("trial_days") or DEFAULT_TRIAL_DAYS),
         "presentation_limit": int(row.get("presentation_limit") or DEFAULT_PRESENTATION_LIMIT),
         "brokerage": row.get("brokerage") or "",
@@ -1173,22 +1219,46 @@ def create_user(
     promo_id = None
     invite_id = None
     granted_trial = False
+    team_owner_id = ""
+    team_plan = ""
+    invite_row = None
 
     if invite_token:
         inv = validate_invite(invite_token)
         if not inv["ok"]:
             raise ValueError(inv["error"])
-        trial_days = inv["trial_days"]
-        presentation_limit = inv["presentation_limit"]
-        granted_trial = int(presentation_limit or 0) > 0 or int(trial_days or 0) > 0
-        if inv.get("brokerage") and not brokerage:
-            brokerage = inv["brokerage"]
-        invite_id = inv["invite"]["id"]
-        if inv["invite"].get("promo_code_id"):
-            promo_id = inv["invite"]["promo_code_id"]
+        invite_row = inv["invite"]
         locked = (inv.get("email") or "").strip().lower()
         if locked and locked != email_n:
             raise ValueError("This invite is locked to a different email")
+        if (invite_row.get("kind") or "") == "team":
+            owner = get_user_by_id(invite_row.get("created_by") or "")
+            if not owner or not is_brokerage_owner(owner):
+                raise ValueError("This team invite is no longer valid")
+            snap = team_snapshot(owner)
+            reserved = any(
+                (p.get("token") == invite_token)
+                or ((p.get("email") or "").strip().lower() == email_n)
+                for p in (snap.get("pending") or [])
+            )
+            if not reserved and int(snap.get("remaining") or 0) < 1:
+                raise ValueError("No seats left on this brokerage plan")
+            team_owner_id = owner["id"]
+            team_plan = (owner.get("plan") or "brokerage_monthly").strip().lower()
+            if inv.get("brokerage") and not brokerage:
+                brokerage = inv["brokerage"]
+            elif owner.get("brokerage") and not brokerage:
+                brokerage = owner.get("brokerage") or ""
+            invite_id = invite_row["id"]
+        else:
+            trial_days = inv["trial_days"]
+            presentation_limit = inv["presentation_limit"]
+            granted_trial = int(presentation_limit or 0) > 0 or int(trial_days or 0) > 0
+            if inv.get("brokerage") and not brokerage:
+                brokerage = inv["brokerage"]
+            invite_id = invite_row["id"]
+            if invite_row.get("promo_code_id"):
+                promo_id = invite_row["promo_code_id"]
 
     if promo_code:
         pv = validate_promo(promo_code)
@@ -1201,7 +1271,12 @@ def create_user(
 
     now = _iso()
     # Public default: setup account (pay at Generate). Promo/invite can still grant trial credits.
-    if granted_trial:
+    # Team-seat invites skip the paywall — they inherit the brokerage owner's plan.
+    if team_owner_id:
+        status = "active"
+        ends = None
+        presentation_limit = None
+    elif granted_trial:
         status = "trial"
         ends = _iso(_utcnow() + timedelta(days=max(1, int(trial_days or 7))))
         presentation_limit = max(1, int(presentation_limit or 1))
@@ -1279,11 +1354,39 @@ def create_user(
             )
         except Exception:
             pass
+    if team_owner_id:
+        owner = get_user_by_id(team_owner_id) or {}
+        try:
+            database.execute(
+                "UPDATE users SET team_owner_id = ?, plan = ?, status = 'active', "
+                "presentation_limit = NULL, brand_primary = ?, brand_accent = ?, logo_url = ?, "
+                "updated_at = ? WHERE id = ?",
+                (
+                    team_owner_id,
+                    team_plan or (owner.get("plan") or "brokerage_monthly"),
+                    owner.get("brand_primary") or brand_primary or "#0c3c6e",
+                    owner.get("brand_accent") or brand_accent or "#1a5f9e",
+                    owner.get("logo_url") or "",
+                    now,
+                    user_id,
+                ),
+            )
+        except Exception:
+            logger.exception("Failed to attach team seat for %s", email_n)
     if promo_id:
         redeem_promo(promo_id)
     if invite_id:
         redeem_invite(invite_id)
-    log_event(user_id, "signup", {"promo_code_id": promo_id, "invite_id": invite_id, "magic": not bool(password)})
+    log_event(
+        user_id,
+        "signup",
+        {
+            "promo_code_id": promo_id,
+            "invite_id": invite_id,
+            "magic": not bool(password),
+            "team_owner_id": team_owner_id or None,
+        },
+    )
     return get_user_by_id(user_id) or {"id": user_id, "email": email_n}
 
 
@@ -1491,6 +1594,14 @@ def consume_magic_link(token: str) -> dict:
         except Exception:
             pass
         user = get_user_by_id(user["id"]) or user
+        invite_tok = (row.get("invite_token") or "").strip()
+        if invite_tok:
+            try:
+                attached = accept_team_invite(user["id"], invite_tok)
+                if attached:
+                    user = attached
+            except ValueError:
+                pass
 
     database.execute(
         "UPDATE magic_links SET used_at = ? WHERE id = ?",
@@ -1574,30 +1685,42 @@ def create_invite(
     expires_days: int = 30,
     created_by: Optional[str] = None,
     promo_code_id: Optional[str] = None,
+    kind: str = "",
 ) -> dict:
     token = secrets.token_urlsafe(16)
     iid = _uid()
     expires = _iso(_utcnow() + timedelta(days=expires_days)) if expires_days else None
-    database.execute(
-        "INSERT INTO invites (id, token, email, promo_code_id, trial_days, presentation_limit, "
-        "brokerage, max_uses, uses, expires_at, created_by, created_at) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)",
-        (
-            iid,
-            token,
-            (email or "").strip().lower() or None,
-            promo_code_id,
-            trial_days,
-            presentation_limit,
-            brokerage or "",
-            max_uses,
-            expires,
-            created_by,
-            _iso(),
-        ),
+    kind_n = (kind or "").strip().lower()
+    params = (
+        iid,
+        token,
+        (email or "").strip().lower() or None,
+        promo_code_id,
+        trial_days,
+        presentation_limit,
+        brokerage or "",
+        max_uses,
+        expires,
+        created_by,
+        _iso(),
     )
+    try:
+        database.execute(
+            "INSERT INTO invites (id, token, email, promo_code_id, trial_days, presentation_limit, "
+            "brokerage, max_uses, uses, expires_at, created_by, created_at, kind) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?)",
+            params + (kind_n,),
+        )
+    except Exception:
+        database.execute(
+            "INSERT INTO invites (id, token, email, promo_code_id, trial_days, presentation_limit, "
+            "brokerage, max_uses, uses, expires_at, created_by, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)",
+            params,
+        )
     row = get_invite(token) or {"id": iid, "token": token}
     row["url"] = f"{app_base_url()}/saas/signup.html?invite={token}"
+    row["kind"] = kind_n
     return row
 
 
@@ -1607,6 +1730,280 @@ def list_invites() -> list[dict]:
     for r in rows:
         r["url"] = f"{base}/saas/signup.html?invite={r['token']}"
     return rows
+
+
+def seat_quantity_for(user: dict) -> int:
+    try:
+        qty = int(user.get("seat_quantity") or 0)
+        if qty > 0:
+            return qty
+    except Exception:
+        pass
+    try:
+        ev = database.execute(
+            """
+            SELECT meta FROM events
+            WHERE user_id = ? AND type IN ('stripe_subscription_active', 'stripe_checkout_completed')
+            ORDER BY created_at DESC LIMIT 20
+            """,
+            (user["id"],),
+            fetch="all",
+        ) or []
+        for row in ev:
+            try:
+                meta = json.loads(row.get("meta") or "{}")
+            except Exception:
+                meta = {}
+            qty = meta.get("seat_quantity") or meta.get("quantity")
+            if qty:
+                return max(1, int(qty))
+    except Exception:
+        pass
+    return 5 if is_brokerage_plan(user.get("plan")) else 1
+
+
+def _pending_team_invites(owner_id: str) -> list[dict]:
+    now = _iso()
+    rows = database.execute(
+        """
+        SELECT * FROM invites
+        WHERE created_by = ? AND COALESCE(kind, '') = 'team'
+          AND uses < max_uses
+          AND (expires_at IS NULL OR expires_at > ?)
+        ORDER BY created_at DESC
+        """,
+        (owner_id, now),
+        fetch="all",
+    ) or []
+    base = app_base_url()
+    for r in rows:
+        r["url"] = f"{base}/saas/signup.html?invite={r['token']}"
+    return rows
+
+
+def _team_members(owner_id: str) -> list[dict]:
+    rows = database.execute(
+        "SELECT * FROM users WHERE team_owner_id = ? AND COALESCE(status, '') != 'disabled' "
+        "ORDER BY created_at ASC",
+        (owner_id,),
+        fetch="all",
+    ) or []
+    return [public_user(r) for r in rows if r]
+
+
+def team_snapshot(owner: dict) -> dict:
+    purchased = seat_quantity_for(owner)
+    members = _team_members(owner["id"])
+    pending = _pending_team_invites(owner["id"])
+    used = 1 + len(members) + len(pending)
+    return {
+        "purchased": purchased,
+        "used": used,
+        "remaining": max(0, purchased - used),
+        "members": members,
+        "pending": [
+            {
+                "id": r.get("id"),
+                "email": r.get("email") or "",
+                "token": r.get("token"),
+                "url": r.get("url"),
+                "expires_at": r.get("expires_at"),
+                "created_at": r.get("created_at"),
+            }
+            for r in pending
+        ],
+        "owner": public_user(owner),
+    }
+
+
+def _parse_invite_emails(raw) -> list[str]:
+    if isinstance(raw, list):
+        text = "\n".join(str(x) for x in raw)
+    else:
+        text = str(raw or "")
+    found: list[str] = []
+    seen: set[str] = set()
+    for part in re.split(r"[\s,;]+", text):
+        email = part.strip().lower()
+        if not email or "@" not in email or "." not in email.split("@")[-1]:
+            continue
+        if email in seen:
+            continue
+        seen.add(email)
+        found.append(email)
+    return found
+
+
+def _attach_user_to_team(user: dict, owner: dict) -> dict:
+    now = _iso()
+    database.execute(
+        "UPDATE users SET team_owner_id = ?, plan = ?, status = 'active', presentation_limit = NULL, "
+        "brand_primary = ?, brand_accent = ?, logo_url = ?, brokerage = CASE WHEN COALESCE(brokerage, '') = '' "
+        "THEN ? ELSE brokerage END, updated_at = ? WHERE id = ?",
+        (
+            owner["id"],
+            (owner.get("plan") or "brokerage_monthly"),
+            owner.get("brand_primary") or "#0c3c6e",
+            owner.get("brand_accent") or "#1a5f9e",
+            owner.get("logo_url") or "",
+            owner.get("brokerage") or "",
+            now,
+            user["id"],
+        ),
+    )
+    log_event(user["id"], "team_joined", {"owner_id": owner["id"]})
+    return get_user_by_id(user["id"]) or user
+
+
+def accept_team_invite(user_id: str, invite_token: str) -> Optional[dict]:
+    """Attach an existing account to a brokerage team invite. No-op if not a team invite."""
+    inv = validate_invite(invite_token)
+    if not inv["ok"]:
+        raise ValueError(inv.get("error") or "Invite not found")
+    if (inv.get("kind") or "") != "team":
+        return None
+    user = get_user_by_id(user_id)
+    if not user:
+        raise ValueError("User not found")
+    locked = (inv.get("email") or "").strip().lower()
+    if locked and locked != (user.get("email") or "").strip().lower():
+        raise ValueError("This invite is locked to a different email")
+    owner = get_user_by_id((inv["invite"].get("created_by") or "").strip())
+    if not owner or not is_brokerage_owner(owner):
+        raise ValueError("This team invite is no longer valid")
+    existing_owner = (user.get("team_owner_id") or "").strip()
+    if existing_owner == owner["id"]:
+        redeem_invite(inv["invite"]["id"])
+        return user
+    if existing_owner:
+        raise ValueError("This account already belongs to another team")
+    if user["id"] == owner["id"]:
+        raise ValueError("You already own this team")
+    if is_brokerage_owner(user) or (
+        (user.get("status") or "").lower() == "active"
+        and (user.get("stripe_subscription_id") or "").strip()
+        and not existing_owner
+    ):
+        raise ValueError("This account already has its own paid plan")
+    snap = team_snapshot(owner)
+    reserved = any(
+        (p.get("token") == invite_token)
+        or ((p.get("email") or "").strip().lower() == (user.get("email") or "").strip().lower())
+        for p in (snap.get("pending") or [])
+    )
+    if not reserved and int(snap.get("remaining") or 0) < 1:
+        raise ValueError("No seats left on this brokerage plan")
+    attached = _attach_user_to_team(user, owner)
+    redeem_invite(inv["invite"]["id"])
+    return attached
+
+
+def invite_team_members(owner: dict, emails) -> dict:
+    if not is_brokerage_owner(owner):
+        raise ValueError("Team invites are for active brokerage plan owners")
+    parsed = _parse_invite_emails(emails)
+    if not parsed:
+        raise ValueError("Enter at least one teammate email")
+    invited: list[dict] = []
+    errors: list[dict] = []
+    for email in parsed:
+        snap = team_snapshot(owner)
+        if int(snap.get("remaining") or 0) < 1:
+            errors.append({"email": email, "error": "No seats left — add seats in billing, then invite again"})
+            continue
+        if email == (owner.get("email") or "").strip().lower():
+            errors.append({"email": email, "error": "That's the owner email"})
+            continue
+        existing = get_user_by_email(email)
+        if existing:
+            existing_owner = (existing.get("team_owner_id") or "").strip()
+            if existing["id"] == owner["id"]:
+                errors.append({"email": email, "error": "That's the owner email"})
+                continue
+            if existing_owner == owner["id"]:
+                errors.append({"email": email, "error": "Already on this team"})
+                continue
+            if existing_owner:
+                errors.append({"email": email, "error": "Already on another team"})
+                continue
+            if is_brokerage_owner(existing) or (
+                (existing.get("status") or "").lower() == "active"
+                and (existing.get("stripe_subscription_id") or "").strip()
+            ):
+                errors.append({"email": email, "error": "This account already has its own paid plan"})
+                continue
+            try:
+                _attach_user_to_team(existing, owner)
+            except Exception:
+                logger.exception("Failed attaching existing user %s", email)
+                errors.append({"email": email, "error": "Could not add this account"})
+                continue
+            link = create_magic_link(email, next_path="/saas/app.html")
+            invited.append({
+                "email": email,
+                "status": "added",
+                "url": link.get("url") or "",
+                "magic_token": link.get("token") or "",
+            })
+            continue
+        pending_emails = {(p.get("email") or "").strip().lower() for p in snap.get("pending") or []}
+        if email in pending_emails:
+            errors.append({"email": email, "error": "Invite already pending"})
+            continue
+        row = create_invite(
+            email=email,
+            trial_days=0,
+            presentation_limit=0,
+            brokerage=owner.get("brokerage") or "",
+            max_uses=1,
+            expires_days=14,
+            created_by=owner["id"],
+            kind="team",
+        )
+        link = create_magic_link(
+            email,
+            invite_token=row["token"],
+            next_path="/saas/app.html",
+        )
+        invited.append({
+            "email": email,
+            "status": "invited",
+            "url": link.get("url") or row.get("url") or "",
+            "invite_token": row.get("token") or "",
+        })
+    log_event(
+        owner["id"],
+        "team_invites_sent",
+        {"invited": [i["email"] for i in invited], "errors": errors},
+    )
+    return {"invited": invited, "errors": errors, "team": team_snapshot(get_user_by_id(owner["id"]) or owner)}
+
+
+def revoke_team_invite(owner: dict, token: str) -> dict:
+    if not is_brokerage_owner(owner):
+        raise ValueError("Only the brokerage owner can revoke invites")
+    row = get_invite(token)
+    if not row or (row.get("created_by") or "") != owner["id"] or (row.get("kind") or "") != "team":
+        raise ValueError("Invite not found")
+    database.execute("UPDATE invites SET uses = max_uses, expires_at = ? WHERE id = ?", (_iso(), row["id"]))
+    log_event(owner["id"], "team_invite_revoked", {"email": row.get("email"), "token": token})
+    return team_snapshot(owner)
+
+
+def remove_teammate(owner: dict, user_id: str) -> dict:
+    if not is_brokerage_owner(owner):
+        raise ValueError("Only the brokerage owner can remove teammates")
+    member = get_user_by_id(user_id)
+    if not member or (member.get("team_owner_id") or "") != owner["id"]:
+        raise ValueError("Teammate not found")
+    database.execute(
+        "UPDATE users SET team_owner_id = '', plan = '', status = 'setup', presentation_limit = 0, "
+        "updated_at = ? WHERE id = ?",
+        (_iso(), user_id),
+    )
+    log_event(owner["id"], "team_member_removed", {"user_id": user_id, "email": member.get("email")})
+    log_event(user_id, "team_removed", {"owner_id": owner["id"]})
+    return team_snapshot(owner)
 
 
 def list_users(q: str = "", limit: int = 200) -> list[dict]:

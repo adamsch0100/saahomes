@@ -96,7 +96,9 @@ if (invite) {
       if (!d.ok) return;
       const hint = document.getElementById('inviteHint');
       hint.style.display = 'block';
-      hint.textContent = 'Invite applied: ' + (d.presentation_limit || 0) + ' presentation(s) / ' + (d.trial_days || 0) + ' day(s) if granted.';
+      hint.textContent = d.kind === 'team'
+        ? ('You\'re invited to ' + (d.brokerage || 'the team') + '\'s ListLogic seats. Sign in with this email to join.')
+        : ('Invite applied: ' + (d.presentation_limit || 0) + ' presentation(s) / ' + (d.trial_days || 0) + ' day(s) if granted.');
       if (d.email) document.getElementById('email').value = d.email;
     }).catch(() => {});
 }
