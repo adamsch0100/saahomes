@@ -39,7 +39,7 @@ Built for Schwartz and Associates / SAA Homes; sold to agents more broadly.
 1. **Sample demo** (`/demo`) — public sample listing (2845 W 13th St, Greeley). No account. Free forever.
 2. **Create account** (email magic link) — no card. Search/Upload, subject, branding allowed (setup).
 3. **Generate** — hard gate. Personalized teaser. Unlock with **7-day Stripe trial** (card required → auto $39/mo) or **$20 one-time** for that report. Or open sample demo.
-4. Optional **promo codes** / **invite links** may still grant complimentary trial credits (admin-controlled).
+4. Optional **promo / access codes** (e.g. `ZPNoCo`) can grant complimentary Generate — including unlimited for a pilot group. Agents enter the code on signup or login.
 5. Paid plans: $20 one-time, $39/mo agent (after 7-day trial), $390/yr, brokerage $29/seat/mo (min 5).
 
 ## Accounts & access

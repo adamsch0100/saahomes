@@ -72,6 +72,10 @@ button.btn { width: 100%; padding: 13px; font-size: 0.95rem; }
       <label for="email">Work email</label>
       <input id="email" type="email" required autocomplete="email" placeholder="you@brokerage.com">
     </div>
+    <div class="field">
+      <label for="promo">Access code <span style="font-weight:500;color:var(--muted)">(optional)</span></label>
+      <input id="promo" type="text" autocomplete="off" placeholder="ZPNoCo" style="text-transform:none">
+    </div>
     <button type="submit" class="btn btn-gold">Email me a link</button>
   </form>
   <p class="status" id="status"></p>
@@ -88,7 +92,21 @@ button.btn { width: 100%; padding: 13px; font-size: 0.95rem; }
 <script>
 const params = new URLSearchParams(location.search);
 const invite = params.get('invite') || '';
+const promo = (params.get('promo') || params.get('code') || '').trim();
 const next = params.get('next') || '/saas/app.html';
+if (promo) document.getElementById('promo').value = promo;
+if (promo) {
+  fetch('/api/promo-info?code=' + encodeURIComponent(promo))
+    .then(r => r.json())
+    .then(d => {
+      if (!d.ok) return;
+      const hint = document.getElementById('inviteHint');
+      hint.style.display = 'block';
+      hint.textContent = d.unlimited
+        ? 'Access code applied: unlimited Generate for this pilot group (no card).'
+        : ('Access code applied: ' + (d.presentation_limit || 0) + ' presentation(s) / ' + (d.trial_days || 0) + ' day(s).');
+    }).catch(() => {});
+}
 if (invite) {
   fetch('/api/invite-info?token=' + encodeURIComponent(invite))
     .then(r => r.json())
@@ -116,6 +134,7 @@ document.getElementById('form').addEventListener('submit', async (e) => {
       body: JSON.stringify({
         email: document.getElementById('email').value.trim(),
         invite,
+        promo_code: (document.getElementById('promo').value || '').trim(),
         next,
       }),
     });

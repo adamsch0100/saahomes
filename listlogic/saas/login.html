@@ -64,6 +64,10 @@ button.btn { width: 100%; padding: 13px; font-size: 0.95rem; }
       <label for="email">Email</label>
       <input id="email" name="email" type="email" autocomplete="username" required>
     </div>
+    <div class="field">
+      <label for="promo">Access code <span style="font-weight:500;color:var(--muted)">(optional)</span></label>
+      <input id="promo" type="text" autocomplete="off" placeholder="ZPNoCo">
+    </div>
     <button type="submit" class="btn btn-primary">Email me a link</button>
   </form>
 
@@ -91,6 +95,8 @@ button.btn { width: 100%; padding: 13px; font-size: 0.95rem; }
 <script>
 const params = new URLSearchParams(location.search);
 const next = params.get('next') || '';
+const promo = (params.get('promo') || params.get('code') || '').trim();
+if (promo) document.getElementById('promo').value = promo;
 let passwordMode = false;
 const magicForm = document.getElementById('magicForm');
 const passwordForm = document.getElementById('passwordForm');
@@ -119,6 +125,7 @@ magicForm.addEventListener('submit', async (e) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: document.getElementById('email').value.trim(),
+        promo_code: (document.getElementById('promo').value || '').trim(),
         next,
       }),
     });

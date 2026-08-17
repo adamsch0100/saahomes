@@ -270,6 +270,10 @@ a.btn { text-decoration: none; display: inline-block; }
       <div class="field"><label>Trial days</label><input id="pDays" type="number" value="60"></div>
       <div class="field"><label>Presentation limit</label><input id="pLimit" type="number" value="3"></div>
     </div>
+    <div class="check-row" style="margin:8px 0 12px">
+      <input type="checkbox" id="pUnlimited">
+      <label for="pUnlimited" style="margin:0">Unlimited Generate (no card, no report cap)</label>
+    </div>
     <div class="row2">
       <div class="field"><label>Max redemptions (blank = unlimited)</label><input id="pMax" type="number" placeholder="200"></div>
       <div class="field"><label>Notes</label><input id="pNotes"></div>
@@ -701,7 +705,7 @@ async function loadPromos() {
   document.getElementById('promosBody').innerHTML = (data.promo_codes || []).map(p => `
     <tr>
       <td><code>${esc(p.code)}</code><br><span class="muted">${esc(p.label || '')}</span></td>
-      <td>${p.presentation_limit} reports / ${p.trial_days}d</td>
+      <td>${p.presentation_limit < 0 ? 'Unlimited generate' : ((p.presentation_limit ?? 0) + ' reports / ' + p.trial_days + 'd')}</td>
       <td>${p.redemptions}${p.max_redemptions != null ? ' / ' + p.max_redemptions : ''}</td>
       <td>${p.active ? 'yes' : 'no'}</td>
       <td><button class="btn btn-soft btn-sm" data-pid="${p.id}" data-active="${p.active ? 0 : 1}">${p.active ? 'Deactivate' : 'Activate'}</button></td>
@@ -719,13 +723,15 @@ document.getElementById('promosBody').addEventListener('click', async (e) => {
 document.getElementById('pCreate').addEventListener('click', async () => {
   try {
     const maxRaw = document.getElementById('pMax').value.trim();
+    const unlimited = document.getElementById('pUnlimited')?.checked;
     await api('/api/admin/promo-codes', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         code: document.getElementById('pCode').value,
         label: document.getElementById('pLabel').value,
-        trial_days: +document.getElementById('pDays').value || 60,
-        presentation_limit: +document.getElementById('pLimit').value || 3,
+        trial_days: unlimited ? 0 : (+document.getElementById('pDays').value || 60),
+        presentation_limit: unlimited ? -1 : (+document.getElementById('pLimit').value || 3),
+        unlimited: !!unlimited,
         max_redemptions: maxRaw === '' ? null : +maxRaw,
         notes: document.getElementById('pNotes').value,
       }),

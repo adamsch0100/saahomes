@@ -150,6 +150,7 @@ PLAN_CATALOG = {
     "agent_monthly": {"label": "Agent monthly", "monthly": 39.0, "recurring": True},
     "agent_annual": {"label": "Agent annual", "monthly": 32.5, "recurring": True},
     "one_time": {"label": "One-time report", "monthly": 0.0, "recurring": False},
+    "promo": {"label": "Pilot promo", "monthly": 0.0, "recurring": False},
     "brokerage_monthly": {"label": "Brokerage seat (monthly)", "monthly": 29.0, "recurring": True, "per_seat": True},
     "brokerage_annual": {"label": "Brokerage seat (annual)", "monthly": 24.17, "recurring": True, "per_seat": True},
 }
@@ -1126,6 +1127,18 @@ def get_presentation_by_share_token(token: str) -> Optional[dict]:
     return _presentation_public(row) if row else None
 
 
+UNLIMITED_PROMO_SENTINEL = -1
+
+
+def _promo_is_unlimited(row: Optional[dict]) -> bool:
+    if not row:
+        return False
+    try:
+        return int(row.get("presentation_limit")) < 0
+    except Exception:
+        return False
+
+
 def get_promo_by_code(code: str) -> Optional[dict]:
     return database.execute(
         "SELECT * FROM promo_codes WHERE lower(code) = lower(?)",
@@ -1148,7 +1161,11 @@ def validate_promo(code: str) -> dict:
         "ok": True,
         "promo": row,
         "trial_days": int(row.get("trial_days") or DEFAULT_TRIAL_DAYS),
-        "presentation_limit": int(row.get("presentation_limit") or DEFAULT_PRESENTATION_LIMIT),
+        "unlimited": _promo_is_unlimited(row),
+        "presentation_limit": (
+            None if _promo_is_unlimited(row)
+            else int(row.get("presentation_limit") if row.get("presentation_limit") is not None else DEFAULT_PRESENTATION_LIMIT)
+        ),
     }
 
 
@@ -1157,6 +1174,40 @@ def redeem_promo(promo_id: str) -> None:
         "UPDATE promo_codes SET redemptions = redemptions + 1 WHERE id = ?",
         (promo_id,),
     )
+
+
+def apply_promo_to_user(user: dict, code: str) -> dict:
+    """Upgrade an existing account with a promo. Does not replace a paid Stripe subscription."""
+    pv = validate_promo(code)
+    if not pv["ok"]:
+        raise ValueError(pv["error"])
+    promo = pv["promo"]
+    if (user.get("status") or "") == "disabled":
+        raise ValueError("This account has been disabled")
+    if (user.get("status") or "") == "active" and (user.get("stripe_subscription_id") or "").strip():
+        return user
+    if (user.get("promo_code_id") or "") == promo["id"] and (user.get("status") or "") == "active":
+        if user.get("presentation_limit") is None or pv.get("unlimited"):
+            return user
+    now = _iso()
+    if pv.get("unlimited"):
+        database.execute(
+            "UPDATE users SET status = 'active', presentation_limit = NULL, trial_ends_at = NULL, "
+            "plan = ?, promo_code_id = ?, updated_at = ? WHERE id = ?",
+            ("promo", promo["id"], now, user["id"]),
+        )
+    else:
+        days = max(1, int(pv.get("trial_days") or 7))
+        limit = max(1, int(pv.get("presentation_limit") or 1))
+        database.execute(
+            "UPDATE users SET status = 'trial', presentation_limit = ?, trial_ends_at = ?, "
+            "promo_code_id = ?, updated_at = ? WHERE id = ?",
+            (limit, _iso(_utcnow() + timedelta(days=days)), promo["id"], now, user["id"]),
+        )
+    if (user.get("promo_code_id") or "") != promo["id"]:
+        redeem_promo(promo["id"])
+    log_event(user["id"], "promo_applied", {"code": (code or "").strip().upper(), "unlimited": bool(pv.get("unlimited"))})
+    return get_user_by_id(user["id"]) or user
 
 
 def get_invite(token: str) -> Optional[dict]:
@@ -1219,6 +1270,7 @@ def create_user(
     promo_id = None
     invite_id = None
     granted_trial = False
+    granted_unlimited = False
     team_owner_id = ""
     team_plan = ""
     invite_row = None
@@ -1266,13 +1318,18 @@ def create_user(
             raise ValueError(pv["error"])
         trial_days = pv["trial_days"]
         presentation_limit = pv["presentation_limit"]
-        granted_trial = int(presentation_limit or 0) > 0 or int(trial_days or 0) > 0
+        granted_unlimited = bool(pv.get("unlimited"))
+        granted_trial = granted_unlimited or int(presentation_limit or 0) > 0 or int(trial_days or 0) > 0
         promo_id = pv["promo"]["id"]
 
     now = _iso()
     # Public default: setup account (pay at Generate). Promo/invite can still grant trial credits.
     # Team-seat invites skip the paywall — they inherit the brokerage owner's plan.
     if team_owner_id:
+        status = "active"
+        ends = None
+        presentation_limit = None
+    elif granted_unlimited:
         status = "active"
         ends = None
         presentation_limit = None
@@ -1373,6 +1430,15 @@ def create_user(
             )
         except Exception:
             logger.exception("Failed to attach team seat for %s", email_n)
+    elif granted_unlimited:
+        try:
+            database.execute(
+                "UPDATE users SET plan = 'promo', status = 'active', presentation_limit = NULL, "
+                "trial_ends_at = NULL, updated_at = ? WHERE id = ?",
+                (now, user_id),
+            )
+        except Exception:
+            logger.exception("Failed to mark promo plan for %s", email_n)
     if promo_id:
         redeem_promo(promo_id)
     if invite_id:
@@ -1600,6 +1666,12 @@ def consume_magic_link(token: str) -> dict:
                 attached = accept_team_invite(user["id"], invite_tok)
                 if attached:
                     user = attached
+            except ValueError:
+                pass
+        promo_tok = (row.get("promo_code") or "").strip()
+        if promo_tok:
+            try:
+                user = apply_promo_to_user(user, promo_tok)
             except ValueError:
                 pass
 
@@ -2314,6 +2386,18 @@ def bootstrap() -> None:
         except Exception as exc:
             # Another instance may have created it concurrently; log and continue.
             logger.info("Promo code CBListLogic already present: %s", exc)
+    if not get_promo_by_code("ZPNoCo"):
+        try:
+            create_promo_code(
+                code="ZPNoCo",
+                label="NoCo CB pilot — unlimited generate",
+                trial_days=0,
+                presentation_limit=UNLIMITED_PROMO_SENTINEL,
+                max_redemptions=25,
+                notes="Small Coldwell Banker NoCo tryout group — unlimited Generate, no card",
+            )
+        except Exception as exc:
+            logger.info("Promo code ZPNoCo already present: %s", exc)
     # Retire legacy codes if they still exist from earlier seeds
     for legacy in ("COLDWELL-NOCO", "LISTLOGIC-BETA"):
         row = get_promo_by_code(legacy)

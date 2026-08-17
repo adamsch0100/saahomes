@@ -130,6 +130,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/api/auth-status",
         "/api/feedback",
         "/api/invite-info",
+        "/api/promo-info",
         "/api/billing/config",
         "/api/billing/webhook",
         "/api/public-config",
@@ -1253,6 +1254,25 @@ def invite_info(token: str = ""):
     }
 
 
+@app.get("/api/promo-info")
+def promo_info(code: str = ""):
+    import auth_service
+
+    if not code:
+        raise HTTPException(400, "Missing promo code")
+    info = auth_service.validate_promo(code)
+    if not info["ok"]:
+        raise HTTPException(404, info.get("error") or "Promo not found")
+    return {
+        "ok": True,
+        "code": (code or "").strip(),
+        "unlimited": bool(info.get("unlimited")),
+        "trial_days": info.get("trial_days"),
+        "presentation_limit": info.get("presentation_limit"),
+        "label": (info.get("promo") or {}).get("label") or "",
+    }
+
+
 @app.post("/api/feedback")
 async def submit_feedback(request: Request):
     import auth_service
@@ -1763,15 +1783,32 @@ async def admin_promo_create(request: Request):
     _require_admin(request)
     payload = await request.json()
     try:
+        unlimited = bool(payload.get("unlimited")) or str(payload.get("presentation_limit") or "").strip().lower() in (
+            "-1",
+            "unlimited",
+        )
+        if unlimited:
+            limit = auth_service.UNLIMITED_PROMO_SENTINEL
+            trial_days = int(payload.get("trial_days") or 0)
+        elif payload.get("presentation_limit") is not None:
+            limit = int(payload.get("presentation_limit"))
+            trial_days = int(
+                payload.get("trial_days")
+                if payload.get("trial_days") is not None
+                else auth_service.default_trial_days()
+            )
+        else:
+            limit = auth_service.default_presentation_limit()
+            trial_days = int(
+                payload.get("trial_days")
+                if payload.get("trial_days") is not None
+                else auth_service.default_trial_days()
+            )
         row = auth_service.create_promo_code(
             code=str(payload.get("code") or ""),
             label=str(payload.get("label") or ""),
-            trial_days=int(payload.get("trial_days") or auth_service.default_trial_days()),
-            presentation_limit=int(
-                payload.get("presentation_limit")
-                if payload.get("presentation_limit") is not None
-                else auth_service.default_presentation_limit()
-            ),
+            trial_days=trial_days,
+            presentation_limit=limit,
             max_redemptions=payload.get("max_redemptions"),
             notes=str(payload.get("notes") or ""),
         )
