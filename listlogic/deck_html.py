@@ -1,9 +1,12 @@
 """Landscape flipbook + printable leave-behind deck for ListLogic presentations."""
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 from typing import Any
+
+from copy_defaults import DEFAULT_LEDES
 
 
 def _clean(obj: Any) -> Any:
@@ -66,8 +69,10 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
     median_dom = float(story.get("median_dom") or s.get("median_dom") or 45)
     top_mkt = float(story.get("top_of_market_pct") or 50)
     exec_sum = _md_strip(report.get("executive_summary") or "")
-    if len(exec_sum) > 360:
-        exec_sum = exec_sum[:360].rsplit(" ", 1)[0] + "…"
+    copy_ledes = report.get("copy_ledes") if isinstance(report.get("copy_ledes"), dict) else {}
+    lede_comps = copy_ledes.get("comps") or DEFAULT_LEDES["comps"]
+    lede_condition = copy_ledes.get("condition") or DEFAULT_LEDES["condition"]
+    lede_close = copy_ledes.get("close") or DEFAULT_LEDES["close"]
     advantages = pos.get("advantages") or []
     risks = pos.get("risks") or []
     scenarios = pos.get("price_scenarios") or []
@@ -175,7 +180,7 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
     comps_html = "".join(_comp_card(c) for c in comps) or '<p class="muted">No close comps</p>'
 
     scenarios_html = "".join(
-        f'<div class="sc{" sc-main" if "Balanced" in (sc.get("label") or "") else ""}">'
+        f'<div class="sc{" sc-main" if "Balanced" in (sc.get("label") or "") else ""}" data-price="{(sc.get("list_price") or 0)}">'
         f'<div class="sc-l">{_esc(sc.get("label") or "")}</div>'
         f'<div class="sc-p">${(sc.get("list_price") or 0):,.0f}</div>'
         f'<div class="sc-m">~{(sc.get("expected_dom") or 0):.0f}d · '
@@ -229,9 +234,9 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
             <div style="margin-top:12px;padding:10px 12px;border-radius:12px;background:#fdf6ea;border:1px solid #ecdfc2">
               <div style="font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#9a6a3a">While You Wait</div>
               <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;text-align:center">
-                <div><div style="font-family:Fraunces,Georgia,serif;font-size:1.4rem;font-weight:700;color:#8a4a12">{lf_active_below}</div><div style="font-size:.62rem;font-weight:700;color:#9a6a3a;text-transform:uppercase">Already cheaper</div></div>
-                <div><div style="font-family:Fraunces,Georgia,serif;font-size:1.4rem;font-weight:700;color:#8a4a12">~{lf_below:.1f}/mo</div><div style="font-size:.62rem;font-weight:700;color:#9a6a3a;text-transform:uppercase">New under you</div></div>
-                <div><div style="font-family:Fraunces,Georgia,serif;font-size:1.4rem;font-weight:700;color:#8a4a12">~{wyw_total:.0f}</div><div style="font-size:.62rem;font-weight:700;color:#9a6a3a;text-transform:uppercase">In ~{lf_wait_dom:.0f}d wait</div></div>
+                <div><div id="deckWywAhead" style="font-family:Fraunces,Georgia,serif;font-size:1.4rem;font-weight:700;color:#8a4a12">{lf_active_below}</div><div style="font-size:.62rem;font-weight:700;color:#9a6a3a;text-transform:uppercase">Already cheaper</div></div>
+                <div><div id="deckWywArrive" style="font-family:Fraunces,Georgia,serif;font-size:1.4rem;font-weight:700;color:#8a4a12">~{lf_below:.1f}/mo</div><div style="font-size:.62rem;font-weight:700;color:#9a6a3a;text-transform:uppercase">New under you</div></div>
+                <div><div id="deckWywTotal" style="font-family:Fraunces,Georgia,serif;font-size:1.4rem;font-weight:700;color:#8a4a12">~{wyw_total:.0f}</div><div style="font-size:.62rem;font-weight:700;color:#9a6a3a;text-transform:uppercase">In <span id="deckWywWait">~{lf_wait_dom:.0f}d</span> wait</div></div>
               </div>
             </div>
 '''
@@ -347,7 +352,7 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
         <p class="lede">{_esc(talk_price)}</p>
         <div class="duo">
           <div class="d yours"><div class="n">${(yoy_summary[-1].get("median_price") or 0)/1000:.0f}k</div><div class="t">Latest-year median sold</div></div>
-          <div class="d"><div class="n">${rec/1000:.0f}k</div><div class="t">Recommended list</div></div>
+          <div class="d"><div class="n" id="deckYoYRec">${rec/1000:.0f}k</div><div class="t">Recommended list</div></div>
         </div>
         <div class="yr-chart grow"><div class="eyebrow">Median sold by year</div><div class="yr-bars">{price_bars}</div></div>
       </div>
@@ -360,7 +365,7 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
         <p class="lede">{_esc(talk_timing)}</p>
         <div class="duo">
           <div class="d"><div class="n">{median_dom:.0f}d</div><div class="t">Market median DOM</div></div>
-          <div class="d yours"><div class="n">~{exp_dom:.0f}d</div><div class="t">Expected at recommended</div></div>
+          <div class="d yours"><div class="n" id="deckYoYDom">~{exp_dom:.0f}d</div><div class="t">Expected at recommended</div></div>
         </div>
         <div class="yr-chart grow"><div class="eyebrow">Median DOM by year</div><div class="yr-bars">{dom_bars}</div></div>
       </div>
@@ -370,8 +375,66 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
     else:
         yoy_slide = ""
 
-    adv_html = "".join(f"<li>{_esc(a)}</li>" for a in advantages[:4]) or "<li>Solid fundamentals</li>"
-    risk_html = "".join(f"<li>{_esc(r)}</li>" for r in risks[:4]) or "<li>Overpricing risk</li>"
+    adv_html = "".join(f"<li>{_esc(a)}</li>" for a in advantages[:6]) or "<li>Solid fundamentals</li>"
+    risk_html = "".join(f"<li>{_esc(r)}</li>" for r in risks[:6]) or "<li>Overpricing risk</li>"
+
+    sold_prices = story.get("sold_prices") or []
+    if not sold_prices:
+        sold_prices = [
+            float(p.get("SoldPrice") or 0)
+            for p in (report.get("points") or [])
+            if p.get("SoldPrice")
+        ]
+    deck_data = {
+        "soldPrices": sold_prices,
+        "rec": rec,
+        "low": low,
+        "high": high,
+        "dom": exp_dom,
+        "topMkt": top_mkt,
+        "marketOdds": (s.get("odds_of_selling") or story.get("market_odds") or 0),
+        "medianDom": median_dom,
+        "inv": inv,
+        "soldCount": int(s.get("sold_count") or story.get("sold_count") or 0),
+        "homeRating": rating,
+        "scenarios": [
+            {
+                "label": sc.get("label"),
+                "price": sc.get("list_price"),
+                "dom": sc.get("expected_dom"),
+                "odds": sc.get("odds_30_day"),
+            }
+            for sc in scenarios[:5]
+        ],
+        "listingFlow": {
+            "newPm": lf_new,
+            "salesPm": lf_sales,
+            "supplyPressure": lf_pressure,
+            "newBelowRecPm": lf_below,
+            "activeBelowRec": lf_active_below,
+            "freshDuringMedianDom": lf_wait_fresh,
+            "medianDomForWait": lf_wait_dom,
+            "subjectSqft": float(lf.get("subject_living_area") or subject.get("living_area") or 0),
+            "samples": lf.get("samples") or [],
+            "insight": lf_insight,
+        },
+        "priceResponse": report.get("price_response") or {},
+    }
+    deck_defaults = {
+        "rec": rec,
+        "low": low,
+        "high": high,
+        "dom": exp_dom,
+        "rating": 5,
+        "bl": exec_sum,
+        "adv": "\n".join(advantages),
+        "risk": "\n".join(risks),
+        "ledes": {
+            "comps": lede_comps,
+            "condition": lede_condition,
+            "close": lede_close,
+        },
+    }
 
     # —— Net Sheet slide (mirrors live spine-net defaults) ——
     net_slide = ""
@@ -486,7 +549,7 @@ a {{ color: inherit; }}
 .deck-chrome .prog {{ font-size: .72rem; color: rgba(255,255,255,.7); min-width: 4.5rem; text-align: center; }}
 
 .stage {{
-  min-height: 100vh; padding: 64px 18px 28px;
+  min-height: 100vh; padding: 64px 18px 118px;
   display: flex; align-items: center; justify-content: center;
 }}
 body.mode-print .stage {{
@@ -622,8 +685,8 @@ h1, h2, h3 {{ font-family: Fraunces, Georgia, serif; font-weight: 700; letter-sp
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
 }}
 .price-rec-bl {{
-  display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden;
-  font-size: .88rem;
+  display: block; overflow: visible; max-width: none;
+  font-size: .86rem; line-height: 1.42;
 }}
 .net-sheet-wrap {{ min-height: 0; overflow: hidden; }}
 .ns-lines {{ overflow: hidden; max-height: 100%; }}
@@ -862,11 +925,55 @@ body.mode-print .hint {{ display: none; }}
 .ns-summary .ns-fine {{ font-size: .64rem; opacity: .75; margin-top: 12px; line-height: 1.4; }}
 @media (max-width: 900px) {{ .net-sheet-wrap {{ grid-template-columns: 1fr; }} }}
 
+.presenter-dock {{
+  position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
+  z-index: 80; width: min(720px, calc(100vw - 28px));
+  background: rgba(10,22,38,.94); color: #fff; border: 1px solid rgba(255,255,255,.14);
+  border-radius: 16px; padding: 10px 14px 12px; box-shadow: 0 16px 40px rgba(0,0,0,.35);
+  backdrop-filter: blur(12px);
+}}
+.presenter-dock .pd-row {{ display: flex; align-items: center; gap: 10px; margin-top: 6px; }}
+.presenter-dock .pd-label {{
+  font-size: .62rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+  color: rgba(255,255,255,.62); min-width: 4.6rem;
+}}
+.pd-rates {{ display: flex; flex-wrap: wrap; gap: 4px; }}
+.pd-rate {{
+  width: 28px; height: 28px; border-radius: 8px; border: 1px solid rgba(255,255,255,.2);
+  background: rgba(255,255,255,.06); color: #fff; font-size: .75rem; font-weight: 800; cursor: pointer;
+}}
+.pd-rate.active {{ background: var(--gold-soft); color: #0f2740; border-color: transparent; }}
+.pd-slider {{ flex: 1; min-width: 0; }}
+.pd-slider input {{ width: 100%; accent-color: var(--gold-soft); }}
+.pd-price {{ font-family: Fraunces, Georgia, serif; font-weight: 700; font-size: 1.05rem; min-width: 5.8rem; text-align: right; }}
+.pd-meta {{
+  display: flex; flex-wrap: wrap; gap: 10px 16px; margin-top: 8px;
+  font-size: .72rem; color: rgba(255,255,255,.78); font-weight: 700;
+  align-items: center;
+}}
+.pd-reset {{
+  margin-left: auto; border: 1px solid rgba(255,255,255,.22); background: transparent;
+  color: #fff; border-radius: 999px; padding: 4px 10px; font-size: .68rem; font-weight: 800;
+  cursor: pointer;
+}}
+body.mode-print .presenter-dock {{ display: none !important; }}
+body.ll-agent [data-lede], body.ll-agent [data-edit] {{
+  outline: 1px dashed transparent; border-radius: 4px; cursor: text;
+}}
+body.ll-agent [data-lede]:hover, body.ll-agent [data-edit]:hover,
+body.ll-agent #deckAdvList li:hover, body.ll-agent #deckRiskList li:hover {{
+  outline-color: rgba(12,60,110,.35);
+}}
+body.ll-agent [data-lede]:focus, body.ll-agent [data-edit]:focus,
+body.ll-agent #deckAdvList li:focus, body.ll-agent #deckRiskList li:focus {{
+  outline-color: var(--navy);
+}}
+
 @media print {{
   @page {{ size: 11in 8.5in; margin: 0; }}
   * {{ -webkit-print-color-adjust: exact; print-color-adjust: exact; }}
   html, body {{ background: #fff !important; margin: 0; padding: 0; }}
-  .deck-chrome, .nav-fab, .hint {{ display: none !important; }}
+  .deck-chrome, .nav-fab, .hint, .presenter-dock {{ display: none !important; }}
   .stage {{ padding: 0 !important; background: #fff !important; min-height: 0 !important; }}
   .deck {{
     max-width: none !important; width: 11in !important; margin: 0 !important; gap: 0 !important;
@@ -911,7 +1018,7 @@ body.mode-print .hint {{ display: none; }}
 <header class="deck-chrome">
   <div class="left">
     <span class="brand">ListLogic · Listing flipbook</span>
-    <a href="{_esc(interactive_href)}" id="linkInteractive">Interactive</a>
+    <a href="{_esc(interactive_href)}" id="linkInteractive">Live Story</a>
     <button type="button" class="on" id="btnFlip" data-mode="flip">Flipbook</button>
     <button type="button" id="btnPrintMode" data-mode="print">Print layout</button>
   </div>
@@ -989,7 +1096,7 @@ body.mode-print .hint {{ display: none; }}
       <div class="slide-top"><span>{logo_html}3 · Comps</span><span>Closest Sales</span></div>
       <div class="slide-body">
         <h2 class="slide-title"><span class="step-badge">3</span>Closest Comparable Sales</h2>
-        <p class="lede">Does it look like yours — or nicer / dated — and does the sold price match that story?</p>
+        <p class="lede" data-lede="comps">{_esc(lede_comps)}</p>
         <div class="comps-grid comps-grid-8">{comps_html}</div>
       </div>
       <div class="slide-foot"><span>{len(comps)} close sales</span><span>ListLogic</span></div>
@@ -1000,9 +1107,9 @@ body.mode-print .hint {{ display: none; }}
       <div class="slide-top"><span>{logo_html}4 · Your Home</span><span>Condition</span></div>
       <div class="slide-body">
         <h2 class="slide-title"><span class="step-badge">4</span>Condition Moves the Number</h2>
-        <p class="lede">Within your segment, updates and presentation decide where you land. We start at a typical <strong>5/10</strong>, rate together, then lock the list.</p>
+        <p class="lede" data-lede="condition">{_esc(lede_condition)}</p>
         <div class="duo" style="margin-top:14px">
-          <div class="d yours"><div class="n">{rating}/10</div><div class="t">{_esc(rating_label)}</div></div>
+          <div class="d yours"><div class="n" id="deckRateScore">{rating}/10</div><div class="t" id="deckRateLabel">{_esc(rating_label)}</div></div>
           <div class="d"><div class="n">5/10</div><div class="t">Starting point · typical for set</div></div>
         </div>
         <div class="facts-grid" style="margin-top:12px">
@@ -1020,10 +1127,10 @@ body.mode-print .hint {{ display: none; }}
       <div class="slide-top"><span>{logo_html}5 · Position</span><span>Market Position</span></div>
       <div class="slide-body">
         <h2 class="slide-title"><span class="step-badge">5</span>Position in Recent Sales</h2>
-        <p class="lede">{_esc(top_stmt)}</p>
+        <p class="lede" id="deckTopStmt">{_esc(top_stmt)}</p>
         <div class="duo compact" style="margin-top:12px">
-          <div class="d"><div class="n">Top {top_mkt:.0f}%</div><div class="t">of similar sales</div></div>
-          <div class="d yours"><div class="n">{rating}/10</div><div class="t">{_esc(rating_label)}</div></div>
+          <div class="d"><div class="n" id="deckPosTop">Top {top_mkt:.0f}%</div><div class="t">of similar sales</div></div>
+          <div class="d yours"><div class="n" id="deckPosRate">{rating}/10</div><div class="t" id="deckPosRateLabel">{_esc(rating_label)}</div></div>
         </div>
         <p class="lede tight">{_esc(trend_line)}</p>
         <p class="talk-chip">{_esc((pos.get("competitive_statement") or "")[:280])}</p>
@@ -1038,13 +1145,13 @@ body.mode-print .hint {{ display: none; }}
         <h2 class="slide-title"><span class="step-badge">7</span>Recommended List Price</h2>
         <div class="price-rec-grid">
           <div class="price-rec-main">
-            <div class="price-rec-num">${rec:,.0f}</div>
-            <div class="price-rec-range">Range <strong>${low:,.0f} – ${high:,.0f}</strong> · ~<strong>{exp_dom:.0f} days</strong> to contract</div>
-            <div class="price-rec-top">Top {top_mkt:.0f}% of similar recent sales</div>
-            <div class="pos-bar" style="margin-top:14px"><div class="pos-marker"></div></div>
-            <div class="bl price-rec-bl">{_esc(exec_sum).replace(chr(10), '<br/>')}</div>
+            <div class="price-rec-num" id="deckRec">${rec:,.0f}</div>
+            <div class="price-rec-range">Range <strong id="deckRange">${low:,.0f} – ${high:,.0f}</strong> · ~<strong id="deckDom">{exp_dom:.0f} days</strong> to contract</div>
+            <div class="price-rec-top" id="deckTopPct">Top {top_mkt:.0f}% of similar recent sales</div>
+            <div class="pos-bar" style="margin-top:14px"><div class="pos-marker" id="deckPosMarker"></div></div>
+            <div class="bl price-rec-bl" id="deckBL" data-edit="bl">{_esc(exec_sum).replace(chr(10), '<br/>')}</div>
           </div>
-          <div class="price-rec-side">{wyw_inline or '<div class="talk-chip">Open Live Story to stress-test higher or lower asks.</div>'}</div>
+          <div class="price-rec-side">{wyw_inline or '<div class="talk-chip">Use the presenter dock to stress-test higher or lower asks.</div>'}</div>
         </div>
       </div>
       <div class="slide-foot"><span>Then choose a strategy lane</span><span>ListLogic</span></div>
@@ -1056,10 +1163,10 @@ body.mode-print .hint {{ display: none; }}
       <div class="slide-body">
         <h2 class="slide-title"><span class="step-badge">7</span>If You Go Higher or Lower</h2>
         <p class="lede">Strategy cards snap you to a lane — days and odds respond.</p>
-        <div class="sc-grid sc-grid-fill">{scenarios_html or '<p class="muted">Open Live Story for live what-if</p>'}</div>
+        <div class="sc-grid sc-grid-fill" id="deckScGrid">{scenarios_html or '<p class="muted">Use the presenter dock for live what-if</p>'}</div>
         <div class="split">
-          <div><h3>Advantages</h3><ul>{adv_html}</ul></div>
-          <div><h3>Watch-Outs</h3><ul>{risk_html}</ul></div>
+          <div><h3>Advantages</h3><ul id="deckAdvList">{adv_html}</ul></div>
+          <div><h3>Watch-Outs</h3><ul id="deckRiskList">{risk_html}</ul></div>
         </div>
       </div>
       <div class="slide-foot"><span>Pick a lane — the market answers</span><span>ListLogic</span></div>
@@ -1074,7 +1181,7 @@ body.mode-print .hint {{ display: none; }}
         <div class="close-inner">
           <div class="eyebrow">Ready When You Are</div>
           <h1>Price with the data.<br>Win with the story.</h1>
-          <p class="lede" style="color:rgba(255,255,255,.85)">We'll fine-tune condition, lock the list, and launch with a plan buyers can believe.</p>
+          <p class="lede" data-lede="close" style="color:rgba(255,255,255,.85)">{_esc(lede_close)}</p>
           <div class="cta">
             <span>{_esc(agent_name or "Your agent")}</span>
             {f'<span>{_esc(agent_phone)}</span>' if agent_phone else ''}
@@ -1092,6 +1199,24 @@ body.mode-print .hint {{ display: none; }}
   <button type="button" id="fabPrev" aria-label="Previous">‹</button>
   <button type="button" id="fabNext" aria-label="Next">›</button>
 </div>
+<aside class="presenter-dock" id="presenterDock" aria-label="Presenter controls">
+  <div class="pd-row">
+    <span class="pd-label">Condition</span>
+    <div class="pd-rates" id="deckRateRow">{"".join(f'<button type="button" class="pd-rate{" active" if i == 5 else ""}" data-rating="{i}">{i}</button>' for i in range(1, 11))}</div>
+  </div>
+  <div class="pd-row">
+    <span class="pd-label">List</span>
+    <div class="pd-slider"><input type="range" id="deckPriceSlider" min="0" max="100" value="50" step="1"></div>
+    <strong class="pd-price" id="deckSlidePrice">${rec:,.0f}</strong>
+  </div>
+  <div class="pd-meta">
+    <span id="deckDockRec">Rec ${rec:,.0f}</span>
+    <span id="deckDockRange">${low:,.0f} – ${high:,.0f}</span>
+    <span id="deckDockDom">~{exp_dom:.0f} days</span>
+    <span id="deckDockOdds">{odds_pct:.0f}% in 30d</span>
+    <button type="button" class="pd-reset" id="deckReset">Reset</button>
+  </div>
+</aside>
 <div class="hint">← → to flip · P for print layout · Esc back to interactive</div>
 
 <script>
@@ -1203,8 +1328,335 @@ body.mode-print .hint {{ display: none; }}
 
   window.addEventListener('resize', () => requestAnimationFrame(fitBodies));
   window.addEventListener('beforeprint', fitBodies);
+  window.__deckFit = fitBodies;
 
   setMode(mode);
+}})();
+</script>
+<script>
+const DATA = {json.dumps(deck_data, allow_nan=False)};
+const defaults = {json.dumps(deck_defaults, allow_nan=False)};
+const RUN_ID = (location.pathname.match(/\\/runs\\/([^\\/]+)/)||[])[1] || '';
+(function() {{
+  const ratingMult = {{1:0.90,2:0.92,3:0.94,4:0.96,5:0.98,6:1.00,7:1.025,8:1.045,9:1.07,10:1.09}};
+  let currentRec = defaults.rec, currentLow = defaults.low, currentHigh = defaults.high, currentDom = defaults.dom, currentRating = 5;
+  let blManual = false;
+
+  function money(n) {{ return '$' + Math.round(Number(n)).toLocaleString('en-US'); }}
+  function ratingLabel(r) {{
+    if (r <= 3) return 'Needs Work';
+    if (r <= 6) return 'Typical';
+    if (r <= 8) return 'Strong';
+    return 'Exceptional';
+  }}
+  function topPct(price) {{
+    const prices = DATA.soldPrices || [];
+    if (!prices.length) return Math.round(DATA.topMkt || 50);
+    const below = prices.filter(p => p < price).length;
+    return Math.max(1, Math.round(100 - 100 * below / prices.length));
+  }}
+  function estimateAtPrice(rec, price, medianDom, baseOdds, inv) {{
+    if (!rec) rec = price || 1;
+    const lf = DATA.listingFlow || {{}};
+    const pr = DATA.priceResponse || {{}};
+    const delta = (price - rec) / rec;
+    const pressure = lf.supplyPressure || 1;
+    const actives = (pr.active_prices || pr.activePrices || []);
+    const salesPm = +(pr.band_sales_pm || pr.bandSalesPm || lf.salesPm || 0.15);
+    const baseDom = +(pr.base_dom || pr.baseDom || medianDom || 45);
+    const oddsBase = +(pr.base_odds || pr.baseOdds || baseOdds || 0.35);
+    const sqft = +(lf.subjectSqft || 0);
+    let expectedDom, odds, freshBelow = 0, method = pr.method || 'heuristic';
+    function newBelowPm(listPrice) {{
+      const samples = lf.samples || [];
+      if (!samples.length) return +(lf.newBelowRecPm || 0);
+      const counts = {{}};
+      samples.forEach(row => {{
+        const p = +row.p || 0, s = +row.s || 0, m = row.m;
+        if (!p || !m) return;
+        if (sqft && s && (s < sqft * 0.8 || s > sqft * 1.2)) return;
+        if (p < listPrice) counts[m] = (counts[m] || 0) + 1;
+      }});
+      const months = Object.keys(counts).sort().slice(-6);
+      if (!months.length) return 0;
+      return months.reduce((a, m) => a + counts[m], 0) / months.length;
+    }}
+    function effectiveQueue(posNow, sales, arrivePm) {{
+      const cutIn = Math.min(0.85, Math.max(0, arrivePm) / Math.max(sales, 0.15));
+      const posEff = Math.max(posNow, 1) / Math.max(1 - cutIn, 0.15);
+      const months = posEff / Math.max(sales, 0.15);
+      return {{ posEff, fresh: arrivePm * months }};
+    }}
+    if (actives.length && method !== 'heuristic') {{
+      const queuePos = (p) => {{
+        let below = 0, near = 0;
+        for (const a of actives) {{
+          if (a < p * 0.995) below++;
+          else if (Math.abs(a - p) / Math.max(p, 1) <= 0.005) near++;
+        }}
+        return 1 + below + 0.5 * near;
+      }};
+      const arrivePm = newBelowPm(price);
+      const arrivePmRec = newBelowPm(rec);
+      const q = effectiveQueue(queuePos(price), salesPm, arrivePm);
+      const qRec = effectiveQueue(queuePos(rec), salesPm, arrivePmRec);
+      const rawDom = 30.44 * q.posEff / Math.max(salesPm, 0.15);
+      const recRaw = 30.44 * qRec.posEff / Math.max(salesPm, 0.15);
+      const scale = baseDom / Math.max(recRaw, 1);
+      let queueDom = rawDom * scale;
+      const rawOdds = Math.min(0.95, salesPm / Math.max(q.posEff + salesPm * 0.35, 0.15));
+      const recOddsRaw = Math.min(0.95, salesPm / Math.max(qRec.posEff + salesPm * 0.35, 0.15));
+      let queueOdds = Math.min(0.92, Math.max(0.03, rawOdds * (oddsBase / Math.max(recOddsRaw, 0.02))));
+      freshBelow = q.fresh;
+      expectedDom = queueDom;
+      if (inv > 6.5 && delta > 0.02) {{ expectedDom *= 1.08; queueOdds *= 0.92; }}
+      else if (inv < 2.5 && delta < 0) {{ expectedDom *= 0.92; queueOdds = Math.min(0.85, queueOdds * 1.08); }}
+      odds = queueOdds;
+      expectedDom = Math.max(10, Math.round(expectedDom));
+    }} else {{
+      let invFactor = 1;
+      if (inv < 2.5) invFactor = 0.75;
+      else if (inv < 4) invFactor = 0.90;
+      else if (inv > 6.5) invFactor = 1.35;
+      let domMult;
+      const belowPm = +(lf.newBelowRecPm || 0);
+      if (delta <= -0.04) domMult = 0.60;
+      else if (delta <= 0) domMult = 0.80 + (delta + 0.04) * 5.0;
+      else if (delta <= 0.03) domMult = 1.0 + delta * 5.0;
+      else if (delta <= 0.08) domMult = 1.15 + (delta - 0.03) * 10.0;
+      else domMult = 1.65 + (delta - 0.08) * 25.0;
+      if (delta <= -0.04) odds = Math.min(0.75, oddsBase * 1.55);
+      else if (delta <= 0.02) odds = oddsBase * (1.15 - delta * 3);
+      else if (delta <= 0.08) odds = Math.max(0.05, oddsBase * (0.90 - (delta - 0.02) * 8.0));
+      else odds = Math.max(0.02, oddsBase * (0.42 - (delta - 0.08) * 4.0));
+      if (delta > 0.02 && pressure > 1) domMult *= 1 + Math.min(0.55, (pressure - 1) * 0.4 + delta * 1.0);
+      if (delta > 0.03 && pressure > 0.9) odds *= Math.max(0.22, 1 - (delta - 0.02) * pressure * 1.6);
+      expectedDom = Math.max(10, Math.round((medianDom || 45) * domMult * invFactor));
+      if (belowPm > 0 && delta > 0) freshBelow = belowPm * (1 + Math.min(0.5, delta * 2)) * (expectedDom / 30.44);
+    }}
+    return {{ expectedDom, odds, freshBelow: Math.round(freshBelow * 10) / 10 }};
+  }}
+  function supplyStatsAtPrice(price) {{
+    const lf = DATA.listingFlow || {{}};
+    const samples = lf.samples || [];
+    const sqft = +lf.subjectSqft || 0;
+    const dom = +lf.medianDomForWait || DATA.medianDom || 45;
+    const inBand = (row) => !sqft || !row.s || (row.s >= sqft * 0.8 && row.s <= sqft * 1.2);
+    if (!price || !samples.length) {{
+      return {{ belowPm: lf.newBelowRecPm || 0, activeBelow: lf.activeBelowRec || 0, waitFresh: lf.freshDuringMedianDom || 0, dom }};
+    }}
+    const band = samples.filter(inBand);
+    const below = band.filter(row => row.p < price);
+    const byMonth = {{}};
+    below.forEach(row => {{ if (row.m) byMonth[row.m] = (byMonth[row.m] || 0) + 1; }});
+    const months = Object.keys(byMonth).sort().slice(-6);
+    const belowPm = months.length ? months.reduce((sum, m) => sum + byMonth[m], 0) / months.length : 0;
+    const activeBelow = band.filter(row => row.a && row.p < price).length;
+    return {{ belowPm, activeBelow, waitFresh: belowPm * (dom / 30.44), dom }};
+  }}
+  function setText(id, text) {{
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  }}
+  function climateLine(rec, low, high, dom) {{
+    const inv = +(DATA.inv || 0);
+    let climate = "a buyer's market";
+    if (inv < 2.5) climate = "a strong seller's market";
+    else if (inv < 4.5) climate = "a seller-favorable market";
+    else if (inv < 7) climate = "a balanced market";
+    const soldN = Math.round(+(DATA.soldCount || 0));
+    return 'This is ' + climate + ' with ' + inv.toFixed(1) + ' months of inventory. Based on ' +
+      soldN + ' recent sales, your home is best positioned between ' + money(low) + ' and ' +
+      money(high) + ', with a recommended list price of ' + money(rec) +
+      '. At that level we would expect roughly ' + Math.round(dom) + ' days to contract. Launch inside the competitive range — that creates the strongest outcome.';
+  }}
+  function setupPriceSlider(rec, selectedPrice) {{
+    const slider = document.getElementById('deckPriceSlider');
+    if (!slider) return;
+    const lo = Math.round(rec * 0.92 / 1000) * 1000;
+    const hi = Math.round(rec * 1.12 / 1000) * 1000;
+    slider.dataset.lo = lo; slider.dataset.hi = hi; slider.dataset.rec = rec;
+    const thumb = selectedPrice != null ? selectedPrice : rec;
+    slider.value = Math.min(100, Math.max(0, Math.round(100 * (thumb - lo) / Math.max(hi - lo, 1))));
+  }}
+  function priceFromSlider() {{
+    const slider = document.getElementById('deckPriceSlider');
+    const lo = +slider.dataset.lo || currentRec * 0.92;
+    const hi = +slider.dataset.hi || currentRec * 1.12;
+    return Math.round((lo + (hi - lo) * (+slider.value / 100)) / 1000) * 1000;
+  }}
+  function paintPrice(rec, low, high, dom, askPrice) {{
+    currentRec = rec; currentLow = low; currentHigh = high; currentDom = dom;
+    const ask = askPrice != null ? askPrice : rec;
+    const out = estimateAtPrice(rec, ask, DATA.medianDom, DATA.marketOdds, DATA.inv);
+    const top = topPct(ask);
+    setText('deckRec', money(ask));
+    setText('deckRange', money(low) + ' – ' + money(high));
+    setText('deckDom', Math.round(out.expectedDom) + ' days');
+    setText('deckTopPct', 'Top ' + top + '% of similar recent sales');
+    setText('deckTopStmt', 'At this list, you would be priced in the top ' + top + '% of recent similar sales.');
+    setText('deckPosTop', 'Top ' + top + '%');
+    setText('deckSlidePrice', money(ask));
+    setText('deckDockRec', 'Rec ' + money(rec));
+    setText('deckDockRange', money(low) + ' – ' + money(high));
+    setText('deckDockDom', '~' + Math.round(out.expectedDom) + ' days');
+    setText('deckDockOdds', Math.round(out.odds * 100) + '% in 30d');
+    setText('deckYoYRec', '$' + Math.round(rec / 1000) + 'k');
+    setText('deckYoYDom', '~' + Math.round(out.expectedDom) + 'd');
+    const marker = document.getElementById('deckPosMarker');
+    if (marker) marker.style.left = 'calc(' + Math.min(98, Math.max(2, 100 - top)) + '% - 2px)';
+    if (!blManual) {{
+      const bl = document.getElementById('deckBL');
+      if (bl) bl.textContent = climateLine(rec, low, high, out.expectedDom);
+    }}
+    const stats = supplyStatsAtPrice(ask);
+    setText('deckWywAhead', String(stats.activeBelow || 0));
+    setText('deckWywArrive', '~' + (stats.belowPm || 0).toFixed(1) + '/mo');
+    const total = (stats.activeBelow || 0) + (stats.belowPm || 0) * (out.expectedDom / 30.44);
+    setText('deckWywTotal', '~' + Math.max(0, Math.round(total)));
+    setText('deckWywWait', '~' + Math.round(out.expectedDom) + 'd');
+    document.querySelectorAll('#deckScGrid .sc[data-price]').forEach(card => {{
+      const p = +card.dataset.price;
+      if (!p) return;
+      const sc = estimateAtPrice(rec, p, DATA.medianDom, DATA.marketOdds, DATA.inv);
+      const meta = card.querySelector('.sc-m');
+      if (meta) meta.textContent = '~' + sc.expectedDom + 'd · ' + Math.round(sc.odds * 100) + '% in 30d';
+    }});
+    if (window.__deckFit) requestAnimationFrame(window.__deckFit);
+  }}
+  function applyRating(r) {{
+    currentRating = r;
+    document.querySelectorAll('.pd-rate').forEach(b => b.classList.toggle('active', +b.dataset.rating === r));
+    const base = defaults.rec / (ratingMult[defaults.rating] || 1);
+    const newRec = Math.round(base * (ratingMult[r] || 1) / 1000) * 1000;
+    const newLow = Math.round(newRec * 0.965 / 1000) * 1000;
+    const newHigh = Math.round(newRec * 1.04 / 1000) * 1000;
+    const out = estimateAtPrice(newRec, newRec, DATA.medianDom, DATA.marketOdds, DATA.inv);
+    setText('deckRateScore', r + '/10');
+    setText('deckRateLabel', ratingLabel(r));
+    setText('deckPosRate', r + '/10');
+    setText('deckPosRateLabel', ratingLabel(r));
+    setupPriceSlider(newRec);
+    paintPrice(newRec, newLow, newHigh, out.expectedDom, newRec);
+  }}
+  document.getElementById('deckRateRow')?.addEventListener('click', e => {{
+    const btn = e.target.closest('.pd-rate');
+    if (btn) applyRating(+btn.dataset.rating);
+  }});
+  let raf = 0;
+  document.getElementById('deckPriceSlider')?.addEventListener('input', () => {{
+    if (raf) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => {{
+      raf = 0;
+      paintPrice(currentRec, currentLow, currentHigh, currentDom, priceFromSlider());
+    }});
+  }});
+
+  function listHtml(id, text) {{
+    const el = document.getElementById(id);
+    if (!el) return;
+    const items = String(text || '').split('\\n').map(s => s.trim()).filter(Boolean);
+    el.innerHTML = items.length ? items.map(s => '<li>' + s.replace(/[&<>]/g, c => ({{'&':'&amp;','<':'&lt;','>':'&gt;'}}[c])) + '</li>').join('') : el.innerHTML;
+  }}
+  function applyStory(saved) {{
+    if (!saved) return;
+    if (saved.bl != null) {{
+      blManual = true;
+      setText('deckBL', saved.bl);
+    }}
+    if (saved.adv != null) listHtml('deckAdvList', saved.adv);
+    if (saved.risk != null) listHtml('deckRiskList', saved.risk);
+    const ledes = saved.ledes || {{}};
+    document.querySelectorAll('[data-lede]').forEach(el => {{
+      const key = el.getAttribute('data-lede');
+      if (ledes[key]) el.textContent = ledes[key];
+    }});
+    if (saved.rating != null) applyRating(+saved.rating);
+    else if (saved.rec != null) {{
+      paintPrice(+saved.rec, +(saved.low || currentLow), +(saved.high || currentHigh), +(saved.dom || currentDom), +saved.rec);
+      setupPriceSlider(+saved.rec);
+    }}
+  }}
+  function collectLedes() {{
+    const out = {{}};
+    document.querySelectorAll('[data-lede]').forEach(el => {{
+      out[el.getAttribute('data-lede')] = el.textContent.trim();
+    }});
+    return out;
+  }}
+  function persistDeckEdits() {{
+    if (!RUN_ID) return;
+    const payload = {{
+      rec: currentRec, low: currentLow, high: currentHigh, dom: currentDom,
+      rating: currentRating,
+      bl: (document.getElementById('deckBL') || {{}}).textContent || '',
+      adv: [...document.querySelectorAll('#deckAdvList li')].map(li => li.textContent.trim()).join('\\n'),
+      risk: [...document.querySelectorAll('#deckRiskList li')].map(li => li.textContent.trim()).join('\\n'),
+      ledes: collectLedes(),
+    }};
+    try {{
+      const prev = JSON.parse(localStorage.getItem('listlogic_edits_' + RUN_ID) || '{{}}');
+      Object.assign(prev, payload);
+      localStorage.setItem('listlogic_edits_' + RUN_ID, JSON.stringify(prev));
+      fetch('/api/runs/' + RUN_ID + '/edits', {{
+        method: 'POST', headers: {{ 'Content-Type': 'application/json' }},
+        credentials: 'same-origin', body: JSON.stringify(prev),
+      }}).catch(() => {{}});
+    }} catch (e) {{}}
+  }}
+  function enableInlineEdits() {{
+    document.body.classList.add('ll-agent');
+    const mark = (el) => {{
+      if (!el) return;
+      el.contentEditable = 'true';
+      el.spellcheck = true;
+    }};
+    document.querySelectorAll('[data-lede], [data-edit]').forEach(mark);
+    document.querySelectorAll('#deckAdvList li, #deckRiskList li').forEach(mark);
+    document.addEventListener('focusin', e => {{
+      if (e.target && e.target.id === 'deckBL') blManual = true;
+    }});
+    document.addEventListener('focusout', e => {{
+      if (!e.target || !e.target.closest('[data-lede], [data-edit], #deckAdvList, #deckRiskList')) return;
+      persistDeckEdits();
+    }});
+  }}
+
+  document.getElementById('deckReset')?.addEventListener('click', () => {{
+    blManual = false;
+    if (defaults.bl) setText('deckBL', defaults.bl);
+    if (defaults.adv != null) listHtml('deckAdvList', defaults.adv);
+    if (defaults.risk != null) listHtml('deckRiskList', defaults.risk);
+    const ledes = defaults.ledes || {{}};
+    document.querySelectorAll('[data-lede]').forEach(el => {{
+      const key = el.getAttribute('data-lede');
+      if (ledes[key]) el.textContent = ledes[key];
+    }});
+    applyRating(5);
+    persistDeckEdits();
+  }});
+
+  setupPriceSlider(currentRec);
+  applyRating(5);
+
+  async function boot() {{
+    let saved = null;
+    if (RUN_ID) {{
+      try {{
+        const res = await fetch('/api/runs/' + RUN_ID + '/edits');
+        if (res.ok) saved = await res.json();
+      }} catch (e) {{}}
+    }}
+    if (!saved || !Object.keys(saved).length) {{
+      try {{ saved = JSON.parse(localStorage.getItem('listlogic_edits_' + (RUN_ID || 'local')) || 'null'); }} catch (e) {{ saved = null; }}
+    }}
+    applyStory(saved);
+    try {{
+      const auth = await fetch('/api/auth-status', {{ credentials: 'same-origin' }}).then(r => r.json());
+      if (auth && auth.authenticated && auth.user) enableInlineEdits();
+    }} catch (e) {{}}
+  }}
+  boot();
 }})();
 </script>
 </body>

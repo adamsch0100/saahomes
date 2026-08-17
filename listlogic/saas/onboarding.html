@@ -35,9 +35,11 @@ body { background: var(--paper); }
 .set-row:first-of-type { border-top: 0; }
 .set-row label { font-size: 0.86rem; font-weight: 600; color: var(--ink-2); }
 .set-row .help { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
-.set-row input[type="text"], .set-row input[type="email"], .set-row input[type="tel"], .set-row input[type="password"], .set-row input[type="file"] {
+.set-row input[type="text"], .set-row input[type="email"], .set-row input[type="tel"], .set-row input[type="password"], .set-row input[type="file"],
+.set-row textarea {
   width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fbfaf7; font-size: 0.9rem; color: var(--ink);
 }
+.set-row textarea { min-height: 72px; resize: vertical; font-family: inherit; }
 .set-row input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26, 95, 158, 0.12); }
 .set-row input[readonly] { background: #f1eee7; color: var(--muted); }
 .set-row .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: #f4f1ea; }
@@ -222,6 +224,54 @@ body { background: var(--paper); }
       </div>
 
       <div class="set-card">
+        <h2>Default wording</h2>
+        <p class="sub">Reusable intros and extra bullets for every new report. This does not overwrite a listing’s generated bottom line or price.</p>
+
+        <div class="set-row">
+          <label for="ledeComps">Comps intro</label>
+          <div>
+            <textarea id="ledeComps" maxlength="500" placeholder="Does it look like yours — or nicer / dated — and does the sold price match that story?"></textarea>
+          </div>
+        </div>
+        <div class="set-row">
+          <label for="ledeCondition">Condition intro</label>
+          <div>
+            <textarea id="ledeCondition" maxlength="500" placeholder="We start at a typical 5/10, rate together, then lock the list."></textarea>
+          </div>
+        </div>
+        <div class="set-row">
+          <label for="ledeClose">Close line</label>
+          <div>
+            <textarea id="ledeClose" maxlength="500" placeholder="We'll fine-tune condition, lock the list, and launch with a plan buyers can believe."></textarea>
+          </div>
+        </div>
+        <div class="set-row">
+          <label for="extraAdv">Always-include advantages</label>
+          <div>
+            <textarea id="extraAdv" placeholder="One per line — appended after the data-generated advantages"></textarea>
+            <div class="help">Example: We price to win the first 10 days.</div>
+          </div>
+        </div>
+        <div class="set-row">
+          <label for="extraRisk">Always-include watch-outs</label>
+          <div>
+            <textarea id="extraRisk" placeholder="One per line — appended after the data-generated watch-outs"></textarea>
+          </div>
+        </div>
+        <div class="set-row">
+          <label for="coachTemplates">Coach templates</label>
+          <div>
+            <textarea id="coachTemplates" style="min-height:96px" placeholder="Title|Talk track per line"></textarea>
+            <div class="help">Private notes for you at the table. Format: Title|Body</div>
+          </div>
+        </div>
+        <div class="set-actions" style="margin-top:8px">
+          <button type="button" class="btn" id="resetWordingBtn">Reset to ListLogic defaults</button>
+        </div>
+        <div class="status-note" id="wordingStatus"></div>
+      </div>
+
+      <div class="set-card">
         <h2>Password</h2>
         <p class="sub" id="pwSub">Set a password so you can sign in without a magic link.</p>
 
@@ -311,6 +361,61 @@ body { background: var(--paper); }
     hero: $('brandHero'),
   };
 
+  function fillCopyDefaults(copy) {
+    copy = copy || {};
+    const ledes = copy.ledes || {};
+    $('ledeComps').value = ledes.comps || '';
+    $('ledeCondition').value = ledes.condition || '';
+    $('ledeClose').value = ledes.close || '';
+    $('extraAdv').value = (copy.extraAdv || []).join('\n');
+    $('extraRisk').value = (copy.extraRisk || []).join('\n');
+    $('coachTemplates').value = copy.coachTemplates || '';
+  }
+
+  function collectCopyDefaults() {
+    return {
+      ledes: {
+        comps: $('ledeComps').value.trim(),
+        condition: $('ledeCondition').value.trim(),
+        close: $('ledeClose').value.trim(),
+      },
+      extraAdv: $('extraAdv').value,
+      extraRisk: $('extraRisk').value,
+      coachTemplates: $('coachTemplates').value,
+    };
+  }
+
+  async function saveCopyDefaults() {
+    const res = await fetch('/api/profile/copy', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(collectCopyDefaults()),
+    });
+    if (!res.ok) throw new Error('Could not save default wording');
+  }
+
+  const wordingStatus = $('wordingStatus');
+  $('resetWordingBtn').addEventListener('click', async () => {
+    wordingStatus.textContent = 'Resetting…';
+    wordingStatus.className = 'status-note';
+    fillCopyDefaults({});
+    try {
+      const res = await fetch('/api/profile/copy', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ledes: {}, extraAdv: [], extraRisk: [], coachTemplates: '' }),
+      });
+      if (!res.ok) throw new Error('Could not reset wording');
+      wordingStatus.textContent = 'Cleared. New reports use ListLogic copy.';
+      wordingStatus.className = 'status-note ok';
+    } catch (err) {
+      wordingStatus.textContent = String(err.message || err);
+      wordingStatus.className = 'status-note error';
+    }
+  });
+
   function setStatus(text, kind) {
     statusEl.textContent = text || '';
     statusEl.className = 'status-note' + (kind ? ' ' + kind : '');
@@ -385,6 +490,7 @@ body { background: var(--paper); }
       $('brandPrimary').value = u.brand_primary || '#0c3c6e';
       $('brandAccent').value = u.brand_accent || '#1a5f9e';
       setPwState(!!u.has_password);
+      fillCopyDefaults(u.copy_defaults || {});
       refreshPreview();
     } catch (e) {
       setStatus('Could not load your profile.', 'error');
@@ -419,6 +525,7 @@ body { background: var(--paper); }
       const res = await fetch('/api/profile', { method: 'POST', body: fd, credentials: 'same-origin' });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Could not save profile');
+      await saveCopyDefaults();
       if (window.llTrack) window.llTrack('profile_complete', { listings_year: $('listingsYear').value || '' });
       setStatus('Saved. New reports will use these settings.', 'ok');
       const next = new URLSearchParams(location.search).get('next');

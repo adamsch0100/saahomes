@@ -142,6 +142,7 @@ def public_user(row: Optional[dict]) -> Optional[dict]:
         "team_owner_id": (row.get("team_owner_id") or "").strip(),
         "is_brokerage_owner": is_brokerage_owner(row),
         "is_teammate": bool((row.get("team_owner_id") or "").strip()),
+        "copy_defaults": parse_copy_defaults(row.get("copy_defaults")),
     }
 
 
@@ -1549,6 +1550,27 @@ def update_profile(
         "profile_updated",
         {"profile_complete": complete, "listings_year": listings, "sms_consent": bool(sms)},
     )
+    return get_user_by_id(user_id) or user
+
+
+def parse_copy_defaults(raw: Any) -> dict:
+    from copy_defaults import parse
+
+    return parse(raw)
+
+
+def update_copy_defaults(user_id: str, payload: Any) -> dict:
+    from copy_defaults import dumps, sanitize
+
+    user = get_user_by_id(user_id)
+    if not user:
+        raise ValueError("User not found")
+    clean = sanitize(payload)
+    database.execute(
+        "UPDATE users SET copy_defaults = ?, updated_at = ? WHERE id = ?",
+        (dumps(clean), _iso(), user_id),
+    )
+    log_event(user_id, "copy_defaults_updated", {"keys": list(clean.keys())})
     return get_user_by_id(user_id) or user
 
 

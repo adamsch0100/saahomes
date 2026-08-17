@@ -166,6 +166,7 @@ def _ensure_growth_profile_schema() -> None:
         ("listings_year", "TEXT", "''"),
         ("sms_consent", "INTEGER", "0"),
         ("sms_consent_at", "TEXT", "''"),
+        ("copy_defaults", "TEXT", "''"),
     ):
         try:
             if using_postgres():

@@ -171,6 +171,18 @@ def render_interactive_html(report: dict) -> str:
         f"{c.get('title', 'Note')}|{c.get('body', '')}" for c in objections
     ) if objections else ""
     exec_sum = report.get("executive_summary") or ""
+    copy_ledes = report.get("copy_ledes") if isinstance(report.get("copy_ledes"), dict) else {}
+    lede_comps = copy_ledes.get("comps") or (
+        "Ranked by similarity to your home — size, beds/baths, age, garage, and how recently it sold, "
+        "inside a comp-supported price band. Tap a home for the full gallery."
+    )
+    lede_condition = copy_ledes.get("condition") or (
+        "Look at the comps above. Condition, updates, and curb appeal change what buyers will pay. "
+        "Lock a band — or fine-tune 1–10 — and we’ll apply it when we set the list."
+    )
+    lede_close = copy_ledes.get("close") or (
+        "We'll fine-tune condition, lock the list, and launch with a plan buyers can believe."
+    )
 
     agent_line = meta.get("agent_name") or ""
     if meta.get("brokerage"):
@@ -734,6 +746,7 @@ def render_interactive_html(report: dict) -> str:
         "rec": rec, "low": low, "high": high, "dom": exp_dom,
         "bl": exec_sum, "adv": adv_text, "risk": risk_text, "obj": obj_text,
         "rating": 5,
+        "ledes": {"comps": lede_comps, "condition": lede_condition, "close": lede_close},
     }
 
     html = f"""<!DOCTYPE html>
@@ -855,6 +868,9 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .fab{{display:none}}
 .panel-overlay{{display:none;position:fixed;inset:0;background:rgba(8,18,32,.48);backdrop-filter:blur(2px);z-index:1001}}
 .panel-overlay.open{{display:block}}
+body.ll-agent [data-lede],body.ll-agent [data-edit]{{outline:1px dashed transparent;border-radius:4px;cursor:text}}
+body.ll-agent [data-lede]:hover,body.ll-agent [data-edit]:hover,body.ll-agent #advList li:hover,body.ll-agent #riskList li:hover{{outline-color:rgba(12,60,110,.28)}}
+body.ll-agent [data-lede]:focus,body.ll-agent [data-edit]:focus,body.ll-agent #advList li:focus,body.ll-agent #riskList li:focus{{outline-color:var(--brand-primary)}}
 .agent-panel{{position:fixed;top:0;right:0;width:min(400px,100vw);height:100vh;background:#f4f7fb;z-index:1002;box-shadow:-12px 0 40px rgba(8,20,40,.22);transform:translateX(105%);transition:transform .28s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column}}
 .agent-panel.open{{transform:translateX(0)}}
 .agent-chip.panel-open{{opacity:.28;pointer-events:none}}
@@ -1372,6 +1388,7 @@ tr.comp-picked td:first-child{{box-shadow:inset 3px 0 0 var(--brand-primary)}}
 .chart-box{{position:relative;width:100%;height:320px}}
 .chart-box.short{{height:240px}}
 .chart-box.scatter-tall{{height:min(520px,62vh);min-height:420px}}
+.chart-box img.print-chart{{display:none}}
 @media(max-width:740px){{.chart-box.scatter-tall{{height:380px;min-height:340px}}}}
 table{{width:100%;border-collapse:collapse;font-size:.8rem}}
 th{{text-align:left;font-size:.62rem;text-transform:uppercase;color:var(--muted);padding:5px 7px;border-bottom:1px solid var(--border);white-space:nowrap}}
@@ -1585,16 +1602,19 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
   #spine-comps > .sub{{margin-bottom:4px;font-size:.68rem}}
   #spine-comps > h2{{margin-bottom:2px}}
 
-  /* Charts: fill leftover space without forcing overflow */
+  /* Charts: snapshot images must use height:auto — % height on auto parent collapses to 0 */
   .chart-box{{
-    height:auto!important;min-height:120px!important;max-height:none!important;
+    height:auto!important;min-height:140px!important;max-height:none!important;
     flex:1 1 auto;
   }}
-  .chart-box.short{{height:auto!important;min-height:110px!important;max-height:none!important}}
-  .chart-box canvas,.chart-box img.print-chart{{
-    max-width:100%!important;max-height:100%!important;
-    width:100%!important;height:100%!important;object-fit:contain!important;
+  .chart-box.short{{height:auto!important;min-height:120px!important;max-height:none!important}}
+  .chart-box canvas{{display:none!important}}
+  .chart-box img.print-chart{{
+    display:block!important;width:100%!important;height:auto!important;
+    max-height:3.35in!important;object-fit:contain!important;
   }}
+  .chart-box.scatter-tall img.print-chart{{max-height:4.5in!important}}
+  .chart-box:not(:has(img.print-chart)) canvas{{display:block!important;width:100%!important;height:auto!important;max-height:3.35in!important}}
 
   #spine-position .scatter-series{{display:none!important}}
   #spine-position .chart-box.scatter-tall{{
@@ -1954,7 +1974,7 @@ body.print-leavebehind .page{{padding-bottom:0}}
 
   <section class="section" id="spine-comps">
     <h2><span class="ttl"><span class="step">3</span>Closest Comparable Sales</span></h2>
-    <p class="sub">Ranked by similarity to your home — size, beds/baths, age, garage, and how recently it sold, inside a comp-supported price band. Tap a home for the full gallery.</p>
+    <p class="sub" data-lede="comps">{lede_comps}</p>
     <details class="comp-rank-how">
       <summary>How comps are ranked</summary>
       <p>Auto picks score every sold home in this market against yours. Living area carries the most weight, then beds, year built, baths, and garage. Recent sales beat older ones. Extreme price outliers that match size but not the product get filtered out. The match % is relative to the best comp on <em>this</em> report — #1 is always the closest fit.</p>
@@ -2002,7 +2022,7 @@ body.print-leavebehind .page{{padding-bottom:0}}
 
   <section class="section" id="spine-rating">
     <h2><span class="ttl"><span class="step">4</span>How Does Your Home Compare?</span></h2>
-    <p class="sub">Look at the comps above. Condition, updates, and curb appeal change what buyers will pay. Lock a band — or fine-tune 1–10 — and we&rsquo;ll apply it when we set the list.</p>
+    <p class="sub" data-lede="condition">{lede_condition}</p>
     <div class="rate-bands" id="rateBands">
       <button type="button" class="rate-band" data-rating="3"><div class="rb-t">Needs Work</div><div class="rb-r">1 – 3</div><div class="rb-d">Dated finishes, deferred maintenance, or weak curb appeal vs comps.</div></button>
       <button type="button" class="rate-band" data-rating="5"><div class="rb-t">Average</div><div class="rb-r">4 – 6</div><div class="rb-d">In line with recent sales — nothing special, nothing broken.</div></button>
@@ -2145,7 +2165,7 @@ body.print-leavebehind .page{{padding-bottom:0}}
       <div class="pos-bar"><div class="pos-marker" id="posMarker" style="left:50%"></div></div>
       <div class="pos-labels"><span>Aggressive</span><span>Heart of market</span><span>Overpriced</span></div>
     </section>
-    <div class="bottom-line"><strong>Bottom Line</strong> — <span id="blText">{exec_sum}</span></div>
+    <div class="bottom-line"><strong>Bottom Line</strong> — <span id="blText" data-edit="bl">{exec_sum}</span></div>
 
     <div class="price-controls">
       <div class="slider-wrap">
@@ -2410,8 +2430,33 @@ body.print-leavebehind .page{{padding-bottom:0}}
         <label for="editRisk">Watch-outs (one per line)</label>
         <textarea id="editRisk">{risk_text}</textarea>
       </div>
+      <div class="field">
+        <label for="editLedeComps">Comps intro</label>
+        <textarea id="editLedeComps">{lede_comps}</textarea>
+      </div>
+      <div class="field">
+        <label for="editLedeCondition">Condition intro</label>
+        <textarea id="editLedeCondition">{lede_condition}</textarea>
+      </div>
+      <div class="field">
+        <label for="editLedeClose">Close line</label>
+        <textarea id="editLedeClose">{lede_close}</textarea>
+      </div>
+      <div class="field">
+        <label for="editExtraAdv">Always-include advantages (one per line)</label>
+        <textarea id="editExtraAdv" placeholder="Shows on every future report"></textarea>
+      </div>
+      <div class="field">
+        <label for="editExtraRisk">Always-include watch-outs (one per line)</label>
+        <textarea id="editExtraRisk" placeholder="Shows on every future report"></textarea>
+      </div>
+      <p class="pane-lead">Save as my default wording stores intros, always-include bullets, and coach notes — not this listing’s bottom line or price.</p>
       <div class="panel-soft" id="aiSellerRow" style="display:none">
         <button type="button" class="btn-soft" id="btnAiSeller">Rewrite story</button>
+      </div>
+      <div class="panel-soft">
+        <button type="button" class="btn-soft" id="btnSaveDefaults">Save as my default wording</button>
+        <button type="button" class="btn-soft" id="btnResetDefaults">Reset my default wording</button>
       </div>
       <div class="panel-toast" id="storyToast" role="status"></div>
     </div>
@@ -2445,7 +2490,7 @@ body.print-leavebehind .page{{padding-bottom:0}}
     </div>
   </div>
   <div class="panel-actions">
-    <button type="button" class="btn-reset" id="btnReset">Reset</button>
+    <button type="button" class="btn-reset" id="btnReset">Reset this listing</button>
     <button type="button" class="btn-apply" id="btnApply">Apply</button>
   </div>
 </aside>
@@ -2496,65 +2541,72 @@ const navy = '{brand_primary}', orange = '#c2410c';
   const copyBtn = document.getElementById('btnCopyShare');
   const printBtn = document.getElementById('btnPrintLeavebehind');
 
+  function eachChart(fn) {{
+    if (typeof Chart === 'undefined') return;
+    document.querySelectorAll('.chart-box canvas').forEach(canvas => {{
+      try {{
+        const ch = (typeof Chart.getChart === 'function') ? Chart.getChart(canvas) : null;
+        if (ch) fn(ch);
+      }} catch (e) {{}}
+    }});
+  }}
+
+  function wakeHiddenCharts() {{
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+    eachChart(ch => {{
+      try {{
+        if (ch.options) ch.options.animation = false;
+        if (ch.update) ch.update('none');
+        if (ch.resize) ch.resize();
+      }} catch (e) {{}}
+    }});
+  }}
+
   function snapshotChartsForPrint() {{
     document.querySelectorAll('.chart-box canvas').forEach(canvas => {{
       try {{
         if (!canvas.width || !canvas.height) return;
-        const existing = canvas.parentNode && canvas.parentNode.querySelector('img.print-chart');
-        if (existing) existing.remove();
-        const img = document.createElement('img');
-        img.className = 'print-chart';
-        img.alt = '';
-        img.src = canvas.toDataURL('image/png');
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.objectFit = 'contain';
-        img.style.display = 'none';
-        canvas.parentNode.appendChild(img);
-        canvas.dataset.printHidden = '1';
-        canvas.style.display = 'none';
-        img.style.display = 'block';
+        const data = canvas.toDataURL('image/png');
+        if (!data || data.length < 800) return;
+        const parent = canvas.parentNode;
+        if (!parent) return;
+        let img = parent.querySelector('img.print-chart');
+        if (!img) {{
+          img = document.createElement('img');
+          img.className = 'print-chart';
+          img.alt = '';
+          parent.appendChild(img);
+        }}
+        img.src = data;
       }} catch (e) {{}}
     }});
   }}
 
   function restoreChartsAfterPrint() {{
-    document.querySelectorAll('.chart-box canvas[data-print-hidden="1"]').forEach(canvas => {{
-      canvas.style.display = '';
-      delete canvas.dataset.printHidden;
-    }});
-    document.querySelectorAll('img.print-chart').forEach(img => img.remove());
     document.body.classList.remove('print-leavebehind');
-    if (typeof Chart !== 'undefined') {{
-      try {{
-        (Chart.helpers && Chart.helpers.each ? Chart.helpers.each(Chart.instances, c => c.resize()) : Object.values(Chart.instances || {{}}).forEach(c => c && c.resize && c.resize()));
-      }} catch (e) {{}}
-    }}
+    eachChart(ch => {{ try {{ if (ch.resize) ch.resize(); }} catch (e) {{}} }});
   }}
 
   function printLeavebehind() {{
     document.body.classList.add('print-leavebehind');
     const st = document.getElementById('shareStatus');
     if (st) st.textContent = 'Printing Live Story…';
-    // Let print CSS reflow, resize Chart.js into the larger boxes, then snapshot.
+    wakeHiddenCharts();
     requestAnimationFrame(() => {{
-      try {{
-        if (typeof Chart !== 'undefined') {{
-          const inst = Chart.instances;
-          if (inst && typeof inst.forEach === 'function') inst.forEach(c => c && c.resize && c.resize());
-          else if (inst) Object.keys(inst).forEach(k => inst[k] && inst[k].resize && inst[k].resize());
-        }}
-      }} catch (e) {{}}
-      setTimeout(() => {{
-        snapshotChartsForPrint();
-        setTimeout(() => window.print(), 60);
-      }}, 120);
+      requestAnimationFrame(() => {{
+        wakeHiddenCharts();
+        setTimeout(() => {{
+          snapshotChartsForPrint();
+          setTimeout(() => window.print(), 80);
+        }}, 240);
+      }});
     }});
   }}
 
   if (printBtn) printBtn.onclick = printLeavebehind;
   window.addEventListener('beforeprint', () => {{
     document.body.classList.add('print-leavebehind');
+    wakeHiddenCharts();
     snapshotChartsForPrint();
   }});
   window.addEventListener('afterprint', restoreChartsAfterPrint);
@@ -4980,6 +5032,8 @@ fetch('/api/auth-status', {{ credentials: 'same-origin' }})
       return;
     }}
     if (menuWrap) menuWrap.classList.add('ll-shown');
+    enableInlineEdits();
+    loadAccountCopyDefaults();
     const appNav = document.getElementById('reportAppNav');
     if (appNav) appNav.hidden = false;
     const teamLink = document.getElementById('reportNavTeam');
@@ -5011,6 +5065,93 @@ document.addEventListener('keydown', (e) => {{
   if (e.key === 'Escape') {{ closeAgentMenu(); closeAgentPanel(); }}
 }});
 document.getElementById('closePanel').onclick = overlay.onclick = closeAgentPanel;
+function collectLedes() {{
+  return {{
+    comps: (document.getElementById('editLedeComps') || {{}}).value || '',
+    condition: (document.getElementById('editLedeCondition') || {{}}).value || '',
+    close: (document.getElementById('editLedeClose') || {{}}).value || '',
+  }};
+}}
+function applyLedesToDom(ledes) {{
+  if (!ledes) return;
+  document.querySelectorAll('[data-lede]').forEach(el => {{
+    const key = el.getAttribute('data-lede');
+    if (ledes[key]) el.textContent = ledes[key];
+  }});
+}}
+function enableInlineEdits() {{
+  document.body.classList.add('ll-agent');
+  const mark = (el) => {{ if (el) {{ el.contentEditable = 'true'; el.spellcheck = true; }} }};
+  document.querySelectorAll('[data-lede], [data-edit]').forEach(mark);
+  document.querySelectorAll('#advList li, #riskList li').forEach(mark);
+  if (document.body.dataset.inlineEdits === '1') return;
+  document.body.dataset.inlineEdits = '1';
+  document.addEventListener('focusin', (e) => {{
+    if (e.target && e.target.id === 'blText') {{
+      const editBL = document.getElementById('editBL');
+      if (editBL) editBL.dataset.manual = '1';
+    }}
+  }});
+  document.addEventListener('focusout', (e) => {{
+    const t = e.target;
+    if (!t) return;
+    if (t.id === 'blText' && document.getElementById('editBL')) document.getElementById('editBL').value = t.textContent.trim();
+    if (t.getAttribute && t.getAttribute('data-lede')) {{
+      const key = t.getAttribute('data-lede');
+      const map = {{ comps: 'editLedeComps', condition: 'editLedeCondition', close: 'editLedeClose' }};
+      const inp = document.getElementById(map[key]);
+      if (inp) inp.value = t.textContent.trim();
+    }}
+    if (t.closest && t.closest('#advList')) {{
+      document.getElementById('editAdv').value = [...document.querySelectorAll('#advList li')].map(li => li.textContent.trim()).join('\\n');
+    }}
+    if (t.closest && t.closest('#riskList')) {{
+      document.getElementById('editRisk').value = [...document.querySelectorAll('#riskList li')].map(li => li.textContent.trim()).join('\\n');
+    }}
+    if (t.closest && t.closest('[data-lede], [data-edit], #advList, #riskList')) persistStoryEdits();
+  }});
+}}
+async function loadAccountCopyDefaults() {{
+  try {{
+    const res = await fetch('/api/profile/copy', {{ credentials: 'same-origin' }});
+    if (!res.ok) return;
+    const data = await res.json();
+    const copy = data.copy_defaults || {{}};
+    if (document.getElementById('editExtraAdv')) document.getElementById('editExtraAdv').value = (copy.extraAdv || []).join('\\n');
+    if (document.getElementById('editExtraRisk')) document.getElementById('editExtraRisk').value = (copy.extraRisk || []).join('\\n');
+    if (copy.ledes && !document.getElementById('editLedeComps')?.value) {{
+      if (copy.ledes.comps) document.getElementById('editLedeComps').value = copy.ledes.comps;
+      if (copy.ledes.condition) document.getElementById('editLedeCondition').value = copy.ledes.condition;
+      if (copy.ledes.close) document.getElementById('editLedeClose').value = copy.ledes.close;
+    }}
+  }} catch (e) {{}}
+}}
+function persistStoryEdits() {{
+  const rec = +document.getElementById('editRec').value;
+  const low = +document.getElementById('editLow').value;
+  const high = +document.getElementById('editHigh').value;
+  const dom = +document.getElementById('editDom').value;
+  const bl = document.getElementById('editBL').value;
+  const adv = document.getElementById('editAdv').value.trim().split('\\n').filter(Boolean);
+  const risk = document.getElementById('editRisk').value.trim().split('\\n').filter(Boolean);
+  const obj = document.getElementById('editObj').value;
+  const ledes = collectLedes();
+  const payload = {{ rec, low, high, dom, bl, adv: adv.join('\\n'), risk: risk.join('\\n'), obj, ledes, rating: currentRating, excluded:[...excluded], selectedComps: selectedCompMls.slice() }};
+  try {{
+    const prev = JSON.parse(localStorage.getItem('listlogic_edits_'+(RUN_ID||'local')) || '{{}}');
+    if (prev.netSheet) payload.netSheet = prev.netSheet;
+    if (prev.hiddenSections) payload.hiddenSections = prev.hiddenSections;
+  }} catch (e) {{}}
+  localStorage.setItem('listlogic_edits_'+(RUN_ID||'local'), JSON.stringify(payload));
+  if (RUN_ID) {{
+    fetch('/api/runs/'+RUN_ID+'/edits', {{ method:'POST', headers:{{'Content-Type':'application/json'}}, credentials:'same-origin', body: JSON.stringify(payload) }}).catch(()=>{{}});
+  }}
+  return {{ rec, low, high, dom, bl, adv, risk, obj, ledes }};
+}}
+function refreshDeckHtml() {{
+  if (!RUN_ID) return;
+  fetch('/api/runs/'+RUN_ID+'/refresh-deck', {{ method:'POST', credentials:'same-origin' }}).catch(()=>{{}});
+}}
 function applyEdits() {{
   const rec = +document.getElementById('editRec').value;
   const low = +document.getElementById('editLow').value;
@@ -5024,19 +5165,66 @@ function applyEdits() {{
   document.getElementById('blText').textContent = bl;
   document.getElementById('advList').innerHTML = adv.map(a => '<li>'+escapeHtml(a)+'</li>').join('');
   document.getElementById('riskList').innerHTML = risk.map(r => '<li>'+escapeHtml(r)+'</li>').join('');
+  if (document.body.classList.contains('ll-agent')) {{
+    document.querySelectorAll('#advList li, #riskList li').forEach(el => {{ el.contentEditable = 'true'; }});
+  }}
+  applyLedesToDom(collectLedes());
   renderObjections(obj);
-  const payload = {{ rec, low, high, dom, bl, adv: adv.join('\\n'), risk: risk.join('\\n'), obj, rating: currentRating, excluded:[...excluded], selectedComps: selectedCompMls.slice() }};
-  try {{
-    const prev = JSON.parse(localStorage.getItem('listlogic_edits_'+(RUN_ID||'local')) || '{{}}');
-    if (prev.netSheet) payload.netSheet = prev.netSheet;
-    if (prev.hiddenSections) payload.hiddenSections = prev.hiddenSections;
-  }} catch (e) {{}}
-  localStorage.setItem('listlogic_edits_'+(RUN_ID||'local'), JSON.stringify(payload));
-  if (RUN_ID) fetch('/api/runs/'+RUN_ID+'/edits', {{ method:'POST', headers:{{'Content-Type':'application/json'}}, body: JSON.stringify(payload) }}).catch(()=>{{}});
-  closeAgentPanel();
+  persistStoryEdits();
+  const opts = arguments[0] || {{}};
+  if (opts.refreshDeck !== false) refreshDeckHtml();
+  if (opts.close !== false) closeAgentPanel();
 }}
-document.getElementById('btnApply').onclick = applyEdits;
+document.getElementById('btnApply').onclick = () => applyEdits();
+document.getElementById('btnSaveDefaults')?.addEventListener('click', async () => {{
+  const toast = document.getElementById('storyToast');
+  const setToast = (msg) => {{ if (toast) toast.textContent = msg; }};
+  setToast('Saving account defaults…');
+  try {{
+    const res = await fetch('/api/profile/copy', {{
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {{ 'Content-Type': 'application/json' }},
+      body: JSON.stringify({{
+        ledes: collectLedes(),
+        extraAdv: (document.getElementById('editExtraAdv') || {{}}).value || '',
+        extraRisk: (document.getElementById('editExtraRisk') || {{}}).value || '',
+        coachTemplates: (document.getElementById('editObj') || {{}}).value || '',
+      }}),
+    }});
+    if (!res.ok) throw new Error('Sign in to save account defaults');
+    setToast('Saved for future reports. This listing’s bottom line was not copied.');
+  }} catch (err) {{
+    setToast(String(err.message || err));
+  }}
+}});
+document.getElementById('btnResetDefaults')?.addEventListener('click', async () => {{
+  const toast = document.getElementById('storyToast');
+  const setToast = (msg) => {{ if (toast) toast.textContent = msg; }};
+  setToast('Resetting account defaults…');
+  try {{
+    const res = await fetch('/api/profile/copy', {{
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {{ 'Content-Type': 'application/json' }},
+      body: JSON.stringify({{ ledes: {{}}, extraAdv: [], extraRisk: [], coachTemplates: '' }}),
+    }});
+    if (!res.ok) throw new Error('Sign in to reset account defaults');
+    if (document.getElementById('editExtraAdv')) document.getElementById('editExtraAdv').value = '';
+    if (document.getElementById('editExtraRisk')) document.getElementById('editExtraRisk').value = '';
+    if (defaults.ledes) {{
+      if (document.getElementById('editLedeComps')) document.getElementById('editLedeComps').value = defaults.ledes.comps || '';
+      if (document.getElementById('editLedeCondition')) document.getElementById('editLedeCondition').value = defaults.ledes.condition || '';
+      if (document.getElementById('editLedeClose')) document.getElementById('editLedeClose').value = defaults.ledes.close || '';
+    }}
+    setToast('Account wording cleared. New reports use ListLogic copy. This listing is unchanged until you Apply or Reset this listing.');
+  }} catch (err) {{
+    setToast(String(err.message || err));
+  }}
+}});
 document.getElementById('btnReset').onclick = () => {{
+  const editBL = document.getElementById('editBL');
+  if (editBL) delete editBL.dataset.manual;
   document.getElementById('editRec').value = defaults.rec;
   document.getElementById('editLow').value = defaults.low;
   document.getElementById('editHigh').value = defaults.high;
@@ -5045,6 +5233,11 @@ document.getElementById('btnReset').onclick = () => {{
   document.getElementById('editAdv').value = defaults.adv;
   document.getElementById('editRisk').value = defaults.risk;
   document.getElementById('editObj').value = defaults.obj;
+  if (defaults.ledes) {{
+    if (document.getElementById('editLedeComps')) document.getElementById('editLedeComps').value = defaults.ledes.comps || '';
+    if (document.getElementById('editLedeCondition')) document.getElementById('editLedeCondition').value = defaults.ledes.condition || '';
+    if (document.getElementById('editLedeClose')) document.getElementById('editLedeClose').value = defaults.ledes.close || '';
+  }}
   excluded.clear();
   selectedCompMls = [...AUTO_COMP_MLS];
   if (window.__AUTO_COMPS_CACHE) {{
@@ -5070,6 +5263,11 @@ async function loadSavedEdits() {{
   if (saved.adv!=null) document.getElementById('editAdv').value = saved.adv;
   if (saved.risk!=null) document.getElementById('editRisk').value = saved.risk;
   if (saved.obj!=null) document.getElementById('editObj').value = saved.obj;
+  if (saved.ledes && typeof saved.ledes === 'object') {{
+    if (saved.ledes.comps!=null && document.getElementById('editLedeComps')) document.getElementById('editLedeComps').value = saved.ledes.comps;
+    if (saved.ledes.condition!=null && document.getElementById('editLedeCondition')) document.getElementById('editLedeCondition').value = saved.ledes.condition;
+    if (saved.ledes.close!=null && document.getElementById('editLedeClose')) document.getElementById('editLedeClose').value = saved.ledes.close;
+  }}
   if (Array.isArray(saved.excluded)) saved.excluded.forEach(i => excluded.add(String(i)));
   if (Array.isArray(saved.selectedComps) && saved.selectedComps.length) {{
     selectedCompMls = saved.selectedComps.map(String);
@@ -5097,7 +5295,7 @@ async function loadSavedEdits() {{
     }}
   }}
   if (Array.isArray(saved.hiddenSections)) applySectionVisibility(saved.hiddenSections);
-  renderTable(); applyEdits();
+  renderTable(); applyEdits({{ refreshDeck: false, close: false }});
 }}
 loadSavedEdits();
 </script>

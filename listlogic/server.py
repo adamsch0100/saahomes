@@ -449,6 +449,7 @@ def _generate(
     data_source: str = "",
     subject_photo_bytes: Optional[bytes] = None,
     subject_photo_ext: str = ".jpg",
+    copy_defaults: Optional[dict] = None,
 ) -> dict:
     defaults = dict(SUBJECT_2845_DEFAULTS) if "2845" in (address or "") and "13" in (address or "") else {}
     overrides = {
@@ -527,6 +528,13 @@ def _generate(
     meta["state"] = "CO"
     meta["market_notes"] = market_notes or ""
     meta["market_label"] = area_name or ""
+    if copy_defaults:
+        try:
+            from copy_defaults import apply_account_copy
+
+            apply_account_copy(report, copy_defaults)
+        except Exception:
+            logger.exception("Failed to apply account copy defaults")
 
     if force_run_id:
         run_id = _safe_run_id(force_run_id)
@@ -2278,6 +2286,12 @@ async def save_run_edits(run_id: str, request: Request):
         payload["adv"] = [html_lib.escape(str(x)) for x in payload["adv"]]
     if isinstance(payload.get("risk"), list):
         payload["risk"] = [html_lib.escape(str(x)) for x in payload["risk"]]
+    if isinstance(payload.get("ledes"), dict):
+        payload["ledes"] = {
+            str(k)[:40]: html_lib.escape(str(v)[:500])
+            for k, v in payload["ledes"].items()
+            if k in ("comps", "condition", "close")
+        }
     (run_dir / "edits.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
     return {"ok": True}
 
@@ -2289,6 +2303,62 @@ def load_run_edits(run_id: str):
     if not path.exists():
         return {}
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+@app.post("/api/runs/{run_id}/refresh-deck")
+def refresh_run_deck(run_id: str, request: Request):
+    """Re-bake flipbook HTML from presentation.json + this-run edits."""
+    _require_user(request)
+    run_id = _safe_run_id(run_id)
+    run_dir = OUTPUT_DIR / run_id
+    json_path = run_dir / "presentation.json"
+    if not json_path.exists():
+        raise HTTPException(404, "Run not found")
+    try:
+        report = json.loads(json_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise HTTPException(400, "Invalid presentation JSON") from exc
+    edits: dict = {}
+    edits_path = run_dir / "edits.json"
+    if edits_path.exists():
+        try:
+            edits = json.loads(edits_path.read_text(encoding="utf-8"))
+        except Exception:
+            edits = {}
+    from copy_defaults import apply_run_edits
+    import deck_html
+
+    apply_run_edits(report, edits)
+    deck_html.save_deck_html(report, run_dir / "deck.html")
+    return {"ok": True}
+
+
+@app.get("/api/profile/copy")
+def get_profile_copy(request: Request):
+    import auth_service
+
+    user = _require_user(request)
+    return {"ok": True, "copy_defaults": auth_service.parse_copy_defaults(user.get("copy_defaults"))}
+
+
+@app.post("/api/profile/copy")
+async def save_profile_copy(request: Request):
+    import auth_service
+
+    user = _require_user(request)
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(400, "Invalid JSON") from exc
+    try:
+        updated = auth_service.update_copy_defaults(user["id"], payload)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    return JSONResponse({
+        "ok": True,
+        "copy_defaults": auth_service.parse_copy_defaults(updated.get("copy_defaults")),
+        "user": auth_service.public_user(updated),
+    })
 
 
 @app.post("/api/runs/{run_id}/scenarios")
@@ -3263,6 +3333,7 @@ async def generate(
             data_source=data_source,
             subject_photo_bytes=subject_photo_bytes,
             subject_photo_ext=subject_photo_ext,
+            copy_defaults=auth_service.parse_copy_defaults(user.get("copy_defaults")),
         )
         logger.info("Generate finished in %.1fs for %s source=%s", time.time() - t0, address, data_source)
     except HTTPException:
