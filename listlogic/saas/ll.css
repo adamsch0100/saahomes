@@ -211,6 +211,7 @@ input:focus, select:focus, textarea:focus {
 .dash-main { min-width: 0; }
 .dash-main .page-head { padding-top: 4px; }
 .dash-main > .container { max-width: none; padding-left: 0; padding-right: 0; }
+.dash-main > .set-wrap,
 body.ll-has-dash .set-wrap { max-width: none; margin: 0; padding: 0 0 8px; }
 .dash-main > .hero-mini,
 .dash-main > header.hero-mini,

@@ -169,6 +169,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/saas/vendor/",
         "/saas/feedback.js",
         "/saas/assistant.js",
+        "/saas/dash-nav.js",
+        "/saas/nav-auth.js",
         "/branding/",
         "/invite/",
     )

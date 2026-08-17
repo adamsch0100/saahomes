@@ -114,6 +114,17 @@ body { background: var(--paper); }
   </div>
 </nav>
 
+<div class="dash">
+  <aside class="dash-side" aria-label="Dashboard">
+    <div class="side-label">Workspace</div>
+    <a href="/saas/app.html#generate"><span class="side-ico">＋</span> Generate</a>
+    <a href="/saas/app.html#reports"><span class="side-ico">▦</span> Reports</a>
+    <a href="/saas/app.html#team" id="navTeam" hidden><span class="side-ico">☰</span> Team</a>
+    <a href="/saas/onboarding.html" class="on" id="navSettings"><span class="side-ico">◎</span> Settings</a>
+    <div class="side-sep" id="adminSideSep" hidden></div>
+    <a href="/saas/admin.html" id="navOwner" hidden><span class="side-ico">⚙</span> Owner console</a>
+  </aside>
+  <div class="dash-main">
 <div class="set-wrap">
   <header class="page-head">
     <h1 id="settingsTitle">Settings</h1>
@@ -274,6 +285,8 @@ body { background: var(--paper); }
     </aside>
   </form>
 </div>
+  </div>
+</div>
 
 <script>
 (function () {
@@ -354,6 +367,14 @@ body { background: var(--paper); }
         $('viewSwitch').hidden = false;
         $('switchAgent').classList.add('on');
         $('adminLink').hidden = false;
+        const navOwner = document.getElementById('navOwner');
+        const adminSideSep = document.getElementById('adminSideSep');
+        if (navOwner) navOwner.hidden = false;
+        if (adminSideSep) adminSideSep.hidden = false;
+      }
+      if (u.is_brokerage_owner) {
+        const navTeam = document.getElementById('navTeam');
+        if (navTeam) navTeam.hidden = false;
       }
       $('name').value = u.name || '';
       $('phone').value = u.phone || '';

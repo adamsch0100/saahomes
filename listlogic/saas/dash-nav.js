@@ -46,11 +46,17 @@
     });
   }
 
-  function shouldWrap() {
-    var path = location.pathname || "";
-    if (AUTH_PAGES.test(path)) return false;
+  function pagePath() {
+    return (location.pathname || "").replace(/\/+$/, "") || "/";
+  }
+
+  function shouldWrap(user) {
+    var path = pagePath();
+    if (AUTH_PAGES.test(path) || AUTH_PAGES.test(path + ".html")) return false;
     if (document.querySelector(".dash-side")) return false;
-    return WRAP_PAGES.test(path);
+    if (/\/saas\/(admin|onboarding)(\.html)?$/.test(path)) return true;
+    if (!user || !(user.role || user.email || user.id)) return false;
+    return WRAP_PAGES.test(path) || WRAP_PAGES.test(path + ".html");
   }
 
   function wrap() {
@@ -74,23 +80,24 @@
     dash.appendChild(main);
     nav.parentNode.insertBefore(dash, nav.nextSibling);
     document.body.classList.add("ll-has-dash");
-    main.querySelectorAll(":scope > .container").forEach(function (el) {
-      el.style.maxWidth = "none";
-      el.style.paddingLeft = "0";
-      el.style.paddingRight = "0";
-    });
+    try {
+      main.querySelectorAll(":scope > .container").forEach(function (el) {
+        el.style.maxWidth = "none";
+        el.style.paddingLeft = "0";
+        el.style.paddingRight = "0";
+      });
+    } catch (err) {}
     return aside;
   }
 
   function mount(user) {
     var side = document.querySelector(".dash-side");
-    if (!side && shouldWrap()) side = wrap();
+    if (!side && shouldWrap(user)) side = wrap();
     if (side) applyUser(side, user);
   }
 
   function start(user) {
-    if (!user) return;
-    var go = function () { mount(user); };
+    var go = function () { mount(user || {}); };
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", go);
     } else {
@@ -101,12 +108,16 @@
   var existing = window.__llAuthUser;
   if (existing) {
     start(existing);
-    return;
+  } else {
+    start({});
+    fetch("/api/auth-status", { credentials: "same-origin" })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data && data.authenticated && data.user) {
+          window.__llAuthUser = data.user;
+          mount(data.user);
+        }
+      })
+      .catch(function () {});
   }
-  fetch("/api/auth-status", { credentials: "same-origin" })
-    .then(function (r) { return r.json(); })
-    .then(function (data) {
-      if (data && data.authenticated && data.user) start(data.user);
-    })
-    .catch(function () {});
 })();
