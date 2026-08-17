@@ -25,6 +25,14 @@ const CITIES = [
   { name: "Milliken", slug: "milliken", description: "Small-town Weld County value", price: "~$460K", label: "Median" },
   { name: "La Salle", slug: "la-salle", description: "Affordable Weld County living", price: "~$420K", label: "Median" },
   { name: "Niwot", slug: "niwot", description: "Boutique Boulder County village", price: "~$850K", label: "Median" },
+  { name: "Estes Park", slug: "estes-park", description: "Rocky Mountain National Park gateway — second homes and full-time living" },
+  { name: "Lyons", slug: "lyons", description: "Boulder foothills mountain town on the St. Vrain" },
+  { name: "Bellvue", slug: "bellvue", description: "Poudre Canyon and acreage living northwest of Fort Collins" },
+  { name: "Red Feather Lakes", slug: "red-feather-lakes", description: "Cabin and lake living — affordable mountain entry northwest of Fort Collins" },
+  { name: "Erie", slug: "erie", description: "Denver-exurb growth between Boulder and Longmont" },
+  { name: "Brighton", slug: "brighton", description: "North Denver / I-76 corridor living" },
+  { name: "Fort Lupton", slug: "fort-lupton", description: "Affordable Weld County small-town living" },
+  { name: "Carbon Valley", slug: "carbon-valley", description: "Firestone, Frederick, Dacono & surrounding communities" },
 ];
 
 /**
@@ -162,7 +170,8 @@ export default function PropertiesPage() {
             {CITIES.map((city) => (
               <li key={city.slug}>
                 <Link to={`/northern-colorado-areas/${city.slug}/`}>
-                  {city.name} — {city.description}. {city.label} {city.price}.
+                  {city.name} — {city.description}
+                  {city.price ? `. ${city.label} ${city.price}` : ""}.
                 </Link>
               </li>
             ))}
