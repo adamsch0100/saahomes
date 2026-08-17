@@ -125,6 +125,14 @@
       });
       wireChip(chip);
     });
+    window.__llAuthUser = user;
+    if (!window.__llDashNavRequested) {
+      window.__llDashNavRequested = true;
+      var dashScript = document.createElement("script");
+      dashScript.src = "/saas/dash-nav.js";
+      dashScript.async = true;
+      document.head.appendChild(dashScript);
+    }
   }
 
   // Mark guest links if pages haven't yet — so hide-until-ready CSS applies

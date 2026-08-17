@@ -758,7 +758,37 @@ def render_interactive_html(report: dict) -> str:
 }}
 *{{box-sizing:border-box;margin:0;padding:0}}
 body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}}
-.page{{max-width:1160px;margin:0 auto;padding:18px 20px 80px}}
+.report-shell{{max-width:1400px;margin:0 auto}}
+.report-side{{
+  background:#fff;border:1px solid var(--border);border-radius:16px;
+  padding:12px 10px 16px;margin:0 0 12px;box-shadow:0 8px 24px -12px rgba(11,18,32,.14);
+}}
+.rs-brand{{font-size:.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:2px 10px 10px}}
+.rs-label{{font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px 10px 8px}}
+.rs-app a,.spine a{{
+  display:flex;align-items:center;gap:8px;width:100%;text-align:left;
+  font-size:.78rem;font-weight:600;color:var(--text);text-decoration:none;
+  padding:8px 10px;border-radius:10px;margin-bottom:2px;
+}}
+.rs-app a:hover,.spine a:hover{{background:#f4f1ea;color:var(--brand-primary)}}
+.spine a.active{{background:var(--brand-primary);color:#fff}}
+.rs-sep{{height:1px;background:var(--border);margin:8px 6px 10px}}
+.rs-app[hidden],.rs-app a[hidden],.spine a[hidden]{{display:none!important}}
+@media(min-width:980px){{
+  .report-shell{{display:grid;grid-template-columns:216px minmax(0,1fr);align-items:start;gap:8px;padding:12px 12px 0}}
+  .report-side{{
+    position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;
+    margin:0;
+  }}
+  .page{{max-width:1160px;margin:0 auto;padding:6px 16px 80px 8px}}
+}}
+@media(max-width:979px){{
+  .report-side{{position:sticky;top:0;z-index:50;margin:10px 12px 0;backdrop-filter:blur(8px);background:rgba(255,255,255,.96)}}
+  .rs-app,.spine{{display:flex;flex-wrap:wrap;gap:4px}}
+  .rs-app a,.spine a{{width:auto;margin:0;padding:6px 10px;font-size:.72rem}}
+  .rs-label,.rs-sep,.rs-brand{{display:none}}
+  .page{{max-width:1160px;margin:0 auto;padding:18px 20px 80px}}
+}}
 .hero{{position:relative;overflow:hidden;background:linear-gradient(150deg,#0b1220 0%,#101a2e 55%,var(--brand-primary) 130%);color:#fff;border-radius:22px;padding:34px 34px 30px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;box-shadow:0 24px 60px -20px rgba(11,18,32,.5)}}
 .hero::after{{content:'';position:absolute;inset:0;background:radial-gradient(600px 300px at 85% 0%,rgba(201,162,39,.22),transparent 60%);pointer-events:none}}
 .hero .brand{{font-size:.68rem;letter-spacing:.16em;opacity:.75;text-transform:uppercase;font-weight:700;position:relative;z-index:1}}
@@ -874,9 +904,6 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .btn-apply:hover{{filter:brightness(1.05)}}
 .btn-reset{{background:#eef2f6;color:var(--text)}}
 .btn-reset:hover{{background:#e2e8f0}}
-.spine{{position:sticky;top:0;z-index:50;background:rgba(238,242,246,.96);backdrop-filter:blur(6px);border:1px solid var(--border);border-radius:10px;padding:8px;margin-bottom:12px;display:flex;gap:6px;flex-wrap:wrap}}
-.spine a{{font-size:.72rem;font-weight:600;color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:8px}}
-.spine a.active,.spine a:hover{{background:var(--brand-primary);color:#fff}}
 .subject{{background:#e4eef8;border:1px solid #c5d6ea;border-radius:8px;padding:7px 14px;margin-bottom:10px;font-size:.88rem}}
 .bottom-line{{background:transparent;border-left:3px solid var(--gold);border-radius:0;padding:6px 0 6px 12px;margin:4px 0 10px;font-size:.78rem;line-height:1.4;color:var(--muted);box-shadow:none}}
 .bottom-line strong{{color:var(--ink);font-size:.72rem;letter-spacing:.04em;text-transform:uppercase}}
@@ -1430,7 +1457,7 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
 @media print{{
   @page{{size:11in 8.5in;margin:0}}
   *{{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
-  .fab,.agent-menu-wrap,.agent-chip,.agent-panel,.panel-overlay,.view-modes,.top-bar,.spine,
+  .fab,.agent-menu-wrap,.agent-chip,.agent-panel,.panel-overlay,.view-modes,.top-bar,.spine,.report-side,
   .listing-drawer,.listing-overlay,.photo-modal,.controls,.scatter-series,
   #spine-fulldata,.share-bar,.price-controls .slider-wrap,
   .slider-track-wrap,input[type=range],.slider-scale,
@@ -1440,6 +1467,7 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
   .page > .section:not([id]),
   #spine-strategy .response-grid .confront-out{{display:none!important}}
   html,body{{background:#fff!important;margin:0;padding:0}}
+  .report-shell{{display:block;max-width:none;padding:0;margin:0}}
   .page{{max-width:none;width:11in;padding:0;margin:0}}
 
   /* One landscape sheet per spine section — inset box so printer margins cannot clip */
@@ -1671,6 +1699,7 @@ body.print-leavebehind .agent-panel,
 body.print-leavebehind .panel-overlay,
 body.print-leavebehind .top-bar,
 body.print-leavebehind .spine,
+body.print-leavebehind .report-side,
 body.print-leavebehind .listing-drawer,
 body.print-leavebehind .listing-overlay,
 body.print-leavebehind #spine-fulldata,
@@ -1683,6 +1712,35 @@ body.print-leavebehind .page{{padding-bottom:0}}
 </style>
 </head>
 <body>
+<div class="report-shell">
+<aside class="report-side" id="reportSide" aria-label="Report navigation">
+  <div class="rs-brand">ListLogic</div>
+  <div class="rs-app" id="reportAppNav" hidden>
+    <div class="rs-label">Workspace</div>
+    <a href="/saas/app.html">Dashboard</a>
+    <a href="/saas/app.html#generate">Generate</a>
+    <a href="/saas/app.html#reports">Reports</a>
+    <a href="/saas/app.html#team" id="reportNavTeam" hidden>Team</a>
+    <a href="/saas/onboarding.html">Settings</a>
+    <a href="/saas/admin.html" id="reportNavOwner" hidden>Owner console</a>
+    <div class="rs-sep"></div>
+  </div>
+  <div class="rs-label">This report</div>
+  <nav class="spine" id="spine">
+    <a href="#spine-corefacts" data-spine="corefacts">How It Works</a>
+    <a href="#spine-market" data-spine="market">1 · Market</a>
+    <a href="#spine-supply" data-spine="supply"{'' if show_listing_flow else ' hidden'}>2 · Supply</a>
+    <a href="#spine-comps" data-spine="comps">3 · Comps</a>
+    <a href="#spine-rating" data-spine="rating">4 · Your Home</a>
+    <a href="#spine-position" data-spine="position">5 · Position</a>
+    <a href="#spine-yoy" data-spine="yoy">6 · Pace</a>
+    <a href="#spine-prices" data-spine="prices">6b · Prices</a>
+    <a href="#spine-timing" data-spine="timing">6c · Timing</a>
+    <a href="#spine-strategy" data-spine="strategy">7 · Price It</a>
+    <a href="#spine-net" data-spine="net">8 · Net Sheet</a>
+    <a href="#spine-fulldata" data-spine="fulldata">Full Market Data</a>
+  </nav>
+</aside>
 <div class="page">
   <div class="hero">
     <div>
@@ -1753,20 +1811,6 @@ body.print-leavebehind .page{{padding-bottom:0}}
       </button>
     </div>
   </div>
-
-  <nav class="spine" id="spine">
-    <a href="#spine-corefacts" data-spine="corefacts">How It Works</a>
-    <a href="#spine-market" data-spine="market">1 · Market</a>
-    <a href="#spine-supply" data-spine="supply">2 · Supply</a>
-    <a href="#spine-comps" data-spine="comps">3 · Comps</a>
-    <a href="#spine-rating" data-spine="rating">4 · Your Home</a>
-    <a href="#spine-position" data-spine="position">5 · Position</a>
-    <a href="#spine-yoy" data-spine="yoy">6 · Pace</a>
-    <a href="#spine-prices" data-spine="prices">6b · Prices</a>
-    <a href="#spine-timing" data-spine="timing">6c · Timing</a>
-    <a href="#spine-strategy" data-spine="strategy">7 · Price It</a>
-    <a href="#spine-net" data-spine="net">8 · Net Sheet</a>
-  </nav>
 
   <section class="core-facts" id="spine-corefacts">
     <div class="cf-head">
@@ -2286,6 +2330,7 @@ body.print-leavebehind .page{{padding-bottom:0}}
   </section>
 
   <footer><strong>ListLogic</strong> — the pricing story, told by the data · Active = available · Under Contract = Pending + Backup · Months of inventory uses Active only · {generated}</footer>
+</div>
 </div>
 
 <div class="sections-modal" id="sectionsModal" hidden>
@@ -3182,7 +3227,7 @@ updateSupplyAtPrice(currentRec);
 refreshWhatIfMetrics(currentRec);
 
 // Spine highlight
-const spineLinks = [...document.querySelectorAll('#spine a')];
+const spineLinks = [...document.querySelectorAll('#spine a[href^="#"]')];
 const sections = spineLinks.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
 function syncSpine() {{
   let active = sections[0];
@@ -4935,6 +4980,10 @@ fetch('/api/auth-status', {{ credentials: 'same-origin' }})
       return;
     }}
     if (menuWrap) menuWrap.classList.add('ll-shown');
+    const appNav = document.getElementById('reportAppNav');
+    if (appNav) appNav.hidden = false;
+    const teamLink = document.getElementById('reportNavTeam');
+    if (teamLink && data.user.is_brokerage_owner) teamLink.hidden = false;
     if (!(data?.user?.role === 'admin')) return;
     let adminLink = document.getElementById('menuAdminLink');
     if (!adminLink) {{
@@ -4950,6 +4999,8 @@ fetch('/api/auth-status', {{ credentials: 'same-origin' }})
       }}
     }}
     if (adminLink) adminLink.hidden = false;
+    const ownerNav = document.getElementById('reportNavOwner');
+    if (ownerNav) ownerNav.hidden = false;
   }})
   .catch(() => {{}});
 document.addEventListener('click', (e) => {{
