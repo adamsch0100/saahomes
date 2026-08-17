@@ -1,12 +1,12 @@
 {
-  "date": "2026-08-03",
+  "date": "2026-08-17",
   "gsc_period": {
-    "start": "2026-07-26",
-    "end": "2026-08-01"
+    "start": "2026-08-09",
+    "end": "2026-08-15"
   },
   "total_urls": 15,
-  "ok": 15,
-  "problems": 0,
+  "ok": 12,
+  "problems": 3,
   "results": [
     {
       "path": "/",
@@ -16,11 +16,18 @@
       "meta_noindex": false,
       "canonical": "https://saahomes.com/",
       "canonical_mismatch": false,
+      "inspection": {
+        "verdict": "PASS",
+        "coverage_state": "Submitted and indexed",
+        "last_crawl_time": "2026-08-14T21:08:46Z",
+        "page_fetch_state": "SUCCESSFUL",
+        "google_canonical": "https://saahomes.com/"
+      },
       "in_sitemap": true,
       "gsc": {
-        "impressions": 19,
+        "impressions": 32,
         "clicks": 0,
-        "position": 4.473684210526316,
+        "position": 10.34375,
         "ctr": 0
       },
       "issues": [],
@@ -34,11 +41,18 @@
       "meta_noindex": false,
       "canonical": "https://saahomes.com/for-buyers/",
       "canonical_mismatch": false,
+      "inspection": {
+        "verdict": "PASS",
+        "coverage_state": "Submitted and indexed",
+        "last_crawl_time": "2026-07-26T09:02:29Z",
+        "page_fetch_state": "SUCCESSFUL",
+        "google_canonical": "https://saahomes.com/for-buyers/"
+      },
       "in_sitemap": true,
       "gsc": {
-        "impressions": 6,
+        "impressions": 5,
         "clicks": 0,
-        "position": 13.5,
+        "position": 12.4,
         "ctr": 0
       },
       "issues": [],
@@ -52,11 +66,18 @@
       "meta_noindex": false,
       "canonical": "https://saahomes.com/for-sellers/",
       "canonical_mismatch": false,
+      "inspection": {
+        "verdict": "PASS",
+        "coverage_state": "Submitted and indexed",
+        "last_crawl_time": "2026-07-25T19:10:33Z",
+        "page_fetch_state": "SUCCESSFUL",
+        "google_canonical": "https://saahomes.com/for-sellers/"
+      },
       "in_sitemap": true,
       "gsc": {
-        "impressions": 4,
+        "impressions": 5,
         "clicks": 0,
-        "position": 6,
+        "position": 29.6,
         "ctr": 0
       },
       "issues": [],
@@ -70,11 +91,12 @@
       "meta_noindex": false,
       "canonical": "https://saahomes.com/contact/",
       "canonical_mismatch": false,
+      "inspection": null,
       "in_sitemap": true,
       "gsc": {
-        "impressions": 9,
+        "impressions": 15,
         "clicks": 0,
-        "position": 87.33333333333333,
+        "position": 44.06666666666667,
         "ctr": 0
       },
       "issues": [],
@@ -88,10 +110,19 @@
       "meta_noindex": false,
       "canonical": "https://saahomes.com/properties/",
       "canonical_mismatch": false,
+      "inspection": {
+        "verdict": "NEUTRAL",
+        "coverage_state": "Discovered - currently not indexed",
+        "last_crawl_time": null,
+        "page_fetch_state": "PAGE_FETCH_STATE_UNSPECIFIED",
+        "google_canonical": null
+      },
       "in_sitemap": true,
       "gsc": null,
-      "issues": [],
-      "ok": true
+      "issues": [
+        "NOT INDEXED \u2014 Google: Discovered - currently not indexed (last crawl never)"
+      ],
+      "ok": false
     },
     {
       "path": "/chfa-down-payment-assistance/",
@@ -101,11 +132,18 @@
       "meta_noindex": false,
       "canonical": "https://saahomes.com/chfa-down-payment-assistance/",
       "canonical_mismatch": false,
+      "inspection": {
+        "verdict": "PASS",
+        "coverage_state": "Submitted and indexed",
+        "last_crawl_time": "2026-08-13T08:30:25Z",
+        "page_fetch_state": "SUCCESSFUL",
+        "google_canonical": "https://saahomes.com/chfa-down-payment-assistance/"
+      },
       "in_sitemap": true,
       "gsc": {
-        "impressions": 31,
+        "impressions": 741,
         "clicks": 0,
-        "position": 58.193548387096776,
+        "position": 59.3859649122807,
         "ctr": 0
       },
       "issues": [],
@@ -119,12 +157,19 @@
       "meta_noindex": false,
       "canonical": "https://saahomes.com/chfa-schools-to-home/",
       "canonical_mismatch": false,
+      "inspection": {
+        "verdict": "PASS",
+        "coverage_state": "Submitted and indexed",
+        "last_crawl_time": "2026-08-09T18:55:10Z",
+        "page_fetch_state": "SUCCESSFUL",
+        "google_canonical": "https://saahomes.com/chfa-schools-to-home/"
+      },
       "in_sitemap": true,
       "gsc": {
-        "impressions": 284,
-        "clicks": 1,
-        "position": 8.929577464788732,
-        "ctr": 0.0035211267605633804
+        "impressions": 251,
+        "clicks": 2,
+        "position": 10.386454183266933,
+        "ctr": 0.00796812749003984
       },
       "issues": [],
       "ok": true
@@ -137,11 +182,18 @@
       "meta_noindex": false,
       "canonical": "https://saahomes.com/colorado-champions-home-loan-program/",
       "canonical_mismatch": false,
+      "inspection": {
+        "verdict": "PASS",
+        "coverage_state": "Submitted and indexed",
+        "last_crawl_time": "2026-08-09T07:05:02Z",
+        "page_fetch_state": "SUCCESSFUL",
+        "google_canonical": "https://saahomes.com/colorado-champions-home-loan-program/"
+      },
       "in_sitemap": true,
       "gsc": {
-        "impressions": 69,
+        "impressions": 91,
         "clicks": 0,
-        "position": 34.608695652173914,
+        "position": 25.384615384615383,
         "ctr": 0
       },
       "issues": [],
@@ -155,10 +207,19 @@
       "meta_noindex": false,
       "canonical": "https://saahomes.com/northern-colorado-areas/fort-collins/",
       "canonical_mismatch": false,
+      "inspection": {
+        "verdict": "NEUTRAL",
+        "coverage_state": "Crawled - currently not indexed",
+        "last_crawl_time": "2026-07-30T07:01:38Z",
+        "page_fetch_state": "SUCCESSFUL",
+        "google_canonical": "https://saahomes.com/northern-colorado-areas/fort-collins/"
+      },
       "in_sitemap": true,
       "gsc": null,
-      "issues": [],
-      "ok": true
+      "issues": [
+        "NOT INDEXED \u2014 Google: Crawled - currently not indexed (last crawl 2026-07-30T07:01:38Z)"
+      ],
+      "ok": false
     },
     {
       "path": "/northern-colorado-areas/loveland/",
@@ -168,8 +229,20 @@
       "meta_noindex": false,
       "canonical": "https://saahomes.com/northern-colorado-areas/loveland/",
       "canonical_mismatch": false,
+      "inspection": {
+        "verdict": "PASS",
+        "coverage_state": "Submitted and indexed",
+        "last_crawl_time": "2026-06-12T04:53:30Z",
+        "page_fetch_state": "SUCCESSFUL",
+        "google_canonical": "https://saahomes.com/northern-colorado-areas/loveland/"
+      },
       "in_sitemap": true,
-      "gsc": null,
+      "gsc": {
+        "impressions": 53,
+        "clicks": 0,
+        "position": 35.509433962264154,
+        "ctr": 0
+      },
       "issues": [],
       "ok": true
     },
@@ -181,11 +254,18 @@
       "meta_noindex": false,
       "canonical": "https://saahomes.com/northern-colorado-areas/windsor/",
       "canonical_mismatch": false,
+      "inspection": {
+        "verdict": "PASS",
+        "coverage_state": "Submitted and indexed",
+        "last_crawl_time": "2026-08-11T06:49:07Z",
+        "page_fetch_state": "SUCCESSFUL",
+        "google_canonical": "https://saahomes.com/northern-colorado-areas/windsor/"
+      },
       "in_sitemap": true,
       "gsc": {
-        "impressions": 104,
+        "impressions": 80,
         "clicks": 0,
-        "position": 34.06730769230769,
+        "position": 39.5125,
         "ctr": 0
       },
       "issues": [],
@@ -199,10 +279,19 @@
       "meta_noindex": false,
       "canonical": "https://saahomes.com/northern-colorado-areas/greeley/",
       "canonical_mismatch": false,
+      "inspection": {
+        "verdict": "NEUTRAL",
+        "coverage_state": "Crawled - currently not indexed",
+        "last_crawl_time": "2026-07-25T05:27:56Z",
+        "page_fetch_state": "SUCCESSFUL",
+        "google_canonical": "https://saahomes.com/northern-colorado-areas/greeley/"
+      },
       "in_sitemap": true,
       "gsc": null,
-      "issues": [],
-      "ok": true
+      "issues": [
+        "NOT INDEXED \u2014 Google: Crawled - currently not indexed (last crawl 2026-07-25T05:27:56Z)"
+      ],
+      "ok": false
     },
     {
       "path": "/northern-colorado-areas/timnath/",
@@ -212,6 +301,13 @@
       "meta_noindex": false,
       "canonical": "https://saahomes.com/northern-colorado-areas/timnath/",
       "canonical_mismatch": false,
+      "inspection": {
+        "verdict": "PASS",
+        "coverage_state": "Submitted and indexed",
+        "last_crawl_time": "2026-07-30T00:31:40Z",
+        "page_fetch_state": "SUCCESSFUL",
+        "google_canonical": "https://saahomes.com/northern-colorado-areas/timnath/"
+      },
       "in_sitemap": true,
       "gsc": null,
       "issues": [],
@@ -225,6 +321,13 @@
       "meta_noindex": false,
       "canonical": "https://saahomes.com/northern-colorado-areas/berthoud/",
       "canonical_mismatch": false,
+      "inspection": {
+        "verdict": "PASS",
+        "coverage_state": "Submitted and indexed",
+        "last_crawl_time": "2026-07-27T17:54:24Z",
+        "page_fetch_state": "SUCCESSFUL",
+        "google_canonical": "https://saahomes.com/northern-colorado-areas/berthoud/"
+      },
       "in_sitemap": true,
       "gsc": null,
       "issues": [],
@@ -238,11 +341,23 @@
       "meta_noindex": false,
       "canonical": "https://saahomes.com/northern-colorado-areas/severance/",
       "canonical_mismatch": false,
+      "inspection": {
+        "verdict": "PASS",
+        "coverage_state": "Submitted and indexed",
+        "last_crawl_time": "2026-06-27T15:49:26Z",
+        "page_fetch_state": "SUCCESSFUL",
+        "google_canonical": "https://saahomes.com/northern-colorado-areas/severance/"
+      },
       "in_sitemap": true,
-      "gsc": null,
+      "gsc": {
+        "impressions": 1,
+        "clicks": 0,
+        "position": 10,
+        "ctr": 0
+      },
       "issues": [],
       "ok": true
     }
   ],
-  "has_issues": false
+  "has_issues": true
 }
