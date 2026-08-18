@@ -163,6 +163,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/saas/upload-mls-export.html",
         "/saas/cma-in-mls.html",
         "/saas/listing-presentation-software.html",
+        "/saas/cma-report-generator.html",
         "/saas/changelog.html",
         "/blog/",
         "/saas/ll.css",
