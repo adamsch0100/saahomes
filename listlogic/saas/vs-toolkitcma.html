@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WHGZQDZ6ZG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-WHGZQDZ6ZG');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ToolkitCMA Alternative · ListLogic — Prove the Price, Not Just a One-Page CMA</title>
+<meta name="description" content="Looking for a ToolkitCMA alternative? Toolkit CMA is a free one-page CMA. ListLogic is the proof conversation: condition-adjusted comps plus interactive price × odds × supply. Search any market or upload any MLS export. Demo free.">
+<link rel="canonical" href="https://listlogic.homes/saas/vs-toolkitcma.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/saas/ll.css">
+<style>
+.hero-mini {
+  background: radial-gradient(900px 400px at 80% -20%, #1a5f9e33, transparent 60%),
+              linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; padding: 64px 0 72px; text-align: center;
+}
+.hero-mini h1 { font-family: 'Fraunces', serif; font-size: clamp(1.9rem, 4vw, 2.7rem); letter-spacing: -0.02em; margin-bottom: 12px; }
+.hero-mini h1 em { font-style: normal; color: var(--accent-2); }
+.hero-mini p { color: #c8d2e0; max-width: 620px; margin: 0 auto; font-size: 1.02rem; }
+.hero-mini .eyebrow { justify-content: center; }
+
+.wedge-band {
+  margin: -34px auto 0; position: relative; z-index: 2;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 22px 26px; max-width: 860px;
+}
+.wedge-band strong { font-family: 'Fraunces', serif; font-size: 1.2rem; display: block; margin-bottom: 6px; }
+.wedge-band p { color: var(--muted); font-size: 0.95rem; margin: 0; }
+
+.section { padding: 64px 0 0; }
+.section h2 { font-family: 'Fraunces', serif; font-size: clamp(1.4rem, 2.5vw, 1.9rem); letter-spacing: -0.015em; margin-bottom: 10px; }
+.section .sub { color: var(--muted); max-width: 640px; margin-bottom: 28px; }
+
+.cmp-table-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+table.cmp { width: 100%; border-collapse: collapse; min-width: 640px; }
+table.cmp th, table.cmp td { padding: 14px 18px; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.cmp th { background: #f1ece1; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; }
+table.cmp th.win { background: var(--navy); color: #fff; }
+table.cmp tr:last-child th, table.cmp tr:last-child td { border-bottom: none; }
+table.cmp td.rowhead { font-weight: 700; }
+table.cmp .yes { color: var(--ok); font-weight: 700; }
+table.cmp .no { color: var(--muted); }
+table.cmp .lead { color: var(--navy); font-weight: 800; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow-sm); }
+.card h3 { font-family: 'Fraunces', serif; font-size: 1.15rem; margin-bottom: 8px; }
+.card p { color: var(--muted); font-size: 0.92rem; }
+.card .kicker { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal); margin-bottom: 6px; }
+
+.faq-ll details { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 16px 20px; margin-bottom: 10px; }
+.faq-ll summary { font-weight: 700; cursor: pointer; }
+.faq-ll p { color: var(--muted); font-size: 0.92rem; margin: 10px 0 0; }
+
+.cta-band {
+  background: linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; text-align: center; padding: 64px 0; margin-top: 64px;
+}
+.cta-band h2 { font-family: 'Fraunces', serif; font-size: clamp(1.5rem, 3vw, 2.1rem); margin-bottom: 10px; }
+.cta-band p { color: #c8d2e0; max-width: 560px; margin: 0 auto 26px; }
+.btn-trial { background: var(--accent-2); color: #1a1200; }
+
+.note { font-size: 0.82rem; color: var(--muted); max-width: 720px; margin: 26px auto 0; text-align: center; }
+
+@media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is ToolkitCMA?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ToolkitCMA (also searched as Toolkit CMA or CMA Toolkit) is a CMA tool popular with newer agents for its free one-page CMA. It produces a fast comparable-sales sheet. That is a useful job. ListLogic is built for the next step: the pricing story — condition-adjusted comps plus interactive price × odds × supply — so you can prove the price when it is hard to sell."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How is ListLogic different from ToolkitCMA?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ToolkitCMA is good at a fast one-page comp sheet. ListLogic builds the proof conversation: a condition-adjusted competitive set, an interactive price × odds × supply curve, and a print/flipbook leave-behind. The difference is not fake vs real — it is a one-pager vs the story that wins the listing."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is ToolkitCMA free? What about ToolkitCMA pricing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ToolkitCMA is publicly known for a free one-page CMA. Paid plans may exist; we do not list competitor prices here — verify current ToolkitCMA pricing on their site. ListLogic starts with a free demo, then a 7-day trial, then $39/month (annual options available), or a $20 one-shot."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is ListLogic a ToolkitCMA alternative?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, if you want a ToolkitCMA alternative for the listing appointment — not a faster one-pager, but a proof kit. Keep the free one-page CMA if you like it. Use ListLogic when the seller is anchored on a number and you need to prove the price."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does ListLogic work with any MLS?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Search any market or upload any MLS export (CSV/TXT). No MLS feed required, no vendor approval, no lock-in. You confirm the column mapping before generating."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I run a listing appointment with ListLogic alone?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. ListLogic is built to be the centerpiece of the pricing conversation: condition-adjusted comps, interactive price × odds × supply in the appointment, plus print or flipbook to leave behind."
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<nav class="ll-nav">
+  <div class="container ll-nav-inner">
+    <a href="index.html" class="ll-brand">
+      <img src="/saas/listlogic-logo.png" alt="ListLogic" class="ll-brand-logo">
+      <small>by SAA Homes</small>
+    </a>
+    <button type="button" class="ll-nav-toggle" id="llNavToggle" aria-label="Menu" aria-expanded="false">☰</button>
+    <div class="ll-nav-links" id="llNavLinks">
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#deliverables">What sellers get</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="faq.html">FAQ</a>
+      <a href="login.html" class="ll-auth-guest">Sign in</a>
+      <a href="signup.html" class="btn btn-trial ll-auth-guest" style="padding:10px 18px;font-size:0.86rem">Create account</a>
+    </div>
+  </div>
+</nav>
+<script>
+(function(){var t=document.getElementById('llNavToggle'),l=document.getElementById('llNavLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.setAttribute('aria-expanded',o?'true':'false');t.textContent=o?'✕':'☰';});l.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){l.classList.remove('open');t.setAttribute('aria-expanded','false');t.textContent='☰';});});})();
+</script>
+<script src="/saas/nav-auth.js"></script>
+
+<section class="hero-mini">
+  <div class="container">
+    <div class="eyebrow">ToolkitCMA alternative</div>
+    <h1>ToolkitCMA makes a fast one-page CMA. ListLogic builds <em>the proof that wins the listing.</em></h1>
+    <p>When it is hard to sell, sellers want the expert who can prove the price. A free one-page CMA is a start. The appointment is won by the pricing story — condition-adjusted comps plus interactive price × odds × supply.</p>
+  </div>
+</section>
+
+<div class="container">
+  <div class="wedge-band">
+    <strong>A free one-pager vs the proof story</strong>
+    <p>ToolkitCMA is free, fast, and good at what it does: a one-page comparable-sales sheet. ListLogic is the next conversation — a condition-adjusted set, an interactive price × odds × supply curve, and a print/flipbook leave-behind. The difference is the proof, not fake vs real.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <h2>ListLogic vs ToolkitCMA at a glance</h2>
+    <p class="sub">Honest comparison: ToolkitCMA is a capable free one-page CMA. The difference is what you can walk at the kitchen table.</p>
+    <div class="cmp-table-wrap">
+      <table class="cmp">
+        <thead>
+          <tr>
+            <th style="width:34%">Capability</th>
+            <th class="win">ListLogic</th>
+            <th>ToolkitCMA</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td class="rowhead">One-page comparable-sales sheet</td>
+          <td><span class="yes">Yes — plus the full pricing story</span></td>
+          <td><span class="yes">Yes — free one-page CMA (publicly known)</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Interactive price curve / odds × supply</td>
+          <td><span class="lead">Yes — see odds drop at each stretch price</span></td>
+          <td><span class="no">One-page sheet, not the product's focus</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Condition-adjusted competitive set</td>
+          <td><span class="lead">Yes — comps fit this house, this condition</span></td>
+          <td><span class="no">Comp sheet — not the walk-through set</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Seller leave-behind</td>
+          <td><span class="yes">Print + flipbook from the same story</span></td>
+          <td><span class="yes">A one-page CMA you can print</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Any MLS / upload</td>
+          <td><span class="lead">Yes — Search any market or upload any MLS export</span></td>
+          <td><span class="no">MLS-oriented CMA workflow</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Pricing</td>
+          <td><span class="lead">Free demo · 7-day trial · $39/mo · $20 one-shot</span></td>
+          <td><span class="yes">Free one-page CMA; paid plans may exist — verify current terms</span></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="text-align:center;margin-top:26px"><a href="/demo" class="btn btn-trial">Try the free demo</a></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Who each is for (honest)</h2>
+    <p class="sub">Both tools can put comps on a page. Pick the job you actually have at the appointment.</p>
+    <div class="two-col">
+      <div class="card">
+        <div class="kicker">ToolkitCMA</div>
+        <h3>A fast free one-page CMA</h3>
+        <p>Newer agents, and anyone who needs a quick comparable-sales sheet between appointments, will like ToolkitCMA. It is popular for a reason: free, fast, and good at a one-page CMA. Keep it if that is the job.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">ListLogic</div>
+        <h3>The expert who can prove the price</h3>
+        <p>Listing agents in a hard market need more than a sheet. ListLogic is for the appointment where the seller is anchored on a number and you have to prove the price — condition-adjusted comps, the curve, and a leave-behind of the same story.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>The pricing-conversation difference</h2>
+    <p class="sub">A one-page CMA answers “what did similar homes sell for?” The listing is won on “what happens to my odds if we stretch?”</p>
+    <div class="two-col">
+      <div class="card">
+        <div class="kicker">The one-pager</div>
+        <h3>Comps on a page</h3>
+        <p>A free one-page CMA is a useful handout: solds, a range, a recommended number. When the seller says “Zillow says more,” you are still arguing opinion against opinion. The sheet did its job. It did not finish the conversation.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">The proof story</div>
+        <h3>Price × odds × supply they can walk</h3>
+        <p>ListLogic puts a condition-adjusted set on the table, then lets the seller move the price and watch odds and competing supply change. Overpricing becomes a choice they can see — then you leave the same story as print or flipbook.</p>
+      </div>
+    </div>
+    <p class="note" style="margin-top:22px">Illustrative — not a measured result: two agents walk the same kitchen table. One leaves a free one-page CMA with six solds and a recommended number. The other walks a condition-adjusted set and shows odds drop as the seller pushes $20,000 above the field — then leaves that story as print or flipbook. Same house. Different conversation.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Fair questions, honest answers</h2>
+    <div class="faq-ll">
+      <details>
+        <summary>What is ToolkitCMA?</summary>
+        <p>ToolkitCMA (also searched as Toolkit CMA or CMA Toolkit) is a CMA tool popular with newer agents for its free one-page CMA. It produces a fast comparable-sales sheet. That is a useful job. ListLogic is built for the next step: the pricing story — condition-adjusted comps plus interactive price × odds × supply — so you can prove the price when it is hard to sell.</p>
+      </details>
+      <details>
+        <summary>How is ListLogic different from ToolkitCMA?</summary>
+        <p>ToolkitCMA is good at a fast one-page comp sheet. ListLogic builds the proof conversation: a condition-adjusted competitive set, an interactive price × odds × supply curve, and a print/flipbook leave-behind. The difference is not fake vs real — it is a one-pager vs the story that wins the listing.</p>
+      </details>
+      <details>
+        <summary>Is ToolkitCMA free? What about ToolkitCMA pricing?</summary>
+        <p>ToolkitCMA is publicly known for a free one-page CMA. Paid plans may exist; we do not list competitor prices here — verify current ToolkitCMA pricing on their site. ListLogic starts with a free demo, then a 7-day trial, then $39/month (annual options available), or a $20 one-shot.</p>
+      </details>
+      <details>
+        <summary>Is ListLogic a ToolkitCMA alternative?</summary>
+        <p>Yes, if you want a ToolkitCMA alternative for the listing appointment — not a faster one-pager, but a proof kit. Keep the free one-page CMA if you like it. Use ListLogic when the seller is anchored on a number and you need to prove the price.</p>
+      </details>
+      <details>
+        <summary>Does ListLogic work with any MLS?</summary>
+        <p>Yes. Search any market or upload any MLS export (CSV/TXT). No MLS feed required, no vendor approval, no lock-in. You confirm the column mapping before generating.</p>
+      </details>
+      <details>
+        <summary>Can I run a listing appointment with ListLogic alone?</summary>
+        <p>Yes. ListLogic is built to be the centerpiece of the pricing conversation: condition-adjusted comps, interactive price × odds × supply in the appointment, plus print or flipbook to leave behind.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="container">
+    <h2>See the pricing story a one-page CMA can't show</h2>
+    <p>Try the free demo. In two minutes you will see interactive price × odds × supply on a real market — the conversation you would run at the kitchen table.</p>
+    <a href="/demo" class="btn btn-trial btn-lg">Try the free demo</a>
+  </div>
+</section>
+
+<p class="note">ToolkitCMA is a trademark of its owner. ListLogic is not affiliated with ToolkitCMA or its owner. This comparison is based on publicly available information and our understanding of the product category; features change — verify what matters to you before switching. ListLogic is built by SAA Homes.</p>
+<p class="note" style="margin-top:8px">Related: <a href="vs-cloud-cma.html">Cloud CMA alternative</a> · <a href="vs-saleswise.html">Saleswise alternative</a> · <a href="interactive-cma-software.html">Interactive CMA software</a> · <a href="/blog/soft-market-listing-presentation-price-odds-supply.html">Why static CMAs lose appointments</a></p>
+
+<footer class="ll-footer">
+  <div class="container">
+    <div><strong>ListLogic</strong> · Data-driven custom pricing strategy</div>
+    <div><a href="https://saahomes.com">SAA Homes</a> · Schwartz and Associates, Coldwell Banker Realty</div>
+    <div><a href="index.html">Home</a> · <a href="faq.html">FAQ</a> · <a href="pricing.html">Pricing</a> · <a href="vs-cloud-cma.html">Cloud CMA alternative</a> · <a href="vs-saleswise.html">Saleswise alternative</a> · <a href="vs-rpr.html">RPR alternative</a> · <a href="mailto:adam@saahomes.com">Contact</a></div>
+  </div>
+</footer>
+</body>
+</html>
