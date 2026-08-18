@@ -165,6 +165,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/saas/listing-presentation-software.html",
         "/saas/cma-report-generator.html",
         "/saas/brokerage-cma-software.html",
+        "/saas/cma-template.html",
         "/saas/changelog.html",
         "/blog/",
         "/saas/ll.css",

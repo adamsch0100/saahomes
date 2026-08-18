@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WHGZQDZ6ZG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-WHGZQDZ6ZG');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CMA Template for Realtors — Free Comparative Market Analysis Framework · ListLogic</title>
+<meta name="description" content="Free CMA template for realtors. Winning CMA structure: subject, condition-adjusted comps, odds, supply. Not a blank PDF — generate it from your data.">
+<link rel="canonical" href="https://listlogic.homes/saas/cma-template.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/saas/ll.css">
+<style>
+.hero-mini {
+  background: radial-gradient(900px 400px at 80% -20%, #0e7a6d33, transparent 60%),
+              linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; padding: 64px 0 72px; text-align: center;
+}
+.hero-mini h1 { font-family: 'Fraunces', serif; font-size: clamp(1.9rem, 4vw, 2.7rem); letter-spacing: -0.02em; margin-bottom: 12px; }
+.hero-mini h1 em { font-style: normal; color: var(--accent-2); }
+.hero-mini p { color: #c8d2e0; max-width: 620px; margin: 0 auto; font-size: 1.02rem; }
+.hero-mini .eyebrow { justify-content: center; }
+
+.wedge-band {
+  margin: -34px auto 0; position: relative; z-index: 2;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 22px 26px; max-width: 860px;
+}
+.wedge-band strong { font-family: 'Fraunces', serif; font-size: 1.2rem; display: block; margin-bottom: 6px; }
+.wedge-band p { color: var(--muted); font-size: 0.95rem; margin: 0; }
+
+.section { padding: 64px 0 0; }
+.section h2 { font-family: 'Fraunces', serif; font-size: clamp(1.4rem, 2.5vw, 1.9rem); letter-spacing: -0.015em; margin-bottom: 10px; }
+.section .sub { color: var(--muted); max-width: 640px; margin-bottom: 28px; }
+
+.cmp-table-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+table.cmp { width: 100%; border-collapse: collapse; min-width: 640px; }
+table.cmp th, table.cmp td { padding: 14px 18px; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.cmp th { background: #f1ece1; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; }
+table.cmp th.win { background: var(--navy); color: #fff; }
+table.cmp tr:last-child th, table.cmp tr:last-child td { border-bottom: none; }
+table.cmp td.rowhead { font-weight: 700; }
+table.cmp .yes { color: var(--ok); font-weight: 700; }
+table.cmp .no { color: var(--muted); }
+table.cmp .lead { color: var(--navy); font-weight: 800; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow-sm); }
+.card h3 { font-family: 'Fraunces', serif; font-size: 1.15rem; margin-bottom: 8px; }
+.card p { color: var(--muted); font-size: 0.92rem; }
+.card .kicker { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal); margin-bottom: 6px; }
+
+.faq-ll details { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 16px 20px; margin-bottom: 10px; }
+.faq-ll summary { font-weight: 700; cursor: pointer; }
+.faq-ll p { color: var(--muted); font-size: 0.92rem; margin: 10px 0 0; }
+
+.cta-band {
+  background: linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; text-align: center; padding: 64px 0; margin-top: 64px;
+}
+.cta-band h2 { font-family: 'Fraunces', serif; font-size: clamp(1.5rem, 3vw, 2.1rem); margin-bottom: 10px; }
+.cta-band p { color: #c8d2e0; max-width: 560px; margin: 0 auto 26px; }
+.btn-trial { background: var(--accent-2); color: #1a1200; }
+
+.note { font-size: 0.82rem; color: var(--muted); max-width: 720px; margin: 26px auto 0; text-align: center; }
+
+@media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is a CMA template for real estate?",
+      "acceptedAnswer": { "@type": "Answer", "text": "A CMA template for real estate is a reusable structure for a comparative market analysis — the sections you fill before a listing appointment. Most templates are blank sold grids and a recommended-price box. A winning CMA template is the story: subject, condition-adjusted comps, the price curve and odds, competing supply, and a leave-behind of the same decision." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is there a free CMA template PDF I can download?",
+      "acceptedAnswer": { "@type": "Answer", "text": "This page is the free CMA template — a section-by-section comparative market analysis framework you can reuse on any listing. ListLogic does not offer a blank downloadable PDF. An empty PDF is a shell. Search any market or upload any MLS export and generate the filled-in pricing story instead." }
+    },
+    {
+      "@type": "Question",
+      "name": "What should a comparative market analysis template include?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Five sections: the subject (facts plus condition), condition-adjusted comps a buyer will cross-shop, the price curve and modeled odds at each stretch, competing supply at that list price, and one recommendation you can leave behind. If a CMA report template skips odds or supply, you are still arguing the number." }
+    },
+    {
+      "@type": "Question",
+      "name": "Why isn't a CMA report template enough?",
+      "acceptedAnswer": { "@type": "Answer", "text": "A CMA report template is static. You paste solds, pick a number, and print. When the seller wants twenty thousand more, the page cannot show what happens to odds or which homes enter the buyer's set. That conversation is why listings are won or lost when it is hard to sell." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I generate a real CMA instead of filling a template?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Create an account, Search any market nationwide or upload any MLS export, confirm the column mapping if you uploaded, set condition and branding, then generate. ListLogic fills the framework with a custom-fit set and interactive price × odds × supply. The sample demo is free — no account required. ListLogic does not connect to any MLS data service." }
+    },
+    {
+      "@type": "Question",
+      "name": "What does it cost to generate a CMA with ListLogic?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The sample demo is free — no account required. Create an account to Search or Upload and set branding. Unlock custom presentations with a 7-day trial (then $39/month) or a $20 one-shot per report. Annual and brokerage seat plans are on the pricing page." }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<nav class="ll-nav">
+  <div class="container ll-nav-inner">
+    <a href="index.html" class="ll-brand">
+      <img src="/saas/listlogic-logo.png" alt="ListLogic" class="ll-brand-logo">
+      <small>by SAA Homes</small>
+    </a>
+    <button type="button" class="ll-nav-toggle" id="llNavToggle" aria-label="Menu" aria-expanded="false">☰</button>
+    <div class="ll-nav-links" id="llNavLinks">
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#deliverables">What sellers get</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="faq.html">FAQ</a>
+      <a href="login.html" class="ll-auth-guest">Sign in</a>
+      <a href="signup.html" class="btn btn-trial ll-auth-guest" style="padding:10px 18px;font-size:0.86rem">Create account</a>
+    </div>
+  </div>
+</nav>
+<script>
+(function(){var t=document.getElementById('llNavToggle'),l=document.getElementById('llNavLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.setAttribute('aria-expanded',o?'true':'false');t.textContent=o?'✕':'☰';});l.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){l.classList.remove('open');t.setAttribute('aria-expanded','false');t.textContent='☰';});});})();
+</script>
+<script src="/saas/nav-auth.js"></script>
+
+<header class="hero-mini">
+  <div class="container">
+    <span class="eyebrow gold">Free CMA template</span>
+    <h1>A CMA template is a blank canvas. You need the <em>filled-in pricing story</em>.</h1>
+    <p>Most CMA templates give you empty sold rows and a box for a number. A winning comparative market analysis is a pricing story: condition-adjusted comps, odds if you stretch, and the supply a buyer will actually shop. Use the framework below — then generate it from your data.</p>
+    <div class="row" style="justify-content:center;margin-top:26px">
+      <a href="/demo" class="btn btn-gold">Try the free demo</a>
+      <a href="/saas/signup.html" class="btn btn-ghost">Create account</a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="wedge-band">
+    <strong>When it's hard to sell, sellers hire the expert who can prove the price.</strong>
+    <p>A CMA template is a shell. The proof is the filled-in price × odds × supply story — condition-adjusted comps from the seller's own market, not a blank grid you reuse from the last listing. That is the conversation that wins the listing.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <h2>The winning CMA structure — use this as your template</h2>
+    <p class="sub">This is the free CMA template: five sections a seller-facing comparative market analysis should contain. Not a downloadable blank PDF. Fill it from the seller's market — or generate it in ListLogic.</p>
+    <div class="two-col">
+      <div class="card">
+        <div class="kicker">Section 1</div>
+        <h3>The subject</h3>
+        <p>Address, type, beds, baths, sq ft, garage, lot, year, and condition. Condition decides whether two same-size houses are the same listing. Write what the seller believes it is worth — and what a buyer will actually cross-shop against it.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Section 2</div>
+        <h3>Condition-adjusted comps</h3>
+        <p>Not the last five solds in the zip. The set a buyer will tour: matching type and area; size, beds, baths, garage, lot around the subject; Active, Pending/Backup, Sold, Expired, and Withdrawn — then adjust for condition.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Section 3</div>
+        <h3>The price curve and odds</h3>
+        <p>A number in a box is not a CMA. Show what happens to modeled odds of a clean sale in a realistic window if you list with the matching solds — and if you stretch. That curve is the conversation.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Section 4</div>
+        <h3>Competing supply</h3>
+        <p>At each list price, which homes enter the buyer's set? Stretch the number and you often compete with nicer inventory. Sellers argue price; they understand a league change.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Section 5</div>
+        <h3>The recommendation / leave-behind</h3>
+        <p>One decision, not a 28-page packet. The same story you walked: the set, the curve, the supply. Leave it as print and a flipbook the spouse who was not in the room can reopen.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Honest note</div>
+        <h3>No blank PDF to download</h3>
+        <p>Agents also search “CMA template real estate PDF.” A blank file is still a shell. This framework is the template; generate the filled-in story next.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Why a static CMA template fails in the appointment</h2>
+    <p class="sub">A reusable form cannot move when the seller wants more money. The listing is won by the trade-off, not the grid.</p>
+    <div class="cmp-table-wrap">
+      <table class="cmp">
+        <thead>
+          <tr>
+            <th>What the appointment needs</th>
+            <th>Blank CMA template</th>
+            <th class="win">Filled ListLogic story</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rowhead">What you're looking at</td>
+            <td>Empty sold rows you paste by hand</td>
+            <td class="lead">Condition-adjusted set a buyer will cross-shop</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Pricing decision</td>
+            <td>You type a number and argue it</td>
+            <td class="lead">Interactive price × odds × supply</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Supply</td>
+            <td class="no">Rarely shown — or a static count</td>
+            <td class="lead">Competing inventory at that list price</td>
+          </tr>
+          <tr>
+            <td class="rowhead">When the seller wants more</td>
+            <td class="no">The page cannot move</td>
+            <td class="lead">They see the curve and the league change</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Leave-behind</td>
+            <td>A printed blank or static PDF</td>
+            <td class="lead">Print + flipbook of the same story</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Data path</td>
+            <td>You copy from wherever you pulled comps</td>
+            <td class="lead">Search any market, or upload any MLS export</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>How to generate the filled-in CMA</h2>
+    <p class="sub">Same five sections — already filled from the seller's market. Search any market nationwide, or upload any MLS export. ListLogic does not connect to any MLS data service.</p>
+    <div class="two-col">
+      <div class="card">
+        <div class="kicker">Step 1</div>
+        <h3>Search any market, or upload</h3>
+        <p>Enter the subject and build the field nationwide, or upload the MLS export you already pulled (CSV/TXT from Matrix, Flexmls, Bright, or RESO-style). No vendor contract.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Step 2</div>
+        <h3>Map the columns</h3>
+        <p>If you uploaded, ListLogic auto-matches Beds, Sq Ft, MLS #, Close Price, and the rest. You confirm with sample rows on screen — change any dropdown that is wrong — before generate.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Step 3</div>
+        <h3>Set condition and branding</h3>
+        <p>Condition decides whether two same-sq-ft houses are actually the same listing. Set it, add your brand, and the competitive set is custom-fit — not a zip-code median.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Step 4</div>
+        <h3>Generate the pricing story</h3>
+        <p>Interactive price × odds × supply on that set. Then print or send the flipbook of the same story. Fast enough for the next appointment — not a magic blank form.</p>
+      </div>
+    </div>
+    <p style="text-align:center;margin-top:26px"><a href="/demo" class="btn btn-trial">Try the free demo</a></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Fair questions, honest answers</h2>
+    <div class="faq-ll">
+      <details open>
+        <summary>What is a CMA template for real estate?</summary>
+        <p>A CMA template for real estate is a reusable structure for a comparative market analysis — the sections you fill before a listing appointment. Most templates are blank sold grids and a recommended-price box. A winning CMA template is the story: subject, condition-adjusted comps, the price curve and odds, competing supply, and a leave-behind of the same decision.</p>
+      </details>
+      <details>
+        <summary>Is there a free CMA template PDF I can download?</summary>
+        <p>This page is the free CMA template — a section-by-section comparative market analysis framework you can reuse on any listing. ListLogic does not offer a blank downloadable PDF. An empty PDF is a shell. Search any market or upload any MLS export and generate the filled-in pricing story instead.</p>
+      </details>
+      <details>
+        <summary>What should a comparative market analysis template include?</summary>
+        <p>Five sections: the subject (facts plus condition), condition-adjusted comps a buyer will cross-shop, the price curve and modeled odds at each stretch, competing supply at that list price, and one recommendation you can leave behind. If a CMA report template skips odds or supply, you are still arguing the number.</p>
+      </details>
+      <details>
+        <summary>Why isn't a CMA report template enough?</summary>
+        <p>A CMA report template is static. You paste solds, pick a number, and print. When the seller wants twenty thousand more, the page cannot show what happens to odds or which homes enter the buyer's set. That conversation is why listings are won or lost when it is hard to sell.</p>
+      </details>
+      <details>
+        <summary>How do I generate a real CMA instead of filling a template?</summary>
+        <p>Create an account, Search any market nationwide or upload any MLS export, confirm the column mapping if you uploaded, set condition and branding, then generate. ListLogic fills the framework with a custom-fit set and interactive price × odds × supply. The sample demo is free — no account required. ListLogic does not connect to any MLS data service.</p>
+      </details>
+      <details>
+        <summary>What does it cost to generate a CMA with ListLogic?</summary>
+        <p>The sample demo is free — no account required. Create an account to Search or Upload and set branding. Unlock custom presentations with a 7-day trial (then $39/month) or a $20 one-shot per report. <a href="pricing.html">See pricing</a>.</p>
+      </details>
+    </div>
+  </div>
+</section>
+<div class="cta-band">
+  <div class="container">
+    <h2>Skip the blank form. Generate the proof.</h2>
+    <p>The free demo shows interactive price × odds × supply on a real market. Generate a custom presentation when you're ready — 7-day trial, then $39/month (or $20 one-shot per report).</p>
+    <a href="/demo" class="btn btn-trial" style="margin-right:10px">Try the free demo</a>
+    <a href="signup.html" class="btn" style="background:transparent;border:1px solid #3a4a63;color:#fff">Create account</a>
+  </div>
+</div>
+<p class="note">Matrix is a trademark of CoreLogic. Flexmls is a trademark of FBS. Bright MLS and RESO are trademarks of their respective owners. ListLogic is not affiliated with or endorsed by any MLS. ListLogic does not connect to any MLS data service. Search any market nationwide, or upload any MLS export. This page is an in-page CMA framework, not a downloadable blank PDF. ListLogic is built by SAA Homes.</p>
+<p class="note" style="margin-top:8px">Related: <a href="cma-report-generator.html">CMA report generator</a> · <a href="cma-software-for-realtors.html">CMA software for realtors</a> · <a href="upload-mls-export.html">Upload MLS export</a> · <a href="listing-presentation-software.html">Listing presentation software</a> · <a href="/blog/what-is-interactive-cma.html">What is an interactive CMA</a></p>
+<footer class="ll-footer">
+  <div class="container">
+    <div><strong>ListLogic</strong> · Data-driven custom pricing strategy</div>
+    <div><a href="https://saahomes.com">SAA Homes</a> · Schwartz and Associates, Coldwell Banker Realty</div>
+    <div><a href="index.html">Home</a> · <a href="faq.html">FAQ</a> · <a href="pricing.html">Pricing</a> · <a href="cma-report-generator.html">CMA report generator</a> · <a href="cma-software-for-realtors.html">CMA software for realtors</a> · <a href="mailto:adam@saahomes.com">Contact</a></div>
+  </div>
+</footer>
+
+<script src="/saas/analytics.js"></script>
+<script src="/saas/utm.js"></script>
+</body>
+</html>
