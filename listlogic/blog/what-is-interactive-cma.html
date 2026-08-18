@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WHGZQDZ6ZG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-WHGZQDZ6ZG');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What Is an Interactive CMA? Real-Estate Pricing You Can Move · ListLogic</title>
+<meta name="description" content="What is an interactive CMA? A real-estate CMA presentation the seller can move: condition-adjusted comps plus interactive price × odds × supply — not a static PDF. How it works, what to look for, and how to get one.">
+<link rel="canonical" href="https://listlogic.homes/blog/what-is-interactive-cma.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/saas/ll.css">
+<style>
+.hero-mini {
+  background: radial-gradient(900px 400px at 80% -20%, #0e7a6d33, transparent 60%),
+              linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff;
+  padding: 64px 0 72px;
+  text-align: center;
+}
+.hero-mini h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(1.9rem, 4vw, 2.7rem);
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+}
+.hero-mini h1 em {
+  font-style: normal;
+  color: var(--accent-2);
+}
+.hero-mini p {
+  color: #c8d2e0;
+  max-width: 620px;
+  margin: 0 auto;
+  font-size: 1.02rem;
+}
+.hero-mini .eyebrow { justify-content: center; }
+
+.article {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 56px 0 72px;
+}
+.article .kicker {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 10px;
+}
+.article h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  margin-bottom: 14px;
+}
+.article .meta {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-bottom: 34px;
+}
+.article h2 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(1.3rem, 2.4vw, 1.7rem);
+  letter-spacing: -0.015em;
+  margin: 42px 0 14px;
+}
+.article h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.15rem;
+  margin: 26px 0 10px;
+}
+.article p {
+  color: var(--ink);
+  font-size: 1.02rem;
+  line-height: 1.72;
+  margin: 0 0 18px;
+}
+.article ul,
+.article ol {
+  margin: 0 0 18px 22px;
+  line-height: 1.7;
+  color: var(--ink);
+  font-size: 1.02rem;
+}
+.article li { margin-bottom: 8px; }
+.article blockquote {
+  border-left: 3px solid var(--accent-2);
+  background: var(--card);
+  padding: 14px 20px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin: 22px 0;
+  font-family: 'Fraunces', serif;
+  font-size: 1.15rem;
+}
+.article .cta-inline {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 22px 26px;
+  margin: 30px 0;
+  text-align: center;
+}
+.article .cta-inline p { margin-bottom: 16px; }
+.article .note {
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 40px;
+}
+.article a {
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.cmp-table-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); margin: 8px 0 22px; }
+table.cmp { width: 100%; border-collapse: collapse; min-width: 640px; }
+table.cmp th, table.cmp td { padding: 14px 18px; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.cmp th { background: #f1ece1; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; }
+table.cmp th.win { background: var(--navy); color: #fff; }
+table.cmp tr:last-child th, table.cmp tr:last-child td { border-bottom: none; }
+table.cmp td.rowhead { font-weight: 700; }
+table.cmp .yes { color: var(--ok); font-weight: 700; }
+table.cmp .no { color: var(--muted); }
+table.cmp .lead { color: var(--navy); font-weight: 800; }
+
+.faq-ll details { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 16px 20px; margin-bottom: 10px; }
+.faq-ll summary { font-weight: 700; cursor: pointer; }
+.faq-ll p { color: var(--muted); font-size: 0.92rem; margin: 10px 0 0; }
+
+.cta-band {
+  background: linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff;
+  text-align: center;
+  padding: 64px 0;
+  margin-top: 64px;
+}
+.cta-band h2 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  margin-bottom: 10px;
+}
+.cta-band p {
+  color: #c8d2e0;
+  max-width: 560px;
+  margin: 0 auto 26px;
+}
+.btn-trial {
+  background: var(--accent-2);
+  color: #1a1200;
+}
+
+.note {
+  font-size: 0.82rem;
+  color: var(--muted);
+  max-width: 720px;
+  margin: 26px auto 0;
+  text-align: center;
+}
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "What Is an Interactive CMA? Real-Estate Pricing You Can Move",
+  "description": "What is an interactive CMA? A real-estate CMA presentation the seller can move: condition-adjusted comps plus interactive price × odds × supply — not a static PDF. How it works, what to look for, and how to get one.",
+  "author": {
+    "@type": "Organization",
+    "name": "ListLogic by SAA Homes"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SAA Homes"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://listlogic.homes/blog/what-is-interactive-cma.html"
+  },
+  "datePublished": "2026-08-18",
+  "dateModified": "2026-08-18"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is an interactive CMA?",
+      "acceptedAnswer": { "@type": "Answer", "text": "An interactive CMA is a real-estate comparative market analysis the seller can move. Instead of a frozen recommended price, it shows condition-adjusted comps plus a interactive price × odds × supply curve so you can change the list price in the room and watch the field update." }
+    },
+    {
+      "@type": "Question",
+      "name": "How is an interactive CMA different from a static or PDF CMA?",
+      "acceptedAnswer": { "@type": "Answer", "text": "A static or PDF CMA reports solds and a number. An interactive CMA is a CMA presentation: you move the list price and see odds and competing supply change against the homes a buyer will actually cross-shop. The report becomes a decision, not a packet." }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does an interactive CMA win the listing appointment?",
+      "acceptedAnswer": { "@type": "Answer", "text": "When it is hard to sell, sellers hire the expert who can prove the price. An interactive CMA is that proof kit — condition-adjusted comps and a curve the seller can walk — so the stretch-price conversation is a choice they can see, not an argument about your opinion." }
+    },
+    {
+      "@type": "Question",
+      "name": "What should I look for in interactive CMA software?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Look for a price the seller can move, modeled odds at each price, supply in this competitive field, condition-adjusted comps, and a leave-behind of the same story. Skip feature catalogs — branded covers, extra chart types, and CRM add-ons do not prove the price." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does an interactive CMA require a live MLS feed?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. An interactive CMA needs a defensible competitive set, not a live MLS feed. ListLogic is not a live MLS feed and does not connect to any MLS data service. Search any market nationwide, or upload any MLS export." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I get an interactive CMA with ListLogic?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The sample demo is free — no account required. Create an account to Search any market or upload any MLS export and set branding. Unlock custom presentations with a 7-day trial (then $39/month) or a $20 one-shot per report." }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<nav class="ll-nav">
+  <div class="container ll-nav-inner">
+    <a href="index.html" class="ll-brand">
+      <img src="/saas/listlogic-logo.png" alt="ListLogic" class="ll-brand-logo">
+      <small>by SAA Homes</small>
+    </a>
+    <button type="button" class="ll-nav-toggle" id="llNavToggle" aria-label="Menu" aria-expanded="false">☰</button>
+    <div class="ll-nav-links" id="llNavLinks">
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#deliverables">What sellers get</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="faq.html">FAQ</a>
+      <a href="login.html" class="ll-auth-guest">Sign in</a>
+      <a href="signup.html" class="btn btn-trial ll-auth-guest" style="padding:10px 18px;font-size:0.86rem">Create account</a>
+    </div>
+  </div>
+</nav>
+<script>
+(function(){var t=document.getElementById('llNavToggle'),l=document.getElementById('llNavLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.setAttribute('aria-expanded',o?'true':'false');t.textContent=o?'✕':'☰';});l.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){l.classList.remove('open');t.setAttribute('aria-expanded','false');t.textContent='☰';});});})();
+</script>
+<script src="/saas/nav-auth.js"></script>
+
+<header class="hero-mini">
+  <div class="container">
+    <span class="eyebrow gold">CMA presentation</span>
+    <h1>What is an <em>interactive CMA</em>?</h1>
+    <p>Not a static report. The price × odds × supply proof the seller can move — so the expert wins the listing.</p>
+    <div class="row" style="justify-content:center;margin-top:26px">
+      <a href="/demo" class="btn btn-gold">Try the free demo</a>
+      <a href="/saas/signup.html" class="btn btn-ghost">Create account</a>
+    </div>
+  </div>
+</header>
+
+<article class="article">
+  <div class="container">
+    <div class="kicker">Listing strategy</div>
+    <div class="meta">ListLogic Team · 8 min read · August 18, 2026</div>
+
+    <p>When it is easy to sell, a listing appointment is a brochure meeting. When it is hard to sell, the appointment is a pricing meeting. The seller already has a number — from Zillow, from 2021, from a neighbor. They are not hiring the agent with the thickest comp packet. They are hiring the expert who can prove the price.</p>
+    <p>That is what an interactive CMA is for.</p>
+    <p>A static CMA — the PDF you printed last night, the six solds from the MLS builder — reports what already happened. It cannot answer the only question in the room: what happens if we stretch the price. In a hard market, that question <em>is</em> the listing.</p>
+    <p>If you searched “what is interactive CMA” and landed on a dictionary, Interactive Brokers, or a defunct corporation, you are not lost. Almost nobody has defined the real-estate meaning. This post does: what an interactive CMA is, how it differs from a static CMA presentation, why it wins the appointment, and what to look for in interactive CMA software — without a feature dump.</p>
+    <blockquote>When it’s hard to sell, sellers want the expert who can prove the price.</blockquote>
+    <p>The proof is not a prettier packet. It is a field the seller can walk and a trade-off they can watch.</p>
+
+    <h2>What is an interactive CMA?</h2>
+    <p>An interactive CMA is a comparative market analysis the seller can move.</p>
+    <p>It is still a CMA. You still start with comparable homes. The difference is what happens after the comps are on the table. Instead of freezing a recommended list price into a report, an interactive CMA lets you change the list price in the room and watch three things update together:</p>
+    <ul>
+      <li><strong>Price</strong> — the number on the sign.</li>
+      <li><strong>Odds</strong> — a modeled likelihood of a clean sale in a realistic window, typically something like 60–90 days. A trade-off, not a guarantee.</li>
+      <li><strong>Supply</strong> — how many homes a buyer would genuinely cross-shop at that price. Not city-wide months of inventory. This field.</li>
+    </ul>
+    <p>Those three sit on a moving price curve. Slide the list price up and the field changes. The home stops competing with similar listings and starts sitting next to nicer ones. The odds do not ease down. They drop because the buyer pool shrinks.</p>
+    <p>Under the curve is a condition-adjusted competitive set. Square footage, beds, baths, garage, lot, and age get you into the right neighborhood of homes. Condition decides whether two houses with the same square footage are actually the same listing. A renovated kitchen and original cabinets are not interchangeable, even when the MLS card looks similar.</p>
+    <p>That is the honest definition. An interactive CMA is not a slide deck with animations. It is not a branded PDF with a screenshot of a slider. It is price × odds × supply the seller can move, on a set of homes a buyer would actually walk.</p>
+    <p>Illustrative — not a measured result: a seller wants $20,000 above the matching solds. You move the curve to their number. Supply jumps from two similar actives to eight nicer homes. The odds fall. You do not have to say “your house is overpriced.” They can see the league change.</p>
+
+    <h2>Interactive CMA vs static CMA</h2>
+    <p>A CMA presentation used to mean a printed packet. Many tools still mean that: assemble comps, pick a number, export PDF. That is a static CMA. It has a job. It is not the appointment.</p>
+    <div class="cmp-table-wrap">
+      <table class="cmp">
+        <thead>
+          <tr>
+            <th>What the seller needs</th>
+            <th>Static / PDF CMA</th>
+            <th class="win">Interactive CMA</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rowhead">What you’re looking at</td>
+            <td>Frozen solds (and maybe actives)</td>
+            <td class="lead">Condition-adjusted set a buyer will cross-shop</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Pricing decision</td>
+            <td>A recommended number you still argue</td>
+            <td class="lead">Live price × odds × supply</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Stretch-price question</td>
+            <td class="no">On you to explain</td>
+            <td class="lead">Built into the curve</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Seller can move the number</td>
+            <td class="no">No — the report is done</td>
+            <td class="lead">Yes — the field updates</td>
+          </tr>
+          <tr>
+            <td class="rowhead">After you leave</td>
+            <td>A packet of comps</td>
+            <td class="lead">The same story as print + flipbook</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Data path</td>
+            <td>Usually one MLS builder</td>
+            <td class="lead">Search any market, or upload any MLS export</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>A static CMA is evidence. An interactive CMA is a decision.</p>
+
+    <h2>Why it wins the listing appointment</h2>
+    <p>The listing is won or lost at the <a href="/blog/how-to-handle-price-objections-real-estate.html">price objection</a>.</p>
+    <p>If you treat that moment like a debate, you lose either way. Cave, and you inherit a listing that sits. Hold the line with opinion, and they hire the agent who promised more.</p>
+    <p>An interactive CMA is the proof kit. It does not make the software the expert. It makes you the expert the seller can see.</p>
+    <p>Three things happen in order:</p>
+    <ol>
+      <li>You put the condition-adjusted set on the table so the stretch price is no longer a hope — it is a different league.</li>
+      <li>You walk the curve so “let’s try the higher number for 30 days” has a visible cost.</li>
+      <li>You leave the same story behind — print or flipbook — so the spouse and the friend who “knows real estate” reopen the same field, not a new argument.</li>
+    </ol>
+    <p>That is why it wins. Not because it looks modern. Because the seller stops arguing with you and starts reading the market with you.</p>
+    <p>You can run a version of this with a legal pad. The software exists so the curve is live, the set is custom-fit, and the leave-behind matches what you just walked. See also <a href="/blog/soft-market-listing-presentation-price-odds-supply.html">why static CMAs lose appointments when sellers are anchored on Zillow</a>.</p>
+
+    <h2>What to look for in interactive CMA software</h2>
+    <p>The phrase “interactive CMA software” is easy to fake. A clickable PDF is not interactive. A branded cover is not a curve. Here is the short checklist — what matters at the kitchen table, not a feature catalog.</p>
+    <ul>
+      <li><strong>A price the seller can move.</strong> If you cannot change the list price in the room and watch the story update, it is a static CMA with extra clicks.</li>
+      <li><strong>Odds at each price.</strong> A single “recommended price” is still an opinion. Odds are the trade-off. They should be labeled as a model, not a promise.</li>
+      <li><strong>Supply that is this field.</strong> City-wide months of inventory is a headline. The seller needs the homes a buyer would walk at that price.</li>
+      <li><strong>Condition-adjusted comps.</strong> Beds and square footage are the start. Condition, garage, lot, and age decide whether two cards belong on the same page.</li>
+      <li><strong>A leave-behind of the same story.</strong> If the interactive version and the PDF tell different stories, the group chat will rewrite the appointment after you leave.</li>
+      <li><strong>Data you already have.</strong> Search any market, or upload any MLS export. You should not need a vendor contract or a live MLS feed to run a CMA presentation.</li>
+    </ul>
+    <p>What you do not need: a dozen chart types, AI blurbs on every page, CRM, social posting, photo galleries, or a template library that never gets to the price. Those can be fine products. They are not why a seller signs.</p>
+
+    <h2>How to get an interactive CMA</h2>
+    <p>You have two honest paths.</p>
+    <p><strong>Build it yourself.</strong> Pull the homes a buyer will cross-shop. Adjust for condition. Write two or three list prices on a pad and, for each, count the competing supply and say out loud what the odds feel like. Slow, but it is the same conversation. <a href="/blog/how-to-price-a-listing-soft-market.html">How to price a listing in a soft market</a> is that framework on a clock.</p>
+    <p><strong>Use a tool.</strong> Interactive CMA software exists so you do not rebuild the curve by hand at every appointment.</p>
+    <p><a href="/saas/interactive-cma-software.html">ListLogic</a> is one option. You search any market nationwide, or you <a href="/saas/upload-mls-export.html">upload any MLS export</a> — CSV or TXT from Matrix, Flexmls, Bright, or a RESO-style file. You confirm the column mapping with sample rows, then generate a custom-fit set plus interactive price × odds × supply. Print it or send the flipbook. There is no live MLS feed and no vendor approval. That is the point: it works with the comps you already pulled.</p>
+    <p>The sample demo is free — no account required. Create an account to Search or Upload and set branding. Unlock custom presentations with a 7-day trial (then $39/month) or a $20 one-shot per report. Annual and brokerage seat plans are on the <a href="/saas/pricing.html">pricing</a> page.</p>
+    <p>If you want to see the mechanic before you care about branding, start at the demo.</p>
+
+    <h2>Fair questions, honest answers</h2>
+    <div class="faq-ll">
+      <details open>
+        <summary>What is an interactive CMA?</summary>
+        <p>An interactive CMA is a real-estate comparative market analysis the seller can move. Instead of a frozen recommended price, it shows condition-adjusted comps plus a interactive price × odds × supply curve so you can change the list price in the room and watch the field update.</p>
+      </details>
+      <details>
+        <summary>How is an interactive CMA different from a static or PDF CMA?</summary>
+        <p>A static or PDF CMA reports solds and a number. An interactive CMA is a CMA presentation: you move the list price and see odds and competing supply change against the homes a buyer will actually cross-shop. The report becomes a decision, not a packet.</p>
+      </details>
+      <details>
+        <summary>Why does an interactive CMA win the listing appointment?</summary>
+        <p>When it is hard to sell, sellers hire the expert who can prove the price. An interactive CMA is that proof kit — condition-adjusted comps and a curve the seller can walk — so the stretch-price conversation is a choice they can see, not an argument about your opinion.</p>
+      </details>
+      <details>
+        <summary>What should I look for in interactive CMA software?</summary>
+        <p>Look for a price the seller can move, modeled odds at each price, supply in this competitive field, condition-adjusted comps, and a leave-behind of the same story. Skip feature catalogs — branded covers, extra chart types, and CRM add-ons do not prove the price.</p>
+      </details>
+      <details>
+        <summary>Does an interactive CMA require a live MLS feed?</summary>
+        <p>No. An interactive CMA needs a defensible competitive set, not a live MLS feed. ListLogic is not a live MLS feed and does not connect to any MLS data service. Search any market nationwide, or upload any MLS export.</p>
+      </details>
+      <details>
+        <summary>How do I get an interactive CMA with ListLogic?</summary>
+        <p>The sample demo is free — no account required. Create an account to Search any market or upload any MLS export and set branding. Unlock custom presentations with a 7-day trial (then $39/month) or a $20 one-shot per report.</p>
+      </details>
+    </div>
+
+    <div class="cta-inline">
+      <p style="font-family:'Fraunces',serif;font-size:1.2rem;margin-bottom:14px;">Prove the price. Walk in with the trade-off.</p>
+      <a href="/demo" class="btn btn-trial" style="background:var(--accent-2);color:#1a1200;">Try the free demo</a>
+    </div>
+
+    <p class="note"><a href="/blog/soft-market-listing-presentation-price-odds-supply.html">Why static CMAs lose appointments when sellers are anchored on Zillow</a> · <a href="/blog/how-to-handle-price-objections-real-estate.html">How to handle price objections</a> · <a href="/blog/how-to-price-a-listing-soft-market.html">How to price a listing in a soft market</a> · <a href="/saas/interactive-cma-software.html">Interactive CMA software</a> · <a href="/saas/cma-software-for-realtors.html">CMA software for realtors</a> · <a href="/saas/upload-mls-export.html">Upload MLS export</a> · <a href="/saas/pricing.html">Pricing</a> · <a href="/saas/faq.html">FAQ</a></p>
+  </div>
+</article>
+
+<div class="cta-band">
+  <div class="container">
+    <h2>Stop arguing the number. Show the curve.</h2>
+    <p>The free demo shows interactive price × odds × supply on a real market. Generate a custom presentation when you’re ready — 7-day trial, then $39/month (or $20 one-shot per report).</p>
+    <a href="/demo" class="btn btn-trial" style="margin-right:10px">Try the free demo</a>
+    <a href="/saas/signup.html" class="btn" style="background:transparent;border:1px solid #3a4a63;color:#fff">Create account</a>
+  </div>
+</div>
+
+<p class="note">ListLogic is not a live MLS feed and does not connect to any MLS data service. Search any market nationwide, or upload any MLS export. Matrix is a trademark of CoreLogic. Flexmls is a trademark of FBS. Bright MLS and RESO are trademarks of their respective owners. ListLogic is not affiliated with or endorsed by any MLS. ListLogic is built by SAA Homes.</p>
+<p class="note" style="margin-top:8px">Related: <a href="/blog/soft-market-listing-presentation-price-odds-supply.html">Soft-market listing presentation</a> · <a href="/blog/how-to-handle-price-objections-real-estate.html">Price objections</a> · <a href="/blog/how-to-price-a-listing-soft-market.html">How to price a listing</a> · <a href="/saas/interactive-cma-software.html">Interactive CMA software</a> · <a href="/saas/listing-presentation-software.html">Listing presentation software</a> · <a href="/saas/upload-mls-export.html">Upload MLS export</a></p>
+
+<footer class="ll-footer">
+  <div class="container">
+    <div><strong>ListLogic</strong> · Data-driven custom pricing strategy</div>
+    <div><a href="https://saahomes.com">SAA Homes</a> · Schwartz and Associates, Coldwell Banker Realty</div>
+    <div><a href="index.html">Home</a> · <a href="faq.html">FAQ</a> · <a href="pricing.html">Pricing</a> · <a href="vs-cloud-cma.html">Cloud CMA alternative</a> · <a href="vs-saleswise.html">Saleswise alternative</a> · <a href="vs-rpr.html">RPR alternative</a> · <a href="mailto:adam@saahomes.com">Contact</a></div>
+  </div>
+</footer>
+
+<script src="/saas/analytics.js"></script>
+<script src="/saas/utm.js"></script>
+</body>
+</html>
