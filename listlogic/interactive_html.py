@@ -1539,7 +1539,7 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
 
   /* One landscape sheet = exactly one @page. Padding lives inside 8.5in — never add outer margin. */
   /* marker: print-page-spine */
-  /* marker: print-fit-v6 */
+  /* marker: print-fit-v7 */
   .page > .hero,
   .page > .core-facts,
   .page > .section[id^="spine-"]:not(#spine-fulldata):not(#spine-comps-more){{
@@ -1627,18 +1627,39 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden
   }}
 
-  /* Supply: drop long copy, keep metrics + chart */
+  /* Supply: compact metrics, chart fills leftover height without clipping */
   #spine-supply > .sub{{display:none!important}}
+  #spine-supply .supply-line{{
+    margin:0 0 6px!important;padding:6px 10px!important;flex:none;gap:8px!important;
+  }}
+  #spine-supply .supply-line .sl-v{{font-size:1.15rem!important}}
   #spine-supply .supply-line .sl-d{{
-    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:.68rem
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:.62rem
   }}
+  #spine-supply .supply-hero{{gap:8px!important;margin:0 0 6px!important;flex:none}}
+  #spine-supply .supply-balance,#spine-supply .supply-pressure{{padding:8px 10px!important}}
+  #spine-supply .supply-balance .sb-n{{font-size:1.45rem!important}}
+  #spine-supply .supply-pressure .sp-h{{font-size:.95rem!important;margin:0 0 2px!important}}
+  #spine-supply .supply-wait{{gap:6px!important;margin:0 0 6px!important;flex:none}}
+  #spine-supply .supply-wait .sw{{padding:7px 8px!important}}
+  #spine-supply .supply-wait .sw-v{{font-size:1.15rem!important}}
   #spine-supply .sw-d,#spine-supply .sp-b{{
-    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:.66rem
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:.62rem
   }}
-  #spine-supply .supply-chart-wrap{{flex:1 1 auto;min-height:0}}
-  #spine-supply .supply-chart-wrap .chart-box{{flex:1 1 auto;min-height:140px!important}}
+  #spine-supply .supply-chart-wrap{{
+    flex:1 1 auto;display:flex;flex-direction:column;min-height:0;overflow:hidden;margin:0!important;
+  }}
+  #spine-supply .supply-chart-wrap > h3{{flex:none;margin:0 0 2px!important;font-size:.72rem!important}}
+  #spine-supply .supply-chart-wrap > .sub,
+  #spine-supply #flowInsight{{display:none!important}}
+  #spine-supply .supply-chart-wrap .chart-box{{
+    flex:1 1 auto!important;min-height:0!important;max-height:none!important;height:auto!important;overflow:hidden;
+  }}
+  #spine-supply .supply-chart-wrap img.print-chart{{
+    width:100%!important;height:100%!important;max-height:none!important;object-fit:contain!important;object-position:left center;
+  }}
 
-  /* Comps: all 8 on one landscape page (4×2) */
+  /* Comps: 4×2 grid — photos fill leftover card height, stats stay compact */
   #spine-comps .comp-map-wrap,
   #spine-comps .comp-subject,
   #spine-comps .comp-rank-how,
@@ -1649,9 +1670,9 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
   .print-only{{display:none!important}}
   #spine-comps .comp-rail{{
     display:grid!important;
-    grid-template-columns:repeat(4,1fr);
+    grid-template-columns:repeat(4,minmax(0,1fr));
     grid-template-rows:1fr 1fr;
-    gap:7px;
+    gap:8px;
     padding:0;
     flex:1 1 auto;
     min-height:0;
@@ -1659,18 +1680,21 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
   }}
   #spine-comps .comp-rail .comp-card{{
     display:flex!important;flex-direction:column;min-height:0;height:100%;
-    box-shadow:none;border-radius:10px;
+    box-shadow:none;border-radius:10px;overflow:hidden;
   }}
-  #spine-comps .comp-visual{{height:70px!important;flex:none}}
-  #spine-comps .comp-card .cb{{padding:5px 7px 7px;flex:1}}
-  #spine-comps .comp-card .ca{{font-size:.68rem;min-height:0;line-height:1.15;margin:0}}
-  #spine-comps .comp-card .cm{{margin:2px 0 3px;font-size:.58rem}}
+  #spine-comps .comp-visual{{
+    flex:1 1 auto!important;height:auto!important;min-height:1.15in;max-height:none;
+  }}
+  #spine-comps .comp-card .cb{{padding:6px 8px 8px;flex:none}}
+  #spine-comps .comp-card .ca{{font-size:.72rem;min-height:0;line-height:1.2;margin:0}}
+  #spine-comps .comp-card .cm{{margin:2px 0 3px;font-size:.6rem}}
   #spine-comps .comp-card .match-why{{display:none}}
-  #spine-comps .comp-card .cf{{font-size:.56rem;gap:2px 5px;margin-top:2px}}
-  #spine-comps .comp-card .match-badge{{font-size:.54rem;padding:1px 5px}}
-  #spine-comps .cph-price{{font-size:1rem!important}}
-  #spine-comps .cph-meta{{font-size:.58rem!important}}
+  #spine-comps .comp-card .cf{{font-size:.58rem;gap:2px 6px;margin-top:2px}}
+  #spine-comps .comp-card .match-badge{{font-size:.56rem;padding:1px 5px}}
+  #spine-comps .cph-price{{font-size:1.05rem!important}}
+  #spine-comps .cph-meta{{font-size:.6rem!important}}
   #spine-comps .comp-delta{{display:none}}
+  #spine-comps .comp-photo-fade{{padding:8px 10px}}
   #spine-comps > .sub{{margin-bottom:4px;font-size:.68rem}}
   #spine-comps > h2{{margin-bottom:2px}}
 
@@ -1738,12 +1762,24 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
   #spine-timing .md-panel-head .md-tag{{display:none}}
 
   #spine-market .band-wrap{{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;margin-top:6px}}
-  #spine-supply .supply-chart-wrap{{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}}
 
+  /* Condition: four bands fill the sheet; score sits under them */
   #spine-rating{{justify-content:flex-start!important}}
-  #spine-rating .rate-bands{{flex:1;align-content:center;gap:10px;margin:8px 0}}
-  #spine-rating .rate-band{{min-height:110px;padding:14px 12px}}
-  #spine-rating .rate-live{{margin-top:auto}}
+  #spine-rating .rate-bands{{
+    flex:1 1 auto;min-height:0;display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    align-items:stretch;align-content:stretch;gap:12px;margin:10px 0 8px;
+  }}
+  #spine-rating .rate-band{{
+    min-height:0;height:100%;padding:16px 14px;
+    display:flex;flex-direction:column;justify-content:center;
+  }}
+  #spine-rating .rate-band .rb-t{{font-size:.82rem}}
+  #spine-rating .rate-band .rb-r{{font-size:.88rem;margin-top:6px}}
+  #spine-rating .rate-band .rb-d{{font-size:.8rem;margin-top:10px;line-height:1.4}}
+  #spine-rating .rate-live{{margin-top:0;flex:none;min-height:0}}
+  #spine-rating .rate-live .rl,#spine-rating .rate-live .rs{{min-height:64px;padding:10px}}
+  #spine-rating #ratingCopy{{flex:none;margin-top:6px!important;-webkit-line-clamp:2}}
 
   /* Strategy: keep recommendation + lanes + while-you-wait inside the sheet */
   #spine-strategy > .sub{{display:none!important}}

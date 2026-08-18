@@ -935,6 +935,7 @@ body.mode-print .hint {{ display: none; }}
 @media (max-width: 900px) {{ .net-sheet-wrap {{ grid-template-columns: 1fr; }} }}
 
 .presenter-dock {{
+  display: none !important;
   position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
   z-index: 80; width: min(720px, calc(100vw - 28px));
   background: rgba(10,22,38,.94); color: #fff; border: 1px solid rgba(255,255,255,.14);
@@ -1023,7 +1024,7 @@ body.ll-agent #deckAdvList li:focus, body.ll-agent #deckRiskList li:focus {{
 }}
 </style>
 </head>
-<body class="mode-flip" data-deck-spine="v5">
+<body class="mode-flip" data-deck-spine="v7">
 <header class="deck-chrome">
   <div class="left">
     <span class="brand">ListLogic · Listing flipbook</span>
@@ -1111,31 +1112,11 @@ body.ll-agent #deckAdvList li:focus, body.ll-agent #deckRiskList li:focus {{
       <div class="slide-foot"><span>{len(comps)} close sales</span><span>ListLogic</span></div>
     </section>
 
-    <!-- 4 · Your Home -->
-    <section class="slide" data-title="4 · Your Home">
-      <div class="slide-top"><span>{logo_html}4 · Your Home</span><span>Condition</span></div>
+    <!-- 4 · Position -->
+    <section class="slide" data-title="4 · Position">
+      <div class="slide-top"><span>{logo_html}4 · Position</span><span>Market Position</span></div>
       <div class="slide-body">
-        <h2 class="slide-title"><span class="step-badge">4</span>Condition Moves the Number</h2>
-        <p class="lede" data-lede="condition">{_esc(lede_condition)}</p>
-        <div class="duo" style="margin-top:14px">
-          <div class="d yours"><div class="n" id="deckRateScore">{rating}/10</div><div class="t" id="deckRateLabel">{_esc(rating_label)}</div></div>
-          <div class="d"><div class="n">5/10</div><div class="t">Starting point · typical for set</div></div>
-        </div>
-        <div class="facts-grid" style="margin-top:12px">
-          <div class="fact"><span class="fn">1–3</span><div><div class="ft">Needs Work</div><div class="fb">Dated finishes or deferred maintenance vs comps.</div></div></div>
-          <div class="fact"><span class="fn">4–6</span><div><div class="ft">Typical</div><div class="fb">5 is average for this set — nothing special, nothing broken.</div></div></div>
-          <div class="fact"><span class="fn">7–8</span><div><div class="ft">Strong</div><div class="fb">Updated kitchen/baths — buyers notice.</div></div></div>
-          <div class="fact"><span class="fn">9–10</span><div><div class="ft">Exceptional</div><div class="fb">Turnkey premium — top of the set.</div></div></div>
-        </div>
-      </div>
-      <div class="slide-foot"><span>Rate together at the table</span><span>ListLogic</span></div>
-    </section>
-
-    <!-- 5 · Position -->
-    <section class="slide" data-title="5 · Position">
-      <div class="slide-top"><span>{logo_html}5 · Position</span><span>Market Position</span></div>
-      <div class="slide-body">
-        <h2 class="slide-title"><span class="step-badge">5</span>Position in Recent Sales</h2>
+        <h2 class="slide-title"><span class="step-badge">4</span>Position in Recent Sales</h2>
         <p class="lede" id="deckTopStmt">{_esc(top_stmt)}</p>
         <div class="duo compact" style="margin-top:12px">
           <div class="d"><div class="n" id="deckPosTop">Top {top_mkt:.0f}%</div><div class="t">of similar sales</div></div>
@@ -1144,7 +1125,7 @@ body.ll-agent #deckAdvList li:focus, body.ll-agent #deckRiskList li:focus {{
         <p class="lede tight">{_esc(trend_line)}</p>
         <p class="talk-chip">{_esc((pos.get("competitive_statement") or "")[:280])}</p>
       </div>
-      <div class="slide-foot"><span>Starts at typical 5/10 in live story</span><span>ListLogic</span></div>
+      <div class="slide-foot"><span>Condition is set in Live Story</span><span>ListLogic</span></div>
     </section>
 {yoy_slide}
     <!-- 7 · Recommendation -->
@@ -1161,7 +1142,7 @@ body.ll-agent #deckAdvList li:focus, body.ll-agent #deckRiskList li:focus {{
             <div class="pos-bar" style="margin-top:14px"><div class="pos-marker" id="deckPosMarker"></div></div>
             <div class="bl price-rec-bl" id="deckBL" data-edit="bl">{_esc(exec_sum).replace(chr(10), '<br/>')}</div>
           </div>
-          <div class="price-rec-side">{wyw_inline or '<div class="talk-chip">Use the presenter dock to stress-test higher or lower asks.</div>'}</div>
+          <div class="price-rec-side">{wyw_inline or '<div class="talk-chip">Strategy cards on the next slide show higher vs lower asks.</div>'}</div>
         </div>
       </div>
       <div class="slide-foot"><span>Then choose a strategy lane</span><span>ListLogic</span></div>
@@ -1173,7 +1154,7 @@ body.ll-agent #deckAdvList li:focus, body.ll-agent #deckRiskList li:focus {{
       <div class="slide-body">
         <h2 class="slide-title"><span class="step-badge">7</span>If You Go Higher or Lower</h2>
         <p class="lede">Strategy cards snap you to a lane — days and odds respond.</p>
-        <div class="sc-grid sc-grid-fill" id="deckScGrid">{scenarios_html or '<p class="muted">Use the presenter dock for live what-if</p>'}</div>
+        <div class="sc-grid sc-grid-fill" id="deckScGrid">{scenarios_html or '<p class="muted">Open Live Story for the live what-if slider.</p>'}</div>
         <div class="split">
           <div><h3>Advantages</h3><ul id="deckAdvList">{adv_html}</ul></div>
           <div><h3>Watch-Outs</h3><ul id="deckRiskList">{risk_html}</ul></div>
@@ -1209,25 +1190,7 @@ body.ll-agent #deckAdvList li:focus, body.ll-agent #deckRiskList li:focus {{
   <button type="button" id="fabPrev" aria-label="Previous">‹</button>
   <button type="button" id="fabNext" aria-label="Next">›</button>
 </div>
-<aside class="presenter-dock" id="presenterDock" aria-label="Presenter controls">
-  <div class="pd-row">
-    <span class="pd-label">Condition</span>
-    <div class="pd-rates" id="deckRateRow">{"".join(f'<button type="button" class="pd-rate{" active" if i == 5 else ""}" data-rating="{i}">{i}</button>' for i in range(1, 11))}</div>
-  </div>
-  <div class="pd-row">
-    <span class="pd-label">List</span>
-    <div class="pd-slider"><input type="range" id="deckPriceSlider" min="0" max="100" value="50" step="1"></div>
-    <strong class="pd-price" id="deckSlidePrice">${rec:,.0f}</strong>
-  </div>
-  <div class="pd-meta">
-    <span id="deckDockRec">Rec ${rec:,.0f}</span>
-    <span id="deckDockRange">${low:,.0f} – ${high:,.0f}</span>
-    <span id="deckDockDom">~{exp_dom:.0f} days</span>
-    <span id="deckDockOdds">{odds_pct:.0f}% in 30d</span>
-    <button type="button" class="pd-reset" id="deckReset">Reset</button>
-  </div>
-</aside>
-<div class="hint">← → to flip · P for print layout · Esc back to interactive</div>
+<div class="hint">← → to flip · P for print layout · Esc back to Live Story</div>
 
 <script>
 (function() {{
@@ -1491,6 +1454,7 @@ const RUN_ID = (location.pathname.match(/\\/runs\\/([^\\/]+)/)||[])[1] || '';
   }}
   function priceFromSlider() {{
     const slider = document.getElementById('deckPriceSlider');
+    if (!slider) return currentRec;
     const lo = +slider.dataset.lo || currentRec * 0.92;
     const hi = +slider.dataset.hi || currentRec * 1.12;
     return Math.round((lo + (hi - lo) * (+slider.value / 100)) / 1000) * 1000;

@@ -1445,7 +1445,7 @@ def _refresh_sample_html(run_dir: Path, *, force: bool = False) -> bool:
                 and "btnPrintLeavebehind" in existing
                 and "listlogic-logo.png" in existing
                 and "print-page-spine" in existing
-                and "print-fit-v6" in existing
+                and "print-fit-v7" in existing
                 and "demo-ui-snappy" in existing
                 and "RUN_ID === 'sample-2845'" in existing
                 and "charts failed to boot" in existing
@@ -1469,7 +1469,7 @@ def _refresh_sample_html(run_dir: Path, *, force: bool = False) -> bool:
                 and "6 · Pace" in deck_existing
                 and "6b · Prices" in deck_existing
                 and "6c · Timing" in deck_existing
-                and "data-deck-spine=\"v5\"" in deck_existing
+                and "data-deck-spine=\"v7\"" in deck_existing
                 and "fitBodies" in deck_existing
                 and "pulseBlock" in existing
                 and "portal-chip" in existing
