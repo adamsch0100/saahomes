@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WHGZQDZ6ZG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-WHGZQDZ6ZG');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CMA Software for Brokerages — Team Listing Presentation Standard · ListLogic</title>
+<meta name="description" content="CMA software for brokerages that standardizes the listing presentation: shared branding, per-agent seats, and the same price × odds × supply proof. Search any market or upload any MLS export.">
+<link rel="canonical" href="https://listlogic.homes/saas/brokerage-cma-software.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/saas/ll.css">
+<style>
+.hero-mini {
+  background: radial-gradient(900px 400px at 80% -20%, #0e7a6d33, transparent 60%),
+              linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; padding: 64px 0 72px; text-align: center;
+}
+.hero-mini h1 { font-family: 'Fraunces', serif; font-size: clamp(1.9rem, 4vw, 2.7rem); letter-spacing: -0.02em; margin-bottom: 12px; }
+.hero-mini h1 em { font-style: normal; color: var(--accent-2); }
+.hero-mini p { color: #c8d2e0; max-width: 620px; margin: 0 auto; font-size: 1.02rem; }
+.hero-mini .eyebrow { justify-content: center; }
+
+.wedge-band {
+  margin: -34px auto 0; position: relative; z-index: 2;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 22px 26px; max-width: 860px;
+}
+.wedge-band strong { font-family: 'Fraunces', serif; font-size: 1.2rem; display: block; margin-bottom: 6px; }
+.wedge-band p { color: var(--muted); font-size: 0.95rem; margin: 0; }
+
+.section { padding: 64px 0 0; }
+.section h2 { font-family: 'Fraunces', serif; font-size: clamp(1.4rem, 2.5vw, 1.9rem); letter-spacing: -0.015em; margin-bottom: 10px; }
+.section .sub { color: var(--muted); max-width: 640px; margin-bottom: 28px; }
+
+.cmp-table-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+table.cmp { width: 100%; border-collapse: collapse; min-width: 640px; }
+table.cmp th, table.cmp td { padding: 14px 18px; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.cmp th { background: #f1ece1; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; }
+table.cmp th.win { background: var(--navy); color: #fff; }
+table.cmp tr:last-child th, table.cmp tr:last-child td { border-bottom: none; }
+table.cmp td.rowhead { font-weight: 700; }
+table.cmp .yes { color: var(--ok); font-weight: 700; }
+table.cmp .no { color: var(--muted); }
+table.cmp .lead { color: var(--navy); font-weight: 800; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow-sm); }
+.card h3 { font-family: 'Fraunces', serif; font-size: 1.15rem; margin-bottom: 8px; }
+.card p { color: var(--muted); font-size: 0.92rem; }
+.card .kicker { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal); margin-bottom: 6px; }
+
+.faq-ll details { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 16px 20px; margin-bottom: 10px; }
+.faq-ll summary { font-weight: 700; cursor: pointer; }
+.faq-ll p { color: var(--muted); font-size: 0.92rem; margin: 10px 0 0; }
+
+.cta-band {
+  background: linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; text-align: center; padding: 64px 0; margin-top: 64px;
+}
+.cta-band h2 { font-family: 'Fraunces', serif; font-size: clamp(1.5rem, 3vw, 2.1rem); margin-bottom: 10px; }
+.cta-band p { color: #c8d2e0; max-width: 560px; margin: 0 auto 26px; }
+.btn-trial { background: var(--accent-2); color: #1a1200; }
+
+.note { font-size: 0.82rem; color: var(--muted); max-width: 720px; margin: 26px auto 0; text-align: center; }
+
+@media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is a brokerage listing presentation standard?",
+      "acceptedAnswer": { "@type": "Answer", "text": "A brokerage listing presentation standard is the proof every agent is expected to bring to the appointment — not a slide template. When it's hard to sell, sellers hire the expert who can prove the price. ListLogic makes that standard the same price × odds × supply story, with print and flipbook of that story, so the office looks like one expert shop." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this CMA software for brokerages, or just another agent login?",
+      "acceptedAnswer": { "@type": "Answer", "text": "It is CMA software for brokerages in the honest sense: seat pricing, shared branding defaults, and per-agent accounts so listing presentation software for teams produces the same deliverable. It is not a CRM, not an MLS roster sync, and not an office analytics suite. Agents still Search any market or upload any MLS export." }
+    },
+    {
+      "@type": "Question",
+      "name": "What do brokerage seats include?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Shared branding defaults, a seat per agent, and the same generate path each person already uses: Search or upload, set condition, walk price × odds × supply, then print or send the flipbook. After checkout you invite teammates from the dashboard by pasting their emails. White-label is on request — not a built-in admin console." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do we roll ListLogic out to a team?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Pick a champion. Run the free demo in a 30-minute lunch-and-learn. Seat a small pilot (minimum 5; most offices start 5–15). Agents keep their MLS — Search any market or upload the export they already pull. Unlock custom presentations when they generate for a real seller. Expand seats if the office wants the same proof on every listing appointment." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does ListLogic connect to a live MLS feed?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. ListLogic is not a live MLS feed and does not connect to any MLS data service. The data path is Search any market nationwide, or upload any MLS export. That is why it works with any MLS without a vendor contract." }
+    },
+    {
+      "@type": "Question",
+      "name": "What does brokerage seat pricing cost?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Brokerage seats are $29 per seat per month, minimum 5 seats. Annual is $24 per seat per month, billed $290 per seat per year. Agents can still use the free sample demo, a 7-day trial then $39/month, or a $20 one-shot per report. Seat checkout is on the pricing page." }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<nav class="ll-nav">
+  <div class="container ll-nav-inner">
+    <a href="index.html" class="ll-brand">
+      <img src="/saas/listlogic-logo.png" alt="ListLogic" class="ll-brand-logo">
+      <small>by SAA Homes</small>
+    </a>
+    <button type="button" class="ll-nav-toggle" id="llNavToggle" aria-label="Menu" aria-expanded="false">☰</button>
+    <div class="ll-nav-links" id="llNavLinks">
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#deliverables">What sellers get</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="faq.html">FAQ</a>
+      <a href="login.html" class="ll-auth-guest">Sign in</a>
+      <a href="signup.html" class="btn btn-trial ll-auth-guest" style="padding:10px 18px;font-size:0.86rem">Create account</a>
+    </div>
+  </div>
+</nav>
+<script>
+(function(){var t=document.getElementById('llNavToggle'),l=document.getElementById('llNavLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.setAttribute('aria-expanded',o?'true':'false');t.textContent=o?'✕':'☰';});l.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){l.classList.remove('open');t.setAttribute('aria-expanded','false');t.textContent='☰';});});})();
+</script>
+<script src="/saas/nav-auth.js"></script>
+
+<header class="hero-mini">
+  <div class="container">
+    <span class="eyebrow gold">Brokerage listing presentation standard</span>
+    <h1>CMA software for brokerages that <em>standardizes the proof</em> — not the slide deck.</h1>
+    <p>Brokerages win when every agent brings the same proof to the appointment. ListLogic is listing presentation software for teams: shared branding, per-agent seats, and interactive price × odds × supply. Search any market, or upload any MLS export.</p>
+    <div class="row" style="justify-content:center;margin-top:26px">
+      <a href="/saas/pricing.html" class="btn btn-gold">See brokerage seats</a>
+      <a href="/demo" class="btn btn-ghost">Try the free demo</a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="wedge-band">
+    <strong>When it's hard to sell, sellers hire the expert who can prove the price.</strong>
+    <p>A brokerage looks like the expert office when the listing presentation is the same proof, not a different PDF every week. Standardize price × odds × supply. That is how you cut stale listings and price reductions — by making a stretch visible in the room, not by arguing after the sign is up.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <h2>What brokerage seats actually give you</h2>
+    <p class="sub">Brokerage tools for agents should make the appointment consistent. Here is the honest list — shared branding, agent accounts, same deliverable. Not a new MLS and not a CRM rip-out.</p>
+    <div class="two-col">
+      <div class="card">
+        <div class="kicker">Shared branding</div>
+        <h3>One look on every leave-behind</h3>
+        <p>Set branding defaults for the office. Each agent still walks their seller, but print and flipbook carry the same shop — not twelve logos and twelve fonts. White-label beyond defaults is on request.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Per-agent accounts</div>
+        <h3>Seats, not a shared password</h3>
+        <p>Minimum five seats. After checkout, invite teammates from the dashboard — paste their emails yourself. Each person Searches or uploads, sets condition, and generates under their own login.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Consistent deliverables</div>
+        <h3>The same pricing story, every listing</h3>
+        <p>Team listing presentation means the same three artifacts: interactive price × odds × supply in the appointment, print on the table, flipbook after you leave. That is the brokerage listing presentation standard.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">What it is not</div>
+        <h3>Honest about the edges</h3>
+        <p>Not an MLS data service. Not roster sync, SSO, or an office scoreboard. Not a replacement for your CMA-in-MLS or your deck tool. Agents keep the MLS they have. You standardize the proof they walk.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>A lunch-and-learn, then a small pilot</h2>
+    <p class="sub">You do not need a vendor committee to try this. One champion, thirty minutes, then seats for the people who actually take listing appointments.</p>
+    <div class="two-col">
+      <div class="card">
+        <div class="kicker">Step 1</div>
+        <h3>Champion runs the demo</h3>
+        <p>The sample demo is free — no account required. A managing broker, trainer, or team lead walks interactive price × odds × supply on a real market before anyone pays.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Step 2</div>
+        <h3>Thirty-minute lunch-and-learn</h3>
+        <p>Show the field, move the price, watch odds and competing supply change. That is the appointment. Bio slides and marketing plans can stay in whatever template you already use.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Step 3</div>
+        <h3>Seat a 5–15 person pilot</h3>
+        <p>Checkout seats on the pricing page (minimum 5). Invite the agents who list. They Search any market or upload any MLS export — Matrix, Flexmls, Bright, or RESO-style CSV/TXT — and confirm the map.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Step 4</div>
+        <h3>Generate for real sellers</h3>
+        <p>Unlock custom presentations when they generate for a client. Expand seats if the office wants the same proof on every appointment. Email <a href="mailto:adam@saahomes.com">adam@saahomes.com</a> if you want us in the room for the first lunch-and-learn.</p>
+      </div>
+    </div>
+    <p class="note" style="margin-top:22px">Illustrative, not a measured result: a team of eight still uses Canva for bio and the marketing plan. The listing appointment now opens on the same condition-adjusted set and the same price × odds × supply walk. Stretch numbers show more competing supply. The seller picks the field, not the loudest promise.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Vs cobbling a team standard together</h2>
+    <p class="sub">Most offices already have a CMA, a deck tool, and a brand kit. The gap is not another template. It is whether every agent can prove the number the same way.</p>
+    <div class="cmp-table-wrap">
+      <table class="cmp">
+        <thead>
+          <tr>
+            <th>What the office needs</th>
+            <th>Cobbled together</th>
+            <th class="win">ListLogic brokerage seats</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rowhead">What the seller sees</td>
+            <td>Whatever that agent built this week</td>
+            <td class="lead">Same proof kit: set + price × odds × supply</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Pricing conversation</td>
+            <td>Argue a number on top of printed solds</td>
+            <td class="lead">Walk the trade-off in the room</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Brand</td>
+            <td>Logo pasted into Canva / PowerPoint / a deck tool</td>
+            <td class="lead">Shared branding defaults on print + flipbook</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Data path</td>
+            <td>Tied to one MLS builder — or a spreadsheet</td>
+            <td class="lead">Search any market, or upload any MLS export</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Accounts</td>
+            <td class="no">Shared logins, or every agent on a personal plan</td>
+            <td class="lead">Per-agent seats; invite by email</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Rollout</td>
+            <td>Hope the new hire copies the last PDF</td>
+            <td class="lead">Demo → lunch-and-learn → 5–15 seat pilot</td>
+          </tr>
+          <tr>
+            <td class="rowhead">What you still bring</td>
+            <td>MLS, CRM, bio, marketing plan</td>
+            <td class="lead">Same — we do not replace those</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Fair questions, honest answers</h2>
+    <div class="faq-ll">
+      <details open>
+        <summary>What is a brokerage listing presentation standard?</summary>
+        <p>A brokerage listing presentation standard is the proof every agent is expected to bring to the appointment — not a slide template. When it's hard to sell, sellers hire the expert who can prove the price. ListLogic makes that standard the same price × odds × supply story, with print and flipbook of that story, so the office looks like one expert shop.</p>
+      </details>
+      <details>
+        <summary>Is this CMA software for brokerages, or just another agent login?</summary>
+        <p>It is CMA software for brokerages in the honest sense: seat pricing, shared branding defaults, and per-agent accounts so listing presentation software for teams produces the same deliverable. It is not a CRM, not an MLS roster sync, and not an office analytics suite. Agents still Search any market or upload any MLS export.</p>
+      </details>
+      <details>
+        <summary>What do brokerage seats include?</summary>
+        <p>Shared branding defaults, a seat per agent, and the same generate path each person already uses: Search or upload, set condition, walk price × odds × supply, then print or send the flipbook. After checkout you invite teammates from the dashboard by pasting their emails. White-label is on request — not a built-in admin console.</p>
+      </details>
+      <details>
+        <summary>How do we roll ListLogic out to a team?</summary>
+        <p>Pick a champion. Run the free demo in a 30-minute lunch-and-learn. Seat a small pilot (minimum 5; most offices start 5–15). Agents keep their MLS — Search any market or upload the export they already pull. Unlock custom presentations when they generate for a real seller. Expand seats if the office wants the same proof on every listing appointment.</p>
+      </details>
+      <details>
+        <summary>Does ListLogic connect to a live MLS feed?</summary>
+        <p>No. ListLogic is not a live MLS feed and does not connect to any MLS data service. The data path is Search any market nationwide, or upload any MLS export. That is why it works with any MLS without a vendor contract.</p>
+      </details>
+      <details>
+        <summary>What does brokerage seat pricing cost?</summary>
+        <p>Brokerage seats are $29 per seat per month, minimum 5 seats. Annual is $24 per seat per month, billed $290 per seat per year. Agents can still use the free sample demo, a 7-day trial then $39/month, or a $20 one-shot per report. Seat checkout is on the <a href="pricing.html">pricing</a> page.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<div class="cta-band">
+  <div class="container">
+    <h2>Seat the office. Standardize the proof.</h2>
+    <p>Brokerage seats start at $29/seat/month (minimum 5). Annual is $24/seat/month, billed $290/year. Walk the free demo first — then checkout seats when the office is ready.</p>
+    <a href="/saas/pricing.html" class="btn btn-trial" style="margin-right:10px">See brokerage seats</a>
+    <a href="/demo" class="btn" style="background:transparent;border:1px solid #3a4a63;color:#fff">Try the free demo</a>
+  </div>
+</div>
+
+<p class="note">Matrix is a trademark of CoreLogic. Flexmls is a trademark of FBS. Bright MLS and RESO are trademarks of their respective owners. ListLogic is not affiliated with or endorsed by any MLS. ListLogic is not a live MLS feed and does not connect to any MLS data service. Search any market nationwide, or upload any MLS export. ListLogic is built by SAA Homes.</p>
+<p class="note" style="margin-top:8px">Related: <a href="listing-presentation-software.html">Listing presentation software</a> · <a href="cma-software-for-realtors.html">CMA software for realtors</a> · <a href="cma-report-generator.html">CMA report generator</a> · <a href="vs-moxi-present.html">Moxi Present alternative</a> · <a href="upload-mls-export.html">Upload MLS export</a></p>
+
+<footer class="ll-footer">
+  <div class="container">
+    <div><strong>ListLogic</strong> · Data-driven custom pricing strategy</div>
+    <div><a href="https://saahomes.com">SAA Homes</a> · Schwartz and Associates, Coldwell Banker Realty</div>
+    <div><a href="index.html">Home</a> · <a href="faq.html">FAQ</a> · <a href="pricing.html">Pricing</a> · <a href="listing-presentation-software.html">Listing presentation software</a> · <a href="cma-software-for-realtors.html">CMA software for realtors</a> · <a href="mailto:adam@saahomes.com">Contact</a></div>
+  </div>
+</footer>
+
+<script src="/saas/analytics.js"></script>
+<script src="/saas/utm.js"></script>
+</body>
+</html>
