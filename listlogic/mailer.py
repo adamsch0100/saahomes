@@ -306,6 +306,8 @@ def send_pulse_brief(
     cc: str = "",
     opt_out_url: str = "",
     agent_name: str = "",
+    agent_note_url: str = "",
+    seller_also_received: bool = False,
 ) -> bool:
     """Weekly locked-list pulse — HTML + plaintext."""
     brief = brief if isinstance(brief, dict) else {}
@@ -318,6 +320,7 @@ def send_pulse_brief(
     report_url = brief.get("report_url") or brief.get("share_url") or ""
     share_url = brief.get("share_url") or report_url
     fingerprint_url = brief.get("fingerprint_url") or share_url
+    agent_fp = brief.get("agent_fingerprint_url") or ""
     tracks = (brief.get("talk") or {}).get("seller" if audience == "seller" else "agent") or []
     who = "Market Fingerprint" if audience == "seller" else "Weekly Market Fingerprint"
     subject = f"{who} · {addr} · {as_of}".strip(" ·")
@@ -348,12 +351,40 @@ def send_pulse_brief(
             "This update uses the last market file on hand. Upload a fresh MLS export to refresh."
             "</p>"
         )
+    note_url = (agent_note_url or "").strip()
+    if not note_url and audience == "agent" and agent_fp:
+        note_url = str(agent_fp).rstrip("/") + "/#note"
+    page_url = fingerprint_url
+    if audience == "agent":
+        page_url = note_url or agent_fp or fingerprint_url
+    agent_cta = ""
+    agent_cta_text = ""
+    if audience == "agent" and note_url:
+        if seller_also_received:
+            cta_lead = (
+                "The seller already has this week’s numbers. Add your 2–4 sentence read — "
+                "they’ll get a short note from you, not a second scoreboard."
+            )
+        else:
+            cta_lead = (
+                "The picture is live on the Fingerprint. Add your 2–4 sentence read when you have a take. "
+                "Drafts stay private until you share."
+            )
+        agent_cta = (
+            f"<p style='margin:0 0 10px;font-size:15px;line-height:1.45'>{_esc(cta_lead)}</p>"
+            f"<p style='margin:0 0 22px'><a href='{_esc(note_url)}' "
+            f"style='display:inline-block;background:#c9a227;color:#1a1200;text-decoration:none;"
+            f"font-weight:700;padding:12px 18px;border-radius:10px'>Write this week’s note</a></p>"
+        )
+        agent_cta_text = f"{cta_lead}\nWrite this week’s note: {note_url}\n\n"
+    open_label = "Write this week’s note" if audience == "agent" and note_url else "Open the Market Fingerprint"
     html = f"""<div style="font-family:Georgia,serif;max-width:640px;margin:0 auto;color:#0b1220">
   <p style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#5c6675">{_esc(who)}</p>
   <h1 style="font-size:22px;margin:6px 0 8px">{_esc(addr)}</h1>
   <p style="color:#5c6675;margin:0 0 16px">Locked list {locked} · { _esc(market) } · as of {_esc(as_of)} · {int(days)} days since lock</p>
   <p style="font-size:16px;margin:0 0 16px"><strong>{_esc(score)}</strong></p>
   {stale}
+  {agent_cta}
   <h3 style="margin:18px 0 8px;font-size:16px">{_esc(talk_label)}</h3>
   <ul>{talk_html or '<li>Quiet week in the size band.</li>'}</ul>
   {section("New similar — under the list", brief.get("new_under") or [])}
@@ -362,7 +393,7 @@ def send_pulse_brief(
   {section("Price cuts since last look", brief.get("price_cuts") or [])}
   {section("Status changes", brief.get("status_changes") or [])}
   {section("No longer in this pull", brief.get("gone") or [])}
-  <p style="margin-top:24px"><a href="{_esc(fingerprint_url)}">Open the Market Fingerprint</a>
+  <p style="margin-top:24px"><a href="{_esc(page_url)}">{_esc(open_label)}</a>
   {" · <a href='" + _esc(report_url) + "'>Live Story</a>" if report_url and report_url != fingerprint_url else ""}</p>
   <p style="font-size:12px;color:#5c6675;margin-top:28px">
     ListLogic Market Fingerprint for this listing only. Not a pricing recommendation.
@@ -372,17 +403,80 @@ def send_pulse_brief(
 </div>"""
     text = (
         f"{who}\n{addr}\nLocked list {locked} · {market} · as of {as_of}\n{score}\n\n"
+        + agent_cta_text
         + "\n".join(f"- {t}" for t in tracks)
         + section_text("New similar — under", brief.get("new_under") or [])
         + section_text("New similar — over", brief.get("new_over") or [])
         + section_text("Still active and cheaper", brief.get("cheaper_active") or [])
         + section_text("Price cuts", brief.get("price_cuts") or [])
-        + f"\nOpen Market Fingerprint: {fingerprint_url}\n"
+        + f"\n{open_label}: {page_url}\n"
         + (f"Stop: {opt_out_url}\n" if opt_out_url else "")
     )
     return send_email(
         to=to,
         cc=cc,
+        subject=subject,
+        body=text,
+        html=html,
+        reply_to=reply_to,
+    )
+
+
+def send_fingerprint_note(
+    *,
+    to: str,
+    note_body: str,
+    brief: dict,
+    agent_name: str = "",
+    reply_to: str = "",
+    as_of: str = "",
+    seller_name: str = "",
+    weekly_already_sent: bool = False,
+) -> bool:
+    """One-shot follow-up from the agent. Not a second weekly scoreboard."""
+    brief = brief if isinstance(brief, dict) else {}
+    addr = brief.get("subject_address") or "Your listing"
+    who = (agent_name or "Your agent").strip() or "Your agent"
+    week = (as_of or brief.get("as_of") or "").strip()[:10]
+    fingerprint_url = brief.get("fingerprint_url") or brief.get("share_url") or ""
+    first = (seller_name or "").strip().split(" ")[0]
+    hi = f"Hi {first}," if first else "Hi,"
+    week_bit = f" for the week of {week}" if week else ""
+    body_txt = (note_body or "").strip()
+    subject = f"A note from {who} · {addr}".strip(" ·")
+    if weekly_already_sent:
+        lead = (
+            f"You already have this week’s market picture for {addr}. "
+            f"I wanted to add a short read{week_bit}:"
+        )
+        footer = (
+            f"Reply to this email and it comes to me. "
+            f"This is my take on the numbers you already have — not a new list price."
+        )
+    else:
+        lead = (
+            f"I added a short note on your Market Fingerprint for {addr}{week_bit}:"
+        )
+        footer = (
+            f"The live page has this week’s picture (rank, new similar homes, pending). "
+            f"Reply to this email and it comes to me. This is not a new list price."
+        )
+    html = f"""<div style="font-family:Georgia,serif;max-width:640px;margin:0 auto;color:#0b1220">
+  <p style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#5c6675">From {_esc(who)}</p>
+  <p style="font-size:16px;margin:12px 0 8px">{_esc(hi)}</p>
+  <p style="font-size:16px;line-height:1.5;margin:0 0 16px">{_esc(lead)}</p>
+  <p style="font-size:17px;line-height:1.55;margin:0 0 20px;padding:14px 16px;border-left:4px solid #c9a227;background:#fbf8f1">{_esc(body_txt)}</p>
+  <p style="margin:0 0 18px"><a href="{_esc(fingerprint_url)}"
+    style="display:inline-block;background:#0c3c6e;color:#fff;text-decoration:none;font-weight:700;padding:12px 18px;border-radius:10px">See it on your Fingerprint</a></p>
+  <p style="font-size:14px;color:#5c6675;line-height:1.45;margin:0 0 8px">{_esc(footer)}</p>
+  <p style="font-size:14px;margin:16px 0 0">{_esc(who)}</p>
+</div>"""
+    text = (
+        f"From {who}\n{hi}\n\n{lead}\n\n{body_txt}\n\n"
+        f"See it on your Fingerprint: {fingerprint_url}\n\n{footer}\n\n{who}\n"
+    )
+    return send_email(
+        to=to,
         subject=subject,
         body=text,
         html=html,

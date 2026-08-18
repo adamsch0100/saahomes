@@ -1350,6 +1350,56 @@ def append_fingerprint_history(history: list | None, snapshot: dict | None, dige
     return rows[-52:]
 
 
+FINGERPRINT_NOTE_MAX_CHARS = 500
+
+
+def _fingerprint_note_as_of(value) -> str:
+    text = str(value or "").strip()[:10]
+    if len(text) != 10 or text[4] != "-" or text[7] != "-":
+        return ""
+    try:
+        datetime.strptime(text, "%Y-%m-%d")
+    except ValueError:
+        return ""
+    return text
+
+
+def sanitize_fingerprint_note_body(text) -> str:
+    """Plain text only — never HTML, never treated as a list-price rec."""
+    import re
+
+    raw = str(text or "")
+    raw = re.sub(r"</?[A-Za-z][^>]{0,200}>", " ", raw)
+    return " ".join(raw.split()).strip()[:FINGERPRINT_NOTE_MAX_CHARS]
+
+
+def normalize_fingerprint_notes(notes) -> list[dict]:
+    """One note per week; drafts stay private until status is published."""
+    if not isinstance(notes, list):
+        return []
+    by_week: dict[str, dict] = {}
+    for item in notes:
+        if not isinstance(item, dict):
+            continue
+        as_of = _fingerprint_note_as_of(item.get("as_of"))
+        body = sanitize_fingerprint_note_body(item.get("body"))
+        if not as_of or not body:
+            continue
+        status = str(item.get("status") or "draft").strip().lower()
+        if status not in ("draft", "published"):
+            status = "draft"
+        published_at = str(item.get("published_at") or "").strip() if status == "published" else ""
+        by_week[as_of] = {
+            "as_of": as_of,
+            "body": body,
+            "status": status,
+            "published_at": published_at,
+            "emailed_at": str(item.get("emailed_at") or "").strip(),
+        }
+    rows = [by_week[k] for k in sorted(by_week)]
+    return rows[-52:]
+
+
 def _pulse_ids(snapshot: dict | None) -> set[str]:
     ids: set[str] = set()
     if not isinstance(snapshot, dict):
@@ -1596,6 +1646,7 @@ def build_pulse_brief(
     baseline: dict | None = None,
     ledger: dict | None = None,
     history: list | None = None,
+    notes: list | None = None,
 ) -> dict:
     """One brief JSON for Live Story, Fingerprint page, and weekly email."""
     lock = lock if isinstance(lock, dict) else {}
@@ -1750,6 +1801,7 @@ def build_pulse_brief(
         "went_sold": went_sold_cards[:PULSE_CARD_CAP],
         "position": position[:40],
         "history": list(history or [])[-12:],
+        "notes": normalize_fingerprint_notes(notes),
         "sold_at": str(lock.get("sold_at") or ""),
     }
 

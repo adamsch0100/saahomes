@@ -2120,6 +2120,7 @@ def _fingerprint_view_payload(run_dir: Path) -> dict:
         (payload.get("brief") or {}).get("stale_upload")
         or (payload.get("needs_upload") and _snapshot_age_days(payload.get("snapshot")) >= 6)
     )
+    payload["agent_name"] = str((report.get("meta") or {}).get("agent_name") or "")
     return payload
 
 
@@ -2128,6 +2129,8 @@ def _fingerprint_html_response(run_dir: Path, *, agent: bool) -> HTMLResponse:
 
     view = _fingerprint_view_payload(run_dir)
     html = fingerprint_html.render_fingerprint_html(view, agent=agent)
+    if agent and run_dir.name != SAMPLE_RUN_ID:
+        _touch_fingerprint_looked(run_dir)
     return HTMLResponse(html)
 
 
@@ -2544,7 +2547,7 @@ def _write_pulse_lock(run_dir: Path, report: dict, *, price=None, source: str = 
         "source": source,
         "seller_access": existing.get("seller_access", True) is not False,
     }
-    for key in ("email", "seller_name", "seller_email", "sold_at", "last_refresh_at"):
+    for key in ("email", "seller_name", "seller_email", "sold_at", "last_refresh_at", "last_looked_at"):
         if existing.get(key) not in (None, ""):
             payload[key] = existing[key]
     (run_dir / "pulse.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -2672,6 +2675,7 @@ def _seed_sample_fingerprint(run_dir: Path, report: dict) -> None:
     )
 
     if _sample_fingerprint_ready(run_dir):
+        _seed_sample_fingerprint_notes(run_dir)
         return
     df = _load_run_market(run_dir)
     if df is None or len(df) == 0:
@@ -2743,6 +2747,7 @@ def _seed_sample_fingerprint(run_dir: Path, report: dict) -> None:
     (run_dir / "fingerprint_history.json").write_text(json.dumps(history, indent=2, default=str), encoding="utf-8")
     lock["last_refresh_at"] = datetime.now().isoformat(timespec="seconds")
     (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
+    _seed_sample_fingerprint_notes(run_dir, history=history)
     _save_pulse_brief(run_dir, report, lock, snap)
     logger.info(
         "Sample Fingerprint seeded lock=%s baseline=%s active_now=%s new=%s pending=%s sold=%s",
@@ -2753,6 +2758,80 @@ def _seed_sample_fingerprint(run_dir: Path, report: dict) -> None:
         digest.get("went_pending"),
         digest.get("went_sold"),
     )
+
+
+def _fingerprint_notes_path(run_dir: Path) -> Path:
+    return run_dir / "fingerprint_notes.json"
+
+
+def _read_fingerprint_notes(run_dir: Path) -> list:
+    from core import normalize_fingerprint_notes
+
+    return normalize_fingerprint_notes(_read_json_file(_fingerprint_notes_path(run_dir), []))
+
+
+def _write_fingerprint_notes(run_dir: Path, notes) -> list:
+    from core import normalize_fingerprint_notes
+
+    rows = normalize_fingerprint_notes(notes)
+    _fingerprint_notes_path(run_dir).write_text(
+        json.dumps(rows, indent=2),
+        encoding="utf-8",
+    )
+    return rows
+
+
+def _touch_fingerprint_looked(run_dir: Path) -> None:
+    lock = _read_json_file(run_dir / "pulse.json")
+    if not isinstance(lock, dict) or not lock.get("locked_price"):
+        return
+    prev = str(lock.get("last_looked_at") or "")
+    now = datetime.now()
+    if prev:
+        try:
+            then = datetime.fromisoformat(prev[:19])
+            if (now - then).total_seconds() < 120:
+                return
+        except ValueError:
+            pass
+    lock["last_looked_at"] = now.isoformat(timespec="seconds")
+    (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
+
+
+def _seed_sample_fingerprint_notes(run_dir: Path, history: list | None = None) -> None:
+    path = _fingerprint_notes_path(run_dir)
+    if path.exists():
+        return
+    rows = history if isinstance(history, list) else (_read_json_file(run_dir / "fingerprint_history.json", []) or [])
+    first_as_of = SAMPLE_FINGERPRINT_LOCKED_AT
+    last_as_of = ""
+    if rows:
+        first_as_of = str((rows[0] or {}).get("as_of") or first_as_of)[:10]
+        last_as_of = str((rows[-1] or {}).get("as_of") or "")[:10]
+    notes = [
+        {
+            "as_of": first_as_of,
+            "body": (
+                "Day-one lock is in. We'll watch similar homes in this size band every week — "
+                "rank, new lists under you, and anything that goes pending. Same number until the picture changes."
+            ),
+            "status": "published",
+            "published_at": f"{SAMPLE_FINGERPRINT_LOCKED_AT}T12:00:00",
+            "emailed_at": "",
+        }
+    ]
+    if last_as_of and last_as_of != first_as_of:
+        notes.append({
+            "as_of": last_as_of,
+            "body": (
+                "Still watching the cheaper similar set. Quiet on new lists under the lock this week. "
+                "Condition still favors you versus the closest homes from day one."
+            ),
+            "status": "published",
+            "published_at": datetime.now().isoformat(timespec="seconds"),
+            "emailed_at": "",
+        })
+    _write_fingerprint_notes(run_dir, notes)
 
 
 def _hydrate_fingerprint_photos(run_dir: Path, snap: dict | None, ledger: dict | None):
@@ -2837,6 +2916,7 @@ def _save_pulse_brief(
         baseline=baseline,
         ledger=ledger,
         history=_read_json_file(run_dir / "fingerprint_history.json", []),
+        notes=_read_fingerprint_notes(run_dir),
     )
     brief["agent_fingerprint_url"] = agent_fp
     (run_dir / "pulse_brief.json").write_text(
@@ -2931,6 +3011,10 @@ def _pulse_payload(run_dir: Path, report: dict | None = None) -> dict:
         "seller_url": share_url,
         "report_url": report_url,
         "run_id": run_dir.name,
+        "notes": _read_fingerprint_notes(run_dir),
+        "agent_name": str(meta.get("agent_name") or ""),
+        "last_looked_at": str((lock or {}).get("last_looked_at") or ""),
+        "seller_got_weekly": _seller_got_weekly_recently(lock),
     }
 
 
@@ -3262,42 +3346,58 @@ def _send_run_pulse_email(run_dir: Path, *, stale_upload: bool = False) -> bool:
     brief = _save_pulse_brief(run_dir, report, lock, snap, stale_upload=stale_upload)
     user = _run_owner_user(run_id)
     agent_email = str((user or {}).get("email") or (report.get("meta") or {}).get("agent_email") or "").strip()
-    seller_email = str(email_cfg.get("seller_email") or "").strip()
+    seller_email = str(email_cfg.get("seller_email") or lock.get("seller_email") or "").strip()
     recips = [str(x) for x in (email_cfg.get("recipients") or ["agent"]) if x in ("agent", "seller")]
-    to = ""
-    cc = ""
-    if "seller" in recips and seller_email:
-        to = seller_email
-        cc = agent_email
-        audience = "seller"
-    else:
-        to = agent_email
-        audience = "agent"
-    if not to:
+    seller_wants = "seller" in recips and bool(seller_email)
+    agent_wants = "agent" in recips and bool(agent_email)
+    # Agent still gets a write-note path when the picture only went to the seller.
+    agent_nudge = bool(agent_email) and (agent_wants or seller_wants)
+    if not seller_wants and not agent_nudge:
         logger.info("Pulse email skipped for %s — no recipient", run_id)
         return False
     import auth_service as _auth
 
     base = _auth.app_base_url().rstrip("/")
     opt_out = f"{base}/api/runs/{run_id}/pulse-opt-out?t={_pulse_opt_out_token(run_id)}"
-    sent = mailer.send_pulse_brief(
-        to=to,
-        cc=cc,
-        brief=brief,
-        audience=audience,
-        reply_to=agent_email,
-        opt_out_url=opt_out,
-        agent_name=str((user or {}).get("name") or (report.get("meta") or {}).get("agent_name") or ""),
-    )
-    if sent:
+    agent_name = str((user or {}).get("name") or (report.get("meta") or {}).get("agent_name") or "")
+    agent_fp = str((brief or {}).get("agent_fingerprint_url") or f"{base}/runs/{run_id}/fingerprint/")
+    note_url = agent_fp.rstrip("/") + "/#note"
+    sent_any = False
+    if seller_wants:
+        sent_any = mailer.send_pulse_brief(
+            to=seller_email,
+            brief=brief,
+            audience="seller",
+            reply_to=agent_email,
+            opt_out_url=opt_out,
+            agent_name=agent_name,
+        ) or sent_any
+    if agent_nudge:
+        sent_any = mailer.send_pulse_brief(
+            to=agent_email,
+            brief=brief,
+            audience="agent",
+            reply_to=agent_email,
+            opt_out_url=opt_out,
+            agent_name=agent_name,
+            agent_note_url=note_url,
+            seller_also_received=seller_wants,
+        ) or sent_any
+    if sent_any:
         email_cfg["last_sent_at"] = datetime.now().isoformat(timespec="seconds")
+        if seller_wants:
+            email_cfg["last_seller_sent_at"] = email_cfg["last_sent_at"]
         lock["email"] = email_cfg
         (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
         try:
-            auth_service.log_event((user or {}).get("id"), f"pulse_email:{run_id}", {"to": to, "cc": cc})
+            auth_service.log_event(
+                (user or {}).get("id"),
+                f"pulse_email:{run_id}",
+                {"seller": seller_wants, "agent": agent_nudge},
+            )
         except Exception:
             logger.exception("Pulse email event log failed")
-    return bool(sent)
+    return bool(sent_any)
 
 
 MAX_PULSE_REEF_REFRESHES = 3
@@ -3495,6 +3595,139 @@ async def mark_fingerprint_sold(run_id: str, request: Request):
     report = _read_json_file(run_dir / "presentation.json", {}) or {}
     _save_pulse_brief(run_dir, report, lock)
     return {"ok": True, "lock": lock, **_pulse_payload(run_dir)}
+
+
+def _seller_got_weekly_recently(lock: dict | None, *, hours: float = 192) -> bool:
+    lock = lock if isinstance(lock, dict) else {}
+    email_cfg = lock.get("email") if isinstance(lock.get("email"), dict) else {}
+    recips = [str(x) for x in (email_cfg.get("recipients") or [])]
+    if "seller" not in recips:
+        return False
+    last = str(email_cfg.get("last_seller_sent_at") or email_cfg.get("last_sent_at") or "")
+    if not last:
+        return False
+    try:
+        then = datetime.fromisoformat(last[:19])
+        return (datetime.now() - then).total_seconds() < hours * 3600
+    except ValueError:
+        return False
+
+
+def _send_fingerprint_note_email(run_dir: Path, note: dict) -> bool:
+    import auth_service
+    import mailer
+
+    lock = _read_json_file(run_dir / "pulse.json") or {}
+    email_cfg = lock.get("email") if isinstance(lock.get("email"), dict) else {}
+    seller_email = str(
+        lock.get("seller_email") or email_cfg.get("seller_email") or ""
+    ).strip()
+    if not seller_email:
+        return False
+    report = _read_json_file(run_dir / "presentation.json", {}) or {}
+    brief = _read_json_file(run_dir / "pulse_brief.json") or _save_pulse_brief(run_dir, report, lock)
+    user = _run_owner_user(run_dir.name)
+    agent_name = str((user or {}).get("name") or (report.get("meta") or {}).get("agent_name") or "")
+    agent_email = str((user or {}).get("email") or (report.get("meta") or {}).get("agent_email") or "").strip()
+    sent = mailer.send_fingerprint_note(
+        to=seller_email,
+        note_body=str(note.get("body") or ""),
+        brief=brief if isinstance(brief, dict) else {},
+        agent_name=agent_name,
+        reply_to=agent_email,
+        as_of=str(note.get("as_of") or ""),
+        seller_name=str(lock.get("seller_name") or ""),
+        weekly_already_sent=_seller_got_weekly_recently(lock),
+    )
+    if sent:
+        try:
+            auth_service.log_event((user or {}).get("id"), f"fingerprint_note:{run_dir.name}", {"to": seller_email})
+        except Exception:
+            logger.exception("Fingerprint note email event log failed")
+    return bool(sent)
+
+
+@app.post("/api/runs/{run_id}/fingerprint/note")
+async def save_fingerprint_note(run_id: str, request: Request):
+    from core import _fingerprint_note_as_of, sanitize_fingerprint_note_body
+
+    run_id = _safe_run_id(run_id)
+    _reject_sample_mutation(run_id)
+    _require_run_owner(request, run_id)
+    run_dir = OUTPUT_DIR / run_id
+    lock = _read_json_file(run_dir / "pulse.json") or {}
+    if not lock:
+        raise HTTPException(400, "Generate a Fingerprint before saving a note")
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    if not isinstance(body, dict):
+        body = {}
+    action = str(body.get("action") or "save").strip().lower()
+    if action not in ("save", "publish", "unpublish"):
+        raise HTTPException(400, "action must be save, publish, or unpublish")
+    send_now = bool(body.get("email"))
+    email_cfg = lock.get("email") if isinstance(lock.get("email"), dict) else {}
+    seller_email = str(lock.get("seller_email") or email_cfg.get("seller_email") or "").strip()
+    if action == "publish" and send_now and not seller_email:
+        raise HTTPException(400, "Add a seller email before sending this note")
+    brief = _read_json_file(run_dir / "pulse_brief.json") or {}
+    as_of = (
+        _fingerprint_note_as_of(body.get("as_of"))
+        or _fingerprint_note_as_of((brief or {}).get("as_of"))
+        or datetime.now().strftime("%Y-%m-%d")
+    )
+    note_body = sanitize_fingerprint_note_body(body.get("body"))
+    notes = _read_fingerprint_notes(run_dir)
+    note = next((n for n in notes if n.get("as_of") == as_of), None)
+    if note is None:
+        note = {
+            "as_of": as_of,
+            "body": "",
+            "status": "draft",
+            "published_at": "",
+            "emailed_at": "",
+        }
+        notes.append(note)
+    if action == "unpublish":
+        note["status"] = "draft"
+        note["published_at"] = ""
+        if note_body:
+            note["body"] = note_body
+    else:
+        if note_body:
+            note["body"] = note_body
+        if action == "publish":
+            if not note.get("body"):
+                raise HTTPException(400, "Write a note before sharing with the seller")
+            note["status"] = "published"
+            note["published_at"] = datetime.now().isoformat(timespec="seconds")
+        elif not note.get("body"):
+            notes = [n for n in notes if n.get("as_of") != as_of]
+            note = {"as_of": as_of, "body": "", "status": "draft", "published_at": "", "emailed_at": ""}
+    notes = _write_fingerprint_notes(run_dir, notes)
+    note = next((n for n in notes if n.get("as_of") == as_of), note)
+    report = _read_json_file(run_dir / "presentation.json", {}) or {}
+    _save_pulse_brief(run_dir, report, lock)
+    emailed = False
+    if action == "publish" and send_now and note.get("body"):
+        emailed = _send_fingerprint_note_email(run_dir, note)
+        if emailed:
+            note["emailed_at"] = datetime.now().isoformat(timespec="seconds")
+            for row in notes:
+                if row.get("as_of") == as_of:
+                    row["emailed_at"] = note["emailed_at"]
+            notes = _write_fingerprint_notes(run_dir, notes)
+            note = next((n for n in notes if n.get("as_of") == as_of), note)
+            _save_pulse_brief(run_dir, report, lock)
+    return {
+        "ok": True,
+        "note": note,
+        "emailed": emailed,
+        "notes": notes,
+        **_pulse_payload(run_dir, report),
+    }
 
 
 @app.get("/api/runs/{run_id}/pulse-opt-out")

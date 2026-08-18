@@ -10,8 +10,33 @@ def _json_script(data) -> str:
     return raw.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
 
 
+def _notes_for_view(notes, *, agent: bool) -> list:
+    rows = notes if isinstance(notes, list) else []
+    out = []
+    for item in rows:
+        if not isinstance(item, dict) or not item.get("body"):
+            continue
+        status = str(item.get("status") or "draft")
+        if not agent and status != "published":
+            continue
+        out.append({
+            "as_of": str(item.get("as_of") or "")[:10],
+            "body": str(item.get("body") or ""),
+            "status": status,
+            "published_at": str(item.get("published_at") or ""),
+            "emailed_at": str(item.get("emailed_at") or ""),
+        })
+    return out
+
+
 def render_fingerprint_html(view: dict, *, agent: bool = False) -> str:
     brief = view.get("brief") if isinstance(view.get("brief"), dict) else {}
+    if not agent:
+        brief = dict(brief)
+        brief["notes"] = [
+            n for n in (brief.get("notes") or [])
+            if isinstance(n, dict) and n.get("status") == "published" and n.get("body")
+        ]
     lock = view.get("lock") if isinstance(view.get("lock"), dict) else {}
     digest = brief.get("digest") if isinstance(brief.get("digest"), dict) else (view.get("digest") or {})
     addr = brief.get("subject_address") or "This listing"
@@ -34,6 +59,10 @@ def render_fingerprint_html(view: dict, *, agent: bool = False) -> str:
         "seller_email": (lock.get("email") or {}).get("seller_email") or lock.get("seller_email") or "",
         "email": lock.get("email") if isinstance(lock.get("email"), dict) else {},
         "stale_upload": bool(brief.get("stale_upload") or view.get("stale_upload")),
+        "agent_name": view.get("agent_name") or (brief.get("agent_name") if isinstance(brief, dict) else "") or "",
+        "last_looked_at": view.get("last_looked_at") or lock.get("last_looked_at") or "",
+        "notes": _notes_for_view(brief.get("notes") or view.get("notes") or [], agent=agent),
+        "seller_got_weekly": bool(view.get("seller_got_weekly")),
     }
     return _PAGE.format(
         title=title,
@@ -139,6 +168,35 @@ body.is-seller .console {{ display:none; }}
 .drawer .close {{ float:right; border:0; background:transparent; font-size:1.4rem; cursor:pointer; }}
 .note {{ font-size:.78rem; color:var(--muted); margin-top:8px; }}
 .upload {{ display:none; }}
+.weeks-wrap {{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin-bottom:18px; }}
+.weeks-wrap h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.15rem; margin-bottom:4px; }}
+.weeks-wrap .sub {{ color:var(--muted); font-size:.82rem; margin-bottom:12px; }}
+.weeks {{ display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; }}
+.week {{
+  flex:0 0 auto; min-width:156px; text-align:left; background:#f7f4ee; border:1px solid var(--line);
+  border-radius:12px; padding:10px 12px; cursor:pointer; font:inherit;
+}}
+.week.is-on, .week:hover {{ border-color:var(--navy); background:#fff; }}
+.week .w-d {{ display:block; font-size:.72rem; font-weight:800; color:var(--navy); }}
+.week .w-m {{ display:block; font-size:.68rem; color:var(--muted); margin-top:4px; line-height:1.35; }}
+.agent-note {{
+  background:#fff; border:1px solid var(--line); border-left:4px solid var(--gold);
+  border-radius:16px; padding:16px 18px; margin-bottom:14px;
+}}
+.agent-note h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.15rem; }}
+.agent-note .when {{ font-size:.75rem; color:var(--muted); margin:4px 0 10px; }}
+.agent-note .body {{ font-size:.95rem; line-height:1.5; }}
+.note-tl {{ margin:0 0 18px; }}
+.note-tl-item {{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-top:8px; font-size:.88rem; }}
+.note-tl-item strong {{ display:block; font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }}
+.read .fact {{ font-size:.72rem; color:var(--muted); margin-top:8px; }}
+.console textarea {{ width:100%; min-height:96px; padding:8px 10px; border:1px solid var(--line); border-radius:8px; font:inherit; resize:vertical; }}
+.console .starters {{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }}
+.console .starter {{ width:auto; display:inline-block; margin-top:0; padding:5px 8px; font-size:.68rem; }}
+.console .cadence {{ font-size:.75rem; color:var(--muted); margin:8px 0 0; }}
+.console .check {{ display:flex; align-items:center; gap:6px; font-size:.78rem; font-weight:600; margin:10px 0 0; }}
+.console .note-console.is-focus {{ box-shadow:0 0 0 3px #c9a22755; border-radius:12px; padding:8px; margin:8px -8px 0; }}
+.console .check-hint {{ font-size:.72rem; color:var(--muted); font-weight:500; margin:4px 0 0 22px; line-height:1.35; }}
 </style>
 </head>
 <body class="{agent_class}">
@@ -201,6 +259,85 @@ function byId(id) {{
   }}
   return null;
 }}
+function weekKey(v) {{
+  return String(v || '').slice(0, 10);
+}}
+function weekLabel(asOf) {{
+  const raw = weekKey(asOf);
+  const d = new Date(raw + 'T12:00:00');
+  if (isNaN(d.getTime())) return esc(raw || '—');
+  return d.toLocaleDateString(undefined, {{ month: 'short', day: 'numeric' }});
+}}
+function noteForWeek(asOf) {{
+  const key = weekKey(asOf);
+  return (DATA.notes || []).find(n => weekKey(n.as_of) === key) || null;
+}}
+function weeksHtml() {{
+  const hist = ((DATA.brief || {{}}).history || []);
+  if (!hist.length) return '';
+  const current = weekKey((DATA.brief || {{}}).as_of);
+  return '<div class="weeks-wrap"><h2>Week by week</h2>' +
+    '<p class="sub">Same lock every week — rank, new under you, pending, still cheaper.</p>' +
+    '<div class="weeks">' + hist.map(w => {{
+      const asOf = weekKey(w.as_of);
+      const rank = (w.rank && w.rank_of) ? (w.rank + '/' + w.rank_of) : '—';
+      const on = asOf === current ? ' is-on' : '';
+      return '<button type="button" class="week' + on + '" data-asof="' + esc(asOf) + '" id="week-' + esc(asOf) + '">' +
+        '<span class="w-d">Week of ' + weekLabel(asOf) + '</span>' +
+        '<span class="w-m">#' + esc(rank) + ' · ' + Number(w.new_under || 0) + ' under · ' +
+        Number(w.went_pending || 0) + ' pending · ' + Number(w.still_active_cheaper || 0) + ' cheaper</span></button>';
+    }}).join('') + '</div></div>';
+}}
+function publishedNotesHtml() {{
+  const notes = (DATA.notes || []).filter(n => n.status === 'published' && n.body);
+  if (!notes.length) return '';
+  const who = DATA.agent_name || 'your agent';
+  const sorted = notes.slice().sort((a, b) => weekKey(b.as_of).localeCompare(weekKey(a.as_of)));
+  const latest = sorted[0];
+  const older = sorted.slice(1);
+  let html = '<div class="agent-note" id="note-' + esc(weekKey(latest.as_of)) + '">' +
+    '<h2>From ' + esc(who) + '</h2>' +
+    '<p class="when">Week of ' + weekLabel(latest.as_of) +
+    (latest.published_at ? ' · shared ' + weekLabel(latest.published_at) : '') + '</p>' +
+    '<p class="body">' + esc(latest.body) + '</p></div>';
+  if (older.length) {{
+    html += '<div class="note-tl">' + older.map(n =>
+      '<div class="note-tl-item" id="note-' + esc(weekKey(n.as_of)) + '">' +
+      '<strong>Week of ' + weekLabel(n.as_of) + '</strong><p>' + esc(n.body) + '</p></div>'
+    ).join('') + '</div>';
+  }}
+  return html;
+}}
+function bindWeeks() {{
+  document.querySelectorAll('.week').forEach(el => {{
+    el.addEventListener('click', () => {{
+      const asOf = el.getAttribute('data-asof');
+      document.querySelectorAll('.week').forEach(w => w.classList.toggle('is-on', w === el));
+      const target = document.getElementById('note-' + asOf);
+      if (target) target.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
+      if (DATA.agent) loadNoteWeek(asOf);
+    }});
+  }});
+}}
+function loadNoteWeek(asOf) {{
+  const ta = document.getElementById('agentNote');
+  const weekEl = document.getElementById('noteWeek');
+  if (weekEl) weekEl.value = weekKey(asOf);
+  const note = noteForWeek(asOf);
+  if (ta) {{
+    ta.value = note && note.body ? note.body : '';
+    updateNoteCount();
+  }}
+  const badge = document.getElementById('noteState');
+  if (badge) {{
+    badge.textContent = note && note.status === 'published' ? 'Shared with seller' : 'Draft — seller cannot see this';
+  }}
+}}
+function updateNoteCount() {{
+  const ta = document.getElementById('agentNote');
+  const el = document.getElementById('noteCount');
+  if (el && ta) el.textContent = (ta.value || '').length + ' / 500';
+}}
 function render() {{
   const b = DATA.brief || {{}};
   const d = DATA.digest || b.digest || {{}};
@@ -222,6 +359,7 @@ function render() {{
     return '<span class="tick' + (p.subject ? ' me' : '') + '" style="left:' + pct + '%"></span>' +
       (p.subject ? '<span class="lab" style="left:' + pct + '%">' + money(p.price) + '</span>' : '');
   }}).join('');
+  const readTitle = DATA.agent ? 'This week’s read' : 'The market picture';
   document.getElementById('main').innerHTML =
     '<div class="hero">' + photo + '<div>' +
       '<div class="kicker">Market Fingerprint</div>' +
@@ -249,9 +387,11 @@ function render() {{
        ['v', (d.rank && d.rank_of) ? (d.rank + ' / ' + d.rank_of) : '—', 'Your price rank']
       ].map(x => '<div class="cell"><div class="v">' + (x[1] == null || x[1] === '' ? '—' : x[1]) + '</div><div class="l">' + x[2] + '</div></div>').join('') +
     '</div>' +
-    '<div class="read"><h2>This week’s read</h2><ul>' +
+    weeksHtml() +
+    publishedNotesHtml() +
+    '<div class="read"><h2>' + readTitle + '</h2><ul>' +
       (talk.length ? talk.map(t => '<li>' + esc(t) + '</li>').join('') : '<li>Quiet week in this size band.</li>') +
-    '</ul></div>' +
+    '</ul>' + (DATA.agent ? '' : '<p class="fact">Facts from this week’s market file — not a new list price.</p>') + '</div>' +
     '<div class="strip-wrap"><h2>Where you sit among similar actives</h2><div class="strip"><div class="rail"></div>' + ticks + '</div></div>' +
     section('Then vs now', 'The similar actives on day one — still active, pending, sold, or gone.', b.baseline, null) +
     section('New similar — under the lock', 'Listed after the Fingerprint started, priced under you.', b.new_under, 'under') +
@@ -260,6 +400,7 @@ function render() {{
     section('Under contract now', 'Pending / backup in this size band.', b.pending_now || b.went_pending, 'Pending');
 
   if (DATA.agent) renderConsole();
+  bindWeeks();
   document.querySelectorAll('.card').forEach(el => {{
     el.addEventListener('click', () => openDrawer(el.getAttribute('data-id')));
   }});
@@ -273,8 +414,25 @@ function renderConsole() {{
   const em = DATA.email || {{}};
     const who = (em.recipients || ['agent']).join(',');
     const on = !!em.on;
+    const currentAsOf = weekKey((DATA.brief || {{}}).as_of);
+    const currentNote = noteForWeek(currentAsOf);
+    const published = (DATA.notes || []).filter(n => n.status === 'published' && n.published_at);
+    published.sort((a, b) => String(b.published_at).localeCompare(String(a.published_at)));
+    const lastShared = published[0];
+    const starters = ((DATA.brief || {{}}).talk || {{}}).agent || [];
+    const starterBtns = starters.map((t, i) =>
+      '<button type="button" class="starter" data-i="' + i + '">Use talk track ' + (i + 1) + '</button>'
+    ).join('');
+    const emailHint = DATA.seller_got_weekly
+      ? 'They already have this week’s numbers. This sends only your read — not another scoreboard.'
+      : (DATA.seller_email
+        ? 'They’ll see it on the Fingerprint. Check this to email the note. Does not start weekly email.'
+        : 'Save a seller email above if you want to email this note.');
+    const emailCheck = DATA.seller_got_weekly && DATA.seller_email ? ' checked' : '';
     document.getElementById('console').innerHTML =
     '<h3>Agent console</h3>' +
+    '<p class="cadence">Last looked ' + (DATA.last_looked_at ? weekLabel(DATA.last_looked_at) : '—') +
+      ' · Last note shared ' + (lastShared ? weekLabel(lastShared.published_at) : 'none') + '</p>' +
     '<label>Locked list price</label>' +
     '<input type="number" id="lockPrice" value="' + (DATA.lock.locked_price || '') + '" step="1000">' +
     '<button type="button" class="btn-gold" id="btnLock">Update lock</button>' +
@@ -293,12 +451,40 @@ function renderConsole() {{
     '</div>' +
     '<button type="button" id="btnEmail">' + (on ? 'Update / keep weekly email' : 'Start weekly email') + '</button>' +
     (on ? '<button type="button" id="btnEmailOff">Stop weekly email</button>' : '') +
+    '<div id="noteConsole" class="note-console">' +
+    '<label>This week’s note to the seller</label>' +
+    '<input type="hidden" id="noteWeek" value="' + esc(currentAsOf) + '">' +
+    '<textarea id="agentNote" maxlength="500" placeholder="2–4 sentences. Draft stays private until you share.">' +
+      esc(currentNote && currentNote.body ? currentNote.body : '') + '</textarea>' +
+    '<div class="count" id="noteCount"></div>' +
+    '<p class="cadence" id="noteState">' + (currentNote && currentNote.status === 'published' ? 'Shared with seller' : 'Draft — seller cannot see this') + '</p>' +
+    (starterBtns ? '<div class="starters">' + starterBtns + '</div>' : '') +
+    '<label class="check"><input type="checkbox" id="noteEmailNow"' + emailCheck + '> Email this note to the seller now</label>' +
+    '<p class="check-hint">' + esc(emailHint) + '</p>' +
+    '<button type="button" id="btnNoteDraft">Save draft</button>' +
+    '<button type="button" class="btn-gold" id="btnNoteShare">Share with seller</button>' +
+    '<button type="button" id="btnNoteUnpublish">Unpublish</button>' +
+    '</div>' +
     (DATA.can_search_refresh ? '<button type="button" id="btnRefresh">Refresh market now</button>' : '') +
     (DATA.needs_upload ? '<label class="upload" id="uploadWrap" style="display:block">Upload MLS export<input type="file" id="exportFile" accept=".txt,.csv,.tsv"></label>' : '') +
     (DATA.sold_at ? '<p class="note">This Fingerprint is archived.</p>' : '<button type="button" id="btnSold">Mark listing sold</button>') +
     '<a class="btn" href="' + esc(DATA.report_url || '#') + '">Open Live Story</a>' +
     '<p class="status" id="fpStatus"></p>';
   bindConsole();
+  updateNoteCount();
+  focusNoteFromMail();
+}}
+function focusNoteFromMail() {{
+  if (!DATA.agent) return;
+  const hash = String(location.hash || '').replace('#', '');
+  if (hash !== 'note') return;
+  const box = document.getElementById('noteConsole');
+  const ta = document.getElementById('agentNote');
+  if (box) {{
+    box.classList.add('is-focus');
+    box.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
+  }}
+  if (ta) setTimeout(function () {{ ta.focus(); }}, 250);
 }}
 function status(msg) {{ const el = document.getElementById('fpStatus'); if (el) el.textContent = msg || ''; }}
 function bindConsole() {{
@@ -379,6 +565,44 @@ function bindConsole() {{
     }});
     if (res.ok) location.reload();
   }});
+  const starters = ((DATA.brief || {{}}).talk || {{}}).agent || [];
+  document.querySelectorAll('.starter').forEach(btn => {{
+    btn.addEventListener('click', () => {{
+      const i = Number(btn.getAttribute('data-i'));
+      const text = starters[i] || '';
+      const ta = document.getElementById('agentNote');
+      if (!ta || !text) return;
+      const cur = (ta.value || '').trim();
+      ta.value = ((cur ? cur + ' ' : '') + text).slice(0, 500);
+      updateNoteCount();
+    }});
+  }});
+  document.getElementById('agentNote')?.addEventListener('input', updateNoteCount);
+  async function postNote(action) {{
+    status(action === 'publish' ? 'Sharing…' : 'Saving…');
+    const res = await fetch('/api/runs/' + run + '/fingerprint/note', {{
+      method:'POST', credentials:'same-origin', headers:{{'Content-Type':'application/json'}},
+      body: JSON.stringify({{
+        action,
+        as_of: document.getElementById('noteWeek').value,
+        body: document.getElementById('agentNote').value,
+        email: action === 'publish' && document.getElementById('noteEmailNow')?.checked
+      }})
+    }});
+    const data = await res.json().catch(() => ({{}}));
+    if (!res.ok) {{ status(data.detail || 'Could not save note'); return; }}
+    if (action === 'publish') {{
+      status(data.emailed ? 'Shared and emailed' : 'Shared with seller');
+    }} else if (action === 'unpublish') {{
+      status('Unpublished — seller no longer sees this note');
+    }} else {{
+      status('Draft saved');
+    }}
+    location.reload();
+  }}
+  document.getElementById('btnNoteDraft')?.addEventListener('click', () => postNote('save'));
+  document.getElementById('btnNoteShare')?.addEventListener('click', () => postNote('publish'));
+  document.getElementById('btnNoteUnpublish')?.addEventListener('click', () => postNote('unpublish'));
 }}
 function openDrawer(id) {{
   const c = byId(id);
