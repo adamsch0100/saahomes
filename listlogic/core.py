@@ -1132,6 +1132,89 @@ def freeze_fingerprint_baseline(snapshot: dict | None) -> dict:
     }
 
 
+def reconstruct_fingerprint_baseline(
+    df: pd.DataFrame,
+    locked_price: float,
+    living_area: float = 0,
+    *,
+    as_of: str,
+    photo_map: dict | None = None,
+    gallery_map: dict | None = None,
+) -> dict:
+    """Rebuild the Active cohort as it would have looked on ``as_of``.
+
+    A home was Active that day if it listed on or before as_of and had not
+    already sold by then. Homes now pending/sold are tagged Active in the
+    freeze so the ledger can show what happened after the lock.
+    """
+    as_of_ts = pd.to_datetime(as_of, errors="coerce")
+    if pd.isna(as_of_ts):
+        as_of_ts = pd.Timestamp.now()
+    as_of_ts = as_of_ts.tz_localize(None) if getattr(as_of_ts, "tzinfo", None) else as_of_ts
+    as_of_ts = pd.Timestamp(as_of_ts).normalize()
+    as_of_str = as_of_ts.strftime("%Y-%m-%d")
+    locked = float(locked_price or 0)
+    empty = {
+        "as_of": as_of_str,
+        "locked_price": int(round(locked)) if locked else 0,
+        "subject_sqft": round(float(living_area or 0)),
+        "listings": [],
+        "ids": [],
+        "rank": 0,
+        "rank_of": 0,
+        "active_count": 0,
+    }
+    if df is None or len(df) == 0 or locked <= 0:
+        return empty
+    work = df.copy()
+    if "LivingArea" in work.columns and living_area and living_area > 0:
+        work = work[listing_flow_sqft_mask(work["LivingArea"], living_area)]
+    if "Price" not in work.columns:
+        return empty
+    listings: list[dict] = []
+    for _, row in work.iterrows():
+        try:
+            price = float(row.get("Price"))
+        except (TypeError, ValueError):
+            continue
+        if price <= 0:
+            continue
+        list_ts = pd.to_datetime(row.get("ListDate"), errors="coerce")
+        if pd.isna(list_ts):
+            continue
+        list_ts = list_ts.tz_localize(None) if getattr(list_ts, "tzinfo", None) else list_ts
+        if pd.Timestamp(list_ts).normalize() > as_of_ts:
+            continue
+        status = str(row.get("StatusNorm") or "")
+        sold_ts = pd.to_datetime(row.get("SoldDate"), errors="coerce")
+        if pd.notna(sold_ts):
+            sold_ts = sold_ts.tz_localize(None) if getattr(sold_ts, "tzinfo", None) else sold_ts
+            if pd.Timestamp(sold_ts).normalize() <= as_of_ts:
+                continue
+        if status == "Sold" or status in FINGERPRINT_LIVE_STATUSES:
+            list_date = ""
+            try:
+                list_date = pd.Timestamp(list_ts).strftime("%Y-%m-%d")
+            except Exception:
+                list_date = ""
+            card = _pulse_listing_from_row(row, locked, list_date=list_date)
+            card["status"] = "Active"
+            card["was_status"] = status
+            listings.append(card)
+    listings = apply_listing_photos(listings, photo_map, gallery_map)
+    rank_info = _assign_active_ranks(listings, locked)
+    return {
+        "as_of": as_of_str,
+        "locked_price": int(round(locked)),
+        "subject_sqft": round(float(living_area or 0)),
+        "listings": listings,
+        "ids": [str(r.get("id")) for r in listings if r.get("id")],
+        "rank": rank_info.get("rank") or 0,
+        "rank_of": rank_info.get("rank_of") or 0,
+        "active_count": len(listings),
+    }
+
+
 def fingerprint_sold_from_df(df: pd.DataFrame, ids: set[str]) -> dict[str, dict]:
     """Baseline ids that now show Sold in the full market pull."""
     found: dict[str, dict] = {}

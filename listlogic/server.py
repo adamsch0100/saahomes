@@ -44,6 +44,7 @@ MAX_UPLOAD_BYTES = 15 * 1024 * 1024
 RATE_LIMIT_WINDOW_SEC = 60
 RATE_LIMIT_MAX_GENERATE = 10
 SAMPLE_RUN_ID = "sample-2845"
+SAMPLE_FINGERPRINT_LOCKED_AT = "2026-07-27"
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ListLogic")
@@ -1584,7 +1585,7 @@ def _seed_sample_launch_files(run_dir: Path) -> bool:
             logger.info("Sample Zestimate seed skipped")
     if (run_dir / "market.csv").exists():
         try:
-            _ensure_fingerprint_files(run_dir, report, source="sample")
+            _seed_sample_fingerprint(run_dir, report)
         except Exception:
             logger.exception("Sample Market Fingerprint seed skipped")
     edits_path = run_dir / "edits.json"
@@ -2095,7 +2096,10 @@ def view_run(run_id: str):
 def _fingerprint_view_payload(run_dir: Path) -> dict:
     report = _read_json_file(run_dir / "presentation.json", {}) or {}
     try:
-        _ensure_fingerprint_files(run_dir, report)
+        if run_dir.name == SAMPLE_RUN_ID:
+            _seed_sample_fingerprint(run_dir, report)
+        else:
+            _ensure_fingerprint_files(run_dir, report)
     except Exception:
         logger.exception("Fingerprint files missing for %s", run_dir.name)
     lock = _read_json_file(run_dir / "pulse.json")
@@ -2497,14 +2501,20 @@ def _load_run_market(run_dir: Path):
     if not path.exists():
         return None
     try:
+        import pandas as pd
+        from market_schema import normalize_market_frame
+
+        df = pd.read_csv(path, sep="|", low_memory=False)
+        if "StatusNorm" in df.columns and "Price" in df.columns:
+            return normalize_market_frame(df, source="saved")
         from core import load_export
 
         return load_export(path)
     except Exception:
         try:
-            import pandas as pd
+            from core import load_export
 
-            return pd.read_csv(path, sep="|")
+            return load_export(path)
         except Exception:
             logger.exception("Failed to load market.csv from %s", run_dir)
             return None
@@ -2611,18 +2621,137 @@ def _write_fingerprint_snapshot(run_dir: Path, report: dict, lock: dict, df, *, 
     return snap
 
 
+def _fingerprint_snapshot_empty(snap) -> bool:
+    return not isinstance(snap, dict) or not snap.get("listings")
+
+
 def _ensure_fingerprint_files(run_dir: Path, report: dict | None = None, *, source: str = "recommended") -> None:
     """Create lock + baseline on first view if Generate already ran."""
     report = report if isinstance(report, dict) else (_read_json_file(run_dir / "presentation.json", {}) or {})
     lock = _read_json_file(run_dir / "pulse.json")
     if not isinstance(lock, dict) or not lock.get("locked_price"):
         _write_pulse_lock(run_dir, report, source=source)
-        return
-    if (run_dir / "fingerprint_baseline.json").exists() and (run_dir / "pulse_snapshot.json").exists():
+        lock = _read_json_file(run_dir / "pulse.json")
+    snap = _read_json_file(run_dir / "pulse_snapshot.json")
+    baseline = _read_json_file(run_dir / "fingerprint_baseline.json")
+    if (
+        isinstance(lock, dict)
+        and lock.get("locked_price")
+        and not _fingerprint_snapshot_empty(snap)
+        and isinstance(baseline, dict)
+        and (baseline.get("listings") or baseline.get("ids"))
+    ):
         return
     df = _load_run_market(run_dir)
-    if df is not None:
+    if df is not None and isinstance(lock, dict) and lock.get("locked_price"):
         _write_fingerprint_snapshot(run_dir, report, lock, df)
+
+
+def _sample_fingerprint_ready(run_dir: Path) -> bool:
+    lock = _read_json_file(run_dir / "pulse.json") or {}
+    baseline = _read_json_file(run_dir / "fingerprint_baseline.json") or {}
+    snap = _read_json_file(run_dir / "pulse_snapshot.json")
+    return bool(
+        str(lock.get("locked_at") or "").startswith(SAMPLE_FINGERPRINT_LOCKED_AT)
+        and not _fingerprint_snapshot_empty(snap)
+        and str(baseline.get("as_of") or "").startswith(SAMPLE_FINGERPRINT_LOCKED_AT)
+        and (baseline.get("listings") or baseline.get("ids"))
+    )
+
+
+def _seed_sample_fingerprint(run_dir: Path, report: dict) -> None:
+    """Lock the public sample on 7/27 and freeze then-vs-now from the demo market."""
+    from core import (
+        append_fingerprint_history,
+        build_pulse_snapshot,
+        digest_pulse,
+        fingerprint_sold_from_df,
+        merge_fingerprint_ledger,
+        reconstruct_fingerprint_baseline,
+    )
+
+    if _sample_fingerprint_ready(run_dir):
+        return
+    df = _load_run_market(run_dir)
+    if df is None or len(df) == 0:
+        _ensure_fingerprint_files(run_dir, report, source="sample")
+        return
+    pos = report.get("positioning") if isinstance(report.get("positioning"), dict) else {}
+    subject = report.get("subject") if isinstance(report.get("subject"), dict) else {}
+    meta = report.get("meta") if isinstance(report.get("meta"), dict) else {}
+    try:
+        locked_price = float(pos.get("recommended_price") or 410000)
+    except (TypeError, ValueError):
+        locked_price = 410000
+    try:
+        subject_sqft = float(subject.get("living_area") or 2392)
+    except (TypeError, ValueError):
+        subject_sqft = 2392.0
+    existing = _read_json_file(run_dir / "pulse.json", {}) or {}
+    lock = {
+        "locked_price": int(round(locked_price)),
+        "locked_at": f"{SAMPLE_FINGERPRINT_LOCKED_AT}T09:00:00",
+        "subject_sqft": subject_sqft,
+        "market_label": meta.get("market_label") or report.get("area") or "West Greeley · similar homes",
+        "source": "sample",
+        "seller_access": existing.get("seller_access", True) is not False,
+    }
+    for key in ("email", "seller_name", "seller_email"):
+        if existing.get(key) not in (None, ""):
+            lock[key] = existing[key]
+    photo_map = _load_photo_map(run_dir)
+    gallery_map = _load_gallery_map(run_dir)
+    snap = build_pulse_snapshot(
+        df,
+        locked_price,
+        subject_sqft,
+        photo_map=photo_map,
+        gallery_map=gallery_map,
+    )
+    baseline = reconstruct_fingerprint_baseline(
+        df,
+        locked_price,
+        subject_sqft,
+        as_of=SAMPLE_FINGERPRINT_LOCKED_AT,
+        photo_map=photo_map,
+        gallery_map=gallery_map,
+    )
+    prev = {
+        "as_of": SAMPLE_FINGERPRINT_LOCKED_AT,
+        "locked_price": int(round(locked_price)),
+        "listings": list(baseline.get("listings") or []),
+        "rank": baseline.get("rank") or 0,
+        "rank_of": baseline.get("rank_of") or 0,
+        "active_count": baseline.get("active_count") or 0,
+    }
+    sold_map = fingerprint_sold_from_df(df, {str(x) for x in (baseline.get("ids") or []) if x})
+    ledger = merge_fingerprint_ledger(
+        None,
+        snap,
+        baseline=baseline,
+        sold_map=sold_map,
+        as_of=snap.get("as_of"),
+    )
+    digest = digest_pulse(snap, lock, prev, baseline=baseline, ledger=ledger)
+    history = append_fingerprint_history([], prev, digest_pulse(prev, lock, None, baseline=baseline, ledger=None))
+    history = append_fingerprint_history(history, snap, digest)
+    (run_dir / "pulse_snapshot.json").write_text(json.dumps(snap, indent=2, default=str), encoding="utf-8")
+    (run_dir / "pulse_snapshot_prev.json").write_text(json.dumps(prev, indent=2, default=str), encoding="utf-8")
+    (run_dir / "fingerprint_baseline.json").write_text(json.dumps(baseline, indent=2, default=str), encoding="utf-8")
+    (run_dir / "fingerprint_ledger.json").write_text(json.dumps(ledger, indent=2, default=str), encoding="utf-8")
+    (run_dir / "fingerprint_history.json").write_text(json.dumps(history, indent=2, default=str), encoding="utf-8")
+    lock["last_refresh_at"] = datetime.now().isoformat(timespec="seconds")
+    (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
+    _save_pulse_brief(run_dir, report, lock, snap)
+    logger.info(
+        "Sample Fingerprint seeded lock=%s baseline=%s active_now=%s new=%s pending=%s sold=%s",
+        lock["locked_at"],
+        baseline.get("active_count"),
+        digest.get("active_count"),
+        (digest.get("new_under") or 0) + (digest.get("new_over") or 0),
+        digest.get("went_pending"),
+        digest.get("went_sold"),
+    )
 
 
 def _hydrate_fingerprint_photos(run_dir: Path, snap: dict | None, ledger: dict | None):
