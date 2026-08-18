@@ -2950,6 +2950,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.42', longitude: '-104.79' },
     metaDescription: 'Pine Ridge Estates Greeley real estate - luxury gated community with executive homes and mountain views. SAA Homes.',
     keywords: 'Pine Ridge Estates Greeley, luxury homes Greeley, gated community Greeley, executive homes Greeley, custom homes Greeley Colorado',
+    youtubeId: '4KlbKBrbSZo',
     neighborhoodHighlights: [
       { title: 'Gated luxury', description: 'Greeley premier gated community with executive homes, large lots, and mountain views.' },
       { title: 'Custom estates', description: 'Custom-built executive homes with premium finishes, gourmet kitchens, and resort-style landscaping.' },
@@ -2981,6 +2982,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.425', longitude: '-104.785' },
     metaDescription: 'Poudre River Ranch Greeley - new construction with trail access. SAA Homes.',
     keywords: 'Poudre River Ranch Greeley, west Greeley new homes, Poudre River Trail homes',
+    youtubeId: '7tjR3-IWnj8',
     neighborhoodHighlights: [
       { title: 'New construction', description: 'Modern open concept floor plans with energy-efficient features.' },
       { title: 'Trail access', description: 'Direct access to the Poudre River Trail - miles of paved pathways.' },
@@ -3012,6 +3014,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.41', longitude: '-104.76' },
     metaDescription: 'Westlake Greeley real estate - established west Greeley neighborhood around Westlake Park with generous lots. SAA Homes.',
     keywords: 'Westlake Greeley, west Greeley homes, Westlake Park Greeley, established Greeley neighborhoods',
+    youtubeId: 'eUxPzzByBPk',
     neighborhoodHighlights: [
       { title: 'Lake living', description: 'Westlake Park features a scenic lake with walking paths, fishing, and community gatherings.' },
       { title: 'Established character', description: 'Mature trees and custom-built homes on large lots give Westlake a settled, desirable feel.' },
