@@ -13,6 +13,7 @@ from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass, field, asdict
 from typing import Optional, List, Dict, Any, Tuple
+from urllib.parse import quote as url_quote
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -754,6 +755,19 @@ def _interp_empirical_dom(knots: list[dict], delta: float, fallback: float) -> f
 # Listing flow / supply stream
 # ---------------------------------------------------------------------------
 
+LISTING_FLOW_SQFT_LO = 0.8
+LISTING_FLOW_SQFT_HI = 1.2
+
+
+def listing_flow_sqft_mask(series: pd.Series, living_area: float) -> pd.Series:
+    """80–120% living-area band used by listing flow and the over/under pulse."""
+    area = float(living_area or 0)
+    if area <= 0:
+        return pd.Series(True, index=series.index)
+    sqft = pd.to_numeric(series, errors="coerce")
+    return (sqft >= area * LISTING_FLOW_SQFT_LO) & (sqft <= area * LISTING_FLOW_SQFT_HI)
+
+
 def compute_listing_flow(
     df: pd.DataFrame,
     sales_per_month: float,
@@ -846,10 +860,7 @@ def compute_listing_flow(
     if recommended_price and recommended_price > 0:
         band = recent.copy()
         if living_area and living_area > 0 and "LivingArea" in band.columns:
-            band = band[
-                (band["LivingArea"] >= living_area * 0.8)
-                & (band["LivingArea"] <= living_area * 1.2)
-            ]
+            band = band[listing_flow_sqft_mask(band["LivingArea"], living_area)]
         price_col = "Price"
         if price_col in band.columns:
             band = band[band[price_col].notna()]
@@ -897,6 +908,378 @@ def compute_listing_flow(
         },
         "insight": insight,
         "overprice_insight": overprice_insight,
+    }
+
+
+def _pulse_listing_id(row: pd.Series) -> str:
+    mls = str(row.get("MLSNumber") or "").strip()
+    if mls:
+        return mls
+    addr = str(row.get("Address") or row.get("StName") or "").strip()
+    price = row.get("Price")
+    return addr or f"{addr}|{price}"
+
+
+def _pulse_num(row: pd.Series, *keys) -> float:
+    for key in keys:
+        if key not in row.index:
+            continue
+        val = row.get(key)
+        if val is None or (isinstance(val, float) and pd.isna(val)):
+            continue
+        try:
+            return float(val)
+        except (TypeError, ValueError):
+            continue
+    return 0.0
+
+
+def pulse_portal_urls(address: str, city: str = "", state: str = "") -> dict:
+    loc = " ".join(part for part in (address or "", city or "", state or "") if str(part).strip())
+    loc = loc.strip()
+    if not loc:
+        return {"zillow": "", "realtor": ""}
+    q = url_quote(loc)
+    return {
+        "zillow": f"https://www.zillow.com/homes/{q}_rb/",
+        "realtor": f"https://www.realtor.com/realestateandhomes-search/{q}",
+    }
+
+
+def _pulse_listing_from_row(row: pd.Series, locked: float, *, list_date: str = "") -> dict:
+    try:
+        price = float(row.get("Price"))
+    except (TypeError, ValueError):
+        price = 0.0
+    sqft = _pulse_num(row, "LivingArea")
+    address = str(row.get("Address") or row.get("StName") or "").strip()
+    city = str(row.get("City") or "").strip()
+    side = "under" if price < locked else ("over" if price > locked else "at")
+    ppsf = round(price / sqft, 2) if price and sqft else 0.0
+    urls = pulse_portal_urls(address, city)
+    return {
+        "id": _pulse_listing_id(row),
+        "mls": str(row.get("MLSNumber") or "").strip(),
+        "address": address,
+        "city": city,
+        "price": int(round(price)) if price else 0,
+        "delta": int(round(price - locked)) if price and locked else 0,
+        "list_date": list_date,
+        "sqft": round(sqft) if sqft else 0,
+        "beds": _pulse_num(row, "Bdrm", "Beds"),
+        "baths": _pulse_num(row, "Bath", "Baths"),
+        "year": int(_pulse_num(row, "YearBuilt")) if _pulse_num(row, "YearBuilt") else 0,
+        "dom": int(round(_pulse_num(row, "DOM"))) if _pulse_num(row, "DOM") else 0,
+        "ppsf": ppsf,
+        "status": str(row.get("StatusNorm") or ""),
+        "side": side,
+        "zillow": urls["zillow"],
+        "realtor": urls["realtor"],
+    }
+
+
+def build_pulse_snapshot(
+    df: pd.DataFrame,
+    locked_price: float,
+    living_area: float = 0,
+    *,
+    as_of: str | None = None,
+) -> dict:
+    """Current similar listings (80–120% sqft) tagged over/under the locked list."""
+    as_of = as_of or datetime.now().strftime("%Y-%m-%d")
+    locked = float(locked_price or 0)
+    empty = {
+        "as_of": as_of,
+        "locked_price": round(locked) if locked else 0,
+        "subject_sqft": round(float(living_area or 0)),
+        "listings": [],
+    }
+    if df is None or len(df) == 0 or locked <= 0:
+        return empty
+
+    work = df.copy()
+    if "LivingArea" in work.columns and living_area and living_area > 0:
+        work = work[listing_flow_sqft_mask(work["LivingArea"], living_area)]
+    if "Price" not in work.columns:
+        return empty
+    work = work[work["Price"].notna()]
+    listings: list[dict] = []
+    for _, row in work.iterrows():
+        try:
+            price = float(row.get("Price"))
+        except (TypeError, ValueError):
+            continue
+        if price <= 0:
+            continue
+        list_date = ""
+        raw_date = row.get("ListDate")
+        if pd.notna(raw_date):
+            try:
+                list_date = pd.to_datetime(raw_date).strftime("%Y-%m-%d")
+            except Exception:
+                list_date = ""
+        listings.append(_pulse_listing_from_row(row, locked, list_date=list_date))
+    return {
+        "as_of": as_of,
+        "locked_price": int(round(locked)),
+        "subject_sqft": round(float(living_area or 0)),
+        "listings": listings,
+    }
+
+
+def _pulse_ids(snapshot: dict | None) -> set[str]:
+    ids: set[str] = set()
+    if not isinstance(snapshot, dict):
+        return ids
+    for row in snapshot.get("listings") or []:
+        if isinstance(row, dict) and row.get("id"):
+            ids.add(str(row["id"]))
+    return ids
+
+
+def digest_pulse(
+    snapshot: dict | None,
+    locked: dict | None,
+    previous: dict | None = None,
+) -> dict:
+    """Over/under counts since the locked list — same band as listing flow.
+
+    A listing is "new" if it listed on/after lock, or it appeared in this
+    snapshot and was missing from the previous refresh snapshot.
+    """
+    snap = snapshot if isinstance(snapshot, dict) else {}
+    lock = locked if isinstance(locked, dict) else {}
+    locked_price = float(lock.get("locked_price") or snap.get("locked_price") or 0)
+    locked_at = str(lock.get("locked_at") or "")
+    lock_ts = pd.to_datetime(locked_at, errors="coerce")
+    prev_ids = _pulse_ids(previous)
+    has_prev = bool(previous and isinstance(previous, dict) and (previous.get("listings") is not None))
+    new_under = 0
+    new_over = 0
+    still_active_cheaper = 0
+    for row in snap.get("listings") or []:
+        if not isinstance(row, dict):
+            continue
+        try:
+            price = float(row.get("price") or 0)
+        except (TypeError, ValueError):
+            price = 0
+        list_ts = pd.to_datetime(row.get("list_date") or "", errors="coerce")
+        listed_after_lock = bool(pd.notna(lock_ts) and pd.notna(list_ts) and list_ts >= lock_ts)
+        appeared = bool(has_prev and row.get("id") and str(row.get("id")) not in prev_ids)
+        is_new = listed_after_lock or appeared
+        side = row.get("side")
+        if not side:
+            side = "under" if price < locked_price else ("over" if price > locked_price else "at")
+        if is_new:
+            if side == "under":
+                new_under += 1
+            elif side == "over":
+                new_over += 1
+        if str(row.get("status") or "") == "Active" and price and price < locked_price:
+            still_active_cheaper += 1
+    as_of = snap.get("as_of") or datetime.now().strftime("%Y-%m-%d")
+    return {
+        "new_under": new_under,
+        "new_over": new_over,
+        "still_active_cheaper": still_active_cheaper,
+        "as_of": as_of,
+        "locked_price": int(round(locked_price)) if locked_price else 0,
+        "locked_at": locked_at,
+        "count": len(snap.get("listings") or []),
+    }
+
+
+PULSE_CARD_CAP = 12
+
+
+def _pulse_is_new(row: dict, lock_ts, prev_ids: set[str], has_prev: bool) -> bool:
+    list_ts = pd.to_datetime(row.get("list_date") or "", errors="coerce")
+    listed_after_lock = bool(pd.notna(lock_ts) and pd.notna(list_ts) and list_ts >= lock_ts)
+    appeared = bool(has_prev and row.get("id") and str(row.get("id")) not in prev_ids)
+    return listed_after_lock or appeared
+
+
+def _pulse_card(row: dict, locked_price: float) -> dict:
+    try:
+        price = float(row.get("price") or 0)
+    except (TypeError, ValueError):
+        price = 0
+    try:
+        locked = float(locked_price or 0)
+    except (TypeError, ValueError):
+        locked = 0
+    delta = int(round(price - locked)) if price and locked else int(row.get("delta") or 0)
+    address = str(row.get("address") or "").strip()
+    city = str(row.get("city") or "").strip()
+    urls = pulse_portal_urls(address, city) if not row.get("zillow") else {
+        "zillow": row.get("zillow") or "",
+        "realtor": row.get("realtor") or "",
+    }
+    return {
+        "id": str(row.get("id") or ""),
+        "mls": str(row.get("mls") or ""),
+        "address": address,
+        "city": city,
+        "price": int(round(price)) if price else 0,
+        "delta": delta,
+        "list_date": str(row.get("list_date") or ""),
+        "sqft": int(row.get("sqft") or 0),
+        "beds": float(row.get("beds") or 0),
+        "baths": float(row.get("baths") or 0),
+        "year": int(row.get("year") or 0),
+        "dom": int(row.get("dom") or 0),
+        "ppsf": float(row.get("ppsf") or 0),
+        "status": str(row.get("status") or ""),
+        "side": str(row.get("side") or ""),
+        "zillow": urls.get("zillow") or "",
+        "realtor": urls.get("realtor") or "",
+    }
+
+
+def _pulse_talk_tracks(
+    digest: dict,
+    *,
+    cheaper_before: int | None = None,
+    stale_upload: bool = False,
+) -> dict:
+    new_under = int(digest.get("new_under") or 0)
+    new_over = int(digest.get("new_over") or 0)
+    cheaper = int(digest.get("still_active_cheaper") or 0)
+    agent: list[str] = []
+    seller: list[str] = []
+    if stale_upload:
+        agent.append("Snapshot unchanged. Upload this week’s MLS export to refresh the pulse.")
+        seller.append("This update uses the last market file we have. Ask your agent for this week’s export to refresh.")
+    if new_under >= 3:
+        agent.append(
+            f"Buyers have cheaper similar options this week — walk the {new_under} addresses listed under the lock."
+        )
+        seller.append(
+            f"{new_under} similar homes came on the market below your list this week. Those are the homes buyers will open first."
+        )
+    elif new_under == 1:
+        agent.append("One similar home listed under the lock this week. Open it with the seller and compare condition.")
+        seller.append("One similar home listed below your price this week. Worth walking through how it compares.")
+    if cheaper_before is not None and cheaper > cheaper_before:
+        agent.append(f"The queue under you grew from {cheaper_before} to {cheaper} still-active cheaper homes.")
+        seller.append(
+            f"More similar homes are now priced under you ({cheaper}, up from {cheaper_before})."
+        )
+    if new_over > new_under and new_over >= 2:
+        agent.append("Most new similar lists came in above the lock — your line is still the value ask.")
+        seller.append("Most new similar homes listed above your price. Your number is still the value play in this set.")
+    if not agent and not stale_upload:
+        agent.append("Quiet week in the size band — no new cheaper similar lists to walk. Keep the lock.")
+        seller.append("A quiet week in your size range. No new similar homes listed under your price.")
+    return {"agent": agent[:4], "seller": seller[:4]}
+
+
+def build_pulse_brief(
+    lock: dict | None,
+    snapshot: dict | None,
+    previous: dict | None = None,
+    *,
+    subject: dict | None = None,
+    share_url: str = "",
+    report_url: str = "",
+    stale_upload: bool = False,
+) -> dict:
+    """One brief JSON for Live Story and weekly email."""
+    lock = lock if isinstance(lock, dict) else {}
+    snap = snapshot if isinstance(snapshot, dict) else {}
+    prev = previous if isinstance(previous, dict) else {}
+    digest = digest_pulse(snap, lock, prev)
+    locked_price = float(digest.get("locked_price") or lock.get("locked_price") or 0)
+    locked_at = str(lock.get("locked_at") or digest.get("locked_at") or "")
+    lock_ts = pd.to_datetime(locked_at, errors="coerce")
+    days_locked = 0
+    if pd.notna(lock_ts):
+        ts = lock_ts.tz_localize(None) if getattr(lock_ts, "tzinfo", None) else lock_ts
+        days_locked = max(0, int((pd.Timestamp.now() - ts).days))
+
+    prev_ids = _pulse_ids(prev)
+    has_prev = bool(prev and prev.get("listings") is not None)
+    prev_by_id = {
+        str(r.get("id")): r
+        for r in (prev.get("listings") or [])
+        if isinstance(r, dict) and r.get("id")
+    }
+    curr_ids = _pulse_ids(snap)
+
+    new_under: list[dict] = []
+    new_over: list[dict] = []
+    cheaper_active: list[dict] = []
+    price_cuts: list[dict] = []
+    status_changes: list[dict] = []
+    for row in snap.get("listings") or []:
+        if not isinstance(row, dict):
+            continue
+        card = _pulse_card(row, locked_price)
+        is_new = _pulse_is_new(row, lock_ts, prev_ids, has_prev)
+        if is_new and card["side"] == "under" and len(new_under) < PULSE_CARD_CAP:
+            new_under.append(card)
+        elif is_new and card["side"] == "over" and len(new_over) < PULSE_CARD_CAP:
+            new_over.append(card)
+        if card["status"] == "Active" and card["price"] and card["price"] < locked_price:
+            if len(cheaper_active) < PULSE_CARD_CAP:
+                cheaper_active.append(card)
+        prev_row = prev_by_id.get(card["id"])
+        if prev_row:
+            try:
+                old_price = float(prev_row.get("price") or 0)
+            except (TypeError, ValueError):
+                old_price = 0
+            if old_price and card["price"] and old_price - card["price"] >= 1000:
+                cut = dict(card)
+                cut["was_price"] = int(round(old_price))
+                if len(price_cuts) < PULSE_CARD_CAP:
+                    price_cuts.append(cut)
+            old_status = str(prev_row.get("status") or "")
+            if old_status and card["status"] and old_status != card["status"]:
+                changed = dict(card)
+                changed["was_status"] = old_status
+                if len(status_changes) < PULSE_CARD_CAP:
+                    status_changes.append(changed)
+
+    gone: list[dict] = []
+    for pid, prev_row in prev_by_id.items():
+        if pid in curr_ids:
+            continue
+        card = _pulse_card(prev_row, locked_price)
+        if len(gone) < PULSE_CARD_CAP:
+            gone.append(card)
+
+    prev_digest = digest_pulse(prev, lock, None) if has_prev else None
+    cheaper_before = int(prev_digest["still_active_cheaper"]) if prev_digest else None
+    tracks = _pulse_talk_tracks(
+        digest,
+        cheaper_before=cheaper_before,
+        stale_upload=stale_upload,
+    )
+    sub = subject if isinstance(subject, dict) else {}
+    new_under.sort(key=lambda c: c.get("price") or 0)
+    new_over.sort(key=lambda c: c.get("price") or 0)
+    cheaper_active.sort(key=lambda c: c.get("price") or 0)
+    return {
+        "as_of": digest.get("as_of"),
+        "locked_price": int(round(locked_price)) if locked_price else 0,
+        "locked_at": locked_at,
+        "days_locked": days_locked,
+        "market_label": str(lock.get("market_label") or ""),
+        "subject_address": str(sub.get("address") or ""),
+        "subject_sqft": float(lock.get("subject_sqft") or sub.get("living_area") or 0),
+        "share_url": share_url or "",
+        "report_url": report_url or "",
+        "digest": digest,
+        "stale_upload": bool(stale_upload),
+        "talk": tracks,
+        "new_under": new_under,
+        "new_over": new_over,
+        "cheaper_active": cheaper_active,
+        "price_cuts": price_cuts,
+        "status_changes": status_changes,
+        "gone": gone,
     }
 
 

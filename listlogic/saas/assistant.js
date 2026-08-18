@@ -35,6 +35,7 @@
   .ll-as-status.ok{color:#0d7a4f}
   .ll-as-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
   .ll-as-chips button{border:1px solid #d8e0ea;background:#fff;border-radius:999px;padding:6px 10px;font-size:.72rem;font-weight:700;color:#0c3c6e;cursor:pointer}
+  @media print{.ll-as-btn,.ll-as-panel,#llSampleBar{display:none!important}}
   `;
   const style = document.createElement("style");
   style.textContent = css;

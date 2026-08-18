@@ -89,6 +89,9 @@ body { background: var(--paper); }
 
 .set-foot { margin-top: 6px; font-size: 0.8rem; color: var(--muted); }
 .set-foot a { font-weight: 700; }
+#wordingDetails { margin-top: 4px; }
+#wordingDetails summary { cursor: pointer; font-size: 0.88rem; font-weight: 700; color: var(--blue); }
+#wordingDetails[open] summary { margin-bottom: 8px; }
 </style>
 </head>
 <body>
@@ -235,49 +238,49 @@ body { background: var(--paper); }
         <p class="brand-note">This is what sellers see at the top of every report.</p>
       </div>
 
-      <div class="set-card">
+      <div class="set-card" id="wordingCard">
         <h2>Default wording</h2>
-        <p class="sub">Reusable intros and extra bullets for every new report. This does not overwrite a listing’s generated bottom line or price.</p>
-
-        <div class="set-row">
-          <label for="ledeComps">Comps intro</label>
-          <div>
-            <textarea id="ledeComps" maxlength="500" placeholder="Does it look like yours — or nicer / dated — and does the sold price match that story?"></textarea>
+        <p class="sub">Change copy on a generated report, then use <strong>Remember for next reports</strong>. This page is only for reviewing or clearing what you saved.</p>
+        <details id="wordingDetails">
+          <summary>View or clear saved wording</summary>
+          <div class="set-row">
+            <label for="ledeComps">Comps intro</label>
+            <div>
+              <textarea id="ledeComps" maxlength="500" placeholder="Saved from a report — leave blank to use ListLogic copy"></textarea>
+            </div>
           </div>
-        </div>
-        <div class="set-row">
-          <label for="ledeCondition">Condition intro</label>
-          <div>
-            <textarea id="ledeCondition" maxlength="500" placeholder="We start at a typical 5/10, rate together, then lock the list."></textarea>
+          <div class="set-row">
+            <label for="ledeCondition">Condition intro</label>
+            <div>
+              <textarea id="ledeCondition" maxlength="500"></textarea>
+            </div>
           </div>
-        </div>
-        <div class="set-row">
-          <label for="ledeClose">Close line</label>
-          <div>
-            <textarea id="ledeClose" maxlength="500" placeholder="We'll fine-tune condition, lock the list, and launch with a plan buyers can believe."></textarea>
+          <div class="set-row">
+            <label for="ledeClose">Close line</label>
+            <div>
+              <textarea id="ledeClose" maxlength="500"></textarea>
+            </div>
           </div>
-        </div>
-        <div class="set-row">
-          <label for="extraAdv">Always-include advantages</label>
-          <div>
-            <textarea id="extraAdv" placeholder="One per line — appended after the data-generated advantages"></textarea>
-            <div class="help">Example: We price to win the first 10 days.</div>
+          <div class="set-row">
+            <label for="extraAdv">Always-include advantages</label>
+            <div>
+              <textarea id="extraAdv" placeholder="One per line"></textarea>
+            </div>
           </div>
-        </div>
-        <div class="set-row">
-          <label for="extraRisk">Always-include watch-outs</label>
-          <div>
-            <textarea id="extraRisk" placeholder="One per line — appended after the data-generated watch-outs"></textarea>
+          <div class="set-row">
+            <label for="extraRisk">Always-include watch-outs</label>
+            <div>
+              <textarea id="extraRisk" placeholder="One per line"></textarea>
+            </div>
           </div>
-        </div>
-        <div class="set-row">
-          <label for="coachTemplates">Coach templates</label>
-          <div>
-            <textarea id="coachTemplates" style="min-height:96px" placeholder="Title|Talk track per line"></textarea>
-            <div class="help">Private notes for you at the table. Format: Title|Body</div>
+          <div class="set-row">
+            <label for="coachTemplates">Coach templates</label>
+            <div>
+              <textarea id="coachTemplates" style="min-height:96px" placeholder="Title|Body per line"></textarea>
+            </div>
           </div>
-        </div>
-        <div class="set-actions" style="margin-top:8px">
+        </details>
+        <div class="set-actions" style="margin-top:12px">
           <button type="button" class="btn" id="resetWordingBtn">Reset to ListLogic defaults</button>
         </div>
         <div class="status-note" id="wordingStatus"></div>

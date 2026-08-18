@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import hmac
 import html as html_lib
 import json
 import logging
@@ -213,7 +214,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         if (
             request.method == "GET"
             and path.startswith("/api/runs/")
-            and path.endswith(("/share", "/edits", "/scenarios", "/comp-photos"))
+            and path.endswith(("/share", "/edits", "/scenarios", "/comp-photos", "/pulse", "/pulse-opt-out"))
         ):
             return await call_next(request)
         # Internal cron
@@ -372,6 +373,12 @@ def _start_scheduler() -> None:
                     logger.info("Photo maintenance: %s", sweep)
             except Exception:
                 logger.exception("Photo maintenance sweep failed")
+            try:
+                pulse = _run_pulse_briefs()
+                if pulse.get("sent"):
+                    logger.info("Pulse briefs: %s", pulse)
+            except Exception:
+                logger.exception("Pulse brief sweep failed")
             time.sleep(6 * 3600)
 
     threading.Thread(target=_loop, name="listlogic-scheduler", daemon=True).start()
@@ -450,6 +457,7 @@ def _generate(
     subject_photo_bytes: Optional[bytes] = None,
     subject_photo_ext: str = ".jpg",
     copy_defaults: Optional[dict] = None,
+    portal_criteria: Optional[dict] = None,
 ) -> dict:
     defaults = dict(SUBJECT_2845_DEFAULTS) if "2845" in (address or "") and "13" in (address or "") else {}
     overrides = {
@@ -528,6 +536,19 @@ def _generate(
     meta["state"] = "CO"
     meta["market_notes"] = market_notes or ""
     meta["market_label"] = area_name or ""
+    if portal_criteria:
+        meta["portal_criteria"] = portal_criteria
+    try:
+        from portal_market import lookup_zestimate, portal_values_fresh
+
+        existing_pv = meta.get("portal_values") if isinstance(meta.get("portal_values"), dict) else None
+        if not portal_values_fresh(existing_pv):
+            z_addr = (address or "").strip() or (getattr(subject, "address", "") or "")
+            portal_values = lookup_zestimate(z_addr)
+            if portal_values:
+                meta["portal_values"] = portal_values
+    except Exception:
+        logger.info("Zestimate lookup skipped for %s", (address or "")[:80])
     if copy_defaults:
         try:
             from copy_defaults import apply_account_copy
@@ -545,6 +566,16 @@ def _generate(
         run_id = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}-{_slug(address)}-{uuid.uuid4().hex[:8]}"
         run_dir = OUTPUT_DIR / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
+    if market_df is not None:
+        try:
+            market_df.to_csv(run_dir / "market.csv", sep="|", index=False)
+        except Exception:
+            logger.exception("Failed to persist market.csv for pulse")
+    elif export_path:
+        try:
+            shutil.copyfile(export_path, run_dir / "market.csv")
+        except Exception:
+            logger.exception("Failed to copy market export for pulse")
 
     # Prefer an uploaded subject photo; else host autofill URL if present (no Reef spend).
     sub = report.get("subject") if isinstance(report.get("subject"), dict) else None
@@ -624,6 +655,10 @@ def _generate(
         json.dumps(report, indent=2, default=str),
         encoding="utf-8",
     )
+    try:
+        _write_pulse_lock(run_dir, report, source="recommended")
+    except Exception:
+        logger.exception("Failed to lock recommended list for pulse")
     html_path = _save_html(report, run_dir / "presentation.html")
 
     if photos_pending:
@@ -1386,7 +1421,7 @@ async def assistant_chat(request: Request):
     return JSONResponse(result)
 
 
-def _refresh_sample_html(run_dir: Path) -> bool:
+def _refresh_sample_html(run_dir: Path, *, force: bool = False) -> bool:
     """Re-bake sample presentation.html + deck.html from saved JSON using current templates.
 
     Returns True when the HTML files were rewritten.
@@ -1397,7 +1432,7 @@ def _refresh_sample_html(run_dir: Path) -> bool:
         return False
     try:
         # Skip rewrite when sample already has the current UI markers
-        if html_path.exists():
+        if not force and html_path.exists():
             existing = html_path.read_text(encoding="utf-8", errors="ignore")
             deck_existing = ""
             deck_path = run_dir / "deck.html"
@@ -1410,7 +1445,7 @@ def _refresh_sample_html(run_dir: Path) -> bool:
                 and "btnPrintLeavebehind" in existing
                 and "listlogic-logo.png" in existing
                 and "print-page-spine" in existing
-                and "print-fit-v5" in existing
+                and "print-fit-v6" in existing
                 and "demo-ui-snappy" in existing
                 and "RUN_ID === 'sample-2845'" in existing
                 and "charts failed to boot" in existing
@@ -1436,6 +1471,9 @@ def _refresh_sample_html(run_dir: Path) -> bool:
                 and "6c · Timing" in deck_existing
                 and "data-deck-spine=\"v5\"" in deck_existing
                 and "fitBodies" in deck_existing
+                and "pulseBlock" in existing
+                and "portal-chip" in existing
+                and "pulseMail" in existing
             ):
                 return False
         report = json.loads(json_path.read_text(encoding="utf-8"))
@@ -1510,13 +1548,60 @@ def _repair_sample_run_paths(run_dir: Path) -> bool:
     return True
 
 
+def _seed_sample_launch_files(run_dir: Path) -> bool:
+    """Lock pulse + optional Zestimate so public /demo shows the new story.
+
+    Returns True when presentation.json changed (caller should rebake HTML).
+    """
+    json_path = run_dir / "presentation.json"
+    report = _read_json_file(json_path, {}) or {}
+    if not report:
+        return False
+    json_changed = False
+    meta = report.setdefault("meta", {})
+    pv = meta.get("portal_values") if isinstance(meta.get("portal_values"), dict) else None
+    if not (pv and pv.get("amount")):
+        try:
+            from portal_market import lookup_zestimate
+
+            addr = (
+                (report.get("subject") or {}).get("address")
+                if isinstance(report.get("subject"), dict)
+                else ""
+            ) or "2845 W 13th Street Greeley 80634"
+            portal_values = lookup_zestimate(str(addr))
+            if portal_values:
+                meta["portal_values"] = portal_values
+                json_path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+                json_changed = True
+        except Exception:
+            logger.info("Sample Zestimate seed skipped")
+    if not (run_dir / "pulse.json").exists() and (run_dir / "market.csv").exists():
+        _write_pulse_lock(run_dir, report, source="sample")
+    edits_path = run_dir / "edits.json"
+    edits = _read_json_file(edits_path, {}) or {}
+    if not isinstance(edits, dict):
+        edits = {}
+    changed = False
+    if edits.get("portalChip") != "on":
+        edits["portalChip"] = "on"
+        changed = True
+    if edits.get("pulseBlock") != "on":
+        edits["pulseBlock"] = "on"
+        changed = True
+    if changed:
+        edits_path.write_text(json.dumps(edits, indent=2), encoding="utf-8")
+    return json_changed
+
+
 def _ensure_sample_run() -> str:
     """Build or reuse the public sample listing run (no trial credit)."""
     run_dir = OUTPUT_DIR / SAMPLE_RUN_ID
     html_path = run_dir / "presentation.html"
     if html_path.exists():
         _repair_sample_run_paths(run_dir)
-        html_refreshed = _refresh_sample_html(run_dir)
+        json_changed = _seed_sample_launch_files(run_dir)
+        html_refreshed = _refresh_sample_html(run_dir, force=json_changed)
         # Sample photos must be volume-local, not expiring CDN links.
         try:
             remote, missing = _run_photo_health(run_dir)
@@ -1573,6 +1658,7 @@ def _ensure_sample_run() -> str:
                 shutil.rmtree(run_dir, ignore_errors=True)
             src.rename(run_dir)
             _rewrite_run_paths(run_dir, result["run_id"], SAMPLE_RUN_ID)
+    _seed_sample_launch_files(run_dir)
     return SAMPLE_RUN_ID
 
 
@@ -2267,10 +2353,221 @@ def view_run_json(run_id: str):
     return FileResponse(path, media_type="application/json")
 
 
+def _read_json_file(path: Path, default=None):
+    if not path.exists():
+        return default
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return default
+
+
+def _require_run_owner(request: Request, run_id: str) -> dict:
+    user = _require_user(request)
+    if (user.get("role") or "") == "admin":
+        return user
+    share = _read_json_file(OUTPUT_DIR / run_id / "share.json", {}) or {}
+    if str(share.get("user_id") or "") == str(user.get("id") or ""):
+        return user
+    try:
+        import auth_service
+
+        row = auth_service.get_presentation_by_run(run_id)
+        if row and str(row.get("user_id") or "") == str(user.get("id") or ""):
+            return user
+    except Exception:
+        logger.exception("Run owner lookup failed for %s", run_id)
+    raise HTTPException(403, "Not your report")
+
+
+def _load_run_market(run_dir: Path):
+    path = run_dir / "market.csv"
+    if not path.exists():
+        return None
+    try:
+        from core import load_export
+
+        return load_export(path)
+    except Exception:
+        try:
+            import pandas as pd
+
+            return pd.read_csv(path, sep="|")
+        except Exception:
+            logger.exception("Failed to load market.csv from %s", run_dir)
+            return None
+
+
+def _write_pulse_lock(run_dir: Path, report: dict, *, price=None, source: str = "recommended") -> Optional[dict]:
+    from core import build_pulse_snapshot
+
+    pos = report.get("positioning") or {}
+    subject = report.get("subject") or {}
+    meta = report.get("meta") or {}
+    existing = _read_json_file(run_dir / "pulse.json", {}) or {}
+    try:
+        locked_price = float(price if price not in (None, "") else pos.get("recommended_price") or 0)
+    except (TypeError, ValueError):
+        locked_price = 0
+    if locked_price <= 0:
+        return None
+    try:
+        subject_sqft = float(subject.get("living_area") or existing.get("subject_sqft") or 0)
+    except (TypeError, ValueError):
+        subject_sqft = 0
+    payload = {
+        "locked_price": int(round(locked_price)),
+        "locked_at": datetime.now().isoformat(timespec="seconds"),
+        "subject_sqft": subject_sqft,
+        "market_label": meta.get("market_label") or report.get("area") or "",
+        "source": source,
+    }
+    if isinstance(existing.get("email"), dict):
+        payload["email"] = existing["email"]
+    (run_dir / "pulse.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    df = _load_run_market(run_dir)
+    if df is not None:
+        snap = build_pulse_snapshot(df, locked_price, subject_sqft)
+        (run_dir / "pulse_snapshot.json").write_text(
+            json.dumps(snap, indent=2, default=str),
+            encoding="utf-8",
+        )
+        _save_pulse_brief(run_dir, report, payload, snap)
+    return payload
+
+
+def _pulse_links(run_id: str, report: dict | None = None) -> tuple[str, str]:
+    import auth_service
+
+    base = auth_service.app_base_url().rstrip("/")
+    report_url = f"{base}/runs/{run_id}/"
+    share_url = report_url
+    token = ""
+    try:
+        row = auth_service.get_presentation_by_run(run_id)
+        token = str((row or {}).get("share_token") or "")
+    except Exception:
+        token = ""
+    if not token:
+        share = _read_json_file(OUTPUT_DIR / run_id / "share.json", {}) or {}
+        token = str(share.get("share_token") or "")
+    if token:
+        share_url = f"{base}/p/{token}"
+    return report_url, share_url
+
+
+def _save_pulse_brief(
+    run_dir: Path,
+    report: dict,
+    lock: dict,
+    snap: dict | None = None,
+    *,
+    stale_upload: bool = False,
+) -> dict:
+    from core import build_pulse_brief
+
+    snap = snap if snap is not None else _read_json_file(run_dir / "pulse_snapshot.json")
+    prev = _read_json_file(run_dir / "pulse_snapshot_prev.json")
+    subject = report.get("subject") if isinstance(report.get("subject"), dict) else {}
+    report_url, share_url = _pulse_links(run_dir.name, report)
+    brief = build_pulse_brief(
+        lock,
+        snap,
+        prev,
+        subject=subject,
+        share_url=share_url,
+        report_url=report_url,
+        stale_upload=stale_upload,
+    )
+    (run_dir / "pulse_brief.json").write_text(
+        json.dumps(brief, indent=2, default=str),
+        encoding="utf-8",
+    )
+    return brief
+
+
+def _listing_flow_client(flow: dict | None) -> dict | None:
+    if not isinstance(flow, dict):
+        return None
+    return {
+        "newPm": flow.get("new_listings_per_month"),
+        "salesPm": flow.get("sales_per_month"),
+        "supplyPressure": flow.get("supply_pressure"),
+        "netPm": flow.get("net_inventory_per_month"),
+        "newBelowRecPm": flow.get("new_below_recommended_per_month"),
+        "activeBelowRec": flow.get("active_below_recommended_now"),
+        "thresholdPrice": flow.get("threshold_price"),
+        "subjectSqft": flow.get("subject_living_area"),
+        "samples": flow.get("samples") or [],
+        "insight": flow.get("insight") or "",
+        "chart": flow.get("chart") or {},
+    }
+
+
+def _rebuild_listing_flow(report: dict, df, locked_price: float, subject_sqft: float) -> dict:
+    from core import compute_listing_flow
+
+    stats = report.get("stats") or {}
+    pos = report.get("positioning") or {}
+    subject = report.get("subject") or {}
+    try:
+        rec = float(locked_price or pos.get("recommended_price") or 0)
+    except (TypeError, ValueError):
+        rec = 0
+    try:
+        sqft = float(subject_sqft or subject.get("living_area") or 0)
+    except (TypeError, ValueError):
+        sqft = 0
+    flow = compute_listing_flow(
+        df,
+        float(stats.get("absorption_rate") or 0),
+        rec,
+        sqft,
+    )
+    report["listing_flow"] = flow
+    report["chart_listing_flow"] = flow.get("chart") or {}
+    return flow
+
+
+def _pulse_payload(run_dir: Path, report: dict | None = None) -> dict:
+    from core import digest_pulse
+
+    if report is None:
+        report = _read_json_file(run_dir / "presentation.json", {}) or {}
+    meta = report.get("meta") or {}
+    lock = _read_json_file(run_dir / "pulse.json")
+    snap = _read_json_file(run_dir / "pulse_snapshot.json")
+    prev = _read_json_file(run_dir / "pulse_snapshot_prev.json")
+    digest = digest_pulse(snap, lock, prev) if lock else None
+    brief = _read_json_file(run_dir / "pulse_brief.json")
+    if lock and not brief:
+        try:
+            brief = _save_pulse_brief(run_dir, report, lock, snap)
+        except Exception:
+            brief = None
+    data_source = str(meta.get("data_source") or "")
+    return {
+        "lock": lock,
+        "digest": digest,
+        "brief": brief,
+        "snapshot": snap,
+        "data_source": data_source,
+        "can_search_refresh": bool(meta.get("portal_criteria")),
+        "needs_upload": data_source == "mls_export" and not meta.get("portal_criteria"),
+        "listingFlow": _listing_flow_client(report.get("listing_flow")),
+    }
+
+
+def _reject_sample_mutation(run_id: str) -> None:
+    if run_id == SAMPLE_RUN_ID:
+        raise HTTPException(403, "The public sample is read-only")
+
+
 @app.post("/api/runs/{run_id}/edits")
 async def save_run_edits(run_id: str, request: Request):
     """Persist Agent Tools overrides alongside the run."""
     run_id = _safe_run_id(run_id)
+    _reject_sample_mutation(run_id)
     run_dir = OUTPUT_DIR / run_id
     if not run_dir.exists():
         raise HTTPException(404, "Run not found")
@@ -2292,6 +2589,15 @@ async def save_run_edits(run_id: str, request: Request):
             for k, v in payload["ledes"].items()
             if k in ("comps", "condition", "close")
         }
+    if payload.get("portalChip") not in ("on", "off"):
+        payload.pop("portalChip", None)
+    if payload.get("pulseBlock") not in ("on", "off"):
+        payload.pop("pulseBlock", None)
+    existing = _read_json_file(run_dir / "edits.json", {}) or {}
+    if "portalChip" not in payload and existing.get("portalChip") in ("on", "off"):
+        payload["portalChip"] = existing["portalChip"]
+    if "pulseBlock" not in payload and existing.get("pulseBlock") in ("on", "off"):
+        payload["pulseBlock"] = existing["pulseBlock"]
     (run_dir / "edits.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
     return {"ok": True}
 
@@ -2310,6 +2616,7 @@ def refresh_run_deck(run_id: str, request: Request):
     """Re-bake flipbook HTML from presentation.json + this-run edits."""
     _require_user(request)
     run_id = _safe_run_id(run_id)
+    _reject_sample_mutation(run_id)
     run_dir = OUTPUT_DIR / run_id
     json_path = run_dir / "presentation.json"
     if not json_path.exists():
@@ -2329,8 +2636,436 @@ def refresh_run_deck(run_id: str, request: Request):
     import deck_html
 
     apply_run_edits(report, edits)
+    if edits.get("portalChip") in ("on", "off"):
+        report.setdefault("meta", {})["portal_chip"] = edits["portalChip"]
     deck_html.save_deck_html(report, run_dir / "deck.html")
     return {"ok": True}
+
+
+@app.get("/api/runs/{run_id}/pulse")
+def get_run_pulse(run_id: str):
+    run_id = _safe_run_id(run_id)
+    run_dir = OUTPUT_DIR / run_id
+    if not (run_dir / "presentation.json").exists():
+        raise HTTPException(404, "Run not found")
+    return _pulse_payload(run_dir)
+
+
+@app.post("/api/runs/{run_id}/pulse-lock")
+async def lock_run_pulse(run_id: str, request: Request):
+    run_id = _safe_run_id(run_id)
+    _reject_sample_mutation(run_id)
+    _require_run_owner(request, run_id)
+    run_dir = OUTPUT_DIR / run_id
+    json_path = run_dir / "presentation.json"
+    if not json_path.exists():
+        raise HTTPException(404, "Run not found")
+    report = _read_json_file(json_path, {}) or {}
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    price = body.get("price") if isinstance(body, dict) else None
+    if price in (None, ""):
+        edits = _read_json_file(run_dir / "edits.json", {}) or {}
+        price = edits.get("rec")
+    lock = _write_pulse_lock(run_dir, report, price=price, source="agent")
+    if not lock:
+        raise HTTPException(400, "Need a list price to lock")
+    return _pulse_payload(run_dir, report)
+
+
+@app.post("/api/runs/{run_id}/pulse-refresh")
+async def refresh_run_pulse(run_id: str, request: Request):
+    run_id = _safe_run_id(run_id)
+    _reject_sample_mutation(run_id)
+    _require_run_owner(request, run_id)
+    run_dir = OUTPUT_DIR / run_id
+    json_path = run_dir / "presentation.json"
+    if not json_path.exists():
+        raise HTTPException(404, "Run not found")
+    report = _read_json_file(json_path, {}) or {}
+    meta = report.get("meta") or {}
+    lock = _read_json_file(run_dir / "pulse.json")
+    if not lock:
+        raise HTTPException(400, "Lock a list price before refreshing the pulse")
+    from core import build_pulse_snapshot, digest_pulse
+
+    criteria = meta.get("portal_criteria")
+    export_file = None
+    content_type = (request.headers.get("content-type") or "").lower()
+    if "multipart/form-data" in content_type:
+        form = await request.form()
+        maybe = form.get("export_file")
+        if maybe is not None and getattr(maybe, "filename", None):
+            export_file = maybe
+    snap_existing = _read_json_file(run_dir / "pulse_snapshot.json")
+    if export_file is None and _snapshot_age_days(snap_existing) < 1:
+        df_saved = _load_run_market(run_dir)
+        if df_saved is not None:
+            brief = _save_pulse_brief(run_dir, report, lock, snap_existing)
+            return {
+                **_pulse_payload(run_dir, report),
+                "digest": digest_pulse(snap_existing, lock, _read_json_file(run_dir / "pulse_snapshot_prev.json")),
+                "brief": brief,
+                "snapshot": snap_existing,
+                "listingFlow": _listing_flow_client(report.get("listing_flow")),
+                "reused": True,
+            }
+
+    df = None
+    if export_file is not None:
+        suffix = Path(export_file.filename or "export.txt").suffix.lower() or ".txt"
+        if suffix not in {".txt", ".csv", ".tsv"}:
+            raise HTTPException(400, "Export must be .txt, .csv, or .tsv")
+        content = await export_file.read()
+        if not content or not content.strip():
+            raise HTTPException(400, "Uploaded file is empty")
+        if len(content) > MAX_UPLOAD_BYTES:
+            raise HTTPException(400, "Export must be 15MB or smaller")
+        tmp = UPLOAD_DIR / f"{uuid.uuid4().hex}{suffix}"
+        tmp.write_bytes(content)
+        try:
+            from export_mapper import load_mapped_export
+
+            df, _map_result = load_mapped_export(tmp)
+        except Exception as exc:
+            raise HTTPException(400, f"Could not map export headers: {exc}") from exc
+        finally:
+            try:
+                tmp.unlink()
+            except OSError:
+                pass
+        df.to_csv(run_dir / "market.csv", sep="|", index=False)
+    elif criteria:
+        from portal_market import build_portal_from_criteria, parse_portal_criteria, friendly_portal_error
+
+        try:
+            parsed = parse_portal_criteria(criteria)
+            df = await asyncio.to_thread(build_portal_from_criteria, parsed, mode="refresh")
+        except Exception as exc:
+            logger.exception("Pulse search refresh failed")
+            raise HTTPException(400, friendly_portal_error(exc)) from exc
+        if df is None or len(df) == 0:
+            raise HTTPException(400, "No portal listings matched those filters")
+        df.to_csv(run_dir / "market.csv", sep="|", index=False)
+    else:
+        raise HTTPException(
+            400,
+            "Upload a fresh MLS export to refresh this pulse.",
+        )
+
+    prev_path = run_dir / "pulse_snapshot.json"
+    if prev_path.exists():
+        try:
+            shutil.copyfile(prev_path, run_dir / "pulse_snapshot_prev.json")
+        except OSError:
+            logger.exception("Failed to keep previous pulse snapshot")
+    prev = _read_json_file(run_dir / "pulse_snapshot_prev.json")
+    locked_price = float(lock.get("locked_price") or 0)
+    subject_sqft = float(lock.get("subject_sqft") or 0)
+    snap = build_pulse_snapshot(df, locked_price, subject_sqft)
+    (run_dir / "pulse_snapshot.json").write_text(
+        json.dumps(snap, indent=2, default=str),
+        encoding="utf-8",
+    )
+    try:
+        flow = _rebuild_listing_flow(report, df, locked_price, subject_sqft)
+        json_path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+    except Exception:
+        logger.exception("Failed to rebuild listing flow after pulse refresh")
+        flow = report.get("listing_flow")
+    brief = _save_pulse_brief(run_dir, report, lock, snap)
+    return {
+        **_pulse_payload(run_dir, report),
+        "digest": digest_pulse(snap, lock, prev),
+        "brief": brief,
+        "snapshot": snap,
+        "listingFlow": _listing_flow_client(flow),
+    }
+
+
+def _pulse_opt_out_token(run_id: str) -> str:
+    secret = (os.environ.get("SESSION_SECRET") or os.environ.get("CRON_SECRET") or "listlogic-pulse").encode()
+    return hmac.new(secret, f"pulse-opt-out:{run_id}".encode(), hashlib.sha256).hexdigest()[:24]
+
+
+def _normalize_pulse_email(body: dict, existing: dict | None = None) -> dict:
+    prev = existing if isinstance(existing, dict) else {}
+    prev_email = prev.get("email") if isinstance(prev.get("email"), dict) else {}
+    raw = body.get("recipients")
+    recips: list[str] = []
+    if isinstance(raw, str):
+        if raw == "both":
+            recips = ["agent", "seller"]
+        elif raw in ("agent", "seller"):
+            recips = [raw]
+    elif isinstance(raw, list):
+        recips = [str(x) for x in raw if str(x) in ("agent", "seller")]
+    if not recips:
+        recips = [str(x) for x in (prev_email.get("recipients") or ["agent"]) if x in ("agent", "seller")]
+    if not recips:
+        recips = ["agent"]
+    seller_email = str(body.get("seller_email") if "seller_email" in body else prev_email.get("seller_email") or "").strip()
+    if seller_email and not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", seller_email):
+        raise HTTPException(400, "Seller email looks invalid")
+    on = body.get("on")
+    if on is None:
+        on = prev_email.get("on", False)
+    on = bool(on)
+    if on and "seller" in recips and not seller_email:
+        raise HTTPException(400, "Add a seller email to include them on the weekly pulse")
+    started_at = prev_email.get("started_at") or ""
+    if on and not started_at:
+        started_at = datetime.now().isoformat(timespec="seconds")
+    if not on:
+        started_at = started_at or ""
+    return {
+        "on": on,
+        "recipients": recips,
+        "seller_email": seller_email,
+        "started_at": started_at,
+        "last_sent_at": prev_email.get("last_sent_at") or "",
+    }
+
+
+def _run_owner_user(run_id: str):
+    import auth_service
+    import db as database
+
+    uid = ""
+    share = _read_json_file(OUTPUT_DIR / run_id / "share.json", {}) or {}
+    uid = str(share.get("user_id") or "")
+    if not uid:
+        try:
+            row = database.execute(
+                "SELECT user_id FROM presentations WHERE run_id = ?",
+                (run_id,),
+                fetch="one",
+            )
+            uid = str((row or {}).get("user_id") or "")
+        except Exception:
+            uid = ""
+    return auth_service.get_user_by_id(uid) if uid else None
+
+
+def _snapshot_age_days(snap: dict | None) -> float:
+    if not isinstance(snap, dict) or not snap.get("as_of"):
+        return 999
+    ts = None
+    try:
+        import pandas as pd
+
+        ts = pd.to_datetime(snap.get("as_of"), errors="coerce")
+        if ts is not None and hasattr(ts, "tzinfo") and ts.tzinfo is not None:
+            ts = ts.tz_localize(None)
+        if ts is None or (hasattr(ts, "value") and pd.isna(ts)):
+            return 999
+        return max(0.0, float((pd.Timestamp.now() - ts).days))
+    except Exception:
+        return 999
+
+
+def _send_run_pulse_email(run_dir: Path, *, stale_upload: bool = False) -> bool:
+    import auth_service
+    import mailer
+
+    run_id = run_dir.name
+    report = _read_json_file(run_dir / "presentation.json", {}) or {}
+    lock = _read_json_file(run_dir / "pulse.json") or {}
+    email_cfg = lock.get("email") if isinstance(lock.get("email"), dict) else {}
+    if not email_cfg.get("on"):
+        return False
+    snap = _read_json_file(run_dir / "pulse_snapshot.json")
+    brief = _save_pulse_brief(run_dir, report, lock, snap, stale_upload=stale_upload)
+    user = _run_owner_user(run_id)
+    agent_email = str((user or {}).get("email") or (report.get("meta") or {}).get("agent_email") or "").strip()
+    seller_email = str(email_cfg.get("seller_email") or "").strip()
+    recips = [str(x) for x in (email_cfg.get("recipients") or ["agent"]) if x in ("agent", "seller")]
+    to = ""
+    cc = ""
+    if "seller" in recips and seller_email:
+        to = seller_email
+        cc = agent_email
+        audience = "seller"
+    else:
+        to = agent_email
+        audience = "agent"
+    if not to:
+        logger.info("Pulse email skipped for %s — no recipient", run_id)
+        return False
+    import auth_service as _auth
+
+    base = _auth.app_base_url().rstrip("/")
+    opt_out = f"{base}/api/runs/{run_id}/pulse-opt-out?t={_pulse_opt_out_token(run_id)}"
+    sent = mailer.send_pulse_brief(
+        to=to,
+        cc=cc,
+        brief=brief,
+        audience=audience,
+        reply_to=agent_email,
+        opt_out_url=opt_out,
+        agent_name=str((user or {}).get("name") or (report.get("meta") or {}).get("agent_name") or ""),
+    )
+    if sent:
+        email_cfg["last_sent_at"] = datetime.now().isoformat(timespec="seconds")
+        lock["email"] = email_cfg
+        (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
+        try:
+            auth_service.log_event((user or {}).get("id"), f"pulse_email:{run_id}", {"to": to, "cc": cc})
+        except Exception:
+            logger.exception("Pulse email event log failed")
+    return bool(sent)
+
+
+MAX_PULSE_REEF_REFRESHES = 3
+
+
+def _run_pulse_briefs() -> dict:
+    """Weekly enrolled pulses: refresh Search if stale, then email."""
+    import auth_service
+
+    checked = 0
+    sent = 0
+    skipped = 0
+    reef_refreshes = 0
+    if not OUTPUT_DIR.exists():
+        return {"checked": 0, "sent": 0, "skipped": 0}
+    for run_dir in OUTPUT_DIR.iterdir():
+        if not run_dir.is_dir():
+            continue
+        lock = _read_json_file(run_dir / "pulse.json")
+        if not isinstance(lock, dict):
+            continue
+        email_cfg = lock.get("email") if isinstance(lock.get("email"), dict) else {}
+        if not email_cfg.get("on"):
+            continue
+        checked += 1
+        run_id = run_dir.name
+        user = _run_owner_user(run_id)
+        uid = (user or {}).get("id")
+        last_sent = str(email_cfg.get("last_sent_at") or "")
+        if last_sent:
+            try:
+                import pandas as pd
+                last_ts = pd.to_datetime(last_sent, errors="coerce")
+                if pd.notna(last_ts) and (pd.Timestamp.now() - last_ts).total_seconds() < 144 * 3600:
+                    skipped += 1
+                    continue
+            except Exception:
+                pass
+        if uid and auth_service.event_already_sent(uid, f"pulse_email:{run_id}", within_hours=144):
+            skipped += 1
+            continue
+        report = _read_json_file(run_dir / "presentation.json", {}) or {}
+        meta = report.get("meta") or {}
+        criteria = meta.get("portal_criteria")
+        snap = _read_json_file(run_dir / "pulse_snapshot.json")
+        stale_upload = False
+        if criteria and _snapshot_age_days(snap) >= 5:
+            if reef_refreshes >= MAX_PULSE_REEF_REFRESHES:
+                logger.info("Pulse cron Reef cap reached; emailing last brief for %s", run_id)
+            else:
+                try:
+                    from portal_market import build_portal_from_criteria, parse_portal_criteria
+                    from core import build_pulse_snapshot
+
+                    parsed = parse_portal_criteria(criteria)
+                    df = build_portal_from_criteria(parsed, mode="refresh")
+                    reef_refreshes += 1
+                    if df is not None and len(df):
+                        prev_path = run_dir / "pulse_snapshot.json"
+                        if prev_path.exists():
+                            shutil.copyfile(prev_path, run_dir / "pulse_snapshot_prev.json")
+                        df.to_csv(run_dir / "market.csv", sep="|", index=False)
+                        snap = build_pulse_snapshot(
+                            df,
+                            float(lock.get("locked_price") or 0),
+                            float(lock.get("subject_sqft") or 0),
+                        )
+                        (run_dir / "pulse_snapshot.json").write_text(
+                            json.dumps(snap, indent=2, default=str),
+                            encoding="utf-8",
+                        )
+                        try:
+                            _rebuild_listing_flow(
+                                report,
+                                df,
+                                float(lock.get("locked_price") or 0),
+                                float(lock.get("subject_sqft") or 0),
+                            )
+                            (run_dir / "presentation.json").write_text(
+                                json.dumps(report, indent=2, default=str),
+                                encoding="utf-8",
+                            )
+                        except Exception:
+                            logger.exception("Pulse cron listing-flow rebuild failed for %s", run_id)
+                except Exception:
+                    logger.exception("Pulse cron Search refresh failed for %s", run_id)
+        elif not criteria:
+            stale_upload = _snapshot_age_days(snap) >= 5
+        if _send_run_pulse_email(run_dir, stale_upload=stale_upload):
+            sent += 1
+        else:
+            skipped += 1
+    return {"checked": checked, "sent": sent, "skipped": skipped, "reef_refreshes": reef_refreshes}
+
+
+@app.post("/api/runs/{run_id}/pulse-email")
+async def save_run_pulse_email(run_id: str, request: Request):
+    run_id = _safe_run_id(run_id)
+    _reject_sample_mutation(run_id)
+    _require_run_owner(request, run_id)
+    run_dir = OUTPUT_DIR / run_id
+    if not (run_dir / "presentation.json").exists():
+        raise HTTPException(404, "Run not found")
+    lock = _read_json_file(run_dir / "pulse.json")
+    if not lock:
+        raise HTTPException(400, "Lock a list price before starting the weekly pulse")
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    if not isinstance(body, dict):
+        body = {}
+    email_cfg = _normalize_pulse_email(body, lock)
+    lock["email"] = email_cfg
+    (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
+    return {"ok": True, "lock": lock, **_pulse_payload(run_dir)}
+
+
+@app.get("/api/runs/{run_id}/pulse-opt-out")
+def pulse_email_opt_out(run_id: str, t: str = ""):
+    run_id = _safe_run_id(run_id)
+    expected = _pulse_opt_out_token(run_id)
+    if not t or not hmac.compare_digest(str(t), expected):
+        raise HTTPException(403, "Invalid opt-out link")
+    run_dir = OUTPUT_DIR / run_id
+    lock = _read_json_file(run_dir / "pulse.json") or {}
+    email_cfg = lock.get("email") if isinstance(lock.get("email"), dict) else {}
+    email_cfg["on"] = False
+    lock["email"] = email_cfg
+    if run_dir.exists():
+        (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
+    return HTMLResponse(
+        "<!doctype html><html><body style='font-family:system-ui;padding:2rem'>"
+        "<p>Weekly market pulse emails are stopped for this listing.</p>"
+        "</body></html>"
+    )
+
+
+@app.post("/api/internal/pulse-briefs")
+def internal_pulse_briefs(request: Request):
+    secret = (os.environ.get("CRON_SECRET") or os.environ.get("SESSION_SECRET") or "").strip()
+    got = (request.headers.get("x-cron-secret") or request.query_params.get("secret") or "").strip()
+    user = _current_user(request)
+    if secret and got == secret:
+        pass
+    elif user and (user.get("role") or "") == "admin":
+        pass
+    else:
+        raise HTTPException(403, "Not allowed")
+    return _run_pulse_briefs()
 
 
 @app.get("/api/profile/copy")
@@ -3129,6 +3864,7 @@ async def generate(
     cleanup_paths: list[Path] = []
     logo_url = ""
     market_df = None
+    criteria = None
     data_source = "mls_export"
     rename_overrides = None
     if column_map and column_map.strip():
@@ -3334,6 +4070,7 @@ async def generate(
             subject_photo_bytes=subject_photo_bytes,
             subject_photo_ext=subject_photo_ext,
             copy_defaults=auth_service.parse_copy_defaults(user.get("copy_defaults")),
+            portal_criteria=criteria if source == "portal" else None,
         )
         logger.info("Generate finished in %.1fs for %s source=%s", time.time() - t0, address, data_source)
     except HTTPException:

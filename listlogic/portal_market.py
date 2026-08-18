@@ -10,6 +10,7 @@ Primary path: Realtor solds (2y) + Realtor for-sale actives.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
@@ -37,16 +38,23 @@ PREVIEW_SOLD_PAGES = 2
 PREVIEW_ACTIVE_PAGES = 1
 GENERATE_SOLD_PAGES = 6
 GENERATE_ACTIVE_PAGES = 3
+REFRESH_SOLD_PAGES = 3
+REFRESH_ACTIVE_PAGES = 2
 PREVIEW_CALL_BUDGET = 4          # hard cap on Reef calls for preview
 GENERATE_CALL_BUDGET = 12        # hard cap on Reef calls for generate market pull
+REFRESH_CALL_BUDGET = 6          # pulse refresh — enough for new/cheaper/cuts
 SUBJECT_CALL_BUDGET = 2          # at most 2 Reef calls per subject autofill
+ZESTIMATE_CALL_BUDGET = 2        # search + optional property_detail; never steals generate budget
 PREVIEW_CACHE_TTL_SEC = 15 * 60
+PORTAL_DISK_CACHE_TTL_SEC = 24 * 3600
 SUBJECT_CACHE_TTL_SEC = 7 * 24 * 3600
 
 _DATA_ROOT = Path(os.environ.get("LISTLOGIC_DATA_DIR") or "/data")
 if not _DATA_ROOT.exists():
     _DATA_ROOT = ROOT
 _SUBJECT_CACHE_DIR = _DATA_ROOT / "output" / "subject_cache"
+_PORTAL_DISK_CACHE_DIR = _DATA_ROOT / "output" / "portal_cache"
+_ZESTIMATE_CACHE_DIR = _DATA_ROOT / "output" / "zestimate_cache"
 _PREVIEW_CACHE: dict[str, tuple[float, pd.DataFrame]] = {}
 _reef_budget = threading.local()
 
@@ -1040,11 +1048,50 @@ def _criteria_cache_key(c: dict, *, mode: str) -> str:
     return json.dumps(payload, sort_keys=True, default=str)
 
 
+def _portal_disk_paths(cache_key: str) -> tuple[Path, Path]:
+    digest = hashlib.sha256(cache_key.encode("utf-8")).hexdigest()[:24]
+    return (
+        _PORTAL_DISK_CACHE_DIR / f"{digest}.csv",
+        _PORTAL_DISK_CACHE_DIR / f"{digest}.meta.json",
+    )
+
+
+def _read_portal_disk_cache(cache_key: str) -> Optional[pd.DataFrame]:
+    csv_path, meta_path = _portal_disk_paths(cache_key)
+    if not csv_path.exists() or not meta_path.exists():
+        return None
+    try:
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        cached_at = float(meta.get("cached_at") or 0)
+        if not cached_at or (time.time() - cached_at) > PORTAL_DISK_CACHE_TTL_SEC:
+            return None
+        return pd.read_csv(csv_path, sep="|")
+    except Exception:
+        logger.info("Portal disk cache read failed")
+        return None
+
+
+def _write_portal_disk_cache(cache_key: str, df: pd.DataFrame) -> None:
+    if df is None or len(df) == 0:
+        return
+    try:
+        _PORTAL_DISK_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        csv_path, meta_path = _portal_disk_paths(cache_key)
+        df.to_csv(csv_path, sep="|", index=False)
+        meta_path.write_text(
+            json.dumps({"cached_at": time.time(), "rows": int(len(df))}),
+            encoding="utf-8",
+        )
+    except OSError:
+        logger.info("Portal disk cache write failed")
+
+
 def build_portal_from_criteria(criteria: dict, *, mode: str = "generate") -> pd.DataFrame:
     """Build market frame from a criteria dict (API/UI shape).
 
     mode:
       - preview  → cheap (few pages + short cache + tight call budget)
+      - refresh  → mid pull for weekly pulse (disk-cached 24h)
       - generate → fuller pull with a hard call budget
     """
     c = parse_portal_criteria(criteria)
@@ -1057,18 +1104,30 @@ def build_portal_from_criteria(criteria: dict, *, mode: str = "generate") -> pd.
         bounds = bounds_from_ring(polygon)
 
     mode_l = (mode or "generate").strip().lower()
+    criteria_for_key = {**c, "map_bounds": bounds, "polygon_ring": polygon}
+    cache_key = _criteria_cache_key(criteria_for_key, mode=mode_l)
+
     if mode_l == "preview":
         sold_pages, active_pages = PREVIEW_SOLD_PAGES, PREVIEW_ACTIVE_PAGES
         budget = PREVIEW_CALL_BUDGET
-        cache_key = _criteria_cache_key({**c, "map_bounds": bounds, "polygon_ring": polygon}, mode="preview")
         hit = _PREVIEW_CACHE.get(cache_key)
         if hit and (time.time() - hit[0]) < PREVIEW_CACHE_TTL_SEC:
             logger.info("Portal preview cache hit for %s", location)
             return hit[1].copy()
+    elif mode_l == "refresh":
+        sold_pages, active_pages = REFRESH_SOLD_PAGES, REFRESH_ACTIVE_PAGES
+        budget = REFRESH_CALL_BUDGET
+        cached = _read_portal_disk_cache(cache_key)
+        if cached is not None:
+            logger.info("Portal refresh disk cache hit for %s", location)
+            return cached
     else:
         sold_pages, active_pages = GENERATE_SOLD_PAGES, GENERATE_ACTIVE_PAGES
         budget = GENERATE_CALL_BUDGET
-        cache_key = None
+        cached = _read_portal_disk_cache(cache_key)
+        if cached is not None:
+            logger.info("Portal generate disk cache hit for %s", location)
+            return cached
 
     prev = get_reef_call_budget()
     set_reef_call_budget(budget)
@@ -1099,13 +1158,14 @@ def build_portal_from_criteria(criteria: dict, *, mode: str = "generate") -> pd.
     finally:
         set_reef_call_budget(prev)
 
-    if cache_key is not None:
+    if mode_l == "preview":
         _PREVIEW_CACHE[cache_key] = (time.time(), df.copy())
-        # Bound memory
         if len(_PREVIEW_CACHE) > 40:
             oldest = sorted(_PREVIEW_CACHE.items(), key=lambda kv: kv[1][0])[:10]
             for k, _ in oldest:
                 _PREVIEW_CACHE.pop(k, None)
+    else:
+        _write_portal_disk_cache(cache_key, df)
     return df
 
 
@@ -1395,5 +1455,136 @@ def lookup_subject_property(address: str) -> dict[str, Any]:
     }
     _write_subject_cache(q, out)
     return out
+
+
+def _reef_items(envelope: dict | None) -> list[dict]:
+    if not isinstance(envelope, dict):
+        return []
+    data = envelope.get("data")
+    if isinstance(data, list):
+        return [x for x in data if isinstance(x, dict)]
+    if isinstance(data, dict):
+        items = data.get("items") or data.get("results") or data.get("listings")
+        if isinstance(items, list):
+            return [x for x in items if isinstance(x, dict)]
+        if data.get("zpid") or data.get("address_line") or data.get("listing"):
+            listing = data.get("listing") if isinstance(data.get("listing"), dict) else data
+            return [listing] if isinstance(listing, dict) else []
+    items = envelope.get("items") or envelope.get("results")
+    return [x for x in items if isinstance(x, dict)] if isinstance(items, list) else []
+
+
+def _as_money(val: Any) -> int | None:
+    if val is None or val == "":
+        return None
+    try:
+        amount = float(val)
+    except (TypeError, ValueError):
+        return None
+    if amount <= 0:
+        return None
+    return int(round(amount))
+
+
+def _zestimate_cache_path(address: str) -> Path:
+    key = re.sub(r"[^a-z0-9]+", "-", (address or "").lower()).strip("-")[:80] or "addr"
+    return _ZESTIMATE_CACHE_DIR / f"{key}.json"
+
+
+def portal_values_fresh(pv: dict | None, *, max_age_sec: float = SUBJECT_CACHE_TTL_SEC) -> bool:
+    """True when a stored portal estimate has an amount and is newer than max_age_sec."""
+    if not isinstance(pv, dict) or not pv.get("amount"):
+        return False
+    pulled = str(pv.get("pulled_at") or "")
+    if not pulled:
+        return False
+    try:
+        ts = datetime.fromisoformat(pulled.replace("Z", "+00:00"))
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=timezone.utc)
+        return (datetime.now(timezone.utc) - ts).total_seconds() < max_age_sec
+    except Exception:
+        return False
+
+
+def _read_zestimate_cache(address: str) -> dict | None:
+    path = _zestimate_cache_path(address)
+    if not path.exists():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    if not portal_values_fresh(data if isinstance(data, dict) else None):
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def _write_zestimate_cache(address: str, payload: dict) -> None:
+    try:
+        _ZESTIMATE_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        _zestimate_cache_path(address).write_text(
+            json.dumps(payload, indent=2, default=str),
+            encoding="utf-8",
+        )
+    except OSError:
+        logger.info("Zestimate cache write failed")
+
+
+def lookup_zestimate(address: str) -> dict | None:
+    """Best-effort Zillow Zestimate. Soft-fails; never spends generate's market budget."""
+    q = (address or "").strip()
+    if not q:
+        return None
+    cached = _read_zestimate_cache(q)
+    if cached:
+        logger.info("Zestimate cache hit for %s", q[:80])
+        return cached
+    if not _api_key():
+        return None
+    prev = get_reef_call_budget()
+    set_reef_call_budget(ZESTIMATE_CALL_BUDGET)
+    try:
+        envelope = reef_call(
+            "zillow",
+            "search",
+            {"location": q, "max_pages": 1, "max_results": 8},
+            timeout=45,
+        )
+        items = _reef_items(envelope)
+        best = _pick_best_listing(q, items)
+        if not best:
+            return None
+        amount = _as_money(best.get("zestimate_usd"))
+        zpid = best.get("zpid") or best.get("property_id")
+        url = best.get("url") or ""
+        if amount is None and zpid:
+            detail = reef_call("zillow", "property_detail", {"zpid": str(zpid)}, timeout=45)
+            listing = {}
+            data = detail.get("data") if isinstance(detail, dict) else {}
+            if isinstance(data, dict):
+                listing = data.get("listing") if isinstance(data.get("listing"), dict) else data
+                listings = data.get("listings")
+                if isinstance(listings, list) and listings and isinstance(listings[0], dict):
+                    listing = listings[0]
+            amount = _as_money(listing.get("zestimate_usd"))
+            url = url or listing.get("url") or ""
+            zpid = zpid or listing.get("zpid")
+        if amount is None:
+            return None
+        result = {
+            "source": "zillow",
+            "amount": amount,
+            "pulled_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "zpid": str(zpid) if zpid else None,
+            "url": str(url) if url else None,
+        }
+        _write_zestimate_cache(q, result)
+        return result
+    except Exception as exc:
+        logger.info("Zestimate lookup soft-fail for %s: %s", q[:80], exc)
+        return None
+    finally:
+        set_reef_call_budget(prev)
 
 

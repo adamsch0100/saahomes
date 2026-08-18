@@ -741,6 +741,8 @@ def render_interactive_html(report: dict) -> str:
         },
         "priceResponse": report.get("price_response") or {},
         "llmEnhanced": llm_on,
+        "portalValues": meta.get("portal_values") or None,
+        "dataSource": meta.get("data_source") or "",
     }
     defaults = {
         "rec": rec, "low": low, "high": high, "dom": exp_dom,
@@ -868,6 +870,10 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .fab{{display:none}}
 .panel-overlay{{display:none;position:fixed;inset:0;background:rgba(8,18,32,.48);backdrop-filter:blur(2px);z-index:1001}}
 .panel-overlay.open{{display:block}}
+.remember-bar{{display:none;align-items:center;flex-wrap:wrap;gap:10px;margin:0 0 12px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:#fff}}
+body.ll-agent .remember-bar{{display:flex}}
+.remember-bar span{{font-size:.8rem;color:var(--muted)}}
+.remember-toast{{font-size:.78rem;font-weight:700;color:var(--brand-primary)}}
 body.ll-agent [data-lede],body.ll-agent [data-edit]{{outline:1px dashed transparent;border-radius:4px;cursor:text}}
 body.ll-agent [data-lede]:hover,body.ll-agent [data-edit]:hover,body.ll-agent #advList li:hover,body.ll-agent #riskList li:hover{{outline-color:rgba(12,60,110,.28)}}
 body.ll-agent [data-lede]:focus,body.ll-agent [data-edit]:focus,body.ll-agent #advList li:focus,body.ll-agent #riskList li:focus{{outline-color:var(--brand-primary)}}
@@ -901,7 +907,7 @@ body.ll-agent [data-lede]:focus,body.ll-agent [data-edit]:focus,body.ll-agent #a
 .panel-pane .field{{margin-bottom:10px}}
 .panel-pane .field:last-child{{margin-bottom:0}}
 .panel-soft{{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}}
-.panel-soft .btn-soft{{flex:1;min-width:120px;padding:9px 12px;border-radius:10px;border:1px solid var(--border);background:#f8fafc;color:var(--brand-primary);font:inherit;font-size:.78rem;font-weight:700;cursor:pointer}}
+.panel-pane .btn-soft,.panel-soft .btn-soft{{flex:1;min-width:120px;padding:9px 12px;border-radius:10px;border:1px solid var(--border);background:#f8fafc;color:var(--brand-primary);font:inherit;font-size:.78rem;font-weight:700;cursor:pointer}}
 .panel-soft .btn-soft:hover{{background:#eef4fa;border-color:#c5d6ea}}
 .panel-soft .btn-soft:disabled{{opacity:.55;cursor:wait}}
 .panel-soft .btn-soft.primary{{background:var(--brand-primary);color:#fff;border-color:var(--brand-primary)}}
@@ -928,6 +934,46 @@ body.ll-agent [data-lede]:focus,body.ll-agent [data-edit]:focus,body.ll-agent #a
 .verdict .eyebrow{{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;opacity:.8;position:relative;z-index:1;margin:0}}
 .verdict .big{{font-family:'Fraunces',Georgia,serif;font-size:clamp(1.9rem,4vw,2.6rem);font-weight:700;line-height:1.05;margin-top:2px;letter-spacing:-.02em;position:relative;z-index:1}}
 .verdict .sub{{margin-top:4px;font-size:.88rem;opacity:.95;position:relative;z-index:1}}
+.portal-chip{{display:none;position:relative;z-index:1;margin-top:8px;align-items:center;gap:8px;flex-wrap:wrap}}
+.portal-chip.is-on{{display:flex}}
+body.ll-agent .portal-chip.has-value{{display:flex}}
+.portal-chip .pc-label{{font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;opacity:.75}}
+.portal-chip .pc-amt{{font-size:.92rem;font-weight:700;opacity:.95}}
+.portal-chip .pc-amt[hidden],.portal-chip:not(.is-on) .pc-amt{{display:none}}
+.portal-chip .pc-toggle{{display:none;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.08);color:#fff;border-radius:999px;padding:3px 9px;font:inherit;font-size:.68rem;font-weight:700;cursor:pointer}}
+body.ll-agent .portal-chip .pc-toggle{{display:inline-flex}}
+.pulse-card{{display:none;margin:12px 0 0;padding:14px 16px;border:1px solid var(--border);border-radius:14px;background:#fff}}
+.pulse-card.is-on,.pulse-card.is-agent{{display:block}}
+body:not(.ll-agent) .pulse-card:not(.is-on){{display:none!important}}
+.pulse-card h3{{font-size:.92rem;margin:0 0 4px;color:var(--brand-primary)}}
+.pulse-card .pulse-sub{{font-size:.78rem;color:var(--muted);margin:0 0 10px}}
+.pulse-grid{{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}}
+.pulse-cell{{background:#f4f7fb;border-radius:10px;padding:10px 8px;text-align:center}}
+.pulse-cell .pv{{font-family:'Fraunces',Georgia,serif;font-size:1.35rem;font-weight:700;color:var(--brand-primary);line-height:1.1}}
+.pulse-cell .pl{{font-size:.68rem;color:var(--muted);font-weight:600;margin-top:4px}}
+.pulse-actions{{display:none;margin-top:10px;gap:8px;flex-wrap:wrap;align-items:center}}
+body.ll-agent .pulse-actions{{display:flex}}
+.pulse-actions button,.pulse-actions label.pulse-upload{{border:1px solid var(--border);background:#fff;border-radius:8px;padding:6px 10px;font:inherit;font-size:.75rem;font-weight:700;cursor:pointer;color:var(--brand-primary)}}
+.pulse-actions .pulse-status{{font-size:.75rem;color:var(--muted)}}
+.pulse-lists{{margin-top:12px}}
+.pulse-lists details{{border-top:1px solid var(--border);padding:8px 0}}
+.pulse-lists summary{{cursor:pointer;font-size:.8rem;font-weight:700;color:var(--brand-primary)}}
+.pulse-li{{padding:8px 0;border-bottom:1px solid #f0eee8;font-size:.8rem}}
+.pulse-li strong{{display:block}}
+.pulse-li .pulse-meta{{color:var(--muted);font-size:.72rem}}
+.pulse-li a{{margin-right:8px;font-weight:700}}
+.pulse-talk{{margin:10px 0 0;padding:10px 12px;background:#f4f7fb;border-radius:10px}}
+.pulse-talk h4{{margin:0 0 6px;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}}
+.pulse-talk li{{margin:4px 0 4px 1.1rem;font-size:.8rem}}
+.pulse-mail{{display:none;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:.8rem}}
+body.ll-agent .pulse-mail{{display:block}}
+body.ll-sample .pulse-mail,body.ll-sample .pulse-actions{{display:none!important}}
+.pulse-mail label{{display:block;font-weight:700;margin:8px 0 4px}}
+.pulse-mail input[type=email]{{width:100%;padding:7px 8px;border:1px solid var(--border);border-radius:8px;font:inherit}}
+.pulse-mail .pulse-who{{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0}}
+.pulse-mail .pulse-who label{{font-weight:600;margin:0}}
+.agent-only{{display:none}}
+body.ll-agent .agent-only{{display:block}}
 .verdict .top{{display:none}}
 .verdict .pos-bar,.verdict .pos-labels{{display:none}}
 #spine-strategy > .sub{{margin-bottom:6px}}
@@ -1474,7 +1520,7 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
 @media print{{
   @page{{size:11in 8.5in;margin:0}}
   *{{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
-  .fab,.agent-menu-wrap,.agent-chip,.agent-panel,.panel-overlay,.view-modes,.top-bar,.spine,.report-side,
+  .fab,.agent-menu-wrap,.agent-chip,.agent-panel,.panel-overlay,.view-modes,.top-bar,.remember-bar,.spine,.report-side,
   .listing-drawer,.listing-overlay,.photo-modal,.controls,.scatter-series,
   #spine-fulldata,.share-bar,.price-controls .slider-wrap,
   .slider-track-wrap,input[type=range],.slider-scale,
@@ -1482,31 +1528,57 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
   #confrontOut,.rate-row,.kpi .tip,.comp-photo-fade,.photo-fetch-banner,
   .page > .two-col,
   .page > .section:not([id]),
-  #spine-strategy .response-grid .confront-out{{display:none!important}}
-  html,body{{background:#fff!important;margin:0;padding:0}}
-  .report-shell{{display:block;max-width:none;padding:0;margin:0}}
-  .page{{max-width:none;width:11in;padding:0;margin:0}}
+  #spine-strategy .response-grid .confront-out,
+  .portal-chip:not(.is-on),.portal-chip .pc-toggle,.pulse-actions,.pulse-mail,
+  #llSampleBar,.ll-as-btn,.ll-as-panel,.pulse-card{{display:none!important}}
+  .portal-chip.is-on{{display:flex!important;margin-top:4px}}
+  .portal-chip.is-on .pc-amt{{display:inline!important;font-size:.8rem}}
+  html,body{{background:#fff!important;margin:0;padding:0;width:11in;height:auto;overflow:hidden}}
+  .report-shell{{display:block;max-width:none;width:11in;padding:0;margin:0;overflow:hidden}}
+  .page{{max-width:none;width:11in;padding:0;margin:0;overflow:hidden}}
 
-  /* One landscape sheet per spine section — inset box so printer margins cannot clip */
+  /* One landscape sheet = exactly one @page. Padding lives inside 8.5in — never add outer margin. */
   /* marker: print-page-spine */
-  /* marker: print-fit-v5 */
+  /* marker: print-fit-v6 */
   .page > .hero,
   .page > .core-facts,
-  .page > .section[id^="spine-"]:not(#spine-fulldata){{
+  .page > .section[id^="spine-"]:not(#spine-fulldata):not(#spine-comps-more){{
     box-sizing:border-box;
-    width:10.5in;height:7.9in;max-height:7.9in;min-height:7.9in;
-    margin:0.3in auto;
-    padding:0.22in 0.34in;
+    width:11in;height:8.5in;max-height:8.5in;min-height:8.5in;
+    margin:0;padding:0.28in 0.38in;
     border:none;border-radius:0;box-shadow:none!important;
     overflow:hidden;
     page-break-after:always;break-after:page;
     page-break-inside:avoid;break-inside:avoid;
+    page-break-before:auto;break-before:auto;
     display:flex;flex-direction:column;
   }}
-  .page > .hero{{
-    padding:0.5in 0.5in;display:flex;align-items:center;
+  #spine-net{{
+    page-break-after:auto!important;break-after:auto!important;
   }}
-  .page > .core-facts,
+  .page > .section[id^="spine-"][hidden],
+  .page > .section[id^="spine-"][style*="display:none"],
+  #spine-comps-more,#spine-fulldata{{
+    display:none!important;height:0!important;min-height:0!important;max-height:0!important;
+    page-break-after:auto!important;break-after:auto!important;overflow:hidden!important;
+  }}
+  .page > .hero{{
+    padding:0.45in 0.5in;display:flex;align-items:center;justify-content:space-between;
+  }}
+  .page > .hero h1{{font-size:2.15rem!important}}
+  .page > .core-facts{{
+    display:flex;flex-direction:column;justify-content:flex-start;
+  }}
+  .page > .core-facts .cf-eyebrow{{
+    white-space:normal!important;font-size:1.2rem!important;
+  }}
+  .page > .core-facts .cf-grid{{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;flex:1;min-height:0;
+  }}
+  .page > .core-facts .cf-card{{
+    min-height:0!important;padding:10px 12px!important;gap:6px;
+  }}
+  .page > .core-facts .cf-b{{font-size:.72rem!important;line-height:1.35}}
   #spine-rating{{
     display:flex;flex-direction:column;justify-content:center;
   }}
@@ -1697,7 +1769,9 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
   #spine-net .net-summary .ns-big{{font-size:1.55rem!important}}
   #spine-net .net-summary .ns-fine{{display:none}}
   #spine-net .net-row{{padding:3px 8px!important;font-size:.72rem!important}}
-  #spine-net .net-row .ni input{{border:none;background:transparent;padding:0 12px 0 0;font-size:.72rem}}
+  #spine-net .ni{{display:none!important}}
+  #spine-net .net-row{{grid-template-columns:1fr auto!important}}
+  #spine-strategy .verdict .sub{{white-space:normal!important}}
 
   #compMap{{height:240px!important}}
   .comp-map-foot{{display:none!important}}
@@ -1715,6 +1789,11 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
 body.print-leavebehind .fab,
 body.print-leavebehind .agent-menu-wrap,
 body.print-leavebehind .agent-chip,
+body.print-leavebehind .remember-bar,
+body.print-leavebehind .pulse-actions,
+body.print-leavebehind .pulse-mail,
+body.print-leavebehind .pulse-card,
+body.print-leavebehind .portal-chip .pc-toggle,
 body.print-leavebehind .agent-panel,
 body.print-leavebehind .panel-overlay,
 body.print-leavebehind .top-bar,
@@ -1727,7 +1806,10 @@ body.print-leavebehind .page > .two-col,
 body.print-leavebehind .page > .section:not([id]),
 body.print-leavebehind .page > footer,
 body.print-leavebehind #spine-comps-more,
-body.print-leavebehind .print-only{{display:none!important}}
+body.print-leavebehind .print-only,
+body.print-leavebehind #llSampleBar,
+body.print-leavebehind .ll-as-btn,
+body.print-leavebehind .ll-as-panel{{display:none!important}}
 body.print-leavebehind .page{{padding-bottom:0}}
 </style>
 </head>
@@ -1782,6 +1864,12 @@ body.print-leavebehind .page{{padding-bottom:0}}
       <button type="button" class="vm" id="btnCopyShare" style="display:none">Share with client</button>
       <span class="vm-status" id="shareStatus"></span>
     </div>
+  </div>
+  <div class="remember-bar" id="rememberBar">
+    <span>Click an intro or bullet to edit this listing.</span>
+    <button type="button" class="btn-soft primary" id="btnSaveDefaults">Remember for next reports</button>
+    <button type="button" class="btn-soft" id="btnResetDefaults">Clear saved wording</button>
+    <span class="remember-toast" id="storyToast" role="status"></span>
   </div>
   <div class="photo-fetch-banner" id="photoFetchBanner" aria-live="polite">
     <span class="spin" aria-hidden="true"></span>
@@ -2160,6 +2248,11 @@ body.print-leavebehind .page{{padding-bottom:0}}
     <section class="verdict" id="spine-verdict">
       <div class="eyebrow">Recommended List Price</div>
       <div class="big" id="dispRec">${rec:,.0f}</div>
+      <div class="portal-chip" id="portalChip" hidden>
+        <span class="pc-label">Zillow estimate</span>
+        <span class="pc-amt" id="portalAmt"></span>
+        <button type="button" class="pc-toggle" id="btnPortalChip">Show portal estimate</button>
+      </div>
       <div class="sub">Range <strong id="dispRange">${low:,.0f} – ${high:,.0f}</strong> · target under contract in ~<strong id="dispDom">{exp_dom:.0f} days</strong></div>
       <div class="top" id="topLine">Top <span id="topStat">{top_mkt:.0f}</span>% of similar recent sales</div>
       <div class="pos-bar"><div class="pos-marker" id="posMarker" style="left:50%"></div></div>
@@ -2210,6 +2303,51 @@ body.print-leavebehind .page{{padding-bottom:0}}
           <div class="wyw-bar"><div class="fill" id="wywFill" style="width:35%"></div><div class="marker" id="wywMarker" style="left:35%"></div></div>
         </div>
         <p class="wyw-note" id="wywNote">At the recommended list, the queue works <b>for</b> you. Price above it and buyer attention shifts to cheaper options.</p>
+      </div>
+    </div>
+    <div class="pulse-card" id="pulseBlock" hidden>
+      <h3>Market since you locked</h3>
+      <p class="pulse-sub" id="pulseAsOf">Lock a list to measure new similar homes over and under that line.</p>
+      <div class="pulse-grid">
+        <div class="pulse-cell">
+          <div class="pv" id="pulseNewUnder">—</div>
+          <div class="pl">New similar under</div>
+        </div>
+        <div class="pulse-cell">
+          <div class="pv" id="pulseNewOver">—</div>
+          <div class="pl">New similar over</div>
+        </div>
+        <div class="pulse-cell">
+          <div class="pv" id="pulseActiveCheaper">—</div>
+          <div class="pl">Still-active cheaper</div>
+        </div>
+      </div>
+      <div class="pulse-talk" id="pulseTalk" hidden>
+        <h4>Talk track</h4>
+        <ul id="pulseTalkList"></ul>
+      </div>
+      <div class="pulse-lists" id="pulseLists"></div>
+      <div class="pulse-actions">
+        <button type="button" id="btnPulseLock">Lock this list</button>
+        <button type="button" id="btnPulseRefresh">Refresh</button>
+        <label class="pulse-upload" id="pulseUploadWrap" hidden>Upload fresh export<input type="file" id="pulseExportFile" accept=".txt,.csv,.tsv" hidden></label>
+        <button type="button" id="btnPulseVis">Hide from seller</button>
+        <span class="pulse-status" id="pulseStatus"></span>
+      </div>
+      <div class="pulse-mail" id="pulseMail">
+        <strong>Weekly pulse email</strong>
+        <p class="pulse-sub" id="pulseMailStatus">Not started — opt in for this listing only.</p>
+        <div class="pulse-who">
+          <label><input type="radio" name="pulseWho" value="agent" checked> Me</label>
+          <label><input type="radio" name="pulseWho" value="seller"> Seller</label>
+          <label><input type="radio" name="pulseWho" value="both"> Both</label>
+        </div>
+        <label for="pulseSellerEmail">Seller email</label>
+        <input type="email" id="pulseSellerEmail" placeholder="seller@email.com" autocomplete="off">
+        <div class="pulse-actions" style="margin-top:8px">
+          <button type="button" id="btnPulseEmailStart">Start weekly pulse</button>
+          <button type="button" id="btnPulseEmailStop" hidden>Stop weekly pulse</button>
+        </div>
       </div>
     </div>
   </section>
@@ -2414,6 +2552,19 @@ body.print-leavebehind .page{{padding-bottom:0}}
           <input type="number" id="editDom" value="{exp_dom}" step="1">
         </div>
       </div>
+      <div class="field span2" id="portalChipRow" hidden>
+        <label>Zillow estimate on this report</label>
+        <button type="button" class="btn-soft" id="btnPortalChipPanel">Show portal estimate</button>
+      </div>
+      <div class="field span2">
+        <label>Over/under pulse on seller view</label>
+        <button type="button" class="btn-soft" id="btnPulseVisPanel">Visible to seller</button>
+      </div>
+      <div class="field span2" id="pulseMailPanel">
+        <label>Weekly pulse email</label>
+        <p class="pane-lead" id="pulseMailPanelStatus">Start it on the Price It card after you lock a list.</p>
+        <button type="button" class="btn-soft" id="btnPulseEmailPanel">Start weekly pulse</button>
+      </div>
     </div>
     <div class="panel-pane" id="pane-story" role="tabpanel">
       <span class="panel-pill">Seller-facing</span>
@@ -2430,33 +2581,14 @@ body.print-leavebehind .page{{padding-bottom:0}}
         <label for="editRisk">Watch-outs (one per line)</label>
         <textarea id="editRisk">{risk_text}</textarea>
       </div>
-      <div class="field">
-        <label for="editLedeComps">Comps intro</label>
-        <textarea id="editLedeComps">{lede_comps}</textarea>
-      </div>
-      <div class="field">
-        <label for="editLedeCondition">Condition intro</label>
-        <textarea id="editLedeCondition">{lede_condition}</textarea>
-      </div>
-      <div class="field">
-        <label for="editLedeClose">Close line</label>
-        <textarea id="editLedeClose">{lede_close}</textarea>
-      </div>
-      <div class="field">
-        <label for="editExtraAdv">Always-include advantages (one per line)</label>
-        <textarea id="editExtraAdv" placeholder="Shows on every future report"></textarea>
-      </div>
-      <div class="field">
-        <label for="editExtraRisk">Always-include watch-outs (one per line)</label>
-        <textarea id="editExtraRisk" placeholder="Shows on every future report"></textarea>
-      </div>
-      <p class="pane-lead">Save as my default wording stores intros, always-include bullets, and coach notes — not this listing’s bottom line or price.</p>
+      <textarea id="editLedeComps" hidden>{lede_comps}</textarea>
+      <textarea id="editLedeCondition" hidden>{lede_condition}</textarea>
+      <textarea id="editLedeClose" hidden>{lede_close}</textarea>
+      <textarea id="editExtraAdv" hidden></textarea>
+      <textarea id="editExtraRisk" hidden></textarea>
+      <p class="pane-lead">Click intros or bullets on the report to edit this listing. <strong>Remember for next reports</strong> keeps intros and extra lines — not this home’s bottom line or price.</p>
       <div class="panel-soft" id="aiSellerRow" style="display:none">
         <button type="button" class="btn-soft" id="btnAiSeller">Rewrite story</button>
-      </div>
-      <div class="panel-soft">
-        <button type="button" class="btn-soft" id="btnSaveDefaults">Save as my default wording</button>
-        <button type="button" class="btn-soft" id="btnResetDefaults">Reset my default wording</button>
       </div>
       <div class="panel-toast" id="storyToast" role="status"></div>
     </div>
@@ -2531,6 +2663,8 @@ const MAPBOX_TOKEN = {json.dumps(_mapbox_token())};
 const DEFAULT_COLS = {json.dumps(default_cols)};
 const defaults = {json.dumps(defaults, allow_nan=False)};
 const RUN_ID = (location.pathname.match(/\\/runs\\/([^\\/]+)/)||[])[1] || '';
+const IS_SAMPLE = RUN_ID === 'sample-2845' || /[?&]sample=1(?:&|$)/.test(location.search);
+if (IS_SAMPLE) document.body.classList.add('ll-sample');
 const LINK_CITY = DATA.linkCity, LINK_STATE = DATA.linkState;
 const navy = '{brand_primary}', orange = '#c2410c';
 
@@ -2584,11 +2718,21 @@ const navy = '{brand_primary}', orange = '#c2410c';
 
   function restoreChartsAfterPrint() {{
     document.body.classList.remove('print-leavebehind');
+    const bar = document.getElementById('llSampleBar');
+    if (bar) bar.style.removeProperty('display');
+    document.querySelectorAll('.ll-as-btn,.ll-as-panel').forEach(el => {{ el.style.removeProperty('display'); }});
     eachChart(ch => {{ try {{ if (ch.resize) ch.resize(); }} catch (e) {{}} }});
+  }}
+
+  function hidePrintChrome() {{
+    const bar = document.getElementById('llSampleBar');
+    if (bar) bar.style.display = 'none';
+    document.querySelectorAll('.ll-as-btn,.ll-as-panel').forEach(el => {{ el.style.setProperty('display', 'none', 'important'); }});
   }}
 
   function printLeavebehind() {{
     document.body.classList.add('print-leavebehind');
+    hidePrintChrome();
     const st = document.getElementById('shareStatus');
     if (st) st.textContent = 'Printing Live Story…';
     wakeHiddenCharts();
@@ -2606,6 +2750,7 @@ const navy = '{brand_primary}', orange = '#c2410c';
   if (printBtn) printBtn.onclick = printLeavebehind;
   window.addEventListener('beforeprint', () => {{
     document.body.classList.add('print-leavebehind');
+    hidePrintChrome();
     wakeHiddenCharts();
     snapshotChartsForPrint();
   }});
@@ -3777,15 +3922,14 @@ async function fetchPhotoMap() {{
         Object.assign(galleryMap, data.galleries || {{}});
         status = data.status || 'ready';
         const pending = status === 'pending' || status === 'fetching';
-        const isSample = RUN_ID === 'sample-2845' || /[?&]sample=1(?:&|$)/.test(location.search);
         const hasPhotos = Object.keys(photoMap).length > 0;
         setPhotoFetchBanner(
-          pending && !isSample && !hasPhotos,
+          pending && !IS_SAMPLE && !hasPhotos,
           data.message || (pending ? 'Fetching listing photos…' : ''),
           data.done || 0,
           data.total || 0
         );
-        if (pending && !isSample && !photoPollTimer) {{
+        if (pending && !IS_SAMPLE && !photoPollTimer) {{
           // Kick background fetch if generate left it pending
           fetch('/api/runs/' + RUN_ID + '/comp-photos/fetch', {{ method: 'POST' }}).catch(() => {{}});
           photoPollTimer = setInterval(async () => {{
@@ -5027,7 +5171,7 @@ fetch('/api/auth-status', {{ credentials: 'same-origin' }})
     // Public/shared (seller) viewers should never see edit/sections/sign-out.
     const menuWrap = document.getElementById('agentMenuWrap');
     const authed = !!(data && data.authenticated && data.user);
-    if (!authed) {{
+    if (!authed || IS_SAMPLE) {{
       if (menuWrap) menuWrap.style.display = 'none';
       return;
     }}
@@ -5066,11 +5210,20 @@ document.addEventListener('keydown', (e) => {{
 }});
 document.getElementById('closePanel').onclick = overlay.onclick = closeAgentPanel;
 function collectLedes() {{
+  const fromDom = {{}};
+  document.querySelectorAll('[data-lede]').forEach(el => {{
+    fromDom[el.getAttribute('data-lede')] = el.textContent.trim();
+  }});
   return {{
-    comps: (document.getElementById('editLedeComps') || {{}}).value || '',
-    condition: (document.getElementById('editLedeCondition') || {{}}).value || '',
-    close: (document.getElementById('editLedeClose') || {{}}).value || '',
+    comps: fromDom.comps || (document.getElementById('editLedeComps') || {{}}).value || '',
+    condition: fromDom.condition || (document.getElementById('editLedeCondition') || {{}}).value || '',
+    close: fromDom.close || (document.getElementById('editLedeClose') || {{}}).value || '',
   }};
+}}
+function extraLinesFrom(id, generated) {{
+  const now = new Set((document.getElementById(id)?.value || '').split('\\n').map(s => s.trim()).filter(Boolean));
+  const orig = new Set(String(generated || '').split('\\n').map(s => s.trim()).filter(Boolean));
+  return [...now].filter(line => !orig.has(line));
 }}
 function applyLedesToDom(ledes) {{
   if (!ledes) return;
@@ -5081,6 +5234,8 @@ function applyLedesToDom(ledes) {{
 }}
 function enableInlineEdits() {{
   document.body.classList.add('ll-agent');
+  const pulse = document.getElementById('pulseBlock');
+  if (pulse) {{ pulse.hidden = false; pulse.classList.add('is-agent'); }}
   const mark = (el) => {{ if (el) {{ el.contentEditable = 'true'; el.spellcheck = true; }} }};
   document.querySelectorAll('[data-lede], [data-edit]').forEach(mark);
   document.querySelectorAll('#advList li, #riskList li').forEach(mark);
@@ -5136,11 +5291,13 @@ function persistStoryEdits() {{
   const risk = document.getElementById('editRisk').value.trim().split('\\n').filter(Boolean);
   const obj = document.getElementById('editObj').value;
   const ledes = collectLedes();
-  const payload = {{ rec, low, high, dom, bl, adv: adv.join('\\n'), risk: risk.join('\\n'), obj, ledes, rating: currentRating, excluded:[...excluded], selectedComps: selectedCompMls.slice() }};
+  const payload = {{ rec, low, high, dom, bl, adv: adv.join('\\n'), risk: risk.join('\\n'), obj, ledes, rating: currentRating, excluded:[...excluded], selectedComps: selectedCompMls.slice(), portalChip: document.body.dataset.portalChip || 'off', pulseBlock: document.body.dataset.pulseBlock || 'on' }};
   try {{
     const prev = JSON.parse(localStorage.getItem('listlogic_edits_'+(RUN_ID||'local')) || '{{}}');
     if (prev.netSheet) payload.netSheet = prev.netSheet;
     if (prev.hiddenSections) payload.hiddenSections = prev.hiddenSections;
+    if (prev.portalChip && !payload.portalChip) payload.portalChip = prev.portalChip;
+    if (prev.pulseBlock && !payload.pulseBlock) payload.pulseBlock = prev.pulseBlock;
   }} catch (e) {{}}
   localStorage.setItem('listlogic_edits_'+(RUN_ID||'local'), JSON.stringify(payload));
   if (RUN_ID) {{
@@ -5174,6 +5331,7 @@ function applyEdits() {{
   const opts = arguments[0] || {{}};
   if (opts.refreshDeck !== false) refreshDeckHtml();
   if (opts.close !== false) closeAgentPanel();
+  if (opts.lockPulse !== false && document.body.classList.contains('ll-agent')) lockPulseIfNeeded(rec);
 }}
 document.getElementById('btnApply').onclick = () => applyEdits();
 document.getElementById('btnSaveDefaults')?.addEventListener('click', async () => {{
@@ -5187,13 +5345,13 @@ document.getElementById('btnSaveDefaults')?.addEventListener('click', async () =
       headers: {{ 'Content-Type': 'application/json' }},
       body: JSON.stringify({{
         ledes: collectLedes(),
-        extraAdv: (document.getElementById('editExtraAdv') || {{}}).value || '',
-        extraRisk: (document.getElementById('editExtraRisk') || {{}}).value || '',
+        extraAdv: extraLinesFrom('editAdv', defaults.adv),
+        extraRisk: extraLinesFrom('editRisk', defaults.risk),
         coachTemplates: (document.getElementById('editObj') || {{}}).value || '',
       }}),
     }});
     if (!res.ok) throw new Error('Sign in to save account defaults');
-    setToast('Saved for future reports. This listing’s bottom line was not copied.');
+    setToast('Saved. Next reports will use your intros and extra lines — not this home’s price.');
   }} catch (err) {{
     setToast(String(err.message || err));
   }}
@@ -5295,9 +5453,287 @@ async function loadSavedEdits() {{
     }}
   }}
   if (Array.isArray(saved.hiddenSections)) applySectionVisibility(saved.hiddenSections);
-  renderTable(); applyEdits({{ refreshDeck: false, close: false }});
+  if (saved.portalChip === 'on' || saved.portalChip === 'off') setPortalChip(saved.portalChip, {{ persist: false }});
+  if (saved.pulseBlock === 'on' || saved.pulseBlock === 'off') setPulseBlock(saved.pulseBlock, {{ persist: false }});
+  renderTable(); applyEdits({{ refreshDeck: false, close: false, lockPulse: false }});
 }}
+function setPortalChip(mode, opts) {{
+  const on = mode === 'on';
+  document.body.dataset.portalChip = on ? 'on' : 'off';
+  const chip = document.getElementById('portalChip');
+  const amt = document.getElementById('portalAmt');
+  const pv = DATA.portalValues || {{}};
+  const label = on ? 'Hide portal estimate' : 'Show portal estimate';
+  if (chip) {{
+    chip.classList.toggle('is-on', on);
+    chip.classList.toggle('has-value', !!(pv && pv.amount));
+    chip.hidden = !(pv && pv.amount);
+  }}
+  if (amt && pv.amount) amt.textContent = money(pv.amount);
+  document.querySelectorAll('#btnPortalChip, #btnPortalChipPanel').forEach(btn => {{
+    if (btn) btn.textContent = label;
+  }});
+  const row = document.getElementById('portalChipRow');
+  if (row) row.hidden = !(pv && pv.amount);
+  if (opts && opts.persist === false) return;
+  persistStoryEdits();
+  if (opts && opts.refreshDeck !== false) refreshDeckHtml();
+}}
+function setPulseBlock(mode, opts) {{
+  const on = mode !== 'off';
+  document.body.dataset.pulseBlock = on ? 'on' : 'off';
+  const card = document.getElementById('pulseBlock');
+  if (card) {{
+    card.classList.toggle('is-on', on);
+    card.classList.toggle('is-agent', document.body.classList.contains('ll-agent'));
+  }}
+  const label = on ? 'Hide from seller' : 'Show to seller';
+  document.querySelectorAll('#btnPulseVis, #btnPulseVisPanel').forEach(btn => {{
+    if (btn) btn.textContent = label;
+  }});
+  if (opts && opts.persist === false) return;
+  persistStoryEdits();
+}}
+function renderPulse(data) {{
+  const card = document.getElementById('pulseBlock');
+  if (!card) return;
+  const lock = data && data.lock;
+  const digest = data && data.digest;
+  const isAgent = document.body.classList.contains('ll-agent');
+  if (!lock && !isAgent) {{
+    card.hidden = true;
+    return;
+  }}
+  card.hidden = false;
+  card.classList.toggle('is-agent', isAgent);
+  if ((document.body.dataset.pulseBlock || 'on') === 'on') card.classList.add('is-on');
+  else card.classList.remove('is-on');
+  const asOf = document.getElementById('pulseAsOf');
+  if (lock && digest) {{
+    const locked = money(lock.locked_price);
+    const when = digest.as_of || '';
+    if (asOf) asOf.textContent = 'Against ' + locked + (when ? ' · as of ' + when : '') + ' · refresh to update';
+    const set = (id, n) => {{ const el = document.getElementById(id); if (el) el.textContent = String(n); }};
+    set('pulseNewUnder', digest.new_under);
+    set('pulseNewOver', digest.new_over);
+    set('pulseActiveCheaper', digest.still_active_cheaper);
+  }} else if (asOf) {{
+    asOf.textContent = 'Lock this list to measure new similar homes over and under that line.';
+  }}
+  const uploadWrap = document.getElementById('pulseUploadWrap');
+  if (uploadWrap) uploadWrap.hidden = !data || !data.needs_upload;
+  if (data && data.listingFlow && data.listingFlow.samples) {{
+    DATA.listingFlow = Object.assign(DATA.listingFlow || {{}}, data.listingFlow);
+    if (typeof updateSupplyAtPrice === 'function') updateSupplyAtPrice(currentRec || DATA.rec);
+  }}
+  renderPulseBrief(data && data.brief, isAgent);
+  renderPulseEmail(lock && lock.email);
+}}
+function pulseCardHtml(card) {{
+  const delta = Number(card.delta || 0);
+  const deltaTxt = delta ? ((delta > 0 ? '+' : '') + Math.round(delta).toLocaleString('en-US')) : 'at the list';
+  const bits = [];
+  if (card.beds) bits.push(card.beds + ' bd');
+  if (card.baths) bits.push(card.baths + ' ba');
+  if (card.sqft) bits.push(Math.round(card.sqft).toLocaleString('en-US') + ' sf');
+  if (card.list_date) bits.push(card.list_date);
+  if (card.dom) bits.push(card.dom + ' DOM');
+  const links = (card.zillow ? '<a href="' + card.zillow + '" target="_blank" rel="noopener">Zillow</a>' : '')
+    + (card.realtor ? '<a href="' + card.realtor + '" target="_blank" rel="noopener">Realtor.com</a>' : '');
+  return '<div class="pulse-li"><strong>' + escapeHtml(card.address || 'Listing') + '</strong>'
+    + '<div class="pulse-meta">' + money(card.price) + ' (' + deltaTxt + ') · ' + escapeHtml(card.status || '')
+    + (bits.length ? ' · ' + escapeHtml(bits.join(' · ')) : '') + '</div>' + links + '</div>';
+}}
+function renderPulseBrief(brief, isAgent) {{
+  const lists = document.getElementById('pulseLists');
+  const talkBox = document.getElementById('pulseTalk');
+  const talkList = document.getElementById('pulseTalkList');
+  if (!brief) {{
+    if (lists) lists.innerHTML = '';
+    if (talkBox) talkBox.hidden = true;
+    return;
+  }}
+  const tracks = ((brief.talk || {{}})[isAgent ? 'agent' : 'seller']) || [];
+  if (talkBox && talkList) {{
+    talkList.innerHTML = tracks.map(t => '<li>' + escapeHtml(t) + '</li>').join('');
+    talkBox.hidden = !tracks.length;
+  }}
+  if (!lists) return;
+  const blocks = [
+    ['New similar — under', brief.new_under],
+    ['New similar — over', brief.new_over],
+    ['Still active and cheaper', brief.cheaper_active],
+    ['Price cuts', brief.price_cuts],
+    ['Status changes', brief.status_changes],
+    ['No longer in this pull', brief.gone],
+  ];
+  lists.innerHTML = blocks.filter(([, rows]) => rows && rows.length).map(([title, rows]) => {{
+    return '<details open><summary>' + escapeHtml(title) + ' (' + rows.length + ')</summary>'
+      + rows.map(pulseCardHtml).join('') + '</details>';
+  }}).join('');
+}}
+function renderPulseEmail(cfg) {{
+  const on = !!(cfg && cfg.on);
+  const recips = (cfg && cfg.recipients) || ['agent'];
+  const who = (recips.indexOf('seller') >= 0 && recips.indexOf('agent') >= 0) ? 'both'
+    : (recips.indexOf('seller') >= 0 ? 'seller' : 'agent');
+  document.querySelectorAll('input[name="pulseWho"]').forEach(inp => {{ inp.checked = inp.value === who; }});
+  const sellerInp = document.getElementById('pulseSellerEmail');
+  if (sellerInp && cfg && cfg.seller_email) sellerInp.value = cfg.seller_email;
+  const status = on
+    ? ('Weekly pulse on · ' + who + (cfg.last_sent_at ? ' · last sent ' + String(cfg.last_sent_at).slice(0, 10) : ''))
+    : 'Not started — opt in for this listing only.';
+  const st = document.getElementById('pulseMailStatus');
+  if (st) st.textContent = status;
+  const pst = document.getElementById('pulseMailPanelStatus');
+  if (pst) pst.textContent = status;
+  const start = document.getElementById('btnPulseEmailStart');
+  const stop = document.getElementById('btnPulseEmailStop');
+  if (start) start.textContent = on ? 'Update weekly pulse' : 'Start weekly pulse';
+  if (stop) stop.hidden = !on;
+  const panelBtn = document.getElementById('btnPulseEmailPanel');
+  if (panelBtn) panelBtn.textContent = on ? 'Update weekly pulse' : 'Start weekly pulse';
+}}
+function pulseEmailPayload(on) {{
+  const who = (document.querySelector('input[name="pulseWho"]:checked') || {{}}).value || 'agent';
+  return {{
+    on: !!on,
+    recipients: who,
+    seller_email: (document.getElementById('pulseSellerEmail') || {{}}).value || '',
+  }};
+}}
+async function savePulseEmail(on) {{
+  if (!RUN_ID) return;
+  pulseStatus(on ? 'Saving weekly pulse…' : 'Stopping…');
+  try {{
+    const res = await fetch('/api/runs/' + RUN_ID + '/pulse-email', {{
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {{ 'Content-Type': 'application/json' }},
+      body: JSON.stringify(pulseEmailPayload(on)),
+    }});
+    const data = await res.json().catch(() => ({{}}));
+    if (!res.ok) throw new Error(apiDetail(data, 'Could not save'));
+    renderPulse(data);
+    pulseStatus(on ? 'Weekly pulse on' : 'Weekly pulse stopped');
+  }} catch (err) {{
+    pulseStatus(String(err.message || err));
+  }}
+}}
+function apiDetail(data, fallback) {{
+  const d = data && data.detail;
+  if (typeof d === 'string' && d) return d;
+  if (Array.isArray(d) && d[0]) return d[0].msg || d[0].detail || fallback;
+  return fallback;
+}}
+async function lockPulseIfNeeded(price) {{
+  if (!RUN_ID || !price) return;
+  try {{
+    const res = await fetch('/api/runs/' + RUN_ID + '/pulse');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data.lock) {{
+      renderPulse(data);
+      return;
+    }}
+    const lockRes = await fetch('/api/runs/' + RUN_ID + '/pulse-lock', {{
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {{ 'Content-Type': 'application/json' }},
+      body: JSON.stringify({{ price }}),
+    }});
+    if (lockRes.ok) renderPulse(await lockRes.json());
+  }} catch (e) {{}}
+}}
+async function loadPulse() {{
+  if (!RUN_ID) {{
+    const card = document.getElementById('pulseBlock');
+    if (card && document.body.classList.contains('ll-agent')) {{ card.hidden = false; card.classList.add('is-agent'); }}
+    return;
+  }}
+  try {{
+    const res = await fetch('/api/runs/' + RUN_ID + '/pulse');
+    if (!res.ok) return;
+    renderPulse(await res.json());
+  }} catch (e) {{}}
+}}
+function pulseStatus(msg) {{
+  const el = document.getElementById('pulseStatus');
+  if (el) el.textContent = msg || '';
+}}
+document.getElementById('btnPortalChip')?.addEventListener('click', () => {{
+  setPortalChip(document.body.dataset.portalChip === 'on' ? 'off' : 'on');
+}});
+document.getElementById('btnPortalChipPanel')?.addEventListener('click', () => {{
+  setPortalChip(document.body.dataset.portalChip === 'on' ? 'off' : 'on');
+}});
+document.getElementById('btnPulseVis')?.addEventListener('click', () => {{
+  setPulseBlock(document.body.dataset.pulseBlock === 'off' ? 'on' : 'off');
+}});
+document.getElementById('btnPulseVisPanel')?.addEventListener('click', () => {{
+  setPulseBlock(document.body.dataset.pulseBlock === 'off' ? 'on' : 'on');
+}});
+document.getElementById('btnPulseLock')?.addEventListener('click', async () => {{
+  if (!RUN_ID) return;
+  pulseStatus('Locking…');
+  try {{
+    const rec = +document.getElementById('editRec')?.value || currentRec || DATA.rec;
+    const res = await fetch('/api/runs/' + RUN_ID + '/pulse-lock', {{
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {{ 'Content-Type': 'application/json' }},
+      body: JSON.stringify({{ price: rec }}),
+    }});
+    if (!res.ok) throw new Error(apiDetail(await res.json().catch(() => ({{}})), 'Could not lock'));
+    renderPulse(await res.json());
+    pulseStatus('Locked at ' + money(rec));
+  }} catch (err) {{
+    pulseStatus(String(err.message || err));
+  }}
+}});
+document.getElementById('btnPulseRefresh')?.addEventListener('click', async () => {{
+  if (!RUN_ID) return;
+  const fileInp = document.getElementById('pulseExportFile');
+  const needsUpload = fileInp && document.getElementById('pulseUploadWrap') && !document.getElementById('pulseUploadWrap').hidden;
+  if (needsUpload && !(fileInp.files && fileInp.files[0])) {{
+    pulseStatus('Upload a fresh MLS export to refresh.');
+    fileInp.click();
+    return;
+  }}
+  pulseStatus('Refreshing…');
+  try {{
+    let res;
+    if (fileInp && fileInp.files && fileInp.files[0]) {{
+      const fd = new FormData();
+      fd.append('export_file', fileInp.files[0]);
+      res = await fetch('/api/runs/' + RUN_ID + '/pulse-refresh', {{ method: 'POST', credentials: 'same-origin', body: fd }});
+    }} else {{
+      res = await fetch('/api/runs/' + RUN_ID + '/pulse-refresh', {{ method: 'POST', credentials: 'same-origin' }});
+    }}
+    const data = await res.json().catch(() => ({{}}));
+    if (!res.ok) throw new Error(apiDetail(data, 'Refresh failed'));
+    renderPulse(data);
+    pulseStatus('Updated ' + (data.digest && data.digest.as_of ? data.digest.as_of : ''));
+  }} catch (err) {{
+    pulseStatus(String(err.message || err));
+  }}
+}});
+document.getElementById('pulseExportFile')?.addEventListener('change', () => {{
+  if (document.getElementById('pulseExportFile')?.files?.[0]) {{
+    document.getElementById('btnPulseRefresh')?.click();
+  }}
+}});
+document.getElementById('btnPulseEmailStart')?.addEventListener('click', () => savePulseEmail(true));
+document.getElementById('btnPulseEmailStop')?.addEventListener('click', () => savePulseEmail(false));
+document.getElementById('btnPulseEmailPanel')?.addEventListener('click', () => {{
+  const mail = document.getElementById('pulseMail');
+  if (mail) mail.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
+  savePulseEmail(true);
+}});
+setPortalChip('off', {{ persist: false, refreshDeck: false }});
+setPulseBlock('on', {{ persist: false }});
 loadSavedEdits();
+loadPulse();
 </script>
 <script src="/saas/assistant.js"></script>
 </body>

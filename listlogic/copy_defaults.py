@@ -159,4 +159,6 @@ def apply_run_edits(report: dict, edits: Any) -> dict:
                 merged[key] = text
         if merged:
             report["copy_ledes"] = merged
+    if data.get("portalChip") in ("on", "off"):
+        report.setdefault("meta", {})["portal_chip"] = data["portalChip"]
     return report

@@ -100,6 +100,14 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
 
     market_label = mdef.get("label") or area or "Your competitive market"
     chips = [c for c in (mdef.get("chips") or []) if c][:6]
+    portal_values = meta.get("portal_values") if isinstance(meta.get("portal_values"), dict) else {}
+    portal_line = ""
+    try:
+        portal_amt = float((portal_values or {}).get("amount") or 0)
+    except (TypeError, ValueError):
+        portal_amt = 0
+    if meta.get("portal_chip") == "on" and portal_amt > 0:
+        portal_line = f'<div class="portal-quiet">Zillow estimate ${portal_amt:,.0f}</div>'
 
     temp_label = (
         "Strong seller's market" if inv < 2.5 else
@@ -763,6 +771,7 @@ h1, h2, h3 {{ font-family: Fraunces, Georgia, serif; font-weight: 700; letter-sp
 .price-rec-main {{ display: flex; flex-direction: column; justify-content: center; }}
 .price-rec-num {{ font-family: Fraunces, Georgia, serif; font-size: clamp(2.8rem, 6vw, 4.2rem); font-weight: 700; color: var(--navy); letter-spacing: -.03em; line-height: 1; }}
 .price-rec-range {{ margin-top: 10px; font-size: 1rem; color: var(--muted); }}
+.portal-quiet {{ margin-top: 8px; font-size: .78rem; color: var(--muted); font-weight: 600; }}
 .price-rec-top {{ margin-top: 8px; color: var(--accent); font-weight: 700; }}
 .price-rec-bl {{ color: var(--ink); background: #f0f5fb; border-left-color: var(--accent); }}
 .price-rec-side {{ display: flex; flex-direction: column; justify-content: center; }}
@@ -1146,6 +1155,7 @@ body.ll-agent #deckAdvList li:focus, body.ll-agent #deckRiskList li:focus {{
         <div class="price-rec-grid">
           <div class="price-rec-main">
             <div class="price-rec-num" id="deckRec">${rec:,.0f}</div>
+            {portal_line}
             <div class="price-rec-range">Range <strong id="deckRange">${low:,.0f} – ${high:,.0f}</strong> · ~<strong id="deckDom">{exp_dom:.0f} days</strong> to contract</div>
             <div class="price-rec-top" id="deckTopPct">Top {top_mkt:.0f}% of similar recent sales</div>
             <div class="pos-bar" style="margin-top:14px"><div class="pos-marker" id="deckPosMarker"></div></div>

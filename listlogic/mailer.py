@@ -31,7 +31,15 @@ def feedback_to() -> str:
     return (os.environ.get("FEEDBACK_TO") or os.environ.get("ADMIN_BOOTSTRAP_EMAIL") or "adam@saahomes.com").strip()
 
 
-def send_email(*, to: str, subject: str, body: str, reply_to: str = "") -> bool:
+def send_email(
+    *,
+    to: str,
+    subject: str,
+    body: str,
+    reply_to: str = "",
+    html: str = "",
+    cc: str = "",
+) -> bool:
     cfg = _smtp_config()
     if not cfg:
         logger.info("SMTP not configured — skip email to %s · %s", to, subject)
@@ -40,9 +48,13 @@ def send_email(*, to: str, subject: str, body: str, reply_to: str = "") -> bool:
     msg["From"] = cfg["user"]
     msg["To"] = to
     msg["Subject"] = subject
+    if cc:
+        msg["Cc"] = cc
     if reply_to:
         msg["Reply-To"] = reply_to
     msg.set_content(body)
+    if html:
+        msg.add_alternative(html, subtype="html")
     try:
         with smtplib.SMTP(cfg["host"], cfg["port"], timeout=30) as smtp:
             smtp.starttls()
@@ -226,3 +238,152 @@ def send_owner_digest(digest: dict) -> bool:
         f"— ListLogic\n"
     )
     return send_email(to=feedback_to(), subject=f"ListLogic weekly · ${b.get('mrr', 0):,.0f} MRR · {b.get('paying', 0)} paying", body=body)
+
+
+def _money(n) -> str:
+    try:
+        return f"${int(round(float(n))):,}"
+    except (TypeError, ValueError):
+        return "—"
+
+
+def _esc(text) -> str:
+    return (
+        str(text or "")
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
+    )
+
+
+def _pulse_card_html(card: dict) -> str:
+    delta = int(card.get("delta") or 0)
+    delta_txt = f"{delta:+,}" if delta else "at the list"
+    bits = []
+    if card.get("beds"):
+        bits.append(f"{card.get('beds'):g} bd")
+    if card.get("baths"):
+        bits.append(f"{card.get('baths'):g} ba")
+    if card.get("sqft"):
+        bits.append(f"{int(card['sqft']):,} sf")
+    if card.get("list_date"):
+        bits.append(str(card["list_date"]))
+    if card.get("dom"):
+        bits.append(f"{int(card['dom'])} DOM")
+    meta = " · ".join(bits)
+    links = []
+    if card.get("zillow"):
+        links.append(f'<a href="{_esc(card["zillow"])}">Zillow</a>')
+    if card.get("realtor"):
+        links.append(f'<a href="{_esc(card["realtor"])}">Realtor.com</a>')
+    return (
+        f"<tr><td style='padding:10px 0;border-bottom:1px solid #eee'>"
+        f"<strong>{_esc(card.get('address') or 'Listing')}</strong>"
+        f"{' · ' + _esc(card.get('city')) if card.get('city') else ''}<br>"
+        f"{_money(card.get('price'))} <span style='color:#5c6675'>({_esc(delta_txt)} vs lock)</span>"
+        f"{' · ' + _esc(card.get('status')) if card.get('status') else ''}<br>"
+        f"<span style='color:#5c6675;font-size:13px'>{_esc(meta)}</span>"
+        f"{('<br>' + ' · '.join(links)) if links else ''}"
+        f"</td></tr>"
+    )
+
+
+def _pulse_card_text(card: dict) -> str:
+    delta = int(card.get("delta") or 0)
+    line = f"- {card.get('address') or 'Listing'} · {_money(card.get('price'))} ({delta:+,} vs lock)"
+    if card.get("zillow"):
+        line += f"\n  {card['zillow']}"
+    return line
+
+
+def send_pulse_brief(
+    *,
+    to: str,
+    brief: dict,
+    audience: str = "agent",
+    reply_to: str = "",
+    cc: str = "",
+    opt_out_url: str = "",
+    agent_name: str = "",
+) -> bool:
+    """Weekly locked-list pulse — HTML + plaintext."""
+    brief = brief if isinstance(brief, dict) else {}
+    digest = brief.get("digest") or {}
+    addr = brief.get("subject_address") or "Your listing"
+    locked = _money(brief.get("locked_price") or digest.get("locked_price"))
+    as_of = brief.get("as_of") or digest.get("as_of") or ""
+    days = brief.get("days_locked") or 0
+    market = brief.get("market_label") or ""
+    report_url = brief.get("report_url") or brief.get("share_url") or ""
+    share_url = brief.get("share_url") or report_url
+    tracks = (brief.get("talk") or {}).get("seller" if audience == "seller" else "agent") or []
+    who = "Market pulse" if audience == "seller" else "Weekly market pulse"
+    subject = f"{who} · {addr} · {as_of}".strip(" ·")
+
+    def section(title: str, cards: list) -> str:
+        if not cards:
+            return ""
+        rows = "".join(_pulse_card_html(c) for c in cards[:12])
+        return f"<h3 style='margin:22px 0 8px;font-size:16px'>{_esc(title)}</h3><table width='100%'>{rows}</table>"
+
+    def section_text(title: str, cards: list) -> str:
+        if not cards:
+            return ""
+        lines = "\n".join(_pulse_card_text(c) for c in cards[:12])
+        return f"\n{title}\n{lines}\n"
+
+    talk_html = "".join(f"<li>{_esc(t)}</li>" for t in tracks)
+    talk_label = "What to tell them" if audience == "agent" else "This week in your market"
+    score = (
+        f"{int(digest.get('new_under') or 0)} new similar under · "
+        f"{int(digest.get('new_over') or 0)} new similar over · "
+        f"{int(digest.get('still_active_cheaper') or 0)} still-active cheaper"
+    )
+    stale = ""
+    if brief.get("stale_upload"):
+        stale = (
+            "<p style='background:#fdf3e7;padding:10px 12px;border-radius:8px'>"
+            "This update uses the last market file on hand. Upload a fresh MLS export to refresh."
+            "</p>"
+        )
+    html = f"""<div style="font-family:Georgia,serif;max-width:640px;margin:0 auto;color:#0b1220">
+  <p style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#5c6675">{_esc(who)}</p>
+  <h1 style="font-size:22px;margin:6px 0 8px">{_esc(addr)}</h1>
+  <p style="color:#5c6675;margin:0 0 16px">Locked list {locked} · { _esc(market) } · as of {_esc(as_of)} · {int(days)} days since lock</p>
+  <p style="font-size:16px;margin:0 0 16px"><strong>{_esc(score)}</strong></p>
+  {stale}
+  <h3 style="margin:18px 0 8px;font-size:16px">{_esc(talk_label)}</h3>
+  <ul>{talk_html or '<li>Quiet week in the size band.</li>'}</ul>
+  {section("New similar — under the list", brief.get("new_under") or [])}
+  {section("New similar — over the list", brief.get("new_over") or [])}
+  {section("Still active and cheaper", brief.get("cheaper_active") or [])}
+  {section("Price cuts since last look", brief.get("price_cuts") or [])}
+  {section("Status changes", brief.get("status_changes") or [])}
+  {section("No longer in this pull", brief.get("gone") or [])}
+  <p style="margin-top:24px"><a href="{_esc(report_url)}">Open the Live Story</a>
+  {" · <a href='" + _esc(share_url) + "'>Share link</a>" if share_url and share_url != report_url else ""}</p>
+  <p style="font-size:12px;color:#5c6675;margin-top:28px">
+    ListLogic market pulse for this listing only. Not a pricing recommendation.
+    {(" · <a href='" + _esc(opt_out_url) + "'>Stop these emails</a>") if opt_out_url else ""}
+    {(" · " + _esc(agent_name)) if agent_name else ""}
+  </p>
+</div>"""
+    text = (
+        f"{who}\n{addr}\nLocked list {locked} · {market} · as of {as_of}\n{score}\n\n"
+        + "\n".join(f"- {t}" for t in tracks)
+        + section_text("New similar — under", brief.get("new_under") or [])
+        + section_text("New similar — over", brief.get("new_over") or [])
+        + section_text("Still active and cheaper", brief.get("cheaper_active") or [])
+        + section_text("Price cuts", brief.get("price_cuts") or [])
+        + f"\nOpen: {report_url}\n"
+        + (f"Stop: {opt_out_url}\n" if opt_out_url else "")
+    )
+    return send_email(
+        to=to,
+        cc=cc,
+        subject=subject,
+        body=text,
+        html=html,
+        reply_to=reply_to,
+    )
