@@ -7163,6 +7163,226 @@ export const blogPosts = [
       },
     ],
   },
+  {
+    slug: 'buying-a-home-in-erie-colorado',
+    title: 'Buying a Home in Erie, Colorado: A Complete 2026 Guide',
+    excerpt: 'Erie is one of the Front Range\'s fastest-growing Denver-exurb towns, spanning Weld and Boulder counties between Boulder and Longmont. Here is what buyers need to know about Erie homes for sale, neighborhoods, pricing, and the buying process in 2026.',
+    date: '2026-08-18',
+    category: 'Buyer Tips',
+    image: '/images/buyers-hero.jpg',
+    readTime: '9 min read',
+    keywords: 'erie homes for sale, erie co homes for sale, buying a home in erie colorado, erie colorado real estate, erie co realtor, moving to erie colorado, erie neighborhoods, erie co new construction, homes for sale in erie co, best neighborhoods erie colorado',
+    relatedLinks: [
+      { title: 'Erie homes for sale', href: '/northern-colorado-areas/erie/', description: 'Area guide with live IRES market stats' },
+      { title: 'Browse Erie listings', href: '/properties/?location=Erie, CO', description: 'New construction and resale homes' },
+      { title: 'Erie new construction guide', href: '/blog/erie-colorado-new-construction-buyer-guide/', description: 'Colliers Hill, Vista Ridge & builder inventory' },
+      { title: 'Best realtor in Erie', href: '/blog/erie-colorado-real-estate-agent/', description: 'Finding a trusted Erie real estate agent' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Buyer representation across Northern Colorado' },
+      { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Statewide programs for Colorado buyers' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
+    ],
+    cta: {
+      title: 'Ready to find your home in Erie?',
+      description: 'Adam and Mandi Schwartz help buyers across Erie, Longmont, Boulder, and the I-25 corridor navigate new construction, established neighborhoods, and the Weld-Boulder county line with clarity and confidence. Call (970) 999-1407 to start your Erie home search.',
+      primaryHref: '/contact/',
+      primaryText: 'Start Your Erie Home Search',
+      secondaryHref: '/northern-colorado-areas/erie/',
+      secondaryText: 'Browse Erie homes for sale',
+    },
+    faqs: [
+      { q: 'What is the average home price in Erie, Colorado?', a: 'Erie median home prices currently run roughly $690,000 to $725,000, with a wide spread by neighborhood: more established and in-town areas like Old Town Erie tend to sit lower, while newer and golf-course communities like Colliers Hill and Vista Ridge command premiums. Live listing medians appear on our Erie area guide; a comparative market analysis is more accurate than a portal estimate for any specific home.' },
+      { q: 'What are the best neighborhoods in Erie?', a: 'The most searched Erie neighborhoods include Colliers Hill (master-planned new construction), Vista Ridge (golf-course community), Erie Commons (established single-family), Old Town Erie (historic small-town core), plus Flatiron Meadows, Erie Highlands, Compass, and Creekside. We publish a neighborhood guide for each so you can compare price bands, school assignments, and lifestyle.' },
+      { q: 'Is Erie in Weld County or Boulder County?', a: 'Both. Erie sits on the Weld-Boulder county line, with many neighborhoods in Weld County and others in Boulder County. County determines the property tax base and some program rules, so we confirm the county on the exact parcel before you set a budget or write an offer.' },
+      { q: 'Which school district is Erie in?', a: 'Most of Erie is served by St. Vrain Valley School District (RE-1J), including Erie High School. A few neighborhoods on the Boulder County side fall in Boulder Valley School District. School assignment is by exact address, so we confirm boundaries before you write an offer.' },
+      { q: 'Can I use CHFA down payment assistance in Erie?', a: 'Yes. CHFA programs, including SmartStep Plus, Preferred Plus, and FirstStep, are available statewide for income-qualified buyers. Because Erie spans two counties, the applicable income and purchase-price limits depend on the exact property location, so we pair every Erie buyer with a CHFA-experienced lender to confirm eligibility.' },
+    ],
+    sections: [
+      {
+        heading: 'Why buyers choose Erie, Colorado',
+        paragraphs: [
+          'Erie is one of the clearest Denver-exurb growth stories on the Front Range — a rapidly expanding town on the Weld-Boulder county line, roughly 2.5 miles west of I-25 along Erie Parkway. Buyers who want newer homes without full Boulder prices, strong St. Vrain Valley schools, and a practical commute toward Denver, Boulder, or Longmont often land here first.',
+          'That position gives Erie a buyer pool that is broader than a typical Northern Colorado town: Boulder and Longmont commuters, families moving out of the Denver metro, and buyers priced out of Boulder proper who still want the corridor lifestyle and access. The tradeoff is a market that stays competitive in the best-located new communities, so strategy matters.',
+          'SAA Homes helps Erie buyers compare new construction against resale, confirm the county and school boundary on the exact address, and run the CHFA conversation in the same sitting. We cover builder incentives, offer strategy, and neighborhood-level pricing with live IRES market data — never static marketing numbers.',
+        ],
+        relatedLinks: [
+          { title: 'Erie homes for sale', href: '/northern-colorado-areas/erie/', description: 'Neighborhoods, market context & live IRES stats' },
+          { title: 'Erie new construction guide', href: '/blog/erie-colorado-new-construction-buyer-guide/', description: 'Builder communities & the buying-new playbook' },
+        ],
+      },
+      {
+        heading: 'Erie neighborhoods: new construction and established favorites',
+        paragraphs: [
+          'Colliers Hill is Erie\'s best-known master-planned community — a vibrant new-home neighborhood along Erie Parkway with multiple builders, community pools and parks, and homes spanning a wide price band. It is the first neighborhood many buyers name when they start an Erie search, and it is where new-construction inventory concentrates.',
+          'Vista Ridge is the resale anchor — a large master-planned community in east Erie with golf-course views, pools, and clubhouses, typically running from the mid-$400,000s to $900,000-plus. Erie Commons is an established, highly sought-after neighborhood with ranch and two-story homes and mature landscaping. Old Town Erie is the historic core along Briggs Street with small-town character and more generous lots.',
+          'Flatiron Meadows, Erie Highlands, Compass, and Creekside round out the map with newer single-family product at varying price points. We publish a neighborhood guide for each, so you can compare price bands, HOA structures, and school assignments before you tour.',
+        ],
+        relatedLinks: [
+          { title: 'Erie homes for sale', href: '/northern-colorado-areas/erie/', description: 'All Erie neighborhoods and market data' },
+          { title: 'Best realtor in Erie', href: '/blog/erie-colorado-real-estate-agent/', description: 'County-line expertise for your search' },
+        ],
+      },
+      {
+        heading: 'Steps to buy a home in Erie',
+        paragraphs: [
+          'Start with mortgage pre-approval so you know your budget in the current rate environment. The Erie median near $690,000 to $725,000 means entry points exist in attached homes and smaller single-family product, but the active price ranges move quickly — especially in new communities where builders release lots in phases.',
+          'Define your must-haves: bedrooms, yard, garage, commute to Boulder or Denver, and whether you prefer a new construction community or an established neighborhood. Confirm the county and school boundary on any address early — the Erie county split changes the property tax base and, for some buyers, the CHFA math.',
+          'In the competitive Erie new-construction market, the total cost matters as much as the list price: base price, lot premium, design-center upgrades, and closing costs. We run that math against comparable resale inventory so you are comparing true totals, not brochures.',
+        ],
+        list: [
+          'Get pre-approved with a trusted lender (ask about CHFA and county-specific limits)',
+          'Define your target neighborhoods and confirm county + school boundary on each address',
+          'Compare new construction total cost against resale in the same neighborhood',
+          'Tour homes and model homes with your buyer agent',
+          'Make a strong, informed offer, then complete inspection, appraisal, and closing',
+        ],
+        relatedLinks: [
+          { title: 'Browse Erie listings', href: '/properties/?location=Erie, CO', description: 'Search current Erie homes for sale' },
+          { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Buyer representation across Northern Colorado' },
+        ],
+      },
+      {
+        heading: 'Erie housing market overview for 2026',
+        paragraphs: [
+          'The Erie median home price currently runs roughly $690,000 to $725,000, up about 8% year-over-year — a reflection of Denver-exurb demand and a new-construction-heavy mix. Inventory in Erie stays deeper relative to many Northern Colorado towns, which gives buyers more choice but keeps the best-located new homes competitive.',
+          'The market is segmented: newer and golf-course communities like Colliers Hill and Vista Ridge sit at the top of the price band, while more established and in-town neighborhoods offer lower entry points. That spread means the Erie median is less useful than a neighborhood-level comparison for the home you are actually considering.',
+          'Buyers who understand neighborhood pricing, arrive pre-approved, and work with an agent who knows the county line have a measurable advantage — especially when builder incentives or resale concessions are on the table.',
+        ],
+        relatedLinks: [
+          { title: 'Erie homes for sale', href: '/northern-colorado-areas/erie/', description: 'Live IRES listing counts and median list price' },
+        ],
+      },
+      {
+        heading: 'Programs and assistance for Erie buyers',
+        paragraphs: [
+          'Colorado buyers looking at Erie may qualify for down payment assistance through CHFA — including SmartStep Plus grants, Preferred Plus deferred second mortgages, and FirstStep for first-time buyers. Because Erie spans Weld and Boulder counties, the applicable income and purchase-price limits depend on the exact property location.',
+          'Weld County and Boulder County can carry different program parameters, so we confirm the county first and pair you with a CHFA-experienced lender to verify eligibility before you write an offer. Conventional, FHA, and VA loans are also widely available for Erie properties, and some builders offer preferred-lender incentives worth comparing.',
+          'Review our complete CHFA down payment assistance guide, or ask your agent and lender which programs fit your situation. A local lender familiar with both Weld and Boulder county programs can help you compare every option side by side.',
+        ],
+        relatedLinks: [
+          { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'SmartStep, Preferred, FirstStep and more' },
+          { title: 'Mortgage Calculator', href: '/mortgage-calculator/', description: 'Estimate your monthly payment' },
+        ],
+      },
+      {
+        heading: 'Why choose Schwartz and Associates for your Erie home search?',
+        paragraphs: [
+          'Adam and Mandi Schwartz bring over 20 years of combined Northern Colorado real estate experience. As a Coldwell Banker Realty team, SAA Homes has deep knowledge of Erie neighborhoods, the nuances of the Weld-Boulder county line, and the new-construction dynamics that set Erie apart from Boulder, Longmont, and the Carbon Valley.',
+          'Our buyer process includes helping you compare Erie against nearby markets — Longmont, Boulder, Frederick, Firestone, and Lafayette — to make sure you find the right fit for your lifestyle, budget, and commute. We connect you with trusted local lenders experienced with CHFA on both sides of the county line, tour homes and model homes together, and negotiate with your best interests in mind.',
+          'Located at 3665 John F. Kennedy Parkway, Suite 210, Fort Collins, CO 80525, we serve Erie buyers through the entire journey. Call (970) 999-1407 or visit our contact page to schedule a free consultation.',
+        ],
+        relatedLinks: [
+          { title: 'Erie homes for sale', href: '/northern-colorado-areas/erie/', description: 'Neighborhoods, market insights & lifestyle' },
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407 to discuss your buying goals' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'selling-your-home-in-erie-colorado',
+    title: 'Selling Your Home in Erie, Colorado: A Complete 2026 Guide',
+    excerpt: 'Everything Erie home sellers need to know in 2026 — pricing strategy, home preparation, market conditions, and your options, including a cash offer or a free home valuation. Here is how to sell smart in one of the Front Range\'s fastest-growing towns.',
+    date: '2026-08-18',
+    category: 'Seller Tips',
+    image: '/images/Northern Colorado.webp',
+    readTime: '10 min read',
+    keywords: 'sell my home erie colorado, erie co real estate agent, selling a home in erie co, erie colorado homes for sale, erie home selling guide, how to sell a home in erie colorado, listing agent erie co, erie co home value, cash offer erie colorado',
+    relatedLinks: [
+      { title: 'Sell your home in Erie', href: '/northern-colorado-areas/erie/', description: 'Area guide with live IRES market stats' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Expert seller representation & free market analysis' },
+      { title: 'Browse Erie homes for sale', href: '/properties/?location=Erie, CO', description: 'See your current competition' },
+      { title: 'Best realtor in Erie', href: '/blog/erie-colorado-real-estate-agent/', description: 'A trusted Erie listing agent' },
+      { title: 'Erie new construction guide', href: '/blog/erie-colorado-new-construction-buyer-guide/', description: 'The new inventory you are competing with' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Understand your buyer pool' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
+    ],
+    cta: {
+      title: 'Ready to sell your Erie home?',
+      description: 'Adam and Mandi Schwartz provide expert Erie listing representation — from pre-listing preparation and strategic pricing to closing. Request a free, no-obligation market analysis or a cash offer on your Erie home today. Call (970) 999-1407.',
+      primaryHref: '/for-sellers/#market-report-form',
+      primaryText: 'Get a Free Market Analysis',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to an Erie Listing Agent',
+    },
+    faqs: [
+      { q: 'How much is my Erie home worth in 2026?', a: 'Erie home values vary by neighborhood, condition, and whether your property sits on the Weld or Boulder county side. Erie median home prices currently run roughly $690,000 to $725,000, with newer and golf-course communities at the top of the band. Request a free comparative market analysis from a local Erie listing agent for a personalized estimate.' },
+      { q: 'What is the best time of year to sell a home in Erie?', a: 'Spring and early summer (May through August) are traditionally the strongest selling seasons in Erie, when family buyers are most active. However, well-priced Erie homes sell year-round in this high-demand Denver-exurb market. The key is pricing right and presenting your home well, regardless of season.' },
+      { q: 'How long does it take to sell a home in Erie?', a: 'Timing depends on price point and neighborhood. Well-priced homes in active ranges can draw offers within a few weeks, while premium listings in golf-course or newer communities may take longer. Your Erie listing agent will set realistic expectations based on recent solds in your specific neighborhood.' },
+      { q: 'Should I make repairs before selling my Erie home?', a: 'Focus on high-return improvements: curb appeal, fresh neutral paint, decluttering, and addressing obvious issues buyers and appraisers will flag. A pre-listing inspection can help you decide which repairs are worth the investment. Erie buyers in the mid-to-upper price ranges expect move-in-ready homes.' },
+      { q: 'Can I sell my Erie home for cash?', a: 'Yes. Some sellers prefer a cash offer for speed and certainty — no financing contingency, a flexible timeline, and a simpler close. A cash offer is not always your highest price, so we compare it against a traditional listing with a free home valuation before you decide. Call (970) 999-1407 to explore both options.' },
+    ],
+    sections: [
+      {
+        heading: 'Why selling in Erie in 2026 offers real advantages',
+        paragraphs: [
+          'Erie is one of the fastest-growing Denver-exurb towns on the Front Range, and that demand works in a seller\'s favor. Your buyer pool includes Boulder and Longmont commuters, families moving out of the Denver metro, and buyers priced out of Boulder proper who still want the corridor lifestyle — a broad audience many Northern Colorado towns do not have.',
+          'In 2026, Erie median home prices run roughly $690,000 to $725,000, up about 8% year-over-year. The market has balanced from the pandemic-era frenzy, but well-presented, accurately priced homes in desirable neighborhoods still command strong interest. The difference today is that buyers have more choices — which makes strategic pricing and presentation essential.',
+          'Working with an Erie listing agent who understands the Weld-Boulder county line, new-construction competition, and neighborhood-level comps is your single biggest advantage. A local agent knows which neighborhoods command premiums and which buyer segments are most active in your price range.',
+        ],
+        relatedLinks: [
+          { title: 'Sell your home in Erie', href: '/northern-colorado-areas/erie/', description: 'Neighborhoods, market data & lifestyle' },
+        ],
+      },
+      {
+        heading: 'Understanding your Erie home value in a two-county market',
+        paragraphs: [
+          'Pricing your Erie home correctly from day one is the most important decision you will make. A comparative market analysis (CMA) from an experienced Erie listing agent is far more accurate than an online estimate — your agent compares recent sold listings from your specific neighborhood, adjusting for square footage, updates, lot size, and whether your home sits in Weld or Boulder County.',
+          'That county split matters: Weld and Boulder counties have different property tax bases, and some program rules differ. We confirm the county on your exact parcel before pricing, and we price against your neighborhood\'s own solds — a Vista Ridge golf-course lot, an Erie Commons ranch, and a Colliers Hill new build do not move on the same curve.',
+          'Key factors that affect your Erie home value include neighborhood (Colliers Hill vs. Old Town Erie), school assignment (St. Vrain Valley vs. Boulder Valley), county, recent updates, lot size, and proximity to trails and parks.',
+        ],
+      },
+      {
+        heading: 'Preparing your Erie home for the 2026 buyer',
+        paragraphs: [
+          'First impressions matter in the competitive Erie market. Most buyers start their search online, and your listing photos and virtual tour are often the deciding factor in whether they schedule a showing. Professional photography is essential — homes with professional photos sell faster and closer to asking price.',
+          'Focus your preparation on high-return changes for Erie\'s family-oriented buyers: declutter every room, deep clean carpets and windows, refresh paint in neutral colors, and improve curb appeal with landscaping and a clean entryway. Stage the kitchen, primary suite, and living areas to help buyers visualize the space.',
+          'Erie buyers value outdoor living and community amenities — highlight patios, decks, fenced yards, and proximity to trails, parks, and the town\'s events. A well-maintained backyard with space for kids or pets can be the feature that sets your listing apart.',
+        ],
+        list: [
+          'Professional photography and twilight shots',
+          'Declutter and depersonalize all rooms',
+          'Deep clean carpets, windows, and surfaces',
+          'Neutral paint refresh where needed',
+          'Landscape and improve curb appeal',
+          'Stage high-impact rooms (living, kitchen, primary suite)',
+        ],
+      },
+      {
+        heading: 'Marketing your Erie listing to the right buyers',
+        paragraphs: [
+          'Your Erie listing agent should run a full marketing plan: placement on the MLS and major portals, social media promotion, email to active buyer networks, and targeted digital advertising reaching relocating buyers from Denver and out of state. Erie attracts a steady stream of relocation buyers from higher-cost Front Range and out-of-state markets.',
+          'Video tours and drone footage help out-of-state buyers — who increasingly buy Erie homes sight-unseen or after a single visit — feel confident making an offer. Highlighting the commute to Boulder, Longmont, or the Denver metro, plus St. Vrain Valley schools and community amenities, speaks directly to your buyer pool.',
+          'Strategic pricing is itself a marketing tool. A well-priced Erie home generates early showing activity and can create competition among buyers, driving the final price above initial expectations. Your agent should help you find the launch price that balances your goals with current market conditions.',
+        ],
+        relatedLinks: [
+          { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Professional marketing & expert pricing strategy' },
+        ],
+      },
+      {
+        heading: 'Your selling options: list it, or take a cash offer',
+        paragraphs: [
+          'Not every Erie seller wants a traditional listing. A cash offer can mean a faster, simpler close — no financing contingency, a flexible timeline, and fewer hurdles. It can be the right fit when you need to move quickly, are relocating, or want to avoid showing your home over several weekends.',
+          'A cash offer is not always your highest price. The right answer is to compare it against what a well-marketed traditional listing would net — which is why we start every Erie seller with a free, no-obligation home valuation and, when relevant, a cash offer side by side. You decide with real numbers, not a guess.',
+          'Whatever path you choose, we help you rank offers by certainty of close, not only top line. Erie offers can arrive with conventional financing, CHFA, or cash layered in, and we help you weigh each one against your timeline and goals.',
+        ],
+        relatedLinks: [
+          { title: 'Sell your home in Erie', href: '/northern-colorado-areas/erie/', description: 'See the Seller section and free home valuation' },
+          { title: 'Cash Home Buyers', href: '/cash-home-buyers/', description: 'Compare a cash offer against a listing' },
+        ],
+      },
+      {
+        heading: 'Why choose Schwartz and Associates as your Erie listing agent?',
+        paragraphs: [
+          'Adam and Mandi Schwartz bring over 20 years of combined experience serving Northern Colorado home sellers. As a Coldwell Banker Realty team, SAA Homes has access to the industry\'s most powerful marketing platform while maintaining the personalized attention only a local team can provide.',
+          'Our Erie seller process includes professional photography and videography, strategic pricing based on real-time market data, aggressive digital marketing targeting active buyers, open houses and broker tours, and continuous communication from listing to closing — plus a cash-offer and free-valuation option for sellers who want alternatives.',
+          'Located at 3665 John F. Kennedy Parkway, Suite 210, Fort Collins, CO 80525, our team is deeply connected to the Erie community. We know the neighborhoods — from Colliers Hill to Old Town Erie — and we understand what buyers in each area expect. When you work with SAA Homes, you get a complete selling system designed for the Erie market.',
+        ],
+        relatedLinks: [
+          { title: 'Sell your home in Erie', href: '/northern-colorado-areas/erie/', description: 'Neighborhoods, schools & market insights' },
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407 to discuss your home' },
+        ],
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug) {

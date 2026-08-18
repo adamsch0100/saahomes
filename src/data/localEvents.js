@@ -239,6 +239,31 @@ export const cityEvents = {
       officialUrl: 'https://www.coloradoshakes.org/',
     },
   ],
+  erie: [
+    {
+      name: 'Erie Farmers Market',
+      season: 'Summer',
+      typicalMonths: 'May–September',
+      dates: 'May 7 – Sep 17, 2026',
+      description: 'Weekly Thursday evening market (5–8pm) on Briggs Street in downtown Erie, with local produce, meats, eggs, artisan breads, honey, and cheese.',
+      officialUrl: 'https://www.erieco.gov/Calendar.aspx?EID=5151',
+    },
+    {
+      name: 'Erie Balloon Festival',
+      season: 'Summer',
+      typicalMonths: 'July',
+      dates: 'Jul 10–12, 2026',
+      description: 'The 28th annual Erie Balloon Festival fills the skies with dozens of hot air balloons over the Colliers Hill area, with early-morning inflations and family activities.',
+      officialUrl: 'https://erieballoonfestival.com/',
+    },
+    {
+      name: 'Erie Town Fair',
+      season: 'Spring',
+      typicalMonths: 'May',
+      description: 'The annual Erie community celebration each May with a parade, vendors, live music, and family activities in the downtown area.',
+      officialUrl: 'https://www.eriechamber.org/special-events/',
+    },
+  ],
   timnath: [
     {
       name: 'Timnath 4th of July Celebration',

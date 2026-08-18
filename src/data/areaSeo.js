@@ -898,6 +898,7 @@ export function getAreaExactTitle(area) {
     'loveland': 'Loveland Homes for Sale | Loveland CO Real Estate & Neighborhood Guide | SAA Homes',
     'windsor': 'Windsor Colorado Homes for Sale | Windsor CO Real Estate & Community Guide | SAA Homes',
     'greeley': 'Greeley Homes for Sale | Greeley CO Real Estate & Neighborhood Guide | SAA Homes',
+    'erie': 'Erie CO Homes for Sale | Erie Colorado Real Estate Guide | SAA Homes',
   };
   if (cityTitles[area.slug]) return cityTitles[area.slug];
   return `${area.city} Real Estate | Homes for Sale in ${area.city}, CO | Schwartz and Associates`;
