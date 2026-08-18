@@ -1,4 +1,4 @@
-﻿"""
+"""
 ListLogic – Core Analysis Engine
 Data-driven custom pricing strategy for listing agents.
 
@@ -946,6 +946,20 @@ def pulse_portal_urls(address: str, city: str = "", state: str = "") -> dict:
     }
 
 
+FINGERPRINT_LIVE_STATUSES = frozenset({"Active", "Pending", "Backup", "FirstRight"})
+FINGERPRINT_UC_STATUSES = frozenset({"Pending", "Backup", "FirstRight"})
+
+
+def _pulse_latlng(row: pd.Series) -> tuple[float | None, float | None]:
+    lat = _pulse_num(row, "Latitude", "Lat")
+    lng = _pulse_num(row, "Longitude", "Lng", "Lon")
+    if not lat or not lng:
+        return None, None
+    if abs(lat) > 90 or abs(lng) > 180:
+        return None, None
+    return lat, lng
+
+
 def _pulse_listing_from_row(row: pd.Series, locked: float, *, list_date: str = "") -> dict:
     try:
         price = float(row.get("Price"))
@@ -957,6 +971,8 @@ def _pulse_listing_from_row(row: pd.Series, locked: float, *, list_date: str = "
     side = "under" if price < locked else ("over" if price > locked else "at")
     ppsf = round(price / sqft, 2) if price and sqft else 0.0
     urls = pulse_portal_urls(address, city)
+    lat, lng = _pulse_latlng(row)
+    photo = extract_photo_url(row)
     return {
         "id": _pulse_listing_id(row),
         "mls": str(row.get("MLSNumber") or "").strip(),
@@ -975,6 +991,64 @@ def _pulse_listing_from_row(row: pd.Series, locked: float, *, list_date: str = "
         "side": side,
         "zillow": urls["zillow"],
         "realtor": urls["realtor"],
+        "photo_url": photo,
+        "photos": [photo] if photo else [],
+        "lat": lat,
+        "lng": lng,
+        "rank": 0,
+        "rank_of": 0,
+    }
+
+
+def apply_listing_photos(listings: list[dict], photo_map: dict | None, gallery_map: dict | None = None) -> list[dict]:
+    """Attach hosted MLS photos onto fingerprint listing cards."""
+    photos = photo_map if isinstance(photo_map, dict) else {}
+    galleries = gallery_map if isinstance(gallery_map, dict) else {}
+    out: list[dict] = []
+    for row in listings or []:
+        if not isinstance(row, dict):
+            continue
+        card = dict(row)
+        mls = str(card.get("mls") or card.get("id") or "")
+        hosted = photos.get(mls) or photos.get(card.get("id")) or ""
+        if isinstance(hosted, list):
+            hosted = hosted[0] if hosted else ""
+        gallery = galleries.get(mls) or galleries.get(card.get("id")) or []
+        if isinstance(gallery, str):
+            gallery = [gallery] if gallery else []
+        if hosted and not card.get("photo_url"):
+            card["photo_url"] = hosted
+        urls = []
+        if card.get("photo_url"):
+            urls.append(str(card["photo_url"]))
+        for u in gallery:
+            su = str(u or "").strip()
+            if su and su not in urls:
+                urls.append(su)
+        card["photos"] = urls[:8]
+        if urls and not card.get("photo_url"):
+            card["photo_url"] = urls[0]
+        out.append(card)
+    return out
+
+
+def _assign_active_ranks(listings: list[dict], locked_price: float) -> dict:
+    """Rank Active listings by list price; subject rank includes the locked list."""
+    actives = [
+        r for r in listings
+        if isinstance(r, dict) and str(r.get("status") or "") == "Active" and r.get("price")
+    ]
+    actives.sort(key=lambda r: int(r.get("price") or 0))
+    n = len(actives)
+    for i, row in enumerate(actives, 1):
+        row["rank"] = i
+        row["rank_of"] = n
+    locked = float(locked_price or 0)
+    cheaper = sum(1 for r in actives if int(r.get("price") or 0) < locked) if locked else 0
+    return {
+        "rank": cheaper + 1 if locked else 0,
+        "rank_of": n + 1 if locked else n,
+        "active_count": n,
     }
 
 
@@ -984,8 +1058,10 @@ def build_pulse_snapshot(
     living_area: float = 0,
     *,
     as_of: str | None = None,
+    photo_map: dict | None = None,
+    gallery_map: dict | None = None,
 ) -> dict:
-    """Current similar listings (80–120% sqft) tagged over/under the locked list."""
+    """Live similar listings (Active + under contract) tagged over/under the locked list."""
     as_of = as_of or datetime.now().strftime("%Y-%m-%d")
     locked = float(locked_price or 0)
     empty = {
@@ -993,6 +1069,9 @@ def build_pulse_snapshot(
         "locked_price": round(locked) if locked else 0,
         "subject_sqft": round(float(living_area or 0)),
         "listings": [],
+        "rank": 0,
+        "rank_of": 0,
+        "active_count": 0,
     }
     if df is None or len(df) == 0 or locked <= 0:
         return empty
@@ -1011,6 +1090,9 @@ def build_pulse_snapshot(
             continue
         if price <= 0:
             continue
+        status = str(row.get("StatusNorm") or "")
+        if status not in FINGERPRINT_LIVE_STATUSES:
+            continue
         list_date = ""
         raw_date = row.get("ListDate")
         if pd.notna(raw_date):
@@ -1019,12 +1101,170 @@ def build_pulse_snapshot(
             except Exception:
                 list_date = ""
         listings.append(_pulse_listing_from_row(row, locked, list_date=list_date))
+    listings = apply_listing_photos(listings, photo_map, gallery_map)
+    rank_info = _assign_active_ranks(listings, locked)
     return {
         "as_of": as_of,
         "locked_price": int(round(locked)),
         "subject_sqft": round(float(living_area or 0)),
         "listings": listings,
+        **rank_info,
     }
+
+
+def freeze_fingerprint_baseline(snapshot: dict | None) -> dict:
+    """Day-0 Active cohort from the first snapshot."""
+    snap = snapshot if isinstance(snapshot, dict) else {}
+    actives = [
+        dict(r)
+        for r in (snap.get("listings") or [])
+        if isinstance(r, dict) and str(r.get("status") or "") == "Active"
+    ]
+    return {
+        "as_of": snap.get("as_of") or datetime.now().strftime("%Y-%m-%d"),
+        "locked_price": int(snap.get("locked_price") or 0),
+        "subject_sqft": snap.get("subject_sqft") or 0,
+        "listings": actives,
+        "ids": [str(r.get("id")) for r in actives if r.get("id")],
+        "rank": snap.get("rank") or 0,
+        "rank_of": snap.get("rank_of") or 0,
+        "active_count": len(actives),
+    }
+
+
+def fingerprint_sold_from_df(df: pd.DataFrame, ids: set[str]) -> dict[str, dict]:
+    """Baseline ids that now show Sold in the full market pull."""
+    found: dict[str, dict] = {}
+    if df is None or len(df) == 0 or not ids:
+        return found
+    work = df.copy()
+    if "StatusNorm" not in work.columns:
+        return found
+    sold = work[work["StatusNorm"] == "Sold"]
+    for _, row in sold.iterrows():
+        pid = _pulse_listing_id(row)
+        if pid not in ids:
+            continue
+        list_date = ""
+        raw_date = row.get("ListDate")
+        if pd.notna(raw_date):
+            try:
+                list_date = pd.to_datetime(raw_date).strftime("%Y-%m-%d")
+            except Exception:
+                list_date = ""
+        card = _pulse_listing_from_row(row, 0, list_date=list_date)
+        card["status"] = "Sold"
+        found[pid] = card
+    return found
+
+
+def merge_fingerprint_ledger(
+    ledger: dict | None,
+    snapshot: dict | None,
+    *,
+    baseline: dict | None = None,
+    sold_map: dict | None = None,
+    as_of: str | None = None,
+) -> dict:
+    """Keep every seen listing, including homes that left the live pull."""
+    snap = snapshot if isinstance(snapshot, dict) else {}
+    as_of = as_of or str(snap.get("as_of") or datetime.now().strftime("%Y-%m-%d"))
+    locked = float(snap.get("locked_price") or 0)
+    prev = ledger if isinstance(ledger, dict) else {}
+    listings = dict(prev.get("listings") or {})
+    baseline_ids = set()
+    if isinstance(baseline, dict):
+        baseline_ids = {str(x) for x in (baseline.get("ids") or []) if x}
+        if not baseline_ids:
+            baseline_ids = {
+                str(r.get("id"))
+                for r in (baseline.get("listings") or [])
+                if isinstance(r, dict) and r.get("id")
+            }
+
+    curr_ids: set[str] = set()
+    for row in snap.get("listings") or []:
+        if not isinstance(row, dict) or not row.get("id"):
+            continue
+        pid = str(row["id"])
+        curr_ids.add(pid)
+        existing = listings.get(pid) if isinstance(listings.get(pid), dict) else {}
+        card = _pulse_card(row, locked)
+        status_hist = list(existing.get("status_history") or [])
+        new_status = str(card.get("status") or "")
+        new_price = int(card.get("price") or 0)
+        last = status_hist[-1] if status_hist else {}
+        if not status_hist or last.get("status") != new_status or last.get("price") != new_price:
+            status_hist.append({"as_of": as_of, "status": new_status, "price": new_price})
+            status_hist = status_hist[-16:]
+        listings[pid] = {
+            **existing,
+            **card,
+            "baseline": bool(existing.get("baseline") or pid in baseline_ids),
+            "first_seen": existing.get("first_seen") or as_of,
+            "last_seen": as_of,
+            "first_price": existing.get("first_price") or new_price,
+            "last_price": new_price,
+            "first_status": existing.get("first_status") or new_status,
+            "last_status": new_status,
+            "rank_then": existing.get("rank_then") or card.get("rank") or 0,
+            "rank_now": card.get("rank") or 0,
+            "status_history": status_hist,
+            "gone": False,
+        }
+
+    sold_map = sold_map if isinstance(sold_map, dict) else {}
+    for pid, sold_row in sold_map.items():
+        existing = listings.get(pid) if isinstance(listings.get(pid), dict) else {}
+        card = _pulse_card(sold_row, locked)
+        card["status"] = "Sold"
+        status_hist = list(existing.get("status_history") or [])
+        if not status_hist or status_hist[-1].get("status") != "Sold":
+            status_hist.append({"as_of": as_of, "status": "Sold", "price": int(card.get("price") or 0)})
+        listings[pid] = {
+            **existing,
+            **card,
+            "baseline": bool(existing.get("baseline") or pid in baseline_ids),
+            "first_seen": existing.get("first_seen") or as_of,
+            "last_seen": as_of,
+            "last_status": "Sold",
+            "status_history": status_hist[-16:],
+            "gone": False,
+        }
+        curr_ids.add(pid)
+
+    for pid, existing in list(listings.items()):
+        if pid in curr_ids:
+            continue
+        last_status = str(existing.get("last_status") or "")
+        gone = last_status not in FINGERPRINT_UC_STATUSES and last_status != "Sold"
+        listings[pid] = {**existing, "gone": gone, "last_seen": existing.get("last_seen") or as_of}
+
+    return {"listings": listings, "updated": as_of}
+
+
+def append_fingerprint_history(history: list | None, snapshot: dict | None, digest: dict | None) -> list:
+    snap = snapshot if isinstance(snapshot, dict) else {}
+    dig = digest if isinstance(digest, dict) else {}
+    rows = list(history) if isinstance(history, list) else []
+    as_of = str(snap.get("as_of") or dig.get("as_of") or datetime.now().strftime("%Y-%m-%d"))
+    row = {
+        "as_of": as_of,
+        "locked_price": int(snap.get("locked_price") or dig.get("locked_price") or 0),
+        "rank": int(snap.get("rank") or dig.get("rank") or 0),
+        "rank_of": int(snap.get("rank_of") or dig.get("rank_of") or 0),
+        "active_count": int(snap.get("active_count") or 0),
+        "new_under": int(dig.get("new_under") or 0),
+        "new_over": int(dig.get("new_over") or 0),
+        "still_active_cheaper": int(dig.get("still_active_cheaper") or 0),
+        "went_pending": int(dig.get("went_pending") or 0),
+        "went_sold": int(dig.get("went_sold") or 0),
+    }
+    if rows and rows[-1].get("as_of") == as_of:
+        rows[-1] = row
+    else:
+        rows.append(row)
+    return rows[-52:]
 
 
 def _pulse_ids(snapshot: dict | None) -> set[str]:
@@ -1041,6 +1281,9 @@ def digest_pulse(
     snapshot: dict | None,
     locked: dict | None,
     previous: dict | None = None,
+    *,
+    baseline: dict | None = None,
+    ledger: dict | None = None,
 ) -> dict:
     """Over/under counts since the locked list — same band as listing flow.
 
@@ -1057,6 +1300,8 @@ def digest_pulse(
     new_under = 0
     new_over = 0
     still_active_cheaper = 0
+    active_now = 0
+    pending_now = 0
     for row in snap.get("listings") or []:
         if not isinstance(row, dict):
             continue
@@ -1064,6 +1309,11 @@ def digest_pulse(
             price = float(row.get("price") or 0)
         except (TypeError, ValueError):
             price = 0
+        status = str(row.get("status") or "")
+        if status == "Active":
+            active_now += 1
+        if status in FINGERPRINT_UC_STATUSES:
+            pending_now += 1
         list_ts = pd.to_datetime(row.get("list_date") or "", errors="coerce")
         listed_after_lock = bool(pd.notna(lock_ts) and pd.notna(list_ts) and list_ts >= lock_ts)
         appeared = bool(has_prev and row.get("id") and str(row.get("id")) not in prev_ids)
@@ -1076,8 +1326,33 @@ def digest_pulse(
                 new_under += 1
             elif side == "over":
                 new_over += 1
-        if str(row.get("status") or "") == "Active" and price and price < locked_price:
+        if status == "Active" and price and price < locked_price:
             still_active_cheaper += 1
+
+    baseline_ids = set()
+    if isinstance(baseline, dict):
+        baseline_ids = {str(x) for x in (baseline.get("ids") or []) if x}
+        if not baseline_ids:
+            baseline_ids = {
+                str(r.get("id"))
+                for r in (baseline.get("listings") or [])
+                if isinstance(r, dict) and r.get("id")
+            }
+    went_pending = 0
+    went_sold = 0
+    still_from_baseline = 0
+    ledger_listings = (ledger or {}).get("listings") if isinstance(ledger, dict) else {}
+    if isinstance(ledger_listings, dict) and baseline_ids:
+        for pid in baseline_ids:
+            rec = ledger_listings.get(pid) if isinstance(ledger_listings.get(pid), dict) else {}
+            st = str(rec.get("last_status") or "")
+            if st == "Active" and not rec.get("gone"):
+                still_from_baseline += 1
+            elif st in FINGERPRINT_UC_STATUSES:
+                went_pending += 1
+            elif st == "Sold":
+                went_sold += 1
+
     as_of = snap.get("as_of") or datetime.now().strftime("%Y-%m-%d")
     return {
         "new_under": new_under,
@@ -1087,6 +1362,15 @@ def digest_pulse(
         "locked_price": int(round(locked_price)) if locked_price else 0,
         "locked_at": locked_at,
         "count": len(snap.get("listings") or []),
+        "active_count": int(snap.get("active_count") or active_now),
+        "pending_now": pending_now,
+        "baseline_active": len(baseline_ids),
+        "still_from_baseline": still_from_baseline,
+        "went_pending": went_pending,
+        "went_sold": went_sold,
+        "rank": int(snap.get("rank") or 0),
+        "rank_of": int(snap.get("rank_of") or 0),
+        "rank_then": int((baseline or {}).get("rank") or 0) if isinstance(baseline, dict) else 0,
     }
 
 
@@ -1116,6 +1400,10 @@ def _pulse_card(row: dict, locked_price: float) -> dict:
         "zillow": row.get("zillow") or "",
         "realtor": row.get("realtor") or "",
     }
+    photos = row.get("photos") if isinstance(row.get("photos"), list) else []
+    photo_url = str(row.get("photo_url") or (photos[0] if photos else "") or "")
+    if photo_url and photo_url not in photos:
+        photos = [photo_url] + list(photos)
     return {
         "id": str(row.get("id") or ""),
         "mls": str(row.get("mls") or ""),
@@ -1134,6 +1422,18 @@ def _pulse_card(row: dict, locked_price: float) -> dict:
         "side": str(row.get("side") or ""),
         "zillow": urls.get("zillow") or "",
         "realtor": urls.get("realtor") or "",
+        "photo_url": photo_url,
+        "photos": [str(u) for u in photos if u][:8],
+        "lat": row.get("lat"),
+        "lng": row.get("lng"),
+        "rank": int(row.get("rank") or 0),
+        "rank_of": int(row.get("rank_of") or 0),
+        "rank_then": int(row.get("rank_then") or 0),
+        "was_price": int(row.get("was_price") or row.get("first_price") or 0),
+        "was_status": str(row.get("was_status") or row.get("first_status") or ""),
+        "baseline": bool(row.get("baseline")),
+        "gone": bool(row.get("gone")),
+        "status_history": row.get("status_history") if isinstance(row.get("status_history"), list) else [],
     }
 
 
@@ -1146,11 +1446,36 @@ def _pulse_talk_tracks(
     new_under = int(digest.get("new_under") or 0)
     new_over = int(digest.get("new_over") or 0)
     cheaper = int(digest.get("still_active_cheaper") or 0)
+    rank = int(digest.get("rank") or 0)
+    rank_of = int(digest.get("rank_of") or 0)
+    rank_then = int(digest.get("rank_then") or 0)
+    went_pending = int(digest.get("went_pending") or 0)
+    went_sold = int(digest.get("went_sold") or 0)
     agent: list[str] = []
     seller: list[str] = []
     if stale_upload:
-        agent.append("Snapshot unchanged. Upload this week’s MLS export to refresh the pulse.")
+        agent.append("Snapshot unchanged. Upload this week’s MLS export to refresh the Fingerprint.")
         seller.append("This update uses the last market file we have. Ask your agent for this week’s export to refresh.")
+    if rank and rank_of and rank_then and rank > rank_then:
+        agent.append(
+            f"Rank slipped from {rank_then} to {rank} of {rank_of} in this size band. Walk whether the lock still wins the first showing."
+        )
+        seller.append(
+            f"Your list is now {rank} of {rank_of} similar actives (was {rank_then}). More homes sit under you than on day one."
+        )
+    elif rank and rank_of:
+        agent.append(f"You sit {rank} of {rank_of} similar actives at the locked list.")
+        seller.append(f"Among similar homes buyers can still buy, yours is priced {rank} of {rank_of}.")
+    if went_pending >= 1:
+        agent.append(
+            f"{went_pending} home{'s' if went_pending != 1 else ''} from the original set went under contract. Those buyers did not wait."
+        )
+        seller.append(
+            f"{went_pending} similar home{'s' if went_pending != 1 else ''} from when we first ran this Fingerprint {'are' if went_pending != 1 else 'is'} now under contract."
+        )
+    if went_sold >= 1:
+        agent.append(f"{went_sold} from the original set sold — proof of what this band will pay.")
+        seller.append(f"{went_sold} similar home{'s' if went_sold != 1 else ''} from the original set sold.")
     if new_under >= 3:
         agent.append(
             f"Buyers have cheaper similar options this week — walk the {new_under} addresses listed under the lock."
@@ -1183,13 +1508,17 @@ def build_pulse_brief(
     subject: dict | None = None,
     share_url: str = "",
     report_url: str = "",
+    fingerprint_url: str = "",
     stale_upload: bool = False,
+    baseline: dict | None = None,
+    ledger: dict | None = None,
+    history: list | None = None,
 ) -> dict:
-    """One brief JSON for Live Story and weekly email."""
+    """One brief JSON for Live Story, Fingerprint page, and weekly email."""
     lock = lock if isinstance(lock, dict) else {}
     snap = snapshot if isinstance(snapshot, dict) else {}
     prev = previous if isinstance(previous, dict) else {}
-    digest = digest_pulse(snap, lock, prev)
+    digest = digest_pulse(snap, lock, prev, baseline=baseline, ledger=ledger)
     locked_price = float(digest.get("locked_price") or lock.get("locked_price") or 0)
     locked_at = str(lock.get("locked_at") or digest.get("locked_at") or "")
     lock_ts = pd.to_datetime(locked_at, errors="coerce")
@@ -1212,6 +1541,8 @@ def build_pulse_brief(
     cheaper_active: list[dict] = []
     price_cuts: list[dict] = []
     status_changes: list[dict] = []
+    still_active: list[dict] = []
+    pending_now: list[dict] = []
     for row in snap.get("listings") or []:
         if not isinstance(row, dict):
             continue
@@ -1221,9 +1552,12 @@ def build_pulse_brief(
             new_under.append(card)
         elif is_new and card["side"] == "over" and len(new_over) < PULSE_CARD_CAP:
             new_over.append(card)
-        if card["status"] == "Active" and card["price"] and card["price"] < locked_price:
-            if len(cheaper_active) < PULSE_CARD_CAP:
+        if card["status"] == "Active":
+            still_active.append(card)
+            if card["price"] and card["price"] < locked_price and len(cheaper_active) < PULSE_CARD_CAP:
                 cheaper_active.append(card)
+        if card["status"] in FINGERPRINT_UC_STATUSES and len(pending_now) < PULSE_CARD_CAP:
+            pending_now.append(card)
         prev_row = prev_by_id.get(card["id"])
         if prev_row:
             try:
@@ -1250,7 +1584,35 @@ def build_pulse_brief(
         if len(gone) < PULSE_CARD_CAP:
             gone.append(card)
 
-    prev_digest = digest_pulse(prev, lock, None) if has_prev else None
+    baseline_then: list[dict] = []
+    went_pending_cards: list[dict] = []
+    went_sold_cards: list[dict] = []
+    ledger_listings = (ledger or {}).get("listings") if isinstance(ledger, dict) else {}
+    if isinstance(ledger_listings, dict):
+        for rec in ledger_listings.values():
+            if not isinstance(rec, dict) or not rec.get("baseline"):
+                continue
+            card = _pulse_card(rec, locked_price)
+            st = str(rec.get("last_status") or "")
+            if rec.get("gone") and st == "Active":
+                card["status"] = "Gone"
+            baseline_then.append(card)
+            if st in FINGERPRINT_UC_STATUSES:
+                went_pending_cards.append(card)
+            elif st == "Sold":
+                went_sold_cards.append(card)
+    elif isinstance(baseline, dict):
+        for row in baseline.get("listings") or []:
+            if isinstance(row, dict):
+                baseline_then.append(_pulse_card(row, locked_price))
+
+    still_active.sort(key=lambda c: c.get("price") or 0)
+    new_under.sort(key=lambda c: c.get("price") or 0)
+    new_over.sort(key=lambda c: c.get("price") or 0)
+    cheaper_active.sort(key=lambda c: c.get("price") or 0)
+    baseline_then.sort(key=lambda c: c.get("was_price") or c.get("price") or 0)
+
+    prev_digest = digest_pulse(prev, lock, None, baseline=baseline, ledger=None) if has_prev else None
     cheaper_before = int(prev_digest["still_active_cheaper"]) if prev_digest else None
     tracks = _pulse_talk_tracks(
         digest,
@@ -1258,9 +1620,25 @@ def build_pulse_brief(
         stale_upload=stale_upload,
     )
     sub = subject if isinstance(subject, dict) else {}
-    new_under.sort(key=lambda c: c.get("price") or 0)
-    new_over.sort(key=lambda c: c.get("price") or 0)
-    cheaper_active.sort(key=lambda c: c.get("price") or 0)
+    fp_url = fingerprint_url or share_url or report_url
+    position = []
+    for card in still_active:
+        if card.get("price"):
+            position.append({
+                "id": card.get("id"),
+                "price": card.get("price"),
+                "address": card.get("address"),
+                "subject": False,
+            })
+    if locked_price:
+        position.append({
+            "id": "subject",
+            "price": int(round(locked_price)),
+            "address": str(sub.get("address") or "Your home"),
+            "subject": True,
+        })
+    position.sort(key=lambda c: c.get("price") or 0)
+
     return {
         "as_of": digest.get("as_of"),
         "locked_price": int(round(locked_price)) if locked_price else 0,
@@ -1268,18 +1646,28 @@ def build_pulse_brief(
         "days_locked": days_locked,
         "market_label": str(lock.get("market_label") or ""),
         "subject_address": str(sub.get("address") or ""),
+        "subject_photo": str(sub.get("photo_url") or sub.get("photo") or ""),
         "subject_sqft": float(lock.get("subject_sqft") or sub.get("living_area") or 0),
         "share_url": share_url or "",
         "report_url": report_url or "",
+        "fingerprint_url": fp_url or "",
         "digest": digest,
         "stale_upload": bool(stale_upload),
         "talk": tracks,
         "new_under": new_under,
         "new_over": new_over,
         "cheaper_active": cheaper_active,
+        "still_active": still_active[:24],
+        "pending_now": pending_now,
         "price_cuts": price_cuts,
         "status_changes": status_changes,
         "gone": gone,
+        "baseline": baseline_then[:24],
+        "went_pending": went_pending_cards[:PULSE_CARD_CAP],
+        "went_sold": went_sold_cards[:PULSE_CARD_CAP],
+        "position": position[:40],
+        "history": list(history or [])[-12:],
+        "sold_at": str(lock.get("sold_at") or ""),
     }
 
 

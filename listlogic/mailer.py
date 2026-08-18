@@ -317,8 +317,9 @@ def send_pulse_brief(
     market = brief.get("market_label") or ""
     report_url = brief.get("report_url") or brief.get("share_url") or ""
     share_url = brief.get("share_url") or report_url
+    fingerprint_url = brief.get("fingerprint_url") or share_url
     tracks = (brief.get("talk") or {}).get("seller" if audience == "seller" else "agent") or []
-    who = "Market pulse" if audience == "seller" else "Weekly market pulse"
+    who = "Market Fingerprint" if audience == "seller" else "Weekly Market Fingerprint"
     subject = f"{who} · {addr} · {as_of}".strip(" ·")
 
     def section(title: str, cards: list) -> str:
@@ -361,10 +362,10 @@ def send_pulse_brief(
   {section("Price cuts since last look", brief.get("price_cuts") or [])}
   {section("Status changes", brief.get("status_changes") or [])}
   {section("No longer in this pull", brief.get("gone") or [])}
-  <p style="margin-top:24px"><a href="{_esc(report_url)}">Open the Live Story</a>
-  {" · <a href='" + _esc(share_url) + "'>Share link</a>" if share_url and share_url != report_url else ""}</p>
+  <p style="margin-top:24px"><a href="{_esc(fingerprint_url)}">Open the Market Fingerprint</a>
+  {" · <a href='" + _esc(report_url) + "'>Live Story</a>" if report_url and report_url != fingerprint_url else ""}</p>
   <p style="font-size:12px;color:#5c6675;margin-top:28px">
-    ListLogic market pulse for this listing only. Not a pricing recommendation.
+    ListLogic Market Fingerprint for this listing only. Not a pricing recommendation.
     {(" · <a href='" + _esc(opt_out_url) + "'>Stop these emails</a>") if opt_out_url else ""}
     {(" · " + _esc(agent_name)) if agent_name else ""}
   </p>
@@ -376,7 +377,7 @@ def send_pulse_brief(
         + section_text("New similar — over", brief.get("new_over") or [])
         + section_text("Still active and cheaper", brief.get("cheaper_active") or [])
         + section_text("Price cuts", brief.get("price_cuts") or [])
-        + f"\nOpen: {report_url}\n"
+        + f"\nOpen Market Fingerprint: {fingerprint_url}\n"
         + (f"Stop: {opt_out_url}\n" if opt_out_url else "")
     )
     return send_email(

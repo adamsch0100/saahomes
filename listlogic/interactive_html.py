@@ -947,12 +947,14 @@ body.ll-agent .portal-chip .pc-toggle{{display:inline-flex}}
 body:not(.ll-agent) .pulse-card:not(.is-on){{display:none!important}}
 .pulse-card h3{{font-size:.92rem;margin:0 0 4px;color:var(--brand-primary)}}
 .pulse-card .pulse-sub{{font-size:.78rem;color:var(--muted);margin:0 0 10px}}
+.pulse-open-wrap{{margin:12px 0 4px}}
+.pulse-open{{font-weight:800;font-size:.9rem;color:var(--brand-primary);text-decoration:none}}
 .pulse-grid{{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}}
 .pulse-cell{{background:#f4f7fb;border-radius:10px;padding:10px 8px;text-align:center}}
 .pulse-cell .pv{{font-family:'Fraunces',Georgia,serif;font-size:1.35rem;font-weight:700;color:var(--brand-primary);line-height:1.1}}
 .pulse-cell .pl{{font-size:.68rem;color:var(--muted);font-weight:600;margin-top:4px}}
-.pulse-actions{{display:none;margin-top:10px;gap:8px;flex-wrap:wrap;align-items:center}}
-body.ll-agent .pulse-actions{{display:flex}}
+.pulse-actions,.pulse-mail{{display:none!important}}
+body.ll-agent .pulse-actions,.pulse-mail{{display:none!important}}
 .pulse-actions button,.pulse-actions label.pulse-upload{{border:1px solid var(--border);background:#fff;border-radius:8px;padding:6px 10px;font:inherit;font-size:.75rem;font-weight:700;cursor:pointer;color:var(--brand-primary)}}
 .pulse-actions .pulse-status{{font-size:.75rem;color:var(--muted)}}
 .pulse-lists{{margin-top:12px}}
@@ -2342,8 +2344,8 @@ body.print-leavebehind .page{{padding-bottom:0}}
       </div>
     </div>
     <div class="pulse-card" id="pulseBlock" hidden>
-      <h3>Market since you locked</h3>
-      <p class="pulse-sub" id="pulseAsOf">Lock a list to measure new similar homes over and under that line.</p>
+      <h3>Market Fingerprint</h3>
+      <p class="pulse-sub" id="pulseAsOf">The living market picture after you lock a list — still active, new, pending, sold.</p>
       <div class="pulse-grid">
         <div class="pulse-cell">
           <div class="pv" id="pulseNewUnder">—</div>
@@ -2359,32 +2361,10 @@ body.print-leavebehind .page{{padding-bottom:0}}
         </div>
       </div>
       <div class="pulse-talk" id="pulseTalk" hidden>
-        <h4>Talk track</h4>
+        <h4>This week’s read</h4>
         <ul id="pulseTalkList"></ul>
       </div>
-      <div class="pulse-lists" id="pulseLists"></div>
-      <div class="pulse-actions">
-        <button type="button" id="btnPulseLock">Lock this list</button>
-        <button type="button" id="btnPulseRefresh">Refresh</button>
-        <label class="pulse-upload" id="pulseUploadWrap" hidden>Upload fresh export<input type="file" id="pulseExportFile" accept=".txt,.csv,.tsv" hidden></label>
-        <button type="button" id="btnPulseVis">Hide from seller</button>
-        <span class="pulse-status" id="pulseStatus"></span>
-      </div>
-      <div class="pulse-mail" id="pulseMail">
-        <strong>Weekly pulse email</strong>
-        <p class="pulse-sub" id="pulseMailStatus">Not started — opt in for this listing only.</p>
-        <div class="pulse-who">
-          <label><input type="radio" name="pulseWho" value="agent" checked> Me</label>
-          <label><input type="radio" name="pulseWho" value="seller"> Seller</label>
-          <label><input type="radio" name="pulseWho" value="both"> Both</label>
-        </div>
-        <label for="pulseSellerEmail">Seller email</label>
-        <input type="email" id="pulseSellerEmail" placeholder="seller@email.com" autocomplete="off">
-        <div class="pulse-actions" style="margin-top:8px">
-          <button type="button" id="btnPulseEmailStart">Start weekly pulse</button>
-          <button type="button" id="btnPulseEmailStop" hidden>Stop weekly pulse</button>
-        </div>
-      </div>
+      <p class="pulse-open-wrap"><a class="pulse-open" id="pulseOpenFp" href="#">Open Market Fingerprint →</a></p>
     </div>
   </section>
 
@@ -2593,13 +2573,14 @@ body.print-leavebehind .page{{padding-bottom:0}}
         <button type="button" class="btn-soft" id="btnPortalChipPanel">Show portal estimate</button>
       </div>
       <div class="field span2">
-        <label>Over/under pulse on seller view</label>
+        <label>Market Fingerprint on seller view</label>
         <button type="button" class="btn-soft" id="btnPulseVisPanel">Visible to seller</button>
       </div>
       <div class="field span2" id="pulseMailPanel">
-        <label>Weekly pulse email</label>
-        <p class="pane-lead" id="pulseMailPanelStatus">Start it on the Price It card after you lock a list.</p>
-        <button type="button" class="btn-soft" id="btnPulseEmailPanel">Start weekly pulse</button>
+        <label>Market Fingerprint</label>
+        <p class="pane-lead" id="pulseMailPanelStatus">Lock, seller link, weekly email, and refresh live on the Fingerprint page.</p>
+        <a class="btn-soft" id="btnOpenFingerprint" href="#">Open Market Fingerprint</a>
+        <button type="button" class="btn-soft" id="btnPulseEmailPanel" hidden>Start weekly pulse</button>
       </div>
     </div>
     <div class="panel-pane" id="pane-story" role="tabpanel">
@@ -5548,16 +5529,24 @@ function renderPulse(data) {{
   if (lock && digest) {{
     const locked = money(lock.locked_price);
     const when = digest.as_of || '';
-    if (asOf) asOf.textContent = 'Against ' + locked + (when ? ' · as of ' + when : '') + ' · refresh to update';
+    if (asOf) asOf.textContent = 'Against ' + locked + (when ? ' · as of ' + when : '') + ' · open the Fingerprint for the living picture.';
     const set = (id, n) => {{ const el = document.getElementById(id); if (el) el.textContent = String(n); }};
     set('pulseNewUnder', digest.new_under);
     set('pulseNewOver', digest.new_over);
     set('pulseActiveCheaper', digest.still_active_cheaper);
   }} else if (asOf) {{
-    asOf.textContent = 'Lock this list to measure new similar homes over and under that line.';
+    asOf.textContent = 'Generate locks the recommended list. Open the Market Fingerprint after they list.';
   }}
   const uploadWrap = document.getElementById('pulseUploadWrap');
   if (uploadWrap) uploadWrap.hidden = !data || !data.needs_upload;
+  const fp = document.getElementById('pulseOpenFp');
+  if (fp) {{
+    const url = (data && (data.agent_fingerprint_url || data.fingerprint_url))
+      || (RUN_ID ? '/runs/' + RUN_ID + '/fingerprint/' : '#');
+    fp.href = url;
+    const fpBtn = document.getElementById('btnOpenFingerprint');
+    if (fpBtn) fpBtn.href = url;
+  }}
   if (data && data.listingFlow && data.listingFlow.samples) {{
     DATA.listingFlow = Object.assign(DATA.listingFlow || {{}}, data.listingFlow);
     if (typeof updateSupplyAtPrice === 'function') updateSupplyAtPrice(currentRec || DATA.rec);
@@ -5622,7 +5611,7 @@ function renderPulseEmail(cfg) {{
   const st = document.getElementById('pulseMailStatus');
   if (st) st.textContent = status;
   const pst = document.getElementById('pulseMailPanelStatus');
-  if (pst) pst.textContent = status;
+  if (pst) pst.textContent = 'Lock, seller link, weekly email, and refresh live on the Fingerprint page.';
   const start = document.getElementById('btnPulseEmailStart');
   const stop = document.getElementById('btnPulseEmailStop');
   if (start) start.textContent = on ? 'Update weekly pulse' : 'Start weekly pulse';

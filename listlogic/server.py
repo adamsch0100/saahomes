@@ -725,6 +725,7 @@ def _generate(
         "pdf_url": pdf_url,
         "story_pdf_url": story_pdf_url,
         "deck_url": f"/runs/{run_id}/deck.html",
+        "fingerprint_url": f"/runs/{run_id}/fingerprint/",
         "photos_pending": photos_pending,
         "recommended_price": positioning.get("recommended_price"),
         "price_low": positioning.get("price_low"),
@@ -1581,8 +1582,11 @@ def _seed_sample_launch_files(run_dir: Path) -> bool:
                 json_changed = True
         except Exception:
             logger.info("Sample Zestimate seed skipped")
-    if not (run_dir / "pulse.json").exists() and (run_dir / "market.csv").exists():
-        _write_pulse_lock(run_dir, report, source="sample")
+    if (run_dir / "market.csv").exists():
+        try:
+            _ensure_fingerprint_files(run_dir, report, source="sample")
+        except Exception:
+            logger.exception("Sample Market Fingerprint seed skipped")
     edits_path = run_dir / "edits.json"
     edits = _read_json_file(edits_path, {}) or {}
     if not isinstance(edits, dict):
@@ -1673,6 +1677,13 @@ def demo_redirect():
     return RedirectResponse(url=f"/runs/{run_id}/?sample=1", status_code=302)
 
 
+@app.get("/demo/fingerprint")
+@app.get("/demo/fingerprint/")
+def demo_fingerprint_redirect():
+    run_id = _ensure_sample_run()
+    return RedirectResponse(url=f"/runs/{run_id}/fingerprint/?sample=1", status_code=302)
+
+
 @app.get("/api/demo")
 def api_demo():
     run_id = _ensure_sample_run()
@@ -1680,6 +1691,7 @@ def api_demo():
         "ok": True,
         "run_id": run_id,
         "url": f"/runs/{run_id}/?sample=1",
+        "fingerprint_url": f"/runs/{run_id}/fingerprint/?sample=1",
         "sample": True,
     }
 
@@ -2080,6 +2092,101 @@ def view_run(run_id: str):
     return FileResponse(path, media_type="text/html")
 
 
+def _fingerprint_view_payload(run_dir: Path) -> dict:
+    report = _read_json_file(run_dir / "presentation.json", {}) or {}
+    try:
+        _ensure_fingerprint_files(run_dir, report)
+    except Exception:
+        logger.exception("Fingerprint files missing for %s", run_dir.name)
+    lock = _read_json_file(run_dir / "pulse.json")
+    if isinstance(lock, dict) and lock.get("locked_price"):
+        meta = report.get("meta") if isinstance(report.get("meta"), dict) else {}
+        needs_upload = str(meta.get("data_source") or "") == "mls_export" and not meta.get("portal_criteria")
+        stale = bool(needs_upload and _snapshot_age_days(_read_json_file(run_dir / "pulse_snapshot.json")) >= 6)
+        try:
+            _save_pulse_brief(run_dir, report, lock, stale_upload=stale)
+        except Exception:
+            logger.exception("Fingerprint brief rebuild failed for %s", run_dir.name)
+    payload = _pulse_payload(run_dir, report)
+    payload["report"] = {
+        "subject": report.get("subject") if isinstance(report.get("subject"), dict) else {},
+    }
+    payload["stale_upload"] = bool(
+        (payload.get("brief") or {}).get("stale_upload")
+        or (payload.get("needs_upload") and _snapshot_age_days(payload.get("snapshot")) >= 6)
+    )
+    return payload
+
+
+def _fingerprint_html_response(run_dir: Path, *, agent: bool) -> HTMLResponse:
+    import fingerprint_html
+
+    view = _fingerprint_view_payload(run_dir)
+    html = fingerprint_html.render_fingerprint_html(view, agent=agent)
+    return HTMLResponse(html)
+
+
+def _seller_access_on(run_dir: Path) -> bool:
+    lock = _read_json_file(run_dir / "pulse.json", {}) or {}
+    return lock.get("seller_access", True) is not False
+
+
+@app.get("/runs/{run_id}/fingerprint")
+@app.get("/runs/{run_id}/fingerprint/")
+def view_run_fingerprint(run_id: str, request: Request):
+    run_id = _safe_run_id(run_id)
+    run_dir = OUTPUT_DIR / run_id
+    if not (run_dir / "presentation.json").exists():
+        path = _hydrate_run_from_db(run_id)
+        run_dir = path.parent if path else run_dir
+    if not (run_dir / "presentation.json").exists():
+        raise HTTPException(404, "Fingerprint not found")
+    agent = False
+    if run_id == SAMPLE_RUN_ID:
+        agent = False
+    else:
+        try:
+            _require_run_owner(request, run_id)
+            agent = True
+        except HTTPException:
+            if not _seller_access_on(run_dir):
+                return HTMLResponse(
+                    "<!doctype html><html><body style='font-family:system-ui;padding:2rem'>"
+                    "<p>This Market Fingerprint is private.</p></body></html>",
+                    status_code=403,
+                )
+            agent = False
+    return _fingerprint_html_response(run_dir, agent=agent)
+
+
+@app.get("/p/{share_token}/fingerprint")
+@app.get("/p/{share_token}/fingerprint/")
+def view_shared_fingerprint(share_token: str, request: Request):
+    import auth_service
+
+    token = (share_token or "").strip()
+    if not re.fullmatch(r"[A-Za-z0-9_-]{6,64}", token):
+        raise HTTPException(404, "Share link not found")
+    row = auth_service.get_presentation_by_share_token(token)
+    if not row or not row.get("run_id"):
+        raise HTTPException(404, "Share link not found")
+    run_id = _safe_run_id(row["run_id"])
+    run_dir = OUTPUT_DIR / run_id
+    if not (run_dir / "presentation.json").exists():
+        path = _hydrate_run_from_db(run_id)
+        run_dir = path.parent if path else run_dir
+    if not (run_dir / "presentation.json").exists():
+        raise HTTPException(404, "Fingerprint not found")
+    if not _seller_access_on(run_dir):
+        return HTMLResponse(
+            "<!doctype html><html><body style='font-family:system-ui;padding:2rem'>"
+            "<p>This Market Fingerprint is private. Ask your agent for an updated link.</p>"
+            "</body></html>",
+            status_code=403,
+        )
+    return _fingerprint_html_response(run_dir, agent=False)
+
+
 @app.get("/p/{share_token}")
 @app.get("/p/{share_token}/")
 def view_shared_presentation(share_token: str, request: Request):
@@ -2404,8 +2511,6 @@ def _load_run_market(run_dir: Path):
 
 
 def _write_pulse_lock(run_dir: Path, report: dict, *, price=None, source: str = "recommended") -> Optional[dict]:
-    from core import build_pulse_snapshot
-
     pos = report.get("positioning") or {}
     subject = report.get("subject") or {}
     meta = report.get("meta") or {}
@@ -2426,22 +2531,132 @@ def _write_pulse_lock(run_dir: Path, report: dict, *, price=None, source: str = 
         "subject_sqft": subject_sqft,
         "market_label": meta.get("market_label") or report.get("area") or "",
         "source": source,
+        "seller_access": existing.get("seller_access", True) is not False,
     }
-    if isinstance(existing.get("email"), dict):
-        payload["email"] = existing["email"]
+    for key in ("email", "seller_name", "seller_email", "sold_at", "last_refresh_at"):
+        if existing.get(key) not in (None, ""):
+            payload[key] = existing[key]
     (run_dir / "pulse.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
     df = _load_run_market(run_dir)
     if df is not None:
-        snap = build_pulse_snapshot(df, locked_price, subject_sqft)
-        (run_dir / "pulse_snapshot.json").write_text(
-            json.dumps(snap, indent=2, default=str),
-            encoding="utf-8",
-        )
-        _save_pulse_brief(run_dir, report, payload, snap)
+        _write_fingerprint_snapshot(run_dir, report, payload, df)
+    else:
+        _save_pulse_brief(run_dir, report, payload)
     return payload
 
 
-def _pulse_links(run_id: str, report: dict | None = None) -> tuple[str, str]:
+def _write_fingerprint_snapshot(run_dir: Path, report: dict, lock: dict, df, *, rotate_prev: bool = False) -> dict:
+    from core import (
+        append_fingerprint_history,
+        build_pulse_snapshot,
+        digest_pulse,
+        fingerprint_sold_from_df,
+        freeze_fingerprint_baseline,
+        merge_fingerprint_ledger,
+    )
+
+    locked_price = float(lock.get("locked_price") or 0)
+    subject_sqft = float(lock.get("subject_sqft") or 0)
+    photo_map = _load_photo_map(run_dir)
+    gallery_map = _load_gallery_map(run_dir)
+    snap = build_pulse_snapshot(
+        df,
+        locked_price,
+        subject_sqft,
+        photo_map=photo_map,
+        gallery_map=gallery_map,
+    )
+    prev_path = run_dir / "pulse_snapshot.json"
+    if rotate_prev and prev_path.exists():
+        try:
+            shutil.copyfile(prev_path, run_dir / "pulse_snapshot_prev.json")
+        except OSError:
+            logger.exception("Failed to keep previous fingerprint snapshot")
+    (run_dir / "pulse_snapshot.json").write_text(
+        json.dumps(snap, indent=2, default=str),
+        encoding="utf-8",
+    )
+    baseline_path = run_dir / "fingerprint_baseline.json"
+    baseline = _read_json_file(baseline_path)
+    if not isinstance(baseline, dict) or not (baseline.get("listings") or baseline.get("ids")):
+        baseline = freeze_fingerprint_baseline(snap)
+        baseline_path.write_text(json.dumps(baseline, indent=2, default=str), encoding="utf-8")
+    baseline_ids = {str(x) for x in (baseline.get("ids") or []) if x}
+    sold_map = fingerprint_sold_from_df(df, baseline_ids)
+    ledger = merge_fingerprint_ledger(
+        _read_json_file(run_dir / "fingerprint_ledger.json"),
+        snap,
+        baseline=baseline,
+        sold_map=sold_map,
+        as_of=snap.get("as_of"),
+    )
+    (run_dir / "fingerprint_ledger.json").write_text(
+        json.dumps(ledger, indent=2, default=str),
+        encoding="utf-8",
+    )
+    prev = _read_json_file(run_dir / "pulse_snapshot_prev.json")
+    digest = digest_pulse(snap, lock, prev, baseline=baseline, ledger=ledger)
+    history = append_fingerprint_history(
+        _read_json_file(run_dir / "fingerprint_history.json", []),
+        snap,
+        digest,
+    )
+    (run_dir / "fingerprint_history.json").write_text(
+        json.dumps(history, indent=2, default=str),
+        encoding="utf-8",
+    )
+    lock["last_refresh_at"] = datetime.now().isoformat(timespec="seconds")
+    (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
+    _save_pulse_brief(run_dir, report, lock, snap)
+    return snap
+
+
+def _ensure_fingerprint_files(run_dir: Path, report: dict | None = None, *, source: str = "recommended") -> None:
+    """Create lock + baseline on first view if Generate already ran."""
+    report = report if isinstance(report, dict) else (_read_json_file(run_dir / "presentation.json", {}) or {})
+    lock = _read_json_file(run_dir / "pulse.json")
+    if not isinstance(lock, dict) or not lock.get("locked_price"):
+        _write_pulse_lock(run_dir, report, source=source)
+        return
+    if (run_dir / "fingerprint_baseline.json").exists() and (run_dir / "pulse_snapshot.json").exists():
+        return
+    df = _load_run_market(run_dir)
+    if df is not None:
+        _write_fingerprint_snapshot(run_dir, report, lock, df)
+
+
+def _hydrate_fingerprint_photos(run_dir: Path, snap: dict | None, ledger: dict | None):
+    """Attach hosted MLS photos that arrived after the snapshot was frozen."""
+    from core import apply_listing_photos
+
+    photo_map = _load_photo_map(run_dir)
+    gallery_map = _load_gallery_map(run_dir)
+    if isinstance(snap, dict) and snap.get("listings"):
+        snap = dict(snap)
+        snap["listings"] = apply_listing_photos(snap["listings"], photo_map, gallery_map)
+    if isinstance(ledger, dict) and isinstance(ledger.get("listings"), dict):
+        rows = [v for v in ledger["listings"].values() if isinstance(v, dict)]
+        updated = apply_listing_photos(rows, photo_map, gallery_map)
+        by_id = {str(r.get("id")): r for r in updated if r.get("id")}
+        ledger = dict(ledger)
+        ledger["listings"] = {
+            k: by_id.get(str(k), v) for k, v in ledger["listings"].items()
+        }
+    return snap, ledger
+
+
+def _fingerprint_needs_photos(snap: dict | None, photo_map: dict | None) -> bool:
+    photos = photo_map if isinstance(photo_map, dict) else {}
+    for row in (snap or {}).get("listings") or []:
+        if not isinstance(row, dict):
+            continue
+        mls = str(row.get("mls") or row.get("id") or "")
+        if mls and not row.get("photo_url") and not photos.get(mls):
+            return True
+    return False
+
+
+def _pulse_links(run_id: str, report: dict | None = None) -> tuple[str, str, str, str]:
     import auth_service
 
     base = auth_service.app_base_url().rstrip("/")
@@ -2457,8 +2672,10 @@ def _pulse_links(run_id: str, report: dict | None = None) -> tuple[str, str]:
         share = _read_json_file(OUTPUT_DIR / run_id / "share.json", {}) or {}
         token = str(share.get("share_token") or "")
     if token:
-        share_url = f"{base}/p/{token}"
-    return report_url, share_url
+        share_url = f"{base}/p/{token}/"
+    fingerprint_url = f"{share_url.rstrip('/')}/fingerprint/"
+    agent_fingerprint = f"{base}/runs/{run_id}/fingerprint/"
+    return report_url, share_url, fingerprint_url, agent_fingerprint
 
 
 def _save_pulse_brief(
@@ -2474,7 +2691,10 @@ def _save_pulse_brief(
     snap = snap if snap is not None else _read_json_file(run_dir / "pulse_snapshot.json")
     prev = _read_json_file(run_dir / "pulse_snapshot_prev.json")
     subject = report.get("subject") if isinstance(report.get("subject"), dict) else {}
-    report_url, share_url = _pulse_links(run_dir.name, report)
+    report_url, share_url, fingerprint_url, agent_fp = _pulse_links(run_dir.name, report)
+    baseline = _read_json_file(run_dir / "fingerprint_baseline.json")
+    ledger = _read_json_file(run_dir / "fingerprint_ledger.json")
+    snap, ledger = _hydrate_fingerprint_photos(run_dir, snap, ledger)
     brief = build_pulse_brief(
         lock,
         snap,
@@ -2482,8 +2702,13 @@ def _save_pulse_brief(
         subject=subject,
         share_url=share_url,
         report_url=report_url,
+        fingerprint_url=fingerprint_url,
         stale_upload=stale_upload,
+        baseline=baseline,
+        ledger=ledger,
+        history=_read_json_file(run_dir / "fingerprint_history.json", []),
     )
+    brief["agent_fingerprint_url"] = agent_fp
     (run_dir / "pulse_brief.json").write_text(
         json.dumps(brief, indent=2, default=str),
         encoding="utf-8",
@@ -2543,7 +2768,17 @@ def _pulse_payload(run_dir: Path, report: dict | None = None) -> dict:
     lock = _read_json_file(run_dir / "pulse.json")
     snap = _read_json_file(run_dir / "pulse_snapshot.json")
     prev = _read_json_file(run_dir / "pulse_snapshot_prev.json")
-    digest = digest_pulse(snap, lock, prev) if lock else None
+    digest = (
+        digest_pulse(
+            snap,
+            lock,
+            prev,
+            baseline=_read_json_file(run_dir / "fingerprint_baseline.json"),
+            ledger=_read_json_file(run_dir / "fingerprint_ledger.json"),
+        )
+        if lock
+        else None
+    )
     brief = _read_json_file(run_dir / "pulse_brief.json")
     if lock and not brief:
         try:
@@ -2551,6 +2786,7 @@ def _pulse_payload(run_dir: Path, report: dict | None = None) -> dict:
         except Exception:
             brief = None
     data_source = str(meta.get("data_source") or "")
+    report_url, share_url, fingerprint_url, agent_fp = _pulse_links(run_dir.name, report)
     return {
         "lock": lock,
         "digest": digest,
@@ -2560,6 +2796,11 @@ def _pulse_payload(run_dir: Path, report: dict | None = None) -> dict:
         "can_search_refresh": bool(meta.get("portal_criteria")),
         "needs_upload": data_source == "mls_export" and not meta.get("portal_criteria"),
         "listingFlow": _listing_flow_client(report.get("listing_flow")),
+        "fingerprint_url": fingerprint_url,
+        "agent_fingerprint_url": agent_fp,
+        "seller_url": share_url,
+        "report_url": report_url,
+        "run_id": run_dir.name,
     }
 
 
@@ -2761,29 +3002,35 @@ async def refresh_run_pulse(run_id: str, request: Request):
         )
 
     prev_path = run_dir / "pulse_snapshot.json"
-    if prev_path.exists():
-        try:
-            shutil.copyfile(prev_path, run_dir / "pulse_snapshot_prev.json")
-        except OSError:
-            logger.exception("Failed to keep previous pulse snapshot")
+    snap = _write_fingerprint_snapshot(run_dir, report, lock, df, rotate_prev=True)
     prev = _read_json_file(run_dir / "pulse_snapshot_prev.json")
     locked_price = float(lock.get("locked_price") or 0)
     subject_sqft = float(lock.get("subject_sqft") or 0)
-    snap = build_pulse_snapshot(df, locked_price, subject_sqft)
-    (run_dir / "pulse_snapshot.json").write_text(
-        json.dumps(snap, indent=2, default=str),
-        encoding="utf-8",
-    )
     try:
         flow = _rebuild_listing_flow(report, df, locked_price, subject_sqft)
         json_path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
     except Exception:
         logger.exception("Failed to rebuild listing flow after pulse refresh")
         flow = report.get("listing_flow")
-    brief = _save_pulse_brief(run_dir, report, lock, snap)
+    brief = _read_json_file(run_dir / "pulse_brief.json") or _save_pulse_brief(run_dir, report, lock, snap)
+    from core import digest_pulse
+
+    if run_id != SAMPLE_RUN_ID:
+        try:
+            if _fingerprint_needs_photos(snap, _load_photo_map(run_dir)):
+                _start_background_photos(run_id, run_dir)
+        except Exception:
+            logger.exception("Fingerprint photo enrich after refresh failed for %s", run_id)
+
     return {
         **_pulse_payload(run_dir, report),
-        "digest": digest_pulse(snap, lock, prev),
+        "digest": digest_pulse(
+            snap,
+            lock,
+            prev,
+            baseline=_read_json_file(run_dir / "fingerprint_baseline.json"),
+            ledger=_read_json_file(run_dir / "fingerprint_ledger.json"),
+        ),
         "brief": brief,
         "snapshot": snap,
         "listingFlow": _listing_flow_client(flow),
@@ -2819,7 +3066,7 @@ def _normalize_pulse_email(body: dict, existing: dict | None = None) -> dict:
         on = prev_email.get("on", False)
     on = bool(on)
     if on and "seller" in recips and not seller_email:
-        raise HTTPException(400, "Add a seller email to include them on the weekly pulse")
+        raise HTTPException(400, "Add a seller email to include them on the weekly email")
     started_at = prev_email.get("started_at") or ""
     if on and not started_at:
         started_at = datetime.now().isoformat(timespec="seconds")
@@ -2927,26 +3174,74 @@ MAX_PULSE_REEF_REFRESHES = 3
 
 
 def _run_pulse_briefs() -> dict:
-    """Weekly enrolled pulses: refresh Search if stale, then email."""
+    """Weekly Fingerprint refresh for Search markets; email only if opted in."""
     import auth_service
 
     checked = 0
     sent = 0
     skipped = 0
+    refreshed = 0
     reef_refreshes = 0
     if not OUTPUT_DIR.exists():
-        return {"checked": 0, "sent": 0, "skipped": 0}
+        return {"checked": 0, "sent": 0, "skipped": 0, "refreshed": 0}
     for run_dir in OUTPUT_DIR.iterdir():
         if not run_dir.is_dir():
             continue
         lock = _read_json_file(run_dir / "pulse.json")
-        if not isinstance(lock, dict):
+        if not isinstance(lock, dict) or not lock.get("locked_price"):
             continue
-        email_cfg = lock.get("email") if isinstance(lock.get("email"), dict) else {}
-        if not email_cfg.get("on"):
+        if lock.get("sold_at"):
+            continue
+        if run_dir.name == SAMPLE_RUN_ID:
             continue
         checked += 1
         run_id = run_dir.name
+        report = _read_json_file(run_dir / "presentation.json", {}) or {}
+        meta = report.get("meta") or {}
+        criteria = meta.get("portal_criteria")
+        snap = _read_json_file(run_dir / "pulse_snapshot.json")
+        stale_upload = False
+        if criteria and _snapshot_age_days(snap) >= 6:
+            if reef_refreshes >= MAX_PULSE_REEF_REFRESHES:
+                logger.info("Fingerprint cron Reef cap reached; skipping refresh for %s", run_id)
+            else:
+                try:
+                    from portal_market import build_portal_from_criteria, parse_portal_criteria
+
+                    parsed = parse_portal_criteria(criteria)
+                    df = build_portal_from_criteria(parsed, mode="refresh")
+                    reef_refreshes += 1
+                    if df is not None and len(df):
+                        df.to_csv(run_dir / "market.csv", sep="|", index=False)
+                        snap = _write_fingerprint_snapshot(run_dir, report, lock, df, rotate_prev=True)
+                        lock = _read_json_file(run_dir / "pulse.json") or lock
+                        try:
+                            _rebuild_listing_flow(
+                                report,
+                                df,
+                                float(lock.get("locked_price") or 0),
+                                float(lock.get("subject_sqft") or 0),
+                            )
+                            (run_dir / "presentation.json").write_text(
+                                json.dumps(report, indent=2, default=str),
+                                encoding="utf-8",
+                            )
+                        except Exception:
+                            logger.exception("Fingerprint cron listing-flow rebuild failed for %s", run_id)
+                        refreshed += 1
+                        try:
+                            if _fingerprint_needs_photos(snap, _load_photo_map(run_dir)):
+                                _start_background_photos(run_id, run_dir)
+                        except Exception:
+                            logger.exception("Fingerprint cron photo enrich failed for %s", run_id)
+                except Exception:
+                    logger.exception("Fingerprint cron Search refresh failed for %s", run_id)
+        elif not criteria:
+            stale_upload = _snapshot_age_days(snap) >= 6
+
+        email_cfg = lock.get("email") if isinstance(lock.get("email"), dict) else {}
+        if not email_cfg.get("on"):
+            continue
         user = _run_owner_user(run_id)
         uid = (user or {}).get("id")
         last_sent = str(email_cfg.get("last_sent_at") or "")
@@ -2962,58 +3257,17 @@ def _run_pulse_briefs() -> dict:
         if uid and auth_service.event_already_sent(uid, f"pulse_email:{run_id}", within_hours=144):
             skipped += 1
             continue
-        report = _read_json_file(run_dir / "presentation.json", {}) or {}
-        meta = report.get("meta") or {}
-        criteria = meta.get("portal_criteria")
-        snap = _read_json_file(run_dir / "pulse_snapshot.json")
-        stale_upload = False
-        if criteria and _snapshot_age_days(snap) >= 5:
-            if reef_refreshes >= MAX_PULSE_REEF_REFRESHES:
-                logger.info("Pulse cron Reef cap reached; emailing last brief for %s", run_id)
-            else:
-                try:
-                    from portal_market import build_portal_from_criteria, parse_portal_criteria
-                    from core import build_pulse_snapshot
-
-                    parsed = parse_portal_criteria(criteria)
-                    df = build_portal_from_criteria(parsed, mode="refresh")
-                    reef_refreshes += 1
-                    if df is not None and len(df):
-                        prev_path = run_dir / "pulse_snapshot.json"
-                        if prev_path.exists():
-                            shutil.copyfile(prev_path, run_dir / "pulse_snapshot_prev.json")
-                        df.to_csv(run_dir / "market.csv", sep="|", index=False)
-                        snap = build_pulse_snapshot(
-                            df,
-                            float(lock.get("locked_price") or 0),
-                            float(lock.get("subject_sqft") or 0),
-                        )
-                        (run_dir / "pulse_snapshot.json").write_text(
-                            json.dumps(snap, indent=2, default=str),
-                            encoding="utf-8",
-                        )
-                        try:
-                            _rebuild_listing_flow(
-                                report,
-                                df,
-                                float(lock.get("locked_price") or 0),
-                                float(lock.get("subject_sqft") or 0),
-                            )
-                            (run_dir / "presentation.json").write_text(
-                                json.dumps(report, indent=2, default=str),
-                                encoding="utf-8",
-                            )
-                        except Exception:
-                            logger.exception("Pulse cron listing-flow rebuild failed for %s", run_id)
-                except Exception:
-                    logger.exception("Pulse cron Search refresh failed for %s", run_id)
-        elif not criteria:
-            stale_upload = _snapshot_age_days(snap) >= 5
         if _send_run_pulse_email(run_dir, stale_upload=stale_upload):
             sent += 1
         else:
             skipped += 1
-    return {"checked": checked, "sent": sent, "skipped": skipped, "reef_refreshes": reef_refreshes}
+    return {
+        "checked": checked,
+        "sent": sent,
+        "skipped": skipped,
+        "refreshed": refreshed,
+        "reef_refreshes": reef_refreshes,
+    }
 
 
 @app.post("/api/runs/{run_id}/pulse-email")
@@ -3026,7 +3280,7 @@ async def save_run_pulse_email(run_id: str, request: Request):
         raise HTTPException(404, "Run not found")
     lock = _read_json_file(run_dir / "pulse.json")
     if not lock:
-        raise HTTPException(400, "Lock a list price before starting the weekly pulse")
+        raise HTTPException(400, "Lock a list price before starting weekly email")
     try:
         body = await request.json()
     except Exception:
@@ -3036,6 +3290,80 @@ async def save_run_pulse_email(run_id: str, request: Request):
     email_cfg = _normalize_pulse_email(body, lock)
     lock["email"] = email_cfg
     (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
+    return {"ok": True, "lock": lock, **_pulse_payload(run_dir)}
+
+
+@app.post("/api/runs/{run_id}/fingerprint/contact")
+async def save_fingerprint_contact(run_id: str, request: Request):
+    run_id = _safe_run_id(run_id)
+    _reject_sample_mutation(run_id)
+    _require_run_owner(request, run_id)
+    run_dir = OUTPUT_DIR / run_id
+    lock = _read_json_file(run_dir / "pulse.json") or {}
+    if not lock:
+        raise HTTPException(400, "Generate a Fingerprint before saving seller contact")
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    if not isinstance(body, dict):
+        body = {}
+    name = html_lib.escape(str(body.get("seller_name") or "").strip())[:120]
+    email = str(body.get("seller_email") or "").strip()
+    if email and not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+        raise HTTPException(400, "Seller email looks invalid")
+    lock["seller_name"] = name
+    lock["seller_email"] = email
+    email_cfg = lock.get("email") if isinstance(lock.get("email"), dict) else {}
+    if email:
+        email_cfg["seller_email"] = email
+        lock["email"] = email_cfg
+    (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
+    return {"ok": True, "lock": lock}
+
+
+@app.post("/api/runs/{run_id}/fingerprint/share")
+async def save_fingerprint_share(run_id: str, request: Request):
+    run_id = _safe_run_id(run_id)
+    _reject_sample_mutation(run_id)
+    _require_run_owner(request, run_id)
+    run_dir = OUTPUT_DIR / run_id
+    lock = _read_json_file(run_dir / "pulse.json") or {}
+    if not lock:
+        raise HTTPException(400, "Fingerprint not found")
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    lock["seller_access"] = bool((body or {}).get("seller_access", True))
+    (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
+    return {"ok": True, "seller_access": lock["seller_access"], **_pulse_payload(run_dir)}
+
+
+@app.post("/api/runs/{run_id}/fingerprint/sold")
+async def mark_fingerprint_sold(run_id: str, request: Request):
+    run_id = _safe_run_id(run_id)
+    _reject_sample_mutation(run_id)
+    _require_run_owner(request, run_id)
+    run_dir = OUTPUT_DIR / run_id
+    lock = _read_json_file(run_dir / "pulse.json") or {}
+    if not lock:
+        raise HTTPException(400, "Fingerprint not found")
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    sold = bool((body or {}).get("sold", True))
+    if sold:
+        lock["sold_at"] = datetime.now().isoformat(timespec="seconds")
+        email_cfg = lock.get("email") if isinstance(lock.get("email"), dict) else {}
+        email_cfg["on"] = False
+        lock["email"] = email_cfg
+    else:
+        lock.pop("sold_at", None)
+    (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
+    report = _read_json_file(run_dir / "presentation.json", {}) or {}
+    _save_pulse_brief(run_dir, report, lock)
     return {"ok": True, "lock": lock, **_pulse_payload(run_dir)}
 
 
@@ -3054,7 +3382,7 @@ def pulse_email_opt_out(run_id: str, t: str = ""):
         (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
     return HTMLResponse(
         "<!doctype html><html><body style='font-family:system-ui;padding:2rem'>"
-        "<p>Weekly market pulse emails are stopped for this listing.</p>"
+        "<p>Weekly Market Fingerprint emails are stopped for this listing. The live page still updates if the market refreshes.</p>"
         "</body></html>"
     )
 
@@ -3841,6 +4169,8 @@ async def generate(
     brokerage: str = Form("Schwartz and Associates, Coldwell Banker Realty"),
     brand_primary: str = Form("#0c3c6e"),
     brand_accent: str = Form("#1a5f9e"),
+    seller_name: str = Form(""),
+    seller_email: str = Form(""),
     logo: Optional[UploadFile] = File(None),
     subject_photo: Optional[UploadFile] = File(None),
 ):
@@ -4096,6 +4426,22 @@ async def generate(
     result = dict(result)
     try:
         run_dir = OUTPUT_DIR / result["run_id"]
+        sn = html_lib.escape((seller_name or "").strip())[:120]
+        se = (seller_email or "").strip()
+        if se and not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", se):
+            se = ""
+        if sn or se:
+            lock = _read_json_file(run_dir / "pulse.json", {}) or {}
+            if lock:
+                if sn:
+                    lock["seller_name"] = sn
+                if se:
+                    lock["seller_email"] = se
+                    email_cfg = lock.get("email") if isinstance(lock.get("email"), dict) else {}
+                    email_cfg["seller_email"] = se
+                    email_cfg.setdefault("on", False)
+                    lock["email"] = email_cfg
+                (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
         presentation_html = ""
         deck_html = ""
         try:
@@ -4122,6 +4468,11 @@ async def generate(
         result["share_url"] = saved.get("share_url") or result.get("share_url")
         result["share_token"] = saved.get("share_token")
         result["saved"] = True
+        result["fingerprint_url"] = f"/runs/{result['run_id']}/fingerprint/"
+        result["agent_fingerprint_url"] = f"/runs/{result['run_id']}/fingerprint/"
+        token = saved.get("share_token") or ""
+        if token:
+            result["fingerprint_url"] = f"/p/{token}/fingerprint/"
         # Sidecar for public share endpoint / recovery
         try:
             run_dir = OUTPUT_DIR / result["run_id"]

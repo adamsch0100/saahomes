@@ -319,7 +319,7 @@
     <div class="page-head">
       <span class="eyebrow">Library</span>
       <h1>Your reports</h1>
-      <p class="sub">Reopen any presentation you’ve generated. Client share links stay on the short /p/… URL.</p>
+      <p class="sub">Reopen any Market Fingerprint you’ve generated. Seller links stay on the short /p/…/fingerprint/ URL.</p>
     </div>
     <div class="reports" id="reportsPanel" style="margin-top:0">
       <div id="reportsList"><p class="empty">Loading…</p></div>
@@ -347,9 +347,9 @@
 
   <div class="dash-view on" id="view-generate">
     <div class="page-head">
-      <span class="eyebrow">New presentation</span>
-      <h1>Generate a presentation</h1>
-      <p class="sub">Search a market nationwide, or upload any MLS export — smart header mapping included.</p>
+      <span class="eyebrow">New Fingerprint</span>
+      <h1>Generate a Market Fingerprint</h1>
+      <p class="sub">Search a market nationwide, or upload any MLS export — Live Story, print, flipbook, plus a living seller link.</p>
     </div>
 
   <form id="genForm">
@@ -637,6 +637,26 @@
 
     <div class="card step-card">
       <div class="step-head">
+        <span class="step-num">2b</span>
+        <div>
+          <h2>Seller on this Fingerprint</h2>
+          <p>Optional. Attaches to the live seller link. Does not start weekly email.</p>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Seller name <span style="font-weight:400;text-transform:none">(optional)</span></label>
+          <input type="text" id="sellerName" name="seller_name" placeholder="Seller name" autocomplete="name">
+        </div>
+        <div class="field">
+          <label>Seller email <span style="font-weight:400;text-transform:none">(optional)</span></label>
+          <input type="email" id="sellerEmail" name="seller_email" placeholder="seller@email.com" autocomplete="email">
+        </div>
+      </div>
+    </div>
+
+    <div class="card step-card">
+      <div class="step-head">
         <span class="step-num">3</span>
         <div>
           <h2>Agent branding</h2>
@@ -680,13 +700,13 @@
     </div>
 
     <div class="submit-row">
-      <button type="submit" class="btn btn-gold" id="generateBtn">Generate presentation</button>
+      <button type="submit" class="btn btn-gold" id="generateBtn">Generate Market Fingerprint</button>
       <p class="status" id="status" style="margin-top:0">Ready — uses the sample export by default.</p>
     </div>
   </form>
 
   <div class="result" id="result">
-    <h3>Presentation ready</h3>
+    <h3>Market Fingerprint ready</h3>
     <div class="metrics">
       <div class="metric"><div class="v" id="mRec">—</div><div class="l">Recommended</div></div>
       <div class="metric"><div class="v" id="mMoi">—</div><div class="l">Mo Inventory</div></div>
@@ -694,7 +714,8 @@
       <div class="metric"><div class="v" id="mUc">—</div><div class="l">Under Contract</div></div>
     </div>
     <div class="actions">
-      <a class="btn btn-gold" id="openResult" href="#" target="_blank" rel="noopener">Open presentation</a>
+      <a class="btn btn-gold" id="openResult" href="#" target="_blank" rel="noopener">Open Live Story</a>
+      <a class="btn btn-ghost" id="openFingerprint" href="#" target="_blank" rel="noopener">Open Market Fingerprint</a>
       <a class="btn btn-ghost" id="openStoryPdf" href="#" target="_blank" rel="noopener" style="display:none">PDF packet</a>
       <a class="btn btn-ghost" id="openDeck" href="#" target="_blank" rel="noopener" style="display:none">Listing flipbook</a>
     </div>
@@ -1896,7 +1917,8 @@ async function loadReports() {
             '</div>' +
           '</div>' +
           '<div class="report-actions">' +
-            '<a class="btn btn-gold" href="' + open + '" target="_blank" rel="noopener">Open</a>' +
+            '<a class="btn btn-gold" href="' + open.replace(/\/?$/, '/') + 'fingerprint/" target="_blank" rel="noopener">Fingerprint</a>' +
+            '<a class="btn" href="' + open + '" target="_blank" rel="noopener">Live Story</a>' +
             '<button type="button" class="btn" data-share="' + escapeAttr(share) + '">Copy link</button>' +
           '</div>' +
         '</div>'
@@ -2060,6 +2082,11 @@ form.addEventListener('submit', async (e) => {
     document.getElementById('mUc').textContent = payload.under_contract_count ?? '—';
     const open = document.getElementById('openResult');
     open.href = payload.url;
+    const fp = document.getElementById('openFingerprint');
+    if (fp) {
+      fp.href = payload.agent_fingerprint_url || payload.fingerprint_url || (payload.url ? payload.url.replace(/\/?$/, '/') + 'fingerprint/' : '#');
+      fp.style.display = 'inline-flex';
+    }
     const storyPdf = document.getElementById('openStoryPdf');
     if (payload.story_pdf_url) {
       storyPdf.href = payload.story_pdf_url;
