@@ -760,8 +760,10 @@ def home():
 
 @app.get("/saas")
 @app.get("/saas/")
+@app.get("/saas/index.html")
 async def home_canonical_redirect():
-    # Collapse the bare /saas directory onto "/" so there's one canonical home.
+    # Collapse the bare /saas directory (and its index) onto "/" so there's one
+    # canonical home. (Note: /saas/*.html product pages stay untouched.)
     return RedirectResponse(url="/", status_code=301)
 
 
