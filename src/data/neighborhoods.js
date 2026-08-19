@@ -3046,6 +3046,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.415', longitude: '-104.79' },
     metaDescription: 'Oxford area Greeley real estate - newer west Greeley homes near Oxford Village and University Schools. SAA Homes.',
     keywords: 'Oxford Greeley, west Greeley new homes, Oxford Village Greeley, University Schools area homes',
+    youtubeId: 'UIPDYOyiVfE',
     neighborhoodHighlights: [
       { title: 'Newer construction', description: 'Most homes built after 2000 with modern floor plans and contemporary finishes.' },
       { title: 'Shopping access', description: 'Oxford Village and Centerplace shopping centers provide convenient retail and dining.' },
@@ -3077,6 +3078,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.415', longitude: '-104.775' },
     metaDescription: 'Westwood Greeley - established west Greeley homes near Centerplace Shopping Center. SAA Homes.',
     keywords: 'Westwood Greeley, west Greeley established homes, Greeley West High School area, Centerplace shopping',
+    youtubeId: 'CqyVMFV1SZM',
     neighborhoodHighlights: [
       { title: 'Established setting', description: 'Mature trees and established homes on generous lots give Westwood a settled, desirable feel.' },
       { title: 'Shopping access', description: 'Minutes from Centerplace Shopping Center with department stores, dining, and services.' },
@@ -3108,6 +3110,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.41', longitude: '-104.795' },
     metaDescription: 'Deerfield Greeley - newer west Greeley subdivision near McAuliffe Elementary with park access. SAA Homes.',
     keywords: 'Deerfield Greeley, west Greeley new construction, McAuliffe Elementary area, Deerfield subdivision Greeley',
+    youtubeId: 'UyEPC0t1v-Q',
     neighborhoodHighlights: [
       { title: 'Newer homes', description: 'Modern construction with open floor plans and energy-efficient features in a growing corridor.' },
       { title: 'Family park', description: 'Deerfield Park features a playground, open space, and walking paths - perfect for families.' },
