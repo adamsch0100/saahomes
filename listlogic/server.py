@@ -752,7 +752,17 @@ def _generate(
 
 @app.get("/", response_class=HTMLResponse)
 def home():
-    return RedirectResponse(url="/saas/")
+    # Serve the homepage directly at "/" (no redirect to /saas/) so "/" is the
+    # single canonical home — avoids the duplicate-canonical indexation issue.
+    index = ROOT / "saas" / "index.html"
+    return HTMLResponse(content=index.read_text(encoding="utf-8")) if index.exists() else RedirectResponse(url="/saas/")
+
+
+@app.get("/saas")
+@app.get("/saas/")
+async def home_canonical_redirect():
+    # Collapse the bare /saas directory onto "/" so there's one canonical home.
+    return RedirectResponse(url="/", status_code=301)
 
 
 @app.get("/favicon.ico")
