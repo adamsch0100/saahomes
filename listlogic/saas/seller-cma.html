@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WHGZQDZ6ZG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-WHGZQDZ6ZG');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seller CMA Software · ListLogic — Interactive Price × Odds × Supply, Any MLS</title>
+<meta name="description" content="Seller CMA software built for the pricing conversation: custom-fit competitive set plus interactive price × odds × supply. Search any market or upload any MLS export. Free demo.">
+<link rel="canonical" href="https://listlogic.homes/saas/seller-cma.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/saas/ll.css">
+<style>
+.hero-mini {
+  background: radial-gradient(900px 400px at 80% -20%, #1a5f9e33, transparent 60%),
+              linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; padding: 64px 0 72px; text-align: center;
+}
+.hero-mini h1 { font-family: 'Fraunces', serif; font-size: clamp(1.9rem, 4vw, 2.7rem); letter-spacing: -0.02em; margin-bottom: 12px; }
+.hero-mini h1 em { font-style: normal; color: var(--accent-2); }
+.hero-mini p { color: #c8d2e0; max-width: 620px; margin: 0 auto; font-size: 1.02rem; }
+.hero-mini .eyebrow { justify-content: center; }
+
+.wedge-band {
+  margin: -34px auto 0; position: relative; z-index: 2;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 22px 26px; max-width: 860px;
+}
+.wedge-band strong { font-family: 'Fraunces', serif; font-size: 1.2rem; display: block; margin-bottom: 6px; }
+.wedge-band p { color: var(--muted); font-size: 0.95rem; margin: 0; }
+
+.section { padding: 64px 0 0; }
+.section h2 { font-family: 'Fraunces', serif; font-size: clamp(1.4rem, 2.5vw, 1.9rem); letter-spacing: -0.015em; margin-bottom: 10px; }
+.section .sub { color: var(--muted); max-width: 640px; margin-bottom: 28px; }
+
+.cmp-table-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+table.cmp { width: 100%; border-collapse: collapse; min-width: 640px; }
+table.cmp th, table.cmp td { padding: 14px 18px; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.cmp th { background: #f1ece1; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; }
+table.cmp th.win { background: var(--navy); color: #fff; }
+table.cmp tr:last-child th, table.cmp tr:last-child td { border-bottom: none; }
+table.cmp td.rowhead { font-weight: 700; }
+table.cmp .yes { color: var(--ok); font-weight: 700; }
+table.cmp .no { color: var(--muted); }
+table.cmp .lead { color: var(--navy); font-weight: 800; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow-sm); }
+.card h3 { font-family: 'Fraunces', serif; font-size: 1.15rem; margin-bottom: 8px; }
+.card p { color: var(--muted); font-size: 0.92rem; }
+.card .kicker { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal); margin-bottom: 6px; }
+
+.faq-ll details { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 16px 20px; margin-bottom: 10px; }
+.faq-ll summary { font-weight: 700; cursor: pointer; }
+.faq-ll p { color: var(--muted); font-size: 0.92rem; margin: 10px 0 0; }
+
+.cta-band {
+  background: linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; text-align: center; padding: 64px 0; margin-top: 64px;
+}
+.cta-band h2 { font-family: 'Fraunces', serif; font-size: clamp(1.5rem, 3vw, 2.1rem); margin-bottom: 10px; }
+.cta-band p { color: #c8d2e0; max-width: 560px; margin: 0 auto 26px; }
+.btn-trial { background: var(--accent-2); color: #1a1200; }
+
+.note { font-size: 0.82rem; color: var(--muted); max-width: 720px; margin: 26px auto 0; text-align: center; }
+
+@media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is seller CMA software?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Seller CMA software helps real estate agents prepare a Comparative Market Analysis for a listing appointment. Most tools stop at comparable sales. ListLogic adds the pricing-decision layer: a custom-fit competitive set plus interactive price × odds × supply, so the seller sees the trade-off at every price before the sign goes up."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How is ListLogic different from standard seller CMA tools?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Standard seller CMA tools show comps in a report or slide deck. ListLogic is built around the pricing decision: for each possible list price, the seller sees their odds of selling and the supply pressure from homes a buyer would actually cross-shop. It turns a pricing dispute into a shared reading of the market."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does ListLogic need a live MLS feed?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. ListLogic works by Search on any market nationwide, or by uploading any MLS export — Matrix, RESO-style, and common CSV/TXT formats. You confirm the column mapping before generating. No live MLS integration or vendor contract required."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does the seller actually see?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "An interactive pricing story: their home's competitive set, the odds of selling at each price point, and the supply pressure from comparable homes — plus a print PDF and flipbook leave-behind of the same story."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much does ListLogic cost?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Free interactive demo, then a 7-day trial, then $39/month (annual options available), or a $20 one-shot for a single presentation. No per-report pricing games."
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<nav class="ll-nav">
+  <div class="container ll-nav-inner">
+    <a href="index.html" class="ll-brand">
+      <img src="/saas/listlogic-logo.png" alt="ListLogic" class="ll-brand-logo">
+      <small>by SAA Homes</small>
+    </a>
+    <button type="button" class="ll-nav-toggle" id="llNavToggle" aria-label="Menu" aria-expanded="false">☰</button>
+    <div class="ll-nav-links" id="llNavLinks">
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#deliverables">What sellers get</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="faq.html">FAQ</a>
+      <a href="login.html" class="ll-auth-guest">Sign in</a>
+      <a href="signup.html" class="btn btn-trial ll-auth-guest" style="padding:10px 18px;font-size:0.86rem">Create account</a>
+    </div>
+  </div>
+</nav>
+<script>
+(function(){var t=document.getElementById('llNavToggle'),l=document.getElementById('llNavLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.setAttribute('aria-expanded',o?'true':'false');t.textContent=o?'✕':'☰';});l.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){l.classList.remove('open');t.setAttribute('aria-expanded','false');t.textContent='☰';});});})();
+</script>
+<script src="/saas/nav-auth.js"></script>
+
+<section class="hero-mini">
+  <div class="container">
+    <div class="eyebrow">Seller presentation software</div>
+    <h1>A seller CMA should show the <em>pricing trade-off</em>, not just the comps.</h1>
+    <p>ListLogic is seller pricing-decision software: custom-fit competitive set plus interactive price × odds × supply, so overpricing is visible in the appointment — before the seller learns it from 60 quiet days on market.</p>
+  </div>
+</section>
+
+<div class="container">
+  <div class="wedge-band">
+    <strong>The pricing-decision gap in most seller CMAs</strong>
+    <p>Most seller CMA tools answer "what did similar homes sell for?" They don't answer "what happens to my odds if we list $20k higher?" ListLogic makes that trade-off visible live, in the appointment — so the seller chooses the market before the market chooses for them.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <h2>What seller CMA software should do</h2>
+    <p class="sub">The best seller presentation isn't the prettiest report. It's the one that changes the seller's pricing decision while you're still in the room.</p>
+    <div class="cmp-table-wrap">
+      <table class="cmp">
+        <thead>
+          <tr>
+            <th style="width:34%">What the appointment needs</th>
+            <th>Typical seller CMA</th>
+            <th class="win">ListLogic</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td class="rowhead">Comparable sales / comps</td>
+          <td><span class="yes">Yes</span></td>
+          <td><span class="yes">Yes</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Custom-fit competitive set (not just city averages)</td>
+          <td><span class="no">Often template-driven</span></td>
+          <td><span class="lead">Yes — per-property comps from your market</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Interactive price × odds × supply story</td>
+          <td><span class="no">Static report or slides</span></td>
+          <td><span class="lead">Yes — see odds drop at each stretch price</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Works with any MLS</td>
+          <td><span class="no">Tied to one data vendor</span></td>
+          <td><span class="lead">Yes — Search or upload any MLS export</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Live in the appointment</td>
+          <td><span class="no">Pre-built deck</span></td>
+          <td><span class="lead">Yes — interactive story</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Print + flipbook leave-behind</td>
+          <td><span class="yes">PDF export</span></td>
+          <td><span class="yes">Yes — print + flipbook</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Flat transparent pricing</td>
+          <td><span class="no">Bundled or tiered</span></td>
+          <td><span class="lead">$39/mo · trial · $20 one-shot</span></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="text-align:center;margin-top:26px"><a href="/demo" class="btn btn-trial">Try the free demo</a></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Why the pricing story wins listings</h2>
+    <div class="two-col">
+      <div class="card">
+        <div class="kicker">The appointment</div>
+        <h3>One conversation, not ten slides</h3>
+        <p>Instead of walking a seller through a report they can't read, you walk them through their own market: here's your competitive set, here's what sells, and here's what happens to your odds at $X, $X+10k, $X+20k.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">The anchor</div>
+        <h3>Beat the Zillow anchor with math, not opinion</h3>
+        <p>Sellers arrive anchored on a number. A static CMA is your opinion against theirs. Price × odds × supply is the market talking — it turns a pricing dispute into a shared reading of the data.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">The soft market</div>
+        <h3>Rising inventory, longer DOM</h3>
+        <p>When months of supply climbs, pricing errors get expensive. ListLogic surfaces price cuts and DOM pressure from your own market data — so you bring the problem, not the problem arriving after a stale listing.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">The close</div>
+        <h3>Leave behind that keeps you hired</h3>
+        <p>Print or flipbook the pricing story for the seller to keep. When the listing comes, your pricing conversation is already on their fridge.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>How it works with your MLS</h2>
+    <p class="sub">No live MLS feed required. Search any market or upload any export — the same presentation quality everywhere.</p>
+    <div class="two-col">
+      <div class="card">
+        <div class="kicker">Option A — Search</div>
+        <h3>Nationwide market builder</h3>
+        <p>Enter the address, set price/beds/baths/sqft filters, optionally draw a map boundary. ListLogic builds the competitive set and market cut for that home — no file needed.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Option B — Upload</div>
+        <h3>Any MLS CSV / TXT</h3>
+        <p>Export comps from Matrix, RESO-style files, or everyday headers (Beds, Sq Ft, MLS #, Close Price). ListLogic maps columns and shows you the mapping with sample rows before generating. You stay in control.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Fair questions, honest answers</h2>
+    <div class="faq-ll">
+      <details open>
+        <summary>What is seller CMA software?</summary>
+        <p>Seller CMA software helps real estate agents prepare a Comparative Market Analysis for a listing appointment. Most tools stop at comparable sales. ListLogic adds the pricing-decision layer: a custom-fit competitive set plus interactive price × odds × supply, so the seller sees the trade-off at every price before the sign goes up.</p>
+      </details>
+      <details>
+        <summary>How is ListLogic different from standard seller CMA tools?</summary>
+        <p>Standard seller CMA tools show comps in a report or slide deck. ListLogic is built around the pricing decision: for each possible list price, the seller sees their odds of selling and the supply pressure from homes a buyer would actually cross-shop. It turns a pricing dispute into a shared reading of the market.</p>
+      </details>
+      <details>
+        <summary>Does ListLogic need a live MLS feed?</summary>
+        <p>No. ListLogic works by Search on any market nationwide, or by uploading any MLS export — Matrix, RESO-style, and common CSV/TXT formats. You confirm the column mapping before generating. No live MLS integration or vendor contract required.</p>
+      </details>
+      <details>
+        <summary>What does the seller actually see?</summary>
+        <p>An interactive pricing story: their home's competitive set, the odds of selling at each price point, and the supply pressure from comparable homes — plus a print PDF and flipbook leave-behind of the same story.</p>
+      </details>
+      <details>
+        <summary>How much does it cost?</summary>
+        <p>Free interactive demo, then a 7-day trial, then $39/month (annual options available), or a $20 one-shot for a single presentation. No per-report pricing games.</p>
+      </details>
+      <details>
+        <summary>Can I use ListLogic alongside my existing CMA tool?</summary>
+        <p>Yes. Many agents use their MLS-bundled CMA for comps and ListLogic for the pricing conversation. ListLogic accepts uploaded MLS exports, so you can pull comps from your usual source and turn them into the interactive pricing story.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="container">
+    <h2>See the pricing story your seller CMA is missing</h2>
+    <p>Try the free demo. In two minutes you'll see the interactive price × odds × supply curve on a real market — bring a recent listing and run the same conversation you'd run at the kitchen table.</p>
+    <a href="/demo" class="btn btn-trial btn-lg">Try the free demo</a>
+  </div>
+</section>
+
+<p class="note">Matrix is a trademark of CoreLogic, Inc. Flexmls is a trademark of FBS. Bright MLS is a trademark of Bright MLS. RESO is a trademark of the Real Estate Standards Organization. This page is based on publicly available information and our understanding of the product category; features change — verify what matters to you. ListLogic is built by SAA Homes.</p>
+<p class="note" style="margin-top:8px">Related: <a href="cma-software-for-realtors.html">CMA software for realtors</a> · <a href="/saas/vs-cloud-cma.html">Cloud CMA alternative</a> · <a href="/saas/interactive-cma-software.html">Interactive CMA software</a> · <a href="/blog/soft-market-listing-presentation-price-odds-supply.html">Why static CMAs lose appointments when sellers are anchored on Zillow</a></p>
+
+<footer class="ll-footer">
+  <div class="container">
+    <div><strong>ListLogic</strong> · Data-driven custom pricing strategy</div>
+    <div><a href="https://saahomes.com">SAA Homes</a> · Schwartz and Associates, Coldwell Banker Realty</div>
+    <div><a href="index.html">Home</a> · <a href="faq.html">FAQ</a> · <a href="pricing.html">Pricing</a> · <a href="vs-cloud-cma.html">Cloud CMA alternative</a> · <a href="vs-saleswise.html">Saleswise alternative</a> · <a href="vs-rpr.html">RPR alternative</a> · <a href="mailto:adam@saahomes.com">Contact</a></div>
+  </div>
+</footer>
+</body>
+</html>
