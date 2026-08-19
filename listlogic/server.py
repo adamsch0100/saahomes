@@ -122,6 +122,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/",
         "/health",
         "/demo",
+        "/demo/fingerprint",
+        "/demo/fingerprint/",
         "/api/demo",
         "/api/demo-export",
         "/api/login",
