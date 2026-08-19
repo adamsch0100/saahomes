@@ -7171,6 +7171,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/buyers-hero.jpg',
     readTime: '9 min read',
+    youtubeId: 'J98kx7ZHi64',
     keywords: 'erie homes for sale, erie co homes for sale, buying a home in erie colorado, erie colorado real estate, erie co realtor, moving to erie colorado, erie neighborhoods, erie co new construction, homes for sale in erie co, best neighborhoods erie colorado',
     relatedLinks: [
       { title: 'Erie homes for sale', href: '/northern-colorado-areas/erie/', description: 'Area guide with live IRES market stats' },
@@ -7285,6 +7286,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/Northern Colorado.webp',
     readTime: '10 min read',
+    youtubeId: '91-VKSMToh4',
     keywords: 'sell my home erie colorado, erie co real estate agent, selling a home in erie co, erie colorado homes for sale, erie home selling guide, how to sell a home in erie colorado, listing agent erie co, erie co home value, cash offer erie colorado',
     relatedLinks: [
       { title: 'Sell your home in Erie', href: '/northern-colorado-areas/erie/', description: 'Area guide with live IRES market stats' },
