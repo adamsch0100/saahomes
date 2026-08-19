@@ -2677,6 +2677,7 @@ def _seed_sample_fingerprint(run_dir: Path, report: dict) -> None:
 
     if _sample_fingerprint_ready(run_dir):
         _seed_sample_fingerprint_notes(run_dir)
+        _backfill_sample_fingerprint_visuals(run_dir)
         return
     df = _load_run_market(run_dir)
     if df is None or len(df) == 0:
@@ -2749,6 +2750,7 @@ def _seed_sample_fingerprint(run_dir: Path, report: dict) -> None:
     lock["last_refresh_at"] = datetime.now().isoformat(timespec="seconds")
     (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
     _seed_sample_fingerprint_notes(run_dir, history=history)
+    _backfill_sample_fingerprint_visuals(run_dir)
     _save_pulse_brief(run_dir, report, lock, snap)
     logger.info(
         "Sample Fingerprint seeded lock=%s baseline=%s active_now=%s new=%s pending=%s sold=%s",
@@ -2833,6 +2835,83 @@ def _seed_sample_fingerprint_notes(run_dir: Path, history: list | None = None) -
             "emailed_at": "",
         })
     _write_fingerprint_notes(run_dir, notes)
+
+
+def _sample_visuals_ready(run_dir: Path) -> bool:
+    from core import FINGERPRINT_UC_STATUSES
+
+    ledger = _read_json_file(run_dir / "fingerprint_ledger.json") or {}
+    listings = ledger.get("listings") if isinstance(ledger, dict) else {}
+    if not isinstance(listings, dict):
+        return False
+    dates: set[str] = set()
+    for rec in listings.values():
+        if not isinstance(rec, dict) or not rec.get("baseline"):
+            continue
+        for row in rec.get("status_history") or []:
+            if not isinstance(row, dict):
+                continue
+            st = str(row.get("status") or "")
+            if st in FINGERPRINT_UC_STATUSES or st == "Sold":
+                as_of = str(row.get("as_of") or "")[:10]
+                if as_of:
+                    dates.add(as_of)
+    return len(dates) >= 2
+
+
+def _backfill_sample_fingerprint_visuals(run_dir: Path) -> None:
+    """Date pending/sold events across the sample's two real weeks so week-click lights up homes."""
+    from core import FINGERPRINT_UC_STATUSES
+
+    if _sample_visuals_ready(run_dir):
+        return
+    ledger = _read_json_file(run_dir / "fingerprint_ledger.json") or {}
+    listings = ledger.get("listings") if isinstance(ledger, dict) else None
+    if not isinstance(listings, dict) or not listings:
+        return
+    history = _read_json_file(run_dir / "fingerprint_history.json", []) or []
+    snap = _read_json_file(run_dir / "pulse_snapshot.json") or {}
+    first = SAMPLE_FINGERPRINT_LOCKED_AT
+    last = str(snap.get("as_of") or "")[:10]
+    if history:
+        first = str((history[0] or {}).get("as_of") or first)[:10]
+        last = str((history[-1] or {}).get("as_of") or last)[:10]
+    if not last or last == first:
+        return
+    moved = []
+    for rec in listings.values():
+        if not isinstance(rec, dict) or not rec.get("baseline"):
+            continue
+        st = str(rec.get("last_status") or rec.get("status") or "")
+        if st in FINGERPRINT_UC_STATUSES or st == "Sold":
+            moved.append(rec)
+    if not moved:
+        return
+    for i, rec in enumerate(moved):
+        event_as_of = first if (i % 2 == 0) else last
+        first_price = int(rec.get("first_price") or rec.get("was_price") or rec.get("price") or 0)
+        last_price = int(rec.get("last_price") or rec.get("price") or 0)
+        rec["status_history"] = [
+            {
+                "as_of": first,
+                "status": str(rec.get("first_status") or "Active"),
+                "price": first_price,
+            },
+            {
+                "as_of": event_as_of,
+                "status": str(rec.get("last_status") or rec.get("status") or ""),
+                "price": last_price,
+            },
+        ]
+    ledger["listings"] = listings
+    (run_dir / "fingerprint_ledger.json").write_text(
+        json.dumps(ledger, indent=2, default=str),
+        encoding="utf-8",
+    )
+    report = _read_json_file(run_dir / "presentation.json", {}) or {}
+    lock = _read_json_file(run_dir / "pulse.json") or {}
+    if isinstance(lock, dict) and lock.get("locked_price"):
+        _save_pulse_brief(run_dir, report, lock, snap)
 
 
 def _hydrate_fingerprint_photos(run_dir: Path, snap: dict | None, ledger: dict | None):

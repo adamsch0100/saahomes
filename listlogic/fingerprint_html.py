@@ -197,6 +197,26 @@ body.is-seller .console {{ display:none; }}
 .console .check {{ display:flex; align-items:center; gap:6px; font-size:.78rem; font-weight:600; margin:10px 0 0; }}
 .console .note-console.is-focus {{ box-shadow:0 0 0 3px #c9a22755; border-radius:12px; padding:8px; margin:8px -8px 0; }}
 .console .check-hint {{ font-size:.72rem; color:var(--muted); font-weight:500; margin:4px 0 0 22px; line-height:1.35; }}
+.card.is-week {{ border-color:var(--gold); box-shadow:0 0 0 2px #c9a22755; }}
+.week-homes {{ margin-top:14px; }}
+.week-homes h3 {{ font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }}
+.week-homes .cards {{ grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); }}
+.spark {{ margin:8px 0 14px; }}
+.spark svg {{ display:block; max-width:280px; }}
+.spark .cap {{ font-size:.72rem; color:var(--muted); margin-top:4px; }}
+.lanes {{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin-bottom:18px; }}
+.lanes h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.15rem; margin-bottom:4px; }}
+.lanes > .sub {{ color:var(--muted); font-size:.82rem; margin-bottom:12px; }}
+.lane {{ margin-top:10px; }}
+.lane h3 {{ font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }}
+.lane-row {{ display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; }}
+.lane-home {{
+  flex:0 0 auto; width:72px; padding:0; border:1px solid var(--line); border-radius:10px;
+  overflow:hidden; background:#dfe6ef; cursor:pointer;
+}}
+.lane-home.is-week {{ border-color:var(--gold); box-shadow:0 0 0 2px #c9a22755; }}
+.lane-pic {{ display:block; width:72px; height:56px; background:#dfe6ef center/cover no-repeat; }}
+.lane-pic.empty {{ background:#e8eef4; }}
 </style>
 </head>
 <body class="{agent_class}">
@@ -272,13 +292,156 @@ function noteForWeek(asOf) {{
   const key = weekKey(asOf);
   return (DATA.notes || []).find(n => weekKey(n.as_of) === key) || null;
 }}
+function isUc(st) {{
+  const s = String(st || '').toLowerCase();
+  return s === 'pending' || s === 'backup' || s === 'firstright' || s === 'sold';
+}}
+function inWeek(dateStr, start, end) {{
+  const d = weekKey(dateStr);
+  if (!d || !start) return false;
+  if (d < start) return false;
+  if (end && d >= end) return false;
+  return true;
+}}
+function weekWindows() {{
+  const hist = ((DATA.brief || {{}}).history || []).slice().sort(function (a, b) {{
+    return weekKey(a.as_of).localeCompare(weekKey(b.as_of));
+  }});
+  return hist.map(function (w, i) {{
+    return {{
+      as_of: weekKey(w.as_of),
+      start: weekKey(w.as_of),
+      end: hist[i + 1] ? weekKey(hist[i + 1].as_of) : ''
+    }};
+  }});
+}}
+function cardMovedInWeek(c, start, end) {{
+  if (!c) return false;
+  const hist = c.status_history || [];
+  for (let i = 0; i < hist.length; i++) {{
+    if (isUc(hist[i].status) && inWeek(hist[i].as_of, start, end)) return true;
+  }}
+  return !!(c.list_date && inWeek(c.list_date, start, end));
+}}
+function homesForWeek(asOf) {{
+  const wins = weekWindows();
+  const key = weekKey(asOf);
+  const w = wins.find(function (x) {{ return x.as_of === key; }}) || wins[wins.length - 1];
+  if (!w) return [];
+  const b = DATA.brief || {{}};
+  const seen = {{}};
+  const out = [];
+  const pools = [b.baseline, b.new_under, b.new_over, b.went_pending, b.went_sold, b.pending_now];
+  for (let p = 0; p < pools.length; p++) {{
+    const pool = pools[p] || [];
+    for (let i = 0; i < pool.length; i++) {{
+      const c = pool[i];
+      if (!c || !c.id || seen[c.id]) continue;
+      if (cardMovedInWeek(c, w.start, w.end)) {{
+        seen[c.id] = 1;
+        out.push(c);
+      }}
+    }}
+  }}
+  return out;
+}}
+function sparklineHtml() {{
+  const hist = ((DATA.brief || {{}}).history || []);
+  if (hist.length < 2) return '';
+  const cheaper = hist.map(function (w) {{ return Number(w.still_active_cheaper || 0); }});
+  const ranks = hist.map(function (w) {{ return Number(w.rank || 0); }});
+  function poly(vals, color) {{
+    const max = Math.max.apply(null, vals.concat([1]));
+    const min = Math.min.apply(null, vals);
+    const span = Math.max(max - min, 1);
+    const pts = vals.map(function (v, i) {{
+      const x = 6 + (vals.length < 2 ? 0 : i / (vals.length - 1) * 200);
+      const y = 38 - ((v - min) / span) * 30;
+      return x.toFixed(1) + ',' + y.toFixed(1);
+    }}).join(' ');
+    return '<polyline fill="none" stroke="' + color + '" stroke-width="2" points="' + pts + '"/>';
+  }}
+  return '<div class="spark"><svg viewBox="0 0 212 48" width="212" height="48" aria-hidden="true">' +
+    poly(cheaper, '#0e7a6d') + poly(ranks, '#c9a227') + '</svg>' +
+    '<p class="cap">Teal: still cheaper than you · Gold: your rank among similar actives. Same lock.</p></div>';
+}}
+function lanesHtml() {{
+  const rows = ((DATA.brief || {{}}).baseline || []);
+  if (!rows.length) return '';
+  const active = [];
+  const pending = [];
+  const sold = [];
+  for (let i = 0; i < rows.length; i++) {{
+    const c = rows[i];
+    const st = String(c.status || '').toLowerCase();
+    if (st === 'sold') sold.push(c);
+    else if (st === 'pending' || st === 'backup' || st === 'firstright') pending.push(c);
+    else if (st !== 'gone') active.push(c);
+  }}
+  function lane(title, items) {{
+    if (!items.length) return '';
+    return '<div class="lane"><h3>' + esc(title) + ' · ' + items.length + '</h3><div class="lane-row">' +
+      items.slice(0, 18).map(function (c) {{
+        const pic = c.photo_url
+          ? 'style="background-image:url(\\'' + String(c.photo_url).replace(/'/g, '%27') + '\\')"'
+          : '';
+        return '<button type="button" class="lane-home" data-id="' + esc(c.id) + '" title="' + esc(c.address || '') + '">' +
+          '<span class="lane-pic' + (c.photo_url ? '' : ' empty') + '" ' + pic + '></span></button>';
+      }}).join('') + '</div></div>';
+  }}
+  return '<div class="lanes" id="day0Lanes"><h2>Day-0 set — where they are now</h2>' +
+    '<p class="sub">The similar actives from generate. Still active, under contract, or sold — same lock.</p>' +
+    lane('Still active', active) + lane('Under contract', pending) + lane('Sold', sold) + '</div>';
+}}
+function weekHomesHtml(asOf) {{
+  const homes = homesForWeek(asOf);
+  if (!homes.length) {{
+    return '<div class="week-homes" id="weekHomes"><h3>Homes this week</h3>' +
+      '<p class="sub">Nothing cheaper listed or from the day-0 set went under contract in this week.</p></div>';
+  }}
+  return '<div class="week-homes" id="weekHomes"><h3>Homes this week · ' + homes.length + '</h3>' +
+    '<p class="sub">Went under contract / sold, or newly listed in this size band.</p>' +
+    '<div class="cards">' + homes.map(function (c) {{ return cardHtml(c, c.status); }}).join('') + '</div></div>';
+}}
+function applyWeekHighlight(asOf) {{
+  const wins = weekWindows();
+  const key = weekKey(asOf);
+  const w = wins.find(function (x) {{ return x.as_of === key; }}) || wins[wins.length - 1];
+  const ids = {{}};
+  if (w) {{
+    homesForWeek(w.as_of).forEach(function (c) {{ ids[c.id] = 1; }});
+  }}
+  document.querySelectorAll('.card[data-id], .lane-home[data-id]').forEach(function (el) {{
+    el.classList.toggle('is-week', !!ids[el.getAttribute('data-id')]);
+  }});
+}}
+function selectWeek(asOf, scroll) {{
+  const key = weekKey(asOf);
+  document.querySelectorAll('.week').forEach(function (el) {{
+    el.classList.toggle('is-on', el.getAttribute('data-asof') === key);
+  }});
+  const box = document.getElementById('weekHomes');
+  if (box) box.outerHTML = weekHomesHtml(key);
+  applyWeekHighlight(key);
+  document.querySelectorAll('#weekHomes .card').forEach(function (el) {{
+    el.addEventListener('click', function () {{ openDrawer(el.getAttribute('data-id')); }});
+  }});
+  if (scroll) {{
+    const homes = document.getElementById('weekHomes');
+    if (homes) homes.scrollIntoView({{ behavior: 'smooth', block: 'nearest' }});
+    const note = document.getElementById('note-' + key);
+    if (note) note.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
+  }}
+  if (DATA.agent) loadNoteWeek(key);
+}}
 function weeksHtml() {{
   const hist = ((DATA.brief || {{}}).history || []);
   if (!hist.length) return '';
-  const current = weekKey((DATA.brief || {{}}).as_of);
+  const current = weekKey((DATA.brief || {{}}).as_of) || weekKey(hist[hist.length - 1].as_of);
   return '<div class="weeks-wrap"><h2>Week by week</h2>' +
-    '<p class="sub">Same lock every week — rank, new under you, pending, still cheaper.</p>' +
-    '<div class="weeks">' + hist.map(w => {{
+    '<p class="sub">Same lock every week — rank, new under you, pending, still cheaper. Click a week to see those homes.</p>' +
+    sparklineHtml() +
+    '<div class="weeks">' + hist.map(function (w) {{
       const asOf = weekKey(w.as_of);
       const rank = (w.rank && w.rank_of) ? (w.rank + '/' + w.rank_of) : '—';
       const on = asOf === current ? ' is-on' : '';
@@ -286,7 +449,7 @@ function weeksHtml() {{
         '<span class="w-d">Week of ' + weekLabel(asOf) + '</span>' +
         '<span class="w-m">#' + esc(rank) + ' · ' + Number(w.new_under || 0) + ' under · ' +
         Number(w.went_pending || 0) + ' pending · ' + Number(w.still_active_cheaper || 0) + ' cheaper</span></button>';
-    }}).join('') + '</div></div>';
+    }}).join('') + '</div>' + weekHomesHtml(current) + '</div>';
 }}
 function publishedNotesHtml() {{
   const notes = (DATA.notes || []).filter(n => n.status === 'published' && n.body);
@@ -311,11 +474,7 @@ function publishedNotesHtml() {{
 function bindWeeks() {{
   document.querySelectorAll('.week').forEach(el => {{
     el.addEventListener('click', () => {{
-      const asOf = el.getAttribute('data-asof');
-      document.querySelectorAll('.week').forEach(w => w.classList.toggle('is-on', w === el));
-      const target = document.getElementById('note-' + asOf);
-      if (target) target.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
-      if (DATA.agent) loadNoteWeek(asOf);
+      selectWeek(el.getAttribute('data-asof'), true);
     }});
   }});
 }}
@@ -388,6 +547,7 @@ function render() {{
       ].map(x => '<div class="cell"><div class="v">' + (x[1] == null || x[1] === '' ? '—' : x[1]) + '</div><div class="l">' + x[2] + '</div></div>').join('') +
     '</div>' +
     weeksHtml() +
+    lanesHtml() +
     publishedNotesHtml() +
     '<div class="read"><h2>' + readTitle + '</h2><ul>' +
       (talk.length ? talk.map(t => '<li>' + esc(t) + '</li>').join('') : '<li>Quiet week in this size band.</li>') +
@@ -401,7 +561,10 @@ function render() {{
 
   if (DATA.agent) renderConsole();
   bindWeeks();
-  document.querySelectorAll('.card').forEach(el => {{
+  const hist = (b.history || []);
+  const current = weekKey(b.as_of) || (hist.length ? weekKey(hist[hist.length - 1].as_of) : '');
+  if (current) selectWeek(current, false);
+  document.querySelectorAll('.card, .lane-home').forEach(el => {{
     el.addEventListener('click', () => openDrawer(el.getAttribute('data-id')));
   }});
 }}
