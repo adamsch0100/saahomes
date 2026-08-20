@@ -7151,6 +7151,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Boulder.jpg',
     readTime: '10 min read',
+    youtubeId: 'SvNae87fFuo',
     keywords: 'Boulder luxury neighborhoods, luxury homes Boulder, Mapleton Hill luxury homes, Chautauqua Boulder homes, Pine Brook Hills Boulder, Flatirons area luxury homes, Newlands Boulder, luxury realtor Boulder, million dollar homes Boulder, Boulder luxury real estate, luxury homes Boulder CO',
     relatedLinks: [
       { title: 'Luxury Real Estate Hub', href: '/luxury-real-estate/', description: 'Premium property services & private-client care' },
