@@ -308,6 +308,7 @@ export const neighborhoods = [
     walkScore: 35,
     metaDescription: 'English Ranch Fort Collins real estate — established southeast Fort Collins subdivision with on-site park, walking trail, and Fossil Ridge schools. SAA Homes.',
     keywords: 'English Ranch Fort Collins, southeast Fort Collins homes, Fossil Ridge High School area, Fort Collins subdivisions, Harmony Road Fort Collins real estate, English Ranch Park',
+    youtubeId: 'AgTcef3pSrM',
     neighborhoodHighlights: [
       { title: 'On-site park & trail', description: 'English Ranch Park features a playground and a walking trail right in the neighborhood.' },
       { title: 'Fossil Ridge schools', description: 'Minutes from Fossil Ridge High School and Preston Middle School — a top choice for families.' },
@@ -501,6 +502,7 @@ export const neighborhoods = [
     walkScore: 32,
     metaDescription: 'Bucking Horse Fort Collins real estate — Fort Collins\' agrihood community with a working farm, trails, and the Jessup Farm Artisan Village. New construction near Fossil Ridge schools. SAA Homes.',
     keywords: 'Bucking Horse Fort Collins, Bucking Horse agrihood, Jessup Farm Fort Collins, east Fort Collins new construction, Fort Collins farmhouse homes, Bucking Horse homes for sale',
+    youtubeId: 'zzsOx7rS8Uw',
     neighborhoodHighlights: [
       { title: 'Agrihood living', description: 'A working community farm, garden plots, and farm stand sit at the heart of the neighborhood — a truly unique Fort Collins lifestyle.' },
       { title: 'Jessup Farm Artisan Village', description: 'Brewery, restaurant, coffee shop, and local retail along Jessup Drive — plus Josh & John\'s ice cream.' },
@@ -630,6 +632,7 @@ export const neighborhoods = [
     walkScore: 30,
     metaDescription: 'Southridge Greens Fort Collins real estate — quiet southeast Fort Collins community with ranch and patio homes near Harmony Road and I-25. Fossil Ridge schools. SAA Homes.',
     keywords: 'Southridge Greens Fort Collins, Village at Southridge Greens, southeast Fort Collins homes, Fort Collins patio homes, Trilby Road Fort Collins real estate, Fossil Ridge High School area',
+    youtubeId: 'uUCb94QFpj0',
     neighborhoodHighlights: [
       { title: 'Single-level living', description: 'Ranch and patio home floor plans with low-maintenance yards are the community\'s hallmark.' },
       { title: 'Quiet & established', description: 'Mature landscaping and low-traffic streets create a calm, settled atmosphere.' },
