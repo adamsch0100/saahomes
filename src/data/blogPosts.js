@@ -1453,6 +1453,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/foreclosure-short-sale-northern-colorado-guide.jpg',
     readTime: '8 min read',
+    youtubeId: 'EjXzpf9Uw1w',
     keywords: 'short sale loveland, loveland short sale, how to short sale my home loveland, short sale vs foreclosure colorado, short sale process colorado, underwater mortgage loveland, distressed home sale loveland, cash home buyers loveland, sell my house fast loveland, larimer county short sale',
     relatedLinks: [
       { title: 'Foreclosure & Short Sale Guide', href: '/blog/foreclosure-short-sale-northern-colorado-guide/', description: 'The full Northern Colorado process' },
