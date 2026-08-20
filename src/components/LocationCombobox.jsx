@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
  * Typed city/ZIP multi-select combobox for ListingSearch.
  * - Type-ahead over live /api/listings/locations counts (never hardcoded)
  * - Multi city + multi zip as removable chips
- * - Quick-pick chips for the 19 NoCO cities
+ * - Quick-pick chips for the 27 NoCO communities
  * - Default scope remains Northern Colorado (__noco__)
  */
 

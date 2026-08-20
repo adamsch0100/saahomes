@@ -79,7 +79,7 @@ export const blogPosts = [
         heading: 'What the live Colorado inventory actually shows',
         paragraphs: [
           'The IRES MLS feed has no structured “assumable loan” field. The only signal in the data is the public remarks. We flag a listing when the description contains assumable-loan language (the same match as description ILIKE \'%assum%\'). That is honest and imperfect: a true “Assumable VA loan at 2.5%” hits, and so can a solar-lease “buyer to assume” sentence. Every flagged listing still has to be confirmed with the lender.',
-          'As of August 13, 2026, our live Active inventory shows 328 Colorado listings whose remarks match that signal, including 52 in the 19 Northern Colorado cities we serve. The largest NoCO counts on that date: Greeley 11, Johnstown 7, Frederick 5, Windsor 4, Milliken 4, Timnath 3, Boulder 3, Fort Collins 2, Loveland 2. Those numbers change as listings come on and off the market — treat them as current, not a forecast.',
+          'As of August 13, 2026, our live Active inventory shows 328 Colorado listings whose remarks match that signal, including 52 in the 27 Northern Colorado communities we serve. The largest NoCO counts on that date: Greeley 11, Johnstown 7, Frederick 5, Windsor 4, Milliken 4, Timnath 3, Boulder 3, Fort Collins 2, Loveland 2. Those numbers change as listings come on and off the market — treat them as current, not a forecast.',
           'A real remarks example from a current Fort Collins Active listing: “Assumable VA loan at 4.99%… Qualified buyers can step into the seller’s existing rate.” That is the listing’s language. Veteran status is often not required on a VA assumption. We will not invent a monthly savings number from it.',
         ],
         relatedLinks: [
@@ -132,7 +132,7 @@ export const blogPosts = [
       {
         heading: 'Fort Collins assumable inventory — live, not a brochure',
         paragraphs: [
-          'As of August 13, 2026, our live Active search shows 2 Fort Collins listings whose public remarks mention assumption language. Across the 19 Northern Colorado cities we serve, the same filter returns 52 listings. Statewide Active inventory matching the signal is 328. Those counts move as homes go pending, withdraw, or new remarks hit the feed — they are current, not a promise of what you will see next week.',
+          'As of August 13, 2026, our live Active search shows 2 Fort Collins listings whose public remarks mention assumption language. Across the 27 Northern Colorado communities we serve, the same filter returns 52 listings. Statewide Active inventory matching the signal is 328. Those counts move as homes go pending, withdraw, or new remarks hit the feed — they are current, not a promise of what you will see next week.',
           'The IRES feed has no structured loan field. We flag a listing when the remarks contain “assum” (assumable, assume, assumption). That is the same rule the Assumable chip on /properties/ uses. It is a screening tool, not a lender confirmation. One of the two current Fort Collins hits is a clear VA-assumption remark; the other mentions a buyer assuming a financed solar system. We leave both in the filter because we will not silently rewrite MLS remarks — and we tell you which is which before you tour.',
         ],
         relatedLinks: [
@@ -3338,7 +3338,7 @@ export const blogPosts = [
         heading: 'Cash buyers are also your clients — the investor side of the market',
         paragraphs: [
           'Cash buyers are not just a resource for sellers; they are an important client segment in their own right. Real estate investors, house flippers, and out-of-state buyers looking for Northern Colorado rental properties all need expert representation to find the right deals in a competitive market.',
-          'If you are a cash buyer looking for investment properties, fix-and-flip opportunities, or long-term holds, SAA Homes can help. With boots on the ground across 19 Northern Colorado communities, we know which neighborhoods have the best flip potential, where rental demand is strongest, and which properties are likely to be overpriced or undervalued.',
+          'If you are a cash buyer looking for investment properties, fix-and-flip opportunities, or long-term holds, SAA Homes can help. With boots on the ground across all 27 Northern Colorado communities, we know which neighborhoods have the best flip potential, where rental demand is strongest, and which properties are likely to be overpriced or undervalued.',
           'Our investor services include market-specific comp analysis, off-market property leads, and connections with local contractors, lenders, and property managers. Whether you are buying your first rental or building a portfolio, we bring the same world-class service we provide to every buyer and seller.',
         ],
         relatedLinks: [

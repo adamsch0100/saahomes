@@ -114,7 +114,7 @@ export default function EventsCalendarPage() {
             "@context": "https://schema.org",
             "@type": "ItemList",
             name: "Northern Colorado Events Calendar",
-            description: "Curated flagship events across 19 Northern Colorado communities.",
+            description: "Curated flagship events across 27 Northern Colorado communities.",
             numberOfItems: allEvents.length,
           },
           {
