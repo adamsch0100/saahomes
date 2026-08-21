@@ -2563,7 +2563,7 @@ def _write_pulse_lock(run_dir: Path, report: dict, *, price=None, source: str = 
         "source": source,
         "seller_access": existing.get("seller_access", True) is not False,
     }
-    for key in ("email", "seller_name", "seller_email", "sold_at", "last_refresh_at", "last_looked_at"):
+    for key in ("email", "seller_name", "seller_email", "sold_at", "last_refresh_at", "last_looked_at", "active_at", "active_at_source"):
         if existing.get(key) not in (None, ""):
             payload[key] = existing[key]
     (run_dir / "pulse.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -2573,6 +2573,83 @@ def _write_pulse_lock(run_dir: Path, report: dict, *, price=None, source: str = 
     else:
         _save_pulse_brief(run_dir, report, payload)
     return payload
+
+
+def _clock_baseline(run_dir: Path, lock: dict | None) -> dict | None:
+    from core import fingerprint_clock
+
+    clock = fingerprint_clock(lock)
+    if clock.get("clock") == "active":
+        active = _read_json_file(run_dir / "fingerprint_active_baseline.json")
+        if isinstance(active, dict) and (active.get("listings") or active.get("ids")):
+            return active
+    generate = _read_json_file(run_dir / "fingerprint_baseline.json")
+    return generate if isinstance(generate, dict) else None
+
+
+def _ensure_active_baseline(run_dir: Path, report: dict, lock: dict, df=None) -> dict | None:
+    from core import _fingerprint_date, reconstruct_fingerprint_baseline
+
+    active_at = _fingerprint_date((lock or {}).get("active_at"))
+    if not active_at:
+        return None
+    path = run_dir / "fingerprint_active_baseline.json"
+    existing = _read_json_file(path)
+    if (
+        isinstance(existing, dict)
+        and str(existing.get("as_of") or "")[:10] == active_at
+        and (existing.get("listings") or existing.get("ids"))
+    ):
+        return existing
+    generate = _read_json_file(run_dir / "fingerprint_baseline.json")
+    if (
+        df is None
+        and isinstance(generate, dict)
+        and str(generate.get("as_of") or "")[:10] == active_at
+        and (generate.get("listings") or generate.get("ids"))
+    ):
+        path.write_text(json.dumps(generate, indent=2, default=str), encoding="utf-8")
+        return generate
+    if df is None or len(df) == 0:
+        return existing if isinstance(existing, dict) else None
+    subject = report.get("subject") if isinstance(report.get("subject"), dict) else {}
+    try:
+        locked_price = float((lock or {}).get("locked_price") or 0)
+    except (TypeError, ValueError):
+        locked_price = 0
+    try:
+        subject_sqft = float((lock or {}).get("subject_sqft") or subject.get("living_area") or 0)
+    except (TypeError, ValueError):
+        subject_sqft = 0
+    baseline = reconstruct_fingerprint_baseline(
+        df,
+        locked_price,
+        subject_sqft,
+        as_of=active_at,
+        photo_map=_load_photo_map(run_dir),
+        gallery_map=_load_gallery_map(run_dir),
+    )
+    path.write_text(json.dumps(baseline, indent=2, default=str), encoding="utf-8")
+    return baseline
+
+
+def _apply_active_at(run_dir: Path, lock: dict | None, report: dict, df=None, snap=None) -> dict:
+    from core import detect_subject_active_at
+
+    lock = dict(lock) if isinstance(lock, dict) else {}
+    source = str(lock.get("active_at_source") or "")
+    if source not in ("agent", "sample"):
+        subject = report.get("subject") if isinstance(report.get("subject"), dict) else {}
+        found = ""
+        if df is not None:
+            found = detect_subject_active_at(df, subject)
+        if not found and snap is not None:
+            found = detect_subject_active_at(snap, subject)
+        if found:
+            lock["active_at"] = found
+            lock["active_at_source"] = "detected"
+    _ensure_active_baseline(run_dir, report, lock, df)
+    return lock
 
 
 def _write_fingerprint_snapshot(run_dir: Path, report: dict, lock: dict, df, *, rotate_prev: bool = False) -> dict:
@@ -2611,8 +2688,11 @@ def _write_fingerprint_snapshot(run_dir: Path, report: dict, lock: dict, df, *, 
     if not isinstance(baseline, dict) or not (baseline.get("listings") or baseline.get("ids")):
         baseline = freeze_fingerprint_baseline(snap)
         baseline_path.write_text(json.dumps(baseline, indent=2, default=str), encoding="utf-8")
+    lock = _apply_active_at(run_dir, lock, report, df=df, snap=snap)
+    clock_base = _clock_baseline(run_dir, lock) or baseline
     baseline_ids = {str(x) for x in (baseline.get("ids") or []) if x}
-    sold_map = fingerprint_sold_from_df(df, baseline_ids)
+    clock_ids = {str(x) for x in ((clock_base or {}).get("ids") or []) if x}
+    sold_map = fingerprint_sold_from_df(df, baseline_ids | clock_ids)
     ledger = merge_fingerprint_ledger(
         _read_json_file(run_dir / "fingerprint_ledger.json"),
         snap,
@@ -2625,7 +2705,8 @@ def _write_fingerprint_snapshot(run_dir: Path, report: dict, lock: dict, df, *, 
         encoding="utf-8",
     )
     prev = _read_json_file(run_dir / "pulse_snapshot_prev.json")
-    digest = digest_pulse(snap, lock, prev, baseline=baseline, ledger=ledger)
+    subject = report.get("subject") if isinstance(report.get("subject"), dict) else {}
+    digest = digest_pulse(snap, lock, prev, baseline=clock_base, ledger=ledger, subject=subject)
     history = append_fingerprint_history(
         _read_json_file(run_dir / "fingerprint_history.json", []),
         snap,
@@ -2691,6 +2772,12 @@ def _seed_sample_fingerprint(run_dir: Path, report: dict) -> None:
     )
 
     if _sample_fingerprint_ready(run_dir):
+        lock = _read_json_file(run_dir / "pulse.json") or {}
+        if isinstance(lock, dict) and lock.get("locked_price") and not lock.get("active_at"):
+            lock["active_at"] = SAMPLE_FINGERPRINT_LOCKED_AT
+            lock["active_at_source"] = "sample"
+            (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
+        _ensure_active_baseline(run_dir, report, lock if isinstance(lock, dict) else {})
         _seed_sample_fingerprint_notes(run_dir)
         _backfill_sample_fingerprint_visuals(run_dir)
         return
@@ -2713,6 +2800,8 @@ def _seed_sample_fingerprint(run_dir: Path, report: dict) -> None:
     lock = {
         "locked_price": int(round(locked_price)),
         "locked_at": f"{SAMPLE_FINGERPRINT_LOCKED_AT}T09:00:00",
+        "active_at": SAMPLE_FINGERPRINT_LOCKED_AT,
+        "active_at_source": "sample",
         "subject_sqft": subject_sqft,
         "market_label": meta.get("market_label") or report.get("area") or "West Greeley · similar homes",
         "source": "sample",
@@ -2754,12 +2843,13 @@ def _seed_sample_fingerprint(run_dir: Path, report: dict) -> None:
         sold_map=sold_map,
         as_of=snap.get("as_of"),
     )
-    digest = digest_pulse(snap, lock, prev, baseline=baseline, ledger=ledger)
-    history = append_fingerprint_history([], prev, digest_pulse(prev, lock, None, baseline=baseline, ledger=None))
+    digest = digest_pulse(snap, lock, prev, baseline=baseline, ledger=ledger, subject=subject)
+    history = append_fingerprint_history([], prev, digest_pulse(prev, lock, None, baseline=baseline, ledger=None, subject=subject))
     history = append_fingerprint_history(history, snap, digest)
     (run_dir / "pulse_snapshot.json").write_text(json.dumps(snap, indent=2, default=str), encoding="utf-8")
     (run_dir / "pulse_snapshot_prev.json").write_text(json.dumps(prev, indent=2, default=str), encoding="utf-8")
     (run_dir / "fingerprint_baseline.json").write_text(json.dumps(baseline, indent=2, default=str), encoding="utf-8")
+    (run_dir / "fingerprint_active_baseline.json").write_text(json.dumps(baseline, indent=2, default=str), encoding="utf-8")
     (run_dir / "fingerprint_ledger.json").write_text(json.dumps(ledger, indent=2, default=str), encoding="utf-8")
     (run_dir / "fingerprint_history.json").write_text(json.dumps(history, indent=2, default=str), encoding="utf-8")
     lock["last_refresh_at"] = datetime.now().isoformat(timespec="seconds")
@@ -2995,8 +3085,13 @@ def _save_pulse_brief(
     snap = snap if snap is not None else _read_json_file(run_dir / "pulse_snapshot.json")
     prev = _read_json_file(run_dir / "pulse_snapshot_prev.json")
     subject = report.get("subject") if isinstance(report.get("subject"), dict) else {}
+    need_detect = str((lock or {}).get("active_at_source") or "") != "agent" and not (lock or {}).get("active_at")
+    df = _load_run_market(run_dir) if need_detect else None
+    lock = _apply_active_at(run_dir, lock, report, df=df, snap=snap)
+    if lock.get("locked_price"):
+        (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
     report_url, share_url, fingerprint_url, agent_fp = _pulse_links(run_dir.name, report)
-    baseline = _read_json_file(run_dir / "fingerprint_baseline.json")
+    baseline = _clock_baseline(run_dir, lock)
     ledger = _read_json_file(run_dir / "fingerprint_ledger.json")
     snap, ledger = _hydrate_fingerprint_photos(run_dir, snap, ledger)
     brief = build_pulse_brief(
@@ -3078,8 +3173,9 @@ def _pulse_payload(run_dir: Path, report: dict | None = None) -> dict:
             snap,
             lock,
             prev,
-            baseline=_read_json_file(run_dir / "fingerprint_baseline.json"),
+            baseline=_clock_baseline(run_dir, lock),
             ledger=_read_json_file(run_dir / "fingerprint_ledger.json"),
+            subject=report.get("subject") if isinstance(report.get("subject"), dict) else {},
         )
         if lock
         else None
@@ -3337,8 +3433,9 @@ async def refresh_run_pulse(run_id: str, request: Request):
             snap,
             lock,
             prev,
-            baseline=_read_json_file(run_dir / "fingerprint_baseline.json"),
+            baseline=_clock_baseline(run_dir, lock),
             ledger=_read_json_file(run_dir / "fingerprint_ledger.json"),
+            subject=report.get("subject") if isinstance(report.get("subject"), dict) else {},
         ),
         "brief": brief,
         "snapshot": snap,
@@ -3645,6 +3742,47 @@ async def save_fingerprint_contact(run_id: str, request: Request):
         lock["email"] = email_cfg
     (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
     return {"ok": True, "lock": lock}
+
+
+@app.post("/api/runs/{run_id}/fingerprint/active")
+async def save_fingerprint_active(run_id: str, request: Request):
+    from core import _fingerprint_date
+
+    run_id = _safe_run_id(run_id)
+    _reject_sample_mutation(run_id)
+    _require_run_owner(request, run_id)
+    run_dir = OUTPUT_DIR / run_id
+    lock = _read_json_file(run_dir / "pulse.json") or {}
+    if not lock:
+        raise HTTPException(400, "Generate a Fingerprint before setting the listed date")
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    if not isinstance(body, dict):
+        body = {}
+    raw = str(body.get("active_at") or "").strip()
+    if not raw:
+        lock.pop("active_at", None)
+        lock.pop("active_at_source", None)
+        active_path = run_dir / "fingerprint_active_baseline.json"
+        if active_path.exists():
+            try:
+                active_path.unlink()
+            except OSError:
+                pass
+    else:
+        day = _fingerprint_date(raw)
+        if not day:
+            raise HTTPException(400, "Listed date must be YYYY-MM-DD")
+        lock["active_at"] = day
+        lock["active_at_source"] = "agent"
+        report = _read_json_file(run_dir / "presentation.json", {}) or {}
+        _ensure_active_baseline(run_dir, report, lock, _load_run_market(run_dir))
+    (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
+    report = _read_json_file(run_dir / "presentation.json", {}) or {}
+    _save_pulse_brief(run_dir, report, lock)
+    return {"ok": True, "lock": lock, **_pulse_payload(run_dir)}
 
 
 @app.post("/api/runs/{run_id}/fingerprint/share")
