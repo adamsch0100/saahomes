@@ -245,6 +245,11 @@ tbody tr:last-child td{border-bottom:none}
   .topbar{padding:12px 16px}
   .top-links a.hide-m{display:none}
 }
+/* View-switch pill (unified across consoles) */
+.seg{display:inline-flex;gap:0;padding:3px;background:rgba(148,178,214,.12);border:1px solid var(--line2);border-radius:999px}
+.seg a{padding:6px 16px;border-radius:999px;font-size:.8rem;font-weight:700;text-decoration:none;color:var(--muted);transition:.15s;white-space:nowrap}
+.seg a:hover{color:var(--ink)}
+.seg a.on{background:var(--gold);color:#161006;box-shadow:0 2px 8px rgba(212,169,79,.3)}
 </style>
 <link rel="stylesheet" href="/saas/dash-light-admin.css">
 </head>
@@ -253,14 +258,16 @@ tbody tr:last-child td{border-bottom:none}
 <header class="topbar">
   <a class="brand" href="/saas/admin.html">
     <img src="/saas/listlogic-logo.png" alt="ListLogic">
-    <span class="tag">Owner</span>
   </a>
+  <nav class="seg" id="viewSwitch">
+    <a href="/saas/app.html">Agent</a>
+    <a href="/saas/admin.html" class="on">Owner</a>
+  </nav>
   <div class="spacer"></div>
   <nav class="top-links">
-    <a href="/saas/app.html">Agent dashboard</a>
     <a href="/saas/app.html#generate" class="hide-m">Generate</a>
     <a href="/saas/">Site</a>
-    <a href="#" id="logout">Sign out</a>
+    <a href="#" id="logoutLink">Sign out</a>
   </nav>
 </header>
 
@@ -563,7 +570,7 @@ function openTab(name) {
   const btn = document.querySelector('#snav button[data-tab="' + name + '"]');
   if (btn) btn.click();
 }
-document.getElementById('logout').addEventListener('click', async (e) => {
+document.getElementById('logoutLink').addEventListener('click', async (e) => {
   e.preventDefault();
   await fetch('/api/logout', { method: 'POST' });
   location.href = '/saas/login.html';

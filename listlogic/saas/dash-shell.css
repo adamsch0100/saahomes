@@ -1,0 +1,115 @@
+/* dash-shell.css — unified chrome: ll-nav → owner-style topbar, dash-side → flat sidebar */
+/* Applied to agent (app.html) and settings (onboarding.html) — NOT admin (it already has .topbar) */
+
+/* ---- Nav: same as .topbar ---- */
+.ll-nav {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: 16px;
+  padding: 11px 26px;
+  background: rgba(247, 244, 238, .82); backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+  min-height: 57px;
+}
+.ll-nav .container { width: 100%; padding: 0; max-width: none; display: flex; align-items: center; gap: 16px; }
+.ll-nav .ll-nav-left { display: flex; align-items: center; gap: 16px; }
+.ll-nav .ll-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-family: 'Fraunces', serif; font-size: 1.15rem; font-weight: 700; }
+.ll-nav .ll-brand img { height: 28px; border-radius: 7px; }
+.ll-nav .ll-nav-links { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+
+body.dark .ll-nav { background: rgba(10, 22, 38, .82); border-bottom-color: rgba(148, 178, 214, .14); }
+body.dark .ll-nav .ll-nav-links a,
+body.dark .ll-nav a.ll-nav-pill-soft { color: #c9d5e6; background: transparent; border: none; padding: 8px 12px; border-radius: 9px; font-weight: 600; font-size: .84rem; text-decoration: none; transition: .15s; }
+body.dark .ll-nav .ll-nav-links a:hover { color: #fff; background: rgba(148, 178, 214, .08); }
+
+/* ---- View switch pill: same as .seg on admin ---- */
+.ll-view-switch {
+  display: inline-flex; gap: 0; padding: 3px;
+  background: rgba(148, 178, 214, .12); border-radius: 999px;
+  border: 1px solid var(--line);
+}
+.ll-view-switch a {
+  padding: 6px 16px; border-radius: 999px;
+  font-size: .8rem; font-weight: 700; text-decoration: none;
+  color: var(--muted); transition: .15s; white-space: nowrap;
+}
+.ll-view-switch a:hover { color: var(--ink); }
+.ll-view-switch a.on {
+  background: var(--gold); color: #161006; box-shadow: 0 2px 8px rgba(212, 169, 79, .3);
+}
+body.dark .ll-view-switch { background: rgba(148, 178, 214, .1); border-color: rgba(148, 178, 214, .16); }
+body.dark .ll-view-switch a.on { background: #d4a94f; color: #161006; }
+
+/* ---- Sidebar: flat like admin .sidebar ---- */
+.dash-side {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 28px 14px 40px 18px !important;
+  position: sticky; top: 78px;
+  width: 210px; flex-shrink: 0;
+}
+.dash-side .side-label {
+  font-size: .64rem; font-weight: 800; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--faint);
+  margin: 0 10px 10px; display: block;
+}
+.dash-side a, .dash-side button.side-link {
+  display: flex; align-items: center; gap: 11px; width: 100%;
+  background: none; border: none; cursor: pointer; text-align: left;
+  padding: 9px 13px; border-radius: 10px;
+  color: var(--muted); font-family: inherit; font-size: .88rem; font-weight: 600;
+  text-decoration: none; transition: .15s;
+  border-left: 2px solid transparent;
+}
+.dash-side a:hover, .dash-side button.side-link:hover {
+  color: var(--ink); background: rgba(28, 42, 66, .06);
+}
+.dash-side a.on, .dash-side button.side-link.on {
+  color: var(--ink); background: rgba(212, 169, 79, .12);
+  border-left-color: var(--gold);
+}
+.dash-side .side-ico { width: 1.2em; text-align: center; opacity: .85; font-size: .9rem; }
+.dash-side .side-sep { height: 1px; background: var(--line); margin: 12px 4px; }
+
+body.dark .dash-side a:hover, body.dark .dash-side button.side-link:hover {
+  color: #e8eef7; background: rgba(148, 178, 214, .06);
+}
+body.dark .dash-side a.on, body.dark .dash-side button.side-link.on {
+  color: #e8eef7; background: rgba(212, 169, 79, .12);
+}
+
+/* ---- Dash grid: match owner ---- */
+.dash { max-width: none; padding: 24px 30px 56px; gap: 24px; grid-template-columns: 210px minmax(0, 1fr); }
+@media (max-width: 900px) {
+  .dash { grid-template-columns: 1fr; padding: 16px 14px 46px; }
+  .dash-side { position: static; width: 100%; padding: 10px !important;
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  }
+  .dash-side .side-label { display: none; }
+}
+
+/* ---- Settings page tweaks ---- */
+body.dark .set-wrap { color: #e8eef7; }
+body.dark .store-card, body.dark .field-group { background: #101f36; border-color: rgba(148, 178, 214, .16); }
+
+/* ---- Theme toggle button (consistent positioning) ---- */
+.ll-theme-toggle {
+  border: 1px solid var(--line); background: transparent; color: var(--muted);
+  width: 34px; height: 34px; border-radius: 10px; cursor: pointer;
+  font-size: .95rem; line-height: 1; display: inline-flex;
+  align-items: center; justify-content: center;
+  transition: .15s; margin-right: 4px; flex-shrink: 0;
+}
+.ll-theme-toggle:hover { color: var(--gold); border-color: var(--gold); }
+
+/* Pill-style links in nav (onboarding settings etc.) */
+.ll-nav-links a.ll-nav-pill,
+.ll-nav-links a.ll-nav-pill-soft {
+  padding: 7px 18px; border-radius: 10px; font-weight: 700; font-size: .82rem;
+  text-decoration: none; border: 1px solid var(--line);
+}
+.ll-nav-links a.ll-nav-pill { background: var(--navy); color: #fff; }
+.ll-nav-links a.ll-nav-pill-soft { background: transparent; color: var(--ink); }
+body.dark .ll-nav-links a.ll-nav-pill-soft { color: #c9d5e6; }
+body.dark .ll-nav-links a.ll-nav-pill-soft:hover { background: rgba(148, 178, 214, .08); color: #fff; }
