@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/saas/ll.css">
+<link rel="stylesheet" href="/saas/dash-light-agent.css">
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
 <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.3/mapbox-gl-draw.css" rel="stylesheet">
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
@@ -245,6 +246,11 @@
 .team-row .btn { padding: 6px 12px; font-size: 0.78rem; }
 #teamEmails { min-height: 92px; resize: vertical; }
 .container.narrow { max-width: none; padding: 0; }
+
+/* Full-width dashboard (match owner console) */
+.dash { max-width: none; padding: 24px 30px 56px; gap: 26px; }
+.dash-main > .container, .dash-view .container { max-width: none; padding: 0; }
+@media (max-width: 900px){ .dash { padding: 16px 14px 46px; } }
 </style>
 </head>
 <body>
@@ -2145,6 +2151,7 @@ form.addEventListener('submit', async (e) => {
   }
 });
 </script>
+<script src="/saas/dash-theme.js"></script>
 <script src="/saas/analytics.js"></script>
 <script src="/saas/utm.js"></script>
 <script src="/saas/assistant.js"></script>

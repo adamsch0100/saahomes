@@ -1,0 +1,85 @@
+/* ============ LIGHT/DARK THEME — agent console (app.html) ============
+ * Default = ll.css original light look, untouched.
+ * body.dark flips to the premium dark palette (matches owner console).
+ * Toggle via dash-theme.js (synced with owner console via localStorage).
+ */
+body.dark{
+  --ink:#e8eef7; --ink-2:#c9d5e6;
+  --paper:#0a1626; --card:#101f36; --line:rgba(148,178,214,.16);
+  --muted:#8fa3bd;
+  --navy:#6aa8ff; --blue:#6aa8ff;
+  --teal:#3ec9a7;
+  --accent:#d4a94f; --accent-2:#e5c37b;
+}
+body.dark{
+  background:
+    radial-gradient(1200px 600px at 85% -10%, rgba(106,168,255,.08), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(212,169,79,.07), transparent 55%),
+    #0a1626;
+  color:#e8eef7;
+}
+
+/* Nav */
+body.dark .ll-nav{background:rgba(10,22,38,.85);border-bottom-color:rgba(148,178,214,.14)}
+body.dark .ll-nav a{color:#c9d5e6}
+body.dark .ll-nav-links a:hover{color:#fff}
+body.dark .ll-view-switch{background:rgba(148,178,214,.09);border-color:rgba(148,178,214,.18)}
+body.dark .ll-view-switch a{color:#8fa3bd}
+body.dark .ll-view-switch a.on{background:rgba(212,169,79,.15);color:#e5c37b}
+
+/* Cards & panels */
+body.dark .card,
+body.dark .step-card{background:#101f36;border-color:rgba(148,178,214,.16);color:#e8eef7;box-shadow:0 10px 30px rgba(2,10,22,.4)}
+body.dark .dash-side{background:#101f36;border-color:rgba(148,178,214,.16);box-shadow:0 10px 30px rgba(2,10,22,.4)}
+body.dark .dash-side a,
+body.dark .dash-side button.side-link,
+body.dark .dash-side .side-label{color:#c9d5e6}
+body.dark .banner{background:rgba(212,169,79,.1);border-color:rgba(212,169,79,.3);color:#e5c37b}
+body.dark .dash-side{border-right-color:rgba(148,178,214,.12)}
+body.dark .dash-side a:hover,
+body.dark .dash-side button.side-link:hover{background:rgba(148,178,214,.07);color:#fff}
+body.dark .dash-side a.on,
+body.dark .dash-side button.side-link.on{background:rgba(212,169,79,.14);color:#e5c37b}
+body.dark .side-sep{background:rgba(148,178,214,.12)}
+
+/* Forms */
+body.dark input,body.dark select,body.dark textarea{
+  background:rgba(9,18,32,.65);border-color:rgba(148,178,214,.24);color:#e8eef7;
+}
+body.dark input::placeholder{color:#5f7591}
+body.dark .field label{color:#8fa3bd}
+
+/* Buttons */
+body.dark .btn{background:#13253f;border-color:rgba(148,178,214,.22);color:#e8eef7}
+body.dark .btn:hover{border-color:#d4a94f;color:#e5c37b}
+body.dark .btn-primary{background:linear-gradient(135deg,#c99b3f,#d4a94f);color:#161006;border-color:transparent;font-weight:700}
+body.dark .btn-gold{color:#161006}
+body.dark .btn-outline{background:transparent;color:#e8eef7}
+body.dark .btn-soft{background:rgba(106,168,255,.1);color:#a9c7ff}
+body.dark .btn-soft:hover{background:rgba(106,168,255,.17)}
+
+/* Tables / lists / misc */
+body.dark table th{color:#5f7591;border-bottom-color:rgba(148,178,214,.2)}
+body.dark table td{border-bottom-color:rgba(148,178,214,.12)}
+body.dark tbody tr:hover td{background:rgba(148,178,214,.05)}
+body.dark code{background:rgba(106,168,255,.11);border:none;color:#a9c7ff}
+body.dark .status{color:#8fa3bd}
+body.dark .status.ok{color:#3ec9a7}
+body.dark .status.error{color:#ef7a7a}
+
+/* Hardcoded-light patches inside app.html inline styles */
+body.dark [style*="background:#fff"],
+body.dark [style*="background: #fff"]{background:#101f36 !important}
+body.dark [style*="background:#f7f4ee"]{background:#0d1d33 !important}
+body.dark [style*="color:#0c3c6e"]{color:#a9c7ff !important}
+body.dark .mapboxgl-popup-content,
+body.dark .mapboxgl-ctrl-group{background:#101f36;color:#e8eef7}
+
+/* Theme toggle button — matches owner console */
+.ll-theme-toggle{
+  border:1px solid var(--line);background:transparent;color:var(--muted);
+  width:34px;height:34px;border-radius:10px;cursor:pointer;
+  font-size:.95rem;line-height:1;display:inline-flex;align-items:center;justify-content:center;
+  transition:.15s;margin-right:6px;
+}
+.ll-theme-toggle:hover{color:var(--accent);border-color:var(--accent)}
