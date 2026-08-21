@@ -300,6 +300,18 @@ export default function AreaGuidePage() {
         </div>
       </section>
 
+      <section className="py-16 px-6 bg-white">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-3xl font-bold font-serif mb-4 text-center">
+            Free {area.city} market report
+          </h2>
+          <p className="text-lg mb-6 text-center text-gray-700">
+            Get instant access to the latest sales trends and market data for {area.city}, CO.
+          </p>
+          <MarketReportForm areaName={`${area.city}, CO`} />
+        </div>
+      </section>
+
       {whyChoose.length > 0 && (
         <section className="py-16 px-6 bg-gray-50">
           <div className="max-w-6xl mx-auto">
@@ -393,18 +405,6 @@ export default function AreaGuidePage() {
           </div>
         </section>
       )}
-
-      <section className="py-16 px-6 bg-white">
-        <div className="max-w-2xl mx-auto">
-          <h2 className="text-3xl font-bold font-serif mb-4 text-center">
-            Free {area.city} market report
-          </h2>
-          <p className="text-lg mb-6 text-center text-gray-700">
-            Get instant access to the latest sales trends and market data for {area.city}, CO.
-          </p>
-          <MarketReportForm areaName={`${area.city}, CO`} />
-        </div>
-      </section>
 
       <AreaEventsSection city={area.city} slug={area.slug} />
 
