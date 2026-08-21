@@ -296,6 +296,24 @@ export default function WellingtonPage() {
 
       <AreaFAQSection faqs={AREA_FAQS['wellington']} city="Wellington" />
 
+      {/* Final CTA */}
+      <section className="py-16 px-6 bg-black text-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold font-serif mb-4">Ready to buy or sell in Wellington?</h2>
+          <p className="text-gray-300 mb-8">
+            Adam and Mandi Schwartz help buyers and sellers across Wellington and all of Northern Colorado.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link to="/contact/" className="inline-block px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+              Contact SAA Homes
+            </Link>
+            <a href="tel:(970) 999-1407" className="inline-block px-8 py-3 border-2 border-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
+              Call (970) 999-1407
+            </a>
+          </div>
+        </div>
+      </section>
+
     </>
   );
 }

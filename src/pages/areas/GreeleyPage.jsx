@@ -223,6 +223,30 @@ export default function GreeleyPage() {
         </div>
       </section>
 
+      {/* CHFA First-Time Buyer Banner */}
+      <section className="py-16 px-6" style={{ backgroundColor: "#CFB36E" }}>
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold font-serif text-gray-900 mb-3">First-time buyer in Greeley?</h2>
+          <p className="text-gray-800 mb-6">
+            Many Greeley and Weld County buyers qualify for CHFA down payment assistance — grants and deferred loans up to $25,000 for down payment and closing costs.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              to="/chfa-down-payment-assistance/#chfa-dpa-lead-form"
+              className="inline-flex px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Free CHFA Consultation
+            </Link>
+            <Link
+              to="/chfa-down-payment-assistance/"
+              className="inline-flex px-6 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+            >
+              CHFA program guide →
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <section className="py-16 px-6" style={{ backgroundColor: "#CFB36E" }}>
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold font-serif text-gray-900 mb-3">Work in Greeley? Explore G-HOPE</h2>
@@ -404,6 +428,24 @@ export default function GreeleyPage() {
       <RecentlySoldSection citySlug="greeley" />
 
       <AreaFAQSection faqs={AREA_FAQS['greeley']} city="Greeley" />
+
+      {/* Final CTA */}
+      <section className="py-16 px-6 bg-black text-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold font-serif mb-4">Ready to buy or sell in Greeley?</h2>
+          <p className="text-gray-300 mb-8">
+            Adam and Mandi Schwartz help buyers and sellers across Greeley and all of Weld County. Call (970) 999-1407.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link to="/for-buyers/" className="inline-block px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+              For Buyers
+            </Link>
+            <Link to="/for-sellers/" className="inline-block px-8 py-3 border-2 border-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
+              For Sellers
+            </Link>
+          </div>
+        </div>
+      </section>
 
     </>
   );

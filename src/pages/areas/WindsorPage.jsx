@@ -53,12 +53,20 @@ export default function WindsorPage() {
             <p className="text-lg mb-6 text-gray-700">
               Explore available properties in Windsor, CO
             </p>
-            <Link
-              to="/properties/?location=Windsor, CO"
-              className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              Search Windsor Homes
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                to="/properties/?location=Windsor, CO"
+                className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                Search Windsor Homes
+              </Link>
+              <Link
+                to="/contact/"
+                className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+              >
+                Talk to an Agent
+              </Link>
+            </div>
           </div>
         </section>
 
@@ -200,6 +208,32 @@ export default function WindsorPage() {
           </div>
         </section>
 
+        {/* CHFA First-Time Buyer Banner */}
+        <section className="mb-12 py-12 px-6 rounded-lg" style={{ backgroundColor: "#CFB36E" }}>
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-2xl sm:text-3xl font-bold font-serif text-gray-900 mb-3">
+              First-time buyer in Windsor?
+            </h2>
+            <p className="text-gray-800 mb-6">
+              Many Windsor buyers qualify for CHFA down payment assistance — grants and deferred loans up to $25,000 for down payment and closing costs.
+            </p>
+            <div className="flex flex-wrap gap-4 justify-center">
+              <Link
+                to="/chfa-down-payment-assistance/#chfa-dpa-lead-form"
+                className="inline-flex px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                Free CHFA Consultation
+              </Link>
+              <Link
+                to="/chfa-down-payment-assistance/"
+                className="inline-flex px-6 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+              >
+                CHFA program guide →
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* Luxury Homes in Windsor */}
         <CityLuxurySection citySlug="windsor" />
 
@@ -276,6 +310,24 @@ export default function WindsorPage() {
       <RecentlySoldSection citySlug="windsor" />
 
       <AreaFAQSection faqs={AREA_FAQS['windsor']} city="Windsor" />
+
+      {/* Final CTA */}
+      <section className="py-16 px-6 bg-black text-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold font-serif mb-4">Ready to buy or sell in Windsor?</h2>
+          <p className="text-gray-300 mb-8">
+            Adam and Mandi Schwartz help buyers and sellers across Windsor and all of Northern Colorado.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link to="/contact/" className="inline-block px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+              Contact SAA Homes
+            </Link>
+            <Link to="/properties/?location=Windsor, CO" className="inline-block px-8 py-3 border-2 border-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
+              Search Windsor Homes
+            </Link>
+          </div>
+        </div>
+      </section>
 
     </>
   );
