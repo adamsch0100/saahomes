@@ -1,34 +1,62 @@
 /* ListLogic dashboard theme toggle (owner + agent consoles)
- * - Injects a 🌓 button into the page's top nav
- * - Persists choice in localStorage ('ll-dash-theme')
- * - Toggles body.light; pages carry their own light-theme CSS
+ *
+ * One shared preference ('light' | 'dark') stored in localStorage
+ * under 'll-dash-theme' — switching on one page switches both.
+ *
+ * Each page declares its own default via <body data-theme-default="dark|light">.
+ * The toggle adds/removes an override class on <body>:
+ *   - if page default is dark  → override class is 'light'
+ *   - if page default is light → override class is 'dark'
+ * Pages ship CSS for their override class (dash-light-admin.css /
+ * dash-light-agent.css).
  */
 (function () {
   var KEY = 'll-dash-theme';
 
-  function apply(theme) {
-    document.body.classList.toggle('light', theme === 'light');
+  function pageDefault() {
+    var d = document.body.getAttribute('data-theme-default');
+    return d === 'light' ? 'light' : 'dark';
+  }
+
+  function overrideClass() {
+    return pageDefault() === 'dark' ? 'light' : 'dark';
+  }
+
+  function effectiveTheme(stored) {
+    return stored || pageDefault();
+  }
+
+  function apply(stored) {
+    var theme = effectiveTheme(stored);
+    var cls = overrideClass();
+    var wantOverride = (theme !== pageDefault());
+    document.body.classList.toggle(cls, wantOverride);
+    // Clean the opposite class in case of stray state
+    var other = cls === 'light' ? 'dark' : 'light';
+    document.body.classList.remove(other);
+
     var btn = document.getElementById('llThemeToggle');
     if (btn) {
       btn.textContent = theme === 'light' ? '☾' : '☀';
-      btn.title = theme === 'light' ? 'Switch to dark' : 'Switch to light';
+      btn.title = theme === 'light' ? 'Switch to light mode' : 'Switch to dark mode';
       btn.setAttribute('aria-label', btn.title);
     }
   }
 
-  function current() {
-    return localStorage.getItem(KEY) ||
-      (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+  function getStored() {
+    try { return localStorage.getItem(KEY); } catch (e) { return null; }
+  }
+
+  function setStored(v) {
+    try { localStorage.setItem(KEY, v); } catch (e) {}
   }
 
   function init() {
-    // Don't run twice
-    if (document.getElementById('llThemeToggle')) return;
+    if (!document.body || document.getElementById('llThemeToggle')) return;
 
-    // Find insertion point: owner console topbar or agent ll-nav links
     var host =
-      document.querySelector('.topbar .top-links') ||   // admin redesign
-      document.querySelector('.ll-nav .ll-nav-links');  // agent console (+ legacy)
+      document.querySelector('.topbar .top-links') ||
+      document.querySelector('.ll-nav .ll-nav-links');
     if (!host) return;
 
     var btn = document.createElement('button');
@@ -36,23 +64,22 @@
     btn.type = 'button';
     btn.className = 'll-theme-toggle';
     btn.addEventListener('click', function () {
-      var next = document.body.classList.contains('light') ? 'dark' : 'light';
-      try { localStorage.setItem(KEY, next); } catch (e) {}
+      var next = getStored() === 'light' ? 'dark'
+               : getStored() === 'dark' ? 'light'
+               : (pageDefault() === 'dark' ? 'light' : 'dark');
+      setStored(next);
       apply(next);
     });
     host.insertBefore(btn, host.firstChild);
+    apply(getStored());
 
-    apply(current());
-
-    // Sync across tabs
     window.addEventListener('storage', function (e) {
-      if (e.key === KEY) apply(e.newValue === 'light' ? 'light' : 'dark');
+      if (e.key === KEY) apply(e.newValue);
     });
 
-    // Expose for pages that need to react to switches (e.g. charts)
     window.llDashTheme = {
-      get: current,
-      isLight: function () { return document.body.classList.contains('light'); }
+      get: function () { return effectiveTheme(getStored()); },
+      isLight: function () { return effectiveTheme(getStored()) === 'light'; }
     };
   }
 
