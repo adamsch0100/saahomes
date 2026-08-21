@@ -19,7 +19,7 @@ export default function BoulderPage() {
         <div className="absolute inset-0 bg-black/60"></div>
         <div className="relative z-10 text-center text-white px-6">
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">Boulder, CO</h1>
-          <p className="mt-4 text-xl">Where Mountains Meet Innovation</p>
+          <p className="mt-4 text-xl">Flatirons views and Boulder County lifestyle</p>
         </div>
       </section>
 
@@ -32,6 +32,9 @@ export default function BoulderPage() {
           <div className="prose prose-lg max-w-none">
             <p className="text-lg leading-relaxed mb-4">
               Boulder is an iconic Colorado city of approximately 108,000 residents, nestled at the base of the Rocky Mountains' Flatirons. Known worldwide for its stunning natural beauty, progressive values, and active lifestyle, Boulder offers an unparalleled quality of life. The city consistently ranks among the best places to live in America, attracting outdoor enthusiasts, entrepreneurs, scientists, and artists from around the globe.
+            </p>
+            <p className="text-lg leading-relaxed mb-4">
+              SAA Homes provides Boulder County real estate expertise for buyers and sellers navigating this premium market. While Boulder's pricing is the highest in our service area, our team helps clients identify the right neighborhood and financing approach — including CHFA program eligibility where applicable for qualified buyers entering Boulder County.
             </p>
           </div>
         </section>
@@ -250,6 +253,32 @@ export default function BoulderPage() {
         </div>
       </section>
 
+      {/* CHFA First-Time Buyer Banner */}
+      <section className="py-12 px-6" style={{ backgroundColor: "#CFB36E" }}>
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold font-serif text-gray-900 mb-3">
+            First-time buyer in Boulder?
+          </h2>
+          <p className="text-gray-800 mb-6">
+            Many Boulder County buyers qualify for CHFA down payment assistance — grants and deferred loans up to $25,000 for down payment and closing costs.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link
+              to="/chfa-down-payment-assistance/#chfa-dpa-lead-form"
+              className="inline-flex px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Free CHFA Consultation
+            </Link>
+            <Link
+              to="/chfa-down-payment-assistance/"
+              className="inline-flex px-6 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+            >
+              CHFA program guide →
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <section className="py-10 px-6" style={{ backgroundColor: "#CFB36E" }}>
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-gray-900 text-lg leading-relaxed">
@@ -268,6 +297,24 @@ export default function BoulderPage() {
       <RecentlySoldSection citySlug="boulder" />
 
       <AreaFAQSection faqs={AREA_FAQS['boulder']} city="Boulder" />
+
+      {/* Final CTA */}
+      <section className="py-16 px-6 bg-black text-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold font-serif mb-4">Ready to buy or sell in Boulder?</h2>
+          <p className="text-gray-300 mb-8">
+            Adam and Mandi Schwartz help buyers and sellers across Boulder and all of Boulder County.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link to="/for-buyers/" className="inline-block px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+              For Buyers
+            </Link>
+            <Link to="/for-sellers/" className="inline-block px-8 py-3 border-2 border-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
+              For Sellers
+            </Link>
+          </div>
+        </div>
+      </section>
 
     </>
   );

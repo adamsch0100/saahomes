@@ -7502,6 +7502,260 @@ export const blogPosts = [
       },
     ],
   },
+  {
+    slug: 'buying-a-home-in-berthoud',
+    title: 'Buying a Home in Berthoud, Colorado: A 2026 Buyer Guide',
+    excerpt: 'Everything Berthoud home buyers need to know in 2026 — new construction, I-25 corridor commutes, CHFA down payment assistance, and how SAA Homes helps you find the right Northern Colorado home.',
+    date: '2026-08-21',
+    category: 'Buyer Tips',
+    image: '/images/Northern Colorado.webp',
+    readTime: '9 min read',
+    keywords: 'buying a home in berthoud colorado, berthoud co real estate, berthoud homes for sale, berthoud colorado realtor, move to berthoud, berthoud new construction, berthoud first-time home buyer, CHFA berthoud',
+    relatedLinks: [
+      { title: 'Berthoud real estate guide', href: '/northern-colorado-areas/berthoud/', description: 'Neighborhoods, schools & market data' },
+      { title: 'Browse Berthoud homes for sale', href: '/properties/?location=Berthoud, CO', description: 'Current Berthoud listings' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'How we represent buyers across Northern Colorado' },
+      { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Grants & deferred loans up to $25,000' },
+      { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Compare nearby Larimer County pricing' },
+      { title: 'Loveland homes for sale', href: '/northern-colorado-areas/loveland/', description: 'Another nearby NoCO option' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
+    ],
+    cta: {
+      title: 'Ready to buy a home in Berthoud?',
+      description: 'Adam and Mandi Schwartz provide expert Berthoud and Northern Colorado buyer guidance — from CHFA program eligibility to offer and closing. Call (970) 999-1407.',
+      primaryHref: '/for-buyers/',
+      primaryText: 'Start Your Home Search',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to a Berthoud Realtor',
+    },
+    faqs: [
+      { q: 'Is Berthoud a good place to buy a home?', a: 'Berthoud is one of Northern Colorado\'s fastest-growing small towns, sitting on the I-25 corridor between Fort Collins and Longmont. Buyers choose it for new construction, mountain views, a genuine small-town feel, and relative value compared to larger Front Range cities.' },
+      { q: 'How much do homes cost in Berthoud?', a: 'Berthoud home prices vary widely by neighborhood and age of construction, with new builds and established subdivisions often spanning the mid-$400Ks into the $600Ks and up for acreage properties. A comparative market analysis from a local Berthoud realtor is far more accurate than a broad online estimate.' },
+      { q: 'What school district serves Berthoud?', a: 'Berthoud is served by the Thompson School District for most of the town, with some Weld County portions near the border served by other districts. School boundaries vary by address, so confirm the specific school assignment for any home you are considering.' },
+      { q: 'Can I use CHFA down payment assistance in Berthoud?', a: 'Yes. Many Berthoud buyers qualify for CHFA down payment assistance programs — grants and deferred loans up to $25,000 for down payment and closing costs. SAA Homes connects you with CHFA participating lenders to confirm eligibility.' },
+      { q: 'What is the commute from Berthoud?', a: 'Berthoud sits directly on the I-25 corridor, roughly 15 minutes from Loveland, 20 minutes from Longmont, and about 30–40 minutes from Fort Collins or Boulder depending on traffic. Denver is about 45–60 minutes south.' },
+    ],
+    sections: [
+      {
+        heading: 'Why buyers are choosing Berthoud in 2026',
+        paragraphs: [
+          'Berthoud sits on the I-25 corridor between Fort Collins and Longmont — one of Northern Colorado\'s fastest-growing small towns. With new residential development, mountain views, and a genuine small-town feel, Berthoud attracts families and first-time buyers looking for value along the Front Range.',
+          'The town\'s draw is the combination: easier commutes than many exurbs, active new construction from master-planned communities, and a tight-knit community anchored by events like Berthoud Day and local parks. Buyers priced out of Boulder and increasingly out of parts of Fort Collins and Longmont find Berthoud a practical, attractive alternative.',
+        ],
+        relatedLinks: [
+          { title: 'Berthoud real estate guide', href: '/northern-colorado-areas/berthoud/', description: 'Neighborhoods, schools & market data' },
+        ],
+      },
+      {
+        heading: 'Berthoud neighborhoods and what they offer',
+        paragraphs: [
+          'Berthoud\'s housing stock mixes downtown historic charm, established subdivisions, newer construction, and country properties with acreage on the Larimer-Weld county line. Downtown Berthoud offers walkable character; new-construction communities offer modern floor plans and energy efficiency; acreage properties appeal to buyers who want space without a full rural move.',
+          'Your priority — school assignment, commute, lot size, or new-build warranty — should drive the neighborhood shortlist. A local Berthoud realtor can map which communities match each priority, because boundaries and builder activity shift as the town grows.',
+        ],
+        list: [
+          'Downtown Berthoud — historic character and walkability',
+          'New construction communities — modern builds and builder incentives',
+          'Established subdivisions — mature trees and settled streets',
+          'Acreage and country properties — space on the Larimer/Weld line',
+        ],
+      },
+      {
+        heading: 'Financing a Berthoud home, including CHFA',
+        paragraphs: [
+          'Berthoud buyers routinely use conventional, FHA, and VA financing, and many first-time buyers qualify for CHFA down payment assistance — grants and deferred loans up to $25,000 for down payment and closing costs. CHFA programs are administered through participating lenders, and income and purchase-price limits apply.',
+          'Getting pre-approved before you tour is the single highest-leverage step. It tells you your real budget, makes your offer stronger in a competitive new-construction market, and clarifies which down payment assistance programs you actually qualify for.',
+        ],
+        relatedLinks: [
+          { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Grants & deferred loans up to $25,000' },
+          { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Buyer representation & program hub' },
+        ],
+      },
+      {
+        heading: 'How the Berthoud buying process works',
+        paragraphs: [
+          'The Berthoud buying process follows the Colorado purchase contract: define budget and must-haves, get pre-approved, tour neighborhoods and new-build communities, write an offer, negotiate, complete inspection and appraisal, and close. New construction adds builder timelines and design-center steps that resale purchases do not have.',
+          'Schwartz and Associates (SAA Homes) guides you through each step — from comparing a resale home against a new build, to reading builder contracts, to negotiating inspection items and meeting closing deadlines.',
+        ],
+      },
+      {
+        heading: 'Work with a Berthoud realtor who knows the corridor',
+        paragraphs: [
+          'Adam and Mandi Schwartz live and work in Northern Colorado, with 20+ combined years helping buyers across Berthoud, Loveland, Longmont, Fort Collins, and the entire Front Range corridor. We pair market data with on-the-ground knowledge of builders, school boundaries, and what each neighborhood actually costs.',
+          'Sellers receive a free market analysis of their Berthoud home. Buyers get help defining budget, commute, and neighborhood priorities, plus introductions to recommended lenders including CHFA participating lenders. Call (970) 999-1407 or visit the contact page to start.',
+        ],
+        relatedLinks: [
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Adam and Mandi Schwartz — (970) 999-1407' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'selling-your-home-in-berthoud',
+    title: 'Selling Your Home in Berthoud, Colorado: A 2026 Seller Guide',
+    excerpt: 'How to sell a Berthoud home in 2026 — pricing against new construction and I-25 corridor demand, preparing your listing, and working with a local Berthoud listing agent.',
+    date: '2026-08-21',
+    category: 'Seller Tips',
+    image: '/images/Northern Colorado.webp',
+    readTime: '9 min read',
+    keywords: 'selling a home in berthoud colorado, sell my home berthoud co, berthoud co real estate agent, berthoud homes for sale, how to sell a house in berthoud, berthoud home selling guide, listing agent berthoud co, berthoud home value, berthoud housing market 2026',
+    relatedLinks: [
+      { title: 'Berthoud real estate guide', href: '/northern-colorado-areas/berthoud/', description: 'Neighborhoods, schools & market data' },
+      { title: 'Browse Berthoud homes for sale', href: '/properties/?location=Berthoud, CO', description: 'Current Berthoud listings' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
+      { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'How assisted buyers finance purchases' },
+      { title: 'Loveland real estate', href: '/northern-colorado-areas/loveland/', description: 'Compare nearby pricing' },
+      { title: 'Longmont real estate', href: '/northern-colorado-areas/longmont/', description: 'Another corridor alternative buyers consider' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
+    ],
+    cta: {
+      title: 'Ready to sell your Berthoud home?',
+      description: 'Adam and Mandi Schwartz provide expert Berthoud and Northern Colorado seller guidance — from pricing strategy to closing. Get a free, no-obligation market analysis for your home today.',
+      primaryHref: '/for-sellers/#market-report-form',
+      primaryText: 'Get a Free Market Analysis',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to a Berthoud Listing Agent',
+    },
+    faqs: [
+      { q: 'How much is my Berthoud home worth?', a: 'Berthoud home values vary by neighborhood, age of construction, and lot size, with new builds, established subdivisions, and acreage properties all pricing differently. A comparative market analysis from a local Berthoud listing agent is far more accurate than an automated estimate.' },
+      { q: 'How long does it take to sell a home in Berthoud?', a: 'Well-priced Berthoud homes typically sell within about 20–45 days. Homes competing directly against active new construction can take longer, so pricing and presentation against the builder alternative matter more than season alone.' },
+      { q: 'How does selling in Berthoud differ from Loveland or Longmont?', a: 'Berthoud is a smaller, newer market with a heavier new-construction presence than Loveland or Longmont. That means your biggest competitor is often a builder, not just another resale. Pricing must reflect that reality while still marketing Berthoud\'s small-town charm and corridor location.' },
+      { q: 'Do Berthoud buyers use down payment assistance?', a: 'Yes. Many buyers explore CHFA statewide programs plus other Colorado down payment assistance options. Understanding how assisted buyers finance helps you evaluate offer strength, not just top-line price.' },
+      { q: 'What should I fix before listing my Berthoud home?', a: 'Prioritize curb appeal, neutral paint, deep cleaning, and fixing obvious deferred maintenance. When competing with new construction, a spotless, move-in-ready presentation and professional photography matter even more.' },
+    ],
+    sections: [
+      {
+        heading: 'What makes the Berthoud seller market distinct',
+        paragraphs: [
+          'Berthoud is a small-town market on the I-25 corridor where the biggest competitor for a resale listing is often a brand-new home from an active builder community. That dynamic shapes everything about how you should price and market — buyers are comparing your home against a new-build alternative, not just last year\'s neighborhood sale.',
+          'The demand is real: Berthoud attracts buyers priced out of Boulder and parts of Fort Collins and Longmont who still want corridor access, good schools, and small-town character. For sellers, that means a well-presented, accurately priced home can move quickly — but an overpriced one competes directly against builder incentives.',
+        ],
+        relatedLinks: [
+          { title: 'Berthoud real estate guide', href: '/northern-colorado-areas/berthoud/', description: 'Neighborhoods, market data & lifestyle' },
+        ],
+      },
+      {
+        heading: 'Pricing your Berthoud home against new construction',
+        paragraphs: [
+          'The most common Berthoud pricing mistake is anchoring to peak-year sale memories while ignoring the builder alternative down the street. A comparative market analysis from SAA Homes uses recent solds — not actives — adjusted for square footage, updates, lot, and age, and pressure-tests your price against what a buyer can get new at a similar total monthly cost.',
+          'Launching slightly aggressive and cutting later costs more than pricing correctly on day one. Well-priced Berthoud homes generate early traffic; overpriced ones educate buyers on what not to buy and sit while builders sell.',
+        ],
+      },
+      {
+        heading: 'Preparing a Berthoud listing that competes with new builds',
+        paragraphs: [
+          'When a buyer can walk through a pristine model home, your resale has to match that standard. Focus preparation where returns are highest: declutter and depersonalize, deep clean, refresh paint in neutral tones, tighten landscaping and entry appeal, and address any obvious deferred maintenance.',
+          'Professional photography, video, and a sharp online presence are non-negotiable in a market competing against builder marketing. SAA Homes provides professional photography and videography, aggressive digital marketing, and a data-driven pricing strategy.',
+        ],
+        relatedLinks: [
+          { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Professional marketing & pricing strategy' },
+        ],
+      },
+      {
+        heading: 'Selling acreage and country properties in Berthoud',
+        paragraphs: [
+          'Berthoud\'s acreage and Larimer-Weld border properties appeal to a different buyer than the subdivision market — often buyers relocating for space, horses, or a shop. These listings need marketing that surfaces well in land and acreage searches, not just city searches, and pricing that accounts for the true comparable set.',
+          'SAA Homes understands the county-line nuances — water rights, outbuildings, and what appraisers will and will not credit — so your acreage listing is priced and marketed to the right audience.',
+        ],
+      },
+      {
+        heading: 'Work with a Berthoud listing agent',
+        paragraphs: [
+          'Adam and Mandi Schwartz provide expert Berthoud and Northern Colorado seller guidance — from pricing strategy and professional marketing to negotiation and closing. Sellers receive a free market analysis of their Berthoud home.',
+          'Call (970) 999-1407 or visit the contact page to schedule a free consultation and get a market analysis within 24 hours.',
+        ],
+        relatedLinks: [
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Adam and Mandi Schwartz — (970) 999-1407' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'buying-a-home-in-longmont',
+    title: 'Buying a Home in Longmont, Colorado: A 2026 Buyer Guide',
+    excerpt: 'Everything Longmont home buyers need to know in 2026 — St. Vrain Valley schools, Prospect and Old Town neighborhoods, LDPAP and CHFA down payment assistance, and how SAA Homes helps.',
+    date: '2026-08-21',
+    category: 'Buyer Tips',
+    image: '/images/Longmont.jpg',
+    readTime: '10 min read',
+    keywords: 'buying a home in longmont colorado, longmont co real estate, longmont homes for sale, longmont colorado realtor, move to longmont, longmont first-time home buyer, longmont LDPAP, CHFA longmont, longmont neighborhoods',
+    relatedLinks: [
+      { title: 'Longmont real estate guide', href: '/northern-colorado-areas/longmont/', description: 'Neighborhoods, schools & market data' },
+      { title: 'Browse Longmont homes for sale', href: '/properties/?location=Longmont, CO', description: 'Current Longmont listings' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'How we represent buyers across Northern Colorado' },
+      { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Includes Longmont LDPAP overview' },
+      { title: 'Boulder real estate', href: '/northern-colorado-areas/boulder/', description: 'Compare Boulder County pricing' },
+      { title: 'Carbon Valley affordability guide', href: '/blog/carbon-valley-affordable-homes-guide/', description: 'Firestone & Frederick value alternatives' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
+    ],
+    cta: {
+      title: 'Ready to buy a home in Longmont?',
+      description: 'Adam and Mandi Schwartz provide expert Longmont and Boulder County buyer guidance — from down payment assistance to offer and closing. Call (970) 999-1407.',
+      primaryHref: '/for-buyers/',
+      primaryText: 'Start Your Home Search',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to a Longmont Realtor',
+    },
+    faqs: [
+      { q: 'Is Longmont a good place to buy a home?', a: 'Longmont is Boulder County\'s most accessible major city for many Front Range buyers — tech and agriculture roots, a walkable Main Street core, the St. Vrain Greenway, and Union Reservoir recreation without Boulder\'s entry prices. It consistently ranks among the best places to live in Colorado.' },
+      { q: 'How much do homes cost in Longmont?', a: 'Longmont home prices typically range from about $500,000 to $750,000 depending on neighborhood, size, and condition. Prospect, properties near McIntosh Lake, and well-updated Old Town homes can command premiums, while some edge and older inventory trades lower.' },
+      { q: 'What school district serves Longmont?', a: 'Longmont is served by the St. Vrain Valley School District, consistently ranked among the top districts in Colorado, with schools like Skyline High School and Silver Creek High School plus strong charter and STEM programs.' },
+      { q: 'Can I use down payment assistance in Longmont?', a: 'Yes. Buyers can explore CHFA statewide programs plus Longmont\'s own LDPAP (up to 10% of purchase price, max $40,000 for income-qualified buyers inside city limits), and Boulder County BCDPAP for homes outside Boulder city. SAA Homes connects you with lenders to confirm eligibility.' },
+      { q: 'What is the commute from Longmont?', a: 'Longmont is about 15 miles north of Boulder and 35 miles north of Denver, with easy access via Highway 119 and I-25. Fort Collins is roughly 25–30 minutes north, and the Carbon Valley towns of Firestone and Frederick sit just east.' },
+    ],
+    sections: [
+      {
+        heading: 'Why buyers choose Longmont in 2026',
+        paragraphs: [
+          'Longmont is Boulder County\'s most accessible major city for many Northern Colorado and Front Range buyers — a mix of tech and agriculture roots, a walkable Main Street, the St. Vrain Greenway, Union Reservoir, and NextLight gigabit municipal broadband, all without Boulder\'s entry prices.',
+          'Buyers choose Longmont for the combination of strong schools, a genuine downtown, outdoor access, and a lower cost per square foot than Boulder. It is a practical home base for Boulder and Denver commuters, local tech workers, and families who want St. Vrain Valley schools.',
+        ],
+        relatedLinks: [
+          { title: 'Longmont real estate guide', href: '/northern-colorado-areas/longmont/', description: 'Neighborhoods, market data & lifestyle' },
+        ],
+      },
+      {
+        heading: 'Longmont neighborhoods to know',
+        paragraphs: [
+          'Longmont\'s neighborhoods span distinct characters. Prospect New Town is a nationally known New Urbanist community with walkable streets and colorful architecture. Old Town offers historic character near Main Street. Southwest and McIntosh Lake-adjacent areas deliver family neighborhoods and outdoor living, while newer east-side subdivisions offer larger, newer floor plans.',
+          'Your priority — walkability, school assignment, commute, or new construction — should drive the shortlist. A local Longmont realtor can map which neighborhoods match each priority and where your budget actually stretches.',
+        ],
+        list: [
+          'Prospect New Town — New Urbanist walkability and design',
+          'Old Town — historic character near Main Street',
+          'Southwest & McIntosh Lake area — family neighborhoods and outdoor living',
+          'East-side subdivisions — newer, larger floor plans',
+        ],
+      },
+      {
+        heading: 'Financing a Longmont home: LDPAP, BCDPAP, and CHFA',
+        paragraphs: [
+          'Longmont buyers have several down payment assistance paths. CHFA statewide programs offer grants and deferred loans up to $25,000. Longmont\'s own LDPAP offers up to 10% of purchase price (max $40,000) for income-qualified buyers inside city limits, and Boulder County BCDPAP covers first-time buyers up to 80% AMI for homes outside Boulder city.',
+          'Get pre-approved before you tour. It sets your real budget, strengthens your offer, and clarifies which assistance programs you actually qualify for — because income tiers and program availability change.',
+        ],
+        relatedLinks: [
+          { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Includes Longmont LDPAP overview' },
+          { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Buyer representation & program hub' },
+        ],
+      },
+      {
+        heading: 'How the Longmont buying process works',
+        paragraphs: [
+          'The Longmont buying process follows the Colorado purchase contract: define budget and must-haves, get pre-approved, tour neighborhoods, write an offer, negotiate, complete inspection and appraisal, and close. Longmont\'s mid-market is competitive, so well-priced homes generate early traffic and multiple offers are common.',
+          'Schwartz and Associates (SAA Homes) guides you through each step — comparing neighborhoods, pressure-testing offer strategy, negotiating inspection items, and meeting closing deadlines with local Boulder County knowledge.',
+        ],
+      },
+      {
+        heading: 'Work with a Longmont realtor who knows Boulder County',
+        paragraphs: [
+          'Adam and Mandi Schwartz live and work in Northern Colorado, with 20+ combined years helping buyers across Longmont, Boulder, Fort Collins, Loveland, and the entire Front Range. We pair market data with on-the-ground knowledge of St. Vrain school boundaries, neighborhood character, and down payment assistance programs.',
+          'Call (970) 999-1407 or visit the contact page to start your Longmont home search with a team that knows Boulder County.',
+        ],
+        relatedLinks: [
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Adam and Mandi Schwartz — (970) 999-1407' },
+        ],
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug) {

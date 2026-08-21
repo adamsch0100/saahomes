@@ -9,6 +9,7 @@ import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
 import TopRatedSchools from "../../components/TopRatedSchools.jsx";
 import CityLuxurySection from "../../components/CityLuxurySection.jsx";
 import CityVeteransSection from "../../components/CityVeteransSection.jsx";
+import AreaEventsSection from "../../components/AreaEventsSection.jsx";
 
 export default function LovelandPage() {
   return (
@@ -237,6 +238,32 @@ export default function LovelandPage() {
           </div>
         </section>
 
+        {/* CHFA First-Time Buyer Banner */}
+        <section className="mb-12 py-12 px-6 rounded-lg" style={{ backgroundColor: "#CFB36E" }}>
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-2xl sm:text-3xl font-bold font-serif text-gray-900 mb-3">
+              First-time buyer in Loveland?
+            </h2>
+            <p className="text-gray-800 mb-6">
+              Many Loveland buyers qualify for CHFA down payment assistance — grants and deferred loans up to $25,000 for down payment and closing costs.
+            </p>
+            <div className="flex flex-wrap gap-4 justify-center">
+              <Link
+                to="/chfa-down-payment-assistance/#chfa-dpa-lead-form"
+                className="inline-flex px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                Free CHFA Consultation
+              </Link>
+              <Link
+                to="/chfa-down-payment-assistance/"
+                className="inline-flex px-6 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+              >
+                CHFA program guide →
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* Luxury Homes in Loveland */}
         <CityLuxurySection citySlug="loveland" />
 
@@ -311,6 +338,8 @@ export default function LovelandPage() {
       <RecentlySoldSection citySlug="loveland" />
 
       <AreaFAQSection faqs={AREA_FAQS['loveland']} city="Loveland" />
+
+      <AreaEventsSection city="Loveland" slug="loveland" />
 
     </>
   );

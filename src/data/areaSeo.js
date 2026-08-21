@@ -504,6 +504,7 @@ export const areaSeoPages = [
     keywords: 'Firestone CO real estate, Firestone homes for sale, Carbon Valley Colorado, Weld County realtor, Firestone new construction, Northern Colorado family homes, sell my house fast Firestone, Firestone home value, Firestone housing market, cash home buyers Firestone, we buy houses Firestone, foreclosures Firestone, short sale Firestone, Weld County foreclosures',
     heroImage: '/images/buyers-hero.jpg',
     tagline: 'Carbon Valley growth and family-friendly neighborhoods',
+    youtubeId: '7E274DfsUek',
     geo: { latitude: '40.1125', longitude: '-104.9366' },
     sitemapPriority: '0.82',
     introParagraphs: [

@@ -42,12 +42,20 @@ export default function LongmontPage() {
             <p className="text-lg mb-6 text-gray-700">
               Explore available properties in Longmont, CO
             </p>
-            <Link
-              to="/properties/?location=Longmont, CO"
-              className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              Search Longmont Homes
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                to="/properties/?location=Longmont, CO"
+                className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                Search Longmont Homes
+              </Link>
+              <Link
+                to="/contact/"
+                className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+              >
+                Talk to an Agent
+              </Link>
+            </div>
           </div>
         </section>
 
@@ -229,6 +237,32 @@ export default function LongmontPage() {
             <Link to="/northern-colorado-areas/fort-collins/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
               <h3 className="font-bold text-gray-900">Fort Collins →</h3>
               <p className="text-sm text-gray-600">CSU and breweries, 25 min north</p>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* CHFA First-Time Buyer Banner */}
+      <section className="py-12 px-6" style={{ backgroundColor: "#CFB36E" }}>
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold font-serif text-gray-900 mb-3">
+            First-time buyer in Longmont?
+          </h2>
+          <p className="text-gray-800 mb-6">
+            Many Longmont and Boulder County buyers qualify for CHFA down payment assistance — grants and deferred loans up to $25,000 for down payment and closing costs.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link
+              to="/chfa-down-payment-assistance/#chfa-dpa-lead-form"
+              className="inline-flex px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Free CHFA Consultation
+            </Link>
+            <Link
+              to="/chfa-down-payment-assistance/"
+              className="inline-flex px-6 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+            >
+              CHFA program guide →
             </Link>
           </div>
         </div>
