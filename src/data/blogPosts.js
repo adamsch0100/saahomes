@@ -7031,6 +7031,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/buying-a-home-in-severance-colorado.jpg',
     readTime: '9 min read',
+    youtubeId: '6C3D8x0Vc4I',
     keywords: 'best realtor severance co, best real estate agent severance colorado, severance realtor, severance real estate agent, severance co realtor, severance colorado realtor, schwartz and associates severance, severance commons, bluesky severance, weld re-4 schools, new construction severance co, best realtor in severance colorado',
     relatedLinks: [
       { title: 'Severance homes for sale', href: '/northern-colorado-areas/severance/', description: 'New construction, neighborhoods & the Severance market' },
