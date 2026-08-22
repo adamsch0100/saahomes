@@ -6908,6 +6908,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/Northern Colorado.webp',
     readTime: '9 min read',
+    youtubeId: 'l4gEU8DCEo4',
     keywords: 'best realtor erie co, best real estate agent erie colorado, erie realtor, erie real estate agent, erie co realtor, erie colorado realtor, schwartz and associates erie, colliers hill erie, vista ridge erie, erie commons homes, st vrain valley schools erie, best realtor in erie colorado',
     relatedLinks: [
       { title: 'Erie homes for sale', href: '/northern-colorado-areas/erie/', description: 'New construction, neighborhoods & the Erie market' },
