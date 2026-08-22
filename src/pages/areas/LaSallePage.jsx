@@ -3,11 +3,19 @@ import AreaSEO from "../../components/AreaSEO.jsx";
 import AreaFAQSection from "../../components/AreaFAQSection.jsx";
 import RecentlySoldSection from "../../components/RecentlySoldSection.jsx";
 import { AREA_FAQS } from "../../data/areaFaqs.js";
+import { getAreaSeo } from "../../data/areaSeo.js";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
+import LatestMarketUpdateBanner from "../../components/LatestMarketUpdateBanner.jsx";
+import AreaEventsSection from "../../components/AreaEventsSection.jsx";
+import CityStatsBand from "../../components/CityStatsBand.jsx";
+
+const GOLD = "#CFB36E";
 
 export default function LaSallePage() {
+  const area = getAreaSeo("la-salle");
+
   return (
     <>
       <AreaSEO slug="la-salle" />
@@ -18,7 +26,7 @@ export default function LaSallePage() {
         <div className="absolute inset-0 bg-black/60"></div>
         <div className="relative z-10 text-center text-white px-6">
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">La Salle, Colorado</h1>
-          <p className="mt-4 text-xl">Historic Charm, Modern Opportunities</p>
+          <p className="mt-4 text-xl">{area.tagline}</p>
         </div>
       </section>
 
@@ -26,14 +34,18 @@ export default function LaSallePage() {
       <section className="py-16 px-6 bg-white">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-4xl font-bold mb-6 text-center">Your La Salle Area Guide</h2>
-          <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            La Salle is a historic community in Northern Colorado that offers affordable living, strong schools, and a welcoming small-town atmosphere. Located in Weld County, La Salle provides residents with a peaceful lifestyle while maintaining easy access to Greeley and other Northern Colorado cities.
-          </p>
-          <p className="text-lg text-gray-700 leading-relaxed">
-            With its rich history, affordable housing, and strong sense of community, La Salle attracts families and individuals seeking quality of life at reasonable prices. The town's excellent schools and safe neighborhoods make it an ideal place to raise a family.
-          </p>
+          {area.introParagraphs?.map((p, i) => (
+            <p key={i} className="text-lg text-gray-700 leading-relaxed mb-6">{p}</p>
+          ))}
         </div>
       </section>
+
+      <LatestMarketUpdateBanner variant="compact" cityName="La Salle" />
+
+      {/* City Stats Band — quick info cards */}
+      <div className="max-w-6xl mx-auto px-6 mt-8 mb-8">
+        <CityStatsBand city="La Salle" />
+      </div>
 
       {/* Property Search CTA */}
       <section className="py-16 px-6 bg-gray-50">
@@ -51,7 +63,24 @@ export default function LaSallePage() {
         </div>
       </section>
 
-      {/* Economy Section */}
+      {/* Why Buy in La Salle? */}
+      {area.whyChoose?.length > 0 && (
+        <section className="py-16 px-6 bg-white">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-3xl font-bold font-serif mb-8 text-center">Why Buy in La Salle?</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {area.whyChoose.map((item) => (
+                <div key={item.title} className="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
+                  <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                  <p className="text-gray-700 text-sm leading-relaxed">{item.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Economy & Community */}
       <section className="py-16 px-6 bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -220,6 +249,32 @@ export default function LaSallePage() {
         </div>
       </section>
 
+      {/* CHFA First-Time Buyer Banner */}
+      <section className="py-12 px-6 rounded-lg" style={{ backgroundColor: GOLD }}>
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold font-serif text-gray-900 mb-3">
+            First-time buyer in La Salle?
+          </h2>
+          <p className="text-gray-800 mb-6">
+            Many La Salle buyers qualify for CHFA down payment assistance — grants and deferred loans up to $25,000 for down payment and closing costs.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link
+              to="/chfa-down-payment-assistance/#chfa-dpa-lead-form"
+              className="inline-flex px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Free CHFA Consultation
+            </Link>
+            <Link
+              to="/chfa-down-payment-assistance/"
+              className="inline-flex px-6 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+            >
+              CHFA program guide →
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Area Highlights */}
             {/* Neighborhood Guides */}
       <section className="py-12 px-6 bg-gray-50">
@@ -228,7 +283,7 @@ export default function LaSallePage() {
         </div>
       </section>
 
-<section className="py-16 px-6 bg-white">
+      <section className="py-16 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-8 text-center">La Salle Highlights</h2>
           <div className="grid md:grid-cols-2 gap-8">
@@ -256,11 +311,66 @@ export default function LaSallePage() {
         </div>
       </section>
 
+      {/* Nearby Northern Colorado Communities */}
+      <section className="py-8 px-6 bg-gray-50">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold mb-4 text-center">Nearby Northern Colorado Communities</h2>
+          <p className="text-gray-700 text-center mb-6">
+            La Salle offers quiet Weld County living minutes south of Greeley. Explore nearby communities to find your perfect fit.
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Link to="/northern-colorado-areas/greeley/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Greeley →</h3>
+              <p className="text-sm text-gray-600">Weld County hub, 8 min north</p>
+            </Link>
+            <Link to="/northern-colorado-areas/evans/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Evans →</h3>
+              <p className="text-sm text-gray-600">Weld neighbor, 5 min north</p>
+            </Link>
+            <Link to="/northern-colorado-areas/milliken/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Milliken →</h3>
+              <p className="text-sm text-gray-600">Affordable Weld, 10 min west</p>
+            </Link>
+            <Link to="/northern-colorado-areas/fort-collins/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Fort Collins →</h3>
+              <p className="text-sm text-gray-600">CSU and breweries, 25 min west</p>
+            </Link>
+            <Link to="/northern-colorado-areas/johnstown/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Johnstown →</h3>
+              <p className="text-sm text-gray-600">I-25 corridor, 15 min west</p>
+            </Link>
+            <Link to="/northern-colorado-areas/eaton/" className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow transition-all">
+              <h3 className="font-bold text-gray-900">Eaton →</h3>
+              <p className="text-sm text-gray-600">Rural schools community, 12 min northwest</p>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <RecentlySoldSection citySlug="la-salle" />
 
       <AreaFAQSection faqs={AREA_FAQS['la-salle']} city="La Salle" />
 
+      <AreaEventsSection city="La Salle" slug="la-salle" />
+
+      {/* Final CTA */}
+      <section className="py-16 px-6 bg-black text-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold font-serif mb-4">Ready to buy or sell in La Salle?</h2>
+          <p className="text-gray-300 mb-8">
+            Adam and Mandi Schwartz help buyers and sellers across La Salle and all of Northern Colorado.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link to="/contact/" className="inline-block px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+              Contact SAA Homes
+            </Link>
+            <a href="tel:(970) 999-1407" className="inline-block px-8 py-3 border-2 border-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
+              Call (970) 999-1407
+            </a>
+          </div>
+        </div>
+      </section>
+
     </>
   );
 }
-
