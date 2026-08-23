@@ -38,7 +38,7 @@ export default function ForSellersPage() {
         <div className="relative z-10 text-center text-white px-6 max-w-4xl mx-auto">
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold font-serif mb-6">Why Sell With Us?</h1>
           <p className="text-lg sm:text-xl font-sans max-w-3xl mx-auto">
-            Get proven results and streamlined service from start to finish. Scroll down to learn more about how we can get you results with our record-setting sales strategies.
+            Get proven results and streamlined service from start to finish. Our record-setting sales strategies and professional marketing campaigns are designed to get you top dollar for your property.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <a href="#home-valuation" className="inline-flex items-center justify-center px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
