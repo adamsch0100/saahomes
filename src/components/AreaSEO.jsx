@@ -73,7 +73,7 @@ export default function AreaSEO({ slug }) {
       description={area.description}
       keywords={getAreaKeywords(area)}
       canonical={pageUrl}
-      ogTitle={shareMeta?.ogTitle || `${area.city} Real Estate | Schwartz and Associates`}
+      ogTitle={shareMeta?.ogTitle || getAreaExactTitle(area)}
       ogDescription={shareMeta?.ogDescription || area.description}
       ogImage={shareMeta?.ogImage || imageUrl}
       ogImageAlt={shareMeta?.ogImageAlt || `${area.city}, Colorado real estate guide`}
