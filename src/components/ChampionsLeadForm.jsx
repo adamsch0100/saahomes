@@ -114,8 +114,8 @@ export default function ChampionsLeadForm({ compact = false }) {
           <input type="email" id="champions-email" name="email" required value={formData.email} onChange={handleChange} className={inputClass} />
         </div>
         <div>
-          <label htmlFor="champions-phone" className={labelClass}>Phone *</label>
-          <input type="tel" id="champions-phone" name="phone" required value={formData.phone} onChange={handleChange} className={inputClass} />
+          <label htmlFor="champions-phone" className={labelClass}>Phone (optional)</label>
+          <input type="tel" id="champions-phone" name="phone" autoComplete="tel" inputMode="tel" placeholder="(970) 555-0123" value={formData.phone} onChange={handleChange} className={inputClass} />
         </div>
       </div>
 
@@ -175,8 +175,11 @@ export default function ChampionsLeadForm({ compact = false }) {
         {isSubmitting ? 'Submitting...' : 'Request Local Guidance'}
       </button>
 
-      <p className="text-xs text-gray-500 mt-4 text-center">
-        By submitting, you agree to be contacted about the Champions program and home buying services.
+      <p className="text-xs text-gray-500 mt-3 text-center">
+        No obligation. Your info goes straight to Adam &amp; Mandi — no call center, no spam.
+      </p>
+      <p className="text-xs text-gray-500 mt-2 text-center">
+        Prefer to talk? Call <a href="tel:(970) 999-1407" className="font-semibold text-gray-700 hover:underline">(970) 999-1407</a> — we're here to help.
       </p>
     </form>
   );

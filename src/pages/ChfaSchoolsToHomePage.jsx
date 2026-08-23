@@ -239,7 +239,7 @@ export default function ChfaSchoolsToHomePage() {
       {/* Hero */}
       <section
         className="relative min-h-[min(100svh,680px)] sm:min-h-[520px] bg-cover bg-center flex items-center justify-center pt-28 sm:pt-32 pb-24 sm:pb-16"
-        style={{ backgroundImage: "url('/images/buyers-hero.jpg')" }}
+        style={{ backgroundImage: "url('/images/buyers-hero.webp')" }}
       >
         <div className="absolute inset-0 bg-black/65" />
         <div className="relative z-10 max-w-5xl mx-auto text-center text-white px-4 sm:px-6">
@@ -255,15 +255,15 @@ export default function ChfaSchoolsToHomePage() {
           <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center max-w-md sm:max-w-none mx-auto">
             <a
               href="#chfa-lead-form"
-              className="inline-flex items-center justify-center px-6 sm:px-8 py-3.5 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors touch-manipulation"
+              className="inline-flex items-center justify-center px-6 sm:px-8 py-3.5 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors touch-manipulation shadow-lg"
             >
               Get Free Consultation
             </a>
             <a
-              href="#how-it-works"
+              href="#who-qualifies"
               className="inline-flex items-center justify-center px-6 sm:px-8 py-3.5 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors touch-manipulation"
             >
-              How It Works
+              Check If I Qualify
             </a>
           </div>
         </div>
@@ -309,7 +309,7 @@ export default function ChfaSchoolsToHomePage() {
       </section>
 
       {/* Who Qualifies */}
-      <section className="py-16 px-6 bg-gray-50">
+      <section id="who-qualifies" className="py-16 px-6 bg-gray-50 scroll-mt-28">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
@@ -353,7 +353,7 @@ export default function ChfaSchoolsToHomePage() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-16 px-6">
+      <section id="how-it-works" className="py-16 px-6 scroll-mt-28">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4">How the program works</h2>

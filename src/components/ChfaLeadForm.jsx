@@ -216,8 +216,8 @@ export default function ChfaLeadForm({ compact = false }) {
         {isSubmitting ? 'Submitting...' : 'Request a Free Consultation'}
       </button>
 
-      <p className="text-xs text-gray-500 mt-4 text-center">
-        By submitting, you agree to be contacted about CHFA Schools To Home and home buying services.
+      <p className="text-xs text-gray-500 mt-3 text-center">
+        No obligation. Your info goes straight to Adam &amp; Mandi — no call center, no spam.
       </p>
       <p className="text-xs text-gray-500 mt-2 text-center">
         Prefer to talk? Call <a href="tel:(970) 999-1407" className="font-semibold text-gray-700 hover:underline">(970) 999-1407</a> — we're here to help.
