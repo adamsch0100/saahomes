@@ -114,7 +114,7 @@ export default function ContactCTA() {
               disabled={isSubmitting}
               className="mt-6 w-full px-8 py-4 bg-white text-gray-900 font-bold rounded-lg shadow-lg hover:bg-gray-100 transform hover:scale-[1.02] transition-all text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Sending...' : 'Send Message'}
+              {isSubmitting ? 'Sending...' : 'Get My Free Consultation'}
             </button>
             <p className="mt-4 text-center text-gray-300 text-sm">
               Or email us directly at{" "}
