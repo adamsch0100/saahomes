@@ -6776,6 +6776,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/Boulder.jpg',
     readTime: '10 min read',
+    youtubeId: 'a2h9ZIbQkKc',
     keywords: 'best realtor boulder, best real estate agent boulder, boulder realtor, boulder real estate agent, boulder co realtor, boulder colorado realtor, schwartz and associates boulder, boulder county realtor, boulder luxury real estate, best realtor in boulder colorado, boulder real estate agent for buyers',
     relatedLinks: [
       { title: 'Boulder homes for sale', href: '/northern-colorado-areas/boulder/', description: 'Neighborhoods, schools & the Boulder County market' },
