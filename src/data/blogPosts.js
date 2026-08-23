@@ -4223,7 +4223,7 @@ export const blogPosts = [
   },
   {
     slug: 'best-neighborhoods-fort-collins-2026',
-    title: 'Best Neighborhoods in Fort Collins, Colorado 2026: A Complete Guide',
+    title: 'Best Neighborhoods in Fort Collins CO (2026): Prices, Schools & Map',
     excerpt: 'From Old Town to Waterglen, discover Fort Collins best neighborhoods for every buyer — rankings, price ranges, schools, and lifestyle for each of our 30+ Fort Collins neighborhoods.',
     date: '2026-07-20',
     category: 'Buyer Tips',
