@@ -305,7 +305,7 @@ export function getSitemapEntries(lastmod) {
         lastmod: date,
         title: getAreaExactTitle(area),
         description: area.description,
-        ogTitle: `${area.city} Real Estate | Schwartz and Associates`,
+        ogTitle: getAreaExactTitle(area),
         ogDescription: area.description,
         ogImage: area.heroImage,
         ogImageAlt: `${area.city}, Colorado real estate guide`,

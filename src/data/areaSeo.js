@@ -612,7 +612,7 @@ export const areaSeoPages = [
     exactTitle: 'Niwot CO Real Estate | Homes for Sale in Niwot Colorado | SAA Homes',
     description: 'Niwot, Colorado real estate with SAA Homes. Charming Boulder County community between Longmont and Boulder with top schools, Old Town character, and premium Northern Colorado lifestyle.',
     keywords: 'Niwot CO real estate, Niwot homes for sale, Niwot Colorado realtor, Boulder County homes, Left Hand Valley real estate, Longmont area luxury homes, sell my house fast Niwot, Niwot home value, Niwot housing market, cash home buyers Niwot, short sale Niwot, Boulder County foreclosures',
-    heroImage: '/images/Boulder.jpg',
+    heroImage: '/images/Northern Colorado.webp',
     tagline: 'Boulder County charm between Longmont and Boulder',
     geo: { latitude: '40.1039', longitude: '-105.1708' },
     sitemapPriority: '0.82',
@@ -902,6 +902,7 @@ export function getAreaExactTitle(area) {
     'erie': 'Erie CO Homes for Sale | Erie Colorado Real Estate Guide | SAA Homes',
   };
   if (cityTitles[area.slug]) return cityTitles[area.slug];
+  if (area.exactTitle) return area.exactTitle;
   return `${area.city} Real Estate | Homes for Sale in ${area.city}, CO | Schwartz and Associates`;
 }
 
