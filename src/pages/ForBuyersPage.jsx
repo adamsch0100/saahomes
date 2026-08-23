@@ -241,9 +241,14 @@ export default function ForBuyersPage() {
                 <p className="text-gray-800 mb-6">
                   Questions? Call us at <a href="tel:(970) 999-1407" className="font-bold hover:underline">(970) 999-1407</a>
                 </p>
-                <a href="/contact/?interest=Buying a home" className="inline-block px-8 py-3 bg-gray-900 text-white font-semibold rounded hover:bg-gray-800 transition-colors">
-                  Apply Now
-                </a>
+                <div className="flex gap-4 justify-center md:justify-start">
+                  <a href="/contact/?interest=Buying a home" className="inline-block px-8 py-3 bg-gray-900 text-white font-semibold rounded hover:bg-gray-800 transition-colors">
+                    Apply Now
+                  </a>
+                  <a href="tel:(970) 999-1407" className="inline-block px-8 py-3 border-2 border-gray-900 text-gray-900 font-semibold rounded hover:bg-gray-900 hover:text-white transition-colors">
+                    Call (970) 999-1407
+                  </a>
+                </div>
               </div>
             </div>
           </div>
