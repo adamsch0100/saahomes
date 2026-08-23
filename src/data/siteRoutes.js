@@ -223,8 +223,8 @@ const staticPages = [
     path: '/chfa-schools-to-home/',
     priority: '0.95',
     changefreq: 'weekly',
-    title: 'CHFA Schools To Home 2026: 25% Down Payment for CO Teachers',
-    description: 'CO teachers & public school staff: CHFA Schools To Home provides up to 25% down payment assistance with no monthly payment. Check eligibility and income limits. Free consult: (970) 999-1407.',
+    title: 'CHFA Schools To Home Program (2026) | Teacher Down Payment Assistance Colorado',
+    description: 'Yes — CHFA Schools To Home is active in 2026. Colorado teachers & public school staff get up to 25% down payment assistance with no monthly payment. See eligibility & income limits, then talk to Adam & Mandi (970) 999-1407.',
     ogTitle: 'CHFA Schools To Home 2026: 25% Down Payment for CO Teachers',
     ogDescription: 'Colorado teachers & public school employees may qualify for up to 25% down payment help through CHFA Schools To Home — with no monthly DPA payment. SAA Homes helps educators across Northern Colorado use the program. Free consult: (970) 999-1407.',
     ogImage: '/images/buyers-hero.jpg',
@@ -325,20 +325,31 @@ export function getSitemapEntries(lastmod) {
         ogImageAlt: post.title,
       })
     ),
-    ...neighborhoods.map((n) =>
-      withShareMeta({
+    ...neighborhoods.map((n) => {
+      const cityDisplay = n.cityDisplay ||
+        (n.citySlug ? n.citySlug.split('-').map((w) => w[0].toUpperCase() + w.slice(1)).join(' ') : '');
+      const city = n.name.toLowerCase().includes(cityDisplay.toLowerCase()) ? '' : ` ${cityDisplay}`;
+      const price = n.priceRangeDescription
+        ? n.priceRangeDescription.replace(/\s*\([^)]*\)/g, '').split(' to ')[0].trim()
+        : '';
+      return withShareMeta({
         path: `/northern-colorado-areas/${n.citySlug}/${n.slug}/`,
         priority: '0.7',
         changefreq: 'monthly',
         lastmod: date,
-        title: `${n.name}, ${n.cityDisplay} — Neighborhood Guide | SAA Homes`,
-        description: n.description,
-        ogTitle: `${n.name} ${n.cityDisplay} Neighborhood Guide`,
-        ogDescription: n.description,
+        // ≤62 chars: name + city + "Homes for Sale" first; price hook only if it fits
+        title: (() => {
+          const base = `${n.name}${city} Homes for Sale`;
+          const tail = price ? ` — from ${price} | SAA` : ' | SAA';
+          return (base + tail).length <= 68 ? base + tail : `${base} | SAA`;
+        })(),
+        description: n.metaDescription || n.description,
+        ogTitle: `${n.name} ${cityDisplay} Neighborhood Guide`,
+        ogDescription: n.metaDescription || n.description,
         ogImage: n.image || '/images/Northern Colorado.webp',
-        ogImageAlt: `${n.name} neighborhood in ${n.cityDisplay}, Colorado`,
-      })
-    ),
+        ogImageAlt: `${n.name} neighborhood in ${cityDisplay}, Colorado`,
+      });
+    }),
     // City "homes for sale" pages — Tier S money pages (daily freshness)
     ...CITY_HOMES.map((c) =>
       withShareMeta({
