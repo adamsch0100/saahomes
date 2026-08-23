@@ -668,7 +668,7 @@ export default function ChfaSchoolsToHomePage() {
       {/* Bottom Lead Form */}
       <section className="py-16 px-6 bg-gray-50">
         <div className="max-w-3xl mx-auto">
-          <ChfaLeadForm />
+          <ChfaLeadForm compact />
         </div>
       </section>
 

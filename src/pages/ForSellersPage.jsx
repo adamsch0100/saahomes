@@ -173,6 +173,9 @@ export default function ForSellersPage() {
             <p className="text-lg text-gray-700">
               Get a free, instant estimate of your home's value
             </p>
+            <p className="mt-4 text-xl">
+              Prefer to talk? Call <a href="tel:(970) 999-1407" className="text-black font-bold hover:underline">(970) 999-1407</a> for your instant home valuation
+            </p>
           </div>
           <realscout-home-value agent-encoded-id="QWdlbnQtMjUxOTI5" include-name include-phone remove-title remove-subtitle></realscout-home-value>
         </div>
