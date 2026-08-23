@@ -220,8 +220,9 @@ export const validateChampionsLeadSubmission = [
   validEmailField('champions'),
 
   body('phone')
-    .optional({ values: 'falsy' })
     .trim()
+    .notEmpty()
+    .withMessage('Phone is required')
     .isLength({ max: 50 }),
 
   body('responderType')

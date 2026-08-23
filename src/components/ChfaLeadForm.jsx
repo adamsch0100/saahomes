@@ -143,11 +143,12 @@ export default function ChfaLeadForm({ compact = false }) {
           />
         </div>
         <div>
-          <label htmlFor="chfa-phone" className={labelClass}>Phone (optional)</label>
+          <label htmlFor="chfa-phone" className={labelClass}>Phone *</label>
           <input
             type="tel"
             id="chfa-phone"
             name="phone"
+            required
             autoComplete="tel"
             inputMode="tel"
             placeholder="(970) 555-0123"

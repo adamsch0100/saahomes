@@ -160,8 +160,8 @@ export default function ChfaDpaLeadForm({ compact = false, sourcePage = '/chfa-d
           <input type="email" id="chfa-dpa-email" name="email" required autoComplete="email" inputMode="email" value={formData.email} onChange={handleChange} className={inputClass} />
         </div>
         <div>
-          <label htmlFor="chfa-dpa-phone" className={labelClass}>Phone (optional)</label>
-          <input type="tel" id="chfa-dpa-phone" name="phone" autoComplete="tel" inputMode="tel" value={formData.phone} onChange={handleChange} className={inputClass} />
+          <label htmlFor="chfa-dpa-phone" className={labelClass}>Phone *</label>
+          <input type="tel" id="chfa-dpa-phone" name="phone" required autoComplete="tel" inputMode="tel" value={formData.phone} onChange={handleChange} className={inputClass} />
         </div>
       </div>
 
