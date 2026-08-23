@@ -7771,6 +7771,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Northern Colorado.webp',
     readTime: '7 min read',
+    youtubeId: 'Mh1H_EX5t2M',
     keywords: 'frederick co homes for sale, frederick colorado real estate, frederick co realtor, buying a home in frederick colorado, carbon valley homes, affordable northern colorado homes, first-time home buyer frederick co, frederick colorado neighborhoods, frederick co new construction, frederick colorado real estate agent',
     relatedLinks: [
       { title: 'Frederick homes for sale', href: '/northern-colorado-areas/frederick/', description: 'Affordable Carbon Valley communities and homes for sale' },
