@@ -913,12 +913,12 @@ export const blogPosts = [
       { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
     ],
     cta: {
-      title: 'Ready to make your move in Northern Colorado this summer?',
-      description: 'Adam and Mandi Schwartz help buyers and sellers across Fort Collins, Loveland, Windsor, and Greeley navigate today\'s market with clarity and confidence. Request a free consultation or market report tailored to your city and price range.',
-      primaryHref: '/contact/',
-      primaryText: 'Get the Full Market Report',
-      secondaryHref: '/for-sellers/',
-      secondaryText: 'Download the full report',
+      title: 'Get the full Northern Colorado market report for your city',
+      description: 'Adam and Mandi Schwartz will send median prices, days on market, and neighborhood trends for your city and price range — straight from current MLS data. Sellers get a free home valuation included; buyers get a tailored search plan.',
+      primaryHref: '/for-sellers/#home-valuation',
+      primaryText: 'Send Me the Market Report',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to Adam & Mandi',
     },
     sections: [
       {
@@ -1020,10 +1020,10 @@ export const blogPosts = [
     cta: {
       title: 'Want personalized market guidance for your Northern Colorado move?',
       description: 'Adam and Mandi Schwartz help buyers and sellers across Fort Collins, Loveland, Windsor, and Greeley navigate today\'s market with clarity and confidence. Request a free consultation or market report.',
-      primaryHref: '/contact/',
-      primaryText: 'Get the Full Market Report',
-      secondaryHref: '/for-sellers/',
-      secondaryText: 'Download the full report',
+      primaryHref: '/for-sellers/#home-valuation',
+      primaryText: 'Send Me the Market Report',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to Adam & Mandi',
     },
     sections: [
       {
@@ -3397,6 +3397,14 @@ export const blogPosts = [
         a: 'No — but it is smart to have one on your side. A cash buyer will often present an offer at a discount to market value, and without an agent you have no independent way to verify what the home could actually bring. SAA Homes will compare a cash offer against a free home valuation at no cost and no obligation, so you can decide with real numbers instead of guessing. Call (970) 999-1407 to run the comparison.'
       },
     ],
+    cta: {
+      title: 'Compare a cash offer vs. listing for top dollar',
+      description: 'Adam and Mandi Schwartz give Northern Colorado sellers both numbers — what a vetted cash buyer would likely pay and what your home could bring on the open market — so you can choose with confidence. Free home valuation, no obligation.',
+      primaryHref: '/for-sellers/#home-valuation',
+      primaryText: 'Get My Free Home Valuation',
+      secondaryHref: '/cash-home-buyers/',
+      secondaryText: 'Explore Cash Offers',
+    },
   },
   {
     slug: 'foreclosure-short-sale-northern-colorado-guide',
@@ -3663,12 +3671,12 @@ export const blogPosts = [
       { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
     ],
     cta: {
-      title: 'Ready to make your move in Northern Colorado this summer?',
-      description: 'Adam and Mandi Schwartz help buyers and sellers across Fort Collins, Loveland, Windsor, and Greeley navigate today\'s market with clarity and confidence. Request a free consultation or market report tailored to your city and price range.',
-      primaryHref: '/contact/',
-      primaryText: 'Get the Full Market Report',
-      secondaryHref: '/for-sellers/',
-      secondaryText: 'Download the full report',
+      title: 'Get the full August 2026 market report for your city',
+      description: 'Adam and Mandi Schwartz will send median prices, days on market, and neighborhood trends for your city and price range — straight from current MLS data. Sellers get a free home valuation included; buyers get a tailored search plan.',
+      primaryHref: '/for-sellers/#home-valuation',
+      primaryText: 'Send Me the Market Report',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to Adam & Mandi',
     },
     faqs: [
       { q: 'What is the median home price in Fort Collins?', a: 'The median single-family home price held at approximately $610,000 in July 2026, with condos and townhomes around $385,000. Days on market averaged 40 days for single-family homes.' },

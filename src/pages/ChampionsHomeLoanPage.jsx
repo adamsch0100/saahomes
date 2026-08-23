@@ -233,7 +233,7 @@ export default function ChampionsHomeLoanPage() {
       {/* Hero */}
       <section
         className="relative min-h-[min(100svh,720px)] sm:min-h-[560px] bg-cover bg-center flex items-end sm:items-center justify-center pt-28 sm:pt-32 pb-16 sm:pb-20"
-        style={{ backgroundImage: "url('/images/Shwartz-CTA-Buyers.jpg')" }}
+        style={{ backgroundImage: "url('/images/Shwartz-CTA-Buyers.webp')" }}
       >
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/50" />
         <div className="relative z-10 max-w-5xl mx-auto text-center text-white px-4 sm:px-6 w-full">
@@ -264,7 +264,7 @@ export default function ChampionsHomeLoanPage() {
               href="#champions-lead-form"
               className="inline-flex items-center justify-center px-8 py-3.5 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors touch-manipulation shadow-lg"
             >
-              Get Program Updates
+              Get Free Consultation
             </a>
             <a
               href="#how-it-works"
