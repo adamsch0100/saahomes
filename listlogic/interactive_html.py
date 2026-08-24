@@ -2359,15 +2359,15 @@ body.ll-sample .sample-demo-bar{{display:flex}}
     </div>
     <div class="pulse-card" id="pulseBlock" hidden>
       <h3>Market Fingerprint</h3>
-      <p class="pulse-sub" id="pulseAsOf">The living market picture after you lock a list — still active, new, pending, sold.</p>
+      <p class="pulse-sub" id="pulseAsOf">The living market picture after they list — still active, new, pending, sold.</p>
       <div class="pulse-grid">
         <div class="pulse-cell">
           <div class="pv" id="pulseNewUnder">—</div>
-          <div class="pl">New similar under</div>
+          <div class="pl">Under initial list</div>
         </div>
         <div class="pulse-cell">
           <div class="pv" id="pulseNewOver">—</div>
-          <div class="pl">New similar over</div>
+          <div class="pl">Over initial list</div>
         </div>
         <div class="pulse-cell">
           <div class="pv" id="pulseActiveCheaper">—</div>
@@ -5555,7 +5555,7 @@ function renderPulse(data) {{
   }} else if (asOf) {{
     asOf.textContent = IS_SAMPLE
       ? 'After they list, the Fingerprint is the weekly seller link. Open it to walk the weeks from this market file.'
-      : 'Generate locks the recommended list. Open the Market Fingerprint after they list.';
+      : 'Generate sets the initial list. Open the Market Fingerprint after they list.';
   }}
   const uploadWrap = document.getElementById('pulseUploadWrap');
   if (uploadWrap) uploadWrap.hidden = !data || !data.needs_upload;
@@ -5613,8 +5613,8 @@ function renderPulseBrief(brief, isAgent) {{
   }}
   if (!lists) return;
   const blocks = [
-    ['New similar — under', brief.new_under],
-    ['New similar — over', brief.new_over],
+    ['Under initial list', brief.new_under],
+    ['Over initial list', brief.new_over],
     ['Still active and cheaper', brief.cheaper_active],
     ['Price cuts', brief.price_cuts],
     ['Status changes', brief.status_changes],

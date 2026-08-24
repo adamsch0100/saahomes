@@ -1224,7 +1224,7 @@ def apply_listing_photos(listings: list[dict], photo_map: dict | None, gallery_m
 
 
 def _assign_active_ranks(listings: list[dict], locked_price: float) -> dict:
-    """Rank Active listings by list price; subject rank includes the locked list."""
+    """Rank Active listings by list price; subject rank includes the initial list."""
     actives = [
         r for r in listings
         if isinstance(r, dict) and str(r.get("status") or "") == "Active" and r.get("price")
@@ -1252,7 +1252,7 @@ def build_pulse_snapshot(
     photo_map: dict | None = None,
     gallery_map: dict | None = None,
 ) -> dict:
-    """Live similar listings (Active + under contract) tagged over/under the locked list."""
+    """Live similar listings (Active + under contract) tagged over/under the initial list."""
     as_of = as_of or datetime.now().strftime("%Y-%m-%d")
     locked = float(locked_price or 0)
     empty = {
@@ -1570,7 +1570,7 @@ def merge_fingerprint_ledger(
         new_price = int(card.get("price") or 0)
         last = status_hist[-1] if status_hist else {}
         if not status_hist or last.get("status") != new_status or last.get("price") != new_price:
-            status_hist.append({"as_of": as_of, "status": new_status, "price": new_price})
+            status_hist.append({"as_of": as_of, "as_of": as_of, "status": new_status, "price": new_price})
             status_hist = status_hist[-16:]
         listings[pid] = {
             **existing,
@@ -1861,7 +1861,8 @@ def _pulse_card(row: dict, locked_price: float) -> dict:
         "city": city,
         "price": int(round(price)) if price else 0,
         "delta": delta,
-        "list_date": str(row.get("list_date") or ""),
+        "list_date": str(row.get("list_date") or row.get("list_date") or ""),
+        "list_date": str(row.get("list_date") or row.get("list_date") or ""),
         "sqft": int(row.get("sqft") or 0),
         "beds": float(row.get("beds") or 0),
         "baths": float(row.get("baths") or 0),
@@ -1872,6 +1873,7 @@ def _pulse_card(row: dict, locked_price: float) -> dict:
         "side": str(row.get("side") or ""),
         "zillow": urls.get("zillow") or "",
         "realtor": urls.get("realtor") or "",
+        "photo_url": photo_url,
         "photo_url": photo_url,
         "photos": [str(u) for u in photos if u][:8],
         "lat": row.get("lat"),
@@ -1913,13 +1915,13 @@ def _pulse_talk_tracks(
         seller.append("This update uses the last market file we have. Ask your agent for this week’s export to refresh.")
     if rank and rank_of and rank_then and rank > rank_then:
         agent.append(
-            f"Rank slipped from {rank_then} to {rank} of {rank_of} in this size band. Walk whether the lock still wins the first showing."
+            f"Rank slipped from {rank_then} to {rank} of {rank_of} in this size band. Walk whether the initial list still wins the first showing."
         )
         seller.append(
             f"Your list is now {rank} of {rank_of} similar actives (was {rank_then}). More homes sit under you than {since_you}."
         )
     elif rank and rank_of:
-        agent.append(f"You sit {rank} of {rank_of} similar actives at the locked list.")
+        agent.append(f"You sit {rank} of {rank_of} similar actives at the initial list.")
         seller.append(f"Among similar homes buyers can still buy, yours is priced {rank} of {rank_of}.")
     if listed_week or uc_week or sold_week:
         bits = []
@@ -1944,13 +1946,13 @@ def _pulse_talk_tracks(
         seller.append(f"{went_sold} similar home{'s' if went_sold != 1 else ''} sold {since_you}.")
     if new_under >= 3:
         agent.append(
-            f"{new_under} similar homes listed under the lock {clock_label}. Walk those addresses — buyers open cheaper first."
+            f"{new_under} similar homes listed under the initial list {clock_label}. Walk those addresses — buyers open cheaper first."
         )
         seller.append(
             f"{new_under} similar homes have listed below your price {since_you}. Those are the homes buyers will open first."
         )
     elif new_under == 1:
-        agent.append(f"One similar home listed under the lock {clock_label}. Open it with the seller and compare condition.")
+        agent.append(f"One similar home listed under the initial list {clock_label}. Open it with the seller and compare condition.")
         seller.append(f"One similar home listed below your price {since_you}. Worth walking through how it compares.")
     if cheaper_before is not None and cheaper > cheaper_before:
         agent.append(f"The queue under you grew from {cheaper_before} to {cheaper} still-active cheaper homes.")
@@ -1958,10 +1960,10 @@ def _pulse_talk_tracks(
             f"More similar homes are now priced under you ({cheaper}, up from {cheaper_before})."
         )
     if new_over > new_under and new_over >= 2:
-        agent.append("Most new similar lists came in above the lock — your line is still the value ask.")
+        agent.append("Most new similar lists came in above the initial list — your number is still the value ask.")
         seller.append("Most new similar homes listed above your price. Your number is still the value play in this set.")
     if not agent and not stale_upload:
-        agent.append("Quiet week in the size band — no new cheaper similar lists to walk. Keep the lock.")
+        agent.append("Quiet week in the size band — no new cheaper similar lists to walk. Hold the initial list.")
         seller.append("A quiet week in your size range. No new similar homes listed under your price.")
     return {"agent": agent[:4], "seller": seller[:4]}
 
@@ -1976,6 +1978,72 @@ def _baseline_ids(baseline: dict | None) -> set[str]:
         str(r.get("id"))
         for r in (baseline.get("listings") or [])
         if isinstance(r, dict) and r.get("id")
+    }
+
+
+def _comp_set(lock: dict | None, subject: dict | None, *, portal_criteria: dict | None = None, city: str = "") -> dict:
+    """How this similar set was cut — beds, baths, garage, size band, market."""
+    lock = lock if isinstance(lock, dict) else {}
+    sub = subject if isinstance(subject, dict) else {}
+    c = portal_criteria if isinstance(portal_criteria, dict) else {}
+    try:
+        sqft = float(
+            lock.get("subject_sqft")
+            or lock.get("subject_sqft")
+            or sub.get("living_area")
+            or sub.get("sqft")
+            or 0
+        )
+    except (TypeError, ValueError):
+        sqft = 0.0
+    lo = int(round(sqft * LISTING_FLOW_SQFT_LO)) if sqft else 0
+    hi = int(round(sqft * LISTING_FLOW_SQFT_HI)) if sqft else 0
+    def _num(key_a, key_b=None, fallback=None):
+        for key in (key_a, key_b):
+            if not key:
+                continue
+            val = c.get(key)
+            if val is None:
+                val = sub.get(key)
+            if val not in (None, "", 0, 0.0):
+                try:
+                    return float(val)
+                except (TypeError, ValueError):
+                    continue
+        return fallback
+    beds = _num("min_beds", "beds", sub.get("beds") or lock.get("subject_beds"))
+    baths = _num("min_baths", "baths", sub.get("baths") or lock.get("subject_baths"))
+    garage = _num(
+        "min_garage",
+        "garage_spaces",
+        sub.get("garage_spaces") or lock.get("subject_garage"),
+    )
+    market = str(lock.get("market_label") or lock.get("area_name") or city or "").strip()
+    chips: list[str] = []
+    if beds:
+        chips.append(f"{int(beds)}+ bed" if c.get("min_beds") else f"{int(beds)} bed")
+    if baths:
+        n = baths if baths % 1 else int(baths)
+        chips.append(f"{n}+ bath" if c.get("min_baths") else f"{n} bath")
+    if garage:
+        n = int(garage)
+        chips.append(f"{n}+ car" if c.get("min_garage") else f"{n}-car garage")
+    if lo and hi:
+        chips.append(f"{lo:,}–{hi:,} sf")
+    if market:
+        chips.append(market.split("·")[0].strip())
+    if not chips:
+        chips.append("Similar homes in this market")
+    return {
+        "chips": chips,
+        "beds": beds or 0,
+        "baths": baths or 0,
+        "garage": garage or 0,
+        "sqft_low": lo,
+        "sqft_high": hi,
+        "sqft": int(round(sqft)) if sqft else 0,
+        "market": market,
+        "city": str(city or "").strip(),
     }
 
 
@@ -2001,6 +2069,8 @@ def build_pulse_brief(
     ledger: dict | None = None,
     history: list | None = None,
     notes: list | None = None,
+    portal_criteria: dict | None = None,
+    city: str = "",
 ) -> dict:
     """One brief JSON for Live Story, Fingerprint page, and weekly email."""
     lock = lock if isinstance(lock, dict) else {}
@@ -2161,11 +2231,14 @@ def build_pulse_brief(
     return {
         "as_of": digest.get("as_of"),
         "locked_price": int(round(locked_price)) if locked_price else 0,
+        "locked_price": int(round(locked_price)) if locked_price else 0,
         "locked_at": locked_at,
         "active_at": _fingerprint_date(active_at),
         "clock": digest.get("clock") or "generate",
         "clock_at": clock_at,
         "clock_label": digest.get("clock_label") or "since generate",
+        "days_locked": days_locked,
+        "days_active": days_active,
         "days_locked": days_locked,
         "days_active": days_active,
         "market_label": str(lock.get("market_label") or ""),
@@ -2177,6 +2250,7 @@ def build_pulse_brief(
         "fingerprint_url": fp_url or "",
         "digest": digest,
         "stale_upload": bool(stale_upload),
+        "talk": tracks,
         "talk": tracks,
         "new_under": new_under,
         "new_over": new_over,
@@ -2191,12 +2265,15 @@ def build_pulse_brief(
         "status_changes": status_changes,
         "gone": gone,
         "baseline": baseline_then[:24],
+        "baseline": baseline_then[:24],
         "went_pending": went_pending_cards[:PULSE_CARD_CAP],
         "went_sold": went_sold_cards[:PULSE_CARD_CAP],
         "position": position[:40],
         "history": list(history or [])[-12:],
         "notes": normalize_fingerprint_notes(notes),
         "sold_at": str(lock.get("sold_at") or ""),
+        "comp_set": _comp_set(lock, sub, portal_criteria=portal_criteria, city=city),
+        "last_refresh_at": str(lock.get("last_refresh_at") or lock.get("last_looked_at") or ""),
     }
 
 

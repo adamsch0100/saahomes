@@ -618,6 +618,7 @@ def enrich_report_photos(
     cache_only: bool = False,
     deadline: float | None = None,
     on_listing: Any = None,
+    extra_listings: list | None = None,
 ) -> dict[str, str]:
     """Attach hosted photo galleries to comps. Sets row photo_url + photos[].
 
@@ -656,6 +657,31 @@ def enrich_report_photos(
             "lng": c.get("longitude"),
             "row": c,
         })
+
+    seen = {t["public_key"] for t in candidates}
+    for c in extra_listings or []:
+        if not isinstance(c, dict):
+            continue
+        mls = str(c.get("mls_number") or c.get("mls") or c.get("id") or "").strip()
+        addr = str(c.get("address") or "").strip()
+        if not mls and not addr:
+            continue
+        public_key = mls or _safe_key(addr)
+        if public_key in seen or public_key == SUBJECT_KEY:
+            continue
+        seen.add(public_key)
+        candidates.append({
+            "key": _safe_key(mls or addr),
+            "public_key": public_key,
+            "address": ", ".join(
+                x for x in [addr, str(c.get("city") or ""), str(c.get("state") or "CO")] if x
+            ),
+            "lat": c.get("latitude") or c.get("lat"),
+            "lng": c.get("longitude") or c.get("lng"),
+            "row": c,
+        })
+        if len(candidates) >= max_comps + 24:
+            break
 
     if include_subject and isinstance(subject, dict):
         sub_addr = str(subject.get("address") or "").strip()

@@ -94,13 +94,21 @@ a {{ color:var(--navy); }}
 body.is-agent .wrap {{ max-width:1320px; display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:24px; align-items:start; }}
 @media (max-width:980px) {{ body.is-agent .wrap {{ grid-template-columns:1fr; }} }}
 .hero {{
-  background:linear-gradient(150deg, var(--ink), #16233c); color:#fff;
-  border-radius:22px; padding:28px 28px 24px; display:grid; grid-template-columns:88px 1fr; gap:18px; align-items:center;
+  position:relative; color:#fff; border-radius:22px; overflow:hidden;
+  min-height:220px; display:flex; align-items:flex-end;
+  background:linear-gradient(150deg, var(--ink), #16233c);
 }}
-.hero img {{ width:88px; height:88px; object-fit:cover; border-radius:16px; background:#1a2a44; }}
-.hero .ph {{ width:88px; height:88px; border-radius:16px; background:#1a2a44; }}
+.hero img, .hero .ph {{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+}}
+.hero .ph {{ background:#1a2a44; display:block; }}
+.hero .veil {{
+  position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(11,18,32,.12) 15%, rgba(11,18,32,.88));
+}}
+.hero .copy {{ position:relative; z-index:1; padding:28px 24px 20px; width:100%; }}
 .hero .kicker {{ font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; color:#c9a227; font-weight:800; }}
-.hero h1 {{ font-family:Fraunces,Georgia,serif; font-size:clamp(1.4rem,3vw,2rem); margin:4px 0 8px; }}
+.hero h1 {{ font-family:Fraunces,Georgia,serif; font-size:clamp(1.45rem,3vw,2.1rem); margin:4px 0 8px; }}
 .hero .meta {{ color:#c8d2e0; font-size:.88rem; }}
 .live {{ display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:700; color:#8ee0c8; }}
 .live i {{ width:7px; height:7px; border-radius:50%; background:#3dd6a5; animation:pulse 1.6s ease-in-out infinite; }}
@@ -174,21 +182,38 @@ body.is-seller .console {{ display:none; }}
 .weeks-wrap {{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin-bottom:18px; }}
 .weeks-wrap h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.15rem; margin-bottom:4px; }}
 .weeks-wrap .sub {{ color:var(--muted); font-size:.82rem; margin-bottom:12px; }}
-.weeks {{ display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; }}
+.weeks {{ display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; }}
 .week {{
-  flex:0 0 auto; min-width:156px; text-align:left; background:#f7f4ee; border:1px solid var(--line);
-  border-radius:12px; padding:10px 12px; cursor:pointer; font:inherit;
+  flex:0 0 auto; background:#f7f4ee; border:1px solid var(--line);
+  border-radius:999px; padding:6px 12px; cursor:pointer; font:inherit;
+  font-size:.78rem; font-weight:700; color:var(--navy);
 }}
 .week.is-on, .week:hover {{ border-color:var(--navy); background:#fff; }}
-.week .w-d {{ display:block; font-size:.72rem; font-weight:800; color:var(--navy); }}
-.week .w-m {{ display:block; font-size:.68rem; color:var(--muted); margin-top:4px; line-height:1.35; }}
-.agent-note {{
+.from-agent {{
   background:#fff; border:1px solid var(--line); border-left:4px solid var(--gold);
-  border-radius:16px; padding:16px 18px; margin-bottom:14px;
+  border-radius:16px; padding:16px 18px; margin:0 0 16px;
 }}
-.agent-note h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.15rem; }}
-.agent-note .when {{ font-size:.75rem; color:var(--muted); margin:4px 0 10px; }}
-.agent-note .body {{ font-size:.95rem; line-height:1.5; }}
+.from-agent .kicker {{ font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); font-weight:800; }}
+.from-agent h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.22rem; margin:2px 0 4px; }}
+.from-agent .when {{ font-size:.75rem; color:var(--muted); margin-bottom:8px; }}
+.from-agent .body {{ font-size:.95rem; line-height:1.5; }}
+.from-agent .recs {{ margin:10px 0 0; }}
+.from-agent .recs-k {{ font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:800; margin-bottom:4px; }}
+.from-agent .recs li {{ margin:5px 0 5px 1.1rem; font-size:.9rem; line-height:1.45; }}
+.past-pick {{
+  display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:14px;
+  font-size:.78rem; font-weight:700; color:var(--navy);
+}}
+.past-pick select {{
+  font:inherit; font-weight:600; color:var(--ink); background:#f7f4ee;
+  border:1px solid var(--line); border-radius:10px; padding:6px 10px; min-width:180px;
+}}
+.past-note {{
+  margin-top:10px; padding:10px 12px; background:#f7f4ee; border-radius:12px; font-size:.88rem; line-height:1.45;
+}}
+.past-note strong {{ display:block; font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }}
+.week-stat {{ font-size:.92rem; color:var(--ink); margin:4px 0 10px; }}
+.week-stat b {{ font-family:Fraunces,Georgia,serif; font-size:1.15rem; color:var(--navy); }}
 .note-tl {{ margin:0 0 18px; }}
 .note-tl-item {{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-top:8px; font-size:.88rem; }}
 .note-tl-item strong {{ display:block; font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }}
@@ -201,9 +226,9 @@ body.is-seller .console {{ display:none; }}
 .console .note-console.is-focus {{ box-shadow:0 0 0 3px #c9a22755; border-radius:12px; padding:8px; margin:8px -8px 0; }}
 .console .check-hint {{ font-size:.72rem; color:var(--muted); font-weight:500; margin:4px 0 0 22px; line-height:1.35; }}
 .card.is-week {{ border-color:var(--gold); box-shadow:0 0 0 2px #c9a22755; }}
-.week-homes {{ margin-top:14px; }}
+.week-homes {{ margin-top:8px; }}
 .week-homes h3 {{ font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }}
-.week-homes .cards {{ grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); }}
+.week-homes .empty {{ font-size:.82rem; color:var(--muted); }}
 .spark {{ margin:8px 0 14px; }}
 .spark svg {{ display:block; max-width:280px; }}
 .spark .cap {{ font-size:.72rem; color:var(--muted); margin-top:4px; }}
@@ -265,10 +290,8 @@ body.is-seller .console {{ display:none; }}
 .story {{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:16px 0 14px; }}
 .story .lead {{ font-family:Fraunces,Georgia,serif; font-size:1.28rem; line-height:1.35; }}
 .story .long {{ color:var(--muted); font-size:.9rem; margin-top:6px; line-height:1.45; }}
-.week-nums {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:0 0 12px; }}
-.week-nums .cell {{ background:var(--navy); color:#fff; border-radius:14px; padding:14px 10px; text-align:center; }}
-.week-nums .n {{ font-family:Fraunces,Georgia,serif; font-size:1.85rem; font-weight:700; }}
-.week-nums .l {{ font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:#c8d2e0; margin-top:4px; font-weight:700; }}
+.hero .links a {{ color:#fff; }}
+.week-nums {{ display:none; }}
 .since-nums {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:0 0 18px; }}
 .since-nums .cell {{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px 10px; text-align:center; }}
 .since-nums .n {{ font-family:Fraunces,Georgia,serif; font-size:1.35rem; font-weight:700; color:var(--navy); }}
@@ -282,6 +305,34 @@ body.is-seller .console {{ display:none; }}
 .week-col h3 {{ font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }}
 .week-col .empty {{ font-size:.82rem; color:var(--muted); }}
 .why {{ font-size:.82rem; color:var(--muted); margin:0 0 16px; line-height:1.45; }}
+.filters {{
+  background:#fff; border:1px solid var(--line); border-radius:16px;
+  padding:12px 16px; margin:14px 0 10px;
+  display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+}}
+.filters-k {{ font-size:.68rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-right:4px; }}
+.filters-n {{ width:100%; font-size:.78rem; color:var(--muted); margin:4px 0 0; font-weight:500; }}
+.chip {{
+  display:inline-block; background:#fff; border:1px solid var(--line); border-radius:999px;
+  padding:5px 11px; font-size:.78rem; font-weight:700; color:var(--navy);
+}}
+.facts {{
+  display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin:0 0 18px;
+}}
+@media (max-width:800px) {{ .facts {{ grid-template-columns:1fr 1fr; }} }}
+.fact {{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px 12px; }}
+.fact .fk {{ display:block; font-size:.62rem; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); font-weight:800; }}
+.fact .fv {{ display:block; font-family:Fraunces,Georgia,serif; font-size:1.05rem; font-weight:700; color:var(--navy); margin-top:3px; }}
+.walk {{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:0 0 18px; }}
+.walk h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.2rem; margin-bottom:4px; }}
+.walk .sub {{ color:var(--muted); font-size:.84rem; margin-bottom:10px; }}
+.weeks-bar {{
+  position:sticky; top:0; z-index:6; background:#fff; padding:8px 0 10px; margin:0 -4px 10px;
+}}
+.since-line {{ font-size:.82rem; color:var(--muted); margin:8px 0 0; }}
+.since-line b {{ color:var(--ink); }}
+.week-homes .lane {{ margin-top:8px; }}
+@media (max-width:640px) {{ .hero {{ min-height:180px; }} }}
 </style>
 </head>
 <body class="{agent_class}">
@@ -330,7 +381,7 @@ function cardHtml(c, extraTag) {{
   if (c.beds) bits.push(c.beds + ' bd');
   if (c.baths) bits.push(c.baths + ' ba');
   if (c.sqft) bits.push(Number(c.sqft).toLocaleString() + ' sf');
-  if (c.delta) bits.push((c.delta > 0 ? '+' : '') + money(Math.abs(c.delta)).replace('$','') + ' vs lock');
+  if (c.delta) bits.push((c.delta > 0 ? '+' : '') + money(Math.abs(c.delta)).replace('$','') + ' vs list');
   if (c.was_price && c.was_price !== c.price) bits.push(money(c.was_price) + ' → ' + money(c.price));
   if (c.rank_then && c.rank) bits.push('rank ' + c.rank_then + ' → ' + c.rank);
   else if (c.rank) bits.push('#' + c.rank);
@@ -350,6 +401,12 @@ function byId(id) {{
 }}
 function weekKey(v) {{
   return String(v || '').slice(0, 10);
+}}
+function listDate(c) {{
+  return weekKey(c && (c.list_date || c.list_date));
+}}
+function photoUrl(c) {{
+  return (c && (c.photo_url || c.photo_url)) || '';
 }}
 function weekLabel(asOf) {{
   const raw = weekKey(asOf);
@@ -406,15 +463,20 @@ function inWeek(dateStr, start, end) {{
   if (end && d >= end) return false;
   return true;
 }}
+function weekAsOf(w) {{
+  return weekKey((w && (w.as_of || w.as_of)) || '');
+}}
 function weekWindows() {{
   const hist = ((DATA.brief || {{}}).history || []).slice().sort(function (a, b) {{
-    return weekKey(a.as_of).localeCompare(weekKey(b.as_of));
+    return weekAsOf(a).localeCompare(weekAsOf(b));
   }});
   return hist.map(function (w, i) {{
+    const key = weekAsOf(w);
     return {{
-      as_of: weekKey(w.as_of),
-      start: weekKey(w.as_of),
-      end: hist[i + 1] ? weekKey(hist[i + 1].as_of) : ''
+      as_of: key,
+      as_of: key,
+      start: key,
+      end: hist[i + 1] ? weekAsOf(hist[i + 1]) : ''
     }};
   }});
 }}
@@ -423,23 +485,23 @@ function cardMovedInWeek(c, start, end) {{
   const hist = c.status_history || [];
   for (let i = 0; i < hist.length; i++) {{
     const st = hist[i].status;
-    if ((isUc(st) || String(st || '').toLowerCase() === 'sold') && inWeek(hist[i].as_of, start, end)) return true;
+    if ((isUc(st) || String(st || '').toLowerCase() === 'sold') && inWeek(hist[i].as_of || hist[i].as_of, start, end)) return true;
   }}
-  return !!(c.list_date && inWeek(c.list_date, start, end));
+  return !!(listDate(c) && inWeek(listDate(c), start, end));
 }}
 function weekCounts(asOf) {{
   const wins = weekWindows();
   const key = weekKey(asOf);
-  const w = wins.find(function (x) {{ return x.as_of === key; }}) || wins[wins.length - 1];
+  const w = wins.find(function (x) {{ return (x.as_of || x.as_of) === key; }}) || wins[wins.length - 1];
   const out = {{ listed: 0, uc: 0, sold: 0 }};
   if (!w) return out;
-  homesForWeek(w.as_of).forEach(function (c) {{
-    if (c.list_date && inWeek(c.list_date, w.start, w.end)) out.listed += 1;
+  homesForWeek(w.as_of || w.as_of).forEach(function (c) {{
+    if (listDate(c) && inWeek(listDate(c), w.start, w.end)) out.listed += 1;
     const hist = c.status_history || [];
     let sold = false;
     let uc = false;
     for (let i = 0; i < hist.length; i++) {{
-      if (!inWeek(hist[i].as_of, w.start, w.end)) continue;
+      if (!inWeek(hist[i].as_of || hist[i].as_of, w.start, w.end)) continue;
       const st = String(hist[i].status || '').toLowerCase();
       if (st === 'sold') sold = true;
       else if (isUc(st)) uc = true;
@@ -452,7 +514,7 @@ function weekCounts(asOf) {{
 function homesForWeek(asOf) {{
   const wins = weekWindows();
   const key = weekKey(asOf);
-  const w = wins.find(function (x) {{ return x.as_of === key; }}) || wins[wins.length - 1];
+  const w = wins.find(function (x) {{ return (x.as_of || x.as_of) === key; }}) || wins[wins.length - 1];
   if (!w) return [];
   const b = DATA.brief || {{}};
   const seen = {{}};
@@ -489,10 +551,25 @@ function sparklineHtml() {{
   }}
   return '<div class="spark"><svg viewBox="0 0 212 48" width="212" height="48" aria-hidden="true">' +
     poly(cheaper, '#0e7a6d') + poly(ranks, '#c9a227') + '</svg>' +
-    '<p class="cap">Teal: still cheaper than you · Gold: your rank among similar actives. Same lock.</p></div>';
+    '<p class="cap">Teal: still cheaper than you · Gold: your rank among similar actives. Same initial list.</p></div>';
+}}
+function laneHome(c) {{
+  const pic = photoUrl(c)
+    ? 'style="background-image:url(\\'' + String(photoUrl(c)).replace(/'/g, '%27') + '\\')"'
+    : '';
+  return '<button type="button" class="lane-home" data-id="' + esc(c.id) + '" title="' + esc(c.address || '') + '">' +
+    '<span class="lane-pic' + (photoUrl(c) ? '' : ' empty') + '" ' + pic + '></span>' +
+    '<span class="lane-meta"><span class="p">' + money(c.price) + '</span>' +
+    '<span class="m">' + esc(homeBits(c) || (c.address || '')) + '</span></span></button>';
+}}
+function photoLane(title, sub, rows, sid) {{
+  if (!rows || !rows.length) return '';
+  return '<div class="lanes"' + (sid ? ' id="' + sid + '"' : '') + '><h2>' + esc(title) + '</h2>' +
+    '<p class="sub">' + esc(sub) + '</p>' +
+    '<div class="lane"><div class="lane-row">' + sortedRows(rows, laneSort).map(laneHome).join('') + '</div></div></div>';
 }}
 function lanesHtml() {{
-  const rows = sortedRows(((DATA.brief || {{}}).baseline || []), laneSort);
+  const rows = sortedRows(((DATA.brief || {{}}).baseline || (DATA.brief || {{}}).baseline || []), laneSort);
   if (!rows.length) return '';
   const active = [];
   const pending = [];
@@ -503,15 +580,6 @@ function lanesHtml() {{
     if (st === 'sold') sold.push(c);
     else if (st === 'pending' || st === 'backup' || st === 'firstright') pending.push(c);
     else if (st !== 'gone') active.push(c);
-  }}
-  function laneHome(c) {{
-    const pic = c.photo_url
-      ? 'style="background-image:url(\\'' + String(c.photo_url).replace(/'/g, '%27') + '\\')"'
-      : '';
-    return '<button type="button" class="lane-home" data-id="' + esc(c.id) + '" title="' + esc(c.address || '') + '">' +
-      '<span class="lane-pic' + (c.photo_url ? '' : ' empty') + '" ' + pic + '></span>' +
-      '<span class="lane-meta"><span class="p">' + money(c.price) + '</span>' +
-      '<span class="m">' + esc(homeBits(c) || (c.address || '')) + '</span></span></button>';
   }}
   function lane(title, items) {{
     if (!items.length) return '';
@@ -528,7 +596,7 @@ function weekHomesHtml(asOf) {{
   const homes = homesForWeek(asOf);
   const wins = weekWindows();
   const key = weekKey(asOf);
-  const w = wins.find(function (x) {{ return x.as_of === key; }}) || wins[wins.length - 1];
+  const w = wins.find(function (x) {{ return (x.as_of || x.as_of) === key; }}) || wins[wins.length - 1];
   const listed = [];
   const uc = [];
   const sold = [];
@@ -547,31 +615,28 @@ function weekHomesHtml(asOf) {{
     else if (didList) listed.push(c);
     else listed.push(c);
   }});
-  function col(title, rows, tag) {{
-    return '<div class="week-col"><h3>' + esc(title) + ' · ' + rows.length + '</h3>' +
+  function col(title, rows) {{
+    return '<div class="lane"><h3>' + esc(title) + ' · ' + rows.length + '</h3>' +
       (rows.length
-        ? '<div class="cards">' + rows.map(function (c) {{ return cardHtml(c, tag || c.status); }}).join('') + '</div>'
+        ? '<div class="lane-row">' + rows.map(laneHome).join('') + '</div>'
         : '<p class="empty">None this week.</p>') + '</div>';
   }}
   if (!homes.length) {{
-    return '<div class="week-homes" id="weekHomes"><h3>What moved this week</h3>' +
-      '<p class="sub">No similar homes listed, went under contract, or sold in this week.</p></div>';
+    return '<div class="week-homes" id="weekHomes"><p class="empty">No similar homes listed, went under contract, or sold this week.</p></div>';
   }}
-  return '<div class="week-homes" id="weekHomes"><h3>What moved this week · ' + homes.length + '</h3>' +
-    '<p class="sub">Same size band as your home. Pending and under contract are the same bucket. Click a home for beds, baths, and square feet.</p>' +
-    '<div class="week-grid">' +
-      col('Listed', listed, 'Listed') +
-      col('Under contract', uc, 'Under contract') +
-      col('Sold', sold, 'Sold') +
-    '</div></div>';
+  return '<div class="week-homes" id="weekHomes">' +
+    col('Listed', listed) +
+    col('Under contract', uc) +
+    col('Sold', sold) +
+    '</div>';
 }}
 function applyWeekHighlight(asOf) {{
   const wins = weekWindows();
   const key = weekKey(asOf);
-  const w = wins.find(function (x) {{ return x.as_of === key; }}) || wins[wins.length - 1];
+  const w = wins.find(function (x) {{ return (x.as_of || x.as_of) === key; }}) || wins[wins.length - 1];
   const ids = {{}};
   if (w) {{
-    homesForWeek(w.as_of).forEach(function (c) {{ ids[c.id] = 1; }});
+    homesForWeek(w.as_of || w.as_of).forEach(function (c) {{ ids[c.id] = 1; }});
   }}
   document.querySelectorAll('.card[data-id], .lane-home[data-id]').forEach(function (el) {{
     el.classList.toggle('is-week', !!ids[el.getAttribute('data-id')]);
@@ -584,57 +649,126 @@ function selectWeek(asOf, scroll) {{
   }});
   const box = document.getElementById('weekHomes');
   if (box) box.outerHTML = weekHomesHtml(key);
+  const score = document.getElementById('weekScore');
+  if (score) score.outerHTML = weekScoreHtml(key);
   applyWeekHighlight(key);
-  document.querySelectorAll('#weekHomes .card').forEach(function (el) {{
+  document.querySelectorAll('#weekHomes .card, #weekHomes .lane-home').forEach(function (el) {{
     el.addEventListener('click', function () {{ openDrawer(el.getAttribute('data-id')); }});
   }});
   if (scroll) {{
-    const homes = document.getElementById('weekHomes');
-    if (homes) homes.scrollIntoView({{ behavior: 'smooth', block: 'nearest' }});
-    const note = document.getElementById('note-' + key);
-    if (note) note.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
+    const bar = document.querySelector('.weeks-bar');
+    if (bar) bar.scrollIntoView({{ behavior: 'smooth', block: 'nearest' }});
   }}
   if (DATA.agent) loadNoteWeek(key);
+}}
+function prettyDate(s) {{
+  const raw = weekKey(s);
+  const d = new Date(raw + 'T12:00:00');
+  if (isNaN(d.getTime())) return raw || '—';
+  return d.toLocaleDateString(undefined, {{ month: 'short', day: 'numeric', year: 'numeric' }});
+}}
+function filtersHtml() {{
+  const chips = (((DATA.brief || {{}}).comp_set || {{}}).chips || []);
+  if (!chips.length) return '';
+  return '<div class="filters"><span class="filters-k">Similar set</span>' +
+    chips.map(function (c) {{ return '<span class="chip">' + esc(c) + '</span>'; }}).join('') +
+    '<p class="filters-n">Beds, baths, garage, and size a buyer would cross-shop against this home.</p></div>';
+}}
+function factsHtml(b, d) {{
+  const chips = [];
+  const listPrice = b.locked_price || b.locked_price || ((DATA.lock || {{}}).locked_price);
+  chips.push(['Initial list', money(listPrice)]);
+  if (DATA.active_at) chips.push(['Listed', prettyDate(DATA.active_at)]);
+  if (b.days_active || b.days_active) chips.push(['Days on market', String(b.days_active || b.days_active)]);
+  else if (b.days_locked || b.days_locked) chips.push(['Days since generate', String(b.days_locked || b.days_locked)]);
+  if (b.as_of) chips.push(['Market as of', prettyDate(b.as_of)]);
+  return '<div class="facts">' + chips.map(function (x) {{
+    return '<div class="fact"><span class="fk">' + esc(x[0]) + '</span><span class="fv">' + esc(x[1]) + '</span></div>';
+  }}).join('') + '</div>';
+}}
+function weekScoreHtml(asOf) {{
+  const hist = ((DATA.brief || {{}}).history || []);
+  const row = hist.find(function (w) {{ return weekAsOf(w) === weekKey(asOf); }}) || {{}};
+  const wc = weekCounts(asOf);
+  const listed = Number(wc.listed || row.listed_week || row.listed_week || 0);
+  const uc = Number(wc.uc || row.uc_week || row.uc_week || 0);
+  const sold = Number(wc.sold || row.sold_week || row.sold_week || 0);
+  return '<p class="week-stat" id="weekScore"><b>' + listed + '</b> listed · <b>' +
+    uc + '</b> under contract · <b>' + sold + '</b> sold</p>';
+}}
+function sinceLineHtml(d) {{
+  return '<p class="since-line">Since listed: <b>' + Number(d.listed_since || 0) + '</b> listed · <b>' +
+    Number(d.uc_since || 0) + '</b> under contract · <b>' + Number(d.sold_since || 0) + '</b> sold in this set</p>';
 }}
 function weeksHtml() {{
   const hist = ((DATA.brief || {{}}).history || []);
   if (!hist.length) return '';
-  const current = weekKey((DATA.brief || {{}}).as_of) || weekKey(hist[hist.length - 1].as_of);
-  return '<div class="weeks-wrap"><h2>Walk the weeks</h2>' +
-    '<p class="sub">Start at list week, then click forward. Each card is listed, under contract, or sold that week — the conversation for the seller update.</p>' +
-    sparklineHtml() +
-    '<div class="weeks">' + hist.map(function (w) {{
-      const asOf = weekKey(w.as_of);
-      const rank = (w.rank && w.rank_of) ? (w.rank + '/' + w.rank_of) : '—';
+  const current = weekKey((DATA.brief || {{}}).as_of) || weekAsOf(hist[hist.length - 1]);
+  const d = DATA.digest || (DATA.brief || {{}}).digest || {{}};
+  return '<div class="walk" id="walkWeeks"><h2>Walk the weeks</h2>' +
+    '<p class="sub">Same similar set, week by week. Tap a date — photos below use the same lanes as Where they are now.</p>' +
+    '<div class="weeks-bar"><div class="weeks">' + hist.map(function (w) {{
+      const asOf = weekAsOf(w);
       const on = asOf === current ? ' is-on' : '';
-      const wc = weekCounts(asOf);
       return '<button type="button" class="week' + on + '" data-asof="' + esc(asOf) + '" id="week-' + esc(asOf) + '">' +
-        '<span class="w-d">Week of ' + weekLabel(asOf) + '</span>' +
-        '<span class="w-m">' + Number(wc.listed || w.listed_week || 0) + ' listed · ' +
-        Number(wc.uc || w.uc_week || 0) + ' under contract · ' +
-        Number(wc.sold || w.sold_week || 0) + ' sold</span>' +
-        '<span class="w-m">#' + esc(rank) + ' · ' + Number(w.still_active_cheaper || 0) + ' cheaper</span></button>';
-    }}).join('') + '</div>' + weekHomesHtml(current) + '</div>';
+        weekLabel(asOf) + '</button>';
+    }}).join('') + '</div></div>' +
+    weekScoreHtml(current) +
+    weekHomesHtml(current) +
+    sinceLineHtml(d) + '</div>';
 }}
-function publishedNotesHtml() {{
-  const notes = (DATA.notes || []).filter(n => n.status === 'published' && n.body);
-  if (!notes.length) return '';
+function fromAgentHtml() {{
+  const notes = (DATA.notes || []).filter(function (n) {{ return n.status === 'published' && n.body; }});
   const who = DATA.agent_name || 'your agent';
-  const sorted = notes.slice().sort((a, b) => weekKey(b.as_of).localeCompare(weekKey(a.as_of)));
-  const latest = sorted[0];
-  const older = sorted.slice(1);
-  let html = '<div class="agent-note" id="note-' + esc(weekKey(latest.as_of)) + '">' +
-    '<h2>From ' + esc(who) + '</h2>' +
-    '<p class="when">Week of ' + weekLabel(latest.as_of) +
-    (latest.published_at ? ' · shared ' + weekLabel(latest.published_at) : '') + '</p>' +
-    '<p class="body">' + esc(latest.body) + '</p></div>';
-  if (older.length) {{
-    html += '<div class="note-tl">' + older.map(n =>
-      '<div class="note-tl-item" id="note-' + esc(weekKey(n.as_of)) + '">' +
-      '<strong>Week of ' + weekLabel(n.as_of) + '</strong><p>' + esc(n.body) + '</p></div>'
-    ).join('') + '</div>';
+  const talk = (((DATA.brief || {{}}).talk || (DATA.brief || {{}}).talk || {{}})[DATA.agent ? 'agent' : 'seller'] || []);
+  const current = weekKey((DATA.brief || {{}}).as_of);
+  const sorted = notes.slice().sort(function (a, b) {{ return weekKey(b.as_of).localeCompare(weekKey(a.as_of)); }});
+  const latest = sorted.find(function (n) {{ return weekKey(n.as_of) === current; }}) || sorted[0];
+  const older = sorted.filter(function (n) {{ return n !== latest; }});
+  if (!latest && !talk.length) return '';
+  let html = '<div class="from-agent" id="note-' + esc(weekKey((latest && latest.as_of) || current)) + '">' +
+    '<div class="kicker">Weekly summary</div>' +
+    '<h2>This week from ' + esc(who) + '</h2>' +
+    '<p class="when">Week of ' + weekLabel((latest && latest.as_of) || current) +
+    (latest && latest.published_at ? ' · shared ' + weekLabel(latest.published_at) : '') + '</p>';
+  if (latest && latest.body) {{
+    html += '<p class="body">' + esc(latest.body) + '</p>';
   }}
-  return html;
+  if (talk.length) {{
+    html += '<div class="recs"><div class="recs-k">Recommendations this week</div><ul>' +
+      talk.map(function (t) {{ return '<li>' + esc(t) + '</li>'; }}).join('') + '</ul></div>';
+  }}
+  if (older.length) {{
+    html += '<label class="past-pick">Earlier weeks <select id="pastNotePick">' +
+      '<option value="">This week</option>' +
+      older.map(function (n) {{
+        return '<option value="' + esc(weekKey(n.as_of)) + '">Week of ' + weekLabel(n.as_of) + '</option>';
+      }}).join('') + '</select></label>' +
+      '<div id="pastNotePanel" hidden></div>';
+  }}
+  return html + '</div>';
+}}
+function bindFromAgent() {{
+  const pick = document.getElementById('pastNotePick');
+  const panel = document.getElementById('pastNotePanel');
+  if (!pick || !panel) return;
+  const notes = (DATA.notes || []).filter(function (n) {{ return n.status === 'published' && n.body; }});
+  pick.addEventListener('change', function () {{
+    const key = weekKey(pick.value);
+    if (!key) {{
+      panel.hidden = true;
+      panel.innerHTML = '';
+      return;
+    }}
+    const n = notes.find(function (row) {{ return weekKey(row.as_of) === key; }});
+    if (!n) {{
+      panel.hidden = true;
+      return;
+    }}
+    panel.hidden = false;
+    panel.innerHTML = '<div class="past-note" id="note-' + esc(key) + '"><strong>Week of ' +
+      weekLabel(n.as_of) + '</strong><p>' + esc(n.body) + '</p></div>';
+  }});
 }}
 function bindWeeks() {{
   document.querySelectorAll('.week').forEach(el => {{
@@ -816,51 +950,38 @@ function render() {{
   const statusLine = sold
     ? '<div class="archive">Archived · listed as sold ' + esc(String(sold).slice(0,10)) + '</div>'
     : '<div class="live"><i></i> Live Fingerprint</div>';
-  const talk = ((b.talk || {{}})[DATA.agent ? 'agent' : 'seller'] || []);
+  const talk = ((b.talk || b.talk || {{}})[DATA.agent ? 'agent' : 'seller'] || []);
   const pos = b.position || [];
-  const daysLine = clockKind() === 'active' && b.days_active != null
-    ? ' · ' + b.days_active + ' days on market'
-    : (b.days_locked != null ? ' · ' + b.days_locked + ' days since generate' : '');
-  const readTitle = DATA.agent ? 'This week’s read' : 'The market picture';
-  const sinceCopy = clockKind() === 'active' ? 'after this home went active' : 'after generate';
   document.getElementById('main').innerHTML =
-    '<div class="hero">' + photo + '<div>' +
+    '<div class="hero">' + photo + '<div class="veil"></div><div class="copy">' +
       '<div class="kicker">Market Fingerprint</div>' +
       '<h1>' + esc(b.subject_address || 'This listing') + '</h1>' +
-      '<div class="meta">Locked list ' + money(b.locked_price) +
-        (b.market_label ? ' · ' + esc(b.market_label) : '') +
-        ' · as of ' + esc(b.as_of || '') +
-        daysLine +
-        (DATA.active_at ? ' · listed ' + esc(String(DATA.active_at).slice(0,10)) : '') +
-        (DATA.lock && DATA.lock.last_refresh_at ? ' · updated ' + esc(String(DATA.lock.last_refresh_at).slice(0,10)) : '') +
-        (DATA.needs_upload ? ' · Upload market' : ' · Search market') +
-      '</div>' + statusLine +
+      statusLine +
       '<div class="links">' +
         (b.report_url ? '<a href="' + esc(b.report_url) + '">Live Story</a>' : '') +
         (DATA.agent && DATA.share_url ? '<a href="' + esc(DATA.share_url.replace(/\\/?$/, '/')) + 'fingerprint/">Seller link</a>' : '') +
       '</div></div></div>' +
+    filtersHtml() +
+    factsHtml(b, d) +
+    fromAgentHtml() +
     (DATA.stale_upload ? '<p class="note">' + (DATA.agent
       ? 'Upload this week’s MLS export to refresh. The seller still sees the last file on hand.'
       : 'This picture uses the last market file we have. Ask your agent to refresh it with this week’s export.') + '</p>' : '') +
-    scoreboardHtml(d) +
-    weeksHtml() +
     lanesHtml() +
-    publishedNotesHtml() +
-    '<div class="read"><h2>' + readTitle + '</h2><ul>' +
-      (talk.length ? talk.map(t => '<li>' + esc(t) + '</li>').join('') : '<li>Quiet week in this size band.</li>') +
-    '</ul>' + (DATA.agent ? '' : '<p class="fact">Facts from this week’s market file — not a new list price.</p>') + '</div>' +
+    weeksHtml() +
     stripHtml(pos, d) +
-    section('Listed ' + sinceCopy + ' — under the lock', 'New similar homes priced under you.', b.new_under || b.new_under, 'under') +
-    section('Listed ' + sinceCopy + ' — over the lock', 'New similar homes priced over you.', b.new_over || b.new_over, 'over') +
-    section('Price cuts', 'Homes that dropped $1,000+ since the last look.', b.price_cuts || b.price_cuts, null) +
-    section('Under contract now', 'Pending, backup, and first-right — same bucket — in this size band.', b.pending_now || b.pending_now || b.went_pending, 'Under contract');
+    photoLane('Listed since — under the initial list', 'New similar homes priced under the initial list.', b.new_under || b.new_under) +
+    photoLane('Listed since — over the initial list', 'New similar homes priced over the initial list.', b.new_over || b.new_over) +
+    photoLane('Price cuts', 'Homes that dropped $1,000+ since the last look.', b.price_cuts || b.price_cuts) +
+    photoLane('Under contract now', 'Pending, backup, and first-right — same bucket — in this size band.', b.pending_now || b.pending_now || b.went_pending);
 
   if (DATA.agent) renderConsole();
   bindWeeks();
+  bindFromAgent();
   bindSorts();
   bindPins();
   const hist = (b.history || []);
-  const current = weekKey(b.as_of) || (hist.length ? weekKey(hist[hist.length - 1].as_of) : '');
+  const current = weekKey(b.as_of) || (hist.length ? weekAsOf(hist[hist.length - 1]) : '');
   if (current) selectWeek(current, false);
   document.querySelectorAll('.card, .lane-home').forEach(el => {{
     el.addEventListener('click', () => openDrawer(el.getAttribute('data-id')));
@@ -894,9 +1015,9 @@ function renderConsole() {{
     '<h3>Agent console</h3>' +
     '<p class="cadence">Last looked ' + (DATA.last_looked_at ? weekLabel(DATA.last_looked_at) : '—') +
       ' · Last note shared ' + (lastShared ? weekLabel(lastShared.published_at) : 'none') + '</p>' +
-    '<label>Locked list price</label>' +
+    '<label>Initial list price</label>' +
     '<input type="number" id="lockPrice" value="' + (DATA.lock.locked_price || '') + '" step="1000">' +
-    '<button type="button" class="btn-gold" id="btnLock">Update lock</button>' +
+    '<button type="button" class="btn-gold" id="btnLock">Update list price</button>' +
     '<label>Listed / went active</label>' +
     '<input type="date" id="activeAt" value="' + esc(String(DATA.active_at || '').slice(0,10)) + '">' +
     '<p class="cadence">' + (DATA.active_at
@@ -957,7 +1078,7 @@ function status(msg) {{ const el = document.getElementById('fpStatus'); if (el) 
 function bindConsole() {{
   const run = DATA.run_id;
   document.getElementById('btnLock')?.addEventListener('click', async () => {{
-    status('Updating lock…');
+    status('Saving list price…');
     const res = await fetch('/api/runs/' + run + '/pulse-lock', {{
       method:'POST', credentials:'same-origin', headers:{{'Content-Type':'application/json'}},
       body: JSON.stringify({{ price: Number(document.getElementById('lockPrice').value) }})
@@ -1088,7 +1209,7 @@ function openDrawer(id) {{
   document.getElementById('drawerBody').innerHTML =
     (pics[0] ? '<img class="dpic" src="' + esc(pics[0]) + '" alt="">' : '') +
     '<h3>' + esc(c.address) + '</h3>' +
-    '<p>' + money(c.price) + (c.delta ? ' · ' + (c.delta > 0 ? '+' : '') + money(c.delta) + ' vs lock' : '') + '</p>' +
+    '<p>' + money(c.price) + (c.delta ? ' · ' + (c.delta > 0 ? '+' : '') + money(c.delta) + ' vs list' : '') + '</p>' +
     '<p class="meta">' + esc([c.status, c.beds ? c.beds + ' bd' : '', c.baths ? c.baths + ' ba' : '', c.sqft ? Number(c.sqft).toLocaleString() + ' sf' : '', c.dom ? c.dom + ' DOM' : ''].filter(Boolean).join(' · ')) + '</p>' +
     (hist ? '<p style="margin-top:12px;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#5c6675">Status</p><ul>' + hist + '</ul>' : '') +
     '<p style="margin-top:14px;font-size:.82rem">' +

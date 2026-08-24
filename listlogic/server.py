@@ -46,7 +46,7 @@ RATE_LIMIT_MAX_GENERATE = 10
 SAMPLE_RUN_ID = "sample-2845"
 SAMPLE_FINGERPRINT_LOCKED_AT = "2026-06-02"
 SAMPLE_FINGERPRINT_MIN_WEEKS = 4
-SAMPLE_FINGERPRINT_STORY = "from-export-v2"
+SAMPLE_FINGERPRINT_STORY = "from-export-v4"
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ListLogic")
@@ -1633,9 +1633,11 @@ def _ensure_sample_run() -> str:
         # Sample photos must be volume-local, not expiring CDN links.
         try:
             remote, missing = _run_photo_health(run_dir)
+            snap = _read_json_file(run_dir / "pulse_snapshot.json")
+            need_fp = _fingerprint_needs_photos(snap, _load_photo_map(run_dir))
             if remote:
                 _start_rehost(SAMPLE_RUN_ID, run_dir)
-            elif missing:
+            elif missing or need_fp:
                 _start_background_photos(SAMPLE_RUN_ID, run_dir)
             elif _load_photo_map(run_dir):
                 _write_photos_status(run_dir, status="ready", message="")
@@ -1662,6 +1664,7 @@ def _ensure_sample_run() -> str:
         living_area=2392.0,
         beds=4.0,
         baths=2.0,
+        garage_spaces=2.0,
         year_built=1969,
         condition="average",
         list_price=None,
@@ -2877,7 +2880,11 @@ def _seed_sample_fingerprint(run_dir: Path, report: dict) -> None:
             lock["active_at_source"] = "sample"
             (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
         _ensure_active_baseline(run_dir, report, lock if isinstance(lock, dict) else {})
-        _seed_sample_fingerprint_notes(run_dir)
+        _seed_sample_fingerprint_notes(run_dir, overwrite=True)
+        try:
+            _save_pulse_brief(run_dir, report, lock if isinstance(lock, dict) else {})
+        except Exception:
+            logger.exception("Sample Fingerprint brief refresh skipped")
         return
     df = _load_run_market(run_dir)
     if df is None or len(df) == 0:
@@ -2906,6 +2913,9 @@ def _seed_sample_fingerprint(run_dir: Path, report: dict) -> None:
         "active_at": lock_day,
         "active_at_source": "sample",
         "subject_sqft": subject_sqft,
+        "subject_beds": float(subject.get("beds") or 4),
+        "subject_baths": float(subject.get("baths") or 2),
+        "subject_garage": float(subject.get("garage_spaces") or 2),
         "market_label": meta.get("market_label") or report.get("area") or "West Greeley · similar homes",
         "source": "sample",
         "sample_story": SAMPLE_FINGERPRINT_STORY,
@@ -3042,9 +3052,8 @@ def _seed_sample_fingerprint_notes(run_dir: Path, history: list | None = None, *
         rank_txt = f"You sit {rank} of {rank_of} similar actives." if rank and rank_of else ""
         if i == 0:
             body = (
-                "Listed this week at the same number as the listing appointment. "
-                "This Fingerprint is the weekly picture we’ll send — new similar lists, "
-                "under contract, and sold — until it closes. " + rank_txt
+                "Hold the initial list this week unless a cheaper similar home shows up that "
+                "buyers will open first. Walk those cheaper new lists before you talk price. " + rank_txt
             ).strip()
         else:
             bits = []
@@ -3055,9 +3064,16 @@ def _seed_sample_fingerprint_notes(run_dir: Path, history: list | None = None, *
             if sold:
                 bits.append(f"{sold} sold")
             if bits:
-                body = f"This week: {', '.join(bits)}. Pending and under contract are the same bucket. {rank_txt}".strip()
+                body = (
+                    f"{', '.join(bits).capitalize()} in your set. Recommendation: walk the cheaper "
+                    f"new lists first — those are the homes buyers open. Hold the initial list unless "
+                    f"one of those is a true match. {rank_txt}"
+                ).strip()
             else:
-                body = f"Quiet week in this size band — no new lists, under contracts, or sales to walk. {rank_txt}".strip()
+                body = (
+                    f"Quiet week in this size band. Recommendation: hold the initial list and "
+                    f"keep showing — no new cheaper similar lists to chase. {rank_txt}"
+                ).strip()
         notes.append({
             "as_of": as_of,
             "body": body[:500],
@@ -3166,6 +3182,44 @@ def _hydrate_fingerprint_photos(run_dir: Path, snap: dict | None, ledger: dict |
     return snap, ledger
 
 
+def _fingerprint_photo_targets(run_dir: Path, cap: int = 20) -> list[dict]:
+    """Snapshot + ledger listings so Fingerprint cards can get real photos."""
+    snap = _read_json_file(run_dir / "pulse_snapshot.json") or {}
+    ledger = _read_json_file(run_dir / "fingerprint_ledger.json") or {}
+    rows: list[dict] = []
+    for row in snap.get("listings") or []:
+        if isinstance(row, dict):
+            rows.append(row)
+    listings = ledger.get("listings") if isinstance(ledger, dict) else {}
+    if isinstance(listings, dict):
+        rows.extend(v for v in listings.values() if isinstance(v, dict))
+    elif isinstance(listings, list):
+        rows.extend(v for v in listings if isinstance(v, dict))
+    out: list[dict] = []
+    seen: set[str] = set()
+    for row in rows:
+        mls = str(row.get("mls") or row.get("id") or "").strip()
+        addr = str(row.get("address") or "").strip()
+        key = mls or addr
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        out.append({
+            "mls_number": mls,
+            "mls": mls,
+            "id": mls,
+            "address": addr,
+            "city": row.get("city") or "",
+            "state": "CO",
+            "latitude": row.get("lat") or row.get("latitude"),
+            "longitude": row.get("lng") or row.get("longitude"),
+            "photo_url": row.get("photo_url") or "",
+        })
+        if len(out) >= cap:
+            break
+    return out
+
+
 def _fingerprint_needs_photos(snap: dict | None, photo_map: dict | None) -> bool:
     photos = photo_map if isinstance(photo_map, dict) else {}
     for row in (snap or {}).get("listings") or []:
@@ -3221,6 +3275,7 @@ def _save_pulse_brief(
     baseline = _clock_baseline(run_dir, lock)
     ledger = _read_json_file(run_dir / "fingerprint_ledger.json")
     snap, ledger = _hydrate_fingerprint_photos(run_dir, snap, ledger)
+    meta = report.get("meta") if isinstance(report.get("meta"), dict) else {}
     brief = build_pulse_brief(
         lock,
         snap,
@@ -3234,6 +3289,8 @@ def _save_pulse_brief(
         ledger=ledger,
         history=_read_json_file(run_dir / "fingerprint_history.json", []),
         notes=_read_fingerprint_notes(run_dir),
+        portal_criteria=meta.get("portal_criteria") if isinstance(meta.get("portal_criteria"), dict) else None,
+        city=str(meta.get("city") or report.get("area") or ""),
     )
     brief["agent_fingerprint_url"] = agent_fp
     (run_dir / "pulse_brief.json").write_text(
@@ -4495,7 +4552,8 @@ def _background_photo_enrich(run_id: str, run_dir: Path) -> None:
             _write_photos_status(run_dir, status="ready", message="Photo fetch skipped")
             return
         report = json.loads(json_path.read_text(encoding="utf-8"))
-        total = _expected_photo_targets(report)
+        extras = _fingerprint_photo_targets(run_dir)
+        total = _expected_photo_targets(report) + len(extras)
         _write_photos_status(
             run_dir,
             status="fetching",
@@ -4529,6 +4587,7 @@ def _background_photo_enrich(run_id: str, run_dir: Path) -> None:
             cache_only=False,
             deadline=time.time() + 240,
             on_listing=on_listing,
+            extra_listings=extras,
         )
         merged = {**existing, **{k: v for k, v in photo_map.items() if v}}
         _save_photo_map(run_dir, merged)
@@ -4549,6 +4608,12 @@ def _background_photo_enrich(run_id: str, run_dir: Path) -> None:
             _save_html(report, run_dir / "presentation.html")
         except Exception:
             logger.exception("Failed to rewrite HTML after background photos for %s", run_id)
+        lock = _read_json_file(run_dir / "pulse.json")
+        if isinstance(lock, dict) and lock.get("locked_price"):
+            try:
+                _save_pulse_brief(run_dir, report, lock)
+            except Exception:
+                logger.exception("Failed to refresh Fingerprint brief after photos for %s", run_id)
         count = len([v for v in merged.values() if v])
         _write_photos_status(
             run_dir,
@@ -4597,7 +4662,8 @@ def fetch_run_comp_photos(run_id: str):
     if not reef_enabled():
         raise HTTPException(400, "REEF_API_KEY is not configured on this service")
     photos = _load_photo_map(run_dir)
-    if run_id == SAMPLE_RUN_ID and photos:
+    snap = _read_json_file(run_dir / "pulse_snapshot.json")
+    if run_id == SAMPLE_RUN_ID and photos and not _fingerprint_needs_photos(snap, photos):
         _write_photos_status(run_dir, status="ready", message="")
         status = _load_photos_status(run_dir)
         return {
