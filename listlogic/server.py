@@ -1602,11 +1602,10 @@ def _seed_sample_launch_files(run_dir: Path) -> bool:
                 json_changed = True
         except Exception:
             logger.info("Sample Zestimate seed skipped")
-    if (run_dir / "market.csv").exists():
-        try:
-            _seed_sample_fingerprint(run_dir, report)
-        except Exception:
-            logger.exception("Sample Market Fingerprint seed skipped")
+    try:
+        _seed_sample_fingerprint(run_dir, report)
+    except Exception:
+        logger.exception("Sample Market Fingerprint seed skipped")
     edits_path = run_dir / "edits.json"
     edits = _read_json_file(edits_path, {}) or {}
     if not isinstance(edits, dict):
@@ -2521,6 +2520,18 @@ def _require_run_owner(request: Request, run_id: str) -> dict:
 
 def _load_run_market(run_dir: Path):
     path = run_dir / "market.csv"
+    if not path.exists() and run_dir.name == SAMPLE_RUN_ID and DEMO_EXPORT.exists():
+        try:
+            from core import load_export
+
+            df = load_export(DEMO_EXPORT)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            df.to_csv(path, sep="|", index=False)
+            logger.info("Wrote sample market.csv from demo export (%s rows)", len(df))
+            return df
+        except Exception:
+            logger.exception("Failed to load demo export for sample market")
+            return None
     if not path.exists():
         return None
     try:
