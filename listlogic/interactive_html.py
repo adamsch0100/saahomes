@@ -1849,9 +1849,23 @@ body.print-leavebehind #llSampleBar,
 body.print-leavebehind .ll-as-btn,
 body.print-leavebehind .ll-as-panel{{display:none!important}}
 body.print-leavebehind .page{{padding-bottom:0}}
+.sample-demo-bar{{
+  display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  background:#0b1220;color:#fff;padding:10px 18px;font-size:.86rem;position:sticky;top:0;z-index:50;
+}}
+body.ll-sample .sample-demo-bar{{display:flex}}
+.sample-demo-bar span{{color:#c8d2e0}}
+.sample-demo-bar a{{
+  color:#0b1220;background:#c9a227;text-decoration:none;font-weight:800;padding:8px 14px;border-radius:999px;
+}}
+@media print{{ .sample-demo-bar{{display:none!important}} }}
 </style>
 </head>
 <body>
+<div class="sample-demo-bar" id="sampleDemoBar">
+  <span>Demo listing appointment — then this home’s weekly Fingerprint from the same market file.</span>
+  <a href="/demo/fingerprint">Open the weekly Fingerprint →</a>
+</div>
 <div class="report-shell">
 <aside class="report-side" id="reportSide" aria-label="Report navigation">
   <div class="rs-brand">ListLogic</div>
@@ -5529,23 +5543,37 @@ function renderPulse(data) {{
   if (lock && digest) {{
     const locked = money(lock.locked_price);
     const when = digest.as_of || '';
-    if (asOf) asOf.textContent = 'Against ' + locked + (when ? ' · as of ' + when : '') + ' · open the Fingerprint for the living picture.';
+    if (asOf) {{
+      asOf.textContent = IS_SAMPLE
+        ? 'Weeks after list from this market file — listed, under contract, and sold in this size band. Open the Fingerprint to walk week by week.'
+        : ('Against ' + locked + (when ? ' · as of ' + when : '') + ' · open the Fingerprint for the living picture.');
+    }}
     const set = (id, n) => {{ const el = document.getElementById(id); if (el) el.textContent = String(n); }};
-    set('pulseNewUnder', digest.new_under);
-    set('pulseNewOver', digest.new_over);
-    set('pulseActiveCheaper', digest.still_active_cheaper);
+    set('pulseNewUnder', digest.listed_week != null ? digest.listed_week : digest.new_under);
+    set('pulseNewOver', digest.uc_week != null ? digest.uc_week : digest.new_over);
+    set('pulseActiveCheaper', digest.sold_week != null ? digest.sold_week : digest.still_active_cheaper);
   }} else if (asOf) {{
-    asOf.textContent = 'Generate locks the recommended list. Open the Market Fingerprint after they list.';
+    asOf.textContent = IS_SAMPLE
+      ? 'After they list, the Fingerprint is the weekly seller link. Open it to walk the weeks from this market file.'
+      : 'Generate locks the recommended list. Open the Market Fingerprint after they list.';
   }}
   const uploadWrap = document.getElementById('pulseUploadWrap');
   if (uploadWrap) uploadWrap.hidden = !data || !data.needs_upload;
   const fp = document.getElementById('pulseOpenFp');
   if (fp) {{
-    const url = (data && (data.agent_fingerprint_url || data.fingerprint_url))
-      || (RUN_ID ? '/runs/' + RUN_ID + '/fingerprint/' : '#');
+    const url = IS_SAMPLE
+      ? '/demo/fingerprint'
+      : ((data && (data.agent_fingerprint_url || data.fingerprint_url))
+        || (RUN_ID ? '/runs/' + RUN_ID + '/fingerprint/' : '#'));
     fp.href = url;
     const fpBtn = document.getElementById('btnOpenFingerprint');
     if (fpBtn) fpBtn.href = url;
+  }}
+  if (IS_SAMPLE) {{
+    const labs = document.querySelectorAll('#pulseBlock .pl');
+    if (labs[0]) labs[0].textContent = 'Listed this week';
+    if (labs[1]) labs[1].textContent = 'Under contract this week';
+    if (labs[2]) labs[2].textContent = 'Sold this week';
   }}
   if (data && data.listingFlow && data.listingFlow.samples) {{
     DATA.listingFlow = Object.assign(DATA.listingFlow || {{}}, data.listingFlow);

@@ -1406,26 +1406,127 @@ def reconstruct_fingerprint_baseline(
     }
 
 
-def fingerprint_sold_from_df(df: pd.DataFrame, ids: set[str]) -> dict[str, dict]:
-    """Baseline ids that now show Sold in the full market pull."""
+def _pulse_day(value) -> pd.Timestamp | None:
+    ts = pd.to_datetime(value, errors="coerce")
+    if pd.isna(ts):
+        return None
+    ts = ts.tz_localize(None) if getattr(ts, "tzinfo", None) else ts
+    return pd.Timestamp(ts).normalize()
+
+
+def _status_as_of_row(row: pd.Series, as_of_ts: pd.Timestamp, *, latest: bool = False) -> str:
+    """Active / under-contract / Sold as of a historical day."""
+    list_ts = _pulse_day(row.get("ListDate"))
+    if list_ts is None or list_ts > as_of_ts:
+        return ""
+    sold_ts = _pulse_day(row.get("SoldDate"))
+    if sold_ts is not None and sold_ts <= as_of_ts:
+        return "Sold"
+    current = str(row.get("StatusNorm") or "")
+    if current in FINGERPRINT_UC_STATUSES:
+        pending_ts = _pulse_day(row.get("LastUpdateDate"))
+        if pending_ts is not None and list_ts <= pending_ts <= as_of_ts:
+            return current
+        if latest:
+            return current
+        return "Active"
+    if current == "Sold":
+        pending_ts = (sold_ts - pd.Timedelta(days=14)) if sold_ts is not None else None
+        if pending_ts is not None and pending_ts < list_ts:
+            pending_ts = list_ts
+        if pending_ts is not None and pending_ts <= as_of_ts:
+            return "Pending"
+        return "Active"
+    if current in FINGERPRINT_LIVE_STATUSES:
+        return current
+    return ""
+
+
+def build_pulse_snapshot_as_of(
+    df: pd.DataFrame,
+    locked_price: float,
+    living_area: float = 0,
+    *,
+    as_of: str,
+    photo_map: dict | None = None,
+    gallery_map: dict | None = None,
+    latest: bool = False,
+) -> dict:
+    """Live similar set as it would have looked on ``as_of`` (Active + under contract)."""
+    as_of_ts = _pulse_day(as_of) or pd.Timestamp.now().normalize()
+    as_of_str = as_of_ts.strftime("%Y-%m-%d")
+    locked = float(locked_price or 0)
+    empty = {
+        "as_of": as_of_str,
+        "locked_price": int(round(locked)) if locked else 0,
+        "subject_sqft": round(float(living_area or 0)),
+        "listings": [],
+        "rank": 0,
+        "rank_of": 0,
+        "active_count": 0,
+    }
+    if df is None or len(df) == 0 or locked <= 0:
+        return empty
+    work = df.copy()
+    if "LivingArea" in work.columns and living_area and living_area > 0:
+        work = work[listing_flow_sqft_mask(work["LivingArea"], living_area)]
+    if "Price" not in work.columns:
+        return empty
+    listings: list[dict] = []
+    for _, row in work.iterrows():
+        try:
+            price = float(row.get("Price"))
+        except (TypeError, ValueError):
+            continue
+        if price <= 0:
+            continue
+        status = _status_as_of_row(row, as_of_ts, latest=latest)
+        if status not in FINGERPRINT_LIVE_STATUSES:
+            continue
+        list_date = ""
+        list_ts = _pulse_day(row.get("ListDate"))
+        if list_ts is not None:
+            list_date = list_ts.strftime("%Y-%m-%d")
+        card = _pulse_listing_from_row(row, locked, list_date=list_date)
+        card["status"] = status
+        listings.append(card)
+    listings = apply_listing_photos(listings, photo_map, gallery_map)
+    rank_info = _assign_active_ranks(listings, locked)
+    return {
+        "as_of": as_of_str,
+        "locked_price": int(round(locked)),
+        "subject_sqft": round(float(living_area or 0)),
+        "listings": listings,
+        **rank_info,
+    }
+
+
+def fingerprint_sold_from_df(
+    df: pd.DataFrame,
+    ids: set[str],
+    *,
+    as_of: str | None = None,
+) -> dict[str, dict]:
+    """Ids that show Sold in the market pull, optionally only if sold by ``as_of``."""
     found: dict[str, dict] = {}
     if df is None or len(df) == 0 or not ids:
         return found
     work = df.copy()
-    if "StatusNorm" not in work.columns:
-        return found
-    sold = work[work["StatusNorm"] == "Sold"]
-    for _, row in sold.iterrows():
+    as_of_ts = _pulse_day(as_of) if as_of else None
+    for _, row in work.iterrows():
         pid = _pulse_listing_id(row)
         if pid not in ids:
             continue
+        sold_ts = _pulse_day(row.get("SoldDate"))
+        status = str(row.get("StatusNorm") or "")
+        if status != "Sold" and sold_ts is None:
+            continue
+        if as_of_ts is not None and (sold_ts is None or sold_ts > as_of_ts):
+            continue
         list_date = ""
-        raw_date = row.get("ListDate")
-        if pd.notna(raw_date):
-            try:
-                list_date = pd.to_datetime(raw_date).strftime("%Y-%m-%d")
-            except Exception:
-                list_date = ""
+        list_ts = _pulse_day(row.get("ListDate"))
+        if list_ts is not None:
+            list_date = list_ts.strftime("%Y-%m-%d")
         card = _pulse_listing_from_row(row, 0, list_date=list_date)
         card["status"] = "Sold"
         found[pid] = card
@@ -2079,9 +2180,13 @@ def build_pulse_brief(
         "talk": tracks,
         "new_under": new_under,
         "new_over": new_over,
+        "new_under": new_under,
+        "new_over": new_over,
         "cheaper_active": cheaper_active,
         "still_active": still_active[:24],
         "pending_now": pending_now,
+        "pending_now": pending_now,
+        "price_cuts": price_cuts,
         "price_cuts": price_cuts,
         "status_changes": status_changes,
         "gone": gone,

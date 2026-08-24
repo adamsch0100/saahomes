@@ -15,7 +15,7 @@ import threading
 import time
 import uuid
 from collections import defaultdict, deque
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Optional
 
@@ -44,7 +44,9 @@ MAX_UPLOAD_BYTES = 15 * 1024 * 1024
 RATE_LIMIT_WINDOW_SEC = 60
 RATE_LIMIT_MAX_GENERATE = 10
 SAMPLE_RUN_ID = "sample-2845"
-SAMPLE_FINGERPRINT_LOCKED_AT = "2026-07-27"
+SAMPLE_FINGERPRINT_LOCKED_AT = "2026-06-02"
+SAMPLE_FINGERPRINT_MIN_WEEKS = 4
+SAMPLE_FINGERPRINT_STORY = "from-export-v2"
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ListLogic")
@@ -835,7 +837,7 @@ h1{{font-family:Fraunces,serif;font-size:1.6rem}} .muted{{color:#64748b}}</style
 <p class="muted">Run <code>{safe}</code> was lost when the app redeployed before permanent storage was enabled.</p>
 <p>Generate a fresh presentation from the app — new runs are saved on permanent storage.</p>
 <p><a class="btn btn-primary" href="/saas/app.html">Back to ListLogic</a>
- · <a href="/demo">Try the sample</a></p>
+ · <a href="/demo">Try the demo</a></p>
 </body></html>"""
     return HTMLResponse(body, status_code=404)
 
@@ -2072,6 +2074,7 @@ _PRESENTATION_MARKERS = (
     "MAPBOX_TOKEN",
     "print-fit-v2",
     "demo-ui-snappy",
+    "sample-demo-bar",
     "charts failed to boot",
     "/saas/vendor/chart.umd.min.js",
 )
@@ -2748,23 +2751,108 @@ def _ensure_fingerprint_files(run_dir: Path, report: dict | None = None, *, sour
         _write_fingerprint_snapshot(run_dir, report, lock, df)
 
 
+def _sample_history_has_motion(history) -> bool:
+    if not isinstance(history, list) or len(history) < SAMPLE_FINGERPRINT_MIN_WEEKS:
+        return False
+    total = 0
+    for i, week in enumerate(history):
+        if i == 0 or not isinstance(week, dict):
+            continue
+        total += int(week.get("listed_week") or 0)
+        total += int(week.get("uc_week") or 0)
+        total += int(week.get("sold_week") or 0)
+    return total >= 4
+
+
 def _sample_fingerprint_ready(run_dir: Path) -> bool:
     lock = _read_json_file(run_dir / "pulse.json") or {}
     baseline = _read_json_file(run_dir / "fingerprint_baseline.json") or {}
     snap = _read_json_file(run_dir / "pulse_snapshot.json")
+    history = _read_json_file(run_dir / "fingerprint_history.json", []) or []
     return bool(
-        str(lock.get("locked_at") or "").startswith(SAMPLE_FINGERPRINT_LOCKED_AT)
+        lock.get("sample_story") == SAMPLE_FINGERPRINT_STORY
+        and lock.get("locked_price")
+        and lock.get("locked_at")
         and not _fingerprint_snapshot_empty(snap)
-        and str(baseline.get("as_of") or "").startswith(SAMPLE_FINGERPRINT_LOCKED_AT)
         and (baseline.get("listings") or baseline.get("ids"))
+        and isinstance(history, list)
+        and len(history) >= SAMPLE_FINGERPRINT_MIN_WEEKS
+        and _sample_history_has_motion(history)
     )
 
 
+def _sample_week_dates(start: str, end: str) -> list[str]:
+    """Weekly as-of dates from lock day through the latest snapshot, inclusive."""
+    try:
+        first = datetime.strptime(str(start)[:10], "%Y-%m-%d")
+        last = datetime.strptime(str(end)[:10], "%Y-%m-%d")
+    except ValueError:
+        return [str(start)[:10]]
+    if last < first:
+        last = first
+    days = []
+    cur = first
+    while cur < last:
+        days.append(cur.strftime("%Y-%m-%d"))
+        cur += timedelta(days=7)
+    last_s = last.strftime("%Y-%m-%d")
+    if not days or days[-1] != last_s:
+        days.append(last_s)
+    if len(days) <= 8:
+        return days
+    inner = days[1:-1]
+    step = max(1, len(inner) / 6)
+    picked = [days[0]]
+    i = 0.0
+    while len(picked) < 7 and int(i) < len(inner):
+        day = inner[int(i)]
+        if day not in picked:
+            picked.append(day)
+        i += step
+    if days[-1] not in picked:
+        picked.append(days[-1])
+    return picked
+
+
+def _sample_market_as_of(df) -> str:
+    """Latest list / sold / update day in the demo market file."""
+    import pandas as pd
+
+    latest = None
+    if df is None or len(df) == 0:
+        return datetime.now().strftime("%Y-%m-%d")
+    for col in ("SoldDate", "ListDate", "LastUpdateDate"):
+        if col not in df.columns:
+            continue
+        series = pd.to_datetime(df[col], errors="coerce")
+        mx = series.max()
+        if pd.isna(mx):
+            continue
+        day = pd.Timestamp(mx)
+        if getattr(day, "tzinfo", None) is not None:
+            day = day.tz_localize(None)
+        day = day.normalize()
+        if latest is None or day > latest:
+            latest = day
+    return (latest or pd.Timestamp.now()).strftime("%Y-%m-%d")
+
+
+def _sample_lock_day(df) -> str:
+    """List day for the demo Fingerprint: ~7 weeks before the market file ends."""
+    as_of = _sample_market_as_of(df)
+    try:
+        last = datetime.strptime(str(as_of)[:10], "%Y-%m-%d")
+    except ValueError:
+        return SAMPLE_FINGERPRINT_LOCKED_AT
+    first = last - timedelta(days=49)
+    return first.strftime("%Y-%m-%d")
+
+
 def _seed_sample_fingerprint(run_dir: Path, report: dict) -> None:
-    """Lock the public sample on 7/27 and freeze then-vs-now from the demo market."""
+    """Lock the public demo on a list day in this MLS file and replay real weekly movement."""
     from core import (
         append_fingerprint_history,
-        build_pulse_snapshot,
+        build_pulse_snapshot_as_of,
         digest_pulse,
         fingerprint_sold_from_df,
         merge_fingerprint_ledger,
@@ -2774,12 +2862,11 @@ def _seed_sample_fingerprint(run_dir: Path, report: dict) -> None:
     if _sample_fingerprint_ready(run_dir):
         lock = _read_json_file(run_dir / "pulse.json") or {}
         if isinstance(lock, dict) and lock.get("locked_price") and not lock.get("active_at"):
-            lock["active_at"] = SAMPLE_FINGERPRINT_LOCKED_AT
+            lock["active_at"] = str(lock.get("locked_at") or "")[:10] or SAMPLE_FINGERPRINT_LOCKED_AT
             lock["active_at_source"] = "sample"
             (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
         _ensure_active_baseline(run_dir, report, lock if isinstance(lock, dict) else {})
         _seed_sample_fingerprint_notes(run_dir)
-        _backfill_sample_fingerprint_visuals(run_dir)
         return
     df = _load_run_market(run_dir)
     if df is None or len(df) == 0:
@@ -2789,7 +2876,7 @@ def _seed_sample_fingerprint(run_dir: Path, report: dict) -> None:
     subject = report.get("subject") if isinstance(report.get("subject"), dict) else {}
     meta = report.get("meta") if isinstance(report.get("meta"), dict) else {}
     try:
-        locked_price = float(pos.get("recommended_price") or 410000)
+        locked_price = float(pos.get("recommended_price") or pos.get("recommended_price") or 410000)
     except (TypeError, ValueError):
         locked_price = 410000
     try:
@@ -2797,14 +2884,20 @@ def _seed_sample_fingerprint(run_dir: Path, report: dict) -> None:
     except (TypeError, ValueError):
         subject_sqft = 2392.0
     existing = _read_json_file(run_dir / "pulse.json", {}) or {}
+    lock_day = _sample_lock_day(df)
+    end = _sample_market_as_of(df)
+    week_days = _sample_week_dates(lock_day, end)
+    if not week_days:
+        week_days = [lock_day]
     lock = {
         "locked_price": int(round(locked_price)),
-        "locked_at": f"{SAMPLE_FINGERPRINT_LOCKED_AT}T09:00:00",
-        "active_at": SAMPLE_FINGERPRINT_LOCKED_AT,
+        "locked_at": f"{lock_day}T09:00:00",
+        "active_at": lock_day,
         "active_at_source": "sample",
         "subject_sqft": subject_sqft,
         "market_label": meta.get("market_label") or report.get("area") or "West Greeley · similar homes",
         "source": "sample",
+        "sample_story": SAMPLE_FINGERPRINT_STORY,
         "seller_access": existing.get("seller_access", True) is not False,
     }
     for key in ("email", "seller_name", "seller_email"):
@@ -2812,59 +2905,71 @@ def _seed_sample_fingerprint(run_dir: Path, report: dict) -> None:
             lock[key] = existing[key]
     photo_map = _load_photo_map(run_dir)
     gallery_map = _load_gallery_map(run_dir)
-    snap = build_pulse_snapshot(
-        df,
-        locked_price,
-        subject_sqft,
-        photo_map=photo_map,
-        gallery_map=gallery_map,
-    )
     baseline = reconstruct_fingerprint_baseline(
         df,
         locked_price,
         subject_sqft,
-        as_of=SAMPLE_FINGERPRINT_LOCKED_AT,
+        as_of=week_days[0],
         photo_map=photo_map,
         gallery_map=gallery_map,
     )
-    prev = {
-        "as_of": SAMPLE_FINGERPRINT_LOCKED_AT,
-        "locked_price": int(round(locked_price)),
-        "listings": list(baseline.get("listings") or []),
-        "rank": baseline.get("rank") or 0,
-        "rank_of": baseline.get("rank_of") or 0,
-        "active_count": baseline.get("active_count") or 0,
-    }
-    sold_map = fingerprint_sold_from_df(df, {str(x) for x in (baseline.get("ids") or []) if x})
-    ledger = merge_fingerprint_ledger(
-        None,
-        snap,
-        baseline=baseline,
-        sold_map=sold_map,
-        as_of=snap.get("as_of"),
-    )
-    digest = digest_pulse(snap, lock, prev, baseline=baseline, ledger=ledger, subject=subject)
-    history = append_fingerprint_history([], prev, digest_pulse(prev, lock, None, baseline=baseline, ledger=None, subject=subject))
-    history = append_fingerprint_history(history, snap, digest)
+    seen_ids = {str(x) for x in (baseline.get("ids") or []) if x}
+    ledger = None
+    history: list = []
+    prev = None
+    prior = None
+    snap = None
+    digest = {}
+    for i, day in enumerate(week_days):
+        is_last = i == len(week_days) - 1
+        snap = build_pulse_snapshot_as_of(
+            df,
+            locked_price,
+            subject_sqft,
+            as_of=day,
+            photo_map=photo_map,
+            gallery_map=gallery_map,
+            latest=is_last,
+        )
+        for row in snap.get("listings") or []:
+            if isinstance(row, dict) and row.get("id"):
+                seen_ids.add(str(row["id"]))
+        sold_map = fingerprint_sold_from_df(df, seen_ids, as_of=day)
+        ledger = merge_fingerprint_ledger(
+            ledger,
+            snap,
+            baseline=baseline,
+            sold_map=sold_map,
+            as_of=day,
+        )
+        digest = digest_pulse(snap, lock, prev, baseline=baseline, ledger=ledger, subject=subject)
+        history = append_fingerprint_history(history, snap, digest)
+        prior = prev
+        prev = snap
+    if not history or snap is None:
+        return
     (run_dir / "pulse_snapshot.json").write_text(json.dumps(snap, indent=2, default=str), encoding="utf-8")
-    (run_dir / "pulse_snapshot_prev.json").write_text(json.dumps(prev, indent=2, default=str), encoding="utf-8")
+    (run_dir / "pulse_snapshot_prev.json").write_text(
+        json.dumps(prior or prev, indent=2, default=str),
+        encoding="utf-8",
+    )
     (run_dir / "fingerprint_baseline.json").write_text(json.dumps(baseline, indent=2, default=str), encoding="utf-8")
     (run_dir / "fingerprint_active_baseline.json").write_text(json.dumps(baseline, indent=2, default=str), encoding="utf-8")
     (run_dir / "fingerprint_ledger.json").write_text(json.dumps(ledger, indent=2, default=str), encoding="utf-8")
     (run_dir / "fingerprint_history.json").write_text(json.dumps(history, indent=2, default=str), encoding="utf-8")
     lock["last_refresh_at"] = datetime.now().isoformat(timespec="seconds")
     (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
-    _seed_sample_fingerprint_notes(run_dir, history=history)
-    _backfill_sample_fingerprint_visuals(run_dir)
+    _seed_sample_fingerprint_notes(run_dir, history=history, overwrite=True)
     _save_pulse_brief(run_dir, report, lock, snap)
     logger.info(
-        "Sample Fingerprint seeded lock=%s baseline=%s active_now=%s new=%s pending=%s sold=%s",
+        "Sample Fingerprint seeded lock=%s weeks=%s baseline=%s active_now=%s listed_week=%s uc_week=%s sold_week=%s",
         lock["locked_at"],
+        len(history),
         baseline.get("active_count"),
         digest.get("active_count"),
-        (digest.get("new_under") or 0) + (digest.get("new_over") or 0),
-        digest.get("went_pending"),
-        digest.get("went_sold"),
+        digest.get("listed_week"),
+        digest.get("uc_week"),
+        digest.get("sold_week"),
     )
 
 
@@ -2906,40 +3011,51 @@ def _touch_fingerprint_looked(run_dir: Path) -> None:
     (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
 
 
-def _seed_sample_fingerprint_notes(run_dir: Path, history: list | None = None) -> None:
+def _seed_sample_fingerprint_notes(run_dir: Path, history: list | None = None, *, overwrite: bool = False) -> None:
     path = _fingerprint_notes_path(run_dir)
-    if path.exists():
+    if path.exists() and not overwrite:
         return
     rows = history if isinstance(history, list) else (_read_json_file(run_dir / "fingerprint_history.json", []) or [])
-    first_as_of = SAMPLE_FINGERPRINT_LOCKED_AT
-    last_as_of = ""
-    if rows:
-        first_as_of = str((rows[0] or {}).get("as_of") or first_as_of)[:10]
-        last_as_of = str((rows[-1] or {}).get("as_of") or "")[:10]
-    notes = [
-        {
-            "as_of": first_as_of,
-            "body": (
-                "Day-one lock is in. We'll watch similar homes in this size band every week — "
-                "rank, new lists under you, and anything that goes pending. Same number until the picture changes."
-            ),
-            "status": "published",
-            "published_at": f"{SAMPLE_FINGERPRINT_LOCKED_AT}T12:00:00",
-            "emailed_at": "",
-        }
-    ]
-    if last_as_of and last_as_of != first_as_of:
+    notes = []
+    for i, week in enumerate(rows):
+        if not isinstance(week, dict):
+            continue
+        as_of = str(week.get("as_of") or "")[:10]
+        if not as_of:
+            continue
+        listed = int(week.get("listed_week") or 0)
+        uc = int(week.get("uc_week") or 0)
+        sold = int(week.get("sold_week") or 0)
+        rank = week.get("rank") or 0
+        rank_of = week.get("rank_of") or 0
+        rank_txt = f"You sit {rank} of {rank_of} similar actives." if rank and rank_of else ""
+        if i == 0:
+            body = (
+                "Listed this week at the same number as the listing appointment. "
+                "This Fingerprint is the weekly picture we’ll send — new similar lists, "
+                "under contract, and sold — until it closes. " + rank_txt
+            ).strip()
+        else:
+            bits = []
+            if listed:
+                bits.append(f"{listed} similar listed")
+            if uc:
+                bits.append(f"{uc} went under contract")
+            if sold:
+                bits.append(f"{sold} sold")
+            if bits:
+                body = f"This week: {', '.join(bits)}. Pending and under contract are the same bucket. {rank_txt}".strip()
+            else:
+                body = f"Quiet week in this size band — no new lists, under contracts, or sales to walk. {rank_txt}".strip()
         notes.append({
-            "as_of": last_as_of,
-            "body": (
-                "Still watching the cheaper similar set. Quiet on new lists under the lock this week. "
-                "Condition still favors you versus the closest homes from day one."
-            ),
+            "as_of": as_of,
+            "body": body[:500],
             "status": "published",
-            "published_at": datetime.now().isoformat(timespec="seconds"),
+            "published_at": f"{as_of}T12:00:00",
             "emailed_at": "",
         })
-    _write_fingerprint_notes(run_dir, notes)
+    if notes:
+        _write_fingerprint_notes(run_dir, notes)
 
 
 def _sample_visuals_ready(run_dir: Path) -> bool:
@@ -3624,7 +3740,11 @@ def _run_pulse_briefs() -> dict:
         snap = _read_json_file(run_dir / "pulse_snapshot.json")
         stale_upload = False
         if criteria and _snapshot_age_days(snap) >= 6:
-            if reef_refreshes >= MAX_PULSE_REEF_REFRESHES:
+            from portal_market import reef_configured
+
+            if not reef_configured():
+                logger.warning("Fingerprint cron skipped Search refresh for %s: REEF_API_KEY is not set", run_id)
+            elif reef_refreshes >= MAX_PULSE_REEF_REFRESHES:
                 logger.info("Fingerprint cron Reef cap reached; skipping refresh for %s", run_id)
             else:
                 try:

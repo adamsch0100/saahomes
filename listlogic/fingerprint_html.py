@@ -253,10 +253,43 @@ body.is-seller .console {{ display:none; }}
 .strip-pin .p {{ font-family:Fraunces,Georgia,serif; font-size:1rem; font-weight:700; }}
 .strip-pin .m {{ font-size:.68rem; color:var(--muted); margin-top:2px; }}
 .card.is-pin {{ border-color:var(--navy); box-shadow:0 0 0 2px #0c3c6e44; }}
+.sample-demo-bar {{
+  display:none; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  background:#0b1220; color:#fff; padding:10px 18px; font-size:.86rem; margin:0 0 16px; border-radius:14px;
+}}
+.sample-demo-bar.is-on {{ display:flex; }}
+.sample-demo-bar span {{ color:#c8d2e0; }}
+.sample-demo-bar a {{
+  color:#0b1220; background:var(--gold); text-decoration:none; font-weight:800; padding:8px 14px; border-radius:999px;
+}}
+.story {{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:16px 0 14px; }}
+.story .lead {{ font-family:Fraunces,Georgia,serif; font-size:1.28rem; line-height:1.35; }}
+.story .long {{ color:var(--muted); font-size:.9rem; margin-top:6px; line-height:1.45; }}
+.week-nums {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:0 0 12px; }}
+.week-nums .cell {{ background:var(--navy); color:#fff; border-radius:14px; padding:14px 10px; text-align:center; }}
+.week-nums .n {{ font-family:Fraunces,Georgia,serif; font-size:1.85rem; font-weight:700; }}
+.week-nums .l {{ font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:#c8d2e0; margin-top:4px; font-weight:700; }}
+.since-nums {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:0 0 18px; }}
+.since-nums .cell {{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px 10px; text-align:center; }}
+.since-nums .n {{ font-family:Fraunces,Georgia,serif; font-size:1.35rem; font-weight:700; color:var(--navy); }}
+.since-nums .l {{ font-size:.68rem; color:var(--muted); margin-top:4px; font-weight:700; }}
+.legend {{ display:flex; flex-wrap:wrap; gap:10px 16px; font-size:.78rem; color:var(--muted); margin:0 0 12px; }}
+.legend b {{ color:var(--ink); }}
+.week-grid {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }}
+@media (max-width:800px) {{
+  .week-nums, .since-nums, .week-grid {{ grid-template-columns:1fr; }}
+}}
+.week-col h3 {{ font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }}
+.week-col .empty {{ font-size:.82rem; color:var(--muted); }}
+.why {{ font-size:.82rem; color:var(--muted); margin:0 0 16px; line-height:1.45; }}
 </style>
 </head>
 <body class="{agent_class}">
 <div class="wrap">
+  <div class="sample-demo-bar" id="sampleDemoBar">
+    <span>This listing’s weekly seller picture — listed, under contract, and sold from the same market file as the appointment.</span>
+    <a href="/demo">Back to the listing appointment →</a>
+  </div>
   <main id="main"></main>
   <aside class="console" id="console"></aside>
 </div>
@@ -424,7 +457,7 @@ function homesForWeek(asOf) {{
   const b = DATA.brief || {{}};
   const seen = {{}};
   const out = [];
-  const pools = [b.baseline, b.new_under, b.new_over, b.went_pending, b.went_sold, b.pending_now];
+  const pools = [b.baseline, b.still_active, b.new_under || b.new_under, b.new_over || b.new_over, b.went_pending, b.went_sold, b.pending_now || b.pending_now];
   for (let p = 0; p < pools.length; p++) {{
     const pool = pools[p] || [];
     for (let i = 0; i < pool.length; i++) {{
@@ -493,13 +526,44 @@ function lanesHtml() {{
 }}
 function weekHomesHtml(asOf) {{
   const homes = homesForWeek(asOf);
-  if (!homes.length) {{
-    return '<div class="week-homes" id="weekHomes"><h3>Homes this week</h3>' +
-      '<p class="sub">Nothing listed, under contract, or sold in this week.</p></div>';
+  const wins = weekWindows();
+  const key = weekKey(asOf);
+  const w = wins.find(function (x) {{ return x.as_of === key; }}) || wins[wins.length - 1];
+  const listed = [];
+  const uc = [];
+  const sold = [];
+  homes.forEach(function (c) {{
+    let didSold = false;
+    let didUc = false;
+    (c.status_history || []).forEach(function (h) {{
+      if (!w || !inWeek(h.as_of, w.start, w.end)) return;
+      const st = String(h.status || '').toLowerCase();
+      if (st === 'sold') didSold = true;
+      else if (isUc(st)) didUc = true;
+    }});
+    const didList = !!(c.list_date && w && inWeek(c.list_date, w.start, w.end));
+    if (didSold) sold.push(c);
+    else if (didUc) uc.push(c);
+    else if (didList) listed.push(c);
+    else listed.push(c);
+  }});
+  function col(title, rows, tag) {{
+    return '<div class="week-col"><h3>' + esc(title) + ' · ' + rows.length + '</h3>' +
+      (rows.length
+        ? '<div class="cards">' + rows.map(function (c) {{ return cardHtml(c, tag || c.status); }}).join('') + '</div>'
+        : '<p class="empty">None this week.</p>') + '</div>';
   }}
-  return '<div class="week-homes" id="weekHomes"><h3>Homes this week · ' + homes.length + '</h3>' +
-    '<p class="sub">Newly listed, went under contract, or sold in this week. Pending and under contract are the same.</p>' +
-    '<div class="cards">' + homes.map(function (c) {{ return cardHtml(c, c.status); }}).join('') + '</div></div>';
+  if (!homes.length) {{
+    return '<div class="week-homes" id="weekHomes"><h3>What moved this week</h3>' +
+      '<p class="sub">No similar homes listed, went under contract, or sold in this week.</p></div>';
+  }}
+  return '<div class="week-homes" id="weekHomes"><h3>What moved this week · ' + homes.length + '</h3>' +
+    '<p class="sub">Same size band as your home. Pending and under contract are the same bucket. Click a home for beds, baths, and square feet.</p>' +
+    '<div class="week-grid">' +
+      col('Listed', listed, 'Listed') +
+      col('Under contract', uc, 'Under contract') +
+      col('Sold', sold, 'Sold') +
+    '</div></div>';
 }}
 function applyWeekHighlight(asOf) {{
   const wins = weekWindows();
@@ -536,8 +600,8 @@ function weeksHtml() {{
   const hist = ((DATA.brief || {{}}).history || []);
   if (!hist.length) return '';
   const current = weekKey((DATA.brief || {{}}).as_of) || weekKey(hist[hist.length - 1].as_of);
-  return '<div class="weeks-wrap"><h2>Week by week</h2>' +
-    '<p class="sub">Each week vs the last refresh: new lists, under contract (same as pending), and sold. Click a week to see those homes.</p>' +
+  return '<div class="weeks-wrap"><h2>Walk the weeks</h2>' +
+    '<p class="sub">Start at list week, then click forward. Each card is listed, under contract, or sold that week — the conversation for the seller update.</p>' +
     sparklineHtml() +
     '<div class="weeks">' + hist.map(function (w) {{
       const asOf = weekKey(w.as_of);
@@ -598,25 +662,48 @@ function updateNoteCount() {{
   const el = document.getElementById('noteCount');
   if (el && ta) el.textContent = (ta.value || '').length + ' / 500';
 }}
+function storyHtml(d) {{
+  const listedW = Number(d.listed_week || 0);
+  const ucW = Number(d.uc_week || 0);
+  const soldW = Number(d.sold_week || 0);
+  const bits = [];
+  if (listedW) bits.push(listedW + ' similar home' + (listedW === 1 ? '' : 's') + ' listed');
+  if (ucW) bits.push(ucW + ' went under contract');
+  if (soldW) bits.push(soldW + ' sold');
+  const lead = bits.length
+    ? ('This week: ' + bits.join(', ') + '.')
+    : 'Quiet this week — no similar lists, under contracts, or sales.';
+  const since = sinceLabel();
+  const long = since + ': ' + Number(d.listed_since || 0) + ' listed, ' +
+    Number(d.uc_since || 0) + ' under contract, ' + Number(d.sold_since || 0) + ' sold in this size band.';
+  const why = clockKind() === 'active'
+    ? 'These are homes like yours — same size band, around your list price. Under contract means a buyer chose that home instead of waiting.'
+    : 'Not listed yet. Counts run from generate until you set the listed date; then this board switches to since you listed.';
+  return '<div class="story"><p class="lead">' + esc(lead) + '</p><p class="long">' + esc(long) + '</p></div>' +
+    '<p class="why">' + esc(why) + '</p>';
+}}
 function scoreboardHtml(d) {{
   const since = sinceLabel();
   const listedSince = Number(d.listed_since != null ? d.listed_since : ((d.new_under || 0) + (d.new_over || 0)));
   const ucSince = Number(d.uc_since != null ? d.uc_since : d.went_pending || 0);
   const soldSince = Number(d.sold_since != null ? d.sold_since : d.went_sold || 0);
-  const rows = [
-    ['Listed', listedSince, d.listed_week],
-    ['Under contract', ucSince, d.uc_week],
-    ['Sold', soldSince, d.sold_week]
-  ];
-  const clockHint = clockKind() === 'active'
-    ? 'Since this home went active, plus what moved since the last weekly refresh. Pending and under contract are the same.'
-    : 'Not listed yet — counts are since generate. Set the listed date (or we pick it up when this address goes Active) and the board switches to since active.';
-  return '<div class="board"><table><thead><tr><th></th><th>' + esc(since) + '</th><th>This week</th></tr></thead><tbody>' +
-    rows.map(function (r) {{
-      return '<tr><td class="row">' + r[0] + '</td><td><div class="n">' + (r[1] == null || r[1] === '' ? '—' : r[1]) + '</div></td><td><div class="n">' + (r[2] == null || r[2] === '' ? '0' : r[2]) + '</div></td></tr>';
-    }}).join('') + '</tbody></table><p class="hint">' + clockHint + '</p></div>' +
+  function numCell(n, label, dark) {{
+    return '<div class="cell"><div class="n">' + (n == null || n === '' ? '0' : n) + '</div><div class="l">' + esc(label) + '</div></div>';
+  }}
+  return storyHtml(d) +
+    '<div class="week-nums">' +
+      numCell(d.listed_week, 'Listed this week') +
+      numCell(d.uc_week, 'Under contract this week') +
+      numCell(d.sold_week, 'Sold this week') +
+    '</div>' +
+    '<div class="since-nums">' +
+      numCell(listedSince, 'Listed ' + since) +
+      numCell(ucSince, 'Under contract ' + since) +
+      numCell(soldSince, 'Sold ' + since) +
+    '</div>' +
+    '<p class="legend"><b>Listed</b> new similar homes · <b>Under contract</b> pending/backup/first-right · <b>Sold</b> closed in this band</p>' +
     '<div class="score">' +
-      [['v', (d.active_count != null && d.baseline_active != null) ? (d.active_count + ' / ' + d.baseline_active) : (d.active_count ?? '—'), 'Active now vs then'],
+      [['v', (d.active_count != null && d.baseline_active != null) ? (d.active_count + ' / ' + d.baseline_active) : (d.active_count ?? '—'), 'Active now vs at list'],
        ['v', d.still_active_cheaper, 'Still cheaper than you'],
        ['v', (d.rank && d.rank_of) ? (d.rank + ' / ' + d.rank_of) : '—', 'Your price rank']
       ].map(x => '<div class="cell"><div class="v">' + (x[1] == null || x[1] === '' ? '—' : x[1]) + '</div><div class="l">' + x[2] + '</div></div>').join('') +
@@ -763,11 +850,10 @@ function render() {{
       (talk.length ? talk.map(t => '<li>' + esc(t) + '</li>').join('') : '<li>Quiet week in this size band.</li>') +
     '</ul>' + (DATA.agent ? '' : '<p class="fact">Facts from this week’s market file — not a new list price.</p>') + '</div>' +
     stripHtml(pos, d) +
-    section('Where they sit now', 'Same similar set — still active, under contract, sold, or gone. Default order is price.', sortedRows(b.baseline || [], laneSort), null, 'thenNow') +
-    section('Listed ' + sinceCopy + ' — under the lock', 'New similar homes priced under you.', b.new_under, 'under') +
-    section('Listed ' + sinceCopy + ' — over the lock', 'New similar homes priced over you.', b.new_over, 'over') +
-    section('Price cuts', 'Homes that dropped $1,000+ since the last look.', b.price_cuts, null) +
-    section('Under contract now', 'Pending, backup, and first-right — same bucket — in this size band.', b.pending_now || b.went_pending, 'Under contract');
+    section('Listed ' + sinceCopy + ' — under the lock', 'New similar homes priced under you.', b.new_under || b.new_under, 'under') +
+    section('Listed ' + sinceCopy + ' — over the lock', 'New similar homes priced over you.', b.new_over || b.new_over, 'over') +
+    section('Price cuts', 'Homes that dropped $1,000+ since the last look.', b.price_cuts || b.price_cuts, null) +
+    section('Under contract now', 'Pending, backup, and first-right — same bucket — in this size band.', b.pending_now || b.pending_now || b.went_pending, 'Under contract');
 
   if (DATA.agent) renderConsole();
   bindWeeks();
@@ -1018,6 +1104,11 @@ document.getElementById('drawerClose').addEventListener('click', () => {{
 document.getElementById('drawer').addEventListener('click', (e) => {{
   if (e.target.id === 'drawer') {{ e.currentTarget.classList.remove('open'); e.currentTarget.hidden = true; }}
 }});
+(function () {{
+  const sample = DATA.run_id === 'sample-2845' || /[?&]sample=1(?:&|$)/.test(location.search);
+  const bar = document.getElementById('sampleDemoBar');
+  if (bar && sample) bar.classList.add('is-on');
+}})();
 render();
 </script>
 </body>
