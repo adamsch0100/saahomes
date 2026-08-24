@@ -7882,6 +7882,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Northern Colorado.webp',
     readTime: '7 min read',
+    youtubeId: 'hjZUYKVNtE0',
     keywords: 'living in niwot colorado, niwot co homes for sale, niwot colorado real estate, niwot neighborhoods, moving to niwot colorado, niwot co realtor, boulder county small towns, left hand valley real estate, niwot colorado schools, best realtor niwot co',
     relatedLinks: [
       { title: 'Niwot homes for sale', href: '/northern-colorado-areas/niwot/', description: 'Niwot neighborhoods and Boulder County market insights' },
