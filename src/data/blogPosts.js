@@ -1100,37 +1100,106 @@ export const blogPosts = [
   },
   {
     slug: 'selling-a-home-in-windsor-colorado',
-    title: 'Selling a Home in Windsor, Colorado: Pricing, Timing, and Marketing Tips',
-    excerpt: 'What Windsor sellers need to know about Northern Colorado pricing, buyer demand, and how to stand out in a competitive Larimer County market.',
-    date: '2026-06-28',
+    title: 'Selling a Home in Windsor, Colorado: Pricing, Timing, and Marketing Tips (2026 Guide)',
+    excerpt: "Updated for August 2026: what Windsor sellers need to know about current median prices, days on market, buyer demand from Water Valley to Pelican Lakes, and how Schwartz and Associates markets your home across Northern Colorado.",
+    keywords: 'sell my house fast Windsor, sell my house fast Windsor CO, selling a home in Windsor Colorado, Windsor home values, Windsor CO housing market, we buy houses Windsor, cash home buyers Windsor, Windsor Colorado real estate market',
+    date: '2026-08-24',
     category: 'Seller Tips',
     image: '/images/Windsor-CO-Area-Guide.jpg',
-    readTime: '7 min read',
+    readTime: '9 min read',
     youtubeId: 'd-EqBbkXIZg',
+    relatedLinks: [
+      { title: 'Windsor homes for sale', href: '/northern-colorado-areas/windsor/', description: 'Neighborhoods, schools & market data' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Full-service listing & marketing' },
+      { title: 'Free Home Valuation', href: '/for-sellers/#home-valuation', description: 'See what your Windsor home is worth' },
+      { title: 'Cash Home Buyers Hub', href: '/cash-home-buyers/', description: 'Compare a cash offer vs. listing' },
+      { title: 'Northern Colorado Market Update - August 2026', href: '/blog/northern-colorado-market-update-august-2026/', description: 'Regional prices & trends behind these numbers' },
+    ],
+    cta: {
+      title: 'Get your Windsor home value and selling plan',
+      description: "Adam and Mandi Schwartz will show you what your Windsor home is worth today, what buyers are paying in your subdivision, and how fast homes like yours are moving - plus what a cash offer would look like if speed matters more than top dollar.",
+      primaryHref: '/for-sellers/#home-valuation',
+      primaryText: 'Get My Free Home Valuation',
+      secondaryHref: '/northern-colorado-areas/windsor/',
+      secondaryText: 'Explore the Windsor Market',
+    },
+    faqs: [
+      {
+        q: 'What is the median home price in Windsor, Colorado right now?',
+        a: "Windsor's median sale price was approximately $588,000 in July 2026, up 2.1% year-over-year - the highest among the four major Northern Colorado markets. Median listing prices sit closer to $645,000, and sellers are receiving roughly 97.8% of list price on average.",
+      },
+      {
+        q: 'How long does it take to sell a house in Windsor?',
+        a: "Days on market in Windsor have extended to about 45 days across all price points as of July 2026. The $450,000 to $600,000 segment remains relatively active with 25 to 35 day marketing times, while homes above $750,000 routinely require 65 or more days and benefit from aggressive upfront pricing.",
+      },
+      {
+        q: 'Is Windsor a buyer\'s or seller\'s market in 2026?',
+        a: "Balanced, tilting toward buyers with preparation. Inventory is up versus 2025 and the gap between asking and selling prices has widened, so overpriced homes sit. Well-priced homes in the $450,000 to $600,000 range still attract steady showing activity, and sellers who offer concessions such as rate buydowns or closing cost help upfront are standing out.",
+      },
+      {
+        q: 'Can I sell my Windsor house fast for cash?',
+        a: "Yes. Vetted cash buyers can close in as little as 7 to 14 days with no financing contingency, but cash offers typically come in 10% to 25% below open-market value. Before accepting one, get a free home valuation so you know exactly what a traditional Windsor listing could bring - SAA Homes compares both paths for you at no cost.",
+      },
+    ],
     sections: [
       {
-        heading: 'Why Windsor sellers need a local strategy',
+        heading: 'Why Windsor sellers need a hyper-local strategy',
         paragraphs: [
-          'Windsor sits between Fort Collins and Greeley with strong family demand, newer neighborhoods, and buyers comparing Larimer County schools against Weld County affordability nearby.',
-          'Selling in Windsor is not the same as selling in Fort Collins or Loveland. Neighborhoods near Water Valley, Pelican Lakes, and downtown Windsor each attract different buyer profiles and price sensitivities.',
+          "Windsor sits between Fort Collins and Greeley with strong family demand, newer neighborhoods, and buyers comparing Larimer County schools against Weld County affordability nearby. It is one of the most searched housing markets in Northern Colorado, which means your listing competes for attention against plenty of fresh inventory.",
+          "Selling in Windsor is not the same as selling in Fort Collins or Loveland. Neighborhoods near Water Valley, Pelican Lakes, Highland Meadows, and downtown Windsor each attract different buyer profiles and price sensitivities. Pricing from subdivision-level comparable sales - not county-wide averages - is the difference between selling and sitting.",
         ],
       },
       {
-        heading: 'Pricing and preparation',
+        heading: 'Windsor home prices right now (August 2026 update)',
         paragraphs: [
-          'Overpricing remains the top reason Windsor listings sit. Use recent comparable sales within your subdivision — not county-wide averages — and launch with professional photos and clean staging.',
-          'Sellers who address inspection items upfront and disclose HOA details clearly reduce renegotiation risk in Windsor\'s balanced market.',
+          "Windsor commands the highest median home price among the four major Northern Colorado markets, with a July 2026 median sale price of approximately $588,000 - up 2.1% year-over-year. The median listing price remains elevated near $645,000, but the gap between asking and selling prices has grown: sellers are receiving approximately 97.8% of list price on average, down from 99% a year ago.",
+          "Days on market have extended to about 45 days across all price points. The market is bifurcated: the $450,000 to $600,000 segment remains relatively active with 25 to 35 day marketing times, while premium properties above $750,000 routinely take 65 or more days. Sellers in the upper tier should be prepared for price adjustments and should strongly consider offering concessions upfront rather than after weeks of silence.",
+        ],
+        relatedLinks: [
+          { title: 'Northern Colorado Market Update - August 2026', href: '/blog/northern-colorado-market-update-august-2026/', description: 'Full regional data behind these numbers' },
+        ],
+      },
+      {
+        heading: 'Pricing your Windsor home to sell',
+        paragraphs: [
+          "Overpricing remains the top reason Windsor listings stall. Price from the most recent 90 days of comparable sales within your own subdivision, and launch with professional photos and clean staging from day one - the first two weeks of showing activity are when well-priced homes generate their strongest offers.",
+          "Budget for buyer concessions from the start. In the 2026 market, Windsor sellers increasingly offer rate buydowns, closing cost assistance, or home warranties to keep deals together. Addressing obvious inspection items and disclosing HOA details clearly also reduces renegotiation risk later in the transaction.",
+        ],
+      },
+      {
+        heading: 'The Weld County line: a marketing edge for the right listings',
+        paragraphs: [
+          "Windsor straddles the Larimer-Weld county line, and that geography creates a genuine selling point. Properties on the Weld County side carry lower property tax rates - roughly 50 to 65 mills versus 65 to 80 mills in Larimer County - potentially saving owners $1,500 to $3,000 per year depending on home value.",
+          "If your home is on the Weld County side, make sure your listing leads with that math. Buyers comparing near-identical homes across the line respond strongly to documented annual tax savings, and it can justify a tighter list-to-sale price ratio.",
         ],
       },
       {
         heading: 'Marketing that reaches relocating buyers',
         paragraphs: [
-          'Many Windsor buyers search from out of state. Strong online presentation, virtual tour options, and clear school and commute information drive showing activity.',
-          'Schwartz and Associates lists Windsor homes with targeted digital marketing and local expertise across Northern Colorado.',
+          "Many Windsor buyers search from out of state - drawn by the lakes, trails, and small-town feel within reach of both Fort Collins and Denver. Strong online presentation is non-negotiable: professional photography, video tours, Matterport 3D walkthroughs, and clear school and commute information drive showing requests from relocating families.",
+          "Schwartz and Associates lists Windsor homes with targeted digital marketing across the major portals and social channels, plus direct outreach to our buyer network across Northern Colorado. The goal is maximum qualified exposure in the first 14 days, when the algorithmic and buyer attention curves peak.",
+        ],
+      },
+      {
+        heading: 'Need speed? Compare a cash offer before you list',
+        paragraphs: [
+          "If your timeline is measured in weeks - relocation, inheritance, divorce, or a purchased replacement home - a cash sale can close in as little as 7 to 14 days with no appraisal contingency and no repair negotiations. The trade-off is price: cash offers in the region typically run 10% to 25% below what a well-marketed listing can bring.",
+          "You do not have to guess. SAA Homes will show you both numbers side by side - a vetted cash offer and a full open-market valuation - so you can decide with real figures. Many Windsor sellers discover their home fits the still-active $450,000 to $600,000 segment, where a traditional listing moves nearly as fast as a cash deal for meaningfully more money.",
         ],
         relatedLinks: [
-          { title: 'Windsor area guide', href: '/northern-colorado-areas/windsor/', description: 'Homes for sale & local info' },
-          { title: 'Free market report', href: '/for-sellers/', description: 'Windsor pricing snapshot' },
+          { title: 'Cash Home Buyers Hub', href: '/cash-home-buyers/', description: 'How cash offers work in Northern Colorado' },
+          { title: 'Free Home Valuation', href: '/for-sellers/#home-valuation', description: 'Your open-market number first' },
+        ],
+      },
+      {
+        heading: 'Ready to sell your Windsor home?',
+        paragraphs: [
+          "Adam and Mandi Schwartz bring 20+ years of combined Northern Colorado experience and a track record of record-setting Windsor-area sales. You will get a subdivision-level pricing strategy, professional marketing, skilled negotiation, and honest advice about whether listing or a cash offer fits your goals.",
+          "Call (970) 999-1407 or request your free home valuation to start with real numbers for your neighborhood - not generic estimates.",
+        ],
+        relatedLinks: [
+          { title: 'Contact SAA Homes', href: '/contact/?interest=Selling a home', description: 'Talk to Adam & Mandi about your Windsor sale' },
+          { title: 'Windsor homes for sale', href: '/northern-colorado-areas/windsor/', description: 'See the competition before you list' },
         ],
       },
     ],
@@ -1560,46 +1629,6 @@ export const blogPosts = [
       secondaryHref: '/cash-home-buyers/',
       secondaryText: 'See Cash Buyer Options',
     },
-  },
-  {
-    slug: 'weld-county-vs-larimer-county-buyer-guide',
-    title: 'Weld County vs Larimer County: Northern Colorado Home Buyer Guide',
-    excerpt: 'Should you buy in Weld or Larimer County? Compare Greeley and Evans value against Fort Collins, Loveland, and Windsor — plus CHFA limits and commute tradeoffs.',
-    date: '2026-06-30',
-    category: 'Buyer Tips',
-    image: '/images/Northern Colorado.webp',
-    readTime: '8 min read',
-    youtubeId: '0Pm0AsXgNGc',
-    sections: [
-      {
-        heading: 'County lines shape budget and lifestyle',
-        paragraphs: [
-          'Larimer County includes Fort Collins, Loveland, Windsor, Timnath, and Berthoud — generally higher price points and Poudre or Thompson school districts depending on location.',
-          'Weld County includes Greeley, Evans, Firestone, Frederick, and Severance — often more affordable with strong growth in the Carbon Valley and Greeley corridor.',
-        ],
-        relatedLinks: [
-          { title: 'Severance CO homes for sale', href: '/northern-colorado-areas/severance/', description: 'Fast-growing Weld County town between Windsor and Greeley' },
-        ],
-      },
-      {
-        heading: 'CHFA and program differences',
-        paragraphs: [
-          'CHFA income and purchase price limits vary by county and targeted areas. Larimer buyers may hit limits faster in Fort Collins; Weld buyers in Greeley or Carbon Valley often find more headroom.',
-          'Greeley city employees may also qualify for G-HOPE down payment assistance — a Weld-specific advantage.',
-        ],
-      },
-      {
-        heading: 'Making the county choice',
-        paragraphs: [
-          'Start with your maximum comfortable payment and commute radius. Then compare 3–5 neighborhoods in each county with a local agent who knows both sides of the line.',
-        ],
-        relatedLinks: [
-          { title: 'Greeley area guide', href: '/northern-colorado-areas/greeley/', description: 'Weld County hub' },
-          { title: 'Fort Collins area guide', href: '/northern-colorado-areas/fort-collins/', description: 'Larimer County flagship' },
-          { title: 'Carbon Valley guide', href: '/blog/carbon-valley-affordability-guide-firestone-frederick/', description: 'Firestone & Frederick affordability' },
-        ],
-      },
-    ],
   },
   {
     slug: 'northern-colorado-events-guide-2026',
@@ -3260,16 +3289,17 @@ export const blogPosts = [
   },
   {
     slug: 'cash-home-buyers-fort-collins-northern-colorado',
-    title: 'Cash Home Buyers in Fort Collins & Northern Colorado: What Sellers Need to Know in 2026',
-    excerpt: 'Thinking about selling your Northern Colorado home for cash? Compare cash offers vs. traditional listings, learn what to expect, and find out how SAA Homes helps sellers choose the right path.',
+    title: 'Cash Home Buyers in Fort Collins & Northern Colorado: What Sellers Need to Know (Updated August 2026)',
+    excerpt: 'Updated for August 2026: compare cash offers vs. traditional listings with current Fort Collins market numbers, learn what to expect, and see how SAA Homes helps sellers choose the path that nets the most.',
     keywords: 'sell my house fast Fort Collins, sell my house fast Fort Collins CO, we buy houses Fort Collins, cash home buyers Fort Collins, cash offer for home Fort Collins, sell my house fast Northern Colorado, cash home buyers Northern Colorado, sell house fast Fort Collins, Fort Collins cash home buyer',
-    date: '2026-07-10',
+    date: '2026-08-24',
     category: 'Seller Tips',
     image: '/images/cash-home-buyers-fort-collins-northern-colorado.jpg',
     readTime: '7 min read',
     youtubeId: 'ppibH9GQHkg',
     relatedLinks: [
       { title: 'Cash Home Buyers Hub', href: '/cash-home-buyers/', description: 'Sell for cash or invest in Northern Colorado' },
+      { title: 'Northern Colorado Market Update - August 2026', href: '/blog/northern-colorado-market-update-august-2026/', description: 'Current market numbers behind this guide' },
       { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Full-service listing & marketing' },
       { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Market insights & neighborhoods' },
       { title: 'Loveland homes for sale', href: '/northern-colorado-areas/loveland/', description: 'Sweetheart City real estate' },
@@ -3364,6 +3394,18 @@ export const blogPosts = [
         ],
       },
       {
+        heading: 'August 2026 market update: what Fort Collins sellers should know before taking a cash offer',
+        paragraphs: [
+          "Heading into late summer 2026, Fort Collins remains a stable but more balanced market. The median single-family price held near $610,000 in July, active inventory is up roughly 15% versus July 2025, and the median time on market sits around 40 days. Well-presented homes priced between $500,000 and $650,000 are still going under contract in about three weeks, while homes above $750,000 commonly need 55 to 70 days.",
+          "Why does this matter if you are weighing a cash offer? More inventory gives buyers choices, and that is exactly when discounted cash offers look tempting next to a listing that might take a few extra weeks. But convenience has a price: cash offers in Northern Colorado typically run 10% to 25% below open-market value. If your home fits the profile that is still selling in about three weeks, a well-marketed listing will usually net more even after normal carrying costs.",
+          "The smart move is to price both paths before choosing either. Get a free home valuation, ask any cash buyer for their written number and proof of funds, and compare net proceeds rather than gross offers. Adam and Mandi Schwartz run this comparison with Northern Colorado sellers every week, including what repairs, concessions, and timeline differences actually do to your bottom line.",
+        ],
+        relatedLinks: [
+          { title: 'Northern Colorado Market Update - August 2026', href: '/blog/northern-colorado-market-update-august-2026/', description: 'Latest prices, inventory and days-on-market trends' },
+          { title: 'Free Home Valuation', href: '/for-sellers/#home-valuation', description: 'Know your open-market value first' },
+        ],
+      },
+      {
         heading: 'Ready to explore your options?',
         paragraphs: [
           'Whether you are selling and want to compare a cash offer against market value, or you are a cash buyer looking for your next Northern Colorado investment, SAA Homes can help. We serve all 27 communities across the Front Range from Fort Collins to Greeley, Loveland to Longmont.',
@@ -3395,6 +3437,14 @@ export const blogPosts = [
       {
         q: 'Do I need a real estate agent to sell my house for cash?',
         a: 'No — but it is smart to have one on your side. A cash buyer will often present an offer at a discount to market value, and without an agent you have no independent way to verify what the home could actually bring. SAA Homes will compare a cash offer against a free home valuation at no cost and no obligation, so you can decide with real numbers instead of guessing. Call (970) 999-1407 to run the comparison.'
+      },
+      {
+        q: 'Are cash home sales legal in Colorado?',
+        a: "Yes. Selling your home to a cash buyer is a standard real estate transaction in Colorado - the buyer simply pays without mortgage financing, and closing still goes through a licensed title company. Reputable cash buyers provide proof of funds and put their offer in writing. Ask directly whether a buyer is purchasing with their own funds or assigning the contract, and have a local agent review the paperwork before you sign.",
+      },
+      {
+        q: 'How do I know if a cash offer on my Fort Collins home is fair?',
+        a: "Compare it to evidence, not gut feel. Pull recent comparable sales, get a free home valuation, and subtract what a traditional sale would really cost you - commission if you list, expected concessions, holding costs, and the extra weeks on market. A fair cash offer typically lands below full retail precisely because it removes those costs and risks. An offer dramatically below every comparable sale with no clear justification is a lowball - keep shopping it around.",
       },
     ],
     cta: {
