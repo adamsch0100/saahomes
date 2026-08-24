@@ -687,6 +687,7 @@ function injectAreaBody(html, area) {
     ],
     'windsor': [
       { title: 'Selling Your Home in Windsor, Colorado', slug: 'selling-your-home-in-windsor-colorado', blurb: 'Pricing strategy, preparation tips & local market insights' },
+      { title: 'Selling a Home in Windsor, Colorado: 2026 Guide', slug: 'selling-a-home-in-windsor-colorado', blurb: 'Current median prices, days on market & the Weld County tax-line edge' },
       { title: 'Cash Home Buyers in Fort Collins & Northern Colorado', slug: 'cash-home-buyers-fort-collins-northern-colorado', blurb: 'Sell fast with a cash offer or a marketed listing' },
     ],
     'loveland': [
@@ -1074,6 +1075,16 @@ const MONEY_PAGE_CONTENT = {
         ],
       },
       {
+        heading: 'More Ways to Sell — Cash Offers vs. Listing',
+        paragraphs: [
+          'Not every sale needs a full listing. If speed matters more than top dollar, learn how vetted cash buyers work in Fort Collins and Northern Colorado - and how a cash offer compares against what your home could bring on the open market.',
+        ],
+        relatedLinks: [
+          { title: 'Cash Home Buyers in Fort Collins & Northern Colorado', href: '/blog/cash-home-buyers-fort-collins-northern-colorado/', description: 'Compare cash offers vs. traditional listings' },
+          { title: 'Explore Cash Offers', href: '/cash-home-buyers/', description: 'Get a no-obligation cash offer' },
+        ],
+      },
+      {
         heading: 'Marketing That Gets Results',
         list: [
           'Professional photography and virtual tours for every listing',
@@ -1373,6 +1384,15 @@ function injectMoneyPageBody(html, route, content) {
       if (section.list) {
         html += `        <ul>\n`;
         html += section.list.map((item) => `          <li>${escapeHtml(item)}</li>`).join('\n') + '\n';
+        html += `        </ul>\n`;
+      }
+      if (section.relatedLinks) {
+        html += `        <ul class="prerendered-blog-links">\n`;
+        html += section.relatedLinks
+          .map((link) =>
+            `          <li><a href="${escapeAttr(link.href)}">${escapeHtml(link.title)}</a>${link.description ? ` &mdash; ${escapeHtml(link.description)}` : ''}</li>`
+          )
+          .join('\n') + '\n';
         html += `        </ul>\n`;
       }
       html += `      </section>\n`;

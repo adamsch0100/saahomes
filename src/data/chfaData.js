@@ -108,6 +108,22 @@ export const CHFA_FAQS = [
     a: 'Yes. CHFA DPA funds can be used toward down payment, closing costs, prepaids, and in some cases principal reduction — depending on the program and lender approval.',
   },
   {
+    q: "What is the CHFA FirstGeneration program in Colorado?",
+    a: "CHFA FirstGeneration and FirstGeneration Plus are FHA-only first mortgage programs for first-generation homebuyers - buyers who have never owned a home and whose parents or legal guardians have never owned one. The paired down payment assistance second mortgage offers up to $25,000 regardless of the first mortgage amount, usable toward down payment, closing costs, prepaids, or principal reduction. Standard CHFA requirements still apply: 620 minimum credit score, $1,000 minimum borrower contribution, homebuyer education, and county income and purchase price limits.",
+  },
+  {
+    q: "Does CHFA have a down payment assistance program for borrowers with disabilities?",
+    a: "Yes. CHFA disability-focused assistance follows the same deferred second-mortgage structure as other CHFA DPA options - no monthly payments, repaid only when you sell, refinance, pay off the mortgage, or move out - and may reach up to $25,000 regardless of loan size. Program guidelines are updated periodically, so a CHFA participating lender confirms current eligibility and amounts for your situation. SAA Homes coordinates your Northern Colorado home search with whichever CHFA program your lender approves.",
+  },
+  {
+    q: "How are CHFA income limits determined for my household?",
+    a: "CHFA income limits are set by county, household size, and whether the property is in a designated targeted area. For reference, mid-2026 non-targeted ranges are approximately $130,000-$156,000+ in Larimer County (Fort Collins, Loveland, Wellington, Timnath) and approximately $153,600-$179,200 in Weld County (Greeley, Windsor, Eaton, Milliken, La Salle, Mead), with higher limits in targeted areas. Purchase price caps also apply by county. CHFA updates these limits periodically - always confirm current figures through the official CHFA income limits resource or a participating lender before you shop.",
+  },
+  {
+    q: "How do I find a CHFA-approved participating lender in Colorado?",
+    a: "Every CHFA loan - including all down payment assistance options on this page - is originated through a CHFA participating lender; you cannot apply directly through CHFA. CHFA publishes the official lender list at chfainfo.com under Participating Lenders. Interview two or three lenders, ask which CHFA program fits your income and credit profile, and get pre-approved before serious house hunting. SAA Homes works alongside Northern Colorado CHFA lenders regularly and can help you time your search around pre-approval. Call (970) 999-1407 to get started.",
+  },
+  {
     q: 'How do I apply for CHFA down payment assistance?',
     a: 'Start by contacting a CHFA Participating Lender — not CHFA directly. Complete homebuyer education, get pre-approved, then work with a REALTOR® to find a home within program limits. SAA Homes can guide your Northern Colorado search while your lender handles CHFA program details.',
   },
