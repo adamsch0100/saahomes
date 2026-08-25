@@ -504,10 +504,28 @@ body.is-seller .console {{ display:none; }}
 .sample-demo-bar a {{
   color:#0b1220; background:var(--gold); text-decoration:none; font-weight:800; padding:8px 14px; border-radius:999px;
 }}
+.view-switch {{
+  display:none; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  background:#0b1220; color:#fff; padding:10px 18px; font-size:.86rem; margin:0 0 16px; border-radius:14px;
+  grid-column:1 / -1;
+}}
+.view-switch.is-on {{ display:flex; }}
+.view-switch span {{ color:#c8d2e0; }}
+.view-switch a {{
+  color:#0b1220; background:var(--gold); text-decoration:none; font-weight:800; padding:8px 14px; border-radius:999px;
+}}
+.sample-demo-bar {{ grid-column:1 / -1; }}
+.hero .links a {{
+  color:#0b1220; background:var(--gold); text-decoration:none; font-weight:800;
+  padding:8px 14px; border-radius:999px;
+}}
+.hero .links a.ghost {{
+  color:#fff; background:transparent; border:1px solid rgba(255,255,255,.45);
+}}
+@media print {{ .view-switch, .sample-demo-bar {{ display:none!important; }} }}
 .story {{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:16px 0 14px; }}
 .story .lead {{ font-family:Fraunces,Georgia,serif; font-size:1.28rem; line-height:1.35; }}
 .story .long {{ color:var(--muted); font-size:.9rem; margin-top:6px; line-height:1.45; }}
-.hero .links a {{ color:#fff; }}
 .week-nums {{ display:none; }}
 .since-nums {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:0 0 18px; }}
 .since-nums .cell {{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px 10px; text-align:center; }}
@@ -582,6 +600,10 @@ body.is-seller .console {{ display:none; }}
     <span>Real Greeley listing from the market file — not mock comps. Photos appear when we can match the address publicly.</span>
     <a href="/demo">Back to the listing appointment →</a>
   </div>
+  <div class="view-switch" id="viewSwitch">
+    <span>Same listing — Live Story is the appointment, Fingerprint is the weekly seller picture.</span>
+    <a id="switchStory" href="#">Open Live Story →</a>
+  </div>
   <p class="photo-banner" id="photoBanner">Pulling listing photos for this similar set…</p>
   <main id="main"></main>
   <aside class="console" id="console"></aside>
@@ -594,6 +616,15 @@ body.is-seller .console {{ display:none; }}
 </div>
 <script>
 const DATA = {data_json};
+function siblingStoryUrl() {{
+  const sample = DATA.run_id === 'sample-2845' || /[?&]sample=1(?:&|$)/.test(location.search);
+  if (sample) return '/demo';
+  const path = location.pathname.replace(/\\/+$/, '');
+  const share = path.match(/^\\/p\\/([^/]+)/);
+  if (share) return '/p/' + share[1] + '/';
+  if (DATA.run_id) return '/runs/' + DATA.run_id + '/';
+  return DATA.report_url || '';
+}}
 function money(n) {{
   const v = Number(n || 0);
   if (!v) return '—';
@@ -1753,8 +1784,8 @@ function render() {{
       '<h1>' + esc(b.subject_address || 'This listing') + '</h1>' +
       statusLine +
       '<div class="links">' +
-        (b.report_url ? '<a href="' + esc(b.report_url) + '">Live Story</a>' : '') +
-        (DATA.agent && DATA.share_url ? '<a href="' + esc(DATA.share_url.replace(/\\/?$/, '/')) + 'fingerprint/">Seller link</a>' : '') +
+        (siblingStoryUrl() ? '<a href="' + esc(siblingStoryUrl()) + '">Live Story</a>' : '') +
+        (DATA.agent && DATA.share_url ? '<a class="ghost" href="' + esc(DATA.share_url.replace(/\\/?$/, '/')) + 'fingerprint/">Seller Fingerprint link</a>' : '') +
       '</div></div></div>' +
     filtersHtml() +
     factsHtml(b, d) +
@@ -1853,7 +1884,7 @@ function renderConsole() {{
     (DATA.can_search_refresh ? '<button type="button" id="btnRefresh">Refresh market now</button>' : '') +
     (DATA.needs_upload ? '<label class="upload" id="uploadWrap" style="display:block">Upload MLS export<input type="file" id="exportFile" accept=".txt,.csv,.tsv"></label>' : '') +
     (DATA.sold_at ? '<p class="note">This Fingerprint is archived.</p>' : '<button type="button" id="btnSold">Mark listing sold</button>') +
-    '<a class="btn" href="' + esc(DATA.report_url || '#') + '">Open Live Story</a>' +
+    '<a class="btn" href="' + esc(siblingStoryUrl() || '#') + '">Open Live Story</a>' +
     '<p class="status" id="fpStatus"></p>';
   bindConsole();
   updateNoteCount();
@@ -2076,6 +2107,11 @@ document.addEventListener('keydown', function (e) {{
   const sample = DATA.run_id === 'sample-2845' || /[?&]sample=1(?:&|$)/.test(location.search);
   const bar = document.getElementById('sampleDemoBar');
   if (bar && sample) bar.classList.add('is-on');
+  const story = siblingStoryUrl();
+  const a = document.getElementById('switchStory');
+  if (a && story) a.href = story;
+  const sw = document.getElementById('viewSwitch');
+  if (sw && story && !sample) sw.classList.add('is-on');
 }})();
 render();
 </script>
