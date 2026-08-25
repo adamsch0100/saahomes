@@ -7575,6 +7575,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Northern Colorado.webp',
     readTime: '9 min read',
+    youtubeId: 'wD9eWvH-A9o',
     keywords: 'buying a home in berthoud colorado, berthoud co real estate, berthoud homes for sale, berthoud colorado realtor, move to berthoud, berthoud new construction, berthoud first-time home buyer, CHFA berthoud',
     relatedLinks: [
       { title: 'Berthoud real estate guide', href: '/northern-colorado-areas/berthoud/', description: 'Neighborhoods, schools & market data' },
@@ -7662,6 +7663,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/Northern Colorado.webp',
     readTime: '9 min read',
+    youtubeId: 'r5zNFByicAM',
     keywords: 'selling a home in berthoud colorado, sell my home berthoud co, berthoud co real estate agent, berthoud homes for sale, how to sell a house in berthoud, berthoud home selling guide, listing agent berthoud co, berthoud home value, berthoud housing market 2026',
     relatedLinks: [
       { title: 'Berthoud real estate guide', href: '/northern-colorado-areas/berthoud/', description: 'Neighborhoods, schools & market data' },
