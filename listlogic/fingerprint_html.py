@@ -94,6 +94,10 @@ def render_fingerprint_html(view: dict, *, agent: bool = False) -> str:
         "mapbox_token": _mapbox_token(),
         "subject_lat": brief.get("subject_lat") or report_sub.get("latitude") or report_sub.get("lat"),
         "subject_lng": brief.get("subject_lng") or report_sub.get("longitude") or report_sub.get("lng"),
+        "subject_year": report_sub.get("year_built") or report_sub.get("year") or 0,
+        "subject_beds": report_sub.get("beds") or 0,
+        "subject_baths": report_sub.get("baths") or 0,
+        "subject_sqft": brief.get("subject_sqft") or report_sub.get("living_area") or 0,
     }
     return _PAGE.format(
         title=title,
@@ -280,8 +284,7 @@ body.is-seller .console {{ display:none; }}
 .console .note-console.is-focus {{ box-shadow:0 0 0 3px #c9a22755; border-radius:12px; padding:8px; margin:8px -8px 0; }}
 .console .check-hint {{ font-size:.72rem; color:var(--muted); font-weight:500; margin:4px 0 0 22px; line-height:1.35; }}
 .card.is-week {{ border-color:var(--gold); box-shadow:0 0 0 2px #c9a22755; }}
-.week-homes {{ margin-top:8px; }}
-.week-homes h3 {{ font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }}
+.week-homes {{ margin-top:4px; }}
 .week-homes .empty {{ font-size:.82rem; color:var(--muted); }}
 .spark {{ margin:8px 0 14px; }}
 .spark svg {{ display:block; max-width:280px; }}
@@ -311,7 +314,15 @@ body.is-seller .console {{ display:none; }}
 }}
 .lane-home.is-week {{ border-color:var(--gold); box-shadow:0 0 0 2px #c9a22755; }}
 .lane-home.is-pin {{ border-color:var(--navy); box-shadow:0 0 0 2px #0c3c6e44; }}
-.lane-pic {{ display:block; width:100%; height:124px; background:#dfe6ef center/cover no-repeat; }}
+.lane-pic {{ display:block; width:100%; height:124px; background:#dfe6ef center/cover no-repeat; position:relative; }}
+.lane-badge {{
+  position:absolute; left:8px; top:8px; z-index:1;
+  font-size:.58rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
+  border-radius:99px; padding:3px 7px; background:rgba(255,255,255,.94);
+}}
+.lane-badge.is-uc {{ color:#c2410c; }}
+.lane-badge.is-sold {{ color:#475569; }}
+.lane-home.is-on {{ border-color:var(--gold); box-shadow:0 0 0 3px #c9a22744; }}
 .lane-pic.empty {{
   background-color:#e8eef4;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='40' viewBox='0 0 48 40'><path fill='%23b7c2cf' d='M24 4l20 16h-6v16H10V20H4z'/></svg>");
@@ -442,6 +453,64 @@ body.is-seller .console {{ display:none; }}
 .now-kicker .kicker {{ font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--navy); font-weight:800; }}
 .now-kicker h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.22rem; margin:2px 0 4px; }}
 .now-kicker .sub {{ color:var(--muted); font-size:.82rem; line-height:1.45; }}
+.levers {{
+  background:#fff; border:1px solid var(--line); border-radius:18px;
+  padding:20px 18px 22px; margin-bottom:18px;
+}}
+.levers > .kicker {{ font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); font-weight:800; }}
+.levers > h2 {{ font-family:Fraunces,Georgia,serif; font-size:clamp(1.2rem,2.4vw,1.55rem); margin:4px 0 6px; line-height:1.25; }}
+.levers > .sub {{ color:var(--muted); font-size:.88rem; line-height:1.5; margin-bottom:14px; }}
+.lever-row {{ display:flex; gap:12px; overflow-x:auto; padding-bottom:8px; margin-bottom:16px; }}
+.lever-q {{ margin:4px 0 14px; }}
+.lever-ask {{ font-family:Fraunces,Georgia,serif; font-size:1.08rem; margin-bottom:10px; }}
+.lever-answers {{ display:flex; flex-wrap:wrap; gap:8px; }}
+.lever-ans, .lever-cond button, .lever-open {{
+  appearance:none; -webkit-appearance:none; font:inherit; cursor:pointer;
+  border:1px solid var(--line); background:#fff; color:var(--ink);
+  border-radius:999px; padding:8px 14px; font-weight:700; font-size:.82rem;
+}}
+.lever-ans.is-on, .lever-cond button.is-on {{
+  background:var(--gold); border-color:transparent; color:#1a1200;
+}}
+.lever-faces {{
+  display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;
+}}
+.lever-face {{ border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#f7f4ee; }}
+.lever-pic {{ height:168px; background:#dfe6ef center/cover no-repeat; }}
+.lever-pic.empty {{
+  background-color:#e8eef4;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='40' viewBox='0 0 48 40'><path fill='%23b7c2cf' d='M24 4l20 16h-6v16H10V20H4z'/></svg>");
+  background-repeat:no-repeat; background-position:center; background-size:44px 36px;
+}}
+.lever-face-l {{ padding:10px 12px 12px; font-size:.82rem; font-weight:700; line-height:1.35; }}
+.lever-face-l span {{ display:block; color:var(--muted); font-weight:600; font-size:.72rem; margin-top:2px; }}
+.lever-grid {{
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-bottom:14px;
+}}
+.lever-card {{
+  border:1px solid var(--line); border-radius:14px; padding:12px 13px 14px; background:#fbfaf7;
+}}
+.lever-card .lk {{ font-size:.78rem; font-weight:800; letter-spacing:.04em; text-transform:uppercase; margin-bottom:8px; }}
+.lever-card .lk em {{
+  display:block; font-style:normal; font-size:.62rem; letter-spacing:.07em;
+  text-transform:uppercase; font-weight:800; margin-top:3px; color:var(--teal);
+}}
+.lever-card p {{ font-size:.84rem; line-height:1.45; color:var(--ink); }}
+.lever-card .lm {{ color:var(--muted); font-size:.74rem; margin-top:8px; }}
+.lever-card.is-hot {{ border-color:#e8c96a; background:#fff8e6; }}
+.lever-card.is-lock {{ background:#f3f0ea; }}
+.lever-card.is-lock .lk em {{ color:var(--muted); }}
+.lever-cond {{ display:flex; flex-direction:column; gap:6px; margin-top:10px; }}
+.lever-cond button {{ width:100%; border-radius:10px; text-align:left; }}
+.lever-verdict {{
+  background:#0c3c6e; color:#fff; border-radius:14px; padding:14px 16px;
+  font-size:.92rem; line-height:1.5; margin-bottom:12px;
+}}
+.lever-open {{ display:inline-block; border-radius:10px; padding:9px 14px; color:var(--navy); }}
+@media (max-width:800px) {{
+  .lever-faces, .lever-grid {{ grid-template-columns:1fr; }}
+  .lever-pic {{ height:140px; }}
+}}
 .sample-demo-bar {{
   display:none; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
   background:#0b1220; color:#fff; padding:10px 18px; font-size:.86rem; margin:0 0 16px; border-radius:14px;
@@ -495,8 +564,12 @@ body.is-seller .console {{ display:none; }}
 }}
 .since-line {{ font-size:.82rem; color:var(--muted); margin:8px 0 0; }}
 .since-line b {{ color:var(--ink); }}
-.week-homes .lane {{ margin-top:8px; }}
-.week-homes .lane:first-of-type {{ border-top:0; padding-top:0; margin-top:0; }}
+.week-homes .lane {{
+  margin-top:16px; padding-top:14px; border-top:1px solid var(--line);
+}}
+.week-homes .lane:first-of-type {{
+  border-top:0; padding-top:0; margin-top:6px;
+}}
 @media (max-width:640px) {{ .hero {{ min-height:180px; }} }}
 </style>
 </head>
@@ -609,6 +682,9 @@ function sinceLabel() {{
   return clockKind() === 'active' ? 'since active' : 'since generate';
 }}
 let laneSort = 'price';
+let leverId = '';
+const leverCond = {{}};
+const leverAns = {{}};
 function sortVal(c, by) {{
   if (by === 'sqft') return Number(c.sqft || 0);
   if (by === 'beds') return Number(c.beds || 0);
@@ -750,13 +826,18 @@ function sparklineHtml() {{
     poly(cheaper, '#0e7a6d') + poly(ranks, '#c9a227') + '</svg>' +
     '<p class="cap">Teal: still cheaper than you · Gold: your rank among similar actives. Same initial list.</p></div>';
 }}
-function laneHome(c) {{
+function laneHome(c, extraClass) {{
   const pic = photoUrl(c)
     ? 'style="background-image:url(\\'' + String(photoUrl(c)).replace(/'/g, '%27') + '\\')"'
     : '';
   const street = streetLine(c);
-  return '<button type="button" class="lane-home" data-id="' + esc(c.id) + '" title="' + esc(c.address || '') + '">' +
-    '<span class="lane-pic' + (photoUrl(c) ? '' : ' empty') + '" ' + pic + '></span>' +
+  const st = String(c.status || '').toLowerCase();
+  const badge = st === 'sold'
+    ? '<span class="lane-badge is-sold">Sold</span>'
+    : (isUc(st) ? '<span class="lane-badge is-uc">Pending</span>' : '');
+  const extra = extraClass ? ' ' + extraClass : '';
+  return '<button type="button" class="lane-home' + extra + '" data-id="' + esc(c.id) + '" title="' + esc(c.address || '') + '">' +
+    '<span class="lane-pic' + (photoUrl(c) ? '' : ' empty') + '" ' + pic + '>' + badge + '</span>' +
     '<span class="lane-meta"><span class="p">' + money(c.price) + '</span>' +
     (street ? '<span class="a">' + esc(street) + '</span>' : '') +
     '<span class="m">' + esc(homeBits(c)) + '</span></span></button>';
@@ -767,13 +848,203 @@ function photoLane(title, sub, rows, sid) {{
     '<p class="sub">' + esc(sub) + '</p>' +
     '<div class="lane"><div class="lane-row">' + sortedRows(rows, laneSort).map(laneHome).join('') + '</div></div></div>';
 }}
+function closedHomes() {{
+  const b = DATA.brief || {{}};
+  const seen = {{}};
+  const out = [];
+  function take(c) {{
+    if (!c || !c.id || seen[c.id]) return;
+    const st = String(c.status || '').toLowerCase();
+    if (st === 'sold' || isUc(st)) {{
+      seen[c.id] = 1;
+      out.push(c);
+    }}
+  }}
+  [b.pending_now, b.went_pending, b.went_sold, b.baseline].forEach(function (pool) {{
+    (pool || []).forEach(take);
+  }});
+  return sortedRows(out, laneSort);
+}}
+function milesBetween(aLat, aLng, bLat, bLng) {{
+  const lat1 = Number(aLat), lng1 = Number(aLng), lat2 = Number(bLat), lng2 = Number(bLng);
+  if (!isFinite(lat1) || !isFinite(lng1) || !isFinite(lat2) || !isFinite(lng2)) return null;
+  if ((lat1 === 0 && lng1 === 0) || (lat2 === 0 && lng2 === 0)) return null;
+  const toRad = function (d) {{ return d * Math.PI / 180; }};
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  return 3958.8 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}}
+function leverStoreKey() {{
+  return 'll-fp-lever-' + String(DATA.run_id || 'run');
+}}
+function saveLevers() {{
+  try {{
+    sessionStorage.setItem(leverStoreKey(), JSON.stringify({{ id: leverId, cond: leverCond, ans: leverAns }}));
+  }} catch (e) {{}}
+}}
+function loadLevers() {{
+  try {{
+    const raw = JSON.parse(sessionStorage.getItem(leverStoreKey()) || 'null');
+    if (!raw) return;
+    if (raw.id) leverId = raw.id;
+    if (raw.cond) Object.assign(leverCond, raw.cond);
+    if (raw.ans) Object.assign(leverAns, raw.ans);
+  }} catch (e) {{}}
+}}
+function leverFace(url, title, sub) {{
+  return '<div class="lever-face">' +
+    '<div class="lever-pic' + (url ? '' : ' empty') + '"' +
+    (url ? ' style="background-image:url(\\'' + String(url).replace(/'/g, '%27') + '\\')"' : '') +
+    '></div>' +
+    '<div class="lever-face-l">' + esc(title) + (sub ? '<span>' + esc(sub) + '</span>' : '') + '</div></div>';
+}}
+function leverStageHtml(id) {{
+  const homes = closedHomes();
+  const c = byId(id) || homes[0];
+  if (!c) return '';
+  leverId = c.id;
+  const yours = listPrice();
+  const cheaper = c.price && yours && c.price < yours;
+  const delta = c.delta || (c.price && yours ? c.price - yours : 0);
+  const miles = milesBetween(DATA.subject_lat, DATA.subject_lng, c.lat, c.lng);
+  const subYear = Number(DATA.subject_year || 0);
+  const newer = c.year && subYear && c.year >= subYear + 8;
+  const cond = leverCond[c.id] || '';
+  const ans = leverAns[c.id] || '';
+  const yourPic = (DATA.brief || {{}}).subject_photo;
+  const theirPic = photoUrl(c);
+  const st = String(c.status || '').toLowerCase();
+  const stLab = st === 'sold' ? 'Sold' : (isUc(st) ? 'Pending' : (c.status || 'Closed'));
+  let priceLine = cheaper
+    ? 'Theirs listed ' + money(Math.abs(delta)) + ' under yours. Price is a lever they used — and one you can still pull.'
+    : (delta > 0
+      ? 'They went pending ' + money(delta) + ' over your list. This was not a cheaper-number win.'
+      : 'Same number as yours. Price is not the differentiator here.');
+  const yourPpsf = Number((DATA.brief || {{}}).subject_sqft || DATA.subject_sqft || 0);
+  const subPpsf = yours && yourPpsf ? yours / yourPpsf : 0;
+  let condLine = 'Look at the photos side by side. Year built is a clue, not the whole story. Tap what you see.';
+  if (c.year && subYear) {{
+    condLine = 'Theirs built ' + c.year + ' · yours ' + subYear + '. Condition is the other lever you can still change. Tap how the photos compare.';
+  }}
+  let locLine = 'Location can explain why a buyer chose this pocket. It cannot help you sell. You cannot pick the house up and move it.';
+  if (miles != null) {{
+    if (miles < 0.4) locLine = miles.toFixed(1) + ' miles — same pocket. Location is not why they went pending, and it is not a lever you can pull.';
+    else locLine = miles.toFixed(1) + ' miles from yours. If buyers wanted that pocket, that is the discussion — not a reason to cut your number. You cannot move this house.';
+  }}
+  let verdict = 'Two levers can still change the outcome: price and condition. Location belongs in the discussion. It cannot sell the home.';
+  if (cheaper && (cond === 'better' || newer)) {{
+    verdict = 'Yes — they used both levers you can change: a lower number and a better-looking house. Location is not the move.';
+  }} else if (cheaper && cond !== 'worse') {{
+    verdict = 'Price is the conversation. They listed under you. Condition is your call from the photos. Location cannot close this gap.';
+  }} else if (!cheaper && (cond === 'better' || newer)) {{
+    verdict = 'They were not cheaper. If the photos look better, condition is the lever — not a price cut, and not location.';
+  }} else if (miles != null && miles >= 1.2 && !cheaper) {{
+    verdict = 'This may have been the pocket, not the number. Location is not a lever. Do not chase this by cutting price.';
+  }} else if (!cheaper && cond === 'worse') {{
+    verdict = 'No. They did not beat you on price or condition. This one should not move your list.';
+  }} else if (cond === 'same' && cheaper) {{
+    verdict = 'Same look in the photos, lower number. Price is the lever they used. You can still pull that one.';
+  }}
+  if (ans === 'yes' && !cheaper && cond === 'worse') {{
+    verdict += ' You said yes — the two adjustable levers do not back that up.';
+  }}
+  const condBtns = [['better','Theirs looks better'],['same','About the same'],['worse','Yours looks better']].map(function (p) {{
+    return '<button type="button" data-cond="' + p[0] + '" class="' + (cond === p[0] ? 'is-on' : '') + '">' + p[1] + '</button>';
+  }}).join('');
+  const ansBtns = [['yes','Yes'],['maybe','Not sure'],['no','No']].map(function (p) {{
+    return '<button type="button" class="lever-ans' + (ans === p[0] ? ' is-on' : '') + '" data-ans="' + p[0] + '">' + p[1] + '</button>';
+  }}).join('');
+  return '<div class="lever-q">' +
+    '<p class="lever-ask">Should this have gone under contract before yours?</p>' +
+    '<div class="lever-answers">' + ansBtns + '</div></div>' +
+    '<div class="lever-faces">' +
+      leverFace(yourPic, 'Yours', money(yours) + (subPpsf ? ' · $' + Math.round(subPpsf) + '/sf' : '')) +
+      leverFace(theirPic, streetLine(c) || 'This home', money(c.price) + ' · ' + stLab) +
+    '</div>' +
+    '<div class="lever-grid">' +
+      '<article class="lever-card' + (cheaper ? ' is-hot' : '') + '"><div class="lk">Price <em>you can change this</em></div><p>' +
+      esc(priceLine) + '</p><p class="lm">' + esc(homeBits(c)) + (c.ppsf ? ' · $' + Math.round(c.ppsf) + '/sf' : '') + '</p></article>' +
+      '<article class="lever-card' + (cond === 'better' ? ' is-hot' : '') + '"><div class="lk">Condition <em>you can change this</em></div><p>' +
+      esc(condLine) + '</p><div class="lever-cond">' + condBtns + '</div></article>' +
+      '<article class="lever-card is-lock"><div class="lk">Location <em>not a lever</em></div><p>' +
+      esc(locLine) + '</p></article>' +
+    '</div>' +
+    '<p class="lever-verdict">' + esc(verdict) + '</p>' +
+    '<button type="button" class="lever-open" data-id="' + esc(c.id) + '">Open full listing</button>';
+}}
+function leverWalkHtml() {{
+  loadLevers();
+  const homes = closedHomes();
+  if (!homes.length) return '';
+  const ids = {{}};
+  homes.forEach(function (c) {{ ids[c.id] = 1; }});
+  if (!leverId || !ids[leverId]) leverId = homes[0].id;
+  return '<section class="levers" id="leverWalk">' +
+    '<div class="kicker">Two levers you can still pull</div>' +
+    '<h2>Should this have gone under contract before yours?</h2>' +
+    '<p class="sub">Homes that went pending or sold. The differentiator is price or condition — those two you can still change. Location can be the discussion. It cannot help you sell, because you cannot pick the house up and move it. Tap a home and walk it.</p>' +
+    '<div class="lever-row" id="leverRow">' + homes.map(function (c) {{
+      return laneHome(c, c.id === leverId ? 'is-on' : '');
+    }}).join('') + '</div>' +
+    '<div id="leverStage">' + leverStageHtml(leverId) + '</div></section>';
+}}
+function bindLeverStage() {{
+  const stage = document.getElementById('leverStage');
+  if (!stage) return;
+  stage.querySelectorAll('.lever-ans').forEach(function (btn) {{
+    btn.addEventListener('click', function () {{
+      leverAns[leverId] = btn.getAttribute('data-ans');
+      saveLevers();
+      stage.innerHTML = leverStageHtml(leverId);
+      bindLeverStage();
+    }});
+  }});
+  stage.querySelectorAll('.lever-cond button').forEach(function (btn) {{
+    btn.addEventListener('click', function () {{
+      leverCond[leverId] = btn.getAttribute('data-cond');
+      saveLevers();
+      stage.innerHTML = leverStageHtml(leverId);
+      bindLeverStage();
+    }});
+  }});
+  const open = stage.querySelector('.lever-open');
+  if (open) open.addEventListener('click', function () {{ openDrawer(open.getAttribute('data-id')); }});
+}}
+function bindLevers() {{
+  const walk = document.getElementById('leverWalk');
+  if (!walk) return;
+  walk.querySelectorAll('#leverRow .lane-home').forEach(function (el) {{
+    el.addEventListener('click', function (ev) {{
+      ev.preventDefault();
+      ev.stopPropagation();
+      leverId = el.getAttribute('data-id');
+      saveLevers();
+      walk.querySelectorAll('#leverRow .lane-home').forEach(function (x) {{
+        x.classList.toggle('is-on', x.getAttribute('data-id') === leverId);
+      }});
+      const stage = document.getElementById('leverStage');
+      if (stage) {{
+        stage.innerHTML = leverStageHtml(leverId);
+        bindLeverStage();
+      }}
+    }});
+  }});
+  bindLeverStage();
+}}
+function bindHomeClicks(root) {{
+  const scope = root || document;
+  scope.querySelectorAll('.card, .lane-home').forEach(function (el) {{
+    el.addEventListener('click', function () {{
+      if (el.closest('#leverRow')) return;
+      openDrawer(el.getAttribute('data-id'));
+    }});
+  }});
+}}
 function nowLanesHtml() {{
   const b = DATA.brief || {{}};
-  const uc = photoLane(
-    'Under contract now',
-    'Pending, backup, and first-right in this size band — buyers who did not wait.',
-    b.pending_now || b.went_pending
-  );
+  const walk = leverWalkHtml();
   const under = photoLane(
     'Listed under yours — they provide the value',
     'Similar homes listed under your price. They are offering more value to the same buyers looking at yours.',
@@ -785,24 +1056,22 @@ function nowLanesHtml() {{
     b.new_over
   );
   const cuts = photoLane('Price cuts', 'Homes that dropped $1,000+ since the last look.', b.price_cuts);
-  const body = uc + under + over + cuts;
+  const body = walk + under + over + cuts;
   if (!body) return '';
   return '<div id="nowLanes"><div class="now-kicker"><div class="kicker">Right now</div>' +
     '<h2>What is happening around your list</h2>' +
-    '<p class="sub">Who went under contract, who is beating you on value, and who you are beating. Walk this with the seller, then check where you sit.</p></div>' +
+    '<p class="sub">Start with homes that went pending or sold — should they have beaten yours? Then who is listed under or over you.</p></div>' +
     body + '</div>';
 }}
 function lanesHtml() {{
   const rows = sortedRows(((DATA.brief || {{}}).baseline || (DATA.brief || {{}}).baseline || []), laneSort);
   if (!rows.length) return '';
   const active = [];
-  const pending = [];
-  const sold = [];
+  const closed = [];
   for (let i = 0; i < rows.length; i++) {{
     const c = rows[i];
     const st = String(c.status || '').toLowerCase();
-    if (st === 'sold') sold.push(c);
-    else if (st === 'pending' || st === 'backup' || st === 'firstright') pending.push(c);
+    if (st === 'sold' || isUc(st)) closed.push(c);
     else if (st !== 'gone') active.push(c);
   }}
   function lane(title, items, kind) {{
@@ -811,17 +1080,16 @@ function lanesHtml() {{
       items.map(laneHome).join('') + '</div></div>';
   }}
   const when = clockKind() === 'active' ? 'when this home went active' : 'when this Fingerprint was generated';
-  const total = active.length + pending.length + sold.length;
+  const total = active.length + closed.length;
   return '<div class="lanes" id="day0Lanes"><h2>The original similar set</h2>' +
-    '<p class="sub">Homes that were similar actives ' + when + ' — still active, under contract, or sold. Supporting picture of that first list, not this week’s news.</p>' +
+    '<p class="sub">Homes that were similar actives ' + when + ' — still active, or already pending/sold. Supporting picture of that first list, not this week’s news.</p>' +
     '<div class="set-totals">' +
       '<span><b>' + total + '</b> in this set</span>' +
       '<span><b>' + active.length + '</b> still active</span>' +
-      '<span><b>' + pending.length + '</b> under contract</span>' +
-      '<span><b>' + sold.length + '</b> sold</span>' +
+      '<span><b>' + closed.length + '</b> went pending or sold</span>' +
     '</div>' +
     sortsHtml('lanes') +
-    lane('Still active', active, 'active') + lane('Under contract', pending, 'uc') + lane('Sold since ' + (clockKind() === 'active' ? 'active' : 'generate'), sold, 'sold') + '</div>';
+    lane('Still active', active, 'active') + lane('Went pending or sold', closed, 'uc') + '</div>';
 }}
 function weekHomesHtml(asOf) {{
   const homes = homesForWeek(asOf);
@@ -829,8 +1097,7 @@ function weekHomesHtml(asOf) {{
   const key = weekKey(asOf);
   const w = wins.find(function (x) {{ return (x.as_of || x.as_of) === key; }}) || wins[wins.length - 1];
   const listed = [];
-  const uc = [];
-  const sold = [];
+  const closed = [];
   homes.forEach(function (c) {{
     let didSold = false;
     let didUc = false;
@@ -841,8 +1108,7 @@ function weekHomesHtml(asOf) {{
       else if (isUc(st)) didUc = true;
     }});
     const didList = !!(listDate(c) && w && inWeek(listDate(c), w.start, w.end));
-    if (didSold) sold.push(c);
-    else if (didUc) uc.push(c);
+    if (didSold || didUc) closed.push(c);
     else if (didList) listed.push(c);
     else listed.push(c);
   }});
@@ -853,12 +1119,11 @@ function weekHomesHtml(asOf) {{
         : '<p class="empty">None this week.</p>') + '</div>';
   }}
   if (!homes.length) {{
-    return '<div class="week-homes" id="weekHomes"><p class="empty">No similar homes listed, went under contract, or sold this week.</p></div>';
+    return '<div class="week-homes" id="weekHomes"><p class="empty">No similar homes listed or went pending/sold this week.</p></div>';
   }}
   return '<div class="week-homes" id="weekHomes">' +
     col('Listed', listed, 'active') +
-    col('Under contract', uc, 'uc') +
-    col('Sold', sold, 'sold') +
+    col('Went pending or sold', closed, 'uc') +
     '</div>';
 }}
 function applyWeekHighlight(asOf) {{
@@ -886,9 +1151,7 @@ function selectWeek(asOf, scroll) {{
   const score = document.getElementById('weekScore');
   if (score) score.outerHTML = weekScoreHtml(key);
   applyWeekHighlight(key);
-  document.querySelectorAll('#weekHomes .card, #weekHomes .lane-home').forEach(function (el) {{
-    el.addEventListener('click', function () {{ openDrawer(el.getAttribute('data-id')); }});
-  }});
+  bindHomeClicks(document.getElementById('weekHomes'));
   if (scroll) {{
     const bar = document.querySelector('.weeks-bar');
     if (bar) bar.scrollIntoView({{ behavior: 'smooth', block: 'nearest' }});
@@ -940,7 +1203,7 @@ function weeksHtml() {{
   const current = weekKey((DATA.brief || {{}}).as_of) || weekAsOf(hist[hist.length - 1]);
   const d = DATA.digest || (DATA.brief || {{}}).digest || {{}};
   return '<div class="walk" id="walkWeeks"><h2>Walk the weeks</h2>' +
-    '<p class="sub">Same similar set, week by week. Tap a date to walk listed, under contract, and sold that week.</p>' +
+    '<p class="sub">Same similar set, week by week. Tap a date to walk listed homes, then homes that went pending or sold.</p>' +
     '<div class="weeks-bar"><div class="weeks">' + hist.map(function (w) {{
       const asOf = weekAsOf(w);
       const on = asOf === current ? ' is-on' : '';
@@ -1241,6 +1504,11 @@ function paintPhotos(photos, galleries) {{
       pic.style.backgroundImage = 'url(\\'' + String(url).replace(/'/g, '%27') + '\\')';
     }}
   }});
+  const stage = document.getElementById('leverStage');
+  if (stage && leverId) {{
+    stage.innerHTML = leverStageHtml(leverId);
+    bindLeverStage();
+  }}
 }}
 function kickPhotos() {{
   if (photosKicked) return;
@@ -1452,9 +1720,13 @@ function bindSorts() {{
       }});
       bindSorts();
       bindPins();
-      document.querySelectorAll('.card, .lane-home').forEach(function (el) {{
-        el.addEventListener('click', function () {{ openDrawer(el.getAttribute('data-id')); }});
-      }});
+      const walk = document.getElementById('leverWalk');
+      if (walk) {{
+        const html = leverWalkHtml();
+        if (html) walk.outerHTML = html;
+      }}
+      bindLevers();
+      bindHomeClicks();
     }});
   }});
 }}
@@ -1499,12 +1771,11 @@ function render() {{
   bindMap();
   bindSorts();
   bindPins();
+  bindLevers();
   const hist = (b.history || []);
   const current = weekKey(b.as_of) || (hist.length ? weekAsOf(hist[hist.length - 1]) : '');
   if (current) selectWeek(current, false);
-  document.querySelectorAll('.card, .lane-home').forEach(el => {{
-    el.addEventListener('click', () => openDrawer(el.getAttribute('data-id')));
-  }});
+  bindHomeClicks();
   kickPhotos();
 }}
 function section(title, sub, rows, tag, sid) {{
