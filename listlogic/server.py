@@ -46,7 +46,7 @@ RATE_LIMIT_MAX_GENERATE = 10
 SAMPLE_RUN_ID = "sample-2845"
 SAMPLE_FINGERPRINT_LOCKED_AT = "2026-06-02"
 SAMPLE_FINGERPRINT_MIN_WEEKS = 4
-SAMPLE_FINGERPRINT_STORY = "from-export-v4"
+SAMPLE_FINGERPRINT_STORY = "from-export-v5"
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ListLogic")
@@ -2142,6 +2142,14 @@ def _fingerprint_view_payload(run_dir: Path) -> dict:
         or (payload.get("needs_upload") and _snapshot_age_days(payload.get("snapshot")) >= 6)
     )
     payload["agent_name"] = str((report.get("meta") or {}).get("agent_name") or "")
+    try:
+        snap = payload.get("snapshot") or _read_json_file(run_dir / "pulse_snapshot.json")
+        from reef_photos import reef_enabled
+        if reef_enabled() and _fingerprint_needs_photos(snap, _load_photo_map(run_dir)):
+            _start_background_photos(run_dir.name, run_dir)
+            payload["photos_fetching"] = True
+    except Exception:
+        logger.exception("Fingerprint photo fetch start failed for %s", run_dir.name)
     return payload
 
 
@@ -3182,7 +3190,7 @@ def _hydrate_fingerprint_photos(run_dir: Path, snap: dict | None, ledger: dict |
     return snap, ledger
 
 
-def _fingerprint_photo_targets(run_dir: Path, cap: int = 20) -> list[dict]:
+def _fingerprint_photo_targets(run_dir: Path, cap: int = 120) -> list[dict]:
     """Snapshot + ledger listings so Fingerprint cards can get real photos."""
     snap = _read_json_file(run_dir / "pulse_snapshot.json") or {}
     ledger = _read_json_file(run_dir / "fingerprint_ledger.json") or {}
@@ -3215,9 +3223,8 @@ def _fingerprint_photo_targets(run_dir: Path, cap: int = 20) -> list[dict]:
             "longitude": row.get("lng") or row.get("longitude"),
             "photo_url": row.get("photo_url") or "",
         })
-        if len(out) >= cap:
-            break
-    return out
+    out.sort(key=lambda r: 0 if not r.get("photo_url") else 1)
+    return out[:cap]
 
 
 def _fingerprint_needs_photos(snap: dict | None, photo_map: dict | None) -> bool:
@@ -3225,8 +3232,14 @@ def _fingerprint_needs_photos(snap: dict | None, photo_map: dict | None) -> bool
     for row in (snap or {}).get("listings") or []:
         if not isinstance(row, dict):
             continue
-        mls = str(row.get("mls") or row.get("id") or "")
-        if mls and not row.get("photo_url") and not photos.get(mls):
+        if row.get("photo_url") or (isinstance(row.get("photos"), list) and row["photos"]):
+            continue
+        mls = str(row.get("mls") or row.get("id") or "").strip()
+        addr = str(row.get("address") or "").strip()
+        compact = "".join(ch for ch in addr if ch.isalnum() or ch in "-_")[:48]
+        if photos.get(mls) or photos.get(str(row.get("id") or "")) or photos.get(addr) or (compact and photos.get(compact)):
+            continue
+        if mls or addr:
             return True
     return False
 
@@ -3390,6 +3403,7 @@ def _pulse_payload(run_dir: Path, report: dict | None = None) -> dict:
         "agent_name": str(meta.get("agent_name") or ""),
         "last_looked_at": str((lock or {}).get("last_looked_at") or ""),
         "seller_got_weekly": _seller_got_weekly_recently(lock),
+        "photos_fetching": False,
     }
 
 
@@ -4585,11 +4599,28 @@ def _background_photo_enrich(run_id: str, run_dir: Path) -> None:
             run_dir=run_dir,
             run_id=run_id,
             cache_only=False,
-            deadline=time.time() + 240,
+            deadline=time.time() + 480,
             on_listing=on_listing,
             extra_listings=extras,
         )
         merged = {**existing, **{k: v for k, v in photo_map.items() if v}}
+        for extra in extras or []:
+            if not isinstance(extra, dict):
+                continue
+            mls = str(extra.get("mls") or extra.get("id") or extra.get("mls_number") or "").strip()
+            addr = str(extra.get("address") or "").strip()
+            compact = "".join(ch for ch in addr if ch.isalnum() or ch in "-_")[:48]
+            url = merged.get(mls) or merged.get(addr) or merged.get(compact)
+            if not url:
+                continue
+            for key in (mls, addr, compact):
+                if key and key not in merged:
+                    merged[key] = url
+            gal = galleries.get(mls) or galleries.get(addr) or galleries.get(compact)
+            if gal:
+                for key in (mls, addr, compact):
+                    if key and key not in galleries:
+                        galleries[key] = gal
         _save_photo_map(run_dir, merged)
         # Galleries from report rows
         for c in (report.get("positioning") or {}).get("closest_comps") or []:
@@ -4609,9 +4640,20 @@ def _background_photo_enrich(run_id: str, run_dir: Path) -> None:
         except Exception:
             logger.exception("Failed to rewrite HTML after background photos for %s", run_id)
         lock = _read_json_file(run_dir / "pulse.json")
+        snap = _read_json_file(run_dir / "pulse_snapshot.json")
+        if isinstance(snap, dict) and isinstance(snap.get("listings"), list):
+            try:
+                from core import apply_listing_photos
+                snap["listings"] = apply_listing_photos(snap["listings"], merged, galleries)
+                (run_dir / "pulse_snapshot.json").write_text(
+                    json.dumps(snap, indent=2, default=str),
+                    encoding="utf-8",
+                )
+            except Exception:
+                logger.exception("Failed to persist Fingerprint photos onto snapshot for %s", run_id)
         if isinstance(lock, dict) and lock.get("locked_price"):
             try:
-                _save_pulse_brief(run_dir, report, lock)
+                _save_pulse_brief(run_dir, report, lock, snap if isinstance(snap, dict) else None)
             except Exception:
                 logger.exception("Failed to refresh Fingerprint brief after photos for %s", run_id)
         count = len([v for v in merged.values() if v])
@@ -4701,8 +4743,9 @@ def list_comp_photos(run_id: str):
         raise HTTPException(404, "Run not found")
     status = _load_photos_status(run_dir)
     photos = _load_photo_map(run_dir)
+    snap = _read_json_file(run_dir / "pulse_snapshot.json")
     st = (status.get("status") or "ready").lower()
-    if run_id == SAMPLE_RUN_ID and photos:
+    if run_id == SAMPLE_RUN_ID and photos and not _fingerprint_needs_photos(snap, photos):
         st = "ready"
     return {
         "photos": photos,

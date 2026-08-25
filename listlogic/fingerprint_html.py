@@ -2,12 +2,34 @@
 from __future__ import annotations
 
 import json
+import os
 from html import escape as _esc
+from pathlib import Path
 
 
 def _json_script(data) -> str:
     raw = json.dumps(data, default=str, ensure_ascii=False)
     return raw.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
+
+
+def _mapbox_token() -> str:
+    for key in ("MAPBOX_ACCESS_TOKEN", "MAPBOX_TOKEN", "VITE_MAPBOX_TOKEN"):
+        val = (os.environ.get(key) or "").strip()
+        if val:
+            return val
+    env_path = Path(__file__).resolve().parent / ".env"
+    if env_path.exists():
+        try:
+            for line in env_path.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                name, raw = line.split("=", 1)
+                if name.strip() in ("MAPBOX_ACCESS_TOKEN", "MAPBOX_TOKEN", "VITE_MAPBOX_TOKEN"):
+                    return raw.strip().strip('"').strip("'")
+        except OSError:
+            pass
+    return ""
 
 
 def _notes_for_view(notes, *, agent: bool) -> list:
@@ -41,6 +63,9 @@ def render_fingerprint_html(view: dict, *, agent: bool = False) -> str:
     digest = brief.get("digest") if isinstance(brief.get("digest"), dict) else (view.get("digest") or {})
     addr = brief.get("subject_address") or "This listing"
     title = f"Market Fingerprint · {_esc(addr)}"
+    report_sub = {}
+    if isinstance(view.get("report"), dict) and isinstance(view["report"].get("subject"), dict):
+        report_sub = view["report"]["subject"]
     data = {
         "agent": bool(agent),
         "brief": brief,
@@ -65,6 +90,10 @@ def render_fingerprint_html(view: dict, *, agent: bool = False) -> str:
         "last_looked_at": view.get("last_looked_at") or lock.get("last_looked_at") or "",
         "notes": _notes_for_view(brief.get("notes") or view.get("notes") or [], agent=agent),
         "seller_got_weekly": bool(view.get("seller_got_weekly")),
+        "photos_fetching": bool(view.get("photos_fetching")),
+        "mapbox_token": _mapbox_token(),
+        "subject_lat": brief.get("subject_lat") or report_sub.get("latitude") or report_sub.get("lat"),
+        "subject_lng": brief.get("subject_lng") or report_sub.get("longitude") or report_sub.get("lng"),
     }
     return _PAGE.format(
         title=title,
@@ -81,6 +110,8 @@ _PAGE = """<!DOCTYPE html>
 <title>{title}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.9.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.9.0/mapbox-gl.js"></script>
 <style>
 :root {{
   --ink:#0b1220; --navy:#0c3c6e; --muted:#5c6675; --line:#e6e0d4;
@@ -239,17 +270,48 @@ body.is-seller .console {{ display:none; }}
 .lane h3 {{ font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }}
 .lane-row {{ display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; }}
 .lane-home {{
-  flex:0 0 auto; width:148px; padding:0; border:1px solid var(--line); border-radius:12px;
+  flex:0 0 auto; width:176px; padding:0; border:1px solid var(--line); border-radius:12px;
   overflow:hidden; background:#fff; cursor:pointer; text-align:left; font:inherit; color:inherit;
   appearance:none; -webkit-appearance:none;
 }}
 .lane-home.is-week {{ border-color:var(--gold); box-shadow:0 0 0 2px #c9a22755; }}
 .lane-home.is-pin {{ border-color:var(--navy); box-shadow:0 0 0 2px #0c3c6e44; }}
-.lane-pic {{ display:block; width:100%; height:86px; background:#dfe6ef center/cover no-repeat; }}
-.lane-pic.empty {{ background:#e8eef4; }}
-.lane-meta {{ padding:7px 8px 8px; }}
+.lane-pic {{ display:block; width:100%; height:110px; background:#dfe6ef center/cover no-repeat; }}
+.lane-pic.empty {{
+  background-color:#e8eef4;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='40' viewBox='0 0 48 40'><path fill='%23b7c2cf' d='M24 4l20 16h-6v16H10V20H4z'/></svg>");
+  background-repeat:no-repeat;
+  background-position:center 32px;
+  background-size:36px 30px;
+}}
+.lane-meta {{ padding:8px 9px 9px; }}
 .lane-meta .p {{ font-family:Fraunces,Georgia,serif; font-size:.95rem; font-weight:700; }}
-.lane-meta .m {{ font-size:.68rem; color:var(--muted); margin-top:2px; line-height:1.35; }}
+.lane-meta .a {{ display:block; font-size:.72rem; font-weight:700; color:var(--ink); margin-top:3px; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }}
+.lane-meta .m {{ font-size:.65rem; color:var(--muted); margin-top:2px; line-height:1.35; }}
+.photo-banner {{
+  display:none; margin:0 0 14px; padding:10px 14px; border-radius:12px;
+  background:#0c3c6e; color:#fff; font-size:.82rem; font-weight:600;
+}}
+.photo-banner.is-on {{ display:block; }}
+.fp-map {{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:0 0 18px; }}
+.fp-map h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.15rem; margin-bottom:4px; }}
+.fp-map > .sub {{ color:var(--muted); font-size:.82rem; margin-bottom:10px; }}
+.fp-map-legend {{ display:flex; flex-wrap:wrap; gap:8px 14px; font-size:.72rem; color:var(--muted); font-weight:700; margin:0 0 10px; }}
+.fp-map-legend i {{ display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; vertical-align:middle; box-shadow:0 0 0 2px #fff, 0 1px 3px rgba(11,18,32,.25); }}
+.fp-map-legend i.is-you {{ background:var(--gold); }}
+.fp-map-legend i.is-active {{ background:var(--teal); }}
+.fp-map-legend i.is-uc {{ background:#e65100; }}
+.fp-map-legend i.is-sold {{ background:#94a3b8; }}
+.fp-map-canvas {{ height:340px; border-radius:12px; overflow:hidden; background:#e8eef4; }}
+.fp-pin {{
+  width:14px; height:14px; border-radius:50%; border:2px solid #fff;
+  box-shadow:0 1px 4px rgba(11,18,32,.35); cursor:pointer;
+}}
+.fp-pin.is-you {{ width:18px; height:18px; background:var(--gold); }}
+.fp-pin.is-active {{ background:var(--teal); }}
+.fp-pin.is-uc {{ background:#e65100; }}
+.fp-pin.is-sold {{ background:#94a3b8; }}
+.mapboxgl-popup-content {{ padding:10px 12px; border-radius:12px; font-size:.78rem; line-height:1.35; max-width:240px; }}
 .sorts {{ display:flex; flex-wrap:wrap; gap:6px; margin:4px 0 10px; align-items:center; }}
 .sorts span {{ font-size:.68rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-right:4px; }}
 .sorts button {{
@@ -257,18 +319,60 @@ body.is-seller .console {{ display:none; }}
   background:#f7f4ee; font:inherit; font-size:.72rem; font-weight:700; cursor:pointer; color:var(--navy);
 }}
 .sorts button.is-on {{ background:var(--navy); color:#fff; border-color:var(--navy); }}
-.board {{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:14px 16px 12px; margin-bottom:18px; }}
-.board table {{ width:100%; border-collapse:collapse; }}
-.board th, .board td {{ padding:8px 6px; text-align:center; }}
-.board th {{ font-size:.68rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:700; }}
-.board td.row {{ text-align:left; font-size:.82rem; font-weight:700; color:var(--navy); }}
-.board .n {{ font-family:Fraunces,Georgia,serif; font-size:1.35rem; font-weight:700; color:var(--navy); }}
-.board .hint {{ font-size:.78rem; color:var(--muted); margin-top:8px; }}
+.board {{
+  background:linear-gradient(165deg, #0b1220 0%, #10213a 55%, #0c3c6e 140%);
+  color:#fff; border:1px solid #1c2c46; border-radius:20px;
+  padding:22px 22px 16px; margin:0 0 20px; overflow:hidden;
+}}
+.board-top .kicker {{
+  font-size:.68rem; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); font-weight:800;
+}}
+.board-top h2 {{
+  font-family:Fraunces,Georgia,serif; font-size:clamp(1.35rem, 2.6vw, 1.85rem);
+  margin:4px 0 6px; font-weight:700;
+}}
+.board-top .sub {{ color:#c8d2e0; font-size:.88rem; line-height:1.45; max-width:46rem; }}
+.board-panes {{
+  display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:16px 0 8px;
+}}
+.board-pane {{
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08);
+  border-radius:16px; padding:14px 14px 10px;
+}}
+.board-pane-h {{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:10px; }}
+.board-pane-h span {{ font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; font-weight:800; color:#f0d060; }}
+.board-pane-h small {{ color:#9aabc0; font-size:.72rem; }}
+.board-grid {{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; }}
+.board-stat {{ text-align:center; padding:6px 2px; }}
+.board-n {{ font-family:Fraunces,Georgia,serif; font-size:clamp(1.35rem, 2.4vw, 1.85rem); font-weight:700; line-height:1; }}
+.board-l {{ font-size:.62rem; letter-spacing:.04em; text-transform:uppercase; font-weight:800; color:#c8d2e0; margin-top:6px; }}
+.board-h {{ font-size:.62rem; color:#8a9bb0; margin-top:2px; line-height:1.3; }}
+.board-stat.is-under .board-n {{ color:#f3b4b4; }}
+.board-stat.is-over .board-n {{ color:#8ee0c8; }}
+.board-table-wrap {{ overflow-x:auto; margin-top:12px; }}
+.board-table {{ width:100%; border-collapse:collapse; min-width:520px; }}
+.board-table th, .board-table td {{ padding:9px 8px; text-align:center; font-size:.82rem; }}
+.board-table th {{
+  font-size:.62rem; letter-spacing:.07em; text-transform:uppercase; color:#9aabc0; font-weight:800;
+  border-bottom:1px solid rgba(255,255,255,.1);
+}}
+.board-table th:first-child, .board-table td:first-child {{ text-align:left; }}
+.board-table td {{ font-family:Fraunces,Georgia,serif; font-size:1.02rem; font-weight:700; border-bottom:1px solid rgba(255,255,255,.06); }}
+.board-table td:first-child {{ font-family:Inter,system-ui,sans-serif; font-size:.82rem; color:#d5deea; }}
+.board-week {{ cursor:pointer; }}
+.board-week:hover td {{ background:rgba(255,255,255,.04); }}
+.board-week.is-on td {{ background:rgba(201,162,39,.16); }}
+.board-table .is-under {{ color:#f3b4b4; }}
+.board-table .is-over {{ color:#8ee0c8; }}
+@media (max-width:800px) {{
+  .board-panes {{ grid-template-columns:1fr; }}
+  .board-grid {{ grid-template-columns:repeat(3,minmax(0,1fr)); }}
+}}
 .strip {{ position:relative; height:88px; }}
 .strip .tick {{ cursor:pointer; }}
 .strip .tick.is-pin {{ background:var(--navy); }}
 .strip-pin {{
-  position:absolute; z-index:4; width:210px; background:#fff; border:1px solid var(--line);
+  position:absolute; z-index:4; width:228px; background:#fff; border:1px solid var(--line);
   border-radius:12px; box-shadow:0 10px 28px rgba(11,18,32,.14); padding:8px; display:none;
   transform:translateX(-50%); bottom:48px; text-align:left;
 }}
@@ -338,9 +442,10 @@ body.is-seller .console {{ display:none; }}
 <body class="{agent_class}">
 <div class="wrap">
   <div class="sample-demo-bar" id="sampleDemoBar">
-    <span>This listing’s weekly seller picture — listed, under contract, and sold from the same market file as the appointment.</span>
+    <span>Real Greeley listing from the market file — not mock comps. Photos appear when we can match the address publicly.</span>
     <a href="/demo">Back to the listing appointment →</a>
   </div>
+  <p class="photo-banner" id="photoBanner">Pulling listing photos for this similar set…</p>
   <main id="main"></main>
   <aside class="console" id="console"></aside>
 </div>
@@ -373,8 +478,9 @@ function tagClass(st) {{
   return '';
 }}
 function cardHtml(c, extraTag) {{
-  const pic = c.photo_url
-    ? '<div class="pic" style="background-image:url(\\'' + String(c.photo_url).replace(/'/g, '%27') + '\\')"></div>'
+  const url = photoUrl(c);
+  const pic = url
+    ? '<div class="pic" style="background-image:url(\\'' + String(url).replace(/'/g, '%27') + '\\')"></div>'
     : '<div class="pic empty">No photo</div>';
   const st = extraTag || c.status || '';
   const bits = [];
@@ -393,7 +499,7 @@ function cardHtml(c, extraTag) {{
 }}
 function byId(id) {{
   const b = DATA.brief || {{}};
-  const pools = [b.still_active, b.new_under, b.new_over, b.baseline, b.went_pending, b.went_sold, b.cheaper_active, b.price_cuts, b.gone];
+  const pools = [b.still_active, b.new_under, b.new_over, b.baseline, b.went_pending, b.went_sold, b.cheaper_active, b.price_cuts, b.gone, b.pending_now, b.position];
   for (const pool of pools) {{
     for (const c of (pool || [])) if (c && c.id === id) return c;
   }}
@@ -406,7 +512,18 @@ function listDate(c) {{
   return weekKey(c && (c.list_date || c.list_date));
 }}
 function photoUrl(c) {{
-  return (c && (c.photo_url || c.photo_url)) || '';
+  if (!c) return '';
+  if (c.photos && c.photos.length) return c.photos[0];
+  return c.photo_url || c.photo_url || '';
+}}
+function statusHistory(c) {{
+  return (c && (c.status_history || c.status_history)) || [];
+}}
+function listPrice() {{
+  const b = DATA.brief || {{}};
+  const d = DATA.digest || b.digest || {{}};
+  const lock = DATA.lock || {{}};
+  return Number(b.locked_price || lock.locked_price || d.locked_price || 0);
 }}
 function weekLabel(asOf) {{
   const raw = weekKey(asOf);
@@ -448,6 +565,25 @@ function homeBits(c) {{
   if (c.baths) bits.push(Number(c.baths) + ' ba');
   if (c.sqft) bits.push(Number(c.sqft).toLocaleString() + ' sf');
   return bits.join(' · ');
+}}
+function streetLine(c) {{
+  if (!c) return '';
+  let a = String(c.address || '').trim();
+  const city = String(c.city || '').trim();
+  if (city) {{
+    const at = a.toLowerCase().lastIndexOf(city.toLowerCase());
+    if (at > 0) a = a.slice(0, at).replace(/[,\\s]+$/, '');
+  }}
+  return a || String(c.address || '').trim();
+}}
+function mapsHref(c) {{
+  if (!c) return '';
+  const lat = Number(c.lat), lng = Number(c.lng);
+  if (isFinite(lat) && isFinite(lng) && !(lat === 0 && lng === 0)) {{
+    return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(lat + ',' + lng);
+  }}
+  const q = [c.address, c.city, 'CO'].filter(Boolean).join(', ');
+  return q ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q) : '';
 }}
 function sortsHtml(id) {{
   const keys = [['price','Price'],['sqft','Sq ft'],['beds','Beds'],['baths','Baths']];
@@ -495,9 +631,9 @@ function weekCounts(asOf) {{
   const w = wins.find(function (x) {{ return (x.as_of || x.as_of) === key; }}) || wins[wins.length - 1];
   const out = {{ listed: 0, uc: 0, sold: 0 }};
   if (!w) return out;
-  homesForWeek(w.as_of || w.as_of).forEach(function (c) {{
+    homesForWeek(w.as_of || w.as_of).forEach(function (c) {{
     if (listDate(c) && inWeek(listDate(c), w.start, w.end)) out.listed += 1;
-    const hist = c.status_history || [];
+    const hist = statusHistory(c);
     let sold = false;
     let uc = false;
     for (let i = 0; i < hist.length; i++) {{
@@ -557,10 +693,12 @@ function laneHome(c) {{
   const pic = photoUrl(c)
     ? 'style="background-image:url(\\'' + String(photoUrl(c)).replace(/'/g, '%27') + '\\')"'
     : '';
+  const street = streetLine(c);
   return '<button type="button" class="lane-home" data-id="' + esc(c.id) + '" title="' + esc(c.address || '') + '">' +
     '<span class="lane-pic' + (photoUrl(c) ? '' : ' empty') + '" ' + pic + '></span>' +
     '<span class="lane-meta"><span class="p">' + money(c.price) + '</span>' +
-    '<span class="m">' + esc(homeBits(c) || (c.address || '')) + '</span></span></button>';
+    (street ? '<span class="a">' + esc(street) + '</span>' : '') +
+    '<span class="m">' + esc(homeBits(c)) + '</span></span></button>';
 }}
 function photoLane(title, sub, rows, sid) {{
   if (!rows || !rows.length) return '';
@@ -588,7 +726,7 @@ function lanesHtml() {{
   }}
   const when = clockKind() === 'active' ? 'when this home went active' : 'when this Fingerprint was generated';
   return '<div class="lanes" id="day0Lanes"><h2>Where they are now</h2>' +
-    '<p class="sub">The similar actives from ' + when + '. Price order by default — sort by size or beds/baths. Hover a home on the strip below to light it up here.</p>' +
+    '<p class="sub">The similar actives from ' + when + ' — real addresses from the market file. Price order by default. Empty photos mean we could not match that home publicly, not that the home is fake.</p>' +
     sortsHtml('lanes') +
     lane('Still active', active) + lane('Under contract', pending) + lane('Sold since ' + (clockKind() === 'active' ? 'active' : 'generate'), sold) + '</div>';
 }}
@@ -603,13 +741,13 @@ function weekHomesHtml(asOf) {{
   homes.forEach(function (c) {{
     let didSold = false;
     let didUc = false;
-    (c.status_history || []).forEach(function (h) {{
-      if (!w || !inWeek(h.as_of, w.start, w.end)) return;
+    (statusHistory(c) || []).forEach(function (h) {{
+      if (!w || !inWeek(h.as_of || h.as_of, w.start, w.end)) return;
       const st = String(h.status || '').toLowerCase();
       if (st === 'sold') didSold = true;
       else if (isUc(st)) didUc = true;
     }});
-    const didList = !!(c.list_date && w && inWeek(c.list_date, w.start, w.end));
+    const didList = !!(listDate(c) && w && inWeek(listDate(c), w.start, w.end));
     if (didSold) sold.push(c);
     else if (didUc) uc.push(c);
     else if (didList) listed.push(c);
@@ -645,6 +783,9 @@ function applyWeekHighlight(asOf) {{
 function selectWeek(asOf, scroll) {{
   const key = weekKey(asOf);
   document.querySelectorAll('.week').forEach(function (el) {{
+    el.classList.toggle('is-on', el.getAttribute('data-asof') === key);
+  }});
+  document.querySelectorAll('.board-week').forEach(function (el) {{
     el.classList.toggle('is-on', el.getAttribute('data-asof') === key);
   }});
   const box = document.getElementById('weekHomes');
@@ -747,6 +888,271 @@ function fromAgentHtml() {{
       '<div id="pastNotePanel" hidden></div>';
   }}
   return html + '</div>';
+}}
+function weekMotion(asOf) {{
+  const hist = ((DATA.brief || {{}}).history || []);
+  const row = hist.find(function (w) {{ return weekAsOf(w) === weekKey(asOf); }}) || {{}};
+  const wins = weekWindows();
+  const key = weekKey(asOf);
+  const w = wins.find(function (x) {{ return (x.as_of || x.as_of) === key; }}) || wins[wins.length - 1];
+  const locked = listPrice();
+  const out = {{ listed: 0, under: 0, over: 0, uc: 0, sold: 0 }};
+  if (w) {{
+    homesForWeek(w.as_of || w.as_of).forEach(function (c) {{
+      if (listDate(c) && inWeek(listDate(c), w.start, w.end)) {{
+        out.listed += 1;
+        const side = c.side || (c.price < locked ? 'under' : c.price > locked ? 'over' : 'at');
+        if (side === 'under') out.under += 1;
+        else if (side === 'over') out.over += 1;
+      }}
+      let sold = false;
+      let uc = false;
+      statusHistory(c).forEach(function (h) {{
+        if (!inWeek(h.as_of || h.as_of, w.start, w.end)) return;
+        const st = String(h.status || '').toLowerCase();
+        if (st === 'sold') sold = true;
+        else if (isUc(st)) uc = true;
+      }});
+      if (sold) out.sold += 1;
+      else if (uc) out.uc += 1;
+    }});
+  }}
+  if (!out.listed && !out.uc && !out.sold) {{
+    out.listed = Number(row.listed_week || 0);
+    out.under = Number(row.listed_under_week || 0);
+    out.over = Number(row.listed_over_week || 0);
+    out.uc = Number(row.uc_week || 0);
+    out.sold = Number(row.sold_week || 0);
+  }}
+  return out;
+}}
+function boardHtml() {{
+  const d = DATA.digest || (DATA.brief || {{}}).digest || {{}};
+  const hist = ((DATA.brief || {{}}).history || []).slice().sort(function (a, b) {{
+    return weekAsOf(a).localeCompare(weekAsOf(b));
+  }});
+  const current = weekKey((DATA.brief || {{}}).as_of) || (hist.length ? weekAsOf(hist[hist.length - 1]) : '');
+  const week = weekMotion(current);
+  const locked = listPrice();
+  const sinceKind = clockKind() === 'active' ? 'Since you listed' : 'Since this Fingerprint';
+  const since = {{
+    listed: Number(d.listed_since || 0),
+    under: Number(d.listed_under_since != null ? d.listed_under_since : (d.new_under || 0)),
+    over: Number(d.listed_over_since != null ? d.listed_over_since : (d.new_over || 0)),
+    uc: Number(d.uc_since || 0),
+    sold: Number(d.sold_since || 0)
+  }};
+  function stats(pack) {{
+    return '<div class="board-grid">' +
+      '<div class="board-stat"><div class="board-n">' + pack.listed + '</div><div class="board-l">New</div><div class="board-h">Listed into this set</div></div>' +
+      '<div class="board-stat is-under"><div class="board-n">' + pack.under + '</div><div class="board-l">Under list</div><div class="board-h">New lists below ' + money(locked) + '</div></div>' +
+      '<div class="board-stat is-over"><div class="board-n">' + pack.over + '</div><div class="board-l">Over list</div><div class="board-h">New lists above ' + money(locked) + '</div></div>' +
+      '<div class="board-stat"><div class="board-n">' + pack.uc + '</div><div class="board-l">Under contract</div><div class="board-h">Pending / backup / first-right</div></div>' +
+      '<div class="board-stat"><div class="board-n">' + pack.sold + '</div><div class="board-l">Sold</div><div class="board-h">Closed in this set</div></div>' +
+    '</div>';
+  }}
+  const rows = hist.map(function (w) {{
+    const asOf = weekAsOf(w);
+    const m = weekMotion(asOf);
+    const on = asOf === current ? ' is-on' : '';
+    return '<tr class="board-week' + on + '" data-asof="' + esc(asOf) + '">' +
+      '<td>' + weekLabel(asOf) + '</td>' +
+      '<td>' + m.listed + '</td>' +
+      '<td class="is-under">' + m.under + '</td>' +
+      '<td class="is-over">' + m.over + '</td>' +
+      '<td>' + m.uc + '</td>' +
+      '<td>' + m.sold + '</td></tr>';
+  }}).join('');
+  return '<section class="board" id="marketBoard">' +
+    '<div class="board-top"><div class="kicker">Market board</div>' +
+    '<h2>What happened around your list</h2>' +
+    '<p class="sub">New similar listings split under and over your initial list of <b>' + money(locked) +
+    '</b>. Under contract groups pending, backup, and first-right. Tap a week to walk those homes.</p></div>' +
+    '<div class="board-panes">' +
+      '<div class="board-pane"><div class="board-pane-h"><span>This week</span><small>' + weekLabel(current) + '</small></div>' + stats(week) + '</div>' +
+      '<div class="board-pane"><div class="board-pane-h"><span>' + esc(sinceKind) + '</span><small>Running total</small></div>' + stats(since) + '</div>' +
+    '</div>' +
+    (hist.length
+      ? '<div class="board-table-wrap"><table class="board-table"><thead><tr>' +
+        '<th>Week</th><th>New</th><th>Under list</th><th>Over list</th><th>Under contract</th><th>Sold</th>' +
+        '</tr></thead><tbody>' + rows + '</tbody></table></div>'
+      : '') +
+    '</section>';
+}}
+function mapKind(c) {{
+  const st = String((c && c.status) || '').toLowerCase();
+  if (st === 'sold') return 'sold';
+  if (st === 'pending' || st === 'backup' || st === 'firstright' || st.indexOf('contract') >= 0) return 'uc';
+  return 'active';
+}}
+function mapPoints() {{
+  const seen = {{}};
+  const pts = [];
+  function add(c, kind) {{
+    if (!c || seen[c.id]) return;
+    const lat = Number(c.lat), lng = Number(c.lng);
+    if (!isFinite(lat) || !isFinite(lng) || (lat === 0 && lng === 0)) return;
+    seen[c.id] = 1;
+    pts.push({{
+      id: c.id,
+      lat: lat,
+      lng: lng,
+      kind: kind || mapKind(c),
+      address: c.address || '',
+      price: c.price,
+      status: c.status || ''
+    }});
+  }}
+  const b = DATA.brief || {{}};
+  const subLat = Number(DATA.subject_lat || b.subject_lat);
+  const subLng = Number(DATA.subject_lng || b.subject_lng);
+  if (isFinite(subLat) && isFinite(subLng) && !(subLat === 0 && subLng === 0)) {{
+    seen.subject = 1;
+    pts.push({{
+      id: 'subject',
+      lat: subLat,
+      lng: subLng,
+      kind: 'you',
+      address: b.subject_address || 'Your list',
+      price: b.locked_price,
+      status: 'Your list'
+    }});
+  }}
+  [b.still_active, b.pending_now, b.went_pending, b.went_sold, b.baseline, b.new_under, b.new_over, b.position].forEach(function (pool) {{
+    (pool || []).forEach(function (c) {{
+      if (c && c.subject) return;
+      add(c, mapKind(c));
+    }});
+  }});
+  return pts;
+}}
+function mapHtml() {{
+  if (!DATA.mapbox_token) return '';
+  return '<section class="fp-map" id="fpMap">' +
+    '<h2>Where this set sits</h2>' +
+    '<p class="sub">Pins are the same similar homes from the market file. Gold is your list. Tap a pin to open the listing.</p>' +
+    '<div class="fp-map-legend">' +
+      '<span><i class="is-you"></i>Your list</span>' +
+      '<span><i class="is-active"></i>Active</span>' +
+      '<span><i class="is-uc"></i>Under contract</span>' +
+      '<span><i class="is-sold"></i>Sold</span>' +
+    '</div>' +
+    '<div class="fp-map-canvas" id="fpMapCanvas"></div></section>';
+}}
+let fpMap = null;
+function bindMap() {{
+  const wrap = document.getElementById('fpMap');
+  const el = document.getElementById('fpMapCanvas');
+  const token = DATA.mapbox_token;
+  if (fpMap) {{
+    fpMap.remove();
+    fpMap = null;
+  }}
+  if (!wrap || !el || typeof mapboxgl === 'undefined' || !token) {{
+    if (wrap && (!token || typeof mapboxgl === 'undefined')) wrap.style.display = 'none';
+    return;
+  }}
+  const pts = mapPoints();
+  if (!pts.length) {{
+    wrap.style.display = 'none';
+    return;
+  }}
+  wrap.style.display = '';
+  mapboxgl.accessToken = token;
+  fpMap = new mapboxgl.Map({{
+    container: el,
+    style: 'mapbox://styles/mapbox/streets-v12',
+    center: [pts[0].lng, pts[0].lat],
+    zoom: 12
+  }});
+  fpMap.addControl(new mapboxgl.NavigationControl({{ showCompass: false }}), 'top-right');
+  const bounds = new mapboxgl.LngLatBounds();
+  pts.forEach(function (p) {{
+    bounds.extend([p.lng, p.lat]);
+    const pin = document.createElement('div');
+    pin.className = 'fp-pin is-' + p.kind;
+    pin.title = p.address || '';
+    pin.addEventListener('click', function () {{
+      if (p.id && p.id !== 'subject') openDrawer(p.id);
+    }});
+    new mapboxgl.Marker({{ element: pin }})
+      .setLngLat([p.lng, p.lat])
+      .setPopup(new mapboxgl.Popup({{ offset: 12, closeButton: false }}).setHTML(
+        '<strong>' + esc(p.address || 'Listing') + '</strong><div>' + money(p.price) + '</div>'
+      ))
+      .addTo(fpMap);
+  }});
+  fpMap.on('load', function () {{
+    fpMap.resize();
+    if (pts.length > 1) fpMap.fitBounds(bounds, {{ padding: 48, maxZoom: 14 }});
+  }});
+}}
+function bindBoard() {{
+  document.querySelectorAll('#marketBoard .board-week').forEach(function (el) {{
+    el.addEventListener('click', function () {{
+      selectWeek(el.getAttribute('data-asof'), true);
+    }});
+  }});
+}}
+let photosKicked = false;
+function paintPhotos(photos, galleries) {{
+  function apply(c) {{
+    if (!c) return;
+    const url = (photos && (photos[c.mls] || photos[c.id] || photos[c.address])) || '';
+    if (url) {{
+      c.photo_url = c.photo_url || url;
+      if (!c.photos || !c.photos.length) c.photos = (galleries && (galleries[c.mls] || galleries[c.id])) || [url];
+    }}
+  }}
+  const b = DATA.brief || {{}};
+  [b.still_active, b.new_under, b.new_over, b.baseline, b.went_pending, b.went_sold, b.pending_now, b.price_cuts, b.cheaper_active, b.position].forEach(function (pool) {{
+    (pool || []).forEach(apply);
+  }});
+  document.querySelectorAll('.lane-home[data-id], .lane-home[data-id]').forEach(function (el) {{
+    const c = byId(el.getAttribute('data-id') || el.getAttribute('data-id'));
+    const url = photoUrl(c);
+    const pic = el.querySelector('.lane-pic, .lane-pic');
+    if (pic && url) {{
+      pic.classList.remove('empty');
+      pic.style.backgroundImage = 'url(\\'' + String(url).replace(/'/g, '%27') + '\\')';
+    }}
+  }});
+}}
+function kickPhotos() {{
+  if (photosKicked) return;
+  photosKicked = true;
+  const run = DATA.run_id;
+  if (!run) return;
+  const banner = document.getElementById('photoBanner');
+  if (banner && DATA.photos_fetching) banner.classList.add('is-on');
+  const reloadKey = 'll-fp-photos-' + run;
+  function tick(info) {{
+    if (!info) return;
+    paintPhotos(info.photos || {{}}, info.galleries || {{}});
+    const fetching = info.status === 'fetching' || info.status === 'pending' || DATA.photos_fetching;
+    if (banner) banner.classList.toggle('is-on', !!(fetching && info.status !== 'ready'));
+    if (info.status === 'fetching' || info.status === 'pending') {{
+      DATA.photos_fetching = true;
+      setTimeout(function () {{
+        fetch('/api/runs/' + encodeURIComponent(run) + '/comp-photos', {{ credentials: 'same-origin' }})
+          .then(function (r) {{ return r.json(); }})
+          .then(function (next) {{ DATA.photos_fetching = (next.status === 'fetching' || next.status === 'pending'); tick(next); }})
+          .catch(function () {{}});
+      }}, 2500);
+      return;
+    }}
+    DATA.photos_fetching = false;
+    if (banner) banner.classList.remove('is-on');
+    const empty = document.querySelectorAll('.lane-pic.empty, .lane-pic.empty').length;
+    if (Object.keys(info.photos || {{}}).length && empty > 2 && !sessionStorage.getItem(reloadKey)) {{
+      sessionStorage.setItem(reloadKey, '1');
+      location.reload();
+    }}
+  }}
+  fetch('/api/runs/' + encodeURIComponent(run) + '/comp-photos/fetch', {{ method: 'POST', credentials: 'same-origin' }})
+    .then(function (r) {{ return r.json(); }})
+    .then(tick)
+    .catch(function () {{ if (banner) banner.classList.remove('is-on'); }});
 }}
 function bindFromAgent() {{
   const pick = document.getElementById('pastNotePick');
@@ -857,18 +1263,19 @@ function stripHtml(pos, d) {{
       (p.subject ? '<span class="lab" style="left:' + pct + '%">' + money(p.price) + '</span>' : '');
   }}).join('');
   return '<div class="strip-wrap" id="sitStrip"><h2>Where you sit among similar actives</h2>' +
-    '<p class="sub">Hover a pin for beds, baths, and square feet — it lights up in Where they are now when that home is in the original set. Default order is price.</p>' +
+    '<p class="sub">Hover a pin for the address, beds, baths, and square feet — it lights up in Where they are now when that home is in the original set. Default order is price.</p>' +
     sortsHtml('strip') +
     '<div class="strip" id="priceStrip"><div class="rail"></div>' + ticks + '<div class="strip-pin" id="stripPin"></div></div></div>';
 }}
 function pinCardHtml(p) {{
   if (!p) return '';
-  const pic = p.photo_url
-    ? '<img src="' + esc(p.photo_url) + '" alt="">'
+  const url = photoUrl(p);
+  const pic = url
+    ? '<img src="' + esc(url) + '" alt="">'
     : '<div class="ph"></div>';
-  return pic + '<strong>' + esc(p.subject ? 'Your list' : (p.address || 'Listing')) + '</strong>' +
+  return pic + '<strong>' + esc(p.subject ? 'Your list' : (streetLine(p) || p.address || 'Listing')) + '</strong>' +
     '<div class="p">' + money(p.price) + '</div>' +
-    '<div class="m">' + esc(homeBits(p) || p.status || '') + '</div>';
+    '<div class="m">' + esc([homeBits(p), p.city, p.status].filter(Boolean).join(' · ')) + '</div>';
 }}
 function positionById(id) {{
   const pos = ((DATA.brief || {{}}).position || []);
@@ -886,8 +1293,8 @@ function showPin(id, tickEl) {{
   if (tickEl) {{
     const strip = document.getElementById('priceStrip');
     const left = tickEl.offsetLeft;
-    const max = strip ? strip.clientWidth - 105 : left;
-    pin.style.left = Math.max(105, Math.min(left, max)) + 'px';
+    const max = strip ? strip.clientWidth - 114 : left;
+    pin.style.left = Math.max(114, Math.min(left, max)) + 'px';
   }}
 }}
 function hidePin() {{
@@ -964,6 +1371,8 @@ function render() {{
     filtersHtml() +
     factsHtml(b, d) +
     fromAgentHtml() +
+    boardHtml() +
+    mapHtml() +
     (DATA.stale_upload ? '<p class="note">' + (DATA.agent
       ? 'Upload this week’s MLS export to refresh. The seller still sees the last file on hand.'
       : 'This picture uses the last market file we have. Ask your agent to refresh it with this week’s export.') + '</p>' : '') +
@@ -978,6 +1387,8 @@ function render() {{
   if (DATA.agent) renderConsole();
   bindWeeks();
   bindFromAgent();
+  bindBoard();
+  bindMap();
   bindSorts();
   bindPins();
   const hist = (b.history || []);
@@ -986,6 +1397,7 @@ function render() {{
   document.querySelectorAll('.card, .lane-home').forEach(el => {{
     el.addEventListener('click', () => openDrawer(el.getAttribute('data-id')));
   }});
+  kickPhotos();
 }}
 function section(title, sub, rows, tag, sid) {{
   if (!rows || !rows.length) return '';
@@ -1206,16 +1618,19 @@ function openDrawer(id) {{
   if (!c) return;
   const pics = (c.photos && c.photos.length ? c.photos : (c.photo_url ? [c.photo_url] : []));
   const hist = (c.status_history || []).map(h => '<li>' + esc(h.as_of) + ' · ' + esc(h.status) + ' · ' + money(h.price) + '</li>').join('');
+  const maps = mapsHref(c);
+  const links = [];
+  if (maps) links.push('<a href="' + esc(maps) + '" target="_blank" rel="noopener">Map</a>');
+  if (c.zillow) links.push('<a href="' + esc(c.zillow) + '" target="_blank" rel="noopener">Zillow</a>');
+  if (c.realtor) links.push('<a href="' + esc(c.realtor) + '" target="_blank" rel="noopener">Realtor.com</a>');
   document.getElementById('drawerBody').innerHTML =
     (pics[0] ? '<img class="dpic" src="' + esc(pics[0]) + '" alt="">' : '') +
     '<h3>' + esc(c.address) + '</h3>' +
+    (c.city ? '<p class="meta">' + esc(c.city) + '</p>' : '') +
     '<p>' + money(c.price) + (c.delta ? ' · ' + (c.delta > 0 ? '+' : '') + money(c.delta) + ' vs list' : '') + '</p>' +
     '<p class="meta">' + esc([c.status, c.beds ? c.beds + ' bd' : '', c.baths ? c.baths + ' ba' : '', c.sqft ? Number(c.sqft).toLocaleString() + ' sf' : '', c.dom ? c.dom + ' DOM' : ''].filter(Boolean).join(' · ')) + '</p>' +
     (hist ? '<p style="margin-top:12px;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#5c6675">Status</p><ul>' + hist + '</ul>' : '') +
-    '<p style="margin-top:14px;font-size:.82rem">' +
-      (c.zillow ? '<a href="' + esc(c.zillow) + '" target="_blank" rel="noopener">Zillow</a> · ' : '') +
-      (c.realtor ? '<a href="' + esc(c.realtor) + '" target="_blank" rel="noopener">Realtor.com</a>' : '') +
-    '</p>';
+    (links.length ? '<p style="margin-top:14px;font-size:.82rem">' + links.join(' · ') + '</p>' : '');
   const d = document.getElementById('drawer');
   d.hidden = false; d.classList.add('open');
 }}

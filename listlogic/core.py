@@ -912,7 +912,7 @@ def compute_listing_flow(
 
 
 def _pulse_listing_id(row: pd.Series) -> str:
-    mls = str(row.get("MLSNumber") or "").strip()
+    mls = str(row.get("MLSNumber") or row.get("MLSNumber") or "").strip()
     if mls:
         return mls
     addr = str(row.get("Address") or row.get("StName") or "").strip()
@@ -1121,24 +1121,48 @@ def _window_event_counts(
     *,
     start_inclusive: bool = True,
     subject: dict | None = None,
+    locked_price: float = 0.0,
 ) -> dict[str, int]:
     listed = 0
     uc = 0
     sold = 0
+    listed_under = 0
+    listed_over = 0
     if not start:
-        return {"listed": 0, "uc": 0, "sold": 0}
+        return {"listed": 0, "uc": 0, "sold": 0, "listed_under": 0, "listed_over": 0}
+    try:
+        locked = float(locked_price or 0)
+    except (TypeError, ValueError):
+        locked = 0.0
     for row in rows:
         if listing_is_subject(row, subject):
             continue
         if _in_date_window(_listing_on_date(row), start, end, start_inclusive=start_inclusive):
             listed += 1
+            try:
+                price = float(row.get("price") or 0)
+            except (TypeError, ValueError):
+                price = 0.0
+            side = str(row.get("side") or "")
+            if not side and locked:
+                side = "under" if price < locked else ("over" if price > locked else "at")
+            if side == "under":
+                listed_under += 1
+            elif side == "over":
+                listed_over += 1
         sold_day = _status_event_date(row, FINGERPRINT_SOLD_STATUSES)
         uc_day = _status_event_date(row, set(FINGERPRINT_UC_STATUSES))
         if _in_date_window(sold_day, start, end, start_inclusive=start_inclusive):
             sold += 1
         elif _in_date_window(uc_day, start, end, start_inclusive=start_inclusive):
             uc += 1
-    return {"listed": listed, "uc": uc, "sold": sold}
+    return {
+        "listed": listed,
+        "uc": uc,
+        "sold": sold,
+        "listed_under": listed_under,
+        "listed_over": listed_over,
+    }
 
 
 def _pulse_latlng(row: pd.Series) -> tuple[float | None, float | None]:
@@ -1166,7 +1190,7 @@ def _pulse_listing_from_row(row: pd.Series, locked: float, *, list_date: str = "
     photo = extract_photo_url(row)
     return {
         "id": _pulse_listing_id(row),
-        "mls": str(row.get("MLSNumber") or "").strip(),
+        "mls": str(row.get("MLSNumber") or row.get("MLSNumber") or row.get("MLSNumber") or "").strip(),
         "address": address,
         "city": city,
         "price": int(round(price)) if price else 0,
@@ -1191,6 +1215,41 @@ def _pulse_listing_from_row(row: pd.Series, locked: float, *, list_date: str = "
     }
 
 
+def _photo_key_variants(*parts: str) -> list[str]:
+    keys: list[str] = []
+    seen: set[str] = set()
+    for part in parts:
+        text = str(part or "").strip()
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        keys.append(text)
+        compact = "".join(ch for ch in text if ch.isalnum() or ch in "-_")[:48]
+        if compact and compact not in seen:
+            seen.add(compact)
+            keys.append(compact)
+    return keys
+
+
+def _lookup_photo(store: dict | None, card: dict, *, allow_list: bool = False):
+    if not isinstance(store, dict) or not store:
+        return [] if allow_list else ""
+    for key in _photo_key_variants(
+        str(card.get("mls") or ""),
+        str(card.get("id") or ""),
+        str(card.get("mls_number") or ""),
+        str(card.get("address") or ""),
+    ):
+        val = store.get(key)
+        if isinstance(val, list):
+            if allow_list:
+                return val
+            val = val[0] if val else ""
+        if val:
+            return val
+    return [] if allow_list else ""
+
+
 def apply_listing_photos(listings: list[dict], photo_map: dict | None, gallery_map: dict | None = None) -> list[dict]:
     """Attach hosted MLS photos onto fingerprint listing cards."""
     photos = photo_map if isinstance(photo_map, dict) else {}
@@ -1200,24 +1259,29 @@ def apply_listing_photos(listings: list[dict], photo_map: dict | None, gallery_m
         if not isinstance(row, dict):
             continue
         card = dict(row)
-        mls = str(card.get("mls") or card.get("id") or "")
-        hosted = photos.get(mls) or photos.get(card.get("id")) or ""
-        if isinstance(hosted, list):
-            hosted = hosted[0] if hosted else ""
-        gallery = galleries.get(mls) or galleries.get(card.get("id")) or []
+        hosted = _lookup_photo(photos, card)
+        gallery = _lookup_photo(galleries, card, allow_list=True) or []
         if isinstance(gallery, str):
             gallery = [gallery] if gallery else []
-        if hosted and not card.get("photo_url"):
+        if not isinstance(gallery, list):
+            gallery = []
+        if hosted:
             card["photo_url"] = hosted
         urls = []
-        if card.get("photo_url"):
-            urls.append(str(card["photo_url"]))
-        for u in gallery:
-            su = str(u or "").strip()
+        primary = str(card.get("photo_url") or "")
+        if primary:
+            urls.append(primary)
+        for item in gallery:
+            su = str(item or "").strip()
+            if su and su not in urls:
+                urls.append(su)
+        existing = card.get("photos") if isinstance(card.get("photos"), list) else []
+        for item in existing:
+            su = str(item or "").strip()
             if su and su not in urls:
                 urls.append(su)
         card["photos"] = urls[:8]
-        if urls and not card.get("photo_url"):
+        if urls:
             card["photo_url"] = urls[0]
         out.append(card)
     return out
@@ -1640,6 +1704,8 @@ def append_fingerprint_history(history: list | None, snapshot: dict | None, dige
         "listed_week": int(dig.get("listed_week") or 0),
         "uc_week": int(dig.get("uc_week") or 0),
         "sold_week": int(dig.get("sold_week") or 0),
+        "listed_under_week": int(dig.get("listed_under_week") or 0),
+        "listed_over_week": int(dig.get("listed_over_week") or 0),
         "clock": str(dig.get("clock") or ""),
         "clock_at": str(dig.get("clock_at") or ""),
     }
@@ -1732,11 +1798,15 @@ def digest_pulse(
     as_of = _fingerprint_date(snap.get("as_of")) or datetime.now().strftime("%Y-%m-%d")
     prev_as_of = _fingerprint_date((previous or {}).get("as_of")) if isinstance(previous, dict) else ""
     pool = _fingerprint_pool(snap, ledger)
-    since = _window_event_counts(pool, clock_at, as_of, start_inclusive=True, subject=subject)
+    since = _window_event_counts(
+        pool, clock_at, as_of, start_inclusive=True, subject=subject, locked_price=locked_price
+    )
     week = (
-        _window_event_counts(pool, prev_as_of, as_of, start_inclusive=False, subject=subject)
+        _window_event_counts(
+            pool, prev_as_of, as_of, start_inclusive=False, subject=subject, locked_price=locked_price
+        )
         if prev_as_of
-        else {"listed": 0, "uc": 0, "sold": 0}
+        else {"listed": 0, "uc": 0, "sold": 0, "listed_under": 0, "listed_over": 0}
     )
 
     new_under = 0
@@ -1806,6 +1876,10 @@ def digest_pulse(
         "listed_week": week["listed"],
         "uc_week": week["uc"],
         "sold_week": week["sold"],
+        "listed_under_week": week.get("listed_under") or 0,
+        "listed_over_week": week.get("listed_over") or 0,
+        "listed_under_since": since.get("listed_under") or 0,
+        "listed_over_since": since.get("listed_over") or 0,
         "still_active_cheaper": still_active_cheaper,
         "as_of": as_of,
         "locked_price": int(round(locked_price)) if locked_price else 0,
@@ -1827,7 +1901,7 @@ def digest_pulse(
     }
 
 
-PULSE_CARD_CAP = 12
+PULSE_CARD_CAP = 24
 
 
 def _pulse_is_new(row: dict, clock_at: str, as_of: str = "") -> bool:
@@ -2207,11 +2281,14 @@ def build_pulse_brief(
                 "id": card.get("id"),
                 "price": card.get("price"),
                 "address": card.get("address"),
+                "city": card.get("city") or "",
                 "subject": False,
                 "beds": card.get("beds") or 0,
                 "baths": card.get("baths") or 0,
                 "sqft": card.get("sqft") or 0,
                 "photo_url": card.get("photo_url") or "",
+                "lat": card.get("lat"),
+                "lng": card.get("lng"),
                 "status": card.get("status") or "Active",
             })
     if locked_price:
@@ -2219,11 +2296,14 @@ def build_pulse_brief(
             "id": "subject",
             "price": int(round(locked_price)),
             "address": str(sub.get("address") or "Your home"),
+            "city": str(sub.get("city") or ""),
             "subject": True,
             "beds": sub.get("beds") or 0,
             "baths": sub.get("baths") or 0,
             "sqft": lock.get("subject_sqft") or sub.get("living_area") or 0,
             "photo_url": str(sub.get("photo_url") or sub.get("photo") or ""),
+            "lat": sub.get("latitude") or sub.get("lat"),
+            "lng": sub.get("longitude") or sub.get("lng"),
             "status": "Your list",
         })
     position.sort(key=lambda c: c.get("price") or 0)
@@ -2244,6 +2324,8 @@ def build_pulse_brief(
         "market_label": str(lock.get("market_label") or ""),
         "subject_address": str(sub.get("address") or ""),
         "subject_photo": str(sub.get("photo_url") or sub.get("photo") or ""),
+        "subject_lat": sub.get("latitude") or sub.get("lat"),
+        "subject_lng": sub.get("longitude") or sub.get("lng"),
         "subject_sqft": float(lock.get("subject_sqft") or sub.get("living_area") or 0),
         "share_url": share_url or "",
         "report_url": report_url or "",
@@ -2257,15 +2339,15 @@ def build_pulse_brief(
         "new_under": new_under,
         "new_over": new_over,
         "cheaper_active": cheaper_active,
-        "still_active": still_active[:24],
+        "still_active": still_active[:40],
         "pending_now": pending_now,
         "pending_now": pending_now,
         "price_cuts": price_cuts,
         "price_cuts": price_cuts,
         "status_changes": status_changes,
         "gone": gone,
-        "baseline": baseline_then[:24],
-        "baseline": baseline_then[:24],
+        "baseline": baseline_then[:40],
+        "baseline": baseline_then[:40],
         "went_pending": went_pending_cards[:PULSE_CARD_CAP],
         "went_sold": went_sold_cards[:PULSE_CARD_CAP],
         "position": position[:40],

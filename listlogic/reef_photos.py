@@ -58,10 +58,14 @@ STREET_STOPWORDS = {
 }
 
 
+_REEF_KEY_NAMES = ("REEF_API_KEY", "REEF_API_KEY")
+
+
 def _load_dotenv_key() -> str:
-    key = (os.environ.get("REEF_API_KEY") or "").strip()
-    if key:
-        return key
+    for name in _REEF_KEY_NAMES:
+        key = (os.environ.get(name) or "").strip()
+        if key:
+            return key
     env_path = ROOT / ".env"
     if not env_path.exists():
         return ""
@@ -71,7 +75,7 @@ def _load_dotenv_key() -> str:
             if not line or line.startswith("#") or "=" not in line:
                 continue
             name, val = line.split("=", 1)
-            if name.strip() == "REEF_API_KEY":
+            if name.strip() in _REEF_KEY_NAMES:
                 return val.strip().strip('"').strip("'")
     except OSError:
         return ""
@@ -680,7 +684,7 @@ def enrich_report_photos(
             "lng": c.get("longitude") or c.get("lng"),
             "row": c,
         })
-        if len(candidates) >= max_comps + 24:
+        if len(candidates) >= max_comps + 120:
             break
 
     if include_subject and isinstance(subject, dict):
