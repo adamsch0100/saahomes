@@ -897,13 +897,13 @@ function leverStageHtml(id) {{
   const cond = leverCond[c.id] || '';
   const ans = leverAns[c.id] || '';
   let priceLine = cheaper
-    ? 'Listed ' + money(Math.abs(delta)) + ' under this list. Price is a lever they used — and one that can still be pulled.'
+    ? 'Listed ' + money(Math.abs(delta)) + ' under this list. They came in cheaper — you can still change your number too.'
     : (delta > 0
-      ? 'Went pending ' + money(delta) + ' over this list. Not a cheaper-number win.'
-      : 'Same number as this list. Price is not the differentiator here.');
-  let condLine = 'Condition is the other adjustable lever. Tap what the photos show.';
+      ? 'Went pending ' + money(delta) + ' over this list. It wasn’t a cheaper-number win.'
+      : 'Same number as this list. Price isn’t what separated them.');
+  let condLine = 'Condition is the other thing you can still change. Tap what the photos show.';
   if (c.year && subYear) {{
-    condLine = 'Built ' + c.year + ' · this list ' + subYear + '. Condition is the other adjustable lever. Tap what the photos show.';
+    condLine = 'Built ' + c.year + ' · this list ' + subYear + '. Condition is the other thing you can still change. Tap what the photos show.';
   }}
   const condBtns = [['better','Looks better'],['same','About the same'],['worse','Looks worse']].map(function (p) {{
     return '<button type="button" data-cond="' + p[0] + '" class="' + (cond === p[0] ? 'is-on' : '') + '">' + p[1] + '</button>';
@@ -915,9 +915,9 @@ function leverStageHtml(id) {{
     '<p class="lever-ask">Should this have gone under contract first?</p>' +
     '<div class="lever-answers">' + ansBtns + '</div></div>' +
     '<div class="lever-grid">' +
-      '<article class="lever-card' + (cheaper ? ' is-hot' : '') + '"><div class="lk">Price <em>adjustable</em></div><p>' +
+      '<article class="lever-card' + (cheaper ? ' is-hot' : '') + '"><div class="lk">Price <em>still in play</em></div><p>' +
       esc(priceLine) + '</p><p class="lm">' + esc(homeBits(c)) + (c.ppsf ? ' · $' + Math.round(c.ppsf) + '/sf' : '') + '</p></article>' +
-      '<article class="lever-card' + (cond === 'better' ? ' is-hot' : '') + '"><div class="lk">Condition <em>adjustable</em></div><p>' +
+      '<article class="lever-card' + (cond === 'better' ? ' is-hot' : '') + '"><div class="lk">Condition <em>still in play</em></div><p>' +
       esc(condLine) + '</p><div class="lever-cond">' + condBtns + '</div></article>' +
     '</div>';
 }}
@@ -930,8 +930,8 @@ function leverWalkHtml() {{
   if (!leverId || !ids[leverId]) leverId = homes[0].id;
   return '<section class="levers" id="leverWalk">' +
     '<div class="kicker">Price · condition · location</div>' +
-    '<h2>Three levers: price, condition, location</h2>' +
-    '<p class="sub">Only two are adjustable: price and condition. Location is not. Tap a home that went pending or sold. Clicking opens the listing.</p>' +
+    '<h2>Price, condition, location</h2>' +
+    '<p class="sub">You can\u2019t change the street. You can still work the price, and you can still work the condition. Tap a home that went pending or sold.</p>' +
     '<div class="lever-row" id="leverRow">' + homes.map(function (c) {{
       return laneHome(c, c.id === leverId ? 'is-on' : '');
     }}).join('') + '</div>' +
@@ -992,13 +992,13 @@ function nowLanesHtml() {{
   const b = DATA.brief || {{}};
   const walk = leverWalkHtml();
   const under = photoLane(
-    'Listed under yours — yours is providing the value',
-    'Similar homes listed under this price. Yours is providing the value to the same buyers.',
+    'Listed under you — they\u2019re the cheaper option',
+    'Similar homes asking less than yours. Sitting next to them, yours looks expensive.',
     b.new_under
   );
   const over = photoLane(
-    'Listed over yours — providing value to yours',
-    'Similar homes listed over this price. They are providing value to yours.',
+    'Listed over you — you\u2019re the cheaper option',
+    'Similar homes asking more. Sitting next to them, yours looks like the better buy.',
     b.new_over
   );
   const cuts = photoLane('Price cuts', 'Homes that dropped $1,000+ since the last look.', b.price_cuts);
@@ -1006,7 +1006,7 @@ function nowLanesHtml() {{
   if (!body) return '';
   return '<div id="nowLanes"><div class="now-kicker"><div class="kicker">Right now</div>' +
     '<h2>What is happening around your list</h2>' +
-    '<p class="sub">Start with homes that went pending or sold — should they have beaten yours? Then who is listed under or over you.</p></div>' +
+    '<p class="sub">Start with what went pending or sold. Should they have beaten yours? Then look at what listed under you and over you.</p></div>' +
     body + '</div>';
 }}
 function lanesHtml() {{
@@ -1178,7 +1178,7 @@ function marketPulseHtml() {{
   if (rating) {{
     notes += '<p class="mkt-note">Condition rating from the appointment: <b>' + rating + '/10</b>' +
       (pack.home_rating_label ? ' <span>' + esc(pack.home_rating_label) + '</span>' : '') +
-      '. Price and condition are still the two adjustable levers.</p>';
+      '. You can still work the price and the condition.</p>';
   }}
   return '<section class="mkt-pulse" id="marketPulse"><div class="kicker">Same market as the appointment</div>' +
     '<h2>What the market is doing</h2>' +

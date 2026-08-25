@@ -2053,12 +2053,12 @@ body.ll-sample .sample-demo-bar{{display:flex}}
         </div>
       </article>
       <article class="cf-card">
-        <div class="cf-top"><span class="cf-n">4</span><div class="cf-t" data-copy="cf-levers">Three Levers: Price, Condition, Location</div></div>
-        <p class="cf-b" data-copy="cf-levers-b">Buyers shop those three. Location is not a lever you can pull after they list. Price and condition still are — walk homes that went pending or sold against those two and see whether they should have beaten yours.</p>
+        <div class="cf-top"><span class="cf-n">4</span><div class="cf-t" data-copy="cf-levers">Price, Condition, Location</div></div>
+        <p class="cf-b" data-copy="cf-levers-b">That’s what buyers compare. You can’t move the house. You can still change the ask, and you can still change how it shows. When something similar goes pending or sold, look at those two — on price and condition, should they have beaten yours?</p>
       </article>
       <article class="cf-card">
-        <div class="cf-top"><span class="cf-n">5</span><div class="cf-t" data-copy="cf-value">Who Is Providing the Value</div></div>
-        <p class="cf-b" data-copy="cf-value-b">A similar home listed under yours is providing the value to the same buyers. Listed over yours, they are providing value to yours. That’s how the field actually shops — not a zip-code average.</p>
+        <div class="cf-top"><span class="cf-n">5</span><div class="cf-t" data-copy="cf-value">Who Looks Like the Better Buy</div></div>
+        <p class="cf-b" data-copy="cf-value-b">If a similar home lists under you, they’re the cheaper option sitting next to yours. If they list over you, you’re the cheaper option. That’s how people actually shop. Not a city average.</p>
       </article>
       <article class="cf-card">
         <div class="cf-top"><span class="cf-n">6</span><div class="cf-t" data-copy="cf-6-t">Price Buys Time — and Odds</div></div>

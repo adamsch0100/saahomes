@@ -1505,6 +1505,7 @@ def _refresh_sample_html(run_dir: Path, *, force: bool = False) -> bool:
                 and "edit-dock" in existing
                 and "cf-levers" in existing
                 and "btnEditSave" in existing
+                and "Who Looks Like the Better Buy" in existing
             ):
                 return False
         report = json.loads(json_path.read_text(encoding="utf-8"))
@@ -2089,6 +2090,8 @@ _PRESENTATION_MARKERS = (
     "edit-dock",
     "cf-levers",
     "btnEditSave",
+    "You can\u2019t move the house",
+    "Who Looks Like the Better Buy",
 )
 
 
