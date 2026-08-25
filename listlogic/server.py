@@ -3190,7 +3190,7 @@ def _hydrate_fingerprint_photos(run_dir: Path, snap: dict | None, ledger: dict |
     return snap, ledger
 
 
-def _fingerprint_photo_targets(run_dir: Path, cap: int = 120) -> list[dict]:
+def _fingerprint_photo_targets(run_dir: Path, cap: int = 200) -> list[dict]:
     """Snapshot + ledger listings so Fingerprint cards can get real photos."""
     snap = _read_json_file(run_dir / "pulse_snapshot.json") or {}
     ledger = _read_json_file(run_dir / "fingerprint_ledger.json") or {}
@@ -4599,7 +4599,7 @@ def _background_photo_enrich(run_id: str, run_dir: Path) -> None:
             run_dir=run_dir,
             run_id=run_id,
             cache_only=False,
-            deadline=time.time() + 480,
+            deadline=time.time() + 900,
             on_listing=on_listing,
             extra_listings=extras,
         )

@@ -706,15 +706,27 @@ function photoLane(title, sub, rows, sid) {{
 }}
 function nowLanesHtml() {{
   const b = DATA.brief || {{}};
-  const under = photoLane('Listed since — under your list', 'New similar homes priced under the initial list. Buyers open these first.', b.new_under);
-  const over = photoLane('Listed since — over your list', 'New similar homes priced over the initial list.', b.new_over);
+  const uc = photoLane(
+    'Under contract now',
+    'Pending, backup, and first-right in this size band — buyers who did not wait.',
+    b.pending_now || b.went_pending
+  );
+  const under = photoLane(
+    'Listed under yours — they provide the value',
+    'Similar homes listed under your price. They are offering more value to the same buyers looking at yours.',
+    b.new_under
+  );
+  const over = photoLane(
+    'Listed over yours — you provide the value',
+    'Similar homes listed over your price. Your list is the value play for buyers looking at theirs.',
+    b.new_over
+  );
   const cuts = photoLane('Price cuts', 'Homes that dropped $1,000+ since the last look.', b.price_cuts);
-  const uc = photoLane('Under contract now', 'Pending, backup, and first-right in this size band.', b.pending_now || b.went_pending);
-  const body = under + over + cuts + uc;
+  const body = uc + under + over + cuts;
   if (!body) return '';
   return '<div id="nowLanes"><div class="now-kicker"><div class="kicker">Right now</div>' +
     '<h2>What is happening around your list</h2>' +
-    '<p class="sub">New lists, price cuts, and homes that went under contract — walk these with the seller, then check where you sit.</p></div>' +
+    '<p class="sub">Who went under contract, who is beating you on value, and who you are beating. Walk this with the seller, then check where you sit.</p></div>' +
     body + '</div>';
 }}
 function lanesHtml() {{
