@@ -143,12 +143,12 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
     )
 
     facts = [
-        ("1", "Custom-Fit Market", "Size, garage, area, and timeframe — not the whole city."),
-        ("2", "Absorption Sets Pace", f"{sales_mo:.1f} sales/mo vs {active_n} active → {inv:.1f} mo inventory."),
-        ("3", "Active = Competition", f"Pending/Backup are spoken for. List, and buyers choose among {with_yours}."),
-        ("4", "Closes Set Value", "Asking prices are opinions. Sold prices are facts."),
-        ("5", "Condition Moves It", "We start at typical 5/10 — adjust together and the list responds."),
-        ("6", "Price Buys Time", f"Well-priced homes here go UC in ~{median_dom:.0f} days."),
+        ("1", "Custom-Fit to This Home", "Not a city average. Size, garage, area, and timeframe — the homes a buyer would actually put next to yours."),
+        ("2", "Absorption Sets the Pace", "How fast this segment sells versus how many are for sale. That ratio is months of inventory — who has leverage."),
+        ("3", "Only Actives Compete", "Pending and backup are already spoken for. Buyers choose among what’s for sale now."),
+        ("4", "Price, Condition, Location", "That’s what buyers compare. You can’t move the house. You can still change the ask, and how it shows."),
+        ("5", "Who Looks Like the Better Buy", "If they list under you, they’re the cheaper option next to yours. If they list over you, you are."),
+        ("6", "Price Buys Time", "Priced with the market, homes here move. Overpriced listings linger — and help sell everyone else’s house."),
     ]
     facts_html = "".join(
         f'<div class="fact"><span class="fn">{n}</span><div><div class="ft">{_esc(t)}</div>'
@@ -1065,9 +1065,9 @@ body.ll-agent #deckAdvList li:focus, body.ll-agent #deckRiskList li:focus {{
     <section class="slide" data-title="How It Works">
       <div class="slide-top"><span>{logo_html}How It Works</span><span>Ground Rules</span></div>
       <div class="slide-body">
-        <div class="eyebrow">Core Facts of ListLogic — Data Driven Pricing</div>
-        <h2>Built Around This Home — Not the Citywide Average</h2>
-        <p class="lede">Every number comes from <strong>{_esc(market_label)}</strong>: homes a buyer would actually cross-shop with yours.</p>
+        <div class="eyebrow">Core Facts of ListLogic</div>
+        <h2>How we look at this listing</h2>
+        <p class="lede">The numbers live on the next slides. These are the rules behind them.</p>
         <div class="facts-grid">{facts_html}</div>
       </div>
       <div class="slide-foot"><span>{_esc(address)}</span><span>ListLogic</span></div>

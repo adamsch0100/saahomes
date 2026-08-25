@@ -1540,17 +1540,13 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
 .cf-grid{{display:grid;grid-template-columns:1fr;gap:10px;position:relative;z-index:1}}
 @media(min-width:640px){{.cf-grid{{grid-template-columns:repeat(2,1fr)}}}}
 @media(min-width:980px){{.cf-grid{{grid-template-columns:repeat(3,1fr)}}}}
-.cf-card{{display:flex;flex-direction:column;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:16px 16px 14px;min-height:168px;transition:background .2s ease,border-color .2s ease,transform .2s ease}}
+.cf-card{{display:flex;flex-direction:column;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:14px 16px 14px;min-height:0;transition:background .2s ease,border-color .2s ease,transform .2s ease}}
 .cf-card:hover{{background:rgba(255,255,255,.1);border-color:rgba(253,230,138,.35);transform:translateY(-1px)}}
 .cf-card .cf-top{{display:flex;align-items:center;gap:10px}}
 .cf-card .cf-n{{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#fde68a;color:#0c2238;font-size:.8rem;font-weight:800;box-shadow:0 2px 8px rgba(253,230,138,.35)}}
-.cf-card .cf-t{{font-size:.95rem;font-weight:800;color:#fff;line-height:1.25;letter-spacing:-.01em}}
-.cf-card .cf-b{{font-size:.8rem;line-height:1.45;color:rgba(255,255,255,.8);margin:0;flex:1}}
+.cf-card .cf-t{{font-size:.92rem;font-weight:800;color:#fff;line-height:1.25;letter-spacing:-.01em}}
+.cf-card .cf-b{{font-size:.8rem;line-height:1.4;color:rgba(255,255,255,.82);margin:0}}
 .cf-card .cf-b strong{{color:#fde68a;font-weight:700}}
-.cf-card .cf-metric{{margin-top:auto;display:flex;flex-wrap:wrap;gap:6px;padding-top:4px}}
-.cf-card .cf-m{{display:inline-flex;flex-direction:column;align-items:flex-start;padding:8px 10px;border-radius:10px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.12);min-width:4.5rem}}
-.cf-card .cf-m .mv{{font-size:1.15rem;font-weight:800;letter-spacing:-.02em;color:#fde68a;line-height:1}}
-.cf-card .cf-m .ml{{font-size:.58rem;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.65);font-weight:700;margin-top:4px}}
 .cf-card.cf-key{{background:rgba(253,230,138,.1);border-color:rgba(253,230,138,.32)}}
 @media(max-width:740px){{
   .two-col,.confront,.market-duo,.split{{grid-template-columns:1fr}}
@@ -2055,46 +2051,34 @@ body.ll-sample .sample-demo-bar{{display:flex}}
     </div>
   </div>
 
-  <section class="core-facts" id="spine-corefacts">
+  <section class="core-facts" id="spine-corefacts" data-cf="no-stats">
     <div class="cf-head">
-      <div class="cf-eyebrow" data-copy="cf-eyebrow">Core Facts of ListLogic — Data Driven Pricing</div>
+      <div class="cf-eyebrow" data-copy="cf-eyebrow">Core Facts of ListLogic</div>
     </div>
     <div class="cf-grid">
       <article class="cf-card">
-        <div class="cf-top"><span class="cf-n">1</span><div class="cf-t" data-copy="cf-1-t">The Market Is Custom-Fit to This Home</div></div>
-        <p class="cf-b" data-copy="cf-1-b">We don’t price against the whole city. Size, garage, area, and timeframe are filtered so the comparison is apples to apples — what a buyer would actually put side-by-side with yours.</p>
+        <div class="cf-top"><span class="cf-n">1</span><div class="cf-t" data-copy="cf-1-t">Custom-Fit to This Home</div></div>
+        <p class="cf-b" data-copy="cf-1-b">Not a city average. Size, garage, area, and timeframe — the homes a buyer would actually put next to yours.</p>
+      </article>
+      <article class="cf-card">
+        <div class="cf-top"><span class="cf-n">2</span><div class="cf-t" data-copy="cf-2-t">Absorption Sets the Pace</div></div>
+        <p class="cf-b" data-copy="cf-2-b">How fast this segment sells versus how many are for sale. That ratio is months of inventory — who has leverage.</p>
+      </article>
+      <article class="cf-card">
+        <div class="cf-top"><span class="cf-n">3</span><div class="cf-t" data-copy="cf-3-t">Only Actives Compete</div></div>
+        <p class="cf-b" data-copy="cf-3-b">Pending and backup are already spoken for. Buyers choose among what’s for sale now.</p>
       </article>
       <article class="cf-card cf-key">
-        <div class="cf-top"><span class="cf-n">2</span><div class="cf-t" data-copy="cf-2-t">Absorption Sets the Pace</div></div>
-        <p class="cf-b" data-copy="cf-2-b">How fast this segment sells vs. how many are for sale. That ratio — months of inventory — is the clearest read on seller vs. buyer leverage.</p>
-        <div class="cf-metric">
-          <div class="cf-m"><span class="mv">{inv:.1f}</span><span class="ml" data-copy="cf-2-ml1">Months inv.</span></div>
-          <div class="cf-m"><span class="mv">{active_n}</span><span class="ml" data-copy="cf-2-ml2">Active</span></div>
-          <div class="cf-m"><span class="mv">{sales_mo:.1f}</span><span class="ml" data-copy="cf-2-ml3">Sales / mo</span></div>
-        </div>
-      </article>
-      <article class="cf-card">
-        <div class="cf-top"><span class="cf-n">3</span><div class="cf-t" data-copy="cf-3-t">Competition Is Who’s for Sale Now</div></div>
-        <p class="cf-b" data-copy="cf-3-b">Only Active listings compete for buyers. Pending and Backup are already spoken for. List yours, and buyers choose among this many homes — including you.</p>
-        <div class="cf-metric">
-          <div class="cf-m"><span class="mv">{with_yours}</span><span class="ml" data-copy="cf-3-ml1">If you list</span></div>
-          <div class="cf-m"><span class="mv">{active_n}</span><span class="ml" data-copy="cf-3-ml2">Active now</span></div>
-        </div>
-      </article>
-      <article class="cf-card">
         <div class="cf-top"><span class="cf-n">4</span><div class="cf-t" data-copy="cf-levers">Price, Condition, Location</div></div>
-        <p class="cf-b" data-copy="cf-levers-b">That’s what buyers compare. You can’t move the house. You can still change the ask, and you can still change how it shows. When something similar goes pending or sold, look at those two — on price and condition, should they have beaten yours?</p>
+        <p class="cf-b" data-copy="cf-levers-b">That’s what buyers compare. You can’t move the house. You can still change the ask, and how it shows.</p>
       </article>
       <article class="cf-card">
         <div class="cf-top"><span class="cf-n">5</span><div class="cf-t" data-copy="cf-value">Who Looks Like the Better Buy</div></div>
-        <p class="cf-b" data-copy="cf-value-b">If a similar home lists under you, they’re the cheaper option sitting next to yours. If they list over you, you’re the cheaper option. That’s how people actually shop. Not a city average.</p>
+        <p class="cf-b" data-copy="cf-value-b">If they list under you, they’re the cheaper option next to yours. If they list over you, you are.</p>
       </article>
       <article class="cf-card">
-        <div class="cf-top"><span class="cf-n">6</span><div class="cf-t" data-copy="cf-6-t">Price Buys Time — and Odds</div></div>
-        <p class="cf-b" data-copy="cf-6-b">Priced with the market, homes here go under contract in about this many days. Overpriced homes linger — and become the listing that helps sell everyone else’s house.</p>
-        <div class="cf-metric">
-          <div class="cf-m"><span class="mv">{median_dom:.0f}</span><span class="ml" data-copy="cf-6-ml1">Median days</span></div>
-        </div>
+        <div class="cf-top"><span class="cf-n">6</span><div class="cf-t" data-copy="cf-6-t">Price Buys Time</div></div>
+        <p class="cf-b" data-copy="cf-6-b">Priced with the market, homes here move. Overpriced listings linger — and help sell everyone else’s house.</p>
       </article>
     </div>
   </section>
