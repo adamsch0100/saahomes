@@ -1504,6 +1504,7 @@ def _refresh_sample_html(run_dir: Path, *, force: bool = False) -> bool:
                 and "btnEditMode" in existing
                 and "edit-dock" in existing
                 and "cf-levers" in existing
+                and "btnEditSave" in existing
             ):
                 return False
         report = json.loads(json_path.read_text(encoding="utf-8"))
@@ -2087,6 +2088,7 @@ _PRESENTATION_MARKERS = (
     "btnEditMode",
     "edit-dock",
     "cf-levers",
+    "btnEditSave",
 )
 
 
@@ -3484,6 +3486,17 @@ async def save_run_edits(run_id: str, request: Request):
             for k, v in payload["ledes"].items()
             if k in ("comps", "condition", "close")
         }
+    if isinstance(payload.get("copy"), dict):
+        clean_copy = {}
+        for i, (key, val) in enumerate(payload["copy"].items()):
+            if i >= 200:
+                break
+            slug = "".join(ch for ch in str(key) if ch.isalnum() or ch in "-_")[:80]
+            if not slug:
+                continue
+            text = re.sub(r"<[^>]*>", "", html_lib.unescape(str(val)))
+            clean_copy[slug] = text[:4000]
+        payload["copy"] = clean_copy
     if payload.get("portalChip") not in ("on", "off"):
         payload.pop("portalChip", None)
     if payload.get("pulseBlock") not in ("on", "off"):
@@ -3493,6 +3506,8 @@ async def save_run_edits(run_id: str, request: Request):
         payload["portalChip"] = existing["portalChip"]
     if "pulseBlock" not in payload and existing.get("pulseBlock") in ("on", "off"):
         payload["pulseBlock"] = existing["pulseBlock"]
+    if "copy" not in payload and isinstance(existing.get("copy"), dict):
+        payload["copy"] = existing["copy"]
     (run_dir / "edits.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
     return {"ok": True}
 
