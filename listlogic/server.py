@@ -2588,9 +2588,13 @@ def _write_pulse_lock(run_dir: Path, report: dict, *, price=None, source: str = 
         "source": source,
         "seller_access": existing.get("seller_access", True) is not False,
     }
-    for key in ("email", "seller_name", "seller_email", "sold_at", "last_refresh_at", "last_looked_at", "active_at", "active_at_source"):
-        if existing.get(key) not in (None, ""):
+    for key in ("email", "seller_name", "seller_email", "sold_at", "last_refresh_at", "last_looked_at", "active_at", "active_at_source", "market_pulse_then", "market_pulse_now"):
+        if existing.get(key) not in (None, "", {}):
             payload[key] = existing[key]
+    if not isinstance(payload.get("market_pulse_then"), dict) or payload.get("market_pulse_then") is None:
+        from core import market_pulse_from_report
+
+        payload["market_pulse_then"] = market_pulse_from_report(report)
     (run_dir / "pulse.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
     df = _load_run_market(run_dir)
     if df is not None:
@@ -2742,6 +2746,7 @@ def _write_fingerprint_snapshot(run_dir: Path, report: dict, lock: dict, df, *, 
         encoding="utf-8",
     )
     lock["last_refresh_at"] = datetime.now().isoformat(timespec="seconds")
+    _ensure_market_pulse(run_dir, report, lock, df=df)
     (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
     _save_pulse_brief(run_dir, report, lock, snap)
     return snap
@@ -3266,6 +3271,36 @@ def _pulse_links(run_id: str, report: dict | None = None) -> tuple[str, str, str
     return report_url, share_url, fingerprint_url, agent_fingerprint
 
 
+def _ensure_market_pulse(run_dir: Path, report: dict, lock: dict | None, df=None) -> dict:
+    """Freeze appointment vitals once; recompute the same stats from the current market file."""
+    from core import compute_market_pulse, market_pulse_from_report
+
+    report = report if isinstance(report, dict) else {}
+    lock = lock if isinstance(lock, dict) else {}
+    then = lock.get("market_pulse_then")
+    if not isinstance(then, dict) or then.get("active_count") is None:
+        then = market_pulse_from_report(report)
+        lock["market_pulse_then"] = then
+    now = lock.get("market_pulse_now") if isinstance(lock.get("market_pulse_now"), dict) else None
+    if df is None and not now:
+        df = _load_run_market(run_dir)
+    if df is not None and len(df) > 0:
+        subject = report.get("subject") if isinstance(report.get("subject"), dict) else {}
+        area = str((report.get("meta") or {}).get("market_label") or report.get("area") or "Market")
+        now = compute_market_pulse(df, area_name=area, subject=subject)
+        lock["market_pulse_now"] = now
+    if not isinstance(now, dict) or not now:
+        now = then
+    story = report.get("story") if isinstance(report.get("story"), dict) else {}
+    rating = int(story.get("home_rating") or then.get("home_rating") or 0)
+    return {
+        "then": then,
+        "now": now,
+        "home_rating": rating or None,
+        "home_rating_label": str(story.get("home_rating_label") or then.get("home_rating_label") or ""),
+    }
+
+
 def _save_pulse_brief(
     run_dir: Path,
     report: dict,
@@ -3280,8 +3315,10 @@ def _save_pulse_brief(
     prev = _read_json_file(run_dir / "pulse_snapshot_prev.json")
     subject = report.get("subject") if isinstance(report.get("subject"), dict) else {}
     need_detect = str((lock or {}).get("active_at_source") or "") != "agent" and not (lock or {}).get("active_at")
-    df = _load_run_market(run_dir) if need_detect else None
+    need_pulse = not isinstance((lock or {}).get("market_pulse_now"), dict)
+    df = _load_run_market(run_dir) if (need_detect or need_pulse) else None
     lock = _apply_active_at(run_dir, lock, report, df=df, snap=snap)
+    pulse = _ensure_market_pulse(run_dir, report, lock, df=df)
     if lock.get("locked_price"):
         (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
     report_url, share_url, fingerprint_url, agent_fp = _pulse_links(run_dir.name, report)
@@ -3304,6 +3341,7 @@ def _save_pulse_brief(
         notes=_read_fingerprint_notes(run_dir),
         portal_criteria=meta.get("portal_criteria") if isinstance(meta.get("portal_criteria"), dict) else None,
         city=str(meta.get("city") or report.get("area") or ""),
+        market_pulse=pulse,
     )
     brief["agent_fingerprint_url"] = agent_fp
     (run_dir / "pulse_brief.json").write_text(

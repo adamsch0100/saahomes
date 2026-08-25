@@ -563,6 +563,77 @@ def compute_market_stats(
     )
 
 
+def compact_market_pulse(stats, dns: dict | None = None) -> dict:
+    """Appointment-facing vitals only — serializable then/now payload."""
+    if stats is None:
+        s: dict = {}
+    elif isinstance(stats, dict):
+        s = stats
+    else:
+        s = asdict(stats)
+    dns = dns if isinstance(dns, dict) else {}
+    try:
+        active = int(s.get("active_count") or 0)
+    except (TypeError, ValueError):
+        active = 0
+    try:
+        odds = float(s.get("odds_of_selling") or 0)
+    except (TypeError, ValueError):
+        odds = 0.0
+    return {
+        "as_of": str(s.get("as_of") or "")[:10],
+        "months_of_inventory": round(float(s.get("months_of_inventory") or 0), 1),
+        "absorption_rate": round(float(s.get("absorption_rate") or 0), 2),
+        "odds_of_selling": round(odds, 3),
+        "active_count": active,
+        "with_yours": active + 1,
+        "pending_count": int(s.get("pending_count") or 0),
+        "median_dom": float(s.get("median_dom") or 0),
+        "median_sold_price": float(s.get("median_sold_price") or 0),
+        "median_price_per_sqft": float(s.get("median_price_per_sqft") or 0),
+        "sold_count": int(s.get("sold_count") or 0),
+        "expired_withdrawn_count": int(s.get("expired_withdrawn_count") or 0),
+        "true_did_not_sell": int(dns.get("true_did_not_sell") or 0),
+        "likely_relist_churn": int(dns.get("likely_relist_churn") or 0),
+    }
+
+
+def market_pulse_from_report(report: dict | None) -> dict:
+    """Freeze the numbers the seller saw at the listing appointment."""
+    report = report if isinstance(report, dict) else {}
+    stats = report.get("stats") if isinstance(report.get("stats"), dict) else {}
+    story = report.get("story") if isinstance(report.get("story"), dict) else {}
+    dns = report.get("did_not_sell") if isinstance(report.get("did_not_sell"), dict) else {}
+    if not dns and isinstance(story.get("did_not_sell"), dict):
+        dns = story["did_not_sell"]
+    pulse = compact_market_pulse(stats, dns)
+    if story.get("months_of_inventory") not in (None, ""):
+        pulse["months_of_inventory"] = round(float(story["months_of_inventory"]), 1)
+    odds = story.get("market_odds")
+    if odds in (None, ""):
+        odds = story.get("odds_of_selling")
+    if odds not in (None, ""):
+        pulse["odds_of_selling"] = round(float(odds), 3)
+    if story.get("sales_per_month") not in (None, ""):
+        pulse["absorption_rate"] = round(float(story["sales_per_month"]), 2)
+    if story.get("active_on_market") not in (None, ""):
+        pulse["active_count"] = int(story["active_on_market"])
+    if story.get("with_your_home") not in (None, ""):
+        pulse["with_yours"] = int(story["with_your_home"])
+    else:
+        pulse["with_yours"] = int(pulse.get("active_count") or 0) + 1
+    if story.get("under_contract") not in (None, ""):
+        pulse["pending_count"] = int(story["under_contract"])
+    if story.get("median_dom") not in (None, ""):
+        pulse["median_dom"] = float(story["median_dom"])
+    rating = int(story.get("home_rating") or 0)
+    pulse["home_rating"] = rating or None
+    pulse["home_rating_label"] = str(story.get("home_rating_label") or "")
+    if not pulse.get("as_of"):
+        pulse["as_of"] = str((report.get("meta") or {}).get("generated") or "")[:10]
+    return pulse
+
+
 def _size_band_mask(df: pd.DataFrame, living_area: float, lo: float = 0.8, hi: float = 1.2) -> pd.Series:
     if df is None or len(df) == 0 or not living_area or "LivingArea" not in df.columns:
         return pd.Series(True, index=df.index) if df is not None else pd.Series(dtype=bool)
@@ -993,6 +1064,34 @@ def listing_is_subject(row: dict | None, subject: dict | None) -> bool:
     if a and b and (a in b or b in a):
         return True
     return False
+
+
+def compute_market_pulse(
+    df: pd.DataFrame,
+    *,
+    area_name: str = "Market",
+    subject: dict | None = None,
+) -> dict:
+    """Recompute appointment vitals from the current market file (same filters as the report)."""
+    if df is None or len(df) == 0:
+        return {}
+    stats = compute_market_stats(df, area_name=area_name)
+    dns = analyze_did_not_sell(df)
+    pulse = compact_market_pulse(stats, dns)
+    if "StatusNorm" in df.columns:
+        active = df[df["StatusNorm"] == "Active"]
+        n = 0
+        for _, row in active.iterrows():
+            rec = {
+                "mls": str(row.get("MLSNumber") or ""),
+                "address": str(row.get("Address") or ""),
+            }
+            if listing_is_subject(rec, subject):
+                continue
+            n += 1
+        pulse["active_count"] = n
+        pulse["with_yours"] = n + 1
+    return pulse
 
 
 def fingerprint_clock(lock: dict | None) -> dict:
@@ -2145,6 +2244,7 @@ def build_pulse_brief(
     notes: list | None = None,
     portal_criteria: dict | None = None,
     city: str = "",
+    market_pulse: dict | None = None,
 ) -> dict:
     """One brief JSON for Live Story, Fingerprint page, and weekly email."""
     lock = lock if isinstance(lock, dict) else {}
@@ -2356,6 +2456,7 @@ def build_pulse_brief(
         "sold_at": str(lock.get("sold_at") or ""),
         "comp_set": _comp_set(lock, sub, portal_criteria=portal_criteria, city=city),
         "last_refresh_at": str(lock.get("last_refresh_at") or lock.get("last_looked_at") or ""),
+        "market_pulse": market_pulse if isinstance(market_pulse, dict) else {},
     }
 
 

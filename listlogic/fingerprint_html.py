@@ -540,6 +540,25 @@ body.is-seller .console {{ display:none; }}
 .fact {{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px 12px; }}
 .fact .fk {{ display:block; font-size:.62rem; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); font-weight:800; }}
 .fact .fv {{ display:block; font-family:Fraunces,Georgia,serif; font-size:1.05rem; font-weight:700; color:var(--navy); margin-top:3px; }}
+.mkt-pulse {{
+  background:#fff; border:1px solid var(--line); border-radius:16px;
+  padding:16px 18px 18px; margin:0 0 18px;
+}}
+.mkt-pulse .kicker {{ font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--navy); font-weight:800; }}
+.mkt-pulse h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.2rem; margin:2px 0 4px; }}
+.mkt-pulse > .sub {{ color:var(--muted); font-size:.84rem; line-height:1.45; margin-bottom:12px; }}
+.mkt-grid {{
+  display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px;
+}}
+@media (max-width:800px) {{ .mkt-grid {{ grid-template-columns:1fr 1fr; }} }}
+.mkt-cell {{
+  border:1px solid var(--line); border-radius:12px; padding:10px 12px; background:#fbfaf7;
+}}
+.mkt-cell .mk {{ font-size:.62rem; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); font-weight:800; }}
+.mkt-cell .mn {{ font-family:Fraunces,Georgia,serif; font-size:1.35rem; font-weight:700; color:var(--navy); margin:4px 0 2px; }}
+.mkt-cell .mt {{ font-size:.72rem; color:var(--muted); line-height:1.35; }}
+.mkt-note {{ font-size:.84rem; color:var(--ink); margin:12px 0 0; line-height:1.45; }}
+.mkt-note span {{ color:var(--muted); }}
 .walk {{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:0 0 18px; }}
 .walk h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.2rem; margin-bottom:4px; }}
 .walk .sub {{ color:var(--muted); font-size:.84rem; margin-bottom:10px; }}
@@ -1109,6 +1128,65 @@ function factsHtml(b, d) {{
   return '<div class="facts">' + chips.map(function (x) {{
     return '<div class="fact"><span class="fk">' + esc(x[0]) + '</span><span class="fv">' + esc(x[1]) + '</span></div>';
   }}).join('') + '</div>';
+}}
+function pulsePct(v) {{
+  const n = Number(v || 0);
+  if (!n && n !== 0) return '—';
+  const pct = n > 1 ? n : n * 100;
+  return Math.round(pct) + '%';
+}}
+function pulseNum(v, kind) {{
+  const n = Number(v);
+  if (!isFinite(n) || (n === 0 && kind !== 'count' && kind !== 'inv')) return '—';
+  if (kind === 'money') return money(n);
+  if (kind === 'pct') return pulsePct(n);
+  if (kind === 'inv') return n.toFixed(1);
+  if (kind === 'ppsf') return n ? ('$' + Math.round(n)) : '—';
+  if (kind === 'days') return n ? (Math.round(n) + 'd') : '—';
+  if (kind === 'rate') return n ? n.toFixed(1) : '—';
+  return String(Math.round(n));
+}}
+function pulseDeltaLine(nowV, thenV, kind, thenLab) {{
+  const nowS = pulseNum(nowV, kind);
+  const thenS = pulseNum(thenV, kind);
+  if (thenS === '—' || thenS === nowS) return thenS === '—' ? '' : ('Was ' + thenS + ' ' + thenLab);
+  return 'Was ' + thenS + ' ' + thenLab;
+}}
+function marketPulseHtml() {{
+  const pack = ((DATA.brief || {{}}).market_pulse || {{}});
+  const then = pack.then || {{}};
+  const now = pack.now || {{}};
+  if (!now.active_count && !then.active_count && !now.months_of_inventory && !then.months_of_inventory) return '';
+  const thenLab = clockKind() === 'active' ? 'when listed' : 'at generate';
+  const days = Number((DATA.brief || {{}}).days_active || (DATA.brief || {{}}).days_locked || 0);
+  const med = Number(now.median_dom || then.median_dom || 0);
+  const rating = pack.home_rating || then.home_rating;
+  const cells = [
+    ['Months of inventory', pulseNum(now.months_of_inventory, 'inv'), pulseDeltaLine(now.months_of_inventory, then.months_of_inventory, 'inv', thenLab)],
+    ['30-day odds', pulseNum(now.odds_of_selling, 'pct'), pulseDeltaLine(now.odds_of_selling, then.odds_of_selling, 'pct', thenLab)],
+    ['Sales / month', pulseNum(now.absorption_rate, 'rate'), pulseDeltaLine(now.absorption_rate, then.absorption_rate, 'rate', thenLab)],
+    ['Active now', String(now.active_count != null ? now.active_count : '—'), 'Including this home: ' + (now.with_yours != null ? now.with_yours : '—') + (then.active_count != null ? ' · was ' + then.active_count + ' ' + thenLab : '')],
+    ['Median days', pulseNum(now.median_dom, 'days'), pulseDeltaLine(now.median_dom, then.median_dom, 'days', thenLab)],
+    ['Median sold', pulseNum(now.median_sold_price, 'money'), pulseDeltaLine(now.median_sold_price, then.median_sold_price, 'money', thenLab)],
+    ['Median $ / sf', pulseNum(now.median_price_per_sqft, 'ppsf'), pulseDeltaLine(now.median_price_per_sqft, then.median_price_per_sqft, 'ppsf', thenLab)],
+    ['Did not sell', String(now.true_did_not_sell != null ? now.true_did_not_sell : (now.expired_withdrawn_count || '—')), (then.true_did_not_sell != null ? ('Was ' + then.true_did_not_sell + ' ' + thenLab) : '')]
+  ];
+  let notes = '';
+  if (days && med) {{
+    notes += '<p class="mkt-note">This listing: <b>' + days + ' days</b> on market. Typical in this set: <b>' + Math.round(med) + ' days</b>.</p>';
+  }}
+  if (rating) {{
+    notes += '<p class="mkt-note">Condition rating from the appointment: <b>' + rating + '/10</b>' +
+      (pack.home_rating_label ? ' <span>' + esc(pack.home_rating_label) + '</span>' : '') +
+      '. Price and condition are still the two adjustable levers.</p>';
+  }}
+  return '<section class="mkt-pulse" id="marketPulse"><div class="kicker">Same market as the appointment</div>' +
+    '<h2>What the market is doing</h2>' +
+    '<p class="sub">The same vitals from the listing appointment, on this week’s file. Then vs now — not a new CMA.</p>' +
+    '<div class="mkt-grid">' + cells.map(function (c) {{
+      return '<article class="mkt-cell"><div class="mk">' + esc(c[0]) + '</div><div class="mn">' + esc(c[1]) + '</div>' +
+        (c[2] ? '<div class="mt">' + esc(c[2]) + '</div>' : '') + '</article>';
+    }}).join('') + '</div>' + notes + '</section>';
 }}
 function weekScoreHtml(asOf) {{
   const hist = ((DATA.brief || {{}}).history || []);
@@ -1680,6 +1758,7 @@ function render() {{
       '</div></div></div>' +
     filtersHtml() +
     factsHtml(b, d) +
+    marketPulseHtml() +
     fromAgentHtml() +
     boardHtml() +
     mapHtml() +
