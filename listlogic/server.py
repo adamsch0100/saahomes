@@ -1500,6 +1500,8 @@ def _refresh_sample_html(run_dir: Path, *, force: bool = False) -> bool:
                 and "pulseBlock" in existing
                 and "portal-chip" in existing
                 and "pulseMail" in existing
+                and "data-price-field" in existing
+                and "btnBarSections" in existing
             ):
                 return False
         report = json.loads(json_path.read_text(encoding="utf-8"))
@@ -2079,6 +2081,8 @@ _PRESENTATION_MARKERS = (
     "sample-demo-bar",
     "charts failed to boot",
     "/saas/vendor/chart.umd.min.js",
+    "data-price-field",
+    "btnBarSections",
 )
 
 
