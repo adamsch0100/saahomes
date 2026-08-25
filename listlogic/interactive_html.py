@@ -1909,7 +1909,7 @@ body.ll-sample .sample-demo-bar{{display:flex}}
     <div class="view-modes" id="viewModes">
       <span class="vm-label">Presentation</span>
       <span class="vm on">Live story</span>
-      <button type="button" class="vm" id="btnPrintLeavebehind" title="Print the Live Story — one section per page">Print leave-behind</button>
+      <button type="button" class="vm" id="btnPrintLeavebehind" title="Print the listing presentation — one section per page">Print Listing Presentation</button>
       <a id="deckLink" href="#" style="display:none">Flipbook</a>
       <a id="pdfLink" href="#" style="display:none">Packet PDF</a>
       <a id="storyPdfLink" href="#" style="display:none">Story PDF</a>
@@ -2599,7 +2599,7 @@ body.ll-sample .sample-demo-bar{{display:flex}}
     </div>
     <div class="panel-pane" id="pane-story" role="tabpanel">
       <span class="panel-pill">Seller-facing</span>
-      <p class="pane-lead">Bottom line, advantages, and watch-outs show in Price it. Use <strong>Print leave-behind</strong> for a page-per-section print of this Live Story.</p>
+      <p class="pane-lead">Bottom line, advantages, and watch-outs show in Price it. Use <strong>Print Listing Presentation</strong> for a page-per-section print of this Live Story.</p>
       <div class="field">
         <label for="editBL">Bottom line</label>
         <textarea id="editBL" class="tall">{exec_sum}</textarea>
