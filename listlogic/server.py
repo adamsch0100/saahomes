@@ -1502,6 +1502,7 @@ def _refresh_sample_html(run_dir: Path, *, force: bool = False) -> bool:
                 and "pulseMail" in existing
                 and "data-price-field" in existing
                 and "btnEditMode" in existing
+                and "edit-dock" in existing
             ):
                 return False
         report = json.loads(json_path.read_text(encoding="utf-8"))
@@ -2083,6 +2084,7 @@ _PRESENTATION_MARKERS = (
     "/saas/vendor/chart.umd.min.js",
     "data-price-field",
     "btnEditMode",
+    "edit-dock",
 )
 
 

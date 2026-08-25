@@ -470,12 +470,12 @@ def render_interactive_html(report: dict) -> str:
             f'<button type="button" class="whatif-card{" active" if "Balanced" in (sc.get("label") or "") else ""}" '
             f'data-price="{int(sc.get("list_price") or 0)}" data-label="{sc.get("label") or ""}" '
             f'title="{sc.get("label") or ""}">'
-            f'<div class="wf-label">{_whatif_short_label(sc.get("label") or "")}</div>'
+            f'<div class="wf-label" data-copy="whatif-{idx}">{_whatif_short_label(sc.get("label") or "")}</div>'
             f'<div class="wf-price">${sc.get("list_price", 0):,.0f}</div>'
             f'<div class="wf-meta">~{sc.get("expected_dom", 0):.0f}d · {(sc.get("odds_30_day") or 0) * 100:.0f}%</div>'
             f'</button>'
         )
-        for sc in whatif_scenarios
+        for idx, sc in enumerate(whatif_scenarios)
     )
     sens_rows = "".join(
         f"<tr class=\"{'rec' if 'Balanced' in (sc.get('label') or '') else ''}\">"
@@ -636,21 +636,21 @@ def render_interactive_html(report: dict) -> str:
     dns_kpi_true = (
         f'<div class="kpi has-tip" tabindex="0">'
         f'<div class="v">{dns_true}</div>'
-        f'<div class="l">Didn\'t Sell <span class="tip-i" aria-hidden="true">?</span></div>'
-        f'<div class="tip" role="tooltip">{dns_tip_true}</div></div>'
+        f'<div class="l" data-copy="kpi-dns">Didn\'t Sell <span class="tip-i" aria-hidden="true">?</span></div>'
+        f'<div class="tip" role="tooltip" data-copy="kpi-dns-tip">{dns_tip_true}</div></div>'
     )
     dns_kpi_churn = (
         f'<div class="kpi has-tip" tabindex="0">'
         f'<div class="v">{dns_churn}</div>'
-        f'<div class="l">Back on Market Soon <span class="tip-i" aria-hidden="true">?</span></div>'
-        f'<div class="tip" role="tooltip">{dns_tip_churn}</div></div>'
+        f'<div class="l" data-copy="kpi-churn">Back on Market Soon <span class="tip-i" aria-hidden="true">?</span></div>'
+        f'<div class="tip" role="tooltip" data-copy="kpi-churn-tip">{dns_tip_churn}</div></div>'
     )
 
     market_def_html = f'''
     <div class="market-def">
       <div class="md-row">
         <div>
-          <div class="md-label">Your competitive market</div>
+          <div class="md-label" data-copy="mdef-label">Your competitive market</div>
           <div class="md-title">{mdef.get("label") or area or "Custom market"}</div>
         </div>
         <div class="md-chips">{mdef_chips}</div>
@@ -827,6 +827,12 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .view-modes span.vm.on{{background:var(--brand-primary);color:#fff;border-color:var(--brand-primary)}}
 .view-modes a:hover,.view-modes button.vm:hover{{background:#e8f0fa}}
 .view-modes .vm-status{{border:none;background:transparent;padding:0 4px;font-size:.72rem;color:var(--muted);font-weight:600}}
+.edit-dock{{display:none;align-items:center;gap:8px;flex:none;margin-left:auto}}
+body.ll-agent .edit-dock{{display:flex}}
+.edit-dock #btnEditMode{{border:1px solid var(--brand-primary);background:#fff;color:var(--brand-primary);padding:8px 16px;border-radius:999px;font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;letter-spacing:.02em}}
+.edit-dock #btnEditMode:hover{{background:#e8f0fa}}
+body.ll-editing .edit-dock #btnEditMode{{background:var(--brand-primary);color:#fff}}
+.edit-dock #editSaveStatus{{font-size:.72rem;color:var(--muted);font-weight:600;min-width:3.2rem}}
 .photo-fetch-banner{{
   display:none;align-items:center;gap:10px;flex-wrap:wrap;
   margin:0 0 12px;padding:10px 14px;border-radius:12px;
@@ -871,12 +877,19 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .panel-overlay{{display:none;position:fixed;inset:0;background:rgba(8,18,32,.48);backdrop-filter:blur(2px);z-index:1001}}
 .panel-overlay.open{{display:block}}
 .view-modes .vm.edit-toggle{{display:none}}
-body.ll-agent .view-modes .vm.edit-toggle{{display:inline-flex}}
-body.ll-editing .view-modes .vm.edit-toggle{{background:var(--brand-primary);color:#fff;border-color:var(--brand-primary)}}
 .remember-bar{{display:none}}
-body.ll-editing [data-lede],body.ll-editing [data-edit],body.ll-editing #advList li,body.ll-editing #riskList li,body.ll-editing .ll-price-hit{{cursor:text;outline:none;border-radius:3px}}
-body.ll-editing [data-lede]:hover,body.ll-editing [data-edit]:hover,body.ll-editing #advList li:hover,body.ll-editing #riskList li:hover,body.ll-editing .ll-price-hit:hover{{background:rgba(12,60,110,.05)}}
-body.ll-editing [data-lede]:focus,body.ll-editing [data-edit]:focus,body.ll-editing #advList li:focus,body.ll-editing #riskList li:focus,body.ll-editing .ll-price-hit:focus{{background:rgba(12,60,110,.07);box-shadow:0 0 0 2px rgba(12,60,110,.2);caret-color:var(--brand-primary)}}
+body.ll-editing [data-lede],body.ll-editing [data-edit],body.ll-editing [data-copy],body.ll-editing #advList li,body.ll-editing #riskList li,body.ll-editing .ll-price-hit{{
+  cursor:text;border-radius:5px;outline:1.5px dashed rgba(12,60,110,.4);outline-offset:3px;
+  background:rgba(12,60,110,.07);box-shadow:inset 0 0 0 1px rgba(12,60,110,.06);
+}}
+body.ll-editing [data-lede]:hover,body.ll-editing [data-edit]:hover,body.ll-editing [data-copy]:hover,body.ll-editing #advList li:hover,body.ll-editing #riskList li:hover,body.ll-editing .ll-price-hit:hover{{
+  background:rgba(12,60,110,.12);outline-color:rgba(12,60,110,.65);
+}}
+body.ll-editing [data-lede]:focus,body.ll-editing [data-edit]:focus,body.ll-editing [data-copy]:focus,body.ll-editing #advList li:focus,body.ll-editing #riskList li:focus,body.ll-editing .ll-price-hit:focus{{
+  outline:2px solid var(--brand-primary);outline-offset:2px;background:#fff;caret-color:var(--brand-primary);box-shadow:0 0 0 3px rgba(12,60,110,.14);
+}}
+body.ll-editing .verdict .ll-price-hit{{outline-color:rgba(253,230,138,.65);background:rgba(255,255,255,.1)}}
+body.ll-editing .verdict .ll-price-hit:hover,body.ll-editing .verdict .ll-price-hit:focus{{outline-color:#fde68a;background:rgba(255,255,255,.16)}}
 .ll-add-line{{display:none;margin-top:6px;border:0;background:transparent;color:var(--muted);padding:0;font:inherit;font-size:.75rem;font-weight:700;cursor:pointer}}
 body.ll-editing .ll-add-line{{display:inline-flex}}
 body.ll-editing .ll-add-line:hover{{color:var(--brand-primary)}}
@@ -1525,7 +1538,7 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
 @media print{{
   @page{{size:11in 8.5in;margin:0}}
   *{{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
-  .fab,.agent-menu-wrap,.agent-chip,.agent-panel,.panel-overlay,.view-modes,.top-bar,.remember-bar,.spine,.report-side,.ll-add-line,
+  .fab,.agent-menu-wrap,.agent-chip,.agent-panel,.panel-overlay,.view-modes,.top-bar,.remember-bar,.spine,.report-side,.ll-add-line,.edit-dock,
   .listing-drawer,.listing-overlay,.photo-modal,.controls,.scatter-series,
   #spine-fulldata,.share-bar,.price-controls .slider-wrap,
   .slider-track-wrap,input[type=range],.slider-scale,
@@ -1538,7 +1551,7 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
   #llSampleBar,.ll-as-btn,.ll-as-panel,.pulse-card{{display:none!important}}
   .portal-chip.is-on{{display:flex!important;margin-top:4px}}
   .portal-chip.is-on .pc-amt{{display:inline!important;font-size:.8rem}}
-  body.ll-editing [data-lede],body.ll-editing [data-edit],body.ll-editing #advList li,body.ll-editing #riskList li,body.ll-editing .ll-price-hit{{background:transparent!important;box-shadow:none!important;cursor:inherit!important}}
+  body.ll-editing [data-lede],body.ll-editing [data-edit],body.ll-editing [data-copy],body.ll-editing #advList li,body.ll-editing #riskList li,body.ll-editing .ll-price-hit{{background:transparent!important;box-shadow:none!important;outline:none!important;cursor:inherit!important}}
   html,body{{background:#fff!important;margin:0;padding:0;width:11in;height:auto;overflow:hidden}}
   .report-shell{{display:block;max-width:none;width:11in;padding:0;margin:0;overflow:hidden}}
   .page{{max-width:none;width:11in;padding:0;margin:0;overflow:hidden}}
@@ -1915,14 +1928,16 @@ body.ll-sample .sample-demo-bar{{display:flex}}
     <div class="view-modes" id="viewModes">
       <span class="vm-label">Presentation</span>
       <span class="vm on">Live story</span>
-      <button type="button" class="vm edit-toggle" id="btnEditMode" aria-pressed="false" title="Click the story text to edit, then click away to save">Edit</button>
       <button type="button" class="vm" id="btnPrintLeavebehind" title="Print the listing presentation — one section per page">Print Listing Presentation</button>
       <a id="deckLink" href="#" style="display:none">Flipbook</a>
       <a id="pdfLink" href="#" style="display:none">Packet PDF</a>
       <a id="storyPdfLink" href="#" style="display:none">Story PDF</a>
       <button type="button" class="vm" id="btnCopyShare" style="display:none">Share with client</button>
       <span class="vm-status" id="shareStatus"></span>
+    </div>
+    <div class="edit-dock" id="editDock">
       <span class="vm-status" id="editSaveStatus" role="status"></span>
+      <button type="button" id="btnEditMode" aria-pressed="false" title="Click story text to edit, then click away to save">Edit</button>
     </div>
   </div>
   <div class="photo-fetch-banner" id="photoFetchBanner" aria-live="polite">
@@ -1958,9 +1973,9 @@ body.ll-sample .sample-demo-bar{{display:flex}}
         <span class="mi-ico">↩</span>
         <span class="mi-copy"><strong>Remember wording</strong><span>Intros and extra lines for next reports</span></span>
       </button>
-      <button type="button" class="mi" id="btnResetDefaults" role="menuitem">
-        <span class="mi-ico">↺</span>
-        <span class="mi-copy"><strong>Clear saved wording</strong><span>New reports use ListLogic copy</span></span>
+      <button type="button" class="mi" id="btnRestoreCopy" role="menuitem">
+        <span class="mi-ico">LL</span>
+        <span class="mi-copy"><strong>Restore ListLogic wording</strong><span>Titles, descriptions, and story copy on this report</span></span>
       </button>
       <div class="mi-sep"></div>
       <a href="/saas/pricing.html" role="menuitem">
@@ -1984,78 +1999,78 @@ body.ll-sample .sample-demo-bar{{display:flex}}
 
   <section class="core-facts" id="spine-corefacts">
     <div class="cf-head">
-      <div class="cf-eyebrow">Core Facts of ListLogic — Data Driven Pricing</div>
+      <div class="cf-eyebrow" data-copy="cf-eyebrow">Core Facts of ListLogic — Data Driven Pricing</div>
     </div>
     <div class="cf-grid">
       <article class="cf-card">
-        <div class="cf-top"><span class="cf-n">1</span><div class="cf-t">The Market Is Custom-Fit to This Home</div></div>
-        <p class="cf-b">We don’t price against the whole city. Size, garage, area, and timeframe are filtered so the comparison is <strong>apples to apples</strong> — what a buyer would actually put side-by-side with yours.</p>
+        <div class="cf-top"><span class="cf-n">1</span><div class="cf-t" data-copy="cf-1-t">The Market Is Custom-Fit to This Home</div></div>
+        <p class="cf-b" data-copy="cf-1-b">We don’t price against the whole city. Size, garage, area, and timeframe are filtered so the comparison is apples to apples — what a buyer would actually put side-by-side with yours.</p>
       </article>
       <article class="cf-card cf-key">
-        <div class="cf-top"><span class="cf-n">2</span><div class="cf-t">Absorption Sets the Pace</div></div>
-        <p class="cf-b">How fast this segment sells vs. how many are for sale. That ratio — months of inventory — is the clearest read on seller vs. buyer leverage.</p>
+        <div class="cf-top"><span class="cf-n">2</span><div class="cf-t" data-copy="cf-2-t">Absorption Sets the Pace</div></div>
+        <p class="cf-b" data-copy="cf-2-b">How fast this segment sells vs. how many are for sale. That ratio — months of inventory — is the clearest read on seller vs. buyer leverage.</p>
         <div class="cf-metric">
-          <div class="cf-m"><span class="mv">{inv:.1f}</span><span class="ml">Months inv.</span></div>
-          <div class="cf-m"><span class="mv">{active_n}</span><span class="ml">Active</span></div>
-          <div class="cf-m"><span class="mv">{sales_mo:.1f}</span><span class="ml">Sales / mo</span></div>
+          <div class="cf-m"><span class="mv">{inv:.1f}</span><span class="ml" data-copy="cf-2-ml1">Months inv.</span></div>
+          <div class="cf-m"><span class="mv">{active_n}</span><span class="ml" data-copy="cf-2-ml2">Active</span></div>
+          <div class="cf-m"><span class="mv">{sales_mo:.1f}</span><span class="ml" data-copy="cf-2-ml3">Sales / mo</span></div>
         </div>
       </article>
       <article class="cf-card">
-        <div class="cf-top"><span class="cf-n">3</span><div class="cf-t">Competition Is Who’s for Sale Now</div></div>
-        <p class="cf-b">Only <strong>Active</strong> listings compete for buyers. Pending and Backup are already spoken for. List yours, and buyers choose among this many homes — including you.</p>
+        <div class="cf-top"><span class="cf-n">3</span><div class="cf-t" data-copy="cf-3-t">Competition Is Who’s for Sale Now</div></div>
+        <p class="cf-b" data-copy="cf-3-b">Only Active listings compete for buyers. Pending and Backup are already spoken for. List yours, and buyers choose among this many homes — including you.</p>
         <div class="cf-metric">
-          <div class="cf-m"><span class="mv">{with_yours}</span><span class="ml">If you list</span></div>
-          <div class="cf-m"><span class="mv">{active_n}</span><span class="ml">Active now</span></div>
+          <div class="cf-m"><span class="mv">{with_yours}</span><span class="ml" data-copy="cf-3-ml1">If you list</span></div>
+          <div class="cf-m"><span class="mv">{active_n}</span><span class="ml" data-copy="cf-3-ml2">Active now</span></div>
         </div>
       </article>
       <article class="cf-card">
-        <div class="cf-top"><span class="cf-n">4</span><div class="cf-t">Buyers Set Value — Closes Prove It</div></div>
-        <p class="cf-b">Asking prices are opinions. <strong>Sold prices are facts.</strong> The recommended list is anchored to what buyers just paid for the closest recent comparables — not what neighbors hope to get.</p>
+        <div class="cf-top"><span class="cf-n">4</span><div class="cf-t" data-copy="cf-4-t">Buyers Set Value — Closes Prove It</div></div>
+        <p class="cf-b" data-copy="cf-4-b">Asking prices are opinions. Sold prices are facts. The recommended list is anchored to what buyers just paid for the closest recent comparables — not what neighbors hope to get.</p>
       </article>
       <article class="cf-card">
-        <div class="cf-top"><span class="cf-n">5</span><div class="cf-t">Location Is Fixed — Condition Moves the Number</div></div>
-        <p class="cf-b">Within your segment, updates and presentation decide where you land in the band. We’ll rate the home <strong>together, 1–10</strong>, and the list price responds live to that rating.</p>
+        <div class="cf-top"><span class="cf-n">5</span><div class="cf-t" data-copy="cf-5-t">Location Is Fixed — Condition Moves the Number</div></div>
+        <p class="cf-b" data-copy="cf-5-b">Within your segment, updates and presentation decide where you land in the band. We’ll rate the home together, 1–10, and the list price responds live to that rating.</p>
       </article>
       <article class="cf-card">
-        <div class="cf-top"><span class="cf-n">6</span><div class="cf-t">Price Buys Time — and Odds</div></div>
-        <p class="cf-b">Priced with the market, homes here go under contract in about this many days. Overpriced homes linger — and become the listing that <strong>helps sell everyone else’s house</strong>.</p>
+        <div class="cf-top"><span class="cf-n">6</span><div class="cf-t" data-copy="cf-6-t">Price Buys Time — and Odds</div></div>
+        <p class="cf-b" data-copy="cf-6-b">Priced with the market, homes here go under contract in about this many days. Overpriced homes linger — and become the listing that helps sell everyone else’s house.</p>
         <div class="cf-metric">
-          <div class="cf-m"><span class="mv">{median_dom:.0f}</span><span class="ml">Median days</span></div>
+          <div class="cf-m"><span class="mv">{median_dom:.0f}</span><span class="ml" data-copy="cf-6-ml1">Median days</span></div>
         </div>
       </article>
     </div>
   </section>
 
   <section class="section" id="spine-market">
-    <h2><span class="ttl"><span class="step">1</span>Homes on the Market</span><span class="temp {temp_class}">{temp_label} · {inv:.1f} mo inventory</span></h2>
+    <h2><span class="ttl"><span class="step">1</span><span data-copy="t-market">Homes on the Market</span></span><span class="temp {temp_class}">{temp_label} · {inv:.1f} mo inventory</span></h2>
     {market_def_html}
-    <p class="sub">Competition = <strong>Active only</strong>. Pending + Backup are under contract — already spoken for, not inventory.</p>
+    <p class="sub" data-copy="s-market">Competition = Active only. Pending + Backup are under contract — already spoken for, not inventory.</p>
     <div class="market-duo">
-      <div class="duo"><div class="n">{active_n}</div><div class="t">Active on Market</div></div>
-      <div class="duo yours"><div class="n">{with_yours}</div><div class="t">With Your Home Included</div></div>
+      <div class="duo"><div class="n">{active_n}</div><div class="t" data-copy="duo-active">Active on Market</div></div>
+      <div class="duo yours"><div class="n">{with_yours}</div><div class="t" data-copy="duo-yours">With Your Home Included</div></div>
     </div>
     <div class="ask-trio">
-      <div class="ask-card"><div class="aq">How Long Should It Take?</div><div class="aa">{ask.get("how_long") or f"Typical time to contract is about <b>{median_dom:.0f} days</b>."}</div></div>
-      <div class="ask-card"><div class="aq">What Are the Odds?</div><div class="aa">{ask.get("odds") or f"About <b>{odds_pct:.0f}%</b> chance of going under contract in ~30 days when priced well."}</div></div>
-      <div class="ask-card"><div class="aq">When Is the Market Most Active?</div><div class="aa">{ask.get("when_active") or f"Homes are absorbing at about <b>{sales_mo:.1f}</b> sales per month."}</div></div>
+      <div class="ask-card"><div class="aq" data-copy="ask-1-q">How Long Should It Take?</div><div class="aa" data-copy="ask-1-a">{ask.get("how_long") or f"Typical time to contract is about <b>{median_dom:.0f} days</b>."}</div></div>
+      <div class="ask-card"><div class="aq" data-copy="ask-2-q">What Are the Odds?</div><div class="aa" data-copy="ask-2-a">{ask.get("odds") or f"About <b>{odds_pct:.0f}%</b> chance of going under contract in ~30 days when priced well."}</div></div>
+      <div class="ask-card"><div class="aq" data-copy="ask-3-q">When Is the Market Most Active?</div><div class="aa" data-copy="ask-3-a">{ask.get("when_active") or f"Homes are absorbing at about <b>{sales_mo:.1f}</b> sales per month."}</div></div>
     </div>
     <div class="band-wrap" id="bandWrap" style="{'display:none' if not (price_bands.get('labels')) else ''}">
-      <h3>Active Competition by List-Price Band</h3>
-      <p class="sub" style="margin-bottom:6px">Where today’s Active homes sit by asking price — the highlighted band is the market-supported value line from comps.</p>
+      <h3 data-copy="t-bands">Active Competition by List-Price Band</h3>
+      <p class="sub" style="margin-bottom:6px" data-copy="s-bands">Where today’s Active homes sit by asking price — the highlighted band is the market-supported value line from comps.</p>
       <div class="chart-box short"><canvas id="priceBandChart"></canvas></div>
-      <p class="band-insight" id="bandInsight">{band_insight}</p>
+      <p class="band-insight" id="bandInsight" data-copy="insight-band">{band_insight}</p>
     </div>
     <div class="kpis market-kpis">
-      <div class="kpi"><div class="v">{uc_n}</div><div class="l">Under Contract</div></div>
-      <div class="kpi"><div class="v">{sales_mo:.1f}</div><div class="l">Sales / Month</div></div>
-      <div class="kpi"><div class="v">{inv:.1f}</div><div class="l">Months of Inventory</div></div>
-      <div class="kpi"><div class="v">{odds_pct:.0f}%</div><div class="l">30-Day Market Odds</div></div>
-      <div class="kpi"><div class="v">{s.get("sold_count", 0)}</div><div class="l">Recently Closed</div></div>
+      <div class="kpi"><div class="v">{uc_n}</div><div class="l" data-copy="kpi-uc">Under Contract</div></div>
+      <div class="kpi"><div class="v">{sales_mo:.1f}</div><div class="l" data-copy="kpi-sales">Sales / Month</div></div>
+      <div class="kpi"><div class="v">{inv:.1f}</div><div class="l" data-copy="kpi-inv">Months of Inventory</div></div>
+      <div class="kpi"><div class="v">{odds_pct:.0f}%</div><div class="l" data-copy="kpi-odds">30-Day Market Odds</div></div>
+      <div class="kpi"><div class="v">{s.get("sold_count", 0)}</div><div class="l" data-copy="kpi-closed">Recently Closed</div></div>
       {dns_kpi_true}
       {dns_kpi_churn}
-      <div class="kpi"><div class="v">${(s.get("median_sold_price") or 0)/1000:.0f}k</div><div class="l">Median Sold Price</div></div>
-      <div class="kpi"><div class="v">{(s.get("median_dom") or 0):.0f}</div><div class="l">Median Days on Market</div></div>
-      <div class="kpi"><div class="v">${(s.get("median_price_per_sqft") or 0):.0f}</div><div class="l">Median $ / Sq Ft</div></div>
+      <div class="kpi"><div class="v">${(s.get("median_sold_price") or 0)/1000:.0f}k</div><div class="l" data-copy="kpi-medsold">Median Sold Price</div></div>
+      <div class="kpi"><div class="v">{(s.get("median_dom") or 0):.0f}</div><div class="l" data-copy="kpi-meddom">Median Days on Market</div></div>
+      <div class="kpi"><div class="v">${(s.get("median_price_per_sqft") or 0):.0f}</div><div class="l" data-copy="kpi-psf">Median $ / Sq Ft</div></div>
     </div>
   </section>
 
