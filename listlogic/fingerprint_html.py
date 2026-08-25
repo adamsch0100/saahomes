@@ -400,9 +400,9 @@ body.is-seller .console {{ display:none; }}
 .board-pane-h {{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:10px; }}
 .board-pane-h span {{ font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; font-weight:800; color:#f0d060; }}
 .board-pane-h small {{ color:#9aabc0; font-size:.72rem; }}
-.board-grid {{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; }}
+.board-grid {{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:0; }}
 .board-stat {{
-  text-align:center; padding:8px 6px; border-right:1px solid rgba(255,255,255,.08);
+  text-align:center; padding:8px 10px; border-right:1px solid rgba(255,255,255,.18);
 }}
 .board-stat:last-child {{ border-right:0; }}
 .board-n {{ font-family:Fraunces,Georgia,serif; font-size:clamp(1.45rem, 2.6vw, 2rem); font-weight:700; line-height:1; }}
@@ -420,17 +420,21 @@ body.is-seller .console {{ display:none; }}
 .board-total .k {{ font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:#f0d060; font-weight:800; }}
 .board-total .v {{ font-family:Fraunces,Georgia,serif; font-size:1.35rem; font-weight:700; margin:4px 0 2px; }}
 .board-total .s {{ font-size:.78rem; color:#c8d2e0; line-height:1.4; }}
-.board-table tfoot td {{ color:#f0d060; border-bottom:0; }}
 .board-table-wrap {{ overflow-x:auto; margin-top:12px; }}
 .board-table {{ width:100%; border-collapse:collapse; min-width:520px; }}
-.board-table th, .board-table td {{ padding:9px 8px; text-align:center; font-size:.82rem; }}
+.board-table th, .board-table td {{
+  padding:9px 8px; text-align:center; font-size:.82rem;
+  border-right:1px solid rgba(255,255,255,.16);
+  border-bottom:1px solid rgba(255,255,255,.12);
+}}
 .board-table th {{
   font-size:.62rem; letter-spacing:.07em; text-transform:uppercase; color:#9aabc0; font-weight:800;
-  border-bottom:1px solid rgba(255,255,255,.1);
 }}
+.board-table th:last-child, .board-table td:last-child {{ border-right:0; }}
 .board-table th:first-child, .board-table td:first-child {{ text-align:left; }}
-.board-table td {{ font-family:Fraunces,Georgia,serif; font-size:1.02rem; font-weight:700; border-bottom:1px solid rgba(255,255,255,.06); }}
+.board-table td {{ font-family:Fraunces,Georgia,serif; font-size:1.02rem; font-weight:700; }}
 .board-table td:first-child {{ font-family:Inter,system-ui,sans-serif; font-size:.82rem; color:#d5deea; }}
+.board-table tfoot td {{ color:#f0d060; border-bottom:0; }}
 .board-week {{ cursor:pointer; }}
 .board-week:hover td {{ background:rgba(255,255,255,.04); }}
 .board-week.is-on td {{ background:rgba(201,162,39,.16); }}
@@ -439,7 +443,7 @@ body.is-seller .console {{ display:none; }}
 @media (max-width:800px) {{
   .board-panes, .board-totals {{ grid-template-columns:1fr; }}
   .board-grid {{ grid-template-columns:repeat(3,minmax(0,1fr)); }}
-  .board-stat {{ border-right:0; }}
+  .board-stat:nth-child(3n) {{ border-right:0; }}
 }}
 .strip {{ position:relative; height:72px; }}
 .strip .tick {{ cursor:pointer; }}
@@ -488,10 +492,6 @@ body.is-seller .console {{ display:none; }}
 .lever-card.is-hot {{ border-color:#e8c96a; background:#fff8e6; }}
 .lever-cond {{ display:flex; flex-direction:column; gap:6px; margin-top:10px; }}
 .lever-cond button {{ width:100%; border-radius:10px; text-align:left; }}
-.lever-verdict {{
-  background:#0c3c6e; color:#fff; border-radius:14px; padding:14px 16px;
-  font-size:.92rem; line-height:1.5;
-}}
 @media (max-width:800px) {{
   .lever-grid {{ grid-template-columns:1fr; }}
 }}
@@ -849,17 +849,6 @@ function closedHomes() {{
   }});
   return sortedRows(out, laneSort);
 }}
-function milesBetween(aLat, aLng, bLat, bLng) {{
-  const lat1 = Number(aLat), lng1 = Number(aLng), lat2 = Number(bLat), lng2 = Number(bLng);
-  if (!isFinite(lat1) || !isFinite(lng1) || !isFinite(lat2) || !isFinite(lng2)) return null;
-  if ((lat1 === 0 && lng1 === 0) || (lat2 === 0 && lng2 === 0)) return null;
-  const toRad = function (d) {{ return d * Math.PI / 180; }};
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
-  return 3958.8 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}}
 function leverStoreKey() {{
   return 'll-fp-lever-' + String(DATA.run_id || 'run');
 }}
@@ -885,9 +874,7 @@ function leverStageHtml(id) {{
   const list = listPrice();
   const cheaper = c.price && list && c.price < list;
   const delta = c.delta || (c.price && list ? c.price - list : 0);
-  const miles = milesBetween(DATA.subject_lat, DATA.subject_lng, c.lat, c.lng);
   const subYear = Number(DATA.subject_year || 0);
-  const newer = c.year && subYear && c.year >= subYear + 8;
   const cond = leverCond[c.id] || '';
   const ans = leverAns[c.id] || '';
   let priceLine = cheaper
@@ -898,23 +885,6 @@ function leverStageHtml(id) {{
   let condLine = 'Condition is the other adjustable lever. Tap what the photos show.';
   if (c.year && subYear) {{
     condLine = 'Built ' + c.year + ' · this list ' + subYear + '. Condition is the other adjustable lever. Tap what the photos show.';
-  }}
-  let verdict = 'Only price and condition can still change the outcome.';
-  if (cheaper && (cond === 'better' || newer)) {{
-    verdict = 'Yes — they used both adjustable levers: a lower number and a better-looking house.';
-  }} else if (cheaper && cond !== 'worse') {{
-    verdict = 'Price is the conversation. They listed under this number. Condition is the call from the photos.';
-  }} else if (!cheaper && (cond === 'better' || newer)) {{
-    verdict = 'They were not cheaper. If the photos look better, condition is the lever — not a price cut.';
-  }} else if (miles != null && miles >= 1.2 && !cheaper) {{
-    verdict = 'This may have been the pocket, not the number. Location is not adjustable. Do not chase this by cutting price.';
-  }} else if (!cheaper && cond === 'worse') {{
-    verdict = 'No. They did not beat this list on price or condition.';
-  }} else if (cond === 'same' && cheaper) {{
-    verdict = 'Same look in the photos, lower number. Price is the lever they used.';
-  }}
-  if (ans === 'yes' && !cheaper && cond === 'worse') {{
-    verdict += ' You said yes — the two adjustable levers do not back that up.';
   }}
   const condBtns = [['better','Looks better'],['same','About the same'],['worse','Looks worse']].map(function (p) {{
     return '<button type="button" data-cond="' + p[0] + '" class="' + (cond === p[0] ? 'is-on' : '') + '">' + p[1] + '</button>';
@@ -930,8 +900,7 @@ function leverStageHtml(id) {{
       esc(priceLine) + '</p><p class="lm">' + esc(homeBits(c)) + (c.ppsf ? ' · $' + Math.round(c.ppsf) + '/sf' : '') + '</p></article>' +
       '<article class="lever-card' + (cond === 'better' ? ' is-hot' : '') + '"><div class="lk">Condition <em>adjustable</em></div><p>' +
       esc(condLine) + '</p><div class="lever-cond">' + condBtns + '</div></article>' +
-    '</div>' +
-    '<p class="lever-verdict">' + esc(verdict) + '</p>';
+    '</div>';
 }}
 function leverWalkHtml() {{
   loadLevers();
@@ -943,7 +912,7 @@ function leverWalkHtml() {{
   return '<section class="levers" id="leverWalk">' +
     '<div class="kicker">Price · condition · location</div>' +
     '<h2>Three levers: price, condition, location</h2>' +
-    '<p class="sub">Only two are adjustable: price and condition. Location is not — you cannot pick the house up and move it. Tap a home that went pending or sold. Clicking opens the listing.</p>' +
+    '<p class="sub">Only two are adjustable: price and condition. Location is not. Tap a home that went pending or sold. Clicking opens the listing.</p>' +
     '<div class="lever-row" id="leverRow">' + homes.map(function (c) {{
       return laneHome(c, c.id === leverId ? 'is-on' : '');
     }}).join('') + '</div>' +
@@ -1174,7 +1143,7 @@ function weeksHtml() {{
 }}
 function fromAgentHtml() {{
   const notes = (DATA.notes || []).filter(function (n) {{ return n.status === 'published' && n.body; }});
-  const who = DATA.agent_name || 'your agent';
+  const who = String(DATA.agent_name || '').trim();
   const talk = (((DATA.brief || {{}}).talk || (DATA.brief || {{}}).talk || {{}})[DATA.agent ? 'agent' : 'seller'] || []);
   const current = weekKey((DATA.brief || {{}}).as_of);
   const sorted = notes.slice().sort(function (a, b) {{ return weekKey(b.as_of).localeCompare(weekKey(a.as_of)); }});
@@ -1183,7 +1152,7 @@ function fromAgentHtml() {{
   if (!latest && !talk.length) return '';
   let html = '<div class="from-agent" id="note-' + esc(weekKey((latest && latest.as_of) || current)) + '">' +
     '<div class="kicker">Weekly summary</div>' +
-    '<h2>This week from ' + esc(who) + '</h2>' +
+    '<h2>This week from your agent' + (who ? ' - ' + esc(who) : '') + '</h2>' +
     '<p class="when">Week of ' + weekLabel((latest && latest.as_of) || current) +
     (latest && latest.published_at ? ' · shared ' + weekLabel(latest.published_at) : '') + '</p>';
   if (latest && latest.body) {{
