@@ -464,7 +464,7 @@ body.is-seller .console {{ display:none; }}
 .lever-q {{ margin:4px 0 14px; }}
 .lever-ask {{ font-family:Fraunces,Georgia,serif; font-size:1.08rem; margin-bottom:10px; }}
 .lever-answers {{ display:flex; flex-wrap:wrap; gap:8px; }}
-.lever-ans, .lever-cond button, .lever-open {{
+.lever-ans, .lever-cond button {{
   appearance:none; -webkit-appearance:none; font:inherit; cursor:pointer;
   border:1px solid var(--line); background:#fff; color:var(--ink);
   border-radius:999px; padding:8px 14px; font-weight:700; font-size:.82rem;
@@ -472,20 +472,8 @@ body.is-seller .console {{ display:none; }}
 .lever-ans.is-on, .lever-cond button.is-on {{
   background:var(--gold); border-color:transparent; color:#1a1200;
 }}
-.lever-faces {{
-  display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;
-}}
-.lever-face {{ border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#f7f4ee; }}
-.lever-pic {{ height:168px; background:#dfe6ef center/cover no-repeat; }}
-.lever-pic.empty {{
-  background-color:#e8eef4;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='40' viewBox='0 0 48 40'><path fill='%23b7c2cf' d='M24 4l20 16h-6v16H10V20H4z'/></svg>");
-  background-repeat:no-repeat; background-position:center; background-size:44px 36px;
-}}
-.lever-face-l {{ padding:10px 12px 12px; font-size:.82rem; font-weight:700; line-height:1.35; }}
-.lever-face-l span {{ display:block; color:var(--muted); font-weight:600; font-size:.72rem; margin-top:2px; }}
 .lever-grid {{
-  display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-bottom:14px;
+  display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;
 }}
 .lever-card {{
   border:1px solid var(--line); border-radius:14px; padding:12px 13px 14px; background:#fbfaf7;
@@ -498,18 +486,14 @@ body.is-seller .console {{ display:none; }}
 .lever-card p {{ font-size:.84rem; line-height:1.45; color:var(--ink); }}
 .lever-card .lm {{ color:var(--muted); font-size:.74rem; margin-top:8px; }}
 .lever-card.is-hot {{ border-color:#e8c96a; background:#fff8e6; }}
-.lever-card.is-lock {{ background:#f3f0ea; }}
-.lever-card.is-lock .lk em {{ color:var(--muted); }}
 .lever-cond {{ display:flex; flex-direction:column; gap:6px; margin-top:10px; }}
 .lever-cond button {{ width:100%; border-radius:10px; text-align:left; }}
 .lever-verdict {{
   background:#0c3c6e; color:#fff; border-radius:14px; padding:14px 16px;
-  font-size:.92rem; line-height:1.5; margin-bottom:12px;
+  font-size:.92rem; line-height:1.5;
 }}
-.lever-open {{ display:inline-block; border-radius:10px; padding:9px 14px; color:var(--navy); }}
 @media (max-width:800px) {{
-  .lever-faces, .lever-grid {{ grid-template-columns:1fr; }}
-  .lever-pic {{ height:140px; }}
+  .lever-grid {{ grid-template-columns:1fr; }}
 }}
 .sample-demo-bar {{
   display:none; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
@@ -893,86 +877,61 @@ function loadLevers() {{
     if (raw.ans) Object.assign(leverAns, raw.ans);
   }} catch (e) {{}}
 }}
-function leverFace(url, title, sub) {{
-  return '<div class="lever-face">' +
-    '<div class="lever-pic' + (url ? '' : ' empty') + '"' +
-    (url ? ' style="background-image:url(\\'' + String(url).replace(/'/g, '%27') + '\\')"' : '') +
-    '></div>' +
-    '<div class="lever-face-l">' + esc(title) + (sub ? '<span>' + esc(sub) + '</span>' : '') + '</div></div>';
-}}
 function leverStageHtml(id) {{
   const homes = closedHomes();
   const c = byId(id) || homes[0];
   if (!c) return '';
   leverId = c.id;
-  const yours = listPrice();
-  const cheaper = c.price && yours && c.price < yours;
-  const delta = c.delta || (c.price && yours ? c.price - yours : 0);
+  const list = listPrice();
+  const cheaper = c.price && list && c.price < list;
+  const delta = c.delta || (c.price && list ? c.price - list : 0);
   const miles = milesBetween(DATA.subject_lat, DATA.subject_lng, c.lat, c.lng);
   const subYear = Number(DATA.subject_year || 0);
   const newer = c.year && subYear && c.year >= subYear + 8;
   const cond = leverCond[c.id] || '';
   const ans = leverAns[c.id] || '';
-  const yourPic = (DATA.brief || {{}}).subject_photo;
-  const theirPic = photoUrl(c);
-  const st = String(c.status || '').toLowerCase();
-  const stLab = st === 'sold' ? 'Sold' : (isUc(st) ? 'Pending' : (c.status || 'Closed'));
   let priceLine = cheaper
-    ? 'Theirs listed ' + money(Math.abs(delta)) + ' under yours. Price is a lever they used — and one you can still pull.'
+    ? 'Listed ' + money(Math.abs(delta)) + ' under this list. Price is a lever they used — and one that can still be pulled.'
     : (delta > 0
-      ? 'They went pending ' + money(delta) + ' over your list. This was not a cheaper-number win.'
-      : 'Same number as yours. Price is not the differentiator here.');
-  const yourPpsf = Number((DATA.brief || {{}}).subject_sqft || DATA.subject_sqft || 0);
-  const subPpsf = yours && yourPpsf ? yours / yourPpsf : 0;
-  let condLine = 'Look at the photos side by side. Year built is a clue, not the whole story. Tap what you see.';
+      ? 'Went pending ' + money(delta) + ' over this list. Not a cheaper-number win.'
+      : 'Same number as this list. Price is not the differentiator here.');
+  let condLine = 'Condition is the other adjustable lever. Tap what the photos show.';
   if (c.year && subYear) {{
-    condLine = 'Theirs built ' + c.year + ' · yours ' + subYear + '. Condition is the other lever you can still change. Tap how the photos compare.';
+    condLine = 'Built ' + c.year + ' · this list ' + subYear + '. Condition is the other adjustable lever. Tap what the photos show.';
   }}
-  let locLine = 'Location can explain why a buyer chose this pocket. It cannot help you sell. You cannot pick the house up and move it.';
-  if (miles != null) {{
-    if (miles < 0.4) locLine = miles.toFixed(1) + ' miles — same pocket. Location is not why they went pending, and it is not a lever you can pull.';
-    else locLine = miles.toFixed(1) + ' miles from yours. If buyers wanted that pocket, that is the discussion — not a reason to cut your number. You cannot move this house.';
-  }}
-  let verdict = 'Two levers can still change the outcome: price and condition. Location belongs in the discussion. It cannot sell the home.';
+  let verdict = 'Only price and condition can still change the outcome.';
   if (cheaper && (cond === 'better' || newer)) {{
-    verdict = 'Yes — they used both levers you can change: a lower number and a better-looking house. Location is not the move.';
+    verdict = 'Yes — they used both adjustable levers: a lower number and a better-looking house.';
   }} else if (cheaper && cond !== 'worse') {{
-    verdict = 'Price is the conversation. They listed under you. Condition is your call from the photos. Location cannot close this gap.';
+    verdict = 'Price is the conversation. They listed under this number. Condition is the call from the photos.';
   }} else if (!cheaper && (cond === 'better' || newer)) {{
-    verdict = 'They were not cheaper. If the photos look better, condition is the lever — not a price cut, and not location.';
+    verdict = 'They were not cheaper. If the photos look better, condition is the lever — not a price cut.';
   }} else if (miles != null && miles >= 1.2 && !cheaper) {{
-    verdict = 'This may have been the pocket, not the number. Location is not a lever. Do not chase this by cutting price.';
+    verdict = 'This may have been the pocket, not the number. Location is not adjustable. Do not chase this by cutting price.';
   }} else if (!cheaper && cond === 'worse') {{
-    verdict = 'No. They did not beat you on price or condition. This one should not move your list.';
+    verdict = 'No. They did not beat this list on price or condition.';
   }} else if (cond === 'same' && cheaper) {{
-    verdict = 'Same look in the photos, lower number. Price is the lever they used. You can still pull that one.';
+    verdict = 'Same look in the photos, lower number. Price is the lever they used.';
   }}
   if (ans === 'yes' && !cheaper && cond === 'worse') {{
     verdict += ' You said yes — the two adjustable levers do not back that up.';
   }}
-  const condBtns = [['better','Theirs looks better'],['same','About the same'],['worse','Yours looks better']].map(function (p) {{
+  const condBtns = [['better','Looks better'],['same','About the same'],['worse','Looks worse']].map(function (p) {{
     return '<button type="button" data-cond="' + p[0] + '" class="' + (cond === p[0] ? 'is-on' : '') + '">' + p[1] + '</button>';
   }}).join('');
   const ansBtns = [['yes','Yes'],['maybe','Not sure'],['no','No']].map(function (p) {{
     return '<button type="button" class="lever-ans' + (ans === p[0] ? ' is-on' : '') + '" data-ans="' + p[0] + '">' + p[1] + '</button>';
   }}).join('');
   return '<div class="lever-q">' +
-    '<p class="lever-ask">Should this have gone under contract before yours?</p>' +
+    '<p class="lever-ask">Should this have gone under contract first?</p>' +
     '<div class="lever-answers">' + ansBtns + '</div></div>' +
-    '<div class="lever-faces">' +
-      leverFace(yourPic, 'Yours', money(yours) + (subPpsf ? ' · $' + Math.round(subPpsf) + '/sf' : '')) +
-      leverFace(theirPic, streetLine(c) || 'This home', money(c.price) + ' · ' + stLab) +
-    '</div>' +
     '<div class="lever-grid">' +
-      '<article class="lever-card' + (cheaper ? ' is-hot' : '') + '"><div class="lk">Price <em>you can change this</em></div><p>' +
+      '<article class="lever-card' + (cheaper ? ' is-hot' : '') + '"><div class="lk">Price <em>adjustable</em></div><p>' +
       esc(priceLine) + '</p><p class="lm">' + esc(homeBits(c)) + (c.ppsf ? ' · $' + Math.round(c.ppsf) + '/sf' : '') + '</p></article>' +
-      '<article class="lever-card' + (cond === 'better' ? ' is-hot' : '') + '"><div class="lk">Condition <em>you can change this</em></div><p>' +
+      '<article class="lever-card' + (cond === 'better' ? ' is-hot' : '') + '"><div class="lk">Condition <em>adjustable</em></div><p>' +
       esc(condLine) + '</p><div class="lever-cond">' + condBtns + '</div></article>' +
-      '<article class="lever-card is-lock"><div class="lk">Location <em>not a lever</em></div><p>' +
-      esc(locLine) + '</p></article>' +
     '</div>' +
-    '<p class="lever-verdict">' + esc(verdict) + '</p>' +
-    '<button type="button" class="lever-open" data-id="' + esc(c.id) + '">Open full listing</button>';
+    '<p class="lever-verdict">' + esc(verdict) + '</p>';
 }}
 function leverWalkHtml() {{
   loadLevers();
@@ -982,9 +941,9 @@ function leverWalkHtml() {{
   homes.forEach(function (c) {{ ids[c.id] = 1; }});
   if (!leverId || !ids[leverId]) leverId = homes[0].id;
   return '<section class="levers" id="leverWalk">' +
-    '<div class="kicker">Two levers you can still pull</div>' +
-    '<h2>Should this have gone under contract before yours?</h2>' +
-    '<p class="sub">Homes that went pending or sold. The differentiator is price or condition — those two you can still change. Location can be the discussion. It cannot help you sell, because you cannot pick the house up and move it. Tap a home and walk it.</p>' +
+    '<div class="kicker">Price · condition · location</div>' +
+    '<h2>Three levers: price, condition, location</h2>' +
+    '<p class="sub">Only two are adjustable: price and condition. Location is not — you cannot pick the house up and move it. Tap a home that went pending or sold. Clicking opens the listing.</p>' +
     '<div class="lever-row" id="leverRow">' + homes.map(function (c) {{
       return laneHome(c, c.id === leverId ? 'is-on' : '');
     }}).join('') + '</div>' +
@@ -1009,8 +968,6 @@ function bindLeverStage() {{
       bindLeverStage();
     }});
   }});
-  const open = stage.querySelector('.lever-open');
-  if (open) open.addEventListener('click', function () {{ openDrawer(open.getAttribute('data-id')); }});
 }}
 function bindLevers() {{
   const walk = document.getElementById('leverWalk');
@@ -1029,6 +986,7 @@ function bindLevers() {{
         stage.innerHTML = leverStageHtml(leverId);
         bindLeverStage();
       }}
+      openDrawer(leverId);
     }});
   }});
   bindLeverStage();
@@ -1046,13 +1004,13 @@ function nowLanesHtml() {{
   const b = DATA.brief || {{}};
   const walk = leverWalkHtml();
   const under = photoLane(
-    'Listed under yours — they provide the value',
-    'Similar homes listed under your price. They are offering more value to the same buyers looking at yours.',
+    'Listed under yours — yours is providing the value',
+    'Similar homes listed under this price. Yours is providing the value to the same buyers.',
     b.new_under
   );
   const over = photoLane(
-    'Listed over yours — you provide the value',
-    'Similar homes listed over your price. Your list is the value play for buyers looking at theirs.',
+    'Listed over yours — providing value to yours',
+    'Similar homes listed over this price. They are providing value to yours.',
     b.new_over
   );
   const cuts = photoLane('Price cuts', 'Homes that dropped $1,000+ since the last look.', b.price_cuts);
