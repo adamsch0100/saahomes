@@ -474,18 +474,18 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
     if subj_bits:
         flow.append(Paragraph(f"<b>Subject:</b> {' · '.join(subj_bits)}", styles["small"]))
     facts = [
-        [Paragraph("<b>1. Custom-Fit Market</b>", styles["body_bold"]),
-         Paragraph("Size, garage, area, and timeframe — apples-to-apples vs what buyers compare.", styles["body"])],
-        [Paragraph("<b>2. Absorption Sets Pace</b>", styles["body_bold"]),
-         Paragraph(f"{sales_mo:.1f} sales/mo vs {active_n} Active → <b>{inv:.1f}</b> months of inventory.", styles["body"])],
-        [Paragraph("<b>3. Active = Competition</b>", styles["body_bold"]),
-         Paragraph(f"Pending/Backup are spoken for. List, and buyers choose among <b>{with_yours}</b>.", styles["body"])],
-        [Paragraph("<b>4. Closes Set Value</b>", styles["body_bold"]),
-         Paragraph("Asking prices are opinions. Sold prices are facts — the list is anchored to recent closes.", styles["body"])],
-        [Paragraph("<b>5. Condition Moves It</b>", styles["body_bold"]),
-         Paragraph("We start at a typical <b>5/10</b>, rate together, and the list responds.", styles["body"])],
+        [Paragraph("<b>1. Custom-Fit to This Home</b>", styles["body_bold"]),
+         Paragraph("Not a city average. Size, garage, area, and timeframe — the homes a buyer would actually put next to yours.", styles["body"])],
+        [Paragraph("<b>2. Absorption Sets the Pace</b>", styles["body_bold"]),
+         Paragraph("How fast this segment sells versus how many are for sale. That ratio is months of inventory — who has leverage.", styles["body"])],
+        [Paragraph("<b>3. Only Actives Compete</b>", styles["body_bold"]),
+         Paragraph("Pending and backup are already spoken for. Buyers choose among what’s for sale now.", styles["body"])],
+        [Paragraph("<b>4. Price, Condition, Location</b>", styles["body_bold"]),
+         Paragraph("That’s what buyers compare. You can’t move the house. You can still change the ask, and how it shows.", styles["body"])],
+        [Paragraph("<b>5. Who Looks Like the Better Buy</b>", styles["body_bold"]),
+         Paragraph("If they list under you, they’re the cheaper option next to yours. If they list over you, you are.", styles["body"])],
         [Paragraph("<b>6. Price Buys Time</b>", styles["body_bold"]),
-         Paragraph(f"Well-priced homes here go under contract in about <b>{median_dom:.0f}</b> days.", styles["body"])],
+         Paragraph("Priced with the market, homes here move. Overpriced listings linger — and help sell everyone else’s house.", styles["body"])],
     ]
     ft = Table(facts, colWidths=[2.0 * inch, 4.9 * inch])
     ft.setStyle(TableStyle([
