@@ -41,7 +41,7 @@ MAX_GALLERY_PHOTOS = 15
 # Reject Realtor/Zillow thumbnails that are too small to look sharp in the deck.
 MIN_PHOTO_BYTES = 12_000
 PHOTO_CACHE_VERSION = 2
-PHOTO_MISS_VERSION = 4
+PHOTO_MISS_VERSION = 5
 ENRICH_BUDGET_SEC = 55
 CLUSTER_RADIUS_DEG = 0.006
 CLUSTER_PAD_DEG = 0.002
@@ -227,11 +227,15 @@ def _address_match_score(target: str, candidate: str) -> float:
     if not t_tokens:
         return 0.55
     overlap = len(t_tokens & c_tokens)
-    if overlap == 0:
-        if t_tokens and c_tokens:
-            return 0.0
+    if overlap:
+        return 0.55 + 0.45 * (overlap / max(len(t_tokens), 1))
+    cand_low = (candidate or "").lower()
+    numbered = [tok for tok in t_tokens if any(ch.isdigit() for ch in tok)]
+    if numbered and any(tok in cand_low for tok in numbered):
         return 0.55
-    return 0.55 + 0.45 * (overlap / max(len(t_tokens), 1))
+    if not t_tokens or not c_tokens:
+        return 0.55
+    return 0.0
 
 
 def upgrade_listing_photo_url(url: str) -> str:
@@ -396,7 +400,7 @@ def _search_address(address: str) -> list[dict]:
 def _match_item(target_address: str, items: list[dict]) -> dict | None:
     scored: list[tuple[float, dict]] = []
     for item in items:
-        cand = item.get("address") or item.get("address_line") or ""
+        cand = item.get("address") or item.get("address_line") or item.get("streetAddress") or item.get("unparsed_address") or ""
         score = _address_match_score(target_address, str(cand))
         if score >= 0.55:
             scored.append((score, item))

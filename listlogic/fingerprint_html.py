@@ -201,13 +201,36 @@ body.is-seller .console {{ display:none; }}
 .console .status {{ font-size:.75rem; color:var(--muted); margin-top:8px; min-height:1.2em; }}
 .links {{ display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; font-size:.82rem; font-weight:700; }}
 .drawer {{
-  position:fixed; inset:0; background:rgba(11,18,32,.46); z-index:40; display:none; align-items:stretch; justify-content:flex-end;
+  position:fixed; inset:0; background:rgba(11,18,32,.55); z-index:40; display:none;
+  align-items:center; justify-content:center; padding:20px;
 }}
 .drawer.open {{ display:flex; }}
-.drawer .panel {{ width:min(420px,100%); background:#fff; padding:20px; overflow:auto; }}
-.drawer .dpic {{ width:100%; height:220px; object-fit:cover; border-radius:12px; background:#eef2f7; }}
-.drawer h3 {{ font-family:Fraunces,Georgia,serif; margin:12px 0 6px; }}
-.drawer .close {{ float:right; border:0; background:transparent; font-size:1.4rem; cursor:pointer; }}
+.drawer .panel {{
+  width:min(720px,100%); max-height:min(90vh,920px); background:#fff; overflow:auto;
+  border-radius:20px; box-shadow:0 24px 60px rgba(11,18,32,.28); position:relative;
+}}
+.drawer .gallery {{ position:relative; background:#dfe6ef; }}
+.drawer .dpic {{ width:100%; height:min(42vh,360px); object-fit:cover; display:block; background:#eef2f7; }}
+.drawer .dpic.empty {{ height:120px; }}
+.drawer .gal-btn {{
+  position:absolute; top:50%; transform:translateY(-50%); width:36px; height:36px; border:0;
+  border-radius:50%; background:rgba(11,18,32,.72); color:#fff; font-size:1.35rem; cursor:pointer; line-height:1;
+}}
+.drawer .gal-prev {{ left:10px; }}
+.drawer .gal-next {{ right:10px; }}
+.drawer .gal-count {{
+  position:absolute; right:12px; bottom:10px; background:rgba(11,18,32,.7); color:#fff;
+  font-size:.72rem; font-weight:700; padding:3px 8px; border-radius:99px;
+}}
+.drawer .panel-body {{ padding:8px 22px 22px; }}
+.drawer h3 {{ font-family:Fraunces,Georgia,serif; margin:12px 0 4px; font-size:1.35rem; }}
+.drawer .price-line {{ font-family:Fraunces,Georgia,serif; font-size:1.2rem; font-weight:700; }}
+.drawer .close {{
+  position:absolute; top:10px; right:10px; z-index:2; width:36px; height:36px; border:0;
+  border-radius:50%; background:rgba(255,255,255,.92); font-size:1.4rem; cursor:pointer; line-height:1;
+}}
+.drawer .meta {{ color:var(--muted); font-size:.88rem; line-height:1.4; }}
+.drawer ul {{ margin:6px 0 0 1.1rem; font-size:.88rem; line-height:1.45; }}
 .note {{ font-size:.78rem; color:var(--muted); margin-top:8px; }}
 .upload {{ display:none; }}
 .weeks-wrap {{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin-bottom:18px; }}
@@ -266,28 +289,52 @@ body.is-seller .console {{ display:none; }}
 .lanes {{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin-bottom:18px; }}
 .lanes h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.15rem; margin-bottom:4px; }}
 .lanes > .sub {{ color:var(--muted); font-size:.82rem; margin-bottom:12px; }}
-.lane {{ margin-top:10px; }}
-.lane h3 {{ font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }}
-.lane-row {{ display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; }}
+.lane {{ margin-top:16px; padding-top:14px; border-top:1px solid var(--line); }}
+.lanes > .lane:first-of-type {{ border-top:0; padding-top:0; margin-top:6px; }}
+.lane h3 {{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  font-size:.8rem; letter-spacing:.04em; text-transform:uppercase; color:var(--ink);
+  font-weight:800; margin-bottom:10px;
+}}
+.lane h3 .n {{
+  display:inline-block; background:#eef2f7; color:var(--navy); border-radius:99px;
+  padding:2px 9px; font-size:.72rem; letter-spacing:0; font-weight:800;
+}}
+.lane.is-uc h3 {{ color:#c2410c; }}
+.lane.is-sold h3 {{ color:#64748b; }}
+.lane.is-active h3 {{ color:var(--teal); }}
+.lane-row {{ display:flex; gap:12px; overflow-x:auto; padding-bottom:6px; }}
 .lane-home {{
-  flex:0 0 auto; width:176px; padding:0; border:1px solid var(--line); border-radius:12px;
+  flex:0 0 auto; width:200px; padding:0; border:1px solid var(--line); border-radius:14px;
   overflow:hidden; background:#fff; cursor:pointer; text-align:left; font:inherit; color:inherit;
   appearance:none; -webkit-appearance:none;
 }}
 .lane-home.is-week {{ border-color:var(--gold); box-shadow:0 0 0 2px #c9a22755; }}
 .lane-home.is-pin {{ border-color:var(--navy); box-shadow:0 0 0 2px #0c3c6e44; }}
-.lane-pic {{ display:block; width:100%; height:110px; background:#dfe6ef center/cover no-repeat; }}
+.lane-pic {{ display:block; width:100%; height:124px; background:#dfe6ef center/cover no-repeat; }}
 .lane-pic.empty {{
   background-color:#e8eef4;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='40' viewBox='0 0 48 40'><path fill='%23b7c2cf' d='M24 4l20 16h-6v16H10V20H4z'/></svg>");
   background-repeat:no-repeat;
-  background-position:center 32px;
+  background-position:center 42px;
   background-size:36px 30px;
 }}
-.lane-meta {{ padding:8px 9px 9px; }}
-.lane-meta .p {{ font-family:Fraunces,Georgia,serif; font-size:.95rem; font-weight:700; }}
-.lane-meta .a {{ display:block; font-size:.72rem; font-weight:700; color:var(--ink); margin-top:3px; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }}
-.lane-meta .m {{ font-size:.65rem; color:var(--muted); margin-top:2px; line-height:1.35; }}
+.lane-meta {{ padding:10px 11px 12px; }}
+.lane-meta .p {{ font-family:Fraunces,Georgia,serif; font-size:1.08rem; font-weight:700; }}
+.lane-meta .a {{
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  font-size:.8rem; font-weight:700; color:var(--ink); margin-top:4px; line-height:1.3;
+  overflow:hidden;
+}}
+.lane-meta .m {{ font-size:.72rem; color:var(--muted); margin-top:4px; line-height:1.4; }}
+.set-totals {{
+  display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 12px;
+}}
+.set-totals span {{
+  background:#f7f4ee; border:1px solid var(--line); border-radius:999px;
+  padding:5px 11px; font-size:.78rem; font-weight:700; color:var(--navy);
+}}
+.set-totals b {{ font-family:Fraunces,Georgia,serif; font-size:.95rem; }}
 .photo-banner {{
   display:none; margin:0 0 14px; padding:10px 14px; border-radius:12px;
   background:#0c3c6e; color:#fff; font-size:.82rem; font-weight:600;
@@ -343,12 +390,26 @@ body.is-seller .console {{ display:none; }}
 .board-pane-h span {{ font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; font-weight:800; color:#f0d060; }}
 .board-pane-h small {{ color:#9aabc0; font-size:.72rem; }}
 .board-grid {{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; }}
-.board-stat {{ text-align:center; padding:6px 2px; }}
-.board-n {{ font-family:Fraunces,Georgia,serif; font-size:clamp(1.35rem, 2.4vw, 1.85rem); font-weight:700; line-height:1; }}
-.board-l {{ font-size:.62rem; letter-spacing:.04em; text-transform:uppercase; font-weight:800; color:#c8d2e0; margin-top:6px; }}
-.board-h {{ font-size:.62rem; color:#8a9bb0; margin-top:2px; line-height:1.3; }}
+.board-stat {{
+  text-align:center; padding:8px 6px; border-right:1px solid rgba(255,255,255,.08);
+}}
+.board-stat:last-child {{ border-right:0; }}
+.board-n {{ font-family:Fraunces,Georgia,serif; font-size:clamp(1.45rem, 2.6vw, 2rem); font-weight:700; line-height:1; }}
+.board-l {{ font-size:.7rem; letter-spacing:.04em; text-transform:uppercase; font-weight:800; color:#e8eef6; margin-top:7px; }}
+.board-h {{ font-size:.68rem; color:#9aabc0; margin-top:3px; line-height:1.35; }}
 .board-stat.is-under .board-n {{ color:#f3b4b4; }}
 .board-stat.is-over .board-n {{ color:#8ee0c8; }}
+.board-totals {{
+  display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:12px 0 4px;
+}}
+.board-total {{
+  background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1);
+  border-radius:14px; padding:12px 14px;
+}}
+.board-total .k {{ font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:#f0d060; font-weight:800; }}
+.board-total .v {{ font-family:Fraunces,Georgia,serif; font-size:1.35rem; font-weight:700; margin:4px 0 2px; }}
+.board-total .s {{ font-size:.78rem; color:#c8d2e0; line-height:1.4; }}
+.board-table tfoot td {{ color:#f0d060; border-bottom:0; }}
 .board-table-wrap {{ overflow-x:auto; margin-top:12px; }}
 .board-table {{ width:100%; border-collapse:collapse; min-width:520px; }}
 .board-table th, .board-table td {{ padding:9px 8px; text-align:center; font-size:.82rem; }}
@@ -365,8 +426,9 @@ body.is-seller .console {{ display:none; }}
 .board-table .is-under {{ color:#f3b4b4; }}
 .board-table .is-over {{ color:#8ee0c8; }}
 @media (max-width:800px) {{
-  .board-panes {{ grid-template-columns:1fr; }}
+  .board-panes, .board-totals {{ grid-template-columns:1fr; }}
   .board-grid {{ grid-template-columns:repeat(3,minmax(0,1fr)); }}
+  .board-stat {{ border-right:0; }}
 }}
 .strip {{ position:relative; height:72px; }}
 .strip .tick {{ cursor:pointer; }}
@@ -434,6 +496,7 @@ body.is-seller .console {{ display:none; }}
 .since-line {{ font-size:.82rem; color:var(--muted); margin:8px 0 0; }}
 .since-line b {{ color:var(--ink); }}
 .week-homes .lane {{ margin-top:8px; }}
+.week-homes .lane:first-of-type {{ border-top:0; padding-top:0; margin-top:0; }}
 @media (max-width:640px) {{ .hero {{ min-height:180px; }} }}
 </style>
 </head>
@@ -742,16 +805,23 @@ function lanesHtml() {{
     else if (st === 'pending' || st === 'backup' || st === 'firstright') pending.push(c);
     else if (st !== 'gone') active.push(c);
   }}
-  function lane(title, items) {{
+  function lane(title, items, kind) {{
     if (!items.length) return '';
-    return '<div class="lane"><h3>' + esc(title) + ' · ' + items.length + '</h3><div class="lane-row">' +
+    return '<div class="lane' + (kind ? ' is-' + kind : '') + '"><h3>' + esc(title) + ' <span class="n">' + items.length + '</span></h3><div class="lane-row">' +
       items.map(laneHome).join('') + '</div></div>';
   }}
   const when = clockKind() === 'active' ? 'when this home went active' : 'when this Fingerprint was generated';
+  const total = active.length + pending.length + sold.length;
   return '<div class="lanes" id="day0Lanes"><h2>The original similar set</h2>' +
     '<p class="sub">Homes that were similar actives ' + when + ' — still active, under contract, or sold. Supporting picture of that first list, not this week’s news.</p>' +
+    '<div class="set-totals">' +
+      '<span><b>' + total + '</b> in this set</span>' +
+      '<span><b>' + active.length + '</b> still active</span>' +
+      '<span><b>' + pending.length + '</b> under contract</span>' +
+      '<span><b>' + sold.length + '</b> sold</span>' +
+    '</div>' +
     sortsHtml('lanes') +
-    lane('Still active', active) + lane('Under contract', pending) + lane('Sold since ' + (clockKind() === 'active' ? 'active' : 'generate'), sold) + '</div>';
+    lane('Still active', active, 'active') + lane('Under contract', pending, 'uc') + lane('Sold since ' + (clockKind() === 'active' ? 'active' : 'generate'), sold, 'sold') + '</div>';
 }}
 function weekHomesHtml(asOf) {{
   const homes = homesForWeek(asOf);
@@ -776,8 +846,8 @@ function weekHomesHtml(asOf) {{
     else if (didList) listed.push(c);
     else listed.push(c);
   }});
-  function col(title, rows) {{
-    return '<div class="lane"><h3>' + esc(title) + ' · ' + rows.length + '</h3>' +
+  function col(title, rows, kind) {{
+    return '<div class="lane' + (kind ? ' is-' + kind : '') + '"><h3>' + esc(title) + ' <span class="n">' + rows.length + '</span></h3>' +
       (rows.length
         ? '<div class="lane-row">' + rows.map(laneHome).join('') + '</div>'
         : '<p class="empty">None this week.</p>') + '</div>';
@@ -786,9 +856,9 @@ function weekHomesHtml(asOf) {{
     return '<div class="week-homes" id="weekHomes"><p class="empty">No similar homes listed, went under contract, or sold this week.</p></div>';
   }}
   return '<div class="week-homes" id="weekHomes">' +
-    col('Listed', listed) +
-    col('Under contract', uc) +
-    col('Sold', sold) +
+    col('Listed', listed, 'active') +
+    col('Under contract', uc, 'uc') +
+    col('Sold', sold, 'sold') +
     '</div>';
 }}
 function applyWeekHighlight(asOf) {{
@@ -974,6 +1044,18 @@ function boardHtml() {{
       '<div class="board-stat"><div class="board-n">' + pack.sold + '</div><div class="board-l">Sold</div><div class="board-h">Closed in this set</div></div>' +
     '</div>';
   }}
+  function totalCard(label, pack) {{
+    const moved = Number(pack.listed || 0) + Number(pack.uc || 0) + Number(pack.sold || 0);
+    return '<div class="board-total"><div class="k">' + esc(label) + '</div>' +
+      '<div class="v">' + moved + ' homes moved</div>' +
+      '<div class="s">' + pack.listed + ' listed · ' + pack.under + ' under your price · ' + pack.over +
+      ' over your price · ' + pack.uc + ' under contract · ' + pack.sold + ' sold</div></div>';
+  }}
+  const sums = {{ listed: 0, under: 0, over: 0, uc: 0, sold: 0 }};
+  hist.forEach(function (w) {{
+    const m = weekMotion(weekAsOf(w));
+    sums.listed += m.listed; sums.under += m.under; sums.over += m.over; sums.uc += m.uc; sums.sold += m.sold;
+  }});
   const rows = hist.map(function (w) {{
     const asOf = weekAsOf(w);
     const m = weekMotion(asOf);
@@ -995,10 +1077,13 @@ function boardHtml() {{
       '<div class="board-pane"><div class="board-pane-h"><span>This week</span><small>' + weekLabel(current) + '</small></div>' + stats(week) + '</div>' +
       '<div class="board-pane"><div class="board-pane-h"><span>' + esc(sinceKind) + '</span><small>Running total</small></div>' + stats(since) + '</div>' +
     '</div>' +
+    '<div class="board-totals">' + totalCard('This week', week) + totalCard(sinceKind, since) + '</div>' +
     (hist.length
       ? '<div class="board-table-wrap"><table class="board-table"><thead><tr>' +
         '<th>Week</th><th>New</th><th>Under list</th><th>Over list</th><th>Under contract</th><th>Sold</th>' +
-        '</tr></thead><tbody>' + rows + '</tbody></table></div>'
+        '</tr></thead><tbody>' + rows + '</tbody>' +
+        '<tfoot><tr><td>Total</td><td>' + sums.listed + '</td><td class="is-under">' + sums.under +
+        '</td><td class="is-over">' + sums.over + '</td><td>' + sums.uc + '</td><td>' + sums.sold + '</td></tr></tfoot></table></div>'
       : '') +
     '</section>';
 }}
@@ -1636,32 +1721,79 @@ function bindConsole() {{
   document.getElementById('btnNoteShare')?.addEventListener('click', () => postNote('publish'));
   document.getElementById('btnNoteUnpublish')?.addEventListener('click', () => postNote('unpublish'));
 }}
+let galPics = [];
+let galIdx = 0;
+function closeDrawer() {{
+  const d = document.getElementById('drawer');
+  if (!d) return;
+  d.classList.remove('open');
+  d.hidden = true;
+  galPics = [];
+  galIdx = 0;
+}}
+function paintGallery() {{
+  const img = document.getElementById('galPic');
+  const count = document.getElementById('galCount');
+  if (!img || !galPics.length) return;
+  img.src = galPics[galIdx];
+  if (count) count.textContent = (galIdx + 1) + ' / ' + galPics.length;
+}}
+function bindGallery() {{
+  const prev = document.getElementById('galPrev');
+  const next = document.getElementById('galNext');
+  if (prev) prev.addEventListener('click', function (ev) {{
+    ev.stopPropagation();
+    if (!galPics.length) return;
+    galIdx = (galIdx + galPics.length - 1) % galPics.length;
+    paintGallery();
+  }});
+  if (next) next.addEventListener('click', function (ev) {{
+    ev.stopPropagation();
+    if (!galPics.length) return;
+    galIdx = (galIdx + 1) % galPics.length;
+    paintGallery();
+  }});
+}}
 function openDrawer(id) {{
   const c = byId(id);
   if (!c) return;
-  const pics = (c.photos && c.photos.length ? c.photos : (c.photo_url ? [c.photo_url] : []));
+  galPics = (c.photos && c.photos.length ? c.photos : (c.photo_url ? [c.photo_url] : [])).filter(Boolean);
+  galIdx = 0;
   const hist = (c.status_history || []).map(h => '<li>' + esc(h.as_of) + ' · ' + esc(h.status) + ' · ' + money(h.price) + '</li>').join('');
   const maps = mapsHref(c);
   const links = [];
   if (maps) links.push('<a href="' + esc(maps) + '" target="_blank" rel="noopener">Map</a>');
   if (c.zillow) links.push('<a href="' + esc(c.zillow) + '" target="_blank" rel="noopener">Zillow</a>');
   if (c.realtor) links.push('<a href="' + esc(c.realtor) + '" target="_blank" rel="noopener">Realtor.com</a>');
+  const gal = galPics.length
+    ? '<div class="gallery"><img class="dpic" id="galPic" src="' + esc(galPics[0]) + '" alt="">' +
+      (galPics.length > 1
+        ? '<button type="button" class="gal-btn gal-prev" id="galPrev" aria-label="Previous photo">‹</button>' +
+          '<button type="button" class="gal-btn gal-next" id="galNext" aria-label="Next photo">›</button>' +
+          '<div class="gal-count" id="galCount">1 / ' + galPics.length + '</div>'
+        : '') +
+      '</div>'
+    : '<div class="gallery"><div class="dpic empty"></div></div>';
   document.getElementById('drawerBody').innerHTML =
-    (pics[0] ? '<img class="dpic" src="' + esc(pics[0]) + '" alt="">' : '') +
+    gal +
+    '<div class="panel-body">' +
     '<h3>' + esc(c.address) + '</h3>' +
     (c.city ? '<p class="meta">' + esc(c.city) + '</p>' : '') +
-    '<p>' + money(c.price) + (c.delta ? ' · ' + (c.delta > 0 ? '+' : '') + money(c.delta) + ' vs list' : '') + '</p>' +
+    '<p class="price-line">' + money(c.price) + (c.delta ? ' · ' + (c.delta > 0 ? '+' : '') + money(c.delta) + ' vs list' : '') + '</p>' +
     '<p class="meta">' + esc([c.status, c.beds ? c.beds + ' bd' : '', c.baths ? c.baths + ' ba' : '', c.sqft ? Number(c.sqft).toLocaleString() + ' sf' : '', c.dom ? c.dom + ' DOM' : ''].filter(Boolean).join(' · ')) + '</p>' +
-    (hist ? '<p style="margin-top:12px;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#5c6675">Status</p><ul>' + hist + '</ul>' : '') +
-    (links.length ? '<p style="margin-top:14px;font-size:.82rem">' + links.join(' · ') + '</p>' : '');
+    (hist ? '<p class="meta" style="margin-top:14px;text-transform:uppercase;letter-spacing:.06em;font-size:.72rem;">Status</p><ul>' + hist + '</ul>' : '') +
+    (links.length ? '<p style="margin-top:14px;font-size:.88rem">' + links.join(' · ') + '</p>' : '') +
+    '</div>';
   const d = document.getElementById('drawer');
   d.hidden = false; d.classList.add('open');
+  bindGallery();
 }}
-document.getElementById('drawerClose').addEventListener('click', () => {{
-  const d = document.getElementById('drawer'); d.classList.remove('open'); d.hidden = true;
-}});
+document.getElementById('drawerClose').addEventListener('click', closeDrawer);
 document.getElementById('drawer').addEventListener('click', (e) => {{
-  if (e.target.id === 'drawer') {{ e.currentTarget.classList.remove('open'); e.currentTarget.hidden = true; }}
+  if (e.target.id === 'drawer') closeDrawer();
+}});
+document.addEventListener('keydown', function (e) {{
+  if (e.key === 'Escape') closeDrawer();
 }});
 (function () {{
   const sample = DATA.run_id === 'sample-2845' || /[?&]sample=1(?:&|$)/.test(location.search);
