@@ -474,20 +474,20 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
     if subj_bits:
         flow.append(Paragraph(f"<b>Subject:</b> {' · '.join(subj_bits)}", styles["small"]))
     facts = [
-        [Paragraph("<b>1. Custom-Fit to This Home</b>", styles["body_bold"]),
-         Paragraph("Not a city average. Size, garage, area, and timeframe — the homes a buyer would actually put next to yours.", styles["body"])],
-        [Paragraph("<b>2. Absorption Sets the Pace</b>", styles["body_bold"]),
-         Paragraph("How fast this segment sells versus how many are for sale. That ratio is months of inventory — who has leverage.", styles["body"])],
-        [Paragraph("<b>3. Only Actives Compete</b>", styles["body_bold"]),
-         Paragraph("Pending and backup are already spoken for. Buyers choose among what’s for sale now.", styles["body"])],
-        [Paragraph("<b>4. Price, Condition, Location</b>", styles["body_bold"]),
-         Paragraph("That’s what buyers compare. You can’t move the house. You can still change the ask, and how it shows.", styles["body"])],
-        [Paragraph("<b>5. Who Looks Like the Better Buy</b>", styles["body_bold"]),
-         Paragraph("If they list under you, they’re the cheaper option next to yours. If they list over you, you are.", styles["body"])],
-        [Paragraph("<b>6. Price Buys Time</b>", styles["body_bold"]),
-         Paragraph("Priced with the market, homes here move. Overpriced listings linger — and help sell everyone else’s house.", styles["body"])],
+        [Paragraph("<b>1. Your Home’s Market Fingerprint</b>", styles["body_bold"]),
+         Paragraph("Custom market fit to your home — size, beds, baths, garage, lot size, and location.", styles["body"])],
+        [Paragraph("<b>2. Supply and Demand</b>", styles["body_bold"]),
+         Paragraph("How many homes are for sale versus how fast they sell. That balance is who has leverage.", styles["body"])],
+        [Paragraph("<b>3. Your Competition</b>", styles["body_bold"]),
+         Paragraph("Active, available homes — the ones a buyer can actually go see. Pending and backup are already spoken for.", styles["body"])],
+        [Paragraph("<b>4. Three Levers — Price, Condition, Location</b>", styles["body_bold"]),
+         Paragraph("That’s what buyers compare. You can’t move the house. You can still change the asking price, and improve the condition.", styles["body"])],
+        [Paragraph("<b>5. Providing Value or Are the Value</b>", styles["body_bold"]),
+         Paragraph("If a similar home lists under you, they’re providing the value — they look like the better buy next to yours. If they list over you, you are the value. Same kind of house; the ask is what makes one of you look like the deal.", styles["body"])],
+        [Paragraph("<b>6. Pricing Determines Time to Contract</b>", styles["body_bold"]),
+         Paragraph("The asking price is what determines how long it takes to go under contract. Priced with the market, homes here move. Overpriced listings linger — and help sell everyone else’s house.", styles["body"])],
     ]
-    ft = Table(facts, colWidths=[2.0 * inch, 4.9 * inch])
+    ft = Table(facts, colWidths=[2.35 * inch, 4.55 * inch])
     ft.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, -1), LIGHT),
         ("BOX", (0, 0), (-1, -1), 0.5, BORDER),

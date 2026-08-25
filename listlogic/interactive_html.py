@@ -1544,7 +1544,7 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
 .cf-card:hover{{background:rgba(255,255,255,.1);border-color:rgba(253,230,138,.35);transform:translateY(-1px)}}
 .cf-card .cf-top{{display:flex;align-items:center;gap:10px}}
 .cf-card .cf-n{{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#fde68a;color:#0c2238;font-size:.8rem;font-weight:800;box-shadow:0 2px 8px rgba(253,230,138,.35)}}
-.cf-card .cf-t{{font-size:.92rem;font-weight:800;color:#fff;line-height:1.25;letter-spacing:-.01em}}
+.cf-card .cf-t{{flex:1;min-width:0;font-size:.92rem;font-weight:800;color:#fff;line-height:1.25;letter-spacing:-.01em}}
 .cf-card .cf-b{{font-size:.8rem;line-height:1.4;color:rgba(255,255,255,.82);margin:0}}
 .cf-card .cf-b strong{{color:#fde68a;font-weight:700}}
 .cf-card.cf-key{{background:rgba(253,230,138,.1);border-color:rgba(253,230,138,.32)}}
@@ -2051,34 +2051,34 @@ body.ll-sample .sample-demo-bar{{display:flex}}
     </div>
   </div>
 
-  <section class="core-facts" id="spine-corefacts" data-cf="no-stats">
+  <section class="core-facts" id="spine-corefacts" data-cf="fingerprint">
     <div class="cf-head">
       <div class="cf-eyebrow" data-copy="cf-eyebrow">Core Facts of ListLogic</div>
     </div>
     <div class="cf-grid">
       <article class="cf-card">
-        <div class="cf-top"><span class="cf-n">1</span><div class="cf-t" data-copy="cf-1-t">Custom-Fit to This Home</div></div>
-        <p class="cf-b" data-copy="cf-1-b">Not a city average. Size, garage, area, and timeframe — the homes a buyer would actually put next to yours.</p>
+        <div class="cf-top"><span class="cf-n">1</span><div class="cf-t" data-copy="cf-1-t">Your Home’s Market Fingerprint</div></div>
+        <p class="cf-b" data-copy="cf-1-b">Custom market fit to your home — size, beds, baths, garage, lot size, and location.</p>
       </article>
       <article class="cf-card">
-        <div class="cf-top"><span class="cf-n">2</span><div class="cf-t" data-copy="cf-2-t">Absorption Sets the Pace</div></div>
-        <p class="cf-b" data-copy="cf-2-b">How fast this segment sells versus how many are for sale. That ratio is months of inventory — who has leverage.</p>
+        <div class="cf-top"><span class="cf-n">2</span><div class="cf-t" data-copy="cf-2-t">Supply and Demand</div></div>
+        <p class="cf-b" data-copy="cf-2-b">How many homes are for sale versus how fast they sell. That balance is who has leverage.</p>
       </article>
       <article class="cf-card">
-        <div class="cf-top"><span class="cf-n">3</span><div class="cf-t" data-copy="cf-3-t">Only Actives Compete</div></div>
-        <p class="cf-b" data-copy="cf-3-b">Pending and backup are already spoken for. Buyers choose among what’s for sale now.</p>
+        <div class="cf-top"><span class="cf-n">3</span><div class="cf-t" data-copy="cf-3-t">Your Competition</div></div>
+        <p class="cf-b" data-copy="cf-3-b">Active, available homes — the ones a buyer can actually go see. Pending and backup are already spoken for.</p>
       </article>
       <article class="cf-card cf-key">
-        <div class="cf-top"><span class="cf-n">4</span><div class="cf-t" data-copy="cf-levers">Price, Condition, Location</div></div>
-        <p class="cf-b" data-copy="cf-levers-b">That’s what buyers compare. You can’t move the house. You can still change the ask, and how it shows.</p>
+        <div class="cf-top"><span class="cf-n">4</span><div class="cf-t" data-copy="cf-levers">Three Levers — Price, Condition, Location</div></div>
+        <p class="cf-b" data-copy="cf-levers-b">That’s what buyers compare. You can’t move the house. You can still change the asking price, and improve the condition.</p>
       </article>
       <article class="cf-card">
-        <div class="cf-top"><span class="cf-n">5</span><div class="cf-t" data-copy="cf-value">Who Looks Like the Better Buy</div></div>
-        <p class="cf-b" data-copy="cf-value-b">If they list under you, they’re the cheaper option next to yours. If they list over you, you are.</p>
+        <div class="cf-top"><span class="cf-n">5</span><div class="cf-t" data-copy="cf-value">Providing Value or Are the Value</div></div>
+        <p class="cf-b" data-copy="cf-value-b">If a similar home lists under you, they’re providing the value — they look like the better buy next to yours. If they list over you, you are the value. Same kind of house; the ask is what makes one of you look like the deal.</p>
       </article>
       <article class="cf-card">
-        <div class="cf-top"><span class="cf-n">6</span><div class="cf-t" data-copy="cf-6-t">Price Buys Time</div></div>
-        <p class="cf-b" data-copy="cf-6-b">Priced with the market, homes here move. Overpriced listings linger — and help sell everyone else’s house.</p>
+        <div class="cf-top"><span class="cf-n">6</span><div class="cf-t" data-copy="cf-6-t">Pricing Determines Time to Contract</div></div>
+        <p class="cf-b" data-copy="cf-6-b">The asking price is what determines how long it takes to go under contract. Priced with the market, homes here move. Overpriced listings linger — and help sell everyone else’s house.</p>
       </article>
     </div>
   </section>

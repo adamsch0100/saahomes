@@ -143,12 +143,12 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
     )
 
     facts = [
-        ("1", "Custom-Fit to This Home", "Not a city average. Size, garage, area, and timeframe — the homes a buyer would actually put next to yours."),
-        ("2", "Absorption Sets the Pace", "How fast this segment sells versus how many are for sale. That ratio is months of inventory — who has leverage."),
-        ("3", "Only Actives Compete", "Pending and backup are already spoken for. Buyers choose among what’s for sale now."),
-        ("4", "Price, Condition, Location", "That’s what buyers compare. You can’t move the house. You can still change the ask, and how it shows."),
-        ("5", "Who Looks Like the Better Buy", "If they list under you, they’re the cheaper option next to yours. If they list over you, you are."),
-        ("6", "Price Buys Time", "Priced with the market, homes here move. Overpriced listings linger — and help sell everyone else’s house."),
+        ("1", "Your Home’s Market Fingerprint", "Custom market fit to your home — size, beds, baths, garage, lot size, and location."),
+        ("2", "Supply and Demand", "How many homes are for sale versus how fast they sell. That balance is who has leverage."),
+        ("3", "Your Competition", "Active, available homes — the ones a buyer can actually go see. Pending and backup are already spoken for."),
+        ("4", "Three Levers — Price, Condition, Location", "That’s what buyers compare. You can’t move the house. You can still change the asking price, and improve the condition."),
+        ("5", "Providing Value or Are the Value", "If a similar home lists under you, they’re providing the value — they look like the better buy next to yours. If they list over you, you are the value. Same kind of house; the ask is what makes one of you look like the deal."),
+        ("6", "Pricing Determines Time to Contract", "The asking price is what determines how long it takes to go under contract. Priced with the market, homes here move. Overpriced listings linger — and help sell everyone else’s house."),
     ]
     facts_html = "".join(
         f'<div class="fact"><span class="fn">{n}</span><div><div class="ft">{_esc(t)}</div>'
