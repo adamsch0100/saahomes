@@ -368,20 +368,18 @@ body.is-seller .console {{ display:none; }}
   .board-panes {{ grid-template-columns:1fr; }}
   .board-grid {{ grid-template-columns:repeat(3,minmax(0,1fr)); }}
 }}
-.strip {{ position:relative; height:88px; }}
+.strip {{ position:relative; height:72px; }}
 .strip .tick {{ cursor:pointer; }}
 .strip .tick.is-pin {{ background:var(--navy); }}
-.strip-pin {{
-  position:absolute; z-index:4; width:228px; background:#fff; border:1px solid var(--line);
-  border-radius:12px; box-shadow:0 10px 28px rgba(11,18,32,.14); padding:8px; display:none;
-  transform:translateX(-50%); bottom:48px; text-align:left;
+.strip-now {{
+  min-height:1.4em; margin:6px 0 0; font-size:.84rem; font-weight:700; color:var(--ink); line-height:1.35;
 }}
-.strip-pin.open {{ display:block; }}
-.strip-pin img, .strip-pin .ph {{ width:100%; height:92px; object-fit:cover; border-radius:8px; background:#eef2f7; display:block; }}
-.strip-pin strong {{ display:block; font-size:.82rem; margin-top:6px; }}
-.strip-pin .p {{ font-family:Fraunces,Georgia,serif; font-size:1rem; font-weight:700; }}
-.strip-pin .m {{ font-size:.68rem; color:var(--muted); margin-top:2px; }}
+.strip-now span {{ color:var(--muted); font-weight:500; }}
 .card.is-pin {{ border-color:var(--navy); box-shadow:0 0 0 2px #0c3c6e44; }}
+.now-kicker {{ margin:0 0 12px; }}
+.now-kicker .kicker {{ font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--navy); font-weight:800; }}
+.now-kicker h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.22rem; margin:2px 0 4px; }}
+.now-kicker .sub {{ color:var(--muted); font-size:.82rem; line-height:1.45; }}
 .sample-demo-bar {{
   display:none; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
   background:#0b1220; color:#fff; padding:10px 18px; font-size:.86rem; margin:0 0 16px; border-radius:14px;
@@ -706,6 +704,19 @@ function photoLane(title, sub, rows, sid) {{
     '<p class="sub">' + esc(sub) + '</p>' +
     '<div class="lane"><div class="lane-row">' + sortedRows(rows, laneSort).map(laneHome).join('') + '</div></div></div>';
 }}
+function nowLanesHtml() {{
+  const b = DATA.brief || {{}};
+  const under = photoLane('Listed since — under your list', 'New similar homes priced under the initial list. Buyers open these first.', b.new_under);
+  const over = photoLane('Listed since — over your list', 'New similar homes priced over the initial list.', b.new_over);
+  const cuts = photoLane('Price cuts', 'Homes that dropped $1,000+ since the last look.', b.price_cuts);
+  const uc = photoLane('Under contract now', 'Pending, backup, and first-right in this size band.', b.pending_now || b.went_pending);
+  const body = under + over + cuts + uc;
+  if (!body) return '';
+  return '<div id="nowLanes"><div class="now-kicker"><div class="kicker">Right now</div>' +
+    '<h2>What is happening around your list</h2>' +
+    '<p class="sub">New lists, price cuts, and homes that went under contract — walk these with the seller, then check where you sit.</p></div>' +
+    body + '</div>';
+}}
 function lanesHtml() {{
   const rows = sortedRows(((DATA.brief || {{}}).baseline || (DATA.brief || {{}}).baseline || []), laneSort);
   if (!rows.length) return '';
@@ -725,8 +736,8 @@ function lanesHtml() {{
       items.map(laneHome).join('') + '</div></div>';
   }}
   const when = clockKind() === 'active' ? 'when this home went active' : 'when this Fingerprint was generated';
-  return '<div class="lanes" id="day0Lanes"><h2>Where they are now</h2>' +
-    '<p class="sub">The similar actives from ' + when + ' — real addresses from the market file. Price order by default. Empty photos mean we could not match that home publicly, not that the home is fake.</p>' +
+  return '<div class="lanes" id="day0Lanes"><h2>The original similar set</h2>' +
+    '<p class="sub">Homes that were similar actives ' + when + ' — still active, under contract, or sold. Supporting picture of that first list, not this week’s news.</p>' +
     sortsHtml('lanes') +
     lane('Still active', active) + lane('Under contract', pending) + lane('Sold since ' + (clockKind() === 'active' ? 'active' : 'generate'), sold) + '</div>';
 }}
@@ -847,7 +858,7 @@ function weeksHtml() {{
   const current = weekKey((DATA.brief || {{}}).as_of) || weekAsOf(hist[hist.length - 1]);
   const d = DATA.digest || (DATA.brief || {{}}).digest || {{}};
   return '<div class="walk" id="walkWeeks"><h2>Walk the weeks</h2>' +
-    '<p class="sub">Same similar set, week by week. Tap a date — photos below use the same lanes as Where they are now.</p>' +
+    '<p class="sub">Same similar set, week by week. Tap a date to walk listed, under contract, and sold that week.</p>' +
     '<div class="weeks-bar"><div class="weeks">' + hist.map(function (w) {{
       const asOf = weekAsOf(w);
       const on = asOf === current ? ' is-on' : '';
@@ -1096,12 +1107,28 @@ function bindBoard() {{
 }}
 let photosKicked = false;
 function paintPhotos(photos, galleries) {{
+  function compact(s) {{
+    return String(s || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 48);
+  }}
+  function lookup(store, c, whole) {{
+    if (!store || !c) return '';
+    const keys = [c.mls, c.id, c.address, compact(c.mls), compact(c.id), compact(c.address)];
+    for (let i = 0; i < keys.length; i++) {{
+      const k = keys[i];
+      if (!k || !store[k]) continue;
+      const v = store[k];
+      if (whole) return v;
+      return Array.isArray(v) ? (v[0] || '') : v;
+    }}
+    return '';
+  }}
   function apply(c) {{
     if (!c) return;
-    const url = (photos && (photos[c.mls] || photos[c.id] || photos[c.address])) || '';
+    const url = lookup(photos, c);
     if (url) {{
       c.photo_url = c.photo_url || url;
-      if (!c.photos || !c.photos.length) c.photos = (galleries && (galleries[c.mls] || galleries[c.id])) || [url];
+      const gal = lookup(galleries, c, true);
+      if (!c.photos || !c.photos.length) c.photos = gal ? (Array.isArray(gal) ? gal : [gal]) : [url];
     }}
   }}
   const b = DATA.brief || {{}};
@@ -1263,43 +1290,30 @@ function stripHtml(pos, d) {{
       (p.subject ? '<span class="lab" style="left:' + pct + '%">' + money(p.price) + '</span>' : '');
   }}).join('');
   return '<div class="strip-wrap" id="sitStrip"><h2>Where you sit among similar actives</h2>' +
-    '<p class="sub">Hover a pin for the address, beds, baths, and square feet — it lights up in Where they are now when that home is in the original set. Default order is price.</p>' +
+    '<p class="sub">Each pin is a similar active. Hover to name it — tap to open the home. Your list is the gold pin.</p>' +
     sortsHtml('strip') +
-    '<div class="strip" id="priceStrip"><div class="rail"></div>' + ticks + '<div class="strip-pin" id="stripPin"></div></div></div>';
+    '<div class="strip" id="priceStrip"><div class="rail"></div>' + ticks + '</div>' +
+    '<p class="strip-now" id="stripNow">Hover a pin — tap to open that home.</p></div>';
 }}
-function pinCardHtml(p) {{
-  if (!p) return '';
-  const url = photoUrl(p);
-  const pic = url
-    ? '<img src="' + esc(url) + '" alt="">'
-    : '<div class="ph"></div>';
-  return pic + '<strong>' + esc(p.subject ? 'Your list' : (streetLine(p) || p.address || 'Listing')) + '</strong>' +
-    '<div class="p">' + money(p.price) + '</div>' +
-    '<div class="m">' + esc([homeBits(p), p.city, p.status].filter(Boolean).join(' · ')) + '</div>';
+function pinCaption(p) {{
+  if (!p) return 'Hover a pin — tap to open that home.';
+  const who = p.subject ? 'Your list' : (streetLine(p) || p.address || 'Listing');
+  const bits = homeBits(p);
+  return '<b>' + esc(who) + '</b> · ' + money(p.price) + (bits ? ' <span>' + esc(bits) + '</span>' : '');
 }}
 function positionById(id) {{
   const pos = ((DATA.brief || {{}}).position || []);
   return pos.find(function (p) {{ return String(p.id) === String(id); }}) || byId(id);
 }}
 function showPin(id, tickEl) {{
-  const pin = document.getElementById('stripPin');
+  const cap = document.getElementById('stripNow');
   const p = positionById(id);
   document.querySelectorAll('.tick, .lane-home, .card').forEach(function (el) {{
     el.classList.toggle('is-pin', el.getAttribute('data-id') === String(id));
   }});
-  if (!pin || !p) return;
-  pin.innerHTML = pinCardHtml(p);
-  pin.classList.add('open');
-  if (tickEl) {{
-    const strip = document.getElementById('priceStrip');
-    const left = tickEl.offsetLeft;
-    const max = strip ? strip.clientWidth - 114 : left;
-    pin.style.left = Math.max(114, Math.min(left, max)) + 'px';
-  }}
+  if (cap) cap.innerHTML = pinCaption(p);
 }}
 function hidePin() {{
-  const pin = document.getElementById('stripPin');
-  if (pin) pin.classList.remove('open');
   document.querySelectorAll('.is-pin').forEach(function (el) {{ el.classList.remove('is-pin'); }});
 }}
 function bindPins() {{
@@ -1376,13 +1390,10 @@ function render() {{
     (DATA.stale_upload ? '<p class="note">' + (DATA.agent
       ? 'Upload this week’s MLS export to refresh. The seller still sees the last file on hand.'
       : 'This picture uses the last market file we have. Ask your agent to refresh it with this week’s export.') + '</p>' : '') +
-    lanesHtml() +
-    weeksHtml() +
+    nowLanesHtml() +
     stripHtml(pos, d) +
-    photoLane('Listed since — under the initial list', 'New similar homes priced under the initial list.', b.new_under || b.new_under) +
-    photoLane('Listed since — over the initial list', 'New similar homes priced over the initial list.', b.new_over || b.new_over) +
-    photoLane('Price cuts', 'Homes that dropped $1,000+ since the last look.', b.price_cuts || b.price_cuts) +
-    photoLane('Under contract now', 'Pending, backup, and first-right — same bucket — in this size band.', b.pending_now || b.pending_now || b.went_pending);
+    weeksHtml() +
+    lanesHtml();
 
   if (DATA.agent) renderConsole();
   bindWeeks();

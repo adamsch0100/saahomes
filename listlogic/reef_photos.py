@@ -41,6 +41,7 @@ MAX_GALLERY_PHOTOS = 15
 # Reject Realtor/Zillow thumbnails that are too small to look sharp in the deck.
 MIN_PHOTO_BYTES = 12_000
 PHOTO_CACHE_VERSION = 2
+PHOTO_MISS_VERSION = 3
 ENRICH_BUDGET_SEC = 55
 CLUSTER_RADIUS_DEG = 0.006
 CLUSTER_PAD_DEG = 0.002
@@ -121,8 +122,9 @@ def _read_cache(cache_key: str) -> dict | None:
     if fetched and (time.time() - fetched) > CACHE_TTL_DAYS * 86400:
         return None
     if data.get("miss"):
+        if int(data.get("cache_version") or 1) < PHOTO_MISS_VERSION:
+            return None
         return data
-    # Drop thumbnail-era cache entries so Search-path blurry s.jpg files get re-fetched.
     if int(data.get("cache_version") or 1) < PHOTO_CACHE_VERSION:
         return None
     primary = data.get("primary_path") or ""
@@ -158,6 +160,7 @@ def _write_cache(cache_key: str, payload: dict) -> dict:
     payload = dict(payload)
     payload["fetched_at"] = time.time()
     payload["cache_key"] = cache_key
+    payload["cache_version"] = PHOTO_CACHE_VERSION
     (folder / "meta.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
     return payload
 
@@ -165,7 +168,13 @@ def _write_cache(cache_key: str, payload: dict) -> dict:
 def _write_miss(cache_key: str, reason: str = "") -> dict:
     folder = CACHE_DIR / cache_key
     folder.mkdir(parents=True, exist_ok=True)
-    payload = {"miss": True, "reason": reason, "fetched_at": time.time(), "cache_key": cache_key}
+    payload = {
+        "miss": True,
+        "reason": reason,
+        "fetched_at": time.time(),
+        "cache_key": cache_key,
+        "cache_version": PHOTO_MISS_VERSION,
+    }
     (folder / "meta.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
     return payload
 
@@ -324,18 +333,32 @@ def _geocode(address: str) -> tuple[float | None, float | None]:
 
 
 def _search_bounds(west: float, east: float, south: float, north: float) -> list[dict]:
-    res = _call(
-        "search_by_coordinates",
-        {
-            "map_bounds": {"west": west, "east": east, "south": south, "north": north},
-            "status": "recently_sold",
-            "max_results": "80",
-        },
-    )
-    if not res.get("ok"):
-        logger.info("Reef cluster search failed: %s", res.get("error"))
-        return []
-    return list((res.get("data") or {}).get("items") or [])
+    """Pull for-sale (includes pending on Zillow) and sold so active Fingerprint cards can match."""
+    bounds = {"west": west, "east": east, "south": south, "north": north}
+    items: list[dict] = []
+    seen: set[str] = set()
+    for status in ("for_sale", "sold"):
+        res = _call(
+            "search_by_coordinates",
+            {
+                "map_bounds": bounds,
+                "status": status,
+                "max_results": "80",
+                "home_type": "house",
+            },
+        )
+        if not res.get("ok"):
+            logger.info("Reef cluster search failed (%s): %s", status, res.get("error"))
+            continue
+        for item in list((res.get("data") or {}).get("items") or []):
+            if not isinstance(item, dict):
+                continue
+            key = str(item.get("zpid") or item.get("address") or "")
+            if not key or key in seen:
+                continue
+            seen.add(key)
+            items.append(item)
+    return items
 
 
 def _match_item(target_address: str, items: list[dict]) -> dict | None:
