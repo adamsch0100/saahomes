@@ -2024,12 +2024,12 @@ body.ll-sample .sample-demo-bar{{display:flex}}
         </div>
       </article>
       <article class="cf-card">
-        <div class="cf-top"><span class="cf-n">4</span><div class="cf-t" data-copy="cf-4-t">Buyers Set Value — Closes Prove It</div></div>
-        <p class="cf-b" data-copy="cf-4-b">Asking prices are opinions. Sold prices are facts. The recommended list is anchored to what buyers just paid for the closest recent comparables — not what neighbors hope to get.</p>
+        <div class="cf-top"><span class="cf-n">4</span><div class="cf-t" data-copy="cf-levers">Three Levers: Price, Condition, Location</div></div>
+        <p class="cf-b" data-copy="cf-levers-b">Buyers shop those three. Location is not a lever you can pull after they list. Price and condition still are — walk homes that went pending or sold against those two and see whether they should have beaten yours.</p>
       </article>
       <article class="cf-card">
-        <div class="cf-top"><span class="cf-n">5</span><div class="cf-t" data-copy="cf-5-t">Location Is Fixed — Condition Moves the Number</div></div>
-        <p class="cf-b" data-copy="cf-5-b">Within your segment, updates and presentation decide where you land in the band. We’ll rate the home together, 1–10, and the list price responds live to that rating.</p>
+        <div class="cf-top"><span class="cf-n">5</span><div class="cf-t" data-copy="cf-value">Who Is Providing the Value</div></div>
+        <p class="cf-b" data-copy="cf-value-b">A similar home listed under yours is providing the value to the same buyers. Listed over yours, they are providing value to yours. That’s how the field actually shops — not a zip-code average.</p>
       </article>
       <article class="cf-card">
         <div class="cf-top"><span class="cf-n">6</span><div class="cf-t" data-copy="cf-6-t">Price Buys Time — and Odds</div></div>

@@ -1503,6 +1503,7 @@ def _refresh_sample_html(run_dir: Path, *, force: bool = False) -> bool:
                 and "data-price-field" in existing
                 and "btnEditMode" in existing
                 and "edit-dock" in existing
+                and "cf-levers" in existing
             ):
                 return False
         report = json.loads(json_path.read_text(encoding="utf-8"))
@@ -2085,6 +2086,7 @@ _PRESENTATION_MARKERS = (
     "data-price-field",
     "btnEditMode",
     "edit-dock",
+    "cf-levers",
 )
 
 
