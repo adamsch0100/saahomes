@@ -224,6 +224,16 @@
     }
   });
 
+  function guestSampleAuthHtml() {
+    return (
+      "<span>Sample listing — free forever. Create an account to build yours; unlock at Generate.</span>" +
+      '<span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
+      '<a href="/saas/login.html" style="color:#fff;background:transparent;border:1px solid rgba(255,255,255,.45);text-decoration:none;padding:8px 12px;border-radius:8px;font-weight:700">Sign in</a>' +
+      '<a href="/saas/signup.html" style="background:#c9a227;color:#0c3c6e;text-decoration:none;padding:8px 12px;border-radius:8px;font-weight:700">Create account</a>' +
+      "</span>"
+    );
+  }
+
   // Sample banner (public demo) — keep agent chip / sticky spine below it
   const isSample = new URLSearchParams(location.search).get("sample") === "1";
   if (isSample) {
@@ -259,19 +269,14 @@
             "<span>Signed in as <strong>" + name + "</strong> — exploring the sample listing.</span>" +
             '<a href="/saas/app.html" style="background:#c9a227;color:#0c3c6e;text-decoration:none;padding:8px 12px;border-radius:8px;font-weight:700">Go to my dashboard</a>';
         } else {
-          bar.innerHTML =
-            "<span>Sample listing — free forever. Create an account to build yours; unlock at Generate.</span>" +
-            '<a href="/saas/signup.html" style="background:#c9a227;color:#0c3c6e;text-decoration:none;padding:8px 12px;border-radius:8px;font-weight:700">Create account</a>';
-          // Hide the floating agent account chip for public sample viewers
+          bar.innerHTML = guestSampleAuthHtml();
           const chip = document.getElementById("agentMenuWrap");
           if (chip) chip.style.display = "none";
         }
         offsetSampleChrome();
       })
       .catch(() => {
-        bar.innerHTML =
-          "<span>Sample listing — free forever. Create an account to build yours; unlock at Generate.</span>" +
-          '<a href="/saas/signup.html" style="background:#c9a227;color:#0c3c6e;text-decoration:none;padding:8px 12px;border-radius:8px;font-weight:700">Create account</a>';
+        bar.innerHTML = guestSampleAuthHtml();
         const chip = document.getElementById("agentMenuWrap");
         if (chip) chip.style.display = "none";
         offsetSampleChrome();

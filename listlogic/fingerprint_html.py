@@ -2115,6 +2115,7 @@ document.addEventListener('keydown', function (e) {{
 }})();
 render();
 </script>
+<script src="/saas/assistant.js"></script>
 </body>
 </html>
 """
