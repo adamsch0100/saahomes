@@ -870,24 +870,16 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .fab{{display:none}}
 .panel-overlay{{display:none;position:fixed;inset:0;background:rgba(8,18,32,.48);backdrop-filter:blur(2px);z-index:1001}}
 .panel-overlay.open{{display:block}}
-.remember-bar{{display:none;align-items:center;flex-wrap:wrap;gap:10px;margin:0 0 12px;padding:10px 12px;border:1px solid #e4c76a;border-radius:12px;background:#fffbeb}}
-body.ll-agent .remember-bar{{display:flex}}
-.remember-bar span{{font-size:.8rem;color:#6b5420;line-height:1.35}}
-.remember-bar span strong{{color:#3f2e0a}}
-.remember-bar .btn-soft{{padding:7px 12px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--brand-primary);font:inherit;font-size:.76rem;font-weight:700;cursor:pointer}}
-.remember-bar .btn-soft.primary{{background:var(--brand-primary);color:#fff;border-color:var(--brand-primary)}}
-.remember-toast{{font-size:.78rem;font-weight:700;color:var(--brand-primary)}}
-body.ll-agent [data-lede],body.ll-agent [data-edit],body.ll-agent #advList li,body.ll-agent #riskList li{{outline:1.5px dashed #c9a227;outline-offset:2px;background:rgba(201,162,39,.14);border-radius:6px;cursor:text;padding:4px 8px}}
-body.ll-agent [data-lede]:hover,body.ll-agent [data-edit]:hover,body.ll-agent #advList li:hover,body.ll-agent #riskList li:hover{{background:rgba(201,162,39,.22)}}
-body.ll-agent [data-lede]:focus,body.ll-agent [data-edit]:focus,body.ll-agent #advList li:focus,body.ll-agent #riskList li:focus{{outline:2px solid var(--brand-primary);background:#fff;caret-color:var(--brand-primary)}}
-body.ll-agent [data-lede]::before,body.ll-agent [data-edit]::before{{content:'Click to edit';display:block;font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#9a7b1a;margin:0 0 4px;font-family:Inter,system-ui,sans-serif}}
-body.ll-agent .bottom-line [data-edit]::before{{display:inline;margin:0 8px 0 0}}
-body.ll-agent .ll-price-hit{{cursor:text;outline:1.5px dashed rgba(253,230,138,.7);outline-offset:4px;border-radius:8px;padding:0 6px}}
-body.ll-agent .ll-price-hit:hover,body.ll-agent .ll-price-hit:focus-within{{outline-color:#fde68a;background:rgba(253,230,138,.14)}}
-.ll-price-input{{font:inherit;font-weight:inherit;color:#0b1220;background:#fff;border:0;border-radius:8px;width:7.5rem;padding:2px 6px}}
-.verdict .big .ll-price-input{{width:11rem;font-size:.55em}}
-.ll-add-line{{display:none;margin-top:8px;border:1px dashed rgba(12,60,110,.35);background:#fff;color:var(--brand-primary);border-radius:10px;padding:7px 12px;font:inherit;font-size:.78rem;font-weight:700;cursor:pointer}}
-body.ll-agent .ll-add-line{{display:inline-flex}}
+.view-modes .vm.edit-toggle{{display:none}}
+body.ll-agent .view-modes .vm.edit-toggle{{display:inline-flex}}
+body.ll-editing .view-modes .vm.edit-toggle{{background:var(--brand-primary);color:#fff;border-color:var(--brand-primary)}}
+.remember-bar{{display:none}}
+body.ll-editing [data-lede],body.ll-editing [data-edit],body.ll-editing #advList li,body.ll-editing #riskList li,body.ll-editing .ll-price-hit{{cursor:text;outline:none;border-radius:3px}}
+body.ll-editing [data-lede]:hover,body.ll-editing [data-edit]:hover,body.ll-editing #advList li:hover,body.ll-editing #riskList li:hover,body.ll-editing .ll-price-hit:hover{{background:rgba(12,60,110,.05)}}
+body.ll-editing [data-lede]:focus,body.ll-editing [data-edit]:focus,body.ll-editing #advList li:focus,body.ll-editing #riskList li:focus,body.ll-editing .ll-price-hit:focus{{background:rgba(12,60,110,.07);box-shadow:0 0 0 2px rgba(12,60,110,.2);caret-color:var(--brand-primary)}}
+.ll-add-line{{display:none;margin-top:6px;border:0;background:transparent;color:var(--muted);padding:0;font:inherit;font-size:.75rem;font-weight:700;cursor:pointer}}
+body.ll-editing .ll-add-line{{display:inline-flex}}
+body.ll-editing .ll-add-line:hover{{color:var(--brand-primary)}}
 .agent-panel{{position:fixed;top:0;right:0;width:min(400px,100vw);height:100vh;background:#f4f7fb;z-index:1002;box-shadow:-12px 0 40px rgba(8,20,40,.22);transform:translateX(105%);transition:transform .28s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column}}
 .agent-panel.open{{transform:translateX(0)}}
 .agent-chip.panel-open{{opacity:.28;pointer-events:none}}
@@ -1546,8 +1538,7 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
   #llSampleBar,.ll-as-btn,.ll-as-panel,.pulse-card{{display:none!important}}
   .portal-chip.is-on{{display:flex!important;margin-top:4px}}
   .portal-chip.is-on .pc-amt{{display:inline!important;font-size:.8rem}}
-  body.ll-agent [data-lede]::before,body.ll-agent [data-edit]::before,.ll-add-line,.ll-price-input{{display:none!important}}
-  body.ll-agent [data-lede],body.ll-agent [data-edit],body.ll-agent #advList li,body.ll-agent #riskList li,body.ll-agent .ll-price-hit{{outline:none!important;background:transparent!important;padding:0!important;cursor:inherit!important}}
+  body.ll-editing [data-lede],body.ll-editing [data-edit],body.ll-editing #advList li,body.ll-editing #riskList li,body.ll-editing .ll-price-hit{{background:transparent!important;box-shadow:none!important;cursor:inherit!important}}
   html,body{{background:#fff!important;margin:0;padding:0;width:11in;height:auto;overflow:hidden}}
   .report-shell{{display:block;max-width:none;width:11in;padding:0;margin:0;overflow:hidden}}
   .page{{max-width:none;width:11in;padding:0;margin:0;overflow:hidden}}
@@ -1861,14 +1852,7 @@ body.print-leavebehind #spine-comps-more,
 body.print-leavebehind .print-only,
 body.print-leavebehind #llSampleBar,
 body.print-leavebehind .ll-as-btn,
-body.print-leavebehind .ll-as-panel,
-body.print-leavebehind [data-lede]::before,
-body.print-leavebehind [data-edit]::before{{display:none!important}}
-body.print-leavebehind [data-lede],
-body.print-leavebehind [data-edit],
-body.print-leavebehind #advList li,
-body.print-leavebehind #riskList li,
-body.print-leavebehind .ll-price-hit{{outline:none!important;background:transparent!important;padding:0!important}}
+body.print-leavebehind .ll-as-panel{{display:none!important}}
 body.print-leavebehind .page{{padding-bottom:0}}
 .sample-demo-bar{{
   display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
@@ -1931,21 +1915,15 @@ body.ll-sample .sample-demo-bar{{display:flex}}
     <div class="view-modes" id="viewModes">
       <span class="vm-label">Presentation</span>
       <span class="vm on">Live story</span>
+      <button type="button" class="vm edit-toggle" id="btnEditMode" aria-pressed="false" title="Click the story text to edit, then click away to save">Edit</button>
       <button type="button" class="vm" id="btnPrintLeavebehind" title="Print the listing presentation — one section per page">Print Listing Presentation</button>
       <a id="deckLink" href="#" style="display:none">Flipbook</a>
       <a id="pdfLink" href="#" style="display:none">Packet PDF</a>
       <a id="storyPdfLink" href="#" style="display:none">Story PDF</a>
       <button type="button" class="vm" id="btnCopyShare" style="display:none">Share with client</button>
       <span class="vm-status" id="shareStatus"></span>
+      <span class="vm-status" id="editSaveStatus" role="status"></span>
     </div>
-  </div>
-  <div class="remember-bar" id="rememberBar">
-    <span><strong>Editing this listing.</strong> Gold fields are live — click, type, click away. Price, range, and days are in Price it.</span>
-    <button type="button" class="btn-soft" id="btnBarSections">Sections</button>
-    <button type="button" class="btn-soft" id="btnBarTools">Coach &amp; photos</button>
-    <button type="button" class="btn-soft primary" id="btnSaveDefaults">Remember for next reports</button>
-    <button type="button" class="btn-soft" id="btnResetDefaults">Clear saved wording</button>
-    <span class="remember-toast" id="storyToast" role="status"></span>
   </div>
   <div class="photo-fetch-banner" id="photoFetchBanner" aria-live="polite">
     <span class="spin" aria-hidden="true"></span>
@@ -1975,6 +1953,14 @@ body.ll-sample .sample-demo-bar{{display:flex}}
       <button type="button" class="mi" id="menuSections" role="menuitem">
         <span class="mi-ico">☰</span>
         <span class="mi-copy"><strong>Sections</strong><span>Include or hide report steps</span></span>
+      </button>
+      <button type="button" class="mi" id="btnSaveDefaults" role="menuitem">
+        <span class="mi-ico">↩</span>
+        <span class="mi-copy"><strong>Remember wording</strong><span>Intros and extra lines for next reports</span></span>
+      </button>
+      <button type="button" class="mi" id="btnResetDefaults" role="menuitem">
+        <span class="mi-ico">↺</span>
+        <span class="mi-copy"><strong>Clear saved wording</strong><span>New reports use ListLogic copy</span></span>
       </button>
       <div class="mi-sep"></div>
       <a href="/saas/pricing.html" role="menuitem">
@@ -2331,13 +2317,13 @@ body.ll-sample .sample-demo-bar{{display:flex}}
     <p class="sub">Set the list with the slider — strategy cards snap you to a lane. Then see market positioning vs. what happens while you wait.</p>
     <section class="verdict" id="spine-verdict">
       <div class="eyebrow">Recommended List Price</div>
-      <div class="big ll-price-hit" id="dispRec" data-price-field="rec" title="Click to edit list price">${rec:,.0f}</div>
+      <div class="big ll-price-hit" id="dispRec" data-price-field="rec">${rec:,.0f}</div>
       <div class="portal-chip" id="portalChip" hidden>
         <span class="pc-label">Zillow estimate</span>
         <span class="pc-amt" id="portalAmt"></span>
         <button type="button" class="pc-toggle" id="btnPortalChip">Show portal estimate</button>
       </div>
-      <div class="sub">Range <strong><span class="ll-price-hit" id="dispLow" data-price-field="low" title="Click to edit range low">${low:,.0f}</span> – <span class="ll-price-hit" id="dispHigh" data-price-field="high" title="Click to edit range high">${high:,.0f}</span></strong> · target under contract in ~<strong><span class="ll-price-hit" id="dispDom" data-price-field="dom" title="Click to edit days to contract">{exp_dom:.0f}</span> days</strong></div>
+      <div class="sub">Range <strong><span class="ll-price-hit" id="dispLow" data-price-field="low">${low:,.0f}</span> – <span class="ll-price-hit" id="dispHigh" data-price-field="high">${high:,.0f}</span></strong> · target under contract in ~<strong><span class="ll-price-hit" id="dispDom" data-price-field="dom">{exp_dom:.0f}</span> days</strong></div>
       <div class="top" id="topLine">Top <span id="topStat">{top_mkt:.0f}</span>% of similar recent sales</div>
       <div class="pos-bar"><div class="pos-marker" id="posMarker" style="left:50%"></div></div>
       <div class="pos-labels"><span>Aggressive</span><span>Heart of market</span><span>Overpriced</span></div>
@@ -2632,7 +2618,7 @@ body.ll-sample .sample-demo-bar{{display:flex}}
     </div>
     <div class="panel-pane" id="pane-story" role="tabpanel">
       <span class="panel-pill">Seller-facing</span>
-      <p class="pane-lead">Bottom line, advantages, watch-outs, intros, and the recommended price edit on the page. Use <strong>Print Listing Presentation</strong> for a page-per-section print of this Live Story.</p>
+      <p class="pane-lead">Bottom line, advantages, watch-outs, intros, and the recommended price edit on the page in <strong>Edit</strong> mode. Use <strong>Print Listing Presentation</strong> for a page-per-section print of this Live Story.</p>
       <div class="field">
         <label for="editBL">Bottom line</label>
         <textarea id="editBL" class="tall">{exec_sum}</textarea>
@@ -2650,7 +2636,7 @@ body.ll-sample .sample-demo-bar{{display:flex}}
       <textarea id="editLedeClose" hidden>{lede_close}</textarea>
       <textarea id="editExtraAdv" hidden></textarea>
       <textarea id="editExtraRisk" hidden></textarea>
-      <p class="pane-lead">Click gold fields on the report to edit this listing. <strong>Remember for next reports</strong> keeps intros and extra lines — not this home’s bottom line or price.</p>
+      <p class="pane-lead">Turn on <strong>Edit</strong> in the presentation bar, then click the story text. Click away to save. <strong>Remember wording</strong> in the menu keeps intros and extra lines — not this home’s bottom line or price.</p>
       <div class="panel-soft" id="aiSellerRow" style="display:none">
         <button type="button" class="btn-soft" id="btnAiSeller">Rewrite story</button>
       </div>
@@ -3090,18 +3076,18 @@ function syncBottomLine(rec, low, high, dom) {{
 function setVerdict(rec, low, high, dom) {{
   currentRec = rec; currentLow = low; currentHigh = high; currentDom = dom;
   const recEl = document.getElementById('dispRec');
-  if (recEl && !recEl.querySelector('input')) {{
+  if (recEl && recEl !== document.activeElement) {{
     recEl.dataset.settled = '1';
     recEl.textContent = money(rec);
   }}
   const lowEl = document.getElementById('dispLow');
-  if (lowEl && !lowEl.querySelector('input')) lowEl.textContent = money(low);
+  if (lowEl && lowEl !== document.activeElement) lowEl.textContent = money(low);
   const highEl = document.getElementById('dispHigh');
-  if (highEl && !highEl.querySelector('input')) highEl.textContent = money(high);
+  if (highEl && highEl !== document.activeElement) highEl.textContent = money(high);
   const rangeEl = document.getElementById('dispRange');
   if (rangeEl) rangeEl.textContent = money(low) + ' – ' + money(high);
   const domEl = document.getElementById('dispDom');
-  if (domEl && !domEl.querySelector('input')) domEl.textContent = String(Math.round(dom));
+  if (domEl && domEl !== document.activeElement) domEl.textContent = String(Math.round(dom));
   const editRec = document.getElementById('editRec');
   if (editRec) editRec.value = rec;
   const editLow = document.getElementById('editLow');
@@ -5174,14 +5160,12 @@ function closeAgentPanel() {{
 }}
 fab.onclick = (e) => {{ e.stopPropagation(); toggleAgentMenu(); }};
 document.getElementById('menuOpenTools')?.addEventListener('click', () => openAgentPanel());
-document.getElementById('btnBarTools')?.addEventListener('click', () => openAgentPanel());
 function openSectionsModal() {{
   closeAgentMenu();
   const modal = document.getElementById('sectionsModal');
   if (modal) {{ modal.hidden = false; modal.classList.add('open'); }}
 }}
 document.getElementById('menuSections')?.addEventListener('click', openSectionsModal);
-document.getElementById('btnBarSections')?.addEventListener('click', openSectionsModal);
 function closeSectionsModal() {{
   const modal = document.getElementById('sectionsModal');
   if (modal) {{ modal.classList.remove('open'); modal.hidden = true; }}
@@ -5299,18 +5283,19 @@ function extraLinesFrom(id, generated) {{
 function applyLedesToDom(ledes) {{
   if (!ledes) return;
   document.querySelectorAll('[data-lede]').forEach(el => {{
+    if (el === document.activeElement) return;
     const key = el.getAttribute('data-lede');
     if (ledes[key]) el.textContent = ledes[key];
   }});
 }}
-function markEditable(el) {{
+function markEditable(el, on) {{
   if (!el) return;
-  el.contentEditable = 'true';
-  el.spellcheck = true;
-  el.setAttribute('title', 'Click to edit');
+  el.contentEditable = on ? 'true' : 'false';
+  el.spellcheck = !!on;
 }}
 function wireStoryLists() {{
-  document.querySelectorAll('#advList li, #riskList li').forEach(markEditable);
+  const on = document.body.classList.contains('ll-editing');
+  document.querySelectorAll('#advList li, #riskList li').forEach(el => markEditable(el, on));
 }}
 function syncStoryListsToFields() {{
   const adv = document.getElementById('editAdv');
@@ -5319,82 +5304,79 @@ function syncStoryListsToFields() {{
   if (risk) risk.value = [...document.querySelectorAll('#riskList li')].map(li => li.textContent.trim()).filter(Boolean).join('\\n');
 }}
 function addStoryLine(which) {{
+  if (!document.body.classList.contains('ll-editing')) return;
   const ul = document.getElementById(which === 'risk' ? 'riskList' : 'advList');
   if (!ul) return;
   const li = document.createElement('li');
   li.textContent = '';
-  markEditable(li);
+  markEditable(li, true);
   ul.appendChild(li);
   li.focus();
 }}
-function startPriceEdit(el) {{
-  if (!el || el.querySelector('input')) return;
+function flashSaved() {{
+  const status = document.getElementById('editSaveStatus');
+  if (!status) return;
+  status.textContent = 'Saved';
+  clearTimeout(window._llSaveToast);
+  window._llSaveToast = setTimeout(() => {{ if (status.textContent === 'Saved') status.textContent = ''; }}, 1600);
+}}
+function commitPriceFromEl(el) {{
   const field = el.getAttribute('data-price-field');
   const ids = {{ rec: 'editRec', low: 'editLow', high: 'editHigh', dom: 'editDom' }};
   const src = document.getElementById(ids[field]);
   if (!src) return;
-  const input = document.createElement('input');
-  input.type = 'number';
-  input.className = 'll-price-input';
-  input.value = src.value;
-  input.step = field === 'dom' ? '1' : '1000';
-  input.min = field === 'dom' ? '1' : '1000';
-  const restore = () => {{
+  const n = Number(String(el.textContent).replace(/[^0-9.]/g, ''));
+  if (!Number.isFinite(n) || n <= 0) {{
     if (field === 'dom') el.textContent = String(Math.round(+src.value || 0));
     else el.textContent = money(src.value);
-  }};
-  const commit = () => {{
-    const n = +input.value;
-    if (!Number.isFinite(n) || n <= 0) {{ restore(); return; }}
-    src.value = n;
-    applyEdits({{ close: false, refreshDeck: true }});
-  }};
-  input.addEventListener('blur', commit);
-  input.addEventListener('keydown', (e) => {{
-    if (e.key === 'Enter') {{ e.preventDefault(); input.blur(); }}
-    if (e.key === 'Escape') {{ e.preventDefault(); input.removeEventListener('blur', commit); restore(); }}
-  }});
-  el.textContent = '';
-  el.appendChild(input);
-  input.focus();
-  input.select();
+    return;
+  }}
+  src.value = Math.round(n);
+  applyEdits({{ close: false, refreshDeck: true }});
+}}
+function setEditMode(on) {{
+  on = !!on;
+  if (!on && document.body.classList.contains('ll-editing')) {{
+    const active = document.activeElement;
+    if (active && active !== document.body && typeof active.blur === 'function') active.blur();
+  }}
+  document.body.classList.toggle('ll-editing', on);
+  const btn = document.getElementById('btnEditMode');
+  if (btn) {{
+    btn.classList.toggle('on', on);
+    btn.textContent = on ? 'Done' : 'Edit';
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }}
+  const recEl = document.getElementById('dispRec');
+  if (recEl) recEl.dataset.settled = '1';
+  document.querySelectorAll('[data-lede], [data-edit], [data-price-field]').forEach(el => markEditable(el, on));
+  wireStoryLists();
+  try {{ localStorage.setItem('listlogic_edit_mode_' + (RUN_ID || 'local'), on ? '1' : '0'); }} catch (e) {{}}
+  if (!on) persistStoryEdits();
 }}
 function enableInlineEdits() {{
   document.body.classList.add('ll-agent');
   const pulse = document.getElementById('pulseBlock');
   if (pulse) {{ pulse.hidden = false; pulse.classList.add('is-agent'); }}
-  document.querySelectorAll('[data-lede], [data-edit]').forEach(markEditable);
-  wireStoryLists();
-  document.querySelectorAll('[data-price-field]').forEach(el => {{
-    el.setAttribute('tabindex', '0');
-    if (!el.getAttribute('title')) el.setAttribute('title', 'Click to edit');
-  }});
   if (document.body.dataset.inlineEdits === '1') return;
   document.body.dataset.inlineEdits = '1';
-  document.addEventListener('click', (e) => {{
-    const hit = e.target.closest('[data-price-field]');
-    if (!hit || hit.querySelector('input')) return;
-    startPriceEdit(hit);
+  document.getElementById('btnEditMode')?.addEventListener('click', () => {{
+    setEditMode(!document.body.classList.contains('ll-editing'));
   }});
   document.addEventListener('keydown', (e) => {{
-    const priceHit = e.target.closest('[data-price-field]');
-    if (priceHit && (e.key === 'Enter' || e.key === ' ') && !priceHit.querySelector('input') && e.target === priceHit) {{
-      e.preventDefault();
-      startPriceEdit(priceHit);
-      return;
-    }}
-    if (e.key === 'Enter' && e.target.closest('[data-lede], [data-edit]')) {{
+    if (!document.body.classList.contains('ll-editing')) return;
+    if (e.key === 'Enter' && e.target.closest('[data-lede], [data-edit], [data-price-field]')) {{
       e.preventDefault();
       e.target.blur();
       return;
     }}
     const li = e.target.closest('#advList li, #riskList li');
-    if (!li || !document.body.classList.contains('ll-agent')) return;
+    if (!li) return;
     if (e.key === 'Enter') {{
       e.preventDefault();
       const neu = document.createElement('li');
       neu.textContent = '';
-      markEditable(neu);
+      markEditable(neu, true);
       li.after(neu);
       neu.focus();
       return;
@@ -5408,6 +5390,7 @@ function enableInlineEdits() {{
         if (prev) prev.focus();
         syncStoryListsToFields();
         persistStoryEdits();
+        flashSaved();
       }}
     }}
   }});
@@ -5422,7 +5405,12 @@ function enableInlineEdits() {{
   }});
   document.addEventListener('focusout', (e) => {{
     const t = e.target;
-    if (!t) return;
+    if (!t || !document.body.classList.contains('ll-editing')) return;
+    if (t.getAttribute && t.getAttribute('data-price-field')) {{
+      commitPriceFromEl(t);
+      flashSaved();
+      return;
+    }}
     if (t.id === 'blText' && document.getElementById('editBL')) document.getElementById('editBL').value = t.textContent.trim();
     if (t.getAttribute && t.getAttribute('data-lede')) {{
       const key = t.getAttribute('data-lede');
@@ -5431,8 +5419,14 @@ function enableInlineEdits() {{
       if (inp) inp.value = t.textContent.trim();
     }}
     if (t.closest && (t.closest('#advList') || t.closest('#riskList'))) syncStoryListsToFields();
-    if (t.closest && t.closest('[data-lede], [data-edit], #advList, #riskList')) persistStoryEdits();
+    if (t.closest && t.closest('[data-lede], [data-edit], #advList, #riskList')) {{
+      persistStoryEdits();
+      flashSaved();
+    }}
   }});
+  let prefer = false;
+  try {{ prefer = localStorage.getItem('listlogic_edit_mode_' + (RUN_ID || 'local')) === '1'; }} catch (e) {{}}
+  setEditMode(prefer);
 }}
 async function loadAccountCopyDefaults() {{
   try {{
@@ -5487,10 +5481,11 @@ function applyEdits() {{
   const risk = document.getElementById('editRisk').value.trim().split('\\n').filter(Boolean);
   const obj = document.getElementById('editObj').value;
   setVerdict(rec, low, high, dom);
-  document.getElementById('blText').textContent = bl;
+  const blEl = document.getElementById('blText');
+  if (blEl && blEl !== document.activeElement) blEl.textContent = bl;
   document.getElementById('advList').innerHTML = adv.map(a => '<li>'+escapeHtml(a)+'</li>').join('');
   document.getElementById('riskList').innerHTML = risk.map(r => '<li>'+escapeHtml(r)+'</li>').join('');
-  if (document.body.classList.contains('ll-agent')) wireStoryLists();
+  if (document.body.classList.contains('ll-editing')) wireStoryLists();
   applyLedesToDom(collectLedes());
   renderObjections(obj);
   persistStoryEdits();
@@ -5501,7 +5496,8 @@ function applyEdits() {{
 }}
 document.getElementById('btnApply').onclick = () => applyEdits();
 document.getElementById('btnSaveDefaults')?.addEventListener('click', async () => {{
-  const toast = document.getElementById('storyToast');
+  closeAgentMenu();
+  const toast = document.getElementById('editSaveStatus') || document.getElementById('storyToast');
   const setToast = (msg) => {{ if (toast) toast.textContent = msg; }};
   setToast('Saving account defaults…');
   try {{
@@ -5523,7 +5519,8 @@ document.getElementById('btnSaveDefaults')?.addEventListener('click', async () =
   }}
 }});
 document.getElementById('btnResetDefaults')?.addEventListener('click', async () => {{
-  const toast = document.getElementById('storyToast');
+  closeAgentMenu();
+  const toast = document.getElementById('editSaveStatus') || document.getElementById('storyToast');
   const setToast = (msg) => {{ if (toast) toast.textContent = msg; }};
   setToast('Resetting account defaults…');
   try {{
