@@ -22,7 +22,7 @@ import { LUXURY_HUB_FAQS } from '../src/data/luxuryMarket.js';
 // AREA_CONTENT_DATE in src/data/areaSeo.js. Bump when content is substantively
 // updated — drives Google re-crawl of pages it previously crawled pre-content
 // (indexation patrol 2026-08-17: /properties/, FC, Greeley "not indexed").
-const CONTENT_DATE = '2026-08-17';
+const CONTENT_DATE = '2026-08-26';
 
 // Live listings API for ItemList schema (real active MLS rows only — never fabricate).
 // Prefer LISTINGS_API_BASE / VITE_API_URL when building against a non-prod environment.
@@ -1094,6 +1094,19 @@ const MONEY_PAGE_CONTENT = {
           'Email campaigns to our network of qualified buyer agents',
         ],
       },
+      {
+        heading: 'Sell in Northern Colorado by City',
+        paragraphs: [
+          'Each community has its own seller dynamics — from Fort Collins demand to Greeley affordability. Click a city below for market data, neighborhoods, and seller insights:',
+        ],
+        relatedLinks: [
+          { href: '/northern-colorado-areas/fort-collins/', title: 'Fort Collins Seller Insights', description: 'Largest market with stable demand and CSU drivers' },
+          { href: '/northern-colorado-areas/greeley/', title: 'Greeley Seller Insights', description: 'Fast-moving affordable market with strong buyer pool' },
+          { href: '/northern-colorado-areas/loveland/', title: 'Loveland Seller Insights', description: 'Balanced market along the I-25 corridor' },
+          { href: '/northern-colorado-areas/windsor/', title: 'Windsor Seller Insights', description: 'Premium family market with top-rated schools' },
+          { href: '/northern-colorado-areas/timnath/', title: 'Timnath Seller Insights', description: 'New construction communities with steady turnover' },
+        ],
+      },
     ],
     cta: {
       title: 'Start Your Home Sale Today',
@@ -1130,6 +1143,19 @@ const MONEY_PAGE_CONTENT = {
           'Colorado Champions Home Loan — expanded CHFA eligibility for first responders (police, firefighters, EMTs)',
           'FHA and VA loans with low down payment options',
           'Conventional financing with competitive rates from local lenders',
+        ],
+      },
+      {
+        heading: 'Explore Northern Colorado Communities',
+        paragraphs: [
+          'Each Northern Colorado community offers a unique lifestyle. Click a city below to explore homes for sale, neighborhoods, and market data:',
+        ],
+        relatedLinks: [
+          { href: '/northern-colorado-areas/fort-collins/', title: 'Fort Collins Area Guide', description: 'CSU, Old Town, and the largest housing market' },
+          { href: '/northern-colorado-areas/loveland/', title: 'Loveland Area Guide', description: 'The Sweetheart City with lakefront living' },
+          { href: '/northern-colorado-areas/windsor/', title: 'Windsor Area Guide', description: 'Top-rated schools and family neighborhoods' },
+          { href: '/northern-colorado-areas/greeley/', title: 'Greeley Area Guide', description: 'The most affordable major market, home to UNC' },
+          { href: '/northern-colorado-areas/timnath/', title: 'Timnath Area Guide', description: 'New construction and master-planned communities' },
         ],
       },
     ],
@@ -1169,19 +1195,18 @@ const MONEY_PAGE_CONTENT = {
         ],
       },
       {
-        heading: 'Homes for Sale by Northern Colorado City',
-        paragraphs: [
-          'Each community offers a distinct lifestyle and price point. Browse the full city guide for market data, neighborhoods, schools, and available listings:',
-        ],
-        list: [
-          'Fort Collins — CSU, Old Town, and the largest housing market in Northern Colorado',
-          'Loveland — the Sweetheart City with lakefront living along I-25',
-          'Windsor — top-rated schools and family neighborhoods near Windsor Lake',
-          'Greeley — the most affordable major market in the region, home to UNC',
-          'Timnath — new construction and master-planned communities',
-          'Wellington, Berthoud, Johnstown, Severance, Eaton, Milliken & more',
-        ],
-      },
+              heading: 'Homes for Sale by Northern Colorado City',
+              paragraphs: [
+                'Each community offers a distinct lifestyle and price point. Click a city below for market data, neighborhoods, schools, and available listings:',
+              ],
+              relatedLinks: [
+                { href: '/northern-colorado-areas/fort-collins/', title: 'Fort Collins Area Guide', description: 'CSU, Old Town, and the largest housing market in Northern Colorado' },
+                { href: '/northern-colorado-areas/loveland/', title: 'Loveland Area Guide', description: 'The Sweetheart City with lakefront living along I-25' },
+                { href: '/northern-colorado-areas/windsor/', title: 'Windsor Area Guide', description: 'Top-rated schools and family neighborhoods near Windsor Lake' },
+                { href: '/northern-colorado-areas/greeley/', title: 'Greeley Area Guide', description: 'The most affordable major market in the region, home to UNC' },
+                { href: '/northern-colorado-areas/timnath/', title: 'Timnath Area Guide', description: 'New construction and master-planned communities' },
+              ],
+            },
     ],
     cta: {
       title: 'Need Help Finding Your Perfect Home?',
