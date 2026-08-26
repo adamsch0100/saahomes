@@ -7744,6 +7744,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Longmont.jpg',
     readTime: '10 min read',
+    youtubeId: 'QsdwzCnuA7o',
     keywords: 'buying a home in longmont colorado, longmont co real estate, longmont homes for sale, longmont colorado realtor, move to longmont, longmont first-time home buyer, longmont LDPAP, CHFA longmont, longmont neighborhoods',
     relatedLinks: [
       { title: 'Longmont real estate guide', href: '/northern-colorado-areas/longmont/', description: 'Neighborhoods, schools & market data' },
