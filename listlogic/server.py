@@ -175,6 +175,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/saas/win-more-listings.html",
         "/saas/vs-toolkitcma.html",
         "/saas/seller-cma.html",
+        "/saas/pricing-strategy-listing-appointment.html",
         "/saas/changelog.html",
         "/blog/",
         "/saas/ll.css",
