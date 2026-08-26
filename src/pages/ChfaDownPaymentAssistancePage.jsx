@@ -627,6 +627,45 @@ export default function ChfaDownPaymentAssistancePage() {
         </div>
       </section>
 
+      {/* CHFA FirstGeneration program — dedicated H2 for "chfa first generation program colorado" query */}
+
+      <section className="py-16 sm:py-20 px-6 bg-white">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-6">CHFA FirstGeneration Program: Up to $25,000 DPA Regardless of Loan Size</h2>
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            The CHFA FirstGeneration and FirstGeneration Plus programs are FHA-only first mortgage programs designed specifically for <strong>first-generation homebuyers</strong> — buyers who have never owned a home <em>and</em> whose parents or legal guardians have never owned one. The defining advantage: paired down payment assistance up to <strong>$25,000 regardless of the first mortgage amount</strong>, rather than a percentage-based cap.
+          </p>
+          <div className="grid sm:grid-cols-2 gap-6 mb-8">
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-6">
+              <h3 className="font-bold font-serif text-lg mb-2">Who qualifies?</h3>
+              <ul className="space-y-2 text-gray-700 text-sm">
+                <li className="flex gap-2"><span className="text-blue-600 font-bold">•</span> Never owned a home as an adult</li>
+                <li className="flex gap-2"><span className="text-blue-600 font-bold">•</span> Parents/guardians never owned a home</li>
+                <li className="flex gap-2"><span className="text-blue-600 font-bold">•</span> Meet standard CHFA requirements: 620+ credit score, $1,000 minimum contribution, county income/purchase limits</li>
+                <li className="flex gap-2"><span className="text-blue-600 font-bold">•</span> Complete CHFA-approved homebuyer education</li>
+              </ul>
+            </div>
+            <div className="bg-amber-50 border border-amber-100 rounded-xl p-6">
+              <h3 className="font-bold font-serif text-lg mb-2">How much DPA can you get?</h3>
+              <ul className="space-y-2 text-gray-700 text-sm">
+                <li className="flex gap-2"><span className="text-amber-600 font-bold">•</span> Up to <strong>$25,000</strong> as a deferred second mortgage</li>
+                <li className="flex gap-2"><span className="text-amber-600 font-bold">•</span> Not capped at a percentage of the loan amount — unlike most CHFA DPA options</li>
+                <li className="flex gap-2"><span className="text-amber-600 font-bold">•</span> Zero monthly payments; repaid when you sell, refinance, or move out</li>
+                <li className="flex gap-2"><span className="text-amber-600 font-bold">•</span> Usable toward down payment, closing costs, prepaids, or principal reduction</li>
+              </ul>
+            </div>
+          </div>
+          <p className="text-gray-700 leading-relaxed mb-4">
+            In Northern Colorado, FirstGeneration is especially valuable because the standard percentage-based DPA caps (3–4%) would produce far less than $25,000 on a typical Larimer County home. For a Loveland home around $510,000 or a Fort Collins home near $610,000, the flat $25,000 maximum can meaningfully reduce or eliminate the cash needed to close. This makes FirstGeneration one of the most powerful CHFA programs for eligible buyers in communities across Larimer and Weld counties.
+          </p>
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+            <p className="text-sm text-gray-600">
+              <strong>Note:</strong> FirstGeneration is an FHA-only program. Other loan types (VA, USDA, Conventional) are not available under this specific program. If you need a different loan type, the standard CHFA SmartStep or Preferred programs may be a better fit. Your CHFA participating lender can compare all options based on your credit profile and purchase plans. Call SAA Homes at <strong>(970) 999-1407</strong> for help connecting with a lender.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Requirements */}
       <section className="py-16 px-6 bg-black text-white">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-start">
