@@ -134,6 +134,8 @@ export default function LeadCaptureChat() {
     } else if (isListing) {
       const addr = document.querySelector("h1")?.textContent?.trim();
       message = addr ? `Questions about ${addr}? I know this home — ask me anything.` : "Questions about this home? I can tell you more.";
+    } else if (/\/chfa/.test(path)) {
+      message = "Looking into down payment assistance? I'm an AI assistant who knows CHFA & DPA programs inside out — ask me about SmartStep, Schools to Home, or G-HOPE.";
     } else if (isSearch || isCity) {
       const place = pageLocationLabel(path, location.search);
       message = place
