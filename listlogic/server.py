@@ -1508,6 +1508,7 @@ def _refresh_sample_html(run_dir: Path, *, force: bool = False) -> bool:
                 and "fpNavLink" in existing
                 and "Your Home’s Market Fingerprint" in existing
                 and 'data-cf="fingerprint"' in existing
+                and 'data-supply="pace"' in existing
             ):
                 return False
         report = json.loads(json_path.read_text(encoding="utf-8"))
@@ -2096,6 +2097,7 @@ _PRESENTATION_MARKERS = (
     "fpNavLink",
     "Your Home’s Market Fingerprint",
     "data-cf=\"fingerprint\"",
+    "data-supply=\"pace\"",
 )
 
 

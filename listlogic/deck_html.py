@@ -202,11 +202,12 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
     lf_new = float(lf.get("new_listings_per_month") or 0)
     lf_sales = float(lf.get("sales_per_month") or sales_mo)
     lf_pressure = float(lf.get("supply_pressure") or 0)
+    lf_net = float(lf.get("net_inventory_per_month") or 0)
     lf_below = float(lf.get("new_below_recommended_per_month") or 0)
     lf_active_below = int(lf.get("active_below_recommended_now") or 0)
     lf_wait_fresh = float(lf.get("fresh_during_median_dom") or 0)
     lf_wait_dom = float(lf.get("median_dom_for_wait") or median_dom or 0)
-    lf_insight = lf.get("overprice_insight") or lf.get("insight") or ""
+    lf_insight = lf.get("insight") or ""
     show_supply = lf_new > 0
     if lf_pressure >= 1.15:
         supply_headline = "Supply Is Building"
@@ -221,14 +222,14 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
       <div class="slide-top"><span>{logo_html}2 · Supply</span><span>Supply Stream</span></div>
       <div class="slide-body">
         <h2 class="slide-title"><span class="step-badge">2</span>{_esc(supply_headline)}</h2>
-        <p class="lede">New listings keep arriving. Price too high, and fresher, better-value homes get the tours first.</p>
+        <p class="lede">New listings versus sales — the pipeline behind today’s snapshot.</p>
         <div class="kpis" style="margin-top:16px">
           <div class="kpi"><div class="kv">{lf_new:.1f}</div><div class="kl">New / month</div></div>
           <div class="kpi"><div class="kv">{lf_sales:.1f}</div><div class="kl">Sales / month</div></div>
           <div class="kpi"><div class="kv">{lf_pressure:.2f}×</div><div class="kl">Supply pressure</div></div>
-          <div class="kpi"><div class="kv">{lf_below:.1f}</div><div class="kl">New below rec / mo</div></div>
+          <div class="kpi"><div class="kv">{('+' if lf_net >= 0 else '')}{lf_net:.1f}</div><div class="kl">Net / month</div></div>
         </div>
-        <p class="lede" style="margin-top:14px;max-width:60ch">{lf_active_below} Active homes sit under the recommended line now. {_esc(lf_insight)}</p>
+        <p class="lede" style="margin-top:14px;max-width:60ch">{_esc(lf_insight)}</p>
       </div>
       <div class="slide-foot"><span>Pipeline, not just today's snapshot</span><span>ListLogic</span></div>
     </section>

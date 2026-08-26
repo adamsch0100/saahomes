@@ -588,12 +588,10 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
         flow.append(Paragraph("The Supply Stream", styles["section"]))
         flow.append(Paragraph(
             "Active competition is a snapshot. The supply stream is the pipeline — new homes that keep "
-            "arriving while yours sits. Price too high, and fresher listings underneath yours become "
-            "the ones buyers tour first.",
+            "arriving while yours sits versus how fast they sell.",
             styles["small"],
         ))
-        wait_fresh = float(lf.get("fresh_during_median_dom") or 0)
-        wait_dom = float(lf.get("median_dom_for_wait") or median_dom or 0)
+        lf_net = float(lf.get("net_inventory_per_month") or 0)
         supply_kpis = [[
             Paragraph(
                 f"<b>{float(lf.get('new_listings_per_month') or 0):.1f}</b><br/>New / mo",
@@ -608,7 +606,7 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
                 styles["kpi_val"],
             ),
             Paragraph(
-                f"<b>~{wait_fresh:.1f}</b><br/>New below in ~{wait_dom:.0f}d",
+                f"<b>{('+' if lf_net >= 0 else '')}{lf_net:.1f}</b><br/>Net / mo",
                 styles["kpi_val"],
             ),
         ]]
@@ -623,10 +621,10 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
             ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ]))
         flow.append(sk)
-        if lf.get("overprice_insight") or lf.get("insight"):
+        if lf.get("insight"):
             flow.append(Spacer(1, 4))
             flow.append(Paragraph(
-                lf.get("overprice_insight") or lf.get("insight") or "",
+                lf.get("insight") or "",
                 styles["body"],
             ))
     band_labels = bands.get("labels") or []

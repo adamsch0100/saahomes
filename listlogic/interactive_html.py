@@ -2116,18 +2116,11 @@ body.ll-sample .sample-demo-bar{{display:flex}}
     </div>
   </section>
 
-  <section class="section supply-section" id="spine-supply" style="{'display:none' if not show_listing_flow else ''}">
+  <section class="section supply-section" id="spine-supply" data-supply="pace" style="{'display:none' if not show_listing_flow else ''}">
     <h2><span class="ttl"><span class="step">2</span><span data-copy="t-supply">The Supply Stream</span></span>
       <span class="temp {'hot' if lf_pressure_tone == 'building' else 'warm'}">{lf_pressure_headline} · {lf_pressure:.2f}×</span>
     </h2>
-    <p class="sub" data-copy="s-supply">Active competition is a snapshot. The supply stream is the <strong>pipeline</strong> — new homes that keep arriving while yours sits. Price above the market-supported value line, and fresher listings underneath yours become the ones buyers tour first.</p>
-    <div class="supply-line" id="supplyLine">
-      <div>
-        <div class="sl-k" data-copy="sl-k">Market-Supported Value Line</div>
-        <div class="sl-v" id="supplyLinePrice">${rec:,.0f}</div>
-      </div>
-      <div class="sl-d" id="supplyLineCopy" data-copy="sl-copy">From recent comps for similar homes — not your final ask yet. We use this line to count how many listings are already cheaper, and how many more arrive while a typical sale takes ~{lf_wait_dom:.0f} days. Agent tools can override the line later if needed.</div>
-    </div>
+    <p class="sub" data-copy="s-supply">Active competition is a snapshot. The supply stream is the <strong>pipeline</strong> — new homes that keep arriving while yours sits versus how fast they sell.</p>
     <div class="supply-hero">
       <div class="supply-balance">
         <div class="sb-title" data-copy="sb-title">New Listings vs Sales · Recent Pace</div>
@@ -2154,28 +2147,11 @@ body.ll-sample .sample-demo-bar{{display:flex}}
         </div>
       </div>
     </div>
-    <div class="supply-wait">
-      <div class="sw">
-        <div class="sw-t" data-copy="sw-cheaper">Cheaper New Listings</div>
-        <div class="sw-v" id="supplyBelowPm">{lf_below_pm:.1f}<span style="font-size:.85rem;font-weight:700;color:var(--muted)"> / mo</span></div>
-        <div class="sw-d" id="supplyBelowPmCopy">Similar-size homes that <strong>come on market under</strong> <span class="supply-line-ref">${rec:,.0f}</span> each month — the better-value stream buyers see first.</div>
-      </div>
-      <div class="sw">
-        <div class="sw-t" data-copy="sw-today">Already Cheaper Today</div>
-        <div class="sw-v" id="supplyActiveBelow">{lf_active_below}</div>
-        <div class="sw-d" id="supplyActiveBelowCopy"><strong>Active</strong> homes right now asking less than <span class="supply-line-ref">${rec:,.0f}</span> — already on the buyer tour list.</div>
-      </div>
-      <div class="sw accent">
-        <div class="sw-t" data-copy="sw-wait">During a typical ~{lf_wait_dom:.0f}-day sale</div>
-        <div class="sw-v" id="supplyWaitFresh">~{lf_wait_fresh:.1f}</div>
-        <div class="sw-d" id="supplyWaitCopy" data-copy="sw-wait-d">Extra similar homes expected to <strong>list under that line</strong> before a well-priced home usually goes under contract — on top of what’s Active today.</div>
-      </div>
-    </div>
     <div class="supply-chart-wrap">
       <h3 style="font-size:.9rem;margin:0 0 6px;color:var(--brand-primary)" data-copy="t-flow">New Listings vs Closed Sales by Month</h3>
       <p class="sub" style="margin-bottom:8px" data-copy="s-flow">When the blue bars run ahead of navy, inventory is building in this competitive set.</p>
       <div class="chart-box"><canvas id="listingFlowChart"></canvas></div>
-      <p class="supply-insight" id="flowInsight" data-copy="insight-flow">{lf_insight}{' ' + lf_overprice if lf_overprice else ''}</p>
+      <p class="supply-insight" id="flowInsight" data-copy="insight-flow">{lf_insight}</p>
     </div>
   </section>
 
@@ -3250,24 +3226,9 @@ function updateSupplyAtPrice(price) {{
   lf.activeBelowRec = stats.activeBelow;
   lf.freshDuringMedianDom = Math.round(stats.waitFresh * 10) / 10;
   lf.thresholdPrice = price;
-  const linePrice = document.getElementById('supplyLinePrice');
-  if (linePrice) linePrice.textContent = money(price);
-  document.querySelectorAll('.supply-line-ref').forEach(el => {{ el.textContent = money(price); }});
-  const belowPmEl = document.getElementById('supplyBelowPm');
-  if (belowPmEl) belowPmEl.innerHTML = lf.newBelowRecPm.toFixed(1) + '<span style="font-size:.85rem;font-weight:700;color:var(--muted)"> / mo</span>';
-  const activeEl = document.getElementById('supplyActiveBelow');
-  if (activeEl) activeEl.textContent = String(lf.activeBelowRec);
-  const waitEl = document.getElementById('supplyWaitFresh');
-  if (waitEl) waitEl.textContent = '~' + lf.freshDuringMedianDom.toFixed(1);
   const insight = document.getElementById('flowInsight');
   if (insight && !copyLocked(insight)) {{
-    const base = lf.insight || '';
-    const extra = lf.newBelowRecPm > 0
-      ? (' Against a comp-supported value line of <b>' + money(price) + '</b>, about <b>' +
-         lf.newBelowRecPm.toFixed(1) + '</b> similar new listings/month come in cheaper — with <b>' +
-         lf.activeBelowRec + '</b> Active under that line right now.')
-      : '';
-    insight.innerHTML = base + extra;
+    insight.innerHTML = lf.insight || '';
   }}
 }}
 
