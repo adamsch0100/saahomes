@@ -150,9 +150,11 @@ export default function MarketReportForm({ areaName }) {
       </div>
 
       {/* Optional home address → seller nurture home profile */}
-      <div className="mb-6 rounded-lg border border-gray-100 bg-gray-50 p-4">
-        <p className="text-sm font-semibold text-gray-800">Your home address <span className="font-normal text-gray-400">(optional — unlocks My Home value tracking)</span></p>
-        <div className="mt-3 grid md:grid-cols-2 gap-4">
+      <details className="mb-6 rounded-lg border border-gray-100 bg-gray-50">
+        <summary className="cursor-pointer p-4 text-sm font-semibold text-gray-800 hover:text-black select-none">
+          Your home address <span className="font-normal text-gray-400">(optional — unlocks My Home value tracking)</span>
+        </summary>
+        <div className="px-4 pb-4 grid md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
             <label htmlFor="address_line" className="block text-xs font-medium text-gray-600 mb-1">Street</label>
             <input
@@ -194,7 +196,7 @@ export default function MarketReportForm({ areaName }) {
             />
           </div>
         </div>
-      </div>
+      </details>
 
       <button
         type="submit"

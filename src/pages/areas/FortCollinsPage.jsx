@@ -10,6 +10,7 @@ import TopRatedSchools from "../../components/TopRatedSchools.jsx";
 import SectionTownsBand from "../../components/SectionTownsBand.jsx";
 import CityLuxurySection from "../../components/CityLuxurySection.jsx";
 import CityVeteransSection from "../../components/CityVeteransSection.jsx";
+import LatestMarketUpdateBanner from "../../components/LatestMarketUpdateBanner.jsx";
 
 export default function FortCollinsPage() {
   return (
@@ -49,6 +50,8 @@ export default function FortCollinsPage() {
             </p>
           </div>
         </section>
+
+        <LatestMarketUpdateBanner variant="compact" cityName="Fort Collins" />
 
         {/* Property Search CTA */}
         <section className="mb-12 bg-gray-50 p-8 rounded-lg">

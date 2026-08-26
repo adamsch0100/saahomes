@@ -64,6 +64,36 @@ function buildWebsiteSchema() {
   };
 }
 
+/**
+ * Drop JSON-LD schemas that already exist in the prerendered <head> so React Helmet
+ * does not re-inject the same entity on hydration (fixes the 4-of-5 type duplication
+ * where the SSR/prerender layer and react-helmet-async both emit schemas).
+ */
+function dedupeJsonLd(schemas) {
+  if (typeof document === "undefined") return schemas;
+  let existing;
+  try {
+    existing = new Set();
+    document.querySelectorAll('script[type="application/ld+json"]').forEach((el) => {
+      try {
+        const parsed = JSON.parse(el.textContent || "");
+        if (parsed && parsed["@type"]) {
+          existing.add(parsed["@id"] ? `@id:${parsed["@id"]}` : `@type:${parsed["@type"]}`);
+        }
+      } catch {
+        /* skip malformed pre-existing script */
+      }
+    });
+  } catch {
+    return schemas;
+  }
+  return schemas.filter((schema) => {
+    if (!schema || !schema["@type"]) return true;
+    const key = schema["@id"] ? `@id:${schema["@id"]}` : `@type:${schema["@type"]}`;
+    return !existing.has(key);
+  });
+}
+
 export default function SEO({
   title,
   exactTitle,
@@ -97,6 +127,8 @@ export default function SEO({
     ...jsonLd,
   ];
 
+  const visibleSchemas = dedupeJsonLd(schemas);
+
   return (
     <Helmet htmlAttributes={{ lang: 'en' }}>
       <title>{fullTitle}</title>
@@ -128,7 +160,7 @@ export default function SEO({
       {finalOgImage && <meta name="twitter:image:alt" content={finalOgImageAlt} />}
       {finalOgUrl && <meta name="twitter:url" content={finalOgUrl} />}
 
-      {schemas.map((schema, index) => (
+      {visibleSchemas.map((schema, index) => (
         <script key={`${location.pathname}-${schema['@type']}-${index}`} type="application/ld+json">
           {JSON.stringify(schema)}
         </script>

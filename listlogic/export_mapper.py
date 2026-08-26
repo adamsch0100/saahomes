@@ -354,5 +354,5 @@ def inspect_export(path: str | Path) -> dict[str, Any]:
     result.delimiter = delim
     payload = result.to_dict()
     payload["row_count"] = int(len(df))
-    payload["sample_rows"] = df.head(3).astype(str).to_dict(orient="records")
+    payload["sample_rows"] = df.head(5).astype(str).to_dict(orient="records")
     return payload

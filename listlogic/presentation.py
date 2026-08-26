@@ -495,13 +495,6 @@ def build_presentation(
             f"About <b>{listing_flow.get('new_listings_per_month', 0):.1f}</b> new listings arrive "
             f"each month vs <b>{listing_flow.get('sales_per_month', sales_mo_story):.1f}</b> sales "
             f"(supply pressure <b>{listing_flow.get('supply_pressure', 0):.2f}×</b>)."
-            + (
-                f" Against the comp-supported value line of "
-                f"<b>${listing_flow.get('threshold_price') or rec:,.0f}</b>, "
-                f"~<b>{listing_flow.get('new_below_recommended_per_month', 0):.1f}</b>/month "
-                f"list cheaper in your size band."
-                if listing_flow.get("new_below_recommended_per_month") else ""
-            )
         ),
         "peak_month": peak_month,
         "peak_sales": peak_n,

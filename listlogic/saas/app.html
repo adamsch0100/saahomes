@@ -17,7 +17,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/saas/ll.css">
-<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
+<link rel="stylesheet" href="/saas/dash-light-agent.css">
+<link rel="stylesheet" href="/saas/dash-shell.css">
 <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.3/mapbox-gl-draw.css" rel="stylesheet">
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
 <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.3/mapbox-gl-draw.js"></script>
@@ -145,16 +146,66 @@
   display: none;
 }
 .portal-preview.show { display: block; }
+.dropzone {
+  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  margin-top: 6px; padding: 28px 18px; border: 2px dashed #c5d6e8; border-radius: 14px;
+  background: #f4f8fb; cursor: pointer; text-align: center; color: var(--navy);
+}
+.dropzone:hover, .dropzone.drag { border-color: var(--navy); background: #e8f0f7; }
+.dropzone.has-file { border-style: solid; background: #eef6ef; border-color: #b7d4bc; }
+.dropzone.disabled { opacity: 0.55; pointer-events: none; }
+.dropzone strong { font-size: 0.95rem; }
+.dropzone span { font-size: 0.78rem; color: var(--muted); }
+.dropzone input[type="file"] {
+  position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;
+}
+.mls-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0 0 14px; }
+@media (max-width: 640px) { .mls-steps { grid-template-columns: 1fr; } }
+.mls-steps div { background: #f7f4ee; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.mls-steps b { display: block; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.mls-steps p { margin: 0; font-size: 0.84rem; color: var(--ink); line-height: 1.4; }
+.mls-alt { margin: 10px 0 0; font-size: 0.82rem; color: var(--muted); }
+.mls-alt button { border: 0; background: none; color: var(--navy); font: inherit; font-weight: 700; cursor: pointer; padding: 0; text-decoration: underline; }
 #mappingReview {
-  display: none; margin-top: 12px; padding: 12px; border: 1px solid var(--line);
-  background: #f7f4ee; border-radius: var(--radius-sm); font-size: 0.82rem;
+  display: none; margin-top: 12px; padding: 14px 16px; border: 1px solid var(--line);
+  background: #f7f4ee; border-radius: 14px; font-size: 0.84rem;
 }
 #mappingReview.show { display: block; }
-#mappingReview table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-#mappingReview td, #mappingReview th { padding: 4px 6px; text-align: left; border-bottom: 1px solid var(--line); font-size: 0.78rem; }
+#mappingReview.ready { background: #eef6ef; border-color: #b7d4bc; }
+#mappingReview.needs { background: #fdf3e7; border-color: #f0d9b8; }
+.map-sum-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.map-sum-head strong { font-size: 0.95rem; color: var(--navy); }
+.map-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.map-chips span {
+  font-size: 0.72rem; background: #fff; border: 1px solid var(--line); border-radius: 999px;
+  padding: 4px 10px; color: var(--ink);
+}
+.map-chips span.miss { background: #fae8e2; border-color: #ecc5b8; color: #8a2b2b; font-weight: 700; }
+.map-modal {
+  position: fixed; inset: 0; z-index: 180; background: rgba(11,18,32,0.55);
+  display: grid; place-items: center; padding: 18px;
+}
+.map-modal[hidden] { display: none !important; }
+.map-modal-card {
+  background: #fff; border-radius: 18px; max-width: 720px; width: 100%; max-height: min(88vh, 820px);
+  display: flex; flex-direction: column; box-shadow: 0 40px 90px -30px rgba(0,0,0,0.5);
+}
+.map-modal-card header, .map-modal-card footer {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 16px 18px; flex: none;
+}
+.map-modal-card header { border-bottom: 1px solid var(--line); }
+.map-modal-card footer { border-top: 1px solid var(--line); }
+.map-modal-card header h3 { font-family: Fraunces, serif; font-size: 1.15rem; margin: 0; }
+.map-modal-card header p { margin: 4px 0 0; font-size: 0.82rem; color: var(--muted); }
+#mappingConfirmStatus.ok { color: var(--teal); font-weight: 600; }
+.map-modal-body { padding: 12px 18px 16px; overflow: auto; }
+#mappingReviewTable table { width: 100%; border-collapse: collapse; }
+#mappingReviewTable td, #mappingReviewTable th { padding: 7px 6px; text-align: left; border-bottom: 1px solid var(--line); font-size: 0.8rem; }
+#mappingReviewTable select { width: 100%; max-width: 280px; }
+#mappingSample { margin-top: 14px; overflow: auto; }
 #mappingSample table { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
 #mappingSample th, #mappingSample td { padding: 3px 5px; border: 1px solid var(--line); white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
-#mappingConfirmStatus.ok { color: var(--teal); font-weight: 600; }
 #generateBtn:disabled { opacity: 0.55; cursor: not-allowed; }
 .ll-paywall {
   position: fixed; inset: 0; z-index: 200; background: rgba(11,18,32,0.55);
@@ -245,16 +296,21 @@
 .team-row .btn { padding: 6px 12px; font-size: 0.78rem; }
 #teamEmails { min-height: 92px; resize: vertical; }
 .container.narrow { max-width: none; padding: 0; }
+
+/* Full-width dashboard (match owner console) */
+.dash { max-width: none; padding: 24px 30px 56px; gap: 26px; }
+.dash-main > .container, .dash-view .container { max-width: none; padding: 0; }
+@media (max-width: 900px){ .dash { padding: 16px 14px 46px; } }
 </style>
 </head>
-<body>
+<body data-theme-default="light">
 
 <nav class="ll-nav">
   <div class="container ll-nav-inner">
     <div class="ll-nav-left">
       <a href="/saas/app.html" class="ll-brand">
         <img src="/saas/listlogic-logo.png" alt="ListLogic" class="ll-brand-logo">
-        <small id="brandRole">by SAA Homes</small>
+        <small id="brandRole"></small>
       </a>
       <div class="ll-view-switch" id="viewSwitch" hidden>
         <a href="/saas/admin.html">Owner console</a>
@@ -378,7 +434,7 @@
         </button>
         <button type="button" class="mode-btn" id="modeMlsBtn" data-mode="mls">
           <strong>Upload</strong>
-          <span>CSV/TXT from any MLS · review column mapping before you run</span>
+          <span>CSV or TXT from your MLS · columns map as soon as you drop the file</span>
         </button>
       </div>
       <input type="hidden" id="marketSource" name="market_source" value="portal">
@@ -548,54 +604,48 @@
       </div>
 
       <div id="mlsPanel" hidden>
-        <div class="field">
-          <label>Upload market export(s)</label>
+        <div class="mls-steps" aria-hidden="true">
+          <div><b>1 · In MLS</b><p>Pull the homes a buyer would cross-shop: same type, nearby, last 2 years.</p></div>
+          <div><b>2 · Export</b><p>Save as CSV or TXT. Excel works if you Save As CSV first.</p></div>
+          <div><b>3 · Drop it here</b><p>We map the columns right away. Edit only if something looks off.</p></div>
+        </div>
+        <label class="dropzone" id="exportDropzone">
           <input type="file" id="exportFile" name="export_files" accept=".txt,.csv,.tsv" multiple>
-          <div class="file-list" id="exportFileList" hidden></div>
-        </div>
-        <label class="check-row">
-          <input type="checkbox" id="useSample">
-          Use sample Greeley export (export-71.txt)
+          <strong id="dropzoneTitle">Drop your MLS export here</strong>
+          <span id="dropzoneHint">or click to choose a CSV or TXT file</span>
         </label>
-        <p class="hint">CSV, TXT, or TSV from any MLS (pipe, comma, or tab). We auto-match columns; you can fix any field before you generate.</p>
+        <div class="file-list" id="exportFileList" hidden></div>
+        <input type="checkbox" id="useSample" hidden>
+        <p class="mls-alt" id="sampleAlt">No file handy? <button type="button" id="useSampleBtn">Try the sample Greeley export</button></p>
+        <p class="mls-alt" id="sampleOn" hidden>Using the sample Greeley export. <button type="button" id="clearSampleBtn">Use my own file instead</button></p>
         <div id="mappingReview">
-          <strong>Column mapping</strong>
-          <p id="mappingReviewMsg" style="margin:4px 0 0"></p>
-          <div id="mappingReviewTable"></div>
-          <div id="mappingSample" style="margin-top:10px;overflow:auto"></div>
-          <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-            <button type="button" class="btn" id="confirmMappingBtn" style="background:var(--navy);color:#fff;border:none;padding:10px 16px;border-radius:8px;font-weight:700;cursor:pointer">Confirm mapping</button>
-            <span id="mappingConfirmStatus" style="font-size:0.8rem;color:var(--muted)"></span>
-          </div>
-        </div>
-        <details class="howto" id="exportHowto" open>
-          <summary>How to build your seller's custom market</summary>
-          <div class="howto-body">
-            <div class="goal">
-              <div><div class="gv">2 years</div><div class="gl">List / close lookback</div></div>
-              <div><div class="gv">Match the home</div><div class="gl">SF · beds · baths · garage · lot</div></div>
-              <div><div class="gv">~500</div><div class="gl">Homes in the file</div></div>
+          <div class="map-sum-head">
+            <div>
+              <strong id="mappingReviewTitle">Reading columns…</strong>
+              <p id="mappingReviewMsg" style="margin:4px 0 0"></p>
             </div>
-            <p class="hint" style="margin-top:10px">Create your seller's custom market — the homes a buyer will actually cross-shop against theirs. Filter in MLS, export, then upload.</p>
+            <button type="button" class="btn btn-ghost" id="editMappingBtn" style="border:1px solid var(--line);color:var(--navy);padding:8px 12px;font-size:0.8rem">Edit mapping</button>
+          </div>
+          <div id="mappingChips" class="map-chips"></div>
+        </div>
+        <details class="howto" id="exportHowto">
+          <summary>What to include in the MLS search</summary>
+          <div class="howto-body">
+            <p class="hint" style="margin-top:0">Filter in your MLS first. ListLogic prices from the homes in the file — it does not pull extra listings.</p>
             <ol>
               <li><strong>Statuses:</strong> Active, Pending / Backup, Sold, Expired, and Withdrawn.</li>
-              <li><strong>Property type</strong> that matches the subject (house vs condo / townhome).</li>
-              <li><strong>Area</strong> a buyer would cross-shop (city, subdivision, or map).</li>
-              <li><strong>Time:</strong> last <strong>2 years</strong> by list date or close date.</li>
-              <li><strong>Size band:</strong> living / total square footage around the subject.</li>
-              <li><strong>Beds, baths, and garage spaces</strong> in a tight range around the subject.</li>
-              <li><strong>Lot size</strong> (acres or sq ft) when lot matters for this home.</li>
-              <li><strong>Export</strong> as CSV or TXT — aim for about <strong>500</strong> homes. If your MLS only offers Excel, Save As CSV.</li>
+              <li><strong>Same property type</strong> as the subject (house vs condo / townhome).</li>
+              <li><strong>Area</strong> a buyer would actually tour (city, subdivision, or map).</li>
+              <li><strong>Last 2 years</strong> by list date or close date.</li>
+              <li><strong>Size, beds, baths, garage, and lot</strong> in a tight band around the subject.</li>
+              <li><strong>About 500 homes</strong> is a solid set. More is fine.</li>
             </ol>
-            <div class="callout">
-              <strong>Then in ListLogic:</strong> upload the file. We auto-match headers (MLS #, status, price, sold price, beds, baths, sq ft, garage, dates, address, lot, and more). Check the dropdowns — change any that are wrong — then <strong>Confirm mapping</strong> and Generate.
-            </div>
           </div>
         </details>
         <div class="row2" style="margin-top:12px">
           <div class="field">
             <label>Narrow by city <span style="font-weight:400;text-transform:none">(optional)</span></label>
-            <input type="text" id="city" name="city_filter" value="" placeholder="Blank = full export">
+            <input type="text" id="city" name="city_filter" value="" placeholder="Leave blank to use the whole file">
           </div>
           <div class="field"></div>
         </div>
@@ -701,7 +751,7 @@
 
     <div class="submit-row">
       <button type="submit" class="btn btn-gold" id="generateBtn">Generate Market Fingerprint</button>
-      <p class="status" id="status" style="margin-top:0">Ready — uses the sample export by default.</p>
+      <p class="status" id="status" style="margin-top:0">Ready — search a market or upload an MLS export.</p>
     </div>
   </form>
 
@@ -729,6 +779,26 @@
   </div><!-- /view-generate -->
   </div><!-- /dash-main -->
 </div><!-- /dash -->
+
+<div class="map-modal" id="mappingModal" hidden>
+  <div class="map-modal-card" role="dialog" aria-labelledby="mappingModalTitle">
+    <header>
+      <div>
+        <h3 id="mappingModalTitle">Edit column mapping</h3>
+        <p>We matched your file to ListLogic fields. Change any row that looks wrong.</p>
+      </div>
+      <button type="button" class="ll-paywall-close" id="mappingModalClose" aria-label="Close">×</button>
+    </header>
+    <div class="map-modal-body">
+      <div id="mappingReviewTable"></div>
+      <div id="mappingSample"></div>
+    </div>
+    <footer>
+      <span id="mappingConfirmStatus" style="font-size:0.8rem;color:var(--muted)"></span>
+      <button type="button" class="btn btn-gold" id="confirmMappingBtn">Use this mapping</button>
+    </footer>
+  </div>
+</div>
 
 <script>
 const form = document.getElementById('genForm');
@@ -893,12 +963,22 @@ document.getElementById('logoutLink').addEventListener('click', async (e) => {
   location.href = '/saas/login.html';
 });
 
-useSample.addEventListener('change', () => {
+function syncSampleUi() {
+  const drop = document.getElementById('exportDropzone');
+  const alt = document.getElementById('sampleAlt');
+  const on = document.getElementById('sampleOn');
   exportFile.disabled = useSample.checked;
-  statusEl.textContent = useSample.checked
-    ? 'Sample export selected — confirm column mapping below.'
-    : 'Upload your export(s), confirm mapping, then generate.';
+  if (drop) drop.classList.toggle('disabled', useSample.checked);
+  if (alt) alt.hidden = useSample.checked;
+  if (on) on.hidden = !useSample.checked;
+}
+
+useSample.addEventListener('change', () => {
+  syncSampleUi();
   statusEl.className = 'status';
+  statusEl.textContent = useSample.checked
+    ? 'Sample export loaded — columns mapped below.'
+    : 'Drop your MLS export. We’ll map the columns right away.';
   refreshExportFileList();
   if (useSample.checked) inspectSampleExport();
   else {
@@ -906,23 +986,40 @@ useSample.addEventListener('change', () => {
     syncGenerateEnabled();
     if ([...(exportFile.files || [])].length) inspectSelectedExport();
     else {
-      document.getElementById('mappingReview').classList.remove('show');
+      document.getElementById('mappingReview').classList.remove('show', 'ready', 'needs');
       columnMapOverride = null;
     }
   }
 });
-exportFile.disabled = useSample.checked;
+syncSampleUi();
+document.getElementById('useSampleBtn')?.addEventListener('click', () => {
+  useSample.checked = true;
+  useSample.dispatchEvent(new Event('change'));
+});
+document.getElementById('clearSampleBtn')?.addEventListener('click', () => {
+  useSample.checked = false;
+  useSample.dispatchEvent(new Event('change'));
+});
 function refreshExportFileList() {
   const list = document.getElementById('exportFileList');
+  const drop = document.getElementById('exportDropzone');
+  const title = document.getElementById('dropzoneTitle');
+  const hint = document.getElementById('dropzoneHint');
   if (!list) return;
   const files = [...(exportFile.files || [])];
   if (!files.length || useSample.checked) {
     list.hidden = true;
     list.innerHTML = '';
+    if (drop) drop.classList.remove('has-file');
+    if (title) title.textContent = 'Drop your MLS export here';
+    if (hint) hint.textContent = 'or click to choose a CSV or TXT file';
     return;
   }
   list.hidden = false;
   list.innerHTML = files.map((f) => '<span>' + escapeHtml(f.name) + ' · ' + Math.round(f.size / 1024) + ' KB</span>').join('');
+  if (drop) drop.classList.add('has-file');
+  if (title) title.textContent = files.length === 1 ? files[0].name : files.length + ' files selected';
+  if (hint) hint.textContent = 'Drop another file to replace, or click to choose';
 }
 
 /* —— Search vs Upload dual mode —— */
@@ -953,6 +1050,36 @@ const MAP_REVIEW_FIELDS = [
   'ListDate', 'SoldDate', 'MLSNumber', 'Address', 'GarSpaces', 'Acres', 'LotSize',
   'YearBuilt', 'Latitude', 'Longitude', 'DOM', 'City', 'ZipCode'
 ];
+const FIELD_LABELS = {
+  Status: 'Status',
+  Price: 'List price',
+  SoldPrice: 'Sold / close price',
+  Bdrm: 'Beds',
+  Bath: 'Baths',
+  TotalSqFt: 'Total sq ft',
+  FinishedSQFT: 'Living sq ft',
+  ListDate: 'List date',
+  SoldDate: 'Sold / close date',
+  MLSNumber: 'MLS #',
+  Address: 'Address',
+  GarSpaces: 'Garage',
+  Acres: 'Lot acres',
+  LotSize: 'Lot size',
+  YearBuilt: 'Year built',
+  Latitude: 'Latitude',
+  Longitude: 'Longitude',
+  DOM: 'Days on market',
+  City: 'City',
+  ZipCode: 'ZIP',
+};
+const MISSING_LABELS = {
+  Status: 'Status',
+  Bdrm: 'Beds',
+  Bath: 'Baths',
+  SqFt: 'Square feet',
+  'Price|SoldPrice': 'List or sold price',
+  'MLSNumber|Address': 'MLS # or address',
+};
 
 function syncGenerateEnabled() {
   if (marketMode === 'portal') {
@@ -973,7 +1100,7 @@ function setMarketMode(mode) {
   statusEl.className = 'status';
   statusEl.textContent = marketMode === 'portal'
     ? 'Search — subject address centers the map and draws a 1-mile area.'
-    : 'Upload — confirm column mapping before generate.';
+    : 'Drop your MLS export. We’ll map the columns right away.';
   if (marketMode === 'portal') {
     requestAnimationFrame(() => {
       ensurePortalMap();
@@ -1611,112 +1738,219 @@ document.getElementById('portalPreviewBtn').addEventListener('click', async () =
 function collectColumnMapFromTable() {
   const table = document.getElementById('mappingReviewTable');
   const map = {};
+  if (!table) return map;
   table.querySelectorAll('select[data-internal]').forEach((s) => {
     if (s.value) map[s.getAttribute('data-internal')] = s.value;
   });
   return map;
 }
 
+function missingFromCurrentMap() {
+  const map = collectColumnMapFromTable();
+  const have = new Set(Object.keys(map).filter((k) => map[k]));
+  const miss = [];
+  if (!have.has('Status')) miss.push('Status');
+  if (!have.has('Bdrm')) miss.push('Beds');
+  if (!have.has('Bath')) miss.push('Baths');
+  if (!have.has('Price') && !have.has('SoldPrice')) miss.push('List or sold price');
+  if (!have.has('TotalSqFt') && !have.has('FinishedSQFT')) miss.push('Square feet');
+  if (!have.has('MLSNumber') && !have.has('Address')) miss.push('MLS # or address');
+  return miss;
+}
+
+function friendlyMissing(code) {
+  return MISSING_LABELS[code] || code;
+}
+
+function mappedFromInspect(inspect) {
+  const byInternal = {};
+  Object.keys((inspect && inspect.rename_map) || {}).forEach((src) => {
+    byInternal[inspect.rename_map[src]] = src;
+  });
+  ((inspect && inspect.mappings) || []).forEach((m) => {
+    if (m.internal && m.source) byInternal[m.internal] = m.source;
+  });
+  return byInternal;
+}
+function mappedByInternal(inspect) {
+  const fromTable = collectColumnMapFromTable();
+  if (Object.keys(fromTable).length) return fromTable;
+  return mappedFromInspect(inspect);
+}
+
 function setMappingConfirmed(ok) {
   mappingConfirmed = !!ok;
   const st = document.getElementById('mappingConfirmStatus');
-  if (ok) {
-    st.textContent = 'Mapping confirmed — ready to generate.';
-    st.className = 'ok';
-  } else {
-    st.textContent = 'Review columns, then confirm mapping.';
-    st.className = '';
+  if (st) {
+    st.textContent = ok ? 'Ready to generate.' : 'Map the required fields, then use this mapping.';
+    st.className = ok ? 'ok' : '';
   }
   syncGenerateEnabled();
 }
 
-function renderMappingReview(inspect) {
+function openMappingModal() {
+  const modal = document.getElementById('mappingModal');
+  if (modal) modal.hidden = false;
+}
+
+function closeMappingModal() {
+  const modal = document.getElementById('mappingModal');
+  if (modal) modal.hidden = true;
+}
+
+function renderMappingSummary(inspect) {
   const box = document.getElementById('mappingReview');
+  const title = document.getElementById('mappingReviewTitle');
   const msg = document.getElementById('mappingReviewMsg');
-  const table = document.getElementById('mappingReviewTable');
-  const sampleEl = document.getElementById('mappingSample');
+  const chips = document.getElementById('mappingChips');
+  if (!box) return;
   if (!inspect) {
-    box.classList.remove('show');
+    box.classList.remove('show', 'ready', 'needs');
     setMappingConfirmed(false);
     return;
   }
-  lastInspect = inspect;
+  const byInternal = mappedByInternal(inspect);
+  const mappedN = Object.keys(byInternal).length;
+  const missing = (inspect.missing_required || []).map(friendlyMissing);
+  const homes = inspect.row_count != null ? inspect.row_count + ' homes' : '';
+  const ready = !missing.length;
   box.classList.add('show');
-  const warn = (inspect.warnings || []).join(' · ');
-  msg.textContent =
-    'Confidence ' + Math.round((inspect.confidence || 0) * 100) + '%' +
-    ((inspect.missing_required || []).length ? ' · needs: ' + inspect.missing_required.join(', ') : '') +
-    (warn ? ' · ' + warn : '') +
-    ' — verify each field, then confirm.';
-  const headers = inspect.headers || [];
-  const rename = Object.assign({}, inspect.rename_map || {});
-  const byInternal = {};
+  box.classList.toggle('ready', ready);
+  box.classList.toggle('needs', !ready);
+  if (title) title.textContent = ready
+    ? 'Columns mapped'
+    : 'We need a couple of fields from your file';
+  if (msg) {
+    msg.textContent = ready
+      ? (homes ? homes + ' · ' : '') + mappedN + ' fields matched. Edit only if a column looks wrong.'
+      : 'Missing: ' + missing.join(', ') + '. Click Edit mapping to point those at the right columns.';
+  }
+  if (chips) {
+    const bits = MAP_REVIEW_FIELDS.filter((f) => byInternal[f]).map((f) =>
+      '<span>' + escapeHtml(FIELD_LABELS[f] || f) + ' ← ' + escapeHtml(byInternal[f]) + '</span>'
+    );
+    missing.forEach((m) => { bits.push('<span class="miss">Needs ' + escapeHtml(m) + '</span>'); });
+    chips.innerHTML = bits.join('');
+  }
+  setMappingConfirmed(ready);
+  statusEl.className = ready ? 'status ok' : 'status';
+  statusEl.textContent = ready
+    ? 'File mapped — generate when you’re ready, or edit mapping first.'
+    : 'File read. Map the missing fields, then generate.';
+}
+
+function fillMappingTable(inspect) {
+  const table = document.getElementById('mappingReviewTable');
+  const sampleEl = document.getElementById('mappingSample');
+  if (!table) return;
+  const headers = (inspect && inspect.headers) || [];
+  const byInternal = Object.assign({}, mappedFromInspect(inspect || {}), columnMapOverride || {});
   const methodByInternal = {};
-  Object.keys(rename).forEach((src) => { byInternal[rename[src]] = src; });
-  (inspect.mappings || []).forEach((m) => {
-    if (m.internal && m.source) byInternal[m.internal] = m.source;
+  ((inspect && inspect.mappings) || []).forEach((m) => {
     if (m.internal) methodByInternal[m.internal] = (m.method || '') + (m.confidence != null ? ' ' + Math.round(m.confidence * 100) + '%' : '');
   });
   table.innerHTML =
-    '<table><thead><tr><th>Field</th><th>Your column</th><th>Match</th></tr></thead><tbody>' +
+    '<table><thead><tr><th>ListLogic field</th><th>Your column</th><th>Match</th></tr></thead><tbody>' +
     MAP_REVIEW_FIELDS.map((field) => {
       const selected = byInternal[field] || '';
       const opts = ['<option value="">— skip —</option>']
         .concat(headers.map((h) =>
           '<option value="' + escapeAttr(h) + '"' + (h === selected ? ' selected' : '') + '>' + escapeHtml(h) + '</option>'
         ));
-      return '<tr><td>' + escapeHtml(field) + '</td><td><select data-internal="' + escapeAttr(field) + '">' + opts.join('') + '</select></td><td style="color:#5a6a7a">' + escapeHtml(methodByInternal[field] || '') + '</td></tr>';
+      return '<tr><td>' + escapeHtml(FIELD_LABELS[field] || field) + '</td><td><select data-internal="' + escapeAttr(field) + '">' + opts.join('') + '</select></td><td style="color:#5a6a7a">' + escapeHtml(methodByInternal[field] || (selected ? 'mapped' : 'not found')) + '</td></tr>';
     }).join('') +
     '</tbody></table>';
   table.querySelectorAll('select[data-internal]').forEach((sel) => {
     sel.addEventListener('change', () => {
       columnMapOverride = collectColumnMapFromTable();
-      setMappingConfirmed(false);
+      const miss = missingFromCurrentMap();
+      setMappingConfirmed(!miss.length);
     });
   });
   columnMapOverride = collectColumnMapFromTable();
-  setMappingConfirmed(false);
 
-  const rows = inspect.sample_rows || [];
-  if (rows.length && headers.length) {
-    const showCols = headers.slice(0, 8);
-    sampleEl.innerHTML =
-      '<div style="font-weight:600;margin-bottom:4px">Sample rows</div><table><thead><tr>' +
-      showCols.map((h) => '<th>' + escapeHtml(h) + '</th>').join('') +
-      '</tr></thead><tbody>' +
-      rows.map((r) => '<tr>' + showCols.map((h) => '<td title="' + escapeAttr(r[h] || '') + '">' + escapeHtml(r[h] || '') + '</td>').join('') + '</tr>').join('') +
-      '</tbody></table>';
-  } else {
-    sampleEl.innerHTML = '';
+  const rows = (inspect && inspect.sample_rows) || [];
+  if (sampleEl) {
+    if (rows.length && headers.length) {
+      const showCols = headers.slice(0, 8);
+      sampleEl.innerHTML =
+        '<div style="font-weight:600;margin-bottom:4px">Sample rows from your file</div><table><thead><tr>' +
+        showCols.map((h) => '<th>' + escapeHtml(h) + '</th>').join('') +
+        '</tr></thead><tbody>' +
+        rows.map((r) => '<tr>' + showCols.map((h) => '<td title="' + escapeAttr(r[h] || '') + '">' + escapeHtml(r[h] || '') + '</td>').join('') + '</tr>').join('') +
+        '</tbody></table>';
+    } else {
+      sampleEl.innerHTML = '';
+    }
   }
+}
+
+function renderMappingReview(inspect, opts) {
+  opts = opts || {};
+  if (!inspect) {
+    renderMappingSummary(null);
+    return;
+  }
+  lastInspect = inspect;
+  fillMappingTable(inspect);
+  renderMappingSummary(inspect);
+  const missing = (inspect.missing_required || []).length;
+  if (opts.open || missing) openMappingModal();
 }
 
 document.getElementById('confirmMappingBtn').addEventListener('click', () => {
   columnMapOverride = collectColumnMapFromTable();
-  if (!columnMapOverride.Status && !(lastInspect && lastInspect.rename_map)) {
+  const miss = missingFromCurrentMap();
+  if (miss.length) {
     statusEl.className = 'status error';
-    statusEl.textContent = 'Map at least Status (and price / beds / baths / sqft) before confirming.';
+    statusEl.textContent = 'Still need: ' + miss.join(', ') + '.';
+    setMappingConfirmed(false);
     return;
   }
   setMappingConfirmed(true);
+  closeMappingModal();
+  renderMappingSummary(Object.assign({}, lastInspect || {}, { missing_required: [] }));
   statusEl.className = 'status ok';
-  statusEl.textContent = 'Mapping confirmed.';
+  statusEl.textContent = 'Mapping saved — ready to generate.';
+});
+document.getElementById('editMappingBtn')?.addEventListener('click', () => {
+  if (!lastInspect) return;
+  fillMappingTable(lastInspect);
+  openMappingModal();
+});
+document.getElementById('mappingModalClose')?.addEventListener('click', closeMappingModal);
+document.getElementById('mappingModal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'mappingModal') closeMappingModal();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeMappingModal();
 });
 
 async function inspectSelectedExport() {
   if (marketMode !== 'mls' || useSample.checked) return;
   const files = [...(exportFile.files || [])];
   if (!files.length) {
-    document.getElementById('mappingReview').classList.remove('show');
-    setMappingConfirmed(false);
+    renderMappingSummary(null);
     return;
   }
+  const box = document.getElementById('mappingReview');
+  const title = document.getElementById('mappingReviewTitle');
+  const msg = document.getElementById('mappingReviewMsg');
+  if (box) {
+    box.classList.add('show');
+    box.classList.remove('ready', 'needs');
+  }
+  if (title) title.textContent = 'Reading your file…';
+  if (msg) msg.textContent = 'Matching columns now.';
+  const chips = document.getElementById('mappingChips');
+  if (chips) chips.innerHTML = '';
+  columnMapOverride = null;
   const fd = new FormData();
   fd.append('export_file', files[0]);
   try {
     const res = await fetch('/api/export/inspect', { method: 'POST', body: fd, credentials: 'same-origin' });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Inspect failed');
+    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Could not read that file');
     renderMappingReview(data);
   } catch (err) {
     statusEl.className = 'status error';
@@ -1727,6 +1961,7 @@ async function inspectSelectedExport() {
 
 async function inspectSampleExport() {
   if (marketMode !== 'mls') return;
+  columnMapOverride = null;
   try {
     const res = await fetch('/api/export/inspect-sample', { credentials: 'same-origin' });
     if (res.ok) {
@@ -1741,10 +1976,39 @@ async function inspectSampleExport() {
 }
 
 exportFile.addEventListener('change', () => {
+  useSample.checked = false;
+  syncSampleUi();
   refreshExportFileList();
   mappingConfirmed = false;
   inspectSelectedExport();
 });
+(function wireExportDropzone() {
+  const drop = document.getElementById('exportDropzone');
+  if (!drop) return;
+  ['dragenter', 'dragover'].forEach((ev) => drop.addEventListener(ev, (e) => {
+    e.preventDefault();
+    drop.classList.add('drag');
+  }));
+  ['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, (e) => {
+    e.preventDefault();
+    drop.classList.remove('drag');
+  }));
+  drop.addEventListener('drop', (e) => {
+    const files = [...(e.dataTransfer.files || [])].filter((f) => /\.(txt|csv|tsv)$/i.test(f.name));
+    if (!files.length) {
+      statusEl.className = 'status error';
+      statusEl.textContent = 'Use a CSV or TXT export from your MLS.';
+      return;
+    }
+    const dt = new DataTransfer();
+    files.slice(0, 3).forEach((f) => dt.items.add(f));
+    exportFile.files = dt.files;
+    useSample.checked = false;
+    syncSampleUi();
+    refreshExportFileList();
+    inspectSelectedExport();
+  });
+})();
 
 function showDashView(name) {
   const views = { generate: 'view-generate', reports: 'view-reports', team: 'view-team' };
@@ -1973,7 +2237,7 @@ form.addEventListener('submit', async (e) => {
 
   if (marketMode === 'mls' && !mappingConfirmed) {
     statusEl.className = 'status error';
-    statusEl.textContent = 'Confirm column mapping before generating.';
+    statusEl.textContent = 'Drop your MLS export first — we’ll map the columns, then you can generate.';
     return;
   }
 
@@ -2145,6 +2409,7 @@ form.addEventListener('submit', async (e) => {
   }
 });
 </script>
+<script src="/saas/dash-theme.js"></script>
 <script src="/saas/analytics.js"></script>
 <script src="/saas/utm.js"></script>
 <script src="/saas/assistant.js"></script>

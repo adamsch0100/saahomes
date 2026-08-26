@@ -31,20 +31,27 @@ body {
 .auth-brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -0.02em; font-size: 1.1rem; margin-bottom: 22px; }
 .auth-brand img { height: 42px; width: auto; display: block; }
 h1 { font-family: 'Fraunces', serif; font-size: 1.7rem; letter-spacing: -0.02em; margin-bottom: 6px; }
-.sub { color: var(--muted); font-size: 0.92rem; margin-bottom: 20px; }
+.sub { color: var(--muted); font-size: 0.92rem; margin-bottom: 16px; }
 .hint-box {
   background: #f7f4ee; border: 1px solid var(--line); border-radius: var(--radius-sm);
-  padding: 13px 15px; font-size: 0.84rem; color: var(--muted); margin-bottom: 20px; line-height: 1.5;
+  padding: 13px 15px; font-size: 0.84rem; color: var(--muted); margin-bottom: 18px; line-height: 1.5;
 }
 button.btn { width: 100%; padding: 13px; font-size: 0.95rem; }
 .auth-links { margin-top: 20px; font-size: 0.82rem; display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
 .auth-links a { color: var(--muted); text-decoration: none; }
 .auth-links a:hover { color: var(--ink); }
-.toggle { margin-top: 14px; text-align: center; font-size: 0.82rem; }
-.toggle button {
-  background: none; border: none; color: var(--navy); font-weight: 700; cursor: pointer; text-decoration: underline;
+.auth-toggle {
+  display: flex; background: #e9e3d7; border: 1px solid var(--line);
+  border-radius: 999px; padding: 3px; margin: 0 0 18px;
 }
+.auth-toggle button {
+  flex: 1; border: none; background: transparent; padding: 8px 14px;
+  border-radius: 999px; font-size: 0.84rem; font-weight: 700; color: var(--ink-2);
+  cursor: pointer; font-family: inherit;
+}
+.auth-toggle button.on { background: var(--ink); color: #fff; }
 .dev-link { word-break: break-all; font-size: 0.78rem; margin-top: 10px; }
+.field[hidden] { display: none !important; }
 </style>
 </head>
 <body>
@@ -53,37 +60,33 @@ button.btn { width: 100%; padding: 13px; font-size: 0.95rem; }
     <img src="/saas/listlogic-logo.png" alt="ListLogic">
   </a>
   <h1>Welcome back</h1>
-  <p class="sub">We·ll email you a one-time sign-in link.</p>
+  <p class="sub" id="authSub">We’ll email you a one-time sign-in link.</p>
   <div class="hint-box">
     New here? <a href="signup.html">Create an account</a>
     · or <a href="/demo">try the sample listing</a> with no signup.
   </div>
 
-  <form id="magicForm">
+  <div class="auth-toggle" role="tablist" aria-label="Sign-in method">
+    <button type="button" class="on" id="modeEmail" role="tab" aria-selected="true" data-mode="email">Email</button>
+    <button type="button" id="modePassword" role="tab" aria-selected="false" data-mode="password">Password</button>
+  </div>
+
+  <form id="authForm">
     <div class="field">
       <label for="email">Email</label>
       <input id="email" name="email" type="email" autocomplete="username" required>
     </div>
-    <div class="field">
+    <div class="field" id="passwordField" hidden>
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password">
+    </div>
+    <div class="field" id="promoField">
       <label for="promo">Access code <span style="font-weight:500;color:var(--muted)">(optional)</span></label>
       <input id="promo" type="text" autocomplete="off" placeholder="Enter access code if you have one">
     </div>
-    <button type="submit" class="btn btn-primary">Email me a link</button>
+    <button type="submit" class="btn btn-primary" id="authSubmit">Email me a link</button>
   </form>
 
-  <form id="passwordForm" style="display:none;margin-top:8px">
-    <div class="field">
-      <label for="pwEmail">Email</label>
-      <input id="pwEmail" type="email" autocomplete="username" required>
-    </div>
-    <div class="field">
-      <label for="password">Password</label>
-      <input id="password" type="password" autocomplete="current-password" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Sign in with password</button>
-  </form>
-
-  <p class="toggle"><button type="button" id="toggleMode">Use password instead</button></p>
   <p class="status" id="status"></p>
   <p class="dev-link" id="devLink" style="display:none"></p>
   <div class="auth-links">
@@ -97,34 +100,66 @@ const params = new URLSearchParams(location.search);
 const next = params.get('next') || '';
 const promo = (params.get('promo') || params.get('code') || '').trim();
 if (promo) document.getElementById('promo').value = promo;
-let passwordMode = false;
-const magicForm = document.getElementById('magicForm');
-const passwordForm = document.getElementById('passwordForm');
-const toggle = document.getElementById('toggleMode');
 
-toggle.addEventListener('click', () => {
-  passwordMode = !passwordMode;
-  magicForm.style.display = passwordMode ? 'none' : 'block';
-  passwordForm.style.display = passwordMode ? 'block' : 'none';
-  toggle.textContent = passwordMode ? 'Use email link instead' : 'Use password instead';
-  if (passwordMode) {
-    document.getElementById('pwEmail').value = document.getElementById('email').value;
-  }
+const form = document.getElementById('authForm');
+const passwordField = document.getElementById('passwordField');
+const passwordInput = document.getElementById('password');
+const promoField = document.getElementById('promoField');
+const submitBtn = document.getElementById('authSubmit');
+const sub = document.getElementById('authSub');
+const modeBtns = [...document.querySelectorAll('.auth-toggle [data-mode]')];
+let passwordMode = (params.get('mode') || '').toLowerCase() === 'password';
+
+function setMode(usePassword) {
+  passwordMode = !!usePassword;
+  passwordField.hidden = !passwordMode;
+  promoField.hidden = passwordMode;
+  passwordInput.required = passwordMode;
+  submitBtn.textContent = passwordMode ? 'Sign in' : 'Email me a link';
+  sub.textContent = passwordMode
+    ? 'Sign in with the password you set in Settings.'
+    : 'We’ll email you a one-time sign-in link.';
+  modeBtns.forEach((btn) => {
+    const on = btn.dataset.mode === (passwordMode ? 'password' : 'email');
+    btn.classList.toggle('on', on);
+    btn.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+}
+
+modeBtns.forEach((btn) => {
+  btn.addEventListener('click', () => setMode(btn.dataset.mode === 'password'));
 });
+setMode(passwordMode);
 
-magicForm.addEventListener('submit', async (e) => {
+form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const status = document.getElementById('status');
   const dev = document.getElementById('devLink');
   status.className = 'status';
-  status.textContent = 'Sending link·';
+  status.textContent = passwordMode ? 'Signing in…' : 'Sending link…';
   dev.style.display = 'none';
+  const email = document.getElementById('email').value.trim();
   try {
+    if (passwordMode) {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password: passwordInput.value,
+          next,
+        }),
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(payload.detail || 'Invalid email or password');
+      location.href = payload.next || (payload.user?.role === 'admin' ? '/saas/admin.html' : '/saas/app.html');
+      return;
+    }
     const res = await fetch('/api/auth/magic-link', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: document.getElementById('email').value.trim(),
+        email,
         promo_code: (document.getElementById('promo').value || '').trim(),
         next,
       }),
@@ -137,30 +172,6 @@ magicForm.addEventListener('submit', async (e) => {
       dev.style.display = 'block';
       dev.innerHTML = 'Dev link: <a href="' + data.dev_url + '">' + data.dev_url + '</a>';
     }
-  } catch (err) {
-    status.className = 'status error';
-    status.textContent = String(err.message || err);
-  }
-});
-
-passwordForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const status = document.getElementById('status');
-  status.className = 'status';
-  status.textContent = 'Signing in·';
-  try {
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: document.getElementById('pwEmail').value.trim(),
-        password: document.getElementById('password').value,
-        next,
-      }),
-    });
-    const payload = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(payload.detail || 'Invalid email or password');
-    location.href = payload.next || (payload.user?.role === 'admin' ? '/saas/admin.html' : '/saas/app.html');
   } catch (err) {
     status.className = 'status error';
     status.textContent = String(err.message || err);

@@ -38,10 +38,10 @@ export default function ForSellersPage() {
         <div className="relative z-10 text-center text-white px-6 max-w-4xl mx-auto">
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold font-serif mb-6">Why Sell With Us?</h1>
           <p className="text-lg sm:text-xl font-sans max-w-3xl mx-auto">
-            Get proven results and streamlined service from start to finish. Scroll down to learn more about how we can get you results with our record-setting sales strategies.
+            Get proven results and streamlined service from start to finish. Our record-setting sales strategies and professional marketing campaigns are designed to get you top dollar for your property.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="/home-valuation/" className="inline-flex items-center justify-center px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+            <a href="#home-valuation" className="inline-flex items-center justify-center px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
               Get Your Home Value
             </a>
             <a href="/contact/?interest=Selling a home" className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
@@ -85,7 +85,7 @@ export default function ForSellersPage() {
               We combine data-driven pricing strategies with aggressive marketing campaigns to create maximum demand for your property. Our goal is to generate multiple offers and create a competitive bidding environment that works in your favor.
             </p>
             <div className="flex gap-4 flex-wrap">
-              <a href="/home-valuation/" className="inline-block px-6 py-3 bg-black text-white font-semibold rounded hover:bg-gray-800 transition-colors">
+              <a href="#home-valuation" className="inline-block px-6 py-3 bg-black text-white font-semibold rounded hover:bg-gray-800 transition-colors">
                 Get Your Home Value
               </a>
               <a href="/contact/?interest=Selling a home" className="inline-block px-6 py-3 border-2 border-black text-black font-semibold rounded hover:bg-black hover:text-white transition-colors">
@@ -172,6 +172,9 @@ export default function ForSellersPage() {
             <h2 className="text-4xl font-bold mb-4">In Depth Market Analysis for Your Home</h2>
             <p className="text-lg text-gray-700">
               Get a free, instant estimate of your home's value
+            </p>
+            <p className="mt-4 text-xl">
+              Prefer to talk? Call <a href="tel:(970) 999-1407" className="text-black font-bold hover:underline">(970) 999-1407</a> for your instant home valuation
             </p>
           </div>
           <realscout-home-value agent-encoded-id="QWdlbnQtMjUxOTI5" include-name include-phone remove-title remove-subtitle></realscout-home-value>
@@ -264,6 +267,32 @@ export default function ForSellersPage() {
         </div>
       </section>
 
+      {/* Cash-buyer path cross-link (internal link equity to cash cluster) */}
+      <section className="py-12 px-6 bg-white">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold font-serif mb-3">More Ways to Sell</h2>
+          <p className="text-gray-700 mb-6">
+            Not every sale needs a full listing. If speed matters more than top dollar, learn how vetted
+            cash buyers work in Fort Collins and Northern Colorado &mdash; and how a cash offer compares
+            against what your home could bring on the open market.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="/blog/cash-home-buyers-fort-collins-northern-colorado/"
+              className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Cash Home Buyer Guide &rarr;
+            </a>
+            <a
+              href="/cash-home-buyers/"
+              className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+            >
+              Explore Cash Offers
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Luxury sellers cross-link */}
       <section className="py-12 px-6 bg-gray-50">
         <div className="max-w-3xl mx-auto text-center">
@@ -292,7 +321,7 @@ export default function ForSellersPage() {
             <a href="/contact/?interest=Selling a home" className="inline-block px-8 py-3 bg-white text-black font-semibold rounded hover:bg-gray-100 transition-colors">
               Get Started
             </a>
-            <a href="/home-valuation/" className="inline-block px-8 py-3 border-2 border-white text-white font-semibold rounded hover:bg-white hover:text-black transition-colors">
+            <a href="#home-valuation" className="inline-block px-8 py-3 border-2 border-white text-white font-semibold rounded hover:bg-white hover:text-black transition-colors">
               Free Home Valuation
             </a>
           </div>

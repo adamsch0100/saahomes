@@ -36,7 +36,7 @@ Built for Schwartz and Associates / SAA Homes; sold to agents more broadly.
 - Recommended list is anchored to recent comparable closes, not wishful asking prices.
 
 ## Funnel: Demo → Account → Unlock → Paid
-1. **Sample demo** (`/demo`) — public sample listing (2845 W 13th St, Greeley). No account. Free forever.
+1. **Public demo** (`/demo` appointment, `/demo/fingerprint` weekly seller picture) — one Greeley listing (2845 W 13th). No account. Free forever. Fingerprint weeks are rebuilt from list / pending / sold dates in that market file.
 2. **Create account** (email magic link) — no card. Search/Upload, subject, branding allowed (setup).
 3. **Generate** — hard gate. Personalized teaser. Unlock with **7-day Stripe trial** (card required → auto $39/mo) or **$20 one-time** for that report. Or open sample demo.
 4. Optional **promo / access codes** (e.g. `ZPNoCo`) can grant complimentary Generate — including unlimited for a pilot group. Agents enter the code on signup or login.

@@ -143,12 +143,12 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
     )
 
     facts = [
-        ("1", "Custom-Fit Market", "Size, garage, area, and timeframe — not the whole city."),
-        ("2", "Absorption Sets Pace", f"{sales_mo:.1f} sales/mo vs {active_n} active → {inv:.1f} mo inventory."),
-        ("3", "Active = Competition", f"Pending/Backup are spoken for. List, and buyers choose among {with_yours}."),
-        ("4", "Closes Set Value", "Asking prices are opinions. Sold prices are facts."),
-        ("5", "Condition Moves It", "We start at typical 5/10 — adjust together and the list responds."),
-        ("6", "Price Buys Time", f"Well-priced homes here go UC in ~{median_dom:.0f} days."),
+        ("1", "Your Home’s Market Fingerprint", "Custom market fit to your home — size, beds, baths, garage, lot size, and location."),
+        ("2", "Supply and Demand", "How many homes are for sale versus how fast they sell. That balance is who has leverage."),
+        ("3", "Your Competition", "Active, available homes — the ones a buyer can actually go see. Pending and backup are already spoken for."),
+        ("4", "Three Levers — Price, Condition, Location", "That’s what buyers compare. You can’t move the house. You can still change the asking price, and improve the condition."),
+        ("5", "Providing Value or Are the Value", "If a similar home lists under you, they’re providing the value — they look like the better buy next to yours. If they list over you, you are the value. Same kind of house; the ask is what makes one of you look like the deal."),
+        ("6", "Pricing Determines Time to Contract", "The asking price is what determines how long it takes to go under contract. Priced with the market, homes here move. Overpriced listings linger — and help sell everyone else’s house."),
     ]
     facts_html = "".join(
         f'<div class="fact"><span class="fn">{n}</span><div><div class="ft">{_esc(t)}</div>'
@@ -202,11 +202,12 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
     lf_new = float(lf.get("new_listings_per_month") or 0)
     lf_sales = float(lf.get("sales_per_month") or sales_mo)
     lf_pressure = float(lf.get("supply_pressure") or 0)
+    lf_net = float(lf.get("net_inventory_per_month") or 0)
     lf_below = float(lf.get("new_below_recommended_per_month") or 0)
     lf_active_below = int(lf.get("active_below_recommended_now") or 0)
     lf_wait_fresh = float(lf.get("fresh_during_median_dom") or 0)
     lf_wait_dom = float(lf.get("median_dom_for_wait") or median_dom or 0)
-    lf_insight = lf.get("overprice_insight") or lf.get("insight") or ""
+    lf_insight = lf.get("insight") or ""
     show_supply = lf_new > 0
     if lf_pressure >= 1.15:
         supply_headline = "Supply Is Building"
@@ -221,14 +222,14 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
       <div class="slide-top"><span>{logo_html}2 · Supply</span><span>Supply Stream</span></div>
       <div class="slide-body">
         <h2 class="slide-title"><span class="step-badge">2</span>{_esc(supply_headline)}</h2>
-        <p class="lede">New listings keep arriving. Price too high, and fresher, better-value homes get the tours first.</p>
+        <p class="lede">New listings versus sales — the pipeline behind today’s snapshot.</p>
         <div class="kpis" style="margin-top:16px">
           <div class="kpi"><div class="kv">{lf_new:.1f}</div><div class="kl">New / month</div></div>
           <div class="kpi"><div class="kv">{lf_sales:.1f}</div><div class="kl">Sales / month</div></div>
           <div class="kpi"><div class="kv">{lf_pressure:.2f}×</div><div class="kl">Supply pressure</div></div>
-          <div class="kpi"><div class="kv">{lf_below:.1f}</div><div class="kl">New below rec / mo</div></div>
+          <div class="kpi"><div class="kv">{('+' if lf_net >= 0 else '')}{lf_net:.1f}</div><div class="kl">Net / month</div></div>
         </div>
-        <p class="lede" style="margin-top:14px;max-width:60ch">{lf_active_below} Active homes sit under the recommended line now. {_esc(lf_insight)}</p>
+        <p class="lede" style="margin-top:14px;max-width:60ch">{_esc(lf_insight)}</p>
       </div>
       <div class="slide-foot"><span>Pipeline, not just today's snapshot</span><span>ListLogic</span></div>
     </section>
@@ -1065,9 +1066,9 @@ body.ll-agent #deckAdvList li:focus, body.ll-agent #deckRiskList li:focus {{
     <section class="slide" data-title="How It Works">
       <div class="slide-top"><span>{logo_html}How It Works</span><span>Ground Rules</span></div>
       <div class="slide-body">
-        <div class="eyebrow">Core Facts of ListLogic — Data Driven Pricing</div>
-        <h2>Built Around This Home — Not the Citywide Average</h2>
-        <p class="lede">Every number comes from <strong>{_esc(market_label)}</strong>: homes a buyer would actually cross-shop with yours.</p>
+        <div class="eyebrow">Core Facts of ListLogic</div>
+        <h2>How we look at this listing</h2>
+        <p class="lede">The numbers live on the next slides. These are the rules behind them.</p>
         <div class="facts-grid">{facts_html}</div>
       </div>
       <div class="slide-foot"><span>{_esc(address)}</span><span>ListLogic</span></div>

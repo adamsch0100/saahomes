@@ -3,11 +3,19 @@ import AreaSEO from "../../components/AreaSEO.jsx";
 import AreaFAQSection from "../../components/AreaFAQSection.jsx";
 import RecentlySoldSection from "../../components/RecentlySoldSection.jsx";
 import { AREA_FAQS } from "../../data/areaFaqs.js";
+import { getAreaSeo } from "../../data/areaSeo.js";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
+import LatestMarketUpdateBanner from "../../components/LatestMarketUpdateBanner.jsx";
+import AreaEventsSection from "../../components/AreaEventsSection.jsx";
+import CityStatsBand from "../../components/CityStatsBand.jsx";
+
+const GOLD = "#CFB36E";
 
 export default function JohnstownPage() {
+  const area = getAreaSeo("johnstown");
+
   return (
     <>
       <AreaSEO slug="johnstown" />
@@ -18,7 +26,7 @@ export default function JohnstownPage() {
         <div className="absolute inset-0 bg-black/60"></div>
         <div className="relative z-10 text-center text-white px-6">
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">Johnstown, Colorado</h1>
-          <p className="mt-4 text-xl">Where History Meets Modern Living</p>
+          <p className="mt-4 text-xl">{area.tagline}</p>
         </div>
       </section>
 
@@ -26,14 +34,35 @@ export default function JohnstownPage() {
       <section className="py-16 px-6 bg-white">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-4xl font-bold mb-6 text-center">Your Johnstown Area Guide</h2>
-          <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            Johnstown is a historic Colorado town that beautifully blends its rich past with modern development. Located between Loveland and Greeley, Johnstown offers residents a quiet, family-friendly lifestyle with convenient access to Northern Colorado's major cities and amenities.
-          </p>
-          <p className="text-lg text-gray-700 leading-relaxed">
-            With its affordable housing, growing commercial district, and strong community spirit, Johnstown attracts families and individuals seeking quality of life without the higher costs of larger cities. The town's strategic location and continued growth make it an excellent place to call home.
-          </p>
+          {area.introParagraphs?.map((p, i) => (
+            <p key={i} className="text-lg text-gray-700 leading-relaxed mb-6">{p}</p>
+          ))}
         </div>
       </section>
+
+      <LatestMarketUpdateBanner variant="compact" cityName="Johnstown" />
+
+      {/* City Stats Band — quick info cards */}
+      <div className="max-w-6xl mx-auto px-6 mt-8 mb-8">
+        <CityStatsBand city="Johnstown" />
+      </div>
+
+      {/* Why Buy in Johnstown? */}
+      {area.whyChoose?.length > 0 && (
+        <section className="py-16 px-6 bg-white">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-3xl font-bold font-serif mb-8 text-center">Why Buy in Johnstown?</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {area.whyChoose.map((item) => (
+                <div key={item.title} className="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
+                  <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                  <p className="text-gray-700 text-sm leading-relaxed">{item.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Property Search CTA */}
       <section className="py-16 px-6 bg-gray-50">
@@ -42,16 +71,24 @@ export default function JohnstownPage() {
           <p className="text-lg mb-6 text-gray-700">
             Explore available properties in Johnstown, CO
           </p>
-          <Link
-            to="/properties/?location=Johnstown, CO"
-            className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            Search Johnstown Homes
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/properties/?location=Johnstown, CO"
+              className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Search Johnstown Homes
+            </Link>
+            <Link
+              to="/contact/"
+              className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-gray-800 hover:text-white transition-colors"
+            >
+              Talk to an Agent
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Economy Section */}
+      {/* Economy & Growth */}
       <section className="py-16 px-6 bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -220,6 +257,32 @@ export default function JohnstownPage() {
         </div>
       </section>
 
+      {/* CHFA First-Time Buyer Banner */}
+      <section className="py-12 px-6 rounded-lg" style={{ backgroundColor: GOLD }}>
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold font-serif text-gray-900 mb-3">
+            First-time buyer in Johnstown?
+          </h2>
+          <p className="text-gray-800 mb-6">
+            Many Johnstown buyers qualify for CHFA down payment assistance — grants and deferred loans up to $25,000 for down payment and closing costs.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link
+              to="/chfa-down-payment-assistance/#chfa-dpa-lead-form"
+              className="inline-flex px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Free CHFA Consultation
+            </Link>
+            <Link
+              to="/chfa-down-payment-assistance/"
+              className="inline-flex px-6 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+            >
+              CHFA program guide →
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Area Highlights */}
             {/* Neighborhood Guides */}
       <section className="py-12 px-6 bg-gray-50">
@@ -228,7 +291,7 @@ export default function JohnstownPage() {
         </div>
       </section>
 
-<section className="py-16 px-6 bg-white">
+      <section className="py-16 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-8 text-center">Johnstown Highlights</h2>
           <div className="grid md:grid-cols-2 gap-8">
@@ -296,7 +359,26 @@ export default function JohnstownPage() {
 
       <AreaFAQSection faqs={AREA_FAQS['johnstown']} city="Johnstown" />
 
+      <AreaEventsSection city="Johnstown" slug="johnstown" />
+
+      {/* Final CTA */}
+      <section className="py-16 px-6 bg-black text-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold font-serif mb-4">Ready to buy or sell in Johnstown?</h2>
+          <p className="text-gray-300 mb-8">
+            Adam and Mandi Schwartz help buyers and sellers across Johnstown and all of Northern Colorado.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link to="/contact/" className="inline-block px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+              Contact SAA Homes
+            </Link>
+            <a href="tel:(970) 999-1407" className="inline-block px-8 py-3 border-2 border-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
+              Call (970) 999-1407
+            </a>
+          </div>
+        </div>
+      </section>
+
     </>
   );
 }
-

@@ -470,12 +470,12 @@ def render_interactive_html(report: dict) -> str:
             f'<button type="button" class="whatif-card{" active" if "Balanced" in (sc.get("label") or "") else ""}" '
             f'data-price="{int(sc.get("list_price") or 0)}" data-label="{sc.get("label") or ""}" '
             f'title="{sc.get("label") or ""}">'
-            f'<div class="wf-label">{_whatif_short_label(sc.get("label") or "")}</div>'
+            f'<div class="wf-label" data-copy="whatif-{idx}">{_whatif_short_label(sc.get("label") or "")}</div>'
             f'<div class="wf-price">${sc.get("list_price", 0):,.0f}</div>'
             f'<div class="wf-meta">~{sc.get("expected_dom", 0):.0f}d · {(sc.get("odds_30_day") or 0) * 100:.0f}%</div>'
             f'</button>'
         )
-        for sc in whatif_scenarios
+        for idx, sc in enumerate(whatif_scenarios)
     )
     sens_rows = "".join(
         f"<tr class=\"{'rec' if 'Balanced' in (sc.get('label') or '') else ''}\">"
@@ -636,21 +636,21 @@ def render_interactive_html(report: dict) -> str:
     dns_kpi_true = (
         f'<div class="kpi has-tip" tabindex="0">'
         f'<div class="v">{dns_true}</div>'
-        f'<div class="l">Didn\'t Sell <span class="tip-i" aria-hidden="true">?</span></div>'
-        f'<div class="tip" role="tooltip">{dns_tip_true}</div></div>'
+        f'<div class="l" data-copy="kpi-dns">Didn\'t Sell <span class="tip-i" aria-hidden="true">?</span></div>'
+        f'<div class="tip" role="tooltip" data-copy="kpi-dns-tip">{dns_tip_true}</div></div>'
     )
     dns_kpi_churn = (
         f'<div class="kpi has-tip" tabindex="0">'
         f'<div class="v">{dns_churn}</div>'
-        f'<div class="l">Back on Market Soon <span class="tip-i" aria-hidden="true">?</span></div>'
-        f'<div class="tip" role="tooltip">{dns_tip_churn}</div></div>'
+        f'<div class="l" data-copy="kpi-churn">Back on Market Soon <span class="tip-i" aria-hidden="true">?</span></div>'
+        f'<div class="tip" role="tooltip" data-copy="kpi-churn-tip">{dns_tip_churn}</div></div>'
     )
 
     market_def_html = f'''
     <div class="market-def">
       <div class="md-row">
         <div>
-          <div class="md-label">Your competitive market</div>
+          <div class="md-label" data-copy="mdef-label">Your competitive market</div>
           <div class="md-title">{mdef.get("label") or area or "Custom market"}</div>
         </div>
         <div class="md-chips">{mdef_chips}</div>
@@ -826,7 +826,30 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .view-modes a,.view-modes span.vm,.view-modes button.vm{{border:1px solid var(--border);background:#f8fafc;padding:6px 12px;border-radius:999px;font-size:.75rem;font-weight:700;color:var(--brand-primary);text-decoration:none;font:inherit;cursor:pointer;line-height:1.2}}
 .view-modes span.vm.on{{background:var(--brand-primary);color:#fff;border-color:var(--brand-primary)}}
 .view-modes a:hover,.view-modes button.vm:hover{{background:#e8f0fa}}
+.view-modes a#fpNavLink{{background:#0b1220;color:#fde68a;border-color:#0b1220}}
+.view-modes a#fpNavLink:hover{{background:#16233c;color:#fff}}
 .view-modes .vm-status{{border:none;background:transparent;padding:0 4px;font-size:.72rem;color:var(--muted);font-weight:600}}
+.edit-dock{{display:none;align-items:center;gap:8px;flex:none;margin-left:auto}}
+body.ll-agent:not(.ll-editing) .edit-dock{{display:flex}}
+.edit-dock #btnEditMode{{border:1px solid var(--brand-primary);background:#fff;color:var(--brand-primary);padding:8px 16px;border-radius:999px;font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;letter-spacing:.02em}}
+.edit-dock #btnEditMode:hover{{background:#e8f0fa}}
+.edit-chrome{{display:none;position:fixed;top:0;left:0;right:0;z-index:1080;background:#0c2238;color:#fff;box-shadow:0 10px 28px rgba(8,20,40,.28)}}
+body.ll-editing .edit-chrome{{display:block!important}}
+.edit-chrome-bar{{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;max-width:1400px;margin:0 auto;padding:10px 16px}}
+.edit-chrome-kicker{{font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#fde68a;flex:none}}
+.edit-chrome-hint{{font-size:.8rem;color:#c8d2e0;flex:1;min-width:180px}}
+.edit-chrome #editSaveStatus{{font-size:.75rem;color:#fde68a;font-weight:700;min-width:3.2rem}}
+.edit-chrome #btnEditSave,.edit-chrome #btnEditDone{{border:0;border-radius:999px;padding:8px 16px;font:inherit;font-size:.8rem;font-weight:800;cursor:pointer}}
+.edit-chrome #btnEditSave{{background:#fde68a;color:#0c2238}}
+.edit-chrome #btnEditSave:hover{{background:#f6e08a}}
+.edit-chrome #btnEditDone{{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35)}}
+.edit-chrome #btnEditDone:hover{{border-color:#fff}}
+body.ll-editing{{padding-top:56px}}
+body.ll-editing::after{{content:'';position:fixed;inset:0;border:4px solid #c9a227;pointer-events:none;z-index:1075}}
+@media(min-width:980px){{body.ll-editing .report-side{{top:68px;max-height:calc(100vh - 80px)}}}}
+@media(max-width:979px){{body.ll-editing .report-side{{top:56px}}}}
+body.ll-editing .core-facts{{overflow:visible}}
+body.ll-editing .whatif-card .wf-label{{white-space:normal;overflow:visible;text-overflow:unset}}
 .photo-fetch-banner{{
   display:none;align-items:center;gap:10px;flex-wrap:wrap;
   margin:0 0 12px;padding:10px 14px;border-radius:12px;
@@ -870,13 +893,34 @@ body{{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--
 .fab{{display:none}}
 .panel-overlay{{display:none;position:fixed;inset:0;background:rgba(8,18,32,.48);backdrop-filter:blur(2px);z-index:1001}}
 .panel-overlay.open{{display:block}}
-.remember-bar{{display:none;align-items:center;flex-wrap:wrap;gap:10px;margin:0 0 12px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:#fff}}
-body.ll-agent .remember-bar{{display:flex}}
-.remember-bar span{{font-size:.8rem;color:var(--muted)}}
-.remember-toast{{font-size:.78rem;font-weight:700;color:var(--brand-primary)}}
-body.ll-agent [data-lede],body.ll-agent [data-edit]{{outline:1px dashed transparent;border-radius:4px;cursor:text}}
-body.ll-agent [data-lede]:hover,body.ll-agent [data-edit]:hover,body.ll-agent #advList li:hover,body.ll-agent #riskList li:hover{{outline-color:rgba(12,60,110,.28)}}
-body.ll-agent [data-lede]:focus,body.ll-agent [data-edit]:focus,body.ll-agent #advList li:focus,body.ll-agent #riskList li:focus{{outline-color:var(--brand-primary)}}
+.view-modes .vm.edit-toggle{{display:none}}
+.remember-bar{{display:none}}
+body.ll-editing [data-lede],body.ll-editing [data-edit],body.ll-editing [data-copy],body.ll-editing #advList li,body.ll-editing #riskList li,body.ll-editing .ll-price-hit{{
+  cursor:text;border-radius:5px;outline:1.5px dashed rgba(12,60,110,.4);outline-offset:3px;
+  background:rgba(12,60,110,.07);box-shadow:inset 0 0 0 1px rgba(12,60,110,.06);
+  -webkit-user-select:text;user-select:text;
+}}
+body.ll-editing [data-copy]:has(.tip-i),body.ll-editing .tip[data-copy]{{
+  cursor:inherit;outline:none;background:transparent;box-shadow:none;-webkit-user-select:none;user-select:none;
+}}
+body.ll-editing [data-lede]:hover,body.ll-editing [data-edit]:hover,body.ll-editing [data-copy]:hover,body.ll-editing #advList li:hover,body.ll-editing #riskList li:hover,body.ll-editing .ll-price-hit:hover{{
+  background:rgba(12,60,110,.12);outline-color:rgba(12,60,110,.65);
+}}
+body.ll-editing [data-lede]:focus,body.ll-editing [data-edit]:focus,body.ll-editing [data-copy]:focus,body.ll-editing #advList li:focus,body.ll-editing #riskList li:focus,body.ll-editing .ll-price-hit:focus{{
+  outline:2px solid var(--brand-primary);outline-offset:2px;background:#fff;caret-color:var(--brand-primary);box-shadow:0 0 0 3px rgba(12,60,110,.14);
+}}
+body.ll-editing .core-facts [data-copy],body.ll-editing .core-facts [data-lede],body.ll-editing .verdict [data-copy],body.ll-editing .verdict [data-edit],body.ll-editing .verdict .ll-price-hit{{
+  outline-color:rgba(253,230,138,.55);background:rgba(255,255,255,.12);box-shadow:inset 0 0 0 1px rgba(253,230,138,.18);color:inherit;
+}}
+body.ll-editing .core-facts [data-copy]:hover,body.ll-editing .verdict [data-copy]:hover,body.ll-editing .verdict [data-edit]:hover,body.ll-editing .verdict .ll-price-hit:hover{{
+  outline-color:#fde68a;background:rgba(255,255,255,.2);
+}}
+body.ll-editing .core-facts [data-copy]:focus,body.ll-editing .verdict [data-copy]:focus,body.ll-editing .verdict [data-edit]:focus,body.ll-editing .verdict .ll-price-hit:focus{{
+  outline:2px solid #fde68a;outline-offset:2px;background:rgba(12,34,56,.92);color:#fff;caret-color:#fde68a;box-shadow:0 0 0 3px rgba(253,230,138,.28);
+}}
+.ll-add-line{{display:none;margin-top:6px;border:0;background:transparent;color:var(--muted);padding:0;font:inherit;font-size:.75rem;font-weight:700;cursor:pointer}}
+body.ll-editing .ll-add-line{{display:inline-flex}}
+body.ll-editing .ll-add-line:hover{{color:var(--brand-primary)}}
 .agent-panel{{position:fixed;top:0;right:0;width:min(400px,100vw);height:100vh;background:#f4f7fb;z-index:1002;box-shadow:-12px 0 40px rgba(8,20,40,.22);transform:translateX(105%);transition:transform .28s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column}}
 .agent-panel.open{{transform:translateX(0)}}
 .agent-chip.panel-open{{opacity:.28;pointer-events:none}}
@@ -1496,17 +1540,13 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
 .cf-grid{{display:grid;grid-template-columns:1fr;gap:10px;position:relative;z-index:1}}
 @media(min-width:640px){{.cf-grid{{grid-template-columns:repeat(2,1fr)}}}}
 @media(min-width:980px){{.cf-grid{{grid-template-columns:repeat(3,1fr)}}}}
-.cf-card{{display:flex;flex-direction:column;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:16px 16px 14px;min-height:168px;transition:background .2s ease,border-color .2s ease,transform .2s ease}}
+.cf-card{{display:flex;flex-direction:column;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:14px 16px 14px;min-height:0;transition:background .2s ease,border-color .2s ease,transform .2s ease}}
 .cf-card:hover{{background:rgba(255,255,255,.1);border-color:rgba(253,230,138,.35);transform:translateY(-1px)}}
 .cf-card .cf-top{{display:flex;align-items:center;gap:10px}}
 .cf-card .cf-n{{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#fde68a;color:#0c2238;font-size:.8rem;font-weight:800;box-shadow:0 2px 8px rgba(253,230,138,.35)}}
-.cf-card .cf-t{{font-size:.95rem;font-weight:800;color:#fff;line-height:1.25;letter-spacing:-.01em}}
-.cf-card .cf-b{{font-size:.8rem;line-height:1.45;color:rgba(255,255,255,.8);margin:0;flex:1}}
+.cf-card .cf-t{{flex:1;min-width:0;font-size:.92rem;font-weight:800;color:#fff;line-height:1.25;letter-spacing:-.01em}}
+.cf-card .cf-b{{font-size:.8rem;line-height:1.4;color:rgba(255,255,255,.82);margin:0}}
 .cf-card .cf-b strong{{color:#fde68a;font-weight:700}}
-.cf-card .cf-metric{{margin-top:auto;display:flex;flex-wrap:wrap;gap:6px;padding-top:4px}}
-.cf-card .cf-m{{display:inline-flex;flex-direction:column;align-items:flex-start;padding:8px 10px;border-radius:10px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.12);min-width:4.5rem}}
-.cf-card .cf-m .mv{{font-size:1.15rem;font-weight:800;letter-spacing:-.02em;color:#fde68a;line-height:1}}
-.cf-card .cf-m .ml{{font-size:.58rem;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.65);font-weight:700;margin-top:4px}}
 .cf-card.cf-key{{background:rgba(253,230,138,.1);border-color:rgba(253,230,138,.32)}}
 @media(max-width:740px){{
   .two-col,.confront,.market-duo,.split{{grid-template-columns:1fr}}
@@ -1522,7 +1562,7 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
 @media print{{
   @page{{size:11in 8.5in;margin:0}}
   *{{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
-  .fab,.agent-menu-wrap,.agent-chip,.agent-panel,.panel-overlay,.view-modes,.top-bar,.remember-bar,.spine,.report-side,
+  .fab,.agent-menu-wrap,.agent-chip,.agent-panel,.panel-overlay,.view-modes,.top-bar,.remember-bar,.spine,.report-side,.ll-add-line,.edit-dock,.edit-chrome,.view-switch,
   .listing-drawer,.listing-overlay,.photo-modal,.controls,.scatter-series,
   #spine-fulldata,.share-bar,.price-controls .slider-wrap,
   .slider-track-wrap,input[type=range],.slider-scale,
@@ -1535,7 +1575,10 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
   #llSampleBar,.ll-as-btn,.ll-as-panel,.pulse-card{{display:none!important}}
   .portal-chip.is-on{{display:flex!important;margin-top:4px}}
   .portal-chip.is-on .pc-amt{{display:inline!important;font-size:.8rem}}
+  body.ll-editing [data-lede],body.ll-editing [data-edit],body.ll-editing [data-copy],body.ll-editing #advList li,body.ll-editing #riskList li,body.ll-editing .ll-price-hit{{background:transparent!important;box-shadow:none!important;outline:none!important;cursor:inherit!important}}
   html,body{{background:#fff!important;margin:0;padding:0;width:11in;height:auto;overflow:hidden}}
+  body.ll-editing{{padding-top:0!important}}
+  body.ll-editing::after{{display:none!important}}
   .report-shell{{display:block;max-width:none;width:11in;padding:0;margin:0;overflow:hidden}}
   .page{{max-width:none;width:11in;padding:0;margin:0;overflow:hidden}}
 
@@ -1828,6 +1871,7 @@ body.print-leavebehind .fab,
 body.print-leavebehind .agent-menu-wrap,
 body.print-leavebehind .agent-chip,
 body.print-leavebehind .remember-bar,
+body.print-leavebehind .ll-add-line,
 body.print-leavebehind .pulse-actions,
 body.print-leavebehind .pulse-mail,
 body.print-leavebehind .pulse-card,
@@ -1846,12 +1890,49 @@ body.print-leavebehind .page > footer,
 body.print-leavebehind #spine-comps-more,
 body.print-leavebehind .print-only,
 body.print-leavebehind #llSampleBar,
+body.print-leavebehind .view-switch,
 body.print-leavebehind .ll-as-btn,
 body.print-leavebehind .ll-as-panel{{display:none!important}}
 body.print-leavebehind .page{{padding-bottom:0}}
+.sample-demo-bar{{
+  display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  background:#0b1220;color:#fff;padding:10px 18px;font-size:.86rem;position:sticky;top:0;z-index:50;
+}}
+body.ll-sample .sample-demo-bar{{display:flex}}
+.sample-demo-bar span{{color:#c8d2e0}}
+.sample-demo-bar a{{
+  color:#0b1220;background:#c9a227;text-decoration:none;font-weight:800;padding:8px 14px;border-radius:999px;
+}}
+@media print{{ .sample-demo-bar,.view-switch{{display:none!important}} }}
+.view-switch{{
+  display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  background:#0b1220;color:#fff;padding:10px 18px;font-size:.86rem;margin:0 0 12px;border-radius:14px;
+}}
+.view-switch.is-on{{display:flex}}
+.view-switch span{{color:#c8d2e0}}
+.view-switch a{{
+  color:#0b1220;background:#c9a227;text-decoration:none;font-weight:800;padding:8px 14px;border-radius:999px;
+}}
 </style>
 </head>
 <body>
+<div class="edit-chrome" id="editChrome">
+  <div class="edit-chrome-bar">
+    <span class="edit-chrome-kicker">Editing</span>
+    <span class="edit-chrome-hint">Click any highlighted text. Scroll anywhere — Save stays here.</span>
+    <span id="editSaveStatus" role="status"></span>
+    <button type="button" id="btnEditSave">Save</button>
+    <button type="button" id="btnEditDone">Done</button>
+  </div>
+</div>
+<div class="sample-demo-bar" id="sampleDemoBar">
+  <span>Demo listing appointment — then this home’s weekly Fingerprint from the same market file.</span>
+  <a href="/demo/fingerprint">Open the weekly Fingerprint →</a>
+</div>
+<div class="view-switch" id="viewSwitch">
+  <span>Same listing — Live Story is the appointment, Fingerprint is the weekly seller picture.</span>
+  <a id="fpNavCta" href="#">Open Market Fingerprint →</a>
+</div>
 <div class="report-shell">
 <aside class="report-side" id="reportSide" aria-label="Report navigation">
   <div class="rs-brand">ListLogic</div>
@@ -1876,16 +1957,18 @@ body.print-leavebehind .page{{padding-bottom:0}}
     <a href="#spine-yoy" data-spine="yoy">6 · Pace</a>
     <a href="#spine-prices" data-spine="prices">6b · Prices</a>
     <a href="#spine-timing" data-spine="timing">6c · Timing</a>
+    <a href="#spine-storylists" data-spine="storylists">Advantages</a>
     <a href="#spine-strategy" data-spine="strategy">7 · Price It</a>
     <a href="#spine-net" data-spine="net">8 · Net Sheet</a>
     <a href="#spine-fulldata" data-spine="fulldata">Full Market Data</a>
+    <a href="#" id="spineFingerprint" hidden>Fingerprint</a>
   </nav>
 </aside>
 <div class="page">
   <div class="hero">
     <div>
       <div class="brand">{logo_html}{brand_text}</div>
-      <h1>{hero_title}</h1>
+      <h1 data-copy="hero-title">{hero_title}</h1>
       <div class="hero-chips">{hero_chips}</div>
     </div>
     <div class="meta">{meta_html}</div>
@@ -1895,19 +1978,17 @@ body.print-leavebehind .page{{padding-bottom:0}}
     <div class="view-modes" id="viewModes">
       <span class="vm-label">Presentation</span>
       <span class="vm on">Live story</span>
-      <button type="button" class="vm" id="btnPrintLeavebehind" title="Print the Live Story — one section per page">Print leave-behind</button>
+      <a class="vm" id="fpNavLink" href="#" hidden>Market Fingerprint</a>
+      <button type="button" class="vm" id="btnPrintLeavebehind" title="Print the listing presentation — one section per page">Print Listing Presentation</button>
       <a id="deckLink" href="#" style="display:none">Flipbook</a>
       <a id="pdfLink" href="#" style="display:none">Packet PDF</a>
       <a id="storyPdfLink" href="#" style="display:none">Story PDF</a>
       <button type="button" class="vm" id="btnCopyShare" style="display:none">Share with client</button>
       <span class="vm-status" id="shareStatus"></span>
     </div>
-  </div>
-  <div class="remember-bar" id="rememberBar">
-    <span>Click an intro or bullet to edit this listing.</span>
-    <button type="button" class="btn-soft primary" id="btnSaveDefaults">Remember for next reports</button>
-    <button type="button" class="btn-soft" id="btnResetDefaults">Clear saved wording</button>
-    <span class="remember-toast" id="storyToast" role="status"></span>
+    <div class="edit-dock" id="editDock">
+      <button type="button" id="btnEditMode" aria-pressed="false" title="Edit titles and story wording">Edit</button>
+    </div>
   </div>
   <div class="photo-fetch-banner" id="photoFetchBanner" aria-live="polite">
     <span class="spin" aria-hidden="true"></span>
@@ -1926,17 +2007,29 @@ body.print-leavebehind .page{{padding-bottom:0}}
         <span class="mi-ico">⌂</span>
         <span class="mi-copy"><strong>Dashboard</strong><span>Saved reports &amp; new generate</span></span>
       </a>
+      <a href="#" id="menuFingerprint" role="menuitem" hidden>
+        <span class="mi-ico">◉</span>
+        <span class="mi-copy"><strong>Market Fingerprint</strong><span>Weekly seller story after they list</span></span>
+      </a>
       <a href="/saas/app.html#generate" role="menuitem">
         <span class="mi-ico">＋</span>
         <span class="mi-copy"><strong>New presentation</strong><span>Upload MLS &amp; build another</span></span>
       </a>
       <button type="button" class="mi" id="menuOpenTools" role="menuitem">
         <span class="mi-ico">✎</span>
-        <span class="mi-copy"><strong>Edit this report</strong><span>Price, story, coach, photos</span></span>
+        <span class="mi-copy"><strong>Coach &amp; photos</strong><span>Private notes, AI rewrite, listing photos</span></span>
       </button>
       <button type="button" class="mi" id="menuSections" role="menuitem">
         <span class="mi-ico">☰</span>
         <span class="mi-copy"><strong>Sections</strong><span>Include or hide report steps</span></span>
+      </button>
+      <button type="button" class="mi" id="btnSaveDefaults" role="menuitem">
+        <span class="mi-ico">↩</span>
+        <span class="mi-copy"><strong>Remember wording</strong><span>Intros and extra lines for next reports</span></span>
+      </button>
+      <button type="button" class="mi" id="btnRestoreCopy" role="menuitem">
+        <span class="mi-ico">LL</span>
+        <span class="mi-copy"><strong>Restore ListLogic wording</strong><span>Titles, descriptions, and story copy on this report</span></span>
       </button>
       <div class="mi-sep"></div>
       <a href="/saas/pricing.html" role="menuitem">
@@ -1958,101 +2051,82 @@ body.print-leavebehind .page{{padding-bottom:0}}
     </div>
   </div>
 
-  <section class="core-facts" id="spine-corefacts">
+  <section class="core-facts" id="spine-corefacts" data-cf="fingerprint">
     <div class="cf-head">
-      <div class="cf-eyebrow">Core Facts of ListLogic — Data Driven Pricing</div>
+      <div class="cf-eyebrow" data-copy="cf-eyebrow">Core Facts of ListLogic</div>
     </div>
     <div class="cf-grid">
       <article class="cf-card">
-        <div class="cf-top"><span class="cf-n">1</span><div class="cf-t">The Market Is Custom-Fit to This Home</div></div>
-        <p class="cf-b">We don’t price against the whole city. Size, garage, area, and timeframe are filtered so the comparison is <strong>apples to apples</strong> — what a buyer would actually put side-by-side with yours.</p>
+        <div class="cf-top"><span class="cf-n">1</span><div class="cf-t" data-copy="cf-1-t">Your Home’s Market Fingerprint</div></div>
+        <p class="cf-b" data-copy="cf-1-b">Custom market fit to your home — size, beds, baths, garage, lot size, and location.</p>
+      </article>
+      <article class="cf-card">
+        <div class="cf-top"><span class="cf-n">2</span><div class="cf-t" data-copy="cf-2-t">Supply and Demand</div></div>
+        <p class="cf-b" data-copy="cf-2-b">How many homes are for sale versus how fast they sell. That balance is who has leverage.</p>
+      </article>
+      <article class="cf-card">
+        <div class="cf-top"><span class="cf-n">3</span><div class="cf-t" data-copy="cf-3-t">Your Competition</div></div>
+        <p class="cf-b" data-copy="cf-3-b">Active, available homes — the ones a buyer can actually go see. Pending and backup are already spoken for.</p>
       </article>
       <article class="cf-card cf-key">
-        <div class="cf-top"><span class="cf-n">2</span><div class="cf-t">Absorption Sets the Pace</div></div>
-        <p class="cf-b">How fast this segment sells vs. how many are for sale. That ratio — months of inventory — is the clearest read on seller vs. buyer leverage.</p>
-        <div class="cf-metric">
-          <div class="cf-m"><span class="mv">{inv:.1f}</span><span class="ml">Months inv.</span></div>
-          <div class="cf-m"><span class="mv">{active_n}</span><span class="ml">Active</span></div>
-          <div class="cf-m"><span class="mv">{sales_mo:.1f}</span><span class="ml">Sales / mo</span></div>
-        </div>
+        <div class="cf-top"><span class="cf-n">4</span><div class="cf-t" data-copy="cf-levers">Three Levers — Price, Condition, Location</div></div>
+        <p class="cf-b" data-copy="cf-levers-b">That’s what buyers compare. You can’t move the house. You can still change the asking price, and improve the condition.</p>
       </article>
       <article class="cf-card">
-        <div class="cf-top"><span class="cf-n">3</span><div class="cf-t">Competition Is Who’s for Sale Now</div></div>
-        <p class="cf-b">Only <strong>Active</strong> listings compete for buyers. Pending and Backup are already spoken for. List yours, and buyers choose among this many homes — including you.</p>
-        <div class="cf-metric">
-          <div class="cf-m"><span class="mv">{with_yours}</span><span class="ml">If you list</span></div>
-          <div class="cf-m"><span class="mv">{active_n}</span><span class="ml">Active now</span></div>
-        </div>
+        <div class="cf-top"><span class="cf-n">5</span><div class="cf-t" data-copy="cf-value">Providing Value or Are the Value</div></div>
+        <p class="cf-b" data-copy="cf-value-b">If a similar home lists under you, they’re providing the value — they look like the better buy next to yours. If they list over you, you are the value. Same kind of house; the ask is what makes one of you look like the deal.</p>
       </article>
       <article class="cf-card">
-        <div class="cf-top"><span class="cf-n">4</span><div class="cf-t">Buyers Set Value — Closes Prove It</div></div>
-        <p class="cf-b">Asking prices are opinions. <strong>Sold prices are facts.</strong> The recommended list is anchored to what buyers just paid for the closest recent comparables — not what neighbors hope to get.</p>
-      </article>
-      <article class="cf-card">
-        <div class="cf-top"><span class="cf-n">5</span><div class="cf-t">Location Is Fixed — Condition Moves the Number</div></div>
-        <p class="cf-b">Within your segment, updates and presentation decide where you land in the band. We’ll rate the home <strong>together, 1–10</strong>, and the list price responds live to that rating.</p>
-      </article>
-      <article class="cf-card">
-        <div class="cf-top"><span class="cf-n">6</span><div class="cf-t">Price Buys Time — and Odds</div></div>
-        <p class="cf-b">Priced with the market, homes here go under contract in about this many days. Overpriced homes linger — and become the listing that <strong>helps sell everyone else’s house</strong>.</p>
-        <div class="cf-metric">
-          <div class="cf-m"><span class="mv">{median_dom:.0f}</span><span class="ml">Median days</span></div>
-        </div>
+        <div class="cf-top"><span class="cf-n">6</span><div class="cf-t" data-copy="cf-6-t">Pricing Determines Time to Contract</div></div>
+        <p class="cf-b" data-copy="cf-6-b">The asking price is what determines how long it takes to go under contract. Priced with the market, homes here move. Overpriced listings linger — and help sell everyone else’s house.</p>
       </article>
     </div>
   </section>
 
   <section class="section" id="spine-market">
-    <h2><span class="ttl"><span class="step">1</span>Homes on the Market</span><span class="temp {temp_class}">{temp_label} · {inv:.1f} mo inventory</span></h2>
+    <h2><span class="ttl"><span class="step">1</span><span data-copy="t-market">Homes on the Market</span></span><span class="temp {temp_class}">{temp_label} · {inv:.1f} mo inventory</span></h2>
     {market_def_html}
-    <p class="sub">Competition = <strong>Active only</strong>. Pending + Backup are under contract — already spoken for, not inventory.</p>
+    <p class="sub" data-copy="s-market">Competition = Active only. Pending + Backup are under contract — already spoken for, not inventory.</p>
     <div class="market-duo">
-      <div class="duo"><div class="n">{active_n}</div><div class="t">Active on Market</div></div>
-      <div class="duo yours"><div class="n">{with_yours}</div><div class="t">With Your Home Included</div></div>
+      <div class="duo"><div class="n">{active_n}</div><div class="t" data-copy="duo-active">Active on Market</div></div>
+      <div class="duo yours"><div class="n">{with_yours}</div><div class="t" data-copy="duo-yours">With Your Home Included</div></div>
     </div>
     <div class="ask-trio">
-      <div class="ask-card"><div class="aq">How Long Should It Take?</div><div class="aa">{ask.get("how_long") or f"Typical time to contract is about <b>{median_dom:.0f} days</b>."}</div></div>
-      <div class="ask-card"><div class="aq">What Are the Odds?</div><div class="aa">{ask.get("odds") or f"About <b>{odds_pct:.0f}%</b> chance of going under contract in ~30 days when priced well."}</div></div>
-      <div class="ask-card"><div class="aq">When Is the Market Most Active?</div><div class="aa">{ask.get("when_active") or f"Homes are absorbing at about <b>{sales_mo:.1f}</b> sales per month."}</div></div>
+      <div class="ask-card"><div class="aq" data-copy="ask-1-q">How Long Should It Take?</div><div class="aa" data-copy="ask-1-a">{ask.get("how_long") or f"Typical time to contract is about <b>{median_dom:.0f} days</b>."}</div></div>
+      <div class="ask-card"><div class="aq" data-copy="ask-2-q">What Are the Odds?</div><div class="aa" data-copy="ask-2-a">{ask.get("odds") or f"About <b>{odds_pct:.0f}%</b> chance of going under contract in ~30 days when priced well."}</div></div>
+      <div class="ask-card"><div class="aq" data-copy="ask-3-q">When Is the Market Most Active?</div><div class="aa" data-copy="ask-3-a">{ask.get("when_active") or f"Homes are absorbing at about <b>{sales_mo:.1f}</b> sales per month."}</div></div>
     </div>
     <div class="band-wrap" id="bandWrap" style="{'display:none' if not (price_bands.get('labels')) else ''}">
-      <h3>Active Competition by List-Price Band</h3>
-      <p class="sub" style="margin-bottom:6px">Where today’s Active homes sit by asking price — the highlighted band is the market-supported value line from comps.</p>
+      <h3 data-copy="t-bands">Active Competition by List-Price Band</h3>
+      <p class="sub" style="margin-bottom:6px" data-copy="s-bands">Where today’s Active homes sit by asking price — the highlighted band is the market-supported value line from comps.</p>
       <div class="chart-box short"><canvas id="priceBandChart"></canvas></div>
-      <p class="band-insight" id="bandInsight">{band_insight}</p>
+      <p class="band-insight" id="bandInsight" data-copy="insight-band">{band_insight}</p>
     </div>
     <div class="kpis market-kpis">
-      <div class="kpi"><div class="v">{uc_n}</div><div class="l">Under Contract</div></div>
-      <div class="kpi"><div class="v">{sales_mo:.1f}</div><div class="l">Sales / Month</div></div>
-      <div class="kpi"><div class="v">{inv:.1f}</div><div class="l">Months of Inventory</div></div>
-      <div class="kpi"><div class="v">{odds_pct:.0f}%</div><div class="l">30-Day Market Odds</div></div>
-      <div class="kpi"><div class="v">{s.get("sold_count", 0)}</div><div class="l">Recently Closed</div></div>
+      <div class="kpi"><div class="v">{uc_n}</div><div class="l" data-copy="kpi-uc">Under Contract</div></div>
+      <div class="kpi"><div class="v">{sales_mo:.1f}</div><div class="l" data-copy="kpi-sales">Sales / Month</div></div>
+      <div class="kpi"><div class="v">{inv:.1f}</div><div class="l" data-copy="kpi-inv">Months of Inventory</div></div>
+      <div class="kpi"><div class="v">{odds_pct:.0f}%</div><div class="l" data-copy="kpi-odds">30-Day Market Odds</div></div>
+      <div class="kpi"><div class="v">{s.get("sold_count", 0)}</div><div class="l" data-copy="kpi-closed">Recently Closed</div></div>
       {dns_kpi_true}
       {dns_kpi_churn}
-      <div class="kpi"><div class="v">${(s.get("median_sold_price") or 0)/1000:.0f}k</div><div class="l">Median Sold Price</div></div>
-      <div class="kpi"><div class="v">{(s.get("median_dom") or 0):.0f}</div><div class="l">Median Days on Market</div></div>
-      <div class="kpi"><div class="v">${(s.get("median_price_per_sqft") or 0):.0f}</div><div class="l">Median $ / Sq Ft</div></div>
+      <div class="kpi"><div class="v">${(s.get("median_sold_price") or 0)/1000:.0f}k</div><div class="l" data-copy="kpi-medsold">Median Sold Price</div></div>
+      <div class="kpi"><div class="v">{(s.get("median_dom") or 0):.0f}</div><div class="l" data-copy="kpi-meddom">Median Days on Market</div></div>
+      <div class="kpi"><div class="v">${(s.get("median_price_per_sqft") or 0):.0f}</div><div class="l" data-copy="kpi-psf">Median $ / Sq Ft</div></div>
     </div>
   </section>
 
-  <section class="section supply-section" id="spine-supply" style="{'display:none' if not show_listing_flow else ''}">
-    <h2><span class="ttl"><span class="step">2</span>The Supply Stream</span>
+  <section class="section supply-section" id="spine-supply" data-supply="pace" style="{'display:none' if not show_listing_flow else ''}">
+    <h2><span class="ttl"><span class="step">2</span><span data-copy="t-supply">The Supply Stream</span></span>
       <span class="temp {'hot' if lf_pressure_tone == 'building' else 'warm'}">{lf_pressure_headline} · {lf_pressure:.2f}×</span>
     </h2>
-    <p class="sub">Active competition is a snapshot. The supply stream is the <strong>pipeline</strong> — new homes that keep arriving while yours sits. Price above the market-supported value line, and fresher listings underneath yours become the ones buyers tour first.</p>
-    <div class="supply-line" id="supplyLine">
-      <div>
-        <div class="sl-k">Market-Supported Value Line</div>
-        <div class="sl-v" id="supplyLinePrice">${rec:,.0f}</div>
-      </div>
-      <div class="sl-d" id="supplyLineCopy">From recent comps for similar homes — not your final ask yet. We use this line to count how many listings are already cheaper, and how many more arrive while a typical sale takes ~{lf_wait_dom:.0f} days. Agent tools can override the line later if needed.</div>
-    </div>
+    <p class="sub" data-copy="s-supply">Active competition is a snapshot. The supply stream is the <strong>pipeline</strong> — new homes that keep arriving while yours sits versus how fast they sell.</p>
     <div class="supply-hero">
       <div class="supply-balance">
-        <div class="sb-title">New Listings vs Sales · Recent Pace</div>
+        <div class="sb-title" data-copy="sb-title">New Listings vs Sales · Recent Pace</div>
         <div class="sb-pair">
-          <div><div class="sb-n">{lf_new_pm:.1f}</div><div class="sb-l">New / month</div></div>
-          <div><div class="sb-n">{lf_sales_pm:.1f}</div><div class="sb-l">Sales / month</div></div>
+          <div><div class="sb-n">{lf_new_pm:.1f}</div><div class="sb-l" data-copy="sb-new">New / month</div></div>
+          <div><div class="sb-n">{lf_sales_pm:.1f}</div><div class="sb-l" data-copy="sb-sold">Sales / month</div></div>
         </div>
         <div class="sb-bar" aria-hidden="true">
           <div class="new" style="width:{lf_new_share}%"></div>
@@ -2068,42 +2142,25 @@ body.print-leavebehind .page{{padding-bottom:0}}
         <div class="sp-h">{lf_pressure_headline}</div>
         <p class="sp-b">{lf_pressure_blurb}</p>
         <div class="sp-metric">
-          <div class="sp-m"><div class="mv">{lf_pressure:.2f}×</div><div class="ml">Supply pressure</div></div>
-          <div class="sp-m"><div class="mv">{('+' if lf_net >= 0 else '')}{lf_net:.1f}</div><div class="ml">Net / month</div></div>
+          <div class="sp-m"><div class="mv">{lf_pressure:.2f}×</div><div class="ml" data-copy="sp-ml1">Supply pressure</div></div>
+          <div class="sp-m"><div class="mv">{('+' if lf_net >= 0 else '')}{lf_net:.1f}</div><div class="ml" data-copy="sp-ml2">Net / month</div></div>
         </div>
       </div>
     </div>
-    <div class="supply-wait">
-      <div class="sw">
-        <div class="sw-t">Cheaper New Listings</div>
-        <div class="sw-v" id="supplyBelowPm">{lf_below_pm:.1f}<span style="font-size:.85rem;font-weight:700;color:var(--muted)"> / mo</span></div>
-        <div class="sw-d" id="supplyBelowPmCopy">Similar-size homes that <strong>come on market under</strong> <span class="supply-line-ref">${rec:,.0f}</span> each month — the better-value stream buyers see first.</div>
-      </div>
-      <div class="sw">
-        <div class="sw-t">Already Cheaper Today</div>
-        <div class="sw-v" id="supplyActiveBelow">{lf_active_below}</div>
-        <div class="sw-d" id="supplyActiveBelowCopy"><strong>Active</strong> homes right now asking less than <span class="supply-line-ref">${rec:,.0f}</span> — already on the buyer tour list.</div>
-      </div>
-      <div class="sw accent">
-        <div class="sw-t">During a typical ~{lf_wait_dom:.0f}-day sale</div>
-        <div class="sw-v" id="supplyWaitFresh">~{lf_wait_fresh:.1f}</div>
-        <div class="sw-d" id="supplyWaitCopy">Extra similar homes expected to <strong>list under that line</strong> before a well-priced home usually goes under contract — on top of what’s Active today.</div>
-      </div>
-    </div>
     <div class="supply-chart-wrap">
-      <h3 style="font-size:.9rem;margin:0 0 6px;color:var(--brand-primary)">New Listings vs Closed Sales by Month</h3>
-      <p class="sub" style="margin-bottom:8px">When the blue bars run ahead of navy, inventory is building in this competitive set.</p>
+      <h3 style="font-size:.9rem;margin:0 0 6px;color:var(--brand-primary)" data-copy="t-flow">New Listings vs Closed Sales by Month</h3>
+      <p class="sub" style="margin-bottom:8px" data-copy="s-flow">When the blue bars run ahead of navy, inventory is building in this competitive set.</p>
       <div class="chart-box"><canvas id="listingFlowChart"></canvas></div>
-      <p class="supply-insight" id="flowInsight">{lf_insight}{' ' + lf_overprice if lf_overprice else ''}</p>
+      <p class="supply-insight" id="flowInsight" data-copy="insight-flow">{lf_insight}</p>
     </div>
   </section>
 
   <section class="section" id="spine-comps">
-    <h2><span class="ttl"><span class="step">3</span>Closest Comparable Sales</span></h2>
+    <h2><span class="ttl"><span class="step">3</span><span data-copy="t-comps">Closest Comparable Sales</span></span></h2>
     <p class="sub" data-lede="comps">{lede_comps}</p>
     <details class="comp-rank-how">
-      <summary>How comps are ranked</summary>
-      <p>Auto picks score every sold home in this market against yours. Living area carries the most weight, then beds, year built, baths, and garage. Recent sales beat older ones. Extreme price outliers that match size but not the product get filtered out. The match % is relative to the best comp on <em>this</em> report — #1 is always the closest fit.</p>
+      <summary data-copy="comps-how-sum">How comps are ranked</summary>
+      <p data-copy="comps-how">Auto picks score every sold home in this market against yours. Living area carries the most weight, then beds, year built, baths, and garage. Recent sales beat older ones. Extreme price outliers that match size but not the product get filtered out. The match % is relative to the best comp on <em>this</em> report — #1 is always the closest fit.</p>
     </details>
     <div class="comp-toolbar" id="compToolbar">
       <span id="compToolbarLabel"><strong>Auto picks</strong> · closest sales for this home</span>
@@ -2118,7 +2175,7 @@ body.print-leavebehind .page{{padding-bottom:0}}
     <div class="comp-rail" id="compRail">{comps_cards or '<p class="muted">No close comps</p>'}</div>
     <div class="comp-map-wrap" id="compMapWrap">
       <div class="comp-map-head">
-        <strong>Market map</strong>
+        <strong data-copy="map-head">Market map</strong>
         <div class="comp-map-legend" id="mapKindFilters" data-map-filters="1">
           <span class="static"><i class="you"></i> Your home</span>
           <span class="static"><i class="comp"></i> Selected comps</span>
@@ -2129,7 +2186,7 @@ body.print-leavebehind .page{{padding-bottom:0}}
         </div>
       </div>
       <div id="compMap" role="img" aria-label="Map of comps and market listings"></div>
-      <div class="comp-map-foot">Hover a pin for a quick peek. Click a sold home to add or remove it as a comp.</div>
+      <div class="comp-map-foot" data-copy="map-foot">Hover a pin for a quick peek. Click a sold home to add or remove it as a comp.</div>
     </div>
     <button type="button" class="comp-table-toggle" id="btnCompTable">Show table view</button>
     <div class="comp-table-wrap" id="compTableWrap">
@@ -2147,59 +2204,59 @@ body.print-leavebehind .page{{padding-bottom:0}}
   </section>
 
   <section class="section" id="spine-rating">
-    <h2><span class="ttl"><span class="step">4</span>How Does Your Home Compare?</span></h2>
+    <h2><span class="ttl"><span class="step">4</span><span data-copy="t-rating">How Does Your Home Compare?</span></span></h2>
     <p class="sub" data-lede="condition">{lede_condition}</p>
     <div class="rate-bands" id="rateBands">
-      <button type="button" class="rate-band" data-rating="3"><div class="rb-t">Needs Work</div><div class="rb-r">1 – 3</div><div class="rb-d">Dated finishes, deferred maintenance, or weak curb appeal vs comps.</div></button>
-      <button type="button" class="rate-band" data-rating="5"><div class="rb-t">Average</div><div class="rb-r">4 – 6</div><div class="rb-d">In line with recent sales — nothing special, nothing broken.</div></button>
-      <button type="button" class="rate-band" data-rating="7"><div class="rb-t">Strong</div><div class="rb-r">7 – 8</div><div class="rb-d">Updated kitchen/baths, clean presentation — buyers notice.</div></button>
-      <button type="button" class="rate-band" data-rating="9"><div class="rb-t">Exceptional</div><div class="rb-r">9 – 10</div><div class="rb-d">Top of the set — turnkey, premium finishes, stands out.</div></button>
+      <button type="button" class="rate-band" data-rating="3"><div class="rb-t" data-copy="rb-needs-t">Needs Work</div><div class="rb-r">1 – 3</div><div class="rb-d" data-copy="rb-needs-d">Dated finishes, deferred maintenance, or weak curb appeal vs comps.</div></button>
+      <button type="button" class="rate-band" data-rating="5"><div class="rb-t" data-copy="rb-avg-t">Average</div><div class="rb-r">4 – 6</div><div class="rb-d" data-copy="rb-avg-d">In line with recent sales — nothing special, nothing broken.</div></button>
+      <button type="button" class="rate-band" data-rating="7"><div class="rb-t" data-copy="rb-strong-t">Strong</div><div class="rb-r">7 – 8</div><div class="rb-d" data-copy="rb-strong-d">Updated kitchen/baths, clean presentation — buyers notice.</div></button>
+      <button type="button" class="rate-band" data-rating="9"><div class="rb-t" data-copy="rb-ex-t">Exceptional</div><div class="rb-r">9 – 10</div><div class="rb-d" data-copy="rb-ex-d">Top of the set — turnkey, premium finishes, stands out.</div></button>
     </div>
     <div class="rate-row" id="rateRow">{rating_buttons}</div>
     <div class="rate-live">
-      <div class="rl"><div class="lbl">Condition vs typical</div><div class="amt" id="rateLivePrice">—</div></div>
-      <div class="rs"><div class="lbl">Your rating</div><div class="amt" id="rateLiveScore">{home_rating}/10</div></div>
+      <div class="rl"><div class="lbl" data-copy="rate-lbl-vs">Condition vs typical</div><div class="amt" id="rateLivePrice">—</div></div>
+      <div class="rs"><div class="lbl" data-copy="rate-lbl-you">Your rating</div><div class="amt" id="rateLiveScore">{home_rating}/10</div></div>
     </div>
-    <p class="sub" id="ratingCopy" style="margin-top:8px">Starting at <strong>5/10</strong> (typical for this set). Adjust together — list dollars unlock in <strong>Price it</strong>.</p>
+    <p class="sub" id="ratingCopy" style="margin-top:8px" data-copy="rating-copy">Starting at <strong>5/10</strong> (typical for this set). Adjust together — list dollars unlock in <strong>Price it</strong>.</p>
   </section>
 
   <section class="section" id="spine-position">
-    <p class="section-kicker">Step 5 · Where you sit</p>
-    <h2><span class="ttl"><span class="step">5</span>Your Home on the Price vs Sq Ft Map</span>
+    <p class="section-kicker" data-copy="k-position">Step 5 · Where you sit</p>
+    <h2><span class="ttl"><span class="step">5</span><span data-copy="t-position">Your Home on the Price vs Sq Ft Map</span></span>
       <span class="controls" id="scatterRange">
         <button type="button" data-scatter-mo="3">3 mo</button>
         <button type="button" class="active" data-scatter-mo="6">6 mo</button>
         <button type="button" data-scatter-mo="0">All sales</button>
       </span>
     </h2>
-    <p class="sub">Orange line = sold trend · Tap layers on/off · <span id="scatterCount">Recent sales</span></p>
+    <p class="sub"><span data-copy="s-position">Orange line = sold trend · Tap layers on/off ·</span> <span id="scatterCount">Recent sales</span></p>
     <div class="controls scatter-series" id="scatterSeries">
       <button type="button" class="active series-sold" data-scatter-series="Sold">Sold</button>
       <button type="button" class="active series-active" data-scatter-series="Active">Active</button>
       <button type="button" class="active series-home" data-scatter-series="Your Home">Your home</button>
     </div>
     <div class="chart-box scatter-tall"><canvas id="scatter"></canvas></div>
-    <div class="story-note" id="topStmt">{top_stmt}</div>
+    <div class="story-note" id="topStmt" data-copy="pos-stmt">{top_stmt}</div>
   </section>
 
   <section class="section" id="spine-yoy">
-    <p class="section-kicker">Step 6 · Market detail</p>
-    <h2><span class="ttl"><span class="step">6</span>Pace — Is the Market Speeding Up or Slowing?</span></h2>
-    <p class="sub">Year-over-year sales tell you whether demand is building or thinning in this exact segment.</p>
+    <p class="section-kicker" data-copy="k-yoy">Step 6 · Market detail</p>
+    <h2><span class="ttl"><span class="step">6</span><span data-copy="t-yoy">Pace — Is the Market Speeding Up or Slowing?</span></span></h2>
+    <p class="sub" data-copy="s-yoy">Year-over-year sales tell you whether demand is building or thinning in this exact segment.</p>
     <div class="kpis yoy-kpis" style="--yoy-cols:{yoy_n}">{yoy_kpi or '<div class="kpi"><div class="v">—</div><div class="l">Need dated sales</div></div>'}</div>
     <div class="md-panel">
       <div class="md-panel-head">
-        <h3>Sales volume</h3>
+        <h3 data-copy="t-vol">Sales volume</h3>
         <span class="md-tag">Talking point</span>
       </div>
-      <p class="md-talk">{insight_pace}</p>
+      <p class="md-talk" data-copy="talk-pace">{insight_pace}</p>
       <div class="md-chart-grid">
         <div class="md-chart-block">
-          <h4>Sales by year</h4>
+          <h4 data-copy="h-sales-year">Sales by year</h4>
           <div class="chart-box short"><canvas id="yoySales"></canvas></div>
         </div>
         <div class="md-chart-block">
-          <h4>Same-month · last year vs this year</h4>
+          <h4 data-copy="h-same-month">Same-month · last year vs this year</h4>
           <div class="chart-box short"><canvas id="yoyMonthly"></canvas></div>
         </div>
       </div>
@@ -2207,27 +2264,27 @@ body.print-leavebehind .page{{padding-bottom:0}}
   </section>
 
   <section class="section" id="spine-prices">
-    <p class="section-kicker">Step 6b · What buyers paid</p>
-    <h2><span class="ttl">Prices — What the Market Is Actually Paying</span>
+    <p class="section-kicker" data-copy="k-prices">Step 6b · What buyers paid</p>
+    <h2><span class="ttl"><span data-copy="t-prices">Prices — What the Market Is Actually Paying</span></span>
       <span class="controls" id="priceTrendToggle" style="{'display:none' if not monthly_price_bands.get('labels') else ''}">
         <button type="button" class="active" data-price-view="all">All sales</button>
         <button type="button" data-price-view="bands">Vs. your price line</button>
       </span>
     </h2>
-    <p class="sub" id="priceTrendSub">Median sold price is the clearest signal of buyer willingness to pay in this set.</p>
+    <p class="sub" id="priceTrendSub" data-copy="s-prices">Median sold price is the clearest signal of buyer willingness to pay in this set.</p>
     <div class="md-panel">
       <div class="md-panel-head">
-        <h3>Price movement</h3>
+        <h3 data-copy="t-price-move">Price movement</h3>
         <span class="md-tag">Talking point</span>
       </div>
-      <p class="md-talk">{insight_price}</p>
+      <p class="md-talk" data-copy="talk-price">{insight_price}</p>
       <div class="md-chart-grid">
         <div class="md-chart-block">
-          <h4>Median sold price by year</h4>
+          <h4 data-copy="h-price-year">Median sold price by year</h4>
           <div class="chart-box short"><canvas id="yoyPrice"></canvas></div>
         </div>
         <div class="md-chart-block">
-          <h4>Median sold price by month</h4>
+          <h4 data-copy="h-price-month">Median sold price by month</h4>
           <div class="chart-box feature"><canvas id="priceTrend"></canvas></div>
         </div>
       </div>
@@ -2235,33 +2292,33 @@ body.print-leavebehind .page{{padding-bottom:0}}
   </section>
 
   <section class="section" id="spine-timing">
-    <p class="section-kicker">Step 6c · How long it takes</p>
-    <h2><span class="ttl">Timing — Days on Market</span>
+    <p class="section-kicker" data-copy="k-timing">Step 6c · How long it takes</p>
+    <h2><span class="ttl"><span data-copy="t-timing">Timing — Days on Market</span></span>
       <span class="controls">
         <button type="button" class="active" data-chart="dom" data-mode="dist">Distribution</button>
         <button type="button" data-chart="dom" data-mode="trend">By Month</button>
       </span>
     </h2>
-    <p class="sub">Median: <strong>{(dom_dist.get("median") or median_dom):.0f} days</strong> — price with the market and this is the pace to expect.</p>
+    <p class="sub" data-copy="s-timing">Median: <strong>{(dom_dist.get("median") or median_dom):.0f} days</strong> — price with the market and this is the pace to expect.</p>
     <div class="md-panel">
       <div class="md-panel-head">
-        <h3>Time to contract</h3>
+        <h3 data-copy="t-contract">Time to contract</h3>
         <span class="md-tag">Talking point</span>
       </div>
-      <p class="md-talk">{insight_timing}</p>
+      <p class="md-talk" data-copy="talk-timing">{insight_timing}</p>
       <div class="md-chart-grid">
         <div class="md-chart-block">
-          <h4>Median DOM by year</h4>
+          <h4 data-copy="h-dom-year">Median DOM by year</h4>
           <div class="chart-box short"><canvas id="yoyDom"></canvas></div>
         </div>
         <div class="md-chart-block">
-          <h4>Where sales land</h4>
+          <h4 data-copy="h-dom-land">Where sales land</h4>
           <div class="chart-box feature"><canvas id="domChart"></canvas></div>
         </div>
       </div>
       <div class="md-chart-grid solo" style="margin-top:12px">
         <div class="md-chart-block">
-          <h4>Sales volume trend
+          <h4><span data-copy="h-sales-trend">Sales volume trend</span>
             <span class="controls" style="float:right">
               <button type="button" class="active" data-chart="sales" data-mode="month">Month</button>
               <button type="button" data-chart="sales" data-mode="year">Year</button>
@@ -2273,30 +2330,38 @@ body.print-leavebehind .page{{padding-bottom:0}}
     </div>
   </section>
 
-  <section class="section">
+  <section class="section" id="spine-storylists">
     <div class="split">
-      <div><h2 style="border:none;margin:0 0 6px;font-size:.9rem">Advantages</h2><ul id="advList">{''.join(f'<li>{a}</li>' for a in advantages)}</ul></div>
-      <div><h2 style="border:none;margin:0 0 6px;font-size:.9rem">Watch-Outs</h2><ul id="riskList">{''.join(f'<li>{r}</li>' for r in risks)}</ul></div>
+      <div>
+        <h2 style="border:none;margin:0 0 6px;font-size:.9rem" data-copy="t-adv">Advantages</h2>
+        <ul id="advList">{''.join(f'<li>{a}</li>' for a in advantages)}</ul>
+        <button type="button" class="ll-add-line" data-list="adv">+ Add advantage</button>
+      </div>
+      <div>
+        <h2 style="border:none;margin:0 0 6px;font-size:.9rem" data-copy="t-watch">Watch-Outs</h2>
+        <ul id="riskList">{''.join(f'<li>{r}</li>' for r in risks)}</ul>
+        <button type="button" class="ll-add-line" data-list="risk">+ Add watch-out</button>
+      </div>
     </div>
   </section>
 
   <section class="section" id="spine-strategy">
-    <h2><span class="ttl"><span class="step">7</span>Price It — Strategy &amp; Trade-Offs</span></h2>
-    <p class="sub">Set the list with the slider — strategy cards snap you to a lane. Then see market positioning vs. what happens while you wait.</p>
+    <h2><span class="ttl"><span class="step">7</span><span data-copy="t-strategy">Price It — Strategy &amp; Trade-Offs</span></span></h2>
+    <p class="sub" data-copy="s-strategy">Set the list with the slider — strategy cards snap you to a lane. Then see market positioning vs. what happens while you wait.</p>
     <section class="verdict" id="spine-verdict">
-      <div class="eyebrow">Recommended List Price</div>
-      <div class="big" id="dispRec">${rec:,.0f}</div>
+      <div class="eyebrow" data-copy="v-eyebrow">Recommended List Price</div>
+      <div class="big ll-price-hit" id="dispRec" data-price-field="rec">${rec:,.0f}</div>
       <div class="portal-chip" id="portalChip" hidden>
         <span class="pc-label">Zillow estimate</span>
         <span class="pc-amt" id="portalAmt"></span>
         <button type="button" class="pc-toggle" id="btnPortalChip">Show portal estimate</button>
       </div>
-      <div class="sub">Range <strong id="dispRange">${low:,.0f} – ${high:,.0f}</strong> · target under contract in ~<strong id="dispDom">{exp_dom:.0f} days</strong></div>
+      <div class="sub">Range <strong><span class="ll-price-hit" id="dispLow" data-price-field="low">${low:,.0f}</span> – <span class="ll-price-hit" id="dispHigh" data-price-field="high">${high:,.0f}</span></strong> · target under contract in ~<strong><span class="ll-price-hit" id="dispDom" data-price-field="dom">{exp_dom:.0f}</span> days</strong></div>
       <div class="top" id="topLine">Top <span id="topStat">{top_mkt:.0f}</span>% of similar recent sales</div>
       <div class="pos-bar"><div class="pos-marker" id="posMarker" style="left:50%"></div></div>
       <div class="pos-labels"><span>Aggressive</span><span>Heart of market</span><span>Overpriced</span></div>
     </section>
-    <div class="bottom-line"><strong>Bottom Line</strong> — <span id="blText" data-edit="bl">{exec_sum}</span></div>
+    <div class="bottom-line"><strong data-copy="t-bl">Bottom Line</strong> — <span id="blText" data-edit="bl">{exec_sum}</span></div>
 
     <div class="price-controls">
       <div class="slider-wrap">
@@ -2318,22 +2383,22 @@ body.print-leavebehind .page{{padding-bottom:0}}
       <div class="confront-out" id="confrontOut">Pick a price above to see the market response.</div>
       <div class="wyw" id="wywModule" style="{'display:none' if not show_listing_flow else ''}">
         <div class="wyw-head">
-          <span class="wyw-title">While You Wait</span>
-          <span class="wyw-sub">Cheaper competition while you sit</span>
+          <span class="wyw-title" data-copy="wyw-title">While You Wait</span>
+          <span class="wyw-sub" data-copy="wyw-sub">Cheaper competition while you sit</span>
         </div>
-        <p class="wyw-lede">Buyers shop value first. Raise the list — more homes sit under you, and more keep listing under you while you wait.</p>
+        <p class="wyw-lede" data-copy="wyw-lede">Buyers shop value first. Raise the list — more homes sit under you, and more keep listing under you while you wait.</p>
         <div class="wyw-grid">
           <div class="wyw-cell" title="Similar Active homes priced under your list right now.">
             <div class="wv" id="wywAhead">{lf_active_below}</div>
-            <div class="wl">Already cheaper<span class="wyw-tip" aria-hidden="true">?</span></div>
+            <div class="wl"><span data-copy="wyw-l-ahead">Already cheaper</span><span class="wyw-tip" aria-hidden="true">?</span></div>
           </div>
           <div class="wyw-cell" title="Average new similar listings per month that come on under your price (last ~6 months).">
             <div class="wv" id="wywArrive">~{lf_below_pm:.1f}/mo</div>
-            <div class="wl">New under you<span class="wyw-tip" aria-hidden="true">?</span></div>
+            <div class="wl"><span data-copy="wyw-l-arrive">New under you</span><span class="wyw-tip" aria-hidden="true">?</span></div>
           </div>
           <div class="wyw-cell hot" title="Already cheaper Actives plus new cheaper listings expected during your days-to-contract. Buyer attention diverted — not a closed-sales count.">
             <div class="wv" id="wywTotal">~{lf_wait_fresh + lf_active_below:.0f}</div>
-            <div class="wl">In your wait<span class="wyw-tip" aria-hidden="true">?</span></div>
+            <div class="wl"><span data-copy="wyw-l-wait">In your wait</span><span class="wyw-tip" aria-hidden="true">?</span></div>
           </div>
         </div>
         <div class="wyw-bar-wrap">
@@ -2344,16 +2409,16 @@ body.print-leavebehind .page{{padding-bottom:0}}
       </div>
     </div>
     <div class="pulse-card" id="pulseBlock" hidden>
-      <h3>Market Fingerprint</h3>
-      <p class="pulse-sub" id="pulseAsOf">The living market picture after you lock a list — still active, new, pending, sold.</p>
+      <h3 data-copy="t-pulse">Market Fingerprint</h3>
+      <p class="pulse-sub" id="pulseAsOf">The living market picture after they list — still active, new, pending, sold.</p>
       <div class="pulse-grid">
         <div class="pulse-cell">
           <div class="pv" id="pulseNewUnder">—</div>
-          <div class="pl">New similar under</div>
+          <div class="pl">Under initial list</div>
         </div>
         <div class="pulse-cell">
           <div class="pv" id="pulseNewOver">—</div>
-          <div class="pl">New similar over</div>
+          <div class="pl">Over initial list</div>
         </div>
         <div class="pulse-cell">
           <div class="pv" id="pulseActiveCheaper">—</div>
@@ -2369,11 +2434,11 @@ body.print-leavebehind .page{{padding-bottom:0}}
   </section>
 
   <section class="section" id="spine-net">
-    <h2><span class="ttl"><span class="step">8</span>Net Sheet — What You Walk Away With</span></h2>
-    <p class="sub">Estimated proceeds at the price on the slider — move it and this sheet updates. Tap any line to adjust to your situation. Estimates only, not a closing statement.</p>
+    <h2><span class="ttl"><span class="step">8</span><span data-copy="t-net">Net Sheet — What You Walk Away With</span></span></h2>
+    <p class="sub" data-copy="s-net">Estimated proceeds at the price on the slider — move it and this sheet updates. Tap any line to adjust to your situation. Estimates only, not a closing statement.</p>
     <div class="net-grid">
       <div class="net-lines" id="netLines">
-        <div class="net-subhead">Selling costs</div>
+        <div class="net-subhead" data-copy="net-h-sell">Selling costs</div>
         <div class="net-row">
           <div class="nl">Seller broker fee</div>
           <div class="ni"><input type="number" id="netSellerFeePct" min="0" max="10" step="0.1" value="3"><span class="nu">%</span></div>
@@ -2399,7 +2464,7 @@ body.print-leavebehind .page{{padding-bottom:0}}
           <div></div>
           <div class="nv" id="netSellingVal">—</div>
         </div>
-        <div class="net-subhead">Closing expenses <span>· seller-paid</span></div>
+        <div class="net-subhead"><span data-copy="net-h-close">Closing expenses</span> <span>· seller-paid</span></div>
         <div class="net-row">
           <div class="nl">Prop. taxes <small>auto · annual rate prorated to close</small></div>
           <div class="ni"><input type="number" id="netTaxRate" min="0" max="5" step="0.01" value="0.76"><span class="nu">%</span></div>
@@ -2435,7 +2500,7 @@ body.print-leavebehind .page{{padding-bottom:0}}
           <div></div>
           <div class="nv" id="netClosingVal">—</div>
         </div>
-        <div class="net-subhead">Mortgage payoff</div>
+        <div class="net-subhead" data-copy="net-h-payoff">Mortgage payoff</div>
         <div class="net-row">
           <div class="nl">Seller loan balance <small>current mortgage payoff — not a selling cost</small></div>
           <div class="ni"><input type="number" id="netPayoff" min="0" step="500" value="0"><span class="nu">$</span></div>
@@ -2448,13 +2513,13 @@ body.print-leavebehind .page{{padding-bottom:0}}
         </div>
       </div>
       <div class="net-summary">
-        <div class="ns-eyebrow">Estimated net to seller</div>
+        <div class="ns-eyebrow" data-copy="ns-eyebrow">Estimated net to seller</div>
         <div class="ns-big" id="netBig">—</div>
         <div class="ns-sub">at <strong id="netPrice">—</strong> · <span id="netPct">—</span> of list</div>
         <div class="ns-bar"><div class="ns-fill" id="netFill"></div></div>
         <div class="ns-deductions" id="netDeductNote">—</div>
         <div class="ns-note" id="netRecNote">—</div>
-        <div class="ns-fine">Estimates only — your closer issues the official figures. Loan balance, concessions, and fees change this the most.</div>
+        <div class="ns-fine" data-copy="ns-fine">Estimates only — your closer issues the official figures. Loan balance, concessions, and fees change this the most.</div>
       </div>
     </div>
   </section>
@@ -2462,8 +2527,8 @@ body.print-leavebehind .page{{padding-bottom:0}}
   <section class="section" id="spine-fulldata">
     <div class="fulldata-head" id="fulldataHead" role="button" tabindex="0" aria-expanded="true" aria-controls="fulldataBody">
       <div>
-        <h2>Full Market Data <span class="muted" id="includeCount"></span></h2>
-        <p class="sub fulldata-sub">Every home in this market · Active = competition · Pending/Backup = under contract · Dark <strong>In comps</strong> buttons are selected — click to remove · Sort by Comp to pull used rows to the top</p>
+        <h2><span data-copy="t-fulldata">Full Market Data</span> <span class="muted" id="includeCount"></span></h2>
+        <p class="sub fulldata-sub" data-copy="s-fulldata">Every home in this market · Active = competition · Pending/Backup = under contract · Dark <strong>In comps</strong> buttons are selected — click to remove · Sort by Comp to pull used rows to the top</p>
       </div>
       <button type="button" class="fulldata-toggle" id="btnToggleFulldata" aria-expanded="true">Collapse</button>
     </div>
@@ -2503,7 +2568,7 @@ body.print-leavebehind .page{{padding-bottom:0}}
     </div>
   </section>
 
-  <footer><strong>ListLogic</strong> — the pricing story, told by the data · Active = available · Under Contract = Pending + Backup · Months of inventory uses Active only · {generated}</footer>
+  <footer><strong>ListLogic</strong> — <span data-copy="footer">the pricing story, told by the data · Active = available · Under Contract = Pending + Backup · Months of inventory uses Active only</span> · {generated}</footer>
 </div>
 </div>
 
@@ -2525,6 +2590,7 @@ body.print-leavebehind .page{{padding-bottom:0}}
       <label><input type="checkbox" data-section="spine-yoy" checked> 6 · Pace</label>
       <label><input type="checkbox" data-section="spine-prices" checked> 6b · Prices</label>
       <label><input type="checkbox" data-section="spine-timing" checked> 6c · Timing</label>
+      <label><input type="checkbox" data-section="spine-storylists" checked> Advantages &amp; watch-outs</label>
       <label><input type="checkbox" data-section="spine-strategy" checked> 7 · Price It</label>
       <label><input type="checkbox" data-section="spine-net" checked> 8 · Net Sheet</label>
       <label><input type="checkbox" data-section="spine-fulldata" checked> Full Market Data</label>
@@ -2585,7 +2651,7 @@ body.print-leavebehind .page{{padding-bottom:0}}
     </div>
     <div class="panel-pane" id="pane-story" role="tabpanel">
       <span class="panel-pill">Seller-facing</span>
-      <p class="pane-lead">Bottom line, advantages, and watch-outs show in Price it. Use <strong>Print leave-behind</strong> for a page-per-section print of this Live Story.</p>
+      <p class="pane-lead">Bottom line, advantages, watch-outs, intros, and the recommended price edit on the page in <strong>Edit</strong> mode. Use <strong>Print Listing Presentation</strong> for a page-per-section print of this Live Story.</p>
       <div class="field">
         <label for="editBL">Bottom line</label>
         <textarea id="editBL" class="tall">{exec_sum}</textarea>
@@ -2603,7 +2669,7 @@ body.print-leavebehind .page{{padding-bottom:0}}
       <textarea id="editLedeClose" hidden>{lede_close}</textarea>
       <textarea id="editExtraAdv" hidden></textarea>
       <textarea id="editExtraRisk" hidden></textarea>
-      <p class="pane-lead">Click intros or bullets on the report to edit this listing. <strong>Remember for next reports</strong> keeps intros and extra lines — not this home’s bottom line or price.</p>
+      <p class="pane-lead">Turn on <strong>Edit</strong> in the presentation bar, then click the story text. Click away to save. <strong>Remember wording</strong> in the menu keeps intros and extra lines — not this home’s bottom line or price.</p>
       <div class="panel-soft" id="aiSellerRow" style="display:none">
         <button type="button" class="btn-soft" id="btnAiSeller">Rewrite story</button>
       </div>
@@ -2682,6 +2748,30 @@ const defaults = {json.dumps(defaults, allow_nan=False)};
 const RUN_ID = (location.pathname.match(/\\/runs\\/([^\\/]+)/)||[])[1] || '';
 const IS_SAMPLE = RUN_ID === 'sample-2845' || /[?&]sample=1(?:&|$)/.test(location.search);
 if (IS_SAMPLE) document.body.classList.add('ll-sample');
+function siblingFingerprintUrl() {{
+  if (IS_SAMPLE) return '/demo/fingerprint';
+  const path = location.pathname.replace(/\\/+$/, '');
+  const share = path.match(/^\\/p\\/([^/]+)/);
+  if (share) return '/p/' + share[1] + '/fingerprint/';
+  if (RUN_ID) return '/runs/' + RUN_ID + '/fingerprint/';
+  return '';
+}}
+function wireFingerprintNav() {{
+  const url = siblingFingerprintUrl();
+  ['fpNavLink', 'fpNavCta', 'pulseOpenFp', 'btnOpenFingerprint', 'menuFingerprint', 'spineFingerprint'].forEach(id => {{
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (!url) {{ el.hidden = true; return; }}
+    el.href = url;
+    el.hidden = false;
+  }});
+  const sw = document.getElementById('viewSwitch');
+  if (sw) {{
+    if (url && !IS_SAMPLE) sw.classList.add('is-on');
+    else sw.classList.remove('is-on');
+  }}
+}}
+wireFingerprintNav();
 const LINK_CITY = DATA.linkCity, LINK_STATE = DATA.linkState;
 const navy = '{brand_primary}', orange = '#c2410c';
 
@@ -3019,9 +3109,28 @@ function refreshWhatIfMetrics(rec) {{
 }}
 
 let currentRec = defaults.rec, currentLow = defaults.low, currentHigh = defaults.high, currentDom = defaults.dom, currentRating = 5;
+let LL_COPY_DEFAULTS = null;
+let _llSavedCopy = {{}};
+let _llCopyReset = false;
+
+function copyLocked(el) {{
+  if (!el) return true;
+  if (el === document.activeElement) return true;
+  if (el.getAttribute('data-custom') === '1') return true;
+  const key = el.getAttribute('data-copy');
+  if (key && _llSavedCopy && _llSavedCopy[key]) return true;
+  return false;
+}}
 
 function syncBottomLine(rec, low, high, dom) {{
   // Keep Bottom Line dollars locked to the live recommended list (rating/slider can change it).
+  const bl = document.getElementById('blText');
+  const editBL = document.getElementById('editBL');
+  if (bl === document.activeElement) return;
+  if (editBL && editBL.dataset.manual) {{
+    if (bl) bl.textContent = editBL.value;
+    return;
+  }}
   const inv = +(DATA.inv || 0);
   let climate = "a buyer's market";
   if (inv < 2.5) climate = "a strong seller's market";
@@ -3034,23 +3143,25 @@ function syncBottomLine(rec, low, high, dom) {{
     money(low) + ' and ' + money(high) + ', with a recommended list price of ' + money(rec) +
     '. At that level we would expect roughly ' + Math.round(dom) + ' days to contract. ' +
     'Launch inside the competitive range — that creates the strongest outcome.';
-  const bl = document.getElementById('blText');
   if (bl) bl.textContent = text;
-  const editBL = document.getElementById('editBL');
-  if (editBL && !editBL.dataset.manual) editBL.value = text;
+  if (editBL) editBL.value = text;
 }}
 
 function setVerdict(rec, low, high, dom) {{
   currentRec = rec; currentLow = low; currentHigh = high; currentDom = dom;
   const recEl = document.getElementById('dispRec');
-  if (recEl) {{
+  if (recEl && recEl !== document.activeElement) {{
     recEl.dataset.settled = '1';
     recEl.textContent = money(rec);
   }}
+  const lowEl = document.getElementById('dispLow');
+  if (lowEl && lowEl !== document.activeElement) lowEl.textContent = money(low);
+  const highEl = document.getElementById('dispHigh');
+  if (highEl && highEl !== document.activeElement) highEl.textContent = money(high);
   const rangeEl = document.getElementById('dispRange');
   if (rangeEl) rangeEl.textContent = money(low) + ' – ' + money(high);
   const domEl = document.getElementById('dispDom');
-  if (domEl) domEl.textContent = Math.round(dom) + ' days';
+  if (domEl && domEl !== document.activeElement) domEl.textContent = String(Math.round(dom));
   const editRec = document.getElementById('editRec');
   if (editRec) editRec.value = rec;
   const editLow = document.getElementById('editLow');
@@ -3064,7 +3175,7 @@ function setVerdict(rec, low, high, dom) {{
   const topStat = document.getElementById('topStat');
   if (topStat) topStat.textContent = top;
   const topStmt = document.getElementById('topStmt');
-  if (topStmt) topStmt.textContent = 'At this list, you would be priced in the top ' + top + '% of recent similar sales.';
+  if (topStmt && !copyLocked(topStmt)) topStmt.textContent = 'At this list, you would be priced in the top ' + top + '% of recent similar sales.';
   const marker = document.getElementById('posMarker');
   if (marker) marker.style.left = 'calc(' + Math.min(98, Math.max(2, 100 - top)) + '% - 2px)';
   if (window._scatterChart && DATA.subject) {{
@@ -3115,24 +3226,9 @@ function updateSupplyAtPrice(price) {{
   lf.activeBelowRec = stats.activeBelow;
   lf.freshDuringMedianDom = Math.round(stats.waitFresh * 10) / 10;
   lf.thresholdPrice = price;
-  const linePrice = document.getElementById('supplyLinePrice');
-  if (linePrice) linePrice.textContent = money(price);
-  document.querySelectorAll('.supply-line-ref').forEach(el => {{ el.textContent = money(price); }});
-  const belowPmEl = document.getElementById('supplyBelowPm');
-  if (belowPmEl) belowPmEl.innerHTML = lf.newBelowRecPm.toFixed(1) + '<span style="font-size:.85rem;font-weight:700;color:var(--muted)"> / mo</span>';
-  const activeEl = document.getElementById('supplyActiveBelow');
-  if (activeEl) activeEl.textContent = String(lf.activeBelowRec);
-  const waitEl = document.getElementById('supplyWaitFresh');
-  if (waitEl) waitEl.textContent = '~' + lf.freshDuringMedianDom.toFixed(1);
   const insight = document.getElementById('flowInsight');
-  if (insight) {{
-    const base = lf.insight || '';
-    const extra = lf.newBelowRecPm > 0
-      ? (' Against a comp-supported value line of <b>' + money(price) + '</b>, about <b>' +
-         lf.newBelowRecPm.toFixed(1) + '</b> similar new listings/month come in cheaper — with <b>' +
-         lf.activeBelowRec + '</b> Active under that line right now.')
-      : '';
-    insight.innerHTML = base + extra;
+  if (insight && !copyLocked(insight)) {{
+    insight.innerHTML = lf.insight || '';
   }}
 }}
 
@@ -3331,7 +3427,7 @@ function renderWhileYouWait(price, out) {{
   const marker = document.getElementById('wywMarker');
   if (marker) marker.style.left = fillPct + '%';
   const note = document.getElementById('wywNote');
-  if (note) {{
+  if (note && !copyLocked(note)) {{
     if (deltaPct > 0.03) {{
       note.innerHTML = 'At <b>' + money(price) + '</b>, ~<b>' + Math.max(0, Math.round(total)) +
         '</b> similar homes under your price compete for buyers during a ~' + Math.round(dom) + '-day wait.';
@@ -3362,7 +3458,10 @@ function applyRating(r) {{
   const ratePrice = document.getElementById('rateLivePrice');
   if (ratePrice) ratePrice.textContent = vsTxt;
   document.getElementById('rateLiveScore').textContent = r + '/10';
-  document.getElementById('ratingCopy').innerHTML = 'At <strong>' + r + '/10</strong>, condition is <strong>' + vsTxt + '</strong> vs a typical <strong>5/10</strong> home in this set. List dollars unlock in <strong>Price it</strong>.';
+  const ratingCopy = document.getElementById('ratingCopy');
+  if (ratingCopy && !copyLocked(ratingCopy)) {{
+    ratingCopy.innerHTML = 'At <strong>' + r + '/10</strong>, condition is <strong>' + vsTxt + '</strong> vs a typical <strong>5/10</strong> home in this set. List dollars unlock in <strong>Price it</strong>.';
+  }}
   document.getElementById('sellerPrice').value = newRec;
   setupPriceSlider(newRec);
   renderConfront(newRec);
@@ -3374,6 +3473,7 @@ document.getElementById('rateRow').addEventListener('click', e => {{
   if (btn) applyRating(+btn.dataset.rating);
 }});
 document.getElementById('rateBands').addEventListener('click', e => {{
+  if (document.body.classList.contains('ll-editing')) return;
   const band = e.target.closest('.rate-band');
   if (band) applyRating(+band.dataset.rating);
 }});
@@ -3411,6 +3511,7 @@ function priceFromSlider() {{
   return Math.round((lo + (hi - lo) * (+slider.value / 100)) / 1000) * 1000;
 }}
 document.getElementById('whatIfGrid').addEventListener('click', e => {{
+  if (document.body.classList.contains('ll-editing') && e.target.closest('[data-copy]')) return;
   const card = e.target.closest('.whatif-card');
   if (!card) return;
   document.querySelectorAll('.whatif-card').forEach(c => c.classList.remove('active'));
@@ -3732,12 +3833,12 @@ function bootCharts(attempt) {{
         priceTrendChart.data.datasets = bandDatasets();
         priceTrendChart.options.plugins.legend.display = true;
         priceTrendChart.options.plugins.legend.labels = {{ boxWidth: 10, font: {{ size: 10 }} }};
-        if (priceTrendSub) priceTrendSub.innerHTML = 'Median sold price by month, split at your recommended line of <strong>' + money(bandSplit) + '</strong> — are the homes closing the ones priced under it?';
+        if (priceTrendSub && !copyLocked(priceTrendSub)) priceTrendSub.innerHTML = 'Median sold price by month, split at your recommended line of <strong>' + money(bandSplit) + '</strong> — are the homes closing the ones priced under it?';
       }} else {{
         priceTrendChart.data.labels = DATA.monthlyPrice.labels;
         priceTrendChart.data.datasets = [{{ data: priceTrendVals, borderColor: navy, fill: true, tension: 0.35, backgroundColor: 'rgba(12,60,110,0.12)', pointRadius: 3.5, pointHoverRadius: 6, pointBackgroundColor: '#fff', pointBorderColor: navy, pointBorderWidth: 2 }}];
         priceTrendChart.options.plugins.legend.display = false;
-        if (priceTrendSub) priceTrendSub.textContent = 'Median sold price is the clearest signal of buyer willingness to pay in this set.';
+        if (priceTrendSub && !copyLocked(priceTrendSub)) priceTrendSub.textContent = 'Median sold price is the clearest signal of buyer willingness to pay in this set.';
       }}
       priceTrendChart.update();
     }});
@@ -5123,11 +5224,12 @@ function closeAgentPanel() {{
 }}
 fab.onclick = (e) => {{ e.stopPropagation(); toggleAgentMenu(); }};
 document.getElementById('menuOpenTools')?.addEventListener('click', () => openAgentPanel());
-document.getElementById('menuSections')?.addEventListener('click', () => {{
+function openSectionsModal() {{
   closeAgentMenu();
   const modal = document.getElementById('sectionsModal');
   if (modal) {{ modal.hidden = false; modal.classList.add('open'); }}
-}});
+}}
+document.getElementById('menuSections')?.addEventListener('click', openSectionsModal);
 function closeSectionsModal() {{
   const modal = document.getElementById('sectionsModal');
   if (modal) {{ modal.classList.remove('open'); modal.hidden = true; }}
@@ -5223,7 +5325,14 @@ document.addEventListener('click', (e) => {{
   if (wrap && !wrap.contains(e.target)) closeAgentMenu();
 }});
 document.addEventListener('keydown', (e) => {{
-  if (e.key === 'Escape') {{ closeAgentMenu(); closeAgentPanel(); }}
+  if (e.key === 'Escape') {{
+    closeAgentMenu();
+    closeAgentPanel();
+    if (document.body.classList.contains('ll-editing')) {{
+      saveStoryEditsNow();
+      setEditMode(false);
+    }}
+  }}
 }});
 document.getElementById('closePanel').onclick = overlay.onclick = closeAgentPanel;
 function collectLedes() {{
@@ -5245,19 +5354,193 @@ function extraLinesFrom(id, generated) {{
 function applyLedesToDom(ledes) {{
   if (!ledes) return;
   document.querySelectorAll('[data-lede]').forEach(el => {{
+    if (el === document.activeElement) return;
     const key = el.getAttribute('data-lede');
     if (ledes[key]) el.textContent = ledes[key];
   }});
+}}
+function isCopyEditTarget(el) {{
+  if (!el || !el.getAttribute('data-copy')) return false;
+  if (el.classList.contains('tip') || el.closest('.tip')) return false;
+  if (el.querySelector('.tip-i')) return false;
+  return true;
+}}
+function collectCopy() {{
+  const out = {{}};
+  document.querySelectorAll('[data-copy]').forEach(el => {{
+    if (!isCopyEditTarget(el)) return;
+    const key = el.getAttribute('data-copy');
+    if (!key) return;
+    if (el.getAttribute('data-custom') !== '1' && !(_llSavedCopy && _llSavedCopy[key])) return;
+    out[key] = el.innerText.replace(/\\s+\\n/g, '\\n').trim();
+  }});
+  return out;
+}}
+function applyCopy(copy, asDefaults) {{
+  if (!copy || typeof copy !== 'object') return;
+  if (asDefaults) _llSavedCopy = {{}};
+  else _llSavedCopy = Object.assign({{}}, _llSavedCopy || {{}}, copy);
+  document.querySelectorAll('[data-copy]').forEach(el => {{
+    if (!isCopyEditTarget(el) || el === document.activeElement) return;
+    const key = el.getAttribute('data-copy');
+    if (copy[key] == null) return;
+    el.textContent = copy[key];
+    if (asDefaults) el.removeAttribute('data-custom');
+    else el.setAttribute('data-custom', '1');
+  }});
+}}
+function markEditable(el, on) {{
+  if (!el) return;
+  if (on) {{
+    el.setAttribute('contenteditable', 'true');
+    el.setAttribute('tabindex', '0');
+  }} else {{
+    el.removeAttribute('contenteditable');
+    el.removeAttribute('tabindex');
+  }}
+  el.spellcheck = !!on;
+}}
+function storyEditSelector() {{
+  return '[data-lede], [data-edit], [data-copy], [data-price-field], #advList li, #riskList li';
+}}
+function wireStoryEdits(on) {{
+  document.querySelectorAll('[data-lede], [data-edit], [data-price-field]').forEach(el => markEditable(el, on));
+  document.querySelectorAll('[data-copy]').forEach(el => {{
+    if (isCopyEditTarget(el)) markEditable(el, on);
+  }});
+  document.querySelectorAll('#advList li, #riskList li').forEach(el => markEditable(el, on));
+}}
+function wireStoryLists() {{
+  const on = document.body.classList.contains('ll-editing');
+  document.querySelectorAll('#advList li, #riskList li').forEach(el => markEditable(el, on));
+}}
+function syncStoryListsToFields() {{
+  const adv = document.getElementById('editAdv');
+  const risk = document.getElementById('editRisk');
+  if (adv) adv.value = [...document.querySelectorAll('#advList li')].map(li => li.textContent.trim()).filter(Boolean).join('\\n');
+  if (risk) risk.value = [...document.querySelectorAll('#riskList li')].map(li => li.textContent.trim()).filter(Boolean).join('\\n');
+}}
+function addStoryLine(which) {{
+  if (!document.body.classList.contains('ll-editing')) return;
+  const ul = document.getElementById(which === 'risk' ? 'riskList' : 'advList');
+  if (!ul) return;
+  const li = document.createElement('li');
+  li.textContent = '';
+  markEditable(li, true);
+  ul.appendChild(li);
+  li.focus();
+}}
+function flashSaved(msg) {{
+  const status = document.getElementById('editSaveStatus');
+  if (!status) return;
+  status.textContent = msg || 'Saved';
+  clearTimeout(window._llSaveToast);
+  window._llSaveToast = setTimeout(() => {{
+    if (status.textContent === (msg || 'Saved')) status.textContent = '';
+  }}, 1800);
+}}
+function commitPriceFromEl(el) {{
+  const field = el.getAttribute('data-price-field');
+  const ids = {{ rec: 'editRec', low: 'editLow', high: 'editHigh', dom: 'editDom' }};
+  const src = document.getElementById(ids[field]);
+  if (!src) return;
+  const n = Number(String(el.textContent).replace(/[^0-9.]/g, ''));
+  if (!Number.isFinite(n) || n <= 0) {{
+    if (field === 'dom') el.textContent = String(Math.round(+src.value || 0));
+    else el.textContent = money(src.value);
+    return;
+  }}
+  src.value = Math.round(n);
+  applyEdits({{ close: false, refreshDeck: true }});
+}}
+function setEditMode(on) {{
+  on = !!on;
+  if (!on && document.body.classList.contains('ll-editing')) {{
+    const active = document.activeElement;
+    if (active && active !== document.body && typeof active.blur === 'function') active.blur();
+  }}
+  document.body.classList.toggle('ll-editing', on);
+  const btn = document.getElementById('btnEditMode');
+  if (btn) {{
+    btn.classList.toggle('on', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }}
+  const recEl = document.getElementById('dispRec');
+  if (recEl) recEl.dataset.settled = '1';
+  wireStoryEdits(on);
+  try {{ localStorage.setItem('listlogic_edit_mode_' + (RUN_ID || 'local'), on ? '1' : '0'); }} catch (e) {{}}
+  if (!on) persistStoryEdits();
+}}
+function saveStoryEditsNow() {{
+  const active = document.activeElement;
+  if (active && active.closest && active.closest(storyEditSelector())) {{
+    if (active.getAttribute && active.getAttribute('data-price-field')) commitPriceFromEl(active);
+    if (active.id === 'blText' && document.getElementById('editBL')) {{
+      document.getElementById('editBL').dataset.manual = '1';
+      document.getElementById('editBL').value = active.textContent.trim();
+    }}
+    if (active.getAttribute && active.getAttribute('data-lede')) {{
+      const key = active.getAttribute('data-lede');
+      const map = {{ comps: 'editLedeComps', condition: 'editLedeCondition', close: 'editLedeClose' }};
+      const inp = document.getElementById(map[key]);
+      if (inp) inp.value = active.textContent.trim();
+    }}
+    if (active.closest('#advList') || active.closest('#riskList')) syncStoryListsToFields();
+  }}
+  persistStoryEdits();
+  flashSaved();
 }}
 function enableInlineEdits() {{
   document.body.classList.add('ll-agent');
   const pulse = document.getElementById('pulseBlock');
   if (pulse) {{ pulse.hidden = false; pulse.classList.add('is-agent'); }}
-  const mark = (el) => {{ if (el) {{ el.contentEditable = 'true'; el.spellcheck = true; }} }};
-  document.querySelectorAll('[data-lede], [data-edit]').forEach(mark);
-  document.querySelectorAll('#advList li, #riskList li').forEach(mark);
   if (document.body.dataset.inlineEdits === '1') return;
   document.body.dataset.inlineEdits = '1';
+  document.getElementById('btnEditMode')?.addEventListener('click', () => setEditMode(true));
+  document.getElementById('btnEditSave')?.addEventListener('click', saveStoryEditsNow);
+  document.getElementById('btnEditDone')?.addEventListener('click', () => {{
+    saveStoryEditsNow();
+    setEditMode(false);
+  }});
+  document.addEventListener('keydown', (e) => {{
+    if (!document.body.classList.contains('ll-editing')) return;
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {{
+      e.preventDefault();
+      saveStoryEditsNow();
+      return;
+    }}
+    if (e.key === 'Enter' && e.target.closest('[data-price-field]')) {{
+      e.preventDefault();
+      e.target.blur();
+      return;
+    }}
+    const li = e.target.closest('#advList li, #riskList li');
+    if (!li) return;
+    if (e.key === 'Enter') {{
+      e.preventDefault();
+      const neu = document.createElement('li');
+      neu.textContent = '';
+      markEditable(neu, true);
+      li.after(neu);
+      neu.focus();
+      return;
+    }}
+    if ((e.key === 'Backspace' || e.key === 'Delete') && !li.textContent.trim() && !e.repeat) {{
+      const ul = li.parentElement;
+      if (ul && ul.children.length > 1) {{
+        e.preventDefault();
+        const prev = li.previousElementSibling || li.nextElementSibling;
+        li.remove();
+        if (prev) prev.focus();
+        syncStoryListsToFields();
+        persistStoryEdits();
+        flashSaved();
+      }}
+    }}
+  }});
+  document.querySelectorAll('.ll-add-line').forEach(btn => {{
+    btn.addEventListener('click', () => addStoryLine(btn.getAttribute('data-list')));
+  }});
   document.addEventListener('focusin', (e) => {{
     if (e.target && e.target.id === 'blText') {{
       const editBL = document.getElementById('editBL');
@@ -5266,7 +5549,12 @@ function enableInlineEdits() {{
   }});
   document.addEventListener('focusout', (e) => {{
     const t = e.target;
-    if (!t) return;
+    if (!t || !document.body.classList.contains('ll-editing')) return;
+    if (t.getAttribute && t.getAttribute('data-price-field')) {{
+      commitPriceFromEl(t);
+      flashSaved();
+      return;
+    }}
     if (t.id === 'blText' && document.getElementById('editBL')) document.getElementById('editBL').value = t.textContent.trim();
     if (t.getAttribute && t.getAttribute('data-lede')) {{
       const key = t.getAttribute('data-lede');
@@ -5274,14 +5562,14 @@ function enableInlineEdits() {{
       const inp = document.getElementById(map[key]);
       if (inp) inp.value = t.textContent.trim();
     }}
-    if (t.closest && t.closest('#advList')) {{
-      document.getElementById('editAdv').value = [...document.querySelectorAll('#advList li')].map(li => li.textContent.trim()).join('\\n');
+    if (t.closest && (t.closest('#advList') || t.closest('#riskList'))) syncStoryListsToFields();
+    if (t.getAttribute && t.getAttribute('data-copy') && isCopyEditTarget(t)) t.setAttribute('data-custom', '1');
+    if (t.closest && t.closest(storyEditSelector())) {{
+      persistStoryEdits();
+      flashSaved();
     }}
-    if (t.closest && t.closest('#riskList')) {{
-      document.getElementById('editRisk').value = [...document.querySelectorAll('#riskList li')].map(li => li.textContent.trim()).join('\\n');
-    }}
-    if (t.closest && t.closest('[data-lede], [data-edit], #advList, #riskList')) persistStoryEdits();
   }});
+  setEditMode(false);
 }}
 async function loadAccountCopyDefaults() {{
   try {{
@@ -5299,6 +5587,8 @@ async function loadAccountCopyDefaults() {{
   }} catch (e) {{}}
 }}
 function persistStoryEdits() {{
+  const active = document.activeElement;
+  if (active && isCopyEditTarget(active)) active.setAttribute('data-custom', '1');
   const rec = +document.getElementById('editRec').value;
   const low = +document.getElementById('editLow').value;
   const high = +document.getElementById('editHigh').value;
@@ -5308,6 +5598,7 @@ function persistStoryEdits() {{
   const risk = document.getElementById('editRisk').value.trim().split('\\n').filter(Boolean);
   const obj = document.getElementById('editObj').value;
   const ledes = collectLedes();
+  const copy = collectCopy();
   const payload = {{ rec, low, high, dom, bl, adv: adv.join('\\n'), risk: risk.join('\\n'), obj, ledes, rating: currentRating, excluded:[...excluded], selectedComps: selectedCompMls.slice(), portalChip: document.body.dataset.portalChip || 'off', pulseBlock: document.body.dataset.pulseBlock || 'on' }};
   try {{
     const prev = JSON.parse(localStorage.getItem('listlogic_edits_'+(RUN_ID||'local')) || '{{}}');
@@ -5315,7 +5606,12 @@ function persistStoryEdits() {{
     if (prev.hiddenSections) payload.hiddenSections = prev.hiddenSections;
     if (prev.portalChip && !payload.portalChip) payload.portalChip = prev.portalChip;
     if (prev.pulseBlock && !payload.pulseBlock) payload.pulseBlock = prev.pulseBlock;
+    if (prev.copy && typeof prev.copy === 'object') payload.copy = prev.copy;
   }} catch (e) {{}}
+  if (Object.keys(copy).length || _llCopyReset) {{
+    payload.copy = copy;
+    _llCopyReset = false;
+  }}
   localStorage.setItem('listlogic_edits_'+(RUN_ID||'local'), JSON.stringify(payload));
   if (RUN_ID) {{
     fetch('/api/runs/'+RUN_ID+'/edits', {{ method:'POST', headers:{{'Content-Type':'application/json'}}, credentials:'same-origin', body: JSON.stringify(payload) }}).catch(()=>{{}});
@@ -5336,12 +5632,11 @@ function applyEdits() {{
   const risk = document.getElementById('editRisk').value.trim().split('\\n').filter(Boolean);
   const obj = document.getElementById('editObj').value;
   setVerdict(rec, low, high, dom);
-  document.getElementById('blText').textContent = bl;
+  const blEl = document.getElementById('blText');
+  if (blEl && blEl !== document.activeElement) blEl.textContent = bl;
   document.getElementById('advList').innerHTML = adv.map(a => '<li>'+escapeHtml(a)+'</li>').join('');
   document.getElementById('riskList').innerHTML = risk.map(r => '<li>'+escapeHtml(r)+'</li>').join('');
-  if (document.body.classList.contains('ll-agent')) {{
-    document.querySelectorAll('#advList li, #riskList li').forEach(el => {{ el.contentEditable = 'true'; }});
-  }}
+  if (document.body.classList.contains('ll-editing')) wireStoryEdits(true);
   applyLedesToDom(collectLedes());
   renderObjections(obj);
   persistStoryEdits();
@@ -5351,8 +5646,24 @@ function applyEdits() {{
   if (opts.lockPulse !== false && document.body.classList.contains('ll-agent')) lockPulseIfNeeded(rec);
 }}
 document.getElementById('btnApply').onclick = () => applyEdits();
+document.getElementById('btnRestoreCopy')?.addEventListener('click', () => {{
+  closeAgentMenu();
+  if (LL_COPY_DEFAULTS) applyCopy(LL_COPY_DEFAULTS, true);
+  document.querySelectorAll('[data-custom]').forEach(el => el.removeAttribute('data-custom'));
+  _llSavedCopy = {{}};
+  _llCopyReset = true;
+  if (defaults.ledes) {{
+    applyLedesToDom(defaults.ledes);
+    if (document.getElementById('editLedeComps')) document.getElementById('editLedeComps').value = defaults.ledes.comps || '';
+    if (document.getElementById('editLedeCondition')) document.getElementById('editLedeCondition').value = defaults.ledes.condition || '';
+    if (document.getElementById('editLedeClose')) document.getElementById('editLedeClose').value = defaults.ledes.close || '';
+  }}
+  persistStoryEdits();
+  flashSaved('ListLogic wording restored');
+}});
 document.getElementById('btnSaveDefaults')?.addEventListener('click', async () => {{
-  const toast = document.getElementById('storyToast');
+  closeAgentMenu();
+  const toast = document.getElementById('editSaveStatus') || document.getElementById('storyToast');
   const setToast = (msg) => {{ if (toast) toast.textContent = msg; }};
   setToast('Saving account defaults…');
   try {{
@@ -5374,7 +5685,8 @@ document.getElementById('btnSaveDefaults')?.addEventListener('click', async () =
   }}
 }});
 document.getElementById('btnResetDefaults')?.addEventListener('click', async () => {{
-  const toast = document.getElementById('storyToast');
+  closeAgentMenu();
+  const toast = document.getElementById('editSaveStatus') || document.getElementById('storyToast');
   const setToast = (msg) => {{ if (toast) toast.textContent = msg; }};
   setToast('Resetting account defaults…');
   try {{
@@ -5443,6 +5755,7 @@ async function loadSavedEdits() {{
     if (saved.ledes.condition!=null && document.getElementById('editLedeCondition')) document.getElementById('editLedeCondition').value = saved.ledes.condition;
     if (saved.ledes.close!=null && document.getElementById('editLedeClose')) document.getElementById('editLedeClose').value = saved.ledes.close;
   }}
+  if (saved.copy && typeof saved.copy === 'object') applyCopy(saved.copy);
   if (Array.isArray(saved.excluded)) saved.excluded.forEach(i => excluded.add(String(i)));
   if (Array.isArray(saved.selectedComps) && saved.selectedComps.length) {{
     selectedCompMls = saved.selectedComps.map(String);
@@ -5473,6 +5786,7 @@ async function loadSavedEdits() {{
   if (saved.portalChip === 'on' || saved.portalChip === 'off') setPortalChip(saved.portalChip, {{ persist: false }});
   if (saved.pulseBlock === 'on' || saved.pulseBlock === 'off') setPulseBlock(saved.pulseBlock, {{ persist: false }});
   renderTable(); applyEdits({{ refreshDeck: false, close: false, lockPulse: false }});
+  if (saved.copy && typeof saved.copy === 'object') applyCopy(saved.copy);
 }}
 function setPortalChip(mode, opts) {{
   const on = mode === 'on';
@@ -5529,23 +5843,35 @@ function renderPulse(data) {{
   if (lock && digest) {{
     const locked = money(lock.locked_price);
     const when = digest.as_of || '';
-    if (asOf) asOf.textContent = 'Against ' + locked + (when ? ' · as of ' + when : '') + ' · open the Fingerprint for the living picture.';
+    if (asOf) {{
+      asOf.textContent = IS_SAMPLE
+        ? 'Weeks after list from this market file — listed, under contract, and sold in this size band. Open the Fingerprint to walk week by week.'
+        : ('Against ' + locked + (when ? ' · as of ' + when : '') + ' · open the Fingerprint for the living picture.');
+    }}
     const set = (id, n) => {{ const el = document.getElementById(id); if (el) el.textContent = String(n); }};
-    set('pulseNewUnder', digest.new_under);
-    set('pulseNewOver', digest.new_over);
-    set('pulseActiveCheaper', digest.still_active_cheaper);
+    set('pulseNewUnder', digest.listed_week != null ? digest.listed_week : digest.new_under);
+    set('pulseNewOver', digest.uc_week != null ? digest.uc_week : digest.new_over);
+    set('pulseActiveCheaper', digest.sold_week != null ? digest.sold_week : digest.still_active_cheaper);
   }} else if (asOf) {{
-    asOf.textContent = 'Generate locks the recommended list. Open the Market Fingerprint after they list.';
+    asOf.textContent = IS_SAMPLE
+      ? 'After they list, the Fingerprint is the weekly seller link. Open it to walk the weeks from this market file.'
+      : 'Generate sets the initial list. Open the Market Fingerprint after they list.';
   }}
   const uploadWrap = document.getElementById('pulseUploadWrap');
   if (uploadWrap) uploadWrap.hidden = !data || !data.needs_upload;
   const fp = document.getElementById('pulseOpenFp');
   if (fp) {{
-    const url = (data && (data.agent_fingerprint_url || data.fingerprint_url))
-      || (RUN_ID ? '/runs/' + RUN_ID + '/fingerprint/' : '#');
-    fp.href = url;
-    const fpBtn = document.getElementById('btnOpenFingerprint');
-    if (fpBtn) fpBtn.href = url;
+    const url = siblingFingerprintUrl()
+      || (IS_SAMPLE ? '/demo/fingerprint' : '')
+      || ((data && (data.agent_fingerprint_url || data.fingerprint_url)) || '');
+    if (url) fp.href = url;
+  }}
+  wireFingerprintNav();
+  if (IS_SAMPLE) {{
+    const labs = document.querySelectorAll('#pulseBlock .pl');
+    if (labs[0]) labs[0].textContent = 'Listed this week';
+    if (labs[1]) labs[1].textContent = 'Under contract this week';
+    if (labs[2]) labs[2].textContent = 'Sold this week';
   }}
   if (data && data.listingFlow && data.listingFlow.samples) {{
     DATA.listingFlow = Object.assign(DATA.listingFlow || {{}}, data.listingFlow);
@@ -5585,8 +5911,8 @@ function renderPulseBrief(brief, isAgent) {{
   }}
   if (!lists) return;
   const blocks = [
-    ['New similar — under', brief.new_under],
-    ['New similar — over', brief.new_over],
+    ['Under initial list', brief.new_under],
+    ['Over initial list', brief.new_over],
     ['Still active and cheaper', brief.cheaper_active],
     ['Price cuts', brief.price_cuts],
     ['Status changes', brief.status_changes],
@@ -5757,6 +6083,7 @@ document.getElementById('btnPulseEmailPanel')?.addEventListener('click', () => {
 }});
 setPortalChip('off', {{ persist: false, refreshDeck: false }});
 setPulseBlock('on', {{ persist: false }});
+LL_COPY_DEFAULTS = collectCopy();
 loadSavedEdits();
 loadPulse();
 </script>

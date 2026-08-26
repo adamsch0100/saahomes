@@ -281,7 +281,7 @@ def _pulse_card_html(card: dict) -> str:
         f"<tr><td style='padding:10px 0;border-bottom:1px solid #eee'>"
         f"<strong>{_esc(card.get('address') or 'Listing')}</strong>"
         f"{' · ' + _esc(card.get('city')) if card.get('city') else ''}<br>"
-        f"{_money(card.get('price'))} <span style='color:#5c6675'>({_esc(delta_txt)} vs lock)</span>"
+        f"{_money(card.get('price'))} <span style='color:#5c6675'>({_esc(delta_txt)} vs list)</span>"
         f"{' · ' + _esc(card.get('status')) if card.get('status') else ''}<br>"
         f"<span style='color:#5c6675;font-size:13px'>{_esc(meta)}</span>"
         f"{('<br>' + ' · '.join(links)) if links else ''}"
@@ -291,7 +291,7 @@ def _pulse_card_html(card: dict) -> str:
 
 def _pulse_card_text(card: dict) -> str:
     delta = int(card.get("delta") or 0)
-    line = f"- {card.get('address') or 'Listing'} · {_money(card.get('price'))} ({delta:+,} vs lock)"
+    line = f"- {card.get('address') or 'Listing'} · {_money(card.get('price'))} ({delta:+,} vs list)"
     if card.get("zillow"):
         line += f"\n  {card['zillow']}"
     return line
@@ -315,7 +315,8 @@ def send_pulse_brief(
     addr = brief.get("subject_address") or "Your listing"
     locked = _money(brief.get("locked_price") or digest.get("locked_price"))
     as_of = brief.get("as_of") or digest.get("as_of") or ""
-    days = brief.get("days_locked") or 0
+    days = brief.get("days_active") or brief.get("days_locked") or 0
+    days_label = "days on market" if brief.get("active_at") or digest.get("active_at") else "days since generate"
     market = brief.get("market_label") or ""
     report_url = brief.get("report_url") or brief.get("share_url") or ""
     share_url = brief.get("share_url") or report_url
@@ -340,9 +341,11 @@ def send_pulse_brief(
     talk_html = "".join(f"<li>{_esc(t)}</li>" for t in tracks)
     talk_label = "What to tell them" if audience == "agent" else "This week in your market"
     score = (
-        f"{int(digest.get('new_under') or 0)} new similar under · "
-        f"{int(digest.get('new_over') or 0)} new similar over · "
-        f"{int(digest.get('still_active_cheaper') or 0)} still-active cheaper"
+        f"{int(digest.get('listed_week') or 0)} listed this week · "
+        f"{int(digest.get('uc_week') or 0)} under contract this week · "
+        f"{int(digest.get('sold_week') or 0)} sold this week"
+        f" · {int(digest.get('listed_since') or ((digest.get('new_under') or 0) + (digest.get('new_over') or 0)))} listed "
+        f"{digest.get('clock_label') or 'since generate'}"
     )
     stale = ""
     if brief.get("stale_upload"):
@@ -381,7 +384,7 @@ def send_pulse_brief(
     html = f"""<div style="font-family:Georgia,serif;max-width:640px;margin:0 auto;color:#0b1220">
   <p style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#5c6675">{_esc(who)}</p>
   <h1 style="font-size:22px;margin:6px 0 8px">{_esc(addr)}</h1>
-  <p style="color:#5c6675;margin:0 0 16px">Locked list {locked} · { _esc(market) } · as of {_esc(as_of)} · {int(days)} days since lock</p>
+  <p style="color:#5c6675;margin:0 0 16px">Initial list {locked} · { _esc(market) } · as of {_esc(as_of)} · {int(days)} {days_label}</p>
   <p style="font-size:16px;margin:0 0 16px"><strong>{_esc(score)}</strong></p>
   {stale}
   {agent_cta}
@@ -402,7 +405,7 @@ def send_pulse_brief(
   </p>
 </div>"""
     text = (
-        f"{who}\n{addr}\nLocked list {locked} · {market} · as of {as_of}\n{score}\n\n"
+        f"{who}\n{addr}\nInitial list {locked} · {market} · as of {as_of}\n{score}\n\n"
         + agent_cta_text
         + "\n".join(f"- {t}" for t in tracks)
         + section_text("New similar — under", brief.get("new_under") or [])

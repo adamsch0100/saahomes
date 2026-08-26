@@ -165,6 +165,43 @@ export function listingCanonicalUrl(listing) {
 }
 
 /**
+ * RealEstateListing schema for a single listing card.
+ * Mirrors ListingDetailPage.jsx's listingSchema (offers.availability mapping)
+ * but uses only fields present on the search-grid `results` rows — never fabricated.
+ * @param {object} listing — row from /api/listings
+ * @returns {object|null} JSON-LD RealEstateListing or null when no canonical URL
+ */
+export function buildRealEstateListingSchema(listing) {
+  if (!listing) return null;
+  const url = listingCanonicalUrl(listing);
+  if (!url) return null;
+
+  // Real availability from the MLS status field (matches ListingDetailPage).
+  const availability =
+    {
+      Active: "https://schema.org/InStock",
+      "Active Under Contract": "https://schema.org/LimitedAvailability",
+      Pending: "https://schema.org/OutOfStock",
+      Sold: "https://schema.org/Discontinued",
+      Withdrawn: "https://schema.org/OutOfStock",
+      Expired: "https://schema.org/OutOfStock",
+    }[listing.status] || "https://schema.org/InStock";
+
+  return {
+    "@type": "RealEstateListing",
+    name: formatListingItemName(listing),
+    url,
+    offers: {
+      "@type": "Offer",
+      availability,
+      ...(listing.list_price != null
+        ? { price: Number(listing.list_price), priceCurrency: "USD" }
+        : {}),
+    },
+  };
+}
+
+/**
  * ItemList of real MLS listings for search / area featured grids.
  * @param {Array} listings — rows from /api/listings (must have slug or listing_id)
  * @param {{ name?: string, description?: string, maxItems?: number }} options
@@ -189,6 +226,7 @@ export function buildListingsItemListSchema(listings, options = {}) {
         position: 0, // filled below
         url,
         name: formatListingItemName(listing),
+        item: buildRealEstateListingSchema(listing),
       };
     })
     .filter(Boolean)

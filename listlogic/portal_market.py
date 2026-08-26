@@ -145,6 +145,10 @@ def friendly_portal_error(exc: BaseException) -> str:
     return text or "Market search failed."
 
 
+def reef_configured() -> bool:
+    return bool(_api_key())
+
+
 def reef_call(engine: str, action: str, params: dict | None = None, timeout: int = 60) -> dict:
     _consume_reef_budget()
     key = _api_key()
@@ -224,7 +228,12 @@ def _realtor_item_to_row(item: dict, *, status_force: str | None = None) -> dict
         status = "Pending"
 
     sold_price = item.get("last_sold_price_usd") or item.get("sold_price_usd")
-    list_price = item.get("list_price_usd") or item.get("price")
+    list_price = (
+        item.get("list_price_usd")
+        or item.get("list_price")
+        or item.get("price")
+        or item.get("list_price")
+    )
     # Some metros omit last_sold_price on sold cards; list/price is the close amount.
     if status == "Sold" and not sold_price:
         sold_price = list_price
@@ -269,7 +278,7 @@ def _realtor_item_to_row(item: dict, *, status_force: str | None = None) -> dict
 
     addr = item.get("address_line") or item.get("address") or ""
     pid = str(item.get("property_id") or item.get("listing_id") or "")
-    photo = item.get("primary_photo_url") or ""
+    photo = item.get("primary_photo_url") or item.get("photo_url") or item.get("photo") or ""
     if not photo:
         photos = item.get("photos") or []
         if isinstance(photos, list) and photos:
@@ -557,8 +566,7 @@ def fetch_realtor_solds(
                 logger.info("Sold fetch stopped early on budget (%s kept)", len(all_items))
                 break
             raise
-        data = envelope.get("data") or {}
-        items = data.get("results") or data.get("items") or []
+        items = _reef_items(envelope)
         if not items:
             break
         stop = False
@@ -653,8 +661,7 @@ def fetch_realtor_actives(
                 logger.info("Active fetch stopped early on budget (%s kept)", len(all_items))
                 break
             raise
-        data = envelope.get("data") or {}
-        items = data.get("results") or data.get("items") or []
+        items = _reef_items(envelope)
         if not items:
             break
         for it in items:

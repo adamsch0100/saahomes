@@ -2,12 +2,34 @@
 from __future__ import annotations
 
 import json
+import os
 from html import escape as _esc
+from pathlib import Path
 
 
 def _json_script(data) -> str:
     raw = json.dumps(data, default=str, ensure_ascii=False)
     return raw.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
+
+
+def _mapbox_token() -> str:
+    for key in ("MAPBOX_ACCESS_TOKEN", "MAPBOX_TOKEN", "VITE_MAPBOX_TOKEN"):
+        val = (os.environ.get(key) or "").strip()
+        if val:
+            return val
+    env_path = Path(__file__).resolve().parent / ".env"
+    if env_path.exists():
+        try:
+            for line in env_path.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                name, raw = line.split("=", 1)
+                if name.strip() in ("MAPBOX_ACCESS_TOKEN", "MAPBOX_TOKEN", "VITE_MAPBOX_TOKEN"):
+                    return raw.strip().strip('"').strip("'")
+        except OSError:
+            pass
+    return ""
 
 
 def _notes_for_view(notes, *, agent: bool) -> list:
@@ -41,6 +63,9 @@ def render_fingerprint_html(view: dict, *, agent: bool = False) -> str:
     digest = brief.get("digest") if isinstance(brief.get("digest"), dict) else (view.get("digest") or {})
     addr = brief.get("subject_address") or "This listing"
     title = f"Market Fingerprint · {_esc(addr)}"
+    report_sub = {}
+    if isinstance(view.get("report"), dict) and isinstance(view["report"].get("subject"), dict):
+        report_sub = view["report"]["subject"]
     data = {
         "agent": bool(agent),
         "brief": brief,
@@ -55,6 +80,8 @@ def render_fingerprint_html(view: dict, *, agent: bool = False) -> str:
         "fingerprint_url": brief.get("fingerprint_url") or "",
         "seller_access": lock.get("seller_access", True) is not False,
         "sold_at": lock.get("sold_at") or brief.get("sold_at") or "",
+        "active_at": lock.get("active_at") or brief.get("active_at") or "",
+        "active_at_source": lock.get("active_at_source") or "",
         "seller_name": lock.get("seller_name") or "",
         "seller_email": (lock.get("email") or {}).get("seller_email") or lock.get("seller_email") or "",
         "email": lock.get("email") if isinstance(lock.get("email"), dict) else {},
@@ -63,6 +90,14 @@ def render_fingerprint_html(view: dict, *, agent: bool = False) -> str:
         "last_looked_at": view.get("last_looked_at") or lock.get("last_looked_at") or "",
         "notes": _notes_for_view(brief.get("notes") or view.get("notes") or [], agent=agent),
         "seller_got_weekly": bool(view.get("seller_got_weekly")),
+        "photos_fetching": bool(view.get("photos_fetching")),
+        "mapbox_token": _mapbox_token(),
+        "subject_lat": brief.get("subject_lat") or report_sub.get("latitude") or report_sub.get("lat"),
+        "subject_lng": brief.get("subject_lng") or report_sub.get("longitude") or report_sub.get("lng"),
+        "subject_year": report_sub.get("year_built") or report_sub.get("year") or 0,
+        "subject_beds": report_sub.get("beds") or 0,
+        "subject_baths": report_sub.get("baths") or 0,
+        "subject_sqft": brief.get("subject_sqft") or report_sub.get("living_area") or 0,
     }
     return _PAGE.format(
         title=title,
@@ -79,6 +114,8 @@ _PAGE = """<!DOCTYPE html>
 <title>{title}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.9.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.9.0/mapbox-gl.js"></script>
 <style>
 :root {{
   --ink:#0b1220; --navy:#0c3c6e; --muted:#5c6675; --line:#e6e0d4;
@@ -92,20 +129,28 @@ a {{ color:var(--navy); }}
 body.is-agent .wrap {{ max-width:1320px; display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:24px; align-items:start; }}
 @media (max-width:980px) {{ body.is-agent .wrap {{ grid-template-columns:1fr; }} }}
 .hero {{
-  background:linear-gradient(150deg, var(--ink), #16233c); color:#fff;
-  border-radius:22px; padding:28px 28px 24px; display:grid; grid-template-columns:88px 1fr; gap:18px; align-items:center;
+  position:relative; color:#fff; border-radius:22px; overflow:hidden;
+  min-height:220px; display:flex; align-items:flex-end;
+  background:linear-gradient(150deg, var(--ink), #16233c);
 }}
-.hero img {{ width:88px; height:88px; object-fit:cover; border-radius:16px; background:#1a2a44; }}
-.hero .ph {{ width:88px; height:88px; border-radius:16px; background:#1a2a44; }}
+.hero img, .hero .ph {{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+}}
+.hero .ph {{ background:#1a2a44; display:block; }}
+.hero .veil {{
+  position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(11,18,32,.12) 15%, rgba(11,18,32,.88));
+}}
+.hero .copy {{ position:relative; z-index:1; padding:28px 24px 20px; width:100%; }}
 .hero .kicker {{ font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; color:#c9a227; font-weight:800; }}
-.hero h1 {{ font-family:Fraunces,Georgia,serif; font-size:clamp(1.4rem,3vw,2rem); margin:4px 0 8px; }}
+.hero h1 {{ font-family:Fraunces,Georgia,serif; font-size:clamp(1.45rem,3vw,2.1rem); margin:4px 0 8px; }}
 .hero .meta {{ color:#c8d2e0; font-size:.88rem; }}
 .live {{ display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:700; color:#8ee0c8; }}
 .live i {{ width:7px; height:7px; border-radius:50%; background:#3dd6a5; animation:pulse 1.6s ease-in-out infinite; }}
 @keyframes pulse {{ 50% {{ opacity:.35; }} }}
 .archive {{ color:#f0d060; font-size:.78rem; font-weight:700; }}
-.score {{ display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px; margin:18px 0; }}
-@media (max-width:800px) {{ .score {{ grid-template-columns:repeat(3,1fr); }} }}
+.score {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:18px 0; }}
+@media (max-width:800px) {{ .score {{ grid-template-columns:1fr 1fr 1fr; }} }}
 .score .cell {{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px 10px; text-align:center; }}
 .score .v {{ font-family:Fraunces,Georgia,serif; font-size:1.45rem; font-weight:700; color:var(--navy); }}
 .score .l {{ font-size:.68rem; color:var(--muted); font-weight:600; margin-top:4px; }}
@@ -113,10 +158,11 @@ body.is-agent .wrap {{ max-width:1320px; display:grid; grid-template-columns:min
 .read h2 {{ font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }}
 .read li {{ margin:6px 0 6px 1.1rem; font-size:.92rem; line-height:1.45; }}
 .strip-wrap {{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px 18px 22px; margin-bottom:18px; }}
-.strip-wrap h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.15rem; margin-bottom:12px; }}
+.strip-wrap h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.15rem; margin-bottom:4px; }}
+.strip-wrap .sub {{ color:var(--muted); font-size:.82rem; margin-bottom:8px; }}
 .strip {{ position:relative; height:52px; }}
 .strip .rail {{ position:absolute; left:0; right:0; top:24px; height:4px; background:#e8eef6; border-radius:99px; }}
-.strip .tick {{ position:absolute; top:12px; width:10px; height:10px; border-radius:50%; background:#9fb0c6; transform:translateX(-50%); }}
+.strip .tick {{ position:absolute; top:12px; width:10px; height:10px; border-radius:50%; background:#9fb0c6; transform:translateX(-50%); border:0; padding:0; appearance:none; -webkit-appearance:none; }}
 .strip .tick.me {{ width:16px; height:16px; top:9px; background:var(--gold); box-shadow:0 0 0 4px #c9a22733; }}
 .strip .lab {{ position:absolute; top:34px; font-size:.62rem; color:var(--muted); transform:translateX(-50%); white-space:nowrap; }}
 .sec {{ margin:22px 0; }}
@@ -159,33 +205,73 @@ body.is-seller .console {{ display:none; }}
 .console .status {{ font-size:.75rem; color:var(--muted); margin-top:8px; min-height:1.2em; }}
 .links {{ display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; font-size:.82rem; font-weight:700; }}
 .drawer {{
-  position:fixed; inset:0; background:rgba(11,18,32,.46); z-index:40; display:none; align-items:stretch; justify-content:flex-end;
+  position:fixed; inset:0; background:rgba(11,18,32,.55); z-index:40; display:none;
+  align-items:center; justify-content:center; padding:20px;
 }}
 .drawer.open {{ display:flex; }}
-.drawer .panel {{ width:min(420px,100%); background:#fff; padding:20px; overflow:auto; }}
-.drawer .dpic {{ width:100%; height:220px; object-fit:cover; border-radius:12px; background:#eef2f7; }}
-.drawer h3 {{ font-family:Fraunces,Georgia,serif; margin:12px 0 6px; }}
-.drawer .close {{ float:right; border:0; background:transparent; font-size:1.4rem; cursor:pointer; }}
+.drawer .panel {{
+  width:min(720px,100%); max-height:min(90vh,920px); background:#fff; overflow:auto;
+  border-radius:20px; box-shadow:0 24px 60px rgba(11,18,32,.28); position:relative;
+}}
+.drawer .gallery {{ position:relative; background:#dfe6ef; }}
+.drawer .dpic {{ width:100%; height:min(42vh,360px); object-fit:cover; display:block; background:#eef2f7; }}
+.drawer .dpic.empty {{ height:120px; }}
+.drawer .gal-btn {{
+  position:absolute; top:50%; transform:translateY(-50%); width:36px; height:36px; border:0;
+  border-radius:50%; background:rgba(11,18,32,.72); color:#fff; font-size:1.35rem; cursor:pointer; line-height:1;
+}}
+.drawer .gal-prev {{ left:10px; }}
+.drawer .gal-next {{ right:10px; }}
+.drawer .gal-count {{
+  position:absolute; right:12px; bottom:10px; background:rgba(11,18,32,.7); color:#fff;
+  font-size:.72rem; font-weight:700; padding:3px 8px; border-radius:99px;
+}}
+.drawer .panel-body {{ padding:8px 22px 22px; }}
+.drawer h3 {{ font-family:Fraunces,Georgia,serif; margin:12px 0 4px; font-size:1.35rem; }}
+.drawer .price-line {{ font-family:Fraunces,Georgia,serif; font-size:1.2rem; font-weight:700; }}
+.drawer .close {{
+  position:absolute; top:10px; right:10px; z-index:2; width:36px; height:36px; border:0;
+  border-radius:50%; background:rgba(255,255,255,.92); font-size:1.4rem; cursor:pointer; line-height:1;
+}}
+.drawer .meta {{ color:var(--muted); font-size:.88rem; line-height:1.4; }}
+.drawer ul {{ margin:6px 0 0 1.1rem; font-size:.88rem; line-height:1.45; }}
 .note {{ font-size:.78rem; color:var(--muted); margin-top:8px; }}
 .upload {{ display:none; }}
 .weeks-wrap {{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin-bottom:18px; }}
 .weeks-wrap h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.15rem; margin-bottom:4px; }}
 .weeks-wrap .sub {{ color:var(--muted); font-size:.82rem; margin-bottom:12px; }}
-.weeks {{ display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; }}
+.weeks {{ display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; }}
 .week {{
-  flex:0 0 auto; min-width:156px; text-align:left; background:#f7f4ee; border:1px solid var(--line);
-  border-radius:12px; padding:10px 12px; cursor:pointer; font:inherit;
+  flex:0 0 auto; background:#f7f4ee; border:1px solid var(--line);
+  border-radius:999px; padding:6px 12px; cursor:pointer; font:inherit;
+  font-size:.78rem; font-weight:700; color:var(--navy);
 }}
 .week.is-on, .week:hover {{ border-color:var(--navy); background:#fff; }}
-.week .w-d {{ display:block; font-size:.72rem; font-weight:800; color:var(--navy); }}
-.week .w-m {{ display:block; font-size:.68rem; color:var(--muted); margin-top:4px; line-height:1.35; }}
-.agent-note {{
+.from-agent {{
   background:#fff; border:1px solid var(--line); border-left:4px solid var(--gold);
-  border-radius:16px; padding:16px 18px; margin-bottom:14px;
+  border-radius:16px; padding:16px 18px; margin:0 0 16px;
 }}
-.agent-note h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.15rem; }}
-.agent-note .when {{ font-size:.75rem; color:var(--muted); margin:4px 0 10px; }}
-.agent-note .body {{ font-size:.95rem; line-height:1.5; }}
+.from-agent .kicker {{ font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); font-weight:800; }}
+.from-agent h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.22rem; margin:2px 0 4px; }}
+.from-agent .when {{ font-size:.75rem; color:var(--muted); margin-bottom:8px; }}
+.from-agent .body {{ font-size:.95rem; line-height:1.5; }}
+.from-agent .recs {{ margin:10px 0 0; }}
+.from-agent .recs-k {{ font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:800; margin-bottom:4px; }}
+.from-agent .recs li {{ margin:5px 0 5px 1.1rem; font-size:.9rem; line-height:1.45; }}
+.past-pick {{
+  display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:14px;
+  font-size:.78rem; font-weight:700; color:var(--navy);
+}}
+.past-pick select {{
+  font:inherit; font-weight:600; color:var(--ink); background:#f7f4ee;
+  border:1px solid var(--line); border-radius:10px; padding:6px 10px; min-width:180px;
+}}
+.past-note {{
+  margin-top:10px; padding:10px 12px; background:#f7f4ee; border-radius:12px; font-size:.88rem; line-height:1.45;
+}}
+.past-note strong {{ display:block; font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }}
+.week-stat {{ font-size:.92rem; color:var(--ink); margin:4px 0 10px; }}
+.week-stat b {{ font-family:Fraunces,Georgia,serif; font-size:1.15rem; color:var(--navy); }}
 .note-tl {{ margin:0 0 18px; }}
 .note-tl-item {{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-top:8px; font-size:.88rem; }}
 .note-tl-item strong {{ display:block; font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }}
@@ -198,29 +284,327 @@ body.is-seller .console {{ display:none; }}
 .console .note-console.is-focus {{ box-shadow:0 0 0 3px #c9a22755; border-radius:12px; padding:8px; margin:8px -8px 0; }}
 .console .check-hint {{ font-size:.72rem; color:var(--muted); font-weight:500; margin:4px 0 0 22px; line-height:1.35; }}
 .card.is-week {{ border-color:var(--gold); box-shadow:0 0 0 2px #c9a22755; }}
-.week-homes {{ margin-top:14px; }}
-.week-homes h3 {{ font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }}
-.week-homes .cards {{ grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); }}
+.week-homes {{ margin-top:4px; }}
+.week-homes .empty {{ font-size:.82rem; color:var(--muted); }}
 .spark {{ margin:8px 0 14px; }}
 .spark svg {{ display:block; max-width:280px; }}
 .spark .cap {{ font-size:.72rem; color:var(--muted); margin-top:4px; }}
 .lanes {{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin-bottom:18px; }}
 .lanes h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.15rem; margin-bottom:4px; }}
 .lanes > .sub {{ color:var(--muted); font-size:.82rem; margin-bottom:12px; }}
-.lane {{ margin-top:10px; }}
-.lane h3 {{ font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }}
-.lane-row {{ display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; }}
+.lane {{ margin-top:16px; padding-top:14px; border-top:1px solid var(--line); }}
+.lanes > .lane:first-of-type {{ border-top:0; padding-top:0; margin-top:6px; }}
+.lane h3 {{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  font-size:.8rem; letter-spacing:.04em; text-transform:uppercase; color:var(--ink);
+  font-weight:800; margin-bottom:10px;
+}}
+.lane h3 .n {{
+  display:inline-block; background:#eef2f7; color:var(--navy); border-radius:99px;
+  padding:2px 9px; font-size:.72rem; letter-spacing:0; font-weight:800;
+}}
+.lane.is-uc h3 {{ color:#c2410c; }}
+.lane.is-sold h3 {{ color:#64748b; }}
+.lane.is-active h3 {{ color:var(--teal); }}
+.lane-row {{ display:flex; gap:12px; overflow-x:auto; padding-bottom:6px; }}
 .lane-home {{
-  flex:0 0 auto; width:72px; padding:0; border:1px solid var(--line); border-radius:10px;
-  overflow:hidden; background:#dfe6ef; cursor:pointer;
+  flex:0 0 auto; width:200px; padding:0; border:1px solid var(--line); border-radius:14px;
+  overflow:hidden; background:#fff; cursor:pointer; text-align:left; font:inherit; color:inherit;
+  appearance:none; -webkit-appearance:none;
 }}
 .lane-home.is-week {{ border-color:var(--gold); box-shadow:0 0 0 2px #c9a22755; }}
-.lane-pic {{ display:block; width:72px; height:56px; background:#dfe6ef center/cover no-repeat; }}
-.lane-pic.empty {{ background:#e8eef4; }}
+.lane-home.is-pin {{ border-color:var(--navy); box-shadow:0 0 0 2px #0c3c6e44; }}
+.lane-pic {{ display:block; width:100%; height:124px; background:#dfe6ef center/cover no-repeat; position:relative; }}
+.lane-badge {{
+  position:absolute; left:8px; top:8px; z-index:1;
+  font-size:.58rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
+  border-radius:99px; padding:3px 7px; background:rgba(255,255,255,.94);
+}}
+.lane-badge.is-uc {{ color:#c2410c; }}
+.lane-badge.is-sold {{ color:#475569; }}
+.lane-home.is-on {{ border-color:var(--gold); box-shadow:0 0 0 3px #c9a22744; }}
+.lane-pic.empty {{
+  background-color:#e8eef4;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='40' viewBox='0 0 48 40'><path fill='%23b7c2cf' d='M24 4l20 16h-6v16H10V20H4z'/></svg>");
+  background-repeat:no-repeat;
+  background-position:center 42px;
+  background-size:36px 30px;
+}}
+.lane-meta {{ padding:10px 11px 12px; }}
+.lane-meta .p {{ font-family:Fraunces,Georgia,serif; font-size:1.08rem; font-weight:700; }}
+.lane-meta .a {{
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  font-size:.8rem; font-weight:700; color:var(--ink); margin-top:4px; line-height:1.3;
+  overflow:hidden;
+}}
+.lane-meta .m {{ font-size:.72rem; color:var(--muted); margin-top:4px; line-height:1.4; }}
+.set-totals {{
+  display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 12px;
+}}
+.set-totals span {{
+  background:#f7f4ee; border:1px solid var(--line); border-radius:999px;
+  padding:5px 11px; font-size:.78rem; font-weight:700; color:var(--navy);
+}}
+.set-totals b {{ font-family:Fraunces,Georgia,serif; font-size:.95rem; }}
+.photo-banner {{
+  display:none; margin:0 0 14px; padding:10px 14px; border-radius:12px;
+  background:#0c3c6e; color:#fff; font-size:.82rem; font-weight:600;
+}}
+.photo-banner.is-on {{ display:block; }}
+.fp-map {{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:0 0 18px; }}
+.fp-map h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.15rem; margin-bottom:4px; }}
+.fp-map > .sub {{ color:var(--muted); font-size:.82rem; margin-bottom:10px; }}
+.fp-map-legend {{ display:flex; flex-wrap:wrap; gap:8px 14px; font-size:.72rem; color:var(--muted); font-weight:700; margin:0 0 10px; }}
+.fp-map-legend i {{ display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; vertical-align:middle; box-shadow:0 0 0 2px #fff, 0 1px 3px rgba(11,18,32,.25); }}
+.fp-map-legend i.is-you {{ background:var(--gold); }}
+.fp-map-legend i.is-active {{ background:var(--teal); }}
+.fp-map-legend i.is-uc {{ background:#e65100; }}
+.fp-map-legend i.is-sold {{ background:#94a3b8; }}
+.fp-map-canvas {{ height:340px; border-radius:12px; overflow:hidden; background:#e8eef4; }}
+.fp-pin {{
+  width:14px; height:14px; border-radius:50%; border:2px solid #fff;
+  box-shadow:0 1px 4px rgba(11,18,32,.35); cursor:pointer;
+}}
+.fp-pin.is-you {{ width:18px; height:18px; background:var(--gold); }}
+.fp-pin.is-active {{ background:var(--teal); }}
+.fp-pin.is-uc {{ background:#e65100; }}
+.fp-pin.is-sold {{ background:#94a3b8; }}
+.mapboxgl-popup-content {{ padding:10px 12px; border-radius:12px; font-size:.78rem; line-height:1.35; max-width:240px; }}
+.sorts {{ display:flex; flex-wrap:wrap; gap:6px; margin:4px 0 10px; align-items:center; }}
+.sorts span {{ font-size:.68rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-right:4px; }}
+.sorts button {{
+  width:auto; margin:0; padding:5px 10px; border-radius:99px; border:1px solid var(--line);
+  background:#f7f4ee; font:inherit; font-size:.72rem; font-weight:700; cursor:pointer; color:var(--navy);
+}}
+.sorts button.is-on {{ background:var(--navy); color:#fff; border-color:var(--navy); }}
+.board {{
+  background:linear-gradient(165deg, #0b1220 0%, #10213a 55%, #0c3c6e 140%);
+  color:#fff; border:1px solid #1c2c46; border-radius:20px;
+  padding:22px 22px 16px; margin:0 0 20px; overflow:hidden;
+}}
+.board-top .kicker {{
+  font-size:.68rem; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); font-weight:800;
+}}
+.board-top h2 {{
+  font-family:Fraunces,Georgia,serif; font-size:clamp(1.35rem, 2.6vw, 1.85rem);
+  margin:4px 0 6px; font-weight:700;
+}}
+.board-top .sub {{ color:#c8d2e0; font-size:.88rem; line-height:1.45; max-width:46rem; }}
+.board-panes {{
+  display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:16px 0 8px;
+}}
+.board-pane {{
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08);
+  border-radius:16px; padding:14px 14px 10px;
+}}
+.board-pane-h {{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:10px; }}
+.board-pane-h span {{ font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; font-weight:800; color:#f0d060; }}
+.board-pane-h small {{ color:#9aabc0; font-size:.72rem; }}
+.board-grid {{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:0; }}
+.board-stat {{
+  text-align:center; padding:8px 10px; border-right:1px solid rgba(255,255,255,.18);
+}}
+.board-stat:last-child {{ border-right:0; }}
+.board-n {{ font-family:Fraunces,Georgia,serif; font-size:clamp(1.45rem, 2.6vw, 2rem); font-weight:700; line-height:1; }}
+.board-l {{ font-size:.7rem; letter-spacing:.04em; text-transform:uppercase; font-weight:800; color:#e8eef6; margin-top:7px; }}
+.board-h {{ font-size:.68rem; color:#9aabc0; margin-top:3px; line-height:1.35; }}
+.board-stat.is-under .board-n {{ color:#f3b4b4; }}
+.board-stat.is-over .board-n {{ color:#8ee0c8; }}
+.board-totals {{
+  display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:12px 0 4px;
+}}
+.board-total {{
+  background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1);
+  border-radius:14px; padding:12px 14px;
+}}
+.board-total .k {{ font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:#f0d060; font-weight:800; }}
+.board-total .v {{ font-family:Fraunces,Georgia,serif; font-size:1.35rem; font-weight:700; margin:4px 0 2px; }}
+.board-total .s {{ font-size:.78rem; color:#c8d2e0; line-height:1.4; }}
+.board-table-wrap {{ overflow-x:auto; margin-top:12px; }}
+.board-table {{ width:100%; border-collapse:collapse; min-width:520px; }}
+.board-table th, .board-table td {{
+  padding:9px 8px; text-align:center; font-size:.82rem;
+  border-right:1px solid rgba(255,255,255,.16);
+  border-bottom:1px solid rgba(255,255,255,.12);
+}}
+.board-table th {{
+  font-size:.62rem; letter-spacing:.07em; text-transform:uppercase; color:#9aabc0; font-weight:800;
+}}
+.board-table th:last-child, .board-table td:last-child {{ border-right:0; }}
+.board-table th:first-child, .board-table td:first-child {{ text-align:left; }}
+.board-table td {{ font-family:Fraunces,Georgia,serif; font-size:1.02rem; font-weight:700; }}
+.board-table td:first-child {{ font-family:Inter,system-ui,sans-serif; font-size:.82rem; color:#d5deea; }}
+.board-table tfoot td {{ color:#f0d060; border-bottom:0; }}
+.board-week {{ cursor:pointer; }}
+.board-week:hover td {{ background:rgba(255,255,255,.04); }}
+.board-week.is-on td {{ background:rgba(201,162,39,.16); }}
+.board-table .is-under {{ color:#f3b4b4; }}
+.board-table .is-over {{ color:#8ee0c8; }}
+@media (max-width:800px) {{
+  .board-panes, .board-totals {{ grid-template-columns:1fr; }}
+  .board-grid {{ grid-template-columns:repeat(3,minmax(0,1fr)); }}
+  .board-stat:nth-child(3n) {{ border-right:0; }}
+}}
+.strip {{ position:relative; height:72px; }}
+.strip .tick {{ cursor:pointer; }}
+.strip .tick.is-pin {{ background:var(--navy); }}
+.strip-now {{
+  min-height:1.4em; margin:6px 0 0; font-size:.84rem; font-weight:700; color:var(--ink); line-height:1.35;
+}}
+.strip-now span {{ color:var(--muted); font-weight:500; }}
+.card.is-pin {{ border-color:var(--navy); box-shadow:0 0 0 2px #0c3c6e44; }}
+.now-kicker {{ margin:0 0 12px; }}
+.now-kicker .kicker {{ font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--navy); font-weight:800; }}
+.now-kicker h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.22rem; margin:2px 0 4px; }}
+.now-kicker .sub {{ color:var(--muted); font-size:.82rem; line-height:1.45; }}
+.levers {{
+  background:#fff; border:1px solid var(--line); border-radius:18px;
+  padding:20px 18px 22px; margin-bottom:18px;
+}}
+.levers > .kicker {{ font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); font-weight:800; }}
+.levers > h2 {{ font-family:Fraunces,Georgia,serif; font-size:clamp(1.2rem,2.4vw,1.55rem); margin:4px 0 6px; line-height:1.25; }}
+.levers > .sub {{ color:var(--muted); font-size:.88rem; line-height:1.5; margin-bottom:14px; }}
+.lever-row {{ display:flex; gap:12px; overflow-x:auto; padding-bottom:8px; margin-bottom:16px; }}
+.lever-q {{ margin:4px 0 14px; }}
+.lever-ask {{ font-family:Fraunces,Georgia,serif; font-size:1.08rem; margin-bottom:10px; }}
+.lever-answers {{ display:flex; flex-wrap:wrap; gap:8px; }}
+.lever-ans, .lever-cond button {{
+  appearance:none; -webkit-appearance:none; font:inherit; cursor:pointer;
+  border:1px solid var(--line); background:#fff; color:var(--ink);
+  border-radius:999px; padding:8px 14px; font-weight:700; font-size:.82rem;
+}}
+.lever-ans.is-on, .lever-cond button.is-on {{
+  background:var(--gold); border-color:transparent; color:#1a1200;
+}}
+.lever-grid {{
+  display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;
+}}
+.lever-card {{
+  border:1px solid var(--line); border-radius:14px; padding:12px 13px 14px; background:#fbfaf7;
+}}
+.lever-card .lk {{ font-size:.78rem; font-weight:800; letter-spacing:.04em; text-transform:uppercase; margin-bottom:8px; }}
+.lever-card .lk em {{
+  display:block; font-style:normal; font-size:.62rem; letter-spacing:.07em;
+  text-transform:uppercase; font-weight:800; margin-top:3px; color:var(--teal);
+}}
+.lever-card p {{ font-size:.84rem; line-height:1.45; color:var(--ink); }}
+.lever-card .lm {{ color:var(--muted); font-size:.74rem; margin-top:8px; }}
+.lever-card.is-hot {{ border-color:#e8c96a; background:#fff8e6; }}
+.lever-cond {{ display:flex; flex-direction:column; gap:6px; margin-top:10px; }}
+.lever-cond button {{ width:100%; border-radius:10px; text-align:left; }}
+@media (max-width:800px) {{
+  .lever-grid {{ grid-template-columns:1fr; }}
+}}
+.sample-demo-bar {{
+  display:none; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  background:#0b1220; color:#fff; padding:10px 18px; font-size:.86rem; margin:0 0 16px; border-radius:14px;
+}}
+.sample-demo-bar.is-on {{ display:flex; }}
+.sample-demo-bar span {{ color:#c8d2e0; }}
+.sample-demo-bar a {{
+  color:#0b1220; background:var(--gold); text-decoration:none; font-weight:800; padding:8px 14px; border-radius:999px;
+}}
+.view-switch {{
+  display:none; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  background:#0b1220; color:#fff; padding:10px 18px; font-size:.86rem; margin:0 0 16px; border-radius:14px;
+  grid-column:1 / -1;
+}}
+.view-switch.is-on {{ display:flex; }}
+.view-switch span {{ color:#c8d2e0; }}
+.view-switch a {{
+  color:#0b1220; background:var(--gold); text-decoration:none; font-weight:800; padding:8px 14px; border-radius:999px;
+}}
+.sample-demo-bar {{ grid-column:1 / -1; }}
+.hero .links a {{
+  color:#0b1220; background:var(--gold); text-decoration:none; font-weight:800;
+  padding:8px 14px; border-radius:999px;
+}}
+.hero .links a.ghost {{
+  color:#fff; background:transparent; border:1px solid rgba(255,255,255,.45);
+}}
+@media print {{ .view-switch, .sample-demo-bar {{ display:none!important; }} }}
+.story {{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:16px 0 14px; }}
+.story .lead {{ font-family:Fraunces,Georgia,serif; font-size:1.28rem; line-height:1.35; }}
+.story .long {{ color:var(--muted); font-size:.9rem; margin-top:6px; line-height:1.45; }}
+.week-nums {{ display:none; }}
+.since-nums {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:0 0 18px; }}
+.since-nums .cell {{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px 10px; text-align:center; }}
+.since-nums .n {{ font-family:Fraunces,Georgia,serif; font-size:1.35rem; font-weight:700; color:var(--navy); }}
+.since-nums .l {{ font-size:.68rem; color:var(--muted); margin-top:4px; font-weight:700; }}
+.legend {{ display:flex; flex-wrap:wrap; gap:10px 16px; font-size:.78rem; color:var(--muted); margin:0 0 12px; }}
+.legend b {{ color:var(--ink); }}
+.week-grid {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }}
+@media (max-width:800px) {{
+  .week-nums, .since-nums, .week-grid {{ grid-template-columns:1fr; }}
+}}
+.week-col h3 {{ font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }}
+.week-col .empty {{ font-size:.82rem; color:var(--muted); }}
+.why {{ font-size:.82rem; color:var(--muted); margin:0 0 16px; line-height:1.45; }}
+.filters {{
+  background:#fff; border:1px solid var(--line); border-radius:16px;
+  padding:12px 16px; margin:14px 0 10px;
+  display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+}}
+.filters-k {{ font-size:.68rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-right:4px; }}
+.filters-n {{ width:100%; font-size:.78rem; color:var(--muted); margin:4px 0 0; font-weight:500; }}
+.chip {{
+  display:inline-block; background:#fff; border:1px solid var(--line); border-radius:999px;
+  padding:5px 11px; font-size:.78rem; font-weight:700; color:var(--navy);
+}}
+.facts {{
+  display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin:0 0 18px;
+}}
+@media (max-width:800px) {{ .facts {{ grid-template-columns:1fr 1fr; }} }}
+.fact {{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px 12px; }}
+.fact .fk {{ display:block; font-size:.62rem; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); font-weight:800; }}
+.fact .fv {{ display:block; font-family:Fraunces,Georgia,serif; font-size:1.05rem; font-weight:700; color:var(--navy); margin-top:3px; }}
+.mkt-pulse {{
+  background:#fff; border:1px solid var(--line); border-radius:16px;
+  padding:16px 18px 18px; margin:0 0 18px;
+}}
+.mkt-pulse .kicker {{ font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--navy); font-weight:800; }}
+.mkt-pulse h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.2rem; margin:2px 0 4px; }}
+.mkt-pulse > .sub {{ color:var(--muted); font-size:.84rem; line-height:1.45; margin-bottom:12px; }}
+.mkt-grid {{
+  display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px;
+}}
+@media (max-width:800px) {{ .mkt-grid {{ grid-template-columns:1fr 1fr; }} }}
+.mkt-cell {{
+  border:1px solid var(--line); border-radius:12px; padding:10px 12px; background:#fbfaf7;
+}}
+.mkt-cell .mk {{ font-size:.62rem; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); font-weight:800; }}
+.mkt-cell .mn {{ font-family:Fraunces,Georgia,serif; font-size:1.35rem; font-weight:700; color:var(--navy); margin:4px 0 2px; }}
+.mkt-cell .mt {{ font-size:.72rem; color:var(--muted); line-height:1.35; }}
+.mkt-note {{ font-size:.84rem; color:var(--ink); margin:12px 0 0; line-height:1.45; }}
+.mkt-note span {{ color:var(--muted); }}
+.walk {{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:0 0 18px; }}
+.walk h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.2rem; margin-bottom:4px; }}
+.walk .sub {{ color:var(--muted); font-size:.84rem; margin-bottom:10px; }}
+.weeks-bar {{
+  position:sticky; top:0; z-index:6; background:#fff; padding:8px 0 10px; margin:0 -4px 10px;
+}}
+.since-line {{ font-size:.82rem; color:var(--muted); margin:8px 0 0; }}
+.since-line b {{ color:var(--ink); }}
+.week-homes .lane {{
+  margin-top:16px; padding-top:14px; border-top:1px solid var(--line);
+}}
+.week-homes .lane:first-of-type {{
+  border-top:0; padding-top:0; margin-top:6px;
+}}
+@media (max-width:640px) {{ .hero {{ min-height:180px; }} }}
 </style>
 </head>
 <body class="{agent_class}">
 <div class="wrap">
+  <div class="sample-demo-bar" id="sampleDemoBar">
+    <span>Real Greeley listing from the market file — not mock comps. Photos appear when we can match the address publicly.</span>
+    <a href="/demo">Back to the listing appointment →</a>
+  </div>
+  <div class="view-switch" id="viewSwitch">
+    <span>Same listing — Live Story is the appointment, Fingerprint is the weekly seller picture.</span>
+    <a id="switchStory" href="#">Open Live Story →</a>
+  </div>
+  <p class="photo-banner" id="photoBanner">Pulling listing photos for this similar set…</p>
   <main id="main"></main>
   <aside class="console" id="console"></aside>
 </div>
@@ -232,6 +616,15 @@ body.is-seller .console {{ display:none; }}
 </div>
 <script>
 const DATA = {data_json};
+function siblingStoryUrl() {{
+  const sample = DATA.run_id === 'sample-2845' || /[?&]sample=1(?:&|$)/.test(location.search);
+  if (sample) return '/demo';
+  const path = location.pathname.replace(/\\/+$/, '');
+  const share = path.match(/^\\/p\\/([^/]+)/);
+  if (share) return '/p/' + share[1] + '/';
+  if (DATA.run_id) return '/runs/' + DATA.run_id + '/';
+  return DATA.report_url || '';
+}}
 function money(n) {{
   const v = Number(n || 0);
   if (!v) return '—';
@@ -245,7 +638,7 @@ function esc(s) {{
 function tagClass(st) {{
   const s = String(st || '').toLowerCase();
   if (s === 'active') return 'tag-active';
-  if (s === 'pending' || s === 'backup' || s === 'firstright') return 'tag-pending';
+  if (s === 'pending' || s === 'backup' || s === 'firstright' || s.indexOf('contract') >= 0) return 'tag-pending';
   if (s === 'sold') return 'tag-sold';
   if (s === 'gone') return 'tag-gone';
   if (s === 'under') return 'tag-under';
@@ -253,15 +646,16 @@ function tagClass(st) {{
   return '';
 }}
 function cardHtml(c, extraTag) {{
-  const pic = c.photo_url
-    ? '<div class="pic" style="background-image:url(\\'' + String(c.photo_url).replace(/'/g, '%27') + '\\')"></div>'
+  const url = photoUrl(c);
+  const pic = url
+    ? '<div class="pic" style="background-image:url(\\'' + String(url).replace(/'/g, '%27') + '\\')"></div>'
     : '<div class="pic empty">No photo</div>';
   const st = extraTag || c.status || '';
   const bits = [];
   if (c.beds) bits.push(c.beds + ' bd');
   if (c.baths) bits.push(c.baths + ' ba');
   if (c.sqft) bits.push(Number(c.sqft).toLocaleString() + ' sf');
-  if (c.delta) bits.push((c.delta > 0 ? '+' : '') + money(Math.abs(c.delta)).replace('$','') + ' vs lock');
+  if (c.delta) bits.push((c.delta > 0 ? '+' : '') + money(Math.abs(c.delta)).replace('$','') + ' vs list');
   if (c.was_price && c.was_price !== c.price) bits.push(money(c.was_price) + ' → ' + money(c.price));
   if (c.rank_then && c.rank) bits.push('rank ' + c.rank_then + ' → ' + c.rank);
   else if (c.rank) bits.push('#' + c.rank);
@@ -273,7 +667,7 @@ function cardHtml(c, extraTag) {{
 }}
 function byId(id) {{
   const b = DATA.brief || {{}};
-  const pools = [b.still_active, b.new_under, b.new_over, b.baseline, b.went_pending, b.went_sold, b.cheaper_active, b.price_cuts, b.gone];
+  const pools = [b.still_active, b.new_under, b.new_over, b.baseline, b.went_pending, b.went_sold, b.cheaper_active, b.price_cuts, b.gone, b.pending_now, b.position];
   for (const pool of pools) {{
     for (const c of (pool || [])) if (c && c.id === id) return c;
   }}
@@ -281,6 +675,23 @@ function byId(id) {{
 }}
 function weekKey(v) {{
   return String(v || '').slice(0, 10);
+}}
+function listDate(c) {{
+  return weekKey(c && (c.list_date || c.list_date));
+}}
+function photoUrl(c) {{
+  if (!c) return '';
+  if (c.photos && c.photos.length) return c.photos[0];
+  return c.photo_url || c.photo_url || '';
+}}
+function statusHistory(c) {{
+  return (c && (c.status_history || c.status_history)) || [];
+}}
+function listPrice() {{
+  const b = DATA.brief || {{}};
+  const d = DATA.digest || b.digest || {{}};
+  const lock = DATA.lock || {{}};
+  return Number(b.locked_price || lock.locked_price || d.locked_price || 0);
 }}
 function weekLabel(asOf) {{
   const raw = weekKey(asOf);
@@ -294,7 +705,63 @@ function noteForWeek(asOf) {{
 }}
 function isUc(st) {{
   const s = String(st || '').toLowerCase();
-  return s === 'pending' || s === 'backup' || s === 'firstright' || s === 'sold';
+  return s === 'pending' || s === 'backup' || s === 'firstright' || s === 'under contract';
+}}
+function clockKind() {{
+  const d = DATA.digest || (DATA.brief || {{}}).digest || {{}};
+  if ((d.clock || '') === 'active' || DATA.active_at) return 'active';
+  return 'generate';
+}}
+function sinceLabel() {{
+  return clockKind() === 'active' ? 'since active' : 'since generate';
+}}
+let laneSort = 'price';
+let leverId = '';
+const leverCond = {{}};
+const leverAns = {{}};
+function sortVal(c, by) {{
+  if (by === 'sqft') return Number(c.sqft || 0);
+  if (by === 'beds') return Number(c.beds || 0);
+  if (by === 'baths') return Number(c.baths || 0);
+  return Number(c.price || c.was_price || 0);
+}}
+function sortedRows(rows, by) {{
+  return (rows || []).slice().sort(function (a, b) {{
+    return sortVal(a, by) - sortVal(b, by);
+  }});
+}}
+function homeBits(c) {{
+  const bits = [];
+  if (c.beds) bits.push(Number(c.beds) + ' bd');
+  if (c.baths) bits.push(Number(c.baths) + ' ba');
+  if (c.sqft) bits.push(Number(c.sqft).toLocaleString() + ' sf');
+  return bits.join(' · ');
+}}
+function streetLine(c) {{
+  if (!c) return '';
+  let a = String(c.address || '').trim();
+  const city = String(c.city || '').trim();
+  if (city) {{
+    const at = a.toLowerCase().lastIndexOf(city.toLowerCase());
+    if (at > 0) a = a.slice(0, at).replace(/[,\\s]+$/, '');
+  }}
+  return a || String(c.address || '').trim();
+}}
+function mapsHref(c) {{
+  if (!c) return '';
+  const lat = Number(c.lat), lng = Number(c.lng);
+  if (isFinite(lat) && isFinite(lng) && !(lat === 0 && lng === 0)) {{
+    return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(lat + ',' + lng);
+  }}
+  const q = [c.address, c.city, 'CO'].filter(Boolean).join(', ');
+  return q ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q) : '';
+}}
+function sortsHtml(id) {{
+  const keys = [['price','Price'],['sqft','Sq ft'],['beds','Beds'],['baths','Baths']];
+  return '<div class="sorts" data-sort-for="' + id + '"><span>Sort</span>' +
+    keys.map(function (k) {{
+      return '<button type="button" data-sort="' + k[0] + '"' + (laneSort === k[0] ? ' class="is-on"' : '') + '>' + k[1] + '</button>';
+    }}).join('') + '</div>';
 }}
 function inWeek(dateStr, start, end) {{
   const d = weekKey(dateStr);
@@ -303,15 +770,20 @@ function inWeek(dateStr, start, end) {{
   if (end && d >= end) return false;
   return true;
 }}
+function weekAsOf(w) {{
+  return weekKey((w && (w.as_of || w.as_of)) || '');
+}}
 function weekWindows() {{
   const hist = ((DATA.brief || {{}}).history || []).slice().sort(function (a, b) {{
-    return weekKey(a.as_of).localeCompare(weekKey(b.as_of));
+    return weekAsOf(a).localeCompare(weekAsOf(b));
   }});
   return hist.map(function (w, i) {{
+    const key = weekAsOf(w);
     return {{
-      as_of: weekKey(w.as_of),
-      start: weekKey(w.as_of),
-      end: hist[i + 1] ? weekKey(hist[i + 1].as_of) : ''
+      as_of: key,
+      as_of: key,
+      start: key,
+      end: hist[i + 1] ? weekAsOf(hist[i + 1]) : ''
     }};
   }});
 }}
@@ -319,19 +791,42 @@ function cardMovedInWeek(c, start, end) {{
   if (!c) return false;
   const hist = c.status_history || [];
   for (let i = 0; i < hist.length; i++) {{
-    if (isUc(hist[i].status) && inWeek(hist[i].as_of, start, end)) return true;
+    const st = hist[i].status;
+    if ((isUc(st) || String(st || '').toLowerCase() === 'sold') && inWeek(hist[i].as_of || hist[i].as_of, start, end)) return true;
   }}
-  return !!(c.list_date && inWeek(c.list_date, start, end));
+  return !!(listDate(c) && inWeek(listDate(c), start, end));
+}}
+function weekCounts(asOf) {{
+  const wins = weekWindows();
+  const key = weekKey(asOf);
+  const w = wins.find(function (x) {{ return (x.as_of || x.as_of) === key; }}) || wins[wins.length - 1];
+  const out = {{ listed: 0, uc: 0, sold: 0 }};
+  if (!w) return out;
+    homesForWeek(w.as_of || w.as_of).forEach(function (c) {{
+    if (listDate(c) && inWeek(listDate(c), w.start, w.end)) out.listed += 1;
+    const hist = statusHistory(c);
+    let sold = false;
+    let uc = false;
+    for (let i = 0; i < hist.length; i++) {{
+      if (!inWeek(hist[i].as_of || hist[i].as_of, w.start, w.end)) continue;
+      const st = String(hist[i].status || '').toLowerCase();
+      if (st === 'sold') sold = true;
+      else if (isUc(st)) uc = true;
+    }}
+    if (sold) out.sold += 1;
+    else if (uc) out.uc += 1;
+  }});
+  return out;
 }}
 function homesForWeek(asOf) {{
   const wins = weekWindows();
   const key = weekKey(asOf);
-  const w = wins.find(function (x) {{ return x.as_of === key; }}) || wins[wins.length - 1];
+  const w = wins.find(function (x) {{ return (x.as_of || x.as_of) === key; }}) || wins[wins.length - 1];
   if (!w) return [];
   const b = DATA.brief || {{}};
   const seen = {{}};
   const out = [];
-  const pools = [b.baseline, b.new_under, b.new_over, b.went_pending, b.went_sold, b.pending_now];
+  const pools = [b.baseline, b.still_active, b.new_under || b.new_under, b.new_over || b.new_over, b.went_pending, b.went_sold, b.pending_now || b.pending_now];
   for (let p = 0; p < pools.length; p++) {{
     const pool = pools[p] || [];
     for (let i = 0; i < pool.length; i++) {{
@@ -363,53 +858,258 @@ function sparklineHtml() {{
   }}
   return '<div class="spark"><svg viewBox="0 0 212 48" width="212" height="48" aria-hidden="true">' +
     poly(cheaper, '#0e7a6d') + poly(ranks, '#c9a227') + '</svg>' +
-    '<p class="cap">Teal: still cheaper than you · Gold: your rank among similar actives. Same lock.</p></div>';
+    '<p class="cap">Teal: still cheaper than you · Gold: your rank among similar actives. Same initial list.</p></div>';
+}}
+function laneHome(c, extraClass) {{
+  const pic = photoUrl(c)
+    ? 'style="background-image:url(\\'' + String(photoUrl(c)).replace(/'/g, '%27') + '\\')"'
+    : '';
+  const street = streetLine(c);
+  const st = String(c.status || '').toLowerCase();
+  const badge = st === 'sold'
+    ? '<span class="lane-badge is-sold">Sold</span>'
+    : (isUc(st) ? '<span class="lane-badge is-uc">Pending</span>' : '');
+  const extra = extraClass ? ' ' + extraClass : '';
+  return '<button type="button" class="lane-home' + extra + '" data-id="' + esc(c.id) + '" title="' + esc(c.address || '') + '">' +
+    '<span class="lane-pic' + (photoUrl(c) ? '' : ' empty') + '" ' + pic + '>' + badge + '</span>' +
+    '<span class="lane-meta"><span class="p">' + money(c.price) + '</span>' +
+    (street ? '<span class="a">' + esc(street) + '</span>' : '') +
+    '<span class="m">' + esc(homeBits(c)) + '</span></span></button>';
+}}
+function photoLane(title, sub, rows, sid) {{
+  if (!rows || !rows.length) return '';
+  return '<div class="lanes"' + (sid ? ' id="' + sid + '"' : '') + '><h2>' + esc(title) + '</h2>' +
+    '<p class="sub">' + esc(sub) + '</p>' +
+    '<div class="lane"><div class="lane-row">' + sortedRows(rows, laneSort).map(laneHome).join('') + '</div></div></div>';
+}}
+function closedHomes() {{
+  const b = DATA.brief || {{}};
+  const seen = {{}};
+  const out = [];
+  function take(c) {{
+    if (!c || !c.id || seen[c.id]) return;
+    const st = String(c.status || '').toLowerCase();
+    if (st === 'sold' || isUc(st)) {{
+      seen[c.id] = 1;
+      out.push(c);
+    }}
+  }}
+  [b.pending_now, b.went_pending, b.went_sold, b.baseline].forEach(function (pool) {{
+    (pool || []).forEach(take);
+  }});
+  return sortedRows(out, laneSort);
+}}
+function leverStoreKey() {{
+  return 'll-fp-lever-' + String(DATA.run_id || 'run');
+}}
+function saveLevers() {{
+  try {{
+    sessionStorage.setItem(leverStoreKey(), JSON.stringify({{ id: leverId, cond: leverCond, ans: leverAns }}));
+  }} catch (e) {{}}
+}}
+function loadLevers() {{
+  try {{
+    const raw = JSON.parse(sessionStorage.getItem(leverStoreKey()) || 'null');
+    if (!raw) return;
+    if (raw.id) leverId = raw.id;
+    if (raw.cond) Object.assign(leverCond, raw.cond);
+    if (raw.ans) Object.assign(leverAns, raw.ans);
+  }} catch (e) {{}}
+}}
+function leverStageHtml(id) {{
+  const homes = closedHomes();
+  const c = byId(id) || homes[0];
+  if (!c) return '';
+  leverId = c.id;
+  const list = listPrice();
+  const cheaper = c.price && list && c.price < list;
+  const delta = c.delta || (c.price && list ? c.price - list : 0);
+  const subYear = Number(DATA.subject_year || 0);
+  const cond = leverCond[c.id] || '';
+  const ans = leverAns[c.id] || '';
+  let priceLine = cheaper
+    ? 'Listed ' + money(Math.abs(delta)) + ' under this list. They came in cheaper — you can still change your number too.'
+    : (delta > 0
+      ? 'Went pending ' + money(delta) + ' over this list. It wasn’t a cheaper-number win.'
+      : 'Same number as this list. Price isn’t what separated them.');
+  let condLine = 'Condition is the other thing you can still change. Tap what the photos show.';
+  if (c.year && subYear) {{
+    condLine = 'Built ' + c.year + ' · this list ' + subYear + '. Condition is the other thing you can still change. Tap what the photos show.';
+  }}
+  const condBtns = [['better','Looks better'],['same','About the same'],['worse','Looks worse']].map(function (p) {{
+    return '<button type="button" data-cond="' + p[0] + '" class="' + (cond === p[0] ? 'is-on' : '') + '">' + p[1] + '</button>';
+  }}).join('');
+  const ansBtns = [['yes','Yes'],['maybe','Not sure'],['no','No']].map(function (p) {{
+    return '<button type="button" class="lever-ans' + (ans === p[0] ? ' is-on' : '') + '" data-ans="' + p[0] + '">' + p[1] + '</button>';
+  }}).join('');
+  return '<div class="lever-q">' +
+    '<p class="lever-ask">Should this have gone under contract first?</p>' +
+    '<div class="lever-answers">' + ansBtns + '</div></div>' +
+    '<div class="lever-grid">' +
+      '<article class="lever-card' + (cheaper ? ' is-hot' : '') + '"><div class="lk">Price <em>still in play</em></div><p>' +
+      esc(priceLine) + '</p><p class="lm">' + esc(homeBits(c)) + (c.ppsf ? ' · $' + Math.round(c.ppsf) + '/sf' : '') + '</p></article>' +
+      '<article class="lever-card' + (cond === 'better' ? ' is-hot' : '') + '"><div class="lk">Condition <em>still in play</em></div><p>' +
+      esc(condLine) + '</p><div class="lever-cond">' + condBtns + '</div></article>' +
+    '</div>';
+}}
+function leverWalkHtml() {{
+  loadLevers();
+  const homes = closedHomes();
+  if (!homes.length) return '';
+  const ids = {{}};
+  homes.forEach(function (c) {{ ids[c.id] = 1; }});
+  if (!leverId || !ids[leverId]) leverId = homes[0].id;
+  return '<section class="levers" id="leverWalk">' +
+    '<div class="kicker">Price · condition · location</div>' +
+    '<h2>Price, condition, location</h2>' +
+    '<p class="sub">You can\u2019t change the street. You can still work the price, and you can still work the condition. Tap a home that went pending or sold.</p>' +
+    '<div class="lever-row" id="leverRow">' + homes.map(function (c) {{
+      return laneHome(c, c.id === leverId ? 'is-on' : '');
+    }}).join('') + '</div>' +
+    '<div id="leverStage">' + leverStageHtml(leverId) + '</div></section>';
+}}
+function bindLeverStage() {{
+  const stage = document.getElementById('leverStage');
+  if (!stage) return;
+  stage.querySelectorAll('.lever-ans').forEach(function (btn) {{
+    btn.addEventListener('click', function () {{
+      leverAns[leverId] = btn.getAttribute('data-ans');
+      saveLevers();
+      stage.innerHTML = leverStageHtml(leverId);
+      bindLeverStage();
+    }});
+  }});
+  stage.querySelectorAll('.lever-cond button').forEach(function (btn) {{
+    btn.addEventListener('click', function () {{
+      leverCond[leverId] = btn.getAttribute('data-cond');
+      saveLevers();
+      stage.innerHTML = leverStageHtml(leverId);
+      bindLeverStage();
+    }});
+  }});
+}}
+function bindLevers() {{
+  const walk = document.getElementById('leverWalk');
+  if (!walk) return;
+  walk.querySelectorAll('#leverRow .lane-home').forEach(function (el) {{
+    el.addEventListener('click', function (ev) {{
+      ev.preventDefault();
+      ev.stopPropagation();
+      leverId = el.getAttribute('data-id');
+      saveLevers();
+      walk.querySelectorAll('#leverRow .lane-home').forEach(function (x) {{
+        x.classList.toggle('is-on', x.getAttribute('data-id') === leverId);
+      }});
+      const stage = document.getElementById('leverStage');
+      if (stage) {{
+        stage.innerHTML = leverStageHtml(leverId);
+        bindLeverStage();
+      }}
+      openDrawer(leverId);
+    }});
+  }});
+  bindLeverStage();
+}}
+function bindHomeClicks(root) {{
+  const scope = root || document;
+  scope.querySelectorAll('.card, .lane-home').forEach(function (el) {{
+    el.addEventListener('click', function () {{
+      if (el.closest('#leverRow')) return;
+      openDrawer(el.getAttribute('data-id'));
+    }});
+  }});
+}}
+function nowLanesHtml() {{
+  const b = DATA.brief || {{}};
+  const walk = leverWalkHtml();
+  const under = photoLane(
+    'Listed under you — they\u2019re the cheaper option',
+    'Similar homes asking less than yours. Sitting next to them, yours looks expensive.',
+    b.new_under
+  );
+  const over = photoLane(
+    'Listed over you — you\u2019re the cheaper option',
+    'Similar homes asking more. Sitting next to them, yours looks like the better buy.',
+    b.new_over
+  );
+  const cuts = photoLane('Price cuts', 'Homes that dropped $1,000+ since the last look.', b.price_cuts);
+  const body = walk + under + over + cuts;
+  if (!body) return '';
+  return '<div id="nowLanes"><div class="now-kicker"><div class="kicker">Right now</div>' +
+    '<h2>What is happening around your list</h2>' +
+    '<p class="sub">Start with what went pending or sold. Should they have beaten yours? Then look at what listed under you and over you.</p></div>' +
+    body + '</div>';
 }}
 function lanesHtml() {{
-  const rows = ((DATA.brief || {{}}).baseline || []);
+  const rows = sortedRows(((DATA.brief || {{}}).baseline || (DATA.brief || {{}}).baseline || []), laneSort);
   if (!rows.length) return '';
   const active = [];
-  const pending = [];
-  const sold = [];
+  const closed = [];
   for (let i = 0; i < rows.length; i++) {{
     const c = rows[i];
     const st = String(c.status || '').toLowerCase();
-    if (st === 'sold') sold.push(c);
-    else if (st === 'pending' || st === 'backup' || st === 'firstright') pending.push(c);
+    if (st === 'sold' || isUc(st)) closed.push(c);
     else if (st !== 'gone') active.push(c);
   }}
-  function lane(title, items) {{
+  function lane(title, items, kind) {{
     if (!items.length) return '';
-    return '<div class="lane"><h3>' + esc(title) + ' · ' + items.length + '</h3><div class="lane-row">' +
-      items.slice(0, 18).map(function (c) {{
-        const pic = c.photo_url
-          ? 'style="background-image:url(\\'' + String(c.photo_url).replace(/'/g, '%27') + '\\')"'
-          : '';
-        return '<button type="button" class="lane-home" data-id="' + esc(c.id) + '" title="' + esc(c.address || '') + '">' +
-          '<span class="lane-pic' + (c.photo_url ? '' : ' empty') + '" ' + pic + '></span></button>';
-      }}).join('') + '</div></div>';
+    return '<div class="lane' + (kind ? ' is-' + kind : '') + '"><h3>' + esc(title) + ' <span class="n">' + items.length + '</span></h3><div class="lane-row">' +
+      items.map(laneHome).join('') + '</div></div>';
   }}
-  return '<div class="lanes" id="day0Lanes"><h2>Day-0 set — where they are now</h2>' +
-    '<p class="sub">The similar actives from generate. Still active, under contract, or sold — same lock.</p>' +
-    lane('Still active', active) + lane('Under contract', pending) + lane('Sold', sold) + '</div>';
+  const when = clockKind() === 'active' ? 'when this home went active' : 'when this Fingerprint was generated';
+  const total = active.length + closed.length;
+  return '<div class="lanes" id="day0Lanes"><h2>The original similar set</h2>' +
+    '<p class="sub">Homes that were similar actives ' + when + ' — still active, or already pending/sold. Supporting picture of that first list, not this week’s news.</p>' +
+    '<div class="set-totals">' +
+      '<span><b>' + total + '</b> in this set</span>' +
+      '<span><b>' + active.length + '</b> still active</span>' +
+      '<span><b>' + closed.length + '</b> went pending or sold</span>' +
+    '</div>' +
+    sortsHtml('lanes') +
+    lane('Still active', active, 'active') + lane('Went pending or sold', closed, 'uc') + '</div>';
 }}
 function weekHomesHtml(asOf) {{
   const homes = homesForWeek(asOf);
-  if (!homes.length) {{
-    return '<div class="week-homes" id="weekHomes"><h3>Homes this week</h3>' +
-      '<p class="sub">Nothing cheaper listed or from the day-0 set went under contract in this week.</p></div>';
+  const wins = weekWindows();
+  const key = weekKey(asOf);
+  const w = wins.find(function (x) {{ return (x.as_of || x.as_of) === key; }}) || wins[wins.length - 1];
+  const listed = [];
+  const closed = [];
+  homes.forEach(function (c) {{
+    let didSold = false;
+    let didUc = false;
+    (statusHistory(c) || []).forEach(function (h) {{
+      if (!w || !inWeek(h.as_of || h.as_of, w.start, w.end)) return;
+      const st = String(h.status || '').toLowerCase();
+      if (st === 'sold') didSold = true;
+      else if (isUc(st)) didUc = true;
+    }});
+    const didList = !!(listDate(c) && w && inWeek(listDate(c), w.start, w.end));
+    if (didSold || didUc) closed.push(c);
+    else if (didList) listed.push(c);
+    else listed.push(c);
+  }});
+  function col(title, rows, kind) {{
+    return '<div class="lane' + (kind ? ' is-' + kind : '') + '"><h3>' + esc(title) + ' <span class="n">' + rows.length + '</span></h3>' +
+      (rows.length
+        ? '<div class="lane-row">' + rows.map(laneHome).join('') + '</div>'
+        : '<p class="empty">None this week.</p>') + '</div>';
   }}
-  return '<div class="week-homes" id="weekHomes"><h3>Homes this week · ' + homes.length + '</h3>' +
-    '<p class="sub">Went under contract / sold, or newly listed in this size band.</p>' +
-    '<div class="cards">' + homes.map(function (c) {{ return cardHtml(c, c.status); }}).join('') + '</div></div>';
+  if (!homes.length) {{
+    return '<div class="week-homes" id="weekHomes"><p class="empty">No similar homes listed or went pending/sold this week.</p></div>';
+  }}
+  return '<div class="week-homes" id="weekHomes">' +
+    col('Listed', listed, 'active') +
+    col('Went pending or sold', closed, 'uc') +
+    '</div>';
 }}
 function applyWeekHighlight(asOf) {{
   const wins = weekWindows();
   const key = weekKey(asOf);
-  const w = wins.find(function (x) {{ return x.as_of === key; }}) || wins[wins.length - 1];
+  const w = wins.find(function (x) {{ return (x.as_of || x.as_of) === key; }}) || wins[wins.length - 1];
   const ids = {{}};
   if (w) {{
-    homesForWeek(w.as_of).forEach(function (c) {{ ids[c.id] = 1; }});
+    homesForWeek(w.as_of || w.as_of).forEach(function (c) {{ ids[c.id] = 1; }});
   }}
   document.querySelectorAll('.card[data-id], .lane-home[data-id]').forEach(function (el) {{
     el.classList.toggle('is-week', !!ids[el.getAttribute('data-id')]);
@@ -420,56 +1120,489 @@ function selectWeek(asOf, scroll) {{
   document.querySelectorAll('.week').forEach(function (el) {{
     el.classList.toggle('is-on', el.getAttribute('data-asof') === key);
   }});
+  document.querySelectorAll('.board-week').forEach(function (el) {{
+    el.classList.toggle('is-on', el.getAttribute('data-asof') === key);
+  }});
   const box = document.getElementById('weekHomes');
   if (box) box.outerHTML = weekHomesHtml(key);
+  const score = document.getElementById('weekScore');
+  if (score) score.outerHTML = weekScoreHtml(key);
   applyWeekHighlight(key);
-  document.querySelectorAll('#weekHomes .card').forEach(function (el) {{
-    el.addEventListener('click', function () {{ openDrawer(el.getAttribute('data-id')); }});
-  }});
+  bindHomeClicks(document.getElementById('weekHomes'));
   if (scroll) {{
-    const homes = document.getElementById('weekHomes');
-    if (homes) homes.scrollIntoView({{ behavior: 'smooth', block: 'nearest' }});
-    const note = document.getElementById('note-' + key);
-    if (note) note.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
+    const bar = document.querySelector('.weeks-bar');
+    if (bar) bar.scrollIntoView({{ behavior: 'smooth', block: 'nearest' }});
   }}
   if (DATA.agent) loadNoteWeek(key);
+}}
+function prettyDate(s) {{
+  const raw = weekKey(s);
+  const d = new Date(raw + 'T12:00:00');
+  if (isNaN(d.getTime())) return raw || '—';
+  return d.toLocaleDateString(undefined, {{ month: 'short', day: 'numeric', year: 'numeric' }});
+}}
+function filtersHtml() {{
+  const chips = (((DATA.brief || {{}}).comp_set || {{}}).chips || []);
+  if (!chips.length) return '';
+  return '<div class="filters"><span class="filters-k">Similar set</span>' +
+    chips.map(function (c) {{ return '<span class="chip">' + esc(c) + '</span>'; }}).join('') +
+    '<p class="filters-n">Beds, baths, garage, and size a buyer would cross-shop against this home.</p></div>';
+}}
+function factsHtml(b, d) {{
+  const chips = [];
+  const listPrice = b.locked_price || b.locked_price || ((DATA.lock || {{}}).locked_price);
+  chips.push(['Initial list', money(listPrice)]);
+  if (DATA.active_at) chips.push(['Listed', prettyDate(DATA.active_at)]);
+  if (b.days_active || b.days_active) chips.push(['Days on market', String(b.days_active || b.days_active)]);
+  else if (b.days_locked || b.days_locked) chips.push(['Days since generate', String(b.days_locked || b.days_locked)]);
+  if (b.as_of) chips.push(['Market as of', prettyDate(b.as_of)]);
+  return '<div class="facts">' + chips.map(function (x) {{
+    return '<div class="fact"><span class="fk">' + esc(x[0]) + '</span><span class="fv">' + esc(x[1]) + '</span></div>';
+  }}).join('') + '</div>';
+}}
+function pulsePct(v) {{
+  const n = Number(v || 0);
+  if (!n && n !== 0) return '—';
+  const pct = n > 1 ? n : n * 100;
+  return Math.round(pct) + '%';
+}}
+function pulseNum(v, kind) {{
+  const n = Number(v);
+  if (!isFinite(n) || (n === 0 && kind !== 'count' && kind !== 'inv')) return '—';
+  if (kind === 'money') return money(n);
+  if (kind === 'pct') return pulsePct(n);
+  if (kind === 'inv') return n.toFixed(1);
+  if (kind === 'ppsf') return n ? ('$' + Math.round(n)) : '—';
+  if (kind === 'days') return n ? (Math.round(n) + 'd') : '—';
+  if (kind === 'rate') return n ? n.toFixed(1) : '—';
+  return String(Math.round(n));
+}}
+function pulseDeltaLine(nowV, thenV, kind, thenLab) {{
+  const nowS = pulseNum(nowV, kind);
+  const thenS = pulseNum(thenV, kind);
+  if (thenS === '—' || thenS === nowS) return thenS === '—' ? '' : ('Was ' + thenS + ' ' + thenLab);
+  return 'Was ' + thenS + ' ' + thenLab;
+}}
+function marketPulseHtml() {{
+  const pack = ((DATA.brief || {{}}).market_pulse || {{}});
+  const then = pack.then || {{}};
+  const now = pack.now || {{}};
+  if (!now.active_count && !then.active_count && !now.months_of_inventory && !then.months_of_inventory) return '';
+  const thenLab = clockKind() === 'active' ? 'when listed' : 'at generate';
+  const days = Number((DATA.brief || {{}}).days_active || (DATA.brief || {{}}).days_locked || 0);
+  const med = Number(now.median_dom || then.median_dom || 0);
+  const rating = pack.home_rating || then.home_rating;
+  const cells = [
+    ['Months of inventory', pulseNum(now.months_of_inventory, 'inv'), pulseDeltaLine(now.months_of_inventory, then.months_of_inventory, 'inv', thenLab)],
+    ['30-day odds', pulseNum(now.odds_of_selling, 'pct'), pulseDeltaLine(now.odds_of_selling, then.odds_of_selling, 'pct', thenLab)],
+    ['Sales / month', pulseNum(now.absorption_rate, 'rate'), pulseDeltaLine(now.absorption_rate, then.absorption_rate, 'rate', thenLab)],
+    ['Active now', String(now.active_count != null ? now.active_count : '—'), 'Including this home: ' + (now.with_yours != null ? now.with_yours : '—') + (then.active_count != null ? ' · was ' + then.active_count + ' ' + thenLab : '')],
+    ['Median days', pulseNum(now.median_dom, 'days'), pulseDeltaLine(now.median_dom, then.median_dom, 'days', thenLab)],
+    ['Median sold', pulseNum(now.median_sold_price, 'money'), pulseDeltaLine(now.median_sold_price, then.median_sold_price, 'money', thenLab)],
+    ['Median $ / sf', pulseNum(now.median_price_per_sqft, 'ppsf'), pulseDeltaLine(now.median_price_per_sqft, then.median_price_per_sqft, 'ppsf', thenLab)],
+    ['Did not sell', String(now.true_did_not_sell != null ? now.true_did_not_sell : (now.expired_withdrawn_count || '—')), (then.true_did_not_sell != null ? ('Was ' + then.true_did_not_sell + ' ' + thenLab) : '')]
+  ];
+  let notes = '';
+  if (days && med) {{
+    notes += '<p class="mkt-note">This listing: <b>' + days + ' days</b> on market. Typical in this set: <b>' + Math.round(med) + ' days</b>.</p>';
+  }}
+  if (rating) {{
+    notes += '<p class="mkt-note">Condition rating from the appointment: <b>' + rating + '/10</b>' +
+      (pack.home_rating_label ? ' <span>' + esc(pack.home_rating_label) + '</span>' : '') +
+      '. You can still work the price and the condition.</p>';
+  }}
+  return '<section class="mkt-pulse" id="marketPulse"><div class="kicker">Same market as the appointment</div>' +
+    '<h2>What the market is doing</h2>' +
+    '<p class="sub">The same vitals from the listing appointment, on this week’s file. Then vs now — not a new CMA.</p>' +
+    '<div class="mkt-grid">' + cells.map(function (c) {{
+      return '<article class="mkt-cell"><div class="mk">' + esc(c[0]) + '</div><div class="mn">' + esc(c[1]) + '</div>' +
+        (c[2] ? '<div class="mt">' + esc(c[2]) + '</div>' : '') + '</article>';
+    }}).join('') + '</div>' + notes + '</section>';
+}}
+function weekScoreHtml(asOf) {{
+  const hist = ((DATA.brief || {{}}).history || []);
+  const row = hist.find(function (w) {{ return weekAsOf(w) === weekKey(asOf); }}) || {{}};
+  const wc = weekCounts(asOf);
+  const listed = Number(wc.listed || row.listed_week || row.listed_week || 0);
+  const uc = Number(wc.uc || row.uc_week || row.uc_week || 0);
+  const sold = Number(wc.sold || row.sold_week || row.sold_week || 0);
+  return '<p class="week-stat" id="weekScore"><b>' + listed + '</b> listed · <b>' +
+    uc + '</b> under contract · <b>' + sold + '</b> sold</p>';
+}}
+function sinceLineHtml(d) {{
+  return '<p class="since-line">Since listed: <b>' + Number(d.listed_since || 0) + '</b> listed · <b>' +
+    Number(d.uc_since || 0) + '</b> under contract · <b>' + Number(d.sold_since || 0) + '</b> sold in this set</p>';
 }}
 function weeksHtml() {{
   const hist = ((DATA.brief || {{}}).history || []);
   if (!hist.length) return '';
-  const current = weekKey((DATA.brief || {{}}).as_of) || weekKey(hist[hist.length - 1].as_of);
-  return '<div class="weeks-wrap"><h2>Week by week</h2>' +
-    '<p class="sub">Same lock every week — rank, new under you, pending, still cheaper. Click a week to see those homes.</p>' +
-    sparklineHtml() +
-    '<div class="weeks">' + hist.map(function (w) {{
-      const asOf = weekKey(w.as_of);
-      const rank = (w.rank && w.rank_of) ? (w.rank + '/' + w.rank_of) : '—';
+  const current = weekKey((DATA.brief || {{}}).as_of) || weekAsOf(hist[hist.length - 1]);
+  const d = DATA.digest || (DATA.brief || {{}}).digest || {{}};
+  return '<div class="walk" id="walkWeeks"><h2>Walk the weeks</h2>' +
+    '<p class="sub">Same similar set, week by week. Tap a date to walk listed homes, then homes that went pending or sold.</p>' +
+    '<div class="weeks-bar"><div class="weeks">' + hist.map(function (w) {{
+      const asOf = weekAsOf(w);
       const on = asOf === current ? ' is-on' : '';
       return '<button type="button" class="week' + on + '" data-asof="' + esc(asOf) + '" id="week-' + esc(asOf) + '">' +
-        '<span class="w-d">Week of ' + weekLabel(asOf) + '</span>' +
-        '<span class="w-m">#' + esc(rank) + ' · ' + Number(w.new_under || 0) + ' under · ' +
-        Number(w.went_pending || 0) + ' pending · ' + Number(w.still_active_cheaper || 0) + ' cheaper</span></button>';
-    }}).join('') + '</div>' + weekHomesHtml(current) + '</div>';
+        weekLabel(asOf) + '</button>';
+    }}).join('') + '</div></div>' +
+    weekScoreHtml(current) +
+    weekHomesHtml(current) +
+    sinceLineHtml(d) + '</div>';
 }}
-function publishedNotesHtml() {{
-  const notes = (DATA.notes || []).filter(n => n.status === 'published' && n.body);
-  if (!notes.length) return '';
-  const who = DATA.agent_name || 'your agent';
-  const sorted = notes.slice().sort((a, b) => weekKey(b.as_of).localeCompare(weekKey(a.as_of)));
-  const latest = sorted[0];
-  const older = sorted.slice(1);
-  let html = '<div class="agent-note" id="note-' + esc(weekKey(latest.as_of)) + '">' +
-    '<h2>From ' + esc(who) + '</h2>' +
-    '<p class="when">Week of ' + weekLabel(latest.as_of) +
-    (latest.published_at ? ' · shared ' + weekLabel(latest.published_at) : '') + '</p>' +
-    '<p class="body">' + esc(latest.body) + '</p></div>';
-  if (older.length) {{
-    html += '<div class="note-tl">' + older.map(n =>
-      '<div class="note-tl-item" id="note-' + esc(weekKey(n.as_of)) + '">' +
-      '<strong>Week of ' + weekLabel(n.as_of) + '</strong><p>' + esc(n.body) + '</p></div>'
-    ).join('') + '</div>';
+function fromAgentHtml() {{
+  const notes = (DATA.notes || []).filter(function (n) {{ return n.status === 'published' && n.body; }});
+  const who = String(DATA.agent_name || '').trim();
+  const talk = (((DATA.brief || {{}}).talk || (DATA.brief || {{}}).talk || {{}})[DATA.agent ? 'agent' : 'seller'] || []);
+  const current = weekKey((DATA.brief || {{}}).as_of);
+  const sorted = notes.slice().sort(function (a, b) {{ return weekKey(b.as_of).localeCompare(weekKey(a.as_of)); }});
+  const latest = sorted.find(function (n) {{ return weekKey(n.as_of) === current; }}) || sorted[0];
+  const older = sorted.filter(function (n) {{ return n !== latest; }});
+  if (!latest && !talk.length) return '';
+  let html = '<div class="from-agent" id="note-' + esc(weekKey((latest && latest.as_of) || current)) + '">' +
+    '<div class="kicker">Weekly summary</div>' +
+    '<h2>This week from your agent' + (who ? ' - ' + esc(who) : '') + '</h2>' +
+    '<p class="when">Week of ' + weekLabel((latest && latest.as_of) || current) +
+    (latest && latest.published_at ? ' · shared ' + weekLabel(latest.published_at) : '') + '</p>';
+  if (latest && latest.body) {{
+    html += '<p class="body">' + esc(latest.body) + '</p>';
   }}
-  return html;
+  if (talk.length) {{
+    html += '<div class="recs"><div class="recs-k">Recommendations this week</div><ul>' +
+      talk.map(function (t) {{ return '<li>' + esc(t) + '</li>'; }}).join('') + '</ul></div>';
+  }}
+  if (older.length) {{
+    html += '<label class="past-pick">Earlier weeks <select id="pastNotePick">' +
+      '<option value="">This week</option>' +
+      older.map(function (n) {{
+        return '<option value="' + esc(weekKey(n.as_of)) + '">Week of ' + weekLabel(n.as_of) + '</option>';
+      }}).join('') + '</select></label>' +
+      '<div id="pastNotePanel" hidden></div>';
+  }}
+  return html + '</div>';
+}}
+function weekMotion(asOf) {{
+  const hist = ((DATA.brief || {{}}).history || []);
+  const row = hist.find(function (w) {{ return weekAsOf(w) === weekKey(asOf); }}) || {{}};
+  const wins = weekWindows();
+  const key = weekKey(asOf);
+  const w = wins.find(function (x) {{ return (x.as_of || x.as_of) === key; }}) || wins[wins.length - 1];
+  const locked = listPrice();
+  const out = {{ listed: 0, under: 0, over: 0, uc: 0, sold: 0 }};
+  if (w) {{
+    homesForWeek(w.as_of || w.as_of).forEach(function (c) {{
+      if (listDate(c) && inWeek(listDate(c), w.start, w.end)) {{
+        out.listed += 1;
+        const side = c.side || (c.price < locked ? 'under' : c.price > locked ? 'over' : 'at');
+        if (side === 'under') out.under += 1;
+        else if (side === 'over') out.over += 1;
+      }}
+      let sold = false;
+      let uc = false;
+      statusHistory(c).forEach(function (h) {{
+        if (!inWeek(h.as_of || h.as_of, w.start, w.end)) return;
+        const st = String(h.status || '').toLowerCase();
+        if (st === 'sold') sold = true;
+        else if (isUc(st)) uc = true;
+      }});
+      if (sold) out.sold += 1;
+      else if (uc) out.uc += 1;
+    }});
+  }}
+  if (!out.listed && !out.uc && !out.sold) {{
+    out.listed = Number(row.listed_week || 0);
+    out.under = Number(row.listed_under_week || 0);
+    out.over = Number(row.listed_over_week || 0);
+    out.uc = Number(row.uc_week || 0);
+    out.sold = Number(row.sold_week || 0);
+  }}
+  return out;
+}}
+function boardHtml() {{
+  const d = DATA.digest || (DATA.brief || {{}}).digest || {{}};
+  const hist = ((DATA.brief || {{}}).history || []).slice().sort(function (a, b) {{
+    return weekAsOf(a).localeCompare(weekAsOf(b));
+  }});
+  const current = weekKey((DATA.brief || {{}}).as_of) || (hist.length ? weekAsOf(hist[hist.length - 1]) : '');
+  const week = weekMotion(current);
+  const locked = listPrice();
+  const sinceKind = clockKind() === 'active' ? 'Since you listed' : 'Since this Fingerprint';
+  const since = {{
+    listed: Number(d.listed_since || 0),
+    under: Number(d.listed_under_since != null ? d.listed_under_since : (d.new_under || 0)),
+    over: Number(d.listed_over_since != null ? d.listed_over_since : (d.new_over || 0)),
+    uc: Number(d.uc_since || 0),
+    sold: Number(d.sold_since || 0)
+  }};
+  function stats(pack) {{
+    return '<div class="board-grid">' +
+      '<div class="board-stat"><div class="board-n">' + pack.listed + '</div><div class="board-l">New</div><div class="board-h">Listed into this set</div></div>' +
+      '<div class="board-stat is-under"><div class="board-n">' + pack.under + '</div><div class="board-l">Under list</div><div class="board-h">New lists below ' + money(locked) + '</div></div>' +
+      '<div class="board-stat is-over"><div class="board-n">' + pack.over + '</div><div class="board-l">Over list</div><div class="board-h">New lists above ' + money(locked) + '</div></div>' +
+      '<div class="board-stat"><div class="board-n">' + pack.uc + '</div><div class="board-l">Under contract</div><div class="board-h">Pending / backup / first-right</div></div>' +
+      '<div class="board-stat"><div class="board-n">' + pack.sold + '</div><div class="board-l">Sold</div><div class="board-h">Closed in this set</div></div>' +
+    '</div>';
+  }}
+  function totalCard(label, pack) {{
+    const moved = Number(pack.listed || 0) + Number(pack.uc || 0) + Number(pack.sold || 0);
+    return '<div class="board-total"><div class="k">' + esc(label) + '</div>' +
+      '<div class="v">' + moved + ' homes moved</div>' +
+      '<div class="s">' + pack.listed + ' listed · ' + pack.under + ' under your price · ' + pack.over +
+      ' over your price · ' + pack.uc + ' under contract · ' + pack.sold + ' sold</div></div>';
+  }}
+  const sums = {{ listed: 0, under: 0, over: 0, uc: 0, sold: 0 }};
+  hist.forEach(function (w) {{
+    const m = weekMotion(weekAsOf(w));
+    sums.listed += m.listed; sums.under += m.under; sums.over += m.over; sums.uc += m.uc; sums.sold += m.sold;
+  }});
+  const rows = hist.map(function (w) {{
+    const asOf = weekAsOf(w);
+    const m = weekMotion(asOf);
+    const on = asOf === current ? ' is-on' : '';
+    return '<tr class="board-week' + on + '" data-asof="' + esc(asOf) + '">' +
+      '<td>' + weekLabel(asOf) + '</td>' +
+      '<td>' + m.listed + '</td>' +
+      '<td class="is-under">' + m.under + '</td>' +
+      '<td class="is-over">' + m.over + '</td>' +
+      '<td>' + m.uc + '</td>' +
+      '<td>' + m.sold + '</td></tr>';
+  }}).join('');
+  return '<section class="board" id="marketBoard">' +
+    '<div class="board-top"><div class="kicker">Market board</div>' +
+    '<h2>What happened around your list</h2>' +
+    '<p class="sub">New similar listings split under and over your initial list of <b>' + money(locked) +
+    '</b>. Under contract groups pending, backup, and first-right. Tap a week to walk those homes.</p></div>' +
+    '<div class="board-panes">' +
+      '<div class="board-pane"><div class="board-pane-h"><span>This week</span><small>' + weekLabel(current) + '</small></div>' + stats(week) + '</div>' +
+      '<div class="board-pane"><div class="board-pane-h"><span>' + esc(sinceKind) + '</span><small>Running total</small></div>' + stats(since) + '</div>' +
+    '</div>' +
+    '<div class="board-totals">' + totalCard('This week', week) + totalCard(sinceKind, since) + '</div>' +
+    (hist.length
+      ? '<div class="board-table-wrap"><table class="board-table"><thead><tr>' +
+        '<th>Week</th><th>New</th><th>Under list</th><th>Over list</th><th>Under contract</th><th>Sold</th>' +
+        '</tr></thead><tbody>' + rows + '</tbody>' +
+        '<tfoot><tr><td>Total</td><td>' + sums.listed + '</td><td class="is-under">' + sums.under +
+        '</td><td class="is-over">' + sums.over + '</td><td>' + sums.uc + '</td><td>' + sums.sold + '</td></tr></tfoot></table></div>'
+      : '') +
+    '</section>';
+}}
+function mapKind(c) {{
+  const st = String((c && c.status) || '').toLowerCase();
+  if (st === 'sold') return 'sold';
+  if (st === 'pending' || st === 'backup' || st === 'firstright' || st.indexOf('contract') >= 0) return 'uc';
+  return 'active';
+}}
+function mapPoints() {{
+  const seen = {{}};
+  const pts = [];
+  function add(c, kind) {{
+    if (!c || seen[c.id]) return;
+    const lat = Number(c.lat), lng = Number(c.lng);
+    if (!isFinite(lat) || !isFinite(lng) || (lat === 0 && lng === 0)) return;
+    seen[c.id] = 1;
+    pts.push({{
+      id: c.id,
+      lat: lat,
+      lng: lng,
+      kind: kind || mapKind(c),
+      address: c.address || '',
+      price: c.price,
+      status: c.status || ''
+    }});
+  }}
+  const b = DATA.brief || {{}};
+  const subLat = Number(DATA.subject_lat || b.subject_lat);
+  const subLng = Number(DATA.subject_lng || b.subject_lng);
+  if (isFinite(subLat) && isFinite(subLng) && !(subLat === 0 && subLng === 0)) {{
+    seen.subject = 1;
+    pts.push({{
+      id: 'subject',
+      lat: subLat,
+      lng: subLng,
+      kind: 'you',
+      address: b.subject_address || 'Your list',
+      price: b.locked_price,
+      status: 'Your list'
+    }});
+  }}
+  [b.still_active, b.pending_now, b.went_pending, b.went_sold, b.baseline, b.new_under, b.new_over, b.position].forEach(function (pool) {{
+    (pool || []).forEach(function (c) {{
+      if (c && c.subject) return;
+      add(c, mapKind(c));
+    }});
+  }});
+  return pts;
+}}
+function mapHtml() {{
+  if (!DATA.mapbox_token) return '';
+  return '<section class="fp-map" id="fpMap">' +
+    '<h2>Where this set sits</h2>' +
+    '<p class="sub">Pins are the same similar homes from the market file. Gold is your list. Tap a pin to open the listing.</p>' +
+    '<div class="fp-map-legend">' +
+      '<span><i class="is-you"></i>Your list</span>' +
+      '<span><i class="is-active"></i>Active</span>' +
+      '<span><i class="is-uc"></i>Under contract</span>' +
+      '<span><i class="is-sold"></i>Sold</span>' +
+    '</div>' +
+    '<div class="fp-map-canvas" id="fpMapCanvas"></div></section>';
+}}
+let fpMap = null;
+function bindMap() {{
+  const wrap = document.getElementById('fpMap');
+  const el = document.getElementById('fpMapCanvas');
+  const token = DATA.mapbox_token;
+  if (fpMap) {{
+    fpMap.remove();
+    fpMap = null;
+  }}
+  if (!wrap || !el || typeof mapboxgl === 'undefined' || !token) {{
+    if (wrap && (!token || typeof mapboxgl === 'undefined')) wrap.style.display = 'none';
+    return;
+  }}
+  const pts = mapPoints();
+  if (!pts.length) {{
+    wrap.style.display = 'none';
+    return;
+  }}
+  wrap.style.display = '';
+  mapboxgl.accessToken = token;
+  fpMap = new mapboxgl.Map({{
+    container: el,
+    style: 'mapbox://styles/mapbox/streets-v12',
+    center: [pts[0].lng, pts[0].lat],
+    zoom: 12
+  }});
+  fpMap.addControl(new mapboxgl.NavigationControl({{ showCompass: false }}), 'top-right');
+  const bounds = new mapboxgl.LngLatBounds();
+  pts.forEach(function (p) {{
+    bounds.extend([p.lng, p.lat]);
+    const pin = document.createElement('div');
+    pin.className = 'fp-pin is-' + p.kind;
+    pin.title = p.address || '';
+    pin.addEventListener('click', function () {{
+      if (p.id && p.id !== 'subject') openDrawer(p.id);
+    }});
+    new mapboxgl.Marker({{ element: pin }})
+      .setLngLat([p.lng, p.lat])
+      .setPopup(new mapboxgl.Popup({{ offset: 12, closeButton: false }}).setHTML(
+        '<strong>' + esc(p.address || 'Listing') + '</strong><div>' + money(p.price) + '</div>'
+      ))
+      .addTo(fpMap);
+  }});
+  fpMap.on('load', function () {{
+    fpMap.resize();
+    if (pts.length > 1) fpMap.fitBounds(bounds, {{ padding: 48, maxZoom: 14 }});
+  }});
+}}
+function bindBoard() {{
+  document.querySelectorAll('#marketBoard .board-week').forEach(function (el) {{
+    el.addEventListener('click', function () {{
+      selectWeek(el.getAttribute('data-asof'), true);
+    }});
+  }});
+}}
+let photosKicked = false;
+function paintPhotos(photos, galleries) {{
+  function compact(s) {{
+    return String(s || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 48);
+  }}
+  function lookup(store, c, whole) {{
+    if (!store || !c) return '';
+    const keys = [c.mls, c.id, c.address, compact(c.mls), compact(c.id), compact(c.address)];
+    for (let i = 0; i < keys.length; i++) {{
+      const k = keys[i];
+      if (!k || !store[k]) continue;
+      const v = store[k];
+      if (whole) return v;
+      return Array.isArray(v) ? (v[0] || '') : v;
+    }}
+    return '';
+  }}
+  function apply(c) {{
+    if (!c) return;
+    const url = lookup(photos, c);
+    if (url) {{
+      c.photo_url = c.photo_url || url;
+      const gal = lookup(galleries, c, true);
+      if (!c.photos || !c.photos.length) c.photos = gal ? (Array.isArray(gal) ? gal : [gal]) : [url];
+    }}
+  }}
+  const b = DATA.brief || {{}};
+  [b.still_active, b.new_under, b.new_over, b.baseline, b.went_pending, b.went_sold, b.pending_now, b.price_cuts, b.cheaper_active, b.position].forEach(function (pool) {{
+    (pool || []).forEach(apply);
+  }});
+  document.querySelectorAll('.lane-home[data-id], .lane-home[data-id]').forEach(function (el) {{
+    const c = byId(el.getAttribute('data-id') || el.getAttribute('data-id'));
+    const url = photoUrl(c);
+    const pic = el.querySelector('.lane-pic, .lane-pic');
+    if (pic && url) {{
+      pic.classList.remove('empty');
+      pic.style.backgroundImage = 'url(\\'' + String(url).replace(/'/g, '%27') + '\\')';
+    }}
+  }});
+  const stage = document.getElementById('leverStage');
+  if (stage && leverId) {{
+    stage.innerHTML = leverStageHtml(leverId);
+    bindLeverStage();
+  }}
+}}
+function kickPhotos() {{
+  if (photosKicked) return;
+  photosKicked = true;
+  const run = DATA.run_id;
+  if (!run) return;
+  const banner = document.getElementById('photoBanner');
+  if (banner && DATA.photos_fetching) banner.classList.add('is-on');
+  const reloadKey = 'll-fp-photos-' + run;
+  function tick(info) {{
+    if (!info) return;
+    paintPhotos(info.photos || {{}}, info.galleries || {{}});
+    const fetching = info.status === 'fetching' || info.status === 'pending' || DATA.photos_fetching;
+    if (banner) banner.classList.toggle('is-on', !!(fetching && info.status !== 'ready'));
+    if (info.status === 'fetching' || info.status === 'pending') {{
+      DATA.photos_fetching = true;
+      setTimeout(function () {{
+        fetch('/api/runs/' + encodeURIComponent(run) + '/comp-photos', {{ credentials: 'same-origin' }})
+          .then(function (r) {{ return r.json(); }})
+          .then(function (next) {{ DATA.photos_fetching = (next.status === 'fetching' || next.status === 'pending'); tick(next); }})
+          .catch(function () {{}});
+      }}, 2500);
+      return;
+    }}
+    DATA.photos_fetching = false;
+    if (banner) banner.classList.remove('is-on');
+    const empty = document.querySelectorAll('.lane-pic.empty, .lane-pic.empty').length;
+    if (Object.keys(info.photos || {{}}).length && empty > 2 && !sessionStorage.getItem(reloadKey)) {{
+      sessionStorage.setItem(reloadKey, '1');
+      location.reload();
+    }}
+  }}
+  fetch('/api/runs/' + encodeURIComponent(run) + '/comp-photos/fetch', {{ method: 'POST', credentials: 'same-origin' }})
+    .then(function (r) {{ return r.json(); }})
+    .then(tick)
+    .catch(function () {{ if (banner) banner.classList.remove('is-on'); }});
+}}
+function bindFromAgent() {{
+  const pick = document.getElementById('pastNotePick');
+  const panel = document.getElementById('pastNotePanel');
+  if (!pick || !panel) return;
+  const notes = (DATA.notes || []).filter(function (n) {{ return n.status === 'published' && n.body; }});
+  pick.addEventListener('change', function () {{
+    const key = weekKey(pick.value);
+    if (!key) {{
+      panel.hidden = true;
+      panel.innerHTML = '';
+      return;
+    }}
+    const n = notes.find(function (row) {{ return weekKey(row.as_of) === key; }});
+    if (!n) {{
+      panel.hidden = true;
+      return;
+    }}
+    panel.hidden = false;
+    panel.innerHTML = '<div class="past-note" id="note-' + esc(key) + '"><strong>Week of ' +
+      weekLabel(n.as_of) + '</strong><p>' + esc(n.body) + '</p></div>';
+  }});
 }}
 function bindWeeks() {{
   document.querySelectorAll('.week').forEach(el => {{
@@ -497,6 +1630,142 @@ function updateNoteCount() {{
   const el = document.getElementById('noteCount');
   if (el && ta) el.textContent = (ta.value || '').length + ' / 500';
 }}
+function storyHtml(d) {{
+  const listedW = Number(d.listed_week || 0);
+  const ucW = Number(d.uc_week || 0);
+  const soldW = Number(d.sold_week || 0);
+  const bits = [];
+  if (listedW) bits.push(listedW + ' similar home' + (listedW === 1 ? '' : 's') + ' listed');
+  if (ucW) bits.push(ucW + ' went under contract');
+  if (soldW) bits.push(soldW + ' sold');
+  const lead = bits.length
+    ? ('This week: ' + bits.join(', ') + '.')
+    : 'Quiet this week — no similar lists, under contracts, or sales.';
+  const since = sinceLabel();
+  const long = since + ': ' + Number(d.listed_since || 0) + ' listed, ' +
+    Number(d.uc_since || 0) + ' under contract, ' + Number(d.sold_since || 0) + ' sold in this size band.';
+  const why = clockKind() === 'active'
+    ? 'These are homes like yours — same size band, around your list price. Under contract means a buyer chose that home instead of waiting.'
+    : 'Not listed yet. Counts run from generate until you set the listed date; then this board switches to since you listed.';
+  return '<div class="story"><p class="lead">' + esc(lead) + '</p><p class="long">' + esc(long) + '</p></div>' +
+    '<p class="why">' + esc(why) + '</p>';
+}}
+function scoreboardHtml(d) {{
+  const since = sinceLabel();
+  const listedSince = Number(d.listed_since != null ? d.listed_since : ((d.new_under || 0) + (d.new_over || 0)));
+  const ucSince = Number(d.uc_since != null ? d.uc_since : d.went_pending || 0);
+  const soldSince = Number(d.sold_since != null ? d.sold_since : d.went_sold || 0);
+  function numCell(n, label, dark) {{
+    return '<div class="cell"><div class="n">' + (n == null || n === '' ? '0' : n) + '</div><div class="l">' + esc(label) + '</div></div>';
+  }}
+  return storyHtml(d) +
+    '<div class="week-nums">' +
+      numCell(d.listed_week, 'Listed this week') +
+      numCell(d.uc_week, 'Under contract this week') +
+      numCell(d.sold_week, 'Sold this week') +
+    '</div>' +
+    '<div class="since-nums">' +
+      numCell(listedSince, 'Listed ' + since) +
+      numCell(ucSince, 'Under contract ' + since) +
+      numCell(soldSince, 'Sold ' + since) +
+    '</div>' +
+    '<p class="legend"><b>Listed</b> new similar homes · <b>Under contract</b> pending/backup/first-right · <b>Sold</b> closed in this band</p>' +
+    '<div class="score">' +
+      [['v', (d.active_count != null && d.baseline_active != null) ? (d.active_count + ' / ' + d.baseline_active) : (d.active_count ?? '—'), 'Active now vs at list'],
+       ['v', d.still_active_cheaper, 'Still cheaper than you'],
+       ['v', (d.rank && d.rank_of) ? (d.rank + ' / ' + d.rank_of) : '—', 'Your price rank']
+      ].map(x => '<div class="cell"><div class="v">' + (x[1] == null || x[1] === '' ? '—' : x[1]) + '</div><div class="l">' + x[2] + '</div></div>').join('') +
+    '</div>';
+}}
+function stripHtml(pos, d) {{
+  const ordered = sortedRows(pos || [], laneSort);
+  const prices = ordered.map(p => p.price).filter(Boolean);
+  const lo = Math.min.apply(null, prices.concat([d.locked_price || 0]));
+  const hi = Math.max.apply(null, prices.concat([d.locked_price || 0]));
+  const span = Math.max(hi - lo, 1);
+  const ticks = ordered.slice(0, 24).map(function (p, i) {{
+    const pct = laneSort === 'price'
+      ? 4 + 92 * ((p.price - lo) / span)
+      : (ordered.length < 2 ? 50 : 4 + 92 * i / (Math.min(ordered.length, 24) - 1));
+    return '<button type="button" class="tick' + (p.subject ? ' me' : '') + '" data-id="' + esc(p.id || '') + '" style="left:' + pct + '%" aria-label="' + esc(p.address || 'Listing') + '"></button>' +
+      (p.subject ? '<span class="lab" style="left:' + pct + '%">' + money(p.price) + '</span>' : '');
+  }}).join('');
+  return '<div class="strip-wrap" id="sitStrip"><h2>Where you sit among similar actives</h2>' +
+    '<p class="sub">Each pin is a similar active. Hover to name it — tap to open the home. Your list is the gold pin.</p>' +
+    sortsHtml('strip') +
+    '<div class="strip" id="priceStrip"><div class="rail"></div>' + ticks + '</div>' +
+    '<p class="strip-now" id="stripNow">Hover a pin — tap to open that home.</p></div>';
+}}
+function pinCaption(p) {{
+  if (!p) return 'Hover a pin — tap to open that home.';
+  const who = p.subject ? 'Your list' : (streetLine(p) || p.address || 'Listing');
+  const bits = homeBits(p);
+  return '<b>' + esc(who) + '</b> · ' + money(p.price) + (bits ? ' <span>' + esc(bits) + '</span>' : '');
+}}
+function positionById(id) {{
+  const pos = ((DATA.brief || {{}}).position || []);
+  return pos.find(function (p) {{ return String(p.id) === String(id); }}) || byId(id);
+}}
+function showPin(id, tickEl) {{
+  const cap = document.getElementById('stripNow');
+  const p = positionById(id);
+  document.querySelectorAll('.tick, .lane-home, .card').forEach(function (el) {{
+    el.classList.toggle('is-pin', el.getAttribute('data-id') === String(id));
+  }});
+  if (cap) cap.innerHTML = pinCaption(p);
+}}
+function hidePin() {{
+  document.querySelectorAll('.is-pin').forEach(function (el) {{ el.classList.remove('is-pin'); }});
+}}
+function bindPins() {{
+  document.querySelectorAll('#priceStrip .tick').forEach(function (el) {{
+    el.addEventListener('mouseenter', function () {{ showPin(el.getAttribute('data-id'), el); }});
+    el.addEventListener('focus', function () {{ showPin(el.getAttribute('data-id'), el); }});
+    el.addEventListener('click', function (ev) {{
+      ev.preventDefault();
+      const id = el.getAttribute('data-id');
+      showPin(id, el);
+      if (id && id !== 'subject') openDrawer(id);
+      const lane = document.querySelector('.lane-home[data-id="' + id + '"]');
+      if (lane) lane.scrollIntoView({{ behavior: 'smooth', block: 'nearest', inline: 'center' }});
+    }});
+  }});
+  document.querySelectorAll('.lane-home').forEach(function (el) {{
+    el.addEventListener('mouseenter', function () {{
+      const tick = document.querySelector('#priceStrip .tick[data-id="' + el.getAttribute('data-id') + '"]');
+      showPin(el.getAttribute('data-id'), tick);
+    }});
+  }});
+}}
+function bindSorts() {{
+  document.querySelectorAll('.sorts button').forEach(function (btn) {{
+    btn.addEventListener('click', function () {{
+      laneSort = btn.getAttribute('data-sort') || 'price';
+      const b = DATA.brief || {{}};
+      const lanes = document.getElementById('day0Lanes');
+      if (lanes) {{
+        const html = lanesHtml();
+        if (html) lanes.outerHTML = html;
+      }}
+      const thenSec = document.getElementById('thenNow');
+      if (thenSec) thenSec.outerHTML = section('Where they sit now', 'Same similar set — still active, under contract, sold, or gone. Default order is price.', sortedRows(b.baseline || [], laneSort), null, 'thenNow');
+      const strip = document.getElementById('sitStrip');
+      if (strip) strip.outerHTML = stripHtml(b.position || [], DATA.digest || b.digest || {{}});
+      document.querySelectorAll('.sorts button').forEach(function (x) {{
+        x.classList.toggle('is-on', x.getAttribute('data-sort') === laneSort);
+      }});
+      bindSorts();
+      bindPins();
+      const walk = document.getElementById('leverWalk');
+      if (walk) {{
+        const html = leverWalkHtml();
+        if (html) walk.outerHTML = html;
+      }}
+      bindLevers();
+      bindHomeClicks();
+    }});
+  }});
+}}
 function render() {{
   const b = DATA.brief || {{}};
   const d = DATA.digest || b.digest || {{}};
@@ -507,70 +1776,48 @@ function render() {{
   const statusLine = sold
     ? '<div class="archive">Archived · listed as sold ' + esc(String(sold).slice(0,10)) + '</div>'
     : '<div class="live"><i></i> Live Fingerprint</div>';
-  const talk = ((b.talk || {{}})[DATA.agent ? 'agent' : 'seller'] || []);
+  const talk = ((b.talk || b.talk || {{}})[DATA.agent ? 'agent' : 'seller'] || []);
   const pos = b.position || [];
-  const prices = pos.map(p => p.price).filter(Boolean);
-  const lo = Math.min.apply(null, prices.concat([d.locked_price || 0]));
-  const hi = Math.max.apply(null, prices.concat([d.locked_price || 0]));
-  const span = Math.max(hi - lo, 1);
-  const ticks = pos.slice(0, 18).map(p => {{
-    const pct = 4 + 92 * ((p.price - lo) / span);
-    return '<span class="tick' + (p.subject ? ' me' : '') + '" style="left:' + pct + '%"></span>' +
-      (p.subject ? '<span class="lab" style="left:' + pct + '%">' + money(p.price) + '</span>' : '');
-  }}).join('');
-  const readTitle = DATA.agent ? 'This week’s read' : 'The market picture';
   document.getElementById('main').innerHTML =
-    '<div class="hero">' + photo + '<div>' +
+    '<div class="hero">' + photo + '<div class="veil"></div><div class="copy">' +
       '<div class="kicker">Market Fingerprint</div>' +
       '<h1>' + esc(b.subject_address || 'This listing') + '</h1>' +
-      '<div class="meta">Locked list ' + money(b.locked_price) +
-        (b.market_label ? ' · ' + esc(b.market_label) : '') +
-        ' · as of ' + esc(b.as_of || '') +
-        (b.days_locked != null ? ' · ' + b.days_locked + ' days since lock' : '') +
-        (DATA.lock && DATA.lock.last_refresh_at ? ' · updated ' + esc(String(DATA.lock.last_refresh_at).slice(0,10)) : '') +
-        (DATA.needs_upload ? ' · Upload market' : ' · Search market') +
-      '</div>' + statusLine +
+      statusLine +
       '<div class="links">' +
-        (b.report_url ? '<a href="' + esc(b.report_url) + '">Live Story</a>' : '') +
-        (DATA.agent && DATA.share_url ? '<a href="' + esc(DATA.share_url.replace(/\\/?$/, '/')) + 'fingerprint/">Seller link</a>' : '') +
+        (siblingStoryUrl() ? '<a href="' + esc(siblingStoryUrl()) + '">Live Story</a>' : '') +
+        (DATA.agent && DATA.share_url ? '<a class="ghost" href="' + esc(DATA.share_url.replace(/\\/?$/, '/')) + 'fingerprint/">Seller Fingerprint link</a>' : '') +
       '</div></div></div>' +
+    filtersHtml() +
+    factsHtml(b, d) +
+    marketPulseHtml() +
+    fromAgentHtml() +
+    boardHtml() +
+    mapHtml() +
     (DATA.stale_upload ? '<p class="note">' + (DATA.agent
       ? 'Upload this week’s MLS export to refresh. The seller still sees the last file on hand.'
       : 'This picture uses the last market file we have. Ask your agent to refresh it with this week’s export.') + '</p>' : '') +
-    '<div class="score">' +
-      [['v', (d.active_count != null && d.baseline_active != null) ? (d.active_count + ' / ' + d.baseline_active) : (d.active_count ?? '—'), 'Active now vs day 0'],
-       ['v', (Number(d.new_under || 0) + Number(d.new_over || 0)) || 0, 'New since generate'],
-       ['v', d.went_pending, 'Went pending'],
-       ['v', d.went_sold, 'Sold from day 0'],
-       ['v', d.still_active_cheaper, 'Still cheaper than you'],
-       ['v', (d.rank && d.rank_of) ? (d.rank + ' / ' + d.rank_of) : '—', 'Your price rank']
-      ].map(x => '<div class="cell"><div class="v">' + (x[1] == null || x[1] === '' ? '—' : x[1]) + '</div><div class="l">' + x[2] + '</div></div>').join('') +
-    '</div>' +
+    nowLanesHtml() +
+    stripHtml(pos, d) +
     weeksHtml() +
-    lanesHtml() +
-    publishedNotesHtml() +
-    '<div class="read"><h2>' + readTitle + '</h2><ul>' +
-      (talk.length ? talk.map(t => '<li>' + esc(t) + '</li>').join('') : '<li>Quiet week in this size band.</li>') +
-    '</ul>' + (DATA.agent ? '' : '<p class="fact">Facts from this week’s market file — not a new list price.</p>') + '</div>' +
-    '<div class="strip-wrap"><h2>Where you sit among similar actives</h2><div class="strip"><div class="rail"></div>' + ticks + '</div></div>' +
-    section('Then vs now', 'The similar actives on day one — still active, pending, sold, or gone.', b.baseline, null) +
-    section('New similar — under the lock', 'Listed after the Fingerprint started, priced under you.', b.new_under, 'under') +
-    section('New similar — over the lock', 'Listed after the Fingerprint started, priced over you.', b.new_over, 'over') +
-    section('Price cuts', 'Homes that dropped $1,000+ since the last look.', b.price_cuts, null) +
-    section('Under contract now', 'Pending / backup in this size band.', b.pending_now || b.went_pending, 'Pending');
+    lanesHtml();
 
   if (DATA.agent) renderConsole();
   bindWeeks();
+  bindFromAgent();
+  bindBoard();
+  bindMap();
+  bindSorts();
+  bindPins();
+  bindLevers();
   const hist = (b.history || []);
-  const current = weekKey(b.as_of) || (hist.length ? weekKey(hist[hist.length - 1].as_of) : '');
+  const current = weekKey(b.as_of) || (hist.length ? weekAsOf(hist[hist.length - 1]) : '');
   if (current) selectWeek(current, false);
-  document.querySelectorAll('.card, .lane-home').forEach(el => {{
-    el.addEventListener('click', () => openDrawer(el.getAttribute('data-id')));
-  }});
+  bindHomeClicks();
+  kickPhotos();
 }}
-function section(title, sub, rows, tag) {{
+function section(title, sub, rows, tag, sid) {{
   if (!rows || !rows.length) return '';
-  return '<section class="sec"><h2>' + esc(title) + '</h2><p class="sub">' + esc(sub) + '</p><div class="cards">' +
+  return '<section class="sec"' + (sid ? ' id="' + sid + '"' : '') + '><h2>' + esc(title) + '</h2><p class="sub">' + esc(sub) + '</p><div class="cards">' +
     rows.map(c => cardHtml(c, tag)).join('') + '</div></section>';
 }}
 function renderConsole() {{
@@ -596,9 +1843,15 @@ function renderConsole() {{
     '<h3>Agent console</h3>' +
     '<p class="cadence">Last looked ' + (DATA.last_looked_at ? weekLabel(DATA.last_looked_at) : '—') +
       ' · Last note shared ' + (lastShared ? weekLabel(lastShared.published_at) : 'none') + '</p>' +
-    '<label>Locked list price</label>' +
+    '<label>Initial list price</label>' +
     '<input type="number" id="lockPrice" value="' + (DATA.lock.locked_price || '') + '" step="1000">' +
-    '<button type="button" class="btn-gold" id="btnLock">Update lock</button>' +
+    '<button type="button" class="btn-gold" id="btnLock">Update list price</button>' +
+    '<label>Listed / went active</label>' +
+    '<input type="date" id="activeAt" value="' + esc(String(DATA.active_at || '').slice(0,10)) + '">' +
+    '<p class="cadence">' + (DATA.active_at
+      ? (DATA.active_at_source === 'agent' ? 'You set this date. The board uses since active.' : 'Picked up from the market file when this address went Active. Change it if needed.')
+      : 'Leave blank until it lists. After this date — or when we see this address Active — the board switches from since generate to since active.') + '</p>' +
+    '<button type="button" id="btnActive">Save listed date</button>' +
     '<label>Seller name</label><input type="text" id="sellerName" value="' + esc(DATA.seller_name) + '">' +
     '<label>Seller email</label><input type="email" id="sellerEmail" value="' + esc(DATA.seller_email) + '">' +
     '<button type="button" id="btnContact">Save seller contact</button>' +
@@ -631,7 +1884,7 @@ function renderConsole() {{
     (DATA.can_search_refresh ? '<button type="button" id="btnRefresh">Refresh market now</button>' : '') +
     (DATA.needs_upload ? '<label class="upload" id="uploadWrap" style="display:block">Upload MLS export<input type="file" id="exportFile" accept=".txt,.csv,.tsv"></label>' : '') +
     (DATA.sold_at ? '<p class="note">This Fingerprint is archived.</p>' : '<button type="button" id="btnSold">Mark listing sold</button>') +
-    '<a class="btn" href="' + esc(DATA.report_url || '#') + '">Open Live Story</a>' +
+    '<a class="btn" href="' + esc(siblingStoryUrl() || '#') + '">Open Live Story</a>' +
     '<p class="status" id="fpStatus"></p>';
   bindConsole();
   updateNoteCount();
@@ -653,10 +1906,19 @@ function status(msg) {{ const el = document.getElementById('fpStatus'); if (el) 
 function bindConsole() {{
   const run = DATA.run_id;
   document.getElementById('btnLock')?.addEventListener('click', async () => {{
-    status('Updating lock…');
+    status('Saving list price…');
     const res = await fetch('/api/runs/' + run + '/pulse-lock', {{
       method:'POST', credentials:'same-origin', headers:{{'Content-Type':'application/json'}},
       body: JSON.stringify({{ price: Number(document.getElementById('lockPrice').value) }})
+    }});
+    if (!res.ok) {{ status(await res.text()); return; }}
+    location.reload();
+  }});
+  document.getElementById('btnActive')?.addEventListener('click', async () => {{
+    status('Saving listed date…');
+    const res = await fetch('/api/runs/' + run + '/fingerprint/active', {{
+      method:'POST', credentials:'same-origin', headers:{{'Content-Type':'application/json'}},
+      body: JSON.stringify({{ active_at: document.getElementById('activeAt').value }})
     }});
     if (!res.ok) {{ status(await res.text()); return; }}
     location.reload();
@@ -767,32 +2029,93 @@ function bindConsole() {{
   document.getElementById('btnNoteShare')?.addEventListener('click', () => postNote('publish'));
   document.getElementById('btnNoteUnpublish')?.addEventListener('click', () => postNote('unpublish'));
 }}
+let galPics = [];
+let galIdx = 0;
+function closeDrawer() {{
+  const d = document.getElementById('drawer');
+  if (!d) return;
+  d.classList.remove('open');
+  d.hidden = true;
+  galPics = [];
+  galIdx = 0;
+}}
+function paintGallery() {{
+  const img = document.getElementById('galPic');
+  const count = document.getElementById('galCount');
+  if (!img || !galPics.length) return;
+  img.src = galPics[galIdx];
+  if (count) count.textContent = (galIdx + 1) + ' / ' + galPics.length;
+}}
+function bindGallery() {{
+  const prev = document.getElementById('galPrev');
+  const next = document.getElementById('galNext');
+  if (prev) prev.addEventListener('click', function (ev) {{
+    ev.stopPropagation();
+    if (!galPics.length) return;
+    galIdx = (galIdx + galPics.length - 1) % galPics.length;
+    paintGallery();
+  }});
+  if (next) next.addEventListener('click', function (ev) {{
+    ev.stopPropagation();
+    if (!galPics.length) return;
+    galIdx = (galIdx + 1) % galPics.length;
+    paintGallery();
+  }});
+}}
 function openDrawer(id) {{
   const c = byId(id);
   if (!c) return;
-  const pics = (c.photos && c.photos.length ? c.photos : (c.photo_url ? [c.photo_url] : []));
+  galPics = (c.photos && c.photos.length ? c.photos : (c.photo_url ? [c.photo_url] : [])).filter(Boolean);
+  galIdx = 0;
   const hist = (c.status_history || []).map(h => '<li>' + esc(h.as_of) + ' · ' + esc(h.status) + ' · ' + money(h.price) + '</li>').join('');
+  const maps = mapsHref(c);
+  const links = [];
+  if (maps) links.push('<a href="' + esc(maps) + '" target="_blank" rel="noopener">Map</a>');
+  if (c.zillow) links.push('<a href="' + esc(c.zillow) + '" target="_blank" rel="noopener">Zillow</a>');
+  if (c.realtor) links.push('<a href="' + esc(c.realtor) + '" target="_blank" rel="noopener">Realtor.com</a>');
+  const gal = galPics.length
+    ? '<div class="gallery"><img class="dpic" id="galPic" src="' + esc(galPics[0]) + '" alt="">' +
+      (galPics.length > 1
+        ? '<button type="button" class="gal-btn gal-prev" id="galPrev" aria-label="Previous photo">‹</button>' +
+          '<button type="button" class="gal-btn gal-next" id="galNext" aria-label="Next photo">›</button>' +
+          '<div class="gal-count" id="galCount">1 / ' + galPics.length + '</div>'
+        : '') +
+      '</div>'
+    : '<div class="gallery"><div class="dpic empty"></div></div>';
   document.getElementById('drawerBody').innerHTML =
-    (pics[0] ? '<img class="dpic" src="' + esc(pics[0]) + '" alt="">' : '') +
+    gal +
+    '<div class="panel-body">' +
     '<h3>' + esc(c.address) + '</h3>' +
-    '<p>' + money(c.price) + (c.delta ? ' · ' + (c.delta > 0 ? '+' : '') + money(c.delta) + ' vs lock' : '') + '</p>' +
+    (c.city ? '<p class="meta">' + esc(c.city) + '</p>' : '') +
+    '<p class="price-line">' + money(c.price) + (c.delta ? ' · ' + (c.delta > 0 ? '+' : '') + money(c.delta) + ' vs list' : '') + '</p>' +
     '<p class="meta">' + esc([c.status, c.beds ? c.beds + ' bd' : '', c.baths ? c.baths + ' ba' : '', c.sqft ? Number(c.sqft).toLocaleString() + ' sf' : '', c.dom ? c.dom + ' DOM' : ''].filter(Boolean).join(' · ')) + '</p>' +
-    (hist ? '<p style="margin-top:12px;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#5c6675">Status</p><ul>' + hist + '</ul>' : '') +
-    '<p style="margin-top:14px;font-size:.82rem">' +
-      (c.zillow ? '<a href="' + esc(c.zillow) + '" target="_blank" rel="noopener">Zillow</a> · ' : '') +
-      (c.realtor ? '<a href="' + esc(c.realtor) + '" target="_blank" rel="noopener">Realtor.com</a>' : '') +
-    '</p>';
+    (hist ? '<p class="meta" style="margin-top:14px;text-transform:uppercase;letter-spacing:.06em;font-size:.72rem;">Status</p><ul>' + hist + '</ul>' : '') +
+    (links.length ? '<p style="margin-top:14px;font-size:.88rem">' + links.join(' · ') + '</p>' : '') +
+    '</div>';
   const d = document.getElementById('drawer');
   d.hidden = false; d.classList.add('open');
+  bindGallery();
 }}
-document.getElementById('drawerClose').addEventListener('click', () => {{
-  const d = document.getElementById('drawer'); d.classList.remove('open'); d.hidden = true;
-}});
+document.getElementById('drawerClose').addEventListener('click', closeDrawer);
 document.getElementById('drawer').addEventListener('click', (e) => {{
-  if (e.target.id === 'drawer') {{ e.currentTarget.classList.remove('open'); e.currentTarget.hidden = true; }}
+  if (e.target.id === 'drawer') closeDrawer();
 }});
+document.addEventListener('keydown', function (e) {{
+  if (e.key === 'Escape') closeDrawer();
+}});
+(function () {{
+  const sample = DATA.run_id === 'sample-2845' || /[?&]sample=1(?:&|$)/.test(location.search);
+  const bar = document.getElementById('sampleDemoBar');
+  if (bar && sample) bar.classList.add('is-on');
+  const story = siblingStoryUrl();
+  const a = document.getElementById('switchStory');
+  if (a && story) a.href = story;
+  const sw = document.getElementById('viewSwitch');
+  if (sw && story && !sample) sw.classList.add('is-on');
+}})();
 render();
 </script>
+<script src="/saas/assistant.js"></script>
 </body>
 </html>
 """

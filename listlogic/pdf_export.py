@@ -474,20 +474,20 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
     if subj_bits:
         flow.append(Paragraph(f"<b>Subject:</b> {' · '.join(subj_bits)}", styles["small"]))
     facts = [
-        [Paragraph("<b>1. Custom-Fit Market</b>", styles["body_bold"]),
-         Paragraph("Size, garage, area, and timeframe — apples-to-apples vs what buyers compare.", styles["body"])],
-        [Paragraph("<b>2. Absorption Sets Pace</b>", styles["body_bold"]),
-         Paragraph(f"{sales_mo:.1f} sales/mo vs {active_n} Active → <b>{inv:.1f}</b> months of inventory.", styles["body"])],
-        [Paragraph("<b>3. Active = Competition</b>", styles["body_bold"]),
-         Paragraph(f"Pending/Backup are spoken for. List, and buyers choose among <b>{with_yours}</b>.", styles["body"])],
-        [Paragraph("<b>4. Closes Set Value</b>", styles["body_bold"]),
-         Paragraph("Asking prices are opinions. Sold prices are facts — the list is anchored to recent closes.", styles["body"])],
-        [Paragraph("<b>5. Condition Moves It</b>", styles["body_bold"]),
-         Paragraph("We start at a typical <b>5/10</b>, rate together, and the list responds.", styles["body"])],
-        [Paragraph("<b>6. Price Buys Time</b>", styles["body_bold"]),
-         Paragraph(f"Well-priced homes here go under contract in about <b>{median_dom:.0f}</b> days.", styles["body"])],
+        [Paragraph("<b>1. Your Home’s Market Fingerprint</b>", styles["body_bold"]),
+         Paragraph("Custom market fit to your home — size, beds, baths, garage, lot size, and location.", styles["body"])],
+        [Paragraph("<b>2. Supply and Demand</b>", styles["body_bold"]),
+         Paragraph("How many homes are for sale versus how fast they sell. That balance is who has leverage.", styles["body"])],
+        [Paragraph("<b>3. Your Competition</b>", styles["body_bold"]),
+         Paragraph("Active, available homes — the ones a buyer can actually go see. Pending and backup are already spoken for.", styles["body"])],
+        [Paragraph("<b>4. Three Levers — Price, Condition, Location</b>", styles["body_bold"]),
+         Paragraph("That’s what buyers compare. You can’t move the house. You can still change the asking price, and improve the condition.", styles["body"])],
+        [Paragraph("<b>5. Providing Value or Are the Value</b>", styles["body_bold"]),
+         Paragraph("If a similar home lists under you, they’re providing the value — they look like the better buy next to yours. If they list over you, you are the value. Same kind of house; the ask is what makes one of you look like the deal.", styles["body"])],
+        [Paragraph("<b>6. Pricing Determines Time to Contract</b>", styles["body_bold"]),
+         Paragraph("The asking price is what determines how long it takes to go under contract. Priced with the market, homes here move. Overpriced listings linger — and help sell everyone else’s house.", styles["body"])],
     ]
-    ft = Table(facts, colWidths=[2.0 * inch, 4.9 * inch])
+    ft = Table(facts, colWidths=[2.35 * inch, 4.55 * inch])
     ft.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, -1), LIGHT),
         ("BOX", (0, 0), (-1, -1), 0.5, BORDER),
@@ -588,12 +588,10 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
         flow.append(Paragraph("The Supply Stream", styles["section"]))
         flow.append(Paragraph(
             "Active competition is a snapshot. The supply stream is the pipeline — new homes that keep "
-            "arriving while yours sits. Price too high, and fresher listings underneath yours become "
-            "the ones buyers tour first.",
+            "arriving while yours sits versus how fast they sell.",
             styles["small"],
         ))
-        wait_fresh = float(lf.get("fresh_during_median_dom") or 0)
-        wait_dom = float(lf.get("median_dom_for_wait") or median_dom or 0)
+        lf_net = float(lf.get("net_inventory_per_month") or 0)
         supply_kpis = [[
             Paragraph(
                 f"<b>{float(lf.get('new_listings_per_month') or 0):.1f}</b><br/>New / mo",
@@ -608,7 +606,7 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
                 styles["kpi_val"],
             ),
             Paragraph(
-                f"<b>~{wait_fresh:.1f}</b><br/>New below in ~{wait_dom:.0f}d",
+                f"<b>{('+' if lf_net >= 0 else '')}{lf_net:.1f}</b><br/>Net / mo",
                 styles["kpi_val"],
             ),
         ]]
@@ -623,10 +621,10 @@ def build_story_pdf(report: dict, output_path: str | Path, agent_name: str = "",
             ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ]))
         flow.append(sk)
-        if lf.get("overprice_insight") or lf.get("insight"):
+        if lf.get("insight"):
             flow.append(Spacer(1, 4))
             flow.append(Paragraph(
-                lf.get("overprice_insight") or lf.get("insight") or "",
+                lf.get("insight") or "",
                 styles["body"],
             ))
     band_labels = bands.get("labels") or []

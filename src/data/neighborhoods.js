@@ -308,6 +308,7 @@ export const neighborhoods = [
     walkScore: 35,
     metaDescription: 'English Ranch Fort Collins real estate — established southeast Fort Collins subdivision with on-site park, walking trail, and Fossil Ridge schools. SAA Homes.',
     keywords: 'English Ranch Fort Collins, southeast Fort Collins homes, Fossil Ridge High School area, Fort Collins subdivisions, Harmony Road Fort Collins real estate, English Ranch Park',
+    youtubeId: 'AgTcef3pSrM',
     neighborhoodHighlights: [
       { title: 'On-site park & trail', description: 'English Ranch Park features a playground and a walking trail right in the neighborhood.' },
       { title: 'Fossil Ridge schools', description: 'Minutes from Fossil Ridge High School and Preston Middle School — a top choice for families.' },
@@ -501,6 +502,7 @@ export const neighborhoods = [
     walkScore: 32,
     metaDescription: 'Bucking Horse Fort Collins real estate — Fort Collins\' agrihood community with a working farm, trails, and the Jessup Farm Artisan Village. New construction near Fossil Ridge schools. SAA Homes.',
     keywords: 'Bucking Horse Fort Collins, Bucking Horse agrihood, Jessup Farm Fort Collins, east Fort Collins new construction, Fort Collins farmhouse homes, Bucking Horse homes for sale',
+    youtubeId: 'zzsOx7rS8Uw',
     neighborhoodHighlights: [
       { title: 'Agrihood living', description: 'A working community farm, garden plots, and farm stand sit at the heart of the neighborhood — a truly unique Fort Collins lifestyle.' },
       { title: 'Jessup Farm Artisan Village', description: 'Brewery, restaurant, coffee shop, and local retail along Jessup Drive — plus Josh & John\'s ice cream.' },
@@ -630,6 +632,7 @@ export const neighborhoods = [
     walkScore: 30,
     metaDescription: 'Southridge Greens Fort Collins real estate — quiet southeast Fort Collins community with ranch and patio homes near Harmony Road and I-25. Fossil Ridge schools. SAA Homes.',
     keywords: 'Southridge Greens Fort Collins, Village at Southridge Greens, southeast Fort Collins homes, Fort Collins patio homes, Trilby Road Fort Collins real estate, Fossil Ridge High School area',
+    youtubeId: 'uUCb94QFpj0',
     neighborhoodHighlights: [
       { title: 'Single-level living', description: 'Ranch and patio home floor plans with low-maintenance yards are the community\'s hallmark.' },
       { title: 'Quiet & established', description: 'Mature landscaping and low-traffic streets create a calm, settled atmosphere.' },
@@ -3046,6 +3049,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.415', longitude: '-104.79' },
     metaDescription: 'Oxford area Greeley real estate - newer west Greeley homes near Oxford Village and University Schools. SAA Homes.',
     keywords: 'Oxford Greeley, west Greeley new homes, Oxford Village Greeley, University Schools area homes',
+    youtubeId: 'UIPDYOyiVfE',
     neighborhoodHighlights: [
       { title: 'Newer construction', description: 'Most homes built after 2000 with modern floor plans and contemporary finishes.' },
       { title: 'Shopping access', description: 'Oxford Village and Centerplace shopping centers provide convenient retail and dining.' },
@@ -3077,6 +3081,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.415', longitude: '-104.775' },
     metaDescription: 'Westwood Greeley - established west Greeley homes near Centerplace Shopping Center. SAA Homes.',
     keywords: 'Westwood Greeley, west Greeley established homes, Greeley West High School area, Centerplace shopping',
+    youtubeId: 'CqyVMFV1SZM',
     neighborhoodHighlights: [
       { title: 'Established setting', description: 'Mature trees and established homes on generous lots give Westwood a settled, desirable feel.' },
       { title: 'Shopping access', description: 'Minutes from Centerplace Shopping Center with department stores, dining, and services.' },
@@ -3108,6 +3113,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.41', longitude: '-104.795' },
     metaDescription: 'Deerfield Greeley - newer west Greeley subdivision near McAuliffe Elementary with park access. SAA Homes.',
     keywords: 'Deerfield Greeley, west Greeley new construction, McAuliffe Elementary area, Deerfield subdivision Greeley',
+    youtubeId: 'UyEPC0t1v-Q',
     neighborhoodHighlights: [
       { title: 'Newer homes', description: 'Modern construction with open floor plans and energy-efficient features in a growing corridor.' },
       { title: 'Family park', description: 'Deerfield Park features a playground, open space, and walking paths - perfect for families.' },

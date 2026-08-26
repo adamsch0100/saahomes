@@ -1,4 +1,5 @@
 import getPool from '../config/database.js';
+import { syncListingPhotos, isR2Hosted } from './photoSync.js';
 
 /**
  * IRES IDX feed sync — RESO Web API (JSON) via MLS Grid.
@@ -522,6 +523,43 @@ export async function syncListings({ mode = 'incremental' } = {}) {
       );
     }
 
+    // ── R2 durable-photo phase (SINGLE SOURCE — runs inside the sync lock) ──
+    // Convert a bounded batch of active listings from expiring MLS signed URLs
+    // to permanent Cloudflare R2 copies. Runs SEQUENTIALLY AFTER the API
+    // listing sync (never concurrent with it) so MLS request rate stays inside
+    // the same pacing budget. Downloads are paced by photoSync (2 RPS max) and
+    // routed through the /api/photo proxy (rate-limited). This replaces the
+    // old separate box cron (idx-photos-r2-backfill) — one process owns MLS.
+    // No-op when R2 is not configured on this host (photoSync exits gracefully).
+    const R2_BATCH = parseInt(process.env.R2_BACKFILL_PER_SYNC || '150', 10);
+    let r2Done = 0, r2Photos = 0;
+    try {
+      const base = (process.env.R2_PUBLIC_URL || '').replace(/^https?:\/\//, '');
+      const c = await pool.query(
+        `SELECT id, listing_id, slug, photos FROM listings
+         WHERE is_active AND photos::text <> '[]' AND NOT (photos::text LIKE $1)
+         ORDER BY updated_at DESC LIMIT $2`,
+        [base ? `%${base}%` : '%r2.dev%', R2_BATCH]
+      );
+      for (const row of c.rows) {
+        if (isR2Hosted(row.photos || [])) continue;
+        const newUrls = await syncListingPhotos(row, row.photos || []);
+        if (newUrls && newUrls.length) {
+          await pool.query(
+            `UPDATE listings SET photos = $1, photos_count = $2, updated_at = NOW() WHERE id = $3`,
+            [JSON.stringify(newUrls), newUrls.length, row.id]
+          );
+          r2Photos += newUrls.length;
+        }
+        r2Done += 1;
+      }
+      if (r2Done > 0) {
+        console.log(`🖼️ R2 durable-photo phase: ${r2Done} listings → ${r2Photos} photos (batch ${R2_BATCH})`);
+      }
+    } catch (e) {
+      console.error(`🖼️ R2 durable-photo phase FAILED (non-fatal): ${e.message}`);
+    }
+
     // Persist the watermark for incremental runs. Only advance when we
     // actually consumed records (so a failed/empty run can't skip data).
     // Also persists after the first-run FULL fallback — otherwise the next
@@ -530,8 +568,8 @@ export async function syncListings({ mode = 'incremental' } = {}) {
       await setState(pool, 'ires_last_sync_ts', newWatermark);
     }
 
-    console.log(`✅ IRES sync complete (${mode}): ${total} listings processed, ${seenIds.length} unique${since ? `, since ${since}` : ''}`);
-    return { mode, total, unique: seenIds.length };
+    console.log(`✅ IRES sync complete (${mode}): ${total} listings processed, ${seenIds.length} unique${since ? `, since ${since}` : ''}${r2Done ? `, ${r2Done} R2 photo listings` : ''}`);
+    return { mode, total, unique: seenIds.length, r2PhotoListings: r2Done };
   } finally {
     await releaseLock();
   }

@@ -16,308 +16,480 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/saas/ll.css">
 <style>
-.page-head { padding: 32px 0 6px; }
-.page-head h1 { font-family: 'Fraunces', serif; font-size: clamp(1.5rem, 3vw, 1.9rem); letter-spacing: -0.02em; margin-bottom: 4px; }
-.sub { color: var(--muted); margin-bottom: 20px; font-size: 0.92rem; }
-.ops-strip {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;
-  margin: 0 0 22px;
+/* ============ OWNER CONSOLE REDESIGN — dark premium ============ */
+:root{
+  --bg:#0a1626; --bg2:#0d1d33; --panel:#101f36; --panel2:#13253f;
+  --line:rgba(148,178,214,.14); --line2:rgba(148,178,214,.24);
+  --ink:#e8eef7; --muted:#8fa3bd; --faint:#5f7591;
+  --gold:#d4a94f; --gold2:#e5c37b;
+  --teal:#3ec9a7; --amber:#f0a35c; --red:#ef7a7a; --blue:#6aa8ff;
+  --radius:14px; --navy-shadow:0 10px 34px rgba(2,10,22,.45);
 }
-.ops-card {
-  background: var(--card); border: 1px solid var(--line); border-radius: 12px;
-  padding: 12px 14px;
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:
+    radial-gradient(1200px 600px at 85% -10%, rgba(106,168,255,.08), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(212,169,79,.07), transparent 55%),
+    var(--bg);
+  color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  font-size:15px; line-height:1.5;
+  min-height:100vh;
 }
-.ops-card .label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 700; }
-.ops-card .value { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.02em; margin-top: 4px; }
-.ops-card .hint { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
-.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
-.tabs button {
-  border: 1px solid var(--line); background: var(--card); border-radius: 999px;
-  padding: 9px 18px; cursor: pointer; font-weight: 600; font-size: 0.86rem; color: var(--ink);
-  font-family: inherit; transition: all 0.15s ease;
+h1,h2,h3,.brand-font{font-family:'Fraunces',serif}
+code{background:rgba(106,168,255,.12);border:1px solid rgba(106,168,255,.18);padding:2px 8px;border-radius:7px;font-size:.76rem;color:#a9c7ff;word-break:break-all}
+a{color:var(--gold2)}
+::selection{background:rgba(212,169,79,.32)}
+
+/* ---------- Top bar ---------- */
+.topbar{
+  position:sticky;top:0;z-index:30;
+  display:flex;align-items:center;gap:18px;
+  padding:14px 26px;
+  background:rgba(10,22,38,.82);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
 }
-.tabs button:hover { border-color: var(--ink); }
-.tabs button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
-.panel { display: none; }
-.panel.on { display: block; }
-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
-th { color: var(--muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
-tr:hover td { background: #faf8f3; }
-.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-@media (max-width: 700px) { .row2 { grid-template-columns: 1fr; } }
-.btn-sm { padding: 7px 13px; font-size: 0.78rem; }
-.muted { color: var(--muted); font-size: 0.8rem; }
-.actions button, .actions a.btn { margin: 2px 4px 2px 0; }
-code { background: #eef2f8; padding: 2px 7px; border-radius: 6px; font-size: 0.78rem; }
-h3.panel-title { font-family: 'Fraunces', serif; font-size: 1.1rem; margin-bottom: 14px; letter-spacing: -0.01em; }
-.filter-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
-.filter-chips button {
-  border: 1px solid var(--line); background: #fff; border-radius: 999px;
-  padding: 6px 12px; font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: inherit; color: var(--ink);
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--ink)}
+.brand img{height:30px;border-radius:8px}
+.brand .tag{font-size:.66rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(212,169,79,.4);padding:3px 9px;border-radius:999px;background:rgba(212,169,79,.09)}
+.topbar .spacer{flex:1}
+.top-links{display:flex;gap:6px;align-items:center}
+.top-links a{
+  color:var(--muted);text-decoration:none;font-size:.84rem;font-weight:600;
+  padding:8px 14px;border-radius:10px;transition:.16s;
 }
-.filter-chips button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
-.page-url { word-break: break-all; max-width: 280px; display: inline-block; }
-a.btn { text-decoration: none; display: inline-block; }
-.chat-bubble {
-  border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px;
-  background: #fff; white-space: pre-wrap; line-height: 1.45; font-size: 0.84rem;
+.top-links a:hover{color:var(--ink);background:rgba(148,178,214,.08)}
+.top-links a.on{color:var(--gold);background:rgba(212,169,79,.1)}
+
+/* ---------- Layout ---------- */
+.shell{display:flex;min-height:calc(100vh - 61px)}
+.sidebar{
+  width:228px;flex-shrink:0;padding:26px 14px 40px 20px;
+  border-right:1px solid var(--line);
 }
-.chat-bubble.user { background: #f0f5fb; border-color: #d5e2f0; }
-.chat-bubble.bot { background: #faf8f3; }
-.chat-meta { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-bottom: 8px; font-size: 0.78rem; color: var(--muted); }
-.drawer-backdrop {
-  display: none; position: fixed; inset: 0; background: rgba(10, 24, 40, 0.35); z-index: 40;
+.side-label{font-size:.64rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:0 10px 10px}
+.snav{display:flex;flex-direction:column;gap:3px;margin-bottom:22px}
+.snav button{
+  display:flex;align-items:center;gap:11px;width:100%;
+  background:none;border:none;cursor:pointer;text-align:left;
+  padding:9px 13px;border-radius:10px;
+  color:var(--muted);font-family:inherit;font-size:.88rem;font-weight:600;
+  transition:.15s;border-left:2px solid transparent;
 }
-.drawer-backdrop.on { display: block; }
-.drawer {
-  position: fixed; top: 0; right: 0; bottom: 0; width: min(440px, 100vw); background: #fff;
-  z-index: 50; box-shadow: -12px 0 40px rgba(8, 30, 55, 0.18); transform: translateX(100%);
-  transition: transform 0.2s ease; overflow: auto; padding: 22px 20px 40px;
+.snav button:hover{color:var(--ink);background:rgba(148,178,214,.06)}
+.snav button.on{color:var(--ink);background:rgba(212,169,79,.12);border-left-color:var(--gold)}
+.snav .ico{width:19px;height:19px;display:inline-flex;align-items:center;justify-content:center;font-size:.95rem;opacity:.9}
+.snav .cnt{margin-left:auto;font-size:.68rem;font-weight:800;background:rgba(62,201,167,.16);color:var(--teal);border-radius:999px;padding:2px 8px;min-width:22px;text-align:center}
+.main{flex:1;min-width:0;padding:30px 34px 80px}
+
+/* ---------- Page head ---------- */
+.page-head h1{font-size:clamp(1.5rem,2.6vw,2rem);letter-spacing:-.02em;margin:0 0 6px}
+.page-head .sub{color:var(--muted);font-size:.92rem;margin:0 0 24px}
+
+/* ---------- KPI cards ---------- */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:13px;margin-bottom:30px}
+.kpi{
+  background:linear-gradient(160deg,var(--panel) 0%,var(--bg2) 100%);
+  border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px 17px 14px;position:relative;overflow:hidden;
 }
-.drawer.on { transform: translateX(0); }
-.drawer h2 { font-family: 'Fraunces', serif; font-size: 1.25rem; margin: 0 0 4px; }
-.drawer .close-x { float: right; border: none; background: transparent; font-size: 1.4rem; cursor: pointer; line-height: 1; }
-.user-link { cursor: pointer; color: inherit; text-decoration: underline; text-decoration-color: transparent; }
-.user-link:hover { text-decoration-color: currentColor; }
-.trunc { max-width: 360px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.plan-badge {
-  display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.02em;
-  padding: 3px 10px; border-radius: 999px; background: #eaf1f9; color: var(--navy, #0c3c6e);
-  border: 1px solid #d5e2f0; white-space: nowrap;
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent 70%);opacity:.55}
+.kpi .label{font-size:.63rem;font-weight:800;text-transform:uppercase;letter-spacing:.11em;color:var(--faint)}
+.kpi .value{font-family:'Fraunces',serif;font-size:1.72rem;font-weight:700;letter-spacing:-.02em;margin-top:5px;line-height:1.1}
+.kpi .hint{font-size:.73rem;color:var(--muted);margin-top:4px;line-height:1.4}
+.kpi.gold .value{color:var(--gold2)}
+.kpi.teal .value{color:var(--teal)}
+
+/* ---------- Panels / cards ---------- */
+.panel{display:none}
+.panel.on{display:block;animation:fadein .22s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.card{
+  background:linear-gradient(165deg,var(--panel),var(--bg2));
+  border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px 24px;box-shadow:var(--navy-shadow);
 }
-.plan-badge.paying { background: #e7f3ef; color: #0e7a6d; border-color: #cde5dd; }
-.plan-badge.none { background: #f4f1ea; color: var(--muted); border-color: var(--line); }
-.sub-status { display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: #f4f1ea; color: var(--muted); border: 1px solid var(--line); white-space: nowrap; }
-.sub-status.active, .sub-status.trialing { background: #e7f3ef; color: #0e7a6d; border-color: #cde5dd; }
-.sub-status.past_due, .sub-status.unpaid { background: #faeee4; color: #b3541e; border-color: #efd9c4; }
-.sub-status.canceled { background: #f8e3e3; color: #9b2c2c; border-color: #ecc9c9; }
-.bill-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 16px; }
-.bill-card { background: #faf8f3; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
-.bill-card .label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 700; }
-.bill-card .value { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; margin-top: 4px; }
-.bill-card .hint { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+.panel-title{font-family:'Fraunces',serif;font-size:1.14rem;margin:0 0 4px;letter-spacing:-.01em}
+.panel-sub{color:var(--muted);font-size:.83rem;margin:0 0 18px}
+.headrow{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.headrow .actions-row{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ---------- Inputs & buttons ---------- */
+input,select,textarea{
+  background:rgba(9,18,32,.65);border:1px solid var(--line2);color:var(--ink);
+  border-radius:10px;padding:9px 13px;font-family:inherit;font-size:.87rem;outline:none;
+  transition:border .15s, box-shadow .15s;
+}
+input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,169,79,.14)}
+input::placeholder{color:var(--faint)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:13px}
+.searchbar{display:flex;gap:9px;margin-bottom:16px}
+.searchbar input{flex:1}
+.btn{
+  border:1px solid var(--line2);background:var(--panel2);color:var(--ink);
+  border-radius:10px;padding:9px 16px;cursor:pointer;font-family:inherit;
+  font-weight:600;font-size:.83rem;transition:.15s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;
+}
+.btn:hover{border-color:var(--gold);color:var(--gold2)}
+.btn-primary{background:linear-gradient(135deg,#c99b3f,var(--gold));border-color:transparent;color:#161006;font-weight:800}
+.btn-primary:hover{filter:brightness(1.1);color:#161006}
+.btn-sm{padding:6px 12px;font-size:.77rem;border-radius:8px}
+.btn-ghost{background:transparent}
+button:disabled{opacity:.5;cursor:wait}
+
+/* ---------- Chips ---------- */
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:15px}
+.chips button{
+  border:1px solid var(--line2);background:transparent;color:var(--muted);
+  border-radius:999px;padding:5px 13px;font-size:.76rem;font-weight:700;
+  cursor:pointer;font-family:inherit;transition:.14s;
+}
+.chips button:hover{color:var(--ink);border-color:var(--gold)}
+.chips button.on{background:rgba(212,169,79,.16);border-color:var(--gold);color:var(--gold2)}
+
+/* ---------- Tables ---------- */
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:.83rem;min-width:640px}
+th{
+  text-align:left;padding:11px 13px;color:var(--faint);
+  font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;font-weight:800;
+  border-bottom:1px solid var(--line2);white-space:nowrap;
+  background:rgba(9,18,32,.5);
+  position:sticky;top:0;
+}
+th.sortable{cursor:pointer;user-select:none}
+th.sortable:hover{color:var(--gold2)}
+td{padding:11px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr{transition:background .12s}
+tbody tr:hover td{background:rgba(148,178,214,.05)}
+tbody tr:last-child td{border-bottom:none}
+.muted{color:var(--muted)} .small{font-size:.78rem}
+.user-link{cursor:pointer;color:var(--ink);text-decoration:none;border-bottom:1px dashed transparent;font-weight:700}
+.user-link:hover{color:var(--gold2);border-bottom-color:var(--gold)}
+
+/* ---------- Badges ---------- */
+.badge{display:inline-block;font-size:.69rem;font-weight:800;letter-spacing:.03em;padding:3px 11px;border-radius:999px;border:1px solid transparent;white-space:nowrap}
+.badge.paying,.badge.active,.badge.done{background:rgba(62,201,167,.13);color:var(--teal);border-color:rgba(62,201,167,.3)}
+.badge.trial,.badge.trialing,.badge.new,.badge.seen{background:rgba(106,168,255,.13);color:var(--blue);border-color:rgba(106,168,255,.3)}
+.badge.past_due,.badge.unpaid{background:rgba(240,163,92,.13);color:var(--amber);border-color:rgba(240,163,92,.32)}
+.badge.canceled,.badge.disabled,.badge.expired{background:rgba(239,122,122,.12);color:var(--red);border-color:rgba(239,122,122,.3)}
+.badge.none,.badge.plain{background:rgba(148,178,214,.09);color:var(--muted);border-color:var(--line2)}
+.badge.gold{background:rgba(212,169,79,.14);color:var(--gold2);border-color:rgba(212,169,79,.35)}
+
+/* ---------- Chat cards ---------- */
+.chat-card{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px;background:rgba(9,18,32,.4)}
+.chat-meta{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.76rem;color:var(--muted);margin-bottom:9px;align-items:center}
+.bubble{border-radius:10px;padding:10px 13px;margin-bottom:7px;white-space:pre-wrap;line-height:1.5;font-size:.83rem;border:1px solid var(--line)}
+.bubble.user{background:rgba(106,168,255,.07);border-color:rgba(106,168,255,.16)}
+.bubble.bot{background:rgba(62,201,167,.05);border-color:rgba(62,201,167,.13)}
+.bubble .who{font-size:.64rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:4px}
+.trunc{max-width:420px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ---------- Timeline (events) ---------- */
+.tl{position:relative;padding-left:24px}
+.tl::before{content:'';position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:linear-gradient(var(--line2),transparent)}
+.tl-item{position:relative;padding:9px 0 13px}
+.tl-item::before{content:'';position:absolute;left:-21px;top:15px;width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px rgba(212,169,79,.18)}
+.tl-when{font-size:.74rem;color:var(--faint)}
+
+/* ---------- Toast status ---------- */
+#status{
+  position:fixed;bottom:22px;right:22px;z-index:60;
+  padding:12px 18px;border-radius:12px;font-size:.85rem;font-weight:600;
+  background:var(--panel2);border:1px solid var(--line2);color:var(--ink);
+  box-shadow:var(--navy-shadow);max-width:380px;
+  opacity:0;transform:translateY(8px);pointer-events:none;transition:.25s;
+}
+#status.ok{border-color:rgba(62,201,167,.5);color:var(--teal)}
+#status.error{border-color:rgba(239,122,122,.5);color:var(--red)}
+#status.show{opacity:1;transform:none}
+
+/* ---------- Drawer ---------- */
+.drawer-backdrop{display:none;position:fixed;inset:0;background:rgba(4,10,20,.62);z-index:40;backdrop-filter:blur(2px)}
+.drawer-backdrop.on{display:block}
+.drawer{
+  position:fixed;top:0;right:0;bottom:0;width:min(480px,100vw);
+  background:var(--panel);border-left:1px solid var(--line2);z-index:50;
+  transform:translateX(102%);transition:transform .22s ease;overflow:auto;padding:24px 24px 48px;
+}
+.drawer.on{transform:none}
+.drawer h2{margin:0 0 4px;font-size:1.3rem}
+.close-x{float:right;border:none;background:rgba(148,178,214,.08);color:var(--muted);width:32px;height:32px;border-radius:9px;font-size:1.15rem;cursor:pointer;line-height:1}
+.close-x:hover{color:var(--ink)}
+
+/* ---------- Misc ---------- */
+.check-row{display:flex;gap:9px;align-items:center;margin:10px 0}
+.page-url{word-break:break-all}
+.alert-warn{display:none;background:rgba(240,163,92,.09);border:1px solid rgba(240,163,92,.3);color:var(--amber);border-radius:11px;padding:11px 15px;font-size:.84rem;font-weight:600;margin-bottom:15px}
+.skel{position:relative;overflow:hidden;background:rgba(148,178,214,.07);border-radius:8px;min-height:44px}
+.skel::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(148,178,214,.09),transparent);animation:shim 1.3s infinite}
+@keyframes shim{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.empty{padding:28px 10px;text-align:center;color:var(--faint);font-size:.86rem}
+.rel{font-variant-numeric:tabular-nums}
+
+/* ---------- Responsive ---------- */
+@media (max-width:900px){
+  .shell{flex-direction:column}
+  .sidebar{width:100%;padding:14px 18px;border-right:none;border-bottom:1px solid var(--line);
+    display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .side-label{display:none}
+  .snav{flex-direction:row;flex-wrap:wrap;margin:0;gap:4px}
+  .snav button{width:auto;padding:7px 11px;font-size:.8rem;border-left:none;border:1px solid var(--line);border-radius:9px}
+  .snav button.on{border-color:var(--gold)}
+  .main{padding:22px 16px 70px}
+  .row2{grid-template-columns:1fr}
+  .topbar{padding:12px 16px}
+  .top-links a.hide-m{display:none}
+}
+/* View-switch pill (unified across consoles) */
+.seg{display:inline-flex;gap:0;padding:3px;background:rgba(148,178,214,.12);border:1px solid var(--line2);border-radius:999px}
+.seg a{padding:6px 16px;border-radius:999px;font-size:.8rem;font-weight:700;text-decoration:none;color:var(--muted);transition:.15s;white-space:nowrap}
+.seg a:hover{color:var(--ink)}
+.seg a.on{background:var(--gold);color:#161006;box-shadow:0 2px 8px rgba(212,169,79,.3)}
 </style>
+<link rel="stylesheet" href="/saas/dash-light-admin.css">
 </head>
-<body>
-<nav class="ll-nav">
-  <div class="container ll-nav-inner">
-    <div class="ll-nav-left">
-      <a href="/saas/admin.html" class="ll-brand">
-        <img src="/saas/listlogic-logo.png" alt="ListLogic" class="ll-brand-logo">
-        <small>Owner</small>
-      </a>
-      <div class="ll-view-switch">
-        <a href="/saas/admin.html" class="on">Owner console</a>
-        <a href="/saas/app.html">Agent dashboard</a>
-      </div>
-    </div>
-    <div class="ll-nav-links">
-      <a href="/saas/app.html#generate">Generate</a>
-      <a href="/saas/">Site</a>
-      <a href="#" id="logout">Sign out</a>
-    </div>
-  </div>
-</nav>
-<div class="dash">
-  <aside class="dash-side" aria-label="Dashboard">
-    <div class="side-label">Workspace</div>
-    <a href="/saas/app.html#generate"><span class="side-ico">＋</span> Generate</a>
-    <a href="/saas/app.html#reports"><span class="side-ico">▦</span> Reports</a>
-    <a href="/saas/app.html#team" id="navTeam" hidden><span class="side-ico">☰</span> Team</a>
-    <a href="/saas/onboarding.html" id="navSettings"><span class="side-ico">◎</span> Settings</a>
-    <div class="side-sep" id="adminSideSep"></div>
-    <a href="/saas/admin.html" class="on" id="navOwner"><span class="side-ico">⚙</span> Owner console</a>
+<body data-theme-default="dark">
+
+<header class="topbar">
+  <a class="brand" href="/saas/admin.html">
+    <img src="/saas/listlogic-logo.png" alt="ListLogic">
+  </a>
+  <nav class="seg" id="viewSwitch">
+    <a href="/saas/app.html">Agent</a>
+    <a href="/saas/admin.html" class="on">Owner</a>
+  </nav>
+  <div class="spacer"></div>
+  <nav class="top-links">
+    <a href="/saas/app.html#generate" class="hide-m">Generate</a>
+    <a href="/saas/">Site</a>
+    <a href="#" id="logoutLink">Sign out</a>
+  </nav>
+</header>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="side-label">Console</div>
+    <nav class="snav" id="snav">
+      <button type="button" class="on" data-tab="users"><span class="ico">◉</span> Users</button>
+      <button type="button" data-tab="billing"><span class="ico">◈</span> Billing</button>
+      <button type="button" data-tab="reports"><span class="ico">▦</span> Reports</button>
+      <button type="button" data-tab="ai"><span class="ico">✦</span> AI chats</button>
+      <button type="button" data-tab="feedback"><span class="ico">✉</span> Feedback <span class="cnt" id="fbCount" hidden>0</span></button>
+      <button type="button" data-tab="events"><span class="ico">◷</span> Events</button>
+      <div class="side-label" style="margin-top:16px">Growth tools</div>
+      <button type="button" data-tab="promos"><span class="ico">＃</span> Promo codes</button>
+      <button type="button" data-tab="invites"><span class="ico">➔</span> Invites</button>
+    </nav>
+    <div class="side-label" style="margin-top:18px">Workspace</div>
+    <nav class="snav" style="margin-bottom:0">
+      <a class="btn btn-ghost btn-sm" href="/saas/onboarding.html" style="justify-content:center">Settings</a>
+      <a class="btn btn-ghost btn-sm" href="/saas/app.html#team" id="navTeam" hidden style="justify-content:center">Team</a>
+    </nav>
   </aside>
-  <div class="dash-main">
-<div class="container">
-  <div class="page-head">
-    <span class="eyebrow">Owner console</span>
-    <h1>Manage ListLogic</h1>
-    <p class="sub">Users, every report, AI chats, feedback, and billing at a glance.</p>
-  </div>
 
-  <div class="ops-strip" id="opsStrip" aria-live="polite">
-    <div class="ops-card"><div class="label">Users</div><div class="value" id="statUsers">—</div><div class="hint" id="statUsersHint"></div></div>
-    <div class="ops-card"><div class="label">Paying</div><div class="value" id="statPaying">—</div><div class="hint" id="statMrr"></div></div>
-    <div class="ops-card"><div class="label">Reports (7d)</div><div class="value" id="statPresWeek">—</div><div class="hint" id="statPresTotal"></div></div>
-    <div class="ops-card"><div class="label">AI chats (7d)</div><div class="value" id="statAiWeek">—</div><div class="hint" id="statAiTotal"></div></div>
-    <div class="ops-card"><div class="label">Open feedback</div><div class="value" id="statFbOpen">—</div><div class="hint" id="statFbNew"></div></div>
-    <div class="ops-card"><div class="label">Stripe</div><div class="value" id="statStripe">—</div><div class="hint">Checkout / portal</div></div>
-    <div class="ops-card"><div class="label">Possible shared accts</div><div class="value" id="statShared">—</div><div class="hint" id="statSharedHint">3+ IPs / 7d</div></div>
-  </div>
-
-  <div class="tabs">
-    <button type="button" class="on" data-tab="users">Users</button>
-    <button type="button" data-tab="billing">Billing</button>
-    <button type="button" data-tab="reports">Reports</button>
-    <button type="button" data-tab="ai">AI chats</button>
-    <button type="button" data-tab="feedback">Feedback</button>
-    <button type="button" data-tab="events">Events</button>
-    <button type="button" data-tab="promos">Promo codes</button>
-    <button type="button" data-tab="invites">Invites</button>
-  </div>
-  <p class="status" id="status"></p>
-
-  <section class="panel on" id="tab-users">
-    <div class="card">
-    <div class="row2">
-      <input id="userQ" placeholder="Search email, name, brokerage…">
-      <button class="btn btn-soft btn-sm" type="button" id="userSearch" style="align-self:start">Search</button>
+  <main class="main">
+    <div class="page-head">
+      <h1>Command center</h1>
+      <p class="sub">Everything on ListLogic — users, revenue, reports, and what agents are telling you.</p>
     </div>
-    <div style="overflow:auto"><table>
-      <thead><tr><th>Agent</th><th>Status / plan</th><th>Usage</th><th>Trial ends</th><th>Billing</th><th>Actions</th></tr></thead>
-      <tbody id="usersBody"></tbody>
-    </table></div>
-    </div>
-  </section>
 
-  <section class="panel" id="tab-billing">
-    <div class="card">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
-      <h3 class="panel-title" style="margin:0">Subscriptions &amp; revenue</h3>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-soft btn-sm" type="button" id="billSync">Sync Stripe</button>
-        <button class="btn btn-soft btn-sm" type="button" id="billDigest">Email me the weekly digest</button>
+    <div class="kpis" id="opsStrip" aria-live="polite">
+      <div class="kpi gold"><div class="label">Est. MRR</div><div class="value" id="statMrrTop">—</div><div class="hint" id="statMrrHintTop">syncing…</div></div>
+      <div class="kpi teal"><div class="label">Paying subscribers</div><div class="value" id="statPaying">—</div><div class="hint" id="statMrr">recurring plans</div></div>
+      <div class="kpi"><div class="label">Users</div><div class="value" id="statUsers">—</div><div class="hint" id="statUsersHint"></div></div>
+      <div class="kpi"><div class="label">Reports · 7d</div><div class="value" id="statPresWeek">—</div><div class="hint" id="statPresTotal"></div></div>
+      <div class="kpi"><div class="label">AI chats · 7d</div><div class="value" id="statAiWeek">—</div><div class="hint" id="statAiTotal"></div></div>
+      <div class="kpi"><div class="label">Open feedback</div><div class="value" id="statFbOpen">—</div><div class="hint" id="statFbNew"></div></div>
+      <div class="kpi"><div class="label">Stripe</div><div class="value" id="statStripe">—</div><div class="hint">checkout / portal</div></div>
+      <div class="kpi"><div class="label">Shared accts?</div><div class="value" id="statShared">—</div><div class="hint" id="statSharedHint">3+ IPs / 7d</div></div>
+    </div>
+
+    <p class="status" id="status"></p>
+
+    <!-- ================= USERS ================= -->
+    <section class="panel on" id="tab-users">
+      <div class="card">
+        <div class="headrow">
+          <div><h3 class="panel-title">Agents</h3><p class="panel-sub">Search, review usage, extend trials, adjust limits.</p></div>
+        </div>
+        <div class="searchbar">
+          <input id="userQ" placeholder="Search email, name, brokerage…  (press Enter)">
+          <button class="btn btn-primary btn-sm" type="button" id="userSearch">Search</button>
+        </div>
+        <div class="tablewrap"><table>
+          <thead><tr><th>Agent</th><th>Status / plan</th><th>Usage</th><th>Trial ends</th><th>Billing</th><th>Actions</th></tr></thead>
+          <tbody id="usersBody"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody>
+        </table></div>
       </div>
-    </div>
-    <p class="sub" style="margin-top:8px">Everyone with a plan, Stripe customer, or subscription. Sync pulls live status, last payment, and next renewal from Stripe.</p>
-    <div id="billAlert" style="display:none;background:#faeee4;border:1px solid #efd9c4;color:#8a3d12;border-radius:12px;padding:10px 14px;font-size:0.85rem;font-weight:600;margin-bottom:14px"></div>
-    <div class="bill-cards">
-      <div class="bill-card"><div class="label">Paying subscribers</div><div class="value" id="billPaying">—</div><div class="hint">active recurring plans</div></div>
-      <div class="bill-card"><div class="label">Est. MRR</div><div class="value" id="billMrr">—</div><div class="hint" id="billMrrHint">annual plans ÷ 12</div></div>
-      <div class="bill-card"><div class="label">Stripe customers</div><div class="value" id="billCustomers">—</div><div class="hint">incl. one-time buyers</div></div>
-      <div class="bill-card"><div class="label">Plan mix</div><div class="value" id="billMix" style="font-size:0.95rem;font-weight:600;line-height:1.5">—</div><div class="hint">paying by plan</div></div>
-    </div>
-    <div class="filter-chips" id="billChips">
-      <button type="button" class="on" data-bill="">All</button>
-      <button type="button" data-bill="recurring">Recurring</button>
-      <button type="button" data-bill="one_time">One-time</button>
-      <button type="button" data-bill="trial">Still trialing</button>
-    </div>
-    <div style="overflow:auto"><table>
-      <thead><tr><th>Agent</th><th>Plan</th><th>Stripe status</th><th>Est. value</th><th>Last payment</th><th>Next renewal</th><th>Stripe</th></tr></thead>
-      <tbody id="billingBody"></tbody>
-    </table></div>
-    </div>
-  </section>
+    </section>
 
-  <section class="panel" id="tab-reports">
-    <div class="card">
-    <div class="row2">
-      <input id="reportQ" placeholder="Search address, agent email, run id…">
-      <button class="btn btn-soft btn-sm" type="button" id="reportSearch" style="align-self:start">Search</button>
-    </div>
-    <div style="overflow:auto;margin-top:12px"><table>
-      <thead><tr><th>Address</th><th>Agent</th><th>Price</th><th>When</th><th>Actions</th></tr></thead>
-      <tbody id="reportsBody"></tbody>
-    </table></div>
-    </div>
-  </section>
+    <!-- ================= BILLING ================= -->
+    <section class="panel" id="tab-billing">
+      <div class="card">
+        <div class="headrow">
+          <div><h3 class="panel-title">Subscriptions &amp; revenue</h3>
+          <p class="panel-sub">Everyone with a plan, Stripe customer, or subscription.</p></div>
+          <div class="actions-row">
+            <button class="btn btn-sm" type="button" id="billSync">Sync Stripe</button>
+            <button class="btn btn-primary btn-sm" type="button" id="billDigest">Email me the weekly digest</button>
+          </div>
+        </div>
+        <div id="billAlert" class="alert-warn"></div>
+        <div class="kpis" style="margin-bottom:18px">
+          <div class="kpi gold"><div class="label">Stripe MRR</div><div class="value" id="billMrr">—</div><div class="hint" id="billMrrHint">annual ÷ 12 until sync</div></div>
+          <div class="kpi teal"><div class="label">Paying subs</div><div class="value" id="billPaying">—</div><div class="hint">active recurring plans</div></div>
+          <div class="kpi"><div class="label">Stripe customers</div><div class="value" id="billCustomers">—</div><div class="hint">incl. one-time buyers</div></div>
+          <div class="kpi"><div class="label">Plan mix</div><div class="value" id="billMix" style="font-size:.92rem;font-weight:600;line-height:1.5;font-family:'Inter'">—</div><div class="hint">paying by plan</div></div>
+        </div>
+        <div class="chips" id="billChips">
+          <button type="button" class="on" data-bill="">All</button>
+          <button type="button" data-bill="recurring">Recurring</button>
+          <button type="button" data-bill="one_time">One-time</button>
+          <button type="button" data-bill="trial">Still trialing</button>
+        </div>
+        <div class="tablewrap"><table>
+          <thead><tr><th>Agent</th><th>Plan</th><th>Stripe status</th><th>Est. value</th><th>Last payment</th><th>Next renewal</th><th>Stripe</th></tr></thead>
+          <tbody id="billingBody"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody>
+        </table></div>
+      </div>
+    </section>
 
-  <section class="panel" id="tab-ai">
-    <div class="card">
-    <p class="sub" style="margin-top:0">What agents ask the ListLogic assistant — newest first. Turns start logging after this deploy.</p>
-    <div class="row2">
-      <input id="aiQ" placeholder="Search question, reply, email, page…">
-      <button class="btn btn-soft btn-sm" type="button" id="aiSearch" style="align-self:start">Search</button>
-    </div>
-    <div id="aiList" style="margin-top:14px"></div>
-    </div>
-  </section>
+    <!-- ================= REPORTS ================= -->
+    <section class="panel" id="tab-reports">
+      <div class="card">
+        <div class="headrow">
+          <div><h3 class="panel-title">Reports generated</h3><p class="panel-sub">Every pricing story built in ListLogic.</p></div>
+        </div>
+        <div class="searchbar">
+          <input id="reportQ" placeholder="Search address, agent email, run id…  (press Enter)">
+          <button class="btn btn-primary btn-sm" type="button" id="reportSearch">Search</button>
+        </div>
+        <div class="tablewrap"><table>
+          <thead><tr><th>Address</th><th>Agent</th><th>Price</th><th>When</th><th>Actions</th></tr></thead>
+          <tbody id="reportsBody"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody>
+        </table></div>
+      </div>
+    </section>
 
-  <section class="panel" id="tab-feedback">
-    <div class="card">
-    <div class="filter-chips" id="fbStatusChips">
-      <button type="button" class="on" data-status="">All status</button>
-      <button type="button" data-status="new">New</button>
-      <button type="button" data-status="seen">Seen</button>
-      <button type="button" data-status="done">Done</button>
-    </div>
-    <div class="filter-chips" id="fbCatChips">
-      <button type="button" class="on" data-cat="">All types</button>
-      <button type="button" data-cat="bug">Bug</button>
-      <button type="button" data-cat="suggestion">Suggestion</button>
-      <button type="button" data-cat="other">Other</button>
-    </div>
-    <div style="overflow:auto"><table>
-      <thead><tr><th>When</th><th>Category</th><th>From</th><th>Message / page</th><th>Status</th><th></th></tr></thead>
-      <tbody id="fbBody"></tbody>
-    </table></div>
-    </div>
-  </section>
+    <!-- ================= AI CHATS ================= -->
+    <section class="panel" id="tab-ai">
+      <div class="card">
+        <div class="headrow">
+          <div><h3 class="panel-title">Ask ListLogic — assistant chats</h3>
+          <p class="panel-sub">What agents ask the in-app assistant, newest first.</p></div>
+        </div>
+        <div class="searchbar">
+          <input id="aiQ" placeholder="Search question, reply, email, page…  (press Enter)">
+          <button class="btn btn-primary btn-sm" type="button" id="aiSearch">Search</button>
+        </div>
+        <div id="aiList"></div>
+      </div>
+    </section>
 
-  <section class="panel" id="tab-events">
-    <div class="card">
-    <div class="filter-chips" id="evTypeChips">
-      <button type="button" class="on" data-type="">All</button>
-      <button type="button" data-type="signup">signup</button>
-      <button type="button" data-type="generate">generate</button>
-      <button type="button" data-type="assistant_chat">assistant</button>
-      <button type="button" data-type="feedback">feedback</button>
-      <button type="button" data-type="login">login</button>
-    </div>
-    <div class="row2">
-      <input id="evQ" placeholder="Search type, email, meta…">
-      <button class="btn btn-soft btn-sm" type="button" id="evSearch" style="align-self:start">Search</button>
-    </div>
-    <div style="overflow:auto;margin-top:12px"><table>
-      <thead><tr><th>When</th><th>Type</th><th>Agent</th><th>Meta</th></tr></thead>
-      <tbody id="eventsBody"></tbody>
-    </table></div>
-    </div>
-  </section>
+    <!-- ================= FEEDBACK ================= -->
+    <section class="panel" id="tab-feedback">
+      <div class="card">
+        <div class="headrow">
+          <div><h3 class="panel-title">Feedback inbox</h3><p class="panel-sub">What agents report and suggest.</p></div>
+        </div>
+        <div class="chips" id="fbStatusChips">
+          <button type="button" class="on" data-status="">All status</button>
+          <button type="button" data-status="new">New</button>
+          <button type="button" data-status="seen">Seen</button>
+          <button type="button" data-status="done">Done</button>
+        </div>
+        <div class="chips" id="fbCatChips">
+          <button type="button" class="on" data-cat="">All types</button>
+          <button type="button" data-cat="bug">Bug</button>
+          <button type="button" data-cat="suggestion">Suggestion</button>
+          <button type="button" data-cat="other">Other</button>
+        </div>
+        <div class="tablewrap"><table>
+          <thead><tr><th>When</th><th>Category</th><th>From</th><th>Message / page</th><th>Status</th><th></th></tr></thead>
+          <tbody id="fbBody"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody>
+        </table></div>
+      </div>
+    </section>
 
-  <section class="panel" id="tab-promos">
-    <div class="card">
-    <h3 class="panel-title">Create promo code</h3>
-    <div class="row2">
-      <div class="field"><label>Code</label><input id="pCode" placeholder="CBListLogic"></div>
-      <div class="field"><label>Label</label><input id="pLabel" placeholder="CB NoCo trial"></div>
-    </div>
-    <div class="row2">
-      <div class="field"><label>Trial days</label><input id="pDays" type="number" value="60"></div>
-      <div class="field"><label>Presentation limit</label><input id="pLimit" type="number" value="3"></div>
-    </div>
-    <div class="check-row" style="margin:8px 0 12px">
-      <input type="checkbox" id="pUnlimited">
-      <label for="pUnlimited" style="margin:0">Unlimited Generate (no card, no report cap)</label>
-    </div>
-    <div class="row2">
-      <div class="field"><label>Max redemptions (blank = unlimited)</label><input id="pMax" type="number" placeholder="200"></div>
-      <div class="field"><label>Notes</label><input id="pNotes"></div>
-    </div>
-    <button class="btn btn-primary btn-sm" type="button" id="pCreate">Create code</button>
-    <div style="overflow:auto;margin-top:18px"><table>
-      <thead><tr><th>Code</th><th>Terms</th><th>Redemptions</th><th>Active</th><th></th></tr></thead>
-      <tbody id="promosBody"></tbody>
-    </table></div>
-    </div>
-  </section>
+    <!-- ================= EVENTS ================= -->
+    <section class="panel" id="tab-events">
+      <div class="card">
+        <div class="headrow">
+          <div><h3 class="panel-title">Activity events</h3><p class="panel-sub">Signups, generations, logins — newest first.</p></div>
+        </div>
+        <div class="chips" id="evTypeChips">
+          <button type="button" class="on" data-type="">All</button>
+          <button type="button" data-type="signup">signup</button>
+          <button type="button" data-type="generate">generate</button>
+          <button type="button" data-type="assistant_chat">assistant</button>
+          <button type="button" data-type="feedback">feedback</button>
+          <button type="button" data-type="login">login</button>
+        </div>
+        <div class="searchbar">
+          <input id="evQ" placeholder="Search type, email, meta…  (press Enter)">
+          <button class="btn btn-primary btn-sm" type="button" id="evSearch">Search</button>
+        </div>
+        <div class="tl" id="eventsTl"><div class="empty">Loading…</div></div>
+      </div>
+    </section>
 
-  <section class="panel" id="tab-invites">
-    <div class="card">
-    <h3 class="panel-title">Create invite link</h3>
-    <div class="row2">
-      <div class="field"><label>Email lock (optional)</label><input id="iEmail" type="email"></div>
-      <div class="field"><label>Brokerage</label><input id="iBrokerage"></div>
-    </div>
-    <div class="row2">
-      <div class="field"><label>Trial days</label><input id="iDays" type="number" value="60"></div>
-      <div class="field"><label>Presentation limit</label><input id="iLimit" type="number" value="3"></div>
-    </div>
-    <button class="btn btn-primary btn-sm" type="button" id="iCreate">Create invite</button>
-    <div style="overflow:auto;margin-top:18px"><table>
-      <thead><tr><th>URL</th><th>Terms</th><th>Uses</th><th>Expires</th></tr></thead>
-      <tbody id="invitesBody"></tbody>
-    </table></div>
-    </div>
-  </section>
-  <div style="height:56px"></div>
-</div>
-  </div>
+    <!-- ================= PROMOS ================= -->
+    <section class="panel" id="tab-promos">
+      <div class="card">
+        <div class="headrow">
+          <div><h3 class="panel-title">Promo codes</h3><p class="panel-sub">Member access codes — trial days, generate caps, redemption limits.</p></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Code</label><input id="pCode" placeholder="CBListLogic"></div>
+          <div class="field"><label>Label</label><input id="pLabel" placeholder="CB NoCo trial"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Trial days</label><input id="pDays" type="number" value="60"></div>
+          <div class="field"><label>Presentation limit</label><input id="pLimit" type="number" value="3"></div>
+        </div>
+        <div class="check-row">
+          <input type="checkbox" id="pUnlimited">
+          <label for="pUnlimited" style="margin:0">Unlimited Generate (no card, no report cap)</label>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Max redemptions (blank = unlimited)</label><input id="pMax" type="number" placeholder="200"></div>
+          <div class="field"><label>Notes</label><input id="pNotes"></div>
+        </div>
+        <button class="btn btn-primary btn-sm" type="button" id="pCreate">Create code</button>
+        <div class="tablewrap" style="margin-top:18px"><table>
+          <thead><tr><th>Code</th><th>Terms</th><th>Redemptions</th><th>Active</th><th></th></tr></thead>
+          <tbody id="promosBody"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ================= INVITES ================= -->
+    <section class="panel" id="tab-invites">
+      <div class="card">
+        <div class="headrow">
+          <div><h3 class="panel-title">Invite links</h3><p class="panel-sub">Personalized trial links for offices and agents.</p></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Email lock (optional)</label><input id="iEmail" type="email"></div>
+          <div class="field"><label>Brokerage</label><input id="iBrokerage"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Trial days</label><input id="iDays" type="number" value="60"></div>
+          <div class="field"><label>Presentation limit</label><input id="iLimit" type="number" value="3"></div>
+        </div>
+        <button class="btn btn-primary btn-sm" type="button" id="iCreate">Create invite</button>
+        <div class="tablewrap" style="margin-top:18px"><table>
+          <thead><tr><th>URL</th><th>Terms</th><th>Uses</th><th>Expires</th></tr></thead>
+          <tbody id="invitesBody"><tr><td colspan="4" class="empty">Loading…</td></tr></tbody>
+        </table></div>
+      </div>
+    </section>
+  </main>
 </div>
 
 <div class="drawer-backdrop" id="drawerBackdrop"></div>
@@ -326,16 +498,22 @@ a.btn { text-decoration: none; display: inline-block; }
   <div id="drawerBody"></div>
 </aside>
 
+<script src="/saas/dash-nav.js"></script>
+<script src="/saas/dash-theme.js"></script>
+<script src="/saas/analytics.js"></script>
 <script>
 const statusEl = document.getElementById('status');
+let statusTimer = null;
 let fbStatus = '';
 let fbCategory = '';
 let evType = '';
 let stripeMode = 'live';
 
 function setStatus(msg, ok) {
-  statusEl.className = 'status ' + (ok ? 'ok' : 'error');
+  statusEl.className = 'status ' + (ok ? 'ok' : 'error') + (msg ? ' show' : '');
   statusEl.textContent = msg || '';
+  clearTimeout(statusTimer);
+  if (msg) statusTimer = setTimeout(() => statusEl.classList.remove('show'), 4200);
 }
 async function api(path, opts) {
   const res = await fetch(path, opts);
@@ -366,10 +544,22 @@ function stripeCustomerUrl(cid) {
   const base = stripeMode === 'test' ? 'https://dashboard.stripe.com/test' : 'https://dashboard.stripe.com';
   return base + '/customers/' + encodeURIComponent(cid);
 }
+function relTime(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (isNaN(d)) return esc(String(iso).slice(0, 16));
+  const s = (Date.now() - d.getTime()) / 1000;
+  if (s < 90) return 'just now';
+  if (s < 3600) return Math.floor(s / 60) + 'm ago';
+  if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+  return Math.floor(s / 86400) + 'd ago · ' + String(iso).slice(0, 10);
+}
+function fmtDate(iso) { return (iso || '').slice(0, 10) || '—'; }
 
-document.querySelectorAll('.tabs button').forEach(btn => {
+/* ---------- Sidebar tabs ---------- */
+document.querySelectorAll('#snav button[data-tab]').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('on'));
+    document.querySelectorAll('#snav button').forEach(b => b.classList.remove('on'));
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
     btn.classList.add('on');
     document.getElementById('tab-' + btn.dataset.tab).classList.add('on');
@@ -377,15 +567,16 @@ document.querySelectorAll('.tabs button').forEach(btn => {
   });
 });
 function openTab(name) {
-  const btn = document.querySelector('.tabs button[data-tab="' + name + '"]');
+  const btn = document.querySelector('#snav button[data-tab="' + name + '"]');
   if (btn) btn.click();
 }
-document.getElementById('logout').addEventListener('click', async (e) => {
+document.getElementById('logoutLink').addEventListener('click', async (e) => {
   e.preventDefault();
   await fetch('/api/logout', { method: 'POST' });
   location.href = '/saas/login.html';
 });
 
+/* ---------- Drawer ---------- */
 function closeDrawer() {
   document.getElementById('userDrawer').classList.remove('on');
   document.getElementById('drawerBackdrop').classList.remove('on');
@@ -398,28 +589,40 @@ async function openUserDrawer(userId) {
   const u = data.user || {};
   const stripeUrl = data.stripe_dashboard_url || stripeCustomerUrl(u.stripe_customer_id);
   const reports = (data.presentations || []).map(p =>
-    `<li><a href="${esc(absUrl(p.url))}" target="_blank" rel="noopener">${esc(p.address || p.run_id)}</a>
-     <span class="muted"> · ${esc((p.created_at || '').slice(0,10))}</span></li>`
+    `<li style="margin-bottom:6px"><a href="${esc(absUrl(p.url))}" target="_blank" rel="noopener">${esc(p.address || p.run_id)}</a>
+     <span class="muted small"> · ${esc((p.created_at || '').slice(0, 10))}</span></li>`
   ).join('') || '<li class="muted">No reports</li>';
   const chats = (data.assistant_turns || []).map(t =>
-    `<div class="chat-bubble user trunc">${esc(t.user_message)}</div>
-     <div class="chat-bubble bot trunc">${esc(t.assistant_reply)}</div>
-     <p class="muted" style="margin:0 0 12px">${esc((t.created_at || '').slice(0,16))}</p>`
+    `<div class="bubble user trunc"><span class="who">Agent</span>${esc(t.user_message)}</div>
+     <div class="bubble bot trunc"><span class="who">Assistant</span>${esc(t.assistant_reply)}</div>
+     <p class="muted small" style="margin:2px 0 14px">${esc((t.created_at || '').slice(0, 16))}</p>`
   ).join('') || '<p class="muted">No AI chats yet</p>';
   document.getElementById('drawerBody').innerHTML = `
     <h2>${esc(u.name || u.email || 'Agent')}</h2>
-    <p class="muted" style="margin:0 0 14px">${esc(u.email)} · ${esc(u.brokerage || '—')}</p>
-    <p><strong>${esc(u.status)}</strong> · ${esc(u.role)} · <span class="plan-badge ${u.plan ? '' : 'none'}">${esc(planLabel(u.plan) || 'no plan')}</span></p>
-    <p class="muted">${u.presentations_used ?? 0} / ${u.presentation_limit ?? '∞'} reports · trial ends ${esc((u.trial_ends_at || '').slice(0,10) || '—')}</p>
-    <p class="muted">Joined ${esc((u.created_at || '').slice(0,10))}${u.has_stripe ? ' · Stripe customer' : ''}</p>
-    ${stripeUrl ? `<p><a class="btn btn-soft btn-sm" href="${esc(stripeUrl)}" target="_blank" rel="noopener">Stripe customer</a></p>` : '<p class="muted">No Stripe customer</p>'}
-    <h3 class="panel-title" style="margin-top:18px">Reports</h3>
-    <ul style="padding-left:18px;margin:0 0 16px">${reports}</ul>
+    <p class="muted small" style="margin:0 0 16px">${esc(u.email)} · ${esc(u.brokerage || '—')}</p>
+    <p><span class="badge ${esc(u.status)}">${esc(u.status)}</span> <span class="muted">·</span> ${esc(u.role)}
+       <span class="muted">·</span> <span class="badge ${u.plan ? 'gold' : 'none'}">${esc(planLabel(u.plan) || 'no plan')}</span></p>
+    <p class="muted small">${u.presentations_used ?? 0} / ${u.presentation_limit ?? '∞'} reports · trial ends ${fmtDate(u.trial_ends_at)}</p>
+    <p class="muted small">Joined ${fmtDate(u.created_at)}${u.has_stripe ? ' · Stripe customer' : ''}</p>
+    ${stripeUrl ? `<p><a class="btn btn-sm" href="${esc(stripeUrl)}" target="_blank" rel="noopener">Open Stripe customer ↗</a></p>` : '<p class="muted small">No Stripe customer</p>'}
+    <h3 class="panel-title" style="margin-top:20px">Reports</h3>
+    <ul style="padding-left:18px;margin:0 0 18px;font-size:.85rem">${reports}</ul>
     <h3 class="panel-title">Recent AI chats</h3>
     ${chats}
   `;
   document.getElementById('drawerBackdrop').classList.add('on');
   document.getElementById('userDrawer').classList.add('on');
+}
+
+/* ---------- Stats ---------- */
+function setMrrDisplays(mrr, sourceLabel) {
+  const txt = mrr ? `$${Math.round(mrr).toLocaleString()}` : '—';
+  const el = document.getElementById('statMrrTop');
+  const hintEl = document.getElementById('statMrrHintTop');
+  if (el) el.textContent = txt;
+  if (hintEl) hintEl.textContent = mrr ? sourceLabel : 'no recurring revenue yet';
+  const old = document.getElementById('statMrr');
+  if (old) old.textContent = mrr ? `≈ $${Math.round(mrr).toLocaleString()}/mo est.` : 'recurring plans';
 }
 
 async function loadStats() {
@@ -429,7 +632,7 @@ async function loadStats() {
   document.getElementById('statUsersHint').textContent =
     `${s.users_trial ?? 0} trial · ${s.users_active ?? 0} active · ${s.users_expired ?? 0} expired`;
   document.getElementById('statPaying').textContent = String(s.users_paying ?? '—');
-  document.getElementById('statMrr').textContent = billSummary.mrr ? `≈ $${Math.round(billSummary.mrr).toLocaleString()}/mo est.` : 'recurring plans';
+  setMrrDisplays(billSummary.mrr || null, billSummary.mrr ? 'estimated · recurring plans' : '');
   document.getElementById('statPresWeek').textContent = String(s.presentations_week ?? '—');
   document.getElementById('statPresTotal').textContent = `${s.presentations_total ?? 0} total`;
   document.getElementById('statAiWeek').textContent = String(s.assistant_week ?? '—');
@@ -438,6 +641,9 @@ async function loadStats() {
   document.getElementById('statFbNew').textContent = `${s.feedback_new ?? 0} new`;
   document.getElementById('statStripe').textContent = s.stripe_configured ? 'On' : 'Off';
   if (s.stripe_mode) stripeMode = s.stripe_mode;
+  const fbCount = document.getElementById('fbCount');
+  const n = s.feedback_new ?? 0;
+  if (fbCount) { fbCount.textContent = String(n); fbCount.hidden = !n; }
 }
 
 async function loadShared() {
@@ -447,9 +653,9 @@ async function loadShared() {
     document.getElementById('statShared').textContent = String(flagged.length);
     const hint = document.getElementById('statSharedHint');
     if (!flagged.length) { hint.textContent = 'none flagged · 7d'; return; }
-    hint.innerHTML = flagged.slice(0, 4).map(u =>
+    hint.innerHTML = flagged.slice(0, 3).map(u =>
       `${esc(u.name || u.email)} · ${u.ip_count} IPs`
-    ).join('<br>') + (flagged.length > 4 ? `<br>+${flagged.length - 4} more` : '');
+    ).join('<br>') + (flagged.length > 3 ? `<br>+${flagged.length - 3} more` : '');
   } catch (_) {
     document.getElementById('statShared').textContent = '—';
   }
@@ -482,9 +688,8 @@ async function loadBilling() {
   document.getElementById('billMix').innerHTML = Object.keys(mix).length
     ? Object.entries(mix).map(([p, n]) => `${esc(planLabel(p))} × ${n}`).join('<br>')
     : '—';
-  const mrrEl = document.getElementById('statMrr');
-  if (mrrEl) mrrEl.textContent = billSummary.mrr ? `≈ $${Math.round(billSummary.mrr).toLocaleString()}/mo est.` : 'recurring plans';
   renderBilling();
+  loadStats().catch(() => {});
 }
 
 async function loadBillingLive(force) {
@@ -500,8 +705,7 @@ async function loadBillingLive(force) {
       if (t.mrr != null) {
         document.getElementById('billMrr').textContent = '$' + Math.round(t.mrr).toLocaleString();
         document.getElementById('billMrrHint').textContent = 'Stripe actual · ' + (t.active_subs ?? 0) + ' active subs';
-        const mrrEl = document.getElementById('statMrr');
-        if (mrrEl) mrrEl.textContent = `≈ $${Math.round(t.mrr).toLocaleString()}/mo Stripe`;
+        setMrrDisplays(t.mrr, `Stripe actual · ${t.active_subs ?? 0} active subs`);
       }
       const pastDueRows = billRows.filter(s => (billLive[s.user.id] || {}).subscription_status === 'past_due');
       const alert = document.getElementById('billAlert');
@@ -529,12 +733,11 @@ document.getElementById('billDigest').addEventListener('click', async () => {
   btn.disabled = true; btn.textContent = 'Sending…';
   try {
     const data = await api('/api/internal/owner-digest', { method: 'POST' });
-    setStatus(data.sent ? 'Digest sent to your inbox' : 'Digest logged (SMTP not configured)', !!data.sent);
+    setStatus(data.sent ? 'Digest sent to your inbox ✓' : 'Digest logged (SMTP not configured)', !!data.sent);
   } catch (err) { setStatus(err.message, false); }
   finally { btn.disabled = false; btn.textContent = 'Email me the weekly digest'; }
 });
 
-function fmtDate(iso) { return (iso || '').slice(0, 10) || '—'; }
 function renderBilling() {
   const body = document.getElementById('billingBody');
   const rows = billRows.filter(s => {
@@ -553,22 +756,22 @@ function renderBilling() {
     const paying = live ? (live.monthly_amount || 0) > 0 && ['active', 'trialing'].includes(live.subscription_status || '') : s.monthly_value > 0;
     const value = live && live.monthly_amount ? live.monthly_amount : s.monthly_value;
     const statusBadge = live && live.subscription_status
-      ? `<span class="sub-status ${esc(live.subscription_status)}">${esc(live.subscription_status.replace('_', ' '))}${live.cancel_at_period_end ? ' · cancels' : ''}</span>`
-      : `<span class="muted">${esc(u.status)}</span>`;
+      ? `<span class="badge ${esc(live.subscription_status)}">${esc(live.subscription_status.replace('_', ' '))}${live.cancel_at_period_end ? ' · cancels' : ''}</span>`
+      : `<span class="badge plain">${esc(u.status || '')}</span>`;
     return `
     <tr>
-      <td><a class="user-link" data-uid="${esc(u.id)}"><strong>${esc(u.name || '—')}</strong></a><br><span class="muted">${esc(u.email)}</span></td>
-      <td><span class="plan-badge ${paying ? 'paying' : (s.plan ? '' : 'none')}">${esc(s.plan_label || planLabel(s.plan) || '—')}</span>${s.per_seat ? `<br><span class="muted">${esc(String((live && live.seats) || s.seats))} seats</span>` : ''}</td>
+      <td><a class="user-link" data-uid="${esc(u.id)}">${esc(u.name || '—')}</a><br><span class="muted small">${esc(u.email)}</span></td>
+      <td><span class="badge ${paying ? 'paying' : (s.plan ? 'gold' : 'none')}">${esc(s.plan_label || planLabel(s.plan) || '—')}</span>${s.per_seat ? `<br><span class="muted small">${esc(String((live && live.seats) || s.seats))} seats</span>` : ''}</td>
       <td>${statusBadge}</td>
-      <td>${paying ? '$' + Math.round(value).toLocaleString() + '<span class="muted">/mo</span>' : (s.plan === 'one_time' ? '$20 <span class="muted">once</span>' : '<span class="muted">—</span>')}</td>
-      <td>${live && live.last_payment_amount ? '$' + Math.round(live.last_payment_amount).toLocaleString() + '<br><span class="muted">' + esc(fmtDate(live.last_payment_at)) + '</span>' : '<span class="muted">—</span>'}</td>
+      <td>${paying ? '<strong>' + money(value) + '</strong><span class="muted small">/mo</span>' : (s.plan === 'one_time' ? '$20 <span class="muted small">once</span>' : '<span class="muted">—</span>')}</td>
+      <td>${live && live.last_payment_amount ? money(live.last_payment_amount) + '<br><span class="muted small">' + esc(fmtDate(live.last_payment_at)) + '</span>' : '<span class="muted">—</span>'}</td>
       <td>${live && live.next_renewal ? esc(fmtDate(live.next_renewal)) : '<span class="muted">—</span>'}</td>
-      <td class="actions">
-        ${subUrl ? `<a class="btn btn-soft btn-sm" href="${esc(subUrl)}" target="_blank" rel="noopener">Sub</a>` : ''}
-        ${stripeUrl ? `<a class="btn btn-soft btn-sm" href="${esc(stripeUrl)}" target="_blank" rel="noopener">Customer</a>` : '<span class="muted">—</span>'}
+      <td>
+        ${subUrl ? `<a class="btn btn-sm" href="${esc(subUrl)}" target="_blank" rel="noopener">Sub</a>` : ''}
+        ${stripeUrl ? `<a class="btn btn-sm" href="${esc(stripeUrl)}" target="_blank" rel="noopener">Cust</a>` : '<span class="muted">—</span>'}
       </td>
     </tr>`;
-  }).join('') || '<tr><td colspan="7">No billing records yet</td></tr>';
+  }).join('') || '<tr><td colspan="7" class="empty">No billing records yet</td></tr>';
 }
 wireChips('billChips', 'data-bill', v => { billFilter = v; renderBilling(); });
 document.getElementById('billingBody').addEventListener('click', (e) => {
@@ -579,31 +782,65 @@ document.getElementById('billingBody').addEventListener('click', (e) => {
   }
 });
 
+/* ---------- Users ---------- */
+let usersRows = [];
+let uSort = { key: null, dir: 1 };
+
 async function loadUsers() {
   const q = document.getElementById('userQ').value.trim();
   const data = await api('/api/admin/users?q=' + encodeURIComponent(q));
+  usersRows = data.users || [];
+  renderUsers();
+}
+
+function renderUsers() {
   const body = document.getElementById('usersBody');
-  body.innerHTML = (data.users || []).map(u => {
+  let rows = usersRows.slice();
+  if (uSort.key) {
+    rows.sort((a, b) => {
+      let va, vb;
+      if (uSort.key === 'usage') { va = a.presentations_used ?? 0; vb = b.presentations_used ?? 0; }
+      else if (uSort.key === 'name') { va = (a.name || a.email || '').toLowerCase(); vb = (b.name || b.email || '').toLowerCase(); }
+      else if (uSort.key === 'status') { va = a.status || ''; vb = b.status || ''; }
+      else if (uSort.key === 'trial') { va = a.trial_ends_at || ''; vb = b.trial_ends_at || ''; }
+      if (va < vb) return -1 * uSort.dir;
+      if (va > vb) return 1 * uSort.dir;
+      return 0;
+    });
+  }
+  body.innerHTML = rows.map(u => {
     const stripeUrl = stripeCustomerUrl(u.stripe_customer_id);
     const lbl = planLabel(u.plan);
     const paying = (u.status || '') === 'active' && !!u.plan;
     return `
     <tr>
-      <td><a class="user-link" data-uid="${esc(u.id)}"><strong>${esc(u.name || '—')}</strong></a><br><span class="muted">${esc(u.email)}</span><br><span class="muted">${esc(u.brokerage || '')}</span></td>
-      <td>${esc(u.status)} · ${esc(u.role)}<br><span class="plan-badge ${paying ? 'paying' : (lbl ? '' : 'none')}" style="margin-top:4px">${esc(lbl || 'no plan')}</span></td>
-      <td data-usage>${u.presentations_used ?? 0} / ${u.presentation_limit ?? '∞'}</td>
-      <td>${esc((u.trial_ends_at || '').slice(0,10))}</td>
-      <td>${stripeUrl ? `<a href="${esc(stripeUrl)}" target="_blank" rel="noopener">Stripe</a>` : '<span class="muted">—</span>'}</td>
-      <td class="actions">
-        <button class="btn btn-soft btn-sm" data-act="detail" data-id="${u.id}">Open</button>
-        <button class="btn btn-soft btn-sm" data-act="extend" data-id="${u.id}">+14 days</button>
-        <button class="btn btn-soft btn-sm" data-act="bump" data-id="${u.id}">+3 reports</button>
-        <button class="btn btn-soft btn-sm" data-act="active" data-id="${u.id}">Mark active</button>
-        <button class="btn btn-soft btn-sm" data-act="disable" data-id="${u.id}">Disable</button>
+      <td><a class="user-link" data-uid="${esc(u.id)}">${esc(u.name || '—')}</a><br><span class="muted small">${esc(u.email)}</span>${u.brokerage ? `<br><span class="muted small">${esc(u.brokerage)}</span>` : ''}</td>
+      <td><span class="badge ${esc(u.status)}">${esc(u.status)}</span> <span class="muted small">${esc(u.role)}</span><br><span class="badge ${paying ? 'paying' : (lbl ? 'gold' : 'none')}" style="margin-top:4px">${esc(lbl || 'no plan')}</span></td>
+      <td data-usage><strong>${u.presentations_used ?? 0}</strong> <span class="muted">/ ${u.presentation_limit ?? '∞'}</span></td>
+      <td>${fmtDate(u.trial_ends_at)}${u.trial_ends_at ? `<br><span class="muted small">${esc(relTime(u.trial_ends_at))}</span>` : ''}</td>
+      <td>${stripeUrl ? `<a href="${esc(stripeUrl)}" target="_blank" rel="noopener" class="btn btn-sm">Stripe ↗</a>` : '<span class="muted">—</span>'}</td>
+      <td>
+        <button class="btn btn-sm" data-act="detail" data-id="${u.id}">Open</button>
+        <button class="btn btn-sm" data-act="extend" data-id="${u.id}">+14d</button>
+        <button class="btn btn-sm" data-act="bump" data-id="${u.id}">+3 reports</button>
+        <button class="btn btn-sm" data-act="active" data-id="${u.id}">Mark active</button>
+        <button class="btn btn-sm" data-act="disable" data-id="${u.id}">Disable</button>
       </td>
     </tr>`;
-  }).join('') || '<tr><td colspan="6">No users</td></tr>';
+  }).join('') || '<tr><td colspan="6" class="empty">No users found</td></tr>';
 }
+
+document.querySelectorAll('#tab-users th').forEach((th, i) => {
+  const keys = ['name', 'status', 'usage', 'trial'];
+  if (!keys[i]) return;
+  th.classList.add('sortable');
+  th.title = 'Click to sort';
+  th.addEventListener('click', () => {
+    if (uSort.key === keys[i]) uSort.dir *= -1; else { uSort.key = keys[i]; uSort.dir = 1; }
+    renderUsers();
+  });
+});
+
 document.getElementById('usersBody').addEventListener('click', async (e) => {
   const link = e.target.closest('[data-uid]');
   if (link) {
@@ -633,7 +870,7 @@ document.getElementById('usersBody').addEventListener('click', async (e) => {
   if (act === 'disable') payload.status = 'disabled';
   try {
     await api('/api/admin/users/' + id, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-    setStatus('Updated user', true);
+    setStatus('Updated user ✓', true);
     loadUsers();
     loadStats();
   } catch (err) { setStatus(String(err.message || err), false); }
@@ -643,6 +880,7 @@ document.getElementById('userQ').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') { e.preventDefault(); loadUsers().catch(err => setStatus(err.message, false)); }
 });
 
+/* ---------- Reports ---------- */
 async function loadReports() {
   const q = document.getElementById('reportQ').value.trim();
   const data = await api('/api/admin/presentations?q=' + encodeURIComponent(q));
@@ -652,16 +890,16 @@ async function loadReports() {
     const shareUrl = absUrl(p.share_url || p.url || '');
     return `
     <tr>
-      <td><strong>${esc(p.address || p.title || '—')}</strong><br><span class="muted"><code>${esc(p.run_id || '')}</code></span></td>
-      <td>${esc(p.agent_name || '—')}<br><span class="muted">${esc(p.agent_email || '')}</span></td>
-      <td>${money(p.recommended_price)}</td>
-      <td>${esc((p.created_at || '').slice(0,16))}</td>
-      <td class="actions">
-        <a class="btn btn-soft btn-sm" href="${esc(openUrl)}" target="_blank" rel="noopener">Open</a>
-        <button type="button" class="btn btn-soft btn-sm" data-copy="${esc(shareUrl)}">Copy share</button>
+      <td><strong>${esc(p.address || p.title || '—')}</strong><br><code>${esc(p.run_id || '')}</code></td>
+      <td>${esc(p.agent_name || '—')}<br><span class="muted small">${esc(p.agent_email || '')}</span></td>
+      <td><strong>${money(p.recommended_price)}</strong></td>
+      <td>${relTime(p.created_at)}</td>
+      <td>
+        <a class="btn btn-sm" href="${esc(openUrl)}" target="_blank" rel="noopener">Open</a>
+        <button type="button" class="btn btn-sm" data-copy="${esc(shareUrl)}">Copy share</button>
       </td>
     </tr>`;
-  }).join('') || '<tr><td colspan="5">No presentations</td></tr>';
+  }).join('') || '<tr><td colspan="5" class="empty">No presentations yet — they appear here the moment agents generate</td></tr>';
 }
 document.getElementById('reportSearch').addEventListener('click', () => loadReports().catch(e => setStatus(e.message, false)));
 document.getElementById('reportQ').addEventListener('keydown', (e) => {
@@ -673,33 +911,35 @@ document.getElementById('reportsBody').addEventListener('click', async (e) => {
   const url = btn.dataset.copy || '';
   try {
     await navigator.clipboard.writeText(url);
-    setStatus('Share link copied', true);
+    setStatus('Share link copied ✓', true);
   } catch (_) {
     setStatus(url || 'Nothing to copy', false);
   }
 });
 
+/* ---------- AI chats ---------- */
 async function loadAiChats() {
   const q = document.getElementById('aiQ').value.trim();
   const data = await api('/api/admin/assistant-chats?q=' + encodeURIComponent(q));
   const list = document.getElementById('aiList');
   const turns = data.turns || [];
   if (!turns.length) {
-    list.innerHTML = '<p class="muted">No assistant chats logged yet. New questions will show here after agents use Ask ListLogic.</p>';
+    list.innerHTML = '<div class="empty">No assistant chats logged yet.<br>New questions show here after agents use Ask ListLogic.</div>';
     return;
   }
   list.innerHTML = turns.map(t => `
-    <div style="border-bottom:1px solid var(--line);padding:12px 0 14px">
+    <div class="chat-card">
       <div class="chat-meta">
-        <span>${esc((t.created_at || '').slice(0,16))}</span>
-        <span>${esc(t.agent_name || '—')} · ${esc(t.agent_email || '')}</span>
-        <span>${t.ok ? 'ok' : 'error'}${t.model ? ' · ' + esc(t.model) : ''}</span>
-        ${t.conversation_id ? `<code>${esc(t.conversation_id.slice(0,10))}</code>` : ''}
-        ${t.user_id ? `<button type="button" class="btn btn-soft btn-sm" data-uid="${esc(t.user_id)}">User</button>` : ''}
+        <span class="tl-when">${relTime(t.created_at)}</span>
+        <span><strong>${esc(t.agent_name || '—')}</strong> · ${esc(t.agent_email || '')}</span>
+        <span class="badge ${t.ok ? 'done' : 'canceled'}">${t.ok ? 'ok' : 'error'}</span>
+        ${t.model ? `<span class="muted">${esc(t.model)}</span>` : ''}
+        ${t.conversation_id ? `<code>${esc(t.conversation_id.slice(0, 10))}</code>` : ''}
+        ${t.user_id ? `<button type="button" class="btn btn-sm" data-uid="${esc(t.user_id)}">User</button>` : ''}
       </div>
-      ${t.page_url ? `<div class="muted page-url" style="margin-bottom:8px">${esc(t.page_url)}</div>` : ''}
-      <div class="chat-bubble user"><strong>Agent</strong><br>${esc(t.user_message)}</div>
-      <div class="chat-bubble bot"><strong>Assistant</strong><br>${esc(t.assistant_reply)}</div>
+      ${t.page_url ? `<div class="muted small page-url" style="margin-bottom:8px">${esc(t.page_url)}</div>` : ''}
+      <div class="bubble user"><span class="who">Agent asked</span>${esc(t.user_message)}</div>
+      <div class="bubble bot"><span class="who">Assistant</span>${esc(t.assistant_reply)}</div>
     </div>
   `).join('');
 }
@@ -713,16 +953,17 @@ document.getElementById('aiList').addEventListener('click', (e) => {
   openUserDrawer(btn.dataset.uid).catch(err => setStatus(err.message, false));
 });
 
+/* ---------- Promos ---------- */
 async function loadPromos() {
   const data = await api('/api/admin/promo-codes');
   document.getElementById('promosBody').innerHTML = (data.promo_codes || []).map(p => `
     <tr>
-      <td><code>${esc(p.code)}</code><br><span class="muted">${esc(p.label || '')}</span></td>
-      <td>${p.presentation_limit < 0 ? 'Unlimited generate' : ((p.presentation_limit ?? 0) + ' reports / ' + p.trial_days + 'd')}</td>
+      <td><code>${esc(p.code)}</code><br><span class="muted small">${esc(p.label || '')}</span></td>
+      <td>${p.presentation_limit < 0 ? '<span class="badge paying">Unlimited generate</span>' : ((p.presentation_limit ?? 0) + ' reports / ' + p.trial_days + 'd')}</td>
       <td>${p.redemptions}${p.max_redemptions != null ? ' / ' + p.max_redemptions : ''}</td>
-      <td>${p.active ? 'yes' : 'no'}</td>
-      <td><button class="btn btn-soft btn-sm" data-pid="${p.id}" data-active="${p.active ? 0 : 1}">${p.active ? 'Deactivate' : 'Activate'}</button></td>
-    </tr>`).join('') || '<tr><td colspan="5">None</td></tr>';
+      <td><span class="badge ${p.active ? 'done' : 'none'}">${p.active ? 'active' : 'off'}</span></td>
+      <td><button class="btn btn-sm" data-pid="${p.id}" data-active="${p.active ? 0 : 1}">${p.active ? 'Deactivate' : 'Activate'}</button></td>
+    </tr>`).join('') || '<tr><td colspan="5" class="empty">No promo codes yet</td></tr>';
 }
 document.getElementById('promosBody').addEventListener('click', async (e) => {
   const btn = e.target.closest('button[data-pid]');
@@ -749,20 +990,21 @@ document.getElementById('pCreate').addEventListener('click', async () => {
         notes: document.getElementById('pNotes').value,
       }),
     });
-    setStatus('Promo created', true);
+    setStatus('Promo created ✓', true);
     loadPromos();
   } catch (err) { setStatus(err.message, false); }
 });
 
+/* ---------- Invites ---------- */
 async function loadInvites() {
   const data = await api('/api/admin/invites');
   document.getElementById('invitesBody').innerHTML = (data.invites || []).map(i => `
     <tr>
       <td><code>${esc(i.url || i.token)}</code></td>
-      <td>${i.presentation_limit} / ${i.trial_days}d<br><span class="muted">${esc(i.email || '')} ${esc(i.brokerage || '')}</span></td>
+      <td>${i.presentation_limit} / ${i.trial_days}d<br><span class="muted small">${esc(i.email || '')} ${esc(i.brokerage || '')}</span></td>
       <td>${i.uses} / ${i.max_uses}</td>
-      <td>${esc((i.expires_at || '').slice(0,10))}</td>
-    </tr>`).join('') || '<tr><td colspan="4">None</td></tr>';
+      <td>${fmtDate(i.expires_at)}</td>
+    </tr>`).join('') || '<tr><td colspan="4" class="empty">No invite links yet</td></tr>';
 }
 document.getElementById('iCreate').addEventListener('click', async () => {
   try {
@@ -775,11 +1017,12 @@ document.getElementById('iCreate').addEventListener('click', async () => {
         presentation_limit: +document.getElementById('iLimit').value || 3,
       }),
     });
-    setStatus('Invite: ' + (data.invite?.url || 'created'), true);
+    setStatus('Invite created: ' + (data.invite?.url || ''), true);
     loadInvites();
   } catch (err) { setStatus(err.message, false); }
 });
 
+/* ---------- Feedback ---------- */
 async function loadFeedback() {
   const qs = new URLSearchParams();
   if (fbStatus) qs.set('status', fbStatus);
@@ -787,14 +1030,14 @@ async function loadFeedback() {
   const data = await api('/api/admin/feedback?' + qs.toString());
   document.getElementById('fbBody').innerHTML = (data.feedback || []).map(f => {
     const mailto = f.email
-      ? `mailto:${encodeURIComponent(f.email)}?subject=${encodeURIComponent('Re: ListLogic ' + (f.category || 'feedback'))}&body=${encodeURIComponent('Hi,\\n\\nThanks for your note about ListLogic.\\n\\n---\\n' + (f.message || ''))}`
+      ? `mailto:${encodeURIComponent(f.email)}?subject=${encodeURIComponent('Re: ListLogic ' + (f.category || 'feedback'))}&body=${encodeURIComponent('Hi,\n\nThanks for your note about ListLogic.\n\n---\n' + (f.message || ''))}`
       : '';
     return `
     <tr>
-      <td>${esc((f.created_at || '').slice(0,16))}</td>
-      <td>${esc(f.category)}</td>
+      <td>${relTime(f.created_at)}</td>
+      <td><span class="badge ${f.category === 'bug' ? 'canceled' : f.category === 'suggestion' ? 'trialing' : 'plain'}">${esc(f.category || '')}</span></td>
       <td>${esc(f.email || '—')}</td>
-      <td>${esc(f.message)}${f.page_url ? '<br><span class="muted page-url">' + esc(f.page_url) + '</span>' : ''}</td>
+      <td>${esc(f.message)}${f.page_url ? '<br><span class="muted small page-url">' + esc(f.page_url) + '</span>' : ''}</td>
       <td>
         <select data-fid="${f.id}">
           <option value="new" ${f.status==='new'?'selected':''}>new</option>
@@ -802,11 +1045,11 @@ async function loadFeedback() {
           <option value="done" ${f.status==='done'?'selected':''}>done</option>
         </select>
       </td>
-      <td class="actions">
-        ${mailto ? `<a class="btn btn-soft btn-sm" href="${mailto}">Reply</a>` : '<span class="muted">—</span>'}
+      <td>
+        ${mailto ? `<a class="btn btn-sm" href="${mailto}">Reply</a>` : '<span class="muted">—</span>'}
       </td>
     </tr>`;
-  }).join('') || '<tr><td colspan="6">No feedback yet</td></tr>';
+  }).join('') || '<tr><td colspan="6" class="empty">No feedback yet — when agents send it, it lands here</td></tr>';
 }
 document.getElementById('fbBody').addEventListener('change', async (e) => {
   const sel = e.target.closest('select[data-fid]');
@@ -815,6 +1058,7 @@ document.getElementById('fbBody').addEventListener('change', async (e) => {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status: sel.value }),
   });
+  setStatus('Feedback marked ' + sel.value + ' ✓', true);
   loadStats().catch(() => {});
 });
 function wireChips(rootId, attr, apply) {
@@ -829,24 +1073,33 @@ function wireChips(rootId, attr, apply) {
 wireChips('fbStatusChips', 'data-status', v => { fbStatus = v; loadFeedback().catch(err => setStatus(err.message, false)); });
 wireChips('fbCatChips', 'data-cat', v => { fbCategory = v; loadFeedback().catch(err => setStatus(err.message, false)); });
 
+/* ---------- Events (timeline) ---------- */
 async function loadEvents() {
   const qs = new URLSearchParams();
   const q = document.getElementById('evQ').value.trim();
   if (q) qs.set('q', q);
   if (evType) qs.set('type', evType);
   const data = await api('/api/admin/events?' + qs.toString());
-  document.getElementById('eventsBody').innerHTML = (data.events || []).map(ev => `
-    <tr>
-      <td>${esc((ev.created_at || '').slice(0,16))}</td>
-      <td><code>${esc(ev.type)}</code></td>
-      <td>${esc(ev.agent_name || '—')}<br><span class="muted">${esc(ev.agent_email || '')}</span></td>
-      <td><code class="trunc" style="display:inline-block;max-width:420px;white-space:pre-wrap">${esc(JSON.stringify(ev.meta || {}))}</code></td>
-    </tr>
-  `).join('') || '<tr><td colspan="4">No events</td></tr>';
+  const evs = data.events || [];
+  document.getElementById('eventsTl').innerHTML = evs.map(ev => `
+    <div class="tl-item">
+      <span class="tl-when">${relTime(ev.created_at)} · ${esc((ev.created_at || '').slice(0, 16))}</span>
+      <div style="margin-top:3px;display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+        <span class="badge gold" style="font-size:.64rem">${esc(ev.type)}</span>
+        <strong>${esc(ev.agent_name || '—')}</strong>
+        <span class="muted small">${esc(ev.agent_email || '')}</span>
+      </div>
+      ${ev.meta && Object.keys(ev.meta).length ? `<code style="display:inline-block;margin-top:5px">${esc(JSON.stringify(ev.meta))}</code>` : ''}
+    </div>
+  `).join('') || '<div class="empty">No events yet</div>';
 }
 document.getElementById('evSearch').addEventListener('click', () => loadEvents().catch(e => setStatus(e.message, false)));
+document.getElementById('evQ').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); loadEvents().catch(err => setStatus(err.message, false)); }
+});
 wireChips('evTypeChips', 'data-type', v => { evType = v; loadEvents().catch(err => setStatus(err.message, false)); });
 
+/* ---------- Boot ---------- */
 (async () => {
   const me = await api('/api/auth-status');
   if (!me.authenticated || me.user?.role !== 'admin') {
@@ -863,6 +1116,19 @@ wireChips('evTypeChips', 'data-type', v => { evType = v; loadEvents().catch(err 
   ]);
 })().catch(err => setStatus(String(err.message || err), false));
 </script>
+
+<!--
+OWNER CONSOLE GAP REVIEW — ideas that would need NEW backend endpoints (not implemented here):
+1. Revenue over time chart (MRR trend by week)          — needs /api/admin/revenue-history
+2. Churn & cohort view (canceled per month, retention)  — needs /api/admin/churn-stats
+3. Per-user activity timeline inside drawer             — needs /api/admin/users/{id}/events
+4. CSV export of users/billing                          — needs /api/admin/export?type=users|billing
+5. Fingerprint health panel (active fingerprints, stale sellers) — needs /api/admin/fingerprints
+6. Login/session security log w/ IP history             — needs /api/admin/sessions
+7. Bulk actions on users (select many, extend/disable)  — needs batch POST support
+8. Promo performance (redemption funnel per code)       — needs /api/admin/promo-codes/{id}/stats
+-->
+
 <script src="/saas/dash-nav.js"></script>
 <script src="/saas/analytics.js"></script>
 </body>

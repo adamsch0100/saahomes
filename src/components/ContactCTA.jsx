@@ -95,15 +95,14 @@ export default function ContactCTA() {
                 className="px-6 py-4 rounded-lg bg-white text-gray-900 border-2 border-transparent focus:border-blue-500 focus:outline-none transition-colors"
               >
                 <option value="">I'm interested in...</option>
-                <option value="buying">Buying a Home</option>
-                <option value="selling">Selling a Home</option>
-                <option value="both">Both</option>
-                <option value="consultation">Just a Consultation</option>
+                <option value="Buying a home">Buying a Home</option>
+                <option value="Selling a home">Selling a Home</option>
+                <option value="Both">Both</option>
+                <option value="Just a consultation">Just a Consultation</option>
               </select>
             </div>
             <textarea
               name="message"
-              required
               rows="5"
               placeholder="Tell us about your real estate goals..."
               value={formData.message}
@@ -115,7 +114,7 @@ export default function ContactCTA() {
               disabled={isSubmitting}
               className="mt-6 w-full px-8 py-4 bg-white text-gray-900 font-bold rounded-lg shadow-lg hover:bg-gray-100 transform hover:scale-[1.02] transition-all text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Sending...' : 'Send Message'}
+              {isSubmitting ? 'Sending...' : 'Get My Free Consultation'}
             </button>
             <p className="mt-4 text-center text-gray-300 text-sm">
               Or email us directly at{" "}

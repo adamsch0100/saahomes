@@ -41,6 +41,7 @@ MAX_GALLERY_PHOTOS = 15
 # Reject Realtor/Zillow thumbnails that are too small to look sharp in the deck.
 MIN_PHOTO_BYTES = 12_000
 PHOTO_CACHE_VERSION = 2
+PHOTO_MISS_VERSION = 5
 ENRICH_BUDGET_SEC = 55
 CLUSTER_RADIUS_DEG = 0.006
 CLUSTER_PAD_DEG = 0.002
@@ -58,10 +59,14 @@ STREET_STOPWORDS = {
 }
 
 
+_REEF_KEY_NAMES = ("REEF_API_KEY", "REEF_API_KEY")
+
+
 def _load_dotenv_key() -> str:
-    key = (os.environ.get("REEF_API_KEY") or "").strip()
-    if key:
-        return key
+    for name in _REEF_KEY_NAMES:
+        key = (os.environ.get(name) or "").strip()
+        if key:
+            return key
     env_path = ROOT / ".env"
     if not env_path.exists():
         return ""
@@ -71,7 +76,7 @@ def _load_dotenv_key() -> str:
             if not line or line.startswith("#") or "=" not in line:
                 continue
             name, val = line.split("=", 1)
-            if name.strip() == "REEF_API_KEY":
+            if name.strip() in _REEF_KEY_NAMES:
                 return val.strip().strip('"').strip("'")
     except OSError:
         return ""
@@ -117,8 +122,9 @@ def _read_cache(cache_key: str) -> dict | None:
     if fetched and (time.time() - fetched) > CACHE_TTL_DAYS * 86400:
         return None
     if data.get("miss"):
+        if int(data.get("cache_version") or 1) < PHOTO_MISS_VERSION:
+            return None
         return data
-    # Drop thumbnail-era cache entries so Search-path blurry s.jpg files get re-fetched.
     if int(data.get("cache_version") or 1) < PHOTO_CACHE_VERSION:
         return None
     primary = data.get("primary_path") or ""
@@ -154,6 +160,7 @@ def _write_cache(cache_key: str, payload: dict) -> dict:
     payload = dict(payload)
     payload["fetched_at"] = time.time()
     payload["cache_key"] = cache_key
+    payload["cache_version"] = PHOTO_CACHE_VERSION
     (folder / "meta.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
     return payload
 
@@ -161,7 +168,13 @@ def _write_cache(cache_key: str, payload: dict) -> dict:
 def _write_miss(cache_key: str, reason: str = "") -> dict:
     folder = CACHE_DIR / cache_key
     folder.mkdir(parents=True, exist_ok=True)
-    payload = {"miss": True, "reason": reason, "fetched_at": time.time(), "cache_key": cache_key}
+    payload = {
+        "miss": True,
+        "reason": reason,
+        "fetched_at": time.time(),
+        "cache_key": cache_key,
+        "cache_version": PHOTO_MISS_VERSION,
+    }
     (folder / "meta.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
     return payload
 
@@ -214,9 +227,15 @@ def _address_match_score(target: str, candidate: str) -> float:
     if not t_tokens:
         return 0.55
     overlap = len(t_tokens & c_tokens)
-    if overlap == 0:
-        return 0.0
-    return 0.55 + 0.45 * (overlap / max(len(t_tokens), 1))
+    if overlap:
+        return 0.55 + 0.45 * (overlap / max(len(t_tokens), 1))
+    cand_low = (candidate or "").lower()
+    numbered = [tok for tok in t_tokens if any(ch.isdigit() for ch in tok)]
+    if numbered and any(tok in cand_low for tok in numbered):
+        return 0.55
+    if not t_tokens or not c_tokens:
+        return 0.55
+    return 0.0
 
 
 def upgrade_listing_photo_url(url: str) -> str:
@@ -241,23 +260,31 @@ def upgrade_listing_photo_url(url: str) -> str:
 
 
 def _extract_photo_urls(item: dict, limit: int = MAX_GALLERY_PHOTOS) -> list[str]:
-    photos = item.get("photos") or []
+    photos = item.get("photos") or item.get("miniCardPhotos") or []
     urls: list[str] = []
     for p in photos:
         if isinstance(p, str):
             urls.append(p)
         elif isinstance(p, dict):
-            u = p.get("url") or p.get("href") or ""
+            u = p.get("url") or p.get("href") or p.get("uri") or ""
             if u:
                 urls.append(str(u))
+    for key in ("photo_url", "imgSrc", "image", "image_url", "primary_photo", "hiResImage"):
+        raw = item.get(key)
+        if isinstance(raw, dict):
+            raw = raw.get("url") or raw.get("href") or raw.get("uri") or ""
+        if raw:
+            urls.append(str(raw))
     cleaned: list[str] = []
+    seen: set[str] = set()
     for url in urls:
         url = upgrade_listing_photo_url(url)
         low = url.lower()
-        if not url.startswith("http"):
+        if not url.startswith("http") or url in seen:
             continue
         if "maps.googleapis.com" in low or "staticmap" in low:
             continue
+        seen.add(url)
         cleaned.append(url)
         if len(cleaned) >= limit:
             break
@@ -320,24 +347,60 @@ def _geocode(address: str) -> tuple[float | None, float | None]:
 
 
 def _search_bounds(west: float, east: float, south: float, north: float) -> list[dict]:
-    res = _call(
-        "search_by_coordinates",
-        {
-            "map_bounds": {"west": west, "east": east, "south": south, "north": north},
-            "status": "recently_sold",
-            "max_results": "80",
-        },
-    )
-    if not res.get("ok"):
-        logger.info("Reef cluster search failed: %s", res.get("error"))
+    """Pull for-sale (includes pending on Zillow) and sold so active Fingerprint cards can match."""
+    bounds = {"west": west, "east": east, "south": south, "north": north}
+    items: list[dict] = []
+    seen: set[str] = set()
+    for status in ("for_sale", "sold"):
+        res = _call(
+            "search_by_coordinates",
+            {
+                "map_bounds": bounds,
+                "status": status,
+                "max_results": "200",
+            },
+        )
+        if not res.get("ok"):
+            logger.info("Reef cluster search failed (%s): %s", status, res.get("error"))
+            continue
+        for item in list((res.get("data") or {}).get("items") or []):
+            if not isinstance(item, dict):
+                continue
+            key = str(item.get("zpid") or item.get("address") or "")
+            if not key or key in seen:
+                continue
+            seen.add(key)
+            items.append(item)
+    return items
+
+
+def _search_address(address: str) -> list[dict]:
+    """Street-level Zillow search — last resort when map clusters miss a house."""
+    q = (address or "").strip()
+    if not q:
         return []
-    return list((res.get("data") or {}).get("items") or [])
+    items: list[dict] = []
+    seen: set[str] = set()
+    for status in ("for_sale", "sold"):
+        res = _call("search", {"location": q, "status": status, "max_results": "8"})
+        if not res.get("ok"):
+            logger.info("Reef address search failed (%s): %s", status, res.get("error"))
+            continue
+        for item in list((res.get("data") or {}).get("items") or []):
+            if not isinstance(item, dict):
+                continue
+            key = str(item.get("zpid") or item.get("address") or item.get("address_line") or "")
+            if not key or key in seen:
+                continue
+            seen.add(key)
+            items.append(item)
+    return items
 
 
 def _match_item(target_address: str, items: list[dict]) -> dict | None:
     scored: list[tuple[float, dict]] = []
     for item in items:
-        cand = item.get("address") or item.get("address_line") or ""
+        cand = item.get("address") or item.get("address_line") or item.get("streetAddress") or item.get("unparsed_address") or ""
         score = _address_match_score(target_address, str(cand))
         if score >= 0.55:
             scored.append((score, item))
@@ -345,6 +408,33 @@ def _match_item(target_address: str, items: list[dict]) -> dict | None:
         return None
     scored.sort(key=lambda x: x[0], reverse=True)
     return scored[0][1]
+
+
+def _keep_match(target: dict, item: dict, out: dict) -> bool:
+    addr = str(item.get("address") or item.get("address_line") or "")
+    urls = _extract_photo_urls(item, limit=1)
+    if urls:
+        meta = _persist_photos(
+            target["key"],
+            urls,
+            zpid=item.get("zpid"),
+            matched_address=addr,
+        )
+        if meta:
+            out[target["key"]] = meta
+            return True
+    if item.get("zpid"):
+        out[target["key"]] = _write_cache(
+            target["key"],
+            {
+                "zpid": item.get("zpid"),
+                "matched_address": addr,
+                "gallery_paths": [],
+                "primary_path": "",
+            },
+        )
+        return True
+    return False
 
 
 def _cluster_targets(targets: list[dict]) -> list[list[dict]]:
@@ -501,7 +591,12 @@ def fetch_cluster_photos(targets: list[dict], *, deadline: float | None = None) 
         cached = _read_cache(key)
         if cached and cached.get("miss"):
             continue
-        if cached and (cached.get("primary_path") or cached.get("gallery_paths") or cached.get("zpid")):
+        has_file = False
+        if cached:
+            primary = str(cached.get("primary_path") or "")
+            galleries = [str(p) for p in (cached.get("gallery_paths") or []) if p]
+            has_file = bool(primary and Path(primary).exists()) or any(Path(p).exists() for p in galleries)
+        if has_file:
             out[key] = cached
         else:
             misses.append(t)
@@ -521,7 +616,11 @@ def fetch_cluster_photos(targets: list[dict], *, deadline: float | None = None) 
             located = [t for t in cluster if t.get("lat") is not None and t.get("lng") is not None]
             for t in cluster:
                 if t not in located:
-                    _write_miss(t["key"], "geocode")
+                    items_addr = _search_address(t.get("address") or "")
+                    api_calls += 1
+                    item = _match_item(t.get("address") or "", items_addr)
+                    if not item or not _keep_match(t, item, out):
+                        _write_miss(t["key"], "geocode")
             if not located:
                 continue
 
@@ -534,34 +633,9 @@ def fetch_cluster_photos(targets: list[dict], *, deadline: float | None = None) 
             still: list[dict] = []
             for t in located:
                 item = _match_item(t.get("address") or "", items)
-                if not item:
-                    still.append(t)
-                    continue
-                urls = _extract_photo_urls(item, limit=1)
-                if urls:
-                    meta = _persist_photos(
-                        t["key"],
-                        urls,
-                        zpid=item.get("zpid"),
-                        matched_address=str(item.get("address") or ""),
-                    )
-                    if meta:
-                        out[t["key"]] = meta
-                        continue
-                if item.get("zpid"):
-                    out[t["key"]] = _write_cache(
-                        t["key"],
-                        {
-                            "zpid": item.get("zpid"),
-                            "matched_address": item.get("address"),
-                            "gallery_paths": [],
-                            "primary_path": "",
-                        },
-                    )
-                else:
+                if not item or not _keep_match(t, item, out):
                     still.append(t)
 
-            # Fall back: tighter per-home map search for unmatched
             for t in still:
                 if deadline is not None and time.time() > deadline:
                     break
@@ -571,31 +645,11 @@ def fetch_cluster_photos(targets: list[dict], *, deadline: float | None = None) 
                 api_calls += 1
                 item = _match_item(t.get("address") or "", items2)
                 if not item:
+                    items2 = _search_address(t.get("address") or "")
+                    api_calls += 1
+                    item = _match_item(t.get("address") or "", items2)
+                if not item or not _keep_match(t, item, out):
                     _write_miss(t["key"], "no_match")
-                    continue
-                urls = _extract_photo_urls(item, limit=1)
-                if urls:
-                    meta = _persist_photos(
-                        t["key"],
-                        urls,
-                        zpid=item.get("zpid"),
-                        matched_address=str(item.get("address") or ""),
-                    )
-                    if meta:
-                        out[t["key"]] = meta
-                        continue
-                if item.get("zpid"):
-                    out[t["key"]] = _write_cache(
-                        t["key"],
-                        {
-                            "zpid": item.get("zpid"),
-                            "matched_address": item.get("address"),
-                            "gallery_paths": [],
-                            "primary_path": "",
-                        },
-                    )
-                else:
-                    _write_miss(t["key"], "no_photo")
 
     if deadline is None or time.time() <= deadline:
         api_calls += _hydrate_galleries(out)
@@ -618,6 +672,7 @@ def enrich_report_photos(
     cache_only: bool = False,
     deadline: float | None = None,
     on_listing: Any = None,
+    extra_listings: list | None = None,
 ) -> dict[str, str]:
     """Attach hosted photo galleries to comps. Sets row photo_url + photos[].
 
@@ -656,6 +711,31 @@ def enrich_report_photos(
             "lng": c.get("longitude"),
             "row": c,
         })
+
+    seen = {t["public_key"] for t in candidates}
+    for c in extra_listings or []:
+        if not isinstance(c, dict):
+            continue
+        mls = str(c.get("mls_number") or c.get("mls") or c.get("id") or "").strip()
+        addr = str(c.get("address") or "").strip()
+        if not mls and not addr:
+            continue
+        public_key = mls or _safe_key(addr)
+        if public_key in seen or public_key == SUBJECT_KEY:
+            continue
+        seen.add(public_key)
+        candidates.append({
+            "key": _safe_key(mls or addr),
+            "public_key": public_key,
+            "address": ", ".join(
+                x for x in [addr, str(c.get("city") or ""), str(c.get("state") or "CO")] if x
+            ),
+            "lat": c.get("latitude") or c.get("lat"),
+            "lng": c.get("longitude") or c.get("lng"),
+            "row": c,
+        })
+        if len(candidates) >= max_comps + 200:
+            break
 
     if include_subject and isinstance(subject, dict):
         sub_addr = str(subject.get("address") or "").strip()
