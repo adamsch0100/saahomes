@@ -5,7 +5,7 @@ import { AREA_FAQS } from './areaFaqs.js';
 // the area page content was last substantively changed. Used in WebPage schema
 // so Google sees current, dated content on re-crawl (indexation patrol 2026-08-17:
 // FC/Greeley/properties crawled before content shipped → dateModified drives re-crawl).
-export const AREA_CONTENT_DATE = '2026-08-17';
+export const AREA_CONTENT_DATE = '2026-08-26';
 
 export const areaSeoPages = [
   {
