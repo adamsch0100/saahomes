@@ -18,24 +18,53 @@ export default function BlogPage() {
         description="Northern Colorado real estate blog with CHFA down payment assistance guides, market updates, and home buying tips for Fort Collins, Loveland, Windsor, Greeley, and across Colorado."
         keywords="Northern Colorado real estate blog, CHFA down payment assistance guide, Colorado first time home buyer, Fort Collins housing market, CHFA Fort Collins, educator home loan Colorado, SAA Homes guides"
         canonical="https://saahomes.com/blog/"
-        jsonLd={[{
-          "@context": "https://schema.org",
-          "@type": "Blog",
-          name: "SAA Homes Northern Colorado Real Estate Blog",
-          url: "https://saahomes.com/blog/",
-          description: "Real estate tips, CHFA homebuyer guides, market updates, and neighborhood guides for Northern Colorado.",
-          publisher: {
-            "@type": "Organization",
-            name: "Schwartz And Associates",
-            url: "https://saahomes.com/",
-          },
-          blogPost: sortedPosts.map((post) => ({
-            "@type": "BlogPosting",
-            headline: post.title,
-            url: `https://saahomes.com/blog/${post.slug}/`,
-            datePublished: post.date,
-          })),
-        }]}
+        jsonLd={[
+                  {
+                    "@context": "https://schema.org",
+                    "@type": "Blog",
+                    name: "SAA Homes Northern Colorado Real Estate Blog",
+                    url: "https://saahomes.com/blog/",
+                    description:
+                      "Real estate tips, CHFA homebuyer guides, market updates, and neighborhood guides for Northern Colorado.",
+                    publisher: {
+                      "@type": "Organization",
+                      name: "Schwartz And Associates",
+                      url: "https://saahomes.com/",
+                    },
+                    blogPost: sortedPosts.map((post) => ({
+                      "@type": "BlogPosting",
+                      headline: post.title,
+                      url: `https://saahomes.com/blog/${post.slug}/`,
+                      datePublished: post.date,
+                    })),
+                  },
+                  {
+                    "@context": "https://schema.org",
+                    "@type": "BreadcrumbList",
+                    itemListElement: [
+                      { "@type": "ListItem", position: 1, name: "Home", item: "https://saahomes.com/" },
+                      {
+                        "@type": "ListItem",
+                        position: 2,
+                        name: "Real Estate Guides",
+                        item: "https://saahomes.com/blog/",
+                      },
+                    ],
+                  },
+                  {
+                    "@context": "https://schema.org",
+                    "@type": "ItemList",
+                    name: "SAA Homes Blog Posts",
+                    description:
+                      "Real estate guides, CHFA homebuyer resources, and neighborhood content for Northern Colorado",
+                    itemListElement: sortedPosts.map((post, i) => ({
+                      "@type": "ListItem",
+                      position: i + 1,
+                      name: post.title,
+                      url: `https://saahomes.com/blog/${post.slug}/`,
+                    })),
+                  },
+                ]}
       />
 
       <section className="relative h-80 bg-gray-900 flex items-center justify-center pt-24">
