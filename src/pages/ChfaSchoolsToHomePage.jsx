@@ -235,6 +235,37 @@ export default function ChfaSchoolsToHomePage() {
           ]
         })}
       </script>
+      {/* GEO: HowTo schema for AI answer extraction */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "HowTo",
+          name: "How to apply for CHFA Schools To Home in Colorado",
+          description: "Step-by-step process for Colorado public school employees to access up to 25% down payment assistance through CHFA Schools To Home.",
+          step: steps.map((s, i) => ({
+            "@type": "HowToStep",
+            position: i + 1,
+            name: s.title,
+            text: s.description,
+            url: s.internal ? `https://saahomes.com/chfa-schools-to-home/${s.link}` : s.link,
+          })),
+        })}
+      </script>
+      {/* GEO: ItemList schema for AI answer extraction */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "CHFA Schools To Home Program Features",
+          description: "Key benefits of the CHFA Schools To Home down payment assistance program for Colorado public school employees",
+          itemListElement: programFeatures.map((feature, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            name: feature.title,
+            description: feature.description,
+          })),
+        })}
+      </script>
 
       {/* Hero */}
       <section
