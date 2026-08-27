@@ -425,6 +425,32 @@ export default function FortCollinsPage() {
           </div>
         </section>
 
+      {/* Cash-buyer cross-link from FC area page to cash-home-buyers blog (P0 internal link equity) */}
+      <section className="mb-12 py-8 px-6 bg-white rounded-lg border border-gray-200">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold font-serif mb-3">Selling Your Fort Collins Home for Cash?</h2>
+          <p className="text-gray-700 mb-6">
+            Not every sale needs a full listing. If speed matters more than top dollar, learn how vetted
+            cash buyers work in Fort Collins — and how a cash offer compares against what your home
+            could bring on the open market.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="/blog/cash-home-buyers-fort-collins-northern-colorado/"
+              className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Cash Home Buyer Guide &rarr;
+            </a>
+            <a
+              href="/cash-home-buyers/"
+              className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+            >
+              Explore Cash Offers
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
         <section className="text-center bg-gray-900 text-white p-12 rounded-lg">
           <h2 className="text-3xl font-bold mb-4">Ready to Explore Fort Collins?</h2>

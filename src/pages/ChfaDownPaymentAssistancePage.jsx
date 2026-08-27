@@ -666,6 +666,43 @@ export default function ChfaDownPaymentAssistancePage() {
         </div>
       </section>
 
+      {/* CHFA Disability program — dedicated H2 for "chfa disability program colorado" query */}
+      <section className="py-16 sm:py-20 px-6 bg-white">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-6">CHFA Disability Program: Down Payment Assistance for Borrowers With Disabilities</h2>
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            CHFA offers disability-focused down payment assistance that follows the same deferred second-mortgage structure as other CHFA DPA options — no monthly payments, repaid only when you sell, refinance, pay off the mortgage, or move out. Eligible borrowers may access up to <strong>$25,000 regardless of the first mortgage amount</strong>, making it one of the more generous DPA options available.
+          </p>
+          <div className="grid sm:grid-cols-2 gap-6 mb-8">
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-6">
+              <h3 className="font-bold font-serif text-lg mb-2">Key features</h3>
+              <ul className="space-y-2 text-gray-700 text-sm">
+                <li className="flex gap-2"><span className="text-blue-600 font-bold">•</span> Up to $25,000 in down payment assistance regardless of loan size</li>
+                <li className="flex gap-2"><span className="text-blue-600 font-bold">•</span> Deferred second mortgage — zero monthly payments</li>
+                <li className="flex gap-2"><span className="text-blue-600 font-bold">•</span> Repaid only when you sell, refinance, pay off the mortgage, or move out</li>
+                <li className="flex gap-2"><span className="text-blue-600 font-bold">•</span> Usable toward down payment, closing costs, prepaids, or principal reduction</li>
+                <li className="flex gap-2"><span className="text-blue-600 font-bold">•</span> Standard CHFA requirements still apply: 620 minimum credit score, $1,000 minimum contribution</li>
+              </ul>
+            </div>
+            <div className="bg-amber-50 border border-amber-100 rounded-xl p-6">
+              <h3 className="font-bold font-serif text-lg mb-2">How to access</h3>
+              <ul className="space-y-2 text-gray-700 text-sm">
+                <li className="flex gap-2"><span className="text-amber-600 font-bold">•</span> Apply through a CHFA participating lender — not directly through CHFA</li>
+                <li className="flex gap-2"><span className="text-amber-600 font-bold">•</span> Your lender confirms current eligibility and DPA amounts for your situation</li>
+                <li className="flex gap-2"><span className="text-amber-600 font-bold">•</span> Available statewide, including Larimer and Weld counties</li>
+                <li className="flex gap-2"><span className="text-amber-600 font-bold">•</span> Program guidelines are updated periodically by CHFA</li>
+                <li className="flex gap-2"><span className="text-amber-600 font-bold">•</span> SAA Homes coordinates your Northern Colorado home search with whichever CHFA program your lender approves</li>
+              </ul>
+            </div>
+          </div>
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+            <p className="text-sm text-gray-600">
+              <strong>Note:</strong> CHFA disability program details are subject to periodic guideline updates by CHFA. Always confirm current eligibility and amounts with a CHFA participating lender before shopping for a home. Call SAA Homes at <strong>(970) 999-1407</strong> for help connecting with a lender who understands disability DPA options.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Requirements */}
       <section className="py-16 px-6 bg-black text-white">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-start">
@@ -749,6 +786,43 @@ export default function ChfaDownPaymentAssistancePage() {
             <Link to="/mortgage-calculator/" className="inline-flex items-center px-6 py-3 text-black font-semibold hover:underline">
               Mortgage calculator →
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* CHFA Approved Lender section — dedicated H2 for "chfa approved lender colorado" query */}
+      <section className="py-16 sm:py-20 px-6 bg-white">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-6">How to Find a CHFA-Approved Participating Lender in Colorado</h2>
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            Every CHFA loan — including all down payment assistance options on this page — is originated through a <strong>CHFA participating lender</strong>. You cannot apply directly through CHFA. Lenders handle the pre-approval, underwriting, and closing process, while CHFA provides the funding and program guidelines.
+          </p>
+          <div className="grid sm:grid-cols-2 gap-6 mb-8">
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-6">
+              <h3 className="font-bold font-serif text-lg mb-2">How to find a lender</h3>
+              <ul className="space-y-2 text-gray-700 text-sm">
+                <li className="flex gap-2"><span className="text-blue-600 font-bold">•</span> CHFA publishes the official lender list at chfainfo.com under Participating Lenders</li>
+                <li className="flex gap-2"><span className="text-blue-600 font-bold">•</span> Interview two or three lenders to compare program fit and service</li>
+                <li className="flex gap-2"><span className="text-blue-600 font-bold">•</span> Ask which CHFA program fits your income and credit profile</li>
+                <li className="flex gap-2"><span className="text-blue-600 font-bold">•</span> Get pre-approved before serious house hunting</li>
+                <li className="flex gap-2"><span className="text-blue-600 font-bold">•</span> Confirm the lender has CHFA-specific experience in Northern Colorado</li>
+              </ul>
+            </div>
+            <div className="bg-amber-50 border border-amber-100 rounded-xl p-6">
+              <h3 className="font-bold font-serif text-lg mb-2">What to ask your lender</h3>
+              <ul className="space-y-2 text-gray-700 text-sm">
+                <li className="flex gap-2"><span className="text-amber-600 font-bold">•</span> Which CHFA programs do you offer — SmartStep, Preferred, FirstStep, FirstGeneration?</li>
+                <li className="flex gap-2"><span className="text-amber-600 font-bold">•</span> What are the current income and purchase price limits for my county?</li>
+                <li className="flex gap-2"><span className="text-amber-600 font-bold">•</span> Am I eligible for a grant (no repayment) or a second mortgage (deferred repayment)?</li>
+                <li className="flex gap-2"><span className="text-amber-600 font-bold">•</span> What homebuyer education courses are CHFA-approved?</li>
+                <li className="flex gap-2"><span className="text-amber-600 font-bold">•</span> How long does pre-approval take and what documents do I need?</li>
+              </ul>
+            </div>
+          </div>
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+            <p className="text-sm text-gray-600">
+              <strong>Tip:</strong> SAA Homes works alongside Northern Colorado CHFA lenders regularly and can help you time your search around pre-approval. Call <strong>(970) 999-1407</strong> to get started with a referral to a trusted CHFA participating lender.
+            </p>
           </div>
         </div>
       </section>
