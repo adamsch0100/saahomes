@@ -311,6 +311,32 @@ export default function WindsorPage() {
 
       <AreaFAQSection faqs={AREA_FAQS['windsor']} city="Windsor" />
 
+      {/* Cash-buyer cross-link from Windsor area page to cash-home-buyers blog */}
+      <section className="mb-12 py-8 px-6 bg-white rounded-lg border border-gray-200 max-w-5xl mx-auto">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold font-serif mb-3">Selling Your Windsor Home for Cash?</h2>
+          <p className="text-gray-700 mb-6">
+            Not every sale needs a full listing. If speed matters more than top dollar, learn how vetted
+            cash buyers work in Windsor — and how a cash offer compares against what your home
+            could bring on the open market.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="/blog/cash-home-buyers-windsor-northern-colorado/"
+              className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Windsor Cash Home Buyer Guide &rarr;
+            </a>
+            <a
+              href="/cash-home-buyers/"
+              className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+            >
+              Explore Cash Offers
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="py-16 px-6 bg-black text-white">
         <div className="max-w-4xl mx-auto text-center">
