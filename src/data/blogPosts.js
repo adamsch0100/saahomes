@@ -1638,6 +1638,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/foreclosure-short-sale-northern-colorado-guide.jpg',
     readTime: '8 min read',
+    youtubeId: 'mZDbZNtySNg',
     keywords: 'short sale windsor, windsor short sale, how to short sale my home windsor, short sale vs foreclosure colorado, short sale process colorado, underwater mortgage windsor, distressed home sale windsor, cash home buyers windsor, sell my house fast windsor, weld county short sale, larimer county short sale',
     relatedLinks: [
       { title: 'Foreclosure & Short Sale Guide', href: '/blog/foreclosure-short-sale-northern-colorado-guide/', description: 'The full Northern Colorado process' },
