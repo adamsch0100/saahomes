@@ -22,7 +22,7 @@ import { LUXURY_HUB_FAQS } from '../src/data/luxuryMarket.js';
 // AREA_CONTENT_DATE in src/data/areaSeo.js. Bump when content is substantively
 // updated — drives Google re-crawl of pages it previously crawled pre-content
 // (indexation patrol 2026-08-17: /properties/, FC, Greeley "not indexed").
-const CONTENT_DATE = '2026-08-26';
+const CONTENT_DATE = '2026-08-28';
 
 // Live listings API for ItemList schema (real active MLS rows only — never fabricate).
 // Prefer LISTINGS_API_BASE / VITE_API_URL when building against a non-prod environment.
@@ -1105,6 +1105,7 @@ const MONEY_PAGE_CONTENT = {
           { href: '/northern-colorado-areas/loveland/', title: 'Loveland Seller Insights', description: 'Balanced market along the I-25 corridor' },
           { href: '/northern-colorado-areas/windsor/', title: 'Windsor Seller Insights', description: 'Premium family market with top-rated schools' },
           { href: '/northern-colorado-areas/timnath/', title: 'Timnath Seller Insights', description: 'New construction communities with steady turnover' },
+          { href: '/northern-colorado-areas/estes-park/', title: 'Estes Park Seller Insights', description: 'Mountain cabins and second homes near Rocky Mountain National Park' },
         ],
       },
     ],
@@ -1156,6 +1157,7 @@ const MONEY_PAGE_CONTENT = {
           { href: '/northern-colorado-areas/windsor/', title: 'Windsor Area Guide', description: 'Top-rated schools and family neighborhoods' },
           { href: '/northern-colorado-areas/greeley/', title: 'Greeley Area Guide', description: 'The most affordable major market, home to UNC' },
           { href: '/northern-colorado-areas/timnath/', title: 'Timnath Area Guide', description: 'New construction and master-planned communities' },
+          { href: '/northern-colorado-areas/estes-park/', title: 'Estes Park Area Guide', description: 'Rocky Mountain National Park cabins, second homes, and mountain living' },
         ],
       },
     ],
@@ -1205,6 +1207,7 @@ const MONEY_PAGE_CONTENT = {
                 { href: '/northern-colorado-areas/windsor/', title: 'Windsor Area Guide', description: 'Top-rated schools and family neighborhoods near Windsor Lake' },
                 { href: '/northern-colorado-areas/greeley/', title: 'Greeley Area Guide', description: 'The most affordable major market in the region, home to UNC' },
                 { href: '/northern-colorado-areas/timnath/', title: 'Timnath Area Guide', description: 'New construction and master-planned communities' },
+                { href: '/northern-colorado-areas/estes-park/', title: 'Estes Park Area Guide', description: 'RMNP gateway — cabins, second homes, and full-time mountain living' },
               ],
             },
     ],

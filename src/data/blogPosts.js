@@ -3792,6 +3792,7 @@ export const blogPosts = [
         ],
         relatedLinks: [
           { title: 'Fort Collins vs Loveland vs Windsor', href: '/blog/fort-collins-vs-loveland-vs-windsor/', description: 'City comparison for Northern Colorado buyers' },
+          { title: 'Estes Park homes for sale', href: '/northern-colorado-areas/estes-park/', description: 'Rocky Mountain National Park cabins, second homes & mountain living' },
           { title: 'Northern Colorado Events Guide 2026', href: '/blog/northern-colorado-events-guide-2026/', description: 'Festivals and community events across both counties' },
           { title: 'See All 27 Area Guides', href: '/northern-colorado-areas/', description: 'Explore every community in Weld and Larimer Counties' },
           { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407 to discuss your search' },
