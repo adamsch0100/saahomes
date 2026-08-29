@@ -105,8 +105,13 @@ For each `{city}` above, monitor these query patterns:
 | Colorado first time homebuyer programs 2026 | /chfa-down-payment-assistance/ |
 | CHFA Schools to Home | /chfa-schools-to-home/ |
 | Colorado teacher home loan | /chfa-schools-to-home/ |
+| teacher down payment assistance colorado | /chfa-schools-to-home/ |
+| nurse home loan colorado | /chfa-schools-to-home/ |
 | Colorado Champions home loan | /colorado-champions-home-loan-program/ |
 | first responder home loan Colorado | /colorado-champions-home-loan-program/ |
+| police officer home loan colorado | /colorado-champions-home-loan-program/ |
+| law enforcement home loan colorado | /colorado-champions-home-loan-program/ |
+| firefighter home loan colorado | /colorado-champions-home-loan-program/ |
 
 ---
 

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WHGZQDZ6ZG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-WHGZQDZ6ZG');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing Strategy for the Listing Appointment — Price × Odds × Supply · ListLogic</title>
+<meta name="description" content="Pricing strategy listing appointment: walk sellers through a custom-fit competitive set, interactive price-versus-odds, and true supply pressure — so overpricing gets discussed in the room, not after a stale listing.">
+<link rel="canonical" href="https://listlogic.homes/saas/pricing-strategy-listing-appointment.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/saas/ll.css">
+<style>
+.hero-mini {
+  background: radial-gradient(900px 400px at 20% -20%, #0e7a6d33, transparent 60%),
+              linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; padding: 64px 0 72px; text-align: center;
+}
+.hero-mini h1 { font-family: 'Fraunces', serif; font-size: clamp(1.9rem, 4vw, 2.7rem); letter-spacing: -0.02em; margin-bottom: 12px; }
+.hero-mini h1 em { font-style: normal; color: var(--accent-2); }
+.hero-mini p { color: #c8d2e0; max-width: 620px; margin: 0 auto; font-size: 1.02rem; }
+.hero-mini .eyebrow { justify-content: center; }
+
+.wedge-band {
+  margin: -34px auto 0; position: relative; z-index: 2;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 22px 26px; max-width: 860px;
+}
+.wedge-band strong { font-family: 'Fraunces', serif; font-size: 1.2rem; display: block; margin-bottom: 6px; }
+.wedge-band p { color: var(--muted); font-size: 0.95rem; margin: 0; }
+
+.section { padding: 64px 0 0; }
+.section h2 { font-family: 'Fraunces', serif; font-size: clamp(1.4rem, 2.5vw, 1.9rem); letter-spacing: -0.015em; margin-bottom: 10px; }
+.section .sub { color: var(--muted); max-width: 640px; margin-bottom: 28px; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow-sm); }
+.card h3 { font-family: 'Fraunces', serif; font-size: 1.15rem; margin-bottom: 8px; }
+.card p { color: var(--muted); font-size: 0.92rem; }
+.card .kicker { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal); margin-bottom: 6px; }
+
+.faq-ll details { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 16px 20px; margin-bottom: 10px; }
+.faq-ll summary { font-weight: 700; cursor: pointer; }
+.faq-ll p { color: var(--muted); font-size: 0.92rem; margin: 10px 0 0; }
+
+.cta-band {
+  background: linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; text-align: center; padding: 64px 0; margin-top: 64px;
+}
+.cta-band h2 { font-family: 'Fraunces', serif; font-size: clamp(1.5rem, 3vw, 2.1rem); margin-bottom: 10px; }
+.cta-band p { color: #c8d2e0; max-width: 560px; margin: 0 auto 26px; }
+.btn-trial { background: var(--accent-2); color: #1a1200; }
+
+.note { font-size: 0.82rem; color: var(--muted); max-width: 720px; margin: 26px auto 0; text-align: center; }
+
+@media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is a pricing strategy listing appointment?",
+      "acceptedAnswer": { "@type": "Answer", "text": "A pricing strategy listing appointment is the meeting where the agent and seller agree on a list price and a plan — before the sign goes up. The agent who wins it shows the seller a custom-fit competitive set, a recommended range, and the trade-offs at each price point: what happens to odds and timing if they stretch. It is a pricing decision, not a report handoff." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I talk about price with a seller who is anchored on Zillow?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Do not argue the portal number. Show the seller their own competitive set — the homes a buyer would actually cross-shop — and walk the price-versus-odds curve. When the seller sees that stretching the price moves them into a league with more supply and lower modeled odds, the conversation shifts from opinion to trade-offs. The portal estimate can appear as an optional chip so you can talk about the number they already saw." }
+    },
+    {
+      "@type": "Question",
+      "name": "What should I bring to a listing appointment to prove the price?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Bring a custom-fit competitive set (not city-wide averages), a recommended list price and range, and an interactive way to show trade-offs — live what-if sliders that move price and show how odds and supply change. Leave the same story as a print leave-behind or flipbook so the seller can defend it after you leave. A static CMA report is an opinion; a field they can move is proof." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does ListLogic replace my pricing judgment?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. ListLogic organizes the market story so sellers can see what you already know. Your expertise still chooses the comps, the condition call, and the final list recommendation — ListLogic makes the trade-offs visible and presentation-ready. You can adjust condition, override price and range, edit advantages and watch-outs, and refine which comps to highlight before you generate." }
+    },
+    {
+      "@type": "Question",
+      "name": "How does ListLogic work with my MLS?",
+      "acceptedAnswer": { "@type": "Answer", "text": "ListLogic is not a live MLS feed. Search any market nationwide, or upload a CSV or TXT export from any MLS — Matrix, Flexmls, Bright, or a RESO-style file. After upload you confirm the column mapping with sample rows, then generate. That is why it works with any MLS without a vendor contract." }
+    },
+    {
+      "@type": "Question",
+      "name": "What does a pricing strategy appointment cost?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The sample demo is free — no account required. Create an account to Search or Upload and set branding. Unlock custom presentations with a 7-day trial (then $39/month) or a $20 one-shot per report. Annual and brokerage seat plans are on the pricing page." }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<nav class="ll-nav">
+  <div class="container ll-nav-inner">
+    <a href="index.html" class="ll-brand">
+      <img src="/saas/listlogic-logo.png" alt="ListLogic" class="ll-brand-logo">
+      <small>by SAA Homes</small>
+    </a>
+    <button type="button" class="ll-nav-toggle" id="llNavToggle" aria-label="Menu" aria-expanded="false">☰</button>
+    <div class="ll-nav-links" id="llNavLinks">
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#deliverables">What sellers get</a>
+      <a href="/saas/pricing.html">Pricing</a>
+      <a href="faq.html">FAQ</a>
+      <a href="/saas/login.html" class="ll-auth-guest">Sign in</a>
+      <a href="/saas/signup.html" class="btn btn-trial ll-auth-guest" style="padding:10px 18px;font-size:0.86rem">Create account</a>
+    </div>
+  </div>
+</nav>
+<script>
+(function(){var t=document.getElementById('llNavToggle'),l=document.getElementById('llNavLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.setAttribute('aria-expanded',o?'true':'false');t.textContent=o?'✕':'☰';});l.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){l.classList.remove('open');t.setAttribute('aria-expanded','false');t.textContent='☰';});});})();
+</script>
+<script src="/saas/nav-auth.js"></script>
+
+<header class="hero-mini">
+  <div class="container">
+    <span class="eyebrow gold">Pricing strategy</span>
+    <h1>Pricing strategy for the <em>listing appointment</em></h1>
+    <p>Walk sellers through a custom-fit competitive set, interactive price-versus-odds, and true supply pressure — so overpricing gets discussed in the room, not after a stale listing.</p>
+    <div class="row" style="justify-content:center;margin-top:26px">
+      <a href="/demo" class="btn btn-gold">Try the free demo</a>
+      <a href="/saas/signup.html" class="btn btn-ghost">Create account</a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="wedge-band">
+    <strong>The listing appointment is a pricing decision, not a report handoff.</strong>
+    <p>Sellers already have a number — from a portal, a neighbor, the last agent who promised more. The agent who wins the listing is the one who can show what happens if they stretch the price: how odds and timing change against real supply. That is the pricing strategy conversation.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <h2>The three jobs of a pricing strategy appointment</h2>
+    <p class="sub">A static CMA shows comps and maybe a suggested list price. A pricing strategy appointment makes the seller a participant in the decision — so they own the number and the plan.</p>
+    <div class="two-col">
+      <div class="card">
+        <div class="kicker">Job 1</div>
+        <h3>Build the custom-fit competitive set</h3>
+        <p>City-wide averages lie. Filter to the homes a buyer would genuinely cross-shop against the subject — size, garage, area, age, timeframe — so every number reflects <em>this</em> home's competitive set. Apples-to-apples is what makes the pricing factual.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Job 2</div>
+        <h3>Walk the trade-off curve</h3>
+        <p>Move the list price and show how modeled odds and supply pressure change together. Stretch the number and competing supply rises while odds drop. The seller sees the league change — you do not have to say "overpriced."</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Job 3</div>
+        <h3>Leave proof that survives the group chat</h3>
+        <p>Print the same story or send the flipbook. The spouse and the friend who "knows real estate" reopen the field, not just your opinion. A brochure and a recommended price is an opinion; a field they can move is proof.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Illustrative — not a measured result</div>
+        <h3>Same week, two appointments</h3>
+        <p>One agent leaves a 20-page solds packet and a promised number. The other walks the curve, names the renovated sold that is not comparable, and leaves the flipbook. The seller hires the proof, not the page count.</p>
+      </div>
+    </div>
+    <p style="text-align:center;margin-top:26px"><a href="/demo" class="btn btn-trial">Try the free demo</a></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>How ListLogic runs the pricing strategy appointment</h2>
+    <p class="sub">Search any market or upload any MLS export. Walk the interactive story. Print or send the flipbook. ListLogic is not a live MLS feed.</p>
+    <div class="two-col">
+      <div class="card">
+        <div class="kicker">Step 1</div>
+        <h3>Search or upload</h3>
+        <p>Search any market nationwide, or <a href="upload-mls-export.html">upload any MLS export</a> — CSV or TXT from Matrix, Flexmls, Bright, or a RESO-style file. Confirm the column mapping with sample rows before you generate. You stay in control of the set.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Step 2</div>
+        <h3>The interactive story</h3>
+        <p>Generate a custom-fit competitive set plus <a href="interactive-cma-software.html">interactive price × odds × supply</a>. Move the list price and the seller sees competing supply and modeled odds change together — the pricing conversation, not a static CMA.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Step 3</div>
+        <h3>Print or flipbook</h3>
+        <p>Leave the same story as print and flipbook so it still works after you walk out. That is the <a href="listing-presentation-software.html">listing presentation software</a> job: proof that survives the spouse, not a second branded deck with a frozen recommended price.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Step 4 — after the sign goes up</div>
+        <h3>Market Fingerprint</h3>
+        <p>The appointment won you the listing. The <a href="/demo/fingerprint">Market Fingerprint</a> keeps you in the conversation after they list: one living seller link that tracks the same competitive set weekly — what listed under them, what went pending, where they sit — until it sells. Email is opt-in only.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">What it costs</div>
+        <h3>Free demo · trial or one-shot</h3>
+        <p>The sample demo is free — no account, no card. Create an account to Search or Upload and set branding. Unlock custom presentations with a 7-day trial (then $39/month) or a $20 one-shot. <a href="/saas/pricing.html">See pricing</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Fair questions, honest answers</h2>
+    <div class="faq-ll">
+      <details open>
+        <summary>What is a pricing strategy listing appointment?</summary>
+        <p>A pricing strategy listing appointment is the meeting where the agent and seller agree on a list price and a plan — before the sign goes up. The agent who wins it shows the seller a custom-fit competitive set, a recommended range, and the trade-offs at each price point: what happens to odds and timing if they stretch. It is a pricing decision, not a report handoff.</p>
+      </details>
+      <details>
+        <summary>How do I talk about price with a seller who is anchored on Zillow?</summary>
+        <p>Do not argue the portal number. Show the seller their own competitive set — the homes a buyer would actually cross-shop — and walk the price-versus-odds curve. When the seller sees that stretching the price moves them into a league with more supply and lower modeled odds, the conversation shifts from opinion to trade-offs. The portal estimate can appear as an optional chip so you can talk about the number they already saw.</p>
+      </details>
+      <details>
+        <summary>What should I bring to a listing appointment to prove the price?</summary>
+        <p>Bring a custom-fit competitive set (not city-wide averages), a recommended list price and range, and an interactive way to show trade-offs — live what-if sliders that move price and show how odds and supply change. Leave the same story as a print leave-behind or flipbook so the seller can defend it after you leave. A static CMA report is an opinion; a field they can move is proof.</p>
+      </details>
+      <details>
+        <summary>Does ListLogic replace my pricing judgment?</summary>
+        <p>No. ListLogic organizes the market story so sellers can see what you already know. Your expertise still chooses the comps, the condition call, and the final list recommendation — ListLogic makes the trade-offs visible and presentation-ready. You can adjust condition, override price and range, edit advantages and watch-outs, and refine which comps to highlight before you generate.</p>
+      </details>
+      <details>
+        <summary>How does ListLogic work with my MLS?</summary>
+        <p>ListLogic is not a live MLS feed. Search any market nationwide, or upload a CSV or TXT export from any MLS — Matrix, Flexmls, Bright, or a RESO-style file. After upload you confirm the column mapping with sample rows, then generate. That is why it works with any MLS without a vendor contract.</p>
+      </details>
+      <details>
+        <summary>What does a pricing strategy appointment cost?</summary>
+        <p>The sample demo is free — no account required. Create an account to Search or Upload and set branding. Unlock custom presentations with a 7-day trial (then $39/month) or a $20 one-shot per report. Annual and brokerage seat plans are on the pricing page.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<div class="cta-band">
+  <div class="container">
+    <h2>Prove the price. Win the listing.</h2>
+    <p>The free demo shows interactive price × odds × supply on a real market. Generate a custom presentation when you're ready — 7-day trial, then $39/month (or $20 one-shot per report).</p>
+    <a href="/demo" class="btn btn-trial" style="margin-right:10px">Try the free demo</a>
+    <a href="/saas/signup.html" class="btn" style="background:transparent;border:1px solid #3a4a63;color:#fff">Create account</a>
+  </div>
+</div>
+
+<p class="note">ListLogic is not a live MLS feed and does not connect to any MLS data service. Search any market nationwide, or upload any MLS export. Matrix is a trademark of CoreLogic. Flexmls is a trademark of FBS. Bright MLS and RESO are trademarks of their respective owners. ListLogic is not affiliated with or endorsed by any MLS. ListLogic is built by SAA Homes.</p>
+<p class="note" style="margin-top:8px">Related: <a href="listing-presentation-software.html">Listing presentation software</a> · <a href="interactive-cma-software.html">Interactive CMA software</a> · <a href="upload-mls-export.html">Upload MLS export</a> · <a href="win-more-listings.html">How to win more listings</a> · <a href="/blog/how-to-price-a-listing-soft-market.html">How to price a listing in a soft market</a> · <a href="/blog/soft-market-listing-presentation-price-odds-supply.html">Soft-market listing presentation</a></p>
+
+<footer class="ll-footer">
+  <div class="container">
+    <div><strong>ListLogic</strong> · Data-driven custom pricing strategy</div>
+    <div><a href="https://saahomes.com">SAA Homes</a> · Schwartz and Associates, Coldwell Banker Realty</div>
+    <div><a href="index.html">Home</a> · <a href="faq.html">FAQ</a> · <a href="/saas/pricing.html">Pricing</a> · <a href="listing-presentation-software.html">Listing presentation software</a> · <a href="interactive-cma-software.html">Interactive CMA software</a> · <a href="mailto:adam@saahomes.com">Contact</a></div>
+  </div>
+</footer>
+
+<script src="/saas/analytics.js"></script>
+<script src="/saas/utm.js"></script>
+</body>
+</html>

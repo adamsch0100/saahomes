@@ -3145,6 +3145,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.42', longitude: '-104.69' },
     metaDescription: 'Cranford Greeley - historic east Greeley neighborhood near downtown and UNC. SAA Homes.',
     keywords: 'Cranford Greeley, historic Greeley homes, downtown Greeley real estate, east Greeley neighborhoods',
+    youtubeId: '2m-cFfu-KHA',
     neighborhoodHighlights: [
       { title: 'Historic character', description: 'Greeley original neighborhood with Victorian, Queen Anne, and Craftsman homes from the 1890s.' },
       { title: 'Downtown access', description: 'Walk to downtown Greeley, the University of Northern Colorado, and the Greeley Farmers Market.' },
@@ -3176,6 +3177,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.43', longitude: '-104.7' },
     metaDescription: 'Highland Park Greeley - historic neighborhood near downtown with 20-acre park and pool. SAA Homes.',
     keywords: 'Highland Park Greeley, historic downtown Greeley, Greeley park homes, traditional Greeley neighborhoods',
+    youtubeId: 'uSOpIFkqVx8',
     neighborhoodHighlights: [
       { title: 'Highland Park', description: '20-acre park with pool, tennis courts, playground, and walking paths - the centerpiece of the neighborhood.' },
       { title: 'Historic character', description: 'Early-1900s homes on tree-lined streets with mature landscaping and community pride.' },
@@ -3207,6 +3209,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.445', longitude: '-104.71' },
     metaDescription: 'Stearns Addition Greeley - established north Greeley homes near Island Grove Park and Stampede grounds. SAA Homes.',
     keywords: 'Stearns Addition Greeley, north Greeley homes, Island Grove Park area, Greeley Stampede neighborhood',
+    youtubeId: 'MAEzZfGs5_I',
     neighborhoodHighlights: [
       { title: 'Island Grove Park', description: '150-acre regional park hosting the Greeley Stampede, concerts, and year-round community events.' },
       { title: 'Established character', description: 'Well-maintained mid-century homes with mature trees and a settled community feel.' },
@@ -3238,6 +3241,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.415', longitude: '-104.77' },
     metaDescription: 'Tamarac Greeley - established west Greeley custom homes with mature trees near shopping. SAA Homes.',
     keywords: 'Tamarac Greeley, west Greeley custom homes, established Greeley subdivisions, McAuliffe Elementary area',
+    youtubeId: 'w6JemzPZ9gE',
     neighborhoodHighlights: [
       { title: 'Established luxury', description: 'Custom-built homes on large lots with mature trees - one of west Greeley most desirable neighborhoods.' },
       { title: 'Mature setting', description: 'Winding tree-lined streets with established landscaping and a quiet, private feel.' },

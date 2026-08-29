@@ -229,6 +229,21 @@ export default function ChampionsHomeLoanPage() {
           })),
         })}
       </script>
+      {/* GEO: ItemList schema for AI answer extraction */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "Colorado Champions Home Loan Program — Eligible First Responders",
+          description: "First responder roles eligible for the CHFA Champions Home Loan Program in Colorado",
+          itemListElement: responderCategories.map((cat, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            name: cat.label,
+            description: cat.detail,
+          })),
+        })}
+      </script>
 
       {/* Hero */}
       <section

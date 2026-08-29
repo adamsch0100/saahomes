@@ -114,11 +114,11 @@ export default function ChfaSchoolsToHomePage() {
   return (
     <>
       <SEO
-        exactTitle="CHFA Schools To Home 2026: 25% Down Payment for CO Teachers"
+        exactTitle="CHFA Schools To Home 2026: 25% DPA, $0 Monthly | CO Teachers"
         description="CO teachers & public school staff: CHFA Schools To Home provides up to 25% down payment assistance with no monthly payment. Check eligibility and income limits. Free consult: (970) 999-1407."
         keywords="CHFA Schools To Home, Colorado teacher home loan, educator down payment assistance Colorado, CHFA DPA Colorado, public school employee home buying, Colorado first time home buyer program, teacher mortgage Colorado, Fort Collins teacher home loan, Denver educator homeownership, CHFA down payment assistance 2026, shared appreciation mortgage Colorado"
         canonical="https://saahomes.com/chfa-schools-to-home/"
-        ogTitle="CHFA Schools To Home 2026: 25% Down Payment for CO Teachers"
+        ogTitle="CHFA Schools To Home 2026: 25% DPA, $0 Monthly | CO Teachers"
         ogDescription="Colorado teachers & public school employees may qualify for up to 25% down payment help through CHFA Schools To Home — with no monthly DPA payment. SAA Homes helps educators across Northern Colorado understand and use the program. Free consult: (970) 999-1407."
         ogImage="https://saahomes.com/images/buyers-hero.jpg"
         ogUrl="https://saahomes.com/chfa-schools-to-home/"
@@ -231,8 +231,55 @@ export default function ChfaSchoolsToHomePage() {
                 "@type": "Answer",
                 "text": "No. CHFA Schools To Home cannot be combined with any other CHFA program."
               }
+            },
+            {
+              "@type": "Question",
+              "name": "Can CHFA Schools To Home cover my closing costs as a Colorado teacher?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. The 25% down payment assistance second mortgage can be used for down payment, closing costs, prepaids, and/or principal reduction. For a teacher buying a $400,000 home, closing costs typically run $8,000 to $20,000 — and the Schools To Home DPA of up to $100,000 can cover both the down payment and those closing costs, significantly reducing cash needed at the closing table."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What teacher home loan options are available in Colorado besides CHFA Schools To Home?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Colorado teachers can also use standard CHFA down payment assistance (up to $25K or 3-4% of the loan), conventional 3% down loans, or FHA 3.5% down loans. Schools To Home is the most generous option for eligible educators — up to 25% DPA with no monthly payment — but each option has different income limits, credit requirements, and down payment needs. SAA Homes helps teachers compare all options before choosing one."
+              }
             }
           ]
+        })}
+      </script>
+      {/* GEO: HowTo schema for AI answer extraction */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "HowTo",
+          name: "How to apply for CHFA Schools To Home in Colorado",
+          description: "Step-by-step process for Colorado public school employees to access up to 25% down payment assistance through CHFA Schools To Home.",
+          step: steps.map((s, i) => ({
+            "@type": "HowToStep",
+            position: i + 1,
+            name: s.title,
+            text: s.description,
+            url: s.internal ? `https://saahomes.com/chfa-schools-to-home/${s.link}` : s.link,
+          })),
+        })}
+      </script>
+      {/* GEO: ItemList schema for AI answer extraction */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "CHFA Schools To Home Program Features",
+          description: "Key benefits of the CHFA Schools To Home down payment assistance program for Colorado public school employees",
+          itemListElement: programFeatures.map((feature, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            name: feature.title,
+            description: feature.description,
+          })),
         })}
       </script>
 
@@ -266,6 +313,13 @@ export default function ChfaSchoolsToHomePage() {
               Check If I Qualify
             </a>
           </div>
+          <p className="mt-4 text-sm text-gray-300">
+            Prefer to talk? Call{" "}
+            <a href="tel:(970) 999-1407" className="font-semibold underline hover:text-white transition-colors">
+              (970) 999-1407
+            </a>{" "}
+            — Adam and Mandi can help.
+          </p>
         </div>
       </section>
 
@@ -368,6 +422,179 @@ export default function ChfaSchoolsToHomePage() {
                 <p className="text-gray-700">{feature.description}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Closing costs covered by Schools To Home — P2 teacher-cluster depth */}  
+      <section className="py-16 px-6 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-5 gap-12 items-start">
+            <div className="lg:col-span-3">
+              <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-6">Closing Cost Help for Colorado Teachers</h2>
+              <p className="text-lg text-gray-700 mb-4 leading-relaxed">
+                One of the most practical features of the CHFA Schools To Home program: the 25% DPA second mortgage can be used for <strong>down payment, closing costs, prepaids, and principal reduction</strong> — not just the down payment. For Colorado teachers, this flexibility matters because closing costs add a significant cash burden beyond the down payment.
+              </p>
+              <p className="text-lg text-gray-700 mb-4 leading-relaxed">
+                Closing costs in Northern Colorado — including lender fees, title insurance, appraisal, escrow setup, and recording fees — typically run <strong>2% to 5% of the purchase price</strong>. On a $400,000 home, that is $8,000 to $20,000 in cash needed at closing. When combined with a conventional 3% down payment ($12,000), a teacher could need $20,000 to $32,000 in cash without assistance.
+              </p>
+              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+                With Schools To Home's 25% DPA on a $400,000 first mortgage (up to <strong>$100,000</strong>), the assistance can cover the down payment, all closing costs, and still leave funds for prepaid taxes and insurance. The result: teachers can buy a home with minimal cash out of pocket. Your CHFA participating lender confirms the exact allocation based on your purchase price and loan type.
+              </p>
+              <p className="text-sm text-gray-600 mb-4">
+                <strong>Learn more:</strong> Read our detailed breakdown in the{" "}
+                <a
+                  href="/blog/chfa-schools-to-home-colorado-teachers/"
+                  className="underline font-semibold text-black hover:text-gray-800"
+                >
+                  CHFA Schools To Home blog guide
+                </a>
+                , which walks through eligibility, shared appreciation, and buyer preparation steps for educators across Northern Colorado.
+              </p>
+              <Link
+                to="#chfa-lead-form"
+                className="inline-flex items-center px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors touch-manipulation"
+              >
+                Ask About Closing Cost Coverage
+              </Link>
+            </div>
+            <div className="lg:col-span-2 lg:sticky lg:top-28">
+              <div className="bg-white rounded-lg shadow-lg p-8 border border-gray-100">
+                <h3 className="text-xl font-bold font-serif mb-4">Potential closing cost savings</h3>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Purchase price example</p>
+                    <p className="text-2xl font-bold">$400,000</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Typical closing costs (2-5%)</p>
+                    <p className="text-2xl font-bold">$8,000 - $20,000</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">3% down payment</p>
+                    <p className="text-2xl font-bold">$12,000</p>
+                  </div>
+                  <div className="border-t border-gray-200 pt-4">
+                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Cash needed without DPA</p>
+                    <p className="text-2xl font-bold">$20,000 - $32,000</p>
+                  </div>
+                  <div className="border-t-2 pt-4" style={{ borderColor: '#CFB36E' }}>
+                    <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: '#CFB36E' }}>Schools To Home DPA available</p>
+                    <p className="text-3xl font-bold" style={{ color: '#CFB36E' }}>Up to $100,000</p>
+                    <p className="text-sm text-gray-500 mt-1">(25% of $400K first mortgage)</p>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-400 mt-4">
+                  * Example for illustration. Actual amounts depend on purchase price, loan type, and closing cost details.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Teacher home loan comparison — P2 teacher-cluster depth */}
+      <section className="py-16 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4">Teacher Home Loan Options Compared</h2>
+            <p className="text-lg text-gray-700 max-w-3xl mx-auto">
+              Colorado teachers have multiple pathways to homeownership. Here is how CHFA Schools To Home stacks up against the most common alternatives for educators buying in Northern Colorado.
+            </p>
+          </div>
+          <div className="overflow-x-auto rounded-lg shadow-sm">
+            <table className="w-full bg-white text-sm">
+              <thead>
+                <tr className="bg-gray-900 text-white">
+                  <th className="px-4 py-3 text-left font-semibold">Feature</th>
+                  <th className="px-4 py-3 text-left font-semibold" style={{ backgroundColor: '#CFB36E', color: '#1a1a1a' }}>Schools To Home</th>
+                  <th className="px-4 py-3 text-left font-semibold">Standard CHFA DPA</th>
+                  <th className="px-4 py-3 text-left font-semibold">Conventional (3% down)</th>
+                  <th className="px-4 py-3 text-left font-semibold">FHA (3.5% down)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-gray-100">
+                  <td className="px-4 py-3 font-medium">Maximum DPA</td>
+                  <td className="px-4 py-3 font-semibold" style={{ color: '#CFB36E' }}>Up to 25% of loan</td>
+                  <td className="px-4 py-3">Up to $25K or 3-4%</td>
+                  <td className="px-4 py-3">None (PMI under 20%)</td>
+                  <td className="px-4 py-3">None (MIP req.)</td>
+                </tr>
+                <tr className="border-b border-gray-100 bg-gray-50">
+                  <td className="px-4 py-3 font-medium">Covers closing costs</td>
+                  <td className="px-4 py-3 font-semibold" style={{ color: '#CFB36E' }}>Yes</td>
+                  <td className="px-4 py-3">Yes</td>
+                  <td className="px-4 py-3">Seller concessions</td>
+                  <td className="px-4 py-3">Seller concessions</td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="px-4 py-3 font-medium">Monthly DPA payment</td>
+                  <td className="px-4 py-3 font-semibold" style={{ color: '#CFB36E' }}>$0 deferred</td>
+                  <td className="px-4 py-3">$0 deferred/grant</td>
+                  <td className="px-4 py-3">N/A</td>
+                  <td className="px-4 py-3">N/A</td>
+                </tr>
+                <tr className="border-b border-gray-100 bg-gray-50">
+                  <td className="px-4 py-3 font-medium">Repayment type</td>
+                  <td className="px-4 py-3 font-semibold" style={{ color: '#CFB36E' }}>Deferred + shared appreciation</td>
+                  <td className="px-4 py-3">Deferred (or grant)</td>
+                  <td className="px-4 py-3">N/A</td>
+                  <td className="px-4 py-3">N/A</td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="px-4 py-3 font-medium">First-time buyer?</td>
+                  <td className="px-4 py-3 font-semibold" style={{ color: '#CFB36E' }}>Not required</td>
+                  <td className="px-4 py-3">Depends on program</td>
+                  <td className="px-4 py-3">No</td>
+                  <td className="px-4 py-3">No</td>
+                </tr>
+                <tr className="border-b border-gray-100 bg-gray-50">
+                  <td className="px-4 py-3 font-medium">Min credit score</td>
+                  <td className="px-4 py-3">620</td>
+                  <td className="px-4 py-3">620</td>
+                  <td className="px-4 py-3">620-640</td>
+                  <td className="px-4 py-3">580-640</td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="px-4 py-3 font-medium">Income limit (Larimer)</td>
+                  <td className="px-4 py-3">$178,920</td>
+                  <td className="px-4 py-3">~$130K-$156K</td>
+                  <td className="px-4 py-3">None</td>
+                  <td className="px-4 py-3">None</td>
+                </tr>
+                <tr className="border-b border-gray-100 bg-gray-50">
+                  <td className="px-4 py-3 font-medium">PMI/MIP</td>
+                  <td className="px-4 py-3 font-semibold" style={{ color: '#CFB36E' }}>None</td>
+                  <td className="px-4 py-3">Depends on loan type</td>
+                  <td className="px-4 py-3">Required</td>
+                  <td className="px-4 py-3">Required (MIP)</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-medium">Best for</td>
+                  <td className="px-4 py-3 font-semibold" style={{ color: '#CFB36E' }}>Teachers maximizing DPA</td>
+                  <td className="px-4 py-3">General 1st-time buyers</td>
+                  <td className="px-4 py-3">Buyers with 3% saved</td>
+                  <td className="px-4 py-3">Lower-credit buyers</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="text-sm text-gray-500 mt-6 text-center">
+            Comparison for illustrative purposes. Actual program terms, rates, and availability vary by lender, county, and borrower profile. Always consult a CHFA Participating Lender for personalized qualification.
+          </p>
+          <div className="text-center mt-8">
+            <Link
+              to="#chfa-lead-form"
+              className="inline-flex items-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors touch-manipulation"
+            >
+              Compare Your Options
+            </Link>
+            <p className="text-sm text-gray-500 mt-3">
+              Call{" "}
+              <a href="tel:(970) 999-1407" className="underline font-semibold">(970) 999-1407</a>{" "}
+              to discuss teacher home loan options with Adam and Mandi
+            </p>
           </div>
         </div>
       </section>
@@ -659,6 +886,24 @@ export default function ChfaSchoolsToHomePage() {
               </summary>
               <p className="text-gray-700 mt-4 leading-relaxed">
                 Household income must be at or below $178,920, with a minimum mid-credit score of 620. You must also contribute at least $1,000 toward the purchase and complete required homebuyer education courses.
+              </p>
+            </details>
+            <details className="bg-gray-50 rounded-lg p-6 border border-gray-100 group">
+              <summary className="font-semibold text-lg cursor-pointer list-none flex justify-between items-center">
+                Can Schools To Home cover my closing costs as a Colorado teacher?
+                <span className="text-gray-400 group-open:rotate-45 transition-transform text-2xl">+</span>
+              </summary>
+              <p className="text-gray-700 mt-4 leading-relaxed">
+                Yes. The 25% DPA second mortgage can be used for down payment, closing costs, prepaids, and/or principal reduction. On a $400,000 home, closing costs typically run <strong>$8,000 to $20,000</strong> — and the Schools To Home DPA (up to $100,000 on a $400K first mortgage) can cover both your down payment and those closing costs. Your CHFA participating lender confirms the exact allocation based on your purchase price and loan type.
+              </p>
+            </details>
+            <details className="bg-gray-50 rounded-lg p-6 border border-gray-100 group">
+              <summary className="font-semibold text-lg cursor-pointer list-none flex justify-between items-center">
+                What teacher home loan options exist besides Schools To Home?
+                <span className="text-gray-400 group-open:rotate-45 transition-transform text-2xl">+</span>
+              </summary>
+              <p className="text-gray-700 mt-4 leading-relaxed">
+                Colorado teachers can also use standard CHFA down payment assistance (up to $25K or 3-4% of the loan), conventional 3% down loans, or FHA 3.5% down loans. Schools To Home offers the highest DPA at up to 25% with no monthly payment. The right choice depends on your income, credit score, and purchase price. SAA Homes helps teachers across Fort Collins, Loveland, Windsor, and Greeley compare all options.
               </p>
             </details>
           </div>

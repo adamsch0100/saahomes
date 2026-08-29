@@ -5,7 +5,7 @@ import { AREA_FAQS } from './areaFaqs.js';
 // the area page content was last substantively changed. Used in WebPage schema
 // so Google sees current, dated content on re-crawl (indexation patrol 2026-08-17:
 // FC/Greeley/properties crawled before content shipped → dateModified drives re-crawl).
-export const AREA_CONTENT_DATE = '2026-08-17';
+export const AREA_CONTENT_DATE = '2026-08-28';
 
 export const areaSeoPages = [
   {
@@ -23,6 +23,7 @@ export const areaSeoPages = [
       'Fort Collins is Northern Colorado\'s premier city — home to Colorado State University, a thriving craft brewery scene, and endless outdoor recreation along the Poudre River and Horsetooth Reservoir. The city\'s mix of historic Old Town character, established family neighborhoods, and new communities makes it a top choice for buyers across every stage of life.',
       'SAA Homes provides expert guidance for Fort Collins buyers and sellers, from Old Town condos and CSU-area rentals to executive homes in coveted neighborhoods. Our team knows Larimer County market trends, pricing, and financing options including CHFA programs for qualified first-time buyers exploring Fort Collins homeownership.',
       'Fort Collins\'s market has settled into a stable pattern through summer 2026. The median single-family home price held at approximately $610,000 in July, with condos and townhomes near $385,000. Inventory has grown roughly 15% compared to July 2025, and single-family homes average about 40 days on market — well-priced properties in the $500,000–$650,000 range still attract offers within three weeks, while homes above $750,000 typically take 55–70 days.',
+      'As Fort Collins residents ourselves, Schwartz and Associates brings hyperlocal knowledge to every neighborhood — from Buckinghorse and Waterford family communities south of Harmony Road to Northwest foothills estates and the Midtown urban corridor near CSU. Whether you are looking at historic Victorians in Old Town, townhomes near Fossil Creek Park, or new construction in southeast Fort Collins, we walk each neighborhood regularly and can speak to current conditions, HOA details, and school catchment boundaries from firsthand experience. Call (970) 999-1407 for a Fort Collins neighborhood consultation.',
     ],
     whyChoose: [
       { title: 'CSU and education hub', description: 'Home to Colorado State University with excellent K-12 schools across Poudre School District.' },
@@ -132,6 +133,7 @@ export const areaSeoPages = [
       'Greeley is the largest city in Weld County and one of Northern Colorado\'s fastest-growing urban centers, anchored by the University of Northern Colorado and a strong agricultural and energy economy. The city\'s affordable home prices, diverse neighborhoods, and expanding amenities make it a smart choice for first-time buyers, investors, and families seeking value.',
       'SAA Homes provides Greeley real estate expertise across established neighborhoods, new developments, and communities near UNC and the Greeley medical corridor. Many Greeley buyers qualify for CHFA down payment assistance programs, making homeownership achievable in one of the region\'s most affordable major markets.',
       'Greeley remains Northern Colorado\'s most affordable major market, with a July 2026 median sale price of approximately $432,000 — essentially flat year-over-year. Move-in-ready homes under $400,000 are the fastest-moving segment in the region, often going under contract within 10–14 days, and west Greeley new construction continues to offer builder incentives. The G-HOPE program adds forgivable down payment loans of up to $8,000 for qualifying employees, giving Greeley the strongest price-to-value entry point in Northern Colorado.',
+      'Greeley\'s diverse neighborhoods offer distinct options: west Greeley near the Poudre River Trail delivers newer construction and family-friendly communities with quick access to the U.S. 34 corridor; the University District around UNC provides classic starter homes and investment properties with strong rental demand; and the growing east and south sides add affordable inventory for first-time buyers using CHFA programs. SAA Homes knows each pocket of Greeley personally and can match your budget and lifestyle to the right neighborhood — call (970) 999-1407 to start your Greeley home search.',
     ],
     whyChoose: [
       { title: 'Affordable pricing', description: 'The most accessible home prices among Northern Colorado major cities.' },
