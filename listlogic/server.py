@@ -122,8 +122,14 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
     OPEN_EXACT = {
         "/",
+        "/index.html",
+        "/faq.html",
+        "/terms.html",
+        "/privacy.html",
+        "/refunds.html",
         "/health",
         "/demo",
+        "/demo/",
         "/demo/fingerprint",
         "/demo/fingerprint/",
         "/api/demo",
@@ -759,6 +765,32 @@ def home():
     # single canonical home — avoids the duplicate-canonical indexation issue.
     index = ROOT / "saas" / "index.html"
     return HTMLResponse(content=index.read_text(encoding="utf-8")) if index.exists() else RedirectResponse(url="/saas/")
+
+
+@app.get("/index.html")
+def root_index_html_redirect():
+    # Relative logo href="index.html" on the "/" homepage would otherwise 302 to login.
+    return RedirectResponse(url="/", status_code=301)
+
+
+@app.get("/faq.html")
+def root_faq_redirect():
+    return RedirectResponse(url="/saas/faq.html", status_code=301)
+
+
+@app.get("/terms.html")
+def root_terms_redirect():
+    return RedirectResponse(url="/saas/terms.html", status_code=301)
+
+
+@app.get("/privacy.html")
+def root_privacy_redirect():
+    return RedirectResponse(url="/saas/privacy.html", status_code=301)
+
+
+@app.get("/refunds.html")
+def root_refunds_redirect():
+    return RedirectResponse(url="/saas/refunds.html", status_code=301)
 
 
 @app.get("/saas")
@@ -1704,6 +1736,7 @@ def _ensure_sample_run() -> str:
 
 
 @app.get("/demo")
+@app.get("/demo/")
 def demo_redirect():
     run_id = _ensure_sample_run()
     return RedirectResponse(url=f"/runs/{run_id}/?sample=1", status_code=302)
