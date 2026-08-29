@@ -3241,6 +3241,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.415', longitude: '-104.77' },
     metaDescription: 'Tamarac Greeley - established west Greeley custom homes with mature trees near shopping. SAA Homes.',
     keywords: 'Tamarac Greeley, west Greeley custom homes, established Greeley subdivisions, McAuliffe Elementary area',
+    youtubeId: 'w6JemzPZ9gE',
     neighborhoodHighlights: [
       { title: 'Established luxury', description: 'Custom-built homes on large lots with mature trees - one of west Greeley most desirable neighborhoods.' },
       { title: 'Mature setting', description: 'Winding tree-lined streets with established landscaping and a quiet, private feel.' },
