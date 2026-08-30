@@ -3276,6 +3276,7 @@ export const neighborhoods = [
     walkScore: 45,
     metaDescription: 'Monfort Park Greeley real estate - established west Greeley neighborhood near UNC with tree-lined streets and park access. SAA Homes.',
     keywords: 'Monfort Park Greeley, west Greeley homes, UNC area real estate, Glenmere Park Greeley, established Greeley neighborhoods, mid-century homes Greeley, Poudre River Trail Greeley',
+    youtubeId: 'eX0CRdvNHHg',
     neighborhoodHighlights: [
       { title: 'UNC proximity', description: 'Located minutes from the University of Northern Colorado campus - perfect for faculty or rental investment.' },
       { title: 'Established character', description: 'Tree-lined streets with mid-century ranch homes and mature landscaping in a settled west Greeley neighborhood.' },
@@ -3310,6 +3311,7 @@ export const neighborhoods = [
     walkScore: 40,
     metaDescription: 'Canyon Views Greeley real estate - established west Greeley neighborhood near the Country Club with larger lots and trail access. SAA Homes.',
     keywords: 'Canyon Views Greeley, west Greeley real estate, Greeley Country Club area, larger lot homes Greeley, established Greeley neighborhoods, Poudre River Trail Greeley',
+    youtubeId: 'wgLelMhNEfM',
     neighborhoodHighlights: [
       { title: 'Country Club setting', description: 'Homes adjacent to the Greeley Country Club offer golf course views and a prestigious west Greeley address.' },
       { title: 'Larger lots', description: 'Canyon Views offers some of Greeley\'s largest in-town lots with room for gardens, play areas, and privacy.' },
@@ -3344,6 +3346,7 @@ export const neighborhoods = [
     walkScore: 38,
     metaDescription: 'Cranford Greeley real estate - established west Greeley subdivision near UNC with community park and mature trees. SAA Homes.',
     keywords: 'Cranford Greeley, west Greeley subdivisions, established Greeley neighborhoods, UNC area homes, Poudre River Trail Greeley, Cranford Park Greeley, family neighborhoods Greeley',
+    youtubeId: 'U4CL-9ILGwE',
     neighborhoodHighlights: [
       { title: 'Established community', description: 'Mature trees, established landscaping, and quality-built homes in one of west Greeley\'s most established subdivisions.' },
       { title: 'UNC proximity', description: 'Minutes from the University of Northern Colorado - popular with faculty, staff, and families.' },
@@ -3390,6 +3393,7 @@ export const neighborhoods = [
       'Shawsheen Greeley real estate — established east Greeley neighborhood around Shawsheen Elementary with mid-century homes near the Poudre River Trail. SAA Homes.',
     keywords:
       'Shawsheen Greeley, Shawsheen Elementary Greeley, east Greeley neighborhoods, Greeley mid-century homes, Greeley homes for sale, Greeley school neighborhoods',
+    youtubeId: 'azZdzJPXr4I',
     neighborhoodHighlights: [
       { title: 'Neighborhood school', description: 'Shawsheen Elementary anchors the area — one of Greeley\'s longtime neighborhood schools.' },
       { title: 'Mid-century homes', description: 'Ranch, split-level, and bi-level homes from the 1950s-70s on established, tree-lined streets.' },
