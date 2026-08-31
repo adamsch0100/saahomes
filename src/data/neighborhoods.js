@@ -3429,6 +3429,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.5300', longitude: '-104.9700' },
     metaDescription: 'Timnath Ranch homes for sale in Timnath, CO — new construction, mountain views, larger lots, top-rated Fossil Ridge schools. Expert local agents from SAA Homes.',
     keywords: 'Timnath Ranch real estate, Timnath Colorado homes, Timnath Ranch HOA, new construction Timnath, Fossil Ridge homes, Timnath Ranch subdivision',
+    youtubeId: '0NP_DiWbylc',
     neighborhoodHighlights: [
       { title: 'Mountain views', description: 'Many homes offer panoramic views of Longs Peak and the Front Range from elevated lots.' },
       { title: 'Top schools', description: 'Timnath Elementary (9/10) and Fossil Ridge High School (9/10) serve the community.' },
@@ -3460,6 +3461,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.53', longitude: '-104.965' },
     metaDescription: 'Timnath Village real estate - master-planned community with top-rated schools and village center amenities. SAA Homes.',
     keywords: 'Timnath Village, Timnath Colorado homes, Timnath Village Center, Timnath Elementary homes, Harmony Road Timnath',
+    youtubeId: 'DzUEtytkRXI',
     neighborhoodHighlights: [
       { title: 'Village center', description: 'The Timnath Village Center offers dining, shopping, and community gathering spaces within walking distance.' },
       { title: 'Top schools', description: 'Timnath Elementary (9/10) serves the community - one of the highest-rated schools in Northern Colorado.' },
@@ -3491,6 +3493,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.53', longitude: '-104.96' },
     metaDescription: 'Harmony at Timnath - new construction homes along Harmony Road with mountain views and top schools. SAA Homes.',
     keywords: 'Harmony at Timnath, Timnath new construction, Harmony Road Timnath, Timnath homes for sale',
+    youtubeId: 'ANq06nEaBCY',
     neighborhoodHighlights: [
       { title: 'New construction', description: 'Brand-new homes with modern floor plans, energy-efficient features, and builder warranties.' },
       { title: 'Mountain views', description: 'Elevated lots offer panoramic Front Range and Longs Peak views.' },
