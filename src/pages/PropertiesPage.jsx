@@ -226,6 +226,34 @@ export default function PropertiesPage() {
           </p>
         </section>
 
+        <section>
+          <h2>Northern Colorado Market Overview — Summer 2026</h2>
+          <p>
+            Northern Colorado&apos;s real estate market spans Larimer, Weld, and Boulder counties, each with distinct
+            price points and dynamics. Fort Collins remains the region&apos;s most expensive major market with a July 2026
+            median of approximately $610,000 for single-family homes, while Greeley offers the most affordable entry at
+            roughly $432,000. Loveland and Windsor sit in between — around $510,000 and $588,000 respectively — making
+            them popular mid-range options for buyers relocating from the Denver metro area.
+          </p>
+          <p>
+            Across all cities, inventory has grown roughly 12&ndash;15% compared to summer 2025, giving buyers more
+            choices than they&apos;ve had since early 2022. The &ldquo;sweet spot&rdquo; price range of
+            $400,000&ndash;$550,000 remains the most competitive, especially in Greeley, Loveland, and Windsor. Homes
+            in this range with good condition and location typically go under contract within 15&ndash;25 days, while
+            luxury properties above $750,000 can take 55&ndash;70 days on market.
+          </p>
+          <p>
+            First-time buyers should explore{' '}
+            <Link to="/chfa-down-payment-assistance/">CHFA down payment assistance</Link>{' '}
+            programs, which cap purchase prices at $500,000 in Larimer County and $475,000 in Weld County as of 2026.
+            Educators can access the{' '}
+            <Link to="/chfa-schools-to-home/">Schools to Home</Link> program with
+            reduced interest rates, and first responders, military members, and healthcare workers may qualify for the{' '}
+            <Link to="/colorado-champions-home-loan-program/">Colorado Champions</Link> program with
+            significant rate discounts.
+          </p>
+        </section>
+
         <p>
           IDX information is provided exclusively for personal, non-commercial use and may not be used for
           any purpose other than to identify prospective properties consumers may be interested in purchasing.
