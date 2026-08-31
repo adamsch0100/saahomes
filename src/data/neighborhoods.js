@@ -12362,6 +12362,454 @@ export const neighborhoods = [
       { title: 'Modern value', description: 'Contemporary homes at the Carbon Valley\'s accessible price points.' }
     ],
   },
+{
+    slug: 'hidden-valley-severance',
+    citySlug: 'severance',
+    cityDisplay: 'Severance',
+    county: 'Weld County',
+    type: 'subdivision',
+    name: 'Hidden Valley',
+    alsoKnownAs: ['Hidden Valley at Severance'],
+    description:
+      'Hidden Valley is a well-established Severance subdivision with large single-family homes built between 2015 and 2020, offering spacious floor plans overlooking the rolling Weld County landscape.',
+    longDescription:
+      'Hidden Valley is a residential subdivision in southeastern Severance, located roughly near Weld County Road 23 and Highway 392. The neighborhood features large single-family homes, many exceeding 3,000 square feet, built primarily between 2015 and 2020. Homes range from 3 to 6 bedrooms with 2 to 4 bathrooms on generous lots. The area enjoys views of the surrounding plains and foothills, with quick access to Severance schools, shopping along the Highway 392 corridor, and Windsor and Greeley employment centers. Hidden Valley represents the established suburban phase before the latest wave of Severance growth, offering move-in-ready resale homes in a quiet, family-oriented setting.',
+    homeStyles: ['Contemporary', 'Two-Story', 'Ranch', 'Farmhouse Modern'],
+    yearBuiltRange: { min: 2015, max: 2020 },
+    priceRangeDescription: '$450K to $650K',
+    schoolDistrict: 'Weld RE-4 School District',
+    schools: [
+      { name: 'Range View Elementary', type: 'elementary', level: 'K-5', rating: 8 },
+      { name: 'Severance Middle School', type: 'middle', level: '6-8', rating: 'New school' },
+      { name: 'Severance High School', type: 'high', level: '9-12', rating: 'New school' }
+    ],
+    hoaDescription: 'Mandatory HOA ($75-$150/month) covers common area maintenance and landscaping',
+    features: [
+      'Large homes - many over 3,000 square feet on generous lots',
+      'Established neighborhood with mature landscaping',
+      'Quiet, family-oriented streets',
+      'Mountain and prairie views',
+      'Close to new Severance schools and retail',
+      '15 minutes to Fort Collins and Greeley'
+    ],
+    parks: ['Hidden Valley Park', 'Severance Community Park', 'Eastman Park'],
+    boundaries: 'Weld County Road 23 to CR 27, Highway 392 to CR 74',
+    coordinates: { latitude: '40.537', longitude: '-104.845' },
+    walkScore: 20,
+    metaDescription:
+      'Hidden Valley Severance real estate - large single-family homes in an established Severance subdivision with prairie views. SAA Homes.',
+    keywords:
+      'Hidden Valley Severance, Hidden Valley subdivision, Severance homes for sale, Severance real estate, Severance subdivisions, established Severance neighborhood',
+    neighborhoodHighlights: [
+      { title: 'Spacious homes', description: 'Homes average over 3,000 square feet on generous lots with room to spread out.' },
+      { title: 'Established setting', description: 'Mature trees and landscaping set Hidden Valley apart from newer construction areas.' },
+      { title: 'Move-in ready', description: 'Built 2015-2020, offering modern floor plans as resale rather than new construction.' }
+    ],
+  },
+
+  {
+    slug: 'belmont-farms-severance',
+    citySlug: 'severance',
+    cityDisplay: 'Severance',
+    county: 'Weld County',
+    type: 'subdivision',
+    name: 'Belmont Farms',
+    alsoKnownAs: ['Belmont Farms Severance'],
+    description:
+      'Belmont Farms is an exclusive Severance subdivision with estate homes on 4-to-5-acre lots, offering the privacy of country living within minutes of new Severance town amenities.',
+    longDescription:
+      'Belmont Farms is a luxury rural-residential subdivision in northern Severance, featuring custom estate homes on large acreage parcels. Located along Hilltop Circle and Longs Peak Court near Weld County Road 27, this neighborhood offers homes built between 2005 and 2019 on 4-to-5-acre lots, providing space for horses, gardens, and privacy while remaining minutes from Severance schools and the Highway 392 corridor. The larger lot sizes and custom builds command premium pricing, making Belmont Farms one of Severance most exclusive addresses. Despite its rural character, the neighborhood has easy access to Windsor, Fort Collins, and Greeley via Highway 392 and I-25.',
+    homeStyles: ['Custom Estate', 'Ranch', 'Farmhouse', 'Tuscan', 'Contemporary'],
+    yearBuiltRange: { min: 2005, max: 2019 },
+    priceRangeDescription: '$1.2M to $1.7M',
+    schoolDistrict: 'Weld RE-4 School District',
+    schools: [
+      { name: 'Range View Elementary', type: 'elementary', level: 'K-5', rating: 8 },
+      { name: 'Severance Middle School', type: 'middle', level: '6-8', rating: 'New school' },
+      { name: 'Severance High School', type: 'high', level: '9-12', rating: 'New school' }
+    ],
+    hoaDescription: 'Mandatory HOA ($167-$170/month) covers common area maintenance',
+    features: [
+      'Estate homes on 4-to-5-acre lots',
+      'Custom-built homes with premium finishes',
+      'Horse and hobby-farm potential',
+      'Private, rural setting',
+      'Mountain and prairie views',
+      'Minutes from Severance schools and Windsor retail'
+    ],
+    parks: ['Severance Community Park', 'Eastman Park', 'Hidden Lake Park'],
+    boundaries: 'Weld County Road 27 area, Hilltop Circle vicinity, north of Highway 392',
+    coordinates: { latitude: '40.560', longitude: '-104.855' },
+    walkScore: 15,
+    metaDescription:
+      'Belmont Farms Severance - luxury estate homes on 4-to-5-acre lots in an exclusive Severance subdivision. SAA Homes.',
+    keywords:
+      'Belmont Farms Severance, Belmont Farms subdivision, Severance estate homes, Severance acreage properties, luxury homes Severance CO, Severance large lot homes',
+    neighborhoodHighlights: [
+      { title: 'Estate living', description: 'Custom estate homes on 4-to-5-acre lots provide space, privacy, and premium finishes.' },
+      { title: 'Horse property', description: 'Large acreage parcels are ideal for equestrian use, hobby farming, and country living.' },
+      { title: 'Rural setting, urban access', description: 'Quiet country atmosphere minutes from Severance schools and Windsor amenities.' }
+    ],
+  },
+
+  {
+    slug: 'hunter-hill-severance',
+    citySlug: 'severance',
+    cityDisplay: 'Severance',
+    county: 'Weld County',
+    type: 'subdivision',
+    name: 'Hunter Hill',
+    alsoKnownAs: ['Hunter Hill at Severance'],
+    description:
+      'Hunter Hill is a newer Severance subdivision featuring contemporary single-family homes and townhomes built from 2020 onward, with community parks and easy access to Severance schools.',
+    longDescription:
+      'Hunter Hill is a modern residential development in central Severance, part of the town rapid expansion south of Highway 392. The subdivision features a mix of single-family homes and townhomes built from 2020 onward, with contemporary architectural styles and energy-efficient construction. Community parks and pocket parks are integrated throughout the neighborhood, and the new Severance schools are within walking distance. The location provides convenient access to the Highway 392 retail corridor, Windsor, and Fort Collins. Hunter Hill represents the newer wave of Severance development, appealing to families and first-time buyers seeking value in Northern Colorado.',
+    homeStyles: ['Contemporary', 'Farmhouse Modern', 'Ranch', 'Two-Story', 'Townhome'],
+    yearBuiltRange: { min: 2020, max: 2025 },
+    priceRangeDescription: '$350K to $550K',
+    schoolDistrict: 'Weld RE-4 School District',
+    schools: [
+      { name: 'Range View Elementary', type: 'elementary', level: 'K-5', rating: 8 },
+      { name: 'Severance Middle School', type: 'middle', level: '6-8', rating: 'New school' },
+      { name: 'Severance High School', type: 'high', level: '9-12', rating: 'New school' }
+    ],
+    hoaDescription: 'Mandatory HOA ($75-$150/month) covers common areas and landscaping',
+    features: [
+      'Newer construction - most homes built after 2020',
+      'Mix of single-family homes and townhomes',
+      'Community parks and walking paths',
+      'Walking distance to Severance schools',
+      'Affordable pricing for Northern Colorado',
+      'Growing retail corridor nearby'
+    ],
+    parks: ['Hunter Hill Community Park', 'Severance Community Park', 'Eastman Park (Windsor)'],
+    boundaries: 'Weld County Road 23 to CR 27, Highway 392 to CR 74',
+    coordinates: { latitude: '40.542', longitude: '-104.850' },
+    walkScore: 30,
+    metaDescription:
+      'Hunter Hill Severance - new construction homes and townhomes in a family-friendly Severance subdivision near schools. SAA Homes.',
+    keywords:
+      'Hunter Hill Severance, Hunter Hill subdivision, Severance new construction, Severance townhomes, Severance family neighborhoods, Severance CO homes',
+    neighborhoodHighlights: [
+      { title: 'New construction', description: 'Modern energy-efficient homes built from 2020 onward with open-concept floor plans.' },
+      { title: 'Walk to schools', description: 'New Severance High School and Middle School are within walking distance.' },
+      { title: 'Great value', description: 'Attractive pricing for new construction in fast-growing Northern Colorado.' }
+    ],
+  },
+
+  {
+    slug: 'soaring-eagle-ranch-severance',
+    citySlug: 'severance',
+    cityDisplay: 'Severance',
+    county: 'Weld County',
+    type: 'subdivision',
+    name: 'Soaring Eagle Ranch',
+    alsoKnownAs: ['Soaring Eagle Ranch Severance'],
+    description:
+      'Soaring Eagle Ranch is a peaceful Severance neighborhood with spacious homes on large lots, wide-open views, and an affordable annual HOA fee.',
+    longDescription:
+      'Soaring Eagle Ranch is a rural-residential subdivision in northern Severance, located along Soaring Eagle Circle near Weld County Road 27. The neighborhood offers larger lots with spacious custom and semi-custom homes, providing a quiet country atmosphere with panoramic views of the Front Range and the Weld County plains. The area features a mix of ranch-style and two-story homes on generous parcels, with many homes backing to open space. An affordable annual HOA covers common area maintenance. Despite its rural feel, Soaring Eagle Ranch is just minutes from Severance schools, the Highway 392 corridor, and the amenities of Windsor and Fort Collins.',
+    homeStyles: ['Ranch', 'Custom Contemporary', 'Farmhouse', 'Two-Story'],
+    yearBuiltRange: { min: 2005, max: 2020 },
+    priceRangeDescription: '$500K to $800K',
+    schoolDistrict: 'Weld RE-4 School District',
+    schools: [
+      { name: 'Range View Elementary', type: 'elementary', level: 'K-5', rating: 8 },
+      { name: 'Severance Middle School', type: 'middle', level: '6-8', rating: 'New school' },
+      { name: 'Severance High School', type: 'high', level: '9-12', rating: 'New school' }
+    ],
+    hoaDescription: 'Annual HOA (approx $850/year) covers common area maintenance',
+    features: [
+      'Spacious homes on larger lots',
+      'Panoramic mountain and prairie views',
+      'Quiet country atmosphere',
+      'Low annual HOA fee',
+      'Close to Severance schools',
+      'Minutes to Windsor and Fort Collins'
+    ],
+    parks: ['Severance Community Park', 'Eastman Park', 'Hidden Lake Park'],
+    boundaries: 'Weld County Road 27 area, Soaring Eagle Circle vicinity, north of Highway 392',
+    coordinates: { latitude: '40.558', longitude: '-104.858' },
+    walkScore: 15,
+    metaDescription:
+      'Soaring Eagle Ranch Severance - spacious homes on large lots with mountain views and country living near Windsor. SAA Homes.',
+    keywords:
+      'Soaring Eagle Ranch Severance, Soaring Eagle Ranch subdivision, Severance acreage homes, Severance rural properties, Severance large lot homes',
+    neighborhoodHighlights: [
+      { title: 'Views and space', description: 'Generous lots with panoramic Front Range and prairie views - room to breathe.' },
+      { title: 'Country living, city access', description: 'Quiet rural setting minutes from Severance schools, shopping, and employment centers.' },
+      { title: 'Low HOA', description: 'Affordable annual HOA of about $850 - no monthly burden.' }
+    ],
+  },
+
+  {
+    slug: 'tailholt-severance',
+    citySlug: 'severance',
+    cityDisplay: 'Severance',
+    county: 'Weld County',
+    type: 'subdivision',
+    name: 'Tailholt',
+    alsoKnownAs: ['Tailholt at Severance', 'Tailholt by DR Horton'],
+    description:
+      'Tailholt is a brand-new D.R. Horton community in central Severance offering affordable single-family homes with modern floor plans, starting from the high $300,000s.',
+    longDescription:
+      'Tailholt is a new D.R. Horton community in central Severance, located along 3rd Street. The community offers new-construction single-family homes from 1,400 to 2,700 square feet, with 2-story and ranch-style floor plans. Tailholt homes feature open-concept layouts, modern kitchen and bath finishes, and energy-efficient construction. The community is ideally situated for commuting, with easy access to Fort Collins via Highway 392 and to Greeley via Weld County Road 49. Severance schools, including the new Severance High School and Middle School, are nearby. Tailholt represents one of the most affordable new-construction opportunities in Northern Colorado.',
+    homeStyles: ['Contemporary', 'Ranch', 'Two-Story', 'Craftsman'],
+    yearBuiltRange: { min: 2025, max: 2026 },
+    priceRangeDescription: '$395K to $550K',
+    schoolDistrict: 'Weld RE-4 School District',
+    schools: [
+      { name: 'Range View Elementary', type: 'elementary', level: 'K-5', rating: 8 },
+      { name: 'Severance Middle School', type: 'middle', level: '6-8', rating: 'New school' },
+      { name: 'Severance High School', type: 'high', level: '9-12', rating: 'New school' }
+    ],
+    hoaDescription: 'Mandatory HOA ($75-$125/month) covers common areas and landscaping',
+    features: [
+      'Brand-new construction by D.R. Horton',
+      'Affordable pricing from the high $300,000s',
+      'Open-concept floor plans with modern finishes',
+      'Range of home sizes from 1,400-2,700 sq ft',
+      'Energy-efficient new construction',
+      'Close to new Severance schools and retail'
+    ],
+    parks: ['Tailholt Community Park', 'Severance Community Park', 'Eastman Park (Windsor)'],
+    boundaries: '3rd Street area in central Severance, near Weld County Road 23',
+    coordinates: { latitude: '40.528', longitude: '-104.848' },
+    walkScore: 35,
+    metaDescription:
+      'Tailholt Severance - brand-new homes by D.R. Horton from the high $300,000s in one of Northern Colorado most affordable new communities. SAA Homes.',
+    keywords:
+      'Tailholt Severance, Tailholt D.R. Horton, Severance new construction, affordable Severance homes, Severance new homes, Severance CO real estate',
+    neighborhoodHighlights: [
+      { title: 'Newest community', description: 'Brand-new D.R. Horton community - the freshest construction in fast-growing Severance.' },
+      { title: 'Affordable entry', description: 'Homes starting in the high $300,000s - among the best values in Northern Colorado.' },
+      { title: 'Modern floor plans', description: 'Open-concept ranch and two-story designs from 1,400 to 2,700 square feet.' }
+    ],
+  },
+
+  {
+    slug: 'windsong-ranch-windsor',
+    citySlug: 'windsor',
+    cityDisplay: 'Windsor',
+    county: 'Weld County',
+    type: 'subdivision',
+    name: 'Windsong Ranch',
+    alsoKnownAs: ['Windsong Ranch PUD'],
+    description:
+      'Windsong Ranch is an exclusive Windsor subdivision with only 18 custom homes on large lots, offering a quiet, private community south of downtown with mountain views.',
+    longDescription:
+      'Windsong Ranch is a small, exclusive subdivision in southern Windsor featuring just 18 custom homes on generous lots. Located along Windsong Road south of Crossroads Boulevard, this intimate community offers privacy and space while remaining close to Windsor amenities. Homes are custom-built on large parcels, many with attached RV or boat parking and mountain views. The HOA covers common amenities and management on a quarterly fee basis. Windsong Ranch appeals to buyers seeking a custom home on a larger lot without the restrictions of a denser master-planned community. Windsor Lake, Eastman Park, and downtown Windsor are all within a 5-minute drive.',
+    homeStyles: ['Custom Estate', 'Ranch', 'Contemporary', 'Farmhouse'],
+    yearBuiltRange: { min: 2000, max: 2020 },
+    priceRangeDescription: '$700K to $1.2M',
+    schoolDistrict: 'Windsor School District RE-4',
+    schools: [
+      { name: 'Grand View Elementary', type: 'elementary', level: 'K-5', rating: 8 },
+      { name: 'Windsor Middle School', type: 'middle', level: '6-8', rating: 7 },
+      { name: 'Windsor High School', type: 'high', level: '9-12', rating: 8 }
+    ],
+    hoaDescription: 'Mandatory HOA ($340/quarter) covers common amenities and management',
+    features: [
+      'Exclusive 18-home subdivision',
+      'Custom-built homes on large lots',
+      'Quiet, private community',
+      'RV and boat parking on many lots',
+      'Mountain views',
+      'Minutes to Windsor Lake, Eastman Park, and downtown'
+    ],
+    parks: ['Windsong Ranch Common Area', 'Eastman Park', 'Windsor Lake'],
+    boundaries: 'Windsong Road area, south of Crossroads Boulevard, west of Weld CR 23',
+    coordinates: { latitude: '40.458', longitude: '-104.910' },
+    walkScore: 15,
+    metaDescription:
+      'Windsong Ranch Windsor - exclusive custom homes on large lots in a private 18-home subdivision south of downtown Windsor. SAA Homes.',
+    keywords:
+      'Windsong Ranch Windsor, Windsong Ranch subdivision, Windsor custom homes, Windsor large lot homes, exclusive Windsor neighborhood, Windsor CO real estate',
+    neighborhoodHighlights: [
+      { title: 'Exclusive enclave', description: 'Only 18 custom homes - one of Windsor most private, tight-knit subdivisions.' },
+      { title: 'Space and privacy', description: 'Large lots with room for RV parking, gardens, and breathing space.' },
+      { title: 'Custom quality', description: 'Every home is custom-built, reflecting the owner personal style and finishes.' }
+    ],
+  },
+
+  {
+    slug: 'winter-farm-windsor',
+    citySlug: 'windsor',
+    cityDisplay: 'Windsor',
+    county: 'Weld County',
+    type: 'subdivision',
+    name: 'Winter Farm',
+    alsoKnownAs: ['Winter Farm Windsor', 'Winter Farm Metropolitan District'],
+    description:
+      'Winter Farm is a well-established Windsor subdivision northeast of Old Town, featuring midsize single-family homes built between the 1990s and early 2000s on tree-lined streets.',
+    longDescription:
+      'Winter Farm is a mature residential neighborhood located in northeast Windsor, near the intersection of Weld County Road 19 and CR 66. Developed primarily between the late 1990s and early 2000s, the subdivision features midsize single-family homes on established, tree-lined streets. The neighborhood is known for its practical, family-oriented layout with sidewalks, pocket parks, and a strong sense of community. Winter Farm is served by a metropolitan district that manages roads and drainage. Its location provides easy access to Old Town Windsor, Windsor Lake, and the schools serving northeast Windsor. The neighborhood offers a comfortable, established alternative to the newer master-planned communities on Windsor south side.',
+    homeStyles: ['Ranch', 'Two-Story', 'Split-Level', 'Colonial'],
+    yearBuiltRange: { min: 1995, max: 2005 },
+    priceRangeDescription: '$400K to $600K',
+    schoolDistrict: 'Windsor School District RE-4',
+    schools: [
+      { name: 'Tozer Elementary', type: 'elementary', level: 'K-5', rating: 7 },
+      { name: 'Windsor Middle School', type: 'middle', level: '6-8', rating: 7 },
+      { name: 'Windsor High School', type: 'high', level: '9-12', rating: 8 }
+    ],
+    hoaDescription: 'Winter Farm Metropolitan District covers roads and drainage; no mandatory HOA',
+    features: [
+      'Mature trees and established landscaping',
+      'Midsize single-family homes on quiet streets',
+      'Walkable to Old Town Windsor',
+      'Established community with strong resale value',
+      'Close to Windsor Lake and Eastman Park',
+      'Top-rated Windsor schools'
+    ],
+    parks: ['Winter Farm Park', 'Eastman Park', 'Windsor Lake'],
+    boundaries: 'Weld County Road 19 to CR 21, CR 64 to CR 66, northeast Windsor',
+    coordinates: { latitude: '40.488', longitude: '-104.910' },
+    walkScore: 35,
+    metaDescription:
+      'Winter Farm Windsor - established midsize homes on tree-lined streets in northeast Windsor near Old Town. SAA Homes.',
+    keywords:
+      'Winter Farm Windsor, Winter Farm subdivision, northeast Windsor homes, Windsor established neighborhoods, Windsor CO real estate',
+    neighborhoodHighlights: [
+      { title: 'Established setting', description: 'Mature trees and landscaping create an inviting, settled neighborhood feel.' },
+      { title: 'Close to Old Town', description: 'Short drive or bike ride to Old Town Windsor restaurants, shops, and the Farmers Market.' },
+      { title: 'Solid resale value', description: 'Well-built homes in an established neighborhood with proven long-term value.' }
+    ],
+  },
+
+  {
+    slug: 'brunner-farm-windsor',
+    citySlug: 'windsor',
+    cityDisplay: 'Windsor',
+    county: 'Weld County',
+    type: 'subdivision',
+    name: 'Brunner Farm',
+    alsoKnownAs: ['Brunner Farm Windsor', 'Brunner Farm Subdivision'],
+    description:
+      'Brunner Farm is a well-kept Windsor subdivision with homes built between 1998 and 2018 on large 6,500-8,000 sq ft lots, offering a mature, family-friendly setting near downtown.',
+    longDescription:
+      'Brunner Farm is a residential subdivision in central Windsor, located off Fairfield Avenue near the intersection of Main Street and Weld County Road 19. The neighborhood features single-family homes built primarily between 1998 and 2013, with a few newer infill homes through 2018. Homes range from 1,800 to 2,600 square feet on generous lots of 6,500 to 8,000 square feet. The neighborhood has an established feel with mature trees, sidewalks, and a mix of ranch and two-story homes. Its central location provides easy access to downtown Windsor, Windsor Lake, and the schools serving the area. Brunner Farm appeals to buyers seeking an established home on a large lot in a central Windsor location.',
+    homeStyles: ['Ranch', 'Two-Story', 'Contemporary', 'Craftsman'],
+    yearBuiltRange: { min: 1998, max: 2018 },
+    priceRangeDescription: '$400K to $600K',
+    schoolDistrict: 'Windsor School District RE-4',
+    schools: [
+      { name: 'Tozer Elementary', type: 'elementary', level: 'K-5', rating: 7 },
+      { name: 'Windsor Middle School', type: 'middle', level: '6-8', rating: 7 },
+      { name: 'Windsor High School', type: 'high', level: '9-12', rating: 8 }
+    ],
+    hoaDescription: 'No HOA in most of Brunner Farm',
+    features: [
+      'Large lots - 6,500 to 8,000 square feet',
+      'Central Windsor location near downtown',
+      'Mature trees and established landscaping',
+      'Mix of ranch and two-story homes',
+      'Close to Windsor Lake and Eastman Park',
+      'Top-rated Windsor schools'
+    ],
+    parks: ['Brunner Farm Park', 'Eastman Park', 'Windsor Lake'],
+    boundaries: 'Fairfield Avenue area, Main Street to Weld CR 19, central Windsor',
+    coordinates: { latitude: '40.472', longitude: '-104.915' },
+    walkScore: 40,
+    metaDescription:
+      'Brunner Farm Windsor - established homes on large lots in central Windsor near downtown and schools. SAA Homes.',
+    keywords:
+      'Brunner Farm Windsor, Brunner Farm subdivision, Windsor homes for sale, central Windsor, Windsor established neighborhoods',
+    neighborhoodHighlights: [
+      { title: 'Generous lots', description: '6,500-8,000 sq ft lots offer room for gardens, play sets, and outdoor living.' },
+      { title: 'Central location', description: 'Walk or bike to downtown Windsor, Windsor Lake, and Eastman Park.' },
+      { title: 'No HOA', description: 'Most of Brunner Farm has no HOA - more freedom for homeowners.' }
+    ],
+  },
+
+  {
+    slug: 'eagle-canyon-lyons',
+    citySlug: 'lyons',
+    cityDisplay: 'Lyons',
+    county: 'Boulder County',
+    type: 'subdivision',
+    name: 'Eagle Canyon',
+    alsoKnownAs: ['Eagle Canyon Lyons', 'Eagle Canyon Subdivision'],
+    description:
+      'Eagle Canyon is one of Lyons three largest subdivisions, a residential community along Stone Canyon Way with views of the red-rock foothills and quick access to downtown.',
+    longDescription:
+      'Eagle Canyon is a residential subdivision in eastern Lyons, located along Stone Canyon Way and Eagle Canyon Drive. The town of Lyons identifies it as one of the three largest subdivisions within town limits, alongside Stone Canyon and Lyons Valley Park. The neighborhood features single-family homes on moderately sized lots, with many homes enjoying views of the surrounding sandstone foothills. Home styles include contemporary and Craftsman designs built from the 1990s through the 2000s. Eagle Canyon offers comfortable suburban-style living within the small-town character of Lyons, with downtown shops, restaurants, and the St. Vrain River parks just minutes away. The location provides easy access to Boulder via Highway 36 and to Rocky Mountain National Park via Highway 7.',
+    homeStyles: ['Contemporary', 'Craftsman', 'Ranch', 'Two-Story'],
+    yearBuiltRange: { min: 1990, max: 2010 },
+    priceRangeDescription: '$500K to $900K',
+    schoolDistrict: 'St. Vrain Valley School District',
+    schools: [
+      { name: 'Lyons Elementary School', type: 'elementary', level: 'K-5', rating: 7 },
+      { name: 'Lyons Middle Senior High School', type: 'high', level: '6-12', rating: 7 }
+    ],
+    hoaDescription: 'No HOA in Eagle Canyon',
+    features: [
+      'One of Lyons three largest subdivisions',
+      'Views of red-rock foothills and sandstone formations',
+      'Family-friendly residential streets',
+      'Minutes from downtown Lyons',
+      'Close to Hall Ranch and Heil Valley Ranch trailheads',
+      '25 minutes to Boulder'
+    ],
+    parks: ['Bohn Park', 'LaVern M. Johnson Park', 'Sandstone Park'],
+    boundaries: 'Stone Canyon Way corridor, east of downtown Lyons, near Highway 7',
+    coordinates: { latitude: '40.219', longitude: '-105.253' },
+    walkScore: 25,
+    metaDescription:
+      'Eagle Canyon Lyons - one of Lyons largest subdivisions with foothill views, family homes, and easy Boulder access. SAA Homes.',
+    keywords:
+      'Eagle Canyon Lyons, Eagle Canyon subdivision, Lyons Colorado neighborhoods, Lyons homes for sale, Lyons real estate',
+    neighborhoodHighlights: [
+      { title: 'Foothill setting', description: 'Stunning views of Lyons red-rock foothills and sandstone formations from many homes.' },
+      { title: 'Established subdivision', description: 'One of Lyons largest and most established residential communities.' },
+      { title: 'Outdoor access', description: 'Minutes from Hall Ranch, Heil Valley Ranch, and St. Vrain River parks.' }
+    ],
+  },
+
+  {
+    slug: 'lyons-valley-park',
+    citySlug: 'lyons',
+    cityDisplay: 'Lyons',
+    county: 'Boulder County',
+    type: 'subdivision',
+    name: 'Lyons Valley Park',
+    alsoKnownAs: ['Lyons Valley Park Subdivision', 'Lyons Valley Park Flg 8'],
+    description:
+      'Lyons Valley Park is a large residential subdivision in southern Lyons with deed-restricted single-family homes, well-established landscaping, and a family-friendly atmosphere.',
+    longDescription:
+      'Lyons Valley Park is one of the three largest subdivisions within Lyons town limits, located in the southern portion of town near McConnell Drive. The subdivision consists of several filing phases (including Figure 8) developed from the 1970s through the 1990s. Homes are primarily single-family residences with deed restrictions that help maintain consistent quality and character throughout the neighborhood. The wide, tree-lined streets and established landscaping give Lyons Valley Park a mature, settled feel. The neighborhood provides easy access to downtown Lyons via a short drive or bike ride, and the St. Vrain River parks are nearby. This is a solid, family-oriented community representing Lyons most suburban-style living within the small mountain-town setting.',
+    homeStyles: ['Ranch', 'Split-Level', 'Contemporary', 'Two-Story', 'Multi-Level'],
+    yearBuiltRange: { min: 1970, max: 2000 },
+    priceRangeDescription: '$500K to $850K',
+    schoolDistrict: 'St. Vrain Valley School District',
+    schools: [
+      { name: 'Lyons Elementary School', type: 'elementary', level: 'K-5', rating: 7 },
+      { name: 'Lyons Middle Senior High School', type: 'high', level: '6-12', rating: 7 }
+    ],
+    hoaDescription: 'Deed restrictions apply; no mandatory HOA for most filings',
+    features: [
+      'One of Lyons three largest subdivisions',
+      'Mature trees and established landscaping',
+      'Wide, quiet residential streets',
+      'Deed-restricted homes maintain quality',
+      'Close to downtown Lyons and schools',
+      'Family-oriented neighborhood atmosphere'
+    ],
+    parks: ['Bohn Park', 'LaVern M. Johnson Park', 'Sandstone Park'],
+    boundaries: 'McConnell Drive area, southern portion of Lyons, near Highway 36',
+    coordinates: { latitude: '40.218', longitude: '-105.268' },
+    walkScore: 30,
+    metaDescription:
+      'Lyons Valley Park - one of Lyons largest subdivisions with established homes, family streets, and a mature setting. SAA Homes.',
+    keywords:
+      'Lyons Valley Park, Lyons Valley Park subdivision, Lyons CO homes, Lyons neighborhoods, St. Vrain Valley real estate',
+    neighborhoodHighlights: [
+      { title: 'Mature setting', description: 'Tree-lined streets and established landscaping create a settled, welcoming atmosphere.' },
+      { title: 'One of the largest', description: 'Among the three biggest subdivisions in Lyons, with multiple filing phases.' },
+      { title: 'Family-friendly', description: 'Quiet streets, deed-restricted quality, and close to Lyons Elementary and parks.' }
+    ],
+  },
+
 
 ]
 
