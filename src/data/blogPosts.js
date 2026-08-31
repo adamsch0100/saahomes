@@ -844,6 +844,7 @@ export const blogPosts = [
       { title: 'Loveland homes for sale', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities & pricing' },
       { title: 'Windsor homes for sale', href: '/northern-colorado-areas/windsor/', description: 'Weld-Larimer border family communities' },
       { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
+      { title: 'Police officer home loans guide', href: '/blog/colorado-police-officer-home-loans/', description: 'Law enforcement-focused Champions deep dive' },
     ],
     cta: {
       title: 'First responder looking to buy in Northern Colorado?',
@@ -8629,7 +8630,201 @@ export const blogPosts = [
           secondaryText: 'Explore Cash Offers',
         },
       },
-    ];
+  {
+    slug: 'nurse-home-loan-programs-colorado',
+    title: 'Nurse Home Loan Programs in Colorado (2026): Down Payment Assistance for Nurses & Healthcare Workers',
+    excerpt: 'School nurses qualify for CHFA Schools To Home (up to 25% DPA); hospital and clinical nurses qualify for standard CHFA programs with grants and deferred loans up to $25,000. How nurses in Northern Colorado can buy a home in 2026.',
+    date: '2026-08-31',
+    category: 'CHFA & Homebuyer Programs',
+    image: '/images/nurse-home-loan-programs-colorado.jpg',
+    readTime: '9 min read',
+    keywords: 'nurse home loan Colorado, nursing down payment assistance, nurse mortgage programs Colorado, school nurse CHFA, healthcare worker home loan Colorado, nurse home buying Fort Collins, CHFA for nurses 2026, nurse home loan Northern Colorado',
+    relatedLinks: [
+      { title: 'CHFA Schools To Home Program Page', href: '/chfa-schools-to-home/', description: 'Up to 25% DPA for public school employees — including school nurses' },
+      { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Grants and deferred loans up to $25,000 for qualified buyers' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Buyer representation & program hub' },
+      { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Near UCHealth Poudre Valley Hospital' },
+      { title: 'Loveland homes for sale', href: '/northern-colorado-areas/loveland/', description: 'Near Medical Center of the Rockies & McKee Medical Center' },
+      { title: 'Greeley homes for sale', href: '/northern-colorado-areas/greeley/', description: 'Near Banner North Colorado Medical Center' },
+      { title: 'Windsor homes for sale', href: '/northern-colorado-areas/windsor/', description: 'I-25 corridor family communities' },
+    ],
+    cta: {
+      title: 'Nurse ready to buy in Northern Colorado?',
+      description: 'Adam and Mandi Schwartz help nurses and healthcare workers across Fort Collins, Loveland, Windsor, and Greeley combine CHFA assistance with the right home search. Free consultation — call (970) 999-1407.',
+      primaryHref: '/chfa-down-payment-assistance/#chfa-lead-form',
+      primaryText: 'Get Free CHFA Guidance',
+      secondaryHref: '/for-buyers/',
+      secondaryText: 'See How Buying Works',
+    },
+    faqs: [
+      { q: 'Is there a nurse home loan program in Colorado?', a: 'There is no loan product called a \u201cnurse mortgage,\u201d but nurses in Colorado regularly use CHFA down payment assistance. School nurses qualify for CHFA Schools To Home \u2014 up to 25% DPA as a second mortgage. Hospital and clinical nurses qualify for standard CHFA programs, including SmartStep Plus with a DPA grant up to $25,000 or 3% of the first mortgage, or deferred second mortgages up to $25,000 or 4%.' },
+      { q: 'Do school nurses qualify for CHFA Schools To Home?', a: 'Yes. CHFA lists nurses among eligible full-time Colorado public school employees for Schools To Home, alongside teachers, administrators, counselors, and support staff. You must be designated full-time by your employer at application and closing, work for a CDE-listed public school, and meet the $178,920 household income limit and 620 minimum credit score.' },
+      { q: 'Can a hospital nurse use CHFA down payment assistance?', a: 'Yes. Clinical nurses at hospitals and health systems \u2014 UCHealth Poudre Valley Hospital in Fort Collins, Medical Center of the Rockies and McKee Medical Center in Loveland, Banner North Colorado Medical Center in Greeley \u2014 qualify for standard CHFA first mortgage and DPA programs. There is no separate healthcare-worker program; the standard CHFA programs are the path.' },
+      { q: 'How much down payment assistance can nurses get in Colorado?', a: 'Nurses using standard CHFA programs can get a grant up to $25,000 or 3% of the first mortgage (no repayment) with SmartStep Plus, or a deferred second mortgage up to $25,000 or 4% with zero monthly payments. School nurses using Schools To Home can access up to 25% of the first mortgage as a second mortgage with no monthly payment.' },
+      { q: 'What are the CHFA income limits for nurses in Larimer and Weld counties?', a: 'CHFA income limits are set by county and household size. As of mid-2026, non-targeted household income limits are approximately $130,000\u2013$156,000+ in Larimer County (Fort Collins, Loveland, Wellington, Timnath) and approximately $153,600\u2013$179,200 in Weld County (Greeley, Windsor). Schools To Home uses its own $178,920 household income cap. Targeted areas allow higher limits. Your lender confirms the exact figure.' },
+    ],
+    sections: [
+      {
+        heading: 'Nurses have a clear path to CHFA down payment help',
+        paragraphs: [
+          'There is no separate \u201cnurse home loan\u201d product in Colorado, but nurses are among the professions best positioned for CHFA help \u2014 because they qualify on two tracks. School nurses are explicitly eligible for CHFA Schools To Home, the state\u2019s most generous educator program at up to 25% down payment assistance. Hospital and clinical nurses qualify for standard CHFA programs with grants or deferred loans up to $25,000.',
+          'In Northern Colorado, the region\u2019s major health employers \u2014 UCHealth Poudre Valley Hospital in Fort Collins, Medical Center of the Rockies and McKee Medical Center in Loveland, and Banner North Colorado Medical Center in Greeley \u2014 employ thousands of nurses whose incomes fit CHFA county limits. If you are an RN, LPN, NP, or clinical specialist buying your first home \u2014 or moving up \u2014 CHFA is likely part of the conversation.',
+        ],
+      },
+      {
+        heading: 'Track 1: CHFA Schools To Home for school nurses (up to 25% DPA)',
+        paragraphs: [
+          'CHFA Schools To Home provides up to 25% of your first mortgage as a down payment assistance second mortgage for full-time Colorado public school employees. School nurses are named in the program\u2019s eligible roles \u2014 so if you work full-time for a district, charter school, or BOCES, you may qualify for assistance far larger than the standard $25,000 cap.',
+          'On a $400,000 first mortgage, 25% assistance equals $100,000 in help usable toward down payment, closing costs, prepaids, or principal reduction. The second mortgage has no monthly payment. There is a shared appreciation component at repayment, and Schools To Home cannot be combined with other CHFA programs. Requirements: minimum 620 credit score, household income at or below $178,920, and at least $1,000 of your own contribution.',
+          'School districts serving Northern Colorado \u2014 Poudre School District, Thompson School District, Greeley-Evans District 6, Weld County districts, and area charter schools \u2014 are CDE-listed, the same channel used to verify eligibility.',
+        ],
+        list: [
+          'Up to 25% of the first mortgage as DPA (second mortgage)',
+          'No monthly payment on the assistance',
+          'Minimum 620 credit score and $1,000 contribution',
+          'Household income at or below $178,920',
+          'Cannot combine with any other CHFA program',
+        ],
+        relatedLinks: [
+          { title: 'CHFA Schools To Home Program Page', href: '/chfa-schools-to-home/', description: 'Full eligibility, examples & free consultation' },
+        ],
+      },
+      {
+        heading: 'Track 2: Standard CHFA programs for hospital and clinical nurses',
+        paragraphs: [
+          'Nurses employed by hospitals and health systems use the same CHFA first mortgage and DPA programs as other qualified buyers. SmartStep Plus pairs an FHA, VA, or USDA first mortgage with a no-repayment DPA grant up to $25,000 or 3% of the first mortgage. Preferred and Preferred Plus serve conventional buyers at up to 97% LTV with a deferred second mortgage. FirstGeneration Plus offers up to $25,000 in DPA for first-generation buyers whose parents never owned a home.',
+          'The practical effect for a nurse at Poudre Valley Hospital or North Colorado Medical Center: a 620+ credit score, roughly $1,000 in savings toward the purchase, CHFA-approved homebuyer education, and a household income within county limits can replace a 3\u201310% down payment with a grant or deferred loan. The exact program depends on your loan type and lender.',
+        ],
+        list: [
+          'SmartStep / SmartStep Plus \u2014 FHA, VA, or USDA; grant available',
+          'Preferred / Preferred Plus \u2014 conventional up to 97% LTV',
+          'FirstStep / FirstStep Plus \u2014 FHA for first-time buyers',
+          'FirstGeneration \u2014 FHA; up to $25,000 DPA regardless of loan size',
+        ],
+        relatedLinks: [
+          { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Program comparison, limits table & free consultation' },
+        ],
+      },
+      {
+        heading: 'CHFA income and price limits for Northern Colorado nurses',
+        paragraphs: [
+          'CHFA publishes income and purchase price limits by county, household size, and targeted-area status. Mid-2026 non-targeted ranges: Larimer County household income roughly $130,000\u2013$156,000+ with purchase prices up to about $664,000\u2013$812,000; Weld County household income roughly $153,600\u2013$179,200 with purchase prices up to about $735,000. Households buying in targeted areas can qualify with higher income limits.',
+          'Nurses should confirm the current limits with a CHFA participating lender before shopping \u2014 limits change, and the lender is the source of truth for your exact situation. SAA Homes helps nurse buyers find homes within limits and structure offers in the communities where they work.',
+        ],
+      },
+      {
+        heading: 'What nurses should do this week in Northern Colorado',
+        paragraphs: [
+          'Start with the two tracks: if you are a school nurse, verify your employer with the Colorado Department of Education and check the Schools To Home program page. If you work at a hospital or clinic, review the CHFA down payment assistance guide and ask a participating lender which program fits your income and credit.',
+          'Either way, take a CHFA-approved homebuyer education class early, pull your credit scores, and save the $1,000 borrower contribution. SAA Homes works alongside CHFA lenders across Fort Collins, Loveland, Windsor, and Greeley \u2014 call (970) 999-1407 and we will help you coordinate the search with your program approval.',
+        ],
+        relatedLinks: [
+          { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Buyer representation & program hub' },
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Adam and Mandi Schwartz \u2014 (970) 999-1407' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'colorado-police-officer-home-loans',
+    title: 'Colorado Police Officer Home Loans: CHFA Champions & Down Payment Assistance for Law Enforcement',
+    excerpt: 'Colorado law enforcement can use the CHFA Champions program \u2014 110% income eligibility under SB26-053 \u2014 plus standard CHFA down payment assistance up to $25,000. What police officers in Fort Collins, Loveland, Windsor, and Greeley should know.',
+    date: '2026-08-31',
+    category: 'CHFA & Homebuyer Programs',
+    image: '/images/colorado-police-officer-home-loans.jpg',
+    readTime: '8 min read',
+    keywords: 'police officer home loan Colorado, law enforcement home loan Colorado, CHFA Champions police, Colorado Champions home loan law enforcement, police officer down payment assistance, first responder mortgage Greeley, Fort Collins police home loan',
+    relatedLinks: [
+      { title: 'Colorado Champions Home Loan Program', href: '/colorado-champions-home-loan-program/', description: 'SB26-053 timeline, eligibility & sign up for updates' },
+      { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Standard CHFA programs available to law enforcement now' },
+      { title: 'First responders blog', href: '/blog/colorado-champions-home-loan-first-responders/', description: 'Champions explained for police, fire & EMS' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Buyer representation & program hub' },
+      { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Larimer County communities' },
+      { title: 'Loveland homes for sale', href: '/northern-colorado-areas/loveland/', description: 'Larimer County housing options' },
+      { title: 'Windsor homes for sale', href: '/northern-colorado-areas/windsor/', description: 'I-25 corridor family communities' },
+      { title: 'Greeley homes for sale', href: '/northern-colorado-areas/greeley/', description: 'Weld County affordable options' },
+    ],
+    cta: {
+      title: 'Police officer looking to buy in Northern Colorado?',
+      description: 'Get Colorado Champions program updates and free home buying guidance from SAA Homes. Adam and Mandi Schwartz work with law enforcement families across Fort Collins, Loveland, Windsor, and Greeley \u2014 call (970) 999-1407.',
+      primaryHref: '/colorado-champions-home-loan-program/#champions-lead-form',
+      primaryText: 'Sign Up for Champions Updates',
+      secondaryHref: '/colorado-champions-home-loan-program/',
+      secondaryText: 'See if you qualify',
+    },
+    faqs: [
+      { q: 'Is there a police officer home loan program in Colorado?', a: 'Colorado law enforcement is covered by the Colorado Champions Home Loan Program, created by SB26-053 and effective August 12, 2026. Champions raises income eligibility to 110% of standard CHFA limits and pairs with existing down payment assistance \u2014 grants up to $25,000 or deferred second mortgages up to $25,000 or 3\u20134% of the loan. Officers can also use standard CHFA programs today.' },
+      { q: 'Who counts as a peace officer under SB26-053?', a: 'The law defines peace officers broadly: sworn police officers, deputy sheriffs, corrections officers, 911 emergency communications specialists, wildlife officers, port of entry officers, and more \u2014 plus firefighters and EMTs. Household members of qualifying first responders also qualify.' },
+      { q: 'When can police officers apply for CHFA Champions in Colorado?', a: 'SB26-053 is effective August 12, 2026, and CHFA anticipates launching the program in late 2026. Final guidelines and lender availability are still being developed. Sign up for updates on our Champions program page.' },
+      { q: 'Can Colorado police officers use CHFA down payment assistance now?', a: 'Yes. Many law enforcement households already qualify under existing CHFA programs \u2014 SmartStep, FirstStep, or Preferred \u2014 while Champions is being finalized. Standard requirements apply: 620 minimum credit score, $1,000 borrower contribution, homebuyer education, and county income limits.' },
+      { q: 'What are the 110% income limits for police officers in Larimer and Weld counties?', a: 'Champions raises eligibility to 110% of standard CHFA county limits. For reference, mid-2026 non-targeted CHFA household limits are approximately $130,000\u2013$156,000+ in Larimer County and approximately $153,600\u2013$179,200 in Weld County \u2014 110% of those figures is the Champions ceiling. Your lender confirms the exact number for your household.' },
+    ],
+    sections: [
+      {
+        heading: 'Law enforcement has a dedicated path: Colorado Champions',
+        paragraphs: [
+          'Created by SB26-053 and effective August 12, 2026, the Colorado Champions Home Loan Program is the dedicated CHFA initiative for Colorado first responders and their households. For police officers, the two changes that matter: income eligibility rises to 110% of standard CHFA limits, and the program pairs with existing down payment assistance \u2014 a grant up to $25,000 or 3% of the first mortgage with no repayment, or a deferred second mortgage up to $25,000 or 4% with no monthly payment.',
+          'Champions does not create a new loan product. It expands eligibility inside CHFA\u2019s existing first mortgage and DPA programs, which means officers still work with a CHFA participating lender, still need a 620+ credit score, still contribute at least $1,000, and still complete homebuyer education.',
+        ],
+        relatedLinks: [
+          { title: 'Colorado Champions Home Loan Program', href: '/colorado-champions-home-loan-program/', description: 'Timeline, eligibility & sign up for updates' },
+        ],
+      },
+      {
+        heading: 'Who qualifies: peace officers, corrections, dispatch & more',
+        paragraphs: [
+          'SB26-053 uses a broad peace officer definition. Sworn patrol officers qualify \u2014 Fort Collins Police, Loveland Police, Greeley Police, Larimer County Sheriff\u2019s deputies, Weld County Sheriff\u2019s deputies \u2014 and so do corrections officers, 911 emergency communications specialists, wildlife officers, port of entry officers, firefighters, and EMTs/paramedics. Household members of qualifying first responders qualify too.',
+          'In Northern Colorado, that covers the officers and deputies who protect communities from Fort Collins to Johnstown, plus the dispatch centers serving Larimer and Weld counties. When full guidelines launch, departments and dispatchers across the region will have a pathway to buy in the communities they serve.',
+        ],
+      },
+      {
+        heading: 'What assistance police officers can get',
+        paragraphs: [
+          'Champions pairs the 110% income threshold with CHFA\u2019s existing down payment assistance. Eligible officers can access a DPA grant up to $25,000 or 3% of the first mortgage (no repayment required) on qualifying programs like SmartStep Plus, or a deferred second mortgage up to $25,000 or 4% with zero monthly payments, repaid only when you sell, refinance, pay off the loan, or move out.',
+          'Because income limits are the usual barrier for officer households, the 110% threshold is the headline feature \u2014 more law enforcement families will clear the cap in Larimer and Weld counties under Champions than under standard CHFA limits.',
+        ],
+        list: [
+          '110% of standard CHFA income limits',
+          'DPA grant up to $25,000 or 3% (no repayment)',
+          'Deferred second mortgage up to $25,000 or 4%',
+          'Standard CHFA requirements still apply',
+        ],
+        relatedLinks: [
+          { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Full program comparison & how DPA works' },
+        ],
+      },
+      {
+        heading: 'What officers should do while Champions finalizes',
+        paragraphs: [
+          'The law is effective now, but CHFA anticipates full program implementation in late 2026 \u2014 final guidelines and lender availability are still being developed. Do not wait to prepare. Many officer households already qualify under existing CHFA programs today, and the steps are identical: take a CHFA-approved homebuyer education class, check your credit, save the $1,000 contribution, and get pre-approved with a participating lender.',
+          'SAA Homes can help you time the home search around the program\u2019s rollout \u2014 understand current options now, and position to take advantage of the 110% income threshold the moment your lender can originate it. Sign up for updates on the Champions page to know when guidelines land.',
+        ],
+        list: [
+          'Sign up for Champions program updates',
+          'Complete CHFA homebuyer education early',
+          'Check credit and save the $1,000 contribution',
+          'Talk to a CHFA participating lender about current programs',
+          'Search homes within county purchase price limits',
+        ],
+        relatedLinks: [
+          { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Buyer representation & program hub' },
+          { title: 'First responders blog', href: '/blog/colorado-champions-home-loan-first-responders/', description: 'How Champions works for police, fire & EMS' },
+        ],
+      },
+      {
+        heading: 'How SAA Homes helps law enforcement buyers',
+        paragraphs: [
+          'Adam and Mandi Schwartz represent buyers and sellers across all 27 Northern Colorado communities we serve. For law enforcement families, that means help finding homes within CHFA purchase price limits, coordinating with participating lenders, and writing competitive offers around shift schedules and family timelines.',
+          'Call (970) 999-1407 to talk through the Champions program \u2014 what is available now, what is coming \u2014 and start the search in Fort Collins, Loveland, Windsor, or Greeley.',
+        ],
+        relatedLinks: [
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Adam and Mandi Schwartz \u2014 (970) 999-1407' },
+          { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods & homes for sale' },
+        ],
+      },
+    ],
+  },
+];
 
 export function getBlogPost(slug) {
   return blogPosts.find((post) => post.slug === slug);
