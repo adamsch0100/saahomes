@@ -8638,6 +8638,7 @@ export const blogPosts = [
     category: 'CHFA & Homebuyer Programs',
     image: '/images/nurse-home-loan-programs-colorado.jpg',
     readTime: '9 min read',
+    youtubeId: 'R_0--J9hL-Y',
     keywords: 'nurse home loan Colorado, nursing down payment assistance, nurse mortgage programs Colorado, school nurse CHFA, healthcare worker home loan Colorado, nurse home buying Fort Collins, CHFA for nurses 2026, nurse home loan Northern Colorado',
     relatedLinks: [
       { title: 'CHFA Schools To Home Program Page', href: '/chfa-schools-to-home/', description: 'Up to 25% DPA for public school employees — including school nurses' },
@@ -8733,6 +8734,7 @@ export const blogPosts = [
     category: 'CHFA & Homebuyer Programs',
     image: '/images/colorado-police-officer-home-loans.jpg',
     readTime: '8 min read',
+    youtubeId: 'JrChLX08CGQ',
     keywords: 'police officer home loan Colorado, law enforcement home loan Colorado, CHFA Champions police, Colorado Champions home loan law enforcement, police officer down payment assistance, first responder mortgage Greeley, Fort Collins police home loan',
     relatedLinks: [
       { title: 'Colorado Champions Home Loan Program', href: '/colorado-champions-home-loan-program/', description: 'SB26-053 timeline, eligibility & sign up for updates' },
