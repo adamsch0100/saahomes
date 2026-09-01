@@ -3525,6 +3525,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.525', longitude: '-104.955' },
     metaDescription: 'Timnath Lakeside real estate - lakefront homes on Timnath Reservoir with premium views. SAA Homes.',
     keywords: 'Timnath Lakeside, Timnath Reservoir homes, lakefront homes Timnath, water view homes Timnath',
+    youtubeId: 'VrWCJYI2FGY',
     neighborhoodHighlights: [
       { title: 'Lakefront living', description: 'Scenic reservoir with walking trails - one of the most desirable new communities in Timnath.' },
       { title: 'Premium location', description: 'Lakefront and lake-view home sites with panoramic vistas of the water and mountains.' },
@@ -3556,6 +3557,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.535', longitude: '-104.975' },
     metaDescription: 'The Preserve at Timnath - new construction near Timnath Elementary with preserved open space. SAA Homes.',
     keywords: 'The Preserve Timnath, Timnath new construction, Timnath homes Harmony Road, Fossil Ridge schools Timnath',
+    youtubeId: '2B6R0f0O6dY',
     neighborhoodHighlights: [
       { title: 'Preserved space', description: 'Dedicated open space and walking trails give The Preserve its name - nature at your doorstep.' },
       { title: 'Top schools', description: 'Served by Timnath Elementary (9/10) and Fossil Ridge High School (9/10).' },
@@ -3590,6 +3592,7 @@ export const neighborhoods = [
     walkScore: 25,
     metaDescription: 'South Timnath real estate - new construction homes in growing master-planned communities near I-25 with Fossil Ridge schools. SAA Homes.',
     keywords: 'South Timnath, Timnath Colorado real estate, Timnath ranch, I-25 Timnath homes, Fort Collins border homes, new construction Timnath, Fossil Ridge schools Timnath, Timnath subdivisions',
+    youtubeId: 'v5S2VSAS8Uw',
     neighborhoodHighlights: [
       { title: 'Growth corridor', description: 'South Timnath is one of Northern Colorado\'s fastest-growing areas with new homes and amenities arriving rapidly.' },
       { title: 'I-25 access', description: 'The Harmony Road/I-25 interchange provides direct access to Fort Collins, Loveland, and Denver.' },
