@@ -254,6 +254,43 @@ export default function PropertiesPage() {
           </p>
         </section>
 
+        <section>
+          <h2>City-by-City Comparison: Northern Colorado Home Prices &amp; Market Stats</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>City</th>
+                <th>County</th>
+                <th>July 2026 Median Price</th>
+                <th>YoY Change</th>
+                <th>Avg Days on Market</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Fort Collins</td><td>Larimer</td><td>$610,000</td><td>+2.5%</td><td>40</td></tr>
+              <tr><td>Loveland</td><td>Larimer</td><td>$510,000</td><td>+3.6%</td><td>22</td></tr>
+              <tr><td>Windsor</td><td>Weld / Larimer</td><td>$588,000</td><td>+2.1%</td><td>25-35</td></tr>
+              <tr><td>Greeley</td><td>Weld</td><td>$432,000</td><td>flat</td><td>10-14</td></tr>
+              <tr><td>Timnath</td><td>Larimer / Weld</td><td>$625,000</td><td>+3.8%</td><td>30-45</td></tr>
+              <tr><td>Severance</td><td>Weld</td><td>$520,000</td><td>+4.2%</td><td>20-30</td></tr>
+              <tr><td>Berthoud</td><td>Larimer</td><td>$575,000</td><td>+2.8%</td><td>25-35</td></tr>
+              <tr><td>Johnstown</td><td>Weld</td><td>$495,000</td><td>+3.0%</td><td>25-35</td></tr>
+              <tr><td>Wellington</td><td>Larimer</td><td>$510,000</td><td>+2.5%</td><td>30-40</td></tr>
+              <tr><td>Eaton</td><td>Weld</td><td>$450,000</td><td>+3.8%</td><td>20-30</td></tr>
+              <tr><td>Longmont</td><td>Boulder</td><td>$560,000</td><td>+1.5%</td><td>30-40</td></tr>
+              <tr><td>Boulder</td><td>Boulder</td><td>$950,000</td><td>+2.0%</td><td>45-60</td></tr>
+              <tr><td>Firestone</td><td>Weld</td><td>$520,000</td><td>+3.5%</td><td>20-30</td></tr>
+              <tr><td>Frederick</td><td>Weld</td><td>$530,000</td><td>+4.0%</td><td>20-30</td></tr>
+              <tr><td>Evans</td><td>Weld</td><td>$400,000</td><td>+2.0%</td><td>15-25</td></tr>
+              <tr><td>Milliken</td><td>Weld</td><td>$460,000</td><td>+3.0%</td><td>20-30</td></tr>
+              <tr><td>Mead</td><td>Weld</td><td>$540,000</td><td>+3.2%</td><td>25-35</td></tr>
+            </tbody>
+          </table>
+          <p>
+            Prices are approximate July 2026 medians for single-family homes. Days on market vary by price range, condition, and location within each city. Contact SAA Homes at <strong>(970) 999-1407</strong> for current market data tailored to your specific neighborhood and price point.
+          </p>
+        </section>
+
         <p>
           IDX information is provided exclusively for personal, non-commercial use and may not be used for
           any purpose other than to identify prospective properties consumers may be interested in purchasing.
