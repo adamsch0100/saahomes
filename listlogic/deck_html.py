@@ -513,6 +513,10 @@ def render_deck_html(report: dict, *, interactive_href: str = "presentation.html
     </section>
 '''
 
+    pd_rate_buttons = "".join(
+        f'<button type="button" class="pd-rate{" active" if i == rating else ""}" data-rating="{i}">{i}</button>'
+        for i in range(0, 11)
+    )
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -948,14 +952,15 @@ body.mode-print .hint {{ display: none; }}
   font-size: .62rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
   color: rgba(255,255,255,.62); min-width: 4.6rem;
 }}
-.pd-rates {{ display: flex; flex-wrap: wrap; gap: 4px; }}
+.pd-rates {{ display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: 4px; flex: 1; min-width: 0; }}
 .pd-rate {{
-  width: 28px; height: 28px; border-radius: 8px; border: 1px solid rgba(255,255,255,.2);
-  background: rgba(255,255,255,.06); color: #fff; font-size: .75rem; font-weight: 800; cursor: pointer;
+  width: 100%; height: 28px; border-radius: 8px; border: 1px solid rgba(255,255,255,.2);
+  background: rgba(255,255,255,.06); color: #fff; font-size: .72rem; font-weight: 800; cursor: pointer;
+  touch-action: manipulation;
 }}
 .pd-rate.active {{ background: var(--gold-soft); color: #0f2740; border-color: transparent; }}
 .pd-slider {{ flex: 1; min-width: 0; }}
-.pd-slider input {{ width: 100%; accent-color: var(--gold-soft); }}
+.pd-slider input {{ width: 100%; height: 24px; accent-color: var(--gold-soft); cursor: pointer; touch-action: pan-x; }}
 .pd-price {{ font-family: Fraunces, Georgia, serif; font-weight: 700; font-size: 1.05rem; min-width: 5.8rem; text-align: right; }}
 .pd-meta {{
   display: flex; flex-wrap: wrap; gap: 10px 16px; margin-top: 8px;
@@ -1192,6 +1197,30 @@ body.ll-agent #deckAdvList li:focus, body.ll-agent #deckRiskList li:focus {{
   <button type="button" id="fabNext" aria-label="Next">›</button>
 </div>
 <div class="hint">← → to flip · P for print layout · Esc back to Live Story</div>
+<div class="presenter-dock" id="presenterDock">
+  <div class="pd-row">
+    <span class="pd-label">Condition</span>
+    <div class="pd-rates" id="deckRateRow">{pd_rate_buttons}</div>
+    <span class="pd-price" id="deckRateScore">{rating}/10</span>
+  </div>
+  <div class="pd-row">
+    <span class="pd-label">Condition</span>
+    <div class="pd-slider"><input type="range" id="deckConditionSlider" min="0" max="10" step="1" value="{rating}"></div>
+    <span class="pd-price" id="deckRateLabel">{_esc(rating_label)}</span>
+  </div>
+  <div class="pd-row">
+    <span class="pd-label">List price</span>
+    <div class="pd-slider"><input type="range" id="deckPriceSlider" min="0" max="100" value="50" step="1000"></div>
+    <span class="pd-price" id="deckSlidePrice">${rec:,.0f}</span>
+  </div>
+  <div class="pd-meta">
+    <span id="deckDockRec">Rec ${rec:,.0f}</span>
+    <span id="deckDockRange">${low:,.0f} – ${high:,.0f}</span>
+    <span id="deckDockDom">~{exp_dom:.0f} days</span>
+    <span id="deckDockOdds"></span>
+    <button type="button" class="pd-reset" id="deckReset">Reset</button>
+  </div>
+</div>
 
 <script>
 (function() {{
@@ -1312,12 +1341,17 @@ const DATA = {json.dumps(deck_data, allow_nan=False)};
 const defaults = {json.dumps(deck_defaults, allow_nan=False)};
 const RUN_ID = (location.pathname.match(/\\/runs\\/([^\\/]+)/)||[])[1] || '';
 (function() {{
-  const ratingMult = {{1:0.90,2:0.92,3:0.94,4:0.96,5:0.98,6:1.00,7:1.025,8:1.045,9:1.07,10:1.09}};
+  const ratingMult = {{0:0.88,1:0.90,2:0.92,3:0.94,4:0.96,5:0.98,6:1.00,7:1.025,8:1.045,9:1.07,10:1.09}};
   let currentRec = defaults.rec, currentLow = defaults.low, currentHigh = defaults.high, currentDom = defaults.dom, currentRating = 5;
   let blManual = false;
 
   function money(n) {{ return '$' + Math.round(Number(n)).toLocaleString('en-US'); }}
+  function ratingMultiplier(r) {{
+    const n = Math.max(0, Math.min(10, Math.round(Number(r))));
+    return ratingMult[n] != null ? ratingMult[n] : 1;
+  }}
   function ratingLabel(r) {{
+    if (r <= 0) return 'Distressed';
     if (r <= 3) return 'Needs Work';
     if (r <= 6) return 'Typical';
     if (r <= 8) return 'Strong';
@@ -1449,16 +1483,21 @@ const RUN_ID = (location.pathname.match(/\\/runs\\/([^\\/]+)/)||[])[1] || '';
     if (!slider) return;
     const lo = Math.round(rec * 0.92 / 1000) * 1000;
     const hi = Math.round(rec * 1.12 / 1000) * 1000;
+    slider.min = String(lo);
+    slider.max = String(hi);
+    slider.step = '1000';
     slider.dataset.lo = lo; slider.dataset.hi = hi; slider.dataset.rec = rec;
     const thumb = selectedPrice != null ? selectedPrice : rec;
-    slider.value = Math.min(100, Math.max(0, Math.round(100 * (thumb - lo) / Math.max(hi - lo, 1))));
+    slider.value = String(Math.min(hi, Math.max(lo, Math.round(thumb / 1000) * 1000)));
   }}
   function priceFromSlider() {{
     const slider = document.getElementById('deckPriceSlider');
     if (!slider) return currentRec;
     const lo = +slider.dataset.lo || currentRec * 0.92;
     const hi = +slider.dataset.hi || currentRec * 1.12;
-    return Math.round((lo + (hi - lo) * (+slider.value / 100)) / 1000) * 1000;
+    const raw = +slider.value;
+    if (hi - lo > 100 && raw >= lo) return Math.round(raw / 1000) * 1000;
+    return Math.round((lo + (hi - lo) * (raw / 100)) / 1000) * 1000;
   }}
   function paintPrice(rec, low, high, dom, askPrice) {{
     currentRec = rec; currentLow = low; currentHigh = high; currentDom = dom;
@@ -1500,10 +1539,14 @@ const RUN_ID = (location.pathname.match(/\\/runs\\/([^\\/]+)/)||[])[1] || '';
     if (window.__deckFit) requestAnimationFrame(window.__deckFit);
   }}
   function applyRating(r) {{
+    r = Math.max(0, Math.min(10, Math.round(Number(r))));
+    if (!isFinite(r)) r = 5;
     currentRating = r;
     document.querySelectorAll('.pd-rate').forEach(b => b.classList.toggle('active', +b.dataset.rating === r));
-    const base = defaults.rec / (ratingMult[defaults.rating] || 1);
-    const newRec = Math.round(base * (ratingMult[r] || 1) / 1000) * 1000;
+    const cond = document.getElementById('deckConditionSlider');
+    if (cond && +cond.value !== r) cond.value = String(r);
+    const base = defaults.rec / ratingMultiplier(defaults.rating);
+    const newRec = Math.round(base * ratingMultiplier(r) / 1000) * 1000;
     const newLow = Math.round(newRec * 0.965 / 1000) * 1000;
     const newHigh = Math.round(newRec * 1.04 / 1000) * 1000;
     const out = estimateAtPrice(newRec, newRec, DATA.medianDom, DATA.marketOdds, DATA.inv);
@@ -1518,14 +1561,19 @@ const RUN_ID = (location.pathname.match(/\\/runs\\/([^\\/]+)/)||[])[1] || '';
     const btn = e.target.closest('.pd-rate');
     if (btn) applyRating(+btn.dataset.rating);
   }});
+  document.getElementById('deckConditionSlider')?.addEventListener('input', e => {{
+    applyRating(+e.target.value);
+  }});
   let raf = 0;
-  document.getElementById('deckPriceSlider')?.addEventListener('input', () => {{
+  function onDeckPriceMove() {{
     if (raf) cancelAnimationFrame(raf);
     raf = requestAnimationFrame(() => {{
       raf = 0;
       paintPrice(currentRec, currentLow, currentHigh, currentDom, priceFromSlider());
     }});
-  }});
+  }}
+  document.getElementById('deckPriceSlider')?.addEventListener('input', onDeckPriceMove);
+  document.getElementById('deckPriceSlider')?.addEventListener('change', onDeckPriceMove);
 
   function listHtml(id, text) {{
     const el = document.getElementById(id);

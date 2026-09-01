@@ -80,6 +80,10 @@ def render_fingerprint_html(view: dict, *, agent: bool = False) -> str:
         "fingerprint_url": brief.get("fingerprint_url") or "",
         "seller_access": lock.get("seller_access", True) is not False,
         "sold_at": lock.get("sold_at") or brief.get("sold_at") or "",
+        "paused_at": lock.get("paused_at") or brief.get("paused_at") or "",
+        "paused_reason": lock.get("paused_reason") or brief.get("paused_reason") or "",
+        "stop_on_under_contract": bool(lock.get("stop_on_under_contract") or brief.get("stop_on_under_contract")),
+        "ledger_listings": view.get("ledger_listings") or [],
         "active_at": lock.get("active_at") or brief.get("active_at") or "",
         "active_at_source": lock.get("active_at_source") or "",
         "seller_name": lock.get("seller_name") or "",
@@ -565,6 +569,9 @@ body.is-seller .console {{ display:none; }}
 .mkt-pulse .kicker {{ font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--navy); font-weight:800; }}
 .mkt-pulse h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.2rem; margin:2px 0 4px; }}
 .mkt-pulse > .sub {{ color:var(--muted); font-size:.84rem; line-height:1.45; margin-bottom:12px; }}
+.mkt-lookback {{ margin:0 0 12px; }}
+.mkt-lookback .mk {{ font-size:.62rem; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); font-weight:800; margin-bottom:6px; }}
+.mkt-pulse .weeks {{ margin:0; }}
 .mkt-grid {{
   display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px;
 }}
@@ -763,11 +770,15 @@ function sortsHtml(id) {{
       return '<button type="button" data-sort="' + k[0] + '"' + (laneSort === k[0] ? ' class="is-on"' : '') + '>' + k[1] + '</button>';
     }}).join('') + '</div>';
 }}
-function inWeek(dateStr, start, end) {{
+function inWeek(dateStr, start, end, startExclusive) {{
   const d = weekKey(dateStr);
-  if (!d || !start) return false;
-  if (d < start) return false;
-  if (end && d >= end) return false;
+  if (!d) return false;
+  if (start) {{
+    if (startExclusive ? (d <= start) : (d < start)) return false;
+  }} else if (!end) {{
+    return false;
+  }}
+  if (end && d > end) return false;
   return true;
 }}
 function weekAsOf(w) {{
@@ -779,22 +790,23 @@ function weekWindows() {{
   }});
   return hist.map(function (w, i) {{
     const key = weekAsOf(w);
+    const prev = i > 0 ? weekAsOf(hist[i - 1]) : '';
     return {{
       as_of: key,
-      as_of: key,
-      start: key,
-      end: hist[i + 1] ? weekAsOf(hist[i + 1]) : ''
+      start: prev || weekKey(w.clock_at) || key,
+      startExclusive: !!prev,
+      end: key
     }};
   }});
 }}
-function cardMovedInWeek(c, start, end) {{
+function cardMovedInWeek(c, start, end, startExclusive) {{
   if (!c) return false;
   const hist = c.status_history || [];
   for (let i = 0; i < hist.length; i++) {{
     const st = hist[i].status;
-    if ((isUc(st) || String(st || '').toLowerCase() === 'sold') && inWeek(hist[i].as_of || hist[i].as_of, start, end)) return true;
+    if ((isUc(st) || String(st || '').toLowerCase() === 'sold') && inWeek(hist[i].as_of || hist[i].as_of, start, end, startExclusive)) return true;
   }}
-  return !!(listDate(c) && inWeek(listDate(c), start, end));
+  return !!(listDate(c) && inWeek(listDate(c), start, end, startExclusive));
 }}
 function weekCounts(asOf) {{
   const wins = weekWindows();
@@ -803,12 +815,12 @@ function weekCounts(asOf) {{
   const out = {{ listed: 0, uc: 0, sold: 0 }};
   if (!w) return out;
     homesForWeek(w.as_of || w.as_of).forEach(function (c) {{
-    if (listDate(c) && inWeek(listDate(c), w.start, w.end)) out.listed += 1;
+    if (listDate(c) && inWeek(listDate(c), w.start, w.end, w.startExclusive)) out.listed += 1;
     const hist = statusHistory(c);
     let sold = false;
     let uc = false;
     for (let i = 0; i < hist.length; i++) {{
-      if (!inWeek(hist[i].as_of || hist[i].as_of, w.start, w.end)) continue;
+      if (!inWeek(hist[i].as_of || hist[i].as_of, w.start, w.end, w.startExclusive)) continue;
       const st = String(hist[i].status || '').toLowerCase();
       if (st === 'sold') sold = true;
       else if (isUc(st)) uc = true;
@@ -826,13 +838,13 @@ function homesForWeek(asOf) {{
   const b = DATA.brief || {{}};
   const seen = {{}};
   const out = [];
-  const pools = [b.baseline, b.still_active, b.new_under || b.new_under, b.new_over || b.new_over, b.went_pending, b.went_sold, b.pending_now || b.pending_now];
+  const pools = [DATA.ledger_listings, b.baseline, b.still_active, b.new_under || b.new_under, b.new_over || b.new_over, b.went_pending, b.went_sold, b.pending_now || b.pending_now];
   for (let p = 0; p < pools.length; p++) {{
     const pool = pools[p] || [];
     for (let i = 0; i < pool.length; i++) {{
       const c = pool[i];
       if (!c || !c.id || seen[c.id]) continue;
-      if (cardMovedInWeek(c, w.start, w.end)) {{
+      if (cardMovedInWeek(c, w.start, w.end, w.startExclusive)) {{
         seen[c.id] = 1;
         out.push(c);
       }}
@@ -1079,15 +1091,14 @@ function weekHomesHtml(asOf) {{
     let didSold = false;
     let didUc = false;
     (statusHistory(c) || []).forEach(function (h) {{
-      if (!w || !inWeek(h.as_of || h.as_of, w.start, w.end)) return;
+      if (!w || !inWeek(h.as_of || h.as_of, w.start, w.end, w.startExclusive)) return;
       const st = String(h.status || '').toLowerCase();
       if (st === 'sold') didSold = true;
       else if (isUc(st)) didUc = true;
     }});
-    const didList = !!(listDate(c) && w && inWeek(listDate(c), w.start, w.end));
+    const didList = !!(listDate(c) && w && inWeek(listDate(c), w.start, w.end, w.startExclusive));
     if (didSold || didUc) closed.push(c);
     else if (didList) listed.push(c);
-    else listed.push(c);
   }});
   function col(title, rows, kind) {{
     return '<div class="lane' + (kind ? ' is-' + kind : '') + '"><h3>' + esc(title) + ' <span class="n">' + rows.length + '</span></h3>' +
@@ -1127,6 +1138,11 @@ function selectWeek(asOf, scroll) {{
   if (box) box.outerHTML = weekHomesHtml(key);
   const score = document.getElementById('weekScore');
   if (score) score.outerHTML = weekScoreHtml(key);
+  const pulse = document.getElementById('marketPulse');
+  if (pulse) {{
+    const next = marketPulseHtml(key);
+    if (next) pulse.outerHTML = next;
+  }}
   applyWeekHighlight(key);
   bindHomeClicks(document.getElementById('weekHomes'));
   if (scroll) {{
@@ -1183,27 +1199,47 @@ function pulseDeltaLine(nowV, thenV, kind, thenLab) {{
   if (thenS === '—' || thenS === nowS) return thenS === '—' ? '' : ('Was ' + thenS + ' ' + thenLab);
   return 'Was ' + thenS + ' ' + thenLab;
 }}
-function marketPulseHtml() {{
+function latestWeekKey() {{
+  const hist = ((DATA.brief || {{}}).history || []);
+  return weekKey((DATA.brief || {{}}).as_of) || (hist.length ? weekAsOf(hist[hist.length - 1]) : '');
+}}
+function marketForWeek(asOf) {{
+  const pack = ((DATA.brief || {{}}).market_pulse || {{}});
+  const hist = ((DATA.brief || {{}}).history || []);
+  const key = weekKey(asOf);
+  const latest = latestWeekKey();
+  const row = hist.find(function (w) {{ return weekAsOf(w) === key; }}) || {{}};
+  const fromHist = row.market || row.market_pulse || null;
+  if (fromHist && (fromHist.active_count != null || fromHist.months_of_inventory != null)) return fromHist;
+  if (key === latest) return pack.now || {{}};
+  return fromHist || {{}};
+}}
+function marketPulseHtml(asOf) {{
   const pack = ((DATA.brief || {{}}).market_pulse || {{}});
   const then = pack.then || {{}};
-  const now = pack.now || {{}};
+  const hist = ((DATA.brief || {{}}).history || []);
+  const latest = latestWeekKey();
+  const key = weekKey(asOf) || latest;
+  const now = marketForWeek(key);
   if (!now.active_count && !then.active_count && !now.months_of_inventory && !then.months_of_inventory) return '';
   const thenLab = clockKind() === 'active' ? 'when listed' : 'at generate';
+  const isLatest = !key || key === latest;
   const days = Number((DATA.brief || {{}}).days_active || (DATA.brief || {{}}).days_locked || 0);
   const med = Number(now.median_dom || then.median_dom || 0);
   const rating = pack.home_rating || then.home_rating;
+  const activeLabel = isLatest ? 'Active now' : 'Active that week';
   const cells = [
     ['Months of inventory', pulseNum(now.months_of_inventory, 'inv'), pulseDeltaLine(now.months_of_inventory, then.months_of_inventory, 'inv', thenLab)],
     ['30-day odds', pulseNum(now.odds_of_selling, 'pct'), pulseDeltaLine(now.odds_of_selling, then.odds_of_selling, 'pct', thenLab)],
     ['Sales / month', pulseNum(now.absorption_rate, 'rate'), pulseDeltaLine(now.absorption_rate, then.absorption_rate, 'rate', thenLab)],
-    ['Active now', String(now.active_count != null ? now.active_count : '—'), 'Including this home: ' + (now.with_yours != null ? now.with_yours : '—') + (then.active_count != null ? ' · was ' + then.active_count + ' ' + thenLab : '')],
+    [activeLabel, String(now.active_count != null ? now.active_count : '—'), 'Including this home: ' + (now.with_yours != null ? now.with_yours : '—') + (then.active_count != null ? ' · was ' + then.active_count + ' ' + thenLab : '')],
     ['Median days', pulseNum(now.median_dom, 'days'), pulseDeltaLine(now.median_dom, then.median_dom, 'days', thenLab)],
     ['Median sold', pulseNum(now.median_sold_price, 'money'), pulseDeltaLine(now.median_sold_price, then.median_sold_price, 'money', thenLab)],
     ['Median $ / sf', pulseNum(now.median_price_per_sqft, 'ppsf'), pulseDeltaLine(now.median_price_per_sqft, then.median_price_per_sqft, 'ppsf', thenLab)],
     ['Did not sell', String(now.true_did_not_sell != null ? now.true_did_not_sell : (now.expired_withdrawn_count || '—')), (then.true_did_not_sell != null ? ('Was ' + then.true_did_not_sell + ' ' + thenLab) : '')]
   ];
   let notes = '';
-  if (days && med) {{
+  if (isLatest && days && med) {{
     notes += '<p class="mkt-note">This listing: <b>' + days + ' days</b> on market. Typical in this set: <b>' + Math.round(med) + ' days</b>.</p>';
   }}
   if (rating) {{
@@ -1211,9 +1247,23 @@ function marketPulseHtml() {{
       (pack.home_rating_label ? ' <span>' + esc(pack.home_rating_label) + '</span>' : '') +
       '. You can still work the price and the condition.</p>';
   }}
+  if (!isLatest && !now.active_count && !now.months_of_inventory) {{
+    notes += '<p class="mkt-note">No market snapshot stored for this week yet. Refresh the listing file to backfill earlier weeks.</p>';
+  }}
+  const sub = isLatest
+    ? 'The same vitals from the listing appointment, on this week’s file. Then vs now — not a new CMA. Tap a week to look back.'
+    : ('Week of ' + prettyDate(key) + ' vs ' + thenLab + '. Same market pull, reconstructed as of that week — not a new CMA.');
+  const weekBar = hist.length > 1
+    ? '<div class="mkt-lookback"><div class="mk">Look back</div><div class="weeks">' + hist.map(function (w) {{
+        const asOf = weekAsOf(w);
+        const on = asOf === key ? ' is-on' : '';
+        return '<button type="button" class="week' + on + '" data-asof="' + esc(asOf) + '">' + weekLabel(asOf) + '</button>';
+      }}).join('') + '</div></div>'
+    : '';
   return '<section class="mkt-pulse" id="marketPulse"><div class="kicker">Same market as the appointment</div>' +
     '<h2>What the market is doing</h2>' +
-    '<p class="sub">The same vitals from the listing appointment, on this week’s file. Then vs now — not a new CMA.</p>' +
+    '<p class="sub">' + esc(sub) + '</p>' +
+    weekBar +
     '<div class="mkt-grid">' + cells.map(function (c) {{
       return '<article class="mkt-cell"><div class="mk">' + esc(c[0]) + '</div><div class="mn">' + esc(c[1]) + '</div>' +
         (c[2] ? '<div class="mt">' + esc(c[2]) + '</div>' : '') + '</article>';
@@ -1223,9 +1273,9 @@ function weekScoreHtml(asOf) {{
   const hist = ((DATA.brief || {{}}).history || []);
   const row = hist.find(function (w) {{ return weekAsOf(w) === weekKey(asOf); }}) || {{}};
   const wc = weekCounts(asOf);
-  const listed = Number(wc.listed || row.listed_week || row.listed_week || 0);
-  const uc = Number(wc.uc || row.uc_week || row.uc_week || 0);
-  const sold = Number(wc.sold || row.sold_week || row.sold_week || 0);
+  const listed = Number(row.listed_week != null ? row.listed_week : wc.listed || 0);
+  const uc = Number(row.uc_week != null ? row.uc_week : wc.uc || 0);
+  const sold = Number(row.sold_week != null ? row.sold_week : wc.sold || 0);
   return '<p class="week-stat" id="weekScore"><b>' + listed + '</b> listed · <b>' +
     uc + '</b> under contract · <b>' + sold + '</b> sold</p>';
 }}
@@ -1291,7 +1341,7 @@ function weekMotion(asOf) {{
   const out = {{ listed: 0, under: 0, over: 0, uc: 0, sold: 0 }};
   if (w) {{
     homesForWeek(w.as_of || w.as_of).forEach(function (c) {{
-      if (listDate(c) && inWeek(listDate(c), w.start, w.end)) {{
+      if (listDate(c) && inWeek(listDate(c), w.start, w.end, w.startExclusive)) {{
         out.listed += 1;
         const side = c.side || (c.price < locked ? 'under' : c.price > locked ? 'over' : 'at');
         if (side === 'under') out.under += 1;
@@ -1300,7 +1350,7 @@ function weekMotion(asOf) {{
       let sold = false;
       let uc = false;
       statusHistory(c).forEach(function (h) {{
-        if (!inWeek(h.as_of || h.as_of, w.start, w.end)) return;
+        if (!inWeek(h.as_of || h.as_of, w.start, w.end, w.startExclusive)) return;
         const st = String(h.status || '').toLowerCase();
         if (st === 'sold') sold = true;
         else if (isUc(st)) uc = true;
@@ -1494,13 +1544,6 @@ function bindMap() {{
     if (pts.length > 1) fpMap.fitBounds(bounds, {{ padding: 48, maxZoom: 14 }});
   }});
 }}
-function bindBoard() {{
-  document.querySelectorAll('#marketBoard .board-week').forEach(function (el) {{
-    el.addEventListener('click', function () {{
-      selectWeek(el.getAttribute('data-asof'), true);
-    }});
-  }});
-}}
 let photosKicked = false;
 function paintPhotos(photos, galleries) {{
   function compact(s) {{
@@ -1605,12 +1648,17 @@ function bindFromAgent() {{
   }});
 }}
 function bindWeeks() {{
-  document.querySelectorAll('.week').forEach(el => {{
-    el.addEventListener('click', () => {{
-      selectWeek(el.getAttribute('data-asof'), true);
-    }});
+  const main = document.getElementById('main');
+  if (!main || main.dataset.weekNav === '1') return;
+  main.dataset.weekNav = '1';
+  main.addEventListener('click', function (ev) {{
+    const el = ev.target.closest('.week, .board-week');
+    if (!el || !main.contains(el)) return;
+    const asOf = el.getAttribute('data-asof');
+    if (asOf) selectWeek(asOf, true);
   }});
 }}
+function bindBoard() {{}}
 function loadNoteWeek(asOf) {{
   const ta = document.getElementById('agentNote');
   const weekEl = document.getElementById('noteWeek');
@@ -1770,12 +1818,15 @@ function render() {{
   const b = DATA.brief || {{}};
   const d = DATA.digest || b.digest || {{}};
   const sold = DATA.sold_at;
+  const paused = DATA.paused_at;
   const photo = b.subject_photo
     ? '<img src="' + esc(b.subject_photo) + '" alt="">'
     : '<div class="ph"></div>';
   const statusLine = sold
     ? '<div class="archive">Archived · listed as sold ' + esc(String(sold).slice(0,10)) + '</div>'
-    : '<div class="live"><i></i> Live Fingerprint</div>';
+    : (paused
+      ? '<div class="archive">Weekly reports paused · ' + (DATA.paused_reason === 'sold' ? 'listed as sold' : 'went under contract') + '</div>'
+      : '<div class="live"><i></i> Live Fingerprint</div>');
   const talk = ((b.talk || b.talk || {{}})[DATA.agent ? 'agent' : 'seller'] || []);
   const pos = b.position || [];
   document.getElementById('main').innerHTML =
@@ -1867,6 +1918,9 @@ function renderConsole() {{
     '</div>' +
     '<button type="button" id="btnEmail">' + (on ? 'Update / keep weekly email' : 'Start weekly email') + '</button>' +
     (on ? '<button type="button" id="btnEmailOff">Stop weekly email</button>' : '') +
+    '<label class="check"><input type="checkbox" id="stopOnUc"' + (DATA.stop_on_under_contract ? ' checked' : '') + '> Stop weekly reports when this listing goes under contract</label>' +
+    '<p class="check-hint">When Search or an upload shows this address as pending, backup, or first-right, weekly email and refresh stop on their own.</p>' +
+    (DATA.paused_at && !DATA.sold_at ? '<p class="note">Weekly reports paused after this listing went under contract.</p>' : '') +
     '<div id="noteConsole" class="note-console">' +
     '<label>This week’s note to the seller</label>' +
     '<input type="hidden" id="noteWeek" value="' + esc(currentAsOf) + '">' +
@@ -1967,6 +2021,15 @@ function bindConsole() {{
       body: JSON.stringify(emailBody(false))
     }});
     location.reload();
+  }});
+  document.getElementById('stopOnUc')?.addEventListener('change', async (e) => {{
+    status('Saving…');
+    const res = await fetch('/api/runs/' + run + '/fingerprint/stop-on-contract', {{
+      method:'POST', credentials:'same-origin', headers:{{'Content-Type':'application/json'}},
+      body: JSON.stringify({{ on: !!e.target.checked }})
+    }});
+    if (res.ok) location.reload();
+    else status('Could not save');
   }});
   document.getElementById('btnRefresh')?.addEventListener('click', async () => {{
     status('Refreshing…');

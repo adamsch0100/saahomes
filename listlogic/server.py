@@ -46,7 +46,7 @@ RATE_LIMIT_MAX_GENERATE = 10
 SAMPLE_RUN_ID = "sample-2845"
 SAMPLE_FINGERPRINT_LOCKED_AT = "2026-06-02"
 SAMPLE_FINGERPRINT_MIN_WEEKS = 4
-SAMPLE_FINGERPRINT_STORY = "from-export-v5"
+SAMPLE_FINGERPRINT_STORY = "from-export-v7"
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ListLogic")
@@ -1506,6 +1506,9 @@ def _refresh_sample_html(run_dir: Path, *, force: bool = False) -> bool:
                 and "print-page-spine" in existing
                 and "print-fit-v7" in existing
                 and "demo-ui-snappy" in existing
+                and "cond-0-10" in existing
+                and "conditionSlider" in existing
+                and "presenterDock" in deck_existing
                 and "RUN_ID === 'sample-2845'" in existing
                 and "charts failed to boot" in existing
                 and "/saas/vendor/chart.umd.min.js" in existing
@@ -2119,6 +2122,8 @@ _PRESENTATION_MARKERS = (
     "MAPBOX_TOKEN",
     "print-fit-v2",
     "demo-ui-snappy",
+    "cond-0-10",
+    "conditionSlider",
     "sample-demo-bar",
     "charts failed to boot",
     "/saas/vendor/chart.umd.min.js",
@@ -2641,9 +2646,15 @@ def _write_pulse_lock(run_dir: Path, report: dict, *, price=None, source: str = 
         "source": source,
         "seller_access": existing.get("seller_access", True) is not False,
     }
-    for key in ("email", "seller_name", "seller_email", "sold_at", "last_refresh_at", "last_looked_at", "active_at", "active_at_source", "market_pulse_then", "market_pulse_now"):
+    for key in (
+        "email", "seller_name", "seller_email", "sold_at", "paused_at", "paused_reason",
+        "stop_on_under_contract", "last_refresh_at", "last_looked_at", "active_at",
+        "active_at_source", "market_pulse_then", "market_pulse_now",
+    ):
         if existing.get(key) not in (None, "", {}):
             payload[key] = existing[key]
+    if existing.get("stop_on_under_contract") is True or (report.get("meta") or {}).get("stop_on_under_contract"):
+        payload["stop_on_under_contract"] = True
     if not isinstance(payload.get("market_pulse_then"), dict) or payload.get("market_pulse_then") is None:
         from core import market_pulse_from_report
 
@@ -2734,6 +2745,78 @@ def _apply_active_at(run_dir: Path, lock: dict | None, report: dict, df=None, sn
     return lock
 
 
+def _maybe_pause_on_subject_contract(
+    run_dir: Path,
+    report: dict,
+    lock: dict | None,
+    df=None,
+    snap=None,
+) -> dict:
+    """If the agent opted in, stop weekly reports once the subject goes pending or sold."""
+    from core import FINGERPRINT_UC_STATUSES, detect_subject_market_status
+
+    lock = dict(lock) if isinstance(lock, dict) else {}
+    if run_dir.name == SAMPLE_RUN_ID:
+        return lock
+    if not lock.get("stop_on_under_contract"):
+        return lock
+    if lock.get("sold_at") or lock.get("paused_at"):
+        return lock
+    subject = report.get("subject") if isinstance(report.get("subject"), dict) else {}
+    status = ""
+    if df is not None:
+        status = detect_subject_market_status(df, subject)
+    if not status and snap is not None:
+        status = detect_subject_market_status(snap, subject)
+    if status not in FINGERPRINT_UC_STATUSES and status not in ("Pending", "Sold"):
+        return lock
+    now = datetime.now().isoformat(timespec="seconds")
+    lock["paused_at"] = now
+    lock["paused_reason"] = "sold" if status == "Sold" else "under_contract"
+    if status == "Sold":
+        lock["sold_at"] = lock.get("sold_at") or now
+    email_cfg = lock.get("email") if isinstance(lock.get("email"), dict) else {}
+    email_cfg["on"] = False
+    lock["email"] = email_cfg
+    logger.info(
+        "Fingerprint paused for %s after subject status %s",
+        run_dir.name,
+        status,
+    )
+    return lock
+
+
+def _history_missing_market(history) -> bool:
+    if not isinstance(history, list) or not history:
+        return False
+    for week in history:
+        if not isinstance(week, dict):
+            continue
+        market = week.get("market")
+        if not isinstance(market, dict) or market.get("active_count") is None:
+            return True
+    return False
+
+
+def _backfill_history_market_pulse(run_dir: Path, report: dict, lock: dict | None, df, history) -> list:
+    from core import attach_market_pulse_history
+
+    if df is None or not isinstance(history, list) or not history:
+        return history if isinstance(history, list) else []
+    report = report if isinstance(report, dict) else {}
+    subject = report.get("subject") if isinstance(report.get("subject"), dict) else {}
+    area = str((report.get("meta") or {}).get("market_label") or report.get("area") or "Market")
+    filled, changed = attach_market_pulse_history(
+        history, df, subject=subject, area_name=area
+    )
+    if changed:
+        (run_dir / "fingerprint_history.json").write_text(
+            json.dumps(filled, indent=2, default=str),
+            encoding="utf-8",
+        )
+    return filled
+
+
 def _write_fingerprint_snapshot(run_dir: Path, report: dict, lock: dict, df, *, rotate_prev: bool = False) -> dict:
     from core import (
         append_fingerprint_history,
@@ -2789,17 +2872,20 @@ def _write_fingerprint_snapshot(run_dir: Path, report: dict, lock: dict, df, *, 
     prev = _read_json_file(run_dir / "pulse_snapshot_prev.json")
     subject = report.get("subject") if isinstance(report.get("subject"), dict) else {}
     digest = digest_pulse(snap, lock, prev, baseline=clock_base, ledger=ledger, subject=subject)
+    _ensure_market_pulse(run_dir, report, lock, df=df)
     history = append_fingerprint_history(
         _read_json_file(run_dir / "fingerprint_history.json", []),
         snap,
         digest,
+        market_pulse=lock.get("market_pulse_now") if isinstance(lock.get("market_pulse_now"), dict) else None,
     )
+    history = _backfill_history_market_pulse(run_dir, report, lock, df, history)
     (run_dir / "fingerprint_history.json").write_text(
         json.dumps(history, indent=2, default=str),
         encoding="utf-8",
     )
     lock["last_refresh_at"] = datetime.now().isoformat(timespec="seconds")
-    _ensure_market_pulse(run_dir, report, lock, df=df)
+    lock = _maybe_pause_on_subject_contract(run_dir, report, lock, df=df, snap=snap)
     (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
     _save_pulse_brief(run_dir, report, lock, snap)
     return snap
@@ -2831,6 +2917,19 @@ def _ensure_fingerprint_files(run_dir: Path, report: dict | None = None, *, sour
         _write_fingerprint_snapshot(run_dir, report, lock, df)
 
 
+def _sample_history_has_market(history) -> bool:
+    if not isinstance(history, list) or not history:
+        return False
+    with_market = 0
+    for week in history:
+        if not isinstance(week, dict):
+            continue
+        market = week.get("market")
+        if isinstance(market, dict) and market.get("active_count") is not None:
+            with_market += 1
+    return with_market >= min(len(history), 2)
+
+
 def _sample_history_has_motion(history) -> bool:
     if not isinstance(history, list) or len(history) < SAMPLE_FINGERPRINT_MIN_WEEKS:
         return False
@@ -2858,6 +2957,7 @@ def _sample_fingerprint_ready(run_dir: Path) -> bool:
         and isinstance(history, list)
         and len(history) >= SAMPLE_FINGERPRINT_MIN_WEEKS
         and _sample_history_has_motion(history)
+        and _sample_history_has_market(history)
     )
 
 
@@ -2933,8 +3033,10 @@ def _seed_sample_fingerprint(run_dir: Path, report: dict) -> None:
     from core import (
         append_fingerprint_history,
         build_pulse_snapshot_as_of,
+        compute_market_pulse_as_of,
         digest_pulse,
         fingerprint_sold_from_df,
+        market_pulse_from_report,
         merge_fingerprint_ledger,
         reconstruct_fingerprint_baseline,
     )
@@ -3030,11 +3132,22 @@ def _seed_sample_fingerprint(run_dir: Path, report: dict) -> None:
             as_of=day,
         )
         digest = digest_pulse(snap, lock, prev, baseline=baseline, ledger=ledger, subject=subject)
-        history = append_fingerprint_history(history, snap, digest)
+        area = str(meta.get("market_label") or report.get("area") or "Market")
+        week_pulse = compute_market_pulse_as_of(
+            df, day, area_name=area, subject=subject, latest=is_last
+        )
+        history = append_fingerprint_history(history, snap, digest, market_pulse=week_pulse)
+        if is_last:
+            lock["market_pulse_now"] = week_pulse
         prior = prev
         prev = snap
     if not history or snap is None:
         return
+    lock["market_pulse_then"] = market_pulse_from_report(report)
+    if not isinstance(lock.get("market_pulse_now"), dict) and history:
+        last_week = history[-1] if isinstance(history[-1], dict) else {}
+        if isinstance(last_week.get("market"), dict):
+            lock["market_pulse_now"] = last_week["market"]
     (run_dir / "pulse_snapshot.json").write_text(json.dumps(snap, indent=2, default=str), encoding="utf-8")
     (run_dir / "pulse_snapshot_prev.json").write_text(
         json.dumps(prior or prev, indent=2, default=str),
@@ -3367,11 +3480,15 @@ def _save_pulse_brief(
     snap = snap if snap is not None else _read_json_file(run_dir / "pulse_snapshot.json")
     prev = _read_json_file(run_dir / "pulse_snapshot_prev.json")
     subject = report.get("subject") if isinstance(report.get("subject"), dict) else {}
+    history = _read_json_file(run_dir / "fingerprint_history.json", [])
     need_detect = str((lock or {}).get("active_at_source") or "") != "agent" and not (lock or {}).get("active_at")
     need_pulse = not isinstance((lock or {}).get("market_pulse_now"), dict)
-    df = _load_run_market(run_dir) if (need_detect or need_pulse) else None
+    need_history_market = _history_missing_market(history)
+    df = _load_run_market(run_dir) if (need_detect or need_pulse or need_history_market) else None
     lock = _apply_active_at(run_dir, lock, report, df=df, snap=snap)
     pulse = _ensure_market_pulse(run_dir, report, lock, df=df)
+    if df is not None:
+        history = _backfill_history_market_pulse(run_dir, report, lock, df, history)
     if lock.get("locked_price"):
         (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
     report_url, share_url, fingerprint_url, agent_fp = _pulse_links(run_dir.name, report)
@@ -3390,7 +3507,7 @@ def _save_pulse_brief(
         stale_upload=stale_upload,
         baseline=baseline,
         ledger=ledger,
-        history=_read_json_file(run_dir / "fingerprint_history.json", []),
+        history=history,
         notes=_read_fingerprint_notes(run_dir),
         portal_criteria=meta.get("portal_criteria") if isinstance(meta.get("portal_criteria"), dict) else None,
         city=str(meta.get("city") or report.get("area") or ""),
@@ -3447,6 +3564,30 @@ def _rebuild_listing_flow(report: dict, df, locked_price: float, subject_sqft: f
     return flow
 
 
+def _ledger_listings_for_view(run_dir: Path, lock: dict | None) -> list:
+    from core import _pulse_card
+
+    ledger = _read_json_file(run_dir / "fingerprint_ledger.json")
+    listings = (ledger or {}).get("listings") if isinstance(ledger, dict) else {}
+    if not isinstance(listings, dict):
+        return []
+    try:
+        locked = float((lock or {}).get("locked_price") or 0)
+    except (TypeError, ValueError):
+        locked = 0.0
+    out = []
+    for rec in listings.values():
+        if not isinstance(rec, dict):
+            continue
+        card = _pulse_card(rec, locked)
+        card["status_history"] = rec.get("status_history") if isinstance(rec.get("status_history"), list) else []
+        card["list_date"] = rec.get("list_date") or rec.get("first_seen") or card.get("list_date") or ""
+        out.append(card)
+        if len(out) >= 400:
+            break
+    return out
+
+
 def _pulse_payload(run_dir: Path, report: dict | None = None) -> dict:
     from core import digest_pulse
 
@@ -3481,6 +3622,7 @@ def _pulse_payload(run_dir: Path, report: dict | None = None) -> dict:
         "digest": digest,
         "brief": brief,
         "snapshot": snap,
+        "ledger_listings": _ledger_listings_for_view(run_dir, lock),
         "data_source": data_source,
         "can_search_refresh": bool(meta.get("portal_criteria")),
         "needs_upload": data_source == "mls_export" and not meta.get("portal_criteria"),
@@ -3494,6 +3636,9 @@ def _pulse_payload(run_dir: Path, report: dict | None = None) -> dict:
         "agent_name": str(meta.get("agent_name") or ""),
         "last_looked_at": str((lock or {}).get("last_looked_at") or ""),
         "seller_got_weekly": _seller_got_weekly_recently(lock),
+        "stop_on_under_contract": bool((lock or {}).get("stop_on_under_contract")),
+        "paused_at": str((lock or {}).get("paused_at") or ""),
+        "paused_reason": str((lock or {}).get("paused_reason") or ""),
         "photos_fetching": False,
     }
 
@@ -3601,7 +3746,15 @@ def get_run_pulse(run_id: str):
     run_dir = OUTPUT_DIR / run_id
     if not (run_dir / "presentation.json").exists():
         raise HTTPException(404, "Run not found")
-    return _pulse_payload(run_dir)
+    report = _read_json_file(run_dir / "presentation.json", {}) or {}
+    try:
+        if run_id == SAMPLE_RUN_ID:
+            _seed_sample_fingerprint(run_dir, report)
+        else:
+            _ensure_fingerprint_files(run_dir, report)
+    except Exception:
+        logger.exception("Pulse ensure failed for %s", run_id)
+    return _pulse_payload(run_dir, report)
 
 
 @app.post("/api/runs/{run_id}/pulse-lock")
@@ -3914,7 +4067,7 @@ def _run_pulse_briefs() -> dict:
         lock = _read_json_file(run_dir / "pulse.json")
         if not isinstance(lock, dict) or not lock.get("locked_price"):
             continue
-        if lock.get("sold_at"):
+        if lock.get("sold_at") or lock.get("paused_at"):
             continue
         if run_dir.name == SAMPLE_RUN_ID:
             continue
@@ -4134,6 +4287,34 @@ async def mark_fingerprint_sold(run_id: str, request: Request):
     report = _read_json_file(run_dir / "presentation.json", {}) or {}
     _save_pulse_brief(run_dir, report, lock)
     return {"ok": True, "lock": lock, **_pulse_payload(run_dir)}
+
+
+@app.post("/api/runs/{run_id}/fingerprint/stop-on-contract")
+async def save_stop_on_contract(run_id: str, request: Request):
+    run_id = _safe_run_id(run_id)
+    _reject_sample_mutation(run_id)
+    _require_run_owner(request, run_id)
+    run_dir = OUTPUT_DIR / run_id
+    lock = _read_json_file(run_dir / "pulse.json") or {}
+    if not lock:
+        raise HTTPException(400, "Fingerprint not found")
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    on = bool((body or {}).get("on", True))
+    lock["stop_on_under_contract"] = on
+    report = _read_json_file(run_dir / "presentation.json", {}) or {}
+    if on:
+        lock = _maybe_pause_on_subject_contract(
+            run_dir, report, lock, df=_load_run_market(run_dir)
+        )
+    elif lock.get("paused_reason") == "under_contract" and not lock.get("sold_at"):
+        lock.pop("paused_at", None)
+        lock.pop("paused_reason", None)
+    (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
+    _save_pulse_brief(run_dir, report, lock)
+    return {"ok": True, "lock": lock, **_pulse_payload(run_dir, report)}
 
 
 def _seller_got_weekly_recently(lock: dict | None, *, hours: float = 192) -> bool:
@@ -5111,6 +5292,7 @@ async def generate(
     brand_accent: str = Form("#1a5f9e"),
     seller_name: str = Form(""),
     seller_email: str = Form(""),
+    stop_on_under_contract: str = Form(""),
     logo: Optional[UploadFile] = File(None),
     subject_photo: Optional[UploadFile] = File(None),
 ):
@@ -5370,8 +5552,18 @@ async def generate(
         se = (seller_email or "").strip()
         if se and not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", se):
             se = ""
-        if sn or se:
+        if sn or se or stop_on_under_contract:
             lock = _read_json_file(run_dir / "pulse.json", {}) or {}
+            want_stop = str(stop_on_under_contract or "").lower() in {"1", "true", "yes", "on"}
+            if want_stop:
+                report = _read_json_file(run_dir / "presentation.json", {}) or {}
+                if isinstance(report, dict):
+                    meta = report.get("meta") if isinstance(report.get("meta"), dict) else {}
+                    meta["stop_on_under_contract"] = True
+                    report["meta"] = meta
+                    (run_dir / "presentation.json").write_text(
+                        json.dumps(report, indent=2, default=str), encoding="utf-8"
+                    )
             if lock:
                 if sn:
                     lock["seller_name"] = sn
@@ -5381,6 +5573,8 @@ async def generate(
                     email_cfg["seller_email"] = se
                     email_cfg.setdefault("on", False)
                     lock["email"] = email_cfg
+                if want_stop:
+                    lock["stop_on_under_contract"] = True
                 (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
         presentation_html = ""
         deck_html = ""

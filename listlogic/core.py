@@ -1066,6 +1066,41 @@ def listing_is_subject(row: dict | None, subject: dict | None) -> bool:
     return False
 
 
+def detect_subject_market_status(source, subject: dict | None) -> str:
+    """Current MLS status of the subject home: Active, Pending, Sold, or ''."""
+    if not isinstance(subject, dict) or not (
+        subject.get("address") or subject.get("mls_number") or subject.get("mls")
+    ):
+        return ""
+    rows: list[dict] = []
+    if isinstance(source, pd.DataFrame):
+        if source is None or len(source) == 0:
+            return ""
+        for _, raw in source.iterrows():
+            status = str(raw.get("StatusNorm") or raw.get("status") or "").strip()
+            rows.append({
+                "mls": str(raw.get("MLSNumber") or raw.get("mls") or "").strip(),
+                "address": str(raw.get("Address") or raw.get("address") or "").strip(),
+                "status": status,
+            })
+    elif isinstance(source, dict):
+        rows = [r for r in (source.get("listings") or []) if isinstance(r, dict)]
+    elif isinstance(source, list):
+        rows = [r for r in source if isinstance(r, dict)]
+    for row in rows:
+        if not listing_is_subject(row, subject):
+            continue
+        status = str(row.get("status") or row.get("StatusNorm") or "").strip()
+        if status in FINGERPRINT_UC_STATUSES:
+            return "Pending"
+        if status in FINGERPRINT_SOLD_STATUSES or status == "Sold":
+            return "Sold"
+        if status in FINGERPRINT_LIVE_STATUSES:
+            return status
+        return status
+    return ""
+
+
 def compute_market_pulse(
     df: pd.DataFrame,
     *,
@@ -1092,6 +1127,103 @@ def compute_market_pulse(
         pulse["active_count"] = n
         pulse["with_yours"] = n + 1
     return pulse
+
+
+def _failed_status_as_of(row: pd.Series, as_of_ts: pd.Timestamp) -> str:
+    """Expired / withdrawn as of a historical day; still Active if they had not left yet."""
+    current = str(row.get("StatusNorm") or "")
+    if current not in ("Expired", "Withdrawn"):
+        return ""
+    list_ts = _pulse_day(row.get("ListDate"))
+    if list_ts is None or list_ts > as_of_ts:
+        return ""
+    end = _pulse_day(row.get("LastUpdateDate"))
+    if end is None and pd.notna(row.get("DOM")):
+        try:
+            end = list_ts + pd.Timedelta(days=float(row.get("DOM") or 0))
+        except (TypeError, ValueError):
+            end = None
+    if end is not None and end > as_of_ts:
+        return "Active"
+    return current
+
+
+def market_frame_as_of(df: pd.DataFrame, as_of, *, latest: bool = False) -> pd.DataFrame:
+    """Copy of the market pull with StatusNorm reconstructed as of ``as_of``."""
+    as_of_ts = _pulse_day(as_of) or pd.Timestamp.now().normalize()
+    if df is None or len(df) == 0:
+        return df if df is not None else pd.DataFrame()
+    keep_idx: list = []
+    statuses: list[str] = []
+    for idx, row in df.iterrows():
+        st = _status_as_of_row(row, as_of_ts, latest=latest)
+        if not st:
+            st = _failed_status_as_of(row, as_of_ts)
+        if not st:
+            continue
+        keep_idx.append(idx)
+        statuses.append(st)
+    if not keep_idx:
+        return df.iloc[0:0].copy()
+    work = df.loc[keep_idx].copy()
+    work["StatusNorm"] = statuses
+    return work
+
+
+def compute_market_pulse_as_of(
+    df: pd.DataFrame,
+    as_of,
+    *,
+    area_name: str = "Market",
+    subject: dict | None = None,
+    latest: bool = False,
+) -> dict:
+    """Appointment vitals as they would have read on ``as_of`` (later sales do not leak back)."""
+    as_of_ts = _pulse_day(as_of) or pd.Timestamp.now().normalize()
+    work = market_frame_as_of(df, as_of_ts, latest=latest)
+    pulse = compute_market_pulse(work, area_name=area_name, subject=subject)
+    if pulse:
+        pulse["as_of"] = as_of_ts.strftime("%Y-%m-%d")
+    return pulse
+
+
+def attach_market_pulse_history(
+    history: list | None,
+    df: pd.DataFrame,
+    *,
+    subject: dict | None = None,
+    area_name: str = "Market",
+) -> tuple[list, bool]:
+    """Fill missing per-week market vitals from the MLS pull. Does not overwrite stored weeks."""
+    rows = list(history) if isinstance(history, list) else []
+    if df is None or len(df) == 0 or not rows:
+        return rows, False
+    changed = False
+    n = len(rows)
+    out: list = []
+    for i, week in enumerate(rows):
+        if not isinstance(week, dict):
+            out.append(week)
+            continue
+        row = dict(week)
+        existing = row.get("market")
+        if isinstance(existing, dict) and existing.get("active_count") is not None:
+            out.append(row)
+            continue
+        as_of = str(row.get("as_of") or "")[:10]
+        if len(as_of) != 10:
+            out.append(row)
+            continue
+        row["market"] = compute_market_pulse_as_of(
+            df,
+            as_of,
+            area_name=area_name,
+            subject=subject,
+            latest=(i == n - 1),
+        )
+        changed = True
+        out.append(row)
+    return out, changed
 
 
 def fingerprint_clock(lock: dict | None) -> dict:
@@ -1781,7 +1913,12 @@ def merge_fingerprint_ledger(
     return {"listings": listings, "updated": as_of}
 
 
-def append_fingerprint_history(history: list | None, snapshot: dict | None, digest: dict | None) -> list:
+def append_fingerprint_history(
+    history: list | None,
+    snapshot: dict | None,
+    digest: dict | None,
+    market_pulse: dict | None = None,
+) -> list:
     snap = snapshot if isinstance(snapshot, dict) else {}
     dig = digest if isinstance(digest, dict) else {}
     rows = list(history) if isinstance(history, list) else []
@@ -1808,7 +1945,14 @@ def append_fingerprint_history(history: list | None, snapshot: dict | None, dige
         "clock": str(dig.get("clock") or ""),
         "clock_at": str(dig.get("clock_at") or ""),
     }
+    if isinstance(market_pulse, dict) and (
+        market_pulse.get("active_count") is not None
+        or market_pulse.get("months_of_inventory") is not None
+    ):
+        row["market"] = compact_market_pulse(market_pulse, market_pulse)
     if rows and rows[-1].get("as_of") == as_of:
+        if "market" not in row and isinstance(rows[-1].get("market"), dict):
+            row["market"] = rows[-1]["market"]
         rows[-1] = row
     else:
         rows.append(row)
@@ -2454,6 +2598,9 @@ def build_pulse_brief(
         "history": list(history or [])[-12:],
         "notes": normalize_fingerprint_notes(notes),
         "sold_at": str(lock.get("sold_at") or ""),
+        "paused_at": str(lock.get("paused_at") or ""),
+        "paused_reason": str(lock.get("paused_reason") or ""),
+        "stop_on_under_contract": lock.get("stop_on_under_contract") is True,
         "comp_set": _comp_set(lock, sub, portal_criteria=portal_criteria, city=city),
         "last_refresh_at": str(lock.get("last_refresh_at") or lock.get("last_looked_at") or ""),
         "market_pulse": market_pulse if isinstance(market_pulse, dict) else {},

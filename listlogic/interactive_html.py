@@ -492,7 +492,7 @@ def render_interactive_html(report: dict) -> str:
     )
     rating_buttons = "".join(
         f'<button type="button" class="rate-btn{" active" if i == home_rating else ""}" data-rating="{i}">{i}</button>'
-        for i in range(1, 11)
+        for i in range(0, 11)
     )
     obj_list = list(objections or [
         {"title": "Inventory", "body": "Pricing outside the band extends DOM."},
@@ -1206,13 +1206,15 @@ body.ll-agent .agent-only{{display:block}}
 .rate-band .rb-r{{font-size:.72rem;color:var(--muted);margin-top:2px}}
 .rate-band .rb-d{{font-size:.78rem;margin-top:6px;line-height:1.35}}
 .dns-note{{background:#fff8f0;border:1px solid #f0d9b8;border-radius:10px;padding:10px 12px;margin-top:10px;font-size:.84rem;line-height:1.45}}
-.rate-row{{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}}
-.rate-btn{{width:44px;height:44px;border-radius:10px;border:1px solid var(--border);background:#f8fafc;font-weight:700;font-size:1rem;cursor:pointer;color:var(--brand-primary);transition:transform .15s ease,box-shadow .15s ease,background .15s ease}}
+.rate-row{{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:6px;margin:10px 0}}
+.rate-btn{{width:100%;min-width:0;height:44px;border-radius:10px;border:1px solid var(--border);background:#f8fafc;font-weight:700;font-size:.95rem;cursor:pointer;color:var(--brand-primary);transition:transform .15s ease,box-shadow .15s ease,background .15s ease;touch-action:manipulation}}
 .rate-btn:hover{{transform:translateY(-2px);box-shadow:0 4px 10px rgba(12,60,110,.15)}}
-.rate-btn.active{{background:linear-gradient(145deg,var(--brand-primary),var(--brand-accent));color:#fff;transform:scale(1.08);box-shadow:0 6px 14px rgba(12,60,110,.3)}}
+.rate-btn.active{{background:linear-gradient(145deg,var(--brand-primary),var(--brand-accent));color:#fff;transform:scale(1.06);box-shadow:0 6px 14px rgba(12,60,110,.3)}}
+.cond-slider-wrap{{margin:4px 0 8px}}
+.cond-slider-wrap input[type=range]{{width:100%;height:28px;accent-color:var(--brand-primary);cursor:pointer;touch-action:pan-x}}
 .slider-wrap{{margin:12px 0 4px}}
 .slider-track-wrap{{position:relative;padding:18px 0 2px}}
-.slider-wrap input[type=range]{{width:100%;accent-color:var(--brand-primary);position:relative;z-index:2;margin:0}}
+.slider-wrap input[type=range]{{width:100%;height:28px;accent-color:var(--brand-primary);position:relative;z-index:3;margin:0;cursor:pointer;pointer-events:auto;touch-action:pan-x}}
 .rec-tick{{position:absolute;top:0;bottom:8px;width:0;transform:translateX(-50%);z-index:1;pointer-events:none;display:flex;flex-direction:column;align-items:center}}
 .rec-tick-label{{font-size:.58rem;font-weight:800;letter-spacing:.02em;text-transform:uppercase;color:var(--brand-primary);background:#fff;border:1px solid rgba(12,60,110,.25);border-radius:999px;padding:1px 7px;white-space:nowrap;line-height:1.3;box-shadow:0 1px 3px rgba(12,60,110,.08)}}
 .rec-tick-line{{flex:1;width:2px;margin-top:3px;background:var(--brand-primary);opacity:.55;border-radius:1px;min-height:14px}}
@@ -1551,7 +1553,8 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
 @media(max-width:740px){{
   .two-col,.confront,.market-duo,.split{{grid-template-columns:1fr}}
   .price-row,.rate-live,.obj-grid{{grid-template-columns:repeat(1,1fr)}}
-  .rate-bands{{grid-template-columns:repeat(2,1fr)}}
+  .rate-row{{grid-template-columns:repeat(6,minmax(0,1fr))}}
+  .rate-bands{{grid-template-columns:repeat(2,1fr)}}}}
   #spine-strategy .whatif-grid{{
     display:flex;flex-wrap:nowrap;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;padding-bottom:2px
   }}
@@ -1567,7 +1570,7 @@ a.link{{color:var(--blue);text-decoration:none;font-weight:500;margin-right:3px}
   #spine-fulldata,.share-bar,.price-controls .slider-wrap,
   .slider-track-wrap,input[type=range],.slider-scale,
   .comp-toolbar,.comp-table-toggle,.comp-table-wrap,.car-btn,.car-count,
-  #confrontOut,.rate-row,.kpi .tip,.comp-photo-fade,.photo-fetch-banner,
+  #confrontOut,.rate-row,.cond-slider-wrap,.kpi .tip,.comp-photo-fade,.photo-fetch-banner,
   .page > .two-col,
   .page > .section:not([id]),
   #spine-strategy .response-grid .confront-out,
@@ -2207,12 +2210,17 @@ body.ll-sample .sample-demo-bar{{display:flex}}
     <h2><span class="ttl"><span class="step">4</span><span data-copy="t-rating">How Does Your Home Compare?</span></span></h2>
     <p class="sub" data-lede="condition">{lede_condition}</p>
     <div class="rate-bands" id="rateBands">
-      <button type="button" class="rate-band" data-rating="3"><div class="rb-t" data-copy="rb-needs-t">Needs Work</div><div class="rb-r">1 – 3</div><div class="rb-d" data-copy="rb-needs-d">Dated finishes, deferred maintenance, or weak curb appeal vs comps.</div></button>
+      <button type="button" class="rate-band" data-rating="2"><div class="rb-t" data-copy="rb-needs-t">Needs Work</div><div class="rb-r">0 – 3</div><div class="rb-d" data-copy="rb-needs-d">Dated finishes, deferred maintenance, or weak curb appeal vs comps.</div></button>
       <button type="button" class="rate-band" data-rating="5"><div class="rb-t" data-copy="rb-avg-t">Average</div><div class="rb-r">4 – 6</div><div class="rb-d" data-copy="rb-avg-d">In line with recent sales — nothing special, nothing broken.</div></button>
       <button type="button" class="rate-band" data-rating="7"><div class="rb-t" data-copy="rb-strong-t">Strong</div><div class="rb-r">7 – 8</div><div class="rb-d" data-copy="rb-strong-d">Updated kitchen/baths, clean presentation — buyers notice.</div></button>
       <button type="button" class="rate-band" data-rating="9"><div class="rb-t" data-copy="rb-ex-t">Exceptional</div><div class="rb-r">9 – 10</div><div class="rb-d" data-copy="rb-ex-d">Top of the set — turnkey, premium finishes, stands out.</div></button>
     </div>
     <div class="rate-row" id="rateRow">{rating_buttons}</div>
+    <div class="cond-slider-wrap">
+      <label class="muted" for="conditionSlider">Condition slider — 0 distressed through 10 exceptional</label>
+      <input type="range" id="conditionSlider" min="0" max="10" step="1" value="{home_rating}" aria-valuemin="0" aria-valuemax="10" aria-valuenow="{home_rating}">
+      <div class="slider-scale"><span>0</span><span>5 typical</span><span>10</span></div>
+    </div>
     <div class="rate-live">
       <div class="rl"><div class="lbl" data-copy="rate-lbl-vs">Condition vs typical</div><div class="amt" id="rateLivePrice">—</div></div>
       <div class="rs"><div class="lbl" data-copy="rate-lbl-you">Your rating</div><div class="amt" id="rateLiveScore">{home_rating}/10</div></div>
@@ -2371,7 +2379,7 @@ body.ll-sample .sample-demo-bar{{display:flex}}
             <span class="rec-tick-label" id="recTickLabel">Rec</span>
             <span class="rec-tick-line"></span>
           </div>
-          <input type="range" id="priceSlider" min="0" max="100" value="50" step="1" aria-valuetext="Recommended">
+          <input type="range" id="priceSlider" min="0" max="100" value="50" step="1000" aria-valuetext="Recommended">
         </div>
         <div class="slider-scale"><span id="slideMin">—</span><span id="slideMid">Recommended</span><span id="slideMax">—</span></div>
       </div>
@@ -2414,15 +2422,15 @@ body.ll-sample .sample-demo-bar{{display:flex}}
       <div class="pulse-grid">
         <div class="pulse-cell">
           <div class="pv" id="pulseNewUnder">—</div>
-          <div class="pl">Under initial list</div>
+          <div class="pl">Listed this week</div>
         </div>
         <div class="pulse-cell">
           <div class="pv" id="pulseNewOver">—</div>
-          <div class="pl">Over initial list</div>
+          <div class="pl">Under contract this week</div>
         </div>
         <div class="pulse-cell">
           <div class="pv" id="pulseActiveCheaper">—</div>
-          <div class="pl">Still-active cheaper</div>
+          <div class="pl">Sold this week</div>
         </div>
       </div>
       <div class="pulse-talk" id="pulseTalk" hidden>
@@ -2970,10 +2978,14 @@ document.querySelectorAll('.panel-tab').forEach(tab => {{
   }});
 }});
 
-const ratingMult = {{1:0.90,2:0.92,3:0.94,4:0.96,5:0.98,6:1.00,7:1.025,8:1.045,9:1.07,10:1.09}};
+const ratingMult = {{0:0.88,1:0.90,2:0.92,3:0.94,4:0.96,5:0.98,6:1.00,7:1.025,8:1.045,9:1.07,10:1.09}};
 const RATING_TYPICAL = 5;
+function ratingMultiplier(r) {{
+  const n = Math.max(0, Math.min(10, Math.round(Number(r))));
+  return ratingMult[n] != null ? ratingMult[n] : 1;
+}}
 function ratingVsTypicalPct(r) {{
-  const pct = ((ratingMult[r] || 1) / (ratingMult[RATING_TYPICAL] || 1) - 1) * 100;
+  const pct = (ratingMultiplier(r) / ratingMultiplier(RATING_TYPICAL) - 1) * 100;
   if (Math.abs(pct) < 0.05) return '0%';
   return (pct >= 0 ? '+' : '\\u2212') + Math.abs(pct).toFixed(1) + '%';
 }}
@@ -3272,7 +3284,8 @@ function renderConfront(price) {{
 
 function netAutoTitle(p) {{ return Math.max(0, Math.round(p * 0.0015 / 50) * 50); }}
 function netTaxParts(price) {{
-  const rate = Math.min(5, Math.max(0, parseFloat(document.getElementById('netTaxRate').value) || 0));
+  const rateEl = document.getElementById('netTaxRate');
+  const rate = Math.min(5, Math.max(0, parseFloat(rateEl && rateEl.value) || 0));
   const annual = price * rate / 100;
   const dateEl = document.getElementById('netCloseDate');
   if (dateEl && !dateEl.value) {{
@@ -3287,10 +3300,16 @@ function netTaxParts(price) {{
 }}
 function netCostsAt(price) {{
   price = +price || 0;
-  const num = (id) => Math.max(0, parseFloat(document.getElementById(id).value) || 0);
-  const pct = (id) => Math.min(10, Math.max(0, parseFloat(document.getElementById(id).value) || 0));
+  const num = (id) => {{
+    const el = document.getElementById(id);
+    return el ? Math.max(0, parseFloat(el.value) || 0) : 0;
+  }};
+  const pct = (id) => {{
+    const el = document.getElementById(id);
+    return el ? Math.min(10, Math.max(0, parseFloat(el.value) || 0)) : 0;
+  }};
   const titleEl = document.getElementById('netTitle');
-  const title = titleEl.dataset.auto === '1' ? netAutoTitle(price) : num('netTitle');
+  const title = titleEl && titleEl.dataset.auto === '1' ? netAutoTitle(price) : num('netTitle');
   return {{
     sellerFee: price * pct('netSellerFeePct') / 100,
     buyerFee: price * pct('netBuyerFeePct') / 100,
@@ -3309,7 +3328,7 @@ function renderNetSheet(price) {{
   price = +price || currentRec || 0;
   if (!price) return;
   const titleEl = document.getElementById('netTitle');
-  if (titleEl.dataset.auto === '1') titleEl.value = netAutoTitle(price);
+  if (titleEl && titleEl.dataset.auto === '1') titleEl.value = netAutoTitle(price);
   const c = netCostsAt(price);
   const selling = c.sellerFee + c.buyerFee + c.concession + c.repairs;
   const closing = c.tax + c.title + c.oec + c.bundled + c.water;
@@ -3343,6 +3362,7 @@ function renderNetSheet(price) {{
       + (c.payoff ? ' · Payoff ' + money(c.payoff) : ' · Payoff not entered');
   }}
   const note = document.getElementById('netRecNote');
+  if (!note) return;
   if (Math.abs(price - currentRec) > 500) {{
     const rc = netCostsAt(currentRec);
     const recSell = rc.sellerFee + rc.buyerFee + rc.concession + rc.repairs;
@@ -3440,16 +3460,23 @@ function renderWhileYouWait(price, out) {{
 }}
 
 function applyRating(r) {{
+  r = Math.max(0, Math.min(10, Math.round(Number(r))));
+  if (!isFinite(r)) r = 5;
   currentRating = r;
   document.querySelectorAll('.rate-btn').forEach(b => b.classList.toggle('active', +b.dataset.rating === r));
   document.querySelectorAll('.rate-band').forEach(b => {{
     const mid = +b.dataset.rating;
-    const lo = mid === 3 ? 1 : mid === 5 ? 4 : mid === 7 ? 7 : 9;
-    const hi = mid === 3 ? 3 : mid === 5 ? 6 : mid === 7 ? 8 : 10;
+    const lo = mid <= 3 ? 0 : mid === 5 ? 4 : mid === 7 ? 7 : 9;
+    const hi = mid <= 3 ? 3 : mid === 5 ? 6 : mid === 7 ? 8 : 10;
     b.classList.toggle('active', r >= lo && r <= hi);
   }});
-  const base = defaults.rec / (ratingMult[defaults.rating] || 1);
-  const newRec = Math.round(base * (ratingMult[r] || 1) / 1000) * 1000;
+  const cond = document.getElementById('conditionSlider');
+  if (cond && +cond.value !== r) {{
+    cond.value = String(r);
+    cond.setAttribute('aria-valuenow', String(r));
+  }}
+  const base = defaults.rec / ratingMultiplier(defaults.rating);
+  const newRec = Math.round(base * ratingMultiplier(r) / 1000) * 1000;
   const newLow = Math.round(newRec * 0.965 / 1000) * 1000;
   const newHigh = Math.round(newRec * 1.04 / 1000) * 1000;
   const out = estimateAtPrice(newRec, newRec, DATA.medianDom, DATA.marketOdds, DATA.inv);
@@ -3457,12 +3484,14 @@ function applyRating(r) {{
   const vsTxt = ratingVsTypicalPct(r);
   const ratePrice = document.getElementById('rateLivePrice');
   if (ratePrice) ratePrice.textContent = vsTxt;
-  document.getElementById('rateLiveScore').textContent = r + '/10';
+  const scoreEl = document.getElementById('rateLiveScore');
+  if (scoreEl) scoreEl.textContent = r + '/10';
   const ratingCopy = document.getElementById('ratingCopy');
   if (ratingCopy && !copyLocked(ratingCopy)) {{
     ratingCopy.innerHTML = 'At <strong>' + r + '/10</strong>, condition is <strong>' + vsTxt + '</strong> vs a typical <strong>5/10</strong> home in this set. List dollars unlock in <strong>Price it</strong>.';
   }}
-  document.getElementById('sellerPrice').value = newRec;
+  const sellerPrice = document.getElementById('sellerPrice');
+  if (sellerPrice) sellerPrice.value = newRec;
   setupPriceSlider(newRec);
   renderConfront(newRec);
   syncWhatIfCards(newRec);
@@ -3477,6 +3506,9 @@ document.getElementById('rateBands').addEventListener('click', e => {{
   const band = e.target.closest('.rate-band');
   if (band) applyRating(+band.dataset.rating);
 }});
+document.getElementById('conditionSlider')?.addEventListener('input', e => {{
+  applyRating(+e.target.value);
+}});
 
 function syncWhatIfCards(price) {{
   const cards = document.querySelectorAll('.whatif-card');
@@ -3489,26 +3521,39 @@ function syncWhatIfCards(price) {{
 }}
 function setupPriceSlider(rec, selectedPrice) {{
   const slider = document.getElementById('priceSlider');
+  if (!slider) return;
   const lo = Math.round(rec * 0.92 / 1000) * 1000;
   const hi = Math.round(rec * 1.12 / 1000) * 1000;
+  slider.min = String(lo);
+  slider.max = String(hi);
+  slider.step = '1000';
   slider.dataset.lo = lo; slider.dataset.hi = hi; slider.dataset.rec = rec;
-  document.getElementById('slideMin').textContent = money(lo);
-  document.getElementById('slideMax').textContent = money(hi);
-  document.getElementById('slideMid').textContent = 'Rec ' + money(rec);
+  const minEl = document.getElementById('slideMin');
+  const maxEl = document.getElementById('slideMax');
+  const midEl = document.getElementById('slideMid');
+  if (minEl) minEl.textContent = money(lo);
+  if (maxEl) maxEl.textContent = money(hi);
+  if (midEl) midEl.textContent = 'Rec ' + money(rec);
   const recPct = 100 * (rec - lo) / Math.max(hi - lo, 1);
   const tick = document.getElementById('recTick');
   if (tick) tick.style.left = Math.min(98, Math.max(2, recPct)) + '%';
   const tickLabel = document.getElementById('recTickLabel');
   if (tickLabel) tickLabel.textContent = 'Rec ' + money(rec);
   const thumbPrice = selectedPrice != null ? selectedPrice : rec;
-  const thumbPct = Math.round(100 * (thumbPrice - lo) / Math.max(hi - lo, 1));
-  slider.value = Math.min(100, Math.max(0, thumbPct));
+  const clamped = Math.min(hi, Math.max(lo, Math.round(thumbPrice / 1000) * 1000));
+  slider.value = String(clamped);
+  slider.setAttribute('aria-valuetext', money(clamped));
 }}
 function priceFromSlider() {{
   const slider = document.getElementById('priceSlider');
+  if (!slider) return currentRec;
   const lo = +slider.dataset.lo || currentRec * 0.92;
   const hi = +slider.dataset.hi || currentRec * 1.12;
-  return Math.round((lo + (hi - lo) * (+slider.value / 100)) / 1000) * 1000;
+  const raw = +slider.value;
+  if (hi - lo > 100 && raw >= lo) {{
+    return Math.round(raw / 1000) * 1000;
+  }}
+  return Math.round((lo + (hi - lo) * (raw / 100)) / 1000) * 1000;
 }}
 document.getElementById('whatIfGrid').addEventListener('click', e => {{
   if (document.body.classList.contains('ll-editing') && e.target.closest('[data-copy]')) return;
@@ -3521,20 +3566,29 @@ document.getElementById('whatIfGrid').addEventListener('click', e => {{
   setupPriceSlider(currentRec, price);
   renderConfront(price);
 }});
-/* marker: demo-ui-snappy */
 let _priceSliderRaf = 0;
-document.getElementById('priceSlider').addEventListener('input', () => {{
+/* marker: demo-ui-snappy */
+/* marker: cond-0-10 */
+function onPriceSliderMove() {{
   if (_priceSliderRaf) cancelAnimationFrame(_priceSliderRaf);
   _priceSliderRaf = requestAnimationFrame(() => {{
     _priceSliderRaf = 0;
     const price = priceFromSlider();
-    document.getElementById('sellerPrice').value = price;
+    const sellerPrice = document.getElementById('sellerPrice');
+    if (sellerPrice) sellerPrice.value = price;
+    const slider = document.getElementById('priceSlider');
+    if (slider) slider.setAttribute('aria-valuetext', money(price));
     syncWhatIfCards(price);
     renderConfront(price);
   }});
-}});
+}}
+const _priceSliderEl = document.getElementById('priceSlider');
+if (_priceSliderEl) {{
+  _priceSliderEl.addEventListener('input', onPriceSliderMove);
+  _priceSliderEl.addEventListener('change', onPriceSliderMove);
+}}
 setupPriceSlider(currentRec);
-applyRating(5);
+applyRating(DATA.homeRating != null ? DATA.homeRating : 5);
 renderConfront(currentRec);
 renderNetSheet(currentRec);
 syncWhatIfCards(currentRec);
@@ -5849,9 +5903,13 @@ function renderPulse(data) {{
         : ('Against ' + locked + (when ? ' · as of ' + when : '') + ' · open the Fingerprint for the living picture.');
     }}
     const set = (id, n) => {{ const el = document.getElementById(id); if (el) el.textContent = String(n); }};
-    set('pulseNewUnder', digest.listed_week != null ? digest.listed_week : digest.new_under);
-    set('pulseNewOver', digest.uc_week != null ? digest.uc_week : digest.new_over);
-    set('pulseActiveCheaper', digest.sold_week != null ? digest.sold_week : digest.still_active_cheaper);
+    set('pulseNewUnder', digest.listed_week != null ? digest.listed_week : (digest.new_under || 0));
+    set('pulseNewOver', digest.uc_week != null ? digest.uc_week : (digest.new_over || 0));
+    set('pulseActiveCheaper', digest.sold_week != null ? digest.sold_week : (digest.still_active_cheaper || 0));
+    const labs = document.querySelectorAll('#pulseBlock .pl');
+    if (labs[0]) labs[0].textContent = 'Listed this week';
+    if (labs[1]) labs[1].textContent = 'Under contract this week';
+    if (labs[2]) labs[2].textContent = 'Sold this week';
   }} else if (asOf) {{
     asOf.textContent = IS_SAMPLE
       ? 'After they list, the Fingerprint is the weekly seller link. Open it to walk the weeks from this market file.'
@@ -5867,12 +5925,6 @@ function renderPulse(data) {{
     if (url) fp.href = url;
   }}
   wireFingerprintNav();
-  if (IS_SAMPLE) {{
-    const labs = document.querySelectorAll('#pulseBlock .pl');
-    if (labs[0]) labs[0].textContent = 'Listed this week';
-    if (labs[1]) labs[1].textContent = 'Under contract this week';
-    if (labs[2]) labs[2].textContent = 'Sold this week';
-  }}
   if (data && data.listingFlow && data.listingFlow.samples) {{
     DATA.listingFlow = Object.assign(DATA.listingFlow || {{}}, data.listingFlow);
     if (typeof updateSupplyAtPrice === 'function') updateSupplyAtPrice(currentRec || DATA.rec);
