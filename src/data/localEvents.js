@@ -9,7 +9,7 @@
  */
 
 export const LATEST_EVENTS_GUIDE_SLUG = 'northern-colorado-events-guide-2026';
-export const EVENTS_DATA_LAST_REVIEWED = '2026-08-01';
+export const EVENTS_DATA_LAST_REVIEWED = '2026-09-01';
 
 /** @typedef {{ name: string; season: string; description: string; officialUrl?: string; typicalMonths?: string; dates?: string }} LocalEvent */
 
@@ -43,12 +43,12 @@ export const cityEvents = {
       officialUrl: 'https://www.downtownfortcollins.com/first-friday',
     },
     {
-      name: 'FoCo Food Truck Rally',
-      season: 'Summer',
-      typicalMonths: 'May–September',
-      description: 'City of Fort Collins weekly food truck gathering in City Park — recurring 2026 season (May 12 – Sept 16).',
-      officialUrl: 'https://www.visitftcollins.com/event/foco-food-truck-rally/41399/',
-    },
+        name: 'FoCo Food Truck Rally',
+        season: 'Summer',
+        typicalMonths: 'May–September',
+        description: 'City of Fort Collins weekly food truck gathering in City Park — recurring 2026 season (May 12 – Sept 15).',
+        officialUrl: 'https://www.visitftcollins.com/event/foco-food-truck-rally/41399/',
+      },
     {
       name: 'Larimer County Farmers\' Market',
       season: 'Spring–Fall',
@@ -88,14 +88,7 @@ export const cityEvents = {
       description: 'New Belgium Brewing\'s bike festival and fundraiser with costumed bike parade, music and local nonprofits.',
       officialUrl: 'https://www.visitftcollins.com/event/tour-de-fat/40660/',
     },
-    {
-      name: 'Bohemian Nights at NewWestFest',
-      season: 'Summer',
-      typicalMonths: 'August',
-      description: 'Free downtown festival with national and local acts, local vendors, and Old Town Fort Collins at its liveliest.',
-      officialUrl: 'https://www.visitftcollins.com/events/',
-    },
-  ],
+    ],
   loveland: [
     {
       name: 'Sculpture in the Park Show and Sale',
@@ -144,12 +137,13 @@ export const cityEvents = {
       officialUrl: 'https://www.windsorco.gov/calendar.aspx?CID=32',
     },
     {
-      name: 'Windsor Harvest Festival',
-      season: 'Fall',
-      typicalMonths: 'September',
-      description: 'Windsor\'s signature autumn celebration with parade, carnival, live music and community events.',
-      officialUrl: 'https://www.windsorgov.com/',
-    },
+        name: 'Windsor Harvest Festival',
+        season: 'Fall',
+        typicalMonths: 'September',
+        dates: 'Sep 5–7, 2026',
+        description: '104th annual Windsor Harvest Festival — Labor Day weekend tradition with parade, carnival, balloon launches, fireworks, live music and family activities at Boardwalk Park.',
+        officialUrl: 'https://windsorharvestfest.com/',
+      },
   ],
   greeley: [
     {
