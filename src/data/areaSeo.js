@@ -1,11 +1,9 @@
 import { BUSINESS, SITE_URL } from '../utils/seoConstants.js';
 import { AREA_FAQS } from './areaFaqs.js';
-
 // Freshness signal for E-E-A-T (dated expert content). Update this to the date
 // the area page content was last substantively changed. Used in WebPage schema
 // so Google sees current, dated content on re-crawl.
-export const AREA_CONTENT_DATE = '2026-09-01';
-
+export const AREA_CONTENT_DATE = '2026-09-02';
 export const areaSeoPages = [
   {
     slug: 'fort-collins',
@@ -24,6 +22,7 @@ export const areaSeoPages = [
       'Fort Collins\'s market has settled into a stable pattern through summer 2026. The median single-family home price held at approximately $610,000 in July, with condos and townhomes near $385,000. Inventory has grown roughly 15% compared to July 2025, and single-family homes average about 40 days on market — well-priced properties in the $500,000–$650,000 range still attract offers within three weeks, while homes above $750,000 typically take 55–70 days.',
       'As Fort Collins residents ourselves, Schwartz and Associates brings hyperlocal knowledge to every neighborhood — from Buckinghorse and Waterford family communities south of Harmony Road to Northwest foothills estates and the Midtown urban corridor near CSU. Whether you are looking at historic Victorians in Old Town, townhomes near Fossil Creek Park, or new construction in southeast Fort Collins, we walk each neighborhood regularly and can speak to current conditions, HOA details, and school catchment boundaries from firsthand experience. Poudre School District consistently ranks among Colorado\'s top districts countywide — including well-regarded schools like Liberty Common, Ridgeview Classical, and Preston Middle School — and the district\'s open-enrollment policy means families have options across the city. With 300 sunny days per year, a thriving Downtown Development Authority pushing new mixed-use projects through 2027, and direct I-25 access to Denver and Boulder, Fort Collins continues to attract remote workers, CSU faculty, and families from across the Front Range. Call (970) 999-1407 for a Fort Collins neighborhood consultation.',
       'Fort Collins\'s Spring 2026 construction pipeline added over 400 new single-family lots in southeast Fort Collins alone, with master-planned communities like Water Valley South and The Rookeries drawing buyers who want new construction without leaving city limits. The Midtown General Development Plan continues reshaping the College Avenue corridor between Harmony and Prospect, adding mixed-use projects, new dining, and improved bike-pedestrian connectivity. Meanwhile, the Elizabeth Street and Laporte Avenue revitalization has added new local retailers and infill townhomes northwest of Old Town, giving buyers more options in walkable urban-style settings. Priced correctly at any level, Fort Collins remains Northern Colorado\'s most resilient market — one where local expertise and precise pricing make the difference between a fast sale and a stale listing.',
+            'Entering Fall 2026, Fort Collins inventory has continued the gradual expansion that started in early 2025, giving buyers more negotiating room than they have had in three years. Interest rate relief from the Federal Reserve\'s late-summer cut has brought fence-sitting buyers back into the market, and pending sales in August 2026 were up 8% compared to the same month last year. Seller expectations have adjusted too — price reductions are now common on listings that debut above market, and days on market have stretched past 50 for homes that launched with aggressive pricing. This shift rewards sellers who work with a local agent who can price accurately from day one, and buyers who are pre-approved and ready to move when the right home comes on the market. Whether you are buying or selling this fall, Schwartz and Associates\' daily pulse on Fort Collins\'s micro-neighborhoods gives you the edge that automated tools and out-of-town teams simply cannot match.',
     ],
     whyChoose: [
       { title: 'CSU and education hub', description: 'Home to Colorado State University with excellent K-12 schools across Poudre School District.' },
@@ -135,6 +134,7 @@ export const areaSeoPages = [
       'Greeley remains Northern Colorado\'s most affordable major market, with a July 2026 median sale price of approximately $432,000 — essentially flat year-over-year. Move-in-ready homes under $400,000 are the fastest-moving segment in the region, often going under contract within 10–14 days, and west Greeley new construction continues to offer builder incentives. The G-HOPE program adds forgivable down payment loans of up to $8,000 for qualifying employees, giving Greeley the strongest price-to-value entry point in Northern Colorado.',
       'Greeley\'s diverse neighborhoods offer distinct options: west Greeley near the Poudre River Trail delivers newer construction and family-friendly communities with quick access to the U.S. 34 corridor; the University District around UNC provides classic starter homes and investment properties with strong rental demand; and the growing east and south sides add affordable inventory for first-time buyers using CHFA programs. Greeley-Evans School District 6 operates over 30 elementary and secondary schools, including the well-regarded Frontier Academy and University Schools, and Greeley\'s investments in its downtown — including the new Ice Haus, the renovation of Island Grove Arena, and the Greeley Creative District — are drawing more amenities and small businesses each year. With median prices significantly below the Front Range average, Weld County property tax rates that keep annual carrying costs manageable, and commute times to Fort Collins or Loveland of 20–30 minutes via U.S. 34, Greeley offers the strongest pure value story in Northern Colorado for buyers who prioritize affordability. SAA Homes knows each pocket of Greeley personally and can match your budget and lifestyle to the right neighborhood — call (970) 999-1407 to start your Greeley home search.',
       'Greeley\'s 2026 development pipeline includes over 600 new housing units across west Greeley\'s Poudre River corridor, where master-planned communities like The Ranch at Greeley and West Greeley Highlands add new inventory in the $380,000\u2013$500,000 sweet spot that first-time buyers need to qualify for CHFA purchase price limits. The city\'s aggressive downtown revival continues with the new Greeley Ice Haus drawing regional hockey tournaments year-round, Island Grove Arena\'s $15 million renovation completed in early 2026, and over a dozen new locally owned restaurants and retailers opening along 8th Avenue and 10th Street. For investors, Greeley\'s sub-$350,000 entry point and UNC-driven rental demand make it the strongest cap-rate play in Northern Colorado \u2014 a market where rents have risen 8% year-over-year while home prices stayed flat, creating a widening spread that favors buy-and-hold strategies. Whether you are buying your first home with CHFA assistance or adding to an investment portfolio, Greeley delivers the most raw opportunity in the region.',
+      'Heading into Fall 2026, Greeley\'s affordability story has only strengthened. With Larimer County median prices now exceeding $600,000, more buyers are crossing the county line into Weld County to find homes under $450,000 that still offer good schools, growing amenities, and commutes to Fort Collins or Loveland under 30 minutes. The Federal Reserve\'s September rate cut has reignited interest among first-time buyers who had been waiting on the sidelines, and Greeley\'s active inventory — up roughly 18% year-over-year — means those buyers actually have options to choose from rather than competing in bidding wars. For sellers, the extended market means pricing strategy matters more than ever: move-in-ready homes in west Greeley\'s established neighborhoods still attract multiple offers within two weeks when priced at or below $425,000, while homes above $500,000 now average 45–60 days and frequently require at least one price reduction. Schwartz and Associates tracks each Greeley submarket weekly and can tell you exactly which price bands are moving and which are sitting — call (970) 999-1407 for a current Greeley market assessment.'
     ],
     whyChoose: [
       { title: 'Affordable pricing', description: 'The most accessible home prices among Northern Colorado major cities.' },
@@ -890,11 +890,9 @@ export const areaSeoPages = [
     },
   },
 ];
-
 export function getAreaSeo(slug) {
   return areaSeoPages.find((area) => area.slug === slug);
 }
-
 export function getAreaExactTitle(area) {
   // City-specific title overrides for key Tier S keyword targeting
   const cityTitles = {
@@ -908,7 +906,6 @@ export function getAreaExactTitle(area) {
   if (area.exactTitle) return area.exactTitle;
   return `${area.city} Real Estate | Homes for Sale in ${area.city}, CO | Schwartz and Associates`;
 }
-
 export function getAreaKeywords(area) {
   const core = [
     `${area.city} real estate`,
@@ -921,15 +918,12 @@ export function getAreaKeywords(area) {
   ].join(', ');
   return area.keywords ? `${core}, ${area.keywords}` : core;
 }
-
 export function getAreaPageUrl(slug) {
   return `${SITE_URL}/northern-colorado-areas/${slug}/`;
 }
-
 export function buildAreaPageSchemas(area) {
   const pageUrl = getAreaPageUrl(area.slug);
   const imageUrl = area.heroImage.startsWith('http') ? area.heroImage : `${SITE_URL}${area.heroImage}`;
-
   const schemas = [
     {
       '@context': 'https://schema.org',
@@ -992,7 +986,6 @@ export function buildAreaPageSchemas(area) {
       },
     },
   ];
-
   // Add FAQPage schema if area has FAQ data
   const areaFaqs = AREA_FAQS[area.slug];
   if (areaFaqs && areaFaqs.length > 0) {
@@ -1009,6 +1002,5 @@ export function buildAreaPageSchemas(area) {
       })),
     });
   }
-
   return schemas;
 }

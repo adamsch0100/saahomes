@@ -255,6 +255,27 @@ export default function PropertiesPage() {
         </section>
 
         <section>
+          <h2>Why Work With Schwartz and Associates for Your Home Search</h2>
+          <p>
+            Adam and Mandi Schwartz have spent over 20 years helping families buy and sell homes across Fort Collins,
+            Loveland, Windsor, Greeley, and the entire Northern Colorado region. Unlike large corporate real estate teams
+            where you talk to a different person every time, Schwartz and Associates gives you direct access to the same
+            husband-and-wife team from first conversation through closing day.
+          </p>
+          <p>
+            Every buyer who works with us gets a personalized home search strategy, access to off-market and coming-soon
+            listings before they hit the public feeds, and expert guidance through CHFA down payment assistance, VA loans,
+            and conventional financing. We know every school boundary, HOA policy, and neighborhood character in the
+            27 communities we serve — because we visit them regularly and represent buyers and sellers in each one.
+          </p>
+          <p>
+            Ready to start your Northern Colorado home search? Call <strong>(970) 999-1407</strong> to speak with Adam
+            or Mandi directly, or fill out our{' '}
+            <Link to="/contact/">contact form</Link> and we will reach out within one business day.
+          </p>
+        </section>
+
+        <section>
           <h2>City-by-City Comparison: Northern Colorado Home Prices &amp; Market Stats</h2>
           <table>
             <thead>
