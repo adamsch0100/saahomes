@@ -9,8 +9,12 @@ import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
 import TopRatedSchools from "../../components/TopRatedSchools.jsx";
 import CityLuxurySection from "../../components/CityLuxurySection.jsx";
 import CityVeteransSection from "../../components/CityVeteransSection.jsx";
+import LatestMarketUpdateBanner from "../../components/LatestMarketUpdateBanner.jsx";
+import { getAreaSeo } from "../../data/areaSeo.js";
+import AreaEventsSection from "../../components/AreaEventsSection.jsx";
 
 export default function WindsorPage() {
+  const area = getAreaSeo("windsor");
   return (
     <>
       <AreaSEO slug="windsor" />
@@ -45,6 +49,25 @@ export default function WindsorPage() {
             </p>
           </div>
         </section>
+
+      {/* Why Buy in Windsor? */}
+      {area.whyChoose?.length > 0 && (
+        <section className="py-16 px-6 bg-white">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-3xl font-bold font-serif mb-8 text-center">Why Buy in Windsor?</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {area.whyChoose.map((item) => (
+                <div key={item.title} className="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
+                  <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                  <p className="text-gray-700 text-sm leading-relaxed">{item.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <LatestMarketUpdateBanner variant="compact" cityName="Windsor" />
 
         {/* Property Search CTA */}
         <section className="mb-12 bg-gray-50 p-8 rounded-lg">
@@ -171,24 +194,13 @@ export default function WindsorPage() {
         </section>
 
         {/* Market Report CTA */}
-        <section id="market-report" className="mb-12 bg-gray-100 p-8 rounded-lg scroll-mt-28">
-          <h2 className="text-3xl font-bold mb-4">Want the full market report for Windsor, CO?</h2>
-          <p className="text-lg mb-6">
-            Get detailed information about current market trends, home values, and neighborhood statistics in Windsor.
-          </p>
-          <div className="flex gap-4">
-            <Link 
-              to="/contact/" 
-              className="inline-block px-8 py-3 bg-black text-white font-semibold rounded hover:bg-gray-800 transition-colors"
-            >
-              Contact Us
-            </Link>
-            <a 
-              href="/properties/?location=Windsor,%20CO"
-              className="inline-block px-8 py-3 border-2 border-black text-black font-semibold rounded hover:bg-black hover:text-white transition-colors"
-            >
-              Search Windsor Homes
-            </a>
+        <section id="market-report" className="mb-12 bg-gray-50 p-8 rounded-lg scroll-mt-28">
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold mb-4 text-center">Want the full market report for Windsor, CO?</h2>
+            <p className="text-lg mb-6 text-center text-gray-700">
+              We want to ensure that you have all the information needed to make the best decisions when it comes to your home goals. When you enter your info below you will get instant access to the area's latest market report, complete with sales and demographic trends.
+            </p>
+            <MarketReportForm areaName="Windsor, CO" />
           </div>
         </section>
 
@@ -310,6 +322,8 @@ export default function WindsorPage() {
       <RecentlySoldSection citySlug="windsor" />
 
       <AreaFAQSection faqs={AREA_FAQS['windsor']} city="Windsor" />
+
+            <AreaEventsSection city="Windsor" slug="windsor" />
 
       {/* Cash-buyer cross-link from Windsor area page to cash-home-buyers blog */}
       <section className="mb-12 py-8 px-6 bg-white rounded-lg border border-gray-200 max-w-5xl mx-auto">
