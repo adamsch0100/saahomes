@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WHGZQDZ6ZG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-WHGZQDZ6ZG');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Listing Flipbook &amp; Seller Leave-Behind — A Pricing Story Your Seller Actually Reads · ListLogic</title>
+<meta name="description" content="Turn your listing presentation into a seller leave-behind flipbook. ListLogic turns live price × odds × supply into an interactive link plus a print-ready flipbook — the pricing story the seller re-reads after the appointment.">
+<link rel="canonical" href="https://listlogic.homes/saas/listing-flipbook.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/saas/ll.css">
+<style>
+.hero-mini {
+  background: radial-gradient(900px 400px at 80% -20%, #0e7a6d33, transparent 60%),
+              linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; padding: 64px 0 72px; text-align: center;
+}
+.hero-mini h1 { font-family: 'Fraunces', serif; font-size: clamp(1.9rem, 4vw, 2.7rem); letter-spacing: -0.02em; margin-bottom: 12px; }
+.hero-mini h1 em { font-style: normal; color: var(--accent-2); }
+.hero-mini p { color: #c8d2e0; max-width: 620px; margin: 0 auto; font-size: 1.02rem; }
+.hero-mini .eyebrow { justify-content: center; }
+
+.wedge-band {
+  margin: -34px auto 0; position: relative; z-index: 2;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 22px 26px; max-width: 860px;
+}
+.wedge-band strong { font-family: 'Fraunces', serif; font-size: 1.2rem; display: block; margin-bottom: 6px; }
+.wedge-band p { color: var(--muted); font-size: 0.95rem; margin: 0; }
+
+.section { padding: 64px 0 0; }
+.section h2 { font-family: 'Fraunces', serif; font-size: clamp(1.4rem, 2.5vw, 1.9rem); letter-spacing: -0.015em; margin-bottom: 10px; }
+.section .sub { color: var(--muted); max-width: 640px; margin-bottom: 28px; }
+
+.checklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+.checklist li { display: flex; gap: 12px; align-items: flex-start; font-size: 0.94rem; }
+.checklist li::before { content: "✓"; flex: 0 0 24px; height: 24px; border-radius: 50%; background: rgba(14,122,109,0.12); color: var(--ok); font-weight: 700; display: grid; place-items: center; font-size: 0.8rem; }
+.checklist p { color: var(--muted); font-size: 0.9rem; margin-top: 2px; }
+
+.cmp-table-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+table.cmp { width: 100%; border-collapse: collapse; min-width: 640px; }
+table.cmp th, table.cmp td { padding: 14px 18px; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.cmp th { background: #f1ece1; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; }
+table.cmp th.win { background: var(--navy); color: #fff; }
+table.cmp tr:last-child th, table.cmp tr:last-child td { border-bottom: none; }
+table.cmp td.rowhead { font-weight: 700; }
+table.cmp .yes { color: var(--ok); font-weight: 700; }
+table.cmp .no { color: var(--muted); }
+table.cmp .lead { color: var(--navy); font-weight: 800; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow-sm); }
+.card h3 { font-family: 'Fraunces', serif; font-size: 1.15rem; margin-bottom: 8px; }
+.card p { color: var(--muted); font-size: 0.92rem; }
+.card .kicker { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal); margin-bottom: 6px; }
+
+.faq-ll details { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 16px 20px; margin-bottom: 10px; }
+.faq-ll summary { font-weight: 700; cursor: pointer; }
+.faq-ll p { color: var(--muted); font-size: 0.92rem; margin: 10px 0 0; }
+
+.cta-band {
+  background: linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; text-align: center; padding: 64px 0; margin-top: 64px;
+}
+.cta-band h2 { font-family: 'Fraunces', serif; font-size: clamp(1.5rem, 3vw, 2.1rem); margin-bottom: 10px; }
+.cta-band p { color: #c8d2e0; max-width: 560px; margin: 0 auto 26px; }
+.btn-trial { background: var(--accent-2); color: #1a1200; }
+
+.note { font-size: 0.82rem; color: var(--muted); max-width: 720px; margin: 26px auto 0; text-align: center; }
+
+@media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "ListLogic — Listing Flipbook & Seller Leave-Behind",
+  "description": "Turn the listing presentation into a seller leave-behind flipbook: live interactive price × odds × supply story plus a print-ready flipbook of the same pricing story.",
+  "url": "https://listlogic.homes/saas/listing-flipbook.html",
+  "brand": { "@type": "Brand", "name": "ListLogic" },
+  "offers": {
+    "@type": "Offer",
+    "price": "39.00",
+    "priceCurrency": "USD",
+    "priceValidUntil": "2026-12-31",
+    "availability": "https://schema.org/InStock"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is a listing flipbook?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A listing flipbook is a page-turn digital version of a listing presentation that a seller can flip through after the appointment. In ListLogic, the flipbook is generated from the pricing story itself — the custom-fit competitive set, price × odds × supply, and supply pressure — so the leave-behind is the seller's actual market, not a generic agent brochure."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I also print the flipbook as a PDF?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. The same story renders three ways: a live interactive link you can walk through in the appointment, a print-ready page-structured format for a binder, and the flipbook for the seller to page through afterward. One generation, three surfaces."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What goes into the seller leave-behind?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The flipbook carries the pricing decision: the homes a buyer would genuinely cross-shop, the seller's odds at different list prices, days-on-market and supply pressure, and the market context behind the recommendation. It is a recap of the decision, with your branding, that stands on its own."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is a listing flipbook the same as digital real-estate property brochures?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Generic flipbook tools turn a static PDF into a page-turn file. ListLogic generates the pricing story first — live market, custom-fit comps, price × odds × supply — and then gives you the flipbook as one of the outputs. The content is the seller's pricing plan, not a marketing brochure."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does it cost?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The sample demo is free — no account required. Create an account to Search or Upload and set branding. Unlock custom presentations with a 7-day trial (then $39/month) or a $20 one-shot per report. Annual and brokerage seat plans are on the pricing page."
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<nav class="ll-nav">
+  <div class="container ll-nav-inner">
+    <a href="index.html" class="ll-brand">
+      <img src="/saas/listlogic-logo.png" alt="ListLogic" class="ll-brand-logo">
+      
+    </a>
+    <button type="button" class="ll-nav-toggle" id="llNavToggle" aria-label="Menu" aria-expanded="false">☰</button>
+    <div class="ll-nav-links" id="llNavLinks">
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#deliverables">What sellers get</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="faq.html">FAQ</a>
+      <a href="login.html" class="ll-auth-guest">Sign in</a>
+      <a href="signup.html" class="btn btn-trial ll-auth-guest" style="padding:10px 18px;font-size:0.86rem">Create account</a>
+    </div>
+  </div>
+</nav>
+<script>
+(function(){var t=document.getElementById('llNavToggle'),l=document.getElementById('llNavLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.setAttribute('aria-expanded',o?'true':'false');t.textContent=o?'✕':'☰';});l.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){l.classList.remove('open');t.setAttribute('aria-expanded','false');t.textContent='☰';});});})();
+</script>
+<script src="/saas/nav-auth.js"></script>
+
+<header class="hero-mini">
+  <div class="container">
+    <span class="eyebrow gold">Listing Flipbook + Seller Leave-Behind</span>
+    <h1>Sellers forget your talk after the appointment. <em>They keep the pricing story.</em></h1>
+    <p>Turn the listing presentation into a leave-behind flipbook: the live price × odds × supply story on a link, plus a print-ready page-turn version of the same pricing story. One generation, three surfaces — the part that gets re-read.</p>
+    <div class="row" style="justify-content:center;margin-top:26px">
+      <a href="/demo" class="btn btn-gold">Try the free demo</a>
+      <a href="/saas/signup.html" class="btn btn-ghost">Create account</a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="wedge-band">
+    <strong>The leave-behind is usually a brochure. That's why it gets tossed.</strong>
+    <p>Most sellers get a folder of marketing slick — your logo, your old listings, a table of comps. ListLogic's flipbook carries their actual pricing decision: what a buyer cross-shops, the odds at every list price, and the supply pushing back. It's the object a seller keeps, because it's about their house.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <h2>What a seller leave-behind should actually do</h2>
+    <p class="sub">A leave-behind only matters if it survives the seven days after your appointment — when the seller is talking to two other agents.</p>
+    <div class="two-col">
+      <div>
+        <ul class="checklist">
+          <li>
+            <div><strong>Recap the pricing decision, not the tool</strong><p>The seller left the appointment with a price range. The flipbook shows why — the cross-shop set and the odds curve, not a list of comps they have to interpret.</p></div>
+          </li>
+          <li>
+            <div><strong>Show the trade-off at every price point</strong><p>Price × odds × supply on one page: what happens to the odds of a sale if they stretch. The argument you made in the kitchen, replayable.</p></div>
+          </li>
+          <li>
+            <div><strong>Stay readable on phone and binder</strong><p>The live link works in the appointment on your screen. The flipbook pages turn on their phone after. The print PDF holds up in a stack of competing agents' folders.</p></div>
+          </li>
+          <li>
+            <div><strong>Carry your branding, not a vendor's</strong><p>Set your name, brokerage, and colors once. Every flipbook, print, and interactive story carries it.</p></div>
+          </li>
+          <li>
+            <div><strong>Hold up when the seller shows it to the other agent</strong><p>If a competing agent made a higher, sunnier claim, the flipbook is the counter: supply pressure and odds, not opinion.</p></div>
+          </li>
+        </ul>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;">
+        <div class="kicker">See the three surfaces</div>
+        <h3 style="margin-bottom:12px">Try the free demo</h3>
+        <p style="margin-bottom:22px">No account required. Walk the live pricing story, then view the print and flipbook outputs.</p>
+        <a href="/demo" class="btn btn-trial">Try the free demo</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>How to create a listing flipbook in about two minutes</h2>
+    <p class="sub">From Search or MLS upload to a branded leave-behind, without touching a template tool.</p>
+    <div class="two-col">
+      <div>
+        <ul class="checklist">
+          <li>
+            <div><strong>Search the market or upload your MLS export</strong><p>Enter the address with filters, or drop in a Matrix, Flexmls, Bright, or RESO-style CSV/TXT. Both build the same competitive set.</p></div>
+          </li>
+          <li>
+            <div><strong>Confirm the competitive set</strong><p>Review the homes a buyer would honestly cross-shop — custom-fit to the subject, custom-fit by you.</p></div>
+          </li>
+          <li>
+            <div><strong>Generate the pricing story</strong><p>One click produces the live interactive presentation, the print PDF, and the flipbook — the same story, in every format.</p></div>
+          </li>
+          <li>
+            <div><strong>Walk it live, then leave the flipbook</strong><p>Present the interactive story in the appointment. Text or email the link, and leave the printed flipbook on the counter.</p></div>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <div class="card">
+          <div class="kicker">Soft-market edge</div>
+          <h3>The month supply climbs, the leave-behind argues for you</h3>
+          <p>When inventory is rising, sellers anchor on a neighbor's aspirational list price. A flipbook built on price × odds × supply keeps the honest case in front of them while they're deciding between agents.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Generic flipbook tool vs. a ListLogic listing flipbook</h2>
+    <p class="sub">The format is the same. What the flipbook contains is the difference.</p>
+    <div class="cmp-table-wrap">
+      <table class="cmp">
+        <thead>
+          <tr>
+            <th>What changes</th>
+            <th>Generic flipbook maker</th>
+            <th class="win">ListLogic listing flipbook</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rowhead">What's inside</td>
+            <td>A static PDF you uploaded — usually a marketing brochure</td>
+            <td class="lead">Live-generated pricing story for that listing</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Pricing evidence</td>
+            <td class="no">Whatever comps you pasted in</td>
+            <td class="lead">Custom-fit competitive set with price × odds</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Market pressure</td>
+            <td class="no">Not modeled</td>
+            <td class="lead">Live supply, cuts, and days-on-market context</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Time to produce</td>
+            <td>Export a PDF, upload, format</td>
+            <td class="lead">About two minutes total</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Where it shows up</td>
+            <td>One format — the flipbook</td>
+            <td class="lead">Interactive link + print PDF + flipbook, one generation</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Works with</td>
+            <td>Any static file</td>
+            <td class="lead">Nationwide Search or any MLS export</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="text-align:center;margin-top:26px"><a href="/demo" class="btn btn-trial">Try the free demo</a></p>
+  </div>
+</section>
+
+<section class="section faq-ll">
+  <div class="container">
+    <h2>Listing flipbook FAQ</h2>
+    <p class="sub">Straight answers on the leave-behind surface.</p>
+    <div style="max-width:860px">
+      <details>
+        <summary>What is a listing flipbook?</summary>
+        <p>A listing flipbook is a page-turn digital version of a listing presentation the seller can flip through after the appointment. In ListLogic, the flipbook is generated from the pricing story itself — the competitive set, price × odds × supply, and supply pressure — so the leave-behind is the seller's actual market, not a generic agent brochure.</p>
+      </details>
+      <details>
+        <summary>Can I also print the flipbook as a PDF?</summary>
+        <p>Yes. The same story renders three ways: a live interactive link, a print-ready page-structured format, and the flipbook for the seller to page through after. One generation, three surfaces.</p>
+      </details>
+      <details>
+        <summary>What goes into the seller leave-behind?</summary>
+        <p>The pricing decision: the homes a buyer would cross-shop, odds at different list prices, days-on-market and supply pressure, and the market context behind the recommendation — branded to you.</p>
+      </details>
+      <details>
+        <summary>Is this the same as a digital real-estate property brochure?</summary>
+        <p>No. Generic flipbook tools turn a static PDF into a page-turn file. ListLogic generates the pricing story first — live market, custom-fit comps, price × odds × supply — then gives you the flipbook as an output.</p>
+      </details>
+      <details>
+        <summary>What does it cost?</summary>
+        <p>The sample demo is free — no account required. Create an account to Search or Upload and set branding. Unlock custom presentations with a 7-day trial (then $39/month) or a $20 one-shot per report. <a href="pricing.html">See pricing</a>.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<div class="cta-band">
+  <div class="container">
+    <h2>Leave the pricing story, not a brochure</h2>
+    <p>The free demo shows the live presentation plus the print and flipbook outputs. Generate a custom one when you're ready — 7-day trial, then $39/month (or $20 one-shot per report).</p>
+    <a href="/demo" class="btn btn-trial" style="margin-right:10px">Try the free demo</a>
+    <a href="signup.html" class="btn" style="background:transparent;border:1px solid #3a4a63;color:#fff">Create account</a>
+  </div>
+</div>
+
+<p class="note">ListLogic builds a pricing story from market data — it is not a property brochure tool and not a live MLS feed. The flipbook output carries the pricing presentation you generate, branded to you.</p>
+<p class="note" style="margin-top:8px">Related: <a href="listing-presentation-software.html">Listing presentation software</a> · <a href="seller-cma.html">Seller CMA</a> · <a href="interactive-cma-software.html">Interactive CMA software</a> · <a href="cma-template.html">CMA template</a> · <a href="/blog/listing-appointment-checklist.html">Listing appointment checklist</a> · <a href="/blog/how-to-win-listing-appointments.html">How to win listing appointments</a> · <a href="/blog/soft-market-listing-presentation-price-odds-supply.html">Why static CMAs lose appointments when sellers are anchored on Zillow</a></p>
+
+<footer class="ll-footer">
+  <div class="container">
+    <div><strong>ListLogic</strong> · Data-driven custom pricing strategy</div>
+    <div><a href="https://saahomes.com">SAA Homes</a> · Schwartz and Associates, Coldwell Banker Realty</div>
+    <div><a href="index.html">Home</a> · <a href="faq.html">FAQ</a> · <a href="pricing.html">Pricing</a> · <a href="vs-saleswise.html">Saleswise alternative</a> · <a href="vs-rpr.html">RPR alternative</a> · <a href="interactive-cma-software.html">Interactive CMA software</a> · <a href="mailto:adam@saahomes.com">Contact</a></div>
+  </div>
+</footer>
+
+<script src="/saas/analytics.js"></script>
+<script src="/saas/utm.js"></script>
+</body>
+</html>
