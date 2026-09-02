@@ -6,8 +6,14 @@ import { AREA_FAQS } from "../../data/areaFaqs.js";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
+import LatestMarketUpdateBanner from "../../components/LatestMarketUpdateBanner.jsx";
+import { getAreaSeo } from "../../data/areaSeo.js";
+import AreaEventsSection from "../../components/AreaEventsSection.jsx";
+
+const GOLD = "#CFB36E";
 
 export default function WellingtonPage() {
+  const area = getAreaSeo("wellington");
   return (
     <>
       <AreaSEO slug="wellington" />
@@ -35,6 +41,25 @@ export default function WellingtonPage() {
         </div>
       </section>
 
+      {/* Why Buy in Wellington? */}
+      {area.whyChoose?.length > 0 && (
+        <section className="py-16 px-6 bg-white">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-3xl font-bold font-serif mb-8 text-center">Why Buy in Wellington?</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {area.whyChoose.map((item) => (
+                <div key={item.title} className="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
+                  <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                  <p className="text-gray-700 text-sm leading-relaxed">{item.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <LatestMarketUpdateBanner variant="compact" cityName="Wellington" />
+
       {/* Property Search CTA */}
       <section className="py-16 px-6 bg-gray-50">
         <div className="max-w-2xl mx-auto text-center">
@@ -42,12 +67,20 @@ export default function WellingtonPage() {
           <p className="text-lg mb-6 text-gray-700">
             Explore available properties in Wellington, CO
           </p>
-          <Link
-            to="/properties/?location=Wellington, CO"
-            className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            Search Wellington Homes
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/properties/?location=Wellington, CO"
+              className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Search Wellington Homes
+            </Link>
+            <Link
+              to="/contact/"
+              className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+            >
+              Talk to an Agent
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -220,6 +253,32 @@ export default function WellingtonPage() {
         </div>
       </section>
 
+      {/* CHFA First-Time Buyer Banner */}
+      <section className="py-12 px-6 rounded-lg" style={{ backgroundColor: GOLD }}>
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold font-serif text-gray-900 mb-3">
+            First-time buyer in Wellington?
+          </h2>
+          <p className="text-gray-800 mb-6">
+            Many Wellington buyers qualify for CHFA down payment assistance — grants and deferred loans up to $25,000 for down payment and closing costs. Wellington's affordable entry point makes CHFA an especially powerful tool.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link
+              to="/chfa-down-payment-assistance/#chfa-dpa-lead-form"
+              className="inline-flex px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Free CHFA Consultation
+            </Link>
+            <Link
+              to="/chfa-down-payment-assistance/"
+              className="inline-flex px-6 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+            >
+              CHFA program guide →
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Area Highlights */}
             {/* Neighborhood Guides */}
       <section className="py-12 px-6 bg-gray-50">
@@ -295,6 +354,8 @@ export default function WellingtonPage() {
       <RecentlySoldSection citySlug="wellington" />
 
       <AreaFAQSection faqs={AREA_FAQS['wellington']} city="Wellington" />
+
+      <AreaEventsSection city="Wellington" slug="wellington" />
 
       {/* Final CTA */}
       <section className="py-16 px-6 bg-black text-white">

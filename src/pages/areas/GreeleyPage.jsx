@@ -10,8 +10,14 @@ import TopRatedSchools from "../../components/TopRatedSchools.jsx";
 import SectionTownsBand from "../../components/SectionTownsBand.jsx";
 import CityLuxurySection from "../../components/CityLuxurySection.jsx";
 import CityVeteransSection from "../../components/CityVeteransSection.jsx";
+import LatestMarketUpdateBanner from "../../components/LatestMarketUpdateBanner.jsx";
+import { getAreaSeo } from "../../data/areaSeo.js";
+import AreaEventsSection from "../../components/AreaEventsSection.jsx";
+
+const GOLD = "#CFB36E";
 
 export default function GreeleyPage() {
+  const area = getAreaSeo("greeley");
   return (
     <>
       <AreaSEO slug="greeley" />
@@ -47,6 +53,25 @@ export default function GreeleyPage() {
         </div>
       </section>
 
+      {/* Why Buy in Greeley? */}
+      {area.whyChoose?.length > 0 && (
+        <section className="py-16 px-6 bg-white">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-3xl font-bold font-serif mb-8 text-center">Why Buy in Greeley?</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {area.whyChoose.map((item) => (
+                <div key={item.title} className="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
+                  <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                  <p className="text-gray-700 text-sm leading-relaxed">{item.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <LatestMarketUpdateBanner variant="compact" cityName="Greeley" />
+
       {/* Property Search CTA */}
       <section className="py-16 px-6 bg-gray-50">
         <div className="max-w-2xl mx-auto text-center">
@@ -54,12 +79,20 @@ export default function GreeleyPage() {
           <p className="text-lg mb-6 text-gray-700">
             Explore available properties in Greeley, CO
           </p>
-          <Link
-            to="/properties/?location=Greeley, CO"
-            className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            Search Greeley Homes
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/properties/?location=Greeley, CO"
+              className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Search Greeley Homes
+            </Link>
+            <Link
+              to="/contact/"
+              className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+            >
+              Talk to an Agent
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -454,6 +487,8 @@ export default function GreeleyPage() {
           </div>
         </div>
       </section>
+
+      <AreaEventsSection city="Greeley" slug="greeley" />
 
       {/* Final CTA */}
       <section className="py-16 px-6 bg-black text-white">
