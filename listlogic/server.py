@@ -182,6 +182,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/saas/vs-toolkitcma.html",
         "/saas/seller-cma.html",
         "/saas/pricing-strategy-listing-appointment.html",
+        "/saas/listing-flipbook.html",
         "/saas/changelog.html",
         "/blog/",
         "/saas/ll.css",
