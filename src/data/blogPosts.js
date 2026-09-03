@@ -9013,6 +9013,7 @@ export const blogPosts = [
     category: 'Market Update',
     image: '/images/Northern Colorado.webp',
     readTime: '6 min read',
+    youtubeId: 'uLRyy3otdmM',
     keywords: 'Erie Colorado housing market 2026, Erie CO real estate fall 2026, Erie CO home prices, Erie Colorado market trends, Erie Colorado homes for sale fall 2026, Erie CO new construction vs resale, Erie Colorado real estate updates, Erie CO housing inventory fall 2026',
     relatedLinks: [
       { title: 'Erie Colorado real estate guide', href: '/northern-colorado-areas/erie/', description: 'Live IRES market stats, neighborhoods & lifestyle' },
