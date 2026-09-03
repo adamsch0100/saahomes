@@ -9078,6 +9078,156 @@ export const blogPosts = [
       },
     ],
   },
+  {
+    slug: 'chfa-first-generation-program-colorado',
+    title: 'CHFA FirstGeneration Program Colorado (2026): Up to $25,000 Down Payment Assistance for First-Gen Homebuyers',
+    excerpt: "Colorado first-generation homebuyers — whose parents never owned a home — can access CHFA FirstGeneration Plus with up to $25,000 down payment assistance regardless of loan size. How to qualify, income limits, and next steps in Northern Colorado.",
+    date: '2026-09-03',
+    category: 'CHFA Programs',
+    image: '/images/buyers-hero.jpg',
+    readTime: '7 min read',
+    keywords: 'CHFA FirstGeneration Colorado, CHFA first generation program Colorado, first generation homebuyer Colorado, down payment assistance first generation, CHFA first generation plus, first time homebuyer parents never owned home, first generation home loan Colorado, CHFA DPA first generation Fort Collins',
+    relatedLinks: [
+      { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Standard CHFA programs available to all qualified buyers' },
+      { title: 'CHFA FirstGeneration Program', href: '/chfa-down-payment-assistance/#first-generation', description: 'FirstGeneration details from the CHFA hub' },
+      { title: 'CHFA Schools To Home Program', href: '/chfa-schools-to-home/', description: 'Up to 25% DPA for public school employees, including first-gen educators' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Complete guide to buying in Northern Colorado' },
+      { title: 'Fort Collins area guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods & homes within CHFA limits' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Free consultation — call (970) 999-1407' },
+    ],
+    cta: {
+      title: 'Are you a first-generation homebuyer?',
+      description: 'Schwartz and Associates helps first-generation buyers across Fort Collins, Loveland, Windsor, and Greeley navigate CHFA FirstGeneration options. Free consultation — call (970) 999-1407.',
+      primaryHref: '/chfa-down-payment-assistance/',
+      primaryText: 'Learn about CHFA FirstGeneration',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to Adam & Mandi',
+    },
+    faqs: [
+      { q: 'What is the CHFA FirstGeneration program in Colorado?', a: 'CHFA FirstGeneration and FirstGeneration Plus are FHA-only first mortgage programs for first-generation homebuyers — buyers who have never owned a home and whose parents or legal guardians have never owned one. The paired down payment assistance second mortgage offers up to $25,000 regardless of the first mortgage amount, usable toward down payment, closing costs, prepaids, or principal reduction.' },
+      { q: 'Who qualifies as a first-generation homebuyer for CHFA?', a: 'CHFA defines a first-generation homebuyer as someone who has never owned a home AND whose parents or legal guardians have never owned a home. If a parent or guardian lost a home to foreclosure or short sale, the borrower may still qualify as first-generation. Your CHFA participating lender determines final eligibility.' },
+      { q: 'How much down payment assistance can first-generation buyers get?', a: 'CHFA FirstGeneration Plus offers up to $25,000 regardless of loan size — meaning the assistance is not limited to 3–4% of the first mortgage. On a $300,000 home, that is effectively an 8.3% DPA rate. Standard CHFA requirements still apply: 620 minimum credit score, $1,000 borrower contribution, and homebuyer education.' },
+      { q: 'Can first-generation buyers in Fort Collins or Greeley use this program?', a: 'Yes. CHFA FirstGeneration is available statewide, including Larimer County (Fort Collins, Loveland) and Weld County (Greeley, Windsor). County income limits and purchase price caps apply. SAA Homes helps first-generation buyers find homes within program limits across all 27 Northern Colorado communities we serve.' },
+      { q: 'What CHFA programs are available for first-generation buyers?', a: 'FirstGeneration Plus is the dedicated program, but first-generation buyers may also qualify for SmartStep Plus (grants up to $25K or 3%), Preferred Plus (deferred second mortgage up to $25K or 4%), or FirstStep Plus for first-time buyers. Your lender recommends the best fit based on your credit, income, and loan type.' },
+    ],
+    sections: [
+      {
+        heading: 'What is the CHFA FirstGeneration program?',
+        paragraphs: [
+          "The CHFA FirstGeneration program is Colorado\'s targeted down payment assistance program for buyers whose parents never owned a home. FirstGeneration and FirstGeneration Plus are FHA-only first mortgage programs that pair a fixed-rate CHFA first mortgage with a deferred second mortgage for down payment assistance — up to $25,000 regardless of the first mortgage amount.",
+          "What makes FirstGeneration different from standard CHFA programs: the DPA cap is not 3–4% of the loan. On a $350,000 first mortgage, standard SmartStep Plus caps DPA at $10,500 (3%). FirstGeneration Plus caps at $25,000 — more than double. That flexibility makes it one of the most powerful CHFA programs for buyers who qualify.",
+          "In Northern Colorado, where median prices range from the mid-$400,000s in Greeley to over $600,000 in Fort Collins, the $25,000 cap can cover a substantial portion of the down payment and closing costs — potentially reducing a buyer\'s upfront cash from 3.5% ($14,000 on a $400,000 home) to just the $1,000 minimum borrower contribution.",
+        ],
+        relatedLinks: [
+          { title: 'CHFA FirstGeneration details', href: '/chfa-down-payment-assistance/', description: 'From the CHFA hub page' },
+        ],
+      },
+      {
+        heading: 'Who qualifies as first-generation?',
+        paragraphs: [
+          'CHFA defines first-generation in two parts. First, you must never have owned a home yourself. Second, your parents or legal guardians must never have owned a home. If both conditions are met, you may qualify for the FirstGeneration program.',
+          "There is an important exception: if a parent or legal guardian lost a home to foreclosure or short sale, the borrower may still be eligible as first-generation. Your CHFA participating lender makes the final determination based on program guidelines in effect at the time of application.",
+          "Household income and purchase price limits also apply, and the program is limited to FHA-backed first mortgages. Buyers who prefer conventional financing or have credit profiles better suited to non-FHA options may find SmartStep or Preferred programs a better fit — your lender can compare.",
+        ],
+        relatedLinks: [
+          { title: 'CHFA requirements overview', href: '/chfa-down-payment-assistance/#requirements', description: 'Credit, income, and education requirements' },
+        ],
+      },
+      {
+        heading: 'Income and purchase price limits in Northern Colorado',
+        paragraphs: [
+          'CHFA FirstGeneration uses the same county-level income and purchase price limits as other CHFA programs. In Larimer County (Fort Collins, Loveland, Wellington), non-targeted household income limits for 1–2 person households range from approximately $130,000 to $156,000+, with purchase price limits up to approximately $664,000–$812,000 depending on the program and area designation.',
+          'Weld County (Greeley, Windsor, Severance) generally offers higher income limits — approximately $153,600 to $179,200 for 1–2 person households — with purchase price limits accommodating the full range of home prices in most communities. Targeted areas in both counties allow higher limits and may let non-first-time buyers use certain programs.',
+          'Your lender confirms the exact limits for your household size and target property. These limits change periodically — always check current figures through a CHFA participating lender before making purchase decisions.',
+        ],
+        relatedLinks: [
+          { title: 'Greeley area guide', href: '/northern-colorado-areas/greeley/', description: 'Weld County CHFA limits & affordable listings' },
+          { title: 'Loveland area guide', href: '/northern-colorado-areas/loveland/', description: 'Larimer County CHFA limits & neighborhoods' },
+        ],
+      },
+      {
+        heading: 'How first-generation buyers get started in Northern Colorado',
+        paragraphs: [
+          'The first step is confirming eligibility with a CHFA participating lender. Not all lenders originate FirstGeneration loans — ask specifically whether the lender offers CHFA FirstGeneration and FirstGeneration Plus products.',
+          "Standard CHFA requirements apply: 620 minimum mid-credit score, $1,000 minimum borrower contribution, completion of a CHFA-approved homebuyer education class, and the Understanding Your Financial Commitment course. The lender guides you through each requirement.",
+          "Once pre-approved, SAA Homes helps first-generation buyers search homes within program limits across Fort Collins, Loveland, Windsor, Greeley, and all 27 Northern Colorado communities we serve. We coordinate with your lender to ensure offers meet purchase price caps and structure terms that work for first-generation financing.",
+          'Call (970) 999-1407 to discuss your first-generation homebuying options with Adam or Mandi Schwartz. A 15-minute conversation clarifies whether FirstGeneration is the right path — and if not, which CHFA program fits better.',
+        ],
+        relatedLinks: [
+          { title: 'Buyer services overview', href: '/for-buyers/', description: 'How SAA Homes represents buyers' },
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Free consultation for first-generation buyers' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'chfa-disability-down-payment-assistance-colorado',
+    title: 'CHFA Disability Down Payment Assistance Colorado (2026): Up to $25,000 Deferred DPA',
+    excerpt: 'Colorado homebuyers with disabilities can access CHFA down payment assistance with deferred second mortgages — up to $25,000, no monthly payments, repaid only when you sell, refinance, or move out.',
+    date: '2026-09-03',
+    category: 'CHFA Programs',
+    image: '/images/buyers-hero.jpg',
+    readTime: '6 min read',
+    keywords: 'CHFA disability program Colorado, down payment assistance disability Colorado, CHFA DPA disabled borrowers, disability home loan Colorado, Colorado housing assistance disabled, CHFA disability deferred loan, accessible homes Northern Colorado, disability mortgage assistance Colorado',
+    relatedLinks: [
+      { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Full CHFA DPA overview with disability eligibility details' },
+      { title: 'CHFA FirstGeneration Program', href: '/chfa-down-payment-assistance/', description: 'First-generation buyers may also qualify for expanded DPA' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Complete guide to buying in Northern Colorado' },
+      { title: 'Fort Collins area guide', href: '/northern-colorado-areas/fort-collins/', description: 'Accessible homes & neighborhoods' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Free consultation — call (970) 999-1407' },
+    ],
+    cta: {
+      title: 'Looking to buy with disability assistance?',
+      description: 'Schwartz and Associates helps buyers across Northern Colorado understand CHFA disability-accessible DPA options. Free consultation — call (970) 999-1407.',
+      primaryHref: '/chfa-down-payment-assistance/',
+      primaryText: 'Explore CHFA Disability DPA',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to Adam & Mandi',
+    },
+    faqs: [
+      { q: 'Does CHFA have a down payment assistance program for borrowers with disabilities?', a: 'Yes. CHFA disability-focused assistance follows the same deferred second-mortgage structure as other CHFA DPA options — no monthly payments, repaid only when you sell, refinance, pay off the mortgage, or move out — and may reach up to $25,000 regardless of loan size. Program guidelines are updated periodically, so a CHFA participating lender confirms current eligibility and amounts for your situation.' },
+      { q: 'Is there a separate disability mortgage program in Colorado?', a: 'There is no standalone disability mortgage program. CHFA disability assistance is accessed through standard CHFA first mortgage programs — SmartStep Plus, Preferred Plus, FirstStep Plus — with the DPA component available to qualified borrowers who meet program requirements including credit, income, and homebuyer education.' },
+      { q: 'What credit score do I need for CHFA disability assistance?', a: 'The same CHFA minimum applies: 620 minimum mid-credit score for most programs. Some FHA-based programs allow borrowers with no credit score. Lenders may have additional overlays. A CHFA participating lender confirms your specific eligibility.' },
+      { q: 'Can I use CHFA disability assistance in Fort Collins or Greeley?', a: 'Yes. CHFA programs are available statewide, including Larimer County and Weld County. Income and purchase price limits vary by county, household size, and whether the property is in a targeted area. SAA Homes helps Northern Colorado buyers with disabilities find homes within program limits.' },
+      { q: 'How much down payment assistance can disabled borrowers get?', a: 'Most CHFA DPA programs offer up to $25,000 or 3–4% of the first mortgage. FirstGeneration Plus offers up to $25,000 regardless of loan size. Your lender confirms the exact amount based on the program for which you qualify.' },
+    ],
+    sections: [
+      {
+        heading: 'CHFA down payment assistance for Colorado homebuyers with disabilities',
+        paragraphs: [
+          'Colorado homebuyers with disabilities can access CHFA down payment assistance through the same standard CHFA programs available to all qualified buyers — but the structure of CHFA\'s deferred second mortgage can be particularly valuable for buyers managing disability-related expenses alongside a home purchase.',
+          'CHFA disability-accessible DPA is not a separate program. It is the standard CHFA down payment assistance — a deferred second mortgage with zero monthly payments, repaid only when you sell, refinance, pay off the first mortgage, or no longer use the home as your primary residence. The assistance can reach up to $25,000 or 3–4% of the first mortgage, depending on the program.',
+          'In Northern Colorado, buyers with disabilities working with SAA Homes have access to the full range of CHFA programs — SmartStep Plus (FHA/VA/USDA with grant or deferred DPA), Preferred Plus (conventional at up to 97% LTV), FirstStep Plus (FHA for first-time buyers), and FirstGeneration Plus (up to $25,000 regardless of loan size for eligible first-gen buyers).',
+        ],
+        relatedLinks: [
+          { title: 'CHFA DPA options explained', href: '/chfa-down-payment-assistance/#dpa-options', description: 'Grant vs deferred second mortgage comparison' },
+        ],
+      },
+      {
+        heading: 'How disability DPA works in practice',
+        paragraphs: [
+          "The key feature of CHFA disability-accessible DPA is its deferred repayment structure. Unlike a grant, which is free money, the deferred second mortgage requires no monthly payments — but must be repaid (typically from sale proceeds) when you sell, refinance, pay off the first mortgage, or move out of the home as your primary residence.",
+          "For disability recipients managing fixed incomes, the zero-monthly-payment structure means the DPA does not add to monthly housing costs. The $1,000 minimum borrower contribution is the main upfront cash requirement — on a $350,000 home, CHFA DPA of up to $25,000 can cover the down payment and most or all closing costs.",
+          'Standard CHFA requirements apply: 620 minimum credit score, $1,000 borrower contribution, homebuyer education, and county income and purchase price limits. Social Security Disability Income (SSDI) and Supplemental Security Income (SSI) count as qualifying income for CHFA purposes — your lender documents and verifies income sources during pre-approval.',
+        ],
+        relatedLinks: [
+          { title: 'CHFA requirements', href: '/chfa-down-payment-assistance/#requirements', description: 'Credit, income, and purchase limits' },
+        ],
+      },
+      {
+        heading: 'Next steps for Northern Colorado buyers with disabilities',
+        paragraphs: [
+          "The path starts with a CHFA participating lender who will confirm eligibility, pre-approve you for a specific program, and document your income — including any disability-related income sources. Not all lenders handle disability income documentation the same way; ask about experience with SSDI/SSI and other disability benefit verification.",
+          "Once pre-approved, SAA Homes helps you find homes within CHFA purchase price limits, including accessible properties and neighborhoods that fit your lifestyle needs. We coordinate with your lender to ensure offers are structured correctly and close on time.",
+          'Call (970) 999-1407 to discuss your situation with Adam or Mandi Schwartz. Whether you\'re using CHFA disability DPA, Veterans benefits, or standard financing, we guide Northern Colorado buyers through every step — from lender introduction to closing day.',
+        ],
+        relatedLinks: [
+          { title: 'Buyer services', href: '/for-buyers/', description: 'How SAA Homes represents buyers' },
+          { title: 'Contact us', href: '/contact/', description: 'Free consultation — call (970) 999-1407' },
+        ],
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug) {
