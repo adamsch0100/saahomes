@@ -1114,6 +1114,14 @@ const MONEY_PAGE_CONTENT = {
       text: 'Contact SAA Homes at (970) 999-1407 for your free, no-obligation home valuation. Let us show you how we maximize value and minimize stress when selling your Northern Colorado home.',
     },
     faqs: SELLER_FAQS,
+    steps: [
+      { title: 'Free Home Valuation', description: 'Request a free, no-obligation comparative market analysis showing your home value based on current MLS comps and recent closed sales in your neighborhood.' },
+      { title: 'Prepare Your Home for Sale', description: 'We guide you through decluttering, minor repairs, staging, and professional photography to present your home in its best light to potential buyers.' },
+      { title: 'List and Market Your Home', description: 'Your home reaches buyers through MLS syndication to 500+ websites, social media campaigns, targeted digital advertising, and our network of agents.' },
+      { title: 'Show and Negotiate Offers', description: 'We manage showings, open houses, and offer review, presenting you with a clear comparison of each offer and guiding you through counteroffers.' },
+      { title: 'Navigate Inspections and Appraisal', description: 'We coordinate the buyer inspection, negotiate any requested repairs, and ensure the appraisal supports the agreed purchase price.' },
+      { title: 'Close With Confidence', description: 'We guide you through the closing process, coordinating with the title company, buyer lender, and all parties to ensure a smooth settlement.' },
+    ],
     testimonials: [
       { name: 'Andy Witt', text: 'Adam and Mandi were absolutely phenomenal! Walked me through every step of the process and constantly checked in.', rating: 5 },
       { name: 'Kylie Graff', text: 'We just bought our first home, and could not have done it without the knowledge and guidance from the Schwartz team.', rating: 5 },
@@ -1166,6 +1174,14 @@ const MONEY_PAGE_CONTENT = {
       text: 'Contact SAA Homes at (970) 999-1407 or visit our office at 3665 John F Kennedy Parkway, Suite 210, Fort Collins, CO 80525. Let us help you find the perfect home in Northern Colorado.',
     },
     faqs: BUYER_FAQS,
+    steps: [
+      { title: 'Get Pre-Approved', description: 'Connect with a trusted local lender who understands Northern Colorado programs including CHFA, FHA, VA, and conventional financing. Pre-approval determines your budget and shows sellers you are a serious buyer.' },
+      { title: 'Define Your Home Search', description: 'We help you identify must-haves: preferred communities, price range, home type, bedrooms, schools, and commute requirements across Fort Collins, Loveland, Windsor, Greeley, and all 27 communities.' },
+      { title: 'Search Active Listings', description: 'We search the MLS daily for homes matching your criteria, schedule private showings, and provide market data to help you compare properties and make informed decisions.' },
+      { title: 'Make a Strong Offer', description: 'We conduct a comparative market analysis to determine the right offer price, craft a compelling offer letter, and negotiate terms that protect your interests.' },
+      { title: 'Inspect and Negotiate', description: 'We coordinate the home inspection, review the findings with you, negotiate repairs or credits with the seller, and ensure you understand every aspect of the property condition.' },
+      { title: 'Close and Get Your Keys', description: 'We guide you through the final walkthrough, closing documents, and funding process, ensuring a smooth settlement so you can move into your new Northern Colorado home.' },
+    ],
     testimonials: [
       { name: 'Andy Witt', text: 'Adam and Mandi were absolutely phenomenal! Walked me through every step of the process and constantly checked in.', rating: 5 },
       { name: 'Kylie Graff', text: 'We just bought our first home, and could not have done it without the knowledge and guidance from the Schwartz team.', rating: 5 },
@@ -1710,6 +1726,22 @@ function buildRouteSchemas(route) {
           '@type': 'Answer',
           text: faq.a,
         },
+      })),
+    });
+  }
+
+  // Money pages with steps – add HowTo schema (AI uses for step-by-step answers)
+  if (moneyPage && moneyPage.steps && moneyPage.steps.length > 0) {
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'HowTo',
+      name: moneyPage.path === '/for-sellers/' ? 'How to sell your home in Northern Colorado' : 'How to buy a home in Northern Colorado',
+      description: moneyPage.path === '/for-sellers/' ? 'Step-by-step guide to selling your Northern Colorado home with Schwartz and Associates.' : 'Step-by-step guide to buying a home in Northern Colorado with Schwartz and Associates.',
+      step: moneyPage.steps.map((s, i) => ({
+        '@type': 'HowToStep',
+        position: i + 1,
+        name: s.title,
+        text: s.description,
       })),
     });
   }
