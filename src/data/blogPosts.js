@@ -9005,6 +9005,78 @@ export const blogPosts = [
       },
     ],
   },
+{
+    slug: 'erie-colorado-housing-market-fall-2026',
+    title: 'Erie Colorado Housing Market Fall 2026: Prices, Inventory & What to Expect',
+    excerpt: 'A fall 2026 snapshot of Erie, Colorado\'s housing market — median price trends, new construction vs resale inventory comparisons, and what buyers and sellers should expect on the Boulder–Weld county line this season.',
+    date: '2026-09-03',
+    category: 'Market Update',
+    image: '/images/Northern Colorado.webp',
+    readTime: '6 min read',
+    keywords: 'Erie Colorado housing market 2026, Erie CO real estate fall 2026, Erie CO home prices, Erie Colorado market trends, Erie Colorado homes for sale fall 2026, Erie CO new construction vs resale, Erie Colorado real estate updates, Erie CO housing inventory fall 2026',
+    relatedLinks: [
+      { title: 'Erie Colorado real estate guide', href: '/northern-colorado-areas/erie/', description: 'Live IRES market stats, neighborhoods & lifestyle' },
+      { title: 'Erie new construction buyer guide', href: '/blog/erie-colorado-new-construction-buyer-guide/', description: 'Colliers Hill, Vista Ridge & builder inventory' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Buyer representation & CHFA eligibility across Northern Colorado' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
+      { title: 'Longmont homes for sale', href: '/northern-colorado-areas/longmont/', description: 'Compare the next city north on the Boulder–Weld corridor' },
+      { title: 'Carbon Valley guide', href: '/northern-colorado-areas/carbon-valley/', description: 'Firestone & Frederick value comparison' },
+      { title: 'Boulder homes for sale', href: '/northern-colorado-areas/boulder/', description: 'Premium Boulder County pricing comparison' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
+    ],
+    cta: {
+      title: 'Want the full fall 2026 Erie market report?',
+      description: 'Adam and Mandi Schwartz will send median prices, new construction vs resale breakdown, and neighborhood trends for Erie — straight from current MLS data. Sellers get a free home valuation included; buyers get a tailored search plan for the Boulder–Weld corridor.',
+      primaryHref: '/for-sellers/#home-valuation',
+      primaryText: 'Send Me the Erie Market Report',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to Adam & Mandi',
+    },
+    faqs: [
+      { q: 'What is the median home price in Erie, CO this fall?', a: 'Erie homes in fall 2026 range from the mid-$400,000s for townhomes and smaller properties to $900,000-plus in premium communities like Vista Ridge and Colliers Hill, with new construction from the mid-$500,000s common. Live listing medians appear on the Erie area guide; a comparative market analysis is more accurate than a portal estimate for your specific target neighborhood.' },
+      { q: 'Is now a good time to buy a home in Erie?', a: 'Fall 2026 offers Erie buyers more inventory and less competition than the spring rush. Sellers are more willing to negotiate on price and closing costs, especially on homes that have been on market 45+ days. For buyers, getting pre-approved and working with a local agent who knows the Boulder–Weld county line gives a clear advantage in this season.' },
+      { q: 'How does Erie new construction compare to resale inventory this fall?', a: 'Erie\'s active builder communities continue to add inventory in fall 2026, particularly in Colliers Hill and newer phases of master-planned neighborhoods. Resale inventory has also grown, giving buyers more choices than last year. The comparison often comes down to timeline (new construction requires a longer build window and deposit timing) versus immediate move-in (resale) — plus builder incentives that vary by community.' },
+      { q: 'What should Erie sellers know about the fall 2026 market?', a: 'Erie sellers in fall 2026 should price from the most recent 90 days of comparable sales, not from peak spring comps. Homes priced correctly from day one typically see showings and offers within the first three weeks; overpriced listings can sit for 45 days or more, often requiring price reductions. New construction inventory in adjacent neighborhoods also affects buyer price perception, so a knowledgeable local agent is key.' },
+    ],
+    sections: [
+      {
+        heading: 'Erie\'s fall 2026 market: a corridor in transition',
+        paragraphs: [
+          'Erie sits on the Weld–Boulder county line between Longmont and Boulder, roughly 2.5 miles west of I-25 along Erie Parkway. As one of the Front Range\'s fastest-growing Denver-exurb towns, Erie\'s fall 2026 housing market reflects a corridor in a healthy transition — growing inventory, more balanced conditions, and a market that rewards preparation over impulse.',
+          'Where spring and summer 2026 brought strong demand in Erie\'s best new-construction phases and most desirable resale neighborhoods, fall shifts toward a steadier rhythm. Sellers who price correctly from day one — using the most recent 90 days of comparable sales, not a memory of 2023\'s peaks — continue to attract qualified buyers. Aggressively priced listings, especially in neighborhoods with adjacent new-construction competition, are sitting longer and often returning to market after expired or withdrawn listing periods.',
+          'For buyers, the fall 2026 Erie market offers more time to evaluate communities, compare builder contracts alongside resale inventory, and negotiate terms that would have been harder to secure in a tighter inventory environment. Pre-approved buyers with a clear budget who know the Boulder–Weld county line difference — property tax base varies between the two counties — have the strongest negotiating position.',
+        ],
+        relatedLinks: [
+          { title: 'Erie Colorado real estate guide', href: '/northern-colorado-areas/erie/', description: 'Live IRES stats, neighborhoods & lifestyle' },
+        ],
+      },
+      {
+        heading: 'Median price trends across Erie\'s housing segments',
+        paragraphs: [
+          'Erie\'s housing market spans several distinct price bands that reflect the diversity of its inventory. Townhomes and attached properties generally start in the mid-$400,000s, making them the most accessible entry point for first-time buyers and those using CHFA down payment assistance where applicable. Production single-family homes from active builders fall in the mid-$500,000s to low $700,000s, while premium communities like Vista Ridge and Colliers Hill can reach $900,000-plus for larger floor plans and premium lots.',
+          'The resale market has shown more price flexibility than new construction in fall 2026. Sellers who bought or refinanced at sub-5% rates often have more room to negotiate on price or offer concessions like closing cost assistance or rate buydowns — particularly on homes that have been on market for 45 days or more. New construction builders, by contrast, typically hold firm on base pricing but offer incentives on upgrades, closing costs, or rate buydowns through preferred lenders.',
+          'The Boulder–Weld county line also factors into price perceptions. Homes on the Weld County side of Erie generally carry lower property tax rates than Boulder County addresses, which affects monthly payment calculations and can shift a buyer\'s budget ceiling. Buyers comparing Erie to Longmont or the Carbon Valley should account for county-specific tax differences when modeling their monthly payment.',
+        ],
+        relatedLinks: [
+          { title: 'Browse Erie homes for sale', href: '/properties/?location=Erie, CO', description: 'New construction and resale listings from IRES MLS' },
+        ],
+      },
+      {
+        heading: 'New construction vs resale: the fall 2026 inventory picture',
+        paragraphs: [
+          'Erie\'s inventory remains deep relative to many Northern Colorado towns, and that depth continues into fall 2026. The split between new construction and resale inventory gives buyers more comparison options than in tighter markets like Fort Collins or Windsor, where new construction is more constrained.',
+          'New construction buyers this fall can expect active phases in Colliers Hill, Vista Ridge, and master-planned communities along the Coal Creek corridor. Builders are generally responsive to serious buyers but hold the pricing leverage on base home prices. Incentives typically come as closing-cost credits or rate buydowns from preferred lenders rather than outright price cuts. Buyers working with their own agent — not the on-site sales representative — get independent contract review, informed comparison across builders, and resale comps that help them evaluate whether a new build\'s premium over resale is justified.',
+          'Resale inventory in fall 2026 includes everything from early-2000s family neighborhoods near Erie Community Park to newer resales in communities that were built out in the last three to five years. Homes priced competitively — within 5 percent of the most recent neighborhood comps — typically generate showings within the first two weeks. Overpriced resales that compete directly with new construction often require a price reset after 30 to 45 days.',
+          'The bottom line: Erie buyers this fall have genuine options between new and existing homes — but comparing the two requires understanding builder incentives, HOA structures, county tax implications, and St. Vrain Valley school boundaries for the specific address. Schwartz and Associates helps Erie buyers and sellers navigate those decisions with current MLS data and hands-on neighborhood knowledge. Call (970) 999-1407 to start the conversation.',
+        ],
+        relatedLinks: [
+          { title: 'Erie new construction buyer guide', href: '/blog/erie-colorado-new-construction-buyer-guide/', description: 'Colliers Hill, Vista Ridge & builder inventory' },
+          { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Buyer representation & CHFA eligibility across Northern Colorado' },
+          { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
+        ],
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug) {
