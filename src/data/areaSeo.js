@@ -3,7 +3,7 @@ import { AREA_FAQS } from './areaFaqs.js';
 // Freshness signal for E-E-A-T (dated expert content). Update this to the date
 // the area page content was last substantively changed. Used in WebPage schema
 // so Google sees current, dated content on re-crawl.
-export const AREA_CONTENT_DATE = '2026-09-02';
+export const AREA_CONTENT_DATE = '2026-09-03';
 export const areaSeoPages = [
   {
     slug: 'fort-collins',
