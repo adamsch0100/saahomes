@@ -79,6 +79,7 @@ export default function AreaSEO({ slug }) {
       ogImageAlt={shareMeta?.ogImageAlt || `${area.city}, Colorado real estate guide`}
       ogUrl={pageUrl}
       jsonLd={jsonLd}
+      includeWebsite={true}
     />
   );
 }
