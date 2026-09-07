@@ -2,5 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /4672-w-20th-payment-scenarios.html
 
 Sitemap: https://saahomes.com/sitemap-index.xml
