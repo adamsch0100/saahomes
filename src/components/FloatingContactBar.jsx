@@ -46,6 +46,7 @@ export default function FloatingContactBar() {
         <a
           href={callHref}
           className="flex-1 inline-flex items-center justify-center px-3 py-3.5 bg-black text-white font-semibold rounded-lg text-sm touch-manipulation"
+          aria-label="Call Schwartz and Associates at (970) 999-1407"
         >
           Call Now
         </a>
@@ -53,6 +54,7 @@ export default function FloatingContactBar() {
           <a
             href={helpLink}
             className="flex-1 inline-flex items-center justify-center px-3 py-3.5 border-2 border-black text-black font-semibold rounded-lg text-sm text-center leading-tight touch-manipulation"
+            aria-label={helpLabel}
           >
             {helpLabel}
           </a>
@@ -60,6 +62,7 @@ export default function FloatingContactBar() {
           <Link
             to={helpLink}
             className="flex-1 inline-flex items-center justify-center px-3 py-3.5 border-2 border-black text-black font-semibold rounded-lg text-sm text-center leading-tight touch-manipulation"
+            aria-label={helpLabel}
           >
             {helpLabel}
           </Link>

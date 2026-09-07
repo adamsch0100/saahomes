@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import SEO from "../components/SEO";
 import LatestMarketUpdateBanner from "../components/LatestMarketUpdateBanner.jsx";
 import RecentlySoldSection from "../components/RecentlySoldSection.jsx";
+import MarketReportForm from "../components/MarketReportForm.jsx";
 import AreaFAQSection from "../components/AreaFAQSection.jsx";
 import { FOR_SELLERS_FAQS, buildFaqPageSchema } from "../data/moneyPageFaqs.js";
 
@@ -178,6 +179,19 @@ export default function ForSellersPage() {
             </p>
           </div>
           <realscout-home-value agent-encoded-id="QWdlbnQtMjUxOTI5" include-name include-phone remove-title remove-subtitle></realscout-home-value>
+        </div>
+      </section>
+
+      {/* Market Report Form — our highest-value seller lead magnet */}
+      <section className="py-16 px-6 bg-white">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4">Get Your Personalized Market Report</h2>
+            <p className="text-lg text-gray-700">
+              A detailed analysis of recent sales, active listings, and market trends for your specific Northern Colorado home — not just a Zestimate.
+            </p>
+          </div>
+          <MarketReportForm areaName="Northern Colorado" />
         </div>
       </section>
 

@@ -279,8 +279,14 @@ export default function AreaGuidePage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              to="/cash-home-buyers/"
+              to="/for-sellers/#home-valuation"
               className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Free Home Valuation
+            </Link>
+            <Link
+              to="/cash-home-buyers/"
+              className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
             >
               Get a Cash Offer
             </Link>
@@ -289,12 +295,6 @@ export default function AreaGuidePage() {
               className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
             >
               Cash Buyer Guide
-            </Link>
-            <Link
-              to="/for-sellers/#home-valuation"
-              className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
-            >
-              Free Home Valuation
             </Link>
           </div>
         </div>
