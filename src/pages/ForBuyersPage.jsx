@@ -1,5 +1,6 @@
 import React from "react";
 import SEO from "../components/SEO";
+import ChfaDpaLeadForm from "../components/ChfaDpaLeadForm.jsx";
 import AreaFAQSection from "../components/AreaFAQSection.jsx";
 import { FOR_BUYERS_FAQS, buildFaqPageSchema } from "../data/moneyPageFaqs.js";
 
@@ -216,7 +217,7 @@ export default function ForBuyersPage() {
         </div>
       </section>
 
-      {/* Get Pre-Approved CTA Section with Kitchen Image */}
+      {/* Get Pre-Approved Section with compact CHFA lead form */}
       <section className="py-16 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 gap-8 items-center">
@@ -230,26 +231,8 @@ export default function ForBuyersPage() {
                 decoding="async"
               />
             </div>
-            
-            {/* Get Pre-Approved Content */}
-            <div className="order-1 md:order-2" style={{backgroundColor: '#CFB36E'}}>
-              <div className="p-8 md:p-12 text-center md:text-left">
-                <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4 text-gray-900">Get Pre-Approved</h2>
-                <p className="text-lg text-gray-800 mb-4">
-                  Getting pre-approved for a mortgage is one of the first steps in your home buying journey. It shows sellers you're serious and helps you understand your budget. Connect with our trusted lending partners today.
-                </p>
-                <p className="text-gray-800 mb-6">
-                  Questions? Call us at <a href="tel:(970) 999-1407" className="font-bold hover:underline">(970) 999-1407</a>
-                </p>
-                <div className="flex gap-4 justify-center md:justify-start">
-                  <a href="/contact/?interest=Buying a home" className="inline-block px-8 py-3 bg-gray-900 text-white font-semibold rounded hover:bg-gray-800 transition-colors">
-                    Apply Now
-                  </a>
-                  <a href="tel:(970) 999-1407" className="inline-block px-8 py-3 border-2 border-gray-900 text-gray-900 font-semibold rounded hover:bg-gray-900 hover:text-white transition-colors">
-                    Call (970) 999-1407
-                  </a>
-                </div>
-              </div>
+            <div className="order-1 md:order-2">
+              <ChfaDpaLeadForm compact={true} sourcePage="/for-buyers/" />
             </div>
           </div>
         </div>
@@ -277,4 +260,3 @@ export default function ForBuyersPage() {
     </>
   );
 }
-
