@@ -9230,6 +9230,143 @@ export const blogPosts = [
       },
     ],
   },
+  {
+    slug: 'chfa-income-limits-colorado-northern-cities',
+    title: 'CHFA Income Limits in Colorado (2026): Larimer & Weld County Limits for Fort Collins, Loveland, Greeley & Windsor',
+    excerpt: 'Colorado CHFA income limits for Larimer and Weld counties in 2026 — how household size, targeted areas, and program choice affect how much you can earn and still qualify for down payment assistance in Fort Collins, Loveland, Greeley, and Windsor.',
+    date: '2026-09-08',
+    category: 'CHFA Programs',
+    image: '/images/buyers-hero.jpg',
+    readTime: '8 min read',
+    keywords: 'CHFA income limits Colorado, CHFA Larimer County income limits, CHFA Weld County income limits, CHFA income Fort Collins, CHFA income Greeley, Colorado CHFA income guidelines 2026, CHFA income eligibility Colorado, CHFA income limits by county Colorado, Colorado Housing and Finance Authority income limits',
+    relatedLinks: [
+      { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Full program overview with income and purchase price limits' },
+      { title: 'CHFA Schools To Home Program', href: '/chfa-schools-to-home/', description: '$178,920 income cap for public school employees' },
+      { title: 'Colorado Champions Home Loan Program', href: '/colorado-champions-home-loan-program/', description: '110% income eligibility for first responders' },
+      { title: 'Fort Collins area guide', href: '/northern-colorado-areas/fort-collins/', description: 'Homes within Larimer County limits' },
+      { title: 'Greeley area guide', href: '/northern-colorado-areas/greeley/', description: 'Homes within Weld County limits' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Free buyer consultation — call (970) 999-1407' },
+    ],
+    cta: {
+      title: 'Check your CHFA income eligibility',
+      description: 'Not sure if your household qualifies? Adam and Mandi Schwartz help Northern Colorado buyers verify CHFA income limits across all 27 communities. Free consultation — call (970) 999-1407.',
+      primaryHref: '/chfa-down-payment-assistance/',
+      primaryText: 'Explore CHFA Income Limits',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to Adam and Mandi',
+    },
+    sections: [
+      {
+        heading: 'What are CHFA income limits?',
+        paragraphs: [
+          'CHFA (Colorado Housing and Finance Authority) sets household income limits for every down payment assistance and first mortgage program it offers. These limits vary by county, household size, and whether the property is located in a designated targeted area. If your household income exceeds the limit for your county and household size, you do not qualify for that specific CHFA program though other programs with higher limits may still be available.',
+          'In Northern Colorado, the most common CHFA program income limits matter most for homebuyers in Larimer County (Fort Collins, Loveland, Wellington, Timnath) and Weld County (Greeley, Windsor, Eaton, Milliken, La Salle, Mead). This guide covers mid-2026 limits and explains how to apply them to your situation.',
+        ],
+        relatedLinks: [
+          { title: 'CHFA program overview', href: '/chfa-down-payment-assistance/', description: 'Full program details and limits' },
+        ],
+      },
+      {
+        heading: 'Larimer County CHFA income limits (Fort Collins, Loveland, Wellington, Timnath)',
+        paragraphs: [
+          'For mid-2026, non-targeted Larimer County household income limits range from approximately $130,000 to $156,000 or more, depending on household size and the specific program. Purchase price limits range up to approximately $664,000 to $812,000, also varying by program.',
+          'Targeted areas within Larimer County allow higher income limits and may also waive first-time buyer requirements for certain programs. Your CHFA participating lender confirms the exact limit for your household size and the property you are considering.',
+          'Note that CHFA Schools To Home uses its own $178,920 household income cap, and the Colorado Champions Home Loan Program for first responders raises eligibility to 110% of standard CHFA limits.',
+        ],
+        relatedLinks: [
+          { title: 'Fort Collins area guide', href: '/northern-colorado-areas/fort-collins/', description: 'Homes within Larimer County limits' },
+        ],
+      },
+      {
+        heading: 'Weld County CHFA income limits (Greeley, Windsor, Erie, Firestone, Frederick)',
+        paragraphs: [
+          'For mid-2026, non-targeted Weld County household income limits range from approximately $153,600 to $179,200, with purchase price limits up to approximately $735,000. Like Larimer County, targeted areas within Weld County offer higher limits and expanded eligibility.',
+          'Weld County limits are generally higher than Larimer County due to different HUD area median income calculations. This means some households that exceed Larimer County limits may still qualify under Weld limits if they purchase in a Weld County community like Greeley or Windsor.',
+          'Greeley\'s G-HOPE program adds up to $8,000 in forgivable down payment help for full-time employees with Greeley-area employers, on top of standard CHFA eligibility.',
+        ],
+        relatedLinks: [
+          { title: 'Greeley area guide', href: '/northern-colorado-areas/greeley/', description: 'Weld County homes and programs' },
+          { title: 'Windsor area guide', href: '/northern-colorado-areas/windsor/', description: 'Weld County options in Windsor' },
+        ],
+      },
+      {
+        heading: 'How household size affects your limit',
+        paragraphs: [
+          'CHFA income limits scale with household size — the more people in your household, the higher the income cap. Standard limits are published for 1-2 person households and are adjusted upward for each additional household member (typically $6,000 to $12,000 per additional person depending on the county and program).',
+          '"Household" means everyone who will live in the home, not just the borrowers on the mortgage. If you are a single buyer, you qualify at the 1-2 person household limit. If you are buying with a spouse or partner and have children, your household size includes all dependents, and the limit increases accordingly.',
+        ],
+      },
+      {
+        heading: 'Targeted areas: higher limits, expanded eligibility',
+        paragraphs: [
+          'CHFA designates certain census tracts as targeted areas — typically lower-income or underserved neighborhoods where the agency wants to encourage homeownership. In targeted areas, income limits are higher, and some programs waive the first-time buyer requirement.',
+          'Parts of both Larimer and Weld counties have targeted area designations. Your lender can tell you whether a specific property falls in a targeted area, which may qualify you for a program even if your income exceeds standard limits.',
+        ],
+      },
+      {
+        heading: 'Special programs with different limits',
+        paragraphs: [
+          'Three CHFA programs have their own income limit rules that differ from standard county caps:',
+          'CHFA Schools To Home uses a flat $178,920 household income cap regardless of county, designed for full-time Colorado public school employees. This is higher than most standard Larimer County limits, making it attractive for teacher households with dual incomes.',
+          'The Colorado Champions Home Loan Program for first responders raises income eligibility to 110% of standard CHFA county limits. On Larimer County standard limits of approximately $130,000 to $156,000, 110% brings the cap to approximately $143,000 to $171,600. On Weld County limits of approximately $153,600 to $179,200, 110% raises it to approximately $169,000 to $197,100.',
+          'CHFA FirstGeneration follows standard county limits but offers up to $25,000 in DPA regardless of loan size, making it particularly valuable for eligible first-generation buyers.',
+        ],
+        relatedLinks: [
+          { title: 'Schools To Home details', href: '/chfa-schools-to-home/', description: '$178,920 cap for educators' },
+          { title: 'Champions program details', href: '/colorado-champions-home-loan-program/', description: '110% income limits for first responders' },
+          { title: 'CHFA FirstGeneration program', href: '/chfa-down-payment-assistance/', description: 'Up to $25K DPA regardless of loan size' },
+        ],
+      },
+      {
+        heading: 'How to verify your CHFA income limit',
+        paragraphs: [
+          'CHFA publishes official income limit data on its website, but the most reliable way to verify your eligibility is through a CHFA participating lender. The lender calculates your qualifying household income — which includes base salary, overtime, commissions, self-employment income, and other documented sources — against the current limit for your county and household size.',
+          'A few things buyers should know: CHFA limits apply to gross household income, not take-home pay. Income from all household members age 18 or older counts, even if they are not on the mortgage. Retirement account withdrawals, child support, and some types of disability income may count depending on the program.',
+          'CHFA updates its income limits periodically. The ranges in this guide reflect mid-2026 data. Always confirm current figures through the official CHFA income limits resource or a participating lender before you start house hunting.',
+        ],
+        relatedLinks: [
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Free consultation — call (970) 999-1407' },
+        ],
+      },
+      {
+        heading: 'Ready to check your eligibility?',
+        paragraphs: [
+          'SAA Homes represents buyers across all 27 Northern Colorado communities, from Fort Collins to Greeley, Loveland to Longmont. Adam and Mandi Schwartz work with CHFA participating lenders daily and can help you understand which programs fit your household income.',
+          'Start by calling (970) 999-1407 for a free 15-minute consultation. We will walk through your income, target city, and timeline — then connect you with a lender who can confirm the exact limits for your situation. No pressure, just honest guidance based on 20+ years of Northern Colorado real estate experience.',
+        ],
+        relatedLinks: [
+          { title: 'Free buyer consultation', href: '/contact/', description: 'Call (970) 999-1407' },
+          { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Full buyer process overview' },
+        ],
+      },
+    ],
+    faqs: [
+      {
+        q: 'What is the CHFA income limit for Fort Collins in 2026?',
+        a: 'For mid-2026, Larimer County (Fort Collins, Loveland) non-targeted CHFA income limits are approximately $130,000 to $156,000+ depending on household size and program. Targeted areas allow higher limits. Schools To Home has its own $178,920 cap, and Champions raises to 110% of standard limits for first responders. Your CHFA participating lender confirms the exact amount for your household.'
+      },
+      {
+        q: 'What is the CHFA income limit for Greeley or Windsor?',
+        a: 'For mid-2026, Weld County (Greeley, Windsor) non-targeted CHFA income limits range from approximately $153,600 to $179,200. Targeted areas allow higher limits. Champions for first responders raises income limits to 110% of standard limits. Your lender confirms the precise figure.'
+      },
+      {
+        q: 'Is there a CHFA income limit for teachers?',
+        a: 'CHFA Schools To Home uses its own $178,920 household income cap for all eligible full-time public school employees, regardless of which county they buy in. This is higher than most standard Larimer County limits, making it a strong option for two-income teacher households.'
+      },
+      {
+        q: 'What income counts toward CHFA limits?',
+        a: 'CHFA considers gross household income from all household members age 18 or older — base pay, overtime, commissions, self-employment, and other documented sources. Retirement withdrawals, child support, and some disability benefits may count depending on the program. Your lender calculates your qualifying income against the limit.'
+      },
+      {
+        q: 'How often does CHFA update income limits?',
+        a: 'CHFA typically updates income limits annually or when HUD issues new area median income figures. Mid-2026 limits are current as of this guide. Always confirm through a participating lender before applying.'
+      },
+      {
+        q: 'Does CHFA have higher limits for first responders?',
+        a: 'Yes. The Colorado Champions Home Loan Program raises income eligibility to 110% of standard CHFA limits for peace officers, firefighters, EMTs, and 911 dispatchers. On Larimer County standard limits, this can bring the cap to approximately $143,000 to $171,600.'
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug) {
