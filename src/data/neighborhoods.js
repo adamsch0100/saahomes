@@ -3627,6 +3627,7 @@ export const neighborhoods = [
     walkScore: 30,
     metaDescription: 'North Timnath real estate - historic homes and newer infill near the Timnath Town Green with Poudre River access. SAA Homes.',
     keywords: 'North Timnath, historic Timnath, Timnath Town Green, Timnath General Store, Poudre River Timnath, Fort Collins border homes, Timnath Colorado small town, established Timnath neighborhoods',
+    youtubeId: '_ToYcTixyLI',
     neighborhoodHighlights: [
       { title: 'Historic character', description: 'The original Timnath townsite with the historic General Store, Town Green, and small-town charm.' },
       { title: 'Poudre River', description: 'The Poudre River Trail provides miles of paved pathways for walking, running, and biking.' },
@@ -3661,6 +3662,7 @@ export const neighborhoods = [
     walkScore: 25,
     metaDescription: 'Twin Ponds Timnath real estate - new construction homes with pond views near I-25 in growing east Timnath. SAA Homes.',
     keywords: 'Twin Ponds Timnath, east Timnath homes, new construction Timnath, Timnath pond homes, I-25 Timnath, Harmony Road Timnath, Timnath new communities, Fossil Ridge schools Timnath',
+    youtubeId: 'Iy887N6oYuA',
     neighborhoodHighlights: [
       { title: 'Pond living', description: 'Scenic community ponds provide tranquil views and a relaxing atmosphere in this newer community.' },
       { title: 'New construction', description: 'All homes built 2018 or later with modern open floor plans and energy-efficient construction.' },
@@ -3696,6 +3698,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.3083', longitude: '-105.0800' },
     metaDescription: 'Downtown Berthoud real estate guide — historic homes, small-town charm, and walkable main street. Buy or sell with SAA Homes, your Northern Colorado real estate experts.',
     keywords: 'Downtown Berthoud real estate, Berthoud Colorado homes, historic Berthoud, Berthoud main street, Berthoud bungalows, Berthoud walkable neighborhoods',
+    youtubeId: 'kuL_Qq5Ya_g',
     neighborhoodHighlights: [
       { title: 'Small-town charm', description: 'Tree-lined streets, historic architecture, and a welcoming main street with local businesses.' },
       { title: 'Growing community', description: 'Berthoud is one of Northern Colorado\'s fastest-growing towns with new amenities arriving regularly.' },
