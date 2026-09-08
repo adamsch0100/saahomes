@@ -227,7 +227,7 @@ export default function PropertiesPage() {
         </section>
 
         <section>
-          <h2>Northern Colorado Market Overview — Summer 2026</h2>
+          <h2>Northern Colorado Market Overview — Fall 2026</h2>
           <p>
             Northern Colorado&apos;s real estate market spans Larimer, Weld, and Boulder counties, each with distinct
             price points and dynamics. Fort Collins remains the region&apos;s most expensive major market with a July 2026
@@ -251,6 +251,9 @@ export default function PropertiesPage() {
             reduced interest rates, and first responders, military members, and healthcare workers may qualify for the{' '}
             <Link to="/colorado-champions-home-loan-program/">Colorado Champions</Link> program with
             significant rate discounts.
+          </p>
+          <p>
+            <strong>Fall 2026 update:</strong> The Federal Reserve&apos;s late-summer rate cut has brought buyers back into the market, with pending sales in August 2026 up 8% compared to the same month last year across Northern Colorado. Inventory has expanded roughly 15% year-over-year, giving buyers more negotiating room than they have had in three years. Seller expectations have adjusted too — price reductions are now common on listings that debut above market, and days on market have stretched past 50 for homes that launched with aggressive pricing. This shift rewards sellers who work with a local agent who can price accurately from day one, and buyers who are pre-approved and ready to move when the right home comes on the market.
           </p>
         </section>
 
