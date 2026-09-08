@@ -9086,6 +9086,7 @@ export const blogPosts = [
     category: 'CHFA Programs',
     image: '/images/buyers-hero.jpg',
     readTime: '7 min read',
+    youtubeId: '_oJ9Etr_Hco',
     keywords: 'CHFA FirstGeneration Colorado, CHFA first generation program Colorado, first generation homebuyer Colorado, down payment assistance first generation, CHFA first generation plus, first time homebuyer parents never owned home, first generation home loan Colorado, CHFA DPA first generation Fort Collins',
     relatedLinks: [
       { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Standard CHFA programs available to all qualified buyers' },
@@ -9168,6 +9169,7 @@ export const blogPosts = [
     category: 'CHFA Programs',
     image: '/images/buyers-hero.jpg',
     readTime: '6 min read',
+    youtubeId: '3P2vWcVxwsc',
     keywords: 'CHFA disability program Colorado, down payment assistance disability Colorado, CHFA DPA disabled borrowers, disability home loan Colorado, Colorado housing assistance disabled, CHFA disability deferred loan, accessible homes Northern Colorado, disability mortgage assistance Colorado',
     relatedLinks: [
       { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Full CHFA DPA overview with disability eligibility details' },
