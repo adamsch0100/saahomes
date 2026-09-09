@@ -22,7 +22,7 @@ import { LUXURY_HUB_FAQS } from '../src/data/luxuryMarket.js';
 // AREA_CONTENT_DATE in src/data/areaSeo.js. Bump when content is substantively
 // updated — drives Google re-crawl of pages it previously crawled pre-content
 // (indexation patrol 2026-09-01: /properties/, FC, Greeley "not indexed").
-const CONTENT_DATE = '2026-09-01';
+const CONTENT_DATE = '2026-09-09';
 
 // Live listings API for ItemList schema (real active MLS rows only — never fabricate).
 // Prefer LISTINGS_API_BASE / VITE_API_URL when building against a non-prod environment.
