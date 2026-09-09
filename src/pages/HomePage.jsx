@@ -10,6 +10,7 @@ import SocialSection from "../components/SocialSection";
 import ContactCTA from "../components/ContactCTA";
 import LatestMarketUpdateBanner from "../components/LatestMarketUpdateBanner.jsx";
 import { BUSINESS } from "../utils/seoConstants.js";
+import { getReviewSchema } from "../data/reviews.js";
 
 const homePageSchema = {
   "@context": "https://schema.org",
@@ -53,7 +54,7 @@ export default function HomePage() {
         canonical="https://saahomes.com/"
         ogImage="https://saahomes.com/images/White-Logo-AUTOx110.fit.png"
         includeWebsite={true}
-        jsonLd={[homePageSchema]}
+        jsonLd={[homePageSchema, getReviewSchema()]}
       />
       <Hero />
       <AboutSection />
