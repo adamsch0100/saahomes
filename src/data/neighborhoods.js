@@ -3730,6 +3730,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.3', longitude: '-105.1' },
     metaDescription: 'West Berthoud real estate - larger lots with mountain views near Carter Lake. SAA Homes.',
     keywords: 'West Berthoud homes, Berthoud acreage, Carter Lake area homes, Berthoud mountain view properties',
+    youtubeId: 'xdH0CZdQIlI',
     neighborhoodHighlights: [
       { title: 'Mountain views', description: 'West Berthoud properties offer stunning views of Longs Peak and the Front Range.' },
       { title: 'Space and privacy', description: 'Larger lots with room for gardens, animals, and space between homes.' },
@@ -3761,6 +3762,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.29', longitude: '-105.055' },
     metaDescription: 'Berthoud Meadows real estate - new construction homes in growing south Berthoud. SAA Homes.',
     keywords: 'Berthoud Meadows, Berthoud new construction, south Berthoud homes, Berthoud family neighborhoods',
+    youtubeId: '16zoICCMbCo',
     neighborhoodHighlights: [
       { title: 'Newer construction', description: 'Modern homes with open floor plans, energy efficiency, and builder warranties.' },
       { title: 'Community parks', description: 'Neighborhood parks and green space within walking distance of every home.' },
@@ -3792,6 +3794,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.295', longitude: '-105.06' },
     metaDescription: 'Berthoud Highlands - established south Berthoud homes with mountain views and generous lots. SAA Homes.',
     keywords: 'Berthoud Highlands, south Berthoud homes, established Berthoud subdivision, mountain view homes Berthoud',
+    youtubeId: 'v67t5qNx_Pg',
     neighborhoodHighlights: [
       { title: 'Mountain views', description: 'Many homes offer panoramic views of Longs Peak and the Front Range.' },
       { title: 'Established setting', description: 'Mature trees and established landscaping create a settled, welcoming community.' },
