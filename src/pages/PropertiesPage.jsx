@@ -125,6 +125,17 @@ export default function PropertiesPage() {
     ],
   };
 
+  const pageWebPageSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: pageTitle,
+    url: "https://saahomes.com/properties/",
+    description: pageDescription,
+    inLanguage: "en-US",
+    dateModified: "2026-09-09",
+    isPartOf: { "@type": "WebSite", name: "SAA Homes", url: "https://saahomes.com/" },
+  };
+
   const h1Text = location
     ? `Homes for Sale in ${location}, Colorado`
     : "Homes for Sale in Northern Colorado";
@@ -138,7 +149,7 @@ export default function PropertiesPage() {
         canonical="https://saahomes.com/properties/"
         ogImage="https://saahomes.com/images/buyers-hero.jpg"
         includeWebsite={true}
-        jsonLd={[faqSchema]}
+        jsonLd={[faqSchema, pageWebPageSchema]}
       />
       {tenantTitle ? (
         <Helmet>
