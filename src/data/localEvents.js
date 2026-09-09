@@ -9,7 +9,7 @@
  */
 
 export const LATEST_EVENTS_GUIDE_SLUG = 'northern-colorado-events-guide-2026';
-export const EVENTS_DATA_LAST_REVIEWED = '2026-09-01';
+export const EVENTS_DATA_LAST_REVIEWED = '2026-09-09';
 
 /** @typedef {{ name: string; season: string; description: string; officialUrl?: string; typicalMonths?: string; dates?: string }} LocalEvent */
 
@@ -53,7 +53,7 @@ export const cityEvents = {
       name: 'Larimer County Farmers\' Market',
       season: 'Spring–Fall',
       typicalMonths: 'May–November',
-      description: 'Weekly farmers market downtown Fort Collins — confirmed 2026 season May 16 – Nov 1.',
+      description: 'Weekly farmers market downtown Fort Collins — confirmed 2026 season May 16 – Oct 31 (Saturdays 9am–1pm).',
       officialUrl: 'https://www.visitftcollins.com/event/larimer-county-farmers-market/40472/',
     },
     {
@@ -66,10 +66,9 @@ export const cityEvents = {
     },
     {
       name: 'Fort Collins Foodie Walk',
-      season: 'Summer',
-      typicalMonths: 'July–August',
-      dates: 'Aug 21, 2026',
-      description: 'Downtown Fort Collins tasting walk sampling bites from local restaurants.',
+      season: 'Year-round',
+      typicalMonths: 'January–December',
+      description: 'Monthly Downtown Fort Collins tasting walk sampling bites from local restaurants on the 3rd Friday of each month.',
       officialUrl: 'https://www.visitftcollins.com/event/fort-collins-foodie-walk-%e2%84%a2/17064/',
     },
     {
