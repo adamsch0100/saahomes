@@ -253,6 +253,18 @@ const AREA_FAQS = {
     {
       q: 'What is it like living in Eaton, Colorado?',
       a: 'Eaton is a tight-knit agricultural community with a strong sense of local pride. Residents enjoy the small-town atmosphere, Eaton Days community celebrations, and the convenience of being just minutes from Greeley and Fort Collins. The Eaton School District is highly regarded by local families.'
+    },
+    {
+      q: 'What are the best neighborhoods in Eaton?',
+      a: 'Eaton\'s residential areas include established tree-lined streets near downtown, newer subdivisions on the town\'s south and east sides, and acreage properties on the outskirts that offer more land. The town has seen thoughtful new development that blends with its agricultural heritage, and many homes sit on larger lots compared to Fort Collins or Greeley.'
+    },
+    {
+      q: 'How are the schools in Eaton, Colorado?',
+      a: 'Eaton is served by the highly regarded Eaton School District (RE-2), which consistently earns strong ratings for academic performance and community involvement. The district includes Eaton Elementary, Eaton Middle School, and Eaton High School, all located within the community. Small class sizes and active parental involvement are hallmarks of the district.'
+    },
+    {
+      q: 'What is the commute like from Eaton to Fort Collins and Greeley?',
+      a: 'Eaton sits just 6 miles east of Greeley and 20 miles from Fort Collins via US-85 and US-34, making it convenient for commuters. The drive to downtown Greeley takes about 10 minutes, while Fort Collins is roughly 25-30 minutes. Eaton\'s location offers rural living with quick access to urban amenities.'
     }
   ],
   'milliken': [
@@ -263,6 +275,18 @@ const AREA_FAQS = {
     {
       q: 'What is it like living in Milliken, Colorado?',
       a: 'Milliken maintains a small-town agricultural feel while experiencing steady growth. Residents appreciate the affordable housing, proximity to Greeley and the I-25 corridor, and the peaceful residential atmosphere. The town is popular with first-time buyers and families looking for value.'
+    },
+    {
+      q: 'What are the best neighborhoods in Milliken?',
+      a: 'Milliken\'s newer subdivisions, including areas near Broad Street and the town\'s west side, offer modern construction with mountain views. Established areas near downtown provide older homes on larger lots with mature trees. The town\'s growth corridor along Weld County Road 13 has brought new communities with parks and open space.'
+    },
+    {
+      q: 'How are the schools in Milliken?',
+      a: 'Milliken is served by the Weld County School District RE-5J (Johnstown-Milliken), which includes Milliken Elementary and Milliken Middle School. The district is known for its community focus and strong parent involvement. High school students attend Roosevelt High School in Johnstown, which offers strong academic and extracurricular programs.'
+    },
+    {
+      q: 'Is Milliken a good choice for first-time home buyers?',
+      a: 'Milliken is an excellent choice for first-time buyers in Northern Colorado. With home prices typically $100,000-$200,000 below Fort Collins, CHFA down payment assistance availability, and new construction options with builder incentives, the town offers one of the most accessible paths to homeownership in the region. The growing community also offers strong appreciation potential.'
     }
   ],
   'la-salle': [
@@ -273,6 +297,18 @@ const AREA_FAQS = {
     {
       q: 'What is it like living in La Salle, Colorado?',
       a: 'La Salle offers quiet, rural living with a strong sense of community history. Located just east of Greeley, residents enjoy proximity to Weld County amenities while maintaining a peaceful small-town lifestyle. The community is popular with buyers seeking land and space.'
+    },
+    {
+      q: 'What are the best areas to buy a home in La Salle?',
+      a: 'La Salle offers a mix of older homes on spacious lots near the historic downtown area and newer construction on the town\'s edges. Many properties come with larger lots than typical suburban developments, appealing to buyers who want gardens, space for recreational vehicles, or room for animals.'
+    },
+    {
+      q: 'What is the commute like from La Salle to Greeley and Denver?',
+      a: 'La Salle is located just 5 miles southeast of Greeley and about 55 miles from downtown Denver via US-85 and I-76. The drive to Greeley takes about 10 minutes, while Denver is roughly a 55-65 minute commute. La Salle\'s location offers the quiet of rural living with Greeley\'s amenities just minutes away.'
+    },
+    {
+      q: 'Is La Salle part of the CHFA program for first-time buyers?',
+      a: 'Yes, La Salle is eligible for CHFA down payment assistance programs, making it an excellent option for first-time buyers seeking the most affordable entry point into Northern Colorado homeownership. With home prices starting around $300,000 and CHFA grants up to $25,000, qualified buyers can purchase with very little cash out of pocket. Contact SAA Homes at (970) 999-1407 for a CHFA consultation.'
     }
   ],
   'mead': [
@@ -283,6 +319,18 @@ const AREA_FAQS = {
     {
       q: 'What is it like living in Mead, Colorado?',
       a: 'Mead offers a peaceful small-town lifestyle between Longmont and Fort Collins. Residents enjoy the open spaces, quiet streets, and access to front-range amenities within a short drive. The town is particularly popular with buyers who want acreage or rural settings near the I-25 corridor.'
+    },
+    {
+      q: 'What are the best neighborhoods in Mead?',
+      a: 'Mead\'s residential areas include newer subdivisions near Colorado Highway 66 and established homes in the historic core of town. Many properties offer larger lots than typical Front Range developments, attracting buyers who want room for gardens, horses, or simply more privacy. The town\'s growth has brought new parks and community spaces.'
+    },
+    {
+      q: 'How are the schools in Mead?',
+      a: 'Mead is served by the St. Vrain Valley School District, one of Colorado\'s top-rated districts. Students attend Mead Elementary, Mead Middle School, and Mead High School — all within the community. The district is known for strong academic performance, advanced placement options, and excellent extracurricular programs.'
+    },
+    {
+      q: 'What is the commute like from Mead to Longmont, Boulder, and Denver?',
+      a: 'Mead sits at the junction of I-25 and Colorado Highway 66, providing excellent access to the entire Front Range. Longmont is 10 minutes west, Boulder is 20 minutes southwest, Fort Collins is 25 minutes north, and Denver is about 35-45 minutes south via I-25. This central location makes Mead a strategic choice for commuters to any Front Range job center.'
     }
   ],
   'longmont': [
@@ -407,6 +455,18 @@ const AREA_FAQS = {
     {
       q: 'What is it like living in Evans, Colorado?',
       a: 'Evans is a growing Weld County community adjacent to Greeley, offering a suburban lifestyle with affordable pricing. Residents enjoy proximity to the Poudre River Trail, Greeley\'s shopping and dining, and UNC events while maintaining a quieter residential atmosphere.'
+    },
+    {
+      q: 'What are the best neighborhoods in Evans?',
+      a: 'Evans neighborhoods include established areas near downtown with mature trees, newer communities expanding along US-85, and developments near the Poudre River Trail. The town\'s growth has brought new home construction with modern floor plans while maintaining affordable price points compared to Fort Collins and Windsor.'
+    },
+    {
+      q: 'How are the schools in Evans?',
+      a: 'Evans is served by Greeley-Evans School District 6, one of Colorado\'s largest districts offering diverse educational options including charter schools, magnet programs, and specialized academies. Brentwood Middle School and Prairie Heights Middle School serve the Evans area, with high school students attending Greeley West or Northridge.'
+    },
+    {
+      q: 'Is Evans a good investment for rental properties?',
+      a: 'Evans offers strong rental investment potential due to its proximity to UNC (University of Northern Colorado), affordable home prices, and growing employment base in Greeley\'s healthcare and education sectors. Single-family rental yields in Evans tend to be higher than in Fort Collins due to lower acquisition costs and consistent tenant demand. Contact SAA Homes at (970) 999-1407 to discuss investment opportunities in the Evans area.'
     }
   ],
   'severance': [
