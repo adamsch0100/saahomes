@@ -12,6 +12,7 @@ import CityVeteransSection from "../../components/CityVeteransSection.jsx";
 import AreaEventsSection from "../../components/AreaEventsSection.jsx";
 import LatestMarketUpdateBanner from "../../components/LatestMarketUpdateBanner.jsx";
 import { getAreaSeo } from "../../data/areaSeo.js";
+import CityStatsBand from "../../components/CityStatsBand.jsx";
 
 export default function LovelandPage() {
   const area = getAreaSeo("loveland");
@@ -49,6 +50,11 @@ export default function LovelandPage() {
             </p>
           </div>
         </section>
+
+      {/* City Stats Band — quick info cards */}
+      <div className="max-w-6xl mx-auto px-6 mt-8 mb-8">
+        <CityStatsBand city="Loveland" />
+      </div>
 
       <LatestMarketUpdateBanner variant="compact" cityName="Loveland" />
 

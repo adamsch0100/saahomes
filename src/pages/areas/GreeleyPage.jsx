@@ -13,6 +13,7 @@ import CityVeteransSection from "../../components/CityVeteransSection.jsx";
 import LatestMarketUpdateBanner from "../../components/LatestMarketUpdateBanner.jsx";
 import { getAreaSeo } from "../../data/areaSeo.js";
 import AreaEventsSection from "../../components/AreaEventsSection.jsx";
+import CityStatsBand from "../../components/CityStatsBand.jsx";
 
 const GOLD = "#CFB36E";
 
@@ -52,6 +53,11 @@ export default function GreeleyPage() {
           </p>
         </div>
       </section>
+
+      {/* City Stats Band — quick info cards */}
+      <div className="max-w-6xl mx-auto px-6 mt-8 mb-8">
+        <CityStatsBand city="Greeley" />
+      </div>
 
       {/* Why Buy in Greeley? */}
       {area.whyChoose?.length > 0 && (
