@@ -21,14 +21,29 @@ import_s6_container_env() {
 
 import_s6_container_env
 
+# Parse KEY=VALUE lines. Never `.` source .env — unquoted values with spaces
+# (e.g. Gmail app passwords) make dash execute words as commands and abort
+# cont-init (exit 127), which skips the routing pin and leaves a bad model live.
+load_env_file() {
+  env_file="$1"
+  [ -f "$env_file" ] || return 0
+  while IFS= read -r line || [ -n "$line" ]; do
+    case "$line" in
+      ''|\#*) continue ;;
+    esac
+    key="${line%%=*}"
+    val="${line#*=}"
+    case "$key" in
+      ''|*[!A-Za-z0-9_]*) continue ;;
+    esac
+    val="$(printf '%s' "$val" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'$//")"
+    export "${key}=${val}"
+  done < "$env_file"
+}
+
 ENV_FILE="$DATA_DIR/.env"
-if [ -f "$ENV_FILE" ]; then
-  set -a
-  # shellcheck disable=SC1091
-  . "$ENV_FILE"
-  set +a
-  import_s6_container_env
-fi
+load_env_file "$ENV_FILE"
+import_s6_container_env
 
 env_key_set() {
   key="$1"
@@ -161,7 +176,15 @@ upsert_env() {
   fi
 }
 
+# Volume .env can pin a stale Go key; Railway/s6 must win before upsert + auth seed.
+import_s6_container_env
 upsert_env "OPENCODE_GO_API_KEY" "${OPENCODE_GO_API_KEY:-}"
+upsert_env "OPENCODE_GO_API_KEYS" "${OPENCODE_GO_API_KEYS:-}"
+upsert_env "OPENROUTER_API_KEY" "${OPENROUTER_API_KEY:-}"
+if [ -n "${XAI_API_KEY:-}" ]; then
+  echo "WARNING: XAI_API_KEY is set — Hermes will bill xAI API tokens and skip SuperGrok OAuth. Unset it to use grok CLI-style subscription limits (hermes auth add xai-oauth --no-browser)."
+  upsert_env "XAI_API_KEY" "${XAI_API_KEY}"
+fi
 upsert_env "TELEGRAM_BOT_TOKEN" "${TELEGRAM_BOT_TOKEN:-}"
 upsert_env "TELEGRAM_ALLOWED_USERS" "${TELEGRAM_ALLOWED_USERS:-}"
 append_env "API_SERVER_KEY" "${API_SERVER_KEY:-}"
@@ -227,13 +250,6 @@ elif [ -n "${GSC_SERVICE_ACCOUNT_JSON:-}" ]; then
   chmod 600 "$GSC_KEY_FILE"
 fi
 
-# Bootstrap and manual Console uploads run as root; gateway runs as hermes.
-if [ -f "$GSC_KEY_FILE" ] && id hermes >/dev/null 2>&1; then
-  chown hermes:hermes "$CREDENTIALS_DIR" "$GSC_KEY_FILE"
-  chmod 700 "$CREDENTIALS_DIR"
-  chmod 600 "$GSC_KEY_FILE"
-fi
-
 YOUTUBE_OAUTH_FILE="$CREDENTIALS_DIR/youtube-oauth.json"
 if [ -n "${YOUTUBE_OAUTH_JSON_B64:-}" ]; then
   echo "Writing YouTube OAuth token from YOUTUBE_OAUTH_JSON_B64"
@@ -241,9 +257,15 @@ if [ -n "${YOUTUBE_OAUTH_JSON_B64:-}" ]; then
   chmod 600 "$YOUTUBE_OAUTH_FILE"
 fi
 
-if [ -f "$YOUTUBE_OAUTH_FILE" ] && id hermes >/dev/null 2>&1; then
-  chown hermes:hermes "$YOUTUBE_OAUTH_FILE" 2>/dev/null || true
-  chmod 600 "$YOUTUBE_OAUTH_FILE"
+# Bootstrap and Console uploads run as root; gateway runs as hermes.
+if id hermes >/dev/null 2>&1; then
+  chown -R hermes:hermes "$CREDENTIALS_DIR"
+  chmod 700 "$CREDENTIALS_DIR"
+  if ls "$CREDENTIALS_DIR"/*.json >/dev/null 2>&1; then
+    chmod 600 "$CREDENTIALS_DIR"/*.json
+  fi
+  echo "credentials ownership: hermes:hermes dir=700 json=600"
+  ls -la "$CREDENTIALS_DIR"
 fi
 
 # Hermes agent reads git credentials from /opt/data/.env — sync from Railway on every boot.
@@ -266,9 +288,66 @@ if [ -n "${GITHUB_TOKEN:-}" ] && [ ! -d "$WORKSPACE_DIR/.git" ]; then
   git -C "$WORKSPACE_DIR" config user.name "SAA Homes Hermes"
 fi
 
+# Ox Alpha (x-preview-f-free) 401s. Drop the volume lock and rewrite cron pins
+# onto OpenCode Go so scheduled jobs can run after this boot.
+retire_dead_ox_alpha() {
+  if [ -f "$DATA_DIR/ox-alpha-promo.lock" ]; then
+    echo "retiring ox-alpha-promo.lock — x-preview-f-free 401s; keeping OpenCode Go"
+    rm -f "$DATA_DIR/ox-alpha-promo.lock"
+  fi
+  jobs_file="$DATA_DIR/cron/jobs.json"
+  [ -f "$jobs_file" ] || return 0
+  python3 - "$jobs_file" <<'PY'
+import json
+import sys
+
+path = sys.argv[1]
+with open(path, encoding="utf-8") as fh:
+    blob = json.load(fh)
+jobs = blob.get("jobs") if isinstance(blob, dict) else blob
+changed = 0
+for row in jobs or []:
+    if not isinstance(row, dict):
+        continue
+    model = str(row.get("model") or "")
+    provider = str(row.get("provider") or "")
+    if model in {"x-preview-f-free", "ox-alpha"} or provider == "opencode-zen":
+        row["model"] = "deepseek-v4-flash"
+        row["provider"] = "opencode-go"
+        changed += 1
+print(f"rewrote {changed} cron jobs onto opencode-go/deepseek-v4-flash")
+if changed:
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(blob, fh, indent=2)
+        fh.write("\n")
+PY
+}
+
 # Volume seeded on first boot may predate gateway.platforms.telegram in config.yaml.
 export HERMES_HOME="$DATA_DIR"
 if command -v hermes >/dev/null 2>&1; then
+  # Seed config is source of truth for hybrid routing (Go flash → OpenRouter flash).
+  if [ -f "$SEED_DIR/config.yaml" ]; then
+    cp "$SEED_DIR/config.yaml" "$DATA_DIR/config.yaml"
+  fi
+  hermes config set model.provider opencode-go 2>/dev/null || true
+  hermes config set model.default deepseek-v4-flash 2>/dev/null || true
+  hermes config set auxiliary.compression.provider opencode-go 2>/dev/null || true
+  hermes config set auxiliary.compression.model deepseek-v4-flash 2>/dev/null || true
+  hermes config set auxiliary.web_extract.provider opencode-go 2>/dev/null || true
+  hermes config set auxiliary.web_extract.model deepseek-v4-flash 2>/dev/null || true
+  hermes config set delegation.provider opencode-go 2>/dev/null || true
+  hermes config set delegation.model deepseek-v4-pro 2>/dev/null || true
+  if [ -f "$SEED_DIR/config.yaml" ]; then
+    cp "$SEED_DIR/config.yaml" "$DATA_DIR/config.yaml"
+  fi
+  retire_dead_ox_alpha
+  if [ ! -f "$DATA_DIR/ox-alpha-promo.lock" ] && [ -x /usr/local/bin/model-routing-pulse.py ]; then
+    python3 /usr/local/bin/model-routing-pulse.py --apply-lock-only || echo "WARNING: model-routing lock re-apply failed"
+  fi
+  if [ -x /usr/local/bin/seed-extra-go-keys.sh ]; then
+    /usr/local/bin/seed-extra-go-keys.sh || echo "WARNING: seed-extra-go-keys.sh failed"
+  fi
   if telegram_allowed="$(resolve_telegram_allowed_users)"; then
     upsert_env "TELEGRAM_ALLOWED_USERS" "$telegram_allowed"
     export TELEGRAM_ALLOWED_USERS="$telegram_allowed"

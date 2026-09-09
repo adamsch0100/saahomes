@@ -1,21 +1,54 @@
+# Hybrid routing (all three Hermes agents share this shape, not one shared file):
+#   Volume  → opencode-go / deepseek-v4-flash
+#   Fallback → openrouter / deepseek/deepseek-v4-flash  (quota/429/auth only)
+#   Mid     → opencode-go / deepseek-v4-pro  (content, inspect, delegation)
+#   Hard    → xai-oauth / grok-build-0.1  (SuperGrok/X Premium+ — same family as grok CLI)
+#             Login once per service: hermes auth add xai-oauth --no-browser
+#             Do NOT set XAI_API_KEY unless OAuth returns 403 (API key = pay-per-token).
+#
+# Prompt cache: keep SOUL.md, AGENTS.md, and tools.toolsets git-static (no timestamps,
+# session IDs, or rotating instructions in the system prefix). Do NOT unify SOUL across
+# SAA / ListLogic / FUB — different businesses; cache is per key+model+prefix.
+# One OpenCode Go key per Railway service (sticky). Share OpenRouter + xAI keys.
+
 model:
-  default: kimi-k2.6
+  default: deepseek-v4-flash
   provider: opencode-go
 
 providers:
   opencode-go:
     base_url: https://opencode.ai/zen/go/v1
+  openrouter:
+    base_url: https://openrouter.ai/api/v1
+
+fallback_providers:
+  - provider: openrouter
+    model: deepseek/deepseek-v4-flash
+
+credential_pool_strategies:
+  opencode-go: fill_first
+  openrouter: fill_first
+  xai: fill_first
 
 auxiliary:
   compression:
     provider: opencode-go
     model: deepseek-v4-flash
+    fallback_chain:
+      - provider: openrouter
+        model: deepseek/deepseek-v4-flash
   web_extract:
     provider: opencode-go
     model: deepseek-v4-flash
+    fallback_chain:
+      - provider: openrouter
+        model: deepseek/deepseek-v4-flash
   vision:
     provider: opencode-go
-    model: kimi-k2.6
+    model: deepseek-v4-flash
+    fallback_chain:
+      - provider: openrouter
+        model: deepseek/deepseek-v4-flash
 
 delegation:
   provider: opencode-go
