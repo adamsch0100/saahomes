@@ -10,6 +10,7 @@ import adminRoutes from './routes/admin.js';
 import agentRoutes from './routes/agent.js';
 import { runMigrations } from './config/migrate.js';
 import { startIresSyncScheduler } from './jobs/iresScheduler.js';
+import { NOCO_CITIES } from './config/nocoCities.js';
 
 dotenv.config();
 
@@ -131,7 +132,9 @@ app.get('/sitemap-listings.xml', async (req, res) => {
       const { rows } = await pool.query(
         `SELECT slug, updated_at FROM listings
           WHERE is_active = TRUE AND slug IS NOT NULL
-          ORDER BY slug`
+            AND city = ANY($1::text[])
+          ORDER BY slug`,
+        [NOCO_CITIES]
       );
       const urls = rows.map((r) => {
         const lastmod = r.updated_at
@@ -183,6 +186,34 @@ if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
 
     if (existsSync(prerenderedPath)) {
       return res.sendFile(prerenderedPath);
+    }
+
+    // Legacy listing URLs (/listing/{source}/{listing_id}/{city}/{slug}/) from
+    // the pre-Aug-2026 routing era. They used to serve the SPA shell with a
+    // homepage canonical (soft-404). 301 → the canonical /homes-for-sale/{slug}/
+    // URL when the listing still exists, else 404 (drop from index).
+    const legacyListingMatch = normalized.match(
+      /^\/listing\/[^/]+\/([^/]+)(?:\/.*)?$/
+    );
+    if (legacyListingMatch) {
+      try {
+        const { default: getPool } = await import('./config/database.js');
+        const pool = getPool();
+        const listingId = legacyListingMatch[1];
+        const { rows } = await pool.query(
+          `SELECT slug FROM listings WHERE listing_id = $1 LIMIT 1`,
+          [listingId]
+        );
+        const legacyListings = rows[0];
+        if (legacyListings && legacyListings.slug) {
+          return res.redirect(301, `${SITE_URL}/homes-for-sale/${legacyListings.slug}/`);
+        }
+        // Listing no longer in feed — send 404 so Google drops the soft-404 URL
+        return res.status(404).send('Not Found');
+      } catch (error) {
+        console.error('legacy listing redirect error:', error.message);
+        // fall through to generic shell
+      }
     }
 
     // Dynamic listing pages (/homes-for-sale/:slug/) have no prerendered
