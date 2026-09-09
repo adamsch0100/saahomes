@@ -46,7 +46,15 @@ export default function Hero() {
             </a>
           </div>
           <p className="mt-4 text-sm sm:text-base text-white/80">
-            Serving Fort Collins, Loveland, Windsor &amp; all of Northern Colorado — call{" "}
+            Serving{" "}
+            <a href="/northern-colorado-areas/fort-collins/" className="font-semibold text-white underline hover:text-white/90">Fort Collins</a>
+            {", "}
+            <a href="/northern-colorado-areas/loveland/" className="font-semibold text-white underline hover:text-white/90">Loveland</a>
+            {", "}
+            <a href="/northern-colorado-areas/windsor/" className="font-semibold text-white underline hover:text-white/90">Windsor</a>
+            {" & "}
+            <a href="/northern-colorado-areas/greeley/" className="font-semibold text-white underline hover:text-white/90">Greeley</a>
+            {" — call "}
             <a href="tel:(970) 999-1407" className="font-semibold text-white underline hover:text-white/90">(970) 999-1407</a>
           </p>
         </div>
