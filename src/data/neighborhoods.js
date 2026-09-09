@@ -12820,6 +12820,121 @@ export const neighborhoods = [
   },
 
 
+
+  {
+    slug: 'wildgrass-erie',
+    citySlug: 'erie',
+    cityDisplay: 'Erie',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'Wildgrass',
+    alsoKnownAs: [
+        'Wildgrass at Erie',
+        'Wildgrass Filing 1'
+      ],
+    description:
+      'Wildgrass is a master-planned Erie community with new-construction and newer existing homes, community parks, and easy access to downtown Erie and I-25, popular with families relocating from the Denver metro.',
+    longDescription:
+      'Wildgrass sits on Erie\'s east side near the intersection of Erie Parkway and I-25, making it one of the most commute-friendly neighborhoods in town. Development began in the late 2010s and continues through the 2020s, with builders offering a range of two-story and ranch floor plans. A central park with playgrounds, open space, and a planned pool amenity anchor the community. The neighborhood\'s location provides quick access to Erie Parkway retail, Erie Community Park, and the Coal Creek Trail system. Red Hawk Elementary and Erie High School are both within a short drive. Wildgrass appeals to Front Range buyers who want newer construction, a reasonable commute to Denver, and Erie\'s small-town atmosphere.',
+    homeStyles: [
+      'Two-Story Modern',
+      'Ranch',
+      'Craftsman',
+      'Farmhouse'
+    ],
+    yearBuiltRange: { min: 2018, max: 2026 },
+    priceRangeDescription: '$475K to $950K',
+    schoolDistrict: 'St. Vrain Valley School District',
+    schools: [
+      { name: 'Red Hawk Elementary', type: 'elementary', level: 'K-5', rating: 8 },
+      { name: 'Erie Middle School', type: 'middle', level: '6-8', rating: 7 },
+      { name: 'Erie High School', type: 'high', level: '9-12', rating: 8 }
+    ],
+    hoaDescription: 'Mandatory HOA (approx. $95-$145/month) covers parks, trails, and common area maintenance',
+    features: [
+      'Newer construction homes with modern floor plans',
+      'Community park with playgrounds and planned pool',
+      'Minutes from Erie Parkway shopping and dining',
+      'Quick I-25 access for Denver-area commuters',
+      'Adjacent to future Erie commercial development',
+      'Red Hawk Elementary within a short drive'
+    ],
+    parks: [
+      'Wildgrass Community Park',
+      'Erie Community Park',
+      'Coal Creek Trail'
+    ],
+    boundaries: 'Near Erie Parkway and I-25, east side of Erie',
+    coordinates: { latitude: '40.015', longitude: '105.010' },
+    walkScore: 22,
+    metaDescription:
+      'Wildgrass Erie CO — newer construction homes, community parks, and quick I-25 access in a master-planned community. SAA Homes.',
+    keywords:
+      'Wildgrass Erie, Erie CO new homes, Erie master planned communities, Erie Parkway homes, Wildgrass subdivision Erie, Erie family neighborhoods',
+    neighborhoodHighlights: [
+      { title: 'Commuter-friendly', description: 'Located near Erie Parkway and I-25 for a quick Denver-area commute.' },
+      { title: 'Newer construction', description: 'Active building through the 2020s with modern floor plans and energy-efficient features.' },
+      { title: 'Growing amenities', description: 'Community park, trails, and planned pool amenities serve the neighborhood.' }
+    ],
+  },
+
+  {
+    slug: 'st-vrain-ranch-erie',
+    citySlug: 'erie',
+    cityDisplay: 'Erie',
+    county: 'Weld County',
+    type: 'neighborhood',
+    name: 'St. Vrain Ranch',
+    alsoKnownAs: [
+        'St. Vrain Ranch Erie',
+        'St. Vrain Ranch Subdivision'
+      ],
+    description:
+      'St. Vrain Ranch is a newer Erie subdivision on spacious lots, offering contemporary two-story homes with mountain views and a quiet country feel minutes from Erie Parkway retail and I-25.',
+    longDescription:
+      'St. Vrain Ranch is located on Erie\'s east side along the undeveloped St. Vrain Creek corridor, giving the neighborhood a semi-rural character that\'s increasingly rare in Erie. Homes are built on larger-than-average lots with many backing to open space or agricultural land. The subdivision was developed from the late 2010s through the early 2020s, with several national and regional builders offering two-story and ranch plans. The neighborhood\'s elevated lots and eastern orientation provide wide views of the Boulder County foothills and the Flatirons. While walkable amenities are limited, the trade-off is space, privacy, and quick access to Erie Parkway, I-25, and the upcoming Erie commercial development at Highway 52.',
+    homeStyles: [
+      'Two-Story Modern',
+      'Ranch',
+      'Farmhouse',
+      'Craftsman'
+    ],
+    yearBuiltRange: { min: 2016, max: 2024 },
+    priceRangeDescription: '$500K to $1.1M',
+    schoolDistrict: 'St. Vrain Valley School District',
+    schools: [
+      { name: 'Red Hawk Elementary', type: 'elementary', level: 'K-5', rating: 8 },
+      { name: 'Erie Middle School', type: 'middle', level: '6-8', rating: 7 },
+      { name: 'Erie High School', type: 'high', level: '9-12', rating: 8 }
+    ],
+    hoaDescription: 'Mandatory HOA (approx. $75-$120/month) covers common areas and landscaping',
+    features: [
+      'Spacious lots with room for gardens and outdoor living',
+      'Wide views of the Boulder County foothills and Flatirons',
+      'Semi-rural character with privacy and open space',
+      'Quick I-25 access via Erie Parkway',
+      'Minutes to Erie Parkway retail corridor',
+      'Newer construction with modern floor plans'
+    ],
+    parks: [
+      'Erie Community Park',
+      'Coal Creek Trail',
+      'St. Vrain Creek Open Space'
+    ],
+    boundaries: 'East Erie near Highway 52 and I-25, along St. Vrain Creek corridor',
+    coordinates: { latitude: '40.010', longitude: '105.005' },
+    walkScore: 16,
+    metaDescription:
+      'St. Vrain Ranch Erie CO — spacious lots, mountain views, and newer construction in a quiet east Erie setting. SAA Homes.',
+    keywords:
+      'St. Vrain Ranch Erie, Erie Colorado homes, Erie new subdivisions, larger lot homes Erie, Erie CO real estate, east Erie neighborhoods',
+    neighborhoodHighlights: [
+      { title: 'Generous lots', description: 'Larger-than-average lot sizes give homeowners space for outdoor living, gardens, and privacy.' },
+      { title: 'Mountain views', description: 'East-facing lots deliver wide views of the Boulder County foothills and Flatirons.' },
+      { title: 'Country proximity', description: 'Semi-rural setting minutes from Erie Parkway retail, I-25, and future Highway 52 development.' }
+    ],
+  }
+
 ]
 
 // ── Helper Functions ──
