@@ -13,6 +13,7 @@ import CityVeteransSection from "../../components/CityVeteransSection.jsx";
 import LatestMarketUpdateBanner from "../../components/LatestMarketUpdateBanner.jsx";
 import { getAreaSeo } from "../../data/areaSeo.js";
 import AreaEventsSection from "../../components/AreaEventsSection.jsx";
+import CityStatsBand from "../../components/CityStatsBand.jsx";
 
 export default function FortCollinsPage() {
   const area = getAreaSeo("fort-collins");
@@ -53,6 +54,11 @@ export default function FortCollinsPage() {
             </p>
           </div>
         </section>
+
+      {/* City Stats Band — quick info cards */}
+      <div className="max-w-6xl mx-auto px-6 mt-8 mb-8">
+        <CityStatsBand city="Fort Collins" />
+      </div>
 
       {/* Why Buy in Fort Collins? */}
       {area.whyChoose?.length > 0 && (

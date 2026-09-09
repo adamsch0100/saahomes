@@ -12,6 +12,7 @@ import CityVeteransSection from "../../components/CityVeteransSection.jsx";
 import LatestMarketUpdateBanner from "../../components/LatestMarketUpdateBanner.jsx";
 import { getAreaSeo } from "../../data/areaSeo.js";
 import AreaEventsSection from "../../components/AreaEventsSection.jsx";
+import CityStatsBand from "../../components/CityStatsBand.jsx";
 
 export default function WindsorPage() {
   const area = getAreaSeo("windsor");
@@ -49,6 +50,11 @@ export default function WindsorPage() {
             </p>
           </div>
         </section>
+
+      {/* City Stats Band — quick info cards */}
+      <div className="max-w-6xl mx-auto px-6 mt-8 mb-8">
+        <CityStatsBand city="Windsor" />
+      </div>
 
       {/* Why Buy in Windsor? */}
       {area.whyChoose?.length > 0 && (
