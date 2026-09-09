@@ -113,6 +113,22 @@ const nearbyCommunities = {
     { name: 'Estes Park', slug: 'estes-park', description: 'RMNP via mountain routes' },
     { name: 'Loveland', slug: 'loveland', description: 'South Larimer County' },
   ],
+  'fort-collins': [
+    { name: 'Loveland', slug: 'loveland', description: '10 miles south via US-287 / I-25' },
+    { name: 'Windsor', slug: 'windsor', description: '10 miles east via CO-392' },
+    { name: 'Timnath', slug: 'timnath', description: '8 miles south-east on I-25' },
+    { name: 'Laporte', slug: 'laporte', description: '5 miles northwest of Old Town' },
+    { name: 'Severance', slug: 'severance', description: '14 miles east via CO-392' },
+    { name: 'Wellington', slug: 'wellington', description: '12 miles north on I-25' },
+  ],
+  greeley: [
+    { name: 'Evans', slug: 'evans', description: 'Immediately adjacent south of Greeley' },
+    { name: 'Windsor', slug: 'windsor', description: '12 miles west via US-85 / CO-392' },
+    { name: 'Severance', slug: 'severance', description: '8 miles west of Greeley' },
+    { name: 'Eaton', slug: 'eaton', description: '5 miles north of Greeley' },
+    { name: 'Milliken', slug: 'milliken', description: '8 miles south of Greeley' },
+    { name: 'Fort Collins', slug: 'fort-collins', description: '26 miles west via US-85 / CO-14' },
+  ],
 };
 
 export default function AreaGuidePage() {
