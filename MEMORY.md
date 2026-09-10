@@ -501,3 +501,9 @@ Week of 2026-08-03:
 | https://saahomes.com/northern-colorado-areas/loveland/northgate-loveland/ | 5 | 0 | northgate apartments |
 
 *Report generated: 2026-08-14T13:10:37.424246*
+
+## Daily Ranking Strike — 2026-09-10
+
+✅ No verified regressions. 11 P0 flags from the pre-fix script were FALSE POSITIVES (500-row query+page cutoff — pages still indexed, impressions stable/growing: Windsor 69→117, Murata Farms 8→49). Fixed script (P0 presence from page-dimension fetch) flags 2 pages with 0-impression windows: /erie/vista-ridge-erie/ and /loveland/west-loveland/ — URL Inspection verdict PASS, HTTP 200, low-volume fluctuation only. 0 alerts. Totals: 9,139 impressions / 45 clicks (prev 4,591 / 30) — ~2x WoW growth.
+
+*Report generated: 2026-09-10T13:10:00*
