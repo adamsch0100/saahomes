@@ -188,25 +188,32 @@ export default function ListingDetailPage() {
   }, [listing, searchParams, setSearchParams]);
 
   if (error) {
-    return (
-      <div className="max-w-3xl mx-auto px-4 py-24 text-center">
-        <h1 className="text-2xl font-bold text-gray-900">Listing not found</h1>
-        <p className="text-gray-600 mt-3">
-          This property may no longer be active.{" "}
-          <Link to="/properties/" className="underline text-black">
-            Search current listings
-          </Link>{" "}
-          or call us at{" "}
-          <a href="tel:+19709991407" className="underline">
-            (970) 999-1407
-          </a>
-          .
-        </p>
-      </div>
-    );
-  }
+      return (
+        <>
+          <SEO
+            exactTitle="Listing Not Found | SAA Homes"
+            description="This property may no longer be active. Search current Northern Colorado listings or call (970) 999-1407."
+            robots="noindex, nofollow"
+          />
+          <div className="max-w-3xl mx-auto px-4 py-24 text-center">
+            <h1 className="text-2xl font-bold text-gray-900">Listing not found</h1>
+            <p className="text-gray-600 mt-3">
+              This property may no longer be active.{" "}
+              <Link to="/properties/" className="underline text-black">
+                Search current listings
+              </Link>{" "}
+              or call us at{" "}
+              <a href="tel:+19709991407" className="underline">
+                (970) 999-1407
+              </a>
+              .
+            </p>
+          </div>
+        </>
+      );
+    }
 
-  if (!listing) return <PageDetailSkeleton />;
+    if (!listing) return <PageDetailSkeleton />;
 
   const address = listingAddress(listing);
   const fullAddress = listingFullAddress(listing);
@@ -424,7 +431,7 @@ export default function ListingDetailPage() {
       <SEO
         title={`${fullAddress} | ${listing.city} Real Estate | SAA Homes`}
         description={metaDesc.slice(0, 158)}
-        canonicalPath={`/homes-for-sale/${listing.slug}/`}
+        canonical={`https://saahomes.com/homes-for-sale/${listing.slug}/`}
         ogImage={ogImage}
         jsonLd={[listingSchema, breadcrumbSchema]}
       />
