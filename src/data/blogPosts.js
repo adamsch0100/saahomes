@@ -9868,6 +9868,121 @@ export const blogPosts = [
       },
     ],
   },
+  {
+    slug: 'moving-to-fort-collins-colorado-guide',
+    title: 'Moving to Fort Collins, Colorado: A Complete 2026 Guide for Homebuyers | SAA Homes',
+    excerpt: 'Everything you need to know about moving to Fort Collins, CO in 2026 — cost of living, best neighborhoods, Poudre School District, commutes, things to do, and the Fort Collins housing market for relocating buyers and families.',
+    date: '2026-09-10',
+    category: 'Buyer Tips',
+    image: '/images/Fort-Collins-CO-Area-Guide.jpg',
+    readTime: '9 min read',
+    youtubeId: '',
+    keywords: 'moving to Fort Collins Colorado, relocating to Fort Collins CO, Fort Collins cost of living, Fort Collins neighborhoods, Poudre School District, living in Fort Collins CO, things to do in Fort Collins Colorado, Fort Collins housing market 2026, Fort Collins Colorado real estate, best places to live Fort Collins',
+    relatedLinks: [
+      { title: 'Fort Collins Colorado Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data for Fort Collins' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & resources' },
+      { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Grants up to $25K for qualified buyers' },
+      { title: 'Best Neighborhoods in Fort Collins 2026', href: '/blog/best-neighborhoods-fort-collins-2026/', description: 'Deep dive on the city\'s top neighborhoods' },
+      { title: 'Fort Collins Housing Market Mid-2026', href: '/blog/fort-collins-housing-market-mid-2026/', description: 'Current prices, inventory & trends' },
+      { title: 'Moving to Loveland, Colorado', href: '/blog/moving-to-loveland-colorado-guide/', description: 'Compare Fort Collins\' nearest neighbor' },
+      { title: 'Northern Colorado Events Guide', href: '/blog/northern-colorado-events-guide-2026/', description: 'Things to do in Fort Collins and beyond' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
+    ],
+    cta: {
+      title: 'Ready to make Fort Collins your home?',
+      description: 'Adam and Mandi Schwartz have helped dozens of families relocate to Fort Collins. We\'ll help you find the right neighborhood, make sense of the market, and navigate CHFA programs if you qualify. Call (970) 999-1407 or schedule a chat.',
+      primaryHref: '/contact/',
+      primaryText: 'Talk to Adam & Mandi',
+      secondaryHref: '/for-buyers/',
+      secondaryText: 'Explore Buyer Resources',
+    },
+    faqs: [
+      { q: 'Is Fort Collins, Colorado a good place to live?', a: 'Yes. Fort Collins consistently appears on national "best places to live" lists, most recently landing top billing from Livability for its combination of quality of life, outdoor access, and economic stability. Residents enjoy roughly 300 days of sunshine a year, a mile-high lifestyle at the foothills of the Rockies, a thriving Old Town district, and one of the country\'s most bikeable communities. The city combines a strong research university (Colorado State), a diverse economy, and direct access to Horsetooth Reservoir, Poudre Canyon, and Rocky Mountain National Park — which is why households relocate here from across the country every year.' },
+      { q: 'How much do you need to make to live in Fort Collins, Colorado?', a: 'Using the June 2026 median single-family price of approximately $612,000 with a 20% down payment and an illustrative 6.5% mortgage rate, the monthly payment lands near $3,500 including taxes and insurance — which points to roughly $145,000–$160,000 in household income at the typical 28% housing-debt guideline. Buyers who purchase below the median, put more down, or use CHFA down payment assistance programs reduce what they need to earn. Fort Collins is the most expensive city in Northern Colorado, though still meaningfully more affordable than Boulder.' },
+      { q: 'What are the best neighborhoods in Fort Collins for families?', a: 'Old Town offers historic Victorians and new townhomes within walking distance of top restaurants and Fort Collins High School. South Fort Collins — including Fossil Creek, English Ranch, and Ridgewood Hills — features newer construction, large parks, and the highly regarded Fossil Ridge High School. Northwest Fort Collins, including Indian Hills, offers established neighborhoods with bigger lots and Poudre High School. Midtown provides central convenience with Rocky Mountain High School nearby. Each has distinct price bands and school catchments, so the right choice depends on your budget and priorities.' },
+      { q: 'What is Fort Collins known for?', a: 'Fort Collins is known as the craft beer capital of Colorado (the original New Belgium brewery and Odell Brewing both call the city home), for Colorado State University, and for Old Town Square with its 100-plus locally owned shops, restaurants, and breweries. Outdoors, residents point to Horsetooth Reservoir for boating and sunsets, the Cache la Poudre River — Colorado\'s first designated National Wild and Scenic River — and Lory State Park minutes from town. The city also consistently ranks among the most bike-friendly communities in the U.S.' },
+      { q: 'Is Fort Collins liberal or conservative?', a: 'Fort Collins leans liberal. The city has a distinctly progressive, university-influenced culture, and Larimer County has backed Democratic presidential candidates in every election since 2008. That said, Northern Colorado as a whole is politically mixed: nearby Greeley and Weld County skew more conservative, while Fort Collins and Boulder anchor the region\'s progressive wing. Most residents describe the community as welcoming and civically engaged regardless of party.' },
+      { q: 'What school district serves Fort Collins?', a: 'Fort Collins is served by Poudre School District (PSD), one of Colorado\'s largest districts, with four comprehensive high schools in the city: Fort Collins, Rocky Mountain, Poudre, and Fossil Ridge — all well regarded for academics, athletics, and the arts. Two strong tuition-free charter options, Liberty Common and Ridgeview Classical, offer additional choice. PSD participates in Colorado\'s open enrollment policy, allowing families to request a school outside their attendance area subject to capacity, and Colorado State University\'s high school dual enrollment programs are popular with juniors and seniors.' },
+      { q: 'What is the weather like in Fort Collins, Colorado?', a: 'Fort Collins enjoys about 300 days of sunshine and four distinct seasons at 5,003 feet elevation. Summers are warm and dry with highs mostly in the 80s and low 90s. Winters are milder than the Midwest or Northeast, with daytime highs typically in the 40s and roughly 45–50 inches of snowfall a year — much of it melted within days by intense Front Range sun and occasional chinook winds. Spring brings the most volatile weather, including afternoon thunderstorms and occasional hail. Year-round, the strong sun means UV exposure is higher than at sea level.' },
+    ],
+    sections: [
+      {
+        heading: 'Why Fort Collins? The anchor city of Northern Colorado\'s appeal',
+        paragraphs: [
+          'Fort Collins is the largest city in Northern Colorado — home to roughly 170,000 residents — and the region\'s economic, cultural, and educational anchor. Colorado State University provides the city with a steady stream of research jobs, students, and events, while Old Town Square gives it a walkable historic core that most cities its size can only envy. In 2026, Fort Collins again landed on national "best places to live" rankings, and it is easy to see why: the foothills backdrop, 300 days of sunshine, and a bike network that the League of American Bicyclists has rated Platinum.',
+          'But moving to Fort Collins is also a story of tradeoffs. Housing costs more here than in any other Northern Colorado city except Boulder. The June 2026 median single-family price sits near $612,000 — versus roughly $507,000 in Loveland, $430,000 in Greeley, and $585,000 in Windsor. You pay a premium for the university town energy, the Old Town lifestyle, and the cachet. For many relocating households, the question is whether Fort Collins\' quality of life justifies the price, or whether a nearby community delivers most of it for less.',
+          'The honest answer: Fort Collins is the single best fit for buyers who want the region\'s most complete package — top schools, a vibrant downtown, CSU culture, and deep outdoor recreation — and who can afford the entry price. For everyone else, the surrounding towns offer genuine alternatives. This guide walks through what it really costs, where to live, which schools serve which neighborhoods, and how the market is behaving in fall 2026.',
+        ],
+      },
+      {
+        heading: 'Cost of living in Fort Collins: what to expect in 2026',
+        paragraphs: [
+          'Fort Collins\' cost of living runs above the national average and above every other Northern Colorado city except Boulder. Housing is the dominant factor — by a wide margin.',
+          'Here is how the key costs shake out entering fall 2026:',
+          'Median single-family home price: approximately $612,000 (June 2026, per the latest market data — vs Loveland $507,000, Windsor $585,000, Greeley $430,000, Boulder $920,000)',
+          'Median condo/townhome price: approximately $388,000 (the attached-home segment took a sharper correction in spring 2026 and has been rebounding since)',
+          'Average rent (2-bedroom): $1,500–$2,000 per month depending on location, age, and finish level; Old Town and University area units run at the top of that range',
+          'Property taxes: Larimer County effective rates around 0.6% of assessed value — low by national standards, though Colorado\'s 2020 property tax reforms have shifted more of the burden onto newer and higher-valued homes',
+          'Utilities (electric, gas, water, trash): $200–$350 per month, with Fort Collins Utilities one of the region\'s more competitive city-owned providers',
+          'Sales tax: approximately 8% combined state, county, and city rate',
+          'For buyers using financing assistance, the 2026 CHFA down payment assistance programs (grants up to $25,000, including SmartStep Plus) generally work for Fort Collins price points, and Larimer County\'s 2026 CHFA purchase price limits sit within reach of the local median. A 20% down payment on the median home implies roughly $145,000–$160,000 in household income at typical lender guidelines; CHFA programs and lower-priced segments bring that requirement down.',
+        ],
+      },
+      {
+        heading: 'Where to live: Fort Collins neighborhoods for every lifestyle',
+        paragraphs: [
+          'Fort Collins\' neighborhoods break into a few broad personalities: historic and urban, central and convenient, campus-adjacent, and newer family suburbia. The right pick depends on your budget, commute, and whether you want to walk to a brewery or back up to open space.',
+          'Old Town is the historic heart — Victorian homes, brick streets, and cobblestone Old Town Square surrounded by 100-plus restaurants, shops, and craft breweries. Housing spans $350,000 condos to $1.5 million-plus single-family homes, and the neighborhood feeds Putnam Elementary, Lincoln Middle School, and Fort Collins High School. It is unbeatable for walkability and lifestyle, and priced accordingly.',
+          'Midtown fills the band between Old Town and Harmony Road: established post-war ranches, small commercial districts along College Avenue, and easy access to both ends of the city. Homes generally run from the $450,000s into the $700,000s, served by Olander Elementary, Blevins Middle School, and Rocky Mountain High School. Midtown attracts families who want central convenience without the Old Town price tag.',
+          'The University Area around CSU mixes student rentals with owner-occupied bungalows and new infill townhomes. It is the most affordable walkable territory in town — useful for investors, faculty, and young professionals — served by Putnam Elementary, Lincoln Middle School, and Poudre High School. Expect porch concerts on game weekends and a younger demographic.',
+          'South Fort Collins is the city\'s primary family-growth area: newer subdivisions including Fossil Creek, English Ranch, and Ridgewood Hills, most served by the highly regarded Fossil Ridge High School. Home prices run from the $450,000s for townhomes to the $800,000s for larger single-family homes, and the area\'s Harmony Road corridor provides the fastest access to I-25. The $450,000–$550,000 attached-home band in southeast Fort Collins has been the fastest-moving segment in the city.',
+          'Northwest Fort Collins — including Indian Hills and the foothills neighborhoods west of Overland Trail — offers established homes on larger lots, quiet streets, and quick access to Horsetooth Reservoir and open space, served by Bailey Elementary, Webber Middle School, and Poudre High School. The western foothills also hold Fort Collins\' luxury and equestrian properties, from $1 million into the multi-million range.',
+        ],
+      },
+      {
+        heading: 'Poudre School District: what families should know',
+        paragraphs: [
+          'Fort Collins is served by Poudre School District (PSD), one of Colorado\'s largest and most respected districts. It operates more than 40 schools and, within Fort Collins itself, supports four comprehensive high schools — Fort Collins, Rocky Mountain, Poudre, and Fossil Ridge — each with its own academic and athletic identity.',
+          'Fossil Ridge High School, serving the south side, is consistently rated among the top high schools in Northern Colorado for academics and college readiness. Rocky Mountain High School, in Midtown, has a strong reputation for STEM and performing arts. Fort Collins High School anchors the Old Town/northeast side, and Poudre High School serves the northwest, including the Indian Hills area.',
+          'Families also have strong public choice options. Liberty Common and Ridgeview Classical are highly regarded tuition-free charter schools with classical liberal arts curricula. Colorado\'s open enrollment law lets families apply to any PSD school with capacity, regardless of address — early registration for popular schools is strongly recommended.',
+          'Because school catchment boundaries drive home values, relocating families should confirm which school serves a specific address before choosing a neighborhood. Adam and Mandi Schwartz track PSD boundary information for their buyer clients and can walk you through school-by-school options on a personalized tour.',
+        ],
+      },
+      {
+        heading: 'Getting around: commutes, bikes, and the I-25 corridor',
+        paragraphs: [
+          'Fort Collins is a compact, bike-first city: the League of American Bicyclists has rated it Platinum, and the Mason Corridor MAX bus rapid transit line runs the length of the city between Old Town and South College. Most daily errands are easier by bike or on foot than by car, and the Poudre River Trail links miles of paved paths through town.',
+          'For commuters and road-trippers, drive times from central Fort Collins are roughly: Loveland 15–20 minutes (US 287), Boulder 45 minutes (US 287), Denver about an hour and 65 miles via I-25, Denver International Airport about 90 minutes, Cheyenne 45 minutes, and Estes Park/Rocky Mountain National Park about 50 minutes via US 34 through Loveland.',
+          'The I-25 corridor between Fort Collins and Denver carries the region\'s worst congestion, especially the stretch through Loveland and Berthoud on weekday mornings. US 287 offers a slower but steadier alternative, and Northern Colorado Regional Airport in Loveland adds limited commuter service for those who need faster air connections. Most residents simply plan for Denver and DIA trips as hour-plus excursions.',
+        ],
+      },
+      {
+        heading: 'Things to do: Old Town, craft beer, and the outdoors',
+        paragraphs: [
+          'Fort Collins earned its reputation as the craft beer capital of Colorado honestly: the original New Belgium brewery and Odell Brewing both built their national names here, and the city now counts more than 20 breweries within city limits. Old Town Square anchors the scene with locally owned restaurants, galleries, and the historic Northern Hotel, plus year-round events including the Fort Collins Farmers Market (Saturdays, May–October) and NewWestFest each August.',
+          'Outdoors, Horsetooth Reservoir is the city\'s backyard playground — boating, paddleboarding, hiking, and some of the best sunset views on the Front Range, minutes west of town. The Cache la Poudre River, Colorado\'s first designated National Wild and Scenic River, flows out of Poudre Canyon (US 14), a 40-mile scenic corridor for fishing, whitewater rafting, and the legendary Mishawaka Amphitheatre. Lory State Park adds 26 miles of trails at the foot of the foothills.',
+          'CSU brings big-university culture: Division I athletics (the Rams, with basketball at Moby Arena and football at Canvas Stadium), the UCA/The Lincoln Center arts campus, and a full calendar of concerts and lectures. When you want snow, Loveland Ski Area is about 90 minutes west and a dozen more resorts sit within two hours. It is hard to overstate how much of the Colorado lifestyle is accessible from a Fort Collins driveway.',
+        ],
+      },
+      {
+        heading: 'The Fort Collins housing market in fall 2026',
+        paragraphs: [
+          'Fort Collins\' market entering fall 2026 is the most balanced it has been since before the pandemic. The June 2026 median single-family price of approximately $612,000 was a modest 0.7% recovery from April\'s dip and about 2% below the mid-2025 peak. Condos and townhomes rebounded to roughly $388,000 after a sharper spring correction. Days on market averaged 38 for single-family homes — but well-priced homes under $600,000 continue to draw offers within the first two weeks, while upper-tier properties sit longer.',
+          'For buyers relocating to Fort Collins, this is a genuinely better window than 2021–2022: more inventory, no automatic bidding wars, and sellers willing to negotiate on concessions like closing-cost help and rate buydowns. The sweet spot remains the $450,000–$600,000 band, which captures most of the city\'s sales volume. CHFA down payment assistance of up to $25,000 (2026 programs) remains available to qualified buyers, and Fort Collins prices sit within Larimer County CHFA limits.',
+          'The region around Fort Collins tells the same stabilizing story with different prices: Loveland at roughly $507,000, Windsor at $585,000, and Greeley holding the affordability anchor near $430,000. Barnstorming home values and 48-hour offers are not coming back — pricing accuracy, condition, and presentation drive outcomes now, which rewards working with an agent who tracks micro-neighborhoods weekly.',
+        ],
+      },
+      {
+        heading: 'How SAA Homes helps you move to Fort Collins',
+        paragraphs: [
+          'Moving to a new city comes with a long list of questions: Which neighborhood fits my lifestyle? Are the schools really what the ratings say? Will my budget work in this market? Do I qualify for CHFA down payment assistance? Adam and Mandi Schwartz at SAA Homes answer those questions every day for families relocating to Fort Collins and across Northern Colorado.',
+          'With more than 20 years of combined local real estate experience, Adam and Mandi know Fort Collins block by block — from Victorian gems in Old Town to the fastest-moving townhome pockets in southeast Fort Collins to foothills acreage in the northwest. They track micro-neighborhood pricing weekly, maintain current PSD school catchment knowledge, and stay current on CHFA program eligibility for Larimer County buyers.',
+          'The relocation process at SAA Homes starts with a no-obligation conversation about what you are looking for, your timeline, and your financing options. We provide custom neighborhood tours, current market data, and CHFA program guidance — all before you have to commit to anything.',
+          'Call (970) 999-1407 to start your Fort Collins relocation conversation, or visit our buyer resources page to learn more about homes, financing, and what to expect when buying in Northern Colorado.',
+        ],
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug) {
