@@ -9358,7 +9358,7 @@ export const blogPosts = [
     category: 'Market Update',
     image: '/images/northern-colorado-market-update-september-2026.jpg',
     readTime: '7 min read',
-    youtubeId: '',
+    youtubeId: 'ISkTp0N7h7E',
     keywords: 'Northern Colorado housing market September 2026, Fort Collins home prices fall 2026, Loveland real estate trends, Windsor CO housing market, Greeley home prices, Larimer County market update early fall 2026, Northern Colorado real estate September 2026',
     relatedLinks: [
       { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },

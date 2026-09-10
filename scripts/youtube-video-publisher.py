@@ -963,19 +963,64 @@ def get_blog_post_by_slug(slug):
         if not match:
             return None
 
-        # Get everything from the start of this post object to the slug
-        # Find the opening brace closest to and before the slug
+        # Get everything from the start of this post object to the slug.
+        # Find the opening brace closest to and before the slug.
         post_start = posts_text.group(1).rfind("{", 0, match.start())
         if post_start == -1:
             return None
 
-        post_text = posts_text.group(1)[post_start:]
+        # Bound the post block with a balanced-brace scan (string-aware) so we
+        # do NOT capture later posts in the array (they have their own titles,
+        # excerpts, and sections that would corrupt this post's video).
+        def find_post_end(text, start_idx):
+            depth = 0
+            in_str = False
+            str_char = None
+            i = start_idx
+            while i < len(text):
+                ch = text[i]
+                prev = text[i-1] if i > 0 else ''
+                if in_str:
+                    if ch == str_char and prev != '\\':
+                        in_str = False
+                else:
+                    if ch in ("'", '"'):
+                        in_str = True
+                        str_char = ch
+                    elif ch == '{':
+                        depth += 1
+                    elif ch == '}':
+                        depth -= 1
+                        if depth == 0:
+                            return i + 1
+                i += 1
+            return len(text)
+
+        post_end = find_post_end(posts_text.group(1), post_start)
+        post_text = posts_text.group(1)[post_start:post_end]
+
+        def unescape_js(value):
+            """Decode JS string escapes (\\uXXXX, \\', \\\", \\\\) to real chars."""
+            value = re.sub(r'\\u([0-9a-fA-F]{4})', lambda m: chr(int(m.group(1), 16)), value)
+            value = value.replace('\\"', '"').replace("\\'", "'").replace('\\\\', '\\')
+            return value
 
         # Extract fields from the post text
         def extract_field(name, text):
-            """Extract a single-quoted field value, handling escaped quotes."""
-            p = re.search(rf"{name}:\s*'((?:[^'\\]|\\.)*)'", text)
-            return p.group(1) if p else ""
+            """Extract a field value, handling single- or double-quoted strings.
+            Picks the EARLIEST occurrence of `name:` so double-quoted fields
+            (e.g. titles containing unicode escapes) are not skipped in favor of
+            later single-quoted fields like relatedLinks titles."""
+            pats = [
+                rf"{name}:\s*'((?:[^'\\]|\\.)*)'",
+                rf'{name}:\s*"((?:[^"\\]|\\.)*)"',
+            ]
+            best = None
+            for pat in pats:
+                m = re.search(pat, text)
+                if m and (best is None or m.start() < best[0]):
+                    best = (m.start(), m.group(1))
+            return unescape_js(best[1]) if best else ""
 
         title = extract_field("title", post_text)
         excerpt = extract_field("excerpt", post_text)
@@ -986,16 +1031,16 @@ def get_blog_post_by_slug(slug):
 
         # Extract sections (headings + first paragraph of each)
         sections = []
-        # Find all section blocks within this post
-        section_pattern = r"\{\s*heading:\s*'([^']*)'[\s\S]*?paragraphs:\s*\[([^\]]*)\]"
+        # Find all section blocks within this post (single OR double quoted headings)
+        section_pattern = r"\{\s*heading:\s*(['\"])((?:[^'\"\\]|\\.)*?)\1[\s\S]*?paragraphs:\s*\[([^\]]*)\]"
         for sec_match in re.finditer(section_pattern, post_text):
-            heading = sec_match.group(1)
-            para_text = sec_match.group(2)
-            # Get first paragraph
+            heading = unescape_js(sec_match.group(2))
+            para_text = sec_match.group(3)
+            # Get first paragraph (either quote style)
             first_para = ""
-            para_match = re.search(r"'((?:[^'\\]|\\.)*)'", para_text)
+            para_match = re.search(r"(['\"])(.*?)\1", para_text, re.DOTALL)
             if para_match:
-                first_para = para_match.group(1)[:200]
+                first_para = unescape_js(para_match.group(2))[:200]
             if heading:
                 sections.append({"heading": heading, "paragraphs": [first_para] if first_para else []})
 
