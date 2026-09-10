@@ -34,6 +34,18 @@ const BUYER_FAQS = [
     q: 'What grants and programs are available for first-time homebuyers in Colorado?',
     a: 'Colorado\'s main funding source for first-time buyers is CHFA (Colorado Housing and Finance Authority), which offers down payment assistance through SmartStep & SmartStep Plus (grant or second mortgage on FHA/VA/USDA loans), Preferred & Preferred Plus (conventional up to 97% LTV), FirstStep & FirstStep Plus (FHA for first-time buyers, veterans, or targeted areas), and FirstGeneration & FirstGeneration Plus (up to $25,000 for first-generation buyers). CHFA\'s no-repayment grant adds up to $25,000 or 3% of the first mortgage on eligible programs. Beyond CHFA, look at the CHFA Schools To Home program for educators, Greeley\'s G-HOPE forgivable assistance ($2,500\u2013$8,000 by zone), and USDA or VA zero-down loans for qualifying buyers. Income limits, purchase price caps, and credit requirements vary by county and loan type, so SAA Homes verifies current program details with CHFA-approved lenders before you apply.'
   },
+  {
+    q: 'What is the 3-3-3 rule for buying a house?',
+    a: 'The 3-3-3 rule is a popular home-buying affordability guideline with a few common versions. The most widely used version suggests aiming for a home price around 3x your gross annual income, planning a down payment of at least 3%, and keeping about 3 months of mortgage payments in reserve after closing. Other versions reference 3 months of living expenses saved, 3 months of mortgage payments in reserve, and evaluating at least 3 homes before deciding. It is a budgeting starting point, not a lender requirement — in Northern Colorado, CHFA down payment assistance can effectively reduce the 3% down hurdle for qualified buyers, and a pre-approval from a local lender gives you real numbers for your budget. Schwartz and Associates can connect you with lenders who specialize in Colorado first-time buyer programs.'
+  },
+  {
+    q: 'What credit score do I need to buy a home in Colorado?',
+    a: 'Credit requirements depend on the loan type. FHA loans allow scores as low as 580 with 3.5% down; conventional loans typically require 620 or higher; VA and USDA loans have no official minimum set by the agencies, but most lenders look for 580\u2013640. For CHFA down payment assistance programs, CHFA requires a minimum mid-credit score of 620 for most programs (per chfainfo.com), with some FHA-based programs available to borrowers with no credit score, and lenders may add their own overlays. The best way to know your number is a pre-approval — SAA Homes works with local lenders who can check your credit and match you with the right program.'
+  },
+  {
+    q: 'What are the CHFA income limits for Larimer, Weld, or Boulder County?',
+    a: 'CHFA income limits are set by county, household size, and whether the home is in a designated targeted area. For reference, mid-2026 non-targeted ranges are approximately $130,000\u2013$156,000+ in Larimer County (Fort Collins, Loveland, Wellington, Timnath) and approximately $153,600\u2013$179,200 in Weld County (Greeley, Windsor, Eaton, Milliken), with higher limits in targeted areas and generally higher limits in Boulder County. Purchase price caps also apply by county. CHFA updates these limits periodically, so Schwartz and Associates verifies the current limits for your specific household with CHFA-approved lenders before you apply. Call (970) 999-1407 to check your eligibility.'
+  },
 ];
 
 const SELLER_FAQS = [
