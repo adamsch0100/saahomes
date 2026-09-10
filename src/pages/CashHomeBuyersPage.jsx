@@ -1,7 +1,43 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
+import AreaFAQSection from "../components/AreaFAQSection.jsx";
 import { BUSINESS, formatBusinessAddress } from "../utils/seoConstants";
+
+const CASH_FAQS = [
+  {
+    q: 'How does selling my home for cash work?',
+    a: 'You submit your property details, receive a no-obligation cash offer within 24 hours, and can close in as little as 7–14 days. No repairs, no showings, no agent commissions. SAA Homes connects you with vetted cash buyers or helps you evaluate whether a traditional listing would net you more.',
+  },
+  {
+    q: 'Will I get less selling for cash vs listing traditionally?',
+    a: 'Cash offers are typically below full market value because the buyer takes on the risk and convenience of an as-is, no-contingency purchase. However, when you factor in avoided repairs, no carrying costs during a 30–60 day listing period, and zero commission, the net difference is often smaller than sellers expect. SAA Homes will show you both paths so you can choose what is right for your situation.',
+  },
+  {
+    q: 'Can SAA Homes help me find flip properties as a cash buyer?',
+    a: 'Yes. SAA Homes works with cash buyers, real estate investors, and house flippers across Northern Colorado. We can set you up with off-market leads, connect you with fix-and-flip opportunities, and help you build a portfolio in Fort Collins, Loveland, Windsor, Greeley, and all 27 Front Range communities we serve.',
+  },
+  {
+    q: 'What cities do you cover for cash home buying?',
+    a: 'We serve all of Northern Colorado including Fort Collins, Loveland, Windsor, Greeley, Timnath, Wellington, Berthoud, Johnstown, Severance, Firestone, Frederick, Longmont, Boulder, Eaton, Evans, Milliken, Mead, La Salle, Niwot, Erie, Brighton, Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue, and Carbon Valley. Each area has its own market dynamics and cash buyer demand.',
+  },
+  {
+    q: 'Do I have to sell for cash, or can I list with SAA Homes instead?',
+    a: 'Both options are available. Many sellers come to us for a quick cash offer and end up choosing a traditional listing once they see what their home could command on the open market. There is no obligation either way — we will give you honest advice based on your home\'s condition, your timeline, and your financial goals.',
+  },
+  {
+    q: 'How fast can I sell my house for cash in Fort Collins?',
+    a: 'In Fort Collins, a cash sale can close in as little as 7–14 days — no repairs, no showings, no agent commissions. SAA Homes connects Fort Collins sellers with vetted cash buyers who purchase as-is, and we can also show you what your home would likely bring in a traditional listing so you can compare both paths. Call (970) 999-1407 for a no-obligation cash offer on your Fort Collins home.',
+  },
+  {
+    q: 'Can I sell my house for cash in Windsor or Loveland?',
+    a: 'Yes — we arrange vetted all-cash buyers in Windsor, Loveland, and every Northern Colorado community we serve. Whether it\'s a Windsor family home near Windsor Lake or a Loveland property along the I-25 corridor, cash buyers purchase as-is and can close in 7–14 days. We will give you an honest comparison of a cash offer versus a traditional listing in your specific market.',
+  },
+  {
+    q: 'Does SAA Homes help with cash sales in Greeley and other Weld County cities?',
+    a: 'Yes. Greeley, Timnath, Johnstown, Severance, Eaton, Evans, Milliken, Mead, Firestone, and Frederick sellers can all get a no-obligation cash offer through SAA Homes\' vetted cash buyer network. Weld County markets often have strong investor demand, which means competitive cash offers — especially in Greeley\'s sub-$450,000 price bands. Call (970) 999-1407 to start.',
+  },
+];
 
 const CITIES = [
   { name: "Fort Collins", slug: "fort-collins", tag: "CSU and Old Town" },
@@ -235,48 +271,14 @@ export default function CashHomeBuyersPage() {
           {
             "@context": "https://schema.org",
             "@type": "FAQPage",
-            mainEntity: [
-              {
-                "@type": "Question",
-                name: "How does selling my home for cash work?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "You submit your property details, receive a no-obligation cash offer within 24 hours, and can close in as little as 7–14 days. No repairs, no showings, no agent commissions. SAA Homes connects you with vetted cash buyers or helps you evaluate whether a traditional listing would net you more.",
-                },
+            mainEntity: CASH_FAQS.map((faq) => ({
+              "@type": "Question",
+              name: faq.q,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: faq.a,
               },
-              {
-                "@type": "Question",
-                name: "Will I get less selling for cash vs listing traditionally?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "Cash offers are typically below full market value because the buyer takes on the risk and convenience of an as-is, no-contingency purchase. However, when you factor in avoided repairs, no carrying costs during a 30–60 day listing period, and zero commission, the net difference is often smaller than sellers expect. SAA Homes will show you both paths so you can choose what is right for your situation.",
-                },
-              },
-              {
-                "@type": "Question",
-                name: "Can SAA Homes help me find flip properties as a cash buyer?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "Yes. SAA Homes works with cash buyers, real estate investors, and house flippers across Northern Colorado. We can set you up with off-market leads, connect you with fix-and-flip opportunities, and help you build a portfolio in Fort Collins, Loveland, Windsor, Greeley, and all 27 Front Range communities we serve.",
-                },
-              },
-              {
-                "@type": "Question",
-                name: "What cities do you cover for cash home buying?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "We serve all of Northern Colorado including Fort Collins, Loveland, Windsor, Greeley, Timnath, Wellington, Berthoud, Johnstown, Severance, Firestone, Frederick, Longmont, Boulder, Eaton, Evans, Milliken, Mead, La Salle, Niwot, Erie, Brighton, Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue, and Carbon Valley. Each area has its own market dynamics and cash buyer demand.",
-                },
-              },
-              {
-                "@type": "Question",
-                name: "Do I have to sell for cash, or can I list with SAA Homes instead?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "Both options are available. Many sellers come to us for a quick cash offer and end up choosing a traditional listing once they see what their home could command on the open market. There is no obligation either way — we will give you honest advice based on your home's condition, your timeline, and your financial goals.",
-                },
-              },
-            ],
+            })),
           },
         ]}
       />
@@ -609,6 +611,9 @@ export default function CashHomeBuyersPage() {
           </div>
         </div>
       </section>
+
+      {/* FAQ Section — GEO target for fast-sale queries */}
+      <AreaFAQSection faqs={CASH_FAQS} city="selling your home fast" />
     </>
   );
 }

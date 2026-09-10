@@ -14,6 +14,7 @@ import { neighborhoods } from '../src/data/neighborhoods.js';
 import { blogPosts } from '../src/data/blogPosts.js';
 import { AREA_FAQS } from '../src/data/areaFaqs.js';
 import { BUYER_FAQS, SELLER_FAQS } from '../src/data/buyerSellerFaqs.js';
+import { CONTACT_FAQS } from '../src/data/contactFaqs.js';
 import { CHFA_PAGE_CONFIGS, CHFA_PROGRAMS, CHFA_STEPS, CHFA_DPA_OPTIONS, CHFA_REQUIREMENTS, CHFA_COUNTY_LIMITS, CHFA_SPECIALTY_PROGRAMS } from '../src/data/chfaData.js';
 import { getAllEvents, getCityDisplayName, getMonthNames, getEventsGuidePath, EVENTS_DATA_LAST_REVIEWED } from '../src/data/localEvents.js';
 import { LUXURY_HUB_FAQS } from '../src/data/luxuryMarket.js';
@@ -57,6 +58,12 @@ const CASH_BUYER_FAQS = [
     a: 'Yes. SAA Homes works with cash buyers, real estate investors, and house flippers across Northern Colorado. We can set you up with off-market leads, connect you with fix-and-flip opportunities, and help you build a portfolio in all 27 Front Range communities we serve.' },
   { q: 'Do I have to sell for cash, or can I list with SAA Homes instead?',
     a: 'Both options are available. Many sellers come to us for a quick cash offer and end up choosing a traditional listing once they see what their home could command on the open market. There is no obligation either way — we will give you honest advice based on your home\'s condition, your timeline, and your financial goals.' },
+  { q: 'How fast can I sell my house for cash in Fort Collins?',
+    a: 'In Fort Collins, a cash sale can close in as little as 7–14 days — no repairs, no showings, no agent commissions. SAA Homes connects Fort Collins sellers with vetted cash buyers who purchase as-is, and we can also show you what your home would likely bring in a traditional listing so you can compare both paths. Call (970) 999-1407 for a no-obligation cash offer on your Fort Collins home.' },
+  { q: 'Can I sell my house for cash in Windsor or Loveland?',
+    a: 'Yes — we arrange vetted all-cash buyers in Windsor, Loveland, and every Northern Colorado community we serve. Whether it\'s a Windsor family home near Windsor Lake or a Loveland property along the I-25 corridor, cash buyers purchase as-is and can close in 7–14 days. We will give you an honest comparison of a cash offer versus a traditional listing in your specific market.' },
+  { q: 'Does SAA Homes help with cash sales in Greeley and other Weld County cities?',
+    a: 'Yes. Greeley, Timnath, Johnstown, Severance, Eaton, Evans, Milliken, Mead, Firestone, and Frederick sellers can all get a no-obligation cash offer through SAA Homes\' vetted cash buyer network. Weld County markets often have strong investor demand, which means competitive cash offers — especially in Greeley\'s sub-$450,000 price bands. Call (970) 999-1407 to start.' },
 ];
 
 const LUXURY_FAQS = LUXURY_HUB_FAQS;
@@ -1225,6 +1232,7 @@ const MONEY_PAGE_CONTENT = {
       title: 'We Look Forward To Hearing From You',
       text: 'Call (970) 999-1407, email us, or stop by 3665 John F Kennedy Parkway, Suite 210, Fort Collins, CO 80525. Let Schwartz and Associates guide your Northern Colorado real estate journey.',
     },
+    faqs: CONTACT_FAQS,
   },
   '/properties/': {
     sections: [
