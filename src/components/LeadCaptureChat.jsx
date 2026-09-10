@@ -223,6 +223,7 @@ export default function LeadCaptureChat() {
     if (isOpen && messages.length === 0) {
       const greetings = {
         chfa: "Hi! 👋 I'm Nadia, your SAA Homes real estate assistant. Looking into down payment assistance? I can help you figure out which CHFA program fits your situation — SmartStep, Schools to Home, Champions, or G-HOPE. What questions can I answer?",
+        nurse: "Hi! 👋 I'm Nadia, your SAA Homes real estate assistant. Looking into nurse home loan options? School nurses can qualify for CHFA Schools To Home — up to 25% down payment assistance — and hospital or clinical nurses can use standard CHFA grants and deferred loans up to $25,000. What would you like to know?",
         buyer: "Hey there! 🏡 Thinking about buying a home in Northern Colorado? Whether you're just starting to explore or ready to look at specific neighborhoods, I'm here to help. What are you looking for?",
         seller: "Hi! 📈 Thinking of selling? I can walk you through what your home might be worth in today's market and how our team approaches marketing. What's your timeline looking like?",
         luxury: "Hello — I'm Nadia. I can help with $1M+ homes across Northern Colorado: current listings, neighborhoods, or a private conversation with Adam and Mandi. What would you like to know?",
@@ -233,7 +234,8 @@ export default function LeadCaptureChat() {
       if (hasLead) {
         greeting = "Good to see you again! 👋 I'm Nadia. Want to check on your saved searches, or do you have questions about this area? I can help — and I can set up new alerts from chat if you describe what you're looking for.";
       } else if (/luxury-real-estate/.test(path)) greeting = greetings.luxury;
-      else if (/chfa|dpa|champions|g-hope|greeley/.test(path)) greeting = greetings.chfa;
+      else if (/nurse|nursing|healthcare/.test(path)) greeting = greetings.nurse;
+      else if (/chfa|dpa|champions|g-hope|greeley|police|officer|first-responder|veteran/.test(path)) greeting = greetings.chfa;
       else if (/for-buyers|buying/.test(path)) greeting = greetings.buyer;
       else if (/for-sellers|sell/.test(path)) greeting = greetings.seller;
       else {
