@@ -26,6 +26,10 @@ const BUYER_FAQS = [
     q: 'What should I know about relocating to Northern Colorado?',
     a: 'Relocating to Northern Colorado offers access to outdoor recreation, strong schools, growing job markets, and a high quality of life across 27 distinct communities. Start by researching cities that match your lifestyle — Fort Collins for urban amenities and CSU culture, Loveland for arts and affordability, Windsor for family-friendly neighborhoods with top schools, and Greeley for more affordable options near UNC. The housing market is competitive in desirable areas, so getting pre-approved before your search is essential. CHFA down payment assistance programs are available statewide for qualified buyers. Schwartz and Associates can help you compare cities, find neighborhoods that fit your budget and commute needs, and coordinate with lenders who understand relocation timelines. Call (970) 999-1407 for personalized guidance.'
   },
+  {
+    q: 'How do I find the best realtor in Northern Colorado?',
+    a: 'The best realtor for you is one with deep Northern Colorado market knowledge, verifiable local results, and a communication style that fits yours. Start by comparing agents across the markets you care about — Fort Collins, Loveland, Windsor, Greeley — review their recent sales and client feedback, and interview two or three before committing. Ask how they price homes, how they market listings, and whether they regularly work with CHFA and first-time buyer programs. Schwartz and Associates brings over 20 years of combined local expertise, verified 5.0-star client reviews, and coverage across all 27 Northern Colorado communities. Call (970) 999-1407 for a no-pressure conversation to see if we are the right fit.'
+  },
 ];
 
 const SELLER_FAQS = [

@@ -124,10 +124,14 @@ export const CHFA_FAQS = [
     a: "Every CHFA loan - including all down payment assistance options on this page - is originated through a CHFA participating lender; you cannot apply directly through CHFA. CHFA publishes the official lender list at chfainfo.com under Participating Lenders. Interview two or three lenders, ask which CHFA program fits your income and credit profile, and get pre-approved before serious house hunting. SAA Homes works alongside Northern Colorado CHFA lenders regularly and can help you time your search around pre-approval. Call (970) 999-1407 to get started.",
   },
   {
-    q: 'How do I apply for CHFA down payment assistance?',
-    a: 'Start by contacting a CHFA Participating Lender — not CHFA directly. Complete homebuyer education, get pre-approved, then work with a REALTOR® to find a home within program limits. SAA Homes can guide your Northern Colorado search while your lender handles CHFA program details.',
-  },
-];
+      q: 'How do I apply for CHFA down payment assistance?',
+      a: 'Start by contacting a CHFA Participating Lender — not CHFA directly. Complete homebuyer education, get pre-approved, then work with a REALTOR® to find a home within program limits. SAA Homes can guide your Northern Colorado search while your lender handles CHFA program details.'
+    },
+    {
+      q: 'What is the biggest negative when using CHFA down payment assistance?',
+      a: 'The main tradeoffs are the mortgage rate and the repayment terms. CHFA first mortgages can carry a slightly higher interest rate than a conventional loan without assistance, and the DPA second mortgage must be repaid when you sell, refinance, pay off the first mortgage, or move out. CHFA income and purchase price limits also narrow your home search, and every CHFA loan requires approved homebuyer education plus a $1,000 minimum borrower contribution. For most buyers the math still works — up to $25,000 in assistance usually outweighs a modest rate premium, especially for first-time buyers with limited savings. Your CHFA participating lender provides a full cost comparison before you commit.'
+    },
+  ];
 
 export const CHFA_COUNTY_LIMITS = [
   {
