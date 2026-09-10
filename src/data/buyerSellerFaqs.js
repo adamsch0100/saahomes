@@ -30,6 +30,10 @@ const BUYER_FAQS = [
     q: 'How do I find the best realtor in Northern Colorado?',
     a: 'The best realtor for you is one with deep Northern Colorado market knowledge, verifiable local results, and a communication style that fits yours. Start by comparing agents across the markets you care about — Fort Collins, Loveland, Windsor, Greeley — review their recent sales and client feedback, and interview two or three before committing. Ask how they price homes, how they market listings, and whether they regularly work with CHFA and first-time buyer programs. Schwartz and Associates brings over 20 years of combined local expertise, verified 5.0-star client reviews, and coverage across all 27 Northern Colorado communities. Call (970) 999-1407 for a no-pressure conversation to see if we are the right fit.'
   },
+  {
+    q: 'What grants and programs are available for first-time homebuyers in Colorado?',
+    a: 'Colorado\'s main funding source for first-time buyers is CHFA (Colorado Housing and Finance Authority), which offers down payment assistance through SmartStep & SmartStep Plus (grant or second mortgage on FHA/VA/USDA loans), Preferred & Preferred Plus (conventional up to 97% LTV), FirstStep & FirstStep Plus (FHA for first-time buyers, veterans, or targeted areas), and FirstGeneration & FirstGeneration Plus (up to $25,000 for first-generation buyers). CHFA\'s no-repayment grant adds up to $25,000 or 3% of the first mortgage on eligible programs. Beyond CHFA, look at the CHFA Schools To Home program for educators, Greeley\'s G-HOPE forgivable assistance ($2,500\u2013$8,000 by zone), and USDA or VA zero-down loans for qualifying buyers. Income limits, purchase price caps, and credit requirements vary by county and loan type, so SAA Homes verifies current program details with CHFA-approved lenders before you apply.'
+  },
 ];
 
 const SELLER_FAQS = [
@@ -56,6 +60,10 @@ const SELLER_FAQS = [
   {
     q: 'Can I sell my house fast in Northern Colorado?',
     a: 'Yes. Homes in desirable Northern Colorado neighborhoods that are priced correctly and well-presented often sell within 14–30 days, especially in Fort Collins, Loveland, and Windsor. To sell quickly: price competitively based on a Comparative Market Analysis, declutter and stage your home, make minor repairs, and use professional photography. If you need to sell immediately — due to relocation, financial pressure, or an inherited property — ask about our cash buyer network which can close in as little as 7–14 days with no repairs or showings required. Schwartz and Associates provides honest guidance on whether a fast cash sale or traditional listing will net you more. Call (970) 999-1407 for a free consultation.'
+  },
+  {
+    q: 'Is it a good time to sell a house in Colorado right now?',
+    a: 'Northern Colorado in late 2026 is a more balanced market than the post-pandemic years, and the sellers who win are the ones who price accurately. Inventory has grown in most cities — Loveland active listings were up about 14% in July 2026 — and days on market have lengthened above each market\'s premium tier, but medians remain solid: Fort Collins near $610,000, Loveland near $510,000 (+3.6% year-over-year), Windsor near $588,000 (+2.1%), and Greeley near $432,000. The September 2026 Federal Reserve rate cut has also brought more first-time buyers back, especially to well-priced homes in each city\'s most active price segment. Whether now is right for you depends on your equity, timeline, and next step — request a free market analysis and SAA Homes will show you current comparable sales, expected days on market, and a net-sheet estimate for your specific home.'
   },
 ];
 

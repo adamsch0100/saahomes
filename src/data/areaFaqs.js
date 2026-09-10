@@ -139,6 +139,10 @@ const AREA_FAQS = {
       a: 'Greeley offers some of the most affordable home prices in Northern Colorado, with single-family homes typically ranging from $375,000 to $500,000. The lower price point compared to Larimer County makes Greeley an attractive entry point for first-time buyers and investors while still providing access to the broader Northern Colorado economy.'
     },
     {
+      q: 'Are house prices dropping in Greeley?',
+      a: 'No — Greeley home prices are holding steady, not dropping. The July 2026 median sale price was approximately $432,000, essentially flat year-over-year, keeping Greeley Northern Colorado\'s most affordable major market. Move-in-ready homes under $400,000 are the fastest-moving segment in the region, often going under contract within 10–14 days, while west Greeley new construction continues to offer builder incentives. First-time buyer demand — including CHFA and Greeley\'s G-HOPE forgivable assistance of up to $8,000 — keeps well-priced inventory moving.'
+    },
+    {
       q: 'Is Greeley a good place to live?',
       a: 'Greeley is one of the fastest-growing cities in Colorado, offering a strong economy anchored by the University of Northern Colorado, Banner Health medical centers, and a thriving agriculture sector. The city has invested heavily in downtown revitalization, with new restaurants, breweries, and cultural venues. Recent years have seen significant population growth as buyers seek more affordable alternatives to Fort Collins and Boulder.'
     },
