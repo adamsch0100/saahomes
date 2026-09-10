@@ -5,6 +5,9 @@ import { submitContactForm } from "../utils/api.js";
 import { withLeadMetadata } from "../utils/leadTracking.js";
 import { openNadiaChat } from "../utils/nadiaChat.js";
 import { BUSINESS } from "../utils/seoConstants.js";
+import AreaFAQSection from "../components/AreaFAQSection.jsx";
+import { CONTACT_FAQS } from "../data/contactFaqs.js";
+import { buildFaqPageSchema } from "../data/moneyPageFaqs.js";
 
 const NADIA_CONTACT_MESSAGE =
   "Hi! I have a question about buying/selling in Northern Colorado — can you help?";
@@ -61,6 +64,7 @@ export default function ContactPage() {
         keywords="contact SAA Homes, contact realtor Fort Collins, Northern Colorado real estate contact, Schwartz and Associates phone, real estate inquiry Fort Collins"
         canonical="https://saahomes.com/contact/"
         includeLocalBusiness={true}
+        jsonLd={[buildFaqPageSchema(CONTACT_FAQS)].filter(Boolean)}
       />
 
       {/* Hero Section */}
@@ -295,6 +299,9 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+
+      {/* FAQ Section — GEO target for contact queries */}
+      <AreaFAQSection faqs={CONTACT_FAQS} city="contacting SAA Homes" />
     </>
   );
 }
