@@ -3826,6 +3826,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.305', longitude: '-105.045' },
     metaDescription: 'Berthoud Prairie - affordable new construction in east Berthoud with mountain views. SAA Homes.',
     keywords: 'Berthoud Prairie, Berthoud new construction, east Berthoud homes, affordable Berthoud real estate',
+    youtubeId: 'uiMu6F50KqY',
     neighborhoodHighlights: [
       { title: 'Newer homes', description: 'Modern energy-efficient homes at some of Berthoud most accessible prices.' },
       { title: 'Mountain views', description: 'East Berthoud location offers panoramic Front Range vistas.' },
@@ -3860,6 +3861,7 @@ export const neighborhoods = [
     walkScore: 32,
     metaDescription: 'Berthoud Vista real estate - newer Berthoud subdivision with mountain views and I-25 access in southwest Berthoud. SAA Homes.',
     keywords: 'Berthoud Vista, Berthoud Colorado homes, southwest Berthoud, Berthoud subdivisions, Berthoud new construction, mountain view homes Berthoud, I-25 Berthoud, Berthoud real estate, family homes Berthoud',
+    youtubeId: 'iavdEfXnE2Y',
     neighborhoodHighlights: [
       { title: 'Mountain views', description: 'Many homes in Berthoud Vista capture panoramic views of Longs Peak and the Front Range.' },
       { title: 'Convenient location', description: 'Close to downtown Berthoud, I-25, and Berthoud High School - a central Northern Colorado location.' },
@@ -3894,6 +3896,7 @@ export const neighborhoods = [
     walkScore: 45,
     metaDescription: 'Sierra Addition Berthoud real estate - walkable downtown Berthoud neighborhood with mid-century homes and small-town charm. SAA Homes.',
     keywords: 'Sierra Addition Berthoud, downtown Berthoud homes, Berthoud historic neighborhood, Main Street Berthoud, walkable Berthoud, established Berthoud neighborhoods, mid-century homes Berthoud, Berthoud small-town living',
+    youtubeId: '0VQPRn1sUvQ',
     neighborhoodHighlights: [
       { title: 'Walk to Main Street', description: 'Berthoud\'s historic Main Street with restaurants, breweries, and shops - all within walking distance.' },
       { title: 'Established character', description: 'Mature trees and a mix of mid-century ranches and newer homes in a classic small-town setting.' },
