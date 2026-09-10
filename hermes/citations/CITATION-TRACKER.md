@@ -12,7 +12,7 @@
 | **Telegraph** | ✅ working | — | 2026-08-25 | API works consistently. Used extensively for city guide backlinks. |
 | **Paste.rs** | ✅ working | — | 2026-07-16 | Simple pastebin-style posting works. |
 | **GitHub (repo data files)** | ✅ working | — | 2026-09-08 | Classic PAT with `repo` scope pushes data files with branded links. Runs consistently. |
-| **iBegin.com** | ❌ blocked | — | 2026-09-08 | Cloudflare Turnstile on login page. Account exists (saahomes) but login unreachable from this IP even with browser. Needs residential proxy. |
+| **iBegin.com** | ❌ blocked | — | 2026-09-10 | Cloudflare Turnstile on login page. Account exists (saahomes) but login unreachable from this IP even with browser. Stealth Playwright documented to FAIL here (Aug 26). Re-verified "Just a moment..." at curl level 2026-09-10. Needs residential proxy. |
 | **WhereOrg.com** | ❌ blocked | — | 2026-09-04 | Main page clears with stealth Playwright but AJAX category/city autocomplete returns CF 403. NAP + state + captcha automatable; category is the blocker. |
 
 ## Dead / Permanently Blocked
@@ -47,6 +47,32 @@
 | Pinterest | ❌ blocked | Requires birthdate; OAuth |
 | Medium | ❌ blocked | CF block on signup |
 | Alignable | ❌ blocked | reCAPTCHA on signup |
+
+## Re-verification sweep — 2026-09-10 cron (native-browser + email-confirm brief)
+
+Target list from the cron brief re-probed live from this box (52.52.175.248).
+Every platform was checked at its actual signup/submit URL, not the homepage.
+Presence scan (web_search): **no existing SAA listing on any reachable platform**
+(no dupe risk). The only "Schwartz & Associates" hit is a Gurley, AL attorney
+on misterwhat — known name-collision noise, not SAA.
+
+| Platform | Live probe 2026-09-10 | Verdict (unchanged) |
+|----------|----------------------|---------------------|
+| fyple.biz/register | 200, body contains "outside Australia" | ❌ AU geo-gate |
+| signup.uscity.net | 200; account exists (created earlier today), no creds stored | ⚠️ $29.99 fee gate — needs Adam decision |
+| freelistingusa.com/register | 403 | ❌ Turnstile/IP block |
+| opendi.com/listing/create | 404; homepage = "Opendi International AG" corporate portal | ❌ no self-serve listing path |
+| b2blistings.org free form | 200 | ⚠️ integrity gate — no real-estate category |
+| lacartes.com/register | 000 connection timeout | ❌ unreachable |
+| magicyellow.com | title "Parked Domain \| easyDNS" | 🗑️ dead |
+| misterwhat.com/ClaimYourBusiness | Turnstile markers in body | ❌ Turnstile interstitial |
+| threebestrated.com/submit-business | 200; NAP + Step-2 answers ready in `hermes/scripts/threebestrated_submit.py` | ⚠️ needs_human: reCAPTCHA v2 + CO license # (still not in repo) + real reviews |
+| ibegin.com/login | title "Just a moment..." | ❌ CF interstitial; stealth FAILS here (Aug 26); creds exist, login impossible from this IP |
+
+**Result:** 0 built / 0 verified. 10/10 targets confirmed blocked/dead/fee-gated/
+needs-human with first-hand evidence. No browser runs burned on Turnstile loops.
+Action items for Adam: (1) approve-or-decline $29.99 uscity.net fee, (2) supply
+CO real estate license # + 2-3 real reviews to unlock ThreeBestRated.
 
 ## Future Opportunities
 
