@@ -87,6 +87,9 @@ const canonicalRedirects = {
   '/helpful-guides': '/blog/',
   '/home-valuation': '/for-sellers/',
   '/whats-my-home-worth': '/for-sellers/',
+  // Blog consolidation 2026-09-10: duplicate Windsor realtor post merged into
+  // the canonical /blog/windsor-co-real-estate-agent/ (cannibalization fix).
+  '/blog/windsor-colorado-real-estate-agent': '/blog/windsor-co-real-estate-agent/',
   // Legacy city URLs (pre-June-2026 routing era). These used to serve the
   // area pages at /{city}/ — now they fall through to the SPA shell with a
   // homepage canonical, wasting crawl budget and splitting city-page signals.
