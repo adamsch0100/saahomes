@@ -77,21 +77,34 @@ def fetch_gsc_query_aggregate(service, start_date, end_date, row_limit=500):
     response = service.searchanalytics().query(siteUrl=site_url, body=request).execute()
     return response.get('rows', [])
 
-def fetch_page_totals(service, start_date, end_date):
-    """Fetch accurate aggregate totals using PAGE dimension only.
+def fetch_page_dimension(service, start_date, end_date, row_limit=25000):
+    """Fetch page-dimension rows (full coverage — no query redaction).
 
-    query+page redacts ~80% of GSC data (often showing 0 clicks). Page
-    dimension returns the true impression/click totals.
+    Page-dimension returns one row per indexed page with real impression/click
+    totals. Used for the P0 presence check because the query+page fetch
+    truncates at `row_limit` rows: once total query+page rows exceed the
+    cutoff (traffic growth pushes low-volume pages out), pages appear to
+    "disappear" from GSC even though they still get impressions. Page-
+    dimension with a 25k row limit covers every page, so absence from this
+    fetch genuinely means zero impressions in the window.
     """
     site_url = 'sc-domain:saahomes.com'
     request = {
         'startDate': start_date,
         'endDate': end_date,
         'dimensions': ['page'],
-        'rowLimit': 25000,
+        'rowLimit': row_limit,
     }
     response = service.searchanalytics().query(siteUrl=site_url, body=request).execute()
-    rows = response.get('rows', [])
+    return response.get('rows', [])
+
+def fetch_page_totals(service, start_date, end_date):
+    """Fetch accurate aggregate totals using PAGE dimension only.
+
+    query+page redacts ~80% of GSC data (often showing 0 clicks). Page
+    dimension returns the true impression/click totals.
+    """
+    rows = fetch_page_dimension(service, start_date, end_date)
     return {
         'impressions': sum(r['impressions'] for r in rows),
         'clicks': sum(r['clicks'] for r in rows),
@@ -193,18 +206,25 @@ def check_tier_s_queries(current_rows, previous_rows, cities, templates):
     
     return alerts
 
-def check_page_drops(current_rows, previous_rows):
-    """Check for pages that dropped from indexed to not indexed (P0)."""
+def check_page_drops(current_page_rows, previous_page_rows, previous_query_page_rows=None):
+    """Check for pages that dropped from indexed to not indexed (P0).
+
+    Presence is determined from PAGE-dimension rows (keys[0] = page), NOT the
+    query+page fetch. The query+page fetch truncates at `row_limit` rows: once
+    total query+page rows exceed the cutoff (e.g. traffic growth), low-volume
+    pages drop out of the fetch and look "disappeared" even though they still
+    get impressions — a false P0 alarm (confirmed 2026-09-10: 11 false flags,
+    all pages had stable/growing impressions in the deep page-dimension fetch).
+    Previous-period query+page rows (if given) enrich the report with the
+    queries that drove the page's impressions.
+    """
     current_pages = set()
+    for row in current_page_rows:
+        current_pages.add(row['keys'][0].lower())
+
     previous_pages = {}
-    
-    for row in current_rows:
-        page = row['keys'][1].lower()
-        current_pages.add(page)
-    
-    for row in previous_rows:
-        page = row['keys'][1].lower()
-        query = row['keys'][0].lower()
+    for row in previous_page_rows:
+        page = row['keys'][0].lower()
         if page not in previous_pages:
             previous_pages[page] = {
                 'impressions': 0,
@@ -213,8 +233,15 @@ def check_page_drops(current_rows, previous_rows):
             }
         previous_pages[page]['impressions'] += row['impressions']
         previous_pages[page]['clicks'] += row['clicks']
-        previous_pages[page]['queries'].append(query)
-    
+
+    # Enrich with top queries from the previous-period query+page fetch
+    if previous_query_page_rows:
+        for row in previous_query_page_rows:
+            page = row['keys'][1].lower()
+            query = row['keys'][0].lower()
+            if page in previous_pages:
+                previous_pages[page]['queries'].append(query)
+
     # P0: pages in previous period that are gone now
     disappeared_pages = []
     for page, info in previous_pages.items():
@@ -227,7 +254,7 @@ def check_page_drops(current_rows, previous_rows):
                     'previous_clicks': info['clicks'],
                     'top_queries': list(set(info['queries']))[:5],
                 })
-    
+
     return disappeared_pages
 
 def log_to_memory(alerts, disappeared_pages):
@@ -372,14 +399,26 @@ def main():
         fetch_current_vs_previous(service, days=7)
 
     # Accurate totals via page dimension (query+page redacts ~80% of GSC data)
-    current_totals = fetch_page_totals(service, str(current_start), str(current_end))
-    previous_totals = fetch_page_totals(service, str(previous_start), str(previous_end))
-    
+    current_page_rows = fetch_page_dimension(service, str(current_start), str(current_end))
+    previous_page_rows = fetch_page_dimension(service, str(previous_start), str(previous_end))
+    current_totals = {
+        'impressions': sum(r['impressions'] for r in current_page_rows),
+        'clicks': sum(r['clicks'] for r in current_page_rows),
+        'pages': len(current_page_rows),
+    }
+    previous_totals = {
+        'impressions': sum(r['impressions'] for r in previous_page_rows),
+        'clicks': sum(r['clicks'] for r in previous_page_rows),
+        'pages': len(previous_page_rows),
+    }
+
     # Check Tier S queries
     alerts = check_tier_s_queries(current_rows, previous_rows, TIER_S_CITIES, QUERY_TEMPLATES)
-    
-    # Check P0 page drops
-    disappeared_pages = check_page_drops(current_rows, previous_rows)
+
+    # Check P0 page drops — presence from page-dimension rows (full coverage),
+    # enriched with previous-period queries for the report
+    disappeared_pages = check_page_drops(current_page_rows, previous_page_rows,
+                                         previous_query_page_rows=previous_rows)
     
     # Print summary
     print_summary(current_rows, previous_rows, alerts, disappeared_pages,
