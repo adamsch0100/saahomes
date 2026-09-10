@@ -8,12 +8,12 @@
 | Platform | Status | NAP Match | Last Checked | Notes |
 |----------|--------|-----------|-------------|-------|
 | **ThreeBestRated.com** | ⚠️ needs_human | ✅ Canonical | 2026-09-08 | Steps 1-2 fully filled with canonical NAP. Blocked at Step 2 progression (progressive-disclosure validation). reCAPTCHA v2 at Step 4 is the sole automation blocker. Also needs CO license # (not in repo) and real customer reviews. See `references/threebestrated-field-map.md`. |
-| **iBegin.com** | ❌ blocked | — | 2026-09-08 | Cloudflare Turnstile on login page. Account exists (saahomes) but login unreachable from this IP even with browser. Needs residential proxy. |
-| **WhereOrg.com** | ❌ blocked | — | 2026-09-04 | Main page clears with stealth Playwright but AJAX category/city autocomplete returns CF 403. NAP + state + captcha automatable; category is the blocker. |
-| **Write.as** | ✅ working | — | 2026-07-16 | Anonymous posting works with plain-text content moderation (no markdown tables, unicode). Rate limit ~3-4 posts/run with 65s gaps between. Last used successfully. |
+| **Write.as** | ✅ working | — | 2026-09-10 | Anonymous POST `/api/posts` returns `slug: null` + a token; the post **is live at `https://write.as/{id}`** immediately (verified 5 anchors 2026-09-10). The `POST /api/posts/{id}/publish` step 404s — do NOT treat `slug: None` as failure; verify the `/{id}` URL directly. Rate limit ~65s between posts (2 posts + 45s gap worked). |
 | **Telegraph** | ✅ working | — | 2026-08-25 | API works consistently. Used extensively for city guide backlinks. |
 | **Paste.rs** | ✅ working | — | 2026-07-16 | Simple pastebin-style posting works. |
 | **GitHub (repo data files)** | ✅ working | — | 2026-09-08 | Classic PAT with `repo` scope pushes data files with branded links. Runs consistently. |
+| **iBegin.com** | ❌ blocked | — | 2026-09-08 | Cloudflare Turnstile on login page. Account exists (saahomes) but login unreachable from this IP even with browser. Needs residential proxy. |
+| **WhereOrg.com** | ❌ blocked | — | 2026-09-04 | Main page clears with stealth Playwright but AJAX category/city autocomplete returns CF 403. NAP + state + captcha automatable; category is the blocker. |
 
 ## Dead / Permanently Blocked
 
