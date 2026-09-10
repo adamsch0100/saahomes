@@ -9983,6 +9983,111 @@ export const blogPosts = [
       },
     ],
   },
+  {
+    slug: 'short-sale-vs-foreclosure-colorado',
+    title: 'Short Sale vs Foreclosure in Colorado: A Homeowner’s Guide to Both Paths | SAA Homes',
+    excerpt: 'Facing an underwater mortgage in Northern Colorado? Here is how a short sale and a foreclosure actually differ in Colorado — timeline, credit impact, taxes, and when you can buy again — plus how Schwartz and Associates helps Larimer and Weld County homeowners choose the better path.',
+    date: '2026-09-10',
+    category: 'Seller Tips',
+    image: '/images/foreclosure-short-sale-northern-colorado-guide.jpg',
+    readTime: '10 min read',
+    keywords: 'short sale vs foreclosure colorado, foreclosure vs short sale colorado, short sale vs foreclosure, colorado foreclosure timeline, short sale credit impact, deed in lieu colorado, underwater mortgage colorado, how to avoid foreclosure colorado, distressed home sale northern colorado, mortgage forgiveness debt relief act 2026',
+    relatedLinks: [
+      { title: 'Foreclosure & Short Sale Guide', href: '/blog/foreclosure-short-sale-northern-colorado-guide/', description: 'The full Northern Colorado process' },
+      { title: 'Short Sale in Fort Collins', href: '/blog/short-sale-fort-collins-colorado/', description: 'Larimer County short sale steps' },
+      { title: 'Short Sale in Loveland', href: '/blog/short-sale-loveland-colorado/', description: 'Sweetheart City short sale guide' },
+      { title: 'Short Sale in Windsor', href: '/blog/short-sale-windsor-colorado/', description: 'Windsor & Weld County short sales' },
+      { title: 'Short Sale in Greeley', href: '/blog/short-sale-greeley-colorado/', description: 'Weld County short sale guide' },
+      { title: 'Cash Home Buyers & Foreclosure Help', href: '/cash-home-buyers/', description: 'Confidential consultation for distressed sellers' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Full-service listing & short sale expertise' },
+      { title: 'Free Home Valuation', href: '/for-sellers/#home-valuation', description: 'See what your home is worth today' },
+      { title: 'Greeley area guide', href: '/northern-colorado-areas/greeley/', description: 'Weld County neighborhoods & market data' },
+    ],
+    cta: {
+      title: 'Facing an underwater mortgage in Northern Colorado?',
+      description: 'Schwartz and Associates has helped Larimer and Weld County homeowners negotiate short sales and avoid foreclosure for 20+ combined years. Call (970) 999-1407 for a confidential, no-obligation consultation — before the Colorado foreclosure clock runs out.',
+      primaryHref: '/cash-home-buyers/#cash-offer-form',
+      primaryText: 'Get confidential short sale help',
+      secondaryHref: '/for-sellers/',
+      secondaryText: 'See how we sell your home',
+    },
+    faqs: [
+      { q: 'What is the difference between a short sale and a foreclosure in Colorado?', a: 'A short sale is a sale you choose, in which your lender agrees to accept less than the full amount owed on the mortgage. A foreclosure is a legal process in which the lender takes the home back through a public trustee auction. The practical difference is control: in a short sale you sell the home and negotiate the shortfall, while in a foreclosure you lose the ability to control the outcome.' },
+      { q: 'How long does a foreclosure take in Colorado?', a: 'Colorado uses a non-judicial foreclosure process through the county public trustee. From the recording of the Notice of Election and Demand, the foreclosure sale is typically scheduled 110 to 125 days out, with a Rule 120 hearing to authorize the sale and a cure window that closes 15 days before the auction. That is a fast clock — which is why acting early matters.' },
+      { q: 'Is a short sale better for my credit than a foreclosure?', a: 'Usually, yes. A foreclosure can drop a credit score by 200 to 300 points and remain on a credit report for seven years. A short sale typically causes a smaller drop and may allow you to return to homeownership through FHA financing in as little as two to three years.' },
+      { q: 'Can I buy a home again after a short sale or foreclosure?', a: 'Yes, but the wait differs. After a short sale, FHA guidelines may allow a new purchase in as little as two to three years with re-established credit. After a foreclosure, you may wait up to seven years for a conventional mortgage, though FHA and other programs can offer a shorter path. Lender and program requirements vary, so confirm your specific timeline.' },
+      { q: 'Do I have to pay taxes on forgiven mortgage debt in Colorado?', a: 'Forgiven mortgage debt can be treated as taxable cancellation-of-debt income. The federal exclusion for forgiven principal-residence debt expired after 2025, so the insolvency exclusion — which applies when your total debts exceed the fair market value of your assets — is now the primary federal protection. Review your situation with a qualified tax professional before committing to a short sale or deed in lieu.' },
+      { q: 'Does a short sale cost the seller money out of pocket?', a: 'In a properly negotiated short sale, the lender usually pays the real estate commissions and most closing costs, so the seller often closes with little or nothing out of pocket. Every file is different, and the lender must approve the terms, so confirm the specifics with your agent and the lender early in the process.' },
+    ],
+    sections: [
+      {
+        heading: 'The choice that shapes your next seven years',
+        paragraphs: [
+          'If you owe more than your Northern Colorado home is worth and the payments no longer work, you are facing one of the hardest decisions in real estate: short sale or foreclosure. Both stop the bleeding, but they leave very different marks on your credit, your taxes, and how soon you can buy again.',
+          'Colorado makes the timing urgent. The state uses a non-judicial foreclosure process that moves from the first legal notice to a public auction in roughly four months. That means the window to choose a short sale — and actually close it — is short. The sooner you understand both paths, the more options you keep.',
+          'This guide lays out how a short sale and a foreclosure actually differ in Colorado so you can make an informed choice — and, if a short sale is the right call, act before the clock runs out.',
+        ],
+      },
+      {
+        heading: 'Short sale vs foreclosure: the core differences',
+        paragraphs: [
+          'The single biggest difference between a short sale and a foreclosure is control. In a short sale, you choose to sell the home and negotiate with the lender to accept the shortfall. In a foreclosure, the lender takes the home back through a public auction after you have already lost the ability to control the outcome.',
+          'A short sale keeps the process private and typically lets you buy again sooner. A foreclosure becomes a matter of public record, carries a larger credit hit, and can keep you out of conventional financing for up to seven years.',
+        ],
+        list: [
+          'Short sale: you sell with lender approval, smaller credit hit, may buy again in two to three years',
+          'Foreclosure: the lender takes the home at auction, a 200 to 300 point credit drop, and a seven-year mark on your credit',
+          'Deed in lieu: you hand the deed back to the lender by agreement, generally a last resort when a short sale is not possible',
+        ],
+      },
+      {
+        heading: 'The Colorado foreclosure timeline (and why it moves fast)',
+        paragraphs: [
+          'Colorado is unusual: most foreclosures here are non-judicial, handled by the county public trustee rather than a private trustee or a drawn-out court case. The process begins when the lender’s attorney records a Notice of Election and Demand (NED) under C.R.S. § 38-38-103 with the public trustee in the county where the property sits.',
+          'From the recording of the NED, the foreclosure sale is typically scheduled 110 to 125 days out. A limited court step — the Rule 120 hearing — authorizes the sale, and the homeowner has a cure window that closes 15 days before the auction date, with the cure payment itself due by noon the day before the sale. A 75-day redemption period follows the sale in most cases.',
+          'The takeaway for a Larimer or Weld County homeowner is simple: once the NED is recorded, you have roughly four months to act. A short sale negotiated early has a real chance to close in that window. Waiting until the last few weeks usually removes that option.',
+        ],
+        relatedLinks: [
+          { title: 'Foreclosure & Short Sale Guide', href: '/blog/foreclosure-short-sale-northern-colorado-guide/', description: 'Step-by-step Colorado process' },
+        ],
+      },
+      {
+        heading: 'Credit impact, side by side',
+        paragraphs: [
+          'A completed foreclosure can drop a credit score by 200 to 300 points and stays on your credit report for seven years. A short sale, because it is reported as a settled or negotiated sale, typically causes a smaller drop and may allow a return to homeownership through FHA financing in as little as two to three years.',
+          'The difference in when you can buy again is often the deciding factor. After a short sale, FHA guidelines may permit a new purchase in two to three years with re-established credit. After a foreclosure, conventional financing is often unavailable for up to seven years, though FHA and other programs can offer a shorter path. Exact timelines depend on the program, the lender, and how quickly you rebuild your credit.',
+        ],
+      },
+      {
+        heading: 'Tax implications: what Colorado homeowners need to know in 2026',
+        paragraphs: [
+          'Forgiven mortgage debt can be treated as taxable cancellation-of-debt income. The federal Mortgage Forgiveness Debt Relief Act, which excluded up to $2 million of forgiven principal-residence debt, expired after 2025. For debt forgiven in 2026, the insolvency exclusion is now the primary federal protection: if your total debts exceed the fair market value of your assets at the time the debt is forgiven, some or all of the cancelled debt may be excluded from income.',
+          'This is a moving target with real dollars attached. Schwartz and Associates always recommends you review your specific situation with a qualified tax professional before committing to a short sale, deed in lieu, or any settlement of forgiven debt.',
+        ],
+      },
+      {
+        heading: 'Deed in lieu of foreclosure: the third path',
+        paragraphs: [
+          'A deed in lieu of foreclosure is an agreement in which you voluntarily transfer the deed back to the lender to avoid a foreclosure auction. It is generally a last resort — used when a short sale is not viable or has failed — because the lender must agree to accept the deed and the credit impact is closer to a foreclosure than a short sale.',
+          'It is worth asking about, but only after you and your agent have explored a short sale first. In most Northern Colorado markets, a well-priced short sale finds a buyer and protects your credit far better than a deed in lieu.',
+        ],
+      },
+      {
+        heading: 'How Schwartz and Associates helps Northern Colorado homeowners',
+        paragraphs: [
+          'Adam and Mandi Schwartz have more than 20 combined years helping Larimer and Weld County homeowners — Fort Collins, Loveland, Windsor, Greeley, and the surrounding communities — sell homes under difficult circumstances. That experience matters most in a short sale, where success depends on pricing the home correctly, submitting a complete hardship package, and negotiating with the lender.',
+          'Because Fort Collins, Loveland, Windsor, and Greeley each have their own market dynamics, an accurate Broker Price Opinion and a realistic list price are essential to getting a short sale approved. We handle the lender communication so you do not have to.',
+          'If you are underwater and unsure which path is right, start with a confidential conversation. It costs nothing and can change what the next seven years look like.',
+        ],
+        relatedLinks: [
+          { title: 'Cash Home Buyers & Foreclosure Help', href: '/cash-home-buyers/', description: 'Free, confidential consultation' },
+          { title: 'Free Home Valuation', href: '/for-sellers/#home-valuation', description: 'See what your home is worth today' },
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
+        ],
+      },
+    ],
+  },
+
 ];
 
 export function getBlogPost(slug) {
