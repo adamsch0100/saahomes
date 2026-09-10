@@ -507,3 +507,19 @@ Week of 2026-08-03:
 ✅ No verified regressions. 11 P0 flags from the pre-fix script were FALSE POSITIVES (500-row query+page cutoff — pages still indexed, impressions stable/growing: Windsor 69→117, Murata Farms 8→49). Fixed script (P0 presence from page-dimension fetch) flags 2 pages with 0-impression windows: /erie/vista-ridge-erie/ and /loveland/west-loveland/ — URL Inspection verdict PASS, HTTP 200, low-volume fluctuation only. 0 alerts. Totals: 9,139 impressions / 45 clicks (prev 4,591 / 30) — ~2x WoW growth.
 
 *Report generated: 2026-09-10T13:10:00*
+
+## GEO AUDIT SCORECARD (2026-09-10)
+
+- Area pages with FAQPage schema: 27/27 ✅ deployed (spot-verified live: Fort Collins 11, Greeley 12, Windsor 10, Loveland 11 pairs, all with July 2026 market data)
+- City FAQ pairs: 27 entities, 2-12 pairs each ✅
+- ForBuyers FAQPage schema: Yes (deployed, 11 FAQ pairs — 3 added this audit)
+- ForSellers FAQPage schema: Yes (deployed, 7 FAQ pairs)
+- Buyer FAQ pairs added: 3 (3-3-3 rule, Colorado credit score, CHFA county income limits) — all PAA-matched from Serper
+- Seller FAQ pairs added: 0
+- CHFA cluster FAQPage schema (prerendered): Yes — CHFA 14 + HowTo + ItemList, SchoolsToHome 3, Champions 6, G-Hope 4
+- Homepage/Contact/About/Testimonials AggregateRating + Review: Yes (6 real Google reviews, 5.0 avg)
+- Listing RealEstateListing + offers.availability: Yes — listing detail (InStock), /properties/ (24 listings), area pages (12+)
+- Properties FAQPage + ItemList: Yes; HowTo: ForBuyers, ForSellers, CHFA
+- Serper GEO check (10 rotating queries): SAA not in top-10 organics on any (dominion gap, authority lever). PAA gaps on 3 of 10 queries fixed this run. Kittle has FAQPage + AggregateRating (GEO competitor); Soukup + fasthomesalecolorado have zero GEO markup
+- PR shipped: #177 GEO: add PAA-targeted buyer FAQs (merged squash d0d4f37, live verified)
+- Next gap: schema layer complete — AI citation unlock is organic rank/authority (link building + blog cadence). Optional: SpeakableSpecification if Assistant voice surfaces; watch Kittle GEO depth quarterly
