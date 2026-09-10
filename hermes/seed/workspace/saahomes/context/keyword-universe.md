@@ -214,7 +214,21 @@ Competitive note: Veterans United (veteransunited.com — national SEO, no local
 - ~~Carbon Valley (Firestone/Frederick) affordability guide~~ → shipped
 - ~~Fort Collins vs Loveland vs Windsor comparison~~ → shipped
 - ~~Weld County vs Larimer County buyer guide~~ → shipped
+- ~~Moving to Fort Collins CO guide~~ → shipped 2026-09-10 (PR #174, slug `moving-to-fort-collins-colorado-guide`) — SERP was Reddit/Quora/livability, zero agents
 - Monthly market snapshot (recurring template) — `blog-pipeline` cron + `LATEST_MARKET_UPDATE_SLUG`
+
+**Recent scan findings (2026-09-10 Serper)** — P1/P2 for future runs:
+- `how much is my home worth Longmont CO` — P1: FC version shipped (#172); Longmont Tier A lacks a home-value post; portals (zillow/realtor.com) + ownify.com rank
+- `short sale Longmont CO` — P1: short-sale city posts exist for FC/Loveland/Windsor/Greeley only; Longmont gap; SERP has no cash-buyer competition (zillow, kenna, homes.com)
+- `first time home buyer Fort Collins` — P1: gov/reddit SERP, very beatable; city-specific FTB post could push CHFA funnel
+- `sell my house fast Severance CO` — P1 (rank issue): cash-buyer companies own page 1; areaSeo targets keyword but no visibility
+- `best neighborhoods in Loveland` — P1: workinnortherncolorado.com ranks #2; no Loveland neighborhoods guide exists (FC has one)
+- `living in Carbon Valley Colorado` — P1: developer + generic city-guide SERP, corridor relocation intent
+- `sell rental property Colorado` — P2: thin AI content ranks #1 but weaker commercial intent
+- `short sale vs foreclosure Colorado` — P2: high-authority SERP (CAR, law firms, NAR, DRE) — hard
+- `FSBO Fort Collins` — P2: portals own SERP; medium
+- `we buy houses Fort Collins` — P2: existing cash-home-buyers post not ranking; internal-link/CRO fix, not content gap
+- `senior downsizing Northern Colorado` — ✅ SAA ranks #1 (2026-09-10 verified live) — vertical winning
 
 ---
 

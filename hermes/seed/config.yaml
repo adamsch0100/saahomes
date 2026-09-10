@@ -18,6 +18,8 @@ model:
 providers:
   opencode-go:
     base_url: https://opencode.ai/zen/go/v1
+    extra_headers:
+      x-opencode-session: "saa-homes-cron"
   openrouter:
     base_url: https://openrouter.ai/api/v1
 
