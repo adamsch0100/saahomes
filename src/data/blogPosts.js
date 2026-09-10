@@ -9479,7 +9479,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/moving-to-loveland-colorado-guide.jpg',
     readTime: '9 min read',
-    youtubeId: '',
+    youtubeId: 'mYtEVexD6FE',
     keywords: 'moving to Loveland Colorado, relocating to Loveland CO, Loveland cost of living, Loveland neighborhoods, Loveland Colorado schools, living in Loveland CO, things to do in Loveland Colorado, Loveland housing market 2026, Loveland Colorado real estate, best places to live Loveland',
     relatedLinks: [
       { title: 'Loveland Colorado Area Guide', href: '/northern-colorado-areas/loveland/', description: 'Neighborhoods, schools & market data for Loveland' },
