@@ -10,6 +10,7 @@ import CityLuxurySection from "../../components/CityLuxurySection.jsx";
 import LatestMarketUpdateBanner from "../../components/LatestMarketUpdateBanner.jsx";
 import { getAreaSeo } from "../../data/areaSeo.js";
 import AreaEventsSection from "../../components/AreaEventsSection.jsx";
+import CityStatsBand from "../../components/CityStatsBand.jsx";
 
 const GOLD = "#CFB36E";
 
@@ -60,6 +61,11 @@ export default function TimnathPage() {
       )}
 
       <LatestMarketUpdateBanner variant="compact" cityName="Timnath" />
+
+      {/* City Stats Band — quick info cards */}
+      <div className="max-w-6xl mx-auto px-6 mt-8 mb-8">
+        <CityStatsBand city="Timnath" />
+      </div>
 
       {/* Property Search CTA */}
       <section className="py-16 px-6 bg-gray-50">

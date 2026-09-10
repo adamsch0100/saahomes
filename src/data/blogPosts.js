@@ -9713,6 +9713,175 @@ export const blogPosts = [
       },
     ],
   },
+  {
+    slug: 'buying-a-home-in-johnstown',
+    title: 'Buying a Home in Johnstown, Colorado: A 2026 Buyer Guide',
+    excerpt: 'Everything Johnstown home buyers need to know in 2026 — I-25 corridor commutes, new construction neighborhoods like Johnstown Village and Somerset at Johnstown, CHFA down payment assistance, and how SAA Homes helps you find Johnstown CO homes for sale.',
+    date: '2026-09-10',
+    category: 'Buyer Tips',
+    image: '/images/Johnstown-CO-Area-Guide.jpg',
+    readTime: '9 min read',
+    youtubeId: '',
+    keywords: 'buying a home in johnstown colorado, johnstown co homes for sale, johnstown real estate, johnstown colorado realtor, johnstown new construction, move to johnstown, johnstown first-time home buyer, CHFA johnstown, johnstown milliken real estate, johnstown housing market 2026',
+    relatedLinks: [
+      { title: 'Johnstown Colorado real estate guide', href: '/northern-colorado-areas/johnstown/', description: 'Neighborhoods, schools & market data' },
+      { title: 'Browse Johnstown homes for sale', href: '/properties/?location=Johnstown, CO', description: 'Current Johnstown CO listings' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'How we represent buyers across Northern Colorado' },
+      { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Grants & deferred loans up to $25,000' },
+      { title: 'Milliken real estate', href: '/northern-colorado-areas/milliken/', description: 'Johnstown\'s I-25 corridor neighbor' },
+      { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Compare nearby Larimer County pricing' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
+    ],
+    cta: {
+      title: 'Ready to buy a home in Johnstown?',
+      description: 'Adam and Mandi Schwartz provide expert Johnstown and Northern Colorado buyer guidance — from CHFA program eligibility to offer and closing. Call (970) 999-1407 to start your search for Johnstown CO homes for sale.',
+      primaryHref: '/for-buyers/',
+      primaryText: 'Start Your Home Search',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to a Johnstown Realtor',
+    },
+    faqs: [
+      { q: 'Is Johnstown a good place to buy a home?', a: 'Johnstown is one of Northern Colorado\'s fastest-growing towns along the I-25 corridor between Loveland and Greeley. Buyers choose it for the blend of historic downtown character, active new construction, Weld County value, and a commute that reaches Fort Collins, Loveland, Greeley, and Longmont in roughly 20\u201330 minutes.' },
+      { q: 'How much do homes cost in Johnstown?', a: 'Johnstown home prices vary by neighborhood and age of construction. New-construction communities and established subdivisions span a wide range, while historic downtown properties and Johnstown\'s Weld County location often deliver more space for the price than comparable Larimer County homes. A comparative market analysis from a local Johnstown realtor is far more accurate than a broad online estimate.' },
+      { q: 'What school district serves Johnstown?', a: 'Johnstown is served by Weld County School District RE-5J, which also serves Milliken. Newer communities like Johnstown Village and Somerset at Johnstown sit within RE-5J boundaries, and the district is known for personalized, community-focused schools. Confirm the specific school assignment for any address you are considering.' },
+      { q: 'Can I use CHFA down payment assistance in Johnstown?', a: 'Yes. Many Johnstown buyers qualify for CHFA down payment assistance — grants and deferred loans up to $25,000 for down payment and closing costs. Because Johnstown sits in Weld County with purchase price limits that fit many active listings, SAA Homes connects you with CHFA participating lenders to confirm eligibility.' },
+      { q: 'What is the commute from Johnstown?', a: 'Johnstown sits at the Highway 60 and I-25 crossroads: about 10 minutes to Milliken, 15 minutes to Loveland or Greeley, and roughly 25\u201330 minutes to Fort Collins or Longmont depending on traffic. Denver is about 45\u201360 minutes south on I-25.' },
+    ],
+    sections: [
+      {
+        heading: 'Why buyers are choosing Johnstown in 2026',
+        paragraphs: [
+          'Johnstown sits at the crossroads of Larimer and Weld counties along the I-25 corridor, minutes from the Highway 60 interchange. The town pairs a historic downtown — anchored by its landmark grain elevator — with some of the most active new-home construction in Northern Colorado. Communities like Johnstown Village, Somerset at Johnstown, and Thompson River Reserve keep adding inventory, drawing buyers priced out of Fort Collins and Loveland.',
+          'The town\'s draw is the combination: a shorter commute than many exurbs, active new construction with builder incentives, Weld County price points, and a tight-knit community anchored by events like the Johnstown Corn Roast Festival. Buyers who want front-range access without Larimer County pricing find Johnstown a practical, character-rich alternative.',
+        ],
+        relatedLinks: [
+          { title: 'Johnstown Colorado real estate guide', href: '/northern-colorado-areas/johnstown/', description: 'Neighborhoods, schools & market data' },
+        ],
+      },
+      {
+        heading: 'Johnstown neighborhoods and what they offer',
+        paragraphs: [
+          'Johnstown\'s housing stock mixes historic downtown charm, established subdivisions, and fast-growing new communities. Broadway Addition and the historic downtown offer older homes and walkable character; Johnstown Village, Johnstown Crossing, and Somerset at Johnstown deliver modern floor plans; Thompson River Reserve and Prairie Springs at Johnstown attract buyers who want newer construction with Weld County value.',
+          'Your priority — school assignment, commute, lot size, or new-build warranty — should drive the neighborhood shortlist. A local Johnstown realtor can map which communities match each priority, because boundaries and builder activity shift as the town grows.',
+        ],
+        list: [
+          'Historic downtown / Broadway Addition — walkable, character-rich older homes',
+          'Johnstown Village & Johnstown Crossing — established subdivisions with mature trees',
+          'Somerset at Johnstown — newer construction with modern floor plans',
+          'Thompson River Reserve & Prairie Springs at Johnstown — recent builds near open space',
+        ],
+      },
+      {
+        heading: 'Financing a Johnstown home, including CHFA',
+        paragraphs: [
+          'Johnstown buyers routinely use conventional, FHA, and VA financing, and many first-time buyers qualify for CHFA down payment assistance — grants and deferred loans up to $25,000 for down payment and closing costs. CHFA programs are administered through participating lenders, and income and purchase-price limits apply.',
+          'Getting pre-approved before you tour is the single highest-leverage step. It tells you your real budget, makes your offer stronger in a competitive new-construction market, and clarifies which down payment assistance programs you actually qualify for.',
+        ],
+        relatedLinks: [
+          { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Grants & deferred loans up to $25,000' },
+          { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Buyer representation & program hub' },
+        ],
+      },
+      {
+        heading: 'How the Johnstown buying process works',
+        paragraphs: [
+          'The Johnstown buying process follows the Colorado purchase contract: define budget and must-haves, get pre-approved, tour neighborhoods and new-build communities, write an offer, negotiate, complete inspection and appraisal, and close. New construction adds builder timelines and design-center steps that resale purchases do not have.',
+          'Schwartz and Associates (SAA Homes) guides you through each step — from comparing a resale home against a new build at Somerset or Prairie Springs, to reading builder contracts, to negotiating inspection items and meeting closing deadlines.',
+        ],
+      },
+      {
+        heading: 'Work with a Johnstown realtor who knows the corridor',
+        paragraphs: [
+          'Adam and Mandi Schwartz live and work in Northern Colorado, with 20+ combined years helping buyers across Johnstown, Milliken, Fort Collins, Loveland, Greeley, and the entire I-25 corridor. We pair market data with on-the-ground knowledge of builders, school boundaries, and what each Johnstown neighborhood actually costs.',
+          'Buyers get help defining budget, commute, and neighborhood priorities, plus introductions to recommended lenders including CHFA participating lenders. Call (970) 999-1407 or visit the contact page to start.',
+        ],
+        relatedLinks: [
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Adam and Mandi Schwartz — (970) 999-1407' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'selling-your-home-in-johnstown',
+    title: 'Selling Your Home in Johnstown, Colorado: A 2026 Seller Guide',
+    excerpt: 'How to sell a home in Johnstown in 2026 — pricing against active new construction on the I-25 corridor, preparing your listing, and working with a local Johnstown listing agent. SAA Homes: sell my home Johnstown Colorado.',
+    date: '2026-09-10',
+    category: 'Seller Tips',
+    image: '/images/Johnstown-CO-Area-Guide.jpg',
+    readTime: '9 min read',
+    youtubeId: '',
+    keywords: 'sell my home johnstown colorado, selling a home in johnstown co, johnstown co real estate agent, johnstown homes for sale, how to sell a house in johnstown, johnstown home selling guide, listing agent johnstown co, johnstown home value, johnstown housing market 2026',
+    relatedLinks: [
+      { title: 'Johnstown Colorado real estate guide', href: '/northern-colorado-areas/johnstown/', description: 'Neighborhoods, schools & market data' },
+      { title: 'Browse Johnstown homes for sale', href: '/properties/?location=Johnstown, CO', description: 'Current Johnstown CO listings' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
+      { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'How assisted buyers finance purchases' },
+      { title: 'Milliken real estate', href: '/northern-colorado-areas/milliken/', description: 'Nearby I-25 corridor comparable market' },
+      { title: 'Windsor real estate', href: '/northern-colorado-areas/windsor/', description: 'Another Weld County market buyers compare' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
+    ],
+    cta: {
+      title: 'Ready to sell your Johnstown home?',
+      description: 'Adam and Mandi Schwartz provide expert Johnstown and Northern Colorado seller guidance — from pricing strategy to closing. Get a free, no-obligation market analysis for your home today.',
+      primaryHref: '/for-sellers/#market-report-form',
+      primaryText: 'Get a Free Market Analysis',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to a Johnstown Listing Agent',
+    },
+    faqs: [
+      { q: 'How much is my Johnstown home worth?', a: 'Johnstown home values vary by neighborhood, age of construction, and lot size, with historic downtown properties, established subdivisions, and new communities pricing differently. A comparative market analysis from a local Johnstown listing agent is far more accurate than an automated estimate.' },
+      { q: 'How long does it take to sell a home in Johnstown?', a: 'Well-priced Johnstown homes typically sell within about 20\u201345 days. Homes competing directly against active new construction can take longer, so pricing and presentation against the builder alternative matter more than season alone.' },
+      { q: 'How does selling in Johnstown differ from Fort Collins or Loveland?', a: 'Johnstown is a smaller market with a heavier new-construction presence than Fort Collins or Loveland. That means your biggest competitor is often a builder, not just another resale. Pricing must reflect that reality while still marketing Johnstown\'s historic character and Weld County value.' },
+      { q: 'Do Johnstown buyers use down payment assistance?', a: 'Yes. Many buyers in Johnstown and Milliken explore CHFA statewide programs plus other Colorado down payment assistance options. Understanding how assisted buyers finance helps you evaluate offer strength, not just top-line price.' },
+      { q: 'What should I fix before listing my Johnstown home?', a: 'Prioritize curb appeal, neutral paint, deep cleaning, and fixing obvious deferred maintenance. When competing with new construction, a spotless, move-in-ready presentation and professional photography matter even more.' },
+    ],
+    sections: [
+      {
+        heading: 'What makes the Johnstown seller market distinct',
+        paragraphs: [
+          'Johnstown is a Weld County market on the I-25 corridor where the biggest competitor for a resale listing is often a brand-new home from an active builder community like Johnstown Village, Somerset at Johnstown, or Prairie Springs at Johnstown. That dynamic shapes everything about how you should price and market — buyers are comparing your home against a new-build alternative, not just last year\'s neighborhood sale.',
+          'The demand is real: Johnstown attracts buyers priced out of Fort Collins and Loveland who still want corridor access, Weld RE-5J schools, and small-town character. For sellers, that means a well-presented, accurately priced home can move quickly — but an overpriced one competes directly against builder incentives.',
+        ],
+        relatedLinks: [
+          { title: 'Johnstown Colorado real estate guide', href: '/northern-colorado-areas/johnstown/', description: 'Neighborhoods, market data & lifestyle' },
+        ],
+      },
+      {
+        heading: 'Pricing your Johnstown home against new construction',
+        paragraphs: [
+          'The most common Johnstown pricing mistake is anchoring to peak-year sale memories while ignoring the builder alternative down the street. A comparative market analysis from SAA Homes uses recent solds — not actives — adjusted for square footage, updates, lot, and age, and pressure-tests your price against what a buyer can get new at a similar total monthly cost.',
+          'Launching slightly aggressive and cutting later costs more than pricing correctly on day one. Well-priced Johnstown homes generate early traffic; overpriced ones educate buyers on what not to buy and sit while builders sell.',
+        ],
+      },
+      {
+        heading: 'Preparing a Johnstown listing that competes with new builds',
+        paragraphs: [
+          'When a buyer can walk through a pristine model home, your resale has to match that standard. Focus preparation where returns are highest: declutter and depersonalize, deep clean, refresh paint in neutral tones, tighten landscaping and entry appeal, and address any obvious deferred maintenance.',
+          'Professional photography, video, and a sharp online presence are non-negotiable in a market competing against builder marketing. SAA Homes provides professional photography and videography, aggressive digital marketing, and a data-driven pricing strategy.',
+        ],
+        relatedLinks: [
+          { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Professional marketing & pricing strategy' },
+        ],
+      },
+      {
+        heading: 'Marketing historic downtown and established Johnstown homes',
+        paragraphs: [
+          'Historic downtown and established Johnstown homes offer character, mature lots, and established streets that new construction cannot replicate. Buyers searching for Johnstown homes for sale with charm need those qualities surfaced in the marketing — walkable downtown, community events, and the landmark grain elevator are part of what makes your listing different.',
+          'SAA Homes positions each listing for its true audience: newer builds compete on move-in readiness and modern features; older and historic homes compete on character, location, and value per square foot.',
+        ],
+      },
+      {
+        heading: 'Work with a Johnstown listing agent',
+        paragraphs: [
+          'Adam and Mandi Schwartz provide expert Johnstown and Northern Colorado seller guidance — from pricing strategy and professional marketing to negotiation and closing. Sellers receive a free market analysis of their Johnstown home.',
+          'Call (970) 999-1407 or visit the contact page to schedule a free consultation and get a market analysis within 24 hours.',
+        ],
+        relatedLinks: [
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Adam and Mandi Schwartz — (970) 999-1407' },
+        ],
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug) {
