@@ -323,6 +323,8 @@ export const neighborhoods = [
     type: 'neighborhood',
     name: 'Fossil Creek',
     description: 'Fossil Creek is a family-friendly neighborhood in south Fort Collins centered around Fossil Creek Park, one of the city largest and most popular parks. The area features a mix of newer homes, townhomes, and patio homes with excellent access to the Harmony Road corridor.',
+    longDescription:
+      'Fossil Creek is one of south Fort Collins\' most family-friendly addresses, centered on the 90-acre Fossil Creek Park with its lake, fishing pier, walking trails, playgrounds, and sports fields. Homes span contemporary ranches, two-stories, townhomes, and patio homes built mostly from the mid-1990s onward, with subdivision HOAs that typically run $100-$200 per month. Fossil Creek Trail links the neighborhood to Spring Canyon Park and Ridgeview Park, while the Harmony Road corridor puts grocery, dining, and retail minutes away. Poudre School District schools are a headline feature: Ridgeview Elementary (9/10) and Fossil Ridge High School (9/10) serve the area, along with Preston Middle School (8/10). Prices run roughly $350K for townhomes to $700K for single-family homes, making it one of the strongest school-value combinations in Fort Collins. The neighborhood sits between Harmony Road and Fossil Creek Parkway, from Lemay Avenue to Timberline Road, close to major employers off the Harmony Road corridor.',
     homeStyles: ['Contemporary', 'Ranch', 'Townhome', 'Patio Home'],
     yearBuiltRange: { min: 1995, max: 2025 },
     priceRangeDescription: '$350K (townhomes) to $700K (single-family)',
@@ -1462,6 +1464,8 @@ export const neighborhoods = [
     type: 'neighborhood',
     name: 'West Loveland / Foothills',
     description: 'West Loveland offers larger lots, mountain views, and Devils Backbone open space. Quieter residential atmosphere with quick access to hiking and outdoor recreation.',
+    longDescription:
+      'West Loveland hugs the foothills west of Wilson Avenue, where the Front Range rises just beyond Devils Backbone Open Space and Larimer County Road 27 marks the neighborhood edge. The area blends established ranch-style homes, custom builds, and mountain-contemporary designs on larger lots, many without HOA restrictions. Outdoor recreation anchors everyday life: Devils Backbone Open Space delivers immediate trail access among its dramatic sandstone fins, Horsetooth Mountain Open Space sits a short drive west, and the Loveland Recreation Trail connects riders and walkers toward downtown Loveland. Thompson School District schools — Lincoln Elementary, Bill Reed Middle School, and Loveland High School — serve the neighborhood, and the foothills location keeps the drive to downtown Loveland around 10 minutes. Home prices typically range from $400K to $1M+, with acreage and equestrian properties commanding the upper end. For buyers who want mountain views, a quiet atmosphere, and room to spread out, West Loveland offers one of the best foothills lifestyles in Larimer County.',
     homeStyles: ['Ranch', 'Custom Home', 'Mountain Contemporary', 'Equestrian Property'],
     yearBuiltRange: { min: 1960, max: 2025 },
     priceRangeDescription: '$400K to $1M+',
@@ -2344,6 +2348,8 @@ export const neighborhoods = [
     alsoKnownAs: ['Downtown Windsor', 'Historic Windsor', 'Windsor downtown district'],
     description:
       'Old Town Windsor is the historic heart of Windsor, centered around Main Street and the iconic Windsor Train Depot. This walkable district features locally owned shops, restaurants, and community spaces, surrounded by tree-lined streets with well-preserved early-1900s homes and newer infill development.',
+    longDescription:
+      'Old Town Windsor is the historic heart of Windsor, anchored by Main Street and the iconic Windsor Train Depot. The walkable district mixes well-preserved early-1900s Victorians and Craftsman bungalows with mid-century ranches and modern townhome infill, most without HOA restrictions, and puts local dining, boutique shopping, and community gathering spaces steps away. The Farmers Market on Main runs Saturdays, Boardwalk Park and Windsor Lake are within walking distance, and the annual Windsor Harvest Festival draws residents from across Northern Colorado. The Windsor Community Recreation Center adds pool, fitness, and program space nearby. Windsor School District RE-4 serves the area with Tozer Elementary, Windsor Middle School, and Windsor High School. Homes typically range from $325K to $600K, with historic character and walkability driving the premium. For buyers who want small-town charm with modern convenience, Old Town Windsor offers the most walkable lifestyle in Weld County.',
     homeStyles: ['Victorian', 'Craftsman Bungalow', 'Mid-Century Ranch', 'Modern Townhome'],
     yearBuiltRange: { min: 1900, max: 2025 },
     priceRangeDescription: '$325K to $600K',
