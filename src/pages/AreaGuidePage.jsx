@@ -195,9 +195,7 @@ export default function AreaGuidePage() {
             Your {area.city} Real Estate Guide
           </h2>
           {intro.map((paragraph) => (
-            <p key={paragraph.slice(0, 48)} className="text-lg text-gray-700 leading-relaxed mb-4">
-              {paragraph}
-            </p>
+            <p key={paragraph.slice(0, 48)} className="text-lg text-gray-700 leading-relaxed mb-4" dangerouslySetInnerHTML={{__html: paragraph}} />
           ))}
           {statsCity && (
             <div className="mt-8 mb-6">
