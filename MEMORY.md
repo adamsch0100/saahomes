@@ -15,14 +15,14 @@
 
 ## Content calendar state
 
-last_social_pack_date: 2026-08-05
-last_social_pillar: seller-focus
+last_social_pack_date: 2026-09-10
+last_social_pillar: market-intelligence
 rotation_week_index: 3
-last_3_social_hooks: ["49 neighborhood guides shipped Aug 17 for Erie, Brighton, Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue + Carbon Valley — biggest zero-coverage batch yet.", "Assumable mortgages are the 2026 low-rate play — /assumable-mortgages/ hub + 2 guides live Aug 13.", "Recently Sold — live MLS closed data now on all 27 area pages + /for-sellers/ (Aug 14)."]
-monthly_market_blog_url: https://saahomes.com/blog/northern-colorado-market-update-august-2026/
-blogs_published_this_month: 15 (northern-colorado-market-update-august-2026, windsor-colorado-real-estate-agent, johnstown-colorado-real-estate-agent, berthoud-colorado-real-estate-agent, va-loan-colorado-guide, military-relocation-northern-colorado, selling-your-home-in-longmont, timnath-colorado-real-estate-agent, assumable-mortgage-colorado, assumable-homes-fort-collins, short-sale-fort-collins-colorado, erie-colorado-new-construction-buyer-guide, loveland-colorado-real-estate-agent, greeley-colorado-real-estate-agent, longmont-colorado-real-estate-agent)
+last_3_social_hooks: ["September 2026 NoCo Market Update live — inventory climbing in FC/Loveland/Windsor/Greeley, best buyer leverage since early 2022 (Sep 10, posted to Buffer same day).", "Erie's fall 2026 housing market — growing inventory, smart pricing from Colliers Hill to Vista Ridge (Sep 9).", "September in NoCo: FoCo Food Truck Rally + can't-miss community events across Northern Colorado (Sep 9)."]
+monthly_market_blog_url: https://saahomes.com/blog/northern-colorado-market-update-september-2026/
+blogs_published_this_month: 16 (boulder-colorado-real-estate-agent, erie-colorado-real-estate-agent, severance-colorado-real-estate-agent, boulder-luxury-neighborhoods-guide, windsor-co-real-estate-agent, erie-colorado-housing-market-fall-2026, chfa-first-generation-program-colorado, chfa-disability-down-payment-assistance-colorado, chfa-income-limits-colorado-northern-cities, short-sale-greeley-colorado, northern-colorado-market-update-september-2026, moving-to-loveland-colorado-guide, buying-a-home-in-johnstown, selling-your-home-in-johnstown, how-much-is-my-home-worth-fort-collins, moving-to-fort-collins-colorado-guide)
 pending_social_packs: 18 (see operator-week-2026-08-17.json for full list)
-latest_market_update_slug: northern-colorado-market-update-august-2026
+latest_market_update_slug: northern-colorado-market-update-september-2026
 last_events_check_date: 2026-08-01
 next_notable_event: Larimer County Fair (Jul 31-Aug 4) + Sculpture in the Park (Aug 7-9) — both posted to Buffer 2026-08-01
 events_guide_last_refresh: 2026-06-29
