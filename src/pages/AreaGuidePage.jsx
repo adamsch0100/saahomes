@@ -423,7 +423,7 @@ export default function AreaGuidePage() {
       <AreaEventsSection city={area.city} slug={area.slug} />
 
       {(highlights.neighborhoods?.length > 0 || highlights.attractions?.length > 0) && (
-        <section className="py-16 px-6 bg-gray-50">
+        <section id="neighborhoods" className="py-16 px-6 bg-gray-50">
           <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10">
             {highlights.neighborhoods?.length > 0 && (
               <div>

@@ -662,6 +662,7 @@ export const areaSeoPages = [
     keywords: 'erie CO homes for sale, moving to Erie Colorado, Erie CO new construction, best realtor Erie CO, Erie Colorado real estate, Erie CO realtor, Boulder County homes, Weld County homes, Northern Colorado real estate',
     heroImage: '/images/Northern Colorado.webp',
     tagline: 'Denver-exurb growth between Boulder and Longmont',
+    youtubeId: 'l4gEU8DCEo4',
     geo: { latitude: '40.0503', longitude: '-105.0497' },
     sitemapPriority: '0.85',
     introParagraphs: [
