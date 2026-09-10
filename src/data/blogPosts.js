@@ -7141,10 +7141,10 @@ export const blogPosts = [
     cta: {
       title: 'Ready to work with an Erie realtor who knows the county line?',
       description: 'Adam and Mandi Schwartz help buyers and sellers across Erie, Longmont, Boulder, and the I-25 corridor. Call (970) 999-1407 — we will talk Colliers Hill, Vista Ridge, Old Town Erie, and the Weld–Boulder tax difference before we talk a template CMA.',
-      primaryHref: '/contact/',
-      primaryText: 'Speak with an Erie Realtor',
-      secondaryHref: '/for-sellers/',
-      secondaryText: 'Get a Free Market Analysis',
+      primaryHref: '/northern-colorado-areas/erie/?utm_source=blog',
+      primaryText: 'Explore the Erie Area Guide',
+      secondaryHref: '/contact/',
+      secondaryText: 'Contact SAA Homes',
     },
     faqs: [
       { q: 'What should I look for in a realtor in Erie, CO?', a: 'Choose an agent who knows Erie sits on the Weld–Boulder county line — different counties mean different property tax bases, and school assignment is by exact address between St. Vrain Valley and, in a few neighborhoods, Boulder Valley. They should also know Colliers Hill, Vista Ridge, and Old Town Erie as distinct markets, not one generic Erie ZIP.' },
@@ -7163,6 +7163,24 @@ export const blogPosts = [
         ],
         relatedLinks: [
           { title: 'Erie Colorado real estate guide', href: '/northern-colorado-areas/erie/', description: 'Neighborhoods, market context & lifestyle' },
+        ],
+      },
+      {
+        heading: 'Jump to Erie neighborhoods',
+        paragraphs: [
+          'Erie is not one market — it is a handful of distinct neighborhoods that buyers and sellers treat very differently. Colliers Hill is new construction on the south side; Vista Ridge is the golf-course resale anchor; Old Town Erie is the historic core; and Erie Commons, Creekside, Compass, Flatiron Meadows, and Erie Highlands round out the map with their own price bands, school assignments, and comp sets.',
+          'Use the links below to jump to the full guide for any Erie neighborhood — or go straight to the neighborhood section of the Erie area guide with one click.',
+        ],
+        relatedLinks: [
+          { title: 'Erie neighborhoods on the area guide', href: '/northern-colorado-areas/erie/#neighborhoods', description: 'Jump straight to Popular Areas and neighborhood context' },
+          { title: 'Old Town Erie real estate', href: '/northern-colorado-areas/erie/old-town-erie/', description: 'Historic Briggs Street core and miners cottages' },
+          { title: 'Vista Ridge Erie real estate', href: '/northern-colorado-areas/erie/vista-ridge-erie/', description: 'Golf-course community and top-rated Red Hawk Elementary' },
+          { title: 'Colliers Hill Erie real estate', href: '/northern-colorado-areas/erie/colliers-hill-erie/', description: 'Erie newest master-planned new-construction community' },
+          { title: 'Erie Commons real estate', href: '/northern-colorado-areas/erie/erie-commons/', description: 'Established family neighborhood with pool and clubhouse' },
+          { title: 'Flatiron Meadows real estate', href: '/northern-colorado-areas/erie/flatiron-meadows-erie/', description: 'Newer east-side homes with Flatirons views' },
+          { title: 'Erie Highlands real estate', href: '/northern-colorado-areas/erie/erie-highlands/', description: 'Growing southeast master-planned community' },
+          { title: 'Compass at Erie real estate', href: '/northern-colorado-areas/erie/compass-erie/', description: 'Contemporary homes between Vista Ridge and Flatiron Meadows' },
+          { title: 'Creekside Erie real estate', href: '/northern-colorado-areas/erie/creekside-erie/', description: 'Coal Creek trail access near Old Town Erie' },
         ],
       },
       {
