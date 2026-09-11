@@ -10096,6 +10096,7 @@ export const blogPosts = [
     category: 'Community Guide',
     image: '/images/Eaton-CO-Area-Guide.jpg',
     readTime: '6 min read',
+    youtubeId: 'tMgsNlp4ZPU',
     keywords: 'living in Eaton Colorado, Eaton CO community, moving to Eaton Colorado, Eaton Colorado homes, Eaton Weld County, Eaton real estate',
     relatedLinks: [
       { title: 'Eaton area guide', href: '/northern-colorado-areas/eaton/', description: 'Homes, neighborhoods, and market data for Eaton' },
@@ -10157,6 +10158,7 @@ export const blogPosts = [
     category: 'Market Update',
     image: '/images/Eaton-CO-Area-Guide.jpg',
     readTime: '5 min read',
+    youtubeId: 'QIHXahdpgdY',
     keywords: 'Eaton Colorado real estate market 2026, Eaton CO housing market, Eaton home values, selling a home in Eaton, Eaton Colorado homes for sale',
     relatedLinks: [
       { title: 'Eaton area guide', href: '/northern-colorado-areas/eaton/', description: 'Neighborhoods, schools, and homes for sale' },
