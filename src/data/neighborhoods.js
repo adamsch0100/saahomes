@@ -3939,6 +3939,7 @@ export const neighborhoods = [
     walkScore: 30,
     metaDescription: 'Arroyo Lindo Berthoud real estate - newer homes near I-25 with mountain views in growing Berthoud. SAA Homes.',
     keywords: 'Arroyo Lindo Berthoud, Berthoud new construction, I-25 Berthoud homes, Berthoud subdivisions, mountain view homes Berthoud, commuter homes Berthoud, new homes Northern Colorado, Berthoud real estate',
+    youtubeId: 'qWqRYs1RMmA',
     neighborhoodHighlights: [
       { title: 'Newer community', description: 'Modern homes built 2017 or later with energy-efficient features and contemporary open floor plans.' },
       { title: 'I-25 access', description: 'Located near the I-25 interchange - 15 minutes to Loveland or Longmont.' },
@@ -3975,6 +3976,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.5500', longitude: '-104.8550' },
     metaDescription: 'Severance Colorado real estate guide — new construction homes in one of Northern Colorado\'s fastest-growing towns. Affordable pricing, new schools, and expert guidance from SAA Homes.',
     keywords: 'Severance Colorado homes, Severance new construction, Severance Commons, Severance real estate, fastest growing Northern Colorado towns, Severance CO subdivisions',
+    youtubeId: 'U1aUaEP84VQ',
     neighborhoodHighlights: [
       { title: 'Best value', description: 'Among the most affordable new construction in Northern Colorado — more square footage for your dollar.' },
       { title: 'Brand-new schools', description: 'New Severance High School and Middle School serve the community with modern facilities.' },
@@ -4006,6 +4008,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.54', longitude: '-104.85' },
     metaDescription: 'BlueSky at Severance real estate - new construction in Severance premier master-planned community. SAA Homes.',
     keywords: 'BlueSky Severance, BlueSky subdivision Severance, new homes Severance CO, Severance master-planned community',
+    youtubeId: 'bRaTyz6P2mU',
     neighborhoodHighlights: [
       { title: 'Newer construction', description: 'Modern energy-efficient homes with open concept floor plans in a growing community.' },
       { title: 'New schools', description: 'Brand-new Severance High School and Middle School serve the BlueSky community.' },
