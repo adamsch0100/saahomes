@@ -113,6 +113,17 @@ const staticPages = [
     ogImageAlt: 'Cash home buyers in Northern Colorado',
   },
   {
+    path: '/sell-my-home-eaton/',
+    priority: '0.8',
+    changefreq: 'weekly',
+    title: 'Sell My Home Eaton CO | Eaton Realtors & Free Home Valuation | SAA Homes',
+    description: 'Sell your Eaton, Colorado home with Schwartz and Associates. Free home valuation, local Weld County pricing strategy, professional marketing, and expert negotiation. Call (970) 999-1407.',
+    ogTitle: 'Sell My Home Eaton CO | Free Home Valuation',
+    ogDescription: 'Free home valuation and local Weld County pricing strategy for Eaton sellers. Schwartz and Associates — call (970) 999-1407.',
+    ogImage: '/images/Eaton-CO-Area-Guide.jpg',
+    ogImageAlt: 'Sell your home in Eaton, Colorado with SAA Homes',
+  },
+  {
     path: '/contact/',
     priority: '0.7',
     changefreq: 'monthly',

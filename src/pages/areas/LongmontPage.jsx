@@ -3,11 +3,15 @@ import AreaSEO from "../../components/AreaSEO.jsx";
 import AreaFAQSection from "../../components/AreaFAQSection.jsx";
 import RecentlySoldSection from "../../components/RecentlySoldSection.jsx";
 import { AREA_FAQS } from "../../data/areaFaqs.js";
+import { getAreaSeo } from "../../data/areaSeo.js";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
+import LatestMarketUpdateBanner from "../../components/LatestMarketUpdateBanner.jsx";
+import AreaEventsSection from "../../components/AreaEventsSection.jsx";
 
 export default function LongmontPage() {
+  const area = getAreaSeo("longmont");
   return (
     <>
       <AreaSEO slug="longmont" />
@@ -18,7 +22,10 @@ export default function LongmontPage() {
         <div className="absolute inset-0 bg-black/60"></div>
         <div className="relative z-10 text-center text-white px-6">
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">Longmont, CO</h1>
-          <p className="mt-4 text-xl">Innovation Meets Mountain Living</p>
+          <p className="mt-4 text-xl">{area.tagline}</p>
+          <span className="mt-4 inline-block bg-[#CFB36E] text-gray-900 text-sm font-semibold uppercase tracking-widest px-4 py-1.5 rounded-full">
+            Boulder &amp; Weld Counties
+          </span>
         </div>
       </section>
 
@@ -29,11 +36,30 @@ export default function LongmontPage() {
         <section className="mb-12">
           <h2 className="text-4xl font-bold mb-6">Longmont, CO Area Guide</h2>
           <div className="prose prose-lg max-w-none">
-            <p className="text-lg leading-relaxed mb-4">
-              Longmont is a thriving city of approximately 100,000 residents located in Boulder County, Colorado. Known for its innovative spirit, strong economy, and exceptional quality of life, Longmont offers the perfect blend of urban amenities and outdoor adventure. The city has earned recognition as one of the best places to live in Colorado, combining small-town charm with big-city opportunities.
-            </p>
+            {area.introParagraphs?.slice(0, 2).map((p, i) => (
+              <p key={i} className="text-lg leading-relaxed mb-4">{p}</p>
+            ))}
           </div>
         </section>
+
+        <LatestMarketUpdateBanner variant="compact" cityName="Longmont" />
+
+        {/* Why Buy in Longmont? */}
+        {area.whyChoose?.length > 0 && (
+          <section className="py-16 px-6 bg-white">
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-3xl font-bold font-serif mb-8 text-center">Why Buy in Longmont?</h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {area.whyChoose.map((item) => (
+                  <div key={item.title} className="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
+                    <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                    <p className="text-gray-700 text-sm leading-relaxed">{item.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Property Search CTA */}
         <section className="mb-12 bg-gray-50 p-8 rounded-lg">
@@ -286,6 +312,29 @@ export default function LongmontPage() {
       <RecentlySoldSection citySlug="longmont" />
 
       <AreaFAQSection faqs={AREA_FAQS['longmont']} city="Longmont" />
+
+      <AreaEventsSection city="Longmont" slug="longmont" />
+
+      {/* Work With Schwartz and Associates — Final CTA */}
+      <section className="py-16 px-6 bg-black text-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold font-serif mb-4">Work With Schwartz and Associates in Longmont</h2>
+          <p className="text-gray-300 mb-8">
+            Ready to buy or sell in Longmont? Contact SAA Homes today at <a href="tel:(970) 999-1407" className="text-white font-semibold underline underline-offset-2 hover:text-[#CFB36E]">(970) 999-1407</a> or visit our office at 3665 John F Kennedy Parkway, Suite 210, Fort Collins, CO 80525. Adam and Mandi Schwartz bring 20+ years of combined local expertise to every Longmont transaction.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link to="/for-buyers/" className="inline-block px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+              For Buyers
+            </Link>
+            <Link to="/for-sellers/" className="inline-block px-8 py-3 border-2 border-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
+              For Sellers
+            </Link>
+            <Link to="/contact/" className="inline-block px-8 py-3 border-2 border-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
+              Contact Us
+            </Link>
+          </div>
+        </div>
+      </section>
 
     </>
   );

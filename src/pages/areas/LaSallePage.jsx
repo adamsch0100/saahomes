@@ -54,14 +54,50 @@ export default function LaSallePage() {
           <p className="text-lg mb-6 text-gray-700">
             Explore available properties in La Salle, CO
           </p>
-          <Link
-            to="/properties/?location=La Salle, CO"
-            className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            Search La Salle Homes
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/properties/?location=La Salle, CO"
+              className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Search La Salle Homes
+            </Link>
+            <Link
+              to="/contact/"
+              className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-gray-800 hover:text-white transition-colors"
+            >
+              Talk to an Agent
+            </Link>
+          </div>
         </div>
       </section>
+
+      {/* Sell Your Home in La Salle */}
+      <section className="py-16 px-6 bg-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold font-serif mb-6">Sell Your Home in La Salle</h2>
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            Thinking about selling in La Salle? Get a free, no-obligation market analysis and see
+            what your Weld County home is worth in today&rsquo;s market. Schwartz and Associates
+            brings local pricing strategy, professional marketing, and responsive service to every
+            La Salle listing.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/for-sellers/#home-valuation"
+              className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Free Market Analysis
+            </Link>
+            <a
+              href="tel:(970) 999-1407"
+              className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+            >
+              Call (970) 999-1407
+            </a>
+          </div>
+        </div>
+      </section>
+
 
       {/* Why Buy in La Salle? */}
       {area.whyChoose?.length > 0 && (
@@ -109,7 +145,7 @@ export default function LaSallePage() {
                 </li>
                 <li className="flex items-start">
                   <span className="text-black mr-2">•</span>
-                  <span>Excellent schools (Eaton RE-2)</span>
+                  <span>Weld County School District RE-1</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-black mr-2">•</span>
@@ -165,10 +201,10 @@ export default function LaSallePage() {
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-6">Education in La Salle</h2>
           <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            La Salle is served by Eaton School District RE-2, one of Colorado's top-rated school districts. Students attend schools in nearby Eaton, which are known for their excellent academic programs and dedicated teachers.
+            La Salle is served by Weld County School District RE-1, which operates schools across La Salle, Gilcrest, and Platteville. Students in town attend Pete Mirich Elementary School (PreK–6) and North Valley Middle School, then continue to Valley High School in nearby Gilcrest.
           </p>
           <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            The district offers comprehensive education from elementary through high school, with strong academic performance, extensive extracurricular activities, and successful athletic programs. Small class sizes ensure personalized attention for each student.
+            The district emphasizes strong academic programs, dedicated teachers, and extracurricular activities from elementary through high school. Smaller class sizes help ensure personalized attention for each student.
           </p>
           <p className="text-lg text-gray-700 leading-relaxed">
             Proximity to Greeley provides access to the University of Northern Colorado and other higher education opportunities.
@@ -195,44 +231,44 @@ export default function LaSallePage() {
           <h2 className="text-3xl font-bold mb-8 text-center">10 Things to Know About La Salle</h2>
           <div className="grid md:grid-cols-2 gap-6">
             <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-xl font-bold mb-2">1. Historic Community</h3>
-              <p className="text-gray-700">Rich history and heritage preserved in the town's character and architecture.</p>
+              <h3 className="text-xl font-bold mb-2">1. Small-Town Population</h3>
+              <p className="text-gray-700">La Salle counted 2,359 residents in the 2020 U.S. Census — a quiet, close-knit Weld County community.</p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-xl font-bold mb-2">2. Affordable Living</h3>
-              <p className="text-gray-700">Lower cost of living and housing compared to larger Northern Colorado cities.</p>
+              <h3 className="text-xl font-bold mb-2">2. ZIP Code 80645</h3>
+              <p className="text-gray-700">The town sits in Weld County&rsquo;s 80645 ZIP code, south of Greeley along the South Platte River valley.</p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-xl font-bold mb-2">3. Excellent Schools</h3>
-              <p className="text-gray-700">Part of top-rated Eaton School District with strong academic programs.</p>
+              <h3 className="text-xl font-bold mb-2">3. Weld County School District RE-1</h3>
+              <p className="text-gray-700">Students attend Pete Mirich Elementary School and North Valley Middle School in La Salle, then Valley High School in nearby Gilcrest.</p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-xl font-bold mb-2">4. Small-Town Feel</h3>
-              <p className="text-gray-700">Tight-knit community where neighbors know and support each other.</p>
+              <h3 className="text-xl font-bold mb-2">4. Median Age ~35</h3>
+              <p className="text-gray-700">A median age in the mid-30s reflects a community of young families and working residents.</p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow">
               <h3 className="text-xl font-bold mb-2">5. Close to Greeley</h3>
-              <p className="text-gray-700">Just 8 miles from Greeley for shopping, dining, and employment.</p>
+              <p className="text-gray-700">Roughly 8 miles southwest of Greeley for shopping, dining, healthcare, and the University of Northern Colorado.</p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-xl font-bold mb-2">6. Safe Community</h3>
-              <p className="text-gray-700">Low crime rates and family-friendly environment ideal for raising children.</p>
+              <h3 className="text-xl font-bold mb-2">6. Agricultural Heritage</h3>
+              <p className="text-gray-700">Farming and ranching remain central to the town&rsquo;s identity and surrounding South Platte valley landscape.</p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-xl font-bold mb-2">7. Community Pride</h3>
-              <p className="text-gray-700">Residents take pride in their town and actively participate in community events.</p>
+              <h3 className="text-xl font-bold mb-2">7. Affordable Living</h3>
+              <p className="text-gray-700">Among the most affordable entry points in the Greeley metro, attractive to first-time buyers.</p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-xl font-bold mb-2">8. Outdoor Access</h3>
-              <p className="text-gray-700">Easy access to parks, trails, and nearby reservoirs for recreation.</p>
+              <h3 className="text-xl font-bold mb-2">8. Small-Town Feel</h3>
+              <p className="text-gray-700">A tight-knit community where neighbors know and support one another.</p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-xl font-bold mb-2">9. Family Values</h3>
-              <p className="text-gray-700">Community built on traditional values and strong family connections.</p>
+              <h3 className="text-xl font-bold mb-2">9. Outdoor Access</h3>
+              <p className="text-gray-700">Easy access to the South Platte River, regional trails, and nearby reservoirs for recreation.</p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-xl font-bold mb-2">10. Welcoming Atmosphere</h3>
-              <p className="text-gray-700">Friendly residents who welcome newcomers and foster community spirit.</p>
+              <h3 className="text-xl font-bold mb-2">10. Commuter-Friendly</h3>
+              <p className="text-gray-700">A short drive to Greeley, Evans, and Milliken — and about 70 miles from Denver International Airport.</p>
             </div>
           </div>
         </div>

@@ -3413,6 +3413,7 @@ export const neighborhoods = [
   {
     slug: 'timnath-ranch',
     citySlug: 'timnath',
+    cityDisplay: 'Timnath',
     type: 'subdivision',
     name: 'Timnath Ranch',
     county: 'Larimer County',
@@ -3682,6 +3683,7 @@ export const neighborhoods = [
   {
     slug: 'downtown-berthoud',
     citySlug: 'berthoud',
+    cityDisplay: 'Berthoud',
     type: 'neighborhood',
     name: 'Downtown Berthoud',
     county: 'Larimer County',
@@ -3950,6 +3952,7 @@ export const neighborhoods = [
   {
     slug: 'severance-commons',
     citySlug: 'severance',
+    cityDisplay: 'Severance',
     type: 'neighborhood',
     name: 'Severance Commons',
     county: 'Weld County',
@@ -4177,6 +4180,7 @@ export const neighborhoods = [
   {
     slug: 'johnstown-commons',
     citySlug: 'johnstown',
+    cityDisplay: 'Johnstown',
     type: 'neighborhood',
     name: 'Johnstown Commons',
     county: 'Weld County',
@@ -4404,6 +4408,7 @@ export const neighborhoods = [
   {
     slug: 'wellington-commons',
     citySlug: 'wellington',
+    cityDisplay: 'Wellington',
     type: 'neighborhood',
     name: 'Wellington Commons',
     county: 'Larimer County',

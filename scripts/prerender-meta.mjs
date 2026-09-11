@@ -1852,6 +1852,10 @@ function buildRouteSchemas(route) {
 function buildRouteMetaTags(route) {
   const { path, title, description } = route;
   const canonical = `${SITE_URL}${path}`;
+
+  // Per-city geo.placename for area pages; falls back to the Fort Collins office.
+  const area = matchAreaPage(path);
+  const geoPlacename = area?.city ? `${area.city}, Colorado` : 'Fort Collins, Colorado';
   const tags = [];
 
   const ogTitle = route.ogTitle || title;
@@ -1867,7 +1871,7 @@ function buildRouteMetaTags(route) {
   // robots for noindex pages is applied in injectMeta (replaces shell default)
   tags.push(`<meta name="author" content="${escapeAttr(BUSINESS.name)}" />`);
   tags.push(`<meta name="geo.region" content="US-CO" />`);
-  tags.push(`<meta name="geo.placename" content="Fort Collins, Colorado" />`);
+  tags.push(`<meta name="geo.placename" content="${escapeAttr(geoPlacename)}" />`);
 
   // Open Graph — iMessage, Facebook, LinkedIn read these from static HTML
   tags.push(`<meta property="og:type" content="website" />`);

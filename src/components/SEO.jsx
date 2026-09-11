@@ -111,6 +111,7 @@ export default function SEO({
   includeLocalBusiness = false,
   includeWebsite = false,
   jsonLd = [],
+  geoPlacename = "Fort Collins, Colorado",
 }) {
   const location = useLocation();
   const fullTitle = buildTitle(title, exactTitle);
@@ -137,7 +138,7 @@ export default function SEO({
       <meta name="robots" content={robotsContent} />
       <meta name="author" content={BUSINESS.name} />
       <meta name="geo.region" content="US-CO" />
-      <meta name="geo.placename" content="Fort Collins, Colorado" />
+      <meta name="geo.placename" content={geoPlacename} />
       {canonical && <link rel="canonical" href={canonical} />}
 
       <meta property="og:type" content={type} />

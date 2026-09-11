@@ -464,7 +464,7 @@ export const areaSeoPages = [
     county: 'Boulder County',
     exactTitle: 'Boulder CO Real Estate | Homes for Sale in Boulder Colorado | SAA Homes',
     description: 'Boulder, Colorado real estate guide from SAA Homes. World-class outdoor recreation, top schools, and expert buyer and seller representation in Boulder County.',
-    keywords: 'Boulder CO real estate, Boulder homes for sale, Boulder Colorado realtor, Boulder County luxury homes, Flatirons area real estate, Northern Colorado, sell my house fast Boulder, sell my house Boulder CO, Boulder home value, Boulder housing market, cash home buyers Boulder, we buy houses Boulder, foreclosures Boulder, short sale Boulder, Boulder County foreclosures',
+    keywords: 'Boulder CO real estate, Boulder homes for sale, Boulder Colorado realtor, Boulder County luxury homes, Flatirons area real estate, Northern Colorado, sell my house fast Boulder, sell my house Boulder CO, Boulder home value, Boulder housing market, cash home buyers Boulder, we buy houses Boulder, foreclosures Boulder, short sale Boulder, Boulder County foreclosures, Boulder down payment assistance, Boulder CHFA, Boulder first-time home buyer',
     heroImage: '/images/Boulder.jpg',
     tagline: 'Flatirons views and Boulder County lifestyle',
     geo: { latitude: '40.0150', longitude: '-105.2705' },
