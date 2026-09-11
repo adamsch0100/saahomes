@@ -78,6 +78,7 @@ export default function AreaSEO({ slug }) {
       ogImage={shareMeta?.ogImage || imageUrl}
       ogImageAlt={shareMeta?.ogImageAlt || `${area.city}, Colorado real estate guide`}
       ogUrl={pageUrl}
+      geoPlacename={`${area.city}, Colorado`}
       jsonLd={jsonLd}
       includeWebsite={true}
     />

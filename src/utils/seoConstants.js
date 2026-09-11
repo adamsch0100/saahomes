@@ -216,11 +216,22 @@ export function buildListingsItemListSchema(listings, options = {}) {
 
   if (!Array.isArray(listings) || listings.length === 0) return null;
 
+  // Dedupe by property address (normalized street + city). The IRES feed can
+  // surface the same home under two MLS IDs (e.g. a re-listed property), which
+  // would otherwise render as duplicate ItemList positions. Fall back to the
+  // canonical URL key when a row has no street/city so we never drop valid
+  // listings that share an empty address.
+  const seen = new Set();
   const items = listings
     .slice(0, Math.max(0, maxItems))
     .map((listing) => {
       const url = listingCanonicalUrl(listing);
       if (!url) return null;
+      const street = formatListingStreet(listing).trim().toLowerCase();
+      const city = String(listing.city || "").trim().toLowerCase();
+      const addressKey = street || city ? `${street}||${city}` : url;
+      if (seen.has(addressKey)) return null;
+      seen.add(addressKey);
       return {
         '@type': 'ListItem',
         position: 0, // filled below

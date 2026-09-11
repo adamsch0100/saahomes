@@ -361,6 +361,60 @@ export default function EatonPage() {
 
       <AreaEventsSection city="Eaton" slug="eaton" />
 
+      {/* Selling Your Home in Eaton */}
+      <section className="py-16 px-6 bg-gray-50">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold font-serif mb-6">Selling Your Home in Eaton</h2>
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            Thinking about selling in Eaton? Get a free, no-obligation market analysis and see what
+            your Weld County home is worth in today&rsquo;s market. Schwartz and Associates brings
+            local pricing strategy, professional marketing, and responsive service to every Eaton
+            listing.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/for-sellers/#home-valuation"
+              className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Free Market Analysis
+            </Link>
+            <a
+              href="tel:(970) 999-1407"
+              className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+            >
+              Call (970) 999-1407
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Work with a Local Eaton Realtor */}
+      <section className="py-16 px-6 bg-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold font-serif mb-6">Work with a Local Eaton Realtor</h2>
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            Looking for a <strong>realtor in Eaton, CO</strong>? Adam and Mandi Schwartz know Weld
+            County&rsquo;s rural communities and the Eaton market inside and out. Whether you&rsquo;re
+            buying your first home or selling a family property, we bring 20+ years of combined local
+            expertise to every transaction.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/contact/"
+              className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Contact an Eaton Realtor
+            </Link>
+            <Link
+              to="/sell-my-home-eaton/"
+              className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+            >
+              Sell My Home in Eaton →
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="py-16 px-6 bg-black text-white">
         <div className="max-w-4xl mx-auto text-center">

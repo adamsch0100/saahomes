@@ -10088,6 +10088,276 @@ export const blogPosts = [
     ],
   },
 
+  {
+    slug: 'living-in-eaton-colorado',
+    title: 'Living in Eaton, Colorado: A Community Guide to Weld County',
+    excerpt: 'What it is like to live in Eaton, CO — a close-knit Weld County town north of Greeley with strong schools, agricultural roots, and a quiet rural pace.',
+    date: '2026-09-11',
+    category: 'Community Guide',
+    image: '/images/Eaton-CO-Area-Guide.jpg',
+    readTime: '6 min read',
+    keywords: 'living in Eaton Colorado, Eaton CO community, moving to Eaton Colorado, Eaton Colorado homes, Eaton Weld County, Eaton real estate',
+    relatedLinks: [
+      { title: 'Eaton area guide', href: '/northern-colorado-areas/eaton/', description: 'Homes, neighborhoods, and market data for Eaton' },
+      { title: 'Sell my home in Eaton', href: '/sell-my-home-eaton/', description: 'Free home valuation for Eaton sellers' },
+      { title: 'Eaton homes for sale', href: '/properties/?location=Eaton, CO', description: 'Live IRES MLS listings in Eaton' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Buyer representation and CHFA programs' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Talk to Adam or Mandi Schwartz' },
+    ],
+    cta: {
+      title: 'Thinking about a move to Eaton?',
+      description: 'Schwartz and Associates helps buyers explore Eaton and all of Weld County. Call (970) 999-1407 to talk through neighborhoods, schools, and what is on the market right now.',
+      primaryHref: '/properties/?location=Eaton, CO',
+      primaryText: 'Search Eaton homes',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to a local agent',
+    },
+    faqs: [
+      { q: 'Is Eaton, Colorado a good place to live?', a: 'Eaton is a small, family-oriented town in Weld County known for its strong schools, low-key agricultural character, and close community ties. It appeals to buyers who want a quieter pace within about 10 miles of Greeley.' },
+      { q: 'What school district serves Eaton, CO?', a: 'Eaton School District RE-2 serves the town, operating Eaton Elementary, Eaton Middle School, and Eaton High School.' },
+      { q: 'How far is Eaton from Greeley?', a: 'Eaton sits roughly 10 miles north of Greeley, giving residents convenient access to Greeley amenities while maintaining a rural small-town feel.' },
+      { q: 'What is the Eaton, Colorado ZIP code?', a: 'Eaton is in the 80615 ZIP code in Weld County.' },
+    ],
+    sections: [
+      {
+        heading: 'A quiet Weld County town with deep roots',
+        paragraphs: [
+          'Eaton is a statutory town in Weld County, Colorado, located north of Greeley along the eastern Front Range. Its identity is tied to agriculture and a close-knit community, which is exactly what draws many buyers here — a slower pace and a real sense of neighborliness that larger Northern Colorado cities can not always match.',
+          'The town is compact and walkable at its center, with residential neighborhoods, local businesses, and community gathering places. For buyers coming from Fort Collins, Loveland, or Greeley, Eaton reads as a deliberate step toward a quieter, more rural lifestyle without giving up access to the region.',
+        ],
+      },
+      {
+        heading: 'Schools and family life',
+        paragraphs: [
+          'Eaton School District RE-2 is a major reason families choose the area. The district operates Eaton Elementary, Eaton Middle School, and Eaton High School, and it is a point of pride for residents. Small class sizes and active community involvement are recurring themes when residents describe the schools.',
+          'Youth sports, church and school events, and town celebrations keep families connected throughout the year. For many buyers, the combination of a tight school community and affordable housing is what tips the decision toward Eaton.',
+        ],
+      },
+      {
+        heading: 'Location and everyday convenience',
+        paragraphs: [
+          'Eaton sits about 10 miles north of Greeley, putting groceries, dining, healthcare, and the University of Northern Colorado within an easy drive. Fort Collins is farther west, and the I-25 corridor is reachable through the surrounding road network for commutes to Loveland, Windsor, or Denver.',
+          'The trade-off is intentional: you get more space, more quiet, and often more house for the budget, while accepting a short drive for many amenities. Buyers who value land, room for equipment or animals, and a rural setting tend to feel at home quickly.',
+        ],
+      },
+      {
+        heading: 'Who Eaton is best for',
+        paragraphs: [
+          'Eaton tends to fit families, first-time buyers, and people moving for space and community rather than nightlife. Its agricultural heritage means some buyers look for acreage or properties with outbuildings, while others are simply drawn to the small-town atmosphere.',
+          'If you are exploring Eaton, the fastest way to get grounded is to look at what is actively listed and compare it against the nearby towns of Severance, Milliken, and Greeley. Schwartz and Associates can set that comparison up for you and talk through which Weld County community matches your priorities.',
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'eaton-colorado-real-estate-market-2026',
+    title: 'Eaton, Colorado Real Estate Market: 2026 Buyer and Seller Guide',
+    excerpt: 'A look at the Eaton, CO housing market in 2026 — what shapes demand in this Weld County town, how to evaluate a home, and where to get live, verified market data.',
+    date: '2026-09-11',
+    category: 'Market Update',
+    image: '/images/Eaton-CO-Area-Guide.jpg',
+    readTime: '5 min read',
+    keywords: 'Eaton Colorado real estate market 2026, Eaton CO housing market, Eaton home values, selling a home in Eaton, Eaton Colorado homes for sale',
+    relatedLinks: [
+      { title: 'Eaton area guide', href: '/northern-colorado-areas/eaton/', description: 'Neighborhoods, schools, and homes for sale' },
+      { title: 'Sell my home in Eaton', href: '/sell-my-home-eaton/', description: 'Free home valuation and listing strategy' },
+      { title: 'Free market report', href: '/for-sellers/#home-valuation', description: 'See what your Eaton home is worth' },
+      { title: 'Eaton homes for sale', href: '/properties/?location=Eaton, CO', description: 'Live IRES MLS listings' },
+    ],
+    cta: {
+      title: 'Get a real read on the Eaton market',
+      description: 'Automated estimates can be misleading in a small town with limited comps. Schwartz and Associates prices Eaton homes against live Weld County comparable sales. Call (970) 999-1407.',
+      primaryHref: '/for-sellers/#home-valuation',
+      primaryText: 'Get a free home valuation',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to a local agent',
+    },
+    faqs: [
+      { q: 'Is Eaton, CO a buyers or sellers market in 2026?', a: 'Market balance in Eaton shifts with inventory and buyer demand from Greeley and the broader Weld County market. Because Eaton is a smaller market, individual neighborhoods can vary more than the county as a whole — a local comparative market analysis is the most reliable read.' },
+      { q: 'How are Eaton home values determined?', a: 'An accurate Eaton valuation comes from recent comparable sales in Eaton and nearby Weld County towns, adjusted for lot size, condition, and any acreage or outbuildings. Automated estimates often miss rural-lot and acreage value.' },
+      { q: 'Why is Eaton real estate more affordable than Fort Collins or Boulder?', a: 'Eaton sits farther from the I-25 corridor and the larger employment centers, which keeps pricing more accessible than Fort Collins, Loveland, or Boulder while offering a rural lifestyle.' },
+    ],
+    sections: [
+      {
+        heading: 'What shapes the Eaton market',
+        paragraphs: [
+          'Eaton is a small Weld County town of roughly 5,800 residents (2020 U.S. Census), and that smaller scale is the single biggest factor in how its real estate behaves. With fewer homes on the market at any given time than Greeley or Fort Collins, Eaton pricing can move more noticeably on a handful of transactions.',
+          'Demand tends to come from two directions: buyers seeking value and space who would otherwise look at Greeley or Severance, and people who specifically want the Eaton school district and small-town atmosphere. Seller interest is often tied to moving up within the district or relocating for work.',
+        ],
+      },
+      {
+        heading: 'How to evaluate an Eaton home',
+        paragraphs: [
+          'In a rural market, the lot matters as much as the house. Buyers should evaluate acreage, outbuildings, well and septic (where applicable), and access before focusing on square footage. Sellers should price against true Eaton-area comps, not county-wide averages, because an acreage property and a standard subdivision home can behave very differently.',
+          'Because comps are limited, working with an agent who actually tracks Eaton and the surrounding Weld County towns is the difference between a list price grounded in data and a guess. We run a live comparable-sales analysis for every Eaton listing we take.',
+        ],
+      },
+      {
+        heading: 'Getting verified market data',
+        paragraphs: [
+          'We do not publish fabricated median-price snapshots. The cleanest, most current picture of the Eaton market comes from the active listings themselves — which you can browse live — plus a free home valuation that pulls recent Eaton-area sales for your specific property.',
+          'If you are selling, the goal is a pricing strategy, not a number pulled from a regional average. If you are buying, the goal is understanding what a fair offer looks like in Eaton specifically. Schwartz and Associates provides both, backed by real MLS data.',
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'buying-a-home-in-la-salle-colorado',
+    title: 'Buying a Home in La Salle, Colorado: A Weld County Guide',
+    excerpt: 'A practical guide to buying a home in La Salle, CO — affordability, the Weld RE-1 school district, and what to know before you write an offer.',
+    date: '2026-09-11',
+    category: 'Buyer Tips',
+    image: '/images/la-salle.png',
+    readTime: '6 min read',
+    keywords: 'buying a home in La Salle Colorado, La Salle CO homes for sale, La Salle Colorado real estate, La Salle first time home buyer, Weld County homes',
+    relatedLinks: [
+      { title: 'La Salle area guide', href: '/northern-colorado-areas/la-salle/', description: 'Homes, neighborhoods, and market data' },
+      { title: 'La Salle homes for sale', href: '/properties/?location=La Salle, CO', description: 'Live IRES MLS listings' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Buyer representation and CHFA programs' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Talk to Adam or Mandi Schwartz' },
+    ],
+    cta: {
+      title: 'Ready to buy in La Salle?',
+      description: 'Schwartz and Associates helps buyers search La Salle and all of Weld County, including CHFA down payment assistance guidance for first-time buyers. Call (970) 999-1407.',
+      primaryHref: '/properties/?location=La Salle, CO',
+      primaryText: 'Search La Salle homes',
+      secondaryHref: '/for-buyers/',
+      secondaryText: 'Buyer resources',
+    },
+    faqs: [
+      { q: 'Is La Salle, Colorado affordable for first-time buyers?', a: 'La Salle generally offers some of the more accessible pricing in the Greeley metro area, which is why first-time buyers often include it in their search. Down payment assistance through CHFA can help qualified buyers enter the market.' },
+      { q: 'What schools serve La Salle?', a: 'La Salle is part of Weld County School District RE-1. Students attend Pete Mirich Elementary School and North Valley Middle School in La Salle, then Valley High School in nearby Gilcrest.' },
+      { q: 'How far is La Salle from Greeley?', a: 'La Salle is roughly 8 miles southwest of Greeley, making it a convenient and affordable alternative for people who work in Greeley.' },
+      { q: 'What ZIP code is La Salle?', a: 'La Salle is in the 80645 ZIP code in Weld County.' },
+    ],
+    sections: [
+      {
+        heading: 'Why buyers look at La Salle',
+        paragraphs: [
+          'La Salle is a small Weld County town south of Greeley with a population of 2,359 at the 2020 U.S. Census. Its appeal is straightforward: lower home prices than Greeley, a quiet residential character, and a short commute to Greeley jobs, shopping, and the University of Northern Colorado.',
+          'The town sits along the South Platte River valley, so some buyers also find properties with acreage or a more rural feel than a typical in-town Greeley lot. That mix of affordability and space makes it a natural fit for first-time buyers and people who work in or near Greeley.',
+        ],
+      },
+      {
+        heading: 'Schools and community',
+        paragraphs: [
+          'La Salle is served by Weld County School District RE-1, which operates across La Salle, Gilcrest, and Platteville. Pete Mirich Elementary and North Valley Middle School are in La Salle itself, with Valley High School a short drive away in Gilcrest.',
+          'The community has deep agricultural roots, and residents describe a close-knit, family-oriented atmosphere. For buyers who value a smaller school and a slower pace, La Salle delivers both.',
+        ],
+      },
+      {
+        heading: 'What to know before you offer',
+        paragraphs: [
+          'Because La Salle is a smaller market, inventory can be limited at any given time — so when a well-priced home appears, it can draw attention quickly. Getting pre-qualified and having a clear picture of your budget before you start touring puts you in a stronger position to act.',
+          'Buyers should also check whether a property uses municipal services or well and septic, and whether a lot includes any acreage or outbuildings. These details affect both value and ongoing costs. A local agent can help you sort through them.',
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'selling-your-home-in-la-salle-colorado',
+    title: 'Selling Your Home in La Salle, Colorado: A Seller Guide',
+    excerpt: 'How to sell a home in La Salle, CO — pricing against Weld County comps, marketing to Greeley buyers, and getting the strongest offer.',
+    date: '2026-09-11',
+    category: 'Seller Tips',
+    image: '/images/la-salle.png',
+    readTime: '5 min read',
+    keywords: 'selling a home in La Salle Colorado, sell my home La Salle CO, La Salle home value, La Salle listing agent, Weld County home selling',
+    relatedLinks: [
+      { title: 'La Salle area guide', href: '/northern-colorado-areas/la-salle/', description: 'Homes, neighborhoods, and market data' },
+      { title: 'Free home valuation', href: '/for-sellers/#home-valuation', description: 'See what your La Salle home is worth' },
+      { title: 'Sell your Northern Colorado home', href: '/for-sellers/', description: 'Listing strategy and marketing' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
+    ],
+    cta: {
+      title: 'Get a free La Salle home valuation',
+      description: 'Schwartz and Associates prices La Salle homes against live Weld County comparable sales — not an automated estimate. Call (970) 999-1407 to start.',
+      primaryHref: '/for-sellers/#home-valuation',
+      primaryText: 'Get a free home valuation',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to a local agent',
+    },
+    faqs: [
+      { q: 'How do I price my La Salle home to sell?', a: 'Price it against recent comparable sales in La Salle and nearby Weld County towns, adjusting for lot size, acreage, condition, and any outbuildings. A local comparative market analysis is the most reliable starting point.' },
+      { q: 'Who buys homes in La Salle?', a: 'Many La Salle buyers work in or near Greeley and are looking for more affordable housing or a more rural feel than in-town Greeley. Some are first-time buyers using down payment assistance.' },
+      { q: 'How long does it take to sell in La Salle?', a: 'Timeline depends on price, condition, and current demand. Because inventory can be limited, a well-priced home often moves quickly, but an overpriced home can sit. We show you current days-on-market data for La Salle.' },
+    ],
+    sections: [
+      {
+        heading: 'Pricing is everything in a small market',
+        paragraphs: [
+          'La Salle is a smaller market, so pricing has an outsized effect on results. A home priced slightly above where today\u2019s buyers are transacting can sit, while a home priced in line with true comps often draws multiple showings from Greeley-area buyers quickly.',
+          'The key is using La Salle and Weld County comparable sales — not a county-wide average or a regional trend. Acreage and outbuildings add value that an automated model frequently misses, so a hands-on valuation matters here more than in a dense subdivision.',
+        ],
+      },
+      {
+        heading: 'Marketing to the right buyer',
+        paragraphs: [
+          'The typical La Salle buyer is looking for value, space, or both, often while working in Greeley. Marketing should therefore reach the Greeley and greater Weld County buyer pool, not just the town itself. Professional photography that shows the lot and any acreage is especially important for rural properties.',
+          'Schwartz and Associates markets every La Salle listing across the Front Range buyer audience with professional photography, listing syndication, and targeted digital reach, then handles negotiation through closing.',
+        ],
+      },
+      {
+        heading: 'The pre-listing conversation',
+        paragraphs: [
+          'Before you list, we review recent La Salle sales, current active inventory, and your specific property to recommend a realistic price and any high-ROI preparation. We will also tell you honestly which repairs are worth doing and which you can skip — in a small market, that guidance can save you real money.',
+          'Start with a free, no-obligation home valuation. It costs nothing and gives you a grounded picture of what your La Salle home could bring today.',
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'la-salle-colorado-real-estate-agent',
+    title: 'La Salle, Colorado Real Estate Agent: Why Local Matters',
+    excerpt: 'What to look for in a La Salle, CO realtor — local Weld County knowledge, pricing expertise, and why a Greeley-adjacent market rewards a local agent.',
+    date: '2026-09-11',
+    category: 'Local Expertise',
+    image: '/images/la-salle.png',
+    readTime: '4 min read',
+    keywords: 'La Salle Colorado real estate agent, La Salle realtor, best realtor La Salle CO, La Salle Weld County agent, sell my home La Salle',
+    relatedLinks: [
+      { title: 'La Salle area guide', href: '/northern-colorado-areas/la-salle/', description: 'Homes, neighborhoods, and market data' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Talk to Adam or Mandi Schwartz' },
+      { title: 'Sell your home in La Salle', href: '/for-sellers/#home-valuation', description: 'Free home valuation' },
+      { title: 'La Salle homes for sale', href: '/properties/?location=La Salle, CO', description: 'Live IRES MLS listings' },
+    ],
+    cta: {
+      title: 'Work with a La Salle area agent',
+      description: 'Schwartz and Associates knows Weld County\u2019s small towns and the Greeley market that surrounds them. Call (970) 999-1407 to talk through your buy or sell.',
+      primaryHref: '/contact/',
+      primaryText: 'Contact a local agent',
+      secondaryHref: '/for-sellers/#home-valuation',
+      secondaryText: 'Get a free home valuation',
+    },
+    faqs: [
+      { q: 'Why does a local agent matter in La Salle?', a: 'La Salle is a smaller market with limited comps, so a local agent who tracks La Salle and surrounding Weld County towns can price and negotiate more accurately than someone working from regional data.' },
+      { q: 'Who is the La Salle realtor at Schwartz and Associates?', a: 'Adam and Mandi Schwartz lead Schwartz and Associates (SAA Homes), a Coldwell Banker Realty team with 20+ years of combined experience serving Weld County and all of Northern Colorado.' },
+      { q: 'Can you help me sell my home in La Salle?', a: 'Yes. We provide a free home valuation, local pricing strategy, professional marketing, and full negotiation through closing for La Salle sellers.' },
+    ],
+    sections: [
+      {
+        heading: 'A Greeley-adjacent market rewards local knowledge',
+        paragraphs: [
+          'La Salle sits just southwest of Greeley, and its real estate is shaped by Greeley demand for affordability and space. An agent who only knows Greeley may miss the rural-lot and acreage nuances that affect La Salle values; an agent who only knows small towns may not price against the Greeley buyer pool. Local expertise spans both.',
+          'That is why Schwartz and Associates keeps close tabs on La Salle alongside the surrounding Weld County towns. We can tell you what is actually selling, at what price, and how long it took — not a regional summary.',
+        ],
+      },
+      {
+        heading: 'What to look for in a La Salle realtor',
+        paragraphs: [
+          'Look for an agent who can show you recent La Salle and Weld County comps, who understands well and septic versus municipal utilities, and who is responsive. In a small market, timing matters — the right home or the right buyer does not always wait.',
+          'Ask about down payment assistance guidance if you are buying, and about a realistic pricing and marketing plan if you are selling. A good local agent will be direct about both.',
+        ],
+      },
+      {
+        heading: 'How Schwartz and Associates helps',
+        paragraphs: [
+          'Adam and Mandi Schwartz bring 20+ years of combined Northern Colorado experience to every La Salle transaction. Buyers get neighborhood guidance, lender referrals including CHFA-participating lenders, and skilled negotiation. Sellers get a free home valuation, professional marketing, and a pricing strategy grounded in live Weld County data.',
+          'Whether you are buying your first home or selling a family property, the process starts with a conversation. Call (970) 999-1407.',
+        ],
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug) {

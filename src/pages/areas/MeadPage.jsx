@@ -3,11 +3,16 @@ import AreaSEO from "../../components/AreaSEO.jsx";
 import AreaFAQSection from "../../components/AreaFAQSection.jsx";
 import RecentlySoldSection from "../../components/RecentlySoldSection.jsx";
 import { AREA_FAQS } from "../../data/areaFaqs.js";
+import { getAreaSeo } from "../../data/areaSeo.js";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
+import LatestMarketUpdateBanner from "../../components/LatestMarketUpdateBanner.jsx";
+import CityStatsBand from "../../components/CityStatsBand.jsx";
+import AreaEventsSection from "../../components/AreaEventsSection.jsx";
 
 export default function MeadPage() {
+  const area = getAreaSeo("mead");
   return (
     <>
       <AreaSEO slug="mead" />
@@ -18,7 +23,7 @@ export default function MeadPage() {
         <div className="absolute inset-0 bg-black/60"></div>
         <div className="relative z-10 text-center text-white px-6">
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">Mead, CO</h1>
-          <p className="mt-4 text-xl">Small Town Charm, Big Community Heart</p>
+          <p className="mt-4 text-xl">{area.tagline}</p>
         </div>
       </section>
 
@@ -29,11 +34,32 @@ export default function MeadPage() {
         <section className="mb-12">
           <h2 className="text-4xl font-bold mb-6">Mead, CO Area Guide</h2>
           <div className="prose prose-lg max-w-none">
-            <p className="text-lg leading-relaxed mb-4">
-              Mead is a charming small town located in Weld County, Colorado, offering residents a peaceful, family-friendly atmosphere with easy access to larger cities. With a population of approximately 5,000, Mead provides the perfect balance of small-town living and modern conveniences.
-            </p>
+            {area.introParagraphs?.map((p, i) => (
+              <p key={i} className="text-lg leading-relaxed mb-4">{p}</p>
+            ))}
           </div>
         </section>
+
+        <LatestMarketUpdateBanner variant="compact" cityName="Mead" />
+
+        <CityStatsBand city="Mead" />
+
+        {/* Why Buy in Mead? */}
+        {area.whyChoose?.length > 0 && (
+          <section className="py-16 px-6 bg-white">
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-3xl font-bold font-serif mb-8 text-center">Why Buy in Mead?</h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {area.whyChoose.map((item) => (
+                  <div key={item.title} className="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
+                    <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                    <p className="text-gray-700 text-sm leading-relaxed">{item.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Property Search CTA */}
         <section className="mb-12 bg-gray-50 p-8 rounded-lg">
@@ -42,12 +68,20 @@ export default function MeadPage() {
             <p className="text-lg mb-6 text-gray-700">
               Explore available properties in Mead, CO
             </p>
-            <Link
-              to="/properties/?location=Mead, CO"
-              className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              Search Mead Homes
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                to="/properties/?location=Mead, CO"
+                className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                Search Mead Homes
+              </Link>
+              <Link
+                to="/contact/"
+                className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+              >
+                Talk to an Agent
+              </Link>
+            </div>
           </div>
         </section>
 
@@ -221,6 +255,8 @@ export default function MeadPage() {
       <RecentlySoldSection citySlug="mead" />
 
       <AreaFAQSection faqs={AREA_FAQS['mead']} city="Mead" />
+
+      <AreaEventsSection city="Mead" slug="mead" />
 
       {/* Final CTA */}
       <section className="py-16 px-6 bg-black text-white">

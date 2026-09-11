@@ -150,10 +150,10 @@ export default function MillikenPage() {
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-6">Education in Milliken</h2>
           <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            Milliken is served by Weld County School District RE-5J, which operates schools in the area. The district is committed to providing quality education and offers programs from elementary through high school.
+            Milliken is served by Weld County School District RE-5J (Johnstown-Milliken), which operates schools across the two communities. Students in Milliken attend Milliken Elementary School and Milliken Middle School, then continue to Roosevelt High School in nearby Johnstown.
           </p>
           <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            Schools in Milliken feature dedicated teachers and comprehensive academic programs. The district's focus on student success ensures children receive a solid educational foundation.
+            Schools in Milliken feature dedicated teachers and comprehensive academic programs. The district&rsquo;s focus on student success ensures children receive a solid educational foundation from elementary through high school.
           </p>
           <p className="text-lg text-gray-700 leading-relaxed">
             Proximity to Greeley and other Northern Colorado cities provides access to additional educational resources and higher education institutions.
@@ -166,10 +166,13 @@ export default function MillikenPage() {
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-6">Location & Accessibility</h2>
           <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            Milliken is strategically located in Northern Colorado, approximately 10 miles southwest of Greeley and 15 miles east of Loveland. The town's location provides convenient access to multiple employment centers via I-25 and Highway 60.
+            Milliken is strategically located in Northern Colorado, approximately 10 miles southwest of Greeley and 15 miles east of Loveland. The town&rsquo;s location provides convenient access to multiple employment centers via I-25 and Highway 60.
+          </p>
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            Typical drive times from Milliken: Greeley about 10 minutes, Loveland about 15 minutes, Fort Collins about 20 minutes, and Denver International Airport about 55 minutes to an hour.
           </p>
           <p className="text-lg text-gray-700 leading-relaxed">
-            Denver International Airport is about 65 miles south, roughly an hour's drive. Milliken's central location offers residents easy access to urban amenities while maintaining affordable small-town living.
+            Milliken&rsquo;s central location offers residents easy access to urban amenities while maintaining affordable small-town living.
           </p>
         </div>
       </section>
@@ -231,6 +234,33 @@ export default function MillikenPage() {
             We want to ensure that you have all the information needed to make the best decisions when it comes to your home goals. When you enter your info below you will get instant access to the area's latest market report, complete with sales and demographic trends.
           </p>
           <MarketReportForm areaName="Milliken, CO" />
+        </div>
+      </section>
+
+      {/* Sell My Home in Milliken */}
+      <section className="py-16 px-6 bg-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold font-serif mb-6">Sell My Home in Milliken</h2>
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            Thinking about selling in Milliken? Schwartz and Associates brings local Weld County
+            pricing strategy, professional marketing, and responsive service to every listing. Get a
+            free, no-obligation market analysis to see what your Milliken home could bring in
+            today&rsquo;s market.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/for-sellers/#home-valuation"
+              className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Get a Free Home Valuation
+            </Link>
+            <a
+              href="tel:(970) 999-1407"
+              className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+            >
+              Call (970) 999-1407
+            </a>
+          </div>
         </div>
       </section>
 

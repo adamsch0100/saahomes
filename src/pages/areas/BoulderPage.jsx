@@ -7,6 +7,8 @@ import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
 import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
 import CityLuxurySection from "../../components/CityLuxurySection.jsx";
+import LatestMarketUpdateBanner from "../../components/LatestMarketUpdateBanner.jsx";
+import CityStatsBand from "../../components/CityStatsBand.jsx";
 
 export default function BoulderPage() {
   return (
@@ -46,14 +48,29 @@ export default function BoulderPage() {
             <p className="text-lg mb-6 text-gray-700">
               Explore available properties in Boulder, CO
             </p>
-            <Link
-              to="/properties/?location=Boulder, CO"
-              className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              Search Boulder Homes
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link
+                to="/properties/?location=Boulder, CO"
+                className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                Search Boulder Homes
+              </Link>
+              <Link
+                to="/properties/?location=Boulder%2C+CO"
+                className="text-black font-semibold underline underline-offset-4 hover:text-gray-700 transition-colors"
+              >
+                View all Boulder listings →
+              </Link>
+            </div>
           </div>
         </section>
+
+        {/* City Stats Band — live market snapshot */}
+        <div className="max-w-4xl mx-auto mb-8">
+          <CityStatsBand city="Boulder" />
+        </div>
+
+        <LatestMarketUpdateBanner />
 
         {/* Luxury Homes — deepest treatment (highest-end inventory in region) */}
         <CityLuxurySection citySlug="boulder" deep />
