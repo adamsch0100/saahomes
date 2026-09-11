@@ -3,6 +3,12 @@ import { Link } from "react-router-dom";
 
 const hubLinks = [
   {
+    title: "Search Homes for Sale",
+    href: "/properties/",
+    description: "Live IRES MLS listings across all 27 NoCO communities",
+    badge: "Browse homes",
+  },
+  {
     title: "CHFA Down Payment Assistance",
     href: "/chfa-down-payment-assistance/",
     description: "Grants & loans up to $25K for first-time buyers",
