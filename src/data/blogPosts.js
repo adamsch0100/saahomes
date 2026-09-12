@@ -10369,6 +10369,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/Johnstown-CO-Area-Guide.jpg',
     readTime: '7 min read',
+    youtubeId: 'WhG1csd7lbI',
     relatedLinks: [
       { title: 'Johnstown area guide', href: '/northern-colorado-areas/johnstown/', description: 'Neighborhoods, schools & market data' },
       { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Full-service listing & marketing' },
