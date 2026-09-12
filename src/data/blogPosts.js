@@ -9487,7 +9487,7 @@ export const blogPosts = [
       { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Grants up to $25K for qualified buyers' },
       { title: 'Northern Colorado Events Guide', href: '/blog/northern-colorado-events-guide-2026/', description: 'Things to do in Loveland and beyond' },
       { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
-      { title: 'Fort Collins vs Loveland vs Windsor', href: '/blog/fort-collins-vs-loveland-vs-windsor-comparison/', description: 'How Loveland compares to nearby cities' },
+      { title: 'Fort Collins vs Loveland vs Windsor', href: '/blog/fort-collins-vs-loveland-vs-windsor/', description: 'How Loveland compares to nearby cities' },
     ],
     cta: {
       title: 'Ready to make Loveland your home?',
