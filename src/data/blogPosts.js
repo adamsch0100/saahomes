@@ -10211,6 +10211,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/la-salle.png',
     readTime: '6 min read',
+    youtubeId: 'ml7p2h6NCw0',
     keywords: 'buying a home in La Salle Colorado, La Salle CO homes for sale, La Salle Colorado real estate, La Salle first time home buyer, Weld County homes',
     relatedLinks: [
       { title: 'La Salle area guide', href: '/northern-colorado-areas/la-salle/', description: 'Homes, neighborhoods, and market data' },
