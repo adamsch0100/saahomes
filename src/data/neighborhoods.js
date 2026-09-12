@@ -4040,6 +4040,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.555', longitude: '-104.86' },
     metaDescription: 'Severance Farms real estate - acreage and equestrian properties in a rural setting near new Severance. SAA Homes.',
     keywords: 'Severance Farms, Severance acreage, Severance equestrian properties, rural Severance homes',
+    youtubeId: 'B7wS6MaLiyI',
     neighborhoodHighlights: [
       { title: 'Rural lifestyle', description: 'Larger acreage properties with room for horses, gardens, and wide-open spaces.' },
       { title: 'Mountain views', description: 'Panoramic Front Range views from elevated sites in north Severance.' },
@@ -4071,6 +4072,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.545', longitude: '-104.853' },
     metaDescription: 'Severance Village - new walkable community near Severance schools in growing Severance. SAA Homes.',
     keywords: 'Severance Village, Severance new construction, Severance schools area, walkable Severance community',
+    youtubeId: 'S2LPg6OE0zY',
     neighborhoodHighlights: [
       { title: 'Walkable design', description: 'Planned as a walkable community with schools, parks, and future retail within walking distance.' },
       { title: 'New schools', description: 'Walking distance to brand-new Severance High School and Middle School.' },
@@ -4102,6 +4104,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.548', longitude: '-104.848' },
     metaDescription: 'Severance Green - affordable new construction homes in growing Severance with new schools. SAA Homes.',
     keywords: 'Severance Green, Severance new homes, Severance affordable subdivision, new homes Severance CO',
+    youtubeId: 'kjCkSwa6gAE',
     neighborhoodHighlights: [
       { title: 'Affordable new homes', description: 'Entry-level to mid-range new construction - one of Northern Colorado best values.' },
       { title: 'New schools', description: 'Served by brand-new Severance High School and Middle School.' },
