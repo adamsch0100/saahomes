@@ -4139,6 +4139,7 @@ export const neighborhoods = [
     walkScore: 25,
     metaDescription: 'Severance Ranch real estate - new construction homes with mountain views in growing Severance near Windsor. SAA Homes.',
     keywords: 'Severance Ranch, Severance Colorado new homes, Severance subdivisions, Severance master-planned community, Severance Ranch, Windsor border homes, Severance Middle School, new construction Severance, Weld County new homes',
+    youtubeId: 'oJuJ5xkyro0',
     neighborhoodHighlights: [
       { title: 'Growing community', description: 'Severance is one of Weld County\'s fastest-growing towns with new amenities arriving regularly.' },
       { title: 'Newer homes', description: 'All homes built 2018 or later with modern floor plans and energy-efficient features.' },
@@ -4173,6 +4174,7 @@ export const neighborhoods = [
     walkScore: 22,
     metaDescription: 'Buffalo Ridge Severance real estate - established homes on larger lots with country atmosphere near Windsor. SAA Homes.',
     keywords: 'Buffalo Ridge Severance, established Severance neighborhoods, Severance acreage, larger lot homes Severance, Windsor area real estate, Weld County country homes, Severance Colorado real estate',
+    youtubeId: 'rYWLrtdE7xg',
     neighborhoodHighlights: [
       { title: 'Established setting', description: 'Mature trees and established landscaping on larger lots - a more settled Severance neighborhood.' },
       { title: 'Space and privacy', description: 'Generous lot sizes provide space for gardens, animals, and outdoor living.' },
@@ -4209,6 +4211,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.3450', longitude: '-104.9100' },
     metaDescription: 'Johnstown Colorado real estate guide — affordable homes near I-25, growing town center, and small-town community feel. Expert agents from SAA Homes.',
     keywords: 'Johnstown Colorado homes, Johnstown real estate, Johnstown Commons, Johnstown town center, I-25 homes Colorado, Weld County real estate',
+    youtubeId: 'tLzt8g3V4YA',
     neighborhoodHighlights: [
       { title: 'I-25 access', description: 'Located right on I-25 — 45 minutes to downtown Denver, 15 minutes to Fort Collins.' },
       { title: 'Affordable entry', description: 'One of Northern Colorado\'s most affordable markets — get more home for your budget.' },
