@@ -1,6 +1,7 @@
 # Citation Tracker — SAA Homes / Schwartz and Associates
 
-> Last updated: 2026-09-10
+> Last updated: 2026-09-13
+> 2026-09-13 re-probe (box 54.241.204.220): iBegin 403 cf-challenge, FreeListingUSA 403, Lacartes 403, Opendi 403, MisterWhat CF.php loop, B2BListings UNREACHABLE (000×3 — was working-but-no-category), fyple AU-gate, magicyellow parked (easyDNS), uscity fee-gate ($29.99), ThreeBestRated form live 200. ZERO directory citations buildable from this IP. Also: native browser backend is DOWN on this host (Browserbase CDP endpoint absent) and chromium NOT installed (playwright module ok; dpkg lock held by other process during install); mail_find.py + dir_common.py MISSING from repo (`~/scripts/` empty) — restore before next native-browser claim attempt.
 > Status key: ✅ built | 🔄 in-progress | ❌ blocked | ⚠️ needs_human | 📝 drafted | 🗑️ dead
 
 ## Priority Platforms
@@ -22,10 +23,10 @@
 | MagicYellow.com | 🗑️ dead | Parked domain (easyDNS). No submission path exists. |
 | Fyple.biz | ❌ blocked | AU geo-gated registration (this is US IP). Fyple.com register page in maintenance. |
 | USCity.net | ⚠️ fee-gated | Email signup WORKS at signup.uscity.net (full name/email/password form + business details form with canonical NAP). Account created for Adam Schwartz (adam@saahomes.com). NO existing SAA listing found. BLOCKED at identity verification step: requires $29.99 one-time fee. **Discovery Sep 10 2026** — tracker previously said Facebook-OAuth only (stale). Account exists; needs Adam approval for $29.99 to finalize listing. |
-| FreeListingUSA.com | ❌ blocked | Turnstile loop on register+create-listing (headless + headed Xvfb). |
+| FreeListingUSA.com | ❌ blocked | HTTP 403 Cloudflare challenge (Sep 13 — worse than Aug Turnstile-loop). Needs residential proxy. |
 | Opendi.com / Opendi.us | ❌ blocked | Opendi.com now fully Cloudflare-walled (worse than Aug 24 — was corporate portal, now Turnstile interstitial). Opendi.us = IP-blocked. |
-| B2BListings.org | ⚠️ skipped | Free form live but no real-estate category (closest = Property Surveyors). Miscategorization fails human review. |
-| Lacartes.com | ❌ blocked | Connection timeout (Sep 10 — worse than Aug 24 Cloudflare block). |
+| B2BListings.org | ❌ blocked | Sep 13: site UNREACHABLE (000 timeout ×3) — regression from Aug 24 (free form worked but no real-estate category = integrity-gate skip anyway). |
+| Lacartes.com | ❌ blocked | Sep 13: HTTP 403 Cloudflare (was connection timeout Sep 10). |
 | MisterWhat.com | ❌ blocked | Cloudflare.php interstitial loops indefinitely. |
 | Yelp | ❌ blocked | DataDome captcha. Needs residential proxy or manual claim. |
 | Manta | ❌ blocked | Cloudflare Turnstile. Needs residential proxy. |
