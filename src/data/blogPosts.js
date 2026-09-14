@@ -10289,6 +10289,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/la-salle.png',
     readTime: '5 min read',
+    youtubeId: '2gKIr5MWrLw',
     keywords: 'selling a home in La Salle Colorado, sell my home La Salle CO, La Salle home value, La Salle listing agent, Weld County home selling',
     relatedLinks: [
       { title: 'La Salle area guide', href: '/northern-colorado-areas/la-salle/', description: 'Homes, neighborhoods, and market data' },
@@ -10489,14 +10490,14 @@ export const blogPosts = [
     },
   },
   {
-    slug: "how-much-is-my-home-worth-loveland",
+    slug: 'how-much-is-my-home-worth-loveland',
     title: "How Much Is My Home Worth in Loveland, CO? 2026 Home Value Guide",
     excerpt: "Wondering what your Loveland home is worth in 2026? Learn how home values work in the current Loveland market, what the August 2026 data shows, and how to get an accurate, free data-driven valuation of your Loveland home from SAA Homes.",
     date: "2026-09-13",
     category: "Seller Tips",
     image: "/images/Loveland-CO-Area-Guide.jpg",
     readTime: "8 min read",
-    youtubeId: "",
+    youtubeId: '4cbn11G3mug',
     keywords: "how much is my home worth loveland, loveland home value 2026, what is my loveland house worth, free home valuation loveland, loveland home appraisal, loveland housing market 2026, zestimate vs cma loveland, loveland home price estimate, sell my home loveland, loveland co home value estimate",
     relatedLinks: [
       { title: "Loveland Colorado real estate guide", href: "/northern-colorado-areas/loveland/", description: "Neighborhoods, schools & market data" },
