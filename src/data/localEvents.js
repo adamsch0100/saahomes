@@ -467,6 +467,32 @@ export const cityEvents = {
       officialUrl: 'https://niwot.com/',
     },
   ],
+  'estes-park': [
+    {
+      name: 'Autumn Gold Festival',
+      season: 'Fall',
+      typicalMonths: 'September',
+      dates: 'Sep 26–27, 2026',
+      description: 'The Estes Valley Sunrise Rotary Autumn Gold Festival brings two days of live music, brats, and beer to Bond Park in downtown Estes Park — a favorite fall gathering at the gateway to Rocky Mountain National Park.',
+      officialUrl: 'https://www.visitestespark.com/events-calendar/fall-events/autumn-gold-festival/',
+    },
+    {
+      name: 'Elk Fest',
+      season: 'Fall',
+      typicalMonths: 'October',
+      dates: 'Oct 3–4, 2026',
+      description: 'A free, family-friendly celebration of the annual elk rut with wildlife exhibits, Native American music and storytelling, craft vendors, live entertainment, and the popular bugling contest at Bond Park.',
+      officialUrl: 'https://visitestespark.com/events-calendar/fall-events/elk-fest',
+    },
+    {
+      name: 'Longs Peak Scottish-Irish Highland Festival',
+      season: 'Fall',
+      typicalMonths: 'September',
+      dates: 'Sep 11–13, 2026',
+      description: 'The 50th annual celebration of Celtic culture in Estes Park — pipe bands, Highland athletics, clan tents, and the Estes Park International Tattoo.',
+      officialUrl: 'https://scotfest.com/',
+    },
+  ],
 };
 
 /** Nearby cities whose events are relevant for cross-promotion */
@@ -541,6 +567,7 @@ const CITY_DISPLAY = {
   evans: 'Evans',
   severance: 'Severance',
   niwot: 'Niwot',
+  'estes-park': 'Estes Park',
 };
 
 export function getCityDisplayName(slug) {
