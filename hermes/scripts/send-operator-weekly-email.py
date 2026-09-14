@@ -92,11 +92,12 @@ def build_html(pack: dict[str, Any]) -> str:
         </section>
         """
 
+    time_est = pack.get("time_estimate") or "~30 min this week (social paste + optional outreach review)"
     return f"""<!DOCTYPE html>
 <html><body style="font-family:Arial,sans-serif;color:#111;max-width:720px;margin:0 auto;padding:16px;">
   <h1 style="font-size:22px;">📅 Your week — {week_label}</h1>
   <p>{intro}</p>
-  <p><strong>Total time:</strong> ~30 min this week (social paste + optional outreach review)</p>
+  <p><strong>Total time:</strong> {esc(time_est)}</p>
   {pending_html}
   <h2 style="font-size:18px;margin-top:24px;">Day-by-day schedule</h2>
   {schedule_html}

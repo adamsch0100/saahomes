@@ -1,0 +1,77 @@
+{
+  "subject": "SAA Homes — Your week | Sep 14 – Sep 20",
+  "week_label": "Sep 14 – Sep 20, 2026",
+  "time_estimate": "~10-15 min this week (lead follow-up + optional outreach review — social is fully automated)",
+  "intro": "✅ Back on cadence: last email covered Sep 7-13 (sent late Sep 9 after the Sep 4-9 cron daemon outage). This one is on time. BIG week behind us: the September market update is now LIVE (https://saahomes.com/blog/northern-colorado-market-update-september-2026/ — auto-queued to Buffer Sep 10), and September blog output is at 27 posts per src/data/blogPosts.js — the newest being TODAY's Estes Park trio (realtor / 2026 market / seller guide, all live) and PR #187: FAQPage schema + visible FAQ sections on ALL 343 neighborhood pages plus 5 CHFA FAQs on the first-time-buyer post — the richest GEO/rich-result expansion yet. Since the Sep 9 schedule: 14+ blogs and pages shipped (moving-to-Fort Collins & Loveland guides, Johnstown buyer/seller + sell-my-house-fast, short-sale-vs-foreclosure, La Salle x3, Eaton x2, Loveland home-value guide #186, Estes x3), YouTube embeds on 8+ posts, 40 verified money-page backlinks (GitHub hub, Telegraph x2, Write.as x2, Archive.org x4 — Sep 10), city-audit fixes for 7 cities (#182), and 5 new crawl paths into /properties/ (#183). Social: fully automated via Buffer — your other host deployment owns the queue and posted the Sept market update + Erie market update same-day; this host's duplicate social cron is recommended for disable (not urgent). ⚠️ Two small infra to-dos (5 min, optional): (1) BUFFER_API_KEY and (2) OUTREACH_SMTP_* still aren't in /data/hermes-homes/saa-homes/.env — this box recovers them from session history each run (worked again today), but adding them makes every email/social cron self-sufficient. ⚠️ Fleet: 18/52 jobs errored — 10 killed by gateway shutdowns (Sept outage aftermath: conversion-surge, geo-citation-audit, competitor-content-watch, content-gap-offense, keyword-opportunity-engine, city-audit-batch-2, monthly-market-digital-press + 3; monthly-market-blog was among them but its output — the Sept update — shipped anyway). Others are config gaps (city-audit-batch-4 + timnath-wellington-johnstown-fixes-batch: provider drift; alerts/outbox/grok scripts absent). Most auto-re-dispatched; if you don't see expected output on the site, flag it. No unsent social packs exist (outreach/pending/ doesn't exist = clean).",
+  "pending_social_packs": [],
+  "schedule": [
+    {
+      "day": "Monday",
+      "date": "Sep 14",
+      "priority": "optional",
+      "tasks": [
+        "Read this email — your week at a glance (~1 min)",
+        "Skim Hermes war room on Telegram (rankings were clean: 34/35 URLs OK on today's HTTP patrol; the only anomaly is the known /homes-for-sale/ SPA catch-all — not a real page)",
+        "Follow Up Boss — weekend form leads; market report leads = same-day call/text",
+        "Optional 5-min infra pass: add BUFFER_API_KEY + OUTREACH_SMTP_HOST/USER/PASSWORD (+ SOCIAL_POST_EMAIL_TO) to /data/hermes-homes/saa-homes/.env — see intro. Not blocking anything today.",
+        "No social tasks — all posts auto-queued via Buffer"
+      ],
+      "notes": "Shipped today: PR #187 (FAQPage schema on 343 neighborhood pages), Estes Park x3 blogs (all live), Estes schools/events data."
+    },
+    {
+      "day": "Tuesday",
+      "date": "Sep 15",
+      "priority": "optional",
+      "tasks": [
+        "Follow Up Boss — speed-to-lead on any new contact or CHFA form submissions",
+        "Social posts: queued automatically via Buffer — no action needed."
+      ]
+    },
+    {
+      "day": "Wednesday",
+      "date": "Sep 16",
+      "priority": "high",
+      "tasks": [
+        "Competitor content watch results (if flagged on Telegram — Kittle/All Avenue scans)",
+        "Social posts: queued automatically via Buffer — no action needed.",
+        "FUB mid-week lead check"
+      ],
+      "notes": "Rotation Week 3 — community/city focus. Newest content (Sept market update, Estes Park batch) is already queued by the peer host; no pack to paste."
+    },
+    {
+      "day": "Thursday",
+      "date": "Sep 17",
+      "priority": "high",
+      "tasks": [
+        "Telegram OUTREACH REVIEW — reply 'approved' / 'edit: …' / 'skip' (none were pending last week, so this may be empty — that's fine)",
+        "Social posts: queued automatically via Buffer — no action needed.",
+        "GEO citation audit results if flagged; FUB check"
+      ]
+    },
+    {
+      "day": "Friday",
+      "date": "Sep 18",
+      "priority": "optional",
+      "tasks": [
+        "Follow Up Boss — close out open leads from the week",
+        "Backlog enforcer ships remaining city-audit-wave fixes + Estes/lead-CRO batches automatically — no action",
+        "Social posts: queued automatically via Buffer — no action needed."
+      ]
+    },
+    {
+      "day": "Weekend",
+      "date": "Sep 19-20",
+      "priority": "optional",
+      "tasks": [
+        "Monitor FUB for new leads only — no posting tasks; Buffer covers all social"
+      ]
+    }
+  ],
+  "standing_reminders": [
+    "Market report form leads = high intent — call/text same business day",
+    "Social posts are fully automated via Buffer — no manual posting of any kind",
+    "Never use Browserbase for social — email packs only",
+    "Hermes handles site SEO/blog/deploy — you handle leads + outreach approval",
+    "~10-15 min/week total: if it's taking longer, tell Hermes to fix the process"
+  ]
+}

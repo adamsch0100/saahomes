@@ -20,11 +20,12 @@ last_social_pillar: market-intelligence
 rotation_week_index: 3
 last_3_social_hooks: ["September 2026 NoCo Market Update live — inventory climbing in FC/Loveland/Windsor/Greeley, best buyer leverage since early 2022 (Sep 10, posted to Buffer same day).", "Erie's fall 2026 housing market — growing inventory, smart pricing from Colliers Hill to Vista Ridge (Sep 9).", "September in NoCo: FoCo Food Truck Rally + can't-miss community events across Northern Colorado (Sep 9)."]
 monthly_market_blog_url: https://saahomes.com/blog/northern-colorado-market-update-september-2026/
-blogs_published_this_month: 16 (boulder-colorado-real-estate-agent, erie-colorado-real-estate-agent, severance-colorado-real-estate-agent, boulder-luxury-neighborhoods-guide, windsor-co-real-estate-agent, erie-colorado-housing-market-fall-2026, chfa-first-generation-program-colorado, chfa-disability-down-payment-assistance-colorado, chfa-income-limits-colorado-northern-cities, short-sale-greeley-colorado, northern-colorado-market-update-september-2026, moving-to-loveland-colorado-guide, buying-a-home-in-johnstown, selling-your-home-in-johnstown, how-much-is-my-home-worth-fort-collins, moving-to-fort-collins-colorado-guide)
-pending_social_packs: 18 (see operator-week-2026-08-17.json for full list)
+blogs_published_this_month: 27 (windsor-co-real-estate-agent, boulder-colorado-real-estate-agent, erie-colorado-housing-market-fall-2026, chfa-first-generation-program-colorado, chfa-disability-down-payment-assistance-colorado, erie-colorado-real-estate-agent, severance-colorado-real-estate-agent, chfa-income-limits-colorado-northern-cities, short-sale-greeley-colorado, boulder-luxury-neighborhoods-guide, northern-colorado-market-update-september-2026, moving-to-loveland-colorado-guide, buying-a-home-in-johnstown, selling-your-home-in-johnstown, how-much-is-my-home-worth-fort-collins, moving-to-fort-collins-colorado-guide, short-sale-vs-foreclosure-colorado, living-in-eaton-colorado, eaton-colorado-real-estate-market-2026, buying-a-home-in-la-salle-colorado, selling-your-home-in-la-salle-colorado, la-salle-colorado-real-estate-agent, selling-my-home-fast-in-johnstown, how-much-is-my-home-worth-loveland, estes-park-colorado-real-estate-agent, estes-park-colorado-housing-market-2026, selling-your-home-in-estes-park-colorado) — verified from src/data/blogPosts.js 2026-09-14
+pending_social_packs: 0 (Aug 17 backlog auto-posted via Buffer Aug 18-Sep 4; no unsent packs — see operator-week-2026-09-14.json)
+last_operator_schedule_date: 2026-09-14 (week Sep 14-20 emailed; prior covers Sep 7-13 sent late Sep 9)
 latest_market_update_slug: northern-colorado-market-update-september-2026
-last_events_check_date: 2026-08-01
-next_notable_event: Larimer County Fair (Jul 31-Aug 4) + Sculpture in the Park (Aug 7-9) — both posted to Buffer 2026-08-01
+last_events_check_date: 2026-09-09
+next_notable_event: per src/data/localEvents.js (reviewed 2026-09-09; Estes Park schools+events rows added 2026-09-14)
 events_guide_last_refresh: 2026-06-29
 latest_events_guide_slug: northern-colorado-events-guide-2026
 events_social_packs_this_quarter: 2
@@ -523,3 +524,13 @@ Week of 2026-08-03:
 - Serper GEO check (10 rotating queries): SAA not in top-10 organics on any (dominion gap, authority lever). PAA gaps on 3 of 10 queries fixed this run. Kittle has FAQPage + AggregateRating (GEO competitor); Soukup + fasthomesalecolorado have zero GEO markup
 - PR shipped: #177 GEO: add PAA-targeted buyer FAQs (merged squash d0d4f37, live verified)
 - Next gap: schema layer complete — AI citation unlock is organic rank/authority (link building + blog cadence). Optional: SpeakableSpecification if Assistant voice surfaces; watch Kittle GEO depth quarterly
+
+## Daily Ranking Strike — 2026-09-13
+
+GSC API UNAVAILABLE on this host (no /opt/data/credentials/gsc-key.json — main host has creds). Ran full HTTP coverage sweep instead (35 URLs: all 27 area pages + 8 money pages): 34/35 OK, HTTP 200, canonical self, in sitemap (918 sitemap URLs, 400 listing detail URLs). Last GSC snapshot (2026-09-10): 9,139 imp / 45 clicks (prev 4,591/30, ~2x WoW), 0 alerts, 2 P0 flags (vista-ridge-erie, west-loveland) both verified HTTP 200 — low-volume fluctuation only. Only anomaly: bare /homes-for-sale/ is SPA catch-all soft-404 (canonicalizes to homepage, not in sitemap) — NOT a real page/P0. Clean run, nothing to ship. Helper: scripts/ranking_strike_http_fallback.py.
+
+*Report generated: 2026-09-13T03:45:00*
+
+## Daily Ranking Strike — 2026-09-14
+
+GSC API UNAVAILABLE on this host (no /opt/data/credentials/gsc-key.json). HTTP patrol proxy run: indexation_patrol_http.py 15/15 P0 URLs OK (HTTP 200, canonical self, sitemap: 922 URLs); ranking_strike_http_fallback.py 34/35 OK — only anomaly is bare /homes-for-sale/ (undefined route → SPA catch-all shell, canonicalizes to homepage, not in sitemap; same known soft-404 from 09-13, NOT a real page/P0; verified /sell/, /buy/ same pattern). No regression, nothing to ship. Optional hygiene (blocked: GITHUB_TOKEN absent this host): add '/homes-for-sale': '/properties/', '/sell': '/for-sellers/', '/buy': '/for-buyers/' to canonicalRedirects in backend/src/server.js. Last GSC snapshot (09-10): 9,139 imp / 45 clicks, 0 alerts.
