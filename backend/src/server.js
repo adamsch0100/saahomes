@@ -83,6 +83,11 @@ const canonicalRedirects = {
   '/first-time-home-buyer': '/for-buyers/',
   '/first-time-buyer': '/for-buyers/',
   '/sellers': '/for-sellers/',
+  // Cash-intent money URL: bare /homes-for-sale/ has NO route (the real
+  // search page is /properties/, listings live under /homes-for-sale/{slug}/).
+  // It used to fall through to the SPA shell serving homepage copy + homepage
+  // canonical (soft-404, duplicate-homepage signal) — 301 → /properties/.
+  '/homes-for-sale': '/properties/',
   '/featured-areas': '/northern-colorado-areas/',
   '/helpful-guides': '/blog/',
   '/home-valuation': '/for-sellers/',
