@@ -4243,6 +4243,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.315', longitude: '-104.93' },
     metaDescription: 'Johnstown Crossing - newer homes near I-25 in growing Johnstown. SAA Homes.',
     keywords: 'Johnstown Crossing, Johnstown new homes, I-25 Johnstown, affordable Johnstown real estate',
+    youtubeId: '9Ahm2DWCk3A',
     neighborhoodHighlights: [
       { title: 'I-25 access', description: 'Located just off I-25 - 15 minutes to Loveland, 45 minutes to Denver.' },
       { title: 'Newer homes', description: 'Modern construction with energy-efficient features and contemporary floor plans.' },
@@ -4274,6 +4275,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.33', longitude: '-104.92' },
     metaDescription: 'Johnstown Village - historic central Johnstown homes with walkable downtown access. SAA Homes.',
     keywords: 'Johnstown Village, historic Johnstown homes, downtown Johnstown real estate, Johnstown Colorado neighborhoods',
+    youtubeId: 'qmgqBmzFEIA',
     neighborhoodHighlights: [
       { title: 'Historic character', description: 'Johnstown original neighborhood with historic homes, mature trees, and small-town charm.' },
       { title: 'Walkable downtown', description: 'Walk to Johnstown historic downtown with local shops, dining, and community events.' },
@@ -4305,6 +4307,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.32', longitude: '-104.935' },
     metaDescription: 'Johnstown Village West - newer homes near I-25 in growing Johnstown. SAA Homes.',
     keywords: 'Johnstown Village West, Johnstown Colorado new construction, I-25 corridor Johnstown, affordable Johnstown homes',
+    youtubeId: 'wQiVchqhsNE',
     neighborhoodHighlights: [
       { title: 'I-25 access', description: 'Located just off I-25 - convenient commuting to Fort Collins, Loveland, and Denver.' },
       { title: 'Newer homes', description: 'Modern construction with open floor plans and energy-efficient features.' },
