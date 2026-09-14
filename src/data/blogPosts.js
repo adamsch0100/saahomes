@@ -4279,6 +4279,28 @@ export const blogPosts = [
         ],
       },
     ],
+    faqs: [
+      {
+        q: 'What is the minimum down payment for a first home in Colorado?',
+        a: 'Many Colorado first-time buyers put down 3% to 5% on conventional loans, and VA and USDA loans can allow 0% down for qualified borrowers. With CHFA programs, qualified buyers may receive down payment assistance that covers most or all of their down payment — so the practical minimum of your own funds can be $1,000 or less depending on the program and lender. Ask your CHFA Participating Lender for the exact figure for your situation.',
+      },
+      {
+        q: 'How does CHFA down payment assistance work for first-time buyers?',
+        a: 'CHFA (Colorado Housing and Finance Authority) offers down payment assistance as grants you never repay or as deferred second mortgages you repay when you sell, refinance, or move out. Popular 2026 programs include FirstStep (up to $25,000 or more in assistance), SmartStep (HFA Preferred conventional with reduced mortgage insurance), and Preferred (conventional financing paired with CHFA DPA). You typically need to meet first-time buyer requirements, complete an approved homebuyer education class, have a 620+ credit score, and confirm current income and purchase price limits with a participating lender.',
+      },
+      {
+        q: 'What are the CHFA income limits for Northern Colorado in 2026?',
+        a: '2026 CHFA limits vary by county and household size. In Larimer County, 1-2 person household income limits are roughly $130,000 to $156,000, with purchase price limits of approximately $664,000 to $812,000. Weld County limits tend to be more generous — up to about $153,600 to $179,200 for 1-2 person households. Limits change annually, so confirm the current numbers with a CHFA Participating Lender for your county and household size.',
+      },
+      {
+        q: 'What credit score do I need to buy a first home in Colorado?',
+        a: 'Most CHFA and conventional programs require a minimum mid-credit score of 620-640, though some FHA programs can accept lower scores. Your debt-to-income ratio generally needs to stay under 43-50 percent depending on the loan type. A local mortgage lender can tell you exactly where you stand before you start touring homes.',
+      },
+      {
+        q: 'Is 2026 a good year to buy a first home in Northern Colorado?',
+        a: 'Interest rates stabilized through mid-2026 compared with the volatile 2023-2024 period, and Northern Colorado offers a wide range of price tiers — Greeley and Evans sit well below the state average while Fort Collins and Windsor offer strong job bases and top-rated schools. That combination gives first-time buyers more predictable monthly payments and real options at multiple price points.',
+      },
+    ],
   },
   {
     slug: 'is-windsor-colorado-expensive-to-live',
@@ -4431,7 +4453,7 @@ export const blogPosts = [
         ],
       },
     ],
-  },
+    },
   {
     slug: 'best-neighborhoods-fort-collins-2026',
     title: 'Best Neighborhoods in Fort Collins CO (2026): Prices, Schools & Map',
