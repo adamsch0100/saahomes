@@ -534,3 +534,32 @@ GSC API UNAVAILABLE on this host (no /opt/data/credentials/gsc-key.json — main
 ## Daily Ranking Strike — 2026-09-14
 
 GSC API UNAVAILABLE on this host (no /opt/data/credentials/gsc-key.json). HTTP patrol proxy run: indexation_patrol_http.py 15/15 P0 URLs OK (HTTP 200, canonical self, sitemap: 922 URLs); ranking_strike_http_fallback.py 34/35 OK — only anomaly is bare /homes-for-sale/ (undefined route → SPA catch-all shell, canonicalizes to homepage, not in sitemap; same known soft-404 from 09-13, NOT a real page/P0; verified /sell/, /buy/ same pattern). No regression, nothing to ship. Optional hygiene (blocked: GITHUB_TOKEN absent this host): add '/homes-for-sale': '/properties/', '/sell': '/for-sellers/', '/buy': '/for-buyers/' to canonicalRedirects in backend/src/server.js. Last GSC snapshot (09-10): 9,139 imp / 45 clicks, 0 alerts.
+
+
+## Lead attribution log
+
+Week of 2026-09-05 (FALLBACK brief — GSC/GA4 API blocked on host; no service-account key in /opt/data/credentials/).
+
+| Landing Page | GSC Impressions (last-known 08-03 wk) | Position | GA4 Leads | Gap? | CRO Action (verified 2026-09-14) |
+|---|---|---|---|---|---|
+| /chfa-schools-to-home/ | 233 | 8.9 | 0 | ⚠️ | Form infra OK in live bundle; SERP lost to chfainfo + Kennar — needs above-fold program form + fresh 2026 terms/limits |
+| /chfa-down-payment-assistance/ | 149 | 65.1 | 0 | ⚠️ | Lead page (leader) intact; needs city DPA sub-section refresh + program form CTA after hero |
+| /blog/cash-home-buyers-fort-collins-northern-colorado/ | 145 | 11.4 | 0 | ⚠️ | SERP investor-dominated (iBuyers); reposition to seller consulting CTA (market report) not investor keywords |
+| /colorado-champions-home-loan-program/ | 84 | 30.4 | 0 | ⚠️ | ADD Aug 12 2026 effective date + first-responder expansion (SB26-053, verified DRE) — stale program page |
+| /blog/northern-colorado-market-update-august-2026/ | 45 | 6.2 | 0 | ⚠️ | Refresh to Sept update; add end-of-post lead magnet |
+| /blog/seller-concession-cheat-sheet-northern-colorado/ | 38 | 21.1 | 0 | ⚠️ | Add inline CTA + market report magnet |
+| /blog/best-neighborhoods-fort-collins-2026/ | 34 | 33.9 | 0 | ⚠️ | Add inline CTA + buyer guide magnet |
+| /blog/fort-collins-vs-loveland-vs-windsor/ | 32 | 6.9 | 0 | ⚠️ | Add inline CTA + market report magnet |
+| /northern-colorado-areas/longmont/st-vrain-village/ | 28 | 28.5 | 0 | ⚠️ | Add city market report CTA + neighborhood signup |
+| /blog/weld-county-vs-larimer-county-buyer-guide/ | 26 | 6.0 | 0 | ⚠️ | Add inline CTA + buyer guide magnet |
+
+Live checks 2026-09-14 (via live bundle index-84c53e4d.js + HTTP sweep):
+- Indexation: 15/15 P0+rotating pages HTTP 200, canonical self, in sitemap (922 URLs) — all green.
+- CRO infra VERIFIED: email+phone required:!0, name/email/phone/interest fields, ?interest= params preserved.
+- GA4 lead events wired in live bundle: generate_lead + saa_lead_submit.
+- SERP probes (web_search, directional): SAA absent top-8 for 'chfa schools to home', 'cash home buyers fort collins', 'colorado champions home loan program', 'best realtor fort collins' — Kennar owns Schools-to-Home cluster, iBuyers own cash-buyer SERP, Kittle owns best-realtor (pos 3).
+
+Script fixes shipped (PR #189, merged 90d1a9a1e3): rowLimit 25000, END_DATE -2d lag, GA4 max(generate_lead, saa_lead_submit) dedupe, append lead pages. Ready to run when creds restored:
+GA4_CREDENTIALS=/opt/data/credentials/gsc-key.json ./.venv/bin/python run_lead_attribution.py
+
+*Report generated: 2026-09-14T14:38:44Z (cron fallback)*
