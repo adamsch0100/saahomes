@@ -41,6 +41,8 @@ export const CORE_CITIES = [
   { city: 'Evans', slug: 'evans' },
   { city: 'Severance', slug: 'severance' },
   { city: 'Niwot', slug: 'niwot' },
+  // Corridor additions — not in the original 19, but area pages serve them.
+  { city: 'Estes Park', slug: 'estes-park' },
 ];
 
 const LEVEL_RE =

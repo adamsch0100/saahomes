@@ -277,6 +277,10 @@ export default function ForSellersPage() {
             <a href="/northern-colorado-areas/timnath/" className="text-black hover:underline">Sell a Home in Timnath</a>
             <a href="/northern-colorado-areas/berthoud/" className="text-black hover:underline">Sell a Home in Berthoud</a>
             <a href="/northern-colorado-areas/severance/" className="text-black hover:underline">Sell a Home in Severance</a>
+            <a href="/northern-colorado-areas/estes-park/" className="text-black hover:underline">Sell a Home in Estes Park</a>
+            <a href="/northern-colorado-areas/red-feather-lakes/" className="text-black hover:underline">Sell a Home in Red Feather Lakes</a>
+            <a href="/northern-colorado-areas/lyons/" className="text-black hover:underline">Sell a Home in Lyons</a>
+            <a href="/northern-colorado-areas/bellvue/" className="text-black hover:underline">Sell a Home in Bellvue</a>
           </div>
         </div>
       </section>

@@ -132,6 +132,10 @@ export default function ForBuyersPage() {
                 <a href="/northern-colorado-areas/windsor/" className="text-black font-semibold hover:underline">Windsor Guide</a>
                 <a href="/northern-colorado-areas/greeley/" className="text-black font-semibold hover:underline">Greeley Guide</a>
                 <a href="/northern-colorado-areas/timnath/" className="text-black font-semibold hover:underline">Timnath Guide</a>
+                <a href="/northern-colorado-areas/estes-park/" className="text-black font-semibold hover:underline">Estes Park Guide</a>
+                <a href="/northern-colorado-areas/red-feather-lakes/" className="text-black font-semibold hover:underline">Red Feather Lakes Guide</a>
+                <a href="/northern-colorado-areas/lyons/" className="text-black font-semibold hover:underline">Lyons Guide</a>
+                <a href="/northern-colorado-areas/bellvue/" className="text-black font-semibold hover:underline">Bellvue Guide</a>
               </div>
               <a href="/northern-colorado-areas/" className="text-black font-semibold hover:underline">Explore All Areas →</a>
             </div>
