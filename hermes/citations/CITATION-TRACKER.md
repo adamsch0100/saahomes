@@ -1,7 +1,7 @@
 # Citation Tracker — SAA Homes / Schwartz and Associates
 
-> Last updated: 2026-09-13
-> 2026-09-13 re-probe (box 54.241.204.220): iBegin 403 cf-challenge, FreeListingUSA 403, Lacartes 403, Opendi 403, MisterWhat CF.php loop, B2BListings UNREACHABLE (000×3 — was working-but-no-category), fyple AU-gate, magicyellow parked (easyDNS), uscity fee-gate ($29.99), ThreeBestRated form live 200. ZERO directory citations buildable from this IP. Also: native browser backend is DOWN on this host (Browserbase CDP endpoint absent) and chromium NOT installed (playwright module ok; dpkg lock held by other process during install); mail_find.py + dir_common.py MISSING from repo (`~/scripts/` empty) — restore before next native-browser claim attempt.
+> Last updated: 2026-09-14
+> 2026-09-14 re-probe (box 54.241.204.220, 18:01 UTC): identical to Sep 13 — iBegin/FreelistingUSA/Lacartes/Opendi all 403 CF "Just a moment..."; MisterWhat 302→CF.php loop; fyple AU-gate; magicyellow parked (easyDNS); uscity fee-gate ($29.99); ThreeBestRated form live 200 (needs_human: reCAPTCHA v2 + CO license + reviews). **Delta:** B2BListings REACHABLE again (200; was 000 Sep 13) but category list unchanged — no real-estate category (closest = Property Surveyors) = integrity-gate skip. Still ZERO directory citations buildable from this IP. **Native browser confirmed DOWN again (browser_exec: "Chromium browser is missing — npx agent-browser install"); no OUTREACH_SMTP_*/IBEGIN_*/SERPER keys in /root/.hermes/.env (only commented EMAIL_IMAP_* stubs) → email-confirm flow unavailable; mail_find.py exists at skills/seo/link-building/scripts/mail_find.py but no creds to run it.** Fallback free channels (Telegraph/Write.as/Paste.rs) remain the productive path.
 > Status key: ✅ built | 🔄 in-progress | ❌ blocked | ⚠️ needs_human | 📝 drafted | 🗑️ dead
 
 ## Priority Platforms
