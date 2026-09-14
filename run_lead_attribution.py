@@ -5,9 +5,10 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 
 # ------------------------------------------------------------------
-# Dates
+# Dates — GSC API lags web UI ~48h; push END back 2 days so both
+# GSC and GA4 windows cover identical, complete days.
 # ------------------------------------------------------------------
-END_DATE = datetime.now().date()
+END_DATE = datetime.now().date() - timedelta(days=2)
 START_DATE = END_DATE - timedelta(days=7)
 WEEK_LABEL = START_DATE.strftime("%Y-%m-%d")
 
@@ -38,7 +39,7 @@ req_body = {
     "startDate": START_DATE.isoformat(),
     "endDate": END_DATE.isoformat(),
     "dimensions": ["page"],
-    "rowLimit": 50,
+    "rowLimit": 25000,
     "aggregationType": "auto",
 }
 try:
@@ -64,7 +65,7 @@ req_body_q = {
     "startDate": START_DATE.isoformat(),
     "endDate": END_DATE.isoformat(),
     "dimensions": ["query", "page"],
-    "rowLimit": 50,
+    "rowLimit": 25000,
     "aggregationType": "auto",
 }
 try:
@@ -96,39 +97,31 @@ GA4_PROPERTY_ID = os.getenv("GA4_PROPERTY_ID", "356028551")
 ga4_leads_by_page = defaultdict(int)
 try:
     ga4_client = BetaAnalyticsDataClient.from_service_account_file(GSC_CREDENTIALS_PATH)
-    # Query BOTH lead events: generate_lead (recommended) and saa_lead_submit
-    # (custom event that registers in GA4 Admin faster than generate_lead).
-    # A filter_group with OR semantics covers both names in one request.
+    # Query BOTH lead events by eventName x pageLocation, then take
+    # max(generate_lead, saa_lead_submit) per page — summing OR-grouped
+    # eventCount double-counts when both events fire for one submission.
     ga4_request = RunReportRequest(
         property=f"properties/{GA4_PROPERTY_ID}",
         date_ranges=[DateRange(start_date=START_DATE.isoformat(), end_date=END_DATE.isoformat())],
-        dimensions=[Dimension(name="pageLocation")],
+        dimensions=[Dimension(name="pageLocation"), Dimension(name="eventName")],
         metrics=[Metric(name="eventCount")],
         dimension_filter=FilterExpression(
-            or_group=FilterExpressionList(
-                expressions=[
-                    FilterExpression(
-                        filter=Filter(
-                            field_name="eventName",
-                            string_filter=Filter.StringFilter(value="generate_lead"),
-                        )
-                    ),
-                    FilterExpression(
-                        filter=Filter(
-                            field_name="eventName",
-                            string_filter=Filter.StringFilter(value="saa_lead_submit"),
-                        )
-                    ),
-                ]
+            filter=Filter(
+                field_name="eventName",
+                in_list_filter=Filter.InListFilter(values=["generate_lead", "saa_lead_submit"]),
             )
         ),
     )
     ga4_resp = ga4_client.run_report(ga4_request)
+    counts_by_page = defaultdict(dict)
     for row in ga4_resp.rows:
-        url = row.dimension_values[0].value
+        url, ev = row.dimension_values[0].value, row.dimension_values[1].value
         path = url.replace("https://saahomes.com", "").replace("http://saahomes.com", "")
-        count = int(row.metric_values[0].value)
-        ga4_leads_by_page[path] += count
+        counts_by_page[path][ev] = int(row.metric_values[0].value)
+    for path, ev_counts in counts_by_page.items():
+        ga4_leads_by_page[path] = max(
+            ev_counts.get("generate_lead", 0), ev_counts.get("saa_lead_submit", 0)
+        )
 except Exception as e:
     print(f"GA4 error (will skip): {e}")
 
@@ -146,6 +139,11 @@ sorted_paths = sorted(all_paths, key=lambda p: page_data.get(p, {}).get("impress
 
 # Limit to top 20 by impressions for the table
 top_paths = sorted_paths[:20]
+
+# Never hide a lead page: append any page with leads>0 that missed the cut
+for p in sorted_paths:
+    if p not in top_paths and ga4_leads_by_page.get(p, 0) > 0:
+        top_paths.append(p)
 
 # ------------------------------------------------------------------
 # CRO suggestions based on page path + intent
