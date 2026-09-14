@@ -1,8 +1,9 @@
 import React from "react";
 import { useParams, Link } from "react-router-dom";
-import { getNeighborhood, getNeighborhoodUrl, buildNeighborhoodSchemas, getNeighborhoodMetaDescription } from "../data/neighborhoods.js";
+import { getNeighborhood, getNeighborhoodUrl, buildNeighborhoodSchemas, buildNeighborhoodFaqs, getNeighborhoodMetaDescription } from "../data/neighborhoods.js";
 import { getAreaSeo } from "../data/areaSeo.js";
 import MarketReportForm from "../components/MarketReportForm.jsx";
+import AreaFAQSection from "../components/AreaFAQSection.jsx";
 import SEO from "../components/SEO.jsx";
 
 function NeighborhoodHero({ neighborhood }) {
@@ -208,6 +209,9 @@ export default function NeighborhoodPage() {
             </div>
           </div>
         </section>
+
+        {/* FAQ — GEO/AEO target for neighborhood queries */}
+        <AreaFAQSection faqs={buildNeighborhoodFaqs(neighborhood)} city={neighborhood.name} />
 
         {/* Market report form */}
         <section className="mb-12">

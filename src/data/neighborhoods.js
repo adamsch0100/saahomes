@@ -13720,7 +13720,80 @@ export function buildNeighborhoodSchemas(neighborhood) {
     },
   })
 
+  // FAQPage schema for AEO/GEO capture — generated from verified neighborhood data
+  const faqs = buildNeighborhoodFaqs(neighborhood)
+  if (faqs.length) {
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    })
+  }
+
   return schemas
+}
+
+/**
+ * Build a set of FAQ Q&A pairs from verified neighborhood data.
+ * Every answer is derived from the neighborhood's structured record — no fabricated figures.
+ */
+export function buildNeighborhoodFaqs(neighborhood) {
+  const faqs = []
+  const add = (q, a) => {
+    if (a && String(a).trim()) faqs.push({ q, a: String(a).trim() })
+  }
+
+  add(
+    `What is the price range for homes in ${neighborhood.name}, ${neighborhood.cityDisplay}?`,
+    `${neighborhood.name} homes in ${neighborhood.cityDisplay} generally range from ${neighborhood.priceRangeDescription}. Prices vary by home size, condition, and location — ask SAA Homes for current listings and recent sales in ${neighborhood.name}.`
+  )
+
+  if (neighborhood.homeStyles && neighborhood.homeStyles.length) {
+    add(
+      `What home styles are common in ${neighborhood.name}?`,
+      `${neighborhood.name} features ${neighborhood.homeStyles.join(', ')}. The mix reflects the neighborhood's ${
+        neighborhood.type === 'subdivision' ? 'subdivision plan and era of construction' : 'history and era of construction'
+      }.`
+    )
+  }
+
+  if (neighborhood.schools && neighborhood.schools.length) {
+    const schoolNames = neighborhood.schools
+      .slice(0, 3)
+      .map((s) => s.name)
+      .join(', ')
+    add(
+      `Which schools serve ${neighborhood.name}?`,
+      `${neighborhood.name} is served by ${neighborhood.schoolDistrict}, including ${schoolNames}. School boundaries can vary within a district, so confirm the exact boundary for a specific address before buying.`
+    )
+  }
+
+  if (neighborhood.hoaDescription) {
+    add(
+      `Is there an HOA in ${neighborhood.name}?`,
+      `${neighborhood.hoaDescription}. HOA dues and rules vary by community — review the HOA documents before making an offer.`
+    )
+  }
+
+  if (neighborhood.boundaries) {
+    add(
+      `What are the boundaries of ${neighborhood.name}?`,
+      `${neighborhood.name} roughly spans ${neighborhood.boundaries}. A local buyer's agent can show you the exact boundaries on a map while touring homes.`
+    )
+  }
+
+  if (neighborhood.neighborhoodHighlights && neighborhood.neighborhoodHighlights.length) {
+    const h = neighborhood.neighborhoodHighlights[0]
+    add(`What is ${neighborhood.name} known for?`, `${neighborhood.name} is known for ${h.title.toLowerCase()} — ${h.description}`)
+  } else if (neighborhood.description) {
+    add(`What is ${neighborhood.name} known for?`, neighborhood.description)
+  }
+
+  return faqs
 }
 
 /**
