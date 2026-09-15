@@ -136,6 +136,35 @@ Seven-city audit: Firestone, Frederick, Evans, Severance, Niwot (Weld/Boulder co
 
 ---
 
+## Weekly Deep-Dive — Carbon Valley hub (2026-09-15)
+
+Corridor rotation (weekly single-city job). Carbon Valley = hub for Firestone/Frederick/Dacono/Gilcrest/Platteville/Mead.
+
+| Metric | Result |
+|---|---|
+| Page type | Dynamic template (AreaGuidePage.jsx) hub variant — SectionTownsBand (Dacono/Platteville/Gilcrest live IRES) + hubCrossLinks (Firestone/Frederick/Mead/Fort Lupton) |
+| Template completeness | 13/13 (100%) + 4 custom hub sections; skipCityStats by design |
+| Schema | ✅ 6 JSON-LD scripts 1× each — NO duplication (dynamic-template baseline) |
+| Indexation | ✅ HTTP 200, canonical self, index/follow, sitemap lastmod 2026-09-11, site: page 1; 7 Dacono neighborhood sub-pages indexed |
+| SERP | ❌ Hub page-1 absent for "carbon valley homes for sale"; present ~#5 for seller-intent mix; blog guides rank #1–#3 |
+| Inbound blog refs | 2 → **4 (FIXED PR #193)** |
+
+**Shipped this audit:** PR #193 (merged 9433b2c) — carbon-valley-affordable-homes-guide + carbon-valley-affordability-guide-firestone-frederick relatedLinks now link the hub (top slot); stale "Firestone = Carbon Valley hub" label fixed.
+
+**Competitor moves:** Kittle farms "BEST Real Estate Agents in Firestone" (#1 seller/agent SERP); Luginbill Homes owns why-buy content (#4, /carbon-valley-colorado/); Kenna IDX shells own Dacono (#5–7 ×3); James Sack (same CB office) fires on Firestone (#3). SAA has zero agent-intent page for the corridor.
+
+**Top 3 actions:** P1 carbon-valley-colorado-real-estate-agent post (mirror erie pattern) → hub link; P2 moving-to-Carbon-Valley why-buy post (counter Luginbill); P2 FAQ +depth (price-range / town-comparison Qs). P3: Dacono dedicated page + corridor blog equity (RFL/FL/Lyons/Bellvue = 0 refs).
+
+**Report:** carbon-valley-audit-report.md (repo root)
+
+### Weekly rotation tracking
+- **Audited this week:** Carbon Valley (corridor hub)
+- **Audit completed:** 2026-09-15
+- **Remaining corridor without full audit:** red-feather-lakes, fort-lupton, lyons, bellvue (Batch 4 scheduled 2026-09-22)
+- **Next weekly deep-dive:** red-feather-lakes (2026-09-22) — covers pre-Batch-4 gap; verify its 0 blog-ref equity + cabin-market SERP
+
+---
+
 ## Lead attribution log
 
 Week of 2026-07-25:
