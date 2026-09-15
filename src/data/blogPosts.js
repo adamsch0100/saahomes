@@ -1367,7 +1367,8 @@ export const blogPosts = [
           'Weld County buyers in Firestone and Frederick often qualify for CHFA SmartStep, Preferred, and specialty programs. Pair affordability with a local agent who knows builder phases and resale trends.',
         ],
         relatedLinks: [
-          { title: 'Firestone area guide', href: '/northern-colorado-areas/firestone/', description: 'Carbon Valley hub' },
+          { title: 'Carbon Valley area guide', href: '/northern-colorado-areas/carbon-valley/', description: 'Firestone, Frederick & Dacono hub with live market data' },
+          { title: 'Firestone area guide', href: '/northern-colorado-areas/firestone/', description: 'Firestone neighborhoods & homes for sale' },
           { title: 'Frederick area guide', href: '/northern-colorado-areas/frederick/', description: 'Affordable Carbon Valley living' },
           { title: 'CHFA down payment assistance', href: '/chfa-down-payment-assistance/', description: 'Colorado buyer programs' },
         ],
@@ -3299,6 +3300,7 @@ export const blogPosts = [
     youtubeId: 'WZYB_bmfLxQ',
     keywords: 'carbon valley colorado homes for sale, firestone co homes for sale, frederick co homes for sale, affordable northern colorado homes, carbon valley real estate, firestone colorado realtor, frederick colorado homes, carbon valley new construction, most affordable northern colorado towns, weld county affordable homes, firestone co real estate agent, frederick co realtor, carbon valley first-time home buyer',
     relatedLinks: [
+      { title: 'Carbon Valley area guide', href: '/northern-colorado-areas/carbon-valley/', description: 'Hub with Dacono, Platteville & Gilcrest town sections + live IRES market data' },
       { title: 'Firestone homes for sale', href: '/northern-colorado-areas/firestone/', description: 'Carbon Valley neighborhoods & homes for sale' },
       { title: 'Frederick homes for sale', href: '/northern-colorado-areas/frederick/', description: 'Affordable Carbon Valley communities' },
       { title: 'Longmont homes for sale', href: '/northern-colorado-areas/longmont/', description: 'Boulder County market insights & pricing' },
