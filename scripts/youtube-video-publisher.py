@@ -714,6 +714,10 @@ def assemble_video(slide_images, output_path, music_path=None, brand=None):
                 "-loop", "1", "-framerate", str(fps),
                 "-i", slide_path,
                 "-c:v", "libx264",
+                "-x264opts", "threads=1",
+                "-threads", "1",
+                "-filter_threads", "1",
+                "-filter_complex_threads", "1",
                 "-t", str(sd),
                 "-pix_fmt", "yuv420p",
                 "-vf", f"scale={W}:{H}:force_original_aspect_ratio=decrease,"
