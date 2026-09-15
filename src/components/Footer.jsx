@@ -12,6 +12,7 @@ export default function Footer() {
   const phone = tenantBrand?.phone || "(970) 999-1407";
   const tel = tenantBrand?.tel || "tel:(970) 999-1407";
 
+  {/* OpenCode process proof 2026-09-10 — Vitzer docs; safe to remove */}
   return (
     <footer className="w-full bg-gray-900 text-gray-300 relative z-30 md:-mt-14 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
       <div className="w-full px-6 md:px-12 py-12">
