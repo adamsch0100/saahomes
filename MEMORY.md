@@ -98,6 +98,44 @@ August 2026 rotation. Batch 1: Fort Collins, Loveland, Windsor, Greeley, Timnath
 
 ---
 
+## Market Scorecard — Batch 3 (2026-09-15)
+
+Seven-city audit: Firestone, Frederick, Evans, Severance, Niwot (Weld/Boulder core) + Erie, Brighton (new corridor launches). **All 7 are dynamic-template pages (`:slug` → AreaGuidePage.jsx) — no dedicated JSX pages in this batch.**
+
+| # | City | Page Type | Template Completeness | Schema | CHFA Section | Final CTA | SERP | Action Items | Priority Score |
+|---|------|-----------|---------------------|--------|-------------|-----------|------|-------------|----------------|
+| 1 | **Firestone** | Dynamic (AreaGuidePage) | 13/13 (100%) | ✅ 6 scripts, 1× each — NO duplication | ✅ Gold section | ✅ Present | ❌ Not page 1 (Kenna IDX #2 owns) | 3 items | P2 |
+| 2 | **Frederick** | Dynamic | 13/13 (100%) | ✅ Clean | ✅ Gold section | ✅ Present | ❌ Not page 1 (Kittle dominates directories) | 3 items | P2 |
+| 3 | **Evans** | Dynamic | 13/13 (100%) | ✅ Clean | ✅ Gold + G-HOPE | ✅ Present | ❌ Not page 1 (Sears Real Estate #5) | 3 items | P1 |
+| 4 | **Severance** | Dynamic | 13/13 (100%) | ✅ Clean | ✅ Gold section | ✅ Present | ❌ Not page 1 (new-construction portals) | 3 items | P2 |
+| 5 | **Niwot** | Dynamic | 13/13 (100%) | ✅ Clean | ✅ Gold section | ✅ Present | ❌ Not page 1 (portal + broker IDX) | 3 items | P2 |
+| 6 | **Erie** | Dynamic (CORRIDOR LAUNCH OK) | 13/13 (100%) | ✅ Clean | ✅ Gold section | ✅ Present | ❌ Not page 1 (agent-personal-brand SERP, moving-to SERP owned by 5 competitor guides) | 3 items | P2 |
+| 7 | **Brighton** | Dynamic (CORRIDOR LAUNCH OK) | 13/13 (100%) | ✅ Clean | ✅ Gold section | ✅ Present | ❌ Not page 1 (Kenna IDX #3, RE/MAX Momentum office) | 3 items | **P1** |
+
+### Key findings across Batch 3
+
+1. **✅ Schema duplication is GONE on dynamic-template pages** — all 7 render exactly 6 JSON-LD scripts (RealEstateAgent, WebSite, WebPage, BreadcrumbList, FAQPage, ItemList·12 listings), one each. The double-injection bug (prerender SSR + Helmet) that plagued Batch 1/2 dedicated pages does NOT affect AreaGuidePage routes. This is the clean baseline the dedicated pages should be migrated toward.
+2. **🔴 Brighton has ZERO blog inbound links** — `brighton` does not appear once in `src/data/blogPosts.js`. It's the single biggest content gap in the 27-entity plan: a launched, indexed, schema-clean page with 8 neighborhoods and no internal link equity or dedicated post. P1: buying/moving-to Brighton posts with relatedLinks.
+3. **🔴 Evans has only 3 blog inbound refs** — weakest non-corridor page in the batch. No dedicated Evans buyer/seller post exists. P1-equivalent equity gap.
+4. **🟢 Erie is the model launch** — 27 blog refs, dedicated buying+selling posts, 20 neighborhood sub-pages in sitemap, market-update cluster, YouTube video ID. But "moving to Erie Colorado" SERP is owned by 5 competitor relocation guides (maryhillproperties, clrealtygroup, coloradohomesource, dwellingscolorado, youranthemhome) — SAA has NO moving-to-Erie post.
+5. **🟢 All 7 pages: HTTP 200, canonical self-referencing, no noindex, in sitemap, 13/13 template complete, CHFA gold funnel + Final CTA present, CityStatsBand live IRES stats render.** FAQ counts: 5 (Firestone/Frederick/Evans), 3 (Severance/Niwot/Erie/Brighton).
+6. **⛔ SERP: none of 7 on page 1** for money queries. Portals (Zillow/Realtor/Trulia/Redfin/Homes) own "homes for sale"; EffectiveAgents/HomeLight directories own "best realtor"; Kenna Real Estate ranks top-3 on Firestone AND Brighton with dedicated IDX pages; Kittle leads Frederick directories; agent personal-brand sites (Compass/The Agency/eXp) own "realtor Erie". GSC (daily-ranking-strike) remains the authoritative position source when credentials restored.
+
+### Best & worst performers
+- **Best:** Erie (13/13, clean schema, richest blog equity: 27 refs, buy+sell posts, 20 neighborhoods, video) and Severance (13/13, 15 neighborhoods, dedicated buyer guide shipped).
+- **Worst:** Brighton (13/13 technically but ZERO blog inbound; no internal link equity) and Evans (3 blog refs, no dedicated content).
+- **Most urgent:** Brighton — launched page with no content-equity support; Kenna IDX already owns top-3. Evans close behind.
+
+### Batch 3 rotation tracking
+- **Batch audited:** Batch 3 (Firestone, Frederick, Evans, Severance, Niwot, Erie, Brighton)
+- **Audit completed:** 2026-09-15
+- **Reports:** `{slug}-audit-report.md` × 7 in repo root
+- **Next batch:** Batch 4 (Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue, Carbon Valley) — corridor remainder
+- **Next target date:** 2026-09-22
+- **Note:** Batch schedule ran late (skill's original mapping vs coverage order); remaining corridor cities form the final sweep. Logged + actionable directly in reports.
+
+---
+
 ## Lead attribution log
 
 Week of 2026-07-25:
@@ -563,3 +601,12 @@ Script fixes shipped (PR #189, merged 90d1a9a1e3): rowLimit 25000, END_DATE -2d 
 GA4_CREDENTIALS=/opt/data/credentials/gsc-key.json ./.venv/bin/python run_lead_attribution.py
 
 *Report generated: 2026-09-14T14:38:44Z (cron fallback)*
+
+
+## Daily Ranking Strike — 2026-09-15 (HTTP fallback host — no GSC creds)
+
+- GSC API unavailable on this host: /opt/data/credentials/gsc-key.json absent (full filesystem search confirmed). No URL Inspection / query data this run.
+- HTTP coverage sweep (scripts/ranking_strike_http_fallback.py): 35 URLs → 34 OK, 1 benign fail (/homes-for-sale/ bare = route-pattern prefix, serves homepage canonical; real pages /{city}-homes-for-sale/ + /homes-for-sale/{slug} all 200 & in sitemap).
+- Last-report P0 pages re-verified HTTP 200: /erie/vista-ridge-erie/, /loveland/west-loveland/ — low-volume fluctuation, NOT deindexation (pitfall 13 pattern).
+- Deploy fresh: last-modified Tue 15 Sep 2026 06:16:56 GMT; sitemap 922 URLs.
+- No regressions. Nothing to ship.
