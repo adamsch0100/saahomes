@@ -10619,6 +10619,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/Northern Colorado.webp',
     readTime: '9 min read',
+    youtubeId: 'cjRssaUPBJA',
     keywords: 'best realtor estes park co, best real estate agent estes park colorado, estes park realtor, estes park real estate agent, estes park co realtor, estes park colorado realtor, schwartz and associates estes park, rocky mountain national park real estate agent, estes park cabins for sale',
     relatedLinks: [
       { title: 'Estes Park homes for sale', href: '/northern-colorado-areas/estes-park/', description: 'Live IRES market stats, neighborhoods & mountain lifestyle' },
