@@ -56,7 +56,7 @@ export const areaSeoPages = [
     county: 'Larimer County',
     exactTitle: 'Loveland CO Real Estate | Homes for Sale in Loveland Colorado | SAA Homes',
     description: 'Loveland, Colorado real estate with SAA Homes. Discover the Sweetheart City — homes for sale, lifestyle guide, and local market insights between Fort Collins and Denver.',
-    keywords: 'Loveland CO real estate, Loveland homes for sale, Loveland Colorado realtor, Sweetheart City homes, Larimer County real estate, Northern Colorado homes, sell my house fast Loveland, cash home buyers Loveland, we buy houses Loveland, cash offer for home Loveland, foreclosures Loveland, short sale Loveland, Larimer County foreclosures',
+    keywords: 'Loveland CO real estate, Loveland homes for sale, Loveland Colorado realtor, Sweetheart City homes, Larimer County real estate, Northern Colorado homes, sell my house fast Loveland, cash home buyers Loveland, we buy houses Loveland, cash offer for home Loveland, foreclosures Loveland, short sale Loveland, Larimer County foreclosures, Centerra Loveland homes, Mariana Butte homes, downtown Loveland real estate, Lake Loveland real estate, Boyd Lake homes, Loveland neighborhoods',
     heroImage: '/images/Loveland-CO-Area-Guide.jpg',
     tagline: 'Sweetheart City - Gateway to the Rockies',
     geo: { latitude: '40.3978', longitude: '-105.0750' },
@@ -64,6 +64,7 @@ export const areaSeoPages = [
       'Loveland — the Sweetheart City — sits between Fort Collins and Denver along the I-25 corridor, offering residents art galleries, lakefront recreation, and mountain views. From Lake Loveland and Boyd Lake State Park to the historic downtown sculpture tour, Loveland delivers a balanced lifestyle that appeals to families, retirees, and outdoor enthusiasts.',
       'SAA Homes helps Loveland buyers and sellers navigate neighborhoods ranging from established mature-tree communities to new construction along the northern and eastern edges of the city. Our team covers Larimer County market trends and financing solutions including CHFA down payment assistance for those who qualify.',
       'Loveland is one of Northern Colorado\'s most balanced markets. The July 2026 median sale price was approximately $510,000, up 3.6% year-over-year, with inventory up 14% compared to July 2025. Homes in the $400,000–$550,000 sweet spot typically go under contract in about 22 days, while properties above $675,000 average 55 days on market with more frequent price adjustments. The median price sits comfortably within Larimer County CHFA purchase price limits — and several Loveland neighborhoods qualify as CHFA targeted areas — making the Sweetheart City a strong fit for first-time buyers using down payment assistance.',
+      'Loveland\'s neighborhoods each offer a distinct flavor and price band. <a href="/northern-colorado-areas/loveland/downtown-loveland/">Historic downtown Loveland</a> pairs early-1900s bungalows and Victorians with artist lofts and townhomes steps from Fourth Street galleries, the Rialto Theater, and Chapungu Sculpture Park — condos from the low $300,000s to single-family homes above $1 million. <a href="/northern-colorado-areas/loveland/centerra/">Centerra</a> is Loveland\'s premier master-planned community at the I-25 and Highway 34 crossroads, with new construction, lakefront properties, and golf-course living — townhomes from the mid-$400,000s to lakefront homes above $1.5 million — anchored by the Promenade Shops. Southwest Loveland\'s <a href="/northern-colorado-areas/loveland/mariana-butte/">Mariana Butte</a> wraps the public 18-hole golf course with fairway and patio homes from roughly $400,000 to $900,000-plus, while the <a href="/northern-colorado-areas/loveland/lake-loveland/">Lake Loveland area</a> and Boyd Lake side of town draw buyers who want waterfront living or mid-century ranches on established blocks. On the west and north edges, Namaqua, Buckskin Heights, and the foothills neighborhoods offer larger lots and mountain views, and newer east-side communities like The Vineyard and Cedar Creek keep Loveland one of Northern Colorado\'s best values for new construction. Whether you are searching for a downtown bungalow, a Centerra townhome, or a Mariana Butte golf view, Schwartz and Associates knows each Loveland community block by block. Call (970) 999-1407 for a personalized Loveland home search consultation.',
       'Looking for a Loveland real estate agent? <a href="/blog/loveland-colorado-real-estate-agent/">Read our guide to finding the best Loveland realtor</a> — with neighborhood-by-neighborhood advice and local market expertise from Schwartz and Associates.',
     ],
     whyChoose: [
@@ -74,10 +75,12 @@ export const areaSeoPages = [
     ],
     highlights: {
       neighborhoods: [
-        'Historic downtown Loveland',
-        'Lakefront and golf course communities',
-        'New construction north and east',
-        'Established mature-tree neighborhoods',
+        'Historic downtown Loveland arts district',
+        'Centerra and The Lakes at Centerra',
+        'Mariana Butte golf course community',
+        'Lake Loveland and Boyd Lake waterfront',
+        'Namaqua and Buckskin Heights foothills',
+        'The Vineyard and Cedar Creek new construction',
       ],
       attractions: [
         'Boyd Lake State Park',
