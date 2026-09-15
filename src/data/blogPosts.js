@@ -10737,6 +10737,7 @@ export const blogPosts = [
     category: 'Market Update',
     image: '/images/Northern Colorado.webp',
     readTime: '6 min read',
+    youtubeId: '9sec4gjXJ10',
     keywords: 'Estes Park Colorado housing market 2026, Estes Park CO real estate forecast, Estes Park CO home prices, Estes Park market trends, Estes Park homes for sale 2026, Rocky Mountain National Park real estate market, Estes Park median home price, Estes Park housing forecast',
     relatedLinks: [
       { title: 'Estes Park Colorado real estate guide', href: '/northern-colorado-areas/estes-park/', description: 'Live IRES market stats, neighborhoods & lifestyle' },
