@@ -10907,7 +10907,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/Windsor-CO-Area-Guide.jpg',
     readTime: '8 min read',
-    youtubeId: '',
+    youtubeId: 'caYejeZGNjA',
     keywords: "how much is my home worth windsor, windsor home value 2026, what is my windsor house worth, free home valuation windsor, windsor co home value estimate, sell my home windsor, windsor housing market 2026, windsor home appraisal, zestimate vs cma windsor, water valley home values",
     relatedLinks: [
       { title: 'Windsor Colorado real estate guide', href: '/northern-colorado-areas/windsor/', description: 'Neighborhoods, schools & market data' },
@@ -11157,7 +11157,7 @@ export const blogPosts = [
     category: 'Luxury Homes',
     image: '/images/luxury-home-buying-guide-northern-colorado.jpg',
     readTime: '9 min read',
-    youtubeId: '',
+    youtubeId: 'FZXfGzxk7Lc',
     keywords: "luxury homes windsor co, water valley luxury homes, pelican lakes homes for sale, windsor luxury real estate, windsor golf course homes, the reserve at windsor, million dollar homes windsor, luxury homes for sale northern colorado, waterfront homes windsor, luxury real estate agent windsor",
     relatedLinks: [
       { title: 'Luxury Real Estate in Northern Colorado', href: '/luxury-real-estate/', description: 'Private-client representation for $1M+ homes' },
@@ -11275,7 +11275,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Area-Guide-for-Greeley-CO.jpg',
     readTime: '9 min read',
-    youtubeId: '',
+    youtubeId: 'mSCCgBnV9JE',
     keywords: "moving to greeley colorado, greeley relocation guide 2026, living in greeley co, greeley homes for sale, greeley neighborhoods, greeley cost of living, G-HOPE greeley down payment assistance, CHFA greeley, first time home buyer greeley, moving to northern colorado",
     relatedLinks: [
       { title: 'Greeley Colorado real estate guide', href: '/northern-colorado-areas/greeley/', description: 'Neighborhoods, schools & market data' },
