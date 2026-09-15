@@ -4339,6 +4339,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.335', longitude: '-104.922' },
     metaDescription: 'Johnstown Village Center - walkable downtown Johnstown with historic character and affordable homes. SAA Homes.',
     keywords: 'Johnstown Village Center, downtown Johnstown real estate, historic Johnstown, Johnstown community park area',
+    youtubeId: 'RtiWaKt7I1A',
     neighborhoodHighlights: [
       { title: 'Small-town downtown', description: 'Johnstown historic downtown with local restaurants, shops, and community events.' },
       { title: 'Community park', description: 'Johnstown Community Park features sports fields, playground, and walking paths.' },
@@ -4373,6 +4374,7 @@ export const neighborhoods = [
     walkScore: 28,
     metaDescription: 'Thompson River Reserve Johnstown real estate - new construction riverfront community with trails and parks in Johnstown. SAA Homes.',
     keywords: 'Thompson River Reserve Johnstown, Johnstown new homes, Big Thompson River homes, Johnstown master-planned community, new construction Johnstown, Johnstown Colorado real estate, Roosevelt High School Johnstown',
+    youtubeId: '2BpMT3dxeXU',
     neighborhoodHighlights: [
       { title: 'Riverfront setting', description: 'Walking trails along the Big Thompson River provide a scenic backdrop for this new community.' },
       { title: 'Newer construction', description: 'All homes built 2018 or later with modern energy-efficient features and open floor plans.' },
@@ -4407,6 +4409,7 @@ export const neighborhoods = [
     walkScore: 42,
     metaDescription: 'Broadway Addition Johnstown real estate - established downtown Johnstown homes with walkable access to Main Street. SAA Homes.',
     keywords: 'Broadway Addition Johnstown, historic Johnstown homes, downtown Johnstown real estate, Johnstown bungalows, established Johnstown neighborhoods, affordable Johnstown homes, Main Street Johnstown Colorado',
+    youtubeId: 'hskkkJjPb60',
     neighborhoodHighlights: [
       { title: 'Walkable downtown', description: 'Walk to Johnstown\'s historic Main Street with restaurants, shops, and community events.' },
       { title: 'Established character', description: 'Mid-century homes with mature trees and a classic small-town neighborhood atmosphere.' },
