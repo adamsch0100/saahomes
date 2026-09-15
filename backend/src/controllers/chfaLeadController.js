@@ -21,7 +21,7 @@ export const submitChfaLeadForm = async (req, res) => {
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
        RETURNING *`,
       [
-        firstName, lastName, email, phone || null, schoolEmployer || null,
+        firstName, lastName || null, email, phone || null, schoolEmployer || null,
         buyingTimeline || null, message || null,
         sourcePage || null, utmSource || null, utmMedium || null, utmCampaign || null,
       ]

@@ -463,7 +463,7 @@ export default function ChfaDownPaymentAssistancePage() {
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center max-w-md sm:max-w-none mx-auto">
             <a
-              href="#chfa-dpa-lead-form"
+              href="#chfa-dpa-quick-form"
               className="inline-flex items-center justify-center px-8 py-3.5 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors touch-manipulation shadow-lg"
             >
               Free CHFA Consultation
@@ -485,10 +485,22 @@ export default function ChfaDownPaymentAssistancePage() {
         </div>
       </section>
 
+      {/* Quick-capture lead form — directly under the hero for immediate conversion */}
+      <section className="py-12 px-6 bg-white border-b border-gray-100">
+        <div className="max-w-2xl mx-auto">
+          <ChfaDpaLeadForm
+            minimal
+            heading="See If You Qualify for CHFA Down Payment Help"
+            subheading="Grants and deferred loans up to $25,000. Enter your name, email, and phone — Adam and Mandi will reach out to walk you through your options."
+            formId="chfa-dpa-quick-form"
+          />
+        </div>
+      </section>
+
       {/* Qualify CTA — conversational lead capture */}
       <QualifyCta
         program="CHFA down payment assistance"
-        formAnchor="#chfa-dpa-lead-form"
+        formAnchor="#chfa-dpa-quick-form"
         formLabel="Skip to the consultation form"
       />
 

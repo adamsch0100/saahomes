@@ -1915,7 +1915,7 @@ export const blogPosts = [
     cta: {
       title: 'Ready to sell your Fort Collins home?',
       description: 'Adam and Mandi Schwartz provide expert Fort Collins real estate guidance — from pre-listing preparation to closing. Get a free, no-obligation market analysis for your home today.',
-      primaryHref: '/for-sellers/#market-report-form',
+      primaryHref: '/for-sellers/#home-valuation',
       primaryText: 'Get a Free Market Analysis',
       secondaryHref: '/contact/',
       secondaryText: 'Talk to a Fort Collins Realtor',
@@ -2020,7 +2020,7 @@ export const blogPosts = [
     cta: {
       title: 'Ready to sell your Windsor home?',
       description: 'Adam and Mandi Schwartz provide expert Windsor real estate guidance — from pre-listing preparation to closing. Get a free, no-obligation market analysis for your Windsor home today.',
-      primaryHref: '/for-sellers/#market-report-form',
+      primaryHref: '/for-sellers/#home-valuation',
       primaryText: 'Get a Free Market Analysis',
       secondaryHref: '/contact/',
       secondaryText: 'Talk to a Windsor Real Estate Agent',
@@ -2496,7 +2496,7 @@ export const blogPosts = [
     cta: {
       title: 'Ready to sell your Loveland home?',
       description: 'Adam and Mandi Schwartz provide expert Loveland real estate guidance — from pre-listing preparation to closing. Get a free, no-obligation market analysis for your Loveland home today.',
-      primaryHref: '/for-sellers/#market-report-form',
+      primaryHref: '/for-sellers/#home-valuation',
       primaryText: 'Get a Free Market Analysis',
       secondaryHref: '/contact/',
       secondaryText: 'Talk to a Loveland Real Estate Agent',
@@ -2834,7 +2834,7 @@ export const blogPosts = [
     cta: {
       title: 'Ready to sell your Greeley home?',
       description: 'Adam and Mandi Schwartz provide expert Greeley real estate guidance — from pre-listing preparation to closing. Get a free, no-obligation market analysis for your Greeley home today.',
-      primaryHref: '/for-sellers/#market-report-form',
+      primaryHref: '/for-sellers/#home-valuation',
       primaryText: 'Get a Free Market Analysis',
       secondaryHref: '/contact/',
       secondaryText: 'Talk to a Greeley Real Estate Agent',
@@ -4761,7 +4761,7 @@ export const blogPosts = [
     cta: {
       title: 'Ready to sell your Timnath home?',
       description: 'Adam and Mandi Schwartz provide expert Timnath real estate guidance \u2014 from pre-listing preparation to closing. Get a free, no-obligation market analysis for your home today.',
-      primaryHref: '/for-sellers/#market-report-form',
+      primaryHref: '/for-sellers/#home-valuation',
       primaryText: 'Get a Free Market Analysis',
       secondaryHref: '/contact/',
       secondaryText: 'Talk to a Timnath Real Estate Agent',
@@ -6150,7 +6150,7 @@ export const blogPosts = [
     cta: {
       title: 'Ready to sell your Longmont home?',
       description: 'Adam and Mandi Schwartz provide expert Longmont and Boulder County seller guidance — from pricing strategy to closing. Get a free, no-obligation market analysis for your home today.',
-      primaryHref: '/for-sellers/#market-report-form',
+      primaryHref: '/for-sellers/#home-valuation',
       primaryText: 'Get a Free Market Analysis',
       secondaryHref: '/contact/',
       secondaryText: 'Talk to a Longmont Real Estate Agent',
@@ -7525,7 +7525,7 @@ export const blogPosts = [
     cta: {
       title: 'Ready to sell your Erie home?',
       description: 'Adam and Mandi Schwartz provide expert Erie listing representation — from pre-listing preparation and strategic pricing to closing. Request a free, no-obligation market analysis or a cash offer on your Erie home today. Call (970) 999-1407.',
-      primaryHref: '/for-sellers/#market-report-form',
+      primaryHref: '/for-sellers/#home-valuation',
       primaryText: 'Get a Free Market Analysis',
       secondaryHref: '/contact/',
       secondaryText: 'Talk to an Erie Listing Agent',
@@ -7720,7 +7720,7 @@ export const blogPosts = [
     cta: {
       title: 'Ready to sell your Berthoud home?',
       description: 'Adam and Mandi Schwartz provide expert Berthoud and Northern Colorado seller guidance — from pricing strategy to closing. Get a free, no-obligation market analysis for your home today.',
-      primaryHref: '/for-sellers/#market-report-form',
+      primaryHref: '/for-sellers/#home-valuation',
       primaryText: 'Get a Free Market Analysis',
       secondaryHref: '/contact/',
       secondaryText: 'Talk to a Berthoud Listing Agent',
@@ -9710,7 +9710,7 @@ export const blogPosts = [
     cta: {
       title: 'Ready to sell your Johnstown home?',
       description: 'Adam and Mandi Schwartz provide expert Johnstown and Northern Colorado seller guidance — from pricing strategy to closing. Get a free, no-obligation market analysis for your home today.',
-      primaryHref: '/for-sellers/#market-report-form',
+      primaryHref: '/for-sellers/#home-valuation',
       primaryText: 'Get a Free Market Analysis',
       secondaryHref: '/contact/',
       secondaryText: 'Talk to a Johnstown Listing Agent',

@@ -17,7 +17,7 @@ const targetCounties = [
   'Not sure yet',
 ];
 
-export default function ChfaDpaLeadForm({ compact = false, sourcePage = '/chfa-down-payment-assistance/' }) {
+export default function ChfaDpaLeadForm({ compact = false, minimal = false, heading, subheading, formId = 'chfa-dpa-lead-form', sourcePage = '/chfa-down-payment-assistance/' }) {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -126,15 +126,19 @@ export default function ChfaDpaLeadForm({ compact = false, sourcePage = '/chfa-d
     <form
       onSubmit={handleSubmit}
       className={`bg-white rounded-lg shadow-xl scroll-mt-28 ${compact ? 'p-4 sm:p-6' : 'p-6 sm:p-8'}`}
-      id="chfa-dpa-lead-form"
+      id={formId}
     >
-      <h3 className={`font-bold font-serif text-gray-900 ${compact ? 'text-xl sm:text-2xl mb-4' : 'text-2xl sm:text-3xl mb-2'}`}>
-        {compact ? 'Free CHFA Consultation' : 'Get Your Free CHFA Home Buying Consultation'}
+      <h3 className={`font-bold font-serif text-gray-900 ${minimal ? 'text-xl sm:text-2xl mb-2' : compact ? 'text-xl sm:text-2xl mb-4' : 'text-2xl sm:text-3xl mb-2'}`}>
+        {minimal ? (heading || 'Free CHFA Consultation') : compact ? 'Free CHFA Consultation' : 'Get Your Free CHFA Home Buying Consultation'}
       </h3>
-      {!compact && (
-        <p className="text-gray-600 mb-6">
-          Tell us about your home buying goals. We will help you understand which CHFA programs may fit and how to get started in Northern Colorado.
-        </p>
+      {minimal ? (
+        subheading ? <p className="text-gray-600 mb-4 text-sm leading-relaxed">{subheading}</p> : null
+      ) : (
+        !compact && (
+          <p className="text-gray-600 mb-6">
+            Tell us about your home buying goals. We will help you understand which CHFA programs may fit and how to get started in Northern Colorado.
+          </p>
+        )
       )}
 
       {submitStatus?.type === 'error' && (
@@ -143,16 +147,23 @@ export default function ChfaDpaLeadForm({ compact = false, sourcePage = '/chfa-d
         </div>
       )}
 
-      <div className="grid md:grid-cols-2 gap-4 mb-4">
-        <div>
-          <label htmlFor="chfa-dpa-firstName" className={labelClass}>First Name *</label>
-          <input type="text" id="chfa-dpa-firstName" name="firstName" required autoComplete="given-name" value={formData.firstName} onChange={handleChange} className={inputClass} />
+      {minimal ? (
+        <div className="mb-4">
+          <label htmlFor="chfa-dpa-firstName" className={labelClass}>Full Name *</label>
+          <input type="text" id="chfa-dpa-firstName" name="firstName" required autoComplete="name" placeholder="Your full name" value={formData.firstName} onChange={handleChange} className={inputClass} />
         </div>
-        <div>
-          <label htmlFor="chfa-dpa-lastName" className={labelClass}>Last Name *</label>
-          <input type="text" id="chfa-dpa-lastName" name="lastName" required autoComplete="family-name" value={formData.lastName} onChange={handleChange} className={inputClass} />
+      ) : (
+        <div className="grid md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label htmlFor="chfa-dpa-firstName" className={labelClass}>First Name *</label>
+            <input type="text" id="chfa-dpa-firstName" name="firstName" required autoComplete="given-name" value={formData.firstName} onChange={handleChange} className={inputClass} />
+          </div>
+          <div>
+            <label htmlFor="chfa-dpa-lastName" className={labelClass}>Last Name *</label>
+            <input type="text" id="chfa-dpa-lastName" name="lastName" required autoComplete="family-name" value={formData.lastName} onChange={handleChange} className={inputClass} />
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="grid md:grid-cols-2 gap-4 mb-4">
         <div>
@@ -165,17 +176,19 @@ export default function ChfaDpaLeadForm({ compact = false, sourcePage = '/chfa-d
         </div>
       </div>
 
-      <div className="mb-4">
-        <label htmlFor="chfa-dpa-buyerStatus" className={labelClass}>Buyer status *</label>
-        <select id="chfa-dpa-buyerStatus" name="buyerStatus" required value={formData.buyerStatus} onChange={handleChange} className={inputClass}>
-          <option value="">Select your status</option>
-          {buyerStatuses.map((status) => (
-            <option key={status} value={status}>{status}</option>
-          ))}
-        </select>
-      </div>
+      {!minimal && (
+        <div className="mb-4">
+          <label htmlFor="chfa-dpa-buyerStatus" className={labelClass}>Buyer status *</label>
+          <select id="chfa-dpa-buyerStatus" name="buyerStatus" required value={formData.buyerStatus} onChange={handleChange} className={inputClass}>
+            <option value="">Select your status</option>
+            {buyerStatuses.map((status) => (
+              <option key={status} value={status}>{status}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
-      {compact ? (
+      {!minimal && (compact ? (
         <details className="mb-4">
           <summary className="cursor-pointer text-sm font-semibold text-gray-700 hover:text-black select-none">
             Where and when are you looking? (optional)
@@ -184,7 +197,7 @@ export default function ChfaDpaLeadForm({ compact = false, sourcePage = '/chfa-d
         </details>
       ) : (
         optionalFields
-      )}
+      ))}
 
       <button
         type="submit"

@@ -318,7 +318,7 @@ export default function GreeleyPage() {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
-              to="/for-sellers/#market-report-form"
+              to="/for-sellers/#home-valuation"
               className="inline-flex px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
             >
               Free Market Analysis
