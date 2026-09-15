@@ -1,7 +1,19 @@
 # Citation Tracker — SAA Homes / Schwartz and Associates
 
-> Last updated: 2026-09-14
-> 2026-09-14 re-probe (box 54.241.204.220, 18:01 UTC): identical to Sep 13 — iBegin/FreelistingUSA/Lacartes/Opendi all 403 CF "Just a moment..."; MisterWhat 302→CF.php loop; fyple AU-gate; magicyellow parked (easyDNS); uscity fee-gate ($29.99); ThreeBestRated form live 200 (needs_human: reCAPTCHA v2 + CO license + reviews). **Delta:** B2BListings REACHABLE again (200; was 000 Sep 13) but category list unchanged — no real-estate category (closest = Property Surveyors) = integrity-gate skip. Still ZERO directory citations buildable from this IP. **Native browser confirmed DOWN again (browser_exec: "Chromium browser is missing — npx agent-browser install"); no OUTREACH_SMTP_*/IBEGIN_*/SERPER keys in /root/.hermes/.env (only commented EMAIL_IMAP_* stubs) → email-confirm flow unavailable; mail_find.py exists at skills/seo/link-building/scripts/mail_find.py but no creds to run it.** Fallback free channels (Telegraph/Write.as/Paste.rs) remain the productive path.
+> Last updated: 2026-09-15
+> 2026-09-15 re-probe (box 54.241.204.220, 18:05 UTC): identical verdicts to Sep 14 —
+> freelistingusa/opendi.com/opendi.us/lacartes/ibegin all 403 CF "Just a moment...";
+> misterwhat 200 with Turnstile markers; fyple AU-gate ("outside Australia"); magicyellow
+> parked (easyDNS); uscity signup 200 (fee-gate $29.99); threebestrated form 200 with
+> reCAPTCHA. **Delta:** B2BListings 200 again (flapping 000→200) but still no real-estate
+> category = integrity-gate skip. **Zero directory citations buildable from this IP, again.**
+> Native browser DOWN (no Chromium in /root/.cache/ms-playwright or /opt/data/home); no
+> OUTREACH_SMTP_*/IBEGIN_*/SERPER keys anywhere on host (/opt/data/.env gone; /root/.hermes/.env
+> has only commented EMAIL_IMAP stubs) → email-confirm flow unavailable. **Archive.org pass
+> today:** CDX sweep across 34 money pages (27 area + 7 core) → 6 previously-unlogged captures
+> now VERIFIED + logged built (fort-lupton 09-11, niwot 09-09, champions 09-09, schools-to-home
+> 09-09, about-us 09-09, contact 09-10); SPN 429 handled per discipline (roll, don't hammer).
+> 34/34 money pages now have live, verified Archive.org captures.
 > Status key: ✅ built | 🔄 in-progress | ❌ blocked | ⚠️ needs_human | 📝 drafted | 🗑️ dead
 
 ## Priority Platforms
@@ -9,10 +21,10 @@
 | Platform | Status | NAP Match | Last Checked | Notes |
 |----------|--------|-----------|-------------|-------|
 | **ThreeBestRated.com** | ⚠️ needs_human | ✅ Canonical | 2026-09-08 | Steps 1-2 fully filled with canonical NAP. Blocked at Step 2 progression (progressive-disclosure validation). reCAPTCHA v2 at Step 4 is the sole automation blocker. Also needs CO license # (not in repo) and real customer reviews. See `references/threebestrated-field-map.md`. |
-| **Write.as** | ✅ working | — | 2026-09-10 | Anonymous POST `/api/posts` returns `slug: null` + a token; the post **is live at `https://write.as/{id}`** immediately (verified 5 anchors 2026-09-10). The `POST /api/posts/{id}/publish` step 404s — do NOT treat `slug: None` as failure; verify the `/{id}` URL directly. Rate limit ~65s between posts (2 posts + 45s gap worked). |
-| **Telegraph** | ✅ working | — | 2026-08-25 | API works consistently. Used extensively for city guide backlinks. |
+| **Write.as** | ⚠️ plain-text only | — | 2026-09-15 | Anonymous POST `/api/posts` returns `slug: null` + a token; the post is live at `https://write.as/{id}` BUT the anonymous body renders as **raw markdown** — `[anchor](url)` is NOT converted to an `<a href>` hyperlink, so it is a text mention, NOT a backlink. Do NOT log Write.as as `built`. (Sep 15: 8 rows corrected to `failed_verify - plain-text URL only`.) |
+| **Telegraph** | ✅ working (nofollow) | — | 2026-09-15 | API works consistently. Used extensively for city guide backlinks. **Note:** telegra.ph renders links with `rel="nofollow" target="_blank"` — real hyperlinks but nofollow. |
 | **Paste.rs** | ✅ working | — | 2026-07-16 | Simple pastebin-style posting works. |
-| **GitHub (repo data files)** | ✅ working | — | 2026-09-08 | Classic PAT with `repo` scope pushes data files with branded links. Runs consistently. |
+| **GitHub (repo data files)** | ✅ working | — | 2026-09-15 | Classic PAT with `repo` scope pushes data files with branded links. Runs consistently. **Note:** github.com README viewer adds `rel="nofollow"` to markdown links. **DOFOLLOW path = GitHub Pages** — enable via `POST /repos/{owner}/{repo}/pages {source:{branch:main,path:/}}`, site serves at `https://{owner}.github.io/{repo}/` with plain `<a href>` (no rel) = genuine dofollow. Verified 2026-09-15: `adamsch0100.github.io/northern-colorado-real-estate-areas/` (15 dofollow links). |
 | **iBegin.com** | ❌ blocked | — | 2026-09-10 | Cloudflare Turnstile on login page. Account exists (saahomes) but login unreachable from this IP even with browser. Stealth Playwright documented to FAIL here (Aug 26). Re-verified "Just a moment..." at curl level 2026-09-10. Needs residential proxy. |
 | **WhereOrg.com** | ❌ blocked | — | 2026-09-04 | Main page clears with stealth Playwright but AJAX category/city autocomplete returns CF 403. NAP + state + captcha automatable; category is the blocker. |
 
