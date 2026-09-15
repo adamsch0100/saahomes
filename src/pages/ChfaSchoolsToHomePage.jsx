@@ -301,7 +301,7 @@ export default function ChfaSchoolsToHomePage() {
           </p>
           <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center max-w-md sm:max-w-none mx-auto">
             <a
-              href="#chfa-lead-form"
+              href="#chfa-schools-quick-form"
               className="inline-flex items-center justify-center px-6 sm:px-8 py-3.5 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors touch-manipulation shadow-lg"
             >
               Get Free Consultation
@@ -323,11 +323,23 @@ export default function ChfaSchoolsToHomePage() {
         </div>
       </section>
 
+      {/* Quick-capture lead form — directly under the hero for immediate conversion */}
+      <section className="py-12 px-6 bg-white border-b border-gray-100">
+        <div className="max-w-2xl mx-auto">
+          <ChfaLeadForm
+            compact
+            heading="Colorado Teacher? Get Closing Cost Help"
+            subheading="CHFA Schools To Home offers up to 25% down payment assistance for full-time public school employees — covering your down payment and closing costs. Enter your info and we'll help you see if you qualify."
+            formId="chfa-schools-quick-form"
+          />
+        </div>
+      </section>
+
       {/* Qualify CTA — conversational lead capture */}
       <QualifyCta
         program="the CHFA Schools To Home program"
         chatQuestion="Hi! I'm a Colorado public school employee and I'd like to know if I qualify for the Schools To Home program. Can you walk me through it?"
-        formAnchor="#chfa-lead-form"
+        formAnchor="#chfa-schools-quick-form"
         formLabel="Skip to the consultation form"
       />
 

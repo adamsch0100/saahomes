@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { submitChfaLeadForm } from '../utils/api.js';
 import { withLeadMetadata } from '../utils/leadTracking.js';
 
-export default function ChfaLeadForm({ compact = false }) {
+export default function ChfaLeadForm({ compact = false, heading, subheading, formId = 'chfa-lead-form' }) {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -77,15 +77,19 @@ export default function ChfaLeadForm({ compact = false }) {
     <form
       onSubmit={handleSubmit}
       className={`bg-white rounded-lg shadow-xl scroll-mt-28 ${compact ? 'p-4 sm:p-6' : 'p-6 sm:p-8'}`}
-      id="chfa-lead-form"
+      id={formId}
     >
-      <h3 className={`font-bold font-serif text-gray-900 ${compact ? 'text-xl sm:text-2xl mb-4' : 'text-2xl sm:text-3xl mb-2'}`}>
-        Get Started with CHFA Schools To Home
+      <h3 className={`font-bold font-serif text-gray-900 ${compact ? 'text-xl sm:text-2xl mb-2' : 'text-2xl sm:text-3xl mb-2'}`}>
+        {heading || 'Get Started with CHFA Schools To Home'}
       </h3>
-      {!compact && (
-        <p className="text-gray-600 mb-6">
-          Tell us a little about yourself and we'll help you understand how this program can work for you.
-        </p>
+      {subheading ? (
+        <p className="text-gray-600 mb-4 text-sm leading-relaxed">{subheading}</p>
+      ) : (
+        !compact && (
+          <p className="text-gray-600 mb-6">
+            Tell us a little about yourself and we'll help you understand how this program can work for you.
+          </p>
+        )
       )}
 
       {submitStatus?.type === 'error' && (

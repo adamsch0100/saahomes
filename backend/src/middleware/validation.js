@@ -167,9 +167,8 @@ export const validateChfaLeadSubmission = [
     .withMessage('First name must be less than 255 characters'),
 
   body('lastName')
+    .optional({ checkFalsy: true })
     .trim()
-    .notEmpty()
-    .withMessage('Last name is required')
     .isLength({ max: 255 })
     .withMessage('Last name must be less than 255 characters'),
 
@@ -183,9 +182,8 @@ export const validateChfaLeadSubmission = [
     .withMessage('Phone must be less than 50 characters'),
 
   body('schoolEmployer')
+    .optional({ checkFalsy: true })
     .trim()
-    .notEmpty()
-    .withMessage('School or district employer is required')
     .isLength({ max: 255 })
     .withMessage('School employer must be less than 255 characters'),
 
@@ -257,9 +255,8 @@ export const validateChfaDpaLeadSubmission = [
     .isLength({ max: 255 }),
 
   body('lastName')
+    .optional({ checkFalsy: true })
     .trim()
-    .notEmpty()
-    .withMessage('Last name is required')
     .isLength({ max: 255 }),
 
   validEmailField('chfa-dpa'),
@@ -271,9 +268,8 @@ export const validateChfaDpaLeadSubmission = [
     .isLength({ max: 50 }),
 
   body('buyerStatus')
+    .optional({ checkFalsy: true })
     .trim()
-    .notEmpty()
-    .withMessage('Buyer status is required')
     .isLength({ max: 255 }),
 
   body('targetCounty')

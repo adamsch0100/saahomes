@@ -19,13 +19,14 @@ export default function FloatingContactBar() {
 
   const isAreaPage = location.pathname.startsWith('/northern-colorado-areas/');
   const isSellerPage = location.pathname.includes('for-sellers') || location.pathname.includes('home-valuation');
+  const isSellerBlog = location.pathname.startsWith('/blog/') && /sell/.test(location.pathname);
   const isChfaPage = location.pathname.includes('chfa-schools-to-home') || location.pathname === '/chfa' || location.pathname === '/chfa/';
   const isChampionsPage = location.pathname.includes('colorado-champions-home-loan-program') || location.pathname.includes('champions-home-loan');
   const isChfaDpaPage = location.pathname.includes('chfa-down-payment-assistance') || location.pathname.includes('colorado-chfa-down-payment-assistance') || location.pathname.includes('chfa-dpa');
   const isGhopePage = location.pathname.includes('greeley-g-hope') || location.pathname.includes('g-hope-greeley');
   const helpLink = isSellerPage
     ? '#home-valuation'
-    : isAreaPage
+    : isSellerBlog || isAreaPage
     ? '/for-sellers/#home-valuation'
     : isGhopePage
     ? '/greeley-g-hope-down-payment-assistance/#g-hope-lead-form'
@@ -36,7 +37,7 @@ export default function FloatingContactBar() {
       : isChfaDpaPage
         ? '/chfa-down-payment-assistance/#chfa-dpa-lead-form'
         : '/contact/?interest=Buying a home';
-  const helpLabel = isSellerPage || isAreaPage
+  const helpLabel = isSellerPage || isAreaPage || isSellerBlog
     ? 'Get My Home Value'
     : isChfaPage || isChampionsPage || isChfaDpaPage || isGhopePage ? 'Free Consultation' : 'Get Help Buying';
 
@@ -50,7 +51,7 @@ export default function FloatingContactBar() {
         >
           Call Now
         </a>
-        {isSellerPage || isAreaPage ? (
+        {isSellerPage || isAreaPage || isSellerBlog ? (
           <a
             href={helpLink}
             className="flex-1 inline-flex items-center justify-center px-3 py-3.5 border-2 border-black text-black font-semibold rounded-lg text-sm text-center leading-tight touch-manipulation"

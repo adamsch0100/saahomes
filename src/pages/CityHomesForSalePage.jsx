@@ -267,6 +267,24 @@ export default function CityHomesForSalePage() {
         </div>
       </section>
 
+      {/* Seller cross-link — many home shoppers are also preparing to sell */}
+      {city.slug === 'fort-collins' && (
+        <section className="max-w-7xl mx-auto px-4 py-10">
+          <div className="bg-amber-50 border border-amber-100 rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">Selling a home in Fort Collins?</h2>
+              <p className="text-gray-700 mt-1">
+                Read our complete Fort Collins seller guide — pricing, preparation, and marketing from Schwartz and Associates.
+              </p>
+            </div>
+            <Link to="/blog/selling-your-home-in-fort-collins/"
+              className="shrink-0 px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors">
+              Read the Seller Guide →
+            </Link>
+          </div>
+        </section>
+      )}
+
       {/* Other cities hub-and-spoke */}
       <section className="max-w-7xl mx-auto px-4 py-12">
         <h2 className="text-xl font-bold text-gray-900 mb-4">Homes for Sale Across Northern Colorado</h2>

@@ -31,6 +31,10 @@ function RelatedLinksBox({ links, title = "Related resources" }) {
 export default function BlogPostPage() {
   const { slug } = useParams();
   const post = getBlogPost(slug);
+  // Seller-intent posts (e.g. "Selling Your Home in …") get an above-the-fold
+  // home-value CTA + a sticky "get my home value" bar on scroll — the single
+  // biggest qualified-seller conversion gap in the funnel.
+  const isSellerPost = (post?.category || "").toLowerCase().includes("seller");
   // Inline mid-article CTA (lead capture): appears once the reader passes
   // ~50% of the post — intent is proven, strike while they're engaged.
   // (Hooks before the early return — rules of hooks.)
@@ -48,6 +52,17 @@ export default function BlogPostPage() {
     obs.observe(node);
     return () => obs.disconnect();
   }, [post?.slug]);
+
+  // Sticky home-value bar — appears once the reader scrolls past the hero.
+  const [showSellerBar, setShowSellerBar] = useState(false);
+  useEffect(() => {
+    if (!isSellerPost) return undefined;
+    const onScroll = () => setShowSellerBar(window.scrollY > 440);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [isSellerPost]);
+
   if (!post) {
     return <Navigate to="/blog/" replace />;
   }
@@ -142,6 +157,23 @@ export default function BlogPostPage() {
         jsonLd={jsonLd}
       />
 
+      {isSellerPost && showSellerBar && (
+        <div className="fixed top-0 inset-x-0 z-50 bg-black text-white shadow-lg px-4 py-3">
+          <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
+            <p className="text-sm sm:text-base font-semibold truncate">
+              Selling in Northern Colorado? Get your free home value
+            </p>
+            <a
+              href="/for-sellers/#home-valuation"
+              className="flex-shrink-0 inline-flex items-center px-4 py-2 font-semibold rounded-lg hover:brightness-110 transition-all text-sm"
+              style={{ backgroundColor: "#CFB36E", color: "#1a1a1a" }}
+            >
+              Get My Home Value →
+            </a>
+          </div>
+        </div>
+      )}
+
       <article className="pb-16">
         <section
           className="relative min-h-[360px] sm:min-h-[420px] bg-cover bg-center flex items-end pt-28 sm:pt-32 pb-10 sm:pb-12"
@@ -159,6 +191,23 @@ export default function BlogPostPage() {
             <p className="mt-4 text-gray-200">
               {formattedDate} · {post.readTime}
             </p>
+            {isSellerPost && (
+              <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                <a
+                  href="/for-sellers/#home-valuation"
+                  className="inline-flex items-center justify-center px-6 py-3 font-semibold rounded-lg hover:brightness-110 transition-all shadow-lg"
+                  style={{ backgroundColor: "#CFB36E", color: "#1a1a1a" }}
+                >
+                  Get My Free Home Value →
+                </a>
+                <a
+                  href="tel:(970) 999-1407"
+                  className="inline-flex items-center justify-center px-6 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors"
+                >
+                  Call (970) 999-1407
+                </a>
+              </div>
+            )}
           </div>
         </section>
 
