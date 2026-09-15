@@ -87,6 +87,17 @@ const canonicalRedirects = {
   '/helpful-guides': '/blog/',
   '/home-valuation': '/for-sellers/',
   '/whats-my-home-worth': '/for-sellers/',
+  // Legacy buy/sell/listing aliases (pre-routing-era paths). These fell
+  // through to the SPA shell with a homepage canonical (soft-404), wasting
+  // crawl budget. 301 → the canonical money pages (flagged by indexation
+  // patrol + daily ranking strike 2026-09-13/14/15).
+  '/homes-for-sale': '/properties/',
+  '/listings': '/properties/',
+  '/for-sale': '/properties/',
+  '/sell': '/for-sellers/',
+  '/sell-home': '/for-sellers/',
+  '/buy': '/for-buyers/',
+  '/buy-a-home': '/for-buyers/',
   // Blog consolidation 2026-09-10: duplicate Windsor realtor post merged into
   // the canonical /blog/windsor-co-real-estate-agent/ (cannibalization fix).
   '/blog/windsor-colorado-real-estate-agent': '/blog/windsor-co-real-estate-agent/',
