@@ -1,52 +1,47 @@
 #!/usr/bin/env python3
-import json, os, sys, urllib.request, urllib.error
+"""Create a PR via GitHub API (urllib — avoids curl shell quoting bugs).
 
-env_path = '/opt/data/.env'
-if os.path.exists(env_path):
-    with open(env_path) as f:
-        for line in f:
-            line = line.strip()
-            if '=' in line and not line.startswith('#'):
-                idx = line.find('=')
-                k = line[:idx].strip()
-                v = line[idx+1:].strip().strip("'\"")
-                os.environ[k] = v
+Usage: python3 scripts/create_pr.py <branch> <title> [body]
 
-token = os.environ.get('GITHUB_TOKEN', '')
-if not token:
-    print("ERROR: GITHUB_TOKEN not found")
-    sys.exit(1)
+Reads GITHUB_TOKEN from the environment (source the .env file first).
+"""
+import json
+import os
+import sys
+import urllib.request
+import urllib.error
 
-owner = "adamsch0100"
-repo = "saahomes"
-branch = "hermes/seo-2026-07-01-internal-links"
+TOKEN = os.environ.get('GITHUB_TOKEN')
+if not TOKEN:
+    sys.exit('GITHUB_TOKEN not set')
 
-pr_data = {
-    "title": "Internal Link Architecture: Strengthen link flow to money & area pages",
-    "body": "## Internal Link Architecture Optimization\n\nStrengthened internal link equity flow per the internal-link-architecture skill pattern (every blog post -> 2+ area pages + 1 money page).\n\n### Blog Posts -> Area Pages + Money Pages\n- How to Sell Your Home Fast: /for-sellers/, Fort Collins + Loveland area guides (was: zero links)\n- Buying a Home in Fort Collins: Fort Collins area guide (inline), /for-buyers/\n- CHFA DPA Colorado 2026: Fort Collins + Greeley area guides, /for-buyers/\n- CHFA First-Time Homebuyer NOCO: /for-buyers/\n- CHFA Schools To Home: Fort Collins + Loveland area guides, /for-buyers/\n- Champions Home Loan: Fort Collins + Greeley area guides, /for-buyers/\n- Market Update July 2026: /for-buyers/, /for-sellers/\n- Market Update June 2026: /for-buyers/, /for-sellers/\n- Events Guide 2026: /for-buyers/\n\n### Area Pages -> Nearby Community Cross-Links\nAll 11 dedicated area pages + 6 dynamic AreaGuidePage pages now have Nearby Northern Colorado Communities sections with contextual cross-links to 6 nearby cities each.\n\n### Orphan Pages Addressed\n- G-HOPE page: inbound links via area page CHFA CTA sections\n- Smaller area pages (Milliken, La Salle, Mead, Eaton): cross-linked from larger nearby pages\n- /for-buyers/ and /for-sellers/: now linked from all blog posts\n\n### Brand Checklist\n- Northern Colorado cities referenced\n- SAA Homes named\n- Phone (970) 999-1407 present\n- CHFA claims cite 2026 guidelines\n- No Fair Housing violations\n",
-    "head": branch,
-    "base": "main"
-}
+owner, repo = 'adamsch0100', 'saahomes'
+branch = sys.argv[1]
+title = sys.argv[2]
+body = sys.argv[3] if len(sys.argv) > 3 else ''
 
-data = json.dumps(pr_data).encode('utf-8')
+payload = json.dumps({
+    'title': title,
+    'head': branch,
+    'base': 'main',
+    'body': body,
+}).encode()
 
 req = urllib.request.Request(
-    f"https://api.github.com/repos/{owner}/{repo}/pulls",
-    data=data,
+    f'https://api.github.com/repos/{owner}/{repo}/pulls',
+    data=payload,
     headers={
-        "Authorization": f"token {token}",
-        "Accept": "application/vnd.github.v3+json",
-        "Content-Type": "application/json",
-    }
+        'Authorization': f'token {TOKEN}',
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+    },
+    method='POST',
 )
-
 try:
-    resp = urllib.request.urlopen(req, timeout=30)
-    result = json.loads(resp.read().decode('utf-8'))
-    pr_number = result['number']
-    pr_url = result['html_url']
-    print(f"PR #{pr_number} created: {pr_url}")
+    resp = json.loads(urllib.request.urlopen(req, timeout=30).read())
+    print(json.dumps({'number': resp.get('number'), 'url': resp.get('html_url'),
+                      'head_ref': resp.get('head', {}).get('ref'),
+                      'state': resp.get('state')}, indent=2))
 except urllib.error.HTTPError as e:
-    error_body = e.read().decode('utf-8')
-    print(f"HTTP {e.code}: {error_body}")
+    print(f'HTTP {e.code}: {e.read().decode("utf-8")}')
     sys.exit(1)
