@@ -1509,6 +1509,72 @@ const MONEY_PAGE_CONTENT = {
       { q: "How fast can I close with a VA loan?", a: "A VA purchase often closes on a similar 30–45 day timeline to other loan types once your Certificate of Eligibility, VA appraisal, and underwriting are in place. PCS orders, a delayed appraisal, or a condo approval can add time. We build the contract around your report date rather than promising a number we cannot control. Confirm current timelines with your lender." },
     ],
   },
+  '/sell-my-home-eaton/': {
+    sections: [
+      {
+        heading: 'Sell Your Eaton Home With Local Weld County Expertise',
+        paragraphs: [
+          'Selling in Eaton, Colorado means pricing against live Weld County comparable sales — not an automated estimate. Schwartz and Associates (SAA Homes) prepares a free, no-obligation home valuation, then builds a marketing and negotiation plan around what Eaton buyers are actually doing today.',
+          'Adam and Mandi Schwartz bring 20-plus years of combined Northern Colorado experience to every Eaton listing. Call (970) 999-1407 to get started.',
+        ],
+      },
+      {
+        heading: 'What You Get When You List With SAA Homes',
+        list: [
+          'Local pricing strategy grounded in current Eaton-area comps and active inventory',
+          'Professional photography and listing marketing that reaches active Weld County buyers',
+          'Full negotiation from first offer through inspection, appraisal, and closing',
+          'Straightforward communication — no automated estimates, no boilerplate',
+        ],
+      },
+    ],
+    cta: {
+      title: 'Get your free Eaton home valuation',
+      text: 'Request a free, no-obligation market analysis for your Eaton property from Schwartz and Associates, Coldwell Banker Realty. Call (970) 999-1407.',
+    },
+    faqs: [
+      { q: "How do I sell my home in Eaton, CO?", a: "Start with a free, no-obligation home valuation. Schwartz and Associates (SAA Homes) prices your Eaton home against live Weld County comparable sales, prepares professional photography and marketing, and negotiates the contract through closing. Call (970) 999-1407 to get started." },
+      { q: "What is my Eaton home worth right now?", a: "The best way to know is a free market analysis from a local agent. We pull recent Eaton-area comps and active inventory to give you a realistic price range — not an automated estimate. Request yours at /for-sellers/#home-valuation or call (970) 999-1407." },
+      { q: "How long does it take to sell a home in Eaton?", a: "Timeline depends on price, condition, and current buyer demand in the Eaton and greater Weld County market. A well-priced home that is properly marketed typically moves faster. We show you current days-on-market data for Eaton so your expectations are grounded in today's market." },
+      { q: "Do I need to make repairs before selling in Eaton?", a: "Not always. Some homes sell as-is, and many buyers expect only minor updates. We walk through which repairs add real value versus which you can skip, based on what today's Eaton buyers are actually willing to pay for." },
+      { q: "What does Schwartz and Associates charge to sell my Eaton home?", a: "Commission is set when you list and disclosed in writing. We provide full-service representation — pricing, photography, digital marketing, showings, negotiation, and closing coordination. Call (970) 999-1407 for a straightforward conversation about what listing with SAA Homes looks like." },
+    ],
+  },
+  '/northern-colorado-areas/': {
+    sections: [
+      {
+        heading: '27 Northern Colorado Communities, One Local Team',
+        paragraphs: [
+          'From Fort Collins and Loveland to Windsor, Greeley, and the I-25 corridor, Schwartz and Associates (SAA Homes) maintains detailed area guides for 27 communities across Larimer, Weld, and Boulder counties. Every guide covers local neighborhoods, market trends, schools, and lifestyle so you can compare communities with real information — not generic brochures.',
+          'Whether you are relocating to Northern Colorado, downsizing near family, or buying your first home with a CHFA down payment assistance program, the right community matters. Our agents live and work here. Call (970) 999-1407 to talk through your short list.',
+        ],
+      },
+      {
+        heading: 'Find the Community That Fits Your Life',
+        paragraphs: [
+          'Fort Collins is the largest market, anchored by Colorado State University and Old Town. Loveland balances arts, lakes, and access to the mountains. Windsor offers top-rated schools and family neighborhoods. Greeley is the most affordable major market in the region.',
+          'Follow the I-25 corridor north and you will find Timnath and Severance new construction, the Carbon Valley trio of Firestone, Frederick, and Dacono, and the smaller agriculture-rooted towns of Eaton, Milliken, Johnstown, La Salle, and Mead. To the west, Estes Park, Lyons, and Boulder County communities bring mountain living within reach.',
+        ],
+      },
+      {
+        heading: 'Start With the Data, Then Take a Tour',
+        paragraphs: [
+          'Each area guide includes neighborhoods and subdivisions, market context, schools, and a direct search for homes for sale in that city. Browse the guides below, then search live listings or schedule a tour with an agent who knows the difference between Water Valley and Centerra.',
+        ],
+      },
+    ],
+    cta: {
+      title: 'Ready to explore Northern Colorado communities?',
+      text: 'Tell us which communities you are considering and we will send local market data plus a plan for your search. Schwartz and Associates, Coldwell Banker Realty — call (970) 999-1407.',
+    },
+    faqs: [
+      { q: "How many Northern Colorado communities does SAA Homes cover?", a: "Schwartz and Associates maintains detailed area guides for 27 communities across Larimer, Weld, and Boulder counties — from Fort Collins, Loveland, and Windsor to Greeley, the Carbon Valley, Estes Park, Boulder County, and the I-25 corridor towns. Each guide includes neighborhoods, schools, market context, and a homes-for-sale search for that city." },
+      { q: "Which Northern Colorado city is right for me?", a: "It depends on budget, commute, schools, and lifestyle. Fort Collins is the largest market with CSU and Old Town; Loveland balances arts and mountain access; Windsor is known for top-rated schools; Greeley is the most affordable major market. The I-25 corridor offers newer construction, and Estes Park and Boulder County bring mountain living. Compare the area guides, then call (970) 999-1407 to narrow it down." },
+      { q: "Where can I find homes for sale in Northern Colorado?", a: "Use the live search on /properties/ to browse active MLS listings across Northern Colorado, or open any city area guide to find a homes-for-sale search filtered to that community. Schwartz and Associates works with Coldwell Banker Realty and the IRES MLS covering Larimer, Weld, and Boulder counties." },
+      { q: "Can you help first-time buyers with down payment assistance?", a: "Yes. Colorado Housing and Finance Authority (CHFA) programs can help qualified first-time buyers with down payment and closing costs. See /chfa-down-payment-assistance/ for current programs and eligibility, and call (970) 999-1407 to talk through how they apply to your purchase." },
+      { q: "How do I sell my home in Northern Colorado?", a: "Request a free, no-obligation home valuation at /for-sellers/#home-valuation. We price against live comparable sales in your specific community, then handle photography, marketing, showing coordination, and negotiation through closing. Call (970) 999-1407 to get started." },
+    ],
+  },
 };
 
 function matchMoneyPage(path) {
