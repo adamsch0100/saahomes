@@ -4446,6 +4446,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.6450', longitude: '-105.0050' },
     metaDescription: 'Wellington Colorado real estate guide — affordable homes north of Fort Collins with I-25 access and Poudre School District schools. SAA Homes — your local experts.',
     keywords: 'Wellington Colorado homes, Wellington Commons, Wellington real estate, north Fort Collins homes, Wellington CO subdivisions, Poudre School District homes',
+    youtubeId: 'KG7VfdlRy5w',
     neighborhoodHighlights: [
       { title: 'Fort Collins proximity', description: 'Just 10 minutes north of Fort Collins — enjoy small-town living with big-city access.' },
       { title: 'Affordable option', description: 'Wellington offers more home for your money than Fort Collins, with the same school district.' },
@@ -4477,6 +4478,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.655', longitude: '-105.01' },
     metaDescription: 'Wellington Hills - newer Wellington subdivision with mountain views and Poudre School District. SAA Homes.',
     keywords: 'Wellington Hills, Wellington Colorado homes, north Wellington new construction, Wellington subdivisions',
+    youtubeId: 'r4Jj1Z_1T7U',
     neighborhoodHighlights: [
       { title: 'Mountain views', description: 'Many homes offer stunning views of Longs Peak and the Front Range from north Wellington.' },
       { title: 'Poudre schools', description: 'Served by Poudre School District - the same district serving Fort Collins.' },
@@ -4508,6 +4510,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.65', longitude: '-105.0' },
     metaDescription: 'Wellington Park - new master-planned community in north Wellington with community park. SAA Homes.',
     keywords: 'Wellington Park, Wellington new construction, north Wellington master-planned community, Wellington CO homes',
+    youtubeId: 'GvsBkLqPocI',
     neighborhoodHighlights: [
       { title: 'Newer community', description: 'Master-planned with a central park, walking trails, and modern home construction.' },
       { title: 'Poudre schools', description: 'Served by Poudre School District - Fort Collins school system from a small-town setting.' },
