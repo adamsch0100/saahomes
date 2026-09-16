@@ -56,10 +56,10 @@ export default function BoulderPage() {
                 Search Boulder Homes
               </Link>
               <Link
-                to="/properties/?location=Boulder%2C+CO"
-                className="text-black font-semibold underline underline-offset-4 hover:text-gray-700 transition-colors"
+                to="/contact/"
+                className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-gray-800 hover:text-white transition-colors"
               >
-                View all Boulder listings →
+                Talk to an Agent
               </Link>
             </div>
           </div>

@@ -65,6 +65,23 @@ export default function MillikenPage() {
         </div>
       </section>
 
+      {/* Why Buy in Milliken? */}
+      {area.whyChoose?.length > 0 && (
+        <section className="py-16 px-6 bg-white">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-3xl font-bold font-serif mb-8 text-center">Why Buy in Milliken?</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {area.whyChoose.map((item) => (
+                <div key={item.title} className="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
+                  <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                  <p className="text-gray-700 text-sm leading-relaxed">{item.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Economy Section */}
       <section className="py-16 px-6 bg-gray-50">
         <div className="max-w-6xl mx-auto">

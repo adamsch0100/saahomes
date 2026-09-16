@@ -132,6 +132,10 @@ const canonicalRedirects = {
   '/red-feather-lakes': '/northern-colorado-areas/red-feather-lakes/',
   '/lyons': '/northern-colorado-areas/lyons/',
   '/bellvue': '/northern-colorado-areas/bellvue/',
+  // Legacy neighborhood slug variant (pre-slug-cleanup). rain-dance-windsor
+  // fell through to the SPA shell with a homepage canonical (soft-404).
+  // 301 → the canonical RainDance neighborhood page.
+  '/northern-colorado-areas/windsor/rain-dance-windsor': '/northern-colorado-areas/windsor/raindance/',
 };
 
 // ---- Listing sitemap (Active-only, generated from DB, cached 15 min) ----
