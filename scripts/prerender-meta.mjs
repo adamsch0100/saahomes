@@ -745,6 +745,72 @@ function injectAreaBody(html, area) {
       `      </section>`;
   }
 
+  // Build market stats (verified editorial depth for select cities)
+  let marketStatsHtml = '';
+  if (area.marketStats && area.marketStats.length > 0) {
+    marketStatsHtml =
+      `      <section class="prerendered-market-stats">\n` +
+      `        <h2>${city} Market Snapshot</h2>\n` +
+      area.marketStats.map((p) => `        <p>${escapeHtml(p)}</p>`).join('\n') +
+      `\n      </section>`;
+  }
+
+  // Build new construction section (select cities)
+  let newConstructionHtml = '';
+  if (area.newConstruction) {
+    const nc = area.newConstruction;
+    const ncParas = (nc.paragraphs || []).map((p) => `        <p>${escapeHtml(p)}</p>`).join('\n');
+    const ncCommunities = (nc.communities || []).map((c) => `          <li>${escapeHtml(c)}</li>`).join('\n');
+    newConstructionHtml =
+      `      <section class="prerendered-new-construction">\n` +
+      `        <h2>${escapeHtml(nc.heading || `New Construction in ${city}`)}</h2>\n` +
+      ncParas + `\n` +
+      (ncCommunities ? `        <ul>\n${ncCommunities}\n        </ul>\n` : '') +
+      `        <p><a href="${SITE_URL}${nc.ctaHref || `/properties/?location=${encodeURIComponent(`${city}, CO`)}`}">${escapeHtml(nc.ctaText || 'Search new construction')}</a></p>\n` +
+      `      </section>`;
+  }
+
+  // Build Why Choose cards
+  let whyChooseHtml = '';
+  const whyChoose = area.whyChoose || [];
+  if (whyChoose.length > 0) {
+    whyChooseHtml =
+      `      <section class="prerendered-why-choose">\n` +
+      `        <h2>Why Buy in ${city}?</h2>\n` +
+      whyChoose.map((item) => `        <div class="prerendered-why-card"><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p></div>`).join('\n') +
+      `\n      </section>`;
+  }
+
+  // Build Popular Areas + Local Highlights
+  const highlights = area.highlights || {};
+  let highlightsHtml = '';
+  const hoods = highlights.neighborhoods || [];
+  const attrs = highlights.attractions || [];
+  if (hoods.length > 0 || attrs.length > 0) {
+    const hoodList = hoods.map((h) => `          <li>${escapeHtml(h)}</li>`).join('\n');
+    const attrList = attrs.map((a) => `          <li>${escapeHtml(a)}</li>`).join('\n');
+    highlightsHtml =
+      `      <section class="prerendered-highlights">\n` +
+      `        <h2>${city} Highlights</h2>\n` +
+      (hoodList ? `        <h3>Popular Areas</h3>\n        <ul>\n${hoodList}\n        </ul>\n` : '') +
+      (attrList ? `        <h3>Local Highlights</h3>\n        <ul>\n${attrList}\n        </ul>\n` : '') +
+      `      </section>`;
+  }
+
+  // Market report CTA (mirrors client-side MarketReportForm section)
+  const marketReportCtaHtml =
+    `      <section class="prerendered-market-report">\n` +
+    `        <h2>Get the Latest ${city} Market Report</h2>\n` +
+    `        <p>Get instant access to the latest sales trends and market data for ${city}, Colorado. Request your free ${city} market report from Schwartz and Associates.</p>\n` +
+    `      </section>`;
+
+  // Latest market update note (mirrors LatestMarketUpdateBanner)
+  const latestUpdateHtml =
+    `      <section class="prerendered-latest-update">\n` +
+    `        <h2>${city} Market Update</h2>\n` +
+    `        <p>Stay current on ${city} home prices, inventory, and days on market with the latest Northern Colorado market update from Schwartz and Associates.</p>\n` +
+    `      </section>`;
+
   // CTA with phone number
   const ctaHtml =
     `      <section class="prerendered-cta">\n` +
@@ -760,6 +826,12 @@ function injectAreaBody(html, area) {
     `      ${tagline ? `<p class="prerendered-tagline"><strong>${tagline}</strong></p>\n` : ''}` +
     `      ${county ? `<p class="prerendered-county">Serving ${county}</p>\n` : ''}` +
     `${introHtml}\n` +
+    `${latestUpdateHtml}\n` +
+    `${marketStatsHtml}\n` +
+    `${newConstructionHtml}\n` +
+    `${whyChooseHtml}\n` +
+    `${highlightsHtml}\n` +
+    `${marketReportCtaHtml}\n` +
     `${faqHtml}\n` +
     `${neighborhoodHtml}\n` +
     `${guidesHtml}\n` +

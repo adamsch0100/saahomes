@@ -206,6 +206,17 @@ export default function AreaGuidePage() {
         </div>
       </section>
 
+      {area.marketStats && area.marketStats.length > 0 && (
+        <section className="py-12 px-6 bg-gray-50">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl font-bold font-serif mb-6 text-center">{area.city} Market Snapshot</h2>
+            {area.marketStats.map((p, i) => (
+              <p key={i} className="text-lg text-gray-700 leading-relaxed mb-4">{p}</p>
+            ))}
+          </div>
+        </section>
+      )}
+
       {hubSections.length > 0 && (
         <SectionTownsBand
           title={`${area.city} communities with live market data`}
@@ -337,6 +348,32 @@ export default function AreaGuidePage() {
                   <p className="text-gray-700 text-sm leading-relaxed">{item.description}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {area.newConstruction && (
+        <section className="py-16 px-6 bg-white">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold font-serif mb-6 text-center">{area.newConstruction.heading}</h2>
+            {area.newConstruction.paragraphs.map((p, i) => (
+              <p key={i} className="text-lg text-gray-700 leading-relaxed mb-4">{p}</p>
+            ))}
+            {area.newConstruction.communities && area.newConstruction.communities.length > 0 && (
+              <div className="flex flex-wrap gap-3 justify-center mb-8">
+                {area.newConstruction.communities.map((c) => (
+                  <span key={c} className="px-4 py-2 bg-gray-100 text-gray-800 rounded-full text-sm font-medium">{c}</span>
+                ))}
+              </div>
+            )}
+            <div className="text-center">
+              <Link
+                to={area.newConstruction.ctaHref || searchLink}
+                className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                {area.newConstruction.ctaText || 'Search new construction'}
+              </Link>
             </div>
           </div>
         </section>

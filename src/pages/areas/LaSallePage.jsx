@@ -311,6 +311,37 @@ export default function LaSallePage() {
         </div>
       </section>
 
+      {/* USDA Rural Development Financing */}
+      <section className="py-12 px-6 bg-gray-50">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold font-serif text-gray-900 mb-3">
+            Buying in La Salle with a USDA Rural Development loan?
+          </h2>
+          <p className="text-gray-700 mb-6">
+            La Salle's rural Weld County setting and acreage-lot options make USDA Single Family Housing programs a financing path some buyers explore alongside CHFA and conventional loans. USDA Rural Development loans can offer no-down-payment options for eligible properties in designated rural areas — but eligibility depends on the specific property address, household income, and current USDA program rules.
+          </p>
+          <p className="text-gray-700 mb-6">
+            SAA Homes helps La Salle buyers understand which financing programs may apply to a given home. We do not determine USDA eligibility ourselves — we connect you with approved lenders and point you to official USDA Rural Development guidance so you get accurate, current rules.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <a
+              href="https://www.rd.usda.gov/programs-services/single-family-housing-programs"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              USDA Rural Development guidance →
+            </a>
+            <Link
+              to="/contact/"
+              className="inline-flex px-6 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+            >
+              Ask about La Salle financing
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Area Highlights */}
             {/* Neighborhood Guides */}
       <section className="py-12 px-6 bg-gray-50">

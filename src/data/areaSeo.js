@@ -521,6 +521,20 @@ export const areaSeoPages = [
       neighborhoods: ['Downtown Berthoud', 'New construction communities', 'Country properties with acreage', 'Weld/Larimer border neighborhoods'],
       attractions: ['Berthoud Recreation District', 'Little Thompson Valley', 'Proximity to Carter Lake', 'Short drive to Loveland and Fort Collins'],
     },
+    marketStats: [
+      'The Berthoud housing market leans on new construction as the town grows along the I-25 corridor. As of September 2026, Berthoud shows roughly 250 active listings with a median list price near $630,000 and a median of about $309 per square foot — figures that shift weekly, so use the live snapshot above for current numbers.',
+      'Homes here move at a moderate pace, with a median around 40+ days on market. Sellers priced at market and buyers ready with pre-approval typically move fastest. For the most current Berthoud inventory and pricing, search live listings or call Schwartz and Associates at (970) 999-1407.',
+    ],
+    newConstruction: {
+      heading: 'New Construction in Berthoud',
+      paragraphs: [
+        'New construction is a defining part of the Berthoud market, with active builders adding single-family homes across several master-planned and neighborhood communities. Buyers exploring Berthoud new construction commonly encounter builders such as D.R. Horton, Dream Finders Homes, LGI Homes, and Toll Brothers, with communities including Vantage, Farmstead, Sugar Beet, and Heron Lakes.',
+        'Availability, floor plans, and pricing vary by builder, phase, and community — and they change frequently as phases sell out and new lots release. Rather than quote a snapshot that goes stale, SAA Homes tracks live Berthoud inventory (including new builds) so you can see exactly what is listed today.',
+      ],
+      communities: ['Vantage', 'Farmstead', 'Sugar Beet', 'Heron Lakes'],
+      ctaText: 'Search Berthoud new construction',
+      ctaHref: '/properties/?location=Berthoud, CO',
+    },
   },
   {
     slug: 'firestone',
