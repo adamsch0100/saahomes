@@ -11039,7 +11039,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/Area-Guide-for-Greeley-CO.jpg',
     readTime: '8 min read',
-    youtubeId: '',
+    youtubeId: 'KKyYQBHE49o',
     keywords: "how much is my home worth greeley, greeley home value 2026, what is my greeley house worth, free home valuation greeley, greeley co home value estimate, sell my home greeley, greeley housing market 2026, greeley home appraisal, zestimate vs cma greeley, greeley real estate agent",
     relatedLinks: [
       { title: 'Greeley Colorado real estate guide', href: '/northern-colorado-areas/greeley/', description: 'Neighborhoods, schools & market data' },
