@@ -10813,6 +10813,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/Northern Colorado.webp',
     readTime: '10 min read',
+    youtubeId: '3J6M82xRm6Y',
     keywords: 'sell my home estes park colorado, sell home estes park co, estes park real estate agent, selling a home in estes park co, estes park home value, listing agent estes park co, how to sell a cabin in estes park, estes park short term rental rules, 1031 exchange estes park',
     relatedLinks: [
       { title: 'Estes Park homes for sale', href: '/northern-colorado-areas/estes-park/', description: 'Area guide with live IRES market stats' },
