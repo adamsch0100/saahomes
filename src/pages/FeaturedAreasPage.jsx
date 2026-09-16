@@ -1,8 +1,32 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
+import AreaFAQSection from "../components/AreaFAQSection.jsx";
 import { areaSeoPages } from "../data/areaSeo.js";
 import { buildAreaGuidesItemListSchema } from "../utils/seoConstants.js";
+
+const HUB_FAQS = [
+  {
+    q: "How many Northern Colorado communities does SAA Homes cover?",
+    a: "Schwartz and Associates maintains detailed area guides for 27 communities across Larimer, Weld, and Boulder counties — from Fort Collins, Loveland, and Windsor to Greeley, the Carbon Valley, Estes Park, Boulder County, and the I-25 corridor towns. Each guide includes neighborhoods, schools, market context, and a homes-for-sale search for that city.",
+  },
+  {
+    q: "Which Northern Colorado city is right for me?",
+    a: "It depends on budget, commute, schools, and lifestyle. Fort Collins is the largest market with CSU and Old Town; Loveland balances arts and mountain access; Windsor is known for top-rated schools; Greeley is the most affordable major market. The I-25 corridor offers newer construction, and Estes Park and Boulder County bring mountain living. Compare the area guides, then call (970) 999-1407 to narrow it down.",
+  },
+  {
+    q: "Where can I find homes for sale in Northern Colorado?",
+    a: "Use the live search on /properties/ to browse active MLS listings across Northern Colorado, or open any city area guide to find a homes-for-sale search filtered to that community. Schwartz and Associates works with Coldwell Banker Realty and the IRES MLS covering Larimer, Weld, and Boulder counties.",
+  },
+  {
+    q: "Can you help first-time buyers with down payment assistance?",
+    a: "Yes. Colorado Housing and Finance Authority (CHFA) programs can help qualified first-time buyers with down payment and closing costs. See /chfa-down-payment-assistance/ for current programs and eligibility, and call (970) 999-1407 to talk through how they apply to your purchase.",
+  },
+  {
+    q: "How do I sell my home in Northern Colorado?",
+    a: "Request a free, no-obligation home valuation at /for-sellers/#home-valuation. We price against live comparable sales in your specific community, then handle photography, marketing, showing coordination, and negotiation through closing. Call (970) 999-1407 to get started.",
+  },
+];
 
 const cardDescriptions = {
   "fort-collins": "A vibrant city with CSU, craft breweries, and stunning mountain views. Perfect blend of outdoor recreation and urban amenities.",
@@ -67,6 +91,18 @@ export default function FeaturedAreasPage() {
             "url": "https://saahomes.com/northern-colorado-areas/",
           },
           ...(areaGuidesItemList ? [areaGuidesItemList] : []),
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: HUB_FAQS.map((faq) => ({
+              "@type": "Question",
+              name: faq.q,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: faq.a,
+              },
+            })),
+          },
         ]}
       />
 
@@ -226,6 +262,8 @@ export default function FeaturedAreasPage() {
           </div>
         </div>
       </section>
+
+      <AreaFAQSection faqs={HUB_FAQS} city="Northern Colorado" />
 
       {/* CTA Section */}
       <section className="py-16 px-6 bg-black text-white">
