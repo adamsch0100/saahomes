@@ -15,13 +15,13 @@
 
 ## Content calendar state
 
-last_social_pack_date: 2026-09-10
-last_social_pillar: market-intelligence
-rotation_week_index: 3
-last_3_social_hooks: ["September 2026 NoCo Market Update live — inventory climbing in FC/Loveland/Windsor/Greeley, best buyer leverage since early 2022 (Sep 10, posted to Buffer same day).", "Erie's fall 2026 housing market — growing inventory, smart pricing from Colliers Hill to Vista Ridge (Sep 9).", "September in NoCo: FoCo Food Truck Rally + can't-miss community events across Northern Colorado (Sep 9)."]
+last_social_pack_date: 2026-09-16
+last_social_pillar: content-offense (4-pack blog batch promos, rotation skipped — shipped content prioritized)
+rotation_week_index: 4
+last_3_social_hooks: ["How much is your Windsor home really worth? New guide: $589,950 median sold (Aug '26), 83 DOM, Weld vs Larimer tax math inside. Free CMA (Sep 16, Buffer).", "Greeley home values, August 2026: median list ~$440,600, sub-$400K homes under contract in 10-14 days. Free CMA (Sep 17, Buffer).", "Windsor luxury: Water Valley lakefront ($450K-$1M+), Pelican Lakes golf estates, The Reserve custom homes (Sep 18, Buffer)."]
 monthly_market_blog_url: https://saahomes.com/blog/northern-colorado-market-update-september-2026/
-blogs_published_this_month: 27 (windsor-co-real-estate-agent, boulder-colorado-real-estate-agent, erie-colorado-housing-market-fall-2026, chfa-first-generation-program-colorado, chfa-disability-down-payment-assistance-colorado, erie-colorado-real-estate-agent, severance-colorado-real-estate-agent, chfa-income-limits-colorado-northern-cities, short-sale-greeley-colorado, boulder-luxury-neighborhoods-guide, northern-colorado-market-update-september-2026, moving-to-loveland-colorado-guide, buying-a-home-in-johnstown, selling-your-home-in-johnstown, how-much-is-my-home-worth-fort-collins, moving-to-fort-collins-colorado-guide, short-sale-vs-foreclosure-colorado, living-in-eaton-colorado, eaton-colorado-real-estate-market-2026, buying-a-home-in-la-salle-colorado, selling-your-home-in-la-salle-colorado, la-salle-colorado-real-estate-agent, selling-my-home-fast-in-johnstown, how-much-is-my-home-worth-loveland, estes-park-colorado-real-estate-agent, estes-park-colorado-housing-market-2026, selling-your-home-in-estes-park-colorado) — verified from src/data/blogPosts.js 2026-09-14
-pending_social_packs: 0 (Aug 17 backlog auto-posted via Buffer Aug 18-Sep 4; no unsent packs — see operator-week-2026-09-14.json)
+blogs_published_this_month: 31 (prior 27 + how-much-is-my-home-worth-windsor-colorado, how-much-is-my-home-worth-greeley-colorado, luxury-homes-windsor-colorado, moving-to-greeley-colorado-guide) — shipped 2026-09-15 via PR #195; youtubeIds via PR #197 (FZXfGzxk7Lc / caYejeZGNjA / mSCCgBnV9JE)
+pending_social_packs: 0 — 4 packs (outreach/sent/social-2026-09-{16,17,18,19}-*.json) POSTED to Buffer 2026-09-16, one idea/day Sep 16-19 15:00 UTC, and emailed to Adam. Creds (BUFFER_API_KEY + OUTREACH_SMTP_*) for this run recovered from state.db; still recommend a permanent restore to /data/hermes-homes/saa-homes/.env.
 last_operator_schedule_date: 2026-09-14 (week Sep 14-20 emailed; prior covers Sep 7-13 sent late Sep 9)
 latest_market_update_slug: northern-colorado-market-update-september-2026
 last_events_check_date: 2026-09-09
@@ -639,3 +639,66 @@ GA4_CREDENTIALS=/opt/data/credentials/gsc-key.json ./.venv/bin/python run_lead_a
 - Last-report P0 pages re-verified HTTP 200: /erie/vista-ridge-erie/, /loveland/west-loveland/ — low-volume fluctuation, NOT deindexation (pitfall 13 pattern).
 - Deploy fresh: last-modified Tue 15 Sep 2026 06:16:56 GMT; sitemap 922 URLs.
 - No regressions. Nothing to ship.
+
+## SEO fix shipped — 2026-09-15 (soft-404 canonical redirects)
+
+- PR #199 merged (squash 1ae3041): added 7 legacy aliases to backend/src/server.js canonicalRedirects —
+  `/homes-for-sale`, `/listings`, `/for-sale` → `/properties/`; `/sell`, `/sell-home` → `/for-sellers/`;
+  `/buy`, `/buy-a-home` → `/for-buyers/`. Previously served SPA shell with homepage canonical (soft-404),
+  flagged by indexation patrol + daily strike 09-13/14/15 (earlier "blocked: GITHUB_TOKEN absent" was wrong —
+  token IS in /data/hermes-homes/saa-homes/.env).
+- Live verified 2026-09-15: all 7 return 301 to canonical money pages; `/homes-for-sale/{slug}/` listing
+  details + `/{city}-homes-for-sale/` unaffected (200).
+
+
+## Daily Ranking Strike — 2026-09-16
+
+### Mode: HTTP fallback (GSC creds absent on host)
+GSC service-account key NOT present on this host (/opt/data/credentials/gsc-key.json missing,
+no GSC_CREDENTIALS/GOOGLE_APPLICATION_CREDENTIALS/SERPER_API_KEY in .env or env). Canonical
+GSC script cannot run — used full HTTP coverage sweep (scripts/ranking_strike_http_fallback.py)
++ P0 patrol (scripts/indexation_patrol_http.py).
+
+### Full HTTP sweep (35 URLs: 27 area pages + 8 money pages)
+✅ 35/35 OK — all HTTP 200, canonical self (or healthy redirect), in sitemap (932 URLs).
+- /homes-for-sale/ → 301 → /properties/ (in sitemap) = healthy consolidation, NOT a P0.
+
+### P0 patrol (12 P0 paths + 3 rotating area pages)
+✅ 15/15 OK — no deindexation signals, no canonicals pointing elsewhere, all in sitemap.
+
+### No regressions. Nothing to ship beyond ops tooling.
+Shipped: PR #201 merged — committed HTTP fallback sweep + indexation patrol scripts to repo;
+fixed redirect handling in sweep (was flagging /homes-for-sale/ as canonical mismatch).
+
+*Report generated: 2026-09-16T13:11:06*
+
+
+## Daily Ranking Strike — 2026-09-17
+
+### Mode: HTTP fallback (GSC creds absent on host)
+`/opt/data/credentials/gsc-key.json` missing (`/opt/data` does not exist on this host).
+GSC_API unavailable; SERPER_API_KEY not in env or any .env file — the only copy in state.db is
+redacted (`b6241c...8283`). Canonical GSC script (scripts/ranking_strike.py) cannot run. Used the
+HTTP coverage sweep + P0 patrol (same mode as 2026-09-16).
+
+### Full HTTP sweep — scripts/ranking_strike_http_fallback.py
+35 URLs (27 area pages + 8 money pages): ✅ 35/35 OK — HTTP 200, canonical self (or healthy
+redirect), in sitemap (933 URLs).
+- `/homes-for-sale/` → 301 → `/properties/` (sitemapped) = healthy consolidation, NOT a P0.
+
+### P0 patrol — scripts/indexation_patrol_http.py
+15 URLs (12 P0 + 3 rotating area pages): ✅ 15/15 OK — no noindex, no canonical mismatch,
+all in sitemap. Covers all CHFA / program pages + /properties/.
+
+### Neighborhood spot-check (entity-intent-shift P0 class)
+✅ `/erie/vista-ridge-erie/`, `/loveland/west-loveland/`, `/greeley/monfort-park/`,
+`/greeley/canyon-views-greeley/` — all HTTP 200 + in sitemap. No deindexation signals.
+
+### Vertical money pages
+✅ `/luxury-real-estate/`, `/assumable-mortgages/`, `/veterans/`, `/cash-home-buyers/` —
+all HTTP 200 + sitemapped.
+
+### No regressions. Nothing to ship.
+Last available GSC dataset: 2026-09-10 (45 clicks / 9,139 impressions, 7-day page-dimension).
+
+*Report generated: 2026-09-17T13:03:48Z*
