@@ -1881,7 +1881,8 @@ function buildRouteSchemas(route) {
     });
   }
 
-  // CHFA pages – mark as AboutPage for richer eligibility
+  // CHFA pages – mark as AboutPage for richer eligibility + SpeakableSpecification
+  // (parity with React components; previously client-side only → invisible to crawlers)
   if (
     path.startsWith('/chfa-') ||
     path === '/chfa-down-payment-assistance/' ||
@@ -1892,6 +1893,17 @@ function buildRouteSchemas(route) {
     const aboutSchema = schemas.find((s) => s['@type'] === 'WebPage');
     if (aboutSchema) {
       aboutSchema['@type'] = 'AboutPage';
+      if (path === '/chfa-down-payment-assistance/') {
+        aboutSchema.speakable = {
+          '@type': 'SpeakableSpecification',
+          cssSelector: ['.chfa-dpa-hero-headline', '.chfa-dpa-intro-lead'],
+        };
+      } else if (path === '/colorado-champions-home-loan-program/') {
+        aboutSchema.speakable = {
+          '@type': 'SpeakableSpecification',
+          cssSelector: ['.champions-hero-headline', '.champions-intro-lead'],
+        };
+      }
     }
   }
 
