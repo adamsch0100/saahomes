@@ -46,6 +46,10 @@ const BUYER_FAQS = [
     q: 'What are the CHFA income limits for Larimer, Weld, or Boulder County?',
     a: 'CHFA income limits are set by county, household size, and whether the home is in a designated targeted area. For reference, mid-2026 non-targeted ranges are approximately $130,000\u2013$156,000+ in Larimer County (Fort Collins, Loveland, Wellington, Timnath) and approximately $153,600\u2013$179,200 in Weld County (Greeley, Windsor, Eaton, Milliken), with higher limits in targeted areas and generally higher limits in Boulder County. Purchase price caps also apply by county. CHFA updates these limits periodically, so Schwartz and Associates verifies the current limits for your specific household with CHFA-approved lenders before you apply. Call (970) 999-1407 to check your eligibility.'
   },
+  {
+    q: 'How much do I need to make to afford a $500,000 house in Colorado?',
+    a: 'As a rough 2026 rule of thumb with a 30-year fixed mortgage near 6.5% interest, a $500,000 home costs about $2,900\u2013$3,400 per month including principal, interest, property taxes, and homeowners insurance, depending on your down payment. At a 43% debt-to-income limit (the maximum most lenders allow), that translates to roughly $81,000\u2013$96,000 in gross annual household income. A 20% down payment keeps the payment near the low end; 3\u20135% down with mortgage insurance pushes it higher. These are estimates, not a quote — your exact number depends on the rate you lock, property taxes in your chosen Northern Colorado city, and your total debt picture. A CHFA-approved lender can give you a precise pre-approval figure, and CHFA down payment assistance can reduce the cash you need upfront. Schwartz and Associates works with local lenders who specialize in Colorado buyer financing — call (970) 999-1407 for a referral.'
+  },
 ];
 
 const SELLER_FAQS = [
@@ -72,6 +76,10 @@ const SELLER_FAQS = [
   {
     q: 'Can I sell my house fast in Northern Colorado?',
     a: 'Yes. Homes in desirable Northern Colorado neighborhoods that are priced correctly and well-presented often sell within 14–30 days, especially in Fort Collins, Loveland, and Windsor. To sell quickly: price competitively based on a Comparative Market Analysis, declutter and stage your home, make minor repairs, and use professional photography. If you need to sell immediately — due to relocation, financial pressure, or an inherited property — ask about our cash buyer network which can close in as little as 7–14 days with no repairs or showings required. Schwartz and Associates provides honest guidance on whether a fast cash sale or traditional listing will net you more. Call (970) 999-1407 for a free consultation.'
+  },
+  {
+    q: 'How much would a real estate agent make on a $300,000 house?',
+    a: 'On a $300,000 home, agents typically earn a combined 5\u20136% commission, or $15,000\u2013$18,000, split between the listing agent and the buyer\u2019s agent (about $7,500\u2013$9,000 per side). The amount an individual agent actually takes home depends on their agreement with their brokerage, which commonly ranges from 60%\u201380% of the commission side after brokerage splits and fees — roughly $4,500\u2013$7,200 before taxes and business expenses. Whether that commission is worth it comes down to what the agent delivers: accurate pricing, professional marketing, negotiation, and handling the paperwork and inspections. Schwartz and Associates provides full-service representation for Northern Colorado buyers and sellers and will show you exactly how commission is structured in your transaction. Call (970) 999-1407 to discuss selling your home.'
   },
   {
     q: 'Is it a good time to sell a house in Colorado right now?',
