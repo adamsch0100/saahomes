@@ -4542,6 +4542,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.645', longitude: '-105.003' },
     metaDescription: 'Wellington Crossing - family-friendly subdivision with walkable schools near Fort Collins. SAA Homes.',
     keywords: 'Wellington Crossing, Wellington new construction, Wellington family homes, Rice Elementary area',
+    youtubeId: 'gUIJ2OGOIxE',
     neighborhoodHighlights: [
       { title: 'Walk to school', description: 'Walking distance to Rice Elementary and Wellington Middle School - a family dream location.' },
       { title: 'Newer homes', description: 'Modern construction with contemporary floor plans and energy-efficient features.' },
@@ -4575,6 +4576,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.648', longitude: '-105.008' },
     metaDescription: 'Wellington Village - historic and modern homes in walkable downtown Wellington. SAA Homes.',
     keywords: 'Wellington Village, downtown Wellington homes, Wellington Colorado real estate, Wellington Community Park',
+    youtubeId: '2tzs9ffkgbA',
     neighborhoodHighlights: [
       { title: 'Small-town charm', description: 'Walkable downtown Wellington with the Wellington Community Park, farmers market, and community events.' },
       { title: 'Poudre schools', description: 'Served by Poudre School District - the same excellent district as Fort Collins.' },
@@ -4609,6 +4611,7 @@ export const neighborhoods = [
     walkScore: 30,
     metaDescription: 'The Gardens at Wellington real estate - newer subdivision with modern homes near Fort Collins in growing Wellington. SAA Homes.',
     keywords: 'The Gardens at Wellington, Wellington Colorado new homes, Wellington subdivisions, Fort Collins area homes, Wellington real estate, new construction Wellington, Poudre High School Wellington',
+    youtubeId: '-COiDIStU8E',
     neighborhoodHighlights: [
       { title: 'Northern exposure', description: 'Wellington offers the best value in Larimer County - newer homes at prices well below Fort Collins.' },
       { title: 'Fort Collins access', description: '15 minutes to Fort Collins - the perfect balance of small-town living and big-city amenities.' },
