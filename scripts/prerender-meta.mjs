@@ -145,6 +145,7 @@ function buildRealEstateAgentSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'RealEstateAgent',
+    '@id': BUSINESS.url,
     name: BUSINESS.name,
     alternateName: BUSINESS.alternateName,
     url: BUSINESS.url,
@@ -1829,9 +1830,20 @@ function buildRouteSchemas(route) {
 
   // Trust schema — AggregateRating + Review must be crawler-visible on the
   // trust pages (GEO review 2026-08-07: was Helmet/client-only → invisible).
+  // Merge into the single RealEstateAgent entity instead of pushing a second
+  // top-level RealEstateAgent (dedupe fix — /, /contact/, /about-us/, and
+  // /testimonials/ were each emitting two RealEstateAgent entities per page).
   if (['/', '/about-us/', '/testimonials/', '/contact/'].includes(route.path)) {
     const reviewSchema = getReviewSchema();
-    if (reviewSchema) schemas.push(reviewSchema);
+    if (reviewSchema) {
+      const rea = schemas.find((s) => s['@type'] === 'RealEstateAgent');
+      if (rea) {
+        if (reviewSchema.aggregateRating) rea.aggregateRating = reviewSchema.aggregateRating;
+        if (reviewSchema.review) rea.review = reviewSchema.review;
+      } else {
+        schemas.push(reviewSchema);
+      }
+    }
   }
 
   // Area pages get Place, BreadcrumbList, and full area schemas

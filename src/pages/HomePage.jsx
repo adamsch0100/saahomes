@@ -13,6 +13,8 @@ import AreaFAQSection from "../components/AreaFAQSection.jsx";
 import { BUSINESS } from "../utils/seoConstants.js";
 import { getReviewSchema } from "../data/reviews.js";
 
+const reviewSchema = getReviewSchema();
+
 const homePageSchema = {
   "@context": "https://schema.org",
   "@type": "RealEstateAgent",
@@ -43,6 +45,8 @@ const homePageSchema = {
     "name": name.replace(", CO", ""),
   })),
   "sameAs": BUSINESS.sameAs,
+  "aggregateRating": reviewSchema.aggregateRating,
+  "review": reviewSchema.review,
 };
 
 const HOME_FAQS = [
@@ -91,7 +95,7 @@ export default function HomePage() {
         canonical="https://saahomes.com/"
         ogImage="https://saahomes.com/images/White-Logo-AUTOx110.fit.png"
         includeWebsite={true}
-        jsonLd={[homePageSchema, getReviewSchema(), faqPageSchema]}
+        jsonLd={[homePageSchema, faqPageSchema]}
       />
       <Hero />
       <AboutSection />
