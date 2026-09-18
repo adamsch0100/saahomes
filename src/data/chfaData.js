@@ -160,7 +160,7 @@ export const CHFA_SPECIALTY_PROGRAMS = [
   {
     title: 'CHFA Schools To Home',
     audience: 'Full-time Colorado public school employees',
-    benefit: 'Up to 25% down payment assistance',
+    benefit: 'Up to 25% DPA as a deferred second mortgage (shared appreciation)',
     link: '/chfa-schools-to-home/',
   },
   {
@@ -209,10 +209,10 @@ export const CHFA_PAGE_CONFIGS = {
   '/chfa-schools-to-home/': {
     slug: 'chfa-schools-to-home',
     title: 'CHFA Schools To Home — Colorado Teacher Down Payment Assistance',
-    tagline: 'Up to 25% down payment assistance for Colorado public school employees',
+    tagline: 'Up to 25% down payment help through a deferred second mortgage with shared appreciation, for Colorado public school employees',
     introParagraphs: [
-      'The CHFA Schools To Home program provides down payment assistance specifically for Colorado public school employees. Eligible educators and school staff can receive up to 25% down payment assistance to help buy a home in the communities where they teach.',
-      'This program is designed to help Colorado teachers, administrators, and support staff achieve homeownership in Northern Colorado and across the state. SAA Homes helps educators find homes within program limits and coordinate with CHFA participating lenders.',
+      'The CHFA Schools To Home program provides down payment assistance for full-time Colorado public school employees. Launched in July 2026 and funded through the Public School Permanent Fund (PSPF), it pairs a fixed-rate CHFA first mortgage with a deferred second mortgage for up to 25% of the loan amount, usable toward down payment, closing costs, prepaids, and principal reduction.',
+      'The second mortgage has no monthly payments and is repaid only when you sell, refinance, pay off the first mortgage, or the home is no longer your primary residence. Under the shared appreciation model, you also share a portion of any home appreciation with the PSPF at repayment. SAA Homes helps Northern Colorado educators find homes within program limits and coordinate with CHFA participating lenders.',
     ],
     stats: false,
     programs: false,
@@ -224,15 +224,27 @@ export const CHFA_PAGE_CONFIGS = {
     faqs: [
       {
         q: 'Who is eligible for CHFA Schools To Home?',
-        a: 'Full-time employees of Colorado public school districts, including teachers, administrators, counselors, nurses, and support staff. Eligibility is determined by your lender based on program guidelines.',
+        a: 'At least one borrower must be a full-time employee of a Colorado pre-K through 12 public school, school district, charter school, institute charter school, BOCES, or innovation zone. There are no tenure requirements.',
       },
       {
         q: 'How much down payment assistance can teachers get?',
-        a: 'The CHFA Schools To Home program offers up to 25% down payment assistance. Exact amounts depend on the home price, loan type, and program guidelines. Your lender can confirm specific figures.',
+        a: 'Eligible borrowers can receive a CHFA DPA second mortgage for up to 25% of the first mortgage loan amount, usable toward down payment, closing costs, prepaids, and principal reduction. You are not required to use the full 25%.',
+      },
+      {
+        q: 'What is shared appreciation and when do I repay?',
+        a: 'The second mortgage has no monthly payments. Repayment is deferred until you sell, refinance, pay off the first mortgage, or the home is no longer your primary residence. At that time you repay the DPA balance plus a share of any home appreciation with the Public School Permanent Fund (PSPF). If the home has not appreciated, shared appreciation is zero.',
+      },
+      {
+        q: 'Is the program available now?',
+        a: 'Yes. CHFA launched Schools To Home in July 2026, funded by the Public School Permanent Fund (PSPF). Program details are subject to change; refer to the official CHFA program page for the latest information.',
       },
       {
         q: 'Can I combine Schools To Home with other CHFA programs?',
         a: 'No. Schools To Home is a standalone program and cannot be combined with other CHFA first mortgage or down payment assistance programs. Your lender helps identify the best single program for your situation.',
+      },
+      {
+        q: 'What are the credit and income requirements?',
+        a: 'Borrowers need a minimum mid-credit score of 620, household income at or below the CHFA statewide limit, at least $1,000 toward the purchase, a CHFA-approved homebuyer education class, and completion of the required Understanding Your Financial Commitment course.',
       },
     ],
     contactCta: 'Are you a Colorado educator looking to buy a home? Contact SAA Homes at (970) 999-1407 for guidance on the CHFA Schools To Home program and Northern Colorado real estate.',
