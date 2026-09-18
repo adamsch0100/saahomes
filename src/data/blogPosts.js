@@ -4485,6 +4485,14 @@ export const blogPosts = [
       { title: 'Loveland Colorado homes for sale', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities & pricing' },
       { title: 'Windsor homes for sale', href: '/northern-colorado-areas/windsor/', description: 'Weld-Larimer border family communities' },
     ],
+    cta: {
+      title: 'Find your best-fit Fort Collins neighborhood',
+      description: 'Adam and Mandi Schwartz know every Fort Collins neighborhood — from Old Town Victorians to Waterglen new builds. Tell us what matters and we\'ll point you to the right blocks, then get you into homes for sale. Call (970) 999-1407 or start browsing now.',
+      primaryHref: '/properties/?location=Fort Collins, CO',
+      primaryText: 'Search Fort Collins homes',
+      secondaryHref: '/northern-colorado-areas/fort-collins/',
+      secondaryText: 'Explore the Fort Collins Area Guide',
+    },
     sections: [
       {
         heading: 'Why Fort Collins has the best neighborhoods in Northern Colorado',

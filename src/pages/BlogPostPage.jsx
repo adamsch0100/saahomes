@@ -208,6 +208,23 @@ export default function BlogPostPage() {
                 </a>
               </div>
             )}
+            {!isSellerPost && (
+              <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                <Link
+                  to={cta.primaryHref}
+                  className="inline-flex items-center justify-center px-6 py-3 font-semibold rounded-lg hover:brightness-110 transition-all shadow-lg"
+                  style={{ backgroundColor: "#CFB36E", color: "#1a1a1a" }}
+                >
+                  {cta.primaryText} →
+                </Link>
+                <a
+                  href="tel:(970) 999-1407"
+                  className="inline-flex items-center justify-center px-6 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors"
+                >
+                  Call (970) 999-1407
+                </a>
+              </div>
+            )}
           </div>
         </section>
 
@@ -322,6 +339,13 @@ export default function BlogPostPage() {
                 </Link>
               )}
             </div>
+            <p className="mt-5 text-sm text-gray-600">
+              Prefer to talk? Call{" "}
+              <a href="tel:(970) 999-1407" className="font-semibold text-black hover:underline">
+                (970) 999-1407
+              </a>{" "}
+              — Adam and Mandi Schwartz, Coldwell Banker Realty. We&apos;ll help you take the next step.
+            </p>
           </div>
 
           {relatedPosts.length > 0 && (
