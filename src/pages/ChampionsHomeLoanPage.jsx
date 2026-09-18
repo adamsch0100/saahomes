@@ -177,7 +177,7 @@ export default function ChampionsHomeLoanPage() {
           description: PAGE_DESCRIPTION,
           url: PAGE_URL,
           inLanguage: "en-US",
-          dateModified: "2026-06-24",
+          dateModified: "2026-09-18",
           isPartOf: { "@type": "WebSite", name: "SAA Homes", url: "https://saahomes.com/" },
           about: {
             "@type": "GovernmentService",
@@ -343,7 +343,7 @@ export default function ChampionsHomeLoanPage() {
               <Link to="/northern-colorado-areas/wellington/" className="text-black font-semibold hover:underline">Wellington</Link>.
             </p>
             <p className="text-sm text-gray-500">
-              Page last updated June 24, 2026 — we refresh this guide when CHFA releases final program guidelines.
+              Page last updated September 18, 2026 — we refresh this guide when CHFA releases final program guidelines.
             </p>
           </div>
           <div className="lg:col-span-2 lg:sticky lg:top-28 scroll-mt-28">
