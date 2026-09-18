@@ -4646,6 +4646,7 @@ export const neighborhoods = [
     walkScore: 20,
     metaDescription: 'Wellington Lake area real estate - larger lot homes with lake and mountain views in north Wellington. SAA Homes.',
     keywords: 'Wellington Lake, Wellington Colorado acreage, larger lot homes Wellington, Wellington real estate, affordable Larimer County homes, semi-rural Wellington, Wellington Colorado lake homes',
+    youtubeId: 'OyM_bq6jFog',
     neighborhoodHighlights: [
       { title: 'Lake lifestyle', description: 'Wellington Lake provides scenic views and recreational opportunities in a north Wellington setting.' },
       { title: 'Best value', description: 'Wellington offers the most affordable home prices in Larimer County - genuine value.' },
@@ -4679,6 +4680,7 @@ export const neighborhoods = [
     walkScore: 30,
     metaDescription: 'Clover Creek Longmont — family-friendly south Longmont subdivision with parks, trails, and top-rated schools. Newer homes near Ken Pratt shopping. SAA Homes.',
     keywords: 'Clover Creek Longmont, south Longmont homes, Longmont family neighborhoods, St. Vrain Greenway Longmont, Indian Peaks Elementary area, Longmont subdivisions',
+    youtubeId: 'OVhC-CcI-Dw',
     neighborhoodHighlights: [
       { title: 'Family-friendly', description: 'Community park, quiet streets, and proximity to top-rated schools make Clover Creek ideal for families.' },
       { title: 'Trail access', description: 'St. Vrain Greenway provides paved trails for walking, running, and biking just steps from home.' },
@@ -4709,6 +4711,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.165', longitude: '-105.1' },
     metaDescription: 'Downtown Longmont real estate - historic homes and lofts near Main Street. SAA Homes.',
     keywords: 'Downtown Longmont, historic Longmont homes, Main Street Longmont real estate, Longmont Colorado downtown',
+    youtubeId: 'ca_yHQFdJuQ',
     neighborhoodHighlights: [
       { title: 'Historic Main Street', description: 'Boutique shopping, farm-to-table dining, craft breweries, and year-round events on Main Street.' },
       { title: 'Walkable lifestyle', description: 'Walk to coffee shops, restaurants, parks, and the farmers market from anywhere downtown.' },
