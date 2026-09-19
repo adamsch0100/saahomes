@@ -10520,6 +10520,7 @@ export const blogPosts = [
     title: 'La Salle, Colorado Real Estate Agent: Why Local Matters',
     excerpt: 'What to look for in a La Salle, CO realtor — local Weld County knowledge, pricing expertise, and why a Greeley-adjacent market rewards a local agent.',
     date: '2026-09-11',
+    youtubeId: 'hIB-bg0hW4Y',
     category: 'Local Expertise',
     image: '/images/la-salle.png',
     readTime: '4 min read',
