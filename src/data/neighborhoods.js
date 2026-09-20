@@ -4743,6 +4743,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.17', longitude: '-105.09' },
     metaDescription: 'Longmont Estates - established central Longmont neighborhood with mature trees and generous lots. SAA Homes.',
     keywords: 'Longmont Estates, east Longmont homes, established Longmont neighborhoods, McIntosh Lake area homes',
+    youtubeId: '4F301WE1t-k',
     neighborhoodHighlights: [
       { title: 'Mature character', description: 'Tree-lined streets and established landscaping give Longmont Estates a settled, desirable feel.' },
       { title: 'Generous lots', description: 'Larger lots with room for gardens, play areas, and outdoor living.' },
@@ -4774,6 +4775,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.165', longitude: '-105.105' },
     metaDescription: 'Lagoon area Longmont - Mcintosh Lake area homes with recreation trail access. SAA Homes.',
     keywords: 'Lagoon Longmont, McIntosh Lake area homes, west Longmont real estate, Longmont lake homes',
+    youtubeId: 'FO7RMtWNoV8',
     neighborhoodHighlights: [
       { title: 'McIntosh Lake', description: 'Scenic walking trail around McIntosh Lake - a 88-acre lake with fishing, birding, and walking paths.' },
       { title: 'Central location', description: 'Minutes from downtown Longmont, Main Street dining, and the Longmont Recreation Trail.' },
@@ -4805,6 +4807,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.155', longitude: '-105.125' },
     metaDescription: 'Fox Hill Farm Longmont - custom acreage homes with Longs Peak views near downtown. SAA Homes.',
     keywords: 'Fox Hill Farm Longmont, west Longmont acreage, Longs Peak view homes, Longmont custom homes',
+    youtubeId: 'yVGOP35_7Hk',
     neighborhoodHighlights: [
       { title: 'Longs Peak views', description: 'Stunning panoramic views of Longs Peak and the Front Range from elevated west Longmont.' },
       { title: 'Acreage living', description: 'Larger lots from 0.5-2 acres provide space for gardens, animals, and privacy.' },
