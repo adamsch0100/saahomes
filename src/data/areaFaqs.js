@@ -542,6 +542,14 @@ const AREA_FAQS = {
       q: 'Should I buy in Firestone, Frederick, or Dacono?',
       a: 'They run together geographically but inventory, pricing, and amenities differ. Firestone and Frederick usually offer more listings and established amenities; Dacono is a smaller core-town market. Use the live market lines on our Carbon Valley hub and we will help you tour the right mix.'
     },
+    {
+      q: 'What is the price range for Carbon Valley homes for sale?',
+      a: 'Carbon Valley home prices are among the most affordable in Northern Colorado. Firestone homes typically range from $450,000 to $650,000, Frederick from $400,000 to $575,000, and Dacono from $400,000 to $550,000. New construction commonly runs $450,000 to $700,000 depending on community and finishes. By comparison, Longmont homes typically range from $575,000 to $800,000 and Fort Collins from $525,000 to $850,000. Check the live market lines on our Carbon Valley hub for current listing counts and medians.'
+    },
+    {
+      q: 'How do Firestone, Frederick, and Dacono compare?',
+      a: 'Firestone is the largest and the corridor\'s commercial anchor, with the widest housing variety - established neighborhoods plus active new construction - and prices typically $450,000 to $650,000. Frederick offers some of the lowest prices in the corridor at $400,000 to $575,000, making it the sweet spot for first-time buyers, with Milavec Lake, community parks, and strong new-construction inventory. Dacono is the smaller core-town market at $400,000 to $550,000, with easy I-25 access and renewed interest as development pushes south. All three share the St. Vrain Valley School District and Weld County value.'
+    }
   ],
   'estes-park': [
     {
