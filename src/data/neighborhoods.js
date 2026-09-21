@@ -5898,6 +5898,7 @@ export const neighborhoods = [
     walkScore: 45,
     metaDescription: 'Southmoor Park Longmont real estate - mid-century homes near McIntosh Lake with mature trees in south Longmont. SAA Homes.',
     keywords: 'Southmoor Park Longmont, south Longmont homes, McIntosh Lake real estate, mid-century homes Longmont, Kanemoto Park area, St. Vrain Greenway homes, established Longmont neighborhoods',
+    youtubeId: 'pVZles1MfkA',
     neighborhoodHighlights: [
       { title: 'Lake and park access', description: 'McIntosh Lake offers fishing, paddleboarding, and a 2-mile trail, while Kanemoto Park has sports fields and playgrounds.' },
       { title: 'Mid-century charm', description: 'Classic 1960s ranch and split-level homes with mature trees - some of Longmont\'s most established neighborhoods.' },
@@ -5932,6 +5933,7 @@ export const neighborhoods = [
     walkScore: 35,
     metaDescription: 'The Greens at Sunset Vista Longmont real estate - golf course community with mountain views and community pool in southwest Longmont. SAA Homes.',
     keywords: 'The Greens at Sunset Vista Longmont, Sunset Vista Longmont, southwest Longmont homes, golf course homes Longmont, Village at the Peaks area, Twin Peaks Longmont real estate',
+    youtubeId: 'wY0Lz6DcxIU',
     neighborhoodHighlights: [
       { title: 'Golf course living', description: 'Homes overlooking the Sunset Golf Course with panoramic mountain views - one of Longmont\'s most picturesque settings.' },
       { title: 'Community amenities', description: 'Neighborhood pool and clubhouse provide resort-style living in the heart of southwest Longmont.' },
@@ -5966,6 +5968,7 @@ export const neighborhoods = [
     walkScore: 28,
     metaDescription: 'Renaissance at Longmont — newer master-planned community with pool, parks, and modern homes near Boulder. St. Vrain schools. SAA Homes.',
     keywords: 'Renaissance Longmont, southwest Longmont homes, Longmont master-planned community, Longmont new construction, Longmont pool community, Boulder commute homes',
+    youtubeId: 'F1sfffbE4uM',
     neighborhoodHighlights: [
       { title: 'Community amenities', description: 'Clubhouse, swimming pool, and neighborhood parks create a resort-like feel for residents.' },
       { title: 'Newer homes', description: 'Modern floor plans and energy-efficient construction in a thoughtfully designed master plan.' },
