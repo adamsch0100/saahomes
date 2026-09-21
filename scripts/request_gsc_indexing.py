@@ -23,6 +23,7 @@ URLS_TO_REINDEX = [
     '/properties/',
     '/northern-colorado-areas/fort-collins/',
     '/northern-colorado-areas/greeley/',
+    '/northern-colorado-areas/boulder/',  # stuck "Crawled - not indexed" since 2026-07-22; add so patrols re-queue it
 ]
 
 print("=" * 70)
