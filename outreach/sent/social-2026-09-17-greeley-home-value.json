@@ -1,0 +1,51 @@
+{
+  "subject": "SAA Homes — Social posts | How Much Is My Home Worth in Greeley? (2026 guide)",
+  "promoting": {
+    "title": "How Much Is My Home Worth in Greeley, CO? 2026 Home Value Guide",
+    "url": "https://saahomes.com/blog/how-much-is-my-home-worth-greeley-colorado/"
+  },
+  "intro": "New evergreen seller guide shipped 2026-09-15: Greeley home value guide with August 2026 data ($440,600 median list, sub-$400K moving in 10-14 days, CHFA + G-HOPE context). Planned Buffer schedule: 2026-09-17, one idea per day — all 3 platforms (GBP/FB/X) same day.",
+  "scheduled_posts": [
+    {
+      "platform": "Google Business Profile",
+      "status": "scheduled",
+      "scheduled_at": "2026-09-17T15:00:00.000Z",
+      "buffer_id": "6aaabf06bac4828bcdbd360d"
+    },
+    {
+      "platform": "Facebook",
+      "status": "scheduled",
+      "scheduled_at": "2026-09-17T15:00:00.000Z",
+      "buffer_id": "6aaabf0611e0849709b39c99"
+    },
+    {
+      "platform": "X",
+      "status": "scheduled",
+      "scheduled_at": "2026-09-17T15:00:00.000Z",
+      "buffer_id": "6aaabf0745bad3bf13f3a111"
+    }
+  ],
+  "operator_schedule": [
+    "Nothing to do — posts queued via Buffer automatically when BUFFER_API_KEY is restored."
+  ],
+  "platforms": [
+    {
+      "name": "Google Business Profile",
+      "caption": "How much is your Greeley home worth in 2026? Our new guide covers the August data — median list price near $440,600, the sub-$400K segment moving in 10-14 days, and what west Greeley comps actually show. Learn more at the link below.",
+      "image_url": "https://saahomes.com/images/Area-Guide-for-Greeley-CO.jpg"
+    },
+    {
+      "name": "Facebook",
+      "caption": "💰 Greeley's affordability is its superpower — and its home values tell the story. New guide: $440,600 median list price (Aug '26), move-in-ready homes under $400K going under contract in 10-14 days, and why west Greeley between 35th & 65th resells fastest. Adam & Mandi will run a free, no-obligation CMA using real sold comps: https://saahomes.com/blog/how-much-is-my-home-worth-greeley-colorado/",
+      "image_url": "https://saahomes.com/images/Area-Guide-for-Greeley-CO.jpg"
+    },
+    {
+      "name": "X",
+      "caption": "Greeley home values, August 2026: median list ~$440,600, sub-$400K homes under contract in 10-14 days. Free CMA → https://saahomes.com/blog/how-much-is-my-home-worth-greeley-colorado/",
+      "image_url": "https://saahomes.com/images/Area-Guide-for-Greeley-CO.jpg"
+    }
+  ],
+  "youtube": null,
+  "x": null,
+  "video_note": "YouTube video planned for a later slot (quota permitting)."
+}

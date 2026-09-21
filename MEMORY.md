@@ -15,14 +15,14 @@
 
 ## Content calendar state
 
-last_social_pack_date: 2026-09-16
+last_social_pack_date: 2026-09-19
 last_social_pillar: content-offense (4-pack blog batch promos, rotation skipped — shipped content prioritized)
 rotation_week_index: 4
 last_3_social_hooks: ["How much is your Windsor home really worth? New guide: $589,950 median sold (Aug '26), 83 DOM, Weld vs Larimer tax math inside. Free CMA (Sep 16, Buffer).", "Greeley home values, August 2026: median list ~$440,600, sub-$400K homes under contract in 10-14 days. Free CMA (Sep 17, Buffer).", "Windsor luxury: Water Valley lakefront ($450K-$1M+), Pelican Lakes golf estates, The Reserve custom homes (Sep 18, Buffer)."]
 monthly_market_blog_url: https://saahomes.com/blog/northern-colorado-market-update-september-2026/
-blogs_published_this_month: 31 (prior 27 + how-much-is-my-home-worth-windsor-colorado, how-much-is-my-home-worth-greeley-colorado, luxury-homes-windsor-colorado, moving-to-greeley-colorado-guide) — shipped 2026-09-15 via PR #195; youtubeIds via PR #197 (FZXfGzxk7Lc / caYejeZGNjA / mSCCgBnV9JE)
-pending_social_packs: 0 — 4 packs (outreach/sent/social-2026-09-{16,17,18,19}-*.json) POSTED to Buffer 2026-09-16, one idea/day Sep 16-19 15:00 UTC, and emailed to Adam. Creds (BUFFER_API_KEY + OUTREACH_SMTP_*) for this run recovered from state.db; still recommend a permanent restore to /data/hermes-homes/saa-homes/.env.
-last_operator_schedule_date: 2026-09-14 (week Sep 14-20 emailed; prior covers Sep 7-13 sent late Sep 9)
+blogs_published_this_month: 45 (per src/data/blogPosts.js — 18 new since Sep 14: home-value Windsor/Greeley, luxury Windsor, moving-to-Greeley, Milliken/Mead/Brighton buy+sell, cash-home-buyers Longmont, Carbon Valley agent+moving-to, Evans/Firestone/Frederick/Erie batch #212)
+pending_social_packs: 0 — 4 packs (outreach/sent/social-2026-09-{16,17,18,19}-*.json) POSTED to Buffer 2026-09-16/17/18/19 (buffer_ids confirmed), one idea/day 15:00 UTC, and emailed to Adam. Creds (BUFFER_API_KEY + OUTREACH_SMTP_*) recovered from state.db + known app password; still recommend a permanent restore to /data/hermes-homes/saa-homes/.env.
+last_operator_schedule_date: 2026-09-21 (week Sep 21-27 emailed + verified via IMAP Sent; prior Sep 14-20)
 latest_market_update_slug: northern-colorado-market-update-september-2026
 last_events_check_date: 2026-09-09
 next_notable_event: per src/data/localEvents.js (reviewed 2026-09-09; Estes Park schools+events rows added 2026-09-14)
@@ -702,3 +702,72 @@ all HTTP 200 + sitemapped.
 Last available GSC dataset: 2026-09-10 (45 clicks / 9,139 impressions, 7-day page-dimension).
 
 *Report generated: 2026-09-17T13:03:48Z*
+
+## Daily Ranking Strike — 2026-09-18
+
+### ⚠️ P0 — Pages No Longer Indexed
+
+| Page | Previous Impressions | Previous Clicks | Top Queries |
+|------|---------------------|-----------------|-------------|
+| https://saahomes.com/northern-colorado-areas/bellvue/bellvue-proper/ | 6 | 0 | bellvue colorado |
+| https://saahomes.com/northern-colorado-areas/boulder/downtown-boulder/ | 9 | 0 | boulder downtown colorado, downtown boulder, boulder co downtown |
+| https://saahomes.com/northern-colorado-areas/boulder/newlands/ | 7 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/erie/old-town-erie/ | 12 | 0 | erie town, erie co city guide |
+| https://saahomes.com/northern-colorado-areas/firestone/firestone-commons/ | 5 | 0 | firestone colorado all ages community, firestone all ages community |
+| https://saahomes.com/northern-colorado-areas/firestone/firestone-crossing/ | 6 | 0 |  |
+
+*Report generated: 2026-09-18T13:03:22.665200*
+
+## Daily Ranking Strike — 2026-09-18
+
+### ⚠️ P0 — Pages No Longer Indexed
+
+| Page | Previous Impressions | Previous Clicks | Top Queries |
+|------|---------------------|-----------------|-------------|
+| https://saahomes.com/northern-colorado-areas/bellvue/bellvue-proper/ | 6 | 0 | bellvue colorado |
+| https://saahomes.com/northern-colorado-areas/boulder/downtown-boulder/ | 9 | 0 | downtown boulder, boulder co downtown, boulder downtown |
+| https://saahomes.com/northern-colorado-areas/boulder/newlands/ | 7 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/erie/old-town-erie/ | 12 | 0 | erie town, erie co city guide |
+| https://saahomes.com/northern-colorado-areas/firestone/firestone-commons/ | 5 | 0 | firestone all ages community, firestone colorado all ages community |
+| https://saahomes.com/northern-colorado-areas/firestone/firestone-crossing/ | 6 | 0 |  |
+
+*Report generated: 2026-09-18T13:04:24.186527*
+
+## Daily Ranking Strike — 2026-09-21
+
+### ⚠️ P0 — Pages No Longer Indexed
+
+| Page | Previous Impressions | Previous Clicks | Top Queries |
+|------|---------------------|-----------------|-------------|
+| https://saahomes.com/northern-colorado-areas/firestone/firestone-crossing/ | 6 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/fort-collins/rigden-farm/ | 5 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/lyons/lyons-river-district/ | 7 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/windsor/rain-dance-windsor/ | 11 | 0 |  |
+
+*Report generated: 2026-09-21T13:02:06.394805*
+
+## Daily Ranking Strike — 2026-09-21
+
+### ⚠️ P0 — Pages No Longer Indexed
+
+| Page | Previous Impressions | Previous Clicks | Top Queries |
+|------|---------------------|-----------------|-------------|
+| https://saahomes.com/northern-colorado-areas/firestone/firestone-crossing/ | 6 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/fort-collins/rigden-farm/ | 5 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/lyons/lyons-river-district/ | 7 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/windsor/rain-dance-windsor/ | 11 | 0 |  |
+
+*Report generated: 2026-09-21T13:02:23.271681*
+
+## Daily Ranking Strike — 2026-09-21
+
+### ⚠️ P0 — Pages No Longer Indexed
+
+| Page | Previous Impressions | Previous Clicks | Top Queries |
+|------|---------------------|-----------------|-------------|
+| https://saahomes.com/northern-colorado-areas/firestone/firestone-crossing/ | 6 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/fort-collins/rigden-farm/ | 5 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/lyons/lyons-river-district/ | 7 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/windsor/rain-dance-windsor/ | 11 | 0 |  |
+
+*Report generated: 2026-09-21T13:02:34.162778*

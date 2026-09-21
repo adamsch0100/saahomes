@@ -1,0 +1,77 @@
+{
+  "subject": "SAA Homes — Your week | Sep 21 – Sep 27",
+  "week_label": "Sep 21 – Sep 27, 2026",
+  "time_estimate": "~10-15 min this week (lead follow-up + optional outreach review — social is fully automated)",
+  "intro": "✅ On cadence — no missed week (last schedule Sep 14-20 was emailed on time). BIG content week behind us: September blog output is now 45 posts per src/data/blogPosts.js (18 shipped since last Monday — home-value guides for Windsor & Greeley, luxury Windsor, moving-to-Greeley, Milliken/Mead/Brighton buyer+seller pairs, cash-home-buyers Longmont, Carbon Valley agent-intent + moving-to guides, and TODAY's Evans/Firestone/Frederick/Erie batch via PR #212). Neighborhood library hit 380 verified guides across 27 cities (+37 this week: FC 5, Loveland 7, Greeley 12, Windsor 7, Longmont 3, Boulder 3). Also shipped: CRO above-fold CTAs + click-to-call (#209), lead attribution batch (#208), RealEstateAgent schema dedupe (#206), soft-404 301 aliases live (#199). Social: 100% automated via Buffer — the 09-16/17/18/19 packs (Windsor home value, Greeley home value, Windsor luxury, Moving to Greeley) were already queued to Buffer one-idea-per-day (buffer_ids confirmed) AND emailed for the record — nothing for you to post. ⚠️ Infra note (5 min, optional, recurring): BUFFER_API_KEY and OUTREACH_SMTP_* still aren't in /data/hermes-homes/saa-homes/.env — this box recovered them again this week (state.db + known app password), but a permanent restore makes every email/social cron self-sufficient. ⚠️ Fleet: 12/60 jobs errored — 3 killed by gateway shutdowns (Sept outage aftermath: monthly-market-blog, city-audit-batch-2, monthly-market-digital-press); the rest are script/config gaps (citation-submission-layer1, alerts-email-outbox, grok-heartbeat/finish-notify, mention-recovery-scan, timnath-wellington-johnstown-fixes-batch, openbot heartbeat ×2, city-audit-batch-4 spend-guard hold). Nothing revenue-blocking. 📊 Today's ranking strike flagged 4 neighborhood pages in 0-impression windows (firestone-crossing, rigden-farm, lyons-river-district, rain-dance-windsor) — same low-volume fluctuation pattern as prior weeks; Hermes re-verifying, no action for you.",
+  "pending_social_packs": [],
+  "schedule": [
+    {
+      "day": "Monday",
+      "date": "Sep 21",
+      "priority": "optional",
+      "tasks": [
+        "Read this email — your week at a glance (~1 min)",
+        "Skim Hermes war room on Telegram (4 neighborhood pages in 0-impression windows flagged today — Hermes verifying, expected low-volume noise)",
+        "Follow Up Boss — weekend form leads; market report leads = same-day call/text",
+        "Optional 5-min infra pass: add BUFFER_API_KEY + OUTREACH_SMTP_HOST/USER/PASSWORD (+ SOCIAL_POST_EMAIL_TO) to /data/hermes-homes/saa-homes/.env — see intro. Not blocking anything today.",
+        "No social tasks — all posts auto-queued via Buffer"
+      ],
+      "notes": "Shipped today: PR #212 — Evans buyer/seller + Firestone buy + Frederick sell + moving-to-Erie (5 blog posts, closes Batch-3 audit gaps)."
+    },
+    {
+      "day": "Tuesday",
+      "date": "Sep 22",
+      "priority": "optional",
+      "tasks": [
+        "Follow Up Boss — speed-to-lead on any new contact or CHFA form submissions",
+        "Social posts: queued automatically via Buffer — no action needed."
+      ]
+    },
+    {
+      "day": "Wednesday",
+      "date": "Sep 23",
+      "priority": "high",
+      "tasks": [
+        "Competitor content watch results (if flagged on Telegram — Kittle/All Avenue scans)",
+        "Social posts: queued automatically via Buffer — no action needed.",
+        "FUB mid-week lead check"
+      ],
+      "notes": "Rotation Week 4 — community/city focus. Weekly rotation pack auto-queued by Buffer; newest content (Evans/Firestone/Frederick/Erie batch, Carbon Valley guides) rides the pipeline — no pack to paste."
+    },
+    {
+      "day": "Thursday",
+      "date": "Sep 24",
+      "priority": "high",
+      "tasks": [
+        "Telegram OUTREACH REVIEW — reply 'approved' / 'edit: …' / 'skip' (likely empty: the Sep 15 link-build probe found 10/10 directory targets blocked from this IP, 0 built — no new drafts pending)",
+        "Social posts: queued automatically via Buffer — no action needed.",
+        "GEO citation audit results if flagged; FUB check"
+      ]
+    },
+    {
+      "day": "Friday",
+      "date": "Sep 25",
+      "priority": "optional",
+      "tasks": [
+        "Follow Up Boss — close out open leads from the week",
+        "Backlog enforcer ships remaining fixes automatically (batch-4 corridor + indexation patrol batch) — no action",
+        "Social posts: queued automatically via Buffer — no action needed."
+      ]
+    },
+    {
+      "day": "Weekend",
+      "date": "Sep 26-27",
+      "priority": "optional",
+      "tasks": [
+        "Monitor FUB for new leads only — no posting tasks; Buffer covers all social"
+      ]
+    }
+  ],
+  "standing_reminders": [
+    "Market report form leads = high intent — call/text same business day",
+    "Social posts are fully automated via Buffer — no manual posting of any kind",
+    "Never use Browserbase for social — email packs only",
+    "Hermes handles site SEO/blog/deploy — you handle leads + outreach approval",
+    "~10-15 min/week total: if it's taking longer, tell Hermes to fix the process"
+  ]
+}

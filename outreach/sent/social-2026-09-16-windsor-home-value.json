@@ -1,0 +1,51 @@
+{
+  "subject": "SAA Homes — Social posts | How Much Is My Home Worth in Windsor? (2026 guide)",
+  "promoting": {
+    "title": "How Much Is My Home Worth in Windsor, CO? 2026 Home Value Guide",
+    "url": "https://saahomes.com/blog/how-much-is-my-home-worth-windsor-colorado/"
+  },
+  "intro": "New evergreen seller guide shipped 2026-09-15: Windsor home value guide with August 2026 data ($589,950 median sold, 83 DOM, Weld vs Larimer tax math). Planned Buffer schedule: 2026-09-16, one idea per day — all 3 platforms (GBP/FB/X) same day.",
+  "scheduled_posts": [
+    {
+      "platform": "Google Business Profile",
+      "status": "scheduled",
+      "scheduled_at": "2026-09-16T17:30:00.000Z",
+      "buffer_id": "6aaabf0445bad3bf13f3a07e"
+    },
+    {
+      "platform": "Facebook",
+      "status": "scheduled",
+      "scheduled_at": "2026-09-16T17:30:00.000Z",
+      "buffer_id": "6aaabf0445bad3bf13f3a0ab"
+    },
+    {
+      "platform": "X",
+      "status": "scheduled",
+      "scheduled_at": "2026-09-16T17:30:00.000Z",
+      "buffer_id": "6aaabf05454a5fdb57daddca"
+    }
+  ],
+  "operator_schedule": [
+    "Nothing to do — posts queued via Buffer automatically when BUFFER_API_KEY is restored."
+  ],
+  "platforms": [
+    {
+      "name": "Google Business Profile",
+      "caption": "Wondering what your Windsor home is worth right now? Our new 2026 guide covers the August data — median sold price near $589,950, 83 days on market, and how the Weld vs Larimer county line affects your value. Learn more at the link below.",
+      "image_url": "https://saahomes.com/images/Windsor-CO-Area-Guide.jpg"
+    },
+    {
+      "name": "Facebook",
+      "caption": "🏡 Windsor's home-value question, answered with real August 2026 data. Our new guide breaks down Windsor's $589,950 median sold price, the 83-day average marketing time, why 26% of listings carry price reductions, and exactly how the Weld County tax advantage moves your number. Adam & Mandi Schwartz will run a free, no-obligation CMA on your Windsor home — recent sold comps, not a Zestimate: https://saahomes.com/blog/how-much-is-my-home-worth-windsor-colorado/",
+      "image_url": "https://saahomes.com/images/Windsor-CO-Area-Guide.jpg"
+    },
+    {
+      "name": "X",
+      "caption": "How much is your Windsor home really worth? New guide: $589,950 median sold (Aug '26), 83 DOM, Weld vs Larimer tax math inside. Free CMA → https://saahomes.com/blog/how-much-is-my-home-worth-windsor-colorado/",
+      "image_url": "https://saahomes.com/images/Windsor-CO-Area-Guide.jpg"
+    }
+  ],
+  "youtube": null,
+  "x": null,
+  "video_note": "YouTube video for this post is being generated/uploaded via the seo-video-pipeline (slug how-much-is-my-home-worth-windsor-colorado)."
+}

@@ -1,0 +1,51 @@
+{
+  "subject": "SAA Homes — Social posts | Moving to Greeley (2026 buyer guide)",
+  "promoting": {
+    "title": "Moving to Greeley, Colorado: A Complete 2026 Guide for Homebuyers",
+    "url": "https://saahomes.com/blog/moving-to-greeley-colorado-guide/"
+  },
+  "intro": "New evergreen relocation guide shipped 2026-09-15: moving to Greeley — neighborhoods, $440,600 median, CHFA + G-HOPE down payment help, schools/jobs/life. Planned Buffer schedule: 2026-09-19, one idea per day — all 3 platforms (GBP/FB/X) same day.",
+  "scheduled_posts": [
+    {
+      "platform": "Google Business Profile",
+      "status": "scheduled",
+      "scheduled_at": "2026-09-19T15:00:00.000Z",
+      "buffer_id": "6aaabf09454a5fdb57dade67"
+    },
+    {
+      "platform": "Facebook",
+      "status": "scheduled",
+      "scheduled_at": "2026-09-19T15:00:00.000Z",
+      "buffer_id": "6aaabf0a45bad3bf13f3a1d7"
+    },
+    {
+      "platform": "X",
+      "status": "scheduled",
+      "scheduled_at": "2026-09-19T15:00:00.000Z",
+      "buffer_id": "6aaabf0a11e0849709b39d27"
+    }
+  ],
+  "operator_schedule": [
+    "Nothing to do — posts queued via Buffer automatically when BUFFER_API_KEY is restored."
+  ],
+  "platforms": [
+    {
+      "name": "Google Business Profile",
+      "caption": "Thinking about moving to Greeley? Our new 2026 buyer guide covers neighborhoods, home prices (median list near $440,600), CHFA + G-HOPE down payment help, and what daily life is really like. Learn more at the link below.",
+      "image_url": "https://saahomes.com/images/Area-Guide-for-Greeley-CO.jpg"
+    },
+    {
+      "name": "Facebook",
+      "caption": "🏠 Moving to Greeley in 2026? You're not alone — 582 homes sold there in August alone. Our new guide covers the neighborhoods that matter (west Greeley, the UNC University District, the new master-planned communities), the $440,600 median, CHFA & G-HOPE down payment help up to $8,000, and the 25-30 minute commute to Fort Collins. The most complete relocation guide we've published for Greeley: https://saahomes.com/blog/moving-to-greeley-colorado-guide/",
+      "image_url": "https://saahomes.com/images/Area-Guide-for-Greeley-CO.jpg"
+    },
+    {
+      "name": "X",
+      "caption": "Moving to Greeley? New 2026 guide: neighborhoods, $440,600 median list, CHFA + G-HOPE help up to $8K, 25-30 min to Fort Collins → https://saahomes.com/blog/moving-to-greeley-colorado-guide/",
+      "image_url": "https://saahomes.com/images/Area-Guide-for-Greeley-CO.jpg"
+    }
+  ],
+  "youtube": null,
+  "x": null,
+  "video_note": "YouTube video planned for a later slot (quota permitting)."
+}

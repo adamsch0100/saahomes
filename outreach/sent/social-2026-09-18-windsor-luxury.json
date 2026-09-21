@@ -1,0 +1,51 @@
+{
+  "subject": "SAA Homes — Social posts | Luxury Homes in Windsor (Water Valley, Pelican Lakes)",
+  "promoting": {
+    "title": "Luxury Homes in Windsor, CO: Water Valley, Pelican Lakes & West Windsor Guide",
+    "url": "https://saahomes.com/blog/luxury-homes-windsor-colorado/"
+  },
+  "intro": "New luxury vertical post shipped 2026-09-15: Windsor's premium market — Water Valley lakefront ($450K-$1M+), Pelican Lakes golf estates, The Reserve at Windsor. Feeds the private-client luxury hub (/luxury-real-estate/). Planned Buffer schedule: 2026-09-18, one idea per day — all 3 platforms (GBP/FB/X) same day.",
+  "scheduled_posts": [
+    {
+      "platform": "Google Business Profile",
+      "status": "scheduled",
+      "scheduled_at": "2026-09-18T15:00:00.000Z",
+      "buffer_id": "6aaabf07454a5fdb57dade25"
+    },
+    {
+      "platform": "Facebook",
+      "status": "scheduled",
+      "scheduled_at": "2026-09-18T15:00:00.000Z",
+      "buffer_id": "6aaabf08e2946634ae244a1f"
+    },
+    {
+      "platform": "X",
+      "status": "scheduled",
+      "scheduled_at": "2026-09-18T15:00:00.000Z",
+      "buffer_id": "6aaabf08e2946634ae244a50"
+    }
+  ],
+  "operator_schedule": [
+    "Nothing to do — posts queued via Buffer automatically when BUFFER_API_KEY is restored. Luxury leads route directly to Adam per private-client standard."
+  ],
+  "platforms": [
+    {
+      "name": "Google Business Profile",
+      "caption": "Windsor's luxury market, explained: Water Valley lakefront estates, Pelican Lakes golf-course homes, and The Reserve at Windsor — what $450K to $1M+ actually buys in 2026. Book a private walkthrough of the numbers. Learn more at the link below.",
+      "image_url": "https://saahomes.com/images/luxury-home-buying-guide-northern-colorado.jpg"
+    },
+    {
+      "name": "Facebook",
+      "caption": "🌅 Luxury in Northern Colorado starts in Windsor. Our new guide tours Water Valley's 100-acre private lake community ($450K-$1M+), Pelican Lakes' 18-hole championship golf enclave, and The Reserve at Windsor's custom estates — plus the honest 2026 numbers: 90+ day marketing above $750K, 26% of listings reduced, and the Weld County tax edge. Adam & Mandi handle luxury clients directly, with off-market access: https://saahomes.com/blog/luxury-homes-windsor-colorado/",
+      "image_url": "https://saahomes.com/images/luxury-home-buying-guide-northern-colorado.jpg"
+    },
+    {
+      "name": "X",
+      "caption": "Windsor luxury: Water Valley lakefront ($450K-$1M+), Pelican Lakes golf estates, The Reserve custom homes. 2026 market reality inside → https://saahomes.com/blog/luxury-homes-windsor-colorado/",
+      "image_url": "https://saahomes.com/images/luxury-home-buying-guide-northern-colorado.jpg"
+    }
+  ],
+  "youtube": null,
+  "x": null,
+  "video_note": "YouTube video for this post is being generated/uploaded via the seo-video-pipeline (slug luxury-homes-windsor-colorado)."
+}
