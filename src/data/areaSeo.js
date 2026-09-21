@@ -608,6 +608,7 @@ export const areaSeoPages = [
     introParagraphs: [
       'Evans is a growing Weld County community adjacent to Greeley, offering affordable home prices and a suburban lifestyle with easy access to UNC, medical centers, and regional employers. Evans attracts first-time buyers, young families, and investors looking for Northern Colorado value.',
       'From established neighborhoods to newer development, SAA Homes guides Evans buyers through market conditions, CHFA financing options, and competitive offer strategy in the Greeley metro area.',
+      'As part of the Greeley metro, Evans buyers benefit from one of Northern Colorado\'s most affordable housing markets — Greeley\'s July 2026 median sale price sat near $432,000, and Evans homes often list below that. Many Evans buyers qualify for CHFA down payment assistance, and those employed by qualifying Greeley businesses may also access the city\'s G-HOPE program, a forgivable loan of up to $8,000 that can reduce what is needed at closing. Program details change, so SAA Homes connects buyers with lenders who verify current CHFA and G-HOPE eligibility before an offer is written.',
     ],
     whyChoose: [
       { title: 'Greeley metro access', description: 'Minutes to Greeley employment, shopping, healthcare, and UNC.' },

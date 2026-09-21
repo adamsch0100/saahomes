@@ -485,6 +485,14 @@ const AREA_FAQS = {
     {
       q: 'Is Severance a good investment?',
       a: 'Severance has demonstrated strong appreciation as one of Weld County\'s fastest-growing towns. With continued residential and commercial development planned, the town offers promising potential for long-term value growth, particularly for buyers who get in during early development phases.'
+    },
+    {
+      q: 'What new construction communities are available in Severance?',
+      a: 'Severance is a builder-heavy market. Established communities like Severance Ranch and The Ridge are joined by Tailholt, a DR Horton community that is among the most active new-home neighborhoods in town. Buyers weighing new construction should compare builder incentives, lot premiums, and completion timelines against resale homes nearby.'
+    },
+    {
+      q: 'Can I use CHFA down payment assistance in Severance?',
+      a: 'Yes. Severance is in Weld County, and many first-time and moderate-income buyers qualify for CHFA down payment and closing cost assistance. Eligibility depends on income, purchase price, and program requirements. SAA Homes connects you with CHFA-experienced lenders to confirm what you qualify for before you write an offer.'
     }
   ],
   'niwot': [
