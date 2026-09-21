@@ -11876,6 +11876,7 @@ export const blogPosts = [
     title: 'Selling Your Home in Evans, Colorado: A 2026 Seller Guide',
     excerpt: 'Evans affordability keeps drawing Greeley-metro buyers. Here is how to price, prepare, and market an Evans home to sell for top dollar in 2026.',
     date: '2026-09-21',
+    youtubeId: 'uCXTNzGbeUk',
     category: 'Seller Tips',
     image: '/images/Northern Colorado.webp',
     readTime: '8 min read',
