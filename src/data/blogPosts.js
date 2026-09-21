@@ -11789,6 +11789,7 @@ export const blogPosts = [
     title: 'Buying a Home in Evans, Colorado: A 2026 Buyer Guide',
     excerpt: 'Evans is one of the most affordable communities in the Greeley metro. Here is what buyers should know about Evans homes for sale, neighborhoods, schools, and CHFA financing in 2026.',
     date: '2026-09-21',
+    youtubeId: 'uXLF1nKjA-U',
     category: 'Buyer Tips',
     image: '/images/buyers-hero.jpg',
     readTime: '8 min read',
