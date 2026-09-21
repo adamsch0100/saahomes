@@ -60,6 +60,37 @@ CITIES = {
     "carbon-valley": {"display": "Carbon Valley", "county": "Weld County"},
 }
 
+# Real-set floors per city (no artificial caps — guides keep expanding past these)
+TARGETS = {
+    "fort-collins": 25,
+    "loveland": 25,
+    "windsor": 15,
+    "greeley": 15,
+    "longmont": 15,
+    "boulder": 15,
+    "timnath": 10,
+    "berthoud": 10,
+    "severance": 10,
+    "johnstown": 10,
+    "wellington": 10,
+    "firestone": 10,
+    "frederick": 10,
+    "niwot": 10,
+    "erie": 10,
+    "evans": 6,
+    "milliken": 6,
+    "mead": 6,
+    "eaton": 6,
+    "la-salle": 6,
+    "brighton": 6,
+    "estes-park": 6,
+    "fort-lupton": 6,
+    "lyons": 6,
+    "carbon-valley": 6,
+    "bellvue": 3,
+    "red-feather-lakes": 3,
+}
+
 
 def load_neighborhoods():
     """Load current neighborhoods from the JS data file using basic parsing."""
@@ -107,13 +138,8 @@ def run_discovery():
     
     for slug, info in CITIES.items():
         count = len(by_city.get(slug, []))
-        # Target: 12-15 for major, 3-5 for medium, 1-2 for small
-        if slug in ("fort-collins", "loveland", "windsor", "greeley"):
-            target = 15
-        elif slug in ("timnath", "berthoud", "severance", "johnstown", "wellington", "longmont", "boulder", "firestone", "frederick"):
-            target = 5
-        else:
-            target = 3
+        # Target = real-set floor per city size (no artificial caps — keep expanding beyond)
+        target = TARGETS.get(slug, 3)
         
         status = "✅" if count >= target else ("⚠️" if count >= target // 2 else "❌")
         print(f"{info['display']:<20} {count:>6} {target:>8} {status:>10}")
@@ -124,12 +150,7 @@ def run_discovery():
     underserved = []
     for slug, info in CITIES.items():
         count = len(by_city.get(slug, []))
-        if slug in ("fort-collins", "loveland", "windsor", "greeley"):
-            target = 15
-        elif slug in ("timnath", "berthoud", "severance", "johnstown", "wellington", "longmont", "boulder", "firestone", "frederick"):
-            target = 5
-        else:
-            target = 3
+        target = TARGETS.get(slug, 3)
         
         if count < target:
             underserved.append((info['display'], slug, count, target))
