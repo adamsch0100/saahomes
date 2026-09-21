@@ -617,7 +617,11 @@ export default function LuxuryRealEstatePage() {
             <Link to="/northern-colorado-areas/longmont/" className="underline hover:text-[#1a1a1a]">
               Longmont
             </Link>{" "}
-            (foothills estates). Citywide medians from mid/July 2026 area notes.
+            (foothills estates) ·{" "}
+            <Link to="/northern-colorado-areas/niwot/" className="underline hover:text-[#1a1a1a]">
+              Niwot
+            </Link>{" "}
+            (Old Town, Left Hand Valley estates). Citywide medians from mid/July 2026 area notes.
           </p>
         </div>
       </section>
