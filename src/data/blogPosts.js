@@ -11961,6 +11961,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/buyers-hero.jpg',
     readTime: '8 min read',
+    youtubeId: 'JupIp75qHfs',
     keywords: 'Firestone CO homes for sale, buying a home in Firestone Colorado, Firestone realtor, Carbon Valley real estate, Firestone new construction, Weld County homes, Firestone real estate agent',
     relatedLinks: [
       { title: 'Firestone homes for sale', href: '/northern-colorado-areas/firestone/', description: 'Area guide with live IRES market stats' },
@@ -12049,6 +12050,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/Northern Colorado.webp',
     readTime: '8 min read',
+    youtubeId: 'HESwLwU1K_g',
     keywords: 'sell my home Frederick CO, selling a house in Frederick, Frederick home value, Frederick realtor, Carbon Valley home sale, Frederick real estate agent',
     relatedLinks: [
       { title: 'Sell your home in Frederick', href: '/northern-colorado-areas/frederick/', description: 'Area guide with live IRES market stats' },
