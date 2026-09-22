@@ -6002,6 +6002,7 @@ export const neighborhoods = [
     walkScore: 28,
     metaDescription: 'Sandstone Ranch Longmont real estate - newer master-planned community in southeast Longmont with premier park amenities. SAA Homes.',
     keywords: 'Sandstone Ranch Longmont, southeast Longmont new homes, Sandstone Ranch Park Longmont, master-planned community Longmont, new construction Longmont, St. Vrain Greenway Longmont',
+    youtubeId: 'cTwLw2ywgzg',
     neighborhoodHighlights: [
       { title: 'Premier park', description: 'Sandstone Ranch Park features a splash pad, sports fields, and playgrounds - one of Longmont\'s best neighborhood parks.' },
       { title: 'Newer community', description: 'All homes built 2012 or later with modern floor plans and contemporary finishes.' },
@@ -6036,6 +6037,7 @@ export const neighborhoods = [
     walkScore: 30,
     metaDescription: 'Clover Basin Longmont real estate - new construction homes near Highway 119 with easy Boulder commute and Village at the Peaks access. SAA Homes.',
     keywords: 'Clover Basin Longmont, southwest Longmont new homes, Highway 119 Longmont, Longmont new construction, Village at the Peaks area, Boulder commute Longmont',
+    youtubeId: 'yDE_99CHSro',
     neighborhoodHighlights: [
       { title: 'Boulder commute', description: 'Located at the Highway 119/Hover Road interchange - a 15-minute commute to Boulder or the Gunbarrel tech corridor.' },
       { title: 'New construction', description: 'All homes built 2018 or later with modern open layouts, smart home features, and energy efficiency.' },
@@ -6070,6 +6072,7 @@ export const neighborhoods = [
     walkScore: 20,
     metaDescription: 'Union Reservoir Longmont real estate - lakefront homes and affordable properties with water access near east Longmont. SAA Homes.',
     keywords: 'Union Reservoir Longmont, east Longmont real estate, lakefront homes Longmont, affordable Longmont homes, Union Reservoir boating, Longmont water access, St. Vrain Greenway',
+    youtubeId: 'N1JWNlj89ZA',
     neighborhoodHighlights: [
       { title: 'Lake access', description: 'Union Reservoir offers boating, sailing, fishing, and a sandy beach - a lake lifestyle at an affordable price.' },
       { title: 'Affordable entry', description: 'One of Longmont\'s most affordable areas with home prices significantly below the Boulder County average.' },
