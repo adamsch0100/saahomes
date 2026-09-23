@@ -262,6 +262,9 @@ export default function WindsorPage() {
       <section className="py-12 px-6 bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <NeighborhoodLinks citySlug="windsor" cityName="Windsor" />
+          <p className="text-lg leading-relaxed mt-4 text-gray-700">
+            For buyers exploring new construction, <Link to="/northern-colorado-areas/windsor/raindance/" className="text-[#CFB36E] font-semibold hover:underline">RainDance homes for sale in Windsor</Link> is our dedicated guide to Windsor&apos;s largest master-planned community, featuring Northern Colorado&apos;s first indoor surf park, resort amenities, and a planned town center.
+          </p>
         </div>
       </section>
 

@@ -2251,6 +2251,7 @@ export const blogPosts = [
       { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Grants up to $25K for qualified buyers' },
       { title: 'sell your home in Loveland', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities & pricing' },
       { title: 'sell your home in Greeley', href: '/northern-colorado-areas/greeley/', description: 'Affordable Weld County home options' },
+      { title: 'RainDance homes for sale Windsor', href: '/northern-colorado-areas/windsor/raindance/', description: 'New construction and resale in the Windsor master-planned community' },
     ],
     cta: {
       title: 'Ready to sell your Windsor home?',
@@ -2943,6 +2944,7 @@ export const blogPosts = [
       { title: 'CHFA Down Payment Assistance Guide', href: '/chfa-down-payment-assistance/', description: 'Grants up to $25K for qualified buyers' },
       { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
       { title: 'Northern Colorado Market Update — July 2026', href: '/blog/northern-colorado-market-update-july-2026/', description: 'Mid-year pricing, inventory and trends' },
+      { title: 'RainDance neighborhood in Windsor', href: '/northern-colorado-areas/windsor/raindance/', description: 'New construction, surf park and resort amenities' },
     ],
     cta: {
       title: 'Ready to find your home in Windsor?',
@@ -12216,6 +12218,179 @@ export const blogPosts = [
     ],
   },
 
+  {
+    slug: 'buying-a-home-in-fort-lupton-colorado',
+    title: 'Buying a Home in Fort Lupton, Colorado: A Weld County Value Guide',
+    excerpt: 'Fort Lupton pairs Weld County affordability with US-85 corridor access between Denver and Greeley. Here is what buyers should know about Fort Lupton homes for sale, new construction, schools, and CHFA financing in 2026.',
+    date: '2026-09-23',
+    category: 'Buyer Tips',
+    image: '/images/buyers-hero.jpg',
+    readTime: '7 min read',
+    keywords: 'Fort Lupton CO homes for sale, Fort Lupton new construction, Fort Lupton Colorado real estate, Fort Lupton realtor, Weld County homes, US-85 corridor real estate, buying a home in Fort Lupton',
+    relatedLinks: [
+      { title: 'Fort Lupton homes for sale', href: '/northern-colorado-areas/fort-lupton/', description: 'Area guide with live IRES market stats' },
+      { title: 'Browse Fort Lupton listings', href: '/properties/?location=Fort Lupton, CO', description: 'Current Fort Lupton homes for sale' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Buyer representation across Northern Colorado' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis and professional marketing' },
+      { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Grants and deferred loans for qualified buyers' },
+      { title: 'Carbon Valley Guide', href: '/northern-colorado-areas/carbon-valley/', description: 'Firestone, Frederick, and Dacono corridor' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
+    ],
+    cta: {
+      title: 'Ready to see Fort Lupton homes?',
+      description: 'Adam and Mandi Schwartz know Weld County value markets from Greeley to Brighton. Call (970) 999-1407 to compare new construction against resale and review CHFA options for your Fort Lupton home search.',
+      primaryHref: '/properties/?location=Fort Lupton, CO',
+      primaryText: 'Search Fort Lupton homes',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to an agent',
+    },
+    faqs: [
+      { q: 'Is Fort Lupton a good place to buy a home?', a: 'Fort Lupton is one of the most practical value plays along the US-85 corridor. It sits between the Denver metro and Greeley in Weld County, giving buyers affordable single-family homes and growing amenities with a straight north-south commute on Highway 85.' },
+      { q: 'What does the Fort Lupton housing market look like?', a: 'Fort Lupton pricing generally sits below Larimer County medians while still offering modern floor plans in newer subdivisions. The area guide on this site pulls live IRES active counts and median list prices, so check there for the current number rather than a static figure.' },
+      { q: 'Is there new construction in Fort Lupton?', a: 'Yes. Builders continue to add inventory for first-time and move-up buyers, which is a big part of the Fort Lupton story. Buyers who want a brand-new home without Larimer County pricing increasingly look here.' },
+      { q: 'Does Fort Lupton qualify for CHFA down payment assistance?', a: 'Fort Lupton is in Weld County, and many first-time and moderate-income buyers qualify for CHFA down payment and closing cost assistance where the program fits their situation. SAA Homes is not affiliated with CHFA but helps you verify eligibility with a CHFA Participating Lender.' },
+    ],
+    sections: [
+      {
+        heading: 'Why buyers choose Fort Lupton',
+        paragraphs: [
+          'Fort Lupton sits on the US-85 corridor between the Denver metro and Greeley, which is exactly what makes it a value market. Buyers who want affordable single-family homes, growing amenities, and a straight shot north and south along Highway 85 often land here after comparing Brighton, Platteville, and the Carbon Valley.',
+          'The city pairs an agricultural heritage with ongoing residential development. New construction is a growing part of the story, and the housing stock spans established in-town neighborhoods, newer subdivisions, and larger-lot edges toward agricultural land.',
+        ],
+        relatedLinks: [
+          { title: 'Fort Lupton homes for sale', href: '/northern-colorado-areas/fort-lupton/', description: 'Neighborhoods, market context and live IRES stats' },
+          { title: 'Carbon Valley Guide', href: '/northern-colorado-areas/carbon-valley/', description: 'Firestone, Frederick, and Dacono corridor' },
+        ],
+      },
+      {
+        heading: 'Fort Lupton pricing and what your budget buys',
+        paragraphs: [
+          'Fort Lupton pricing generally sits below Larimer County medians, which puts a move-in-ready single-family home within reach of budgets that would not stretch as far in Fort Collins or Loveland. The live listing counts and median list prices on the Fort Lupton area guide come straight from active IRES data.',
+          'The market is deep enough to offer real choice: established neighborhoods, new construction communities, and larger-lot properties on the edges toward agricultural land. Buyers can be selective about condition, lot size, and schools.',
+        ],
+        list: [
+          'Established Fort Lupton neighborhoods',
+          'New construction communities',
+          'Properties near US-85 and local schools',
+          'Larger-lot edges toward agricultural land',
+        ],
+      },
+      {
+        heading: 'Neighborhoods and home types',
+        paragraphs: [
+          'Fort Lupton spans established neighborhoods near the town core, newer subdivisions that builders continue to fill in, and larger-lot edges where the town transitions to agricultural land. First-time buyers, move-up families, and buyers who want a little more room can all find a fit.',
+          'Because the city sits on the US-85 corridor, outdoor access and open space are part of the draw. Buyers who value parks, recreation programs, and proximity to Denver metro employers will find options that balance neighborhood convenience with room to breathe.',
+        ],
+        relatedLinks: [
+          { title: 'Browse Fort Lupton listings', href: '/properties/?location=Fort Lupton, CO', description: 'Current Fort Lupton homes for sale' },
+        ],
+      },
+      {
+        heading: 'Schools, community, and the US-85 corridor',
+        paragraphs: [
+          'Fort Lupton is a Weld County community with its own schools, parks, and recreation programs. Local services are expanding as the city grows, and the Highway 85 corridor offers a straightforward drive toward Greeley, Brighton, and Denver metro employers.',
+          'Community life centers on local parks and recreation programs, with Greeley and Brighton amenities a short drive away. For families, school selection often becomes part of the neighborhood decision, so confirm boundaries early.',
+        ],
+      },
+      {
+        heading: 'Financing a Fort Lupton home',
+        paragraphs: [
+          'Fort Lupton is a natural fit for CHFA down payment assistance, which is frequently part of the conversation for first-time and moderate-income buyers in Weld County. Conventional, FHA, VA, and USDA-eligible rural properties on the edges all appear in the market.',
+          'Because Fort Lupton spans in-town and semi-rural areas, the right loan depends on the specific property. Work with a lender who understands both Weld County and CHFA program rules to avoid surprises at appraisal and closing.',
+        ],
+        relatedLinks: [
+          { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Grants and deferred loans for qualified buyers' },
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407 to review your options' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'buying-a-home-in-bellvue-colorado',
+    title: 'Buying a Home in Bellvue, Colorado: Poudre Canyon and Acreage Living',
+    excerpt: 'Bellvue sits at the mouth of the Poudre Canyon northwest of Fort Collins. Here is what buyers should know about Bellvue acreage, Poudre Canyon homes, well and septic systems, and the rural Larimer County lifestyle.',
+    date: '2026-09-23',
+    category: 'Buyer Tips',
+    image: '/images/Fort-Collins-CO-Area-Guide.jpg',
+    readTime: '7 min read',
+    keywords: 'Bellvue CO acreage, Poudre Canyon homes for sale, Bellvue Colorado real estate, Larimer County acreage, Poudre River homes, buying a home in Bellvue, Bellvue realtor',
+    relatedLinks: [
+      { title: 'Bellvue homes and acreage', href: '/northern-colorado-areas/bellvue/', description: 'Area guide with live IRES market stats' },
+      { title: 'Browse Bellvue listings', href: '/properties/?location=Bellvue, CO', description: 'Current Bellvue acreage and homes for sale' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Buyer representation across Northern Colorado' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis and professional marketing' },
+      { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'The city minutes from Bellvue' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
+    ],
+    cta: {
+      title: 'Ready to explore Bellvue acreage?',
+      description: 'Adam and Mandi Schwartz help Bellvue and Poudre Canyon buyers evaluate access, water, and insurance before they write an offer. Call (970) 999-1407 to talk through what you want to own.',
+      primaryHref: '/properties/?location=Bellvue, CO',
+      primaryText: 'Search Bellvue homes',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to an agent',
+    },
+    faqs: [
+      { q: 'What kind of property is available in Bellvue?', a: 'Bellvue is an unincorporated Larimer County community at the mouth of the Poudre Canyon, so the mix runs from improved full-time homes to land-heavy parcels and recreational properties. Not every listing is a turnkey suburban home, which is part of what makes the area distinct.' },
+      { q: 'What should I know before buying acreage in Bellvue?', a: 'Due diligence is the key step. Buyers should evaluate access, well and septic systems, and wildfire and insurance considerations, which vary property by property. A local agent who knows the canyon helps you sort the improved homes from the land-heavy inventory.' },
+      { q: 'Is Bellvue close to Fort Collins?', a: 'Yes. Bellvue is minutes northwest of Fort Collins, so buyers get mountain-adjacent living with a short drive to CSU, shopping, and healthcare. Many buyers choose Bellvue specifically for that combination.' },
+      { q: 'What makes Bellvue different from Fort Collins?', a: 'Bellvue offers acreage and rural character that is hard to find inside Fort Collins city limits, with direct access to the Cache la Poudre River corridor. It is for buyers who want space, river and trail access, and a quieter pace while staying close to the city.' },
+    ],
+    sections: [
+      {
+        heading: 'Why buyers choose Bellvue',
+        paragraphs: [
+          'Bellvue is an unincorporated Larimer County community at the mouth of the Poudre Canyon, prized for acreage, river proximity, and a rural lifestyle minutes from Fort Collins. Buyers looking beyond city limits for horses, shops, or mountain access often start their search here.',
+          'It is a different kind of market than Fort Collins or Loveland. Bellvue leans toward land-heavy inventory, improved homes on larger lots, and recreational properties, so the search is less about turnkey suburbs and more about finding the right property for how you want to live.',
+        ],
+        relatedLinks: [
+          { title: 'Bellvue homes and acreage', href: '/northern-colorado-areas/bellvue/', description: 'Poudre Canyon gateway and Larimer County acreage' },
+          { title: 'Fort Collins Area Guide', href: '/northern-colorado-areas/fort-collins/', description: 'The city minutes from Bellvue' },
+        ],
+      },
+      {
+        heading: 'Pricing and what your budget buys',
+        paragraphs: [
+          'Bellvue medians can be shaped by land parcels and diverse property types, so a single number does not tell the whole story. The live IRES counts and pricing on the Bellvue area guide keep the numbers transparent, but the right answer always starts with what you actually want to own.',
+          'Expect a mix of improved full-time residences, larger acreage parcels, and recreational lots and build sites. Because property types vary so widely, working from comps matched to your specific target is essential.',
+        ],
+        list: [
+          'Bellvue area acreage properties',
+          'Poudre Canyon homes',
+          'River-adjacent parcels',
+          'Rural Larimer County sites northwest of Fort Collins',
+        ],
+      },
+      {
+        heading: 'What to know before you buy',
+        paragraphs: [
+          'Due diligence matters more in Bellvue than in most Front Range suburbs. Access, well and septic systems, and wildfire and insurance considerations all vary property by property, and not every listing is turnkey.',
+          'A local agent who knows the Poudre Canyon can help you evaluate the tradeoffs between an improved home and a land-heavy parcel, and can flag the issues that matter for lending and insurance before you write an offer.',
+        ],
+        relatedLinks: [
+          { title: 'Browse Bellvue listings', href: '/properties/?location=Bellvue, CO', description: 'Current Bellvue acreage and homes for sale' },
+        ],
+      },
+      {
+        heading: 'The Poudre Canyon lifestyle',
+        paragraphs: [
+          'The Cache la Poudre River corridor is the headline amenity, with fishing, rafting access, and outdoor recreation as a daily option. Horsetooth and Rist Canyon access are nearby, and the gateway to canyon recreation is right at your doorstep.',
+          'Bellvue is also a quick trip into Fort Collins for CSU, shopping, and healthcare. That combination of rural character and city convenience is exactly what draws buyers to the area.',
+        ],
+      },
+      {
+        heading: 'Financing and buying land in Larimer County',
+        paragraphs: [
+          'Because Bellvue spans improved homes and land-heavy inventory, the right loan depends on the specific property. Improved residences may fit conventional, FHA, VA, or CHFA programs, while raw land and some acreage require different financing altogether.',
+          'Work with a lender and an agent who understand rural Larimer County, well and septic, and wildfire insurance so there are no surprises at appraisal and closing. SAA Homes is not affiliated with CHFA but helps you verify eligibility where it fits.',
+        ],
+        relatedLinks: [
+          { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis and professional marketing' },
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407 to review your options' },
+        ],
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug) {
