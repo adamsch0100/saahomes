@@ -127,6 +127,7 @@ export const blogPosts = [
     category: 'Relocation',
     image: '/images/carbon-valley-affordable-homes-guide.jpg',
     readTime: '8 min read',
+    youtubeId: 'dyzPMtctKmY',
     keywords: 'moving to carbon valley colorado, why buy carbon valley, carbon valley vs boulder, carbon valley vs longmont, firestone co homes for sale, frederick co homes for sale, dacono co homes for sale, carbon valley new construction, carbon valley commute',
     relatedLinks: [
       { title: 'Carbon Valley homes for sale', href: '/northern-colorado-areas/carbon-valley/', description: 'Firestone, Frederick & Dacono market guide' },
