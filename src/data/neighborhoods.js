@@ -41,6 +41,7 @@ export const neighborhoods = [
     walkScore: 18,
     metaDescription: 'Observatory Village Fort Collins real estate — newer luxury homes near I-25 with Power Trail access and top Poudre schools. SAA Homes.',
     keywords: 'Observatory Village Fort Collins, southeast Fort Collins new construction, Fort Collins luxury homes 80528, Power Trail neighborhoods Fort Collins, Zach Elementary homes, Fossil Ridge High School area',
+    youtubeId: 'RHkspE19J0Q',
     neighborhoodHighlights: [
       { title: 'New inventory', description: 'Mostly 2015–2025 construction with modern floor plans, ag-garage layouts, and energy-efficient systems.' },
       { title: 'Trail at your doorstep', description: 'The Power Trail runs along the neighborhood and connects to Fort Collins\' 40+ mile trail network.' },
@@ -73,6 +74,7 @@ export const neighborhoods = [
     walkScore: 22,
     metaDescription: 'Fossil Lake Fort Collins real estate guide — 600+ homes near Fossil Creek Reservoir with top Poudre schools. Expert buyer and seller representation from SAA Homes.',
     keywords: 'Fossil Lake Fort Collins, Fossil Lake Ranch homes, southeast Fort Collins subdivisions, Fossil Creek Reservoir homes, Zach Elementary homes Fort Collins, Fossil Ridge High School neighborhoods',
+    youtubeId: 'EiqkZ8ZmvXU',
     neighborhoodHighlights: [
       { title: 'Protected natural setting', description: 'The community wraps the Fossil Creek Reservoir Natural Area — 72 acres of open space buffer the heron rookery and wetland wildlife.' },
       { title: 'Resort-style amenities', description: 'The Fossil Lake Ranch HOA runs a clubhouse, pool, tennis courts, and parks for residents.' },
@@ -199,6 +201,7 @@ export const neighborhoods = [
     walkScore: 81,
     metaDescription: 'Old Town East Fort Collins real estate — historic Victorians and new lofts in the city\'s most walkable district. SAA Homes.',
     keywords: 'Old Town East Fort Collins, historic homes Fort Collins, Fort Collins lofts, The Exchange Fort Collins, walkable neighborhoods Fort Collins, Poudre River Trail homes',
+    youtubeId: '5bKRO99OoEM',
     neighborhoodHighlights: [
       { title: 'True walkability', description: 'One of Fort Collins\' rarest addresses — walk to coffee, dinner, and Old Town events without a car.' },
       { title: 'Historic plus new', description: 'Restored 1890s homes mix with fresh infill like The Exchange and River Modern lofts.' },
