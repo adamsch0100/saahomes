@@ -15,13 +15,13 @@
 
 ## Content calendar state
 
-last_social_pack_date: 2026-09-19
-last_social_pillar: content-offense (4-pack blog batch promos, rotation skipped — shipped content prioritized)
+last_social_pack_date: 2026-09-23
+last_social_pillar: content-offense + program/seasonal (new corridor guides Fort Lupton + Bellvue prioritized, then CHFA fall program — week 4 rotation)
 rotation_week_index: 4
-last_3_social_hooks: ["How much is your Windsor home really worth? New guide: $589,950 median sold (Aug '26), 83 DOM, Weld vs Larimer tax math inside. Free CMA (Sep 16, Buffer).", "Greeley home values, August 2026: median list ~$440,600, sub-$400K homes under contract in 10-14 days. Free CMA (Sep 17, Buffer).", "Windsor luxury: Water Valley lakefront ($450K-$1M+), Pelican Lakes golf estates, The Reserve custom homes (Sep 18, Buffer)."]
+last_3_social_hooks: ["New 2026 guide: buying a home in Fort Lupton, CO — Weld County value on the US-85 corridor, new construction + CHFA (Sep 24, Buffer).", "New 2026 guide: buying a home in Bellvue, CO — Poudre Canyon acreage, wells/septic/wildfire checks, minutes from Fort Collins (Sep 25, Buffer).", "Fall 2026: CHFA down payment assistance — up to $25K or 3-4% of loan for qualified buyers, via participating lender (Sep 28, Buffer)."]
 monthly_market_blog_url: https://saahomes.com/blog/northern-colorado-market-update-september-2026/
-blogs_published_this_month: 45 (per src/data/blogPosts.js — 18 new since Sep 14: home-value Windsor/Greeley, luxury Windsor, moving-to-Greeley, Milliken/Mead/Brighton buy+sell, cash-home-buyers Longmont, Carbon Valley agent+moving-to, Evans/Firestone/Frederick/Erie batch #212)
-pending_social_packs: 0 — 4 packs (outreach/sent/social-2026-09-{16,17,18,19}-*.json) POSTED to Buffer 2026-09-16/17/18/19 (buffer_ids confirmed), one idea/day 15:00 UTC, and emailed to Adam. Creds (BUFFER_API_KEY + OUTREACH_SMTP_*) recovered from state.db + known app password; still recommend a permanent restore to /data/hermes-homes/saa-homes/.env.
+blogs_published_this_month: 47 (per src/data/blogPosts.js — 20 new since Sep 14: home-value Windsor/Greeley, luxury Windsor, moving-to-Greeley, Milliken/Mead/Brighton buy+sell, cash-home-buyers Longmont, Carbon Valley agent+moving-to, Evans/Firestone/Frederick/Erie batch #212, corridor Fort Lupton + Bellvue #215)
+pending_social_packs: 0 — 3 packs (outreach/sent/social-2026-09-23-{fort-lupton,bellvue,chfa}-*.json) POSTED to Buffer 2026-09-23 (buffer_ids confirmed), one idea/day 15:00 UTC Sep 24/25/28, verified via buffer-query-pending (9 scheduled), and emailed to Adam. Creds: BUFFER_API_KEY + OUTREACH_SMTP_* restored to /data/workspaces/saa-homes/.env AND /opt/data/workspace/saahomes-repo/.env shim (host layout drift: buffer-query-pending.py needs the /opt path).
 last_operator_schedule_date: 2026-09-21 (week Sep 21-27 emailed + verified via IMAP Sent; prior Sep 14-20)
 latest_market_update_slug: northern-colorado-market-update-september-2026
 last_events_check_date: 2026-09-09
@@ -158,10 +158,10 @@ Corridor rotation (weekly single-city job). Carbon Valley = hub for Firestone/Fr
 **Report:** carbon-valley-audit-report.md (repo root)
 
 ### Weekly rotation tracking
-- **Audited this week:** Carbon Valley (corridor hub)
-- **Audit completed:** 2026-09-15
-- **Remaining corridor without full audit:** red-feather-lakes, fort-lupton, lyons, bellvue (Batch 4 scheduled 2026-09-22)
-- **Next weekly deep-dive:** red-feather-lakes (2026-09-22) — covers pre-Batch-4 gap; verify its 0 blog-ref equity + cabin-market SERP
+- **Audited this week:** Red Feather Lakes (corridor, 2026-09-22) — dynamic template 13/13, clean schema (6 JSON-LD ×1, no dup), live IRES band (125 active; 71 under $300K; 8 ≥$1M), but **0 blog inbound refs** + GSC pos 36.7/13 imp/0 clk. Report: red-feather-lakes-audit-report.md. Fixes: P1 (2 RFL blog posts w/ relatedLinks + href-ify 2 Estes Park prose mentions), P2 (cabin FAQ ×3 + under-$300K data post + activate /red-feather-lakes-homes-for-sale/), P3 (seller/for-sellers RFL entry, video youtubeId, RFL ranking-strike block).
+- **Audited previously:** Carbon Valley hub (2026-09-15) · Batch 1 (Aug 1) FC/Loveland/Windsor/Greeley/Timnath · Batch 3 (Sep 15) Firestone/Frederick/Evans/Severance/Niwot/Erie/Brighton
+- **Strictly unevaluated entities remaining:** fort-lupton, lyons, bellvue (Batch 4 corridor remainder — all 0 blog refs); estes-park has blog cluster (4 posts, 10+ refs) + events rows but NO formal area-page audit on record
+- **Next weekly deep-dive:** fort-lupton (2026-09-29) — 0 blog equity, murata-farms neighborhood already pulling 130 imp pos 9.9 (proves demand); then lyons, bellvue to close the corridor
 
 ---
 
@@ -771,3 +771,99 @@ Last available GSC dataset: 2026-09-10 (45 clicks / 9,139 impressions, 7-day pag
 | https://saahomes.com/northern-colorado-areas/windsor/rain-dance-windsor/ | 11 | 0 |  |
 
 *Report generated: 2026-09-21T13:02:34.162778*
+
+## Lead attribution log
+
+Week of 2026-09-12:
+
+| Landing Page | GSC Impressions | Position | GA4 Leads | Gap? | CRO Action |
+|---|---|---|---|---|---|
+| /blog/selling-your-home-in-fort-collins/ | 991 | 10.9 | 0 | ⚠️ | Add inline CTA + end-of-post lead magnet (market report / buyer guide) |
+| /chfa-down-payment-assistance/ | 291 | 55.8 | 0 | ⚠️ | Add program-specific lead form CTA after hero; tighten form fields |
+| /chfa-schools-to-home/ | 264 | 10.2 | 0 | ⚠️ | Add program-specific lead form CTA after hero; tighten form fields |
+| /blog/is-windsor-colorado-expensive-to-live/ | 166 | 6.8 | 0 | ⚠️ | Add inline CTA + end-of-post lead magnet (market report / buyer guide) |
+| /events/ | 130 | 47.8 | 0 | ⚠️ | Add prominent CTA section + exit-intent popup |
+| /blog/northern-colorado-market-update-august-2026/ | 127 | 6.5 | 0 | ⚠️ | Add inline CTA + end-of-post lead magnet (market report / buyer guide) |
+| /blog/assumable-mortgage-colorado/ | 83 | 6.8 | 0 | ⚠️ | Add inline CTA + end-of-post lead magnet (market report / buyer guide) |
+| /blog/cash-home-buyers-fort-collins-northern-colorado/ | 75 | 10.4 | 0 | ⚠️ | Add inline CTA + end-of-post lead magnet (market report / buyer guide) |
+| /blog/va-loan-colorado-guide/ | 66 | 49.0 | 0 | ⚠️ | Add inline CTA + end-of-post lead magnet (market report / buyer guide) |
+| /northern-colorado-areas/windsor/ | 59 | 18.1 | 0 | ⚠️ | Add city-specific market report CTA + neighborhood guide signup |
+| /blog/best-neighborhoods-fort-collins-2026/ | 58 | 12.1 | 0 | ⚠️ | Add inline CTA + end-of-post lead magnet (market report / buyer guide) |
+| /colorado-champions-home-loan-program/ | 52 | 36.6 | 0 | ⚠️ | Add prominent CTA section + exit-intent popup |
+| /northern-colorado-areas/fort-lupton/murata-farms-fort-lupton/ | 50 | 9.7 | 0 | ⚠️ | Add city-specific market report CTA + neighborhood guide signup |
+| /mortgage-calculator/ | 39 | 51.8 | 0 | ⚠️ | Add prominent CTA section + exit-intent popup |
+| / | 38 | 3.8 | 0 | ⚠️ | Add prominent CTA section + exit-intent popup |
+| /blog/berthoud-colorado-real-estate-agent/ | 36 | 12.4 | 0 | ⚠️ | Add inline CTA + end-of-post lead magnet (market report / buyer guide) |
+| /northern-colorado-areas/fort-collins/university-area/ | 34 | 35.5 | 0 | ⚠️ | Add city-specific market report CTA + neighborhood guide signup |
+| /northern-colorado-areas/severance/ | 32 | 27.4 | 0 | ⚠️ | Add city-specific market report CTA + neighborhood guide signup |
+| /northern-colorado-areas/brighton/downtown-brighton/ | 30 | 11.3 | 0 | ⚠️ | Add city-specific market report CTA + neighborhood guide signup |
+| /blog/fort-collins-vs-loveland-vs-windsor/ | 30 | 7.1 | 0 | ⚠️ | Add inline CTA + end-of-post lead magnet (market report / buyer guide) |
+
+### Top queries by page
+
+- **/blog/selling-your-home-in-fort-collins/**: "sell my house fort collins" (531), "sell my house in fort collins" (383), "sell my fort collins house" (17)
+- **/chfa-down-payment-assistance/**: "first time home buyer colorado" (15), "chfa disability program colorado" (9), "colorado first time home buyer" (7)
+- **/chfa-schools-to-home/**: "chfa schools to home" (28), "schools to home" (10), "school to home program colorado" (9)
+- **/blog/is-windsor-colorado-expensive-to-live/**: "town of windsor colorado external market signals 2025-2026" (6), "cost of living in windsor colorado" (5), "windsor colorado" (5)
+- **/events/**: "colorado festivals" (10), "colorado events" (7), "local festivals near me" (5)
+- **/blog/assumable-mortgage-colorado/**: "colorado springs va assumption" (1), "it is a conventional loan" (1)
+- **/blog/cash-home-buyers-fort-collins-northern-colorado/**: "cash home buyers in fort collins" (11), "expert cash buyers" (5), "sell my house fast fort collins co" (4)
+- **/blog/va-loan-colorado-guide/**: "colorado va loans" (9), "va home loan colorado" (8), "colorado va mortgage" (4)
+- **/northern-colorado-areas/windsor/**: "windsor co county" (6), "live in windsor co" (3), "windsor co neighborhood guide" (3)
+- **/blog/best-neighborhoods-fort-collins-2026/**: "best suburbs near fort collins" (8), "best neighborhoods fort collins" (7), "best neighborhoods in fort collins" (5)
+- **/colorado-champions-home-loan-program/**: "chfa colorado springs lender" (4), "first responder mortgage colorado" (4), "chfa approved lender colorado" (3)
+- **/northern-colorado-areas/fort-lupton/murata-farms-fort-lupton/**: "murata farms fort lupton" (13), "murata farms" (8), "fort lupton co new home communities" (2)
+- **/mortgage-calculator/**: "colorado mortgage calculator" (11), "mortgage calculator colorado springs co" (6), "mortgage calculator colorado" (5)
+- **/**: "adam schwartz realtor" (1), "schwartz realty" (1)
+- **/blog/berthoud-colorado-real-estate-agent/**: "real estate agent berthoud" (10), "real estate agents berthoud" (7), "realtors in berthoud" (6)
+- **/northern-colorado-areas/fort-collins/university-area/**: "fort collins co student housing" (31)
+- **/northern-colorado-areas/severance/**: "homes for sale" (2), "homes for sale near me" (2), "houses" (2)
+- **/northern-colorado-areas/brighton/downtown-brighton/**: "downtown brighton colorado" (13), "brighton downtown" (2), "downtown brighton, co" (2)
+*Report generated: 2026-09-21T14:31:35.961438*
+
+## Daily Ranking Strike — 2026-09-22
+
+### ⚠️ P0 — Pages No Longer Indexed
+
+| Page | Previous Impressions | Previous Clicks | Top Queries |
+|------|---------------------|-----------------|-------------|
+| https://saahomes.com/northern-colorado-areas/eaton/eaton-commons/ | 5 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/eaton/eaton-park/ | 13 | 0 | eaton town, eaton park, eaton colorado |
+| https://saahomes.com/northern-colorado-areas/firestone/firestone-crossing/ | 6 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/fort-collins/the-homestead-fc/ | 5 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/lyons/lyons-river-district/ | 7 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/windsor/rain-dance-windsor/ | 8 | 0 |  |
+
+*Report generated: 2026-09-22T13:01:08.870371*
+
+## Daily Ranking Strike — 2026-09-22
+
+### ⚠️ P0 — Pages No Longer Indexed
+
+| Page | Previous Impressions | Previous Clicks | Top Queries |
+|------|---------------------|-----------------|-------------|
+| https://saahomes.com/northern-colorado-areas/eaton/eaton-commons/ | 5 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/eaton/eaton-park/ | 13 | 0 | eaton co, eaton park, eaton town |
+| https://saahomes.com/northern-colorado-areas/firestone/firestone-crossing/ | 6 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/fort-collins/the-homestead-fc/ | 5 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/lyons/lyons-river-district/ | 7 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/windsor/rain-dance-windsor/ | 8 | 0 |  |
+
+*Report generated: 2026-09-22T13:01:27.857741*
+
+## Daily Ranking Strike — 2026-09-23
+
+### ⚠️ P0 — Pages No Longer Indexed
+
+| Page | Previous Impressions | Previous Clicks | Top Queries |
+|------|---------------------|-----------------|-------------|
+| https://saahomes.com/northern-colorado-areas/brighton/ | 6 | 0 | brighton housing market |
+| https://saahomes.com/northern-colorado-areas/eaton/eaton-commons/ | 5 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/eaton/eaton-park/ | 12 | 0 | eaton park, eaton colorado, eaton co |
+| https://saahomes.com/northern-colorado-areas/firestone/firestone-crossing/ | 6 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/fort-collins/the-homestead-fc/ | 5 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/lyons/lyons-river-district/ | 7 | 0 |  |
+
+*Report generated: 2026-09-23T13:02:50.662984*
+
+**Verification (2026-09-23):** All 6 P0 flags = FALSE POSITIVES (low-volume fluctuation). Every URL returns HTTP 200; URL Inspection API verdict PASS "Submitted and indexed" (brighton lastCrawl 2026-09-11, eaton-park 2026-07-23, lyons-river-district 2026-08-28; robots ALLOWED). 28-day site totals: 164 clicks / 25,500 impressions — API fully hydrated, no discrepancy. Zero Tier S alerts. Cash buyer: "cash home buyers" 7 imp @ pos 10.4 (page-1 boundary, up from zero current-period last week). Nothing to ship.
