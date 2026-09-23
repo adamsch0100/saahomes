@@ -12134,6 +12134,7 @@ export const blogPosts = [
     category: 'Relocation',
     image: '/images/Northern Colorado.webp',
     readTime: '9 min read',
+    youtubeId: '1h-sCbDkR4M',
     keywords: 'moving to Erie Colorado, Erie Colorado relocation guide, living in Erie CO, Erie neighborhoods, Erie schools, Erie commute to Denver, Erie new construction, Erie cost of living',
     relatedLinks: [
       { title: 'Erie homes for sale', href: '/northern-colorado-areas/erie/', description: 'Area guide with live IRES market stats' },
