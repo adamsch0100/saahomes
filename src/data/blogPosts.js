@@ -11066,6 +11066,7 @@ export const blogPosts = [
         ],
         relatedLinks: [
           { title: 'Estes Park Colorado real estate guide', href: '/northern-colorado-areas/estes-park/', description: 'Live market stats, neighborhoods & lifestyle' },
+          { title: 'Red Feather Lakes area guide', href: '/northern-colorado-areas/red-feather-lakes/', description: 'The cabin and lake market northwest of Fort Collins' },
         ],
       },
       {
@@ -11135,6 +11136,7 @@ export const blogPosts = [
           'Work with an Estes Park real estate agent who prices mountain inventory honestly',
         ],
         relatedLinks: [
+          { title: 'Red Feather Lakes area guide', href: '/northern-colorado-areas/red-feather-lakes/', description: 'Cabin and lake market northwest of Fort Collins' },
           { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
           { title: 'All Northern Colorado communities', href: '/northern-colorado-areas/', description: '27 city and region guides' },
         ],
@@ -12389,6 +12391,411 @@ export const blogPosts = [
         relatedLinks: [
           { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis and professional marketing' },
           { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407 to review your options' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'best-neighborhoods-loveland-2026',
+    title: 'Best Neighborhoods in Loveland CO (2026): Prices, Schools & Map',
+    excerpt: 'From the historic downtown arts district to Centerra lakefront living, discover the best Loveland Colorado neighborhoods for every buyer — rankings, price ranges, and lifestyle for each community from Schwartz and Associates (SAA Homes).',
+    date: '2026-09-24',
+    category: 'Buyer Tips',
+    image: '/images/Loveland-CO-Area-Guide.jpg',
+    readTime: '11 min read',
+    keywords: 'best neighborhoods in Loveland, Loveland neighborhoods, Loveland CO neighborhoods, best places to live Loveland, Loveland Colorado real estate, Centerra Loveland homes, Mariana Butte Loveland, Lake Loveland real estate, downtown Loveland homes, Loveland CO realtor, moving to Loveland Colorado',
+    relatedLinks: [
+      { title: 'Loveland homes for sale', href: '/northern-colorado-areas/loveland/', description: 'Neighborhoods, schools & homes for sale' },
+      { title: 'Search Loveland Homes for Sale', href: '/properties/?location=Loveland, CO', description: 'Browse current Loveland listings' },
+      { title: 'Fort Collins vs Loveland vs Windsor Comparison', href: '/blog/fort-collins-vs-loveland-vs-windsor/', description: 'Side-by-side city comparison for buyers' },
+      { title: 'Buying a Home in Loveland', href: '/blog/buying-a-home-in-loveland/', description: 'Complete buyer guide for Loveland' },
+      { title: 'Loveland Real Estate Agent', href: '/blog/loveland-colorado-real-estate-agent/', description: 'Finding the best Loveland realtor' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation' },
+      { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Grants up to $25K for qualified buyers' },
+    ],
+    cta: {
+      title: 'Find your best-fit Loveland neighborhood',
+      description: 'Adam and Mandi Schwartz know every Loveland neighborhood — from downtown art studios to Centerra lakefront homes. Tell us what matters and we\'ll point you to the right blocks, then get you into homes for sale. Call (970) 999-1407 or start browsing now.',
+      primaryHref: '/properties/?location=Loveland, CO',
+      primaryText: 'Search Loveland homes',
+      secondaryHref: '/northern-colorado-areas/loveland/',
+      secondaryText: 'Explore the Loveland Area Guide',
+    },
+    sections: [
+      {
+        heading: 'Why Loveland has some of the best neighborhoods in Northern Colorado',
+        paragraphs: [
+          'Loveland — the Sweetheart City — sits between Fort Collins and Denver along the I-25 corridor, and its neighborhoods are among the most balanced in Northern Colorado. You get art galleries, lakefront recreation, and mountain views without paying Fort Collins prices or living in a city that feels too big. Loveland offers genuinely distinct neighborhoods, from early-1900s bungalows in the walkable downtown core to brand-new master-planned communities anchored by the Promenade Shops at Centerra.',
+          'Loveland\'s market is one of Northern Colorado\'s most balanced. The July 2026 median sale price was approximately $510,000, up 3.6% year-over-year, with inventory up 14% compared to July 2025. Homes in the $400,000–$550,000 sweet spot typically go under contract in about 22 days, while properties above $675,000 average 55 days on market. Several Loveland neighborhoods also qualify as CHFA targeted areas, which makes the Sweetheart City a strong fit for first-time buyers using down payment assistance.',
+          'This guide covers every major Loveland neighborhood — real names, real data, and honest pros and cons. Use it to narrow your search, then visit our full Loveland Area Guide for homes currently for sale in each community. Schwartz and Associates walks every Loveland neighborhood regularly and can speak to current conditions, HOA details, and Thompson School District boundaries from firsthand experience.',
+        ],
+      },
+      {
+        heading: 'Downtown Loveland — the arts district\'s walkable core',
+        paragraphs: [
+          'Historic downtown Loveland pairs early-1900s bungalows and Victorians with artist lofts and townhomes steps from Fourth Street galleries, the Rialto Theater, and Chapungu Sculpture Park. It is the most walkable part of the city — the kind of neighborhood where you can grab coffee, visit a studio, and walk to dinner without touching your car.',
+          'Condos start in the low $300,000s, while single-family homes run above $1 million in the most sought-after blocks. The arts district identity is real here: Loveland is home to one of the nation\'s largest sculpture programs, and downtown is its living showroom.',
+          'Best for: artists, empty nesters, and buyers who want a walkable, character-rich neighborhood in a mid-sized Colorado city.',
+        ],
+        relatedLinks: [
+          { title: 'Downtown Loveland Neighborhood Guide', href: '/northern-colorado-areas/loveland/downtown-loveland/', description: 'Full downtown details, homes and pricing' },
+        ],
+      },
+      {
+        heading: 'Centerra — master-planned living at I-25 and Highway 34',
+        paragraphs: [
+          'Centerra is Loveland\'s premier master-planned community at the I-25 and Highway 34 crossroads, with new construction, lakefront properties, and golf-course living. Anchored by the Promenade Shops, Centerra offers a lifestyle where retail, dining, trails, and recreation are all built into the neighborhood rather than a drive away.',
+          'Townhomes start in the mid-$400,000s, with lakefront homes above $1.5 million. The Lakes at Centerra draw buyers who want water views and resort-style amenities without leaving city limits.',
+          'Best for: families, professionals commuting to Fort Collins or Denver, and buyers who want turnkey new construction with built-in amenities.',
+        ],
+        relatedLinks: [
+          { title: 'Centerra Neighborhood Guide', href: '/northern-colorado-areas/loveland/centerra/', description: 'Master-planned community at I-25 & Hwy 34' },
+        ],
+      },
+      {
+        heading: 'Mariana Butte — golf course community in southwest Loveland',
+        paragraphs: [
+          'Mariana Butte wraps the public 18-hole Mariana Butte Golf Course with fairway and patio homes in southwest Loveland. It is a quiet, established golf community where homes back to fairways, ponds, and mountain views.',
+          'Homes range from roughly $400,000 to $900,000-plus, with a mix of single-family, patio homes, and townhomes. Many lots offer fairway or lake views.',
+          'Best for: golf enthusiasts, downsizers who want single-level living, and buyers seeking an established community with mature landscaping.',
+        ],
+        relatedLinks: [
+          { title: 'Mariana Butte Neighborhood Guide', href: '/northern-colorado-areas/loveland/mariana-butte/', description: 'Golf course living in southwest Loveland' },
+        ],
+      },
+      {
+        heading: 'Lake Loveland & Boyd Lake — waterfront living',
+        paragraphs: [
+          'Lake Loveland and the Boyd Lake side of town draw buyers who want waterfront living or mid-century ranches on established blocks. The 450-acre Lake Loveland anchors the area, with lakefront estates, mid-century homes, and newer subdivisions surrounding it. Boyd Lake State Park offers boating, fishing, and a beach just east of town.',
+          'Waterfront homes command a premium, while homes a few blocks off the water offer a more moderate entry point into one of Loveland\'s most desirable districts.',
+          'Best for: water lovers, boaters, and families who want lake access without leaving the city.',
+        ],
+        relatedLinks: [
+          { title: 'Lake Loveland Neighborhood Guide', href: '/northern-colorado-areas/loveland/lake-loveland/', description: 'Waterfront homes around Lake Loveland' },
+        ],
+      },
+      {
+        heading: 'Namaqua & Buckskin Heights — foothills, rivers and larger lots',
+        paragraphs: [
+          'On the west and north edges of town, Namaqua and Buckskin Heights offer larger lots, mountain views, and quick access to outdoor recreation. Namaqua is a historic north Loveland neighborhood along the Big Thompson River with older homes, acreage properties, and a quiet semi-rural feel close to downtown. Buckskin Heights delivers foothills living with views and easy access to Devils Backbone Open Space and hiking trails.',
+          'These neighborhoods appeal to buyers who want space, privacy, and scenery rather than a tightly packed subdivision.',
+          'Best for: outdoor enthusiasts, buyers seeking acreage, and those who want a quieter atmosphere minutes from town.',
+        ],
+        relatedLinks: [
+          { title: 'Namaqua Neighborhood Guide', href: '/northern-colorado-areas/loveland/namaqua/', description: 'Historic north Loveland along the Big Thompson' },
+          { title: 'Buckskin Heights Neighborhood Guide', href: '/northern-colorado-areas/loveland/buckskin-heights/', description: 'Foothills living with Devils Backbone access' },
+        ],
+      },
+      {
+        heading: 'The Vineyard & Cedar Creek — new construction near Centerra',
+        paragraphs: [
+          'The Vineyard and Cedar Creek are newer communities near Centerra\'s Promenade Shops with convenient I-25 access — together they keep Loveland one of Northern Colorado\'s best values for new construction. The Vineyard is a master-planned community with newer homes and lake views, while Cedar Creek offers contemporary homes and community parks.',
+          'These are the neighborhoods to watch if you want a newer, energy-efficient home at a Loveland price point rather than a Fort Collins one.',
+          'Best for: first-time buyers, families who want new construction, and buyers who value proximity to Centerra shopping and I-25.',
+        ],
+        relatedLinks: [
+          { title: 'The Vineyard Neighborhood Guide', href: '/northern-colorado-areas/loveland/vineyard-loveland/', description: 'Master-planned community near Promenade Shops' },
+          { title: 'Cedar Creek Neighborhood Guide', href: '/northern-colorado-areas/loveland/cedar-creek-loveland/', description: 'Newer southwest Loveland subdivision' },
+        ],
+      },
+      {
+        heading: 'Gateway (I-25 corridor) & Loveland Airpark — commuter and aviation niches',
+        paragraphs: [
+          'The Gateway area along Loveland\'s I-25 corridor features newer master-planned communities, retail centers, and the Medical Center of the Rockies — rapid growth with convenient access to both Loveland and Fort Collins. It is the natural landing zone for healthcare professionals and commuters.',
+          'For a genuinely unique option, Loveland Airpark near the Northern Colorado Regional Airport is a hangar-home community with custom homes and attached hangars offering direct runway access for aviation enthusiasts.',
+          'Best for: commuters, medical professionals, and pilots who want to park the plane at home.',
+        ],
+        relatedLinks: [
+          { title: 'Gateway Loveland Neighborhood Guide', href: '/northern-colorado-areas/loveland/gateway-loveland/', description: 'I-25 corridor growth and medical district' },
+          { title: 'Loveland Airpark Neighborhood Guide', href: '/northern-colorado-areas/loveland/airpark-loveland/', description: 'Hangar homes near the regional airport' },
+        ],
+      },
+      {
+        heading: 'Find your perfect Loveland neighborhood with SAA Homes',
+        paragraphs: [
+          'With neighborhoods spanning every price point and lifestyle — from downtown art studios to Centerra lakefronts — Loveland offers more balance than nearly any other Northern Colorado city. Adam and Mandi Schwartz have helped hundreds of Northern Colorado families buy and sell homes across Larimer County.',
+          'Call (970) 999-1407 or explore our Loveland Area Guide to browse current listings and neighborhood data. Schwartz and Associates brings hyperlocal, block-by-block knowledge that automated tools and out-of-town teams simply cannot match.',
+        ],
+        relatedLinks: [
+          { title: 'Loveland homes for sale', href: '/northern-colorado-areas/loveland/', description: 'Everything you need to know about Loveland' },
+          { title: 'Search Loveland Homes for Sale', href: '/properties/?location=Loveland, CO', description: 'Current Loveland listings' },
+          { title: 'Free Buyer Consultation', href: '/for-buyers/', description: 'Start your home search with SAA Homes' },
+        ],
+      },
+    ],
+    faqs: [
+      { q: 'What is the best neighborhood in Loveland for first-time homebuyers?', a: 'The Vineyard and Cedar Creek offer newer, energy-efficient construction at a Loveland price point, while established North Loveland neighborhoods provide more affordable inner-ring options. Several Loveland neighborhoods qualify as CHFA targeted areas, so qualified first-time buyers can pair a lower purchase price with Colorado down payment assistance.' },
+      { q: 'What is the most walkable neighborhood in Loveland?', a: 'Historic downtown Loveland is the city\'s most walkable district — you can reach Fourth Street galleries, the Rialto Theater, Chapungu Sculpture Park, and dozens of locally owned restaurants and breweries without a car.' },
+      { q: 'Which Loveland neighborhood has lake access?', a: 'Lake Loveland and the Boyd Lake area offer waterfront living, with lakefront estates and mid-century homes surrounding the 450-acre Lake Loveland. Centerra\'s The Lakes community also offers lakefront and water-view homes with resort-style amenities.' },
+      { q: 'What is the newest neighborhood in Loveland?', a: 'The Gateway area along the I-25 corridor and the newer communities around Centerra — including The Vineyard and Cedar Creek — are Loveland\'s most active growth zones, with master-planned communities and new construction near the Promenade Shops and Medical Center of the Rockies.' },
+    ],
+  },
+  {
+    slug: 'buying-a-home-in-red-feather-lakes-co',
+    title: 'Buying a Home in Red Feather Lakes, CO: Mountain Cabin and Lake Living',
+    excerpt: 'Red Feather Lakes is one of Northern Colorado\'s most accessible mountain markets — cabins, lakefront, and land northwest of Fort Collins. Here is what buyers should know before they buy.',
+    date: '2026-09-24',
+    category: 'Buyer Tips',
+    image: '/images/Northern Colorado.webp',
+    readTime: '8 min read',
+    keywords: 'red feather lakes homes for sale, red feather lakes real estate agent, red feather lakes cabins for sale, buying a cabin in red feather lakes, mountain cabins under 300k, red feather lakes CO real estate, Larimer County cabins',
+    relatedLinks: [
+      { title: 'Red Feather Lakes homes for sale', href: '/northern-colorado-areas/red-feather-lakes/', description: 'Area guide with live IRES market stats' },
+      { title: 'Browse Red Feather Lakes listings', href: '/red-feather-lakes-homes-for-sale/', description: 'Every active cabin and land listing' },
+      { title: 'Mountain cabins under $300K', href: '/blog/red-feather-lakes-cabins-for-sale-under-300k/', description: 'The affordable cabin tier, by neighborhood' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Buyer representation across Northern Colorado' },
+      { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Statewide programs for qualified buyers' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
+    ],
+    cta: {
+      title: 'Ready to explore Red Feather Lakes?',
+      description: 'Adam and Mandi Schwartz help Red Feather Lakes buyers evaluate access, water, HOA rules, and financing before they write an offer. Call (970) 999-1407 to talk through the cabin or land you want to own.',
+      primaryHref: '/properties/?location=Red Feather Lakes, CO',
+      primaryText: 'Search Red Feather Lakes homes',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to an agent',
+    },
+    faqs: [
+      { q: 'Is Red Feather Lakes a good place to buy a home?', a: 'For buyers who want a true mountain cabin or lake lifestyle without resort-town pricing, yes. Red Feather Lakes is an unincorporated Larimer County community about 45 minutes northwest of Fort Collins, with cabins, small lakes, and a quieter pace than Estes Park. It rewards buyers who do their due diligence on access, water, and association rules.' },
+      { q: 'What do Red Feather Lakes homes cost?', a: 'As of late September 2026, live IRES data showed 125 active listings at a median list price around $254,900 and a median of about $320 per square foot. That median is shaped by a large share of land (65 lots) alongside cabins and homes, so check the live stats on the area guide rather than relying on a single figure.' },
+      { q: 'Are there cabins under $300K in Red Feather Lakes?', a: 'Yes. As of late September 2026, 71 of the 125 active listings — roughly 57% — were priced at or under $300,000. Most of that tier is modest cabins and land. Availability changes daily, so set a saved search with SAA Homes to catch the right property.' },
+      { q: 'What should I check before buying a Red Feather Lakes cabin?', a: 'Access, water, and association rules are the big three. Confirm the access road and seasonal access, verify the well and septic systems, and review any HOA or lake-association covenants. Not every cabin is year-round turnkey, so due diligence is the difference between a smooth purchase and an expensive surprise.' },
+    ],
+    sections: [
+      {
+        heading: 'Why buyers choose Red Feather Lakes',
+        paragraphs: [
+          'Red Feather Lakes is an unincorporated mountain community in northwest Larimer County, known for cabin living, small private lakes, and a price point that undercuts Estes Park and most Front Range foothills markets. Buyers who want a genuine mountain retreat without resort-town premiums often start their search here.',
+          'It is a niche market defined by the mix of improved cabins, lakefront homes, and land. That mix is exactly why a local guide matters — the same search that surfaces a $35,000 lot also surfaces a $1.7 million lakefront home, and the right strategy depends on what you actually want to own.',
+        ],
+        relatedLinks: [
+          { title: 'Red Feather Lakes homes for sale', href: '/northern-colorado-areas/red-feather-lakes/', description: 'Live IRES stats, neighborhoods, and lifestyle' },
+          { title: 'Mountain cabins under $300K', href: '/blog/red-feather-lakes-cabins-for-sale-under-300k/', description: 'The affordable cabin tier, by neighborhood' },
+        ],
+      },
+      {
+        heading: 'Pricing and what your budget buys',
+        paragraphs: [
+          'As of late September 2026, live IRES data showed 125 active listings with a median list price around $254,900, a median of about $320 per square foot, and an average around $365,000. The range is wide — from a $10,000 build site to a $1.78 million lakefront home — because the market mixes land and homes.',
+          'That is the key to reading Red Feather Lakes pricing. Land makes up more than half of active inventory (65 of 125 listings), which pulls the median down. For a turnkey cabin, expect to look toward the upper half of that range, and always price against comps matched to your specific property type and neighborhood.',
+        ],
+        list: [
+          'Cabins and lakefront homes in the village',
+          'Crystal Lakes homes around private community lakes',
+          'Glacier View Meadows cabins and buildable lots',
+          'Raw land and recreational parcels throughout Larimer County',
+        ],
+      },
+      {
+        heading: 'Neighborhoods: village, Crystal Lakes, and Glacier View Meadows',
+        paragraphs: [
+          'Red Feather Lakes Village is the historic core — lakeside cabins, the general store, tavern, and post office along Red Feather Lakes Road, with Red Feather and Placid lakes at the doorstep. It is the practical hub, and pricing generally runs from the mid-$200Ks into the high six figures.',
+          'Crystal Lakes is a large lakeside subdivision on the north side of the community, built around a chain of small private lakes with its own road-and-recreation association. Glacier View Meadows is a 4,500-acre deed-restricted community to the southwest with its own association, trails, and fishing ponds, and it holds the widest price spread — roughly $250K to over $1.2 million.',
+        ],
+        relatedLinks: [
+          { title: 'Red Feather Lakes Village', href: '/northern-colorado-areas/red-feather-lakes/red-feather-lakes-village/', description: 'The historic heart of the community' },
+          { title: 'Crystal Lakes', href: '/northern-colorado-areas/red-feather-lakes/crystal-lakes-red-feather/', description: 'Private lakes and forested lots' },
+          { title: 'Glacier View Meadows', href: '/northern-colorado-areas/red-feather-lakes/glacier-view-meadows/', description: 'A 4,500-acre mountain community' },
+        ],
+      },
+      {
+        heading: 'What to check before you buy',
+        paragraphs: [
+          'Due diligence matters more in Red Feather Lakes than in a Front Range suburb. Access roads, well and septic systems, and wildfire and insurance considerations vary property by property, and seasonal access is a real question for some parcels.',
+          'HOA and lake-association rules also vary by neighborhood. Crystal Lakes and Glacier View Meadows have mandatory associations with annual dues covering roads, lakes, and recreation; the village proper generally does not. Confirm the specific covenants and dues for the property before you write an offer.',
+        ],
+      },
+      {
+        heading: 'Financing a Red Feather Lakes home',
+        paragraphs: [
+          'Because the market spans improved cabins and land-heavy inventory, the right loan depends on the property. Improved primary residences may fit conventional, FHA, VA, USDA, or CHFA programs, while raw land and some acreage require different financing altogether.',
+          'CHFA down payment assistance is available statewide, including Larimer County, for a qualifying primary residence. The practical limits are the primary-residence requirement, county income and purchase price caps, and the underlying loan program\'s property standards — a cabin with well and septic must still appraise and pass those standards. SAA Homes is not affiliated with CHFA but helps you verify eligibility with a participating lender.',
+        ],
+        relatedLinks: [
+          { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Grants and deferred loans up to $25,000' },
+          { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'The full buying process, step by step' },
+        ],
+      },
+      {
+        heading: 'Start with a Red Feather Lakes conversation',
+        paragraphs: [
+          'Call (970) 999-1407 or open the contact page. Tell us whether you want a turnkey cabin, a lakefront home, or land to build on, and we will point you to the neighborhoods and price tiers that actually fit. Buyers get a saved search and a lender introduction that includes CHFA when it applies.',
+          'Schwartz and Associates (SAA Homes) is Adam and Mandi Schwartz, Coldwell Banker Realty, serving Fort Collins, Red Feather Lakes, and all of Northern Colorado. Fair Housing compliance is non-negotiable: we market and show homes without regard to protected class.',
+        ],
+        list: [
+          'Call (970) 999-1407 or visit the contact page',
+          'Name the goal — turnkey cabin, lakefront, or land',
+          'Review access, water, and HOA rules before you offer',
+          'Confirm CHFA and financing fit with a participating lender',
+          'Work with an agent who prices mountain inventory honestly',
+        ],
+        relatedLinks: [
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
+          { title: 'All Northern Colorado communities', href: '/northern-colorado-areas/', description: '27 city and region guides' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'selling-your-home-in-red-feather-lakes-co',
+    title: 'Selling Your Home in Red Feather Lakes, CO: A Cabin Seller\'s Guide',
+    excerpt: 'Selling a Red Feather Lakes cabin is different from selling a Front Range home. Here is how to price, prepare, and market a mountain property to the right buyer in 2026.',
+    date: '2026-09-24',
+    category: 'Seller Tips',
+    image: '/images/Northern Colorado.webp',
+    readTime: '8 min read',
+    keywords: 'sell my home red feather lakes, selling a cabin in red feather lakes, red feather lakes home value, red feather lakes real estate agent, mountain cabin listing, Larimer County cabin for sale',
+    relatedLinks: [
+      { title: 'Red Feather Lakes homes for sale', href: '/northern-colorado-areas/red-feather-lakes/', description: 'Area guide with live IRES market stats' },
+      { title: 'Sell Your Home', href: '/for-sellers/', description: 'Seller representation and a free home valuation' },
+      { title: 'Mountain cabins under $300K', href: '/blog/red-feather-lakes-cabins-for-sale-under-300k/', description: 'How your cabin compares to the affordable tier' },
+      { title: 'Free Home Valuation', href: '/for-sellers/#home-valuation', description: 'See what your Red Feather Lakes home could bring' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
+    ],
+    cta: {
+      title: 'Get a free Red Feather Lakes home valuation',
+      description: 'Schwartz and Associates prepares a comparative market analysis using current Red Feather Lakes comps so you know exactly what your cabin is worth. Call (970) 999-1407 — no obligation.',
+      primaryHref: '/for-sellers/#home-valuation',
+      primaryText: 'Get a free home valuation',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to an agent',
+    },
+    faqs: [
+      { q: 'How is selling a Red Feather Lakes cabin different from a city home?', a: 'The buyer pool is smaller and more specialized, and the value drivers are different. Access, water, well and septic condition, and lake or association access matter as much as square footage. Marketing to mountain and second-home buyers — and pricing against mountain comps, not Front Range comps — is what moves a cabin.' },
+      { q: 'What is my Red Feather Lakes home worth?', a: 'The right answer comes from a comparative market analysis using recent Red Feather Lakes sales matched to your property type and neighborhood. With land and cabins mixed in the same market, a single median is misleading. Schwartz and Associates provides this analysis free.' },
+      { q: 'How fast do Red Feather Lakes homes sell?', a: 'As of late September 2026, the median days on market across active Red Feather Lakes listings was around 67 days, but that figure reflects a slower mountain market with meaningful land inventory. A well-priced, well-presented cabin in a desirable lake community will move faster than an overpriced one.' },
+      { q: 'Should I sell my cabin as a second home or an investment?', a: 'That depends on how the property is best positioned. Second-home buyers and short-term-rental investors are both part of the Red Feather Lakes pool, but the right buyer — and the right marketing — depends on access, water, and any association rules. We position the listing to the actual buyer your property fits.' },
+    ],
+    sections: [
+      {
+        heading: 'What makes the Red Feather Lakes market different',
+        paragraphs: [
+          'Red Feather Lakes is a niche mountain market, not a volume Front Range one. The active inventory — 125 listings as of late September 2026 — is roughly half land and half improved homes, and the buyer pool is smaller, more patient, and more focused on access, water, and lake or association access than on commute time.',
+          'That has two consequences for sellers. First, pricing against the right mountain comps matters more than in a deep suburb where hundreds of near-identical homes trade weekly. Second, the buyers who do show up are genuinely interested in mountain living, so accurate, specific marketing converts them faster than generic listing syndication.',
+        ],
+      },
+      {
+        heading: 'Pricing a mountain cabin correctly',
+        paragraphs: [
+          'The median list price around $254,900 is pulled down by land, so it rarely reflects what a turnkey cabin is worth. Price your cabin against sold cabins of similar type, condition, and location — village lakefront, Crystal Lakes, and Glacier View Meadows all trade on different curves.',
+          'Overpricing is especially costly in a thin market. Buyers in Red Feather Lakes tend to be informed and willing to wait, so a cabin priced above defensible comps can sit through the seasonal cycle. Pricing at or slightly under a verified market value generates the activity that leads to the strongest offers.',
+        ],
+        list: [
+          'Match comps to cabin type, not the land-heavy median',
+          'Separate village, Crystal Lakes, and Glacier View Meadows comps',
+          'Account for access, water, and association dues in value',
+          'Price for the first two weeks of interest',
+        ],
+      },
+      {
+        heading: 'Preparing a cabin for the market',
+        paragraphs: [
+          'Mountain buyers notice condition differently than suburban buyers. Clear access, documented water and septic, a clean fire-mitigation perimeter, and evidence the cabin is weathertight matter more than cosmetic staging. Photograph the setting, the lake or forest access, and the views — not just the interior.',
+          'For land or land-plus-cabin properties, document the buildability, any surveys, water rights, and access easements up front. That documentation removes the questions that stall mountain transactions and gives buyers confidence to offer.',
+        ],
+      },
+      {
+        heading: 'Marketing to the right buyer',
+        paragraphs: [
+          'Red Feather Lakes buyers split roughly into second-home shoppers, outdoor recreation buyers, full-time mountain residents, and short-term-rental investors. Your listing should speak to whichever group your property fits — a lakefront cabin markets to recreation buyers, while a well-built year-round home markets to full-time residents.',
+          'MLS syndication, targeted digital advertising, and the SAA Homes network put your cabin in front of those buyers. For short-term-rental interest, confirm Larimer County STR licensing and any association restrictions before you market the property that way, so the listing is accurate from day one.',
+        ],
+        relatedLinks: [
+          { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis and professional marketing' },
+          { title: 'Mountain cabins under $300K', href: '/blog/red-feather-lakes-cabins-for-sale-under-300k/', description: 'Where the affordable tier is trading' },
+        ],
+      },
+      {
+        heading: 'From offer to closing on mountain property',
+        paragraphs: [
+          'Mountain transactions add a few steps: well and septic inspections, access verification, and sometimes wildfire-insurance review. Plan for those in the timeline, and be ready to document systems so the buyer\'s inspection and appraisal move without surprises.',
+          'Schwartz and Associates manages negotiation, inspections, appraisal, and closing end to end, so you maximize net proceeds and close with confidence — whether you are selling a turnkey cabin, a lakefront home, or land.',
+        ],
+        relatedLinks: [
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407 to review your sale' },
+          { title: 'All Northern Colorado communities', href: '/northern-colorado-areas/', description: '27 city and region guides' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'red-feather-lakes-cabins-for-sale-under-300k',
+    title: 'Red Feather Lakes Cabins for Sale Under $300K: The Affordable Mountain Tier',
+    excerpt: 'Most of Red Feather Lakes\' active inventory is priced under $300,000. Here is what that tier actually contains — cabins, land, and lake community homes — and where to find them.',
+    date: '2026-09-24',
+    category: 'Local Guide',
+    image: '/images/Northern Colorado.webp',
+    readTime: '6 min read',
+    keywords: 'red feather lakes cabins for sale under 300k, mountain cabins under 300k, cheap cabins Colorado, red feather lakes land for sale, Larimer County cabin, red feather lakes homes for sale',
+    relatedLinks: [
+      { title: 'Red Feather Lakes homes for sale', href: '/northern-colorado-areas/red-feather-lakes/', description: 'Area guide with live IRES market stats' },
+      { title: 'Browse Red Feather Lakes listings', href: '/red-feather-lakes-homes-for-sale/', description: 'Every active cabin and land listing' },
+      { title: 'Buying a Home in Red Feather Lakes', href: '/blog/buying-a-home-in-red-feather-lakes-co/', description: 'The full buyer guide' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Buyer representation across Northern Colorado' },
+      { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
+    ],
+    cta: {
+      title: 'Want a cabin under $300K?',
+      description: 'Set a saved search with SAA Homes and we will alert you the moment a qualifying Red Feather Lakes cabin or lot hits the market. Call (970) 999-1407 to get started.',
+      primaryHref: '/properties/?location=Red Feather Lakes, CO',
+      primaryText: 'Search Red Feather Lakes listings',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to an agent',
+    },
+    faqs: [
+      { q: 'How many Red Feather Lakes homes are under $300K?', a: 'As of late September 2026, 71 of the 125 active listings — about 57% — were priced at or under $300,000, according to live IRES data. That share reflects a market where land and modest cabins make up a large portion of inventory.' },
+      { q: 'What do you actually get under $300K in Red Feather Lakes?', a: 'Most of the under-$300K tier is a mix of modest cabins and land. Turnkey, year-round cabins under $300K exist but are less common than buildable lots and rustic cabins. Condition, access, and water are what separate a genuine deal from a project.' },
+      { q: 'Can you use CHFA on a Red Feather Lakes cabin under $300K?', a: 'Potentially, if the cabin is your primary residence and meets the lender\'s property standards. CHFA is available statewide in Larimer County, with county income and purchase price limits. Raw land generally does not qualify — the property must be an improved residence. SAA Homes is not affiliated with CHFA but helps you verify eligibility.' },
+    ],
+    sections: [
+      {
+        heading: 'What the under-$300K tier actually contains',
+        paragraphs: [
+          'The headline number is straightforward: as of late September 2026, 71 of Red Feather Lakes\' 125 active listings were priced at or under $300,000, per live IRES data. The important part is what sits inside that tier.',
+          'With a median list price around $254,900 and 65 of 125 active listings being land, the under-$300K tier is heavier on buildable lots and rustic cabins than on turnkey year-round homes. Buyers who know that going in are far less likely to be surprised by what a listing actually requires.',
+        ],
+      },
+      {
+        heading: 'Cabins versus land under $300K',
+        paragraphs: [
+          'Land dominates the affordable tier. Many under-$300K listings are residential lots — some with HOA lake access in communities like Crystal Lakes, some raw and unimproved. These can be excellent build sites, but they require well, septic, and access work that adds real cost after closing.',
+          'Cabins under $300K do exist, most commonly older, smaller, or seasonal structures. A rustic cabin with a functioning well and septic and year-round access is a different value proposition from a seasonal structure on a seasonal road, so evaluate each listing on its systems, not just its price.',
+        ],
+        list: [
+          'Buildable lots in lake communities',
+          'Rustic and seasonal cabins',
+          'Raw unimproved land parcels',
+          'Occasional turnkey cabins at the top of the tier',
+        ],
+      },
+      {
+        heading: 'Where the under-$300K inventory sits',
+        paragraphs: [
+          'Red Feather Lakes Village holds the most affordable cabin stock, with pricing generally starting in the mid-$200Ks and lake access at Red Feather and Placid lakes nearby. The village proper has no HOA, though lake associations may apply near specific lakes.',
+          'Crystal Lakes offers lake-adjacent value, with a mandatory road-and-recreation association and a separate water and sewer association; its homes generally start a bit higher but include community lake access. Glacier View Meadows, a 4,500-acre deed-restricted community, spans the widest range and includes both rustic cabins and buildable lots under $300K.',
+        ],
+        relatedLinks: [
+          { title: 'Red Feather Lakes Village', href: '/northern-colorado-areas/red-feather-lakes/red-feather-lakes-village/', description: 'Historic core with the most affordable cabins' },
+          { title: 'Crystal Lakes', href: '/northern-colorado-areas/red-feather-lakes/crystal-lakes-red-feather/', description: 'Private lakes and forested lots' },
+          { title: 'Glacier View Meadows', href: '/northern-colorado-areas/red-feather-lakes/glacier-view-meadows/', description: 'A 4,500-acre mountain community' },
+        ],
+      },
+      {
+        heading: 'Due diligence before you buy cheap',
+        paragraphs: [
+          'The lowest-priced listings carry the most homework. Confirm year-round access and whether the road is county-maintained or private, verify the well and septic (or the cost to install them), and review any HOA or association dues and rules before you commit.',
+          'Also check wildfire insurance availability and cost — it has become a deciding factor for some Larimer County mountain purchases. A buyer agent who knows Red Feather Lakes can flag these issues before you spend on inspections.',
+        ],
+      },
+      {
+        heading: 'How to catch the right cabin when it lists',
+        paragraphs: [
+          'Under-$300K cabins and lots in Red Feather Lakes do not linger the way overpriced listings do, so having a saved search and a responsive agent matters. SAA Homes sets up instant alerts tuned to your budget, property type, and neighborhood so you can act quickly when the right property appears.',
+          'Call (970) 999-1407 or open the contact page to set up a Red Feather Lakes search. Schwartz and Associates serves Fort Collins, Red Feather Lakes, and all of Northern Colorado, and we help buyers underwrite the practical costs of mountain ownership rather than chase a low sticker price.',
+        ],
+        relatedLinks: [
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
+          { title: 'Browse Red Feather Lakes listings', href: '/red-feather-lakes-homes-for-sale/', description: 'Every active cabin and land listing' },
         ],
       },
     ],
