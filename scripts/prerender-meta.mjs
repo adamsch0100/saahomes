@@ -398,6 +398,7 @@ const SITE_MONEY_PAGES = [
   ['/chfa-down-payment-assistance/', 'CHFA Down Payment Assistance'],
   ['/chfa-schools-to-home/', 'CHFA Schools to Home'],
   ['/colorado-champions-home-loan-program/', 'Colorado Champions Home Loan'],
+  ['/blog/selling-your-home-in-fort-collins/', 'Selling Your Home in Fort Collins'],
   ['/contact/', 'Contact SAA Homes'],
 ];
 
