@@ -281,6 +281,7 @@ export default function ForSellersPage() {
             <a href="/northern-colorado-areas/red-feather-lakes/" className="text-black hover:underline">Sell a Home in Red Feather Lakes</a>
             <a href="/northern-colorado-areas/lyons/" className="text-black hover:underline">Sell a Home in Lyons</a>
             <a href="/northern-colorado-areas/bellvue/" className="text-black hover:underline">Sell a Home in Bellvue</a>
+            <a href="/blog/selling-your-home-in-fort-collins/" className="text-black hover:underline">Fort Collins Home Selling Guide</a>
           </div>
         </div>
       </section>

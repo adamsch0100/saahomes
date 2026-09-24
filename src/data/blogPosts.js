@@ -2130,8 +2130,8 @@ export const blogPosts = [
   },
   {
     slug: 'selling-your-home-in-fort-collins',
-    title: 'Selling Your Home in Fort Collins: A Complete 2026 Guide for Home Sellers',
-    excerpt: 'Everything Fort Collins home sellers need to know in 2026 — pricing strategy, home preparation, marketing, and why choosing the right local realtor matters for selling your Fort Collins home.',
+    title: 'Sell My House in Fort Collins: 2026 Seller Guide',
+    excerpt: 'Selling your Fort Collins home in 2026? Compare cash offers vs. listing, review current market data, and get a free home valuation. Call (970) 999-1407.',
     date: '2026-07-01',
     category: 'Seller Tips',
     image: '/images/selling-your-home-in-fort-collins.jpg',
@@ -2162,6 +2162,10 @@ export const blogPosts = [
       { q: 'How much are closing costs for sellers in Fort Collins?', a: 'Fort Collins home sellers typically pay 6–8% of the sale price in total closing costs, which includes the real estate commission (usually 5–6% split between buyer and seller agents), title insurance, transfer taxes, and prorated property taxes. Your Fort Collins listing agent will provide a detailed net sheet before you list.' },
       { q: 'Do I need to make repairs before selling my Fort Collins home?', a: 'Not necessarily, but strategic updates can significantly impact your sale price and days on market. Focus on curb appeal, fresh paint, decluttering, and addressing obvious issues buyers and appraisers will spot. A pre-listing inspection can help you decide which repairs are worth making and which to disclose.' },
       { q: 'How long does it take to sell a home in Fort Collins?', a: 'As of mid-2026, the average days on market for Fort Collins single-family homes is approximately 38 days. Well-priced homes under $600,000 often receive offers within two weeks, while homes above $700,000 may take 45–60+ days. Your timeline depends heavily on pricing strategy and home condition.' },
+      { q: 'Are home prices dropping in Fort Collins, CO?', a: 'Fort Collins home values have leveled rather than dropped. Through 2026 the median single-family price has held near $610,000, inventory is up roughly 15% year over year, and single-family homes average about 40 days on market. Well-priced homes in the $500,000 to $650,000 range still attract offers within roughly three weeks, while homes above $750,000 typically take 55 to 70 days. For a figure specific to your street and condition, request a free comparative market analysis from Schwartz and Associates at (970) 999-1407.' },
+      { q: 'What is the hardest month to sell a house in Fort Collins?', a: 'The slowest stretch in Northern Colorado is mid-November through January, when holiday schedules and winter weather thin out buyer traffic and days on market stretch. Activity builds from February and peaks from March through June, when both inventory and buyer demand are highest. That said, well-priced Fort Collins homes sell year-round - accurate pricing and good preparation matter more than the calendar. If you need to move in the off-season, plan for a longer marketing window and a sharper launch price.' },
+      { q: 'What is the best way to sell my Fort Collins house for cash?', a: 'There are three main routes, and they do not net the same amount. National iBuyers and we-buy-houses companies offer speed and certainty but typically pay below open-market value. Local cash investors buy as-is with no repairs, also below market. Listing on the open market usually nets the most, but takes longer and involves preparation and showings. The right answer depends on your timeline, the condition of the home, and how much equity you need out. Compare written offers on net proceeds, not just speed, before signing a cash contract. Call SAA Homes at (970) 999-1407 for a side-by-side comparison of a cash offer versus a listing.' },
+      { q: 'Is selling my Fort Collins home without a realtor a good idea?', a: 'For-sale-by-owner can work for a seller with a strong local network, a straightforward property, and time to manage the process. In practice most Fort Collins FSBO sellers carry pricing, photography, marketing, showings, negotiation, inspection repairs, disclosures, and contract deadlines themselves - and mispricing at launch is the costliest mistake because it burns the first two weeks of market exposure. We consistently see FSBO sellers net less once price corrections, extra days on market, and legal risk are accounted for. A market analysis costs nothing and tells you what the home is worth before you decide.' },
     ],
     sections: [
       {
@@ -2216,6 +2220,26 @@ export const blogPosts = [
           'When offers come in, your Fort Collins listing agent should help you evaluate more than just the price. Compare financing strength (conventional vs. FHA/VA), contingency terms (inspection, appraisal, sale of buyer\'s home), proposed closing timeline, and earnest money deposit. Sometimes a slightly lower offer with stronger financing and fewer contingencies is better than a higher offer that carries closing risk.',
           'Home inspections are standard in Fort Collins. Be prepared for buyers to request repairs or credits after their inspection. Having a pre-listing inspection done before going to market can reduce surprises and streamline negotiations. In multiple-offer situations, you can choose to waive or limit repair requests to strengthen your buyer\'s offer while protecting your sale price.',
           'The closing process in Colorado typically takes 30–45 days from accepted offer to closing. Your agent coordinates with the title company, buyer\'s agent, and your attorney (if applicable) to keep everything on track. The seller typically pays title insurance, owner\'s title policy, and commission fees — your net sheet will detail every cost before you accept an offer.',
+        ],
+      },
+
+{
+        heading: 'Selling for cash vs. listing in Fort Collins',
+        paragraphs: [
+          'Many Fort Collins homeowners start by searching for a fast cash offer, and that can be the right answer when a property needs major repairs, is tenant-occupied, is being sold from out of state, or has to close on a hard deadline. Cash buyers remove financing risk and can close in days.',
+          'The trade-off is price. Cash offers and iBuyer proposals are built to leave margin for the buyer, so the number is usually below what the same home would bring on the open market with professional marketing and a normal marketing window. In a market where well-priced Fort Collins homes in the $500,000 to $650,000 range still draw offers within about three weeks, the gap between a cash number and a listed number is often the largest single line item in the decision.',
+          'The practical approach is to get both. Request an as-is cash-style valuation and an open-market analysis of the same property, compare them on net proceeds after repairs, holding costs, and timeline, then choose. Schwartz and Associates will run that comparison for Fort Collins sellers at no cost - including what the home would need to list and what a cash buyer is likely to offer.',
+        ],
+        list: [
+          'Cash offer or iBuyer: fastest close, no repairs, usually the lowest net',
+          'As-is listing: longer timeline, broader buyer pool, typically a higher net',
+          'Full preparation and staging: most work upfront, highest net in most cases',
+          'Best first step: get both valuations in writing before you sign anything',
+        ],
+        relatedLinks: [
+          { title: 'Cash home buyers in Fort Collins', href: '/cash-home-buyers/', description: 'How cash offers work and when they make sense' },
+          { title: 'What is my Fort Collins home worth?', href: '/for-sellers/#home-valuation', description: 'Free, no-obligation market analysis' },
+          { title: 'Fort Collins market data', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, pricing and trends' },
         ],
       },
       {
@@ -3269,8 +3293,8 @@ export const blogPosts = [
 
   {
     slug: 'fort-collins-vs-loveland-vs-windsor',
-    title: 'Fort Collins vs Loveland vs Windsor: Which Northern Colorado City Is Right for You?',
-    excerpt: 'Comparing Fort Collins, Loveland, and Windsor — Northern Colorado\'s top three cities for home buyers. Neighborhoods, pricing, schools, lifestyle, and how to choose the best fit for your family in 2026.',
+    title: 'Fort Collins vs Loveland vs Windsor: 2026 Guide',
+    excerpt: 'Fort Collins, Loveland and Windsor compared for 2026 - prices, neighborhoods, schools, commutes and taxes, plus how to pick the right Northern Colorado city.',
     date: '2026-07-07',
     category: 'Local Guide',
     image: '/images/fort-collins-vs-loveland-vs-windsor.jpg',
@@ -3945,8 +3969,8 @@ export const blogPosts = [
   },
   {
     slug: 'weld-county-vs-larimer-county-buyer-guide',
-    title: 'Weld County vs Larimer County: Which Northern Colorado County Is Best for Home Buyers in 2026?',
-    excerpt: 'Comparing Weld County and Larimer County — Northern Colorado\'s two largest counties for home buyers. Housing markets, property taxes, school districts, CHFA limits, lifestyle, and how to choose the best county for your family in 2026.',
+    title: 'Weld County vs Larimer County: 2026 Buyer Guide',
+    excerpt: 'Weld County vs Larimer County in 2026 - housing markets, property taxes, school districts, CHFA limits and lifestyle, and how to choose the right county.',
     date: '2026-07-13',
     category: 'Local Guide',
     image: '/images/weld-county-vs-larimer-county-buyer-guide.jpg',
@@ -4543,8 +4567,8 @@ export const blogPosts = [
   },
   {
     slug: 'is-windsor-colorado-expensive-to-live',
-    title: 'Is Windsor Colorado Expensive to Live? | 2026 Cost of Living & Relocation Guide',
-    excerpt: 'Thinking of moving to Windsor, Colorado? Our 2026 guide breaks down the real cost of living — median home prices, rents, utilities, groceries, and taxes — plus answers to top questions like "Is Windsor expensive?" and "Why move to Windsor, Colorado?"',
+    title: 'Is Windsor Colorado Expensive to Live in 2026?',
+    excerpt: 'Is Windsor, Colorado expensive? 2026 costs compared - home prices, rents, utilities, groceries and taxes, plus what actually drives Windsor living costs.',
     date: '2026-07-16',
     category: 'Local Guide',
     image: '/images/is-windsor-colorado-expensive-to-live.jpg',
