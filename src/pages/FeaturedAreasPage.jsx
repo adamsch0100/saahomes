@@ -24,7 +24,11 @@ const HUB_FAQS = [
   },
   {
     q: "How do I sell my home in Northern Colorado?",
-    a: "Request a free, no-obligation home valuation at /for-sellers/#home-valuation. We price against live comparable sales in your specific community, then handle photography, marketing, showing coordination, and negotiation through closing. Call (970) 999-1407 to get started.",
+    a: "Request a free, no-obligation home valuation at /for-sellers/#home-valuation. We price against live comparable sales in your specific community, then handle photography, marketing, showing coordination, and negotiation through closing. Call (970) 999-1407 to get started."
+  },
+  {
+    q: "What is the best place to live in Northern Colorado?",
+    a: "There is no single answer — the right town depends on budget, commute, schools, and lifestyle. Fort Collins is the largest market with CSU and Old Town; Loveland balances arts, mountain access, and slightly lower home prices; Windsor offers the newest construction and highly rated schools at the region's highest price point; Greeley is the most affordable major market; the I-25 corridor (Johnstown, Firestone, Mead, Erie, Brighton) delivers newer construction at moderate prices; and Estes Park or the foothills towns suit mountain-lifestyle buyers. Compare the area guides for neighborhoods, schools, and current market data, then call (970) 999-1407 — Schwartz and Associates can help you narrow it down based on your commute and budget."
   },
 ];
 
