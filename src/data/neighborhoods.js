@@ -234,6 +234,7 @@ export const neighborhoods = [
     walkScore: 20,
     metaDescription: 'Ptarmigan Fort Collins real estate — established luxury homes on large lots near Harmony Road with top Poudre schools. SAA Homes.',
     keywords: 'Ptarmigan Fort Collins, Ptarmigan Country Club area, southeast Fort Collins luxury homes, Harmony Road Fort Collins neighborhoods, custom estate homes Fort Collins, Fossil Ridge High School homes',
+    youtubeId: 'sxOhjEWx79E',
     neighborhoodHighlights: [
       { title: 'Estate character', description: 'Custom-built homes on large, mature lots give Ptarmigan a settled luxury feel rare inside Fort Collins.' },
       { title: 'Golf heritage', description: 'The neighborhood grew up around the Ptarmigan Country Club, the community\'s longtime social and recreational anchor.' },
@@ -360,6 +361,7 @@ export const neighborhoods = [
     walkScore: 20,
     metaDescription: 'The Landings at Fossil Creek Fort Collins real estate — established homes with natural-area views and top Poudre schools. SAA Homes.',
     keywords: 'The Landings at Fossil Creek, Fort Collins homes for sale 80528, Fossil Creek Reservoir homes, southeast Fort Collins communities, patio homes Fort Collins, Zach Elementary homes',
+    youtubeId: '3EF4ar65QVc',
     neighborhoodHighlights: [
       { title: 'Nature out the back door', description: 'Many lots back to the Fossil Creek Reservoir Natural Area with wetland views and wildlife.' },
       { title: 'Established, not raw', description: 'Built in the 2000s, the community has mature landscaping and a fully built-out feel.' },
@@ -1392,6 +1394,7 @@ export const neighborhoods = [
     walkScore: 20,
     metaDescription: 'Deer Meadows Loveland real estate — foothills-view homes minutes from Devils Backbone Open Space trails. SAA Homes.',
     keywords: 'Deer Meadows Loveland, Devils Backbone homes, west Loveland foothills real estate, walk-out ranch Loveland, open space view homes Loveland, Mariana Butte area',
+    youtubeId: '6MfR8gkO_z4',
     neighborhoodHighlights: [
       { title: 'Iconic views', description: 'Devils Backbone and Mariana Butte dominate the western skyline from many homes.' },
       { title: 'Trailhead living', description: 'Devils Backbone Open Space — hiking and mountain biking — is minutes away.' },
