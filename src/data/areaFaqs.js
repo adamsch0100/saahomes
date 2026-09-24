@@ -5,6 +5,10 @@ const AREA_FAQS = {
       a: 'As of mid-2026, the average home price in Fort Collins is approximately $636,000. The Fort Collins real estate market has seen steady appreciation driven by Colorado State University, tech sector growth, and strong demand from buyers relocating to Northern Colorado. Prices vary significantly by neighborhood — Old Town commands a premium, while south Fort Collins and areas near Harmony Road offer more options in the $450K–$600K range.'
     },
     {
+      q: 'Are home prices dropping in Fort Collins, CO?',
+      a: 'It is more of a cool-down and mix shift than a crash. The August 2026 median list price in Fort Collins settled at approximately $550,000, down from roughly $643,000 a year earlier, with active inventory up to about 1,112 homes and days on market averaging 53 days. Much of that year-over-year decline reflects a change in what is listed — more condos and townhomes, more homes above $750K that take longer to market, and fewer entry-level single-family homes. Well-priced homes in the $450K–$600K band still sell in about 15–35 days, while homes above $750,000 average 55–70 days. For sellers, realistic pricing matters more than it did in 2022–2024; for buyers, the added inventory means more choice and negotiating room.'
+    },
+    {
       q: 'Is Fort Collins a good place to live?',
       a: 'Fort Collins consistently ranks among the best places to live in Colorado and the U.S. Residents enjoy 300+ days of sunshine, over 20 craft breweries, a thriving downtown, excellent schools through Poudre School District (ranked 13th in Colorado), and direct access to Rocky Mountain National Park. The presence of Colorado State University brings a vibrant cultural scene, and Fort Collins was named one of the most economically vibrant cities in America by the Milken Institute.'
     },
@@ -95,6 +99,10 @@ const AREA_FAQS = {
     {
       q: 'What is the average home price in Windsor, CO?',
       a: 'Windsor home prices typically range from $500,000 to $750,000, with newer construction communities commanding premium prices. Windsor straddles the Weld and Larimer county line, giving buyers access to both markets. The town\'s family-friendly reputation and strong schools have driven consistent demand.'
+    },
+    {
+      q: 'Is it expensive to live in Windsor, Colorado?',
+      a: 'Windsor is Northern Colorado\'s premium market — the August 2026 median sold price was approximately $589,950, essentially flat year-over-year and the highest of any major market in the region. That premium reflects newer construction, highly rated schools, and Weld County tax advantages on the eastern side of town. Days on market extended to about 83 days in August, and active listings reached roughly 519, giving buyers more selection and negotiating room, while well-priced homes in the $450K–$600K range still attract consistent buyer activity. Compared to Fort Collins, Windsor generally offers newer homes at a comparable price; compared to Greeley, it costs more, but buyers get newer construction and the town\'s family-focused reputation.'
     },
     {
       q: 'Is Windsor a good place to raise a family?',
