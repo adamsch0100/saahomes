@@ -2364,7 +2364,7 @@ export const blogPosts = [
   },
   {
     slug: 'fort-collins-realtor',
-    title: 'Fort Collins Realtor: Your Trusted Real Estate Team for Buying and Selling in Northern Colorado',
+    title: 'Fort Collins Realtor | Local Market Expertise',
     excerpt: 'Looking for a Fort Collins realtor? Schwartz and Associates (SAA Homes) provides expert buyer and seller representation across Fort Collins, Loveland, Windsor, Greeley, and all of Northern Colorado. Here is what you need to know about choosing the right real estate agent for your home goals.',
     date: '2026-07-01',
     category: 'Local Guide',
@@ -2372,7 +2372,7 @@ export const blogPosts = [
     youtubeId: 'MLFe0-Paol0',
     keywords: 'fort collins realtor, fort collins real estate agent, best realtor fort collins, fort collins real estate team, schwartz and associates fort collins, northern colorado realtor, fort collins co realtor, coldwell banker fort collins, fort collins home buying, fort collins home selling',
     relatedLinks: [
-      { title: 'Fort Collins real estate agent', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
+      { title: 'Fort Collins real estate agent', href: '/northern-colorado-areas/fort-collins/', description: 'Choosing a Fort Collins realtor? See how Schwartz and Associates helps Northern Colorado buyers and sellers with pricing, negotiation and CHFA guidance.' },
       { title: 'Loveland Colorado real estate agent', href: '/northern-colorado-areas/loveland/', description: 'Art, lakes & Larimer County living' },
       { title: 'Windsor real estate agent', href: '/northern-colorado-areas/windsor/', description: 'Family communities between Fort Collins and Greeley' },
       { title: 'Greeley real estate agent', href: '/northern-colorado-areas/greeley/', description: 'Weld County affordable home options' },
@@ -3699,7 +3699,7 @@ export const blogPosts = [
   },
   {
     slug: 'cash-home-buyers-fort-collins-northern-colorado',
-    title: 'Cash Home Buyers vs. Working With a Local Realtor: What Fort Collins Sellers Should Know (2026)',
+    title: 'Cash Home Buyers vs. Listing in Fort Collins',
     excerpt: 'Weighing a cash offer on your Northern Colorado home? Compare cash buyers vs. listing with a local realtor, net proceeds, timelines, and how SAA Homes helps Fort Collins sellers choose the path that nets the most.',
     keywords: 'cash home buyers vs realtor Fort Collins, cash offer vs listing Fort Collins, should I sell my house to a cash buyer, is a cash offer fair Fort Collins, cash offer vs working with a realtor, sell my home Fort Collins, selling a house Northern Colorado, cash buyer vs traditional listing',
     date: '2026-08-24',
@@ -3708,7 +3708,7 @@ export const blogPosts = [
     readTime: '7 min read',
     youtubeId: 'ppibH9GQHkg',
     relatedLinks: [
-      { title: 'Cash Home Buyers Hub', href: '/cash-home-buyers/', description: 'Sell for cash or invest in Northern Colorado' },
+      { title: 'Cash Home Buyers Hub', href: '/cash-home-buyers/', description: 'Cash offer or listing? Compare net proceeds, timelines and risk for Fort Collins sellers, and see which path nets more in 2026. Call (970) 999-1407.' },
       { title: 'Northern Colorado Market Update - August 2026', href: '/blog/northern-colorado-market-update-august-2026/', description: 'Current market numbers behind this guide' },
       { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Full-service listing & marketing' },
       { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Market insights & neighborhoods' },
@@ -4113,7 +4113,7 @@ export const blogPosts = [
   },
   {
     slug: 'northern-colorado-market-update-august-2026',
-    title: 'Northern Colorado Market Update — August 2026: Home Prices, Inventory & Summer Trends',
+    title: 'Northern Colorado Market Update - August 2026',
     excerpt: 'An end-of-summer look at home prices, inventory trends, and days on market across Fort Collins, Loveland, Windsor, and Greeley — plus what the late-summer market means for buyers and sellers in Northern Colorado.',
     date: '2026-08-01',
     category: 'Market Update',
@@ -4123,7 +4123,7 @@ export const blogPosts = [
     youtubeId: '8BIhZYX1xvc',
     keywords: 'Northern Colorado housing market August 2026, Fort Collins home prices summer 2026, Loveland real estate trends, Windsor CO housing market, Greeley home prices, Larimer County market update late summer 2026',
     relatedLinks: [
-      { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
+      { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'August 2026 Northern Colorado housing market update: home prices, inventory and days on market for Fort Collins, Loveland, Windsor and Greeley.' },
       { title: 'Loveland Colorado homes for sale', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities' },
       { title: 'Windsor homes for sale', href: '/northern-colorado-areas/windsor/', description: 'Weld/Larimer border growth' },
       { title: 'Greeley homes for sale', href: '/northern-colorado-areas/greeley/', description: 'Weld County affordability' },
@@ -4719,7 +4719,7 @@ export const blogPosts = [
     },
   {
     slug: 'best-neighborhoods-fort-collins-2026',
-    title: 'Best Neighborhoods in Fort Collins CO (2026): Prices, Schools & Map',
+    title: 'Best Neighborhoods in Fort Collins, CO (2026)',
     excerpt: 'From Old Town to Waterglen, discover Fort Collins best neighborhoods for every buyer — rankings, price ranges, schools, and lifestyle for each of our 30+ Fort Collins neighborhoods.',
     date: '2026-07-20',
     category: 'Buyer Tips',
@@ -4727,7 +4727,7 @@ export const blogPosts = [
     readTime: '12 min read',
     youtubeId: 'KwNsik2BFPw',
     relatedLinks: [
-      { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & homes for sale' },
+      { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Fort Collins neighborhoods ranked by price range, schools and lifestyle - from Old Town to Waterglen - plus what each area is actually like to live in.' },
       { title: 'Fort Collins Homes for Sale', href: '/properties/?location=Fort Collins, CO', description: 'Search current Fort Collins listings' },
       { title: 'Fort Collins vs Loveland vs Windsor Comparison', href: '/blog/fort-collins-vs-loveland-vs-windsor/', description: 'Side-by-side city comparison for buyers' },
       { title: 'Fort Collins Luxury Neighborhoods Guide', href: '/blog/fort-collins-luxury-neighborhoods-guide/', description: 'Premium homes and exclusive communities' },
