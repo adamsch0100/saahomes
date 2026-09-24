@@ -12,6 +12,7 @@ import AreaEventsSection from "../components/AreaEventsSection.jsx";
 import TopRatedSchools from "../components/TopRatedSchools.jsx";
 import CityStatsBand from "../components/CityStatsBand.jsx";
 import SectionTownsBand from "../components/SectionTownsBand.jsx";
+import { getCityHomes } from "../data/cityHomesData.js";
 
 const GOLD = "#CFB36E";
 
@@ -151,6 +152,7 @@ export default function AreaGuidePage() {
   const isGreeleyArea = area.slug === 'greeley' || area.slug === 'evans';
   const nearby = nearbyCommunities[area.slug];
   const statsCity = area.skipCityStats ? null : area.city;
+  const homesForSalePath = getCityHomes(slug) ? `/${slug}-homes-for-sale/` : null;
 
   return (
     <>
@@ -286,6 +288,14 @@ export default function AreaGuidePage() {
             >
               Search {area.city} Homes
             </Link>
+            {homesForSalePath && (
+              <Link
+                to={homesForSalePath}
+                className="inline-flex items-center justify-center px-8 py-3 bg-[#CFB36E] text-black font-semibold rounded-lg hover:bg-[#c4a45e] transition-colors"
+              >
+                Browse {area.city} Homes for Sale
+              </Link>
+            )}
             <Link
               to="/contact/"
               className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"

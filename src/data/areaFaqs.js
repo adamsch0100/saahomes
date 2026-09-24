@@ -590,6 +590,18 @@ const AREA_FAQS = {
       q: 'Is Red Feather Lakes a good investment?',
       a: 'It is a niche recreation and cabin market with limited inventory and specialized buyers. Long-term value depends on property type, access, and condition. We help buyers underwrite the practical costs of mountain ownership rather than relying on resort-town hype.'
     },
+    {
+      q: 'Can you use CHFA to buy a cabin with land in Red Feather Lakes?',
+      a: 'Potentially, if the cabin is your primary residence. CHFA programs are available statewide, including Larimer County, with county income and purchase price limits — but the property must be an improved residence, not raw land, and it must meet the underlying loan program\'s appraisal and property standards (FHA, VA, USDA, or conventional). Standard CHFA rules also apply: a 620 minimum credit score, a $1,000 borrower contribution, and approved homebuyer education. CHFA does not publish a blanket acreage cap, so a participating lender confirms eligibility for your specific cabin. SAA Homes is not affiliated with CHFA but helps you verify it.'
+    },
+    {
+      q: 'What are Crystal Lakes HOA rules and costs?',
+      a: 'Crystal Lakes operates under a mandatory road-and-recreation association with annual dues that cover community lakes, roads, and recreation areas, plus a separate water and sewer association with its own assessments. Dues are set annually and billed separately, so confirm current amounts with each association and factor them into your monthly cost. Our area guide lists the road-and-rec dues in an approximate $200–$400 per year range, but the exact figure changes year to year.'
+    },
+    {
+      q: 'Can cabins in Red Feather Lakes be short-term rentals (Larimer County STR rules)?',
+      a: 'Yes, short-term rentals of 30 days or fewer are permitted in unincorporated Larimer County — which includes Red Feather Lakes — but only with a County STR license, a building permit for the conversion, and a passed life-safety inspection. Red Feather Lakes has a tighter spacing rule than the rest of the county: a new STR generally cannot sit within 250 feet of another short-term rental (versus 500 feet elsewhere), and none may sit within 500 feet of a Larimer County park or open space. Rentals are capped at 10 or fewer guests, licenses renew every two years (a $250 renewal fee took effect January 1, 2026), and they are not freely transferable. Private HOA or lake-association covenants can add further restrictions, so confirm both the county license and any private rules before buying for STR use.'
+    },
   ],
   'fort-lupton': [
     {
