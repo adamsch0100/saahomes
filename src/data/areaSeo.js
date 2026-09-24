@@ -836,6 +836,7 @@ export const areaSeoPages = [
       'Red Feather Lakes is an unincorporated mountain community in northwest Larimer County — known for cabin living, small private lakes, and a far more accessible price point than Estes Park or many Front Range foothills markets. Buyers who want a true mountain cabin without resort-town premiums often start here.',
       'SAA Homes helps buyers understand the practical side of Red Feather ownership: access roads, well and septic systems, HOA or association rules around specific lakes, and year-round vs. seasonal use. A large share of inventory can be land as well as cabins, so search strategy matters.',
       'This is a niche market with limited agent content online — which is why a real, data-backed guide matters. Live IRES stats on this page show current active counts and median list prices; medians can look low because land and modest cabins mix with improved homes.',
+      'Much of the current inventory is priced under $300,000 — read our <a href="/blog/red-feather-lakes-cabins-for-sale-under-300k/">Red Feather Lakes cabins under $300K guide</a> for the neighborhood-by-neighborhood split, or <a href="/red-feather-lakes-homes-for-sale/">browse every active Red Feather Lakes listing</a>.',
     ],
     whyChoose: [
       { title: 'Affordable mountain entry', description: 'Often a lower median list price than Estes Park and many foothills communities.' },
