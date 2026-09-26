@@ -1520,6 +1520,7 @@ export const neighborhoods = [
     walkScore: 15,
     metaDescription: 'Hidden Valley Estates Loveland real estate — estate lots and custom homes in the west Loveland foothills. SAA Homes.',
     keywords: 'Hidden Valley Estates Loveland, west Loveland estate homes, foothills acreage Loveland, custom homes Loveland, Devils Backbone real estate, Larimer County foothills homes',
+    youtubeId: 'Fn4i3CUodNM',
     neighborhoodHighlights: [
       { title: 'Estate lots', description: 'Generous home sites for custom ranches and walk-outs — rare inside city limits.' },
       { title: 'Wildlife country', description: 'Deer, elk, and migrating birds pass through the open space surrounding the neighborhood.' },
@@ -1552,6 +1553,7 @@ export const neighborhoods = [
     walkScore: 28,
     metaDescription: 'Kendall Brook Loveland real estate — newer northwest Loveland family homes with foothills views and community parks. SAA Homes.',
     keywords: 'Kendall Brook Loveland, northwest Loveland new homes, Loveland family neighborhoods, foothills view homes Loveland, Wilson Avenue Loveland real estate, Thompson School District subdivisions',
+    youtubeId: 'rfxXZr58CMk',
     neighborhoodHighlights: [
       { title: 'Northwest growth area', description: 'One of northwest Loveland\'s newer family subdivisions with views of the foothills.' },
       { title: 'Shopping minutes away', description: 'Wilson Avenue\'s grocery, dining, and retail hub is a short drive east.' },
@@ -1584,6 +1586,7 @@ export const neighborhoods = [
     walkScore: 25,
     metaDescription: 'Harvest Gold Loveland real estate — maintenance-free ranch and patio homes near the foothills with mountain views. SAA Homes.',
     keywords: 'Harvest Gold Loveland, Loveland patio homes, maintenance-free homes Loveland, northwest Loveland subdivisions, foothills homes Loveland, Loveland retirement communities',
+    youtubeId: 'USU6bAoATdM',
     neighborhoodHighlights: [
       { title: 'Truly low-maintenance', description: 'The HOA covers exterior paint, roofs, landscaping, and snow removal — show up and enjoy.' },
       { title: 'Mountain views', description: 'Many homes face the foothills with daily views of the Front Range.' },
