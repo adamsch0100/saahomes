@@ -1619,6 +1619,7 @@ export const neighborhoods = [
     walkScore: 35,
     metaDescription: 'Hunter\'s Run Loveland real estate — established west Loveland homes near foothills trails and Mariana Butte. SAA Homes.',
     keywords: 'Hunters Run Loveland, west Loveland homes, Loveland foothills neighborhoods, Namaqua Trailhead homes, Mariana Butte area real estate, Thompson School District homes',
+    youtubeId: 'mr7AqG2lmFM',
     neighborhoodHighlights: [
       { title: 'Foothills doorstep', description: 'Minutes to Namaqua Trailhead and Big Thompson River open space for hiking and fishing.' },
       { title: 'Established character', description: '1970s–80s homes with mature trees and a settled, family-friendly feel.' },
@@ -1747,6 +1748,7 @@ export const neighborhoods = [
     walkScore: 25,
     metaDescription: 'Mariana Cove Loveland real estate — custom golf-adjacent homes with Mariana Butte views and foothills access. SAA Homes.',
     keywords: 'Mariana Cove Loveland, Mariana Butte Golf Course homes, west Loveland custom homes, golf course homes Loveland, walk-out ranch Loveland, foothills view homes Colorado',
+    youtubeId: 'i7tYpjFn6Dk',
     neighborhoodHighlights: [
       { title: 'Golf course setting', description: 'Many homes overlook Mariana Butte Golf Course with the hogback ridge behind.' },
       { title: 'Custom construction', description: 'Semi-custom and custom plans with walk-out basements and premium finishes.' },
@@ -1779,6 +1781,7 @@ export const neighborhoods = [
     walkScore: 30,
     metaDescription: 'Mirasol Loveland real estate — newer east Loveland homes minutes from Centerra, I-25, and The Ranch. SAA Homes.',
     keywords: 'Mirasol Loveland, east Loveland real estate, Centerra area homes, Loveland townhomes, I-25 Loveland neighborhoods, The Ranch Loveland homes',
+    youtubeId: 'M4GA94UQpFw',
     neighborhoodHighlights: [
       { title: 'Eastside convenience', description: 'Five minutes to I-25/US 34 with Centerra dining, shopping, and the Medical Center of the Rockies.' },
       { title: 'Modern housing mix', description: 'Contemporary single-family homes and townhomes built mostly in the 2000s–2010s.' },

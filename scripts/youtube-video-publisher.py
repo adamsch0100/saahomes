@@ -1116,23 +1116,35 @@ def get_neighborhood_by_slug(slug):
         else:
             return None
 
+        _STR = r"((?:[^'\\]|\\.)*)"  # JS single-quoted string body, escape-aware
+        _SQ = r"'" + _STR + r"'"     # complete '...' literal
+
+        def unesc(v):
+            return v.replace("\\'", "'").replace('\\"', '"')
+
         def extract(field):
-            m = re.search(rf"{field}:\s*'([^']*)'", block)
+            m = re.search(rf"{field}:\s*{_SQ}", block)
             if m:
-                return m.group(1)
+                return unesc(m.group(1))
             m = re.search(rf"{field}:\s*\[([^\]]+)\]", block)
             if m:
-                items = re.findall(r"'([^']*)'", m.group(1))
+                items = [unesc(x) for x in re.findall(_SQ, m.group(1))]
                 return items
             return None
 
-        nh = re.findall(r"\{ title:\s*'([^']*)', description:\s*'([^']*)'", block)
-        highlights = [{"title": h[0], "description": h[1]} for h in nh]
+        nh = re.findall(
+            r"\{\s*title:\s*" + _SQ + r",\s*description:\s*" + _SQ,
+            block,
+        )
+        highlights = [{"title": unesc(h[0]), "description": unesc(h[1])} for h in nh]
 
-        schools_raw = re.findall(r"\{\s*name:\s*'([^']*)',\s*type:\s*'([^']*)',\s*level:\s*'([^']*)'", block)
-        schools = [{"name": s[0], "type": s[1], "level": s[2]} for s in schools_raw]
+        schools_raw = re.findall(
+            r"\{\s*name:\s*" + _SQ + r",\s*type:\s*" + _SQ + r",\s*level:\s*" + _SQ,
+            block,
+        )
+        schools = [{"name": unesc(s[0]), "type": unesc(s[1]), "level": unesc(s[2])} for s in schools_raw]
 
-        city_slug_match = re.search(r"citySlug:\s*'([^']*)'", block)
+        city_slug_match = re.search(r"citySlug:\s*" + _SQ, block)
 
         return {
             "name": extract("name"),
