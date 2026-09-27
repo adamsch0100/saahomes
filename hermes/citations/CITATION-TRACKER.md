@@ -49,6 +49,11 @@
 | Hotfrog | ❌ blocked | Cloudflare interstitial. |
 | Substack | ❌ blocked | Magic-link email never delivered to adam@ inbox. |
 | Reddit | ❌ blocked | 403 network-level block from this IP. RSS scanning working (report-only). |
+| Cybo.com | ❌ blocked | 2026-09-18 fresh probe: 403 CF "Just a moment..." |
+| Yalwa.info | ❌ blocked | 2026-09-18 fresh probe: 403 CF "Just a moment..." |
+| Tuugo.us | ❌ blocked | 2026-09-18 fresh probe: 403 CF "Just a moment..." |
+| eBusinessPages.com | ❌ blocked | 2026-09-18 fresh probe: 403 CF "Just a moment..." |
+| N49.com | ❌ blocked | 2026-09-18 fresh probe: CloudFront 403 "request could not be satisfied" |
 
 ## Email-Verify Attempts (adam@saahomes.com)
 

@@ -12559,6 +12559,7 @@ export const blogPosts = [
   {
     slug: 'buying-a-home-in-red-feather-lakes-co',
     title: 'Buying a Home in Red Feather Lakes, CO: Mountain Cabin and Lake Living',
+    youtubeId: 'bjw_Z5-gtb4',
     excerpt: 'Red Feather Lakes is one of Northern Colorado\'s most accessible mountain markets — cabins, lakefront, and land northwest of Fort Collins. Here is what buyers should know before they buy.',
     date: '2026-09-24',
     category: 'Buyer Tips',
@@ -12664,6 +12665,7 @@ export const blogPosts = [
   },
   {
     slug: 'selling-your-home-in-red-feather-lakes-co',
+    youtubeId: '6gT6DICfGek',
     title: 'Selling Your Home in Red Feather Lakes, CO: A Cabin Seller\'s Guide',
     excerpt: 'Selling a Red Feather Lakes cabin is different from selling a Front Range home. Here is how to price, prepare, and market a mountain property to the right buyer in 2026.',
     date: '2026-09-24',

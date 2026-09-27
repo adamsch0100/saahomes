@@ -24,6 +24,12 @@ URLS_TO_REINDEX = [
     '/northern-colorado-areas/fort-collins/',
     '/northern-colorado-areas/greeley/',
     '/northern-colorado-areas/boulder/',  # stuck "Crawled - not indexed" since 2026-07-22; add so patrols re-queue it
+    # Batch 2 re-audit 2026-09-24: stale crawls predating Sep modernization (0 impressions 28d)
+    '/northern-colorado-areas/eaton/',   # last crawl 2026-07-27
+    '/northern-colorado-areas/la-salle/',  # last crawl 2026-07-22
+    '/northern-colorado-areas/mead/',    # last crawl 2026-07-26
+    '/northern-colorado-areas/berthoud/',  # last crawl 2026-07-27
+    '/northern-colorado-areas/longmont/',  # last crawl 2026-08-17
 ]
 
 print("=" * 70)

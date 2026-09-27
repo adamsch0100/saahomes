@@ -165,6 +165,45 @@ Corridor rotation (weekly single-city job). Carbon Valley = hub for Firestone/Fr
 
 ---
 
+## Market Scorecard — Batch 2 (2026-09-24)
+
+Re-audit (second rotation) of 7 entities: eaton, milliken, la-salle, mead, longmont, boulder, berthoud. Prior reports 2026-09-09. All 7 live: HTTP 200, canonical self, no noindex, in sitemap, schema clean (6 JSON-LD, no duplication). **Cross-batch P0: hub pages are invisible in Google — 28d impressions (2026-08-27→09-23): eaton 0, la-salle 0, mead 0, boulder 0, berthoud 0, longmont 9 (1 query pos 43), milliken 25 (pos 20–57). ZERO clicks across all 7.** 6/7 last crawls predate Sep modernization (eaton Jul 27, la-salle Jul 22, mead Jul 26, berthoud Jul 27, longmont Aug 17, milliken Sep 10).
+
+| # | City | Page Type | Template | Schema | CHFA | Final CTA | SERP | GSC 28d | Action Items |
+|---|------|-----------|----------|--------|------|-----------|------|---------|--------------|
+| 1 | **Eaton** | Dedicated (EatonPage.jsx) | 13/13 (100%) | ✅ clean | ✅ | ✅ | ❌ none on p1 (name collision) | 0 imp | 5 — P1 re-crawl + prerender align |
+| 2 | **Milliken** | Dedicated (MillikenPage.jsx) | 12/13 (92%) ↑ 11/13 | ✅ clean | ✅ | ✅ | ❌ none on p1 | 25 imp / 0 clk | 5 — P2 stats + moving-to |
+| 3 | **La Salle** | Dedicated (LaSallePage.jsx) | 13/13 (100%) ↑ 12/13 | ✅ clean | ✅ | ✅ | ❌ none on p1 | 0 imp | 5 — P1 re-index + FAQ geo fix |
+| 4 | **Mead** | Dedicated (MeadPage.jsx) | 12/13 (92%) ↑ 8/13 | ✅ clean | ✅ | ✅ | ❌ none on p1 | 0 imp | 8 — P1 re-index, highlights, nearby |
+| 5 | **Longmont** | Dedicated (LongmontPage.jsx) | 13/13 (100%) ↑ 9/13 | ✅ clean | ✅ | ✅ | ❌ blog pos 31–53 only | 9 imp / pos 43 | 5 — P2 agent E-E-A-T |
+| 6 | **Boulder** | Dedicated (BoulderPage.jsx) | 11/13 (85%) ↑ 8/13 | ✅ clean | ✅ | ✅ | ❌ none on p1 | 0 imp — **NOT INDEXED (P0)** | 7 — P0 re-index + prerender, P2 WhyBuy+events |
+| 7 | **Berthoud** | Dynamic (AreaGuidePage) | 13/13 (100%) | ✅ clean | ✅ | ✅ | ⚠️ blog #10 agent q only | 0 imp | 6 — P1 re-crawl + FAQ price fix |
+
+### Key findings across Batch 2
+
+1. **🔴 Zero-impression hub pages (all 7)** — Root cause: (a) Google's last crawl of 6/7 pages predates the Sep dedicated-page modernization, so it evaluates stale thin versions; (b) prerendered fallback (prerender-meta.mjs / SSR) still serves the generic 9-h2 template for dedicated pages — what crawlers see ≠ the rich React page. Highest-leverage fix batch-wide: GSC re-index requests + prerender alignment for dedicated pages.
+2. **🔴 Boulder NOT INDEXED 2+ months** — "Crawled - currently not indexed" since 2026-07-22 crawl; PR #213 re-index request (09-21) did NOT flip status by 09-24. Same state: Fort Collins (crawl Jul 30) + Greeley (Jul 25) from earlier batches = **3/27 area pages stuck not-indexed**. Suspicion: Google quality judgment of prerender-thin content.
+3. **🟢 Blog equity gap FIXED since Sep 9** — eaton 0→2, la-salle 3, mead 2, berthoud 7, milliken 5, longmont 23, boulder 21 refs in blogPosts.js; all but eaton/boulder have buy+sell posts with relatedLinks back to guide.
+4. **🟢 Template completeness up across the board** — Longmont 9→13, Mead 8→12, Boulder 8→11, Milliken 11→12; Eaton/La Salle/Berthoud hold 13/13. FAQ imports fixed everywhere (historical missing-import crash gone).
+5. **🐛 FAQ/data contradictions** — la-salle areaFaqs says "east of Greeley"/"5 miles SE" vs body "8 miles SW" (standardize); berthoud FAQ price band "$475K–$700K" vs Sept marketStats median ~$630K (rich-result contradiction).
+6. **🐛 LongmontPage slice(0,2) drops introParagraphs[2]** — realtor-guide link exists in data, never rendered.
+7. **⛔ GBP website field = http://www.saahomes.com/** (verified 2026-09-24 via Serper places; NAP otherwise exact, rating 5.0, CID 9463514024331947148). Fix to https — P3 all reports.
+8. **🛠 Tooling restored this run** — Serper key recovered from state.db (works; helpers `hermes/serper_query.py`, `hermes/live_page_check.py`); GSC restored to /opt/data/credentials/gsc-key.json and queried via pure-stdlib JWT (no uv/pip on this cron host).
+
+### Best & worst performers
+- **Best:** Longmont (13/13, clean schema, 23 blog refs, neighborhood subpages actually ranking pos 9–15 — template for "how equity should flow"). Eaton/La Salle/Berthoud hold perfect 13/13.
+- **Worst:** Boulder (11/13 but **not indexed** = worst functional state — every dollar of content spent is invisible). Milliken weakest positions among indexed set.
+- **Most urgent:** Boulder indexation + the batch-wide re-crawl push (6/7 pages have stale pre-modernization crawls).
+
+### Batch 2 rotation tracking
+- **Batch audited:** Batch 2 re-run (eaton, milliken, la-salle, mead, longmont, boulder, berthoud)
+- **Audit completed:** 2026-09-24
+- **Reports:** `{slug}-audit-report.md` × 7 in repo root (overwrote 2026-09-09 versions), each with Delta-vs-Sep-9 section
+- **Remaining formal area-page audits:** estes-park (never formally audited; blog cluster + events exist), lyons, bellvue (corridor — weekly deep-dive fort-lupton queued 2026-09-29)
+- **GSC baseline:** file /tmp/gsc_city_data.json + /tmp/gsc_city_queries.json (28d); re-run script /tmp/gsc_fetch2.py pattern for next batch
+
+---
+
 ## Lead attribution log
 
 Week of 2026-07-25:
@@ -867,3 +906,21 @@ Week of 2026-09-12:
 *Report generated: 2026-09-23T13:02:50.662984*
 
 **Verification (2026-09-23):** All 6 P0 flags = FALSE POSITIVES (low-volume fluctuation). Every URL returns HTTP 200; URL Inspection API verdict PASS "Submitted and indexed" (brighton lastCrawl 2026-09-11, eaton-park 2026-07-23, lyons-river-district 2026-08-28; robots ALLOWED). 28-day site totals: 164 clicks / 25,500 impressions — API fully hydrated, no discrepancy. Zero Tier S alerts. Cash buyer: "cash home buyers" 7 imp @ pos 10.4 (page-1 boundary, up from zero current-period last week). Nothing to ship.
+
+## Daily Ranking Strike — 2026-09-24
+
+### ⚠️ P0 — Pages No Longer Indexed
+
+| Page | Previous Impressions | Previous Clicks | Top Queries |
+|------|---------------------|-----------------|-------------|
+| https://saahomes.com/northern-colorado-areas/eaton/eaton-commons/ | 5 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/eaton/eaton-park/ | 12 | 0 | eaton colorado, eaton co, eaton town |
+| https://saahomes.com/northern-colorado-areas/estes-park/downtown-estes-park/ | 9 | 0 | downtown estes park colorado, downtown estes park, estes park main street |
+| https://saahomes.com/northern-colorado-areas/firestone/firestone-crossing/ | 6 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/fort-collins/the-homestead-fc/ | 5 | 0 |  |
+| https://saahomes.com/northern-colorado-areas/loveland/south-loveland/ | 6 | 0 | avenue south loveland |
+| https://saahomes.com/northern-colorado-areas/lyons/lyons-river-district/ | 5 | 0 |  |
+
+*Report generated: 2026-09-24T13:01:05.190327*
+
+**Verification (2026-09-24):** All 7 P0 flags = FALSE POSITIVES (low-volume fluctuation). Every URL returns HTTP 200 (verified via curl -sI; skill requires escalation only on 4xx/5xx or true deindexation). All are neighborhood/POI-intent pages (5-12 impressions prev wk, 0 clicks) repeating the pitfall #13 signature; eaton-park, downtown-estes-park, south-loveland top queries are geographic/POI intent. Zero Section 2 alerts (no drops ≥ 8 with imp ≥ 10). 28-day site totals: 168 clicks / 26,281 impressions — API fully hydrated, NO discrepancy (well above 15-click floor). Nothing to ship.

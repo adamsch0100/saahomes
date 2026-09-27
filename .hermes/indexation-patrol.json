@@ -1,8 +1,8 @@
 {
-  "date": "2026-09-10",
+  "date": "2026-09-24",
   "gsc_period": {
-    "start": "2026-09-02",
-    "end": "2026-09-08"
+    "start": "2026-09-16",
+    "end": "2026-09-22"
   },
   "total_urls": 15,
   "ok": 12,
@@ -19,16 +19,16 @@
       "inspection": {
         "verdict": "PASS",
         "coverage_state": "Submitted and indexed",
-        "last_crawl_time": "2026-09-01T13:43:54Z",
+        "last_crawl_time": "2026-09-19T04:45:48Z",
         "page_fetch_state": "SUCCESSFUL",
         "google_canonical": "https://saahomes.com/"
       },
       "in_sitemap": true,
       "gsc": {
-        "impressions": 7,
-        "clicks": 0,
-        "position": 16,
-        "ctr": 0
+        "impressions": 22,
+        "clicks": 1,
+        "position": 3.227272727272727,
+        "ctr": 0.045454545454545456
       },
       "issues": [],
       "ok": true
@@ -50,9 +50,9 @@
       },
       "in_sitemap": true,
       "gsc": {
-        "impressions": 1,
+        "impressions": 7,
         "clicks": 0,
-        "position": 1,
+        "position": 12.571428571428571,
         "ctr": 0
       },
       "issues": [],
@@ -75,9 +75,9 @@
       },
       "in_sitemap": true,
       "gsc": {
-        "impressions": 4,
+        "impressions": 6,
         "clicks": 0,
-        "position": 13.75,
+        "position": 4.5,
         "ctr": 0
       },
       "issues": [],
@@ -100,9 +100,9 @@
       },
       "in_sitemap": true,
       "gsc": {
-        "impressions": 9,
+        "impressions": 14,
         "clicks": 0,
-        "position": 49.333333333333336,
+        "position": 28.214285714285715,
         "ctr": 0
       },
       "issues": [],
@@ -141,15 +141,15 @@
       "inspection": {
         "verdict": "PASS",
         "coverage_state": "Submitted and indexed",
-        "last_crawl_time": "2026-09-09T03:33:17Z",
+        "last_crawl_time": "2026-09-23T18:46:50Z",
         "page_fetch_state": "SUCCESSFUL",
         "google_canonical": "https://saahomes.com/chfa-down-payment-assistance/"
       },
       "in_sitemap": true,
       "gsc": {
-        "impressions": 763,
+        "impressions": 140,
         "clicks": 0,
-        "position": 55.12450851900393,
+        "position": 53.72857142857143,
         "ctr": 0
       },
       "issues": [],
@@ -166,16 +166,16 @@
       "inspection": {
         "verdict": "PASS",
         "coverage_state": "Submitted and indexed",
-        "last_crawl_time": "2026-09-05T00:02:50Z",
+        "last_crawl_time": "2026-09-23T14:07:56Z",
         "page_fetch_state": "SUCCESSFUL",
         "google_canonical": "https://saahomes.com/chfa-schools-to-home/"
       },
       "in_sitemap": true,
       "gsc": {
-        "impressions": 128,
-        "clicks": 1,
-        "position": 16.046875,
-        "ctr": 0.0078125
+        "impressions": 207,
+        "clicks": 2,
+        "position": 9.502415458937199,
+        "ctr": 0.00966183574879227
       },
       "issues": [],
       "ok": true
@@ -191,16 +191,16 @@
       "inspection": {
         "verdict": "PASS",
         "coverage_state": "Submitted and indexed",
-        "last_crawl_time": "2026-09-08T01:48:01Z",
+        "last_crawl_time": "2026-09-21T16:37:10Z",
         "page_fetch_state": "SUCCESSFUL",
         "google_canonical": "https://saahomes.com/colorado-champions-home-loan-program/"
       },
       "in_sitemap": true,
       "gsc": {
-        "impressions": 68,
-        "clicks": 1,
-        "position": 42.98529411764706,
-        "ctr": 0.014705882352941176
+        "impressions": 41,
+        "clicks": 4,
+        "position": 24.951219512195124,
+        "ctr": 0.0975609756097561
       },
       "issues": [],
       "ok": true
@@ -258,7 +258,7 @@
       "inspection": {
         "verdict": "PASS",
         "coverage_state": "Submitted and indexed",
-        "last_crawl_time": "2026-09-09T03:20:55Z",
+        "last_crawl_time": "2026-09-20T23:00:31Z",
         "page_fetch_state": "SUCCESSFUL",
         "google_canonical": "https://saahomes.com/northern-colorado-areas/windsor/"
       },

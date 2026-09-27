@@ -1,34 +1,76 @@
 {
-  "date": "2026-09-10",
+  "date": "2026-09-24",
   "current_period": {
-    "start": "2026-09-02",
-    "end": "2026-09-08"
+    "start": "2026-09-16",
+    "end": "2026-09-22"
   },
   "previous_period": {
-    "start": "2026-08-26",
-    "end": "2026-09-01"
+    "start": "2026-09-09",
+    "end": "2026-09-15"
   },
   "current_rows": 500,
   "previous_rows": 500,
   "alerts": [],
   "p0_regressions": [
     {
-      "page": "https://saahomes.com/northern-colorado-areas/erie/vista-ridge-erie/",
+      "page": "https://saahomes.com/northern-colorado-areas/eaton/eaton-commons/",
       "previous_impressions": 5,
       "previous_clicks": 0,
       "top_queries": []
     },
     {
-      "page": "https://saahomes.com/northern-colorado-areas/loveland/west-loveland/",
+      "page": "https://saahomes.com/northern-colorado-areas/eaton/eaton-park/",
+      "previous_impressions": 12,
+      "previous_clicks": 0,
+      "top_queries": [
+        "eaton colorado",
+        "eaton co",
+        "eaton town",
+        "eaton park"
+      ]
+    },
+    {
+      "page": "https://saahomes.com/northern-colorado-areas/estes-park/downtown-estes-park/",
+      "previous_impressions": 9,
+      "previous_clicks": 0,
+      "top_queries": [
+        "downtown estes park colorado",
+        "downtown estes park",
+        "estes park main street",
+        "downtown estes"
+      ]
+    },
+    {
+      "page": "https://saahomes.com/northern-colorado-areas/firestone/firestone-crossing/",
       "previous_impressions": 6,
+      "previous_clicks": 0,
+      "top_queries": []
+    },
+    {
+      "page": "https://saahomes.com/northern-colorado-areas/fort-collins/the-homestead-fc/",
+      "previous_impressions": 5,
+      "previous_clicks": 0,
+      "top_queries": []
+    },
+    {
+      "page": "https://saahomes.com/northern-colorado-areas/loveland/south-loveland/",
+      "previous_impressions": 6,
+      "previous_clicks": 0,
+      "top_queries": [
+        "avenue south loveland"
+      ]
+    },
+    {
+      "page": "https://saahomes.com/northern-colorado-areas/lyons/lyons-river-district/",
+      "previous_impressions": 5,
       "previous_clicks": 0,
       "top_queries": []
     }
   ],
   "has_issues": true,
-  "total_current_impressions": 9139,
-  "total_current_clicks": 45,
-  "total_previous_impressions": 4591,
-  "total_previous_clicks": 30,
+  "total_current_impressions": 4888,
+  "total_current_clicks": 37,
+  "total_previous_impressions": 8234,
+  "total_previous_clicks": 53,
   "totals_source": "page-dimension (accurate) \u2014 query+page redacts ~80% of GSC data"
 }
