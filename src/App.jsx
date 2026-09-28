@@ -55,6 +55,7 @@ const ChfaDownPaymentAssistancePage = lazy(() => import("./pages/ChfaDownPayment
 const GHopeHomeLoanPage = lazy(() => import("./pages/GHopeHomeLoanPage.jsx"));
 const AreaGuidePage = lazy(() => import("./pages/AreaGuidePage.jsx"));
 const NeighborhoodPage = lazy(() => import("./pages/NeighborhoodPage.jsx"));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage.jsx"));
 
 /** Branded route-load fallback — gold/black skeleton, never blank */
 function PageLoadFallback() {
@@ -292,6 +293,12 @@ export default function App() {
         <Route path="/blog/:slug/" element={<AppLayout><LazyPage><BlogPostPage /></LazyPage></AppLayout>} />
         <Route path="/helpful-guides" element={<AppLayout><LazyPage><BlogPage /></LazyPage></AppLayout>} />
         <Route path="/helpful-guides/" element={<AppLayout><LazyPage><BlogPage /></LazyPage></AppLayout>} />
+
+        {/* Catch-all 404 — MUST be last. Any URL that didn't match a real
+            route above renders the branded NotFoundPage. Server (Express) also
+            returns HTTP 404 for these paths so Google actually treats them as
+            not-found instead of indexing infinite phantom pages. */}
+        <Route path="*" element={<AppLayout><LazyPage><NotFoundPage /></LazyPage></AppLayout>} />
       </Routes>
     </div>
     <TenantDocumentTitle />

@@ -434,6 +434,7 @@ export default function ListingDetailPage() {
         canonical={`https://saahomes.com/homes-for-sale/${listing.slug}/`}
         ogImage={ogImage}
         jsonLd={[listingSchema, breadcrumbSchema]}
+        robots="noindex, follow"
       />
 
       {/* ── Hero: header block + gallery ───────────────────────── */}

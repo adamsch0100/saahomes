@@ -194,6 +194,34 @@ if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
 
   app.use(express.static(distPath, { index: false }));
 
+  // Serve the branded 404 shell with an HTTP 404 status. Falls back to a
+  // minimal inline shell if the prerendered /404/index.html isn't on disk
+  // (e.g. an older build). Also injects `noindex, follow` even into the
+  // fallback so Google doesn't index a "not found" page.
+  const send404 = (res) => {
+    const notFoundPath = join(distPath, '404', 'index.html');
+    if (existsSync(notFoundPath)) {
+      return res.status(404).sendFile(notFoundPath);
+    }
+    return res
+      .status(404)
+      .type('html')
+      .send(
+        '<!doctype html><html lang="en"><head>' +
+          '<meta charset="utf-8">' +
+          '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+          '<meta name="robots" content="noindex, follow">' +
+          '<title>Page Not Found (404) | SAA Homes</title>' +
+          '<link rel="canonical" href="https://saahomes.com/404/">' +
+          '</head><body>' +
+          '<h1>Page Not Found</h1>' +
+          '<p>The page you\'re looking for isn\'t here. ' +
+          '<a href="https://saahomes.com/">Return to the SAA Homes homepage</a> ' +
+          'or <a href="https://saahomes.com/properties/">search Northern Colorado homes for sale</a>.</p>' +
+          '</body></html>'
+      );
+  };
+
   app.get('*', async (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
 
@@ -227,21 +255,19 @@ if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
           return res.redirect(301, `${SITE_URL}/homes-for-sale/${legacyListings.slug}/`);
         }
         // Listing no longer in feed — send 404 so Google drops the soft-404 URL
-        return res.status(404).send('Not Found');
+        return send404(res);
       } catch (error) {
         console.error('legacy listing redirect error:', error.message);
-        // fall through to generic shell
+        return send404(res);
       }
     }
 
-    // Dynamic listing pages (/homes-for-sale/:slug/) have no prerendered
-    // file. Fallback = dist/index.html (homepage copy) — which caused:
-    //  (a) a visible FLASH of homepage text before React hydrates, and
-    //  (b) an SEO bug: every listing page served the HOMEPAGE title +
-    //      canonical to crawlers (29K pages all claiming to be /).
-    // Serve a listing-aware shell instead: real title/canonical/OG from
-    // the DB, minimal crawlable body. Falls back to a neutral generic
-    // shell if the slug isn't found.
+    // Dynamic listing pages (/homes-for-sale/:slug/) have no prerendered file.
+    // Serve a listing-aware shell with real title/canonical/OG from the DB,
+    // plus a `noindex, follow` robots directive — these thin IDX/MLS pages
+    // were drowning the site's crawl budget (21K+ listing URLs vs 131
+    // editorial pages), so we let Google discover their outbound links but
+    // stop indexing them.
     const listingMatch = normalized.match(/^\/homes-for-sale\/([^/]+)$/);
     if (listingMatch) {
       try {
@@ -257,8 +283,8 @@ if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
           [slug]
         );
         const listing = rows[0];
-        const base = readFileSync(join(distPath, 'index.html'), 'utf8');
         if (listing) {
+          const base = readFileSync(join(distPath, 'index.html'), 'utf8');
           const address = [listing.street_number, listing.street_name, listing.unit]
             .filter(Boolean).join(' ');
           const price = listing.list_price
@@ -305,6 +331,7 @@ if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
           const schemaHtml = `<script type="application/ld+json">${JSON.stringify(listingSchema)}</script>`;
           let html = base
             .replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`)
+            .replace(/<meta name="robots" content="[^"]*"\s*\/?>/, '<meta name="robots" content="noindex, follow" />')
             .replace(/rel="canonical" href="[^"]*"/, `rel="canonical" href="${canonical}"`)
             .replace(/name="description" content="[^"]*"/, `name="description" content="${escapeHtml(description)}"`)
             .replace(/property="og:title" content="[^"]*"/, `property="og:title" content="${escapeHtml(title)}"`)
@@ -314,19 +341,22 @@ if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
             .replace('</head>', `${schemaHtml}</head>`);
           return res.send(html);
         }
-        // Slug not in DB — neutral generic shell (no homepage copy)
-        let html = base
-          .replace(/<title>[^<]*<\/title>/, '<title>Homes for Sale in Northern Colorado | SAA Homes</title>')
-          .replace(/rel="canonical" href="[^"]*"/, `rel="canonical" href="${SITE_URL}${normalized}/"`)
-          .replace('<div id="root"></div>', '<div id="root"></div>');
-        return res.send(html);
+        // Slug not in DB — this is a genuine 404. Was previously served
+        // as a 200 with a generic shell, which meant Google saw millions
+        // of dead listing URLs as real pages and burned crawl budget on
+        // them. Now returns proper 404 so those URLs age out of the index.
+        return send404(res);
       } catch (error) {
         console.error('listing fallback error:', error.message);
-        // fall through to generic shell
+        return send404(res);
       }
     }
 
-    return res.sendFile(join(distPath, 'index.html'));
+    // No route, no prerendered file, not a listing — HTTP 404. Previously
+    // this fell through to serving dist/index.html with 200, which told
+    // Google every URL on the domain was a real page (root cause of the
+    // ~22K bogus URLs indexed for saahomes.com).
+    return send404(res);
   });
 }
 

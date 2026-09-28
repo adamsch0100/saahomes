@@ -2300,6 +2300,61 @@ async function main() {
   }
 
   console.log(`Prerendered ${routes.length} routes with full schema + OG + Twitter.`);
+
+  // ---------------------------------------------------------------------------
+  // /404/ shell — served by Express with HTTP 404 for any URL that doesn't
+  // match a real route or a DB-backed listing. NOT in the sitemap (siteRoutes
+  // filters noindex entries out), but a real file on disk so the 404 body has
+  // proper branded content (H1, links back to key pages, phone number) that
+  // matches the client-rendered NotFoundPage.
+  // ---------------------------------------------------------------------------
+  {
+    const notFoundRoute = {
+      path: '/404/',
+      title: 'Page Not Found (404) | SAA Homes',
+      description:
+        "The page you're looking for isn't here. Explore Northern Colorado homes for sale, area guides, and resources from Schwartz and Associates.",
+      ogTitle: 'Page Not Found | SAA Homes',
+      ogDescription:
+        'The page you were looking for could not be found. Head back to the SAA Homes homepage or search Northern Colorado homes for sale.',
+      ogImage: `${SITE_URL}/images/White-Logo-AUTOx110.fit.png`,
+      ogImageAlt: 'SAA Homes — Northern Colorado real estate',
+      robots: 'noindex, follow',
+    };
+    const canonical = `${SITE_URL}${notFoundRoute.path}`;
+    let html = injectMeta(baseHtml, {
+      title: notFoundRoute.title,
+      description: notFoundRoute.description,
+      canonical,
+      robots: notFoundRoute.robots,
+    });
+    html = injectJsonLd(html, [buildRealEstateAgentSchema(), buildWebsiteSchema()]);
+    html = injectMetaTags(html, buildRouteMetaTags(notFoundRoute));
+    const bodyContent =
+      `\n` +
+      `    <div class="prerendered-generic-content">\n` +
+      `      <p style="text-transform:uppercase;letter-spacing:0.2em;color:#CFB36E;font-weight:600;">404 — Page Not Found</p>\n` +
+      `      <h1>We couldn't find that page.</h1>\n` +
+      `      <p>The link may be broken, the page may have moved, or the URL may have been mistyped. Try one of the destinations below, or head back to our homepage.</p>\n` +
+      `      <ul>\n` +
+      `        <li><a href="${SITE_URL}/">SAA Homes homepage</a></li>\n` +
+      `        <li><a href="${SITE_URL}/properties/">Search homes for sale in Northern Colorado</a></li>\n` +
+      `        <li><a href="${SITE_URL}/northern-colorado-areas/">Northern Colorado area guides</a></li>\n` +
+      `        <li><a href="${SITE_URL}/for-buyers/">Home buyer guide</a></li>\n` +
+      `        <li><a href="${SITE_URL}/for-sellers/">Sell your home</a></li>\n` +
+      `        <li><a href="${SITE_URL}/blog/">Real estate blog &amp; guides</a></li>\n` +
+      `        <li><a href="${SITE_URL}/contact/">Contact SAA Homes</a></li>\n` +
+      `      </ul>\n` +
+      `      <p>Need a person? Call <strong>(970) 999-1407</strong> or <a href="${SITE_URL}/contact/">send us a message</a>.</p>\n` +
+      `    </div>\n  `;
+    html = html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+    html = injectSitewideLinks(html, notFoundRoute.path);
+
+    const notFoundDir = join(distDir, '404');
+    mkdirSync(notFoundDir, { recursive: true });
+    writeFileSync(join(notFoundDir, 'index.html'), html);
+    console.log('Prerendered /404/ shell (served by Express with HTTP 404)');
+  }
 }
 
 main().catch((err) => {
