@@ -53,8 +53,17 @@ function takeRefreshToken() {
   return true;
 }
 
-function refreshWithDedupe(listingId, pool) {
+/**
+ * Start (or join) a listing's IRES URL refresh. Spends at most ONE quota token
+ * per listing refresh: concurrent visitors and the many photo indexes on one
+ * page share the same in-flight fetch instead of each burning a token. Without
+ * this, a single 20-photo listing page could drain the whole 30/min guard and
+ * force every later request onto the placeholder path.
+ * Returns the fresh URL array, or null when the quota guard is exhausted.
+ */
+function beginRefresh(listingId, pool) {
   if (refreshInFlight.has(listingId)) return refreshInFlight.get(listingId);
+  if (!takeRefreshToken()) return null;
   const p = refreshMlsUrls(listingId, pool).finally(() => refreshInFlight.delete(listingId));
   refreshInFlight.set(listingId, p);
   return p;
@@ -169,11 +178,24 @@ async function refreshMlsUrls(listingId, pool) {
  *  is guaranteed to fail (or hang), so skip the doomed fetch entirely and
  *  go straight to the refresh path. Saves one dead request per healing and
  *  never hangs a visitor on an expired CDN connection. */
-function isExpiredMlsUrl(u) {
+export function isExpiredMlsUrl(u) {
   if (!u.includes('media.mlsgrid.com')) return false;
   const m = /[?&]expires=(\d+)/.exec(u);
   if (!m) return false;
   return parseInt(m[1], 10) < Date.now() / 1000;
+}
+
+/** Sentinel for a stored URL already past its expires= epoch. Used as control
+ *  flow (skip the doomed fetch, take the refresh path) — not a real fault, so
+ *  the request handler must not log it at incident-level severity. */
+export function expiredUrlError() {
+  const err = new Error('photo URL expired (past expires=)');
+  err.photoExpired = true;
+  return err;
+}
+
+export function isExpectedPhotoDegradation(error) {
+  return Boolean(error && error.photoExpired);
 }
 
 async function loadPhotosForProxy(pool, rawId) {
@@ -221,7 +243,7 @@ export const getListingPhoto = async (req, res) => {
     try {
       // Expired signed URL → skip the doomed fetch, refresh first (heals the
       // DB row in one request instead of two, never hangs on a dead CDN).
-      if (isExpiredMlsUrl(url)) throw new Error('photo URL expired (past expires=)');
+      if (isExpiredMlsUrl(url)) throw expiredUrlError();
       buf = await fetchWithQueue(url);
     } catch (fetchErr) {
       // MLS signed URLs expire ~60 min after sync → refresh from IRES and retry
@@ -230,8 +252,7 @@ export const getListingPhoto = async (req, res) => {
       // degrade to the placeholder rather than risk IRES suspension.
       // Sold rows skip IRES refresh entirely (rate-limit headroom).
       if (!loaded.allowIresRefresh || !url.includes('media.mlsgrid.com')) throw fetchErr;
-      if (!takeRefreshToken()) throw fetchErr;
-      const fresh = await refreshWithDedupe(loaded.refreshKey, pool);
+      const fresh = await beginRefresh(loaded.refreshKey, pool);
       const freshUrl = fresh?.[idx];
       if (!freshUrl) throw fetchErr;
       buf = await fetchWithQueue(freshUrl);
@@ -244,7 +265,12 @@ export const getListingPhoto = async (req, res) => {
     return res.send(buf);
   } catch (error) {
     if (error.status === 404) return res.status(404).json({ error: 'Photo unavailable' });
-    logger.error('photo proxy error', error);
+    // An expired signed URL with no refresh available (IRES quota guard
+    // tripped, no IRES token, or a sold row) is expected degradation, not a
+    // fault: the quota guard already emits a rate-limited warning and the
+    // visitor gets the placeholder. Keep incident-level logging for real
+    // fetch failures only.
+    if (!isExpectedPhotoDegradation(error)) logger.error('photo proxy error', error);
     return res.status(502).json({ error: 'Photo temporarily unavailable' });
   }
 };
