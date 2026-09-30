@@ -18,6 +18,13 @@ import { CONTACT_FAQS } from '../src/data/contactFaqs.js';
 import { CHFA_PAGE_CONFIGS, CHFA_PROGRAMS, CHFA_STEPS, CHFA_DPA_OPTIONS, CHFA_REQUIREMENTS, CHFA_COUNTY_LIMITS, CHFA_SPECIALTY_PROGRAMS } from '../src/data/chfaData.js';
 import { getAllEvents, getCityDisplayName, getMonthNames, getEventsGuidePath, EVENTS_DATA_LAST_REVIEWED } from '../src/data/localEvents.js';
 import { LUXURY_HUB_FAQS } from '../src/data/luxuryMarket.js';
+import {
+  CITATION_HUB_PATH,
+  CITATION_HUB_LAST_UPDATED,
+  CITATION_HUB_LAYERS,
+  CITATION_HUB_STATS,
+  CITATION_HUB_FAQS,
+} from '../src/data/citationHubStats.js';
 
 // Freshness signal for E-E-A-T (dated expert content). Keep in sync with
 // AREA_CONTENT_DATE in src/data/areaSeo.js. Bump when content is substantively
@@ -1119,6 +1126,80 @@ function injectGenericBody(html, { title }) {
 }
 
 // ---------------------------------------------------------------------------
+// Citation hub — /resources/northern-colorado-housing-statistics-2026/
+// Sourced, dated stat cards (verified rows only) for crawlers that do not run JS.
+// ---------------------------------------------------------------------------
+function injectCitationHubBody(html) {
+  const layerHtml = CITATION_HUB_LAYERS.map((layer) => {
+    const stats = CITATION_HUB_STATS.filter((s) => s.layer === layer.id);
+    if (!stats.length) return '';
+    const statHtml = stats
+      .map((stat) => {
+        const figures = stat.figures
+          .map(
+            (f) =>
+              `          <li><strong>${escapeHtml(f.value)}</strong> &mdash; ${escapeHtml(f.label)}</li>`
+          )
+          .join('\n');
+        const moneyLinks = stat.moneyLinks
+          .map((l) => `<a href="${SITE_URL}${l.to}">${escapeHtml(l.label)}</a>`)
+          .join(' &middot; ');
+        return (
+          `        <article id="${escapeAttr(stat.id)}">\n` +
+          `          <h3>${escapeHtml(stat.claim)}</h3>\n` +
+          `          <ul>\n${figures}\n          </ul>\n` +
+          `          <p><strong>As of:</strong> ${escapeHtml(stat.asOf)}</p>\n` +
+          `          <p><strong>Source:</strong> ${escapeHtml(stat.sourceOrg)} &mdash; <a href="${escapeAttr(stat.sourceUrl)}" rel="noopener">${escapeHtml(stat.sourceLabel)}</a> (verified ${escapeHtml(stat.verified)})</p>\n` +
+          (stat.note ? `          <p>${escapeHtml(stat.note)}</p>\n` : '') +
+          `          <p><em>Cite this:</em> ${escapeHtml(stat.cite)}</p>\n` +
+          `          <p>${moneyLinks}</p>\n` +
+          `        </article>`
+        );
+      })
+      .join('\n');
+    return (
+      `      <section id="layer-${escapeAttr(layer.id)}">\n` +
+      `        <h2>${escapeHtml(layer.label)}</h2>\n` +
+      `        <p>${escapeHtml(layer.blurb)}</p>\n` +
+      `${statHtml}\n` +
+      `      </section>`
+    );
+  }).join('\n');
+
+  const faqHtml = CITATION_HUB_FAQS.map(
+    (faq) =>
+      `        <div itemscope="" itemprop="mainEntity" itemtype="https://schema.org/Question">\n` +
+      `          <h3 itemprop="name">${escapeHtml(faq.q)}</h3>\n` +
+      `          <div itemscope="" itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">\n` +
+      `            <p itemprop="text">${escapeHtml(faq.a)}</p>\n` +
+      `          </div>\n` +
+      `        </div>`
+  ).join('\n');
+
+  const bodyContent =
+    `\n` +
+    `    <div class="prerendered-citation-hub">\n` +
+    `      <h1>Northern Colorado Housing Statistics 2026</h1>\n` +
+    `      <p>Sourced, dated housing numbers for Northern Colorado &mdash; CHFA income and purchase price limits by county, plus U.S. Census figures for Fort Collins. Every figure links to its primary source and shows the date it was verified. Last updated ${escapeHtml(CITATION_HUB_LAST_UPDATED)}.</p>\n` +
+    `${layerHtml}\n` +
+    `      <section class="prerendered-methodology">\n` +
+    `        <h2>Methodology &amp; verification</h2>\n` +
+    `        <p>Figures are taken from primary sources &mdash; the Colorado Housing and Finance Authority for CHFA program limits and the U.S. Census Bureau for community statistics. Each was fetched and read directly; the figure shown matches the source table, and the as-of or effective date is recorded exactly as published. This page does not publish estimated, stale, or secondhand numbers.</p>\n` +
+    `      </section>\n` +
+    `      <section class="prerendered-faq">\n` +
+    `        <h2>Frequently Asked Questions</h2>\n` +
+    `${faqHtml}\n` +
+    `      </section>\n` +
+    `      <section class="prerendered-cta">\n` +
+    `        <h2>Questions about what these numbers mean for you?</h2>\n` +
+    `        <p>Adam and Mandi Schwartz help buyers and sellers across Northern Colorado. Contact SAA Homes at <strong>(970) 999-1407</strong> or visit <a href="${SITE_URL}/contact/">our contact page</a> for a free consultation.</p>\n` +
+    `      </section>\n` +
+    `    </div>\n  `;
+
+  return html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+}
+
+// ---------------------------------------------------------------------------
 // City "homes for sale" pages — /{slug}-homes-for-sale/ (Tier S money pages)
 // ---------------------------------------------------------------------------
 function matchCityHomesPage(path) {
@@ -1270,6 +1351,15 @@ const MONEY_PAGE_CONTENT = {
           { href: '/northern-colorado-areas/greeley/', title: 'Greeley Area Guide', description: 'The most affordable major market, home to UNC' },
           { href: '/northern-colorado-areas/timnath/', title: 'Timnath Area Guide', description: 'New construction and master-planned communities' },
           { href: '/northern-colorado-areas/estes-park/', title: 'Estes Park Area Guide', description: 'Rocky Mountain National Park cabins, second homes, and mountain living' },
+        ],
+      },
+      {
+        heading: 'Northern Colorado Housing Statistics',
+        paragraphs: [
+          'Sourced, dated housing numbers — CHFA income and purchase price limits by county plus U.S. Census figures for Fort Collins — each linked to its primary source and ready to cite.',
+        ],
+        relatedLinks: [
+          { href: '/resources/northern-colorado-housing-statistics-2026/', title: 'Northern Colorado Housing Statistics 2026', description: 'Sourced and dated CHFA limits and Fort Collins Census figures' },
         ],
       },
     ],
@@ -1793,10 +1883,16 @@ function injectChfaBody(html, config) {
   }
 
   // CTA
+  const hubLink =
+    config.slug === 'chfa-down-payment-assistance' ||
+    config.slug === 'colorado-champions-home-loan-program'
+      ? `\n        <p><a href="${SITE_URL}${CITATION_HUB_PATH}">CHFA income &amp; purchase price limits by county (sourced) &rarr;</a></p>\n`
+      : '';
   const ctaHtml =
     `      <section class="prerendered-cta">\n` +
     `        <h2>Work With Schwartz and Associates</h2>\n` +
     `        <p>${escapeHtml(config.contactCta || '')}</p>\n` +
+    `${hubLink}` +
     `      </section>\n`;
 
   const bodyContent =
@@ -2009,6 +2105,25 @@ function buildRouteSchemas(route) {
   }
 
   // Cash Home Buyers, Luxury, and Veterans pages are handled via MONEY_PAGE_CONTENT faqs above
+
+  // Citation hub — FAQPage + BreadcrumbList for the sourced statistics page.
+  if (path === CITATION_HUB_PATH) {
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: CITATION_HUB_FAQS.map((faq) => ({
+        '@type': 'Question',
+        name: faq.q,
+        acceptedAnswer: { '@type': 'Answer', text: faq.a },
+      })),
+    });
+    schemas.push(
+      buildBreadcrumbList([
+        { name: 'Home', url: `${SITE_URL}/` },
+        { name: 'Northern Colorado Housing Statistics 2026', url: canonical },
+      ])
+    );
+  }
 
   return schemas;
 }
@@ -2277,6 +2392,11 @@ async function main() {
     } else if (cityHomes) {
       html = injectCityHomesBody(html, cityHomes);
       console.log(`  Body: injected city homes-for-sale page "${cityHomes.city}" with intro + links + attribution`);
+    } else if (route.path === CITATION_HUB_PATH) {
+      html = injectCitationHubBody(html);
+      console.log(
+        `  Body: injected citation hub with ${CITATION_HUB_STATS.length} verified stat cards + FAQ + methodology`
+      );
     } else {
       html = injectGenericBody(html, route);
     }

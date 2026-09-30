@@ -805,6 +805,9 @@ export default function ChfaDownPaymentAssistancePage() {
             <Link to="/mortgage-calculator/" className="inline-flex items-center px-6 py-3 text-black font-semibold hover:underline">
               Mortgage calculator →
             </Link>
+            <Link to="/resources/northern-colorado-housing-statistics-2026/" className="inline-flex items-center px-6 py-3 text-black font-semibold hover:underline">
+              CHFA income &amp; purchase price limits by county (sourced) →
+            </Link>
           </div>
         </div>
       </section>
