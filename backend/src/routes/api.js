@@ -17,7 +17,7 @@ import {
   autocompleteLocations,
 } from '../controllers/listingController.js';
 import { listSoldListings } from '../controllers/soldListingsController.js';
-import { getListingPhoto } from '../controllers/photoController.js';
+import { getListingPhoto, getListingPhotoDefault } from '../controllers/photoController.js';
 import {
   createAlert, listAlerts, getMe, sendMagicLink, signOut, updateAlert, deleteAlert, unsubscribeAll,
   recordView, recordEvent,
@@ -157,6 +157,8 @@ const listingLimiter = rateLimit({
 router.get('/listings', listingLimiter, searchListings);
 router.get('/sold-listings', listingLimiter, listSoldListings);
 // Listing photo proxy (reliable serving despite MLS URL expiry/rate limits)
+// Bare URL (no index) → first photo, so it answers instead of a catch-all 404.
+router.get('/photo/:listingId', listingLimiter, getListingPhotoDefault);
 router.get('/photo/:listingId/:idx', listingLimiter, getListingPhoto);
 
 router.get('/listings/stats', listingLimiter, getListingStats);

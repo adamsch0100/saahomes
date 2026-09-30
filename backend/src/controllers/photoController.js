@@ -216,11 +216,31 @@ async function loadPhotosForProxy(pool, rawId) {
   return null;
 }
 
+/** Valid listing-photo reference: a numeric PK or an MLS ListingId. */
+export function isValidPhotoId(rawId) {
+  return Boolean(rawId) && String(rawId).length <= 64 && !/[^A-Za-z0-9_-]/.test(String(rawId));
+}
+
+/**
+ * Bare photo URL — GET /api/photo/:listingId (no /:idx). A missing index means
+ * "the listing's first photo", so 302 → the canonical indexed URL. Without this
+ * the request matches no route and the app-level catch-all answers with a
+ * generic `{"error":"Not found"}` 404 instead of a real photo response
+ * (INCIDENT inc-afef3840).
+ */
+export const getListingPhotoDefault = (req, res) => {
+  const rawId = String(req.params.listingId || '');
+  if (!isValidPhotoId(rawId)) {
+    return res.status(400).json({ error: 'Invalid photo reference' });
+  }
+  return res.redirect(302, `/api/photo/${rawId}/0`);
+};
+
 export const getListingPhoto = async (req, res) => {
   try {
     const rawId = String(req.params.listingId || '');
     const idx = Number(req.params.idx);
-    if (!rawId || rawId.length > 64 || /[^A-Za-z0-9_-]/.test(rawId)
+    if (!isValidPhotoId(rawId)
         || !Number.isInteger(idx) || idx < 0 || idx > 100) {
       return res.status(400).json({ error: 'Invalid photo reference' });
     }
