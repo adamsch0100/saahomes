@@ -47,6 +47,12 @@ SAMPLE_RUN_ID = "sample-2845"
 SAMPLE_FINGERPRINT_LOCKED_AT = "2026-06-02"
 SAMPLE_FINGERPRINT_MIN_WEEKS = 4
 SAMPLE_FINGERPRINT_STORY = "from-export-v7"
+# /demo must answer fast. Re-baking the sample HTML/deck, photo health and the
+# PDF sync are heavy, so run them at most once per interval (and only from one
+# thread) instead of on every request. A fresh process always runs once.
+SAMPLE_ENSURE_INTERVAL_SEC = 600
+_sample_ensure_at = 0.0
+_sample_ensure_lock = threading.Lock()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ListLogic")
@@ -1668,39 +1674,53 @@ def _seed_sample_launch_files(run_dir: Path) -> bool:
     return json_changed
 
 
+def _maintain_sample_run(run_dir: Path) -> None:
+    """Refresh the cached sample run's artifacts. Heavy — only call via _ensure_sample_run."""
+    _repair_sample_run_paths(run_dir)
+    json_changed = _seed_sample_launch_files(run_dir)
+    html_refreshed = _refresh_sample_html(run_dir, force=json_changed)
+    # Sample photos must be volume-local, not expiring CDN links.
+    try:
+        remote, missing = _run_photo_health(run_dir)
+        snap = _read_json_file(run_dir / "pulse_snapshot.json")
+        need_fp = _fingerprint_needs_photos(snap, _load_photo_map(run_dir))
+        if remote:
+            _start_rehost(SAMPLE_RUN_ID, run_dir)
+        elif missing or need_fp:
+            _start_background_photos(SAMPLE_RUN_ID, run_dir)
+        elif _load_photo_map(run_dir):
+            _write_photos_status(run_dir, status="ready", message="")
+    except Exception:
+        logger.exception("Sample photo health check failed")
+    # PDFs are expensive — only rebuild when HTML template changed or files missing.
+    pdf_path = run_dir / "presentation.pdf"
+    story_path = run_dir / "story.pdf"
+    need_pdfs = html_refreshed or not pdf_path.exists() or not story_path.exists()
+    if need_pdfs:
+        try:
+            json_path = run_dir / "presentation.json"
+            if json_path.exists():
+                report = json.loads(json_path.read_text(encoding="utf-8"))
+                _refresh_sample_pdfs(report, run_dir)
+        except Exception:
+            logger.exception("Sample PDF sync failed for %s", run_dir.name)
+
+
 def _ensure_sample_run() -> str:
     """Build or reuse the public sample listing run (no trial credit)."""
+    global _sample_ensure_at
     run_dir = OUTPUT_DIR / SAMPLE_RUN_ID
     html_path = run_dir / "presentation.html"
     if html_path.exists():
-        _repair_sample_run_paths(run_dir)
-        json_changed = _seed_sample_launch_files(run_dir)
-        html_refreshed = _refresh_sample_html(run_dir, force=json_changed)
-        # Sample photos must be volume-local, not expiring CDN links.
-        try:
-            remote, missing = _run_photo_health(run_dir)
-            snap = _read_json_file(run_dir / "pulse_snapshot.json")
-            need_fp = _fingerprint_needs_photos(snap, _load_photo_map(run_dir))
-            if remote:
-                _start_rehost(SAMPLE_RUN_ID, run_dir)
-            elif missing or need_fp:
-                _start_background_photos(SAMPLE_RUN_ID, run_dir)
-            elif _load_photo_map(run_dir):
-                _write_photos_status(run_dir, status="ready", message="")
-        except Exception:
-            logger.exception("Sample photo health check failed")
-        # PDFs are expensive — only rebuild when HTML template changed or files missing.
-        pdf_path = run_dir / "presentation.pdf"
-        story_path = run_dir / "story.pdf"
-        need_pdfs = html_refreshed or not pdf_path.exists() or not story_path.exists()
-        if need_pdfs:
-            try:
-                json_path = run_dir / "presentation.json"
-                if json_path.exists():
-                    report = json.loads(json_path.read_text(encoding="utf-8"))
-                    _refresh_sample_pdfs(report, run_dir)
-            except Exception:
-                logger.exception("Sample PDF sync failed for %s", run_dir.name)
+        # Keep /demo fast: refresh the sample artifacts at most once per interval,
+        # and never block a request while another thread is already refreshing.
+        if time.time() - _sample_ensure_at >= SAMPLE_ENSURE_INTERVAL_SEC:
+            if _sample_ensure_lock.acquire(blocking=False):
+                try:
+                    _maintain_sample_run(run_dir)
+                finally:
+                    _sample_ensure_at = time.time()
+                    _sample_ensure_lock.release()
         return SAMPLE_RUN_ID
     if not DEMO_EXPORT.exists():
         raise HTTPException(404, "Sample export missing")
