@@ -843,6 +843,9 @@ const result = document.getElementById('result');
     window.__llEnt = ent;
     window.__llUser = u;
     async function startCheckout(plan) {
+      const checkoutTracked = window.llTrack
+        ? window.llTrack('begin_checkout', { plan: plan, source: 'paywall' })
+        : Promise.resolve();
       try {
         const r = await fetch('/api/billing/checkout', {
           method: 'POST',
@@ -851,7 +854,11 @@ const result = document.getElementById('result');
           body: JSON.stringify({ plan: plan, quantity: 1 }),
         });
         const d = await r.json().catch(() => ({}));
-        if (d.url) { location.href = d.url; return; }
+        if (d.url) {
+          await checkoutTracked;
+          location.href = d.url;
+          return;
+        }
         throw new Error(typeof d.detail === 'string' ? d.detail : 'Checkout unavailable');
       } catch (e) {
         location.href = '/saas/pricing.html?plan=' + encodeURIComponent(plan);
@@ -859,11 +866,9 @@ const result = document.getElementById('result');
     }
     window.__llCheckout = startCheckout;
     document.getElementById('pwTrialBtn')?.addEventListener('click', () => {
-      if (window.llTrack) window.llTrack('begin_checkout', { plan: 'agent_monthly', source: 'paywall' });
       startCheckout('agent_monthly');
     });
     document.getElementById('pwOneBtn')?.addEventListener('click', () => {
-      if (window.llTrack) window.llTrack('begin_checkout', { plan: 'one_time', source: 'paywall' });
       startCheckout('one_time');
     });
     function openPaywall() {

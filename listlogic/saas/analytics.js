@@ -10,6 +10,26 @@
   }
   // Prefer the page-level Google tag if already defined in <head>
   window.gtag = window.gtag || gtag;
+
+  function send(item) {
+    var settled = false;
+    var timeout = setTimeout(finish, 1000);
+    function finish() {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      item.resolve();
+    }
+    try {
+      window.gtag("event", item.eventName, Object.assign({}, item.payload, {
+        event_callback: finish,
+        event_timeout: 1000
+      }));
+    } catch (e) {
+      finish();
+    }
+  }
+
   window.llTrack = function (eventName, params) {
     params = params || {};
     try {
@@ -19,12 +39,23 @@
         if (qs.get(k)) utm[k] = qs.get(k);
       });
       var payload = Object.assign({}, utm, params);
-      if (!MEASUREMENT_ID) {
-        queue.push([eventName, payload]);
-        return;
-      }
-      window.gtag("event", eventName, payload);
-    } catch (e) {}
+      return new Promise(function (resolve) {
+        var settled = false;
+        var fallback = setTimeout(finish, 1500);
+        function finish() {
+          if (settled) return;
+          settled = true;
+          clearTimeout(fallback);
+          resolve();
+        }
+        var item = { eventName: eventName, payload: payload, resolve: finish };
+        var pageTag = document.querySelector('script[src*="googletagmanager.com/gtag/js"]');
+        if (MEASUREMENT_ID || pageTag) send(item);
+        else queue.push(item);
+      });
+    } catch (e) {
+      return Promise.resolve();
+    }
   };
 
   function boot(id) {
@@ -41,9 +72,7 @@
       window.gtag("js", new Date());
       window.gtag("config", MEASUREMENT_ID, { send_page_view: true });
     }
-    queue.forEach(function (item) {
-      window.gtag("event", item[0], item[1]);
-    });
+    queue.forEach(send);
     queue = [];
   }
 
