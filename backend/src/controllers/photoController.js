@@ -34,6 +34,7 @@ const IRES_REFRESH_RATE_PER_MIN = parseInt(process.env.IRES_REFRESH_RATE_PER_MIN
 let refreshTokens = IRES_REFRESH_RATE_PER_MIN;
 let refreshLastRefill = Date.now();
 let refreshBlockedLogAt = 0;
+let degradeLoggedAt = 0;
 const refreshInFlight = new Map(); // listingId -> Promise (dedupe concurrent misses)
 
 function takeRefreshToken() {
@@ -194,8 +195,19 @@ export function expiredUrlError() {
   return err;
 }
 
+/** True when the upstream CDN fetch was aborted by our own timeout guard
+ *  (DOMException TimeoutError / AbortError). A slow MLS host is transient
+ *  upstream behaviour, not a fault of ours: do not hold an incident for it
+ *  (lsn-a2fc0a). */
+export function isUpstreamAbortError(error) {
+  if (!error) return false;
+  const name = error.name || error.cause?.name;
+  const code = error.code || error.cause?.code;
+  return name === 'TimeoutError' || name === 'AbortError' || code === 'ABORT_ERR';
+}
+
 export function isExpectedPhotoDegradation(error) {
-  return Boolean(error && error.photoExpired);
+  return Boolean(error && (error.photoExpired || isUpstreamAbortError(error)));
 }
 
 async function loadPhotosForProxy(pool, rawId) {
@@ -235,6 +247,22 @@ export const getListingPhotoDefault = (req, res) => {
   }
   return res.redirect(302, `/api/photo/${rawId}/0`);
 };
+
+/** Branded SVG served with HTTP 200 when a photo is temporarily unavailable
+ *  (expired signed URL with no refresh available, or an upstream abort).
+ *  Mirrors the frontend fallback in src/utils/photoUrl.js so visitors never
+ *  see a broken image and the uptime probe gets a real answer while the MLS
+ *  CDN recovers or the IRES refresh quota refills. Short max-age so the real
+ *  photo heals on the next request. */
+const PHOTO_PLACEHOLDER_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <rect fill="#1a1a1a" width="800" height="600"/>
+  <g fill="none" stroke="#CFB36E" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" transform="translate(340 200) scale(5)">
+    <path d="M3 10.5 12 3l9 7.5"/>
+    <path d="M5 9.5V20h14V9.5"/>
+    <path d="M9 20v-6h6v6"/>
+  </g>
+  <text x="400" y="430" text-anchor="middle" fill="#CFB36E" font-family="system-ui,sans-serif" font-size="32" font-weight="600">SAA Homes</text>
+</svg>`;
 
 export const getListingPhoto = async (req, res) => {
   try {
@@ -285,12 +313,24 @@ export const getListingPhoto = async (req, res) => {
     return res.send(buf);
   } catch (error) {
     if (error.status === 404) return res.status(404).json({ error: 'Photo unavailable' });
-    // An expired signed URL with no refresh available (IRES quota guard
-    // tripped, no IRES token, or a sold row) is expected degradation, not a
-    // fault: the quota guard already emits a rate-limited warning and the
-    // visitor gets the placeholder. Keep incident-level logging for real
-    // fetch failures only.
-    if (!isExpectedPhotoDegradation(error)) logger.error('photo proxy error', error);
+    // Expected degradation — expired signed URL with no refresh available
+    // (IRES quota guard tripped, no IRES token, or a sold row) or an upstream
+    // abort/timeout. These are transient upstream conditions, not faults of
+    // ours, so log a rate-limited warning and serve the branded placeholder
+    // with HTTP 200 instead of a 502 that reads as an outage (lsn-a2fc0a,
+    // lsn-267b91). Real fetch failures keep the incident-level log + 502.
+    if (isExpectedPhotoDegradation(error)) {
+      const now = Date.now();
+      if (now - degradeLoggedAt > 60000) {
+        degradeLoggedAt = now;
+        logger.warn(`photo proxy degraded — serving placeholder: ${error.message}`);
+      }
+      res.set('Content-Type', 'image/svg+xml');
+      res.set('Cache-Control', 'public, max-age=60');
+      res.set('X-Photo-Fallback', '1');
+      return res.status(200).send(PHOTO_PLACEHOLDER_SVG);
+    }
+    logger.error('photo proxy error', error);
     return res.status(502).json({ error: 'Photo temporarily unavailable' });
   }
 };

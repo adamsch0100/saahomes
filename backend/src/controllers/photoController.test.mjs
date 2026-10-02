@@ -4,6 +4,7 @@ import {
   isExpiredMlsUrl,
   expiredUrlError,
   isExpectedPhotoDegradation,
+  isUpstreamAbortError,
   isValidPhotoId,
   getListingPhotoDefault,
 } from './photoController.js';
@@ -37,6 +38,22 @@ test('genuine fetch failures are not classified as expected degradation', () => 
   err.status = 500;
   assert.equal(isExpectedPhotoDegradation(err), false);
   assert.equal(isExpectedPhotoDegradation(undefined), false);
+});
+
+test('isUpstreamAbortError flags DOMException timeout/abort failures', () => {
+  assert.equal(isUpstreamAbortError(new DOMException('aborted due to timeout', 'TimeoutError')), true);
+  assert.equal(isUpstreamAbortError(new DOMException('aborted', 'AbortError')), true);
+  assert.equal(isUpstreamAbortError(Object.assign(new Error('x'), { name: 'TimeoutError' })), true);
+  const aborted = new Error('aborted');
+  aborted.cause = { code: 'ABORT_ERR' };
+  assert.equal(isUpstreamAbortError(aborted), true);
+  assert.equal(isUpstreamAbortError(Object.assign(new Error('photo fetch 500'), { status: 500 })), false);
+  assert.equal(isUpstreamAbortError(undefined), false);
+});
+
+test('an upstream timeout is expected degradation, not an incident', () => {
+  const err = new DOMException('The operation was aborted due to timeout', 'TimeoutError');
+  assert.equal(isExpectedPhotoDegradation(err), true);
 });
 
 test('isValidPhotoId accepts numeric PKs and MLS ListingIds', () => {
