@@ -7,6 +7,11 @@ import {
   CITATION_HUB_TITLE,
   CITATION_HUB_DESCRIPTION,
 } from './citationHubStats.js';
+import {
+  CHFA_COUNTY_LIMITS_PATH,
+  CHFA_COUNTY_LIMITS_TITLE,
+  CHFA_COUNTY_LIMITS_DESCRIPTION,
+} from './chfaCountyLimits.js';
 
 export const SITE_URL = 'https://saahomes.com';
 
@@ -278,6 +283,17 @@ const staticPages = [
     ogDescription: CITATION_HUB_DESCRIPTION,
     ogImage: '/images/Northern Colorado.webp',
     ogImageAlt: 'Northern Colorado housing statistics — sourced and dated',
+  },
+  {
+    path: CHFA_COUNTY_LIMITS_PATH,
+    priority: '0.8',
+    changefreq: 'monthly',
+    title: CHFA_COUNTY_LIMITS_TITLE,
+    description: CHFA_COUNTY_LIMITS_DESCRIPTION,
+    ogTitle: 'CHFA Income & Purchase Price Limits 2026 by County',
+    ogDescription: CHFA_COUNTY_LIMITS_DESCRIPTION,
+    ogImage: '/images/Northern Colorado.webp',
+    ogImageAlt: 'CHFA income and purchase price limits by county — 2026',
   },
   {
     path: '/blog/',

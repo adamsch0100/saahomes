@@ -14,8 +14,10 @@ import {
 const GOLD = "#CFB36E";
 
 const LAYER_LABELS = {
+  national: "National context",
   state: "Colorado / CHFA",
-  local: "Fort Collins / Larimer County",
+  local: "Larimer & Weld counties",
+  outside: "Other Colorado counties",
 };
 
 function StatCard({ stat }) {
@@ -137,9 +139,11 @@ export default function ResourceStatisticsPage() {
             Northern Colorado Housing Statistics 2026
           </h1>
           <p className="mt-4 text-lg text-gray-300 max-w-3xl leading-relaxed">
-            Sourced, dated housing numbers for Northern Colorado — CHFA income and
-            purchase price limits by county, plus U.S. Census figures for Fort Collins.
-            Every figure links to its primary source and shows the date it was verified.
+            Sourced, dated housing numbers for Northern Colorado — the national
+            mortgage-rate context, CHFA income and purchase price limits for
+            Larimer and Weld counties (plus Adams and Boulder), and U.S. Census
+            figures for Fort Collins and Windsor. Every figure links to its primary
+            source and shows the date it was verified.
           </p>
           <p className="mt-4 text-sm text-gray-400">
             Last updated <time dateTime={CITATION_HUB_LAST_UPDATED}>{CITATION_HUB_LAST_UPDATED}</time>
@@ -273,6 +277,12 @@ export default function ResourceStatisticsPage() {
               className="inline-flex items-center px-8 py-3.5 border-2 border-black text-black font-semibold rounded-lg hover:bg-white transition-colors"
             >
               CHFA Down Payment Assistance
+            </Link>
+            <Link
+              to="/resources/colorado-chfa-income-limits-2026/"
+              className="inline-flex items-center px-8 py-3.5 border-2 border-black text-black font-semibold rounded-lg hover:bg-white transition-colors"
+            >
+              CHFA Limits by County 2026
             </Link>
           </div>
         </div>

@@ -13,6 +13,7 @@ import TopRatedSchools from "../components/TopRatedSchools.jsx";
 import CityStatsBand from "../components/CityStatsBand.jsx";
 import SectionTownsBand from "../components/SectionTownsBand.jsx";
 import { getCityHomes } from "../data/cityHomesData.js";
+import AreaNAP from "../components/AreaNAP.jsx";
 
 const GOLD = "#CFB36E";
 
@@ -520,6 +521,7 @@ export default function AreaGuidePage() {
               Call (970) 999-1407
             </a>
           </div>
+          <AreaNAP className="mt-8 text-gray-300" />
         </div>
       </section>
 

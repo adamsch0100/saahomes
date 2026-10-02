@@ -25,6 +25,16 @@ import {
   CITATION_HUB_STATS,
   CITATION_HUB_FAQS,
 } from '../src/data/citationHubStats.js';
+import {
+  CHFA_COUNTY_LIMITS_PATH,
+  CHFA_COUNTY_LIMITS_LAST_UPDATED,
+  CHFA_COUNTY_LIMITS_EFFECTIVE,
+  CHFA_COUNTY_SOURCE_ORG,
+  CHFA_COUNTY_SOURCE_LABEL,
+  CHFA_COUNTY_SOURCE_URL,
+  CHFA_COUNTY_LIMITS as CHFA_COUNTY_TABLE_ROWS,
+  CHFA_COUNTY_FAQS,
+} from '../src/data/chfaCountyLimits.js';
 
 // Freshness signal for E-E-A-T (dated expert content). Keep in sync with
 // AREA_CONTENT_DATE in src/data/areaSeo.js. Bump when content is substantively
@@ -1180,7 +1190,7 @@ function injectCitationHubBody(html) {
     `\n` +
     `    <div class="prerendered-citation-hub">\n` +
     `      <h1>Northern Colorado Housing Statistics 2026</h1>\n` +
-    `      <p>Sourced, dated housing numbers for Northern Colorado &mdash; CHFA income and purchase price limits by county, plus U.S. Census figures for Fort Collins. Every figure links to its primary source and shows the date it was verified. Last updated ${escapeHtml(CITATION_HUB_LAST_UPDATED)}.</p>\n` +
+    `      <p>Sourced, dated housing numbers for Northern Colorado &mdash; the national mortgage-rate context, CHFA income and purchase price limits for Larimer and Weld counties (plus Adams and Boulder), and U.S. Census figures for Fort Collins and Windsor. Every figure links to its primary source and shows the date it was verified. Last updated ${escapeHtml(CITATION_HUB_LAST_UPDATED)}.</p>\n` +
     `${layerHtml}\n` +
     `      <section class="prerendered-methodology">\n` +
     `        <h2>Methodology &amp; verification</h2>\n` +
@@ -1200,8 +1210,70 @@ function injectCitationHubBody(html) {
 }
 
 // ---------------------------------------------------------------------------
-// City "homes for sale" pages — /{slug}-homes-for-sale/ (Tier S money pages)
+// CHFA county limits table — /resources/colorado-chfa-income-limits-2026/
+// Verified county rows (Larimer/Weld/Boulder/Adams), cite lines, FAQ. Crawlable.
 // ---------------------------------------------------------------------------
+function injectChfaCountyLimitsBody(html) {
+  const rows = CHFA_COUNTY_TABLE_ROWS.map(
+    (row) =>
+      `          <tr id="stat-${escapeAttr(row.id)}-2026">\n` +
+      `            <td><a href="${SITE_URL}${escapeAttr(row.areaPath)}">${escapeHtml(row.county)}</a></td>\n` +
+      `            <td>${escapeHtml(row.incomeNonTargeted)}</td>\n` +
+      `            <td>${escapeHtml(row.incomeTargeted)}</td>\n` +
+      `            <td>${escapeHtml(row.purchasePrice)}</td>\n` +
+      `          </tr>`
+  ).join('\n');
+
+  const citeCards = CHFA_COUNTY_TABLE_ROWS.map(
+    (row) =>
+      `        <article>\n` +
+      `          <h3>${escapeHtml(row.county)}</h3>\n` +
+      `          <p><em>Cite this:</em> ${escapeHtml(row.cite)}</p>\n` +
+      `          <p><a href="${SITE_URL}${escapeAttr(row.areaPath)}">${escapeHtml(row.areaLabel)} &rarr;</a></p>\n` +
+      `        </article>`
+  ).join('\n');
+
+  const faqHtml = CHFA_COUNTY_FAQS.map(
+    (faq) =>
+      `        <div itemscope="" itemprop="mainEntity" itemtype="https://schema.org/Question">\n` +
+      `          <h3 itemprop="name">${escapeHtml(faq.q)}</h3>\n` +
+      `          <div itemscope="" itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">\n` +
+      `            <p itemprop="text">${escapeHtml(faq.a)}</p>\n` +
+      `          </div>\n` +
+      `        </div>`
+  ).join('\n');
+
+  const bodyContent =
+    `\n` +
+    `    <div class="prerendered-chfa-county-limits">\n` +
+    `      <h1>CHFA Income &amp; Purchase Price Limits 2026 by County</h1>\n` +
+    `      <p>The verified CHFA income and purchase price limits for Larimer, Weld, Boulder, and Adams counties &mdash; effective for locks on or after ${escapeHtml(CHFA_COUNTY_LIMITS_EFFECTIVE)}. Every row links to the official CHFA limits table and shows the date it was verified. Last updated ${escapeHtml(CHFA_COUNTY_LIMITS_LAST_UPDATED)}.</p>\n` +
+    `      <section>\n` +
+    `        <h2>CHFA 2026 limits by county</h2>\n` +
+    `        <table>\n` +
+    `          <thead>\n` +
+    `            <tr><th>County</th><th>Income limit &mdash; non-targeted (1&ndash;2 / 3+)</th><th>Income limit &mdash; targeted (1&ndash;2 / 3+)</th><th>Purchase price limit</th></tr>\n` +
+    `          </thead>\n` +
+    `          <tbody>\n${rows}\n          </tbody>\n` +
+    `        </table>\n` +
+    `        <p><strong>Effective:</strong> locks on or after ${escapeHtml(CHFA_COUNTY_LIMITS_EFFECTIVE)}. <strong>Source:</strong> ${escapeHtml(CHFA_COUNTY_SOURCE_ORG)} &mdash; <a href="${escapeAttr(CHFA_COUNTY_SOURCE_URL)}" rel="noopener">${escapeHtml(CHFA_COUNTY_SOURCE_LABEL)}</a> (verified ${escapeHtml(CHFA_COUNTY_LIMITS_LAST_UPDATED)}).</p>\n` +
+    `      </section>\n` +
+    `      <section>\n` +
+    `        <h2>Cite a county row</h2>\n` +
+    `${citeCards}\n` +
+    `      </section>\n` +
+    `      <section class="prerendered-faq">\n` +
+    `        <h2>Frequently Asked Questions</h2>\n` +
+    `${faqHtml}\n` +
+    `      </section>\n` +
+    `      <section class="prerendered-cta">\n` +
+    `        <h2>Not sure which CHFA program fits your county?</h2>\n` +
+    `        <p>Adam and Mandi Schwartz help buyers and sellers across Northern Colorado. Contact SAA Homes at <strong>(970) 999-1407</strong> or visit <a href="${SITE_URL}/chfa-down-payment-assistance/">CHFA Down Payment Assistance</a> for next steps.</p>\n` +
+    `      </section>\n` +
+    `    </div>\n  `;
+
+  return html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+}
 function matchCityHomesPage(path) {
   const normalized = path.replace(/\/$/, '');
   if (!normalized.endsWith('-homes-for-sale')) return null;
@@ -2125,6 +2197,25 @@ function buildRouteSchemas(route) {
     );
   }
 
+  // CHFA county limits table — FAQPage + BreadcrumbList for the citation table.
+  if (path === CHFA_COUNTY_LIMITS_PATH) {
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: CHFA_COUNTY_FAQS.map((faq) => ({
+        '@type': 'Question',
+        name: faq.q,
+        acceptedAnswer: { '@type': 'Answer', text: faq.a },
+      })),
+    });
+    schemas.push(
+      buildBreadcrumbList([
+        { name: 'Home', url: `${SITE_URL}/` },
+        { name: 'CHFA Income & Purchase Price Limits 2026 by County', url: canonical },
+      ])
+    );
+  }
+
   return schemas;
 }
 
@@ -2396,6 +2487,11 @@ async function main() {
       html = injectCitationHubBody(html);
       console.log(
         `  Body: injected citation hub with ${CITATION_HUB_STATS.length} verified stat cards + FAQ + methodology`
+      );
+    } else if (route.path === CHFA_COUNTY_LIMITS_PATH) {
+      html = injectChfaCountyLimitsBody(html);
+      console.log(
+        `  Body: injected CHFA county limits table with ${CHFA_COUNTY_TABLE_ROWS.length} verified rows + cite lines + FAQ`
       );
     } else {
       html = injectGenericBody(html, route);
