@@ -48,11 +48,14 @@ SAMPLE_FINGERPRINT_LOCKED_AT = "2026-06-02"
 SAMPLE_FINGERPRINT_MIN_WEEKS = 4
 SAMPLE_FINGERPRINT_STORY = "from-export-v7"
 # /demo must answer fast. Re-baking the sample HTML/deck, photo health and the
-# PDF sync are heavy, so run them at most once per interval (and only from one
-# thread) instead of on every request. A fresh process always runs once.
+# PDF sync are heavy, so run them off the request path (background thread) at
+# most once per interval, and warm the sample once at process start. Running the
+# refresh inline made a watchdog probing /demo during a restart/deploy window see
+# "no response" while the rebake held the request.
 SAMPLE_ENSURE_INTERVAL_SEC = 600
 _sample_ensure_at = 0.0
 _sample_ensure_lock = threading.Lock()
+_sample_build_lock = threading.Lock()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ListLogic")
@@ -191,6 +194,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/saas/listing-flipbook.html",
         "/saas/changelog.html",
         "/blog/",
+        "/glossary/",
         "/saas/ll.css",
         "/saas/analytics.js",
         "/saas/utm.js",
@@ -282,6 +286,7 @@ app.add_middleware(AuthMiddleware)
 
 app.mount("/saas", StaticFiles(directory=str(ROOT / "saas"), html=True), name="saas")
 app.mount("/blog", StaticFiles(directory=str(ROOT / "blog"), html=True), name="blog")
+app.mount("/glossary", StaticFiles(directory=str(ROOT / "glossary"), html=True), name="glossary")
 
 
 @app.on_event("startup")
@@ -299,6 +304,9 @@ def _startup():
             logger.exception("Auth bootstrap failed")
 
     threading.Thread(target=_boot, name="listlogic-bootstrap", daemon=True).start()
+    # Warm the public /demo sample before the first probe so a restart/deploy
+    # window never runs the heavy rebake inside a request.
+    threading.Thread(target=_warm_sample_run, name="listlogic-sample-boot", daemon=True).start()
     _start_scheduler()
 
 
@@ -1706,56 +1714,88 @@ def _maintain_sample_run(run_dir: Path) -> None:
             logger.exception("Sample PDF sync failed for %s", run_dir.name)
 
 
+def _schedule_sample_maintenance(run_dir: Path) -> None:
+    """Refresh the cached sample run off the request path.
+
+    /demo's first hit after a restart used to run _maintain_sample_run inline, so
+    an external watchdog probing during that window got "no response" while the
+    rebake held the request. Claim the lock, then hand the heavy work to a daemon
+    thread so /demo always answers immediately.
+    """
+    if not _sample_ensure_lock.acquire(blocking=False):
+        return  # a refresh is already running in another thread
+
+    def _warm() -> None:
+        global _sample_ensure_at
+        try:
+            _maintain_sample_run(run_dir)
+        except Exception:
+            logger.exception("Sample run maintenance failed")
+        finally:
+            _sample_ensure_at = time.time()
+            _sample_ensure_lock.release()
+
+    threading.Thread(target=_warm, name="listlogic-sample-warm", daemon=True).start()
+
+
+def _warm_sample_run() -> None:
+    """Build/refresh the sample at process start so /demo never pays for it inline."""
+    try:
+        _ensure_sample_run()
+    except Exception:
+        logger.exception("Sample run warm-up failed")
+
+
 def _ensure_sample_run() -> str:
     """Build or reuse the public sample listing run (no trial credit)."""
-    global _sample_ensure_at
     run_dir = OUTPUT_DIR / SAMPLE_RUN_ID
     html_path = run_dir / "presentation.html"
     if html_path.exists():
-        # Keep /demo fast: refresh the sample artifacts at most once per interval,
-        # and never block a request while another thread is already refreshing.
+        # Keep /demo fast: schedule the refresh in the background at most once per
+        # interval; never block a request while a refresh is already running.
         if time.time() - _sample_ensure_at >= SAMPLE_ENSURE_INTERVAL_SEC:
-            if _sample_ensure_lock.acquire(blocking=False):
-                try:
-                    _maintain_sample_run(run_dir)
-                finally:
-                    _sample_ensure_at = time.time()
-                    _sample_ensure_lock.release()
+            _schedule_sample_maintenance(run_dir)
         return SAMPLE_RUN_ID
     if not DEMO_EXPORT.exists():
         raise HTTPException(404, "Sample export missing")
-    result = _generate(
-        DEMO_EXPORT,
-        address="2845 W 13th Street Greeley 80634",
-        living_area=2392.0,
-        beds=4.0,
-        baths=2.0,
-        garage_spaces=2.0,
-        year_built=1969,
-        condition="average",
-        list_price=None,
-        mls_number="1058539",
-        city_filter="Greeley",
-        area_name="West Greeley · similar homes",
-        market_notes="Public sample listing — create an account to run your own market; unlock at Generate.",
-        agent_name="Adam Schwartz",
-        agent_phone="(970) 533-3990",
-        agent_email="adam@saahomes.com",
-        brokerage="Schwartz and Associates, Coldwell Banker Realty",
-        brand_primary="#0c3c6e",
-        brand_accent="#1a5f9e",
-        logo_url="",
-        force_run_id=SAMPLE_RUN_ID,
-    )
-    # Normalize in case generate returned a different id
-    if result.get("run_id") != SAMPLE_RUN_ID:
-        src = OUTPUT_DIR / result["run_id"]
-        if src.exists() and src.resolve() != run_dir.resolve():
-            if run_dir.exists():
-                shutil.rmtree(run_dir, ignore_errors=True)
-            src.rename(run_dir)
-            _rewrite_run_paths(run_dir, result["run_id"], SAMPLE_RUN_ID)
-    _seed_sample_launch_files(run_dir)
+    # Cold start (fresh image or wiped volume): the build must finish before the
+    # redirect target exists, but serialize it so concurrent callers don't each
+    # run a full _generate.
+    with _sample_build_lock:
+        if html_path.exists():
+            return SAMPLE_RUN_ID
+        result = _generate(
+            DEMO_EXPORT,
+            address="2845 W 13th Street Greeley 80634",
+            living_area=2392.0,
+            beds=4.0,
+            baths=2.0,
+            garage_spaces=2.0,
+            year_built=1969,
+            condition="average",
+            list_price=None,
+            mls_number="1058539",
+            city_filter="Greeley",
+            area_name="West Greeley · similar homes",
+            market_notes="Public sample listing — create an account to run your own market; unlock at Generate.",
+            agent_name="Adam Schwartz",
+            agent_phone="(970) 533-3990",
+            agent_email="adam@saahomes.com",
+            brokerage="Schwartz and Associates, Coldwell Banker Realty",
+            brand_primary="#0c3c6e",
+            brand_accent="#1a5f9e",
+            logo_url="",
+            force_run_id=SAMPLE_RUN_ID,
+        )
+        # Normalize in case generate returned a different id
+        if result.get("run_id") != SAMPLE_RUN_ID:
+            src = OUTPUT_DIR / result["run_id"]
+            if src.exists() and src.resolve() != run_dir.resolve():
+                if run_dir.exists():
+                    shutil.rmtree(run_dir, ignore_errors=True)
+                src.rename(run_dir)
+                _rewrite_run_paths(run_dir, result["run_id"], SAMPLE_RUN_ID)
+        _seed_sample_launch_files(run_dir)
     return SAMPLE_RUN_ID
 
 
