@@ -4,6 +4,7 @@ import SEO from "../components/SEO";
 import AreaFAQSection from "../components/AreaFAQSection.jsx";
 import { areaSeoPages } from "../data/areaSeo.js";
 import { buildAreaGuidesItemListSchema } from "../utils/seoConstants.js";
+import AreaNAP from "../components/AreaNAP.jsx";
 
 const HUB_FAQS = [
   {
@@ -279,6 +280,7 @@ export default function FeaturedAreasPage() {
           <a href="/contact/" className="inline-block px-8 py-3 bg-white text-black font-semibold rounded hover:bg-gray-100 transition-colors">
             Contact Us Today
           </a>
+          <AreaNAP className="mt-8 text-gray-300" />
         </div>
       </section>
     </>
