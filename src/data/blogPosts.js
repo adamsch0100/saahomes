@@ -1,6 +1,6 @@
 import { SITE_URL } from '../utils/seoConstants.js';
 
-export const LATEST_MARKET_UPDATE_SLUG = 'northern-colorado-market-update-september-2026';
+export const LATEST_MARKET_UPDATE_SLUG = 'northern-colorado-market-update-october-2026';
 
 export const blogPosts = [
 
@@ -9809,6 +9809,194 @@ export const blogPosts = [
     },
   },
   {
+    slug: 'northern-colorado-market-update-october-2026',
+    title: 'Northern Colorado Market Update \u2014 October 2026',
+    excerpt: 'September 2026 home sales, inventory and days on market for Fort Collins, Loveland, Windsor and Greeley \u2014 plus what fall means for buyers and sellers.',
+    date: '2026-10-03',
+    category: 'Market Update',
+    image: '/images/northern-colorado-market-update-october-2026.jpg',
+    readTime: '8 min read',
+    keywords: 'Northern Colorado housing market October 2026, Fort Collins home prices September 2026, Loveland real estate market update, Windsor CO housing market, Greeley home prices, Larimer County market update, Weld County home sales, Northern Colorado days on market',
+    relatedLinks: [
+      { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Inventory, neighborhoods & market data' },
+      { title: 'Loveland Colorado homes for sale', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities and pricing' },
+      { title: 'Windsor homes for sale', href: '/northern-colorado-areas/windsor/', description: 'Weld/Larimer border growth corridor' },
+      { title: 'Greeley homes for sale', href: '/northern-colorado-areas/greeley/', description: 'Weld County affordability anchor' },
+      { title: 'Johnstown homes for sale', href: '/northern-colorado-areas/johnstown/', description: 'I-25 corridor new construction' },
+      { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Grants up to $25K for qualified buyers' },
+      { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free home valuation & listing plan' },
+      { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Buyer representation across Northern Colorado' },
+    ],
+    cta: {
+      title: 'Get the full October 2026 market report for your city',
+      description: 'Adam and Mandi Schwartz will send median sale prices, days on market, inventory and neighborhood-level trends for your city and price range, pulled from current IRES MLS data. Sellers get a free home valuation included; buyers get a tailored search plan. Call (970) 999-1407 or send the form.',
+      primaryHref: '/contact/',
+      primaryText: 'Request My Market Report',
+      secondaryHref: '/for-sellers/',
+      secondaryText: 'See What My Home Is Worth',
+    },
+    faqs: [
+      { q: 'Did Northern Colorado home prices go up or down in September 2026?', a: 'It depends on the city and the property type. Single-family detached median sale prices rose month-over-month in Greeley ($431,000 to $460,000), Loveland ($530,000 to $555,000) and Windsor ($605,000 to $610,000), while Fort Collins eased from $650,000 to $599,995. Countywide, Larimer County closed September at a $529,500 median, Weld County at $487,000 and Boulder County at $720,000.' },
+      { q: 'How many homes are for sale in Fort Collins right now?', a: 'Fort Collins carried 764 active residential listings as of October 3, 2026, with a median list price of $530,000. That includes 459 detached homes at a median $610,000 and 270 condominiums and townhomes at a median $373,248. About 55.5% of the city active listings had already been reduced at least once.' },
+      { q: 'How long are homes taking to sell in Northern Colorado?', a: 'In September 2026 closings, median days on market from list date to close was 57 days in Larimer County, 57 days in Weld County and 50 days in Boulder County. Fort Collins detached homes closed in a median 44 days, Loveland and Greeley in 54 days, and Windsor in 59 days.' },
+      { q: 'How much are homes selling for in Greeley and Loveland?', a: 'Greeley closed 96 residential sales in September 2026 with a citywide median of $424,025; the 70 detached homes that sold had a median of $460,000 at a median 100% of asking price. Loveland closed 112 residential sales with a citywide median of $507,500, including 83 detached homes at a median $555,000 and 23 attached homes at a median $369,000.' },
+      { q: 'Is it a buyer or seller market in Northern Colorado right now?', a: 'It is balanced but leaning slightly toward buyers. Sellers still achieve roughly 99% to 100% of asking price in most cities, but inventory keeps building and about half of all active listings in Fort Collins, Loveland, Windsor and Greeley have already seen a price reduction. Buyers have time and negotiating room at every price point above the entry level, and sellers who price from the most recent 90 days of comparable sales still move quickly.' },
+    ],
+    sections: [
+      {
+        heading: 'Northern Colorado enters fall 2026 with more choice and steadier prices',
+        paragraphs: [
+          'Northern Colorado opened October 2026 with more homes for sale than at any point this year, transaction volume holding near August levels, and price movement that varies sharply by city and by property type. September closings recorded by IRES across the Larimer, Weld and Boulder County cities we track totaled 1,122 residential sales \u2014 a roughly even split between Larimer County (448 closings at a $529,500 median) and Weld County (409 closings at a $487,000 median), with Boulder County adding 265 closings at a $720,000 median.',
+          'The single most useful number for anyone buying or selling right now is not the median price \u2014 it is the share of listings that have already been reduced. In Fort Collins that figure is 55.5%, in Windsor 52.6%, in Greeley 52.3% and in Loveland 50.2%. Half of the active market has already repriced once, which tells you sellers are adjusting to buyer expectations rather than waiting.',
+          'A note on method, because it matters when you compare this report to a national portal: every figure here comes from the live IRES MLS feed that powers saahomes.com, pulled on October 3, 2026. Active inventory and list prices are a same-day snapshot of residential listings inside city limits. Closed-sale statistics cover the full month of September 2026 and include detached single-family homes and attached condominiums and townhomes, unless a section says otherwise. Median days on market is measured from list date to closing, so it runs longer than the days-to-offer figures some portals publish.',
+        ],
+      },
+      {
+        heading: 'Inventory snapshot: what is actually for sale today',
+        paragraphs: [
+          'Active residential inventory as of October 3, 2026, with the median asking price and the share of listings that have already been reduced:',
+        ],
+        list: [
+          'Fort Collins \u2014 764 active listings, median list price $530,000, 55.5% reduced',
+          'Loveland \u2014 524 active listings, median list price $526,000, 50.2% reduced',
+          'Windsor \u2014 340 active listings, median list price $624,995, 52.6% reduced',
+          'Greeley \u2014 430 active listings, median list price $432,320, 52.3% reduced',
+          'Longmont \u2014 451 active listings, median list price $575,000, 53.9% reduced',
+          'Erie \u2014 271 active listings, median list price $699,000, 61.3% reduced',
+          'Johnstown \u2014 241 active listings, median list price $495,100, 56.4% reduced',
+          'Berthoud \u2014 224 active listings, median list price $669,995, 49.1% reduced',
+          'Timnath \u2014 102 active listings, median list price $674,950, 49.0% reduced',
+          'Frederick \u2014 99 active listings, median list price $500,000, 51.5% reduced',
+        ],
+        relatedLinks: [
+          { title: 'Browse current Northern Colorado listings', href: '/properties/', description: 'Live IRES MLS search' },
+          { title: 'All 27 area guides', href: '/northern-colorado-areas/', description: 'Larimer, Weld and Boulder County city hubs' },
+        ],
+      },
+      {
+        heading: 'Fort Collins: detached prices ease as condos and townhomes take a bigger share',
+        paragraphs: [
+          'Fort Collins closed 181 residential sales in September 2026 at a citywide median of $535,000. The headline number slid from August, but most of that move is mix rather than value: detached single-family closings fell to 114 from 151 in August, while attached condominium and townhome closings climbed to 67 from 45. Detached homes that did close held a median sale price of $599,995 \u2014 down 7.7% from August\u2019s $650,000 \u2014 and sold in a median 44 days at a median 100% of asking price.',
+          'Inventory explains the rest. Fort Collins carries 764 active residential listings at a median list price of $530,000, and more than half of them have been reduced. Split by type, 459 detached homes are asking a median $610,000 while 270 attached listings are asking a median $373,248. That gap is why a single citywide median can look like a price cut when what actually happened is a shift toward the entry-level end of the market.',
+          'For Fort Collins sellers this is the practical takeaway: the buyers are still there, and they are still paying full asking price for homes that are prepared and correctly priced. What they are not doing is chasing listings that launched above the most recent 90 days of comparable sales. Well-presented detached homes in the $450,000 to $650,000 range are still clearing in roughly six weeks.',
+        ],
+        relatedLinks: [
+          { title: 'Fort Collins area guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
+        ],
+      },
+      {
+        heading: 'Loveland: detached prices firm up as the sales mix normalizes',
+        paragraphs: [
+          'Loveland closed 112 residential sales in September at a citywide median of $507,500. The detached segment \u2014 83 closings \u2014 had a median sale price of $555,000, up 4.7% from August\u2019s $530,000, and closed in a median 54 days at 99.3% of list price. Attached homes were a smaller share of September closings than in August (23 sales at a median $369,000), which is why the citywide median reads lower than the detached figure.',
+          'Loveland\u2019s 524 active residential listings carry a median list price of $526,000, and 50.2% have been reduced at least once. Detached inventory alone is 376 homes at a median $574,732, with another 119 attached listings at a median $399,000. Loveland remains the region\u2019s most balanced market by the numbers: inventory is plentiful, but sale-to-list performance is holding at 99% or better and detached prices are still moving up.',
+          'Buyers should note where that balance sits. The $400,000 to $550,000 band is where most Loveland sales occur and where well-priced homes still move inside two months. Above roughly $675,000, marketing times stretch and the odds of a price adjustment rise sharply.',
+        ],
+        relatedLinks: [
+          { title: 'Loveland area guide', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities and pricing' },
+        ],
+      },
+      {
+        heading: 'Windsor: steady prices, the region\u2019s longest marketing times',
+        paragraphs: [
+          'Windsor stays the premium market in Northern Colorado and the slowest-moving one. September closings totaled 82 residential sales: 71 detached at a median $610,000 (up 0.8% from August\u2019s $605,000) and 9 attached at a median $390,000. Detached homes took a median 59 days from list to close and sold at 99.7% of asking price.',
+          'Windsor\u2019s 340 active residential listings carry a median list price of $624,995 and include 290 detached homes at a median $639,500. Just over half \u2014 52.6% \u2014 have already been reduced. Premium pricing paired with extended marketing time is the defining feature of this market heading into winter, and it rewards sellers who are realistic about the first two weeks on market.',
+        ],
+        relatedLinks: [
+          { title: 'Windsor area guide', href: '/northern-colorado-areas/windsor/', description: 'Weld/Larimer border growth corridor' },
+        ],
+      },
+      {
+        heading: 'Greeley: the affordability anchor keeps gaining',
+        paragraphs: [
+          'Greeley closed 96 residential sales in September, and for a second consecutive month the median moved up rather than down. The 70 detached closings had a median sale price of $460,000 \u2014 up 6.7% from August\u2019s $431,000 \u2014 selling at a median 100% of asking price in a median 54 days. Attached homes closed at a median $324,950.',
+          'Greeley also holds the lowest entry point of any major city in the region: 430 active residential listings at a median list price of $432,320, made up of 322 detached homes at a median $450,000 and 81 attached listings at a median $330,000. That is nearly $180,000 below Fort Collins\u2019s median list price and $140,000 below Loveland\u2019s, which is exactly why Greeley keeps drawing first-time buyers and buyers priced out of Larimer County.',
+          'The discount is not free money \u2014 it comes with a longer commute for many buyers and property tax rates that differ by county \u2014 but for households stretching to reach a down payment, Greeley plus a CHFA down payment assistance program remains the most achievable path into ownership in Northern Colorado.',
+        ],
+        relatedLinks: [
+          { title: 'Greeley area guide', href: '/northern-colorado-areas/greeley/', description: 'Weld County affordability anchor' },
+          { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Grants and deferred loans up to $25,000' },
+        ],
+      },
+      {
+        heading: 'Around the corridor: Longmont, Erie, Johnstown, Berthoud, Timnath and Frederick',
+        paragraphs: [
+          'The I-25 and Carbon Valley corridor cities posted steady September volume with wide differences in price. Detached median sale prices and median days on market for September 2026 closings:',
+        ],
+        list: [
+          'Longmont \u2014 93 detached closings, median $600,000, 44 days on market',
+          'Erie \u2014 46 detached closings, median $727,250, 50 days on market',
+          'Johnstown \u2014 42 detached closings, median $487,536, 62 days on market',
+          'Berthoud \u2014 38 detached closings, median $600,000, 63 days on market',
+          'Wellington \u2014 20 detached closings, median $475,000, 78 days on market',
+          'Frederick \u2014 15 detached closings, median $540,000, 46 days on market',
+          'Timnath \u2014 12 detached closings, median $950,000, 56 days on market',
+        ],
+        relatedLinks: [
+          { title: 'Johnstown area guide', href: '/northern-colorado-areas/johnstown/', description: 'I-25 corridor new construction' },
+          { title: 'Berthoud area guide', href: '/northern-colorado-areas/berthoud/', description: 'Between Longmont and Loveland' },
+        ],
+      },
+      {
+        heading: 'What October 2026 means for Northern Colorado buyers',
+        paragraphs: [
+          'This is the most buyer-friendly Northern Colorado market since early 2022, and the reason is not falling prices \u2014 it is choice and time. Inventory is up across every city we track, median days on market is running in the 44 to 63 day range for detached homes, and roughly half of all active listings have already been reduced. Buyers can compare, negotiate repairs, and ask for concessions without losing the home.',
+          'Two financing realities shape the math right now. First, sellers in most segments will consider closing-cost assistance or a rate buydown because it protects their headline price \u2014 that concession is often worth more to a buyer over the first three years than a small price cut. Second, CHFA down payment assistance remains available through participating lenders in 2026, with programs that combine a first mortgage with down payment help for qualified buyers.',
+        ],
+        list: [
+          'Get pre-approved before touring so your offer can move the same day in the sub-$500,000 segment',
+          'Ask for closing-cost assistance or a rate buydown before you ask for a price cut \u2014 sellers protect their list price, buyers protect their cash',
+          'Check CHFA income and purchase price limits for Larimer and Weld County before you set your budget',
+          'Compare two or three cities, not two or three homes \u2014 the price gap between Greeley and Fort Collins is close to $180,000 at the median',
+          'Confirm HOA dues, metro district fees and county tax rates on any newer build before you write',
+        ],
+        relatedLinks: [
+          { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'How we represent buyers in Northern Colorado' },
+          { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: '2026 programs through participating lenders' },
+        ],
+      },
+      {
+        heading: 'What October 2026 means for Northern Colorado sellers',
+        paragraphs: [
+          'Sellers are still getting paid. Across the markets we tracked in September, detached homes closed at 99% to 100% of asking price, and well-prepared homes in the entry and mid ranges moved in six to nine weeks. What has changed is the margin for error: with half the market already reduced, a listing that launches above the most recent 90 days of comparable sales does not get a second first impression.',
+          'The practical playbook is straightforward. Price from current closed comps rather than last spring\u2019s numbers, use professional photography and video, and expect a 45 to 80 day marketing period depending on your city and price band. If you are also buying in this market, your leverage as a buyer usually more than offsets the concession you offer as a seller.',
+        ],
+        list: [
+          'Price from September 2026 closed sales, not from spring or 2025 comparables',
+          'Expect 44 to 63 days on market for detached homes, longer above $700,000',
+          'Budget for a concession \u2014 rate buydown, closing costs or a home warranty \u2014 from day one',
+          'Presentation still wins: professionally photographed homes are closing near or above asking',
+          'Get a same-day home valuation before you list so the first number on the MLS is the right one',
+        ],
+        relatedLinks: [
+          { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free valuation & full listing plan' },
+        ],
+      },
+      {
+        heading: 'CHFA and Colorado homebuyer programs in fall 2026',
+        paragraphs: [
+          'CHFA continues to fund down payment assistance for Colorado buyers through participating lenders. In 2026, CHFA programs pair a first mortgage with down payment and closing cost help for qualifying households, with income limits and purchase price limits that vary by county \u2014 which is why the same buyer can qualify in Weld County and not in Boulder County.',
+          'Two details matter most in this market. Assistance is generally available to non-first-time buyers in designated targeted areas, not only to first-time buyers, and a $1,000 borrower contribution is typically required. Program parameters, income limits and purchase price limits change, so confirm current numbers with a CHFA participating lender or at chfainfo.com before you write an offer.',
+          'Adam and Mandi Schwartz work with CHFA participating lenders across Larimer and Weld County every week and can tell you which programs fit your file, what your realistic all-in payment looks like, and how much seller concession to ask for alongside a down payment assistance program.',
+        ],
+        relatedLinks: [
+          { title: 'CHFA Down Payment Assistance', href: '/chfa-down-payment-assistance/', description: 'Program details, limits and how to qualify' },
+          { title: 'Contact SAA Homes', href: '/contact/', description: 'Adam and Mandi Schwartz \u2014 (970) 999-1407' },
+        ],
+      },
+      {
+        heading: 'How to read your own city in this market',
+        paragraphs: [
+          'Regional medians are a starting point, not an answer. A four-bedroom home in west Greeley competes against a different set of listings than a townhome near Old Town Fort Collins, and the price band you are shopping in determines whether you are in a seller\u2019s segment or a buyer\u2019s segment inside the same city. Nearly every price band above the median is currently a buyer\u2019s market; the entry level in Greeley and Evans still behaves like a seller\u2019s market.',
+          'That is why we publish this update and then get specific. Adam and Mandi Schwartz have worked Northern Colorado for more than two decades combined and will send you the current numbers for your city, your neighborhood and your price range \u2014 the same IRES data behind every figure in this report. Call (970) 999-1407, or request the free market report and we will follow up with your city\u2019s snapshot within one business day.',
+        ],
+        relatedLinks: [
+          { title: 'Request your free market report', href: '/contact/', description: 'City-level prices, days on market and trends' },
+          { title: 'Browse homes for sale', href: '/properties/', description: 'Live IRES MLS listings across Northern Colorado' },
+        ],
+      },
+    ],
+  },
+  {
     slug: 'northern-colorado-market-update-september-2026',
     title: "Northern Colorado Market Update \u2014 September 2026: Home Prices, Inventory & Fall Trends",
     excerpt: "An early-fall look at home prices, inventory trends, and days on market across Fort Collins, Loveland, Windsor, and Greeley \u2014 plus what the September market means for buyers and sellers in Northern Colorado as the fall season begins.",
@@ -9817,6 +10005,7 @@ export const blogPosts = [
     image: '/images/northern-colorado-market-update-september-2026.jpg',
     readTime: '7 min read',
     youtubeId: 'ISkTp0N7h7E',
+    supersededBy: LATEST_MARKET_UPDATE_SLUG,
     keywords: 'Northern Colorado housing market September 2026, Fort Collins home prices fall 2026, Loveland real estate trends, Windsor CO housing market, Greeley home prices, Larimer County market update early fall 2026, Northern Colorado real estate September 2026',
     relatedLinks: [
       { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
