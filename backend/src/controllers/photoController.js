@@ -206,8 +206,20 @@ export function isUpstreamAbortError(error) {
   return name === 'TimeoutError' || name === 'AbortError' || code === 'ABORT_ERR';
 }
 
+/** True when the upstream media CDN rate-limited us (HTTP 429). Backpressure
+ *  from the CDN, not a fault of ours: degrade to the branded placeholder
+ *  instead of logging an incident and answering 502 (lsn-6364af, inc-281e02c2). */
+export function isUpstreamRateLimitError(error) {
+  if (!error) return false;
+  const status = error.status ?? error.cause?.status;
+  return status === 429;
+}
+
 export function isExpectedPhotoDegradation(error) {
-  return Boolean(error && (error.photoExpired || isUpstreamAbortError(error)));
+  return Boolean(
+    error
+    && (error.photoExpired || isUpstreamAbortError(error) || isUpstreamRateLimitError(error)),
+  );
 }
 
 async function loadPhotosForProxy(pool, rawId) {
@@ -314,11 +326,12 @@ export const getListingPhoto = async (req, res) => {
   } catch (error) {
     if (error.status === 404) return res.status(404).json({ error: 'Photo unavailable' });
     // Expected degradation — expired signed URL with no refresh available
-    // (IRES quota guard tripped, no IRES token, or a sold row) or an upstream
-    // abort/timeout. These are transient upstream conditions, not faults of
-    // ours, so log a rate-limited warning and serve the branded placeholder
-    // with HTTP 200 instead of a 502 that reads as an outage (lsn-a2fc0a,
-    // lsn-267b91). Real fetch failures keep the incident-level log + 502.
+    // (IRES quota guard tripped, no IRES token, or a sold row), an upstream
+    // abort/timeout, or an upstream rate-limit (HTTP 429). These are transient
+    // upstream conditions, not faults of ours, so log a rate-limited warning
+    // and serve the branded placeholder with HTTP 200 instead of a 502 that
+    // reads as an outage (lsn-a2fc0a, lsn-267b91, lsn-6364af). Real fetch
+    // failures keep the incident-level log + 502.
     if (isExpectedPhotoDegradation(error)) {
       const now = Date.now();
       if (now - degradeLoggedAt > 60000) {

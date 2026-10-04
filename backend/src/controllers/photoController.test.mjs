@@ -5,6 +5,7 @@ import {
   expiredUrlError,
   isExpectedPhotoDegradation,
   isUpstreamAbortError,
+  isUpstreamRateLimitError,
   isValidPhotoId,
   getListingPhotoDefault,
 } from './photoController.js';
@@ -53,6 +54,21 @@ test('isUpstreamAbortError flags DOMException timeout/abort failures', () => {
 
 test('an upstream timeout is expected degradation, not an incident', () => {
   const err = new DOMException('The operation was aborted due to timeout', 'TimeoutError');
+  assert.equal(isExpectedPhotoDegradation(err), true);
+});
+
+test('isUpstreamRateLimitError flags an upstream HTTP 429', () => {
+  const direct = Object.assign(new Error('photo fetch 429'), { status: 429 });
+  assert.equal(isUpstreamRateLimitError(direct), true);
+  const wrapped = new Error('fetch failed');
+  wrapped.cause = { status: 429 };
+  assert.equal(isUpstreamRateLimitError(wrapped), true);
+  assert.equal(isUpstreamRateLimitError(Object.assign(new Error('photo fetch 500'), { status: 500 })), false);
+  assert.equal(isUpstreamRateLimitError(undefined), false);
+});
+
+test('an upstream 429 is expected degradation, in the fetch 429 shape the proxy throws', () => {
+  const err = Object.assign(new Error('photo fetch 429'), { status: 429 });
   assert.equal(isExpectedPhotoDegradation(err), true);
 });
 
