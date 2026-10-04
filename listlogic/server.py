@@ -195,6 +195,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/saas/changelog.html",
         "/blog/",
         "/glossary/",
+        "/resources/",
         "/saas/ll.css",
         "/saas/analytics.js",
         "/saas/utm.js",
@@ -287,6 +288,7 @@ app.add_middleware(AuthMiddleware)
 app.mount("/saas", StaticFiles(directory=str(ROOT / "saas"), html=True), name="saas")
 app.mount("/blog", StaticFiles(directory=str(ROOT / "blog"), html=True), name="blog")
 app.mount("/glossary", StaticFiles(directory=str(ROOT / "glossary"), html=True), name="glossary")
+app.mount("/resources", StaticFiles(directory=str(ROOT / "resources"), html=True), name="resources")
 
 
 @app.on_event("startup")
