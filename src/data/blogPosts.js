@@ -12,6 +12,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/carbon-valley-affordable-homes-guide.jpg',
     readTime: '9 min read',
+    youtubeId: 'py31k-cMExg',
     keywords: 'carbon valley realtor, carbon valley real estate agent, firestone real estate agent, frederick real estate agent, best realtor carbon valley co, firestone realtor, dacono real estate agent, carbon valley colorado realtor, schwartz and associates carbon valley',
     relatedLinks: [
       { title: 'Carbon Valley homes for sale', href: '/northern-colorado-areas/carbon-valley/', description: 'Firestone, Frederick & Dacono market guide' },
@@ -9816,6 +9817,7 @@ export const blogPosts = [
     category: 'Market Update',
     image: '/images/northern-colorado-market-update-october-2026.jpg',
     readTime: '8 min read',
+    youtubeId: 'RzSUk73FRB0',
     keywords: 'Northern Colorado housing market October 2026, Fort Collins home prices September 2026, Loveland real estate market update, Windsor CO housing market, Greeley home prices, Larimer County market update, Weld County home sales, Northern Colorado days on market',
     relatedLinks: [
       { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Inventory, neighborhoods & market data' },
@@ -10232,7 +10234,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Johnstown-CO-Area-Guide.jpg',
     readTime: '9 min read',
-    youtubeId: '',
+    youtubeId: 'le0TUN_hm2U',
     keywords: 'buying a home in johnstown colorado, johnstown co homes for sale, johnstown real estate, johnstown colorado realtor, johnstown new construction, move to johnstown, johnstown first-time home buyer, CHFA johnstown, johnstown milliken real estate, johnstown housing market 2026',
     relatedLinks: [
       { title: 'Johnstown Colorado real estate guide', href: '/northern-colorado-areas/johnstown/', description: 'Neighborhoods, schools & market data' },
@@ -10320,7 +10322,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/Johnstown-CO-Area-Guide.jpg',
     readTime: '9 min read',
-    youtubeId: '',
+    youtubeId: '1uajyFaCLPQ',
     keywords: 'sell my home johnstown colorado, selling a home in johnstown co, johnstown co real estate agent, johnstown homes for sale, how to sell a house in johnstown, johnstown home selling guide, listing agent johnstown co, johnstown home value, johnstown housing market 2026',
     relatedLinks: [
       { title: 'Johnstown Colorado real estate guide', href: '/northern-colorado-areas/johnstown/', description: 'Neighborhoods, schools & market data' },
@@ -10401,7 +10403,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/Fort-Collins-CO-Area-Guide.jpg',
     readTime: '8 min read',
-    youtubeId: '',
+    youtubeId: '1-LxXIr6-Ms',
     keywords: 'how much is my home worth fort collins, fort collins home value 2026, what is my fort collins house worth, free home valuation fort collins, fort collins home appraisal, fort collins housing market 2026, zestimate vs cma fort collins, fort collins home price estimate, sell my home fort collins, fort collins home value estimate',
     relatedLinks: [
       { title: 'Fort Collins Colorado real estate guide', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & market data' },
@@ -12531,6 +12533,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/Fort-Collins-CO-Area-Guide.jpg',
     readTime: '7 min read',
+    youtubeId: '-sHDw0fxaU0',
     keywords: 'Bellvue CO acreage, Poudre Canyon homes for sale, Bellvue Colorado real estate, Larimer County acreage, Poudre River homes, buying a home in Bellvue, Bellvue realtor',
     relatedLinks: [
       { title: 'Bellvue homes and acreage', href: '/northern-colorado-areas/bellvue/', description: 'Area guide with live IRES market stats' },
@@ -12943,6 +12946,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/Northern Colorado.webp',
     readTime: '6 min read',
+    youtubeId: 'cKf1A-gjlk4',
     keywords: 'red feather lakes cabins for sale under 300k, mountain cabins under 300k, cheap cabins Colorado, red feather lakes land for sale, Larimer County cabin, red feather lakes homes for sale',
     relatedLinks: [
       { title: 'Red Feather Lakes homes for sale', href: '/northern-colorado-areas/red-feather-lakes/', description: 'Area guide with live IRES market stats' },
