@@ -3916,6 +3916,7 @@ export const neighborhoods = [
     walkScore: 34,
     metaDescription: 'St. Michaels Greeley real estate — managed HOA neighborhood of newer homes near 47th Avenue retail. SAA Homes.',
     keywords: 'St Michaels Greeley, west Greeley HOA homes, newer Greeley subdivisions, 47th Avenue Greeley real estate, UCHealth Greeley Hospital area homes, Greeley family community',
+    youtubeId: '8xfSF6Htg08',
     neighborhoodHighlights: [
       { title: 'Managed and tidy', description: 'A functioning HOA keeps common areas, entries, and landscaping consistently maintained.' },
       { title: 'Retail at your fingertips', description: '47th Avenue and US 34 bring grocery, dining, and services within minutes.' },
@@ -3948,6 +3949,7 @@ export const neighborhoods = [
     walkScore: 25,
     metaDescription: 'T-Bone Ranch Greeley real estate — newer southwest Greeley homes with HOA parks and US 34 access. SAA Homes.',
     keywords: 'T-Bone Ranch Greeley, southwest Greeley homes, new Greeley subdivisions, Boomerang area real estate, Poudre River Trail homes Greeley, Greeley HOA communities',
+    youtubeId: 'KjzvprIkP9E',
     neighborhoodHighlights: [
       { title: 'Value plus new', description: '2000s–2010s construction at some of the best prices on the Front Range.' },
       { title: 'Parks and trails', description: 'HOA parks plus quick access to Boomerang Golf Course and the Poudre River Trail.' },
@@ -3980,6 +3982,7 @@ export const neighborhoods = [
     walkScore: 42,
     metaDescription: 'Promontory Greeley real estate — new west Greeley homes steps from CenterPlace and UCHealth. SAA Homes.',
     keywords: 'Promontory Greeley, west Greeley new construction, CenterPlace Greeley homes, UCHealth Greeley Hospital neighborhoods, Greeley townhomes, new build Weld County',
+    youtubeId: 'fefr8cyBMhk',
     neighborhoodHighlights: [
       { title: 'Walkable retail', description: 'CenterPlace — grocery, restaurants, and services — is steps from many Promontory homes.' },
       { title: 'Medical hub nearby', description: 'UCHealth Greeley Hospital is minutes away, a magnet for healthcare workers.' },
