@@ -1,0 +1,1467 @@
+{
+  "entries": 378,
+  "structural_gaps": [
+    {
+      "slug": "ridgewood-hills",
+      "citySlug": "fort-collins",
+      "cityDisplay": "Fort Collins",
+      "name": "Ridgewood Hills",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "fossil-creek",
+      "citySlug": "fort-collins",
+      "cityDisplay": "Fort Collins",
+      "name": "Fossil Creek",
+      "has_long": true,
+      "has_walk": false
+    },
+    {
+      "slug": "indian-hills",
+      "citySlug": "fort-collins",
+      "cityDisplay": "Fort Collins",
+      "name": "Indian Hills",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "sheely-addition",
+      "citySlug": "fort-collins",
+      "cityDisplay": "Fort Collins",
+      "name": "Sheely Addition",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "city-park-fc",
+      "citySlug": "fort-collins",
+      "cityDisplay": "Fort Collins",
+      "name": "City Park Area",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "horsetooth-west",
+      "citySlug": "fort-collins",
+      "cityDisplay": "Fort Collins",
+      "name": "Horsetooth / West Fort Collins",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "buckingham-fc",
+      "citySlug": "fort-collins",
+      "cityDisplay": "Fort Collins",
+      "name": "Buckingham",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "waterglen-fc",
+      "citySlug": "fort-collins",
+      "cityDisplay": "Fort Collins",
+      "name": "Waterglen",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "collindale-fc",
+      "citySlug": "fort-collins",
+      "cityDisplay": "Fort Collins",
+      "name": "Collindale",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "spring-creek-fc",
+      "citySlug": "fort-collins",
+      "cityDisplay": "Fort Collins",
+      "name": "Spring Creek",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "mariana-butte",
+      "citySlug": "loveland",
+      "cityDisplay": "Loveland",
+      "name": "Mariana Butte",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "high-plains-loveland",
+      "citySlug": "loveland",
+      "cityDisplay": "Loveland",
+      "name": "High Plains",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "lake-loveland",
+      "citySlug": "loveland",
+      "cityDisplay": "Loveland",
+      "name": "Lake Loveland Area",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "north-loveland",
+      "citySlug": "loveland",
+      "cityDisplay": "Loveland",
+      "name": "North Loveland",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "south-loveland",
+      "citySlug": "loveland",
+      "cityDisplay": "Loveland",
+      "name": "South Loveland",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "west-loveland",
+      "citySlug": "loveland",
+      "cityDisplay": "Loveland",
+      "name": "West Loveland / Foothills",
+      "has_long": true,
+      "has_walk": false
+    },
+    {
+      "slug": "sculpture-park-loveland",
+      "citySlug": "loveland",
+      "cityDisplay": "Loveland",
+      "name": "Sculpture Park / Downtown Arts",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "the-orchards-loveland",
+      "citySlug": "loveland",
+      "cityDisplay": "Loveland",
+      "name": "The Orchards",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "gateway-loveland",
+      "citySlug": "loveland",
+      "cityDisplay": "Loveland",
+      "name": "Gateway Area / I-25 Corridor",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "high-plains-village",
+      "citySlug": "loveland",
+      "cityDisplay": "Loveland",
+      "name": "High Plains Village",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "airpark-loveland",
+      "citySlug": "loveland",
+      "cityDisplay": "Loveland",
+      "name": "Loveland Airpark",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "campion-area",
+      "citySlug": "loveland",
+      "cityDisplay": "Loveland",
+      "name": "Campion / East Loveland",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "booth-park-loveland",
+      "citySlug": "loveland",
+      "cityDisplay": "Loveland",
+      "name": "Booth Park / Downtown Loveland",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "highland-meadows-windsor",
+      "citySlug": "windsor",
+      "cityDisplay": "Windsor",
+      "name": "Highland Meadows",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "the-timbers",
+      "citySlug": "windsor",
+      "cityDisplay": "Windsor",
+      "name": "The Timbers",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "windsor-highlands",
+      "citySlug": "windsor",
+      "cityDisplay": "Windsor",
+      "name": "Windsor Highlands",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "mountain-view-windsor",
+      "citySlug": "windsor",
+      "cityDisplay": "Windsor",
+      "name": "Mountain View Estates",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "pelican-lakes",
+      "citySlug": "windsor",
+      "cityDisplay": "Windsor",
+      "name": "Pelican Lakes",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "cornerstone-windsor",
+      "citySlug": "windsor",
+      "cityDisplay": "Windsor",
+      "name": "Cornerstone at Windsor",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "windsor-lake-estates",
+      "citySlug": "windsor",
+      "cityDisplay": "Windsor",
+      "name": "Windsor Lake Estates",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "saddleback-windsor",
+      "citySlug": "windsor",
+      "cityDisplay": "Windsor",
+      "name": "Saddleback at Windsor",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "windsor-green",
+      "citySlug": "windsor",
+      "cityDisplay": "Windsor",
+      "name": "Windsor Green",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "reserve-windsor",
+      "citySlug": "windsor",
+      "cityDisplay": "Windsor",
+      "name": "The Reserve at Windsor",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "mountain-shadows",
+      "citySlug": "greeley",
+      "cityDisplay": "Greeley",
+      "name": "Mountain Shadows",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "glenmere",
+      "citySlug": "greeley",
+      "cityDisplay": "Greeley",
+      "name": "Glenmere",
+      "has_long": false,
+      "has_walk": true
+    },
+    {
+      "slug": "kelly-farm",
+      "citySlug": "greeley",
+      "cityDisplay": "Greeley",
+      "name": "Kelly Farm",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "bittersweet-greeley",
+      "citySlug": "greeley",
+      "cityDisplay": "Greeley",
+      "name": "Bittersweet",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "covington-knolls",
+      "citySlug": "greeley",
+      "cityDisplay": "Greeley",
+      "name": "Covington Knolls",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "pine-ridge-estates",
+      "citySlug": "greeley",
+      "cityDisplay": "Greeley",
+      "name": "Pine Ridge Estates",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "poudre-river-ranch",
+      "citySlug": "greeley",
+      "cityDisplay": "Greeley",
+      "name": "Poudre River Ranch",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "westlake-greeley",
+      "citySlug": "greeley",
+      "cityDisplay": "Greeley",
+      "name": "Westlake",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "oxford-greeley",
+      "citySlug": "greeley",
+      "cityDisplay": "Greeley",
+      "name": "Oxford Area",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "westwood-greeley",
+      "citySlug": "greeley",
+      "cityDisplay": "Greeley",
+      "name": "Westwood",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "deerfield-greeley",
+      "citySlug": "greeley",
+      "cityDisplay": "Greeley",
+      "name": "Deerfield at Greeley",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "cranford-greeley",
+      "citySlug": "greeley",
+      "cityDisplay": "Greeley",
+      "name": "Cranford / East Greeley",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "highland-greeley",
+      "citySlug": "greeley",
+      "cityDisplay": "Greeley",
+      "name": "Highland Park / Downtown Greeley",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "stearns-greeley",
+      "citySlug": "greeley",
+      "cityDisplay": "Greeley",
+      "name": "Stearns Addition / North Greeley",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "tamarac-greeley",
+      "citySlug": "greeley",
+      "cityDisplay": "Greeley",
+      "name": "Tamarac",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "timnath-ranch",
+      "citySlug": "timnath",
+      "cityDisplay": "Timnath",
+      "name": "Timnath Ranch",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "timnath-village",
+      "citySlug": "timnath",
+      "cityDisplay": "Timnath",
+      "name": "Timnath Village",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "harmony-timnath",
+      "citySlug": "timnath",
+      "cityDisplay": "Timnath",
+      "name": "Harmony at Timnath",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "timnath-lakeside",
+      "citySlug": "timnath",
+      "cityDisplay": "Timnath",
+      "name": "Timnath Lakeside",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "preserve-timnath",
+      "citySlug": "timnath",
+      "cityDisplay": "Timnath",
+      "name": "The Preserve at Timnath",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "downtown-berthoud",
+      "citySlug": "berthoud",
+      "cityDisplay": "Berthoud",
+      "name": "Downtown Berthoud",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "west-berthoud",
+      "citySlug": "berthoud",
+      "cityDisplay": "Berthoud",
+      "name": "West Berthoud",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "berthoud-meadows",
+      "citySlug": "berthoud",
+      "cityDisplay": "Berthoud",
+      "name": "Berthoud Meadows",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "berthoud-highlands",
+      "citySlug": "berthoud",
+      "cityDisplay": "Berthoud",
+      "name": "Berthoud Highlands",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "berthoud-prairie",
+      "citySlug": "berthoud",
+      "cityDisplay": "Berthoud",
+      "name": "Berthoud Prairie",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "johnstown-commons",
+      "citySlug": "johnstown",
+      "cityDisplay": "Johnstown",
+      "name": "Johnstown Commons",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "johnstown-crossing",
+      "citySlug": "johnstown",
+      "cityDisplay": "Johnstown",
+      "name": "Johnstown Crossing",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "johnstown-village",
+      "citySlug": "johnstown",
+      "cityDisplay": "Johnstown",
+      "name": "Johnstown Village",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "johnstown-village-west",
+      "citySlug": "johnstown",
+      "cityDisplay": "Johnstown",
+      "name": "Johnstown Village West",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "johnstown-village-center",
+      "citySlug": "johnstown",
+      "cityDisplay": "Johnstown",
+      "name": "Johnstown Village Center",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "wellington-commons",
+      "citySlug": "wellington",
+      "cityDisplay": "Wellington",
+      "name": "Wellington Commons",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "wellington-hills",
+      "citySlug": "wellington",
+      "cityDisplay": "Wellington",
+      "name": "Wellington Hills",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "wellington-park",
+      "citySlug": "wellington",
+      "cityDisplay": "Wellington",
+      "name": "Wellington Park",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "wellington-crossing",
+      "citySlug": "wellington",
+      "cityDisplay": "Wellington",
+      "name": "Wellington Crossing",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "wellington-village",
+      "citySlug": "wellington",
+      "cityDisplay": "Wellington",
+      "name": "Wellington Village",
+      "has_long": true,
+      "has_walk": false
+    },
+    {
+      "slug": "downtown-longmont",
+      "citySlug": "longmont",
+      "cityDisplay": "Longmont",
+      "name": "Downtown Longmont",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "longmont-estates",
+      "citySlug": "longmont",
+      "cityDisplay": "Longmont",
+      "name": "Longmont Estates",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "lagoon-west-longmont",
+      "citySlug": "longmont",
+      "cityDisplay": "Longmont",
+      "name": "Lagoon Area / West Longmont",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "fox-hill-farm-longmont",
+      "citySlug": "longmont",
+      "cityDisplay": "Longmont",
+      "name": "Fox Hill Farm",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "evans-commons",
+      "citySlug": "evans",
+      "cityDisplay": "Evans",
+      "name": "Evans Commons",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "evans-west",
+      "citySlug": "evans",
+      "cityDisplay": "Evans",
+      "name": "West Evans",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "evans-village",
+      "citySlug": "evans",
+      "cityDisplay": "Evans",
+      "name": "Evans Village",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "firestone-commons",
+      "citySlug": "firestone",
+      "cityDisplay": "Firestone",
+      "name": "Firestone Commons",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "firestone-prairie",
+      "citySlug": "firestone",
+      "cityDisplay": "Firestone",
+      "name": "Firestone Prairie",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "firestone-crossing",
+      "citySlug": "firestone",
+      "cityDisplay": "Firestone",
+      "name": "Firestone Crossing",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "mineral-firestone",
+      "citySlug": "firestone",
+      "cityDisplay": "Firestone",
+      "name": "Mineral Road Corridor",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "st-vrain-firestone",
+      "citySlug": "firestone",
+      "cityDisplay": "Firestone",
+      "name": "St. Vrain Village at Firestone",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "frederick-crossing",
+      "citySlug": "frederick",
+      "cityDisplay": "Frederick",
+      "name": "Frederick Crossing",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "frederick-foothills",
+      "citySlug": "frederick",
+      "cityDisplay": "Frederick",
+      "name": "Frederick Foothills",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "frederick-farms",
+      "citySlug": "frederick",
+      "cityDisplay": "Frederick",
+      "name": "Frederick Farms",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "wyatt-frederick",
+      "citySlug": "frederick",
+      "cityDisplay": "Frederick",
+      "name": "Wyatt Farms",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "prairie-frederick",
+      "citySlug": "frederick",
+      "cityDisplay": "Frederick",
+      "name": "Prairie View at Frederick",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "downtown-boulder",
+      "citySlug": "boulder",
+      "cityDisplay": "Boulder",
+      "name": "Downtown Boulder",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "boulder-chautauqua",
+      "citySlug": "boulder",
+      "cityDisplay": "Boulder",
+      "name": "Chautauqua Park",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "boulder-crossroads",
+      "citySlug": "boulder",
+      "cityDisplay": "Boulder",
+      "name": "Crossroads / North Boulder",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "boulder-martin-acres",
+      "citySlug": "boulder",
+      "cityDisplay": "Boulder",
+      "name": "Martin Acres / Table Mesa",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "boulder-university-hill",
+      "citySlug": "boulder",
+      "cityDisplay": "Boulder",
+      "name": "University Hill",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "niwot-village",
+      "citySlug": "niwot",
+      "cityDisplay": "Niwot",
+      "name": "Niwot Village",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "niwot-foothills",
+      "citySlug": "niwot",
+      "cityDisplay": "Niwot",
+      "name": "Niwot Foothills",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "niwot-views",
+      "citySlug": "niwot",
+      "cityDisplay": "Niwot",
+      "name": "Niwot Views",
+      "has_long": false,
+      "has_walk": false
+    },
+    {
+      "slug": "eaton-commons",
+      "citySlug": "eaton",
+      "cityDisplay": "Eaton",
+      "name": "Eaton Commons",
+      "has_long": false,
+      "has_walk": false
+    }
+  ],
+  "unverified_names": [
+    {
+      "slug": "ptarmigan",
+      "citySlug": "fort-collins",
+      "name": "Ptarmigan",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "the-landings",
+      "citySlug": "fort-collins",
+      "name": "The Landings at Fossil Creek",
+      "best_plat_score": 0.33
+    },
+    {
+      "slug": "sheely-addition",
+      "citySlug": "fort-collins",
+      "name": "Sheely Addition",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "tapestry",
+      "citySlug": "fort-collins",
+      "name": "Tapestry",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "trailhead",
+      "citySlug": "fort-collins",
+      "name": "Trailhead",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "red-fox-hills",
+      "citySlug": "fort-collins",
+      "name": "Red Fox Hills",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "braiden-fc",
+      "citySlug": "fort-collins",
+      "name": "Braiden",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "swan-addition",
+      "citySlug": "fort-collins",
+      "name": "Swan Addition",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "mcmurry-addition",
+      "citySlug": "fort-collins",
+      "name": "McMurry Addition",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "lesatz-addition",
+      "citySlug": "fort-collins",
+      "name": "Lesatz Addition",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "waverly-fc",
+      "citySlug": "fort-collins",
+      "name": "Waverly",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "prospectors-ridge",
+      "citySlug": "fort-collins",
+      "name": "Prospector's Ridge",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "rigden-farm",
+      "citySlug": "fort-collins",
+      "name": "The Cottages at Rigden Farm",
+      "best_plat_score": 0.5
+    },
+    {
+      "slug": "deer-meadows",
+      "citySlug": "loveland",
+      "name": "Deer Meadows",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "centerra",
+      "citySlug": "loveland",
+      "name": "Centerra / Southwest Loveland",
+      "best_plat_score": 0.5
+    },
+    {
+      "slug": "hunters-run",
+      "citySlug": "loveland",
+      "name": "Hunter's Run",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "west-loveland",
+      "citySlug": "loveland",
+      "name": "West Loveland / Foothills",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "campion-area",
+      "citySlug": "loveland",
+      "name": "Campion / East Loveland",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "namaqua",
+      "citySlug": "loveland",
+      "name": "Namaqua",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "buckskin-heights",
+      "citySlug": "loveland",
+      "name": "Buckskin Heights",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "fox-run-loveland",
+      "citySlug": "loveland",
+      "name": "Fox Run",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "vineyard-loveland",
+      "citySlug": "loveland",
+      "name": "The Vineyard",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "northgate-loveland",
+      "citySlug": "loveland",
+      "name": "Northgate",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "sunset-vista-loveland",
+      "citySlug": "loveland",
+      "name": "Sunset Vista",
+      "best_plat_score": 0.5
+    },
+    {
+      "slug": "cedar-creek-loveland",
+      "citySlug": "loveland",
+      "name": "Cedar Creek",
+      "best_plat_score": 0.5
+    },
+    {
+      "slug": "eagle-crest-loveland",
+      "citySlug": "loveland",
+      "name": "Eagle Crest",
+      "best_plat_score": 0.5
+    },
+    {
+      "slug": "westhaven-loveland",
+      "citySlug": "loveland",
+      "name": "Westhaven",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "sierra-mesa-loveland",
+      "citySlug": "loveland",
+      "name": "Sierra Mesa",
+      "best_plat_score": 0.5
+    },
+    {
+      "slug": "fairways-olde-course",
+      "citySlug": "loveland",
+      "name": "Fairways at the Olde Course",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "buckskin-village",
+      "citySlug": "loveland",
+      "name": "Buckskin Village",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "highpointe",
+      "citySlug": "windsor",
+      "name": "Highpointe",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "greenspire",
+      "citySlug": "windsor",
+      "name": "Greenspire at Windsor Lake",
+      "best_plat_score": 0.5
+    },
+    {
+      "slug": "highland-meadows-windsor",
+      "citySlug": "windsor",
+      "name": "Highland Meadows",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "the-timbers",
+      "citySlug": "windsor",
+      "name": "The Timbers",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "windsor-highlands",
+      "citySlug": "windsor",
+      "name": "Windsor Highlands",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "pelican-lakes",
+      "citySlug": "windsor",
+      "name": "Pelican Lakes",
+      "best_plat_score": 0.5
+    },
+    {
+      "slug": "saddleback-windsor",
+      "citySlug": "windsor",
+      "name": "Saddleback at Windsor",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "windsor-green",
+      "citySlug": "windsor",
+      "name": "Windsor Green",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "seven-lakes-windsor",
+      "citySlug": "windsor",
+      "name": "Seven Lakes",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "windsor-ridge",
+      "citySlug": "windsor",
+      "name": "Windsor Ridge",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "deerfield-greeley",
+      "citySlug": "greeley",
+      "name": "Deerfield at Greeley",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "cranford-greeley",
+      "citySlug": "greeley",
+      "name": "Cranford / East Greeley",
+      "best_plat_score": 0.5
+    },
+    {
+      "slug": "stearns-greeley",
+      "citySlug": "greeley",
+      "name": "Stearns Addition / North Greeley",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "tamarac-greeley",
+      "citySlug": "greeley",
+      "name": "Tamarac",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "monfort-park",
+      "citySlug": "greeley",
+      "name": "Monfort Park",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "canyon-views-greeley",
+      "citySlug": "greeley",
+      "name": "Canyon Views",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "timnath-ranch",
+      "citySlug": "timnath",
+      "name": "Timnath Ranch",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "timnath-village",
+      "citySlug": "timnath",
+      "name": "Timnath Village",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "harmony-timnath",
+      "citySlug": "timnath",
+      "name": "Harmony at Timnath",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "timnath-lakeside",
+      "citySlug": "timnath",
+      "name": "Timnath Lakeside",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "preserve-timnath",
+      "citySlug": "timnath",
+      "name": "The Preserve at Timnath",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "timnath-south",
+      "citySlug": "timnath",
+      "name": "South Timnath",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "timnath-north",
+      "citySlug": "timnath",
+      "name": "North Timnath",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "twin-ponds-timnath",
+      "citySlug": "timnath",
+      "name": "Twin Ponds",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "berthoud-meadows",
+      "citySlug": "berthoud",
+      "name": "Berthoud Meadows",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "berthoud-highlands",
+      "citySlug": "berthoud",
+      "name": "Berthoud Highlands",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "berthoud-prairie",
+      "citySlug": "berthoud",
+      "name": "Berthoud Prairie",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "berthoud-vista",
+      "citySlug": "berthoud",
+      "name": "Berthoud Vista",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "sierra-berthoud",
+      "citySlug": "berthoud",
+      "name": "Sierra Addition",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "arroyo-berthoud",
+      "citySlug": "berthoud",
+      "name": "Arroyo Lindo",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "johnstown-commons",
+      "citySlug": "johnstown",
+      "name": "Johnstown Commons",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "johnstown-crossing",
+      "citySlug": "johnstown",
+      "name": "Johnstown Crossing",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "johnstown-village",
+      "citySlug": "johnstown",
+      "name": "Johnstown Village",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "thompson-river-johnstown",
+      "citySlug": "johnstown",
+      "name": "Thompson River Reserve",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "broadway-johnstown",
+      "citySlug": "johnstown",
+      "name": "Broadway Addition",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "wellington-hills",
+      "citySlug": "wellington",
+      "name": "Wellington Hills",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "wellington-park",
+      "citySlug": "wellington",
+      "name": "Wellington Park",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "wellington-crossing",
+      "citySlug": "wellington",
+      "name": "Wellington Crossing",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "wellington-village",
+      "citySlug": "wellington",
+      "name": "Wellington Village",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "evans-village",
+      "citySlug": "evans",
+      "name": "Evans Village",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "evans-ranch",
+      "citySlug": "evans",
+      "name": "Evans Ranch",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "evans-oaks",
+      "citySlug": "evans",
+      "name": "Evans Oaks",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "firestone-prairie",
+      "citySlug": "firestone",
+      "name": "Firestone Prairie",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "firestone-crossing",
+      "citySlug": "firestone",
+      "name": "Firestone Crossing",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "firestone-preserve",
+      "citySlug": "firestone",
+      "name": "The Preserve at Firestone",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "firestone-park",
+      "citySlug": "firestone",
+      "name": "Firestone Park",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "firestone-village",
+      "citySlug": "firestone",
+      "name": "Firestone Village",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "coal-ridge",
+      "citySlug": "firestone",
+      "name": "Coal Ridge",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "frederick-crossing",
+      "citySlug": "frederick",
+      "name": "Frederick Crossing",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "bluestem-frederick",
+      "citySlug": "frederick",
+      "name": "Bluestem",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "frederick-foothills",
+      "citySlug": "frederick",
+      "name": "Frederick Foothills",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "frederick-farms",
+      "citySlug": "frederick",
+      "name": "Frederick Farms",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "wyatt-frederick",
+      "citySlug": "frederick",
+      "name": "Wyatt Farms",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "prairie-frederick",
+      "citySlug": "frederick",
+      "name": "Prairie View at Frederick",
+      "best_plat_score": 0.5
+    },
+    {
+      "slug": "frederick-heights",
+      "citySlug": "frederick",
+      "name": "Frederick Heights",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "frederick-meadows",
+      "citySlug": "frederick",
+      "name": "Frederick Meadows",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "wyatt-addition-frederick",
+      "citySlug": "frederick",
+      "name": "Wyatt Addition",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "mead-town",
+      "citySlug": "mead",
+      "name": "Mead Town",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "milliken-town",
+      "citySlug": "milliken",
+      "name": "Milliken Town",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "woodridge-evans",
+      "citySlug": "evans",
+      "name": "Woodridge at Evans",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "masters-evans",
+      "citySlug": "evans",
+      "name": "The Masters at Evans",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "poudre-crest-evans",
+      "citySlug": "evans",
+      "name": "Poudre Crest at Evans",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "somerset-johnstown",
+      "citySlug": "johnstown",
+      "name": "Somerset at Johnstown",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "fairfield-johnstown",
+      "citySlug": "johnstown",
+      "name": "Fairfield at Johnstown",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "prairie-springs-johnstown",
+      "citySlug": "johnstown",
+      "name": "Prairie Springs at Johnstown",
+      "best_plat_score": 0.5
+    },
+    {
+      "slug": "alpine-park-wellington",
+      "citySlug": "wellington",
+      "name": "Alpine Park at Wellington",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "mountain-shadows-wellington",
+      "citySlug": "wellington",
+      "name": "Mountain Shadows at Wellington",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "timber-ridge-wellington",
+      "citySlug": "wellington",
+      "name": "Timber Ridge at Wellington",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "twin-peaks-berthoud",
+      "citySlug": "berthoud",
+      "name": "Twin Peaks at Berthoud",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "cimarron-berthoud",
+      "citySlug": "berthoud",
+      "name": "Cimarron at Berthoud",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "foothills-berthoud",
+      "citySlug": "berthoud",
+      "name": "Foothills at Berthoud",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "fields-at-timnath",
+      "citySlug": "timnath",
+      "name": "The Fields at Timnath",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "iron-horse-timnath",
+      "citySlug": "timnath",
+      "name": "Iron Horse at Timnath",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "bridle-ridge-timnath",
+      "citySlug": "timnath",
+      "name": "Bridle Ridge at Timnath",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "westchester-timnath",
+      "citySlug": "timnath",
+      "name": "Westchester at Timnath",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "sierra-vista-firestone",
+      "citySlug": "firestone",
+      "name": "Sierra Vista at Firestone",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "carter-lake-frederick",
+      "citySlug": "frederick",
+      "name": "Carter Lake at Frederick",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "prairie-center-brighton",
+      "citySlug": "brighton",
+      "name": "Prairie Center",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "bromley-park-brighton",
+      "citySlug": "brighton",
+      "name": "Bromley Park",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "cherry-meadows-brighton",
+      "citySlug": "brighton",
+      "name": "Cherry Meadows",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "todd-creek-brighton",
+      "citySlug": "brighton",
+      "name": "Todd Creek",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "sugar-creek-brighton",
+      "citySlug": "brighton",
+      "name": "Sugar Creek",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "indigo-trails-brighton",
+      "citySlug": "brighton",
+      "name": "Indigo Trails",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "brighton-crossing",
+      "citySlug": "brighton",
+      "name": "Brighton Crossing",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "high-drive-estes-park",
+      "citySlug": "estes-park",
+      "name": "High Drive",
+      "best_plat_score": 0.5
+    },
+    {
+      "slug": "lupton-village-fort-lupton",
+      "citySlug": "fort-lupton",
+      "name": "Lupton Village",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "aristocrat-ranchettes-fort-lupton",
+      "citySlug": "fort-lupton",
+      "name": "Aristocrat Ranchettes",
+      "best_plat_score": 0.0
+    },
+    {
+      "slug": "appaloosa-acres-eaton",
+      "citySlug": "eaton",
+      "name": "Gilbaughs Appaloosa Acres",
+      "best_plat_score": 0.0
+    }
+  ]
+}
