@@ -3700,7 +3700,7 @@ export const blogPosts = [
   },
   {
     slug: 'cash-home-buyers-fort-collins-northern-colorado',
-    title: 'Cash Home Buyers vs. Listing in Fort Collins',
+    title: 'Cash Home Buyers in Fort Collins vs. Listing',
     excerpt: 'Cash offer or listing? Compare net proceeds, timelines and risk for Fort Collins sellers, and see which path nets more in 2026. Call (970) 999-1407.',
     keywords: 'cash home buyers vs realtor Fort Collins, cash offer vs listing Fort Collins, should I sell my house to a cash buyer, is a cash offer fair Fort Collins, cash offer vs working with a realtor, sell my home Fort Collins, selling a house Northern Colorado, cash buyer vs traditional listing',
     date: '2026-08-24',
