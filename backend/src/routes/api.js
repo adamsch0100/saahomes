@@ -1,6 +1,7 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import getPool from '../config/database.js';
+import transporter from '../config/email.js';
 import { submitContactForm } from '../controllers/contactController.js';
 import { submitMarketReportForm } from '../controllers/marketReportController.js';
 import { submitChfaLeadForm } from '../controllers/chfaLeadController.js';
@@ -268,6 +269,41 @@ router.get('/email/open/:token', async (req, res) => {
     // Never fail the pixel — tracking is best-effort
   }
   res.status(200).end(PIXEL_GIF);
+});
+
+// ── Mail transport health probe (public, thin) ────────────────────────────
+// The watch probes this URL so a dead SMTP credential is caught in minutes
+// instead of at a visitor's form submit (incident: 535 auth failures went
+// unnoticed for an hour). Answers 200 only when Gmail SMTP auth succeeds;
+// 503 when the credential is dead or unset. Cached so the probe list and any
+// abuse cannot hammer Gmail with a fresh SMTP connection each hit.
+const MAIL_TEST_TTL = 5 * 60 * 1000;
+let mailTestCache = { at: 0, status: 503, payload: { ok: false, smtp: 'unknown' } };
+
+async function probeMailTransport() {
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    return { status: 503, payload: { ok: false, smtp: 'not-configured' } };
+  }
+  try {
+    await transporter.verify();
+    return { status: 200, payload: { ok: true, smtp: 'ok' } };
+  } catch (error) {
+    return {
+      status: 503,
+      payload: { ok: false, smtp: 'error', code: error.responseCode || null },
+    };
+  }
+}
+
+router.get('/mail-test', async (req, res) => {
+  if (!mailTestCache.payload || Date.now() - mailTestCache.at > MAIL_TEST_TTL) {
+    const result = await probeMailTransport();
+    mailTestCache = { at: Date.now(), ...result };
+  }
+  res.status(mailTestCache.status).json({
+    ...mailTestCache.payload,
+    checkedAt: new Date(mailTestCache.at).toISOString(),
+  });
 });
 
 export default router;
