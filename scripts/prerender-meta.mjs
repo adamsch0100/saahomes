@@ -1535,7 +1535,7 @@ const MONEY_PAGE_CONTENT = {
       {
         heading: 'Your Northern Colorado Real Estate Experts',
         paragraphs: [
-          'Schwartz and Associates (SAA Homes) is a trusted Northern Colorado real estate team serving home buyers and sellers across all 27 communities in Larimer, Weld, and Boulder counties. From Fort Collins and Loveland to Windsor, Greeley, Timnath, Boulder, and beyond, our local expertise helps clients make confident real estate decisions.',
+          'Schwartz and Associates (SAA Homes) is a trusted Northern Colorado real estate team led by Adam Schwartz, a Fort Collins realtor, serving home buyers and sellers across all 27 communities in Larimer, Weld, and Boulder counties. From Fort Collins and Loveland to Windsor, Greeley, Timnath, Boulder, and beyond, our local expertise helps clients make confident real estate decisions.',
           'Whether you are buying your first home, selling to move up or downsize, or exploring CHFA down payment assistance programs, Adam and Mandi Schwartz bring personalized service, market knowledge, and a commitment to your success. We represent clients under Coldwell Banker Realty from our Fort Collins office at 3665 John F Kennedy Parkway, Suite 210.',
         ],
       },
