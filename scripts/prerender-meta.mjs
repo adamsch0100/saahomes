@@ -2485,14 +2485,8 @@ async function main() {
       console.log(`  Body: injected city homes-for-sale page "${cityHomes.city}" with intro + links + attribution`);
     } else if (route.path === CITATION_HUB_PATH) {
       html = injectCitationHubBody(html);
-      console.log(
-        `  Body: injected citation hub with ${CITATION_HUB_STATS.length} verified stat cards + FAQ + methodology`
-      );
     } else if (route.path === CHFA_COUNTY_LIMITS_PATH) {
       html = injectChfaCountyLimitsBody(html);
-      console.log(
-        `  Body: injected CHFA county limits table with ${CHFA_COUNTY_TABLE_ROWS.length} verified rows + cite lines + FAQ`
-      );
     } else {
       html = injectGenericBody(html, route);
     }
