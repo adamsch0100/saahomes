@@ -4079,6 +4079,7 @@ export const neighborhoods = [
     walkScore: 35,
     metaDescription: 'Westmoor Greeley real estate — established west Greeley family homes near the 47th Avenue retail corridor. SAA Homes.',
     keywords: 'Westmoor Greeley, west Greeley homes for sale, Greeley established subdivisions, 47th Avenue Greeley neighborhoods, Greeley family homes, Greeley West boundary homes',
+    youtubeId: 'RIEzIJ9Zc8Y',
     neighborhoodHighlights: [
       { title: 'West-side retail hub', description: 'The 47th Avenue and US 34 corridors put grocery, dining, and services minutes away.' },
       { title: 'Mature and family-friendly', description: 'Settled 1990s–2000s streets with HOA-maintained parks and landscaping.' },
@@ -5540,6 +5541,7 @@ export const neighborhoods = [
     walkScore: 40,
     metaDescription: 'Golden Ponds Longmont real estate — pond-side southwest Longmont homes with trails, wetlands, and St. Vrain schools. SAA Homes.',
     keywords: 'Golden Ponds Longmont, Golden Ponds Nature Area homes, southwest Longmont neighborhoods, pond view homes Longmont, Longmont trails homes, St Vrain Valley school homes',
+    youtubeId: 'IELDIBrokG8',
     neighborhoodHighlights: [
       { title: 'Pond-side living', description: 'Golden Ponds\' shoreline and 1.7 miles of trails wrap the neighborhood.' },
       { title: 'Nature at the door', description: 'Herons, ducks, and geese make the ponds a daily wildlife show.' },
@@ -5572,6 +5574,7 @@ export const neighborhoods = [
     walkScore: 45,
     metaDescription: 'Kensington Longmont real estate — established northeast Longmont family homes near parks and Main Street. SAA Homes.',
     keywords: 'Kensington Longmont, northeast Longmont homes, Longmont family neighborhoods, Indian Peaks Elementary homes, Longmont subdivisions 17th Avenue, St Vrain Valley real estate',
+    youtubeId: 'FZu5uVqkmJk',
     neighborhoodHighlights: [
       { title: 'Family parks', description: 'Playgrounds and green space within walking distance on most streets.' },
       { title: 'North-end base', description: 'Minutes to Main Street, the Village at the Peaks, and the I-25 corridor.' },
