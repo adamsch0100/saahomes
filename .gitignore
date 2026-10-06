@@ -87,3 +87,16 @@ backend/test-*.js
 # Secrets — never commit real credentials (2026-08-11 security fix)
 RAILWAY_ENV_VARS.txt
 *.env.vars
+
+# Generated runtime artifacts (any checkout; never source) — fix-92978-07
+.venv/
+__pycache__/
+*.pyc
+.scratch-digest/
+
+# Local OAuth credentials that live only in a working copy — never commit
+client_secret.json
+youtube_token.pickle
+
+# Backup copies
+*.bak-*
