@@ -2131,7 +2131,7 @@ export const blogPosts = [
   },
   {
     slug: 'selling-your-home-in-fort-collins',
-    title: 'Sell My House in Fort Collins: 2026 Seller Guide',
+    title: 'Sell My Home in Fort Collins: 2026 Seller Guide',
     excerpt: 'Selling your Fort Collins home in 2026? Compare cash offers vs. listing, review current market data, and get a free home valuation. Call (970) 999-1407.',
     date: '2026-07-01',
     category: 'Seller Tips',
