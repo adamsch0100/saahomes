@@ -63,7 +63,7 @@ const ChfaCountyLimitsPage = lazy(() => import("./pages/ChfaCountyLimitsPage.jsx
 function PageLoadFallback() {
   return (
     <div
-      className="min-h-[50vh] w-full animate-pulse"
+      className="min-h-screen w-full animate-pulse"
       role="status"
       aria-live="polite"
       aria-label="Loading page"
@@ -88,8 +88,26 @@ function PageLoadFallback() {
   );
 }
 
+/**
+ * Lazy routes suspend up to the single boundary in AppLayout, which wraps the
+ * page content AND the footer. A boundary here (inside <main>) would let the
+ * footer paint first while the page chunk is still loading.
+ */
 function LazyPage({ children }) {
-  return <Suspense fallback={<PageLoadFallback />}>{children}</Suspense>;
+  return children;
+}
+
+/**
+ * Mounts only once the page content has resolved (it sits inside the same
+ * Suspense boundary). Flags <body> so CSS can reveal the prerendered sitewide
+ * links band that lives outside #root — otherwise it paints before React and
+ * reads as a footer loading ahead of the page.
+ */
+function AppReady() {
+  useEffect(() => {
+    document.body.classList.add('saa-app-ready');
+  }, []);
+  return null;
 }
 
 function AppLayout({ children }) {
@@ -102,26 +120,29 @@ function AppLayout({ children }) {
   
   // App consoles (admin + agent) — no marketing chrome
   if (isAdminPage || isAgentPage) {
-    return <>{children}</>;
+    return <Suspense fallback={<PageLoadFallback />}>{children}</Suspense>;
   }
   
   return (
     <>
       <Header />
       <Breadcrumbs />
-      <main
-        id="page-container"
-        className={
-          isPropertiesSearch
-            ? "w-full overflow-hidden"
-            : "w-full pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-0"
-        }
-      >
-        {children}
-      </main>
-      {!isPropertiesSearch && <FloatingContactBar />}
-      <LeadCaptureChat />
-      {!isPropertiesSearch && <Footer />}
+      <Suspense fallback={<PageLoadFallback />}>
+        <main
+          id="page-container"
+          className={
+            isPropertiesSearch
+              ? "w-full overflow-hidden"
+              : "w-full pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-0"
+          }
+        >
+          {children}
+        </main>
+        {!isPropertiesSearch && <FloatingContactBar />}
+        <LeadCaptureChat />
+        {!isPropertiesSearch && <Footer />}
+        <AppReady />
+      </Suspense>
     </>
   );
 }

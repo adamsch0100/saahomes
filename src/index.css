@@ -200,6 +200,24 @@ body.properties-search-page .prerendered-money-content {
   border: 0 !important;
 }
 
+/* Until the React page has rendered, keep the sitewide links band out of
+   view (still in the DOM for crawlers). It sits after #root, so on first
+   paint it was the only visible block and looked like the footer loading
+   before the page. AppReady in App.jsx adds body.saa-app-ready once the
+   page content and footer have mounted, and the band shows below them. */
+body:not(.saa-app-ready) .prerendered-site-links {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
 /* ─────────────────────────────────────────────────────────────
    Prerendered sitewide links band ("Explore Northern Colorado
    Real Estate") — injected by scripts/prerender-meta.mjs into
