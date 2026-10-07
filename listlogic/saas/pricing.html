@@ -98,6 +98,25 @@
 
 .fineprint { text-align: center; color: var(--muted); font-size: 0.88rem; max-width: 620px; margin: 0 auto; }
 
+.facts-section { padding: 60px 0 0; }
+.facts-section h2 { font-family: 'Fraunces', serif; font-size: clamp(1.4rem, 2.6vw, 1.9rem); letter-spacing: -0.015em; margin-bottom: 10px; }
+.facts-section .sub { color: var(--muted); max-width: 660px; margin-bottom: 24px; }
+.fact-card {
+  background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--teal);
+  border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 22px 24px; margin-bottom: 26px;
+}
+.fact-card .fact-num { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; }
+.fact-card .fact-ctx { color: var(--ink-2); font-size: 0.95rem; margin: 2px 0 10px; }
+.fact-card .fact-src { color: var(--muted); font-size: 0.82rem; margin: 0; }
+.cmp-table-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+table.cmp { width: 100%; border-collapse: collapse; min-width: 640px; }
+table.cmp th, table.cmp td { padding: 14px 18px; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.cmp th { background: #f1ece1; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; }
+table.cmp tr:last-child td { border-bottom: none; }
+table.cmp td.rowhead { font-weight: 700; }
+table.cmp .lead { color: var(--navy); font-weight: 800; }
+.cmp-note { color: var(--muted); font-size: 0.82rem; margin-top: 12px; }
+
 @media (max-width: 980px) { .plans { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 620px) { .plans { grid-template-columns: 1fr; } }
 </style>
@@ -232,6 +251,54 @@
     New to the term? <a href="/glossary/what-is-a-cma-in-real-estate/">What is a CMA in real estate?</a> is the plain-English definition, with a live sample.
   </p>
 </div>
+
+<section class="facts-section" aria-labelledby="costFactsTitle">
+  <div class="container">
+    <h2 id="costFactsTitle">What CMA software costs in 2026</h2>
+    <p class="sub">New-home supply was 8.5 months in August 2026 — a soft market, where the pricing conversation decides listings. Here is what agents pay for the tools, with the source for each number.</p>
+
+    <div class="fact-card">
+      <div class="fact-num">8.5 months</div>
+      <p class="fact-ctx">Supply of new homes at the August 2026 sales pace, down from 9.0 months in July.</p>
+      <p class="fact-src">Source: <a href="https://www.census.gov/construction/nrs/current/index.html" target="_blank" rel="noopener">U.S. Census Bureau &amp; HUD, New Residential Sales</a> · released 2026-09-24. Full sourced set: <a href="/resources/housing-market-statistics/">housing market statistics</a>.</p>
+    </div>
+
+    <div class="cmp-table-wrap">
+      <table class="cmp">
+        <thead>
+          <tr>
+            <th>Tool</th>
+            <th>What you pay</th>
+            <th>Source</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rowhead">ListLogic</td>
+            <td class="lead">Free demo · $20 one-shot · $39/mo · $29/seat/mo (5-seat minimum)</td>
+            <td>Listed on this page; annual saves about two months</td>
+          </tr>
+          <tr>
+            <td class="rowhead">Cloud CMA</td>
+            <td>About $49/mo standalone; often bundled through your MLS, so your cost varies</td>
+            <td>Third-party pricing reviews, checked 2026-10-01 — <a href="vs-cloud-cma.html">Cloud CMA comparison</a></td>
+          </tr>
+          <tr>
+            <td class="rowhead">ToolkitCMA</td>
+            <td>Free one-page CMA; paid plans may exist — check current pricing on their site</td>
+            <td>No verified public price — <a href="vs-toolkitcma.html">ToolkitCMA comparison</a></td>
+          </tr>
+          <tr>
+            <td class="rowhead">RPR</td>
+            <td>Included with NAR membership at no additional cost</td>
+            <td><a href="https://blog.narrpr.com/support/what-is-rpr" target="_blank" rel="noopener">NAR / RPR support</a>, checked 2026-10-01 — <a href="vs-rpr.html">RPR comparison</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="cmp-note">Competitor plans and MLS bundles change; verify current pricing with each vendor before you buy. ListLogic prices are the ones on this page.</p>
+  </div>
+</section>
 
 <div style="height:64px"></div>
 
