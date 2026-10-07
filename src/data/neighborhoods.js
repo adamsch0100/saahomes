@@ -5913,6 +5913,7 @@ export const neighborhoods = [
     walkScore: 60,
     metaDescription: 'Prospect New Town Longmont real estate - award-winning New Urbanist community with walkable town center and architecturally diverse homes. SAA Homes.',
     keywords: 'Prospect New Town Longmont, New Urbanist community Longmont, walkable Longmont neighborhood, Prospect Town Center, architect designed homes Longmont, Longmont real estate',
+    youtubeId: 'J3Gs3dS6-QY',
     neighborhoodHighlights: [
       { title: 'Award-winning design', description: 'Prospect is a nationally recognized New Urbanist community featured in The New York Times, Dwell, and Architectural Record.' },
       { title: 'Walkable town center', description: 'The Prospect Town Center features coffee shops, restaurants, and retail - walk from your front door.' },
@@ -5947,6 +5948,7 @@ export const neighborhoods = [
     walkScore: 38,
     metaDescription: 'Prairie Ridge Longmont real estate - established family subdivision near St. Vrain Greenway and Kanemoto Park. SAA Homes.',
     keywords: 'Prairie Ridge Longmont, southeast Longmont homes, St. Vrain Greenway Longmont, established Longmont subdivisions, family neighborhoods Longmont, Kanemoto Park area, Village at the Peaks Longmont',
+    youtubeId: '5QS2rWYJv2o',
     neighborhoodHighlights: [
       { title: 'Family-friendly', description: 'Community park, quiet streets, and a strong family atmosphere make Prairie Ridge a top family choice.' },
       { title: 'Trail access', description: 'The St. Vrain Greenway Trail connects the neighborhood to downtown Longmont and beyond.' },
@@ -5981,6 +5983,7 @@ export const neighborhoods = [
     walkScore: 55,
     metaDescription: 'St. Vrain Village Longmont real estate - historic bungalows and craftsman homes along the St. Vrain Greenway near Main Street. SAA Homes.',
     keywords: 'St. Vrain Village Longmont, historic Longmont homes, bungalows Longmont, Main Street Longmont area, St. Vrain Greenway homes, walkable Longmont neighborhoods, Roosevelt Park Longmont, Central Elementary Longmont',
+    youtubeId: 'bA6Z-Sec2Wo',
     neighborhoodHighlights: [
       { title: 'Historic character', description: 'Well-preserved early-1900s bungalows and craftsman homes in Longmont\'s original residential district.' },
       { title: 'Walkable location', description: 'Walk to Main Street restaurants, Roosevelt Park, the Longmont Museum, and the Farmers Market.' },
