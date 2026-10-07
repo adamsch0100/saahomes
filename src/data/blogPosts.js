@@ -9699,7 +9699,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/foreclosure-short-sale-northern-colorado-guide.jpg',
     readTime: '8 min read',
-    youtubeId: 'UuXhFgPsHXY',
+    youtubeId: 'MYj-qsPIpb0',
     keywords: 'short sale greeley, greeley short sale, how to short sale my home greeley, short sale vs foreclosure colorado, short sale process colorado, underwater mortgage greeley, distressed home sale greeley, cash home buyers greeley, sell my house fast greeley, weld county short sale',
     relatedLinks: [
       { title: 'Foreclosure & Short Sale Guide', href: '/blog/foreclosure-short-sale-northern-colorado-guide/', description: 'The full Northern Colorado process' },
