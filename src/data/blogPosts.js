@@ -2742,7 +2742,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/selling-your-home-in-loveland.jpg',
     readTime: '10 min read',
-    youtubeId: '8sR3GlX1Mw4',
+    youtubeId: 'XljDXMkiDso',
     keywords: 'sell my home loveland colorado, loveland co real estate agent, loveland colorado homes for sale, selling a house in loveland co, loveland home selling guide, how to sell a home in loveland colorado, listing agent loveland co, loveland co home value, sell house loveland',
     relatedLinks: [
       { title: 'sell your home in Loveland', href: '/northern-colorado-areas/loveland/', description: 'Neighborhoods, schools and market data' },
