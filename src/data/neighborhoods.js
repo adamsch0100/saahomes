@@ -6017,6 +6017,7 @@ export const neighborhoods = [
     walkScore: 42,
     metaDescription: 'Warendorf Longmont real estate — mature northeast Longmont homes on established lots near Hover Road. SAA Homes.',
     keywords: 'Warendorf Longmont, northeast Longmont real estate, mid-century homes Longmont, established Longmont neighborhoods, Hover Road Longmont homes, St Vrain Valley school zone',
+    youtubeId: 'fjmXerTj-1Q',
     neighborhoodHighlights: [
       { title: 'Sixty years of character', description: 'Mature 1960s–70s ranches and split-levels under established trees.' },
       { title: 'Everything is close', description: 'Hover Road, Main Street, downtown, and I-25 within a 15-minute radius.' },
@@ -6050,6 +6051,7 @@ export const neighborhoods = [
     walkScore: 35,
     metaDescription: 'Western Hills Longmont real estate - established west Longmont subdivision with mountain views and community pool. SAA Homes.',
     keywords: 'Western Hills Longmont, west Longmont homes, mountain view Longmont, Twin Peaks Golf Course area, established Longmont subdivisions, Indian Peak Elementary, Highway 119 Longmont',
+    youtubeId: 'sqH4aoDQp7M',
     neighborhoodHighlights: [
       { title: 'Mountain views', description: 'Many homes in Western Hills offer views of Longs Peak, Mount Meeker, and the Front Range.' },
       { title: 'Community pool', description: 'The neighborhood pool and clubhouse provide a summer oasis for families.' },
@@ -6084,6 +6086,7 @@ export const neighborhoods = [
     walkScore: 38,
     metaDescription: 'Fox Hill Longmont real estate - golf course and established homes near Fox Hill Country Club with St. Vrain Greenway access. SAA Homes.',
     keywords: 'Fox Hill Longmont, Fox Hill Country Club, south Longmont golf course homes, St. Vrain Greenway Longmont, established Longmont neighborhoods, McIntosh Lake area, Longmont family homes, Martin Street Longmont',
+    youtubeId: 'kzkR3oyXkQk',
     neighborhoodHighlights: [
       { title: 'Golf course setting', description: 'Homes overlooking the Fox Hill Country Club offer fairway views and a peaceful golf course setting.' },
       { title: 'Greenway trail', description: 'The St. Vrain Greenway runs through Fox Hill, providing paved trail access throughout Longmont.' },
