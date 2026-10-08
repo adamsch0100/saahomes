@@ -2629,7 +2629,7 @@ export const blogPosts = [
     category: 'Buyer Tips',
     image: '/images/buying-a-home-in-greeley.jpg',
     readTime: '8 min read',
-    youtubeId: '-QH0MqSSS7A',
+    youtubeId: '5MemaJazo5E',
     keywords: 'greeley homes for sale, greeley colorado homes for sale, greeley co real estate, buying a home in greeley colorado, homes for sale in greeley co, moving to greeley colorado, greeley neighborhoods, greeley co realtor, greeley colorado real estate agent',
     relatedLinks: [
       { title: 'Greeley homes for sale', href: '/northern-colorado-areas/greeley/', description: 'Neighborhoods, schools and homes for sale' },
