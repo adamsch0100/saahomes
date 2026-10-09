@@ -114,7 +114,7 @@ export default function ChfaSchoolsToHomePage() {
   return (
     <>
       <SEO
-        exactTitle="CHFA Schools To Home 2026: 25% DPA, $0 Monthly | CO Teachers"
+        exactTitle="CHFA Schools To Home 2026: 25% DPA for CO Teachers"
         description="CO teachers & public school staff: CHFA Schools To Home provides up to 25% down payment assistance with no monthly payment. Check eligibility and income limits. Free consult: (970) 999-1407."
         keywords="CHFA Schools To Home, Colorado teacher home loan, educator down payment assistance Colorado, CHFA DPA Colorado, public school employee home buying, Colorado first time home buyer program, teacher mortgage Colorado, Fort Collins teacher home loan, Denver educator homeownership, CHFA down payment assistance 2026, shared appreciation mortgage Colorado"
         canonical="https://saahomes.com/chfa-schools-to-home/"

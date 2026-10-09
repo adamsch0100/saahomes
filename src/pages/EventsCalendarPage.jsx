@@ -102,7 +102,7 @@ export default function EventsCalendarPage() {
   return (
     <>
       <SEO
-        exactTitle="Northern Colorado Events Calendar 2026 | Festivals & Things to Do | SAA Homes"
+        exactTitle="Northern Colorado Events Calendar 2026 | SAA Homes"
         description="Browse Northern Colorado events by month or city — festivals, farmers markets, rodeos, and community celebrations across Fort Collins, Loveland, Windsor, Greeley, and 27 Front Range communities."
         canonical="https://saahomes.com/events/"
         ogTitle="Northern Colorado Events Calendar | SAA Homes"
@@ -127,7 +127,7 @@ export default function EventsCalendarPage() {
       />
 
       {/* Hero */}
-      <section className="relative min-h-[18rem] sm:h-96 bg-cover bg-center flex items-center justify-center pt-28 sm:pt-32 pb-8"
+      <section className="relative min-h-[18rem] sm:min-h-[24rem] bg-cover bg-center flex items-center justify-center pt-28 sm:pt-32 pb-8"
         style={{ backgroundImage: "url('/images/Northern Colorado.webp')" }}>
         <div className="absolute inset-0 bg-black/60"></div>
         <div className="relative z-10 max-w-6xl mx-auto px-6 py-8 text-center">
@@ -139,6 +139,21 @@ export default function EventsCalendarPage() {
             Festivals, farmers markets, rodeos, and community celebrations across {CITY_OPTIONS.length} Front Range
             cities — browse by month to see what's happening and when.
           </p>
+          <div className="mt-6 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center max-w-md sm:max-w-none mx-auto">
+            <Link
+              to="/properties/"
+              className="inline-flex items-center justify-center px-8 py-3.5 font-semibold rounded-lg hover:brightness-110 transition-all shadow-lg touch-manipulation"
+              style={{ backgroundColor: GOLD, color: "#1a1a1a" }}
+            >
+              Search Homes for Sale
+            </Link>
+            <a
+              href="tel:(970) 999-1407"
+              className="inline-flex items-center justify-center px-8 py-3.5 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors touch-manipulation"
+            >
+              Call (970) 999-1407
+            </a>
+          </div>
         </div>
       </section>
 
