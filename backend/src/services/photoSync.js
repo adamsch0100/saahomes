@@ -17,6 +17,7 @@ import 'dotenv/config';
 import pg from 'pg';
 import sharp from 'sharp';
 import { S3Client, PutObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
+import logger from '../utils/logger.js';
 
 // Lazy pool — this module is also imported by iresSoldSync; do not open a
 // connection just because the file was loaded.
@@ -59,30 +60,84 @@ const THUMB_WIDTH = 400;
 const USER_AGENT = 'saahomes-idx/1.0 (Schwartz and Associates)';
 const REQUEST_DELAY_MS = 1000; // 2 workers × 1s spacing = hard 2 RPS cap
 
+// The /api/photo proxy heals an expired MLS URL inside one request (CDN fetch
+// → IRES refresh → retry). Its heal path can legitimately outlast a single
+// fetch budget, so the first attempt stays short (healthy photos are fast) and
+// an abort is retried once at this ceiling instead of being called a failure.
+const DOWNLOAD_TIMEOUT_MS = 30000;
+const DOWNLOAD_TIMEOUT_MAX_MS = 90000;
+
+/**
+ * True when a download was aborted by our own timeout or by the upstream CDN
+ * cutting the connection. The photo proxy already classifies these as expected
+ * degradation (isUpstreamAbortError, lsn-a2fc0a): a slow/expired MLS URL is
+ * transient upstream behaviour, not a fault of ours.
+ */
+export function isDownloadAbortError(error) {
+  if (!error) return false;
+  const name = error.name || error.cause?.name;
+  const code = error.code || error.cause?.code;
+  return name === 'TimeoutError' || name === 'AbortError' || code === 'ABORT_ERR';
+}
+
+/** Transient, recoverable photo degradation (upstream timeout or the proxy's
+ *  branded placeholder). The next sweep retries; log it as a warning, never as
+ *  an incident-level failure. */
+export class PhotoDegradedError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'PhotoDegradedError';
+    this.photoDegraded = true;
+  }
+}
+
+export function isPhotoDegradedError(error) {
+  return Boolean(error && (error.photoDegraded || isDownloadAbortError(error)));
+}
+
 /**
  * Download a photo. media.mlsgrid.com IP-blocks some networks (this Hermes
  * box gets 400/429 while Railway's proxy fetches fine), so route MLS CDN
  * downloads through our own public proxy — it caches + backoffs and works
  * from any IP. Non-MLS URLs (already-R2, etc.) fetch directly.
  */
-async function downloadPhoto(url, { listingId, idx, retries = 2 } = {}) {
+async function downloadPhoto(url, { listingId, idx, retries = 2, timeoutMs = DOWNLOAD_TIMEOUT_MS } = {}) {
   if (!url) throw new Error('photo URL missing from listing row');
   const isMlsCdn = url.includes('media.mlsgrid.com');
   const SITE = process.env.SITE_URL || 'https://saahomes.com';
   if (isMlsCdn && listingId) {
     url = `${SITE}/api/photo/${listingId}/${idx}`;
   }
-  const res = await fetch(url, {
-    headers: { 'User-Agent': USER_AGENT, Accept: 'image/*' },
-    redirect: 'follow',
-    signal: AbortSignal.timeout(30000),
-  });
+  let res;
+  try {
+    res = await fetch(url, {
+      headers: { 'User-Agent': USER_AGENT, Accept: 'image/*' },
+      redirect: 'follow',
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+  } catch (e) {
+    if (isDownloadAbortError(e)) {
+      // The proxy may still be healing (refresh + retry) when our budget runs
+      // out. Retry once at the longer ceiling, then treat it as degradation.
+      if (retries > 0) {
+        return downloadPhoto(url, { listingId, idx, retries: retries - 1, timeoutMs: DOWNLOAD_TIMEOUT_MAX_MS });
+      }
+      throw new PhotoDegradedError(`photo download timed out after ${timeoutMs}ms`);
+    }
+    throw e;
+  }
   if (res.status === 429 && retries > 0) {
     // Rate-limited: back off long (10s, 30s) and retry — then give up.
     const wait = 10000 * Math.pow(3, 2 - retries);
     console.log(`  photo 429 — backing off ${wait / 1000}s (${retries} left)`);
     await new Promise((r) => setTimeout(r, wait));
     return downloadPhoto(url, { listingId, idx, retries: retries - 1 });
+  }
+  // The proxy answers 200 + this header when it degraded to the branded
+  // placeholder. Never store a placeholder as a real photo — let the next
+  // sweep retry the listing instead.
+  if (res.headers?.get?.('x-photo-fallback') === '1') {
+    throw new PhotoDegradedError('photo proxy returned placeholder');
   }
   if (!res.ok) throw new Error(`HTTP ${res.status} for ${url.slice(0, 80)}`);
   return Buffer.from(await res.arrayBuffer());
@@ -158,6 +213,7 @@ export async function syncListingPhotos(listing, photoUrls, { onProgress } = {})
   const uploaded = [];
   let cursor = 0;
   let failed = 0;
+  let deferred = 0;
 
   async function worker() {
     while (true) {
@@ -176,8 +232,13 @@ export async function syncListingPhotos(listing, photoUrls, { onProgress } = {})
         ]);
         uploaded.push(publicUrlFor(heroKey));
       } catch (e) {
-        failed += 1;
-        console.error(`  photo ${i + 1}/${urls.length} failed: ${e.message}`);
+        if (isPhotoDegradedError(e)) {
+          deferred += 1;
+          logger.warn(`photo ${i + 1}/${urls.length} deferred (upstream slow): ${e.message}`);
+        } else {
+          failed += 1;
+          logger.error(`photo ${i + 1}/${urls.length} failed: ${e.message}`);
+        }
       }
       onProgress?.(uploaded.length, urls.length, failed);
     }
@@ -186,6 +247,7 @@ export async function syncListingPhotos(listing, photoUrls, { onProgress } = {})
   await Promise.all(Array.from({ length: Math.min(CONCURRENCY, urls.length) }, worker));
   if (!uploaded.length) return null;
   if (failed > 0) console.log(`  ${failed}/${urls.length} photos failed for ${slug}`);
+  if (deferred > 0) console.log(`  ${deferred}/${urls.length} photos deferred (upstream slow) for ${slug}`);
   return uploaded;
 }
 
@@ -204,6 +266,7 @@ export async function syncSoldListingPhotos(listingId, photoUrls, { onProgress }
   const uploaded = new Array(urls.length).fill(null);
   let cursor = 0;
   let failed = 0;
+  let deferred = 0;
 
   async function worker() {
     while (true) {
@@ -223,8 +286,13 @@ export async function syncSoldListingPhotos(listingId, photoUrls, { onProgress }
         ]);
         uploaded[i] = publicUrlFor(heroKey);
       } catch (e) {
-        failed += 1;
-        console.error(`  sold photo ${i + 1}/${urls.length} failed for ${safeId}: ${e.message}`);
+        if (isPhotoDegradedError(e)) {
+          deferred += 1;
+          logger.warn(`sold photo ${i + 1}/${urls.length} deferred (upstream slow) for ${safeId}: ${e.message}`);
+        } else {
+          failed += 1;
+          logger.error(`sold photo ${i + 1}/${urls.length} failed for ${safeId}: ${e.message}`);
+        }
       }
       onProgress?.(uploaded.filter(Boolean).length, urls.length, failed);
     }
@@ -233,6 +301,7 @@ export async function syncSoldListingPhotos(listingId, photoUrls, { onProgress }
   await Promise.all(Array.from({ length: Math.min(CONCURRENCY, urls.length) }, worker));
   if (!uploaded[0]) return null;
   if (failed > 0) console.log(`  ${failed}/${urls.length} sold photos failed for ${safeId}`);
+  if (deferred > 0) console.log(`  ${deferred}/${urls.length} sold photos deferred (upstream slow) for ${safeId}`);
   return uploaded.filter(Boolean);
 }
 
