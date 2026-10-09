@@ -239,7 +239,7 @@ export const blogPosts = [
 {slug: 'selling-your-home-in-brighton-co', title: 'Selling Your Home in Brighton, CO: A 2026 Seller\'s Guide', excerpt: 'Brighton\'s affordability keeps drawing Denver-metro and Northern Colorado buyers. Here is how to price, prepare, and market a Brighton home to sell for top dollar.', date: '2026-09-16', youtubeId: 'Oh688GR5Yv8', category: 'Seller Tips', image: '/images/buyers-hero.jpg', readTime: '8 min read', keywords: 'sell my home Brighton CO, selling a house in Brighton, Brighton home value, Brighton realtor, Brighton real estate agent, Denver exurb home sale', relatedLinks: [{title: 'Brighton Area Guide', href: '/northern-colorado-areas/brighton/', description: 'Homes for sale, neighborhoods, and market data'}, {title: 'Sell Your Home', href: '/for-sellers/', description: 'Seller representation and a free home valuation'}, {title: 'Free Home Valuation', href: '/for-sellers/#home-valuation', description: 'See what your Brighton home could bring'}, {title: 'Erie Area Guide', href: '/northern-colorado-areas/erie/', description: 'A higher-priced comparison market nearby'}, {title: 'Carbon Valley Guide', href: '/northern-colorado-areas/carbon-valley/', description: 'Neighboring growth corridor for comps'}], cta: {title: 'Get a free Brighton home valuation', description: 'Schwartz and Associates prepares a comparative market analysis using current Brighton comps so you know exactly what your home is worth. Call (970) 999-1407 — no obligation.', primaryHref: '/for-sellers/#home-valuation', primaryText: 'Get a free home valuation', secondaryHref: '/contact/', secondaryText: 'Talk to an agent'}, faqs: [{q: 'How fast do homes sell in Brighton?', a: 'As of mid-September 2026, Brighton\'s median days on market is roughly six weeks. Well-priced homes in desirable school zones move faster, while overpriced listings tend to sit.'}, {q: 'What is my Brighton home worth?', a: 'The right answer comes from a comparative market analysis using recent Brighton sales matched to your neighborhood and home type. With more than 300 active listings, competition is real, so pricing against the correct comps matters. Schwartz and Associates provides this free.'}, {q: 'Is now a good time to sell in Brighton?', a: 'Brighton continues to attract Denver-metro buyers priced out of the northwest metro, so demand is steady. Correct pricing and strong marketing are the deciding factors in a market with meaningful inventory.'}, {q: 'How do I stand out in a market with lots of listings?', a: 'In a deeper market like Brighton, condition, presentation, and pricing do the heavy lifting. Move-in-ready homes that are clean, staged, and priced at or slightly under market generate the most showings and offers. Professional photography and targeted marketing separate the fast sales from the slow ones.'}], sections: [{heading: 'What makes the Brighton market different', paragraphs: ['Brighton is a deep, competitive market. With roughly 360 active listings, sellers do not have the automatic advantage they might in a thin small-town market — buyers have options, so pricing and presentation decide how fast you sell and for how much.', 'The buyer pool is unusually broad: Denver-metro commuters seeking value, Northern Colorado buyers looking south, and local move-up buyers. That breadth is an opportunity, but it also means your home is competing against both new construction and a steady stream of resale listings.']}, {heading: 'Pricing a Brighton home correctly', paragraphs: ['In a market with hundreds of listings, overpricing is expensive. Buyers filter by price first, so an overpriced home is invisible to the buyers who should see it. Pricing at or slightly under a defensible market value generates activity in the critical first two weeks.', 'A comparative market analysis should match comps to your specific neighborhood and home type — established in-town homes, newer subdivisions, and acreage all price differently. New construction nearby is part of the competitive set, so account for it.']}, {heading: 'Preparing your home for the market', paragraphs: ['Move-in-ready homes win in Brighton. Declutter, deep clean, complete obvious repairs, and stage the main rooms. With abundant competition, the homes that photograph and show best are the ones that sell first and sell for more.', 'For acreage or rural-edge properties, the land and setting are part of the value. Tidy fences and outbuildings, document any rural systems, and photograph the lot and views, not just the house.'], list: ['Declutter and deep clean every room', 'Complete obvious repairs before listing', 'Stage the kitchen, living room, and primary bedroom', 'Account for nearby new construction in pricing', 'Photograph the lot and setting on larger properties']}, {heading: 'Marketing to the right buyers', paragraphs: ['Brighton\'s buyer pool splits between Denver-metro commuters, Northern Colorado buyers, and locals. Your listing should speak to whichever group your home fits. A starter home near I-76 markets to commuters; a larger home in a good school zone markets to families; acreage markets to a different buyer entirely.', 'MLS syndication, targeted digital advertising, and the SAA Homes network put your home in front of the right audience. Strong photography and a sharp listing description are the difference between blending in and standing out.']}, {heading: 'From offer to closing', paragraphs: ['Evaluate offers on price, financing strength, contingencies, and timeline. In a market with new construction competing for buyers, a clean conventional or VA pre-approval from a strong lender can matter as much as a slightly higher price with weak financing.', 'Schwartz and Associates manages negotiation, inspections, appraisal, and closing end to end, so you maximize net proceeds and close with confidence.']}]},
   {
     slug: 'assumable-mortgage-colorado',
-    title: 'How Assumable Mortgages Work in Colorado (2026 Guide)',
+    title: 'Assumable Mortgages in Colorado (2026 Guide)',
     excerpt: 'An assumable VA or FHA loan lets a qualified buyer take over the seller’s rate and remaining term. How it works in Colorado, what the IRES feed actually tells us, and how to search live assumable listings in Northern Colorado.',
     date: '2026-08-13',
     category: 'Buyer Tips',
@@ -4866,7 +4866,7 @@ export const blogPosts = [
   },
   {
     slug: 'multigenerational-homes-northern-colorado-guide',
-    title: 'Multigenerational Homes in Northern Colorado: A Complete Buyer\'s Guide for Families',
+    title: 'Multigenerational Homes in Northern Colorado',
     excerpt: 'Looking for a multigenerational home in Northern Colorado? Our guide covers the best layouts, neighborhoods, financing options, and must-have features for families sharing a home in Fort Collins, Loveland, Windsor, and Greeley.',
     date: '2026-07-22',
     category: 'Buyer Tips',
@@ -5125,7 +5125,7 @@ export const blogPosts = [
   },
   {
     slug: 'senior-downsizing-northern-colorado-guide',
-    title: 'Senior Downsizing in Northern Colorado: A Complete 2026 Guide for Homeowners',
+    title: 'Senior Downsizing in Northern Colorado (2026)',
     excerpt: 'Planning to downsize your Northern Colorado home? Our comprehensive guide covers timing your sale, choosing the right smaller home, financial considerations, and the best 55+ and low-maintenance communities in Fort Collins, Loveland, Windsor, and Greeley.',
     date: '2026-07-23',
     category: 'Seller Tips',
@@ -5657,7 +5657,7 @@ export const blogPosts = [
   },
   {
     slug: 'equestrian-properties-northern-colorado-wyoming',
-    title: 'Equestrian Properties in Northern Colorado and Wyoming: Your Complete Guide to Horse Property in the Front Range',
+    title: 'Equestrian Properties in Northern Colorado',
     excerpt: 'From Fort Collins to Cheyenne, discover the best equestrian properties, horse-friendly neighborhoods, and acreage for sale in Northern Colorado and Wyoming. Complete guide with pricing, zoning, and horse amenities.',
     date: '2026-07-29',
     category: 'Buyer Tips',
@@ -5673,6 +5673,14 @@ export const blogPosts = [
       { title: 'Colorado Home Buyers Guide', href: '/for-buyers/', description: 'Expert buyer representation & resources' },
       { title: 'Sell Your Home with SAA Homes', href: '/for-sellers/', description: 'Free market analysis & professional marketing' },
     ],
+    cta: {
+      title: 'Looking for horse property in Northern Colorado?',
+      description: 'Schwartz and Associates knows the equestrian pockets from Horsetooth to Severance and the Wyoming border — acreage, zoning, wells, and trail access included. Call (970) 999-1407 to start your search.',
+      primaryHref: '/properties/',
+      primaryText: 'Search homes for sale',
+      secondaryHref: '/contact/',
+      secondaryText: 'Talk to an agent',
+    },
     sections: [
       {
         heading: 'Why Northern Colorado and Wyoming for equestrian living',
