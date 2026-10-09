@@ -98,5 +98,8 @@ __pycache__/
 client_secret.json
 youtube_token.pickle
 
+# Video pipeline runtime state (per-checkout; holds an absolute path) — never commit
+scripts/video-assets/.last_music_track
+
 # Backup copies
 *.bak-*
