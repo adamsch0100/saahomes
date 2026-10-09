@@ -717,7 +717,7 @@ export const blogPosts = [
     category: 'Market Update',
     image: '/images/northern-colorado-market-update.jpg',
     readTime: '6 min read',
-    youtubeId: 'Z0sxD4Z2yXI',
+    youtubeId: 't8O2KHctN2U',
     supersededBy: LATEST_MARKET_UPDATE_SLUG,
     relatedLinks: [
       {
@@ -2022,7 +2022,7 @@ export const blogPosts = [
     category: 'Local Guide',
     image: '/images/northern-colorado-events-guide-2026.jpg',
     readTime: '10 min read',
-    youtubeId: 'yCQQymVAdu4',
+    youtubeId: 'En-NKBupDr0',
     keywords: 'Northern Colorado events 2026, Fort Collins festivals, Loveland events, Greeley Stampede, things to do Northern Colorado, moving to Fort Collins events, Windsor Harvest Festival, Longmont farmers market',
     relatedLinks: [
       { title: 'Fort Collins homes for sale', href: '/northern-colorado-areas/fort-collins/', description: 'Neighborhoods, schools & homes for sale' },
