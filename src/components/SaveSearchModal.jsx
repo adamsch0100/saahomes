@@ -123,6 +123,7 @@ export default function SaveSearchModal({
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [signInNote, setSignInNote] = useState("");
   const [frequency, setFrequency] = useState("daily");
   const [sendTime, setSendTime] = useState("06:00");
   const [sendDay, setSendDay] = useState("Monday");
@@ -222,6 +223,7 @@ export default function SaveSearchModal({
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error || "Could not save");
+      setSignInNote(data.signInRequired ? data.message || "" : "");
       localStorage.setItem("saa_lead_captured", "1");
       if (intent) localStorage.setItem("saa_intent", intent);
       // RealScout-style: remember criteria so cards/detail can show match chips
@@ -287,7 +289,11 @@ export default function SaveSearchModal({
                   <span className="font-semibold text-gray-900">{filterSummary(filters)}</span>
                   {" "}— including <strong>price drops</strong> and status changes.
                 </p>
-                {wasGuest ? (
+                {signInNote ? (
+                  <p className="text-gray-700 mt-3 text-sm leading-relaxed bg-gray-50 border border-gray-100 rounded-lg px-3 py-2.5">
+                    {signInNote}
+                  </p>
+                ) : wasGuest ? (
                   <p className="text-gray-700 mt-3 text-sm leading-relaxed bg-gray-50 border border-gray-100 rounded-lg px-3 py-2.5">
                     Account created on this device.{" "}
                     <strong>Manage your alerts anytime</strong> — no password required on this browser.

@@ -8,7 +8,13 @@
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import getPool from '../config/database.js';
-import { setAuthCookie } from './alertController.js';
+import {
+  setAuthCookie,
+  isStaffAccount,
+  hasOwnSession,
+  emailSignInLink,
+  SIGN_IN_REQUIRED_MESSAGE,
+} from './alertController.js';
 import { rejectIfDisposableEmail } from '../utils/emailQuality.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -30,8 +36,14 @@ export const register = async (req, res) => {
 
     const pool = getPool();
     const existing = await pool.query('SELECT * FROM users WHERE email = $1', [emailStr]);
-    if (existing.rows.length && existing.rows[0].password_hash) {
+    if (existing.rows.length && (existing.rows[0].password_hash || isStaffAccount(existing.rows[0]))) {
       return res.status(409).json({ success: false, error: 'An account with that email already exists. Log in instead.' });
+    }
+    // Passwordless account (saved a search earlier): only its own session may
+    // set a password — anyone else gets the sign-in link sent to the inbox.
+    if (existing.rows.length && !hasOwnSession(req, existing.rows[0])) {
+      emailSignInLink(existing.rows[0]).catch((e) => console.error('sign-in link failed:', e.message));
+      return res.status(409).json({ success: false, code: 'sign_in_required', error: SIGN_IN_REQUIRED_MESSAGE });
     }
 
     const hash = await bcrypt.hash(passStr, 10);
@@ -154,6 +166,13 @@ export const ensureSession = async (req, res) => {
         [emailStr, nameStr, phoneDigits, token, hash]
       );
       user = created;
+    } else if (isStaffAccount(user.rows[0])) {
+      return res.status(409).json({ success: false, error: 'This email belongs to a team account. Please sign in instead.' });
+    } else if (!hasOwnSession(req, user.rows[0])) {
+      // Knowing an email is not proof of owning it: no cookie, no password
+      // change. The owner signs in from the emailed link.
+      emailSignInLink(user.rows[0]).catch((e) => console.error('sign-in link failed:', e.message));
+      return res.status(409).json({ success: false, code: 'sign_in_required', error: SIGN_IN_REQUIRED_MESSAGE });
     } else {
       const updates = [
         `status = 'active'`,

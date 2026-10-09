@@ -4,7 +4,7 @@ import { sendMarketReportNotification } from '../services/emailService.js';
 import { forwardMarketReportToFollowUpBoss } from '../services/followUpBossService.js';
 import { recordLeadConversion } from '../services/ga4MeasurementService.js';
 import { upsertHomeProfile, computeOurEstimate } from '../services/sellerValueService.js';
-import { setAuthCookie } from './alertController.js';
+import { setAuthCookie, isStaffAccount, hasOwnSession } from './alertController.js';
 import logger from '../utils/logger.js';
 
 function cleanPhone(v) {
@@ -63,7 +63,14 @@ export const submitMarketReportForm = async (req, res) => {
       try {
         let userRow;
         const existing = await client.query('SELECT * FROM users WHERE email = $1', [emailStr]);
+        // Only a brand-new account or the visitor's own session is signed in
+        // here; knowing an existing email must not hand out its session.
+        let canSignIn = true;
+        if (existing.rows[0] && isStaffAccount(existing.rows[0])) {
+          throw new Error('email belongs to a team account; not attaching seller profile');
+        }
         if (existing.rows[0]) {
+          canSignIn = hasOwnSession(req, existing.rows[0]);
           const updated = await client.query(
             `UPDATE users SET
                status = 'active',
@@ -99,7 +106,7 @@ export const submitMarketReportForm = async (req, res) => {
           );
           userRow = created.rows[0];
         }
-        manageToken = userRow.manage_token;
+        if (canSignIn) manageToken = userRow.manage_token;
 
         // upsertHomeProfile uses getPool() — commit first path: do after COMMIT
         submission._userId = userRow.id;
