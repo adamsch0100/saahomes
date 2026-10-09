@@ -6121,6 +6121,7 @@ export const neighborhoods = [
     walkScore: 22,
     metaDescription: 'Lagoon area Longmont real estate - affordable homes near Union Reservoir with canal views in east Longmont. SAA Homes.',
     keywords: 'Lagoon Longmont, east Longmont affordable homes, Union Reservoir area, canal homes Longmont, Longmont manufactured homes, affordable Boulder County real estate, first-time buyer Longmont',
+    youtubeId: 'ayicOb2qRC4',
     neighborhoodHighlights: [
       { title: 'Affordable entry', description: 'The Lagoon area offers some of the most affordable home prices in Boulder County - ideal for first-time buyers.' },
       { title: 'Union Reservoir', description: 'Minutes from Union Reservoir with boating, fishing, swimming, and a sandy beach.' },
@@ -6168,6 +6169,7 @@ export const neighborhoods = [
       'McIntosh Lake Longmont real estate — lakefront and lake-view homes in northwest Longmont with a walking trail, fishing, and mountain views. SAA Homes.',
     keywords:
       'McIntosh Lake Longmont, McIntosh Lake homes, Longmont lake real estate, northwest Longmont neighborhoods, Longmont waterfront homes, lake view homes Longmont',
+    youtubeId: 'NZKxDwIJkb4',
     neighborhoodHighlights: [
       { title: 'Lake living', description: 'An 88-acre lake with a paved walking trail, fishing, and birding right outside your door.' },
       { title: 'Mountain views', description: 'Longs Peak and the Front Range rise to the west — visible from much of the neighborhood.' },
@@ -6203,6 +6205,7 @@ export const neighborhoods = [
     walkScore: 45,
     metaDescription: 'Meadow View Longmont real estate — established west Longmont neighborhood around Meadow View Park with ranch homes, mature trees, and easy access to downtown and Hover Street. SAA Homes.',
     keywords: 'Meadow View Longmont, west Longmont neighborhoods, Meadow View Park Longmont, Longmont ranch homes, established Longmont neighborhoods, Hover Street Longmont',
+    youtubeId: 'k_-CevC5gqo',
     neighborhoodHighlights: [
       { title: 'Park at the center', description: 'Meadow View Park provides open space, playgrounds, and green lawns right in the neighborhood.' },
       { title: 'Established character', description: 'Mature trees and classic ranch and split-level homes on quiet streets.' },
