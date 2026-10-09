@@ -49,6 +49,7 @@ h1 { font-family: 'Fraunces', serif; font-size: 1.5rem; letter-spacing: -0.02em;
     <a href="/saas/login.html">Request a new link</a>
   </div>
 </div>
+<script src="/saas/auth-code.js"></script>
 <script>
 const params = new URLSearchParams(location.search);
 const token = params.get('token') || '';
@@ -72,6 +73,7 @@ const sub = document.getElementById('sub');
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Verification failed');
+    if (data.user && data.user.email && window.llRememberEmail) window.llRememberEmail(data.user.email);
     title.textContent = data.is_new ? 'You’re in' : 'Welcome back';
     const goingAdmin = (data.next || '').includes('admin');
     sub.textContent = data.needs_onboarding
@@ -83,6 +85,14 @@ const sub = document.getElementById('sub');
     status.textContent = 'Email verified.';
     location.href = data.next || '/saas/app.html';
   } catch (err) {
+    // Already signed in on this browser (link opened twice, or a mail scanner used it)?
+    try {
+      const st = await fetch('/api/auth-status', { credentials: 'same-origin' }).then((r) => r.json());
+      if (st && st.authenticated) {
+        location.replace('/saas/app.html');
+        return;
+      }
+    } catch (e) {}
     title.textContent = 'Link didn’t work';
     sub.textContent = 'It may have expired or already been used.';
     status.className = 'status error';

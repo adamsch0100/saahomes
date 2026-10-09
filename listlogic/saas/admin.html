@@ -573,7 +573,7 @@ function openTab(name) {
 document.getElementById('logoutLink').addEventListener('click', async (e) => {
   e.preventDefault();
   await fetch('/api/logout', { method: 'POST' });
-  location.href = '/saas/login.html';
+  location.href = '/saas/login.html?signed_out=1';
 });
 
 /* ---------- Drawer ---------- */

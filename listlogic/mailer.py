@@ -83,18 +83,24 @@ def send_team_invite(*, to: str, url: str, owner_name: str = "", brokerage: str 
     return send_email(to=to, subject="You're invited to ListLogic", body=body)
 
 
-def send_magic_link(*, to: str, url: str, is_new: bool = False) -> bool:
+def send_magic_link(*, to: str, url: str, code: str = "", is_new: bool = False) -> bool:
     action = "Create your ListLogic account" if is_new else "Sign in to ListLogic"
+    code_line = (
+        f"Or type this code on the sign-in page: {code}\n\n" if code else ""
+    )
     body = (
         f"Hi,\n\n"
         f"{action} with this one-time link (expires in 30 minutes):\n\n"
         f"{url}\n\n"
-        f"Sample demo stays free. Setup is free. You only unlock when you Generate "
-        f"(7-day trial then $39/mo, or $20 for one report).\n\n"
+        f"{code_line}"
+        f"Once you're in, ListLogic keeps you signed in on this device.\n\n"
         f"If you didn't request this, you can ignore this email.\n\n"
         f"— ListLogic\n"
     )
-    subject = "Your ListLogic sign-in link" if not is_new else "Your ListLogic account link"
+    if code:
+        subject = f"{code} is your ListLogic {'account' if is_new else 'sign-in'} code"
+    else:
+        subject = "Your ListLogic sign-in link" if not is_new else "Your ListLogic account link"
     return send_email(to=to, subject=subject, body=body)
 
 

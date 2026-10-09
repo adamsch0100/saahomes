@@ -19,7 +19,9 @@ import db as database
 logger = logging.getLogger("ListLogic.auth")
 
 SESSION_COOKIE = "ll_session"
-SESSION_DAYS = 30
+# Sessions roll forward on activity, so an agent who uses ListLogic at least
+# once every SESSION_DAYS never has to sign in again on that device.
+SESSION_DAYS = 60
 MAX_CONCURRENT_SESSIONS = int(os.environ.get("MAX_CONCURRENT_SESSIONS") or "3")
 # Public signup: setup-only (no free custom presentations). Promo/invite may still grant trial credits.
 DEFAULT_TRIAL_DAYS = int(os.environ.get("DEFAULT_TRIAL_DAYS") or "0")
@@ -419,19 +421,20 @@ def _enforce_session_cap(user_id: str, keep_token: Optional[str] = None) -> None
 
 
 def touch_session(token: Optional[str], ip: str = "") -> None:
-    """Refresh last_seen_at (+ip) on a session so Settings shows current devices."""
+    """Refresh last_seen_at (+ip) and roll the expiry forward on an active session."""
     if not token:
         return
+    expires = _iso(_utcnow() + timedelta(days=SESSION_DAYS))
     try:
         if ip:
             database.execute(
-                "UPDATE sessions SET last_seen_at = ?, ip = ? WHERE token_hash = ?",
-                (_iso(), ip, _hash_token(token)),
+                "UPDATE sessions SET last_seen_at = ?, ip = ?, expires_at = ? WHERE token_hash = ?",
+                (_iso(), ip, expires, _hash_token(token)),
             )
         else:
             database.execute(
-                "UPDATE sessions SET last_seen_at = ? WHERE token_hash = ?",
-                (_iso(), _hash_token(token)),
+                "UPDATE sessions SET last_seen_at = ?, expires_at = ? WHERE token_hash = ?",
+                (_iso(), expires, _hash_token(token)),
             )
     except Exception:
         pass
@@ -1575,10 +1578,24 @@ def update_copy_defaults(user_id: str, payload: Any) -> dict:
 
 
 MAGIC_LINK_TTL_MIN = 30
+MAGIC_CODE_MAX_FAILS = 5
+MAGIC_CODE_FAIL_WINDOW_SEC = 15 * 60
+_magic_code_fails: dict[str, list[float]] = {}
 
 
 def _hash_token(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def magic_link_code(token_hash: str) -> str:
+    """6-digit sign-in code paired with a magic link (typed instead of clicking).
+
+    Derived from the stored token hash so no schema change is needed; the
+    server secret keeps it unguessable from the hash alone.
+    """
+    secret = (os.environ.get("SESSION_SECRET") or "listlogic-signin-code").encode("utf-8")
+    digest = hmac.new(secret, (token_hash or "").encode("utf-8"), hashlib.sha256).digest()
+    return f"{int.from_bytes(digest[:8], 'big') % 1_000_000:06d}"
 
 
 def create_magic_link(
@@ -1636,6 +1653,7 @@ def create_magic_link(
         "email": email_n,
         "token": raw,
         "url": verify_url,
+        "code": magic_link_code(_hash_token(raw)),
         "expires_at": expires,
         "is_new": existing is None,
     }
@@ -1658,7 +1676,43 @@ def consume_magic_link(token: str) -> dict:
     exp = _parse_iso(row.get("expires_at"))
     if not exp or exp < _utcnow():
         raise ValueError("This link has expired — request a new one")
+    return _complete_magic_login(row)
 
+
+def consume_magic_code(email: str, code: str) -> dict:
+    """Sign in with the 6-digit code from the sign-in email (same tab, no link click)."""
+    email_n = (email or "").strip().lower()
+    code_n = re.sub(r"\D", "", code or "")
+    if not email_n or len(code_n) != 6:
+        raise ValueError("Enter the 6-digit code from your email")
+    now_ts = _utcnow().timestamp()
+    fails = [t for t in _magic_code_fails.get(email_n, []) if now_ts - t < MAGIC_CODE_FAIL_WINDOW_SEC]
+    if len(fails) >= MAGIC_CODE_MAX_FAILS:
+        _magic_code_fails[email_n] = fails
+        raise ValueError("Too many wrong codes — request a new sign-in email")
+    rows = database.execute(
+        "SELECT * FROM magic_links WHERE email = ? AND used_at IS NULL AND expires_at > ? "
+        "ORDER BY created_at DESC LIMIT 5",
+        (email_n, _iso()),
+        fetch="all",
+    ) or []
+    for row in rows:
+        if hmac.compare_digest(magic_link_code(row.get("token_hash") or ""), code_n):
+            _magic_code_fails.pop(email_n, None)
+            return _complete_magic_login(row)
+    fails.append(now_ts)
+    _magic_code_fails[email_n] = fails
+    if len(fails) >= MAGIC_CODE_MAX_FAILS:
+        # Burn outstanding links so a guessed code can never land later.
+        database.execute(
+            "UPDATE magic_links SET used_at = ? WHERE email = ? AND used_at IS NULL",
+            (_iso(), email_n),
+        )
+        raise ValueError("Too many wrong codes — request a new sign-in email")
+    raise ValueError("That code doesn't match — check the latest email or request a new one")
+
+
+def _complete_magic_login(row: dict) -> dict:
     email_n = (row.get("email") or "").strip().lower()
     user = get_user_by_email(email_n)
     is_new = False

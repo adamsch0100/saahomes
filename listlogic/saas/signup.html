@@ -60,7 +60,7 @@ button.btn { width: 100%; padding: 13px; font-size: 0.95rem; }
   <p class="sub"><strong>Sample demo is free.</strong> Sign up to Search/Upload and brand — card only when you click Generate (7-day trial → $39/mo, or $20 one report).</p>
 
   <div class="perks">
-    <div>Email a magic link — no password until you’re ready</div>
+    <div>No password needed — we email you a 6-digit code</div>
     <div>Build your market + branding free before you unlock</div>
     <div>Living Fingerprint after they list (email is opt-in)</div>
     <div>Pay at Generate: 7-day trial or $20 — sample stays free</div>
@@ -77,7 +77,7 @@ button.btn { width: 100%; padding: 13px; font-size: 0.95rem; }
       <label for="promo">Access code <span style="font-weight:500;color:var(--muted)">(optional)</span></label>
       <input id="promo" type="text" autocomplete="off" placeholder="Enter access code if you have one" style="text-transform:none">
     </div>
-    <button type="submit" class="btn btn-gold">Email me a link</button>
+    <button type="submit" class="btn btn-gold">Create my account</button>
   </form>
   <p class="status" id="status"></p>
   <p class="dev-link" id="devLink" style="display:none"></p>
@@ -90,6 +90,7 @@ button.btn { width: 100%; padding: 13px; font-size: 0.95rem; }
     By continuing you agree to our <a href="terms.html">Terms</a>, <a href="privacy.html">Privacy</a>, and <a href="refunds.html">Refunds</a>.
   </p>
 </div>
+<script src="/saas/auth-code.js"></script>
 <script>
 const params = new URLSearchParams(location.search);
 const invite = params.get('invite') || '';
@@ -121,37 +122,27 @@ if (invite) {
       if (d.email) document.getElementById('email').value = d.email;
     }).catch(() => {});
 }
-document.getElementById('form').addEventListener('submit', async (e) => {
+const signupForm = document.getElementById('form');
+const signupBtn = signupForm.querySelector('button[type=submit]');
+const emailAuth = window.llEmailAuth({
+  form: signupForm,
+  emailInput: document.getElementById('email'),
+  submitBtn: signupBtn,
+  statusEl: document.getElementById('status'),
+  devEl: document.getElementById('devLink'),
+  buildPayload: (email) => ({
+    email,
+    invite,
+    promo_code: (document.getElementById('promo').value || '').trim(),
+    next,
+  }),
+  onSent: (data) => {
+    if (window.llTrack && data.is_new !== false) window.llTrack('sign_up', { method: 'magic_link' });
+  },
+});
+signupForm.addEventListener('submit', (e) => {
   e.preventDefault();
-  const status = document.getElementById('status');
-  const dev = document.getElementById('devLink');
-  status.className = 'status';
-  status.textContent = 'Sending link…';
-  dev.style.display = 'none';
-  try {
-    const res = await fetch('/api/auth/magic-link', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: document.getElementById('email').value.trim(),
-        invite,
-        promo_code: (document.getElementById('promo').value || '').trim(),
-        next,
-      }),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Could not send link');
-    if (window.llTrack) window.llTrack('sign_up', { method: 'magic_link' });
-    status.className = 'status ok';
-    status.textContent = data.message || 'Check your email for a sign-in link.';
-    if (data.dev_url) {
-      dev.style.display = 'block';
-      dev.innerHTML = 'Dev link: <a href="' + data.dev_url + '">' + data.dev_url + '</a>';
-    }
-  } catch (err) {
-    status.className = 'status error';
-    status.textContent = String(err.message || err);
-  }
+  emailAuth.send();
 });
 </script>
 <script src="/saas/analytics.js"></script>

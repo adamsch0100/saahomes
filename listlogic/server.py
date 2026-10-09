@@ -147,6 +147,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/api/signup",
         "/api/auth/magic-link",
         "/api/auth/verify",
+        "/api/auth/verify-code",
         "/api/logout",
         "/api/auth-status",
         "/api/feedback",
@@ -258,7 +259,16 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 return JSONResponse({"detail": "Sign in required", "reason": "auth"}, status_code=401)
             return RedirectResponse(url=f"/saas/login.html?next={path}", status_code=302)
         # App HTML is fine for any signed-in user; entitlement checked on generate
-        return await call_next(request)
+        response = await call_next(request)
+        if request.method == "GET" and not path.startswith("/api/"):
+            # Rolling session: every app page view pushes the cookie expiry out again
+            # (the DB row is extended in touch_session) so active agents stay signed in.
+            import auth_service
+
+            token = request.cookies.get(auth_service.SESSION_COOKIE)
+            if token and response.status_code < 400:
+                _set_session_cookie(response, request, token)
+        return response
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
@@ -1107,6 +1117,30 @@ async def signup(request: Request):
     return resp
 
 
+def _send_in_background(label: str, fn, *args, **kwargs) -> None:
+    """Fire-and-forget email so SMTP latency (often 3-5s with Gmail) never blocks a click."""
+
+    def _run() -> None:
+        try:
+            fn(*args, **kwargs)
+        except Exception:
+            logger.exception("%s failed", label)
+
+    threading.Thread(target=_run, name=f"listlogic-mail-{label}", daemon=True).start()
+
+
+def _dev_links_allowed() -> bool:
+    """Only hand sign-in links back in the HTTP response on a local dev box.
+
+    Returning the link to the browser lets anyone sign in as any email, so it must
+    never happen in production — even when SMTP is down.
+    """
+    if os.environ.get("RAILWAY_ENVIRONMENT") or os.environ.get("RAILWAY_ENVIRONMENT_NAME"):
+        return False
+    base = (os.environ.get("APP_BASE_URL") or "").lower()
+    return not base.startswith("https://")
+
+
 @app.post("/api/auth/magic-link")
 async def request_magic_link(request: Request):
     import auth_service
@@ -1127,58 +1161,42 @@ async def request_magic_link(request: Request):
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
 
-    sent = False
-    send_error = ""
-    try:
-        sent = mailer.send_magic_link(to=link["email"], url=link["url"], is_new=link["is_new"])
-        if not sent and mailer._smtp_config():
-            send_error = "SMTP is configured but the message could not be delivered. Check Railway logs / Gmail app password."
-    except Exception as exc:
-        logger.exception("Magic link email failed")
-        send_error = str(exc)[:200]
-
-    # Dev fallback: include URL when SMTP isn't configured OR send failed
     configured = bool(mailer._smtp_config())
-    if sent:
-        message = "Check your email for a sign-in link."
-    elif not configured:
-        message = "Email delivery isn't configured — use the link below (dev mode)."
-    else:
-        message = "We couldn't send the email right now — use the link below, or try again in a minute."
     out = {
         "ok": True,
         "email": link["email"],
-        "sent": sent,
-        "message": message,
+        "is_new": link["is_new"],
+        "code_login": True,
     }
-    if send_error and not sent:
-        out["send_error"] = send_error
-    if not sent:
+    if configured:
+        _send_in_background(
+            "magic-link",
+            mailer.send_magic_link,
+            to=link["email"],
+            url=link["url"],
+            code=link["code"],
+            is_new=link["is_new"],
+        )
+        out["sent"] = True
+        out["message"] = "Check your email — click the link or type the 6-digit code here."
+    elif _dev_links_allowed():
+        out["sent"] = False
+        out["message"] = "Email delivery isn't configured — use the link below (dev mode)."
         out["dev_url"] = link["url"]
+        out["dev_code"] = link["code"]
+    else:
+        logger.error("Magic link requested for %s but SMTP is not configured", link["email"])
+        raise HTTPException(503, "We couldn't send a sign-in email right now. Try again in a minute, or sign in with your password.")
     return JSONResponse(out)
 
 
-@app.post("/api/auth/verify")
-async def verify_magic_link(request: Request):
+def _finish_magic_login(request: Request, result: dict) -> JSONResponse:
     import auth_service
     import mailer
 
-    try:
-        payload = await request.json()
-    except Exception as exc:
-        raise HTTPException(400, "Invalid JSON") from exc
-    token = str(payload.get("token") or "")
-    try:
-        result = auth_service.consume_magic_link(token)
-    except ValueError as exc:
-        raise HTTPException(400, str(exc)) from exc
-
     user = result["user"]
     if result.get("is_new"):
-        try:
-            mailer.send_welcome(user, auth_service.app_base_url())
-        except Exception:
-            logger.exception("Welcome email failed")
+        _send_in_background("welcome", mailer.send_welcome, user, auth_service.app_base_url())
 
     session = auth_service.create_session(
         user["id"], ip=_client_ip(request), user_agent=request.headers.get("user-agent", "")
@@ -1193,6 +1211,39 @@ async def verify_magic_link(request: Request):
     })
     _set_session_cookie(resp, request, session)
     return resp
+
+
+@app.post("/api/auth/verify")
+async def verify_magic_link(request: Request):
+    import auth_service
+
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(400, "Invalid JSON") from exc
+    token = str(payload.get("token") or "")
+    try:
+        result = auth_service.consume_magic_link(token)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    return _finish_magic_login(request, result)
+
+
+@app.post("/api/auth/verify-code")
+async def verify_magic_code(request: Request):
+    import auth_service
+
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(400, "Invalid JSON") from exc
+    try:
+        result = auth_service.consume_magic_code(
+            str(payload.get("email") or ""), str(payload.get("code") or "")
+        )
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    return _finish_magic_login(request, result)
 
 
 @app.get("/api/sessions")
@@ -5235,7 +5286,12 @@ async def portal_subject(request: Request):
     from portal_market import lookup_subject_property
 
     try:
-        return await asyncio.to_thread(lookup_subject_property, query)
+        # Hard ceiling so the agent is never left staring at a spinner; the UI
+        # switches to manual entry when nothing is found.
+        return await asyncio.wait_for(asyncio.to_thread(lookup_subject_property, query), timeout=25)
+    except asyncio.TimeoutError:
+        logger.warning("Subject lookup timed out for %r", query[:120])
+        return {"found": False, "reason": "timeout"}
     except Exception as exc:
         logger.exception("Subject lookup failed")
         raise HTTPException(400, f"Subject lookup failed: {exc}") from exc

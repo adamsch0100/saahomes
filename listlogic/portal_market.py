@@ -44,6 +44,7 @@ PREVIEW_CALL_BUDGET = 4          # hard cap on Reef calls for preview
 GENERATE_CALL_BUDGET = 12        # hard cap on Reef calls for generate market pull
 REFRESH_CALL_BUDGET = 6          # pulse refresh — enough for new/cheaper/cuts
 SUBJECT_CALL_BUDGET = 2          # at most 2 Reef calls per subject autofill
+SUBJECT_LOOKUP_TIMEOUT_SEC = 12  # per Reef call; the UI falls back to manual entry instead of hanging
 ZESTIMATE_CALL_BUDGET = 2        # search + optional property_detail; never steals generate budget
 PREVIEW_CACHE_TTL_SEC = 15 * 60
 PORTAL_DISK_CACHE_TTL_SEC = 24 * 3600
@@ -893,8 +894,10 @@ def scorecard_vs_matrix(portal_df: pd.DataFrame, matrix_df: pd.DataFrame) -> dic
 # Defaults inspired by Matrix Criteria Summary (editable per run).
 DEFAULT_PORTAL_CRITERIA: dict[str, Any] = {
     "dwelling": DWELLING_DETACHED,
-    "price_min": 300_000,
-    "price_max": 450_000,
+    # No default price band: a fixed band only fits one market (it zeroed out comps
+    # outside ~$300-450k). Size/beds/baths keep the comp set like-for-like instead.
+    "price_min": None,
+    "price_max": None,
     "min_beds": 3,
     "max_beds": 6,
     "min_baths": 2.0,
@@ -989,6 +992,13 @@ def geocode_location(query: str) -> dict:
     }
 
 
+_CLEARABLE_FILTER_KEYS = frozenset({
+    "price_min", "price_max", "min_beds", "max_beds", "min_baths", "max_baths",
+    "min_sqft", "max_sqft", "min_garage", "min_lot_sqft", "max_lot_sqft",
+    "min_year_built", "max_year_built",
+})
+
+
 def parse_portal_criteria(raw: dict | None) -> dict:
     """Merge user criteria onto defaults; coerce types."""
     base = dict(DEFAULT_PORTAL_CRITERIA)
@@ -996,6 +1006,9 @@ def parse_portal_criteria(raw: dict | None) -> dict:
         return base
     for k, v in raw.items():
         if v is None or v == "":
+            # An explicitly blank optional filter means "no limit", not "use the default".
+            if k in _CLEARABLE_FILTER_KEYS:
+                base[k] = None
             continue
         if k in base or k in (
             "location", "map_bounds", "polygon_ring", "require_garage_known",
@@ -1284,6 +1297,7 @@ def _facts_from_listing_item(item: dict) -> dict[str, Any]:
         "city": item.get("city") or "",
         "subdivision": item.get("neighborhood") or item.get("subdivision") or "",
         "property_type": item.get("property_type") or item.get("sub_type") or "",
+        "listing_status": str(item.get("status") or ""),
     }
 
 
@@ -1410,7 +1424,7 @@ def lookup_subject_property(address: str) -> dict[str, Any]:
                 ("search", {"location": loc, "map_bounds": bounds, "limit": 40, "status": "for_sale"}),
             ):
                 try:
-                    envelope = reef_call("realtor", action, extra, timeout=45)
+                    envelope = reef_call("realtor", action, extra, timeout=SUBJECT_LOOKUP_TIMEOUT_SEC)
                     data = envelope.get("data") or {}
                     items = data.get("results") or data.get("items") or []
                     hit = _pick_best_listing(q, items if isinstance(items, list) else [])

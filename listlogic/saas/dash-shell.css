@@ -113,3 +113,5 @@ body.dark .store-card, body.dark .field-group { background: #101f36; border-colo
 .ll-nav-links a.ll-nav-pill-soft { background: transparent; color: var(--ink); }
 body.dark .ll-nav-links a.ll-nav-pill-soft { color: #c9d5e6; }
 body.dark .ll-nav-links a.ll-nav-pill-soft:hover { background: rgba(148, 178, 214, .08); color: #fff; }
+/* Role-gated nav items (Team, Owner console) stay hidden until auth says otherwise. */
+.dash-side [hidden] { display: none !important; }

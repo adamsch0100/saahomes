@@ -59,6 +59,7 @@ button.btn { width: 100%; padding: 13px; font-size: 0.95rem; }
   <a href="/saas/" class="auth-brand" style="text-decoration:none;color:inherit">
     <img src="/saas/listlogic-logo.png" alt="ListLogic">
   </a>
+  <div class="ll-signed-out" id="signedOut" hidden>You’re signed out. Sign back in below — it only takes a moment.</div>
   <h1>Welcome back</h1>
   <p class="sub" id="authSub">We’ll email you a one-time sign-in link.</p>
   <div class="hint-box">
@@ -84,7 +85,7 @@ button.btn { width: 100%; padding: 13px; font-size: 0.95rem; }
       <label for="promo">Access code <span style="font-weight:500;color:var(--muted)">(optional)</span></label>
       <input id="promo" type="text" autocomplete="off" placeholder="Enter access code if you have one">
     </div>
-    <button type="submit" class="btn btn-primary" id="authSubmit">Email me a link</button>
+    <button type="submit" class="btn btn-primary" id="authSubmit">Email me a code</button>
   </form>
 
   <p class="status" id="status"></p>
@@ -95,86 +96,105 @@ button.btn { width: 100%; padding: 13px; font-size: 0.95rem; }
     <a href="/saas/faq.html">FAQ</a>
   </div>
 </div>
+<script src="/saas/auth-code.js"></script>
 <script>
 const params = new URLSearchParams(location.search);
 const next = params.get('next') || '';
 const promo = (params.get('promo') || params.get('code') || '').trim();
+const MODE_KEY = 'll_auth_mode';
 if (promo) document.getElementById('promo').value = promo;
-
 const form = document.getElementById('authForm');
+const emailInput = document.getElementById('email');
 const passwordField = document.getElementById('passwordField');
 const passwordInput = document.getElementById('password');
 const promoField = document.getElementById('promoField');
 const submitBtn = document.getElementById('authSubmit');
 const sub = document.getElementById('authSub');
+const statusEl = document.getElementById('status');
 const modeBtns = [...document.querySelectorAll('.auth-toggle [data-mode]')];
-let passwordMode = (params.get('mode') || '').toLowerCase() === 'password';
 
+// Already signed in (e.g. clicked a bookmarked login link)? Go straight in.
+fetch('/api/auth-status', { credentials: 'same-origin' })
+  .then((r) => r.json())
+  .then((d) => {
+    if (d && d.authenticated) {
+      const dest = next && next.startsWith('/') ? next : (d.user && d.user.role === 'admin' ? '/saas/admin.html' : '/saas/app.html');
+      location.replace(dest);
+    }
+  })
+  .catch(() => {});
+
+if (params.get('signed_out')) document.getElementById('signedOut').hidden = false;
+const remembered = window.llLastEmail ? window.llLastEmail() : '';
+if (remembered && !emailInput.value) emailInput.value = remembered;
+
+let savedMode = '';
+try { savedMode = localStorage.getItem(MODE_KEY) || ''; } catch (e) {}
+let passwordMode = (params.get('mode') || savedMode).toLowerCase() === 'password';
 function setMode(usePassword) {
   passwordMode = !!usePassword;
   passwordField.hidden = !passwordMode;
-  promoField.hidden = passwordMode;
+  promoField.hidden = passwordMode || !promo;
   passwordInput.required = passwordMode;
-  submitBtn.textContent = passwordMode ? 'Sign in' : 'Email me a link';
+  submitBtn.textContent = passwordMode ? 'Sign in' : 'Email me a code';
   sub.textContent = passwordMode
     ? 'Sign in with the password you set in Settings.'
-    : 'We’ll email you a one-time sign-in link.';
+    : 'We’ll email you a 6-digit code and a one-tap link.';
   modeBtns.forEach((btn) => {
     const on = btn.dataset.mode === (passwordMode ? 'password' : 'email');
     btn.classList.toggle('on', on);
     btn.setAttribute('aria-selected', on ? 'true' : 'false');
   });
+  try { localStorage.setItem(MODE_KEY, passwordMode ? 'password' : 'email'); } catch (e) {}
+  statusEl.textContent = '';
+  setTimeout(() => {
+    if (!emailInput.value) emailInput.focus();
+    else if (passwordMode) passwordInput.focus();
+    else submitBtn.focus();
+  }, 0);
 }
-
 modeBtns.forEach((btn) => {
   btn.addEventListener('click', () => setMode(btn.dataset.mode === 'password'));
 });
 setMode(passwordMode);
 
+const emailAuth = window.llEmailAuth({
+  form,
+  emailInput,
+  submitBtn,
+  statusEl,
+  devEl: document.getElementById('devLink'),
+  buildPayload: (email) => ({
+    email,
+    promo_code: (document.getElementById('promo').value || '').trim(),
+    next,
+  }),
+});
+
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const status = document.getElementById('status');
-  const dev = document.getElementById('devLink');
-  status.className = 'status';
-  status.textContent = passwordMode ? 'Signing in…' : 'Sending link…';
-  dev.style.display = 'none';
-  const email = document.getElementById('email').value.trim();
+  if (!passwordMode) {
+    emailAuth.send();
+    return;
+  }
+  statusEl.className = 'status';
+  statusEl.textContent = 'Signing in…';
+  submitBtn.disabled = true;
+  const email = emailInput.value.trim();
   try {
-    if (passwordMode) {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          password: passwordInput.value,
-          next,
-        }),
-      });
-      const payload = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(payload.detail || 'Invalid email or password');
-      location.href = payload.next || (payload.user?.role === 'admin' ? '/saas/admin.html' : '/saas/app.html');
-      return;
-    }
-    const res = await fetch('/api/auth/magic-link', {
+    const res = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email,
-        promo_code: (document.getElementById('promo').value || '').trim(),
-        next,
-      }),
+      body: JSON.stringify({ email, password: passwordInput.value, next }),
     });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Could not send link');
-    status.className = 'status ok';
-    status.textContent = data.message || 'Check your email for a sign-in link.';
-    if (data.dev_url) {
-      dev.style.display = 'block';
-      dev.innerHTML = 'Dev link: <a href="' + data.dev_url + '">' + data.dev_url + '</a>';
-    }
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(payload.detail || 'Invalid email or password');
+    window.llRememberEmail(email);
+    location.href = payload.next || (payload.user?.role === 'admin' ? '/saas/admin.html' : '/saas/app.html');
   } catch (err) {
-    status.className = 'status error';
-    status.textContent = String(err.message || err);
+    statusEl.className = 'status error';
+    statusEl.textContent = String(err.message || err) + ' — or switch to Email for a sign-in code.';
+    submitBtn.disabled = false;
   }
 });
 </script>
