@@ -15,6 +15,7 @@
 import crypto from 'crypto';
 import getPool from '../config/database.js';
 import logger from '../utils/logger.js';
+import { savedSearchPath } from './listingFilters.js';
 import {
   enrichSubmissionFromHistory,
   noteIfDuplicateSubmission,
@@ -251,7 +252,7 @@ async function enrichForForward(submission, path) {
   }
 }
 
-export const forwardAlertSignupToFollowUpBoss = async (user, search) => {
+export const forwardAlertSignupToFollowUpBoss = async (user, search, { smsOptIn = false } = {}) => {
   if (!isFollowUpBossConfigured()) {
     logger.info('Follow Up Boss not configured, skipping saved-search lead forwarding');
     return { success: false, reason: 'not_configured' };
@@ -269,13 +270,15 @@ export const forwardAlertSignupToFollowUpBoss = async (user, search) => {
 
   const filters = search.filters || {};
   const parts = [];
-  if (filters.city) parts.push(`City: ${filters.city}`);
+  if (filters.city && filters.city !== '__noco__' && filters.city !== '__all__') parts.push(`City: ${filters.city}`);
+  if (filters.postal_code) parts.push(`ZIP: ${filters.postal_code}`);
+  if (filters.polygon) parts.push('Area: drawn on the map');
   if (filters.minPrice || filters.maxPrice) {
     parts.push(`Price: ${filters.minPrice ? `$${Number(filters.minPrice).toLocaleString()}` : '$0'}–${filters.maxPrice ? `$${Number(filters.maxPrice).toLocaleString()}` : 'Any'}`);
   }
   if (filters.beds) parts.push(`${filters.beds}+ beds`);
   if (filters.baths) parts.push(`${filters.baths}+ baths`);
-  if (filters.type) parts.push(`Type: ${filters.type}`);
+  if (filters.types || filters.type) parts.push(`Type: ${filters.types || filters.type}`);
   const searchSummary = parts.join(' · ') || 'Anywhere';
 
   const { firstName, lastName } = splitName(userForPerson.name);
@@ -288,8 +291,9 @@ export const forwardAlertSignupToFollowUpBoss = async (user, search) => {
       'New saved search from website — follow-up lead (nurture via nightly listing alerts).',
       `Search name: ${search.name || 'My Search'}`,
       `Criteria: ${searchSummary}`,
-      `Manage alerts: https://saahomes.com/my-saved-searches/?token=${user.manage_token}`,
-    ].join('\n'),
+      `See the search: https://saahomes.com${savedSearchPath(filters)}`,
+      smsOptIn ? 'Text alerts: opted in on the save-search form.' : null,
+    ].filter(Boolean).join('\n'),
     person: {
       firstName,
       lastName,
@@ -298,7 +302,7 @@ export const forwardAlertSignupToFollowUpBoss = async (user, search) => {
       tags: ['Website Lead', 'Saved Search', 'saahomes.com'],
     },
     propertySearch: {
-      city: filters.city || undefined,
+      city: filters.city && filters.city !== '__noco__' && filters.city !== '__all__' ? filters.city : undefined,
       minPrice: filters.minPrice ? Number(filters.minPrice) : undefined,
       maxPrice: filters.maxPrice ? Number(filters.maxPrice) : undefined,
       minBedrooms: filters.beds ? Number(filters.beds) : undefined,

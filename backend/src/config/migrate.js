@@ -192,6 +192,7 @@ export const runMigrations = async () => {
       `);
 
       await client.query(`
+        ALTER TABLE search_snapshots ADD COLUMN IF NOT EXISTS result_prices JSONB;
         ALTER TABLE saved_searches ADD COLUMN IF NOT EXISTS frequency VARCHAR(16) DEFAULT 'daily';
         ALTER TABLE saved_searches ADD COLUMN IF NOT EXISTS send_time VARCHAR(5) DEFAULT '06:00';
         ALTER TABLE saved_searches ADD COLUMN IF NOT EXISTS send_day VARCHAR(10) DEFAULT 'Monday';

@@ -88,18 +88,33 @@ export function hasOwnSession(req, userRow) {
 export const SIGN_IN_REQUIRED_MESSAGE =
   'You already have an account with this email. We just emailed you a sign-in link.';
 
+/** Shown beside the save-search text opt-in (src/components/SaveSearchModal.jsx
+ *  carries the same words); stored verbatim with the consent. */
+export const SMS_ALERT_CONSENT_WORDING =
+  'Text me new matches and price drops for this search from SAA Homes. Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for help.';
+
 export const createAlert = async (req, res) => {
   try {
-    const { email, name, phone, password, ...filterBody } = req.body || {};
+    // `name` is the legacy field for the search's name (older clients); the
+    // person's own name only ever comes from contact_name.
+    const {
+      email, name, search_name: searchNameRaw, contact_name: contactNameRaw,
+      phone, password, sms_opt_in: smsOptInRaw, ...filterBody
+    } = req.body || {};
     const emailStr = String(email || '').trim().toLowerCase();
     if (!EMAIL_RE.test(emailStr)) {
       return res.status(400).json({ success: false, error: 'A valid email is required to save a search.' });
     }
     if (rejectIfDisposableEmail(emailStr, res, 'alert')) return;
+    const smsOptIn = smsOptInRaw === true || smsOptInRaw === 'true';
     const phoneDigits = cleanPhone(phone);
-    if (!phoneDigits) {
-      return res.status(400).json({ success: false, error: 'Please add your phone number so we can reach you about new listings.' });
+    if (String(phone || '').trim() && !phoneDigits) {
+      return res.status(400).json({ success: false, error: 'That phone number doesn’t look right. Check it, or leave it blank.' });
     }
+    if (smsOptIn && !phoneDigits) {
+      return res.status(400).json({ success: false, error: 'Add your mobile number to get text alerts.' });
+    }
+    const contactName = String(contactNameRaw || '').trim().slice(0, 255) || null;
     const filters = cleanFilters(filterBody);
     if (Object.keys(filters).length === 0) {
       return res.status(400).json({ success: false, error: 'Add at least one search criteria (city, price, beds…).' });
@@ -122,15 +137,16 @@ export const createAlert = async (req, res) => {
       const token = crypto.randomBytes(24).toString('hex');
       const created = await pool.query(
         'INSERT INTO users (email, name, manage_token, phone) VALUES ($1, $2, $3, $4) RETURNING *',
-        [emailStr, String(name || '').trim().slice(0, 255) || null, token, phoneDigits]
+        [emailStr, contactName, token, phoneDigits]
       );
       user = created;
     } else {
       user = await pool.query(
         `UPDATE users SET status = 'active', last_active_at = NOW(),
-           phone = COALESCE(NULLIF($1, ''), phone)
-         WHERE id = $2 RETURNING *`,
-        [phoneDigits, user.rows[0].id]
+           phone = COALESCE(NULLIF($1, ''), phone),
+           name = COALESCE(NULLIF($2, ''), name)
+         WHERE id = $3 RETURNING *`,
+        [phoneDigits || '', contactName || '', user.rows[0].id]
       );
     }
     const userRow = user.rows[0];
@@ -160,7 +176,7 @@ export const createAlert = async (req, res) => {
       await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, userRow.id]);
     }
 
-    const searchName = String(name || '').trim().slice(0, 255) || 'My Search';
+    const searchName = String(searchNameRaw ?? name ?? '').trim().slice(0, 255) || 'My Search';
     const schedule = cleanSchedule(req.body || {});
     const inserted = await pool.query(
       `INSERT INTO saved_searches (user_id, name, filters, is_active, frequency, send_time, send_day)
@@ -185,11 +201,21 @@ export const createAlert = async (req, res) => {
         source: 'save_search',
         req,
       }).catch((e) => console.error('consent record failed:', e.message));
+      if (smsOptIn) {
+        await recordConsent({
+          userId: userRow.id,
+          channel: 'sms',
+          granted: true,
+          wording: SMS_ALERT_CONSENT_WORDING,
+          source: 'save_search',
+          req,
+        }).catch((e) => console.error('consent record failed:', e.message));
+      }
     }
 
     // Lead → Follow Up Boss (fire-and-forget, never block the user)
     // Captures fub_person_id from the Person response on our users row.
-    forwardAlertSignupToFollowUpBoss(userRow, searchRow).catch(() => {});
+    forwardAlertSignupToFollowUpBoss(userRow, searchRow, { smsOptIn: isOwner && smsOptIn }).catch(() => {});
 
     // Compute + store lead score from real signals (save-search just landed)
     let leadScore = 0;

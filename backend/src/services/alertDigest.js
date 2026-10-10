@@ -11,7 +11,7 @@
  * Env:  DATABASE_URL (repo .env) + OUTREACH_SMTP_HOST/USER/PASSWORD/FROM
  */
 import 'dotenv/config';
-import pg from 'pg';
+import getPool from '../config/database.js';
 import nodemailer from 'nodemailer';
 import { getRecentViews, filtersToSearchPath } from './leadScore.js';
 import {
@@ -25,7 +25,12 @@ import { marketPack } from '../config/marketPack.js';
 import { buildSavedSearchWhere } from './listingFilters.js';
 import { loadBrandForClientUser, voiceCopy } from './tenantBrand.js';
 
-const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: false });
+// The shared pool (TLS to the Railway proxy; plaintext runs got reset
+// mid-run). Lazy so importing this module never needs DATABASE_URL.
+const pool = {
+  query: (...args) => getPool().query(...args),
+  end: () => getPool().end(),
+};
 
 const SITE = marketPack.market.siteUrl || 'https://saahomes.com';
 const FROM = process.env.OUTREACH_SMTP_FROM || process.env.OUTREACH_SMTP_USER || 'alerts@saahomes.com';
@@ -341,7 +346,7 @@ function cardHtml(l, filters, isNew, isDrop) {
       ${thumbStrip}
       <div style="padding:16px 18px">
         <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap">
-          <span style="font-size:22px;font-weight:800;color:#111">${fmtPrice(l.list_price)}</span>
+          <span style="font-size:22px;font-weight:800;color:#111">${fmtPrice(l.list_price)}${isDrop && l.prev_price ? ` <span style="font-size:14px;font-weight:600;color:#6b7280;text-decoration:line-through">${fmtPrice(l.prev_price)}</span>` : ''}</span>
           <span style="color:#6b7280;font-size:12.5px">${score}% match to your search</span>
         </div>
         <div style="color:#374151;font-size:14px;margin-top:2px">${[l.beds != null ? `${l.beds} bd` : '', l.baths != null ? `${l.baths} ba` : '', fmtSqft(l.living_area), HOME_TYPE_LABEL[l.home_type] || l.property_subtype].filter(Boolean).join(' · ')}</div>
@@ -550,46 +555,162 @@ async function sendEmail(to, subject, html, fromName = AGENT_FROM) {
   await transporter.sendMail({ from: `"${fromName || AGENT_FROM}" <${FROM}>`, to, subject, html });
 }
 
-// ---------------------------------------------------------------- main
-async function runSearch(search, { dryRun, onlyEmail }) {
-  const { whereSql, params } = buildWhere(search.filters);
-  const res = await pool.query(
-    `SELECT id, listing_id, slug, street_number, street_name, city, state, postal_code,
-            list_price, original_list_price, beds, baths, living_area, home_type,
-            property_subtype, days_on_market, photos, status, price_change_timestamp,
-            elementary_school, middle_school, high_school, school_district, subdivision,
-            lot_size_acres, garage_spaces, year_built, hoa_fee, features, description
-     FROM listings WHERE ${whereSql} ORDER BY updated_at DESC LIMIT 60`,
-    params
-  );
-  const current = res.rows;
+// ---------------------------------------------------------------- diffing
+/** Most matching homes a snapshot holds. NoCo inventory is a few thousand. */
+const SNAPSHOT_CAP = 20000;
+/** Cards in one email; counts and the "view all" link cover the rest. */
+const MAX_DIGEST_CARDS = 12;
+/** A home that joins a search counts as "new on the market" this many days in. */
+const NEW_LISTING_DAYS = 7;
 
-  const snap = await pool.query(
-    'SELECT result_ids FROM search_snapshots WHERE search_id = $1 ORDER BY run_at DESC LIMIT 1',
-    [search.id]
-  );
-  const prevIds = snap.rows.length ? new Set(snap.rows[0].result_ids || []) : new Set();
-  const curIds = new Set(current.map((l) => l.listing_id));
+const CARD_COLUMNS = `id, listing_id, slug, street_number, street_name, city, state, postal_code,
+  list_price, original_list_price, beds, baths, living_area, home_type,
+  property_subtype, days_on_market, photos, status, price_change_timestamp,
+  elementary_school, middle_school, high_school, school_district, subdivision,
+  lot_size_acres, garage_spaces, year_built, hoa_fee, features, description`;
 
-  const events = [];
-  for (const l of current) {
-    if (!prevIds.has(l.listing_id)) {
-      events.push({ type: 'new', listing: l });
-    } else if (
-      l.original_list_price && l.list_price &&
-      Number(l.original_list_price) > Number(l.list_price)
-    ) {
-      events.push({ type: 'price_drop', listing: l });
+const isFreshListing = (row) => row.days_on_market == null || Number(row.days_on_market) <= NEW_LISTING_DAYS;
+
+/**
+ * Compare a search's current matches with its last snapshot.
+ *   prev    { ids: [...], prices: {listing_id: price} | null } or null
+ *   current [{ listing_id, list_price, days_on_market }]
+ * With no snapshot (first run) or a legacy one without prices, this run is a
+ * baseline: only homes listed in the last week are news, and no price drops.
+ * After that a price drop means the price fell since the last run, not that
+ * it sits below the original list price.
+ */
+export function diffSearchResults(prev, current) {
+  const prevIds = new Set(prev?.ids || []);
+  const prevPrices = prev?.prices || null;
+  const baseline = !prev || !prevPrices;
+  const curIds = new Set();
+  const newListings = [];
+  const newMatches = [];
+  const priceDrops = [];
+
+  for (const row of current) {
+    const id = row.listing_id;
+    curIds.add(id);
+    if (!prevIds.has(id)) {
+      if (isFreshListing(row) && (!baseline || row.days_on_market != null)) newListings.push(row);
+      else if (!baseline) newMatches.push(row);
+      continue;
+    }
+    if (baseline) continue;
+    const was = prevPrices[id];
+    if (was != null && row.list_price != null && Number(row.list_price) < Number(was)) {
+      priceDrops.push({ ...row, prev_price: Number(was) });
     }
   }
-  const statusChanges = [...prevIds].filter((id) => !curIds.has(id)).length;
+  const left = prev ? [...prevIds].filter((id) => !curIds.has(id)) : [];
 
-  const fresh = events.filter((e) => e.type === 'new');
-  const drops = events.filter((e) => e.type === 'price_drop');
-  if (!fresh.length && !drops.length && !statusChanges) return { sent: false, events: 0 };
+  const prices = {};
+  for (const row of current) prices[row.listing_id] = row.list_price == null ? null : Number(row.list_price);
+  const sameSet = prev && prevIds.size === curIds.size && left.length === 0;
+  const samePrices = sameSet && prevPrices
+    && Object.keys(prices).every((id) => (prevPrices[id] ?? null) === prices[id]);
 
-  const cards = [...fresh.map((e) => cardHtml(e.listing, search.filters, true, false)),
-    ...drops.map((e) => cardHtml(e.listing, search.filters, false, true))].join('');
+  return {
+    baseline,
+    newListings,
+    newMatches,
+    priceDrops,
+    left,
+    snapshot: { ids: [...curIds], prices },
+    changed: !samePrices,
+  };
+}
+
+async function loadSnapshot(searchId) {
+  const r = await pool.query(
+    'SELECT result_ids, result_prices FROM search_snapshots WHERE search_id = $1 ORDER BY run_at DESC, id DESC LIMIT 1',
+    [searchId]
+  );
+  if (!r.rows.length) return null;
+  return { ids: r.rows[0].result_ids || [], prices: r.rows[0].result_prices || null };
+}
+
+async function saveSnapshot(searchId, snapshot) {
+  await pool.query(
+    'INSERT INTO search_snapshots (search_id, result_ids, result_prices) VALUES ($1, $2, $3)',
+    [searchId, JSON.stringify(snapshot.ids), JSON.stringify(snapshot.prices)]
+  );
+  // Only the latest snapshot is ever read; keep a couple for debugging.
+  await pool.query(
+    `DELETE FROM search_snapshots WHERE search_id = $1 AND id NOT IN (
+       SELECT id FROM search_snapshots WHERE search_id = $1 ORDER BY run_at DESC, id DESC LIMIT 3)`,
+    [searchId]
+  );
+}
+
+/** Homes that left the results and really went under contract, sold or came off. */
+async function offMarketAmong(listingIds) {
+  if (!listingIds.length) return [];
+  const r = await pool.query(
+    'SELECT listing_id, status, is_active FROM listings WHERE listing_id = ANY($1)',
+    [listingIds]
+  );
+  return r.rows.filter((row) => !row.is_active || row.status !== 'Active');
+}
+
+// ---------------------------------------------------------------- main
+async function runSearch(search, { dryRun, onlyEmail, send = sendEmail } = {}) {
+  const userRes = await pool.query('SELECT email, name FROM users WHERE id = $1', [search.user_id]);
+  const userRow = userRes.rows[0];
+  if (!userRow?.email) return { sent: false, events: 0 };
+  if (onlyEmail && !userRow.email.toLowerCase().includes(onlyEmail.toLowerCase())) return { sent: false, events: 0 };
+
+  const { whereSql, params } = buildWhere(search.filters);
+  const matches = await pool.query(
+    `SELECT listing_id, list_price, days_on_market FROM listings
+     WHERE ${whereSql} ORDER BY listing_id LIMIT ${SNAPSHOT_CAP}`,
+    params
+  );
+  if (matches.rows.length >= SNAPSHOT_CAP) {
+    console.warn(`search ${search.id}: ${SNAPSHOT_CAP}+ matches, snapshot truncated`);
+  }
+
+  const prev = await loadSnapshot(search.id);
+  const diff = diffSearchResults(prev, matches.rows);
+  const offMarket = await offMarketAmong(diff.left);
+  const statusChanges = offMarket.length;
+
+  const commitSnapshot = async () => {
+    await pool.query('UPDATE saved_searches SET last_run_at = NOW() WHERE id = $1', [search.id]);
+    if (diff.changed) await saveSnapshot(search.id, diff.snapshot);
+  };
+
+  if (!diff.newListings.length && !diff.newMatches.length && !diff.priceDrops.length && !statusChanges) {
+    if (!dryRun) await commitSnapshot();
+    return { sent: false, events: 0, baseline: diff.baseline };
+  }
+
+  // Full rows only for the homes that get a card.
+  const byNewest = (a, b) => (a.days_on_market ?? -1) - (b.days_on_market ?? -1);
+  const dropPct = (r) => 1 - Number(r.list_price) / r.prev_price;
+  const cardPlan = [
+    ...[...diff.newListings].sort(byNewest).map((r) => ({ type: 'new', row: r })),
+    ...[...diff.priceDrops].sort((a, b) => dropPct(b) - dropPct(a)).map((r) => ({ type: 'price_drop', row: r })),
+    ...[...diff.newMatches].sort(byNewest).map((r) => ({ type: 'new_match', row: r })),
+  ].slice(0, MAX_DIGEST_CARDS);
+  const full = cardPlan.length
+    ? await pool.query(`SELECT ${CARD_COLUMNS} FROM listings WHERE listing_id = ANY($1)`, [cardPlan.map((c) => c.row.listing_id)])
+    : { rows: [] };
+  const fullById = new Map(full.rows.map((l) => [l.listing_id, l]));
+  const carded = cardPlan
+    .filter((c) => fullById.has(c.row.listing_id))
+    .map((c) => ({ type: c.type, listing: { ...fullById.get(c.row.listing_id), prev_price: c.row.prev_price ?? null } }));
+
+  const fresh = carded.filter((e) => e.type === 'new');
+  const drops = carded.filter((e) => e.type === 'price_drop');
+  const joined = carded.filter((e) => e.type === 'new_match');
+  const newTotal = diff.newListings.length;
+  const dropTotal = diff.priceDrops.length;
+  const joinedTotal = diff.newMatches.length;
+  const eventTotal = newTotal + dropTotal + joinedTotal + statusChanges;
+
+  const cards = carded.map((e) => cardHtml(e.listing, search.filters, e.type === 'new', e.type === 'price_drop')).join('');
 
   const zipLabel = search.filters.postal_code || search.filters.postalCode || search.filters.zip || '';
   const locBits = [
@@ -609,20 +730,21 @@ async function runSearch(search, { dryRun, onlyEmail }) {
     homeTypesLabel(search.filters),
   ].filter(Boolean).join(' · ');
 
-  // Accurate, human summary lines (counts always match the cards above)
+  // Accurate, human summary lines: true totals, even when cards are capped.
   const summaryLines = [];
-  if (fresh.length === 1) summaryLines.push('1 new home hit the market matching your search');
-  if (fresh.length > 1) summaryLines.push(`${fresh.length} new homes hit the market matching your search`);
-  if (drops.length === 1) summaryLines.push('1 price drop on a home you may have seen');
-  if (drops.length > 1) summaryLines.push(`${drops.length} price drops on homes you may have seen`);
-  if (statusChanges === 1) summaryLines.push('1 home from your search went off market');
-  if (statusChanges > 1) summaryLines.push(`${statusChanges} homes from your search went off market`);
+  if (newTotal === 1) summaryLines.push('1 new home hit the market matching your search');
+  if (newTotal > 1) summaryLines.push(`${newTotal} new homes hit the market matching your search`);
+  if (dropTotal === 1) summaryLines.push('1 price drop since my last email');
+  if (dropTotal > 1) summaryLines.push(`${dropTotal} price drops since my last email`);
+  if (joinedTotal === 1) summaryLines.push('1 more home now matches your search');
+  if (joinedTotal > 1) summaryLines.push(`${joinedTotal} more homes now match your search`);
+  if (statusChanges === 1) summaryLines.push('1 home from your search went under contract or off the market');
+  if (statusChanges > 1) summaryLines.push(`${statusChanges} homes from your search went under contract or off the market`);
+  if (newTotal + dropTotal + joinedTotal > carded.length) {
+    summaryLines.push(`Showing ${carded.length} here; the rest are one tap away below`);
+  }
   if (!summaryLines.length) summaryLines.push('New activity matched your search');
 
-  const userRes = await pool.query('SELECT email, name FROM users WHERE id = $1', [search.user_id]);
-  const userRow = userRes.rows[0];
-  if (!userRow?.email) return { sent: false, events: 0 };
-  if (onlyEmail && !userRow.email.toLowerCase().includes(onlyEmail.toLowerCase())) return { sent: false, events: 0 };
   const firstName = (userRow.name || '').trim().split(' ')[0] || null;
 
   // Personalized subject: "Adam — 3 new homes in Fort Collins match your search"
@@ -643,8 +765,8 @@ async function runSearch(search, { dryRun, onlyEmail }) {
     if (c === '__all__') return 'Colorado';
     return marketPack.market.name;
   })();
-  const newCount = fresh.length;
-  const dropCount = drops.length;
+  const newCount = newTotal;
+  const dropCount = dropTotal;
   // Assigned-agent brand (P-2). Unassigned → null → SAA copy unchanged.
   let brand = null;
   try {
@@ -675,8 +797,8 @@ async function runSearch(search, { dryRun, onlyEmail }) {
     const facts = featureHighlights(l);
     const factText = facts.slice(0, 2).join(', ');
     if (e.type === 'price_drop') {
-      const pct = l.list_price && l.original_list_price
-        ? Math.round((1 - Number(l.list_price) / Number(l.original_list_price)) * 100) : null;
+      const pct = l.list_price && l.prev_price
+        ? Math.round((1 - Number(l.list_price) / Number(l.prev_price)) * 100) : null;
       standouts.push(`The ${l.beds != null ? `${l.beds}-bed ` : ''}home at ${addr} just dropped ${pct ? `${pct}%` : 'in price'} to ${fmtPrice(l.list_price)}${factText ? ` — ${factText}` : ''}.`);
     } else {
       standouts.push(`New today: the ${l.beds != null ? `${l.beds}-bed ` : ''}home at ${addr} is listed at ${fmtPrice(l.list_price)}${factText ? ` — ${factText}` : ''}.`);
@@ -731,10 +853,12 @@ async function runSearch(search, { dryRun, onlyEmail }) {
   }
 
   if (dryRun) {
-    console.log(`[dry] → ${userRow.email}: "${subject}" [variant ${subjectVariant}] (${events.length} events: ${fresh.length} new, ${drops.length} drops, ${statusChanges} off-market)${viewedCallout ? ' [viewed callout]' : ''}${quietSearch ? ' [quiet]' : ''}${audit.ok ? '' : ' [LINK AUDIT FAIL]'}`);
+    console.log(`[dry] → ${userRow.email}: "${subject}" [variant ${subjectVariant}] (${eventTotal} events: ${newTotal} new, ${dropTotal} drops, ${joinedTotal} joined, ${statusChanges} off-market)${viewedCallout ? ' [viewed callout]' : ''}${quietSearch ? ' [quiet]' : ''}${audit.ok ? '' : ' [LINK AUDIT FAIL]'}`);
     return {
       sent: false,
-      events: events.length,
+      events: eventTotal,
+      counts: { new: newTotal, drops: dropTotal, joined: joinedTotal, offMarket: statusChanges },
+      baseline: diff.baseline,
       subject,
       subjectVariant,
       viewedCallout: !!viewedCallout,
@@ -745,12 +869,8 @@ async function runSearch(search, { dryRun, onlyEmail }) {
   }
 
   // Pre-warm proxy cache for every card photo BEFORE send so recipient opens hit HIT.
-  const cardListings = [
-    ...fresh.map((e) => e.listing),
-    ...drops.map((e) => e.listing),
-  ];
   try {
-    await prewarmPhotos(cardListings);
+    await prewarmPhotos(carded.map((e) => e.listing));
   } catch (e) {
     console.error('prewarmPhotos failed (continuing send):', e.message);
   }
@@ -759,26 +879,32 @@ async function runSearch(search, { dryRun, onlyEmail }) {
   const html = withOpenPixel(rawHtml, SITE, tok);
 
   const fromName = brand?.fromName || AGENT_FROM;
-  await sendEmail(userRow.email, subject, html, fromName);
+  await send(userRow.email, subject, html, fromName);
   await pool.query(
     `INSERT INTO email_log (user_id, search_id, type, to_email, subject, events, subject_variant, open_token)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
-    [search.user_id, search.id, 'digest', userRow.email, subject, events.length, subjectVariant, tok]
+    [search.user_id, search.id, 'digest', userRow.email, subject, eventTotal, subjectVariant, tok]
   );
-  for (const e of events) {
+  const logged = [
+    ...diff.newListings.map((r) => ['new', r.listing_id, { old_price: null, list_price: r.list_price }]),
+    ...diff.priceDrops.map((r) => ['price_drop', r.listing_id, { old_price: r.prev_price, list_price: r.list_price }]),
+    ...diff.newMatches.map((r) => ['new_match', r.listing_id, { old_price: null, list_price: r.list_price }]),
+    ...offMarket.map((r) => ['off_market', r.listing_id, { status: r.status }]),
+  ];
+  for (const [type, listingId, detail] of logged) {
     await pool.query(
       'INSERT INTO alert_events (search_id, listing_id, type, detail) VALUES ($1,$2,$3,$4)',
-      [search.id, e.listing.listing_id, e.type, JSON.stringify({ old_price: null, list_price: e.listing.list_price })]
+      [search.id, listingId, type, JSON.stringify(detail)]
     );
   }
 
   // In-app notification center (non-blocking — email path already succeeded)
   try {
-    if (fresh.length) {
+    if (fresh.length || joined.length) {
       await notifyNewMatches({
         userId: search.user_id,
         searchName: search.name,
-        listings: fresh.map((e) => e.listing),
+        listings: [...fresh, ...joined].map((e) => e.listing),
         pool,
       });
     }
@@ -786,7 +912,7 @@ async function runSearch(search, { dryRun, onlyEmail }) {
       await notifyPriceDrop({
         userId: search.user_id,
         listing: e.listing,
-        oldPrice: e.listing.original_list_price,
+        oldPrice: e.listing.prev_price,
         pool,
       });
     }
@@ -794,13 +920,16 @@ async function runSearch(search, { dryRun, onlyEmail }) {
     console.error('notification insert failed:', notifErr.message);
   }
 
-  await pool.query('UPDATE saved_searches SET last_run_at = NOW(), last_email_at = NOW() WHERE id = $1', [search.id]);
-  await pool.query(
-    'INSERT INTO search_snapshots (search_id, result_ids) VALUES ($1, $2)',
-    [search.id, JSON.stringify([...curIds])]
-  );
-  console.log(`✓ ${userRow.email}: "${subject}" — ${events.length} events (${fresh.length} new, ${drops.length} drops, ${statusChanges} off-market)`);
-  return { sent: true, events: events.length, subject };
+  await pool.query('UPDATE saved_searches SET last_email_at = NOW() WHERE id = $1', [search.id]);
+  await commitSnapshot();
+  console.log(`✓ ${userRow.email}: "${subject}" — ${eventTotal} events (${newTotal} new, ${dropTotal} drops, ${joinedTotal} joined, ${statusChanges} off-market)`);
+  return {
+    sent: true,
+    events: eventTotal,
+    counts: { new: newTotal, drops: dropTotal, joined: joinedTotal, offMarket: statusChanges },
+    baseline: diff.baseline,
+    subject,
+  };
 }
 
 /** Send pending email_outbox rows (magic links, transactional emails).
@@ -879,9 +1008,14 @@ export async function runDigest({ dryRun = false, onlyEmail = null, onlySearch =
       console.log(`skip search ${s.id}: listing_alert pref is off`);
       continue;
     }
-    const result = await runSearch({ ...s, manage_token: s.manage_token }, { dryRun, onlyEmail });
-    if (result.sent) sent += 1;
-    totalEvents += result.events || 0;
+    try {
+      const result = await runSearch({ ...s, manage_token: s.manage_token }, { dryRun, onlyEmail });
+      if (result.sent) sent += 1;
+      totalEvents += result.events || 0;
+    } catch (e) {
+      // One bad search (or a failed send) must not stop everyone else's alerts.
+      console.error(`search ${s.id} failed: ${e.message}`);
+    }
   }
   console.log(`alertDigest done: ${sent} emails sent, ${totalEvents} total events.`);
 
@@ -920,6 +1054,7 @@ if (isMain) {
 }
 
 export {
+  runSearch,
   buildWhere,
   matchScore,
   featureHighlights,
