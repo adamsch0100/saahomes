@@ -6250,6 +6250,7 @@ export const neighborhoods = [
       'Old North Longmont real estate — historic Victorians and Craftsman bungalows north of downtown, walkable to Main Street dining and shops. SAA Homes.',
     keywords:
       'Old North Longmont, Old North Longmont Historic District, historic Longmont homes, Longmont Victorian homes, downtown Longmont neighborhoods, Longmont Craftsman bungalows',
+    youtubeId: '230oSJqy2FQ',
     neighborhoodHighlights: [
       { title: 'Historic character', description: 'Brick Victorians, Queen Annes, and Craftsman bungalows from Longmont\'s founding era, many restored.' },
       { title: 'Walk to Main Street', description: 'Downtown Longmont\'s restaurants, breweries, and shops are a short stroll south.' },
@@ -6281,6 +6282,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.376', longitude: '-104.71' },
     metaDescription: 'Evans Colorado real estate - affordable homes near Greeley with US 34 access. SAA Homes.',
     keywords: 'Evans CO real estate, Evans Colorado homes, affordable Northern Colorado homes',
+    youtubeId: 'WsmOmOitlxo',
     neighborhoodHighlights: [
       { title: 'Affordable entry', description: 'One of the most affordable markets in Northern Colorado - great for first-time buyers.' },
       { title: 'Greeley proximity', description: 'Minutes from Greeley shopping, dining, and employment centers.' },
@@ -6312,6 +6314,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.375', longitude: '-104.7' },
     metaDescription: 'West Evans real estate - affordable homes along the US 34 corridor with Poudre River Trail access. SAA Homes.',
     keywords: 'West Evans homes, Evans Colorado real estate, Evans subdivisions, affordable Evans CO homes',
+    youtubeId: 'yM2izl25wEk',
     neighborhoodHighlights: [
       { title: 'Affordable option', description: 'One of the most affordable housing markets in Northern Colorado.' },
       { title: 'Trail access', description: 'Poudre River Trail provides miles of paved pathways for walking and biking.' },
