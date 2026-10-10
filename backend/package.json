@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "test": "node --test 'src/**/*.test.mjs'",
+    "test": "node --test 'src/**/*.test.mjs' 'test/**/*.test.mjs'",
     "migrate": "node src/config/migrate.js",
     "sync-listings": "node src/services/iresSync.js",
     "sync-sold-listings": "node src/services/iresSoldSync.js",
@@ -30,6 +30,7 @@
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.10.1",
     "pg": "^8.11.3",
-    "sharp": "^0.35.3"
+    "sharp": "^0.35.3",
+    "web-push": "^3.6.7"
   }
 }

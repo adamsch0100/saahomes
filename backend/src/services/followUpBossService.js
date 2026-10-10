@@ -15,6 +15,7 @@
 import crypto from 'crypto';
 import getPool from '../config/database.js';
 import logger from '../utils/logger.js';
+import { savedSearchPath } from './listingFilters.js';
 import {
   enrichSubmissionFromHistory,
   noteIfDuplicateSubmission,
@@ -251,7 +252,7 @@ async function enrichForForward(submission, path) {
   }
 }
 
-export const forwardAlertSignupToFollowUpBoss = async (user, search) => {
+export const forwardAlertSignupToFollowUpBoss = async (user, search, { smsOptIn = false } = {}) => {
   if (!isFollowUpBossConfigured()) {
     logger.info('Follow Up Boss not configured, skipping saved-search lead forwarding');
     return { success: false, reason: 'not_configured' };
@@ -269,13 +270,15 @@ export const forwardAlertSignupToFollowUpBoss = async (user, search) => {
 
   const filters = search.filters || {};
   const parts = [];
-  if (filters.city) parts.push(`City: ${filters.city}`);
+  if (filters.city && filters.city !== '__noco__' && filters.city !== '__all__') parts.push(`City: ${filters.city}`);
+  if (filters.postal_code) parts.push(`ZIP: ${filters.postal_code}`);
+  if (filters.polygon) parts.push('Area: drawn on the map');
   if (filters.minPrice || filters.maxPrice) {
     parts.push(`Price: ${filters.minPrice ? `$${Number(filters.minPrice).toLocaleString()}` : '$0'}–${filters.maxPrice ? `$${Number(filters.maxPrice).toLocaleString()}` : 'Any'}`);
   }
   if (filters.beds) parts.push(`${filters.beds}+ beds`);
   if (filters.baths) parts.push(`${filters.baths}+ baths`);
-  if (filters.type) parts.push(`Type: ${filters.type}`);
+  if (filters.types || filters.type) parts.push(`Type: ${filters.types || filters.type}`);
   const searchSummary = parts.join(' · ') || 'Anywhere';
 
   const { firstName, lastName } = splitName(userForPerson.name);
@@ -288,8 +291,9 @@ export const forwardAlertSignupToFollowUpBoss = async (user, search) => {
       'New saved search from website — follow-up lead (nurture via nightly listing alerts).',
       `Search name: ${search.name || 'My Search'}`,
       `Criteria: ${searchSummary}`,
-      `Manage alerts: https://saahomes.com/my-saved-searches/?token=${user.manage_token}`,
-    ].join('\n'),
+      `See the search: https://saahomes.com${savedSearchPath(filters)}`,
+      smsOptIn ? 'Text alerts: opted in on the save-search form.' : null,
+    ].filter(Boolean).join('\n'),
     person: {
       firstName,
       lastName,
@@ -298,7 +302,7 @@ export const forwardAlertSignupToFollowUpBoss = async (user, search) => {
       tags: ['Website Lead', 'Saved Search', 'saahomes.com'],
     },
     propertySearch: {
-      city: filters.city || undefined,
+      city: filters.city && filters.city !== '__noco__' && filters.city !== '__all__' ? filters.city : undefined,
       minPrice: filters.minPrice ? Number(filters.minPrice) : undefined,
       maxPrice: filters.maxPrice ? Number(filters.maxPrice) : undefined,
       minBedrooms: filters.beds ? Number(filters.beds) : undefined,
@@ -1436,4 +1440,153 @@ export async function pullFollowUpBossPerson({ email, fubPersonId, apiKey: apiKe
       error: error.message,
     };
   }
+}
+
+// ------------------------------------------------- pre-signup history → FUB
+const HISTORY_VIEW_LIMIT = 8;
+const HISTORY_SEARCH_LIMIT = 3;
+
+/** FUB propertySearch from a /properties/ query string (our API param names). */
+export function propertySearchFromParams(params) {
+  const q = new URLSearchParams(String(params || '').replace(/^\?/, ''));
+  const num = (k) => (q.get(k) && Number.isFinite(Number(q.get(k))) ? Number(q.get(k)) : undefined);
+  const city = q.get('city');
+  return {
+    city: city && city !== '__noco__' && city !== '__all__' ? city : undefined,
+    zip: q.get('postal_code') || undefined,
+    minPrice: num('minPrice'),
+    maxPrice: num('maxPrice'),
+    minBedrooms: num('beds'),
+    minBathrooms: num('baths'),
+  };
+}
+
+/**
+ * When someone signs up, send what they did before (listings viewed,
+ * searches run) to FUB as dated events, so the agent sees the whole story.
+ * Events older than a day are historical in FUB and don't fire workflows.
+ * Each stream event is sent at most once (events.fub_synced_at).
+ */
+export async function syncVisitorHistoryToFollowUpBoss(userId, { pool = getPool(), post = postFollowUpBossEvent } = {}) {
+  if (!isFollowUpBossConfigured() && post === postFollowUpBossEvent) return { sent: 0, reason: 'not_configured' };
+  const { rows: [user] } = await pool.query('SELECT id, email, name, phone FROM users WHERE id = $1', [userId]);
+  if (!user?.email) return { sent: 0, reason: 'no_email' };
+
+  const { rows: views } = await pool.query(
+    `SELECT DISTINCT ON (e.listing_id) e.id, e.listing_id, e.occurred_at,
+            l.street_number, l.street_name, l.unit, l.city, l.state, l.postal_code,
+            l.list_price, l.beds, l.baths, l.living_area, l.slug, l.home_type
+     FROM events e LEFT JOIN listings l ON l.listing_id = e.listing_id
+     WHERE e.user_id = $1 AND e.type = 'listing_view' AND e.fub_synced_at IS NULL AND e.listing_id IS NOT NULL
+     ORDER BY e.listing_id, e.occurred_at DESC`,
+    [userId]
+  );
+  views.sort((a, b) => new Date(b.occurred_at) - new Date(a.occurred_at));
+  const { rows: searches } = await pool.query(
+    `SELECT id, meta, occurred_at FROM events
+     WHERE user_id = $1 AND type = 'search' AND fub_synced_at IS NULL
+     ORDER BY occurred_at DESC LIMIT ${HISTORY_SEARCH_LIMIT}`,
+    [userId]
+  );
+
+  const { firstName, lastName } = splitName(user.name);
+  const person = {
+    firstName,
+    lastName,
+    emails: [{ value: user.email, type: 'work' }],
+    phones: user.phone ? [{ value: String(user.phone).replace(/\D/g, ''), type: 'mobile' }] : [],
+  };
+  const site = 'https://saahomes.com';
+  let sent = 0;
+  const synced = [];
+
+  for (const v of views.slice(0, HISTORY_VIEW_LIMIT)) {
+    const street = [v.street_number, v.street_name, v.unit ? `#${v.unit}` : null].filter(Boolean).join(' ');
+    try {
+      await post({
+        source: NURTURE_SOURCE,
+        system: SYSTEM_NAME,
+        type: 'Viewed Property',
+        occurredAt: new Date(v.occurred_at).toISOString(),
+        message: 'Viewed before signing up on saahomes.com',
+        person,
+        property: {
+          street: street || undefined,
+          city: v.city || undefined,
+          state: v.state || undefined,
+          code: v.postal_code || undefined,
+          mlsNumber: v.listing_id,
+          price: v.list_price != null ? Number(v.list_price) : undefined,
+          bedrooms: v.beds != null ? Number(v.beds) : undefined,
+          bathrooms: v.baths != null ? Number(v.baths) : undefined,
+          area: v.living_area != null ? Number(v.living_area) : undefined,
+          url: v.slug ? `${site}/homes-for-sale/${v.slug}/` : undefined,
+        },
+      });
+      sent += 1;
+      synced.push(v.id);
+    } catch (e) {
+      logger.warn('FUB history view failed', { message: e.message });
+    }
+  }
+  for (const s of searches) {
+    try {
+      await post({
+        source: NURTURE_SOURCE,
+        system: SYSTEM_NAME,
+        type: 'Property Search',
+        occurredAt: new Date(s.occurred_at).toISOString(),
+        message: `Searched before signing up: ${site}/properties/?${String(s.meta?.params || '').replace(/^\?/, '')}`,
+        person,
+        propertySearch: propertySearchFromParams(s.meta?.params),
+      });
+      sent += 1;
+      synced.push(s.id);
+    } catch (e) {
+      logger.warn('FUB history search failed', { message: e.message });
+    }
+  }
+  // Older views beyond the limit are summarized, not sent one by one.
+  const skipped = views.slice(HISTORY_VIEW_LIMIT).map((v) => v.id);
+  const ids = [...synced, ...skipped];
+  if (ids.length) {
+    await pool.query(
+      `UPDATE events SET fub_synced_at = NOW()
+       WHERE user_id = $1 AND fub_synced_at IS NULL
+         AND (id = ANY($2) OR (type = 'listing_view' AND listing_id IN (
+           SELECT listing_id FROM events WHERE id = ANY($2))))`,
+      [userId, ids]
+    );
+  }
+  return { sent };
+}
+
+// ------------------------------------------------- lead score → FUB field
+/**
+ * Mirror our lead score into a FUB custom field (name in FUB_LEAD_SCORE_FIELD,
+ * e.g. customSAAScore, created once in FUB under Admin → Custom Fields).
+ * Needs the person linked (users.fub_person_id) and an API key. Writes only
+ * when the score changed since the last write.
+ */
+export async function syncLeadScoreToFollowUpBoss(userId, {
+  pool = getPool(), fetchImpl = fetch, apiKey = FOLLOW_UP_BOSS_API_KEY, field = process.env.FUB_LEAD_SCORE_FIELD,
+} = {}) {
+  field = String(field || '').trim();
+  if (!field || !/^custom[A-Za-z0-9]+$/.test(field) || !apiKey) return { skipped: 'not_configured' };
+  const { rows: [u] } = await pool.query(
+    'SELECT fub_person_id, lead_score, fub_lead_score_synced FROM users WHERE id = $1', [userId]
+  );
+  if (!u?.fub_person_id || u.lead_score == null) return { skipped: 'not_linked' };
+  if (u.fub_lead_score_synced === u.lead_score) return { skipped: 'unchanged' };
+  const res = await fetchImpl(`${FUB_PEOPLE_URL}/${u.fub_person_id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: getAuthHeader(apiKey) },
+    body: JSON.stringify({ [field]: u.lead_score }),
+  });
+  if (!res.ok) {
+    logger.warn('FUB lead score write failed', { status: res.status });
+    return { ok: false, status: res.status };
+  }
+  await pool.query('UPDATE users SET fub_lead_score_synced = $1 WHERE id = $2', [u.lead_score, userId]);
+  return { ok: true, score: u.lead_score };
 }

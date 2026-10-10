@@ -1,0 +1,21 @@
+{
+  "name": "SAA Homes: Northern Colorado Home Search",
+  "short_name": "SAA Homes",
+  "description": "Search every Northern Colorado home for sale and get instant alerts for new matches and price drops.",
+  "id": "/",
+  "start_url": "/properties/?src=app",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#111111",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Search homes", "url": "/properties/?src=app", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "My saved searches", "url": "/my-saved-searches/?src=app", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Notifications", "url": "/notifications/?src=app", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

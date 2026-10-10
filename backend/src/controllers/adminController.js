@@ -1465,3 +1465,15 @@ export const patchAgent = async (req, res) => {
     return res.status(500).json({ error: 'Failed to update agent' });
   }
 };
+
+/** GET /api/admin/funnel?days=30 — search-to-lead funnel from the event stream. */
+export const getFunnelStats = async (req, res) => {
+  try {
+    const { getFunnel } = await import('../services/funnel.js');
+    const data = await getFunnel({ days: req.query.days });
+    return res.json({ success: true, data });
+  } catch (error) {
+    console.error('funnel stats error:', error);
+    return res.status(500).json({ success: false, error: 'Could not load the funnel.' });
+  }
+};

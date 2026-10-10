@@ -5,6 +5,12 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#000000" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="SAA Homes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="robots" content="index, follow" />
     <title>Schwartz and Associates | Northern Colorado Real Estate | Fort Collins, Loveland & Greeley</title>
     <meta name="description" content="Schwartz and Associates, Coldwell Banker Realty — Northern Colorado real estate agents serving Fort Collins, Loveland, Windsor, Greeley, and 19+ Front Range communities." />
@@ -12,7 +18,6 @@
     
     <!-- Preconnect to external domains for performance -->
     <link rel="preconnect" href="https://www.googletagmanager.com" />
-    <link rel="preconnect" href="https://em.realscout.com" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
@@ -27,51 +32,6 @@
       gtag('config', 'G-CB5GL0P3EZ');
     </script>
     
-    <!-- RealScout Web Components - Load in head for better compatibility -->
-    <script src="https://em.realscout.com/widgets/realscout-web-components.umd.js" type="module"></script>
-    
-    <!-- RealScout Widget Customization Styles -->
-    <style>
-      /* Simple Search Widget Styles */
-      realscout-simple-search {
-        --rs-ss-font-primary-color: #6a6d72;
-        --rs-ss-searchbar-border-color: hsl(0, 0%, 80%);
-        --rs-ss-box-shadow: 0 10px 15px -3px #0000001a;
-        --rs-ss-widget-width: 100% !important;
-        max-width: 100%;
-        width: 100%;
-      }
-      
-      realscout-advanced-search {
-        --rs-as-button-text-color: #ffffff;
-        --rs-as-background-color: #ffffff;
-        --rs-as-button-color: rgb(35, 93, 137);
-        --rs-as-widget-width: 100% !important;
-        max-width: 100%;
-        width: 100%;
-      }
-      
-      /* Home Value Widget Styles */
-      realscout-home-value {
-        --rs-hvw-background-color: #ffffff;
-        --rs-hvw-title-color: #000000;
-        --rs-hvw-subtitle-color: rgba(28, 30, 38, 0.5);
-        --rs-hvw-primary-button-text-color: #ffffff;
-        --rs-hvw-primary-button-color: rgb(35, 93, 137);
-        --rs-hvw-secondary-button-text-color: rgb(35, 93, 137);
-        --rs-hvw-secondary-button-color: #ffffff;
-        --rs-hvw-widget-width: auto;
-      }
-      @media (min-width: 640px) {
-        realscout-simple-search {
-          --rs-ss-widget-width: 500px !important;
-        }
-        realscout-advanced-search {
-          --rs-as-widget-width: 500px !important;
-        }
-      }
-    </style>
-
     <!-- Prerendered content styles — visible immediately before React hydrates, prevents flash of unstyled content -->
     <style>
       /* === Font fallbacks (Lora for serif, Open Sans for sans) === */

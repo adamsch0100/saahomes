@@ -17,6 +17,7 @@ import {
   CADENCE_ALWAYS_IMMEDIATE,
 } from "../utils/notificationsApi.js";
 import { fetchSessionUser } from "../utils/savedHomesApi.js";
+import InstantAlertsCard from "../components/InstantAlertsCard.jsx";
 
 const GOLD = "#CFB36E";
 const AGENT_PHONE = "(970) 999-1407";
@@ -568,6 +569,7 @@ export default function NotificationCenterPage() {
           </div>
         ) : (
           <>
+            {signedIn === true && <InstantAlertsCard className="mb-4" />}
             <NotificationFrequencySettings signedIn={signedIn === true} />
 
             {/* Filter tabs */}

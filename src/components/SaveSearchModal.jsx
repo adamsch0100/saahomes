@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { rememberSavedSearch } from "../utils/listingHelpers.js";
+import InstantAlertsCard from "./InstantAlertsCard.jsx";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -104,10 +105,27 @@ function filterSummary(filters = {}) {
   return parts.length ? parts.join(" · ") : "All Northern Colorado";
 }
 
+/** Short default name for a search: "Fort Collins · 3+ beds · Under $600K". */
+function suggestSearchName(filters = {}) {
+  const parts = [];
+  const cities = String(filters.city || "").split(",").map((c) => c.trim()).filter(Boolean);
+  const zips = String(filters.postal_code || filters.postalCode || "").split(",").map((z) => z.trim()).filter(Boolean);
+  if (filters.polygon) parts.push("My map area");
+  else if (cities.length) parts.push(cities.length > 2 ? `${cities.slice(0, 2).join(", ")} +${cities.length - 2}` : cities.join(", "));
+  else if (zips.length) parts.push(`ZIP ${zips.length > 2 ? `${zips.slice(0, 2).join(", ")} +${zips.length - 2}` : zips.join(", ")}`);
+  if (filters.beds) parts.push(`${filters.beds}+ beds`);
+  const k = (n) => (Number(n) >= 1e6 ? `$${(Number(n) / 1e6).toFixed(1).replace(/\.0$/, "")}M` : `$${Math.round(Number(n) / 1000)}K`);
+  if (filters.minPrice && filters.maxPrice) parts.push(`${k(filters.minPrice)}–${k(filters.maxPrice)}`);
+  else if (filters.maxPrice) parts.push(`Under ${k(filters.maxPrice)}`);
+  else if (filters.minPrice) parts.push(`${k(filters.minPrice)}+`);
+  return (parts.join(" · ") || "Northern Colorado homes").slice(0, 120);
+}
+
 /**
  * SaveSearchModal — RealScout-style lead capture (frequency + intent + filters).
  * Shares the same session cookie (/api/auth/session via /api/alerts) as AccountModal.
- * Not logged in: email + phone required → backend creates account + sets saa_user_token cookie.
+ * Not logged in: email required, name and mobile optional → backend creates account + sets saa_user_token cookie.
+ * Texts only go out when the visitor ticks the opt-in (unchecked by default).
  * Logged in (cookie session): pre-fills contact, one-tap save under existing account.
  * Heart / header sign-in use AccountModal; this modal owns search-specific fields.
  */
@@ -122,7 +140,10 @@ export default function SaveSearchModal({
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+  const [searchName, setSearchName] = useState("");
+  const [contactName, setContactName] = useState("");
+  const [smsOptIn, setSmsOptIn] = useState(false);
+  const [signInNote, setSignInNote] = useState("");
   const [frequency, setFrequency] = useState("daily");
   const [sendTime, setSendTime] = useState("06:00");
   const [sendDay, setSendDay] = useState("Monday");
@@ -156,7 +177,7 @@ export default function SaveSearchModal({
               setPhone(String(d.data.phone));
             }
           }
-          if (d.data.name && !name) setName(d.data.name);
+          if (d.data.name) setContactName(d.data.name);
         } else {
           setSession(false);
           setWasGuest(true);
@@ -197,8 +218,8 @@ export default function SaveSearchModal({
       setError("Please enter a valid email so we can send your alerts.");
       return;
     }
-    if (!phone.trim()) {
-      setError("Phone is required so we can reach you when a great match hits.");
+    if (smsOptIn && !phone.trim()) {
+      setError("Add your mobile number to get text alerts, or untick the text option.");
       return;
     }
     setState("saving");
@@ -209,19 +230,22 @@ export default function SaveSearchModal({
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
         body: JSON.stringify({
+          ...filters,
           email: emailStr,
-          phone: phone.trim(),
+          contact_name: contactName.trim() || undefined,
+          phone: phone.trim() || undefined,
+          sms_opt_in: smsOptIn,
           password: password || undefined,
-          name: name.trim() || "My Search",
+          search_name: searchName.trim() || suggestedName,
           frequency,
           send_time: sendTime,
           send_day: sendDay,
           intent: intent || "buying",
-          ...filters,
         }),
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error || "Could not save");
+      setSignInNote(data.signInRequired ? data.message || "" : "");
       localStorage.setItem("saa_lead_captured", "1");
       if (intent) localStorage.setItem("saa_intent", intent);
       // RealScout-style: remember criteria so cards/detail can show match chips
@@ -245,11 +269,14 @@ export default function SaveSearchModal({
     if (wasGuest && state !== "done") {
       setEmail("");
       setPhone("");
-      setName("");
+      setContactName("");
+      setSearchName("");
+      setSmsOptIn(false);
     }
   };
 
   const isSignedIn = session && session.email;
+  const suggestedName = suggestSearchName(filters);
 
   return (
     <>
@@ -287,7 +314,11 @@ export default function SaveSearchModal({
                   <span className="font-semibold text-gray-900">{filterSummary(filters)}</span>
                   {" "}— including <strong>price drops</strong> and status changes.
                 </p>
-                {wasGuest ? (
+                {signInNote ? (
+                  <p className="text-gray-700 mt-3 text-sm leading-relaxed bg-gray-50 border border-gray-100 rounded-lg px-3 py-2.5">
+                    {signInNote}
+                  </p>
+                ) : wasGuest ? (
                   <p className="text-gray-700 mt-3 text-sm leading-relaxed bg-gray-50 border border-gray-100 rounded-lg px-3 py-2.5">
                     Account created on this device.{" "}
                     <strong>Manage your alerts anytime</strong> — no password required on this browser.
@@ -297,6 +328,7 @@ export default function SaveSearchModal({
                     Added to your account ({session?.email || email}).
                   </p>
                 )}
+                {!signInNote && <InstantAlertsCard compact className="mt-4" />}
                 {(intent === "selling" || intent === "both") && (
                   <a
                     href="/my-home/"
@@ -362,7 +394,7 @@ export default function SaveSearchModal({
                 ) : (
                   <div className="mt-4 rounded-lg bg-gray-50 border border-gray-100 px-3.5 py-2.5 text-xs text-gray-600 leading-relaxed">
                     <strong className="text-gray-800">One account for hearts + alerts</strong> — we&apos;ll create yours when you save.
-                    Email + phone required.{" "}
+                    Just your email. Add a mobile number if you&apos;d like texts too.{" "}
                     <strong className="text-gray-800">No spam — unsubscribe in one click.</strong>
                   </div>
                 )}
@@ -404,6 +436,21 @@ export default function SaveSearchModal({
                     </div>
                   )}
                   {/* Hide contact fields when signed in and we already have them */}
+                  {!isSignedIn && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Your name <span className="text-gray-400 font-normal">(so we know who we&apos;re helping)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={contactName}
+                        onChange={(e) => setContactName(e.target.value)}
+                        placeholder="First and last name"
+                        autoComplete="name"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none"
+                      />
+                    </div>
+                  )}
                   {!(isSignedIn && session.email) && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
@@ -421,11 +468,10 @@ export default function SaveSearchModal({
                   {!(isSignedIn && session.phone) && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone {isSignedIn ? <span className="text-gray-400 font-normal">(required for alerts)</span> : null}
+                        Mobile phone <span className="text-gray-400 font-normal">(optional)</span>
                       </label>
                       <input
                         type="tel"
-                        required
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="(970) 555-0123"
@@ -434,6 +480,19 @@ export default function SaveSearchModal({
                       />
                     </div>
                   )}
+                  <label className="flex items-start gap-2.5 text-xs text-gray-600 leading-relaxed cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={smsOptIn}
+                      onChange={(e) => setSmsOptIn(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 accent-black"
+                    />
+                    {/* Same words as SMS_ALERT_CONSENT_WORDING in backend/src/controllers/alertController.js */}
+                    <span>
+                      Text me new matches and price drops for this search from SAA Homes. Msg frequency varies.
+                      Msg &amp; data rates may apply. Reply STOP to opt out, HELP for help.
+                    </span>
+                  </label>
                   {/* Signed in with both: still show read-only confirmation */}
                   {isSignedIn && session.email && (
                     <div className="rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-700">
@@ -447,9 +506,9 @@ export default function SaveSearchModal({
                     </label>
                     <input
                       type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="e.g. Fort Collins 3-bed"
+                      value={searchName}
+                      onChange={(e) => setSearchName(e.target.value)}
+                      placeholder={suggestedName}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none"
                     />
                   </div>

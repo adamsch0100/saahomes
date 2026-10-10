@@ -9,6 +9,7 @@
  * Off-market listings still return denormalized snapshot + off_market flag.
  * On save: FUB nurture event + lead score bump (non-blocking).
  */
+import { recordEvent as recordStreamEvent } from '../services/events.js';
 import getPool from '../config/database.js';
 import { setAuthCookie } from './alertController.js';
 import { computeAndStoreLeadScore } from '../services/leadScore.js';
@@ -253,6 +254,13 @@ export const saveHome = async (req, res) => {
         )
         .catch(() => {});
 
+      recordStreamEvent({
+        type: 'home_saved',
+        userId: user.id,
+        listingId: snap.listing_key,
+        meta: { slug: snap.slug, list_price: snap.list_price },
+      });
+
       // Lead score (+20 has-saved-home pattern) — recompute from real signals
       computeAndStoreLeadScore(user.id, pool).catch((e) => {
         console.error('lead score on saved home failed:', e.message);
@@ -321,6 +329,7 @@ export const unsaveHome = async (req, res) => {
       );
     }
 
+    recordStreamEvent({ type: 'home_unsaved', userId: user.id, listingId: listingKey });
     return res.json({ success: true, data: { listing_key: listingKey, removed: true } });
   } catch (error) {
     console.error('unsaveHome error:', error);

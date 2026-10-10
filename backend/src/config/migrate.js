@@ -128,24 +128,6 @@ export const runMigrations = async () => {
       ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS utm_source VARCHAR(100);
       ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS utm_medium VARCHAR(100);
       ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS utm_campaign VARCHAR(100);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS property_subtype VARCHAR(128);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS home_type VARCHAR(16) DEFAULT 'other';
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS elementary_school VARCHAR(128);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS middle_school VARCHAR(128);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS high_school VARCHAR(128);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS days_on_market INTEGER;
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS price_per_sqft INTEGER;
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS subdivision VARCHAR(255);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS features JSONB DEFAULT '{}'::jsonb;
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS original_list_price NUMERIC(12,2);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS price_change_timestamp TIMESTAMPTZ;
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS half_baths NUMERIC(4,1);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS three_quarter_baths NUMERIC(4,1);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS above_grade_area NUMERIC(12,1);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS lot_size_acres NUMERIC(12,2);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS units_total INTEGER;
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS photos_count INTEGER;
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS school_district VARCHAR(255);
     `);
 
       // ---- Saved-search / follow-up engine (Aug 2026) ----
@@ -210,6 +192,7 @@ export const runMigrations = async () => {
       `);
 
       await client.query(`
+        ALTER TABLE search_snapshots ADD COLUMN IF NOT EXISTS result_prices JSONB;
         ALTER TABLE saved_searches ADD COLUMN IF NOT EXISTS frequency VARCHAR(16) DEFAULT 'daily';
         ALTER TABLE saved_searches ADD COLUMN IF NOT EXISTS send_time VARCHAR(5) DEFAULT '06:00';
         ALTER TABLE saved_searches ADD COLUMN IF NOT EXISTS send_day VARCHAR(10) DEFAULT 'Monday';
@@ -353,6 +336,29 @@ export const runMigrations = async () => {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         last_seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
+    `);
+
+    // Columns added after the table first shipped. Kept after the CREATE so a
+    // fresh database (staging, tests, a new tenant) can be built from nothing.
+    await client.query(`
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS property_subtype VARCHAR(128);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS home_type VARCHAR(16) DEFAULT 'other';
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS elementary_school VARCHAR(128);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS middle_school VARCHAR(128);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS high_school VARCHAR(128);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS days_on_market INTEGER;
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS price_per_sqft INTEGER;
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS subdivision VARCHAR(255);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS features JSONB DEFAULT '{}'::jsonb;
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS original_list_price NUMERIC(12,2);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS price_change_timestamp TIMESTAMPTZ;
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS half_baths NUMERIC(4,1);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS three_quarter_baths NUMERIC(4,1);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS above_grade_area NUMERIC(12,1);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS lot_size_acres NUMERIC(12,2);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS units_total INTEGER;
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS photos_count INTEGER;
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS school_district VARCHAR(255);
     `);
 
     await client.query(`
@@ -762,6 +768,133 @@ export const runMigrations = async () => {
     } catch (soldErr) {
       await client.query('ROLLBACK TO SAVEPOINT sold_listings_table');
       console.error('sold_listings migration skipped:', soldErr.message);
+    }
+
+    // ── Platform foundation (Phase 1) ─────────────────────────────────────
+    // Shared by search, Nadia and the CRM: tenants (SAA is tenant 1), a tenant
+    // id on every client table, households, one event stream and a consent
+    // log. Savepoint so a problem here can never roll back the migrations
+    // above on a production deploy.
+    await client.query('SAVEPOINT platform_foundation');
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS tenants (
+          id SERIAL PRIMARY KEY,
+          slug VARCHAR(64) NOT NULL UNIQUE,
+          name VARCHAR(255) NOT NULL,
+          primary_domain VARCHAR(255),
+          market_key VARCHAR(32) NOT NULL DEFAULT 'noco',
+          status VARCHAR(16) NOT NULL DEFAULT 'active',
+          settings JSONB NOT NULL DEFAULT '{}'::jsonb,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        INSERT INTO tenants (id, slug, name, primary_domain, market_key)
+        VALUES (1, 'saa', 'SAA Homes', 'saahomes.com', 'noco')
+        ON CONFLICT (id) DO NOTHING;
+        SELECT setval(pg_get_serial_sequence('tenants', 'id'), GREATEST((SELECT MAX(id) FROM tenants), 1));
+      `);
+
+      // Constant defaults make these metadata-only changes (no table rewrite).
+      for (const table of [
+        'users', 'saved_searches', 'saved_homes', 'notifications', 'notification_prefs',
+        'home_profiles', 'property_views', 'user_events', 'email_log', 'email_outbox',
+        'showing_requests', 'alert_events',
+      ]) {
+        await client.query(`ALTER TABLE ${table} ADD COLUMN IF NOT EXISTS tenant_id INTEGER NOT NULL DEFAULT 1`);
+      }
+
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS households (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          name VARCHAR(255),
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS household_id INTEGER REFERENCES households(id) ON DELETE SET NULL;
+      `);
+
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS events (
+          id BIGSERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          visitor_id VARCHAR(32),
+          type VARCHAR(48) NOT NULL,
+          listing_id VARCHAR(64),
+          search_id INTEGER,
+          source VARCHAR(32) NOT NULL DEFAULT 'web',
+          meta JSONB NOT NULL DEFAULT '{}'::jsonb,
+          occurred_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          fub_synced_at TIMESTAMPTZ,
+          CHECK (user_id IS NOT NULL OR visitor_id IS NOT NULL)
+        );
+        CREATE INDEX IF NOT EXISTS idx_events_user_time ON events(user_id, occurred_at DESC) WHERE user_id IS NOT NULL;
+        CREATE INDEX IF NOT EXISTS idx_events_visitor_unclaimed ON events(visitor_id) WHERE user_id IS NULL;
+        CREATE INDEX IF NOT EXISTS idx_events_tenant_type_time ON events(tenant_id, type, occurred_at DESC);
+      `);
+
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS contact_consents (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          channel VARCHAR(16) NOT NULL CHECK (channel IN ('email', 'sms', 'push', 'call')),
+          status VARCHAR(16) NOT NULL CHECK (status IN ('granted', 'revoked')),
+          wording TEXT,
+          source VARCHAR(128),
+          ip VARCHAR(64),
+          user_agent TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_contact_consents_user ON contact_consents(user_id, channel, created_at DESC);
+      `);
+      await client.query('RELEASE SAVEPOINT platform_foundation');
+    } catch (foundationErr) {
+      await client.query('ROLLBACK TO SAVEPOINT platform_foundation');
+      console.error('platform foundation migration skipped:', foundationErr.message);
+    }
+
+    // ── Installable app + web push ───────────────────────────────────────
+    await client.query('SAVEPOINT web_push');
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS app_settings (
+          key VARCHAR(64) PRIMARY KEY,
+          value JSONB NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE TABLE IF NOT EXISTS push_subscriptions (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          endpoint TEXT NOT NULL UNIQUE,
+          p256dh TEXT NOT NULL,
+          auth TEXT NOT NULL,
+          user_agent TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          last_success_at TIMESTAMPTZ,
+          last_error TEXT,
+          disabled_at TIMESTAMPTZ
+        );
+        CREATE INDEX IF NOT EXISTS idx_push_subscriptions_user ON push_subscriptions(user_id) WHERE disabled_at IS NULL;
+        CREATE TABLE IF NOT EXISTS push_log (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          notification_ids INTEGER[] NOT NULL DEFAULT '{}',
+          title TEXT,
+          delivered INTEGER NOT NULL DEFAULT 0,
+          sent_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_push_log_user_time ON push_log(user_id, sent_at DESC);
+        ALTER TABLE notifications ADD COLUMN IF NOT EXISTS pushed_at TIMESTAMP;
+        ALTER TABLE notifications ADD COLUMN IF NOT EXISTS push_status VARCHAR(16);
+        ALTER TABLE saved_searches ADD COLUMN IF NOT EXISTS push_cursor_at TIMESTAMP;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS fub_lead_score_synced INTEGER;
+      `);
+      await client.query('RELEASE SAVEPOINT web_push');
+    } catch (pushErr) {
+      await client.query('ROLLBACK TO SAVEPOINT web_push');
+      console.error('web push migration skipped:', pushErr.message);
     }
 
     await client.query('COMMIT');

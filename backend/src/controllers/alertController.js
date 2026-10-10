@@ -12,7 +12,15 @@
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import getPool from '../config/database.js';
+import { sanitizeSavedFilters } from '../services/listingFilters.js';
 import { forwardAlertSignupToFollowUpBoss } from '../services/followUpBossService.js';
+import {
+  recordEvent as recordStreamEvent,
+  onIdentified,
+  ensureVisitorId,
+  PUBLIC_EVENT_TYPES,
+} from '../services/events.js';
+import { recordConsent } from '../services/consent.js';
 import { sendEmail, smtpConfigured } from '../services/emailer.js';
 import {
   computeAndStoreLeadScore,
@@ -24,10 +32,6 @@ import {
 import { rejectIfDisposableEmail } from '../utils/emailQuality.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const FILTER_KEYS = ['city', 'minPrice', 'maxPrice', 'beds', 'baths', 'type', 'sort', 'q',
-  'minSqft', 'minYear', 'maxHoa', 'garage', 'basement', 'fireplace', 'pool',
-  'newConstruction', 'waterfront', 'newDays', 'assumable'];
-const TYPE_VALUES = ['detached', 'attached', 'land', 'commercial', 'other', ''];
 const FREQUENCIES = ['immediate', 'daily', 'weekly'];
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -48,29 +52,9 @@ function cleanSchedule(body) {
   return out;
 }
 
-function cleanFilters(body) {
-  const f = {};
-  const numKeys = ['minPrice', 'maxPrice', 'beds', 'baths', 'minSqft', 'minYear', 'maxHoa', 'newDays'];
-  const boolKeys = ['garage', 'basement', 'fireplace', 'pool', 'newConstruction', 'waterfront', 'assumable'];
-  for (const key of FILTER_KEYS) {
-    const v = body[key];
-    if (v === undefined || v === null || v === '') continue;
-    if (numKeys.includes(key)) {
-      const n = Number(v);
-      if (Number.isFinite(n) && n >= 0 && n < 1e9) f[key] = String(Math.round(n));
-    } else if (boolKeys.includes(key)) {
-      if (v === true || v === 'true' || v === 1 || v === '1') f[key] = 'true';
-    } else if (key === 'type') {
-      if (TYPE_VALUES.includes(String(v))) f[key] = String(v);
-    } else if (key === 'city' || key === 'q') {
-      const s = String(v).trim();
-      if (s.length <= 100) f[key] = s;
-    } else if (key === 'sort') {
-      f[key] = String(v).slice(0, 20);
-    }
-  }
-  return f;
-}
+// A saved search keeps every filter the search page understands
+// (services/listingFilters.js), so its alerts match what the visitor saw.
+const cleanFilters = (body) => sanitizeSavedFilters(body);
 
 const COOKIE_NAME = 'saa_user_token';
 const COOKIE_MAX_AGE = 90 * 24 * 60 * 60 * 1000; // 90 days
@@ -85,39 +69,84 @@ export function setAuthCookie(res, token) {
   });
 }
 
+/** Agent/admin seats must never be touched by the public client-signup paths. */
+export function isStaffAccount(userRow) {
+  const role = String(userRow?.role || '').toLowerCase();
+  return role === 'agent' || role === 'admin';
+}
+
+/**
+ * True when this request already carries the session cookie of `userRow`.
+ * Public signup endpoints upsert by email, so knowing an email must never be
+ * enough to sign in as (or set the password of) an existing account.
+ */
+export function hasOwnSession(req, userRow) {
+  const token = req.cookies?.[COOKIE_NAME];
+  return !!(token && userRow?.manage_token && token === userRow.manage_token);
+}
+
+export const SIGN_IN_REQUIRED_MESSAGE =
+  'You already have an account with this email. We just emailed you a sign-in link.';
+
+/** Shown beside the save-search text opt-in (src/components/SaveSearchModal.jsx
+ *  carries the same words); stored verbatim with the consent. */
+export const SMS_ALERT_CONSENT_WORDING =
+  'Text me new matches and price drops for this search from SAA Homes. Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for help.';
+
 export const createAlert = async (req, res) => {
   try {
-    const { email, name, phone, password, ...filterBody } = req.body || {};
+    // `name` is the legacy field for the search's name (older clients); the
+    // person's own name only ever comes from contact_name.
+    const {
+      email, name, search_name: searchNameRaw, contact_name: contactNameRaw,
+      phone, password, sms_opt_in: smsOptInRaw, ...filterBody
+    } = req.body || {};
     const emailStr = String(email || '').trim().toLowerCase();
     if (!EMAIL_RE.test(emailStr)) {
       return res.status(400).json({ success: false, error: 'A valid email is required to save a search.' });
     }
     if (rejectIfDisposableEmail(emailStr, res, 'alert')) return;
+    const smsOptIn = smsOptInRaw === true || smsOptInRaw === 'true';
     const phoneDigits = cleanPhone(phone);
-    if (!phoneDigits) {
-      return res.status(400).json({ success: false, error: 'Please add your phone number so we can reach you about new listings.' });
+    if (String(phone || '').trim() && !phoneDigits) {
+      return res.status(400).json({ success: false, error: 'That phone number doesn’t look right. Check it, or leave it blank.' });
     }
+    if (smsOptIn && !phoneDigits) {
+      return res.status(400).json({ success: false, error: 'Add your mobile number to get text alerts.' });
+    }
+    const contactName = String(contactNameRaw || '').trim().slice(0, 255) || null;
     const filters = cleanFilters(filterBody);
     if (Object.keys(filters).length === 0) {
       return res.status(400).json({ success: false, error: 'Add at least one search criteria (city, price, beds…).' });
     }
 
     const pool = getPool();
-    // Upsert user by email (keep existing phone if none provided)
+    // Upsert user by email (keep existing phone if none provided).
+    // An existing account is only updated/signed in when the request already
+    // holds that account's session; otherwise the search is still saved (lead
+    // capture) but the visitor must use the emailed sign-in link.
     let user = await pool.query('SELECT * FROM users WHERE email = $1', [emailStr]);
-    if (!user.rows.length) {
+    let isOwner = true;
+    const isNewUser = !user.rows.length;
+    if (user.rows.length && isStaffAccount(user.rows[0])) {
+      return res.status(409).json({ success: false, error: 'This email belongs to a team account. Please sign in instead.' });
+    }
+    if (user.rows.length && !hasOwnSession(req, user.rows[0])) {
+      isOwner = false;
+    } else if (!user.rows.length) {
       const token = crypto.randomBytes(24).toString('hex');
       const created = await pool.query(
         'INSERT INTO users (email, name, manage_token, phone) VALUES ($1, $2, $3, $4) RETURNING *',
-        [emailStr, String(name || '').trim().slice(0, 255) || null, token, phoneDigits]
+        [emailStr, contactName, token, phoneDigits]
       );
       user = created;
     } else {
       user = await pool.query(
         `UPDATE users SET status = 'active', last_active_at = NOW(),
-           phone = COALESCE(NULLIF($1, ''), phone)
-         WHERE id = $2 RETURNING *`,
-        [phoneDigits, user.rows[0].id]
+           phone = COALESCE(NULLIF($1, ''), phone),
+           name = COALESCE(NULLIF($2, ''), name)
+         WHERE id = $3 RETURNING *`,
+        [phoneDigits || '', contactName || '', user.rows[0].id]
       );
     }
     const userRow = user.rows[0];
@@ -142,12 +171,12 @@ export const createAlert = async (req, res) => {
     // Optional: create a password so the client can log in with email+password
     // (upgrades a magic-link-only account; 8+ chars required)
     const passStr = String(password || '');
-    if (passStr.length >= 8) {
+    if (isOwner && passStr.length >= 8) {
       const hash = await bcrypt.hash(passStr, 10);
       await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, userRow.id]);
     }
 
-    const searchName = String(name || '').trim().slice(0, 255) || 'My Search';
+    const searchName = String(searchNameRaw ?? name ?? '').trim().slice(0, 255) || 'My Search';
     const schedule = cleanSchedule(req.body || {});
     const inserted = await pool.query(
       `INSERT INTO saved_searches (user_id, name, filters, is_active, frequency, send_time, send_day)
@@ -157,9 +186,36 @@ export const createAlert = async (req, res) => {
     );
     const searchRow = inserted.rows[0];
 
+    await recordStreamEvent({
+      type: 'search_saved',
+      userId: userRow.id,
+      searchId: searchRow.id,
+      meta: { filters, frequency: searchRow.frequency, verified: isOwner },
+    });
+    if (isOwner) {
+      await recordConsent({
+        userId: userRow.id,
+        channel: 'email',
+        granted: true,
+        wording: 'Email me new listings and price changes that match this search.',
+        source: 'save_search',
+        req,
+      }).catch((e) => console.error('consent record failed:', e.message));
+      if (smsOptIn) {
+        await recordConsent({
+          userId: userRow.id,
+          channel: 'sms',
+          granted: true,
+          wording: SMS_ALERT_CONSENT_WORDING,
+          source: 'save_search',
+          req,
+        }).catch((e) => console.error('consent record failed:', e.message));
+      }
+    }
+
     // Lead → Follow Up Boss (fire-and-forget, never block the user)
     // Captures fub_person_id from the Person response on our users row.
-    forwardAlertSignupToFollowUpBoss(userRow, searchRow).catch(() => {});
+    forwardAlertSignupToFollowUpBoss(userRow, searchRow, { smsOptIn: isOwner && smsOptIn }).catch(() => {});
 
     // Compute + store lead score from real signals (save-search just landed)
     let leadScore = 0;
@@ -176,9 +232,24 @@ export const createAlert = async (req, res) => {
       refreshLeadLifecycle(userRow.id, pool).catch(() => {});
     } catch { /* noop */ }
 
+    if (!isOwner) {
+      emailSignInLink(userRow).catch((e) => console.error('sign-in link failed:', e.message));
+      return res.status(201).json({
+        success: true,
+        signInRequired: true,
+        message: SIGN_IN_REQUIRED_MESSAGE,
+        data: {
+          id: searchRow.id,
+          name: searchRow.name,
+          filters: searchRow.filters,
+        },
+      });
+    }
+
     // Auto-login: the manage token becomes a long-lived httpOnly cookie so the
     // user is signed in on this device without ever entering a password.
     setAuthCookie(res, userRow.manage_token);
+    await onIdentified(req, userRow.id, { isNew: isNewUser, via: 'save_search' });
 
     return res.status(201).json({
       success: true,
@@ -315,9 +386,20 @@ export const getMe = async (req, res) => {
 export const recordView = async (req, res) => {
   try {
     const user = await resolveUser(req);
-    if (!user) return res.status(401).json({ success: false, error: 'Not signed in.' });
     const listingId = req.body?.listing_id || req.body?.listingId || req.body?.id;
     if (!listingId) return res.status(400).json({ success: false, error: 'listing_id is required.' });
+    const visitorId = ensureVisitorId(req, res);
+    // Same person + listing within 30 minutes is one view, matching property_views.
+    await recordStreamEvent({
+      type: 'listing_view',
+      userId: user?.id || null,
+      visitorId,
+      listingId: String(listingId),
+      dedupeMinutes: 30,
+    });
+    // Anonymous views are kept in the event stream and join the contact's
+    // history at signup; lead scoring still needs a signed-in contact.
+    if (!user) return res.json({ success: true, data: { anonymous: true } });
     const result = await recordPropertyView(user.id, listingId);
     return res.json({ success: true, data: result });
   } catch (error) {
@@ -339,12 +421,93 @@ export const recordEvent = async (req, res) => {
       return res.status(400).json({ success: false, error: 'Unknown event type.' });
     }
     const result = await recordUserEvent(user.id, type, req.body?.meta || null);
+    await recordStreamEvent({ type, userId: user.id, visitorId: ensureVisitorId(req, res), dedupeMinutes: 24 * 60 });
     return res.json({ success: true, data: result });
   } catch (error) {
     console.error('recordEvent error:', error);
     return res.status(500).json({ success: false, error: 'Could not record event.' });
   }
 };
+
+/**
+ * POST /api/events — browser-sent activity for anyone, signed in or not.
+ * Only low-risk types (search, page_view) are accepted here; everything that
+ * changes state is recorded server-side by the endpoint that does the work.
+ */
+const SEARCH_PARAM_MAX = 1500;
+export const trackPublicEvent = async (req, res) => {
+  try {
+    const type = String(req.body?.type || '').trim();
+    if (!PUBLIC_EVENT_TYPES.has(type)) {
+      return res.status(400).json({ success: false, error: 'Unknown event type.' });
+    }
+    const user = await resolveUser(req);
+    const visitorId = ensureVisitorId(req, res);
+    const meta = {};
+    if (type === 'search') {
+      const params = String(req.body?.params || '').slice(0, SEARCH_PARAM_MAX);
+      if (!params) return res.status(400).json({ success: false, error: 'params is required.' });
+      meta.params = params;
+      const total = Number(req.body?.total);
+      if (Number.isFinite(total) && total >= 0) meta.total = Math.round(total);
+    } else {
+      const path = String(req.body?.path || '').slice(0, 300);
+      if (!path.startsWith('/')) return res.status(400).json({ success: false, error: 'path is required.' });
+      meta.path = path;
+    }
+    await recordStreamEvent({
+      type,
+      userId: user?.id || null,
+      visitorId,
+      meta,
+      // The same search or page from the same person within 10 minutes is one event.
+      dedupeMinutes: 10,
+    });
+    return res.json({ success: true });
+  } catch (error) {
+    console.error('trackPublicEvent error:', error);
+    return res.status(500).json({ success: false, error: 'Could not record event.' });
+  }
+};
+
+/**
+ * Email a sign-in (magic) link for an existing account. Sends inline when
+ * SMTP is configured on this runtime, otherwise queues it in email_outbox.
+ */
+export async function emailSignInLink(userRow) {
+  const manageUrl = `https://saahomes.com/my-saved-searches/?token=${userRow.manage_token}`;
+  const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#111">
+      <tr><td align="center" style="padding:24px 16px">
+        <div style="color:#CFB36E;font-size:20px;font-weight:800">SAA HOMES</div>
+      </td></tr>
+    </table>
+    <div style="max-width:520px;margin:0 auto;padding:24px 16px">
+      <h1 style="font-size:19px;color:#111">Here's your saved searches</h1>
+      <p style="color:#4b5563;font-size:14px;line-height:1.6">Click the button to view and manage your saved searches, alerts, and saved homes.</p>
+      <a href="${manageUrl}" style="display:inline-block;background:#111;color:#fff;font-size:14px;font-weight:700;padding:12px 22px;border-radius:8px;text-decoration:none">Sign in to my saved searches</a>
+      <p style="color:#6b7280;font-size:12px;margin-top:16px">Or copy this link:<br/><span style="color:#111">${manageUrl}</span></p>
+      <p style="color:#9ca3af;font-size:11px;margin-top:20px">Schwartz and Associates · (970) 999-1407 · saahomes.com</p>
+    </div></body></html>`;
+  // Send instantly when SMTP is configured on this runtime; otherwise
+  // queue it — the outbox cron drains the queue as a fallback.
+  const queueIt = async () => {
+    await getPool().query(
+      `INSERT INTO email_outbox (to_email, subject, html) VALUES ($1, $2, $3)`,
+      [userRow.email, 'Your saved searches — SAA Homes', html]
+    );
+  };
+  try {
+    if (smtpConfigured()) {
+      await sendEmail(userRow.email, 'Your saved searches — SAA Homes', html, 'Adam Schwartz, SAA Homes');
+    } else {
+      await queueIt();
+    }
+  } catch (e) {
+    console.error('magic link inline send failed, queuing:', e.message);
+    await queueIt();
+  }
+}
 
 /** POST /api/alerts/magic-link — email the user their sign-in link again. */
 export const sendMagicLink = async (req, res) => {
@@ -355,38 +518,7 @@ export const sendMagicLink = async (req, res) => {
     }
     const user = await getPool().query('SELECT * FROM users WHERE email = $1 AND status = \'active\'', [email]);
     if (user.rows.length) {
-      const manageUrl = `https://saahomes.com/my-saved-searches/?token=${user.rows[0].manage_token}`;
-      const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#111">
-          <tr><td align="center" style="padding:24px 16px">
-            <div style="color:#CFB36E;font-size:20px;font-weight:800">SAA HOMES</div>
-          </td></tr>
-        </table>
-        <div style="max-width:520px;margin:0 auto;padding:24px 16px">
-          <h1 style="font-size:19px;color:#111">Here's your saved searches</h1>
-          <p style="color:#4b5563;font-size:14px;line-height:1.6">Click the button to view and manage your saved searches, alerts, and saved homes.</p>
-          <a href="${manageUrl}" style="display:inline-block;background:#111;color:#fff;font-size:14px;font-weight:700;padding:12px 22px;border-radius:8px;text-decoration:none">Sign in to my saved searches</a>
-          <p style="color:#6b7280;font-size:12px;margin-top:16px">Or copy this link:<br/><span style="color:#111">${manageUrl}</span></p>
-          <p style="color:#9ca3af;font-size:11px;margin-top:20px">Schwartz and Associates · (970) 999-1407 · saahomes.com</p>
-        </div></body></html>`;
-      // Send instantly when SMTP is configured on this runtime; otherwise
-      // queue it — the outbox cron drains the queue as a fallback.
-      const queueIt = async () => {
-        await getPool().query(
-          `INSERT INTO email_outbox (to_email, subject, html) VALUES ($1, $2, $3)`,
-          [email, 'Your saved searches — SAA Homes', html]
-        );
-      };
-      try {
-        if (smtpConfigured()) {
-          await sendEmail(email, 'Your saved searches — SAA Homes', html, 'Adam Schwartz, SAA Homes');
-        } else {
-          await queueIt();
-        }
-      } catch (e) {
-        console.error('magic link inline send failed, queuing:', e.message);
-        await queueIt();
-      }
+      await emailSignInLink(user.rows[0]);
     }
     // Never reveal whether the email exists; always the same friendly reply.
     return res.json({ success: true, message: 'If we have a saved search for that email, your sign-in link is on its way.' });

@@ -21,11 +21,12 @@ import { listSoldListings } from '../controllers/soldListingsController.js';
 import { getListingPhoto, getListingPhotoDefault } from '../controllers/photoController.js';
 import {
   createAlert, listAlerts, getMe, sendMagicLink, signOut, updateAlert, deleteAlert, unsubscribeAll,
-  recordView, recordEvent,
+  recordView, recordEvent, trackPublicEvent,
 } from '../controllers/alertController.js';
 import { register, login, setPassword, ensureSession } from '../controllers/authController.js';
 import { submitShowingRequest } from '../controllers/showingController.js';
 import { runCronDigest } from '../controllers/cronController.js';
+import { getPushKey, getPushStatus, subscribePush, unsubscribePush } from '../controllers/pushController.js';
 import { listSchools, runCronSchoolRatings } from '../controllers/schoolController.js';
 import {
   listHomes,
@@ -64,11 +65,24 @@ import {
 
 const router = express.Router();
 
-// Rate limiting for form submissions
-const formLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 requests per windowMs
+// Rate limiting for form submissions: 5 per IP per 15 minutes, counted per
+// route. Each call makes its own limiter, so submitting one form never uses up
+// the budget for another (one shared limiter once let five listing views block
+// a visitor from saving a search).
+const formLimit = () => rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
   message: 'Too many submissions from this IP, please try again later.',
+});
+
+// Browsing activity (listing views, search events, hearts, notification
+// reads) is high-volume by nature and shares one generous limiter.
+const trackingLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Too many requests, please slow down.' },
 });
 
 // Agent website form capture (P-3b) — IP rate limit (in-process; embeds may retry)
@@ -86,7 +100,7 @@ router.get('/tenant', getPublicTenant);
 // Public API routes
 router.post(
   '/contact',
-  formLimiter,
+  formLimit(),
   validateContactSubmission,
   handleValidationErrors,
   submitContactForm
@@ -97,7 +111,7 @@ router.post('/webform/lead', webformLimiter, submitWebformLead);
 
 router.post(
   '/market-report',
-  formLimiter,
+  formLimit(),
   validateMarketReportSubmission,
   handleValidationErrors,
   submitMarketReportForm
@@ -105,7 +119,7 @@ router.post(
 
 router.post(
   '/chfa-lead',
-  formLimiter,
+  formLimit(),
   validateChfaLeadSubmission,
   handleValidationErrors,
   submitChfaLeadForm
@@ -113,7 +127,7 @@ router.post(
 
 router.post(
   '/champions-lead',
-  formLimiter,
+  formLimit(),
   validateChampionsLeadSubmission,
   handleValidationErrors,
   submitChampionsLeadForm
@@ -121,7 +135,7 @@ router.post(
 
 router.post(
   '/chfa-dpa-lead',
-  formLimiter,
+  formLimit(),
   validateChfaDpaLeadSubmission,
   handleValidationErrors,
   submitChfaDpaLeadForm
@@ -129,13 +143,13 @@ router.post(
 
 router.post(
   '/g-hope-lead',
-  formLimiter,
+  formLimit(),
   validateGhopeLeadSubmission,
   handleValidationErrors,
   submitGhopeLeadForm
 );
 
-router.post('/cash-buyer-lead', formLimiter, submitCashBuyerLead);
+router.post('/cash-buyer-lead', formLimit(), submitCashBuyerLead);
 
 // AI Chat — lighter rate limit for conversation flow
 const chatLimiter = rateLimit({
@@ -146,7 +160,7 @@ const chatLimiter = rateLimit({
 
 router.post('/chat', chatLimiter, handleChatMessage);
 // Nadia AI Search → real saved search (explicit Yes confirmation from chat UI)
-router.post('/chat/create-search', formLimiter, createSearchFromChat);
+router.post('/chat/create-search', formLimit(), createSearchFromChat);
 
 // ── IDX listing search (IRES feed) ────────────────────────────────────────
 const listingLimiter = rateLimit({
@@ -171,32 +185,39 @@ router.get('/listings/:slug', listingLimiter, getListingBySlug);
 router.get('/schools', listingLimiter, listSchools);
 
 // Client accounts (password login — cookie session)
-router.post('/auth/register', formLimiter, register);
-router.post('/auth/login', formLimiter, login);
+router.post('/auth/register', formLimit(), register);
+router.post('/auth/login', formLimit(), login);
 router.post('/auth/password', setPassword);
 // Email + phone session for save-home / lead capture (no password required)
-router.post('/auth/session', formLimiter, ensureSession);
+router.post('/auth/session', formLimit(), ensureSession);
 
 // Saved-search / follow-up alerts (lead capture → FUB)
-router.post('/alerts', formLimiter, createAlert);
+router.post('/alerts', formLimit(), createAlert);
 router.get('/alerts/manage', listAlerts);
 router.get('/alerts/me', getMe);
-router.post('/alerts/view', formLimiter, recordView);
-router.post('/alerts/event', formLimiter, recordEvent);
-router.post('/alerts/magic-link', formLimiter, sendMagicLink);
+router.post('/alerts/view', trackingLimiter, recordView);
+router.post('/alerts/event', trackingLimiter, recordEvent);
+router.post('/events', trackingLimiter, trackPublicEvent);
+router.post('/alerts/magic-link', formLimit(), sendMagicLink);
 router.post('/alerts/signout', signOut);
 router.patch('/alerts/:id', updateAlert);
 router.delete('/alerts/:id', deleteAlert);
-router.post('/alerts/unsubscribe', formLimiter, unsubscribeAll);
+router.post('/alerts/unsubscribe', formLimit(), unsubscribeAll);
 
 // Cron triggers (protected by CRON_SECRET) — scheduler calls the site's own
 // backend so email is sent from saahomes.com, not from Hermes.
 router.post('/cron/digest', runCronDigest);
+
+// Instant alerts on a device (web push)
+router.get('/push/key', getPushKey);
+router.get('/push/status', getPushStatus);
+router.post('/push/subscribe', trackingLimiter, subscribePush);
+router.post('/push/unsubscribe', trackingLimiter, unsubscribePush);
 // Weekly GreatSchools city-page sync (NOT part of the 2h listings sync)
 router.post('/cron/school-ratings', runCronSchoolRatings);
 
 // Showing requests (listing page modal → lead → FUB)
-router.post('/showing', formLimiter, submitShowingRequest);
+router.post('/showing', formLimit(), submitShowingRequest);
 
 // ── Seller nurture track (home profiles + multi-source value) ─────────────
 const homeLimiter = rateLimit({
@@ -205,12 +226,12 @@ const homeLimiter = rateLimit({
   message: 'Too many requests.',
 });
 router.get('/home', homeLimiter, listHomes);
-router.post('/home/profile', formLimiter, saveHomeProfile);
-router.post('/home/estimate', formLimiter, publicEstimate);
+router.post('/home/profile', formLimit(), saveHomeProfile);
+router.post('/home/estimate', formLimit(), publicEstimate);
 router.get('/home/:id/value', homeLimiter, getHomeValue);
-router.post('/home/:id/accuracy', formLimiter, postAccuracy);
-router.post('/home/:id/heat', formLimiter, postSellerHeat);
-router.patch('/home/:id', formLimiter, patchHome);
+router.post('/home/:id/accuracy', formLimit(), postAccuracy);
+router.post('/home/:id/heat', formLimit(), postSellerHeat);
+router.patch('/home/:id', formLimit(), patchHome);
 
 // ── Account-linked saved homes (hearts) ───────────────────────────────────
 const savedHomesLimiter = rateLimit({
@@ -221,7 +242,7 @@ const savedHomesLimiter = rateLimit({
 // status must be registered before :listing_key so "status" is not captured as a key
 router.get('/saved-homes/status', savedHomesLimiter, savedHomesStatus);
 router.get('/saved-homes', savedHomesLimiter, listSavedHomes);
-router.post('/saved-homes', formLimiter, saveHome);
+router.post('/saved-homes', trackingLimiter, saveHome);
 router.delete('/saved-homes/:listing_key', savedHomesLimiter, unsaveHome);
 
 // ── Notification center (in-app nurture events + cadence prefs) ───────────
@@ -233,10 +254,10 @@ const notificationsLimiter = rateLimit({
 // Static paths before :id
 router.get('/notifications', notificationsLimiter, listNotifications);
 router.get('/notifications/prefs', notificationsLimiter, getNotificationPrefs);
-router.put('/notifications/prefs', formLimiter, putNotificationPrefs);
-router.post('/notifications/read-all', formLimiter, markAllNotificationsRead);
-router.post('/notifications/dismiss-all', formLimiter, dismissAllNotifications);
-router.post('/notifications/:id/read', formLimiter, markNotificationRead);
+router.put('/notifications/prefs', formLimit(), putNotificationPrefs);
+router.post('/notifications/read-all', trackingLimiter, markAllNotificationsRead);
+router.post('/notifications/dismiss-all', trackingLimiter, dismissAllNotifications);
+router.post('/notifications/:id/read', trackingLimiter, markNotificationRead);
 router.delete('/notifications/:id', notificationsLimiter, dismissNotification);
 
 // ── Email open-tracking pixel (public, no auth — email clients hit this) ─
