@@ -10,7 +10,6 @@ import ListingDetailPage from "./pages/ListingDetailPage.jsx";
 import { CITY_HOMES } from "./data/cityHomesData.js";
 import FloatingContactBar from "./components/FloatingContactBar.jsx";
 import LeadCaptureChat from "./components/LeadCaptureChat.jsx";
-import { loadRealScoutScript } from "./utils/realscout.js";
 import { GA4_MEASUREMENT_ID, initGaDebugMode } from "./utils/analytics.js";
 import { TenantProvider, TenantDocumentTitle } from "./context/TenantContext.jsx";
 
@@ -149,13 +148,6 @@ function AppLayout({ children }) {
 
 export default function App() {
   const location = useLocation();
-
-  useEffect(() => {
-    // Load RealScout script when app mounts
-    loadRealScoutScript().catch((error) => {
-      console.error('Error loading RealScout script:', error);
-    });
-  }, []);
 
   // Scroll to top when navigating to properties page
   useEffect(() => {

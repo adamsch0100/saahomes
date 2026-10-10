@@ -179,7 +179,17 @@ export async function getTimeline(userId, { limit = 50, before = null } = {}, po
 export async function onIdentified(req, userId, { isNew = false, via = 'unknown' } = {}, pool = getPool()) {
   if (!userId) return;
   const visitorId = req?.cookies?.[VISITOR_COOKIE];
-  await stitchVisitor(visitorId, userId, pool);
+  const stitched = await stitchVisitor(visitorId, userId, pool);
+  if (stitched > 0) {
+    // Give the signup's own FUB event a head start so FUB has the person
+    // before the history arrives.
+    const delay = Number(process.env.FUB_HISTORY_DELAY_MS ?? 15000);
+    setTimeout(() => {
+      import('./followUpBossService.js')
+        .then(({ syncVisitorHistoryToFollowUpBoss }) => syncVisitorHistoryToFollowUpBoss(userId))
+        .catch((e) => console.error('FUB history sync failed:', e.message));
+    }, delay).unref?.();
+  }
   await recordEvent({
     type: isNew ? 'signup' : 'sign_in',
     userId,

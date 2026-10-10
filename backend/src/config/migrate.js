@@ -889,6 +889,7 @@ export const runMigrations = async () => {
         ALTER TABLE notifications ADD COLUMN IF NOT EXISTS pushed_at TIMESTAMP;
         ALTER TABLE notifications ADD COLUMN IF NOT EXISTS push_status VARCHAR(16);
         ALTER TABLE saved_searches ADD COLUMN IF NOT EXISTS push_cursor_at TIMESTAMP;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS fub_lead_score_synced INTEGER;
       `);
       await client.query('RELEASE SAVEPOINT web_push');
     } catch (pushErr) {

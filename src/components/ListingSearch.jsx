@@ -6,6 +6,7 @@ import { useSearchParams } from "react-router-dom";
 import ListingMap from "./ListingMap";
 import ListingDetailPanel from "./ListingDetailPanel";
 import SaveSearchModal from "./SaveSearchModal";
+import SaveSearchNudge from "./SaveSearchNudge.jsx";
 import LocationCombobox, {
   parseCityList,
   parseZipList,
@@ -1690,6 +1691,9 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     typeof window !== "undefined" ? getSavedSearches() : []
   );
   const [panelSlug, setPanelSlug] = useState(null);
+  // Shopping signals for the save-search nudge
+  const [homesOpened, setHomesOpened] = useState(0);
+  const [searchesRun, setSearchesRun] = useState(0);
   const panelHistoryPushed = useRef(false);
   const resultsRef = useRef(null);
   const homeTypeRef = useRef(null);
@@ -1731,7 +1735,10 @@ export default function ListingSearch({ location, height = "700px", compact = fa
       setResults((prev) => (append ? [...prev, ...rows] : rows));
       setMeta(data.meta || { total: 0, pages: 0, page: pageNum });
       setPage(pageNum);
-      if (!append) trackSearch(filtersToParams(f, { forUrl: true }).toString(), data.meta?.total);
+      if (!append) {
+        trackSearch(filtersToParams(f, { forUrl: true }).toString(), data.meta?.total);
+        setSearchesRun((n) => n + 1);
+      }
     } catch (err) {
       if (gen !== fetchGen.current) return;
       const timedOut = err?.name === "TimeoutError" || err?.name === "AbortError";
@@ -1911,6 +1918,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     if (listing?.id) setSelectedId(listing.id);
 
     if (panelSlug === slug) return;
+    setHomesOpened((n) => n + 1);
 
     if (panelSlug) {
       window.history.replaceState(
@@ -2872,6 +2880,13 @@ export default function ListingSearch({ location, height = "700px", compact = fa
       {panelSlug && (
         <ListingDetailPanel slug={panelSlug} onClose={closeListingPanel} />
       )}
+
+      <SaveSearchNudge
+        filters={saveFilters}
+        homesOpened={homesOpened}
+        searchesRun={searchesRun}
+        paused={!!panelSlug || drawerOpen}
+      />
     </div>
   );
 }

@@ -194,6 +194,14 @@ export const getEmailAbStats = async (token) => {
   });
 };
 
+export const getFunnelStats = async (token, days = 30) => {
+  return apiRequest(`/api/admin/funnel?days=${encodeURIComponent(days)}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 // ── Multi-agent seats (P-1) ────────────────────────────────────────────────
 
 export const agentLogin = async (email, password) => {

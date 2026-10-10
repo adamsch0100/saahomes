@@ -39,6 +39,7 @@ export default function HomeValueCapture({ areaName = "Northern Colorado" }) {
   const [value, setValue] = useState(null);
   const [valueLoading, setValueLoading] = useState(false);
   const [valueError, setValueError] = useState(null);
+  const [signInNote, setSignInNote] = useState("");
 
   const setAddrField = (k) => (e) => setAddr((p) => ({ ...p, [k]: e.target.value }));
 
@@ -92,6 +93,12 @@ export default function HomeValueCapture({ areaName = "Northern Colorado" }) {
           location.pathname
         )
       );
+      if (result?.signInRequired) {
+        // Returning client on a new device: the report waits behind the emailed sign-in link.
+        setSignInNote(result.signInMessage || "Check your email for a sign-in link to see your full report.");
+        setStep(3);
+        return;
+      }
       const id = result?.home_profile_id;
       if (!id) throw new Error("Your home profile could not be created. Please try again.");
       setProfileId(id);
@@ -272,6 +279,11 @@ export default function HomeValueCapture({ areaName = "Northern Colorado" }) {
               <p className="text-sm text-gray-500 mt-1">Saved to your dashboard — multi-source, honest, updated monthly.</p>
             </div>
 
+            {signInNote && (
+              <p className="text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 leading-relaxed">
+                {signInNote} Your report will be waiting on <strong>My Home</strong>.
+              </p>
+            )}
             {valueLoading && <p className="text-sm text-gray-500">Loading the full picture…</p>}
             {valueError && <p className="text-sm text-red-600">{valueError}</p>}
 

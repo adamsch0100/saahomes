@@ -186,6 +186,9 @@ export async function computeAndStoreLeadScore(userId, pool = getPool()) {
      WHERE id = $2`,
     [score, userId]
   );
+  import('./followUpBossService.js')
+    .then(({ syncLeadScoreToFollowUpBoss }) => syncLeadScoreToFollowUpBoss(userId, { pool }))
+    .catch(() => {});
 
   return { score, breakdown };
 }

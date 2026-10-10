@@ -17,6 +17,7 @@ import {
   getFubStatus,
   getLeadQualityStats,
   getEmailAbStats,
+  getFunnelStats,
   createAgent,
   listAgents,
   patchAgent,
@@ -41,6 +42,7 @@ router.get('/submissions/:type/:id', ...adminOnly, getSubmission);
 router.get('/stats', ...adminOnly, getStats);
 router.get('/lead-quality-stats', ...adminOnly, getLeadQualityStats);
 router.get('/email-ab-stats', ...adminOnly, getEmailAbStats);
+router.get('/funnel', ...adminOnly, getFunnelStats);
 
 // Client saved-search CRM (agent side — still admin console for P-1)
 router.get('/searches', ...adminOnly, getClientSearches);
