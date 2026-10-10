@@ -290,7 +290,7 @@ body { background: var(--paper); }
 
       <div class="set-card">
         <h2>Password</h2>
-        <p class="sub" id="pwSub">Set a password so you can sign in without a magic link.</p>
+        <p class="sub" id="pwSub">The password you use to sign in.</p>
 
         <div class="pw-toggle" id="pwToggleWrap">
           <input type="checkbox" id="pwToggle" checked>
@@ -311,7 +311,7 @@ body { background: var(--paper); }
         <a class="btn" href="/saas/app.html">Back to dashboard</a>
       </div>
       <div class="status-note" id="status"></div>
-      <p class="set-foot">Need a new email? <a href="/saas/login.html">Use a magic link</a> and it’ll carry your settings forward.</p>
+      <p class="set-foot">Need to change your sign-in email? Use Send feedback and we’ll move your account over.</p>
 
       <div class="set-card" id="sessionsCard">
         <h2>Active sessions</h2>
@@ -433,17 +433,17 @@ body { background: var(--paper); }
     if (hasPassword) {
       pwToggle.checked = false;
       pwToggleLabel.textContent = 'Change password';
-      pwSub.textContent = 'Change it only when you want a new one. Magic link still works anytime.';
+      pwSub.textContent = 'The password you use to sign in. Change it only when you want a new one.';
       pwInput.placeholder = 'Leave blank to keep current password';
       pwInput2.placeholder = 'Confirm new password';
       pwHelp.textContent = 'Leave both blank to keep your current password.';
     } else {
       pwToggle.checked = true;
       pwToggleLabel.textContent = 'Set a password';
-      pwSub.textContent = 'Set a password so you can sign in without a magic link.';
+      pwSub.textContent = 'Set a password so you can sign in with your email and password.';
       pwInput.placeholder = 'New password (8+ characters)';
       pwInput2.placeholder = 'Confirm new password';
-      pwHelp.textContent = 'Required the first time. You can still use a magic link later.';
+      pwHelp.textContent = 'You’ll use this with your email to sign in.';
     }
     syncPwMode();
   }
@@ -494,6 +494,13 @@ body { background: var(--paper); }
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    // Name + brokerage complete the profile; without them the app sends you back here.
+    const missing = [['name', 'your name'], ['brokerage', 'your brokerage']].filter(([id]) => !$(id).value.trim());
+    if (missing.length) {
+      setStatus('Add ' + missing.map((m) => m[1]).join(' and ') + ' — they go on every report.', 'error');
+      $(missing[0][0]).focus();
+      return;
+    }
     setStatus('Saving…');
     const fd = new FormData();
     fd.set('name', $('name').value.trim());

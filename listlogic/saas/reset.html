@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WHGZQDZ6ZG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-WHGZQDZ6ZG');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Choose your password — ListLogic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/saas/ll.css">
+<style>
+body {
+  min-height: 100vh; display: grid; place-items: center; padding: 32px 20px;
+  background: radial-gradient(900px 500px at 80% -10%, #1a5f9e33, transparent 60%),
+              radial-gradient(700px 400px at 10% 110%, #c9a22722, transparent 55%),
+              linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+}
+.auth-card {
+  background: var(--card); border-radius: 22px; padding: 36px 32px;
+  width: 100%; max-width: 440px; box-shadow: 0 40px 90px -30px rgba(0,0,0,0.55);
+}
+.auth-brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -0.02em; font-size: 1.1rem; margin-bottom: 22px; }
+.auth-brand img { height: 42px; width: auto; display: block; }
+h1 { font-family: 'Fraunces', serif; font-size: 1.5rem; letter-spacing: -0.02em; margin-bottom: 8px; }
+.sub { color: var(--muted); font-size: 0.92rem; margin-bottom: 18px; }
+.auth-links { margin-top: 20px; font-size: 0.82rem; }
+.auth-links a { color: var(--muted); }
+button.btn { width: 100%; padding: 13px; font-size: 0.95rem; margin-top: 6px; }
+form[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="auth-card">
+  <a href="/saas/" class="auth-brand" style="text-decoration:none;color:inherit">
+    <img src="/saas/listlogic-logo.png" alt="ListLogic">
+  </a>
+  <h1 id="title">Choose your password</h1>
+  <p class="sub" id="sub">Checking your link…</p>
+  <form id="resetForm" hidden>
+    <div class="field">
+      <label for="password">New password <span style="font-weight:500;color:var(--muted)">(8+ characters)</span></label>
+      <div class="pw-wrap">
+        <input id="password" type="password" minlength="8" required autocomplete="new-password">
+        <button type="button" class="pw-show" data-for="password" aria-label="Show password">Show</button>
+      </div>
+    </div>
+    <input type="email" id="username" autocomplete="username" hidden>
+    <button type="submit" class="btn btn-gold" id="saveBtn">Save password and sign in</button>
+  </form>
+  <p class="status" id="status"></p>
+  <div class="auth-links">
+    <a href="/saas/login.html">Back to sign in</a>
+  </div>
+</div>
+<script src="/saas/auth-ui.js"></script>
+<script>
+const token = new URLSearchParams(location.search).get('token') || '';
+const form = document.getElementById('resetForm');
+const statusEl = document.getElementById('status');
+const title = document.getElementById('title');
+const sub = document.getElementById('sub');
+const saveBtn = document.getElementById('saveBtn');
+const pw = document.getElementById('password');
+function setStatus(msg, kind) { statusEl.className = 'status' + (kind ? ' ' + kind : ''); statusEl.textContent = msg || ''; }
+function linkProblem(msg) {
+  title.textContent = 'This link didn’t work';
+  sub.innerHTML = '';
+  sub.appendChild(document.createTextNode((msg || 'It may have expired or already been used.') + ' '));
+  const a = document.createElement('a');
+  a.href = '/saas/login.html';
+  a.textContent = 'Go to sign in and tap “Forgot your password?” for a fresh one.';
+  sub.appendChild(a);
+  form.hidden = true;
+}
+(async () => {
+  if (!token) { linkProblem('This link is missing its code.'); return; }
+  try {
+    const res = await fetch('/api/auth/reset-info?token=' + encodeURIComponent(token));
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : '');
+    document.getElementById('username').value = data.email || '';
+    title.textContent = data.has_password ? 'Choose a new password' : 'Set your password';
+    sub.textContent = 'For ' + data.email + '. You’ll be signed in as soon as you save.';
+    form.hidden = false;
+    pw.focus();
+  } catch (err) {
+    linkProblem(err.message);
+  }
+})();
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (pw.value.length < 8) { setStatus('Use at least 8 characters.', 'error'); return; }
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving…';
+  setStatus('');
+  try {
+    const res = await fetch('/api/auth/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ token, password: pw.value }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Could not save your password');
+    if (data.user && data.user.email && window.llRememberEmail) window.llRememberEmail(data.user.email);
+    setStatus('Password saved — signing you in…', 'ok');
+    location.href = data.next || '/saas/app.html';
+  } catch (err) {
+    setStatus(String(err.message || err), 'error');
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save password and sign in';
+  }
+});
+</script>
+<script src="/saas/analytics.js"></script>
+</body>
+</html>

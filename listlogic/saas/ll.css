@@ -233,16 +233,14 @@ body.ll-has-dash .set-wrap { max-width: none; margin: 0; padding: 0 0 8px; }
 .ll-footer a { color: var(--muted); text-decoration: none; }
 .ll-footer a:hover { color: var(--ink); }
 
-/* Email sign-in code entry (login + signup) */
-.ll-code-panel[hidden], form[hidden] { display: none !important; }
-.ll-code-sent { font-size: 0.92rem; color: var(--ink-2, #334155); margin: 0 0 12px; line-height: 1.5; }
-.ll-code-row { display: flex; gap: 8px; }
-.ll-code-row input {
-  flex: 1; min-width: 0; font-size: 1.35rem; letter-spacing: 0.3em; text-align: center;
-  font-variant-numeric: tabular-nums; padding: 10px 12px;
+/* Sign-in pages: password field with show/hide, signed-out note */
+.pw-wrap { position: relative; }
+.pw-wrap input { width: 100%; padding-right: 64px; }
+.pw-show {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  border: none; background: none; padding: 4px 6px; font: inherit; font-size: 0.78rem;
+  font-weight: 700; color: var(--navy, #0c3c6e); cursor: pointer;
 }
-.ll-code-row .btn { width: auto !important; flex: 0 0 auto; padding: 10px 18px; }
-.ll-code-links { margin-top: 12px; font-size: 0.82rem; color: var(--muted); text-align: center; }
 .ll-linkbtn {
   border: none; background: none; padding: 0; color: var(--navy, #0c3c6e); font: inherit;
   text-decoration: underline; cursor: pointer;

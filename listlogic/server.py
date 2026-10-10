@@ -145,9 +145,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/api/demo-export",
         "/api/login",
         "/api/signup",
-        "/api/auth/magic-link",
-        "/api/auth/verify",
-        "/api/auth/verify-code",
+        "/api/auth/forgot-password",
+        "/api/auth/reset-info",
+        "/api/auth/reset-password",
         "/api/logout",
         "/api/auth-status",
         "/api/feedback",
@@ -166,6 +166,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/saas/login.html",
         "/saas/signup.html",
         "/saas/verify.html",
+        "/saas/reset.html",
         "/saas/index.html",
         "/saas/pricing.html",
         "/saas/faq.html",
@@ -314,6 +315,14 @@ def _startup():
             logger.info("Auth bootstrap complete")
         except Exception:
             logger.exception("Auth bootstrap failed")
+            return
+        # Password login launch: older accounts without a password each get one
+        # "set your password" email (never repeated). Set PASSWORD_SETUP_EMAILS=0 to hold.
+        if (os.environ.get("PASSWORD_SETUP_EMAILS") or "1").strip() != "0":
+            try:
+                send_password_setup_links_once()
+            except Exception:
+                logger.exception("Password setup emails failed")
 
     threading.Thread(target=_boot, name="listlogic-bootstrap", daemon=True).start()
     # Warm the public /demo sample before the first probe so a restart/deploy
@@ -1080,7 +1089,7 @@ async def billing_webhook(request: Request):
 
 @app.post("/api/signup")
 async def signup(request: Request):
-    """Legacy password signup — prefer /api/auth/magic-link."""
+    """Create an account with email + password and sign straight in."""
     import auth_service
     import mailer
 
@@ -1088,10 +1097,13 @@ async def signup(request: Request):
         payload = await request.json()
     except Exception as exc:
         raise HTTPException(400, "Invalid JSON") from exc
+    password = str(payload.get("password") or "")
+    if len(password) < 8:
+        raise HTTPException(400, "Choose a password with at least 8 characters")
     try:
         user = auth_service.create_user(
             email=str(payload.get("email") or ""),
-            password=str(payload.get("password") or ""),
+            password=password,
             name=str(payload.get("name") or ""),
             phone=str(payload.get("phone") or ""),
             brokerage=str(payload.get("brokerage") or ""),
@@ -1100,18 +1112,21 @@ async def signup(request: Request):
             email_verified=False,
         )
     except ValueError as exc:
-        raise HTTPException(400, str(exc)) from exc
+        msg = str(exc)
+        if "already exists" in msg:
+            raise HTTPException(409, "You already have an account with this email — sign in instead.") from exc
+        raise HTTPException(400, msg) from exc
+    auth_service.log_event(user["id"], "signup", {"method": "password"})
     token = auth_service.create_session(
         user["id"], ip=_client_ip(request), user_agent=request.headers.get("user-agent", "")
     )
-    try:
-        mailer.send_welcome(user, auth_service.app_base_url())
-    except Exception:
-        logger.exception("Welcome email failed")
+    _send_in_background("welcome", mailer.send_welcome, user, auth_service.app_base_url())
+    home = auth_service.resolve_post_auth_next(user, str(payload.get("next") or ""))
     resp = JSONResponse({
         "ok": True,
         "user": auth_service.public_user(user),
         "entitlement": auth_service.entitlement(user),
+        "next": "/saas/onboarding.html?next=" + home,
     })
     _set_session_cookie(resp, request, token)
     return resp
@@ -1130,9 +1145,9 @@ def _send_in_background(label: str, fn, *args, **kwargs) -> None:
 
 
 def _dev_links_allowed() -> bool:
-    """Only hand sign-in links back in the HTTP response on a local dev box.
+    """Only hand password links back in the HTTP response on a local dev box.
 
-    Returning the link to the browser lets anyone sign in as any email, so it must
+    Returning the link to the browser lets anyone take over any account, so it must
     never happen in production — even when SMTP is down.
     """
     if os.environ.get("RAILWAY_ENVIRONMENT") or os.environ.get("RAILWAY_ENVIRONMENT_NAME"):
@@ -1141,109 +1156,124 @@ def _dev_links_allowed() -> bool:
     return not base.startswith("https://")
 
 
-@app.post("/api/auth/magic-link")
-async def request_magic_link(request: Request):
+_password_link_sent_at: dict[str, float] = {}
+PASSWORD_LINK_COOLDOWN_SEC = 60
+
+
+def _send_password_link(user: dict, *, purpose: str, next_path: str = "") -> Optional[str]:
+    """Email a set/reset-password link (rate-limited per email). Returns the URL only in dev."""
     import auth_service
     import mailer
+
+    email = (user.get("email") or "").lower()
+    now = time.time()
+    if now - _password_link_sent_at.get(email, 0) < PASSWORD_LINK_COOLDOWN_SEC:
+        return None
+    _password_link_sent_at[email] = now
+    link = auth_service.create_password_link(user, purpose=purpose, next_path=next_path)
+    auth_service.log_event(user["id"], "password_link_sent", {"purpose": purpose})
+    if mailer._smtp_config():
+        _send_in_background(
+            "password-link", mailer.send_password_link,
+            to=user["email"], url=link["url"], purpose=purpose, name=(user.get("name") or "").split(" ")[0],
+        )
+        return None
+    if _dev_links_allowed():
+        return link["url"]
+    logger.error("Password link for %s not sent: SMTP is not configured", email)
+    return None
+
+
+def send_password_setup_links_once() -> int:
+    """Email every existing no-password account one "set your password" link.
+
+    Runs at startup; each account is mailed at most once (tracked in events), so
+    restarts and redeploys never resend.
+    """
+    import auth_service
+    import mailer
+
+    if not mailer._smtp_config():
+        logger.info("Password setup emails skipped: SMTP not configured")
+        return 0
+    sent = 0
+    for user in auth_service.users_needing_password_setup():
+        try:
+            # Record first so a crash mid-send can never double-mail someone.
+            auth_service.log_event(user["id"], "password_setup_sent", {})
+            link = auth_service.create_password_link(user, purpose="setup")
+            mailer.send_password_link(
+                to=user["email"], url=link["url"], purpose="setup",
+                name=(user.get("name") or "").split(" ")[0],
+            )
+            sent += 1
+        except Exception:
+            logger.exception("Password setup email failed for %s", user.get("email"))
+    if sent:
+        logger.info("Sent %d password setup email(s)", sent)
+    return sent
+
+
+@app.post("/api/auth/forgot-password")
+async def forgot_password(request: Request):
+    import auth_service
 
     try:
         payload = await request.json()
     except Exception as exc:
         raise HTTPException(400, "Invalid JSON") from exc
-    email = str(payload.get("email") or "").strip()
+    email = str(payload.get("email") or "").strip().lower()
+    if not email or "@" not in email:
+        raise HTTPException(400, "Enter the email you signed up with")
+    out = {
+        "ok": True,
+        # Same answer whether or not the account exists, so this can't be used to probe emails.
+        "message": "If that email has a ListLogic account, a link to set your password is on its way. Check your inbox.",
+    }
+    user = auth_service.get_user_by_email(email)
+    if user and (user.get("status") or "") != "disabled":
+        purpose = "setup" if auth_service.user_needs_password(user) else "reset"
+        dev_url = _send_password_link(user, purpose=purpose, next_path=str(payload.get("next") or ""))
+        if dev_url:
+            out["dev_url"] = dev_url
+    return out
+
+
+@app.get("/api/auth/reset-info")
+def reset_info(token: str = ""):
+    import auth_service
+
     try:
-        link = auth_service.create_magic_link(
-            email,
-            promo_code=str(payload.get("promo_code") or ""),
-            invite_token=str(payload.get("invite") or payload.get("invite_token") or ""),
-            next_path=str(payload.get("next") or "/saas/app.html"),
-        )
+        return {"ok": True, **auth_service.password_link_info(token)}
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
 
-    configured = bool(mailer._smtp_config())
-    out = {
-        "ok": True,
-        "email": link["email"],
-        "is_new": link["is_new"],
-        "code_login": True,
-    }
-    if configured:
-        _send_in_background(
-            "magic-link",
-            mailer.send_magic_link,
-            to=link["email"],
-            url=link["url"],
-            code=link["code"],
-            is_new=link["is_new"],
-        )
-        out["sent"] = True
-        out["message"] = "Check your email — click the link or type the 6-digit code here."
-    elif _dev_links_allowed():
-        out["sent"] = False
-        out["message"] = "Email delivery isn't configured — use the link below (dev mode)."
-        out["dev_url"] = link["url"]
-        out["dev_code"] = link["code"]
-    else:
-        logger.error("Magic link requested for %s but SMTP is not configured", link["email"])
-        raise HTTPException(503, "We couldn't send a sign-in email right now. Try again in a minute, or sign in with your password.")
-    return JSONResponse(out)
 
-
-def _finish_magic_login(request: Request, result: dict) -> JSONResponse:
+@app.post("/api/auth/reset-password")
+async def reset_password(request: Request):
     import auth_service
-    import mailer
 
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(400, "Invalid JSON") from exc
+    try:
+        result = auth_service.consume_password_link(
+            str(payload.get("token") or ""), str(payload.get("password") or "")
+        )
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
     user = result["user"]
-    if result.get("is_new"):
-        _send_in_background("welcome", mailer.send_welcome, user, auth_service.app_base_url())
-
     session = auth_service.create_session(
         user["id"], ip=_client_ip(request), user_agent=request.headers.get("user-agent", "")
     )
     resp = JSONResponse({
         "ok": True,
         "user": auth_service.public_user(user),
-        "entitlement": auth_service.entitlement(user),
-        "is_new": result.get("is_new"),
-        "needs_onboarding": result.get("needs_onboarding"),
         "next": result.get("next") or "/saas/app.html",
     })
     _set_session_cookie(resp, request, session)
     return resp
-
-
-@app.post("/api/auth/verify")
-async def verify_magic_link(request: Request):
-    import auth_service
-
-    try:
-        payload = await request.json()
-    except Exception as exc:
-        raise HTTPException(400, "Invalid JSON") from exc
-    token = str(payload.get("token") or "")
-    try:
-        result = auth_service.consume_magic_link(token)
-    except ValueError as exc:
-        raise HTTPException(400, str(exc)) from exc
-    return _finish_magic_login(request, result)
-
-
-@app.post("/api/auth/verify-code")
-async def verify_magic_code(request: Request):
-    import auth_service
-
-    try:
-        payload = await request.json()
-    except Exception as exc:
-        raise HTTPException(400, "Invalid JSON") from exc
-    try:
-        result = auth_service.consume_magic_code(
-            str(payload.get("email") or ""), str(payload.get("code") or "")
-        )
-    except ValueError as exc:
-        raise HTTPException(400, str(exc)) from exc
-    return _finish_magic_login(request, result)
 
 
 @app.get("/api/sessions")
@@ -1356,6 +1386,7 @@ async def login(request: Request):
     email = ""
     password = ""
     requested_next = ""
+    invite_token = ""
     if "application/json" in content_type:
         try:
             payload = await request.json()
@@ -1364,6 +1395,7 @@ async def login(request: Request):
         email = str(payload.get("email") or "")
         password = str(payload.get("password") or "")
         requested_next = str(payload.get("next") or "")
+        invite_token = str(payload.get("invite") or "").strip()
     else:
         form = await request.form()
         # Legacy access-code form field "token" no longer supported as primary login
@@ -1377,8 +1409,24 @@ async def login(request: Request):
             )
     try:
         user = auth_service.login_user(email, password)
+    except auth_service.NeedsPasswordSetup as exc:
+        # Older account from the email-link days: mail a set-password link right now.
+        dev_url = _send_password_link(exc.user, purpose="setup", next_path=requested_next)
+        detail = {
+            "reason": "needs_password",
+            "message": "Your account doesn't have a password yet. We just emailed you a link to set one — "
+                       "open it and you'll be signed in.",
+        }
+        if dev_url:
+            detail["dev_url"] = dev_url
+        raise HTTPException(409, detail) from exc
     except ValueError as exc:
         raise HTTPException(401, str(exc)) from exc
+    if invite_token:
+        try:
+            user = auth_service.accept_team_invite(user["id"], invite_token) or user
+        except ValueError:
+            logger.info("Invite %s not applied at login for %s", invite_token[:8], user.get("email"))
     token = auth_service.create_session(
         user["id"], ip=_client_ip(request), user_agent=request.headers.get("user-agent", "")
     )

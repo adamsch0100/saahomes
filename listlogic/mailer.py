@@ -74,7 +74,7 @@ def send_team_invite(*, to: str, url: str, owner_name: str = "", brokerage: str 
     body = (
         f"Hi,\n\n"
         f"{who}{office_bit} added you to ListLogic.\n\n"
-        f"Open this link to join (expires in 30 minutes):\n\n"
+        f"Open this link to join — you'll pick a password the first time:\n\n"
         f"{url}\n\n"
         f"You'll share the brokerage seat plan — generate presentations with the same branding.\n\n"
         f"If you didn't expect this, you can ignore the email.\n\n"
@@ -83,24 +83,29 @@ def send_team_invite(*, to: str, url: str, owner_name: str = "", brokerage: str 
     return send_email(to=to, subject="You're invited to ListLogic", body=body)
 
 
-def send_magic_link(*, to: str, url: str, code: str = "", is_new: bool = False) -> bool:
-    action = "Create your ListLogic account" if is_new else "Sign in to ListLogic"
-    code_line = (
-        f"Or type this code on the sign-in page: {code}\n\n" if code else ""
-    )
-    body = (
-        f"Hi,\n\n"
-        f"{action} with this one-time link (expires in 30 minutes):\n\n"
-        f"{url}\n\n"
-        f"{code_line}"
-        f"Once you're in, ListLogic keeps you signed in on this device.\n\n"
-        f"If you didn't request this, you can ignore this email.\n\n"
-        f"— ListLogic\n"
-    )
-    if code:
-        subject = f"{code} is your ListLogic {'account' if is_new else 'sign-in'} code"
+def send_password_link(*, to: str, url: str, purpose: str = "reset", name: str = "") -> bool:
+    """Forgot-password link, or the one-time "set your password" link for older accounts."""
+    hi = f"Hi {name}," if name else "Hi,"
+    if purpose == "setup":
+        subject = "Set your ListLogic password"
+        body = (
+            f"{hi}\n\n"
+            f"ListLogic now uses a regular email and password to sign in, instead of emailed links.\n\n"
+            f"Choose your password here (the link works for 14 days):\n\n"
+            f"{url}\n\n"
+            f"After that, sign in any time at https://listlogic.homes/saas/login.html with your email and password. "
+            f"Your reports, branding, and settings are all still there.\n\n"
+            f"— ListLogic\n"
+        )
     else:
-        subject = "Your ListLogic sign-in link" if not is_new else "Your ListLogic account link"
+        subject = "Reset your ListLogic password"
+        body = (
+            f"{hi}\n\n"
+            f"Use this link to choose a new ListLogic password (it expires in 60 minutes):\n\n"
+            f"{url}\n\n"
+            f"If you didn't ask for this, you can ignore this email — your password hasn't changed.\n\n"
+            f"— ListLogic\n"
+        )
     return send_email(to=to, subject=subject, body=body)
 
 
