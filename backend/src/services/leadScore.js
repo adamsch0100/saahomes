@@ -12,80 +12,14 @@
  *   −10  no engagement in the last 30 days
  */
 import getPool from '../config/database.js';
+import { buildSavedSearchWhere, savedSearchPath } from './listingFilters.js';
 
-/** Build WHERE for saved-search filters against the listings table. */
+/**
+ * WHERE for saved-search filters against the listings table. Delegates to the
+ * search page's own filter builder so counts and alerts can never drift.
+ */
 export function buildWhere(filters) {
-  const where = ['is_active = TRUE', "status = 'Active'"];
-  const params = [];
-  let i = 1;
-  const f = filters || {};
-  // Multi-city / multi-zip (parity with listing search + alert digests)
-  const cityRaw = f.city ? String(f.city) : '';
-  const zipRaw = f.postal_code || f.postalCode || f.zip || f.zipCode || f.zips || '';
-  const cityList = cityRaw && cityRaw !== '__noco__' && cityRaw !== '__all__'
-    ? cityRaw.split(',').map((s) => s.trim()).filter(Boolean)
-    : [];
-  const zipList = zipRaw
-    ? String(zipRaw).split(',').map((s) => s.trim()).filter(Boolean)
-    : [];
-  const locParts = [];
-  if (cityList.length === 1) {
-    locParts.push(`LOWER(city) = LOWER($${i})`);
-    params.push(cityList[0]);
-    i += 1;
-  } else if (cityList.length > 1) {
-    locParts.push(`LOWER(city) = ANY($${i}::text[])`);
-    params.push(cityList.map((c) => c.toLowerCase()));
-    i += 1;
-  }
-  if (zipList.length === 1) {
-    locParts.push(`postal_code = $${i}`);
-    params.push(zipList[0]);
-    i += 1;
-  } else if (zipList.length > 1) {
-    locParts.push(`postal_code = ANY($${i}::text[])`);
-    params.push(zipList);
-    i += 1;
-  }
-  if (locParts.length === 1) where.push(locParts[0]);
-  else if (locParts.length > 1) where.push(`(${locParts.join(' OR ')})`);
-  if (f.minPrice) { where.push(`list_price >= $${i++}`); params.push(Number(f.minPrice)); }
-  if (f.maxPrice) { where.push(`list_price <= $${i++}`); params.push(Number(f.maxPrice)); }
-  if (f.beds) { where.push(`beds >= $${i++}`); params.push(Number(f.beds)); }
-  if (f.baths) { where.push(`baths >= $${i++}`); params.push(Number(f.baths)); }
-  if (f.type && ['detached', 'attached', 'land', 'commercial', 'other'].includes(f.type)) {
-    where.push(`home_type = $${i++}`);
-    params.push(f.type);
-  }
-  if (f.q) {
-    where.push(`(LOWER(city) LIKE $${i} OR LOWER(street_name) LIKE $${i} OR LOWER(description) LIKE $${i})`);
-    params.push(`%${String(f.q).toLowerCase()}%`);
-    i += 1;
-  }
-  if (f.minSqft) { where.push(`living_area >= $${i++}`); params.push(Number(f.minSqft)); }
-  if (f.minYear) { where.push(`year_built >= $${i++}`); params.push(Number(f.minYear)); }
-  if (f.maxHoa) { where.push(`hoa_fee <= $${i++}`); params.push(Number(f.maxHoa)); }
-  if (f.garage === 'true' || f.garage === true) where.push('garage_spaces > 0');
-  if (f.basement === 'true' || f.basement === true) {
-    where.push(`COALESCE(features->>'basement','') NOT ILIKE '%none%' AND COALESCE(features->>'basement','') <> ''`);
-  }
-  if (f.fireplace === 'true' || f.fireplace === true) {
-    where.push(`COALESCE(features->>'fireplaces','') <> ''`);
-  }
-  if (f.pool === 'true' || f.pool === true) {
-    where.push(`COALESCE(features->>'pool','') NOT ILIKE 'n%' AND COALESCE(features->>'pool','') <> ''`);
-  }
-  if (f.newConstruction === 'true' || f.newConstruction === true) {
-    where.push(`features->>'new_construction' = 'true'`);
-  }
-  if (f.waterfront === 'true' || f.waterfront === true) {
-    where.push(`features->>'waterfront' = 'true'`);
-  }
-  if (f.assumable === 'true' || f.assumable === true || f.assumable === '1') {
-    where.push('assumable = TRUE');
-  }
-  if (f.newDays) { where.push(`days_on_market <= $${i++}`); params.push(Number(f.newDays)); }
-  return { whereSql: where.join(' AND '), params };
+  return buildSavedSearchWhere(filters);
 }
 
 /**
@@ -400,17 +334,5 @@ export async function getRecentViews(userId, limit = 5, pool = getPool()) {
 
 /** Deep-link path for a saved search's filters. */
 export function filtersToSearchPath(filters = {}) {
-  const params = new URLSearchParams();
-  const keys = [
-    'city', 'minPrice', 'maxPrice', 'beds', 'baths', 'type', 'sort', 'q',
-    'minSqft', 'minYear', 'maxHoa', 'garage', 'basement', 'fireplace', 'pool',
-    'newConstruction', 'waterfront', 'newDays', 'assumable',
-  ];
-  for (const k of keys) {
-    if (filters[k] !== undefined && filters[k] !== null && filters[k] !== '') {
-      params.set(k, String(filters[k]));
-    }
-  }
-  const qs = params.toString();
-  return qs ? `/properties/?${qs}` : '/properties/';
+  return savedSearchPath(filters);
 }

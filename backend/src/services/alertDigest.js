@@ -22,6 +22,7 @@ import {
 import { getPrefFrequency } from './notificationPrefs.js';
 import { pickVariant, openToken, withOpenPixel } from './subjectVariants.js';
 import { marketPack } from '../config/marketPack.js';
+import { buildSavedSearchWhere } from './listingFilters.js';
 import { loadBrandForClientUser, voiceCopy } from './tenantBrand.js';
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: false });
@@ -35,6 +36,18 @@ const fmtPrice = (n) => (n == null ? '—' : `$${Number(n).toLocaleString('en-US
 const fmtSqft = (n) => (n == null ? '' : `${Number(n).toLocaleString()} sqft`);
 
 const HOME_TYPE_LABEL = { detached: 'Detached Home', attached: 'Condo / Townhome / Attached', land: 'Land', commercial: 'Commercial', other: 'Property' };
+const HOME_TYPE_TOKEN_LABEL = {
+  house: 'Houses', houses: 'Houses', townhome: 'Townhomes', townhomes: 'Townhomes', townhouse: 'Townhomes',
+  condo: 'Condos', condos: 'Condos', multi: 'Multi-family', multifamily: 'Multi-family', 'multi-family': 'Multi-family',
+  manufactured: 'Manufactured', land: 'Land', 'lots-land': 'Land', commercial: 'Commercial',
+};
+/** "Houses, Condos" from types=house,condo (or the legacy single type=). */
+function homeTypesLabel(f = {}) {
+  const raw = f.types || f.type || '';
+  const labels = String(raw).split(',').map((t) => t.trim()).filter(Boolean)
+    .map((t) => HOME_TYPE_TOKEN_LABEL[t.toLowerCase()] || HOME_TYPE_LABEL[t.toLowerCase()] || t);
+  return [...new Set(labels)].join(', ');
+}
 
 const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -90,81 +103,9 @@ function isDueWithListingPref(search, listingPrefFreq) {
 }
 
 // ---------------------------------------------------------------- filters
+// Same filter builder as the search page (services/listingFilters.js).
 function buildWhere(filters) {
-  const where = ['is_active = TRUE', 'status = \'Active\''];
-  const params = [];
-  let i = 1;
-  const f = filters || {};
-  // Location: city may be multi ("Denver,Erie"); postal_code / zip may be multi.
-  // Cities and zips OR within group; groups OR together (union of areas).
-  const cityRaw = f.city ? String(f.city) : '';
-  const zipRaw = f.postal_code || f.postalCode || f.zip || f.zipCode || f.zips || '';
-  const cityList = cityRaw && cityRaw !== '__noco__' && cityRaw !== '__all__'
-    ? cityRaw.split(',').map((s) => s.trim()).filter(Boolean)
-    : [];
-  const zipList = zipRaw
-    ? String(zipRaw).split(',').map((s) => s.trim()).filter(Boolean)
-    : [];
-  const locParts = [];
-  if (cityRaw === '__noco__' && zipList.length === 0) {
-    // NoCO default scope for digests that still store __noco__
-    const NOCO = [
-      'Fort Collins', 'Loveland', 'Windsor', 'Greeley', 'Timnath', 'Wellington',
-      'Johnstown', 'Eaton', 'Milliken', 'La Salle', 'Mead', 'Longmont', 'Boulder',
-      'Berthoud', 'Firestone', 'Frederick', 'Evans', 'Severance', 'Niwot',
-    ];
-    where.push(`city = ANY($${i++}::text[])`);
-    params.push(NOCO);
-  } else {
-    if (cityList.length === 1) {
-      locParts.push(`LOWER(city) = LOWER($${i})`);
-      params.push(cityList[0]);
-      i += 1;
-    } else if (cityList.length > 1) {
-      locParts.push(`LOWER(city) = ANY($${i}::text[])`);
-      params.push(cityList.map((c) => c.toLowerCase()));
-      i += 1;
-    }
-    if (zipList.length === 1) {
-      locParts.push(`postal_code = $${i}`);
-      params.push(zipList[0]);
-      i += 1;
-    } else if (zipList.length > 1) {
-      locParts.push(`postal_code = ANY($${i}::text[])`);
-      params.push(zipList);
-      i += 1;
-    }
-    if (locParts.length === 1) where.push(locParts[0]);
-    else if (locParts.length > 1) where.push(`(${locParts.join(' OR ')})`);
-  }
-  if (f.minPrice) { where.push(`list_price >= $${i++}`); params.push(Number(f.minPrice)); }
-  if (f.maxPrice) { where.push(`list_price <= $${i++}`); params.push(Number(f.maxPrice)); }
-  if (f.beds) { where.push(`beds >= $${i++}`); params.push(Number(f.beds)); }
-  if (f.baths) { where.push(`baths >= $${i++}`); params.push(Number(f.baths)); }
-  if (f.type && ['detached', 'attached', 'land', 'commercial', 'other'].includes(f.type)) {
-    where.push(`home_type = $${i++}`);
-    params.push(f.type);
-  }
-  if (f.q) {
-    where.push(`(LOWER(city) LIKE $${i} OR LOWER(street_name) LIKE $${i} OR LOWER(description) LIKE $${i})`);
-    params.push(`%${String(f.q).toLowerCase()}%`);
-    i += 1;
-  }
-  // Expanded MLS detail filters (parity with the search page)
-  if (f.minSqft) { where.push(`living_area >= $${i++}`); params.push(Number(f.minSqft)); }
-  if (f.minYear) { where.push(`year_built >= $${i++}`); params.push(Number(f.minYear)); }
-  if (f.maxHoa) { where.push(`hoa_fee <= $${i++}`); params.push(Number(f.maxHoa)); }
-  if (f.garage === 'true') where.push('garage_spaces > 0');
-  if (f.basement === 'true') where.push(`COALESCE(features->>'basement','') NOT ILIKE '%none%' AND COALESCE(features->>'basement','') <> ''`);
-  if (f.fireplace === 'true') where.push(`COALESCE(features->>'fireplaces','') <> ''`);
-  if (f.pool === 'true') where.push(`COALESCE(features->>'pool','') NOT ILIKE 'n%' AND COALESCE(features->>'pool','') <> ''`);
-  if (f.newConstruction === 'true') where.push(`features->>'new_construction' = 'true'`);
-  if (f.waterfront === 'true') where.push(`features->>'waterfront' = 'true'`);
-  if (f.assumable === 'true' || f.assumable === true || f.assumable === '1') {
-    where.push('assumable = TRUE');
-  }
-  if (f.newDays) { where.push(`days_on_market <= $${i++}`); params.push(Number(f.newDays)); }
-  return { whereSql: where.join(' AND '), params };
+  return buildSavedSearchWhere(filters);
 }
 
 function matchScore(l, filters) {
@@ -656,6 +597,7 @@ async function runSearch(search, { dryRun, onlyEmail }) {
       ? String(search.filters.city).replace(/,/g, ', ')
       : '',
     zipLabel ? String(zipLabel).replace(/,/g, ', ') : '',
+    search.filters.polygon ? 'your drawn area' : '',
   ].filter(Boolean);
   const filterSummary = [
     locBits.length ? `in ${locBits.join(' · ')}` : '',
@@ -664,7 +606,7 @@ async function runSearch(search, { dryRun, onlyEmail }) {
       : '',
     search.filters.beds ? `${search.filters.beds}+ beds` : '',
     search.filters.baths ? `${search.filters.baths}+ baths` : '',
-    search.filters.type ? HOME_TYPE_LABEL[search.filters.type] : '',
+    homeTypesLabel(search.filters),
   ].filter(Boolean).join(' · ');
 
   // Accurate, human summary lines (counts always match the cards above)
@@ -685,6 +627,7 @@ async function runSearch(search, { dryRun, onlyEmail }) {
 
   // Personalized subject: "Adam — 3 new homes in Fort Collins match your search"
   const cityLabel = (() => {
+    if (search.filters.polygon) return 'your drawn area';
     const c = search.filters.city;
     const z = search.filters.postal_code || search.filters.postalCode || search.filters.zip || '';
     if (c && c !== '__noco__' && c !== '__all__') {

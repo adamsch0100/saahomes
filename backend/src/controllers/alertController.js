@@ -12,6 +12,7 @@
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import getPool from '../config/database.js';
+import { sanitizeSavedFilters } from '../services/listingFilters.js';
 import { forwardAlertSignupToFollowUpBoss } from '../services/followUpBossService.js';
 import {
   recordEvent as recordStreamEvent,
@@ -31,10 +32,6 @@ import {
 import { rejectIfDisposableEmail } from '../utils/emailQuality.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const FILTER_KEYS = ['city', 'minPrice', 'maxPrice', 'beds', 'baths', 'type', 'sort', 'q',
-  'minSqft', 'minYear', 'maxHoa', 'garage', 'basement', 'fireplace', 'pool',
-  'newConstruction', 'waterfront', 'newDays', 'assumable'];
-const TYPE_VALUES = ['detached', 'attached', 'land', 'commercial', 'other', ''];
 const FREQUENCIES = ['immediate', 'daily', 'weekly'];
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -55,29 +52,9 @@ function cleanSchedule(body) {
   return out;
 }
 
-function cleanFilters(body) {
-  const f = {};
-  const numKeys = ['minPrice', 'maxPrice', 'beds', 'baths', 'minSqft', 'minYear', 'maxHoa', 'newDays'];
-  const boolKeys = ['garage', 'basement', 'fireplace', 'pool', 'newConstruction', 'waterfront', 'assumable'];
-  for (const key of FILTER_KEYS) {
-    const v = body[key];
-    if (v === undefined || v === null || v === '') continue;
-    if (numKeys.includes(key)) {
-      const n = Number(v);
-      if (Number.isFinite(n) && n >= 0 && n < 1e9) f[key] = String(Math.round(n));
-    } else if (boolKeys.includes(key)) {
-      if (v === true || v === 'true' || v === 1 || v === '1') f[key] = 'true';
-    } else if (key === 'type') {
-      if (TYPE_VALUES.includes(String(v))) f[key] = String(v);
-    } else if (key === 'city' || key === 'q') {
-      const s = String(v).trim();
-      if (s.length <= 100) f[key] = s;
-    } else if (key === 'sort') {
-      f[key] = String(v).slice(0, 20);
-    }
-  }
-  return f;
-}
+// A saved search keeps every filter the search page understands
+// (services/listingFilters.js), so its alerts match what the visitor saw.
+const cleanFilters = (body) => sanitizeSavedFilters(body);
 
 const COOKIE_NAME = 'saa_user_token';
 const COOKIE_MAX_AGE = 90 * 24 * 60 * 60 * 1000; // 90 days
