@@ -854,6 +854,48 @@ export const runMigrations = async () => {
       console.error('platform foundation migration skipped:', foundationErr.message);
     }
 
+    // ── Installable app + web push ───────────────────────────────────────
+    await client.query('SAVEPOINT web_push');
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS app_settings (
+          key VARCHAR(64) PRIMARY KEY,
+          value JSONB NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE TABLE IF NOT EXISTS push_subscriptions (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          endpoint TEXT NOT NULL UNIQUE,
+          p256dh TEXT NOT NULL,
+          auth TEXT NOT NULL,
+          user_agent TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          last_success_at TIMESTAMPTZ,
+          last_error TEXT,
+          disabled_at TIMESTAMPTZ
+        );
+        CREATE INDEX IF NOT EXISTS idx_push_subscriptions_user ON push_subscriptions(user_id) WHERE disabled_at IS NULL;
+        CREATE TABLE IF NOT EXISTS push_log (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          notification_ids INTEGER[] NOT NULL DEFAULT '{}',
+          title TEXT,
+          delivered INTEGER NOT NULL DEFAULT 0,
+          sent_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_push_log_user_time ON push_log(user_id, sent_at DESC);
+        ALTER TABLE notifications ADD COLUMN IF NOT EXISTS pushed_at TIMESTAMP;
+        ALTER TABLE notifications ADD COLUMN IF NOT EXISTS push_status VARCHAR(16);
+        ALTER TABLE saved_searches ADD COLUMN IF NOT EXISTS push_cursor_at TIMESTAMP;
+      `);
+      await client.query('RELEASE SAVEPOINT web_push');
+    } catch (pushErr) {
+      await client.query('ROLLBACK TO SAVEPOINT web_push');
+      console.error('web push migration skipped:', pushErr.message);
+    }
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {

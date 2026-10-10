@@ -26,6 +26,7 @@ import {
 import { register, login, setPassword, ensureSession } from '../controllers/authController.js';
 import { submitShowingRequest } from '../controllers/showingController.js';
 import { runCronDigest } from '../controllers/cronController.js';
+import { getPushKey, getPushStatus, subscribePush, unsubscribePush } from '../controllers/pushController.js';
 import { listSchools, runCronSchoolRatings } from '../controllers/schoolController.js';
 import {
   listHomes,
@@ -206,6 +207,12 @@ router.post('/alerts/unsubscribe', formLimit(), unsubscribeAll);
 // Cron triggers (protected by CRON_SECRET) — scheduler calls the site's own
 // backend so email is sent from saahomes.com, not from Hermes.
 router.post('/cron/digest', runCronDigest);
+
+// Instant alerts on a device (web push)
+router.get('/push/key', getPushKey);
+router.get('/push/status', getPushStatus);
+router.post('/push/subscribe', trackingLimiter, subscribePush);
+router.post('/push/unsubscribe', trackingLimiter, unsubscribePush);
 // Weekly GreatSchools city-page sync (NOT part of the 2h listings sync)
 router.post('/cron/school-ratings', runCronSchoolRatings);
 

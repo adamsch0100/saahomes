@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#111111"/>
+  <path d="M136 250 L256 150 L376 250" fill="none" stroke="#CFB36E" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="256" y="350" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="112" font-weight="700" fill="#CFB36E" letter-spacing="6">SAA</text>
+</svg>

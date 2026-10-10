@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { rememberSavedSearch } from "../utils/listingHelpers.js";
+import InstantAlertsCard from "./InstantAlertsCard.jsx";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -327,6 +328,7 @@ export default function SaveSearchModal({
                     Added to your account ({session?.email || email}).
                   </p>
                 )}
+                {!signInNote && <InstantAlertsCard compact className="mt-4" />}
                 {(intent === "selling" || intent === "both") && (
                   <a
                     href="/my-home/"
