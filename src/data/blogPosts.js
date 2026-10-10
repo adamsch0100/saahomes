@@ -8385,7 +8385,7 @@ export const blogPosts = [
     category: 'Seller Tips',
     image: '/images/selling-your-home-in-loveland.jpg',
     readTime: '7 min read',
-    youtubeId: 'ppibH9GQHkg',
+    youtubeId: 'uvQu_9q_SlM',
     relatedLinks: [
       { title: 'Cash Home Buyers Hub', href: '/cash-home-buyers/', description: 'Sell for cash or invest in Northern Colorado' },
       { title: 'Northern Colorado Market Update - August 2026', href: '/blog/northern-colorado-market-update-august-2026/', description: 'Current market numbers behind this guide' },
@@ -8856,7 +8856,7 @@ export const blogPosts = [
         category: 'Seller Tips',
         image: '/images/selling-your-home-in-greeley.jpg',
         readTime: '7 min read',
-        youtubeId: 'ppibH9GQHkg',
+        youtubeId: 'ZrdRlJaODSA',
         relatedLinks: [
           { title: 'Cash Home Buyers Hub', href: '/cash-home-buyers/', description: 'Sell for cash or invest in Northern Colorado' },
           { title: 'Northern Colorado Market Update - August 2026', href: '/blog/northern-colorado-market-update-august-2026/', description: 'Current market numbers behind this guide' },
