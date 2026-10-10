@@ -37,7 +37,7 @@ Built for Schwartz and Associates / SAA Homes; sold to agents more broadly.
 
 ## Funnel: Demo → Account → Unlock → Paid
 1. **Public demo** (`/demo` appointment, `/demo/fingerprint` weekly seller picture) — one Greeley listing (2845 W 13th). No account. Free forever. Fingerprint weeks are rebuilt from list / pending / sold dates in that market file.
-2. **Create account** (email magic link) — no card. Search/Upload, subject, branding allowed (setup).
+2. **Create account** (email + password) — no card. Search/Upload, subject, branding allowed (setup).
 3. **Generate** — hard gate. Personalized teaser. Unlock with **7-day Stripe trial** (card required → auto $39/mo) or **$20 one-time** for that report. Or open sample demo.
 4. Optional **promo / access codes** (e.g. `ZPNoCo`) can grant complimentary Generate — including unlimited for a pilot group. Agents enter the code on signup or login.
 5. Paid plans: $20 one-time, $39/mo agent (after 7-day trial), $390/yr, brokerage $29/seat/mo (min 5).

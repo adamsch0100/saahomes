@@ -236,6 +236,21 @@
 .ll-paywall-actions .btn { width: 100%; text-align: center; }
 
 .submit-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
+#view-generate .submit-row {
+  position: sticky; bottom: 0; z-index: 5; background: var(--bg, #f6f3ec);
+  padding: 12px 0; border-top: 1px solid var(--line); margin-top: 8px;
+}
+.linkish { border: none; background: none; padding: 0; font: inherit; color: var(--navy, #0c3c6e); text-decoration: underline; cursor: pointer; }
+.next-step {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 12px;
+  padding: 10px 12px; border-radius: 10px; background: #eef6f1; border: 1px solid #cfe5d8; font-size: 0.86rem;
+}
+.next-step .btn { padding: 7px 14px; font-size: 0.82rem; }
+.next-step .btn-ghost { border: 1px solid var(--line); color: var(--navy); }
+.field.need input { border-color: #d9a441; box-shadow: 0 0 0 3px #f6e6c4; }
+.lookup-spin { display: inline-block; width: 11px; height: 11px; margin-right: 6px; vertical-align: -1px;
+  border: 2px solid #c9d6e3; border-top-color: var(--navy, #0c3c6e); border-radius: 50%; animation: llspin .8s linear infinite; }
+@keyframes llspin { to { transform: rotate(360deg); } }
 .submit-row .btn { padding: 14px 30px; font-size: 0.98rem; }
 
 .result {
@@ -421,10 +436,10 @@
       <div class="field">
         <label>Subject address</label>
         <div class="suggest-wrap">
-          <input type="text" id="address" name="address" placeholder="Start typing an address…" value="2845 W 13th St, Greeley, CO 80634" required autocomplete="off">
+          <input type="text" id="address" name="address" placeholder="Start typing the home's address…" value="" required autocomplete="off" autofocus>
           <div class="suggest-list" id="addressSuggest" role="listbox"></div>
         </div>
-        <p class="hint" id="addressHint">Pick a suggestion to center the map, draw the market area, and auto-fill subject facts.</p>
+        <p class="hint" id="addressHint">Pick a suggestion — we center the map, draw the market area, and auto-fill beds, baths, and square feet. <button type="button" class="linkish" id="trySampleAddr">Try a sample address</button></p>
       </div>
 
       <div class="mode-toggle" role="tablist" aria-label="Market mode" style="margin-top:14px">
@@ -469,6 +484,11 @@
 
       <div class="subject-tile" id="subjectTile">
         <div class="tile-label">Subject home</div>
+        <div class="next-step" id="subjectNext" hidden>
+          <span id="subjectNextMsg">Subject looks right?</span>
+          <button type="button" class="btn btn-ghost" id="nextPreviewBtn">Preview comps</button>
+          <button type="button" class="btn btn-gold" id="nextGenerateBtn">Go to Generate ↓</button>
+        </div>
         <p class="tile-hint">Facts for <em>this</em> property on the presentation and comps — auto-filled when possible. Edit or complete anything missing before you generate.</p>
         <div id="subjectAutofillStatus"></div>
         <div class="subject-photo-row" id="subjectPhotoRow">
@@ -486,27 +506,27 @@
         <div class="row2">
           <div class="field">
             <label>Square feet (total)</label>
-            <input type="number" id="sqft" name="living_area" value="2392" placeholder="Required for accurate comps" required>
+            <input type="number" id="sqft" name="living_area" value="" placeholder="Required for accurate comps" required>
           </div>
           <div class="field">
             <label>Year built</label>
-            <input type="number" id="year" name="year_built" value="1969" placeholder="e.g. 1998">
+            <input type="number" id="year" name="year_built" value="" placeholder="e.g. 1998">
           </div>
         </div>
         <div class="row2">
           <div class="field">
             <label>Beds</label>
-            <input type="number" id="beds" name="beds" value="4" step="1" placeholder="e.g. 3" required>
+            <input type="number" id="beds" name="beds" value="" step="1" placeholder="e.g. 3" required>
           </div>
           <div class="field">
             <label>Baths</label>
-            <input type="number" id="baths" name="baths" value="2" step="0.25" placeholder="e.g. 2.5" required>
+            <input type="number" id="baths" name="baths" value="" step="0.25" placeholder="e.g. 2.5" required>
           </div>
         </div>
         <div class="row3">
           <div class="field">
             <label>Garage spaces</label>
-            <input type="number" id="garageSpaces" name="garage_spaces" value="2" min="0" max="10" step="1" placeholder="e.g. 2">
+            <input type="number" id="garageSpaces" name="garage_spaces" value="" min="0" max="10" step="1" placeholder="e.g. 2">
           </div>
           <div class="field">
             <label>Lot acres</label>
@@ -532,7 +552,7 @@
       <div id="portalFilters">
         <div class="filters-tile">
           <div class="tile-label">Market filters</div>
-          <p class="tile-hint">What to pull for comps — separate from the subject home above.</p>
+          <p class="tile-hint" id="filtersHint">What to pull for comps. These follow the subject home automatically — edit any of them to take control.</p>
           <div class="row2">
             <div class="field">
               <label>Dwelling</label>
@@ -549,11 +569,11 @@
           <div class="row3">
             <div class="field">
               <label>Price min</label>
-              <input type="number" id="portalPriceMin" value="300000">
+              <input type="number" id="portalPriceMin" value="" placeholder="any">
             </div>
             <div class="field">
               <label>Price max</label>
-              <input type="number" id="portalPriceMax" value="450000">
+              <input type="number" id="portalPriceMax" value="" placeholder="any">
             </div>
             <div class="field">
               <label>Garage min</label>
@@ -905,7 +925,7 @@ const result = document.getElementById('result');
         else alert(d.detail || 'Billing portal unavailable');
       });
     } else if (!ent.ok) {
-      banner.classList.add('err');
+      if (!(ent.reason === 'payment_required' || u.status === 'setup')) banner.classList.add('err');
       const setupMsg = (ent.reason === 'payment_required' || u.status === 'setup')
         ? '<strong>Setup free.</strong> Search or upload below — unlock at Generate with a 7-day trial ($39/mo after) or $20 for this report. '
         : '<strong>Unlock required.</strong> Sample demo stays free — pick a plan to generate custom presentations. ';
@@ -969,7 +989,7 @@ const result = document.getElementById('result');
 document.getElementById('logoutLink').addEventListener('click', async (e) => {
   e.preventDefault();
   await fetch('/api/logout', { method: 'POST' });
-  location.href = '/saas/login.html';
+  location.href = '/saas/login.html?signed_out=1';
 });
 
 function syncSampleUi() {
@@ -1488,38 +1508,146 @@ document.getElementById('subjectPhotoClear').addEventListener('click', () => {
   setSubjectStatus('Subject photo cleared — upload one or pick the address again.', 'warn');
 });
 
+const SUBJECT_FACT_IDS = ['beds', 'baths', 'sqft', 'year', 'garageSpaces', 'lotAcres', 'subdivision', 'style', 'subjectLat', 'subjectLng'];
+const SUBJECT_REQUIRED_IDS = ['sqft', 'beds', 'baths'];
+const FILTER_IDS = ['portalPriceMin', 'portalPriceMax', 'portalBedsMin', 'portalBedsMax', 'portalBathsMin', 'portalBathsMax',
+  'portalSqftMin', 'portalSqftMax', 'portalGarage', 'portalLotAcresMin', 'portalLotAcresMax', 'portalYearMin', 'portalYearMax'];
+let filtersTouched = false;
+let lookupTimer = null;
+
+function fillIfEmpty(id, value) {
+  const el = document.getElementById(id);
+  if (!el || value == null || value === '') return;
+  if (String(el.value || '').trim() === '') el.value = value;
+}
+
+function clearSubjectFacts() {
+  SUBJECT_FACT_IDS.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const fileInput = document.getElementById('subjectPhoto');
+  const hasUpload = fileInput && fileInput.files && fileInput.files.length;
+  if (!hasUpload) setSubjectPhotoPreview('');
+}
+
+function markNeededFacts(on) {
+  SUBJECT_REQUIRED_IDS.forEach((id) => {
+    const el = document.getElementById(id);
+    const field = el && el.closest('.field');
+    if (field) field.classList.toggle('need', !!on && !String(el.value || '').trim());
+  });
+}
+
+function roundTo(n, step) { return Math.round(n / step) * step; }
+
+// Comps filters follow the subject (sqft ±25%, beds/baths ±1) until the agent edits a filter.
+function deriveFiltersFromSubject() {
+  if (filtersTouched) return;
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v == null ? '' : v; };
+  const sqft = numOrNull('sqft');
+  const beds = numOrNull('beds');
+  const baths = numOrNull('baths');
+  const garage = numOrNull('garageSpaces');
+  if (sqft && sqft > 200) {
+    set('portalSqftMin', roundTo(sqft * 0.75, 50));
+    set('portalSqftMax', roundTo(sqft * 1.25, 50));
+  }
+  if (beds != null && beds > 0) {
+    set('portalBedsMin', Math.max(1, beds - 1));
+    set('portalBedsMax', beds + 1);
+  }
+  if (baths != null && baths > 0) {
+    set('portalBathsMin', Math.max(1, Math.floor(baths) - 1));
+    set('portalBathsMax', Math.ceil(baths) + 1);
+  }
+  set('portalGarage', garage != null && garage >= 1 ? 1 : '');
+}
+
+function subjectReady() {
+  return !!(lastGeocodedQuery && SUBJECT_REQUIRED_IDS.every((id) => numOrNull(id)));
+}
+
+function updateNextStep() {
+  const box = document.getElementById('subjectNext');
+  if (!box) return;
+  box.hidden = !(marketMode === 'portal' && subjectReady());
+  if (!box.hidden) {
+    markNeededFacts(false);
+    const st = document.getElementById('subjectAutofillStatus');
+    if (st && st.classList.contains('warn')) setSubjectStatus('Subject facts set — preview comps or go straight to Generate.', 'ok');
+  }
+}
+
+function stopLookupTimer() {
+  if (lookupTimer) clearInterval(lookupTimer);
+  lookupTimer = null;
+}
+
+function startLookupTimer() {
+  stopLookupTimer();
+  const el = document.getElementById('subjectAutofillStatus');
+  const started = Date.now();
+  const paint = () => {
+    const sec = Math.round((Date.now() - started) / 1000);
+    el.className = '';
+    el.innerHTML = '<span class="lookup-spin" aria-hidden="true"></span>' +
+      (sec < 8
+        ? 'Looking up beds, baths, and square feet for this address…'
+        : 'Still looking (' + sec + 's) — you can type the facts below while we wait.');
+  };
+  paint();
+  lookupTimer = setInterval(paint, 1000);
+}
+
 async function autofillSubjectFacts(address) {
   const q = (address || '').trim();
   if (!q || q === lastSubjectLookupQuery) return;
   const seq = ++subjectLookupSeq;
   lastSubjectLookupQuery = q;
-  setSubjectStatus('Looking up subject facts…', '');
+  // New address: never let the previous home's facts ride along into this report.
+  clearSubjectFacts();
+  markNeededFacts(false);
+  updateNextStep();
+  startLookupTimer();
+  const controller = new AbortController();
+  const abortTimer = setTimeout(() => controller.abort(), 30000);
   try {
     const res = await fetch('/api/portal/subject', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'same-origin',
       body: JSON.stringify({ address: q }),
+      signal: controller.signal,
     });
     const data = await res.json().catch(() => ({}));
     if (seq !== subjectLookupSeq) return;
-    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Lookup failed');
-    if (!data.found) {
-      setSubjectStatus('No auto-match — enter beds, baths, sqft, garage, and year built manually so comps stay accurate.', 'warn');
+    stopLookupTimer();
+    if (res.status === 401) {
+      location.href = '/saas/login.html?next=' + encodeURIComponent('/saas/app.html');
       return;
     }
-    fillSubjectField('beds', data.beds);
-    fillSubjectField('baths', data.baths);
-    fillSubjectField('sqft', data.living_area);
-    fillSubjectField('year', data.year_built);
-    fillSubjectField('garageSpaces', data.garage_spaces);
-    fillSubjectField('subdivision', data.subdivision);
-    fillSubjectField('style', data.style);
-    if (data.acres != null) fillSubjectField('lotAcres', data.acres);
-    else if (data.lot_size != null) fillSubjectField('lotAcres', Math.round((Number(data.lot_size) / 43560) * 1000) / 1000);
-    if (data.list_price != null && document.getElementById('listPrice') && !document.getElementById('listPrice').value) {
-      fillSubjectField('listPrice', data.list_price);
+    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Lookup failed');
+    if (!data.found) {
+      setSubjectStatus('We couldn’t find public records for this address. Enter square feet, beds, and baths below — that’s all Generate needs.', 'warn');
+      markNeededFacts(true);
+      const first = SUBJECT_REQUIRED_IDS.map((id) => document.getElementById(id)).find((el) => el && !el.value);
+      if (first) first.focus({ preventScroll: false });
+      updateNextStep();
+      return;
     }
+    fillIfEmpty('beds', data.beds);
+    fillIfEmpty('baths', data.baths);
+    fillIfEmpty('sqft', data.living_area != null ? Math.round(data.living_area) : null);
+    fillIfEmpty('year', data.year_built);
+    fillIfEmpty('garageSpaces', data.garage_spaces);
+    fillIfEmpty('subdivision', data.subdivision);
+    fillIfEmpty('style', data.style);
+    if (data.acres != null) fillIfEmpty('lotAcres', data.acres);
+    else if (data.lot_size != null) fillIfEmpty('lotAcres', Math.round((Number(data.lot_size) / 43560) * 1000) / 1000);
+    // Only an active listing's price is a real list price — a sold card's price may be years old.
+    const forSale = /for.?sale|active|coming/i.test(String(data.listing_status || ''));
+    if (forSale && data.list_price != null) fillIfEmpty('listPrice', data.list_price);
     if (data.latitude != null) fillSubjectField('subjectLat', data.latitude);
     if (data.longitude != null) fillSubjectField('subjectLng', data.longitude);
     const fileInput = document.getElementById('subjectPhoto');
@@ -1532,13 +1660,59 @@ async function autofillSubjectFacts(address) {
     if (data.year_built != null) bits.push('built ' + data.year_built);
     if (data.garage_spaces != null) bits.push(data.garage_spaces + '-car');
     if (data.photo_url) bits.push('photo');
-    setSubjectStatus('Auto-filled' + (bits.length ? ': ' + bits.join(' · ') : '') + ' — edit if needed.', 'ok');
+    const missing = SUBJECT_REQUIRED_IDS.filter((id) => !numOrNull(id));
+    if (missing.length) {
+      setSubjectStatus('Found part of it' + (bits.length ? ' (' + bits.join(' · ') + ')' : '') + ' — fill in the highlighted fields.', 'warn');
+      markNeededFacts(true);
+    } else {
+      setSubjectStatus('Auto-filled' + (bits.length ? ': ' + bits.join(' · ') : '') + ' — edit anything that looks off.', 'ok');
+    }
+    deriveFiltersFromSubject();
+    updateNextStep();
   } catch (err) {
     if (seq !== subjectLookupSeq) return;
+    stopLookupTimer();
     lastSubjectLookupQuery = '';
-    setSubjectStatus('Could not auto-fill — enter subject facts manually so the report comps stay accurate.', 'warn');
+    const slow = err && err.name === 'AbortError';
+    setSubjectStatus(slow
+      ? 'Public records are slow right now. Enter square feet, beds, and baths below and keep going.'
+      : 'Couldn’t auto-fill this one. Enter square feet, beds, and baths below and keep going.', 'warn');
+    markNeededFacts(true);
+    updateNextStep();
+  } finally {
+    clearTimeout(abortTimer);
   }
 }
+
+FILTER_IDS.forEach((id) => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', () => { filtersTouched = true; });
+});
+['sqft', 'beds', 'baths', 'garageSpaces'].forEach((id) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', () => {
+    deriveFiltersFromSubject();
+    markNeededFacts(document.getElementById('subjectAutofillStatus').classList.contains('warn'));
+    updateNextStep();
+  });
+});
+document.getElementById('nextPreviewBtn').addEventListener('click', () => {
+  document.getElementById('portalPreviewBtn').click();
+  document.getElementById('portalPreview').scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+document.getElementById('nextGenerateBtn').addEventListener('click', () => {
+  const gen = document.getElementById('generateBtn');
+  gen.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setTimeout(() => gen.focus({ preventScroll: true }), 400);
+});
+document.getElementById('trySampleAddr').addEventListener('click', () => {
+  const input = document.getElementById('address');
+  input.value = '2845 W 13th St, Greeley, CO 80634';
+  lastSubjectLookupQuery = '';
+  lastGeocodedQuery = '';
+  geocodeSubject({ silent: false, draw: true });
+});
 
 const addressInput = document.getElementById('address');
 const suggestEl = document.getElementById('addressSuggest');

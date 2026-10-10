@@ -232,3 +232,21 @@ body.ll-has-dash .set-wrap { max-width: none; margin: 0; padding: 0 0 8px; }
 .ll-footer .container { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: center; }
 .ll-footer a { color: var(--muted); text-decoration: none; }
 .ll-footer a:hover { color: var(--ink); }
+
+/* Sign-in pages: password field with show/hide, signed-out note */
+.pw-wrap { position: relative; }
+.pw-wrap input { width: 100%; padding-right: 64px; }
+.pw-show {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  border: none; background: none; padding: 4px 6px; font: inherit; font-size: 0.78rem;
+  font-weight: 700; color: var(--navy, #0c3c6e); cursor: pointer;
+}
+.ll-linkbtn {
+  border: none; background: none; padding: 0; color: var(--navy, #0c3c6e); font: inherit;
+  text-decoration: underline; cursor: pointer;
+}
+.ll-linkbtn:disabled { opacity: 0.5; cursor: default; }
+.ll-signed-out {
+  background: #eef6f1; border: 1px solid #cfe5d8; color: #1f5c3a; border-radius: var(--radius-sm, 10px);
+  padding: 11px 14px; font-size: 0.86rem; margin-bottom: 16px;
+}

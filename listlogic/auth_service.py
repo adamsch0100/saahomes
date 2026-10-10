@@ -19,7 +19,9 @@ import db as database
 logger = logging.getLogger("ListLogic.auth")
 
 SESSION_COOKIE = "ll_session"
-SESSION_DAYS = 30
+# Sessions roll forward on activity, so an agent who uses ListLogic at least
+# once every SESSION_DAYS never has to sign in again on that device.
+SESSION_DAYS = 60
 MAX_CONCURRENT_SESSIONS = int(os.environ.get("MAX_CONCURRENT_SESSIONS") or "3")
 # Public signup: setup-only (no free custom presentations). Promo/invite may still grant trial credits.
 DEFAULT_TRIAL_DAYS = int(os.environ.get("DEFAULT_TRIAL_DAYS") or "0")
@@ -419,19 +421,20 @@ def _enforce_session_cap(user_id: str, keep_token: Optional[str] = None) -> None
 
 
 def touch_session(token: Optional[str], ip: str = "") -> None:
-    """Refresh last_seen_at (+ip) on a session so Settings shows current devices."""
+    """Refresh last_seen_at (+ip) and roll the expiry forward on an active session."""
     if not token:
         return
+    expires = _iso(_utcnow() + timedelta(days=SESSION_DAYS))
     try:
         if ip:
             database.execute(
-                "UPDATE sessions SET last_seen_at = ?, ip = ? WHERE token_hash = ?",
-                (_iso(), ip, _hash_token(token)),
+                "UPDATE sessions SET last_seen_at = ?, ip = ?, expires_at = ? WHERE token_hash = ?",
+                (_iso(), ip, expires, _hash_token(token)),
             )
         else:
             database.execute(
-                "UPDATE sessions SET last_seen_at = ? WHERE token_hash = ?",
-                (_iso(), _hash_token(token)),
+                "UPDATE sessions SET last_seen_at = ?, expires_at = ? WHERE token_hash = ?",
+                (_iso(), expires, _hash_token(token)),
             )
     except Exception:
         pass
@@ -1457,11 +1460,24 @@ def create_user(
     return get_user_by_id(user_id) or {"id": user_id, "email": email_n}
 
 
+class NeedsPasswordSetup(ValueError):
+    """Account predates password login (created by an email link) and has no password yet."""
+
+    def __init__(self, user: dict):
+        super().__init__("This account doesn't have a password yet")
+        self.user = user
+
+
+def user_needs_password(user: Optional[dict]) -> bool:
+    ph = str((user or {}).get("password_hash") or "")
+    return not ph or ph.startswith("magic:")
+
+
 def login_user(email: str, password: str) -> dict:
     user = get_user_by_email(email)
     ph = (user or {}).get("password_hash") or ""
-    if user and str(ph).startswith("magic:"):
-        raise ValueError("This account uses email sign-in. Request a magic link, or set a password after verifying.")
+    if user and (not ph or str(ph).startswith("magic:")) and (user.get("status") or "") != "disabled":
+        raise NeedsPasswordSetup(user)
     if not user or not verify_password(password, ph):
         raise ValueError("Invalid email or password")
     if (user.get("status") or "") == "disabled":
@@ -1575,6 +1591,10 @@ def update_copy_defaults(user_id: str, payload: Any) -> dict:
 
 
 MAGIC_LINK_TTL_MIN = 30
+PASSWORD_RESET_TTL_MIN = 60
+# Links mailed to existing no-password accounts when password login launched.
+PASSWORD_SETUP_TTL_MIN = 14 * 24 * 60
+PASSWORD_LINK_PURPOSES = ("reset", "setup")
 
 
 def _hash_token(token: str) -> str:
@@ -1588,6 +1608,7 @@ def create_magic_link(
     invite_token: str = "",
     next_path: str = "",
     purpose: str = "auth",
+    ttl_minutes: int = MAGIC_LINK_TTL_MIN,
 ) -> dict:
     email_n = email.strip().lower()
     if not email_n or "@" not in email_n:
@@ -1607,7 +1628,7 @@ def create_magic_link(
     raw = secrets.token_urlsafe(32)
     mid = _uid()
     now = _iso()
-    expires = _iso(_utcnow() + timedelta(minutes=MAGIC_LINK_TTL_MIN))
+    expires = _iso(_utcnow() + timedelta(minutes=ttl_minutes))
     safe_next = (next_path or "").strip()
     if safe_next and not safe_next.startswith("/"):
         safe_next = "/saas/app.html"
@@ -1641,82 +1662,85 @@ def create_magic_link(
     }
 
 
-def consume_magic_link(token: str) -> dict:
-    """Validate magic link, create/login user, return session-ready user + next path."""
+def create_password_link(user: dict, *, purpose: str = "reset", next_path: str = "") -> dict:
+    """One-time link to choose a password (forgot-password, or first-time setup)."""
+    if purpose not in PASSWORD_LINK_PURPOSES:
+        raise ValueError("Unknown password link purpose")
+    ttl = PASSWORD_SETUP_TTL_MIN if purpose == "setup" else PASSWORD_RESET_TTL_MIN
+    link = create_magic_link(user["email"], next_path=next_path, purpose=purpose, ttl_minutes=ttl)
+    link["url"] = f"{app_base_url()}/saas/reset.html?token={link['token']}"
+    return link
+
+
+def _password_link_row(token: str) -> dict:
     token = (token or "").strip()
     if not token or len(token) < 20:
-        raise ValueError("Invalid or expired link")
+        raise ValueError("This link is invalid — request a new one")
     row = database.execute(
         "SELECT * FROM magic_links WHERE token_hash = ?",
         (_hash_token(token),),
         fetch="one",
     )
-    if not row:
-        raise ValueError("Invalid or expired link")
+    if not row or (row.get("purpose") or "") not in PASSWORD_LINK_PURPOSES:
+        raise ValueError("This link is invalid — request a new one")
     if row.get("used_at"):
         raise ValueError("This link was already used — request a new one")
     exp = _parse_iso(row.get("expires_at"))
     if not exp or exp < _utcnow():
         raise ValueError("This link has expired — request a new one")
+    return row
 
-    email_n = (row.get("email") or "").strip().lower()
-    user = get_user_by_email(email_n)
-    is_new = False
+
+def password_link_info(token: str) -> dict:
+    row = _password_link_row(token)
+    user = get_user_by_email(row.get("email") or "")
     if not user:
-        user = create_user(
-            email=email_n,
-            password="",
-            promo_code=row.get("promo_code") or "",
-            invite_token=row.get("invite_token") or "",
-            email_verified=True,
-        )
-        is_new = True
-    else:
-        if (user.get("status") or "") == "disabled":
-            raise ValueError("This account has been disabled")
-        try:
-            database.execute(
-                "UPDATE users SET email_verified = 1, updated_at = ? WHERE id = ?",
-                (_iso(), user["id"]),
-            )
-        except Exception:
-            pass
-        user = get_user_by_id(user["id"]) or user
-        invite_tok = (row.get("invite_token") or "").strip()
-        if invite_tok:
-            try:
-                attached = accept_team_invite(user["id"], invite_tok)
-                if attached:
-                    user = attached
-            except ValueError:
-                pass
-        promo_tok = (row.get("promo_code") or "").strip()
-        if promo_tok:
-            try:
-                user = apply_promo_to_user(user, promo_tok)
-            except ValueError:
-                pass
+        raise ValueError("This link is invalid — request a new one")
+    return {"email": user["email"], "purpose": row.get("purpose"), "has_password": not user_needs_password(user)}
 
+
+def consume_password_link(token: str, password: str) -> dict:
+    """Set the password from a reset/setup link and return a session-ready user."""
+    row = _password_link_row(token)
+    user = get_user_by_email(row.get("email") or "")
+    if not user:
+        raise ValueError("This link is invalid — request a new one")
+    if (user.get("status") or "") == "disabled":
+        raise ValueError("This account has been disabled")
+    set_password(user["id"], password)
+    database.execute("UPDATE magic_links SET used_at = ? WHERE id = ?", (_iso(), row["id"]))
+    # A new password retires every other outstanding link for this email.
     database.execute(
-        "UPDATE magic_links SET used_at = ? WHERE id = ?",
-        (_iso(), row["id"]),
+        "UPDATE magic_links SET used_at = ? WHERE email = ? AND used_at IS NULL",
+        (_iso(), user["email"]),
     )
     entitlement(user)
     user = get_user_by_id(user["id"]) or user
-    log_event(user["id"], "magic_login", {"is_new": is_new})
-    requested = (row.get("next_path") or "").strip()
-    next_path = resolve_post_auth_next(user, requested)
-    needs_onboarding = not bool(int(user.get("profile_complete") or 0))
-    if needs_onboarding:
-        dest = next_path if next_path.startswith("/") else "/saas/app.html"
-        # After onboarding, send admins to owner console if that was the intended home
-        next_path = "/saas/onboarding.html?next=" + dest
-    return {
-        "user": user,
-        "is_new": is_new,
-        "next": next_path,
-        "needs_onboarding": needs_onboarding,
-    }
+    log_event(user["id"], "password_link_used", {"purpose": row.get("purpose")})
+    next_path = resolve_post_auth_next(user, row.get("next_path") or "")
+    if not bool(int(user.get("profile_complete") or 0)):
+        next_path = "/saas/onboarding.html?next=" + next_path
+    return {"user": user, "next": next_path}
+
+
+def users_needing_password_setup() -> list[dict]:
+    """Active accounts with no password that haven't been mailed a setup link yet."""
+    rows = database.execute(
+        "SELECT * FROM users WHERE (password_hash IS NULL OR password_hash = '' OR password_hash LIKE 'magic:%') "
+        "AND COALESCE(status, '') <> 'disabled'",
+        (),
+        fetch="all",
+    ) or []
+    out = []
+    for u in rows:
+        sent = database.execute(
+            "SELECT id FROM events WHERE user_id = ? AND type = ? LIMIT 1",
+            (u["id"], "password_setup_sent"),
+            fetch="one",
+        )
+        if not sent:
+            out.append(u)
+    return out
 
 
 def create_promo_code(
@@ -2032,12 +2056,10 @@ def invite_team_members(owner: dict, emails) -> dict:
                 logger.exception("Failed attaching existing user %s", email)
                 errors.append({"email": email, "error": "Could not add this account"})
                 continue
-            link = create_magic_link(email, next_path="/saas/app.html")
             invited.append({
                 "email": email,
                 "status": "added",
-                "url": link.get("url") or "",
-                "magic_token": link.get("token") or "",
+                "url": f"{app_base_url()}/saas/login.html?next=/saas/app.html",
             })
             continue
         pending_emails = {(p.get("email") or "").strip().lower() for p in snap.get("pending") or []}
@@ -2054,15 +2076,10 @@ def invite_team_members(owner: dict, emails) -> dict:
             created_by=owner["id"],
             kind="team",
         )
-        link = create_magic_link(
-            email,
-            invite_token=row["token"],
-            next_path="/saas/app.html",
-        )
         invited.append({
             "email": email,
             "status": "invited",
-            "url": link.get("url") or row.get("url") or "",
+            "url": row.get("url") or f"{app_base_url()}/saas/signup.html?invite={row['token']}",
             "invite_token": row.get("token") or "",
         })
     log_event(

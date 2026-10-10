@@ -12,7 +12,7 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Verifying — ListLogic</title>
+<title>Sign in — ListLogic</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -42,54 +42,10 @@ h1 { font-family: 'Fraunces', serif; font-size: 1.5rem; letter-spacing: -0.02em;
   <a href="/saas/" class="auth-brand" style="text-decoration:none;color:inherit">
     <img src="/saas/listlogic-logo.png" alt="ListLogic">
   </a>
-  <h1 id="title">Signing you in…</h1>
-  <p class="sub" id="sub">One moment while we verify your email link.</p>
-  <p class="status" id="status"></p>
-  <div class="auth-links">
-    <a href="/saas/login.html">Request a new link</a>
-  </div>
+  <h1>ListLogic now uses a password</h1>
+  <p class="sub">Email sign-in links have been retired. Sign in with your email and password — if you haven’t set one yet, the sign-in page will email you a link to choose it.</p>
+  <p><a class="btn btn-primary" href="/saas/login.html">Go to sign in</a></p>
 </div>
-<script>
-const params = new URLSearchParams(location.search);
-const token = params.get('token') || '';
-const status = document.getElementById('status');
-const title = document.getElementById('title');
-const sub = document.getElementById('sub');
-
-(async () => {
-  if (!token) {
-    title.textContent = 'Link missing';
-    sub.textContent = 'Request a new sign-in link from the login page.';
-    status.className = 'status error';
-    status.textContent = 'No token in this URL.';
-    return;
-  }
-  try {
-    const res = await fetch('/api/auth/verify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token }),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Verification failed');
-    title.textContent = data.is_new ? 'You’re in' : 'Welcome back';
-    const goingAdmin = (data.next || '').includes('admin');
-    sub.textContent = data.needs_onboarding
-      ? 'Next: set your password and branding for reports.'
-      : goingAdmin
-        ? 'Taking you to the owner console…'
-        : 'Taking you to the app…';
-    status.className = 'status ok';
-    status.textContent = 'Email verified.';
-    location.href = data.next || '/saas/app.html';
-  } catch (err) {
-    title.textContent = 'Link didn’t work';
-    sub.textContent = 'It may have expired or already been used.';
-    status.className = 'status error';
-    status.textContent = String(err.message || err);
-  }
-})();
-</script>
-<script src="/saas/analytics.js"></script>
+<script>setTimeout(function () { location.replace('/saas/login.html'); }, 2500);</script>
 </body>
 </html>

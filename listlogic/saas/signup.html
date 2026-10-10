@@ -60,7 +60,7 @@ button.btn { width: 100%; padding: 13px; font-size: 0.95rem; }
   <p class="sub"><strong>Sample demo is free.</strong> Sign up to Search/Upload and brand — card only when you click Generate (7-day trial → $39/mo, or $20 one report).</p>
 
   <div class="perks">
-    <div>Email a magic link — no password until you’re ready</div>
+    <div>Email and password — you’re in the app in seconds</div>
     <div>Build your market + branding free before you unlock</div>
     <div>Living Fingerprint after they list (email is opt-in)</div>
     <div>Pay at Generate: 7-day trial or $20 — sample stays free</div>
@@ -74,13 +74,19 @@ button.btn { width: 100%; padding: 13px; font-size: 0.95rem; }
       <input id="email" type="email" required autocomplete="email" placeholder="you@brokerage.com">
     </div>
     <div class="field">
+      <label for="password">Password <span style="font-weight:500;color:var(--muted)">(8+ characters)</span></label>
+      <div class="pw-wrap">
+        <input id="password" type="password" required minlength="8" autocomplete="new-password">
+        <button type="button" class="pw-show" data-for="password" aria-label="Show password">Show</button>
+      </div>
+    </div>
+    <div class="field">
       <label for="promo">Access code <span style="font-weight:500;color:var(--muted)">(optional)</span></label>
       <input id="promo" type="text" autocomplete="off" placeholder="Enter access code if you have one" style="text-transform:none">
     </div>
-    <button type="submit" class="btn btn-gold">Email me a link</button>
+    <button type="submit" class="btn btn-gold" id="signupBtn">Create my account</button>
   </form>
   <p class="status" id="status"></p>
-  <p class="dev-link" id="devLink" style="display:none"></p>
   <div class="auth-links">
     <a href="/saas/login.html">Already have an account?</a>
     <a href="/demo">Try sample listing</a>
@@ -90,6 +96,7 @@ button.btn { width: 100%; padding: 13px; font-size: 0.95rem; }
     By continuing you agree to our <a href="terms.html">Terms</a>, <a href="privacy.html">Privacy</a>, and <a href="refunds.html">Refunds</a>.
   </p>
 </div>
+<script src="/saas/auth-ui.js"></script>
 <script>
 const params = new URLSearchParams(location.search);
 const invite = params.get('invite') || '';
@@ -121,36 +128,53 @@ if (invite) {
       if (d.email) document.getElementById('email').value = d.email;
     }).catch(() => {});
 }
-document.getElementById('form').addEventListener('submit', async (e) => {
+const signupForm = document.getElementById('form');
+const signupBtn = document.getElementById('signupBtn');
+const statusEl = document.getElementById('status');
+signupForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const status = document.getElementById('status');
-  const dev = document.getElementById('devLink');
-  status.className = 'status';
-  status.textContent = 'Sending link…';
-  dev.style.display = 'none';
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  if (password.length < 8) {
+    statusEl.className = 'status error';
+    statusEl.textContent = 'Choose a password with at least 8 characters.';
+    return;
+  }
+  signupBtn.disabled = true;
+  signupBtn.textContent = 'Creating your account…';
+  statusEl.className = 'status';
+  statusEl.textContent = '';
   try {
-    const res = await fetch('/api/auth/magic-link', {
+    const res = await fetch('/api/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
       body: JSON.stringify({
-        email: document.getElementById('email').value.trim(),
+        email,
+        password,
         invite,
         promo_code: (document.getElementById('promo').value || '').trim(),
         next,
       }),
     });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Could not send link');
-    if (window.llTrack) window.llTrack('sign_up', { method: 'magic_link' });
-    status.className = 'status ok';
-    status.textContent = data.message || 'Check your email for a sign-in link.';
-    if (data.dev_url) {
-      dev.style.display = 'block';
-      dev.innerHTML = 'Dev link: <a href="' + data.dev_url + '">' + data.dev_url + '</a>';
+    if (res.status === 409) {
+      const q = new URLSearchParams({ email, next });
+      if (invite) q.set('invite', invite);
+      statusEl.className = 'status error';
+      statusEl.innerHTML = 'You already have an account with this email. <a href="/saas/login.html?' + q.toString() + '">Sign in instead</a>.';
+      return;
     }
+    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Could not create your account');
+    if (window.llRememberEmail) window.llRememberEmail(email);
+    if (window.llTrack) window.llTrack('sign_up', { method: 'password' });
+    location.href = data.next || '/saas/onboarding.html?next=/saas/app.html';
   } catch (err) {
-    status.className = 'status error';
-    status.textContent = String(err.message || err);
+    statusEl.className = 'status error';
+    statusEl.textContent = String(err.message || err);
+  } finally {
+    signupBtn.disabled = false;
+    signupBtn.textContent = 'Create my account';
   }
 });
 </script>

@@ -98,7 +98,7 @@
     if (so) {
       so.addEventListener("click", async () => {
         try { await fetch("/api/logout", { method: "POST", credentials: "same-origin" }); } catch (_) {}
-        location.href = "/saas/login.html";
+        location.href = "/saas/login.html?signed_out=1";
       });
     }
   }
