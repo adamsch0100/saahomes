@@ -13,6 +13,13 @@ import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import getPool from '../config/database.js';
 import { forwardAlertSignupToFollowUpBoss } from '../services/followUpBossService.js';
+import {
+  recordEvent as recordStreamEvent,
+  onIdentified,
+  ensureVisitorId,
+  PUBLIC_EVENT_TYPES,
+} from '../services/events.js';
+import { recordConsent } from '../services/consent.js';
 import { sendEmail, smtpConfigured } from '../services/emailer.js';
 import {
   computeAndStoreLeadScore,
@@ -128,6 +135,7 @@ export const createAlert = async (req, res) => {
     // capture) but the visitor must use the emailed sign-in link.
     let user = await pool.query('SELECT * FROM users WHERE email = $1', [emailStr]);
     let isOwner = true;
+    const isNewUser = !user.rows.length;
     if (user.rows.length && isStaffAccount(user.rows[0])) {
       return res.status(409).json({ success: false, error: 'This email belongs to a team account. Please sign in instead.' });
     }
@@ -185,6 +193,23 @@ export const createAlert = async (req, res) => {
     );
     const searchRow = inserted.rows[0];
 
+    await recordStreamEvent({
+      type: 'search_saved',
+      userId: userRow.id,
+      searchId: searchRow.id,
+      meta: { filters, frequency: searchRow.frequency, verified: isOwner },
+    });
+    if (isOwner) {
+      await recordConsent({
+        userId: userRow.id,
+        channel: 'email',
+        granted: true,
+        wording: 'Email me new listings and price changes that match this search.',
+        source: 'save_search',
+        req,
+      }).catch((e) => console.error('consent record failed:', e.message));
+    }
+
     // Lead → Follow Up Boss (fire-and-forget, never block the user)
     // Captures fub_person_id from the Person response on our users row.
     forwardAlertSignupToFollowUpBoss(userRow, searchRow).catch(() => {});
@@ -221,6 +246,7 @@ export const createAlert = async (req, res) => {
     // Auto-login: the manage token becomes a long-lived httpOnly cookie so the
     // user is signed in on this device without ever entering a password.
     setAuthCookie(res, userRow.manage_token);
+    await onIdentified(req, userRow.id, { isNew: isNewUser, via: 'save_search' });
 
     return res.status(201).json({
       success: true,
@@ -357,9 +383,20 @@ export const getMe = async (req, res) => {
 export const recordView = async (req, res) => {
   try {
     const user = await resolveUser(req);
-    if (!user) return res.status(401).json({ success: false, error: 'Not signed in.' });
     const listingId = req.body?.listing_id || req.body?.listingId || req.body?.id;
     if (!listingId) return res.status(400).json({ success: false, error: 'listing_id is required.' });
+    const visitorId = ensureVisitorId(req, res);
+    // Same person + listing within 30 minutes is one view, matching property_views.
+    await recordStreamEvent({
+      type: 'listing_view',
+      userId: user?.id || null,
+      visitorId,
+      listingId: String(listingId),
+      dedupeMinutes: 30,
+    });
+    // Anonymous views are kept in the event stream and join the contact's
+    // history at signup; lead scoring still needs a signed-in contact.
+    if (!user) return res.json({ success: true, data: { anonymous: true } });
     const result = await recordPropertyView(user.id, listingId);
     return res.json({ success: true, data: result });
   } catch (error) {
@@ -381,9 +418,51 @@ export const recordEvent = async (req, res) => {
       return res.status(400).json({ success: false, error: 'Unknown event type.' });
     }
     const result = await recordUserEvent(user.id, type, req.body?.meta || null);
+    await recordStreamEvent({ type, userId: user.id, visitorId: ensureVisitorId(req, res), dedupeMinutes: 24 * 60 });
     return res.json({ success: true, data: result });
   } catch (error) {
     console.error('recordEvent error:', error);
+    return res.status(500).json({ success: false, error: 'Could not record event.' });
+  }
+};
+
+/**
+ * POST /api/events — browser-sent activity for anyone, signed in or not.
+ * Only low-risk types (search, page_view) are accepted here; everything that
+ * changes state is recorded server-side by the endpoint that does the work.
+ */
+const SEARCH_PARAM_MAX = 1500;
+export const trackPublicEvent = async (req, res) => {
+  try {
+    const type = String(req.body?.type || '').trim();
+    if (!PUBLIC_EVENT_TYPES.has(type)) {
+      return res.status(400).json({ success: false, error: 'Unknown event type.' });
+    }
+    const user = await resolveUser(req);
+    const visitorId = ensureVisitorId(req, res);
+    const meta = {};
+    if (type === 'search') {
+      const params = String(req.body?.params || '').slice(0, SEARCH_PARAM_MAX);
+      if (!params) return res.status(400).json({ success: false, error: 'params is required.' });
+      meta.params = params;
+      const total = Number(req.body?.total);
+      if (Number.isFinite(total) && total >= 0) meta.total = Math.round(total);
+    } else {
+      const path = String(req.body?.path || '').slice(0, 300);
+      if (!path.startsWith('/')) return res.status(400).json({ success: false, error: 'path is required.' });
+      meta.path = path;
+    }
+    await recordStreamEvent({
+      type,
+      userId: user?.id || null,
+      visitorId,
+      meta,
+      // The same search or page from the same person within 10 minutes is one event.
+      dedupeMinutes: 10,
+    });
+    return res.json({ success: true });
+  } catch (error) {
+    console.error('trackPublicEvent error:', error);
     return res.status(500).json({ success: false, error: 'Could not record event.' });
   }
 };

@@ -1,3 +1,4 @@
+import { recordEvent as recordStreamEvent, onIdentified, VISITOR_COOKIE } from '../services/events.js';
 import crypto from 'crypto';
 import getPool from '../config/database.js';
 import { sendMarketReportNotification } from '../services/emailService.js';
@@ -110,6 +111,7 @@ export const submitMarketReportForm = async (req, res) => {
 
         // upsertHomeProfile uses getPool() — commit first path: do after COMMIT
         submission._userId = userRow.id;
+        submission._isNewUser = !existing.rows[0];
         submission._addr = addr;
         submission._zip = zipVal;
         submission._living = living && Number.isFinite(living) ? living : null;
@@ -152,8 +154,16 @@ export const submitMarketReportForm = async (req, res) => {
       }
     }
 
+    recordStreamEvent({
+      type: 'form_submit',
+      userId: submission._userId || null,
+      visitorId: req.cookies?.[VISITOR_COOKIE],
+      meta: { form: 'market_report', submission_id: submission.id },
+    });
+
     if (manageToken) {
       setAuthCookie(res, manageToken);
+      await onIdentified(req, submission._userId, { isNew: !!submission._isNewUser, via: 'market_report' });
     }
 
     sendMarketReportNotification(submission).catch((err) => {

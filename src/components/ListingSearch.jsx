@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { trackSearch } from "../utils/track.js";
 import { Helmet } from "react-helmet-async";
 import { photoUrl } from "../utils/photoUrl.js";
 import { useSearchParams } from "react-router-dom";
@@ -1730,6 +1731,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
       setResults((prev) => (append ? [...prev, ...rows] : rows));
       setMeta(data.meta || { total: 0, pages: 0, page: pageNum });
       setPage(pageNum);
+      if (!append) trackSearch(filtersToParams(f, { forUrl: true }).toString(), data.meta?.total);
     } catch (err) {
       if (gen !== fetchGen.current) return;
       const timedOut = err?.name === "TimeoutError" || err?.name === "AbortError";

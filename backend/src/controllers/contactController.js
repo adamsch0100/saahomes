@@ -1,3 +1,4 @@
+import { recordEvent as recordStreamEvent, VISITOR_COOKIE, sessionUserId } from '../services/events.js';
 import getPool from '../config/database.js';
 import { sendContactNotification } from '../services/emailService.js';
 import { forwardContactToFollowUpBoss } from '../services/followUpBossService.js';
@@ -29,6 +30,13 @@ export const submitContactForm = async (req, res) => {
     const submission = { ...result.rows[0], ...req.body };
 
     await client.query('COMMIT');
+
+    recordStreamEvent({
+      type: 'form_submit',
+      visitorId: req.cookies?.[VISITOR_COOKIE],
+      userId: await sessionUserId(req),
+      meta: { form: 'contact', submission_id: submission.id, source_page: sourcePage || null },
+    });
 
     sendContactNotification(submission).catch((err) => {
       logger.error('Email notification failed (non-blocking)', err);

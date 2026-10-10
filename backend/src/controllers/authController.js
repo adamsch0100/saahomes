@@ -7,6 +7,7 @@
  */
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
+import { onIdentified } from '../services/events.js';
 import getPool from '../config/database.js';
 import {
   setAuthCookie,
@@ -70,6 +71,7 @@ export const register = async (req, res) => {
     }
 
     setAuthCookie(res, userRow.manage_token);
+    await onIdentified(req, userRow.id, { isNew: !existing.rows.length, via: 'register' });
     return res.status(201).json({
       success: true,
       data: { email: userRow.email, name: userRow.name, phone: userRow.phone },
@@ -100,6 +102,7 @@ export const login = async (req, res) => {
 
     await pool.query('UPDATE users SET last_active_at = NOW() WHERE id = $1', [user.rows[0].id]);
     setAuthCookie(res, user.rows[0].manage_token);
+    await onIdentified(req, user.rows[0].id, { via: 'password' });
     return res.json({
       success: true,
       data: { email: user.rows[0].email, name: user.rows[0].name, phone: user.rows[0].phone },
@@ -158,6 +161,7 @@ export const ensureSession = async (req, res) => {
     let hash = null;
     if (passStr.length >= 8) hash = await bcrypt.hash(passStr, 10);
 
+    const isNewUser = !user.rows.length;
     if (!user.rows.length) {
       const token = crypto.randomBytes(24).toString('hex');
       const created = await pool.query(
@@ -195,6 +199,7 @@ export const ensureSession = async (req, res) => {
     }
 
     setAuthCookie(res, user.rows[0].manage_token);
+    await onIdentified(req, user.rows[0].id, { isNew: isNewUser, via: 'session' });
     return res.json({
       success: true,
       data: {

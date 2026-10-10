@@ -769,6 +769,90 @@ export const runMigrations = async () => {
       console.error('sold_listings migration skipped:', soldErr.message);
     }
 
+    // ── Platform foundation (Phase 1) ─────────────────────────────────────
+    // Shared by search, Nadia and the CRM: tenants (SAA is tenant 1), a tenant
+    // id on every client table, households, one event stream and a consent
+    // log. Savepoint so a problem here can never roll back the migrations
+    // above on a production deploy.
+    await client.query('SAVEPOINT platform_foundation');
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS tenants (
+          id SERIAL PRIMARY KEY,
+          slug VARCHAR(64) NOT NULL UNIQUE,
+          name VARCHAR(255) NOT NULL,
+          primary_domain VARCHAR(255),
+          market_key VARCHAR(32) NOT NULL DEFAULT 'noco',
+          status VARCHAR(16) NOT NULL DEFAULT 'active',
+          settings JSONB NOT NULL DEFAULT '{}'::jsonb,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        INSERT INTO tenants (id, slug, name, primary_domain, market_key)
+        VALUES (1, 'saa', 'SAA Homes', 'saahomes.com', 'noco')
+        ON CONFLICT (id) DO NOTHING;
+        SELECT setval(pg_get_serial_sequence('tenants', 'id'), GREATEST((SELECT MAX(id) FROM tenants), 1));
+      `);
+
+      // Constant defaults make these metadata-only changes (no table rewrite).
+      for (const table of [
+        'users', 'saved_searches', 'saved_homes', 'notifications', 'notification_prefs',
+        'home_profiles', 'property_views', 'user_events', 'email_log', 'email_outbox',
+        'showing_requests', 'alert_events',
+      ]) {
+        await client.query(`ALTER TABLE ${table} ADD COLUMN IF NOT EXISTS tenant_id INTEGER NOT NULL DEFAULT 1`);
+      }
+
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS households (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          name VARCHAR(255),
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS household_id INTEGER REFERENCES households(id) ON DELETE SET NULL;
+      `);
+
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS events (
+          id BIGSERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          visitor_id VARCHAR(32),
+          type VARCHAR(48) NOT NULL,
+          listing_id VARCHAR(64),
+          search_id INTEGER,
+          source VARCHAR(32) NOT NULL DEFAULT 'web',
+          meta JSONB NOT NULL DEFAULT '{}'::jsonb,
+          occurred_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          fub_synced_at TIMESTAMPTZ,
+          CHECK (user_id IS NOT NULL OR visitor_id IS NOT NULL)
+        );
+        CREATE INDEX IF NOT EXISTS idx_events_user_time ON events(user_id, occurred_at DESC) WHERE user_id IS NOT NULL;
+        CREATE INDEX IF NOT EXISTS idx_events_visitor_unclaimed ON events(visitor_id) WHERE user_id IS NULL;
+        CREATE INDEX IF NOT EXISTS idx_events_tenant_type_time ON events(tenant_id, type, occurred_at DESC);
+      `);
+
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS contact_consents (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          channel VARCHAR(16) NOT NULL CHECK (channel IN ('email', 'sms', 'push', 'call')),
+          status VARCHAR(16) NOT NULL CHECK (status IN ('granted', 'revoked')),
+          wording TEXT,
+          source VARCHAR(128),
+          ip VARCHAR(64),
+          user_agent TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_contact_consents_user ON contact_consents(user_id, channel, created_at DESC);
+      `);
+      await client.query('RELEASE SAVEPOINT platform_foundation');
+    } catch (foundationErr) {
+      await client.query('ROLLBACK TO SAVEPOINT platform_foundation');
+      console.error('platform foundation migration skipped:', foundationErr.message);
+    }
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {
