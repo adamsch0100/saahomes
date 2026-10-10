@@ -20,7 +20,8 @@ function getPool() {
       // have NODE_ENV unset → ssl:false → plaintext connections that the
       // proxy resets mid-run ("Connection terminated unexpectedly", Aug 10
       // 2026 — sync died ~min 2 of a 5-min run).
-      ssl: { rejectUnauthorized: false },
+      // DATABASE_SSL=disable is for local Postgres and CI test databases only.
+      ssl: process.env.DATABASE_SSL === 'disable' ? false : { rejectUnauthorized: false },
     });
 
     pool.on('connect', () => {

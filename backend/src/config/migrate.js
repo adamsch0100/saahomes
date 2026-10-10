@@ -128,24 +128,6 @@ export const runMigrations = async () => {
       ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS utm_source VARCHAR(100);
       ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS utm_medium VARCHAR(100);
       ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS utm_campaign VARCHAR(100);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS property_subtype VARCHAR(128);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS home_type VARCHAR(16) DEFAULT 'other';
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS elementary_school VARCHAR(128);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS middle_school VARCHAR(128);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS high_school VARCHAR(128);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS days_on_market INTEGER;
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS price_per_sqft INTEGER;
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS subdivision VARCHAR(255);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS features JSONB DEFAULT '{}'::jsonb;
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS original_list_price NUMERIC(12,2);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS price_change_timestamp TIMESTAMPTZ;
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS half_baths NUMERIC(4,1);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS three_quarter_baths NUMERIC(4,1);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS above_grade_area NUMERIC(12,1);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS lot_size_acres NUMERIC(12,2);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS units_total INTEGER;
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS photos_count INTEGER;
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS school_district VARCHAR(255);
     `);
 
       // ---- Saved-search / follow-up engine (Aug 2026) ----
@@ -353,6 +335,29 @@ export const runMigrations = async () => {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         last_seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
+    `);
+
+    // Columns added after the table first shipped. Kept after the CREATE so a
+    // fresh database (staging, tests, a new tenant) can be built from nothing.
+    await client.query(`
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS property_subtype VARCHAR(128);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS home_type VARCHAR(16) DEFAULT 'other';
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS elementary_school VARCHAR(128);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS middle_school VARCHAR(128);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS high_school VARCHAR(128);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS days_on_market INTEGER;
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS price_per_sqft INTEGER;
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS subdivision VARCHAR(255);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS features JSONB DEFAULT '{}'::jsonb;
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS original_list_price NUMERIC(12,2);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS price_change_timestamp TIMESTAMPTZ;
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS half_baths NUMERIC(4,1);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS three_quarter_baths NUMERIC(4,1);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS above_grade_area NUMERIC(12,1);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS lot_size_acres NUMERIC(12,2);
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS units_total INTEGER;
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS photos_count INTEGER;
+      ALTER TABLE listings ADD COLUMN IF NOT EXISTS school_district VARCHAR(255);
     `);
 
     await client.query(`

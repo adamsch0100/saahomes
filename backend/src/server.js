@@ -402,6 +402,7 @@ const startServer = async () => {
   if (process.env.IRES_SYNC_SCHEDULER !== 'off') startIresSyncScheduler();
 };
 
-startServer();
+// Tests import the app without binding a port or starting the MLS scheduler.
+if (process.env.SAA_SERVER_NO_START !== '1') startServer();
 
 export default app;
