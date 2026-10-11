@@ -6346,6 +6346,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.38', longitude: '-104.705' },
     metaDescription: 'Evans Village - established Evans neighborhood near the Poudre River Trail. SAA Homes.',
     keywords: 'Evans Village, established Evans homes, Evans Colorado real estate, Poudre River Trail Evans',
+    youtubeId: 'RwcjbU2KWz4',
     neighborhoodHighlights: [
       { title: 'Established character', description: 'Evans original neighborhood with mature trees and a welcoming community feel.' },
       { title: 'Poudre River Trail', description: 'Direct access to the Poudre River Trail for walking, running, and biking.' },
@@ -6380,6 +6381,7 @@ export const neighborhoods = [
     walkScore: 30,
     metaDescription: 'Evans Ranch real estate - new construction homes near Greeley with affordable pricing and US 34 access. SAA Homes.',
     keywords: 'Evans Ranch Evans CO, Evans Colorado new homes, Evans subdivisions, Greeley area real estate, affordable Northern Colorado homes, new construction Evans, US 34 Evans',
+    youtubeId: 'JexXCAKJC40',
     neighborhoodHighlights: [
       { title: 'Affordable new homes', description: 'New construction at some of the most affordable prices in Northern Colorado - ideal for first-time buyers.' },
       { title: 'Greeley proximity', description: 'Minutes from Greeley shopping, dining, and entertainment - small-town taxes, big-city amenities.' },
@@ -6414,6 +6416,7 @@ export const neighborhoods = [
     walkScore: 35,
     metaDescription: 'Evans Oaks real estate - established subdivision with mature trees and affordable homes near Greeley. SAA Homes.',
     keywords: 'Evans Oaks, Evans Colorado real estate, affordable Evans homes, established Evans subdivisions, Greeley area affordable homes, US 34 Evans, family homes Evans, Evans Oaks subdivision',
+    youtubeId: 'kSP1ttSj8Ik',
     neighborhoodHighlights: [
       { title: 'Affordable pricing', description: 'Evans Oaks offers some of the most affordable single-family homes in the Greeley-Evans area.' },
       { title: 'Established setting', description: 'Mature trees and well-maintained homes in a settled, family-friendly neighborhood.' },
