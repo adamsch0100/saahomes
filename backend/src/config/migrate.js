@@ -985,6 +985,26 @@ export const runMigrations = async () => {
       console.error('tour requests migration skipped:', tourErr.message);
     }
 
+    // ── Agent morning brief ──────────────────────────────────────────────
+    await client.query('SAVEPOINT morning_briefs');
+    try {
+      await client.query(`
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS morning_brief BOOLEAN NOT NULL DEFAULT TRUE;
+        CREATE TABLE IF NOT EXISTS morning_briefs (
+          id SERIAL PRIMARY KEY,
+          agent_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          brief_date DATE NOT NULL,
+          lead_count INTEGER NOT NULL DEFAULT 0,
+          sent_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          UNIQUE (agent_id, brief_date)
+        );
+      `);
+      await client.query('RELEASE SAVEPOINT morning_briefs');
+    } catch (briefErr) {
+      await client.query('ROLLBACK TO SAVEPOINT morning_briefs');
+      console.error('morning brief migration skipped:', briefErr.message);
+    }
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {

@@ -187,7 +187,7 @@ export const listSavedHomes = async (req, res) => {
  * cockpit timeline, event stream, lead score and a Follow Up Boss event.
  * Shared by the heart and by Love / Maybe reactions.
  */
-export async function saveHomeForUser(user, listing, pool = getPool()) {
+export async function saveHomeForUser(user, listing, pool = getPool(), { via = null } = {}) {
   const snap = snapshotFromListing(listing);
 
   // Detect first-time save vs re-save (idempotent heart) for FUB/events
@@ -218,6 +218,7 @@ export async function saveHomeForUser(user, listing, pool = getPool()) {
         ? `$${Number(snap.list_price).toLocaleString('en-US')}`
         : null;
     const detailParts = [
+      via === 'love' ? 'Loved it' : via === 'maybe' ? 'Marked it a maybe' : null,
       snap.property_address || null,
       priceLabel,
       snap.listing_key ? `MLS ${snap.listing_key}` : null,

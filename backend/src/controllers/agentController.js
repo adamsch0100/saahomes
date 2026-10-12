@@ -854,3 +854,48 @@ export const getAgentWebformStats = async (req, res) => {
   }
 };
 
+
+/**
+ * GET /api/agent/brief — today's "who to call and why" for the signed-in agent.
+ * PUT /api/agent/brief — { email: boolean } turns the 7am email on or off.
+ */
+/** The signed-in staff member's user row. Admin tokens from the admin login carry only an email. */
+async function staffRow(req, pool) {
+  const { rows: [row] } = req.user?.id
+    ? await pool.query('SELECT id, name, email, role, morning_brief FROM users WHERE id = $1', [req.user.id])
+    : await pool.query(
+      'SELECT id, name, email, role, morning_brief FROM users WHERE LOWER(email) = LOWER($1) ORDER BY id LIMIT 1',
+      [String(req.user?.email || '')]
+    );
+  return row || null;
+}
+
+export const getAgentBrief = async (req, res) => {
+  try {
+    const pool = getPool();
+    const row = await staffRow(req, pool);
+    // An admin without a user row still covers the unassigned leads; there is just no email to turn on.
+    const agent = row || (req.user?.role === 'admin' ? { id: 0, role: 'admin' } : null);
+    if (!agent) return res.status(404).json({ error: 'Agent not found' });
+    const { buildBrief } = await import('../services/morningBrief.js');
+    const brief = await buildBrief({ ...agent, role: req.user.role === 'admin' ? 'admin' : agent.role }, { pool });
+    return res.json({ success: true, data: { ...brief, email_on: row ? row.morning_brief !== false : null } });
+  } catch (error) {
+    logger.error('getAgentBrief error', error);
+    return res.status(500).json({ error: 'Could not build the brief' });
+  }
+};
+
+export const setAgentBriefEmail = async (req, res) => {
+  try {
+    if (typeof req.body?.email !== 'boolean') return res.status(400).json({ error: 'email must be true or false' });
+    const pool = getPool();
+    const row = await staffRow(req, pool);
+    if (!row) return res.status(404).json({ error: 'Sign in with your agent account to get the email.' });
+    await pool.query('UPDATE users SET morning_brief = $1 WHERE id = $2', [req.body.email, row.id]);
+    return res.json({ success: true, data: { email_on: req.body.email } });
+  } catch (error) {
+    logger.error('setAgentBriefEmail error', error);
+    return res.status(500).json({ error: 'Could not save that' });
+  }
+};

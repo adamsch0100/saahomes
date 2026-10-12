@@ -83,7 +83,11 @@ export const understandSearch = async (req, res) => {
       const userId = await sessionUserId(req, pool).catch(() => null);
       const visitorId = req.cookies?.[VISITOR_COOKIE];
       if (userId || isValidVisitorId(visitorId)) {
-        recordEvent({ type: 'search', userId, visitorId, meta: { asked: text, filters, results: count, via: 'ask' } }, pool);
+        recordEvent({ type: 'search', userId, visitorId, meta: { asked: text, filters, results: count, via: 'ask' } }, pool)
+          .then((row) => (row?.user_id
+            ? import('../services/followUpBossService.js').then(({ pushAskedSearchToFollowUpBoss }) => pushAskedSearchToFollowUpBoss(row, { pool }))
+            : null))
+          .catch((e) => console.warn('asked search → FUB failed:', e.message));
       }
     }
 

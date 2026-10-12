@@ -1467,6 +1467,61 @@ export function propertySearchFromParams(params) {
 }
 
 /**
+ * Where a stream 'search' event points, for FUB. Plain-words searches store
+ * the parsed filters and the buyer's own words; search-page runs store the
+ * query string.
+ */
+export function fubSearchFromEventMeta(meta = {}) {
+  if (meta && meta.filters && typeof meta.filters === 'object') {
+    const path = savedSearchPath(meta.filters);
+    return { path, propertySearch: propertySearchFromParams(path.split('?')[1] || ''), asked: meta.asked ? String(meta.asked) : null };
+  }
+  const params = String(meta?.params || '').replace(/^\?/, '');
+  return { path: `/properties/${params ? `?${params}` : ''}`, propertySearch: propertySearchFromParams(params), asked: null };
+}
+
+/**
+ * A signed-in buyer's plain-words search goes to FUB as a Property Search
+ * event right away, with their own words, so the agent (and Nadia, which
+ * reads FUB events) knows what they're after. The same words are sent at
+ * most once a day.
+ */
+export async function pushAskedSearchToFollowUpBoss(eventRow, { pool = getPool(), post = postFollowUpBossEvent } = {}) {
+  if (!isFollowUpBossConfigured() && post === postFollowUpBossEvent) return { sent: 0, reason: 'not_configured' };
+  if (!eventRow?.id || !eventRow.user_id || !eventRow.meta?.asked) return { sent: 0, reason: 'not_asked' };
+  const { rows: [user] } = await pool.query('SELECT id, email, name, phone, fub_person_id FROM users WHERE id = $1', [eventRow.user_id]);
+  if (!user?.email) return { sent: 0, reason: 'no_email' };
+  const { rows: dup } = await pool.query(
+    `SELECT 1 FROM events WHERE user_id = $1 AND type = 'search' AND id <> $2
+       AND fub_synced_at > NOW() - INTERVAL '1 day' AND LOWER(meta->>'asked') = LOWER($3) LIMIT 1`,
+    [user.id, eventRow.id, String(eventRow.meta.asked)]
+  );
+  const markSynced = () => pool.query('UPDATE events SET fub_synced_at = NOW() WHERE id = $1', [eventRow.id]);
+  if (dup.length) {
+    await markSynced();
+    return { sent: 0, reason: 'duplicate' };
+  }
+  const { path, propertySearch, asked } = fubSearchFromEventMeta(eventRow.meta);
+  const { firstName, lastName } = splitName(user.name);
+  await post({
+    source: NURTURE_SOURCE,
+    system: SYSTEM_NAME,
+    type: 'Property Search',
+    message: `Searched in their own words: “${asked}”\nResults: https://saahomes.com${path}`,
+    person: {
+      ...(user.fub_person_id ? { id: user.fub_person_id } : {}),
+      firstName,
+      lastName,
+      emails: [{ value: user.email, type: 'work' }],
+      phones: user.phone ? [{ value: String(user.phone).replace(/\D/g, ''), type: 'mobile' }] : [],
+    },
+    propertySearch,
+  });
+  await markSynced();
+  return { sent: 1 };
+}
+
+/**
  * When someone signs up, send what they did before (listings viewed,
  * searches run) to FUB as dated events, so the agent sees the whole story.
  * Events older than a day are historical in FUB and don't fire workflows.
@@ -1541,9 +1596,12 @@ export async function syncVisitorHistoryToFollowUpBoss(userId, { pool = getPool(
         system: SYSTEM_NAME,
         type: 'Property Search',
         occurredAt: new Date(s.occurred_at).toISOString(),
-        message: `Searched before signing up: ${site}/properties/?${String(s.meta?.params || '').replace(/^\?/, '')}`,
+        message: (() => {
+          const { path, asked } = fubSearchFromEventMeta(s.meta);
+          return asked ? `Searched “${asked}” before signing up: ${site}${path}` : `Searched before signing up: ${site}${path}`;
+        })(),
         person,
-        propertySearch: propertySearchFromParams(s.meta?.params),
+        propertySearch: fubSearchFromEventMeta(s.meta).propertySearch,
       });
       sent += 1;
       synced.push(s.id);
