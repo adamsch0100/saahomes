@@ -64,6 +64,7 @@ export default function AccountMenu({
 
   const links = [
     { to: "/my-saved-searches/", label: "Saved Homes", icon: "♥" },
+    { to: "/board/", label: "Shop Together", icon: "⧉" },
     {
       to: "/notifications/",
       label: unreadCount > 0 ? `Notifications (${badgeLabel})` : "Notifications",

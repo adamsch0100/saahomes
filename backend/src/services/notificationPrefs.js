@@ -38,7 +38,7 @@ export const DEFAULT_FREQUENCY = {
 export function prefTypeForNotification(notifType) {
   const t = String(notifType || '').slice(0, 32);
   if (t === 'value_update') return 'value_update';
-  if (t === 'showing_confirm' || t === 'shared_home') return null;
+  if (t === 'showing_confirm' || t === 'shared_home' || t === 'board') return null;
   if (t === 'new_match' || t === 'price_drop' || t === 'off_market') return 'search_activity';
   // Unknown nurture types fall under search activity
   if (t) return 'search_activity';

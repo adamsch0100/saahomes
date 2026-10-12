@@ -28,6 +28,7 @@ const CityHomesForSalePage = lazy(() => import("./pages/CityHomesForSalePage.jsx
 const ManageAlertsPage = lazy(() => import("./pages/ManageAlertsPage.jsx"));
 const MyHomePage = lazy(() => import("./pages/MyHomePage.jsx"));
 const NotificationCenterPage = lazy(() => import("./pages/NotificationCenterPage.jsx"));
+const BoardPage = lazy(() => import("./pages/BoardPage.jsx"));
 const FortCollinsPage = lazy(() => import("./pages/areas/FortCollinsPage.jsx"));
 const LovelandPage = lazy(() => import("./pages/areas/LovelandPage.jsx"));
 const MeadPage = lazy(() => import("./pages/areas/MeadPage.jsx"));
@@ -248,6 +249,8 @@ export default function App() {
         <Route path="/my-home/" element={<AppLayout><LazyPage><MyHomePage /></LazyPage></AppLayout>} />
         <Route path="/notifications" element={<AppLayout><LazyPage><NotificationCenterPage /></LazyPage></AppLayout>} />
         <Route path="/notifications/" element={<AppLayout><LazyPage><NotificationCenterPage /></LazyPage></AppLayout>} />
+        <Route path="/board" element={<AppLayout><LazyPage><BoardPage /></LazyPage></AppLayout>} />
+        <Route path="/board/" element={<AppLayout><LazyPage><BoardPage /></LazyPage></AppLayout>} />
         <Route path="/homes-for-sale/:slug" element={<AppLayout><ListingDetailPage /></AppLayout>} />
 
         {/* City homes-for-sale SEO pages */}

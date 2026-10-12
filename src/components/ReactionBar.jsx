@@ -141,6 +141,12 @@ export default function ReactionBar({ listing, className = "" }) {
           );
         })}
       </div>
+      {reaction === "love" && (
+        <p className="mt-2 text-xs text-gray-500">
+          Saved. Buying with someone?{" "}
+          <a href="/board/" className="font-semibold text-[#8a7340] underline underline-offset-2">Shop together</a>
+        </p>
+      )}
       {reaction === "pass" && (
         <p className="mt-2 text-xs text-gray-500">Hidden from your searches and alerts. Tap again to undo.</p>
       )}

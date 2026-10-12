@@ -284,11 +284,33 @@ export async function enrichLeadForCockpit(user, { persist = false } = {}, pool 
     ? nextTouch < startOfToday && stage !== 'closed' && stage !== 'lost'
     : false;
 
+  // Co-buyers on a shared board (household), so the agent knows who else is deciding.
+  let household = null;
+  if (user.household_id) {
+    try {
+      const { rows } = await pool.query(
+        `SELECT u.id, u.name, u.email,
+                (SELECT COUNT(*)::int FROM home_comments c WHERE c.household_id = $1) AS comments
+         FROM users u WHERE u.household_id = $1 AND u.id <> $2 AND u.status = 'active' ORDER BY u.id`,
+        [user.household_id, user.id]
+      );
+      if (rows.length) {
+        household = {
+          co_buyers: rows.map((r) => ({ id: r.id, name: r.name || null, email: r.email })),
+          comments: rows[0].comments,
+        };
+      }
+    } catch {
+      household = null;
+    }
+  }
+
   return {
     id: user.id,
     email: user.email,
     name: user.name,
     phone: user.phone,
+    household,
     intent: user.intent || null,
     status: user.status,
     lead_score: user.lead_score ?? 0,

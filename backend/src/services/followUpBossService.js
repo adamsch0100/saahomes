@@ -710,6 +710,11 @@ const NURTURE_SIGNAL_MAP = {
     type: 'Property Inquiry',
     label: 'Adam shared a home with them on saahomes.com',
   },
+  // A buyer invited them to shop together; they accepted (household board)
+  co_buyer_joined: {
+    type: 'Registration',
+    label: 'Joined a shared home search on saahomes.com as a co-buyer',
+  },
 };
 
 /**
@@ -1589,4 +1594,34 @@ export async function syncLeadScoreToFollowUpBoss(userId, {
   }
   await pool.query('UPDATE users SET fub_lead_score_synced = $1 WHERE id = $2', [u.lead_score, userId]);
   return { ok: true, score: u.lead_score };
+}
+
+const FUB_NOTES_URL = 'https://api.followupboss.com/v1/notes';
+
+/**
+ * Add a note to a contact's Follow Up Boss timeline (public POST /v1/notes).
+ * Used for things an agent should read but that are not lead events, such as
+ * a co-buyer's comment on a home. Skips quietly until the contact is linked.
+ */
+export async function addFollowUpBossNote(userId, { subject, body }, {
+  pool = getPool(), fetchImpl = fetch, apiKey = FOLLOW_UP_BOSS_API_KEY,
+} = {}) {
+  if (!apiKey) return { skipped: 'not_configured' };
+  const { rows: [u] } = await pool.query('SELECT fub_person_id FROM users WHERE id = $1', [userId]);
+  if (!u?.fub_person_id) return { skipped: 'not_linked' };
+  const res = await fetchImpl(FUB_NOTES_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: getAuthHeader(apiKey) },
+    body: JSON.stringify({
+      personId: Number(u.fub_person_id),
+      subject: String(subject || '').slice(0, 200),
+      body: String(body || '').slice(0, 4000),
+      isHtml: false,
+    }),
+  });
+  if (!res.ok) {
+    logger.warn('FUB note write failed', { status: res.status });
+    return { ok: false, status: res.status };
+  }
+  return { ok: true };
 }

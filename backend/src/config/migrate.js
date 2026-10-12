@@ -922,6 +922,44 @@ export const runMigrations = async () => {
       console.error('home reactions migration skipped:', reactionErr.message);
     }
 
+    // ── Household boards (Phase 2) ───────────────────────────────────────
+    // A buyer invites a co-buyer by email; the household shares one board of
+    // saved homes with comments. Invite tokens are stored hashed.
+    await client.query('SAVEPOINT household_boards');
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS household_invites (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          household_id INTEGER NOT NULL REFERENCES households(id) ON DELETE CASCADE,
+          invited_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          email VARCHAR(255) NOT NULL,
+          name VARCHAR(255),
+          token_hash CHAR(64) NOT NULL UNIQUE,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          expires_at TIMESTAMPTZ NOT NULL,
+          accepted_at TIMESTAMPTZ,
+          accepted_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          revoked_at TIMESTAMPTZ
+        );
+        CREATE INDEX IF NOT EXISTS idx_household_invites_household ON household_invites(household_id);
+        CREATE TABLE IF NOT EXISTS home_comments (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          household_id INTEGER NOT NULL REFERENCES households(id) ON DELETE CASCADE,
+          listing_key TEXT NOT NULL,
+          user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          body TEXT NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_home_comments_board ON home_comments(household_id, listing_key, created_at);
+      `);
+      await client.query('RELEASE SAVEPOINT household_boards');
+    } catch (boardErr) {
+      await client.query('ROLLBACK TO SAVEPOINT household_boards');
+      console.error('household boards migration skipped:', boardErr.message);
+    }
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {

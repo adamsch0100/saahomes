@@ -25,7 +25,7 @@ const MT_TZ = 'America/Denver';
 export const QUIET_START_HOUR = 21; // 9pm Mountain
 export const QUIET_END_HOUR = 8; // 8am Mountain
 export const DAILY_PUSH_CAP = 4;
-const PUSH_TYPES = ['new_match', 'price_drop', 'off_market', 'showing_confirm', 'shared_home'];
+const PUSH_TYPES = ['new_match', 'price_drop', 'off_market', 'showing_confirm', 'shared_home', 'board'];
 const NEW_LISTING_DAYS = 7;
 
 export const PUSH_CONSENT_WORDING =

@@ -28,6 +28,15 @@ import { submitShowingRequest } from '../controllers/showingController.js';
 import { runCronDigest } from '../controllers/cronController.js';
 import { getPushKey, getPushStatus, subscribePush, unsubscribePush } from '../controllers/pushController.js';
 import { getReaction, getTaste, listReactions, setReaction } from '../controllers/reactionsController.js';
+import {
+  addBoardComment,
+  cancelInvite,
+  getBoard,
+  getHousehold,
+  inviteToHousehold,
+  joinHousehold,
+  leaveHousehold,
+} from '../controllers/householdController.js';
 import { listSchools, runCronSchoolRatings } from '../controllers/schoolController.js';
 import {
   listHomes,
@@ -251,6 +260,15 @@ router.get('/reactions', savedHomesLimiter, listReactions);
 router.get('/reactions/:listing_key', savedHomesLimiter, getReaction);
 router.put('/reactions/:listing_key', trackingLimiter, setReaction);
 router.get('/taste', savedHomesLimiter, getTaste);
+
+// Household boards: shop together with a co-buyer
+router.get('/household', savedHomesLimiter, getHousehold);
+router.post('/household/invite', formLimit(), inviteToHousehold);
+router.post('/household/join', formLimit(), joinHousehold);
+router.post('/household/leave', trackingLimiter, leaveHousehold);
+router.delete('/household/invites/:id', savedHomesLimiter, cancelInvite);
+router.get('/board', savedHomesLimiter, getBoard);
+router.post('/board/:listing_key/comments', trackingLimiter, addBoardComment);
 
 // ── Notification center (in-app nurture events + cadence prefs) ───────────
 const notificationsLimiter = rateLimit({
