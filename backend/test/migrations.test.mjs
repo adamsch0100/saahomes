@@ -14,6 +14,7 @@ test('migrations build a fresh database from nothing and can run again', { skip:
     'contact_submissions', 'market_report_submissions', 'listings', 'users',
     'saved_searches', 'search_snapshots', 'saved_homes', 'notifications',
     'home_profiles', 'property_views', 'user_events', 'email_outbox',
+    'lead_submit_log',
   ]) {
     assert.ok(tables.has(name), `missing table ${name}`);
   }

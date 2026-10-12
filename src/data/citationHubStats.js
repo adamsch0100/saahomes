@@ -13,7 +13,7 @@ export const CITATION_HUB_TITLE =
   "Northern Colorado Housing Statistics 2026 | SAA Homes";
 export const CITATION_HUB_DESCRIPTION =
   "Free, sourced, dated Northern Colorado housing statistics: the national mortgage-rate context, CHFA income and purchase price limits for Larimer and Weld counties, and U.S. Census figures for Fort Collins and Windsor. Every number links to its primary source — ready to cite.";
-export const CITATION_HUB_LAST_UPDATED = "2026-10-01";
+export const CITATION_HUB_LAST_UPDATED = "2026-10-08";
 
 const CHFA_SOURCE_ORG = "Colorado Housing and Finance Authority";
 const CHFA_SOURCE_LABEL = "CHFA Income & Purchase Price Limits (PDF)";
@@ -66,19 +66,19 @@ export const CITATION_HUB_STATS = [
     id: "stat-national-mortgage-rate-2026",
     layer: "national",
     claim:
-      "The 30-year fixed mortgage rate averaged 6.67% as of August 13, 2026, down from 6.69% the prior week and up from 6.58% a year earlier.",
+      "The 30-year fixed mortgage rate averaged 7.40% as of October 8, 2026, up from 7.28% the prior week and up from 6.30% a year earlier.",
     figures: [
-      { label: "30-year fixed, week of Aug 13, 2026", value: "6.67%" },
-      { label: "Prior week", value: "6.69%" },
-      { label: "A year earlier", value: "6.58%" },
+      { label: "30-year fixed, week of Oct 8, 2026", value: "7.40%" },
+      { label: "Prior week", value: "7.28%" },
+      { label: "A year earlier", value: "6.30%" },
     ],
-    asOf: "Week ending 2026-08-13",
+    asOf: "Week ending 2026-10-08",
     sourceOrg: PMMS_SOURCE_ORG,
     sourceLabel: PMMS_SOURCE_LABEL,
     sourceUrl: PMMS_SOURCE_URL,
-    verified: "2026-10-01",
+    verified: "2026-10-08",
     cite:
-      "The 30-year fixed mortgage rate averaged 6.67% the week of August 13, 2026 (6.69% prior week; 6.58% a year earlier). Source: Freddie Mac Primary Mortgage Market Survey.",
+      "The 30-year fixed mortgage rate averaged 7.40% the week of October 8, 2026 (7.28% prior week; 6.30% a year earlier). Source: Freddie Mac Primary Mortgage Market Survey.",
     moneyLinks: [
       { to: "/mortgage-calculator/", label: "Mortgage Calculator" },
       { to: "/for-buyers/", label: "Northern Colorado Buyer Guide" },

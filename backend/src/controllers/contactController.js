@@ -3,6 +3,12 @@ import getPool from '../config/database.js';
 import { sendContactNotification } from '../services/emailService.js';
 import { forwardContactToFollowUpBoss } from '../services/followUpBossService.js';
 import { recordLeadConversion } from '../services/ga4MeasurementService.js';
+import {
+  createLeadSubmitLog,
+  recordGa4Leg,
+  recordFubLeg,
+  recordNotifyLeg,
+} from '../services/leadSubmitLog.js';
 import logger from '../utils/logger.js';
 
 export const submitContactForm = async (req, res) => {
@@ -38,22 +44,48 @@ export const submitContactForm = async (req, res) => {
       meta: { form: 'contact', submission_id: submission.id, source_page: sourcePage || null },
     });
 
-    sendContactNotification(submission).catch((err) => {
-      logger.error('Email notification failed (non-blocking)', err);
+    // One log row per submit: did each delivery leg actually fire?
+    const logId = await createLeadSubmitLog({
+      leadType: 'contact',
+      submissionId: submission.id,
+      email,
+      sourcePage: sourcePage || null,
     });
 
-    forwardContactToFollowUpBoss(submission).catch((err) => {
-      logger.error('Follow Up Boss forwarding failed (non-blocking)', err);
-    });
+    sendContactNotification(submission)
+      .then((info) => recordNotifyLeg(logId, { success: true, messageId: info?.messageId }))
+      .catch((err) => {
+        recordNotifyLeg(logId, { success: false, error: err.message });
+        logger.error('Email notification failed (non-blocking)', err);
+      });
+
+    forwardContactToFollowUpBoss(submission)
+      .then((result) => recordFubLeg(logId, {
+        success: !!result?.success,
+        personId: result?.fubPersonId,
+        error: result?.success ? null : (result?.reason || result?.error || null),
+      }))
+      .catch((err) => {
+        recordFubLeg(logId, { success: false, error: err.message });
+        logger.error('Follow Up Boss forwarding failed (non-blocking)', err);
+      });
+
+    // Server-side GA4 Measurement Protocol leg — generate_lead + saa_lead_submit.
+    recordLeadConversion('contact', req.body)
+      .then((result) => recordGa4Leg(logId, {
+        fired: !!result?.fired,
+        status: result?.status,
+        error: result?.error || result?.reason || null,
+      }))
+      .catch((err) => {
+        recordGa4Leg(logId, { fired: false, error: err.message });
+        logger.warn('GA4 lead event failed (non-blocking)', { message: err.message });
+      });
 
     // Cockpit lifecycle refresh when contact email maps to a users row
     import('../services/agentCockpit.js')
       .then(({ refreshLeadLifecycleByEmail }) => refreshLeadLifecycleByEmail(email))
       .catch(() => {});
-
-    recordLeadConversion('contact', req.body).catch((err) => {
-      logger.warn('GA4 lead event failed (non-blocking)', { message: err.message });
-    });
 
     logger.info('Contact form submitted', { id: submission.id, email, sourcePage });
 

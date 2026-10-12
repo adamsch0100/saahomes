@@ -985,6 +985,7 @@ export const runMigrations = async () => {
       console.error('tour requests migration skipped:', tourErr.message);
     }
 
+<<<<<<< Updated upstream
     // ── Agent morning brief ──────────────────────────────────────────────
     await client.query('SAVEPOINT morning_briefs');
     try {
@@ -1003,6 +1004,40 @@ export const runMigrations = async () => {
     } catch (briefErr) {
       await client.query('ROLLBACK TO SAVEPOINT morning_briefs');
       console.error('morning brief migration skipped:', briefErr.message);
+=======
+    // ── Lead submit leg log (GA4 / FUB / notify evidence per submit) ──────
+    await client.query('SAVEPOINT lead_submit_log');
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS lead_submit_log (
+          id SERIAL PRIMARY KEY,
+          lead_type VARCHAR(64) NOT NULL,
+          submission_id INTEGER,
+          email VARCHAR(255),
+          source_page VARCHAR(255),
+          ga4_fired BOOLEAN,
+          ga4_status INTEGER,
+          ga4_error TEXT,
+          ga4_at TIMESTAMPTZ,
+          fub_result VARCHAR(32),
+          fub_person_id INTEGER,
+          fub_error TEXT,
+          fub_at TIMESTAMPTZ,
+          notify_result VARCHAR(32),
+          notify_message_id VARCHAR(255),
+          notify_error TEXT,
+          notify_at TIMESTAMPTZ,
+          received_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_lead_submit_log_submission ON lead_submit_log(lead_type, submission_id);
+        CREATE INDEX IF NOT EXISTS idx_lead_submit_log_email ON lead_submit_log(LOWER(email));
+      `);
+      await client.query('RELEASE SAVEPOINT lead_submit_log');
+    } catch (logErr) {
+      await client.query('ROLLBACK TO SAVEPOINT lead_submit_log');
+      console.error('lead submit log migration skipped:', logErr.message);
+>>>>>>> Stashed changes
     }
 
     await client.query('COMMIT');

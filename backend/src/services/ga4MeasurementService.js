@@ -1,7 +1,9 @@
 import logger from '../utils/logger.js';
 
-const MEASUREMENT_ID = process.env.GA4_MEASUREMENT_ID || 'G-BVWCZE025P';
-const API_SECRET = process.env.GA4_MEASUREMENT_API_SECRET;
+/** Same stream as src/utils/analytics.js — GA4_MEASUREMENT_ID can override. */
+const MEASUREMENT_ID = process.env.GA4_MEASUREMENT_ID || 'G-CB5GL0P3EZ';
+/** Railway saahomes env: GA4 Admin → Data streams → Measurement Protocol secrets. */
+const API_SECRET = process.env.GA4_API_SECRET || process.env.GA4_MEASUREMENT_API_SECRET;
 
 function buildClientId(gaClientId) {
   if (gaClientId && /^\d+\.\d+$/.test(String(gaClientId))) {
@@ -12,11 +14,14 @@ function buildClientId(gaClientId) {
 
 /**
  * Server-side GA4 event — reliable when browser tags are blocked or slow to register.
- * Requires GA4_MEASUREMENT_API_SECRET from Admin → Data streams → Measurement Protocol.
+ * Requires GA4_API_SECRET from Admin → Data streams → Measurement Protocol.
+ *
+ * @returns {Promise<{fired: boolean, skipped?: boolean, status?: number, reason?: string, error?: string}>}
+ *   Never throws. `fired: true` means Google accepted the batch (HTTP 2xx/204).
  */
 export async function recordLeadConversion(leadType, metadata = {}) {
   if (!API_SECRET) {
-    return;
+    return { fired: false, skipped: true, reason: 'no_api_secret' };
   }
 
   const clientId = buildClientId(metadata.gaClientId);
@@ -59,11 +64,18 @@ export async function recordLeadConversion(leadType, metadata = {}) {
         status: response.status,
         leadType,
       });
+      return {
+        fired: false,
+        status: response.status,
+        error: `GA4 Measurement Protocol returned ${response.status}`,
+      };
     }
+    return { fired: true, status: response.status };
   } catch (error) {
     logger.warn('GA4 Measurement Protocol error (non-blocking)', {
       leadType,
       message: error.message,
     });
+    return { fired: false, error: error.message };
   }
 }
