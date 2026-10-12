@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import SEO from "../components/SEO";
 import HomeValueChart from "../components/HomeValueChart";
 import RecentClosedSales from "../components/RecentClosedSales";
+import CompsWorkbench from "../components/CompsWorkbench";
 import { marketPack } from "../data/marketPack";
 import { formatPrice } from "../utils/listingHelpers.js";
 
@@ -640,6 +641,10 @@ export default function MyHomePage() {
                     }
                     market={market}
                   />
+
+                  {(profile || activeHome)?.id && (
+                    <CompsWorkbench homeId={(profile || activeHome).id} authQ={authQ} />
+                  )}
 
                   <RecentClosedSales
                     city={(profile || activeHome)?.city}

@@ -23,7 +23,7 @@ const TYPE_MAP = [
   { re: /\b(condos?|condominiums?)\b/i, type: 'attached' },
   { re: /\b(multi[-\s]?family|duplex|triplex|fourplex)\b/i, type: 'attached' },
   { re: /\b(single[-\s]?family|detached|houses?|homes?)\b/i, type: 'detached' },
-  { re: /\b(land|lots?|acreage)\b/i, type: 'land' },
+  { re: /\b(vacant\s+land|land\s+for\s+sale|(?:empty|vacant|buildable)\s+lots?|land)\b/i, type: 'land' },
   { re: /\bcommercial\b/i, type: 'commercial' },
 ];
 
@@ -56,7 +56,7 @@ function parseIntToken(raw, min = 0, max = 20) {
  * @param {string} text
  * @returns {{ filters: object, summary: string, confidence: 'high'|'medium'|'low' } | null}
  */
-export function parseSearchIntent(text) {
+export function parseSearchIntent(text, { lenient = false } = {}) {
   if (!text || typeof text !== 'string') return null;
   const t = text.replace(/\s+/g, ' ').trim();
   if (t.length < 4) return null;
@@ -73,12 +73,9 @@ export function parseSearchIntent(text) {
   if (cities.length) filters.city = cities.join(',');
 
   // ZIP
-  const zipMatch = t.match(/\b(\d{5})\b/);
-  if (zipMatch && !filters.city) {
-    // Store as q when no city — digest/search still works via q in some paths;
-    // also keep city empty and put zip in q for keyword-ish match.
-    filters.q = zipMatch[1];
-  }
+  // ZIP codes (Colorado ZIPs start with 80/81)
+  const zips = [...new Set((t.match(/\b8[01]\d{3}\b/g) || []))].slice(0, 20);
+  if (zips.length && !filters.city) filters.postal_code = zips.join(',');
 
   // --- Price ---
   // under/below/less than / max / up to
@@ -107,10 +104,12 @@ export function parseSearchIntent(text) {
     }
   }
   // Range: $300k-$450k or between $300k and $450k
-  const rangeM = t.match(/(?:between\s+)?\$?\s*([\d,.]+\s*[kKmM]?)\s*(?:-|–|to|and)\s*\$?\s*([\d,.]+\s*[kKmM]?)/i);
-  if (rangeM && !filters.minPrice && !filters.maxPrice) {
-    const a = parseMoneyToken(rangeM[1]);
-    const b = parseMoneyToken(rangeM[2]);
+  const rangeM = t.match(/(?:between\s+)?(\$?)\s*([\d,.]+\s*[kKmM]?)\s*(?:-|–|to|and)\s*(\$?)\s*([\d,.]+\s*[kKmM]?)(?!\s*(?:\+\s*)?(?:bed|br\b|bd\b|bath|ba\b|car|acre|sq|story|stories))/i);
+  const moneyish = rangeM && (rangeM[1] || rangeM[3] || /[kKmM]/.test(rangeM[2] + rangeM[4])
+    || Number(String(rangeM[2]).replace(/[^\d.]/g, '')) >= 10_000);
+  if (moneyish && !filters.minPrice && !filters.maxPrice) {
+    const a = parseMoneyToken(rangeM[2]);
+    const b = parseMoneyToken(rangeM[4]);
     if (a && b) {
       filters.minPrice = String(Math.min(a, b));
       filters.maxPrice = String(Math.max(a, b));
@@ -126,7 +125,8 @@ export function parseSearchIntent(text) {
   }
 
   // --- Beds ---
-  const bedsM = t.match(/(\d+)\s*(?:\+)?\s*(?:bed(?:room)?s?|br\b)/i)
+  const bedsM = t.match(/(\d+)\s*(?:-|–|to|or|and)\s*\d+\s*(?:bed(?:room)?s?|br\b)/i)
+    || t.match(/(\d+)\s*(?:\+)?\s*(?:bed(?:room)?s?|br\b)/i)
     || t.match(/(?:bed(?:room)?s?|br)\s*[:=]?\s*(\d+)/i);
   if (bedsM) {
     const n = parseIntToken(bedsM[1], 1, 12);
@@ -174,8 +174,20 @@ export function parseSearchIntent(text) {
   if (/\bassumable\b|\bassume\s+(?:the\s+)?(?:loan|mortgage|va|fha)\b|\bloan\s+assumption\b/i.test(t)) {
     filters.assumable = 'true';
   }
-  if (/\bbasement\b/i.test(t)) filters.basement = 'true';
-  if (/\b(garage|2[\s-]?car|3[\s-]?car)\b/i.test(t)) filters.garage = 'true';
+  if (/\bwalk[\s-]?out\b/i.test(t)) filters.basement = 'walkout';
+  else if (/\bunfinished\s+basement\b/i.test(t)) filters.basement = 'unfinished';
+  else if (/\bfinished\s+basement\b/i.test(t)) filters.basement = 'finished';
+  else if (/\bbasement\b/i.test(t)) filters.basement = 'true';
+  const carM = t.match(/\b([1-4])\s*(?:(?:-|–|to|or)\s*[1-4]\s*)?(?:\+\s*)?[\s-]?car\b/i);
+  if (carM) filters.garage = carM[1];
+  else if (/\bgarage\b/i.test(t)) filters.garage = 'true';
+
+  // --- Lot size ---
+  const acresM = t.match(/(\d+(?:\.\d+)?)\s*\+?\s*acres?\b/i);
+  if (acresM && Number(acresM[1]) > 0 && Number(acresM[1]) <= 500) filters.minLotAcres = String(Number(acresM[1]));
+  else if (/\bhalf[\s-]+(?:an?\s+)?acre\b/i.test(t)) filters.minLotAcres = '0.5';
+  else if (/\bquarter[\s-]+(?:an?\s+)?acre\b/i.test(t)) filters.minLotAcres = '0.25';
+  else if (/\b(?:an|one|1)\s+acre\b|\bacreage\b/i.test(t)) filters.minLotAcres = '1';
   if (/\bfireplace\b/i.test(t)) filters.fireplace = 'true';
 
   // --- HOA ---
@@ -199,6 +211,7 @@ export function parseSearchIntent(text) {
   // --- Keywords for features not in bool filters ---
   const keywordBits = [];
   if (/\brv\s*(garage|parking|pad)?\b/i.test(t)) keywordBits.push('RV');
+  if (/\b(barn|outbuilding)\b/i.test(t)) keywordBits.push(t.match(/\b(barn|outbuilding)\b/i)[1].toLowerCase());
   if (/\b(mountain\s+view|city\s+view|views?)\b/i.test(t) && !filters.waterfront) keywordBits.push('view');
   if (/\b(ranch|craftsman|modern|victorian|farmhouse)\b/i.test(t)) {
     const style = t.match(/\b(ranch|craftsman|modern|victorian|farmhouse)\b/i);
@@ -210,10 +223,14 @@ export function parseSearchIntent(text) {
   if (keys.length === 0) return null;
 
   // Intent confidence: needs location OR price OR beds-ish to be a real "search"
-  const hasLocation = !!(filters.city || (filters.q && /^\d{5}$/.test(String(filters.q))));
+  const hasLocation = !!(filters.city || filters.postal_code);
   const hasCriteria = !!(filters.minPrice || filters.maxPrice || filters.beds || filters.baths
     || filters.pool || filters.type || filters.minSqft || filters.waterfront
-    || filters.newConstruction || filters.assumable);
+    || filters.newConstruction || filters.assumable || filters.minLotAcres
+    || (filters.garage && filters.garage !== 'true') || (filters.basement && filters.basement !== 'true'));
+  if (lenient) {
+    return { filters, summary: summarizeFilters(filters), confidence: hasCriteria ? 'high' : 'low' };
+  }
   if (!hasLocation && !hasCriteria) return null;
 
   // Soft gate: phrases that look like search intent (browsing / criteria)
@@ -233,10 +250,31 @@ export function parseSearchIntent(text) {
   };
 }
 
+/**
+ * Things people ask for that the search can't filter on, so the page can say
+ * so plainly instead of silently dropping them.
+ */
+const UNSUPPORTED = [
+  { re: /\b(?:good|great|top|best|highly\s+rated)\s+(?:elementary|middle|high)?\s*schools?\b|\bschool\s+district\b|\b(?:near|close\s+to)\s+(?:a\s+|an\s+)?(?:\w+\s+)?(?:elementary|school)\b/i,
+    topic: 'schools', note: 'School ratings aren’t a search filter. Each home lists its assigned schools, and we can talk through them.' },
+  { re: /\bcommute\b|\b(?:close\s+to|near|minutes?\s+(?:from|to)|easy\s+access\s+to)\s+(?:i-?\s?25|the\s+highway|work|downtown|campus|csu|unc|the\s+hospital|the\s+airport|dia)\b/i,
+    topic: 'commute', note: 'Commute time isn’t a filter yet. Drawing an area on the map gets close.' },
+  { re: /\b(?:big|large|huge|private|fenced|bigger)\s+(?:back\s*)?yards?\b/i,
+    topic: 'yard', note: 'Yard size isn’t listed reliably. Try a lot size, like “quarter acre”.' },
+  { re: /\b(?:quiet|safe|safest|family[\s-]friendly|good\s+neighborhood|walkable|nice\s+area)\b/i,
+    topic: 'neighborhood', note: 'We don’t rank neighborhoods. Your agent can walk you through areas that fit.' },
+];
+
+export function unsupportedAsks(text) {
+  const t = String(text || '');
+  return UNSUPPORTED.filter((u) => u.re.test(t)).map(({ topic, note }) => ({ topic, note }));
+}
+
 /** Human-readable filter summary (matches SaveSearchModal tone). */
 export function summarizeFilters(filters = {}) {
   const parts = [];
   if (filters.city) parts.push(filters.city);
+  if (filters.postal_code) parts.push(`ZIP ${filters.postal_code}`);
   if (filters.minPrice || filters.maxPrice) {
     const f = (n) => (n ? `$${Number(n).toLocaleString()}` : 'Any');
     if (filters.minPrice && filters.maxPrice) {
@@ -260,7 +298,10 @@ export function summarizeFilters(filters = {}) {
   if (filters.newConstruction === 'true' || filters.newConstruction === true) parts.push('New construction');
   if (filters.assumable === 'true' || filters.assumable === true) parts.push('Assumable loan');
   if (filters.basement === 'true' || filters.basement === true) parts.push('Basement');
+  else if (filters.basement) parts.push(`${filters.basement[0].toUpperCase()}${filters.basement.slice(1)} basement`);
   if (filters.garage === 'true' || filters.garage === true) parts.push('Garage');
+  else if (filters.garage) parts.push(`${filters.garage}+ car garage`);
+  if (filters.minLotAcres) parts.push(`${filters.minLotAcres}+ acres`);
   if (filters.fireplace === 'true' || filters.fireplace === true) parts.push('Fireplace');
   if (filters.maxHoa === '0' || filters.maxHoa === 0) parts.push('No HOA');
   else if (filters.maxHoa) parts.push(`HOA ≤ $${filters.maxHoa}`);

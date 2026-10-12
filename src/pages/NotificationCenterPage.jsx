@@ -17,6 +17,7 @@ import {
   CADENCE_ALWAYS_IMMEDIATE,
 } from "../utils/notificationsApi.js";
 import { fetchSessionUser } from "../utils/savedHomesApi.js";
+import InstantAlertsCard from "../components/InstantAlertsCard.jsx";
 
 const GOLD = "#CFB36E";
 const AGENT_PHONE = "(970) 999-1407";
@@ -72,6 +73,7 @@ function TypeBadge({ type }) {
     off_market: "bg-gray-100 text-gray-700 border-gray-200",
     showing_confirm: "bg-violet-50 text-violet-900 border-violet-200",
     shared_home: "bg-[#CFB36E]/15 text-[#8a7020] border-[#CFB36E]/40",
+    board: "bg-rose-50 text-rose-900 border-rose-200",
   };
   return (
     <span
@@ -568,6 +570,7 @@ export default function NotificationCenterPage() {
           </div>
         ) : (
           <>
+            {signedIn === true && <InstantAlertsCard className="mb-4" />}
             <NotificationFrequencySettings signedIn={signedIn === true} />
 
             {/* Filter tabs */}

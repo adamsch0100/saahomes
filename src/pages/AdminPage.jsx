@@ -5,6 +5,7 @@ import ClientSearchesManager from '../components/admin/ClientSearchesManager.jsx
 import AgentCockpit from '../components/admin/AgentCockpit.jsx';
 import AgentsManager from '../components/admin/AgentsManager.jsx';
 import SEO from '../components/SEO';
+import FunnelView from '../components/admin/FunnelView.jsx';
 
 const TYPE_LABELS = {
   digest: 'Listing digest',
@@ -25,7 +26,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [filterType, setFilterType] = useState('all');
-  const [tab, setTab] = useState('cockpit'); // cockpit | leads | searches | agents | email-ab
+  const [tab, setTab] = useState('cockpit'); // cockpit | leads | searches | agents | email-ab | funnel
   const [abStats, setAbStats] = useState(null);
   const [abLoading, setAbLoading] = useState(false);
   const [abError, setAbError] = useState(null);
@@ -267,6 +268,13 @@ export default function AdminPage() {
             >
               Email A/B
             </button>
+            <button
+              type="button"
+              onClick={() => setTab('funnel')}
+              className={`min-h-[44px] px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${tab === 'funnel' ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-200 hover:border-black'}`}
+            >
+              Funnel
+            </button>
           </div>
 
           {tab === 'cockpit' ? (
@@ -275,6 +283,8 @@ export default function AdminPage() {
             <ClientSearchesManager token={token} />
           ) : tab === 'agents' ? (
             <AgentsManager token={token} />
+          ) : tab === 'funnel' ? (
+            <FunnelView token={token} />
           ) : tab === 'email-ab' ? (
             <div className="bg-white rounded-lg shadow">
               <div className="p-6 border-b border-gray-200">

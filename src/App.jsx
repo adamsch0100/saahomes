@@ -10,7 +10,6 @@ import ListingDetailPage from "./pages/ListingDetailPage.jsx";
 import { CITY_HOMES } from "./data/cityHomesData.js";
 import FloatingContactBar from "./components/FloatingContactBar.jsx";
 import LeadCaptureChat from "./components/LeadCaptureChat.jsx";
-import { loadRealScoutScript } from "./utils/realscout.js";
 import { GA4_MEASUREMENT_ID, initGaDebugMode } from "./utils/analytics.js";
 import { TenantProvider, TenantDocumentTitle } from "./context/TenantContext.jsx";
 
@@ -29,6 +28,7 @@ const CityHomesForSalePage = lazy(() => import("./pages/CityHomesForSalePage.jsx
 const ManageAlertsPage = lazy(() => import("./pages/ManageAlertsPage.jsx"));
 const MyHomePage = lazy(() => import("./pages/MyHomePage.jsx"));
 const NotificationCenterPage = lazy(() => import("./pages/NotificationCenterPage.jsx"));
+const BoardPage = lazy(() => import("./pages/BoardPage.jsx"));
 const FortCollinsPage = lazy(() => import("./pages/areas/FortCollinsPage.jsx"));
 const LovelandPage = lazy(() => import("./pages/areas/LovelandPage.jsx"));
 const MeadPage = lazy(() => import("./pages/areas/MeadPage.jsx"));
@@ -150,13 +150,6 @@ function AppLayout({ children }) {
 export default function App() {
   const location = useLocation();
 
-  useEffect(() => {
-    // Load RealScout script when app mounts
-    loadRealScoutScript().catch((error) => {
-      console.error('Error loading RealScout script:', error);
-    });
-  }, []);
-
   // Scroll to top when navigating to properties page
   useEffect(() => {
     if (location.pathname === '/properties' || location.pathname === '/properties/') {
@@ -256,13 +249,15 @@ export default function App() {
         <Route path="/my-home/" element={<AppLayout><LazyPage><MyHomePage /></LazyPage></AppLayout>} />
         <Route path="/notifications" element={<AppLayout><LazyPage><NotificationCenterPage /></LazyPage></AppLayout>} />
         <Route path="/notifications/" element={<AppLayout><LazyPage><NotificationCenterPage /></LazyPage></AppLayout>} />
+        <Route path="/board" element={<AppLayout><LazyPage><BoardPage /></LazyPage></AppLayout>} />
+        <Route path="/board/" element={<AppLayout><LazyPage><BoardPage /></LazyPage></AppLayout>} />
         <Route path="/homes-for-sale/:slug" element={<AppLayout><ListingDetailPage /></AppLayout>} />
 
         {/* City homes-for-sale SEO pages */}
         {CITY_HOMES.map((c) => (
           <React.Fragment key={c.slug}>
-            <Route path={`/${c.slug}-homes-for-sale`} element={<AppLayout><LazyPage><CityHomesForSalePage /></LazyPage></AppLayout>} />
-            <Route path={`/${c.slug}-homes-for-sale/`} element={<AppLayout><LazyPage><CityHomesForSalePage /></LazyPage></AppLayout>} />
+            <Route path={`/${c.slug}-homes-for-sale`} element={<AppLayout><LazyPage><CityHomesForSalePage slug={c.slug} /></LazyPage></AppLayout>} />
+            <Route path={`/${c.slug}-homes-for-sale/`} element={<AppLayout><LazyPage><CityHomesForSalePage slug={c.slug} /></LazyPage></AppLayout>} />
           </React.Fragment>
         ))}
         <Route path="/homes-for-sale/:slug/" element={<AppLayout><ListingDetailPage /></AppLayout>} />

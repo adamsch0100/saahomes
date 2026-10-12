@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { trackSearch } from "../utils/track.js";
 import { Helmet } from "react-helmet-async";
 import { photoUrl } from "../utils/photoUrl.js";
 import { useSearchParams } from "react-router-dom";
 import ListingMap from "./ListingMap";
 import ListingDetailPanel from "./ListingDetailPanel";
 import SaveSearchModal from "./SaveSearchModal";
+import SaveSearchNudge from "./SaveSearchNudge.jsx";
 import LocationCombobox, {
   parseCityList,
   parseZipList,
@@ -253,6 +255,9 @@ const HOME_STATUS_VALUES = new Set([
   "Expired",
   "Canceled",
 ]);
+
+// Shown once we know a signed-in buyer's taste (backend falls back otherwise).
+const BEST_SORT = { label: "Best for you", value: "best" };
 
 const SORT_OPTIONS = [
   { label: "Recommended", value: "recommended" },
@@ -795,6 +800,24 @@ function CardStatsLine({ listing, className = "" }) {
  * compact=true → horizontal list row (mobile / dense list).
  * Photo carousel arrows on multi-photo cards (Zillow §3); est. payment micro-line.
  */
+/** First reason this home fits the buyer's taste; the rest on hover. */
+function WhyLine({ fit, compact = false }) {
+  const all = fit?.reasons || [];
+  if (!all.length) return null;
+  // The town reason repeats on every card in a one-town search, so lead with what differs.
+  const isTown = (r) => /where you've saved|a town you keep/.test(r);
+  const reasons = [...all.filter((r) => !isTown(r)), ...all.filter(isTown)];
+  return (
+    <p
+      className={`flex items-start gap-1 text-[#5f6b3a] ${compact ? "text-[11px] mt-0.5" : "text-xs mt-1.5"}`}
+      title={reasons.join(" · ")}
+    >
+      <span aria-hidden="true" className="shrink-0">✓</span>
+      <span className="truncate">{reasons[0]}</span>
+    </p>
+  );
+}
+
 function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compact = false, savedMap = {} }) {
   const { priceCut } = listingBadges(listing);
   const match = matchSavedSearch(listing, savedSearches);
@@ -1016,6 +1039,7 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
           <span aria-hidden="true">★</span> Match
         </p>
       )}
+      <WhyLine fit={listing.match} compact />
     </div>
   ) : (
     <div className="px-3 pt-2.5 pb-3">
@@ -1034,6 +1058,7 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
           Matches your saved search
         </p>
       )}
+      <WhyLine fit={listing.match} />
     </div>
   );
 
@@ -1660,6 +1685,9 @@ export default function ListingSearch({ location, height = "700px", compact = fa
   const [draft, setDraft] = useState(filters);
   const [results, setResults] = useState([]);
   const [meta, setMeta] = useState({ total: 0, pages: 0, page: 1 });
+  const [showHidden, setShowHidden] = useState(false);
+  const showHiddenRef = useRef(false);
+  const filtersRef = useRef(null);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -1689,6 +1717,9 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     typeof window !== "undefined" ? getSavedSearches() : []
   );
   const [panelSlug, setPanelSlug] = useState(null);
+  // Shopping signals for the save-search nudge
+  const [homesOpened, setHomesOpened] = useState(0);
+  const [searchesRun, setSearchesRun] = useState(0);
   const panelHistoryPushed = useRef(false);
   const resultsRef = useRef(null);
   const homeTypeRef = useRef(null);
@@ -1715,6 +1746,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     setError(null);
     try {
       const params = filtersToParams(f, { pageNum });
+      if (showHiddenRef.current) params.set("show_hidden", "1");
       const res = await fetch(`${API_BASE}/api/listings?${params}`, {
         // Deploy rolls swap the backend instance; a fetch that lands mid-swap
         // can hang indefinitely (no server response, no abort). Timeout +
@@ -1730,6 +1762,10 @@ export default function ListingSearch({ location, height = "700px", compact = fa
       setResults((prev) => (append ? [...prev, ...rows] : rows));
       setMeta(data.meta || { total: 0, pages: 0, page: pageNum });
       setPage(pageNum);
+      if (!append) {
+        trackSearch(filtersToParams(f, { forUrl: true }).toString(), data.meta?.total);
+        setSearchesRun((n) => n + 1);
+      }
     } catch (err) {
       if (gen !== fetchGen.current) return;
       const timedOut = err?.name === "TimeoutError" || err?.name === "AbortError";
@@ -1753,6 +1789,8 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     });
   }, [draft, drawerOpen]);
 
+  filtersRef.current = filters;
+
   // Debounced sync: filters → fetch + URL (live updates without Enter)
   useEffect(() => {
     const t = setTimeout(() => {
@@ -1763,6 +1801,13 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- setSearchParams stable-ish; avoid loop
   }, [filters, fetchListings]);
+
+  // A Love / Maybe / Not for me anywhere on the page re-ranks and re-hides results.
+  useEffect(() => {
+    const onReaction = () => fetchListings(filtersRef.current, 1, false);
+    window.addEventListener("saa-reactions-changed", onReaction);
+    return () => window.removeEventListener("saa-reactions-changed", onReaction);
+  }, [fetchListings]);
 
   useEffect(() => {
     const onStorage = () => setSavedSearches(getSavedSearches());
@@ -1909,6 +1954,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     if (listing?.id) setSelectedId(listing.id);
 
     if (panelSlug === slug) return;
+    setHomesOpened((n) => n + 1);
 
     if (panelSlug) {
       window.history.replaceState(
@@ -2030,6 +2076,10 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     if (filters.city === "__all__") return "Colorado";
     return "Northern Colorado";
   })();
+
+  const tasteReady = Boolean(meta.taste?.ready);
+  const sortOptions = tasteReady || filters.sort === "best" ? [BEST_SORT, ...SORT_OPTIONS] : SORT_OPTIONS;
+  const hiddenCount = meta.taste?.hidden || 0;
 
   const resultLabel = loading
     ? `Updating results…`
@@ -2360,7 +2410,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
             className="ml-auto min-h-[44px] px-2.5 py-2 border border-gray-300 rounded-lg text-xs bg-white max-w-[140px] touch-manipulation"
             aria-label="Sort"
           >
-            {SORT_OPTIONS.map((o) => (
+            {sortOptions.map((o) => (
               <option key={o.value} value={o.value}>{o.label}</option>
             ))}
           </select>
@@ -2450,7 +2500,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                 className="min-h-[40px] px-2.5 py-1.5 border border-gray-300 rounded-lg text-sm bg-white"
                 aria-label="Sort"
               >
-                {SORT_OPTIONS.map((o) => (
+                {sortOptions.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
               </select>
@@ -2760,6 +2810,24 @@ export default function ListingSearch({ location, height = "700px", compact = fa
 
           {/* Keep prior cards visible while updating so live filter changes feel instant.
               Mobile list: compact horizontal. Grid: 2 cols when list panel ≥560px (≈ full width @900+). */}
+          {!error && hiddenCount > 0 && (
+            <div className="px-4 pt-2 text-xs text-gray-500">
+              {showHidden
+                ? "Including homes you marked Not for me. "
+                : `${hiddenCount} home${hiddenCount === 1 ? "" : "s"} you marked Not for me ${hiddenCount === 1 ? "is" : "are"} hidden. `}
+              <button
+                type="button"
+                onClick={() => {
+                  showHiddenRef.current = !showHidden;
+                  setShowHidden(!showHidden);
+                  fetchListings(filters, 1, false);
+                }}
+                className="font-semibold text-[#8a7340] underline underline-offset-2 min-h-[32px]"
+              >
+                {showHidden ? "Hide them" : "Show them"}
+              </button>
+            </div>
+          )}
           {!error && results.length > 0 && (
             <div className={`p-3 sm:p-4 ${loading ? "opacity-60 pointer-events-none" : ""}`}>
               <div
@@ -2870,6 +2938,13 @@ export default function ListingSearch({ location, height = "700px", compact = fa
       {panelSlug && (
         <ListingDetailPanel slug={panelSlug} onClose={closeListingPanel} />
       )}
+
+      <SaveSearchNudge
+        filters={saveFilters}
+        homesOpened={homesOpened}
+        searchesRun={searchesRun}
+        paused={!!panelSlug || drawerOpen}
+      />
     </div>
   );
 }

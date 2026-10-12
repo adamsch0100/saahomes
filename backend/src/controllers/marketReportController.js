@@ -1,10 +1,13 @@
+import { recordEvent as recordStreamEvent, onIdentified, VISITOR_COOKIE } from '../services/events.js';
 import crypto from 'crypto';
 import getPool from '../config/database.js';
 import { sendMarketReportNotification } from '../services/emailService.js';
 import { forwardMarketReportToFollowUpBoss } from '../services/followUpBossService.js';
 import { recordLeadConversion } from '../services/ga4MeasurementService.js';
 import { upsertHomeProfile, computeOurEstimate } from '../services/sellerValueService.js';
-import { setAuthCookie } from './alertController.js';
+import {
+  setAuthCookie, isStaffAccount, hasOwnSession, emailSignInLink, SIGN_IN_REQUIRED_MESSAGE,
+} from './alertController.js';
 import logger from '../utils/logger.js';
 
 function cleanPhone(v) {
@@ -63,13 +66,22 @@ export const submitMarketReportForm = async (req, res) => {
       try {
         let userRow;
         const existing = await client.query('SELECT * FROM users WHERE email = $1', [emailStr]);
+        // Only a brand-new account or the visitor's own session is signed in
+        // here; knowing an existing email must not hand out its session.
+        let canSignIn = true;
+        if (existing.rows[0] && isStaffAccount(existing.rows[0])) {
+          throw new Error('email belongs to a team account; not attaching seller profile');
+        }
         if (existing.rows[0]) {
+          canSignIn = hasOwnSession(req, existing.rows[0]);
+          // Name and phone change only from the account's own session; anyone
+          // else's submission is still a seller signal on the lead.
           const updated = await client.query(
             `UPDATE users SET
                status = 'active',
                last_active_at = NOW(),
-               name = COALESCE(NULLIF($1, ''), name),
-               phone = COALESCE(NULLIF($2, ''), phone),
+               name = CASE WHEN $4 THEN COALESCE(NULLIF($1, ''), name) ELSE name END,
+               phone = CASE WHEN $4 THEN COALESCE(NULLIF($2, ''), phone) ELSE phone END,
                intent = CASE
                  WHEN intent IS NULL THEN 'selling'
                  WHEN intent = 'buying' THEN 'both'
@@ -82,6 +94,7 @@ export const submitMarketReportForm = async (req, res) => {
               `${firstName || ''} ${lastName || ''}`.trim(),
               phoneDigits || '',
               existing.rows[0].id,
+              canSignIn,
             ]
           );
           userRow = updated.rows[0];
@@ -99,10 +112,12 @@ export const submitMarketReportForm = async (req, res) => {
           );
           userRow = created.rows[0];
         }
-        manageToken = userRow.manage_token;
+        if (canSignIn) manageToken = userRow.manage_token;
+        else submission._signInUser = userRow;
 
         // upsertHomeProfile uses getPool() — commit first path: do after COMMIT
         submission._userId = userRow.id;
+        submission._isNewUser = !existing.rows[0];
         submission._addr = addr;
         submission._zip = zipVal;
         submission._living = living && Number.isFinite(living) ? living : null;
@@ -145,8 +160,18 @@ export const submitMarketReportForm = async (req, res) => {
       }
     }
 
+    recordStreamEvent({
+      type: 'form_submit',
+      userId: submission._userId || null,
+      visitorId: req.cookies?.[VISITOR_COOKIE],
+      meta: { form: 'market_report', submission_id: submission.id },
+    });
+
     if (manageToken) {
       setAuthCookie(res, manageToken);
+      await onIdentified(req, submission._userId, { isNew: !!submission._isNewUser, via: 'market_report' });
+    } else if (submission._signInUser) {
+      emailSignInLink(submission._signInUser).catch((e) => logger.warn('sign-in link failed', { message: e.message }));
     }
 
     sendMarketReportNotification(submission).catch((err) => {
@@ -181,6 +206,8 @@ export const submitMarketReportForm = async (req, res) => {
       id: submission.id,
       home_profile_id: homeProfileId,
       my_home_path: homeProfileId ? '/my-home/' : null,
+      signInRequired: !!submission._signInUser,
+      signInMessage: submission._signInUser ? SIGN_IN_REQUIRED_MESSAGE : undefined,
     });
   } catch (error) {
     await client.query('ROLLBACK');

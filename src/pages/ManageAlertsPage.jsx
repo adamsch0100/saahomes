@@ -15,6 +15,7 @@ import {
   unsaveHomeApi,
   notifySavedHomesChanged,
 } from "../utils/savedHomesApi.js";
+import InstantAlertsCard from "../components/InstantAlertsCard.jsx";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -570,6 +571,8 @@ export default function ManageAlertsPage() {
             </div>
 
             <LeadScoreBadge score={data.lead_score} label={data.lead_score_label} />
+
+            <InstantAlertsCard className="mt-5" />
 
             {/* Tabs: Saved Searches | Saved Homes */}
             <div

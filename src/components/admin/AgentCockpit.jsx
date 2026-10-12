@@ -250,6 +250,14 @@ function ShareHomeForm({
  * @param {Array} [teammates=[]] - {id,name,email} for assign dropdown
  * @param {number|null} [currentAgentId=null] - logged-in agent id for "Claim"
  */
+/** "Shopping with Jamie Lee (jamie@…) · 4 board comments" for leads on a shared board. */
+function coBuyerLine(lead) {
+  const h = lead?.household;
+  if (!h?.co_buyers?.length) return null;
+  const who = h.co_buyers.map((c) => (c.name ? `${c.name} (${c.email})` : c.email)).join(", ");
+  return `Shopping with ${who}${h.comments ? ` · ${h.comments} board comment${h.comments === 1 ? "" : "s"}` : ""}`;
+}
+
 export default function AgentCockpit({
   token,
   apiPrefix = "/api/admin",
@@ -752,6 +760,7 @@ export default function AgentCockpit({
                         <p>FUB person: {lead.fub_person_id || "not linked yet"}</p>
                       )}
                       <p>Last active: {formatDateTime(lead.last_active_at)}</p>
+                      {coBuyerLine(lead) && <p>{coBuyerLine(lead)}</p>}
                       {lead.assigned_agent_id != null && (
                         <p>
                           Assigned: {lead.assigned_agent_name || lead.assigned_agent_email || `#${lead.assigned_agent_id}`}
@@ -947,6 +956,7 @@ export default function AgentCockpit({
                               <span>Last touched: {formatDateTime(lead.last_touched_at)}</span>
                               <span>Joined: {formatDate(lead.created_at)}</span>
                               <span>Intent: {lead.intent || "—"}</span>
+                              {coBuyerLine(lead) && <span>{coBuyerLine(lead)}</span>}
                               {lead.assigned_agent_id != null && (
                                 <span>
                                   Assigned: {lead.assigned_agent_name || lead.assigned_agent_email || `#${lead.assigned_agent_id}`}

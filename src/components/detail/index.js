@@ -3,6 +3,7 @@ export { default as DescriptionSection } from "./DescriptionSection";
 export { default as AllDetailsSection } from "./AllDetailsSection";
 export { default as MapSection } from "./MapSection";
 export { default as SchoolsSection } from "./SchoolsSection";
+export { default as LocalFactsSection } from "./LocalFactsSection";
 export { default as SimilarHomesSection } from "./SimilarHomesSection";
 export { default as ConversionRail } from "./ConversionRail";
 export { default as MobileStickyBar } from "./MobileStickyBar";

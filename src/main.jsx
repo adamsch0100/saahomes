@@ -4,9 +4,11 @@ import { BrowserRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import App from "./App.jsx";
 import { captureLeadAttribution } from "./utils/leadTracking.js";
+import { registerAppShell } from "./utils/push.js";
 import "./index.css";
 
 captureLeadAttribution();
+registerAppShell();
 
 // Remove build-time prerendered JSON-LD scripts before React mounts.
 // Prerender (scripts/prerender-meta.mjs) injects schemas into static HTML for

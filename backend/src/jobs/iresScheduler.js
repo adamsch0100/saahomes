@@ -26,6 +26,7 @@
 import { syncListings } from '../services/iresSync.js';
 import { syncSoldListings } from '../services/iresSoldSync.js';
 import getPool from '../config/database.js';
+import { runPushPass } from '../services/pushService.js';
 
 const ADVISORY_LOCK_KEY = 833711; // app-wide constant — must not collide with other locks
 const RUN_MINUTE = 57; // sync at :57 each hour (UTC)
@@ -57,6 +58,14 @@ async function runSync() {
     console.log(`[ires-sync] ${now.toISOString()} starting ${mode} sync`);
     const result = await syncListings({ mode });
     console.log(`[ires-sync] ${new Date().toISOString()} complete:`, JSON.stringify(result));
+    // Instant alerts ride the sync: new listings and price changes reach
+    // phones minutes after they land, not at the next digest.
+    try {
+      const push = await runPushPass();
+      console.log(`[push] ${new Date().toISOString()} pass:`, JSON.stringify(push));
+    } catch (pushErr) {
+      console.error(`[push] ${new Date().toISOString()} pass FAILED:`, pushErr.message);
+    }
     // Sold ingest runs AFTER the hourly listing tick at 04:57 so the two
     // never share the MLS Grid budget. Own file lock inside syncSoldListings.
     if (hour === SOLD_SYNC_HOUR) {

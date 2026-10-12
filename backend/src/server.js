@@ -192,7 +192,17 @@ if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
     return next();
   });
 
-  app.use(express.static(distPath, { index: false }));
+  app.use(express.static(distPath, {
+    index: false,
+    setHeaders(res, filePath) {
+      // The service worker and manifest must update with each deploy.
+      if (filePath.endsWith('sw.js')) res.setHeader('Cache-Control', 'no-cache');
+      if (filePath.endsWith('.webmanifest')) {
+        res.setHeader('Content-Type', 'application/manifest+json');
+        res.setHeader('Cache-Control', 'no-cache');
+      }
+    },
+  }));
 
   // Serve the branded 404 shell with an HTTP 404 status. Falls back to a
   // minimal inline shell if the prerendered /404/index.html isn't on disk
@@ -402,6 +412,7 @@ const startServer = async () => {
   if (process.env.IRES_SYNC_SCHEDULER !== 'off') startIresSyncScheduler();
 };
 
-startServer();
+// Tests import the app without binding a port or starting the MLS scheduler.
+if (process.env.SAA_SERVER_NO_START !== '1') startServer();
 
 export default app;

@@ -3,6 +3,7 @@
  * Captures name/email/phone + requested date/time for a listing, saves it,
  * and forwards the lead to Follow Up Boss (source: Showing Request).
  */
+import { recordEvent as recordStreamEvent, VISITOR_COOKIE, sessionUserId } from '../services/events.js';
 import getPool from '../config/database.js';
 import { forwardShowingRequestToFollowUpBoss } from '../services/followUpBossService.js';
 import { rejectIfDisposableEmail } from '../utils/emailQuality.js';
@@ -42,6 +43,15 @@ export const submitShowingRequest = async (req, res) => {
        String(listing_slug || '').trim() || null, String(listing_address || '').trim() || null,
        String(source_page || '').trim().slice(0, 255) || null]
     );
+
+    // Event stream: tied to the contact when this browser is signed in,
+    // otherwise to the visitor (joined to the contact at signup).
+    recordStreamEvent({
+      type: 'showing_request',
+      visitorId: req.cookies?.[VISITOR_COOKIE],
+      userId: await sessionUserId(req),
+      meta: { showing_id: inserted.rows[0].id, listing_slug: String(listing_slug || '').trim() || null, date, time: String(time).slice(0, 20) },
+    });
 
     // FUB lead + person-id capture (fire-and-forget)
     forwardShowingRequestToFollowUpBoss({

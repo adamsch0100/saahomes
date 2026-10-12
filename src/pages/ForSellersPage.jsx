@@ -5,6 +5,7 @@ import RecentlySoldSection from "../components/RecentlySoldSection.jsx";
 import MarketReportForm from "../components/MarketReportForm.jsx";
 import AreaFAQSection from "../components/AreaFAQSection.jsx";
 import { FOR_SELLERS_FAQS, buildFaqPageSchema } from "../data/moneyPageFaqs.js";
+import HomeValueCapture from "../components/HomeValueCapture.jsx";
 
 export default function ForSellersPage() {
   useEffect(() => {
@@ -178,7 +179,9 @@ export default function ForSellersPage() {
               Prefer to talk? Call <a href="tel:(970) 999-1407" className="text-black font-bold hover:underline">(970) 999-1407</a> for your instant home valuation
             </p>
           </div>
-          <realscout-home-value agent-encoded-id="QWdlbnQtMjUxOTI5" include-name include-phone remove-title remove-subtitle></realscout-home-value>
+          <div className="max-w-2xl mx-auto">
+            <HomeValueCapture areaName="Northern Colorado" />
+          </div>
         </div>
       </section>
 
