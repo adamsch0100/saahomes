@@ -1068,6 +1068,9 @@ def _criteria_cache_key(c: dict, *, mode: str) -> str:
     return json.dumps(payload, sort_keys=True, default=str)
 
 
+_PORTAL_DATE_COLUMNS = ("SoldDate", "ListDate", "LastUpdateDate")
+
+
 def _portal_disk_paths(cache_key: str) -> tuple[Path, Path]:
     digest = hashlib.sha256(cache_key.encode("utf-8")).hexdigest()[:24]
     return (
@@ -1085,7 +1088,12 @@ def _read_portal_disk_cache(cache_key: str) -> Optional[pd.DataFrame]:
         cached_at = float(meta.get("cached_at") or 0)
         if not cached_at or (time.time() - cached_at) > PORTAL_DISK_CACHE_TTL_SEC:
             return None
-        return pd.read_csv(csv_path, sep="|")
+        df = pd.read_csv(csv_path, sep="|")
+        # CSV round-trips dates as text; restore them so date math matches a fresh pull.
+        for col in _PORTAL_DATE_COLUMNS:
+            if col in df.columns:
+                df[col] = pd.to_datetime(df[col], errors="coerce")
+        return df
     except Exception:
         logger.info("Portal disk cache read failed")
         return None
