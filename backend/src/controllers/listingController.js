@@ -2,6 +2,11 @@ import getPool from '../config/database.js';
 import { NOCO_CITIES } from '../config/nocoCities.js';
 import { buildListingFilters } from '../services/listingFilters.js';
 import { matchRatingsForListing } from '../services/greatSchoolsSync.js';
+import { sessionUserId } from '../services/events.js';
+import { getTasteProfile, passedListingKeys, scoreListing } from '../services/tasteProfile.js';
+
+// "Best for you" ranks this many of the freshest matches, then pages through them.
+const BEST_FOR_YOU_POOL = 500;
 
 /**
  * Listing search + detail API — powers /properties/ search and
@@ -48,25 +53,67 @@ function orderBySql(sort) {
 export const searchListings = async (req, res) => {
   try {
     const pool = getPool();
-    const { page = 1, limit = 24, sort = 'newest' } = req.query;
+    const { page = 1, limit = 24 } = req.query;
+    let { sort = 'newest' } = req.query;
 
     const { where, params, i: nextI } = buildListingFilters(req.query);
+    let i = nextI;
+
+    // Signed-in buyers: hide homes they marked Not for me, and know their taste.
+    const userId = await sessionUserId(req, pool);
+    let profile = null;
+    let hidden = 0;
+    if (userId) {
+      const [passed, taste] = await Promise.all([
+        passedListingKeys(userId, pool).catch(() => []),
+        getTasteProfile(userId, pool).catch(() => null),
+      ]);
+      profile = taste;
+      hidden = passed.length;
+      if (passed.length && req.query.show_hidden !== '1') {
+        where.push(`listing_id <> ALL($${i}::text[])`);
+        params.push(passed);
+        i += 1;
+      }
+      res.set('Cache-Control', 'private, no-store');
+    }
+    const best = sort === 'best' && profile?.ready;
+    if (sort === 'best' && !best) sort = 'recommended';
+
     const whereSql = where.join(' AND ');
-    const offset = (Math.max(1, Number(page)) - 1) * Number(limit);
-    const orderSql = orderBySql(sort);
+    const pageNum = Math.max(1, Number(page));
+    const limitNum = Number(limit);
+    const offset = (pageNum - 1) * limitNum;
+    const orderSql = orderBySql(best ? 'recommended' : sort);
 
     const countRes = await pool.query(`SELECT COUNT(*) FROM listings WHERE ${whereSql}`, params);
     const total = parseInt(countRes.rows[0].count, 10);
 
-    let i = nextI;
-    const dataRes = await pool.query(
-      `SELECT id, listing_id, status, property_type, property_subtype, home_type, street_number, street_name, unit,
+    const columns = `id, listing_id, status, property_type, property_subtype, home_type, street_number, street_name, unit,
          city, state, postal_code, list_price, original_list_price, beds, baths, living_area, lot_size, lot_size_acres,
          year_built, garage_spaces, hoa_fee, description, assumable, photos, photos_count, latitude, longitude, slug,
-         updated_at, days_on_market, price_per_sqft, subdivision
-       FROM listings WHERE ${whereSql} ORDER BY ${orderSql} LIMIT $${i} OFFSET $${i + 1}`,
-      [...params, Number(limit), offset]
-    );
+         updated_at, days_on_market, price_per_sqft, subdivision`;
+    let rows;
+    let pages = Math.ceil(total / limitNum) || 0;
+    if (best) {
+      const candidates = await pool.query(
+        `SELECT ${columns} FROM listings WHERE ${whereSql} ORDER BY ${orderSql} LIMIT $${i}`,
+        [...params, BEST_FOR_YOU_POOL]
+      );
+      const ranked = candidates.rows
+        .map((row, idx) => ({ row, idx, match: scoreListing(row, profile) }))
+        .sort((a, b) => (b.match?.score ?? 0) - (a.match?.score ?? 0) || a.idx - b.idx);
+      rows = ranked.slice(offset, offset + limitNum).map((r) => ({ ...r.row, match: r.match }));
+      pages = Math.ceil(Math.min(total, BEST_FOR_YOU_POOL) / limitNum) || 0;
+    } else {
+      const dataRes = await pool.query(
+        `SELECT ${columns} FROM listings WHERE ${whereSql} ORDER BY ${orderSql} LIMIT $${i} OFFSET $${i + 1}`,
+        [...params, limitNum, offset]
+      );
+      rows = profile?.ready
+        ? dataRes.rows.map((row) => ({ ...row, match: scoreListing(row, profile) }))
+        : dataRes.rows;
+    }
 
     // City facet counts — same filters (including city scope)
     const facetRes = await pool.query(
@@ -78,9 +125,16 @@ export const searchListings = async (req, res) => {
 
     res.json({
       success: true,
-      data: dataRes.rows,
+      data: rows,
       facets: facetRes.rows,
-      meta: { total, page: Number(page), limit: Number(limit), pages: Math.ceil(total / Number(limit)) || 0 },
+      meta: {
+        total,
+        page: pageNum,
+        limit: limitNum,
+        pages,
+        sort: best ? 'best' : sort,
+        taste: userId ? { ready: Boolean(profile?.ready), hidden } : null,
+      },
     });
   } catch (error) {
     console.error('Listing search failed:', error);

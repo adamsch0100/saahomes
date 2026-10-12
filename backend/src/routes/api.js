@@ -27,6 +27,7 @@ import { register, login, setPassword, ensureSession } from '../controllers/auth
 import { submitShowingRequest } from '../controllers/showingController.js';
 import { runCronDigest } from '../controllers/cronController.js';
 import { getPushKey, getPushStatus, subscribePush, unsubscribePush } from '../controllers/pushController.js';
+import { getReaction, getTaste, listReactions, setReaction } from '../controllers/reactionsController.js';
 import { listSchools, runCronSchoolRatings } from '../controllers/schoolController.js';
 import {
   listHomes,
@@ -244,6 +245,12 @@ router.get('/saved-homes/status', savedHomesLimiter, savedHomesStatus);
 router.get('/saved-homes', savedHomesLimiter, listSavedHomes);
 router.post('/saved-homes', trackingLimiter, saveHome);
 router.delete('/saved-homes/:listing_key', savedHomesLimiter, unsaveHome);
+
+// Love / Maybe / Not for me, notes and "why this home"
+router.get('/reactions', savedHomesLimiter, listReactions);
+router.get('/reactions/:listing_key', savedHomesLimiter, getReaction);
+router.put('/reactions/:listing_key', trackingLimiter, setReaction);
+router.get('/taste', savedHomesLimiter, getTaste);
 
 // ── Notification center (in-app nurture events + cadence prefs) ───────────
 const notificationsLimiter = rateLimit({

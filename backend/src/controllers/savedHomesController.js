@@ -13,6 +13,7 @@ import { recordEvent as recordStreamEvent } from '../services/events.js';
 import getPool from '../config/database.js';
 import { setAuthCookie } from './alertController.js';
 import { computeAndStoreLeadScore } from '../services/leadScore.js';
+import { invalidateTaste } from '../services/tasteProfile.js';
 
 const COOKIE_NAME = 'saa_user_token';
 
@@ -25,7 +26,7 @@ async function findUserByToken(token) {
   return r.rows[0] || null;
 }
 
-async function resolveUser(req) {
+export async function resolveUser(req) {
   const qToken = req.query?.token;
   if (qToken) {
     const u = await findUserByToken(qToken);
@@ -51,7 +52,7 @@ function formatAddress(row) {
 /**
  * Resolve a client-supplied key (IRES listing_id, slug, or serial id) to a listing row.
  */
-async function findListing(pool, key) {
+export async function findListing(pool, key) {
   const raw = String(key || '').trim();
   if (!raw || raw.length > 255) return null;
 
@@ -181,6 +182,105 @@ export const listSavedHomes = async (req, res) => {
   }
 };
 
+/**
+ * Put a home on a buyer's saved list. First saves also tell the agent:
+ * cockpit timeline, event stream, lead score and a Follow Up Boss event.
+ * Shared by the heart and by Love / Maybe reactions.
+ */
+export async function saveHomeForUser(user, listing, pool = getPool()) {
+  const snap = snapshotFromListing(listing);
+
+  // Detect first-time save vs re-save (idempotent heart) for FUB/events
+  const prior = await pool.query(
+    `SELECT id FROM saved_homes WHERE user_id = $1 AND listing_key = $2 LIMIT 1`,
+    [user.id, snap.listing_key]
+  );
+  const isNewSave = !prior.rows.length;
+
+  const inserted = await pool.query(
+    `INSERT INTO saved_homes (user_id, listing_key, property_address, photo_url, list_price, slug, saved_at)
+     VALUES ($1, $2, $3, $4, $5, $6, NOW())
+     ON CONFLICT (user_id, listing_key) DO UPDATE SET
+       property_address = EXCLUDED.property_address,
+       photo_url = COALESCE(EXCLUDED.photo_url, saved_homes.photo_url),
+       list_price = COALESCE(EXCLUDED.list_price, saved_homes.list_price),
+       slug = COALESCE(EXCLUDED.slug, saved_homes.slug)
+     RETURNING id, listing_key, property_address, photo_url, list_price, slug, saved_at`,
+    [user.id, snap.listing_key, snap.property_address, snap.photo_url, snap.list_price, snap.slug]
+  );
+
+  await pool.query('UPDATE users SET last_active_at = NOW() WHERE id = $1', [user.id]);
+
+  // Agent cockpit heat: FUB event + lead score + user_events (new saves only)
+  if (isNewSave) {
+    const priceLabel =
+      snap.list_price != null
+        ? `$${Number(snap.list_price).toLocaleString('en-US')}`
+        : null;
+    const detailParts = [
+      snap.property_address || null,
+      priceLabel,
+      snap.listing_key ? `MLS ${snap.listing_key}` : null,
+    ].filter(Boolean);
+
+    // user_events for cockpit timeline
+    pool
+      .query(
+        `INSERT INTO user_events (user_id, event_type, meta) VALUES ($1, 'saved_home', $2::jsonb)`,
+        [
+          user.id,
+          JSON.stringify({
+            listing_key: snap.listing_key,
+            property_address: snap.property_address,
+            list_price: snap.list_price,
+            slug: snap.slug,
+          }),
+        ]
+      )
+      .catch(() => {});
+
+    recordStreamEvent({
+      type: 'home_saved',
+      userId: user.id,
+      listingId: snap.listing_key,
+      meta: { slug: snap.slug, list_price: snap.list_price },
+    });
+
+    // Lead score (+20 has-saved-home pattern) — recompute from real signals
+    computeAndStoreLeadScore(user.id, pool).catch((e) => {
+      console.error('lead score on saved home failed:', e.message);
+    });
+
+    // FUB: person + "Saved a home" nurture event (source saahomes.com)
+    import('../services/followUpBossService.js')
+      .then(({ pushNurtureSignalToFollowUpBoss }) =>
+        pushNurtureSignalToFollowUpBoss({
+          signal: 'saved_home',
+          email: user.email,
+          name: user.name,
+          phone: user.phone,
+          message: detailParts.join(' · '),
+          property: {
+            street: snap.property_address || undefined,
+            mlsNumber: snap.listing_key || undefined,
+            price: snap.list_price != null ? Number(snap.list_price) : undefined,
+          },
+        })
+      )
+      .catch(() => {});
+
+    try {
+      const { refreshLeadLifecycle } = await import('../services/agentCockpit.js');
+      refreshLeadLifecycle(user.id, pool).catch(() => {});
+    } catch {
+      /* noop */
+    }
+  }
+
+  invalidateTaste(user.id);
+  return { row: inserted.rows[0], isNewSave };
+}
+
 /** POST /api/saved-homes — { listing_key } (IRES id, slug, or serial id) */
 export const saveHome = async (req, res) => {
   try {
@@ -203,98 +303,17 @@ export const saveHome = async (req, res) => {
       });
     }
 
-    const snap = snapshotFromListing(listing);
-
-    // Detect first-time save vs re-save (idempotent heart) for FUB/events
-    const prior = await pool.query(
-      `SELECT id FROM saved_homes WHERE user_id = $1 AND listing_key = $2 LIMIT 1`,
-      [user.id, snap.listing_key]
+    const { row } = await saveHomeForUser(user, listing, pool);
+    // A heart outranks an earlier Not for me.
+    await pool.query(
+      `UPDATE home_reactions SET reaction = NULL, updated_at = NOW()
+       WHERE user_id = $1 AND listing_key = $2 AND reaction = 'pass'`,
+      [user.id, row.listing_key]
     );
-    const isNewSave = !prior.rows.length;
-
-    const inserted = await pool.query(
-      `INSERT INTO saved_homes (user_id, listing_key, property_address, photo_url, list_price, slug, saved_at)
-       VALUES ($1, $2, $3, $4, $5, $6, NOW())
-       ON CONFLICT (user_id, listing_key) DO UPDATE SET
-         property_address = EXCLUDED.property_address,
-         photo_url = COALESCE(EXCLUDED.photo_url, saved_homes.photo_url),
-         list_price = COALESCE(EXCLUDED.list_price, saved_homes.list_price),
-         slug = COALESCE(EXCLUDED.slug, saved_homes.slug)
-       RETURNING id, listing_key, property_address, photo_url, list_price, slug, saved_at`,
-      [user.id, snap.listing_key, snap.property_address, snap.photo_url, snap.list_price, snap.slug]
-    );
-
-    await pool.query('UPDATE users SET last_active_at = NOW() WHERE id = $1', [user.id]);
-
-    // Agent cockpit heat: FUB event + lead score + user_events (new saves only)
-    if (isNewSave) {
-      const priceLabel =
-        snap.list_price != null
-          ? `$${Number(snap.list_price).toLocaleString('en-US')}`
-          : null;
-      const detailParts = [
-        snap.property_address || null,
-        priceLabel,
-        snap.listing_key ? `MLS ${snap.listing_key}` : null,
-      ].filter(Boolean);
-
-      // user_events for cockpit timeline
-      pool
-        .query(
-          `INSERT INTO user_events (user_id, event_type, meta) VALUES ($1, 'saved_home', $2::jsonb)`,
-          [
-            user.id,
-            JSON.stringify({
-              listing_key: snap.listing_key,
-              property_address: snap.property_address,
-              list_price: snap.list_price,
-              slug: snap.slug,
-            }),
-          ]
-        )
-        .catch(() => {});
-
-      recordStreamEvent({
-        type: 'home_saved',
-        userId: user.id,
-        listingId: snap.listing_key,
-        meta: { slug: snap.slug, list_price: snap.list_price },
-      });
-
-      // Lead score (+20 has-saved-home pattern) — recompute from real signals
-      computeAndStoreLeadScore(user.id, pool).catch((e) => {
-        console.error('lead score on saved home failed:', e.message);
-      });
-
-      // FUB: person + "Saved a home" nurture event (source saahomes.com)
-      import('../services/followUpBossService.js')
-        .then(({ pushNurtureSignalToFollowUpBoss }) =>
-          pushNurtureSignalToFollowUpBoss({
-            signal: 'saved_home',
-            email: user.email,
-            name: user.name,
-            phone: user.phone,
-            message: detailParts.join(' · '),
-            property: {
-              street: snap.property_address || undefined,
-              mlsNumber: snap.listing_key || undefined,
-              price: snap.list_price != null ? Number(snap.list_price) : undefined,
-            },
-          })
-        )
-        .catch(() => {});
-
-      try {
-        const { refreshLeadLifecycle } = await import('../services/agentCockpit.js');
-        refreshLeadLifecycle(user.id, pool).catch(() => {});
-      } catch {
-        /* noop */
-      }
-    }
 
     return res.status(201).json({
       success: true,
-      data: hydrateRow(inserted.rows[0], listing),
+      data: hydrateRow(row, listing),
     });
   } catch (error) {
     console.error('saveHome error:', error);
@@ -328,6 +347,14 @@ export const unsaveHome = async (req, res) => {
         [user.id, raw]
       );
     }
+
+    // Unsaving takes back a Love or Maybe; the private note stays.
+    await pool.query(
+      `UPDATE home_reactions SET reaction = NULL, updated_at = NOW()
+       WHERE user_id = $1 AND listing_key = ANY($2::text[]) AND reaction IN ('love', 'maybe')`,
+      [user.id, [listingKey, raw]]
+    );
+    invalidateTaste(user.id);
 
     recordStreamEvent({ type: 'home_unsaved', userId: user.id, listingId: listingKey });
     return res.json({ success: true, data: { listing_key: listingKey, removed: true } });

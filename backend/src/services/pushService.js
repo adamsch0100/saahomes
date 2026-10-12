@@ -18,6 +18,7 @@ import { buildSavedSearchWhere } from './listingFilters.js';
 import { notifyNewMatches, scanSavedHomesForNotifications } from './notificationService.js';
 import { getPrefFrequency } from './notificationPrefs.js';
 import { recordConsent } from './consent.js';
+import { passedListingKeys } from './tasteProfile.js';
 
 const SITE = marketPack.market.siteUrl || 'https://saahomes.com';
 const MT_TZ = 'America/Denver';
@@ -176,8 +177,10 @@ async function queueNewMatches(pool) {
        ORDER BY created_at DESC LIMIT 10`,
       [...params, s.push_cursor_at, now]
     );
-    if (fresh.length) {
-      queued += await notifyNewMatches({ userId: s.user_id, searchName: s.name, listings: fresh, pool });
+    const passed = fresh.length ? new Set(await passedListingKeys(s.user_id, pool).catch(() => [])) : new Set();
+    const wanted = fresh.filter((l) => !passed.has(String(l.listing_id)));
+    if (wanted.length) {
+      queued += await notifyNewMatches({ userId: s.user_id, searchName: s.name, listings: wanted, pool });
     }
     await pool.query('UPDATE saved_searches SET push_cursor_at = $1 WHERE id = $2', [now, s.id]);
   }

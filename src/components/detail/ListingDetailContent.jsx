@@ -16,6 +16,7 @@ import {
   isLandListing,
 } from "../../utils/listingHelpers.js";
 import DescriptionSection from "./DescriptionSection";
+import ReactionBar from "../ReactionBar";
 import AllDetailsSection from "./AllDetailsSection";
 import MapSection from "./MapSection";
 import SchoolsSection from "./SchoolsSection";
@@ -214,6 +215,9 @@ export default function ListingDetailContent({
             />
           </div>
         )}
+
+        {/* You and this home: why it fits, Love / Maybe / Not for me, private note */}
+        <ReactionBar listing={listing} />
 
         {/* 1. Description */}
         <DescriptionSection description={listing.description} />

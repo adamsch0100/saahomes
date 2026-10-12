@@ -897,6 +897,31 @@ export const runMigrations = async () => {
       console.error('web push migration skipped:', pushErr.message);
     }
 
+    // ── Reactions and taste profile (Phase 2) ───────────────────────────
+    // Love / Maybe / Not for me on any home, with a private note. Love and
+    // Maybe also keep the home on the saved list; Not for me hides it.
+    await client.query('SAVEPOINT home_reactions');
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS home_reactions (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          listing_key TEXT NOT NULL,
+          reaction VARCHAR(8) CHECK (reaction IN ('love', 'maybe', 'pass')),
+          note TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          UNIQUE (user_id, listing_key)
+        );
+        CREATE INDEX IF NOT EXISTS idx_home_reactions_pass ON home_reactions(user_id) WHERE reaction = 'pass';
+      `);
+      await client.query('RELEASE SAVEPOINT home_reactions');
+    } catch (reactionErr) {
+      await client.query('ROLLBACK TO SAVEPOINT home_reactions');
+      console.error('home reactions migration skipped:', reactionErr.message);
+    }
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {

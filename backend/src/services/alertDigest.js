@@ -12,6 +12,7 @@
  */
 import 'dotenv/config';
 import getPool from '../config/database.js';
+import { passedListingKeys } from './tasteProfile.js';
 import nodemailer from 'nodemailer';
 import { getRecentViews, filtersToSearchPath } from './leadScore.js';
 import {
@@ -673,6 +674,14 @@ async function runSearch(search, { dryRun, onlyEmail, send = sendEmail } = {}) {
 
   const prev = await loadSnapshot(search.id);
   const diff = diffSearchResults(prev, matches.rows);
+  // Homes the buyer marked Not for me stay in the snapshot but are never news.
+  const passed = new Set(await passedListingKeys(search.user_id, pool).catch(() => []));
+  if (passed.size) {
+    for (const k of ['newListings', 'newMatches', 'priceDrops']) {
+      diff[k] = diff[k].filter((r) => !passed.has(String(r.listing_id)));
+    }
+    diff.left = diff.left.filter((id) => !passed.has(String(id)));
+  }
   const offMarket = await offMarketAmong(diff.left);
   const statusChanges = offMarket.length;
 

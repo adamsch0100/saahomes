@@ -24,6 +24,7 @@ export const EVENT_TYPES = new Set([
   'search_saved',
   'home_saved',
   'home_unsaved',
+  'home_reaction',
   'showing_request',
   'form_submit',
   'home_value_view',
