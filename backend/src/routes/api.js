@@ -39,6 +39,7 @@ import {
 } from '../controllers/householdController.js';
 import { previewTour, requestTour, tourCalendarFile } from '../controllers/tourController.js';
 import { getComps, saveComps } from '../controllers/compsController.js';
+import { understandSearch } from '../controllers/askSearchController.js';
 import { listSchools, runCronSchoolRatings } from '../controllers/schoolController.js';
 import {
   listHomes,
@@ -182,6 +183,7 @@ const listingLimiter = rateLimit({
 });
 
 router.get('/listings', listingLimiter, searchListings);
+router.post('/search/understand', listingLimiter, understandSearch);
 router.get('/sold-listings', listingLimiter, listSoldListings);
 // Listing photo proxy (reliable serving despite MLS URL expiry/rate limits)
 // Bare URL (no index) → first photo, so it answers instead of a catch-all 404.

@@ -9,6 +9,7 @@ import {
   listingStatsLine,
 } from "../utils/listingHelpers.js";
 import ListingPhotoFallback from "../components/ListingPhotoFallback.jsx";
+import AskSearchBox from "../components/AskSearchBox.jsx";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -181,6 +182,9 @@ export default function CityHomesForSalePage({ slug: slugProp }) {
             {city.city} Homes for Sale
           </h1>
           <p className="mt-4 text-lg text-gray-200 max-w-3xl mx-auto">{city.intro}</p>
+          <div className="mt-6">
+            <AskSearchBox city={city.search} />
+          </div>
           <div className="mt-6 flex flex-wrap gap-3 justify-center">
             <a href={`/properties/?location=${encodeURIComponent(city.search)}`}
               className="inline-flex items-center px-6 py-3 bg-[#CFB36E] text-black font-semibold rounded-lg hover:bg-[#bd9f5a] transition-colors">
