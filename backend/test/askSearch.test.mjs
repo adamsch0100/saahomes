@@ -92,3 +92,31 @@ test('a signed-in buyer\'s words land on their timeline', { skip: !hasTestDataba
   assert.equal(rows[0].meta.asked, 'walkout basement under 600k');
   assert.equal(rows[0].meta.via, 'ask');
 });
+
+test('a buyer\'s own words reach Follow Up Boss once a day as a Property Search', { skip: !hasTestDatabase }, async () => {
+  const { pushAskedSearchToFollowUpBoss } = await import('../src/services/followUpBossService.js');
+  const { recordEvent } = await import('../src/services/events.js');
+  const { rows: [u] } = await db.pool.query(
+    "INSERT INTO users (email, name, phone, status, manage_token) VALUES ('words@comcast.net', 'Robin Words', '9705550199', 'active', md5(random()::text) || md5(random()::text)) RETURNING id"
+  );
+  const posted = [];
+  const post = async (body) => posted.push(body);
+  const meta = { asked: 'Ranch with a walkout under 600k', filters: { city: 'Windsor', basement: 'walkout', maxPrice: '600000' }, via: 'ask' };
+
+  const first = await recordEvent({ type: 'search', userId: u.id, meta }, db.pool);
+  assert.deepEqual(await pushAskedSearchToFollowUpBoss(first, { pool: db.pool, post }), { sent: 1 });
+  assert.equal(posted[0].type, 'Property Search');
+  assert.match(posted[0].message, /their own words: “Ranch with a walkout under 600k”/);
+  assert.match(posted[0].message, /saahomes\.com\/properties\/\?city=Windsor&maxPrice=600000&basement=walkout/);
+  assert.equal(posted[0].propertySearch.maxPrice, 600000);
+  assert.equal(posted[0].person.emails[0].value, 'words@comcast.net');
+
+  const again = await recordEvent({ type: 'search', userId: u.id, meta: { ...meta, asked: 'ranch with a walkout UNDER 600k' } }, db.pool);
+  assert.equal((await pushAskedSearchToFollowUpBoss(again, { pool: db.pool, post })).reason, 'duplicate');
+  assert.equal(posted.length, 1);
+
+  // Signup history never re-sends what already went live.
+  const { syncVisitorHistoryToFollowUpBoss } = await import('../src/services/followUpBossService.js');
+  await syncVisitorHistoryToFollowUpBoss(u.id, { pool: db.pool, post });
+  assert.equal(posted.length, 1);
+});

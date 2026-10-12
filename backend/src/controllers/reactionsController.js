@@ -154,7 +154,7 @@ export const setReaction = async (req, res) => {
     // Keep the saved list in step with the reaction.
     let saved;
     if (reaction === 'love' || reaction === 'maybe') {
-      await saveHomeForUser(user, listing, pool);
+      await saveHomeForUser(user, listing, pool, { via: reaction });
       saved = true;
     } else if (reaction === 'pass' || (!reaction && ['love', 'maybe'].includes(before?.reaction))) {
       await pool.query('DELETE FROM saved_homes WHERE user_id = $1 AND listing_key = $2', [user.id, key]);
