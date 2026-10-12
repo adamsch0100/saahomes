@@ -1048,6 +1048,13 @@ async def billing_checkout(request: Request):
     except Exception as exc:
         logger.exception("Stripe checkout failed")
         raise HTTPException(502, f"Checkout failed: {exc}") from exc
+    import auth_service
+
+    auth_service.log_event(
+        user["id"],
+        "checkout_started",
+        {"plan": plan, "quantity": quantity, "session_id": session.get("id")},
+    )
     return {"ok": True, **session}
 
 

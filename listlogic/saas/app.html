@@ -1669,6 +1669,7 @@ async function autofillSubjectFacts(address) {
     }
     deriveFiltersFromSubject();
     updateNextStep();
+    if (window.llTrack) window.llTrack('subject_address_set', { found: true, facts_complete: missing.length === 0 });
   } catch (err) {
     if (seq !== subjectLookupSeq) return;
     stopLookupTimer();
@@ -2497,6 +2498,8 @@ form.addEventListener('submit', async (e) => {
   const controller = new AbortController();
   const abortTimer = setTimeout(() => controller.abort(), 180000);
 
+  if (window.llTrack) window.llTrack('generate_started', { market_source: marketMode });
+
   try {
     const res = await fetch('/api/generate', { method: 'POST', body: data, signal: controller.signal });
     if (res.status === 401) {
@@ -2558,6 +2561,11 @@ form.addEventListener('submit', async (e) => {
     shareInput.value = shareAbsolute(payload.share_url || payload.url);
     result.classList.add('show');
     const entAfter = payload.entitlement || {};
+    if (window.llTrack) window.llTrack('generate_complete', {
+      market_source: marketMode,
+      recommended_price: payload.recommended_price != null ? Number(payload.recommended_price) : null,
+      months_of_inventory: payload.months_of_inventory != null ? Number(payload.months_of_inventory) : null,
+    });
     const upsell = document.getElementById('upsellNote');
     if (entAfter.just_exhausted || entAfter.remaining === 0) {
       upsell.innerHTML = '<strong>That was your last complimentary presentation.</strong> ' +

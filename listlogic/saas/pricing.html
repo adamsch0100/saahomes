@@ -383,7 +383,9 @@ table.cmp .lead { color: var(--navy); font-weight: 800; }
   else setPeriod('monthly');
 
   async function startCheckout(plan) {
-    if (window.llTrack) window.llTrack('begin_checkout', { plan: plan, source: 'pricing' });
+    const checkoutTracked = window.llTrack
+      ? window.llTrack('begin_checkout', { plan: plan, source: 'pricing' })
+      : Promise.resolve();
     let quantity = 1;
     if (plan.startsWith('brokerage')) {
       quantity = seatQty();
@@ -403,7 +405,10 @@ table.cmp .lead { color: var(--navy); font-weight: 800; }
       alert(data.detail || 'Checkout is unavailable right now. Email adam@saahomes.com.');
       return;
     }
-    if (data.url) location.href = data.url;
+    if (data.url) {
+      await checkoutTracked;
+      location.href = data.url;
+    }
   }
 
   document.querySelectorAll('[data-checkout]').forEach((btn) => {
