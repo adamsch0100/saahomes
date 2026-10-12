@@ -38,6 +38,7 @@ import {
   leaveHousehold,
 } from '../controllers/householdController.js';
 import { previewTour, requestTour, tourCalendarFile } from '../controllers/tourController.js';
+import { getComps, saveComps } from '../controllers/compsController.js';
 import { listSchools, runCronSchoolRatings } from '../controllers/schoolController.js';
 import {
   listHomes,
@@ -238,6 +239,8 @@ const homeLimiter = rateLimit({
 });
 router.get('/home', homeLimiter, listHomes);
 router.post('/home/profile', formLimit(), saveHomeProfile);
+router.get('/home/:id/comps', homeLimiter, getComps);
+router.put('/home/:id/comps', homeLimiter, saveComps);
 router.post('/home/estimate', formLimit(), publicEstimate);
 router.get('/home/:id/value', homeLimiter, getHomeValue);
 router.post('/home/:id/accuracy', formLimit(), postAccuracy);
