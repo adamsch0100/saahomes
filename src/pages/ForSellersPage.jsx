@@ -300,7 +300,7 @@ export default function ForSellersPage() {
               href="/blog/cash-home-buyers-fort-collins-northern-colorado/"
               className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
             >
-              Cash Home Buyer Guide &rarr;
+              Cash Home Buyers in Fort Collins &rarr;
             </a>
             <a
               href="/cash-home-buyers/"
