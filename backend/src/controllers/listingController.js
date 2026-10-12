@@ -2,6 +2,7 @@ import getPool from '../config/database.js';
 import { NOCO_CITIES } from '../config/nocoCities.js';
 import { buildListingFilters } from '../services/listingFilters.js';
 import { matchRatingsForListing } from '../services/greatSchoolsSync.js';
+import { localFactsForListing } from '../services/localFacts.js';
 import { sessionUserId } from '../services/events.js';
 import { getTasteProfile, passedListingKeys, scoreListing } from '../services/tasteProfile.js';
 
@@ -214,6 +215,12 @@ export const getListingBySlug = async (req, res) => {
     } catch (schoolErr) {
       console.warn('school ratings lookup failed:', schoolErr.message);
       listing.schools = [];
+    }
+    try {
+      listing.local_facts = await localFactsForListing(listing, pool);
+    } catch (factsErr) {
+      console.warn('local facts failed:', factsErr.message);
+      listing.local_facts = null;
     }
     res.json({ success: true, data: listing });
   } catch (error) {

@@ -20,6 +20,7 @@ import ReactionBar from "../ReactionBar";
 import AllDetailsSection from "./AllDetailsSection";
 import MapSection from "./MapSection";
 import SchoolsSection from "./SchoolsSection";
+import LocalFactsSection from "./LocalFactsSection";
 import SimilarHomesSection from "./SimilarHomesSection";
 import ConversionRail from "./ConversionRail";
 import { VirtualTourButton } from "./VirtualTourModal.jsx";
@@ -325,6 +326,9 @@ export default function ListingDetailContent({
 
         {/* 4. Schools */}
         <SchoolsSection listing={listing} />
+
+        {/* 4b. Costs beyond the mortgage + local facts */}
+        <LocalFactsSection listing={listing} />
 
         {/* 5. Est. payment calculator — single full calculator (rail has teaser only) */}
         {listing.list_price != null && Number(listing.list_price) > 0 && (

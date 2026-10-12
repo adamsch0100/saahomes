@@ -12,9 +12,9 @@ function monthlyHoa(hoaFee, freq) {
   const n = Number(hoaFee);
   if (!Number.isFinite(n)) return 0;
   const f = String(freq || "").toLowerCase();
-  if (f.includes("year") || f.includes("annual")) return n / 12;
-  if (f.includes("quarter")) return n / 3;
   if (f.includes("semi")) return n / 6;
+  if (f.includes("quarter")) return n / 3;
+  if (f.includes("year") || f.includes("annual")) return n / 12;
   // Default / "Monthly" / empty → treat as monthly
   return n;
 }
