@@ -5,6 +5,7 @@
  * Auth via admin token; page is noindex (set by AdminPage SEO).
  */
 import React, { useCallback, useEffect, useState } from "react";
+import TodayBrief from "./TodayBrief.jsx";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -553,6 +554,8 @@ export default function AgentCockpit({
 
   return (
     <div className="space-y-4">
+      <TodayBrief token={token} />
+
       {/* Stats strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">

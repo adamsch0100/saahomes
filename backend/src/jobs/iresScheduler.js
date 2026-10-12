@@ -27,6 +27,7 @@ import { syncListings } from '../services/iresSync.js';
 import { syncSoldListings } from '../services/iresSoldSync.js';
 import getPool from '../config/database.js';
 import { runPushPass } from '../services/pushService.js';
+import { runMorningBriefs } from '../services/morningBrief.js';
 
 const ADVISORY_LOCK_KEY = 833711; // app-wide constant — must not collide with other locks
 const RUN_MINUTE = 57; // sync at :57 each hour (UTC)
@@ -42,6 +43,7 @@ let lastFiredHour = -1;
 async function runSync() {
   if (running) return;
   running = true;
+  const startedAt = new Date();
   const pool = getPool();
   const client = await pool.connect();
   let locked = false;
@@ -77,6 +79,14 @@ async function runSync() {
     console.error(`[ires-sync] ${new Date().toISOString()} FAILED:`, error.message);
   } finally {
     if (locked) {
+      // The agents' morning brief rides the 6:57am Mountain tick (a no-op
+      // otherwise), and runs even when the MLS sync failed.
+      try {
+        const brief = await runMorningBriefs({ now: startedAt });
+        if (brief.sent) console.log(`[brief] ${new Date().toISOString()} sent:`, JSON.stringify(brief));
+      } catch (briefErr) {
+        console.error(`[brief] ${new Date().toISOString()} FAILED:`, briefErr.message);
+      }
       await client.query('SELECT pg_advisory_unlock($1)', [ADVISORY_LOCK_KEY]).catch(() => {});
     }
     client.release();

@@ -14,6 +14,8 @@ import {
   getAgentWebformSlug,
   regenerateAgentWebformSlug,
   getAgentWebformStats,
+  getAgentBrief,
+  setAgentBriefEmail,
 } from '../controllers/agentController.js';
 import { authenticateToken, requireRole } from '../middleware/auth.js';
 
@@ -31,6 +33,8 @@ router.get('/cockpit', ...agentOrAdmin, getAgentCockpit);
 router.patch('/cockpit/:id', ...agentOrAdmin, patchAgentCockpitLead);
 router.post('/assign', ...agentOrAdmin, assignLead);
 router.get('/teammates', ...agentOrAdmin, listTeammates);
+router.get('/brief', ...agentOrAdmin, getAgentBrief);
+router.put('/brief', ...agentOrAdmin, setAgentBriefEmail);
 
 // Connect CRM (P-3a) — per-agent FUB key + contact import
 router.post('/fub/connect', ...agentOrAdmin, connectAgentFub);
