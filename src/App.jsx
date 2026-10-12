@@ -253,8 +253,8 @@ export default function App() {
         {/* City homes-for-sale SEO pages */}
         {CITY_HOMES.map((c) => (
           <React.Fragment key={c.slug}>
-            <Route path={`/${c.slug}-homes-for-sale`} element={<AppLayout><LazyPage><CityHomesForSalePage /></LazyPage></AppLayout>} />
-            <Route path={`/${c.slug}-homes-for-sale/`} element={<AppLayout><LazyPage><CityHomesForSalePage /></LazyPage></AppLayout>} />
+            <Route path={`/${c.slug}-homes-for-sale`} element={<AppLayout><LazyPage><CityHomesForSalePage slug={c.slug} /></LazyPage></AppLayout>} />
+            <Route path={`/${c.slug}-homes-for-sale/`} element={<AppLayout><LazyPage><CityHomesForSalePage slug={c.slug} /></LazyPage></AppLayout>} />
           </React.Fragment>
         ))}
         <Route path="/homes-for-sale/:slug/" element={<AppLayout><ListingDetailPage /></AppLayout>} />

@@ -102,8 +102,11 @@ function CityFaqs({ city }) {
   );
 }
 
-export default function CityHomesForSalePage() {
-  const { slug } = useParams();
+export default function CityHomesForSalePage({ slug: slugProp }) {
+  // The town routes are static paths (/windsor-homes-for-sale/), so the slug
+  // comes in as a prop; there is no :slug param to read.
+  const params = useParams();
+  const slug = slugProp || params.slug;
   const city = getCityHomes(slug);
   const [stats, setStats] = useState(null);
   const [listings, setListings] = useState([]);
