@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import SEO from "../components/SEO";
 import AccountModal from "../components/AccountModal";
+import TourPlanner from "../components/TourPlanner";
 import { formatPrice } from "../utils/listingHelpers.js";
 
 const API_BASE = (() => {
@@ -91,7 +92,7 @@ function CommentBox({ listingKey, onPosted }) {
   );
 }
 
-function HomeCard({ home, shared, onChanged }) {
+function HomeCard({ home, shared, onChanged, inTour, onToggleTour }) {
   const href = home.slug ? `/homes-for-sale/${home.slug}/` : null;
   return (
     <article id={`home-${home.listing_key}`} className="rounded-xl border border-gray-200 bg-white overflow-hidden scroll-mt-36">
@@ -126,6 +127,17 @@ function HomeCard({ home, shared, onChanged }) {
           <div className="mt-3 flex flex-wrap gap-1.5">
             {home.people.map((p) => <PersonChip key={p.user_id} p={p} />)}
           </div>
+          {!home.off_market && (
+            <label className="mt-3 inline-flex items-center gap-2 text-sm text-gray-700 min-h-[36px] cursor-pointer">
+              <input
+                type="checkbox"
+                checked={inTour}
+                onChange={() => onToggleTour(home.listing_key)}
+                className="w-4 h-4 accent-[#CFB36E]"
+              />
+              Add to a tour
+            </label>
+          )}
           {shared && (
             <div className="mt-3 border-t border-gray-100 pt-3">
               {home.comments.length > 0 && (
@@ -206,6 +218,10 @@ export default function BoardPage() {
   const [state, setState] = useState({ loading: true });
   const [joinMsg, setJoinMsg] = useState(null);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [tourKeys, setTourKeys] = useState([]);
+  const [planning, setPlanning] = useState(null);
+  const toggleTour = (key) =>
+    setTourKeys((ks) => (ks.includes(key) ? ks.filter((k) => k !== key) : ks.length >= 8 ? ks : [...ks, key]));
 
   const load = useCallback(async () => {
     try {
@@ -335,7 +351,16 @@ export default function BoardPage() {
                   Nothing saved yet. <Link to="/properties/" className="font-semibold text-[#8a7340] underline">Start a search</Link> and tap the heart on homes you like.
                 </p>
               ) : (
-                state.board.homes.map((h) => <HomeCard key={h.listing_key} home={h} shared={shared} onChanged={load} />)
+                state.board.homes.map((h) => (
+                  <HomeCard
+                    key={h.listing_key}
+                    home={h}
+                    shared={shared}
+                    onChanged={load}
+                    inTour={tourKeys.includes(h.listing_key)}
+                    onToggleTour={toggleTour}
+                  />
+                ))
               )}
             </section>
 
@@ -347,6 +372,29 @@ export default function BoardPage() {
           </>
         )}
       </div>
+      {tourKeys.length > 0 && !planning && (
+        <div className="fixed inset-x-0 bottom-[9.5rem] md:bottom-6 z-40 flex justify-center px-4 pointer-events-none">
+          <div className="pointer-events-auto flex items-center gap-3 rounded-full bg-gray-900 text-white shadow-xl pl-5 pr-2 py-2">
+            <span className="text-sm font-semibold">
+              {tourKeys.length} home{tourKeys.length === 1 ? "" : "s"} picked{tourKeys.length >= 8 ? " (max 8)" : ""}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPlanning([...tourKeys])}
+              className="min-h-[40px] px-4 rounded-full bg-[#CFB36E] text-gray-900 text-sm font-bold"
+            >
+              Plan a tour
+            </button>
+          </div>
+        </div>
+      )}
+      {planning && (
+        <TourPlanner
+          listingKeys={planning}
+          onClose={() => setPlanning(null)}
+          onSent={() => setTourKeys([])}
+        />
+      )}
       <AccountModal
         open={loginOpen}
         onClose={() => setLoginOpen(false)}

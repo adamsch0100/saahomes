@@ -960,6 +960,31 @@ export const runMigrations = async () => {
       console.error('household boards migration skipped:', boardErr.message);
     }
 
+    // ── Tour planner (Phase 2) ───────────────────────────────────────────
+    await client.query('SAVEPOINT tour_requests');
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS tour_requests (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          household_id INTEGER REFERENCES households(id) ON DELETE SET NULL,
+          listing_keys TEXT[] NOT NULL,
+          windows JSONB NOT NULL,
+          note TEXT,
+          est_minutes INTEGER,
+          status VARCHAR(16) NOT NULL DEFAULT 'requested',
+          showing_request_id INTEGER,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_tour_requests_user ON tour_requests(user_id, created_at DESC);
+      `);
+      await client.query('RELEASE SAVEPOINT tour_requests');
+    } catch (tourErr) {
+      await client.query('ROLLBACK TO SAVEPOINT tour_requests');
+      console.error('tour requests migration skipped:', tourErr.message);
+    }
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {

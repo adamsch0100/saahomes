@@ -37,6 +37,7 @@ import {
   joinHousehold,
   leaveHousehold,
 } from '../controllers/householdController.js';
+import { previewTour, requestTour, tourCalendarFile } from '../controllers/tourController.js';
 import { listSchools, runCronSchoolRatings } from '../controllers/schoolController.js';
 import {
   listHomes,
@@ -269,6 +270,11 @@ router.post('/household/leave', trackingLimiter, leaveHousehold);
 router.delete('/household/invites/:id', savedHomesLimiter, cancelInvite);
 router.get('/board', savedHomesLimiter, getBoard);
 router.post('/board/:listing_key/comments', trackingLimiter, addBoardComment);
+
+// Tour planner: several homes, one request, in driving order
+router.post('/tours/plan', trackingLimiter, previewTour);
+router.post('/tours', formLimit(), requestTour);
+router.get('/tours/:id/calendar.ics', savedHomesLimiter, tourCalendarFile);
 
 // ── Notification center (in-app nurture events + cadence prefs) ───────────
 const notificationsLimiter = rateLimit({

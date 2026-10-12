@@ -28,6 +28,7 @@ export const EVENT_TYPES = new Set([
   'household_invite',
   'household_joined',
   'board_comment',
+  'tour_request',
   'showing_request',
   'form_submit',
   'home_value_view',
