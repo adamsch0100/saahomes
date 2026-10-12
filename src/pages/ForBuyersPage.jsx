@@ -162,6 +162,7 @@ export default function ForBuyersPage() {
                 Sourced, dated housing numbers — CHFA income and purchase price limits by county plus U.S. Census figures for Fort Collins — each linked to its primary source.
               </p>
               <a href="/resources/northern-colorado-housing-statistics-2026/" className="text-black font-semibold hover:underline">View the numbers →</a>
+              <a href="/resources/mortgage-rates-statistics/" className="block mt-3 text-black font-semibold hover:underline">This week's mortgage rates →</a>
             </div>
           </div>
         </div>

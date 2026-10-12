@@ -168,6 +168,17 @@ export default function ResourceStatisticsPage() {
             was fetched, the figure matches the source, and the date is current. Numbers
             that fail that gate are held back until they are re-verified.
           </p>
+          <p className="text-gray-700 leading-relaxed">
+            Mortgage rates move every week. The current 30-year and 15-year fixed
+            national averages, and every weekly reading since January 2026, are on our{" "}
+            <Link
+              to="/resources/mortgage-rates-statistics/"
+              className="underline hover:text-black font-semibold"
+            >
+              weekly mortgage rate statistics page
+            </Link>
+            .
+          </p>
         </div>
       </section>
 

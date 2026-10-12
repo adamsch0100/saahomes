@@ -128,6 +128,10 @@ export default function MortgageCalculatorPage() {
               </ul>
             </div>
           </div>
+          <p className="text-gray-700 mt-8 text-center">
+            See the current 30-year and 15-year fixed national averages on our{" "}
+            <a href="/resources/mortgage-rates-statistics/" className="font-semibold underline hover:text-black">weekly mortgage rate statistics page</a>.
+          </p>
         </div>
       </section>
 

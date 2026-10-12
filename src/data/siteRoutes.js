@@ -12,6 +12,11 @@ import {
   CHFA_COUNTY_LIMITS_TITLE,
   CHFA_COUNTY_LIMITS_DESCRIPTION,
 } from './chfaCountyLimits.js';
+import {
+  MORTGAGE_RATES_PATH,
+  MORTGAGE_RATES_TITLE,
+  MORTGAGE_RATES_DESCRIPTION,
+} from './mortgageRatesStats.js';
 
 export const SITE_URL = 'https://saahomes.com';
 
@@ -294,6 +299,18 @@ const staticPages = [
     ogDescription: CHFA_COUNTY_LIMITS_DESCRIPTION,
     ogImage: '/images/Northern Colorado.webp',
     ogImageAlt: 'CHFA income and purchase price limits by county — 2026',
+  },
+  {
+    // National citation magnet — weekly Freddie Mac PMMS mortgage averages
+    path: MORTGAGE_RATES_PATH,
+    priority: '0.8',
+    changefreq: 'weekly',
+    title: MORTGAGE_RATES_TITLE,
+    description: MORTGAGE_RATES_DESCRIPTION,
+    ogTitle: 'Mortgage Rates 2026 — Weekly 30 & 15-Year Averages',
+    ogDescription: MORTGAGE_RATES_DESCRIPTION,
+    ogImage: '/images/Northern Colorado.webp',
+    ogImageAlt: 'Weekly 30-year and 15-year fixed mortgage rate averages, 2026',
   },
   {
     path: '/blog/',

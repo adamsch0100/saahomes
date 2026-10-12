@@ -105,6 +105,7 @@ const GIT_SOURCES = {
   events: ['src/pages/EventsCalendarPage.jsx', 'src/data/localEvents.js'],
   citationHub: ['src/pages/ResourceStatisticsPage.jsx', 'src/data/citationHubStats.js'],
   chfaCountyLimits: ['src/pages/ChfaCountyLimitsPage.jsx', 'src/data/chfaCountyLimits.js'],
+  mortgageRates: ['src/pages/MortgageRatesStatisticsPage.jsx', 'src/data/mortgageRatesStats.js'],
 };
 
 // Map generator output paths -> git source keys (checked in order; first match wins)
@@ -138,6 +139,7 @@ function sourcesFor(path) {
     ['/events/', 'events'],
     ['/resources/northern-colorado-housing-statistics-2026/', 'citationHub'],
     ['/resources/colorado-chfa-income-limits-2026/', 'chfaCountyLimits'],
+    ['/resources/mortgage-rates-statistics/', 'mortgageRates'],
   ];
   for (const [prefix, key] of map) {
     if (path.startsWith(prefix)) return GIT_SOURCES[key];

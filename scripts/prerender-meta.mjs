@@ -35,6 +35,16 @@ import {
   CHFA_COUNTY_LIMITS as CHFA_COUNTY_TABLE_ROWS,
   CHFA_COUNTY_FAQS,
 } from '../src/data/chfaCountyLimits.js';
+import {
+  MORTGAGE_RATES_PATH,
+  MORTGAGE_RATES_LAST_UPDATED,
+  MORTGAGE_RATES_SOURCE_ORG,
+  MORTGAGE_RATES_SOURCE_LABEL,
+  MORTGAGE_RATES_SOURCE_URL,
+  MORTGAGE_RATES_WEEKLY,
+  MORTGAGE_RATES_CITE,
+  MORTGAGE_RATES_FAQS,
+} from '../src/data/mortgageRatesStats.js';
 
 // Freshness signal for E-E-A-T (dated expert content). Keep in sync with
 // AREA_CONTENT_DATE in src/data/areaSeo.js. Bump when content is substantively
@@ -1210,9 +1220,67 @@ function injectCitationHubBody(html) {
 }
 
 // ---------------------------------------------------------------------------
-// CHFA county limits table — /resources/colorado-chfa-income-limits-2026/
-// Verified county rows (Larimer/Weld/Boulder/Adams), cite lines, FAQ. Crawlable.
+// Mortgage rates magnet — /resources/mortgage-rates-statistics/
+// Weekly Freddie Mac PMMS national averages (verified rows), cite line, FAQ.
 // ---------------------------------------------------------------------------
+function injectMortgageRatesBody(html) {
+  const latest = MORTGAGE_RATES_WEEKLY[MORTGAGE_RATES_WEEKLY.length - 1];
+  const rows = [...MORTGAGE_RATES_WEEKLY]
+    .reverse()
+    .map(
+      (row) =>
+        `          <tr id="week-${escapeAttr(row.date)}">` +
+        `<td>${escapeHtml(row.date)}</td>` +
+        `<td>${row.thirty.toFixed(2)}%</td>` +
+        `<td>${row.fifteen.toFixed(2)}%</td></tr>`
+    )
+    .join('\n');
+
+  const faqHtml = MORTGAGE_RATES_FAQS.map(
+    (faq) =>
+      `        <div itemscope="" itemprop="mainEntity" itemtype="https://schema.org/Question">\n` +
+      `          <h3 itemprop="name">${escapeHtml(faq.q)}</h3>\n` +
+      `          <div itemscope="" itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">\n` +
+      `            <p itemprop="text">${escapeHtml(faq.a)}</p>\n` +
+      `          </div>\n` +
+      `        </div>`
+  ).join('\n');
+
+  const bodyContent =
+    `\n` +
+    `    <div class="prerendered-mortgage-rates">\n` +
+    `      <h1>Mortgage Rates 2026: Weekly 30 &amp; 15-Year Averages</h1>\n` +
+    `      <p>The current national average for the 30-year and 15-year fixed mortgage, and every weekly reading since January 2026. Each figure comes from Freddie Mac's Primary Mortgage Market Survey and links to its source. Last updated ${escapeHtml(MORTGAGE_RATES_LAST_UPDATED)}.</p>\n` +
+    `      <section>\n` +
+    `        <h2>This week's national average</h2>\n` +
+    `        <ul>\n` +
+    `          <li><strong>30-year fixed:</strong> ${latest.thirty.toFixed(2)}% (week of ${escapeHtml(latest.date)})</li>\n` +
+    `          <li><strong>15-year fixed:</strong> ${latest.fifteen.toFixed(2)}% (week of ${escapeHtml(latest.date)})</li>\n` +
+    `        </ul>\n` +
+    `      </section>\n` +
+    `      <section>\n` +
+    `        <h2>Weekly mortgage rate history, 2026</h2>\n` +
+    `        <table>\n` +
+    `          <thead>\n` +
+    `            <tr><th>Week of</th><th>30-year fixed</th><th>15-year fixed</th></tr>\n` +
+    `          </thead>\n` +
+    `          <tbody>\n${rows}\n          </tbody>\n` +
+    `        </table>\n` +
+    `        <p><strong>Source:</strong> ${escapeHtml(MORTGAGE_RATES_SOURCE_ORG)} &mdash; <a href="${escapeAttr(MORTGAGE_RATES_SOURCE_URL)}" rel="noopener">${escapeHtml(MORTGAGE_RATES_SOURCE_LABEL)}</a> (verified ${escapeHtml(MORTGAGE_RATES_LAST_UPDATED)}).</p>\n` +
+    `        <p><em>Cite this:</em> ${escapeHtml(MORTGAGE_RATES_CITE)}</p>\n` +
+    `      </section>\n` +
+    `      <section class="prerendered-faq">\n` +
+    `        <h2>Frequently Asked Questions</h2>\n` +
+    `${faqHtml}\n` +
+    `      </section>\n` +
+    `      <section class="prerendered-cta">\n` +
+    `        <h2>Questions about what these rates mean for you?</h2>\n` +
+    `        <p>Adam and Mandi Schwartz help buyers and sellers across Northern Colorado. Contact SAA Homes at <strong>(970) 999-1407</strong> or visit <a href="${SITE_URL}/contact/">our contact page</a> for a free consultation.</p>\n` +
+    `      </section>\n` +
+    `    </div>\n  `;
+
+  return html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+}
 function injectChfaCountyLimitsBody(html) {
   const rows = CHFA_COUNTY_TABLE_ROWS.map(
     (row) =>
@@ -2216,6 +2284,26 @@ function buildRouteSchemas(route) {
     );
   }
 
+  // Mortgage rates magnet — FAQPage + BreadcrumbList for the sourced weekly
+  // rate table.
+  if (path === MORTGAGE_RATES_PATH) {
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: MORTGAGE_RATES_FAQS.map((faq) => ({
+        '@type': 'Question',
+        name: faq.q,
+        acceptedAnswer: { '@type': 'Answer', text: faq.a },
+      })),
+    });
+    schemas.push(
+      buildBreadcrumbList([
+        { name: 'Home', url: `${SITE_URL}/` },
+        { name: 'Mortgage Rates 2026', url: canonical },
+      ])
+    );
+  }
+
   return schemas;
 }
 
@@ -2487,6 +2575,9 @@ async function main() {
       html = injectCitationHubBody(html);
     } else if (route.path === CHFA_COUNTY_LIMITS_PATH) {
       html = injectChfaCountyLimitsBody(html);
+    } else if (route.path === MORTGAGE_RATES_PATH) {
+      html = injectMortgageRatesBody(html);
+      console.log('  Body: injected mortgage rates weekly table + cite + FAQ');
     } else {
       html = injectGenericBody(html, route);
     }

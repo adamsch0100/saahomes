@@ -985,7 +985,6 @@ export const runMigrations = async () => {
       console.error('tour requests migration skipped:', tourErr.message);
     }
 
-<<<<<<< Updated upstream
     // ── Agent morning brief ──────────────────────────────────────────────
     await client.query('SAVEPOINT morning_briefs');
     try {
@@ -1004,7 +1003,8 @@ export const runMigrations = async () => {
     } catch (briefErr) {
       await client.query('ROLLBACK TO SAVEPOINT morning_briefs');
       console.error('morning brief migration skipped:', briefErr.message);
-=======
+    }
+
     // ── Lead submit leg log (GA4 / FUB / notify evidence per submit) ──────
     await client.query('SAVEPOINT lead_submit_log');
     try {
@@ -1037,7 +1037,6 @@ export const runMigrations = async () => {
     } catch (logErr) {
       await client.query('ROLLBACK TO SAVEPOINT lead_submit_log');
       console.error('lead submit log migration skipped:', logErr.message);
->>>>>>> Stashed changes
     }
 
     await client.query('COMMIT');
