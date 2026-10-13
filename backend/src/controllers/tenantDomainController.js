@@ -7,6 +7,7 @@
  */
 import getPool from '../config/database.js';
 import logger from '../utils/logger.js';
+import { tenantIdOf } from '../services/tenantContext.js';
 import { getAgentBrand, publicAgentPayload } from '../services/tenantBrand.js';
 import {
   normalizeDomain,
@@ -23,12 +24,12 @@ const AGENT_RETURNING = `
   custom_domain, domain_verified_at, domain_verify_token
 `;
 
-async function loadAgent(pool, id) {
+async function loadAgent(pool, id, tenantId) {
   const result = await pool.query(
     `SELECT ${AGENT_RETURNING}
      FROM users
-     WHERE id = $1 AND role IN ('agent', 'admin')`,
-    [id]
+     WHERE id = $1 AND role IN ('agent', 'admin') AND tenant_id = $2`,
+    [id, tenantId]
   );
   return result.rows[0] || null;
 }
@@ -49,7 +50,7 @@ export const setAgentDomain = async (req, res) => {
     if (!id) return res.status(400).json({ error: 'Invalid agent id' });
 
     const pool = getPool();
-    const existing = await loadAgent(pool, id);
+    const existing = await loadAgent(pool, id, tenantIdOf(req));
     if (!existing) return res.status(404).json({ error: 'Agent not found' });
 
     const raw = req.body?.custom_domain;
@@ -111,7 +112,7 @@ export const verifyAgentDomain = async (req, res) => {
     if (!id) return res.status(400).json({ error: 'Invalid agent id' });
 
     const pool = getPool();
-    const existing = await loadAgent(pool, id);
+    const existing = await loadAgent(pool, id, tenantIdOf(req));
     if (!existing) return res.status(404).json({ error: 'Agent not found' });
 
     const domain = existing.custom_domain;
@@ -168,7 +169,7 @@ export const deleteAgentDomain = async (req, res) => {
     if (!id) return res.status(400).json({ error: 'Invalid agent id' });
 
     const pool = getPool();
-    const existing = await loadAgent(pool, id);
+    const existing = await loadAgent(pool, id, tenantIdOf(req));
     if (!existing) return res.status(404).json({ error: 'Agent not found' });
 
     const updated = await pool.query(
