@@ -3,6 +3,7 @@ import { sendChfaDpaLeadNotification } from '../services/emailService.js';
 import { forwardChfaDpaLeadToFollowUpBoss } from '../services/followUpBossService.js';
 import { recordLeadConversion } from '../services/ga4MeasurementService.js';
 import logger from '../utils/logger.js';
+import { reportLeadToBoard } from '../services/boardLeadCount.js';
 
 export const submitChfaDpaLeadForm = async (req, res) => {
   const {
@@ -35,6 +36,7 @@ export const submitChfaDpaLeadForm = async (req, res) => {
       logger.error('CHFA DPA lead email notification failed (non-blocking)', err);
     });
 
+    reportLeadToBoard('CHFA DPA');
     forwardChfaDpaLeadToFollowUpBoss(submission).catch((err) => {
       logger.error('Follow Up Boss forwarding failed (non-blocking)', err);
     });

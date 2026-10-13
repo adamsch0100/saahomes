@@ -3,6 +3,7 @@ import { sendChampionsLeadNotification } from '../services/emailService.js';
 import { forwardChampionsLeadToFollowUpBoss } from '../services/followUpBossService.js';
 import { recordLeadConversion } from '../services/ga4MeasurementService.js';
 import logger from '../utils/logger.js';
+import { reportLeadToBoard } from '../services/boardLeadCount.js';
 
 export const submitChampionsLeadForm = async (req, res) => {
   const {
@@ -35,6 +36,7 @@ export const submitChampionsLeadForm = async (req, res) => {
       logger.error('Champions lead email notification failed (non-blocking)', err);
     });
 
+    reportLeadToBoard('Champions');
     forwardChampionsLeadToFollowUpBoss(submission).catch((err) => {
       logger.error('Follow Up Boss forwarding failed (non-blocking)', err);
     });

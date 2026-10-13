@@ -7,6 +7,7 @@ import { recordEvent as recordStreamEvent, VISITOR_COOKIE, sessionUserId } from 
 import getPool from '../config/database.js';
 import { forwardShowingRequestToFollowUpBoss } from '../services/followUpBossService.js';
 import { rejectIfDisposableEmail } from '../utils/emailQuality.js';
+import { reportLeadToBoard } from '../services/boardLeadCount.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -54,6 +55,7 @@ export const submitShowingRequest = async (req, res) => {
     });
 
     // FUB lead + person-id capture (fire-and-forget)
+    reportLeadToBoard('showing request');
     forwardShowingRequestToFollowUpBoss({
       name: nameStr, email: emailStr, phone: phoneDigits,
       showing_date: date, showing_time: time, message: String(message || '').trim(),

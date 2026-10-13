@@ -19,6 +19,7 @@ import {
   tourCalendar,
 } from '../services/tourPlanner.js';
 import { resolveUser } from './savedHomesController.js';
+import { reportLeadToBoard } from '../services/boardLeadCount.js';
 
 const SITE = (process.env.SITE_URL || 'https://saahomes.com').replace(/\/$/, '');
 const MAX_WINDOWS = 3;
@@ -150,6 +151,7 @@ export const requestTour = async (req, res) => {
       userId: user.id,
       meta: { tour_id: tour.id, homes: plan.stops.length, first_window: windows[0] },
     });
+    reportLeadToBoard('tour request');
     forwardShowingRequestToFollowUpBoss({
       name: user.name || user.email,
       email: user.email,

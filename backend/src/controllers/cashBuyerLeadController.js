@@ -3,6 +3,7 @@ import { sendContactNotification } from '../services/emailService.js';
 import { forwardContactToFollowUpBoss } from '../services/followUpBossService.js';
 import { recordLeadConversion } from '../services/ga4MeasurementService.js';
 import logger from '../utils/logger.js';
+import { reportLeadToBoard } from '../services/boardLeadCount.js';
 
 export const submitCashBuyerLeadForm = async (req, res) => {
   const {
@@ -33,6 +34,7 @@ export const submitCashBuyerLeadForm = async (req, res) => {
       logger.error('Cash buyer lead email notification failed (non-blocking)', err);
     });
 
+    reportLeadToBoard('cash buyer page');
     forwardContactToFollowUpBoss({ ...submission, source: 'cash-buyer-page' }).catch((err) => {
       logger.error('Follow Up Boss forwarding failed (non-blocking)', err);
     });

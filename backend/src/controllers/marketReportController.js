@@ -9,6 +9,7 @@ import {
   setAuthCookie, isStaffAccount, hasOwnSession, emailSignInLink, SIGN_IN_REQUIRED_MESSAGE,
 } from './alertController.js';
 import logger from '../utils/logger.js';
+import { reportLeadToBoard } from '../services/boardLeadCount.js';
 
 function cleanPhone(v) {
   const digits = String(v || '').replace(/\D/g, '');
@@ -178,6 +179,7 @@ export const submitMarketReportForm = async (req, res) => {
       logger.error('Email notification failed (non-blocking)', err);
     });
 
+    reportLeadToBoard('market report');
     forwardMarketReportToFollowUpBoss(submission).catch((err) => {
       logger.error('Follow Up Boss forwarding failed (non-blocking)', err);
     });

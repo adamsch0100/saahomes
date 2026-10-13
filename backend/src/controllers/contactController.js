@@ -10,6 +10,7 @@ import {
   recordNotifyLeg,
 } from '../services/leadSubmitLog.js';
 import logger from '../utils/logger.js';
+import { reportLeadToBoard } from '../services/boardLeadCount.js';
 
 export const submitContactForm = async (req, res) => {
   const {
@@ -59,6 +60,7 @@ export const submitContactForm = async (req, res) => {
         logger.error('Email notification failed (non-blocking)', err);
       });
 
+    reportLeadToBoard('contact');
     forwardContactToFollowUpBoss(submission)
       .then((result) => recordFubLeg(logId, {
         success: !!result?.success,
