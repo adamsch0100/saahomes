@@ -3,6 +3,7 @@ import { sendGhopeLeadNotification } from '../services/emailService.js';
 import { forwardGhopeLeadToFollowUpBoss } from '../services/followUpBossService.js';
 import { recordLeadConversion } from '../services/ga4MeasurementService.js';
 import logger from '../utils/logger.js';
+import { reportLeadToBoard } from '../services/boardLeadCount.js';
 
 export const submitGhopeLeadForm = async (req, res) => {
   const {
@@ -35,6 +36,7 @@ export const submitGhopeLeadForm = async (req, res) => {
       logger.error('G-HOPE lead email notification failed (non-blocking)', err);
     });
 
+    reportLeadToBoard('G-HOPE');
     forwardGhopeLeadToFollowUpBoss(submission).catch((err) => {
       logger.error('Follow Up Boss forwarding failed (non-blocking)', err);
     });

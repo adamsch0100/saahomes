@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
+import CiteBlock from "../components/CiteBlock";
 import {
   CHFA_COUNTY_LIMITS_PATH,
   CHFA_COUNTY_LIMITS_URL,
@@ -153,7 +154,8 @@ export default function ChfaCountyLimitsPage() {
             {CHFA_COUNTY_LIMITS.map((row) => (
               <article
                 key={row.id}
-                className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 sm:p-8"
+                id={row.id}
+                className="scroll-mt-28 bg-white rounded-xl border border-gray-200 shadow-sm p-6 sm:p-8"
               >
                 <div className="flex items-center justify-between gap-4 mb-4">
                   <h3 className="text-xl font-bold font-serif">{row.county}</h3>
@@ -161,12 +163,12 @@ export default function ChfaCountyLimitsPage() {
                     Verified {CHFA_COUNTY_LIMITS_LAST_UPDATED}
                   </span>
                 </div>
-                <div className="bg-gray-50 border border-gray-100 rounded-lg p-4 mb-5">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                    Cite this
-                  </p>
-                  <p className="text-sm text-gray-700 italic">{row.cite}</p>
-                </div>
+                <CiteBlock
+                  cite={row.cite}
+                  url={`${CHFA_COUNTY_LIMITS_URL}#${row.id}`}
+                  pageTitle="CHFA Income & Purchase Price Limits 2026 by County"
+                  className="mb-5"
+                />
                 <Link
                   to={row.areaPath}
                   className="text-sm font-semibold text-black hover:underline"

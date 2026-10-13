@@ -65,6 +65,7 @@ export default function Footer() {
             <h4 className="font-semibold text-white mb-4">Resources</h4>
             <ul className="space-y-2 text-sm">
               <li><Link to="/mortgage-calculator/" className="hover:text-white transition-colors">Mortgage Calculator</Link></li>
+              <li><Link to="/resources/" className="hover:text-white transition-colors">Housing Data &amp; Statistics</Link></li>
               <li><Link to="/testimonials/" className="hover:text-white transition-colors">Client Reviews</Link></li>
               <li><Link to="/blog/" className="hover:text-white transition-colors">Real Estate Guides</Link></li>
               <li><Link to="/events/" className="hover:text-white transition-colors">NOCO Events Calendar</Link></li>

@@ -45,6 +45,13 @@ import {
   MORTGAGE_RATES_CITE,
   MORTGAGE_RATES_FAQS,
 } from '../src/data/mortgageRatesStats.js';
+import { citationText, CITATION_PUBLISHER } from '../src/utils/citation.js';
+import {
+  RESOURCES_PATH,
+  RESOURCES_URL,
+  RESOURCES_DESCRIPTION,
+  RESOURCE_PAGES,
+} from '../src/data/resourcesIndex.js';
 
 // Freshness signal for E-E-A-T (dated expert content). Keep in sync with
 // AREA_CONTENT_DATE in src/data/areaSeo.js. Bump when content is substantively
@@ -426,6 +433,7 @@ const SITE_MONEY_PAGES = [
   ['/chfa-schools-to-home/', 'CHFA Schools to Home'],
   ['/colorado-champions-home-loan-program/', 'Colorado Champions Home Loan'],
   ['/blog/selling-your-home-in-fort-collins/', 'Selling Your Home in Fort Collins'],
+  ['/resources/', 'Housing Data &amp; Statistics'],
   ['/contact/', 'Contact SAA Homes'],
 ];
 
@@ -1146,6 +1154,32 @@ function injectGenericBody(html, { title }) {
 }
 
 // ---------------------------------------------------------------------------
+// Resources hub — /resources/ (links every sourced stat page)
+// ---------------------------------------------------------------------------
+function injectResourcesIndexBody(html) {
+  const cards = RESOURCE_PAGES.map(
+    (p) =>
+      `        <article>\n` +
+      `          <h2><a href="${SITE_URL}${escapeAttr(p.path)}">${escapeHtml(p.title)}</a></h2>\n` +
+      `          <p>${escapeHtml(p.description)}</p>\n` +
+      `          <p>Updated ${escapeHtml(p.updated)}</p>\n` +
+      `        </article>`
+  ).join('\n');
+  const bodyContent =
+    `\n` +
+    `    <div class="prerendered-resources">\n` +
+    `      <h1>Northern Colorado Housing Data &amp; Statistics</h1>\n` +
+    `      <p>${escapeHtml(RESOURCES_DESCRIPTION)}</p>\n` +
+    `${cards}\n` +
+    `      <section>\n` +
+    `        <h2>Citing these numbers</h2>\n` +
+    `        <p>Each stat card has a ready-made citation. Please name the primary source shown on the card and credit ${escapeHtml(CITATION_PUBLISHER)} as the compiler with a link to the page.</p>\n` +
+    `      </section>\n` +
+    `    </div>\n  `;
+  return html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+}
+
+// ---------------------------------------------------------------------------
 // Citation hub — /resources/northern-colorado-housing-statistics-2026/
 // Sourced, dated stat cards (verified rows only) for crawlers that do not run JS.
 // ---------------------------------------------------------------------------
@@ -1171,7 +1205,7 @@ function injectCitationHubBody(html) {
           `          <p><strong>As of:</strong> ${escapeHtml(stat.asOf)}</p>\n` +
           `          <p><strong>Source:</strong> ${escapeHtml(stat.sourceOrg)} &mdash; <a href="${escapeAttr(stat.sourceUrl)}" rel="noopener">${escapeHtml(stat.sourceLabel)}</a> (verified ${escapeHtml(stat.verified)})</p>\n` +
           (stat.note ? `          <p>${escapeHtml(stat.note)}</p>\n` : '') +
-          `          <p><em>Cite this:</em> ${escapeHtml(stat.cite)}</p>\n` +
+          `          <p><em>Cite this:</em> ${escapeHtml(citationText(stat.cite, `${SITE_URL}${CITATION_HUB_PATH}#${stat.id}`))}</p>\n` +
           `          <p>${moneyLinks}</p>\n` +
           `        </article>`
         );
@@ -1267,7 +1301,7 @@ function injectMortgageRatesBody(html) {
     `          <tbody>\n${rows}\n          </tbody>\n` +
     `        </table>\n` +
     `        <p><strong>Source:</strong> ${escapeHtml(MORTGAGE_RATES_SOURCE_ORG)} &mdash; <a href="${escapeAttr(MORTGAGE_RATES_SOURCE_URL)}" rel="noopener">${escapeHtml(MORTGAGE_RATES_SOURCE_LABEL)}</a> (verified ${escapeHtml(MORTGAGE_RATES_LAST_UPDATED)}).</p>\n` +
-    `        <p><em>Cite this:</em> ${escapeHtml(MORTGAGE_RATES_CITE)}</p>\n` +
+    `        <p><em>Cite this:</em> ${escapeHtml(citationText(MORTGAGE_RATES_CITE, `${SITE_URL}${MORTGAGE_RATES_PATH}`))}</p>\n` +
     `      </section>\n` +
     `      <section class="prerendered-faq">\n` +
     `        <h2>Frequently Asked Questions</h2>\n` +
@@ -1294,9 +1328,9 @@ function injectChfaCountyLimitsBody(html) {
 
   const citeCards = CHFA_COUNTY_TABLE_ROWS.map(
     (row) =>
-      `        <article>\n` +
+      `        <article id="${escapeAttr(row.id)}">\n` +
       `          <h3>${escapeHtml(row.county)}</h3>\n` +
-      `          <p><em>Cite this:</em> ${escapeHtml(row.cite)}</p>\n` +
+      `          <p><em>Cite this:</em> ${escapeHtml(citationText(row.cite, `${SITE_URL}${CHFA_COUNTY_LIMITS_PATH}#${row.id}`))}</p>\n` +
       `          <p><a href="${SITE_URL}${escapeAttr(row.areaPath)}">${escapeHtml(row.areaLabel)} &rarr;</a></p>\n` +
       `        </article>`
   ).join('\n');
@@ -2260,6 +2294,7 @@ function buildRouteSchemas(route) {
     schemas.push(
       buildBreadcrumbList([
         { name: 'Home', url: `${SITE_URL}/` },
+        { name: 'Resources', url: RESOURCES_URL },
         { name: 'Northern Colorado Housing Statistics 2026', url: canonical },
       ])
     );
@@ -2279,7 +2314,31 @@ function buildRouteSchemas(route) {
     schemas.push(
       buildBreadcrumbList([
         { name: 'Home', url: `${SITE_URL}/` },
+        { name: 'Resources', url: RESOURCES_URL },
         { name: 'CHFA Income & Purchase Price Limits 2026 by County', url: canonical },
+      ])
+    );
+  }
+
+  // Resources hub — CollectionPage of the stat pages + BreadcrumbList.
+  if (path === RESOURCES_PATH) {
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: 'Northern Colorado Housing Data & Statistics',
+      url: RESOURCES_URL,
+      description: RESOURCES_DESCRIPTION,
+      hasPart: RESOURCE_PAGES.map((p) => ({
+        '@type': 'WebPage',
+        name: p.title,
+        url: `${SITE_URL}${p.path}`,
+        dateModified: p.updated,
+      })),
+    });
+    schemas.push(
+      buildBreadcrumbList([
+        { name: 'Home', url: `${SITE_URL}/` },
+        { name: 'Resources', url: RESOURCES_URL },
       ])
     );
   }
@@ -2299,6 +2358,7 @@ function buildRouteSchemas(route) {
     schemas.push(
       buildBreadcrumbList([
         { name: 'Home', url: `${SITE_URL}/` },
+        { name: 'Resources', url: RESOURCES_URL },
         { name: 'Mortgage Rates 2026', url: canonical },
       ])
     );
@@ -2571,6 +2631,9 @@ async function main() {
     } else if (cityHomes) {
       html = injectCityHomesBody(html, cityHomes);
       console.log(`  Body: injected city homes-for-sale page "${cityHomes.city}" with intro + links + attribution`);
+    } else if (route.path === RESOURCES_PATH) {
+      html = injectResourcesIndexBody(html);
+      console.log('  Body: injected resources hub links');
     } else if (route.path === CITATION_HUB_PATH) {
       html = injectCitationHubBody(html);
     } else if (route.path === CHFA_COUNTY_LIMITS_PATH) {

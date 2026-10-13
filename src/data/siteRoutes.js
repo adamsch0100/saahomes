@@ -17,6 +17,11 @@ import {
   MORTGAGE_RATES_TITLE,
   MORTGAGE_RATES_DESCRIPTION,
 } from './mortgageRatesStats.js';
+import {
+  RESOURCES_PATH,
+  RESOURCES_TITLE,
+  RESOURCES_DESCRIPTION,
+} from './resourcesIndex.js';
 
 export const SITE_URL = 'https://saahomes.com';
 
@@ -277,6 +282,18 @@ const staticPages = [
     ogDescription: 'Estimate monthly payments for Fort Collins, Loveland, Windsor & Greeley homes.',
     ogImage: '/images/buyers-hero.jpg',
     ogImageAlt: 'Colorado mortgage payment calculator',
+  },
+  {
+    // Resources hub — parent of every sourced stat page
+    path: RESOURCES_PATH,
+    priority: '0.7',
+    changefreq: 'weekly',
+    title: RESOURCES_TITLE,
+    description: RESOURCES_DESCRIPTION,
+    ogTitle: 'Northern Colorado Housing Data & Statistics — Sourced & Dated',
+    ogDescription: RESOURCES_DESCRIPTION,
+    ogImage: '/images/Northern Colorado.webp',
+    ogImageAlt: 'Northern Colorado housing data and statistics',
   },
   {
     path: CITATION_HUB_PATH,
