@@ -1,9 +1,10 @@
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import getPool from '../config/database.js';
-import { generateToken } from '../middleware/auth.js';
 import logger from '../utils/logger.js';
 import { tenantIdOf } from '../services/tenantContext.js';
+import { finishLogin } from '../services/staffAuth.js';
+import { issueAccountLink } from '../services/accountLinks.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -26,9 +27,13 @@ export const login = async (req, res) => {
 
   // Platform owner: env credentials, admin of whatever brokerage the host resolves to
   if (ADMIN_PASSWORD && email === ADMIN_EMAIL && safeEqual(password, ADMIN_PASSWORD)) {
-    const token = generateToken({ email, role: 'admin', platform: true });
-    logger.info('Admin login successful', { email });
-    return res.json({ success: true, token });
+    logger.info('Admin password accepted', { email });
+    try {
+      return await finishLogin(res, { payload: { email, role: 'admin', platform: true }, body: { success: true } });
+    } catch (error) {
+      logger.error('Admin login finish failed', error);
+      return res.status(500).json({ error: 'Login failed' });
+    }
   }
 
   // Brokerage admin: a users row with role 'admin' in this request's tenant
@@ -42,15 +47,11 @@ export const login = async (req, res) => {
     );
     const row = result.rows[0];
     if (row && row.password_hash && (await bcrypt.compare(String(password), row.password_hash))) {
-      const token = generateToken({
-        id: row.id,
-        email: row.email,
-        role: 'admin',
-        tenant_id: row.tenant_id,
-        name: row.name,
+      logger.info('Admin password accepted', { email: row.email, tenant_id: row.tenant_id });
+      return await finishLogin(res, {
+        payload: { id: row.id, email: row.email, role: 'admin', tenant_id: row.tenant_id, name: row.name },
+        body: { success: true },
       });
-      logger.info('Admin login successful', { email: row.email, tenant_id: row.tenant_id });
-      return res.json({ success: true, token });
     }
   } catch (error) {
     logger.error('Admin login lookup failed', error);
@@ -1237,10 +1238,48 @@ export const getEmailAbStats = async (req, res) => {
 
 const AGENT_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+async function inviteStaff(row, tenantId, tenant) {
+  try {
+    const { sent } = await issueAccountLink({
+      user: { id: row.id, email: row.email, name: row.name, tenant_id: tenantId },
+      purpose: 'invite',
+      tenant,
+    });
+    return sent;
+  } catch (error) {
+    logger.error('staff invite failed', { id: row.id, message: error.message });
+    return false;
+  }
+}
+
+/**
+ * POST /api/admin/agents/:id/invite — (re)send the set-your-password email.
+ */
+export const resendAgentInvite = async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Invalid agent id' });
+  try {
+    const tenantId = tenantIdOf(req);
+    const r = await getPool().query(
+      `SELECT id, email, name FROM users
+       WHERE id = $1 AND tenant_id = $2 AND role IN ('agent', 'admin') AND status = 'active'`,
+      [id, tenantId]
+    );
+    if (!r.rows[0]) return res.status(404).json({ error: 'Agent not found' });
+    const sent = await inviteStaff(r.rows[0], tenantId, req.tenant);
+    if (!sent) return res.status(429).json({ error: 'An invite just went out. Try again in an hour.' });
+    return res.json({ success: true });
+  } catch (error) {
+    logger.error('resendAgentInvite error', error);
+    return res.status(500).json({ error: 'Could not send the invite' });
+  }
+};
+
 /**
  * POST /api/admin/agents
  * Create a teammate account with role=agent.
- * Body: { name, email, phone?, password, brand_name?, brokerage_name?, brand_phone?, voice_style?, marketKey? }
+ * Without a password the agent is emailed an invite to set their own.
+ * Body: { name, email, phone?, password?, brand_name?, brokerage_name?, brand_phone?, voice_style?, marketKey? }
  */
 export const createAgent = async (req, res) => {
   try {
@@ -1255,7 +1294,8 @@ export const createAgent = async (req, res) => {
     if (!nameStr) {
       return res.status(400).json({ error: 'Name is required' });
     }
-    if (passStr.length < 8) {
+    // No password: the agent gets an invite email and sets their own.
+    if (passStr && passStr.length < 8) {
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
 
@@ -1304,11 +1344,11 @@ export const createAgent = async (req, res) => {
       if (role === 'agent' || role === 'admin') {
         return res.status(409).json({ error: 'An agent/admin account with that email already exists' });
       }
-      const hash = await bcrypt.hash(passStr, 10);
+      const hash = passStr ? await bcrypt.hash(passStr, 10) : null;
       const token = crypto.randomBytes(24).toString('hex');
       const updated = await pool.query(
         `UPDATE users SET
-           password_hash = $1,
+           password_hash = COALESCE($1, password_hash),
            name = $2,
            phone = COALESCE($3, phone),
            role = 'agent',
@@ -1327,14 +1367,16 @@ export const createAgent = async (req, res) => {
         [hash, nameStr, phoneVal, token, brandName, brokerageName, brandPhone, voiceStyle, marketKey, row.id]
       );
       logger.info('Existing user upgraded to agent', { email: emailStr, id: row.id });
+      const invited = !passStr && (await inviteStaff(updated.rows[0], tenantId, req.tenant));
       return res.status(200).json({
         success: true,
         data: publicAgentPayload(updated.rows[0]),
         upgraded: true,
+        ...(passStr ? {} : { invited }),
       });
     }
 
-    const hash = await bcrypt.hash(passStr, 10);
+    const hash = passStr ? await bcrypt.hash(passStr, 10) : null;
     const manageToken = crypto.randomBytes(24).toString('hex');
     const created = await pool.query(
       `INSERT INTO users (
@@ -1349,7 +1391,12 @@ export const createAgent = async (req, res) => {
     );
 
     logger.info('Agent account created', { email: emailStr, id: created.rows[0].id });
-    return res.status(201).json({ success: true, data: publicAgentPayload(created.rows[0]) });
+    const invited = !passStr && (await inviteStaff(created.rows[0], tenantId, req.tenant));
+    return res.status(201).json({
+      success: true,
+      data: publicAgentPayload(created.rows[0]),
+      ...(passStr ? {} : { invited }),
+    });
   } catch (error) {
     logger.error('createAgent error', error);
     return res.status(500).json({ error: 'Failed to create agent' });
@@ -1367,6 +1414,7 @@ export const listAgents = async (req, res) => {
       `SELECT id, email, name, phone, role, status, created_at, last_active_at,
               brand_name, brokerage_name, brand_phone, voice_style, market_key,
               custom_domain, domain_verified_at, domain_verify_token,
+              (password_hash IS NULL) AS invite_pending,
               (SELECT COUNT(*)::int FROM users c
                WHERE c.assigned_agent_id = users.id
                  AND COALESCE(c.role, 'client') = 'client') AS assigned_lead_count
@@ -1381,6 +1429,7 @@ export const listAgents = async (req, res) => {
     const data = result.rows.map((row) => ({
       ...publicAgentPayload(row),
       assigned_lead_count: row.assigned_lead_count,
+      invite_pending: row.invite_pending,
     }));
     return res.json({ success: true, data });
   } catch (error) {

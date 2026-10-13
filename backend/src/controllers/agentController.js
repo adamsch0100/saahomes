@@ -5,7 +5,7 @@
  */
 import bcrypt from 'bcrypt';
 import getPool from '../config/database.js';
-import { generateToken } from '../middleware/auth.js';
+import { finishLogin } from '../services/staffAuth.js';
 import logger from '../utils/logger.js';
 import { tenantIdOf, leadVisibility } from '../services/tenantContext.js';
 
@@ -138,23 +138,23 @@ export const agentLogin = async (req, res) => {
 
     await pool.query('UPDATE users SET last_active_at = NOW() WHERE id = $1', [user.id]);
 
-    const token = generateToken({
-      id: user.id,
-      email: user.email,
-      role: role === 'admin' ? 'admin' : 'agent',
-      name: user.name || null,
-      tenant_id: user.tenant_id,
-    });
-
-    logger.info('Agent login successful', { email: user.email, role, id: user.id });
-    return res.json({
-      success: true,
-      token,
-      data: {
+    logger.info('Agent password accepted', { email: user.email, role, id: user.id });
+    return await finishLogin(res, {
+      payload: {
         id: user.id,
         email: user.email,
-        name: user.name,
         role: role === 'admin' ? 'admin' : 'agent',
+        name: user.name || null,
+        tenant_id: user.tenant_id,
+      },
+      body: {
+        success: true,
+        data: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: role === 'admin' ? 'admin' : 'agent',
+        },
       },
     });
   } catch (error) {

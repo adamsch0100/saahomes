@@ -9,6 +9,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import AgentCockpit from '../components/admin/AgentCockpit.jsx';
 import SEO from '../components/SEO';
+import ForgotPassword from '../components/account/ForgotPassword.jsx';
+import TwoStepCodeForm from '../components/account/TwoStepCodeForm.jsx';
+import TwoStepPanel from '../components/account/TwoStepPanel.jsx';
 import {
   agentLogin,
   getAgentTeammates,
@@ -72,6 +75,8 @@ export default function AgentPage() {
   const [error, setError] = useState(null);
   const [teammates, setTeammates] = useState([]);
   const [showBrandPreview, setShowBrandPreview] = useState(false);
+  const [showSecurity, setShowSecurity] = useState(false);
+  const [challenge, setChallenge] = useState(null); // two-step sign-in pending
 
   // Connect CRM (P-3a)
   const [fubStatus, setFubStatus] = useState(null);
@@ -108,6 +113,8 @@ export default function AgentPage() {
     setIsAuthenticated(false);
     setTeammates([]);
     setShowBrandPreview(false);
+    setShowSecurity(false);
+    setChallenge(null);
     setFubStatus(null);
     setFubApiKeyInput('');
     setFubError(null);
@@ -338,21 +345,30 @@ export default function AgentPage() {
     }
   };
 
+  const completeLogin = (response) => {
+    if (response.token) {
+      setToken(response.token);
+      localStorage.setItem(AGENT_TOKEN_KEY, response.token);
+      const user = response.data || null;
+      setAgentUser(user);
+      if (user) localStorage.setItem(AGENT_USER_KEY, JSON.stringify(user));
+      setChallenge(null);
+      setIsAuthenticated(true);
+    } else {
+      setError('Login failed — no token returned');
+    }
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     try {
       const response = await agentLogin(loginData.email, loginData.password);
-      if (response.token) {
-        setToken(response.token);
-        localStorage.setItem(AGENT_TOKEN_KEY, response.token);
-        const user = response.data || null;
-        setAgentUser(user);
-        if (user) localStorage.setItem(AGENT_USER_KEY, JSON.stringify(user));
-        setIsAuthenticated(true);
+      if (response.needs_2fa) {
+        setChallenge(response.challenge);
       } else {
-        setError('Login failed — no token returned');
+        completeLogin(response);
       }
     } catch (err) {
       setError(err.message || 'Login failed. Please check your credentials.');
@@ -380,12 +396,21 @@ export default function AgentPage() {
                 SAA Homes
               </p>
               <h2 className="mt-2 text-center text-3xl font-extrabold text-gray-900">
-                Agent console
+                {challenge ? 'Two-step sign-in' : 'Agent console'}
               </h2>
               <p className="mt-2 text-sm text-gray-500">
                 Team pipeline — claim leads, follow up, close.
               </p>
             </div>
+            {challenge ? (
+              <TwoStepCodeForm
+                challenge={challenge}
+                onSuccess={completeLogin}
+                onCancel={() => setChallenge(null)}
+                buttonClassName="text-black bg-[#CFB36E] hover:bg-[#b89a55]"
+              />
+            ) : (
+            <>
             <form className="mt-8 space-y-6" onSubmit={handleLogin}>
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
@@ -436,6 +461,12 @@ export default function AgentPage() {
                 </button>
               </div>
             </form>
+            <ForgotPassword
+              initialEmail={loginData.email}
+              buttonClassName="text-black bg-[#CFB36E] hover:bg-[#b89a55]"
+            />
+            </>
+            )}
           </div>
         </div>
       </>
@@ -486,6 +517,13 @@ export default function AgentPage() {
                 className="min-h-[44px] px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-lg hover:border-black text-sm font-medium flex items-center"
               >
                 {showBrandPreview ? 'Hide brand preview' : 'Branded site'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowSecurity((v) => !v)}
+                className="min-h-[44px] px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-lg hover:border-black text-sm font-medium flex items-center"
+              >
+                {showSecurity ? 'Hide security' : 'Security'}
               </button>
               {agentUser?.role === 'admin' && (
                 <Link
@@ -561,6 +599,13 @@ export default function AgentPage() {
                   a lead is assigned to you.
                 </p>
               </div>
+            </div>
+          )}
+
+          {/* Account security — two-step sign-in */}
+          {showSecurity && (
+            <div className="mb-6 max-w-2xl">
+              <TwoStepPanel token={token} />
             </div>
           )}
 

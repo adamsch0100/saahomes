@@ -3,7 +3,7 @@
  * Create / activate / deactivate teammates; set brand + voice for white-label emails.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { createAgent, listAgents, patchAgent } from '../../utils/api.js';
+import { createAgent, listAgents, patchAgent, resendAgentInvite } from '../../utils/api.js';
 import { marketPack } from '../../data/marketPack.js';
 import AgentDomainControl from './AgentDomainControl.jsx';
 
@@ -28,6 +28,7 @@ export default function AgentsManager({ token }) {
   const [form, setForm] = useState(emptyForm);
   const [creating, setCreating] = useState(false);
   const [busyId, setBusyId] = useState(null);
+  const [notice, setNotice] = useState(null);
   const [editId, setEditId] = useState(null);
   const [editForm, setEditForm] = useState({
     brand_name: '',
@@ -58,18 +59,22 @@ export default function AgentsManager({ token }) {
     e.preventDefault();
     setCreating(true);
     setError(null);
+    setNotice(null);
     try {
       const body = {
         name: form.name,
         email: form.email,
         phone: form.phone || undefined,
-        password: form.password,
+        password: form.password || undefined,
         brand_name: form.brand_name.trim() || form.name.trim(),
         brokerage_name: form.brokerage_name.trim() || undefined,
         brand_phone: form.brand_phone.trim() || undefined,
         voice_style: form.voice_style || 'warm',
       };
-      await createAgent(token, body);
+      const res = await createAgent(token, body);
+      if (res?.invited || !form.password) {
+        setNotice(`Invite sent to ${form.email}`);
+      }
       setForm(emptyForm);
       await load();
     } catch (err) {
@@ -87,6 +92,20 @@ export default function AgentsManager({ token }) {
       await load();
     } catch (err) {
       setError(err.message || 'Could not update agent');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const resendInvite = async (agent) => {
+    setBusyId(agent.id);
+    setError(null);
+    setNotice(null);
+    try {
+      await resendAgentInvite(token, agent.id);
+      setNotice(`Invite sent to ${agent.email}`);
+    } catch (err) {
+      setError(err.message || 'Could not resend invite');
     } finally {
       setBusyId(null);
     }
@@ -167,16 +186,19 @@ export default function AgentsManager({ token }) {
             />
           </label>
           <label className="block">
-            <span className="text-xs font-medium text-gray-600">Password (min 8)</span>
+            <span className="text-xs font-medium text-gray-600">Password (optional, min 8)</span>
             <input
-              required
               type="password"
               minLength={8}
+              autoComplete="new-password"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               className="mt-1 w-full min-h-[44px] border border-gray-300 rounded-lg px-3 text-sm"
               placeholder="••••••••"
             />
+            <span className="mt-1 block text-xs text-gray-500">
+              Leave blank to email them an invite to set their own password.
+            </span>
           </label>
           <label className="block">
             <span className="text-xs font-medium text-gray-600">Brand name</span>
@@ -233,6 +255,11 @@ export default function AgentsManager({ token }) {
         </form>
       </div>
 
+      {notice && (
+        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg text-sm">
+          {notice}
+        </div>
+      )}
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-sm">
           {error}
@@ -301,6 +328,17 @@ export default function AgentsManager({ token }) {
                     >
                       {editId === a.id ? 'Cancel brand' : 'Edit brand'}
                     </button>
+                    {a.invite_pending && (
+                      <button
+                        type="button"
+                        disabled={busyId === a.id}
+                        onClick={() => resendInvite(a)}
+                        className="min-h-[40px] px-3 rounded-lg border border-gray-300 text-sm text-gray-700 hover:border-black disabled:opacity-40"
+                        title="Email a link to set their password"
+                      >
+                        Resend invite
+                      </button>
+                    )}
                     {a.status === 'active' ? (
                       <button
                         type="button"

@@ -1,4 +1,5 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import {
   agentLogin,
   getAgentCockpit,
@@ -22,7 +23,16 @@ import { authenticateToken, requireRole } from '../middleware/auth.js';
 const router = express.Router();
 
 // Public agent login
-router.post('/login', agentLogin);
+// Failed logins only count toward the limit, so a typo doesn't lock anyone out.
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  skipSuccessfulRequests: true,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many sign-in attempts. Please wait a few minutes and try again.' },
+});
+router.post('/login', loginLimiter, agentLogin);
 
 // Agent + admin: team-pooled cockpit and assignment
 const agentOrAdmin = [authenticateToken, requireRole('agent', 'admin')];

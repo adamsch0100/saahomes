@@ -8,6 +8,8 @@
  *      that agent's tenant and attributes signups to the agent
  *   4. otherwise the default tenant (SAA Homes, id 1), so saahomes.com,
  *      localhost and the Railway domain keep working unchanged
+ * A suspended brokerage still resolves (so its domains never fall through to
+ * SAA), and the middleware answers 503 for it.
  *
  * Controllers read req.tenant; deeper services can call currentTenantId(),
  * which reads the same value from AsyncLocalStorage. Background jobs have no
@@ -70,7 +72,7 @@ function normalizeHost(host) {
   return String(host || '').split(':')[0].trim().toLowerCase().replace(/\.+$/, '');
 }
 
-function shape(row, agent = null) {
+function shape(row, agent = null, siteHost = null) {
   return {
     id: Number(row.id),
     slug: row.slug,
@@ -80,6 +82,9 @@ function shape(row, agent = null) {
     status: row.status || 'active',
     settings: row.settings || {},
     agent, // { id, name } when the host is one agent's own domain
+    // The host this request matched, when it is a known domain of this
+    // tenant. Links in emails use it, never a raw Host header.
+    site_host: siteHost,
   };
 }
 
@@ -90,11 +95,11 @@ async function lookup(pool, hostname) {
   if (bare) {
     const byDomain = await pool.query(
       `SELECT ${TENANT_COLS} FROM tenants
-       WHERE status = 'active' AND LOWER(REGEXP_REPLACE(primary_domain, '^www\\.', '')) = $1
+       WHERE LOWER(REGEXP_REPLACE(primary_domain, '^www\\.', '')) = $1
        ORDER BY id LIMIT 1`,
       [bare]
     );
-    if (byDomain.rows[0]) return shape(byDomain.rows[0]);
+    if (byDomain.rows[0]) return shape(byDomain.rows[0], null, hostname);
   }
 
   const platform = normalizeHost(process.env.PLATFORM_DOMAIN);
@@ -102,10 +107,10 @@ async function lookup(pool, hostname) {
     const slug = hostname.slice(0, -(platform.length + 1));
     if (/^[a-z0-9-]{1,64}$/.test(slug)) {
       const bySlug = await pool.query(
-        `SELECT ${TENANT_COLS} FROM tenants WHERE status = 'active' AND slug = $1 LIMIT 1`,
+        `SELECT ${TENANT_COLS} FROM tenants WHERE slug = $1 LIMIT 1`,
         [slug]
       );
-      if (bySlug.rows[0]) return shape(bySlug.rows[0]);
+      if (bySlug.rows[0]) return shape(bySlug.rows[0], null, hostname);
     }
   }
 
@@ -115,18 +120,31 @@ async function lookup(pool, hostname) {
               u.id AS agent_id, u.name AS agent_name
        FROM users u JOIN tenants t ON t.id = u.tenant_id
        WHERE u.custom_domain IN ($1, $2) AND u.domain_verified_at IS NOT NULL
-         AND u.status = 'active' AND u.role IN ('agent', 'admin') AND t.status = 'active'
+         AND u.status = 'active' AND u.role IN ('agent', 'admin')
        ORDER BY u.id LIMIT 1`,
       [bare, `www.${bare}`]
     );
     const r = byAgent.rows[0];
-    if (r) return shape(r, { id: Number(r.agent_id), name: r.agent_name || null });
+    if (r) return shape(r, { id: Number(r.agent_id), name: r.agent_name || null }, hostname);
   }
 
   const fallback = await pool.query(`SELECT ${TENANT_COLS} FROM tenants WHERE id = $1`, [DEFAULT_TENANT_ID]);
   return fallback.rows[0]
     ? shape(fallback.rows[0])
     : shape({ id: DEFAULT_TENANT_ID, slug: 'saa', name: 'SAA Homes' });
+}
+
+/**
+ * The site address for links in emails: the domain this request came in on
+ * when it is one of the tenant's own, else the tenant's primary domain. An
+ * unknown Host header never ends up in a link (no reset-link poisoning).
+ */
+export function siteUrlFor(tenant) {
+  if (tenant?.site_host) return `https://${tenant.site_host}`;
+  if (tenant?.primary_domain) return `https://${tenant.primary_domain}`;
+  const platform = normalizeHost(process.env.PLATFORM_DOMAIN);
+  if (platform && tenant?.slug && tenant.id !== DEFAULT_TENANT_ID) return `https://${tenant.slug}.${platform}`;
+  return (process.env.SITE_URL || 'https://saahomes.com').replace(/\/$/, '');
 }
 
 /** Resolve a host to its tenant, cached for a minute. */
@@ -141,14 +159,20 @@ export async function resolveTenantForHost(host, { pool = getPool() } = {}) {
 
 /** Express middleware: sets req.tenant and the async tenant context. */
 export function tenantMiddleware(req, res, next) {
-  resolveTenantForHost(req.hostname)
+  return resolveTenantForHost(req.hostname)
     .catch((err) => {
       logger.error('tenant resolution failed', { host: req.hostname, message: err.message });
       return shape({ id: DEFAULT_TENANT_ID, slug: 'saa', name: 'SAA Homes' });
     })
     .then((tenant) => {
       req.tenant = tenant;
-      als.run({ tenant }, () => next());
+      // A paused brokerage's domains answer, but serve nothing. (They don't
+      // fall through to the home brokerage, where signups would land in the
+      // wrong place.)
+      if (tenant.status !== 'active') {
+        return res.status(503).json({ error: 'This site is paused. Please contact the brokerage.' });
+      }
+      return als.run({ tenant }, () => next());
     });
 }
 

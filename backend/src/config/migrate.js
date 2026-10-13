@@ -1104,6 +1104,37 @@ export const runMigrations = async () => {
       console.error('tenant walls migration skipped:', wallErr.message);
     }
 
+    // Staff accounts: password reset and invite links (only a hash of the
+    // token is stored), and two-step sign-in with an authenticator app.
+    await client.query('SAVEPOINT staff_auth');
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS password_resets (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          token_hash CHAR(64) NOT NULL UNIQUE,
+          purpose VARCHAR(16) NOT NULL DEFAULT 'reset',
+          expires_at TIMESTAMPTZ NOT NULL,
+          used_at TIMESTAMPTZ,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_password_resets_user ON password_resets(user_id, created_at DESC);
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS totp_secret_enc TEXT;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS totp_pending_enc TEXT;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS totp_enabled_at TIMESTAMPTZ;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS totp_last_step BIGINT;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS totp_recovery_hashes TEXT[];
+        DROP TRIGGER IF EXISTS password_resets_tenant ON password_resets;
+        CREATE TRIGGER password_resets_tenant BEFORE INSERT ON password_resets
+          FOR EACH ROW EXECUTE FUNCTION tenant_from_parent('users', 'user_id');
+      `);
+      await client.query('RELEASE SAVEPOINT staff_auth');
+    } catch (staffErr) {
+      await client.query('ROLLBACK TO SAVEPOINT staff_auth');
+      console.error('staff auth migration skipped:', staffErr.message);
+    }
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {

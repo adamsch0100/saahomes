@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { adminLogin, getSubmissions, getStats, getEmailAbStats } from '../utils/api.js';
+import { adminLogin, getSubmissions, getStats, getEmailAbStats, getAccountMe } from '../utils/api.js';
 import ClientSearchesManager from '../components/admin/ClientSearchesManager.jsx';
 import AgentCockpit from '../components/admin/AgentCockpit.jsx';
 import AgentsManager from '../components/admin/AgentsManager.jsx';
 import SEO from '../components/SEO';
 import FunnelView from '../components/admin/FunnelView.jsx';
+import BrokeragesManager from '../components/admin/BrokeragesManager.jsx';
+import ForgotPassword from '../components/account/ForgotPassword.jsx';
+import TwoStepCodeForm from '../components/account/TwoStepCodeForm.jsx';
+import TwoStepPanel from '../components/account/TwoStepPanel.jsx';
 
 const TYPE_LABELS = {
   digest: 'Listing digest',
@@ -26,10 +30,12 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [filterType, setFilterType] = useState('all');
-  const [tab, setTab] = useState('cockpit'); // cockpit | leads | searches | agents | email-ab | funnel
+  const [tab, setTab] = useState('cockpit'); // cockpit | leads | searches | agents | email-ab | funnel | security | brokerages
   const [abStats, setAbStats] = useState(null);
   const [abLoading, setAbLoading] = useState(false);
   const [abError, setAbError] = useState(null);
+  const [challenge, setChallenge] = useState(null); // two-step sign-in pending
+  const [me, setMe] = useState(null); // GET /api/account/me — platform flag gates Brokerages
 
   useEffect(() => {
     if (token) {
@@ -69,6 +75,19 @@ export default function AdminPage() {
   }, [filterType, isAuthenticated]);
 
   useEffect(() => {
+    if (!isAuthenticated || !token) return;
+    let cancelled = false;
+    getAccountMe(token)
+      .then((res) => {
+        if (!cancelled) setMe(res || null);
+      })
+      .catch(() => {
+        if (!cancelled) setMe(null);
+      });
+    return () => { cancelled = true; };
+  }, [isAuthenticated, token]);
+
+  useEffect(() => {
     if (!isAuthenticated || !token || tab !== 'email-ab') return;
     let cancelled = false;
     (async () => {
@@ -98,15 +117,24 @@ export default function AdminPage() {
 
     try {
       const response = await adminLogin(loginData.email, loginData.password);
-      if (response.token) {
-        setToken(response.token);
-        localStorage.setItem('adminToken', response.token);
-        setIsAuthenticated(true);
+      if (response.needs_2fa) {
+        setChallenge(response.challenge);
+      } else {
+        completeLogin(response);
       }
     } catch (err) {
       setError(err.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const completeLogin = (response) => {
+    if (response.token) {
+      setToken(response.token);
+      localStorage.setItem('adminToken', response.token);
+      setChallenge(null);
+      setIsAuthenticated(true);
     }
   };
 
@@ -117,6 +145,9 @@ export default function AdminPage() {
     setSubmissions([]);
     setStats(null);
     setAbStats(null);
+    setMe(null);
+    setChallenge(null);
+    setTab('cockpit');
   };
 
   const formatDate = (dateString) => {
@@ -142,9 +173,17 @@ export default function AdminPage() {
           <div className="max-w-md w-full space-y-8">
             <div>
               <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                Admin Login
+                {challenge ? 'Two-step sign-in' : 'Admin Login'}
               </h2>
             </div>
+            {challenge ? (
+              <TwoStepCodeForm
+                challenge={challenge}
+                onSuccess={completeLogin}
+                onCancel={() => setChallenge(null)}
+              />
+            ) : (
+            <>
             <form className="mt-8 space-y-6" onSubmit={handleLogin}>
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
@@ -194,6 +233,9 @@ export default function AdminPage() {
                 </button>
               </div>
             </form>
+            <ForgotPassword initialEmail={loginData.email} />
+            </>
+            )}
           </div>
         </div>
       </>
@@ -275,6 +317,22 @@ export default function AdminPage() {
             >
               Funnel
             </button>
+            <button
+              type="button"
+              onClick={() => setTab('security')}
+              className={`min-h-[44px] px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${tab === 'security' ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-200 hover:border-black'}`}
+            >
+              Security
+            </button>
+            {me?.platform === true && (
+              <button
+                type="button"
+                onClick={() => setTab('brokerages')}
+                className={`min-h-[44px] px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${tab === 'brokerages' ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-200 hover:border-black'}`}
+              >
+                Brokerages
+              </button>
+            )}
           </div>
 
           {tab === 'cockpit' ? (
@@ -285,6 +343,12 @@ export default function AdminPage() {
             <AgentsManager token={token} />
           ) : tab === 'funnel' ? (
             <FunnelView token={token} />
+          ) : tab === 'security' ? (
+            <div className="max-w-2xl">
+              <TwoStepPanel token={token} />
+            </div>
+          ) : tab === 'brokerages' && me?.platform === true ? (
+            <BrokeragesManager token={token} />
           ) : tab === 'email-ab' ? (
             <div className="bg-white rounded-lg shadow">
               <div className="p-6 border-b border-gray-200">

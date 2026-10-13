@@ -8,6 +8,8 @@ import { existsSync, readFileSync } from 'fs';
 import apiRoutes from './routes/api.js';
 import adminRoutes from './routes/admin.js';
 import agentRoutes from './routes/agent.js';
+import accountRoutes from './routes/account.js';
+import platformRoutes from './routes/platform.js';
 import { runMigrations } from './config/migrate.js';
 import { startIresSyncScheduler } from './jobs/iresScheduler.js';
 import { NOCO_CITIES } from './config/nocoCities.js';
@@ -68,6 +70,8 @@ app.get('/health', (req, res) => {
 app.use('/api', apiRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/agent', agentRoutes);
+app.use('/api/account', accountRoutes);
+app.use('/api/platform', platformRoutes);
 
 const canonicalRedirects = {
   '/g-hope-greeley': '/greeley-g-hope-down-payment-assistance/',

@@ -204,7 +204,7 @@ test("Peak's admin, agent and buyer can't read or change SAA data through any ro
   };
   const before = await saaFingerprint();
   const leaks = [];
-  const tried = { admin: 0, agent: 0, buyer: 0 };
+  const tried = { admin: 0, agent: 0, buyer: 0, account: 0, platform: 0 };
 
   const sweep = async (who, prefix, routes, opts) => {
     for (const { method, path } of routes) {
@@ -230,10 +230,12 @@ test("Peak's admin, agent and buyer can't read or change SAA data through any ro
   await sweep('admin', '/admin', await routesOf('admin.js'), { auth: as.admin });
   await sweep('agent', '/agent', await routesOf('agent.js'), { auth: as.agent });
   await sweep('buyer', '', await routesOf('api.js'), { cookie: peak.buyer.manage_token });
+  await sweep('account', '/account', await routesOf('account.js'), { auth: as.admin });
+  await sweep('platform', '/platform', await routesOf('platform.js'), { auth: as.admin });
 
   assert.deepEqual(leaks, [], `SAA data reached Peak:\n${leaks.join('\n')}`);
   assert.equal(await saaFingerprint(), before, "a Peak request changed SAA's data");
-  assert.ok(tried.admin > 40 && tried.agent >= 20 && tried.buyer > 60, JSON.stringify(tried));
+  assert.ok(tried.admin > 40 && tried.agent >= 20 && tried.buyer > 60 && tried.account >= 8 && tried.platform >= 3, JSON.stringify(tried));
 });
 
 test('agents see their own leads and, by default, the shared pond', { skip: !hasTestDatabase }, async () => {
