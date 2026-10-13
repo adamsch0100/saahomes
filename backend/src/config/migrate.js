@@ -1059,6 +1059,10 @@ export const runMigrations = async () => {
         CREATE UNIQUE INDEX IF NOT EXISTS users_tenant_email_key ON users(tenant_id, email);
         CREATE INDEX IF NOT EXISTS idx_users_tenant_role ON users(tenant_id, role);
         CREATE INDEX IF NOT EXISTS idx_users_tenant_lower_email ON users(tenant_id, LOWER(email));
+        -- SAA's agents keep seeing every lead, as they always have. New
+        -- brokerages start with each agent's own leads plus the unassigned pond.
+        UPDATE tenants SET settings = settings || '{"lead_visibility":"all"}'
+        WHERE id = 1 AND NOT (settings ? 'lead_visibility');
 
         CREATE OR REPLACE FUNCTION tenant_from_parent() RETURNS trigger AS $fn$
         DECLARE

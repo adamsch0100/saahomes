@@ -250,18 +250,24 @@ test('agents see their own leads and, by default, the shared pond', { skip: !has
     return JSON.stringify(r.json);
   };
 
+  // SAA keeps its old "everyone sees every lead"; a new brokerage's default is
+  // each agent's own leads plus the unassigned pond.
+  const { clearTenantCache } = await import('../src/services/tenantContext.js');
+  assert.match(await names(), /Saaonly Buyer/, 'SAA agents still see every lead');
+  await q("UPDATE tenants SET settings = settings - 'lead_visibility' WHERE id = 1");
+  clearTenantCache();
+
   let seen = await names();
   assert.match(seen, /Saaonly Pond/, 'unassigned leads are in the shared pond');
   assert.doesNotMatch(seen, /Saaonly Buyer/, "another agent's lead stays hidden");
 
   await q("UPDATE tenants SET settings = settings || '{\"lead_visibility\":\"own\"}' WHERE id = 1");
-  const { clearTenantCache } = await import('../src/services/tenantContext.js');
   clearTenantCache();
   seen = await names();
   assert.doesNotMatch(seen, /Saaonly Pond/, "with 'own', the pond is hidden too");
 
   const r = await call('PATCH', `/agent/cockpit/${saa.buyer.id}`, { auth: asB, host: 'saahomes.com', body: { stage: 'lost' } });
   assert.ok([403, 404].includes(r.status), `agent B changed agent A's lead: ${r.status}`);
-  await q("UPDATE tenants SET settings = settings - 'lead_visibility' WHERE id = 1");
+  await q("UPDATE tenants SET settings = settings || '{\"lead_visibility\":\"all\"}' WHERE id = 1");
   clearTenantCache();
 });
