@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
+import CiteBlock from "../components/CiteBlock";
 import {
   MORTGAGE_RATES_URL,
   MORTGAGE_RATES_TITLE,
@@ -203,9 +204,12 @@ export default function MortgageRatesStatisticsPage() {
             Each figure is a self-contained claim with its week and source, so
             it can be cited as-is. The latest week reads:
           </p>
-          <div className="bg-white border border-gray-200 rounded-lg p-5 mb-5">
-            <p className="text-sm text-gray-700 italic">{MORTGAGE_RATES_CITE}</p>
-          </div>
+          <CiteBlock
+            cite={MORTGAGE_RATES_CITE}
+            url={MORTGAGE_RATES_URL}
+            pageTitle="Mortgage Rates 2026: 30 & 15-Year Fixed Averages"
+            className="mb-5"
+          />
           <p className="text-gray-700 leading-relaxed mb-2">
             Primary source:{" "}
             <a

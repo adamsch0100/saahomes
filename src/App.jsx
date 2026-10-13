@@ -58,6 +58,7 @@ const NeighborhoodPage = lazy(() => import("./pages/NeighborhoodPage.jsx"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage.jsx"));
 const ResourceStatisticsPage = lazy(() => import("./pages/ResourceStatisticsPage.jsx"));
 const MortgageRatesStatisticsPage = lazy(() => import("./pages/MortgageRatesStatisticsPage.jsx"));
+const ResourcesIndexPage = lazy(() => import("./pages/ResourcesIndexPage.jsx"));
 const ChfaCountyLimitsPage = lazy(() => import("./pages/ChfaCountyLimitsPage.jsx"));
 
 /** Branded route-load fallback — gold/black skeleton, never blank */
@@ -314,6 +315,8 @@ export default function App() {
         <Route path="/helpful-guides/" element={<AppLayout><LazyPage><BlogPage /></LazyPage></AppLayout>} />
 
         {/* Citation hub — sourced, dated housing statistics */}
+        <Route path="/resources" element={<AppLayout><LazyPage><ResourcesIndexPage /></LazyPage></AppLayout>} />
+        <Route path="/resources/" element={<AppLayout><LazyPage><ResourcesIndexPage /></LazyPage></AppLayout>} />
         <Route path="/resources/northern-colorado-housing-statistics-2026" element={<AppLayout><LazyPage><ResourceStatisticsPage /></LazyPage></AppLayout>} />
         <Route path="/resources/northern-colorado-housing-statistics-2026/" element={<AppLayout><LazyPage><ResourceStatisticsPage /></LazyPage></AppLayout>} />
         <Route path="/resources/colorado-chfa-income-limits-2026" element={<AppLayout><LazyPage><ChfaCountyLimitsPage /></LazyPage></AppLayout>} />

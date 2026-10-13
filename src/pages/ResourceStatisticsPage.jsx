@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
+import CiteBlock from "../components/CiteBlock";
 import {
   CITATION_HUB_URL,
   CITATION_HUB_TITLE,
@@ -82,12 +83,12 @@ function StatCard({ stat }) {
         <p className="text-xs text-gray-500 mb-5">{stat.note}</p>
       )}
 
-      <div className="bg-gray-50 border border-gray-100 rounded-lg p-4 mb-5">
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-          Cite this
-        </p>
-        <p className="text-sm text-gray-700 italic">{stat.cite}</p>
-      </div>
+      <CiteBlock
+        cite={stat.cite}
+        url={`${CITATION_HUB_URL}#${stat.id}`}
+        pageTitle="Northern Colorado Housing Statistics 2026"
+        className="mb-5"
+      />
 
       <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
         {stat.moneyLinks.map((link) => (
