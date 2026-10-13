@@ -16,6 +16,7 @@ import crypto from 'crypto';
 import getPool from '../config/database.js';
 import logger from '../utils/logger.js';
 import { savedSearchPath } from './listingFilters.js';
+import { currentTenantId, DEFAULT_TENANT_ID } from './tenantContext.js';
 import {
   enrichSubmissionFromHistory,
   noteIfDuplicateSubmission,
@@ -40,6 +41,36 @@ const getAuthHeader = (apiKey) => {
   const encoded = Buffer.from(`${apiKey}:`).toString('base64');
   return `Basic ${encoded}`;
 };
+
+/** Tenant for a FUB call: the one given (row being synced), else the current request's. */
+const fubTenant = (tenantId) => {
+  const id = Number(tenantId);
+  return Number.isInteger(id) && id > 0 ? id : currentTenantId();
+};
+
+const TENANT_FUB_CACHE_MS = 60 * 1000;
+const tenantFubCache = new Map(); // tenant id → { at, key }
+
+/**
+ * Which brokerage FUB account a tenant's people go to. SAA (tenant 1) keeps
+ * the env key; any other tenant only its own tenants.settings.fub_api_key
+ * (cached a minute), never SAA's — null means send nothing.
+ */
+export async function fubApiKeyForTenant(tenantId, pool = getPool()) {
+  const id = fubTenant(tenantId);
+  if (id === DEFAULT_TENANT_ID) return FOLLOW_UP_BOSS_API_KEY || null;
+  const hit = tenantFubCache.get(id);
+  if (hit && Date.now() - hit.at < TENANT_FUB_CACHE_MS) return hit.key;
+  let key = null;
+  try {
+    const r = await pool.query("SELECT settings->>'fub_api_key' AS key FROM tenants WHERE id = $1", [id]);
+    key = String(r.rows[0]?.key || '').trim() || null;
+  } catch {
+    key = null;
+  }
+  tenantFubCache.set(id, { at: Date.now(), key });
+  return key;
+}
 
 const buildAttributionLines = (submission) => {
   const lines = [];
@@ -76,17 +107,17 @@ export function extractFubPersonId(result) {
  * Persist FUB person id on our users row (by email). Idempotent — only writes
  * when the value is missing or different. Never invents IDs.
  */
-export async function storeFubPersonId(email, personId, pool = getPool()) {
+export async function storeFubPersonId(email, personId, pool = getPool(), tenantId = null) {
   const emailStr = String(email || '').trim().toLowerCase();
   const id = Number(personId);
   if (!emailStr.includes('@') || !Number.isFinite(id) || id <= 0) return false;
   try {
     const r = await pool.query(
       `UPDATE users SET fub_person_id = $1
-       WHERE LOWER(email) = $2
+       WHERE LOWER(email) = $2 AND tenant_id = $3
          AND (fub_person_id IS NULL OR fub_person_id <> $1)
        RETURNING id, fub_person_id`,
-      [id, emailStr]
+      [id, emailStr, fubTenant(tenantId)]
     );
     if (r.rows[0]) {
       logger.info('Stored FUB person id', { email: emailStr, fub_person_id: id, user_id: r.rows[0].id });
@@ -101,13 +132,13 @@ export async function storeFubPersonId(email, personId, pool = getPool()) {
 }
 
 /** Look up stored fub_person_id for an email (if any). */
-export async function getFubPersonIdByEmail(email, pool = getPool()) {
+export async function getFubPersonIdByEmail(email, pool = getPool(), tenantId = null) {
   const emailStr = String(email || '').trim().toLowerCase();
   if (!emailStr.includes('@')) return null;
   try {
     const r = await pool.query(
-      'SELECT fub_person_id FROM users WHERE LOWER(email) = $1 AND fub_person_id IS NOT NULL LIMIT 1',
-      [emailStr]
+      'SELECT fub_person_id FROM users WHERE LOWER(email) = $1 AND tenant_id = $2 AND fub_person_id IS NOT NULL LIMIT 1',
+      [emailStr, fubTenant(tenantId)]
     );
     return r.rows[0]?.fub_person_id ? Number(r.rows[0].fub_person_id) : null;
   } catch {
@@ -119,11 +150,11 @@ export async function getFubPersonIdByEmail(email, pool = getPool()) {
  * Attach person.id when we already have it so FUB links to existing contact
  * (avoids accidental new-person creation on name/email mismatch).
  */
-async function attachKnownPersonId(person) {
+async function attachKnownPersonId(person, tenantId = null) {
   if (!person || person.id) return person;
   const email = person.emails?.[0]?.value;
   if (!email) return person;
-  const known = await getFubPersonIdByEmail(email);
+  const known = await getFubPersonIdByEmail(email, getPool(), tenantId);
   if (known) return { ...person, id: known };
   return person;
 }
@@ -138,8 +169,17 @@ async function attachKnownPersonId(person) {
 const postFollowUpBossEvent = async (eventData, opts = {}) => {
   const overrideKey = resolveFubApiKey(opts.apiKey);
   const hasOverride = !!(opts.apiKey != null && String(opts.apiKey).trim());
+  const tenantId = fubTenant(opts.tenantId);
 
-  if (!hasOverride && !isFollowUpBossConfigured()) {
+  // Another brokerage's people never reach SAA's FUB: without an agent key a
+  // non-SAA tenant posts only with its own key, else nothing is sent.
+  const tenantKey = !hasOverride && tenantId !== DEFAULT_TENANT_ID
+    ? await fubApiKeyForTenant(tenantId)
+    : null;
+  if (!hasOverride && tenantId !== DEFAULT_TENANT_ID && !tenantKey) {
+    throw new Error('Follow Up Boss not configured');
+  }
+  if (!hasOverride && !tenantKey && !isFollowUpBossConfigured()) {
     throw new Error('Follow Up Boss not configured');
   }
   if (hasOverride && !overrideKey) {
@@ -150,19 +190,19 @@ const postFollowUpBossEvent = async (eventData, opts = {}) => {
   if (eventData.person && !eventData.person.id) {
     eventData = {
       ...eventData,
-      person: await attachKnownPersonId(eventData.person),
+      person: await attachKnownPersonId(eventData.person, tenantId),
     };
   }
 
   let response;
 
-  if (hasOverride) {
-    // Per-agent key → Events API only (agent's own FUB account)
+  if (hasOverride || tenantKey) {
+    // Per-agent key (or a non-SAA tenant's own key) → Events API only
     response = await fetch(FUB_EVENTS_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: getAuthHeader(overrideKey),
+        Authorization: getAuthHeader(hasOverride ? overrideKey : tenantKey),
       },
       body: JSON.stringify(eventData),
     });
@@ -216,10 +256,10 @@ const postFollowUpBossEvent = async (eventData, opts = {}) => {
  * After a successful FUB event, store people.id on our users row by email.
  * Fire-and-forget safe — never throws to callers that await it with catch.
  */
-async function capturePersonIdFromResult(result, email) {
+async function capturePersonIdFromResult(result, email, tenantId = null) {
   const personId = extractFubPersonId(result);
   if (personId && email) {
-    await storeFubPersonId(email, personId);
+    await storeFubPersonId(email, personId, getPool(), tenantId);
   }
   return personId;
 }
@@ -416,9 +456,9 @@ export const forwardContactToFollowUpBoss = async (submissionIn, opts = {}) => {
   try {
     const result = await postFollowUpBossEvent(
       eventData,
-      overrideKey ? { apiKey: overrideKey } : {}
+      { ...(overrideKey ? { apiKey: overrideKey } : {}), tenantId: opts.tenantId }
     );
-    const fubPersonId = await capturePersonIdFromResult(result, email);
+    const fubPersonId = await capturePersonIdFromResult(result, email, opts.tenantId);
     logger.info('Lead forwarded to Follow Up Boss', {
       eventId: result.id,
       fub_person_id: fubPersonId,
@@ -750,7 +790,7 @@ export async function pushNurtureSignalToFollowUpBoss(opts = {}) {
   }
 
   const { firstName, lastName } = splitName(opts.name);
-  const knownId = opts.fubPersonId || (await getFubPersonIdByEmail(email));
+  const knownId = opts.fubPersonId || (await getFubPersonIdByEmail(email, getPool(), opts.tenantId));
 
   const detailLines = [
     mapped.label,
@@ -781,8 +821,8 @@ export async function pushNurtureSignalToFollowUpBoss(opts = {}) {
   }
 
   try {
-    const result = await postFollowUpBossEvent(eventData);
-    const fubPersonId = await capturePersonIdFromResult(result, email);
+    const result = await postFollowUpBossEvent(eventData, { tenantId: opts.tenantId });
+    const fubPersonId = await capturePersonIdFromResult(result, email, opts.tenantId);
     logger.info('Nurture signal written to Follow Up Boss', {
       signal: signalKey,
       fub_person_id: fubPersonId || knownId,
@@ -822,7 +862,9 @@ export function maskFubApiKey(apiKey) {
  * @param {{ apiKey?: string }} [opts] — optional per-agent key override
  */
 export async function getFollowUpBossPeopleCount(opts = {}) {
-  const apiKey = resolveFubApiKey(opts.apiKey);
+  const apiKey = opts.apiKey != null && String(opts.apiKey).trim()
+    ? String(opts.apiKey).trim()
+    : await fubApiKeyForTenant(opts.tenantId);
   if (!apiKey) {
     return { configured: false, reason: 'not_configured' };
   }
@@ -892,7 +934,9 @@ export async function verifyFollowUpBossApiKey(apiKey) {
  * @param {{ apiKey?: string, limit?: number, offset?: number }} opts
  */
 export async function listFollowUpBossPeople(opts = {}) {
-  const apiKey = resolveFubApiKey(opts.apiKey);
+  const apiKey = opts.apiKey != null && String(opts.apiKey).trim()
+    ? String(opts.apiKey).trim()
+    : await fubApiKeyForTenant(opts.tenantId);
   if (!apiKey) {
     return { success: false, reason: 'not_configured', people: [], total: null };
   }
@@ -1008,9 +1052,15 @@ export function extractFubPersonForImport(person) {
  * @returns {Promise<{ imported: number, duplicates: number, failed: number, total: number|null, pagesFetched: number, truncated: boolean, error?: string }>}
  */
 export async function importFollowUpBossContacts(opts = {}) {
-  const apiKey = resolveFubApiKey(opts.apiKey);
   const agentUserId = Number(opts.agentUserId);
   const pool = opts.pool || getPool();
+  // Imported contacts belong to the importing agent's brokerage
+  const tenantId = Number.isFinite(agentUserId) && agentUserId > 0
+    ? (await pool.query('SELECT tenant_id FROM users WHERE id = $1', [agentUserId])).rows[0]?.tenant_id ?? null
+    : null;
+  const apiKey = opts.apiKey != null && String(opts.apiKey).trim()
+    ? String(opts.apiKey).trim()
+    : await fubApiKeyForTenant(tenantId, pool);
   const maxPages = Math.min(Math.max(parseInt(opts.maxPages, 10) || 25, 1), 25);
   const pageSize = Math.min(Math.max(parseInt(opts.pageSize, 10) || 100, 1), 100);
 
@@ -1025,7 +1075,7 @@ export async function importFollowUpBossContacts(opts = {}) {
       error: 'not_configured',
     };
   }
-  if (!Number.isFinite(agentUserId) || agentUserId <= 0) {
+  if (!Number.isFinite(agentUserId) || agentUserId <= 0 || tenantId == null) {
     return {
       imported: 0,
       duplicates: 0,
@@ -1070,7 +1120,7 @@ export async function importFollowUpBossContacts(opts = {}) {
 
     for (const person of people) {
       try {
-        const result = await upsertFubImportedContact(person, agentUserId, pool);
+        const result = await upsertFubImportedContact(person, agentUserId, pool, tenantId);
         if (result === 'imported') imported += 1;
         else if (result === 'duplicate') duplicates += 1;
         else failed += 1;
@@ -1129,7 +1179,7 @@ export async function importFollowUpBossContacts(opts = {}) {
  * Upsert one FUB person into users as a client contact.
  * @returns {'imported'|'duplicate'|'skipped'}
  */
-async function upsertFubImportedContact(person, agentUserId, pool) {
+async function upsertFubImportedContact(person, agentUserId, pool, tenantId) {
   const fields = extractFubPersonForImport(person);
   if (!fields) return 'skipped';
 
@@ -1142,18 +1192,18 @@ async function upsertFubImportedContact(person, agentUserId, pool) {
   if (personId) {
     const r = await pool.query(
       `SELECT * FROM users
-       WHERE fub_person_id = $1 AND COALESCE(role, 'client') = 'client'
+       WHERE fub_person_id = $1 AND tenant_id = $2 AND COALESCE(role, 'client') = 'client'
        LIMIT 1`,
-      [personId]
+      [personId, tenantId]
     );
     existing = r.rows[0] || null;
   }
   if (!existing && email) {
     const r = await pool.query(
       `SELECT * FROM users
-       WHERE LOWER(email) = $1 AND COALESCE(role, 'client') = 'client'
+       WHERE LOWER(email) = $1 AND tenant_id = $2 AND COALESCE(role, 'client') = 'client'
        LIMIT 1`,
-      [email]
+      [email, tenantId]
     );
     existing = r.rows[0] || null;
   }
@@ -1161,11 +1211,11 @@ async function upsertFubImportedContact(person, agentUserId, pool) {
     // Compare digit-normalized phone (stored may have formatting)
     const r = await pool.query(
       `SELECT * FROM users
-       WHERE COALESCE(role, 'client') = 'client'
+       WHERE COALESCE(role, 'client') = 'client' AND tenant_id = $3
          AND phone IS NOT NULL AND TRIM(phone) <> ''
          AND regexp_replace(phone, '\\D', '', 'g') IN ($1, $2)
        LIMIT 1`,
-      [phone, phone.length === 10 ? `1${phone}` : phone]
+      [phone, phone.length === 10 ? `1${phone}` : phone, tenantId]
     );
     existing = r.rows[0] || null;
   }
@@ -1223,8 +1273,8 @@ async function upsertFubImportedContact(person, agentUserId, pool) {
 
   // Guard: if email belongs to an agent/admin, never demote
   const staff = await pool.query(
-    `SELECT id FROM users WHERE LOWER(email) = $1 AND role IN ('agent', 'admin') LIMIT 1`,
-    [email]
+    `SELECT id FROM users WHERE LOWER(email) = $1 AND tenant_id = $2 AND role IN ('agent', 'admin') LIMIT 1`,
+    [email, tenantId]
   );
   if (staff.rows[0]) return 'skipped';
 
@@ -1235,11 +1285,11 @@ async function upsertFubImportedContact(person, agentUserId, pool) {
     `INSERT INTO users (
        email, name, phone, manage_token, role, status,
        fub_person_id, source, lifecycle_stage, lifecycle_stage_manual,
-       assigned_agent_id, last_active_at
+       assigned_agent_id, last_active_at, tenant_id
      ) VALUES (
        $1, $2, $3, $4, 'client', 'active',
        $5, 'fub-import', $6, FALSE,
-       $7, NOW()
+       $7, NOW(), $8
      )`,
     [
       email,
@@ -1249,6 +1299,7 @@ async function upsertFubImportedContact(person, agentUserId, pool) {
       personId,
       lifecycle,
       agentUserId,
+      tenantId,
     ]
   );
   return 'imported';
@@ -1323,8 +1374,10 @@ function extractPersonFields(person) {
  * @param {string} [opts.apiKey] — optional per-agent key; default = env key
  * @returns {Promise<{configured:boolean, found?:boolean, personId?:string|null, tags?:string[], reason?:string, error?:string}>}
  */
-export async function pullFollowUpBossPerson({ email, fubPersonId, apiKey: apiKeyOverride } = {}) {
-  const apiKey = resolveFubApiKey(apiKeyOverride);
+export async function pullFollowUpBossPerson({ email, fubPersonId, apiKey: apiKeyOverride, tenantId } = {}) {
+  const apiKey = apiKeyOverride != null && String(apiKeyOverride).trim()
+    ? String(apiKeyOverride).trim()
+    : await fubApiKeyForTenant(tenantId);
   if (!apiKey) {
     return { configured: false, reason: 'not_configured' };
   }
@@ -1489,7 +1542,7 @@ export function fubSearchFromEventMeta(meta = {}) {
 export async function pushAskedSearchToFollowUpBoss(eventRow, { pool = getPool(), post = postFollowUpBossEvent } = {}) {
   if (!isFollowUpBossConfigured() && post === postFollowUpBossEvent) return { sent: 0, reason: 'not_configured' };
   if (!eventRow?.id || !eventRow.user_id || !eventRow.meta?.asked) return { sent: 0, reason: 'not_asked' };
-  const { rows: [user] } = await pool.query('SELECT id, email, name, phone, fub_person_id FROM users WHERE id = $1', [eventRow.user_id]);
+  const { rows: [user] } = await pool.query('SELECT id, email, name, phone, fub_person_id, tenant_id FROM users WHERE id = $1', [eventRow.user_id]);
   if (!user?.email) return { sent: 0, reason: 'no_email' };
   const { rows: dup } = await pool.query(
     `SELECT 1 FROM events WHERE user_id = $1 AND type = 'search' AND id <> $2
@@ -1516,7 +1569,7 @@ export async function pushAskedSearchToFollowUpBoss(eventRow, { pool = getPool()
       phones: user.phone ? [{ value: String(user.phone).replace(/\D/g, ''), type: 'mobile' }] : [],
     },
     propertySearch,
-  });
+  }, { tenantId: user.tenant_id });
   await markSynced();
   return { sent: 1 };
 }
@@ -1529,7 +1582,7 @@ export async function pushAskedSearchToFollowUpBoss(eventRow, { pool = getPool()
  */
 export async function syncVisitorHistoryToFollowUpBoss(userId, { pool = getPool(), post = postFollowUpBossEvent } = {}) {
   if (!isFollowUpBossConfigured() && post === postFollowUpBossEvent) return { sent: 0, reason: 'not_configured' };
-  const { rows: [user] } = await pool.query('SELECT id, email, name, phone FROM users WHERE id = $1', [userId]);
+  const { rows: [user] } = await pool.query('SELECT id, email, name, phone, tenant_id FROM users WHERE id = $1', [userId]);
   if (!user?.email) return { sent: 0, reason: 'no_email' };
 
   const { rows: views } = await pool.query(
@@ -1582,7 +1635,7 @@ export async function syncVisitorHistoryToFollowUpBoss(userId, { pool = getPool(
           area: v.living_area != null ? Number(v.living_area) : undefined,
           url: v.slug ? `${site}/homes-for-sale/${v.slug}/` : undefined,
         },
-      });
+      }, { tenantId: user.tenant_id });
       sent += 1;
       synced.push(v.id);
     } catch (e) {
@@ -1602,7 +1655,7 @@ export async function syncVisitorHistoryToFollowUpBoss(userId, { pool = getPool(
         })(),
         person,
         propertySearch: fubSearchFromEventMeta(s.meta).propertySearch,
-      });
+      }, { tenantId: user.tenant_id });
       sent += 1;
       synced.push(s.id);
     } catch (e) {
@@ -1632,13 +1685,15 @@ export async function syncVisitorHistoryToFollowUpBoss(userId, { pool = getPool(
  * when the score changed since the last write.
  */
 export async function syncLeadScoreToFollowUpBoss(userId, {
-  pool = getPool(), fetchImpl = fetch, apiKey = FOLLOW_UP_BOSS_API_KEY, field = process.env.FUB_LEAD_SCORE_FIELD,
+  pool = getPool(), fetchImpl = fetch, apiKey, field = process.env.FUB_LEAD_SCORE_FIELD,
 } = {}) {
   field = String(field || '').trim();
-  if (!field || !/^custom[A-Za-z0-9]+$/.test(field) || !apiKey) return { skipped: 'not_configured' };
+  if (!field || !/^custom[A-Za-z0-9]+$/.test(field)) return { skipped: 'not_configured' };
   const { rows: [u] } = await pool.query(
-    'SELECT fub_person_id, lead_score, fub_lead_score_synced FROM users WHERE id = $1', [userId]
+    'SELECT fub_person_id, lead_score, fub_lead_score_synced, tenant_id FROM users WHERE id = $1', [userId]
   );
+  if (apiKey === undefined) apiKey = await fubApiKeyForTenant(u?.tenant_id, pool);
+  if (!apiKey) return { skipped: 'not_configured' };
   if (!u?.fub_person_id || u.lead_score == null) return { skipped: 'not_linked' };
   if (u.fub_lead_score_synced === u.lead_score) return { skipped: 'unchanged' };
   const res = await fetchImpl(`${FUB_PEOPLE_URL}/${u.fub_person_id}`, {
@@ -1662,10 +1717,11 @@ const FUB_NOTES_URL = 'https://api.followupboss.com/v1/notes';
  * a co-buyer's comment on a home. Skips quietly until the contact is linked.
  */
 export async function addFollowUpBossNote(userId, { subject, body }, {
-  pool = getPool(), fetchImpl = fetch, apiKey = FOLLOW_UP_BOSS_API_KEY,
+  pool = getPool(), fetchImpl = fetch, apiKey,
 } = {}) {
+  const { rows: [u] } = await pool.query('SELECT fub_person_id, tenant_id FROM users WHERE id = $1', [userId]);
+  if (apiKey === undefined) apiKey = await fubApiKeyForTenant(u?.tenant_id, pool);
   if (!apiKey) return { skipped: 'not_configured' };
-  const { rows: [u] } = await pool.query('SELECT fub_person_id FROM users WHERE id = $1', [userId]);
   if (!u?.fub_person_id) return { skipped: 'not_linked' };
   const res = await fetchImpl(FUB_NOTES_URL, {
     method: 'POST',

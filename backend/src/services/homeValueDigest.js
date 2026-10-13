@@ -368,8 +368,8 @@ async function sendOne(profile, { dryRun = false } = {}) {
     await sendEmail(profile.user_email, subject, html, fromName);
   } else {
     await pool.query(
-      `INSERT INTO email_outbox (to_email, subject, html) VALUES ($1, $2, $3)`,
-      [profile.user_email, subject, html]
+      `INSERT INTO email_outbox (to_email, subject, html, tenant_id) VALUES ($1, $2, $3, $4)`,
+      [profile.user_email, subject, html, profile.tenant_id ?? 1]
     );
   }
 

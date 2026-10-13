@@ -87,6 +87,12 @@ test('each agent gets their own leads once a day, and admins cover the unassigne
   assert.match(adam.html, /Sam Seller/);
   assert.doesNotMatch(adam.html, /Pat Buyer/, 'assigned leads stay with their agent');
 
+  // Another brokerage's admin never covers SAA's unassigned leads.
+  const { rows: [peak] } = await q("INSERT INTO tenants (slug, name) VALUES ('peak','Peak Realty') RETURNING id");
+  const { rows: [peakAdmin] } = await q("INSERT INTO users (email, name, role, status, tenant_id, manage_token) VALUES ('boss@peakrealty.com', 'Peak Boss', 'admin', 'active', $1, md5(random()::text) || md5(random()::text)) RETURNING *", [peak.id]);
+  const { buildBrief } = await import('../src/services/morningBrief.js');
+  assert.deepEqual((await buildBrief(peakAdmin, { now: BRIEF_TICK, pool: db.pool })).items.map((i) => i.name), [], 'tenant 1 unassigned lead stays in tenant 1');
+
   r = await runMorningBriefs({ now: new Date(BRIEF_TICK.getTime() + 60_000), send, pool: db.pool });
   assert.equal(r.sent, 0, 'once a day');
 
