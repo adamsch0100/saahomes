@@ -43,6 +43,15 @@ export function currentTenantId() {
   return tenantIdOf(null);
 }
 
+/**
+ * Switch the rest of this async call chain to another tenant: a public POST
+ * that names its brokerage itself (an agent's webform on the agent's own site).
+ */
+export function enterTenant(tenantId) {
+  const tenant = currentTenant();
+  als.enterWith({ tenant: { ...(tenant || {}), id: Number(tenantId), agent: null } });
+}
+
 /** Run fn with tenant as the current tenant (jobs, tests). */
 export function runWithTenant(tenant, fn) {
   return als.run({ tenant }, fn);

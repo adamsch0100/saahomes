@@ -4,6 +4,7 @@
  * Never returns fub_api_key or agent private data.
  */
 import crypto from 'crypto';
+import { enterTenant } from '../services/tenantContext.js';
 import getPool from '../config/database.js';
 import { forwardContactToFollowUpBoss } from '../services/followUpBossService.js';
 import {
@@ -117,6 +118,7 @@ export const submitWebformLead = async (req, res) => {
     }
     // Public POST from the agent's own site: the lead belongs to the agent's brokerage, not the host's
     const tenantId = agent.tenant_id;
+    enterTenant(tenantId);
 
     // Observability for rapid re-submits (never blocks)
     noteIfDuplicateSubmission(pool, email, 'webform').catch(() => {});
