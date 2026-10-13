@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { tokenMatchesTenant } from '../services/tenantContext.js';
 
 dotenv.config();
 
@@ -14,6 +15,11 @@ export const authenticateToken = (req, res, next) => {
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
       return res.status(403).json({ error: 'Invalid or expired token' });
+    }
+    // A staff token works only on its own brokerage's domains. The env admin
+    // login is the platform owner and may act in any brokerage.
+    if (!tokenMatchesTenant(user, req.tenant)) {
+      return res.status(403).json({ error: 'This account belongs to a different brokerage' });
     }
     req.user = user;
     next();
