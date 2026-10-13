@@ -8,6 +8,7 @@ import getPool from '../config/database.js';
 import { forwardShowingRequestToFollowUpBoss } from '../services/followUpBossService.js';
 import { rejectIfDisposableEmail } from '../utils/emailQuality.js';
 import { reportLeadToBoard } from '../services/boardLeadCount.js';
+import { tenantIdOf } from '../services/tenantContext.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -37,12 +38,12 @@ export const submitShowingRequest = async (req, res) => {
 
     const pool = getPool();
     const inserted = await pool.query(
-      `INSERT INTO showing_requests (name, email, phone, showing_date, showing_time, message, listing_slug, listing_address, source_page)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id`,
+      `INSERT INTO showing_requests (name, email, phone, showing_date, showing_time, message, listing_slug, listing_address, source_page, tenant_id)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id`,
       [nameStr, emailStr, String(phone || '').trim() || null, date, String(time).slice(0, 20),
        String(message || '').trim().slice(0, 2000) || null,
        String(listing_slug || '').trim() || null, String(listing_address || '').trim() || null,
-       String(source_page || '').trim().slice(0, 255) || null]
+       String(source_page || '').trim().slice(0, 255) || null, tenantIdOf(req)]
     );
 
     // Event stream: tied to the contact when this browser is signed in,

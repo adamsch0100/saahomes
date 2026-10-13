@@ -6,6 +6,7 @@
  */
 import getPool from '../config/database.js';
 import logger from './logger.js';
+import { currentTenantId } from '../services/tenantContext.js';
 
 /**
  * ~130 well-known disposable / throwaway email domains (static heuristic).
@@ -688,10 +689,11 @@ export async function logBlockedEmail(email, path = 'unknown', pool = getPool())
     const clean = normalizeEmail(email) || String(email || '').trim().toLowerCase() || 'unknown';
     const domain = extractEmailDomain(clean) || clean.split('@')[1] || null;
     await pool.query(
-      `INSERT INTO blocked_email_log (email, domain, path, created_at)
-       VALUES ($1, $2, $3, NOW())
+      `INSERT INTO blocked_email_log (email, domain, path, created_at, tenant_id)
+       VALUES ($1, $2, $3, NOW(), $4)
        ON CONFLICT DO NOTHING`,
-      [clean.slice(0, 255), domain ? String(domain).slice(0, 255) : null, path ? String(path).slice(0, 255) : null]
+      [clean.slice(0, 255), domain ? String(domain).slice(0, 255) : null, path ? String(path).slice(0, 255) : null,
+        currentTenantId()]
     );
   } catch (err) {
     // Table may not exist mid-deploy — never block the 400 response
@@ -723,14 +725,17 @@ export async function enrichSubmissionFromHistory(pool, submission) {
   if (!email) return submission;
 
   const out = { ...submission };
+  const tenantId = Number.isInteger(Number(submission.tenant_id)) && Number(submission.tenant_id) > 0
+    ? Number(submission.tenant_id)
+    : currentTenantId();
   try {
     const contact = await pool.query(
       `SELECT name, phone, interest, area
        FROM contact_submissions
-       WHERE LOWER(email) = $1
+       WHERE LOWER(email) = $1 AND tenant_id = $2
        ORDER BY created_at DESC
        LIMIT 1`,
-      [email]
+      [email, tenantId]
     );
     const prior = contact.rows[0];
 
@@ -746,11 +751,11 @@ export async function enrichSubmissionFromHistory(pool, submission) {
       const market = await pool.query(
         `SELECT phone, first_name, last_name, area
          FROM market_report_submissions
-         WHERE LOWER(email) = $1
+         WHERE LOWER(email) = $1 AND tenant_id = $2
            AND phone IS NOT NULL AND TRIM(phone) <> ''
          ORDER BY created_at DESC
          LIMIT 1`,
-        [email]
+        [email, tenantId]
       );
       const m = market.rows[0];
       if (m) {
@@ -789,26 +794,26 @@ export async function noteIfDuplicateSubmission(pool, email, path = 'unknown') {
       `SELECT minutes_ago FROM (
          SELECT EXTRACT(EPOCH FROM (NOW() - created_at)) / 60.0 AS minutes_ago, created_at
          FROM (
-           SELECT created_at FROM contact_submissions WHERE LOWER(email) = $1
+           SELECT created_at FROM contact_submissions WHERE LOWER(email) = $1 AND tenant_id = $2
            UNION ALL
-           SELECT created_at FROM market_report_submissions WHERE LOWER(email) = $1
+           SELECT created_at FROM market_report_submissions WHERE LOWER(email) = $1 AND tenant_id = $2
            UNION ALL
-           SELECT created_at FROM chfa_lead_submissions WHERE LOWER(email) = $1
+           SELECT created_at FROM chfa_lead_submissions WHERE LOWER(email) = $1 AND tenant_id = $2
            UNION ALL
-           SELECT created_at FROM champions_lead_submissions WHERE LOWER(email) = $1
+           SELECT created_at FROM champions_lead_submissions WHERE LOWER(email) = $1 AND tenant_id = $2
            UNION ALL
-           SELECT created_at FROM chfa_dpa_lead_submissions WHERE LOWER(email) = $1
+           SELECT created_at FROM chfa_dpa_lead_submissions WHERE LOWER(email) = $1 AND tenant_id = $2
            UNION ALL
-           SELECT created_at FROM ghope_lead_submissions WHERE LOWER(email) = $1
+           SELECT created_at FROM ghope_lead_submissions WHERE LOWER(email) = $1 AND tenant_id = $2
            UNION ALL
-           SELECT created_at FROM showing_requests WHERE LOWER(email) = $1
+           SELECT created_at FROM showing_requests WHERE LOWER(email) = $1 AND tenant_id = $2
          ) all_subs
          WHERE created_at > NOW() - INTERVAL '5 minutes'
          ORDER BY created_at DESC
          OFFSET 1
          LIMIT 1
        ) prior`,
-      [clean]
+      [clean, currentTenantId()]
     );
     if (r.rows[0]) {
       const minutesAgo = Math.round(Number(r.rows[0].minutes_ago) * 10) / 10;

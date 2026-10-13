@@ -8,6 +8,7 @@ import {
 } from '../services/searchIntentParser.js';
 import { createAlert } from './alertController.js';
 import { rejectIfDisposableEmail } from '../utils/emailQuality.js';
+import { sessionUser } from '../services/buyerSession.js';
 
 const OPENCODE_API_URL = 'https://opencode.ai/zen/go/v1/chat/completions';
 const OPENCODE_API_KEY = process.env.OPENCODE_GO_API_KEY;
@@ -336,18 +337,11 @@ export const createSearchFromChat = async (req, res) => {
     let sessionPhone = '';
     let sessionName = '';
     try {
-      const token = req.cookies?.saa_user_token;
-      if (token && token.length >= 16) {
-        const pool = getPool();
-        const r = await pool.query(
-          `SELECT email, phone, name FROM users WHERE manage_token = $1 AND status = 'active' LIMIT 1`,
-          [String(token)]
-        );
-        if (r.rows[0]) {
-          sessionEmail = r.rows[0].email || '';
-          sessionPhone = r.rows[0].phone || '';
-          sessionName = r.rows[0].name || '';
-        }
+      const u = await sessionUser(req);
+      if (u) {
+        sessionEmail = u.email || '';
+        sessionPhone = u.phone || '';
+        sessionName = u.name || '';
       }
     } catch {
       /* non-fatal */

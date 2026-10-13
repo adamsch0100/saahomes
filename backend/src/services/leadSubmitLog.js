@@ -8,6 +8,7 @@
  */
 import getPool from '../config/database.js';
 import logger from '../utils/logger.js';
+import { currentTenantId } from './tenantContext.js';
 
 /** Open a log row for a submit. Returns the row id, or null on failure. */
 export async function createLeadSubmitLog(
@@ -17,10 +18,10 @@ export async function createLeadSubmitLog(
   try {
     const db = pool || getPool();
     const { rows } = await db.query(
-      `INSERT INTO lead_submit_log (lead_type, submission_id, email, source_page)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO lead_submit_log (lead_type, submission_id, email, source_page, tenant_id)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING id`,
-      [leadType, submissionId, email, sourcePage]
+      [leadType, submissionId, email, sourcePage, currentTenantId()]
     );
     return rows[0]?.id || null;
   } catch (err) {
