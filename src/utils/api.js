@@ -26,12 +26,14 @@ function trackSuccessfulLead(leadType, formData) {
 export const apiRequest = async (endpoint, options = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
 
+  // options first, then headers: a caller's headers (e.g. Authorization) must
+  // add to the JSON Content-Type, not replace it, or the server sees no body.
   const config = {
+    ...options,
     headers: {
       'Content-Type': 'application/json',
       ...options.headers,
     },
-    ...options,
   };
 
   try {
@@ -391,5 +393,125 @@ export const deleteAgentDomain = async (token, id) => {
     headers: {
       Authorization: `Bearer ${token}`,
     },
+  });
+};
+
+export const resendAgentInvite = async (token, id) => {
+  return apiRequest(`/api/admin/agents/${id}/invite`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+// ── Account: password reset, invites, two-step sign-in ────────────────────
+
+/** POST /api/account/password-reset/request — always succeeds (never reveals whether the email exists). */
+export const requestPasswordReset = async (email) => {
+  return apiRequest('/api/account/password-reset/request', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+};
+
+/** GET /api/account/password-reset/check — { purpose: 'reset' | 'invite', email, name, brokerage } */
+export const checkPasswordResetToken = async (token) => {
+  return apiRequest(`/api/account/password-reset/check?token=${encodeURIComponent(token)}`);
+};
+
+/** POST /api/account/password-reset/confirm — { role, email } */
+export const confirmPasswordReset = async (token, password) => {
+  return apiRequest('/api/account/password-reset/confirm', {
+    method: 'POST',
+    body: JSON.stringify({ token, password }),
+  });
+};
+
+/** POST /api/account/2fa/verify — finishes a needs_2fa login; returns the normal login body. */
+export const verifyTwoStepLogin = async (challenge, code) => {
+  return apiRequest('/api/account/2fa/verify', {
+    method: 'POST',
+    body: JSON.stringify({ challenge, code }),
+  });
+};
+
+/** GET /api/account/2fa — { enabled, enabled_at } */
+export const getTwoStepStatus = async (token) => {
+  return apiRequest('/api/account/2fa', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+/** POST /api/account/2fa/setup — { secret, otpauth_url, qr_data_url } */
+export const setupTwoStep = async (token) => {
+  return apiRequest('/api/account/2fa/setup', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+/** POST /api/account/2fa/enable — { recovery_codes } (shown once) */
+export const enableTwoStep = async (token, code) => {
+  return apiRequest('/api/account/2fa/enable', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ code }),
+  });
+};
+
+/** POST /api/account/2fa/disable */
+export const disableTwoStep = async (token, code) => {
+  return apiRequest('/api/account/2fa/disable', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ code }),
+  });
+};
+
+/** GET /api/account/me — { email, name, role, platform, tenant } */
+export const getAccountMe = async (token) => {
+  return apiRequest('/api/account/me', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+// ── Platform console (platform owner only) ────────────────────────────────
+
+export const listTenants = async (token) => {
+  return apiRequest('/api/platform/tenants', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const createTenant = async (token, body) => {
+  return apiRequest('/api/platform/tenants', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+};
+
+export const patchTenant = async (token, id, body) => {
+  return apiRequest(`/api/platform/tenants/${id}`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
   });
 };
