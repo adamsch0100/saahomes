@@ -264,6 +264,11 @@ export async function recordPropertyView(userId, listingKey, pool = getPool()) {
           ).catch(() => {});
         }
       }
+      // Third view of the same home: a note and a "Hot" tag on the FUB person (once per home).
+      if (viewCount.rows[0]?.n >= 3) {
+        const { noteRepeatHomeView } = await import('./fubAutomation.js');
+        noteRepeatHomeView(userId, listingId, viewCount.rows[0].n, { pool }).catch(() => {});
+      }
     } catch {
       // FUB write-back is non-blocking
     }

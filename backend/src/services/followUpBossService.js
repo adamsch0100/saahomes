@@ -455,7 +455,7 @@ export const forwardAlertSignupToFollowUpBoss = async (user, search, { smsOptIn 
       lastName,
       emails: userForPerson.email ? [{ value: userForPerson.email, type: 'work' }] : [],
       phones: userForPerson.phone ? [{ value: String(userForPerson.phone).replace(/\D/g, ''), type: 'mobile' }] : [],
-      tags: ['Website Lead', 'Saved Search', 'saahomes.com'],
+      tags: ['Website Lead', 'Saved Search', 'saahomes.com', 'Active searcher'],
     },
     propertySearch: {
       city: filters.city && filters.city !== '__noco__' && filters.city !== '__all__' ? filters.city : undefined,

@@ -1,5 +1,9 @@
 import { trackLeadConversion } from './analytics.js';
 import { isCustomDomain } from './tenant.js';
+import { installConsoleFetch } from './consoleBrokerage.js';
+
+// A brokerage console opened on the platform's own site names its brokerage.
+installConsoleFetch();
 
 const API_BASE_URL = (() => {
   if (import.meta.env.VITE_API_URL) {

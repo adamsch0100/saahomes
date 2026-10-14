@@ -6,7 +6,7 @@
 import getPool from '../config/database.js';
 import logger from '../utils/logger.js';
 import {
-  tenantIdOf, clearTenantCache, leadVisibility, siteUrlFor, DEFAULT_TENANT_ID,
+  tenantIdOf, clearTenantCache, leadVisibility, siteUrlFor, hasOwnAddress, DEFAULT_TENANT_ID,
 } from '../services/tenantContext.js';
 import {
   normalizeBrandSettings, publicBrand, brandFor, BRAND_FIELDS, isHomeTenant,
@@ -51,7 +51,7 @@ async function settingsPayload(tenant) {
   const helpers = await emailHelpers();
   const own = typeof helpers.ownDomainSendingAvailable === 'function' && helpers.ownDomainSendingAvailable();
   const sending = s.email?.sending_domain || null;
-  const platform = String(process.env.PLATFORM_DOMAIN || '').trim().toLowerCase();
+  const platform = String(process.env.PLATFORM_BASE_DOMAIN || process.env.PLATFORM_DOMAIN || '').trim().toLowerCase();
   const fubKey = isHomeTenant(tenant) ? (process.env.FOLLOW_UP_BOSS_API_KEY || '') : String(s.fub_api_key || '');
   const site = s.site || {};
   return {
@@ -67,7 +67,7 @@ async function settingsPayload(tenant) {
       sending_domain: sending ? { domain: sending.domain, status: sending.status, records: sending.records || [] } : null,
     },
     site: {
-      url: siteUrlFor(tenant),
+      url: hasOwnAddress(tenant) ? siteUrlFor(tenant) : null,
       primary_domain: tenant.primary_domain || null,
       subdomain_url: platform && !isHomeTenant(tenant) ? `https://${tenant.slug}.${platform}` : null,
       dns: site.records || (tenant.primary_domain && !isHomeTenant(tenant)
@@ -167,7 +167,7 @@ async function saveAsset(pool, tenantId, kind, mime, data) {
   );
 }
 
-const assetUrl = (tenant, kind) => `${siteUrlFor(tenant)}/api/tenant/asset/${kind}?v=${Date.now().toString(36)}`;
+const assetUrl = (tenant, kind) => `${siteUrlFor(tenant)}/api/tenant/asset/${kind}?${hasOwnAddress(tenant) ? '' : `brokerage=${encodeURIComponent(tenant.slug)}&`}v=${Date.now().toString(36)}`;
 
 /** POST /api/admin/settings/asset/:kind { data_url } — logo or icon */
 export const uploadBrandAsset = async (req, res) => {

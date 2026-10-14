@@ -36,6 +36,17 @@ const TENANT_LIST_SQL = `
 export const listTenants = async (req, res) => {
   try {
     const r = await getPool().query(`${TENANT_LIST_SQL} ORDER BY t.id`);
+    // Each brokerage's billing state (trial, active, grace, paused), for the console.
+    const billing = await getPool().query("SELECT id, settings->'billing' AS billing FROM tenants");
+    const byId = new Map(billing.rows.map((b) => [Number(b.id), b.billing || null]));
+    for (const row of r.rows) {
+      const b = Number(row.id) === DEFAULT_TENANT_ID ? null : byId.get(Number(row.id));
+      row.billing = b ? {
+        status: b.status || null, suspended: b.suspended === true, trial_ends_at: b.trial_ends_at || null,
+        grace_ends_at: b.grace_ends_at || null, current_period_end: b.current_period_end || null,
+        seats_billed: b.seats_billed ?? null, has_subscription: !!b.subscription,
+      } : null;
+    }
     return res.json({ success: true, data: r.rows });
   } catch (error) {
     logger.error('listTenants error', error);
@@ -68,7 +79,7 @@ export const createTenant = async (req, res) => {
     return res.status(400).json({ error: 'Short name must be lowercase letters, numbers and dashes' });
   }
   if (domain && !DOMAIN_RE.test(domain)) return res.status(400).json({ error: 'That domain doesn’t look right' });
-  if (!domain && !process.env.PLATFORM_DOMAIN) {
+  if (!domain && !process.env.PLATFORM_BASE_DOMAIN && !process.env.PLATFORM_DOMAIN) {
     return res.status(400).json({ error: 'Give the brokerage a domain so its invite link has somewhere to go' });
   }
   if (!ownerName) return res.status(400).json({ error: 'Owner name is required' });

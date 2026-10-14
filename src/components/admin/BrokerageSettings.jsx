@@ -48,7 +48,15 @@ const primaryClass =
 const secondaryClass =
   'min-h-[44px] px-4 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:border-black disabled:opacity-50';
 
+/**
+ * Show only some sections (the setup steps reuse these forms one at a time):
+ * an array of section titles, or a function of the title. null shows all.
+ */
+export const SettingsSectionFilter = React.createContext(null);
+
 function Section({ title, description, children }) {
+  const only = React.useContext(SettingsSectionFilter);
+  if (only && !(typeof only === 'function' ? only(title) : only.includes(title))) return null;
   return (
     <section className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
       <h2 className="text-lg font-bold text-gray-900">{title}</h2>
@@ -232,6 +240,7 @@ function BrandPreview({ form, logoUrl }) {
 }
 
 export default function BrokerageSettings({ token }) {
+  const onlySections = React.useContext(SettingsSectionFilter);
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState(null);
@@ -488,7 +497,7 @@ export default function BrokerageSettings({ token }) {
 
   return (
     <div className="max-w-3xl space-y-6">
-      {settings.brokerage?.name ? (
+      {settings.brokerage?.name && !onlySections ? (
         <p className="text-sm text-gray-500">
           Settings for <span className="font-semibold text-gray-900">{settings.brokerage.name}</span>
         </p>

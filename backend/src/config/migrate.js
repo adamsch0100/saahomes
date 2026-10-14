@@ -1135,6 +1135,39 @@ export const runMigrations = async () => {
       console.error('staff auth migration skipped:', staffErr.message);
     }
 
+    // Plug and play: self-serve signup (owner email confirmation), the
+    // once-per-home "viewed 3 times" Follow Up Boss note, and Follow Up Boss
+    // webhook deliveries already handled (FUB retries until it gets a 2xx).
+    await client.query('SAVEPOINT plug_and_play');
+    try {
+      await client.query(`
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS email_confirmed_at TIMESTAMPTZ;
+        CREATE TABLE IF NOT EXISTS fub_view_notes (
+          tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          listing_id VARCHAR(64) NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (user_id, listing_id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_fub_view_notes_tenant ON fub_view_notes(tenant_id);
+        DROP TRIGGER IF EXISTS fub_view_notes_tenant ON fub_view_notes;
+        CREATE TRIGGER fub_view_notes_tenant BEFORE INSERT ON fub_view_notes
+          FOR EACH ROW EXECUTE FUNCTION tenant_from_parent('users', 'user_id');
+        CREATE TABLE IF NOT EXISTS fub_webhook_events (
+          tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          event_id VARCHAR(64) NOT NULL,
+          event VARCHAR(48) NOT NULL,
+          received_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (tenant_id, event_id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_fub_webhook_events_tenant ON fub_webhook_events(tenant_id, received_at DESC);
+      `);
+      await client.query('RELEASE SAVEPOINT plug_and_play');
+    } catch (plugErr) {
+      await client.query('ROLLBACK TO SAVEPOINT plug_and_play');
+      console.error('plug and play migration skipped:', plugErr.message);
+    }
+
     // Brokerage brand files (logo, app icon, agent photos) and agent profiles.
     await client.query('SAVEPOINT brand_settings');
     try {

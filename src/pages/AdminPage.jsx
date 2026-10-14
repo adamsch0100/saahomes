@@ -11,6 +11,8 @@ import ForgotPassword from '../components/account/ForgotPassword.jsx';
 import TwoStepCodeForm from '../components/account/TwoStepCodeForm.jsx';
 import TwoStepPanel from '../components/account/TwoStepPanel.jsx';
 import BrokerageSettings from '../components/admin/BrokerageSettings.jsx';
+import OwnerSetup, { ConsoleNotes, OwnerSettingsExtras } from '../components/admin/OwnerSetup.jsx';
+import { takeHandoffToken } from '../utils/consoleBrokerage.js';
 
 const TYPE_LABELS = {
   digest: 'Listing digest',
@@ -24,7 +26,7 @@ function formatOpenRate(rate) {
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [token, setToken] = useState(localStorage.getItem('adminToken'));
+  const [token, setToken] = useState(() => takeHandoffToken() || localStorage.getItem('adminToken'));
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [submissions, setSubmissions] = useState([]);
   const [stats, setStats] = useState(null);
@@ -196,6 +198,7 @@ export default function AdminPage() {
                 {challenge ? 'Two-step sign-in' : 'Admin Login'}
               </h2>
             </div>
+            <ConsoleNotes signIn />
             {challenge ? (
               <TwoStepCodeForm
                 challenge={challenge}
@@ -327,6 +330,8 @@ export default function AdminPage() {
             </div>
           </div>
 
+          <OwnerSetup token={token} onOpenTab={setTab} onLeave={handleLogout} />
+
           <div className="mb-6 flex flex-wrap gap-2">
             <button
               type="button"
@@ -408,7 +413,10 @@ export default function AdminPage() {
               <TwoStepPanel token={token} />
             </div>
           ) : tab === 'settings' ? (
-            <BrokerageSettings token={token} />
+            <div className="max-w-3xl space-y-6">
+              <BrokerageSettings token={token} />
+              <OwnerSettingsExtras token={token} />
+            </div>
           ) : tab === 'brokerages' && me?.platform === true ? (
             <BrokeragesManager token={token} />
           ) : tab === 'email-ab' ? (

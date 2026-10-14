@@ -3,13 +3,20 @@
  *
  * Every request is resolved to one tenant from its host:
  *   1. tenants.primary_domain (with or without www.)
- *   2. <slug>.<PLATFORM_DOMAIN> when PLATFORM_DOMAIN is set
+ *   2. <slug>.<PLATFORM_BASE_DOMAIN> (or PLATFORM_DOMAIN) when set: the free
+ *      address every brokerage gets at signup
  *   3. a verified agent custom domain (users.custom_domain), which belongs to
  *      that agent's tenant and attributes signups to the agent
  *   4. otherwise the default tenant (SAA Homes, id 1), so saahomes.com,
  *      localhost and the Railway domain keep working unchanged
  * A suspended brokerage still resolves (so its domains never fall through to
- * SAA), and the middleware answers 503 for it.
+ * SAA), and the middleware answers 503 for it. One paused for an unpaid bill
+ * still lets its owner sign in and pay (BILLING_OPEN_PATHS).
+ *
+ * A brokerage with no address yet (no domain, no platform base domain) runs
+ * its console on the platform's own host: staff API calls there name it in an
+ * X-Brokerage header (CONSOLE_PATHS only; the staff token must still belong
+ * to it).
  *
  * Controllers read req.tenant; deeper services can call currentTenantId(),
  * which reads the same value from AsyncLocalStorage. Background jobs have no
@@ -74,6 +81,11 @@ function normalizeHost(host) {
   return String(host || '').split(':')[0].trim().toLowerCase().replace(/\.+$/, '');
 }
 
+/** The base domain brokerages get free subdomains on, or '' when not set up. */
+export function platformBaseDomain() {
+  return normalizeHost(process.env.PLATFORM_BASE_DOMAIN || process.env.PLATFORM_DOMAIN);
+}
+
 function shape(row, agent = null, siteHost = null) {
   return {
     id: Number(row.id),
@@ -104,7 +116,7 @@ async function lookup(pool, hostname) {
     if (byDomain.rows[0]) return shape(byDomain.rows[0], null, hostname);
   }
 
-  const platform = normalizeHost(process.env.PLATFORM_DOMAIN);
+  const platform = platformBaseDomain();
   if (platform && hostname.endsWith(`.${platform}`)) {
     const slug = hostname.slice(0, -(platform.length + 1));
     if (/^[a-z0-9-]{1,64}$/.test(slug)) {
@@ -144,9 +156,28 @@ async function lookup(pool, hostname) {
 export function siteUrlFor(tenant) {
   if (tenant?.site_host) return `https://${tenant.site_host}`;
   if (tenant?.primary_domain) return `https://${tenant.primary_domain}`;
-  const platform = normalizeHost(process.env.PLATFORM_DOMAIN);
+  const platform = platformBaseDomain();
   if (platform && tenant?.slug && tenant.id !== DEFAULT_TENANT_ID) return `https://${tenant.slug}.${platform}`;
   return (process.env.SITE_URL || 'https://saahomes.com').replace(/\/$/, '');
+}
+
+/** True when a brokerage has an address of its own (a domain or a platform subdomain). */
+export function hasOwnAddress(tenant) {
+  if (!tenant || tenant.id === DEFAULT_TENANT_ID) return true;
+  return !!(tenant.site_host || tenant.primary_domain || platformBaseDomain());
+}
+
+/**
+ * A link into a brokerage's staff pages (/admin, /agent, /reset-password):
+ * on its own site, or, before it has an address, on the platform's host with
+ * ?brokerage=<slug> so the console knows whose it is.
+ */
+export function consoleUrlFor(tenant, path = '/admin') {
+  const base = siteUrlFor(tenant);
+  if (hasOwnAddress(tenant)) return `${base}${path}`;
+  const sep = path.includes('?') ? '&' : '?';
+  const [p, hash] = path.split('#');
+  return `${base}${p}${sep}brokerage=${encodeURIComponent(tenant.slug)}${hash ? `#${hash}` : ''}`;
 }
 
 /**
@@ -175,9 +206,47 @@ export async function resolveTenantForHost(host, { pool = getPool() } = {}) {
   return tenant;
 }
 
+// Staff APIs a brokerage without an address reaches on the platform's host.
+const CONSOLE_PATHS = /^\/api\/(admin|account|agent)(\/|$)/;
+
+// What still answers for a brokerage paused for an unpaid bill: its brand,
+// sign-in, and billing, so the owner can pay and bring the site back.
+const BILLING_OPEN_PATHS = [
+  /^\/api\/tenant(\/asset\/[^/]+)?$/,
+  /^\/api\/admin\/login$/,
+  /^\/api\/account\//,
+  /^\/api\/admin\/billing(\/|$)/,
+  /^\/api\/admin\/setup$/,
+];
+
+/** True when a brokerage was paused by billing (not by the platform owner). */
+export function pausedForBilling(tenant) {
+  return tenant?.status === 'suspended' && tenant?.settings?.billing?.suspended === true
+    && (tenant?.id ?? DEFAULT_TENANT_ID) !== DEFAULT_TENANT_ID;
+}
+
+export function billingOpenPath(path) {
+  return BILLING_OPEN_PATHS.some((re) => re.test(String(path || '').split('?')[0]));
+}
+
+/** The brokerage named by X-Brokerage on the platform host, or null. */
+const CONSOLE_ASSET_PATH = /^\/api\/tenant\/asset\/[^/?]+(\?|$)/;
+
+async function consoleTenant(req, hostTenant, pool = getPool()) {
+  // Its logo and icon (public anyway) by ?brokerage=, so they show there too.
+  const asset = req.method === 'GET' && CONSOLE_ASSET_PATH.test(String(req.originalUrl || ''));
+  const slug = String((asset ? req.query?.brokerage : req.get?.('x-brokerage')) || '').trim().toLowerCase();
+  if (!slug || !/^[a-z0-9-]{1,64}$/.test(slug)) return null;
+  if ((hostTenant?.id ?? DEFAULT_TENANT_ID) !== DEFAULT_TENANT_ID || hostTenant?.agent) return null;
+  if (!asset && !CONSOLE_PATHS.test(String(req.originalUrl || ''))) return null;
+  const r = await pool.query(`SELECT ${TENANT_COLS} FROM tenants WHERE slug = $1 AND id <> $2 LIMIT 1`, [slug, DEFAULT_TENANT_ID]);
+  return r.rows[0] ? shape(r.rows[0]) : null;
+}
+
 /** Express middleware: sets req.tenant and the async tenant context. */
 export function tenantMiddleware(req, res, next) {
   return resolveTenantForHost(req.hostname)
+    .then(async (tenant) => (await consoleTenant(req, tenant)) || tenant)
     .catch((err) => {
       logger.error('tenant resolution failed', { host: req.hostname, message: err.message });
       return shape({ id: DEFAULT_TENANT_ID, slug: 'saa', name: 'SAA Homes' });
@@ -187,7 +256,7 @@ export function tenantMiddleware(req, res, next) {
       // A paused brokerage's domains answer, but serve nothing. (They don't
       // fall through to the home brokerage, where signups would land in the
       // wrong place.)
-      if (tenant.status !== 'active') {
+      if (tenant.status !== 'active' && !(pausedForBilling(tenant) && billingOpenPath(req.originalUrl))) {
         return res.status(503).json({ error: 'This site is paused. Please contact the brokerage.' });
       }
       return als.run({ tenant }, () => next());
