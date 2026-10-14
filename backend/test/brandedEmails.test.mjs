@@ -89,6 +89,8 @@ test.before(async () => {
       brand: { name: 'Peak Realty', phone: '3035550142', email: 'hello@peak-realty.test', accent_color: '#0f766e' },
     })]
   ));
+  // Peak's MLS has approved its site, so its buyers get real IRES homes.
+  await q(`INSERT INTO tenant_feeds (tenant_id, feed_key, status, sold_enabled) VALUES ($1, 'ires', 'approved', TRUE)`, [peak.id]);
   peakAdmin = await user('owner@peak-realty.test', { tenantId: peak.id, role: 'admin', name: 'Olive Owner' });
   peakAgent = await user('kim@peak-realty.test', { tenantId: peak.id, role: 'agent', name: 'Kim Peak' });
   peakBuyer = await user('pat@comcast.net', { tenantId: peak.id, agentId: peakAgent.id });

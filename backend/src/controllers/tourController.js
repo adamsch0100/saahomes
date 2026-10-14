@@ -22,6 +22,7 @@ import { resolveUser } from './savedHomesController.js';
 import { reportLeadToBoard } from '../services/boardLeadCount.js';
 import { tenantIdOf, siteUrlFor } from '../services/tenantContext.js';
 import { brandFor, isHomeTenant } from '../services/brand.js';
+import { listingScope } from '../services/feeds.js';
 
 const SITE = (process.env.SITE_URL || 'https://saahomes.com').replace(/\/$/, '');
 const MAX_WINDOWS = 3;
@@ -57,10 +58,11 @@ export function cleanWindows(raw, now = new Date()) {
 }
 
 async function loadStops(pool, keys) {
+  const { feeds } = await listingScope(null, { pool });
   const { rows } = await pool.query(
     `SELECT id, listing_id, slug, list_price, street_number, street_name, unit, city, latitude, longitude, status
-     FROM listings WHERE listing_id = ANY($1::text[])`,
-    [keys]
+     FROM listings WHERE listing_id = ANY($1::text[]) AND feed = ANY($2::text[])`,
+    [keys, feeds]
   );
   const byKey = new Map(rows.map((r) => [String(r.listing_id), r]));
   return keys.filter((k) => byKey.has(k)).map((k) => {

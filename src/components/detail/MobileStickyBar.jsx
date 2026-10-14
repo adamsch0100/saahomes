@@ -1,6 +1,7 @@
 import React from "react";
 import ScheduleShowingModal from "../ScheduleShowingModal";
 import { HeartIcon, ShareIcon } from "./icons.jsx";
+import { useBrokerageBrand } from "../../context/TenantContext.jsx";
 
 /**
  * Mobile sticky bottom conversion bar — Save · Share · Nadia · Call · Schedule.
@@ -18,6 +19,7 @@ export default function MobileStickyBar({
   shareCopied = false,
   mode = "fixed", // "fixed" | "footer"
 }) {
+  const bb = useBrokerageBrand();
   if (!listing) return null;
 
   const bar = (
@@ -64,12 +66,14 @@ export default function MobileStickyBar({
       >
         Nadia
       </button>
+      {(!bb || bb.phone) && (
       <a
-        href="tel:+19709991407"
+        href={bb ? bb.tel : "tel:+19709991407"}
         className="shrink-0 min-h-[44px] px-2 py-2.5 border-2 border-black text-black text-xs font-semibold rounded-lg active:scale-95 hover:bg-black hover:text-white transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]"
       >
         Call
       </a>
+      )}
       <div className="flex-1 min-w-0">
         <ScheduleShowingModal
           listing={listing}

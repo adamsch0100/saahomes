@@ -1,9 +1,11 @@
 import React from "react";
+import { useBrokerageBrand } from "../../context/TenantContext.jsx";
 
 /**
  * Public remarks — typographically polished (serif lead / drop-cap feel).
  */
 export default function DescriptionSection({ description }) {
+  const bb = useBrokerageBrand();
   const text =
     description && String(description).trim()
       ? String(description).trim()
@@ -26,9 +28,19 @@ export default function DescriptionSection({ description }) {
       ) : (
         <p className="text-gray-500 text-sm">
           Contact us for details about this property —{" "}
+          {bb ? (
+            bb.phone ? (
+              <a href={bb.tel} className="underline text-gray-800 font-medium">
+                {bb.phone}
+              </a>
+            ) : (
+              bb.name
+            )
+          ) : (
           <a href="tel:+19709991407" className="underline text-gray-800 font-medium">
             (970) 999-1407
           </a>
+          )}
           .
         </p>
       )}

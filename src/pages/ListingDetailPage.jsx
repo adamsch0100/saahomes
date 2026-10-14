@@ -40,6 +40,7 @@ import {
   saveHomeApi,
   unsaveHomeApi,
 } from "../utils/savedHomesApi.js";
+import { SampleBadge } from "../components/ListingAttribution.jsx";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -482,6 +483,7 @@ export default function ListingDetailPage() {
                 <span className="text-2xl sm:text-3xl font-bold text-[color:var(--brand-accent)] tracking-tight">
                   {formatPrice(listing.list_price)}
                 </span>
+                <SampleBadge listing={listing} className="rounded-full" />
                 {priceCut && (
                   <span className="text-gray-400 text-sm line-through">
                     {formatPrice(listing.original_list_price)}

@@ -2,6 +2,7 @@ import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import getPool from '../config/database.js';
 import { isNocoCity } from '../config/nocoCities.js';
 import { isConfigured as r2Configured, isR2Hosted, syncSoldListingPhotos } from './photoSync.js';
+import { OFFICE_FIELDS, rejectsOfficeFields } from './iresSync.js';
 
 /**
  * IRES sold/closed ingest — MLS Grid RESO Web API.
@@ -37,6 +38,8 @@ const SOLD_FIELDS = [
   'ModificationTimestamp', 'ListingContractDate', 'OriginatingSystemName',
   'PropertyAttachedYN', 'MlgCanView',
 ];
+// Office/agent fields (OFFICE_FIELDS) ride along unless the feed rejects them.
+let officeFieldsRejected = false;
 
 // Slightly slower than listing sync (700ms) — leave photo-proxy headroom.
 const RATE_LIMIT_MS = 850;
@@ -129,7 +132,7 @@ async function fetchSoldPage(authToken, offset, { incrementalSince = null, retri
   url.searchParams.set('$top', '100');
   url.searchParams.set('$skip', String(offset));
   url.searchParams.set('$filter', buildSoldFilter({ incrementalSince }));
-  url.searchParams.set('$select', SOLD_FIELDS.join(','));
+  url.searchParams.set('$select', (officeFieldsRejected ? SOLD_FIELDS : [...SOLD_FIELDS, ...OFFICE_FIELDS]).join(','));
   url.searchParams.set('$expand', 'Media');
 
   try {
@@ -149,7 +152,14 @@ async function fetchSoldPage(authToken, offset, { incrementalSince = null, retri
         await sleep(wait);
         return fetchSoldPage(authToken, offset, { incrementalSince, retries: retries - 1 });
       }
-      throw new Error(`IRES sold fetch failed (${res.status}): ${await res.text()}`);
+      const body = await res.text();
+      if (!officeFieldsRejected && rejectsOfficeFields(res.status, body)) {
+        // Retry once without the office/agent fields; sold rows keep syncing.
+        officeFieldsRejected = true;
+        console.warn(`⚠️ IRES sold rejected listing office/agent fields — syncing without them: ${body.slice(0, 200)}`);
+        return fetchSoldPage(authToken, offset, { incrementalSince, retries });
+      }
+      throw new Error(`IRES sold fetch failed (${res.status}): ${body}`);
     }
     return res.json();
   } catch (error) {
@@ -280,6 +290,10 @@ function normalizeSold(raw) {
     photos_count: num(raw.PhotosCount, 500) ?? photos.length,
     modification_timestamp: raw.ModificationTimestamp || null,
     mlg_can_view: raw.MlgCanView,
+    list_office_name: raw.ListOfficeName ? String(raw.ListOfficeName).slice(0, 255) : null,
+    list_office_mls_id: raw.ListOfficeMlsId ? String(raw.ListOfficeMlsId).slice(0, 40) : null,
+    list_agent_name: raw.ListAgentFullName ? String(raw.ListAgentFullName).slice(0, 255) : null,
+    list_agent_mls_id: raw.ListAgentMlsId ? String(raw.ListAgentMlsId).slice(0, 40) : null,
   };
 }
 
@@ -301,10 +315,11 @@ const SOLD_UPSERT_SQL = `
     postal_code, lat, lng, property_type, home_type, beds, baths, living_area, lot_size,
     list_price, sold_price, closed_date, days_on_market, parcel_number, subdivision,
     elementary_school, middle_school, high_school, school_district,
-    photos, photos_count, modification_timestamp, updated_at
+    photos, photos_count, modification_timestamp,
+    list_office_name, list_office_mls_id, list_agent_name, list_agent_mls_id, updated_at
   ) VALUES (
     $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,
-    $24,$25,$26,$27,$28,$29,$30,NOW()
+    $24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,NOW()
   )
   ON CONFLICT (listing_id) DO UPDATE SET
     mls_source = EXCLUDED.mls_source,
@@ -336,7 +351,12 @@ const SOLD_UPSERT_SQL = `
     photos = CASE WHEN sold_listings.photos::text LIKE '%r2.dev%' THEN sold_listings.photos ELSE EXCLUDED.photos END,
     photos_count = CASE WHEN sold_listings.photos::text LIKE '%r2.dev%' THEN sold_listings.photos_count ELSE EXCLUDED.photos_count END,
     modification_timestamp = EXCLUDED.modification_timestamp,
+    list_office_name = COALESCE(EXCLUDED.list_office_name, sold_listings.list_office_name),
+    list_office_mls_id = COALESCE(EXCLUDED.list_office_mls_id, sold_listings.list_office_mls_id),
+    list_agent_name = COALESCE(EXCLUDED.list_agent_name, sold_listings.list_agent_name),
+    list_agent_mls_id = COALESCE(EXCLUDED.list_agent_mls_id, sold_listings.list_agent_mls_id),
     updated_at = NOW()
+  WHERE sold_listings.feed = 'ires'
   RETURNING photos`;
 
 function asPhotoList(photos) {
@@ -479,6 +499,7 @@ export async function syncSoldListings({
           row.parcel_number, row.subdivision,
           row.elementary_school, row.middle_school, row.high_school, row.school_district,
           JSON.stringify(row.photos), row.photos_count, row.modification_timestamp,
+          row.list_office_name, row.list_office_mls_id, row.list_agent_name, row.list_agent_mls_id,
         ]);
         kept += 1;
 
@@ -570,7 +591,7 @@ export async function backfillSoldPhotos({ limit = DEFAULT_PHOTO_BACKFILL } = {}
     const pending = await pool.query(
       `SELECT listing_id, photos
          FROM sold_listings
-        WHERE photos IS NOT NULL
+        WHERE feed = 'ires' AND photos IS NOT NULL
           AND jsonb_typeof(photos) = 'array'
           AND jsonb_array_length(photos) > 0
           AND photos::text NOT LIKE '%r2.dev%'

@@ -14,6 +14,7 @@ import {
   savedSearchPath,
 } from '../services/listingFilters.js';
 import { parseSearchIntent, unsupportedAsks } from '../services/searchIntentParser.js';
+import { listingScope } from '../services/feeds.js';
 import { VISITOR_COOKIE, isValidVisitorId, recordEvent, sessionUserId } from '../services/events.js';
 
 const MAX_TEXT = 300;
@@ -76,7 +77,7 @@ export const understandSearch = async (req, res) => {
     const filters = sanitizeSavedFilters(raw);
     delete filters.polygon;
     const pool = getPool();
-    const { whereSql, params } = buildSavedSearchWhere(filters);
+    const { whereSql, params } = buildSavedSearchWhere(filters, await listingScope(req.tenant, { pool }));
     const { rows: [{ count }] } = await pool.query(`SELECT COUNT(*)::int AS count FROM listings WHERE ${whereSql}`, params);
 
     if (text) {

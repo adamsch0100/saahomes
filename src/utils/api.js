@@ -537,6 +537,37 @@ export const patchTenant = async (token, id, body) => {
   });
 };
 
+/** GET /api/platform/tenants/:id/feeds — listing feeds, service areas, change log */
+export const getTenantFeeds = async (token, id) => {
+  return apiRequest(`/api/platform/tenants/${id}/feeds`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+/** PUT /api/platform/tenants/:id/feeds/:key { status, office_mls_id, sold_enabled, notes } */
+export const putTenantFeed = async (token, id, key, body) => {
+  return apiRequest(`/api/platform/tenants/${id}/feeds/${encodeURIComponent(key)}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+};
+
+/** PUT /api/platform/tenants/:id/service-areas { service_areas } */
+export const putTenantServiceAreas = async (token, id, serviceAreas) => {
+  return apiRequest(`/api/platform/tenants/${id}/service-areas`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ service_areas: serviceAreas }),
+  });
+};
+
 // ── Brokerage settings (brokerage owner or platform owner) ────────────────
 
 /** GET /api/admin/settings — brand, lead routing, security, FUB, email, site */

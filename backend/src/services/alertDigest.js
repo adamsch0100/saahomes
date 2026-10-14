@@ -30,6 +30,7 @@ import {
 } from './emailer.js';
 import { tenantById } from './tenantContext.js';
 import { brandFor, isHomeTenant } from './brand.js';
+import { attributionFor, courtesyLine, feedCatalog, listingScope } from './feeds.js';
 
 // The shared pool (TLS to the Railway proxy; plaintext runs got reset
 // mid-run). Lazy so importing this module never needs DATABASE_URL.
@@ -116,8 +117,8 @@ function isDueWithListingPref(search, listingPrefFreq) {
 
 // ---------------------------------------------------------------- filters
 // Same filter builder as the search page (services/listingFilters.js).
-function buildWhere(filters) {
-  return buildSavedSearchWhere(filters);
+function buildWhere(filters, scope = null) {
+  return buildSavedSearchWhere(filters, scope);
 }
 
 function matchScore(l, filters) {
@@ -303,7 +304,7 @@ function auditEmailLinks(html, { site = SITE } = {}) {
 }
 
 // ---------------------------------------------------------------- cards
-function cardHtml(l, filters, isNew, isDrop, { site = SITE, accent = GOLD } = {}) {
+function cardHtml(l, filters, isNew, isDrop, { site = SITE, accent = GOLD, catalog = null } = {}) {
   // Serve photos through the site's durable proxy (/api/photo) instead of the
   // raw MLS signed URL — signed URLs expire ~60 min after sync, so direct
   // links die before the recipient opens the email (photos didn't load).
@@ -358,6 +359,8 @@ function cardHtml(l, filters, isNew, isDrop, { site = SITE, accent = GOLD } = {}
         </div>
         <div style="color:#374151;font-size:14px;margin-top:2px">${[l.beds != null ? `${l.beds} bd` : '', l.baths != null ? `${l.baths} ba` : '', fmtSqft(l.living_area), HOME_TYPE_LABEL[l.home_type] || l.property_subtype].filter(Boolean).join(' · ')}</div>
         <div style="color:#6b7280;font-size:13px;margin-top:2px">${escapeHtml(address)}, CO ${escapeHtml(l.postal_code || '')}</div>
+        ${l.feed === 'demo' ? '<div style="color:#92400e;font-size:12px;font-weight:700;margin-top:4px">Sample listing · not a real home for sale</div>' : ''}
+        ${catalog && courtesyLine(l, catalog) ? `<div style="color:#6b7280;font-size:11.5px;margin-top:4px">${escapeHtml(courtesyLine(l, catalog))}</div>` : ''}
         ${highlights.length ? `
         <div style="margin-top:10px;padding:10px 12px;background:#f9fafb;border-radius:8px;font-size:13px;color:#374151;line-height:1.55">
           <strong style="color:#111">Why you got this:</strong><br/>${highlights.map((h) => `• ${escapeHtml(h)}`).join('<br/>')}
@@ -387,7 +390,7 @@ function cardHtml(l, filters, isNew, isDrop, { site = SITE, accent = GOLD } = {}
 function digestHtml({
   firstName, searchName, filterSummary, summaryLines, standouts, cards,
   manageUrl, unsubscribeUrl, searchUrl, viewedCallout, brand = null, cityLabel = '',
-  quietSearch = false,
+  quietSearch = false, feedNotes = null,
 }) {
   const { market, sources, dpa, fairHousing, footer, honestLabels } = marketPack;
   const useBrand = !!brand;
@@ -523,7 +526,7 @@ function digestHtml({
       </td></tr>
     </table>
     <div style="color:#9ca3af;font-size:11.5px;margin-top:18px;line-height:1.65">
-      <p style="margin:0 0 8px">${escapeHtml(sources.iresIdx)}</p>
+      ${(own && feedNotes?.length ? feedNotes : [sources.iresIdx]).map((n) => `<p style="margin:0 0 8px">${escapeHtml(n)}</p>`).join('')}
       ${own ? '' : `<p style="margin:0 0 8px">${escapeHtml(footer.depthLine)}</p>
       <p style="margin:0 0 8px">
         ${escapeHtml(dpa.chfaLine)}
@@ -582,7 +585,7 @@ const MAX_DIGEST_CARDS = 12;
 /** A home that joins a search counts as "new on the market" this many days in. */
 const NEW_LISTING_DAYS = 7;
 
-const CARD_COLUMNS = `id, listing_id, slug, street_number, street_name, city, state, postal_code,
+const CARD_COLUMNS = `id, listing_id, slug, street_number, street_name, city, state, postal_code, feed, list_office_name,
   list_price, original_list_price, beds, baths, living_area, home_type,
   property_subtype, days_on_market, photos, status, price_change_timestamp,
   elementary_school, middle_school, high_school, school_district, subdivision,
@@ -664,11 +667,11 @@ async function saveSnapshot(searchId, snapshot) {
 }
 
 /** Homes that left the results and really went under contract, sold or came off. */
-async function offMarketAmong(listingIds) {
+async function offMarketAmong(listingIds, feeds = ['ires']) {
   if (!listingIds.length) return [];
   const r = await pool.query(
-    'SELECT listing_id, status, is_active FROM listings WHERE listing_id = ANY($1)',
-    [listingIds]
+    'SELECT listing_id, status, is_active FROM listings WHERE listing_id = ANY($1) AND feed = ANY($2::text[])',
+    [listingIds, feeds]
   );
   return r.rows.filter((row) => !row.is_active || row.status !== 'Active');
 }
@@ -689,8 +692,11 @@ async function runSearch(search, { dryRun, onlyEmail, send = sendEmail } = {}) {
   }
   const site = tenantBrand ? tenantBrand.siteUrl : SITE;
   const accent = tenantBrand ? tenantBrand.accent : GOLD;
+  // Only homes this buyer's brokerage may show (sample homes in demo mode).
+  const scope = await listingScope(Number(userRow.tenant_id ?? 1));
+  const catalog = await feedCatalog();
 
-  const { whereSql, params } = buildWhere(search.filters);
+  const { whereSql, params } = buildWhere(search.filters, scope);
   const matches = await pool.query(
     `SELECT listing_id, list_price, days_on_market FROM listings
      WHERE ${whereSql} ORDER BY listing_id LIMIT ${SNAPSHOT_CAP}`,
@@ -710,7 +716,7 @@ async function runSearch(search, { dryRun, onlyEmail, send = sendEmail } = {}) {
     }
     diff.left = diff.left.filter((id) => !passed.has(String(id)));
   }
-  const offMarket = await offMarketAmong(diff.left);
+  const offMarket = await offMarketAmong(diff.left, scope.feeds);
   const statusChanges = offMarket.length;
 
   const commitSnapshot = async () => {
@@ -732,7 +738,10 @@ async function runSearch(search, { dryRun, onlyEmail, send = sendEmail } = {}) {
     ...[...diff.newMatches].sort(byNewest).map((r) => ({ type: 'new_match', row: r })),
   ].slice(0, MAX_DIGEST_CARDS);
   const full = cardPlan.length
-    ? await pool.query(`SELECT ${CARD_COLUMNS} FROM listings WHERE listing_id = ANY($1)`, [cardPlan.map((c) => c.row.listing_id)])
+    ? await pool.query(
+      `SELECT ${CARD_COLUMNS} FROM listings WHERE listing_id = ANY($1) AND feed = ANY($2::text[])`,
+      [cardPlan.map((c) => c.row.listing_id), scope.feeds]
+    )
     : { rows: [] };
   const fullById = new Map(full.rows.map((l) => [l.listing_id, l]));
   const carded = cardPlan
@@ -747,7 +756,7 @@ async function runSearch(search, { dryRun, onlyEmail, send = sendEmail } = {}) {
   const joinedTotal = diff.newMatches.length;
   const eventTotal = newTotal + dropTotal + joinedTotal + statusChanges;
 
-  const cards = carded.map((e) => cardHtml(e.listing, search.filters, e.type === 'new', e.type === 'price_drop', { site, accent })).join('');
+  const cards = carded.map((e) => cardHtml(e.listing, search.filters, e.type === 'new', e.type === 'price_drop', { site, accent, catalog })).join('');
 
   const zipLabel = search.filters.postal_code || search.filters.postalCode || search.filters.zip || '';
   const locBits = [
@@ -849,7 +858,7 @@ async function runSearch(search, { dryRun, onlyEmail, send = sendEmail } = {}) {
   // "You viewed X" personalization from real property_views
   let recentViews = [];
   try {
-    recentViews = await getRecentViews(search.user_id, 5, pool);
+    recentViews = await getRecentViews(search.user_id, 5, pool, { feeds: scope.feeds });
   } catch (e) {
     console.error('recent views lookup failed:', e.message);
   }
@@ -859,6 +868,15 @@ async function runSearch(search, { dryRun, onlyEmail, send = sendEmail } = {}) {
   const unsubscribeUrl = `${site}/api/alerts/unsubscribe?token=${search.manage_token}`;
   const searchPath = filtersToSearchPath(search.filters || {});
   const searchUrl = `${site}${searchPath}`;
+
+  // Another brokerage's footer names its own feeds (or says the homes are samples).
+  const feedNotes = [];
+  if (tenantBrand) {
+    const tenantRow = await tenantById(Number(userRow.tenant_id));
+    for (const key of scope.feeds) {
+      feedNotes.push((await attributionFor({ feed: key, updated_at: new Date() }, tenantRow)).disclaimer);
+    }
+  }
 
   // Quiet search: last digest was 7+ days ago — warmer "it's been a minute" open.
   // First-ever email (null last_email_at) keeps the standard open line.
@@ -882,6 +900,7 @@ async function runSearch(search, { dryRun, onlyEmail, send = sendEmail } = {}) {
     brand,
     cityLabel,
     quietSearch,
+    feedNotes,
   };
 
   // Build HTML for dry-run link audit and for the real send path.
