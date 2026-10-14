@@ -1746,6 +1746,69 @@ export const runMigrations = async () => {
       console.error('own crm migration skipped:', ownCrmErr.message);
     }
 
+    // Connecting any MLS: one connection per MLS feed (platform, encrypted
+    // credentials, sync health), and each brokerage's progress through
+    // "Connect your MLS" (applied → approved → connected → live).
+    await client.query('SAVEPOINT mls_connections');
+    try {
+      await client.query(`
+        ALTER TABLE mls_feeds ADD COLUMN IF NOT EXISTS catalog_id VARCHAR(40);
+        ALTER TABLE mls_feeds ADD COLUMN IF NOT EXISTS logo_required BOOLEAN NOT NULL DEFAULT FALSE;
+        ALTER TABLE mls_feeds ADD COLUMN IF NOT EXISTS states TEXT[] NOT NULL DEFAULT '{}';
+        ALTER TABLE mls_feeds ADD COLUMN IF NOT EXISTS display_verified_at TIMESTAMPTZ;
+        UPDATE mls_feeds SET catalog_id = 'ires', states = '{CO}' WHERE key = 'ires' AND catalog_id IS NULL;
+
+        CREATE TABLE IF NOT EXISTS mls_connections (
+          feed_key VARCHAR(16) PRIMARY KEY REFERENCES mls_feeds(key) ON DELETE CASCADE,
+          platform VARCHAR(16) NOT NULL,
+          config JSONB NOT NULL DEFAULT '{}'::jsonb,
+          credentials_enc TEXT,
+          credentials_hint JSONB NOT NULL DEFAULT '{}'::jsonb,
+          credentials_tenant_id INTEGER REFERENCES tenants(id) ON DELETE SET NULL,
+          credentials_updated_at TIMESTAMPTZ,
+          state VARCHAR(16) NOT NULL DEFAULT 'setup' CHECK (state IN ('setup', 'connected', 'live', 'paused')),
+          dropped_fields TEXT[] NOT NULL DEFAULT '{}',
+          cadence_minutes INTEGER NOT NULL DEFAULT 30,
+          watermark TEXT,
+          full_import_at TIMESTAMPTZ,
+          sold_backfill_at TIMESTAMPTZ,
+          reconciled_at TIMESTAMPTZ,
+          roster_at TIMESTAMPTZ,
+          last_test_at TIMESTAMPTZ,
+          last_test_ok BOOLEAN,
+          last_test_error TEXT,
+          last_run_at TIMESTAMPTZ,
+          last_success_at TIMESTAMPTZ,
+          last_error TEXT,
+          last_error_at TIMESTAMPTZ,
+          last_result JSONB,
+          listing_count INTEGER NOT NULL DEFAULT 0,
+          sold_count INTEGER NOT NULL DEFAULT 0,
+          next_run_at TIMESTAMPTZ,
+          running_since TIMESTAMPTZ,
+          created_by_tenant_id INTEGER REFERENCES tenants(id) ON DELETE SET NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_mls_connections_due ON mls_connections(state, next_run_at);
+
+        ALTER TABLE tenant_feeds ADD COLUMN IF NOT EXISTS stage VARCHAR(16);
+        ALTER TABLE tenant_feeds ADD COLUMN IF NOT EXISTS stage_log JSONB NOT NULL DEFAULT '{}'::jsonb;
+        ALTER TABLE tenant_feeds ADD COLUMN IF NOT EXISTS display_confirmed_at TIMESTAMPTZ;
+        ALTER TABLE tenant_feeds ADD COLUMN IF NOT EXISTS go_live_requested_at TIMESTAMPTZ;
+        ALTER TABLE tenant_feeds ADD COLUMN IF NOT EXISTS go_live_auto BOOLEAN NOT NULL DEFAULT FALSE;
+
+        -- Listings from feeds other than IRES and the samples, by the MLS's
+        -- own key: photo refreshes and the daily off-market check.
+        CREATE INDEX IF NOT EXISTS idx_listings_feed_listing_key
+          ON listings (feed, (raw->>'ListingKey')) WHERE feed NOT IN ('ires', 'demo');
+      `);
+      await client.query('RELEASE SAVEPOINT mls_connections');
+    } catch (mlsConnErr) {
+      await client.query('ROLLBACK TO SAVEPOINT mls_connections');
+      console.error('mls connections migration skipped:', mlsConnErr.message);
+    }
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {

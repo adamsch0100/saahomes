@@ -6,7 +6,7 @@ import { localFactsForListing } from '../services/localFacts.js';
 import { sessionUserId } from '../services/events.js';
 import { getTasteProfile, passedListingKeys, scoreListing } from '../services/tasteProfile.js';
 import {
-  attributionFor, decorateCards, feedFilterSql, listingScope, serviceAreaSql, serviceAreaValues,
+  attributionFor, decorateCards, feedFilterSql, listingScope, mlsNumber, serviceAreaSql, serviceAreaValues,
 } from '../services/feeds.js';
 
 // "Best for you" ranks this many of the freshest matches, then pages through them.
@@ -222,6 +222,7 @@ export const getListingBySlug = async (req, res) => {
       delete listing.raw;
     }
     listing.sample = listing.feed === 'demo';
+    listing.mls_number = mlsNumber(listing);
     listing.attribution = await attributionFor(listing, req.tenant, { pool });
     listing.courtesy = listing.attribution.courtesy;
     // Attach GreatSchools ratings when school fields match the cache (never fabricate)

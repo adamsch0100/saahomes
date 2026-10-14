@@ -154,7 +154,7 @@ export default function AllDetailsSection({ listing }) {
           />
           <KeyFact label="County" value={listing.county || null} />
           <KeyFact label="Subdivision" value={listing.subdivision || null} />
-          <KeyFact label="MLS #" value={listing.listing_id || null} />
+          <KeyFact label="MLS #" value={listing.mls_number || listing.listing_id || null} />
           <KeyFact label="Parcel #" value={feats.parcel || null} />
         </div>
       </div>
