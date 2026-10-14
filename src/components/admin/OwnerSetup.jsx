@@ -34,9 +34,9 @@ const STEPS = {
     intro: 'Your site already works on a free address. Point your own domain at it now, or do it later from Settings.',
   },
   fub: {
-    label: 'Follow Up Boss',
-    title: 'Connect Follow Up Boss',
-    intro: 'Optional. New leads, searches and home views land in your Follow Up Boss account. You can skip this and connect later.',
+    label: 'Your CRM',
+    title: 'Pick your CRM',
+    intro: 'Run your leads right here in the cockpit, or send them to Follow Up Boss. You can switch any time without losing anything.',
   },
   mls: {
     label: 'MLS',
@@ -266,7 +266,7 @@ function SetupWizard({ token, setup, onChange, onClose, onOpenTab }) {
 
             {current === 'fub' && (
               <>
-                <SettingsSectionFilter.Provider value={['Follow Up Boss']}>
+                <SettingsSectionFilter.Provider value={['Your CRM', 'Follow Up Boss']}>
                   <BrokerageSettings token={token} />
                 </SettingsSectionFilter.Provider>
                 <FubAutomationCard fub={setup.fub} />

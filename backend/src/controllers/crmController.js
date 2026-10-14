@@ -32,6 +32,7 @@ import {
 } from '../services/smsService.js';
 import { createDraft, sendDraft, sendLeadEmail } from '../services/replyDrafts.js';
 import { getConsents } from '../services/consent.js';
+import { crmModeOf } from '../services/crmMode.js';
 import { saveSubscription, removeSubscription } from '../services/pushService.js';
 
 const posId = (v) => {
@@ -63,7 +64,7 @@ async function staffOf(req, pool) {
 async function visibleLead(req, leadId, pool) {
   const params = [leadId];
   const { rows: [lead] } = await pool.query(
-    `SELECT u.id, u.name, u.email, u.phone, u.status, u.tenant_id, u.assigned_agent_id, u.lifecycle_stage, u.created_at
+    `SELECT u.id, u.name, u.email, u.phone, u.status, u.tenant_id, u.assigned_agent_id, u.lifecycle_stage, u.created_at, u.tags, u.source
      FROM users u WHERE u.id = $1 AND COALESCE(u.role, 'client') = 'client' AND ${visibleLeadSql(req, params, 'u.')}`,
     params
   );
@@ -124,7 +125,9 @@ export const getLeadDetail = wrap('getLeadDetail', async (req, res, pool) => {
     success: true,
     data: {
       viewer_id: me || null,
-      lead: { ...lead, phone_e164: normalizePhone(lead.phone) },
+      crm_mode: crmModeOf(req.tenant),
+      // Leads that came in with only a phone number carry a placeholder address; never show it.
+      lead: { ...lead, email: /\.invalid$/i.test(lead.email || '') ? null : lead.email, phone_e164: normalizePhone(lead.phone) },
       notes: notes.map((n) => ({ ...n, can_edit: isOwner(req) || (me && n.author_id === me) })),
       tasks,
       tours,

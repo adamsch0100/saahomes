@@ -7,9 +7,18 @@ import bcrypt from 'bcrypt';
 import getPool from '../config/database.js';
 import { finishLogin } from '../services/staffAuth.js';
 import logger from '../utils/logger.js';
-import { tenantIdOf, leadVisibility } from '../services/tenantContext.js';
+import { tenantIdOf, leadVisibility, siteUrlFor, DEFAULT_TENANT_ID } from '../services/tenantContext.js';
+import { crmModeOf } from '../services/crmMode.js';
+
+const OWN_CRM_FUB_OFF = 'Your brokerage runs its CRM right here in the cockpit, so Follow Up Boss is turned off. Your owner can switch this in Settings → Your CRM.';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** Where an agent's own website form posts: SAA keeps saahomes.com, a brokerage gets its own address. */
+function webformEndpointFor(req) {
+  if (!req.tenant || req.tenant.id === DEFAULT_TENANT_ID) return 'https://saahomes.com/api/webform/lead';
+  return `${siteUrlFor(req.tenant)}/api/webform/lead`;
+}
 
 /**
  * WHERE fragment for the leads this staff member may see: their tenant only;
@@ -58,7 +67,7 @@ async function listCockpitLeads(req, res) {
        LEFT JOIN users a ON a.id = u.assigned_agent_id
        WHERE u.status IS DISTINCT FROM 'unsubscribed'
          AND COALESCE(u.role, 'client') = 'client'
-         AND ($1 = '%%' OR u.email ILIKE $1 OR u.name ILIKE $1 OR u.phone ILIKE $1 OR ${noteSearchSql('$1', 'u.')})
+         AND ($1 = '%%' OR u.email ILIKE $1 OR u.name ILIKE $1 OR u.phone ILIKE $1 OR ${noteSearchSql('$1', 'u.')} OR EXISTS (SELECT 1 FROM unnest(u.tags) tg WHERE tg ILIKE $1))
          AND ${visible}
          AND ${smartFilterSql(String(smart), 'u.')}
        ORDER BY COALESCE(u.lead_score, 0) DESC, u.last_active_at DESC NULLS LAST, u.created_at DESC
@@ -98,6 +107,7 @@ async function listCockpitLeads(req, res) {
         due_today: dueTodayCount,
         hot: hotCount,
         fub_configured: !!(process.env.FOLLOW_UP_BOSS_API_KEY || process.env.FOLLOW_UP_BOSS_WEBHOOK_URL),
+        crm_mode: req.tenant?.settings?.crm_mode === 'own' ? 'own' : 'fub',
       },
     });
   } catch (error) {
@@ -251,6 +261,12 @@ export const patchAgentCockpitLead = async (req, res) => {
       `UPDATE users SET ${updates.join(', ')} WHERE id = $${i}`,
       params
     );
+    if (body.lifecycle_stage != null) {
+      const { onStageChanged } = await import('../services/actionPlans.js');
+      await onStageChanged({
+        tenantId: existing.rows[0].tenant_id, leadId: id, from: existing.rows[0].lifecycle_stage, to: String(body.lifecycle_stage).toLowerCase().trim(),
+      }, pool).catch((e) => logger.warn('stage plan trigger failed', { message: e.message }));
+    }
 
     const refreshed = await pool.query(
       `SELECT u.*, a.name AS assigned_agent_name, a.email AS assigned_agent_email
@@ -473,7 +489,7 @@ export const getAgentMarket = async (req, res) => {
 /**
  * Build masked FUB status payload for an agent row. Never includes raw key.
  */
-async function buildAgentFubStatus(userId, pool = getPool()) {
+async function buildAgentFubStatus(userId, pool = getPool(), tenant = null) {
   const { maskFubApiKey } = await import('../services/followUpBossService.js');
   const row = await pool.query(
     `SELECT fub_api_key, fub_last_import_at
@@ -502,6 +518,7 @@ async function buildAgentFubStatus(userId, pool = getPool()) {
   return {
     connected,
     maskedKey: connected ? maskFubApiKey(agent.fub_api_key) : null,
+    crm_mode: crmModeOf(tenant),
     lastImportAt: agent.fub_last_import_at
       ? new Date(agent.fub_last_import_at).toISOString()
       : null,
@@ -518,6 +535,9 @@ export const connectAgentFub = async (req, res) => {
     const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({ error: 'Authentication required' });
+    }
+    if (crmModeOf(req.tenant) === 'own') {
+      return res.status(409).json({ error: OWN_CRM_FUB_OFF });
     }
     const apiKey = String(req.body?.apiKey || '').trim();
     if (!apiKey) {
@@ -547,7 +567,7 @@ export const connectAgentFub = async (req, res) => {
     }
 
     logger.info('Agent FUB key connected', { userId, peopleTotal: verified.total ?? null });
-    const status = await buildAgentFubStatus(userId, pool);
+    const status = await buildAgentFubStatus(userId, pool, req.tenant);
     return res.json({ success: true, data: status });
   } catch (error) {
     logger.error('connectAgentFub error', error);
@@ -565,7 +585,7 @@ export const getAgentFubStatus = async (req, res) => {
     if (!userId) {
       return res.status(401).json({ error: 'Authentication required' });
     }
-    const status = await buildAgentFubStatus(userId);
+    const status = await buildAgentFubStatus(userId, getPool(), req.tenant);
     if (!status) {
       return res.status(404).json({ error: 'Agent not found' });
     }
@@ -597,7 +617,7 @@ export const disconnectAgentFub = async (req, res) => {
     }
     logger.info('Agent FUB key disconnected', { userId });
     // Keep lastImportAt / importedCount honest — disconnect only clears the key
-    const status = await buildAgentFubStatus(userId, pool);
+    const status = await buildAgentFubStatus(userId, pool, req.tenant);
     return res.json({
       success: true,
       data: status || {
@@ -622,6 +642,9 @@ export const importAgentFubContacts = async (req, res) => {
     const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({ error: 'Authentication required' });
+    }
+    if (crmModeOf(req.tenant) === 'own') {
+      return res.status(409).json({ error: OWN_CRM_FUB_OFF });
     }
     const pool = getPool();
     const row = await pool.query(
@@ -661,7 +684,7 @@ export const importAgentFubContacts = async (req, res) => {
       });
     }
 
-    const status = await buildAgentFubStatus(userId, pool);
+    const status = await buildAgentFubStatus(userId, pool, req.tenant);
     return res.json({
       success: true,
       data: {
@@ -765,7 +788,7 @@ export const getAgentWebformSlug = async (req, res) => {
     if (!slug) {
       return res.status(404).json({ error: 'Agent not found' });
     }
-    const endpoint = 'https://saahomes.com/api/webform/lead';
+    const endpoint = webformEndpointFor(req);
     return res.json({
       success: true,
       data: {
@@ -826,7 +849,7 @@ export const regenerateAgentWebformSlug = async (req, res) => {
       return res.status(500).json({ error: 'Could not generate a unique slug' });
     }
     logger.info('Agent webform slug regenerated', { userId, slug: newSlug });
-    const endpoint = 'https://saahomes.com/api/webform/lead';
+    const endpoint = webformEndpointFor(req);
     return res.json({
       success: true,
       data: {
@@ -872,7 +895,7 @@ export const getAgentWebformStats = async (req, res) => {
       success: true,
       data: {
         slug,
-        endpoint: 'https://saahomes.com/api/webform/lead',
+        endpoint: webformEndpointFor(req),
         total: row.total || 0,
         last7Days: row.last_7_days || 0,
         lastLeadAt: row.last_lead_at

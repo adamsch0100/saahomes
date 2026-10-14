@@ -95,6 +95,16 @@ export const submitContactForm = async (req, res) => {
         logger.warn('GA4 lead event failed (non-blocking)', { message: err.message });
       });
 
+    // Team inbox (and, when the cockpit is the CRM, a lead): forms and Nadia handoffs.
+    const nadia = /chat conversation lead/i.test(String(interest || '')) || /^Lead from Nadia chat/i.test(String(message || ''));
+    import('../services/leadIntake.js')
+      .then(({ formToInbox }) => formToInbox(req.tenant, {
+        name, email, phone, source: nadia ? 'nadia' : 'contact', kind: nadia ? 'nadia' : 'form',
+        tags: !nadia && /\bsell/i.test(String(interest || '')) ? ['Seller'] : [],
+        message: [interest && !nadia ? `Interest: ${interest}` : null, area ? `Area: ${area}` : null, message || null].filter(Boolean).join('\n'),
+      }))
+      .catch(() => {});
+
     // Cockpit lifecycle refresh when contact email maps to a users row
     import('../services/agentCockpit.js')
       .then(({ refreshLeadLifecycleByEmail }) => refreshLeadLifecycleByEmail(email))

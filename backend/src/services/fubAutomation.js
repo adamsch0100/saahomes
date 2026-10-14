@@ -27,6 +27,7 @@ import {
 } from './tenantContext.js';
 import { sanitizeSavedFilters, savedSearchPath } from './listingFilters.js';
 import { recordEvent } from './events.js';
+import { isOwnCrm } from './crmMode.js';
 
 const FUB_API = 'https://api.followupboss.com/v1';
 const MIN_GAP_MS = 250;
@@ -210,6 +211,8 @@ async function writeWebhookState(pool, tenantId, state) {
  */
 export async function syncFubWebhook(tenantId, { pool = getPool() } = {}) {
   if (Number(tenantId) === DEFAULT_TENANT_ID) return { skipped: 'home' };
+  // Running on its own CRM: no webhook is registered (the key stays saved).
+  if (await isOwnCrm(tenantId, pool)) return { skipped: 'own_crm' };
   const r = await pool.query("SELECT settings->>'fub_api_key' AS key, settings->'fub_webhook' AS hook FROM tenants WHERE id = $1", [tenantId]);
   const apiKey = String(r.rows[0]?.key || '').trim();
   const hook = r.rows[0]?.hook || {};
@@ -416,6 +419,7 @@ export async function startAlertForFubPerson(tenantId, personId, { pool = getPoo
  */
 export async function handlePeopleCreated(tenantId, payload, { pool = getPool() } = {}) {
   if (payload?.event !== 'peopleCreated') return { ignored: payload?.event || 'unknown' };
+  if (await isOwnCrm(tenantId, pool)) return { ignored: 'own_crm' };
   const eventId = String(payload.eventId || '').slice(0, 64);
   if (eventId) {
     const fresh = await pool.query(

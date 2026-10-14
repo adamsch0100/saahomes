@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { crm } from '../../utils/crmApi.js';
 import { createPortal } from 'react-dom';
+import LeadPlansTab, { TagsRow } from './LeadPlans.jsx';
 
 const STAGES = [
   { value: 'new', label: 'New' },
@@ -510,6 +511,7 @@ const TABS = [
   { key: 'notes', label: 'Notes' },
   { key: 'tasks', label: 'Tasks' },
   { key: 'texts', label: 'Texts' },
+  { key: 'plans', label: 'Plans' },
 ];
 
 export default function LeadPanel({ token, leadId, onClose, onPatch, teammates = [], currentAgentId = null, initialTab = 'timeline' }) {
@@ -587,7 +589,7 @@ export default function LeadPanel({ token, leadId, onClose, onPatch, teammates =
               {lead && (
                 <p className="text-sm text-gray-600 mt-0.5 break-all">
                   {lead.phone && <a href={`tel:${lead.phone_e164 || lead.phone}`} className="underline mr-3">{displayPhone(lead.phone)}</a>}
-                  <a href={`mailto:${lead.email}`} className="underline">{lead.email}</a>
+                  {lead.email && <a href={`mailto:${lead.email}`} className="underline">{lead.email}</a>}
                 </p>
               )}
             </div>
@@ -608,6 +610,7 @@ export default function LeadPanel({ token, leadId, onClose, onPatch, teammates =
               </div>
             </div>
           )}
+          {lead && <TagsRow token={token} leadId={leadId} tags={lead.tags} onSaved={(tags) => setData((d) => ({ ...d, lead: { ...d.lead, tags } }))} />}
         </div>
 
         {/* Body */}
@@ -641,6 +644,7 @@ export default function LeadPanel({ token, leadId, onClose, onPatch, teammates =
                 {tab === 'notes' && <NotesTab token={token} leadId={leadId} notes={data.notes} onChanged={load} />}
                 {tab === 'tasks' && <TasksTab token={token} leadId={leadId} tasks={data.tasks} teammates={teammates} currentAgentId={currentAgentId ?? data.viewer_id} onChanged={load} />}
                 {tab === 'texts' && <TextsTab token={token} lead={lead} onSent={load} />}
+                {tab === 'plans' && <LeadPlansTab token={token} leadId={leadId} />}
               </div>
             </>
           )}

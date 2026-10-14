@@ -1577,6 +1577,136 @@ export const runMigrations = async () => {
       console.error('client life migration skipped:', lifeErr.message);
     }
 
+    // Running without Follow Up Boss (phase 6): tags on leads, action plans
+    // (drip sequences) and where each lead is in them, the shared team inbox,
+    // and a log of leads that came in from outside lead sources.
+    await client.query('SAVEPOINT p6_own_crm');
+    try {
+      await client.query(`
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS tags TEXT[] NOT NULL DEFAULT '{}';
+        CREATE INDEX IF NOT EXISTS idx_users_tags ON users USING GIN (tags);
+
+        CREATE TABLE IF NOT EXISTS action_plans (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          owner_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          name VARCHAR(120) NOT NULL,
+          description TEXT,
+          shared BOOLEAN NOT NULL DEFAULT TRUE,
+          trigger JSONB NOT NULL DEFAULT '{"type":"manual"}'::jsonb,
+          auto_start BOOLEAN NOT NULL DEFAULT FALSE,
+          pause_on_reply BOOLEAN NOT NULL DEFAULT TRUE,
+          steps JSONB NOT NULL DEFAULT '[]'::jsonb,
+          starter_key VARCHAR(40),
+          archived_at TIMESTAMPTZ,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_action_plans_tenant ON action_plans(tenant_id);
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_action_plans_starter ON action_plans(tenant_id, starter_key) WHERE starter_key IS NOT NULL;
+
+        CREATE TABLE IF NOT EXISTS action_plan_runs (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          plan_id INTEGER NOT NULL REFERENCES action_plans(id) ON DELETE CASCADE,
+          lead_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          status VARCHAR(12) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'paused', 'done', 'stopped')),
+          step_index INTEGER NOT NULL DEFAULT 0,
+          next_at TIMESTAMPTZ,
+          locked_until TIMESTAMPTZ,
+          started_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          start_reason VARCHAR(40),
+          started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          paused_at TIMESTAMPTZ,
+          pause_reason VARCHAR(40),
+          ended_at TIMESTAMPTZ,
+          end_reason VARCHAR(40)
+        );
+        CREATE INDEX IF NOT EXISTS idx_action_plan_runs_tenant ON action_plan_runs(tenant_id);
+        CREATE INDEX IF NOT EXISTS idx_action_plan_runs_due ON action_plan_runs(next_at) WHERE status = 'active';
+        CREATE INDEX IF NOT EXISTS idx_action_plan_runs_lead ON action_plan_runs(lead_id, started_at DESC);
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_action_plan_runs_live ON action_plan_runs(plan_id, lead_id) WHERE status IN ('active', 'paused');
+
+        CREATE TABLE IF NOT EXISTS action_plan_log (
+          id BIGSERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          run_id INTEGER NOT NULL REFERENCES action_plan_runs(id) ON DELETE CASCADE,
+          lead_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          step_index INTEGER,
+          step_type VARCHAR(12),
+          outcome VARCHAR(16) NOT NULL,
+          detail TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_action_plan_log_tenant ON action_plan_log(tenant_id);
+        CREATE INDEX IF NOT EXISTS idx_action_plan_log_run ON action_plan_log(run_id, created_at);
+
+        CREATE TABLE IF NOT EXISTS inbox_threads (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          lead_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          contact_key VARCHAR(255),
+          contact_name VARCHAR(255),
+          status VARCHAR(8) NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'done')),
+          assignee_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          claimed_at TIMESTAMPTZ,
+          done_at TIMESTAMPTZ,
+          done_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          last_kind VARCHAR(12),
+          last_preview TEXT,
+          last_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          last_inbound_at TIMESTAMPTZ,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_inbox_threads_tenant ON inbox_threads(tenant_id, status, last_at DESC);
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_inbox_threads_lead ON inbox_threads(tenant_id, lead_id) WHERE lead_id IS NOT NULL;
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_inbox_threads_contact ON inbox_threads(tenant_id, contact_key) WHERE lead_id IS NULL;
+
+        CREATE TABLE IF NOT EXISTS inbox_items (
+          id BIGSERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          thread_id INTEGER NOT NULL REFERENCES inbox_threads(id) ON DELETE CASCADE,
+          kind VARCHAR(12) NOT NULL,
+          direction VARCHAR(4) NOT NULL DEFAULT 'in' CHECK (direction IN ('in', 'out')),
+          subject TEXT,
+          body TEXT NOT NULL DEFAULT '',
+          lead_message_id BIGINT,
+          agent_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          meta JSONB NOT NULL DEFAULT '{}'::jsonb,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_inbox_items_tenant ON inbox_items(tenant_id);
+        CREATE INDEX IF NOT EXISTS idx_inbox_items_thread ON inbox_items(thread_id, created_at);
+
+        CREATE TABLE IF NOT EXISTS inbox_reads (
+          tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          thread_id INTEGER NOT NULL REFERENCES inbox_threads(id) ON DELETE CASCADE,
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          read_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (thread_id, user_id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_inbox_reads_tenant ON inbox_reads(tenant_id, user_id);
+
+        CREATE TABLE IF NOT EXISTS lead_intake_log (
+          id BIGSERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          source VARCHAR(24) NOT NULL,
+          lead_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          outcome VARCHAR(16) NOT NULL,
+          assigned_agent_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          assigned_by VARCHAR(16),
+          summary TEXT,
+          error TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_lead_intake_log_tenant ON lead_intake_log(tenant_id, created_at DESC);
+      `);
+      await client.query('RELEASE SAVEPOINT p6_own_crm');
+    } catch (ownCrmErr) {
+      await client.query('ROLLBACK TO SAVEPOINT p6_own_crm');
+      console.error('own crm migration skipped:', ownCrmErr.message);
+    }
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {

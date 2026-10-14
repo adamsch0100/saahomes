@@ -40,7 +40,7 @@ function ghostButton(href, label) {
  * The shared frame: brand header, white card, footer with contact line and
  * per-kind unsubscribe. brand is a brandFor() result.
  */
-export function emailShell({ brand, site, kind, bodyHtml, unsubscribeUrl, manageUrl, preheader = '' }) {
+export function emailShell({ brand, site, kind, bodyHtml, unsubscribeUrl, manageUrl, preheader = '', reason = null, stopLabel = null }) {
   const primary = brand.primary_color || '#111111';
   const accent = brand.accent_color || '#111111';
   const name = String(brand.name || '').toUpperCase();
@@ -62,8 +62,8 @@ export function emailShell({ brand, site, kind, bodyHtml, unsubscribeUrl, manage
         ${bodyHtml}
         <tr><td style="padding:16px 24px 26px;border-top:1px solid #f3f4f6">
           <p style="margin:0;font-size:11px;color:#9ca3af;line-height:1.6">
-            You get this because you asked to stay in touch after your closing.
-            ${unsubscribeUrl ? `<br/><a href="${esc(unsubscribeUrl)}" style="color:#6b7280">Stop ${esc(label ? label.toLowerCase() : 'these')} emails</a>` : ''}
+            ${esc(reason || 'You get this because you asked to stay in touch after your closing.')}
+            ${unsubscribeUrl ? `<br/><a href="${esc(unsubscribeUrl)}" style="color:#6b7280">${esc(stopLabel || `Stop ${label ? label.toLowerCase() : 'these'} emails`)}</a>` : ''}
             ${manageUrl ? ` &nbsp;·&nbsp; <a href="${esc(manageUrl)}" style="color:#6b7280">Manage all emails</a>` : ''}
             ${footer ? `<br/>${esc(footer)}` : ''}
             <br/>Equal Housing Opportunity

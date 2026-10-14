@@ -233,6 +233,28 @@ export const submitWebformLead = async (req, res) => {
       });
     }
 
+    // Team inbox, a source tag and (for a new lead) any plan set to start for website forms.
+    try {
+      const { recordInboundSafe } = await import('../services/teamInbox.js');
+      await pool.query(
+        "UPDATE users SET tags = (SELECT ARRAY(SELECT DISTINCT unnest(tags || ARRAY['Website form']::text[]))) WHERE id = $1",
+        [leadId]
+      );
+      await recordInboundSafe({
+        tenantId,
+        leadId,
+        kind: 'form',
+        body: [interest ? `Interest: ${interest}` : null, area ? `Area: ${area}` : null, message].filter(Boolean).join('\n') || 'Sent the website form',
+        meta: { source: 'webform' },
+      }, pool);
+      if (!duplicate) {
+        const { triggerPlans } = await import('../services/actionPlans.js');
+        await triggerPlans({ tenantId, leadId, event: { type: 'new_lead', source: 'webform' } }, pool);
+      }
+    } catch (err) {
+      logger.warn('webform inbox/plan step failed (non-blocking)', { message: err.message });
+    }
+
     // FUB: agent key when connected, else brokerage env key. Lead is stored either way.
     const agentKey = agent.fub_api_key && String(agent.fub_api_key).trim()
       ? String(agent.fub_api_key).trim()

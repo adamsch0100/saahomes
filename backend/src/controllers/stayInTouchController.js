@@ -146,6 +146,10 @@ export const postClosing = async (req, res) => {
         "UPDATE users SET lifecycle_stage = 'closed', lifecycle_stage_manual = TRUE, next_touch_at = NULL WHERE id = $1 AND tenant_id = $2",
         [client.id, client.tenant_id]
       );
+      // Buyer plans end; a "closed" plan (past client) starts if one is on.
+      const { onStageChanged } = await import('../services/actionPlans.js');
+      await onStageChanged({ tenantId: client.tenant_id, leadId: client.id, from: client.lifecycle_stage || null, to: 'closed' }, pool)
+        .catch((e) => logger.warn('closing plan trigger failed', { message: e.message }));
     }
     // A sale closed through the seller dashboard closes the plan too.
     if (facts.side === 'seller') {

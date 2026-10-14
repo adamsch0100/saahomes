@@ -188,6 +188,14 @@ export const submitMarketReportForm = async (req, res) => {
       logger.error('Follow Up Boss forwarding failed (non-blocking)', err);
     });
 
+    // Team inbox (and, when the cockpit is the CRM, a lead tagged Seller).
+    import('../services/leadIntake.js')
+      .then(({ formToInbox }) => formToInbox(req.tenant, {
+        name: [firstName, lastName].filter(Boolean).join(' '), email, phone, source: 'home_value', kind: 'form', tags: ['Seller'],
+        message: `Asked what their home is worth${submission.address_line ? `: ${submission.address_line}${cityVal ? `, ${cityVal}` : ''}` : ''}`,
+      }))
+      .catch(() => {});
+
     // Market analysis is a high-intent seller signal → cockpit + optional FUB already handled
     import('../services/agentCockpit.js')
       .then(({ refreshLeadLifecycleByEmail }) => refreshLeadLifecycleByEmail(email))

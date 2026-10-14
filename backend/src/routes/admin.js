@@ -40,6 +40,10 @@ import {
   sendTestEmail,
 } from '../controllers/settingsController.js';
 import { getSmsSettings, patchSmsSettings, getAgentReports } from '../controllers/textingController.js';
+import {
+  getCrmSettings, setCrmMode, exportContacts, previewContactsImport, importContacts,
+  getIntake, patchIntake, newIntakeKey, testIntake,
+} from '../controllers/ownCrmController.js';
 import { authenticateToken, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -104,6 +108,19 @@ router.post('/settings/test-email', ...adminOnly, sendTestEmail);
 // Texting (Twilio, 10DLC) and hot-lead routing
 router.get('/settings/sms', ...adminOnly, getSmsSettings);
 router.patch('/settings/sms', ...adminOnly, patchSmsSettings);
+
+// Your CRM: Follow Up Boss or the cockpit; contacts out (CSV) and in (Follow Up Boss CSV)
+const csvBody = express.text({ type: ['text/csv', 'text/plain', 'application/csv'], limit: '15mb' });
+router.get('/crm/settings', ...adminOnly, getCrmSettings);
+router.put('/crm/mode', ...adminOnly, setCrmMode);
+router.get('/crm/export', ...adminOnly, exportContacts);
+router.post('/crm/import/preview', ...adminOnly, csvBody, previewContactsImport);
+router.post('/crm/import', ...adminOnly, csvBody, importContacts);
+// Lead sources: portal emails, Facebook lead ads, Zapier/web forms, routing rules
+router.get('/intake', ...adminOnly, getIntake);
+router.patch('/intake', ...adminOnly, patchIntake);
+router.post('/intake/key', ...adminOnly, newIntakeKey);
+router.post('/intake/test', ...adminOnly, testIntake);
 
 // Brokerage reporting per agent (7/30/90 days, CSV)
 router.get('/reports/agents', ...adminOnly, getAgentReports);
