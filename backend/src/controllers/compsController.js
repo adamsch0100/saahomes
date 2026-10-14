@@ -128,7 +128,7 @@ export const saveComps = async (req, res) => {
       meta: { home_id: profile.id, used: result.estimate?.used || 0, mid: result.estimate?.mid || null },
     });
     if (shouldNote) {
-      flagSellerHeat(user.id, 'comps_adjusted', { home_id: profile.id, mid: result.estimate.mid }, pool).catch(() => {});
+      await flagSellerHeat(user.id, 'comps_adjusted', { home_id: profile.id, mid: result.estimate.mid }, pool).catch(() => {});
       const picked = result.comps.filter((c) => c.included);
       const address = [profile.address_line, profile.city].filter(Boolean).join(', ');
       const lines = [

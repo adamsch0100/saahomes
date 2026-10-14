@@ -33,15 +33,19 @@ export async function createLeadSubmitLog(
   }
 }
 
-/** Record the GA4 Measurement Protocol leg. */
-export async function recordGa4Leg(logId, { fired = false, status = null, error = null } = {}, pool = null) {
+/** Record the GA4 Measurement Protocol leg. `eventId` is the client_id GA4 was handed. */
+export async function recordGa4Leg(
+  logId,
+  { fired = false, status = null, error = null, eventId = null } = {},
+  pool = null
+) {
   if (!logId) return;
   try {
     await (pool || getPool()).query(
       `UPDATE lead_submit_log
-          SET ga4_fired = $2, ga4_status = $3, ga4_error = $4, ga4_at = NOW(), updated_at = NOW()
+          SET ga4_fired = $2, ga4_status = $3, ga4_error = $4, ga4_event_id = $5, ga4_at = NOW(), updated_at = NOW()
         WHERE id = $1`,
-      [logId, !!fired, Number.isFinite(status) ? status : null, error]
+      [logId, !!fired, Number.isFinite(status) ? status : null, error, eventId]
     );
   } catch (err) {
     logger.warn('lead_submit_log GA4 leg update failed (non-blocking)', { message: err.message, logId });
@@ -73,7 +77,56 @@ export async function recordNotifyLeg(logId, { success = false, messageId = null
         WHERE id = $1`,
       [logId, success ? 'sent' : 'failed', messageId, error]
     );
+    if (success) await markHumanNotified(logId, pool);
   } catch (err) {
     logger.warn('lead_submit_log notify leg update failed (non-blocking)', { message: err.message, logId });
+  }
+}
+
+/**
+ * Record the board event-hook leg — the primary human notice, needing no
+ * credential. A delivered board event is a human touch, so it stamps the
+ * minutes-to-human clock as well.
+ */
+export async function recordBoardLeg(
+  logId,
+  { success = false, status = null, error = null } = {},
+  pool = null
+) {
+  if (!logId) return;
+  try {
+    await (pool || getPool()).query(
+      `UPDATE lead_submit_log
+          SET board_result = $2, board_status = $3, board_error = $4, board_at = NOW(), updated_at = NOW()
+        WHERE id = $1`,
+      [logId, success ? 'delivered' : 'failed', Number.isFinite(status) ? status : null, error]
+    );
+    if (success) await markHumanNotified(logId, pool);
+  } catch (err) {
+    logger.warn('lead_submit_log board leg update failed (non-blocking)', { message: err.message, logId });
+  }
+}
+
+/**
+ * Stamp the first human notice for a submit and the minutes it took from the
+ * stored row. COALESCE keeps the first (fastest) touch; later legs cannot
+ * rewrite it. Observability only — never throws.
+ */
+export async function markHumanNotified(logId, pool = null) {
+  if (!logId) return;
+  try {
+    await (pool || getPool()).query(
+      `UPDATE lead_submit_log
+          SET human_notified_at = COALESCE(human_notified_at, NOW()),
+              minutes_to_human = COALESCE(
+                minutes_to_human,
+                ROUND(EXTRACT(EPOCH FROM (NOW() - received_at)) / 60.0, 2)
+              ),
+              updated_at = NOW()
+        WHERE id = $1`,
+      [logId]
+    );
+  } catch (err) {
+    logger.warn('lead_submit_log human-notify stamp failed (non-blocking)', { message: err.message, logId });
   }
 }

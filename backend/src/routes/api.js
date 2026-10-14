@@ -67,6 +67,9 @@ import {
 } from '../controllers/notificationsController.js';
 import { getPublicTenant } from '../controllers/tenantDomainController.js';
 import { serveBrandAsset, listPublicAgents } from '../controllers/settingsController.js';
+import { isFollowUpBossConfigured } from '../services/followUpBossService.js';
+import { boardIntakeUrl, boardNotifyEnabled } from '../services/boardLeadCount.js';
+import { probeOutreachSmtp } from '../services/emailer.js';
 import {
   validateContactSubmission,
   validateMarketReportSubmission,
@@ -364,6 +367,96 @@ router.get('/mail-test', async (req, res) => {
     ...mailTestCache.payload,
     checkedAt: new Date(mailTestCache.at).toISOString(),
   });
+});
+
+// ── Notify health — the four-leg sheet for the lead loop ──────────────────
+// One 200 page that names every leg a stored lead must clear to reach a human:
+//   mail  — the active email transport, OUTREACH_SMTP_* first, Gmail second
+//   fub   — Follow Up Boss forward
+//   board — the OttoBot board event hook (the no-key human notice)
+//   ga4   — the server-side Measurement Protocol leg
+// A dead leg is reported red with its measured value and code, never skipped,
+// so half a gate is never mistaken for a closed one. Always answers 200: the
+// worth of the sheet is the reading, not the status.
+const NOTIFY_HEALTH_TTL = 5 * 60 * 1000;
+let notifyHealthCache = { at: 0, payload: null };
+
+async function mailLeg() {
+  const gmail = await probeMailTransport();
+  const outreach = await probeOutreachSmtp();
+  const mailTest = {
+    status: gmail.status,
+    smtp: gmail.payload.smtp,
+    code: gmail.payload.code || null,
+  };
+  const active = outreach.configured
+    ? { transport: 'outreach_smtp', status: outreach.ok ? 'ok' : 'red', detail: outreach.ok ? 'verified' : (outreach.error || 'error'), code: outreach.code || null }
+    : { transport: 'gmail', status: gmail.status === 200 ? 'ok' : 'red', detail: gmail.payload.smtp, code: gmail.payload.code || null };
+  return { ...active, mailTest };
+}
+
+async function lastSubmitLegSheet() {
+  try {
+    const { rows } = await getPool().query(
+      `SELECT id, lead_type, submission_id, email, source_page, received_at,
+              ga4_fired, ga4_status, ga4_event_id, ga4_error, ga4_at,
+              fub_result, fub_person_id, fub_error, fub_at,
+              notify_result, notify_message_id, notify_error, notify_at,
+              board_result, board_status, board_error, board_at,
+              human_notified_at, minutes_to_human
+         FROM lead_submit_log
+        ORDER BY id DESC
+        LIMIT 1`
+    );
+    const r = rows[0];
+    if (!r) return null;
+    return {
+      id: r.id,
+      lead_type: r.lead_type,
+      submission_id: r.submission_id,
+      email: r.email,
+      source_page: r.source_page,
+      received_at: r.received_at,
+      mail: { result: r.notify_result, message_id: r.notify_message_id, error: r.notify_error, at: r.notify_at },
+      fub: { result: r.fub_result, person_id: r.fub_person_id, error: r.fub_error, at: r.fub_at },
+      board: { result: r.board_result, status: r.board_status, error: r.board_error, at: r.board_at },
+      ga4: { fired: r.ga4_fired, status: r.ga4_status, event_id: r.ga4_event_id, error: r.ga4_error, at: r.ga4_at },
+      human_notified_at: r.human_notified_at,
+      minutes_to_human: r.minutes_to_human,
+    };
+  } catch (error) {
+    return { error: `SOURCE UNAVAILABLE — lead_submit_log unreadable (${error.message})` };
+  }
+}
+
+router.get('/notify-health', async (req, res) => {
+  if (!notifyHealthCache.payload || Date.now() - notifyHealthCache.at > NOTIFY_HEALTH_TTL) {
+    const mail = await mailLeg();
+    const fubConfigured = isFollowUpBossConfigured();
+    const boardOn = boardNotifyEnabled();
+    const ga4Configured = !!(process.env.GA4_API_SECRET || process.env.GA4_MEASUREMENT_API_SECRET);
+    const legs = {
+      mail,
+      fub: {
+        status: fubConfigured ? 'ok' : 'red',
+        detail: fubConfigured ? 'configured' : 'not_configured',
+      },
+      board: {
+        status: boardOn ? 'ok' : 'red',
+        detail: boardOn ? 'hook configured (no credential needed)' : `disabled (${boardIntakeUrl() || 'unset'})`,
+      },
+      ga4: {
+        status: ga4Configured ? 'ok' : 'red',
+        detail: ga4Configured ? 'measurement api_secret set' : 'no_api_secret',
+      },
+    };
+    const lastSubmit = await lastSubmitLegSheet();
+    notifyHealthCache = {
+      at: Date.now(),
+      payload: { ok: true, checkedAt: new Date().toISOString(), legs, lastSubmit },
+    };
+  }
+  res.status(200).json(notifyHealthCache.payload);
 });
 
 export default router;

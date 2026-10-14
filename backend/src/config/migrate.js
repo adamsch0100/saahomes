@@ -1030,6 +1030,13 @@ export const runMigrations = async () => {
           received_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
           updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
+        ALTER TABLE lead_submit_log ADD COLUMN IF NOT EXISTS ga4_event_id VARCHAR(64);
+        ALTER TABLE lead_submit_log ADD COLUMN IF NOT EXISTS board_result VARCHAR(32);
+        ALTER TABLE lead_submit_log ADD COLUMN IF NOT EXISTS board_status INTEGER;
+        ALTER TABLE lead_submit_log ADD COLUMN IF NOT EXISTS board_error TEXT;
+        ALTER TABLE lead_submit_log ADD COLUMN IF NOT EXISTS board_at TIMESTAMPTZ;
+        ALTER TABLE lead_submit_log ADD COLUMN IF NOT EXISTS human_notified_at TIMESTAMPTZ;
+        ALTER TABLE lead_submit_log ADD COLUMN IF NOT EXISTS minutes_to_human NUMERIC(10,2);
         CREATE INDEX IF NOT EXISTS idx_lead_submit_log_submission ON lead_submit_log(lead_type, submission_id);
         CREATE INDEX IF NOT EXISTS idx_lead_submit_log_email ON lead_submit_log(LOWER(email));
       `);

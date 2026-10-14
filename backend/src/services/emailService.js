@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import getPool from '../config/database.js';
 import { currentTenant, currentTenantId, tenantById } from './tenantContext.js';
 import { brandFor, isHomeTenant } from './brand.js';
-import { sendEmail } from './emailer.js';
+import { sendEmail, smtpConfigured } from './emailer.js';
 
 dotenv.config();
 
@@ -50,12 +50,39 @@ async function brokerageRecipients(pool, tenantId, submission) {
 async function deliverLeadNotification(submission, mailOptions, sentLabel, failLabel) {
   const tenantId = Number(submission?.tenant_id) || currentTenantId();
   if (isHomeTenant({ id: tenantId })) {
+    // The already-configured OUTREACH_SMTP_* transport first, Gmail second.
+    // Gmail's app password has been dead (mail-test 503 code 535) since
+    // inc-ed1cf484 while OUTREACH_SMTP_* still sends, so a lead notice must
+    // not depend on the Gmail credential to reach a human.
+    let outreachError = null;
+    if (smtpConfigured()) {
+      try {
+        await sendEmail(
+          ADMIN_EMAIL,
+          mailOptions.subject,
+          mailOptions.html,
+          'SAA Homes Website',
+          { tenantId, replyTo: submission?.email || null }
+        );
+        logger.info(`${sentLabel} notification email sent`, { via: 'outreach_smtp' });
+        return { success: true, messageId: null, via: 'outreach_smtp' };
+      } catch (error) {
+        outreachError = error;
+        logger.warn(`OUTREACH_SMTP_* ${failLabel} notification failed, trying Gmail`, { message: error.message });
+      }
+    }
     try {
       const info = await transporter.sendMail(mailOptions);
-      logger.info(`${sentLabel} notification email sent`, { messageId: info.messageId });
-      return { success: true, messageId: info.messageId };
+      logger.info(`${sentLabel} notification email sent`, { via: 'gmail', messageId: info.messageId });
+      return { success: true, messageId: info.messageId, via: 'gmail' };
     } catch (error) {
       logger.error(`Failed to send ${failLabel} notification email`, error);
+      if (outreachError) {
+        const combined = new Error(`OUTREACH_SMTP_* failed (${outreachError.message}); Gmail failed (${error.message})`);
+        combined.outreachError = outreachError.message;
+        combined.gmailError = error.message;
+        throw combined;
+      }
       throw error;
     }
   }

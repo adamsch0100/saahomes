@@ -20,6 +20,32 @@ const RESEND_TIMEOUT_MS = 10000;
 export const smtpConfigured = () =>
   !!(process.env.OUTREACH_SMTP_HOST && process.env.OUTREACH_SMTP_USER && process.env.OUTREACH_SMTP_PASSWORD);
 
+/**
+ * Verify the already-configured OUTREACH_SMTP_* transport without sending.
+ * Returns { ok, configured, code?, error? }. Never throws, so a health probe
+ * can report the leg instead of skipping it.
+ */
+export async function probeOutreachSmtp() {
+  const host = process.env.OUTREACH_SMTP_HOST;
+  const user = process.env.OUTREACH_SMTP_USER;
+  const password = process.env.OUTREACH_SMTP_PASSWORD;
+  if (!host || !user || !password) {
+    return { ok: false, configured: false, error: 'not_configured' };
+  }
+  try {
+    const transporter = nodemailer.createTransport({
+      host,
+      port: Number(process.env.OUTREACH_SMTP_PORT || 587),
+      secure: String(process.env.OUTREACH_SMTP_SECURE || '') === 'true',
+      auth: { user, pass: password },
+    });
+    await transporter.verify();
+    return { ok: true, configured: true };
+  } catch (error) {
+    return { ok: false, configured: true, code: error.responseCode || null, error: error.message };
+  }
+}
+
 /** True when the platform can send from a brokerage's own domain. */
 export const ownDomainSendingAvailable = () => !!process.env.RESEND_API_KEY;
 

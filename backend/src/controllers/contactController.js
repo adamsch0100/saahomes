@@ -8,6 +8,7 @@ import {
   recordGa4Leg,
   recordFubLeg,
   recordNotifyLeg,
+  recordBoardLeg,
 } from '../services/leadSubmitLog.js';
 import logger from '../utils/logger.js';
 import { reportLeadToBoard } from '../services/boardLeadCount.js';
@@ -62,7 +63,14 @@ export const submitContactForm = async (req, res) => {
         logger.error('Email notification failed (non-blocking)', err);
       });
 
-    reportLeadToBoard('contact');
+    // Board event hook — primary human notice, no credential needed. Log the
+    // result so the leg is recorded, never dropped silently.
+    reportLeadToBoard('contact').then((r) => recordBoardLeg(logId, {
+      success: !!r?.success,
+      status: r?.status ?? null,
+      error: r?.success ? null : (r?.reason || 'not_delivered'),
+    }));
+
     forwardContactToFollowUpBoss(submission)
       .then((result) => recordFubLeg(logId, {
         success: !!result?.success,
@@ -79,6 +87,7 @@ export const submitContactForm = async (req, res) => {
       .then((result) => recordGa4Leg(logId, {
         fired: !!result?.fired,
         status: result?.status,
+        eventId: result?.clientId || null,
         error: result?.error || result?.reason || null,
       }))
       .catch((err) => {

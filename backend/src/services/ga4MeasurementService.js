@@ -16,8 +16,10 @@ function buildClientId(gaClientId) {
  * Server-side GA4 event — reliable when browser tags are blocked or slow to register.
  * Requires GA4_API_SECRET from Admin → Data streams → Measurement Protocol.
  *
- * @returns {Promise<{fired: boolean, skipped?: boolean, status?: number, reason?: string, error?: string}>}
+ * @returns {Promise<{fired: boolean, skipped?: boolean, status?: number, reason?: string, error?: string, clientId?: string}>}
  *   Never throws. `fired: true` means Google accepted the batch (HTTP 2xx/204).
+ *   `clientId` is the GA4 client_id the events were sent under, so the submit
+ *   log keeps a handle to find them in GA4 DebugView.
  */
 export async function recordLeadConversion(leadType, metadata = {}) {
   if (!API_SECRET) {
@@ -67,15 +69,16 @@ export async function recordLeadConversion(leadType, metadata = {}) {
       return {
         fired: false,
         status: response.status,
+        clientId,
         error: `GA4 Measurement Protocol returned ${response.status}`,
       };
     }
-    return { fired: true, status: response.status };
+    return { fired: true, status: response.status, clientId };
   } catch (error) {
     logger.warn('GA4 Measurement Protocol error (non-blocking)', {
       leadType,
       message: error.message,
     });
-    return { fired: false, error: error.message };
+    return { fired: false, clientId, error: error.message };
   }
 }
