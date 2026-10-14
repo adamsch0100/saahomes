@@ -6544,6 +6544,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.142', longitude: '-104.938' },
     metaDescription: 'Mineral Road Firestone - convenient living along Firestone main retail corridor with I-25 access. SAA Homes.',
     keywords: 'Mineral Road Firestone, Firestone shopping corridor, Firestone I-25 homes, Firestone retail area',
+    youtubeId: 'ICkRZiv48cM',
     neighborhoodHighlights: [
       { title: 'Retail corridor', description: 'Mineral Road is Firestone main commercial artery with grocery, dining, and shopping at your doorstep.' },
       { title: 'I-25 access', description: 'Located directly off I-25 at the Mineral Road interchange - easy commuting.' },
@@ -6578,6 +6579,7 @@ export const neighborhoods = [
     walkScore: 25,
     metaDescription: 'Saddleback Firestone real estate — south Firestone community around the Saddleback Golf Course with newer homes, mountain views, and I-25 access. SAA Homes.',
     keywords: 'Saddleback Firestone, Saddleback Golf Course Firestone, south Firestone homes, Carbon Valley real estate, Firestone subdivisions, Firestone new homes',
+    youtubeId: 'm_iBbM2jnCE',
     neighborhoodHighlights: [
       { title: 'Golf course living', description: 'The Saddleback Golf Course anchors the community with green space and views.' },
       { title: 'Mountain views', description: 'Elevated south Firestone terrain gives many homes Front Range and Longs Peak views.' },
