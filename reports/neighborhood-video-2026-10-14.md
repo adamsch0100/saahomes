@@ -41,3 +41,40 @@ Placement verified: `node --check src/data/neighborhoods.js` passes; `scripts/vi
 CHECK: the pending file was stale by 5 slugs — five La Salle-area entries added to `neighborhoods.js` today (`ellis-addition`, `goodner-addition`, `herringtons-addition`, `mccutcheons-addition`, `whittaker-subdivision`) had no video and were not in the queue, because the generator reads the pending file first and only rebuilds it from `neighborhoods.js` when the file is absent. Backfilled this run so they are not stranded until the queue drains (~64 runs).
 
 At 3/day the queue clears in ~64 runs. Videos land in `scripts/video-output/<slug>.mp4` (~1.8 MB each, not committed — only metadata is tracked).
+
+---
+
+## Second dispatch — 14:40 UTC (the scheduled 14:00 run)
+
+**Job:** cron Neighborhood videos — batch upload, repo `/data/workspaces/saa-homes`
+**Engine:** `.venv/bin/python3 scripts/neighborhood-video-generator.py --max 3 --output-dir scripts/video-output --credentials client_secret.json --no-git`
+
+### Uploaded (3 of 3)
+
+| # | Slug | Name / City | YouTube | Privacy (API read-back) | Length |
+|---|------|-------------|---------|---------------------------|--------|
+| 1 | `st-vrain-firestone` | St. Vrain Village at Firestone | https://youtu.be/uXlB0DZmMqM | public | 0:57 |
+| 2 | `firestone-preserve` | The Preserve at Firestone | https://youtu.be/kuiGX01JdKA | public | 0:57 |
+| 3 | `firestone-park` | Firestone Park | https://youtu.be/7M5WEKU9oh0 | public | 0:57 |
+
+Read back with `videos.list?part=snippet,status,contentDetails` → **3/3 returned**: `privacyStatus: public`, `uploadStatus: processed`, `duration PT57S`, titles `<Name> - <City>, CO | Neighborhood Guide | SAA Homes`. Music rotation: `background-music-4`, `-2`, `-3`.
+
+### Quota — LESSON (this run resolved it)
+
+`.uploaded_today` already held **5 rows for UTC date `2026-10-14`** (the 02:47–03:12 UTC batch), so the ~5/day cap looked spent and this run looked like a quota risk. It is not:
+
+- Those 5 uploads ran **19:47–20:12 Pacific on Oct 13**; this run ran **07:41–07:46 Pacific on Oct 14**.
+- YouTube's upload limit resets at **midnight PT (07:00 UTC)**, not UTC midnight. The 14:00 UTC cron = 07:00 PT = exactly the fresh window — by design.
+- All 3 uploads returned **no** `uploadLimitExceeded` / `quota` error.
+
+LESSON: judge headroom by **Pacific date**, not by counting rows in `.uploaded_today` (its stamp is UTC, so rows written before 07:00 UTC belong to the *previous* PT quota day). Actual usage: **5 on PT Oct 13 + 3 on PT Oct 14 = both within the ~5/day limit.** The 13:00 blog publisher used 0 today.
+
+### Data changes
+
+`src/data/neighborhoods.js` — top-level `youtubeId` on all 3, between `keywords:` and `neighborhoodHighlights: [`. Verified three ways: `node --check` PASS; `check_missing_yt.py` → 0 misplaced; depth scan (string-aware brace walk) → `depths=[1]`, `count=1`, `kw_before=True`, `nh_after_top=True` for each.
+
+`.pending_videos` → **189 slugs**; `.uploaded_today` +3 rows; `.last_music_track` = `background-music-3`.
+
+### Queue state
+
+383 entries; **194 with youtubeId**, 189 pending (was 191/192 at start of day). At 3/day the queue clears in ~63 runs.

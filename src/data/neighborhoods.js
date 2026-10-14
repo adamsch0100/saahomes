@@ -6610,6 +6610,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.138', longitude: '-104.93' },
     metaDescription: 'St. Vrain Village Firestone - new homes along the St. Vrain Greenway with I-25 access. SAA Homes.',
     keywords: 'St. Vrain Village Firestone, Firestone new construction, St. Vrain Greenway homes, I-25 Firestone homes',
+    youtubeId: 'uXlB0DZmMqM',
     neighborhoodHighlights: [
       { title: 'St. Vrain Greenway', description: 'Direct access to the St. Vrain Creek Greenway with walking and biking trails.' },
       { title: 'Newer community', description: 'Brand-new homes with contemporary floor plans in a master-planned setting.' },
@@ -6644,6 +6645,7 @@ export const neighborhoods = [
     walkScore: 28,
     metaDescription: 'The Preserve at Firestone real estate - new construction homes near I-25 with community parks and trails. SAA Homes.',
     keywords: 'The Preserve Firestone, Firestone new homes, I-25 Firestone, Firestone subdivisions, master-planned community Firestone, St. Vrain Valley schools, Longmont area homes, new construction Firestone, commuter homes Firestone',
+    youtubeId: 'kuiGX01JdKA',
     neighborhoodHighlights: [
       { title: 'Newer community', description: 'All homes built 2018 or later with modern open floor plans and energy-efficient features.' },
       { title: 'Commuter location', description: 'Near I-25 and Highway 119 - 15 minutes to Longmont or Boulder, 40 to Denver.' },
@@ -6678,6 +6680,7 @@ export const neighborhoods = [
     walkScore: 40,
     metaDescription: 'Firestone Park real estate - established central Firestone neighborhood with mature trees and community park. SAA Homes.',
     keywords: 'Firestone Park, Firestone Colorado real estate, historic Firestone, Firestone Community Park, established Firestone neighborhoods, downtown Firestone homes, mid-century homes Firestone, no HOA Firestone',
+    youtubeId: '7M5WEKU9oh0',
     neighborhoodHighlights: [
       { title: 'Established character', description: 'Mature trees and mid-century homes in Firestone\'s original neighborhood around the community park.' },
       { title: 'Walkable downtown', description: 'Walk to Firestone\'s historic downtown, the community park, and local businesses.' },
