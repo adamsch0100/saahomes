@@ -23,16 +23,17 @@ import { newTrial, planChoice, TRIAL_DAYS } from '../services/billing.js';
 import { plansReady, seatPrice, stripeConfigured } from '../services/stripe.js';
 import { loadPlanCatalog, publicCatalog } from '../services/plans.js';
 import { findPlanPrices } from '../services/stripeSetup.js';
+import { platformIdentity } from '../services/platform.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])$/;
 const RESERVED = new Set([
   'www', 'api', 'app', 'admin', 'agent', 'platform', 'mail', 'static', 'cdn', 'saa', 'start', 'signup',
-  'help', 'support', 'billing', 'status', 'blog', 'docs', 'embed', 'assets', 'email', 'smtp', 'ftp', 'test',
+  'help', 'support', 'billing', 'status', 'blog', 'docs', 'embed', 'assets', 'email', 'smtp', 'ftp', 'test', 'cname',
 ]);
 const MIN_FILL_MS = 2500;
 
-export const productName = () => String(process.env.PRODUCT_NAME || '').trim() || 'SAA Homes for Brokerages';
+export const productName = () => platformIdentity().name;
 
 const onHomeHost = (req) => (req.tenant?.id ?? DEFAULT_TENANT_ID) === DEFAULT_TENANT_ID && !req.tenant?.agent;
 

@@ -23,8 +23,11 @@ import { startIresSyncScheduler } from './jobs/iresScheduler.js';
 import { NOCO_CITIES } from './config/nocoCities.js';
 import { tenantMiddleware, resolveTenantForHost, DEFAULT_TENANT_ID, pausedForBilling } from './services/tenantContext.js';
 import { startBillingScheduler } from './services/billing.js';
-import { productName } from './controllers/signupController.js';
 import { brandFor, isHomeTenant } from './services/brand.js';
+import {
+  platformSite, platformShellBrand, platformIdentityScript,
+} from './services/platformSite.js';
+import { platformIdentity } from './services/platform.js';
 import { feedsFor } from './services/feeds.js';
 
 dotenv.config();
@@ -150,7 +153,12 @@ const BROKERAGE_PATHS = [
   /^\/embed\/(search|listings|listing)$/, /^\/embed\/listing\/[^/]+$/,
 ];
 
-export function renderBrokerageShell(indexHtml, brand, path = '/') {
+/**
+ * opts.platformHost (the request's hostname) marks a platform page (/start,
+ * a console on the platform's own site): the platform's identity rides along
+ * for the app to read. opts.robots replaces the default noindex.
+ */
+export function renderBrokerageShell(indexHtml, brand, path = '/', opts = {}) {
   const html = String(indexHtml || '');
   const name = String(brand?.name || 'Home Search');
   const title = /^\/properties(\/|$)/.test(path) ? `${name} — Homes for Sale` : name;
@@ -193,7 +201,7 @@ export function renderBrokerageShell(indexHtml, brand, path = '/') {
     ...kept.map((t) => `    ${t}`),
     `    <title>${escapeHtml(title)}</title>`,
     `    <meta name="description" content="${escapeHtml(description)}" />`,
-    '    <meta name="robots" content="noindex" />',
+    `    <meta name="robots" content="${escapeHtml(opts.robots || 'noindex')}" />`,
     `    <meta name="theme-color" content="${theme}" />`,
     `    <meta name="apple-mobile-web-app-title" content="${escapeHtml(name)}" />`,
     '    <link rel="manifest" href="/manifest.webmanifest" />',
@@ -201,6 +209,7 @@ export function renderBrokerageShell(indexHtml, brand, path = '/') {
     `    <link rel="apple-touch-icon" href="${escapeHtml(icon || '/brand-icon.svg')}" />`,
     // The app may call gtag(); keep it defined, but nothing is sent anywhere.
     '    <script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);}</script>',
+    ...(opts.platformHost !== undefined ? [`    ${platformIdentityScript(opts.platformHost)}`] : []),
     '</head>',
     `  ${bodyOpen}`,
     '    <div id="root"></div>',
@@ -344,6 +353,16 @@ const canonicalRedirects = {
   '/northern-colorado-areas/windsor/rain-dance-windsor': '/northern-colorado-areas/windsor/raindance/',
 };
 
+// The platform's own marketing domain: its product page, its app pages and
+// files, and a 404 for everything else. Every other host passes through.
+app.use(platformSite({ distPath, renderShell: renderBrokerageShell, renderIcon: renderBrandIconSvg }));
+// The platform's icon, for its pages on any host (/start, consoles).
+app.get('/platform-icon.svg', (req, res) => {
+  const id = platformIdentity();
+  res.setHeader('Cache-Control', 'no-cache');
+  return res.type('image/svg+xml').send(renderBrandIconSvg({ name: id.short_name, primary_color: id.primary_color }));
+});
+
 // Widgets brokerages paste into their own websites (any host, any env).
 app.use(embedPages);
 
@@ -458,17 +477,18 @@ if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
 
   // The platform's signup page (/start) on its own host: a clean shell with
   // the product's name, not one of SAA's prerendered pages. A brokerage's
-  // host never gets here (its allowlist above answers 404).
-  app.get(['/start', '/start/'], (req, res) => {
+  // host never gets here (its allowlist above answers 404). So is a
+  // brokerage's console opened here with ?brokerage= (it has no address yet):
+  // the platform's shell, not SAA's.
+  app.get(['/start', '/start/', '/admin', '/admin/', '/agent', '/agent/', '/reset-password', '/reset-password/'], (req, res, next) => {
+    const start = /^\/start\/?$/.test(req.path);
+    if (!start && !/^[a-z0-9-]{1,64}$/.test(String(req.query.brokerage || ''))) return next();
     try {
       const base = readFileSync(join(distPath, 'index.html'), 'utf8');
       res.setHeader('Cache-Control', 'no-cache');
-      return res.type('html').send(renderBrokerageShell(base, {
-        name: productName(),
-        tagline: 'Your own branded home search site, alerts and AI assistant, working with Follow Up Boss. Live in an afternoon.',
-      }, '/start'));
+      return res.type('html').send(renderBrokerageShell(base, platformShellBrand(), req.path, { platformHost: req.hostname }));
     } catch (error) {
-      console.error('start page error:', error.message);
+      console.error('platform page error:', error.message);
       return res.status(500).type('text/plain').send('Something went wrong.');
     }
   });

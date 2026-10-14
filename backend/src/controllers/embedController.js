@@ -2,9 +2,10 @@
  * Widgets a brokerage pastes into WordPress, Squarespace or Wix, served from
  * its own domain:
  *
- *   /embed.js                 the loader: turns <div data-saa-embed="search"
- *                             data-city="Loveland"></div> into an iframe that
- *                             sizes itself to its content (postMessage)
+ *   /embed.js                 the loader: turns <div data-home-embed="search"
+ *                             data-city="Springfield"></div> into an iframe that
+ *                             sizes itself to its content (postMessage).
+ *                             data-saa-embed still works for older snippets.
  *   /embed/search             a search box
  *   /embed/listings           a grid of homes (city, min/max price, beds, type, count)
  *   /embed/listing/:slug      one featured home
@@ -236,17 +237,17 @@ export const serveEmbedPage = async (req, res) => {
   }
 };
 
-const LOADER_JS = `/* Home search widgets. Paste <div data-saa-embed="search"></div> (or "listings", "listing") and this script. */
+const LOADER_JS = `/* Home search widgets. Paste <div data-home-embed="search"></div> (or "listings", "listing") and this script. */
 (function(){
 var s=document.currentScript;var origin;try{origin=new URL(s&&s.src?s.src:location.href).origin;}catch(e){return;}
 var frames=[];
 var ATTRS={'city':'city','min-price':'minPrice','max-price':'maxPrice','beds':'beds','type':'type','count':'count','listing':'listing'};
 var TITLES={search:'Search homes for sale',listings:'Homes for sale',listing:'Featured home'};
 function mount(el){
-if(el.getAttribute('data-saa-mounted'))return;
-var type=String(el.getAttribute('data-saa-embed')||'search').toLowerCase();
+if(el.getAttribute('data-home-mounted')||el.getAttribute('data-saa-mounted'))return;
+var type=String(el.getAttribute('data-home-embed')||el.getAttribute('data-saa-embed')||'search').toLowerCase();
 if(!TITLES[type])return;
-el.setAttribute('data-saa-mounted','1');
+el.setAttribute('data-home-mounted','1');
 var q=[];for(var a in ATTRS){var v=el.getAttribute('data-'+a);if(v)q.push(ATTRS[a]+'='+encodeURIComponent(v));}
 var f=document.createElement('iframe');
 f.src=origin+'/embed/'+type+(q.length?'?'+q.join('&'):'');
@@ -254,7 +255,7 @@ f.title=TITLES[type];f.loading='lazy';f.setAttribute('scrolling','no');
 f.style.cssText='display:block;width:100%;border:0;overflow:hidden;min-height:'+(type==='search'?'150':'360')+'px;background:transparent';
 el.appendChild(f);frames.push(f);
 }
-function scan(){var els=document.querySelectorAll('[data-saa-embed]');for(var i=0;i<els.length;i++)mount(els[i]);}
+function scan(){var els=document.querySelectorAll('[data-home-embed],[data-saa-embed]');for(var i=0;i<els.length;i++)mount(els[i]);}
 window.addEventListener('message',function(e){
 if(e.origin!==origin)return;var d=e.data;if(!d||d.type!=='saa-embed:height')return;
 for(var i=0;i<frames.length;i++){if(frames[i].contentWindow===e.source){frames[i].style.minHeight='0';frames[i].style.height=Math.max(60,Math.ceil(Number(d.height)||0))+'px';}}

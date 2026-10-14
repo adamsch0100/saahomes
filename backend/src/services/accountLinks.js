@@ -4,10 +4,15 @@
  * owner, after signing up). Only a hash of each token is stored, links
  * point at the brokerage's own site (never at a Host header we don't know),
  * and using one link retires every other open link for that person.
+ *
+ * The confirm email to a new brokerage's owner is platform mail: it comes
+ * from the product (its name, sending address and support), since the owner
+ * just signed up for the product. Invites and resets come from the brokerage.
  */
 import crypto from 'node:crypto';
 import getPool from '../config/database.js';
-import { sendEmail, smtpConfigured } from './emailer.js';
+import { sendEmail, sendPlatformEmail, smtpConfigured } from './emailer.js';
+import { platformIdentity } from './platform.js';
 import { consoleUrlFor } from './tenantContext.js';
 import { brandFor, isHomeTenant } from './brand.js';
 import logger from '../utils/logger.js';
@@ -19,23 +24,27 @@ export const hashLinkToken = (t) => crypto.createHash('sha256').update(String(t)
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 async function sendOrQueue(pool, to, subject, html, fromName, tenantId, opts) {
+  const platform = opts?.platform === true;
   const queueIt = () => pool.query(
-    'INSERT INTO email_outbox (to_email, subject, html, tenant_id) VALUES ($1, $2, $3, $4)',
-    [to, subject, html, tenantId]
+    'INSERT INTO email_outbox (to_email, subject, html, tenant_id, platform) VALUES ($1, $2, $3, $4, $5)',
+    [to, subject, html, tenantId, platform]
   );
   try {
-    if (smtpConfigured()) await (opts ? sendEmail(to, subject, html, fromName, opts) : sendEmail(to, subject, html, fromName));
-    else await queueIt();
+    if (!smtpConfigured()) await queueIt();
+    else if (platform) await sendPlatformEmail(to, subject, html);
+    else await (opts ? sendEmail(to, subject, html, fromName, opts) : sendEmail(to, subject, html, fromName));
   } catch (e) {
     logger.error('account email send failed, queuing', { message: e.message });
     await queueIt();
   }
 }
 
-function emailHtml({ purpose, name, brokerage, link, hours }) {
+function emailHtml({ purpose, name, brokerage, link, hours, platform = null }) {
   const first = String(name || '').trim().split(/\s+/)[0];
   const hello = first ? `Hi ${esc(first)},` : 'Hi,';
-  const lead = purpose === 'confirm'
+  const lead = purpose === 'confirm' && platform
+    ? `Welcome to ${esc(platform.name)}. ${esc(brokerage)} is set up. Confirm this is your email so we can send you leads, receipts and sign-in links.`
+    : purpose === 'confirm'
     ? `Welcome to ${esc(brokerage)}. Confirm this is your email so we can send you leads, receipts and sign-in links.`
     : purpose === 'invite'
       ? `You've been set up with an account at ${esc(brokerage)}. Choose a password to sign in.`
@@ -50,7 +59,8 @@ function emailHtml({ purpose, name, brokerage, link, hours }) {
   <p>${lead}</p>
   <p style="margin:28px 0"><a href="${esc(link)}" style="background:#1d4ed8;color:#fff;padding:12px 20px;border-radius:6px;text-decoration:none;font-weight:bold">${button}</a></p>
   <p style="font-size:13px;color:#6b7280">${tail}</p>
-  <p style="font-size:12px;color:#9ca3af;word-break:break-all">${esc(link)}</p>
+  <p style="font-size:12px;color:#9ca3af;word-break:break-all">${esc(link)}</p>${platform ? `
+  <p style="font-size:12px;color:#9ca3af">${esc(platform.legal_name)}${platform.support_email ? ` · Questions? <a href="mailto:${esc(platform.support_email)}" style="color:#6b7280">${esc(platform.support_email)}</a>` : ''}</p>` : ''}
 </div>`;
 }
 
@@ -84,8 +94,11 @@ export async function issueAccountLink({ user, purpose, tenant, pool = getPool()
   const brokerage = home ? tenant?.name || 'SAA Homes' : brand.name;
   const subject = kind === 'confirm' ? `Confirm your email for ${brokerage}`
     : kind === 'invite' ? `You're invited to ${brokerage}` : `Reset your ${brokerage} password`;
-  const html = emailHtml({ purpose: kind, name: user.name, brokerage, link, hours });
+  // A new brokerage's owner confirming their email hears from the platform.
+  const fromPlatform = kind === 'confirm' && !home;
+  const html = emailHtml({ purpose: kind, name: user.name, brokerage, link, hours, platform: fromPlatform ? platformIdentity() : null });
   if (home) await sendOrQueue(pool, user.email, subject, html, brokerage, user.tenant_id);
+  else if (fromPlatform) await sendOrQueue(pool, user.email, subject, html, null, user.tenant_id, { platform: true });
   else {
     await sendOrQueue(pool, user.email, subject, html, brand.from_name || brokerage, user.tenant_id,
       { tenantId, replyTo: brand.reply_to || brand.email || null });

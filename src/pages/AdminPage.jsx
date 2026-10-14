@@ -8,6 +8,7 @@ import AgentsManager from '../components/admin/AgentsManager.jsx';
 import SEO from '../components/SEO';
 import FunnelView from '../components/admin/FunnelView.jsx';
 import BrokeragesManager from '../components/admin/BrokeragesManager.jsx';
+import PlatformIdentityPanel from '../components/admin/PlatformIdentityPanel.jsx';
 import ForgotPassword from '../components/account/ForgotPassword.jsx';
 import TwoStepCodeForm from '../components/account/TwoStepCodeForm.jsx';
 import TwoStepPanel from '../components/account/TwoStepPanel.jsx';
@@ -443,7 +444,10 @@ export default function AdminPage() {
               <OwnerSettingsExtras token={token} />
             </div>
           ) : tab === 'brokerages' && me?.platform === true ? (
-            <BrokeragesManager token={token} />
+            <div className="space-y-6">
+              <PlatformIdentityPanel token={token} />
+              <BrokeragesManager token={token} />
+            </div>
           ) : tab === 'email-ab' ? (
             <div className="bg-white rounded-lg shadow">
               <div className="p-6 border-b border-gray-200">

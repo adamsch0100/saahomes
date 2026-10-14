@@ -1,4 +1,4 @@
-/* SAA Homes service worker: instant alerts (web push) for the installed app.
+/* Service worker: instant alerts (web push) for the installed app.
  * It deliberately caches nothing, so a deploy is never hidden behind a stale copy. */
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
@@ -6,11 +6,12 @@ self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim(
 self.addEventListener('push', (event) => {
   let data = {};
   try { data = event.data ? event.data.json() : {}; } catch { data = { title: event.data && event.data.text() }; }
-  const title = data.title || 'SAA Homes';
+  // Another brokerage's pushes name their own icon; SAA's keep its icons.
+  const title = data.title || 'New update';
   event.waitUntil(self.registration.showNotification(title, {
     body: data.body || '',
-    icon: '/icons/icon-192.png',
-    badge: '/icons/badge-72.png',
+    icon: data.icon || '/icons/icon-192.png',
+    badge: data.badge || '/icons/badge-72.png',
     image: data.image || undefined,
     tag: data.tag || undefined,
     renotify: !!data.tag,

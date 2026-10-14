@@ -127,7 +127,7 @@ function formatShareResult(data) {
   const lines = [];
   const fub = data.fubStatus || {};
   if (fub.success) {
-    lines.push("FUB event sent (source saahomes.com)");
+    lines.push(`FUB event sent (source ${typeof window !== "undefined" ? window.location.hostname : "this site"})`);
   } else if (fub.reason === "not_configured") {
     lines.push("FUB not configured — event skipped (no fake success)");
   } else if (fub.reason === "no_email") {
@@ -194,7 +194,7 @@ function ShareHomeForm({
           type="text"
           value={listing}
           onChange={(e) => onListingChange(e.target.value)}
-          placeholder="e.g. https://saahomes.com/homes-for-sale/… or MLS#"
+          placeholder={`e.g. ${typeof window !== "undefined" ? window.location.origin : ""}/homes-for-sale/… or MLS#`}
           className="mt-1 w-full min-h-[44px] border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
           disabled={busy}
         />

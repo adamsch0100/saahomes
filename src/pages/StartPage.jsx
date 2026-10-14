@@ -4,11 +4,13 @@
  * brokerage's own domain shows "not found".
  *
  * The new owner lands in their console signed in, with setup steps waiting.
+ * The page wears the platform's identity (utils/platform.js), never SAA's.
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { getSignupInfo, checkSignupSlug, submitSignup } from '../utils/plugAndPlayApi.js';
 import { useIsBrokerage } from '../context/TenantContext.jsx';
 import PlanPicker, { fmtMoney, perInterval } from '../components/billing/PlanPicker.jsx';
+import { usePlatform, isPlatformSite } from '../utils/platform.js';
 
 const OFFER = [
   { title: 'Your own branded search site', text: 'Every home for sale in your market, under your name, logo and colors, on your domain.' },
@@ -22,7 +24,7 @@ const FIELDS = [
   { key: 'name', label: 'Your name', autoComplete: 'name', placeholder: 'Jordan Lee' },
   { key: 'email', label: 'Work email', type: 'email', autoComplete: 'email', placeholder: 'jordan@peakrealty.com' },
   { key: 'phone', label: 'Phone', type: 'tel', autoComplete: 'tel', placeholder: '(555) 555-0100' },
-  { key: 'city', label: 'Main city or market', autoComplete: 'address-level2', placeholder: 'Loveland, CO' },
+  { key: 'city', label: 'Main city or market', autoComplete: 'address-level2', placeholder: 'Austin, TX' },
   { key: 'password', label: 'Password', type: 'password', autoComplete: 'new-password', placeholder: 'At least 8 characters' },
 ];
 
@@ -72,6 +74,7 @@ export default function StartPage() {
   const [fieldError, setFieldError] = useState(null);
   const [choice, setChoice] = useState({ plan: 'team', interval: 'month' });
   const startedAt = useRef(Date.now());
+  const platform = usePlatform(!isBrokerage);
 
   useEffect(() => {
     if (isBrokerage) return;
@@ -80,9 +83,8 @@ export default function StartPage() {
       .then((res) => {
         if (cancelled) return;
         setInfo(res);
-        if (res?.product_name && typeof document !== 'undefined') document.title = `${res.product_name} — Get started`;
       })
-      .catch(() => !cancelled && setInfo({ product_name: 'SAA Homes for Brokerages', trial_days: 14, price: null, base_domain: null }));
+      .catch(() => !cancelled && setInfo({ product_name: null, trial_days: 14, price: null, base_domain: null }));
     return () => { cancelled = true; };
   }, [isBrokerage]);
 
@@ -114,12 +116,16 @@ export default function StartPage() {
     }
   };
 
-  const productName = info?.product_name || 'SAA Homes for Brokerages';
+  const productName = platform?.name || info?.product_name || '';
   const trialDays = info?.trial_days || 14;
   const price = useMemo(() => priceText(info?.price), [info]);
   // The plans, unless the platform still sells its older single per-agent price.
   const plans = !info?.price && info?.plans?.length ? info : null;
   const chosen = plans?.plans.find((p) => p.key === choice.plan) || plans?.plans[0] || null;
+
+  useEffect(() => {
+    if (productName && !isBrokerage && typeof document !== 'undefined') document.title = `${productName} — Get started`;
+  }, [productName, isBrokerage]);
 
   if (isBrokerage) return <NotFound />;
 
@@ -160,7 +166,18 @@ export default function StartPage() {
     <main className="min-h-screen bg-gray-50 text-gray-900">
       <header className="border-b border-gray-200 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <span className="font-bold text-base sm:text-lg tracking-tight">{productName}</span>
+          {isPlatformSite() ? (
+            <a href="/" className="flex items-center gap-2 font-bold text-base sm:text-lg tracking-tight min-h-[44px]">
+              {platform?.logo_url ? <img src={platform.logo_url} alt="" className="h-8 w-auto" /> : null}
+              <span>{productName}</span>
+            </a>
+          ) : (
+            <span className="flex items-center gap-2 font-bold text-base sm:text-lg tracking-tight">
+              {platform?.logo_url ? <img src={platform.logo_url} alt="" className="h-8 w-auto" /> : null}
+              <span>{productName}</span>
+            </span>
+          )}
+          <a href="/admin" className="text-sm font-medium text-gray-600 hover:text-black min-h-[44px] inline-flex items-center px-2">Sign in</a>
         </div>
       </header>
 
@@ -281,6 +298,12 @@ export default function StartPage() {
             )}
             <p className="text-xs text-gray-500 text-center">
               We’ll email you a link to confirm your address.
+              {platform?.support_email ? (
+                <>
+                  {' '}Questions?{' '}
+                  <a href={`mailto:${platform.support_email}`} className="underline">{platform.support_email}</a>
+                </>
+              ) : null}
             </p>
           </form>
         </section>

@@ -216,6 +216,20 @@ export async function pushSiteForUser(userId, pool = getPool()) {
   return brand.site_url && brand.site_url !== fallback ? brand.site_url.replace(/\/$/, '') : '';
 }
 
+/**
+ * The icon a brokerage's pushes show: its own icon, else the initials icon
+ * its site serves. Nothing for SAA, whose service worker keeps its own.
+ */
+export async function pushIconsForUser(userId, site = '', pool = getPool()) {
+  const { rows: [u] } = await pool.query('SELECT tenant_id FROM users WHERE id = $1', [userId]);
+  const tenantId = Number(u?.tenant_id) || DEFAULT_TENANT_ID;
+  if (tenantId === DEFAULT_TENANT_ID) return {};
+  const brand = brandFor(await tenantById(tenantId, { pool }));
+  const own = String(brand.icon_url || '').trim();
+  const icon = own && !own.startsWith('/icons/') ? absolute(own, site) : `${site}/brand-icon.svg`;
+  return { icon, badge: icon };
+}
+
 /** One push for everything pending for a person. */
 export function bundlePayload(items, { site = SITE } = {}) {
   if (items.length === 1) {
@@ -291,7 +305,8 @@ export async function runPushPass({ now = new Date(), send = deliverPush, scanSa
       continue;
     }
 
-    const payload = bundlePayload(items, { site: await pushSiteForUser(userId, pool) });
+    const site = await pushSiteForUser(userId, pool);
+    const payload = { ...bundlePayload(items, { site }), ...(await pushIconsForUser(userId, site, pool)) };
     const { rows: subs } = await pool.query(
       'SELECT id, endpoint, p256dh, auth FROM push_subscriptions WHERE user_id = $1 AND disabled_at IS NULL', [userId]
     );
