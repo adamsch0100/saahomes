@@ -253,6 +253,16 @@ app.get('/health', (req, res) => {
   });
 });
 
+// The board's page watch records the route paths a shipped job names, but the
+// extractor drops the `/api` mount prefix the app serves under, so it checks
+// /notify-health and /mail-test at the site root while the handlers live at
+// /api/notify-health and /api/mail-test (inc-8d926c93; same extractor bug as
+// inc-b3ab4e41). Alias the watched root paths to their canonical endpoints so
+// the watch reads the real reading instead of a 404. The `/api` paths are
+// unchanged; this only adds redirects.
+app.get('/notify-health', (req, res) => res.redirect(302, '/api/notify-health'));
+app.get('/mail-test', (req, res) => res.redirect(302, '/api/mail-test'));
+
 app.use('/api', plugAndPlayPublicRoutes);
 app.use('/api/admin', plugAndPlayAdminRoutes);
 app.use('/api', apiRoutes);
