@@ -1,10 +1,11 @@
 /**
  * Platform console — brokerages (tenants). Only rendered when /api/account/me
  * says platform === true. Add a brokerage (owner gets an invite email),
- * list them, suspend / reactivate.
+ * list them, suspend / reactivate, and set which MLS listings each one shows.
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { createTenant, listTenants, patchTenant } from '../../utils/api.js';
+import TenantListingsPanel from './TenantListingsPanel.jsx';
 
 const GOLD = 'var(--brand-accent)';
 
@@ -32,6 +33,7 @@ export default function BrokeragesManager({ token }) {
   const [creating, setCreating] = useState(false);
   const [notice, setNotice] = useState(null);
   const [busyId, setBusyId] = useState(null);
+  const [listingsFor, setListingsFor] = useState(null);
 
   const load = useCallback(async () => {
     if (!token) return;
@@ -212,6 +214,7 @@ export default function BrokeragesManager({ token }) {
                   <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                   <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Domain</th>
                   <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Listings</th>
                   <th className="px-5 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Agents</th>
                   <th className="px-5 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Leads</th>
                   <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
@@ -234,6 +237,21 @@ export default function BrokeragesManager({ token }) {
                       >
                         {t.status || 'active'}
                       </span>
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap text-sm">
+                      <button
+                        type="button"
+                        onClick={() => setListingsFor(listingsFor?.id === t.id ? null : t)}
+                        className="min-h-[36px] text-left underline-offset-2 hover:underline"
+                        aria-expanded={listingsFor?.id === t.id}
+                      >
+                        {t.live_feeds?.length || t.id === 1 ? (
+                          <span className="text-green-700 font-semibold">Live: {(t.live_feeds?.length ? t.live_feeds : ['ires']).map((k) => k.toUpperCase()).join(', ')}</span>
+                        ) : (
+                          <span className="text-amber-700 font-semibold">Sample homes</span>
+                        )}
+                        <span className="block text-xs text-gray-500">Listings (MLS) ›</span>
+                      </button>
                     </td>
                     <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-900 text-right">{t.agent_count ?? '—'}</td>
                     <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-900 text-right">{t.lead_count ?? '—'}</td>
@@ -268,6 +286,10 @@ export default function BrokeragesManager({ token }) {
           </div>
         )}
       </div>
+
+      {listingsFor && (
+        <TenantListingsPanel key={listingsFor.id} token={token} tenant={listingsFor} onChanged={load} />
+      )}
     </div>
   );
 }

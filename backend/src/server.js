@@ -13,8 +13,9 @@ import platformRoutes from './routes/platform.js';
 import { runMigrations } from './config/migrate.js';
 import { startIresSyncScheduler } from './jobs/iresScheduler.js';
 import { NOCO_CITIES } from './config/nocoCities.js';
-import { tenantMiddleware, resolveTenantForHost } from './services/tenantContext.js';
+import { tenantMiddleware, resolveTenantForHost, DEFAULT_TENANT_ID } from './services/tenantContext.js';
 import { brandFor, isHomeTenant } from './services/brand.js';
+import { feedsFor } from './services/feeds.js';
 
 dotenv.config();
 
@@ -351,9 +352,9 @@ app.get('/sitemap-listings.xml', async (req, res) => {
       const { rows } = await pool.query(
         `SELECT slug, updated_at FROM listings
           WHERE is_active = TRUE AND slug IS NOT NULL
-            AND city = ANY($1::text[])
+            AND city = ANY($1::text[]) AND feed = ANY($2::text[])
           ORDER BY slug`,
-        [NOCO_CITIES]
+        [NOCO_CITIES, await feedsFor(DEFAULT_TENANT_ID, { pool })]
       );
       const urls = rows.map((r) => {
         const lastmod = r.updated_at
@@ -485,8 +486,8 @@ if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
         const pool = getPool();
         const listingId = legacyListingMatch[1];
         const { rows } = await pool.query(
-          `SELECT slug FROM listings WHERE listing_id = $1 LIMIT 1`,
-          [listingId]
+          `SELECT slug FROM listings WHERE listing_id = $1 AND feed = ANY($2::text[]) LIMIT 1`,
+          [listingId, await feedsFor(DEFAULT_TENANT_ID, { pool })]
         );
         const legacyListings = rows[0];
         if (legacyListings && legacyListings.slug) {
@@ -517,8 +518,8 @@ if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
                   list_price, beds, baths, living_area, status,
                   latitude, longitude, property_type, description,
                   updated_at
-             FROM listings WHERE slug = $1 OR listing_id = $1 LIMIT 1`,
-          [slug]
+             FROM listings WHERE (slug = $1 OR listing_id = $1) AND feed = ANY($2::text[]) LIMIT 1`,
+          [slug, await feedsFor(DEFAULT_TENANT_ID, { pool })]
         );
         const listing = rows[0];
         if (listing) {

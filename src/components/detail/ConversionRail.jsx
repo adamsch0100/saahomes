@@ -174,12 +174,14 @@ export default function ConversionRail({
             <HeartIcon filled={saved} />
             {saved ? "Saved ♥" : "Save"}
           </button>
+          {(bb ? bb.phone : marketPack.market.phone) && (
           <a
-            href={marketPack.market.tel}
+            href={bb ? bb.tel : marketPack.market.tel}
             className="w-full inline-flex items-center justify-center px-6 py-3 bg-white text-black text-sm font-semibold rounded-lg hover:bg-gray-100 active:scale-[0.98] transition-all"
           >
-            Call {marketPack.market.phone}
+            Call {bb ? bb.phone : marketPack.market.phone}
           </a>
+          )}
           {feats.virtual_tour && (
             <VirtualTourButton
               url={feats.virtual_tour}
@@ -194,7 +196,11 @@ export default function ConversionRail({
           />
         </div>
         <p className="text-[11px] text-gray-500 mt-4 leading-relaxed">
-          Live IRES MLS data · Updated daily. Listing data from {listing.mls_source || "IRES"} MLS.
+          {bb && listing.attribution
+            ? listing.attribution.sample
+              ? "Sample listing · Not a real home for sale."
+              : `Live ${listing.attribution.feed_name} MLS data · Updated daily.`
+            : <>Live IRES MLS data · Updated daily. Listing data from {listing.mls_source || "IRES"} MLS.</>}
         </p>
       </div>
 

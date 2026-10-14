@@ -15,6 +15,7 @@ import webpush from 'web-push';
 import getPool from '../config/database.js';
 import { marketPack } from '../config/marketPack.js';
 import { buildSavedSearchWhere } from './listingFilters.js';
+import { listingScope } from './feeds.js';
 import { notifyNewMatches, scanSavedHomesForNotifications } from './notificationService.js';
 import { getPrefFrequency } from './notificationPrefs.js';
 import { recordConsent } from './consent.js';
@@ -152,7 +153,7 @@ export function isQuietHour(date = new Date()) {
 /** Fresh listings for saved searches whose owner has push on → new_match rows. */
 async function queueNewMatches(pool) {
   const { rows: searches } = await pool.query(
-    `SELECT s.id, s.user_id, s.name, s.filters, s.push_cursor_at
+    `SELECT s.id, s.user_id, s.name, s.filters, s.push_cursor_at, u.tenant_id
      FROM saved_searches s JOIN users u ON u.id = s.user_id
      WHERE s.is_active = TRUE AND u.status = 'active'
        AND EXISTS (SELECT 1 FROM push_subscriptions p WHERE p.user_id = s.user_id AND p.disabled_at IS NULL)`
@@ -169,7 +170,9 @@ async function queueNewMatches(pool) {
       await pool.query('UPDATE saved_searches SET push_cursor_at = $1 WHERE id = $2', [now, s.id]);
       continue;
     }
-    const { whereSql, params } = buildSavedSearchWhere(s.filters || {});
+    // Only homes the buyer's brokerage may show.
+    const scope = await listingScope(Number(s.tenant_id ?? 1), { pool });
+    const { whereSql, params } = buildSavedSearchWhere(s.filters || {}, scope);
     const n = params.length;
     const { rows: fresh } = await pool.query(
       `SELECT id, listing_id, slug, street_number, street_name, unit, city, list_price, photos

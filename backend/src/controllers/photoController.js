@@ -14,6 +14,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import getPool from '../config/database.js';
 import logger from '../utils/logger.js';
+import { listingScope } from '../services/feeds.js';
+import { demoPhotoSvg, isDemoPhotoRef } from '../services/demoListings.js';
+import { brandFor, isHomeTenant } from '../services/brand.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CACHE_DIR = process.env.PHOTO_CACHE_DIR || path.join('/tmp', 'saahomes-photos');
@@ -222,16 +225,27 @@ export function isExpectedPhotoDegradation(error) {
   );
 }
 
-async function loadPhotosForProxy(pool, rawId) {
+/**
+ * Photos for a listing id (numeric) or a sold MLS id, among the feeds this
+ * brokerage may show (scope from listingScope; no scope = no feed check).
+ */
+async function loadPhotosForProxy(pool, rawId, scope = null) {
   const numericId = Number(rawId);
   const isNumeric = Number.isInteger(numericId) && numericId > 0 && String(numericId) === String(rawId);
   if (isNumeric) {
-    const byPk = await pool.query('SELECT photos FROM listings WHERE id = $1', [numericId]);
+    const byPk = await pool.query(
+      `SELECT photos FROM listings WHERE id = $1
+         AND ($2::text[] IS NULL OR feed = ANY(CASE WHEN status = 'Sold' THEN $3::text[] ELSE $2::text[] END))`,
+      [numericId, scope?.feeds || null, scope?.soldFeeds || null]
+    );
     if (byPk.rows.length) {
       return { photos: byPk.rows[0].photos || [], allowIresRefresh: true, refreshKey: numericId };
     }
   }
-  const sold = await pool.query('SELECT photos FROM sold_listings WHERE listing_id = $1', [rawId]);
+  const sold = await pool.query(
+    'SELECT photos FROM sold_listings WHERE listing_id = $1 AND ($2::text[] IS NULL OR feed = ANY($2::text[]))',
+    [rawId, scope?.soldFeeds || null]
+  );
   if (sold.rows.length) {
     // Sold photos: serve stored URLs only. Do NOT refresh from IRES — that
     // would stack Closed-record fetches on the same MLS Grid budget.
@@ -276,6 +290,13 @@ const PHOTO_PLACEHOLDER_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="80
   <text x="400" y="430" text-anchor="middle" fill="#CFB36E" font-family="system-ui,sans-serif" font-size="32" font-weight="600">SAA Homes</text>
 </svg>`;
 
+/** The degraded-photo placeholder in this brokerage's name (SAA's as before). */
+function placeholderSvg(tenant) {
+  if (!tenant || isHomeTenant(tenant)) return PHOTO_PLACEHOLDER_SVG;
+  const name = String(brandFor(tenant).name || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return PHOTO_PLACEHOLDER_SVG.replace(/#CFB36E/g, '#9ca3af').replace('>SAA Homes<', `>${name}<`);
+}
+
 export const getListingPhoto = async (req, res) => {
   try {
     const rawId = String(req.params.listingId || '');
@@ -283,6 +304,15 @@ export const getListingPhoto = async (req, res) => {
     if (!isValidPhotoId(rawId)
         || !Number.isInteger(idx) || idx < 0 || idx > 100) {
       return res.status(400).json({ error: 'Invalid photo reference' });
+    }
+    // Another brokerage only gets photos of homes in its own feeds, so the
+    // feed check comes before the disk cache. (SAA's cache holds IRES only.)
+    const pool = getPool();
+    const scope = await listingScope(req.tenant, { pool });
+    let loaded = null;
+    if (!scope.home) {
+      loaded = await loadPhotosForProxy(pool, rawId, scope);
+      if (!loaded) return res.status(404).json({ error: 'Listing not found' });
     }
     const file = cachePath(rawId, idx);
     if (fs.existsSync(file)) {
@@ -292,12 +322,17 @@ export const getListingPhoto = async (req, res) => {
       return res.sendFile(file);
     }
 
-    const pool = getPool();
-    const loaded = await loadPhotosForProxy(pool, rawId);
+    if (!loaded) loaded = await loadPhotosForProxy(pool, rawId, scope);
     if (!loaded) return res.status(404).json({ error: 'Listing not found' });
     const photos = loaded.photos || [];
     const url = photos[idx];
     if (!url) return res.status(404).json({ error: 'Photo not found' });
+    // Sample homes: a drawn picture, never a real photo.
+    if (isDemoPhotoRef(url)) {
+      res.set('Content-Type', 'image/svg+xml');
+      res.set('Cache-Control', 'public, max-age=86400');
+      return res.send(demoPhotoSvg(url));
+    }
 
     let buf;
     try {
@@ -341,7 +376,7 @@ export const getListingPhoto = async (req, res) => {
       res.set('Content-Type', 'image/svg+xml');
       res.set('Cache-Control', 'public, max-age=60');
       res.set('X-Photo-Fallback', '1');
-      return res.status(200).send(PHOTO_PLACEHOLDER_SVG);
+      return res.status(200).send(placeholderSvg(req.tenant));
     }
     logger.error('photo proxy error', error);
     return res.status(502).json({ error: 'Photo temporarily unavailable' });

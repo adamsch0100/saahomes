@@ -14,6 +14,7 @@ import {
 import {
   railwayDomainsAvailable, cnameTarget, addCustomDomain, getCustomDomain,
 } from '../services/railwayDomains.js';
+import { clearFeedCache, feedStatusFor, normalizeServiceAreas } from '../services/feeds.js';
 
 const LEAD_VISIBILITY = ['own', 'own_and_unassigned', 'all'];
 const DOMAIN_RE = /^(?=.{4,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
@@ -76,6 +77,8 @@ async function settingsPayload(tenant) {
       domain_status: !tenant.primary_domain ? 'none' : (site.certificate === 'ISSUED' || isHomeTenant(tenant) ? 'active' : 'pending'),
       automatic: railwayDomainsAvailable(),
     },
+    // Which homes the site shows: read-only here except the service areas.
+    listings: await feedStatusFor(tenant).catch(() => null),
   };
 }
 
@@ -135,9 +138,13 @@ export const patchSettings = async (req, res) => {
       }
       patch.fub_api_key = key || null;
     }
+    if (b.service_areas !== undefined) {
+      patch.mls = { ...(tenant.settings.mls || {}), service_areas: normalizeServiceAreas(b.service_areas) };
+    }
     if (!Object.keys(patch).length) return res.status(400).json({ error: 'Nothing to change' });
 
     await writeSettings(pool, tenantId, patch);
+    if (patch.mls) clearFeedCache();
     logger.info('brokerage settings updated', { tenant_id: tenantId, fields: Object.keys(patch), by: req.user?.email });
     const fresh = await loadTenantRow(pool, tenantId);
     return res.json({ success: true, data: await settingsPayload(fresh) });

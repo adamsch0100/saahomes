@@ -16,6 +16,7 @@
  */
 import getPool from '../config/database.js';
 import logger from '../utils/logger.js';
+import { listingScope } from './feeds.js';
 import {
   getPrefFrequency,
   prefTypeForNotification,
@@ -273,15 +274,21 @@ export async function scanSavedHomesForNotifications({ pool = null } = {}) {
       SELECT sh.id AS saved_id, sh.user_id, sh.listing_key, sh.list_price AS saved_price,
              sh.property_address, sh.photo_url, sh.slug AS saved_slug,
              l.id AS listing_db_id, l.listing_id, l.slug, l.list_price, l.status, l.is_active,
-             l.street_number, l.street_name, l.unit, l.city, l.state
+             l.street_number, l.street_name, l.unit, l.city, l.state, l.feed, u.tenant_id
       FROM saved_homes sh
+      JOIN users u ON u.id = sh.user_id
       LEFT JOIN listings l ON l.listing_id = sh.listing_key
       ORDER BY sh.id
       LIMIT 2000
     `);
 
+    // Only homes the buyer's brokerage may show still send news.
+    const feedsByTenant = new Map();
     for (const row of r.rows) {
       if (!row.listing_db_id) continue;
+      const tid = Number(row.tenant_id ?? 1);
+      if (!feedsByTenant.has(tid)) feedsByTenant.set(tid, (await listingScope(tid, { pool: db })).feeds);
+      if (!feedsByTenant.get(tid).includes(row.feed || 'ires')) continue;
 
       const listing = {
         id: row.listing_db_id,

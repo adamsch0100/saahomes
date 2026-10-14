@@ -22,6 +22,7 @@ import { isHomeTenant } from '../services/brand.js';
 import { createNotification } from '../services/notificationService.js';
 import { hasOwnSession, isStaffAccount, setAuthCookie, SIGN_IN_REQUIRED_MESSAGE, emailSignInLink } from './alertController.js';
 import { findListing, resolveUser } from './savedHomesController.js';
+import { listingScope } from '../services/feeds.js';
 import { tenantIdOf, currentTenantId } from '../services/tenantContext.js';
 
 const SITE = (process.env.SITE_URL || 'https://saahomes.com').replace(/\/$/, '');
@@ -307,12 +308,13 @@ export async function buildBoard(user, pool = getPool()) {
   ]);
 
   const keys = [...new Set([...saved.rows.map((r) => r.listing_key), ...comments.rows.map((r) => r.listing_key)])];
+  const { feeds } = await listingScope(user.tenant_id ?? null, { pool });
   const { rows: listings } = keys.length
     ? await pool.query(
       `SELECT id, listing_id, slug, status, is_active, list_price, street_number, street_name, unit, city,
-              beds, baths, living_area
-       FROM listings WHERE listing_id = ANY($1::text[])`,
-      [keys]
+              beds, baths, living_area, feed
+       FROM listings WHERE listing_id = ANY($1::text[]) AND feed = ANY($2::text[])`,
+      [keys, feeds]
     )
     : { rows: [] };
   const byKey = new Map(listings.map((l) => [String(l.listing_id), l]));
@@ -355,6 +357,7 @@ export async function buildBoard(user, pool = getPool()) {
       beds: l?.beds != null ? Number(l.beds) : null,
       baths: l?.baths != null ? Number(l.baths) : null,
       living_area: l?.living_area != null ? Number(l.living_area) : null,
+      sample: l?.feed === 'demo',
       people,
       everyone_loves: members.length > 1 && keen.length === members.length,
       comments: thread,

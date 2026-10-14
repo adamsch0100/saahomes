@@ -15,6 +15,7 @@
 import getPool from '../config/database.js';
 import { currentTenant } from './tenantContext.js';
 import { brandFor, isHomeTenant } from './brand.js';
+import { listingScope } from './feeds.js';
 import logger from '../utils/logger.js';
 import {
   reefConfigured,
@@ -41,8 +42,10 @@ function cleanStr(v, max = 255) {
  * Median price_per_sqft for Active listings in a ZIP (preferred) or city.
  * Falls back to NoCO-wide if local sample is too thin (< 5).
  */
-export async function getMedianPpsqft({ postal_code, city }, pool = getPool()) {
+export async function getMedianPpsqft({ postal_code, city }, pool = getPool(), { feedScope = null } = {}) {
   const minSample = 5;
+  // Only homes this brokerage may show (sample homes in demo mode).
+  const s = feedScope || await listingScope(null, { pool });
   const base = `is_active = TRUE AND status = 'Active'
     AND price_per_sqft IS NOT NULL AND price_per_sqft > 50 AND price_per_sqft < 2000
     AND living_area IS NOT NULL AND living_area > 200`;
@@ -52,8 +55,8 @@ export async function getMedianPpsqft({ postal_code, city }, pool = getPool()) {
       `SELECT COUNT(*)::int AS n,
               PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_per_sqft) AS med_ppsqft,
               PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY list_price) AS med_price
-       FROM listings WHERE ${where}`,
-      params
+       FROM listings WHERE ${where} AND feed = ANY($${params.length + 1}::text[])`,
+      [...params, s.feeds]
     );
     const row = r.rows[0] || {};
     return {
@@ -77,6 +80,11 @@ export async function getMedianPpsqft({ postal_code, city }, pool = getPool()) {
     if (stats.n >= minSample && stats.med_ppsqft) {
       scope = { type: 'city', value: String(city), sample: stats.n };
     }
+  }
+  if (!scope && !s.home) {
+    // Another brokerage: everything it shows.
+    stats = await tryQuery(base, []);
+    scope = { type: 'region', value: s.demo ? 'sample-home' : 'the wider area', sample: stats.n };
   }
   if (!scope) {
     // Northern Colorado core cities
@@ -103,9 +111,11 @@ export async function getMedianPpsqft({ postal_code, city }, pool = getPool()) {
  */
 export async function computeOurEstimate(profile, pool = getPool()) {
   const living = profile.living_area != null ? Number(profile.living_area) : null;
+  const tenantId = profile.user_tenant_id ?? profile.tenant_id ?? null;
   const med = await getMedianPpsqft(
     { postal_code: profile.postal_code, city: profile.city },
-    pool
+    pool,
+    { feedScope: await listingScope(tenantId, { pool }) }
   );
 
   if (!med.median_ppsqft) {
@@ -142,7 +152,7 @@ export async function computeOurEstimate(profile, pool = getPool()) {
       ? `ZIP ${med.scope.value}`
       : med.scope?.type === 'city'
         ? med.scope.value
-        : 'Northern Colorado';
+        : med.scope?.value || 'Northern Colorado';
 
   const label = living && living > 200
     ? `Estimated range based on ${scopeLabel} sales data (median $${med.median_ppsqft}/sqft × ${Number(living).toLocaleString()} sqft, ${med.sample_size} active listings). Updated monthly. Not an appraisal.`

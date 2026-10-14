@@ -148,6 +148,86 @@ function DnsTable({ records }) {
   );
 }
 
+/**
+ * Which homes the site shows. The MLS approves each brokerage; until then the
+ * site shows sample homes. Read-only except the service areas.
+ */
+function ListingsSection({ listings, busy, onSaveAreas, note }) {
+  const [areas, setAreas] = useState((listings?.service_areas || []).join(', '));
+  useEffect(() => {
+    setAreas((listings?.service_areas || []).join(', '));
+  }, [listings?.service_areas]);
+  if (!listings) return null;
+  const live = listings.mode === 'live';
+  const ires = (listings.feeds || []).find((f) => f.key === 'ires');
+  const steps = [
+    { done: live || ['pending', 'approved'].includes(ires?.status), text: 'Apply to IRES as a website data vendor through MLS Grid (mlsgrid.com). Name us as your website provider.' },
+    { done: live, text: 'Your managing broker signs the IRES data license for your site.' },
+    { done: live, text: 'Tell us when IRES approves you. We switch your site to live listings, usually the same day.' },
+  ];
+  return (
+    <Section title="Listings" description="Which homes buyers see on your site.">
+      <div className="space-y-4 text-sm">
+        <div className={`rounded-lg border p-3 ${live ? 'border-green-200 bg-green-50' : 'border-amber-200 bg-amber-50'}`}>
+          <p className={`font-semibold ${live ? 'text-green-900' : 'text-amber-900'}`}>{listings.headline}</p>
+          <p className={`mt-1 ${live ? 'text-green-800' : 'text-amber-800'}`}>
+            {live
+              ? `Every home shows who it's listed with and your MLS's notice. Recent sales are ${listings.sold ? 'on' : 'off'}.`
+              : 'Buyers can try everything (search, map, saved homes, alerts) on sample homes, each clearly labeled as a sample. No real listing shows until your MLS approves your site.'}
+          </p>
+          {listings.suspended?.length ? (
+            <p className="mt-1 text-red-700">Paused: {listings.suspended.join(', ')}. Contact us to turn it back on.</p>
+          ) : null}
+        </div>
+        {!live && (
+          <div>
+            <p className="font-semibold text-gray-900">What to do next</p>
+            <ol className="mt-2 space-y-2">
+              {steps.map((st, i) => (
+                <li key={i} className="flex gap-3">
+                  <span
+                    aria-hidden="true"
+                    className={`shrink-0 h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                      st.done ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'
+                    }`}
+                  >
+                    {st.done ? '✓' : i + 1}
+                  </span>
+                  <span className="text-gray-700">{st.text}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSaveAreas(areas.split(',').map((a) => a.trim()).filter(Boolean));
+          }}
+        >
+          <label className="block">
+            <span className="font-semibold text-gray-900">Service areas</span>
+            <span className="block text-gray-500">
+              Towns or counties your search opens on, separated by commas. Buyers can still search anywhere.
+            </span>
+            <input
+              type="text"
+              value={areas}
+              onChange={(e) => setAreas(e.target.value)}
+              placeholder="Fort Collins, Loveland, Weld County"
+              className={inputClass}
+            />
+          </label>
+          <button type="submit" disabled={busy} className={`${secondaryClass} mt-2`}>
+            {busy ? 'Saving…' : 'Save service areas'}
+          </button>
+        </form>
+        <Note kind={note?.kind}>{note?.text}</Note>
+      </div>
+    </Section>
+  );
+}
+
 function brandFormFrom(brand) {
   const out = {};
   for (const f of BRAND_FIELDS) out[f.key] = brand?.[f.key] || '';
@@ -243,6 +323,7 @@ export default function BrokerageSettings({ token }) {
   const [assetNote, setAssetNote] = useState(null);
 
   const [routingNote, setRoutingNote] = useState(null);
+  const [areasNote, setAreasNote] = useState(null);
   const [securityNote, setSecurityNote] = useState(null);
   const [quickBusy, setQuickBusy] = useState(null);
 
@@ -720,6 +801,14 @@ export default function BrokerageSettings({ token }) {
           <Note kind={siteNote?.kind}>{siteNote?.text}</Note>
         </div>
       </Section>
+
+      {/* Listings (MLS) */}
+      <ListingsSection
+        listings={settings.listings}
+        busy={quickBusy === 'areas'}
+        note={areasNote}
+        onSaveAreas={(list) => quickPatch({ service_areas: list }, 'areas', setAreasNote, 'Saved. Your search opens on these areas.')}
+      />
 
       {/* Lead routing */}
       <Section title="Who sees which leads" description="Applies to every agent's console. You always see everything.">

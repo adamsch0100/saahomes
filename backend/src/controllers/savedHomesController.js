@@ -14,6 +14,7 @@ import getPool from '../config/database.js';
 import { setAuthCookie } from './alertController.js';
 import { computeAndStoreLeadScore } from '../services/leadScore.js';
 import { invalidateTaste } from '../services/tasteProfile.js';
+import { courtesyLine, feedCatalog, listingScope } from '../services/feeds.js';
 
 import { resolveUser } from '../services/buyerSession.js';
 
@@ -31,38 +32,41 @@ function formatAddress(row) {
   return street || cityLine || null;
 }
 
+const LISTING_COLS = `id, listing_id, slug, status, is_active, list_price, photos, feed, list_office_name,
+            street_number, street_name, unit, city, state, postal_code, beds, baths, living_area`;
+
 /**
- * Resolve a client-supplied key (IRES listing_id, slug, or serial id) to a listing row.
+ * Resolve a client-supplied key (IRES listing_id, slug, or serial id) to a
+ * listing row, among the feeds this brokerage may show (the current
+ * request's brokerage unless feeds are given).
  */
-export async function findListing(pool, key) {
+export async function findListing(pool, key, { feeds } = {}) {
   const raw = String(key || '').trim();
   if (!raw || raw.length > 255) return null;
+  const inFeeds = feeds || (await listingScope(null, { pool })).feeds;
 
   // Prefer IRES listing_id (stable key we store)
   let r = await pool.query(
-    `SELECT id, listing_id, slug, status, is_active, list_price, photos,
-            street_number, street_name, unit, city, state, postal_code, beds, baths, living_area
-     FROM listings WHERE listing_id = $1 LIMIT 1`,
-    [raw]
+    `SELECT ${LISTING_COLS}
+     FROM listings WHERE listing_id = $1 AND feed = ANY($2::text[]) LIMIT 1`,
+    [raw, inFeeds]
   );
   if (r.rows.length) return r.rows[0];
 
   // Slug (legacy localStorage hearts stored slugs)
   r = await pool.query(
-    `SELECT id, listing_id, slug, status, is_active, list_price, photos,
-            street_number, street_name, unit, city, state, postal_code, beds, baths, living_area
-     FROM listings WHERE slug = $1 LIMIT 1`,
-    [raw]
+    `SELECT ${LISTING_COLS}
+     FROM listings WHERE slug = $1 AND feed = ANY($2::text[]) LIMIT 1`,
+    [raw, inFeeds]
   );
   if (r.rows.length) return r.rows[0];
 
   // Serial PK (photo proxy id)
   if (/^\d+$/.test(raw)) {
     r = await pool.query(
-      `SELECT id, listing_id, slug, status, is_active, list_price, photos,
-              street_number, street_name, unit, city, state, postal_code, beds, baths, living_area
-       FROM listings WHERE id = $1 LIMIT 1`,
-      [Number(raw)]
+      `SELECT ${LISTING_COLS}
+       FROM listings WHERE id = $1 AND feed = ANY($2::text[]) LIMIT 1`,
+      [Number(raw), inFeeds]
     );
     if (r.rows.length) return r.rows[0];
   }
@@ -94,7 +98,7 @@ function snapshotFromListing(listing) {
   };
 }
 
-function hydrateRow(saved, listing) {
+function hydrateRow(saved, listing, catalog = null) {
   const onMarket = isListingOnMarket(listing);
   const address = listing ? formatAddress(listing) : saved.property_address;
   const listPrice = listing?.list_price != null
@@ -126,6 +130,8 @@ function hydrateRow(saved, listing) {
     street_number: listing?.street_number || null,
     street_name: listing?.street_name || null,
     unit: listing?.unit || null,
+    sample: listing?.feed === 'demo',
+    courtesy: listing && catalog ? courtesyLine(listing, catalog) : null,
   };
 }
 
@@ -148,15 +154,18 @@ export const listSavedHomes = async (req, res) => {
     }
 
     const keys = saved.rows.map((r) => r.listing_key);
+    // Homes outside this brokerage's feeds now (a feed switched or
+    // suspended) show as no longer available, from the saved snapshot.
+    const { feeds } = await listingScope(req.tenant, { pool });
     const listings = await pool.query(
-      `SELECT id, listing_id, slug, status, is_active, list_price, photos,
-              street_number, street_name, unit, city, state, postal_code, beds, baths, living_area
-       FROM listings WHERE listing_id = ANY($1::text[])`,
-      [keys]
+      `SELECT ${LISTING_COLS}
+       FROM listings WHERE listing_id = ANY($1::text[]) AND feed = ANY($2::text[])`,
+      [keys, feeds]
     );
     const byKey = new Map(listings.rows.map((l) => [String(l.listing_id), l]));
+    const catalog = await feedCatalog({ pool });
 
-    const homes = saved.rows.map((row) => hydrateRow(row, byKey.get(String(row.listing_key)) || null));
+    const homes = saved.rows.map((row) => hydrateRow(row, byKey.get(String(row.listing_key)) || null, catalog));
     return res.json({ success: true, data: { homes, email: user.email } });
   } catch (error) {
     console.error('listSavedHomes error:', error);
@@ -297,7 +306,7 @@ export const saveHome = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      data: hydrateRow(row, listing),
+      data: hydrateRow(row, listing, await feedCatalog({ pool })),
     });
   } catch (error) {
     console.error('saveHome error:', error);
@@ -376,12 +385,14 @@ export const savedHomesStatus = async (req, res) => {
 
     const pool = getPool();
     // Map each input → IRES listing_id when resolvable
+    const { feeds } = await listingScope(req.tenant, { pool });
     const listings = await pool.query(
       `SELECT id, listing_id, slug FROM listings
-       WHERE listing_id = ANY($1::text[])
+       WHERE (listing_id = ANY($1::text[])
           OR slug = ANY($1::text[])
-          OR (id::text = ANY($1::text[]))`,
-      [inputs]
+          OR (id::text = ANY($1::text[])))
+         AND feed = ANY($2::text[])`,
+      [inputs, feeds]
     );
 
     const inputToKey = new Map();

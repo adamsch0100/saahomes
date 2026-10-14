@@ -3,6 +3,7 @@ import { photoUrl } from "../utils/photoUrl.js";
 import { formatPrice, formatPriceCompact, listingAddress, listingStatsLine } from "../utils/listingHelpers.js";
 import { LISTING_PHOTO_FALLBACK_SRC } from "../utils/photoUrl.js";
 import { getBrandTheme } from "../utils/brandTheme.js";
+import { courtesyHtml, sampleBadgeHtml } from "./ListingAttribution.jsx";
 
 /**
  * ListingMap — Mapbox GL clustered markers (Zillow-style).
@@ -283,6 +284,7 @@ export default function ListingMap({
                   <p class="font-bold text-sm text-gray-900 m-0 leading-tight">${formatPrice(listing.list_price)}</p>
                   <p class="text-[11px] font-semibold text-gray-700 mt-0.5 mb-0 truncate">${stats}</p>
                   <p class="text-[10px] text-gray-500 mt-0.5 mb-0 truncate">${addr}${listing.city ? `, ${listing.city}` : ""}</p>
+                  ${listing.sample ? `<p class="mt-0.5 mb-0">${sampleBadgeHtml(listing)}</p>` : ""}
                 </div>
               </div>`;
             wirePhotoFallback(el);
@@ -311,6 +313,8 @@ export default function ListingMap({
                 <div class="p-3">
                   <p class="text-xs font-semibold text-gray-800 m-0 truncate">${stats}</p>
                   <p class="text-xs text-gray-500 mt-1 mb-0 truncate">${addr}${listing.city ? `, ${listing.city}` : ""}</p>
+                  ${listing.sample ? `<p class="mt-1 mb-0">${sampleBadgeHtml(listing)}</p>` : ""}
+                  ${courtesyHtml(listing)}
                   <p class="text-xs font-semibold text-[color:var(--brand-accent-text)] mt-2 mb-0">View details →</p>
                 </div>
               </div>`;

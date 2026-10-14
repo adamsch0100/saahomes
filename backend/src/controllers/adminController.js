@@ -5,6 +5,7 @@ import logger from '../utils/logger.js';
 import { tenantIdOf } from '../services/tenantContext.js';
 import { finishLogin } from '../services/staffAuth.js';
 import { issueAccountLink } from '../services/accountLinks.js';
+import { listingScope } from '../services/feeds.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -655,22 +656,24 @@ export const shareHome = async (req, res) => {
 
     const pool = getPool();
 
-    // Live feed only — never fabricate a home
+    // Live feed only — never fabricate a home — and only homes this
+    // brokerage's site shows.
     let listing = null;
+    const { feeds } = await listingScope(req.tenant, { pool });
     {
       let r = await pool.query(
         `SELECT id, listing_id, slug, status, is_active, list_price,
                 street_number, street_name, unit, city, state, postal_code
-         FROM listings WHERE listing_id = $1 LIMIT 1`,
-        [key]
+         FROM listings WHERE listing_id = $1 AND feed = ANY($2::text[]) LIMIT 1`,
+        [key, feeds]
       );
       if (r.rows.length) listing = r.rows[0];
       if (!listing) {
         r = await pool.query(
           `SELECT id, listing_id, slug, status, is_active, list_price,
                   street_number, street_name, unit, city, state, postal_code
-           FROM listings WHERE slug = $1 LIMIT 1`,
-          [key]
+           FROM listings WHERE slug = $1 AND feed = ANY($2::text[]) LIMIT 1`,
+          [key, feeds]
         );
         if (r.rows.length) listing = r.rows[0];
       }
@@ -678,8 +681,8 @@ export const shareHome = async (req, res) => {
         r = await pool.query(
           `SELECT id, listing_id, slug, status, is_active, list_price,
                   street_number, street_name, unit, city, state, postal_code
-           FROM listings WHERE id = $1 LIMIT 1`,
-          [Number(key)]
+           FROM listings WHERE id = $1 AND feed = ANY($2::text[]) LIMIT 1`,
+          [Number(key), feeds]
         );
         if (r.rows.length) listing = r.rows[0];
       }

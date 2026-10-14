@@ -26,6 +26,7 @@ import SaveHomeButton, { useSavedHomesStatus } from "./SaveHomeButton";
 import ListingPhotoFallback from "./ListingPhotoFallback";
 import { marketPack } from "../data/marketPack.js";
 import { useTenant } from "../context/TenantContext.jsx";
+import { CourtesyLine, SampleBadge } from "./ListingAttribution.jsx";
 import { buildListingsItemListSchema } from "../utils/seoConstants.js";
 import { estimateMonthlyPayment } from "./PaymentCalculator.jsx";
 
@@ -752,11 +753,12 @@ function SkeletonCard({ compact = false }) {
   );
 }
 
-function CardBadges({ listing }) {
+function CardBadges({ listing, compact = false }) {
   const { isNew, priceCut, priceCutPct, isNewConstruction, hasOpenHouse, isAssumable } = listingBadges(listing);
-  if (!isNew && !priceCut && !isNewConstruction && !hasOpenHouse && !isAssumable) return null;
+  if (!listing.sample && !isNew && !priceCut && !isNewConstruction && !hasOpenHouse && !isAssumable) return null;
   return (
     <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5 max-w-[78%] z-[1]">
+      <SampleBadge listing={listing} short={compact} />
       {isNew && (
         <span className="inline-flex items-center min-h-[24px] bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] text-[11px] font-bold tracking-wide uppercase px-2.5 py-1 rounded-md shadow-sm">
           New
@@ -942,7 +944,7 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
       ) : (
         <ListingPhotoFallback className="w-full h-full absolute inset-0" compact={compact} />
       )}
-      <CardBadges listing={listing} />
+      <CardBadges listing={listing} compact={compact} />
       <div className={`absolute z-10 ${compact ? "top-1.5 right-1.5" : "top-2 right-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"}`}>
         {/* Keep default 44px SaveHomeButton — density overrides hurt mobile taps (G-UX2-2) */}
         <SaveHomeButton listing={listing} saved={isSaved} />
@@ -1035,6 +1037,7 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
       {typeLabel && (
         <p className="text-xs text-gray-400 mt-0.5">{typeLabel}</p>
       )}
+      <CourtesyLine listing={listing} className="mt-0.5" />
       {match.matches && (
         <p className="mt-1 inline-flex self-start items-center gap-1 text-[10px] font-semibold text-[color:var(--brand-accent-text)] bg-[rgb(var(--brand-accent-rgb)/0.15)] px-2 py-0.5 rounded-full">
           <span aria-hidden="true">★</span> Match
@@ -1053,6 +1056,7 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
         {[listing.city, listing.state, listing.postal_code].filter(Boolean).join(", ")}
         {typeLabel ? ` · ${typeLabel}` : ""}
       </p>
+      <CourtesyLine listing={listing} className="mt-0.5" />
       {match.matches && (
         <p className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-[color:var(--brand-accent-text)] bg-[rgb(var(--brand-accent-rgb)/0.15)] px-2 py-0.5 rounded-full">
           <span aria-hidden="true">★</span>
@@ -2107,15 +2111,24 @@ export default function ListingSearch({ location, height = "700px", compact = fa
 
   // GEO: ItemList of first page of results (max 24) — list or map mode.
   // Only real active MLS rows; canonical /homes-for-sale/{slug}/ URLs.
-  const listingsItemList = useMemo(
-    () =>
-      buildListingsItemListSchema(results, {
+  // Another brokerage: no list for sample homes; real ones point at its own domain.
+  const listingsItemList = useMemo(() => {
+    if (!tenant?.isBrokerage) {
+      return buildListingsItemListSchema(results, {
         name: `Homes for Sale in ${areaLabel}`,
         description: `Active IRES MLS listings for sale in ${areaLabel}.`,
         maxItems: 24,
-      }),
-    [results, areaLabel]
-  );
+      });
+    }
+    const real = (results || []).filter((l) => !l.sample);
+    const schema = buildListingsItemListSchema(real, {
+      name: `Homes for Sale in ${areaLabel}`,
+      description: `Active MLS listings for sale in ${areaLabel}.`,
+      maxItems: 24,
+    });
+    if (!schema || typeof window === "undefined") return schema;
+    return JSON.parse(JSON.stringify(schema).split("https://saahomes.com").join(window.location.origin));
+  }, [results, areaLabel, tenant?.isBrokerage]);
 
   const priceChipLabel = () => {
     if (!filters.minPrice && !filters.maxPrice) return "Price";
@@ -2824,6 +2837,17 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                   <a href="/northern-colorado-areas/" className="underline">city guides</a>
                 </p>
               )}
+            </div>
+          )}
+
+          {/* A brokerage still waiting on its MLS shows sample homes; say so plainly. */}
+          {isBrokerageSite && tenant?.listings?.mode === "demo" && (
+            <div
+              role="note"
+              className="mx-3 sm:mx-4 mt-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs sm:text-sm text-amber-900"
+            >
+              <span className="font-semibold">Sample homes.</span> These are made-up listings so you can try the search.
+              Real homes for sale appear here soon.
             </div>
           )}
 

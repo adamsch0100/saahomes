@@ -13,6 +13,7 @@ import getPool from '../config/database.js';
 import { denverToday } from '../controllers/tourController.js';
 import { currentTenantId, tenantById, siteUrlFor } from './tenantContext.js';
 import { brandFor, isHomeTenant } from './brand.js';
+import { listingScope } from './feeds.js';
 
 const SITE = (process.env.SITE_URL || 'https://saahomes.com').replace(/\/$/, '');
 export const MAX_BRIEF_LEADS = 10;
@@ -141,9 +142,10 @@ export async function buildBrief(agent, { now = new Date(), pool = getPool() } =
   const listingIds = [...new Set(events.map((e) => e.listing_id).filter(Boolean))];
   const homes = new Map();
   if (listingIds.length) {
+    const { feeds } = await listingScope(agent.tenant_id ?? currentTenantId(), { pool });
     const { rows } = await pool.query(
-      'SELECT listing_id, street_number, street_name, city, list_price FROM listings WHERE listing_id = ANY($1::text[])',
-      [listingIds]
+      'SELECT listing_id, street_number, street_name, city, list_price FROM listings WHERE listing_id = ANY($1::text[]) AND feed = ANY($2::text[])',
+      [listingIds, feeds]
     );
     for (const r of rows) homes.set(String(r.listing_id), r);
   }

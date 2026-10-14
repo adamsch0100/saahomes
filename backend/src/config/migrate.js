@@ -1,4 +1,5 @@
 import getPool from './database.js';
+import { seedDemoListings } from '../services/demoListings.js';
 
 export const runMigrations = async () => {
   const pool = getPool();
@@ -1164,6 +1165,100 @@ export const runMigrations = async () => {
     } catch (brandErr) {
       await client.query('ROLLBACK TO SAVEPOINT brand_settings');
       console.error('brand settings migration skipped:', brandErr.message);
+    }
+
+    // MLS feeds: which listing feeds exist, which ones each brokerage is
+    // approved to show, and the feed each listing came from. A brokerage
+    // with no approved feed sees sample homes only.
+    await client.query('SAVEPOINT mls_feeds');
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS mls_feeds (
+          key VARCHAR(16) PRIMARY KEY,
+          name VARCHAR(80) NOT NULL,
+          vendor VARCHAR(120),
+          disclaimer TEXT NOT NULL DEFAULT '',
+          sold_data_allowed BOOLEAN NOT NULL DEFAULT FALSE,
+          courtesy_required BOOLEAN NOT NULL DEFAULT TRUE,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        INSERT INTO mls_feeds (key, name, vendor, disclaimer, sold_data_allowed, courtesy_required) VALUES
+          ('ires', 'IRES', 'IRES via MLS Grid',
+           'Listing data provided by IRES MLS via IDX and displayed by {brokerage}. Information is deemed reliable but not guaranteed. All measurements and square footage are approximate. Buyer should verify all information with independent sources before making decisions. Listing information last updated {updated}.',
+           TRUE, TRUE),
+          ('demo', 'Sample listings', 'Sample data',
+           'These are sample homes so you can try {brokerage}''s home search. They are not real listings and are not for sale. Live MLS listings appear here once the MLS approves this site.',
+           TRUE, FALSE)
+        ON CONFLICT (key) DO NOTHING;
+
+        CREATE TABLE IF NOT EXISTS tenant_feeds (
+          tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          feed_key VARCHAR(16) NOT NULL REFERENCES mls_feeds(key),
+          status VARCHAR(16) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'suspended')),
+          office_mls_id VARCHAR(40),
+          sold_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+          notes TEXT,
+          approved_at TIMESTAMPTZ,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (tenant_id, feed_key)
+        );
+        CREATE INDEX IF NOT EXISTS idx_tenant_feeds_tenant ON tenant_feeds(tenant_id);
+        INSERT INTO tenant_feeds (tenant_id, feed_key, status, sold_enabled, approved_at, notes)
+          SELECT 1, 'ires', 'approved', TRUE, NOW(), 'Home brokerage'
+          WHERE EXISTS (SELECT 1 FROM tenants WHERE id = 1)
+        ON CONFLICT (tenant_id, feed_key) DO NOTHING;
+
+        CREATE TABLE IF NOT EXISTS tenant_feed_log (
+          id BIGSERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          feed_key VARCHAR(16),
+          changed_by VARCHAR(255),
+          changes JSONB NOT NULL DEFAULT '{}'::jsonb,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_tenant_feed_log_tenant ON tenant_feed_log(tenant_id, created_at DESC);
+
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS feed VARCHAR(16) NOT NULL DEFAULT 'ires';
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS list_office_name VARCHAR(255);
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS list_office_mls_id VARCHAR(40);
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS list_agent_name VARCHAR(255);
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS list_agent_mls_id VARCHAR(40);
+        CREATE INDEX IF NOT EXISTS idx_listings_feed ON listings(feed);
+
+        ALTER TABLE sold_listings ADD COLUMN IF NOT EXISTS feed VARCHAR(16) NOT NULL DEFAULT 'ires';
+        ALTER TABLE sold_listings ADD COLUMN IF NOT EXISTS list_office_name VARCHAR(255);
+        ALTER TABLE sold_listings ADD COLUMN IF NOT EXISTS list_office_mls_id VARCHAR(40);
+        ALTER TABLE sold_listings ADD COLUMN IF NOT EXISTS list_agent_name VARCHAR(255);
+        ALTER TABLE sold_listings ADD COLUMN IF NOT EXISTS list_agent_mls_id VARCHAR(40);
+        CREATE INDEX IF NOT EXISTS idx_sold_listings_feed ON sold_listings(feed);
+
+        -- One home carried by two feeds shows once: same street address and
+        -- unit in the same town.
+        CREATE OR REPLACE FUNCTION listing_address_key(num TEXT, street TEXT, unit TEXT, city TEXT)
+          RETURNS TEXT LANGUAGE sql IMMUTABLE AS $fn$
+            SELECT LOWER(REGEXP_REPLACE(
+              COALESCE(num, '') || '|' || COALESCE(street, '') || '|' || COALESCE(unit, '') || '|' || COALESCE(city, ''),
+              '[^A-Za-z0-9|]+', '', 'g'))
+          $fn$;
+        CREATE INDEX IF NOT EXISTS idx_listings_address_key
+          ON listings (listing_address_key(street_number, street_name, unit, city));
+      `);
+      await client.query('RELEASE SAVEPOINT mls_feeds');
+    } catch (feedErr) {
+      await client.query('ROLLBACK TO SAVEPOINT mls_feeds');
+      console.error('mls feeds migration skipped:', feedErr.message);
+    }
+
+    // Sample homes for brokerages still waiting on their MLS (feed = 'demo').
+    await client.query('SAVEPOINT demo_listings');
+    try {
+      await seedDemoListings(client);
+      await client.query('RELEASE SAVEPOINT demo_listings');
+    } catch (demoErr) {
+      await client.query('ROLLBACK TO SAVEPOINT demo_listings');
+      console.error('sample listings seed skipped:', demoErr.message);
     }
 
     await client.query('COMMIT');
