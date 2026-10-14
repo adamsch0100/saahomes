@@ -320,6 +320,16 @@ function nadiaSite(brand) {
   return ownSiteUrl(brand);
 }
 
+async function noteSellingQuestion(req, messages) {
+  const last = [...messages].reverse().find((m) => m?.role === 'user')?.content;
+  const { mentionsSelling } = await import('../services/sellerSignals.js');
+  if (!mentionsSelling(last)) return;
+  const { sessionUserId, recordEvent } = await import('../services/events.js');
+  const userId = await sessionUserId(req);
+  if (!userId) return;
+  await recordEvent({ type: 'seller_question', userId, meta: { via: 'nadia' }, dedupeMinutes: 24 * 60 });
+}
+
 export const handleChatMessage = async (req, res) => {
   const { messages, page } = req.body;
 
@@ -328,6 +338,9 @@ export const handleChatMessage = async (req, res) => {
   }
 
   const brand = await nadiaBrand(req);
+
+  // A signed-in owner asking Nadia about selling is a seller signal for their agent.
+  noteSellingQuestion(req, messages).catch(() => {});
 
   if (!OPENCODE_API_KEY) {
     logger.warn('OpenCode API key not configured — chat AI unavailable');

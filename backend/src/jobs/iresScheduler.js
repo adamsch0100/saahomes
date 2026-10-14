@@ -28,6 +28,7 @@ import { syncSoldListings } from '../services/iresSoldSync.js';
 import getPool from '../config/database.js';
 import { runPushPass } from '../services/pushService.js';
 import { runMorningBriefs } from '../services/morningBrief.js';
+import { runStayInTouch } from '../services/stayInTouch.js';
 
 const ADVISORY_LOCK_KEY = 833711; // app-wide constant — must not collide with other locks
 const RUN_MINUTE = 57; // sync at :57 each hour (UTC)
@@ -86,6 +87,13 @@ async function runSync() {
         if (brief.sent) console.log(`[brief] ${new Date().toISOString()} sent:`, JSON.stringify(brief));
       } catch (briefErr) {
         console.error(`[brief] ${new Date().toISOString()} FAILED:`, briefErr.message);
+      }
+      // Stay-in-touch emails and seller-intent scores ride the 9:57am Mountain tick.
+      try {
+        const stay = await runStayInTouch({ now: startedAt });
+        if (stay.sent || stay.signals) console.log(`[stay] ${new Date().toISOString()} pass:`, JSON.stringify(stay));
+      } catch (stayErr) {
+        console.error(`[stay] ${new Date().toISOString()} FAILED:`, stayErr.message);
       }
       await client.query('SELECT pg_advisory_unlock($1)', [ADVISORY_LOCK_KEY]).catch(() => {});
     }

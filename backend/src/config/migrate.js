@@ -1159,6 +1159,164 @@ export const runMigrations = async () => {
       console.error('brand settings migration skipped:', brandErr.message);
     }
 
+    // Client life after the search (phase 5): closing facts and stay-in-touch
+    // emails, seller-intent scores, and the seller dashboard (plan, showing
+    // feedback, offers). Every row carries its brokerage.
+    await client.query('SAVEPOINT p5_client_life');
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS client_closings (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          user_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+          agent_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          home_profile_id INTEGER REFERENCES home_profiles(id) ON DELETE SET NULL,
+          side VARCHAR(8) NOT NULL DEFAULT 'buyer',
+          address_line VARCHAR(255) NOT NULL,
+          city VARCHAR(100),
+          state VARCHAR(2),
+          postal_code VARCHAR(16),
+          close_date DATE NOT NULL,
+          close_price INTEGER,
+          loan_amount INTEGER,
+          loan_rate NUMERIC(5,3),
+          loan_years SMALLINT,
+          birthday_month SMALLINT CHECK (birthday_month BETWEEN 1 AND 12),
+          birthday_day SMALLINT CHECK (birthday_day BETWEEN 1 AND 31),
+          stay_in_touch BOOLEAN NOT NULL DEFAULT FALSE,
+          consent_at TIMESTAMPTZ,
+          target_rate NUMERIC(5,3),
+          agent_note TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_client_closings_tenant ON client_closings(tenant_id, agent_id);
+        CREATE TABLE IF NOT EXISTS stay_touch_prefs (
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          kind VARCHAR(16) NOT NULL,
+          agent_off BOOLEAN NOT NULL DEFAULT FALSE,
+          client_off BOOLEAN NOT NULL DEFAULT FALSE,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (user_id, kind)
+        );
+        CREATE INDEX IF NOT EXISTS idx_stay_touch_prefs_tenant ON stay_touch_prefs(tenant_id);
+        CREATE TABLE IF NOT EXISTS stay_touch_sends (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          kind VARCHAR(16) NOT NULL,
+          period_key VARCHAR(40) NOT NULL,
+          subject TEXT,
+          open_token VARCHAR(64),
+          sent_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          UNIQUE (user_id, kind, period_key)
+        );
+        CREATE INDEX IF NOT EXISTS idx_stay_touch_sends_tenant ON stay_touch_sends(tenant_id, sent_at DESC);
+        CREATE TABLE IF NOT EXISTS stay_touch_templates (
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          agent_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          kind VARCHAR(16) NOT NULL,
+          subject TEXT NOT NULL,
+          body TEXT NOT NULL,
+          approved_at TIMESTAMPTZ,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (agent_id, kind)
+        );
+        CREATE INDEX IF NOT EXISTS idx_stay_touch_templates_tenant ON stay_touch_templates(tenant_id);
+        CREATE TABLE IF NOT EXISTS seller_intent (
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+          score INTEGER NOT NULL DEFAULT 0,
+          reasons JSONB NOT NULL DEFAULT '[]'::jsonb,
+          computed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          fub_pushed_at TIMESTAMPTZ,
+          fub_pushed_score INTEGER
+        );
+        CREATE INDEX IF NOT EXISTS idx_seller_intent_tenant ON seller_intent(tenant_id, score DESC);
+        CREATE TABLE IF NOT EXISTS seller_plans (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          user_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+          agent_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          home_profile_id INTEGER REFERENCES home_profiles(id) ON DELETE SET NULL,
+          origin VARCHAR(8) NOT NULL DEFAULT 'client',
+          status VARCHAR(16) NOT NULL DEFAULT 'preparing',
+          address_line VARCHAR(255),
+          city VARCHAR(100),
+          postal_code VARCHAR(16),
+          listing_key VARCHAR(64),
+          list_price INTEGER,
+          cma_requested_at TIMESTAMPTZ,
+          cma_note TEXT,
+          cma_ready_at TIMESTAMPTZ,
+          cma_summary TEXT,
+          checklist JSONB NOT NULL DEFAULT '[]'::jsonb,
+          timeline JSONB NOT NULL DEFAULT '[]'::jsonb,
+          closing_checklist JSONB NOT NULL DEFAULT '[]'::jsonb,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_seller_plans_tenant ON seller_plans(tenant_id, agent_id);
+        CREATE TABLE IF NOT EXISTS seller_showing_feedback (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          plan_id INTEGER NOT NULL REFERENCES seller_plans(id) ON DELETE CASCADE,
+          shown_on DATE,
+          interest VARCHAR(8),
+          feedback TEXT NOT NULL,
+          created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_seller_feedback_plan ON seller_showing_feedback(tenant_id, plan_id);
+        CREATE TABLE IF NOT EXISTS seller_offers (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          plan_id INTEGER NOT NULL REFERENCES seller_plans(id) ON DELETE CASCADE,
+          label VARCHAR(80),
+          price INTEGER NOT NULL,
+          financing VARCHAR(40),
+          down_payment_pct NUMERIC(5,2),
+          earnest_money INTEGER,
+          seller_credit INTEGER,
+          close_date DATE,
+          contingencies TEXT,
+          note TEXT,
+          expires_at TIMESTAMPTZ,
+          status VARCHAR(12) NOT NULL DEFAULT 'active',
+          created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_seller_offers_plan ON seller_offers(tenant_id, plan_id);
+        ALTER TABLE tour_requests ADD COLUMN IF NOT EXISTS co_buyer JSONB;
+      `);
+      // Rows hang off a person or a seller plan: they take that tenant.
+      for (const table of ['client_closings', 'stay_touch_prefs', 'stay_touch_sends', 'seller_intent', 'seller_plans']) {
+        await client.query(`
+          DROP TRIGGER IF EXISTS ${table}_tenant ON ${table};
+          CREATE TRIGGER ${table}_tenant BEFORE INSERT ON ${table}
+            FOR EACH ROW EXECUTE FUNCTION tenant_from_parent('users', 'user_id');
+        `);
+      }
+      await client.query(`
+        DROP TRIGGER IF EXISTS stay_touch_templates_tenant ON stay_touch_templates;
+        CREATE TRIGGER stay_touch_templates_tenant BEFORE INSERT ON stay_touch_templates
+          FOR EACH ROW EXECUTE FUNCTION tenant_from_parent('users', 'agent_id');
+      `);
+      for (const table of ['seller_showing_feedback', 'seller_offers']) {
+        await client.query(`
+          DROP TRIGGER IF EXISTS ${table}_tenant ON ${table};
+          CREATE TRIGGER ${table}_tenant BEFORE INSERT ON ${table}
+            FOR EACH ROW EXECUTE FUNCTION tenant_from_parent('seller_plans', 'plan_id');
+        `);
+      }
+      await client.query('RELEASE SAVEPOINT p5_client_life');
+    } catch (lifeErr) {
+      await client.query('ROLLBACK TO SAVEPOINT p5_client_life');
+      console.error('client life migration skipped:', lifeErr.message);
+    }
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {

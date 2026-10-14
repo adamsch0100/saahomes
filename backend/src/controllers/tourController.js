@@ -22,6 +22,7 @@ import { resolveUser } from './savedHomesController.js';
 import { reportLeadToBoard } from '../services/boardLeadCount.js';
 import { tenantIdOf, siteUrlFor } from '../services/tenantContext.js';
 import { brandFor, isHomeTenant } from '../services/brand.js';
+import { notifyAgent } from '../services/agentNotice.js';
 
 const SITE = (process.env.SITE_URL || 'https://saahomes.com').replace(/\/$/, '');
 const MAX_WINDOWS = 3;
@@ -79,6 +80,16 @@ async function loadStops(pool, keys) {
   });
 }
 
+/** Optional person joining the tour: { name, email }. null when absent, false when invalid. */
+export function cleanCoBuyer(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const name = String(raw.name || '').trim().slice(0, 120) || null;
+  const email = String(raw.email || '').trim().toLowerCase().slice(0, 255) || null;
+  if (!name && !email) return null;
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return false;
+  return { name, email };
+}
+
 const publicPlan = (plan) => ({
   ...plan,
   stops: plan.stops.map(({ lat, lng, ...s }) => s),
@@ -116,6 +127,8 @@ export const requestTour = async (req, res) => {
       return res.status(400).json({ success: false, error: 'Add a phone number so your agent can confirm the tour.' });
     }
     const note = String(req.body?.note || '').trim().slice(0, 1000) || null;
+    const coBuyer = cleanCoBuyer(req.body?.co_buyer);
+    if (coBuyer === false) return res.status(400).json({ success: false, error: 'Check the email of the person coming with you.' });
 
     const pool = getPool();
     const stops = await loadStops(pool, keys);
@@ -132,6 +145,7 @@ export const requestTour = async (req, res) => {
       `Estimated ${plan.total_minutes} minutes including about ${plan.drive_minutes} minutes of driving.`,
       `Times that work: ${windowText}`,
       note ? `Note from the buyer: ${note}` : null,
+      coBuyer ? `Coming along: ${[coBuyer.name, coBuyer.email].filter(Boolean).join(', ')}` : null,
     ].filter(Boolean).join('\n');
     const summary = `Tour of ${plan.stops.length} home${plan.stops.length === 1 ? '' : 's'}: ${plan.stops.map((s) => s.address.split(',')[0]).join(' → ')}`;
 
@@ -147,6 +161,9 @@ export const requestTour = async (req, res) => {
       [user.tenant_id || 1, user.id, user.household_id || null, plan.stops.map((s) => s.listing_key),
         JSON.stringify(windows), note, plan.total_minutes, showing.rows[0].id]
     );
+    if (coBuyer) {
+      await pool.query('UPDATE tour_requests SET co_buyer = $1::jsonb WHERE id = $2', [JSON.stringify(coBuyer), tour.id]).catch(() => {});
+    }
 
     recordStreamEvent({
       type: 'tour_request',
@@ -167,6 +184,16 @@ export const requestTour = async (req, res) => {
     import('../services/agentCockpit.js')
       .then(({ refreshLeadLifecycle }) => refreshLeadLifecycle(user.id, pool))
       .catch(() => {});
+    // The agent hears about it right away (email, and a text once texting is set up).
+    notifyAgent({
+      client: user,
+      kind: 'tour_request',
+      title: `${user.name || user.email} asked for a tour`,
+      lines: [summary, `Times that work: ${windowText}`, note ? `Note: ${note}` : null,
+        coBuyer ? `Coming along: ${[coBuyer.name, coBuyer.email].filter(Boolean).join(', ')}` : null, `Phone: ${phoneDigits}`],
+      dueNow: true,
+      pool,
+    }).catch(() => {});
 
     if (user.household_id) {
       const { rows: others } = await pool.query(

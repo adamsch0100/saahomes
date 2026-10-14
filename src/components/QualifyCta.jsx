@@ -1,4 +1,5 @@
 import React from "react";
+import { useBrokerageBrand } from "../context/TenantContext.jsx";
 
 const GOLD = "var(--brand-accent)";
 
@@ -17,6 +18,7 @@ export default function QualifyCta({
   headline = "Not sure if you qualify?",
   subtext = "It's a quick conversation — tell us a little about your situation and we'll walk you through your options. No pressure, no obligation.",
 }) {
+  const bb = useBrokerageBrand();
   const openChat = () => {
     const question =
       chatQuestion ||
@@ -46,10 +48,24 @@ export default function QualifyCta({
           </a>
         </div>
         <p className="mt-4 text-xs text-gray-500">
-          Chat is answered instantly by Nadia, our AI assistant — or call{" "}
-          <a href="tel:+19709991407" className="underline hover:text-gray-300">
-            (970) 999-1407
-          </a>
+          Chat is answered instantly by Nadia, our AI assistant
+          {bb ? (
+            bb.phone ? (
+              <>
+                {" "}— or call{" "}
+                <a href={bb.tel} className="underline hover:text-gray-300">
+                  {bb.phone}
+                </a>
+              </>
+            ) : null
+          ) : (
+            <>
+              {" "}— or call{" "}
+              <a href="tel:+19709991407" className="underline hover:text-gray-300">
+                (970) 999-1407
+              </a>
+            </>
+          )}
           .
         </p>
       </div>

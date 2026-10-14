@@ -3,7 +3,7 @@ import { useParams, Link, useSearchParams } from "react-router-dom";
 import SEO from "../components/SEO";
 import QualifyCta from "../components/QualifyCta";
 import SaveSearchModal from "../components/SaveSearchModal";
-import ScheduleShowingModal from "../components/ScheduleShowingModal";
+import BookTourModal from "../components/BookTourModal";
 import { CITY_HOMES } from "../data/cityHomesData";
 import {
   formatPrice,
@@ -733,7 +733,7 @@ export default function ListingDetailPage() {
 
       {/* Email deep-link host for ?schedule=1 (trigger hidden; modal auto-opens). */}
       {autoOpenSchedule && listing && (
-        <ScheduleShowingModal listing={listing} autoOpen hideTrigger />
+        <BookTourModal listing={listing} autoOpen hideTrigger />
       )}
     </>
   );

@@ -42,6 +42,10 @@ export const EVENT_TYPES = new Set([
   'alert_open',
   'alert_click',
   'consent_changed',
+  // Client life after the search (phase 5)
+  'seller_question',
+  'seller_plan_started',
+  'cma_request',
 ]);
 
 /** Types a browser may send on its own (everything else is recorded server-side). */

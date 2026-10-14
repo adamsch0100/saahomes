@@ -4,6 +4,7 @@ import SEO from "../components/SEO";
 import HomeValueChart from "../components/HomeValueChart";
 import RecentClosedSales from "../components/RecentClosedSales";
 import CompsWorkbench from "../components/CompsWorkbench";
+import SellerDashboard from "../components/seller/SellerDashboard";
 import { marketPack } from "../data/marketPack";
 import { useBrokerageBrand } from "../context/TenantContext.jsx";
 import { formatPrice } from "../utils/listingHelpers.js";
@@ -89,6 +90,11 @@ export default function MyHomePage() {
     : SELLER_ACTIONS;
   const token = searchParams.get("token") || "";
   const unsub = searchParams.get("unsubscribe") === "1";
+  const stopKind = searchParams.get("stop") || "";
+  const [mode, setMode] = useState(searchParams.get("mode") === "seller" ? "seller" : "value");
+  const [sellerPlan, setSellerPlan] = useState(undefined); // undefined loading | null none | plan
+  const [stay, setStay] = useState(null);
+  const [startingPlan, setStartingPlan] = useState(false);
 
   const [session, setSession] = useState(null); // null loading | false guest | data
   const [homes, setHomes] = useState([]);
@@ -160,6 +166,80 @@ export default function MyHomePage() {
       }
     })();
   }, [unsub, activeId, session, token]);
+
+  // Selling plan and the "stay in touch" emails, once signed in.
+  useEffect(() => {
+    if (!session || session === false) return;
+    fetch(`${API_BASE}/api/seller${authQ}`, { credentials: "same-origin" })
+      .then((r) => r.json())
+      .then((d) => setSellerPlan(d?.success ? d.data : null))
+      .catch(() => setSellerPlan(null));
+    fetch(`${API_BASE}/api/stay/me${authQ}`, { credentials: "same-origin" })
+      .then((r) => r.json())
+      .then((d) => setStay(d?.success ? d.data : null))
+      .catch(() => setStay(null));
+  }, [session, authQ]);
+
+  // One-click unsubscribe from one kind of email (?stop=anniversary etc.)
+  useEffect(() => {
+    if (!stopKind || !session || session === false) return;
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/stay/me${authQ}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({ kind: stopKind, on: false }),
+        });
+        const d = await res.json().catch(() => ({}));
+        if (res.ok && d.success) {
+          setStay(d.data);
+          const label = d.data.kinds?.find((k) => k.kind === stopKind)?.label;
+          setToast(`Done. You won't get ${label ? `the ${label.toLowerCase()}` : "those emails"} anymore. You can turn it back on below.`);
+        }
+      } catch {
+        /* non-blocking */
+      }
+    })();
+  }, [stopKind, session, authQ]);
+
+  const setStayKind = async (kind, on) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/stay/me${authQ}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify(kind ? { kind, on } : { target_rate: on }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok || !d.success) throw new Error(d.error || "Could not save.");
+      setStay(d.data);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const startSelling = async () => {
+    setStartingPlan(true);
+    setError("");
+    try {
+      const res = await fetch(`${API_BASE}/api/seller/start${authQ}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ home_profile_id: activeId || undefined }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok || !d.success) throw new Error(d.error || "Could not start your plan.");
+      setSellerPlan(d.data);
+      setMode("seller");
+      setToast("Your selling plan is ready. Your agent has been told.");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setStartingPlan(false);
+    }
+  };
 
   const loadValue = useCallback(
     async (id) => {
@@ -483,6 +563,66 @@ export default function MyHomePage() {
                 </p>
               )}
 
+              {/* Home value / Selling */}
+              <div className="mt-5 inline-flex rounded-xl border border-gray-200 bg-white p-1 shadow-sm" role="tablist" aria-label="My Home view">
+                {[
+                  ["value", "Home value"],
+                  ["seller", sellerPlan ? "Selling" : "Thinking of selling?"],
+                ].map(([k, label]) => (
+                  <button
+                    key={k}
+                    type="button"
+                    role="tab"
+                    aria-selected={mode === k}
+                    onClick={() => setMode(k)}
+                    className={`min-h-[40px] px-4 rounded-lg text-sm font-semibold transition-colors ${
+                      mode === k ? "bg-black text-white" : "text-gray-700 hover:text-black"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {mode === "seller" && (
+                sellerPlan ? (
+                  <SellerDashboard
+                    plan={sellerPlan}
+                    token={token}
+                    onPlan={setSellerPlan}
+                    agentLine={
+                      sellerPlan.agent
+                        ? `Your agent: ${[sellerPlan.agent.name, sellerPlan.agent.phone].filter(Boolean).join(" · ")}`
+                        : bb
+                          ? `Questions? ${[bb.agentName || bb.name, bb.phone].filter(Boolean).join(" · ")}`
+                          : `Questions? Adam & Mandi Schwartz · ${AGENT_PHONE}`
+                    }
+                  />
+                ) : sellerPlan === null ? (
+                  <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm">
+                    <h2 className="text-xl font-bold text-gray-900">Thinking of selling?</h2>
+                    <p className="mt-2 text-sm text-gray-600 leading-relaxed max-w-xl">
+                      Start a selling plan: ask for a free market analysis, see what&apos;s worth fixing (and what to
+                      skip), and follow every step here, from photos to closing. No commitment, and your agent
+                      only reaches out to help.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={startSelling}
+                      disabled={startingPlan}
+                      className="mt-5 w-full sm:w-auto min-h-[48px] px-6 rounded-lg text-sm font-bold disabled:opacity-60"
+                      style={{ backgroundColor: GOLD, color: "var(--brand-on-accent-ink)" }}
+                    >
+                      {startingPlan ? "Starting…" : "I'm thinking of selling"}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mt-6 h-40 rounded-2xl border border-gray-200 bg-white animate-pulse" />
+                )
+              )}
+
+              {mode === "value" && (
+              <>
               {/* Home switcher */}
               {homes.length > 1 && (
                 <div className="mt-5 flex flex-wrap gap-2">
@@ -901,6 +1041,62 @@ export default function MyHomePage() {
                     </form>
                   </details>
                 </div>
+              )}
+              </>
+              )}
+
+              {/* Stay in touch emails (after a closing) */}
+              {stay?.has_closing && stay.kinds?.length > 0 && (
+                <section id="emails" className="mt-8 rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm scroll-mt-24">
+                  <h2 className="text-lg font-bold text-gray-900">Your emails</h2>
+                  <p className="mt-1 text-sm text-gray-500">A few notes a year about your home. Turn off any you don&apos;t want.</p>
+                  <ul className="mt-4 divide-y divide-gray-100">
+                    {stay.kinds.map((k) => (
+                      <li key={k.kind} className="flex items-center justify-between gap-3 py-3">
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-gray-900">{k.label}</p>
+                          {k.off_by_agent && <p className="text-xs text-gray-500">Paused by your agent</p>}
+                          {k.kind === "rate" && !stay.rate_source && <p className="text-xs text-gray-500">Starts once rate data is connected</p>}
+                        </div>
+                        <label className="relative inline-flex shrink-0 cursor-pointer items-center min-h-[44px]">
+                          <input
+                            type="checkbox"
+                            className="peer sr-only"
+                            checked={!!k.on}
+                            disabled={k.off_by_agent || !stay.stay_in_touch}
+                            onChange={(e) => setStayKind(k.kind, e.target.checked)}
+                            aria-label={`${k.label} emails`}
+                          />
+                          <span className="h-6 w-11 rounded-full bg-gray-300 transition-colors peer-checked:bg-[color:var(--brand-accent)] peer-disabled:opacity-50 peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-[color:var(--brand-accent)]" />
+                          <span className="absolute left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5" />
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                  {stay.rate_source && stay.kinds.some((k) => k.kind === "rate" && k.on) && (
+                    <form
+                      className="mt-3 flex flex-wrap items-end gap-2"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        setStayKind(null, e.currentTarget.elements.target_rate.value);
+                        setToast("Saved. We'll email you if rates reach it.");
+                      }}
+                    >
+                      <label className="text-sm text-gray-700">
+                        Tell me when 30-year rates reach
+                        <input
+                          name="target_rate"
+                          inputMode="decimal"
+                          defaultValue={stay.target_rate ?? ""}
+                          placeholder="5.5"
+                          className="ml-2 w-20 min-h-[40px] rounded-lg border border-gray-300 px-2 text-sm"
+                        />
+                        <span className="ml-1">%</span>
+                      </label>
+                      <button type="submit" className="min-h-[40px] px-4 rounded-lg border border-gray-300 text-sm font-semibold">Save</button>
+                    </form>
+                  )}
+                </section>
               )}
             </>
           )}

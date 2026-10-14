@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { adminLogin, getSubmissions, getStats, getEmailAbStats, getAccountMe } from '../utils/api.js';
 import ClientSearchesManager from '../components/admin/ClientSearchesManager.jsx';
 import AgentCockpit from '../components/admin/AgentCockpit.jsx';
+import ClientLifePanel from '../components/agent/ClientLifePanel.jsx';
 import AgentsManager from '../components/admin/AgentsManager.jsx';
 import SEO from '../components/SEO';
 import FunnelView from '../components/admin/FunnelView.jsx';
@@ -396,7 +397,10 @@ export default function AdminPage() {
           </div>
 
           {tab === 'cockpit' ? (
-            <AgentCockpit token={token} />
+            <div className="space-y-6">
+              <AgentCockpit token={token} />
+              <ClientLifePanel token={token} />
+            </div>
           ) : tab === 'searches' ? (
             <ClientSearchesManager token={token} />
           ) : tab === 'agents' ? (

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { formatPrice } from "../utils/listingHelpers.js";
 import { getCityHomesPath } from "../data/cityHomesData";
+import { useBrokerageBrand } from "../context/TenantContext.jsx";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -14,6 +15,7 @@ const API_BASE = (() => {
  * Only shows real computed aggregates — never invents numbers.
  */
 export default function CityStatsBand({ city, className = "", compact = false }) {
+  const bb = useBrokerageBrand();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(Boolean(city));
 
@@ -99,7 +101,7 @@ export default function CityStatsBand({ city, className = "", compact = false })
             {city} market snapshot
           </h2>
           <p className="text-xs text-gray-500 mt-0.5">
-            Live from active SAA Homes listings — verified inventory data only.
+            {bb ? "Live from active listings" : "Live from active SAA Homes listings"} — verified inventory data only.
           </p>
         </div>
         <Link
