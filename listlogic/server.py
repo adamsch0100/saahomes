@@ -4382,6 +4382,10 @@ async def save_fingerprint_contact(run_id: str, request: Request):
         email_cfg["seller_email"] = email
         lock["email"] = email_cfg
     (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
+    if name or email:
+        import board_intake
+
+        board_intake.report_to_board("lead", "fingerprint seller contact")
     return {"ok": True, "lock": lock}
 
 

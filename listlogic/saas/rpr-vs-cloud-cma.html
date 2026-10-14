@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WHGZQDZ6ZG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-WHGZQDZ6ZG');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RPR vs Cloud CMA (2026) — Honest Comparison for Listing Agents · ListLogic</title>
+<meta name="description" content="RPR vs Cloud CMA, honestly: RPR is included with NAR membership, Cloud CMA runs about $49/month or free through many MLSs. What both leave out of the listing appointment — and the price × odds × supply conversation that wins it.">
+<link rel="canonical" href="https://listlogic.homes/saas/rpr-vs-cloud-cma.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/saas/ll.css">
+<style>
+.hero-mini {
+  background: radial-gradient(900px 400px at 80% -20%, #1a5f9e33, transparent 60%),
+              linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; padding: 64px 0 72px; text-align: center;
+}
+.hero-mini h1 { font-family: 'Fraunces', serif; font-size: clamp(1.9rem, 4vw, 2.7rem); letter-spacing: -0.02em; margin-bottom: 12px; }
+.hero-mini h1 em { font-style: normal; color: var(--accent-2); }
+.hero-mini p { color: #c8d2e0; max-width: 660px; margin: 0 auto; font-size: 1.02rem; }
+.hero-mini .eyebrow { justify-content: center; }
+
+.wedge-band {
+  margin: -34px auto 0; position: relative; z-index: 2;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 22px 26px; max-width: 860px;
+}
+.wedge-band strong { font-family: 'Fraunces', serif; font-size: 1.2rem; display: block; margin-bottom: 6px; }
+.wedge-band p { color: var(--muted); font-size: 0.95rem; margin: 0; }
+
+.section { padding: 64px 0 0; }
+.section h2 { font-family: 'Fraunces', serif; font-size: clamp(1.4rem, 2.5vw, 1.9rem); letter-spacing: -0.015em; margin-bottom: 10px; }
+.section .sub { color: var(--muted); max-width: 680px; margin-bottom: 28px; }
+
+.cmp-table-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+table.cmp { width: 100%; border-collapse: collapse; min-width: 720px; }
+table.cmp th, table.cmp td { padding: 14px 18px; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.cmp th { background: #f1ece1; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; }
+table.cmp th.win { background: var(--navy); color: #fff; }
+table.cmp tr:last-child th, table.cmp tr:last-child td { border-bottom: none; }
+table.cmp td.rowhead { font-weight: 700; }
+table.cmp .yes { color: var(--ok); font-weight: 700; }
+table.cmp .no { color: var(--muted); }
+table.cmp .lead { color: var(--navy); font-weight: 800; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow-sm); }
+.card h3 { font-family: 'Fraunces', serif; font-size: 1.15rem; margin-bottom: 8px; }
+.card p { color: var(--muted); font-size: 0.92rem; }
+.card .kicker { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal); margin-bottom: 6px; }
+
+.faq-ll details { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 16px 20px; margin-bottom: 10px; }
+.faq-ll summary { font-weight: 700; cursor: pointer; }
+.faq-ll p { color: var(--muted); font-size: 0.92rem; margin: 10px 0 0; }
+
+.cta-band {
+  background: linear-gradient(180deg, #0b1220 0%, #101a2e 100%);
+  color: #fff; text-align: center; padding: 64px 0; margin-top: 64px;
+}
+.cta-band h2 { font-family: 'Fraunces', serif; font-size: clamp(1.5rem, 3vw, 2.1rem); margin-bottom: 10px; }
+.cta-band p { color: #c8d2e0; max-width: 560px; margin: 0 auto 26px; }
+.btn-trial { background: var(--accent-2); color: #1a1200; }
+
+.note { font-size: 0.82rem; color: var(--muted); max-width: 720px; margin: 26px auto 0; text-align: center; }
+
+@media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is RPR free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes — RPR (REALTORS Property Resource) is included with NAR membership at no additional cost. It's a serious data and research tool: comps, property history, reports, market analytics. The trade-off is that it's agent-side research output — a data-dense report, not a seller-facing pricing conversation."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much does Cloud CMA cost?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Lone Wolf doesn't publish a price on the Cloud CMA product page — you get a trial and a buy link. Third-party software listings put Cloud CMA at about $49 per month or $499 per year. Before paying anything, check your MLS: many MLSs buy Cloud CMA association-wide and provide it to members at no charge."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "RPR vs Cloud CMA — which should I use for listing appointments?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "If your MLS gives you Cloud CMA at no charge, use it for the branded report and live presentation mode, and use RPR for deep research — that stack costs $0 beyond your NAR dues. If you're paying for Cloud CMA and building reports weekly, the subscription is easy to justify on volume. Either way, both tools answer 'what did homes sell for?' Neither shows the seller what happens to their odds of selling if they stretch the price — that's a separate decision layer."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use RPR or Cloud CMA together with ListLogic?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Keep your data source — RPR research or Cloud CMA's live MLS pull — and use ListLogic for the pricing conversation: Search any market or upload any MLS export, and you get an interactive price × odds × supply story for the seller, plus print and a listing flipbook leave-behind."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does ListLogic need a live MLS feed?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. ListLogic works two ways: Search any market nationwide, or upload an MLS export (CSV or TXT) from any MLS — Matrix, RESO-style headers and everyday synonyms all map. That's the product's data path by design, so it works in any market with or without an MLS integration."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does ListLogic cost?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The sample demo is free with no account. To generate your own presentation: a 7-day trial, then $39/month (annual $390), or $20 for a single presentation. You pay only when you unlock a custom presentation — setting up your market is free."
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<nav class="ll-nav">
+  <div class="container ll-nav-inner">
+    <a href="index.html" class="ll-brand">
+      <img src="/saas/listlogic-logo.png" alt="ListLogic" class="ll-brand-logo">
+      
+    </a>
+    <button type="button" class="ll-nav-toggle" id="llNavToggle" aria-label="Menu" aria-expanded="false">☰</button>
+    <div class="ll-nav-links" id="llNavLinks">
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#deliverables">What sellers get</a>
+      <a href="/saas/pricing.html">Pricing</a>
+      <a href="faq.html">FAQ</a>
+      <a href="/saas/login.html" class="ll-auth-guest">Sign in</a>
+      <a href="/saas/signup.html" class="btn btn-trial ll-auth-guest" style="padding:10px 18px;font-size:0.86rem">Create account</a>
+    </div>
+  </div>
+</nav>
+<script>
+(function(){var t=document.getElementById('llNavToggle'),l=document.getElementById('llNavLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.setAttribute('aria-expanded',o?'true':'false');t.textContent=o?'✕':'☰';});l.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){l.classList.remove('open');t.setAttribute('aria-expanded','false');t.textContent='☰';});});})();
+</script>
+<script src="/saas/nav-auth.js"></script>
+
+<section class="hero-mini">
+  <div class="container">
+    <div class="eyebrow">RPR vs Cloud CMA</div>
+    <h1>RPR vs Cloud CMA: the honest comparison for <em>listing agents</em></h1>
+    <p>Short version: RPR is deep research that ships with your NAR membership. Cloud CMA is the polished, live-MLS report — often already paid for by your MLS. Here's what each one actually does in a listing appointment, and the one question both leave you to answer alone.</p>
+  </div>
+</section>
+
+<div class="container">
+  <div class="wedge-band">
+    <strong>Both answer "what did homes sell for?"</strong>
+    <p>Neither one shows a seller what happens if you stretch the price. That question — price × odds × supply — is where listing appointments in a soft market are actually won or lost, and it's the gap this comparison is really about.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <h2>What each tool actually is</h2>
+    <p class="sub">Based on publicly available product information — both are good tools, and they solve different problems.</p>
+    <div class="two-col">
+      <div class="card">
+        <div class="kicker">RPR</div>
+        <h3>Research depth, at no extra cost</h3>
+        <p>RPR (REALTORS® Property Resource) is included with NAR membership at no additional cost and is available only to REALTORS®. It layers MLS data with public records, tax history, and market analytics, and produces reports — including a seller-ready Seller's Report. Its 2026 AI-assisted CMA scores comps for relevance and lets you tighten the criteria before the pull. If you haven't logged in lately, it's better than its old reputation.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Cloud CMA</div>
+        <h3>The category standard for the packet</h3>
+        <p>Cloud CMA (Lone Wolf) pulls live MLS data into branded CMA reports, buyer tours, and seller net sheets. Its live presentation mode turns the report into something you can run on screen with the seller following along — which is why it became the default. You pick the comps yourself; the tool makes them look professional.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">What RPR costs</div>
+        <h3>$0 beyond your dues</h3>
+        <p>RPR is included with NAR membership at no additional cost. The real price is workflow: the output is data-dense and agent-side, so most agents reformat it before a seller ever sees it.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">What Cloud CMA costs</div>
+        <h3>Check your MLS first</h3>
+        <p>Lone Wolf doesn't publish a price on the product page. Third-party software listings put Cloud CMA at roughly <strong>$49/month or $499/year</strong>. But many MLSs buy it association-wide and hand it to members at no charge — so the honest first step is checking your MLS, and only then deciding whether the presentation mode is worth the subscription.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>RPR vs Cloud CMA vs ListLogic, side by side</h2>
+    <p class="sub">Where each one is strong, honestly. RPR wins on data depth and price. Cloud CMA wins on packet polish and live MLS convenience. ListLogic wins on the pricing decision itself.</p>
+    <div class="cmp-table-wrap">
+      <table class="cmp">
+        <thead>
+          <tr>
+            <th style="width:30%">Capability</th>
+            <th>RPR</th>
+            <th>Cloud CMA</th>
+            <th class="win">ListLogic</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td class="rowhead">Cost to start</td>
+          <td><span class="yes">$0 with NAR membership</span></td>
+          <td><span class="yes">$0 via many MLSs; ~$49/mo list</span></td>
+          <td><span class="yes">Free demo, then $20 one-shot or $39/mo</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Live MLS data pull</td>
+          <td><span class="yes">Yes (MLS + public records)</span></td>
+          <td><span class="yes">Yes — live MLS feeds</span></td>
+          <td><span class="no">No live feed — Search any market or upload any MLS export</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Comparable sales &amp; comp selection</td>
+          <td><span class="yes">Yes — AI-scored comps (2026)</span></td>
+          <td><span class="yes">Yes — you select the comps</span></td>
+          <td><span class="lead">Yes — custom-fit competitive set for the subject home</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Client-facing branded report</td>
+          <td><span class="no">Functional, data-dense</span></td>
+          <td><span class="yes">Yes — polished, the category benchmark</span></td>
+          <td><span class="lead">Yes — interactive story, print, and flipbook</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Live presentation mode</td>
+          <td><span class="no">No</span></td>
+          <td><span class="yes">Yes</span></td>
+          <td><span class="lead">Yes — Live Story with what-if sliders</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Seller-facing price × odds × supply</td>
+          <td><span class="no">No</span></td>
+          <td><span class="no">No — comps-based analysis</span></td>
+          <td><span class="lead">Yes — every price shows its odds and supply pressure</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Shows what happens if the seller stretches the price</td>
+          <td><span class="no">No</span></td>
+          <td><span class="no">No</span></td>
+          <td><span class="lead">Yes — visible live, in the appointment</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Market keeps updating after they list</td>
+          <td><span class="yes">Reports on demand</span></td>
+          <td><span class="yes">Follow-up value updates on higher tiers</span></td>
+          <td><span class="lead">Yes — the living Market Fingerprint on the same market</span></td>
+        </tr>
+        <tr>
+          <td class="rowhead">Availability</td>
+          <td><span class="no">REALTORS® only</span></td>
+          <td><span class="yes">Any agent (paid, or via your MLS)</span></td>
+          <td><span class="lead">Any agent, any MLS</span></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>RPR vs Cloud CMA: how to actually choose</h2>
+    <div class="two-col">
+      <div class="card">
+        <div class="kicker">If your MLS includes Cloud CMA</div>
+        <h3>Keep it. Seriously.</h3>
+        <p>Free through your MLS plus free-with-dues RPR covers the pricing analysis for $0. There's no reason to pay for a replacement that does the same job. Spend the money only where the appointment is actually failing.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">If you're paying for Cloud CMA</div>
+        <h3>Let volume decide</h3>
+        <p>If you build reports every week, the subscription is a rounding error against the listings it supports. If you build a handful of CMAs a year, a fixed monthly line item between uses is worth re-checking — including whether your MLS would hand it to you for free.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">If you lose on price, not on comps</div>
+        <h3>The packet isn't the problem</h3>
+        <p>When a seller is anchored on a portal estimate, a more polished report still reads as an argument. The conversation changes when they see their own odds drop as the price climbs. Neither RPR nor Cloud CMA shows that — comps are history, and the seller is deciding on the future.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">The stack most agents land on</div>
+        <h3>Research anywhere. Decide together.</h3>
+        <p>There's no loyalty oath. Research in RPR or Cloud CMA — then bring ListLogic to the table for the pricing decision: a market customized to the subject home, live what-if odds, print, flipbook, and a seller link that stays current after they list.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Where both leave you exposed in a soft market</h2>
+    <p class="sub">In a soft market the seller's anchor is a portal number, inventory is stacking, and every buyer is cross-shopping price, condition, and location. Comps tell you what already sold. They can't answer the three questions that decide the listing:</p>
+    <div class="two-col">
+      <div class="card">
+        <div class="kicker">The question</div>
+        <h3>What happens at each price?</h3>
+        <p>ListLogic prices against the home's own competitive set — not city-wide averages — and shows, at every list price, the odds of selling in a realistic window and the supply pressure behind those odds. The stretch price stops being an opinion and becomes a visible trade-off.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">The outcome</div>
+        <h3>The seller chooses with you</h3>
+        <p>Overpricing gets discussed while you're in the room instead of after 30 days on market. The seller walks away with the story: interactive Live Story, print listing presentation, listing flipbook, and a living link that shows what listed under and over them. That's the appointment RPR and Cloud CMA were never built to run.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Fair questions, honest answers</h2>
+    <div class="faq-ll">
+      <details>
+        <summary>Is RPR really free?</summary>
+        <p>Yes — RPR is included with NAR membership at no additional cost, for REALTORS® only. The catch is the deliverable: it produces data-dense, agent-side reports, so the seller-facing formatting is on you.</p>
+      </details>
+      <details>
+        <summary>How much does Cloud CMA cost — and can I get it free?</summary>
+        <p>Lone Wolf doesn't publish a price on the product page; third-party software listings put Cloud CMA at about $49/month or $499/year. Many MLSs buy it association-wide and give it to members at no charge. Check your MLS first — for a lot of agents the RPR-vs-Cloud-CMA price debate is already settled at $0.</p>
+      </details>
+      <details>
+        <summary>RPR vs Cloud CMA — which should I use for listing appointments?</summary>
+        <p>If Cloud CMA is free through your MLS, use it for the packet and RPR for the research — that's a complete stack for $0. If you're paying and building reports weekly, Cloud CMA's polish earns its keep. What neither does is show the seller what happens to their odds of selling at a stretched price. That's a separate decision layer — and the one most listings hinge on in a soft market.</p>
+      </details>
+      <details>
+        <summary>Can I use ListLogic alongside RPR or Cloud CMA?</summary>
+        <p>Yes. Keep your data source. ListLogic takes the market from Search or your own MLS export and turns it into the pricing conversation: interactive price × odds × supply on a custom-fit competitive set, plus print and flipbook. <a href="vs-rpr.html">RPR alternative</a> · <a href="vs-cloud-cma.html">Cloud CMA alternative</a>.</p>
+      </details>
+      <details>
+        <summary>What does ListLogic cost?</summary>
+        <p>Free demo → 7-day trial → $39/month (annual $390), or a $20 one-shot for a single presentation. You're not charged to explore the sample or set up your market — only when you unlock a custom presentation.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="container">
+    <h2>Comps are the past. Show them the odds.</h2>
+    <p>Try the free demo — in two minutes you'll see the price × odds × supply curve on a real market. Bring a recent listing and run the same conversation you'd run at the kitchen table.</p>
+    <a href="/demo" class="btn btn-trial btn-lg">Try the free demo</a>
+  </div>
+</section>
+
+<p class="note">RPR is a trademark of the National Association of REALTORS®. Cloud CMA is a product of Lone Wolf Technologies. This comparison is based on publicly available information and our understanding of the product category; pricing and features change — verify what matters to you before switching. ListLogic.</p>
+<p class="note" style="margin-top:8px">Related: <a href="vs-cloud-cma.html">Cloud CMA alternative</a> · <a href="vs-rpr.html">RPR alternative</a> · <a href="/blog/soft-market-listing-presentation-price-odds-supply.html">Why static CMAs lose appointments when sellers are anchored on Zillow</a></p>
+
+<footer class="ll-footer">
+  <div class="container">
+    <div><strong>ListLogic</strong> · Data-driven custom pricing strategy</div>
+    <div><a href="https://saahomes.com">SAA Homes</a> · Schwartz and Associates, Coldwell Banker Realty</div>
+    <div><a href="index.html">Home</a> · <a href="faq.html">FAQ</a> · <a href="/saas/pricing.html">Pricing</a> · <a href="vs-cloud-cma.html">Cloud CMA alternative</a> · <a href="vs-saleswise.html">Saleswise alternative</a> · <a href="interactive-cma-software.html">Interactive CMA software</a> · <a href="mailto:adam@saahomes.com">Contact</a></div>
+  </div>
+</footer>
+
+<script src="/saas/analytics.js"></script>
+<script src="/saas/utm.js"></script>
+</body>
+</html>
