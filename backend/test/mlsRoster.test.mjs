@@ -60,6 +60,29 @@ test('the roster names listings by office and agent MLS id, page by page', { ski
   assert.match(decodeURIComponent(calls[0].url), /ModificationTimestamp[+ ]gt[+ ]2026-10-02T00:00:00.000Z/);
 });
 
+test('a first pull cut short starts over instead of skipping what it missed', { skip }, async () => {
+  const { refreshMlsRoster, rosterNeedsFill } = await import('../src/services/mlsRoster.js');
+  await db.pool.query("DELETE FROM mls_roster_fills; DELETE FROM mls_offices; DELETE FROM mls_members");
+  assert.equal(await rosterNeedsFill({ pool: db.pool }), true);
+  // A restart killed the first pull after one late page of offices.
+  await db.pool.query("INSERT INTO mls_offices (feed, office_mls_id, name, modified_at) VALUES ('ires', 'LATE', 'Late Office', '2026-10-09T00:00:00Z')");
+
+  const urls = [];
+  const fakeFetch = async (url) => {
+    urls.push(decodeURIComponent(String(url)));
+    const value = String(url).includes('/Office')
+      ? [{ OfficeMlsId: 'EARLY', OfficeName: 'Early Office', ModificationTimestamp: '2020-01-01T00:00:00Z' },
+        { OfficeMlsId: 'EARLY', OfficeName: 'Early Office', ModificationTimestamp: '2020-01-01T00:00:00Z' }]
+      : [];
+    return new Response(JSON.stringify({ value }), { status: 200 });
+  };
+  const r = await refreshMlsRoster({ pool: db.pool, fetchImpl: fakeFetch });
+  assert.ok(!urls[0].includes('$filter'), 'no completed pull yet, so no "changed since" filter');
+  assert.equal(r.office.saved, 1, 'a record repeated on a page is saved once');
+  assert.equal((await db.pool.query("SELECT name FROM mls_offices WHERE office_mls_id = 'EARLY'")).rows[0].name, 'Early Office');
+  assert.equal(await rosterNeedsFill({ pool: db.pool }), false);
+});
+
 test('a roster the MLS refuses never breaks anything', { skip }, async () => {
   const { refreshMlsRoster } = await import('../src/services/mlsRoster.js');
   const r = await refreshMlsRoster({ pool: db.pool, fetchImpl: async () => new Response('forbidden', { status: 403 }) });
