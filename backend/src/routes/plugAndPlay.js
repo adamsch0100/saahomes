@@ -17,7 +17,7 @@ import {
   getSetup, patchSetup, confirmEmail, resendConfirm, getEmbeds,
 } from '../controllers/setupController.js';
 import {
-  getBilling, startCheckout, openPortal, stripeWebhook,
+  getBilling, startCheckout, choosePlan, openPortal, stripeWebhook,
 } from '../controllers/billingController.js';
 import { serveEmbedPage, serveEmbedLoader, recordEmbedView } from '../controllers/embedController.js';
 import { fubPeopleCreatedWebhook } from '../controllers/fubWebhookController.js';
@@ -79,6 +79,7 @@ adminRoutes.patch('/setup', ...adminOnly, patchSetup);
 adminRoutes.post('/setup/resend-confirm', ...adminOnly, limiter(60 * 60 * 1000, 5, 'Too many emails. Try again later.'), resendConfirm);
 adminRoutes.get('/billing', ...adminOnly, getBilling);
 adminRoutes.post('/billing/checkout', ...adminOnly, startCheckout);
+adminRoutes.post('/billing/plan', ...adminOnly, choosePlan);
 adminRoutes.post('/billing/portal', ...adminOnly, openPortal);
 adminRoutes.get('/embeds', ...adminOnly, getEmbeds);
 

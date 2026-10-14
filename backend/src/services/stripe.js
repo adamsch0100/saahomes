@@ -9,6 +9,10 @@
  * (STRIPE_PRICE_BROKERAGE_SEAT, or STRIPE_PRICE_SEAT) so the two products
  * never collide.
  *
+ * The plan prices themselves (tiered, by lookup key) are created and kept in
+ * step by stripeSetup.js from STRIPE_SECRET_KEY alone; STRIPE_PRICE_BROKERAGE_SEAT
+ * is only the older single-price fallback.
+ *
  * Without STRIPE_SECRET_KEY nothing here is called: billing shows
  * "Billing isn't set up yet".
  */
@@ -20,8 +24,23 @@ export const STRIPE_APP = 'brokerages';
 const SIGNATURE_TOLERANCE_S = 300;
 
 export const stripeConfigured = () => !!String(process.env.STRIPE_SECRET_KEY || '').trim();
+/** The older single per-seat price, kept as a fallback when the plan prices aren't in Stripe. */
 export const seatPriceId = () => String(process.env.STRIPE_PRICE_BROKERAGE_SEAT || process.env.STRIPE_PRICE_SEAT || '').trim();
-export const billingReady = () => stripeConfigured() && !!seatPriceId();
+
+/** 'live' or 'test' from the key's prefix (sk_live_ / rk_live_), null without a key. */
+export function stripeMode() {
+  const key = String(process.env.STRIPE_SECRET_KEY || '').trim();
+  if (!key) return null;
+  return /^(sk|rk)_live_/.test(key) ? 'live' : 'test';
+}
+
+// Set by stripeSetup.js when every plan price is found in Stripe.
+let plansInStripe = false;
+export const setPlansReady = (ready) => { plansInStripe = !!ready; };
+export const plansReady = () => stripeConfigured() && plansInStripe;
+
+/** Something a brokerage can pay with: the plan prices, or the legacy seat price. */
+export const billingReady = () => stripeConfigured() && (plansInStripe || !!seatPriceId());
 
 /** Stripe's form encoding: nested objects and arrays as key[sub][0]=v. */
 export function formEncode(params, prefix = '', out = new URLSearchParams()) {
@@ -100,7 +119,7 @@ const PRICE_CACHE_MS = 60 * 60 * 1000;
 
 /** The seat price for display ({ amount, currency, interval }), cached an hour; null when unknown. */
 export async function seatPrice() {
-  if (!billingReady()) return null;
+  if (!stripeConfigured() || !seatPriceId()) return null;
   const id = seatPriceId();
   if (priceCache.id === id && Date.now() - priceCache.at < PRICE_CACHE_MS) return priceCache.price;
   try {

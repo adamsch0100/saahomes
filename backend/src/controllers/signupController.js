@@ -3,7 +3,7 @@
  * creates their brokerage, their owner account and a free site address in
  * one step, and lands in their setup with a 14-day free trial.
  *
- *   GET  /api/signup/info        product name, price (from Stripe) and trial
+ *   GET  /api/signup/info        product name, plans and prices, and trial
  *   GET  /api/signup/check?slug= is this site address free?
  *   POST /api/signup             create it all
  *
@@ -19,8 +19,10 @@ import {
 } from '../services/tenantContext.js';
 import { issueAccountLink } from '../services/accountLinks.js';
 import { generateToken } from '../middleware/auth.js';
-import { newTrial, TRIAL_DAYS } from '../services/billing.js';
-import { billingReady, seatPrice } from '../services/stripe.js';
+import { newTrial, planChoice, TRIAL_DAYS } from '../services/billing.js';
+import { plansReady, seatPrice, stripeConfigured } from '../services/stripe.js';
+import { loadPlanCatalog, publicCatalog } from '../services/plans.js';
+import { findPlanPrices } from '../services/stripeSetup.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])$/;
@@ -79,12 +81,16 @@ async function freeSlugFrom(pool, name) {
 /** GET /api/signup/info */
 export const signupInfo = async (req, res) => {
   if (!onHomeHost(req)) return res.status(404).json({ error: 'Not found' });
-  const price = billingReady() ? await seatPrice() : null;
+  if (stripeConfigured()) await findPlanPrices();
+  // The legacy single price only shows while the plan prices aren't in Stripe.
+  const price = plansReady() ? null : await seatPrice();
   return res.json({
     success: true,
     product_name: productName(),
     trial_days: TRIAL_DAYS(),
-    price, // { amount, currency, interval } or null → "Pricing on request"
+    // The plans and their prices, known before any Stripe setup.
+    ...publicCatalog(await loadPlanCatalog()),
+    price, // legacy { amount, currency, interval }, or null
     base_domain: platformBaseDomain() || null,
   });
 };
@@ -117,7 +123,7 @@ async function notifyPlatformOwner(pool, tenant, ownerEmail, city) {
 
 /**
  * POST /api/signup { brokerage_name, name, email, phone, password, city,
- *   slug?, website (hidden: must stay empty), elapsed_ms }
+ *   slug?, plan?, interval?, website (hidden: must stay empty), elapsed_ms }
  */
 export const signup = async (req, res) => {
   if (!onHomeHost(req)) return res.status(404).json({ error: 'Not found' });
@@ -156,7 +162,7 @@ export const signup = async (req, res) => {
     }
     const hash = await bcrypt.hash(password, 10);
     const settings = {
-      billing: newTrial(),
+      billing: newTrial(Date.now(), planChoice(await loadPlanCatalog(), b.plan, b.interval) || {}),
       brand: { name: brokerageName, phone, market_name: city },
       signup: { city, at: new Date().toISOString(), via: 'self_serve' },
       setup: { started_at: null },

@@ -697,6 +697,8 @@ const startServer = async () => {
   import('./services/actionPlans.js').then(({ startActionPlanScheduler }) => startActionPlanScheduler()).catch((e) => console.error('Action plan scheduler failed to start:', e.message));
   // Trials, grace periods and pausing unpaid brokerages (hourly).
   if (process.env.BILLING_SCHEDULER !== 'off') startBillingScheduler();
+  // Stripe from STRIPE_SECRET_KEY alone: plan prices and the webhook, in the background.
+  import('./services/stripeSetup.js').then(({ syncStripeOnBoot }) => syncStripeOnBoot()).catch((e) => console.error('Stripe setup skipped:', e.message));
 };
 
 // Tests import the app without binding a port or starting the MLS scheduler.

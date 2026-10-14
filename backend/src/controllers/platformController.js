@@ -8,6 +8,8 @@ import getPool from '../config/database.js';
 import logger from '../utils/logger.js';
 import { DEFAULT_TENANT_ID, clearTenantCache } from '../services/tenantContext.js';
 import { issueAccountLink } from '../services/accountLinks.js';
+import { loadPlanCatalog } from '../services/plans.js';
+import { tenantPlanLine } from './platformBillingController.js';
 import {
   FEED_STATUSES, DEMO_FEED, clearFeedCache, feedCatalog, feedStatusFor, normalizeServiceAreas,
 } from '../services/feeds.js';
@@ -44,12 +46,14 @@ export const listTenants = async (req, res) => {
     // Each brokerage's billing state (trial, active, grace, paused), for the console.
     const billing = await getPool().query("SELECT id, settings->'billing' AS billing FROM tenants");
     const byId = new Map(billing.rows.map((b) => [Number(b.id), b.billing || null]));
+    const catalog = await loadPlanCatalog();
     for (const row of r.rows) {
       const b = Number(row.id) === DEFAULT_TENANT_ID ? null : byId.get(Number(row.id));
       row.billing = b ? {
         status: b.status || null, suspended: b.suspended === true, trial_ends_at: b.trial_ends_at || null,
         grace_ends_at: b.grace_ends_at || null, current_period_end: b.current_period_end || null,
         seats_billed: b.seats_billed ?? null, has_subscription: !!b.subscription,
+        ...tenantPlanLine(b, catalog, row.agent_count),
       } : null;
     }
     return res.json({ success: true, data: r.rows });
