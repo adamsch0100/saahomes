@@ -9,6 +9,8 @@ import bcrypt from 'bcrypt';
 import { hasTestDatabase, createTestDatabase, startTestServer } from './helpers/testDb.mjs';
 
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret-for-settings';
+// The record brokerages point their domain at: the platform's own.
+process.env.PLATFORM_CNAME_TARGET = 'domains.platform.test';
 
 const PEAK = 'peak-realty.test';
 const SAA = 'saahomes.com';
@@ -186,6 +188,8 @@ test('the brokerage connects its own domain', { skip }, async () => {
   assert.equal(set.status, 200, set.text);
   assert.equal(set.json.data.primary_domain, 'peakhomesco.test');
   assert.equal(set.json.data.dns[0].type, 'CNAME');
+  assert.equal(set.json.data.dns[0].value, 'domains.platform.test');
+  assert.doesNotMatch(JSON.stringify(set.json.data), SAA_STRINGS);
 
   // The new domain now serves Peak, and so do links in Peak's emails.
   const pub = await call('GET', '/tenant', { host: 'peakhomesco.test' });
