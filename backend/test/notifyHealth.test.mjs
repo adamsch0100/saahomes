@@ -11,7 +11,7 @@ import { hasTestDatabase, createTestDatabase, startTestServer } from './helpers/
 const waitFor = async (check, ms = 3000) => {
   const end = Date.now() + ms;
   while (Date.now() < end) {
-    if (check()) return true;
+    if (await check()) return true;
     await new Promise((r) => setTimeout(r, 25));
   }
   return false;
