@@ -66,6 +66,7 @@ import {
   putNotificationPrefs,
 } from '../controllers/notificationsController.js';
 import { getPublicTenant } from '../controllers/tenantDomainController.js';
+import { serveBrandAsset, listPublicAgents } from '../controllers/settingsController.js';
 import {
   validateContactSubmission,
   validateMarketReportSubmission,
@@ -109,6 +110,8 @@ const webformLimiter = rateLimit({
 
 // Public tenant resolution (P-2b) — Host header → branded payload or null
 router.get('/tenant', getPublicTenant);
+router.get('/tenant/asset/:kind', serveBrandAsset);
+router.get('/tenant/agents', listPublicAgents);
 
 // Public API routes
 router.post(

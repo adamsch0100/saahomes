@@ -29,6 +29,16 @@ import {
   verifyAgentDomain,
   deleteAgentDomain,
 } from '../controllers/tenantDomainController.js';
+import {
+  getSettings,
+  patchSettings,
+  uploadBrandAsset,
+  setSiteDomain,
+  checkSiteDomain,
+  setEmailDomain,
+  verifyEmailDomain,
+  sendTestEmail,
+} from '../controllers/settingsController.js';
 import { authenticateToken, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -80,5 +90,15 @@ router.post('/agents/:id/invite', ...adminOnly, resendAgentInvite);
 router.post('/agents/:id/domain', ...adminOnly, setAgentDomain);
 router.post('/agents/:id/domain/verify', ...adminOnly, verifyAgentDomain);
 router.delete('/agents/:id/domain', ...adminOnly, deleteAgentDomain);
+
+// Brokerage settings (owner): brand, domain, email sender, routing, FUB
+router.get('/settings', ...adminOnly, getSettings);
+router.patch('/settings', ...adminOnly, patchSettings);
+router.post('/settings/asset/:kind', ...adminOnly, uploadBrandAsset);
+router.post('/settings/domain', ...adminOnly, setSiteDomain);
+router.post('/settings/domain/check', ...adminOnly, checkSiteDomain);
+router.post('/settings/email-domain', ...adminOnly, setEmailDomain);
+router.post('/settings/email-domain/verify', ...adminOnly, verifyEmailDomain);
+router.post('/settings/test-email', ...adminOnly, sendTestEmail);
 
 export default router;

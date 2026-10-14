@@ -18,6 +18,7 @@ import {
   getAgentBrief,
   setAgentBriefEmail,
 } from '../controllers/agentController.js';
+import { getAgentProfile, patchAgentProfile, uploadAgentPhoto } from '../controllers/settingsController.js';
 import { authenticateToken, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -56,5 +57,10 @@ router.post('/fub/import', ...agentOrAdmin, importAgentFubContacts);
 router.get('/webform/slug', ...agentOrAdmin, getAgentWebformSlug);
 router.post('/webform/slug/regenerate', ...agentOrAdmin, regenerateAgentWebformSlug);
 router.get('/webform/stats', ...agentOrAdmin, getAgentWebformStats);
+
+// Agent's own profile: photo, bio, contact, notifications
+router.get('/profile', ...agentOrAdmin, getAgentProfile);
+router.patch('/profile', ...agentOrAdmin, patchAgentProfile);
+router.post('/profile/photo', ...agentOrAdmin, uploadAgentPhoto);
 
 export default router;

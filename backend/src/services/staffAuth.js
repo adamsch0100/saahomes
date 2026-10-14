@@ -14,6 +14,7 @@ import crypto from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import getPool from '../config/database.js';
 import { generateToken } from '../middleware/auth.js';
+import { tenantById } from './tenantContext.js';
 
 const PLATFORM_KEY = 'platform_owner_2fa';
 const CHALLENGE_TTL = '5m';
@@ -79,6 +80,13 @@ export async function finishLogin(res, { payload, body, pool = getPool() }) {
       expiresIn: CHALLENGE_TTL,
     });
     return res.json({ success: true, needs_2fa: true, challenge });
+  }
+  // A brokerage that requires two-step sign-in: this session can only set it up.
+  if (!account.platform) {
+    const tenant = await tenantById(account.tenant_id, { pool });
+    if (tenant?.settings?.require_2fa === true) {
+      return res.json({ ...body, token: generateToken({ ...payload, setup_2fa: true }), setup_2fa_required: true });
+    }
   }
   return res.json({ ...body, token: generateToken(payload) });
 }

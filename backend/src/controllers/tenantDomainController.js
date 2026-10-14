@@ -9,6 +9,7 @@ import getPool from '../config/database.js';
 import logger from '../utils/logger.js';
 import { tenantIdOf } from '../services/tenantContext.js';
 import { getAgentBrand, publicAgentPayload } from '../services/tenantBrand.js';
+import { publicBrand, isHomeTenant } from '../services/brand.js';
 import {
   normalizeDomain,
   isReservedHost,
@@ -196,6 +197,34 @@ export const deleteAgentDomain = async (req, res) => {
  */
 export const getPublicTenant = async (req, res) => {
   try {
+    const tenant = req.tenant;
+    // Another brokerage's own domain: its brand, never SAA's.
+    if (tenant && !isHomeTenant(tenant)) {
+      let agent = null;
+      if (tenant.agent?.id) {
+        const r = await getPool().query(
+          `SELECT id, name, email, phone, brand_name, brokerage_name, brand_phone, market_key
+           FROM users WHERE id = $1 AND tenant_id = $2`,
+          [tenant.agent.id, tenant.id]
+        );
+        agent = r.rows[0] || null;
+      }
+      const brand = publicBrand(tenant, { agent });
+      return res.json({
+        tenant: {
+          slug: tenant.slug,
+          name: tenant.name,
+          isBrokerage: true,
+          agentName: brand.agentName,
+          brand,
+          marketKey: tenant.market_key || 'noco',
+          marketName: brand.marketName,
+        },
+      });
+    }
+
+    // SAA: an agent's own verified domain gets that agent's brand; SAA's own
+    // domains get null so the site stays exactly as it was.
     const host = req.hostname || req.headers.host || '';
     const row = await resolveTenantByHost(getPool(), host);
     if (!row) {

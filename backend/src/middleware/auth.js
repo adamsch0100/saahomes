@@ -21,6 +21,11 @@ export const authenticateToken = (req, res, next) => {
     if (!tokenMatchesTenant(user, req.tenant)) {
       return res.status(403).json({ error: 'This account belongs to a different brokerage' });
     }
+    // Signed in at a brokerage that requires two-step sign-in, but not set
+    // up yet: only the account pages (where it's set up) work.
+    if (user.setup_2fa === true && !String(req.originalUrl || '').startsWith('/api/account/')) {
+      return res.status(403).json({ error: 'Turn on two-step sign-in to continue', code: '2fa_setup_required' });
+    }
     req.user = user;
     next();
   });
