@@ -56,14 +56,43 @@ const MLS_FIELDS = [
   'ModificationTimestamp', 'PhotosChangeTimestamp', 'MlgCanView',
 ];
 
-// Listing office and agent, for "Listing courtesy of …" (IDX rules). If the
-// feed ever rejects them in $select, sync drops them and carries on.
+// Listing office and agent, for "Listing courtesy of …" (IDX rules). When the
+// feed refuses one of them in $select, sync drops just that field and carries
+// on; names the feed won't give come from the Office/Member roster
+// (services/mlsRoster.js) by MLS id.
 export const OFFICE_FIELDS = ['ListOfficeName', 'ListOfficeMlsId', 'ListAgentFullName', 'ListAgentMlsId'];
-let officeFieldsRejected = false;
+const rejectedOfficeFields = new Set();
 
 /** True when an MLS error body is the feed refusing one of the office/agent fields. */
 export function rejectsOfficeFields(status, body) {
   return status === 400 && OFFICE_FIELDS.some((f) => String(body || '').includes(f));
+}
+
+/** The office/agent fields still worth asking for. */
+export function officeSelectFields() {
+  return OFFICE_FIELDS.filter((f) => !rejectedOfficeFields.has(f));
+}
+
+/**
+ * Record which office/agent field(s) an MLS 400 refused. Returns true when a
+ * field was newly dropped (so the caller retries), false when there's nothing
+ * left to drop.
+ */
+export function dropRejectedOfficeFields(status, body) {
+  if (!rejectsOfficeFields(status, body)) return false;
+  const text = String(body || '');
+  const named = [...text.matchAll(/field '([A-Za-z]+)'/g)].map((m) => m[1]).filter((f) => OFFICE_FIELDS.includes(f));
+  const drop = (named.length ? named : OFFICE_FIELDS.filter((f) => text.includes(f)))
+    .filter((f) => !rejectedOfficeFields.has(f));
+  if (!drop.length) return false;
+  for (const f of drop) rejectedOfficeFields.add(f);
+  console.warn(`⚠️ IRES refused ${drop.join(', ')} — syncing without ${drop.length === 1 ? 'it' : 'them'}`);
+  return true;
+}
+
+/** Test hook: forget refused fields. */
+export function resetOfficeFieldRejections() {
+  rejectedOfficeFields.clear();
 }
 
 // Adam's home-type model (Aug 2026): attached = condos/townhomes/multi-unit,
@@ -316,7 +345,7 @@ async function fetchPage(authToken, offset, { incrementalSince = null, retries =
   } else {
     url.searchParams.set('$filter', "(StandardStatus eq 'Active' or StandardStatus eq 'Active Under Contract' or StandardStatus eq 'Pending' or StandardStatus eq 'Withdrawn' or StandardStatus eq 'Expired')");
   }
-  url.searchParams.set('$select', (officeFieldsRejected ? MLS_FIELDS : [...MLS_FIELDS, ...OFFICE_FIELDS]).join(','));
+  url.searchParams.set('$select', [...MLS_FIELDS, ...officeSelectFields()].join(','));
   url.searchParams.set('$expand', 'Media');
 
   try {
@@ -338,10 +367,8 @@ async function fetchPage(authToken, offset, { incrementalSince = null, retries =
         return fetchPage(authToken, offset, { incrementalSince, retries: retries - 1 });
       }
       const body = await res.text();
-      if (!officeFieldsRejected && rejectsOfficeFields(res.status, body)) {
-        // Retry once without the office/agent fields; listings keep syncing.
-        officeFieldsRejected = true;
-        console.warn(`⚠️ IRES rejected listing office/agent fields — syncing without them: ${body.slice(0, 200)}`);
+      if (dropRejectedOfficeFields(res.status, body)) {
+        // Retry without the refused field; listings keep syncing.
         return fetchPage(authToken, offset, { incrementalSince, retries });
       }
       throw new Error(`IRES fetch failed (${res.status}): ${body}`);
@@ -357,7 +384,7 @@ async function fetchPage(authToken, offset, { incrementalSince = null, retries =
   }
 }
 
-async function getToken() {
+export async function getToken() {
   // Static token mode (MLS Grid IDX token) — no OAuth needed.
   if (process.env.IRES_ACCESS_TOKEN) {
     return process.env.IRES_ACCESS_TOKEN;

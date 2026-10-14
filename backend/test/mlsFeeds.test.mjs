@@ -300,4 +300,14 @@ test('the sync asks for office and agent fields and carries on without them if r
   assert.equal(rejectsOfficeFields(400, 'Invalid $select field: ListAgentMlsId'), true);
   assert.equal(rejectsOfficeFields(400, 'Invalid filter'), false);
   assert.equal(rejectsOfficeFields(500, 'ListOfficeName'), false);
+
+  // IRES's real answer names one field: only that one is dropped.
+  const { dropRejectedOfficeFields, officeSelectFields, resetOfficeFieldRejections } = await import('../src/services/iresSync.js');
+  resetOfficeFieldRejections();
+  const body = '{"error":{"code":400,"message":"Invalid select field","target":"$select","details":[{"code":400,"message":"The field \'ListOfficeName\' does not exist or is unable to be retrieved. Please remove it from'
+    + ' your $select."}]}}';
+  assert.equal(dropRejectedOfficeFields(400, body), true);
+  assert.deepEqual(officeSelectFields(), ['ListOfficeMlsId', 'ListAgentFullName', 'ListAgentMlsId']);
+  assert.equal(dropRejectedOfficeFields(400, body), false, 'nothing new to drop, so no endless retry');
+  resetOfficeFieldRejections();
 });

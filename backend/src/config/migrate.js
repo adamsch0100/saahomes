@@ -1577,6 +1577,36 @@ export const runMigrations = async () => {
       console.error('client life migration skipped:', lifeErr.message);
     }
 
+    // The MLS's office and agent roster, so "Listing courtesy of …" can name
+    // the office when the listing feed only gives its MLS id.
+    await client.query('SAVEPOINT mls_roster');
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS mls_offices (
+          feed VARCHAR(16) NOT NULL,
+          office_mls_id VARCHAR(40) NOT NULL,
+          name VARCHAR(255),
+          modified_at TIMESTAMPTZ,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (feed, office_mls_id)
+        )
+      `);
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS mls_members (
+          feed VARCHAR(16) NOT NULL,
+          member_mls_id VARCHAR(40) NOT NULL,
+          full_name VARCHAR(255),
+          modified_at TIMESTAMPTZ,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (feed, member_mls_id)
+        )
+      `);
+      await client.query('RELEASE SAVEPOINT mls_roster');
+    } catch (rosterErr) {
+      await client.query('ROLLBACK TO SAVEPOINT mls_roster');
+      console.error('mls roster migration skipped:', rosterErr.message);
+    }
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {
