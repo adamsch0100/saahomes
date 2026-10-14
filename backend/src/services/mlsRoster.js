@@ -13,7 +13,7 @@ import getPool from '../config/database.js';
 import { getToken } from './iresSync.js';
 
 const PAGE = 1000;
-const MAX_PAGES = 60;
+const MAX_PAGES = 200;
 const PAUSE_MS = 700; // same pace as the listing sync
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -47,10 +47,17 @@ async function fetchJson(url, token, fetchImpl) {
   return res.json();
 }
 
-/** Pull one roster resource (incremental from the newest row we hold) into its table. */
+/**
+ * Pull one roster resource into its table. Until a full pull has finished
+ * (a restart can cut one short) it starts from the beginning; after that it
+ * asks only for what changed since the newest row we hold.
+ */
 async function refreshResource(kind, { pool, token, fetchImpl, base, feed }) {
   const r = RESOURCES[kind];
-  const { rows: [{ since }] } = await pool.query(`SELECT MAX(modified_at) AS since FROM ${r.table} WHERE feed = $1`, [feed]);
+  const { rows: [done] } = await pool.query('SELECT 1 FROM mls_roster_fills WHERE feed = $1 AND kind = $2', [feed, kind]);
+  const since = done
+    ? (await pool.query(`SELECT MAX(modified_at) AS since FROM ${r.table} WHERE feed = $1`, [feed])).rows[0].since
+    : null;
   const url = new URL(`${base}/${r.path}`);
   url.searchParams.set('$top', String(PAGE));
   url.searchParams.set('$select', [r.idField, r.nameField, 'ModificationTimestamp', 'MlgCanView'].join(','));
@@ -62,24 +69,43 @@ async function refreshResource(kind, { pool, token, fetchImpl, base, feed }) {
   while (next && pages < MAX_PAGES) {
     const data = await fetchJson(next, token, fetchImpl);
     pages += 1;
+    const byId = new Map();
     for (const row of data.value || []) {
       const id = row[r.idField] ? String(row[r.idField]).slice(0, 40) : null;
       if (!id) continue;
       // MlgCanView false: the MLS withdrew the record from display.
       const name = row.MlgCanView === false || !row[r.nameField] ? null : String(row[r.nameField]).slice(0, 255);
+      byId.set(id, { name, modified: row.ModificationTimestamp || null });
+    }
+    if (byId.size) {
+      // One statement per page: a roster runs to tens of thousands of rows.
       await pool.query(
         `INSERT INTO ${r.table} (feed, ${r.idCol}, ${r.nameCol}, modified_at, updated_at)
-         VALUES ($1, $2, $3, $4, NOW())
+         SELECT $1, x.id, x.name, x.modified, NOW()
+         FROM UNNEST($2::text[], $3::text[], $4::timestamptz[]) AS x(id, name, modified)
          ON CONFLICT (feed, ${r.idCol}) DO UPDATE
            SET ${r.nameCol} = EXCLUDED.${r.nameCol}, modified_at = EXCLUDED.modified_at, updated_at = NOW()`,
-        [feed, id, name, row.ModificationTimestamp || null]
+        [feed, [...byId.keys()], [...byId.values()].map((v) => v.name), [...byId.values()].map((v) => v.modified)]
       );
-      saved += 1;
+      saved += byId.size;
     }
     next = data['@odata.nextLink'] || null;
     if (next) await sleep(PAUSE_MS);
   }
-  return { pages, saved };
+  if (!next) {
+    await pool.query(
+      `INSERT INTO mls_roster_fills (feed, kind) VALUES ($1, $2)
+       ON CONFLICT (feed, kind) DO UPDATE SET completed_at = NOW()`,
+      [feed, kind]
+    );
+  }
+  return { pages, saved, ...(next ? { unfinished: true } : {}) };
+}
+
+/** True until every roster resource has had one full pull. */
+export async function rosterNeedsFill({ pool = getPool(), feed = 'ires' } = {}) {
+  const { rows: [{ n }] } = await pool.query('SELECT COUNT(*)::int AS n FROM mls_roster_fills WHERE feed = $1', [feed]);
+  return n < Object.keys(RESOURCES).length;
 }
 
 /** Copy roster names onto listings and sold listings that have the MLS id but no name. */

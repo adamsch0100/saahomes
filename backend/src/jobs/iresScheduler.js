@@ -29,7 +29,7 @@ import getPool from '../config/database.js';
 import { runPushPass } from '../services/pushService.js';
 import { runMorningBriefs } from '../services/morningBrief.js';
 import { runStayInTouch } from '../services/stayInTouch.js';
-import { refreshMlsRoster, applyRosterNames } from '../services/mlsRoster.js';
+import { refreshMlsRoster, applyRosterNames, rosterNeedsFill } from '../services/mlsRoster.js';
 
 const ADVISORY_LOCK_KEY = 833711; // app-wide constant — must not collide with other locks
 const RUN_MINUTE = 57; // sync at :57 each hour (UTC)
@@ -65,7 +65,7 @@ async function runSync() {
     // "Listing courtesy of": the office/agent roster refreshes with the daily
     // full sync; every tick names new listings from it.
     try {
-      const roster = mode === 'full' ? await refreshMlsRoster() : { applied: await applyRosterNames() };
+      const roster = (mode === 'full' || await rosterNeedsFill()) ? await refreshMlsRoster() : { applied: await applyRosterNames() };
       console.log(`[mls-roster] ${new Date().toISOString()}`, JSON.stringify(roster));
     } catch (rosterErr) {
       console.error(`[mls-roster] ${new Date().toISOString()} FAILED:`, rosterErr.message);
@@ -111,22 +111,30 @@ async function runSync() {
   }
 }
 
-async function seedRosterOnce() {
+async function seedRosterOnce(attempt = 1) {
   const pool = getPool();
-  const { rows: [{ n }] } = await pool.query('SELECT COUNT(*)::int AS n FROM mls_offices');
-  if (n > 0) return;
+  if (!(await rosterNeedsFill({ pool }))) return;
   const client = await pool.connect();
+  let busy = false;
   try {
     const lr = await client.query('SELECT pg_try_advisory_lock($1) AS ok', [ADVISORY_LOCK_KEY]);
-    if (lr.rows[0]?.ok !== true) return;
-    try {
-      const roster = await refreshMlsRoster({ pool });
-      console.log(`[mls-roster] ${new Date().toISOString()} first fill:`, JSON.stringify(roster));
-    } finally {
-      await client.query('SELECT pg_advisory_unlock($1)', [ADVISORY_LOCK_KEY]).catch(() => {});
+    busy = lr.rows[0]?.ok !== true;
+    if (!busy) {
+      try {
+        console.log(`[mls-roster] ${new Date().toISOString()} first fill starting`);
+        const roster = await refreshMlsRoster({ pool });
+        console.log(`[mls-roster] ${new Date().toISOString()} first fill:`, JSON.stringify(roster));
+      } finally {
+        await client.query('SELECT pg_advisory_unlock($1)', [ADVISORY_LOCK_KEY]).catch(() => {});
+      }
     }
   } finally {
     client.release();
+  }
+  // Another sync holds the lock: try again shortly rather than wait a day.
+  if (busy && attempt < 6) {
+    console.log(`[mls-roster] sync busy, first fill retries in 10 minutes (attempt ${attempt})`);
+    setTimeout(() => { seedRosterOnce(attempt + 1).catch((e) => console.error('[mls-roster] first fill failed:', e.message)); }, 10 * 60 * 1000).unref?.();
   }
 }
 

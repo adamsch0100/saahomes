@@ -1601,6 +1601,15 @@ export const runMigrations = async () => {
           PRIMARY KEY (feed, member_mls_id)
         )
       `);
+      // A roster is only refreshed incrementally once one full pull finished.
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS mls_roster_fills (
+          feed VARCHAR(16) NOT NULL,
+          kind VARCHAR(16) NOT NULL,
+          completed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (feed, kind)
+        )
+      `);
       await client.query('RELEASE SAVEPOINT mls_roster');
     } catch (rosterErr) {
       await client.query('ROLLBACK TO SAVEPOINT mls_roster');
