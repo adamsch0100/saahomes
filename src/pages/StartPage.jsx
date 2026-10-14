@@ -8,6 +8,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { getSignupInfo, checkSignupSlug, submitSignup } from '../utils/plugAndPlayApi.js';
 import { useIsBrokerage } from '../context/TenantContext.jsx';
+import PlanPicker, { fmtMoney, perInterval } from '../components/billing/PlanPicker.jsx';
 
 const OFFER = [
   { title: 'Your own branded search site', text: 'Every home for sale in your market, under your name, logo and colors, on your domain.' },
@@ -69,6 +70,7 @@ export default function StartPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [fieldError, setFieldError] = useState(null);
+  const [choice, setChoice] = useState({ plan: 'team', interval: 'month' });
   const startedAt = useRef(Date.now());
 
   useEffect(() => {
@@ -115,6 +117,9 @@ export default function StartPage() {
   const productName = info?.product_name || 'SAA Homes for Brokerages';
   const trialDays = info?.trial_days || 14;
   const price = useMemo(() => priceText(info?.price), [info]);
+  // The plans, unless the platform still sells its older single per-agent price.
+  const plans = !info?.price && info?.plans?.length ? info : null;
+  const chosen = plans?.plans.find((p) => p.key === choice.plan) || plans?.plans[0] || null;
 
   if (isBrokerage) return <NotFound />;
 
@@ -128,6 +133,10 @@ export default function StartPage() {
         ...form,
         elapsed_ms: Date.now() - startedAt.current,
       };
+      if (chosen) {
+        body.plan = chosen.key;
+        body.interval = choice.interval;
+      }
       if (baseDomain && slugEdited && slug) body.slug = slug;
       const res = await submitSignup(body);
       const data = res?.data || {};
@@ -173,15 +182,28 @@ export default function StartPage() {
               </li>
             ))}
           </ul>
-          <div className="mt-8 rounded-xl border border-gray-200 bg-white p-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Pricing</p>
-              <p className="text-lg font-bold mt-0.5 whitespace-nowrap">{price}</p>
+          {plans ? (
+            <section className="mt-8" aria-labelledby="pricing-title">
+              <h2 id="pricing-title" className="text-xs font-semibold uppercase tracking-wider text-gray-500">Pricing</h2>
+              <p className="text-sm text-gray-600 mt-1 mb-3">
+                {trialDays}-day free trial on any plan. No card to start, no setup fee. You can change plans any time.
+              </p>
+              <PlanPicker catalog={plans} value={{ plan: chosen?.key, interval: choice.interval }} onChange={setChoice} name="signup-plan" />
+              {plans.features?.length > 0 && (
+                <p className="text-xs text-gray-500 mt-3">Every plan: {plans.features.join(' · ')}.</p>
+              )}
+            </section>
+          ) : (
+            <div className="mt-8 rounded-xl border border-gray-200 bg-white p-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Pricing</p>
+                <p className="text-lg font-bold mt-0.5 whitespace-nowrap">{price}</p>
+              </div>
+              <p className="text-sm text-gray-600">
+                {trialDays}-day free trial. No card to start. Sample homes show until your MLS approves your feed.
+              </p>
             </div>
-            <p className="text-sm text-gray-600">
-              {trialDays}-day free trial. No card to start. Sample homes show until your MLS approves your feed.
-            </p>
-          </div>
+          )}
         </section>
 
         <section className="rounded-2xl bg-white border border-gray-200 shadow-sm p-5 sm:p-7" aria-labelledby="start-title">
@@ -252,6 +274,11 @@ export default function StartPage() {
             >
               {busy ? 'Creating your site…' : 'Create my site'}
             </button>
+            {chosen && (
+              <p className="text-xs text-gray-600 text-center">
+                {chosen.name} plan: {fmtMoney(chosen[choice.interval].base_cents, plans.currency)} {perInterval(choice.interval)} after your {trialDays}-day free trial.
+              </p>
+            )}
             <p className="text-xs text-gray-500 text-center">
               We’ll email you a link to confirm your address.
             </p>

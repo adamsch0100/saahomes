@@ -6,6 +6,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { createTenant, listTenants, patchTenant } from '../../utils/api.js';
 import TenantListingsPanel from './TenantListingsPanel.jsx';
+import PlatformBillingPanel from './PlatformBillingPanel.jsx';
+import { fmtMoney } from '../billing/PlanPicker.jsx';
 
 const GOLD = 'var(--brand-accent)';
 
@@ -32,7 +34,7 @@ const BILLING_PILL = {
   canceled: ['Canceled', 'text-gray-600 bg-gray-100'],
 };
 
-/** Billing status for the platform console: trial days left, grace, paused. */
+/** Billing status for the platform console: plan, trial days left, grace, paused, and MRR. */
 function BillingPill({ billing, home }) {
   if (home) return <span className="text-xs text-gray-400">Not billed</span>;
   if (!billing || !billing.status) return <span className="text-xs text-gray-400">—</span>;
@@ -47,6 +49,12 @@ function BillingPill({ billing, home }) {
       ) : billing.seats_billed ? (
         <span className="text-xs text-gray-500">{billing.seats_billed} seat{billing.seats_billed === 1 ? '' : 's'}</span>
       ) : null}
+      {billing.plan_name && (
+        <span className="text-xs text-gray-700">
+          {billing.plan_name}{billing.interval === 'year' ? ', yearly' : ''}
+          {billing.mrr_cents > 0 && <span className="text-gray-500"> · {fmtMoney(billing.mrr_cents)}/mo</span>}
+        </span>
+      )}
     </span>
   );
 }
@@ -135,6 +143,8 @@ export default function BrokeragesManager({ token }) {
 
   return (
     <div className="space-y-6">
+      <PlatformBillingPanel token={token} />
+
       <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
         <h2 className="text-lg font-bold text-gray-900">Add brokerage</h2>
         <p className="text-sm text-gray-500 mt-1">
@@ -220,7 +230,14 @@ export default function BrokeragesManager({ token }) {
 
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">Brokerages</h2>
+          <h2 className="text-lg font-bold text-gray-900">
+            Brokerages
+            {tenants.some((t) => t.billing?.mrr_cents > 0) && (
+              <span className="ml-2 text-sm font-normal text-gray-500">
+                {fmtMoney(tenants.reduce((sum, t) => sum + (t.billing?.mrr_cents || 0), 0))} a month in total
+              </span>
+            )}
+          </h2>
           <button
             type="button"
             onClick={load}
