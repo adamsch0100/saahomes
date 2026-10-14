@@ -1136,6 +1136,10 @@ async def signup(request: Request):
         "next": "/saas/onboarding.html?next=" + home,
     })
     _set_session_cookie(resp, request, token)
+    import board_intake
+
+    invited = bool(str(payload.get("invite") or payload.get("invite_token") or "").strip())
+    board_intake.report_to_board("signup", "team invite signup" if invited else "signup")
     return resp
 
 
