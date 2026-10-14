@@ -10,6 +10,7 @@ import adminRoutes from './routes/admin.js';
 import agentRoutes from './routes/agent.js';
 import accountRoutes from './routes/account.js';
 import platformRoutes from './routes/platform.js';
+import clientLifeRoutes from './routes/clientLife.js';
 import { runMigrations } from './config/migrate.js';
 import { startIresSyncScheduler } from './jobs/iresScheduler.js';
 import { NOCO_CITIES } from './config/nocoCities.js';
@@ -242,6 +243,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/agent', agentRoutes);
 app.use('/api/account', accountRoutes);
 app.use('/api/platform', platformRoutes);
+app.use('/api', clientLifeRoutes.client);
+app.use('/api/agent', clientLifeRoutes.staff);
 
 const canonicalRedirects = {
   '/g-hope-greeley': '/greeley-g-hope-down-payment-assistance/',

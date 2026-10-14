@@ -2,7 +2,7 @@
  * Cron endpoints — let the scheduler (Hermes cron, or Railway later) trigger
  * email work ON the saahomes.com backend instead of sending through Hermes.
  *
- *   POST /api/cron/digest?mode=due|outbox|home-value|push|brief&key=CRON_SECRET
+ *   POST /api/cron/digest?mode=due|outbox|home-value|push|brief|stay&key=CRON_SECRET
  *
  * Responds 200 with an EMPTY body when nothing was sent (silent watchdog),
  * or a small JSON summary when emails went out.
@@ -11,6 +11,7 @@ import { runDigest } from '../services/alertDigest.js';
 import { runHomeValueDigest } from '../services/homeValueDigest.js';
 import { runPushPass } from '../services/pushService.js';
 import { runMorningBriefs } from '../services/morningBrief.js';
+import { runStayInTouch } from '../services/stayInTouch.js';
 
 const CRON_SECRET = process.env.CRON_SECRET;
 
@@ -31,6 +32,11 @@ export const runCronDigest = async (req, res) => {
       const result = await runMorningBriefs({ force: req.query.force === '1' || req.query.force === 'true' });
       if (!result.sent) return res.status(200).send('');
       return res.json({ success: true, mode: 'brief', ...result });
+    }
+    if (mode === 'stay') {
+      const result = await runStayInTouch({ force: req.query.force === '1' || req.query.force === 'true' });
+      if (!result.sent) return res.status(200).send('');
+      return res.json({ success: true, mode: 'stay', ...result });
     }
     if (mode === 'push') {
       const result = await runPushPass();

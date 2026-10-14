@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import ScheduleShowingModal from "../ScheduleShowingModal";
+import BookTourModal from "../BookTourModal";
 import SaveSearchModal from "../SaveSearchModal";
 import {
   formatPrice,
@@ -57,6 +57,13 @@ export default function ConversionRail({
           feats.assoc_fee_freq ? ` / ${String(feats.assoc_fee_freq).toLowerCase()}` : ""
         }`
       : null;
+
+  const scrollToSection = (e, id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    e.preventDefault();
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const scrollToCalculator = (e) => {
     e.preventDefault();
@@ -144,12 +151,19 @@ export default function ConversionRail({
 
         {/* Primary CTAs — full width, stacked */}
         <div className="mt-5 space-y-2.5">
-          <ScheduleShowingModal
+          <BookTourModal
             listing={listing}
-            buttonLabel="Schedule a Showing"
+            buttonLabel="Book a tour"
             buttonClassName="w-full inline-flex items-center justify-center px-6 py-3.5 font-semibold rounded-lg hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
             buttonStyle={{ backgroundColor: "var(--brand-accent)", color: "var(--brand-on-accent-ink)" }}
           />
+          <a
+            href="#affordability"
+            onClick={(e) => scrollToSection(e, "affordability")}
+            className="block text-center text-sm font-semibold text-white underline underline-offset-4 decoration-[color:var(--brand-accent)] hover:text-[color:var(--brand-accent)] py-1"
+          >
+            Can I afford this?
+          </a>
           <button
             type="button"
             onClick={openNadia}

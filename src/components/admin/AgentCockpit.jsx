@@ -9,6 +9,7 @@ import TodayBrief from "./TodayBrief.jsx";
 import LeadPanel from "../crm/LeadPanel.jsx";
 import TasksToday from "../crm/TasksToday.jsx";
 import AgentAlertsToggle from "../crm/AgentAlertsToggle.jsx";
+import ClosingFactsDialog from "../agent/ClosingFactsDialog.jsx";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -556,6 +557,39 @@ export default function AgentCockpit({
     load();
   }, [load]);
 
+  // Closed → ask for the closing facts (stay in touch); Selling → one-click seller plan.
+  const [closingLead, setClosingLead] = useState(null);
+  const [sellerBusyId, setSellerBusyId] = useState(null);
+  const onStageChange = (lead, value) => {
+    if (value === "closed" && lead.lifecycle_stage !== "closed") return setClosingLead(lead);
+    return patchLead(lead.id, { lifecycle_stage: value });
+  };
+  const makeSeller = async (lead) => {
+    setSellerBusyId(lead.id);
+    setError(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/agent/clients/${lead.id}/seller`, { method: "POST", headers, body: "{}" });
+      const data = await res.json().catch(() => ({}));
+      if (!data.success) throw new Error(data.error || "Could not start a selling plan");
+      setLeads((prev) => prev.map((l) => (l.id === lead.id ? { ...l, seller_plan_id: data.data.id, intent: l.intent === "buying" ? "both" : l.intent || "selling" } : l)));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSellerBusyId(null);
+    }
+  };
+  const sellerButton = (lead, cls) => (
+    <button
+      type="button"
+      disabled={sellerBusyId === lead.id || !!lead.seller_plan_id}
+      onClick={() => makeSeller(lead)}
+      title="Start a selling plan on their My Home (they keep their buyer side)"
+      className={`${cls} rounded-lg border border-gray-300 text-gray-700 hover:border-black disabled:opacity-60`}
+    >
+      {lead.seller_plan_id ? "Selling ✓" : sellerBusyId === lead.id ? "…" : "Selling"}
+    </button>
+  );
+
   const patchLead = async (id, body) => {
     setSavingId(id);
     setError(null);
@@ -751,7 +785,7 @@ export default function AgentCockpit({
                     <select
                       value={lead.lifecycle_stage || "new"}
                       disabled={savingId === lead.id}
-                      onChange={(e) => patchLead(lead.id, { lifecycle_stage: e.target.value })}
+                      onChange={(e) => onStageChange(lead, e.target.value)}
                       className={`min-h-[40px] text-xs font-semibold rounded-full px-3 border-0 ${STAGE_STYLE[lead.lifecycle_stage] || STAGE_STYLE.new}`}
                     >
                       {STAGES.filter((s) => s.value !== "all").map((s) => (
@@ -797,6 +831,7 @@ export default function AgentCockpit({
                     >
                       {expanded === lead.id ? "Hide signals" : "Signals"}
                     </button>
+                    {sellerButton(lead, "min-h-[40px] px-3 text-sm")}
                     {showAdminTools && (
                       <>
                         <button
@@ -940,7 +975,7 @@ export default function AgentCockpit({
                           <select
                             value={lead.lifecycle_stage || "new"}
                             disabled={savingId === lead.id}
-                            onChange={(e) => patchLead(lead.id, { lifecycle_stage: e.target.value })}
+                            onChange={(e) => onStageChange(lead, e.target.value)}
                             className={`min-h-[36px] text-xs font-semibold rounded-full px-3 border border-transparent cursor-pointer ${STAGE_STYLE[lead.lifecycle_stage] || STAGE_STYLE.new}`}
                           >
                             {STAGES.filter((s) => s.value !== "all").map((s) => (
@@ -1000,6 +1035,7 @@ export default function AgentCockpit({
                             >
                               Signals
                             </button>
+                            {sellerButton(lead, "min-h-[36px] px-3 text-xs")}
                             {showAdminTools && (
                               <>
                                 <button
@@ -1072,9 +1108,27 @@ export default function AgentCockpit({
           leadId={openLead.id}
           initialTab={openLead.tab}
           onClose={closeLeadPanel}
-          onPatch={patchLead}
+          onPatch={(id, body) => {
+            const lead = leads.find((l) => l.id === id);
+            if (lead && body?.lifecycle_stage) return onStageChange(lead, body.lifecycle_stage);
+            return patchLead(id, body);
+          }}
           teammates={teammates}
           currentAgentId={currentAgentId}
+        />
+      )}
+
+      {closingLead && (
+        <ClosingFactsDialog
+          lead={closingLead}
+          token={token}
+          onCancel={() => setClosingLead(null)}
+          onDone={({ saved }) => {
+            const id = closingLead.id;
+            setClosingLead(null);
+            if (saved) setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, lifecycle_stage: "closed", lifecycle_stage_manual: true, next_touch_at: null } : l)));
+            else patchLead(id, { lifecycle_stage: "closed" });
+          }}
         />
       )}
 
