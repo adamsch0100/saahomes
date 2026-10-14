@@ -176,6 +176,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/saas/vs-cloud-cma.html",
         "/saas/vs-saleswise.html",
         "/saas/vs-rpr.html",
+        "/saas/rpr-vs-cloud-cma.html",
         "/saas/vs-moxi-present.html",
         "/saas/vs-best-cma-software.html",
         "/saas/interactive-cma-software.html",
@@ -1049,9 +1050,17 @@ async def billing_checkout(request: Request):
         logger.exception("Stripe checkout failed")
         raise HTTPException(502, f"Checkout failed: {exc}") from exc
     import auth_service
+    import ga4_measurement
 
     auth_service.log_event(
         user["id"],
+        "checkout_started",
+        {"plan": plan, "quantity": quantity, "session_id": session.get("id")},
+    )
+    # Server-side GA4 leg: the browser begin_checkout can be lost on the redirect,
+    # and this is the durable count that reconciles with the Stripe session.
+    ga4_measurement.send_event("begin_checkout", {"plan": plan, "source": "server"})
+    ga4_measurement.send_event(
         "checkout_started",
         {"plan": plan, "quantity": quantity, "session_id": session.get("id")},
     )
@@ -5347,13 +5356,20 @@ async def portal_subject(request: Request):
     try:
         # Hard ceiling so the agent is never left staring at a spinner; the UI
         # switches to manual entry when nothing is found.
-        return await asyncio.wait_for(asyncio.to_thread(lookup_subject_property, query), timeout=25)
+        result = await asyncio.wait_for(asyncio.to_thread(lookup_subject_property, query), timeout=25)
     except asyncio.TimeoutError:
         logger.warning("Subject lookup timed out for %r", query[:120])
         return {"found": False, "reason": "timeout"}
     except Exception as exc:
         logger.exception("Subject lookup failed")
         raise HTTPException(400, f"Subject lookup failed: {exc}") from exc
+    # Server-side GA4 leg for the address step (the app fires it only when the
+    # browser tag loads; the auth-gated app often does not).
+    if isinstance(result, dict) and result.get("found"):
+        import ga4_measurement
+
+        ga4_measurement.send_event("subject_address_set", {"found": True})
+    return result
 
 
 @app.post("/api/portal/preview")
@@ -5475,8 +5491,12 @@ async def generate(
     subject_photo: Optional[UploadFile] = File(None),
 ):
     import auth_service
+    import ga4_measurement
 
     user = _require_user(request)
+    # Server-side GA4 leg: the app fires generate_started before the fetch, but a
+    # blocked browser tag or the auth-gated app leaves the step with no receipt.
+    ga4_measurement.send_event("generate_started", {"market_source": market_source})
     ent = auth_service.entitlement(user)
     if not ent["ok"]:
         raise HTTPException(
@@ -5806,6 +5826,15 @@ async def generate(
         result["saved"] = False
     result["entitlement"] = after
     result["access_remaining"] = after.get("remaining")
+    # Server-side GA4 leg for the Generate-done step.
+    ga4_measurement.send_event(
+        "generate_complete",
+        {
+            "market_source": source,
+            "recommended_price": result.get("recommended_price"),
+            "months_of_inventory": result.get("months_of_inventory"),
+        },
+    )
     return JSONResponse(result)
 
 

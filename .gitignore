@@ -93,6 +93,7 @@ RAILWAY_ENV_VARS.txt
 __pycache__/
 *.pyc
 .scratch-digest/
+reports/engine-credits-log.jsonl
 
 # Local OAuth credentials that live only in a working copy — never commit
 client_secret.json
