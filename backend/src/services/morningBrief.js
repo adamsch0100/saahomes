@@ -11,6 +11,7 @@
  */
 import getPool from '../config/database.js';
 import { denverToday } from '../controllers/tourController.js';
+import { currentTenantId } from './tenantContext.js';
 
 const SITE = (process.env.SITE_URL || 'https://saahomes.com').replace(/\/$/, '');
 export const MAX_BRIEF_LEADS = 10;
@@ -114,7 +115,7 @@ export function summarizeLead(lead, events, homes = new Map(), { dueToday = fals
   };
 }
 
-/** The brief for one agent (or admin, who also covers unassigned leads). */
+/** The brief for one agent (or admin, who also covers unassigned leads), within the agent's tenant. */
 export async function buildBrief(agent, { now = new Date(), pool = getPool() } = {}) {
   const since = new Date(now.getTime() - LOOKBACK_HOURS * 3600 * 1000);
   const isAdmin = String(agent.role || '') === 'admin';
@@ -122,9 +123,10 @@ export async function buildBrief(agent, { now = new Date(), pool = getPool() } =
     `SELECT id, name, email, phone, lead_score, next_touch_at, lifecycle_stage
      FROM users
      WHERE COALESCE(role, 'client') = 'client' AND status = 'active'
+       AND tenant_id = $3
        AND (assigned_agent_id = $1 OR ($2 AND assigned_agent_id IS NULL))
        AND COALESCE(lifecycle_stage, '') NOT IN ('closed', 'lost')`,
-    [agent.id, isAdmin]
+    [agent.id, isAdmin, agent.tenant_id ?? currentTenantId()]
   );
   if (!leads.length) return { date: denverToday(now), items: [] };
 
@@ -187,7 +189,7 @@ export async function runMorningBriefs({ now = new Date(), force = false, send, 
   const deliver = send || (await import('./emailer.js')).sendEmail;
   const today = denverToday(now);
   const { rows: agents } = await pool.query(
-    `SELECT id, name, email, role FROM users
+    `SELECT id, name, email, role, tenant_id FROM users
      WHERE role IN ('agent', 'admin') AND status = 'active' AND email IS NOT NULL
        AND COALESCE(morning_brief, TRUE)`
   );

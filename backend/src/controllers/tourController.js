@@ -20,6 +20,7 @@ import {
 } from '../services/tourPlanner.js';
 import { resolveUser } from './savedHomesController.js';
 import { reportLeadToBoard } from '../services/boardLeadCount.js';
+import { tenantIdOf } from '../services/tenantContext.js';
 
 const SITE = (process.env.SITE_URL || 'https://saahomes.com').replace(/\/$/, '');
 const MAX_WINDOWS = 3;
@@ -134,10 +135,10 @@ export const requestTour = async (req, res) => {
     const summary = `Tour of ${plan.stops.length} home${plan.stops.length === 1 ? '' : 's'}: ${plan.stops.map((s) => s.address.split(',')[0]).join(' → ')}`;
 
     const showing = await pool.query(
-      `INSERT INTO showing_requests (name, email, phone, showing_date, showing_time, message, listing_slug, listing_address, source_page)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, '/board/') RETURNING id`,
+      `INSERT INTO showing_requests (name, email, phone, showing_date, showing_time, message, listing_slug, listing_address, source_page, tenant_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, '/board/', $9) RETURNING id`,
       [user.name || user.email, user.email, phoneDigits, windows[0].date, windows[0].part, message,
-        plan.stops[0].slug, summary.slice(0, 255)]
+        plan.stops[0].slug, summary.slice(0, 255), tenantIdOf(req)]
     );
     const { rows: [tour] } = await pool.query(
       `INSERT INTO tour_requests (tenant_id, user_id, household_id, listing_keys, windows, note, est_minutes, showing_request_id)

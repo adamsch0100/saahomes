@@ -4,6 +4,7 @@ import { forwardChfaDpaLeadToFollowUpBoss } from '../services/followUpBossServic
 import { recordLeadConversion } from '../services/ga4MeasurementService.js';
 import logger from '../utils/logger.js';
 import { reportLeadToBoard } from '../services/boardLeadCount.js';
+import { tenantIdOf } from '../services/tenantContext.js';
 
 export const submitChfaDpaLeadForm = async (req, res) => {
   const {
@@ -18,17 +19,18 @@ export const submitChfaDpaLeadForm = async (req, res) => {
 
     const result = await client.query(
       `INSERT INTO chfa_dpa_lead_submissions
-        (first_name, last_name, email, phone, buyer_status, target_county, buying_timeline, message, source_page, utm_source, utm_medium, utm_campaign)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        (first_name, last_name, email, phone, buyer_status, target_county, buying_timeline, message, source_page, utm_source, utm_medium, utm_campaign, tenant_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
        RETURNING *`,
       [
         firstName, lastName || null, email, phone || null, buyerStatus || null, targetCounty || null,
         buyingTimeline || null, message || null,
         sourcePage || null, utmSource || null, utmMedium || null, utmCampaign || null,
+        tenantIdOf(req),
       ]
     );
 
-    const submission = { ...result.rows[0], ...req.body };
+    const submission = { ...result.rows[0], ...req.body, id: result.rows[0].id, tenant_id: result.rows[0].tenant_id };
 
     await client.query('COMMIT');
 

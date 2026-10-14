@@ -1,14 +1,22 @@
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import getPool from '../config/database.js';
-import { generateToken } from '../middleware/auth.js';
 import logger from '../utils/logger.js';
+import { tenantIdOf } from '../services/tenantContext.js';
+import { finishLogin } from '../services/staffAuth.js';
+import { issueAccountLink } from '../services/accountLinks.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'adam@saahomes.com';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+function safeEqual(a, b) {
+  const ab = Buffer.from(String(a));
+  const bb = Buffer.from(String(b));
+  return ab.length === bb.length && crypto.timingSafeEqual(ab, bb);
+}
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
@@ -17,12 +25,37 @@ export const login = async (req, res) => {
     return res.status(400).json({ error: 'Email and password are required' });
   }
 
-  // Simple check against environment variables
-  // In production, you'd want to hash the password and store it securely
-  if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-    const token = generateToken({ email, role: 'admin' });
-    logger.info('Admin login successful', { email });
-    return res.json({ success: true, token });
+  // Platform owner: env credentials, admin of whatever brokerage the host resolves to
+  if (ADMIN_PASSWORD && email === ADMIN_EMAIL && safeEqual(password, ADMIN_PASSWORD)) {
+    logger.info('Admin password accepted', { email });
+    try {
+      return await finishLogin(res, { payload: { email, role: 'admin', platform: true }, body: { success: true } });
+    } catch (error) {
+      logger.error('Admin login finish failed', error);
+      return res.status(500).json({ error: 'Login failed' });
+    }
+  }
+
+  // Brokerage admin: a users row with role 'admin' in this request's tenant
+  try {
+    const tenantId = tenantIdOf(req);
+    const result = await getPool().query(
+      `SELECT id, email, name, password_hash, tenant_id FROM users
+       WHERE tenant_id = $1 AND LOWER(email) = $2 AND role = 'admin' AND status = 'active'
+       LIMIT 1`,
+      [tenantId, String(email).trim().toLowerCase()]
+    );
+    const row = result.rows[0];
+    if (row && row.password_hash && (await bcrypt.compare(String(password), row.password_hash))) {
+      logger.info('Admin password accepted', { email: row.email, tenant_id: row.tenant_id });
+      return await finishLogin(res, {
+        payload: { id: row.id, email: row.email, role: 'admin', tenant_id: row.tenant_id, name: row.name },
+        body: { success: true },
+      });
+    }
+  } catch (error) {
+    logger.error('Admin login lookup failed', error);
+    return res.status(500).json({ error: 'Login failed' });
   }
 
   logger.warn('Failed admin login attempt', { email });
@@ -34,23 +67,26 @@ export const getSubmissions = async (req, res) => {
     const { type, limit = 50, offset = 0 } = req.query;
     const limitNum = Math.min(parseInt(limit) || 50, 100); // Max 100
     const offsetNum = parseInt(offset) || 0;
+    const tenantId = tenantIdOf(req);
 
     let query, countQuery;
     
     if (type === 'market-report') {
       query = `
         SELECT * FROM market_report_submissions
+        WHERE tenant_id = $3
         ORDER BY created_at DESC
         LIMIT $1 OFFSET $2
       `;
-      countQuery = 'SELECT COUNT(*) FROM market_report_submissions';
+      countQuery = 'SELECT COUNT(*) FROM market_report_submissions WHERE tenant_id = $1';
     } else if (type === 'contact') {
       query = `
         SELECT * FROM contact_submissions
+        WHERE tenant_id = $3
         ORDER BY created_at DESC
         LIMIT $1 OFFSET $2
       `;
-      countQuery = 'SELECT COUNT(*) FROM contact_submissions';
+      countQuery = 'SELECT COUNT(*) FROM contact_submissions WHERE tenant_id = $1';
     } else {
       // Get both types
       query = `
@@ -66,6 +102,7 @@ export const getSubmissions = async (req, res) => {
           area,
           created_at
         FROM contact_submissions
+        WHERE tenant_id = $3
         UNION ALL
         SELECT 
           'market-report' as type,
@@ -79,20 +116,21 @@ export const getSubmissions = async (req, res) => {
           area,
           created_at
         FROM market_report_submissions
+        WHERE tenant_id = $3
         ORDER BY created_at DESC
         LIMIT $1 OFFSET $2
       `;
       countQuery = `
         SELECT 
-          (SELECT COUNT(*) FROM contact_submissions) +
-          (SELECT COUNT(*) FROM market_report_submissions) as count
+          (SELECT COUNT(*) FROM contact_submissions WHERE tenant_id = $1) +
+          (SELECT COUNT(*) FROM market_report_submissions WHERE tenant_id = $1) as count
       `;
     }
 
     const pool = getPool();
     const [results, countResult] = await Promise.all([
-      pool.query(query, [limitNum, offsetNum]),
-      pool.query(countQuery),
+      pool.query(query, [limitNum, offsetNum, tenantId]),
+      pool.query(countQuery, [tenantId]),
     ]);
 
     const total = parseInt(countResult.rows[0].count || countResult.rows[0]?.count || 0);
@@ -119,12 +157,12 @@ export const getSubmission = async (req, res) => {
 
     let query;
     if (type === 'market-report') {
-      query = 'SELECT * FROM market_report_submissions WHERE id = $1';
+      query = 'SELECT * FROM market_report_submissions WHERE id = $1 AND tenant_id = $2';
     } else {
-      query = 'SELECT * FROM contact_submissions WHERE id = $1';
+      query = 'SELECT * FROM contact_submissions WHERE id = $1 AND tenant_id = $2';
     }
 
-    const result = await getPool().query(query, [id]);
+    const result = await getPool().query(query, [id, tenantIdOf(req)]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Submission not found' });
@@ -140,17 +178,18 @@ export const getSubmission = async (req, res) => {
 export const getStats = async (req, res) => {
   try {
     const pool = getPool();
+    const tenantId = tenantIdOf(req);
     const [contactCount, marketReportCount, recentContacts, recentMarketReports] = await Promise.all([
-      pool.query('SELECT COUNT(*) FROM contact_submissions'),
-      pool.query('SELECT COUNT(*) FROM market_report_submissions'),
+      pool.query('SELECT COUNT(*) FROM contact_submissions WHERE tenant_id = $1', [tenantId]),
+      pool.query('SELECT COUNT(*) FROM market_report_submissions WHERE tenant_id = $1', [tenantId]),
       pool.query(`
         SELECT COUNT(*) FROM contact_submissions 
-        WHERE created_at >= NOW() - INTERVAL '7 days'
-      `),
+        WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '7 days'
+      `, [tenantId]),
       pool.query(`
         SELECT COUNT(*) FROM market_report_submissions 
-        WHERE created_at >= NOW() - INTERVAL '7 days'
-      `),
+        WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '7 days'
+      `, [tenantId]),
     ]);
 
     res.json({
@@ -185,9 +224,10 @@ export const getClientSearches = async (req, res) => {
               (SELECT COUNT(*) FROM saved_searches s WHERE s.user_id = u.id) AS search_count,
               (SELECT COUNT(*) FROM saved_searches s WHERE s.user_id = u.id AND s.is_active) AS active_count
        FROM users u
-       WHERE ($1 = '%%' OR u.email ILIKE $1 OR u.name ILIKE $1 OR u.phone ILIKE $1)
+       WHERE u.tenant_id = $3
+         AND ($1 = '%%' OR u.email ILIKE $1 OR u.name ILIKE $1 OR u.phone ILIKE $1)
        ORDER BY COALESCE(u.lead_score, 0) DESC, u.created_at DESC LIMIT $2`,
-      [like, limitNum]
+      [like, limitNum, tenantIdOf(req)]
     );
     const ids = users.rows.map((u) => u.id);
     let searches = [];
@@ -224,7 +264,8 @@ export const createClientSearch = async (req, res) => {
     }
 
     // Upsert client (no password — they sign in via magic link or set one later)
-    let user = await getPool().query('SELECT * FROM users WHERE email = $1', [email]);
+    const tenantId = tenantIdOf(req);
+    let user = await getPool().query('SELECT * FROM users WHERE email = $1 AND tenant_id = $2', [email, tenantId]);
     let userId;
     if (user.rows.length) {
       userId = user.rows[0].id;
@@ -236,8 +277,8 @@ export const createClientSearch = async (req, res) => {
     } else {
       const token = crypto.randomBytes(24).toString('hex');
       const created = await getPool().query(
-        `INSERT INTO users (email, name, phone, manage_token) VALUES ($1, $2, $3, $4) RETURNING id`,
-        [email, String(client_name || '').trim() || null, String(client_phone || '').replace(/\D/g, '') || null, token]
+        `INSERT INTO users (email, name, phone, manage_token, tenant_id) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+        [email, String(client_name || '').trim() || null, String(client_phone || '').replace(/\D/g, '') || null, token, tenantId]
       );
       userId = created.rows[0].id;
     }
@@ -286,8 +327,12 @@ export const updateClientSearch = async (req, res) => {
     }
     if (!updates.length) return res.status(400).json({ error: 'Nothing to update' });
     updates.push('updated_at = NOW()');
-    params.push(id);
-    await getPool().query(`UPDATE saved_searches SET ${updates.join(', ')} WHERE id = $${i}`, params);
+    params.push(id, tenantIdOf(req));
+    const updated = await getPool().query(
+      `UPDATE saved_searches SET ${updates.join(', ')} WHERE id = $${i} AND tenant_id = $${i + 1}`,
+      params
+    );
+    if (!updated.rowCount) return res.status(404).json({ error: 'Search not found' });
     return res.json({ success: true });
   } catch (error) {
     logger.error('Error updating client search', error);
@@ -298,7 +343,10 @@ export const updateClientSearch = async (req, res) => {
 /** DELETE /api/admin/searches/:id — remove any client's search */
 export const deleteClientSearch = async (req, res) => {
   try {
-    await getPool().query('DELETE FROM saved_searches WHERE id = $1', [Number(req.params.id)]);
+    await getPool().query('DELETE FROM saved_searches WHERE id = $1 AND tenant_id = $2', [
+      Number(req.params.id),
+      tenantIdOf(req),
+    ]);
     return res.json({ success: true });
   } catch (error) {
     logger.error('Error deleting client search', error);
@@ -311,14 +359,14 @@ export const searchStats = async (req, res) => {
   try {
     const r = await getPool().query(`
       SELECT
-        (SELECT COUNT(*) FROM users) AS total_users,
-        (SELECT COUNT(*) FROM saved_searches) AS total_searches,
-        (SELECT COUNT(*) FROM saved_searches WHERE is_active) AS active_searches,
-        (SELECT COUNT(*) FROM users WHERE created_at > NOW() - INTERVAL '7 days') AS users_7d,
-        (SELECT COUNT(*) FROM saved_searches WHERE last_email_at > NOW() - INTERVAL '7 days') AS emailed_7d,
-        (SELECT COUNT(*) FROM showing_requests) AS total_showings,
-        (SELECT COUNT(*) FROM showing_requests WHERE created_at > NOW() - INTERVAL '7 days') AS showings_7d
-    `);
+        (SELECT COUNT(*) FROM users WHERE tenant_id = $1) AS total_users,
+        (SELECT COUNT(*) FROM saved_searches WHERE tenant_id = $1) AS total_searches,
+        (SELECT COUNT(*) FROM saved_searches WHERE tenant_id = $1 AND is_active) AS active_searches,
+        (SELECT COUNT(*) FROM users WHERE tenant_id = $1 AND created_at > NOW() - INTERVAL '7 days') AS users_7d,
+        (SELECT COUNT(*) FROM saved_searches WHERE tenant_id = $1 AND last_email_at > NOW() - INTERVAL '7 days') AS emailed_7d,
+        (SELECT COUNT(*) FROM showing_requests WHERE tenant_id = $1) AS total_showings,
+        (SELECT COUNT(*) FROM showing_requests WHERE tenant_id = $1 AND created_at > NOW() - INTERVAL '7 days') AS showings_7d
+    `, [tenantIdOf(req)]);
     return res.json({ success: true, data: r.rows[0] });
   } catch (error) {
     logger.error('Error fetching search stats', error);
@@ -355,12 +403,13 @@ export const getCockpitLeads = async (req, res) => {
               (SELECT COUNT(*)::int FROM home_profiles hp WHERE hp.user_id = u.id) AS home_count
        FROM users u
        LEFT JOIN users a ON a.id = u.assigned_agent_id
-       WHERE u.status IS DISTINCT FROM 'unsubscribed'
+       WHERE u.tenant_id = $3
+         AND u.status IS DISTINCT FROM 'unsubscribed'
          AND COALESCE(u.role, 'client') = 'client'
          AND ($1 = '%%' OR u.email ILIKE $1 OR u.name ILIKE $1 OR u.phone ILIKE $1)
        ORDER BY COALESCE(u.lead_score, 0) DESC, u.last_active_at DESC NULLS LAST, u.created_at DESC
        LIMIT $2`,
-      [like, limitNum]
+      [like, limitNum, tenantIdOf(req)]
     );
 
     const { enrichLeadForCockpit } = await import('../services/agentCockpit.js');
@@ -432,7 +481,10 @@ export const patchCockpitLead = async (req, res) => {
     }
     const body = req.body || {};
     const pool = getPool();
-    const existing = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+    const existing = await pool.query('SELECT * FROM users WHERE id = $1 AND tenant_id = $2', [
+      id,
+      tenantIdOf(req),
+    ]);
     if (!existing.rows[0]) {
       return res.status(404).json({ error: 'Lead not found' });
     }
@@ -689,9 +741,9 @@ export const shareHome = async (req, res) => {
     // Resolve recipient account (optional — FUB still fires without it)
     const userRes = await pool.query(
       `SELECT id, email, name FROM users
-       WHERE LOWER(email) = $1 AND status IS DISTINCT FROM 'unsubscribed'
+       WHERE tenant_id = $2 AND LOWER(email) = $1 AND status IS DISTINCT FROM 'unsubscribed'
        LIMIT 1`,
-      [email]
+      [email, tenantIdOf(req)]
     );
     const recipient = userRes.rows[0] || null;
 
@@ -807,15 +859,15 @@ export const syncFubLifecycle = async (req, res) => {
       }
       const r = await pool.query(
         `SELECT id, email, name, lifecycle_stage, lifecycle_stage_manual, fub_person_id
-         FROM users WHERE id = $1 LIMIT 1`,
-        [idNum]
+         FROM users WHERE id = $1 AND tenant_id = $2 LIMIT 1`,
+        [idNum, tenantIdOf(req)]
       );
       lead = r.rows[0] || null;
     } else {
       const r = await pool.query(
         `SELECT id, email, name, lifecycle_stage, lifecycle_stage_manual, fub_person_id
-         FROM users WHERE LOWER(email) = $1 LIMIT 1`,
-        [emailRaw]
+         FROM users WHERE LOWER(email) = $1 AND tenant_id = $2 LIMIT 1`,
+        [emailRaw, tenantIdOf(req)]
       );
       lead = r.rows[0] || null;
     }
@@ -1017,75 +1069,76 @@ export const getFubStatus = async (req, res) => {
 export const getLeadQualityStats = async (req, res) => {
   try {
     const pool = getPool();
+    const tenantId = tenantIdOf(req);
 
     const [totals, blocked, topDomains, byPathBlocked, byPathSubmitted] = await Promise.all([
       pool.query(`
         SELECT
           (
-            (SELECT COUNT(*)::int FROM contact_submissions WHERE created_at >= NOW() - INTERVAL '30 days') +
-            (SELECT COUNT(*)::int FROM market_report_submissions WHERE created_at >= NOW() - INTERVAL '30 days') +
-            (SELECT COUNT(*)::int FROM chfa_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days') +
-            (SELECT COUNT(*)::int FROM champions_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days') +
-            (SELECT COUNT(*)::int FROM chfa_dpa_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days') +
-            (SELECT COUNT(*)::int FROM ghope_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days') +
-            (SELECT COUNT(*)::int FROM showing_requests WHERE created_at >= NOW() - INTERVAL '30 days')
+            (SELECT COUNT(*)::int FROM contact_submissions WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days') +
+            (SELECT COUNT(*)::int FROM market_report_submissions WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days') +
+            (SELECT COUNT(*)::int FROM chfa_lead_submissions WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days') +
+            (SELECT COUNT(*)::int FROM champions_lead_submissions WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days') +
+            (SELECT COUNT(*)::int FROM chfa_dpa_lead_submissions WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days') +
+            (SELECT COUNT(*)::int FROM ghope_lead_submissions WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days') +
+            (SELECT COUNT(*)::int FROM showing_requests WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days')
           ) AS total_submissions,
           (
             SELECT COUNT(DISTINCT LOWER(email))::int FROM (
-              SELECT email FROM contact_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+              SELECT email FROM contact_submissions WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days'
               UNION
-              SELECT email FROM market_report_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+              SELECT email FROM market_report_submissions WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days'
               UNION
-              SELECT email FROM chfa_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+              SELECT email FROM chfa_lead_submissions WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days'
               UNION
-              SELECT email FROM champions_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+              SELECT email FROM champions_lead_submissions WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days'
               UNION
-              SELECT email FROM chfa_dpa_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+              SELECT email FROM chfa_dpa_lead_submissions WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days'
               UNION
-              SELECT email FROM ghope_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+              SELECT email FROM ghope_lead_submissions WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days'
               UNION
-              SELECT email FROM showing_requests WHERE created_at >= NOW() - INTERVAL '30 days'
+              SELECT email FROM showing_requests WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days'
             ) all_emails
           ) AS unique_emails
-      `).catch(() => ({ rows: [{ total_submissions: 0, unique_emails: 0 }] })),
+      `, [tenantId]).catch(() => ({ rows: [{ total_submissions: 0, unique_emails: 0 }] })),
       pool.query(`
         SELECT COUNT(*)::int AS blocked_disposable
         FROM blocked_email_log
-        WHERE created_at >= NOW() - INTERVAL '30 days'
-      `).catch(() => ({ rows: [{ blocked_disposable: 0 }] })),
+        WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days'
+      `, [tenantId]).catch(() => ({ rows: [{ blocked_disposable: 0 }] })),
       pool.query(`
         SELECT domain, COUNT(*)::int AS count
         FROM blocked_email_log
-        WHERE created_at >= NOW() - INTERVAL '30 days'
+        WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days'
           AND domain IS NOT NULL
         GROUP BY domain
         ORDER BY count DESC
         LIMIT 10
-      `).catch(() => ({ rows: [] })),
+      `, [tenantId]).catch(() => ({ rows: [] })),
       pool.query(`
         SELECT COALESCE(path, 'unknown') AS path, COUNT(*)::int AS blocked
         FROM blocked_email_log
-        WHERE created_at >= NOW() - INTERVAL '30 days'
+        WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days'
         GROUP BY COALESCE(path, 'unknown')
-      `).catch(() => ({ rows: [] })),
+      `, [tenantId]).catch(() => ({ rows: [] })),
       pool.query(`
         SELECT path, COUNT(*)::int AS submitted FROM (
-          SELECT 'contact' AS path FROM contact_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+          SELECT 'contact' AS path FROM contact_submissions WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days'
           UNION ALL
-          SELECT 'market-report' FROM market_report_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+          SELECT 'market-report' FROM market_report_submissions WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days'
           UNION ALL
-          SELECT 'chfa' FROM chfa_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+          SELECT 'chfa' FROM chfa_lead_submissions WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days'
           UNION ALL
-          SELECT 'champions' FROM champions_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+          SELECT 'champions' FROM champions_lead_submissions WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days'
           UNION ALL
-          SELECT 'chfa-dpa' FROM chfa_dpa_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+          SELECT 'chfa-dpa' FROM chfa_dpa_lead_submissions WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days'
           UNION ALL
-          SELECT 'ghope' FROM ghope_lead_submissions WHERE created_at >= NOW() - INTERVAL '30 days'
+          SELECT 'ghope' FROM ghope_lead_submissions WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days'
           UNION ALL
-          SELECT 'showing' FROM showing_requests WHERE created_at >= NOW() - INTERVAL '30 days'
+          SELECT 'showing' FROM showing_requests WHERE tenant_id = $1 AND created_at >= NOW() - INTERVAL '30 days'
         ) s
         GROUP BY path
-      `).catch(() => ({ rows: [] })),
+      `, [tenantId]).catch(() => ({ rows: [] })),
     ]);
 
     const total_submissions = Number(totals.rows[0]?.total_submissions || 0);
@@ -1142,12 +1195,13 @@ export const getEmailAbStats = async (req, res) => {
         COUNT(*)::int AS sent,
         COUNT(*) FILTER (WHERE COALESCE(open_count, 0) > 0)::int AS opened
       FROM email_log
-      WHERE subject_variant IS NOT NULL
+      WHERE tenant_id = $1
+        AND (subject_variant IS NOT NULL
          OR open_token IS NOT NULL
-         OR type IN ('digest', 'home_value_digest')
+         OR type IN ('digest', 'home_value_digest'))
       GROUP BY COALESCE(type, 'unknown'), COALESCE(subject_variant, '(none)')
       ORDER BY type, variant
-    `).catch(() => ({ rows: [] }));
+    `, [tenantIdOf(req)]).catch(() => ({ rows: [] }));
 
     const variants = (result.rows || []).map((r) => {
       const sent = Number(r.sent || 0);
@@ -1184,10 +1238,48 @@ export const getEmailAbStats = async (req, res) => {
 
 const AGENT_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+async function inviteStaff(row, tenantId, tenant) {
+  try {
+    const { sent } = await issueAccountLink({
+      user: { id: row.id, email: row.email, name: row.name, tenant_id: tenantId },
+      purpose: 'invite',
+      tenant,
+    });
+    return sent;
+  } catch (error) {
+    logger.error('staff invite failed', { id: row.id, message: error.message });
+    return false;
+  }
+}
+
+/**
+ * POST /api/admin/agents/:id/invite — (re)send the set-your-password email.
+ */
+export const resendAgentInvite = async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Invalid agent id' });
+  try {
+    const tenantId = tenantIdOf(req);
+    const r = await getPool().query(
+      `SELECT id, email, name FROM users
+       WHERE id = $1 AND tenant_id = $2 AND role IN ('agent', 'admin') AND status = 'active'`,
+      [id, tenantId]
+    );
+    if (!r.rows[0]) return res.status(404).json({ error: 'Agent not found' });
+    const sent = await inviteStaff(r.rows[0], tenantId, req.tenant);
+    if (!sent) return res.status(429).json({ error: 'An invite just went out. Try again in an hour.' });
+    return res.json({ success: true });
+  } catch (error) {
+    logger.error('resendAgentInvite error', error);
+    return res.status(500).json({ error: 'Could not send the invite' });
+  }
+};
+
 /**
  * POST /api/admin/agents
  * Create a teammate account with role=agent.
- * Body: { name, email, phone?, password, brand_name?, brokerage_name?, brand_phone?, voice_style?, marketKey? }
+ * Without a password the agent is emailed an invite to set their own.
+ * Body: { name, email, phone?, password?, brand_name?, brokerage_name?, brand_phone?, voice_style?, marketKey? }
  */
 export const createAgent = async (req, res) => {
   try {
@@ -1202,7 +1294,8 @@ export const createAgent = async (req, res) => {
     if (!nameStr) {
       return res.status(400).json({ error: 'Name is required' });
     }
-    if (passStr.length < 8) {
+    // No password: the agent gets an invite email and sets their own.
+    if (passStr && passStr.length < 8) {
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
 
@@ -1238,9 +1331,11 @@ export const createAgent = async (req, res) => {
     const marketKey = marketNorm.key;
 
     const pool = getPool();
-    const existing = await pool.query('SELECT id, role, password_hash FROM users WHERE LOWER(email) = $1', [
-      emailStr,
-    ]);
+    const tenantId = tenantIdOf(req);
+    const existing = await pool.query(
+      'SELECT id, role, password_hash FROM users WHERE LOWER(email) = $1 AND tenant_id = $2',
+      [emailStr, tenantId]
+    );
 
     if (existing.rows.length) {
       const row = existing.rows[0];
@@ -1249,11 +1344,11 @@ export const createAgent = async (req, res) => {
       if (role === 'agent' || role === 'admin') {
         return res.status(409).json({ error: 'An agent/admin account with that email already exists' });
       }
-      const hash = await bcrypt.hash(passStr, 10);
+      const hash = passStr ? await bcrypt.hash(passStr, 10) : null;
       const token = crypto.randomBytes(24).toString('hex');
       const updated = await pool.query(
         `UPDATE users SET
-           password_hash = $1,
+           password_hash = COALESCE($1, password_hash),
            name = $2,
            phone = COALESCE($3, phone),
            role = 'agent',
@@ -1272,29 +1367,36 @@ export const createAgent = async (req, res) => {
         [hash, nameStr, phoneVal, token, brandName, brokerageName, brandPhone, voiceStyle, marketKey, row.id]
       );
       logger.info('Existing user upgraded to agent', { email: emailStr, id: row.id });
+      const invited = !passStr && (await inviteStaff(updated.rows[0], tenantId, req.tenant));
       return res.status(200).json({
         success: true,
         data: publicAgentPayload(updated.rows[0]),
         upgraded: true,
+        ...(passStr ? {} : { invited }),
       });
     }
 
-    const hash = await bcrypt.hash(passStr, 10);
+    const hash = passStr ? await bcrypt.hash(passStr, 10) : null;
     const manageToken = crypto.randomBytes(24).toString('hex');
     const created = await pool.query(
       `INSERT INTO users (
          email, name, phone, manage_token, password_hash, role, status, last_active_at,
-         brand_name, brokerage_name, brand_phone, voice_style, market_key
+         brand_name, brokerage_name, brand_phone, voice_style, market_key, tenant_id
        )
-       VALUES ($1, $2, $3, $4, $5, 'agent', 'active', NOW(), $6, $7, $8, $9, $10)
+       VALUES ($1, $2, $3, $4, $5, 'agent', 'active', NOW(), $6, $7, $8, $9, $10, $11)
        RETURNING id, email, name, phone, role, status, created_at, last_active_at,
                  brand_name, brokerage_name, brand_phone, voice_style, market_key,
                  custom_domain, domain_verified_at, domain_verify_token`,
-      [emailStr, nameStr, phoneVal, manageToken, hash, brandName, brokerageName, brandPhone, voiceStyle, marketKey]
+      [emailStr, nameStr, phoneVal, manageToken, hash, brandName, brokerageName, brandPhone, voiceStyle, marketKey, tenantId]
     );
 
     logger.info('Agent account created', { email: emailStr, id: created.rows[0].id });
-    return res.status(201).json({ success: true, data: publicAgentPayload(created.rows[0]) });
+    const invited = !passStr && (await inviteStaff(created.rows[0], tenantId, req.tenant));
+    return res.status(201).json({
+      success: true,
+      data: publicAgentPayload(created.rows[0]),
+      ...(passStr ? {} : { invited }),
+    });
   } catch (error) {
     logger.error('createAgent error', error);
     return res.status(500).json({ error: 'Failed to create agent' });
@@ -1312,19 +1414,22 @@ export const listAgents = async (req, res) => {
       `SELECT id, email, name, phone, role, status, created_at, last_active_at,
               brand_name, brokerage_name, brand_phone, voice_style, market_key,
               custom_domain, domain_verified_at, domain_verify_token,
+              (password_hash IS NULL) AS invite_pending,
               (SELECT COUNT(*)::int FROM users c
                WHERE c.assigned_agent_id = users.id
                  AND COALESCE(c.role, 'client') = 'client') AS assigned_lead_count
        FROM users
-       WHERE role IN ('agent', 'admin')
+       WHERE role IN ('agent', 'admin') AND tenant_id = $1
        ORDER BY
          CASE status WHEN 'active' THEN 0 ELSE 1 END,
          name NULLS LAST,
-         email`
+         email`,
+      [tenantIdOf(req)]
     );
     const data = result.rows.map((row) => ({
       ...publicAgentPayload(row),
       assigned_lead_count: row.assigned_lead_count,
+      invite_pending: row.invite_pending,
     }));
     return res.json({ success: true, data });
   } catch (error) {
@@ -1347,8 +1452,8 @@ export const patchAgent = async (req, res) => {
     const body = req.body || {};
     const pool = getPool();
     const existing = await pool.query(
-      `SELECT * FROM users WHERE id = $1 AND role IN ('agent', 'admin')`,
-      [id]
+      `SELECT * FROM users WHERE id = $1 AND role IN ('agent', 'admin') AND tenant_id = $2`,
+      [id, tenantIdOf(req)]
     );
     if (!existing.rows[0]) {
       return res.status(404).json({ error: 'Agent not found' });
@@ -1470,7 +1575,7 @@ export const patchAgent = async (req, res) => {
 export const getFunnelStats = async (req, res) => {
   try {
     const { getFunnel } = await import('../services/funnel.js');
-    const data = await getFunnel({ days: req.query.days });
+    const data = await getFunnel({ days: req.query.days, tenantId: tenantIdOf(req) });
     return res.json({ success: true, data });
   } catch (error) {
     console.error('funnel stats error:', error);

@@ -1,14 +1,34 @@
 /**
  * Multi-agent seats (P-1) — agent login, team-pooled cockpit, assign.
  * Reuses agentCockpit service for the same lead shape as /api/admin/cockpit.
- * Visibility: agents see ALL client users (team pool). No admin settings here.
+ * Visibility: only the request's tenant; agents see leads per the tenant's lead_visibility. No admin settings here.
  */
 import bcrypt from 'bcrypt';
 import getPool from '../config/database.js';
-import { generateToken } from '../middleware/auth.js';
+import { finishLogin } from '../services/staffAuth.js';
 import logger from '../utils/logger.js';
+import { tenantIdOf, leadVisibility } from '../services/tenantContext.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * WHERE fragment for the leads this staff member may see: their tenant only;
+ * admins see every lead there, agents per the tenant's lead visibility.
+ * Appends its values to params.
+ */
+function visibleLeadSql(req, params, alias = '') {
+  params.push(tenantIdOf(req));
+  let sql = `${alias}tenant_id = $${params.length}`;
+  const visibility = req.user?.role === 'admin' ? 'all' : leadVisibility(req.tenant);
+  if (visibility !== 'all') {
+    params.push(Number(req.user?.id) || 0);
+    const p = `$${params.length}`;
+    sql += visibility === 'own'
+      ? ` AND ${alias}assigned_agent_id = ${p}`
+      : ` AND (${alias}assigned_agent_id = ${p} OR ${alias}assigned_agent_id IS NULL)`;
+  }
+  return sql;
+}
 
 /**
  * Shared cockpit list — same shape as admin getCockpitLeads, plus assignment.
@@ -20,13 +40,15 @@ async function listCockpitLeads(req, res) {
     const limitNum = Math.min(parseInt(limit, 10) || 100, 200);
     const like = `%${String(q).trim()}%`;
     const pool = getPool();
+    const listParams = [like, limitNum];
+    const visible = visibleLeadSql(req, listParams, 'u.');
 
     const users = await pool.query(
       `SELECT u.id, u.email, u.name, u.phone, u.role, u.status, u.intent,
               u.lead_score, u.lead_score_updated_at, u.seller_heat, u.seller_heat_at,
               u.lifecycle_stage, u.lifecycle_stage_manual, u.next_touch_at, u.last_touched_at,
               u.fub_person_id, u.source, u.created_at, u.last_active_at, u.household_id,
-              u.assigned_agent_id,
+              u.assigned_agent_id, u.tenant_id,
               a.name AS assigned_agent_name,
               a.email AS assigned_agent_email,
               (SELECT COUNT(*)::int FROM saved_searches s WHERE s.user_id = u.id) AS search_count,
@@ -36,9 +58,10 @@ async function listCockpitLeads(req, res) {
        WHERE u.status IS DISTINCT FROM 'unsubscribed'
          AND COALESCE(u.role, 'client') = 'client'
          AND ($1 = '%%' OR u.email ILIKE $1 OR u.name ILIKE $1 OR u.phone ILIKE $1)
+         AND ${visible}
        ORDER BY COALESCE(u.lead_score, 0) DESC, u.last_active_at DESC NULLS LAST, u.created_at DESC
        LIMIT $2`,
-      [like, limitNum]
+      listParams
     );
 
     const { enrichLeadForCockpit } = await import('../services/agentCockpit.js');
@@ -83,7 +106,7 @@ async function listCockpitLeads(req, res) {
 
 /**
  * POST /api/agent/login — email + password for users with role agent|admin.
- * Clients rejected with 403. JWT: { id, email, role }.
+ * Clients rejected with 403. JWT: { id, email, role, tenant_id }; only users of the request's tenant.
  */
 export const agentLogin = async (req, res) => {
   try {
@@ -95,8 +118,8 @@ export const agentLogin = async (req, res) => {
 
     const pool = getPool();
     const result = await pool.query(
-      "SELECT * FROM users WHERE LOWER(email) = $1 AND status = 'active'",
-      [emailStr]
+      "SELECT * FROM users WHERE LOWER(email) = $1 AND tenant_id = $2 AND status = 'active'",
+      [emailStr, tenantIdOf(req)]
     );
     const user = result.rows[0];
     if (!user || !user.password_hash) {
@@ -115,22 +138,23 @@ export const agentLogin = async (req, res) => {
 
     await pool.query('UPDATE users SET last_active_at = NOW() WHERE id = $1', [user.id]);
 
-    const token = generateToken({
-      id: user.id,
-      email: user.email,
-      role: role === 'admin' ? 'admin' : 'agent',
-      name: user.name || null,
-    });
-
-    logger.info('Agent login successful', { email: user.email, role, id: user.id });
-    return res.json({
-      success: true,
-      token,
-      data: {
+    logger.info('Agent password accepted', { email: user.email, role, id: user.id });
+    return await finishLogin(res, {
+      payload: {
         id: user.id,
         email: user.email,
-        name: user.name,
         role: role === 'admin' ? 'admin' : 'agent',
+        name: user.name || null,
+        tenant_id: user.tenant_id,
+      },
+      body: {
+        success: true,
+        data: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: role === 'admin' ? 'admin' : 'agent',
+        },
       },
     });
   } catch (error) {
@@ -154,9 +178,11 @@ export const patchAgentCockpitLead = async (req, res) => {
     }
     const body = req.body || {};
     const pool = getPool();
+    const existingParams = [id];
     const existing = await pool.query(
-      `SELECT * FROM users WHERE id = $1 AND COALESCE(role, 'client') = 'client'`,
-      [id]
+      `SELECT * FROM users WHERE id = $1 AND COALESCE(role, 'client') = 'client'
+         AND ${visibleLeadSql(req, existingParams)}`,
+      existingParams
     );
     if (!existing.rows[0]) {
       return res.status(404).json({ error: 'Lead not found' });
@@ -263,9 +289,11 @@ export const assignLead = async (req, res) => {
     }
 
     const pool = getPool();
+    const leadParams = [userId];
     const leadRes = await pool.query(
-      `SELECT * FROM users WHERE id = $1 AND COALESCE(role, 'client') = 'client'`,
-      [userId]
+      `SELECT * FROM users WHERE id = $1 AND COALESCE(role, 'client') = 'client'
+         AND ${visibleLeadSql(req, leadParams)}`,
+      leadParams
     );
     if (!leadRes.rows[0]) {
       return res.status(404).json({ error: 'Lead not found' });
@@ -275,8 +303,8 @@ export const assignLead = async (req, res) => {
     if (assignedAgentId != null) {
       const agentRes = await pool.query(
         `SELECT id, email, name, role, status FROM users
-         WHERE id = $1 AND role IN ('agent', 'admin') AND status = 'active'`,
-        [assignedAgentId]
+         WHERE id = $1 AND tenant_id = $2 AND role IN ('agent', 'admin') AND status = 'active'`,
+        [assignedAgentId, tenantIdOf(req)]
       );
       if (!agentRes.rows[0]) {
         return res.status(400).json({ error: 'assigned_agent_id must be an active agent or admin' });
@@ -350,8 +378,9 @@ export const listTeammates = async (req, res) => {
     const result = await pool.query(
       `SELECT id, email, name, phone, role, status, last_active_at
        FROM users
-       WHERE role IN ('agent', 'admin') AND status = 'active'
-       ORDER BY name NULLS LAST, email`
+       WHERE role IN ('agent', 'admin') AND status = 'active' AND tenant_id = $1
+       ORDER BY name NULLS LAST, email`,
+      [tenantIdOf(req)]
     );
     return res.json({
       success: true,
@@ -862,10 +891,10 @@ export const getAgentWebformStats = async (req, res) => {
 /** The signed-in staff member's user row. Admin tokens from the admin login carry only an email. */
 async function staffRow(req, pool) {
   const { rows: [row] } = req.user?.id
-    ? await pool.query('SELECT id, name, email, role, morning_brief FROM users WHERE id = $1', [req.user.id])
+    ? await pool.query('SELECT id, name, email, role, morning_brief, tenant_id FROM users WHERE id = $1', [req.user.id])
     : await pool.query(
-      'SELECT id, name, email, role, morning_brief FROM users WHERE LOWER(email) = LOWER($1) ORDER BY id LIMIT 1',
-      [String(req.user?.email || '')]
+      'SELECT id, name, email, role, morning_brief, tenant_id FROM users WHERE LOWER(email) = LOWER($1) AND tenant_id = $2 ORDER BY id LIMIT 1',
+      [String(req.user?.email || ''), tenantIdOf(req)]
     );
   return row || null;
 }
@@ -875,7 +904,7 @@ export const getAgentBrief = async (req, res) => {
     const pool = getPool();
     const row = await staffRow(req, pool);
     // An admin without a user row still covers the unassigned leads; there is just no email to turn on.
-    const agent = row || (req.user?.role === 'admin' ? { id: 0, role: 'admin' } : null);
+    const agent = row || (req.user?.role === 'admin' ? { id: 0, role: 'admin', tenant_id: tenantIdOf(req) } : null);
     if (!agent) return res.status(404).json({ error: 'Agent not found' });
     const { buildBrief } = await import('../services/morningBrief.js');
     const brief = await buildBrief({ ...agent, role: req.user.role === 'admin' ? 'admin' : agent.role }, { pool });

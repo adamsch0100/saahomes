@@ -1,4 +1,5 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import {
   login,
   getSubmissions,
@@ -21,6 +22,7 @@ import {
   createAgent,
   listAgents,
   patchAgent,
+  resendAgentInvite,
 } from '../controllers/adminController.js';
 import {
   setAgentDomain,
@@ -32,7 +34,16 @@ import { authenticateToken, requireRole } from '../middleware/auth.js';
 const router = express.Router();
 
 // Public admin routes
-router.post('/login', login);
+// Failed logins only count toward the limit, so a typo doesn't lock anyone out.
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  skipSuccessfulRequests: true,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many sign-in attempts. Please wait a few minutes and try again.' },
+});
+router.post('/login', loginLimiter, login);
 
 // Protected admin-only routes (agents use /api/agent/* for cockpit)
 const adminOnly = [authenticateToken, requireRole('admin')];
@@ -65,6 +76,7 @@ router.get('/fub/status', ...adminOnly, getFubStatus);
 router.get('/agents', ...adminOnly, listAgents);
 router.post('/agents', ...adminOnly, createAgent);
 router.patch('/agents/:id', ...adminOnly, patchAgent);
+router.post('/agents/:id/invite', ...adminOnly, resendAgentInvite);
 router.post('/agents/:id/domain', ...adminOnly, setAgentDomain);
 router.post('/agents/:id/domain/verify', ...adminOnly, verifyAgentDomain);
 router.delete('/agents/:id/domain', ...adminOnly, deleteAgentDomain);

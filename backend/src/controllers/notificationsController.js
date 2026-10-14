@@ -12,31 +12,9 @@
  */
 import getPool from '../config/database.js';
 import { getUserPrefs, upsertUserPrefs } from '../services/notificationPrefs.js';
+import { resolveUser } from '../services/buyerSession.js';
 
-const COOKIE_NAME = 'saa_user_token';
 const PAGE_SIZE = 20;
-
-async function findUserByToken(token) {
-  if (!token || token.length < 16 || token.length > 80) return null;
-  const r = await getPool().query(
-    "SELECT * FROM users WHERE manage_token = $1 AND status = 'active'",
-    [String(token)]
-  );
-  return r.rows[0] || null;
-}
-
-async function resolveUser(req) {
-  const qToken = req.query?.token;
-  if (qToken) {
-    const u = await findUserByToken(qToken);
-    if (u) return u;
-  }
-  const cookieToken = req.cookies?.[COOKIE_NAME];
-  if (cookieToken) return findUserByToken(cookieToken);
-  const bodyToken = req.body?.token;
-  if (bodyToken) return findUserByToken(bodyToken);
-  return null;
-}
 
 function serialize(row) {
   return {

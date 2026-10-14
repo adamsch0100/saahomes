@@ -101,7 +101,7 @@ export async function saveSubscription({ userId, subscription, req, pool = getPo
     `INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth, user_agent)
      VALUES ($1, $2, $3, $4, $5)
      ON CONFLICT (endpoint) DO UPDATE SET
-       user_id = EXCLUDED.user_id, p256dh = EXCLUDED.p256dh, auth = EXCLUDED.auth,
+       user_id = EXCLUDED.user_id, tenant_id = EXCLUDED.tenant_id, p256dh = EXCLUDED.p256dh, auth = EXCLUDED.auth,
        user_agent = EXCLUDED.user_agent, disabled_at = NULL, last_error = NULL,
        created_at = CASE WHEN push_subscriptions.user_id = EXCLUDED.user_id
                          THEN push_subscriptions.created_at ELSE NOW() END`,

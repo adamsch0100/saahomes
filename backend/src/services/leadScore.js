@@ -13,6 +13,7 @@
  */
 import getPool from '../config/database.js';
 import { buildSavedSearchWhere, savedSearchPath } from './listingFilters.js';
+import { currentTenantId } from './tenantContext.js';
 
 /**
  * WHERE for saved-search filters against the listings table. Delegates to the
@@ -74,12 +75,13 @@ export async function getSearchMatchMeta(filters, pool = getPool()) {
  */
 export async function computeAndStoreLeadScore(userId, pool = getPool()) {
   const userRes = await pool.query(
-    'SELECT id, email, last_active_at, created_at FROM users WHERE id = $1',
+    'SELECT id, email, last_active_at, created_at, tenant_id FROM users WHERE id = $1',
     [userId]
   );
   if (!userRes.rows[0]) return { score: 0, breakdown: {} };
   const user = userRes.rows[0];
   const email = (user.email || '').toLowerCase();
+  const tenantId = user.tenant_id ?? currentTenantId();
   const breakdown = {
     saved_search: 0,
     saved_home: 0,
@@ -112,7 +114,7 @@ export async function computeAndStoreLeadScore(userId, pool = getPool()) {
 
   // +25 schedule showing
   if (email) {
-    if ((await safeCount('SELECT COUNT(*)::int AS n FROM showing_requests WHERE LOWER(email) = $1', [email])) > 0) {
+    if ((await safeCount('SELECT COUNT(*)::int AS n FROM showing_requests WHERE LOWER(email) = $1 AND tenant_id = $2', [email, tenantId])) > 0) {
       breakdown.showing = 25;
     }
   }
@@ -128,8 +130,8 @@ export async function computeAndStoreLeadScore(userId, pool = getPool()) {
   // +10 contact form
   if (email) {
     if ((await safeCount(
-      'SELECT COUNT(*)::int AS n FROM contact_submissions WHERE LOWER(email) = $1',
-      [email]
+      'SELECT COUNT(*)::int AS n FROM contact_submissions WHERE LOWER(email) = $1 AND tenant_id = $2',
+      [email, tenantId]
     )) > 0) {
       breakdown.contact = 10;
     }
@@ -241,7 +243,7 @@ export async function recordPropertyView(userId, listingKey, pool = getPool()) {
       );
       if (viewCount.rows[0]?.n === 2) {
         const userRow = await pool.query(
-          'SELECT email, name, phone FROM users WHERE id = $1',
+          'SELECT email, name, phone, tenant_id FROM users WHERE id = $1',
           [userId]
         );
         const u = userRow.rows[0];
@@ -254,6 +256,7 @@ export async function recordPropertyView(userId, listingKey, pool = getPool()) {
             phone: u.phone,
             message: `Listing: ${listingId}`,
             property: { mlsNumber: listingId },
+            tenantId: u.tenant_id,
           }).catch(() => {});
           await pool.query(
             `INSERT INTO user_events (user_id, event_type, meta) VALUES ($1, 'listing_view_2x', $2::jsonb)`,

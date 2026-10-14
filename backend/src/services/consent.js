@@ -5,7 +5,8 @@
  * go to contacts whose latest row for that channel is 'granted'.
  */
 import getPool from '../config/database.js';
-import { recordEvent, DEFAULT_TENANT_ID } from './events.js';
+import { recordEvent } from './events.js';
+import { currentTenantId } from './tenantContext.js';
 
 export const CHANNELS = ['email', 'sms', 'push', 'call'];
 
@@ -16,7 +17,7 @@ export async function recordConsent({
   wording = null,
   source = null,
   req = null,
-  tenantId = DEFAULT_TENANT_ID,
+  tenantId = currentTenantId(),
 } = {}, pool = getPool()) {
   if (!userId || !CHANNELS.includes(channel)) return null;
   const status = granted ? 'granted' : 'revoked';

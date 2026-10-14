@@ -30,6 +30,8 @@ import {
   filtersToSearchPath,
 } from '../services/leadScore.js';
 import { rejectIfDisposableEmail } from '../utils/emailQuality.js';
+import { tenantIdOf, currentTenantId } from '../services/tenantContext.js';
+import { findUserByToken as findBuyerByToken, resolveUser } from '../services/buyerSession.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FREQUENCIES = ['immediate', 'daily', 'weekly'];
@@ -125,7 +127,8 @@ export const createAlert = async (req, res) => {
     // An existing account is only updated/signed in when the request already
     // holds that account's session; otherwise the search is still saved (lead
     // capture) but the visitor must use the emailed sign-in link.
-    let user = await pool.query('SELECT * FROM users WHERE email = $1', [emailStr]);
+    const tenantId = tenantIdOf(req);
+    let user = await pool.query('SELECT * FROM users WHERE email = $1 AND tenant_id = $2', [emailStr, tenantId]);
     let isOwner = true;
     const isNewUser = !user.rows.length;
     if (user.rows.length && isStaffAccount(user.rows[0])) {
@@ -136,8 +139,8 @@ export const createAlert = async (req, res) => {
     } else if (!user.rows.length) {
       const token = crypto.randomBytes(24).toString('hex');
       const created = await pool.query(
-        'INSERT INTO users (email, name, manage_token, phone) VALUES ($1, $2, $3, $4) RETURNING *',
-        [emailStr, contactName, token, phoneDigits]
+        'INSERT INTO users (email, name, manage_token, phone, tenant_id, assigned_agent_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+        [emailStr, contactName, token, phoneDigits, tenantId, req.tenant?.agent?.id || null]
       );
       user = created;
     } else {
@@ -267,27 +270,6 @@ export const createAlert = async (req, res) => {
   }
 };
 
-const findUserByToken = async (token) => {
-  if (!token || token.length < 16 || token.length > 80) return null;
-  const r = await getPool().query('SELECT * FROM users WHERE manage_token = $1 AND status = \'active\'', [String(token)]);
-  return r.rows[0] || null;
-};
-
-/** Resolve user from query token OR session cookie. */
-async function resolveUser(req) {
-  const qToken = req.query?.token;
-  if (qToken) {
-    const u = await findUserByToken(qToken);
-    if (u) return u;
-  }
-  const cookieToken = req.cookies?.[COOKIE_NAME];
-  if (cookieToken) return findUserByToken(cookieToken);
-  // Body token used by some POSTs
-  const bodyToken = req.body?.token;
-  if (bodyToken) return findUserByToken(bodyToken);
-  return null;
-}
-
 /** Attach live match_count + preview listing to each saved search. */
 async function enrichSearches(rows, pool = getPool()) {
   const out = [];
@@ -369,7 +351,7 @@ export const getMe = async (req, res) => {
   try {
     const token = req.cookies?.[COOKIE_NAME];
     if (!token) return res.status(401).json({ success: false, error: 'Not signed in.' });
-    const user = await findUserByToken(token);
+    const user = await findBuyerByToken(token, tenantIdOf(req));
     if (!user) {
       res.clearCookie(COOKIE_NAME, { path: '/' });
       return res.status(401).json({ success: false, error: 'Session expired.' });
@@ -493,8 +475,8 @@ export async function emailSignInLink(userRow) {
   // queue it — the outbox cron drains the queue as a fallback.
   const queueIt = async () => {
     await getPool().query(
-      `INSERT INTO email_outbox (to_email, subject, html) VALUES ($1, $2, $3)`,
-      [userRow.email, 'Your saved searches — SAA Homes', html]
+      `INSERT INTO email_outbox (to_email, subject, html, tenant_id) VALUES ($1, $2, $3, $4)`,
+      [userRow.email, 'Your saved searches — SAA Homes', html, userRow.tenant_id ?? currentTenantId()]
     );
   };
   try {
@@ -516,7 +498,7 @@ export const sendMagicLink = async (req, res) => {
     if (!EMAIL_RE.test(email)) {
       return res.status(400).json({ success: false, error: 'Please enter a valid email.' });
     }
-    const user = await getPool().query('SELECT * FROM users WHERE email = $1 AND status = \'active\'', [email]);
+    const user = await getPool().query('SELECT * FROM users WHERE email = $1 AND tenant_id = $2 AND status = \'active\'', [email, tenantIdOf(req)]);
     if (user.rows.length) {
       await emailSignInLink(user.rows[0]);
     }
@@ -563,9 +545,9 @@ export const updateAlert = async (req, res) => {
     }
     if (!updates.length) return res.status(400).json({ success: false, error: 'Nothing to update.' });
     updates.push('updated_at = NOW()');
-    params.push(id);
+    params.push(id, user.id);
     const updated = await pool.query(
-      `UPDATE saved_searches SET ${updates.join(', ')} WHERE id = $${i} RETURNING id, name, filters, is_active, frequency, send_time, send_day`,
+      `UPDATE saved_searches SET ${updates.join(', ')} WHERE id = $${i} AND user_id = $${i + 1} RETURNING id, name, filters, is_active, frequency, send_time, send_day`,
       params
     );
     await pool.query('UPDATE users SET last_active_at = NOW() WHERE id = $1', [user.id]);

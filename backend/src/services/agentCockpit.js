@@ -15,6 +15,7 @@
  *   new: same day · showing: +1d · active: +3d · nurturing: +7d · closed/lost: none
  */
 import getPool from '../config/database.js';
+import { currentTenantId } from './tenantContext.js';
 
 export const LIFECYCLE_STAGES = ['new', 'nurturing', 'showing', 'active', 'closed', 'lost'];
 
@@ -30,7 +31,7 @@ const HIGH_INTENT_EVENT_TYPES = [
  * Count high-intent events in the last 7 days for a user.
  * Returns { count, isHot, signals[] } from real DB rows only.
  */
-export async function computeHeat(userId, email, pool = getPool()) {
+export async function computeHeat(userId, email, pool = getPool(), tenantId = currentTenantId()) {
   const emailStr = String(email || '').trim().toLowerCase();
   const signals = [];
   let count = 0;
@@ -59,9 +60,9 @@ export async function computeHeat(userId, email, pool = getPool()) {
   if (emailStr) {
     const showings = await safe(
       `SELECT id, listing_address, created_at FROM showing_requests
-       WHERE LOWER(email) = $1 AND created_at > NOW() - INTERVAL '7 days'
+       WHERE LOWER(email) = $1 AND tenant_id = $2 AND created_at > NOW() - INTERVAL '7 days'
        ORDER BY created_at DESC`,
-      [emailStr]
+      [emailStr, tenantId]
     );
     for (const row of showings.rows) {
       signals.push({ type: 'showing_request', at: row.created_at, detail: row.listing_address });
@@ -73,9 +74,9 @@ export async function computeHeat(userId, email, pool = getPool()) {
   if (emailStr) {
     const reports = await safe(
       `SELECT id, area, created_at FROM market_report_submissions
-       WHERE LOWER(email) = $1 AND created_at > NOW() - INTERVAL '7 days'
+       WHERE LOWER(email) = $1 AND tenant_id = $2 AND created_at > NOW() - INTERVAL '7 days'
        ORDER BY created_at DESC`,
-      [emailStr]
+      [emailStr, tenantId]
     );
     for (const row of reports.rows) {
       signals.push({ type: 'market_analysis', at: row.created_at, detail: row.area });
@@ -204,8 +205,8 @@ export function deriveNextTouchAt(stage, { lastTouchedAt, createdAt, lastActiveA
  * Enrich a user row with heat, lifecycle, next-touch for the cockpit.
  * Optionally persists auto-derived stage/next_touch when not manual.
  */
-export async function enrichLeadForCockpit(user, { persist = false } = {}, pool = getPool()) {
-  const heat = await computeHeat(user.id, user.email, pool);
+export async function enrichLeadForCockpit(user, { persist = false, tenantId = user?.tenant_id ?? currentTenantId() } = {}, pool = getPool()) {
+  const heat = await computeHeat(user.id, user.email, pool, tenantId);
   const email = String(user.email || '').toLowerCase();
 
   const safeCount = async (sql, params) => {
@@ -218,11 +219,11 @@ export async function enrichLeadForCockpit(user, { persist = false } = {}, pool 
   };
 
   const hasShowing = email
-    ? (await safeCount('SELECT COUNT(*)::int AS n FROM showing_requests WHERE LOWER(email) = $1', [email])) > 0
+    ? (await safeCount('SELECT COUNT(*)::int AS n FROM showing_requests WHERE LOWER(email) = $1 AND tenant_id = $2', [email, tenantId])) > 0
     : false;
   const hasSearch = (await safeCount('SELECT COUNT(*)::int AS n FROM saved_searches WHERE user_id = $1', [user.id])) > 0;
   const hasContact = email
-    ? (await safeCount('SELECT COUNT(*)::int AS n FROM contact_submissions WHERE LOWER(email) = $1', [email])) > 0
+    ? (await safeCount('SELECT COUNT(*)::int AS n FROM contact_submissions WHERE LOWER(email) = $1 AND tenant_id = $2', [email, tenantId])) > 0
     : false;
   const hasViews = (await safeCount('SELECT COUNT(*)::int AS n FROM property_views WHERE user_id = $1', [user.id])) > 0;
   const hasSellerHeat = !!(user.seller_heat);
@@ -356,11 +357,11 @@ export async function refreshLeadLifecycle(userId, pool = getPool()) {
 /**
  * Resolve user id by email for lifecycle refresh from form leads.
  */
-export async function refreshLeadLifecycleByEmail(email, pool = getPool()) {
+export async function refreshLeadLifecycleByEmail(email, pool = getPool(), tenantId = currentTenantId()) {
   const emailStr = String(email || '').trim().toLowerCase();
   if (!emailStr.includes('@')) return null;
   try {
-    const r = await pool.query('SELECT id FROM users WHERE LOWER(email) = $1 LIMIT 1', [emailStr]);
+    const r = await pool.query('SELECT id FROM users WHERE LOWER(email) = $1 AND tenant_id = $2 LIMIT 1', [emailStr, tenantId]);
     if (!r.rows[0]) return null;
     return refreshLeadLifecycle(r.rows[0].id, pool);
   } catch {

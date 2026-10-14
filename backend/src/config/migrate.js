@@ -1039,6 +1039,102 @@ export const runMigrations = async () => {
       console.error('lead submit log migration skipped:', logErr.message);
     }
 
+    // ── Walls between brokerages ─────────────────────────────────────────
+    // Email is unique per brokerage, not across the platform, so the same
+    // person can be a lead at two brokerages without either seeing the other.
+    // Rows that belong to a person, a saved search or a household take their
+    // tenant from that parent in the database itself, so no insert can file a
+    // row under the wrong brokerage.
+    await client.query('SAVEPOINT tenant_walls');
+    try {
+      for (const table of [
+        'contact_submissions', 'market_report_submissions', 'chfa_lead_submissions',
+        'champions_lead_submissions', 'chfa_dpa_lead_submissions', 'ghope_lead_submissions',
+        'lead_submit_log', 'search_snapshots', 'push_log', 'blocked_email_log',
+      ]) {
+        await client.query(`ALTER TABLE ${table} ADD COLUMN IF NOT EXISTS tenant_id INTEGER NOT NULL DEFAULT 1`);
+      }
+      await client.query(`
+        ALTER TABLE users DROP CONSTRAINT IF EXISTS users_email_key;
+        CREATE UNIQUE INDEX IF NOT EXISTS users_tenant_email_key ON users(tenant_id, email);
+        CREATE INDEX IF NOT EXISTS idx_users_tenant_role ON users(tenant_id, role);
+        CREATE INDEX IF NOT EXISTS idx_users_tenant_lower_email ON users(tenant_id, LOWER(email));
+        -- SAA's agents keep seeing every lead, as they always have. New
+        -- brokerages start with each agent's own leads plus the unassigned pond.
+        UPDATE tenants SET settings = settings || '{"lead_visibility":"all"}'
+        WHERE id = 1 AND NOT (settings ? 'lead_visibility');
+
+        CREATE OR REPLACE FUNCTION tenant_from_parent() RETURNS trigger AS $fn$
+        DECLARE
+          parent_id TEXT;
+          parent_tenant INTEGER;
+        BEGIN
+          parent_id := to_jsonb(NEW) ->> TG_ARGV[1];
+          IF parent_id IS NOT NULL THEN
+            EXECUTE format('SELECT tenant_id FROM %I WHERE id = $1', TG_ARGV[0])
+              INTO parent_tenant USING parent_id::integer;
+            IF parent_tenant IS NOT NULL THEN
+              NEW.tenant_id := parent_tenant;
+            END IF;
+          END IF;
+          RETURN NEW;
+        END
+        $fn$ LANGUAGE plpgsql;
+      `);
+      const parents = {
+        users: ['saved_searches', 'saved_homes', 'notifications', 'notification_prefs', 'home_profiles',
+          'property_views', 'user_events', 'email_log', 'events', 'contact_consents', 'push_subscriptions',
+          'home_reactions', 'tour_requests', 'push_log', 'email_outbox'],
+        saved_searches: ['alert_events', 'search_snapshots'],
+        households: ['household_invites', 'home_comments'],
+      };
+      const parentKey = { users: 'user_id', saved_searches: 'search_id', households: 'household_id' };
+      for (const [parent, tables] of Object.entries(parents)) {
+        for (const table of tables) {
+          await client.query(`
+            DROP TRIGGER IF EXISTS ${table}_tenant ON ${table};
+            CREATE TRIGGER ${table}_tenant BEFORE INSERT ON ${table}
+              FOR EACH ROW EXECUTE FUNCTION tenant_from_parent('${parent}', '${parentKey[parent]}');
+          `);
+        }
+      }
+      await client.query('RELEASE SAVEPOINT tenant_walls');
+    } catch (wallErr) {
+      await client.query('ROLLBACK TO SAVEPOINT tenant_walls');
+      console.error('tenant walls migration skipped:', wallErr.message);
+    }
+
+    // Staff accounts: password reset and invite links (only a hash of the
+    // token is stored), and two-step sign-in with an authenticator app.
+    await client.query('SAVEPOINT staff_auth');
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS password_resets (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          token_hash CHAR(64) NOT NULL UNIQUE,
+          purpose VARCHAR(16) NOT NULL DEFAULT 'reset',
+          expires_at TIMESTAMPTZ NOT NULL,
+          used_at TIMESTAMPTZ,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_password_resets_user ON password_resets(user_id, created_at DESC);
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS totp_secret_enc TEXT;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS totp_pending_enc TEXT;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS totp_enabled_at TIMESTAMPTZ;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS totp_last_step BIGINT;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS totp_recovery_hashes TEXT[];
+        DROP TRIGGER IF EXISTS password_resets_tenant ON password_resets;
+        CREATE TRIGGER password_resets_tenant BEFORE INSERT ON password_resets
+          FOR EACH ROW EXECUTE FUNCTION tenant_from_parent('users', 'user_id');
+      `);
+      await client.query('RELEASE SAVEPOINT staff_auth');
+    } catch (staffErr) {
+      await client.query('ROLLBACK TO SAVEPOINT staff_auth');
+      console.error('staff auth migration skipped:', staffErr.message);
+    }
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {

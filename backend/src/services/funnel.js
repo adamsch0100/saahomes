@@ -4,6 +4,7 @@
  * an anonymous visitor id. Each step counts people who did it in the window.
  */
 import getPool from '../config/database.js';
+import { currentTenantId } from './tenantContext.js';
 
 export const FUNNEL_STEPS = [
   { key: 'visited', label: 'Visited', types: null },
@@ -15,7 +16,7 @@ export const FUNNEL_STEPS = [
   { key: 'showing', label: 'Asked for a showing', types: ['showing_request'] },
 ];
 
-export async function getFunnel({ days = 30, tenantId = 1 } = {}, pool = getPool()) {
+export async function getFunnel({ days = 30, tenantId = currentTenantId() } = {}, pool = getPool()) {
   const d = Math.max(1, Math.min(365, Math.round(Number(days) || 30)));
   const params = [tenantId, d];
   const select = FUNNEL_STEPS.map((s) => {

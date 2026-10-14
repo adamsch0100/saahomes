@@ -19,6 +19,7 @@ import { sendEmail, smtpConfigured } from '../services/emailer.js';
 import { createNotification } from '../services/notificationService.js';
 import { hasOwnSession, isStaffAccount, setAuthCookie, SIGN_IN_REQUIRED_MESSAGE, emailSignInLink } from './alertController.js';
 import { findListing, resolveUser } from './savedHomesController.js';
+import { tenantIdOf, currentTenantId } from '../services/tenantContext.js';
 
 const SITE = (process.env.SITE_URL || 'https://saahomes.com').replace(/\/$/, '');
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -35,7 +36,7 @@ const unauthorized = (res) => res.status(401).json({ success: false, error: 'Sig
 
 async function sendOrQueue(to, subject, html, fromName) {
   const queueIt = () => getPool().query(
-    'INSERT INTO email_outbox (to_email, subject, html) VALUES ($1, $2, $3)', [to, subject, html]
+    'INSERT INTO email_outbox (to_email, subject, html, tenant_id) VALUES ($1, $2, $3, $4)', [to, subject, html, currentTenantId()]
   );
   try {
     if (smtpConfigured()) await sendEmail(to, subject, html, fromName);
@@ -173,18 +174,22 @@ export const joinHousehold = async (req, res) => {
       return res.status(400).json({ success: false, error: 'That invite link is not valid.' });
     }
     const pool = getPool();
-    const { rows: [invite] } = await pool.query('SELECT * FROM household_invites WHERE token_hash = $1', [hashToken(token)]);
+    const { rows: [invite] } = await pool.query(
+      'SELECT * FROM household_invites WHERE token_hash = $1 AND tenant_id = $2', [hashToken(token), tenantIdOf(req)]
+    );
     if (!invite || invite.revoked_at || invite.accepted_at || new Date(invite.expires_at) < new Date()) {
       return res.status(410).json({ success: false, error: 'This invite has expired or was already used. Ask for a new one.' });
     }
 
     let isNew = false;
-    let { rows: [member] } = await pool.query('SELECT * FROM users WHERE lower(email) = $1', [invite.email.toLowerCase()]);
+    let { rows: [member] } = await pool.query(
+      'SELECT * FROM users WHERE lower(email) = $1 AND tenant_id = $2', [invite.email.toLowerCase(), invite.tenant_id]
+    );
     if (!member) {
       isNew = true;
       ({ rows: [member] } = await pool.query(
-        'INSERT INTO users (email, name, manage_token, tenant_id) VALUES ($1, $2, $3, $4) RETURNING *',
-        [invite.email, invite.name, crypto.randomBytes(24).toString('hex'), invite.tenant_id]
+        'INSERT INTO users (email, name, manage_token, tenant_id, assigned_agent_id) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+        [invite.email, invite.name, crypto.randomBytes(24).toString('hex'), invite.tenant_id, req.tenant?.agent?.id || null]
       ));
     }
     // Staff seats never sign in from an emailed link; they sign in as usual.

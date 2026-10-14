@@ -4,6 +4,7 @@ import { forwardContactToFollowUpBoss } from '../services/followUpBossService.js
 import { recordLeadConversion } from '../services/ga4MeasurementService.js';
 import logger from '../utils/logger.js';
 import { reportLeadToBoard } from '../services/boardLeadCount.js';
+import { tenantIdOf } from '../services/tenantContext.js';
 
 /**
  * POST /api/cash-buyer-lead — cash-home-buyers page lead capture.
@@ -26,8 +27,8 @@ export const submitCashBuyerLead = async (req, res) => {
 
     const result = await client.query(
       `INSERT INTO contact_submissions
-        (name, email, phone, interest, message, area, source_page)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+        (name, email, phone, interest, message, area, source_page, tenant_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
       [
         name,
@@ -37,10 +38,11 @@ export const submitCashBuyerLead = async (req, res) => {
         message || null,
         city || null,
         'cash-home-buyers',
+        tenantIdOf(req),
       ]
     );
 
-    const submission = { ...result.rows[0], ...req.body, sourcePage: 'cash-home-buyers' };
+    const submission = { ...result.rows[0], ...req.body, sourcePage: 'cash-home-buyers', id: result.rows[0].id, tenant_id: result.rows[0].tenant_id };
 
     await client.query('COMMIT');
 

@@ -10,6 +10,7 @@ import {
 } from './alertController.js';
 import logger from '../utils/logger.js';
 import { reportLeadToBoard } from '../services/boardLeadCount.js';
+import { tenantIdOf } from '../services/tenantContext.js';
 
 function cleanPhone(v) {
   const digits = String(v || '').replace(/\D/g, '');
@@ -48,25 +49,26 @@ export const submitMarketReportForm = async (req, res) => {
     const result = await client.query(
       `INSERT INTO market_report_submissions
         (first_name, last_name, email, phone, area, source_page, utm_source, utm_medium, utm_campaign,
-         address_line, postal_code, living_area)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+         address_line, postal_code, living_area, tenant_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
        RETURNING *`,
       [
         firstName, lastName, email, phone || null, area || null,
         sourcePage || null, utmSource || null, utmMedium || null, utmCampaign || null,
         addr, zipVal,
         living && Number.isFinite(living) ? living : null,
+        tenantIdOf(req),
       ]
     );
 
-    const submission = { ...result.rows[0], ...req.body };
+    const submission = { ...result.rows[0], ...req.body, id: result.rows[0].id, tenant_id: result.rows[0].tenant_id };
 
     // Create/attach user + home profile for seller nurture when we have an address
     const emailStr = String(email || '').trim().toLowerCase();
     if (emailStr && addr) {
       try {
         let userRow;
-        const existing = await client.query('SELECT * FROM users WHERE email = $1', [emailStr]);
+        const existing = await client.query('SELECT * FROM users WHERE email = $1 AND tenant_id = $2', [emailStr, tenantIdOf(req)]);
         // Only a brand-new account or the visitor's own session is signed in
         // here; knowing an existing email must not hand out its session.
         let canSignIn = true;
@@ -102,13 +104,15 @@ export const submitMarketReportForm = async (req, res) => {
         } else {
           const token = crypto.randomBytes(24).toString('hex');
           const created = await client.query(
-            `INSERT INTO users (email, name, manage_token, phone, intent, seller_heat, seller_heat_at)
-             VALUES ($1, $2, $3, $4, 'selling', TRUE, NOW()) RETURNING *`,
+            `INSERT INTO users (email, name, manage_token, phone, intent, seller_heat, seller_heat_at, tenant_id, assigned_agent_id)
+             VALUES ($1, $2, $3, $4, 'selling', TRUE, NOW(), $5, $6) RETURNING *`,
             [
               emailStr,
               `${firstName || ''} ${lastName || ''}`.trim() || null,
               token,
               phoneDigits,
+              tenantIdOf(req),
+              req.tenant?.agent?.id || null,
             ]
           );
           userRow = created.rows[0];

@@ -17,6 +17,8 @@ import {
   SIGN_IN_REQUIRED_MESSAGE,
 } from './alertController.js';
 import { rejectIfDisposableEmail } from '../utils/emailQuality.js';
+import { tenantIdOf } from '../services/tenantContext.js';
+import { sessionUser } from '../services/buyerSession.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -36,7 +38,8 @@ export const register = async (req, res) => {
     if (passStr.length < 8) return res.status(400).json({ success: false, error: 'Password must be at least 8 characters.' });
 
     const pool = getPool();
-    const existing = await pool.query('SELECT * FROM users WHERE email = $1', [emailStr]);
+    const tenantId = tenantIdOf(req);
+    const existing = await pool.query('SELECT * FROM users WHERE email = $1 AND tenant_id = $2', [emailStr, tenantId]);
     if (existing.rows.length && (existing.rows[0].password_hash || isStaffAccount(existing.rows[0]))) {
       return res.status(409).json({ success: false, error: 'An account with that email already exists. Log in instead.' });
     }
@@ -63,9 +66,9 @@ export const register = async (req, res) => {
     } else {
       const token = crypto.randomBytes(24).toString('hex');
       const created = await pool.query(
-        `INSERT INTO users (email, name, phone, manage_token, password_hash, role)
-         VALUES ($1, $2, $3, $4, $5, 'client') RETURNING *`,
-        [emailStr, nameStr, phoneDigits, token, hash]
+        `INSERT INTO users (email, name, phone, manage_token, password_hash, role, tenant_id, assigned_agent_id)
+         VALUES ($1, $2, $3, $4, $5, 'client', $6, $7) RETURNING *`,
+        [emailStr, nameStr, phoneDigits, token, hash, tenantId, req.tenant?.agent?.id || null]
       );
       userRow = created.rows[0];
     }
@@ -91,8 +94,8 @@ export const login = async (req, res) => {
     }
     const pool = getPool();
     const user = await pool.query(
-      "SELECT * FROM users WHERE email = $1 AND status = 'active'",
-      [emailStr]
+      "SELECT * FROM users WHERE email = $1 AND tenant_id = $2 AND status = 'active'",
+      [emailStr, tenantIdOf(req)]
     );
     if (!user.rows.length || !user.rows[0].password_hash) {
       return res.status(401).json({ success: false, error: 'Incorrect email or password.' });
@@ -115,17 +118,16 @@ export const login = async (req, res) => {
 
 export const setPassword = async (req, res) => {
   try {
-    const token = req.cookies?.saa_user_token;
-    if (!token) return res.status(401).json({ success: false, error: 'Not signed in.' });
+    if (!req.cookies?.saa_user_token) return res.status(401).json({ success: false, error: 'Not signed in.' });
     const passStr = String(req.body?.password || '');
     if (passStr.length < 8) return res.status(400).json({ success: false, error: 'Password must be at least 8 characters.' });
 
     const pool = getPool();
-    const user = await pool.query('SELECT * FROM users WHERE manage_token = $1 AND status = \'active\'', [token]);
-    if (!user.rows.length) return res.status(401).json({ success: false, error: 'Session expired.' });
+    const user = await sessionUser(req, pool);
+    if (!user) return res.status(401).json({ success: false, error: 'Session expired.' });
 
     const hash = await bcrypt.hash(passStr, 10);
-    await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, user.rows[0].id]);
+    await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, user.id]);
     return res.json({ success: true });
   } catch (error) {
     console.error('setPassword error:', error);
@@ -155,7 +157,8 @@ export const ensureSession = async (req, res) => {
     }
 
     const pool = getPool();
-    let user = await pool.query('SELECT * FROM users WHERE email = $1', [emailStr]);
+    const tenantId = tenantIdOf(req);
+    let user = await pool.query('SELECT * FROM users WHERE email = $1 AND tenant_id = $2', [emailStr, tenantId]);
     const nameStr = String(name || '').trim().slice(0, 255) || null;
     const passStr = String(password || '');
     let hash = null;
@@ -165,9 +168,9 @@ export const ensureSession = async (req, res) => {
     if (!user.rows.length) {
       const token = crypto.randomBytes(24).toString('hex');
       const created = await pool.query(
-        `INSERT INTO users (email, name, phone, manage_token, password_hash, role, status, last_active_at)
-         VALUES ($1, $2, $3, $4, $5, 'client', 'active', NOW()) RETURNING *`,
-        [emailStr, nameStr, phoneDigits, token, hash]
+        `INSERT INTO users (email, name, phone, manage_token, password_hash, role, status, last_active_at, tenant_id, assigned_agent_id)
+         VALUES ($1, $2, $3, $4, $5, 'client', 'active', NOW(), $6, $7) RETURNING *`,
+        [emailStr, nameStr, phoneDigits, token, hash, tenantId, req.tenant?.agent?.id || null]
       );
       user = created;
     } else if (isStaffAccount(user.rows[0])) {

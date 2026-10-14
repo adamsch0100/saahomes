@@ -11,6 +11,8 @@
  */
 import crypto from 'node:crypto';
 import getPool from '../config/database.js';
+import { currentTenantId } from './tenantContext.js';
+import { sessionUser } from './buyerSession.js';
 
 export const DEFAULT_TENANT_ID = 1;
 export const VISITOR_COOKIE = 'saa_vid';
@@ -92,7 +94,7 @@ export async function recordEvent({
   searchId = null,
   source = 'web',
   meta = null,
-  tenantId = DEFAULT_TENANT_ID,
+  tenantId = currentTenantId(),
   occurredAt = null,
   dedupeMinutes = 0,
 } = {}, pool = getPool()) {
@@ -149,7 +151,9 @@ export async function stitchVisitor(visitorId, userId, pool = getPool()) {
   try {
     if (!isValidVisitorId(visitorId) || !userId) return 0;
     const r = await pool.query(
-      'UPDATE events SET user_id = $2 WHERE visitor_id = $1 AND user_id IS NULL',
+      `UPDATE events SET user_id = $2
+        WHERE visitor_id = $1 AND user_id IS NULL
+          AND tenant_id = (SELECT tenant_id FROM users WHERE id = $2)`,
       [visitorId, userId]
     );
     return r.rowCount || 0;
@@ -207,13 +211,8 @@ export async function onIdentified(req, userId, { isNew = false, via = 'unknown'
 /** The signed-in contact's id from the session cookie, or null. */
 export async function sessionUserId(req, pool = getPool()) {
   try {
-    const token = req?.cookies?.saa_user_token;
-    if (!token) return null;
-    const { rows } = await pool.query(
-      "SELECT id FROM users WHERE manage_token = $1 AND status = 'active' LIMIT 1",
-      [token]
-    );
-    return rows[0]?.id || null;
+    const user = await sessionUser(req, pool);
+    return user?.id || null;
   } catch {
     return null;
   }

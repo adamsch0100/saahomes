@@ -4,6 +4,7 @@
  * Never returns fub_api_key or agent private data.
  */
 import crypto from 'crypto';
+import { enterTenant } from '../services/tenantContext.js';
 import getPool from '../config/database.js';
 import { forwardContactToFollowUpBoss } from '../services/followUpBossService.js';
 import {
@@ -103,7 +104,7 @@ export const submitWebformLead = async (req, res) => {
 
     // Resolve agent by public slug only (active agent or admin)
     const agentRes = await pool.query(
-      `SELECT id, email, name, brand_name, fub_api_key, role, status
+      `SELECT id, email, name, brand_name, fub_api_key, role, status, tenant_id
        FROM users
        WHERE webform_slug = $1
          AND role IN ('agent', 'admin')
@@ -115,6 +116,9 @@ export const submitWebformLead = async (req, res) => {
     if (!agent) {
       return res.status(404).json({ ok: false, error: 'Unknown form link' });
     }
+    // Public POST from the agent's own site: the lead belongs to the agent's brokerage, not the host's
+    const tenantId = agent.tenant_id;
+    enterTenant(tenantId);
 
     // Observability for rapid re-submits (never blocks)
     noteIfDuplicateSubmission(pool, email, 'webform').catch(() => {});
@@ -123,28 +127,28 @@ export const submitWebformLead = async (req, res) => {
     let existing = null;
     const byEmail = await pool.query(
       `SELECT * FROM users
-       WHERE LOWER(email) = $1 AND COALESCE(role, 'client') = 'client'
+       WHERE LOWER(email) = $1 AND tenant_id = $2 AND COALESCE(role, 'client') = 'client'
        LIMIT 1`,
-      [email]
+      [email, tenantId]
     );
     existing = byEmail.rows[0] || null;
 
     if (!existing) {
       const byPhone = await pool.query(
         `SELECT * FROM users
-         WHERE COALESCE(role, 'client') = 'client'
+         WHERE COALESCE(role, 'client') = 'client' AND tenant_id = $3
            AND phone IS NOT NULL AND TRIM(phone) <> ''
            AND regexp_replace(phone, '\\D', '', 'g') IN ($1, $2)
          LIMIT 1`,
-        [phone, phone.length === 10 ? `1${phone}` : phone]
+        [phone, phone.length === 10 ? `1${phone}` : phone, tenantId]
       );
       existing = byPhone.rows[0] || null;
     }
 
     // Never demote agent/admin accounts that share the email
     const staff = await pool.query(
-      `SELECT id FROM users WHERE LOWER(email) = $1 AND role IN ('agent', 'admin') LIMIT 1`,
-      [email]
+      `SELECT id FROM users WHERE LOWER(email) = $1 AND tenant_id = $2 AND role IN ('agent', 'admin') LIMIT 1`,
+      [email, tenantId]
     );
     if (staff.rows[0] && !existing) {
       return res.status(400).json({
@@ -194,13 +198,13 @@ export const submitWebformLead = async (req, res) => {
         `INSERT INTO users (
            email, name, phone, manage_token, role, status,
            source, assigned_agent_id, lifecycle_stage, lifecycle_stage_manual,
-           last_active_at
+           last_active_at, tenant_id
          ) VALUES (
            $1, $2, $3, $4, 'client', 'active',
            $5, $6, 'new', FALSE,
-           NOW()
+           NOW(), $7
          ) RETURNING id`,
-        [email, name, phone, manageToken, source, agent.id]
+        [email, name, phone, manageToken, source, agent.id, tenantId]
       );
       leadId = inserted.rows[0].id;
     }
@@ -210,8 +214,8 @@ export const submitWebformLead = async (req, res) => {
     try {
       await pool.query(
         `INSERT INTO contact_submissions
-           (name, email, phone, interest, message, area, source_page)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+           (name, email, phone, interest, message, area, source_page, tenant_id)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
         [
           name || null,
           email,
@@ -220,6 +224,7 @@ export const submitWebformLead = async (req, res) => {
           message,
           area,
           `webform:${slug}`,
+          tenantId,
         ]
       );
     } catch (err) {
@@ -250,6 +255,7 @@ export const submitWebformLead = async (req, res) => {
           eventSource: 'Agent Website Form',
           tags: ['Website Lead', 'Agent Webform', 'saahomes.com'],
           path: 'webform',
+          tenantId,
         }
       );
     } catch (err) {
