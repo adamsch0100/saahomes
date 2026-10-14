@@ -39,6 +39,7 @@ import {
   verifyEmailDomain,
   sendTestEmail,
 } from '../controllers/settingsController.js';
+import { getSmsSettings, patchSmsSettings, getAgentReports } from '../controllers/textingController.js';
 import { authenticateToken, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -100,5 +101,11 @@ router.post('/settings/domain/check', ...adminOnly, checkSiteDomain);
 router.post('/settings/email-domain', ...adminOnly, setEmailDomain);
 router.post('/settings/email-domain/verify', ...adminOnly, verifyEmailDomain);
 router.post('/settings/test-email', ...adminOnly, sendTestEmail);
+// Texting (Twilio, 10DLC) and hot-lead routing
+router.get('/settings/sms', ...adminOnly, getSmsSettings);
+router.patch('/settings/sms', ...adminOnly, patchSmsSettings);
+
+// Brokerage reporting per agent (7/30/90 days, CSV)
+router.get('/reports/agents', ...adminOnly, getAgentReports);
 
 export default router;

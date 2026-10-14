@@ -639,6 +639,8 @@ const startServer = async () => {
   // not on an external cron box. Advisory lock 833711 prevents concurrent
   // cluster-wide runs. Opt out with IRES_SYNC_SCHEDULER=off.
   if (process.env.IRES_SYNC_SCHEDULER !== 'off') startIresSyncScheduler();
+  // Task reminders, text alerts for saved searches and tour reminders.
+  import('./services/crmService.js').then(({ startCrmScheduler }) => startCrmScheduler()).catch((e) => console.error('CRM scheduler failed to start:', e.message));
 };
 
 // Tests import the app without binding a port or starting the MLS scheduler.

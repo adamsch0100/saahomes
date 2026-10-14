@@ -1261,6 +1261,131 @@ export const runMigrations = async () => {
       console.error('sample listings seed skipped:', demoErr.message);
     }
 
+    // Light CRM in the cockpit: notes, tasks, texts and emails per lead,
+    // reply drafts the agent approves, hot-lead alerts, and the per-brokerage
+    // text opt-out list. Each row takes its tenant from the lead.
+    await client.query('SAVEPOINT agent_crm');
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS lead_notes (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          lead_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          author_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          author_name VARCHAR(255),
+          kind VARCHAR(16) NOT NULL DEFAULT 'note',
+          body TEXT NOT NULL,
+          pinned BOOLEAN NOT NULL DEFAULT FALSE,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ,
+          edited_by_name VARCHAR(255),
+          deleted_at TIMESTAMPTZ,
+          fub_synced_at TIMESTAMPTZ
+        );
+        CREATE INDEX IF NOT EXISTS idx_lead_notes_tenant ON lead_notes(tenant_id);
+        CREATE INDEX IF NOT EXISTS idx_lead_notes_lead ON lead_notes(lead_id, created_at DESC);
+
+        CREATE TABLE IF NOT EXISTS lead_tasks (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          lead_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          assignee_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          title VARCHAR(255) NOT NULL,
+          kind VARCHAR(16) NOT NULL DEFAULT 'follow_up',
+          due_at TIMESTAMPTZ,
+          remind_at TIMESTAMPTZ,
+          reminded_at TIMESTAMPTZ,
+          done_at TIMESTAMPTZ,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ,
+          fub_task_id INTEGER,
+          fub_synced_at TIMESTAMPTZ
+        );
+        CREATE INDEX IF NOT EXISTS idx_lead_tasks_tenant ON lead_tasks(tenant_id);
+        CREATE INDEX IF NOT EXISTS idx_lead_tasks_lead ON lead_tasks(lead_id, created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_lead_tasks_open ON lead_tasks(tenant_id, assignee_id, due_at) WHERE done_at IS NULL;
+
+        CREATE TABLE IF NOT EXISTS lead_messages (
+          id BIGSERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          lead_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          agent_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          channel VARCHAR(8) NOT NULL CHECK (channel IN ('sms', 'email')),
+          direction VARCHAR(4) NOT NULL CHECK (direction IN ('out', 'in')),
+          kind VARCHAR(24) NOT NULL DEFAULT 'conversation',
+          to_addr VARCHAR(255),
+          from_addr VARCHAR(255),
+          subject TEXT,
+          body TEXT NOT NULL,
+          status VARCHAR(16) NOT NULL DEFAULT 'queued',
+          error TEXT,
+          provider_id VARCHAR(64),
+          draft_id INTEGER,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_lead_messages_tenant ON lead_messages(tenant_id, created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_lead_messages_lead ON lead_messages(lead_id, created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_lead_messages_provider ON lead_messages(provider_id) WHERE provider_id IS NOT NULL;
+
+        CREATE TABLE IF NOT EXISTS sms_opt_outs (
+          tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          phone VARCHAR(20) NOT NULL,
+          source VARCHAR(32),
+          opted_out_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (tenant_id, phone)
+        );
+
+        CREATE TABLE IF NOT EXISTS reply_drafts (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          lead_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          agent_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          channel VARCHAR(8) NOT NULL CHECK (channel IN ('sms', 'email')),
+          subject TEXT,
+          body TEXT NOT NULL,
+          source VARCHAR(16) NOT NULL DEFAULT 'nadia',
+          status VARCHAR(16) NOT NULL DEFAULT 'draft',
+          message_id BIGINT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          sent_at TIMESTAMPTZ
+        );
+        CREATE INDEX IF NOT EXISTS idx_reply_drafts_tenant ON reply_drafts(tenant_id);
+        CREATE INDEX IF NOT EXISTS idx_reply_drafts_lead ON reply_drafts(lead_id, created_at DESC);
+
+        CREATE TABLE IF NOT EXISTS hot_lead_alerts (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          lead_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          agent_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          reason VARCHAR(32) NOT NULL,
+          detail TEXT,
+          channels TEXT[] NOT NULL DEFAULT '{}',
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_hot_lead_alerts_tenant ON hot_lead_alerts(tenant_id, created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_hot_lead_alerts_lead ON hot_lead_alerts(lead_id, reason, created_at DESC);
+
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS first_contacted_at TIMESTAMPTZ;
+        ALTER TABLE saved_searches ADD COLUMN IF NOT EXISTS sms_cursor_at TIMESTAMP;
+        ALTER TABLE tour_requests ADD COLUMN IF NOT EXISTS confirmed_start TIMESTAMPTZ;
+        ALTER TABLE tour_requests ADD COLUMN IF NOT EXISTS confirmed_by INTEGER;
+        ALTER TABLE tour_requests ADD COLUMN IF NOT EXISTS ack_texted_at TIMESTAMPTZ;
+        ALTER TABLE tour_requests ADD COLUMN IF NOT EXISTS reminder_texted_at TIMESTAMPTZ;
+      `);
+      for (const table of ['lead_notes', 'lead_tasks', 'lead_messages', 'reply_drafts', 'hot_lead_alerts']) {
+        await client.query(`
+          DROP TRIGGER IF EXISTS ${table}_tenant ON ${table};
+          CREATE TRIGGER ${table}_tenant BEFORE INSERT ON ${table}
+            FOR EACH ROW EXECUTE FUNCTION tenant_from_parent('users', 'lead_id');
+        `);
+      }
+      await client.query('RELEASE SAVEPOINT agent_crm');
+    } catch (crmErr) {
+      await client.query('ROLLBACK TO SAVEPOINT agent_crm');
+      console.error('agent crm migration skipped:', crmErr.message);
+    }
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {

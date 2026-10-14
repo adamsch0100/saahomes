@@ -17,6 +17,7 @@ import {
 } from '../../utils/api.js';
 import { normalizeHex, readableOn } from '../../utils/brandTheme.js';
 import { readImageAsDataUrl } from '../../utils/imageUpload.js';
+import TextingSettings from './TextingSettings.jsx';
 
 const GOLD = 'var(--brand-accent)';
 
@@ -905,6 +906,8 @@ export default function BrokerageSettings({ token }) {
         )}
         <Note kind={fubNote?.kind}>{fubNote?.text}</Note>
       </Section>
+
+      <TextingSettings token={token} />
 
       {/* Test email */}
       <Section title="Test email" description="See exactly what your buyers get: a sample email with your brand, sent to you.">

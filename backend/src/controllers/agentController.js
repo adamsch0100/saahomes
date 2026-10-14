@@ -16,7 +16,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * admins see every lead there, agents per the tenant's lead visibility.
  * Appends its values to params.
  */
-function visibleLeadSql(req, params, alias = '') {
+export function visibleLeadSql(req, params, alias = '') {
   params.push(tenantIdOf(req));
   let sql = `${alias}tenant_id = $${params.length}`;
   const visibility = req.user?.role === 'admin' ? 'all' : leadVisibility(req.tenant);
@@ -36,12 +36,13 @@ function visibleLeadSql(req, params, alias = '') {
  */
 async function listCockpitLeads(req, res) {
   try {
-    const { q = '', stage = '', due = '', limit = 100 } = req.query;
+    const { q = '', stage = '', due = '', limit = 100, smart = '' } = req.query;
     const limitNum = Math.min(parseInt(limit, 10) || 100, 200);
     const like = `%${String(q).trim()}%`;
     const pool = getPool();
     const listParams = [like, limitNum];
     const visible = visibleLeadSql(req, listParams, 'u.');
+    const { smartFilterSql, noteSearchSql } = await import('../services/crmService.js');
 
     const users = await pool.query(
       `SELECT u.id, u.email, u.name, u.phone, u.role, u.status, u.intent,
@@ -57,8 +58,9 @@ async function listCockpitLeads(req, res) {
        LEFT JOIN users a ON a.id = u.assigned_agent_id
        WHERE u.status IS DISTINCT FROM 'unsubscribed'
          AND COALESCE(u.role, 'client') = 'client'
-         AND ($1 = '%%' OR u.email ILIKE $1 OR u.name ILIKE $1 OR u.phone ILIKE $1)
+         AND ($1 = '%%' OR u.email ILIKE $1 OR u.name ILIKE $1 OR u.phone ILIKE $1 OR ${noteSearchSql('$1', 'u.')})
          AND ${visible}
+         AND ${smartFilterSql(String(smart), 'u.')}
        ORDER BY COALESCE(u.lead_score, 0) DESC, u.last_active_at DESC NULLS LAST, u.created_at DESC
        LIMIT $2`,
       listParams
@@ -220,6 +222,7 @@ export const patchAgentCockpitLead = async (req, res) => {
 
     if (body.mark_touched === true) {
       updates.push('last_touched_at = NOW()');
+      updates.push('first_contacted_at = COALESCE(first_contacted_at, NOW())');
       if (body.next_touch_at === undefined) {
         const { deriveNextTouchAt } = await import('../services/agentCockpit.js');
         const stage = body.lifecycle_stage

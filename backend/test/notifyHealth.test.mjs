@@ -77,7 +77,7 @@ test('notify-health answers 200 with a four-leg sheet and the last submit leg lo
     const { rows } = await db.pool.query(
       'SELECT board_result, human_notified_at, minutes_to_human FROM lead_submit_log ORDER BY id DESC LIMIT 1'
     );
-    return rows[0]?.board_result === 'delivered';
+    return rows[0]?.board_result === 'delivered' && !!rows[0]?.human_notified_at;
   }), 'board leg was not recorded as delivered');
 
   const { rows } = await db.pool.query(

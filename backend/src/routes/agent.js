@@ -19,6 +19,11 @@ import {
   setAgentBriefEmail,
 } from '../controllers/agentController.js';
 import { getAgentProfile, patchAgentProfile, uploadAgentPhoto } from '../controllers/settingsController.js';
+import {
+  getLeadDetail, getLeadTimeline, addNote, editNote, deleteNote, addTask, editTask, deleteTask, listTasks,
+  getTextThread, sendLeadText, sendLeadEmailNow, draftReply, sendReplyDraft, discardDraft, confirmTour,
+  getTextingStatus, subscribeAgentPush, unsubscribeAgentPush,
+} from '../controllers/crmController.js';
 import { authenticateToken, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -62,5 +67,27 @@ router.get('/webform/stats', ...agentOrAdmin, getAgentWebformStats);
 router.get('/profile', ...agentOrAdmin, getAgentProfile);
 router.patch('/profile', ...agentOrAdmin, patchAgentProfile);
 router.post('/profile/photo', ...agentOrAdmin, uploadAgentPhoto);
+
+// Light CRM: lead timeline, notes, tasks, texts, emails, reply drafts, tours
+router.get('/crm/leads/:id', ...agentOrAdmin, getLeadDetail);
+router.get('/crm/leads/:id/timeline', ...agentOrAdmin, getLeadTimeline);
+router.post('/crm/leads/:id/notes', ...agentOrAdmin, addNote);
+router.patch('/crm/notes/:id', ...agentOrAdmin, editNote);
+router.delete('/crm/notes/:id', ...agentOrAdmin, deleteNote);
+router.post('/crm/leads/:id/tasks', ...agentOrAdmin, addTask);
+router.patch('/crm/tasks/:id', ...agentOrAdmin, editTask);
+router.delete('/crm/tasks/:id', ...agentOrAdmin, deleteTask);
+router.get('/crm/tasks', ...agentOrAdmin, listTasks);
+router.get('/crm/leads/:id/texts', ...agentOrAdmin, getTextThread);
+router.post('/crm/leads/:id/texts', ...agentOrAdmin, sendLeadText);
+router.post('/crm/leads/:id/emails', ...agentOrAdmin, sendLeadEmailNow);
+router.post('/crm/leads/:id/drafts', ...agentOrAdmin, draftReply);
+router.post('/crm/drafts/:id/send', ...agentOrAdmin, sendReplyDraft);
+router.post('/crm/drafts/:id/discard', ...agentOrAdmin, discardDraft);
+router.post('/crm/tours/:id/confirm', ...agentOrAdmin, confirmTour);
+router.get('/crm/texting', ...agentOrAdmin, getTextingStatus);
+// Hot-lead alerts on this device (web push for staff)
+router.post('/push/subscribe', ...agentOrAdmin, subscribeAgentPush);
+router.post('/push/unsubscribe', ...agentOrAdmin, unsubscribeAgentPush);
 
 export default router;
