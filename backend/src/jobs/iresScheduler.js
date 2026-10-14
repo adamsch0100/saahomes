@@ -29,6 +29,7 @@ import getPool from '../config/database.js';
 import { runPushPass } from '../services/pushService.js';
 import { runMorningBriefs } from '../services/morningBrief.js';
 import { runStayInTouch } from '../services/stayInTouch.js';
+import { refreshMlsRoster, applyRosterNames } from '../services/mlsRoster.js';
 
 const ADVISORY_LOCK_KEY = 833711; // app-wide constant — must not collide with other locks
 const RUN_MINUTE = 57; // sync at :57 each hour (UTC)
@@ -61,6 +62,14 @@ async function runSync() {
     console.log(`[ires-sync] ${now.toISOString()} starting ${mode} sync`);
     const result = await syncListings({ mode });
     console.log(`[ires-sync] ${new Date().toISOString()} complete:`, JSON.stringify(result));
+    // "Listing courtesy of": the office/agent roster refreshes with the daily
+    // full sync; every tick names new listings from it.
+    try {
+      const roster = mode === 'full' ? await refreshMlsRoster() : { applied: await applyRosterNames() };
+      console.log(`[mls-roster] ${new Date().toISOString()}`, JSON.stringify(roster));
+    } catch (rosterErr) {
+      console.error(`[mls-roster] ${new Date().toISOString()} FAILED:`, rosterErr.message);
+    }
     // Instant alerts ride the sync: new listings and price changes reach
     // phones minutes after they land, not at the next digest.
     try {
@@ -102,6 +111,25 @@ async function runSync() {
   }
 }
 
+async function seedRosterOnce() {
+  const pool = getPool();
+  const { rows: [{ n }] } = await pool.query('SELECT COUNT(*)::int AS n FROM mls_offices');
+  if (n > 0) return;
+  const client = await pool.connect();
+  try {
+    const lr = await client.query('SELECT pg_try_advisory_lock($1) AS ok', [ADVISORY_LOCK_KEY]);
+    if (lr.rows[0]?.ok !== true) return;
+    try {
+      const roster = await refreshMlsRoster({ pool });
+      console.log(`[mls-roster] ${new Date().toISOString()} first fill:`, JSON.stringify(roster));
+    } finally {
+      await client.query('SELECT pg_advisory_unlock($1)', [ADVISORY_LOCK_KEY]).catch(() => {});
+    }
+  } finally {
+    client.release();
+  }
+}
+
 /** Mounted from server.js after migrations. */
 export function startIresSyncScheduler() {
   if (started) return;
@@ -121,5 +149,7 @@ export function startIresSyncScheduler() {
     runSync();
   };
   setInterval(tick, TICK_MS);
+  // First boot with an empty roster: fill it now rather than at the next full sync.
+  setTimeout(() => { seedRosterOnce().catch((e) => console.error('[mls-roster] first fill failed:', e.message)); }, 3 * 60 * 1000).unref?.();
   console.log(`[ires-sync] hourly scheduler started — fires at :${String(RUN_MINUTE).padStart(2, '0')} UTC (daily full at 0${FULL_SYNC_HOUR}:57 UTC, sold ingest at 0${SOLD_SYNC_HOUR}:57 UTC), advisory lock key ${ADVISORY_LOCK_KEY}`);
 }

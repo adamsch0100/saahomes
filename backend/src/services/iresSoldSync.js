@@ -2,7 +2,7 @@ import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import getPool from '../config/database.js';
 import { isNocoCity } from '../config/nocoCities.js';
 import { isConfigured as r2Configured, isR2Hosted, syncSoldListingPhotos } from './photoSync.js';
-import { OFFICE_FIELDS, rejectsOfficeFields } from './iresSync.js';
+import { officeSelectFields, dropRejectedOfficeFields } from './iresSync.js';
 
 /**
  * IRES sold/closed ingest — MLS Grid RESO Web API.
@@ -38,8 +38,7 @@ const SOLD_FIELDS = [
   'ModificationTimestamp', 'ListingContractDate', 'OriginatingSystemName',
   'PropertyAttachedYN', 'MlgCanView',
 ];
-// Office/agent fields (OFFICE_FIELDS) ride along unless the feed rejects them.
-let officeFieldsRejected = false;
+// Office/agent fields ride along unless the feed refuses them (see iresSync.js).
 
 // Slightly slower than listing sync (700ms) — leave photo-proxy headroom.
 const RATE_LIMIT_MS = 850;
@@ -132,7 +131,7 @@ async function fetchSoldPage(authToken, offset, { incrementalSince = null, retri
   url.searchParams.set('$top', '100');
   url.searchParams.set('$skip', String(offset));
   url.searchParams.set('$filter', buildSoldFilter({ incrementalSince }));
-  url.searchParams.set('$select', (officeFieldsRejected ? SOLD_FIELDS : [...SOLD_FIELDS, ...OFFICE_FIELDS]).join(','));
+  url.searchParams.set('$select', [...SOLD_FIELDS, ...officeSelectFields()].join(','));
   url.searchParams.set('$expand', 'Media');
 
   try {
@@ -153,10 +152,8 @@ async function fetchSoldPage(authToken, offset, { incrementalSince = null, retri
         return fetchSoldPage(authToken, offset, { incrementalSince, retries: retries - 1 });
       }
       const body = await res.text();
-      if (!officeFieldsRejected && rejectsOfficeFields(res.status, body)) {
-        // Retry once without the office/agent fields; sold rows keep syncing.
-        officeFieldsRejected = true;
-        console.warn(`⚠️ IRES sold rejected listing office/agent fields — syncing without them: ${body.slice(0, 200)}`);
+      if (dropRejectedOfficeFields(res.status, body)) {
+        // Retry without the refused field; sold rows keep syncing.
         return fetchSoldPage(authToken, offset, { incrementalSince, retries });
       }
       throw new Error(`IRES sold fetch failed (${res.status}): ${body}`);
