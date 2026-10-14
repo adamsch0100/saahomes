@@ -10,6 +10,7 @@ import adminRoutes from './routes/admin.js';
 import agentRoutes from './routes/agent.js';
 import accountRoutes from './routes/account.js';
 import platformRoutes from './routes/platform.js';
+import mlsConnectRoutes from './routes/mlsConnect.js';
 import clientLifeRoutes from './routes/clientLife.js';
 import ownCrmPublicRoutes from './routes/ownCrm.js';
 import {
@@ -20,6 +21,8 @@ import {
 } from './routes/plugAndPlay.js';
 import { runMigrations } from './config/migrate.js';
 import { startIresSyncScheduler } from './jobs/iresScheduler.js';
+import { startMlsScheduler } from './jobs/mlsScheduler.js';
+import { checkCredentialsKey } from './services/mls/secrets.js';
 import { NOCO_CITIES } from './config/nocoCities.js';
 import { tenantMiddleware, resolveTenantForHost, DEFAULT_TENANT_ID, pausedForBilling } from './services/tenantContext.js';
 import { startBillingScheduler } from './services/billing.js';
@@ -270,6 +273,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/agent', agentRoutes);
 app.use('/api/account', accountRoutes);
 app.use('/api/platform', platformRoutes);
+app.use('/api/admin', mlsConnectRoutes.owner);
+app.use('/api/platform', mlsConnectRoutes.platform);
 app.use('/api', clientLifeRoutes.client);
 app.use('/api/agent', clientLifeRoutes.staff);
 
@@ -691,6 +696,10 @@ const startServer = async () => {
   // not on an external cron box. Advisory lock 833711 prevents concurrent
   // cluster-wide runs. Opt out with IRES_SYNC_SCHEDULER=off.
   if (process.env.IRES_SYNC_SCHEDULER !== 'off') startIresSyncScheduler();
+  // Every other connected MLS (mls/engine.js), each on its own cadence and
+  // advisory lock. Opt out with MLS_SYNC_SCHEDULER=off.
+  checkCredentialsKey();
+  if (process.env.MLS_SYNC_SCHEDULER !== 'off') startMlsScheduler();
   // Task reminders, text alerts for saved searches and tour reminders.
   import('./services/crmService.js').then(({ startCrmScheduler }) => startCrmScheduler()).catch((e) => console.error('CRM scheduler failed to start:', e.message));
   // Action plans: emails, texts and tasks on their day (every minute).
