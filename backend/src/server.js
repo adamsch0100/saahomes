@@ -11,10 +11,18 @@ import agentRoutes from './routes/agent.js';
 import accountRoutes from './routes/account.js';
 import platformRoutes from './routes/platform.js';
 import clientLifeRoutes from './routes/clientLife.js';
+import {
+  publicRoutes as plugAndPlayPublicRoutes,
+  adminRoutes as plugAndPlayAdminRoutes,
+  embedPages,
+  rawWebhooks,
+} from './routes/plugAndPlay.js';
 import { runMigrations } from './config/migrate.js';
 import { startIresSyncScheduler } from './jobs/iresScheduler.js';
 import { NOCO_CITIES } from './config/nocoCities.js';
-import { tenantMiddleware, resolveTenantForHost, DEFAULT_TENANT_ID } from './services/tenantContext.js';
+import { tenantMiddleware, resolveTenantForHost, DEFAULT_TENANT_ID, pausedForBilling } from './services/tenantContext.js';
+import { startBillingScheduler } from './services/billing.js';
+import { productName } from './controllers/signupController.js';
 import { brandFor, isHomeTenant } from './services/brand.js';
 import { feedsFor } from './services/feeds.js';
 
@@ -138,6 +146,7 @@ const BROKERAGE_PATHS = [
   /^\/$/, /^\/contact$/, /^\/properties$/, /^\/homes-for-sale\/[^/]+$/, /^\/alerts\/manage$/,
   /^\/my-saved-searches$/, /^\/my-home$/, /^\/notifications$/, /^\/board$/, /^\/mortgage-calculator$/,
   /^\/admin$/, /^\/agent$/, /^\/reset-password$/,
+  /^\/embed\/(search|listings|listing)$/, /^\/embed\/listing\/[^/]+$/,
 ];
 
 export function renderBrokerageShell(indexHtml, brand, path = '/') {
@@ -225,6 +234,9 @@ app.use(cors({
   },
   credentials: true,
 }));
+// Stripe and Follow Up Boss sign the exact bytes they send: these routes get
+// the raw body, so they come before the JSON parser.
+app.use(rawWebhooks);
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -238,6 +250,8 @@ app.get('/health', (req, res) => {
   });
 });
 
+app.use('/api', plugAndPlayPublicRoutes);
+app.use('/api/admin', plugAndPlayAdminRoutes);
 app.use('/api', apiRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/agent', agentRoutes);
@@ -316,6 +330,9 @@ const canonicalRedirects = {
   // 301 → the canonical RainDance neighborhood page.
   '/northern-colorado-areas/windsor/rain-dance-windsor': '/northern-colorado-areas/windsor/raindance/',
 };
+
+// Widgets brokerages paste into their own websites (any host, any env).
+app.use(embedPages);
 
 // On a brokerage's host: no SAA sitemaps, robots disallow all (its own SEO
 // comes later), and its own manifest and icon. SAA's hosts fall through.
@@ -408,7 +425,9 @@ if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
     if (!tenant) return next();
     const brand = brandFor(tenant);
     res.setHeader('Cache-Control', 'no-cache');
-    if (tenant.status !== 'active') {
+    // Paused for an unpaid bill: the owner can still sign in and pay.
+    const billingOpen = pausedForBilling(tenant) && /^\/(admin|reset-password)\/?$/.test(req.path);
+    if (tenant.status !== 'active' && !billingOpen) {
       return res.status(503).type('html').send(
         `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>${escapeHtml(brand.name)}</title></head>` +
         '<body><p>This site is paused. Please contact the brokerage.</p></body></html>'
@@ -420,6 +439,23 @@ if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
       return res.status(known ? 200 : 404).type('html').send(renderBrokerageShell(base, brand, req.path));
     } catch (error) {
       console.error('brokerage shell error:', error.message);
+      return res.status(500).type('text/plain').send('Something went wrong.');
+    }
+  });
+
+  // The platform's signup page (/start) on its own host: a clean shell with
+  // the product's name, not one of SAA's prerendered pages. A brokerage's
+  // host never gets here (its allowlist above answers 404).
+  app.get(['/start', '/start/'], (req, res) => {
+    try {
+      const base = readFileSync(join(distPath, 'index.html'), 'utf8');
+      res.setHeader('Cache-Control', 'no-cache');
+      return res.type('html').send(renderBrokerageShell(base, {
+        name: productName(),
+        tagline: 'Your own branded home search site, alerts and AI assistant, working with Follow Up Boss. Live in an afternoon.',
+      }, '/start'));
+    } catch (error) {
+      console.error('start page error:', error.message);
       return res.status(500).type('text/plain').send('Something went wrong.');
     }
   });
@@ -644,6 +680,8 @@ const startServer = async () => {
   if (process.env.IRES_SYNC_SCHEDULER !== 'off') startIresSyncScheduler();
   // Task reminders, text alerts for saved searches and tour reminders.
   import('./services/crmService.js').then(({ startCrmScheduler }) => startCrmScheduler()).catch((e) => console.error('CRM scheduler failed to start:', e.message));
+  // Trials, grace periods and pausing unpaid brokerages (hourly).
+  if (process.env.BILLING_SCHEDULER !== 'off') startBillingScheduler();
 };
 
 // Tests import the app without binding a port or starting the MLS scheduler.

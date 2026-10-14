@@ -1,17 +1,18 @@
 /**
- * One-time links for staff accounts: "reset your password" and "you're
- * invited, set your password". Only a hash of each token is stored, links
+ * One-time links for staff accounts: "reset your password", "you're
+ * invited, set your password" and "confirm your email" (a new brokerage's
+ * owner, after signing up). Only a hash of each token is stored, links
  * point at the brokerage's own site (never at a Host header we don't know),
  * and using one link retires every other open link for that person.
  */
 import crypto from 'node:crypto';
 import getPool from '../config/database.js';
 import { sendEmail, smtpConfigured } from './emailer.js';
-import { siteUrlFor } from './tenantContext.js';
+import { consoleUrlFor } from './tenantContext.js';
 import { brandFor, isHomeTenant } from './brand.js';
 import logger from '../utils/logger.js';
 
-export const LINK_TTL_HOURS = { reset: 1, invite: 24 * 7 };
+export const LINK_TTL_HOURS = { reset: 1, invite: 24 * 7, confirm: 24 * 7 };
 const MAX_LINKS_PER_HOUR = 3;
 
 export const hashLinkToken = (t) => crypto.createHash('sha256').update(String(t)).digest('hex');
@@ -34,12 +35,14 @@ async function sendOrQueue(pool, to, subject, html, fromName, tenantId, opts) {
 function emailHtml({ purpose, name, brokerage, link, hours }) {
   const first = String(name || '').trim().split(/\s+/)[0];
   const hello = first ? `Hi ${esc(first)},` : 'Hi,';
-  const lead = purpose === 'invite'
-    ? `You've been set up with an account at ${esc(brokerage)}. Choose a password to sign in.`
-    : `Someone asked to reset the password for your ${esc(brokerage)} account. If that was you, choose a new one below.`;
-  const button = purpose === 'invite' ? 'Set my password' : 'Choose a new password';
+  const lead = purpose === 'confirm'
+    ? `Welcome to ${esc(brokerage)}. Confirm this is your email so we can send you leads, receipts and sign-in links.`
+    : purpose === 'invite'
+      ? `You've been set up with an account at ${esc(brokerage)}. Choose a password to sign in.`
+      : `Someone asked to reset the password for your ${esc(brokerage)} account. If that was you, choose a new one below.`;
+  const button = purpose === 'confirm' ? 'Confirm my email' : purpose === 'invite' ? 'Set my password' : 'Choose a new password';
   const expiry = hours >= 24 ? `${Math.round(hours / 24)} days` : `${hours} hour${hours === 1 ? '' : 's'}`;
-  const tail = purpose === 'invite'
+  const tail = purpose !== 'reset'
     ? `This link works for ${expiry}.`
     : `This link works for ${expiry}. If you didn't ask for this, you can ignore this email and your password stays the same.`;
   return `<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;color:#1f2937">
@@ -57,7 +60,7 @@ function emailHtml({ purpose, name, brokerage, link, hours }) {
  * Returns { sent: boolean } — false when the per-hour cap is hit.
  */
 export async function issueAccountLink({ user, purpose, tenant, pool = getPool() }) {
-  const kind = purpose === 'invite' ? 'invite' : 'reset';
+  const kind = ['invite', 'confirm'].includes(purpose) ? purpose : 'reset';
   const recent = await pool.query(
     "SELECT COUNT(*)::int AS n FROM password_resets WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour'",
     [user.id]
@@ -71,13 +74,16 @@ export async function issueAccountLink({ user, purpose, tenant, pool = getPool()
      VALUES ($1, $2, $3, NOW() + make_interval(hours => $4))`,
     [user.id, hashLinkToken(token), kind, hours]
   );
-  const link = `${siteUrlFor(tenant)}/reset-password?token=${token}`;
+  const link = kind === 'confirm'
+    ? consoleUrlFor(tenant, `/admin?confirm=${token}`)
+    : consoleUrlFor(tenant, `/reset-password?token=${token}`);
   // Another brokerage's name comes from its brand (never SAA's); SAA's is unchanged.
   const tenantId = Number(tenant?.id ?? 1);
   const home = isHomeTenant({ id: tenantId });
   const brand = home ? null : brandFor({ ...tenant, id: tenantId });
   const brokerage = home ? tenant?.name || 'SAA Homes' : brand.name;
-  const subject = kind === 'invite' ? `You're invited to ${brokerage}` : `Reset your ${brokerage} password`;
+  const subject = kind === 'confirm' ? `Confirm your email for ${brokerage}`
+    : kind === 'invite' ? `You're invited to ${brokerage}` : `Reset your ${brokerage} password`;
   const html = emailHtml({ purpose: kind, name: user.name, brokerage, link, hours });
   if (home) await sendOrQueue(pool, user.email, subject, html, brokerage, user.tenant_id);
   else {
@@ -88,15 +94,20 @@ export async function issueAccountLink({ user, purpose, tenant, pool = getPool()
   return { sent: true };
 }
 
-/** The open link for a raw token in this tenant, joined to its user, or null. */
-export async function findOpenLink(token, tenantId, pool = getPool()) {
+/**
+ * The open link for a raw token in this tenant, joined to its user, or null.
+ * Password links (reset, invite) by default; an email-confirm link never sets
+ * a password.
+ */
+export async function findOpenLink(token, tenantId, pool = getPool(), { purposes = ['reset', 'invite'] } = {}) {
   if (!token || typeof token !== 'string' || token.length < 20 || token.length > 100) return null;
   const r = await pool.query(
     `SELECT pr.id, pr.purpose, pr.user_id, u.email, u.name, u.role, u.tenant_id
      FROM password_resets pr JOIN users u ON u.id = pr.user_id
      WHERE pr.token_hash = $1 AND pr.tenant_id = $2 AND u.tenant_id = $2
-       AND pr.used_at IS NULL AND pr.expires_at > NOW() AND u.status = 'active'`,
-    [hashLinkToken(token), tenantId]
+       AND pr.used_at IS NULL AND pr.expires_at > NOW() AND u.status = 'active'
+       AND pr.purpose = ANY($3::text[])`,
+    [hashLinkToken(token), tenantId, purposes]
   );
   return r.rows[0] || null;
 }

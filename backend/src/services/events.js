@@ -47,6 +47,7 @@ export const EVENT_TYPES = new Set([
   'seller_question',
   'seller_plan_started',
   'cma_request',
+  'embed_view',
 ]);
 
 /** Types a browser may send on its own (everything else is recorded server-side). */

@@ -47,6 +47,7 @@ const MortgageCalculatorPage = lazy(() => import("./pages/MortgageCalculatorPage
 const AdminPage = lazy(() => import("./pages/AdminPage.jsx"));
 const AgentPage = lazy(() => import("./pages/AgentPage.jsx"));
 const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage.jsx"));
+const StartPage = lazy(() => import("./pages/StartPage.jsx"));
 const TestimonialsPage = lazy(() => import("./pages/TestimonialsPage.jsx"));
 const EventsCalendarPage = lazy(() => import("./pages/EventsCalendarPage.jsx"));
 const BlogPage = lazy(() => import("./pages/BlogPage.jsx"));
@@ -123,12 +124,13 @@ function AppLayout({ children }) {
   const isAdminPage = location.pathname.startsWith('/admin');
   const isAgentPage = location.pathname.startsWith('/agent');
   const isAccountPage = location.pathname.startsWith('/reset-password');
+  const isStartPage = /^\/start\/?$/.test(location.pathname);
   // Full-screen Zillow-style search — no page chrome below the header
   const isPropertiesSearch =
     location.pathname === '/properties' || location.pathname === '/properties/';
   
   // App consoles (admin + agent) and password set/reset — no marketing chrome
-  if (isAdminPage || isAgentPage || isAccountPage) {
+  if (isAdminPage || isAgentPage || isAccountPage || isStartPage) {
     return <Suspense fallback={<PageLoadFallback />}>{children}</Suspense>;
   }
   
@@ -188,6 +190,8 @@ export default function App() {
         <Route path="/agent/" element={<AppLayout><LazyPage><AgentPage /></LazyPage></AppLayout>} />
         <Route path="/reset-password" element={<AppLayout><LazyPage><ResetPasswordPage /></LazyPage></AppLayout>} />
         <Route path="/reset-password/" element={<AppLayout><LazyPage><ResetPasswordPage /></LazyPage></AppLayout>} />
+        <Route path="/start" element={<AppLayout><LazyPage><StartPage /></LazyPage></AppLayout>} />
+        <Route path="/start/" element={<AppLayout><LazyPage><StartPage /></LazyPage></AppLayout>} />
         {/* Critical path — eager */}
         <Route path="/" element={<AppLayout><HomePage /></AppLayout>} />
         <Route path="/about-us" element={<AppLayout><LazyPage><AboutPage /></LazyPage></AppLayout>} />
