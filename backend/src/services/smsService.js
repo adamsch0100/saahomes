@@ -449,12 +449,19 @@ export async function handleInboundText(req, { pool = getPool(), notify = null }
 
 async function logInbound(tenantId, from, body, kind, params, pool) {
   const [lead] = await leadsByPhone(tenantId, from, pool);
-  await pool.query(
+  const { rows: [msg] } = await pool.query(
     `INSERT INTO lead_messages (tenant_id, lead_id, agent_id, channel, direction, kind, to_addr, from_addr, body, status, provider_id)
-     VALUES ($1, $2, $3, 'sms', 'in', $4, $5, $6, $7, 'received', $8)`,
+     VALUES ($1, $2, $3, 'sms', 'in', $4, $5, $6, $7, 'received', $8) RETURNING id`,
     [tenantId, lead?.id || null, lead?.assigned_agent_id || null, kind, normalizePhone(params.To) || params.MessagingServiceSid || null,
       from, String(body || '').slice(0, 1600), String(params.MessageSid || params.SmsSid || '').slice(0, 64) || null]
   );
+  // Every conversation text lands in the team inbox (and pauses the lead's plans).
+  if (kind === 'conversation') {
+    const { recordInboundSafe } = await import('./teamInbox.js');
+    await recordInboundSafe({
+      tenantId, leadId: lead?.id || null, contactKey: lead ? null : from, kind: 'text', body: String(body || '').slice(0, 1600), leadMessageId: msg?.id || null,
+    }, pool);
+  }
   return lead || null;
 }
 

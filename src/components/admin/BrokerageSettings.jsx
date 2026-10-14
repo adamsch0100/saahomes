@@ -18,6 +18,7 @@ import {
 import { normalizeHex, readableOn } from '../../utils/brandTheme.js';
 import { readImageAsDataUrl } from '../../utils/imageUpload.js';
 import TextingSettings from './TextingSettings.jsx';
+import { YourCrm, LeadSources } from './CrmSettings.jsx';
 
 const GOLD = 'var(--brand-accent)';
 
@@ -880,9 +881,16 @@ export default function BrokerageSettings({ token }) {
         <Note kind={securityNote?.kind}>{securityNote?.text}</Note>
       </Section>
 
+      <YourCrm token={token} Section={Section} onModeChange={(mode) => setSettings((s) => ({ ...s, crm_mode: mode }))} />
+
       {/* Follow Up Boss */}
       <Section title="Follow Up Boss" description="Send new leads to your brokerage's Follow Up Boss account.">
-        {fub.connected ? (
+        {settings.crm_mode === 'own' ? (
+          <p className="text-sm text-gray-700">
+            Off. This cockpit is your CRM, so nothing is sent to Follow Up Boss. Switch under Your CRM to turn it back on
+            {fub.connected ? '; your saved key is kept.' : '.'}
+          </p>
+        ) : fub.connected ? (
           <div className="flex flex-wrap items-center gap-3">
             <p className="text-sm text-gray-700">
               Connected{fub.last4 ? (
@@ -915,6 +923,8 @@ export default function BrokerageSettings({ token }) {
         )}
         <Note kind={fubNote?.kind}>{fubNote?.text}</Note>
       </Section>
+
+      <LeadSources token={token} Section={Section} />
 
       <TextingSettings token={token} />
 

@@ -709,7 +709,16 @@ export default function AgentPage() {
             </div>
           )}
 
-          {/* Connect CRM (P-3a) — per-agent Follow Up Boss key + contact import */}
+          {/* Connect CRM (P-3a) — per-agent Follow Up Boss key + contact import (not when the cockpit is the brokerage's CRM) */}
+          {fubStatus?.crm_mode === 'own' ? (
+          <div className="mb-6 bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-5">
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: GOLD }}>Your CRM</p>
+            <p className="mt-1 text-sm text-gray-700">
+              Your brokerage runs its leads right here: stages, tags, notes, tasks, action plans and the team inbox.
+              Follow Up Boss is turned off, so there’s nothing to connect.
+            </p>
+          </div>
+          ) : (
           <div className="mb-6 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="px-4 py-3 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-black">
               <div>
@@ -848,6 +857,7 @@ export default function AgentPage() {
               </p>
             </div>
           </div>
+          )}
 
           {/* Website forms (P-3b) — public capture link + embed snippet */}
           <div className="mb-6 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -970,7 +980,7 @@ export default function AgentPage() {
                     <ol className="list-decimal list-inside space-y-1 text-gray-600 text-sm">
                       <li>
                         <span className="font-medium">POST</span> JSON or form fields to{' '}
-                        <span className="font-mono text-xs">{WEBFORM_ENDPOINT}</span>
+                        <span className="font-mono text-xs">{webformData?.endpoint || WEBFORM_ENDPOINT}</span>
                       </li>
                       <li>
                         Required: <span className="font-mono text-xs">slug</span>,{' '}

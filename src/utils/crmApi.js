@@ -1,7 +1,8 @@
 /**
  * Cockpit CRM calls (staff token): lead timeline, notes, tasks, texts,
- * emails, reply drafts, tours, texting settings, reports, and hot-lead
- * alerts on this device.
+ * emails, reply drafts, tours, texting settings, reports, hot-lead alerts
+ * on this device, action plans, tags, the team inbox, lead sources and the
+ * CRM mode with contacts in and out.
  */
 import { pushSupported } from './push.js';
 
@@ -48,7 +49,63 @@ export const crm = {
   saveSmsSettings: (t, body) => call(t, 'PATCH', '/admin/settings/sms', body),
   report: (t, days) => call(t, 'GET', `/admin/reports/agents?days=${days}`),
   teammates: (t) => call(t, 'GET', '/agent/teammates'),
+  // Action plans
+  plans: (t) => call(t, 'GET', '/agent/plans'),
+  createPlan: (t, body) => call(t, 'POST', '/agent/plans', body),
+  updatePlan: (t, id, body) => call(t, 'PATCH', `/agent/plans/${id}`, body),
+  deletePlan: (t, id) => call(t, 'DELETE', `/agent/plans/${id}`),
+  copyPlan: (t, id) => call(t, 'POST', `/agent/plans/${id}/copy`),
+  leadPlans: (t, id) => call(t, 'GET', `/agent/crm/leads/${id}/plans`),
+  addToPlan: (t, id, planId) => call(t, 'POST', `/agent/crm/leads/${id}/plans`, { plan_id: planId }),
+  changeRun: (t, runId, action) => call(t, 'POST', `/agent/plans/runs/${runId}/${action}`),
+  setTags: (t, id, tags) => call(t, 'PUT', `/agent/crm/leads/${id}/tags`, { tags }),
+  crmMode: (t) => call(t, 'GET', '/agent/crm/mode'),
+  // Team inbox
+  inbox: (t, filter = 'open', q = '') => call(t, 'GET', `/agent/inbox?filter=${filter}${q ? `&q=${encodeURIComponent(q)}` : ''}`),
+  inboxCounts: (t) => call(t, 'GET', '/agent/inbox/counts'),
+  thread: (t, id) => call(t, 'GET', `/agent/inbox/${id}`),
+  threadAction: (t, id, action, body) => call(t, 'POST', `/agent/inbox/${id}/${action}`, body),
+  reply: (t, id, channel, body, subject) => call(t, 'POST', `/agent/inbox/${id}/reply`, { channel, body, subject }),
+  threadToLead: (t, id) => call(t, 'POST', `/agent/inbox/${id}/lead`),
+  // Your CRM and lead sources (owner)
+  crmSettings: (t) => call(t, 'GET', '/admin/crm/settings'),
+  setCrmMode: (t, mode) => call(t, 'PUT', '/admin/crm/mode', { mode }),
+  intake: (t) => call(t, 'GET', '/admin/intake'),
+  saveIntake: (t, body) => call(t, 'PATCH', '/admin/intake', body),
+  newIntakeKey: (t) => call(t, 'POST', '/admin/intake/key'),
+  testIntake: (t, body) => call(t, 'POST', '/admin/intake/test', body),
 };
+
+/** CSV text to the server: as text/csv, so files over a megabyte go through. */
+async function csvCall(token, path, text, mapping) {
+  const qs = mapping ? `?mapping=${encodeURIComponent(JSON.stringify(mapping))}` : '';
+  const res = await fetch(`${API_BASE}/api${path}${qs}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'text/csv' },
+    body: text,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.success === false) throw new Error(data.error || 'Something went wrong. Please try again.');
+  return data.data;
+}
+export const previewContactsCsv = (token, text) => csvCall(token, '/admin/crm/import/preview', text);
+export const importContactsCsv = (token, text, mapping) => csvCall(token, '/admin/crm/import', text, mapping);
+
+/** Download every contact as CSV. */
+export async function downloadContactsCsv(token) {
+  const res = await fetch(`${API_BASE}/api/admin/crm/export`, { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) throw new Error('Could not download your contacts');
+  const name = /filename="([^"]+)"/.exec(res.headers.get('content-disposition') || '')?.[1] || 'contacts.csv';
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 
 /** Download the report CSV (the token can't ride a plain link). */
 export async function downloadReportCsv(token, days) {

@@ -102,7 +102,9 @@ export function describeEvent(e, home) {
     case 'board_comment': return { kind: 'board', title: `Commented on ${where}` };
     case 'comps_adjusted': return { kind: 'seller', title: 'Built their own home value from recent sales' };
     case 'home_value_view': return { kind: 'seller', title: 'Checked their home value' };
-    case 'form_submit': return { kind: 'form', title: FORM_LABEL[m.form] || 'Filled in a form' };
+    case 'form_submit':
+      if (m.form === 'lead_intake') return { kind: 'form', title: `${m.created === false ? 'Came back' : 'New lead'} from ${m.source_label || 'a lead source'}` };
+      return { kind: 'form', title: FORM_LABEL[m.form] || 'Filled in a form' };
     case 'chat_opened': return { kind: 'nadia', title: 'Chatted with Nadia' };
     case 'nadia_question': return { kind: 'nadia', title: m.topic === 'offer' ? 'Asked Nadia about making an offer' : 'Asked Nadia what they can afford', detail: m.asked || null };
     case 'signup': return { kind: 'account', title: 'Created an account' };
@@ -204,7 +206,8 @@ export async function buildTimeline(leadId, tenantId, { limit = 100, before = nu
   for (const m of messages) {
     const out = m.direction === 'out';
     const ch = m.channel === 'sms' ? 'Text' : 'Email';
-    const label = !out ? `${ch} from lead` : m.kind === 'alert' ? 'Text alert sent' : m.kind === 'tour' ? 'Tour text sent' : `${ch} sent${m.agent_name ? ` by ${m.agent_name}` : ''}`;
+    const label = !out ? `${ch} from lead` : m.kind === 'alert' ? 'Text alert sent' : m.kind === 'tour' ? 'Tour text sent'
+      : m.kind === 'plan' ? `${ch} sent by an action plan` : `${ch} sent${m.agent_name ? ` by ${m.agent_name}` : ''}`;
     items.push({
       id: `msg-${m.id}`, at: m.at, kind: m.channel === 'sms' ? 'text' : 'email', title: m.subject && m.channel === 'email' ? `${label}: ${m.subject}` : label,
       detail: m.body, status: m.status, direction: m.direction,

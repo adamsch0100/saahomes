@@ -62,6 +62,7 @@ async function settingsPayload(tenant) {
     lead_visibility: leadVisibility(tenant),
     require_2fa: s.require_2fa === true,
     fub: { connected: !!fubKey, last4: fubKey ? fubKey.slice(-4) : null, managed_by_platform: isHomeTenant(tenant) },
+    crm_mode: s.crm_mode === 'own' ? 'own' : 'fub',
     email: {
       provider: sending?.status === 'verified' && own ? 'resend' : 'shared',
       can_use_own_domain: !!own,
@@ -131,6 +132,9 @@ export const patchSettings = async (req, res) => {
         return res.status(400).json({ error: "This brokerage's Follow Up Boss key is set on the server" });
       }
       const key = String(b.fub_api_key || '').trim();
+      if (key && tenant.settings.crm_mode === 'own') {
+        return res.status(409).json({ error: 'Your brokerage runs on its own CRM right now. Switch “Your CRM” to Follow Up Boss first.' });
+      }
       if (key) {
         const { verifyFollowUpBossApiKey } = await import('../services/followUpBossService.js');
         const verified = await verifyFollowUpBossApiKey(key);
