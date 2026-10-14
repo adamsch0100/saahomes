@@ -1746,6 +1746,24 @@ export const runMigrations = async () => {
       console.error('own crm migration skipped:', ownCrmErr.message);
     }
 
+    // Platform-wide settings (one JSONB value per key): the plan prices the
+    // platform owner set, and the Stripe product, prices and webhook the app
+    // set up for itself (services/plans.js, services/stripeSetup.js).
+    await client.query('SAVEPOINT platform_settings');
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS platform_settings (
+          key VARCHAR(64) PRIMARY KEY,
+          value JSONB NOT NULL DEFAULT '{}'::jsonb,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+      `);
+      await client.query('RELEASE SAVEPOINT platform_settings');
+    } catch (platformSettingsErr) {
+      await client.query('ROLLBACK TO SAVEPOINT platform_settings');
+      console.error('platform settings migration skipped:', platformSettingsErr.message);
+    }
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {
