@@ -6,7 +6,7 @@
 import crypto from 'node:crypto';
 import getPool from '../config/database.js';
 import logger from '../utils/logger.js';
-import { DEFAULT_TENANT_ID, clearTenantCache } from '../services/tenantContext.js';
+import { DEFAULT_TENANT_ID, clearTenantCache, platformBaseDomain } from '../services/tenantContext.js';
 import { issueAccountLink } from '../services/accountLinks.js';
 import {
   FEED_STATUSES, DEMO_FEED, clearFeedCache, feedCatalog, feedStatusFor, normalizeServiceAreas,
@@ -15,7 +15,7 @@ import {
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/;
 const DOMAIN_RE = /^(?=.{4,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
-const RESERVED_SLUGS = new Set(['www', 'api', 'app', 'admin', 'agent', 'platform', 'mail', 'static', 'cdn', 'saa']);
+const RESERVED_SLUGS = new Set(['www', 'api', 'app', 'admin', 'agent', 'platform', 'mail', 'static', 'cdn', 'saa', 'cname']);
 
 export const requirePlatform = (req, res, next) => {
   if (req.user?.platform !== true) return res.status(403).json({ error: 'Platform owner only' });
@@ -84,7 +84,7 @@ export const createTenant = async (req, res) => {
     return res.status(400).json({ error: 'Short name must be lowercase letters, numbers and dashes' });
   }
   if (domain && !DOMAIN_RE.test(domain)) return res.status(400).json({ error: 'That domain doesn’t look right' });
-  if (!domain && !process.env.PLATFORM_BASE_DOMAIN && !process.env.PLATFORM_DOMAIN) {
+  if (!domain && !platformBaseDomain()) {
     return res.status(400).json({ error: 'Give the brokerage a domain so its invite link has somewhere to go' });
   }
   if (!ownerName) return res.status(400).json({ error: 'Owner name is required' });

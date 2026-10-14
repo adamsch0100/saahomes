@@ -1746,6 +1746,27 @@ export const runMigrations = async () => {
       console.error('own crm migration skipped:', ownCrmErr.message);
     }
 
+    // The platform's own identity (name, domains, sender, colors), as the
+    // platform owner overrides it in the console (services/platform.js). One
+    // row. Platform mail queued in email_outbox goes out under the platform's
+    // name, not the brokerage's.
+    await client.query('SAVEPOINT platform_identity');
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS platform_identity (
+          id SMALLINT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+          overrides JSONB NOT NULL DEFAULT '{}'::jsonb,
+          updated_by VARCHAR(255),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        ALTER TABLE email_outbox ADD COLUMN IF NOT EXISTS platform BOOLEAN NOT NULL DEFAULT FALSE;
+      `);
+      await client.query('RELEASE SAVEPOINT platform_identity');
+    } catch (platformErr) {
+      await client.query('ROLLBACK TO SAVEPOINT platform_identity');
+      console.error('platform identity migration skipped:', platformErr.message);
+    }
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {
