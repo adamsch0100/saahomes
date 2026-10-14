@@ -11,6 +11,7 @@ import agentRoutes from './routes/agent.js';
 import accountRoutes from './routes/account.js';
 import platformRoutes from './routes/platform.js';
 import clientLifeRoutes from './routes/clientLife.js';
+import ownCrmPublicRoutes from './routes/ownCrm.js';
 import {
   publicRoutes as plugAndPlayPublicRoutes,
   adminRoutes as plugAndPlayAdminRoutes,
@@ -237,6 +238,8 @@ app.use(cors({
 // Stripe and Follow Up Boss sign the exact bytes they send: these routes get
 // the raw body, so they come before the JSON parser.
 app.use(rawWebhooks);
+// Inbound email, lead sources and plan unsubscribes: raw bodies, found by each brokerage's key.
+app.use(ownCrmPublicRoutes);
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -680,6 +683,8 @@ const startServer = async () => {
   if (process.env.IRES_SYNC_SCHEDULER !== 'off') startIresSyncScheduler();
   // Task reminders, text alerts for saved searches and tour reminders.
   import('./services/crmService.js').then(({ startCrmScheduler }) => startCrmScheduler()).catch((e) => console.error('CRM scheduler failed to start:', e.message));
+  // Action plans: emails, texts and tasks on their day (every minute).
+  import('./services/actionPlans.js').then(({ startActionPlanScheduler }) => startActionPlanScheduler()).catch((e) => console.error('Action plan scheduler failed to start:', e.message));
   // Trials, grace periods and pausing unpaid brokerages (hourly).
   if (process.env.BILLING_SCHEDULER !== 'off') startBillingScheduler();
 };

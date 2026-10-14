@@ -9,6 +9,9 @@ import TodayBrief from "./TodayBrief.jsx";
 import LeadPanel from "../crm/LeadPanel.jsx";
 import TasksToday from "../crm/TasksToday.jsx";
 import AgentAlertsToggle from "../crm/AgentAlertsToggle.jsx";
+import TeamInbox from "../crm/TeamInbox.jsx";
+import ActionPlans from "../crm/ActionPlans.jsx";
+import { crm } from "../../utils/crmApi.js";
 import ClosingFactsDialog from "../agent/ClosingFactsDialog.jsx";
 
 const API_BASE = (() => {
@@ -301,6 +304,13 @@ export default function AgentCockpit({
     return Number.isInteger(id) && id > 0 ? { id, tab: p.get("tab") || "timeline" } : null;
   });
   const [tasksKey, setTasksKey] = useState(0);
+  // Leads | Inbox | Action plans (?view=inbox from an inbox alert)
+  const [view, setView] = useState(() => {
+    if (typeof window === "undefined") return "leads";
+    const v = new URLSearchParams(window.location.search).get("view");
+    return v === "inbox" || v === "plans" ? v : "leads";
+  });
+  const [inboxCounts, setInboxCounts] = useState(null);
   // Share-home form (It 16 / P5) — one lead at a time
   const [shareLeadId, setShareLeadId] = useState(null);
   const [shareListing, setShareListing] = useState("");
@@ -621,8 +631,86 @@ export default function AgentCockpit({
     }
   };
 
+  useEffect(() => {
+    let live = true;
+    const tick = () => crm.inboxCounts(token).then((c) => { if (live) setInboxCounts(c); }).catch(() => {});
+    tick();
+    const id = setInterval(tick, 60000);
+    return () => { live = false; clearInterval(id); };
+  }, [token]);
+
+  const switchView = (v) => {
+    setView(v);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (v === "leads") url.searchParams.delete("view");
+      else url.searchParams.set("view", v);
+      window.history.replaceState(null, "", url.pathname + (url.search || ""));
+    }
+  };
+
+  const viewTabs = (
+    <div className="flex gap-1 border-b border-gray-200 overflow-x-auto" role="tablist" aria-label="Cockpit">
+      {[
+        ["leads", "Leads"],
+        ["inbox", "Inbox"],
+        ["plans", "Action plans"],
+      ].map(([k, label]) => (
+        <button
+          key={k}
+          type="button"
+          role="tab"
+          aria-selected={view === k}
+          onClick={() => switchView(k)}
+          className={`min-h-[44px] px-4 text-sm font-semibold border-b-2 -mb-px whitespace-nowrap ${
+            view === k ? "border-gray-900 text-gray-900" : "border-transparent text-gray-500 hover:text-gray-900"
+          }`}
+        >
+          {label}
+          {k === "inbox" && inboxCounts?.unread ? (
+            <span className="ml-1.5 text-[11px] bg-gray-900 text-white rounded-full px-1.5" aria-label={`${inboxCounts.unread} unread`}>
+              {inboxCounts.unread}
+            </span>
+          ) : null}
+        </button>
+      ))}
+    </div>
+  );
+
+  const leadPanel = openLead && (
+    <LeadPanel
+      key={openLead.id}
+      token={token}
+      leadId={openLead.id}
+      initialTab={openLead.tab}
+      onClose={closeLeadPanel}
+      onPatch={(id, body) => {
+        const lead = leads.find((l) => l.id === id);
+        if (lead && body?.lifecycle_stage) return onStageChange(lead, body.lifecycle_stage);
+        return patchLead(id, body);
+      }}
+      teammates={teammates}
+      currentAgentId={currentAgentId}
+    />
+  );
+
+  if (view !== "leads") {
+    return (
+      <div className="space-y-4">
+        {viewTabs}
+        {view === "inbox" ? (
+          <TeamInbox token={token} onCounts={setInboxCounts} onOpenLead={(id) => openLeadPanel(id)} />
+        ) : (
+          <ActionPlans token={token} />
+        )}
+        {leadPanel}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
+      {viewTabs}
       <TodayBrief token={token} />
 
       <div className="grid gap-4 lg:grid-cols-2 items-start">
@@ -657,7 +745,9 @@ export default function AgentCockpit({
         <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">FUB CRM</p>
           <p className="text-sm font-semibold text-gray-900 mt-2">
-            {fubStatus == null
+            {meta?.crm_mode === "own"
+              ? "Off · this cockpit is your CRM"
+              : fubStatus == null
               ? "…"
               : fubStatus.configured
                 ? fubStatus.success !== false
@@ -1101,22 +1191,7 @@ export default function AgentCockpit({
         )}
       </div>
 
-      {openLead && (
-        <LeadPanel
-          key={openLead.id}
-          token={token}
-          leadId={openLead.id}
-          initialTab={openLead.tab}
-          onClose={closeLeadPanel}
-          onPatch={(id, body) => {
-            const lead = leads.find((l) => l.id === id);
-            if (lead && body?.lifecycle_stage) return onStageChange(lead, body.lifecycle_stage);
-            return patchLead(id, body);
-          }}
-          teammates={teammates}
-          currentAgentId={currentAgentId}
-        />
-      )}
+      {leadPanel}
 
       {closingLead && (
         <ClosingFactsDialog
@@ -1137,7 +1212,7 @@ export default function AgentCockpit({
         {showAssignment
           ? " Team pool: every agent sees all contacts; Claim or Assign tracks who is working the lead."
           : ""}
-        {showAdminTools
+        {showAdminTools && meta?.crm_mode !== "own"
           ? " FUB is source of truth — nurture signals write back when the API key is configured; use Sync from FUB to refresh lifecycle from FUB tags (manual stages are never overwritten)."
           : ""}
       </p>

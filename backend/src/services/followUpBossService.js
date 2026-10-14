@@ -20,6 +20,7 @@ import {
   currentTenant, currentTenantId, DEFAULT_TENANT_ID, siteUrlFor, tenantById,
 } from './tenantContext.js';
 import { brandFor } from './brand.js';
+import { isOwnCrm } from './crmMode.js';
 import {
   enrichSubmissionFromHistory,
   noteIfDuplicateSubmission,
@@ -61,6 +62,8 @@ const tenantFubCache = new Map(); // tenant id → { at, key }
  */
 export async function fubApiKeyForTenant(tenantId, pool = getPool()) {
   const id = fubTenant(tenantId);
+  // A brokerage running on its own CRM never talks to Follow Up Boss.
+  if (await isOwnCrm(id, pool)) return null;
   if (id === DEFAULT_TENANT_ID) return FOLLOW_UP_BOSS_API_KEY || null;
   const hit = tenantFubCache.get(id);
   if (hit && Date.now() - hit.at < TENANT_FUB_CACHE_MS) return hit.key;
@@ -125,6 +128,7 @@ async function agentFubKeyForLead({ tenantId, email, agentUserId }, pool) {
  */
 export async function fubRouteFor({ tenantId, email, agentUserId } = {}, { pool = getPool() } = {}) {
   const id = fubTenant(tenantId);
+  if (await isOwnCrm(id, pool)) return null;
   if (id === DEFAULT_TENANT_ID) {
     return isFollowUpBossConfigured() ? { via: 'env', key: FOLLOW_UP_BOSS_API_KEY || null } : null;
   }
@@ -280,6 +284,8 @@ const postFollowUpBossEvent = async (eventData, opts = {}) => {
   const overrideKey = resolveFubApiKey(opts.apiKey);
   const hasOverride = !!(opts.apiKey != null && String(opts.apiKey).trim());
   const tenantId = fubTenant(opts.tenantId);
+  // Own-CRM brokerages send nothing, not even with an agent's own key.
+  if (await isOwnCrm(tenantId)) throw new Error('Follow Up Boss not configured');
 
   // Another brokerage's people never reach SAA's FUB: a non-SAA tenant posts
   // only with its own key or its agent's key (fubRouteFor), else nothing is sent.
@@ -532,6 +538,7 @@ export const forwardShowingRequestToFollowUpBoss = async (showing) => {
  */
 export const forwardContactToFollowUpBoss = async (submissionIn, opts = {}) => {
   const overrideKey = opts.apiKey != null ? String(opts.apiKey).trim() : '';
+  if (await isOwnCrm(fubTenant(opts.tenantId))) return { success: false, reason: 'not_configured' };
   const route = overrideKey ? null : await fubRouteFor({ tenantId: opts.tenantId, email: submissionIn?.email });
   if (!overrideKey && !route) {
     logger.info('Follow Up Boss not configured, skipping lead forwarding');
@@ -986,6 +993,7 @@ export function maskFubApiKey(apiKey) {
  * @param {{ apiKey?: string }} [opts] — optional per-agent key override
  */
 export async function getFollowUpBossPeopleCount(opts = {}) {
+  if (await isOwnCrm(fubTenant(opts.tenantId))) return { configured: false, reason: 'not_configured' };
   const apiKey = opts.apiKey != null && String(opts.apiKey).trim()
     ? String(opts.apiKey).trim()
     : await fubApiKeyForTenant(opts.tenantId);
@@ -1058,6 +1066,7 @@ export async function verifyFollowUpBossApiKey(apiKey) {
  * @param {{ apiKey?: string, limit?: number, offset?: number }} opts
  */
 export async function listFollowUpBossPeople(opts = {}) {
+  if (await isOwnCrm(fubTenant(opts.tenantId))) return { success: false, reason: 'not_configured', people: [], total: null };
   const apiKey = opts.apiKey != null && String(opts.apiKey).trim()
     ? String(opts.apiKey).trim()
     : await fubApiKeyForTenant(opts.tenantId);
@@ -1185,10 +1194,11 @@ export async function importFollowUpBossContacts(opts = {}) {
   const apiKey = opts.apiKey != null && String(opts.apiKey).trim()
     ? String(opts.apiKey).trim()
     : await fubApiKeyForTenant(tenantId, pool);
+  const ownCrm = tenantId != null && await isOwnCrm(tenantId, pool);
   const maxPages = Math.min(Math.max(parseInt(opts.maxPages, 10) || 25, 1), 25);
   const pageSize = Math.min(Math.max(parseInt(opts.pageSize, 10) || 100, 1), 100);
 
-  if (!apiKey) {
+  if (!apiKey || ownCrm) {
     return {
       imported: 0,
       duplicates: 0,
@@ -1499,6 +1509,7 @@ function extractPersonFields(person) {
  * @returns {Promise<{configured:boolean, found?:boolean, personId?:string|null, tags?:string[], reason?:string, error?:string}>}
  */
 export async function pullFollowUpBossPerson({ email, fubPersonId, apiKey: apiKeyOverride, tenantId } = {}) {
+  if (await isOwnCrm(fubTenant(tenantId))) return { configured: false, reason: 'not_configured' };
   const apiKey = apiKeyOverride != null && String(apiKeyOverride).trim()
     ? String(apiKeyOverride).trim()
     : await fubApiKeyForTenant(tenantId);
@@ -1822,7 +1833,7 @@ export async function syncLeadScoreToFollowUpBoss(userId, {
   if (apiKey === undefined) {
     apiKey = (await fubRouteFor({ tenantId: u?.tenant_id, agentUserId: u?.assigned_agent_id }, { pool }))?.key || null;
   }
-  if (!apiKey) return { skipped: 'not_configured' };
+  if (!apiKey || await isOwnCrm(u?.tenant_id, pool)) return { skipped: 'not_configured' };
   if (!u?.fub_person_id || u.lead_score == null) return { skipped: 'not_linked' };
   if (u.fub_lead_score_synced === u.lead_score) return { skipped: 'unchanged' };
   const res = await fetchImpl(`${FUB_PEOPLE_URL}/${u.fub_person_id}`, {
@@ -1852,7 +1863,7 @@ export async function addFollowUpBossNote(userId, { subject, body }, {
   if (apiKey === undefined) {
     apiKey = (await fubRouteFor({ tenantId: u?.tenant_id, agentUserId: u?.assigned_agent_id }, { pool }))?.key || null;
   }
-  if (!apiKey) return { skipped: 'not_configured' };
+  if (!apiKey || await isOwnCrm(u?.tenant_id, pool)) return { skipped: 'not_configured' };
   if (!u?.fub_person_id) return { skipped: 'not_linked' };
   const res = await fetchImpl(FUB_NOTES_URL, {
     method: 'POST',

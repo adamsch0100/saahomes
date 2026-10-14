@@ -144,6 +144,10 @@ export async function recordEvent({
     // Hot-lead alerts to the agent (and tour texts) look at every lead event.
     if (rows[0]?.user_id) {
       import('./hotLeads.js').then(({ onLeadEvent }) => onLeadEvent(rows[0], pool)).catch(() => {});
+      // Action plans: a tour request pauses them; a website signup can start one.
+      if (['tour_request', 'showing_request', 'signup'].includes(type)) {
+        import('./actionPlans.js').then(({ onPlanEvent }) => onPlanEvent(rows[0], pool)).catch(() => {});
+      }
     }
     return rows[0] || null;
   } catch (err) {

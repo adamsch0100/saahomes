@@ -15,6 +15,7 @@ import BrokerageSettings from '../components/admin/BrokerageSettings.jsx';
 import BrokerageReports from '../components/admin/BrokerageReports.jsx';
 import OwnerSetup, { ConsoleNotes, OwnerSettingsExtras } from '../components/admin/OwnerSetup.jsx';
 import { takeHandoffToken } from '../utils/consoleBrokerage.js';
+import { crm } from '../utils/crmApi.js';
 
 const TYPE_LABELS = {
   digest: 'Listing digest',
@@ -41,6 +42,7 @@ export default function AdminPage() {
   const [abError, setAbError] = useState(null);
   const [challenge, setChallenge] = useState(null); // two-step sign-in pending
   const [me, setMe] = useState(null); // GET /api/account/me — platform flag gates Brokerages
+  const [crmMode, setCrmMode] = useState(null); // 'own' when the cockpit is this brokerage's CRM
   // The brokerage requires two-step sign-in and this account hasn't set it up:
   // the token only works on /api/account/*, so show only the setup panel.
   const [setupRequired, setSetupRequired] = useState(false);
@@ -56,6 +58,11 @@ export default function AdminPage() {
       setIsAuthenticated(true);
       fetchData();
     }
+  }, [token]);
+
+  useEffect(() => {
+    if (!token) return;
+    crm.crmMode(token).then((d) => setCrmMode(d?.mode || null)).catch(() => setCrmMode(null));
   }, [token]);
 
   const fetchData = async () => {
@@ -313,7 +320,11 @@ export default function AdminPage() {
           <div className="mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Agent Cockpit</h1>
-              <p className="text-sm text-gray-500 mt-1">Scores, heat, stages &amp; follow-ups — FUB stays CRM source of truth.</p>
+              <p className="text-sm text-gray-500 mt-1">
+                {crmMode === 'own'
+                  ? 'Scores, heat, stages & follow-ups — this cockpit is your CRM.'
+                  : 'Scores, heat, stages & follow-ups — FUB stays CRM source of truth.'}
+              </p>
             </div>
             <div className="flex flex-wrap gap-2 self-start sm:self-auto">
               <Link

@@ -48,6 +48,8 @@ function promptFor({ channel, lead, agent, brand, timeline, notes, lastInbound }
   const voice = agent?.voice_style || 'warm';
   const facts = [
     `Lead: ${lead.name || lead.email}${lead.lifecycle_stage ? ` (stage: ${lead.lifecycle_stage})` : ''}`,
+    lead.tags?.length ? `Tags: ${lead.tags.join(', ')}` : null,
+    lead.source ? `Came from: ${lead.source}` : null,
     `Agent writing: ${agent?.name || 'the agent'} at ${brand.name}`,
     lastInbound ? `The lead's latest message to us: "${String(lastInbound).slice(0, 400)}"` : null,
     notes.length ? `Agent notes:\n${notes.map((n) => `- ${String(n).slice(0, 200)}`).join('\n')}` : null,
@@ -78,7 +80,7 @@ function parseEmail(text) {
 export async function createDraft({ tenant, leadId, agent, channel = 'sms' }, pool = getPool()) {
   if (!['sms', 'email'].includes(channel)) throw Object.assign(new Error('Pick text or email'), { status: 400 });
   const { rows: [lead] } = await pool.query(
-    'SELECT id, name, email, phone, lifecycle_stage FROM users WHERE id = $1 AND tenant_id = $2', [leadId, tenant.id]
+    'SELECT id, name, email, phone, lifecycle_stage, tags, source FROM users WHERE id = $1 AND tenant_id = $2', [leadId, tenant.id]
   );
   if (!lead) throw Object.assign(new Error('Lead not found'), { status: 404 });
   const brand = brandFor(tenant, isHomeTenant(tenant) ? {} : { agent });
@@ -135,7 +137,7 @@ export async function sendLeadEmail({ tenant, leadId, agent, subject, body, draf
     "SELECT id, email, status FROM users WHERE id = $1 AND tenant_id = $2 AND COALESCE(role, 'client') = 'client'",
     [leadId, tenant.id]
   );
-  if (!lead?.email) return { ok: false, reason: 'no_email' };
+  if (!lead?.email || /\.invalid$/i.test(lead.email)) return { ok: false, reason: 'no_email' };
   if (lead.status === 'unsubscribed') return { ok: false, reason: 'email_off' };
   const consents = await getConsents(lead.id, pool);
   if (consents.email?.status === 'revoked') return { ok: false, reason: 'email_off' };
@@ -151,7 +153,9 @@ export async function sendLeadEmail({ tenant, leadId, agent, subject, body, draf
   try {
     const emailer = await import('./emailer.js');
     if (emailer.smtpConfigured() || emailer.ownDomainSendingAvailable()) {
-      await emailer.sendEmail(lead.email, subj, html, fromName, { tenantId: tenant.id, replyTo: agent?.email || undefined });
+      // Replies come back to the team inbox when the brokerage set up an inbound address.
+      const replyTo = tenant.settings?.inbound?.reply_to || agent?.email || undefined;
+      await emailer.sendEmail(lead.email, subj, html, fromName, { tenantId: tenant.id, replyTo });
       await pool.query("UPDATE lead_messages SET status = 'sent' WHERE id = $1", [msg.id]);
     } else {
       await pool.query('INSERT INTO email_outbox (to_email, subject, html, tenant_id) VALUES ($1, $2, $3, $4)', [lead.email, subj, html, tenant.id]);

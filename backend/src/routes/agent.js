@@ -24,6 +24,10 @@ import {
   getTextThread, sendLeadText, sendLeadEmailNow, draftReply, sendReplyDraft, discardDraft, confirmTour,
   getTextingStatus, subscribeAgentPush, unsubscribeAgentPush,
 } from '../controllers/crmController.js';
+import {
+  getPlans, createPlan, updatePlan, deletePlan, copyPlan, changePlanRun, getLeadPlans, addLeadToPlan, setLeadTags,
+  getCrmModeForStaff, getInbox, getInboxCounts, getInboxThread, actOnThread, replyInThread, threadToLead,
+} from '../controllers/ownCrmController.js';
 import { authenticateToken, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -89,5 +93,23 @@ router.get('/crm/texting', ...agentOrAdmin, getTextingStatus);
 // Hot-lead alerts on this device (web push for staff)
 router.post('/push/subscribe', ...agentOrAdmin, subscribeAgentPush);
 router.post('/push/unsubscribe', ...agentOrAdmin, unsubscribeAgentPush);
+
+// Action plans, tags and the team inbox (the cockpit as the CRM)
+router.get('/crm/mode', ...agentOrAdmin, getCrmModeForStaff);
+router.put('/crm/leads/:id/tags', ...agentOrAdmin, setLeadTags);
+router.get('/crm/leads/:id/plans', ...agentOrAdmin, getLeadPlans);
+router.post('/crm/leads/:id/plans', ...agentOrAdmin, addLeadToPlan);
+router.get('/plans', ...agentOrAdmin, getPlans);
+router.post('/plans', ...agentOrAdmin, createPlan);
+router.post('/plans/runs/:id/:action', ...agentOrAdmin, changePlanRun);
+router.patch('/plans/:id', ...agentOrAdmin, updatePlan);
+router.delete('/plans/:id', ...agentOrAdmin, deletePlan);
+router.post('/plans/:id/copy', ...agentOrAdmin, copyPlan);
+router.get('/inbox', ...agentOrAdmin, getInbox);
+router.get('/inbox/counts', ...agentOrAdmin, getInboxCounts);
+router.get('/inbox/:id', ...agentOrAdmin, getInboxThread);
+router.post('/inbox/:id/reply', ...agentOrAdmin, replyInThread);
+router.post('/inbox/:id/lead', ...agentOrAdmin, threadToLead);
+router.post('/inbox/:id/:action', ...agentOrAdmin, actOnThread);
 
 export default router;

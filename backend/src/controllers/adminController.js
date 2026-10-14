@@ -408,7 +408,7 @@ export const getCockpitLeads = async (req, res) => {
        WHERE u.tenant_id = $3
          AND u.status IS DISTINCT FROM 'unsubscribed'
          AND COALESCE(u.role, 'client') = 'client'
-         AND ($1 = '%%' OR u.email ILIKE $1 OR u.name ILIKE $1 OR u.phone ILIKE $1 OR ${noteSearchSql('$1', 'u.')})
+         AND ($1 = '%%' OR u.email ILIKE $1 OR u.name ILIKE $1 OR u.phone ILIKE $1 OR ${noteSearchSql('$1', 'u.')} OR EXISTS (SELECT 1 FROM unnest(u.tags) tg WHERE tg ILIKE $1))
          AND ${smartFilterSql(String(smart), 'u.')}
        ORDER BY COALESCE(u.lead_score, 0) DESC, u.last_active_at DESC NULLS LAST, u.created_at DESC
        LIMIT $2`,
@@ -448,6 +448,7 @@ export const getCockpitLeads = async (req, res) => {
         due_today: dueTodayCount,
         hot: hotCount,
         fub_configured: !!(process.env.FOLLOW_UP_BOSS_API_KEY || process.env.FOLLOW_UP_BOSS_WEBHOOK_URL),
+        crm_mode: req.tenant?.settings?.crm_mode === 'own' ? 'own' : 'fub',
       },
     });
   } catch (error) {
@@ -554,6 +555,12 @@ export const patchCockpitLead = async (req, res) => {
       `UPDATE users SET ${updates.join(', ')} WHERE id = $${i}`,
       params
     );
+    if (body.lifecycle_stage != null) {
+      const { onStageChanged } = await import('../services/actionPlans.js');
+      await onStageChanged({
+        tenantId: existing.rows[0].tenant_id, leadId: id, from: existing.rows[0].lifecycle_stage, to: String(body.lifecycle_stage).toLowerCase().trim(),
+      }, pool).catch((e) => logger.warn('stage plan trigger failed', { message: e.message }));
+    }
 
     const refreshed = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
     const { enrichLeadForCockpit } = await import('../services/agentCockpit.js');
