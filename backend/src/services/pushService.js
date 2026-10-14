@@ -19,6 +19,8 @@ import { notifyNewMatches, scanSavedHomesForNotifications } from './notification
 import { getPrefFrequency } from './notificationPrefs.js';
 import { recordConsent } from './consent.js';
 import { passedListingKeys } from './tasteProfile.js';
+import { DEFAULT_TENANT_ID, siteUrlFor, tenantById } from './tenantContext.js';
+import { brandFor } from './brand.js';
 
 const SITE = marketPack.market.siteUrl || 'https://saahomes.com';
 const MT_TZ = 'America/Denver';
@@ -187,25 +189,39 @@ async function queueNewMatches(pool) {
   return queued;
 }
 
-function absolute(url) {
+function absolute(url, site = SITE) {
   if (!url) return null;
-  return /^https?:\/\//.test(url) ? url : `${SITE}${url.startsWith('/') ? '' : '/'}${url}`;
+  return /^https?:\/\//.test(url) ? url : `${site}${url.startsWith('/') ? '' : '/'}${url}`;
 }
 
-function withSource(url) {
-  const abs = absolute(url || '/notifications/');
+function withSource(url, site = SITE) {
+  const abs = absolute(url || '/notifications/', site);
   return `${abs}${abs.includes('?') ? '&' : '?'}src=push`;
 }
 
+/**
+ * Links in a person's pushes open their brokerage's site: SAA's as before,
+ * another brokerage's own domain, or a path on whatever site installed the
+ * app when the brokerage has no domain yet (never saahomes.com).
+ */
+export async function pushSiteForUser(userId, pool = getPool()) {
+  const { rows: [u] } = await pool.query('SELECT tenant_id FROM users WHERE id = $1', [userId]);
+  const tenantId = Number(u?.tenant_id) || DEFAULT_TENANT_ID;
+  if (tenantId === DEFAULT_TENANT_ID) return SITE;
+  const brand = brandFor(await tenantById(tenantId, { pool }));
+  const fallback = siteUrlFor({ id: DEFAULT_TENANT_ID });
+  return brand.site_url && brand.site_url !== fallback ? brand.site_url.replace(/\/$/, '') : '';
+}
+
 /** One push for everything pending for a person. */
-export function bundlePayload(items) {
+export function bundlePayload(items, { site = SITE } = {}) {
   if (items.length === 1) {
     const n = items[0];
     return {
       title: n.title,
       body: n.body || '',
-      url: withSource(n.link),
-      image: absolute(n.image_url),
+      url: withSource(n.link, site),
+      image: absolute(n.image_url, site),
       tag: `n-${n.id}`,
     };
   }
@@ -219,8 +235,8 @@ export function bundlePayload(items) {
   return {
     title: bits.join(', ').replace(/^./, (c) => c.toUpperCase()),
     body: items.slice(0, 2).map((n) => n.title).join(' · '),
-    url: withSource('/notifications/'),
-    image: absolute(items.find((n) => n.image_url)?.image_url),
+    url: withSource('/notifications/', site),
+    image: absolute(items.find((n) => n.image_url)?.image_url, site),
     tag: 'saa-updates',
   };
 }
@@ -272,7 +288,7 @@ export async function runPushPass({ now = new Date(), send = deliverPush, scanSa
       continue;
     }
 
-    const payload = bundlePayload(items);
+    const payload = bundlePayload(items, { site: await pushSiteForUser(userId, pool) });
     const { rows: subs } = await pool.query(
       'SELECT id, endpoint, p256dh, auth FROM push_subscriptions WHERE user_id = $1 AND disabled_at IS NULL', [userId]
     );

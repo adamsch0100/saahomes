@@ -13,7 +13,8 @@ import platformRoutes from './routes/platform.js';
 import { runMigrations } from './config/migrate.js';
 import { startIresSyncScheduler } from './jobs/iresScheduler.js';
 import { NOCO_CITIES } from './config/nocoCities.js';
-import { tenantMiddleware } from './services/tenantContext.js';
+import { tenantMiddleware, resolveTenantForHost } from './services/tenantContext.js';
+import { brandFor, isHomeTenant } from './services/brand.js';
 
 dotenv.config();
 
@@ -28,6 +29,166 @@ const escapeHtml = (s) =>
   String(s ?? '').replace(/[&<>"']/g, (c) =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
   );
+
+// ---- Another brokerage's site: its own page shell, manifest and icon ----
+// SAA's prerendered pages (title, meta, JSON-LD and body text) are SAA's. On a
+// brokerage's host the app gets the bare SPA shell with that brokerage's head.
+
+/** The brokerage whose host this is, or null on SAA's own and unknown hosts. */
+async function brokerageForHost(req) {
+  try {
+    const tenant = await resolveTenantForHost(req.hostname);
+    return isHomeTenant(tenant) ? null : tenant;
+  } catch {
+    return null;
+  }
+}
+
+/** Up to two initials from a brand name ("Peak Realty" → "PR"). */
+export function brandInitials(name) {
+  const words = String(name || '').split(/\s+/).map((w) => w.replace(/[^A-Za-z0-9]/g, '')).filter(Boolean);
+  const letters = words.slice(0, 2).map((w) => w[0].toUpperCase()).join('');
+  return letters || 'H';
+}
+
+/** Black or white, whichever reads on the given background color. */
+function textColorOn(hex) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || ''));
+  if (!m) return '#ffffff';
+  const n = parseInt(m[1], 16);
+  const lum = (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
+  return lum > 0.6 ? '#111111' : '#ffffff';
+}
+
+/** A plain square icon: the brand's initials on its primary color. */
+export function renderBrandIconSvg(brand) {
+  const bg = /^#[0-9a-f]{6}$/i.test(brand?.primary_color || '') ? brand.primary_color : '#111111';
+  const initials = escapeHtml(brandInitials(brand?.name));
+  const size = initials.length > 1 ? 220 : 280;
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">' +
+    `<rect width="512" height="512" rx="96" fill="${bg}"/>` +
+    `<text x="256" y="256" dy="0.35em" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="${size}" fill="${textColorOn(bg)}">${initials}</text>` +
+    '</svg>';
+}
+
+/** The brokerage's own icon when it set one (never SAA's /icons/), else null. */
+function brandIconUrl(brand) {
+  const url = String(brand?.icon_url || '').trim();
+  if (!url || url.startsWith('/icons/')) return null;
+  return /^https:\/\//i.test(url) || url.startsWith('/') ? url : null;
+}
+
+/** The installable-app manifest for a brokerage's site. */
+export function buildBrokerageManifest(brand) {
+  const name = String(brand?.name || 'Home Search');
+  const shortName = name.length <= 12 ? name : name.split(/\s+/)[0].slice(0, 12);
+  const color = /^#[0-9a-f]{6}$/i.test(brand?.primary_color || '') ? brand.primary_color : '#111111';
+  const own = brandIconUrl(brand);
+  const icons = [
+    ...(own ? [
+      { src: own, sizes: '192x192', purpose: 'any' },
+      { src: own, sizes: '512x512', purpose: 'any' },
+    ] : []),
+    { src: '/brand-icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+  ];
+  const shortcutIcon = [{ src: own || '/brand-icon.svg', sizes: own ? '192x192' : 'any' }];
+  return {
+    name,
+    short_name: shortName,
+    description: brand?.tagline
+      || (brand?.market_name
+        ? `Search ${brand.market_name} homes for sale and get instant alerts for new matches and price drops.`
+        : 'Search homes for sale and get instant alerts for new matches and price drops.'),
+    id: '/',
+    start_url: '/properties/?src=app',
+    scope: '/',
+    display: 'standalone',
+    background_color: color,
+    theme_color: color,
+    icons,
+    shortcuts: [
+      { name: 'Search homes', url: '/properties/?src=app', icons: shortcutIcon },
+      { name: 'My saved searches', url: '/my-saved-searches/?src=app', icons: shortcutIcon },
+      { name: 'Notifications', url: '/notifications/?src=app', icons: shortcutIcon },
+    ],
+  };
+}
+
+/** Head tags of the built shell that carry no brand: charset, viewport, app assets, fonts. */
+function isNeutralHeadTag(tag) {
+  if (/^<meta\s+charset=/i.test(tag)) return true;
+  if (/^<meta\s+name="(viewport|mobile-web-app-capable|apple-mobile-web-app-capable|apple-mobile-web-app-status-bar-style)"/i.test(tag)) return true;
+  if (/\s(?:src|href)="\/assets\//i.test(tag)) return true;
+  if (/^<link\b/i.test(tag) && /\shref="https:\/\/fonts\.(googleapis|gstatic)\.com[/"]/i.test(tag)) return true;
+  return false;
+}
+
+/**
+ * The SPA shell (dist/index.html) with a brokerage's head: its title,
+ * description, theme color and icon, noindex, and nothing of SAA's
+ * (canonical, OG/Twitter tags, JSON-LD, analytics, prerendered body text).
+ * The head is rebuilt from an allowlist, so tags added to SAA's head later
+ * never leak onto another brokerage's site.
+ */
+export function renderBrokerageShell(indexHtml, brand, path = '/') {
+  const html = String(indexHtml || '');
+  const name = String(brand?.name || 'Home Search');
+  const title = /^\/properties(\/|$)/.test(path) ? `${name} — Homes for Sale` : name;
+  const description = brand?.tagline
+    || (brand?.market_name ? `Search ${brand.market_name} homes for sale with ${name}.` : `Search homes for sale with ${name}.`);
+  const theme = /^#[0-9a-f]{6}$/i.test(brand?.primary_color || '') ? brand.primary_color : '#111111';
+  const icon = brandIconUrl(brand);
+
+  const headStart = html.search(/<head\b[^>]*>/i);
+  const headEnd = html.search(/<\/head>/i);
+  const rawHead = headStart >= 0 && headEnd > headStart ? html.slice(headStart, headEnd) : '';
+  const head = rawHead
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<style\b[\s\S]*?<\/style>/gi, '')
+    .replace(/<title\b[\s\S]*?<\/title>/gi, '');
+  const kept = [];
+  const tagRe = /<script\b[^>]*>[\s\S]*?<\/script>|<(?:meta|link)\b[^>]*>/gi;
+  for (const m of head.matchAll(tagRe)) {
+    const tag = m[0];
+    const open = tag.match(/^<[^>]*>/)[0];
+    if (/^<script/i.test(tag)) {
+      // Only the app's own bundle; inline scripts (analytics) and JSON-LD go.
+      if (/\ssrc="\/assets\//i.test(open)) kept.push(tag);
+    } else if (isNeutralHeadTag(tag)) {
+      kept.push(tag);
+    }
+  }
+
+  const bodyOpen = (html.match(/<body\b[^>]*>/i) || ['<body>'])[0];
+  const bodyStart = html.search(/<body\b[^>]*>/i);
+  const bodyScripts = bodyStart >= 0
+    ? [...html.slice(bodyStart).matchAll(/<script\b[^>]*\ssrc="\/assets\/[^"]*"[^>]*>\s*<\/script>/gi)].map((m) => m[0])
+    : [];
+  const htmlOpen = (html.match(/<html\b[^>]*>/i) || ['<html lang="en">'])[0];
+
+  return [
+    '<!DOCTYPE html>',
+    htmlOpen,
+    '<head>',
+    ...kept.map((t) => `    ${t}`),
+    `    <title>${escapeHtml(title)}</title>`,
+    `    <meta name="description" content="${escapeHtml(description)}" />`,
+    '    <meta name="robots" content="noindex" />',
+    `    <meta name="theme-color" content="${theme}" />`,
+    `    <meta name="apple-mobile-web-app-title" content="${escapeHtml(name)}" />`,
+    '    <link rel="manifest" href="/manifest.webmanifest" />',
+    `    <link rel="icon" href="${escapeHtml(icon || '/brand-icon.svg')}" />`,
+    `    <link rel="apple-touch-icon" href="${escapeHtml(icon || '/brand-icon.svg')}" />`,
+    // The app may call gtag(); keep it defined, but nothing is sent anywhere.
+    '    <script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);}</script>',
+    '</head>',
+    `  ${bodyOpen}`,
+    '    <div id="root"></div>',
+    ...bodyScripts.map((t) => `    ${t}`),
+    '  </body>',
+    '</html>',
+  ].join('\n');
+}
 
 const app = express();
 app.set('trust proxy', 1);
@@ -144,6 +305,32 @@ const canonicalRedirects = {
   '/northern-colorado-areas/windsor/rain-dance-windsor': '/northern-colorado-areas/windsor/raindance/',
 };
 
+// On a brokerage's host: no SAA sitemaps, robots disallow all (its own SEO
+// comes later), and its own manifest and icon. SAA's hosts fall through.
+const BROKERAGE_SITE_FILES = new Set([
+  '/robots.txt', '/sitemap.xml', '/sitemap-index.xml', '/sitemap-listings.xml',
+  '/manifest.webmanifest', '/brand-icon.svg', '/favicon.svg', '/favicon.ico',
+]);
+app.use(async (req, res, next) => {
+  if ((req.method !== 'GET' && req.method !== 'HEAD') || !BROKERAGE_SITE_FILES.has(req.path)) return next();
+  const tenant = await brokerageForHost(req);
+  if (!tenant) return next();
+  const brand = brandFor(tenant);
+  res.setHeader('Cache-Control', 'no-cache');
+  switch (req.path) {
+    case '/robots.txt':
+      return res.type('text/plain').send('User-agent: *\nDisallow: /\n');
+    case '/manifest.webmanifest':
+      return res.type('application/manifest+json').send(JSON.stringify(buildBrokerageManifest(brand), null, 2));
+    case '/brand-icon.svg':
+    case '/favicon.svg':
+    case '/favicon.ico':
+      return res.type('image/svg+xml').send(renderBrandIconSvg(brand));
+    default:
+      return res.status(404).type('text/plain').send('Not found');
+  }
+});
+
 // ---- Listing sitemap (Active-only, generated from DB, cached 15 min) ----
 let listingsSitemapCache = { xml: null, at: 0 };
 const LISTINGS_SITEMAP_TTL = 15 * 60 * 1000;
@@ -196,6 +383,32 @@ if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
       return res.redirect(301, target);
     }
     return next();
+  });
+
+  // A brokerage's pages: the SPA shell with its own head, never SAA's
+  // prerendered pages. Built assets (/assets, /icons, images) serve as usual.
+  app.use(async (req, res, next) => {
+    if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+    if (req.path.startsWith('/api')) return next();
+    const ext = req.path.match(/\.([a-z0-9]+)$/i);
+    if (ext && ext[1].toLowerCase() !== 'html') return next();
+    const tenant = await brokerageForHost(req);
+    if (!tenant) return next();
+    const brand = brandFor(tenant);
+    res.setHeader('Cache-Control', 'no-cache');
+    if (tenant.status !== 'active') {
+      return res.status(503).type('html').send(
+        `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>${escapeHtml(brand.name)}</title></head>` +
+        '<body><p>This site is paused. Please contact the brokerage.</p></body></html>'
+      );
+    }
+    try {
+      const base = readFileSync(join(distPath, 'index.html'), 'utf8');
+      return res.status(200).type('html').send(renderBrokerageShell(base, brand, req.path));
+    } catch (error) {
+      console.error('brokerage shell error:', error.message);
+      return res.status(500).type('text/plain').send('Something went wrong.');
+    }
   });
 
   app.use(express.static(distPath, {

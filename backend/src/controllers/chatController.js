@@ -9,6 +9,8 @@ import {
 import { createAlert } from './alertController.js';
 import { rejectIfDisposableEmail } from '../utils/emailQuality.js';
 import { sessionUser } from '../services/buyerSession.js';
+import { brandFor, isHomeTenant } from '../services/brand.js';
+import { DEFAULT_TENANT_ID, siteUrlFor } from '../services/tenantContext.js';
 
 const OPENCODE_API_URL = 'https://opencode.ai/zen/go/v1/chat/completions';
 const OPENCODE_API_KEY = process.env.OPENCODE_GO_API_KEY;
@@ -19,7 +21,7 @@ const NCOCITIES = ['Fort Collins', 'Loveland', 'Windsor', 'Greeley', 'Timnath', 
 /** Pull real listing details from our MLS database when the visitor is
  *  on a listing page or asks about a specific home. Returns a compact,
  *  factual context block (or null). */
-async function resolveListingContext(page, messages) {
+async function resolveListingContext(page, messages, site = 'https://saahomes.com') {
   try {
     const pool = getPool();
     const last = [...(messages || [])].reverse().find((m) => m?.role === 'user')?.content || '';
@@ -35,7 +37,7 @@ async function resolveListingContext(page, messages) {
          FROM listings WHERE slug = $1 AND is_active LIMIT 1`,
         [slugMatch[1]]
       );
-      if (r.rows[0]) return formatListingContext(r.rows[0]);
+      if (r.rows[0]) return formatListingContext(r.rows[0], site);
     }
 
     // 2) Message mentions a street address + city
@@ -52,7 +54,7 @@ async function resolveListingContext(page, messages) {
          ORDER BY updated_at DESC LIMIT 1`,
         [addrMatch[3], `%${addrMatch[2].trim()}%`]
       );
-      if (r.rows[0]) return formatListingContext(r.rows[0]);
+      if (r.rows[0]) return formatListingContext(r.rows[0], site);
     }
 
     // 3) Message just mentions a city → surface a couple of current homes
@@ -67,7 +69,7 @@ async function resolveListingContext(page, messages) {
          ORDER BY updated_at DESC LIMIT 2`,
         [cityMention]
       );
-      if (r.rows.length) return r.rows.map(formatListingContext).join('\n\n');
+      if (r.rows.length) return r.rows.map((row) => formatListingContext(row, site)).join('\n\n');
     }
   } catch (error) {
     logger.warn('Listing context lookup failed', error);
@@ -75,7 +77,7 @@ async function resolveListingContext(page, messages) {
   return null;
 }
 
-function formatListingContext(l) {
+function formatListingContext(l, site = 'https://saahomes.com') {
   const f = l.features || {};
   const parts = [
     `Address: ${[l.street_number, l.street_name, l.unit && `#${l.unit}`, l.city, l.state].filter(Boolean).join(' ')}`,
@@ -100,7 +102,7 @@ function formatListingContext(l) {
     f.pool ? 'Pool: yes' : null,
     f.view ? `View: ${f.view}` : null,
     l.description ? `Description: ${String(l.description).replace(/\s+/g, ' ').slice(0, 260)}` : null,
-    `Link: https://saahomes.com/homes-for-sale/${l.slug}/`,
+    site ? `Link: ${site}/homes-for-sale/${l.slug}/` : null,
   ].filter(Boolean);
   return `LISTING DETAILS (real data from our MLS feed — use these exact facts, never invent others):\n${parts.join('\n')}`;
 }
@@ -192,6 +194,132 @@ Rules:
 - Do NOT give legal or tax advice. Recommend they speak with a lender or attorney.
 - Be honest about what you know and humble about what you don't.`;
 
+/** A brokerage's own site address, never SAA's (siteUrlFor falls back to it). */
+function ownSiteUrl(brand) {
+  const fallback = siteUrlFor({ id: DEFAULT_TENANT_ID });
+  return brand.site_url && brand.site_url !== fallback ? brand.site_url : null;
+}
+
+/**
+ * Nadia for another brokerage: the same job and rules, in that brokerage's
+ * name, with only the contact details it has set. Nothing of SAA's (team,
+ * phone, offers, local market numbers) is in it.
+ */
+function brokerageSystemPrompt(brand) {
+  const name = brand.name;
+  const team = brand.agent_name || 'one of our agents';
+  const teamShort = brand.agent_name || 'an agent';
+  const market = brand.market_name || null;
+  const site = ownSiteUrl(brand);
+  const facts = [
+    `- Name: ${name}${brand.legal_name && brand.legal_name !== name ? ` (${brand.legal_name})` : ''}`,
+    brand.agent_name ? `- Agent: ${brand.agent_name}` : null,
+    brand.address ? `- Office: ${brand.address}` : null,
+    brand.phone ? `- Phone: ${brand.phone}` : null,
+    site ? `- Website: ${site}` : null,
+    brand.email ? `- Email: ${brand.email}` : null,
+    market ? `- Service area: ${market}` : null,
+  ].filter(Boolean).join('\n');
+
+  return `You are Nadia, a friendly and helpful member of the ${name} team${market ? ` in ${market}` : ''}. Your job is to help website visitors with their real estate questions and naturally connect them with ${team} when they're ready.
+
+## YOUR IDENTITY
+- You are Nadia, ${name}'s assistant. You help visitors with their real estate questions and connect them with ${team} when they're ready.
+- You are NOT a real estate agent. You're a team assistant. If someone asks, say "I'm part of the ${name} team — let me get ${teamShort} to help with that!"
+- Warm, helpful, genuine — like a concierge who knows real estate${market ? ` in ${market}` : ''}.
+- Never pushy or salesy. You educate, guide, and hand off to the team.
+- Keep responses concise (2-4 sentences). Use occasional emojis but don't overdo it.
+- Use natural, conversational language. Act human — no need to mention you're AI or a bot.
+- Only give the contact details listed below. If something isn't listed, don't guess it.
+
+## WHAT YOU KNOW ABOUT ${name.toUpperCase()}
+${facts}
+
+## FINANCING AND PROGRAMS
+- VA loan facts (from VA.gov — do not invent rates or funding-fee percentages): 0% down (VA does not require a down payment; a lender might), no monthly PMI, one-time funding fee unless exempt, Certificate of Eligibility (COE) required, VA appraisal is not a home inspection, occupancy required (primary residence), VA loans are assumable.
+- Many states and cities offer down payment assistance and first-time buyer programs. Don't name specific programs, amounts or income limits; offer to connect them with ${teamShort} or a local lender who knows what's available.
+
+## SAVED SEARCH ALERTS (your superpower)
+When a visitor describes what homes they want — city, price, beds/baths, pool, condo, etc. — you can set up a REAL saved search that emails them when matching listings hit the market.
+
+Rules:
+1. NEVER create a search silently. Always ask first.
+2. When PROPOSED SEARCH FILTERS are in your context (or the visitor clearly described criteria), offer alerts and start your reply with [[SAVE_SEARCH]] on its own line, then a short friendly message that restates the criteria and asks if they want alerts. Example:
+   [[SAVE_SEARCH]]
+   I can set up alerts for 3-bedroom homes under $400,000 with a pool. You'll get an email when new matches hit — want me to turn that on?
+3. The website shows Yes / No buttons under your message — keep the ask short so those buttons make sense.
+4. If they only asked a general question (financing, schools, process) with no home criteria, do NOT use [[SAVE_SEARCH]].
+5. Do NOT invent criteria they didn't mention. Only reference filters from PROPOSED SEARCH FILTERS or their exact words.
+6. After they confirm (the site handles creation), you may later point them to ${site ? `${site}/my-saved-searches/` : 'My Saved Searches on this site'} to manage alerts.
+
+## CONVERSATION FLOW
+1. Greet warmly and ask how you can help. **Tailor your greeting to the page they're on** — if they're on a city/area page, reference the city. If they're on a listing page, reference the home.
+2. Answer questions based on what you know
+3. If they describe a home search, offer saved-search alerts with [[SAVE_SEARCH]] (see above)
+4. If you don't know something specific, be honest and offer to connect them with ${team}
+5. After 2-3 exchanges (or when the visitor shows buying/selling intent), naturally suggest a consultation with ${team}
+6. When they agree, use [[HANDOFF]] at the START of your reply to trigger the contact form
+7. When they explicitly ask to speak to someone immediately, use [[TRANSFER]] at the START of your reply to give them the live transfer option
+8. NEVER ask for personal info in the chat — the handoff / save-search forms collect it
+
+## HANDOFF RULES
+- When the visitor agrees to connect or wants to move forward, say something like: "I'd love to connect you with ${team}! They'll be able to walk you through everything in detail. Let me grab your info — how would you like them to reach out?"
+- IMPORTANT: When the visitor agrees to be connected, start your reply with [[HANDOFF]] on its own line, then your message. This triggers the contact form on the website. Example:
+  [[HANDOFF]]
+  I'd love to connect you with ${team}! Let me grab a few details so they can reach out to you.
+
+- When the visitor explicitly asks to talk to a real person right now, start your reply with [[TRANSFER]] on its own line. Example:
+  [[TRANSFER]]
+  Absolutely! I can have ${team} reach out to you directly. Would you like me to arrange that?
+
+- When LISTING DETAILS are included in your context, use those exact verified facts (price, beds, baths, schools, features) to answer questions about the home. Never change or invent numbers. If the visitor asks something not covered by the details, say so and offer to have ${team} get the full picture.
+- If no listing details are in your context, do NOT make up specific home listings, prices, or availability. Direct them to the home search on this site (/properties/) or offer to connect them with ${team}.
+- Do NOT give legal or tax advice. Recommend they speak with a lender or attorney.
+- Be honest about what you know and humble about what you don't.`;
+}
+
+/**
+ * Nadia's system prompt for a brand (brandFor result). SAA's is the prompt
+ * above, unchanged; any other brokerage gets its own.
+ */
+export function buildNadiaSystemPrompt(brand) {
+  if (!brand || brand.is_home) return SYSTEM_PROMPT;
+  return brokerageSystemPrompt(brand);
+}
+
+/** The brand Nadia speaks for on this request: the host's brokerage, narrowed to its agent's own domain. */
+async function nadiaBrand(req) {
+  const tenant = req.tenant || null;
+  if (isHomeTenant(tenant)) return brandFor(tenant);
+  let agent = null;
+  const agentId = Number(tenant?.agent?.id);
+  if (Number.isInteger(agentId) && agentId > 0) {
+    try {
+      const r = await getPool().query(
+        `SELECT name, email, phone, brand_name, brokerage_name, brand_phone FROM users
+         WHERE id = $1 AND tenant_id = $2 AND role IN ('agent', 'admin') AND status = 'active'`,
+        [agentId, tenant.id]
+      );
+      agent = r.rows[0] || null;
+    } catch (error) {
+      logger.warn('Nadia agent brand lookup failed', { message: error.message });
+    }
+  }
+  return brandFor(tenant, { agent });
+}
+
+/** "Please call …" for SAA as today; another brokerage only when it has a phone. */
+function callLine(brand, saaLine) {
+  if (brand.is_home) return saaLine;
+  return brand.phone ? ` Please call ${brand.phone}.` : ' Please try again in a moment.';
+}
+
+/** The site base for listing links in Nadia's context; null when a brokerage has no address of its own yet. */
+function nadiaSite(brand) {
+  if (brand.is_home) return 'https://saahomes.com';
+  return ownSiteUrl(brand);
+}
+
 export const handleChatMessage = async (req, res) => {
   const { messages, page } = req.body;
 
@@ -199,12 +327,15 @@ export const handleChatMessage = async (req, res) => {
     return res.status(400).json({ error: 'Messages array is required' });
   }
 
+  const brand = await nadiaBrand(req);
+
   if (!OPENCODE_API_KEY) {
     logger.warn('OpenCode API key not configured — chat AI unavailable');
-    return res.status(503).json({ error: 'Chat AI not configured. Please call (970) 999-1407.' });
+    return res.status(503).json({ error: `Chat AI not configured.${callLine(brand, ' Please call (970) 999-1407.')}` });
   }
 
-  const listingContext = await resolveListingContext(page, messages);
+  const site = nadiaSite(brand);
+  const listingContext = await resolveListingContext(page, messages, site);
   const searchParsed = extractSearchFromMessages(messages);
   const lastUser = [...messages].reverse().find((m) => m?.role === 'user')?.content || '';
   const wantSearchOffer = !!(searchParsed && (
@@ -221,7 +352,7 @@ If this looks like a real home search, offer to set up email alerts and start yo
     : null;
 
   const apiMessages = [
-    { role: 'system', content: SYSTEM_PROMPT },
+    { role: 'system', content: buildNadiaSystemPrompt(brand) },
     ...(page ? [{ role: 'system', content: `The visitor is currently on this page: ${page}` }] : []),
     ...(listingContext ? [{ role: 'system', content: listingContext }] : []),
     ...(searchContext ? [{ role: 'system', content: searchContext }] : []),
@@ -251,7 +382,7 @@ If this looks like a real home search, offer to set up email alerts and start yo
     if (!response.ok) {
       const errorText = await response.text();
       logger.error('OpenCode API error', { status: response.status, error: errorText });
-      return res.status(502).json({ error: 'AI service temporarily unavailable. Please call (970) 999-1407.' });
+      return res.status(502).json({ error: `AI service temporarily unavailable.${callLine(brand, ' Please call (970) 999-1407.')}` });
     }
 
     const data = await response.json();
@@ -307,7 +438,7 @@ If this looks like a real home search, offer to set up email alerts and start yo
     });
   } catch (error) {
     logger.error('Chat service error', error);
-    res.status(500).json({ error: 'Chat service error. Please call (970) 999-1407.' });
+    res.status(500).json({ error: `Chat service error.${callLine(brand, ' Please call (970) 999-1407.')}` });
   }
 };
 

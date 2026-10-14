@@ -16,7 +16,10 @@ import crypto from 'crypto';
 import getPool from '../config/database.js';
 import logger from '../utils/logger.js';
 import { savedSearchPath } from './listingFilters.js';
-import { currentTenantId, DEFAULT_TENANT_ID } from './tenantContext.js';
+import {
+  currentTenant, currentTenantId, DEFAULT_TENANT_ID, siteUrlFor, tenantById,
+} from './tenantContext.js';
+import { brandFor } from './brand.js';
 import {
   enrichSubmissionFromHistory,
   noteIfDuplicateSubmission,
@@ -70,6 +73,113 @@ export async function fubApiKeyForTenant(tenantId, pool = getPool()) {
   }
   tenantFubCache.set(id, { at: Date.now(), key });
   return key;
+}
+
+const positiveId = (v) => {
+  const n = Number(v);
+  return Number.isInteger(n) && n > 0 ? n : null;
+};
+
+/**
+ * The connected FUB key of a lead's agent in this brokerage: the agent given,
+ * else the agent the lead (by email) is assigned to, else the agent whose own
+ * domain the request came in on. Only an active agent of the same tenant
+ * counts, so a lead never reaches another brokerage's account.
+ */
+async function agentFubKeyForLead({ tenantId, email, agentUserId }, pool) {
+  try {
+    let agentId = positiveId(agentUserId);
+    const emailStr = String(email || '').trim().toLowerCase();
+    if (!agentId && emailStr.includes('@')) {
+      const r = await pool.query(
+        `SELECT assigned_agent_id FROM users
+         WHERE LOWER(email) = $1 AND tenant_id = $2 AND COALESCE(role, 'client') = 'client'
+           AND assigned_agent_id IS NOT NULL
+         LIMIT 1`,
+        [emailStr, tenantId]
+      );
+      agentId = positiveId(r.rows[0]?.assigned_agent_id);
+    }
+    if (!agentId) {
+      const host = currentTenant();
+      if (host?.id === tenantId) agentId = positiveId(host?.agent?.id);
+    }
+    if (!agentId) return null;
+    const r = await pool.query(
+      `SELECT fub_api_key FROM users
+       WHERE id = $1 AND tenant_id = $2 AND role IN ('agent', 'admin') AND status = 'active'`,
+      [agentId, tenantId]
+    );
+    return String(r.rows[0]?.fub_api_key || '').trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Where a lead goes in Follow Up Boss, decided per tenant:
+ *   SAA → the env key / webhook, exactly as before ({ via: 'env' })
+ *   another brokerage → its own tenants.settings.fub_api_key ({ via: 'tenant' }),
+ *     else the lead's agent's connected key ({ via: 'agent' })
+ *   otherwise null: not configured, send nothing.
+ */
+export async function fubRouteFor({ tenantId, email, agentUserId } = {}, { pool = getPool() } = {}) {
+  const id = fubTenant(tenantId);
+  if (id === DEFAULT_TENANT_ID) {
+    return isFollowUpBossConfigured() ? { via: 'env', key: FOLLOW_UP_BOSS_API_KEY || null } : null;
+  }
+  const tenantKey = await fubApiKeyForTenant(id, pool);
+  if (tenantKey) return { via: 'tenant', key: tenantKey };
+  const agentKey = await agentFubKeyForLead({ tenantId: id, email, agentUserId }, pool);
+  if (agentKey) return { via: 'agent', key: agentKey };
+  return null;
+}
+
+/**
+ * Names FUB shows for another brokerage's events, in place of SAA's
+ * ('SAA Homes Website', 'saahomes.com', saahomes.com links). Null for SAA.
+ */
+export async function fubLabelsFor(tenantId) {
+  const id = fubTenant(tenantId);
+  if (id === DEFAULT_TENANT_ID) return null;
+  const brand = brandFor(await tenantById(id));
+  const fallback = siteUrlFor({ id: DEFAULT_TENANT_ID });
+  const site = brand.site_url && brand.site_url !== fallback ? brand.site_url.replace(/\/$/, '') : null;
+  return {
+    name: brand.name,
+    system: `${brand.name} Website`,
+    site,
+    siteLabel: site ? site.replace(/^https?:\/\//, '') : brand.name,
+  };
+}
+
+/** Another brokerage's copy of an event built with SAA's names. SAA's events pass through as-is. */
+export function rebrandFubEvent(eventData, labels) {
+  if (!labels || !eventData) return eventData;
+  const text = (v) => (typeof v !== 'string' ? v : v
+    .replace(/https:\/\/saahomes\.com/g, labels.site || '')
+    .replace(/saahomes\.com/g, labels.siteLabel)
+    .replace(/\bAdam shared\b/g, 'Their agent shared')
+    .replace(/SAA Homes/g, labels.name));
+  const out = {
+    ...eventData,
+    system: labels.system,
+    source: eventData.source === NURTURE_SOURCE ? labels.name : text(eventData.source),
+    message: text(eventData.message),
+  };
+  if (eventData.person && Array.isArray(eventData.person.tags)) {
+    out.person = {
+      ...eventData.person,
+      tags: eventData.person.tags.map((t) => (t === NURTURE_SOURCE ? labels.name : text(t))),
+    };
+  }
+  if (eventData.property && typeof eventData.property.url === 'string') {
+    out.property = {
+      ...eventData.property,
+      url: labels.site ? text(eventData.property.url) : undefined,
+    };
+  }
+  return out;
 }
 
 const buildAttributionLines = (submission) => {
@@ -171,20 +281,24 @@ const postFollowUpBossEvent = async (eventData, opts = {}) => {
   const hasOverride = !!(opts.apiKey != null && String(opts.apiKey).trim());
   const tenantId = fubTenant(opts.tenantId);
 
-  // Another brokerage's people never reach SAA's FUB: without an agent key a
-  // non-SAA tenant posts only with its own key, else nothing is sent.
-  const tenantKey = !hasOverride && tenantId !== DEFAULT_TENANT_ID
-    ? await fubApiKeyForTenant(tenantId)
-    : null;
-  if (!hasOverride && tenantId !== DEFAULT_TENANT_ID && !tenantKey) {
-    throw new Error('Follow Up Boss not configured');
-  }
-  if (!hasOverride && !tenantKey && !isFollowUpBossConfigured()) {
+  // Another brokerage's people never reach SAA's FUB: a non-SAA tenant posts
+  // only with its own key or its agent's key (fubRouteFor), else nothing is sent.
+  const route = hasOverride
+    ? null
+    : (opts.route !== undefined
+      ? opts.route
+      : await fubRouteFor({ tenantId, email: eventData?.person?.emails?.[0]?.value, agentUserId: opts.agentUserId }));
+  if (!hasOverride && !route) {
     throw new Error('Follow Up Boss not configured');
   }
   if (hasOverride && !overrideKey) {
     throw new Error('Follow Up Boss API key missing');
   }
+  // A tenant's or agent's own key goes straight to the Events API; SAA's env
+  // route keeps the webhook / env key below.
+  const tenantKey = !hasOverride && route.via !== 'env' ? route.key : null;
+
+  eventData = rebrandFubEvent(eventData, await fubLabelsFor(tenantId));
 
   // Prefer linking to known person when possible
   if (eventData.person && !eventData.person.id) {
@@ -293,7 +407,9 @@ async function enrichForForward(submission, path) {
 }
 
 export const forwardAlertSignupToFollowUpBoss = async (user, search, { smsOptIn = false } = {}) => {
-  if (!isFollowUpBossConfigured()) {
+  const tenantId = user?.tenant_id ?? undefined;
+  const route = await fubRouteFor({ tenantId, email: user?.email, agentUserId: user?.assigned_agent_id });
+  if (!route) {
     logger.info('Follow Up Boss not configured, skipping saved-search lead forwarding');
     return { success: false, reason: 'not_configured' };
   }
@@ -351,8 +467,8 @@ export const forwardAlertSignupToFollowUpBoss = async (user, search, { smsOptIn 
   };
 
   try {
-    const result = await postFollowUpBossEvent(eventData);
-    const fubPersonId = await capturePersonIdFromResult(result, userForPerson.email);
+    const result = await postFollowUpBossEvent(eventData, { tenantId, route });
+    const fubPersonId = await capturePersonIdFromResult(result, userForPerson.email, tenantId);
     logger.info('Saved-search lead forwarded to Follow Up Boss', {
       eventId: result.id,
       fub_person_id: fubPersonId,
@@ -365,7 +481,8 @@ export const forwardAlertSignupToFollowUpBoss = async (user, search, { smsOptIn 
 };
 
 export const forwardShowingRequestToFollowUpBoss = async (showing) => {
-  if (!isFollowUpBossConfigured()) {
+  const route = await fubRouteFor({ email: showing?.email });
+  if (!route) {
     logger.info('Follow Up Boss not configured, skipping showing lead forwarding');
     return { success: false, reason: 'not_configured' };
   }
@@ -394,7 +511,7 @@ export const forwardShowingRequestToFollowUpBoss = async (showing) => {
   };
 
   try {
-    const result = await postFollowUpBossEvent(eventData);
+    const result = await postFollowUpBossEvent(eventData, { route });
     const fubPersonId = await capturePersonIdFromResult(result, submission.email);
     logger.info('Showing request forwarded to Follow Up Boss', {
       eventId: result.id,
@@ -415,7 +532,8 @@ export const forwardShowingRequestToFollowUpBoss = async (showing) => {
  */
 export const forwardContactToFollowUpBoss = async (submissionIn, opts = {}) => {
   const overrideKey = opts.apiKey != null ? String(opts.apiKey).trim() : '';
-  if (!overrideKey && !isFollowUpBossConfigured()) {
+  const route = overrideKey ? null : await fubRouteFor({ tenantId: opts.tenantId, email: submissionIn?.email });
+  if (!overrideKey && !route) {
     logger.info('Follow Up Boss not configured, skipping lead forwarding');
     return { success: false, reason: 'not_configured' };
   }
@@ -456,7 +574,7 @@ export const forwardContactToFollowUpBoss = async (submissionIn, opts = {}) => {
   try {
     const result = await postFollowUpBossEvent(
       eventData,
-      { ...(overrideKey ? { apiKey: overrideKey } : {}), tenantId: opts.tenantId }
+      { ...(overrideKey ? { apiKey: overrideKey } : { route }), tenantId: opts.tenantId }
     );
     const fubPersonId = await capturePersonIdFromResult(result, email, opts.tenantId);
     logger.info('Lead forwarded to Follow Up Boss', {
@@ -473,7 +591,8 @@ export const forwardContactToFollowUpBoss = async (submissionIn, opts = {}) => {
 };
 
 export const forwardChfaLeadToFollowUpBoss = async (submissionIn) => {
-  if (!isFollowUpBossConfigured()) {
+  const route = await fubRouteFor({ email: submissionIn?.email });
+  if (!route) {
     logger.info('Follow Up Boss not configured, skipping lead forwarding');
     return { success: false, reason: 'not_configured' };
   }
@@ -504,7 +623,7 @@ export const forwardChfaLeadToFollowUpBoss = async (submissionIn) => {
   };
 
   try {
-    const result = await postFollowUpBossEvent(eventData);
+    const result = await postFollowUpBossEvent(eventData, { route });
     const fubPersonId = await capturePersonIdFromResult(result, email);
     logger.info('CHFA lead forwarded to Follow Up Boss', { eventId: result.id, fub_person_id: fubPersonId });
     return { success: true, eventId: result.id, fubPersonId };
@@ -515,7 +634,8 @@ export const forwardChfaLeadToFollowUpBoss = async (submissionIn) => {
 };
 
 export const forwardChampionsLeadToFollowUpBoss = async (submissionIn) => {
-  if (!isFollowUpBossConfigured()) {
+  const route = await fubRouteFor({ email: submissionIn?.email });
+  if (!route) {
     logger.info('Follow Up Boss not configured, skipping lead forwarding');
     return { success: false, reason: 'not_configured' };
   }
@@ -554,7 +674,7 @@ export const forwardChampionsLeadToFollowUpBoss = async (submissionIn) => {
   };
 
   try {
-    const result = await postFollowUpBossEvent(eventData);
+    const result = await postFollowUpBossEvent(eventData, { route });
     const fubPersonId = await capturePersonIdFromResult(result, email);
     logger.info('Champions lead forwarded to Follow Up Boss', { eventId: result.id, fub_person_id: fubPersonId });
     return { success: true, eventId: result.id, fubPersonId };
@@ -565,7 +685,8 @@ export const forwardChampionsLeadToFollowUpBoss = async (submissionIn) => {
 };
 
 export const forwardChfaDpaLeadToFollowUpBoss = async (submissionIn) => {
-  if (!isFollowUpBossConfigured()) {
+  const route = await fubRouteFor({ email: submissionIn?.email });
+  if (!route) {
     logger.info('Follow Up Boss not configured, skipping lead forwarding');
     return { success: false, reason: 'not_configured' };
   }
@@ -604,7 +725,7 @@ export const forwardChfaDpaLeadToFollowUpBoss = async (submissionIn) => {
   };
 
   try {
-    const result = await postFollowUpBossEvent(eventData);
+    const result = await postFollowUpBossEvent(eventData, { route });
     const fubPersonId = await capturePersonIdFromResult(result, email);
     logger.info('CHFA DPA lead forwarded to Follow Up Boss', { eventId: result.id, fub_person_id: fubPersonId });
     return { success: true, eventId: result.id, fubPersonId };
@@ -615,7 +736,8 @@ export const forwardChfaDpaLeadToFollowUpBoss = async (submissionIn) => {
 };
 
 export const forwardGhopeLeadToFollowUpBoss = async (submissionIn) => {
-  if (!isFollowUpBossConfigured()) {
+  const route = await fubRouteFor({ email: submissionIn?.email });
+  if (!route) {
     logger.info('Follow Up Boss not configured, skipping lead forwarding');
     return { success: false, reason: 'not_configured' };
   }
@@ -654,7 +776,7 @@ export const forwardGhopeLeadToFollowUpBoss = async (submissionIn) => {
   };
 
   try {
-    const result = await postFollowUpBossEvent(eventData);
+    const result = await postFollowUpBossEvent(eventData, { route });
     const fubPersonId = await capturePersonIdFromResult(result, email);
     logger.info('G-HOPE lead forwarded to Follow Up Boss', { eventId: result.id, fub_person_id: fubPersonId });
     return { success: true, eventId: result.id, fubPersonId };
@@ -665,7 +787,8 @@ export const forwardGhopeLeadToFollowUpBoss = async (submissionIn) => {
 };
 
 export const forwardMarketReportToFollowUpBoss = async (submissionIn) => {
-  if (!isFollowUpBossConfigured()) {
+  const route = await fubRouteFor({ email: submissionIn?.email });
+  if (!route) {
     logger.info('Follow Up Boss not configured, skipping lead forwarding');
     return { success: false, reason: 'not_configured' };
   }
@@ -695,7 +818,7 @@ export const forwardMarketReportToFollowUpBoss = async (submissionIn) => {
   };
 
   try {
-    const result = await postFollowUpBossEvent(eventData);
+    const result = await postFollowUpBossEvent(eventData, { route });
     const fubPersonId = await capturePersonIdFromResult(result, email);
     logger.info('Market report lead forwarded to Follow Up Boss', {
       eventId: result.id,
@@ -772,7 +895,8 @@ const NURTURE_SIGNAL_MAP = {
  * @param {object} [opts.propertySearch] — optional FUB propertySearch object
  */
 export async function pushNurtureSignalToFollowUpBoss(opts = {}) {
-  if (!isFollowUpBossConfigured()) {
+  const route = await fubRouteFor({ tenantId: opts.tenantId, email: opts.email });
+  if (!route) {
     logger.info('Follow Up Boss not configured, skipping nurture signal', { signal: opts.signal });
     return { success: false, reason: 'not_configured' };
   }
@@ -821,7 +945,7 @@ export async function pushNurtureSignalToFollowUpBoss(opts = {}) {
   }
 
   try {
-    const result = await postFollowUpBossEvent(eventData, { tenantId: opts.tenantId });
+    const result = await postFollowUpBossEvent(eventData, { tenantId: opts.tenantId, route });
     const fubPersonId = await capturePersonIdFromResult(result, email, opts.tenantId);
     logger.info('Nurture signal written to Follow Up Boss', {
       signal: signalKey,
@@ -1540,10 +1664,11 @@ export function fubSearchFromEventMeta(meta = {}) {
  * most once a day.
  */
 export async function pushAskedSearchToFollowUpBoss(eventRow, { pool = getPool(), post = postFollowUpBossEvent } = {}) {
-  if (!isFollowUpBossConfigured() && post === postFollowUpBossEvent) return { sent: 0, reason: 'not_configured' };
   if (!eventRow?.id || !eventRow.user_id || !eventRow.meta?.asked) return { sent: 0, reason: 'not_asked' };
   const { rows: [user] } = await pool.query('SELECT id, email, name, phone, fub_person_id, tenant_id FROM users WHERE id = $1', [eventRow.user_id]);
   if (!user?.email) return { sent: 0, reason: 'no_email' };
+  const route = await fubRouteFor({ tenantId: user.tenant_id, email: user.email }, { pool });
+  if (!route && post === postFollowUpBossEvent) return { sent: 0, reason: 'not_configured' };
   const { rows: dup } = await pool.query(
     `SELECT 1 FROM events WHERE user_id = $1 AND type = 'search' AND id <> $2
        AND fub_synced_at > NOW() - INTERVAL '1 day' AND LOWER(meta->>'asked') = LOWER($3) LIMIT 1`,
@@ -1569,7 +1694,7 @@ export async function pushAskedSearchToFollowUpBoss(eventRow, { pool = getPool()
       phones: user.phone ? [{ value: String(user.phone).replace(/\D/g, ''), type: 'mobile' }] : [],
     },
     propertySearch,
-  }, { tenantId: user.tenant_id });
+  }, { tenantId: user.tenant_id, ...(route ? { route } : {}) });
   await markSynced();
   return { sent: 1 };
 }
@@ -1581,9 +1706,11 @@ export async function pushAskedSearchToFollowUpBoss(eventRow, { pool = getPool()
  * Each stream event is sent at most once (events.fub_synced_at).
  */
 export async function syncVisitorHistoryToFollowUpBoss(userId, { pool = getPool(), post = postFollowUpBossEvent } = {}) {
-  if (!isFollowUpBossConfigured() && post === postFollowUpBossEvent) return { sent: 0, reason: 'not_configured' };
   const { rows: [user] } = await pool.query('SELECT id, email, name, phone, tenant_id FROM users WHERE id = $1', [userId]);
   if (!user?.email) return { sent: 0, reason: 'no_email' };
+  const route = await fubRouteFor({ tenantId: user.tenant_id, email: user.email }, { pool });
+  if (!route && post === postFollowUpBossEvent) return { sent: 0, reason: 'not_configured' };
+  const postOpts = { tenantId: user.tenant_id, ...(route ? { route } : {}) };
 
   const { rows: views } = await pool.query(
     `SELECT DISTINCT ON (e.listing_id) e.id, e.listing_id, e.occurred_at,
@@ -1635,7 +1762,7 @@ export async function syncVisitorHistoryToFollowUpBoss(userId, { pool = getPool(
           area: v.living_area != null ? Number(v.living_area) : undefined,
           url: v.slug ? `${site}/homes-for-sale/${v.slug}/` : undefined,
         },
-      }, { tenantId: user.tenant_id });
+      }, postOpts);
       sent += 1;
       synced.push(v.id);
     } catch (e) {
@@ -1655,7 +1782,7 @@ export async function syncVisitorHistoryToFollowUpBoss(userId, { pool = getPool(
         })(),
         person,
         propertySearch: fubSearchFromEventMeta(s.meta).propertySearch,
-      }, { tenantId: user.tenant_id });
+      }, postOpts);
       sent += 1;
       synced.push(s.id);
     } catch (e) {
@@ -1690,9 +1817,11 @@ export async function syncLeadScoreToFollowUpBoss(userId, {
   field = String(field || '').trim();
   if (!field || !/^custom[A-Za-z0-9]+$/.test(field)) return { skipped: 'not_configured' };
   const { rows: [u] } = await pool.query(
-    'SELECT fub_person_id, lead_score, fub_lead_score_synced, tenant_id FROM users WHERE id = $1', [userId]
+    'SELECT fub_person_id, lead_score, fub_lead_score_synced, tenant_id, assigned_agent_id FROM users WHERE id = $1', [userId]
   );
-  if (apiKey === undefined) apiKey = await fubApiKeyForTenant(u?.tenant_id, pool);
+  if (apiKey === undefined) {
+    apiKey = (await fubRouteFor({ tenantId: u?.tenant_id, agentUserId: u?.assigned_agent_id }, { pool }))?.key || null;
+  }
   if (!apiKey) return { skipped: 'not_configured' };
   if (!u?.fub_person_id || u.lead_score == null) return { skipped: 'not_linked' };
   if (u.fub_lead_score_synced === u.lead_score) return { skipped: 'unchanged' };
@@ -1719,8 +1848,10 @@ const FUB_NOTES_URL = 'https://api.followupboss.com/v1/notes';
 export async function addFollowUpBossNote(userId, { subject, body }, {
   pool = getPool(), fetchImpl = fetch, apiKey,
 } = {}) {
-  const { rows: [u] } = await pool.query('SELECT fub_person_id, tenant_id FROM users WHERE id = $1', [userId]);
-  if (apiKey === undefined) apiKey = await fubApiKeyForTenant(u?.tenant_id, pool);
+  const { rows: [u] } = await pool.query('SELECT fub_person_id, tenant_id, assigned_agent_id FROM users WHERE id = $1', [userId]);
+  if (apiKey === undefined) {
+    apiKey = (await fubRouteFor({ tenantId: u?.tenant_id, agentUserId: u?.assigned_agent_id }, { pool }))?.key || null;
+  }
   if (!apiKey) return { skipped: 'not_configured' };
   if (!u?.fub_person_id) return { skipped: 'not_linked' };
   const res = await fetchImpl(FUB_NOTES_URL, {

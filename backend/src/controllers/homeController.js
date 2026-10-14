@@ -313,12 +313,13 @@ export const postSellerHeat = async (req, res) => {
       profile_id: id,
     }, pool);
 
-    // FUB nurture signal (source: saahomes.com) — fire-and-forget
+    // FUB nurture signal (source: the brokerage's site) — fire-and-forget
     try {
       const { pushNurtureSignalToFollowUpBoss } = await import('../services/followUpBossService.js');
       const signal = reason === 'value_view_2x' ? 'value_view_2x' : 'market_analysis';
       pushNurtureSignalToFollowUpBoss({
         signal,
+        tenantId: user.tenant_id,
         email: user.email,
         name: user.name,
         phone: user.phone,
