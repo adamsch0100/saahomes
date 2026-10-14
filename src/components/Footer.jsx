@@ -4,9 +4,79 @@ import { getEventsGuidePath } from "../data/localEvents.js";
 import { LISTLOGIC_URL } from "../utils/seoConstants.js";
 import { useTenant } from "../context/TenantContext.jsx";
 
+/**
+ * Another brokerage's own domain: its brand only. Each line shows only when the
+ * brokerage has that value; no SAA links, social accounts or market copy.
+ */
+function BrokerageFooter({ brand }) {
+  const b = brand || {};
+  const name = b.brandName || "";
+  const legal = b.brokerage || name;
+  return (
+    <footer className="w-full bg-gray-900 text-gray-300 relative z-30 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
+      <div className="w-full px-6 md:px-12 py-12">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+          <div>
+            {b.logoUrl ? (
+              <img src={b.logoUrl} alt={name} className="h-12 w-auto max-w-[14rem] object-contain mb-4" />
+            ) : name ? (
+              <p className="text-lg font-extrabold tracking-wide mb-1" style={{ color: "var(--brand-accent)" }}>
+                {name}
+              </p>
+            ) : null}
+            {b.tagline ? <p className="text-sm text-gray-400">{b.tagline}</p> : null}
+          </div>
+
+          <div>
+            <h4 className="font-semibold text-white mb-4">Homes</h4>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/properties/" className="hover:text-white transition-colors">Homes for Sale</Link></li>
+              <li><a href="/#home-value" className="hover:text-white transition-colors">What&apos;s My Home Worth?</a></li>
+              <li><Link to="/mortgage-calculator/" className="hover:text-white transition-colors">Mortgage Calculator</Link></li>
+              <li><Link to="/my-saved-searches/" className="hover:text-white transition-colors">Saved Searches</Link></li>
+              <li><Link to="/contact/" className="hover:text-white transition-colors">Contact</Link></li>
+            </ul>
+          </div>
+
+          {(b.address || b.email || b.phone) && (
+            <div>
+              <h4 className="font-semibold text-white mb-4">Get in touch</h4>
+              <ul className="space-y-2 text-sm">
+                {b.address ? <li className="text-gray-400">{b.address}</li> : null}
+                {b.email ? (
+                  <li><a href={`mailto:${b.email}`} className="hover:text-white transition-colors">{b.email}</a></li>
+                ) : null}
+                {b.phone ? (
+                  <li><a href={b.tel || `tel:${b.phone}`} className="hover:text-white transition-colors">{b.phone}</a></li>
+                ) : null}
+              </ul>
+            </div>
+          )}
+        </div>
+
+        <div className="pt-8 border-t border-gray-700 text-sm text-gray-400 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="space-y-1 text-center sm:text-left">
+            {b.brandLine && b.brandLine !== legal ? <p>{b.brandLine}</p> : null}
+            {b.licenseLine ? <p>{b.licenseLine}</p> : null}
+            <p>
+              © {new Date().getFullYear()}{legal ? ` ${legal}.` : ""} All rights reserved. Equal Housing Opportunity.
+            </p>
+          </div>
+          <div className="flex gap-6 items-center">
+            <Link to="/contact/" className="hover:text-white transition-colors">Contact</Link>
+            <Link to="/agent/" className="hover:text-white transition-colors text-gray-500" aria-label="Agent console login">Agent Console</Link>
+            <Link to="/admin/" className="hover:text-white transition-colors text-gray-500" aria-label="Admin login">Admin</Link>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
 export default function Footer() {
   const { tenant } = useTenant();
   const tenantBrand = tenant?.brand || null;
+  if (tenant?.isBrokerage) return <BrokerageFooter brand={tenantBrand} />;
   const brandName = tenantBrand?.brandName || null;
   const brokerage = tenantBrand?.brokerage || "Schwartz and Associates";
   const phone = tenantBrand?.phone || "(970) 999-1407";
@@ -20,7 +90,7 @@ export default function Footer() {
           <div>
             {brandName ? (
               <>
-                <p className="text-lg font-extrabold tracking-wide mb-1" style={{ color: "#CFB36E" }}>
+                <p className="text-lg font-extrabold tracking-wide mb-1" style={{ color: "var(--brand-accent)" }}>
                   {brandName}
                 </p>
                 <p className="text-xs text-gray-400 mb-4">

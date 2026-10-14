@@ -5,6 +5,7 @@ import HomeValueChart from "../components/HomeValueChart";
 import RecentClosedSales from "../components/RecentClosedSales";
 import CompsWorkbench from "../components/CompsWorkbench";
 import { marketPack } from "../data/marketPack";
+import { useBrokerageBrand } from "../context/TenantContext.jsx";
 import { formatPrice } from "../utils/listingHelpers.js";
 
 const API_BASE = (() => {
@@ -13,7 +14,7 @@ const API_BASE = (() => {
   return "";
 })();
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 const AGENT_PHONE = marketPack.market.phone;
 const AGENT_TEL = marketPack.market.tel;
 
@@ -77,6 +78,15 @@ const SELLER_ACTIONS = [
 
 export default function MyHomePage() {
   const [searchParams] = useSearchParams();
+  // Another brokerage's domain: talk to its agents, call its phone.
+  const bb = useBrokerageBrand();
+  const sellerActions = bb
+    ? SELLER_ACTIONS.map((a) =>
+        a.key === "talk"
+          ? { ...a, cta: "Talk to an Agent — Free, No Pressure", href: bb.tel || "/contact/?interest=Selling a home", sub: bb.phone || null }
+          : a
+      )
+    : SELLER_ACTIONS;
   const token = searchParams.get("token") || "";
   const unsub = searchParams.get("unsubscribe") === "1";
 
@@ -331,7 +341,7 @@ export default function MyHomePage() {
           {/* Header */}
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#CFB36E]">
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[color:var(--brand-accent)]">
                 Seller dashboard
               </p>
               <h1 className="text-3xl sm:text-4xl font-bold font-serif text-gray-900 mt-1">
@@ -568,7 +578,7 @@ export default function MyHomePage() {
                 <div className="mt-6 space-y-5">
                   {/* Address + headline compare */}
                   <div className="rounded-2xl bg-black text-white p-5 sm:p-6 shadow-lg">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#CFB36E]">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[color:var(--brand-accent)]">
                       Current estimated range
                     </p>
                     <h2 className="text-lg sm:text-xl font-semibold mt-1 text-gray-100">
@@ -593,7 +603,7 @@ export default function MyHomePage() {
                               <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold">
                                 Market services (estimate)
                               </p>
-                              <p className="text-xl font-bold text-[#CFB36E]">{fmt(market.mid)}</p>
+                              <p className="text-xl font-bold text-[color:var(--brand-accent)]">{fmt(market.mid)}</p>
                               <p className="text-[10px] text-gray-500 mt-0.5 max-w-[12rem] leading-snug">
                                 Source:{" "}
                                 {market.source ||
@@ -706,7 +716,7 @@ export default function MyHomePage() {
                   </p>
 
                   {/* One-two ask */}
-                  <div className="rounded-2xl border-2 border-[#CFB36E]/40 bg-[#CFB36E]/08 p-5">
+                  <div className="rounded-2xl border-2 border-[rgb(var(--brand-accent-rgb)/0.4)] p-5">
                     <p className="text-sm font-bold text-gray-900">Is this estimate close?</p>
                     <p className="text-xs text-gray-500 mt-1">
                       One tap helps us guide you to the right next step — no sales pitch.
@@ -756,7 +766,7 @@ export default function MyHomePage() {
                       Mapped to the questions sellers actually ask.
                     </p>
                     <div className="mt-4 space-y-2.5">
-                      {SELLER_ACTIONS.map((a) => {
+                      {sellerActions.map((a) => {
                         const onClick = async (e) => {
                           if (a.heat) {
                             e.preventDefault();
@@ -786,7 +796,7 @@ export default function MyHomePage() {
                           >
                             <p
                               className={`text-[10px] font-bold uppercase tracking-wide ${
-                                a.primary ? "text-[#CFB36E]" : "text-gray-400"
+                                a.primary ? "text-[color:var(--brand-accent)]" : "text-gray-400"
                               }`}
                             >
                               {a.question}
@@ -896,8 +906,16 @@ export default function MyHomePage() {
           )}
 
           <p className="mt-10 text-center text-xs text-gray-400">
+            {bb ? (
+              [bb.legalName || bb.name, bb.phone, marketPack.fairHousing, marketPack.honestLabels.notAppraisal]
+                .filter(Boolean)
+                .join(" · ")
+            ) : (
+              <>
             {marketPack.market.brokerage} · {AGENT_PHONE} · {marketPack.fairHousing} ·{" "}
             {marketPack.honestLabels.notAppraisal}
+              </>
+            )}
           </p>
         </div>
       </div>

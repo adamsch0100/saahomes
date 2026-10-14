@@ -1,6 +1,11 @@
 /**
  * Two-step sign-in settings for signed-in staff (admin or agent token).
  * off → setup (QR + secret + confirm code) → just enabled (recovery codes, shown once) → on.
+ *
+ * `required`: the brokerage requires two-step sign-in and this account must set
+ * it up before anything else works. `onEnabled(res)` gets the enable response
+ * (its `token`, when present, replaces the setup-only token); `onDone()` runs
+ * once the recovery codes are acknowledged (or when it's already on).
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import {
@@ -10,7 +15,7 @@ import {
   disableTwoStep,
 } from '../../utils/api.js';
 
-const GOLD = '#CFB36E';
+const GOLD = 'var(--brand-accent)';
 
 function formatSince(value) {
   if (!value) return null;
@@ -19,7 +24,7 @@ function formatSince(value) {
   return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-export default function TwoStepPanel({ token }) {
+export default function TwoStepPanel({ token, required = false, onEnabled, onDone }) {
   const [status, setStatus] = useState(null); // { enabled, enabled_at }
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -69,6 +74,7 @@ export default function TwoStepPanel({ token }) {
     setError(null);
     try {
       const res = await enableTwoStep(token, code.replace(/\s+/g, ''));
+      if (onEnabled) onEnabled(res);
       setRecoveryCodes(res.recovery_codes || []);
       setSetup(null);
       setCode('');
@@ -116,7 +122,7 @@ export default function TwoStepPanel({ token }) {
 
   const inputClass =
     'w-full sm:w-48 min-h-[44px] border border-gray-300 rounded-lg px-3 text-sm font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-black';
-  const primaryClass = 'min-h-[44px] px-5 rounded-lg text-sm font-semibold text-black disabled:opacity-50';
+  const primaryClass = 'min-h-[44px] px-5 rounded-lg text-sm font-semibold text-[color:var(--brand-on-accent)] disabled:opacity-50';
   const secondaryClass =
     'min-h-[44px] px-4 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:border-black disabled:opacity-50';
 
@@ -141,6 +147,12 @@ export default function TwoStepPanel({ token }) {
       </div>
 
       <div className="mt-4 space-y-4">
+        {required && !status?.enabled && (
+          <p className="text-sm font-semibold text-gray-900">
+            Your brokerage requires two-step sign-in. Set it up to continue.
+          </p>
+        )}
+
         {loading && !status && (
           <div className="space-y-3" aria-busy="true">
             <div className="h-10 rounded-lg bg-gray-100 animate-pulse" />
@@ -164,8 +176,15 @@ export default function TwoStepPanel({ token }) {
               <button type="button" onClick={copyCodes} className={primaryClass} style={{ backgroundColor: GOLD }}>
                 Copy codes
               </button>
-              <button type="button" onClick={() => setRecoveryCodes(null)} className={secondaryClass}>
-                I saved them
+              <button
+                type="button"
+                onClick={() => {
+                  setRecoveryCodes(null);
+                  if (onDone) onDone();
+                }}
+                className={secondaryClass}
+              >
+                {onDone ? 'I saved them — continue' : 'I saved them'}
               </button>
               {copyMsg && <span className="text-sm text-gray-600">{copyMsg}</span>}
             </div>
@@ -231,7 +250,11 @@ export default function TwoStepPanel({ token }) {
               On{formatSince(status.enabled_at) ? ` since ${formatSince(status.enabled_at)}` : ''}. You&apos;ll be asked
               for a code each time you sign in.
             </p>
-            {!disabling ? (
+            {required && onDone ? (
+              <button type="button" onClick={onDone} className={primaryClass} style={{ backgroundColor: GOLD }}>
+                Continue
+              </button>
+            ) : !disabling ? (
               <button
                 type="button"
                 onClick={() => {

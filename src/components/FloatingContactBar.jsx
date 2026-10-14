@@ -6,6 +6,8 @@ export default function FloatingContactBar() {
   const location = useLocation();
   const { tenant } = useTenant();
   const callHref = tenant?.brand?.tel || "tel:(970) 999-1407";
+  // Another brokerage's domain: call only when it has a phone; help goes to its contact page.
+  const isBrokerage = !!tenant?.isBrokerage;
 
   // Listing detail owns its own sticky CTAs; full-screen search needs the whole viewport
   if (
@@ -40,6 +42,42 @@ export default function FloatingContactBar() {
   const helpLabel = isSellerPage || isAreaPage || isSellerBlog
     ? 'Get My Home Value'
     : isChfaPage || isChampionsPage || isChfaDpaPage || isGhopePage ? 'Free Consultation' : 'Get Help Buying';
+
+  if (isBrokerage) {
+    const b = tenant.brand || {};
+    const tel = b.tel || (b.phone ? `tel:${b.phone}` : null);
+    const isHome = location.pathname === '/' || location.pathname === '';
+    return (
+      <div className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
+        <div className="flex gap-3">
+          {tel ? (
+            <a
+              href={tel}
+              className="flex-1 inline-flex items-center justify-center px-3 py-3.5 bg-black text-white font-semibold rounded-lg text-sm touch-manipulation"
+              aria-label={`Call ${b.brandName || 'us'}${b.phone ? ` at ${b.phone}` : ''}`}
+            >
+              Call Now
+            </a>
+          ) : null}
+          {isHome ? (
+            <a
+              href="#home-value"
+              className="flex-1 inline-flex items-center justify-center px-3 py-3.5 border-2 border-black text-black font-semibold rounded-lg text-sm text-center leading-tight touch-manipulation"
+            >
+              Get My Home Value
+            </a>
+          ) : (
+            <Link
+              to="/contact/?interest=Buying a home"
+              className="flex-1 inline-flex items-center justify-center px-3 py-3.5 border-2 border-black text-black font-semibold rounded-lg text-sm text-center leading-tight touch-manipulation"
+            >
+              Get Help Buying
+            </Link>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">

@@ -5,7 +5,7 @@ import ChampionsLeadForm from "../components/ChampionsLeadForm";
 import QualifyCta from "../components/QualifyCta";
 import ChfaResourceHub from "../components/ChfaResourceHub";
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 
 const responderCategories = [
   { label: "Peace Officers", detail: "Police, sheriff, corrections, deputies, wildlife & port of entry" },
@@ -264,7 +264,7 @@ export default function ChampionsHomeLoanPage() {
           </div>
           <span
             className="inline-block mb-4 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold tracking-wide uppercase"
-            style={{ backgroundColor: GOLD, color: "#1a1a1a" }}
+            style={{ backgroundColor: GOLD, color: "var(--brand-on-accent-ink)" }}
           >
             Coming Late 2026 · Effective Aug 12, 2026
           </span>
@@ -368,7 +368,7 @@ export default function ChampionsHomeLoanPage() {
                 className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow text-center"
               >
                 <div
-                  className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center text-black font-bold text-lg"
+                  className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center text-[color:var(--brand-on-accent)] font-bold text-lg"
                   style={{ backgroundColor: GOLD }}
                 >
                   {cat.label.charAt(0)}
@@ -451,7 +451,7 @@ export default function ChampionsHomeLoanPage() {
               <div key={option.title} className="relative bg-white rounded-xl p-8 shadow-lg border border-gray-100 overflow-hidden">
                 <span
                   className="absolute top-0 right-0 px-4 py-1.5 text-xs font-bold uppercase tracking-wide rounded-bl-lg"
-                  style={{ backgroundColor: GOLD, color: "#1a1a1a" }}
+                  style={{ backgroundColor: GOLD, color: "var(--brand-on-accent-ink)" }}
                 >
                   {option.highlight}
                 </span>
@@ -555,7 +555,7 @@ export default function ChampionsHomeLoanPage() {
               {timeline.map((item, i) => (
                 <div key={item.date} className="relative text-center">
                   <div
-                    className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center text-black font-bold text-lg border-4 border-white shadow-md relative z-10"
+                    className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center text-[color:var(--brand-on-accent)] font-bold text-lg border-4 border-white shadow-md relative z-10"
                     style={{ backgroundColor: GOLD }}
                   >
                     {i + 1}
@@ -601,7 +601,7 @@ export default function ChampionsHomeLoanPage() {
             {steps.map((step) => (
               <div key={step.step} className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                 <span
-                  className="inline-flex items-center justify-center w-10 h-10 rounded-full text-black font-bold mb-4"
+                  className="inline-flex items-center justify-center w-10 h-10 rounded-full text-[color:var(--brand-on-accent)] font-bold mb-4"
                   style={{ backgroundColor: GOLD }}
                 >
                   {step.step}

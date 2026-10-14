@@ -140,7 +140,7 @@ export default function ForBuyersPage() {
               <a href="/northern-colorado-areas/" className="text-black font-semibold hover:underline">Explore All Areas →</a>
             </div>
 
-            <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow border-2 border-[#CFB36E]/40">
+            <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow border-2 border-[rgb(var(--brand-accent-rgb)/0.4)]">
               <h3 className="text-2xl font-bold mb-4 font-serif">Veterans — VA Loans &amp; 0.5% Back</h3>
               <p className="text-gray-700 mb-4">
                 0.5% of the purchase price back to veterans, plus VA loan guidance and military relocation help across Northern Colorado.
@@ -148,7 +148,7 @@ export default function ForBuyersPage() {
               <a href="/veterans/" className="text-black font-semibold hover:underline">Veterans hub →</a>
             </div>
 
-            <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow border-2 border-[#CFB36E]/30">
+            <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow border-2 border-[rgb(var(--brand-accent-rgb)/0.3)]">
               <h3 className="text-2xl font-bold mb-4 font-serif">Luxury Real Estate</h3>
               <p className="text-gray-700 mb-4">
                 Private, white-glove search for high-end homes across Boulder, Fort Collins, Loveland, Windsor, Greeley, and Timnath.
@@ -156,7 +156,7 @@ export default function ForBuyersPage() {
               <a href="/luxury-real-estate/" className="text-black font-semibold hover:underline">Luxury hub →</a>
             </div>
 
-            <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow border-2 border-[#CFB36E]/40">
+            <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow border-2 border-[rgb(var(--brand-accent-rgb)/0.4)]">
               <h3 className="text-2xl font-bold mb-4 font-serif">Northern Colorado Housing Statistics</h3>
               <p className="text-gray-700 mb-4">
                 Sourced, dated housing numbers — CHFA income and purchase price limits by county plus U.S. Census figures for Fort Collins — each linked to its primary source.

@@ -5,7 +5,7 @@
 import React, { useEffect, useState } from 'react';
 import { deleteAgentDomain, setAgentDomain, verifyAgentDomain } from '../../utils/api.js';
 
-const GOLD = '#CFB36E';
+const GOLD = 'var(--brand-accent)';
 
 function statusBadge(agent) {
   if (agent.domain_verified_at && agent.custom_domain) {
@@ -129,7 +129,7 @@ export default function AgentDomainControl({ token, agent, onUpdated }) {
             <button
               type="submit"
               disabled={busy}
-              className="min-h-[40px] px-4 rounded-lg text-sm font-semibold text-black disabled:opacity-50"
+              className="min-h-[40px] px-4 rounded-lg text-sm font-semibold text-[color:var(--brand-on-accent)] disabled:opacity-50"
               style={{ backgroundColor: GOLD }}
             >
               {busy ? 'Saving…' : 'Set'}

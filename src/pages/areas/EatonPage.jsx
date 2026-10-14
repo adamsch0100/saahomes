@@ -11,7 +11,7 @@ import LatestMarketUpdateBanner from "../../components/LatestMarketUpdateBanner.
 import AreaEventsSection from "../../components/AreaEventsSection.jsx";
 import CityStatsBand from "../../components/CityStatsBand.jsx";
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 
 export default function EatonPage() {
   const area = getAreaSeo("eaton");

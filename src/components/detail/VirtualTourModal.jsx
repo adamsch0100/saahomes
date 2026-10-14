@@ -191,8 +191,8 @@ export default function VirtualTourModal({ url, open, onClose, title = "Virtual 
             />
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-              <div className="w-14 h-14 rounded-full bg-[#CFB36E]/20 flex items-center justify-center mb-4">
-                <span className="text-[#CFB36E] text-2xl" aria-hidden="true">
+              <div className="w-14 h-14 rounded-full bg-[rgb(var(--brand-accent-rgb)/0.2)] flex items-center justify-center mb-4">
+                <span className="text-[color:var(--brand-accent)] text-2xl" aria-hidden="true">
                   ⧉
                 </span>
               </div>
@@ -206,7 +206,7 @@ export default function VirtualTourModal({ url, open, onClose, title = "Virtual 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-5 inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-sm active:scale-[0.98] transition-transform"
-                style={{ backgroundColor: "#CFB36E", color: "#1a1a1a" }}
+                style={{ backgroundColor: "var(--brand-accent)", color: "var(--brand-on-accent-ink)" }}
               >
                 Open virtual tour
               </a>
@@ -229,7 +229,7 @@ export default function VirtualTourModal({ url, open, onClose, title = "Virtual 
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs font-semibold text-[#CFB36E] underline underline-offset-2"
+              className="text-xs font-semibold text-[color:var(--brand-accent)] underline underline-offset-2"
             >
               Open in new tab
             </a>

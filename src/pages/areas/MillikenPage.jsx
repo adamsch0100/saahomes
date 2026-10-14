@@ -10,7 +10,7 @@ import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
 import LatestMarketUpdateBanner from "../../components/LatestMarketUpdateBanner.jsx";
 import AreaEventsSection from "../../components/AreaEventsSection.jsx";
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 
 export default function MillikenPage() {
   const area = getAreaSeo("milliken");

@@ -18,8 +18,9 @@ import {
 } from "../utils/notificationsApi.js";
 import { fetchSessionUser } from "../utils/savedHomesApi.js";
 import InstantAlertsCard from "../components/InstantAlertsCard.jsx";
+import { useBrokerageBrand } from "../context/TenantContext.jsx";
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 const AGENT_PHONE = "(970) 999-1407";
 
 const FILTERS = [
@@ -72,7 +73,7 @@ function TypeBadge({ type }) {
     value_update: "bg-sky-50 text-sky-900 border-sky-200",
     off_market: "bg-gray-100 text-gray-700 border-gray-200",
     showing_confirm: "bg-violet-50 text-violet-900 border-violet-200",
-    shared_home: "bg-[#CFB36E]/15 text-[#8a7020] border-[#CFB36E]/40",
+    shared_home: "bg-[rgb(var(--brand-accent-rgb)/0.15)] text-[#8a7020] border-[rgb(var(--brand-accent-rgb)/0.4)]",
     board: "bg-rose-50 text-rose-900 border-rose-200",
   };
   return (
@@ -94,7 +95,7 @@ function NotificationRow({ item, onOpen, onMarkRead, onDismiss, busyId }) {
   return (
     <div
       className={`flex gap-3 sm:gap-4 p-4 border-b border-gray-100 hover:bg-gray-50/80 transition-colors ${
-        unread ? "bg-[#CFB36E]/[0.06] border-l-[3px] border-l-[#CFB36E]" : "border-l-[3px] border-l-transparent"
+        unread ? "bg-[rgb(var(--brand-accent-rgb)/0.06)] border-l-[3px] border-l-[color:var(--brand-accent)]" : "border-l-[3px] border-l-transparent"
       }`}
     >
       <button
@@ -130,7 +131,7 @@ function NotificationRow({ item, onOpen, onMarkRead, onDismiss, busyId }) {
               type="button"
               disabled={busy}
               onClick={() => onMarkRead(item)}
-              className="inline-flex items-center min-h-[44px] px-3 py-2 text-xs font-semibold text-gray-700 hover:text-black hover:bg-gray-100 rounded-lg disabled:opacity-50 touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
+              className="inline-flex items-center min-h-[44px] px-3 py-2 text-xs font-semibold text-gray-700 hover:text-black hover:bg-gray-100 rounded-lg disabled:opacity-50 touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]"
             >
               Mark read
             </button>
@@ -139,7 +140,7 @@ function NotificationRow({ item, onOpen, onMarkRead, onDismiss, busyId }) {
             type="button"
             disabled={busy}
             onClick={() => onDismiss(item)}
-            className="inline-flex items-center min-h-[44px] px-3 py-2 text-xs font-semibold text-gray-500 hover:text-red-700 hover:bg-red-50 rounded-lg disabled:opacity-50 touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
+            className="inline-flex items-center min-h-[44px] px-3 py-2 text-xs font-semibold text-gray-500 hover:text-red-700 hover:bg-red-50 rounded-lg disabled:opacity-50 touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]"
           >
             Dismiss
           </button>
@@ -182,7 +183,7 @@ function FrequencySegment({ type, value, options, onChange, disabled, savedFlash
               type="button"
               disabled={disabled}
               onClick={() => onChange(type, freq)}
-              className={`min-h-[40px] px-2.5 sm:px-3 py-2 text-xs sm:text-sm font-semibold rounded-md transition-colors disabled:opacity-50 touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E] ${
+              className={`min-h-[40px] px-2.5 sm:px-3 py-2 text-xs sm:text-sm font-semibold rounded-md transition-colors disabled:opacity-50 touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)] ${
                 active
                   ? "bg-black text-white shadow-sm"
                   : "text-gray-700 hover:bg-white hover:text-black"
@@ -203,6 +204,7 @@ function FrequencySegment({ type, value, options, onChange, disabled, savedFlash
 }
 
 function NotificationFrequencySettings({ signedIn }) {
+  const bb = useBrokerageBrand();
   const [prefsByType, setPrefsByType] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -290,8 +292,14 @@ function NotificationFrequencySettings({ signedIn }) {
           Notification frequency
         </h2>
         <p className="text-sm text-gray-600 mt-1 leading-relaxed">
+          {bb ? (
+            `These controls apply to email and in-app notifications. Emails come from ${[bb.name, bb.phone].filter(Boolean).join(" · ")}. You can change these anytime.`
+          ) : (
+            <>
           These controls apply to email and in-app notifications. Emails come from Adam &amp; Mandi
           Schwartz · {AGENT_PHONE}. You can change these anytime.
+            </>
+          )}
         </p>
       </div>
 
@@ -562,7 +570,7 @@ export default function NotificationCenterPage() {
             </p>
             <Link
               to="/properties/"
-              className="inline-flex items-center justify-center px-5 py-3 rounded-lg text-sm font-bold text-black"
+              className="inline-flex items-center justify-center px-5 py-3 rounded-lg text-sm font-bold text-[color:var(--brand-on-accent)]"
               style={{ backgroundColor: GOLD }}
             >
               Browse homes &amp; sign in
@@ -625,7 +633,7 @@ export default function NotificationCenterPage() {
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <Link
                       to="/properties/"
-                      className="inline-flex items-center justify-center px-5 py-3 rounded-lg text-sm font-bold text-black"
+                      className="inline-flex items-center justify-center px-5 py-3 rounded-lg text-sm font-bold text-[color:var(--brand-on-accent)]"
                       style={{ backgroundColor: GOLD }}
                     >
                       Save a home search

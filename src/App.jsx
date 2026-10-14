@@ -11,7 +11,8 @@ import { CITY_HOMES } from "./data/cityHomesData.js";
 import FloatingContactBar from "./components/FloatingContactBar.jsx";
 import LeadCaptureChat from "./components/LeadCaptureChat.jsx";
 import { GA4_MEASUREMENT_ID, initGaDebugMode } from "./utils/analytics.js";
-import { TenantProvider, TenantDocumentTitle } from "./context/TenantContext.jsx";
+import { TenantProvider, TenantDocumentTitle, useIsBrokerage } from "./context/TenantContext.jsx";
+import BrokerageRouteGuard, { TenantLoadingGate } from "./components/brokerage/BrokerageRouteGuard.jsx";
 
 // Route-level code splitting — marketing, area, admin, blog, tools (lazy)
 const AboutPage = lazy(() => import("./pages/AboutPage.jsx"));
@@ -73,7 +74,7 @@ function PageLoadFallback() {
     >
       <div className="bg-black pt-28 sm:pt-32 pb-10">
         <div className="max-w-7xl mx-auto px-6 space-y-4">
-          <div className="h-3 w-24 rounded bg-[#CFB36E]/40" />
+          <div className="h-3 w-24 rounded bg-[rgb(var(--brand-accent-rgb)/0.4)]" />
           <div className="h-10 w-2/3 max-w-lg rounded bg-white/10" />
           <div className="h-4 w-1/2 max-w-md rounded bg-white/10" />
         </div>
@@ -107,14 +108,18 @@ function LazyPage({ children }) {
  * reads as a footer loading ahead of the page.
  */
 function AppReady() {
+  const isBrokerage = useIsBrokerage();
   useEffect(() => {
+    // SAA's prerendered links band stays out of view on a brokerage's domain.
+    if (isBrokerage) return;
     document.body.classList.add('saa-app-ready');
-  }, []);
+  }, [isBrokerage]);
   return null;
 }
 
 function AppLayout({ children }) {
   const location = useLocation();
+  const isBrokerage = useIsBrokerage();
   const isAdminPage = location.pathname.startsWith('/admin');
   const isAgentPage = location.pathname.startsWith('/agent');
   const isAccountPage = location.pathname.startsWith('/reset-password');
@@ -130,7 +135,7 @@ function AppLayout({ children }) {
   return (
     <>
       <Header />
-      <Breadcrumbs />
+      {!isBrokerage && <Breadcrumbs />}
       <Suspense fallback={<PageLoadFallback />}>
         <main
           id="page-container"
@@ -140,7 +145,7 @@ function AppLayout({ children }) {
               : "w-full pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-0"
           }
         >
-          {children}
+          <BrokerageRouteGuard>{children}</BrokerageRouteGuard>
         </main>
         {!isPropertiesSearch && <FloatingContactBar />}
         <LeadCaptureChat />
@@ -175,6 +180,7 @@ export default function App() {
   return (
     <TenantProvider>
     <div className="min-h-screen w-full bg-white text-gray-900">
+      <TenantLoadingGate>
       <Routes>
         <Route path="/admin" element={<AppLayout><LazyPage><AdminPage /></LazyPage></AppLayout>} />
         <Route path="/admin/" element={<AppLayout><LazyPage><AdminPage /></LazyPage></AppLayout>} />
@@ -336,6 +342,7 @@ export default function App() {
             not-found instead of indexing infinite phantom pages. */}
         <Route path="*" element={<AppLayout><LazyPage><NotFoundPage /></LazyPage></AppLayout>} />
       </Routes>
+      </TenantLoadingGate>
     </div>
     <TenantDocumentTitle />
     </TenantProvider>

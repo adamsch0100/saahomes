@@ -1,6 +1,6 @@
 import React from 'react';
 
-const GOLD = '#CFB36E';
+const GOLD = 'var(--brand-accent)';
 
 export default function AreaFAQSection({ faqs, city }) {
   if (!faqs || faqs.length === 0) return null;

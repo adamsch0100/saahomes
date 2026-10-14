@@ -18,7 +18,7 @@ import {
   MORTGAGE_RATES_FAQS,
 } from "../data/mortgageRatesStats.js";
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 
 function formatRate(value) {
   return `${value.toFixed(2)}%`;

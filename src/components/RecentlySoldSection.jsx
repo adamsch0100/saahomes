@@ -78,7 +78,7 @@ function SoldCard({ row }) {
         ) : (
           <ListingPhotoFallback className="w-full h-full absolute inset-0" />
         )}
-        <span className="absolute top-2 left-2 bg-[#CFB36E] text-black text-xs font-bold uppercase tracking-wide px-2.5 py-1 rounded">
+        <span className="absolute top-2 left-2 bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] text-xs font-bold uppercase tracking-wide px-2.5 py-1 rounded">
           Sold
         </span>
         {row.sold_price != null ? (

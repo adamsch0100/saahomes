@@ -290,7 +290,7 @@ export default function ChfaSchoolsToHomePage() {
       >
         <div className="absolute inset-0 bg-black/65" />
         <div className="relative z-10 max-w-5xl mx-auto text-center text-white px-4 sm:px-6">
-          <span className="inline-block mb-4 px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold tracking-wide uppercase" style={{ backgroundColor: "#CFB36E", color: "#1a1a1a" }}>
+          <span className="inline-block mb-4 px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold tracking-wide uppercase" style={{ backgroundColor: "var(--brand-accent)", color: "var(--brand-on-accent-ink)" }}>
             Now Available
           </span>
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-serif leading-tight">
@@ -359,11 +359,11 @@ export default function ChfaSchoolsToHomePage() {
             </p>
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="bg-gray-50 rounded-lg p-5 border border-gray-100">
-                <p className="text-3xl font-bold font-serif" style={{ color: "#CFB36E" }}>25%</p>
+                <p className="text-3xl font-bold font-serif" style={{ color: "var(--brand-accent)" }}>25%</p>
                 <p className="text-gray-700 mt-1">Maximum DPA as a second mortgage</p>
               </div>
               <div className="bg-gray-50 rounded-lg p-5 border border-gray-100">
-                <p className="text-3xl font-bold font-serif" style={{ color: "#CFB36E" }}>$178,920</p>
+                <p className="text-3xl font-bold font-serif" style={{ color: "var(--brand-accent)" }}>$178,920</p>
                 <p className="text-gray-700 mt-1">Maximum household income limit</p>
               </div>
             </div>
@@ -490,9 +490,9 @@ export default function ChfaSchoolsToHomePage() {
                     <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Cash needed without DPA</p>
                     <p className="text-2xl font-bold">$20,000 - $32,000</p>
                   </div>
-                  <div className="border-t-2 pt-4" style={{ borderColor: '#CFB36E' }}>
-                    <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: '#CFB36E' }}>Schools To Home DPA available</p>
-                    <p className="text-3xl font-bold" style={{ color: '#CFB36E' }}>Up to $100,000</p>
+                  <div className="border-t-2 pt-4" style={{ borderColor: 'var(--brand-accent)' }}>
+                    <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'var(--brand-accent)' }}>Schools To Home DPA available</p>
+                    <p className="text-3xl font-bold" style={{ color: 'var(--brand-accent)' }}>Up to $100,000</p>
                     <p className="text-sm text-gray-500 mt-1">(25% of $400K first mortgage)</p>
                   </div>
                 </div>
@@ -519,7 +519,7 @@ export default function ChfaSchoolsToHomePage() {
               <thead>
                 <tr className="bg-gray-900 text-white">
                   <th className="px-4 py-3 text-left font-semibold">Feature</th>
-                  <th className="px-4 py-3 text-left font-semibold" style={{ backgroundColor: '#CFB36E', color: '#1a1a1a' }}>Schools To Home</th>
+                  <th className="px-4 py-3 text-left font-semibold" style={{ backgroundColor: 'var(--brand-accent)', color: 'var(--brand-on-accent-ink)' }}>Schools To Home</th>
                   <th className="px-4 py-3 text-left font-semibold">Standard CHFA DPA</th>
                   <th className="px-4 py-3 text-left font-semibold">Conventional (3% down)</th>
                   <th className="px-4 py-3 text-left font-semibold">FHA (3.5% down)</th>
@@ -528,35 +528,35 @@ export default function ChfaSchoolsToHomePage() {
               <tbody>
                 <tr className="border-b border-gray-100">
                   <td className="px-4 py-3 font-medium">Maximum DPA</td>
-                  <td className="px-4 py-3 font-semibold" style={{ color: '#CFB36E' }}>Up to 25% of loan</td>
+                  <td className="px-4 py-3 font-semibold" style={{ color: 'var(--brand-accent)' }}>Up to 25% of loan</td>
                   <td className="px-4 py-3">Up to $25K or 3-4%</td>
                   <td className="px-4 py-3">None (PMI under 20%)</td>
                   <td className="px-4 py-3">None (MIP req.)</td>
                 </tr>
                 <tr className="border-b border-gray-100 bg-gray-50">
                   <td className="px-4 py-3 font-medium">Covers closing costs</td>
-                  <td className="px-4 py-3 font-semibold" style={{ color: '#CFB36E' }}>Yes</td>
+                  <td className="px-4 py-3 font-semibold" style={{ color: 'var(--brand-accent)' }}>Yes</td>
                   <td className="px-4 py-3">Yes</td>
                   <td className="px-4 py-3">Seller concessions</td>
                   <td className="px-4 py-3">Seller concessions</td>
                 </tr>
                 <tr className="border-b border-gray-100">
                   <td className="px-4 py-3 font-medium">Monthly DPA payment</td>
-                  <td className="px-4 py-3 font-semibold" style={{ color: '#CFB36E' }}>$0 deferred</td>
+                  <td className="px-4 py-3 font-semibold" style={{ color: 'var(--brand-accent)' }}>$0 deferred</td>
                   <td className="px-4 py-3">$0 deferred/grant</td>
                   <td className="px-4 py-3">N/A</td>
                   <td className="px-4 py-3">N/A</td>
                 </tr>
                 <tr className="border-b border-gray-100 bg-gray-50">
                   <td className="px-4 py-3 font-medium">Repayment type</td>
-                  <td className="px-4 py-3 font-semibold" style={{ color: '#CFB36E' }}>Deferred + shared appreciation</td>
+                  <td className="px-4 py-3 font-semibold" style={{ color: 'var(--brand-accent)' }}>Deferred + shared appreciation</td>
                   <td className="px-4 py-3">Deferred (or grant)</td>
                   <td className="px-4 py-3">N/A</td>
                   <td className="px-4 py-3">N/A</td>
                 </tr>
                 <tr className="border-b border-gray-100">
                   <td className="px-4 py-3 font-medium">First-time buyer?</td>
-                  <td className="px-4 py-3 font-semibold" style={{ color: '#CFB36E' }}>Not required</td>
+                  <td className="px-4 py-3 font-semibold" style={{ color: 'var(--brand-accent)' }}>Not required</td>
                   <td className="px-4 py-3">Depends on program</td>
                   <td className="px-4 py-3">No</td>
                   <td className="px-4 py-3">No</td>
@@ -577,14 +577,14 @@ export default function ChfaSchoolsToHomePage() {
                 </tr>
                 <tr className="border-b border-gray-100 bg-gray-50">
                   <td className="px-4 py-3 font-medium">PMI/MIP</td>
-                  <td className="px-4 py-3 font-semibold" style={{ color: '#CFB36E' }}>None</td>
+                  <td className="px-4 py-3 font-semibold" style={{ color: 'var(--brand-accent)' }}>None</td>
                   <td className="px-4 py-3">Depends on loan type</td>
                   <td className="px-4 py-3">Required</td>
                   <td className="px-4 py-3">Required (MIP)</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-3 font-medium">Best for</td>
-                  <td className="px-4 py-3 font-semibold" style={{ color: '#CFB36E' }}>Teachers maximizing DPA</td>
+                  <td className="px-4 py-3 font-semibold" style={{ color: 'var(--brand-accent)' }}>Teachers maximizing DPA</td>
                   <td className="px-4 py-3">General 1st-time buyers</td>
                   <td className="px-4 py-3">Buyers with 3% saved</td>
                   <td className="px-4 py-3">Lower-credit buyers</td>
@@ -640,7 +640,7 @@ export default function ChfaSchoolsToHomePage() {
             </div>
 
             <div className="rounded-lg p-8" style={{ backgroundColor: "#1f1f1f" }}>
-              <h3 className="text-xl font-bold font-serif mb-6" style={{ color: "#CFB36E" }}>
+              <h3 className="text-xl font-bold font-serif mb-6" style={{ color: "var(--brand-accent)" }}>
                 Example scenario
               </h3>
               <div className="space-y-3 text-sm">
@@ -674,7 +674,7 @@ export default function ChfaSchoolsToHomePage() {
                 </div>
                 <div className="flex justify-between pt-2 font-bold text-lg">
                   <span>Total owed at repayment</span>
-                  <span style={{ color: "#CFB36E" }}>$98,125</span>
+                  <span style={{ color: "var(--brand-accent)" }}>$98,125</span>
                 </div>
                 <div className="flex justify-between text-gray-400">
                   <span>Remaining borrower equity</span>
@@ -745,7 +745,7 @@ export default function ChfaSchoolsToHomePage() {
       </section>
 
       {/* Steps */}
-      <section className="py-16 px-6" style={{ backgroundColor: "#CFB36E" }}>
+      <section className="py-16 px-6" style={{ backgroundColor: "var(--brand-accent)" }}>
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-12 text-center text-gray-900">
             Your path to homeownership

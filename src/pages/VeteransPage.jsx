@@ -6,7 +6,7 @@ import QualifyCta from "../components/QualifyCta";
 import { BUSINESS } from "../utils/seoConstants";
 import { buildFaqPageSchema } from "../data/moneyPageFaqs.js";
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 const PAGE_URL = "https://saahomes.com/veterans/";
 const PAGE_TITLE =
   "Veterans Real Estate Northern Colorado | VA Loans & 0.5% Back | SAA Homes";
@@ -178,7 +178,7 @@ export default function VeteransPage() {
         <div className="relative z-10 max-w-5xl mx-auto text-center text-white px-4 sm:px-6 w-full">
           <p
             className="inline-block mb-4 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold tracking-[0.18em] uppercase"
-            style={{ backgroundColor: GOLD, color: "#1a1a1a" }}
+            style={{ backgroundColor: GOLD, color: "var(--brand-on-accent-ink)" }}
           >
             Schwartz and Associates · Northern Colorado
           </p>
@@ -394,7 +394,7 @@ export default function VeteransPage() {
               <Link
                 key={city.name}
                 to={city.href}
-                className="block rounded-xl border border-white/15 p-5 hover:border-[#CFB36E] transition-colors"
+                className="block rounded-xl border border-white/15 p-5 hover:border-[color:var(--brand-accent)] transition-colors"
               >
                 <h3 className="text-xl font-bold font-serif mb-2">{city.name}</h3>
                 <p className="text-sm text-gray-400">{city.note}</p>
@@ -429,7 +429,7 @@ export default function VeteransPage() {
               <details key={faq.q} className="group rounded-xl border border-gray-200 bg-gray-50 p-5 sm:p-6">
                 <summary className="cursor-pointer font-semibold text-lg text-gray-900 list-none flex items-start justify-between gap-4">
                   <span>{faq.q}</span>
-                  <span className="text-[#CFB36E] group-open:rotate-45 transition-transform text-2xl leading-none">+</span>
+                  <span className="text-[color:var(--brand-accent)] group-open:rotate-45 transition-transform text-2xl leading-none">+</span>
                 </summary>
                 <p className="mt-4 text-gray-700 leading-relaxed">{faq.a}</p>
               </details>

@@ -7,7 +7,7 @@ import { createAgent, listAgents, patchAgent, resendAgentInvite } from '../../ut
 import { marketPack } from '../../data/marketPack.js';
 import AgentDomainControl from './AgentDomainControl.jsx';
 
-const GOLD = '#CFB36E';
+const GOLD = 'var(--brand-accent)';
 const VOICE_STYLES = marketPack.agentVoice?.voiceStyles || ['warm', 'professional', 'short'];
 
 const emptyForm = {
@@ -246,7 +246,7 @@ export default function AgentsManager({ token }) {
             <button
               type="submit"
               disabled={creating}
-              className="min-h-[44px] px-5 rounded-lg text-sm font-semibold text-black disabled:opacity-50"
+              className="min-h-[44px] px-5 rounded-lg text-sm font-semibold text-[color:var(--brand-on-accent)] disabled:opacity-50"
               style={{ backgroundColor: GOLD }}
             >
               {creating ? 'Creating…' : 'Create agent'}
@@ -406,7 +406,7 @@ export default function AgentsManager({ token }) {
                         type="button"
                         disabled={busyId === a.id}
                         onClick={() => saveBrand(a.id)}
-                        className="min-h-[40px] px-4 rounded-lg text-sm font-semibold text-black disabled:opacity-50"
+                        className="min-h-[40px] px-4 rounded-lg text-sm font-semibold text-[color:var(--brand-on-accent)] disabled:opacity-50"
                         style={{ backgroundColor: GOLD }}
                       >
                         {busyId === a.id ? 'Saving…' : 'Save brand'}

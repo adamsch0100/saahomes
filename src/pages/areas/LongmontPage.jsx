@@ -23,7 +23,7 @@ export default function LongmontPage() {
         <div className="relative z-10 text-center text-white px-6">
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">Longmont, CO</h1>
           <p className="mt-4 text-xl">{area.tagline}</p>
-          <span className="mt-4 inline-block bg-[#CFB36E] text-gray-900 text-sm font-semibold uppercase tracking-widest px-4 py-1.5 rounded-full">
+          <span className="mt-4 inline-block bg-[color:var(--brand-accent)] text-gray-900 text-sm font-semibold uppercase tracking-widest px-4 py-1.5 rounded-full">
             Boulder &amp; Weld Counties
           </span>
         </div>
@@ -269,7 +269,7 @@ export default function LongmontPage() {
       </section>
 
       {/* CHFA First-Time Buyer Banner */}
-      <section className="py-12 px-6" style={{ backgroundColor: "#CFB36E" }}>
+      <section className="py-12 px-6" style={{ backgroundColor: "var(--brand-accent)" }}>
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-2xl sm:text-3xl font-bold font-serif text-gray-900 mb-3">
             First-time buyer in Longmont?
@@ -294,7 +294,7 @@ export default function LongmontPage() {
         </div>
       </section>
 
-      <section className="py-10 px-6" style={{ backgroundColor: "#CFB36E" }}>
+      <section className="py-10 px-6" style={{ backgroundColor: "var(--brand-accent)" }}>
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-gray-900 text-lg leading-relaxed">
             Longmont buyers: city <strong>LDPAP</strong> offers up to <strong>10% / $40,000</strong> for income-qualified
@@ -320,7 +320,7 @@ export default function LongmontPage() {
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold font-serif mb-4">Work With Schwartz and Associates in Longmont</h2>
           <p className="text-gray-300 mb-8">
-            Ready to buy or sell in Longmont? Contact SAA Homes today at <a href="tel:(970) 999-1407" className="text-white font-semibold underline underline-offset-2 hover:text-[#CFB36E]">(970) 999-1407</a> or visit our office at 3665 John F Kennedy Parkway, Suite 210, Fort Collins, CO 80525. Adam and Mandi Schwartz bring 20+ years of combined local expertise to every Longmont transaction.
+            Ready to buy or sell in Longmont? Contact SAA Homes today at <a href="tel:(970) 999-1407" className="text-white font-semibold underline underline-offset-2 hover:text-[color:var(--brand-accent)]">(970) 999-1407</a> or visit our office at 3665 John F Kennedy Parkway, Suite 210, Fort Collins, CO 80525. Adam and Mandi Schwartz bring 20+ years of combined local expertise to every Longmont transaction.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link to="/for-buyers/" className="inline-block px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">

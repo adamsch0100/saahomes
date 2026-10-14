@@ -7,7 +7,7 @@ import { buildFaqPageSchema } from "../data/moneyPageFaqs.js";
 import { submitContactForm } from "../utils/api.js";
 import { withLeadMetadata } from "../utils/leadTracking.js";
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 const PAGE_URL = "https://saahomes.com/assumable-mortgages/";
 const PAGE_TITLE =
   "Assumable Mortgages in Colorado | VA & FHA Loan Assumption | SAA Homes";
@@ -146,7 +146,7 @@ function AssumableLeadForm() {
           type="text" required
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
-          className="w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-900 placeholder-gray-400 focus:border-[#CFB36E] outline-none transition-colors"
+          className="w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-900 placeholder-gray-400 focus:border-[color:var(--brand-accent)] outline-none transition-colors"
           placeholder="Your full name"
         />
       </div>
@@ -158,7 +158,7 @@ function AssumableLeadForm() {
           type="email" required
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
-          className="w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-900 placeholder-gray-400 focus:border-[#CFB36E] outline-none transition-colors"
+          className="w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-900 placeholder-gray-400 focus:border-[color:var(--brand-accent)] outline-none transition-colors"
           placeholder="your@email.com"
         />
       </div>
@@ -170,7 +170,7 @@ function AssumableLeadForm() {
           type="tel" required
           value={form.phone}
           onChange={(e) => setForm({ ...form, phone: e.target.value })}
-          className="w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-900 placeholder-gray-400 focus:border-[#CFB36E] outline-none transition-colors"
+          className="w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-900 placeholder-gray-400 focus:border-[color:var(--brand-accent)] outline-none transition-colors"
           placeholder="(970) 555-1234"
         />
       </div>
@@ -181,7 +181,7 @@ function AssumableLeadForm() {
         <select
           value={form.loanType}
           onChange={(e) => setForm({ ...form, loanType: e.target.value })}
-          className="w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-900 focus:border-[#CFB36E] outline-none transition-colors"
+          className="w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-900 focus:border-[color:var(--brand-accent)] outline-none transition-colors"
         >
           <option value="">Select one…</option>
           <option value="Buying — assume a VA loan">Buying — assume a VA loan</option>
@@ -198,7 +198,7 @@ function AssumableLeadForm() {
           type="text"
           value={form.city}
           onChange={(e) => setForm({ ...form, city: e.target.value })}
-          className="w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-900 placeholder-gray-400 focus:border-[#CFB36E] outline-none transition-colors"
+          className="w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-900 placeholder-gray-400 focus:border-[color:var(--brand-accent)] outline-none transition-colors"
           placeholder="Fort Collins, Windsor, Loveland…"
         />
       </div>
@@ -210,7 +210,7 @@ function AssumableLeadForm() {
           rows={3}
           value={form.message}
           onChange={(e) => setForm({ ...form, message: e.target.value })}
-          className="w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-900 placeholder-gray-400 focus:border-[#CFB36E] outline-none transition-colors"
+          className="w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-900 placeholder-gray-400 focus:border-[color:var(--brand-accent)] outline-none transition-colors"
           placeholder="Tell us about the home you're considering…"
         />
       </div>
@@ -277,7 +277,7 @@ export default function AssumableMortgagesPage() {
         <div className="relative z-10 max-w-5xl mx-auto text-center text-white px-4 sm:px-6 w-full">
           <p
             className="inline-block mb-4 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold tracking-[0.18em] uppercase"
-            style={{ backgroundColor: GOLD, color: "#1a1a1a" }}
+            style={{ backgroundColor: GOLD, color: "var(--brand-on-accent-ink)" }}
           >
             Schwartz and Associates · Northern Colorado
           </p>

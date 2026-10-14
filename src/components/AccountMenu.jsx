@@ -139,7 +139,7 @@ export default function AccountMenu({
               onClick={nav}
               className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-200 hover:text-white hover:bg-white/10 transition-colors"
             >
-              <span className="text-[#CFB36E] w-4 text-center" aria-hidden="true">
+              <span className="text-[color:var(--brand-accent)] w-4 text-center" aria-hidden="true">
                 {item.icon}
               </span>
               {item.label}
@@ -153,7 +153,7 @@ export default function AccountMenu({
             disabled={signingOut}
             className="w-full text-left flex items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-50"
           >
-            <span className="text-[#CFB36E] w-4 text-center" aria-hidden="true">
+            <span className="text-[color:var(--brand-accent)] w-4 text-center" aria-hidden="true">
               →
             </span>
             {signingOut ? "Signing out…" : "Sign out"}

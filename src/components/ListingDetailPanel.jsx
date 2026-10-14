@@ -314,7 +314,7 @@ export default function ListingDetailPanel({ slug, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex items-center gap-1.5 min-h-[44px] px-2.5 py-2 rounded-lg text-sm font-semibold text-gray-800 hover:bg-gray-100 active:scale-95 transition-transform touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
+            className="inline-flex items-center gap-1.5 min-h-[44px] px-2.5 py-2 rounded-lg text-sm font-semibold text-gray-800 hover:bg-gray-100 active:scale-95 transition-transform touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]"
             aria-label="Close and return to search"
           >
             <svg
@@ -340,7 +340,7 @@ export default function ListingDetailPanel({ slug, onClose }) {
                 <button
                   type="button"
                   onClick={onShare}
-                  className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 rounded-full border border-gray-300 text-gray-800 hover:border-black active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
+                  className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 rounded-full border border-gray-300 text-gray-800 hover:border-black active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]"
                   aria-label={shareCopied ? "Link copied" : "Share this home"}
                   title={shareCopied ? "Link copied" : "Share"}
                 >
@@ -349,9 +349,9 @@ export default function ListingDetailPanel({ slug, onClose }) {
                 <button
                   type="button"
                   onClick={onToggleSave}
-                  className={`inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 rounded-full border text-sm active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E] ${
+                  className={`inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 rounded-full border text-sm active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)] ${
                     saved
-                      ? "bg-[#CFB36E] border-[#CFB36E] text-black"
+                      ? "bg-[color:var(--brand-accent)] border-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)]"
                       : "border-gray-300 text-gray-800 hover:border-black"
                   }`}
                   aria-label={saved ? "Remove from saved homes" : "Save this home"}
@@ -364,7 +364,7 @@ export default function ListingDetailPanel({ slug, onClose }) {
             <button
               type="button"
               onClick={onClose}
-              className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full hover:bg-gray-100 flex items-center justify-center text-2xl text-gray-700 leading-none active:scale-95 transition-transform touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
+              className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full hover:bg-gray-100 flex items-center justify-center text-2xl text-gray-700 leading-none active:scale-95 transition-transform touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]"
               aria-label="Close"
             >
               ×

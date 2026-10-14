@@ -1,7 +1,10 @@
 import React from "react";
 import SEO from "../components/SEO";
+import { useBrokerageBrand } from "../context/TenantContext.jsx";
 
 export default function MortgageCalculatorPage() {
+  // Another brokerage's domain: its market, and no link to SAA's statistics pages.
+  const bb = useBrokerageBrand();
   return (
     <>
       <SEO 
@@ -30,7 +33,7 @@ export default function MortgageCalculatorPage() {
           <div className="mb-8 text-center">
             <h2 className="text-4xl font-bold font-serif mb-4">Mortgage Payment Calculator</h2>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto">
-              Use our mortgage calculator to estimate your monthly payments, understand how much home you can afford, and plan your home purchase in Northern Colorado.
+              Use our mortgage calculator to estimate your monthly payments, understand how much home you can afford, and plan your home purchase{bb ? (bb.market ? ` in ${bb.market}` : "") : " in Northern Colorado"}.
             </p>
           </div>
 
@@ -84,7 +87,7 @@ export default function MortgageCalculatorPage() {
       </section>
 
       {/* Get Pre-Approved CTA Section */}
-      <section className="py-16 px-6" style={{backgroundColor: '#CFB36E'}}>
+      <section className="py-16 px-6" style={{backgroundColor: 'var(--brand-accent)'}}>
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-4 text-gray-900">Get Pre-Approved</h2>
           <p className="text-lg text-gray-800 mb-8 max-w-2xl mx-auto">
@@ -128,10 +131,12 @@ export default function MortgageCalculatorPage() {
               </ul>
             </div>
           </div>
+          {!bb && (
           <p className="text-gray-700 mt-8 text-center">
             See the current 30-year and 15-year fixed national averages on our{" "}
             <a href="/resources/mortgage-rates-statistics/" className="font-semibold underline hover:text-black">weekly mortgage rate statistics page</a>.
           </p>
+          )}
         </div>
       </section>
 

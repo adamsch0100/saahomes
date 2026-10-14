@@ -4,6 +4,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Brand palette. These are SAA's colors; on another brokerage's domain
+   TenantProvider overwrites them on <html> from the brokerage's brand. */
+:root {
+  --brand-accent: #CFB36E;
+  --brand-accent-rgb: 207 179 110;
+  --brand-accent-hover: #c0a55e;
+  --brand-accent-strong: #bd9f5a;
+  --brand-accent-deep: #b89a55;
+  --brand-accent-text: #8a7340;
+  --brand-on-accent: #000000;
+  --brand-on-accent-ink: #1a1a1a;
+  --brand-primary: #111111;
+}
+
 @layer base {
   html {
     overflow-x: hidden;
@@ -27,7 +41,7 @@
 
   /* Visible keyboard focus on conversion surfaces (search, detail, modals) */
   :focus-visible {
-    outline: 2px solid #CFB36E;
+    outline: 2px solid var(--brand-accent);
     outline-offset: 2px;
   }
 
@@ -218,6 +232,12 @@ body:not(.saa-app-ready) .prerendered-site-links {
   border: 0 !important;
 }
 
+/* Another brokerage's domain: SAA's links band never shows (TenantProvider
+   adds body.brokerage-site once that brokerage's brand has loaded). */
+body.brokerage-site .prerendered-site-links {
+  display: none !important;
+}
+
 /* ─────────────────────────────────────────────────────────────
    Prerendered sitewide links band ("Explore Northern Colorado
    Real Estate") — injected by scripts/prerender-meta.mjs into
@@ -268,7 +288,7 @@ body:not(.saa-app-ready) .prerendered-site-links {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #CFB36E; /* brand gold */
+  color: var(--brand-accent); /* brand gold */
   margin: 0 0 1rem;
 }
 .prerendered-site-links ul {
@@ -294,7 +314,7 @@ body:not(.saa-app-ready) .prerendered-site-links {
   transition: color 0.15s ease;
 }
 .prerendered-site-links a:hover {
-  color: #CFB36E;
+  color: var(--brand-accent);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -306,7 +326,7 @@ body:not(.saa-app-ready) .prerendered-site-links {
   color: #d1d5db;
 }
 .prerendered-site-links-cta a {
-  color: #CFB36E;
+  color: var(--brand-accent);
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;

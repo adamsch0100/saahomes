@@ -15,7 +15,7 @@ import SectionTownsBand from "../components/SectionTownsBand.jsx";
 import { getCityHomes } from "../data/cityHomesData.js";
 import AreaNAP from "../components/AreaNAP.jsx";
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 
 const nearbyCommunities = {
   berthoud: [
@@ -292,7 +292,7 @@ export default function AreaGuidePage() {
             {homesForSalePath && (
               <Link
                 to={homesForSalePath}
-                className="inline-flex items-center justify-center px-8 py-3 bg-[#CFB36E] text-black font-semibold rounded-lg hover:bg-[#c4a45e] transition-colors"
+                className="inline-flex items-center justify-center px-8 py-3 bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] font-semibold rounded-lg hover:bg-[#c4a45e] transition-colors"
               >
                 Browse {area.city} Homes for Sale
               </Link>

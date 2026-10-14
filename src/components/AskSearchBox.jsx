@@ -77,7 +77,7 @@ export default function AskSearchBox({ city, tone = "dark" }) {
         <button
           type="submit"
           disabled={busy}
-          className="shrink-0 min-h-[44px] px-4 sm:px-5 rounded-lg bg-[#CFB36E] text-black font-semibold hover:bg-[#bd9f5a] disabled:opacity-60"
+          className="shrink-0 min-h-[44px] px-4 sm:px-5 rounded-lg bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] font-semibold hover:bg-[color:var(--brand-accent-strong)] disabled:opacity-60"
         >
           {busy && !result ? "Searching…" : "Search"}
         </button>

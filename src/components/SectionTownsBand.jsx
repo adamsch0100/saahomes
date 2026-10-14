@@ -8,7 +8,7 @@ const API_BASE = (() => {
   return "";
 })();
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 
 /**
  * Nearby / hub section towns with LIVE market lines from /api/listings/stats.
@@ -94,7 +94,7 @@ export default function SectionTownsBand({ title, intro, towns = [] }) {
                   </div>
                   <p
                     className="text-sm font-semibold shrink-0 sm:text-right"
-                    style={{ color: GOLD === "#CFB36E" ? "#8a7340" : GOLD }}
+                    style={{ color: "var(--brand-accent-text)" }}
                   >
                     {marketLine}
                   </p>

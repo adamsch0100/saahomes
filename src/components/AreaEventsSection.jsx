@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { getCityEvents, getEventsGuidePath, EVENTS_DATA_LAST_REVIEWED } from "../data/localEvents";
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 
 export default function AreaEventsSection({ city, slug }) {
   const events = getCityEvents(slug);

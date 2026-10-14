@@ -1,6 +1,6 @@
 import React from "react";
 import { marketPack } from "../data/marketPack.js";
-import { LISTING_PHOTO_FALLBACK_SRC as FALLBACK_SRC } from "../utils/photoUrl.js";
+import { useTenant } from "../context/TenantContext.jsx";
 
 const BRAND = marketPack.market.brand || "SAA Homes";
 
@@ -10,9 +10,12 @@ const BRAND = marketPack.market.brand || "SAA Homes";
  */
 export default function ListingPhotoFallback({
   className = "",
-  label = BRAND,
+  label,
   compact = false,
 }) {
+  const { tenant } = useTenant();
+  // A brokerage's own domain shows its name (or none), never SAA's.
+  if (label === undefined) label = tenant?.isBrokerage ? tenant.brand?.brandName || "" : BRAND;
   return (
     <div
       className={`flex flex-col items-center justify-center bg-[#1a1a1a] text-center select-none ${className}`}
@@ -24,7 +27,8 @@ export default function ListingPhotoFallback({
         height={compact ? 28 : 40}
         viewBox="0 0 24 24"
         fill="none"
-        stroke="#CFB36E"
+        stroke="currentColor"
+        style={{ color: "var(--brand-accent)" }}
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -36,7 +40,7 @@ export default function ListingPhotoFallback({
       </svg>
       {label ? (
         <span
-          className={`mt-2 font-semibold tracking-wide text-[#CFB36E] ${
+          className={`mt-2 font-semibold tracking-wide text-[color:var(--brand-accent)] ${
             compact ? "text-[10px]" : "text-xs"
           }`}
         >
@@ -48,4 +52,4 @@ export default function ListingPhotoFallback({
 }
 
 /** Re-export for map popups / img onError (single source in photoUrl.js). */
-export const LISTING_PHOTO_FALLBACK_SRC = FALLBACK_SRC;
+export { LISTING_PHOTO_FALLBACK_SRC } from "../utils/photoUrl.js";

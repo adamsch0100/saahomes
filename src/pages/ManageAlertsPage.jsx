@@ -16,6 +16,7 @@ import {
   notifySavedHomesChanged,
 } from "../utils/savedHomesApi.js";
 import InstantAlertsCard from "../components/InstantAlertsCard.jsx";
+import { useBrokerageBrand } from "../context/TenantContext.jsx";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -47,7 +48,7 @@ function filtersText(filters = {}) {
   if (filters.baths) parts.push(`${filters.baths}+ baths`);
   if (filters.type && TYPE_LABEL[filters.type]) parts.push(TYPE_LABEL[filters.type]);
   if (filters.minSqft) parts.push(`${Number(filters.minSqft).toLocaleString()}+ sqft`);
-  return parts.length ? parts.join(" · ") : "All Northern Colorado";
+  return parts.length ? parts.join(" · ") : "All homes";
 }
 
 function authQuery(token) {
@@ -65,7 +66,7 @@ function LeadScoreBadge({ score, label }) {
     <div className={`mt-5 rounded-xl border px-4 py-3 flex items-start gap-3 ${ring}`}>
       <div
         className="shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg border-2"
-        style={{ borderColor: "#CFB36E", color: "#1a1a1a", background: "#fff" }}
+        style={{ borderColor: "var(--brand-accent)", color: "#1a1a1a", background: "#fff" }}
         aria-label={`Activity score ${n}`}
       >
         {n}
@@ -194,8 +195,8 @@ function SavedHomeCard({ home, onUnsave, onOpen, busy }) {
             <button
               type="button"
               onClick={() => onOpen?.(home)}
-              className="inline-flex items-center min-h-[44px] px-3.5 py-2 rounded-lg text-sm font-semibold text-black touch-manipulation"
-              style={{ backgroundColor: "#CFB36E" }}
+              className="inline-flex items-center min-h-[44px] px-3.5 py-2 rounded-lg text-sm font-semibold text-[color:var(--brand-on-accent)] touch-manipulation"
+              style={{ backgroundColor: "var(--brand-accent)" }}
             >
               View home
             </button>
@@ -212,10 +213,10 @@ function SavedHomeCard({ home, onUnsave, onOpen, busy }) {
             type="button"
             disabled={busy}
             onClick={() => onUnsave?.(home)}
-            className="inline-flex items-center gap-1.5 min-h-[44px] px-3.5 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:border-[#CFB36E] disabled:opacity-50 touch-manipulation"
+            className="inline-flex items-center gap-1.5 min-h-[44px] px-3.5 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:border-[color:var(--brand-accent)] disabled:opacity-50 touch-manipulation"
             aria-label="Remove from saved homes"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="#CFB36E" stroke="#CFB36E" strokeWidth="2">
+            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style={{ fill: "var(--brand-accent)", stroke: "var(--brand-accent)" }} strokeWidth="2">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
             Unsave
@@ -228,6 +229,7 @@ function SavedHomeCard({ home, onUnsave, onOpen, busy }) {
 
 export default function ManageAlertsPage() {
   const [params] = useSearchParams();
+  const bb = useBrokerageBrand();
   const token = params.get("token") || "";
   const tabParam = params.get("tab") || "";
   const [data, setData] = useState(null);
@@ -438,7 +440,7 @@ export default function ManageAlertsPage() {
           <div className="flex flex-wrap gap-2">
             <Link
               to="/my-home/"
-              className="shrink-0 inline-flex items-center px-4 py-2.5 rounded-lg text-sm font-semibold border border-[#CFB36E] text-gray-900 hover:bg-[#CFB36E]/20 transition-colors"
+              className="shrink-0 inline-flex items-center px-4 py-2.5 rounded-lg text-sm font-semibold border border-[color:var(--brand-accent)] text-gray-900 hover:bg-[rgb(var(--brand-accent-rgb)/0.2)] transition-colors"
             >
               My home value
             </Link>
@@ -540,8 +542,21 @@ export default function ManageAlertsPage() {
           <div className="mt-8 bg-white border border-gray-200 rounded-xl p-8 text-center">
             <p className="text-gray-700">{error}</p>
             <p className="text-gray-400 text-sm mt-2">
+              {bb ? (
+                bb.phone ? (
+                  <>
+                    If the problem persists, call {bb.name || "us"} at{" "}
+                    <a href={bb.tel} className="underline">{bb.phone}</a>.
+                  </>
+                ) : (
+                  "If the problem persists, please try again later."
+                )
+              ) : (
+                <>
               If the problem persists, call Schwartz and Associates at{" "}
               <a href={marketPack.market.tel} className="underline">{marketPack.market.phone}</a>.
+                </>
+              )}
             </p>
           </div>
         ) : loading ? (
@@ -587,7 +602,7 @@ export default function ManageAlertsPage() {
                 onClick={() => setTab("searches")}
                 className={`min-h-[44px] px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors touch-manipulation ${
                   tab === "searches"
-                    ? "border-[#CFB36E] text-gray-900"
+                    ? "border-[color:var(--brand-accent)] text-gray-900"
                     : "border-transparent text-gray-500 hover:text-gray-800"
                 }`}
               >
@@ -603,7 +618,7 @@ export default function ManageAlertsPage() {
                 onClick={() => setTab("homes")}
                 className={`min-h-[44px] px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors touch-manipulation ${
                   tab === "homes"
-                    ? "border-[#CFB36E] text-gray-900"
+                    ? "border-[color:var(--brand-accent)] text-gray-900"
                     : "border-transparent text-gray-500 hover:text-gray-800"
                 }`}
               >
@@ -696,8 +711,8 @@ export default function ManageAlertsPage() {
                           <div className="mt-3 flex flex-wrap gap-2">
                             <Link
                               to={editPath}
-                              className="inline-flex items-center px-3.5 py-2 rounded-lg text-sm font-semibold text-black min-h-[44px]"
-                              style={{ backgroundColor: "#CFB36E" }}
+                              className="inline-flex items-center px-3.5 py-2 rounded-lg text-sm font-semibold text-[color:var(--brand-on-accent)] min-h-[44px]"
+                              style={{ backgroundColor: "var(--brand-accent)" }}
                             >
                               View {s.match_count === 1 ? "1 match" : `${Number(s.match_count || 0).toLocaleString()} matches`}
                             </Link>

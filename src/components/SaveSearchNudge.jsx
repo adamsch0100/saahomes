@@ -71,7 +71,7 @@ export default function SaveSearchNudge({ filters, homesOpened, searchesRun, pau
           filters={filters}
           buttonLabel="Save search"
           hideIcon
-          buttonClassName="shrink-0 min-h-[40px] px-3.5 py-2 bg-[#CFB36E] text-black rounded-lg text-sm font-bold touch-manipulation"
+          buttonClassName="shrink-0 min-h-[40px] px-3.5 py-2 bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] rounded-lg text-sm font-bold touch-manipulation"
         />
         <button
           type="button"

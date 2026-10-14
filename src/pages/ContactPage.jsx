@@ -86,7 +86,7 @@ export default function ContactPage() {
             <button
               type="button"
               onClick={() => openNadiaChat(NADIA_CONTACT_MESSAGE)}
-              className="inline-flex items-center justify-center px-8 py-3 border-2 border-[#CFB36E] text-[#CFB36E] font-semibold rounded-lg hover:bg-[#CFB36E] hover:text-black transition-colors"
+              className="inline-flex items-center justify-center px-8 py-3 border-2 border-[color:var(--brand-accent)] text-[color:var(--brand-accent)] font-semibold rounded-lg hover:bg-[color:var(--brand-accent)] hover:text-[color:var(--brand-on-accent)] transition-colors"
             >
               Ask Nadia
             </button>
@@ -132,7 +132,7 @@ export default function ContactPage() {
                 <button
                   type="button"
                   onClick={() => openNadiaChat(NADIA_CONTACT_MESSAGE)}
-                  className="inline-flex items-center justify-center px-6 py-3 bg-[#CFB36E] text-black font-semibold rounded-lg hover:opacity-90 transition-opacity"
+                  className="inline-flex items-center justify-center px-6 py-3 bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] font-semibold rounded-lg hover:opacity-90 transition-opacity"
                 >
                   Ask Nadia
                 </button>

@@ -4,6 +4,7 @@ import PaymentCalculator from "../PaymentCalculator";
 import CityStatsBand from "../CityStatsBand";
 import SaveSearchModal from "../SaveSearchModal";
 import { getCityHomesPath } from "../../data/cityHomesData";
+import { useBrokerageBrand } from "../../context/TenantContext.jsx";
 import {
   formatPrice,
   listingBadges,
@@ -49,6 +50,8 @@ export default function ListingDetailContent({
   stickyTopClass = "lg:top-24",
   mapInteractive = true,
 }) {
+  // Another brokerage's domain: no SAA area guides or SAA contact lines.
+  const bb = useBrokerageBrand();
   if (!listing) return null;
 
   const feats = listing.features || {};
@@ -85,7 +88,7 @@ export default function ListingDetailContent({
             </div>
             <div className="flex flex-wrap gap-1.5 mt-2">
               {isNew && (
-                <span className="bg-[#CFB36E] text-black text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded">
+                <span className="bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded">
                   New
                 </span>
               )}
@@ -100,7 +103,7 @@ export default function ListingDetailContent({
                 </span>
               )}
               {isAssumable && (
-                <span className="bg-black text-[#CFB36E] border border-[#CFB36E] text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded">
+                <span className="bg-black text-[color:var(--brand-accent)] border border-[color:var(--brand-accent)] text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded">
                   Assumable loan possible
                 </span>
               )}
@@ -154,7 +157,7 @@ export default function ListingDetailContent({
               {listing.subdivision && <span> · {listing.subdivision}</span>}
             </p>
             {match.matches && (
-              <p className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-[#8a7340] bg-[#CFB36E]/15 px-2 py-0.5 rounded-full">
+              <p className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-[color:var(--brand-accent-text)] bg-[rgb(var(--brand-accent-rgb)/0.15)] px-2 py-0.5 rounded-full">
                 <span aria-hidden="true">★</span>
                 Matches your saved search
                 {match.reasons.length > 0 && match.reasons[0] !== "your saved search"
@@ -172,9 +175,9 @@ export default function ListingDetailContent({
             onClick={onToggleSave}
             aria-label={saved ? "Remove from saved homes" : "Save this home"}
             aria-pressed={saved}
-            className={`flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border text-sm font-semibold active:scale-[0.98] transition-transform focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E] ${
+            className={`flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border text-sm font-semibold active:scale-[0.98] transition-transform focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)] ${
               saved
-                ? "bg-[#CFB36E] border-[#CFB36E] text-black"
+                ? "bg-[color:var(--brand-accent)] border-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)]"
                 : "border-gray-300 text-gray-900"
             }`}
           >
@@ -186,7 +189,7 @@ export default function ListingDetailContent({
               type="button"
               onClick={onShare}
               aria-label={shareCopied ? "Link copied" : "Share this home"}
-              className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border border-gray-300 text-sm font-semibold text-gray-900 active:scale-[0.98] transition-transform focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
+              className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border border-gray-300 text-sm font-semibold text-gray-900 active:scale-[0.98] transition-transform focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]"
             >
               <ShareIcon />
               {shareCopied ? "Copied" : "Share"}
@@ -195,14 +198,14 @@ export default function ListingDetailContent({
           <button
             type="button"
             onClick={openNadia}
-            className="flex-1 inline-flex items-center justify-center px-3 py-2.5 rounded-lg border border-gray-300 text-sm font-semibold text-gray-900 active:scale-[0.98] transition-transform focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
+            className="flex-1 inline-flex items-center justify-center px-3 py-2.5 rounded-lg border border-gray-300 text-sm font-semibold text-gray-900 active:scale-[0.98] transition-transform focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]"
           >
             Ask Nadia
           </button>
         </div>
 
         {!hasAnySavedSearch() && !match.matches && (
-          <div className="rounded-xl border border-[#CFB36E]/40 bg-[#CFB36E]/10 px-4 py-4 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+          <div className="rounded-xl border border-[rgb(var(--brand-accent-rgb)/0.4)] bg-[rgb(var(--brand-accent-rgb)/0.1)] px-4 py-4 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
             <div>
               <p className="text-sm font-semibold text-gray-900">Like homes similar to this?</p>
               <p className="text-xs text-gray-600 mt-0.5">
@@ -225,7 +228,7 @@ export default function ListingDetailContent({
 
         {/* Virtual tour — on-site modal embed (external fallback inside modal) */}
         {feats.virtual_tour && (
-          <div className="rounded-xl border border-[#CFB36E]/50 bg-[#CFB36E]/10 p-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+          <div className="rounded-xl border border-[rgb(var(--brand-accent-rgb)/0.5)] bg-[rgb(var(--brand-accent-rgb)/0.1)] p-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
             <div>
               <h2 className="text-lg font-bold text-gray-900 font-serif">Virtual tour</h2>
               <p className="text-sm text-gray-600 mt-0.5">
@@ -356,7 +359,7 @@ export default function ListingDetailContent({
         {/* 6. City stats + about city + similar */}
         {listing.city && <CityStatsBand city={listing.city} />}
 
-        {listing.city && (
+        {listing.city && !bb && (
           <div className="bg-black text-white rounded-xl p-6">
             <h2 className="text-xl font-bold font-serif mb-2">About {listing.city}</h2>
             <p className="text-gray-300 text-sm leading-relaxed mb-4">
@@ -367,7 +370,7 @@ export default function ListingDetailContent({
             <div className="flex flex-wrap gap-2">
               <Link
                 to={`/northern-colorado-areas/${citySlug}/`}
-                className="px-4 py-2 bg-[#CFB36E] text-black text-sm font-semibold rounded-lg hover:bg-[#bd9f5a] active:scale-[0.98] transition-transform"
+                className="px-4 py-2 bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] text-sm font-semibold rounded-lg hover:bg-[color:var(--brand-accent-strong)] active:scale-[0.98] transition-transform"
               >
                 {listing.city} Neighborhood Guide
               </Link>
@@ -433,10 +436,26 @@ export default function ListingDetailContent({
             >
               =
             </span>
+            {bb ? (
+              <>
+                Equal Housing Opportunity{bb.legalName || bb.name ? ` · ${bb.legalName || bb.name}` : ""}
+                {bb.phone ? (
+                  <>
+                    {" · "}
+                    <a href={bb.tel} className="underline hover:text-gray-800">
+                      {bb.phone}
+                    </a>
+                  </>
+                ) : null}
+              </>
+            ) : (
+              <>
             Equal Housing Opportunity · Schwartz and Associates, Coldwell Banker Realty ·{" "}
             <a href="tel:+19709991407" className="underline hover:text-gray-800">
               (970) 999-1407
             </a>
+              </>
+            )}
           </p>
         </div>
       </div>

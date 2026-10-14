@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { getBrandTheme } from "../utils/brandTheme.js";
 
 export default function MapSection() {
   const mapContainer = useRef(null);
@@ -97,7 +98,7 @@ export default function MapSection() {
                   Search Homes
                 </a>
                 <a href="${area.url}" 
-                   style="padding: 10px 20px; background: #CFB36E; color: white; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 600; display: block;">
+                   style="padding: 10px 20px; background: var(--brand-accent); color: white; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 600; display: block;">
                   Learn More
                 </a>
               </div>
@@ -113,7 +114,7 @@ export default function MapSection() {
           // Show popup on hover
           el.addEventListener('mouseenter', () => {
             popup.addTo(map.current);
-            el.querySelector('path').setAttribute('fill', '#CFB36E');
+            el.querySelector('path').setAttribute('fill', getBrandTheme().accent);
           });
 
           el.addEventListener('mouseleave', () => {

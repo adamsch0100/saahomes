@@ -130,6 +130,14 @@ function isNeutralHeadTag(tag) {
  * The head is rebuilt from an allowlist, so tags added to SAA's head later
  * never leak onto another brokerage's site.
  */
+// Pages a brokerage's own domain serves (mirrors src/components/brokerage/BrokerageRouteGuard.jsx);
+// every other path gets the shell with a 404 so SAA-only pages are never indexed there.
+const BROKERAGE_PATHS = [
+  /^\/$/, /^\/contact$/, /^\/properties$/, /^\/homes-for-sale\/[^/]+$/, /^\/alerts\/manage$/,
+  /^\/my-saved-searches$/, /^\/my-home$/, /^\/notifications$/, /^\/board$/, /^\/mortgage-calculator$/,
+  /^\/admin$/, /^\/agent$/, /^\/reset-password$/,
+];
+
 export function renderBrokerageShell(indexHtml, brand, path = '/') {
   const html = String(indexHtml || '');
   const name = String(brand?.name || 'Home Search');
@@ -404,7 +412,8 @@ if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
     }
     try {
       const base = readFileSync(join(distPath, 'index.html'), 'utf8');
-      return res.status(200).type('html').send(renderBrokerageShell(base, brand, req.path));
+      const known = BROKERAGE_PATHS.some((re) => re.test(req.path.length > 1 ? req.path.replace(/\/$/, '') : req.path));
+      return res.status(known ? 200 : 404).type('html').send(renderBrokerageShell(base, brand, req.path));
     } catch (error) {
       console.error('brokerage shell error:', error.message);
       return res.status(500).type('text/plain').send('Something went wrong.');

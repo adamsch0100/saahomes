@@ -29,7 +29,7 @@ export default function NeighborhoodLinks({ citySlug, cityName, limit, columns =
           <Link
             key={n.slug}
             to={`/northern-colorado-areas/${citySlug}/${n.slug}/`}
-            className="block p-5 rounded-xl border border-gray-200 hover:border-[#CFB36E] hover:shadow-md transition-all bg-white"
+            className="block p-5 rounded-xl border border-gray-200 hover:border-[color:var(--brand-accent)] hover:shadow-md transition-all bg-white"
           >
             <h3 className="font-bold font-serif text-lg mb-1">{n.name}</h3>
             <p className="text-sm text-gray-600">
@@ -42,7 +42,7 @@ export default function NeighborhoodLinks({ citySlug, cityName, limit, columns =
         <div className="text-center mt-6">
           <Link
             to={`/northern-colorado-areas/${citySlug}/`}
-            className="text-[#CFB36E] font-semibold hover:underline"
+            className="text-[color:var(--brand-accent)] font-semibold hover:underline"
           >
             View all {neighborhoods.length} {cityName} neighborhoods →
           </Link>

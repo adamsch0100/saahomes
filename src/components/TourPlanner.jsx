@@ -104,7 +104,7 @@ export default function TourPlanner({ listingKeys, onClose, onSent }) {
             <div className="mt-4 flex flex-wrap gap-2">
               <a
                 href={`${API_BASE}${sent.calendar_url}`}
-                className="inline-flex items-center min-h-[44px] px-4 rounded-lg bg-[#CFB36E] text-gray-900 text-sm font-bold"
+                className="inline-flex items-center min-h-[44px] px-4 rounded-lg bg-[color:var(--brand-accent)] text-gray-900 text-sm font-bold"
               >
                 Add a hold to my calendar
               </a>
@@ -147,7 +147,7 @@ export default function TourPlanner({ listingKeys, onClose, onSent }) {
               <button
                 type="button"
                 onClick={() => setWindows((ws) => [...ws, { date: localDate(ws.length + 2), part: "morning" }])}
-                className="text-sm font-semibold text-[#8a7340] underline min-h-[32px]"
+                className="text-sm font-semibold text-[color:var(--brand-accent-text)] underline min-h-[32px]"
               >
                 Add another time
               </button>

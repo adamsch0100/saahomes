@@ -33,9 +33,9 @@ export default function MobileStickyBar({
       <button
         type="button"
         onClick={onToggleSave}
-        className={`w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full border flex items-center justify-center active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E] ${
+        className={`w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full border flex items-center justify-center active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)] ${
           saved
-            ? "bg-[#CFB36E] border-[#CFB36E] text-black"
+            ? "bg-[color:var(--brand-accent)] border-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)]"
             : "border-gray-300 text-gray-800 hover:border-black"
         }`}
         aria-label={saved ? "Unsave home" : "Save home"}
@@ -46,9 +46,9 @@ export default function MobileStickyBar({
         <button
           type="button"
           onClick={onShare}
-          className={`w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full border flex items-center justify-center active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E] ${
+          className={`w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full border flex items-center justify-center active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)] ${
             shareCopied
-              ? "bg-[#CFB36E] border-[#CFB36E] text-black"
+              ? "bg-[color:var(--brand-accent)] border-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)]"
               : "border-gray-300 text-gray-800 hover:border-black"
           }`}
           aria-label={shareCopied ? "Link copied" : "Share this home"}
@@ -60,13 +60,13 @@ export default function MobileStickyBar({
       <button
         type="button"
         onClick={openNadia}
-        className="shrink-0 min-h-[44px] px-2 py-2.5 border border-gray-300 text-gray-900 text-xs font-semibold rounded-lg active:scale-95 hover:border-black transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
+        className="shrink-0 min-h-[44px] px-2 py-2.5 border border-gray-300 text-gray-900 text-xs font-semibold rounded-lg active:scale-95 hover:border-black transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]"
       >
         Nadia
       </button>
       <a
         href="tel:+19709991407"
-        className="shrink-0 min-h-[44px] px-2 py-2.5 border-2 border-black text-black text-xs font-semibold rounded-lg active:scale-95 hover:bg-black hover:text-white transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
+        className="shrink-0 min-h-[44px] px-2 py-2.5 border-2 border-black text-black text-xs font-semibold rounded-lg active:scale-95 hover:bg-black hover:text-white transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]"
       >
         Call
       </a>
@@ -75,7 +75,7 @@ export default function MobileStickyBar({
           listing={listing}
           buttonLabel="Schedule"
           buttonClassName="w-full min-h-[44px] inline-flex items-center justify-center px-2.5 py-2.5 text-sm font-semibold rounded-lg active:scale-[0.98] hover:opacity-90 transition-all touch-manipulation"
-          buttonStyle={{ backgroundColor: "#CFB36E", color: "#1a1a1a" }}
+          buttonStyle={{ backgroundColor: "var(--brand-accent)", color: "var(--brand-on-accent-ink)" }}
           hideIcon
         />
       </div>

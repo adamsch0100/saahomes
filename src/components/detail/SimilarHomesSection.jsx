@@ -54,7 +54,7 @@ function SimilarCard({ listing: l }) {
   return (
     <Link
       to={`/homes-for-sale/${l.slug}/`}
-      className="group relative block bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 active:scale-[0.99] transition-all min-w-[260px] w-[78vw] max-w-sm snap-start sm:min-w-0 sm:w-auto sm:max-w-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
+      className="group relative block bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 active:scale-[0.99] transition-all min-w-[260px] w-[78vw] max-w-sm snap-start sm:min-w-0 sm:w-auto sm:max-w-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]"
     >
       <div className="relative aspect-[4/3] bg-[#1a1a1a] overflow-hidden">
         <SimilarCardPhoto listing={l} />
@@ -65,12 +65,12 @@ function SimilarCard({ listing: l }) {
             </span>
           )}
           {b.isNew && !b.priceCut && (
-            <span className="bg-[#CFB36E] text-black text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+            <span className="bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] text-[10px] font-bold px-2 py-0.5 rounded uppercase">
               New
             </span>
           )}
           {b.isAssumable && (
-            <span className="bg-black/85 text-[#CFB36E] border border-[#CFB36E] text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+            <span className="bg-black/85 text-[color:var(--brand-accent)] border border-[color:var(--brand-accent)] text-[10px] font-bold px-2 py-0.5 rounded uppercase">
               Assumable loan possible
             </span>
           )}

@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { photoUrl } from "../utils/photoUrl.js";
 import { formatPrice, formatPriceCompact, listingAddress, listingStatsLine } from "../utils/listingHelpers.js";
 import { LISTING_PHOTO_FALLBACK_SRC } from "../utils/photoUrl.js";
+import { getBrandTheme } from "../utils/brandTheme.js";
 
 /**
  * ListingMap — Mapbox GL clustered markers (Zillow-style).
@@ -185,7 +186,7 @@ export default function ListingMap({
           source: "listings",
           filter: ["has", "point_count"],
           paint: {
-            "circle-color": "#111111",
+            "circle-color": getBrandTheme().primary,
             "circle-radius": ["step", ["get", "point_count"], 18, 10, 24, 40, 30, 100, 36],
             "circle-opacity": 0.92,
             "circle-stroke-width": 2,
@@ -310,7 +311,7 @@ export default function ListingMap({
                 <div class="p-3">
                   <p class="text-xs font-semibold text-gray-800 m-0 truncate">${stats}</p>
                   <p class="text-xs text-gray-500 mt-1 mb-0 truncate">${addr}${listing.city ? `, ${listing.city}` : ""}</p>
-                  <p class="text-xs font-semibold text-[#8a7340] mt-2 mb-0">View details →</p>
+                  <p class="text-xs font-semibold text-[color:var(--brand-accent-text)] mt-2 mb-0">View details →</p>
                 </div>
               </div>`;
             wirePhotoFallback(el);
@@ -613,7 +614,7 @@ function pinColorExpression(selectedId, heatmapOn) {
       "case",
       ["==", ["to-string", ["get", "id"]], selected],
       "#000000",
-      "#CFB36E",
+      getBrandTheme().accent,
     ];
   }
   return [
@@ -626,7 +627,7 @@ function pinColorExpression(selectedId, heatmapOn) {
     "#eab308",
     ["==", ["get", "priceBand"], 2],
     "#ef4444",
-    "#CFB36E",
+    getBrandTheme().accent,
   ];
 }
 
@@ -721,7 +722,7 @@ function drawStyles() {
       type: "fill",
       filter: ["all", ["==", "$type", "Polygon"], ["!=", "mode", "static"]],
       paint: {
-        "fill-color": "#CFB36E",
+        "fill-color": getBrandTheme().accent,
         "fill-outline-color": "#111111",
         "fill-opacity": 0.18,
       },
@@ -742,7 +743,7 @@ function drawStyles() {
       filter: ["all", ["==", "meta", "vertex"], ["==", "$type", "Point"], ["!=", "mode", "static"]],
       paint: {
         "circle-radius": 5,
-        "circle-color": "#CFB36E",
+        "circle-color": getBrandTheme().accent,
         "circle-stroke-color": "#111111",
         "circle-stroke-width": 1.5,
       },
@@ -764,7 +765,7 @@ function drawStyles() {
       filter: ["all", ["==", "$type", "Point"], ["==", "meta", "feature"], ["!=", "mode", "static"]],
       paint: {
         "circle-radius": 5,
-        "circle-color": "#CFB36E",
+        "circle-color": getBrandTheme().accent,
         "circle-stroke-color": "#111111",
         "circle-stroke-width": 1.5,
       },

@@ -25,7 +25,11 @@ const fmt = (n) => {
  * Step 3: full multi-source report (Zillow/Realtor/Redfin AVMs + 10-yr chart)
  *         via /api/home/:id/value → link to /my-home/
  */
-export default function HomeValueCapture({ areaName = "Northern Colorado" }) {
+/**
+ * `areaName` (may be empty) and `talkLabel` let another brokerage's site use
+ * this without SAA's market or names; SAA's pages keep the defaults.
+ */
+export default function HomeValueCapture({ areaName = "Northern Colorado", talkLabel = "Talk to Adam & Mandi — Free, No Pressure" }) {
   const location = useLocation();
   const [step, setStep] = useState(1);
   const [addr, setAddr] = useState({ address_line: "", city: "", postal_code: "", living_area: "" });
@@ -141,7 +145,7 @@ export default function HomeValueCapture({ areaName = "Northern Colorado" }) {
             <div key={label} className="flex items-center gap-2">
               <span
                 className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] font-bold ${
-                  done ? "bg-black text-white" : active ? "bg-[#CFB36E] text-black" : "bg-gray-100 text-gray-400"
+                  done ? "bg-black text-white" : active ? "bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)]" : "bg-gray-100 text-gray-400"
                 }`}
               >
                 {done ? "✓" : n}
@@ -162,7 +166,7 @@ export default function HomeValueCapture({ areaName = "Northern Colorado" }) {
             <div>
               <h3 className="text-2xl font-serif font-bold text-gray-900">What's your home worth today?</h3>
               <p className="text-sm text-gray-500 mt-1.5">
-                Enter your address for an instant estimate from live Northern Colorado sales data. No account needed.
+                Enter your address for an instant estimate from live {areaName ? `${areaName} ` : ""}sales data. No account needed.
               </p>
             </div>
             <div>
@@ -189,7 +193,7 @@ export default function HomeValueCapture({ areaName = "Northern Colorado" }) {
             <button
               type="submit"
               disabled={estimating}
-              className="w-full min-h-[48px] bg-[#CFB36E] hover:bg-[#c0a55e] text-black font-bold rounded-lg transition-colors disabled:opacity-60"
+              className="w-full min-h-[48px] bg-[color:var(--brand-accent)] hover:bg-[color:var(--brand-accent-hover)] text-[color:var(--brand-on-accent)] font-bold rounded-lg transition-colors disabled:opacity-60"
             >
               {estimating ? "Estimating…" : "Get My Estimate — Free"}
             </button>
@@ -264,7 +268,7 @@ export default function HomeValueCapture({ areaName = "Northern Colorado" }) {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full min-h-[48px] bg-[#CFB36E] hover:bg-[#c0a55e] text-black font-bold rounded-lg transition-colors disabled:opacity-60"
+              className="w-full min-h-[48px] bg-[color:var(--brand-accent)] hover:bg-[color:var(--brand-accent-hover)] text-[color:var(--brand-on-accent)] font-bold rounded-lg transition-colors disabled:opacity-60"
             >
               {submitting ? "Saving…" : "Unlock My Full Report — Free"}
             </button>
@@ -327,9 +331,9 @@ export default function HomeValueCapture({ areaName = "Northern Colorado" }) {
                   </p>
                   <Link
                     to="/contact/?interest=Selling a home"
-                    className="mt-4 inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 bg-[#CFB36E] hover:bg-[#c0a55e] text-black text-sm font-bold rounded-lg transition-colors"
+                    className="mt-4 inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 bg-[color:var(--brand-accent)] hover:bg-[color:var(--brand-accent-hover)] text-[color:var(--brand-on-accent)] text-sm font-bold rounded-lg transition-colors"
                   >
-                    Talk to Adam & Mandi — Free, No Pressure
+                    {talkLabel}
                   </Link>
                 </div>
 

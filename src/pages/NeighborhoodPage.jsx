@@ -76,7 +76,7 @@ function FeatureList({ features }) {
       <div className="grid sm:grid-cols-2 gap-3">
         {features.map((f, i) => (
           <div key={i} className="flex items-start gap-3">
-            <span className="text-[#CFB36E] mt-0.5">✦</span>
+            <span className="text-[color:var(--brand-accent)] mt-0.5">✦</span>
             <span className="text-gray-700">{f}</span>
           </div>
         ))}
@@ -128,7 +128,7 @@ export default function NeighborhoodPage() {
         <div className="text-center p-8">
           <h1 className="text-3xl font-bold mb-4">Neighborhood guide coming soon</h1>
           <p className="text-gray-600 mb-6">We're building out our detailed neighborhood guides for {city ? cityArea?.city || city : "this area"}.</p>
-          <Link to="/northern-colorado-areas/" className="text-[#CFB36E] font-semibold hover:underline">
+          <Link to="/northern-colorado-areas/" className="text-[color:var(--brand-accent)] font-semibold hover:underline">
             ← Back to all area guides
           </Link>
         </div>

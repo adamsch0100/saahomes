@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useTenant } from "../context/TenantContext.jsx";
 
 /**
  * Typed city/ZIP multi-select combobox for ListingSearch.
@@ -71,6 +72,11 @@ export default function LocationCombobox({
   inputClassName = "",
   id = "location-combobox",
 }) {
+  const { tenant } = useTenant();
+  // Default-scope name: SAA's market, or another brokerage's own (or "All areas").
+  const defaultScopeLabel = tenant?.isBrokerage
+    ? tenant.marketName || tenant.brand?.marketName || "All areas"
+    : "Northern Colorado";
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -86,7 +92,7 @@ export default function LocationCombobox({
   const scopeLabel = (() => {
     if (cities.length || zips.length) return null;
     if (city === "__all__") return "All Colorado";
-    return "Northern Colorado";
+    return defaultScopeLabel;
   })();
 
   const fetchSuggestions = useCallback(async (q) => {
@@ -289,7 +295,7 @@ export default function LocationCombobox({
                   e.stopPropagation();
                   clearScopeChip();
                 }}
-                aria-label="Reset to Northern Colorado"
+                aria-label={`Reset to ${defaultScopeLabel}`}
               >
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden="true">
                   <path d="M18 6L6 18M6 6l12 12" />
@@ -301,7 +307,7 @@ export default function LocationCombobox({
         {cities.map((c) => (
           <span
             key={`c-${c}`}
-            className="inline-flex items-center gap-1 pl-2.5 pr-1.5 py-0.5 rounded-full text-xs font-semibold bg-[#CFB36E]/25 text-gray-900 border border-[#CFB36E]/50"
+            className="inline-flex items-center gap-1 pl-2.5 pr-1.5 py-0.5 rounded-full text-xs font-semibold bg-[rgb(var(--brand-accent-rgb)/0.25)] text-gray-900 border border-[rgb(var(--brand-accent-rgb)/0.5)]"
           >
             {c}
             <button
@@ -322,7 +328,7 @@ export default function LocationCombobox({
         {zips.map((z) => (
           <span
             key={`z-${z}`}
-            className="inline-flex items-center gap-1 pl-2.5 pr-1.5 py-0.5 rounded-full text-xs font-semibold bg-[#CFB36E]/25 text-gray-900 border border-[#CFB36E]/50"
+            className="inline-flex items-center gap-1 pl-2.5 pr-1.5 py-0.5 rounded-full text-xs font-semibold bg-[rgb(var(--brand-accent-rgb)/0.25)] text-gray-900 border border-[rgb(var(--brand-accent-rgb)/0.5)]"
           >
             {z}
             <button
@@ -363,7 +369,7 @@ export default function LocationCombobox({
         />
         {loading && (
           <span
-            className="inline-block w-3.5 h-3.5 border-2 border-[#CFB36E] border-t-transparent rounded-full animate-spin shrink-0"
+            className="inline-block w-3.5 h-3.5 border-2 border-[color:var(--brand-accent)] border-t-transparent rounded-full animate-spin shrink-0"
             aria-hidden="true"
           />
         )}
@@ -385,7 +391,7 @@ export default function LocationCombobox({
               className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 text-left text-sm hover:bg-gray-50 ${
                 (s.value === "__noco__" && city === "__noco__" && !cities.length && !zips.length)
                 || (s.value === "__all__" && city === "__all__" && !cities.length)
-                  ? "bg-[#CFB36E]/10 font-semibold"
+                  ? "bg-[rgb(var(--brand-accent-rgb)/0.1)] font-semibold"
                   : ""
               }`}
             >
@@ -415,7 +421,7 @@ export default function LocationCombobox({
                     aria-selected={selected}
                     onClick={() => addCity(c.value)}
                     className={`w-full flex items-center justify-between gap-3 px-3.5 py-2 text-left text-sm hover:bg-gray-50 ${
-                      selected ? "bg-[#CFB36E]/15 font-semibold" : ""
+                      selected ? "bg-[rgb(var(--brand-accent-rgb)/0.15)] font-semibold" : ""
                     }`}
                   >
                     <span>{c.label}</span>
@@ -443,7 +449,7 @@ export default function LocationCombobox({
                     aria-selected={selected}
                     onClick={() => addZip(z.value)}
                     className={`w-full flex items-center justify-between gap-3 px-3.5 py-2 text-left text-sm hover:bg-gray-50 ${
-                      selected ? "bg-[#CFB36E]/15 font-semibold" : ""
+                      selected ? "bg-[rgb(var(--brand-accent-rgb)/0.15)] font-semibold" : ""
                     }`}
                   >
                     <span>{z.label}</span>

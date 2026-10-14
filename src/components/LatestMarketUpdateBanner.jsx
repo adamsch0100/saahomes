@@ -38,7 +38,7 @@ export default function LatestMarketUpdateBanner({ variant = "default", cityName
             />
           </div>
           <div className="p-8 flex flex-col justify-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-[#CFB36E] mb-2">{headline}</p>
+            <p className="text-sm font-semibold uppercase tracking-widest text-[color:var(--brand-accent)] mb-2">{headline}</p>
             <h2 className="text-2xl sm:text-3xl font-bold font-serif mb-3">{post.title}</h2>
             <p className="text-gray-300 mb-6 leading-relaxed">{post.excerpt}</p>
             <div className="flex flex-wrap gap-3">

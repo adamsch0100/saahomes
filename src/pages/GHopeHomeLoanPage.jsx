@@ -5,7 +5,7 @@ import GHopeLeadForm from "../components/GHopeLeadForm";
 import QualifyCta from "../components/QualifyCta";
 import ChfaResourceHub from "../components/ChfaResourceHub";
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 const PAGE_URL = "https://saahomes.com/greeley-g-hope-down-payment-assistance/";
 const OFFICIAL_URL = "https://greeleyco.gov/residents/resources/housing-solutions/";
 const ZONE_MAP = "/images/G-HOPE-Greeley-Zone-Map.png";
@@ -245,7 +245,7 @@ export default function GHopeHomeLoanPage() {
         <div className="relative z-10 max-w-5xl mx-auto text-center text-white px-4 sm:px-6 w-full">
           <span
             className="inline-block mb-4 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold tracking-wide uppercase"
-            style={{ backgroundColor: GOLD, color: "#1a1a1a" }}
+            style={{ backgroundColor: GOLD, color: "var(--brand-on-accent-ink)" }}
           >
             City of Greeley · Housing for All
           </span>
@@ -457,7 +457,7 @@ export default function GHopeHomeLoanPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {eligibilityRequirements.map((item) => (
               <div key={item.title} className="bg-gray-50 rounded-xl p-5 border border-gray-100">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mb-3" style={{ backgroundColor: GOLD, color: "#1a1a1a" }}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mb-3" style={{ backgroundColor: GOLD, color: "var(--brand-on-accent-ink)" }}>
                   ✓
                 </div>
                 <h3 className="font-bold text-gray-900 mb-2">{item.title}</h3>
@@ -541,7 +541,7 @@ export default function GHopeHomeLoanPage() {
               <div key={item.step} className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm text-center">
                 <div
                   className="w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4"
-                  style={{ backgroundColor: GOLD, color: "#1a1a1a" }}
+                  style={{ backgroundColor: GOLD, color: "var(--brand-on-accent-ink)" }}
                 >
                   {item.step}
                 </div>

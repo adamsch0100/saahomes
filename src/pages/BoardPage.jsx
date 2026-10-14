@@ -39,7 +39,7 @@ function PersonChip({ p }) {
     p.reaction === "pass"
       ? "bg-gray-100 text-gray-600"
       : p.reaction || p.saved
-        ? "bg-[#CFB36E]/20 text-[#6d5a2c]"
+        ? "bg-[rgb(var(--brand-accent-rgb)/0.2)] text-[#6d5a2c]"
         : "bg-white text-gray-400 border border-dashed border-gray-300";
   return (
     <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${tone}`}>
@@ -78,7 +78,7 @@ function CommentBox({ listingKey, onPosted }) {
         onChange={(e) => setBody(e.target.value)}
         maxLength={1000}
         placeholder="Add a comment for your board"
-        className="flex-1 min-w-0 min-h-[44px] rounded-lg border border-gray-300 px-3 text-sm focus:border-[#CFB36E] focus:outline-none"
+        className="flex-1 min-w-0 min-h-[44px] rounded-lg border border-gray-300 px-3 text-sm focus:border-[color:var(--brand-accent)] focus:outline-none"
       />
       <button
         type="submit"
@@ -102,7 +102,7 @@ function HomeCard({ home, shared, onChanged, inTour, onToggleTour }) {
             <img src={`${API_BASE}${home.photo_url}`} alt={home.address || "Home photo"} className="absolute inset-0 w-full h-full object-cover" loading="lazy" onError={(e) => { e.currentTarget.style.display = "none"; }} />
           )}
           {home.everyone_loves && (
-            <span className="absolute top-2 left-2 rounded-full bg-[#CFB36E] text-gray-900 text-[11px] font-bold px-2.5 py-1 shadow">
+            <span className="absolute top-2 left-2 rounded-full bg-[color:var(--brand-accent)] text-gray-900 text-[11px] font-bold px-2.5 py-1 shadow">
               Everyone loves it
             </span>
           )}
@@ -133,7 +133,7 @@ function HomeCard({ home, shared, onChanged, inTour, onToggleTour }) {
                 type="checkbox"
                 checked={inTour}
                 onChange={() => onToggleTour(home.listing_key)}
-                className="w-4 h-4 accent-[#CFB36E]"
+                className="w-4 h-4 accent-[color:var(--brand-accent)]"
               />
               Add to a tour
             </label>
@@ -199,7 +199,7 @@ function InviteForm({ onInvited }) {
         placeholder="Their email"
         className="min-h-[44px] rounded-lg border border-gray-300 px-3 text-sm"
       />
-      <button type="submit" disabled={busy} className="min-h-[44px] px-5 rounded-lg bg-[#CFB36E] text-gray-900 text-sm font-bold disabled:opacity-60">
+      <button type="submit" disabled={busy} className="min-h-[44px] px-5 rounded-lg bg-[color:var(--brand-accent)] text-gray-900 text-sm font-bold disabled:opacity-60">
         Send invite
       </button>
       {msg && (
@@ -348,7 +348,7 @@ export default function BoardPage() {
             <section className="mt-6 space-y-4" aria-label="Homes on the board">
               {state.board.homes.length === 0 ? (
                 <p className="text-sm text-gray-600">
-                  Nothing saved yet. <Link to="/properties/" className="font-semibold text-[#8a7340] underline">Start a search</Link> and tap the heart on homes you like.
+                  Nothing saved yet. <Link to="/properties/" className="font-semibold text-[color:var(--brand-accent-text)] underline">Start a search</Link> and tap the heart on homes you like.
                 </p>
               ) : (
                 state.board.homes.map((h) => (
@@ -381,7 +381,7 @@ export default function BoardPage() {
             <button
               type="button"
               onClick={() => setPlanning([...tourKeys])}
-              className="min-h-[40px] px-4 rounded-full bg-[#CFB36E] text-gray-900 text-sm font-bold"
+              className="min-h-[40px] px-4 rounded-full bg-[color:var(--brand-accent)] text-gray-900 text-sm font-bold"
             >
               Plan a tour
             </button>

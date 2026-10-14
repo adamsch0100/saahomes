@@ -25,6 +25,7 @@ import {
 import SaveHomeButton, { useSavedHomesStatus } from "./SaveHomeButton";
 import ListingPhotoFallback from "./ListingPhotoFallback";
 import { marketPack } from "../data/marketPack.js";
+import { useTenant } from "../context/TenantContext.jsx";
 import { buildListingsItemListSchema } from "../utils/seoConstants.js";
 import { estimateMonthlyPayment } from "./PaymentCalculator.jsx";
 
@@ -757,7 +758,7 @@ function CardBadges({ listing }) {
   return (
     <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5 max-w-[78%] z-[1]">
       {isNew && (
-        <span className="inline-flex items-center min-h-[24px] bg-[#CFB36E] text-black text-[11px] font-bold tracking-wide uppercase px-2.5 py-1 rounded-md shadow-sm">
+        <span className="inline-flex items-center min-h-[24px] bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] text-[11px] font-bold tracking-wide uppercase px-2.5 py-1 rounded-md shadow-sm">
           New
         </span>
       )}
@@ -777,7 +778,7 @@ function CardBadges({ listing }) {
         </span>
       )}
       {isAssumable && (
-        <span className="inline-flex items-center min-h-[24px] bg-black/85 text-[#CFB36E] border border-[#CFB36E] text-[11px] font-bold tracking-wide uppercase px-2.5 py-1 rounded-md shadow-sm">
+        <span className="inline-flex items-center min-h-[24px] bg-black/85 text-[color:var(--brand-accent)] border border-[color:var(--brand-accent)] text-[11px] font-bold tracking-wide uppercase px-2.5 py-1 rounded-md shadow-sm">
           Assumable loan possible
         </span>
       )}
@@ -953,7 +954,7 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
             type="button"
             onClick={(e) => stepPhoto(-1, e)}
             onMouseDown={(e) => e.stopPropagation()}
-            className={`absolute left-1 top-1/2 -translate-y-1/2 z-20 rounded-full bg-white/95 hover:bg-white shadow-md flex items-center justify-center text-gray-900 leading-none active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#CFB36E] ${
+            className={`absolute left-1 top-1/2 -translate-y-1/2 z-20 rounded-full bg-white/95 hover:bg-white shadow-md flex items-center justify-center text-gray-900 leading-none active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[color:var(--brand-accent)] ${
               compact
                 ? "w-10 h-10 min-w-[40px] min-h-[40px] text-lg opacity-100"
                 : "w-11 h-11 min-w-[44px] min-h-[44px] text-xl opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
@@ -966,7 +967,7 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
             type="button"
             onClick={(e) => stepPhoto(1, e)}
             onMouseDown={(e) => e.stopPropagation()}
-            className={`absolute right-1 top-1/2 -translate-y-1/2 z-20 rounded-full bg-white/95 hover:bg-white shadow-md flex items-center justify-center text-gray-900 leading-none active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#CFB36E] ${
+            className={`absolute right-1 top-1/2 -translate-y-1/2 z-20 rounded-full bg-white/95 hover:bg-white shadow-md flex items-center justify-center text-gray-900 leading-none active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[color:var(--brand-accent)] ${
               compact
                 ? "w-10 h-10 min-w-[40px] min-h-[40px] text-lg opacity-100"
                 : "w-11 h-11 min-w-[44px] min-h-[44px] text-xl opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:right-12"
@@ -1035,7 +1036,7 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
         <p className="text-xs text-gray-400 mt-0.5">{typeLabel}</p>
       )}
       {match.matches && (
-        <p className="mt-1 inline-flex self-start items-center gap-1 text-[10px] font-semibold text-[#8a7340] bg-[#CFB36E]/15 px-2 py-0.5 rounded-full">
+        <p className="mt-1 inline-flex self-start items-center gap-1 text-[10px] font-semibold text-[color:var(--brand-accent-text)] bg-[rgb(var(--brand-accent-rgb)/0.15)] px-2 py-0.5 rounded-full">
           <span aria-hidden="true">★</span> Match
         </p>
       )}
@@ -1053,7 +1054,7 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
         {typeLabel ? ` · ${typeLabel}` : ""}
       </p>
       {match.matches && (
-        <p className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-[#8a7340] bg-[#CFB36E]/15 px-2 py-0.5 rounded-full">
+        <p className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-[color:var(--brand-accent-text)] bg-[rgb(var(--brand-accent-rgb)/0.15)] px-2 py-0.5 rounded-full">
           <span aria-hidden="true">★</span>
           Matches your saved search
         </p>
@@ -1073,7 +1074,7 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
           : "rounded-[10px]"
       } ${
         selected
-          ? "border-[#CFB36E] shadow-lg ring-2 ring-[#CFB36E]/35"
+          ? "border-[color:var(--brand-accent)] shadow-lg ring-2 ring-[rgb(var(--brand-accent-rgb)/0.35)]"
           : "border-gray-200 shadow-sm hover:shadow-lg hover:border-gray-300"
       }`}
     >
@@ -1087,7 +1088,7 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
             open(e);
           }
         }}
-        className={`block w-full text-left cursor-pointer active:scale-[0.99] transition-transform focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E] ${
+        className={`block w-full text-left cursor-pointer active:scale-[0.99] transition-transform focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)] ${
           compact ? "flex flex-row min-h-[112px]" : ""
         }`}
       >
@@ -1110,13 +1111,13 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
 
 /* ── Shared form control styles — min 44px tap targets on interactive chips ── */
 const selectClass =
-  "w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white text-gray-900 focus:ring-2 focus:ring-[#CFB36E] focus:border-[#CFB36E] outline-none min-h-[44px]";
+  "w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white text-gray-900 focus:ring-2 focus:ring-[color:var(--brand-accent)] focus:border-[color:var(--brand-accent)] outline-none min-h-[44px]";
 const chipBase =
-  "inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 py-2 border rounded-full text-sm font-medium transition-colors whitespace-nowrap touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]";
+  "inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 py-2 border rounded-full text-sm font-medium transition-colors whitespace-nowrap touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]";
 const chipIdle = `${chipBase} border-gray-300 bg-white text-gray-800 hover:border-black`;
 const chipActive = `${chipBase} border-black bg-black text-white`;
 const pillBtn =
-  "inline-flex items-center justify-center min-h-[36px] px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]";
+  "inline-flex items-center justify-center min-h-[36px] px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]";
 const pillIdle = `${pillBtn} border-gray-300 bg-white text-gray-700 hover:border-black`;
 const pillOn = `${pillBtn} border-black bg-black text-white`;
 
@@ -1673,6 +1674,16 @@ function FilterDrawerBody({
 
 export default function ListingSearch({ location, height = "700px", compact = false }) {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { tenant } = useTenant();
+  const isBrokerageSite = !!tenant?.isBrokerage;
+  // Market name/phone shown in this search: SAA's pack, or another brokerage's own.
+  const market = tenant?.isBrokerage
+    ? {
+        name: tenant.marketName || tenant.brand?.marketName || "",
+        phone: tenant.brand?.phone || null,
+        tel: tenant.brand?.tel || null,
+      }
+    : marketPack.market;
 
   const [filters, setFilters] = useState(() => {
     const base = filtersFromParams(searchParams);
@@ -2074,6 +2085,8 @@ export default function ListingSearch({ location, height = "700px", compact = fa
     else if (zipList.length) bits.push(`ZIP ${zipList.join(", ")}`);
     if (bits.length) return bits.join(" · ");
     if (filters.city === "__all__") return "Colorado";
+    // Another brokerage's domain: its market (or a plain "your area"), not SAA's.
+    if (tenant?.isBrokerage) return tenant.marketName || tenant.brand?.marketName || "your area";
     return "Northern Colorado";
   })();
 
@@ -2236,7 +2249,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           <select
             value={filters.beds}
             onChange={(e) => setFilterInstant("beds", e.target.value)}
-            className={`min-h-[44px] px-3.5 py-2 border rounded-full text-sm font-medium outline-none touch-manipulation focus-visible:ring-2 focus-visible:ring-[#CFB36E] ${
+            className={`min-h-[44px] px-3.5 py-2 border rounded-full text-sm font-medium outline-none touch-manipulation focus-visible:ring-2 focus-visible:ring-[color:var(--brand-accent)] ${
               filters.beds ? "border-black bg-black text-white" : "border-gray-300 bg-white"
             }`}
             aria-label="Beds"
@@ -2251,7 +2264,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           <select
             value={filters.baths}
             onChange={(e) => setFilterInstant("baths", e.target.value)}
-            className={`min-h-[44px] px-3.5 py-2 border rounded-full text-sm font-medium outline-none touch-manipulation focus-visible:ring-2 focus-visible:ring-[#CFB36E] ${
+            className={`min-h-[44px] px-3.5 py-2 border rounded-full text-sm font-medium outline-none touch-manipulation focus-visible:ring-2 focus-visible:ring-[color:var(--brand-accent)] ${
               filters.baths ? "border-black bg-black text-white" : "border-gray-300 bg-white"
             }`}
             aria-label="Baths"
@@ -2326,8 +2339,8 @@ export default function ListingSearch({ location, height = "700px", compact = fa
             onClick={() => setFilterInstant("assumable", filters.assumable === "true" ? "" : "true")}
             className={
               filters.assumable === "true"
-                ? `${chipBase} border-[#CFB36E] bg-[#CFB36E] text-black`
-                : `${chipBase} border-[#CFB36E] bg-white text-gray-900 hover:bg-[#CFB36E]/15`
+                ? `${chipBase} border-[color:var(--brand-accent)] bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)]`
+                : `${chipBase} border-[color:var(--brand-accent)] bg-white text-gray-900 hover:bg-[rgb(var(--brand-accent-rgb)/0.15)]`
             }
             aria-pressed={filters.assumable === "true"}
             title="Show listings whose remarks mention an assumable VA or FHA loan"
@@ -2373,10 +2386,10 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           <button
             type="button"
             onClick={() => setFilterInstant("assumable", filters.assumable === "true" ? "" : "true")}
-            className={`inline-flex items-center justify-center min-h-[44px] px-3.5 py-2 border rounded-full text-sm font-semibold touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E] ${
+            className={`inline-flex items-center justify-center min-h-[44px] px-3.5 py-2 border rounded-full text-sm font-semibold touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)] ${
               filters.assumable === "true"
-                ? "border-[#CFB36E] bg-[#CFB36E] text-black"
-                : "border-[#CFB36E] bg-white text-gray-900"
+                ? "border-[color:var(--brand-accent)] bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)]"
+                : "border-[color:var(--brand-accent)] bg-white text-gray-900"
             }`}
             aria-pressed={filters.assumable === "true"}
           >
@@ -2385,7 +2398,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           <button
             type="button"
             onClick={openDrawer}
-            className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 py-2 border border-gray-300 rounded-full text-sm font-semibold bg-white touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
+            className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 py-2 border border-gray-300 rounded-full text-sm font-semibold bg-white touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]"
             aria-label={
               activeFilterCount > 0
                 ? `Open filters, ${activeFilterCount} active`
@@ -2429,7 +2442,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                   key={chip.id}
                   type="button"
                   onClick={() => removeChip(chip)}
-                  className="inline-flex items-center gap-1 min-h-[32px] pl-2.5 pr-1.5 py-1 rounded-full text-xs font-semibold bg-[#CFB36E]/20 text-gray-900 border border-[#CFB36E]/50 hover:bg-[#CFB36E]/35 whitespace-nowrap touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
+                  className="inline-flex items-center gap-1 min-h-[32px] pl-2.5 pr-1.5 py-1 rounded-full text-xs font-semibold bg-[rgb(var(--brand-accent-rgb)/0.2)] text-gray-900 border border-[rgb(var(--brand-accent-rgb)/0.5)] hover:bg-[rgb(var(--brand-accent-rgb)/0.35)] whitespace-nowrap touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]"
                   title={`Remove ${chip.label}`}
                   aria-label={`Remove filter: ${chip.label}`}
                 >
@@ -2455,15 +2468,15 @@ export default function ListingSearch({ location, height = "700px", compact = fa
 
         {/* Results meta + sort (desktop) — live count, no Enter needed */}
         <div className="hidden md:flex items-center justify-between px-4 py-2.5 border-t border-gray-100 bg-gray-50/80">
-          <p className={`text-sm font-semibold ${loading ? "text-[#8a7340]" : "text-gray-900"}`} aria-live="polite">
+          <p className={`text-sm font-semibold ${loading ? "text-[color:var(--brand-accent-text)]" : "text-gray-900"}`} aria-live="polite">
             {resultLabel}
             {loading && (
-              <span className="ml-2 inline-block w-3.5 h-3.5 border-2 border-[#CFB36E] border-t-transparent rounded-full animate-spin align-[-2px]" aria-hidden="true" />
+              <span className="ml-2 inline-block w-3.5 h-3.5 border-2 border-[color:var(--brand-accent)] border-t-transparent rounded-full animate-spin align-[-2px]" aria-hidden="true" />
             )}
           </p>
           <div className="flex items-center gap-3">
             {hasAnySavedSearch() && (
-              <span className="text-xs text-[#8a7340] font-medium hidden lg:inline">
+              <span className="text-xs text-[color:var(--brand-accent-text)] font-medium hidden lg:inline">
                 ★ Match chips show homes that fit your saved search
               </span>
             )}
@@ -2609,7 +2622,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                 style={{
                   background: priceHeatmap
                     ? "linear-gradient(90deg, #22c55e, #eab308, #ef4444)"
-                    : "linear-gradient(90deg, #CFB36E, #CFB36E)",
+                    : "linear-gradient(90deg, var(--brand-accent), var(--brand-accent))",
                 }}
                 aria-hidden="true"
               />
@@ -2636,7 +2649,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
               <div className="pointer-events-auto max-w-sm w-full rounded-xl bg-white/95 backdrop-blur-sm border border-gray-200 shadow-xl px-5 py-4 text-center">
                 <p className="text-sm font-bold text-gray-900">
                   {filters.assumable === "true"
-                    ? `No assumable listings${areaLabel && areaLabel !== marketPack.market.name ? ` in ${areaLabel}` : ""} right now`
+                    ? `No assumable listings${areaLabel && areaLabel !== market.name ? ` in ${areaLabel}` : ""} right now`
                     : "No homes match your filters"}
                 </p>
                 {activeChips.length > 0 && (
@@ -2652,7 +2665,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="mt-3 min-h-[40px] px-4 py-2 bg-black text-white text-xs font-semibold rounded-lg touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
+                  className="mt-3 min-h-[40px] px-4 py-2 bg-black text-white text-xs font-semibold rounded-lg touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]"
                 >
                   Clear all filters
                 </button>
@@ -2664,7 +2677,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                   }}
                   className="mt-2 inline-block text-xs font-semibold text-gray-600 underline underline-offset-2 hover:text-black"
                 >
-                  Browse all {marketPack.market.name} homes
+                  Browse all {market.name} homes
                 </a>
               </div>
             </div>
@@ -2691,7 +2704,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           }`}
         >
           <div className="md:hidden px-4 pt-3 pb-1">
-            <p className={`text-sm font-semibold ${loading ? "text-[#8a7340]" : "text-gray-900"}`} aria-live="polite">
+            <p className={`text-sm font-semibold ${loading ? "text-[color:var(--brand-accent-text)]" : "text-gray-900"}`} aria-live="polite">
               {resultLabel}
             </p>
           </div>
@@ -2712,8 +2725,8 @@ export default function ListingSearch({ location, height = "700px", compact = fa
           )}
 
           {loading && results.length > 0 && (
-            <div className="mx-3 sm:mx-4 mt-3 mb-1 flex items-center gap-2 px-3 py-2.5 rounded-lg bg-[#CFB36E]/15 border border-[#CFB36E]/40 text-sm font-semibold text-gray-900">
-              <span className="inline-block w-3.5 h-3.5 border-2 border-[#CFB36E] border-t-transparent rounded-full animate-spin shrink-0" aria-hidden="true" />
+            <div className="mx-3 sm:mx-4 mt-3 mb-1 flex items-center gap-2 px-3 py-2.5 rounded-lg bg-[rgb(var(--brand-accent-rgb)/0.15)] border border-[rgb(var(--brand-accent-rgb)/0.4)] text-sm font-semibold text-gray-900">
+              <span className="inline-block w-3.5 h-3.5 border-2 border-[color:var(--brand-accent)] border-t-transparent rounded-full animate-spin shrink-0" aria-hidden="true" />
               Updating results…
             </div>
           )}
@@ -2722,8 +2735,12 @@ export default function ListingSearch({ location, height = "700px", compact = fa
             <div className="flex flex-col items-center justify-center text-center min-h-[360px] px-6">
               <p className="text-gray-900 font-semibold text-lg">We couldn&apos;t load listings</p>
               <p className="text-gray-500 mt-2 max-w-md text-sm">
-                Please try again in a moment, or call{" "}
-                <a href={marketPack.market.tel} className="underline text-black font-medium">{marketPack.market.phone}</a>.
+                Please try again in a moment{market.phone ? (
+                  <>
+                    , or call{" "}
+                    <a href={market.tel} className="underline text-black font-medium">{market.phone}</a>
+                  </>
+                ) : null}.
               </p>
               <button
                 type="button"
@@ -2748,14 +2765,14 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                   ? `No assumable listings${
                       filters.polygon
                         ? " in your drawn area"
-                        : areaLabel && areaLabel !== marketPack.market.name
+                        : areaLabel && areaLabel !== market.name
                           ? ` in ${areaLabel}`
                           : ""
                     } right now`
                   : `No homes match your filters${
                       filters.polygon
                         ? " in your drawn area"
-                        : areaLabel && areaLabel !== marketPack.market.name
+                        : areaLabel && areaLabel !== market.name
                           ? ` in ${areaLabel}`
                           : ""
                     }`}
@@ -2765,7 +2782,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                   {activeChips.map((chip) => (
                     <span
                       key={chip.id}
-                      className="inline-flex items-center min-h-[28px] px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#CFB36E]/20 text-gray-900 border border-[#CFB36E]/45"
+                      className="inline-flex items-center min-h-[28px] px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[rgb(var(--brand-accent-rgb)/0.2)] text-gray-900 border border-[rgb(var(--brand-accent-rgb)/0.45)]"
                     >
                       {chip.label}
                     </span>
@@ -2781,7 +2798,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="min-h-[44px] px-5 py-2.5 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-800 active:scale-[0.99] transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
+                  className="min-h-[44px] px-5 py-2.5 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-800 active:scale-[0.99] transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]"
                 >
                   Clear all filters
                 </button>
@@ -2799,12 +2816,14 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                 }}
                 className="mt-4 text-sm font-semibold text-gray-700 underline underline-offset-2 hover:text-black"
               >
-                Browse all {marketPack.market.name} homes
+                Browse all {market.name} homes
               </a>
-              <p className="text-gray-400 text-xs mt-4">
-                Or explore our{" "}
-                <a href="/northern-colorado-areas/" className="underline">city guides</a>
-              </p>
+              {!isBrokerageSite && (
+                <p className="text-gray-400 text-xs mt-4">
+                  Or explore our{" "}
+                  <a href="/northern-colorado-areas/" className="underline">city guides</a>
+                </p>
+              )}
             </div>
           )}
 
@@ -2822,7 +2841,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                   setShowHidden(!showHidden);
                   fetchListings(filters, 1, false);
                 }}
-                className="font-semibold text-[#8a7340] underline underline-offset-2 min-h-[32px]"
+                className="font-semibold text-[color:var(--brand-accent-text)] underline underline-offset-2 min-h-[32px]"
               >
                 {showHidden ? "Hide them" : "Show them"}
               </button>
@@ -2873,7 +2892,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
                     Showing all {meta.total.toLocaleString()} homes
                   </p>
                 )}
-                <div className="w-full max-w-md text-center rounded-xl border border-[#CFB36E]/40 bg-[#CFB36E]/10 px-4 py-4 mt-2">
+                <div className="w-full max-w-md text-center rounded-xl border border-[rgb(var(--brand-accent-rgb)/0.4)] bg-[rgb(var(--brand-accent-rgb)/0.1)] px-4 py-4 mt-2">
                   <p className="text-sm font-semibold text-gray-900">Want new matches in your inbox?</p>
                   <p className="text-xs text-gray-600 mt-1">
                     Save this search — new listings and price drops, no spam.

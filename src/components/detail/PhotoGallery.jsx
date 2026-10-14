@@ -224,7 +224,7 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
         className="absolute inset-0 pointer-events-none bg-gradient-to-br from-neutral-800 via-neutral-900 to-neutral-800"
         aria-hidden="true"
       >
-        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_center,_#CFB36E_0%,_transparent_65%)]" />
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_center,_var(--brand-accent)_0%,_transparent_65%)]" />
       </div>
 
       {total <= 0 ? (
@@ -278,7 +278,7 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
                 type="button"
                 onClick={onArrowClick(-1)}
                 onMouseDown={onArrowMouseDown}
-                className={`absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-30 rounded-full bg-white/95 hover:bg-white shadow-lg flex items-center justify-center text-gray-900 leading-none active:scale-95 transition-transform pointer-events-auto touch-manipulation select-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E] ${
+                className={`absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-30 rounded-full bg-white/95 hover:bg-white shadow-lg flex items-center justify-center text-gray-900 leading-none active:scale-95 transition-transform pointer-events-auto touch-manipulation select-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)] ${
                   large ? "w-12 h-12 text-2xl" : "w-10 h-10 text-xl"
                 }`}
                 aria-label="Previous photo"
@@ -289,7 +289,7 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
                 type="button"
                 onClick={onArrowClick(1)}
                 onMouseDown={onArrowMouseDown}
-                className={`absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-30 rounded-full bg-white/95 hover:bg-white shadow-lg flex items-center justify-center text-gray-900 leading-none active:scale-95 transition-transform pointer-events-auto touch-manipulation select-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E] ${
+                className={`absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-30 rounded-full bg-white/95 hover:bg-white shadow-lg flex items-center justify-center text-gray-900 leading-none active:scale-95 transition-transform pointer-events-auto touch-manipulation select-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)] ${
                   large ? "w-12 h-12 text-2xl" : "w-10 h-10 text-xl"
                 }`}
                 aria-label="Next photo"
@@ -311,7 +311,7 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
     <>
       <div ref={rootRef} className="space-y-3" tabIndex={-1}>
         <div
-          className={`relative overflow-hidden focus-within:ring-2 focus-within:ring-[#CFB36E] ${
+          className={`relative overflow-hidden focus-within:ring-2 focus-within:ring-[color:var(--brand-accent)] ${
             compact ? "" : "rounded-xl"
           }`}
         >
@@ -326,7 +326,7 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
               setFullscreen(true);
             }}
             onMouseDown={(e) => e.stopPropagation()}
-            className="absolute top-3 right-3 z-40 min-h-[44px] px-3.5 py-2 rounded-full bg-black/70 hover:bg-black text-white text-xs font-semibold active:scale-95 transition-transform pointer-events-auto touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
+            className="absolute top-3 right-3 z-40 min-h-[44px] px-3.5 py-2 rounded-full bg-black/70 hover:bg-black text-white text-xs font-semibold active:scale-95 transition-transform pointer-events-auto touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]"
             aria-label="Open full-screen photo gallery"
           >
             Expand
@@ -346,7 +346,7 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
                 onClick={() => setActive(i)}
                 className={`relative w-20 h-14 sm:w-24 sm:h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-opacity touch-manipulation pointer-events-auto ${
                   i === active
-                    ? "border-[#CFB36E] opacity-100"
+                    ? "border-[color:var(--brand-accent)] opacity-100"
                     : "border-transparent opacity-70 hover:opacity-100"
                 }`}
                 aria-label={`Photo ${i + 1}`}
@@ -397,7 +397,7 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
             <button
               type="button"
               onClick={() => setFullscreen(false)}
-              className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full hover:bg-white/10 flex items-center justify-center text-2xl touch-manipulation active:scale-95 transition-transform focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
+              className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full hover:bg-white/10 flex items-center justify-center text-2xl touch-manipulation active:scale-95 transition-transform focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]"
               aria-label="Close gallery"
             >
               ×
@@ -414,7 +414,7 @@ export default function PhotoGallery({ listingId, photos, photosCount, alt, comp
                   type="button"
                   onClick={() => setActive(i)}
                   className={`w-14 h-10 rounded overflow-hidden flex-shrink-0 border-2 touch-manipulation pointer-events-auto ${
-                    i === active ? "border-[#CFB36E]" : "border-transparent opacity-60"
+                    i === active ? "border-[color:var(--brand-accent)]" : "border-transparent opacity-60"
                   }`}
                 >
                   <img
