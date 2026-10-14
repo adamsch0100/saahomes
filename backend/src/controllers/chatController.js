@@ -328,6 +328,7 @@ export const handleChatMessage = async (req, res) => {
   }
 
   const brand = await nadiaBrand(req);
+  noteNadiaIntent(req, messages).catch(() => {});
 
   if (!OPENCODE_API_KEY) {
     logger.warn('OpenCode API key not configured — chat AI unavailable');
@@ -523,3 +524,49 @@ export const createSearchFromChat = async (req, res) => {
     });
   }
 };
+
+const OFFER_RE = /\b(make|making|put in|write|submit)\b.{0,20}\boffer\b|\boffer on\b|\bhow much (should|do) (i|we) offer\b/i;
+const AFFORD_RE = /\bafford\b|\bpre-?approv|\bdown payment\b|\bmonthly payment\b|\bhow much (house|home) can\b|\bqualify for\b/i;
+
+/** An offer or affordability question is a moment the agent should hear about. */
+async function noteNadiaIntent(req, messages) {
+  const asked = String([...(messages || [])].reverse().find((m) => m?.role === 'user')?.content || '').slice(0, 300);
+  const topic = OFFER_RE.test(asked) ? 'offer' : AFFORD_RE.test(asked) ? 'afford' : null;
+  if (!topic) return;
+  const { recordEvent, VISITOR_COOKIE } = await import('../services/events.js');
+  const user = await sessionUser(req).catch(() => null);
+  await recordEvent({
+    type: 'nadia_question',
+    userId: user?.id || null,
+    visitorId: req.cookies?.[VISITOR_COOKIE],
+    meta: { topic, asked: asked.slice(0, 200) },
+    dedupeMinutes: 60,
+  });
+}
+
+/**
+ * One call to the chat model Nadia uses (same endpoint, key and model), for
+ * other features such as reply drafts. Returns the reply text, or throws
+ * { code: 'not_configured' } when no key is set.
+ */
+export async function chatCompletion(apiMessages, { maxTokens = 1500, temperature = 0.7, fetchImpl = (...a) => globalThis.fetch(...a) } = {}) {
+  const key = process.env.OPENCODE_GO_API_KEY;
+  if (!key) throw Object.assign(new Error('Chat AI not configured'), { code: 'not_configured' });
+  const response = await fetchImpl(OPENCODE_API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+    body: JSON.stringify({
+      model: OPENCODE_MODEL,
+      messages: apiMessages,
+      max_tokens: maxTokens,
+      temperature,
+    }),
+  });
+  if (!response.ok) throw Object.assign(new Error(`AI service error ${response.status}`), { code: 'upstream' });
+  const data = await response.json();
+  const reply = data.choices?.[0]?.message?.content;
+  const reasoning = data.choices?.[0]?.message?.reasoning_content;
+  const text = (reply && reply.trim()) ? reply.trim() : (reasoning ? reasoning.trim() : '');
+  if (!text) throw Object.assign(new Error('AI service returned nothing'), { code: 'empty' });
+  return text;
+}

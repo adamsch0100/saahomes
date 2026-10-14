@@ -363,7 +363,8 @@ export const sendTestEmail = async (req, res) => {
 
 // ── agent profile ──
 
-const NOTIFY_KEYS = ['new_lead_email', 'hot_lead_push', 'morning_brief'];
+const NOTIFY_KEYS = ['new_lead_email', 'hot_lead_push', 'morning_brief', 'hot_lead_text'];
+const NOTIFY_OFF_BY_DEFAULT = ['hot_lead_text'];
 const PROFILE_COLS = 'id, name, email, phone, bio, photo_url, brand_name, brand_phone, title, license_number, notify_prefs';
 
 function profileOut(row) {
@@ -371,7 +372,7 @@ function profileOut(row) {
   return {
     id: row.id, name: row.name, email: row.email, phone: row.phone, bio: row.bio, photo_url: row.photo_url,
     brand_name: row.brand_name, brand_phone: row.brand_phone, title: row.title, license_number: row.license_number,
-    notify: Object.fromEntries(NOTIFY_KEYS.map((k) => [k, n[k] !== false])),
+    notify: Object.fromEntries(NOTIFY_KEYS.map((k) => [k, NOTIFY_OFF_BY_DEFAULT.includes(k) ? n[k] === true : n[k] !== false])),
   };
 }
 

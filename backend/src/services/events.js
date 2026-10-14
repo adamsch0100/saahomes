@@ -42,6 +42,7 @@ export const EVENT_TYPES = new Set([
   'alert_open',
   'alert_click',
   'consent_changed',
+  'nadia_question',
 ]);
 
 /** Types a browser may send on its own (everything else is recorded server-side). */
@@ -135,6 +136,10 @@ export async function recordEvent({
         occurredAt,
       ]
     );
+    // Hot-lead alerts to the agent (and tour texts) look at every lead event.
+    if (rows[0]?.user_id) {
+      import('./hotLeads.js').then(({ onLeadEvent }) => onLeadEvent(rows[0], pool)).catch(() => {});
+    }
     return rows[0] || null;
   } catch (err) {
     console.error('recordEvent failed:', type, err.message);

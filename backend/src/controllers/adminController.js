@@ -385,10 +385,11 @@ export const searchStats = async (req, res) => {
  */
 export const getCockpitLeads = async (req, res) => {
   try {
-    const { q = '', stage = '', due = '', limit = 100 } = req.query;
+    const { q = '', stage = '', due = '', limit = 100, smart = '' } = req.query;
     const limitNum = Math.min(parseInt(limit, 10) || 100, 200);
     const like = `%${String(q).trim()}%`;
     const pool = getPool();
+    const { smartFilterSql, noteSearchSql } = await import('../services/crmService.js');
 
     // Base user list — client pool only (exclude agent/admin seats), with assignment
     const users = await pool.query(
@@ -406,7 +407,8 @@ export const getCockpitLeads = async (req, res) => {
        WHERE u.tenant_id = $3
          AND u.status IS DISTINCT FROM 'unsubscribed'
          AND COALESCE(u.role, 'client') = 'client'
-         AND ($1 = '%%' OR u.email ILIKE $1 OR u.name ILIKE $1 OR u.phone ILIKE $1)
+         AND ($1 = '%%' OR u.email ILIKE $1 OR u.name ILIKE $1 OR u.phone ILIKE $1 OR ${noteSearchSql('$1', 'u.')})
+         AND ${smartFilterSql(String(smart), 'u.')}
        ORDER BY COALESCE(u.lead_score, 0) DESC, u.last_active_at DESC NULLS LAST, u.created_at DESC
        LIMIT $2`,
       [like, limitNum, tenantIdOf(req)]
@@ -521,6 +523,7 @@ export const patchCockpitLead = async (req, res) => {
 
     if (body.mark_touched === true) {
       updates.push('last_touched_at = NOW()');
+      updates.push('first_contacted_at = COALESCE(first_contacted_at, NOW())');
       // Default next touch from stage cadence if not explicitly set
       if (body.next_touch_at === undefined) {
         const { deriveNextTouchAt } = await import('../services/agentCockpit.js');

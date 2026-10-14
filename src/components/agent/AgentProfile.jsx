@@ -31,6 +31,7 @@ const FIELDS = [
 const NOTIFY = [
   { key: 'new_lead_email', label: 'Email me when I get a new lead' },
   { key: 'hot_lead_push', label: 'Push alert when a lead turns hot' },
+  { key: 'hot_lead_text', label: 'Text me when a lead turns hot' },
   { key: 'morning_brief', label: 'Morning brief: who to call today' },
 ];
 
@@ -49,6 +50,7 @@ function formFrom(p) {
     notify: {
       new_lead_email: !!p?.notify?.new_lead_email,
       hot_lead_push: !!p?.notify?.hot_lead_push,
+      hot_lead_text: !!p?.notify?.hot_lead_text,
       morning_brief: !!p?.notify?.morning_brief,
     },
   };
