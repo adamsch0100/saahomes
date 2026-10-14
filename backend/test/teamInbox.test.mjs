@@ -71,7 +71,8 @@ const mkUser = async (tenantId, email, role, extra = {}) => (await q(
 )).rows[0];
 const threadFor = async (leadId) => (await q('SELECT * FROM inbox_threads WHERE lead_id = $1', [leadId])).rows[0];
 const waitFor = async (fn) => {
-  for (let i = 0; i < 40; i += 1) {
+  // Intake finishes after the response goes out; give a busy test run time.
+  for (let i = 0; i < 200; i += 1) {
     const v = await fn();
     if (v) return v;
     await new Promise((r) => setTimeout(r, 25));
@@ -208,10 +209,10 @@ test('forms and Nadia handoffs land in the inbox, and become leads', { skip }, a
   assert.ok(items.some((i) => i.kind === 'form' && /Old Town/.test(i.body)));
 
   await call('POST', '/contact', { body: { name: 'Nate Nadia', email: 'natenadia@gmail.com', interest: 'Chat Conversation Lead', message: 'Lead from Nadia chat: wants a 3 bed under 600k' } });
-  const nate = await waitFor(async () => (await q("SELECT * FROM users WHERE tenant_id = $1 AND email = 'natenadia@gmail.com'", [peak.id])).rows[0]);
-  const nt = await waitFor(() => threadFor(nate.id));
-  assert.equal(nt.last_kind, 'nadia');
-  assert.ok(nate.tags.includes('Nadia chat'), 'tagged with where they came from');
+  const nate = await waitFor(async () => (await q("SELECT * FROM users WHERE tenant_id = $1 AND email = 'natenadia@gmail.com' AND 'Nadia chat' = ANY(tags)", [peak.id])).rows[0]);
+  assert.ok(nate, 'tagged with where they came from');
+  const nt = await waitFor(async () => { const th = await threadFor(nate.id); return th?.last_kind === 'nadia' ? th : null; });
+  assert.ok(nt, 'the Nadia handoff lands in the inbox');
 });
 
 test('visibility: agents see their own and the pond; owners see all; other brokerages see nothing', { skip }, async () => {
