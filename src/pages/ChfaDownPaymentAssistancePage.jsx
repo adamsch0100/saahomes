@@ -5,7 +5,7 @@ import ChfaDpaLeadForm from "../components/ChfaDpaLeadForm";
 import ChfaResourceHub from "../components/ChfaResourceHub";
 import QualifyCta from "../components/QualifyCta";
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 
 const chfaPrograms = [
   {
@@ -451,7 +451,7 @@ export default function ChfaDownPaymentAssistancePage() {
         <div className="relative z-10 max-w-5xl mx-auto text-center text-white px-4 sm:px-6 w-full">
           <span
             className="inline-block mb-4 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold tracking-wide uppercase"
-            style={{ backgroundColor: GOLD, color: "#1a1a1a" }}
+            style={{ backgroundColor: GOLD, color: "var(--brand-on-accent-ink)" }}
           >
             Colorado Housing &amp; Finance Authority
           </span>
@@ -570,7 +570,7 @@ export default function ChfaDownPaymentAssistancePage() {
               <div key={option.title} className="relative bg-white rounded-xl p-8 shadow-lg border border-gray-100 overflow-hidden">
                 <span
                   className="absolute top-0 right-0 px-4 py-1.5 text-xs font-bold uppercase tracking-wide rounded-bl-lg"
-                  style={{ backgroundColor: GOLD, color: "#1a1a1a" }}
+                  style={{ backgroundColor: GOLD, color: "var(--brand-on-accent-ink)" }}
                 >
                   {option.highlight}
                 </span>
@@ -616,7 +616,7 @@ export default function ChfaDownPaymentAssistancePage() {
                       <span className="font-semibold text-gray-900 block">{program.name}</span>
                       <span
                         className="inline-block mt-1 px-2 py-0.5 rounded text-xs font-bold"
-                        style={{ backgroundColor: `${GOLD}33`, color: "#1a1a1a" }}
+                        style={{ backgroundColor: "rgb(var(--brand-accent-rgb) / 0.2)", color: "#1a1a1a" }}
                       >
                         {program.highlight}
                       </span>
@@ -735,7 +735,7 @@ export default function ChfaDownPaymentAssistancePage() {
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center px-6 py-3 rounded-lg font-semibold transition-colors"
-              style={{ backgroundColor: GOLD, color: "#1a1a1a" }}
+              style={{ backgroundColor: GOLD, color: "var(--brand-on-accent-ink)" }}
             >
               Official CHFA requirements →
             </a>
@@ -1047,7 +1047,7 @@ export default function ChfaDownPaymentAssistancePage() {
             {steps.map((step) => (
               <div key={step.step} className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                 <span
-                  className="inline-flex items-center justify-center w-10 h-10 rounded-full text-black font-bold mb-4"
+                  className="inline-flex items-center justify-center w-10 h-10 rounded-full text-[color:var(--brand-on-accent)] font-bold mb-4"
                   style={{ backgroundColor: GOLD }}
                 >
                   {step.step}

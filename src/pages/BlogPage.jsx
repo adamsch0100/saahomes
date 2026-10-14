@@ -77,7 +77,7 @@ export default function BlogPage() {
       {chfaPosts.length > 0 && (
         <section className="py-12 px-6 bg-black text-white">
           <div className="max-w-7xl mx-auto">
-            <p className="text-sm font-semibold uppercase tracking-widest mb-2 text-center" style={{ color: "#CFB36E" }}>
+            <p className="text-sm font-semibold uppercase tracking-widest mb-2 text-center" style={{ color: "var(--brand-accent)" }}>
               Featured CHFA Guides
             </p>
             <h2 className="text-2xl sm:text-3xl font-bold font-serif text-center mb-8">
@@ -88,7 +88,7 @@ export default function BlogPage() {
                 <Link
                   key={post.slug}
                   to={`/blog/${post.slug}/`}
-                  className="block p-5 rounded-xl border border-gray-700 bg-gray-900/50 hover:border-[#CFB36E] transition-colors"
+                  className="block p-5 rounded-xl border border-gray-700 bg-gray-900/50 hover:border-[color:var(--brand-accent)] transition-colors"
                 >
                   <span className="text-xs text-gray-400">{post.readTime}</span>
                   <h3 className="font-bold font-serif mt-2 text-sm leading-snug hover:underline">{post.title}</h3>
@@ -99,7 +99,7 @@ export default function BlogPage() {
               <Link
                 to="/chfa-down-payment-assistance/"
                 className="inline-flex items-center px-6 py-3 rounded-lg font-semibold"
-                style={{ backgroundColor: "#CFB36E", color: "#1a1a1a" }}
+                style={{ backgroundColor: "var(--brand-accent)", color: "var(--brand-on-accent-ink)" }}
               >
                 View all CHFA programs →
               </Link>

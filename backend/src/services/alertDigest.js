@@ -25,6 +25,11 @@ import { pickVariant, openToken, withOpenPixel } from './subjectVariants.js';
 import { marketPack } from '../config/marketPack.js';
 import { buildSavedSearchWhere } from './listingFilters.js';
 import { loadBrandForClientUser, voiceCopy } from './tenantBrand.js';
+import {
+  sendEmail as sendBrandedEmail, emailBrandForUser, nurtureBrand, siteHost, textOnAccent,
+} from './emailer.js';
+import { tenantById } from './tenantContext.js';
+import { brandFor, isHomeTenant } from './brand.js';
 
 // The shared pool (TLS to the Railway proxy; plaintext runs got reset
 // mid-run). Lazy so importing this module never needs DATABASE_URL.
@@ -37,6 +42,7 @@ const SITE = marketPack.market.siteUrl || 'https://saahomes.com';
 const FROM = process.env.OUTREACH_SMTP_FROM || process.env.OUTREACH_SMTP_USER || 'alerts@saahomes.com';
 const AGENT_FROM = marketPack.agentVoice?.defaultFromName || `Adam Schwartz, ${marketPack.market.brand}`;
 const AGENT_PHONE = marketPack.market.phone;
+const GOLD = '#CFB36E';
 
 const fmtPrice = (n) => (n == null ? '—' : `$${Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`);
 const fmtSqft = (n) => (n == null ? '' : `${Number(n).toLocaleString()} sqft`);
@@ -180,11 +186,11 @@ function descriptionSnippet(l) {
 
 // ---------------------------------------------------------------- photos
 /** Proxy-only photo URL — never raw media.mlsgrid signed links. */
-function photoUrl(listingId, idx) {
-  return `${SITE}/api/photo/${listingId}/${idx}`;
+function photoUrl(listingId, idx, site = SITE) {
+  return `${site}/api/photo/${listingId}/${idx}`;
 }
 
-const PLACEHOLDER_PHOTO = `${SITE}/images/buyers-hero.jpg`;
+const placeholderPhoto = (site = SITE) => `${site}/images/buyers-hero.jpg`;
 const MAX_CARD_PHOTOS = 4; // 1 hero + up to 3 thumbs
 
 /**
@@ -297,7 +303,7 @@ function auditEmailLinks(html, { site = SITE } = {}) {
 }
 
 // ---------------------------------------------------------------- cards
-function cardHtml(l, filters, isNew, isDrop) {
+function cardHtml(l, filters, isNew, isDrop, { site = SITE, accent = GOLD } = {}) {
   // Serve photos through the site's durable proxy (/api/photo) instead of the
   // raw MLS signed URL — signed URLs expire ~60 min after sync, so direct
   // links die before the recipient opens the email (photos didn't load).
@@ -305,8 +311,8 @@ function cardHtml(l, filters, isNew, isDrop) {
   // R2 copies when present.
   const photos = Array.isArray(l.photos) ? l.photos : [];
   const photoCount = Math.min(photos.length, MAX_CARD_PHOTOS);
-  const hero = photoCount > 0 ? photoUrl(l.id, 0) : PLACEHOLDER_PHOTO;
-  const url = `${SITE}/homes-for-sale/${l.slug}/`;
+  const hero = photoCount > 0 ? photoUrl(l.id, 0, site) : placeholderPhoto(site);
+  const url = `${site}/homes-for-sale/${l.slug}/`;
   const scheduleUrl = `${url}?schedule=1`;
   const nadiaUrl = `${url}?nadia=1`;
   const score = matchScore(l, filters);
@@ -317,7 +323,7 @@ function cardHtml(l, filters, isNew, isDrop) {
   const badge = isDrop ? 'PRICE DROP' : isNew ? 'NEW' : '';
   const badgeStyle = isDrop
     ? 'background:#065f46;color:#fff'
-    : 'background:#CFB36E;color:#1a1a1a';
+    : `background:${accent};color:${textOnAccent(accent)}`;
 
   // Thumbnail strip: idx 1..3. Progressive enhancement — swipeable on Apple Mail;
   // static row elsewhere. All thumbs link to the listing.
@@ -327,7 +333,7 @@ function cardHtml(l, filters, isNew, isDrop) {
     for (let idx = 1; idx < photoCount; idx += 1) {
       thumbs.push(
         `<a href="${url}" style="display:inline-block;margin-right:6px;text-decoration:none;vertical-align:top">` +
-        `<img src="${photoUrl(l.id, idx)}" alt="${alt}" width="96" height="72" ` +
+        `<img src="${photoUrl(l.id, idx, site)}" alt="${alt}" width="96" height="72" ` +
         `style="width:96px;height:72px;object-fit:cover;border-radius:6px;display:block;border:1px solid #e5e7eb"/>` +
         `</a>`
       );
@@ -361,7 +367,7 @@ function cardHtml(l, filters, isNew, isDrop) {
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px">
           <tr>
             <td style="padding:0 4px 8px 0;width:50%" valign="top">
-              <a href="${scheduleUrl}" style="display:block;background:#CFB36E;color:#1a1a1a;font-size:13px;font-weight:800;padding:11px 12px;border-radius:8px;text-decoration:none;text-align:center">Schedule a tour</a>
+              <a href="${scheduleUrl}" style="display:block;background:${accent};color:${textOnAccent(accent)};font-size:13px;font-weight:800;padding:11px 12px;border-radius:8px;text-decoration:none;text-align:center">Schedule a tour</a>
             </td>
             <td style="padding:0 0 8px 4px;width:50%" valign="top">
               <a href="${nadiaUrl}" style="display:block;background:#111;color:#fff;font-size:13px;font-weight:600;padding:11px 12px;border-radius:8px;text-decoration:none;text-align:center">Ask Nadia</a>
@@ -453,11 +459,18 @@ function digestHtml({
 
   // Assigned-agent brand path (P-2)
   const brandUpper = String(brand.brandName || market.brand || 'SAA Homes').toUpperCase();
-  const phone = brand.phone || AGENT_PHONE;
-  const tel = brand.tel || market.tel;
-  const headerSubline = brand.headerSubline || footer.headerSubline;
-  const brandLine = brand.brandLine || footer.brandLine;
+  // Another brokerage (brand.tenantBrand): its own values only, never SAA's.
+  const own = !!brand.tenantBrand;
+  const phone = own ? brand.phone : brand.phone || AGENT_PHONE;
+  const tel = own ? brand.tel : brand.tel || market.tel;
+  const headerSubline = own ? brand.headerSubline : brand.headerSubline || footer.headerSubline;
+  const brandLine = own ? brand.brandLine : brand.brandLine || footer.brandLine;
   const signOffName = brand.agentName || brand.brandName || market.brand;
+  const accent = brand.accent || GOLD;
+  const onAccent = textOnAccent(accent);
+  const siteLabel = own ? siteHost(brand.siteUrl) : 'saahomes.com';
+  const signOffParts = [signOffName, brand.brandName, phone, siteLabel].filter(Boolean);
+  const signOff = own ? [...new Set(signOffParts)] : signOffParts;
   const voice = voiceCopy('digest', brand.voiceStyle, {
     firstName,
     city: cityLabel || brand.marketName || market.name,
@@ -473,8 +486,8 @@ function digestHtml({
   <html><body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#111">
     <tr><td align="center" style="padding:26px 16px">
-      <div style="color:#CFB36E;font-size:22px;font-weight:800;letter-spacing:0.5px">${escapeHtml(brandUpper)}</div>
-      <div style="color:#9ca3af;font-size:13px;margin-top:4px">${escapeHtml(headerSubline)}</div>
+      <div style="color:${accent};font-size:22px;font-weight:800;letter-spacing:0.5px">${escapeHtml(brandUpper)}</div>
+      ${headerSubline ? `<div style="color:#9ca3af;font-size:13px;margin-top:4px">${escapeHtml(headerSubline)}</div>` : ''}
     </td></tr>
   </table>
   <div style="max-width:580px;margin:0 auto;padding:26px 16px">
@@ -486,40 +499,40 @@ function digestHtml({
       ${summaryLines.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}
     </ul>
     ${viewedCallout ? `
-    <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 18px;background:#fffbeb;border-left:3px solid #CFB36E;padding:12px 14px;border-radius:0 8px 8px 0">
+    <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 18px;background:#fffbeb;border-left:3px solid ${accent};padding:12px 14px;border-radius:0 8px 8px 0">
       ${viewedCallout}
     </p>` : ''}
     ${standouts.length ? `
-    <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 20px;background:#f9fafb;border-left:3px solid #CFB36E;padding:12px 14px;border-radius:0 8px 8px 0">
+    <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 20px;background:#f9fafb;border-left:3px solid ${accent};padding:12px 14px;border-radius:0 8px 8px 0">
       <strong style="color:#111">A few worth a look:</strong><br/>
       ${standouts.map((s) => escapeHtml(s)).join('<br/><br/>')}
     </p>` : ''}
     ${cards}
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:22px;background:#111;border-radius:12px">
       <tr><td style="padding:20px" align="center">
-        <a href="${searchUrl || manageUrl}" style="display:inline-block;background:#CFB36E;color:#1a1a1a;font-size:14px;font-weight:800;padding:12px 22px;border-radius:8px;text-decoration:none;margin-bottom:12px">
+        <a href="${searchUrl || manageUrl}" style="display:inline-block;background:${accent};color:${onAccent};font-size:14px;font-weight:800;padding:12px 22px;border-radius:8px;text-decoration:none;margin-bottom:12px">
           View all matches for this search
         </a>
         <p style="color:#fff;font-size:14px;line-height:1.7;margin:0">
-          Any of these catch your eye? <strong style="color:#CFB36E">Just reply to this email</strong> and we'll set up a showing — or call/text <a href="${tel}" style="color:#CFB36E;text-decoration:none">${escapeHtml(phone)}</a>.
+          Any of these catch your eye? <strong style="color:${accent}">Just reply to this email</strong> and we'll set up a showing${phone ? ` — or call/text <a href="${tel}" style="color:${accent};text-decoration:none">${escapeHtml(phone)}</a>` : ''}.
         </p>
         <p style="color:#d1d5db;font-size:13px;line-height:1.65;margin:14px 0 0;font-style:italic">
           ${escapeHtml(psLine)}
         </p>
-        <p style="color:#9ca3af;font-size:13px;margin:10px 0 0">— ${escapeHtml(signOffName)} · ${escapeHtml(brand.brandName)} · ${escapeHtml(phone)} · saahomes.com</p>
+        <p style="color:#9ca3af;font-size:13px;margin:10px 0 0">— ${signOff.map(escapeHtml).join(' · ')}</p>
       </td></tr>
     </table>
     <div style="color:#9ca3af;font-size:11.5px;margin-top:18px;line-height:1.65">
       <p style="margin:0 0 8px">${escapeHtml(sources.iresIdx)}</p>
-      <p style="margin:0 0 8px">${escapeHtml(footer.depthLine)}</p>
+      ${own ? '' : `<p style="margin:0 0 8px">${escapeHtml(footer.depthLine)}</p>
       <p style="margin:0 0 8px">
         ${escapeHtml(dpa.chfaLine)}
         <a href="${dpa.hubUrl}" style="color:#6b7280">${escapeHtml(dpa.hubPath)}</a>
-      </p>
+      </p>`}
       <p style="margin:0 0 8px">${escapeHtml(fairHousing)} · ${escapeHtml(honestLabels.notAppraisal)}</p>
       <p style="margin:0">
         <a href="${manageUrl}" style="color:#4b5563">Manage your alerts</a> · <a href="${unsubscribeUrl}" style="color:#4b5563">Unsubscribe</a>
-        <br/>${escapeHtml(brandLine)} · ${escapeHtml(phone)}
+        ${[brandLine, phone].filter(Boolean).length ? `<br/>${[brandLine, phone].filter(Boolean).map(escapeHtml).join(' · ')}` : ''}
       </p>
     </div>
   </div>
@@ -547,7 +560,12 @@ function buildViewedCallout(recentViews, freshListings) {
   return `<strong style="color:#111">You viewed ${escapeHtml(label)}</strong> — ${n}. Here are the ones that match your saved search.`;
 }
 
-async function sendEmail(to, subject, html, fromName = AGENT_FROM) {
+async function sendEmail(to, subject, html, fromName = AGENT_FROM, opts = {}) {
+  // Another brokerage's mail goes through the shared sender (its own domain
+  // when verified, its brand's Reply-To). SAA's path below is unchanged.
+  if (opts?.tenantId != null && !isHomeTenant({ id: Number(opts.tenantId) })) {
+    return sendBrandedEmail(to, subject, html, fromName, opts);
+  }
   const host = process.env.OUTREACH_SMTP_HOST;
   const user = process.env.OUTREACH_SMTP_USER;
   const password = process.env.OUTREACH_SMTP_PASSWORD;
@@ -657,10 +675,20 @@ async function offMarketAmong(listingIds) {
 
 // ---------------------------------------------------------------- main
 async function runSearch(search, { dryRun, onlyEmail, send = sendEmail } = {}) {
-  const userRes = await pool.query('SELECT email, name FROM users WHERE id = $1', [search.user_id]);
+  const userRes = await pool.query('SELECT email, name, tenant_id, assigned_agent_id FROM users WHERE id = $1', [search.user_id]);
   const userRow = userRes.rows[0];
   if (!userRow?.email) return { sent: false, events: 0 };
   if (onlyEmail && !userRow.email.toLowerCase().includes(onlyEmail.toLowerCase())) return { sent: false, events: 0 };
+
+  // Another brokerage's buyer gets that brokerage's brand and links; SAA's
+  // buyers keep the SAA copy below (tenantBrand stays null for them).
+  let tenantBrand = null;
+  if (!isHomeTenant({ id: Number(userRow.tenant_id ?? 1) })) {
+    const { tenant, agent, brand: b } = await emailBrandForUser(userRow, { pool });
+    tenantBrand = nurtureBrand(tenant, b, agent);
+  }
+  const site = tenantBrand ? tenantBrand.siteUrl : SITE;
+  const accent = tenantBrand ? tenantBrand.accent : GOLD;
 
   const { whereSql, params } = buildWhere(search.filters);
   const matches = await pool.query(
@@ -719,7 +747,7 @@ async function runSearch(search, { dryRun, onlyEmail, send = sendEmail } = {}) {
   const joinedTotal = diff.newMatches.length;
   const eventTotal = newTotal + dropTotal + joinedTotal + statusChanges;
 
-  const cards = carded.map((e) => cardHtml(e.listing, search.filters, e.type === 'new', e.type === 'price_drop')).join('');
+  const cards = carded.map((e) => cardHtml(e.listing, search.filters, e.type === 'new', e.type === 'price_drop', { site, accent })).join('');
 
   const zipLabel = search.filters.postal_code || search.filters.postalCode || search.filters.zip || '';
   const locBits = [
@@ -772,17 +800,20 @@ async function runSearch(search, { dryRun, onlyEmail, send = sendEmail } = {}) {
       return `ZIP ${zparts.join(', ')}`;
     }
     if (c === '__all__') return 'Colorado';
+    if (tenantBrand) return tenantBrand.marketName || 'your area';
     return marketPack.market.name;
   })();
   const newCount = newTotal;
   const dropCount = dropTotal;
   // Assigned-agent brand (P-2). Unassigned → null → SAA copy unchanged.
-  let brand = null;
-  try {
-    brand = await loadBrandForClientUser(pool, search.user_id);
-  } catch (e) {
-    console.error('tenant brand lookup failed:', e.message);
-    brand = null;
+  let brand = tenantBrand;
+  if (!brand) {
+    try {
+      brand = await loadBrandForClientUser(pool, search.user_id);
+    } catch (e) {
+      console.error('tenant brand lookup failed:', e.message);
+      brand = null;
+    }
   }
 
   // Deterministic A/B subject (same user always gets same variant for digest)
@@ -791,6 +822,7 @@ async function runSearch(search, { dryRun, onlyEmail, send = sendEmail } = {}) {
     cityLabel,
     newCount,
     dropCount,
+    ...(tenantBrand ? { marketName: tenantBrand.marketName || 'your area', brandName: tenantBrand.brandName } : {}),
   });
   // Optional brand prefix only on variant C ("market update" slot) when assigned
   if (brand?.agentFirstName && subjectVariant === 'C') {
@@ -823,10 +855,10 @@ async function runSearch(search, { dryRun, onlyEmail, send = sendEmail } = {}) {
   }
   const viewedCallout = buildViewedCallout(recentViews, fresh.map((e) => e.listing));
 
-  const manageUrl = `${SITE}/my-saved-searches/?token=${search.manage_token}`;
-  const unsubscribeUrl = `${SITE}/api/alerts/unsubscribe?token=${search.manage_token}`;
+  const manageUrl = `${site}/my-saved-searches/?token=${search.manage_token}`;
+  const unsubscribeUrl = `${site}/api/alerts/unsubscribe?token=${search.manage_token}`;
   const searchPath = filtersToSearchPath(search.filters || {});
-  const searchUrl = `${SITE}${searchPath}`;
+  const searchUrl = `${site}${searchPath}`;
 
   // Quiet search: last digest was 7+ days ago — warmer "it's been a minute" open.
   // First-ever email (null last_email_at) keeps the standard open line.
@@ -854,7 +886,7 @@ async function runSearch(search, { dryRun, onlyEmail, send = sendEmail } = {}) {
 
   // Build HTML for dry-run link audit and for the real send path.
   const rawHtml = digestHtml(digestOpts);
-  const audit = auditEmailLinks(rawHtml);
+  const audit = auditEmailLinks(rawHtml, { site });
   if (!audit.ok) {
     console.warn(`link audit FAIL for search ${search.id}: ${audit.errors.slice(0, 8).join('; ')}`);
   } else {
@@ -885,10 +917,14 @@ async function runSearch(search, { dryRun, onlyEmail, send = sendEmail } = {}) {
   }
 
   const tok = openToken();
-  const html = withOpenPixel(rawHtml, SITE, tok);
+  const html = withOpenPixel(rawHtml, site, tok);
 
   const fromName = brand?.fromName || AGENT_FROM;
-  await send(userRow.email, subject, html, fromName);
+  if (tenantBrand) {
+    await send(userRow.email, subject, html, fromName, { tenantId: tenantBrand.tenantId, replyTo: tenantBrand.replyTo });
+  } else {
+    await send(userRow.email, subject, html, fromName);
+  }
   await pool.query(
     `INSERT INTO email_log (user_id, search_id, type, to_email, subject, events, subject_variant, open_token)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
@@ -945,7 +981,7 @@ async function runSearch(search, { dryRun, onlyEmail, send = sendEmail } = {}) {
  *  Respects due_at when set (cadence-queued rows wait until due). */
 async function drainOutbox() {
   const pending = await pool.query(
-    `SELECT id, to_email, subject, html FROM email_outbox
+    `SELECT id, to_email, subject, html, tenant_id FROM email_outbox
      WHERE sent_at IS NULL
        AND (due_at IS NULL OR due_at <= NOW())
      ORDER BY id
@@ -955,7 +991,16 @@ async function drainOutbox() {
   let sent = 0;
   for (const row of pending.rows) {
     try {
-      await sendEmail(row.to_email, row.subject, row.html);
+      if (row.tenant_id != null && !isHomeTenant({ id: Number(row.tenant_id) })) {
+        // Queued for another brokerage: its name, never SAA's.
+        const brand = brandFor(await tenantById(row.tenant_id));
+        await sendEmail(row.to_email, row.subject, row.html, brand.from_name || brand.name, {
+          tenantId: Number(row.tenant_id),
+          replyTo: brand.reply_to || brand.email || null,
+        });
+      } else {
+        await sendEmail(row.to_email, row.subject, row.html);
+      }
       await pool.query('UPDATE email_outbox SET sent_at = NOW() WHERE id = $1', [row.id]);
       sent += 1;
     } catch (e) {

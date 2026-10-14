@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useBrokerageBrand } from "../context/TenantContext.jsx";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -39,6 +40,7 @@ export default function ScheduleShowingModal({
   /** Skip the trigger button — modal-only host for deep-links. */
   hideTrigger = false,
 }) {
+  const bb = useBrokerageBrand();
   const [open, setOpen] = useState(!!autoOpen);
 
   useEffect(() => {
@@ -124,7 +126,7 @@ export default function ScheduleShowingModal({
           >
             {state === "done" ? (
               <div className="text-center py-4">
-                <div className="mx-auto w-14 h-14 rounded-full bg-[#CFB36E]/25 flex items-center justify-center text-2xl mb-3" aria-hidden="true">✓</div>
+                <div className="mx-auto w-14 h-14 rounded-full bg-[rgb(var(--brand-accent-rgb)/0.25)] flex items-center justify-center text-2xl mb-3" aria-hidden="true">✓</div>
                 <h3 id="schedule-showing-title" className="text-xl font-bold text-gray-900">Showing requested!</h3>
                 <p className="text-gray-600 mt-2 text-sm leading-relaxed">
                   We&apos;ll confirm your showing of{" "}
@@ -134,14 +136,26 @@ export default function ScheduleShowingModal({
                   </span>
                   .
                 </p>
+                {bb ? (
+                  <p className="text-gray-500 mt-3 text-sm">
+                    An agent will reach out shortly to confirm.
+                    {bb.phone ? (
+                      <>
+                        {" "}Need it sooner? Call{" "}
+                        <a href={bb.tel} className="underline font-semibold">{bb.phone}</a>.
+                      </>
+                    ) : null}
+                  </p>
+                ) : (
                 <p className="text-gray-500 mt-3 text-sm">
                   Adam or Mandi will reach out shortly to confirm. Need it sooner? Call{" "}
                   <a href="tel:+19709991407" className="underline font-semibold">(970) 999-1407</a>.
                 </p>
+                )}
                 <button
                   type="button"
                   onClick={() => { setOpen(false); setState("idle"); setName(""); setEmail(""); setPhone(""); setDate(""); setTime(""); setMessage(""); }}
-                  className="mt-5 w-full py-3 bg-[#CFB36E] text-black font-semibold rounded-lg hover:bg-[#bd9f5a]"
+                  className="mt-5 w-full py-3 bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] font-semibold rounded-lg hover:bg-[color:var(--brand-accent-strong)]"
                 >
                   Done
                 </button>

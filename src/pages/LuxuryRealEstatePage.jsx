@@ -154,11 +154,11 @@ function LuxuryLeadForm() {
   if (submitted) {
     return (
       <div className="text-center py-10">
-        <p className="text-[#CFB36E] text-xs uppercase tracking-[0.28em] mb-4">Received</p>
+        <p className="text-[color:var(--brand-accent)] text-xs uppercase tracking-[0.28em] mb-4">Received</p>
         <h3 className="text-2xl font-serif text-white mb-3">We have your note.</h3>
         <p className="text-gray-400 max-w-md mx-auto leading-relaxed">
           Adam or Mandi will reply privately. If the matter is time-sensitive, call{" "}
-          <a href="tel:9709991407" className="text-[#CFB36E] hover:text-white">
+          <a href="tel:9709991407" className="text-[color:var(--brand-accent)] hover:text-white">
             (970) 999-1407
           </a>
           .
@@ -168,7 +168,7 @@ function LuxuryLeadForm() {
   }
 
   const fieldClass =
-    "w-full bg-transparent border-b border-white/20 py-3 text-white placeholder-gray-500 focus:border-[#CFB36E] outline-none transition-colors";
+    "w-full bg-transparent border-b border-white/20 py-3 text-white placeholder-gray-500 focus:border-[color:var(--brand-accent)] outline-none transition-colors";
   const intentBtn = (value, label) => {
     const active = form.preference === value;
     return (
@@ -177,8 +177,8 @@ function LuxuryLeadForm() {
         onClick={() => setPreference(value)}
         className={`flex-1 px-3 py-3 text-[11px] tracking-[0.14em] uppercase border transition-colors ${
           active
-            ? "border-[#CFB36E] bg-[#CFB36E] text-black"
-            : "border-white/20 text-gray-300 hover:border-[#CFB36E] hover:text-[#CFB36E]"
+            ? "border-[color:var(--brand-accent)] bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)]"
+            : "border-white/20 text-gray-300 hover:border-[color:var(--brand-accent)] hover:text-[color:var(--brand-accent)]"
         }`}
       >
         {label}
@@ -236,7 +236,7 @@ function LuxuryLeadForm() {
         <select
           value={form.preference}
           onChange={(e) => setPreference(e.target.value)}
-          className="w-full bg-[#141414] border border-white/15 py-3 px-3 text-white focus:border-[#CFB36E] outline-none"
+          className="w-full bg-[#141414] border border-white/15 py-3 px-3 text-white focus:border-[color:var(--brand-accent)] outline-none"
         >
           <option value="">Select one</option>
           <option value="buying-luxury">Acquiring a $1M+ home</option>
@@ -263,14 +263,14 @@ function LuxuryLeadForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full py-3.5 border border-[#CFB36E] text-[#CFB36E] text-sm tracking-[0.22em] uppercase hover:bg-[#CFB36E] hover:text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full py-3.5 border border-[color:var(--brand-accent)] text-[color:var(--brand-accent)] text-sm tracking-[0.22em] uppercase hover:bg-[color:var(--brand-accent)] hover:text-[color:var(--brand-on-accent)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isSubmitting ? "Sending…" : "Enquire in confidence"}
       </button>
       <button
         type="button"
         onClick={() => openNadiaChat(nadiaMessageForPreference(form.preference))}
-        className="w-full py-3 text-sm text-gray-400 hover:text-[#CFB36E] transition-colors"
+        className="w-full py-3 text-sm text-gray-400 hover:text-[color:var(--brand-accent)] transition-colors"
       >
         Have a question about a $1M+ property? Ask Nadia.
       </button>
@@ -448,7 +448,7 @@ export default function LuxuryRealEstatePage() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/20" />
         <div className="relative z-10 max-w-6xl mx-auto px-5 sm:px-8 pb-16 sm:pb-20 w-full">
-          <p className="text-[#CFB36E] tracking-[0.28em] text-[11px] sm:text-xs uppercase mb-5">
+          <p className="text-[color:var(--brand-accent)] tracking-[0.28em] text-[11px] sm:text-xs uppercase mb-5">
             Schwartz and Associates · {MILLION_PLUS_LABEL}
           </p>
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-serif font-bold text-white mb-5 leading-[1.05]">
@@ -460,20 +460,20 @@ export default function LuxuryRealEstatePage() {
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <a
               href="#private-consultation"
-              className="inline-flex items-center justify-center px-8 py-3.5 border border-[#CFB36E] text-[#CFB36E] text-sm tracking-[0.18em] uppercase hover:bg-[#CFB36E] hover:text-black transition-colors"
+              className="inline-flex items-center justify-center px-8 py-3.5 border border-[color:var(--brand-accent)] text-[color:var(--brand-accent)] text-sm tracking-[0.18em] uppercase hover:bg-[color:var(--brand-accent)] hover:text-[color:var(--brand-on-accent)] transition-colors"
             >
               Private Consultation
             </a>
             <a
               href="tel:9709991407"
-              className="inline-flex items-center justify-center px-8 py-3.5 text-white text-sm tracking-[0.12em] hover:text-[#CFB36E] transition-colors"
+              className="inline-flex items-center justify-center px-8 py-3.5 text-white text-sm tracking-[0.12em] hover:text-[color:var(--brand-accent)] transition-colors"
             >
               (970) 999-1407
             </a>
             <button
               type="button"
               onClick={() => openNadiaChat(NADIA_LUXURY_MESSAGE)}
-              className="inline-flex items-center justify-center px-8 py-3.5 text-white/80 text-sm tracking-[0.12em] hover:text-[#CFB36E] transition-colors"
+              className="inline-flex items-center justify-center px-8 py-3.5 text-white/80 text-sm tracking-[0.12em] hover:text-[color:var(--brand-accent)] transition-colors"
             >
               Ask Nadia
             </button>
@@ -484,13 +484,13 @@ export default function LuxuryRealEstatePage() {
       {/* Opening narrative */}
       <section className="py-20 sm:py-28 px-5 sm:px-8 bg-[#FAF7F2]">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="text-[#CFB36E] tracking-[0.24em] text-[11px] uppercase mb-5">
+          <p className="text-[color:var(--brand-accent)] tracking-[0.24em] text-[11px] uppercase mb-5">
             For this buyer. For this seller.
           </p>
           <h2 className="text-3xl sm:text-4xl font-serif font-bold text-[#1a1a1a] mb-8 leading-tight">
             Northern Colorado&apos;s most significant homes.
           </h2>
-          <div className="w-12 h-px bg-[#CFB36E] mx-auto mb-8" />
+          <div className="w-12 h-px bg-[color:var(--brand-accent)] mx-auto mb-8" />
           <p className="text-lg text-[#3a3a3a] leading-relaxed mb-5">
             For buyers and sellers of Northern Colorado&apos;s most significant homes — the{" "}
             {MILLION_PLUS_LABEL} tier — representation is a matter of discretion, market command,
@@ -508,18 +508,18 @@ export default function LuxuryRealEstatePage() {
             <Link to="/for-buyers/" className="underline underline-offset-4 hover:text-[#1a1a1a]">
               Buyer representation
             </Link>
-            <span className="mx-2 text-[#CFB36E]">·</span>
+            <span className="mx-2 text-[color:var(--brand-accent)]">·</span>
             <Link to="/for-sellers/" className="underline underline-offset-4 hover:text-[#1a1a1a]">
               Seller representation
             </Link>
-            <span className="mx-2 text-[#CFB36E]">·</span>
+            <span className="mx-2 text-[color:var(--brand-accent)]">·</span>
             <Link
               to="/blog/luxury-home-buying-guide-northern-colorado/"
               className="underline underline-offset-4 hover:text-[#1a1a1a]"
             >
               Luxury buying guide
             </Link>
-            <span className="mx-2 text-[#CFB36E]">·</span>
+            <span className="mx-2 text-[color:var(--brand-accent)]">·</span>
             <Link
               to="/contact/?interest=luxury"
               className="underline underline-offset-4 hover:text-[#1a1a1a]"
@@ -533,7 +533,7 @@ export default function LuxuryRealEstatePage() {
       {/* $1M+ by city */}
       <section className="py-20 sm:py-24 px-5 sm:px-8 bg-white" id="market-at-a-glance">
         <div className="max-w-6xl mx-auto">
-          <p className="text-[#CFB36E] tracking-[0.24em] text-[11px] uppercase mb-4 text-center">
+          <p className="text-[color:var(--brand-accent)] tracking-[0.24em] text-[11px] uppercase mb-4 text-center">
             The {MILLION_PLUS_DISPLAY} tier
           </p>
           <h2 className="text-3xl sm:text-4xl font-serif font-bold mb-4 text-center text-[#1a1a1a]">
@@ -557,7 +557,7 @@ export default function LuxuryRealEstatePage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/15" />
                   <div className="absolute inset-0 p-6 sm:p-8 flex flex-col justify-end">
-                    <p className="text-[#CFB36E] text-[11px] tracking-[0.22em] uppercase mb-2">
+                    <p className="text-[color:var(--brand-accent)] text-[11px] tracking-[0.22em] uppercase mb-2">
                       {MILLION_PLUS_DISPLAY} · {context.county}
                     </p>
                     <h3 className="text-3xl font-serif font-bold text-white mb-3">{context.city}</h3>
@@ -570,13 +570,13 @@ export default function LuxuryRealEstatePage() {
                     <div className="flex flex-wrap gap-x-5 gap-y-2 mb-3">
                       <Link
                         to={`/northern-colorado-areas/${slug}/#luxury-homes`}
-                        className="text-sm text-white underline underline-offset-4 hover:text-[#CFB36E]"
+                        className="text-sm text-white underline underline-offset-4 hover:text-[color:var(--brand-accent)]"
                       >
                         City guide
                       </Link>
                       <Link
                         to={millionPlusSearchHref(context.city)}
-                        className="text-sm text-[#CFB36E] hover:text-white"
+                        className="text-sm text-[color:var(--brand-accent)] hover:text-white"
                       >
                         Live {MILLION_PLUS_DISPLAY} listings
                       </Link>
@@ -590,7 +590,7 @@ export default function LuxuryRealEstatePage() {
                             <Link
                               key={listingKey(row)}
                               to={`/homes-for-sale/${row.slug}/`}
-                              className="text-xs text-white/80 hover:text-[#CFB36E] underline underline-offset-4"
+                              className="text-xs text-white/80 hover:text-[color:var(--brand-accent)] underline underline-offset-4"
                             >
                               {addr}
                               {row.list_price ? ` · ${formatPrice(row.list_price)}` : ""}
@@ -630,7 +630,7 @@ export default function LuxuryRealEstatePage() {
       {selectedResidences.length > 0 && (
         <section className="py-20 sm:py-24 px-5 sm:px-8 bg-[#111] text-white" id="selected-residences">
           <div className="max-w-6xl mx-auto">
-            <p className="text-[#CFB36E] tracking-[0.24em] text-[11px] uppercase mb-4 text-center">
+            <p className="text-[color:var(--brand-accent)] tracking-[0.24em] text-[11px] uppercase mb-4 text-center">
               Current $1M+ inventory
             </p>
             <h2 className="text-3xl sm:text-4xl font-serif font-bold mb-4 text-center">
@@ -663,7 +663,7 @@ export default function LuxuryRealEstatePage() {
                       </span>
                     </div>
                     <div className="p-5">
-                      <p className="text-[#CFB36E] text-[11px] tracking-[0.18em] uppercase mb-1">
+                      <p className="text-[color:var(--brand-accent)] text-[11px] tracking-[0.18em] uppercase mb-1">
                         {listing.city}
                       </p>
                       <p className="text-white font-serif text-lg truncate">{addr || listing.city}</p>
@@ -676,7 +676,7 @@ export default function LuxuryRealEstatePage() {
             <div className="text-center mt-10">
               <Link
                 to={millionPlusSearchHref("")}
-                className="inline-flex items-center justify-center px-8 py-3 border border-[#CFB36E] text-[#CFB36E] text-sm tracking-[0.18em] uppercase hover:bg-[#CFB36E] hover:text-black transition-colors"
+                className="inline-flex items-center justify-center px-8 py-3 border border-[color:var(--brand-accent)] text-[color:var(--brand-accent)] text-sm tracking-[0.18em] uppercase hover:bg-[color:var(--brand-accent)] hover:text-[color:var(--brand-on-accent)] transition-colors"
               >
                 All {MILLION_PLUS_DISPLAY} listings
               </Link>
@@ -688,7 +688,7 @@ export default function LuxuryRealEstatePage() {
       {/* Neighborhoods */}
       <section className="py-20 sm:py-24 px-5 sm:px-8 bg-[#FAF7F2]" id="luxury-neighborhoods">
         <div className="max-w-6xl mx-auto">
-          <p className="text-[#CFB36E] tracking-[0.24em] text-[11px] uppercase mb-4 text-center">
+          <p className="text-[color:var(--brand-accent)] tracking-[0.24em] text-[11px] uppercase mb-4 text-center">
             Addresses
           </p>
           <h2 className="text-3xl sm:text-4xl font-serif font-bold mb-4 text-center text-[#1a1a1a]">
@@ -709,7 +709,7 @@ export default function LuxuryRealEstatePage() {
                     <h3 className="text-2xl font-serif font-bold text-[#1a1a1a]">{ctx.city}</h3>
                     <Link
                       to={`/northern-colorado-areas/${slug}/#luxury-homes`}
-                      className="text-sm text-[#1a1a1a] underline underline-offset-4 hover:text-[#CFB36E]"
+                      className="text-sm text-[#1a1a1a] underline underline-offset-4 hover:text-[color:var(--brand-accent)]"
                     >
                       {ctx.city} luxury context
                     </Link>
@@ -719,7 +719,7 @@ export default function LuxuryRealEstatePage() {
                       <Link
                         key={n.slug}
                         to={`/northern-colorado-areas/${slug}/${n.slug}/`}
-                        className="block p-5 bg-white border border-black/5 hover:border-[#CFB36E] transition-colors"
+                        className="block p-5 bg-white border border-black/5 hover:border-[color:var(--brand-accent)] transition-colors"
                       >
                         <span className="font-serif text-lg text-[#1a1a1a]">{n.name}</span>
                         <span className="block text-sm text-[#6a6a6a] mt-1">{n.priceHint}</span>
@@ -737,13 +737,13 @@ export default function LuxuryRealEstatePage() {
       <section className="py-20 sm:py-24 px-5 sm:px-8 bg-white" id="private-consultation">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-14 lg:gap-20 items-start">
           <div>
-            <p className="text-[#CFB36E] tracking-[0.24em] text-[11px] uppercase mb-4">
+            <p className="text-[color:var(--brand-accent)] tracking-[0.24em] text-[11px] uppercase mb-4">
               Private client
             </p>
             <h2 className="text-3xl sm:text-4xl font-serif font-bold mb-6 text-[#1a1a1a] leading-tight">
               How we work at this level
             </h2>
-            <div className="w-12 h-px bg-[#CFB36E] mb-10" />
+            <div className="w-12 h-px bg-[color:var(--brand-accent)] mb-10" />
             <ul className="space-y-8">
               {LUXURY_CLIENT_PROMISES.map((item) => (
                 <li key={item.title}>
@@ -753,8 +753,8 @@ export default function LuxuryRealEstatePage() {
               ))}
             </ul>
           </div>
-          <div className="bg-[#111] p-8 sm:p-10 border-t border-[#CFB36E]">
-            <p className="text-[#CFB36E] text-[11px] uppercase tracking-[0.24em] mb-3">
+          <div className="bg-[#111] p-8 sm:p-10 border-t border-[color:var(--brand-accent)]">
+            <p className="text-[color:var(--brand-accent)] text-[11px] uppercase tracking-[0.24em] mb-3">
               Private consultation
             </p>
             <h3 className="text-2xl font-serif text-white mb-3">Enquire in confidence</h3>
@@ -799,7 +799,7 @@ export default function LuxuryRealEstatePage() {
               <Link
                 key={item.to}
                 to={item.to}
-                className="p-5 bg-white border border-black/5 hover:border-[#CFB36E] transition-colors"
+                className="p-5 bg-white border border-black/5 hover:border-[color:var(--brand-accent)] transition-colors"
               >
                 <h3 className="font-serif text-lg text-[#1a1a1a] mb-1">{item.title}</h3>
                 <p className="text-sm text-[#6a6a6a]">{item.desc}</p>
@@ -812,7 +812,7 @@ export default function LuxuryRealEstatePage() {
       {/* FAQ */}
       <section className="py-20 sm:py-24 px-5 sm:px-8 bg-white" id="luxury-faq">
         <div className="max-w-3xl mx-auto">
-          <p className="text-[#CFB36E] tracking-[0.24em] text-[11px] uppercase mb-4 text-center">
+          <p className="text-[color:var(--brand-accent)] tracking-[0.24em] text-[11px] uppercase mb-4 text-center">
             Questions
           </p>
           <h2 className="text-3xl sm:text-4xl font-serif font-bold mb-4 text-center text-[#1a1a1a]">
@@ -827,7 +827,7 @@ export default function LuxuryRealEstatePage() {
                 <summary className="flex items-center justify-between px-5 sm:px-6 py-4 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
                   <h3 className="text-base sm:text-lg font-serif pr-4 text-[#1a1a1a]">{faq.q}</h3>
                   <span
-                    className="flex-shrink-0 text-[#CFB36E] text-lg leading-none transition-transform duration-200 group-open:rotate-45"
+                    className="flex-shrink-0 text-[color:var(--brand-accent)] text-lg leading-none transition-transform duration-200 group-open:rotate-45"
                     aria-hidden="true"
                   >
                     +
@@ -845,7 +845,7 @@ export default function LuxuryRealEstatePage() {
       {/* Close */}
       <section className="py-20 px-5 sm:px-8 bg-[#111] text-white text-center">
         <div className="max-w-2xl mx-auto">
-          <p className="text-[#CFB36E] tracking-[0.24em] text-[11px] uppercase mb-4">
+          <p className="text-[color:var(--brand-accent)] tracking-[0.24em] text-[11px] uppercase mb-4">
             Direct access
           </p>
           <h2 className="text-3xl sm:text-5xl font-serif font-bold mb-6 leading-tight">
@@ -857,27 +857,27 @@ export default function LuxuryRealEstatePage() {
           </p>
           <a
             href="tel:9709991407"
-            className="inline-block text-2xl sm:text-3xl font-serif text-[#CFB36E] hover:text-white transition-colors mb-8"
+            className="inline-block text-2xl sm:text-3xl font-serif text-[color:var(--brand-accent)] hover:text-white transition-colors mb-8"
           >
             (970) 999-1407
           </a>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a
               href="#private-consultation"
-              className="inline-block px-8 py-3.5 border border-[#CFB36E] text-[#CFB36E] text-sm tracking-[0.18em] uppercase hover:bg-[#CFB36E] hover:text-black transition-colors"
+              className="inline-block px-8 py-3.5 border border-[color:var(--brand-accent)] text-[color:var(--brand-accent)] text-sm tracking-[0.18em] uppercase hover:bg-[color:var(--brand-accent)] hover:text-[color:var(--brand-on-accent)] transition-colors"
             >
               Private Consultation
             </a>
             <button
               type="button"
               onClick={() => openNadiaChat(NADIA_LUXURY_MESSAGE)}
-              className="inline-block px-8 py-3.5 text-white text-sm tracking-[0.12em] hover:text-[#CFB36E] transition-colors"
+              className="inline-block px-8 py-3.5 text-white text-sm tracking-[0.12em] hover:text-[color:var(--brand-accent)] transition-colors"
             >
               Ask Nadia
             </button>
             <Link
               to="/contact/?interest=luxury"
-              className="inline-block px-8 py-3.5 text-white text-sm tracking-[0.12em] hover:text-[#CFB36E] transition-colors"
+              className="inline-block px-8 py-3.5 text-white text-sm tracking-[0.12em] hover:text-[color:var(--brand-accent)] transition-colors"
             >
               Write to us
             </Link>

@@ -10,7 +10,7 @@ import {
 } from "../data/localEvents.js";
 import { areaSeoPages } from "../data/areaSeo.js";
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 const MONTH_NAMES = getMonthNames();
 
 // All 27 Northern Colorado entity slugs (same order as areaSeo.js)
@@ -143,7 +143,7 @@ export default function EventsCalendarPage() {
             <Link
               to="/properties/"
               className="inline-flex items-center justify-center px-8 py-3.5 font-semibold rounded-lg hover:brightness-110 transition-all shadow-lg touch-manipulation"
-              style={{ backgroundColor: GOLD, color: "#1a1a1a" }}
+              style={{ backgroundColor: GOLD, color: "var(--brand-on-accent-ink)" }}
             >
               Search Homes for Sale
             </Link>

@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 
 const CITY_COPY = {
   "fort-collins": {
@@ -71,7 +71,7 @@ export default function CityVeteransSection({ citySlug }) {
           </Link>
           <a
             href="tel:9709991407"
-            className="inline-flex items-center justify-center px-6 py-3 border-2 font-semibold rounded-lg transition-colors hover:bg-[#CFB36E]/10"
+            className="inline-flex items-center justify-center px-6 py-3 border-2 font-semibold rounded-lg transition-colors hover:bg-[rgb(var(--brand-accent-rgb)/0.1)]"
             style={{ borderColor: GOLD, color: "#1a1a1a" }}
           >
             (970) 999-1407

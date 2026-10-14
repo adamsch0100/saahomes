@@ -1,4 +1,5 @@
 import { trackLeadConversion } from './analytics.js';
+import { isCustomDomain } from './tenant.js';
 
 const API_BASE_URL = (() => {
   if (import.meta.env.VITE_API_URL) {
@@ -47,16 +48,32 @@ export const apiRequest = async (endpoint, options = {}) => {
     }
 
     if (!response.ok) {
+      // The brokerage requires two-step sign-in and this account hasn't set it
+      // up: the token only works on /api/account/*. Pages show the setup screen.
+      if (response.status === 403 && data?.code === '2fa_setup_required') {
+        const setupError = new Error('Your brokerage requires two-step sign-in. Set it up to continue.');
+        setupError.code = '2fa_setup_required';
+        setupError.status = 403;
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('saa-2fa-setup-required'));
+        }
+        throw setupError;
+      }
       if (data?.errors?.length) {
         throw new Error(data.errors.map((e) => e.msg).join(', '));
       }
-      throw new Error(data?.error || `Request failed (${response.status}). Please call (970) 999-1407.`);
+      // SAA's phone only on SAA's own site; another brokerage's visitors get a plain retry.
+      throw new Error(data?.error || (isCustomDomain()
+        ? `Request failed (${response.status}). Please try again.`
+        : `Request failed (${response.status}). Please call (970) 999-1407.`));
     }
 
     return data;
   } catch (error) {
     if (error.name === 'TypeError') {
-      throw new Error('Unable to reach our servers. Please call (970) 999-1407 or email info@saahomes.com.');
+      throw new Error(isCustomDomain()
+        ? 'Unable to reach our servers. Please check your connection and try again.'
+        : 'Unable to reach our servers. Please call (970) 999-1407 or email info@saahomes.com.');
     }
     console.error('API request failed:', error);
     throw error;
@@ -455,7 +472,11 @@ export const setupTwoStep = async (token) => {
   });
 };
 
-/** POST /api/account/2fa/enable — { recovery_codes } (shown once) */
+/**
+ * POST /api/account/2fa/enable — { recovery_codes } (shown once). When the
+ * brokerage required two-step sign-in, also { token }: a full token that
+ * replaces the setup-only one.
+ */
 export const enableTwoStep = async (token, code) => {
   return apiRequest('/api/account/2fa/enable', {
     method: 'POST',
@@ -514,4 +535,129 @@ export const patchTenant = async (token, id, body) => {
     },
     body: JSON.stringify(body),
   });
+};
+
+// ── Brokerage settings (brokerage owner or platform owner) ────────────────
+
+/** GET /api/admin/settings — brand, lead routing, security, FUB, email, site */
+export const getBrokerageSettings = async (token) => {
+  return apiRequest('/api/admin/settings', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+/** PATCH /api/admin/settings — { brand?, lead_visibility?, require_2fa?, fub_api_key? } */
+export const patchBrokerageSettings = async (token, body) => {
+  return apiRequest('/api/admin/settings', {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+};
+
+/** POST /api/admin/settings/asset/:kind (logo | icon) — { data_url } → { url } */
+export const uploadBrokerageAsset = async (token, kind, dataUrl) => {
+  return apiRequest(`/api/admin/settings/asset/${encodeURIComponent(kind)}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ data_url: dataUrl }),
+  });
+};
+
+/** POST /api/admin/settings/email-domain — { domain } → { data: email } */
+export const createBrokerageEmailDomain = async (token, domain) => {
+  return apiRequest('/api/admin/settings/email-domain', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ domain }),
+  });
+};
+
+/** POST /api/admin/settings/email-domain/verify → { data: email } */
+export const verifyBrokerageEmailDomain = async (token) => {
+  return apiRequest('/api/admin/settings/email-domain/verify', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+/** POST /api/admin/settings/domain — { domain } → { data: site } */
+export const setBrokerageSiteDomain = async (token, domain) => {
+  return apiRequest('/api/admin/settings/domain', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ domain }),
+  });
+};
+
+/** POST /api/admin/settings/domain/check — refresh DNS/certificate status → { data: site } */
+export const checkBrokerageSiteDomain = async (token) => {
+  return apiRequest('/api/admin/settings/domain/check', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+/** POST /api/admin/settings/test-email → { to } */
+export const sendBrokerageTestEmail = async (token) => {
+  return apiRequest('/api/admin/settings/test-email', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+// ── Agent profile ─────────────────────────────────────────────────────────
+
+/** GET /api/agent/profile */
+export const getAgentProfile = async (token) => {
+  return apiRequest('/api/agent/profile', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+/** PATCH /api/agent/profile — { name, phone, bio, brand_name, brand_phone, title, license_number, notify } */
+export const patchAgentProfile = async (token, body) => {
+  return apiRequest('/api/agent/profile', {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+};
+
+/** POST /api/agent/profile/photo — { data_url } → { url } */
+export const uploadAgentPhoto = async (token, dataUrl) => {
+  return apiRequest('/api/agent/profile/photo', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ data_url: dataUrl }),
+  });
+};
+
+// ── Public: this brokerage's agents ───────────────────────────────────────
+
+/** GET /api/tenant/agents — active agents of the current brokerage (empty on SAA) */
+export const getTenantAgents = async () => {
+  return apiRequest('/api/tenant/agents');
 };

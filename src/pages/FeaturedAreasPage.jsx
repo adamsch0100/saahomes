@@ -194,7 +194,7 @@ export default function FeaturedAreasPage() {
       {/* Luxury Real Estate CTA */}
       <section className="py-16 px-6 bg-gray-950 text-white">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-[#CFB36E] tracking-[0.2em] text-sm font-semibold uppercase mb-4">Premium Properties</p>
+          <p className="text-[color:var(--brand-accent)] tracking-[0.2em] text-sm font-semibold uppercase mb-4">Premium Properties</p>
           <h2 className="text-4xl font-bold mb-4">Luxury Real Estate in Northern Colorado</h2>
           <p className="text-gray-400 mb-8 max-w-2xl mx-auto">
             Discover exceptional high-end properties across Fort Collins, Loveland, Windsor, and Greeley. 
@@ -202,7 +202,7 @@ export default function FeaturedAreasPage() {
           </p>
           <Link 
             to="/luxury-real-estate/"
-            className="inline-block px-8 py-3 border-2 border-[#CFB36E] text-[#CFB36E] font-bold hover:bg-[#CFB36E] hover:text-black transition-colors"
+            className="inline-block px-8 py-3 border-2 border-[color:var(--brand-accent)] text-[color:var(--brand-accent)] font-bold hover:bg-[color:var(--brand-accent)] hover:text-[color:var(--brand-on-accent)] transition-colors"
           >
             EXPLORE LUXURY HOMES
           </Link>

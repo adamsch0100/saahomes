@@ -34,7 +34,7 @@ export default function NotFoundPage() {
         className="relative pt-28 sm:pt-32 pb-16 sm:pb-20 px-4 sm:px-6 bg-black"
       >
         <div className="max-w-4xl mx-auto text-center text-white">
-          <p className="text-sm uppercase tracking-[0.2em] text-[#CFB36E] mb-4">
+          <p className="text-sm uppercase tracking-[0.2em] text-[color:var(--brand-accent)] mb-4">
             404 — Page Not Found
           </p>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-serif mb-4">
@@ -48,7 +48,7 @@ export default function NotFoundPage() {
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               to="/"
-              className="inline-flex items-center justify-center px-6 py-3 bg-[#CFB36E] text-black font-semibold rounded-lg hover:bg-[#b89a5a] transition-colors"
+              className="inline-flex items-center justify-center px-6 py-3 bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] font-semibold rounded-lg hover:bg-[#b89a5a] transition-colors"
             >
               Back to Homepage
             </Link>
@@ -71,7 +71,7 @@ export default function NotFoundPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <Link
               to="/for-buyers/"
-              className="block p-5 border border-gray-200 rounded-lg hover:border-[#CFB36E] hover:shadow-md transition"
+              className="block p-5 border border-gray-200 rounded-lg hover:border-[color:var(--brand-accent)] hover:shadow-md transition"
             >
               <h3 className="font-semibold text-gray-900 mb-1">For Buyers</h3>
               <p className="text-sm text-gray-600">
@@ -82,7 +82,7 @@ export default function NotFoundPage() {
 
             <Link
               to="/for-sellers/"
-              className="block p-5 border border-gray-200 rounded-lg hover:border-[#CFB36E] hover:shadow-md transition"
+              className="block p-5 border border-gray-200 rounded-lg hover:border-[color:var(--brand-accent)] hover:shadow-md transition"
             >
               <h3 className="font-semibold text-gray-900 mb-1">For Sellers</h3>
               <p className="text-sm text-gray-600">
@@ -93,7 +93,7 @@ export default function NotFoundPage() {
 
             <Link
               to="/northern-colorado-areas/"
-              className="block p-5 border border-gray-200 rounded-lg hover:border-[#CFB36E] hover:shadow-md transition"
+              className="block p-5 border border-gray-200 rounded-lg hover:border-[color:var(--brand-accent)] hover:shadow-md transition"
             >
               <h3 className="font-semibold text-gray-900 mb-1">
                 Northern Colorado Area Guides
@@ -106,7 +106,7 @@ export default function NotFoundPage() {
 
             <Link
               to="/northern-colorado-areas/fort-collins/"
-              className="block p-5 border border-gray-200 rounded-lg hover:border-[#CFB36E] hover:shadow-md transition"
+              className="block p-5 border border-gray-200 rounded-lg hover:border-[color:var(--brand-accent)] hover:shadow-md transition"
             >
               <h3 className="font-semibold text-gray-900 mb-1">
                 Fort Collins Real Estate
@@ -119,7 +119,7 @@ export default function NotFoundPage() {
 
             <Link
               to="/chfa-down-payment-assistance/"
-              className="block p-5 border border-gray-200 rounded-lg hover:border-[#CFB36E] hover:shadow-md transition"
+              className="block p-5 border border-gray-200 rounded-lg hover:border-[color:var(--brand-accent)] hover:shadow-md transition"
             >
               <h3 className="font-semibold text-gray-900 mb-1">
                 CHFA Down Payment Assistance
@@ -132,7 +132,7 @@ export default function NotFoundPage() {
 
             <Link
               to="/blog/"
-              className="block p-5 border border-gray-200 rounded-lg hover:border-[#CFB36E] hover:shadow-md transition"
+              className="block p-5 border border-gray-200 rounded-lg hover:border-[color:var(--brand-accent)] hover:shadow-md transition"
             >
               <h3 className="font-semibold text-gray-900 mb-1">
                 Northern Colorado Real Estate Blog
@@ -149,14 +149,14 @@ export default function NotFoundPage() {
               Need a person? Call{" "}
               <a
                 href="tel:9709991407"
-                className="font-semibold text-gray-900 hover:text-[#CFB36E]"
+                className="font-semibold text-gray-900 hover:text-[color:var(--brand-accent)]"
               >
                 (970) 999-1407
               </a>{" "}
               or{" "}
               <Link
                 to="/contact/"
-                className="font-semibold text-gray-900 underline hover:text-[#CFB36E]"
+                className="font-semibold text-gray-900 underline hover:text-[color:var(--brand-accent)]"
               >
                 send us a message
               </Link>

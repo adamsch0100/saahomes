@@ -56,7 +56,7 @@ export default function SellMyHomeEatonPage() {
       <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-24">
         <div className="absolute inset-0 bg-[url('/images/Eaton-CO-Area-Guide.jpg')] bg-cover bg-center opacity-10" />
         <div className="relative max-w-6xl mx-auto px-4 text-center">
-          <span className="inline-block bg-[#CFB36E]/20 text-[#CFB36E] text-sm uppercase tracking-widest px-4 py-2 rounded-full mb-6 font-semibold">
+          <span className="inline-block bg-[rgb(var(--brand-accent-rgb)/0.2)] text-[color:var(--brand-accent)] text-sm uppercase tracking-widest px-4 py-2 rounded-full mb-6 font-semibold">
             Eaton Seller Services
           </span>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-6 leading-tight">
@@ -70,13 +70,13 @@ export default function SellMyHomeEatonPage() {
           <div className="flex flex-wrap gap-4 justify-center">
             <Link
               to="/for-sellers/#home-valuation"
-              className="inline-block bg-[#CFB36E] hover:bg-[#c0a55e] text-black font-bold py-4 px-8 rounded transition-colors"
+              className="inline-block bg-[color:var(--brand-accent)] hover:bg-[color:var(--brand-accent-hover)] text-[color:var(--brand-on-accent)] font-bold py-4 px-8 rounded transition-colors"
             >
               Get a Free Home Valuation
             </Link>
             <a
               href="tel:(970) 999-1407"
-              className="inline-block border-2 border-[#CFB36E] text-[#CFB36E] hover:bg-[#CFB36E] hover:text-black font-bold py-4 px-8 rounded transition-colors"
+              className="inline-block border-2 border-[color:var(--brand-accent)] text-[color:var(--brand-accent)] hover:bg-[color:var(--brand-accent)] hover:text-[color:var(--brand-on-accent)] font-bold py-4 px-8 rounded transition-colors"
             >
               Call (970) 999-1407
             </a>
@@ -124,7 +124,7 @@ export default function SellMyHomeEatonPage() {
       </section>
 
       {/* Home valuation CTA band */}
-      <section className="py-16 px-6 bg-[#CFB36E]">
+      <section className="py-16 px-6 bg-[color:var(--brand-accent)]">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold font-serif text-gray-900 mb-4">
             Curious What Your Eaton Home Is Worth?
@@ -179,7 +179,7 @@ export default function SellMyHomeEatonPage() {
           <h2 className="text-3xl font-bold font-serif mb-4">Ready to Sell Your Eaton Home?</h2>
           <p className="text-gray-300 mb-8">
             Talk to Adam or Mandi Schwartz about listing your Eaton home. Call{" "}
-            <a href="tel:(970) 999-1407" className="text-white font-semibold underline underline-offset-2 hover:text-[#CFB36E]">
+            <a href="tel:(970) 999-1407" className="text-white font-semibold underline underline-offset-2 hover:text-[color:var(--brand-accent)]">
               (970) 999-1407
             </a>{" "}
             or start with a free home valuation.

@@ -16,7 +16,7 @@ import {
   CHFA_COUNTY_FAQS,
 } from "../data/chfaCountyLimits.js";
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 
 export default function ChfaCountyLimitsPage() {
   const faqSchema = {

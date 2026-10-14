@@ -11,7 +11,7 @@ import { getAreaSeo } from "../../data/areaSeo.js";
 import AreaEventsSection from "../../components/AreaEventsSection.jsx";
 import CityStatsBand from "../../components/CityStatsBand.jsx";
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 
 export default function WellingtonPage() {
   const area = getAreaSeo("wellington");

@@ -29,7 +29,7 @@ export function openToken() {
 
 /**
  * 1×1 open-tracking pixel HTML. Append before </body> of the email.
- * @param {string} site  e.g. https://saahomes.com
+ * @param {string} site  the brokerage's site, e.g. https://saahomes.com
  * @param {string} tok   open_token hex
  */
 export function openPixelHtml(site, tok) {
@@ -57,7 +57,9 @@ function plural(n, one, many) {
  */
 function digestPool(ctx) {
   const firstName = (ctx.firstName || '').trim() || null;
-  const city = (ctx.cityLabel || 'Northern Colorado').trim() || 'Northern Colorado';
+  // ctx.marketName: the brokerage's market (brand.market_name); SAA's default otherwise.
+  const fallbackCity = ctx.marketName || 'Northern Colorado';
+  const city = (ctx.cityLabel || fallbackCity).trim() || fallbackCity;
   const newCount = Number(ctx.newCount) || 0;
   const dropCount = Number(ctx.dropCount) || 0;
   const nameSuffix = firstName ? `, ${firstName}` : '';
@@ -141,7 +143,8 @@ function digestPool(ctx) {
  * never invented. midFmt / deltaFmt are pre-formatted currency strings.
  */
 function homeValuePool(ctx) {
-  const city = (ctx.cityLabel || ctx.city || 'Northern Colorado').trim() || 'Northern Colorado';
+  const fallbackCity = ctx.marketName || 'Northern Colorado';
+  const city = (ctx.cityLabel || ctx.city || fallbackCity).trim() || fallbackCity;
   const midFmt = ctx.midFmt || ctx.mid || '';
   const delta = ctx.delta;
   const deltaFmt = ctx.deltaFmt || '';
@@ -175,7 +178,7 @@ export function pickVariant(type, userId, ctx = {}) {
     pool = homeValuePool(ctx);
   } else {
     // Unknown type — single control so callers never crash
-    pool = [{ key: 'A', subject: ctx.subject || 'SAA Homes update' }];
+    pool = [{ key: 'A', subject: ctx.subject || `${ctx.brandName || 'SAA Homes'} update` }];
   }
 
   const seed = `${t === 'home_value_digest' ? 'home_value' : t}:${userId ?? ''}`;

@@ -96,7 +96,7 @@ export default function CompsWorkbench({ homeId, authQ = "" }) {
                 type="checkbox"
                 checked={c.included}
                 onChange={() => update({ comps: data.comps.map((x) => (x.id === c.id ? { ...x, included: !x.included } : x)) })}
-                className="mt-1 w-4 h-4 accent-[#CFB36E]"
+                className="mt-1 w-4 h-4 accent-[color:var(--brand-accent)]"
               />
               <span className="flex-1 min-w-0">
                 <span className="flex justify-between gap-2">
@@ -129,7 +129,7 @@ export default function CompsWorkbench({ homeId, authQ = "" }) {
                   name={`cond-${homeId}`}
                   checked={data.condition === o.value}
                   onChange={() => update({ condition: o.value })}
-                  className="accent-[#CFB36E]"
+                  className="accent-[color:var(--brand-accent)]"
                 />
                 {o.label}
                 {o.pct !== 0 && <span className="text-xs text-gray-400">{pct(o.pct)}</span>}
@@ -152,7 +152,7 @@ export default function CompsWorkbench({ homeId, authQ = "" }) {
                         : [...data.upgrades, o.value],
                     })
                   }
-                  className="accent-[#CFB36E]"
+                  className="accent-[color:var(--brand-accent)]"
                 />
                 {o.label}
                 <span className="text-xs text-gray-400">{pct(o.pct)}</span>

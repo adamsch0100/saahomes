@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
+import { useBrokerageBrand } from "../context/TenantContext.jsx";
 import {
   ensureSessionApi,
   loginApi,
@@ -16,7 +17,7 @@ import {
  * Design notes (Zillow × RealScout × SAA original):
  * - Zillow: gate hearts on account; single sticky CTA; email-first return visits
  * - RealScout Capture: intent + contact in one step; success shows what they unlocked
- * - SAA original: email+phone required (brand rule), gold #CFB36E, Fair Housing footer,
+ * - SAA original: email+phone required (brand rule), brand gold, Fair Housing footer,
  *   magic-link for passwordless return, cookie session (no new auth system)
  *
  * Props:
@@ -63,6 +64,7 @@ export default function AccountModal({
   successMeta = null,
 }) {
   const copy = PURPOSE_COPY[purpose] || PURPOSE_COPY["sign-in"];
+  const bb = useBrokerageBrand();
   const [mode, setMode] = useState("save"); // save | password | magic
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -253,18 +255,18 @@ export default function AccountModal({
         {screen === "success" ? (
           <div className="text-center py-2 pr-6">
             <div
-              className="mx-auto w-14 h-14 rounded-full bg-[#CFB36E]/25 flex items-center justify-center text-2xl mb-3"
+              className="mx-auto w-14 h-14 rounded-full bg-[rgb(var(--brand-accent-rgb)/0.25)] flex items-center justify-center text-2xl mb-3"
               aria-hidden="true"
             >
               ✓
             </div>
-            <p className="text-[11px] font-bold tracking-widest uppercase text-[#CFB36E]">SAA Homes</p>
+            <p className="text-[11px] font-bold tracking-widest uppercase text-[color:var(--brand-accent)]">{bb ? bb.name : "SAA Homes"}</p>
             <h2 id="account-modal-title" className="text-xl font-bold text-gray-900 mt-1">
               {copy.successTitle}
             </h2>
             <ul className="mt-4 text-left space-y-2.5 text-sm text-gray-700">
               <li className="flex gap-2">
-                <span className="text-[#CFB36E] font-bold shrink-0" aria-hidden="true">
+                <span className="text-[color:var(--brand-accent)] font-bold shrink-0" aria-hidden="true">
                   ✓
                 </span>
                 <span>
@@ -276,7 +278,7 @@ export default function AccountModal({
               </li>
               {(purpose === "save-search" || successMeta?.searchSummary) && (
                 <li className="flex gap-2">
-                  <span className="text-[#CFB36E] font-bold shrink-0" aria-hidden="true">
+                  <span className="text-[color:var(--brand-accent)] font-bold shrink-0" aria-hidden="true">
                     ✓
                   </span>
                   <span>
@@ -289,7 +291,7 @@ export default function AccountModal({
               )}
               {typeof searchesCount === "number" && searchesCount > 0 && (
                 <li className="flex gap-2">
-                  <span className="text-[#CFB36E] font-bold shrink-0" aria-hidden="true">
+                  <span className="text-[color:var(--brand-accent)] font-bold shrink-0" aria-hidden="true">
                     ✓
                   </span>
                   <span>
@@ -299,7 +301,7 @@ export default function AccountModal({
               )}
               {(intent === "selling" || intent === "both") && (
                 <li className="flex gap-2">
-                  <span className="text-[#CFB36E] font-bold shrink-0" aria-hidden="true">
+                  <span className="text-[color:var(--brand-accent)] font-bold shrink-0" aria-hidden="true">
                     ✓
                   </span>
                   <span>Home value tracking available on My Home</span>
@@ -307,7 +309,7 @@ export default function AccountModal({
               )}
               {wasGuest && (
                 <li className="flex gap-2">
-                  <span className="text-[#CFB36E] font-bold shrink-0" aria-hidden="true">
+                  <span className="text-[color:var(--brand-accent)] font-bold shrink-0" aria-hidden="true">
                     ✓
                   </span>
                   <span>Account created on this device — stay signed in to manage anytime</span>
@@ -333,18 +335,20 @@ export default function AccountModal({
             <button
               type="button"
               onClick={closeSuccess}
-              className="mt-3 w-full py-3 min-h-[48px] bg-[#CFB36E] text-black font-semibold rounded-lg hover:bg-[#bd9f5a]"
+              className="mt-3 w-full py-3 min-h-[48px] bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] font-semibold rounded-lg hover:bg-[color:var(--brand-accent-strong)]"
             >
               Done
             </button>
             <p className="text-[11px] text-gray-400 mt-3 leading-relaxed">
-              Schwartz and Associates · (970) 999-1407 · Unsubscribe anytime from any email.
+              {bb
+                ? [bb.legalName || bb.name, bb.phone, "Unsubscribe anytime from any email."].filter(Boolean).join(" · ")
+                : "Schwartz and Associates · (970) 999-1407 · Unsubscribe anytime from any email."}
             </p>
           </div>
         ) : (
           <>
             <div className="pr-10">
-              <p className="text-[11px] font-bold tracking-widest uppercase text-[#CFB36E]">SAA Homes</p>
+              <p className="text-[11px] font-bold tracking-widest uppercase text-[color:var(--brand-accent)]">{bb ? bb.name : "SAA Homes"}</p>
               <h2 id="account-modal-title" className="text-xl font-bold text-gray-900 mt-1">
                 {title || copy.title}
               </h2>
@@ -602,7 +606,7 @@ export default function AccountModal({
               )}
 
               <p className="text-[11px] text-gray-400 text-center leading-relaxed">
-                By continuing you agree we may contact you about Northern Colorado homes. Fair
+                By continuing you agree we may contact you about {bb ? (bb.market ? `${bb.market} ` : "") : "Northern Colorado "}homes. Fair
                 Housing Act compliant. No spam — unsubscribe in one click.
               </p>
             </form>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { rememberSavedSearch } from "../utils/listingHelpers.js";
 import InstantAlertsCard from "./InstantAlertsCard.jsx";
+import { useBrokerageBrand } from "../context/TenantContext.jsx";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -102,7 +103,7 @@ function filterSummary(filters = {}) {
   if (filters.maxHoa) parts.push(filters.maxHoa === "0" || filters.maxHoa === 0 ? "No HOA" : `HOA ≤ $${filters.maxHoa}`);
   if (filters.hasImages === "true" || filters.hasImages === true) parts.push("Has photos");
   if (filters.hasTour === "true" || filters.hasTour === true || filters.has3d === "true") parts.push("Virtual tour");
-  return parts.length ? parts.join(" · ") : "All Northern Colorado";
+  return parts.length ? parts.join(" · ") : "All homes";
 }
 
 /** Short default name for a search: "Fort Collins · 3+ beds · Under $600K". */
@@ -136,6 +137,7 @@ export default function SaveSearchModal({
   buttonStyle = {},
   hideIcon = false,
 }) {
+  const bb = useBrokerageBrand();
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -305,7 +307,7 @@ export default function SaveSearchModal({
           >
             {state === "done" ? (
               <div className="text-center py-4">
-                <div className="mx-auto w-14 h-14 rounded-full bg-[#CFB36E]/25 flex items-center justify-center text-2xl mb-3" aria-hidden="true">✓</div>
+                <div className="mx-auto w-14 h-14 rounded-full bg-[rgb(var(--brand-accent-rgb)/0.25)] flex items-center justify-center text-2xl mb-3" aria-hidden="true">✓</div>
                 <h3 id="save-search-title" className="text-xl font-bold text-gray-900">
                   {wasGuest ? "You're set up!" : "Search saved!"}
                 </h3>
@@ -344,12 +346,14 @@ export default function SaveSearchModal({
                   Manage my alerts
                 </a>
                 <p className="text-gray-500 mt-3 text-xs">
-                  Schwartz and Associates · (970) 999-1407 · Unsubscribe anytime from any email.
+                  {bb
+                    ? [bb.legalName || bb.name, bb.phone, "Unsubscribe anytime from any email."].filter(Boolean).join(" · ")
+                    : "Schwartz and Associates · (970) 999-1407 · Unsubscribe anytime from any email."}
                 </p>
                 <button
                   type="button"
                   onClick={resetAndClose}
-                  className="mt-4 w-full py-3 bg-[#CFB36E] text-black font-semibold rounded-lg hover:bg-[#bd9f5a]"
+                  className="mt-4 w-full py-3 bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] font-semibold rounded-lg hover:bg-[color:var(--brand-accent-strong)]"
                 >
                   Done
                 </button>
@@ -367,7 +371,7 @@ export default function SaveSearchModal({
                   <button
                     type="button"
                     onClick={resetAndClose}
-                    className="shrink-0 min-w-[44px] min-h-[44px] w-11 h-11 rounded-full flex items-center justify-center text-2xl leading-none text-gray-400 hover:text-gray-700 hover:bg-gray-100 active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E]"
+                    className="shrink-0 min-w-[44px] min-h-[44px] w-11 h-11 rounded-full flex items-center justify-center text-2xl leading-none text-gray-400 hover:text-gray-700 hover:bg-gray-100 active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]"
                     aria-label="Close"
                   >
                     ×
@@ -489,7 +493,7 @@ export default function SaveSearchModal({
                     />
                     {/* Same words as SMS_ALERT_CONSENT_WORDING in backend/src/controllers/alertController.js */}
                     <span>
-                      Text me new matches and price drops for this search from SAA Homes. Msg frequency varies.
+                      Text me new matches and price drops for this search from {bb ? bb.name : "SAA Homes"}. Msg frequency varies.
                       Msg &amp; data rates may apply. Reply STOP to opt out, HELP for help.
                     </span>
                   </label>

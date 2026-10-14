@@ -67,7 +67,7 @@ function CompRow({ row }) {
         ) : (
           <ListingPhotoFallback className="w-full h-full absolute inset-0" />
         )}
-        <span className="absolute top-1 left-1 bg-[#CFB36E] text-black text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded">
+        <span className="absolute top-1 left-1 bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded">
           Sold
         </span>
       </div>
@@ -140,7 +140,7 @@ export default function RecentClosedSales({ city, postalCode }) {
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5">
-      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#CFB36E]">
+      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[color:var(--brand-accent)]">
         Recent closed sales near you
       </p>
       <h3 className="text-lg font-bold text-gray-900 mt-1">

@@ -69,7 +69,7 @@ export default function FunnelView({ token }) {
                     </div>
                     <div className="mt-1.5 h-3 rounded-full bg-gray-100 overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-[#CFB36E]"
+                        className="h-full rounded-full bg-[color:var(--brand-accent)]"
                         style={{ width: `${top ? Math.max(1, (s.people / top) * 100) : 0}%` }}
                       />
                     </div>

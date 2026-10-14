@@ -131,8 +131,8 @@ export default function ReactionBar({ listing, className = "" }) {
                 on
                   ? c.value === "pass"
                     ? "bg-gray-800 border-gray-800 text-white"
-                    : "bg-[#CFB36E] border-[#CFB36E] text-gray-900"
-                  : "bg-white border-gray-300 text-gray-800 hover:border-[#CFB36E]"
+                    : "bg-[color:var(--brand-accent)] border-[color:var(--brand-accent)] text-gray-900"
+                  : "bg-white border-gray-300 text-gray-800 hover:border-[color:var(--brand-accent)]"
               }`}
             >
               <span aria-hidden="true">{c.icon}</span>
@@ -144,7 +144,7 @@ export default function ReactionBar({ listing, className = "" }) {
       {reaction === "love" && (
         <p className="mt-2 text-xs text-gray-500">
           Saved. Buying with someone?{" "}
-          <a href="/board/" className="font-semibold text-[#8a7340] underline underline-offset-2">Shop together</a>
+          <a href="/board/" className="font-semibold text-[color:var(--brand-accent-text)] underline underline-offset-2">Shop together</a>
         </p>
       )}
       {reaction === "pass" && (
@@ -163,7 +163,7 @@ export default function ReactionBar({ listing, className = "" }) {
                 maxLength={1000}
                 rows={3}
                 placeholder="Only you can see this. Great kitchen, small yard, busy street…"
-                className="w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-[#CFB36E] focus:outline-none"
+                className="w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-[color:var(--brand-accent)] focus:outline-none"
               />
               <div className="mt-2 flex gap-2">
                 <button
@@ -192,7 +192,7 @@ export default function ReactionBar({ listing, className = "" }) {
                   setNoteDraft(state.note || "");
                   setNoteOpen(true);
                 }}
-                className="text-[#8a7340] underline underline-offset-2"
+                className="text-[color:var(--brand-accent-text)] underline underline-offset-2"
               >
                 Edit
               </button>
@@ -204,7 +204,7 @@ export default function ReactionBar({ listing, className = "" }) {
                 setNoteDraft("");
                 setNoteOpen(true);
               }}
-              className="text-sm font-semibold text-[#8a7340] underline underline-offset-2 min-h-[32px]"
+              className="text-sm font-semibold text-[color:var(--brand-accent-text)] underline underline-offset-2 min-h-[32px]"
             >
               Add a private note
             </button>

@@ -45,9 +45,13 @@ export default function PropertiesPage() {
   const [searchParams] = useSearchParams();
   const location = searchParams.get("location") || "";
   const { tenant } = useTenant();
+  // Another brokerage's domain: its market, and no SAA crawl copy (below).
+  const defaultArea = tenant?.isBrokerage
+    ? tenant.marketName || tenant.brand?.marketName || ""
+    : "Northern Colorado";
   const tenantTitle = tenant?.brand?.brandName
     ? `${tenant.brand.brandName} — ${
-        location ? `Homes for Sale in ${location}` : "Homes for Sale in Northern Colorado"
+        location ? `Homes for Sale in ${location}` : defaultArea ? `Homes for Sale in ${defaultArea}` : "Homes for Sale"
       }`
     : null;
 
@@ -163,6 +167,7 @@ export default function PropertiesPage() {
         page never scrolls outside the full-screen search. Crawlers still
         index the text and links; FAQPage JSON-LD is in <head> via <SEO>.
       */}
+      {!tenant?.isBrokerage && (
       <div className="seo-crawl-layer" data-seo-layer="properties">
         <h1>{h1Text}</h1>
         <p>
@@ -333,6 +338,7 @@ export default function PropertiesPage() {
           Schwartz and Associates. Equal Housing Opportunity.
         </p>
       </div>
+      )}
 
       {/* Full-viewport search — fills everything below the fixed header.
           Document scroll is locked; only the results list scrolls. */}

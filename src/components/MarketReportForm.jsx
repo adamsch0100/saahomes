@@ -65,7 +65,7 @@ export default function MarketReportForm({ areaName }) {
           <Link
             to={myHomePath}
             className="mt-4 inline-flex items-center justify-center px-5 py-2.5 rounded-lg text-sm font-bold text-black"
-            style={{ background: '#CFB36E' }}
+            style={{ background: 'var(--brand-accent)' }}
           >
             View my home value →
           </Link>

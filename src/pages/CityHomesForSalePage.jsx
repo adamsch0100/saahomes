@@ -187,7 +187,7 @@ export default function CityHomesForSalePage({ slug: slugProp }) {
           </div>
           <div className="mt-6 flex flex-wrap gap-3 justify-center">
             <a href={`/properties/?location=${encodeURIComponent(city.search)}`}
-              className="inline-flex items-center px-6 py-3 bg-[#CFB36E] text-black font-semibold rounded-lg hover:bg-[#bd9f5a] transition-colors">
+              className="inline-flex items-center px-6 py-3 bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] font-semibold rounded-lg hover:bg-[color:var(--brand-accent-strong)] transition-colors">
               Open Full Search & Map
             </a>
             <a href={city.areaPath}
@@ -268,7 +268,7 @@ export default function CityHomesForSalePage({ slug: slugProp }) {
             </p>
           </div>
           <a href="/chfa-down-payment-assistance/"
-            className="shrink-0 px-6 py-3 bg-[#CFB36E] text-black font-semibold rounded-lg hover:bg-[#bd9f5a] transition-colors">
+            className="shrink-0 px-6 py-3 bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] font-semibold rounded-lg hover:bg-[color:var(--brand-accent-strong)] transition-colors">
             See CHFA Programs
           </a>
         </div>

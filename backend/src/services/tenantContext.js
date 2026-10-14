@@ -25,9 +25,11 @@ const LEAD_VISIBILITY = ['own', 'own_and_unassigned', 'all'];
 
 const als = new AsyncLocalStorage();
 const cache = new Map(); // hostname → { at, tenant }
+const byId = new Map(); // tenant id → { at, tenant }
 
 export function clearTenantCache() {
   cache.clear();
+  byId.clear();
 }
 
 /** The tenant of the request being served, or null outside a request. */
@@ -145,6 +147,22 @@ export function siteUrlFor(tenant) {
   const platform = normalizeHost(process.env.PLATFORM_DOMAIN);
   if (platform && tenant?.slug && tenant.id !== DEFAULT_TENANT_ID) return `https://${tenant.slug}.${platform}`;
   return (process.env.SITE_URL || 'https://saahomes.com').replace(/\/$/, '');
+}
+
+/**
+ * A tenant by id, cached for a minute: for jobs and emails that start from a
+ * row (a user, a saved search) rather than a request.
+ */
+export async function tenantById(id, { pool = getPool() } = {}) {
+  const key = Number(id) || DEFAULT_TENANT_ID;
+  const hit = byId.get(key);
+  if (hit && Date.now() - hit.at < CACHE_MS) return hit.tenant;
+  const r = await pool.query(`SELECT ${TENANT_COLS} FROM tenants WHERE id = $1`, [key]);
+  const tenant = r.rows[0]
+    ? shape(r.rows[0])
+    : shape({ id: DEFAULT_TENANT_ID, slug: 'saa', name: 'SAA Homes', primary_domain: 'saahomes.com' });
+  byId.set(key, { at: Date.now(), tenant });
+  return tenant;
 }
 
 /** Resolve a host to its tenant, cached for a minute. */

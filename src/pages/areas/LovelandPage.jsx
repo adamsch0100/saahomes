@@ -275,7 +275,7 @@ export default function LovelandPage() {
         </section>
 
         {/* CHFA First-Time Buyer Banner */}
-        <section className="mb-12 py-12 px-6 rounded-lg" style={{ backgroundColor: "#CFB36E" }}>
+        <section className="mb-12 py-12 px-6 rounded-lg" style={{ backgroundColor: "var(--brand-accent)" }}>
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-2xl sm:text-3xl font-bold font-serif text-gray-900 mb-3">
               First-time buyer in Loveland?

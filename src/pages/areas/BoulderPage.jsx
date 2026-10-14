@@ -271,7 +271,7 @@ export default function BoulderPage() {
       </section>
 
       {/* CHFA First-Time Buyer Banner */}
-      <section className="py-12 px-6" style={{ backgroundColor: "#CFB36E" }}>
+      <section className="py-12 px-6" style={{ backgroundColor: "var(--brand-accent)" }}>
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-2xl sm:text-3xl font-bold font-serif text-gray-900 mb-3">
             First-time buyer in Boulder?
@@ -296,7 +296,7 @@ export default function BoulderPage() {
         </div>
       </section>
 
-      <section className="py-10 px-6" style={{ backgroundColor: "#CFB36E" }}>
+      <section className="py-10 px-6" style={{ backgroundColor: "var(--brand-accent)" }}>
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-gray-900 text-lg leading-relaxed">
             Boulder buyers: the city&apos;s <strong>H2O</strong> program can offer a shared-appreciation second loan up to{" "}

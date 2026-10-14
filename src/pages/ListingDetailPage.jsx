@@ -30,6 +30,7 @@ import {
   pricePerSqftOf,
 } from "../components/detail";
 import AccountModal from "../components/AccountModal";
+import { useBrokerageBrand } from "../context/TenantContext.jsx";
 import {
   fetchSessionUser,
   fetchSavedStatus,
@@ -48,6 +49,7 @@ const API_BASE = (() => {
 
 export default function ListingDetailPage() {
   const { slug } = useParams();
+  const bb = useBrokerageBrand();
   const [searchParams, setSearchParams] = useSearchParams();
   const [listing, setListing] = useState(null);
   const [error, setError] = useState(null);
@@ -202,11 +204,25 @@ export default function ListingDetailPage() {
               <Link to="/properties/" className="underline text-black">
                 Search current listings
               </Link>{" "}
+              {bb ? (
+                bb.phone ? (
+                  <>
+                    or call us at{" "}
+                    <a href={bb.tel} className="underline">
+                      {bb.phone}
+                    </a>
+                    .
+                  </>
+                ) : null
+              ) : (
+                <>
               or call us at{" "}
               <a href="tel:+19709991407" className="underline">
                 (970) 999-1407
               </a>
               .
+                </>
+              )}
             </p>
           </div>
         </>
@@ -463,7 +479,7 @@ export default function ListingDetailPage() {
               </h1>
 
               <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mt-2.5">
-                <span className="text-2xl sm:text-3xl font-bold text-[#CFB36E] tracking-tight">
+                <span className="text-2xl sm:text-3xl font-bold text-[color:var(--brand-accent)] tracking-tight">
                   {formatPrice(listing.list_price)}
                 </span>
                 {priceCut && (
@@ -472,7 +488,7 @@ export default function ListingDetailPage() {
                   </span>
                 )}
                 {isNew && (
-                  <span className="bg-[#CFB36E] text-black text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
+                  <span className="bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
                     New
                   </span>
                 )}
@@ -482,12 +498,12 @@ export default function ListingDetailPage() {
                   </span>
                 )}
                 {isNewConstruction && (
-                  <span className="border border-[#CFB36E] text-[#CFB36E] text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
+                  <span className="border border-[color:var(--brand-accent)] text-[color:var(--brand-accent)] text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
                     New construction
                   </span>
                 )}
                 {isAssumable && (
-                  <span className="bg-black/85 text-[#CFB36E] border border-[#CFB36E] text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
+                  <span className="bg-black/85 text-[color:var(--brand-accent)] border border-[color:var(--brand-accent)] text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
                     Assumable loan possible
                   </span>
                 )}
@@ -586,11 +602,11 @@ export default function ListingDetailPage() {
               </p>
 
               {match.matches && (
-                <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#CFB36E]/15 border border-[#CFB36E]/40 px-3 py-1.5">
-                  <span className="text-[#CFB36E] text-xs" aria-hidden="true">
+                <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-[rgb(var(--brand-accent-rgb)/0.15)] border border-[rgb(var(--brand-accent-rgb)/0.4)] px-3 py-1.5">
+                  <span className="text-[color:var(--brand-accent)] text-xs" aria-hidden="true">
                     ★
                   </span>
-                  <p className="text-xs sm:text-sm text-[#CFB36E] font-semibold">
+                  <p className="text-xs sm:text-sm text-[color:var(--brand-accent)] font-semibold">
                     Matches your saved search
                     {match.reasons.length > 0 && match.reasons[0] !== "your saved search"
                       ? `: ${match.reasons.slice(0, 3).join(" · ")}`
@@ -641,7 +657,7 @@ export default function ListingDetailPage() {
                 aria-label={saved ? "Remove from saved homes" : "Save this home"}
                 className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-semibold transition-colors min-h-[44px] ${
                   saved
-                    ? "bg-[#CFB36E] border-[#CFB36E] text-black"
+                    ? "bg-[color:var(--brand-accent)] border-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)]"
                     : "border-white text-white hover:bg-white hover:text-black"
                 }`}
               >
@@ -651,7 +667,7 @@ export default function ListingDetailPage() {
               <SaveSearchModal
                 filters={likeThisFilters}
                 buttonLabel="Get alerts"
-                buttonClassName="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[#CFB36E] text-[#CFB36E] text-sm font-semibold hover:bg-[#CFB36E] hover:text-black transition-colors"
+                buttonClassName="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[color:var(--brand-accent)] text-[color:var(--brand-accent)] text-sm font-semibold hover:bg-[color:var(--brand-accent)] hover:text-[color:var(--brand-on-accent)] transition-colors"
               />
             </div>
           </div>

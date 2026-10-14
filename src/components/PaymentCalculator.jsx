@@ -153,7 +153,7 @@ export default function PaymentCalculator({
 
       {/* Home price — always shown so the calc is grounded in this listing */}
       <div
-        className={`mb-3 rounded-lg border border-[#CFB36E]/35 bg-[#CFB36E]/10 ${
+        className={`mb-3 rounded-lg border border-[rgb(var(--brand-accent-rgb)/0.35)] bg-[rgb(var(--brand-accent-rgb)/0.1)] ${
           isCompact ? "px-2.5 py-2" : "px-3 py-2.5"
         }`}
       >
@@ -191,7 +191,7 @@ export default function PaymentCalculator({
             step={1}
             value={Math.min(50, Math.round(resolvedDownPct))}
             onChange={(e) => onDownPctChange(e.target.value)}
-            className="w-full accent-[#CFB36E] h-2 cursor-pointer"
+            className="w-full accent-[color:var(--brand-accent)] h-2 cursor-pointer"
             aria-valuemin={0}
             aria-valuemax={50}
             aria-valuenow={Math.round(resolvedDownPct)}

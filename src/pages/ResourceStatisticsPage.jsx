@@ -12,7 +12,7 @@ import {
   CITATION_HUB_FAQS,
 } from "../data/citationHubStats.js";
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 
 const LAYER_LABELS = {
   national: "National context",
@@ -30,7 +30,7 @@ function StatCard({ stat }) {
       <div className="flex items-center justify-between gap-4 mb-4">
         <span
           className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide"
-          style={{ backgroundColor: `${GOLD}33`, color: "#1a1a1a" }}
+          style={{ backgroundColor: "rgb(var(--brand-accent-rgb) / 0.2)", color: "#1a1a1a" }}
         >
           {LAYER_LABELS[stat.layer] || stat.layer}
         </span>

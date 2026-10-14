@@ -147,7 +147,7 @@ function CashBuyerLeadForm() {
           type="text" required
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
-          className="w-full bg-transparent border-b border-gray-600 py-3 text-white placeholder-gray-500 focus:border-[#CFB36E] outline-none transition-colors"
+          className="w-full bg-transparent border-b border-gray-600 py-3 text-white placeholder-gray-500 focus:border-[color:var(--brand-accent)] outline-none transition-colors"
           placeholder="Your full name"
         />
       </div>
@@ -159,7 +159,7 @@ function CashBuyerLeadForm() {
           type="email" required
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
-          className="w-full bg-transparent border-b border-gray-600 py-3 text-white placeholder-gray-500 focus:border-[#CFB36E] outline-none transition-colors"
+          className="w-full bg-transparent border-b border-gray-600 py-3 text-white placeholder-gray-500 focus:border-[color:var(--brand-accent)] outline-none transition-colors"
           placeholder="your@email.com"
         />
       </div>
@@ -171,7 +171,7 @@ function CashBuyerLeadForm() {
           type="tel" required
           value={form.phone}
           onChange={(e) => setForm({ ...form, phone: e.target.value })}
-          className="w-full bg-transparent border-b border-gray-600 py-3 text-white placeholder-gray-500 focus:border-[#CFB36E] outline-none transition-colors"
+          className="w-full bg-transparent border-b border-gray-600 py-3 text-white placeholder-gray-500 focus:border-[color:var(--brand-accent)] outline-none transition-colors"
           placeholder="(970) 555-1234"
         />
       </div>
@@ -182,7 +182,7 @@ function CashBuyerLeadForm() {
         <select
           value={form.interest}
           onChange={(e) => setForm({ ...form, interest: e.target.value })}
-          className="w-full bg-gray-900 border border-gray-600 rounded py-3 px-4 text-white focus:border-[#CFB36E] outline-none transition-colors"
+          className="w-full bg-gray-900 border border-gray-600 rounded py-3 px-4 text-white focus:border-[color:var(--brand-accent)] outline-none transition-colors"
         >
           <option value="">Select one</option>
           <option value="selling-for-cash">Selling my home — want a cash offer</option>
@@ -199,7 +199,7 @@ function CashBuyerLeadForm() {
         <select
           value={form.city}
           onChange={(e) => setForm({ ...form, city: e.target.value })}
-          className="w-full bg-gray-900 border border-gray-600 rounded py-3 px-4 text-white focus:border-[#CFB36E] outline-none transition-colors"
+          className="w-full bg-gray-900 border border-gray-600 rounded py-3 px-4 text-white focus:border-[color:var(--brand-accent)] outline-none transition-colors"
         >
           <option value="">Select a city</option>
           {CITIES.map((c) => (
@@ -216,13 +216,13 @@ function CashBuyerLeadForm() {
           value={form.message}
           onChange={(e) => setForm({ ...form, message: e.target.value })}
           rows={3}
-          className="w-full bg-transparent border-b border-gray-600 py-3 text-white placeholder-gray-500 focus:border-[#CFB36E] outline-none transition-colors resize-none"
+          className="w-full bg-transparent border-b border-gray-600 py-3 text-white placeholder-gray-500 focus:border-[color:var(--brand-accent)] outline-none transition-colors resize-none"
           placeholder="Address, condition, timeline, budget, or any details you&rsquo;d like to share..."
         />
       </div>
       <button
         type="submit"
-        className="w-full bg-[#CFB36E] hover:bg-[#c0a55e] text-black font-bold py-4 px-6 rounded transition-colors"
+        className="w-full bg-[color:var(--brand-accent)] hover:bg-[color:var(--brand-accent-hover)] text-[color:var(--brand-on-accent)] font-bold py-4 px-6 rounded transition-colors"
       >
         Send — No Obligation
       </button>
@@ -237,7 +237,7 @@ function ComparisonTable() {
         <thead>
           <tr className="border-b border-gray-700">
             <th className="text-left py-4 px-3 font-semibold text-gray-300">Factor</th>
-            <th className="text-left py-4 px-3 font-semibold text-[#CFB36E]">Cash Sale</th>
+            <th className="text-left py-4 px-3 font-semibold text-[color:var(--brand-accent)]">Cash Sale</th>
             <th className="text-left py-4 px-3 font-semibold text-gray-300">Traditional Listing</th>
           </tr>
         </thead>
@@ -287,12 +287,12 @@ export default function CashHomeBuyersPage() {
       <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-24">
         <div className="absolute inset-0 bg-[url('/images/Northern Colorado.webp')] bg-cover bg-center opacity-10" />
         <div className="relative max-w-6xl mx-auto px-4 text-center">
-          <span className="inline-block bg-[#CFB36E]/20 text-[#CFB36E] text-sm uppercase tracking-widest px-4 py-2 rounded-full mb-6 font-semibold">
+          <span className="inline-block bg-[rgb(var(--brand-accent-rgb)/0.2)] text-[color:var(--brand-accent)] text-sm uppercase tracking-widest px-4 py-2 rounded-full mb-6 font-semibold">
             Cash Sales &bull; Investor Services
           </span>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-6 leading-tight">
             Sell Your Northern Colorado Home<br />
-            <span className="text-[#CFB36E]">For Cash — Or Invest With Confidence</span>
+            <span className="text-[color:var(--brand-accent)]">For Cash — Or Invest With Confidence</span>
           </h1>
           <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-8 leading-relaxed">
             Whether you need to sell fast and move on, or you&rsquo;re a cash buyer looking for
@@ -303,13 +303,13 @@ export default function CashHomeBuyersPage() {
           <div className="flex flex-wrap gap-4 justify-center">
             <a
               href="#cash-offer-form"
-              className="inline-block bg-[#CFB36E] hover:bg-[#c0a55e] text-black font-bold py-4 px-8 rounded transition-colors"
+              className="inline-block bg-[color:var(--brand-accent)] hover:bg-[color:var(--brand-accent-hover)] text-[color:var(--brand-on-accent)] font-bold py-4 px-8 rounded transition-colors"
             >
               Get a Cash Offer
             </a>
             <Link
               to="/for-sellers/"
-              className="inline-block border-2 border-[#CFB36E] text-[#CFB36E] hover:bg-[#CFB36E] hover:text-black font-bold py-4 px-8 rounded transition-colors"
+              className="inline-block border-2 border-[color:var(--brand-accent)] text-[color:var(--brand-accent)] hover:bg-[color:var(--brand-accent)] hover:text-[color:var(--brand-on-accent)] font-bold py-4 px-8 rounded transition-colors"
             >
               Compare Traditional Listing
             </Link>
@@ -361,7 +361,7 @@ export default function CashHomeBuyersPage() {
               </ul>
               <a
                 href="#cash-offer-form"
-                className="inline-block w-full text-center bg-[#CFB36E] hover:bg-[#c0a55e] text-black font-bold py-3 px-6 rounded transition-colors"
+                className="inline-block w-full text-center bg-[color:var(--brand-accent)] hover:bg-[color:var(--brand-accent-hover)] text-[color:var(--brand-on-accent)] font-bold py-3 px-6 rounded transition-colors"
               >
                 Get Your Cash Offer
               </a>
@@ -401,7 +401,7 @@ export default function CashHomeBuyersPage() {
               </ul>
               <a
                 href="#cash-offer-form"
-                className="inline-block w-full text-center border-2 border-[#CFB36E] text-[#CFB36E] hover:bg-[#CFB36E] hover:text-black font-bold py-3 px-6 rounded transition-colors"
+                className="inline-block w-full text-center border-2 border-[color:var(--brand-accent)] text-[color:var(--brand-accent)] hover:bg-[color:var(--brand-accent)] hover:text-[color:var(--brand-on-accent)] font-bold py-3 px-6 rounded transition-colors"
               >
                 Connect as an Investor
               </a>
@@ -424,7 +424,7 @@ export default function CashHomeBuyersPage() {
           <div className="text-center mt-10">
             <Link
               to="/for-sellers/"
-              className="inline-block bg-[#CFB36E] hover:bg-[#c0a55e] text-black font-bold py-3 px-8 rounded transition-colors"
+              className="inline-block bg-[color:var(--brand-accent)] hover:bg-[color:var(--brand-accent-hover)] text-[color:var(--brand-on-accent)] font-bold py-3 px-8 rounded transition-colors"
             >
               Learn More About Listing With SAA Homes
             </Link>
@@ -449,11 +449,11 @@ export default function CashHomeBuyersPage() {
                 to={`/northern-colorado-areas/${city.slug}/`}
                 className="block bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg p-5 transition-colors group"
               >
-                <h3 className="font-bold text-lg group-hover:text-[#CFB36E] transition-colors">
+                <h3 className="font-bold text-lg group-hover:text-[color:var(--brand-accent)] transition-colors">
                   {city.name}
                 </h3>
                 <p className="text-sm text-gray-400 mt-1">{city.tag}</p>
-                <span className="text-xs text-[#CFB36E] mt-2 inline-block opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="text-xs text-[color:var(--brand-accent)] mt-2 inline-block opacity-0 group-hover:opacity-100 transition-opacity">
                   View area guide →
                 </span>
               </Link>
@@ -582,7 +582,7 @@ export default function CashHomeBuyersPage() {
           </h2>
           <div className="grid md:grid-cols-3 gap-8 text-left mt-10">
             <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-              <div className="text-[#CFB36E] text-3xl mb-3">01</div>
+              <div className="text-[color:var(--brand-accent)] text-3xl mb-3">01</div>
               <h3 className="font-bold mb-2">Both Sides of the Table</h3>
               <p className="text-sm text-gray-400">
                 We work with sellers seeking cash offers AND investors looking for deals.
@@ -591,7 +591,7 @@ export default function CashHomeBuyersPage() {
               </p>
             </div>
             <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-              <div className="text-[#CFB36E] text-3xl mb-3">02</div>
+              <div className="text-[color:var(--brand-accent)] text-3xl mb-3">02</div>
               <h3 className="font-bold mb-2">27-Community Coverage</h3>
               <p className="text-sm text-gray-400">
                 From Boulder to Greeley, Fort Collins to Firestone — we know the comps,
@@ -600,7 +600,7 @@ export default function CashHomeBuyersPage() {
               </p>
             </div>
             <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-              <div className="text-[#CFB36E] text-3xl mb-3">03</div>
+              <div className="text-[color:var(--brand-accent)] text-3xl mb-3">03</div>
               <h3 className="font-bold mb-2">Honest Path Guidance</h3>
               <p className="text-sm text-gray-400">
                 We won&rsquo;t push you into a cash sale if a traditional listing makes

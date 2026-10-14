@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { submitContactForm } from "../utils/api.js";
 import { rememberSavedSearch } from "../utils/listingHelpers.js";
 import { areaSeoPages } from "../data/areaSeo.js";
+import { useBrokerageBrand } from "../context/TenantContext.jsx";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, '');
@@ -27,8 +28,12 @@ function humanizeSlug(slug) {
     .join(" ");
 }
 
-/** Best-known location label for the current page + query string. */
-function pageLocationLabel(path, search = "") {
+/**
+ * Best-known location label for the current page + query string.
+ * `defaultArea`: the market name for the plain search page (another brokerage
+ * passes its own market, or "" for none).
+ */
+function pageLocationLabel(path, search = "", defaultArea = "Northern Colorado") {
   // Area hub pages: /northern-colorado-areas/{slug}/
   const areaMatch = path.match(/\/northern-colorado-areas\/([a-z0-9-]+)\/?$/);
   if (areaMatch) return AREA_BY_SLUG.get(areaMatch[1]) || humanizeSlug(areaMatch[1]) || "";
@@ -45,7 +50,7 @@ function pageLocationLabel(path, search = "") {
       const first = cityParam.split(",")[0].trim();
       if (first) return AREA_BY_SLUG.get(first) || humanizeSlug(first) || "";
     }
-    return "Northern Colorado";
+    return defaultArea;
   }
   return "";
 }
@@ -59,8 +64,41 @@ function stripControlTags(reply = "") {
     .trim();
 }
 
+/** Copy for another brokerage's domain: its name, market and phone, never SAA's. */
+function brokerageChatCopy(bb) {
+  const name = bb.name || "our team";
+  const inArea = bb.market ? ` in ${bb.market}` : "";
+  const people = bb.agentName || "an agent";
+  return {
+    defaultArea: bb.market || "",
+    teaser: `Buying or selling${inArea}? I can help you find your way.`,
+    greetings: {
+      buyer: `Hey there! 🏡 Thinking about buying a home${inArea}? Whether you're just starting to explore or ready to look at specific neighborhoods, I'm here to help. What are you looking for?`,
+      seller: "Hi! 📈 Thinking of selling? I can walk you through what your home might be worth in today's market and how our team approaches marketing. What's your timeline looking like?",
+      default: `Hi there! 👋 I'm Nadia, your personal real estate assistant at ${name}. Whether you're buying, selling, or just curious about real estate${inArea} — I'd love to help point you in the right direction. What can I answer for you?`,
+    },
+    placeGreeting: (place) =>
+      `Hi! 👋 I'm Nadia, your ${name} assistant. Looking in ${place}? I can help you find homes, compare neighborhoods, or set up alerts so new listings come to you. What are you hoping to find?`,
+    trouble: bb.phone
+      ? `Sorry, I'm having trouble connecting right now. You can always call us direct at ${bb.phone}!`
+      : "Sorry, I'm having trouble connecting right now. Please try again in a moment.",
+    browsing: "No problem — just browsing is fine! You can always ask me later to set up alerts, or browse homes at /properties/. Anything else I can help with?",
+    phoneRequired: `Phone is required so ${people} can reach you.`,
+    sendFailed: bb.phone
+      ? `Couldn't send. Call ${bb.phone} and we'll help right away.`
+      : "Couldn't send. Please try again.",
+    transfer: `I've got you! Let me grab a few details so ${people} can jump in and help you directly.`,
+    transferAsk: `Want to talk to ${people} directly?`,
+    reachAsk: `Great! How should ${people} reach you?`,
+    connectButton: bb.agentName ? `Connect Me With ${bb.agentName}` : "Connect Me With an Agent",
+    willReach: (method) => `${bb.agentName || "An agent"} will reach out via ${method} shortly.`,
+  };
+}
+
 export default function LeadCaptureChat() {
   const location = useLocation();
+  const bb = useBrokerageBrand();
+  const bc = bb ? brokerageChatCopy(bb) : null;
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -128,16 +166,16 @@ export default function LeadCaptureChat() {
     const lastShown = Number(sessionStorage.getItem("nadia_teaser_at") || 0);
     if (sessionStorage.getItem("nadia_teaser_dismissed") || now - lastShown < 15 * 60 * 1000) return;
 
-    let message = "Buying or selling in Northern Colorado? I can help you find your way.";
-    if (/\/luxury-real-estate/.test(path)) {
+    let message = bc ? bc.teaser : "Buying or selling in Northern Colorado? I can help you find your way.";
+    if (!bc && /\/luxury-real-estate/.test(path)) {
       message = "Questions about a $1M+ property? Ask Nadia — I can walk you through current listings or a private conversation with Adam and Mandi.";
     } else if (isListing) {
       const addr = document.querySelector("h1")?.textContent?.trim();
       message = addr ? `Questions about ${addr}? I know this home — ask me anything.` : "Questions about this home? I can tell you more.";
-    } else if (/\/chfa/.test(path)) {
+    } else if (!bc && /\/chfa/.test(path)) {
       message = "Looking into down payment assistance? I'm an AI assistant who knows CHFA & DPA programs inside out — ask me about SmartStep, Schools to Home, or G-HOPE.";
     } else if (isSearch || isCity) {
-      const place = pageLocationLabel(path, location.search);
+      const place = pageLocationLabel(path, location.search, bc ? bc.defaultArea : undefined);
       message = place
         ? `Looking for a place in ${place}? I can set up alerts so new homes come to you — want me to save this search?`
         : "Looking for a place? Save your search and new homes come to you.";
@@ -231,7 +269,14 @@ export default function LeadCaptureChat() {
       };
       const path = location.pathname;
       let greeting = greetings.default;
-      if (hasLead) {
+      if (bc) {
+        // Another brokerage: its own name/market; SAA-only programs aren't on its site.
+        const place = pageLocationLabel(path, location.search, bc.defaultArea);
+        if (hasLead) greeting = "Good to see you again! 👋 I'm Nadia. Want to check on your saved searches, or do you have questions about this area? I can help — and I can set up new alerts from chat if you describe what you're looking for.";
+        else if (/for-buyers|buying/.test(path)) greeting = bc.greetings.buyer;
+        else if (/for-sellers|sell/.test(path)) greeting = bc.greetings.seller;
+        else greeting = place ? bc.placeGreeting(place) : bc.greetings.default;
+      } else if (hasLead) {
         greeting = "Good to see you again! 👋 I'm Nadia. Want to check on your saved searches, or do you have questions about this area? I can help — and I can set up new alerts from chat if you describe what you're looking for.";
       } else if (/luxury-real-estate/.test(path)) greeting = greetings.luxury;
       else if (/nurse|nursing|healthcare/.test(path)) greeting = greetings.nurse;
@@ -313,7 +358,7 @@ export default function LeadCaptureChat() {
     } catch (err) {
       setMessages((prev) => [...prev, {
         role: "assistant",
-        content: `Sorry, I'm having trouble connecting right now. You can always call us direct at (970) 999-1407!`,
+        content: bc ? bc.trouble : `Sorry, I'm having trouble connecting right now. You can always call us direct at (970) 999-1407!`,
       }]);
     } finally {
       setIsTyping(false);
@@ -346,7 +391,7 @@ export default function LeadCaptureChat() {
       ...prev,
       {
         role: "assistant",
-        content: "No problem — just browsing is fine! You can always ask me later to set up alerts, or browse homes at saahomes.com/properties/. Anything else I can help with?",
+        content: bc ? bc.browsing : "No problem — just browsing is fine! You can always ask me later to set up alerts, or browse homes at saahomes.com/properties/. Anything else I can help with?",
       },
     ]);
   };
@@ -435,7 +480,7 @@ export default function LeadCaptureChat() {
       return;
     }
     if (!leadInfo.phone || !String(leadInfo.phone).trim()) {
-      setLeadError("Phone is required so Adam or Mandi can reach you.");
+      setLeadError(bc ? bc.phoneRequired : "Phone is required so Adam or Mandi can reach you.");
       return;
     }
     setIsTyping(true);
@@ -457,7 +502,7 @@ export default function LeadCaptureChat() {
         window.gtag("event", "generate_lead", { lead_type: "chat_handoff_nadia", page: location.pathname });
       }
     } catch (err) {
-      setLeadError("Couldn't send. Call (970) 999-1407 and we'll help right away.");
+      setLeadError(bc ? bc.sendFailed : "Couldn't send. Call (970) 999-1407 and we'll help right away.");
     } finally {
       setIsTyping(false);
     }
@@ -466,7 +511,7 @@ export default function LeadCaptureChat() {
   const handleTransferToAgent = () => {
     setShowTransferOption(false);
     setHandoffStep("collecting");
-    setMessages((prev) => [...prev, { role: "assistant", content: "I've got you! Let me grab a few details so Adam or Mandi can jump in and help you directly." }]);
+    setMessages((prev) => [...prev, { role: "assistant", content: bc ? bc.transfer : "I've got you! Let me grab a few details so Adam or Mandi can jump in and help you directly." }]);
   };
 
   const handleOpen = () => {
@@ -662,7 +707,7 @@ export default function LeadCaptureChat() {
             {/* Live transfer option */}
             {showTransferOption && handoffStep === null && (
               <div className="bg-blue-50 rounded-2xl p-4 text-center" style={{ animation: 'chatFadeIn 0.3s ease-out' }}>
-                <p className="text-sm font-semibold text-gray-900 mb-2">Want to talk to Adam or Mandi directly?</p>
+                <p className="text-sm font-semibold text-gray-900 mb-2">{bc ? bc.transferAsk : "Want to talk to Adam or Mandi directly?"}</p>
                 <div className="flex gap-2">
                   <button onClick={handleTransferToAgent} className="flex-1 py-2.5 bg-black text-white font-semibold rounded-xl text-sm hover:bg-gray-800 transition-colors">
                     Yes, connect me 🤝
@@ -677,7 +722,7 @@ export default function LeadCaptureChat() {
             {/* Handoff form */}
             {handoffStep === "collecting" && (
               <div className="bg-blue-50 rounded-2xl p-4" style={{ animation: 'chatFadeIn 0.3s ease-out' }}>
-                <p className="text-sm font-semibold text-gray-900 mb-3">Great! How should Adam or Mandi reach you?</p>
+                <p className="text-sm font-semibold text-gray-900 mb-3">{bc ? bc.reachAsk : "Great! How should Adam or Mandi reach you?"}</p>
                 <form onSubmit={handleHandoffSubmit} className="space-y-2">
                   <input required placeholder="Your name *" value={leadInfo.name} onChange={(e) => setLeadInfo({ ...leadInfo, name: e.target.value })}
                     className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black" />
@@ -713,7 +758,7 @@ export default function LeadCaptureChat() {
 
                   {leadError && <p className="text-red-600 text-xs">{leadError}</p>}
                   <button type="submit" className="w-full py-2.5 bg-black text-white font-semibold rounded-xl text-sm hover:bg-gray-800 transition-colors">
-                    Connect Me With Adam & Mandi
+                    {bc ? bc.connectButton : "Connect Me With Adam & Mandi"}
                   </button>
                 </form>
               </div>
@@ -722,11 +767,27 @@ export default function LeadCaptureChat() {
             {handoffStep === "submitted" && (
               <div className="bg-green-50 rounded-2xl p-4 text-center" style={{ animation: 'chatFadeIn 0.3s ease-out' }}>
                 <p className="font-semibold text-gray-900">You're all set, {leadInfo.name.split(" ")[0]}! 🎉</p>
+                {bc ? (
+                  <>
+                    <p className="text-sm text-gray-600 mt-1">{bc.willReach(leadInfo.contactMethod)}</p>
+                    {bb.phone ? (
+                      <>
+                        <p className="text-xs text-gray-400 mt-1">Need immediate help?</p>
+                        <a href={bb.tel} className="inline-block mt-2 px-5 py-2.5 bg-black text-white font-semibold rounded-xl text-sm hover:bg-gray-800 transition-colors">
+                          Call {bb.phone}
+                        </a>
+                      </>
+                    ) : null}
+                  </>
+                ) : (
+                  <>
                 <p className="text-sm text-gray-600 mt-1">Adam or Mandi will reach out via {leadInfo.contactMethod} shortly.</p>
                 <p className="text-xs text-gray-400 mt-1">Need immediate help?</p>
                 <a href="tel:(970) 999-1407" className="inline-block mt-2 px-5 py-2.5 bg-black text-white font-semibold rounded-xl text-sm hover:bg-gray-800 transition-colors">
                   Call (970) 999-1407
                 </a>
+                  </>
+                )}
               </div>
             )}
 
@@ -760,9 +821,14 @@ export default function LeadCaptureChat() {
                 Manage my alerts
               </a>
             )}
-            {handoffStep === "submitted" && (
+            {handoffStep === "submitted" && !bc && (
               <a href="tel:(970) 999-1407" className="block w-full py-2.5 border-2 border-black text-black font-semibold rounded-xl text-sm text-center hover:bg-gray-50 transition-colors">
                 Call (970) 999-1407
+              </a>
+            )}
+            {handoffStep === "submitted" && bc && bb.phone && (
+              <a href={bb.tel} className="block w-full py-2.5 border-2 border-black text-black font-semibold rounded-xl text-sm text-center hover:bg-gray-50 transition-colors">
+                Call {bb.phone}
               </a>
             )}
           </div>
@@ -795,7 +861,7 @@ export default function LeadCaptureChat() {
       <button
         onClick={isOpen ? () => setIsOpen(false) : handleOpen}
         className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-white transition-all duration-200 hover:scale-105 active:scale-95 overflow-hidden ${
-          isOpen ? "bg-gray-800 rotate-45" : showNudge ? "ring-4 ring-[#CFB36E]/60" : "ring-2 ring-[#CFB36E]/40"
+          isOpen ? "bg-gray-800 rotate-45" : showNudge ? "ring-4 ring-[rgb(var(--brand-accent-rgb)/0.6)]" : "ring-2 ring-[rgb(var(--brand-accent-rgb)/0.4)]"
         }`}
         style={!isOpen && showNudge ? { animation: 'chatPulse 2s ease-in-out infinite' } : {}}
         aria-label={`Ask ${CHAT_NAME} — your home assistant`}

@@ -115,7 +115,7 @@ test('co-buyers hear about the tour request', { skip: !hasTestDatabase }, async 
   const r = await b.post('/tours', { listing_keys: [home.listing_id], windows: [{ date: soon(3), part: 'evening' }] });
   assert.equal(r.status, 201, r.text);
   const n = await db.pool.query(
-    "SELECT title FROM notifications n JOIN users u ON u.id = n.user_id WHERE u.email = 'nosy@comcast.net' AND n.type = 'board'"
+    "SELECT n.title FROM notifications n JOIN users u ON u.id = n.user_id WHERE u.email = 'nosy@comcast.net' AND n.type = 'board'"
   );
   assert.deepEqual(n.rows.map((x) => x.title), ['Taylor asked for a tour of 1 home']);
 });

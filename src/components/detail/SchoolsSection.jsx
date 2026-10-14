@@ -1,6 +1,6 @@
 import React from "react";
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 
 /**
  * GreatSchools Rating badge (1–10). Attribution required on every badge.
@@ -11,7 +11,7 @@ function RatingBadge({ rating, href, schoolName }) {
   const badge = (
     <span
       className="inline-flex items-center justify-center min-w-[2.5rem] h-10 px-2 rounded-full text-sm font-bold text-gray-900 border-2 shadow-sm"
-      style={{ backgroundColor: `${GOLD}33`, borderColor: GOLD }}
+      style={{ backgroundColor: "rgb(var(--brand-accent-rgb) / 0.2)", borderColor: GOLD }}
       title={`GreatSchools Rating: ${rating}/10`}
       aria-label={`GreatSchools Rating ${rating} out of 10`}
     >
@@ -110,7 +110,7 @@ export default function SchoolsSection({ listing }) {
           {cards.map((card) => (
             <div
               key={`${card.level}-${card.name}`}
-              className="bg-white rounded-lg border border-gray-200 p-4 hover:border-[#CFB36E]/60 transition-colors flex gap-3 items-start"
+              className="bg-white rounded-lg border border-gray-200 p-4 hover:border-[rgb(var(--brand-accent-rgb)/0.6)] transition-colors flex gap-3 items-start"
             >
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] text-gray-500 uppercase tracking-wide font-medium">

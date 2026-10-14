@@ -57,7 +57,7 @@ export default function TodayBrief({ token }) {
         </div>
         {brief.email_on !== null && (
           <label className="flex items-center gap-2 text-xs text-gray-600 min-h-[32px]">
-            <input type="checkbox" checked={brief.email_on} onChange={toggleEmail} disabled={saving} className="accent-[#CFB36E]" />
+            <input type="checkbox" checked={brief.email_on} onChange={toggleEmail} disabled={saving} className="accent-[color:var(--brand-accent)]" />
             Email me this at 7am
           </label>
         )}
@@ -78,7 +78,7 @@ export default function TodayBrief({ token }) {
                   )}
                 </p>
                 <p className="text-sm text-gray-600">{it.reasons.join(" · ")}</p>
-                <p className="text-sm text-[#8a7340]">Try: {it.opener}</p>
+                <p className="text-sm text-[color:var(--brand-accent-text)]">Try: {it.opener}</p>
               </div>
             </li>
           ))}

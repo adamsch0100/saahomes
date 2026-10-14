@@ -213,7 +213,13 @@ export const enableTwoStep = async (req, res) => {
       recovery_hashes: hashes,
     });
     logger.info('two-step sign-in enabled', { account });
-    return res.json({ success: true, recovery_codes: codes });
+    // A session that was limited to setting this up becomes a full session.
+    let token;
+    if (req.user.setup_2fa === true) {
+      const { iat, exp, setup_2fa: _s, ...payload } = req.user;
+      token = generateToken(payload);
+    }
+    return res.json({ success: true, recovery_codes: codes, ...(token ? { token } : {}) });
   } catch (error) {
     logger.error('enableTwoStep error', error);
     return res.status(500).json({ error: 'Could not turn on two-step sign-in' });

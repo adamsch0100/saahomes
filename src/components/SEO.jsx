@@ -2,6 +2,7 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 import { BUSINESS, SITE_TITLE_SUFFIX, toAbsoluteUrl } from "../utils/seoConstants.js";
+import { useBrokerageBrand } from "../context/TenantContext.jsx";
 
 const BRAND_MARKERS = ['SAA Homes', 'Schwartz And Associates', 'Schwartz and Associates'];
 
@@ -94,6 +95,32 @@ function dedupeJsonLd(schemas) {
   });
 }
 
+/*
+ * Another brokerage's own domain: pages it shares with SAA (search, listings,
+ * saved searches, …) still pass SAA's titles and copy. Swap SAA's name, phone,
+ * email and market for the brokerage's, point URLs at this domain, and drop
+ * anything that still names SAA's people or company.
+ */
+const SAA_ORIGIN_RE = /^https?:\/\/(www\.)?saahomes\.com/i;
+const SAA_LEFTOVER_RE = /\bAdam\b|\bMandi\b|Schwartz|saahomes|\bSAA\b|Coldwell/i;
+
+function brokerageText(text, bb) {
+  if (!text) return text;
+  return String(text)
+    .replace(/Schwartz [Aa]nd Associates|SAA Homes/g, bb.name || "")
+    .replace(/\(970\) 999-1407/g, bb.phone || "")
+    .replace(/info@saahomes\.com/g, bb.email || "")
+    .replace(/Northern Colorado/g, bb.market || "")
+    .replace(/(\|\s*){2,}/g, "| ")
+    .replace(/^[\s|·—-]+|[\s|·—-]+$/g, "")
+    .replace(/\s{2,}/g, " ");
+}
+
+function brokerageUrl(url) {
+  if (!url || typeof window === "undefined") return url;
+  return String(url).replace(SAA_ORIGIN_RE, window.location.origin);
+}
+
 export default function SEO({
   title,
   exactTitle,
@@ -114,6 +141,22 @@ export default function SEO({
   geoPlacename = "Fort Collins, Colorado",
 }) {
   const location = useLocation();
+  const bb = useBrokerageBrand();
+  if (bb) {
+    return (
+      <BrokerageSEO
+        bb={bb}
+        title={title}
+        exactTitle={exactTitle}
+        description={description}
+        canonical={canonical}
+        type={type}
+        robots={robots}
+        jsonLd={jsonLd}
+        pathname={location.pathname}
+      />
+    );
+  }
   const fullTitle = buildTitle(title, exactTitle);
   const finalOgTitle = ogTitle || fullTitle;
   const finalOgDescription = ogDescription || description;
@@ -163,6 +206,59 @@ export default function SEO({
 
       {visibleSchemas.map((schema, index) => (
         <script key={`${location.pathname}-${schema['@type']}-${index}`} type="application/ld+json">
+          {JSON.stringify(schema)}
+        </script>
+      ))}
+    </Helmet>
+  );
+}
+
+/** Head tags on another brokerage's domain: its name, its domain, nothing of SAA's. */
+function BrokerageSEO({ bb, title, exactTitle, description, canonical, type, robots, jsonLd, pathname }) {
+  const name = bb.name || "";
+  let fullTitle = brokerageText(exactTitle || title || "", bb);
+  if (fullTitle && !exactTitle && name && !fullTitle.includes(name)) fullTitle = `${fullTitle} | ${name}`;
+  if (!fullTitle || SAA_LEFTOVER_RE.test(fullTitle)) fullTitle = name || "Homes for Sale";
+
+  let desc = brokerageText(description || "", bb);
+  if (!desc || SAA_LEFTOVER_RE.test(desc)) {
+    desc = bb.tagline || `Homes for sale${bb.market ? ` in ${bb.market}` : ""}${name ? ` from ${name}` : ""}.`;
+  }
+
+  const url = canonical ? brokerageUrl(canonical) : null;
+  const ogImage = bb.logoUrl
+    ? (bb.logoUrl.startsWith("http") || typeof window === "undefined" ? bb.logoUrl : `${window.location.origin}${bb.logoUrl}`)
+    : null;
+  const schemas = (jsonLd || [])
+    .map((schema) => {
+      try {
+        const text = JSON.stringify(schema).replace(/https?:\/\/(www\.)?saahomes\.com/gi, typeof window === "undefined" ? "" : window.location.origin);
+        return SAA_LEFTOVER_RE.test(text) ? null : JSON.parse(text);
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean);
+
+  return (
+    <Helmet htmlAttributes={{ lang: 'en' }}>
+      <title>{fullTitle}</title>
+      <meta name="description" content={desc} />
+      <meta name="robots" content={robots || "index, follow, max-image-preview:large"} />
+      {name ? <meta name="author" content={name} /> : null}
+      {url && <link rel="canonical" href={url} />}
+      <meta property="og:type" content={type} />
+      {name ? <meta property="og:site_name" content={name} /> : null}
+      <meta property="og:locale" content="en_US" />
+      <meta property="og:title" content={fullTitle} />
+      <meta property="og:description" content={desc} />
+      {ogImage && <meta property="og:image" content={ogImage} />}
+      {url && <meta property="og:url" content={url} />}
+      <meta name="twitter:card" content="summary" />
+      <meta name="twitter:title" content={fullTitle} />
+      <meta name="twitter:description" content={desc} />
+      {schemas.map((schema, index) => (
+        <script key={`${pathname}-${schema['@type']}-${index}`} type="application/ld+json">
           {JSON.stringify(schema)}
         </script>
       ))}

@@ -9,7 +9,7 @@ import {
 } from "../data/resourcesIndex.js";
 import { CITATION_PUBLISHER } from "../utils/citation.js";
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 
 export default function ResourcesIndexPage() {
   const collectionSchema = {

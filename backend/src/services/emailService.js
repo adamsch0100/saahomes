@@ -1,10 +1,89 @@
 import transporter from '../config/email.js';
 import logger from '../utils/logger.js';
 import dotenv from 'dotenv';
+import getPool from '../config/database.js';
+import { currentTenant, currentTenantId, tenantById } from './tenantContext.js';
+import { brandFor, isHomeTenant } from './brand.js';
+import { sendEmail } from './emailer.js';
 
 dotenv.config();
 
 const ADMIN_EMAIL = process.env.GMAIL_USER || 'adam@saahomes.com';
+
+/**
+ * Who hears about a lead at another brokerage: the lead's assigned agent
+ * when it has one, otherwise the brokerage's active admins. Never SAA's inbox.
+ */
+async function brokerageRecipients(pool, tenantId, submission) {
+  const staff = async (id) => (id ? (await pool.query(
+    `SELECT email FROM users WHERE id = $1 AND tenant_id = $2 AND role IN ('agent', 'admin')
+       AND status = 'active' AND email IS NOT NULL`,
+    [id, tenantId]
+  )).rows.map((r) => r.email) : []);
+
+  let agentId = Number(submission?.assigned_agent_id) || null;
+  if (!agentId && submission?.email) {
+    const lead = await pool.query(
+      'SELECT assigned_agent_id FROM users WHERE lower(email) = lower($1) AND tenant_id = $2 LIMIT 1',
+      [String(submission.email), tenantId]
+    );
+    agentId = lead.rows[0]?.assigned_agent_id || null;
+  }
+  const cur = currentTenant();
+  if (!agentId && cur?.id === tenantId && cur.agent?.id) agentId = cur.agent.id;
+  const agent = await staff(agentId);
+  if (agent.length) return agent;
+
+  const admins = await pool.query(
+    `SELECT email FROM users WHERE tenant_id = $1 AND role = 'admin' AND status = 'active' AND email IS NOT NULL
+     ORDER BY id`,
+    [tenantId]
+  );
+  return admins.rows.map((r) => r.email);
+}
+
+/**
+ * Deliver a staff lead notification. SAA's go to SAA's inbox exactly as
+ * before; another brokerage's go to its own people, under its own name, and
+ * queue in email_outbox when this runtime can't send.
+ */
+async function deliverLeadNotification(submission, mailOptions, sentLabel, failLabel) {
+  const tenantId = Number(submission?.tenant_id) || currentTenantId();
+  if (isHomeTenant({ id: tenantId })) {
+    try {
+      const info = await transporter.sendMail(mailOptions);
+      logger.info(`${sentLabel} notification email sent`, { messageId: info.messageId });
+      return { success: true, messageId: info.messageId };
+    } catch (error) {
+      logger.error(`Failed to send ${failLabel} notification email`, error);
+      throw error;
+    }
+  }
+
+  const pool = getPool();
+  const brand = brandFor(await tenantById(tenantId, { pool }));
+  const to = await brokerageRecipients(pool, tenantId, submission);
+  if (!to.length) {
+    const error = new Error(`No active admin to notify for tenant ${tenantId}`);
+    logger.error(`Failed to send ${failLabel} notification email`, error);
+    throw error;
+  }
+  const fromName = `${brand.name} Website`;
+  let queued = 0;
+  for (const addr of to) {
+    try {
+      await sendEmail(addr, mailOptions.subject, mailOptions.html, fromName, { tenantId, replyTo: submission?.email || null });
+    } catch {
+      await pool.query(
+        'INSERT INTO email_outbox (to_email, subject, html, tenant_id) VALUES ($1, $2, $3, $4)',
+        [addr, mailOptions.subject, mailOptions.html, tenantId]
+      );
+      queued += 1;
+    }
+  }
+  logger.info(`${sentLabel} notification email sent`, { tenantId, recipients: to.length, queued });
+  return { success: true, messageId: null, queued };
+}
 
 export const sendContactNotification = async (submission) => {
   const { name, email, phone, interest, message, area } = submission;
@@ -38,14 +117,7 @@ Submitted at: ${new Date().toLocaleString()}
     `.trim(),
   };
 
-  try {
-    const info = await transporter.sendMail(mailOptions);
-    logger.info('Contact notification email sent', { messageId: info.messageId });
-    return { success: true, messageId: info.messageId };
-  } catch (error) {
-    logger.error('Failed to send contact notification email', error);
-    throw error;
-  }
+  return deliverLeadNotification(submission, mailOptions, 'Contact', 'contact');
 };
 
 export const sendChfaLeadNotification = async (submission) => {
@@ -80,14 +152,7 @@ Submitted at: ${new Date().toLocaleString()}
     `.trim(),
   };
 
-  try {
-    const info = await transporter.sendMail(mailOptions);
-    logger.info('CHFA lead notification email sent', { messageId: info.messageId });
-    return { success: true, messageId: info.messageId };
-  } catch (error) {
-    logger.error('Failed to send CHFA lead notification email', error);
-    throw error;
-  }
+  return deliverLeadNotification(submission, mailOptions, 'CHFA lead', 'CHFA lead');
 };
 
 export const sendMarketReportNotification = async (submission) => {
@@ -118,14 +183,7 @@ Submitted at: ${new Date().toLocaleString()}
     `.trim(),
   };
 
-  try {
-    const info = await transporter.sendMail(mailOptions);
-    logger.info('Market report notification email sent', { messageId: info.messageId });
-    return { success: true, messageId: info.messageId };
-  } catch (error) {
-    logger.error('Failed to send market report notification email', error);
-    throw error;
-  }
+  return deliverLeadNotification(submission, mailOptions, 'Market report', 'market report');
 };
 
 export const sendChampionsLeadNotification = async (submission) => {
@@ -164,14 +222,7 @@ Submitted at: ${new Date().toLocaleString()}
     `.trim(),
   };
 
-  try {
-    const info = await transporter.sendMail(mailOptions);
-    logger.info('Champions lead notification email sent', { messageId: info.messageId });
-    return { success: true, messageId: info.messageId };
-  } catch (error) {
-    logger.error('Failed to send Champions lead notification email', error);
-    throw error;
-  }
+  return deliverLeadNotification(submission, mailOptions, 'Champions lead', 'Champions lead');
 };
 
 export const sendChfaDpaLeadNotification = async (submission) => {
@@ -210,14 +261,7 @@ Submitted at: ${new Date().toLocaleString()}
     `.trim(),
   };
 
-  try {
-    const info = await transporter.sendMail(mailOptions);
-    logger.info('CHFA DPA lead notification email sent', { messageId: info.messageId });
-    return { success: true, messageId: info.messageId };
-  } catch (error) {
-    logger.error('Failed to send CHFA DPA lead notification email', error);
-    throw error;
-  }
+  return deliverLeadNotification(submission, mailOptions, 'CHFA DPA lead', 'CHFA DPA lead');
 };
 
 export const sendGhopeLeadNotification = async (submission) => {
@@ -256,13 +300,6 @@ Submitted at: ${new Date().toLocaleString()}
     `.trim(),
   };
 
-  try {
-    const info = await transporter.sendMail(mailOptions);
-    logger.info('G-HOPE lead notification email sent', { messageId: info.messageId });
-    return { success: true, messageId: info.messageId };
-  } catch (error) {
-    logger.error('Failed to send G-HOPE lead notification email', error);
-    throw error;
-  }
+  return deliverLeadNotification(submission, mailOptions, 'G-HOPE lead', 'G-HOPE lead');
 };
 

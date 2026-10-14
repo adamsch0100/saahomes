@@ -49,14 +49,14 @@ function NotificationDropdownRow({ item, onOpen }) {
       type="button"
       onClick={() => onOpen(item)}
       className={`w-full text-left flex gap-3 px-3 py-2.5 hover:bg-white/10 transition-colors ${
-        unread ? "border-l-2 border-[#CFB36E]" : "border-l-2 border-transparent"
+        unread ? "border-l-2 border-[color:var(--brand-accent)]" : "border-l-2 border-transparent"
       }`}
     >
       <div className="w-10 h-10 rounded overflow-hidden bg-gray-800 shrink-0">
         {img ? (
           <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-[#CFB36E]">
+          <div className="w-full h-full flex items-center justify-center text-[color:var(--brand-accent)]">
             <BellIcon className="w-4 h-4" />
           </div>
         )}
@@ -78,6 +78,8 @@ export default function Header() {
   const location = useLocation();
   const { tenant } = useTenant();
   const tenantBrand = tenant?.brand || null;
+  // Another brokerage's own domain: its brand and only the pages it shares with SAA.
+  const isBrokerage = !!tenant?.isBrokerage;
   const headerRef = useRef(null);
   const bellRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -310,7 +312,7 @@ export default function Header() {
               type="button"
               onClick={handleMarkAllRead}
               disabled={markingAll || unreadCount === 0}
-              className="text-xs text-[#CFB36E] hover:text-white disabled:opacity-40 disabled:cursor-default transition-colors"
+              className="text-xs text-[color:var(--brand-accent)] hover:text-white disabled:opacity-40 disabled:cursor-default transition-colors"
             >
               Mark all read
             </button>
@@ -332,7 +334,7 @@ export default function Header() {
             <Link
               to="/notifications/"
               onClick={() => setBellOpen(false)}
-              className="block text-center text-sm font-medium py-2.5 text-[#CFB36E] hover:bg-white/10 transition-colors"
+              className="block text-center text-sm font-medium py-2.5 text-[color:var(--brand-accent)] hover:bg-white/10 transition-colors"
             >
               View all notifications
             </Link>
@@ -356,6 +358,7 @@ export default function Header() {
           className={`transition-all duration-300 ${
             solidBar ? "bg-black shadow-md" : "bg-transparent"
           }`}
+          style={isBrokerage && solidBar ? { backgroundColor: "var(--brand-primary)" } : undefined}
         >
           <div
             className={`w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between relative ${
@@ -375,12 +378,20 @@ export default function Header() {
               <Link to="/properties/" className="hover:text-gray-200 transition-colors text-sm">
                 Properties
               </Link>
+              {isBrokerage ? (
+                <a href="/#home-value" className="hover:text-gray-200 transition-colors text-sm">
+                  Home Valuation
+                </a>
+              ) : (
+                <>
               <Link to="/for-sellers/#home-valuation" className="hover:text-gray-200 transition-colors text-sm">
                 Home Valuation
               </Link>
               <Link to="/northern-colorado-areas/" className="hover:text-gray-200 transition-colors text-sm">
                 Northern Colorado Areas
               </Link>
+                </>
+              )}
             </div>
 
             <button
@@ -400,7 +411,17 @@ export default function Header() {
               to="/"
               className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center z-40 pointer-events-auto"
             >
-              {tenantBrand?.brandName ? (
+              {isBrokerage && tenantBrand?.logoUrl ? (
+                <img
+                  src={tenantBrand.logoUrl}
+                  alt={tenantBrand.brandName || "Home"}
+                  className={
+                    isSearchHeader
+                      ? "w-auto h-9 sm:h-10 lg:h-11 max-w-[11rem] object-contain"
+                      : "w-auto h-12 sm:h-16 lg:h-20 max-w-[14rem] sm:max-w-[18rem] object-contain"
+                  }
+                />
+              ) : tenantBrand?.brandName ? (
                 <span className="flex flex-col items-center text-center px-2">
                   <span
                     className={
@@ -408,7 +429,7 @@ export default function Header() {
                         ? "text-sm sm:text-base font-extrabold tracking-wide leading-tight"
                         : "text-base sm:text-xl lg:text-2xl font-extrabold tracking-wide leading-tight"
                     }
-                    style={{ color: "#CFB36E" }}
+                    style={{ color: "var(--brand-accent)" }}
                   >
                     {tenantBrand.brandName}
                   </span>
@@ -432,6 +453,10 @@ export default function Header() {
             </Link>
 
             <nav className="hidden lg:flex items-center gap-6 text-white text-sm z-30">
+              {isBrokerage ? (
+                <Link to="/mortgage-calculator/" className="hover:text-gray-200 transition-colors">Mortgage Calculator</Link>
+              ) : (
+                <>
               <Link to="/about-us/" className="hover:text-gray-200 transition-colors">About Us</Link>
               <div className="relative group">
                 <Link to="/for-buyers/" className="hover:text-gray-200 transition-colors inline-flex items-center gap-1">
@@ -465,6 +490,8 @@ export default function Header() {
               <Link to="/for-sellers/" className="hover:text-gray-200 transition-colors">For Sellers</Link>
               <Link to="/luxury-real-estate/" className="hover:text-gray-200 transition-colors">Luxury</Link>
               <Link to="/blog/" className="hover:text-gray-200 transition-colors">Real Estate Guides</Link>
+                </>
+              )}
               <Link to="/contact/" className="hover:text-gray-200 transition-colors">Contact</Link>
               {signedIn ? bellButton : null}
               {signedIn ? (
@@ -518,6 +545,14 @@ export default function Header() {
           <nav className="mt-14 space-y-5">
             <Link onClick={closeMenu} to="/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Home</Link>
 
+            {isBrokerage ? (
+              <>
+                <Link onClick={closeMenu} to="/properties/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Property Search</Link>
+                <a onClick={closeMenu} href="/#home-value" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Home Valuation</a>
+                <Link onClick={closeMenu} to="/mortgage-calculator/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Mortgage Calculator</Link>
+              </>
+            ) : (
+              <>
             <div>
               <div className="flex items-center justify-between gap-3">
                 <Link onClick={closeMenu} to="/for-buyers/" className="text-lg sm:text-xl hover:text-gray-300 transition-colors font-semibold">
@@ -560,6 +595,8 @@ export default function Header() {
             <Link onClick={closeMenu} to="/blog/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Real Estate Guides</Link>
             <Link onClick={closeMenu} to="/properties/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Property Search</Link>
             <Link onClick={closeMenu} to="/about-us/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">About Us</Link>
+              </>
+            )}
             <Link onClick={closeMenu} to="/contact/" className="block text-lg sm:text-xl hover:text-gray-300 transition-colors">Contact</Link>
             {signedIn ? (
               <AccountMenu
@@ -583,6 +620,22 @@ export default function Header() {
             )}
           </nav>
 
+          {isBrokerage ? (
+            (tenantBrand?.email || tenantBrand?.phone) && (
+              <div className="mt-10 space-y-3 text-sm text-gray-300">
+                {tenantBrand.email ? (
+                  <a href={`mailto:${tenantBrand.email}`} className="block hover:text-white transition-colors">
+                    ✉ {tenantBrand.email}
+                  </a>
+                ) : null}
+                {tenantBrand.phone ? (
+                  <a href={tenantBrand.tel || `tel:${tenantBrand.phone}`} className="block hover:text-white transition-colors">
+                    ☎ {tenantBrand.phone}
+                  </a>
+                ) : null}
+              </div>
+            )
+          ) : (
           <div className="mt-10 space-y-3 text-sm text-gray-300">
             <a href="mailto:info@saahomes.com" className="block hover:text-white transition-colors">
               ✉ info@saahomes.com
@@ -594,6 +647,7 @@ export default function Header() {
               ☎ {tenantBrand?.phone || "(970) 999-1407"}
             </a>
           </div>
+          )}
         </div>
       </div>
 

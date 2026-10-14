@@ -93,7 +93,7 @@ export default function VeteransLeadForm({ compact = false }) {
   }
 
   const inputClass =
-    'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CFB36E]';
+    'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-accent)]';
   const labelClass = 'block text-sm font-medium text-gray-700 mb-2';
 
   return (

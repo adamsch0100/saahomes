@@ -11,7 +11,8 @@
  */
 import getPool from '../config/database.js';
 import { denverToday } from '../controllers/tourController.js';
-import { currentTenantId } from './tenantContext.js';
+import { currentTenantId, tenantById, siteUrlFor } from './tenantContext.js';
+import { brandFor, isHomeTenant } from './brand.js';
 
 const SITE = (process.env.SITE_URL || 'https://saahomes.com').replace(/\/$/, '');
 export const MAX_BRIEF_LEADS = 10;
@@ -163,7 +164,8 @@ export async function buildBrief(agent, { now = new Date(), pool = getPool() } =
   return { date: today, items: items.slice(0, MAX_BRIEF_LEADS), more: Math.max(0, items.length - MAX_BRIEF_LEADS) };
 }
 
-export function briefEmail(agent, brief) {
+/** site: the agent's brokerage site (SAA's SITE by default). */
+export function briefEmail(agent, brief, { site = SITE } = {}) {
   const first = (agent.name || '').trim().split(/\s+/)[0] || 'there';
   const rows = brief.items.map((it, i) => `
     <tr><td style="padding:14px 0;border-top:1px solid #eee">
@@ -175,7 +177,7 @@ export function briefEmail(agent, brief) {
     <p style="font-size:15px;color:#111">Good morning, ${esc(first)}. ${brief.items.length === 1 ? 'One person is' : `${brief.items.length} people are`} worth a call today, based on what they did since yesterday morning.</p>
     <table style="width:100%;border-collapse:collapse">${rows}</table>
     ${brief.more ? `<p style="font-size:13px;color:#555">${plural(brief.more, 'more lead')} in the cockpit.</p>` : ''}
-    <p style="margin-top:18px"><a href="${SITE}/agent/" style="background:#111;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600">Open the cockpit</a></p>
+    <p style="margin-top:18px"><a href="${site}/agent/" style="background:#111;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600">Open the cockpit</a></p>
   </div>`;
 }
 
@@ -205,7 +207,14 @@ export async function runMorningBriefs({ now = new Date(), force = false, send, 
       );
       if (!claim.rows.length) continue;
       const subject = `${plural(brief.items.length, 'person', 'people')} to call today${brief.items[0] ? `, starting with ${brief.items[0].name.split(' ')[0]}` : ''}`;
-      await deliver(agent.email, subject, briefEmail(agent, brief), 'SAA Homes');
+      const tenant = await tenantById(agent.tenant_id, { pool });
+      if (isHomeTenant(tenant)) {
+        await deliver(agent.email, subject, briefEmail(agent, brief), 'SAA Homes');
+      } else {
+        // Another brokerage's agent: its own site and name.
+        const brand = brandFor(tenant);
+        await deliver(agent.email, subject, briefEmail(agent, brief, { site: siteUrlFor(tenant) }), brand.from_name || brand.name, { tenantId: tenant.id });
+      }
       sent += 1;
     } catch (e) {
       console.error('[brief] agent', agent.id, 'failed:', e.message);

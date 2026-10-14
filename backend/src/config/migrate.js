@@ -1135,6 +1135,30 @@ export const runMigrations = async () => {
       console.error('staff auth migration skipped:', staffErr.message);
     }
 
+    // Brokerage brand files (logo, app icon, agent photos) and agent profiles.
+    await client.query('SAVEPOINT brand_settings');
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS tenant_assets (
+          tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          kind VARCHAR(40) NOT NULL,
+          mime VARCHAR(40) NOT NULL,
+          data BYTEA NOT NULL,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (tenant_id, kind)
+        );
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS photo_url TEXT;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS title VARCHAR(120);
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS license_number VARCHAR(60);
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS notify_prefs JSONB NOT NULL DEFAULT '{}'::jsonb;
+      `);
+      await client.query('RELEASE SAVEPOINT brand_settings');
+    } catch (brandErr) {
+      await client.query('ROLLBACK TO SAVEPOINT brand_settings');
+      console.error('brand settings migration skipped:', brandErr.message);
+    }
+
     await client.query('COMMIT');
     console.log('Database migrations completed');
   } catch (error) {

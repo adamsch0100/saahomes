@@ -110,7 +110,7 @@ export default function ResetPasswordPage() {
             <>
               <div className="text-center">
                 {isInvite && info.brokerage && (
-                  <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#CFB36E' }}>
+                  <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--brand-accent)' }}>
                     Join {info.brokerage}
                   </p>
                 )}

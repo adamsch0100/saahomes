@@ -9,6 +9,7 @@ import {
   pushState,
   isStandalone,
 } from "../utils/push.js";
+import { useBrokerageBrand } from "../context/TenantContext.jsx";
 
 /**
  * "Get instant alerts on this phone" — web push opt-in plus app install.
@@ -16,6 +17,10 @@ import {
  * compact: one-line version for tight spots like the save-search modal.
  */
 export default function InstantAlertsCard({ compact = false, className = "" }) {
+  // Another brokerage's domain names itself and this site, not SAA.
+  const bb = useBrokerageBrand();
+  const appName = bb ? bb.name || "this site" : "SAA Homes";
+  const siteHost = bb ? (typeof window !== "undefined" ? window.location.hostname : "this site") : "saahomes.com";
   const [status, setStatus] = useState("checking"); // checking | on | off | blocked | unsupported
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -54,14 +59,14 @@ export default function InstantAlertsCard({ compact = false, className = "" }) {
 
   if (status === "checking") return null;
 
-  const shell = `rounded-xl border border-[#CFB36E]/50 bg-[#CFB36E]/10 text-left ${compact ? "px-3.5 py-3" : "p-4"} ${className}`;
+  const shell = `rounded-xl border border-[rgb(var(--brand-accent-rgb)/0.5)] bg-[rgb(var(--brand-accent-rgb)/0.1)] text-left ${compact ? "px-3.5 py-3" : "p-4"} ${className}`;
   const installButton = installable && !isStandalone() ? (
     <button
       type="button"
       onClick={() => promptInstall().then(() => setInstallable(canPromptInstall()))}
       className="mt-2 text-xs font-semibold underline text-gray-800"
     >
-      Add SAA Homes to your home screen
+      Add {appName} to your home screen
     </button>
   ) : null;
 
@@ -70,7 +75,7 @@ export default function InstantAlertsCard({ compact = false, className = "" }) {
       <div className={shell}>
         <p className="text-sm font-semibold text-gray-900">Get instant alerts on your iPhone</p>
         <p className="text-xs text-gray-700 mt-1 leading-relaxed">
-          Tap <strong>Share</strong>, then <strong>Add to Home Screen</strong>. Open SAA Homes from your home screen and
+          Tap <strong>Share</strong>, then <strong>Add to Home Screen</strong>. Open {appName} from your home screen and
           turn on alerts there. New matches and price drops show up the moment we see them.
         </p>
       </div>
@@ -103,7 +108,7 @@ export default function InstantAlertsCard({ compact = false, className = "" }) {
       <div className={shell}>
         <p className="text-sm font-semibold text-gray-900">Notifications are blocked</p>
         <p className="text-xs text-gray-700 mt-1 leading-relaxed">
-          Allow notifications for saahomes.com in your browser settings, then come back here to turn on instant alerts.
+          Allow notifications for {siteHost} in your browser settings, then come back here to turn on instant alerts.
         </p>
       </div>
     );

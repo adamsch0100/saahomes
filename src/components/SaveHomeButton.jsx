@@ -186,15 +186,16 @@ export default function SaveHomeButton({
         aria-pressed={saved}
         title={saved ? "Saved" : "Save home"}
         onClick={toggle}
-        className={`inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-white/95 shadow-md border border-black/5 hover:scale-105 active:scale-95 transition-transform touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E] ${className}`}
+        className={`inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-white/95 shadow-md border border-black/5 hover:scale-105 active:scale-95 transition-transform touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)] ${className}`}
       >
         <svg
           width={size}
           height={size}
           viewBox="0 0 24 24"
           aria-hidden="true"
-          fill={saved ? "#CFB36E" : "none"}
-          stroke={saved ? "#CFB36E" : "#111"}
+          fill="none"
+          stroke="#111"
+          style={saved ? { fill: "var(--brand-accent)", stroke: "var(--brand-accent)" } : undefined}
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"

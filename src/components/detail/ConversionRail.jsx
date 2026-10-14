@@ -9,6 +9,7 @@ import {
   isLandListing,
 } from "../../utils/listingHelpers.js";
 import { marketPack } from "../../data/marketPack.js";
+import { useBrokerageBrand } from "../../context/TenantContext.jsx";
 import { HeartIcon } from "./icons.jsx";
 import { pricePerSqftOf, lotLabel } from "./utils.js";
 import { VirtualTourButton } from "./VirtualTourModal.jsx";
@@ -27,6 +28,7 @@ export default function ConversionRail({
   likeThisFilters,
   stickyTopClass = "lg:top-6",
 }) {
+  const bb = useBrokerageBrand();
   const feats = listing?.features || {};
   const listPrice = listing?.list_price;
   const hoaFee = listing?.hoa_fee;
@@ -74,7 +76,7 @@ export default function ConversionRail({
       {/* Price + key facts + status */}
       <div className="bg-black text-white rounded-xl p-5 sm:p-6 shadow-xl">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="text-2xl font-bold text-[#CFB36E] tracking-tight">
+          <p className="text-2xl font-bold text-[color:var(--brand-accent)] tracking-tight">
             {formatPrice(listing.list_price)}
           </p>
           {listing.status === "Active" && (
@@ -102,17 +104,17 @@ export default function ConversionRail({
 
         <div className="flex flex-wrap gap-1.5 mt-2.5">
           {isNew && (
-            <span className="bg-[#CFB36E] text-black text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded">
+            <span className="bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded">
               New
             </span>
           )}
           {isNewConstruction && (
-            <span className="border border-[#CFB36E] text-[#CFB36E] text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded">
+            <span className="border border-[color:var(--brand-accent)] text-[color:var(--brand-accent)] text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded">
               New construction
             </span>
           )}
           {isAssumable && (
-            <span className="border border-[#CFB36E] text-[#CFB36E] text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded">
+            <span className="border border-[color:var(--brand-accent)] text-[color:var(--brand-accent)] text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded">
               Assumable loan possible
             </span>
           )}
@@ -146,7 +148,7 @@ export default function ConversionRail({
             listing={listing}
             buttonLabel="Schedule a Showing"
             buttonClassName="w-full inline-flex items-center justify-center px-6 py-3.5 font-semibold rounded-lg hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
-            buttonStyle={{ backgroundColor: "#CFB36E", color: "#1a1a1a" }}
+            buttonStyle={{ backgroundColor: "var(--brand-accent)", color: "var(--brand-on-accent-ink)" }}
           />
           <button
             type="button"
@@ -163,9 +165,9 @@ export default function ConversionRail({
             onClick={onToggleSave}
             aria-label={saved ? "Remove from saved homes" : "Save this home"}
             aria-pressed={saved}
-            className={`w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border text-sm font-semibold active:scale-[0.98] transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CFB36E] ${
+            className={`w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border text-sm font-semibold active:scale-[0.98] transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)] ${
               saved
-                ? "bg-[#CFB36E] border-[#CFB36E] text-black"
+                ? "bg-[color:var(--brand-accent)] border-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)]"
                 : "border-white/40 text-white hover:border-white"
             }`}
           >
@@ -182,7 +184,7 @@ export default function ConversionRail({
             <VirtualTourButton
               url={feats.virtual_tour}
               label="Virtual Tour"
-              className="w-full inline-flex items-center justify-center px-6 py-3 border border-[#CFB36E] text-[#CFB36E] font-semibold rounded-lg hover:bg-[#CFB36E] hover:text-black transition-colors text-sm cursor-pointer"
+              className="w-full inline-flex items-center justify-center px-6 py-3 border border-[color:var(--brand-accent)] text-[color:var(--brand-accent)] font-semibold rounded-lg hover:bg-[color:var(--brand-accent)] hover:text-[color:var(--brand-on-accent)] transition-colors text-sm cursor-pointer"
             />
           )}
           <SaveSearchModal
@@ -196,11 +198,45 @@ export default function ConversionRail({
         </p>
       </div>
 
-      {/* Compact agent card */}
+      {/* Compact agent card — another brokerage's domain shows that brokerage */}
+      {bb ? (
+      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden" style={{ backgroundColor: "var(--brand-primary)" }}>
+            <span className="text-[color:var(--brand-accent)] font-serif font-bold text-sm">
+              {String(bb.name || "")
+                .split(/\s+/)
+                .map((w) => w[0])
+                .filter(Boolean)
+                .slice(0, 3)
+                .join("")
+                .toUpperCase()}
+            </span>
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] uppercase tracking-wide text-gray-500 font-medium">
+              Your local agents
+            </p>
+            <p className="font-semibold text-gray-900 font-serif">{bb.agentName || bb.name}</p>
+            {bb.agentName || bb.legalName ? (
+              <p className="text-xs text-gray-600">{bb.agentName ? bb.name : bb.legalName}</p>
+            ) : null}
+          </div>
+        </div>
+        {bb.phone ? (
+          <a
+            href={bb.tel}
+            className="text-sm font-semibold text-gray-900 mt-3 inline-block hover:text-[color:var(--brand-accent)]"
+          >
+            {bb.phone}
+          </a>
+        ) : null}
+      </div>
+      ) : (
       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-full bg-black flex items-center justify-center shrink-0">
-            <span className="text-[#CFB36E] font-serif font-bold text-sm">SAA</span>
+            <span className="text-[color:var(--brand-accent)] font-serif font-bold text-sm">SAA</span>
           </div>
           <div className="min-w-0">
             <p className="text-[10px] uppercase tracking-wide text-gray-500 font-medium">
@@ -212,18 +248,19 @@ export default function ConversionRail({
         </div>
         <a
           href={marketPack.market.tel}
-          className="text-sm font-semibold text-gray-900 mt-3 inline-block hover:text-[#CFB36E]"
+          className="text-sm font-semibold text-gray-900 mt-3 inline-block hover:text-[color:var(--brand-accent)]"
         >
           {marketPack.market.phone}
         </a>
       </div>
+      )}
 
       {/* Compact est. payment teaser — scrolls to full calculator in main content */}
       {estPayment && (
         <button
           type="button"
           onClick={scrollToCalculator}
-          className="w-full text-left rounded-xl border border-gray-200 bg-white p-4 shadow-sm hover:border-[#CFB36E]/60 hover:shadow-md transition-all group"
+          className="w-full text-left rounded-xl border border-gray-200 bg-white p-4 shadow-sm hover:border-[rgb(var(--brand-accent-rgb)/0.6)] hover:shadow-md transition-all group"
           aria-label="View full payment calculator"
         >
           <div className="flex items-start justify-between gap-2">
@@ -237,7 +274,7 @@ export default function ConversionRail({
               </p>
             </div>
             <span
-              className="text-[#CFB36E] text-lg font-bold group-hover:translate-x-0.5 transition-transform"
+              className="text-[color:var(--brand-accent)] text-lg font-bold group-hover:translate-x-0.5 transition-transform"
               aria-hidden="true"
             >
               →
@@ -251,7 +288,7 @@ export default function ConversionRail({
             {" · "}
             {estPayment.downPct}% down · {estPayment.rate}% · {estPayment.termYears}-yr
           </p>
-          <p className="text-[11px] font-semibold text-gray-800 mt-2 underline underline-offset-2 decoration-[#CFB36E]/60 group-hover:decoration-[#CFB36E]">
+          <p className="text-[11px] font-semibold text-gray-800 mt-2 underline underline-offset-2 decoration-[rgb(var(--brand-accent-rgb)/0.6)] group-hover:decoration-[color:var(--brand-accent)]">
             Adjust down payment &amp; rate
           </p>
         </button>

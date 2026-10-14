@@ -12,6 +12,9 @@ import SEO from '../components/SEO';
 import ForgotPassword from '../components/account/ForgotPassword.jsx';
 import TwoStepCodeForm from '../components/account/TwoStepCodeForm.jsx';
 import TwoStepPanel from '../components/account/TwoStepPanel.jsx';
+import AgentProfile from '../components/agent/AgentProfile.jsx';
+import { useTenant } from '../context/TenantContext.jsx';
+import { getBrandTheme } from '../utils/brandTheme.js';
 import {
   agentLogin,
   getAgentTeammates,
@@ -29,13 +32,22 @@ import { marketPack, resolveTenantBrand } from '../data/marketPack.js';
 
 const AGENT_TOKEN_KEY = 'agentToken';
 const AGENT_USER_KEY = 'agentUser';
-const GOLD = '#CFB36E';
+const GOLD = 'var(--brand-accent)';
 const WEBFORM_ENDPOINT = 'https://saahomes.com/api/webform/lead';
 
-function buildWebformSnippet(slug, agentLabel) {
+/**
+ * `opts.endpoint` / `opts.formName`: on another brokerage's domain the form posts
+ * to that domain and is named for that brokerage (SAA keeps saahomes.com).
+ * The button takes the brand's accent color (the snippet lives on other sites,
+ * where our CSS variables don't exist).
+ */
+function buildWebformSnippet(slug, agentLabel, opts = {}) {
   const label = agentLabel || 'your agent';
-  return `<!-- SAA Homes lead form — goes straight to ${label} -->
-<form action="${WEBFORM_ENDPOINT}" method="POST" style="max-width:420px;font-family:system-ui,sans-serif">
+  const endpoint = opts.endpoint || WEBFORM_ENDPOINT;
+  const formName = opts.formName === undefined ? 'SAA Homes' : opts.formName;
+  const theme = getBrandTheme();
+  return `<!-- ${formName ? `${formName} lead form` : 'Lead form'} — goes straight to ${label} -->
+<form action="${endpoint}" method="POST" style="max-width:420px;font-family:system-ui,sans-serif">
   <input type="hidden" name="slug" value="${slug}" />
   <p style="font-size:13px;color:#555;margin:0 0 12px">This form goes straight to ${label}</p>
   <label style="display:block;margin-bottom:8px">Name<br/>
@@ -53,13 +65,32 @@ function buildWebformSnippet(slug, agentLabel) {
   <label style="display:block;margin-bottom:12px">Message (optional)<br/>
     <textarea name="message" rows="3" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px"></textarea>
   </label>
-  <button type="submit" style="background:#CFB36E;color:#000;font-weight:600;border:0;padding:12px 20px;border-radius:8px;cursor:pointer">
+  <button type="submit" style="background:${theme.accent};color:${theme.onAccent === '#000000' ? '#000' : '#fff'};font-weight:600;border:0;padding:12px 20px;border-radius:8px;cursor:pointer">
     Send message
   </button>
 </form>`;
 }
 
+/** On another brokerage's domain the console shows that brokerage's brand, not SAA's. */
+function brokerageConsoleBrand(tenant, agentUser) {
+  const tb = tenant?.brand || {};
+  return {
+    brandName: tb.brandName || tenant?.name || '',
+    brokerage: tb.brokerage || null,
+    phone: tb.phone || null,
+    tel: tb.tel || null,
+    voiceStyle: agentUser?.brand?.voiceStyle || null,
+    agentName: agentUser?.name || null,
+    fromName: tb.brandName || null,
+    headerSubline: tb.headerSubline || null,
+    brandLine: tb.brandLine || null,
+    isCustom: true,
+  };
+}
+
 export default function AgentPage() {
+  const { tenant } = useTenant();
+  const isBrokerage = !!tenant?.isBrokerage;
   const [token, setToken] = useState(() => localStorage.getItem(AGENT_TOKEN_KEY));
   const [agentUser, setAgentUser] = useState(() => {
     try {
@@ -76,6 +107,9 @@ export default function AgentPage() {
   const [teammates, setTeammates] = useState([]);
   const [showBrandPreview, setShowBrandPreview] = useState(false);
   const [showSecurity, setShowSecurity] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  // The brokerage requires two-step sign-in and this account hasn't set it up.
+  const [setupRequired, setSetupRequired] = useState(false);
   const [challenge, setChallenge] = useState(null); // two-step sign-in pending
 
   // Connect CRM (P-3a)
@@ -99,11 +133,20 @@ export default function AgentPage() {
   // Market pack label (P-4) — read-only; admin assigns market_key
   const [agentMarket, setAgentMarket] = useState(null);
 
-  const brand = resolveTenantBrand(agentUser);
+  const brand = isBrokerage ? brokerageConsoleBrand(tenant, agentUser) : resolveTenantBrand(agentUser);
   const marketLabel =
     agentMarket?.marketName ||
     agentUser?.brand?.marketName ||
-    marketPack.market.name;
+    (isBrokerage ? tenant.marketName || tenant.brand?.marketName || '' : marketPack.market.name);
+  const webformOpts = isBrokerage && typeof window !== 'undefined'
+    ? { endpoint: `${window.location.origin}/api/webform/lead`, formName: brand.brandName || '' }
+    : {};
+
+  useEffect(() => {
+    const onSetupRequired = () => setSetupRequired(true);
+    window.addEventListener('saa-2fa-setup-required', onSetupRequired);
+    return () => window.removeEventListener('saa-2fa-setup-required', onSetupRequired);
+  }, []);
 
   const handleLogout = useCallback(() => {
     setToken(null);
@@ -114,6 +157,8 @@ export default function AgentPage() {
     setTeammates([]);
     setShowBrandPreview(false);
     setShowSecurity(false);
+    setShowProfile(false);
+    setSetupRequired(false);
     setChallenge(null);
     setFubStatus(null);
     setFubApiKeyInput('');
@@ -246,13 +291,14 @@ export default function AgentPage() {
   useEffect(() => {
     if (token) {
       setIsAuthenticated(true);
+      if (setupRequired) return;
       loadTeammates(token);
       loadMe(token);
       loadMarket(token);
       loadFubStatus(token);
       loadWebform(token);
     }
-  }, [token, loadTeammates, loadMe, loadMarket, loadFubStatus, loadWebform]);
+  }, [token, setupRequired, loadTeammates, loadMe, loadMarket, loadFubStatus, loadWebform]);
 
   const handleFubConnect = async (e) => {
     e.preventDefault();
@@ -347,6 +393,7 @@ export default function AgentPage() {
 
   const completeLogin = (response) => {
     if (response.token) {
+      setSetupRequired(!!response.setup_2fa_required);
       setToken(response.token);
       localStorage.setItem(AGENT_TOKEN_KEY, response.token);
       const user = response.data || null;
@@ -393,7 +440,7 @@ export default function AgentPage() {
                 className="text-xs font-bold uppercase tracking-widest"
                 style={{ color: GOLD }}
               >
-                SAA Homes
+                {isBrokerage ? tenant.brand?.brandName || tenant.name : 'SAA Homes'}
               </p>
               <h2 className="mt-2 text-center text-3xl font-extrabold text-gray-900">
                 {challenge ? 'Two-step sign-in' : 'Agent console'}
@@ -407,7 +454,7 @@ export default function AgentPage() {
                 challenge={challenge}
                 onSuccess={completeLogin}
                 onCancel={() => setChallenge(null)}
-                buttonClassName="text-black bg-[#CFB36E] hover:bg-[#b89a55]"
+                buttonClassName="text-[color:var(--brand-on-accent)] bg-[color:var(--brand-accent)] hover:bg-[color:var(--brand-accent-deep)]"
               />
             ) : (
             <>
@@ -455,7 +502,7 @@ export default function AgentPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-md text-black bg-[#CFB36E] hover:bg-[#b89a55] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50"
+                  className="group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-md text-[color:var(--brand-on-accent)] bg-[color:var(--brand-accent)] hover:bg-[color:var(--brand-accent-deep)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50"
                 >
                   {loading ? 'Signing in…' : 'Sign in'}
                 </button>
@@ -463,13 +510,51 @@ export default function AgentPage() {
             </form>
             <ForgotPassword
               initialEmail={loginData.email}
-              buttonClassName="text-black bg-[#CFB36E] hover:bg-[#b89a55]"
+              buttonClassName="text-[color:var(--brand-on-accent)] bg-[color:var(--brand-accent)] hover:bg-[color:var(--brand-accent-deep)]"
             />
             </>
             )}
           </div>
         </div>
       </>
+    );
+  }
+
+  if (setupRequired) {
+    return (
+      <div className="min-h-screen w-full bg-gray-50">
+        <SEO
+          title="Two-step sign-in"
+          description="Agent console two-step sign-in setup"
+          canonical="https://saahomes.com/agent/"
+          robots="noindex, nofollow"
+        />
+        <div className="py-12 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-2xl mx-auto space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <h1 className="text-2xl font-bold text-gray-900">Set up two-step sign-in</h1>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="min-h-[44px] px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm font-medium"
+              >
+                Logout
+              </button>
+            </div>
+            <TwoStepPanel
+              token={token}
+              required
+              onEnabled={(res) => {
+                if (res?.token) {
+                  setToken(res.token);
+                  localStorage.setItem(AGENT_TOKEN_KEY, res.token);
+                }
+              }}
+              onDone={() => setSetupRequired(false)}
+            />
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -520,6 +605,13 @@ export default function AgentPage() {
               </button>
               <button
                 type="button"
+                onClick={() => setShowProfile((v) => !v)}
+                className="min-h-[44px] px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-lg hover:border-black text-sm font-medium flex items-center"
+              >
+                {showProfile ? 'Hide profile' : 'Profile'}
+              </button>
+              <button
+                type="button"
                 onClick={() => setShowSecurity((v) => !v)}
                 className="min-h-[44px] px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-lg hover:border-black text-sm font-medium flex items-center"
               >
@@ -549,7 +641,7 @@ export default function AgentPage() {
               <div className="bg-black px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div>
                   <span className="text-sm font-extrabold tracking-wide" style={{ color: GOLD }}>
-                    {String(brand.brandName || marketPack.market.brand).toUpperCase()}
+                    {String(brand.brandName || (isBrokerage ? '' : marketPack.market.brand)).toUpperCase()}
                   </span>
                   <span className="block sm:inline sm:ml-3 text-xs text-gray-400">
                     {brand.headerSubline}
@@ -568,7 +660,7 @@ export default function AgentPage() {
               </div>
               <div className="bg-white px-4 py-4">
                 <p className="text-sm font-semibold text-gray-900">
-                  Homes for sale — {marketPack.market.name}
+                  Homes for sale{isBrokerage ? (marketLabel ? ` — ${marketLabel}` : '') : ` — ${marketPack.market.name}`}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
                   Preview only: search chrome shows your brand name, brokerage, and phone.
@@ -599,6 +691,13 @@ export default function AgentPage() {
                   a lead is assigned to you.
                 </p>
               </div>
+            </div>
+          )}
+
+          {/* Agent profile — photo, bio, contact, notifications */}
+          {showProfile && (
+            <div className="mb-6 max-w-2xl">
+              <AgentProfile token={token} onSaved={() => loadMe(token)} />
             </div>
           )}
 
@@ -663,7 +762,7 @@ export default function AgentPage() {
                   <button
                     type="submit"
                     disabled={fubConnectBusy || !fubApiKeyInput.trim()}
-                    className="min-h-[44px] px-5 py-2 rounded-lg text-sm font-semibold text-black disabled:opacity-50"
+                    className="min-h-[44px] px-5 py-2 rounded-lg text-sm font-semibold text-[color:var(--brand-on-accent)] disabled:opacity-50"
                     style={{ backgroundColor: GOLD }}
                   >
                     {fubConnectBusy ? 'Verifying…' : 'Connect'}
@@ -693,7 +792,7 @@ export default function AgentPage() {
                       type="button"
                       onClick={handleFubImport}
                       disabled={fubImportBusy || fubDisconnectBusy}
-                      className="min-h-[44px] px-5 py-2 rounded-lg text-sm font-semibold text-black disabled:opacity-50"
+                      className="min-h-[44px] px-5 py-2 rounded-lg text-sm font-semibold text-[color:var(--brand-on-accent)] disabled:opacity-50"
                       style={{ backgroundColor: GOLD }}
                     >
                       {fubImportBusy ? 'Importing contacts…' : 'Import contacts'}
@@ -829,7 +928,7 @@ export default function AgentPage() {
                       <button
                         type="button"
                         onClick={() => copyText(webformData?.endpoint || WEBFORM_ENDPOINT, 'Endpoint copied')}
-                        className="min-h-[44px] px-4 py-2 rounded-lg text-sm font-semibold text-black shrink-0"
+                        className="min-h-[44px] px-4 py-2 rounded-lg text-sm font-semibold text-[color:var(--brand-on-accent)] shrink-0"
                         style={{ backgroundColor: GOLD }}
                       >
                         Copy endpoint
@@ -900,12 +999,13 @@ export default function AgentPage() {
                             copyText(
                               buildWebformSnippet(
                                 webformData.slug,
-                                brand.fromName || brand.brandName || agentUser?.name
+                                brand.fromName || brand.brandName || agentUser?.name,
+                                webformOpts
                               ),
                               'Snippet copied'
                             )
                           }
-                          className="min-h-[36px] px-3 py-1.5 rounded-lg text-xs font-semibold text-black"
+                          className="min-h-[36px] px-3 py-1.5 rounded-lg text-xs font-semibold text-[color:var(--brand-on-accent)]"
                           style={{ backgroundColor: GOLD }}
                         >
                           Copy snippet
@@ -914,7 +1014,8 @@ export default function AgentPage() {
                       <pre className="text-[11px] leading-relaxed p-3 rounded-lg border border-gray-200 bg-gray-900 text-gray-100 overflow-x-auto max-h-48">
                         {buildWebformSnippet(
                           webformData.slug,
-                          brand.fromName || brand.brandName || agentUser?.name
+                          brand.fromName || brand.brandName || agentUser?.name,
+                          webformOpts
                         )}
                       </pre>
                       <p className="text-[11px] text-gray-400">

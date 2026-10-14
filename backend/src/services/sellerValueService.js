@@ -13,6 +13,8 @@
  * If no AVM available → our range only. Never invent a second number.
  */
 import getPool from '../config/database.js';
+import { currentTenant } from './tenantContext.js';
+import { brandFor, isHomeTenant } from './brand.js';
 import logger from '../utils/logger.js';
 import {
   reefConfigured,
@@ -367,6 +369,14 @@ export async function buildHomeValue(profile, opts = {}) {
     disclaimer:
       'All figures are estimates, not appraisals. SAA Homes estimates use live MLS sales data. Market service figures come from licensed automated valuation APIs when available. For a definitive number, request a full market analysis from Adam & Mandi.',
   };
+
+  // Another brokerage's homeowner sees that brokerage's name, not SAA's.
+  const tenant = currentTenant();
+  if (tenant && !isHomeTenant(tenant)) {
+    const name = brandFor(tenant).name;
+    result.our.source_label = `${name} (local MLS data)`;
+    result.disclaimer = `All figures are estimates, not appraisals. ${name} estimates use live MLS sales data. Market service figures come from licensed automated valuation APIs when available. For a definitive number, ask your agent for a full market analysis.`;
+  }
 
   // Build compare line from our data alone first
   if (our.mid != null) {

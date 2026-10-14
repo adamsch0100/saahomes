@@ -8,6 +8,7 @@ import crypto from 'node:crypto';
 import getPool from '../config/database.js';
 import { sendEmail, smtpConfigured } from './emailer.js';
 import { siteUrlFor } from './tenantContext.js';
+import { brandFor, isHomeTenant } from './brand.js';
 import logger from '../utils/logger.js';
 
 export const LINK_TTL_HOURS = { reset: 1, invite: 24 * 7 };
@@ -16,13 +17,13 @@ const MAX_LINKS_PER_HOUR = 3;
 export const hashLinkToken = (t) => crypto.createHash('sha256').update(String(t)).digest('hex');
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-async function sendOrQueue(pool, to, subject, html, fromName, tenantId) {
+async function sendOrQueue(pool, to, subject, html, fromName, tenantId, opts) {
   const queueIt = () => pool.query(
     'INSERT INTO email_outbox (to_email, subject, html, tenant_id) VALUES ($1, $2, $3, $4)',
     [to, subject, html, tenantId]
   );
   try {
-    if (smtpConfigured()) await sendEmail(to, subject, html, fromName);
+    if (smtpConfigured()) await (opts ? sendEmail(to, subject, html, fromName, opts) : sendEmail(to, subject, html, fromName));
     else await queueIt();
   } catch (e) {
     logger.error('account email send failed, queuing', { message: e.message });
@@ -71,9 +72,18 @@ export async function issueAccountLink({ user, purpose, tenant, pool = getPool()
     [user.id, hashLinkToken(token), kind, hours]
   );
   const link = `${siteUrlFor(tenant)}/reset-password?token=${token}`;
-  const brokerage = tenant?.name || 'SAA Homes';
+  // Another brokerage's name comes from its brand (never SAA's); SAA's is unchanged.
+  const tenantId = Number(tenant?.id ?? 1);
+  const home = isHomeTenant({ id: tenantId });
+  const brand = home ? null : brandFor({ ...tenant, id: tenantId });
+  const brokerage = home ? tenant?.name || 'SAA Homes' : brand.name;
   const subject = kind === 'invite' ? `You're invited to ${brokerage}` : `Reset your ${brokerage} password`;
-  await sendOrQueue(pool, user.email, subject, emailHtml({ purpose: kind, name: user.name, brokerage, link, hours }), brokerage, user.tenant_id);
+  const html = emailHtml({ purpose: kind, name: user.name, brokerage, link, hours });
+  if (home) await sendOrQueue(pool, user.email, subject, html, brokerage, user.tenant_id);
+  else {
+    await sendOrQueue(pool, user.email, subject, html, brand.from_name || brokerage, user.tenant_id,
+      { tenantId, replyTo: brand.reply_to || brand.email || null });
+  }
   logger.info('account link issued', { user_id: user.id, purpose: kind });
   return { sent: true };
 }

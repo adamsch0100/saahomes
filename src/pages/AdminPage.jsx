@@ -10,6 +10,7 @@ import BrokeragesManager from '../components/admin/BrokeragesManager.jsx';
 import ForgotPassword from '../components/account/ForgotPassword.jsx';
 import TwoStepCodeForm from '../components/account/TwoStepCodeForm.jsx';
 import TwoStepPanel from '../components/account/TwoStepPanel.jsx';
+import BrokerageSettings from '../components/admin/BrokerageSettings.jsx';
 
 const TYPE_LABELS = {
   digest: 'Listing digest',
@@ -30,12 +31,21 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [filterType, setFilterType] = useState('all');
-  const [tab, setTab] = useState('cockpit'); // cockpit | leads | searches | agents | email-ab | funnel | security | brokerages
+  const [tab, setTab] = useState('cockpit'); // cockpit | leads | searches | agents | email-ab | funnel | security | settings | brokerages
   const [abStats, setAbStats] = useState(null);
   const [abLoading, setAbLoading] = useState(false);
   const [abError, setAbError] = useState(null);
   const [challenge, setChallenge] = useState(null); // two-step sign-in pending
   const [me, setMe] = useState(null); // GET /api/account/me — platform flag gates Brokerages
+  // The brokerage requires two-step sign-in and this account hasn't set it up:
+  // the token only works on /api/account/*, so show only the setup panel.
+  const [setupRequired, setSetupRequired] = useState(false);
+
+  useEffect(() => {
+    const onSetupRequired = () => setSetupRequired(true);
+    window.addEventListener('saa-2fa-setup-required', onSetupRequired);
+    return () => window.removeEventListener('saa-2fa-setup-required', onSetupRequired);
+  }, []);
 
   useEffect(() => {
     if (token) {
@@ -45,7 +55,7 @@ export default function AdminPage() {
   }, [token]);
 
   const fetchData = async () => {
-    if (!token) return;
+    if (!token || setupRequired) return;
     
     setLoading(true);
     setError(null);
@@ -72,10 +82,10 @@ export default function AdminPage() {
     if (isAuthenticated) {
       fetchData();
     }
-  }, [filterType, isAuthenticated]);
+  }, [filterType, isAuthenticated, setupRequired]);
 
   useEffect(() => {
-    if (!isAuthenticated || !token) return;
+    if (!isAuthenticated || !token || setupRequired) return;
     let cancelled = false;
     getAccountMe(token)
       .then((res) => {
@@ -85,7 +95,7 @@ export default function AdminPage() {
         if (!cancelled) setMe(null);
       });
     return () => { cancelled = true; };
-  }, [isAuthenticated, token]);
+  }, [isAuthenticated, token, setupRequired]);
 
   useEffect(() => {
     if (!isAuthenticated || !token || tab !== 'email-ab') return;
@@ -131,6 +141,7 @@ export default function AdminPage() {
 
   const completeLogin = (response) => {
     if (response.token) {
+      setSetupRequired(!!response.setup_2fa_required);
       setToken(response.token);
       localStorage.setItem('adminToken', response.token);
       setChallenge(null);
@@ -147,7 +158,16 @@ export default function AdminPage() {
     setAbStats(null);
     setMe(null);
     setChallenge(null);
+    setSetupRequired(false);
     setTab('cockpit');
+  };
+
+  // Two-step setup finished: the full token replaces the setup-only one.
+  const handleTwoStepEnabled = (res) => {
+    if (res?.token) {
+      setToken(res.token);
+      localStorage.setItem('adminToken', res.token);
+    }
   };
 
   const formatDate = (dateString) => {
@@ -242,6 +262,39 @@ export default function AdminPage() {
     );
   }
 
+  if (setupRequired) {
+    return (
+      <div className="min-h-screen w-full bg-gray-50">
+        <SEO
+          title="Two-step sign-in"
+          description="Admin panel two-step sign-in setup"
+          canonical="https://saahomes.com/admin/"
+          robots="noindex, nofollow"
+        />
+        <div className="py-12 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-2xl mx-auto space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <h1 className="text-2xl font-bold text-gray-900">Set up two-step sign-in</h1>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="min-h-[44px] px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
+              >
+                Logout
+              </button>
+            </div>
+            <TwoStepPanel
+              token={token}
+              required
+              onEnabled={handleTwoStepEnabled}
+              onDone={() => setSetupRequired(false)}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen w-full bg-gray-50">
       <SEO
@@ -324,6 +377,13 @@ export default function AdminPage() {
             >
               Security
             </button>
+            <button
+              type="button"
+              onClick={() => setTab('settings')}
+              className={`min-h-[44px] px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${tab === 'settings' ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-200 hover:border-black'}`}
+            >
+              Settings
+            </button>
             {me?.platform === true && (
               <button
                 type="button"
@@ -347,6 +407,8 @@ export default function AdminPage() {
             <div className="max-w-2xl">
               <TwoStepPanel token={token} />
             </div>
+          ) : tab === 'settings' ? (
+            <BrokerageSettings token={token} />
           ) : tab === 'brokerages' && me?.platform === true ? (
             <BrokeragesManager token={token} />
           ) : tab === 'email-ab' ? (
@@ -416,7 +478,7 @@ export default function AdminPage() {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
                             {row.opened}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium" style={{ color: '#CFB36E' }}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium" style={{ color: 'var(--brand-accent)' }}>
                             {formatOpenRate(row.open_rate)}
                           </td>
                         </tr>
@@ -434,7 +496,7 @@ export default function AdminPage() {
                           <td className="px-6 py-4 text-sm font-semibold text-gray-900 text-right">
                             {abStats.totals.opened}
                           </td>
-                          <td className="px-6 py-4 text-sm font-semibold text-right" style={{ color: '#CFB36E' }}>
+                          <td className="px-6 py-4 text-sm font-semibold text-right" style={{ color: 'var(--brand-accent)' }}>
                             {formatOpenRate(abStats.totals.open_rate)}
                           </td>
                         </tr>

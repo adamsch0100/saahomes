@@ -201,7 +201,7 @@ export default function ClientSearchesManager({ token }) {
               </select>
             )}
           </div>
-          <button type="submit" className="px-4 py-2.5 bg-[#CFB36E] text-black rounded-lg text-sm font-bold hover:bg-[#bd9f5a]">Create search</button>
+          <button type="submit" className="px-4 py-2.5 bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] rounded-lg text-sm font-bold hover:bg-[color:var(--brand-accent-strong)]">Create search</button>
         </form>
       )}
 

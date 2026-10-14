@@ -71,7 +71,7 @@ function toDateInputValue(iso) {
   return `${y}-${m}-${day}`;
 }
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 
 /** Format FUB lifecycle-sync API result into honest status lines for the agent. */
 function formatFubSyncResult(data) {
@@ -156,7 +156,7 @@ function ShareHomeForm({
   return (
     <div
       className="mt-3 rounded-lg border p-3 space-y-3"
-      style={{ borderColor: `${GOLD}66`, backgroundColor: `${GOLD}0d` }}
+      style={{ borderColor: "rgb(var(--brand-accent-rgb) / 0.4)", backgroundColor: "rgb(var(--brand-accent-rgb) / 0.051)" }}
     >
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-semibold text-gray-900">Share a home</p>
@@ -208,7 +208,7 @@ function ShareHomeForm({
         type="button"
         disabled={busy || !listing.trim() || !email.trim()}
         onClick={onSubmit}
-        className="w-full min-h-[44px] px-4 rounded-lg text-sm font-semibold text-black disabled:opacity-50"
+        className="w-full min-h-[44px] px-4 rounded-lg text-sm font-semibold text-[color:var(--brand-on-accent)] disabled:opacity-50"
         style={{ backgroundColor: GOLD }}
       >
         {busy ? "Sending…" : "Send"}
@@ -395,7 +395,7 @@ export default function AgentCockpit({
             disabled={busy}
             onClick={() => assignLead(lead, currentAgentId)}
             className="min-h-[36px] px-3 rounded-lg text-xs font-semibold text-black border disabled:opacity-50"
-            style={{ borderColor: GOLD, backgroundColor: `${GOLD}22` }}
+            style={{ borderColor: GOLD, backgroundColor: "rgb(var(--brand-accent-rgb) / 0.133)" }}
           >
             {busy ? "…" : "Claim"}
           </button>
@@ -485,7 +485,7 @@ export default function AgentCockpit({
             ? "text-red-800 bg-red-50 border-red-100"
             : "text-gray-800 bg-white border-gray-200"
         }`}
-        style={ok ? { borderColor: `${GOLD}66` } : undefined}
+        style={ok ? { borderColor: "rgb(var(--brand-accent-rgb) / 0.4)" } : undefined}
       >
         <p className="font-semibold" style={ok ? { color: "#8a7329" } : undefined}>
           FUB sync
@@ -661,7 +661,7 @@ export default function AgentCockpit({
                         {lead.source === "fub-import" && (
                           <span
                             className="ml-1.5 text-[10px] font-bold uppercase tracking-wide text-black px-1.5 py-0.5 rounded align-middle"
-                            style={{ backgroundColor: `${GOLD}55` }}
+                            style={{ backgroundColor: "rgb(var(--brand-accent-rgb) / 0.333)" }}
                             title="Imported from Follow Up Boss"
                           >
                             FUB
@@ -670,7 +670,7 @@ export default function AgentCockpit({
                         {lead.source === "webform" && (
                           <span
                             className="ml-1.5 text-[10px] font-bold uppercase tracking-wide text-black px-1.5 py-0.5 rounded align-middle"
-                            style={{ backgroundColor: `${GOLD}55` }}
+                            style={{ backgroundColor: "rgb(var(--brand-accent-rgb) / 0.333)" }}
                             title="Submitted via agent website form"
                           >
                             Webform
@@ -739,7 +739,7 @@ export default function AgentCockpit({
                           type="button"
                           onClick={() => openShareForm(lead)}
                           className="min-h-[40px] px-3 rounded-lg text-sm font-semibold text-black border"
-                          style={{ borderColor: GOLD, backgroundColor: `${GOLD}22` }}
+                          style={{ borderColor: GOLD, backgroundColor: "rgb(var(--brand-accent-rgb) / 0.133)" }}
                         >
                           Share a home
                         </button>
@@ -748,7 +748,7 @@ export default function AgentCockpit({
                           disabled={fubSyncBusyId === lead.id}
                           onClick={() => syncFubLifecycle(lead)}
                           className="min-h-[40px] px-3 rounded-lg text-sm font-semibold text-black border disabled:opacity-50"
-                          style={{ borderColor: GOLD, backgroundColor: `${GOLD}22` }}
+                          style={{ borderColor: GOLD, backgroundColor: "rgb(var(--brand-accent-rgb) / 0.133)" }}
                         >
                           {fubSyncBusyId === lead.id ? "Syncing…" : "Sync from FUB"}
                         </button>
@@ -812,7 +812,7 @@ export default function AgentCockpit({
                             {lead.source === "fub-import" && (
                               <span
                                 className="ml-1.5 text-[10px] font-bold uppercase tracking-wide text-black px-1.5 py-0.5 rounded"
-                                style={{ backgroundColor: `${GOLD}55` }}
+                                style={{ backgroundColor: "rgb(var(--brand-accent-rgb) / 0.333)" }}
                                 title="Imported from Follow Up Boss"
                               >
                                 FUB
@@ -821,7 +821,7 @@ export default function AgentCockpit({
                             {lead.source === "webform" && (
                               <span
                                 className="ml-1.5 text-[10px] font-bold uppercase tracking-wide text-black px-1.5 py-0.5 rounded"
-                                style={{ backgroundColor: `${GOLD}55` }}
+                                style={{ backgroundColor: "rgb(var(--brand-accent-rgb) / 0.333)" }}
                                 title="Submitted via agent website form"
                               >
                                 Webform
@@ -933,7 +933,7 @@ export default function AgentCockpit({
                                   type="button"
                                   onClick={() => openShareForm(lead)}
                                   className="min-h-[36px] px-3 rounded-lg text-xs font-semibold text-black border hover:opacity-90"
-                                  style={{ borderColor: GOLD, backgroundColor: `${GOLD}22` }}
+                                  style={{ borderColor: GOLD, backgroundColor: "rgb(var(--brand-accent-rgb) / 0.133)" }}
                                 >
                                   Share a home
                                 </button>
@@ -942,7 +942,7 @@ export default function AgentCockpit({
                                   disabled={fubSyncBusyId === lead.id}
                                   onClick={() => syncFubLifecycle(lead)}
                                   className="min-h-[36px] px-3 rounded-lg text-xs font-semibold text-black border hover:opacity-90 disabled:opacity-50"
-                                  style={{ borderColor: GOLD, backgroundColor: `${GOLD}22` }}
+                                  style={{ borderColor: GOLD, backgroundColor: "rgb(var(--brand-accent-rgb) / 0.133)" }}
                                 >
                                   {fubSyncBusyId === lead.id ? "Syncing…" : "Sync from FUB"}
                                 </button>

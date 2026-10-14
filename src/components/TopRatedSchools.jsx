@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -94,7 +94,7 @@ export default function TopRatedSchools({ city, citySlug, limit = 8 }) {
           {schools.map((s) => (
             <div
               key={`${s.citySlug || s.city}-${s.name}`}
-              className="flex items-center gap-3 p-4 rounded-xl border border-gray-100 bg-gray-50 hover:border-[#CFB36E]/50 transition-colors"
+              className="flex items-center gap-3 p-4 rounded-xl border border-gray-100 bg-gray-50 hover:border-[rgb(var(--brand-accent-rgb)/0.5)] transition-colors"
             >
               {s.rating != null && (
                 <a
@@ -102,7 +102,7 @@ export default function TopRatedSchools({ city, citySlug, limit = 8 }) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="shrink-0 inline-flex flex-col items-center justify-center w-12 h-12 rounded-full border-2 text-gray-900 font-bold"
-                  style={{ backgroundColor: `${GOLD}33`, borderColor: GOLD }}
+                  style={{ backgroundColor: "rgb(var(--brand-accent-rgb) / 0.2)", borderColor: GOLD }}
                   title={`GreatSchools Rating: ${s.rating}/10`}
                   aria-label={`${s.name} GreatSchools Rating ${s.rating}/10`}
                 >

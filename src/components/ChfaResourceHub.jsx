@@ -84,7 +84,7 @@ export default function ChfaResourceHub({ compact = false }) {
     <section className="py-16 px-6 bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-10">
-          <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: "#CFB36E" }}>
+          <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: "var(--brand-accent)" }}>
             Colorado Homebuyer Resources
           </p>
           <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4">Your homebuyer program hub</h2>
@@ -98,17 +98,17 @@ export default function ChfaResourceHub({ compact = false }) {
             <Link
               key={link.href}
               to={link.href}
-              className="group block rounded-xl p-6 border border-gray-700 bg-gray-800/50 hover:border-[#CFB36E] hover:bg-gray-800 transition-all"
+              className="group block rounded-xl p-6 border border-gray-700 bg-gray-800/50 hover:border-[color:var(--brand-accent)] hover:bg-gray-800 transition-all"
             >
               <span
                 className="inline-block px-2 py-0.5 rounded text-xs font-bold uppercase mb-3"
-                style={{ backgroundColor: "#CFB36E", color: "#1a1a1a" }}
+                style={{ backgroundColor: "var(--brand-accent)", color: "var(--brand-on-accent-ink)" }}
               >
                 {link.badge}
               </span>
               <h3 className="text-xl font-bold font-serif mb-2 group-hover:underline">{link.title}</h3>
               <p className="text-gray-400 text-sm">{link.description}</p>
-              <span className="inline-block mt-4 text-sm font-semibold" style={{ color: "#CFB36E" }}>
+              <span className="inline-block mt-4 text-sm font-semibold" style={{ color: "var(--brand-accent)" }}>
                 View program →
               </span>
             </Link>

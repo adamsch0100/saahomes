@@ -234,11 +234,12 @@ export async function saveHomeForUser(user, listing, pool = getPool(), { via = n
       console.error('lead score on saved home failed:', e.message);
     });
 
-    // FUB: person + "Saved a home" nurture event (source saahomes.com)
+    // FUB: person + "Saved a home" nurture event (source: the brokerage's site)
     import('../services/followUpBossService.js')
       .then(({ pushNurtureSignalToFollowUpBoss }) =>
         pushNurtureSignalToFollowUpBoss({
           signal: 'saved_home',
+          tenantId: user.tenant_id,
           email: user.email,
           name: user.name,
           phone: user.phone,

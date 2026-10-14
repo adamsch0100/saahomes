@@ -6,7 +6,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { createTenant, listTenants, patchTenant } from '../../utils/api.js';
 
-const GOLD = '#CFB36E';
+const GOLD = 'var(--brand-accent)';
 
 const emptyForm = {
   name: '',
@@ -173,7 +173,7 @@ export default function BrokeragesManager({ token }) {
             <button
               type="submit"
               disabled={creating}
-              className="min-h-[44px] px-5 rounded-lg text-sm font-semibold text-black disabled:opacity-50"
+              className="min-h-[44px] px-5 rounded-lg text-sm font-semibold text-[color:var(--brand-on-accent)] disabled:opacity-50"
               style={{ backgroundColor: GOLD }}
             >
               {creating ? 'Adding…' : 'Add brokerage'}

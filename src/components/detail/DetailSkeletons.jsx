@@ -6,7 +6,7 @@ export function PageDetailSkeleton() {
       <div className="bg-black pt-24 sm:pt-28 pb-6">
         <div className="max-w-7xl mx-auto px-4 space-y-3">
           <div className="h-8 w-2/3 max-w-md bg-white/10 rounded" />
-          <div className="h-7 w-40 bg-[#CFB36E]/30 rounded" />
+          <div className="h-7 w-40 bg-[rgb(var(--brand-accent-rgb)/0.3)] rounded" />
           <div className="h-4 w-64 bg-white/10 rounded" />
         </div>
         <div className="max-w-7xl mx-auto px-4 mt-6">

@@ -1,6 +1,6 @@
 import React from "react";
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 
 /**
  * QualifyCta — conversational lead-capture band for lending/program pages.
@@ -34,7 +34,7 @@ export default function QualifyCta({
             type="button"
             onClick={openChat}
             className="inline-flex items-center justify-center gap-2 px-8 py-3.5 font-semibold rounded-lg hover:opacity-90 transition-opacity touch-manipulation shadow-lg cursor-pointer"
-            style={{ backgroundColor: GOLD, color: "#1a1a1a" }}
+            style={{ backgroundColor: GOLD, color: "var(--brand-on-accent-ink)" }}
           >
             💬 Chat about qualifying
           </button>

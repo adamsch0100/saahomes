@@ -8,7 +8,7 @@ import {
   millionPlusSearchHref,
 } from "../data/luxuryMarket.js";
 
-const GOLD = "#CFB36E";
+const GOLD = "var(--brand-accent)";
 
 /**
  * City-modified luxury H2/H3 block for area pages.
@@ -77,7 +77,7 @@ export default function CityLuxurySection({ citySlug, deep = false }) {
                 <Link
                   key={n.slug}
                   to={`/northern-colorado-areas/${citySlug}/${n.slug}/`}
-                  className="block p-4 rounded-lg border border-gray-200 hover:border-[#CFB36E] hover:shadow-md transition-all bg-gray-50"
+                  className="block p-4 rounded-lg border border-gray-200 hover:border-[color:var(--brand-accent)] hover:shadow-md transition-all bg-gray-50"
                 >
                   <span className="font-semibold text-gray-900">{n.name}</span>
                   <span className="block text-sm text-gray-600 mt-1">{n.priceHint}</span>
@@ -96,14 +96,14 @@ export default function CityLuxurySection({ citySlug, deep = false }) {
           </Link>
           <Link
             to="/luxury-real-estate/"
-            className="inline-flex items-center justify-center px-6 py-3 border-2 font-semibold rounded-lg transition-colors hover:bg-[#CFB36E]/10"
+            className="inline-flex items-center justify-center px-6 py-3 border-2 font-semibold rounded-lg transition-colors hover:bg-[rgb(var(--brand-accent-rgb)/0.1)]"
             style={{ borderColor: GOLD, color: "#1a1a1a" }}
           >
             Northern Colorado Luxury Hub
           </Link>
           <Link
             to={millionPlusSearchHref(ctx.city)}
-            className="inline-flex items-center justify-center px-6 py-3 border-2 font-semibold rounded-lg transition-colors hover:bg-[#CFB36E]/10"
+            className="inline-flex items-center justify-center px-6 py-3 border-2 font-semibold rounded-lg transition-colors hover:bg-[rgb(var(--brand-accent-rgb)/0.1)]"
             style={{ borderColor: GOLD, color: "#1a1a1a" }}
           >
             {ctx.city} $1M+ listings

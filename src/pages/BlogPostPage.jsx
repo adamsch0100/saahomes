@@ -166,7 +166,7 @@ export default function BlogPostPage() {
             <a
               href="/for-sellers/#home-valuation"
               className="flex-shrink-0 inline-flex items-center px-4 py-2 font-semibold rounded-lg hover:brightness-110 transition-all text-sm"
-              style={{ backgroundColor: "#CFB36E", color: "#1a1a1a" }}
+              style={{ backgroundColor: "var(--brand-accent)", color: "var(--brand-on-accent-ink)" }}
             >
               Get My Home Value →
             </a>
@@ -184,7 +184,7 @@ export default function BlogPostPage() {
             <Link to="/blog/" className="text-sm text-gray-200 hover:text-white mb-4 inline-block">
               ← Back to Real Estate Guides
             </Link>
-            <span className="block text-sm font-semibold uppercase tracking-wide text-[#CFB36E] mb-3">
+            <span className="block text-sm font-semibold uppercase tracking-wide text-[color:var(--brand-accent)] mb-3">
               {post.category}
             </span>
             <h1 className="text-4xl sm:text-5xl font-bold font-serif leading-tight">{post.title}</h1>
@@ -196,7 +196,7 @@ export default function BlogPostPage() {
                 <a
                   href="/for-sellers/#home-valuation"
                   className="inline-flex items-center justify-center px-6 py-3 font-semibold rounded-lg hover:brightness-110 transition-all shadow-lg"
-                  style={{ backgroundColor: "#CFB36E", color: "#1a1a1a" }}
+                  style={{ backgroundColor: "var(--brand-accent)", color: "var(--brand-on-accent-ink)" }}
                 >
                   Get My Free Home Value →
                 </a>
@@ -213,7 +213,7 @@ export default function BlogPostPage() {
                 <Link
                   to={cta.primaryHref}
                   className="inline-flex items-center justify-center px-6 py-3 font-semibold rounded-lg hover:brightness-110 transition-all shadow-lg"
-                  style={{ backgroundColor: "#CFB36E", color: "#1a1a1a" }}
+                  style={{ backgroundColor: "var(--brand-accent)", color: "var(--brand-on-accent-ink)" }}
                 >
                   {cta.primaryText} →
                 </Link>
@@ -281,7 +281,7 @@ export default function BlogPostPage() {
                 <>
                   <div ref={inlineCtaSentinel} className="h-4" aria-hidden="true" />
                   {showInlineCta && (
-                    <div className="my-10 p-7 rounded-2xl border-2 border-[#CFB36E] bg-gradient-to-br from-white to-amber-50 shadow-md text-center">
+                    <div className="my-10 p-7 rounded-2xl border-2 border-[color:var(--brand-accent)] bg-gradient-to-br from-white to-amber-50 shadow-md text-center">
                       <h3 className="text-xl font-bold font-serif mb-2">
                         See what's selling in your city right now
                       </h3>

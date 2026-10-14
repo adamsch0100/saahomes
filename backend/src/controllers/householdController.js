@@ -15,7 +15,10 @@
 import crypto from 'crypto';
 import getPool from '../config/database.js';
 import { recordEvent as recordStreamEvent, onIdentified } from '../services/events.js';
-import { sendEmail, smtpConfigured } from '../services/emailer.js';
+import {
+  sendEmail, smtpConfigured, emailBrandForUser, emailSiteUrl, contactLine,
+} from '../services/emailer.js';
+import { isHomeTenant } from '../services/brand.js';
 import { createNotification } from '../services/notificationService.js';
 import { hasOwnSession, isStaffAccount, setAuthCookie, SIGN_IN_REQUIRED_MESSAGE, emailSignInLink } from './alertController.js';
 import { findListing, resolveUser } from './savedHomesController.js';
@@ -34,12 +37,12 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 
 const unauthorized = (res) => res.status(401).json({ success: false, error: 'Sign in to shop together.' });
 
-async function sendOrQueue(to, subject, html, fromName) {
+async function sendOrQueue(to, subject, html, fromName, opts) {
   const queueIt = () => getPool().query(
     'INSERT INTO email_outbox (to_email, subject, html, tenant_id) VALUES ($1, $2, $3, $4)', [to, subject, html, currentTenantId()]
   );
   try {
-    if (smtpConfigured()) await sendEmail(to, subject, html, fromName);
+    if (smtpConfigured()) await (opts ? sendEmail(to, subject, html, fromName, opts) : sendEmail(to, subject, html, fromName));
     else await queueIt();
   } catch (e) {
     console.error('household email send failed, queuing:', e.message);
@@ -144,19 +147,25 @@ export const inviteToHousehold = async (req, res) => {
     );
 
     const from = user.name || user.email;
-    const joinUrl = `${SITE}/board/?join=${token}`;
+    // The inviter's brokerage: its name, colors and site (SAA's unchanged).
+    const { tenant, brand } = await emailBrandForUser({ ...user, tenant_id: user.tenant_id || 1 }, { pool });
+    const home = isHomeTenant(tenant);
+    const site = emailSiteUrl(tenant, SITE);
+    const joinUrl = `${site}/board/?join=${token}`;
     const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#111">
-        <tr><td align="center" style="padding:24px 16px"><div style="color:#CFB36E;font-size:20px;font-weight:800">SAA HOMES</div></td></tr>
+        <tr><td align="center" style="padding:24px 16px"><div style="color:${esc(brand.accent_color)};font-size:20px;font-weight:800">${esc(brand.name.toUpperCase())}</div></td></tr>
       </table>
       <div style="max-width:520px;margin:0 auto;padding:24px 16px">
         <h1 style="font-size:19px;color:#111">${esc(from)} wants to shop for a home with you</h1>
         <p style="color:#4b5563;font-size:14px;line-height:1.6">Join their board to see the homes they've saved, react to each one, and talk it over in one place. Your private notes stay private.</p>
         <a href="${joinUrl}" style="display:inline-block;background:#111;color:#fff;font-size:14px;font-weight:700;padding:12px 22px;border-radius:8px;text-decoration:none">Join the board</a>
         <p style="color:#6b7280;font-size:12px;margin-top:16px">This link signs you in, so don't forward it. It works once and expires in ${INVITE_DAYS} days.</p>
-        <p style="color:#9ca3af;font-size:11px;margin-top:20px">Schwartz and Associates · (970) 999-1407 · saahomes.com</p>
+        <p style="color:#9ca3af;font-size:11px;margin-top:20px">${esc(home ? contactLine(brand, 'https://saahomes.com') : contactLine(brand, site))}</p>
       </div></body></html>`;
-    await sendOrQueue(email, `${firstName(user)} invited you to shop for a home together`, html, 'SAA Homes');
+    const subject = `${firstName(user)} invited you to shop for a home together`;
+    if (home) await sendOrQueue(email, subject, html, 'SAA Homes');
+    else await sendOrQueue(email, subject, html, brand.from_name || brand.name, { tenantId: tenant.id, replyTo: brand.reply_to || brand.email || null });
 
     recordStreamEvent({ type: 'household_invite', userId: user.id, meta: { invite_id: invite.id } });
     return res.status(201).json({ success: true, data: { invite } });
