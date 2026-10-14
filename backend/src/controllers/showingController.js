@@ -9,6 +9,7 @@ import { forwardShowingRequestToFollowUpBoss } from '../services/followUpBossSer
 import { rejectIfDisposableEmail } from '../utils/emailQuality.js';
 import { reportLeadToBoard } from '../services/boardLeadCount.js';
 import { tenantIdOf } from '../services/tenantContext.js';
+import { brandFor } from '../services/brand.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -75,6 +76,10 @@ export const submitShowingRequest = async (req, res) => {
     });
   } catch (error) {
     console.error('submitShowingRequest error:', error);
-    return res.status(500).json({ success: false, error: 'Could not submit your showing request. Please try again or call (970) 999-1407.' });
+    const { phone } = brandFor(req.tenant);
+    return res.status(500).json({
+      success: false,
+      error: `Could not submit your showing request. Please try again${phone ? ` or call ${phone}` : ''}.`,
+    });
   }
 };

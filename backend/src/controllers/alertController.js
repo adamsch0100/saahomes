@@ -21,7 +21,10 @@ import {
   PUBLIC_EVENT_TYPES,
 } from '../services/events.js';
 import { recordConsent } from '../services/consent.js';
-import { sendEmail, smtpConfigured } from '../services/emailer.js';
+import {
+  sendEmail, smtpConfigured, emailBrandForUser, emailSiteUrl, contactLine,
+} from '../services/emailer.js';
+import { isHomeTenant } from '../services/brand.js';
 import {
   computeAndStoreLeadScore,
   getSearchMatchMeta,
@@ -94,6 +97,13 @@ export const SIGN_IN_REQUIRED_MESSAGE =
  *  carries the same words); stored verbatim with the consent. */
 export const SMS_ALERT_CONSENT_WORDING =
   'Text me new matches and price drops for this search from SAA Homes. Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for help.';
+
+/** The same words with another brokerage's name (SAA's stay exactly as above). */
+export function smsAlertConsentWording(tenant) {
+  if (isHomeTenant(tenant)) return SMS_ALERT_CONSENT_WORDING;
+  const name = tenant?.settings?.brand?.name || tenant?.name || 'us';
+  return SMS_ALERT_CONSENT_WORDING.replace('from SAA Homes', `from ${name}`);
+}
 
 export const createAlert = async (req, res) => {
   try {
@@ -209,7 +219,7 @@ export const createAlert = async (req, res) => {
           userId: userRow.id,
           channel: 'sms',
           granted: true,
-          wording: SMS_ALERT_CONSENT_WORDING,
+          wording: smsAlertConsentWording(req.tenant),
           source: 'save_search',
           req,
         }).catch((e) => console.error('consent record failed:', e.message));
@@ -457,11 +467,16 @@ export const trackPublicEvent = async (req, res) => {
  * SMTP is configured on this runtime, otherwise queues it in email_outbox.
  */
 export async function emailSignInLink(userRow) {
-  const manageUrl = `https://saahomes.com/my-saved-searches/?token=${userRow.manage_token}`;
+  // The account's own brokerage: its name, colors and site (SAA's unchanged).
+  const { tenant, brand } = await emailBrandForUser({ ...userRow, tenant_id: userRow.tenant_id ?? currentTenantId() });
+  const site = emailSiteUrl(tenant);
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const subject = `Your saved searches — ${brand.name}`;
+  const manageUrl = `${site}/my-saved-searches/?token=${userRow.manage_token}`;
   const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#111">
       <tr><td align="center" style="padding:24px 16px">
-        <div style="color:#CFB36E;font-size:20px;font-weight:800">SAA HOMES</div>
+        <div style="color:${esc(brand.accent_color)};font-size:20px;font-weight:800">${esc(brand.name.toUpperCase())}</div>
       </td></tr>
     </table>
     <div style="max-width:520px;margin:0 auto;padding:24px 16px">
@@ -469,19 +484,20 @@ export async function emailSignInLink(userRow) {
       <p style="color:#4b5563;font-size:14px;line-height:1.6">Click the button to view and manage your saved searches, alerts, and saved homes.</p>
       <a href="${manageUrl}" style="display:inline-block;background:#111;color:#fff;font-size:14px;font-weight:700;padding:12px 22px;border-radius:8px;text-decoration:none">Sign in to my saved searches</a>
       <p style="color:#6b7280;font-size:12px;margin-top:16px">Or copy this link:<br/><span style="color:#111">${manageUrl}</span></p>
-      <p style="color:#9ca3af;font-size:11px;margin-top:20px">Schwartz and Associates · (970) 999-1407 · saahomes.com</p>
+      <p style="color:#9ca3af;font-size:11px;margin-top:20px">${esc(contactLine(brand, site))}</p>
     </div></body></html>`;
   // Send instantly when SMTP is configured on this runtime; otherwise
   // queue it — the outbox cron drains the queue as a fallback.
   const queueIt = async () => {
     await getPool().query(
       `INSERT INTO email_outbox (to_email, subject, html, tenant_id) VALUES ($1, $2, $3, $4)`,
-      [userRow.email, 'Your saved searches — SAA Homes', html, userRow.tenant_id ?? currentTenantId()]
+      [userRow.email, subject, html, tenant.id]
     );
   };
   try {
     if (smtpConfigured()) {
-      await sendEmail(userRow.email, 'Your saved searches — SAA Homes', html, 'Adam Schwartz, SAA Homes');
+      if (isHomeTenant(tenant)) await sendEmail(userRow.email, subject, html, 'Adam Schwartz, SAA Homes');
+      else await sendEmail(userRow.email, subject, html, brand.from_name || brand.name, { tenantId: tenant.id, replyTo: brand.reply_to || brand.email || null });
     } else {
       await queueIt();
     }

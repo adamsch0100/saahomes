@@ -94,18 +94,18 @@ const icsEscape = (s) => String(s ?? '').replace(/\\/g, '\\\\').replace(/;/g, '\
  * A tentative calendar hold for the first requested window, in Mountain time.
  * The tour is a request until the agent confirms, and the event says so.
  */
-export function tourCalendar({ id, plan, window, site = 'https://saahomes.com', now = new Date() }) {
+export function tourCalendar({ id, plan, window, site = 'https://saahomes.com', brandName = 'SAA Homes', uidHost = 'saahomes.com', now = new Date() }) {
   const part = DAY_PARTS[window.part];
   const day = window.date.replace(/-/g, '');
   const stamp = now.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//SAA Homes//Tour Planner//EN',
+    `PRODID:-//${brandName}//Tour Planner//EN`,
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
-    `UID:tour-${id}@saahomes.com`,
+    `UID:tour-${id}@${uidHost}`,
     `DTSTAMP:${stamp}`,
     `DTSTART;TZID=America/Denver:${day}T${part.start.replace(':', '')}00`,
     `DTEND;TZID=America/Denver:${day}T${part.end.replace(':', '')}00`,

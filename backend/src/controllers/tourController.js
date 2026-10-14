@@ -20,7 +20,8 @@ import {
 } from '../services/tourPlanner.js';
 import { resolveUser } from './savedHomesController.js';
 import { reportLeadToBoard } from '../services/boardLeadCount.js';
-import { tenantIdOf } from '../services/tenantContext.js';
+import { tenantIdOf, siteUrlFor } from '../services/tenantContext.js';
+import { brandFor, isHomeTenant } from '../services/brand.js';
 
 const SITE = (process.env.SITE_URL || 'https://saahomes.com').replace(/\/$/, '');
 const MAX_WINDOWS = 3;
@@ -196,7 +197,13 @@ export const requestTour = async (req, res) => {
     });
   } catch (error) {
     console.error('requestTour error:', error);
-    return res.status(500).json({ success: false, error: 'Could not send your tour request. Call (970) 999-1407 and we will set it up.' });
+    const { phone } = brandFor(req.tenant);
+    return res.status(500).json({
+      success: false,
+      error: phone
+        ? `Could not send your tour request. Call ${phone} and we will set it up.`
+        : 'Could not send your tour request. Please try again in a moment.',
+    });
   }
 };
 
@@ -210,9 +217,16 @@ export const tourCalendarFile = async (req, res) => {
     const allowed = tour && (tour.user_id === user.id || (tour.household_id && tour.household_id === user.household_id));
     if (!allowed) return res.status(404).json({ success: false, error: 'Tour not found.' });
     const plan = planRoute(await loadStops(pool, tour.listing_keys));
-    const ics = tourCalendar({ id: tour.id, plan, window: tour.windows[0], site: SITE });
+    // Another brokerage's calendar file carries its own name and site.
+    const home = isHomeTenant(req.tenant);
+    const site = home ? SITE : siteUrlFor(req.tenant);
+    const ics = home
+      ? tourCalendar({ id: tour.id, plan, window: tour.windows[0], site: SITE })
+      : tourCalendar({
+        id: tour.id, plan, window: tour.windows[0], site, brandName: brandFor(req.tenant).name, uidHost: site.replace(/^https?:\/\//, ''),
+      });
     res.set('Content-Type', 'text/calendar; charset=utf-8');
-    res.set('Content-Disposition', `attachment; filename="saa-home-tour-${tour.id}.ics"`);
+    res.set('Content-Disposition', `attachment; filename="${home ? 'saa-' : ''}home-tour-${tour.id}.ics"`);
     res.set('Cache-Control', 'private, no-store');
     return res.send(ics);
   } catch (error) {
