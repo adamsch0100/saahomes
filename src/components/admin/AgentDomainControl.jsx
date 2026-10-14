@@ -4,6 +4,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { deleteAgentDomain, setAgentDomain, verifyAgentDomain } from '../../utils/api.js';
+import { useIsBrokerage } from '../../context/TenantContext.jsx';
 
 const GOLD = 'var(--brand-accent)';
 
@@ -36,13 +37,14 @@ export default function AgentDomainControl({ token, agent, onUpdated }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [info, setInfo] = useState(null);
+  const isBrokerage = useIsBrokerage();
 
   useEffect(() => {
     setDomainInput(agent.custom_domain || '');
   }, [agent.custom_domain]);
 
   const tokenValue = agent.domain_verify_token || '';
-  const txtValue = tokenValue ? `saa-verify=${tokenValue}` : '';
+  const txtValue = tokenValue ? `${isBrokerage ? 'site-verify' : 'saa-verify'}=${tokenValue}` : '';
   const badge = statusBadge(agent);
 
   const handleSet = async (e) => {

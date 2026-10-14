@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
-import { getTenant, isCustomDomain } from '../utils/tenant.js';
+import { getTenant, isCustomDomain, consoleTenantSlug } from '../utils/tenant.js';
 import { applyBrandTheme, themeFromBrand } from '../utils/brandTheme.js';
 import { setListingPhotoFallbackBrand } from '../utils/photoUrl.js';
+import { embeddedPlatform, isPlatformSite } from '../utils/platform.js';
 
 const TenantContext = createContext({ tenant: null, loading: false });
 
@@ -34,7 +35,7 @@ function applyBrokerageBrand(tenant) {
 export function TenantProvider({ children }) {
   const [tenant, setTenant] = useState(null);
   // On a non-SAA host the brand isn't known until /api/tenant answers.
-  const [loading, setLoading] = useState(() => isCustomDomain());
+  const [loading, setLoading] = useState(() => isCustomDomain() || !!consoleTenantSlug());
 
   useEffect(() => {
     let cancelled = false;
@@ -42,6 +43,11 @@ export function TenantProvider({ children }) {
       .then((resolved) => {
         if (cancelled) return;
         if (resolved?.isBrokerage) applyBrokerageBrand(resolved);
+        else if (isPlatformSite()) {
+          // The platform's own site wears the platform's colors, not SAA's gold.
+          const p = embeddedPlatform();
+          applyBrandTheme(themeFromBrand({ primaryColor: p?.primary_color, accentColor: p?.accent_color }));
+        }
         setTenant(resolved || null);
       })
       .catch(() => {

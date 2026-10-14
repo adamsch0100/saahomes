@@ -26,7 +26,7 @@ import { marketPack } from '../config/marketPack.js';
 import { buildSavedSearchWhere } from './listingFilters.js';
 import { loadBrandForClientUser, voiceCopy } from './tenantBrand.js';
 import {
-  sendEmail as sendBrandedEmail, emailBrandForUser, nurtureBrand, siteHost, textOnAccent,
+  sendEmail as sendBrandedEmail, sendPlatformEmail, emailBrandForUser, nurtureBrand, siteHost, textOnAccent,
 } from './emailer.js';
 import { tenantById } from './tenantContext.js';
 import { brandFor, isHomeTenant } from './brand.js';
@@ -1000,7 +1000,7 @@ async function runSearch(search, { dryRun, onlyEmail, send = sendEmail } = {}) {
  *  Respects due_at when set (cadence-queued rows wait until due). */
 async function drainOutbox() {
   const pending = await pool.query(
-    `SELECT id, to_email, subject, html, tenant_id FROM email_outbox
+    `SELECT id, to_email, subject, html, tenant_id, platform FROM email_outbox
      WHERE sent_at IS NULL
        AND (due_at IS NULL OR due_at <= NOW())
      ORDER BY id
@@ -1010,7 +1010,10 @@ async function drainOutbox() {
   let sent = 0;
   for (const row of pending.rows) {
     try {
-      if (row.tenant_id != null && !isHomeTenant({ id: Number(row.tenant_id) })) {
+      if (row.platform === true) {
+        // Platform mail (a new brokerage's signup confirmation): the product's name.
+        await sendPlatformEmail(row.to_email, row.subject, row.html);
+      } else if (row.tenant_id != null && !isHomeTenant({ id: Number(row.tenant_id) })) {
         // Queued for another brokerage: its name, never SAA's.
         const brand = brandFor(await tenantById(row.tenant_id));
         await sendEmail(row.to_email, row.subject, row.html, brand.from_name || brand.name, {

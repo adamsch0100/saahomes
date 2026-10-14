@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 import { BUSINESS, SITE_TITLE_SUFFIX, toAbsoluteUrl } from "../utils/seoConstants.js";
 import { useBrokerageBrand } from "../context/TenantContext.jsx";
+import { usePlatform, isPlatformSite } from "../utils/platform.js";
 
 const BRAND_MARKERS = ['SAA Homes', 'Schwartz And Associates', 'Schwartz and Associates'];
 
@@ -143,6 +144,13 @@ export default function SEO({
 }) {
   const location = useLocation();
   const bb = useBrokerageBrand();
+  // The platform's own site (its console, for the platform owner): the
+  // product's name, nothing of SAA's.
+  const onPlatform = !bb && isPlatformSite();
+  const platform = usePlatform(onPlatform);
+  if (onPlatform) {
+    return <PlatformSEO platform={platform} title={exactTitle || title} description={description} robots={robots} />;
+  }
   if (bb) {
     return (
       <BrokerageSEO
@@ -210,6 +218,20 @@ export default function SEO({
           {JSON.stringify(schema)}
         </script>
       ))}
+    </Helmet>
+  );
+}
+
+/** Head tags on the platform's own site: the product's name only. */
+function PlatformSEO({ platform, title, description, robots }) {
+  const name = platform?.name || "";
+  const fullTitle = title && name && !title.includes(name) ? `${title} | ${name}` : title || name;
+  return (
+    <Helmet htmlAttributes={{ lang: 'en' }}>
+      {fullTitle ? <title>{fullTitle}</title> : null}
+      {description ? <meta name="description" content={description} /> : null}
+      <meta name="robots" content={robots || "noindex, nofollow"} />
+      {name ? <meta property="og:site_name" content={name} /> : null}
     </Helmet>
   );
 }

@@ -29,7 +29,7 @@ const BRAND_FIELDS = [
   { key: 'email', label: 'Email', placeholder: 'hello@yourbrokerage.com', type: 'email' },
   { key: 'tagline', label: 'Tagline', placeholder: 'Homes, people, neighborhoods', wide: true },
   { key: 'address', label: 'Office address', placeholder: '123 Main St, Springfield, CO 80000', wide: true },
-  { key: 'license_line', label: 'License line', placeholder: 'Licensed real estate brokerage in Colorado', wide: true },
+  { key: 'license_line', label: 'License line', placeholder: 'Licensed real estate brokerage, license #12345', wide: true },
   { key: 'market_name', label: 'Market name', placeholder: 'Front Range', hint: 'The area you serve, as buyers say it.' },
 ];
 
@@ -787,6 +787,17 @@ export default function BrokerageSettings({ token }) {
                 </p>
               ) : null}
               <DnsTable records={site.dns} />
+              {site.domain_status !== 'active' && !site.dns?.length ? (
+                <p className="text-gray-500 mt-2">
+                  {site.dns_help ? (
+                    <>
+                      Email{' '}
+                      <a href={`mailto:${site.dns_help}`} className="underline text-gray-900">{site.dns_help}</a>
+                      {' '}and we’ll send you the record to add.
+                    </>
+                  ) : 'We’ll send you the record to add.'}
+                </p>
+              ) : null}
               {site.domain_status !== 'active' && (
                 <button type="button" onClick={checkSiteDomain} disabled={siteBusy} className={`${secondaryClass} mt-3`}>
                   {siteBusy ? 'Checking…' : 'Check status'}

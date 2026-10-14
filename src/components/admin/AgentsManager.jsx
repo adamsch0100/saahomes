@@ -182,7 +182,7 @@ export default function AgentsManager({ token }) {
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
               className="mt-1 w-full min-h-[44px] border border-gray-300 rounded-lg px-3 text-sm"
-              placeholder="970…"
+              placeholder="(555) 555-0100"
             />
           </label>
           <label className="block">

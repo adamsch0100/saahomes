@@ -6,12 +6,18 @@
  *
  * A brokerage that has verified its own sending domain (settings.email
  * .sending_domain, status 'verified') sends through Resend instead, from
- * notify@<its domain>, when RESEND_API_KEY is set on the platform.
+ * notify@<its domain>, when RESEND_API_KEY is set on the platform. Any other
+ * brokerage's mail goes out from the platform's sending address when one is
+ * set (PLATFORM_FROM_EMAIL), never from the home brokerage's.
+ *
+ * Platform mail (signup confirmations and anything else from the product
+ * itself, not from a brokerage) goes through sendPlatformEmail.
  */
 import nodemailer from 'nodemailer';
 import getPool from '../config/database.js';
 import { tenantById, siteUrlFor } from './tenantContext.js';
 import { brandFor, isHomeTenant } from './brand.js';
+import { platformSender } from './platform.js';
 
 const FROM = process.env.OUTREACH_SMTP_FROM || process.env.OUTREACH_SMTP_USER || 'alerts@saahomes.com';
 const RESEND_API = 'https://api.resend.com';
@@ -104,19 +110,42 @@ export async function sendEmail(to, subject, html, fromName = 'SAA Homes', opts 
   }
 
   if (!smtpConfigured()) throw new Error('OUTREACH_SMTP_* not set');
-  const transporter = nodemailer.createTransport({
-    host: process.env.OUTREACH_SMTP_HOST,
-    port: Number(process.env.OUTREACH_SMTP_PORT || 587),
-    secure: String(process.env.OUTREACH_SMTP_SECURE || '') === 'true',
-    auth: { user: process.env.OUTREACH_SMTP_USER, pass: process.env.OUTREACH_SMTP_PASSWORD },
-  });
-  await transporter.sendMail({
-    from: `"${tenant && !isHomeTenant(tenant) ? displayName(name) : name}" <${FROM}>`,
+  const brokerage = tenant && !isHomeTenant(tenant);
+  await smtpTransport().sendMail({
+    from: `"${brokerage ? displayName(name) : name}" <${brokerage ? sharedFromAddress() : FROM}>`,
     to,
     subject,
     html,
     ...(replyTo ? { replyTo } : {}),
   });
+}
+
+function smtpTransport() {
+  return nodemailer.createTransport({
+    host: process.env.OUTREACH_SMTP_HOST,
+    port: Number(process.env.OUTREACH_SMTP_PORT || 587),
+    secure: String(process.env.OUTREACH_SMTP_SECURE || '') === 'true',
+    auth: { user: process.env.OUTREACH_SMTP_USER, pass: process.env.OUTREACH_SMTP_PASSWORD },
+  });
+}
+
+/** The address another brokerage's shared mail and platform mail come from. */
+export function sharedFromAddress() {
+  return platformSender().address || FROM;
+}
+
+/** From and Reply-To for platform mail: the product's name and support. */
+export function platformFrom() {
+  const s = platformSender();
+  return { from: `"${displayName(s.name)}" <${sharedFromAddress()}>`, replyTo: s.replyTo || null };
+}
+
+/** Send one email from the platform itself (not from any brokerage). */
+export async function sendPlatformEmail(to, subject, html, { replyTo } = {}) {
+  if (!smtpConfigured()) throw new Error('OUTREACH_SMTP_* not set');
+  const f = platformFrom();
+  const reply = replyTo === undefined ? f.replyTo : replyTo;
+  await smtpTransport().sendMail({ from: f.from, to, subject, html, ...(reply ? { replyTo: reply } : {}) });
 }
 
 function shapeDomain(d) {
