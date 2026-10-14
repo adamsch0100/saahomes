@@ -1,9 +1,10 @@
 import React from "react";
-import ScheduleShowingModal from "../ScheduleShowingModal";
+import BookTourModal from "../BookTourModal";
+import { useBrokerageBrand } from "../../context/TenantContext.jsx";
 import { HeartIcon, ShareIcon } from "./icons.jsx";
 
 /**
- * Mobile sticky bottom conversion bar — Save · Share · Nadia · Call · Schedule.
+ * Mobile sticky bottom conversion bar — Save · Share · Nadia · Call · Book a tour.
  * Share is icon-only (≥44px) so five actions fit on ≤360px screens without overflow.
  * Use fixed for route page; use shrink-0 footer inside modal.
  *
@@ -18,7 +19,9 @@ export default function MobileStickyBar({
   shareCopied = false,
   mode = "fixed", // "fixed" | "footer"
 }) {
+  const bb = useBrokerageBrand();
   if (!listing) return null;
+  // Another brokerage's domain calls that brokerage (or hides Call without a phone).
 
   const bar = (
     <div className="relative flex items-center gap-1 max-w-lg mx-auto">
@@ -64,16 +67,18 @@ export default function MobileStickyBar({
       >
         Nadia
       </button>
+      {(!bb || bb.phone) && (
       <a
-        href="tel:+19709991407"
+        href={bb ? bb.tel : "tel:+19709991407"}
         className="shrink-0 min-h-[44px] px-2 py-2.5 border-2 border-black text-black text-xs font-semibold rounded-lg active:scale-95 hover:bg-black hover:text-white transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]"
       >
         Call
       </a>
+      )}
       <div className="flex-1 min-w-0">
-        <ScheduleShowingModal
+        <BookTourModal
           listing={listing}
-          buttonLabel="Schedule"
+          buttonLabel="Book a tour"
           buttonClassName="w-full min-h-[44px] inline-flex items-center justify-center px-2.5 py-2.5 text-sm font-semibold rounded-lg active:scale-[0.98] hover:opacity-90 transition-all touch-manipulation"
           buttonStyle={{ backgroundColor: "var(--brand-accent)", color: "var(--brand-on-accent-ink)" }}
           hideIcon

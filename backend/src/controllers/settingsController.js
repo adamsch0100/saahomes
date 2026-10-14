@@ -6,7 +6,7 @@
 import getPool from '../config/database.js';
 import logger from '../utils/logger.js';
 import {
-  tenantIdOf, clearTenantCache, leadVisibility, siteUrlFor, DEFAULT_TENANT_ID,
+  tenantIdOf, clearTenantCache, leadVisibility, siteUrlFor, hasOwnAddress, DEFAULT_TENANT_ID,
 } from '../services/tenantContext.js';
 import {
   normalizeBrandSettings, publicBrand, brandFor, BRAND_FIELDS, isHomeTenant,
@@ -14,6 +14,7 @@ import {
 import {
   railwayDomainsAvailable, cnameTarget, addCustomDomain, getCustomDomain,
 } from '../services/railwayDomains.js';
+import { clearFeedCache, feedStatusFor, normalizeServiceAreas } from '../services/feeds.js';
 
 const LEAD_VISIBILITY = ['own', 'own_and_unassigned', 'all'];
 const DOMAIN_RE = /^(?=.{4,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
@@ -51,7 +52,7 @@ async function settingsPayload(tenant) {
   const helpers = await emailHelpers();
   const own = typeof helpers.ownDomainSendingAvailable === 'function' && helpers.ownDomainSendingAvailable();
   const sending = s.email?.sending_domain || null;
-  const platform = String(process.env.PLATFORM_DOMAIN || '').trim().toLowerCase();
+  const platform = String(process.env.PLATFORM_BASE_DOMAIN || process.env.PLATFORM_DOMAIN || '').trim().toLowerCase();
   const fubKey = isHomeTenant(tenant) ? (process.env.FOLLOW_UP_BOSS_API_KEY || '') : String(s.fub_api_key || '');
   const site = s.site || {};
   return {
@@ -67,7 +68,7 @@ async function settingsPayload(tenant) {
       sending_domain: sending ? { domain: sending.domain, status: sending.status, records: sending.records || [] } : null,
     },
     site: {
-      url: siteUrlFor(tenant),
+      url: hasOwnAddress(tenant) ? siteUrlFor(tenant) : null,
       primary_domain: tenant.primary_domain || null,
       subdomain_url: platform && !isHomeTenant(tenant) ? `https://${tenant.slug}.${platform}` : null,
       dns: site.records || (tenant.primary_domain && !isHomeTenant(tenant)
@@ -76,6 +77,8 @@ async function settingsPayload(tenant) {
       domain_status: !tenant.primary_domain ? 'none' : (site.certificate === 'ISSUED' || isHomeTenant(tenant) ? 'active' : 'pending'),
       automatic: railwayDomainsAvailable(),
     },
+    // Which homes the site shows: read-only here except the service areas.
+    listings: await feedStatusFor(tenant).catch(() => null),
   };
 }
 
@@ -135,9 +138,13 @@ export const patchSettings = async (req, res) => {
       }
       patch.fub_api_key = key || null;
     }
+    if (b.service_areas !== undefined) {
+      patch.mls = { ...(tenant.settings.mls || {}), service_areas: normalizeServiceAreas(b.service_areas) };
+    }
     if (!Object.keys(patch).length) return res.status(400).json({ error: 'Nothing to change' });
 
     await writeSettings(pool, tenantId, patch);
+    if (patch.mls) clearFeedCache();
     logger.info('brokerage settings updated', { tenant_id: tenantId, fields: Object.keys(patch), by: req.user?.email });
     const fresh = await loadTenantRow(pool, tenantId);
     return res.json({ success: true, data: await settingsPayload(fresh) });
@@ -167,7 +174,7 @@ async function saveAsset(pool, tenantId, kind, mime, data) {
   );
 }
 
-const assetUrl = (tenant, kind) => `${siteUrlFor(tenant)}/api/tenant/asset/${kind}?v=${Date.now().toString(36)}`;
+const assetUrl = (tenant, kind) => `${siteUrlFor(tenant)}/api/tenant/asset/${kind}?${hasOwnAddress(tenant) ? '' : `brokerage=${encodeURIComponent(tenant.slug)}&`}v=${Date.now().toString(36)}`;
 
 /** POST /api/admin/settings/asset/:kind { data_url } — logo or icon */
 export const uploadBrandAsset = async (req, res) => {
@@ -363,7 +370,8 @@ export const sendTestEmail = async (req, res) => {
 
 // ── agent profile ──
 
-const NOTIFY_KEYS = ['new_lead_email', 'hot_lead_push', 'morning_brief'];
+const NOTIFY_KEYS = ['new_lead_email', 'hot_lead_push', 'morning_brief', 'hot_lead_text'];
+const NOTIFY_OFF_BY_DEFAULT = ['hot_lead_text'];
 const PROFILE_COLS = 'id, name, email, phone, bio, photo_url, brand_name, brand_phone, title, license_number, notify_prefs';
 
 function profileOut(row) {
@@ -371,7 +379,7 @@ function profileOut(row) {
   return {
     id: row.id, name: row.name, email: row.email, phone: row.phone, bio: row.bio, photo_url: row.photo_url,
     brand_name: row.brand_name, brand_phone: row.brand_phone, title: row.title, license_number: row.license_number,
-    notify: Object.fromEntries(NOTIFY_KEYS.map((k) => [k, n[k] !== false])),
+    notify: Object.fromEntries(NOTIFY_KEYS.map((k) => [k, NOTIFY_OFF_BY_DEFAULT.includes(k) ? n[k] === true : n[k] !== false])),
   };
 }
 

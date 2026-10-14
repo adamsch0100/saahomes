@@ -1,7 +1,9 @@
 import React from "react";
 import ListingMap from "../ListingMap";
+import { useBrokerageBrand } from "../../context/TenantContext.jsx";
 
 export default function MapSection({ listing, photos = [], interactive = true }) {
+  const bb = useBrokerageBrand();
   if (!listing?.latitude || !listing?.longitude) {
     return (
       <section aria-labelledby="detail-map-heading">
@@ -13,9 +15,19 @@ export default function MapSection({ listing, photos = [], interactive = true })
         </h2>
         <p className="text-sm text-gray-500">
           Contact us for location details —{" "}
+          {bb ? (
+            bb.phone ? (
+              <a href={bb.tel} className="underline text-gray-800 font-medium">
+                {bb.phone}
+              </a>
+            ) : (
+              bb.name
+            )
+          ) : (
           <a href="tel:+19709991407" className="underline text-gray-800 font-medium">
             (970) 999-1407
           </a>
+          )}
           .
         </p>
       </section>

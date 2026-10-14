@@ -14,22 +14,24 @@
 import getPool from '../config/database.js';
 import { buildSavedSearchWhere, savedSearchPath } from './listingFilters.js';
 import { currentTenantId } from './tenantContext.js';
+import { listingScope } from './feeds.js';
 
 /**
  * WHERE for saved-search filters against the listings table. Delegates to the
  * search page's own filter builder so counts and alerts can never drift.
  */
-export function buildWhere(filters) {
-  return buildSavedSearchWhere(filters);
+export function buildWhere(filters, scope = null) {
+  return buildSavedSearchWhere(filters, scope);
 }
 
 /**
  * Live match count + most recently updated matching listing for a filters object.
  * Returns { match_count, preview } — preview may be null.
  */
-export async function getSearchMatchMeta(filters, pool = getPool()) {
+export async function getSearchMatchMeta(filters, pool = getPool(), { scope = null } = {}) {
   try {
-    const { whereSql, params } = buildWhere(filters);
+    // Counted among the homes this brokerage shows (the current request's).
+    const { whereSql, params } = buildWhere(filters, scope || await listingScope(null, { pool }));
     const countRes = await pool.query(
       `SELECT COUNT(*)::int AS n FROM listings WHERE ${whereSql}`,
       params
@@ -264,6 +266,11 @@ export async function recordPropertyView(userId, listingKey, pool = getPool()) {
           ).catch(() => {});
         }
       }
+      // Third view of the same home: a note and a "Hot" tag on the FUB person (once per home).
+      if (viewCount.rows[0]?.n >= 3) {
+        const { noteRepeatHomeView } = await import('./fubAutomation.js');
+        noteRepeatHomeView(userId, listingId, viewCount.rows[0].n, { pool }).catch(() => {});
+      }
     } catch {
       // FUB write-back is non-blocking
     }
@@ -310,16 +317,17 @@ export async function recordUserEvent(userId, eventType, meta = null, pool = get
 }
 
 /** Recent property views with listing details (for digest personalization). */
-export async function getRecentViews(userId, limit = 5, pool = getPool()) {
+export async function getRecentViews(userId, limit = 5, pool = getPool(), { feeds = null } = {}) {
+  const inFeeds = feeds || (await listingScope(null, { pool })).feeds;
   const res = await pool.query(
     `SELECT DISTINCT ON (pv.listing_id)
        pv.listing_id, pv.viewed_at,
        l.slug, l.street_number, l.street_name, l.city, l.list_price, l.beds, l.home_type
      FROM property_views pv
-     LEFT JOIN listings l ON l.listing_id = pv.listing_id
+     LEFT JOIN listings l ON l.listing_id = pv.listing_id AND l.feed = ANY($2::text[])
      WHERE pv.user_id = $1
      ORDER BY pv.listing_id, pv.viewed_at DESC`,
-    [userId]
+    [userId, inFeeds]
   );
   // Re-sort by most recent view and limit
   return res.rows

@@ -9,6 +9,7 @@
  * Never fabricate a filter that cannot hit live data.
  */
 import { NOCO_CITIES } from '../config/nocoCities.js';
+import { feedFilterSql, serviceAreaSql, serviceAreaValues } from './feeds.js';
 
 
 // Legacy single-value property_type aliases (still accepted).
@@ -222,7 +223,12 @@ export const HOME_STATUS_VALUES = new Set([
   'Canceled',
 ]);
 
-export function buildListingFilters(query = {}) {
+// With no brokerage given (scripts, older callers): SAA's IRES homes only,
+// never sample homes.
+const HOME_SCOPE = Object.freeze({ home: true, feeds: ['ires'], soldFeeds: ['ires'], serviceAreas: [] });
+
+export function buildListingFilters(query = {}, scopeIn = HOME_SCOPE) {
+  const scope = scopeIn || HOME_SCOPE;
   const {
     city, minPrice, maxPrice, beds, baths, type, types,
     status: statusRaw,
@@ -280,8 +286,23 @@ export function buildListingFilters(query = {}) {
   const zipRaw = postalCodeSnake || postalCode || zip || zipCode || zips || '';
   const zipList = parseLocationList(zipRaw);
 
-  if (!polyRing) {
-    if (city === '__noco__') {
+  // A brokerage's own default area: its service areas when set; with none,
+  // another brokerage's default is everything its feeds carry (Northern
+  // Colorado is SAA's market, not theirs).
+  const defaultArea = !city || city === '__noco__';
+  const areas = scope ? serviceAreaValues(scope.serviceAreas) : [];
+  const useAreas = scope && defaultArea && !zipList.length && areas.length > 0;
+  const noDefault = scope && !scope.home && city === '__noco__';
+
+  if (!polyRing && useAreas) {
+    where.push(serviceAreaSql(`$${i}`));
+    params.push(areas);
+    i += 1;
+  } else if (!polyRing) {
+    if (city === '__noco__' && noDefault) {
+      if (zipList.length === 1) push('postal_code = $n', zipList[0]);
+      else if (zipList.length > 1) push('postal_code = ANY($n::text[])', zipList);
+    } else if (city === '__noco__') {
       // NoCO default — still allow zip refinement within / outside via OR when zips set
       if (zipList.length === 0) {
         push('city = ANY($n::text[])', NOCO_CITIES);
@@ -564,6 +585,23 @@ export function buildListingFilters(query = {}) {
     pushRaw('assumable = TRUE');
   }
 
+  // Only homes from feeds this brokerage may show; sold homes only from
+  // feeds with sold data turned on.
+  if (scope) {
+    const soldOnly = status === 'Sold';
+    const feeds = soldOnly ? scope.soldFeeds : scope.feeds;
+    if (!feeds.length) {
+      pushRaw('FALSE');
+    } else {
+      where.push(feedFilterSql(`$${i}`, feeds));
+      params.push(feeds);
+      i += 1;
+    }
+    if (!soldOnly && (!status || status === 'any' || status === 'all')) {
+      push("(status <> 'Sold' OR feed = ANY($n::text[]))", scope.soldFeeds);
+    }
+  }
+
   return { where, params, i };
 }
 
@@ -660,12 +698,12 @@ export function sanitizeSavedFilters(body = {}) {
  * WHERE clause for a saved search's alerts. Same builder as the search page;
  * alerts are always about homes for sale now, so status is pinned to Active.
  */
-export function buildSavedSearchWhere(filters = {}) {
+export function buildSavedSearchWhere(filters = {}, scope = HOME_SCOPE) {
   const f = { ...(filters || {}) };
   delete f.status;
   if (HOME_STATUS_VALUES.has(String(f.listingStatus || ''))) delete f.listingStatus;
   if (!f.city && !f.postal_code && !f.polygon) f.city = '__noco__';
-  const { where, params } = buildListingFilters({ ...f, status: 'Active' });
+  const { where, params } = buildListingFilters({ ...f, status: 'Active' }, scope);
   return { whereSql: where.join(' AND '), params };
 }
 

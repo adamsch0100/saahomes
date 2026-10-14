@@ -85,9 +85,14 @@ test('a signed-in buyer\'s words land on their timeline', { skip: !hasTestDataba
   const b = browser(server.url);
   assert.equal((await b.post('/alerts', { email: 'asker@comcast.net', city: 'Windsor' })).status, 201);
   assert.equal((await b.post('/search/understand', { text: 'walkout basement under 600k', city: 'Windsor' })).status, 200);
-  const { rows } = await db.pool.query(
-    "SELECT e.meta FROM events e JOIN users u ON u.id = e.user_id WHERE u.email = 'asker@comcast.net' AND e.type = 'search'"
-  );
+  // The event is written after the response goes out: give it a moment.
+  let rows = [];
+  for (let i = 0; i < 40 && !rows.length; i += 1) {
+    if (i) await new Promise((r) => setTimeout(r, 50));
+    ({ rows } = await db.pool.query(
+      "SELECT e.meta FROM events e JOIN users u ON u.id = e.user_id WHERE u.email = 'asker@comcast.net' AND e.type = 'search'"
+    ));
+  }
   assert.equal(rows.length, 1);
   assert.equal(rows[0].meta.asked, 'walkout basement under 600k');
   assert.equal(rows[0].meta.via, 'ask');

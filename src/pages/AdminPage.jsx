@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { adminLogin, getSubmissions, getStats, getEmailAbStats, getAccountMe } from '../utils/api.js';
 import ClientSearchesManager from '../components/admin/ClientSearchesManager.jsx';
 import AgentCockpit from '../components/admin/AgentCockpit.jsx';
+import ClientLifePanel from '../components/agent/ClientLifePanel.jsx';
 import AgentsManager from '../components/admin/AgentsManager.jsx';
 import SEO from '../components/SEO';
 import FunnelView from '../components/admin/FunnelView.jsx';
@@ -11,6 +12,9 @@ import ForgotPassword from '../components/account/ForgotPassword.jsx';
 import TwoStepCodeForm from '../components/account/TwoStepCodeForm.jsx';
 import TwoStepPanel from '../components/account/TwoStepPanel.jsx';
 import BrokerageSettings from '../components/admin/BrokerageSettings.jsx';
+import BrokerageReports from '../components/admin/BrokerageReports.jsx';
+import OwnerSetup, { ConsoleNotes, OwnerSettingsExtras } from '../components/admin/OwnerSetup.jsx';
+import { takeHandoffToken } from '../utils/consoleBrokerage.js';
 
 const TYPE_LABELS = {
   digest: 'Listing digest',
@@ -24,14 +28,14 @@ function formatOpenRate(rate) {
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [token, setToken] = useState(localStorage.getItem('adminToken'));
+  const [token, setToken] = useState(() => takeHandoffToken() || localStorage.getItem('adminToken'));
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [submissions, setSubmissions] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [filterType, setFilterType] = useState('all');
-  const [tab, setTab] = useState('cockpit'); // cockpit | leads | searches | agents | email-ab | funnel | security | settings | brokerages
+  const [tab, setTab] = useState('cockpit'); // cockpit | leads | searches | agents | reports | email-ab | funnel | security | settings | brokerages
   const [abStats, setAbStats] = useState(null);
   const [abLoading, setAbLoading] = useState(false);
   const [abError, setAbError] = useState(null);
@@ -196,6 +200,7 @@ export default function AdminPage() {
                 {challenge ? 'Two-step sign-in' : 'Admin Login'}
               </h2>
             </div>
+            <ConsoleNotes signIn />
             {challenge ? (
               <TwoStepCodeForm
                 challenge={challenge}
@@ -327,6 +332,8 @@ export default function AdminPage() {
             </div>
           </div>
 
+          <OwnerSetup token={token} onOpenTab={setTab} onLeave={handleLogout} />
+
           <div className="mb-6 flex flex-wrap gap-2">
             <button
               type="button"
@@ -355,6 +362,13 @@ export default function AdminPage() {
               className={`min-h-[44px] px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${tab === 'agents' ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-200 hover:border-black'}`}
             >
               Agent seats
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab('reports')}
+              className={`min-h-[44px] px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${tab === 'reports' ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-200 hover:border-black'}`}
+            >
+              Reports
             </button>
             <button
               type="button"
@@ -396,11 +410,16 @@ export default function AdminPage() {
           </div>
 
           {tab === 'cockpit' ? (
-            <AgentCockpit token={token} />
+            <div className="space-y-6">
+              <AgentCockpit token={token} />
+              <ClientLifePanel token={token} />
+            </div>
           ) : tab === 'searches' ? (
             <ClientSearchesManager token={token} />
           ) : tab === 'agents' ? (
             <AgentsManager token={token} />
+          ) : tab === 'reports' ? (
+            <BrokerageReports token={token} />
           ) : tab === 'funnel' ? (
             <FunnelView token={token} />
           ) : tab === 'security' ? (
@@ -408,7 +427,10 @@ export default function AdminPage() {
               <TwoStepPanel token={token} />
             </div>
           ) : tab === 'settings' ? (
-            <BrokerageSettings token={token} />
+            <div className="max-w-3xl space-y-6">
+              <BrokerageSettings token={token} />
+              <OwnerSettingsExtras token={token} />
+            </div>
           ) : tab === 'brokerages' && me?.platform === true ? (
             <BrokeragesManager token={token} />
           ) : tab === 'email-ab' ? (

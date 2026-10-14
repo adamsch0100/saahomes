@@ -1,5 +1,6 @@
 import getPool from '../config/database.js';
 import { NOCO_CITIES, resolveSoldCity } from '../config/nocoCities.js';
+import { listingScope, serviceAreaSql, serviceAreaValues } from '../services/feeds.js';
 
 function normalizeZip(raw) {
   if (raw == null || raw === '') return '';
@@ -25,8 +26,14 @@ export async function listSoldListings(req, res) {
       : 12;
 
     const pool = getPool();
-    const params = [];
+    // Sold data only from feeds this brokerage has sold data turned on for.
+    const scope = await listingScope(req.tenant, { pool });
+    if (!scope.soldFeeds.length) {
+      return res.json({ success: true, city: resolved.label || null, citySlug: resolved.slug || '', count: 0, listings: [] });
+    }
+    const params = [scope.soldFeeds];
     const where = [
+      'feed = ANY($1::text[])',
       "closed_date IS NOT NULL",
       "closed_date >= (CURRENT_DATE - INTERVAL '12 months')",
       'sold_price IS NOT NULL',
@@ -50,7 +57,10 @@ export async function listSoldListings(req, res) {
     } else if (resolved.city) {
       params.push(resolved.city);
       where.push(`city = $${params.length}`);
-    } else {
+    } else if (scope.serviceAreas.length) {
+      params.push(serviceAreaValues(scope.serviceAreas));
+      where.push(serviceAreaSql(`$${params.length}`));
+    } else if (scope.home) {
       params.push(NOCO_CITIES);
       where.push(`city = ANY($${params.length}::text[])`);
     }

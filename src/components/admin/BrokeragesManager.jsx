@@ -1,10 +1,11 @@
 /**
  * Platform console — brokerages (tenants). Only rendered when /api/account/me
  * says platform === true. Add a brokerage (owner gets an invite email),
- * list them, suspend / reactivate.
+ * list them, suspend / reactivate, and set which MLS listings each one shows.
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { createTenant, listTenants, patchTenant } from '../../utils/api.js';
+import TenantListingsPanel from './TenantListingsPanel.jsx';
 
 const GOLD = 'var(--brand-accent)';
 
@@ -23,6 +24,33 @@ function slugify(value) {
     .replace(/^-+|-+$/g, '');
 }
 
+const BILLING_PILL = {
+  trialing: ['Trial', 'text-blue-700 bg-blue-50'],
+  active: ['Paying', 'text-green-700 bg-green-50'],
+  grace: ['Trial ended', 'text-amber-800 bg-amber-50'],
+  past_due: ['Past due', 'text-amber-800 bg-amber-50'],
+  canceled: ['Canceled', 'text-gray-600 bg-gray-100'],
+};
+
+/** Billing status for the platform console: trial days left, grace, paused. */
+function BillingPill({ billing, home }) {
+  if (home) return <span className="text-xs text-gray-400">Not billed</span>;
+  if (!billing || !billing.status) return <span className="text-xs text-gray-400">—</span>;
+  const [label, cls] = billing.suspended ? ['Paused', 'text-red-700 bg-red-50'] : BILLING_PILL[billing.status] || [billing.status, 'text-gray-600 bg-gray-100'];
+  const until = billing.status === 'trialing' ? billing.trial_ends_at : billing.grace_ends_at || billing.current_period_end;
+  const days = until ? Math.ceil((new Date(until).getTime() - Date.now()) / 86400000) : null;
+  return (
+    <span className="inline-flex flex-col gap-0.5">
+      <span className={`self-start text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded ${cls}`}>{label}</span>
+      {!billing.suspended && days != null && days >= 0 && billing.status !== 'active' ? (
+        <span className="text-xs text-gray-500">{days} day{days === 1 ? '' : 's'} left</span>
+      ) : billing.seats_billed ? (
+        <span className="text-xs text-gray-500">{billing.seats_billed} seat{billing.seats_billed === 1 ? '' : 's'}</span>
+      ) : null}
+    </span>
+  );
+}
+
 export default function BrokeragesManager({ token }) {
   const [tenants, setTenants] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -32,6 +60,7 @@ export default function BrokeragesManager({ token }) {
   const [creating, setCreating] = useState(false);
   const [notice, setNotice] = useState(null);
   const [busyId, setBusyId] = useState(null);
+  const [listingsFor, setListingsFor] = useState(null);
 
   const load = useCallback(async () => {
     if (!token) return;
@@ -212,6 +241,8 @@ export default function BrokeragesManager({ token }) {
                   <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                   <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Domain</th>
                   <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Listings</th>
+                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Billing</th>
                   <th className="px-5 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Agents</th>
                   <th className="px-5 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Leads</th>
                   <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
@@ -234,6 +265,24 @@ export default function BrokeragesManager({ token }) {
                       >
                         {t.status || 'active'}
                       </span>
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap text-sm">
+                      <button
+                        type="button"
+                        onClick={() => setListingsFor(listingsFor?.id === t.id ? null : t)}
+                        className="min-h-[36px] text-left underline-offset-2 hover:underline"
+                        aria-expanded={listingsFor?.id === t.id}
+                      >
+                        {t.live_feeds?.length || t.id === 1 ? (
+                          <span className="text-green-700 font-semibold">Live: {(t.live_feeds?.length ? t.live_feeds : ['ires']).map((k) => k.toUpperCase()).join(', ')}</span>
+                        ) : (
+                          <span className="text-amber-700 font-semibold">Sample homes</span>
+                        )}
+                        <span className="block text-xs text-gray-500">Listings (MLS) ›</span>
+                      </button>
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap text-sm">
+                      <BillingPill billing={t.billing} home={t.id === 1} />
                     </td>
                     <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-900 text-right">{t.agent_count ?? '—'}</td>
                     <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-900 text-right">{t.lead_count ?? '—'}</td>
@@ -268,6 +317,10 @@ export default function BrokeragesManager({ token }) {
           </div>
         )}
       </div>
+
+      {listingsFor && (
+        <TenantListingsPanel key={listingsFor.id} token={token} tenant={listingsFor} onChanged={load} />
+      )}
     </div>
   );
 }

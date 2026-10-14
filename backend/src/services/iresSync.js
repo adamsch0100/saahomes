@@ -56,6 +56,16 @@ const MLS_FIELDS = [
   'ModificationTimestamp', 'PhotosChangeTimestamp', 'MlgCanView',
 ];
 
+// Listing office and agent, for "Listing courtesy of …" (IDX rules). If the
+// feed ever rejects them in $select, sync drops them and carries on.
+export const OFFICE_FIELDS = ['ListOfficeName', 'ListOfficeMlsId', 'ListAgentFullName', 'ListAgentMlsId'];
+let officeFieldsRejected = false;
+
+/** True when an MLS error body is the feed refusing one of the office/agent fields. */
+export function rejectsOfficeFields(status, body) {
+  return status === 400 && OFFICE_FIELDS.some((f) => String(body || '').includes(f));
+}
+
 // Adam's home-type model (Aug 2026): attached = condos/townhomes/multi-unit,
 // detached = freestanding homes. PropertyAttachedYN is the feed's definitive
 // flag; PropertySubType carries the label.
@@ -236,6 +246,10 @@ function normalizeListing(raw) {
     longitude: numSigned(raw.Longitude, 180),
     listing_url: null,
     mls_source: raw.OriginatingSystemName || 'IRES',
+    list_office_name: raw.ListOfficeName ? String(raw.ListOfficeName).slice(0, 255) : null,
+    list_office_mls_id: raw.ListOfficeMlsId ? String(raw.ListOfficeMlsId).slice(0, 40) : null,
+    list_agent_name: raw.ListAgentFullName ? String(raw.ListAgentFullName).slice(0, 255) : null,
+    list_agent_mls_id: raw.ListAgentMlsId ? String(raw.ListAgentMlsId).slice(0, 40) : null,
     elementary_school: raw.ElementarySchool || null,
     middle_school: raw.MiddleOrJuniorSchool || null,
     high_school: raw.HighSchool || null,
@@ -302,7 +316,7 @@ async function fetchPage(authToken, offset, { incrementalSince = null, retries =
   } else {
     url.searchParams.set('$filter', "(StandardStatus eq 'Active' or StandardStatus eq 'Active Under Contract' or StandardStatus eq 'Pending' or StandardStatus eq 'Withdrawn' or StandardStatus eq 'Expired')");
   }
-  url.searchParams.set('$select', MLS_FIELDS.join(','));
+  url.searchParams.set('$select', (officeFieldsRejected ? MLS_FIELDS : [...MLS_FIELDS, ...OFFICE_FIELDS]).join(','));
   url.searchParams.set('$expand', 'Media');
 
   try {
@@ -321,16 +335,23 @@ async function fetchPage(authToken, offset, { incrementalSince = null, retries =
         const wait = [5000, 15000, 45000, 90000][4 - retries] || 90000;
         console.log(`⚠️ IRES ${res.status} — backing off ${wait / 1000}s (${retries} left)`);
         await sleep(wait);
-        return fetchPage(authToken, offset, retries - 1);
+        return fetchPage(authToken, offset, { incrementalSince, retries: retries - 1 });
       }
-      throw new Error(`IRES fetch failed (${res.status}): ${await res.text()}`);
+      const body = await res.text();
+      if (!officeFieldsRejected && rejectsOfficeFields(res.status, body)) {
+        // Retry once without the office/agent fields; listings keep syncing.
+        officeFieldsRejected = true;
+        console.warn(`⚠️ IRES rejected listing office/agent fields — syncing without them: ${body.slice(0, 200)}`);
+        return fetchPage(authToken, offset, { incrementalSince, retries });
+      }
+      throw new Error(`IRES fetch failed (${res.status}): ${body}`);
     }
     return res.json();
   } catch (error) {
     if (error.name === 'AbortError' && retries > 0) {
       console.log(`⚠️ IRES page timeout — retrying (${retries} left)`);
       await sleep(5000);
-      return fetchPage(authToken, offset, retries - 1);
+      return fetchPage(authToken, offset, { incrementalSince, retries: retries - 1 });
     }
     throw error;
   }
@@ -404,8 +425,9 @@ const LISTING_UPSERT_SQL = `
     three_quarter_baths, living_area, above_grade_area, lot_size, lot_size_acres, units_total,
     year_built, garage_spaces, hoa_fee, description, assumable, photos, photos_count, latitude, longitude,
     listing_url, mls_source, elementary_school, middle_school, high_school, school_district,
-    days_on_market, price_per_sqft, subdivision, features, raw, slug, last_seen_at)
-  VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,NOW())
+    days_on_market, price_per_sqft, subdivision, features, raw, slug,
+    list_office_name, list_office_mls_id, list_agent_name, list_agent_mls_id, last_seen_at)
+  VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,NOW())
   ON CONFLICT (listing_id) DO UPDATE SET
     status = EXCLUDED.status, is_active = EXCLUDED.is_active, property_type = EXCLUDED.property_type,
     property_subtype = EXCLUDED.property_subtype, home_type = EXCLUDED.home_type,
@@ -434,7 +456,12 @@ const LISTING_UPSERT_SQL = `
     days_on_market = EXCLUDED.days_on_market, price_per_sqft = EXCLUDED.price_per_sqft,
     subdivision = EXCLUDED.subdivision, features = EXCLUDED.features,
     raw = EXCLUDED.raw, slug = EXCLUDED.slug,
-    updated_at = NOW(), last_seen_at = NOW()`;
+    list_office_name = COALESCE(EXCLUDED.list_office_name, listings.list_office_name),
+    list_office_mls_id = COALESCE(EXCLUDED.list_office_mls_id, listings.list_office_mls_id),
+    list_agent_name = COALESCE(EXCLUDED.list_agent_name, listings.list_agent_name),
+    list_agent_mls_id = COALESCE(EXCLUDED.list_agent_mls_id, listings.list_agent_mls_id),
+    updated_at = NOW(), last_seen_at = NOW()
+  WHERE listings.feed = 'ires'`;
 
 /**
  * IRES → Postgres sync.
@@ -504,7 +531,8 @@ export async function syncListings({ mode = 'incremental' } = {}) {
            JSON.stringify(l.photos), l.photos_count, l.latitude, l.longitude, l.listing_url,
            l.mls_source, l.elementary_school, l.middle_school, l.high_school, l.school_district,
            l.days_on_market, l.price_per_sqft, l.subdivision, JSON.stringify(l.features),
-           JSON.stringify(l.raw), l.slug]
+           JSON.stringify(l.raw), l.slug,
+           l.list_office_name, l.list_office_mls_id, l.list_agent_name, l.list_agent_mls_id]
         );
         total += 1;
       }
@@ -518,7 +546,7 @@ export async function syncListings({ mode = 'incremental' } = {}) {
     if (mode === 'full' && seenIds.length) {
       await pool.query(
         `UPDATE listings SET is_active = FALSE, status = 'Withdrawn', updated_at = NOW()
-         WHERE is_active = TRUE AND listing_id != ALL($1::varchar[])`,
+         WHERE is_active = TRUE AND feed = 'ires' AND listing_id != ALL($1::varchar[])`,
         [seenIds]
       );
     }
@@ -537,7 +565,7 @@ export async function syncListings({ mode = 'incremental' } = {}) {
       const base = (process.env.R2_PUBLIC_URL || '').replace(/^https?:\/\//, '');
       const c = await pool.query(
         `SELECT id, listing_id, slug, photos FROM listings
-         WHERE is_active AND photos::text <> '[]' AND NOT (photos::text LIKE $1)
+         WHERE is_active AND feed = 'ires' AND photos::text <> '[]' AND NOT (photos::text LIKE $1)
          ORDER BY updated_at DESC LIMIT $2`,
         [base ? `%${base}%` : '%r2.dev%', R2_BATCH]
       );

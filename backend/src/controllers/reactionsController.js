@@ -19,6 +19,7 @@ import {
   scoreListing,
 } from '../services/tasteProfile.js';
 import { findListing, resolveUser, saveHomeForUser } from './savedHomesController.js';
+import { listingScope } from '../services/feeds.js';
 
 const MAX_NOTE = 1000;
 
@@ -51,13 +52,14 @@ export const listReactions = async (req, res) => {
       for (const r of rows) map[r.listing_key] = { reaction: r.reaction, note: r.note };
       return res.json({ success: true, data: { reactions: map } });
     }
+    const { feeds } = await listingScope(req.tenant, { pool });
     const { rows } = await pool.query(
       `SELECT r.listing_key, r.reaction, r.note, r.updated_at, l.slug, l.list_price, l.city,
-              l.street_number, l.street_name, l.unit, l.id AS listing_db_id
-       FROM home_reactions r LEFT JOIN listings l ON l.listing_id = r.listing_key
+              l.street_number, l.street_name, l.unit, l.id AS listing_db_id, l.feed
+       FROM home_reactions r LEFT JOIN listings l ON l.listing_id = r.listing_key AND l.feed = ANY($2::text[])
        WHERE r.user_id = $1 AND (r.reaction IS NOT NULL OR r.note IS NOT NULL)
        ORDER BY r.updated_at DESC LIMIT 500`,
-      [user.id]
+      [user.id, feeds]
     );
     const homes = rows.map((r) => ({
       listing_key: r.listing_key,
@@ -69,6 +71,7 @@ export const listReactions = async (req, res) => {
       address: [[r.street_number, r.street_name, r.unit ? `#${r.unit}` : null].filter(Boolean).join(' '), r.city]
         .filter(Boolean).join(', ') || null,
       photo_url: r.listing_db_id ? `/api/photo/${r.listing_db_id}/0` : null,
+      sample: r.feed === 'demo',
     }));
     return res.json({ success: true, data: { homes } });
   } catch (error) {

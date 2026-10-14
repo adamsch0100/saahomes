@@ -11,6 +11,7 @@ import AskSearchBox from "../components/AskSearchBox.jsx";
 import HomeValueCapture from "../components/HomeValueCapture.jsx";
 import ListingPhotoFallback from "../components/ListingPhotoFallback.jsx";
 import SaveHomeButton from "../components/SaveHomeButton.jsx";
+import { CourtesyLine, SampleBadge } from "../components/ListingAttribution.jsx";
 import { useTenant } from "../context/TenantContext.jsx";
 import { photoUrl } from "../utils/photoUrl.js";
 import { formatPrice, listingStatsLine } from "../utils/listingHelpers.js";
@@ -74,6 +75,7 @@ function ListingCard({ listing }) {
         >
           <SaveHomeButton listing={listing} />
         </div>
+        <SampleBadge listing={listing} className="absolute top-2 left-2 z-[1]" />
         <span className="absolute bottom-2 left-2 bg-black/75 text-white text-sm font-bold px-3 py-1 rounded-lg">
           {formatPrice(listing.list_price)}
         </span>
@@ -84,6 +86,7 @@ function ListingCard({ listing }) {
         <p className="text-gray-500 text-sm truncate">
           {[listing.city, listing.postal_code].filter(Boolean).join(" ")}
         </p>
+        <CourtesyLine listing={listing} className="mt-1" />
       </div>
     </Link>
   );
@@ -107,6 +110,9 @@ function NewListings() {
     };
   }, []);
 
+  const { tenant } = useTenant();
+  // Until the MLS approves the site, these are sample homes; say so.
+  const sample = tenant?.listings?.mode === "demo";
   if (listings && listings.length === 0) return null;
 
   return (
@@ -114,12 +120,17 @@ function NewListings() {
       <div className="max-w-7xl mx-auto">
         <div className="flex items-end justify-between gap-3 mb-6">
           <h2 id="new-listings-heading" className="text-2xl sm:text-3xl font-bold text-gray-900 font-serif">
-            New on the market
+            {sample ? "Try the search" : "New on the market"}
           </h2>
           <Link to="/properties/" className="text-sm font-semibold text-gray-700 underline underline-offset-2 hover:text-black">
             See all homes
           </Link>
         </div>
+        {sample && (
+          <p className="-mt-3 mb-5 text-sm text-gray-600">
+            These are sample homes so you can see how the search works. Real homes for sale appear here soon.
+          </p>
+        )}
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {listings
             ? listings.map((l) => <ListingCard key={l.listing_id || l.id || l.slug} listing={l} />)

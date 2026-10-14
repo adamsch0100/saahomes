@@ -4,6 +4,7 @@ import SEO from "../components/SEO";
 import AccountModal from "../components/AccountModal";
 import TourPlanner from "../components/TourPlanner";
 import { formatPrice } from "../utils/listingHelpers.js";
+import { SampleBadge } from "../components/ListingAttribution.jsx";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -106,6 +107,7 @@ function HomeCard({ home, shared, onChanged, inTour, onToggleTour }) {
               Everyone loves it
             </span>
           )}
+          <SampleBadge listing={home} className="absolute bottom-2 left-2" />
         </div>
         <div className="p-4 flex-1 min-w-0">
           <div className="flex items-baseline justify-between gap-3">

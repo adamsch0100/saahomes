@@ -85,6 +85,26 @@ export default function TodayBrief({ token }) {
         </ol>
       )}
       {brief.more > 0 && <p className="mt-2 text-xs text-gray-500">{brief.more} more below in your pipeline.</p>}
+      {brief.seller_watch?.length > 0 && (
+        <div className="mt-4 border-t border-gray-100 pt-3">
+          <h3 className="text-sm font-bold text-gray-900">Might be thinking of selling</h3>
+          <ul className="mt-1 divide-y divide-gray-100">
+            {brief.seller_watch.map((s) => (
+              <li key={s.lead_id} className="py-2">
+                <p className="text-sm font-semibold text-gray-900">
+                  {s.name}
+                  <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${s.level === "likely" ? "bg-orange-50 text-orange-800" : "bg-gray-100 text-gray-600"}`}>
+                    {s.level === "likely" ? "Likely" : "Maybe"} · {s.score}
+                  </span>
+                  {s.phone && <a href={`tel:${s.phone}`} className="ml-2 font-normal text-gray-600 underline">{displayPhone(s.phone)}</a>}
+                </p>
+                <p className="text-sm text-gray-600">{s.reasons.join(" · ")}</p>
+                <p className="text-sm text-[color:var(--brand-accent-text)]">Try: {s.opener}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   );
 }

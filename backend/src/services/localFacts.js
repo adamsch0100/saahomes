@@ -27,22 +27,24 @@ export function monthlyHoa(fee, freq) {
 }
 
 /** Median property tax as a share of list price, across this town's homes for sale. */
-export async function townTaxRate(city, pool = getPool()) {
-  const key = String(city || '').trim().toLowerCase();
-  if (!key) return null;
+export async function townTaxRate(city, pool = getPool(), { feeds = ['ires'] } = {}) {
+  const town = String(city || '').trim().toLowerCase();
+  if (!town) return null;
+  // Only from homes this brokerage may show.
+  const key = `${[...feeds].sort().join(',')}|${town}`;
   const hit = taxRateCache.get(key);
   if (hit && Date.now() - hit.at < CACHE_MS) return hit.n >= MIN_TOWN_SAMPLE ? hit.rate : null;
   const { rows: [r] } = await pool.query(
     `SELECT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY (features->>'tax_annual')::numeric / list_price) AS rate,
             COUNT(*)::int AS n
      FROM listings
-     WHERE is_active = TRUE AND status = 'Active' AND LOWER(city) = $1
+     WHERE is_active = TRUE AND status = 'Active' AND LOWER(city) = $1 AND feed = ANY($2::text[])
        AND list_price > 50000
        AND COALESCE(home_type, '') <> 'land'
        AND COALESCE(features->>'new_construction', 'false') <> 'true'
        AND features->>'tax_annual' ~ '^[0-9]+(\\.[0-9]+)?$'
        AND (features->>'tax_annual')::numeric > 0`,
-    [key]
+    [town, feeds]
   );
   const rate = r?.rate != null ? Number(r.rate) : null;
   taxRateCache.set(key, { at: Date.now(), rate, n: r?.n || 0 });
@@ -149,10 +151,10 @@ export function buildLocalFacts(listing, { townRate = null } = {}) {
   return meaningful ? out : null;
 }
 
-export async function localFactsForListing(listing, pool = getPool()) {
+export async function localFactsForListing(listing, pool = getPool(), { feeds = [listing?.feed || 'ires'] } = {}) {
   let townRate = null;
   try {
-    townRate = await townTaxRate(listing.city, pool);
+    townRate = await townTaxRate(listing.city, pool, { feeds });
   } catch {
     townRate = null;
   }

@@ -13,6 +13,7 @@ import { HOME_TYPE_LABEL } from "./utils.js";
 import ListingPhotoFallback from "../ListingPhotoFallback.jsx";
 import SaveHomeButton from "../SaveHomeButton.jsx";
 import { estimateMonthlyPayment } from "../PaymentCalculator.jsx";
+import { CourtesyLine, SampleBadge } from "../ListingAttribution.jsx";
 
 function SimilarCardPhoto({ listing: l }) {
   const [failed, setFailed] = useState(false);
@@ -59,6 +60,7 @@ function SimilarCard({ listing: l }) {
       <div className="relative aspect-[4/3] bg-[#1a1a1a] overflow-hidden">
         <SimilarCardPhoto listing={l} />
         <div className="absolute top-2 left-2 z-[1] flex flex-wrap gap-1 max-w-[78%]">
+          <SampleBadge listing={l} />
           {b.priceCut && (
             <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">
               Price reduced
@@ -110,6 +112,7 @@ function SimilarCard({ listing: l }) {
           {[l.street_number, l.street_name].filter(Boolean).join(" ")}
           {l.city ? `, ${l.city}` : ""}
         </p>
+        <CourtesyLine listing={l} className="mt-0.5" />
       </div>
     </Link>
   );

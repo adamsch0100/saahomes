@@ -11,6 +11,7 @@ import { rejectIfDisposableEmail } from '../utils/emailQuality.js';
 import { sessionUser } from '../services/buyerSession.js';
 import { brandFor, isHomeTenant } from '../services/brand.js';
 import { DEFAULT_TENANT_ID, siteUrlFor } from '../services/tenantContext.js';
+import { listingScope } from '../services/feeds.js';
 
 const OPENCODE_API_URL = 'https://opencode.ai/zen/go/v1/chat/completions';
 const OPENCODE_API_KEY = process.env.OPENCODE_GO_API_KEY;
@@ -25,6 +26,8 @@ async function resolveListingContext(page, messages, site = 'https://saahomes.co
   try {
     const pool = getPool();
     const last = [...(messages || [])].reverse().find((m) => m?.role === 'user')?.content || '';
+    // Only homes this brokerage may show (sample homes in demo mode).
+    const { feeds } = await listingScope(null, { pool });
 
     // 1) Visitor is on a listing page → exact slug
     const slugMatch = String(page || '').match(/\/homes-for-sale\/([^\/?#]+)/);
@@ -33,9 +36,9 @@ async function resolveListingContext(page, messages, site = 'https://saahomes.co
         `SELECT street_number, street_name, unit, city, state, postal_code, list_price, original_list_price,
                 beds, baths, living_area, lot_size_acres, home_type, property_subtype, year_built,
                 garage_spaces, elementary_school, middle_school, high_school, school_district,
-                subdivision, days_on_market, features, description, slug
-         FROM listings WHERE slug = $1 AND is_active LIMIT 1`,
-        [slugMatch[1]]
+                subdivision, days_on_market, features, description, slug, feed
+         FROM listings WHERE slug = $1 AND is_active AND feed = ANY($2::text[]) LIMIT 1`,
+        [slugMatch[1], feeds]
       );
       if (r.rows[0]) return formatListingContext(r.rows[0], site);
     }
@@ -47,12 +50,12 @@ async function resolveListingContext(page, messages, site = 'https://saahomes.co
         `SELECT street_number, street_name, unit, city, state, postal_code, list_price, original_list_price,
                 beds, baths, living_area, lot_size_acres, home_type, property_subtype, year_built,
                 garage_spaces, elementary_school, middle_school, high_school, school_district,
-                subdivision, days_on_market, features, description, slug
+                subdivision, days_on_market, features, description, slug, feed
          FROM listings
          WHERE is_active AND LOWER(city) = LOWER($1)
-           AND LOWER(street_name) LIKE LOWER($2)
+           AND LOWER(street_name) LIKE LOWER($2) AND feed = ANY($3::text[])
          ORDER BY updated_at DESC LIMIT 1`,
-        [addrMatch[3], `%${addrMatch[2].trim()}%`]
+        [addrMatch[3], `%${addrMatch[2].trim()}%`, feeds]
       );
       if (r.rows[0]) return formatListingContext(r.rows[0], site);
     }
@@ -64,10 +67,10 @@ async function resolveListingContext(page, messages, site = 'https://saahomes.co
         `SELECT street_number, street_name, unit, city, state, postal_code, list_price, original_list_price,
                 beds, baths, living_area, lot_size_acres, home_type, property_subtype, year_built,
                 garage_spaces, elementary_school, middle_school, high_school, school_district,
-                subdivision, days_on_market, features, description, slug
-         FROM listings WHERE is_active AND LOWER(city) = LOWER($1)
+                subdivision, days_on_market, features, description, slug, feed
+         FROM listings WHERE is_active AND LOWER(city) = LOWER($1) AND feed = ANY($2::text[])
          ORDER BY updated_at DESC LIMIT 2`,
-        [cityMention]
+        [cityMention, feeds]
       );
       if (r.rows.length) return r.rows.map((row) => formatListingContext(row, site)).join('\n\n');
     }
@@ -104,6 +107,9 @@ function formatListingContext(l, site = 'https://saahomes.com') {
     l.description ? `Description: ${String(l.description).replace(/\s+/g, ' ').slice(0, 260)}` : null,
     site ? `Link: ${site}/homes-for-sale/${l.slug}/` : null,
   ].filter(Boolean);
+  if (l.feed === 'demo') {
+    return `SAMPLE LISTING (a made-up home shown so visitors can try the search; it is not real and not for sale — say so if they ask about touring or buying it):\n${parts.join('\n')}`;
+  }
   return `LISTING DETAILS (real data from our MLS feed — use these exact facts, never invent others):\n${parts.join('\n')}`;
 }
 
@@ -320,6 +326,16 @@ function nadiaSite(brand) {
   return ownSiteUrl(brand);
 }
 
+async function noteSellingQuestion(req, messages) {
+  const last = [...messages].reverse().find((m) => m?.role === 'user')?.content;
+  const { mentionsSelling } = await import('../services/sellerSignals.js');
+  if (!mentionsSelling(last)) return;
+  const { sessionUserId, recordEvent } = await import('../services/events.js');
+  const userId = await sessionUserId(req);
+  if (!userId) return;
+  await recordEvent({ type: 'seller_question', userId, meta: { via: 'nadia' }, dedupeMinutes: 24 * 60 });
+}
+
 export const handleChatMessage = async (req, res) => {
   const { messages, page } = req.body;
 
@@ -328,6 +344,10 @@ export const handleChatMessage = async (req, res) => {
   }
 
   const brand = await nadiaBrand(req);
+  noteNadiaIntent(req, messages).catch(() => {});
+
+  // A signed-in owner asking Nadia about selling is a seller signal for their agent.
+  noteSellingQuestion(req, messages).catch(() => {});
 
   if (!OPENCODE_API_KEY) {
     logger.warn('OpenCode API key not configured — chat AI unavailable');
@@ -523,3 +543,49 @@ export const createSearchFromChat = async (req, res) => {
     });
   }
 };
+
+const OFFER_RE = /\b(make|making|put in|write|submit)\b.{0,20}\boffer\b|\boffer on\b|\bhow much (should|do) (i|we) offer\b/i;
+const AFFORD_RE = /\bafford\b|\bpre-?approv|\bdown payment\b|\bmonthly payment\b|\bhow much (house|home) can\b|\bqualify for\b/i;
+
+/** An offer or affordability question is a moment the agent should hear about. */
+async function noteNadiaIntent(req, messages) {
+  const asked = String([...(messages || [])].reverse().find((m) => m?.role === 'user')?.content || '').slice(0, 300);
+  const topic = OFFER_RE.test(asked) ? 'offer' : AFFORD_RE.test(asked) ? 'afford' : null;
+  if (!topic) return;
+  const { recordEvent, VISITOR_COOKIE } = await import('../services/events.js');
+  const user = await sessionUser(req).catch(() => null);
+  await recordEvent({
+    type: 'nadia_question',
+    userId: user?.id || null,
+    visitorId: req.cookies?.[VISITOR_COOKIE],
+    meta: { topic, asked: asked.slice(0, 200) },
+    dedupeMinutes: 60,
+  });
+}
+
+/**
+ * One call to the chat model Nadia uses (same endpoint, key and model), for
+ * other features such as reply drafts. Returns the reply text, or throws
+ * { code: 'not_configured' } when no key is set.
+ */
+export async function chatCompletion(apiMessages, { maxTokens = 1500, temperature = 0.7, fetchImpl = (...a) => globalThis.fetch(...a) } = {}) {
+  const key = process.env.OPENCODE_GO_API_KEY;
+  if (!key) throw Object.assign(new Error('Chat AI not configured'), { code: 'not_configured' });
+  const response = await fetchImpl(OPENCODE_API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+    body: JSON.stringify({
+      model: OPENCODE_MODEL,
+      messages: apiMessages,
+      max_tokens: maxTokens,
+      temperature,
+    }),
+  });
+  if (!response.ok) throw Object.assign(new Error(`AI service error ${response.status}`), { code: 'upstream' });
+  const data = await response.json();
+  const reply = data.choices?.[0]?.message?.content;
+  const reasoning = data.choices?.[0]?.message?.reasoning_content;
+  const text = (reply && reply.trim()) ? reply.trim() : (reasoning ? reasoning.trim() : '');
+  if (!text) throw Object.assign(new Error('AI service returned nothing'), { code: 'empty' });
+  return text;
+}

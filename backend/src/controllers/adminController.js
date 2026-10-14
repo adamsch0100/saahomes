@@ -5,6 +5,7 @@ import logger from '../utils/logger.js';
 import { tenantIdOf } from '../services/tenantContext.js';
 import { finishLogin } from '../services/staffAuth.js';
 import { issueAccountLink } from '../services/accountLinks.js';
+import { listingScope } from '../services/feeds.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -385,10 +386,11 @@ export const searchStats = async (req, res) => {
  */
 export const getCockpitLeads = async (req, res) => {
   try {
-    const { q = '', stage = '', due = '', limit = 100 } = req.query;
+    const { q = '', stage = '', due = '', limit = 100, smart = '' } = req.query;
     const limitNum = Math.min(parseInt(limit, 10) || 100, 200);
     const like = `%${String(q).trim()}%`;
     const pool = getPool();
+    const { smartFilterSql, noteSearchSql } = await import('../services/crmService.js');
 
     // Base user list — client pool only (exclude agent/admin seats), with assignment
     const users = await pool.query(
@@ -406,7 +408,8 @@ export const getCockpitLeads = async (req, res) => {
        WHERE u.tenant_id = $3
          AND u.status IS DISTINCT FROM 'unsubscribed'
          AND COALESCE(u.role, 'client') = 'client'
-         AND ($1 = '%%' OR u.email ILIKE $1 OR u.name ILIKE $1 OR u.phone ILIKE $1)
+         AND ($1 = '%%' OR u.email ILIKE $1 OR u.name ILIKE $1 OR u.phone ILIKE $1 OR ${noteSearchSql('$1', 'u.')})
+         AND ${smartFilterSql(String(smart), 'u.')}
        ORDER BY COALESCE(u.lead_score, 0) DESC, u.last_active_at DESC NULLS LAST, u.created_at DESC
        LIMIT $2`,
       [like, limitNum, tenantIdOf(req)]
@@ -521,6 +524,7 @@ export const patchCockpitLead = async (req, res) => {
 
     if (body.mark_touched === true) {
       updates.push('last_touched_at = NOW()');
+      updates.push('first_contacted_at = COALESCE(first_contacted_at, NOW())');
       // Default next touch from stage cadence if not explicitly set
       if (body.next_touch_at === undefined) {
         const { deriveNextTouchAt } = await import('../services/agentCockpit.js');
@@ -655,22 +659,24 @@ export const shareHome = async (req, res) => {
 
     const pool = getPool();
 
-    // Live feed only — never fabricate a home
+    // Live feed only — never fabricate a home — and only homes this
+    // brokerage's site shows.
     let listing = null;
+    const { feeds } = await listingScope(req.tenant, { pool });
     {
       let r = await pool.query(
         `SELECT id, listing_id, slug, status, is_active, list_price,
                 street_number, street_name, unit, city, state, postal_code
-         FROM listings WHERE listing_id = $1 LIMIT 1`,
-        [key]
+         FROM listings WHERE listing_id = $1 AND feed = ANY($2::text[]) LIMIT 1`,
+        [key, feeds]
       );
       if (r.rows.length) listing = r.rows[0];
       if (!listing) {
         r = await pool.query(
           `SELECT id, listing_id, slug, status, is_active, list_price,
                   street_number, street_name, unit, city, state, postal_code
-           FROM listings WHERE slug = $1 LIMIT 1`,
-          [key]
+           FROM listings WHERE slug = $1 AND feed = ANY($2::text[]) LIMIT 1`,
+          [key, feeds]
         );
         if (r.rows.length) listing = r.rows[0];
       }
@@ -678,8 +684,8 @@ export const shareHome = async (req, res) => {
         r = await pool.query(
           `SELECT id, listing_id, slug, status, is_active, list_price,
                   street_number, street_name, unit, city, state, postal_code
-           FROM listings WHERE id = $1 LIMIT 1`,
-          [Number(key)]
+           FROM listings WHERE id = $1 AND feed = ANY($2::text[]) LIMIT 1`,
+          [Number(key), feeds]
         );
         if (r.rows.length) listing = r.rows[0];
       }

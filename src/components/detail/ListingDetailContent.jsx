@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import PaymentCalculator from "../PaymentCalculator";
+import AffordabilityPanel from "../AffordabilityPanel";
 import CityStatsBand from "../CityStatsBand";
 import SaveSearchModal from "../SaveSearchModal";
 import { getCityHomesPath } from "../../data/cityHomesData";
@@ -27,6 +28,7 @@ import ConversionRail from "./ConversionRail";
 import { VirtualTourButton } from "./VirtualTourModal.jsx";
 import { HeartIcon, ShareIcon } from "./icons.jsx";
 import { HOME_TYPE_LABEL, formatDate, pricePerSqftOf } from "./utils.js";
+import { SampleNotice } from "../ListingAttribution.jsx";
 
 /**
  * Shared two-column body for listing detail:
@@ -64,6 +66,7 @@ export default function ListingDetailContent({
   const pricePerSqft = pricePerSqftOf(listing);
   const priceChangeDate = formatDate(listing.price_change_timestamp);
   const isPanel = variant === "panel";
+  const attribution = listing.attribution || null;
 
   return (
     <div
@@ -73,6 +76,7 @@ export default function ListingDetailContent({
     >
       {/* ── LEFT: content column ───────────────────────────────────── */}
       <div className="lg:col-span-2 space-y-8 sm:space-y-10 min-w-0">
+        <SampleNotice listing={listing} />
         {/* Panel: price + address (desktop also in rail). Page: hero already has this — mobile actions only. */}
         {isPanel && (
           <div>
@@ -203,6 +207,20 @@ export default function ListingDetailContent({
             Ask Nadia
           </button>
         </div>
+        {listing.list_price != null && Number(listing.list_price) > 0 && (
+          <a
+            href="#affordability"
+            onClick={(e) => {
+              const el = document.getElementById("affordability");
+              if (!el) return;
+              e.preventDefault();
+              el.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className="lg:hidden -mt-2 inline-flex min-h-[44px] items-center text-sm font-semibold text-gray-900 underline underline-offset-4 decoration-[color:var(--brand-accent)]"
+          >
+            Can I afford this?
+          </a>
+        )}
 
         {!hasAnySavedSearch() && !match.matches && (
           <div className="rounded-xl border border-[rgb(var(--brand-accent-rgb)/0.4)] bg-[rgb(var(--brand-accent-rgb)/0.1)] px-4 py-4 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
@@ -356,6 +374,9 @@ export default function ListingDetailContent({
           </div>
         )}
 
+        {/* 5b. Can I afford this? — income and debts against this home's cost */}
+        {listing.list_price != null && Number(listing.list_price) > 0 && <AffordabilityPanel listing={listing} />}
+
         {/* 6. City stats + about city + similar */}
         {listing.city && <CityStatsBand city={listing.city} />}
 
@@ -412,8 +433,24 @@ export default function ListingDetailContent({
           </div>
         )}
 
-        {/* IDX / Fair Housing footer */}
+        {/* IDX / Fair Housing footer. Another brokerage: its feed's own
+            disclaimer, filled with its name. SAA keeps its wording. */}
         <div className="border-t border-gray-200 pt-6 text-xs text-gray-500 leading-relaxed space-y-2">
+          {attribution?.courtesy && (
+            <p className="text-[12px] font-semibold text-gray-700">
+              {attribution.courtesy}
+              {attribution.agent ? <span className="font-normal text-gray-500"> · Listing agent: {attribution.agent}</span> : null}
+            </p>
+          )}
+          {bb && attribution ? (
+            <>
+              <p className="text-[11px] font-medium text-gray-600">
+                {attribution.sample ? "Sample listing · Not a real home for sale" : `Live ${attribution.feed_name} MLS data`}
+              </p>
+              <p>{attribution.disclaimer}</p>
+            </>
+          ) : (
+            <>
           <p className="text-[11px] font-medium text-gray-600">
             Live IRES MLS data · Updated daily
           </p>
@@ -423,6 +460,8 @@ export default function ListingDetailContent({
             approximate. Buyer should verify all information with independent sources before
             making decisions.
           </p>
+            </>
+          )}
           {feats.showing_instructions && (
             <p>
               <span className="font-semibold text-gray-600">Showing instructions: </span>

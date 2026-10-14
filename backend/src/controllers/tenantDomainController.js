@@ -10,6 +10,7 @@ import logger from '../utils/logger.js';
 import { tenantIdOf } from '../services/tenantContext.js';
 import { getAgentBrand, publicAgentPayload } from '../services/tenantBrand.js';
 import { publicBrand, isHomeTenant } from '../services/brand.js';
+import { listingScope } from '../services/feeds.js';
 import {
   normalizeDomain,
   isReservedHost,
@@ -210,6 +211,7 @@ export const getPublicTenant = async (req, res) => {
         agent = r.rows[0] || null;
       }
       const brand = publicBrand(tenant, { agent });
+      const scope = await listingScope(tenant).catch(() => null);
       return res.json({
         tenant: {
           slug: tenant.slug,
@@ -219,6 +221,8 @@ export const getPublicTenant = async (req, res) => {
           brand,
           marketKey: tenant.market_key || 'noco',
           marketName: brand.marketName,
+          // Sample homes until the MLS approves this site.
+          listings: { mode: scope?.demo === false ? 'live' : 'demo', sold: !!scope?.soldFeeds?.length },
         },
       });
     }

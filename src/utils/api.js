@@ -1,5 +1,9 @@
 import { trackLeadConversion } from './analytics.js';
 import { isCustomDomain } from './tenant.js';
+import { installConsoleFetch } from './consoleBrokerage.js';
+
+// A brokerage console opened on the platform's own site names its brokerage.
+installConsoleFetch();
 
 const API_BASE_URL = (() => {
   if (import.meta.env.VITE_API_URL) {
@@ -534,6 +538,37 @@ export const patchTenant = async (token, id, body) => {
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(body),
+  });
+};
+
+/** GET /api/platform/tenants/:id/feeds — listing feeds, service areas, change log */
+export const getTenantFeeds = async (token, id) => {
+  return apiRequest(`/api/platform/tenants/${id}/feeds`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+/** PUT /api/platform/tenants/:id/feeds/:key { status, office_mls_id, sold_enabled, notes } */
+export const putTenantFeed = async (token, id, key, body) => {
+  return apiRequest(`/api/platform/tenants/${id}/feeds/${encodeURIComponent(key)}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+};
+
+/** PUT /api/platform/tenants/:id/service-areas { service_areas } */
+export const putTenantServiceAreas = async (token, id, serviceAreas) => {
+  return apiRequest(`/api/platform/tenants/${id}/service-areas`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ service_areas: serviceAreas }),
   });
 };
 

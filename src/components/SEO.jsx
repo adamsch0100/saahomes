@@ -111,6 +111,7 @@ function brokerageText(text, bb) {
     .replace(/\(970\) 999-1407/g, bb.phone || "")
     .replace(/info@saahomes\.com/g, bb.email || "")
     .replace(/Northern Colorado/g, bb.market || "")
+    .replace(/\bIRES MLS\b/g, "MLS")
     .replace(/(\|\s*){2,}/g, "| ")
     .replace(/^[\s|·—-]+|[\s|·—-]+$/g, "")
     .replace(/\s{2,}/g, " ");

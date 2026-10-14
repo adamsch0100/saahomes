@@ -6,6 +6,10 @@
  */
 import React, { useCallback, useEffect, useState } from "react";
 import TodayBrief from "./TodayBrief.jsx";
+import LeadPanel from "../crm/LeadPanel.jsx";
+import TasksToday from "../crm/TasksToday.jsx";
+import AgentAlertsToggle from "../crm/AgentAlertsToggle.jsx";
+import ClosingFactsDialog from "../agent/ClosingFactsDialog.jsx";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -21,6 +25,16 @@ const STAGES = [
   { value: "active", label: "Active" },
   { value: "closed", label: "Closed" },
   { value: "lost", label: "Lost" },
+];
+
+// Smart filters (server-side, see crmService.smartFilterSql)
+const SMART = [
+  { value: "", label: "All leads" },
+  { value: "hot", label: "Hot this week" },
+  { value: "quiet", label: "Gone quiet 14+ days" },
+  { value: "new", label: "New" },
+  { value: "tour", label: "Has a tour" },
+  { value: "homeowners", label: "Homeowners" },
 ];
 
 const STAGE_STYLE = {
@@ -278,6 +292,15 @@ export default function AgentCockpit({
   const [savingId, setSavingId] = useState(null);
   const [expanded, setExpanded] = useState(null);
   const [assignBusyId, setAssignBusyId] = useState(null);
+  const [smart, setSmart] = useState("");
+  // Lead panel: timeline, notes, tasks, texts (opened from a row, a task or a push alert's ?lead= link)
+  const [openLead, setOpenLead] = useState(() => {
+    if (typeof window === "undefined") return null;
+    const p = new URLSearchParams(window.location.search);
+    const id = Number(p.get("lead"));
+    return Number.isInteger(id) && id > 0 ? { id, tab: p.get("tab") || "timeline" } : null;
+  });
+  const [tasksKey, setTasksKey] = useState(0);
   // Share-home form (It 16 / P5) — one lead at a time
   const [shareLeadId, setShareLeadId] = useState(null);
   const [shareListing, setShareListing] = useState("");
@@ -503,6 +526,7 @@ export default function AgentCockpit({
       if (q.trim()) params.set("q", q.trim());
       if (stage && stage !== "all") params.set("stage", stage);
       if (dueOnly) params.set("due", "today");
+      if (smart) params.set("smart", smart);
       params.set("limit", "100");
 
       const cockpitPromise = fetch(`${API_BASE}${cockpitPath}?${params}`, { headers }).then((r) =>
@@ -527,11 +551,44 @@ export default function AgentCockpit({
     } finally {
       setLoading(false);
     }
-  }, [q, stage, dueOnly, token, cockpitPath, showAdminTools]);
+  }, [q, stage, dueOnly, smart, token, cockpitPath, showAdminTools]);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  // Closed → ask for the closing facts (stay in touch); Selling → one-click seller plan.
+  const [closingLead, setClosingLead] = useState(null);
+  const [sellerBusyId, setSellerBusyId] = useState(null);
+  const onStageChange = (lead, value) => {
+    if (value === "closed" && lead.lifecycle_stage !== "closed") return setClosingLead(lead);
+    return patchLead(lead.id, { lifecycle_stage: value });
+  };
+  const makeSeller = async (lead) => {
+    setSellerBusyId(lead.id);
+    setError(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/agent/clients/${lead.id}/seller`, { method: "POST", headers, body: "{}" });
+      const data = await res.json().catch(() => ({}));
+      if (!data.success) throw new Error(data.error || "Could not start a selling plan");
+      setLeads((prev) => prev.map((l) => (l.id === lead.id ? { ...l, seller_plan_id: data.data.id, intent: l.intent === "buying" ? "both" : l.intent || "selling" } : l)));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSellerBusyId(null);
+    }
+  };
+  const sellerButton = (lead, cls) => (
+    <button
+      type="button"
+      disabled={sellerBusyId === lead.id || !!lead.seller_plan_id}
+      onClick={() => makeSeller(lead)}
+      title="Start a selling plan on their My Home (they keep their buyer side)"
+      className={`${cls} rounded-lg border border-gray-300 text-gray-700 hover:border-black disabled:opacity-60`}
+    >
+      {lead.seller_plan_id ? "Selling ✓" : sellerBusyId === lead.id ? "…" : "Selling"}
+    </button>
+  );
 
   const patchLead = async (id, body) => {
     setSavingId(id);
@@ -552,9 +609,26 @@ export default function AgentCockpit({
     }
   };
 
+  const openLeadPanel = (id, tab = "timeline") => setOpenLead({ id, tab });
+  const closeLeadPanel = () => {
+    setOpenLead(null);
+    setTasksKey((k) => k + 1);
+    if (typeof window !== "undefined" && window.location.search.includes("lead=")) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("lead");
+      url.searchParams.delete("tab");
+      window.history.replaceState(null, "", url.pathname + (url.search || ""));
+    }
+  };
+
   return (
     <div className="space-y-4">
       <TodayBrief token={token} />
+
+      <div className="grid gap-4 lg:grid-cols-2 items-start">
+        <TasksToday token={token} onOpenLead={openLeadPanel} refreshKey={tasksKey} />
+        <AgentAlertsToggle token={token} />
+      </div>
 
       {/* Stats strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -622,6 +696,21 @@ export default function AgentCockpit({
             {loading ? "Loading…" : "Refresh"}
           </button>
         </div>
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" role="group" aria-label="Smart filters">
+          {SMART.map((f) => (
+            <button
+              key={f.value || "all"}
+              type="button"
+              aria-pressed={smart === f.value}
+              onClick={() => setSmart(f.value)}
+              className={`shrink-0 min-h-[40px] px-3 rounded-full text-sm font-medium border ${
+                smart === f.value ? "bg-black text-white border-black" : "bg-white text-gray-700 border-gray-300 hover:border-black"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
         {dueOnly && (
           <p className="mt-3 text-sm text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
             Showing follow-up queue for <strong>today</strong> (including overdue), sorted by heat then score.
@@ -657,7 +746,9 @@ export default function AgentCockpit({
                     <div className="min-w-0">
                       <p className="font-semibold text-gray-900 truncate">
                         {lead.is_hot && <span className="mr-1" title={`${lead.heat_count} high-intent events in 7d`}>🔥</span>}
-                        {lead.name || "—"}
+                        <button type="button" onClick={() => openLeadPanel(lead.id)} className="font-semibold underline-offset-2 hover:underline text-left">
+                          {lead.name || lead.email || "—"}
+                        </button>
                         {lead.source === "fub-import" && (
                           <span
                             className="ml-1.5 text-[10px] font-bold uppercase tracking-wide text-black px-1.5 py-0.5 rounded align-middle"
@@ -694,7 +785,7 @@ export default function AgentCockpit({
                     <select
                       value={lead.lifecycle_stage || "new"}
                       disabled={savingId === lead.id}
-                      onChange={(e) => patchLead(lead.id, { lifecycle_stage: e.target.value })}
+                      onChange={(e) => onStageChange(lead, e.target.value)}
                       className={`min-h-[40px] text-xs font-semibold rounded-full px-3 border-0 ${STAGE_STYLE[lead.lifecycle_stage] || STAGE_STYLE.new}`}
                     >
                       {STAGES.filter((s) => s.value !== "all").map((s) => (
@@ -707,6 +798,13 @@ export default function AgentCockpit({
                     </span>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => openLeadPanel(lead.id)}
+                      className="min-h-[40px] px-3 rounded-lg text-sm font-semibold text-[color:var(--brand-on-accent)] bg-[color:var(--brand-accent)]"
+                    >
+                      Open
+                    </button>
                     <input
                       type="date"
                       value={toDateInputValue(lead.next_touch_at)}
@@ -733,6 +831,7 @@ export default function AgentCockpit({
                     >
                       {expanded === lead.id ? "Hide signals" : "Signals"}
                     </button>
+                    {sellerButton(lead, "min-h-[40px] px-3 text-sm")}
                     {showAdminTools && (
                       <>
                         <button
@@ -808,7 +907,9 @@ export default function AgentCockpit({
                       <tr className={`hover:bg-gray-50 ${lead.is_due_today ? "bg-amber-50/40" : ""}`}>
                         <td className="px-4 py-3">
                           <div className="font-semibold text-gray-900">
-                            {lead.name || "—"}
+                            <button type="button" onClick={() => openLeadPanel(lead.id)} className="font-semibold hover:underline underline-offset-2 text-left">
+                              {lead.name || "—"}
+                            </button>
                             {lead.source === "fub-import" && (
                               <span
                                 className="ml-1.5 text-[10px] font-bold uppercase tracking-wide text-black px-1.5 py-0.5 rounded"
@@ -874,7 +975,7 @@ export default function AgentCockpit({
                           <select
                             value={lead.lifecycle_stage || "new"}
                             disabled={savingId === lead.id}
-                            onChange={(e) => patchLead(lead.id, { lifecycle_stage: e.target.value })}
+                            onChange={(e) => onStageChange(lead, e.target.value)}
                             className={`min-h-[36px] text-xs font-semibold rounded-full px-3 border border-transparent cursor-pointer ${STAGE_STYLE[lead.lifecycle_stage] || STAGE_STYLE.new}`}
                           >
                             {STAGES.filter((s) => s.value !== "all").map((s) => (
@@ -914,6 +1015,13 @@ export default function AgentCockpit({
                           <div className="flex flex-col gap-1.5">
                             <button
                               type="button"
+                              onClick={() => openLeadPanel(lead.id)}
+                              className="min-h-[36px] px-3 rounded-lg text-xs font-semibold text-[color:var(--brand-on-accent)] bg-[color:var(--brand-accent)] hover:opacity-90"
+                            >
+                              Open
+                            </button>
+                            <button
+                              type="button"
                               disabled={savingId === lead.id}
                               onClick={() => patchLead(lead.id, { mark_touched: true })}
                               className="min-h-[36px] px-3 rounded-lg bg-gray-900 text-white text-xs font-semibold hover:bg-black disabled:opacity-50"
@@ -927,6 +1035,7 @@ export default function AgentCockpit({
                             >
                               Signals
                             </button>
+                            {sellerButton(lead, "min-h-[36px] px-3 text-xs")}
                             {showAdminTools && (
                               <>
                                 <button
@@ -991,6 +1100,37 @@ export default function AgentCockpit({
           </>
         )}
       </div>
+
+      {openLead && (
+        <LeadPanel
+          key={openLead.id}
+          token={token}
+          leadId={openLead.id}
+          initialTab={openLead.tab}
+          onClose={closeLeadPanel}
+          onPatch={(id, body) => {
+            const lead = leads.find((l) => l.id === id);
+            if (lead && body?.lifecycle_stage) return onStageChange(lead, body.lifecycle_stage);
+            return patchLead(id, body);
+          }}
+          teammates={teammates}
+          currentAgentId={currentAgentId}
+        />
+      )}
+
+      {closingLead && (
+        <ClosingFactsDialog
+          lead={closingLead}
+          token={token}
+          onCancel={() => setClosingLead(null)}
+          onDone={({ saved }) => {
+            const id = closingLead.id;
+            setClosingLead(null);
+            if (saved) setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, lifecycle_stage: "closed", lifecycle_stage_manual: true, next_touch_at: null } : l)));
+            else patchLead(id, { lifecycle_stage: "closed" });
+          }}
+        />
+      )}
 
       <p className="text-xs text-gray-400 text-center px-2">
         Scores and heat are derived from real activity only (saved searches, showings, views, market analysis).

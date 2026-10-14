@@ -23,6 +23,7 @@ import {
 import { getCreditStatus, reefConfigured } from '../services/reefApiService.js';
 import logger from '../utils/logger.js';
 import { resolveUser } from '../services/buyerSession.js';
+import { recordEvent as recordStreamEvent } from '../services/events.js';
 
 
 function publicProfile(row) {
@@ -168,6 +169,8 @@ export const getHomeValue = async (req, res) => {
 
     // Record value view → SELLER HEAT at 2x
     const updated = await recordValueView(id, user.id, pool);
+    // Event stream: one view per home per hour feeds the seller-intent score.
+    recordStreamEvent({ type: 'home_value_view', userId: user.id, meta: { home_id: id }, dedupeMinutes: 60 });
 
     const fetchAvm = req.query.avm !== '0' && req.query.avm !== 'false';
     const includeChart = req.query.chart !== '0' && req.query.chart !== 'false';

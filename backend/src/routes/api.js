@@ -26,6 +26,7 @@ import {
 import { register, login, setPassword, ensureSession } from '../controllers/authController.js';
 import { submitShowingRequest } from '../controllers/showingController.js';
 import { runCronDigest } from '../controllers/cronController.js';
+import { inboundSms, smsStatus } from '../controllers/textingController.js';
 import { getPushKey, getPushStatus, subscribePush, unsubscribePush } from '../controllers/pushController.js';
 import { getReaction, getTaste, listReactions, setReaction } from '../controllers/reactionsController.js';
 import {
@@ -227,6 +228,11 @@ router.post('/alerts/unsubscribe', formLimit(), unsubscribeAll);
 // Cron triggers (protected by CRON_SECRET) — scheduler calls the site's own
 // backend so email is sent from saahomes.com, not from Hermes.
 router.post('/cron/digest', runCronDigest);
+
+// Texting: Twilio webhooks (signature-checked) for replies, STOP/HELP/START and delivery status.
+const smsWebhookLimiter = rateLimit({ windowMs: 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false });
+router.post('/sms/inbound', smsWebhookLimiter, inboundSms);
+router.post('/sms/status', smsWebhookLimiter, smsStatus);
 
 // Instant alerts on a device (web push)
 router.get('/push/key', getPushKey);

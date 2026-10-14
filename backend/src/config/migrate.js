@@ -1,4 +1,5 @@
 import getPool from './database.js';
+import { seedDemoListings } from '../services/demoListings.js';
 
 export const runMigrations = async () => {
   const pool = getPool();
@@ -1142,6 +1143,39 @@ export const runMigrations = async () => {
       console.error('staff auth migration skipped:', staffErr.message);
     }
 
+    // Plug and play: self-serve signup (owner email confirmation), the
+    // once-per-home "viewed 3 times" Follow Up Boss note, and Follow Up Boss
+    // webhook deliveries already handled (FUB retries until it gets a 2xx).
+    await client.query('SAVEPOINT plug_and_play');
+    try {
+      await client.query(`
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS email_confirmed_at TIMESTAMPTZ;
+        CREATE TABLE IF NOT EXISTS fub_view_notes (
+          tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          listing_id VARCHAR(64) NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (user_id, listing_id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_fub_view_notes_tenant ON fub_view_notes(tenant_id);
+        DROP TRIGGER IF EXISTS fub_view_notes_tenant ON fub_view_notes;
+        CREATE TRIGGER fub_view_notes_tenant BEFORE INSERT ON fub_view_notes
+          FOR EACH ROW EXECUTE FUNCTION tenant_from_parent('users', 'user_id');
+        CREATE TABLE IF NOT EXISTS fub_webhook_events (
+          tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          event_id VARCHAR(64) NOT NULL,
+          event VARCHAR(48) NOT NULL,
+          received_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (tenant_id, event_id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_fub_webhook_events_tenant ON fub_webhook_events(tenant_id, received_at DESC);
+      `);
+      await client.query('RELEASE SAVEPOINT plug_and_play');
+    } catch (plugErr) {
+      await client.query('ROLLBACK TO SAVEPOINT plug_and_play');
+      console.error('plug and play migration skipped:', plugErr.message);
+    }
+
     // Brokerage brand files (logo, app icon, agent photos) and agent profiles.
     await client.query('SAVEPOINT brand_settings');
     try {
@@ -1164,6 +1198,383 @@ export const runMigrations = async () => {
     } catch (brandErr) {
       await client.query('ROLLBACK TO SAVEPOINT brand_settings');
       console.error('brand settings migration skipped:', brandErr.message);
+    }
+
+    // MLS feeds: which listing feeds exist, which ones each brokerage is
+    // approved to show, and the feed each listing came from. A brokerage
+    // with no approved feed sees sample homes only.
+    await client.query('SAVEPOINT mls_feeds');
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS mls_feeds (
+          key VARCHAR(16) PRIMARY KEY,
+          name VARCHAR(80) NOT NULL,
+          vendor VARCHAR(120),
+          disclaimer TEXT NOT NULL DEFAULT '',
+          sold_data_allowed BOOLEAN NOT NULL DEFAULT FALSE,
+          courtesy_required BOOLEAN NOT NULL DEFAULT TRUE,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        INSERT INTO mls_feeds (key, name, vendor, disclaimer, sold_data_allowed, courtesy_required) VALUES
+          ('ires', 'IRES', 'IRES via MLS Grid',
+           'Listing data provided by IRES MLS via IDX and displayed by {brokerage}. Information is deemed reliable but not guaranteed. All measurements and square footage are approximate. Buyer should verify all information with independent sources before making decisions. Listing information last updated {updated}.',
+           TRUE, TRUE),
+          ('demo', 'Sample listings', 'Sample data',
+           'These are sample homes so you can try {brokerage}''s home search. They are not real listings and are not for sale. Live MLS listings appear here once the MLS approves this site.',
+           TRUE, FALSE)
+        ON CONFLICT (key) DO NOTHING;
+
+        CREATE TABLE IF NOT EXISTS tenant_feeds (
+          tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          feed_key VARCHAR(16) NOT NULL REFERENCES mls_feeds(key),
+          status VARCHAR(16) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'suspended')),
+          office_mls_id VARCHAR(40),
+          sold_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+          notes TEXT,
+          approved_at TIMESTAMPTZ,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (tenant_id, feed_key)
+        );
+        CREATE INDEX IF NOT EXISTS idx_tenant_feeds_tenant ON tenant_feeds(tenant_id);
+        INSERT INTO tenant_feeds (tenant_id, feed_key, status, sold_enabled, approved_at, notes)
+          SELECT 1, 'ires', 'approved', TRUE, NOW(), 'Home brokerage'
+          WHERE EXISTS (SELECT 1 FROM tenants WHERE id = 1)
+        ON CONFLICT (tenant_id, feed_key) DO NOTHING;
+
+        CREATE TABLE IF NOT EXISTS tenant_feed_log (
+          id BIGSERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          feed_key VARCHAR(16),
+          changed_by VARCHAR(255),
+          changes JSONB NOT NULL DEFAULT '{}'::jsonb,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_tenant_feed_log_tenant ON tenant_feed_log(tenant_id, created_at DESC);
+
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS feed VARCHAR(16) NOT NULL DEFAULT 'ires';
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS list_office_name VARCHAR(255);
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS list_office_mls_id VARCHAR(40);
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS list_agent_name VARCHAR(255);
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS list_agent_mls_id VARCHAR(40);
+        CREATE INDEX IF NOT EXISTS idx_listings_feed ON listings(feed);
+
+        ALTER TABLE sold_listings ADD COLUMN IF NOT EXISTS feed VARCHAR(16) NOT NULL DEFAULT 'ires';
+        ALTER TABLE sold_listings ADD COLUMN IF NOT EXISTS list_office_name VARCHAR(255);
+        ALTER TABLE sold_listings ADD COLUMN IF NOT EXISTS list_office_mls_id VARCHAR(40);
+        ALTER TABLE sold_listings ADD COLUMN IF NOT EXISTS list_agent_name VARCHAR(255);
+        ALTER TABLE sold_listings ADD COLUMN IF NOT EXISTS list_agent_mls_id VARCHAR(40);
+        CREATE INDEX IF NOT EXISTS idx_sold_listings_feed ON sold_listings(feed);
+
+        -- One home carried by two feeds shows once: same street address and
+        -- unit in the same town.
+        CREATE OR REPLACE FUNCTION listing_address_key(num TEXT, street TEXT, unit TEXT, city TEXT)
+          RETURNS TEXT LANGUAGE sql IMMUTABLE AS $fn$
+            SELECT LOWER(REGEXP_REPLACE(
+              COALESCE(num, '') || '|' || COALESCE(street, '') || '|' || COALESCE(unit, '') || '|' || COALESCE(city, ''),
+              '[^A-Za-z0-9|]+', '', 'g'))
+          $fn$;
+        CREATE INDEX IF NOT EXISTS idx_listings_address_key
+          ON listings (listing_address_key(street_number, street_name, unit, city));
+      `);
+      await client.query('RELEASE SAVEPOINT mls_feeds');
+    } catch (feedErr) {
+      await client.query('ROLLBACK TO SAVEPOINT mls_feeds');
+      console.error('mls feeds migration skipped:', feedErr.message);
+    }
+
+    // Sample homes for brokerages still waiting on their MLS (feed = 'demo').
+    await client.query('SAVEPOINT demo_listings');
+    try {
+      await seedDemoListings(client);
+      await client.query('RELEASE SAVEPOINT demo_listings');
+    } catch (demoErr) {
+      await client.query('ROLLBACK TO SAVEPOINT demo_listings');
+      console.error('sample listings seed skipped:', demoErr.message);
+    }
+
+    // Light CRM in the cockpit: notes, tasks, texts and emails per lead,
+    // reply drafts the agent approves, hot-lead alerts, and the per-brokerage
+    // text opt-out list. Each row takes its tenant from the lead.
+    await client.query('SAVEPOINT agent_crm');
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS lead_notes (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          lead_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          author_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          author_name VARCHAR(255),
+          kind VARCHAR(16) NOT NULL DEFAULT 'note',
+          body TEXT NOT NULL,
+          pinned BOOLEAN NOT NULL DEFAULT FALSE,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ,
+          edited_by_name VARCHAR(255),
+          deleted_at TIMESTAMPTZ,
+          fub_synced_at TIMESTAMPTZ
+        );
+        CREATE INDEX IF NOT EXISTS idx_lead_notes_tenant ON lead_notes(tenant_id);
+        CREATE INDEX IF NOT EXISTS idx_lead_notes_lead ON lead_notes(lead_id, created_at DESC);
+
+        CREATE TABLE IF NOT EXISTS lead_tasks (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          lead_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          assignee_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          title VARCHAR(255) NOT NULL,
+          kind VARCHAR(16) NOT NULL DEFAULT 'follow_up',
+          due_at TIMESTAMPTZ,
+          remind_at TIMESTAMPTZ,
+          reminded_at TIMESTAMPTZ,
+          done_at TIMESTAMPTZ,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ,
+          fub_task_id INTEGER,
+          fub_synced_at TIMESTAMPTZ
+        );
+        CREATE INDEX IF NOT EXISTS idx_lead_tasks_tenant ON lead_tasks(tenant_id);
+        CREATE INDEX IF NOT EXISTS idx_lead_tasks_lead ON lead_tasks(lead_id, created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_lead_tasks_open ON lead_tasks(tenant_id, assignee_id, due_at) WHERE done_at IS NULL;
+
+        CREATE TABLE IF NOT EXISTS lead_messages (
+          id BIGSERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          lead_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          agent_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          channel VARCHAR(8) NOT NULL CHECK (channel IN ('sms', 'email')),
+          direction VARCHAR(4) NOT NULL CHECK (direction IN ('out', 'in')),
+          kind VARCHAR(24) NOT NULL DEFAULT 'conversation',
+          to_addr VARCHAR(255),
+          from_addr VARCHAR(255),
+          subject TEXT,
+          body TEXT NOT NULL,
+          status VARCHAR(16) NOT NULL DEFAULT 'queued',
+          error TEXT,
+          provider_id VARCHAR(64),
+          draft_id INTEGER,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_lead_messages_tenant ON lead_messages(tenant_id, created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_lead_messages_lead ON lead_messages(lead_id, created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_lead_messages_provider ON lead_messages(provider_id) WHERE provider_id IS NOT NULL;
+
+        CREATE TABLE IF NOT EXISTS sms_opt_outs (
+          tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          phone VARCHAR(20) NOT NULL,
+          source VARCHAR(32),
+          opted_out_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (tenant_id, phone)
+        );
+
+        CREATE TABLE IF NOT EXISTS reply_drafts (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          lead_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          agent_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          channel VARCHAR(8) NOT NULL CHECK (channel IN ('sms', 'email')),
+          subject TEXT,
+          body TEXT NOT NULL,
+          source VARCHAR(16) NOT NULL DEFAULT 'nadia',
+          status VARCHAR(16) NOT NULL DEFAULT 'draft',
+          message_id BIGINT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          sent_at TIMESTAMPTZ
+        );
+        CREATE INDEX IF NOT EXISTS idx_reply_drafts_tenant ON reply_drafts(tenant_id);
+        CREATE INDEX IF NOT EXISTS idx_reply_drafts_lead ON reply_drafts(lead_id, created_at DESC);
+
+        CREATE TABLE IF NOT EXISTS hot_lead_alerts (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          lead_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          agent_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          reason VARCHAR(32) NOT NULL,
+          detail TEXT,
+          channels TEXT[] NOT NULL DEFAULT '{}',
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_hot_lead_alerts_tenant ON hot_lead_alerts(tenant_id, created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_hot_lead_alerts_lead ON hot_lead_alerts(lead_id, reason, created_at DESC);
+
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS first_contacted_at TIMESTAMPTZ;
+        ALTER TABLE saved_searches ADD COLUMN IF NOT EXISTS sms_cursor_at TIMESTAMP;
+        ALTER TABLE tour_requests ADD COLUMN IF NOT EXISTS confirmed_start TIMESTAMPTZ;
+        ALTER TABLE tour_requests ADD COLUMN IF NOT EXISTS confirmed_by INTEGER;
+        ALTER TABLE tour_requests ADD COLUMN IF NOT EXISTS ack_texted_at TIMESTAMPTZ;
+        ALTER TABLE tour_requests ADD COLUMN IF NOT EXISTS reminder_texted_at TIMESTAMPTZ;
+      `);
+      for (const table of ['lead_notes', 'lead_tasks', 'lead_messages', 'reply_drafts', 'hot_lead_alerts']) {
+        await client.query(`
+          DROP TRIGGER IF EXISTS ${table}_tenant ON ${table};
+          CREATE TRIGGER ${table}_tenant BEFORE INSERT ON ${table}
+            FOR EACH ROW EXECUTE FUNCTION tenant_from_parent('users', 'lead_id');
+        `);
+      }
+      await client.query('RELEASE SAVEPOINT agent_crm');
+    } catch (crmErr) {
+      await client.query('ROLLBACK TO SAVEPOINT agent_crm');
+      console.error('agent crm migration skipped:', crmErr.message);
+    }
+
+    // Client life after the search (phase 5): closing facts and stay-in-touch
+    // emails, seller-intent scores, and the seller dashboard (plan, showing
+    // feedback, offers). Every row carries its brokerage.
+    await client.query('SAVEPOINT p5_client_life');
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS client_closings (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          user_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+          agent_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          home_profile_id INTEGER REFERENCES home_profiles(id) ON DELETE SET NULL,
+          side VARCHAR(8) NOT NULL DEFAULT 'buyer',
+          address_line VARCHAR(255) NOT NULL,
+          city VARCHAR(100),
+          state VARCHAR(2),
+          postal_code VARCHAR(16),
+          close_date DATE NOT NULL,
+          close_price INTEGER,
+          loan_amount INTEGER,
+          loan_rate NUMERIC(5,3),
+          loan_years SMALLINT,
+          birthday_month SMALLINT CHECK (birthday_month BETWEEN 1 AND 12),
+          birthday_day SMALLINT CHECK (birthday_day BETWEEN 1 AND 31),
+          stay_in_touch BOOLEAN NOT NULL DEFAULT FALSE,
+          consent_at TIMESTAMPTZ,
+          target_rate NUMERIC(5,3),
+          agent_note TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_client_closings_tenant ON client_closings(tenant_id, agent_id);
+        CREATE TABLE IF NOT EXISTS stay_touch_prefs (
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          kind VARCHAR(16) NOT NULL,
+          agent_off BOOLEAN NOT NULL DEFAULT FALSE,
+          client_off BOOLEAN NOT NULL DEFAULT FALSE,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (user_id, kind)
+        );
+        CREATE INDEX IF NOT EXISTS idx_stay_touch_prefs_tenant ON stay_touch_prefs(tenant_id);
+        CREATE TABLE IF NOT EXISTS stay_touch_sends (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          kind VARCHAR(16) NOT NULL,
+          period_key VARCHAR(40) NOT NULL,
+          subject TEXT,
+          open_token VARCHAR(64),
+          sent_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          UNIQUE (user_id, kind, period_key)
+        );
+        CREATE INDEX IF NOT EXISTS idx_stay_touch_sends_tenant ON stay_touch_sends(tenant_id, sent_at DESC);
+        CREATE TABLE IF NOT EXISTS stay_touch_templates (
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          agent_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          kind VARCHAR(16) NOT NULL,
+          subject TEXT NOT NULL,
+          body TEXT NOT NULL,
+          approved_at TIMESTAMPTZ,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (agent_id, kind)
+        );
+        CREATE INDEX IF NOT EXISTS idx_stay_touch_templates_tenant ON stay_touch_templates(tenant_id);
+        CREATE TABLE IF NOT EXISTS seller_intent (
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+          score INTEGER NOT NULL DEFAULT 0,
+          reasons JSONB NOT NULL DEFAULT '[]'::jsonb,
+          computed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          fub_pushed_at TIMESTAMPTZ,
+          fub_pushed_score INTEGER
+        );
+        CREATE INDEX IF NOT EXISTS idx_seller_intent_tenant ON seller_intent(tenant_id, score DESC);
+        CREATE TABLE IF NOT EXISTS seller_plans (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          user_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+          agent_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          home_profile_id INTEGER REFERENCES home_profiles(id) ON DELETE SET NULL,
+          origin VARCHAR(8) NOT NULL DEFAULT 'client',
+          status VARCHAR(16) NOT NULL DEFAULT 'preparing',
+          address_line VARCHAR(255),
+          city VARCHAR(100),
+          postal_code VARCHAR(16),
+          listing_key VARCHAR(64),
+          list_price INTEGER,
+          cma_requested_at TIMESTAMPTZ,
+          cma_note TEXT,
+          cma_ready_at TIMESTAMPTZ,
+          cma_summary TEXT,
+          checklist JSONB NOT NULL DEFAULT '[]'::jsonb,
+          timeline JSONB NOT NULL DEFAULT '[]'::jsonb,
+          closing_checklist JSONB NOT NULL DEFAULT '[]'::jsonb,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_seller_plans_tenant ON seller_plans(tenant_id, agent_id);
+        CREATE TABLE IF NOT EXISTS seller_showing_feedback (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          plan_id INTEGER NOT NULL REFERENCES seller_plans(id) ON DELETE CASCADE,
+          shown_on DATE,
+          interest VARCHAR(8),
+          feedback TEXT NOT NULL,
+          created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_seller_feedback_plan ON seller_showing_feedback(tenant_id, plan_id);
+        CREATE TABLE IF NOT EXISTS seller_offers (
+          id SERIAL PRIMARY KEY,
+          tenant_id INTEGER NOT NULL DEFAULT 1 REFERENCES tenants(id),
+          plan_id INTEGER NOT NULL REFERENCES seller_plans(id) ON DELETE CASCADE,
+          label VARCHAR(80),
+          price INTEGER NOT NULL,
+          financing VARCHAR(40),
+          down_payment_pct NUMERIC(5,2),
+          earnest_money INTEGER,
+          seller_credit INTEGER,
+          close_date DATE,
+          contingencies TEXT,
+          note TEXT,
+          expires_at TIMESTAMPTZ,
+          status VARCHAR(12) NOT NULL DEFAULT 'active',
+          created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_seller_offers_plan ON seller_offers(tenant_id, plan_id);
+        ALTER TABLE tour_requests ADD COLUMN IF NOT EXISTS co_buyer JSONB;
+      `);
+      // Rows hang off a person or a seller plan: they take that tenant.
+      for (const table of ['client_closings', 'stay_touch_prefs', 'stay_touch_sends', 'seller_intent', 'seller_plans']) {
+        await client.query(`
+          DROP TRIGGER IF EXISTS ${table}_tenant ON ${table};
+          CREATE TRIGGER ${table}_tenant BEFORE INSERT ON ${table}
+            FOR EACH ROW EXECUTE FUNCTION tenant_from_parent('users', 'user_id');
+        `);
+      }
+      await client.query(`
+        DROP TRIGGER IF EXISTS stay_touch_templates_tenant ON stay_touch_templates;
+        CREATE TRIGGER stay_touch_templates_tenant BEFORE INSERT ON stay_touch_templates
+          FOR EACH ROW EXECUTE FUNCTION tenant_from_parent('users', 'agent_id');
+      `);
+      for (const table of ['seller_showing_feedback', 'seller_offers']) {
+        await client.query(`
+          DROP TRIGGER IF EXISTS ${table}_tenant ON ${table};
+          CREATE TRIGGER ${table}_tenant BEFORE INSERT ON ${table}
+            FOR EACH ROW EXECUTE FUNCTION tenant_from_parent('seller_plans', 'plan_id');
+        `);
+      }
+      await client.query('RELEASE SAVEPOINT p5_client_life');
+    } catch (lifeErr) {
+      await client.query('ROLLBACK TO SAVEPOINT p5_client_life');
+      console.error('client life migration skipped:', lifeErr.message);
     }
 
     await client.query('COMMIT');

@@ -8,6 +8,9 @@ import getPool from '../config/database.js';
 import logger from '../utils/logger.js';
 import { DEFAULT_TENANT_ID, clearTenantCache } from '../services/tenantContext.js';
 import { issueAccountLink } from '../services/accountLinks.js';
+import {
+  FEED_STATUSES, DEMO_FEED, clearFeedCache, feedCatalog, feedStatusFor, normalizeServiceAreas,
+} from '../services/feeds.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/;
@@ -29,13 +32,26 @@ const TENANT_LIST_SQL = `
   SELECT t.id, t.slug, t.name, t.primary_domain, t.market_key, t.status, t.created_at,
          (SELECT COUNT(*)::int FROM users u WHERE u.tenant_id = t.id AND u.role IN ('agent', 'admin') AND u.status = 'active') AS agent_count,
          (SELECT COUNT(*)::int FROM users u WHERE u.tenant_id = t.id AND COALESCE(u.role, 'client') = 'client') AS lead_count,
-         (SELECT u.email FROM users u WHERE u.tenant_id = t.id AND u.role = 'admin' ORDER BY u.id LIMIT 1) AS owner_email
+         (SELECT u.email FROM users u WHERE u.tenant_id = t.id AND u.role = 'admin' ORDER BY u.id LIMIT 1) AS owner_email,
+         (SELECT COALESCE(array_agg(f.feed_key ORDER BY f.created_at), '{}') FROM tenant_feeds f
+           WHERE f.tenant_id = t.id AND f.status = 'approved' AND f.feed_key <> 'demo') AS live_feeds
   FROM tenants t`;
 
 /** GET /tenants */
 export const listTenants = async (req, res) => {
   try {
     const r = await getPool().query(`${TENANT_LIST_SQL} ORDER BY t.id`);
+    // Each brokerage's billing state (trial, active, grace, paused), for the console.
+    const billing = await getPool().query("SELECT id, settings->'billing' AS billing FROM tenants");
+    const byId = new Map(billing.rows.map((b) => [Number(b.id), b.billing || null]));
+    for (const row of r.rows) {
+      const b = Number(row.id) === DEFAULT_TENANT_ID ? null : byId.get(Number(row.id));
+      row.billing = b ? {
+        status: b.status || null, suspended: b.suspended === true, trial_ends_at: b.trial_ends_at || null,
+        grace_ends_at: b.grace_ends_at || null, current_period_end: b.current_period_end || null,
+        seats_billed: b.seats_billed ?? null, has_subscription: !!b.subscription,
+      } : null;
+    }
     return res.json({ success: true, data: r.rows });
   } catch (error) {
     logger.error('listTenants error', error);
@@ -68,7 +84,7 @@ export const createTenant = async (req, res) => {
     return res.status(400).json({ error: 'Short name must be lowercase letters, numbers and dashes' });
   }
   if (domain && !DOMAIN_RE.test(domain)) return res.status(400).json({ error: 'That domain doesn’t look right' });
-  if (!domain && !process.env.PLATFORM_DOMAIN) {
+  if (!domain && !process.env.PLATFORM_BASE_DOMAIN && !process.env.PLATFORM_DOMAIN) {
     return res.status(400).json({ error: 'Give the brokerage a domain so its invite link has somewhere to go' });
   }
   if (!ownerName) return res.status(400).json({ error: 'Owner name is required' });
@@ -158,5 +174,136 @@ export const patchTenant = async (req, res) => {
   } catch (error) {
     logger.error('patchTenant error', error);
     return res.status(500).json({ error: 'Could not update the brokerage' });
+  }
+};
+
+// ── Listings (MLS) per brokerage ────────────────────────────────────────
+
+const MLS_ID_RE = /^[A-Za-z0-9._-]{1,40}$/;
+
+async function tenantRow(pool, id) {
+  const r = await pool.query('SELECT id, slug, name, primary_domain, market_key, status, settings FROM tenants WHERE id = $1', [id]);
+  return r.rows[0] ? { ...r.rows[0], id: Number(r.rows[0].id), settings: r.rows[0].settings || {} } : null;
+}
+
+async function feedsPayload(pool, tenant) {
+  const status = await feedStatusFor(tenant, { pool });
+  const log = await pool.query(
+    `SELECT feed_key, changed_by, changes, created_at FROM tenant_feed_log
+     WHERE tenant_id = $1 ORDER BY created_at DESC, id DESC LIMIT 20`,
+    [tenant.id]
+  );
+  return { ...status, log: log.rows };
+}
+
+/** GET /tenants/:id/feeds — feed status, service areas and the change log. */
+export const getTenantFeeds = async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Invalid brokerage' });
+  try {
+    const pool = getPool();
+    const tenant = await tenantRow(pool, id);
+    if (!tenant) return res.status(404).json({ error: 'Brokerage not found' });
+    return res.json({ success: true, data: await feedsPayload(pool, tenant) });
+  } catch (error) {
+    logger.error('getTenantFeeds error', error);
+    return res.status(500).json({ error: 'Could not load listings settings' });
+  }
+};
+
+/**
+ * PUT /tenants/:id/feeds/:key { status?, office_mls_id?, sold_enabled?, notes? }
+ * Every change is written to tenant_feed_log with who made it.
+ */
+export const putTenantFeed = async (req, res) => {
+  const id = Number(req.params.id);
+  const key = String(req.params.key || '').trim().toLowerCase();
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Invalid brokerage' });
+  const b = req.body || {};
+  try {
+    const pool = getPool();
+    const catalog = await feedCatalog({ pool });
+    if (!catalog.has(key) || key === DEMO_FEED) return res.status(400).json({ error: 'Unknown listing feed' });
+    const tenant = await tenantRow(pool, id);
+    if (!tenant) return res.status(404).json({ error: 'Brokerage not found' });
+
+    const changes = {};
+    if (b.status !== undefined) {
+      if (!FEED_STATUSES.includes(b.status)) return res.status(400).json({ error: 'Status must be pending, approved or suspended' });
+      if (id === DEFAULT_TENANT_ID && key === 'ires' && b.status !== 'approved') {
+        return res.status(400).json({ error: 'The home brokerage always shows IRES' });
+      }
+      changes.status = b.status;
+    }
+    if (b.office_mls_id !== undefined) {
+      const v = String(b.office_mls_id || '').trim();
+      if (v && !MLS_ID_RE.test(v)) return res.status(400).json({ error: 'Office MLS ID should be letters and numbers' });
+      changes.office_mls_id = v || null;
+    }
+    if (b.sold_enabled !== undefined) changes.sold_enabled = b.sold_enabled === true;
+    if (b.notes !== undefined) changes.notes = String(b.notes || '').trim().slice(0, 1000) || null;
+    if (!Object.keys(changes).length) return res.status(400).json({ error: 'Nothing to change' });
+
+    const before = (await pool.query(
+      'SELECT status, office_mls_id, sold_enabled, notes FROM tenant_feeds WHERE tenant_id = $1 AND feed_key = $2',
+      [id, key]
+    )).rows[0] || null;
+    const next = {
+      status: changes.status ?? before?.status ?? 'pending',
+      office_mls_id: 'office_mls_id' in changes ? changes.office_mls_id : before?.office_mls_id ?? null,
+      sold_enabled: changes.sold_enabled ?? before?.sold_enabled ?? false,
+      notes: 'notes' in changes ? changes.notes : before?.notes ?? null,
+    };
+    await pool.query(
+      `INSERT INTO tenant_feeds (tenant_id, feed_key, status, office_mls_id, sold_enabled, notes, approved_at, updated_at)
+       VALUES ($1, $2, $3::varchar, $4, $5, $6, CASE WHEN $3::varchar = 'approved' THEN NOW() END, NOW())
+       ON CONFLICT (tenant_id, feed_key) DO UPDATE SET
+         status = EXCLUDED.status, office_mls_id = EXCLUDED.office_mls_id,
+         sold_enabled = EXCLUDED.sold_enabled, notes = EXCLUDED.notes,
+         approved_at = CASE WHEN EXCLUDED.status = 'approved' AND tenant_feeds.status <> 'approved' THEN NOW()
+                            ELSE tenant_feeds.approved_at END,
+         updated_at = NOW()`,
+      [id, key, next.status, next.office_mls_id, next.sold_enabled, next.notes]
+    );
+    const diff = {};
+    for (const k of Object.keys(changes)) {
+      if ((before?.[k] ?? null) !== next[k]) diff[k] = { from: before?.[k] ?? null, to: next[k] };
+    }
+    if (Object.keys(diff).length) {
+      await pool.query(
+        'INSERT INTO tenant_feed_log (tenant_id, feed_key, changed_by, changes) VALUES ($1, $2, $3, $4)',
+        [id, key, req.user?.email || null, JSON.stringify(diff)]
+      );
+    }
+    clearFeedCache();
+    logger.info('brokerage listing feed updated', { tenant_id: id, feed: key, changes: Object.keys(diff), by: req.user?.email });
+    return res.json({ success: true, data: await feedsPayload(pool, tenant) });
+  } catch (error) {
+    logger.error('putTenantFeed error', error);
+    return res.status(500).json({ error: 'Could not update the listing feed' });
+  }
+};
+
+/** PUT /tenants/:id/service-areas { service_areas: [...] } */
+export const putTenantServiceAreas = async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Invalid brokerage' });
+  try {
+    const pool = getPool();
+    const tenant = await tenantRow(pool, id);
+    if (!tenant) return res.status(404).json({ error: 'Brokerage not found' });
+    const areas = normalizeServiceAreas(req.body?.service_areas);
+    const mls = { ...(tenant.settings.mls || {}), service_areas: areas };
+    await pool.query('UPDATE tenants SET settings = settings || $1::jsonb WHERE id = $2', [JSON.stringify({ mls }), id]);
+    await pool.query(
+      'INSERT INTO tenant_feed_log (tenant_id, feed_key, changed_by, changes) VALUES ($1, NULL, $2, $3)',
+      [id, req.user?.email || null, JSON.stringify({ service_areas: { from: tenant.settings.mls?.service_areas || [], to: areas } })]
+    );
+    clearTenantCache();
+    clearFeedCache();
+    return res.json({ success: true, data: await feedsPayload(pool, await tenantRow(pool, id)) });
+  } catch (error) {
+    logger.error('putTenantServiceAreas error', error);
+    return res.status(500).json({ error: 'Could not save service areas' });
   }
 };

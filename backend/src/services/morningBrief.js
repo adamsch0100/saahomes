@@ -13,6 +13,7 @@ import getPool from '../config/database.js';
 import { denverToday } from '../controllers/tourController.js';
 import { currentTenantId, tenantById, siteUrlFor } from './tenantContext.js';
 import { brandFor, isHomeTenant } from './brand.js';
+import { listingScope } from './feeds.js';
 
 const SITE = (process.env.SITE_URL || 'https://saahomes.com').replace(/\/$/, '');
 export const MAX_BRIEF_LEADS = 10;
@@ -120,6 +121,15 @@ export function summarizeLead(lead, events, homes = new Map(), { dueToday = fals
 export async function buildBrief(agent, { now = new Date(), pool = getPool() } = {}) {
   const since = new Date(now.getTime() - LOOKBACK_HOURS * 3600 * 1000);
   const isAdmin = String(agent.role || '') === 'admin';
+  // Tasks due today (and overdue) from the cockpit CRM.
+  let tasks = [];
+  try {
+    const { dueTasksFor } = await import('./crmService.js');
+    const tenant = await tenantById(agent.tenant_id ?? currentTenantId(), { pool });
+    tasks = await dueTasksFor({ ...agent, tenant_id: tenant.id }, { now, tenant }, pool);
+  } catch {
+    tasks = [];
+  }
   const { rows: leads } = await pool.query(
     `SELECT id, name, email, phone, lead_score, next_touch_at, lifecycle_stage
      FROM users
@@ -129,7 +139,10 @@ export async function buildBrief(agent, { now = new Date(), pool = getPool() } =
        AND COALESCE(lifecycle_stage, '') NOT IN ('closed', 'lost')`,
     [agent.id, isAdmin, agent.tenant_id ?? currentTenantId()]
   );
-  if (!leads.length) return { date: denverToday(now), items: [] };
+  // Owners who may be thinking of selling (past clients included).
+  const { sellerWatchFor } = await import('./sellerSignals.js');
+  const sellerWatch = await sellerWatchFor({ ...agent, tenant_id: agent.tenant_id ?? currentTenantId() }, { pool });
+  if (!leads.length) return { date: denverToday(now), items: [], tasks, seller_watch: sellerWatch };
 
   const ids = leads.map((l) => l.id);
   const { rows: events } = await pool.query(
@@ -141,9 +154,10 @@ export async function buildBrief(agent, { now = new Date(), pool = getPool() } =
   const listingIds = [...new Set(events.map((e) => e.listing_id).filter(Boolean))];
   const homes = new Map();
   if (listingIds.length) {
+    const { feeds } = await listingScope(agent.tenant_id ?? currentTenantId(), { pool });
     const { rows } = await pool.query(
-      'SELECT listing_id, street_number, street_name, city, list_price FROM listings WHERE listing_id = ANY($1::text[])',
-      [listingIds]
+      'SELECT listing_id, street_number, street_name, city, list_price FROM listings WHERE listing_id = ANY($1::text[]) AND feed = ANY($2::text[])',
+      [listingIds, feeds]
     );
     for (const r of rows) homes.set(String(r.listing_id), r);
   }
@@ -161,7 +175,7 @@ export async function buildBrief(agent, { now = new Date(), pool = getPool() } =
     if (item) items.push(item);
   }
   items.sort((a, b) => b.priority - a.priority || (b.lead_score - a.lead_score));
-  return { date: today, items: items.slice(0, MAX_BRIEF_LEADS), more: Math.max(0, items.length - MAX_BRIEF_LEADS) };
+  return { date: today, items: items.slice(0, MAX_BRIEF_LEADS), more: Math.max(0, items.length - MAX_BRIEF_LEADS), tasks, seller_watch: sellerWatch };
 }
 
 /** site: the agent's brokerage site (SAA's SITE by default). */
@@ -174,9 +188,17 @@ export function briefEmail(agent, brief, { site = SITE } = {}) {
       <div style="font-size:13px;color:#8a7340;margin-top:4px">Try: ${esc(it.opener)}</div>
     </td></tr>`).join('');
   return `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:16px">
-    <p style="font-size:15px;color:#111">Good morning, ${esc(first)}. ${brief.items.length === 1 ? 'One person is' : `${brief.items.length} people are`} worth a call today, based on what they did since yesterday morning.</p>
+    <p style="font-size:15px;color:#111">Good morning, ${esc(first)}. ${brief.items.length ? `${brief.items.length === 1 ? 'One person is' : `${brief.items.length} people are`} worth a call today, based on what they did since yesterday morning.` : (brief.tasks?.length ? `You have ${plural(brief.tasks.length, 'task')} due today.` : 'A few homeowners you know may be thinking about selling.')}</p>
     <table style="width:100%;border-collapse:collapse">${rows}</table>
     ${brief.more ? `<p style="font-size:13px;color:#555">${plural(brief.more, 'more lead')} in the cockpit.</p>` : ''}
+    ${brief.tasks?.length ? `<p style="font-size:15px;font-weight:700;color:#111;margin:18px 0 6px">Due today</p>
+    <ul style="padding-left:18px;margin:0;font-size:14px;color:#333">${brief.tasks.map((t) => `<li style="margin:4px 0">${esc(t.title)} · ${esc(t.lead_name)}${t.overdue ? ' <span style="color:#b91c1c">(overdue)</span>' : ''}</li>`).join('')}</ul>` : ''}
+    ${brief.seller_watch?.length ? `<p style="font-size:15px;font-weight:700;color:#111;margin:18px 0 0">Might be thinking of selling</p>
+    <table style="width:100%;border-collapse:collapse">${brief.seller_watch.map((s) => `
+    <tr><td style="padding:12px 0;border-top:1px solid #eee">
+      <div style="font-size:15px;font-weight:700;color:#111">${esc(s.name)}${s.phone ? ` · <a href="tel:${esc(s.phone)}" style="color:#111">${esc(displayPhone(s.phone))}</a>` : ''}</div>
+      <div style="font-size:13px;color:#555;margin-top:4px">${s.reasons.map(esc).join(' · ')}</div>
+    </td></tr>`).join('')}</table>` : ''}
     <p style="margin-top:18px"><a href="${site}/agent/" style="background:#111;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600">Open the cockpit</a></p>
   </div>`;
 }
@@ -199,14 +221,18 @@ export async function runMorningBriefs({ now = new Date(), force = false, send, 
   for (const agent of agents) {
     try {
       const brief = await buildBrief(agent, { now, pool });
-      if (!brief.items.length) continue;
+      if (!brief.items.length && !brief.tasks?.length && !brief.seller_watch?.length) continue;
       const claim = await pool.query(
         `INSERT INTO morning_briefs (agent_id, brief_date, lead_count) VALUES ($1, $2, $3)
          ON CONFLICT (agent_id, brief_date) DO NOTHING RETURNING id`,
         [agent.id, today, brief.items.length]
       );
       if (!claim.rows.length) continue;
-      const subject = `${plural(brief.items.length, 'person', 'people')} to call today${brief.items[0] ? `, starting with ${brief.items[0].name.split(' ')[0]}` : ''}`;
+      const subject = brief.items.length
+        ? `${plural(brief.items.length, 'person', 'people')} to call today${brief.items[0] ? `, starting with ${brief.items[0].name.split(' ')[0]}` : ''}`
+        : brief.tasks?.length
+          ? `${plural(brief.tasks.length, 'task')} due today`
+          : `${plural(brief.seller_watch.length, 'homeowner')} may be thinking of selling`;
       const tenant = await tenantById(agent.tenant_id, { pool });
       if (isHomeTenant(tenant)) {
         await deliver(agent.email, subject, briefEmail(agent, brief), 'SAA Homes');

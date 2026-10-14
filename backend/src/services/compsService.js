@@ -8,6 +8,7 @@
  * and the page says so.
  */
 import getPool from '../config/database.js';
+import { courtesyLine, feedCatalog, listingScope } from './feeds.js';
 
 export const COMP_LOOKBACK_DAYS = 365;
 export const MAX_COMPS = 12;
@@ -123,15 +124,19 @@ export function compEstimate(subject, comps, { condition = 'average', upgrades =
 }
 
 /** Recent sales like the subject home, most similar first. */
-export async function findComps(profile, pool = getPool(), now = new Date()) {
+export async function findComps(profile, pool = getPool(), now = new Date(), { soldFeeds = null } = {}) {
+  // Sales only from feeds this brokerage has sold data turned on for.
+  const feeds = soldFeeds || (await listingScope(profile?.tenant_id ?? null, { pool })).soldFeeds;
+  if (!feeds.length) return { scope: 'none', comps: [] };
   const run = async (where, params) => (await pool.query(
     `SELECT listing_id, address, street_number, street_name, unit, city, postal_code, subdivision,
-            beds, baths, living_area, sold_price, list_price, closed_date, days_on_market, home_type
+            beds, baths, living_area, sold_price, list_price, closed_date, days_on_market, home_type,
+            feed, list_office_name
      FROM sold_listings
-     WHERE ${where} AND sold_price > 0 AND living_area > 200
+     WHERE ${where} AND sold_price > 0 AND living_area > 200 AND feed = ANY($2::text[])
        AND closed_date >= CURRENT_DATE - make_interval(days => ${COMP_LOOKBACK_DAYS})
      ORDER BY closed_date DESC LIMIT 200`,
-    params
+    [...params, feeds]
   )).rows;
   let rows = profile.postal_code ? await run('postal_code = $1', [String(profile.postal_code)]) : [];
   let scope = 'zip';
@@ -144,6 +149,7 @@ export async function findComps(profile, pool = getPool(), now = new Date()) {
   const close = rows.filter((r) =>
     (!sq || Math.abs(n(r.living_area) - sq) / sq <= 0.35) && (beds == null || n(r.beds) == null || Math.abs(n(r.beds) - beds) <= 1));
   const pool2 = close.length >= 3 ? close : rows;
+  const catalog = await feedCatalog({ pool });
   return {
     scope,
     comps: pool2
@@ -159,6 +165,8 @@ export async function findComps(profile, pool = getPool(), now = new Date()) {
           list_price: n(r.list_price),
           closed_date: r.closed_date,
           price_per_sqft: n(r.living_area) ? Math.round(n(r.sold_price) / n(r.living_area)) : null,
+          sample: r.feed === 'demo',
+          courtesy: courtesyLine(r, catalog),
           similarity: similarity(profile, r, now),
         };
       })

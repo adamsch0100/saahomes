@@ -5,6 +5,9 @@ import { matchRatingsForListing } from '../services/greatSchoolsSync.js';
 import { localFactsForListing } from '../services/localFacts.js';
 import { sessionUserId } from '../services/events.js';
 import { getTasteProfile, passedListingKeys, scoreListing } from '../services/tasteProfile.js';
+import {
+  attributionFor, decorateCards, feedFilterSql, listingScope, serviceAreaSql, serviceAreaValues,
+} from '../services/feeds.js';
 
 // "Best for you" ranks this many of the freshest matches, then pages through them.
 const BEST_FOR_YOU_POOL = 500;
@@ -57,7 +60,8 @@ export const searchListings = async (req, res) => {
     const { page = 1, limit = 24 } = req.query;
     let { sort = 'newest' } = req.query;
 
-    const { where, params, i: nextI } = buildListingFilters(req.query);
+    const scope = await listingScope(req.tenant, { pool });
+    const { where, params, i: nextI } = buildListingFilters(req.query, scope);
     let i = nextI;
 
     // Signed-in buyers: hide homes they marked Not for me, and know their taste.
@@ -93,7 +97,7 @@ export const searchListings = async (req, res) => {
     const columns = `id, listing_id, status, property_type, property_subtype, home_type, street_number, street_name, unit,
          city, state, postal_code, list_price, original_list_price, beds, baths, living_area, lot_size, lot_size_acres,
          year_built, garage_spaces, hoa_fee, description, assumable, photos, photos_count, latitude, longitude, slug,
-         updated_at, days_on_market, price_per_sqft, subdivision`;
+         updated_at, days_on_market, price_per_sqft, subdivision, feed, list_office_name`;
     let rows;
     let pages = Math.ceil(total / limitNum) || 0;
     if (best) {
@@ -124,6 +128,8 @@ export const searchListings = async (req, res) => {
       params
     );
 
+    rows = await decorateCards(rows, { pool });
+
     res.json({
       success: true,
       data: rows,
@@ -147,8 +153,9 @@ export const getListingStats = async (req, res) => {
   try {
     const pool = getPool();
     const { city } = req.query;
-    const params = [];
-    let where = 'is_active = TRUE AND status = \'Active\'';
+    const scope = await listingScope(req.tenant, { pool });
+    const params = [scope.feeds];
+    let where = `is_active = TRUE AND status = 'Active' AND ${feedFilterSql('$1', scope.feeds)}`;
     if (city) {
       params.push(city);
       where += ` AND LOWER(city) = LOWER($${params.length})`;
@@ -198,9 +205,14 @@ export const getListingBySlug = async (req, res) => {
   try {
     const pool = getPool();
     const { slug } = req.params;
+    const scope = await listingScope(req.tenant, { pool });
+    // A home outside this brokerage's feeds doesn't exist here; a sold home
+    // only when that feed's sold data is on.
     const result = await pool.query(
-      `SELECT * FROM listings WHERE slug = $1 OR listing_id = $2`,
-      [slug, slug]
+      `SELECT * FROM listings WHERE (slug = $1 OR listing_id = $1)
+         AND feed = ANY(CASE WHEN status = 'Sold' THEN $3::text[] ELSE $2::text[] END)
+       LIMIT 1`,
+      [slug, scope.feeds, scope.soldFeeds]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ success: false, error: 'Listing not found' });
@@ -209,6 +221,9 @@ export const getListingBySlug = async (req, res) => {
     if (listing.raw) {
       delete listing.raw;
     }
+    listing.sample = listing.feed === 'demo';
+    listing.attribution = await attributionFor(listing, req.tenant, { pool });
+    listing.courtesy = listing.attribution.courtesy;
     // Attach GreatSchools ratings when school fields match the cache (never fabricate)
     try {
       listing.schools = await matchRatingsForListing(listing);
@@ -217,7 +232,7 @@ export const getListingBySlug = async (req, res) => {
       listing.schools = [];
     }
     try {
-      listing.local_facts = await localFactsForListing(listing, pool);
+      listing.local_facts = await localFactsForListing(listing, pool, { feeds: scope.feeds });
     } catch (factsErr) {
       console.warn('local facts failed:', factsErr.message);
       listing.local_facts = null;
@@ -240,23 +255,37 @@ export const autocompleteLocations = async (req, res) => {
     const q = String(req.query.q || '').trim();
     const limit = Math.min(Math.max(1, Number(req.query.limit) || 15), 40);
     const looksLikeZip = /^\d{1,5}$/.test(q);
+    const scope = await listingScope(req.tenant, { pool });
+    const feedSql = feedFilterSql('$1', scope.feeds);
 
-    // Special scoped options (always available; counts from live DB)
-    const nocoRes = await pool.query(
-      `SELECT COUNT(*)::int AS cnt FROM listings
-       WHERE is_active = TRUE AND status = 'Active' AND city = ANY($1::text[])`,
-      [NOCO_CITIES]
-    );
+    // Special scoped options (always available; counts from live DB). The
+    // default scope is SAA's Northern Colorado, or another brokerage's
+    // service areas (everything it shows when it has none).
+    const areas = serviceAreaValues(scope.serviceAreas);
+    const nocoRes = areas.length
+      ? await pool.query(
+        `SELECT COUNT(*)::int AS cnt FROM listings
+         WHERE is_active = TRUE AND status = 'Active' AND ${feedSql} AND ${serviceAreaSql('$2')}`,
+        [scope.feeds, areas]
+      )
+      : scope.home
+        ? await pool.query(
+          `SELECT COUNT(*)::int AS cnt FROM listings
+           WHERE is_active = TRUE AND status = 'Active' AND ${feedSql} AND city = ANY($2::text[])`,
+          [scope.feeds, NOCO_CITIES]
+        )
+        : null;
     const allRes = await pool.query(
       `SELECT COUNT(*)::int AS cnt FROM listings
-       WHERE is_active = TRUE AND status = 'Active'`
+       WHERE is_active = TRUE AND status = 'Active' AND ${feedSql}`,
+      [scope.feeds]
     );
     const specials = [
       {
         type: 'scope',
         value: '__noco__',
         label: 'Northern Colorado',
-        count: nocoRes.rows[0]?.cnt || 0,
+        count: (nocoRes || allRes).rows[0]?.cnt || 0,
       },
       {
         type: 'scope',
@@ -273,12 +302,12 @@ export const autocompleteLocations = async (req, res) => {
       const cityRes = await pool.query(
         `SELECT city AS value, COUNT(*)::int AS cnt
          FROM listings
-         WHERE is_active = TRUE AND status = 'Active'
+         WHERE is_active = TRUE AND status = 'Active' AND ${feedSql}
            AND city IS NOT NULL AND BTRIM(city) <> ''
          GROUP BY city
          ORDER BY cnt DESC
-         LIMIT $1`,
-        [limit]
+         LIMIT $2`,
+        [scope.feeds, limit]
       );
       cities = cityRes.rows.map((r) => ({
         type: 'city',
@@ -290,12 +319,12 @@ export const autocompleteLocations = async (req, res) => {
       const zipRes = await pool.query(
         `SELECT postal_code AS value, COUNT(*)::int AS cnt
          FROM listings
-         WHERE is_active = TRUE AND status = 'Active'
-           AND postal_code IS NOT NULL AND postal_code LIKE $1
+         WHERE is_active = TRUE AND status = 'Active' AND ${feedSql}
+           AND postal_code IS NOT NULL AND postal_code LIKE $2
          GROUP BY postal_code
          ORDER BY cnt DESC
-         LIMIT $2`,
-        [`${q}%`, limit]
+         LIMIT $3`,
+        [scope.feeds, `${q}%`, limit]
       );
       zips = zipRes.rows.map((r) => ({
         type: 'zip',
@@ -309,16 +338,16 @@ export const autocompleteLocations = async (req, res) => {
       const cityRes = await pool.query(
         `SELECT city AS value, COUNT(*)::int AS cnt
          FROM listings
-         WHERE is_active = TRUE AND status = 'Active'
-           AND city IS NOT NULL AND city ILIKE $1
+         WHERE is_active = TRUE AND status = 'Active' AND ${feedSql}
+           AND city IS NOT NULL AND city ILIKE $2
          GROUP BY city
          ORDER BY
-           CASE WHEN LOWER(city) = LOWER($2) THEN 0
-                WHEN LOWER(city) LIKE LOWER($3) THEN 1
+           CASE WHEN LOWER(city) = LOWER($3) THEN 0
+                WHEN LOWER(city) LIKE LOWER($4) THEN 1
                 ELSE 2 END,
            cnt DESC
-         LIMIT $4`,
-        [`%${q}%`, q, `${q}%`, limit]
+         LIMIT $5`,
+        [scope.feeds, `%${q}%`, q, `${q}%`, limit]
       );
       cities = cityRes.rows.map((r) => ({
         type: 'city',

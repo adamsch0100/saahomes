@@ -17,6 +17,7 @@ import {
 } from "../utils/savedHomesApi.js";
 import InstantAlertsCard from "../components/InstantAlertsCard.jsx";
 import { useBrokerageBrand } from "../context/TenantContext.jsx";
+import { CourtesyLine, SampleBadge } from "../components/ListingAttribution.jsx";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -180,16 +181,19 @@ function SavedHomeCard({ home, onUnsave, onOpen, busy }) {
             onError={() => setImgFailed(true)}
           />
         )}
-        {home.off_market && (
+        {home.off_market ? (
           <span className="absolute top-2 left-2 text-[11px] font-bold uppercase tracking-wide bg-gray-900/90 text-white px-2 py-1 rounded-md">
             Off market
           </span>
+        ) : (
+          <SampleBadge listing={home} className="absolute top-2 left-2" />
         )}
       </button>
       <div className="flex-1 min-w-0 p-4 flex flex-col justify-center gap-1">
         <p className="text-lg font-bold text-gray-900">{formatPrice(home.list_price)}</p>
         <p className="text-sm text-gray-700 leading-snug">{home.property_address || "Saved home"}</p>
         {stats ? <p className="text-xs text-gray-500">{stats}</p> : null}
+        <CourtesyLine listing={home} />
         <div className="mt-3 flex flex-wrap gap-2">
           {canOpen && (
             <button

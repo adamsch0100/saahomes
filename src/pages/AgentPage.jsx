@@ -8,6 +8,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import AgentCockpit from '../components/admin/AgentCockpit.jsx';
+import ClientLifePanel from '../components/agent/ClientLifePanel.jsx';
 import SEO from '../components/SEO';
 import ForgotPassword from '../components/account/ForgotPassword.jsx';
 import TwoStepCodeForm from '../components/account/TwoStepCodeForm.jsx';
@@ -1051,6 +1052,10 @@ export default function AgentPage() {
             teammates={teammates}
             currentAgentId={agentUser?.id ?? null}
           />
+
+          <div className="mt-6">
+            <ClientLifePanel token={token} />
+          </div>
         </div>
       </div>
     </div>

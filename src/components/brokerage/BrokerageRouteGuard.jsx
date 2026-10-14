@@ -38,6 +38,8 @@ const SHARED_PATHS = [
   /^\/admin$/,
   /^\/agent$/,
   /^\/reset-password$/,
+  /^\/embed\/(search|listings|listing)$/,
+  /^\/embed\/listing\/[^/]+$/,
 ];
 
 function normalize(pathname) {
