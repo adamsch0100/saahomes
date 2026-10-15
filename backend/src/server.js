@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { dirname, join, sep } from 'path';
 import { existsSync, readFileSync } from 'fs';
 import apiRoutes from './routes/api.js';
 import adminRoutes from './routes/admin.js';
@@ -515,9 +515,19 @@ if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
     }
   });
 
+  // Vite names the files in dist/assets by their content hash, so browsers
+  // can keep them for good; a deploy changes the name, not the file. Pages
+  // always revalidate, and everything else (images, icons) for an hour.
+  const hashedAssetsPath = join(distPath, 'assets') + sep;
   app.use(express.static(distPath, {
     index: false,
+    maxAge: '1h',
     setHeaders(res, filePath) {
+      if (filePath.startsWith(hashedAssetsPath)) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      } else if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache');
+      }
       // The service worker and manifest must update with each deploy.
       if (filePath.endsWith('sw.js')) res.setHeader('Cache-Control', 'no-cache');
       if (filePath.endsWith('.webmanifest')) {
