@@ -32,6 +32,7 @@ import {
   clearFeedCache, feedStatusFor, attributionFor, DEMO_FEED, HOME_FEED,
 } from '../services/feeds.js';
 import { productName } from './signupController.js';
+import { platformIdentity } from '../services/platform.js';
 import { CATALOG, catalogEntry, searchCatalog, DEFAULT_DISCLAIMER, DEFAULT_DISPLAY } from '../services/mls/catalog.js';
 import { PLATFORMS, PLATFORM_IDS, platformList } from '../services/mls/platforms.js';
 import { createAdapter, MlsApiError } from '../services/mls/adapters.js';
@@ -241,8 +242,10 @@ async function ownerContact(pool, tenantId, req) {
 function vendorSheet({ tenant, owner, feed, platform, officeMlsId, soldAllowed }) {
   const brand = brandFor(tenant);
   const site = hasOwnAddress(tenant) ? siteUrlFor(tenant) : null;
-  const vendorName = process.env.MLS_VENDOR_COMPANY || productName();
-  const vendorContact = [process.env.MLS_VENDOR_CONTACT_NAME, process.env.MLS_VENDOR_CONTACT_EMAIL, process.env.MLS_VENDOR_CONTACT_PHONE]
+  const id = platformIdentity();
+  const vendorName = process.env.MLS_VENDOR_COMPANY || id.legal_name || productName();
+  // The platform's support address stands in until a named contact is set.
+  const vendorContact = [process.env.MLS_VENDOR_CONTACT_NAME, process.env.MLS_VENDOR_CONTACT_EMAIL || id.support_email, process.env.MLS_VENDOR_CONTACT_PHONE]
     .filter(Boolean).join(' · ');
   const p = PLATFORMS[platform];
   const rows = [

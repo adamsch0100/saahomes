@@ -72,7 +72,11 @@ export default function StartPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [fieldError, setFieldError] = useState(null);
-  const [choice, setChoice] = useState({ plan: 'team', interval: 'month' });
+  // The marketing page's "Start free trial" links name a plan: /start?plan=brokerage
+  const [choice, setChoice] = useState(() => {
+    const asked = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('plan') : null;
+    return { plan: /^[a-z]{2,20}$/.test(asked || '') ? asked : 'team', interval: 'month' };
+  });
   const startedAt = useRef(Date.now());
   const platform = usePlatform(!isBrokerage);
 

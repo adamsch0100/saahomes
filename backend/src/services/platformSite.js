@@ -10,13 +10,14 @@
  *   anything else             the platform's 404 (no SAA page answers here)
  *
  * The page is plain HTML and CSS rendered here: no framework, no web fonts,
- * nothing to wait for. Plans come from /api/billing/plans when that exists;
- * until then the pricing section offers the free trial.
+ * nothing to wait for. Plans come from the plan catalog; if it can't be
+ * read, the pricing section offers the free trial.
  */
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { platformIdentity, publicPlatform, isPlatformHost, refreshPlatformIdentity } from './platform.js';
 import { TRIAL_DAYS } from './billing.js';
+import { loadPlanCatalog, publicCatalog } from './plans.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 // JSON inside <script>: no closing tags, no line separators.
@@ -258,32 +259,41 @@ function footerHtml(id) {
 </div></footer>`;
 }
 
-// Renders plans from /api/billing/plans when that answers; otherwise the
-// free-trial card stays. Builds DOM nodes (no HTML from the response).
-const PLANS_SCRIPT = `(function(){
-var box=document.getElementById('plans');if(!box||!window.fetch)return;
-function money(p){var n=null;if(typeof p.amount==='number')n=p.amount;else if(typeof p.unit_amount==='number')n=p.unit_amount/100;else if(typeof p.price==='number')n=p.price;else if(p.price&&typeof p.price.amount==='number')n=p.price.amount;
-if(n==null)return typeof p.price==='string'?p.price:null;
-var cur=(p.currency||(p.price&&p.price.currency)||'usd').toUpperCase();
-try{return n.toLocaleString('en-US',{style:'currency',currency:cur,maximumFractionDigits:n%1?2:0});}catch(e){return '$'+n;}}
-function el(t,c,txt){var e=document.createElement(t);if(c)e.className=c;if(txt!=null)e.textContent=txt;return e;}
-fetch('/api/billing/plans',{credentials:'same-origin'}).then(function(r){return r.ok?r.json():null;}).then(function(d){
-var list=Array.isArray(d)?d:d&&(Array.isArray(d.plans)?d.plans:Array.isArray(d.data)?d.data:d.data&&Array.isArray(d.data.plans)?d.data.plans:null);
-if(!list||!list.length)return;
-box.textContent='';box.className='plans'+(list.length>1?' many':'');
-list.slice(0,4).forEach(function(p,i){
-var c=el('div','plan'+(p.featured||p.recommended?' lead':''));c.appendChild(el('h3',null,p.name||p.title||'Plan'));
-var m=money(p);if(m){var pr=el('div','price',m);var iv=p.interval||(p.price&&p.price.interval)||'month';
-var per=(p.per_seat||p.per_agent||p.unit==='seat'||p.unit==='agent')?' per agent':'';pr.appendChild(el('small',null,per+' / '+iv));c.appendChild(pr);}
-if(p.description)c.appendChild(el('p',null,p.description));
-var f=p.features||p.highlights;if(Array.isArray(f)&&f.length){var ul=el('ul');f.slice(0,8).forEach(function(x){ul.appendChild(el('li',null,typeof x==='string'?x:(x&&(x.label||x.name))||''));});c.appendChild(ul);}
-var a=el('a','btn '+(i===0||p.featured?'primary':'ghost'),'Start free trial');a.href='/start'+(p.id?'?plan='+encodeURIComponent(p.id):'');c.appendChild(a);
-box.appendChild(c);});
-}).catch(function(){});
-})();`;
+const dollars = (cents) => `$${(cents / 100).toLocaleString('en-US', { maximumFractionDigits: cents % 100 ? 2 : 0 })}`;
+
+/** Plan cards from the live plan catalog (services/plans.js publicCatalog). */
+function plansHtml(catalog, trialDays) {
+  const plans = catalog?.plans || [];
+  if (!plans.length) {
+    return `<div id="plans" class="plans">
+        <div class="plan lead">
+          <h3>Start free for ${trialDays} days</h3>
+          <p>Your branded site, home search app, CRM, AI follow-up and seller tools. Pick a plan any time before your trial ends.</p>
+          <a class="btn primary" href="/start">Start free trial</a>
+        </div>
+      </div>`;
+  }
+  const mid = plans.length > 2 ? 1 : 0;
+  const cards = plans.map((p, i) => `<div class="plan${i === mid ? ' lead' : ''}">
+          <h3>${esc(p.name)}</h3>
+          <div class="price">${dollars(p.month.base_cents)}<small> / month</small></div>
+          <p>${esc(p.included)} agents included, then ${dollars(p.month.extra_cents)} per agent.</p>
+          ${p.tagline ? `<p>${esc(p.tagline)}</p>` : ''}
+          <a class="btn ${i === mid ? 'primary' : 'ghost'}" href="/start?plan=${encodeURIComponent(p.key)}">Start free trial</a>
+        </div>`).join('\n        ');
+  const yearly = Number(catalog.yearly_months) > 0 && Number(catalog.yearly_months) < 12
+    ? ` Pay yearly and get ${12 - Number(catalog.yearly_months)} months free.` : '';
+  const features = (catalog.features || []).length
+    ? `<p class="intro">Every plan includes: ${(catalog.features || []).map(esc).join(' &middot; ')}.</p>` : '';
+  return `<div id="plans" class="plans many">
+        ${cards}
+      </div>
+      ${features}
+      <p class="intro">${trialDays}-day free trial on every plan. No setup fee.${yearly}</p>`;
+}
 
 /** The product page for brokerages. */
-export function renderPlatformHome(id = platformIdentity(), { trialDays = TRIAL_DAYS() } = {}) {
+export function renderPlatformHome(id = platformIdentity(), { trialDays = TRIAL_DAYS(), catalog = null } = {}) {
   const title = `${id.name}: home search, CRM and AI follow-up for brokerages`;
   const description = `Give buyers a branded home search app, give agents a CRM that says who to call, and let AI answer and follow up by text and email. ${trialDays}-day free trial.`;
   const canonical = id.marketing_url ? `${id.marketing_url}/` : null;
@@ -365,13 +375,7 @@ ${headerHtml(id)}
     <div class="wrap">
       <h2 id="pricing-title">Pricing</h2>
       <p class="intro">Try everything free first. No card to start.</p>
-      <div id="plans" class="plans" aria-live="polite">
-        <div class="plan lead">
-          <h3>Start free for ${trialDays} days</h3>
-          <p>Your branded site, home search app, CRM, AI follow-up and seller tools. Pick a plan any time before your trial ends.</p>
-          <a class="btn primary" href="/start">Start free trial</a>
-        </div>
-      </div>
+      ${plansHtml(catalog, trialDays)}
     </div>
   </section>
 
@@ -395,7 +399,6 @@ ${headerHtml(id)}
   </section>
 </main>
 ${footerHtml(id)}
-<script>${PLANS_SCRIPT}</script>
 </body>
 </html>`;
 }
@@ -484,7 +487,11 @@ export function platformSite({ distPath, renderShell, renderIcon }) {
     switch (path) {
       case '/':
         res.setHeader('Cache-Control', 'public, max-age=300');
-        return res.type('html').send(renderPlatformHome(id));
+        let catalog = null;
+        try {
+          catalog = publicCatalog(await loadPlanCatalog());
+        } catch { /* the free-trial card shows instead */ }
+        return res.type('html').send(renderPlatformHome(id, { catalog }));
       case '/robots.txt':
         return res.type('text/plain').send(platformRobots(id));
       case '/sitemap.xml':

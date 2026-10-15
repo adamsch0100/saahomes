@@ -201,7 +201,7 @@ function ListingsSection({ token, listings, busy, onSaveAreas, note }) {
               type="text"
               value={areas}
               onChange={(e) => setAreas(e.target.value)}
-              placeholder="Fort Collins, Loveland, Weld County"
+              placeholder="e.g. Springfield, Riverton, Clark County"
               className={inputClass}
             />
           </label>

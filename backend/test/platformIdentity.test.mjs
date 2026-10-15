@@ -215,8 +215,8 @@ test('the marketing page answers on the marketing domain only', { skip }, async 
     assert.match(r.text, /id="features"/);
     assert.match(r.text, /id="compare"/);
     assert.match(r.text, /id="pricing"/);
-    assert.match(r.text, /Start free for 14 days/);
-    assert.match(r.text, /\/api\/billing\/plans/);
+    assert.match(r.text, /14-day free trial on every plan/);
+    assert.match(r.text, /href="\/start\?plan=team"/);
     assert.match(r.text, /<link rel="canonical" href="https:\/\/brokerkit\.test\/">/);
     assert.match(r.text, /help@brokerkit\.test/);
     assert.match(r.text, /Brokerkit, Inc\./);
@@ -246,13 +246,18 @@ test('the marketing page answers on the marketing domain only', { skip }, async 
   }
 });
 
-test('the marketing page stands alone: the trial offer until billing lists plans, nothing to wait for', async () => {
+test('the marketing page stands alone: the plans when they load, the trial offer otherwise, nothing to wait for', async () => {
   const { renderPlatformHome } = await import('../src/services/platformSite.js');
+  const { loadPlanCatalog, publicCatalog } = await import('../src/services/plans.js');
   const html = renderPlatformHome(platform.platformIdentity(), { trialDays: 21 });
   assert.match(html, /Start free for 21 days/);
   assert.match(html, /21 days free\. No card to start\./);
-  // Plans render as DOM nodes from the response, never as HTML.
-  assert.doesNotMatch(html, /innerHTML/);
+  const priced = renderPlatformHome(platform.platformIdentity(), { trialDays: 21, catalog: publicCatalog(await loadPlanCatalog()) });
+  assert.match(priced, /\$699<small> \/ month<\/small>/);
+  assert.match(priced, /25 agents included, then \$15 per agent/);
+  assert.match(priced, /href="\/start\?plan=brokerage"/);
+  assert.match(priced, /Pay yearly and get 2 months free/);
+  assert.doesNotMatch(priced, /<script(?! type="application\/ld\+json")/, 'no script needed for prices');
   // Fast: one request, no web fonts or framework.
   assert.doesNotMatch(html, /fonts\.googleapis|<script[^>]+src=/);
   assert.ok(html.length < 40000, `small page (${html.length} bytes)`);
