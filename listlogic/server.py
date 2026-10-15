@@ -1922,16 +1922,24 @@ def _ensure_sample_run() -> str:
 
 @app.get("/demo")
 @app.get("/demo/")
-def demo_redirect():
+def demo_redirect(request: Request):
     run_id = _ensure_sample_run()
-    return RedirectResponse(url=f"/runs/{run_id}/?sample=1", status_code=302)
+    url = f"/runs/{run_id}/?sample=1"
+    incoming = request.url.query
+    if incoming:
+        url = f"{url}&{incoming}"
+    return RedirectResponse(url=url, status_code=302)
 
 
 @app.get("/demo/fingerprint")
 @app.get("/demo/fingerprint/")
-def demo_fingerprint_redirect():
+def demo_fingerprint_redirect(request: Request):
     run_id = _ensure_sample_run()
-    return RedirectResponse(url=f"/runs/{run_id}/fingerprint/?sample=1", status_code=302)
+    url = f"/runs/{run_id}/fingerprint/?sample=1"
+    incoming = request.url.query
+    if incoming:
+        url = f"{url}&{incoming}"
+    return RedirectResponse(url=url, status_code=302)
 
 
 @app.get("/api/demo")

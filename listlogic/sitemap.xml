@@ -151,6 +151,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://listlogic.homes/blog/</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://listlogic.homes/blog/listing-appointment-checklist.html</loc>
     <lastmod>2026-08-18</lastmod>
     <changefreq>monthly</changefreq>
