@@ -6,6 +6,7 @@
  *   GET  /api/signup/info        product name, plans and prices, and trial
  *   GET  /api/signup/check?slug= is this site address free?
  *   POST /api/signup             create it all
+ *   POST /api/signup/handoff     trade signup's one-time code for the owner's sign-in
  *
  * Only answers on the home brokerage's own host. Bots meet a hidden field,
  * a minimum fill time and a per-IP limit (routes/plugAndPlay.js).
@@ -15,9 +16,9 @@ import bcrypt from 'bcrypt';
 import getPool from '../config/database.js';
 import logger from '../utils/logger.js';
 import {
-  DEFAULT_TENANT_ID, clearTenantCache, platformBaseDomain, siteUrlFor, consoleUrlFor, hasOwnAddress,
+  DEFAULT_TENANT_ID, clearTenantCache, platformBaseDomain, siteUrlFor, consoleUrlFor, hasOwnAddress, tenantIdOf,
 } from '../services/tenantContext.js';
-import { issueAccountLink } from '../services/accountLinks.js';
+import { issueAccountLink, hashLinkToken } from '../services/accountLinks.js';
 import { generateToken } from '../middleware/auth.js';
 import { newTrial, planChoice, TRIAL_DAYS } from '../services/billing.js';
 import { plansReady, seatPrice, stripeConfigured } from '../services/stripe.js';
@@ -196,6 +197,15 @@ export const signup = async (req, res) => {
     logger.info('brokerage signed up', { tenant_id: tenant.id, slug });
 
     const token = generateToken({ id: owner.id, email: owner.email, role: 'admin', tenant_id: tenant.id, name: owner.name });
+    // The console usually lives on another host (the brokerage's new address),
+    // which can't read this page's storage. It gets a one-time code instead of
+    // the token itself, good for ten minutes, traded in at POST /signup/handoff.
+    const handoff = crypto.randomBytes(32).toString('base64url');
+    await pool.query(
+      `INSERT INTO password_resets (tenant_id, user_id, token_hash, purpose, expires_at)
+       VALUES ($1, $2, $3, 'handoff', NOW() + INTERVAL '10 minutes')`,
+      [tenant.id, owner.id, hashLinkToken(handoff)]
+    );
     return res.status(201).json({
       success: true,
       data: {
@@ -204,6 +214,7 @@ export const signup = async (req, res) => {
         site_url: hasOwnAddress(tenant) ? siteUrlFor(tenant) : null,
         console_url: consoleUrlFor(tenant, '/admin'),
         token,
+        handoff,
         confirm_sent: confirmSent,
         trial_ends_at: settings.billing.trial_ends_at,
       },
@@ -215,5 +226,35 @@ export const signup = async (req, res) => {
     return res.status(500).json({ error: 'Could not create your brokerage. Please try again.' });
   } finally {
     client.release();
+  }
+};
+
+const HANDOFF_EXPIRED = 'This sign-in link has expired. Sign in with your email and password.';
+
+/**
+ * POST /api/signup/handoff { code }
+ * The brokerage's console, on its own host, trades the code from signup for
+ * the owner's sign-in. The code works once, within ten minutes, and only on
+ * that brokerage's own site.
+ */
+export const redeemHandoff = async (req, res) => {
+  const code = String(req.body?.code || '').trim();
+  if (!/^[A-Za-z0-9_-]{20,100}$/.test(code)) return res.status(400).json({ error: HANDOFF_EXPIRED });
+  try {
+    const { rows: [owner] } = await getPool().query(
+      `UPDATE password_resets pr SET used_at = NOW()
+       FROM users u
+       WHERE pr.token_hash = $1 AND pr.purpose = 'handoff' AND pr.tenant_id = $2
+         AND pr.used_at IS NULL AND pr.expires_at > NOW()
+         AND u.id = pr.user_id AND u.tenant_id = pr.tenant_id AND u.status = 'active' AND u.role = 'admin'
+       RETURNING u.id, u.email, u.name, u.tenant_id`,
+      [hashLinkToken(code), tenantIdOf(req)]
+    );
+    if (!owner) return res.status(400).json({ error: HANDOFF_EXPIRED });
+    const token = generateToken({ id: owner.id, email: owner.email, role: 'admin', tenant_id: owner.tenant_id, name: owner.name });
+    return res.json({ success: true, data: { token } });
+  } catch (error) {
+    logger.error('signup handoff error', error);
+    return res.status(500).json({ error: 'Could not sign you in. Please try again.' });
   }
 };

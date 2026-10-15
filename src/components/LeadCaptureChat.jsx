@@ -13,7 +13,25 @@ const API_BASE = (() => {
 
 const CHAT_NAME = "Nadia";
 const CHAT_TITLE = "Your Home Assistant";
+// SAA's photo of Nadia. Another brokerage's site shows its own icon or logo,
+// or the first letter of its name in its colors (ChatAvatar below).
 const AVATAR_PATH = "/images/nadia-avatar.jpg";
+
+function ChatAvatar({ bb, className, alt = CHAT_NAME }) {
+  if (!bb) return <img src={AVATAR_PATH} alt={alt} className={className} />;
+  const image = bb.iconUrl || bb.logoUrl;
+  if (image) return <img src={image} alt={alt} className={className} style={{ background: "#fff" }} />;
+  return (
+    <span
+      aria-label={alt}
+      role="img"
+      className={`${className} inline-flex items-center justify-center font-bold text-[color:var(--brand-on-accent)]`}
+      style={{ backgroundColor: "var(--brand-accent)" }}
+    >
+      {String(bb.name || CHAT_NAME).trim().charAt(0).toUpperCase() || "N"}
+    </span>
+  );
+}
 
 // Slug → display name for the 27 known area pages (never guess from <title> —
 // titles carry boilerplate like "Homes for Sale in ..." that reads wrong when
@@ -567,7 +585,7 @@ export default function LeadCaptureChat() {
           {/* Header */}
           <div className="bg-black text-white px-5 py-3.5 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-3">
-              <img src={AVATAR_PATH} alt={CHAT_NAME} className="nadia-avatar" />
+              <ChatAvatar bb={bb} className="nadia-avatar" />
               <div>
                 <p className="font-semibold text-sm">{CHAT_NAME} — {CHAT_TITLE}</p>
                 <p className="text-xs text-gray-400 flex items-center gap-1.5">
@@ -588,7 +606,7 @@ export default function LeadCaptureChat() {
                 style={{ animation: 'chatBounceIn 0.25s ease-out' }}
               >
                 {msg.role === "assistant" && (
-                  <img src={AVATAR_PATH} alt={CHAT_NAME} className="nadia-avatar-sm mt-1" />
+                  <ChatAvatar bb={bb} className="nadia-avatar-sm mt-1" />
                 )}
                 <div
                   className={`max-w-[80%] px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
@@ -605,7 +623,7 @@ export default function LeadCaptureChat() {
             {/* Typing indicator */}
             {isTyping && (
               <div className="flex items-start gap-2.5">
-                <img src={AVATAR_PATH} alt={CHAT_NAME} className="nadia-avatar-sm mt-1" />
+                <ChatAvatar bb={bb} className="nadia-avatar-sm mt-1" />
                 <div className="bg-gray-50 rounded-2xl rounded-tl-sm px-4 py-3">
                   <div className="flex gap-1.5">
                     <span className="w-2 h-2 bg-gray-400 rounded-full" style={{ animation: 'chatTyping 1.2s ease-in-out infinite' }} />
@@ -870,7 +888,7 @@ export default function LeadCaptureChat() {
         {isOpen ? (
           <span className="text-2xl font-light text-white">&times;</span>
         ) : (
-          <img src={AVATAR_PATH} alt={`Ask ${CHAT_NAME}`} className="w-full h-full object-cover" />
+          <ChatAvatar bb={bb} alt={`Ask ${CHAT_NAME}`} className="w-full h-full object-cover text-xl" />
         )}
       </button>
     </div>

@@ -80,15 +80,16 @@ export function installConsoleFetch() {
 }
 
 /**
- * A sign-in handed over by signup (/admin#t=<token>): store it as the admin
- * session and take it out of the address bar. Returns the token or null.
+ * The one-time code signup hands to a console on another host (/admin#h=<code>):
+ * take it out of the address bar at once and return it, or null. The code is
+ * traded for a sign-in with POST /api/signup/handoff and works once; the
+ * sign-in itself never rides in a URL.
  */
-export function takeHandoffToken() {
+export function takeHandoffCode() {
   if (typeof window === 'undefined') return null;
-  const m = /(?:^#|&)t=([A-Za-z0-9._-]+)/.exec(window.location.hash || '');
+  const m = /(?:^#|&)h=([A-Za-z0-9._-]+)/.exec(window.location.hash || '');
   if (!m) return null;
   try {
-    localStorage.setItem('adminToken', m[1]);
     window.history.replaceState(null, '', window.location.pathname + window.location.search);
   } catch {
     /* ignore */

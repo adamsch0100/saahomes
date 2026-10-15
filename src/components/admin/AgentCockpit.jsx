@@ -292,6 +292,9 @@ export default function AgentCockpit({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [fubStatus, setFubStatus] = useState(null);
+  // Follow Up Boss is in play only when this brokerage runs on it and a key is set;
+  // everything that mentions it (sync, ids, the footer) stays out of view otherwise.
+  const fubOn = meta?.crm_mode !== "own" && !!fubStatus?.configured;
   const [savingId, setSavingId] = useState(null);
   const [expanded, setExpanded] = useState(null);
   const [assignBusyId, setAssignBusyId] = useState(null);
@@ -521,7 +524,7 @@ export default function AgentCockpit({
         style={ok ? { borderColor: "rgb(var(--brand-accent-rgb) / 0.4)" } : undefined}
       >
         <p className="font-semibold" style={ok ? { color: "#8a7329" } : undefined}>
-          FUB sync
+          Follow Up Boss sync
         </p>
         <p className="text-xs mt-0.5">{line}</p>
       </div>
@@ -743,17 +746,17 @@ export default function AgentCockpit({
           <p className="text-2xl font-bold text-gray-900 mt-1">{meta?.hot ?? "—"}</p>
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">FUB CRM</p>
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">CRM</p>
           <p className="text-sm font-semibold text-gray-900 mt-2">
             {meta?.crm_mode === "own"
-              ? "Off · this cockpit is your CRM"
+              ? "This cockpit"
               : fubStatus == null
               ? "…"
               : fubStatus.configured
                 ? fubStatus.success !== false
-                  ? `Live · ${fubStatus.total != null ? `${fubStatus.total} people` : "connected"}`
-                  : "Key set · check failed"
-                : "Not configured"}
+                  ? `Follow Up Boss · ${fubStatus.total != null ? `${fubStatus.total} people` : "connected"}`
+                  : "Follow Up Boss · key set, check failed"
+                : "This cockpit · no CRM connected"}
           </p>
         </div>
       </div>
@@ -822,7 +825,9 @@ export default function AgentCockpit({
         )}
         {!loading && leads.length === 0 && (
           <div className="p-10 text-center text-gray-500">
-            No leads match. Try clearing filters or check that users exist in the database.
+            {q.trim() || stage !== "all" || dueOnly || smart
+              ? "No leads match these filters. Try clearing them."
+              : "No leads yet. Your first form fill or saved search lands here."}
           </div>
         )}
 
@@ -932,15 +937,17 @@ export default function AgentCockpit({
                         >
                           Share a home
                         </button>
-                        <button
-                          type="button"
-                          disabled={fubSyncBusyId === lead.id}
-                          onClick={() => syncFubLifecycle(lead)}
-                          className="min-h-[40px] px-3 rounded-lg text-sm font-semibold text-black border disabled:opacity-50"
-                          style={{ borderColor: GOLD, backgroundColor: "rgb(var(--brand-accent-rgb) / 0.133)" }}
-                        >
-                          {fubSyncBusyId === lead.id ? "Syncing…" : "Sync from FUB"}
-                        </button>
+                        {fubOn && (
+                          <button
+                            type="button"
+                            disabled={fubSyncBusyId === lead.id}
+                            onClick={() => syncFubLifecycle(lead)}
+                            className="min-h-[40px] px-3 rounded-lg text-sm font-semibold text-black border disabled:opacity-50"
+                            style={{ borderColor: GOLD, backgroundColor: "rgb(var(--brand-accent-rgb) / 0.133)" }}
+                          >
+                            {fubSyncBusyId === lead.id ? "Syncing…" : "Sync from Follow Up Boss"}
+                          </button>
+                        )}
                       </>
                     )}
                   </div>
@@ -948,8 +955,8 @@ export default function AgentCockpit({
                   {expanded === lead.id && (
                     <div className="mt-3 text-xs text-gray-600 bg-gray-50 rounded-lg p-3 space-y-1">
                       <p>Searches: {lead.search_count ?? 0} · Homes: {lead.home_count ?? 0}</p>
-                      {showAdminTools && (
-                        <p>FUB person: {lead.fub_person_id || "not linked yet"}</p>
+                      {showAdminTools && fubOn && (
+                        <p>Follow Up Boss person: {lead.fub_person_id || "not linked yet"}</p>
                       )}
                       <p>Last active: {formatDateTime(lead.last_active_at)}</p>
                       {coBuyerLine(lead) && <p>{coBuyerLine(lead)}</p>}
@@ -1039,7 +1046,7 @@ export default function AgentCockpit({
                           )}
                           <div className="text-xs text-gray-400 mt-0.5">
                             {lead.search_count ? `${lead.search_count} search${lead.search_count === 1 ? "" : "es"}` : "no searches"}
-                            {showAdminTools && lead.fub_person_id ? ` · FUB #${lead.fub_person_id}` : ""}
+                            {showAdminTools && fubOn && lead.fub_person_id ? ` · Follow Up Boss #${lead.fub_person_id}` : ""}
                           </div>
                         </td>
                         <td className="px-4 py-3">
@@ -1136,15 +1143,17 @@ export default function AgentCockpit({
                                 >
                                   Share a home
                                 </button>
-                                <button
-                                  type="button"
-                                  disabled={fubSyncBusyId === lead.id}
-                                  onClick={() => syncFubLifecycle(lead)}
-                                  className="min-h-[36px] px-3 rounded-lg text-xs font-semibold text-black border hover:opacity-90 disabled:opacity-50"
-                                  style={{ borderColor: GOLD, backgroundColor: "rgb(var(--brand-accent-rgb) / 0.133)" }}
-                                >
-                                  {fubSyncBusyId === lead.id ? "Syncing…" : "Sync from FUB"}
-                                </button>
+                                {fubOn && (
+                                  <button
+                                    type="button"
+                                    disabled={fubSyncBusyId === lead.id}
+                                    onClick={() => syncFubLifecycle(lead)}
+                                    className="min-h-[36px] px-3 rounded-lg text-xs font-semibold text-black border hover:opacity-90 disabled:opacity-50"
+                                    style={{ borderColor: GOLD, backgroundColor: "rgb(var(--brand-accent-rgb) / 0.133)" }}
+                                  >
+                                    {fubSyncBusyId === lead.id ? "Syncing…" : "Sync from Follow Up Boss"}
+                                  </button>
+                                )}
                               </>
                             )}
                           </div>
@@ -1212,8 +1221,8 @@ export default function AgentCockpit({
         {showAssignment
           ? " Team pool: every agent sees all contacts; Claim or Assign tracks who is working the lead."
           : ""}
-        {showAdminTools && meta?.crm_mode !== "own"
-          ? " FUB is source of truth — nurture signals write back when the API key is configured; use Sync from FUB to refresh lifecycle from FUB tags (manual stages are never overwritten)."
+        {showAdminTools && fubOn
+          ? " Follow Up Boss keeps the record: nurture signals write back to it, and Sync pulls each lead's stage from its tags (stages set by hand are never overwritten)."
           : ""}
       </p>
     </div>

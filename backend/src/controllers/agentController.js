@@ -9,6 +9,7 @@ import { finishLogin } from '../services/staffAuth.js';
 import logger from '../utils/logger.js';
 import { tenantIdOf, leadVisibility, siteUrlFor, DEFAULT_TENANT_ID } from '../services/tenantContext.js';
 import { crmModeOf } from '../services/crmMode.js';
+import { fubApiKeyForTenant } from '../services/followUpBossService.js';
 
 const OWN_CRM_FUB_OFF = 'Your brokerage runs its CRM right here in the cockpit, so Follow Up Boss is turned off. Your owner can switch this in Settings → Your CRM.';
 
@@ -106,7 +107,8 @@ async function listCockpitLeads(req, res) {
         total: filtered.length,
         due_today: dueTodayCount,
         hot: hotCount,
-        fub_configured: !!(process.env.FOLLOW_UP_BOSS_API_KEY || process.env.FOLLOW_UP_BOSS_WEBHOOK_URL),
+        // This brokerage's own key (SAA's is the server's), never another's.
+        fub_configured: !!(await fubApiKeyForTenant(tenantIdOf(req))),
         crm_mode: req.tenant?.settings?.crm_mode === 'own' ? 'own' : 'fub',
       },
     });

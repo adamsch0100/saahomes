@@ -915,7 +915,9 @@ export default function BrokerageSettings({ token }) {
 
       <LeadSources token={token} Section={Section} />
 
-      <TextingSettings token={token} />
+      {(!onlySections || (typeof onlySections === 'function' ? onlySections('Texting') : onlySections.includes('Texting'))) && (
+        <TextingSettings token={token} />
+      )}
 
       {/* Test email */}
       <Section title="Test email" description="See exactly what your buyers get: a sample email with your brand, sent to you.">

@@ -151,13 +151,23 @@ export default function StartPage() {
       const res = await submitSignup(body);
       const data = res?.data || {};
       let dest = data.console_url || '/admin';
+      let sameOrigin = true;
       try {
         const u = new URL(dest, window.location.href);
-        dest = u.origin === window.location.origin ? `${u.pathname}${u.search}` : u.toString();
+        sameOrigin = u.origin === window.location.origin;
+        dest = sameOrigin ? `${u.pathname}${u.search}` : u.toString();
       } catch {
         /* keep as is */
       }
-      window.location.assign(`${dest}#t=${encodeURIComponent(data.token || '')}`);
+      if (sameOrigin) {
+        // The sign-in stays out of the address bar: keep it here, then open the console.
+        try { localStorage.setItem('adminToken', data.token || ''); } catch { /* ignore */ }
+        window.location.assign(dest);
+      } else {
+        // The console's host can't read this page's storage: it gets a one-time
+        // code in the fragment (never sent to a server) and strips it on arrival.
+        window.location.assign(`${dest}#h=${encodeURIComponent(data.handoff || '')}`);
+      }
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');
       setFieldError(err.field || null);

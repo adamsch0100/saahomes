@@ -37,7 +37,7 @@ const STEPS = {
   fub: {
     label: 'Your CRM',
     title: 'Pick your CRM',
-    intro: 'Run your leads right here in the cockpit, or send them to Follow Up Boss. You can switch any time without losing anything.',
+    intro: 'Run your leads right here in the cockpit, or send them to Follow Up Boss. You can switch any time without losing anything. Texting is set up here too.',
   },
   mls: {
     label: 'MLS',
@@ -267,7 +267,7 @@ function SetupWizard({ token, setup, onChange, onClose, onOpenTab }) {
 
             {current === 'fub' && (
               <>
-                <SettingsSectionFilter.Provider value={['Your CRM', 'Follow Up Boss']}>
+                <SettingsSectionFilter.Provider value={['Your CRM', 'Follow Up Boss', 'Texting']}>
                   <BrokerageSettings token={token} />
                 </SettingsSectionFilter.Provider>
                 <FubAutomationCard fub={setup.fub} />

@@ -589,7 +589,8 @@ export default function ManageAlertsPage() {
               </button>
             </div>
 
-            <LeadScoreBadge score={data.lead_score} label={data.lead_score_label} />
+            {/* An internal score; another brokerage's buyers never see it. */}
+            {!bb && <LeadScoreBadge score={data.lead_score} label={data.lead_score_label} />}
 
             <InstantAlertsCard className="mt-5" />
 
@@ -812,13 +813,13 @@ export default function ManageAlertsPage() {
                   <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
                     <p className="text-lg font-semibold text-gray-900">No saved homes yet</p>
                     <p className="text-gray-500 text-sm mt-2 max-w-sm mx-auto">
-                      Start browsing {marketPack.market.name} listings and tap the heart to save your favorites.
+                      Start browsing {bb ? bb.market || "" : marketPack.market.name} listings and tap the heart to save your favorites.
                     </p>
                     <Link
                       to="/properties/"
                       className="inline-block mt-5 px-5 py-2.5 bg-black text-white rounded-lg text-sm font-semibold min-h-[44px]"
                     >
-                      Browse {marketPack.market.name} homes
+                      Browse {bb ? bb.market || "" : marketPack.market.name} homes
                     </Link>
                   </div>
                 ) : (
@@ -838,9 +839,23 @@ export default function ManageAlertsPage() {
             )}
 
             <p className="mt-4 text-xs text-gray-400">
+              {bb ? (
+                bb.phone ? (
+                  <>
+                    Questions? Call or text{" "}
+                    <a href={bb.tel} className="underline">{bb.phone}</a>
+                    {" "}· {marketPack.fairHousing}
+                  </>
+                ) : (
+                  marketPack.fairHousing
+                )
+              ) : (
+                <>
               Questions? Call or text{" "}
               <a href={marketPack.market.tel} className="underline">{marketPack.market.phone}</a>
               {" "}· {marketPack.fairHousing}
+                </>
+              )}
             </p>
           </>
         )}
