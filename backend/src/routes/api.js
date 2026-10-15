@@ -1,6 +1,7 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import getPool from '../config/database.js';
+import { migrationFailures } from '../config/migrate.js';
 import transporter from '../config/email.js';
 import { submitContactForm } from '../controllers/contactController.js';
 import { submitMarketReportForm } from '../controllers/marketReportController.js';
@@ -457,9 +458,15 @@ router.get('/notify-health', async (req, res) => {
       },
     };
     const lastSubmit = await lastSubmitLegSheet();
+    // Schema steps that failed at boot (config/migrate.js). Empty means the
+    // database is fully migrated.
+    const migrations = {
+      status: migrationFailures.length ? 'red' : 'ok',
+      failed: migrationFailures.map((f) => f.name),
+    };
     notifyHealthCache = {
       at: Date.now(),
-      payload: { ok: true, checkedAt: new Date().toISOString(), legs, lastSubmit },
+      payload: { ok: true, checkedAt: new Date().toISOString(), legs, lastSubmit, migrations },
     };
   }
   res.status(200).json(notifyHealthCache.payload);
