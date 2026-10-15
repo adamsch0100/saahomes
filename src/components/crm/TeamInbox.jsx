@@ -25,6 +25,15 @@ const KIND_STYLE = {
 };
 const KIND_LABEL = { text: 'Text', email: 'Email', nadia: 'Nadia', form: 'Form', lead: 'New lead' };
 
+// What each empty list means, in plain words, with the one thing to do next.
+const EMPTY_COPY = {
+  open: 'Nothing waiting. Texts, email replies, form fills and portal leads from your site land here, and you reply from this page.',
+  mine: 'Nothing assigned to you. Claim a conversation from Open or Unassigned.',
+  unassigned: 'Nothing waiting for a claim. New conversations start here until someone claims them.',
+  done: 'Nothing closed yet. Mark a conversation done and it moves here.',
+  all: 'No conversations yet. Texts, email replies, form fills and portal leads from your site land here. Share your site link to get the first one.',
+};
+
 const btnLight = 'min-h-[40px] px-3 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-800 hover:border-black disabled:opacity-50';
 const btnDark = 'min-h-[44px] px-4 rounded-lg bg-gray-900 text-white text-sm font-semibold hover:bg-black disabled:opacity-50';
 
@@ -256,7 +265,9 @@ export default function TeamInbox({ token, onOpenLead, onCounts }) {
           {!threads && !error && <p className="p-4 text-sm text-gray-500">Loading…</p>}
           {threads && threads.length === 0 && (
             <p className="p-6 text-sm text-gray-500 text-center">
-              {filter === 'open' ? 'All caught up. New texts, email replies, forms and portal leads show up here.' : 'Nothing here.'}
+              {q.trim()
+                ? 'No conversations match that search.'
+                : EMPTY_COPY[filter] || EMPTY_COPY.all}
             </p>
           )}
           {threads && threads.length > 0 && (
@@ -284,7 +295,7 @@ export default function TeamInbox({ token, onOpenLead, onCounts }) {
         <div className={`${active ? 'block' : 'hidden lg:block'} min-w-0`}>
           {active
             ? <Thread key={active} token={token} id={active} teammates={teammates} onBack={() => setActive(null)} onChanged={changed} onOpenLead={onOpenLead} />
-            : <p className="hidden lg:block p-8 text-sm text-gray-500 text-center">Pick a conversation.</p>}
+            : <p className="hidden lg:block p-8 text-sm text-gray-500 text-center">{threads && threads.length === 0 ? 'A conversation opens here once one comes in.' : 'Pick a conversation.'}</p>}
         </div>
       </div>
     </div>

@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host",
-    "build": "node scripts/generate-sitemap.mjs && vite build && node scripts/prerender-meta.mjs",
+    "dev": "node scripts/generate-blog-index.mjs && vite --host",
+    "build": "node scripts/generate-blog-index.mjs && node scripts/generate-sitemap.mjs && vite build && node scripts/prerender-meta.mjs",
+    "blog-index": "node scripts/generate-blog-index.mjs",
     "sitemap": "node scripts/generate-sitemap.mjs",
     "indexnow": "node scripts/submit-indexnow.mjs",
     "postbuild": "npm ci --prefix backend --omit=dev",

@@ -1,6 +1,7 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import getPool from '../config/database.js';
+import { migrationFailures } from '../config/migrate.js';
 import transporter from '../config/email.js';
 import { submitContactForm } from '../controllers/contactController.js';
 import { submitMarketReportForm } from '../controllers/marketReportController.js';
@@ -20,7 +21,7 @@ import {
 import { listSoldListings } from '../controllers/soldListingsController.js';
 import { getListingPhoto, getListingPhotoDefault } from '../controllers/photoController.js';
 import {
-  createAlert, listAlerts, getMe, sendMagicLink, signOut, updateAlert, deleteAlert, unsubscribeAll,
+  createAlert, listAlerts, getMe, updateMe, sendMagicLink, signOut, updateAlert, deleteAlert, unsubscribeAll,
   recordView, recordEvent, trackPublicEvent,
 } from '../controllers/alertController.js';
 import { register, login, setPassword, ensureSession } from '../controllers/authController.js';
@@ -216,6 +217,7 @@ router.post('/auth/session', formLimit(), ensureSession);
 router.post('/alerts', formLimit(), createAlert);
 router.get('/alerts/manage', listAlerts);
 router.get('/alerts/me', getMe);
+router.patch('/alerts/me', formLimit(), updateMe);
 router.post('/alerts/view', trackingLimiter, recordView);
 router.post('/alerts/event', trackingLimiter, recordEvent);
 router.post('/events', trackingLimiter, trackPublicEvent);
@@ -457,9 +459,15 @@ router.get('/notify-health', async (req, res) => {
       },
     };
     const lastSubmit = await lastSubmitLegSheet();
+    // Schema steps that failed at boot (config/migrate.js). Empty means the
+    // database is fully migrated.
+    const migrations = {
+      status: migrationFailures.length ? 'red' : 'ok',
+      failed: migrationFailures.map((f) => f.name),
+    };
     notifyHealthCache = {
       at: Date.now(),
-      payload: { ok: true, checkedAt: new Date().toISOString(), legs, lastSubmit },
+      payload: { ok: true, checkedAt: new Date().toISOString(), legs, lastSubmit, migrations },
     };
   }
   res.status(200).json(notifyHealthCache.payload);

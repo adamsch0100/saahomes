@@ -62,6 +62,8 @@ test('notify-health answers 200 with a four-leg sheet and the last submit leg lo
   assert.equal(health.status, 200);
   const body = await health.json();
   assert.equal(body.ok, true);
+  // Every schema step ran at boot, so nothing is listed as failed.
+  assert.deepEqual(body.migrations, { status: 'ok', failed: [] });
   assert.deepEqual(Object.keys(body.legs).sort(), ['board', 'fub', 'ga4', 'mail']);
   for (const [name, leg] of Object.entries(body.legs)) {
     assert.ok(['ok', 'red'].includes(leg.status), `${name} leg must be ok|red`);

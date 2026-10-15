@@ -1,9 +1,10 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { dirname, join, sep } from 'path';
 import { existsSync, readFileSync } from 'fs';
 import apiRoutes from './routes/api.js';
 import adminRoutes from './routes/admin.js';
@@ -25,6 +26,7 @@ import { startMlsScheduler } from './jobs/mlsScheduler.js';
 import { checkCredentialsKey } from './services/mls/secrets.js';
 import { NOCO_CITIES } from './config/nocoCities.js';
 import { tenantMiddleware, resolveTenantForHost, DEFAULT_TENANT_ID, pausedForBilling } from './services/tenantContext.js';
+import { corsOptionsFor, OPEN_CORS_PATHS } from './services/corsPolicy.js';
 import { startBillingScheduler } from './services/billing.js';
 import { brandFor, isHomeTenant } from './services/brand.js';
 import {
@@ -228,25 +230,40 @@ const PORT = process.env.PORT || 3000;
 const HOST = '0.0.0.0';
 const distPath = join(__dirname, '../../dist');
 
-const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? [
-      'https://saahomes.com',
-      'https://www.saahomes.com',
-      process.env.FRONTEND_URL,
-      process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : null,
-    ].filter(Boolean)
-  : ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'];
+// Security headers. No Content-Security-Policy: the pages carry inline
+// scripts, Google Fonts, Maps, YouTube, Stripe and analytics, and a policy
+// would break them. Photos and widgets are loaded from other sites, so
+// resources stay cross-origin. HSTS without includeSubDomains: brokerages
+// point their own domains here, and their other subdomains (mail, older
+// hosts) are not ours to force onto https. The referrer policy is the
+// browsers' own default, so outbound links behave as before.
+const helmetOptions = {
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  strictTransportSecurity: { maxAge: 31536000, includeSubDomains: false },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+};
+const securityHeaders = helmet(helmetOptions);
+// The widgets are iframed into other sites: no X-Frame-Options there.
+const widgetSecurityHeaders = helmet({ ...helmetOptions, frameguard: false });
+app.use((req, res, next) => (OPEN_CORS_PATHS.test(req.path) ? widgetSecurityHeaders : securityHeaders)(req, res, next));
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-      return;
-    }
-    callback(null, true);
-  },
-  credentials: true,
-}));
+// Browsers on our own hosts (the site, every brokerage's domains, the
+// platform's) may call the API with cookies; the widgets answer any origin
+// without them; everything else gets no allow header. See corsPolicy.js.
+app.use((req, res, next) => {
+  corsOptionsFor(req)
+    .then((options) => {
+      // Caches keep answers for different origins apart, allowed or not.
+      if (options.origin !== '*' && req.get('origin')) res.vary('Origin');
+      cors(options)(req, res, next);
+    })
+    .catch((error) => {
+      console.error('CORS policy error:', error.message);
+      cors({ origin: false })(req, res, next);
+    });
+});
 // Stripe and Follow Up Boss sign the exact bytes they send: these routes get
 // the raw body, so they come before the JSON parser.
 app.use(rawWebhooks);
@@ -498,9 +515,19 @@ if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
     }
   });
 
+  // Vite names the files in dist/assets by their content hash, so browsers
+  // can keep them for good; a deploy changes the name, not the file. Pages
+  // always revalidate, and everything else (images, icons) for an hour.
+  const hashedAssetsPath = join(distPath, 'assets') + sep;
   app.use(express.static(distPath, {
     index: false,
+    maxAge: '1h',
     setHeaders(res, filePath) {
+      if (filePath.startsWith(hashedAssetsPath)) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      } else if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache');
+      }
       // The service worker and manifest must update with each deploy.
       if (filePath.endsWith('sw.js')) res.setHeader('Cache-Control', 'no-cache');
       if (filePath.endsWith('.webmanifest')) {
@@ -708,6 +735,12 @@ const startServer = async () => {
   try {
     await runMigrations();
   } catch (error) {
+    // MIGRATIONS_STRICT=1: a failed step stops the boot instead of serving a
+    // half-migrated schema. Off by default (see migrate.js).
+    if (process.env.MIGRATIONS_STRICT === '1') {
+      console.error('Migration error on startup, exiting (MIGRATIONS_STRICT=1):', error.message);
+      process.exit(1);
+    }
     console.error('Migration error on startup (API will still run):', error.message);
   }
 

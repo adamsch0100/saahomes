@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { getBlogPost } from "../data/blogPosts";
+// Titles only: the full posts (1.5 MB) stay out of the main bundle.
+import { getBlogTitle } from "../data/blogIndex.js";
 
 const breadcrumbMap = {
   "about-us": "About SAA Homes",
@@ -188,12 +189,11 @@ function getBlogTrail(pathname) {
   if (!match) return null;
 
   const slug = match[1];
-  const post = getBlogPost(slug);
 
   return [
     { path: "/", label: "Home" },
     { path: "/blog/", label: "Blog" },
-    { path: `/blog/${slug}/`, label: post?.title || slug },
+    { path: `/blog/${slug}/`, label: getBlogTitle(slug) || slug },
   ];
 }
 
