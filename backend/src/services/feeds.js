@@ -174,9 +174,31 @@ export function serviceAreaValues(areas) {
   return (areas || []).map((v) => v.toLowerCase().replace(/\s+county$/i, ''));
 }
 
-const TIME_FMT = new Intl.DateTimeFormat('en-US', {
-  timeZone: 'America/Denver', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit',
-});
+// "Last updated" in the MLS's own time zone, from the first state it covers.
+const STATE_ZONES = {
+  ET: ['CT', 'DE', 'DC', 'FL', 'GA', 'IN', 'KY', 'ME', 'MD', 'MA', 'MI', 'NH', 'NJ', 'NY', 'NC', 'OH', 'PA', 'RI', 'SC', 'VT', 'VA', 'WV'],
+  CT: ['AL', 'AR', 'IL', 'IA', 'KS', 'LA', 'MN', 'MS', 'MO', 'NE', 'ND', 'OK', 'SD', 'TN', 'TX', 'WI'],
+  MT: ['AZ', 'CO', 'ID', 'MT', 'NM', 'UT', 'WY'],
+  PT: ['CA', 'NV', 'OR', 'WA'],
+  AKT: ['AK'],
+  HT: ['HI'],
+};
+const ZONE_IDS = {
+  ET: 'America/New_York', CT: 'America/Chicago', MT: 'America/Denver', PT: 'America/Los_Angeles', AKT: 'America/Anchorage', HT: 'Pacific/Honolulu',
+};
+const zoneFormats = new Map();
+
+export function feedTimeZone(states) {
+  const first = String((Array.isArray(states) && states[0]) || 'CO').toUpperCase();
+  const label = Object.keys(STATE_ZONES).find((z) => STATE_ZONES[z].includes(first)) || 'MT';
+  const id = first === 'AZ' ? 'America/Phoenix' : ZONE_IDS[label];
+  if (!zoneFormats.has(id)) {
+    zoneFormats.set(id, new Intl.DateTimeFormat('en-US', {
+      timeZone: id, month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit',
+    }));
+  }
+  return { label, format: zoneFormats.get(id) };
+}
 
 function fillTemplate(text, vars) {
   return String(text || '').replace(/\{(\w+)\}/g, (m, k) => (vars[k] != null ? vars[k] : m));
@@ -230,7 +252,8 @@ export async function attributionFor(listing, tenant, { pool } = {}) {
   const info = catalog.get(feed) || FALLBACK_FEEDS[feed] || FALLBACK_FEEDS.ires;
   const brand = brandFor(tenant || { id: DEFAULT_TENANT_ID });
   const updatedAt = listing?.updated_at ? new Date(listing.updated_at) : null;
-  const updated = updatedAt && !Number.isNaN(updatedAt.getTime()) ? `${TIME_FMT.format(updatedAt)} MT` : 'recently';
+  const zone = feedTimeZone(info.states);
+  const updated = updatedAt && !Number.isNaN(updatedAt.getTime()) ? `${zone.format.format(updatedAt)} ${zone.label}` : 'recently';
   return {
     feed,
     feed_name: info.name,

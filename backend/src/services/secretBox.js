@@ -27,7 +27,7 @@ function keyFrom(raw) {
 }
 
 /** The 32-byte key, or null when neither CREDENTIALS_KEY nor JWT_SECRET is set. */
-function secretKey() {
+export function secretKey() {
   const explicit = String(process.env.CREDENTIALS_KEY || '').trim();
   if (explicit) return keyFrom(explicit);
   const jwt = String(process.env.JWT_SECRET || '').trim();

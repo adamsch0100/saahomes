@@ -11,30 +11,15 @@
  */
 import crypto from 'node:crypto';
 import logger from '../../utils/logger.js';
+import { secretKey } from '../secretBox.js';
 
 const VERSION = 'v1';
-let warned = false;
 
-function keyFromString(raw) {
-  const s = String(raw).trim();
-  if (/^[0-9a-f]{64}$/i.test(s)) return Buffer.from(s, 'hex');
-  try {
-    const b = Buffer.from(s, 'base64');
-    if (b.length === 32 && /^[A-Za-z0-9+/]+=*$/.test(s)) return b;
-  } catch { /* not base64 */ }
-  return crypto.createHash('sha256').update(s).digest();
-}
-
-/** The 32-byte key for credentials. */
+/** The 32-byte key for credentials (the same key as secretBox.js). */
 export function credentialsKey() {
-  if (process.env.CREDENTIALS_KEY) return keyFromString(process.env.CREDENTIALS_KEY);
-  const fallback = process.env.JWT_SECRET;
-  if (!fallback) throw new Error('CREDENTIALS_KEY (or JWT_SECRET) must be set to store MLS credentials');
-  if (!warned) {
-    warned = true;
-    logger.warn('CREDENTIALS_KEY is not set: MLS credentials are encrypted with a key derived from JWT_SECRET. Set CREDENTIALS_KEY (64 hex characters) and re-save credentials.');
-  }
-  return crypto.createHash('sha256').update(`mls-credentials:${fallback}`).digest();
+  const key = secretKey();
+  if (!key) throw new Error('CREDENTIALS_KEY (or JWT_SECRET) must be set to store MLS credentials');
+  return key;
 }
 
 /** Called at startup so the missing-key warning shows in the boot log. */
