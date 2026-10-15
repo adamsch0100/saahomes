@@ -19,6 +19,7 @@ import { normalizeHex, readableOn } from '../../utils/brandTheme.js';
 import { readImageAsDataUrl } from '../../utils/imageUpload.js';
 import TextingSettings from './TextingSettings.jsx';
 import { YourCrm, LeadSources } from './CrmSettings.jsx';
+import MlsConnect from './MlsConnect.jsx';
 
 const GOLD = 'var(--brand-accent)';
 
@@ -160,21 +161,16 @@ function DnsTable({ records }) {
 
 /**
  * Which homes the site shows. The MLS approves each brokerage; until then the
- * site shows sample homes. Read-only except the service areas.
+ * site shows sample homes. "Connect your MLS" (MlsConnect.jsx) walks the
+ * owner through it; the service areas are edited here.
  */
-function ListingsSection({ listings, busy, onSaveAreas, note }) {
+function ListingsSection({ token, listings, busy, onSaveAreas, note }) {
   const [areas, setAreas] = useState((listings?.service_areas || []).join(', '));
   useEffect(() => {
     setAreas((listings?.service_areas || []).join(', '));
   }, [listings?.service_areas]);
   if (!listings) return null;
   const live = listings.mode === 'live';
-  const ires = (listings.feeds || []).find((f) => f.key === 'ires');
-  const steps = [
-    { done: live || ['pending', 'approved'].includes(ires?.status), text: 'Apply to IRES as a website data vendor through MLS Grid (mlsgrid.com). Name us as your website provider.' },
-    { done: live, text: 'Your managing broker signs the IRES data license for your site.' },
-    { done: live, text: 'Tell us when IRES approves you. We switch your site to live listings, usually the same day.' },
-  ];
   return (
     <Section title="Listings" description="Which homes buyers see on your site.">
       <div className="space-y-4 text-sm">
@@ -189,26 +185,7 @@ function ListingsSection({ listings, busy, onSaveAreas, note }) {
             <p className="mt-1 text-red-700">Paused: {listings.suspended.join(', ')}. Contact us to turn it back on.</p>
           ) : null}
         </div>
-        {!live && (
-          <div>
-            <p className="font-semibold text-gray-900">What to do next</p>
-            <ol className="mt-2 space-y-2">
-              {steps.map((st, i) => (
-                <li key={i} className="flex gap-3">
-                  <span
-                    aria-hidden="true"
-                    className={`shrink-0 h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                      st.done ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'
-                    }`}
-                  >
-                    {st.done ? '✓' : i + 1}
-                  </span>
-                  <span className="text-gray-700">{st.text}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        )}
+        <MlsConnect token={token} />
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -826,6 +803,7 @@ export default function BrokerageSettings({ token }) {
 
       {/* Listings (MLS) */}
       <ListingsSection
+        token={token}
         listings={settings.listings}
         busy={quickBusy === 'areas'}
         note={areasNote}
