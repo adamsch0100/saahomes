@@ -1,9 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { getLatestMarketUpdatePost } from "../data/blogPosts";
+// Just the card (slug, title, excerpt, image), generated from the posts: the
+// home page is always loaded, and the full posts would land in its bundle.
+import { LATEST_MARKET_UPDATE } from "../data/blogIndex.js";
 
 export default function LatestMarketUpdateBanner({ variant = "default", cityName = null }) {
-  const post = getLatestMarketUpdatePost();
+  const post = LATEST_MARKET_UPDATE;
   if (!post) return null;
 
   const href = `/blog/${post.slug}/`;
