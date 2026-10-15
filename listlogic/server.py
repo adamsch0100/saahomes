@@ -141,6 +141,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/demo/",
         "/demo/fingerprint",
         "/demo/fingerprint/",
+        "/runs",
+        "/runs/",
         "/api/demo",
         "/api/demo-export",
         "/api/login",
@@ -2349,6 +2351,19 @@ def _rebake_if_stale(run_id: str, html_path: Path) -> Path:
     except Exception:
         logger.exception("Stale rebake failed for %s", run_id)
     return html_path
+
+
+@app.get("/runs")
+@app.get("/runs/")
+def runs_index_redirect(request: Request):
+    # A bare /runs/ (no run id) is a truncated presentation link. Send it to the
+    # live free sample instead of a 404, passing the query string through so
+    # utm/sample params survive — same shape as the /demo alias.
+    url = "/demo"
+    incoming = request.url.query
+    if incoming:
+        url = f"{url}?{incoming}"
+    return RedirectResponse(url=url, status_code=302)
 
 
 @app.get("/runs/{run_id}/")
