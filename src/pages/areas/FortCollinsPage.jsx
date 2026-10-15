@@ -6,6 +6,7 @@ import NeighborhoodLinks from "../../components/NeighborhoodLinks.jsx";
 import { AREA_FAQS } from "../../data/areaFaqs.js";
 import { Link } from "react-router-dom";
 import MarketReportForm from "../../components/MarketReportForm.jsx";
+import AreaMarketReportCapture from "../../components/AreaMarketReportCapture.jsx";
 import TopRatedSchools from "../../components/TopRatedSchools.jsx";
 import SectionTownsBand from "../../components/SectionTownsBand.jsx";
 import CityLuxurySection from "../../components/CityLuxurySection.jsx";
@@ -22,20 +23,22 @@ export default function FortCollinsPage() {
       <AreaSEO slug="fort-collins" />
       
       {/* Hero Section */}
-      <section className="relative min-h-[18rem] sm:h-96 bg-cover bg-center flex items-center justify-center pt-28 sm:pt-32 pb-8" 
+      <section className="relative min-h-[18rem] bg-cover bg-center flex items-center justify-center pt-28 sm:pt-32 pb-10" 
         style={{backgroundImage: "url('/images/Fort-Collins-CO-Area-Guide.jpg')"}}>
         <div className="absolute inset-0 bg-black/60"></div>
-        <div className="relative z-10 text-center text-white px-6">
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">Fort Collins, CO</h1>
-          <p className="mt-4 text-xl">CSU, craft breweries, and Front Range living</p>
-          <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="/properties/?location=Fort Collins, CO" className="inline-flex items-center justify-center px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors">
-              Search Fort Collins Homes
-            </a>
-            <a href="#market-report" className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
-              Get Market Report
+        <div className="relative z-10 w-full max-w-6xl mx-auto px-6 grid lg:grid-cols-2 gap-8 items-center">
+          <div className="text-center lg:text-left text-white">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">Fort Collins, CO</h1>
+            <p className="mt-4 text-xl">CSU, craft breweries, and Front Range living</p>
+            <p className="mt-4 text-sm text-white/80">
+              Schwartz and Associates with Coldwell Banker Realty. Over 20 combined years helping Fort Collins buyers and sellers.
+            </p>
+            <a href="/properties/?location=Fort Collins, CO" className="mt-6 inline-block text-white underline hover:text-gray-200">
+              Or search Fort Collins homes
             </a>
           </div>
+          {/* Above-the-fold capture: one ask, the free market report */}
+          <AreaMarketReportCapture areaName="Fort Collins, CO" captureLabel="fort-collins-above-fold" />
         </div>
       </section>
 
