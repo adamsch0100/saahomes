@@ -6,6 +6,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { createTenant, listTenants, patchTenant } from '../../utils/api.js';
 import TenantListingsPanel from './TenantListingsPanel.jsx';
+import MlsConnectionsPanel from './MlsConnectionsPanel.jsx';
 
 const GOLD = 'var(--brand-accent)';
 
@@ -321,6 +322,8 @@ export default function BrokeragesManager({ token }) {
       {listingsFor && (
         <TenantListingsPanel key={listingsFor.id} token={token} tenant={listingsFor} onChanged={load} />
       )}
+
+      <MlsConnectionsPanel token={token} onChanged={load} />
     </div>
   );
 }

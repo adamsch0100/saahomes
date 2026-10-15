@@ -198,6 +198,7 @@ export function platformList() {
     return {
       id, name: p.name, summary: p.summary, docs: p.docs, vendor_contact: p.vendor_contact,
       credential_fields: p.credential_fields, config_fields: p.config_fields, rate_note: p.rate.note,
+      min_cadence_minutes: p.min_cadence_minutes,
     };
   });
 }
