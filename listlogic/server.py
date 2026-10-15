@@ -126,6 +126,12 @@ def _clear_session_cookie(resp: Response) -> None:
     resp.delete_cookie(auth_service.SESSION_COOKIE, path="/")
 
 
+# IndexNow ownership file. The key is the filename, so it must be anonymously
+# readable at https://listlogic.homes/<file> for engines that verify keyLocation
+# (see scripts/submit-indexnow.mjs). Kept in step with public/<file>.
+INDEXNOW_KEY_FILENAME = "dcb3e94b2a7bfa9d81019c0e5e6268c4.txt"
+
+
 class AuthMiddleware(BaseHTTPMiddleware):
     """Session auth. Marketing, demo, signup/login, and feedback stay public."""
 
@@ -161,6 +167,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/favicon.ico",
         "/robots.txt",
         "/sitemap.xml",
+        f"/{INDEXNOW_KEY_FILENAME}",
         "/presentation.html",
         "/deck.html",
     }
@@ -854,6 +861,11 @@ def robots():
 @app.get("/sitemap.xml")
 def sitemap():
     return FileResponse(ROOT / "sitemap.xml", media_type="application/xml")
+
+
+@app.get(f"/{INDEXNOW_KEY_FILENAME}")
+def indexnow_key():
+    return FileResponse(ROOT / INDEXNOW_KEY_FILENAME, media_type="text/plain")
 
 
 @app.get("/health")
