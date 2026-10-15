@@ -48,10 +48,20 @@ export const resendOwnerConfirm = (token) =>
 
 // ── billing (owner) ──
 export const getOwnerBilling = (token) => apiRequest('/api/admin/billing', { headers: auth(token) });
-export const startBillingCheckout = (token) =>
-  apiRequest('/api/admin/billing/checkout', { method: 'POST', headers: auth(token) });
+export const startBillingCheckout = (token, choice = {}) =>
+  apiRequest('/api/admin/billing/checkout', { method: 'POST', headers: auth(token), body: JSON.stringify(choice) });
+/** { plan, interval }: remembered before subscribing, switched (prorated) after. */
+export const chooseBillingPlan = (token, choice) =>
+  apiRequest('/api/admin/billing/plan', { method: 'POST', headers: auth(token), body: JSON.stringify(choice) });
 export const openBillingPortal = (token) =>
   apiRequest('/api/admin/billing/portal', { method: 'POST', headers: auth(token) });
+
+// ── plans and Stripe (platform owner) ──
+export const getPlatformBilling = (token) => apiRequest('/api/platform/billing', { headers: auth(token) });
+export const savePlatformPlans = (token, body) =>
+  apiRequest('/api/platform/plans', { method: 'PUT', headers: auth(token), body: JSON.stringify(body) });
+export const syncPlatformBilling = (token) =>
+  apiRequest('/api/platform/billing/sync', { method: 'POST', headers: auth(token) });
 
 // ── embeds (owner) ──
 export const getOwnerEmbeds = (token) => apiRequest('/api/admin/embeds', { headers: auth(token) });

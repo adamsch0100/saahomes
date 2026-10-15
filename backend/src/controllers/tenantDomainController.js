@@ -7,7 +7,7 @@
  */
 import getPool from '../config/database.js';
 import logger from '../utils/logger.js';
-import { tenantIdOf } from '../services/tenantContext.js';
+import { tenantIdOf, tenantById, DEFAULT_TENANT_ID } from '../services/tenantContext.js';
 import { getAgentBrand, publicAgentPayload } from '../services/tenantBrand.js';
 import { publicBrand, isHomeTenant } from '../services/brand.js';
 import { listingScope } from '../services/feeds.js';
@@ -77,7 +77,7 @@ export const setAgentDomain = async (req, res) => {
       });
     }
     if (isReservedHost(domain)) {
-      return res.status(400).json({ error: 'saahomes.com is reserved for the SAA brand.' });
+      return res.status(400).json({ error: 'That domain is reserved.' });
     }
 
     const token = generateVerifyToken();
@@ -96,7 +96,7 @@ export const setAgentDomain = async (req, res) => {
       success: true,
       data: publicAgentPayload(updated.rows[0]),
       token,
-      txt: txtRecordValue(token),
+      txt: txtRecordValue(token, { home: isHomeTenant(req.tenant) }),
     });
   } catch (error) {
     logger.error('setAgentDomain error', error);
@@ -128,7 +128,7 @@ export const verifyAgentDomain = async (req, res) => {
     const ok = await verifyDomainTxt(domain, token);
     if (!ok) {
       return res.status(400).json({
-        error: `TXT record not found yet — create ${txtRecordValue(token)} at ${domain} and wait for propagation (up to a few minutes).`,
+        error: `TXT record not found yet — create ${txtRecordValue(token, { home: isHomeTenant(req.tenant) })} at ${domain} and wait for propagation (up to a few minutes).`,
       });
     }
 
@@ -198,7 +198,15 @@ export const deleteAgentDomain = async (req, res) => {
  */
 export const getPublicTenant = async (req, res) => {
   try {
-    const tenant = req.tenant;
+    let tenant = req.tenant;
+    // A brokerage's console on the platform's own site (it has no address
+    // yet) names it with ?brokerage=, so the console wears its brand, not
+    // the home brokerage's. Only on the platform's host, never an agent's.
+    const consoleSlug = String(req.query?.brokerage || '').trim().toLowerCase();
+    if (consoleSlug && /^[a-z0-9-]{1,64}$/.test(consoleSlug) && isHomeTenant(tenant) && !tenant?.agent) {
+      const r = await getPool().query('SELECT id FROM tenants WHERE slug = $1 AND id <> $2', [consoleSlug, DEFAULT_TENANT_ID]);
+      if (r.rows[0]) tenant = await tenantById(Number(r.rows[0].id));
+    }
     // Another brokerage's own domain: its brand, never SAA's.
     if (tenant && !isHomeTenant(tenant)) {
       let agent = null;

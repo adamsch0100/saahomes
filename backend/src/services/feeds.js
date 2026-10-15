@@ -41,13 +41,20 @@ const FALLBACK_FEEDS = {
   },
 };
 
-/** Every feed the platform knows: key → { key, name, vendor, disclaimer, courtesy_required, sold_data_allowed }. */
+/** Every feed the platform knows: key → { key, name, vendor, disclaimer, courtesy_required, sold_data_allowed, logo_required }. */
 export async function feedCatalog({ pool = getPool() } = {}) {
   if (feedInfoCache.map && Date.now() - feedInfoCache.at < CACHE_MS) return feedInfoCache.map;
   let map = new Map(Object.entries(FALLBACK_FEEDS));
   try {
-    const r = await pool.query('SELECT key, name, vendor, disclaimer, courtesy_required, sold_data_allowed FROM mls_feeds ORDER BY key');
-    if (r.rows.length) map = new Map(r.rows.map((row) => [row.key, row]));
+    // SELECT * so a column added later (logo_required) never breaks this.
+    const r = await pool.query('SELECT * FROM mls_feeds ORDER BY key');
+    if (r.rows.length) {
+      map = new Map(r.rows.map((row) => [row.key, {
+        key: row.key, name: row.name, vendor: row.vendor, disclaimer: row.disclaimer,
+        courtesy_required: row.courtesy_required, sold_data_allowed: row.sold_data_allowed,
+        logo_required: row.logo_required === true,
+      }]));
+    }
   } catch (error) {
     logger.warn(`mls_feeds unavailable, using defaults: ${error.message}`);
   }
@@ -167,9 +174,31 @@ export function serviceAreaValues(areas) {
   return (areas || []).map((v) => v.toLowerCase().replace(/\s+county$/i, ''));
 }
 
-const TIME_FMT = new Intl.DateTimeFormat('en-US', {
-  timeZone: 'America/Denver', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit',
-});
+// "Last updated" in the MLS's own time zone, from the first state it covers.
+const STATE_ZONES = {
+  ET: ['CT', 'DE', 'DC', 'FL', 'GA', 'IN', 'KY', 'ME', 'MD', 'MA', 'MI', 'NH', 'NJ', 'NY', 'NC', 'OH', 'PA', 'RI', 'SC', 'VT', 'VA', 'WV'],
+  CT: ['AL', 'AR', 'IL', 'IA', 'KS', 'LA', 'MN', 'MS', 'MO', 'NE', 'ND', 'OK', 'SD', 'TN', 'TX', 'WI'],
+  MT: ['AZ', 'CO', 'ID', 'MT', 'NM', 'UT', 'WY'],
+  PT: ['CA', 'NV', 'OR', 'WA'],
+  AKT: ['AK'],
+  HT: ['HI'],
+};
+const ZONE_IDS = {
+  ET: 'America/New_York', CT: 'America/Chicago', MT: 'America/Denver', PT: 'America/Los_Angeles', AKT: 'America/Anchorage', HT: 'Pacific/Honolulu',
+};
+const zoneFormats = new Map();
+
+export function feedTimeZone(states) {
+  const first = String((Array.isArray(states) && states[0]) || 'CO').toUpperCase();
+  const label = Object.keys(STATE_ZONES).find((z) => STATE_ZONES[z].includes(first)) || 'MT';
+  const id = first === 'AZ' ? 'America/Phoenix' : ZONE_IDS[label];
+  if (!zoneFormats.has(id)) {
+    zoneFormats.set(id, new Intl.DateTimeFormat('en-US', {
+      timeZone: id, month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit',
+    }));
+  }
+  return { label, format: zoneFormats.get(id) };
+}
 
 function fillTemplate(text, vars) {
   return String(text || '').replace(/\{(\w+)\}/g, (m, k) => (vars[k] != null ? vars[k] : m));
@@ -184,8 +213,19 @@ export function courtesyLine(row, catalog) {
 }
 
 /**
+ * The MLS's own number for a listing. Feeds other than IRES and the samples
+ * store "<feed>-<number>" so two MLSs never collide; buyers see the number.
+ */
+export function mlsNumber(row) {
+  const id = String(row?.listing_id || '');
+  const feed = row?.feed || HOME_FEED;
+  if (feed === HOME_FEED || feed === DEMO_FEED) return id || null;
+  return id.startsWith(`${feed}-`) ? id.slice(feed.length + 1) : id || null;
+}
+
+/**
  * Card fields every listing response carries: whether it's a sample home,
- * the courtesy line, and nothing about the listing agent.
+ * the courtesy line, the MLS number, and nothing about the listing agent.
  */
 export function decorateCard(row, catalog) {
   if (!row) return row;
@@ -193,6 +233,7 @@ export function decorateCard(row, catalog) {
   out.feed = row.feed || HOME_FEED;
   out.sample = out.feed === DEMO_FEED;
   out.courtesy = courtesyLine(out, catalog);
+  if (row.listing_id !== undefined) out.mls_number = mlsNumber(out);
   return out;
 }
 
@@ -211,12 +252,14 @@ export async function attributionFor(listing, tenant, { pool } = {}) {
   const info = catalog.get(feed) || FALLBACK_FEEDS[feed] || FALLBACK_FEEDS.ires;
   const brand = brandFor(tenant || { id: DEFAULT_TENANT_ID });
   const updatedAt = listing?.updated_at ? new Date(listing.updated_at) : null;
-  const updated = updatedAt && !Number.isNaN(updatedAt.getTime()) ? `${TIME_FMT.format(updatedAt)} MT` : 'recently';
+  const zone = feedTimeZone(info.states);
+  const updated = updatedAt && !Number.isNaN(updatedAt.getTime()) ? `${zone.format.format(updatedAt)} ${zone.label}` : 'recently';
   return {
     feed,
     feed_name: info.name,
     sample: feed === DEMO_FEED,
     courtesy: courtesyLine({ ...listing, feed }, catalog),
+    logo_required: info.logo_required === true,
     office: listing?.list_office_name || null,
     agent: listing?.list_agent_name || null,
     disclaimer: fillTemplate(info.disclaimer, { brokerage: brand.legal_name || brand.name, updated }),
@@ -230,8 +273,10 @@ export async function feedStatusFor(tenant, { pool = getPool() } = {}) {
   const scope = await listingScope(t, { pool });
   const catalog = await feedCatalog({ pool });
   const named = (k) => catalog.get(k)?.name || k.toUpperCase();
+  // IRES always, plus every feed this brokerage has started or been given:
+  // a feed another brokerage connected isn't this one's business.
   const feeds = [...catalog.values()]
-    .filter((f) => f.key !== DEMO_FEED)
+    .filter((f) => f.key !== DEMO_FEED && (f.key === HOME_FEED || scope.rows.some((r) => r.feed_key === f.key)))
     .map((f) => {
       const row = scope.rows.find((r) => r.feed_key === f.key);
       return {

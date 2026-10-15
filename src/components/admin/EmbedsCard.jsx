@@ -109,7 +109,7 @@ export default function EmbedsCard({ token }) {
 
   const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
   const divSnippet = base
-    ? `<div data-saa-embed="${widget}"${attrs.map(([k, v]) => ` data-${k}="${esc(v)}"`).join('')}></div>\n<script src="${base}/embed.js" async></script>`
+    ? `<div data-home-embed="${widget}"${attrs.map(([k, v]) => ` data-${k}="${esc(v)}"`).join('')}></div>\n<script src="${base}/embed.js" async></script>`
     : '';
   const iframeSnippet = base
     ? `<iframe src="${base}/embed/${widget}${query}" title="Homes for sale" style="width:100%;border:0;min-height:${widget === 'search' ? 150 : 520}px" loading="lazy"></iframe>`

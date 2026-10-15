@@ -3,8 +3,8 @@
  *
  * Every request is resolved to one tenant from its host:
  *   1. tenants.primary_domain (with or without www.)
- *   2. <slug>.<PLATFORM_BASE_DOMAIN> (or PLATFORM_DOMAIN) when set: the free
- *      address every brokerage gets at signup
+ *   2. <slug>.<app domain> when set (PLATFORM_BASE_DOMAIN, or the platform
+ *      console, see platform.js): the free address every brokerage gets at signup
  *   3. a verified agent custom domain (users.custom_domain), which belongs to
  *      that agent's tenant and attributes signups to the agent
  *   4. otherwise the default tenant (SAA Homes, id 1), so saahomes.com,
@@ -25,6 +25,7 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import getPool from '../config/database.js';
 import logger from '../utils/logger.js';
+import { platformIdentity, platformSiteUrl, refreshPlatformIdentity } from './platform.js';
 
 export const DEFAULT_TENANT_ID = 1;
 const CACHE_MS = 60 * 1000;
@@ -83,7 +84,7 @@ function normalizeHost(host) {
 
 /** The base domain brokerages get free subdomains on, or '' when not set up. */
 export function platformBaseDomain() {
-  return normalizeHost(process.env.PLATFORM_BASE_DOMAIN || process.env.PLATFORM_DOMAIN);
+  return normalizeHost(platformIdentity().app_domain);
 }
 
 function shape(row, agent = null, siteHost = null) {
@@ -158,6 +159,8 @@ export function siteUrlFor(tenant) {
   if (tenant?.primary_domain) return `https://${tenant.primary_domain}`;
   const platform = platformBaseDomain();
   if (platform && tenant?.slug && tenant.id !== DEFAULT_TENANT_ID) return `https://${tenant.slug}.${platform}`;
+  // A brokerage with no address yet: the platform's own site, never SAA's.
+  if (tenant && (tenant.id ?? DEFAULT_TENANT_ID) !== DEFAULT_TENANT_ID) return platformSiteUrl();
   return (process.env.SITE_URL || 'https://saahomes.com').replace(/\/$/, '');
 }
 
@@ -245,7 +248,8 @@ async function consoleTenant(req, hostTenant, pool = getPool()) {
 
 /** Express middleware: sets req.tenant and the async tenant context. */
 export function tenantMiddleware(req, res, next) {
-  return resolveTenantForHost(req.hostname)
+  return refreshPlatformIdentity()
+    .then(() => resolveTenantForHost(req.hostname))
     .then(async (tenant) => (await consoleTenant(req, tenant)) || tenant)
     .catch((err) => {
       logger.error('tenant resolution failed', { host: req.hostname, message: err.message });

@@ -234,12 +234,13 @@ async function loadPhotosForProxy(pool, rawId, scope = null) {
   const isNumeric = Number.isInteger(numericId) && numericId > 0 && String(numericId) === String(rawId);
   if (isNumeric) {
     const byPk = await pool.query(
-      `SELECT photos FROM listings WHERE id = $1
+      `SELECT photos, feed FROM listings WHERE id = $1
          AND ($2::text[] IS NULL OR feed = ANY(CASE WHEN status = 'Sold' THEN $3::text[] ELSE $2::text[] END))`,
       [numericId, scope?.feeds || null, scope?.soldFeeds || null]
     );
     if (byPk.rows.length) {
-      return { photos: byPk.rows[0].photos || [], allowIresRefresh: true, refreshKey: numericId };
+      const feed = byPk.rows[0].feed || 'ires';
+      return { photos: byPk.rows[0].photos || [], allowIresRefresh: feed === 'ires', refreshKey: numericId, feed };
     }
   }
   const sold = await pool.query(
@@ -346,8 +347,13 @@ export const getListingPhoto = async (req, res) => {
       // Quota guard: skip the refresh when the 0.5 RPS budget is exhausted —
       // degrade to the placeholder rather than risk IRES suspension.
       // Sold rows skip IRES refresh entirely (rate-limit headroom).
-      if (!loaded.allowIresRefresh || !url.includes('media.mlsgrid.com')) throw fetchErr;
-      const fresh = await beginRefresh(loaded.refreshKey, pool);
+      // Other MLS feeds refresh through their own connection, on their own
+      // small budget (mls/engine.js refreshListingPhotos).
+      const otherFeed = loaded.feed && loaded.feed !== 'ires' && loaded.feed !== 'demo' && loaded.refreshKey;
+      if (!otherFeed && (!loaded.allowIresRefresh || !url.includes('media.mlsgrid.com'))) throw fetchErr;
+      const fresh = otherFeed
+        ? await (await import('../services/mls/engine.js')).refreshListingPhotos(pool, loaded.refreshKey)
+        : await beginRefresh(loaded.refreshKey, pool);
       const freshUrl = fresh?.[idx];
       if (!freshUrl) throw fetchErr;
       buf = await fetchWithQueue(freshUrl);

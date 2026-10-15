@@ -6,14 +6,15 @@
 import getPool from '../config/database.js';
 import logger from '../utils/logger.js';
 import {
-  tenantIdOf, clearTenantCache, leadVisibility, siteUrlFor, hasOwnAddress, DEFAULT_TENANT_ID,
+  tenantIdOf, clearTenantCache, leadVisibility, siteUrlFor, hasOwnAddress, DEFAULT_TENANT_ID, platformBaseDomain,
 } from '../services/tenantContext.js';
 import {
   normalizeBrandSettings, publicBrand, brandFor, BRAND_FIELDS, isHomeTenant,
 } from '../services/brand.js';
 import {
-  railwayDomainsAvailable, cnameTarget, addCustomDomain, getCustomDomain,
+  railwayDomainsAvailable, cnameTarget, addCustomDomain, getCustomDomain, displayDnsRecords,
 } from '../services/railwayDomains.js';
+import { platformIdentity } from '../services/platform.js';
 import { clearFeedCache, feedStatusFor, normalizeServiceAreas } from '../services/feeds.js';
 
 const LEAD_VISIBILITY = ['own', 'own_and_unassigned', 'all'];
@@ -52,7 +53,7 @@ async function settingsPayload(tenant) {
   const helpers = await emailHelpers();
   const own = typeof helpers.ownDomainSendingAvailable === 'function' && helpers.ownDomainSendingAvailable();
   const sending = s.email?.sending_domain || null;
-  const platform = String(process.env.PLATFORM_BASE_DOMAIN || process.env.PLATFORM_DOMAIN || '').trim().toLowerCase();
+  const platform = platformBaseDomain();
   const fubKey = isHomeTenant(tenant) ? (process.env.FOLLOW_UP_BOSS_API_KEY || '') : String(s.fub_api_key || '');
   const site = s.site || {};
   return {
@@ -72,9 +73,11 @@ async function settingsPayload(tenant) {
       url: hasOwnAddress(tenant) ? siteUrlFor(tenant) : null,
       primary_domain: tenant.primary_domain || null,
       subdomain_url: platform && !isHomeTenant(tenant) ? `https://${tenant.slug}.${platform}` : null,
-      dns: site.records || (tenant.primary_domain && !isHomeTenant(tenant)
-        ? [{ type: 'CNAME', name: '@ or www', value: cnameTarget(), status: 'unknown' }]
-        : []),
+      dns: tenant.primary_domain && !isHomeTenant(tenant) ? displayDnsRecords(site) : (site.records || []),
+      // No record to show yet (the platform has no CNAME target): who to ask.
+      dns_help: tenant.primary_domain && !isHomeTenant(tenant) && !site.railway_id && !cnameTarget()
+        ? platformIdentity().support_email
+        : null,
       domain_status: !tenant.primary_domain ? 'none' : (site.certificate === 'ISSUED' || isHomeTenant(tenant) ? 'active' : 'pending'),
       automatic: railwayDomainsAvailable(),
     },

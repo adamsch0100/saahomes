@@ -3,13 +3,16 @@
  *
  * Verification is REAL DNS only — no bypass, no test-mode success flag.
  * A domain is "live" only when domain_verified_at is set after a TXT
- * record `saa-verify=<token>` is found on the hostname.
+ * record `saa-verify=<token>` (the home brokerage's agents) or
+ * `site-verify=<token>` (any other brokerage's) is found on the hostname.
  */
 import { randomBytes } from 'node:crypto';
 import { resolveTxt } from 'node:dns/promises';
 
 const DNS_TIMEOUT_MS = 5000;
 const TXT_PREFIX = 'saa-verify=';
+// Another brokerage's agents never see the home brokerage's name in DNS.
+const NEUTRAL_TXT_PREFIX = 'site-verify=';
 
 /** Hostname: labels of letters/digits/hyphens, dots between. No wildcards. */
 const HOSTNAME_RE =
@@ -54,8 +57,8 @@ export function generateVerifyToken() {
   return randomBytes(16).toString('hex');
 }
 
-export function txtRecordValue(token) {
-  return `${TXT_PREFIX}${token}`;
+export function txtRecordValue(token, { home = true } = {}) {
+  return `${home ? TXT_PREFIX : NEUTRAL_TXT_PREFIX}${token}`;
 }
 
 function withTimeout(promise, ms) {
@@ -67,7 +70,8 @@ function withTimeout(promise, ms) {
 }
 
 /**
- * Real DNS TXT lookup. True only when a record equals `saa-verify=<token>`.
+ * Real DNS TXT lookup. True only when a record equals `saa-verify=<token>`
+ * or `site-verify=<token>`.
  * NXDOMAIN, timeout, and any resolver error → false. Never throws.
  * @param {string} domain
  * @param {string} token
@@ -77,7 +81,7 @@ export async function verifyDomainTxt(domain, token) {
   const host = normalizeDomain(domain);
   const tok = String(token || '').trim();
   if (!host || !tok) return false;
-  const expected = txtRecordValue(tok);
+  const expected = [txtRecordValue(tok), txtRecordValue(tok, { home: false })];
   try {
     const records = await withTimeout(resolveTxt(host), DNS_TIMEOUT_MS);
     const values = (records || []).map((chunks) =>
@@ -85,7 +89,7 @@ export async function verifyDomainTxt(domain, token) {
         .trim()
         .replace(/^"+|"+$/g, '')
     );
-    return values.includes(expected);
+    return values.some((v) => expected.includes(v));
   } catch {
     return false;
   }

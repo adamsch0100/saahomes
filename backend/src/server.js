@@ -10,6 +10,7 @@ import adminRoutes from './routes/admin.js';
 import agentRoutes from './routes/agent.js';
 import accountRoutes from './routes/account.js';
 import platformRoutes from './routes/platform.js';
+import mlsConnectRoutes from './routes/mlsConnect.js';
 import clientLifeRoutes from './routes/clientLife.js';
 import ownCrmPublicRoutes from './routes/ownCrm.js';
 import {
@@ -20,11 +21,16 @@ import {
 } from './routes/plugAndPlay.js';
 import { runMigrations } from './config/migrate.js';
 import { startIresSyncScheduler } from './jobs/iresScheduler.js';
+import { startMlsScheduler } from './jobs/mlsScheduler.js';
+import { checkCredentialsKey } from './services/mls/secrets.js';
 import { NOCO_CITIES } from './config/nocoCities.js';
 import { tenantMiddleware, resolveTenantForHost, DEFAULT_TENANT_ID, pausedForBilling } from './services/tenantContext.js';
 import { startBillingScheduler } from './services/billing.js';
-import { productName } from './controllers/signupController.js';
 import { brandFor, isHomeTenant } from './services/brand.js';
+import {
+  platformSite, platformShellBrand, platformIdentityScript,
+} from './services/platformSite.js';
+import { platformIdentity } from './services/platform.js';
 import { feedsFor } from './services/feeds.js';
 
 dotenv.config();
@@ -150,7 +156,12 @@ const BROKERAGE_PATHS = [
   /^\/embed\/(search|listings|listing)$/, /^\/embed\/listing\/[^/]+$/,
 ];
 
-export function renderBrokerageShell(indexHtml, brand, path = '/') {
+/**
+ * opts.platformHost (the request's hostname) marks a platform page (/start,
+ * a console on the platform's own site): the platform's identity rides along
+ * for the app to read. opts.robots replaces the default noindex.
+ */
+export function renderBrokerageShell(indexHtml, brand, path = '/', opts = {}) {
   const html = String(indexHtml || '');
   const name = String(brand?.name || 'Home Search');
   const title = /^\/properties(\/|$)/.test(path) ? `${name} — Homes for Sale` : name;
@@ -193,7 +204,7 @@ export function renderBrokerageShell(indexHtml, brand, path = '/') {
     ...kept.map((t) => `    ${t}`),
     `    <title>${escapeHtml(title)}</title>`,
     `    <meta name="description" content="${escapeHtml(description)}" />`,
-    '    <meta name="robots" content="noindex" />',
+    `    <meta name="robots" content="${escapeHtml(opts.robots || 'noindex')}" />`,
     `    <meta name="theme-color" content="${theme}" />`,
     `    <meta name="apple-mobile-web-app-title" content="${escapeHtml(name)}" />`,
     '    <link rel="manifest" href="/manifest.webmanifest" />',
@@ -201,6 +212,7 @@ export function renderBrokerageShell(indexHtml, brand, path = '/') {
     `    <link rel="apple-touch-icon" href="${escapeHtml(icon || '/brand-icon.svg')}" />`,
     // The app may call gtag(); keep it defined, but nothing is sent anywhere.
     '    <script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);}</script>',
+    ...(opts.platformHost !== undefined ? [`    ${platformIdentityScript(opts.platformHost)}`] : []),
     '</head>',
     `  ${bodyOpen}`,
     '    <div id="root"></div>',
@@ -270,6 +282,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/agent', agentRoutes);
 app.use('/api/account', accountRoutes);
 app.use('/api/platform', platformRoutes);
+app.use('/api/admin', mlsConnectRoutes.owner);
+app.use('/api/platform', mlsConnectRoutes.platform);
 app.use('/api', clientLifeRoutes.client);
 app.use('/api/agent', clientLifeRoutes.staff);
 
@@ -343,6 +357,16 @@ const canonicalRedirects = {
   // 301 → the canonical RainDance neighborhood page.
   '/northern-colorado-areas/windsor/rain-dance-windsor': '/northern-colorado-areas/windsor/raindance/',
 };
+
+// The platform's own marketing domain: its product page, its app pages and
+// files, and a 404 for everything else. Every other host passes through.
+app.use(platformSite({ distPath, renderShell: renderBrokerageShell, renderIcon: renderBrandIconSvg }));
+// The platform's icon, for its pages on any host (/start, consoles).
+app.get('/platform-icon.svg', (req, res) => {
+  const id = platformIdentity();
+  res.setHeader('Cache-Control', 'no-cache');
+  return res.type('image/svg+xml').send(renderBrandIconSvg({ name: id.short_name, primary_color: id.primary_color }));
+});
 
 // Widgets brokerages paste into their own websites (any host, any env).
 app.use(embedPages);
@@ -458,17 +482,18 @@ if (process.env.NODE_ENV === 'production' && existsSync(distPath)) {
 
   // The platform's signup page (/start) on its own host: a clean shell with
   // the product's name, not one of SAA's prerendered pages. A brokerage's
-  // host never gets here (its allowlist above answers 404).
-  app.get(['/start', '/start/'], (req, res) => {
+  // host never gets here (its allowlist above answers 404). So is a
+  // brokerage's console opened here with ?brokerage= (it has no address yet):
+  // the platform's shell, not SAA's.
+  app.get(['/start', '/start/', '/admin', '/admin/', '/agent', '/agent/', '/reset-password', '/reset-password/'], (req, res, next) => {
+    const start = /^\/start\/?$/.test(req.path);
+    if (!start && !/^[a-z0-9-]{1,64}$/.test(String(req.query.brokerage || ''))) return next();
     try {
       const base = readFileSync(join(distPath, 'index.html'), 'utf8');
       res.setHeader('Cache-Control', 'no-cache');
-      return res.type('html').send(renderBrokerageShell(base, {
-        name: productName(),
-        tagline: 'Your own branded home search site, alerts and AI assistant, working with Follow Up Boss. Live in an afternoon.',
-      }, '/start'));
+      return res.type('html').send(renderBrokerageShell(base, platformShellBrand(), req.path, { platformHost: req.hostname }));
     } catch (error) {
-      console.error('start page error:', error.message);
+      console.error('platform page error:', error.message);
       return res.status(500).type('text/plain').send('Something went wrong.');
     }
   });
@@ -691,12 +716,18 @@ const startServer = async () => {
   // not on an external cron box. Advisory lock 833711 prevents concurrent
   // cluster-wide runs. Opt out with IRES_SYNC_SCHEDULER=off.
   if (process.env.IRES_SYNC_SCHEDULER !== 'off') startIresSyncScheduler();
+  // Every other connected MLS (mls/engine.js), each on its own cadence and
+  // advisory lock. Opt out with MLS_SYNC_SCHEDULER=off.
+  checkCredentialsKey();
+  if (process.env.MLS_SYNC_SCHEDULER !== 'off') startMlsScheduler();
   // Task reminders, text alerts for saved searches and tour reminders.
   import('./services/crmService.js').then(({ startCrmScheduler }) => startCrmScheduler()).catch((e) => console.error('CRM scheduler failed to start:', e.message));
   // Action plans: emails, texts and tasks on their day (every minute).
   import('./services/actionPlans.js').then(({ startActionPlanScheduler }) => startActionPlanScheduler()).catch((e) => console.error('Action plan scheduler failed to start:', e.message));
   // Trials, grace periods and pausing unpaid brokerages (hourly).
   if (process.env.BILLING_SCHEDULER !== 'off') startBillingScheduler();
+  // Stripe from STRIPE_SECRET_KEY alone: plan prices and the webhook, in the background.
+  import('./services/stripeSetup.js').then(({ syncStripeOnBoot }) => syncStripeOnBoot()).catch((e) => console.error('Stripe setup skipped:', e.message));
 };
 
 // Tests import the app without binding a port or starting the MLS scheduler.

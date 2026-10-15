@@ -186,11 +186,15 @@ test('signup creates its own brokerage, owner, trial and address, apart from eve
   assert.ok(owners[0].password_hash);
   assert.equal(owners[0].email_confirmed_at, null);
 
-  // The confirm email: in the brokerage's name, linking to its own address.
+  // The confirm email: platform mail (the product welcomes its new
+  // customer), naming the brokerage and linking to its own address. The
+  // product's default name is the only SAA-like text in it.
   const { rows: [mail] } = await db.pool.query("SELECT * FROM email_outbox WHERE to_email = 'sam@summit.test' ORDER BY id DESC LIMIT 1");
   assert.match(mail.subject, /Confirm your email for Summit Peak Homes/);
   assert.equal(Number(mail.tenant_id), t.id);
-  assert.doesNotMatch(mail.html, SAA_STRINGS);
+  assert.equal(mail.platform, true);
+  assert.match(mail.html, /Welcome to SAA Homes for Brokerages\. Summit Peak Homes is set up/);
+  assert.doesNotMatch(mail.html.replace(/SAA Homes for Brokerages/g, ''), SAA_STRINGS);
   const token = mail.html.match(/summit-peak-homes\.homes\.test\/admin\?confirm=([A-Za-z0-9_-]+)/)?.[1];
   assert.ok(token, 'confirm link points at the new site');
 

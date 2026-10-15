@@ -18,6 +18,7 @@ import AgentsManager from './AgentsManager.jsx';
 import BillingCard from './BillingCard.jsx';
 import FubAutomationCard from './FubAutomationCard.jsx';
 import EmbedsCard from './EmbedsCard.jsx';
+import MlsConnect from './MlsConnect.jsx';
 import { getOwnerSetup, patchOwnerSetup, confirmOwnerEmail, resendOwnerConfirm } from '../../utils/plugAndPlayApi.js';
 import { consoleBrokerage, clearConsoleBrokerage } from '../../utils/consoleBrokerage.js';
 import { applyBrandTheme, themeFromBrand } from '../../utils/brandTheme.js';
@@ -41,7 +42,7 @@ const STEPS = {
   mls: {
     label: 'MLS',
     title: 'Your MLS feed',
-    intro: 'We’ll show sample homes until your MLS approves you. Ask your MLS for an IDX or data feed license for your brokerage; approval usually takes a few days to a few weeks.',
+    intro: 'We’ll show sample homes until your MLS approves you. Find your MLS below and we’ll walk you through it; approval usually takes a few days to a few weeks.',
   },
   agents: {
     label: 'Agents',
@@ -276,12 +277,7 @@ function SetupWizard({ token, setup, onChange, onClose, onOpenTab }) {
             {current === 'mls' && (
               <>
                 <section className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                  <h2 className="text-lg font-bold text-gray-900">MLS paperwork</h2>
-                  <ol className="mt-3 space-y-2 text-sm text-gray-700 list-decimal pl-5">
-                    <li>Ask your MLS for an IDX or data feed license, and name this site as your vendor.</li>
-                    <li>Sign and return their agreement. They’ll tell you when you’re approved.</li>
-                    <li>Until then your site shows sample homes, clearly marked, so you can share it and try everything.</li>
-                  </ol>
+                  <MlsConnect token={token} />
                   <div className="mt-4 flex flex-wrap items-center gap-2">
                     {setup.mls_paperwork_started_at ? (
                       <p className="text-sm text-green-700 font-medium">Paperwork started {fmtDate(setup.mls_paperwork_started_at)}.</p>

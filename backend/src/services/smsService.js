@@ -643,6 +643,8 @@ export function registrationKit(tenant, { consentWording, agentName = 'Andy' } =
   const b = brandFor(tenant);
   const site = siteUrlFor(tenant);
   const prefix = `${b.name}: `;
+  // Sample homes sit in the brokerage's own market (SAA's samples are as before).
+  const city = isHomeTenant(tenant) ? 'Fort Collins' : (String(b.market_name || '').split(',')[0].trim() || 'Springfield');
   return {
     brand_name: b.name,
     legal_name: b.legal_name || b.name,
@@ -652,8 +654,8 @@ export function registrationKit(tenant, { consentWording, agentName = 'Andy' } =
     opt_in_wording: consentWording,
     opt_in_where: `On the "Save this search" form on ${site}/properties/, next to an unchecked box the person ticks themselves. People who text us first are also opted in for replies.`,
     samples: [
-      `${prefix}New match for "3 bed in Fort Collins": 1234 Elm St, Fort Collins, $525K. ${site}/homes-for-sale/1234-elm-st/${STOP_FOOTER}`,
-      `${prefix}Price drop on 1234 Elm St, Fort Collins: now $499K (was $525K). ${site}/homes-for-sale/1234-elm-st/${STOP_FOOTER}`,
+      `${prefix}New match for "3 bed in ${city}": 1234 Elm St, ${city}, $525K. ${site}/homes-for-sale/1234-elm-st/${STOP_FOOTER}`,
+      `${prefix}Price drop on 1234 Elm St, ${city}: now $499K (was $525K). ${site}/homes-for-sale/1234-elm-st/${STOP_FOOTER}`,
       `${prefix}Thanks, Sam. We got your tour request for 3 homes. ${agentName} will confirm a time shortly.${STOP_FOOTER}`,
       `${prefix}Reminder: your home tour is Sat, Oct 18, 10:00 AM with ${agentName}. Reply here with any questions.${STOP_FOOTER}`,
       `Hi Sam, it's ${agentName} with ${b.name}. Want to see 1234 Elm St this weekend?${STOP_FOOTER}`,
