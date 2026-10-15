@@ -708,6 +708,12 @@ const startServer = async () => {
   try {
     await runMigrations();
   } catch (error) {
+    // MIGRATIONS_STRICT=1: a failed step stops the boot instead of serving a
+    // half-migrated schema. Off by default (see migrate.js).
+    if (process.env.MIGRATIONS_STRICT === '1') {
+      console.error('Migration error on startup, exiting (MIGRATIONS_STRICT=1):', error.message);
+      process.exit(1);
+    }
     console.error('Migration error on startup (API will still run):', error.message);
   }
 
