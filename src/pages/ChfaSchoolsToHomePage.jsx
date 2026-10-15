@@ -822,6 +822,12 @@ export default function ChfaSchoolsToHomePage() {
             >
               General CHFA down payment assistance →
             </Link>
+            <Link
+              to="/chfa-down-payment-assistance/#how-much-cash"
+              className="inline-block px-6 py-3 text-black font-semibold hover:underline mb-3"
+            >
+              How much cash CHFA covers →
+            </Link>
           </div>
         </div>
       </section>

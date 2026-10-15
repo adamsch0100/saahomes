@@ -64,6 +64,21 @@ const dpaOptions = [
   },
 ];
 
+const cashAssistRows = [
+  {
+    option: "Down payment assistance grant",
+    maximum: "Up to the lesser of $25,000 or 3% of your first mortgage",
+    example: "Up to $6,000 on a $200,000 mortgage",
+    repayment: "No repayment required",
+  },
+  {
+    option: "Deferred second mortgage",
+    maximum: "Up to the lesser of $25,000 or 4% of your first mortgage",
+    example: "Up to $8,000 on a $200,000 mortgage",
+    repayment: "Deferred until you pay off, sell, refinance, or move out",
+  },
+];
+
 const generalRequirements = [
   { label: "Credit score", value: "Minimum mid-score of 620 (some programs allow no credit score)" },
   { label: "Borrower contribution", value: "At least $1,000 toward the home purchase" },
@@ -376,7 +391,7 @@ export default function ChfaDownPaymentAssistancePage() {
           description: PAGE_DESCRIPTION,
           url: PAGE_URL,
           inLanguage: "en-US",
-          dateModified: "2026-08-07",
+          dateModified: "2026-10-15",
           isPartOf: { "@type": "WebSite", name: "SAA Homes", url: "https://saahomes.com/" },
           about: {
             "@type": "GovernmentService",
@@ -547,12 +562,61 @@ export default function ChfaDownPaymentAssistancePage() {
               navigate program limits, find qualifying homes, and coordinate with CHFA lenders.
             </p>
             <p className="text-sm text-gray-500">
-              Page last updated August 7, 2026. Program details subject to change — verify with CHFA or your lender.
+              Page last updated October 15, 2026. Program details subject to change — verify with CHFA or your lender.
             </p>
           </div>
           <div className="lg:col-span-2 lg:sticky lg:top-28 scroll-mt-28">
             <ChfaDpaLeadForm compact />
           </div>
+        </div>
+      </section>
+
+      {/* How much cash — answer-first block + sourced CHFA table */}
+      <section id="how-much-cash" className="py-16 sm:py-20 px-6 scroll-mt-28">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-6">
+            How much cash do you need to buy a house in Northern Colorado?
+          </h2>
+          <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+            Your cash need is two numbers: the down payment your loan requires and everything else due at closing.
+            FHA financing starts at 3.5% down, and CHFA pairs its first mortgage with assistance that can cover part
+            of the down payment and closing costs. The two standard CHFA options are a grant up to the lesser of
+            $25,000 or 3% of your first mortgage, or a deferred second mortgage up to the lesser of $25,000 or 4%.
+          </p>
+          <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm mb-5">
+            <table className="w-full min-w-[720px] text-left text-sm">
+              <thead>
+                <tr className="bg-gray-900 text-white">
+                  <th className="px-5 py-4 font-semibold">CHFA assistance</th>
+                  <th className="px-5 py-4 font-semibold">Maximum</th>
+                  <th className="px-5 py-4 font-semibold">CHFA&apos;s $200,000 example</th>
+                  <th className="px-5 py-4 font-semibold">Repayment</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cashAssistRows.map((row, i) => (
+                  <tr key={row.option} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                    <td className="px-5 py-4 font-semibold text-gray-900">{row.option}</td>
+                    <td className="px-5 py-4 text-gray-700">{row.maximum}</td>
+                    <td className="px-5 py-4 text-gray-700">{row.example}</td>
+                    <td className="px-5 py-4 text-gray-700">{row.repayment}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-sm text-gray-500 mb-6">
+            Sources: CHFA, Down Payment Assistance (chfainfo.com/homeownership/down-payment-assistance) for the
+            grant and second mortgage figures, and HUD for the 3.5% FHA minimum down payment. Both fetched
+            October 15, 2026. CHFA figures assume a 30-year, fixed-rate first mortgage, and higher interest rates
+            apply when you use assistance. Your CHFA participating lender confirms the exact amount for your loan.
+          </p>
+          <a
+            href="#chfa-dpa-quick-form"
+            className="inline-flex items-center justify-center px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors touch-manipulation"
+          >
+            See what you may qualify for
+          </a>
         </div>
       </section>
 

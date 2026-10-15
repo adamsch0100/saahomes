@@ -461,6 +461,12 @@ export default function ChampionsHomeLoanPage() {
               </div>
             ))}
           </div>
+          <p className="text-center text-sm text-gray-600 mt-8 max-w-2xl mx-auto">
+            See both options in a sourced table, with CHFA&apos;s own $200,000 example, on our{" "}
+            <Link to="/chfa-down-payment-assistance/#how-much-cash" className="font-semibold text-black hover:underline">
+              CHFA down payment assistance guide
+            </Link>.
+          </p>
         </div>
       </section>
 
