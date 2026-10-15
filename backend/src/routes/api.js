@@ -21,7 +21,7 @@ import {
 import { listSoldListings } from '../controllers/soldListingsController.js';
 import { getListingPhoto, getListingPhotoDefault } from '../controllers/photoController.js';
 import {
-  createAlert, listAlerts, getMe, sendMagicLink, signOut, updateAlert, deleteAlert, unsubscribeAll,
+  createAlert, listAlerts, getMe, updateMe, sendMagicLink, signOut, updateAlert, deleteAlert, unsubscribeAll,
   recordView, recordEvent, trackPublicEvent,
 } from '../controllers/alertController.js';
 import { register, login, setPassword, ensureSession } from '../controllers/authController.js';
@@ -217,6 +217,7 @@ router.post('/auth/session', formLimit(), ensureSession);
 router.post('/alerts', formLimit(), createAlert);
 router.get('/alerts/manage', listAlerts);
 router.get('/alerts/me', getMe);
+router.patch('/alerts/me', formLimit(), updateMe);
 router.post('/alerts/view', trackingLimiter, recordView);
 router.post('/alerts/event', trackingLimiter, recordEvent);
 router.post('/events', trackingLimiter, trackPublicEvent);

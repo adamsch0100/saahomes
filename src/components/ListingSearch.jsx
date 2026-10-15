@@ -26,7 +26,7 @@ import SaveHomeButton, { useSavedHomesStatus } from "./SaveHomeButton";
 import ListingPhotoFallback from "./ListingPhotoFallback";
 import { marketPack } from "../data/marketPack.js";
 import { useTenant } from "../context/TenantContext.jsx";
-import { CourtesyLine, SampleBadge } from "./ListingAttribution.jsx";
+import { CourtesyLine } from "./ListingAttribution.jsx";
 import { buildListingsItemListSchema } from "../utils/seoConstants.js";
 import { estimateMonthlyPayment } from "./PaymentCalculator.jsx";
 
@@ -753,37 +753,58 @@ function SkeletonCard({ compact = false }) {
   );
 }
 
-function CardBadges({ listing, compact = false }) {
-  const { isNew, priceCut, priceCutPct, isNewConstruction, hasOpenHouse, isAssumable } = listingBadges(listing);
-  if (!listing.sample && !isNew && !priceCut && !isNewConstruction && !hasOpenHouse && !isAssumable) return null;
+/**
+ * The one badge that earns a place on the photo: price drop, then new, then
+ * a saved-search match. Everything else lives in the text block (CardTags),
+ * so a 280px thumbnail never carries more than this badge and the heart.
+ */
+function photoBadge(listing, match) {
+  const { isNew, priceCut, priceCutPct } = listingBadges(listing);
+  if (priceCut) {
+    return { key: "drop", label: `Price drop${priceCutPct ? ` ${priceCutPct}%` : ""}`, className: "bg-emerald-600 text-white" };
+  }
+  if (isNew) return { key: "new", label: "New", className: "bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)]" };
+  if (match?.matches) {
+    return { key: "match", label: "★ Match", className: "bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)]" };
+  }
+  return null;
+}
+
+function CardBadge({ badge, compact = false }) {
+  if (!badge) return null;
+  // The list card's 140px photo keeps the heart top-right and the arrows
+  // mid-height, so its one badge sits bottom-left where nothing else is.
   return (
-    <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5 max-w-[78%] z-[1]">
-      <SampleBadge listing={listing} short={compact} />
-      {isNew && (
-        <span className="inline-flex items-center min-h-[24px] bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] text-[11px] font-bold tracking-wide uppercase px-2.5 py-1 rounded-md shadow-sm">
-          New
+    <span
+      className={`absolute z-[1] inline-flex items-center font-bold tracking-wide uppercase rounded-md shadow-sm ${
+        compact ? "bottom-1.5 left-1.5 text-[10px] px-1.5 py-0.5" : "top-2.5 left-2.5 min-h-[24px] text-[11px] px-2.5 py-1"
+      } ${badge.className}`}
+    >
+      {badge.label}
+    </span>
+  );
+}
+
+/** Secondary facts under the photo: sample, open house, new build, assumable. */
+function CardTags({ listing, compact = false }) {
+  const { isNewConstruction, hasOpenHouse, isAssumable } = listingBadges(listing);
+  const tags = [];
+  if (listing.sample) tags.push({ key: "sample", label: compact ? "Sample" : "Sample listing", className: "bg-amber-100 text-amber-900 border-amber-300" });
+  if (hasOpenHouse) tags.push({ key: "open", label: "Open house", className: "bg-blue-50 text-blue-800 border-blue-200" });
+  if (isNewConstruction) tags.push({ key: "build", label: "New construction", className: "bg-gray-100 text-gray-800 border-gray-200" });
+  if (isAssumable) tags.push({ key: "assumable", label: "Assumable loan", className: "bg-gray-100 text-gray-800 border-gray-200" });
+  if (!tags.length) return null;
+  return (
+    <div className={`flex flex-wrap gap-1 ${compact ? "mt-1" : "mt-1.5"}`}>
+      {tags.map((t) => (
+        <span
+          key={t.key}
+          className={`inline-flex items-center border text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded ${t.className}`}
+          title={t.key === "sample" ? "A sample home to try the search. Not a real listing and not for sale." : undefined}
+        >
+          {t.label}
         </span>
-      )}
-      {priceCut && (
-        <span className="inline-flex items-center min-h-[24px] bg-emerald-600 text-white text-[11px] font-bold tracking-wide uppercase px-2.5 py-1 rounded-md shadow-sm">
-          Price drop{priceCutPct ? ` ${priceCutPct}%` : ""}
-        </span>
-      )}
-      {hasOpenHouse && (
-        <span className="inline-flex items-center min-h-[24px] bg-blue-600 text-white text-[11px] font-bold tracking-wide uppercase px-2.5 py-1 rounded-md shadow-sm">
-          Open house
-        </span>
-      )}
-      {isNewConstruction && (
-        <span className="inline-flex items-center min-h-[24px] bg-black/85 text-white text-[11px] font-bold tracking-wide uppercase px-2.5 py-1 rounded-md shadow-sm">
-          New construction
-        </span>
-      )}
-      {isAssumable && (
-        <span className="inline-flex items-center min-h-[24px] bg-black/85 text-[color:var(--brand-accent)] border border-[color:var(--brand-accent)] text-[11px] font-bold tracking-wide uppercase px-2.5 py-1 rounded-md shadow-sm">
-          Assumable loan possible
-        </span>
-      )}
+      ))}
     </div>
   );
 }
@@ -824,6 +845,7 @@ function WhyLine({ fit, compact = false }) {
 function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compact = false, savedMap = {} }) {
   const { priceCut } = listingBadges(listing);
   const match = matchSavedSearch(listing, savedSearches);
+  const badge = photoBadge(listing, match);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgFailed, setImgFailed] = useState(false);
   const [photoIdx, setPhotoIdx] = useState(0);
@@ -944,7 +966,7 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
       ) : (
         <ListingPhotoFallback className="w-full h-full absolute inset-0" compact={compact} />
       )}
-      <CardBadges listing={listing} compact={compact} />
+      <CardBadge badge={badge} compact={compact} />
       <div className={`absolute z-10 ${compact ? "top-1.5 right-1.5" : "top-2 right-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"}`}>
         {/* Keep default 44px SaveHomeButton — density overrides hurt mobile taps (G-UX2-2) */}
         <SaveHomeButton listing={listing} saved={isSaved} />
@@ -995,15 +1017,9 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
           </div>
         </div>
       )}
-      {/* Photo counter — grid + compact list (G-UX2-9) */}
-      {multiPhoto && (
-        <span
-          className={`absolute bg-black/65 text-white font-medium rounded z-[1] tabular-nums pointer-events-none ${
-            compact
-              ? "bottom-1.5 left-1.5 text-[9px] px-1 py-0.5"
-              : "bottom-2.5 right-2.5 text-[10px] px-1.5 py-0.5"
-          }`}
-        >
+      {/* Photo counter — grid cards, on hover (the list card says "N photos" under the photo) */}
+      {multiPhoto && !compact && (
+        <span className="absolute bottom-2.5 right-2.5 bg-black/65 text-white font-medium rounded z-[1] tabular-nums pointer-events-none text-[10px] px-1.5 py-0.5 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
           {safePhotoIdx + 1} / {photoCount}
         </span>
       )}
@@ -1034,11 +1050,14 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
         {addr || "Address available on request"}
         {listing.city ? `, ${listing.city}` : ""}
       </p>
-      {typeLabel && (
-        <p className="text-xs text-gray-400 mt-0.5">{typeLabel}</p>
+      {(typeLabel || multiPhoto) && (
+        <p className="text-xs text-gray-400 mt-0.5">
+          {[typeLabel, multiPhoto ? `${photoCount} photos` : null].filter(Boolean).join(" · ")}
+        </p>
       )}
+      <CardTags listing={listing} compact />
       <CourtesyLine listing={listing} className="mt-0.5" />
-      {match.matches && (
+      {match.matches && badge?.key !== "match" && (
         <p className="mt-1 inline-flex self-start items-center gap-1 text-[10px] font-semibold text-[color:var(--brand-accent-text)] bg-[rgb(var(--brand-accent-rgb)/0.15)] px-2 py-0.5 rounded-full">
           <span aria-hidden="true">★</span> Match
         </p>
@@ -1056,8 +1075,9 @@ function ListingCard({ listing, selected, onHover, onOpen, savedSearches, compac
         {[listing.city, listing.state, listing.postal_code].filter(Boolean).join(", ")}
         {typeLabel ? ` · ${typeLabel}` : ""}
       </p>
+      <CardTags listing={listing} />
       <CourtesyLine listing={listing} className="mt-0.5" />
-      {match.matches && (
+      {match.matches && badge?.key !== "match" && (
         <p className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-[color:var(--brand-accent-text)] bg-[rgb(var(--brand-accent-rgb)/0.15)] px-2 py-0.5 rounded-full">
           <span aria-hidden="true">★</span>
           Matches your saved search
@@ -2425,11 +2445,6 @@ export default function ListingSearch({ location, height = "700px", compact = fa
               </span>
             )}
           </button>
-          <SaveSearchModal
-            filters={saveFilters}
-            buttonLabel="Save"
-            buttonClassName="inline-flex items-center justify-center gap-1 min-h-[44px] px-3.5 py-2 border border-gray-300 rounded-full text-sm font-semibold bg-white touch-manipulation"
-          />
           <select
             value={filters.sort}
             onChange={(e) => setFilterInstant("sort", e.target.value)}
@@ -2564,7 +2579,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
             view === "map" ? "block flex-1" : "hidden"
           }`}
         >
-          <div className="absolute inset-0">
+          <div className="absolute inset-x-0 top-0 bottom-[4.25rem] lg:bottom-0">
             <ListingMap
               listings={results}
               selectedId={selectedId}
@@ -2712,7 +2727,7 @@ export default function ListingSearch({ location, height = "700px", compact = fa
 
         <div
           ref={resultsRef}
-          className={`overflow-y-auto overscroll-contain bg-gray-50 @container ${
+          className={`overflow-y-auto overscroll-contain bg-gray-50 @container pb-[4.75rem] lg:pb-0 ${
             view === "list" ? "flex-1" : "hidden lg:block lg:w-[42%] xl:w-[40%]"
           }`}
         >
@@ -2988,6 +3003,29 @@ export default function ListingSearch({ location, height = "700px", compact = fa
         searchesRun={searchesRun}
         paused={!!panelSlug || drawerOpen}
       />
+
+      {/* Mobile sticky bottom bar — Save + Nadia live here (the floating chat
+          launcher stays off this page below lg), so nothing sits over the cards. */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-3 pt-2.5 pb-[calc(0.65rem+env(safe-area-inset-bottom,0px))]">
+        <div className="flex items-center gap-2 max-w-lg mx-auto">
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent("open-nadia-chat"))}
+            className="shrink-0 min-h-[44px] px-4 py-2.5 border border-gray-300 text-gray-900 text-sm font-semibold rounded-lg active:scale-95 hover:border-black transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]"
+          >
+            Ask Nadia
+          </button>
+          <div className="flex-1 min-w-0">
+            <SaveSearchModal
+              filters={saveFilters}
+              buttonLabel="Save this search"
+              hideIcon
+              buttonClassName="w-full min-h-[44px] inline-flex items-center justify-center px-3 py-2.5 text-sm font-semibold rounded-lg active:scale-[0.98] hover:opacity-90 transition-all touch-manipulation"
+              buttonStyle={{ backgroundColor: "var(--brand-accent)", color: "var(--brand-on-accent-ink)" }}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

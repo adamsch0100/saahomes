@@ -59,24 +59,16 @@ function SimilarCard({ listing: l }) {
     >
       <div className="relative aspect-[4/3] bg-[#1a1a1a] overflow-hidden">
         <SimilarCardPhoto listing={l} />
-        <div className="absolute top-2 left-2 z-[1] flex flex-wrap gap-1 max-w-[78%]">
-          <SampleBadge listing={l} />
-          {b.priceCut && (
-            <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">
-              Price reduced
-            </span>
-          )}
-          {b.isNew && !b.priceCut && (
-            <span className="bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] text-[10px] font-bold px-2 py-0.5 rounded uppercase">
-              New
-            </span>
-          )}
-          {b.isAssumable && (
-            <span className="bg-black/85 text-[color:var(--brand-accent)] border border-[color:var(--brand-accent)] text-[10px] font-bold px-2 py-0.5 rounded uppercase">
-              Assumable loan possible
-            </span>
-          )}
-        </div>
+        {/* One badge on the photo (price drop, else new); sample + assumable go under it */}
+        {b.priceCut ? (
+          <span className="absolute top-2 left-2 z-[1] bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+            Price reduced
+          </span>
+        ) : b.isNew ? (
+          <span className="absolute top-2 left-2 z-[1] bg-[color:var(--brand-accent)] text-[color:var(--brand-on-accent)] text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+            New
+          </span>
+        ) : null}
         {/* Save heart — stopPropagation handled inside SaveHomeButton */}
         <div
           className="absolute top-2 right-2 z-10 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
@@ -112,6 +104,16 @@ function SimilarCard({ listing: l }) {
           {[l.street_number, l.street_name].filter(Boolean).join(" ")}
           {l.city ? `, ${l.city}` : ""}
         </p>
+        {(l.sample || b.isAssumable) && (
+          <div className="mt-1.5 flex flex-wrap gap-1">
+            <SampleBadge listing={l} short className="min-h-0 text-[10px] px-1.5 py-0.5 shadow-none" />
+            {b.isAssumable && (
+              <span className="inline-flex items-center border border-gray-200 bg-gray-100 text-gray-800 text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded">
+                Assumable loan
+              </span>
+            )}
+          </div>
+        )}
         <CourtesyLine listing={l} className="mt-0.5" />
       </div>
     </Link>

@@ -57,7 +57,7 @@ export default function SaveSearchNudge({ filters, homesOpened, searchesRun, pau
   };
 
   return (
-    <div className={`fixed inset-x-0 bottom-[9.5rem] md:bottom-6 z-40 justify-center px-4 pointer-events-none ${saved ? "hidden" : "flex"}`}>
+    <div className={`fixed inset-x-0 bottom-[5rem] lg:bottom-6 z-40 justify-center px-4 pointer-events-none ${saved ? "hidden" : "flex"}`}>
       <div
         role="dialog"
         aria-label="Save this search"

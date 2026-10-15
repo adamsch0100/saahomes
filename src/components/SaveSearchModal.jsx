@@ -22,9 +22,6 @@ const TYPE_LABEL = {
   manufactured: "Manufactured",
 };
 
-const HOURS = Array.from({ length: 24 }, (_, h) => `${String(h).padStart(2, "0")}:00`);
-const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-
 const FREQ_LABEL = { daily: "Daily", weekly: "Weekly", immediate: "As it happens" };
 
 function filterSummary(filters = {}) {
@@ -107,7 +104,7 @@ function filterSummary(filters = {}) {
 }
 
 /** Short default name for a search: "Fort Collins · 3+ beds · Under $600K". */
-function suggestSearchName(filters = {}) {
+function suggestSearchName(filters = {}, bb = null) {
   const parts = [];
   const cities = String(filters.city || "").split(",").map((c) => c.trim()).filter(Boolean);
   const zips = String(filters.postal_code || filters.postalCode || "").split(",").map((z) => z.trim()).filter(Boolean);
@@ -119,16 +116,17 @@ function suggestSearchName(filters = {}) {
   if (filters.minPrice && filters.maxPrice) parts.push(`${k(filters.minPrice)}–${k(filters.maxPrice)}`);
   else if (filters.maxPrice) parts.push(`Under ${k(filters.maxPrice)}`);
   else if (filters.minPrice) parts.push(`${k(filters.minPrice)}+`);
-  return (parts.join(" · ") || "Northern Colorado homes").slice(0, 120);
+  const fallback = bb ? (bb.market ? `${bb.market} homes` : "All homes") : "Northern Colorado homes";
+  return (parts.join(" · ") || fallback).slice(0, 120);
 }
 
 /**
- * SaveSearchModal — RealScout-style lead capture (frequency + intent + filters).
- * Shares the same session cookie (/api/auth/session via /api/alerts) as AccountModal.
- * Not logged in: email required, name and mobile optional → backend creates account + sets saa_user_token cookie.
- * Texts only go out when the visitor ticks the opt-in (unchecked by default).
- * Logged in (cookie session): pre-fills contact, one-tap save under existing account.
- * Heart / header sign-in use AccountModal; this modal owns search-specific fields.
+ * SaveSearchModal — one field, then the rest.
+ * Step "save": the email (or a one-tap save when the visitor is signed in);
+ * the search is saved the moment it's valid. Step "details": name, mobile +
+ * text opt-in, and how often, all optional (PATCH /api/alerts/me + /:id).
+ * Step "done": where to manage it. Shares the session cookie (/api/alerts/me)
+ * with AccountModal; a guest save creates the account and signs this device in.
  */
 export default function SaveSearchModal({
   filters = {},
@@ -139,19 +137,15 @@ export default function SaveSearchModal({
 }) {
   const bb = useBrokerageBrand();
   const [open, setOpen] = useState(false);
+  const [step, setStep] = useState("save"); // save | details | done
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [searchName, setSearchName] = useState("");
   const [contactName, setContactName] = useState("");
   const [smsOptIn, setSmsOptIn] = useState(false);
-  const [signInNote, setSignInNote] = useState("");
   const [frequency, setFrequency] = useState("daily");
-  const [sendTime, setSendTime] = useState("06:00");
-  const [sendDay, setSendDay] = useState("Monday");
-  // Intent routes buyer vs seller nurture track: buying | selling | both
-  const [intent, setIntent] = useState("buying");
-  const [state, setState] = useState("idle"); // idle | saving | done | error
+  const [savedId, setSavedId] = useState(null);
+  const [signInNote, setSignInNote] = useState("");
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   // Session: null = checking, false = guest, object = signed in
   const [session, setSession] = useState(null);
@@ -204,27 +198,26 @@ export default function SaveSearchModal({
       if (e.key !== "Escape") return;
       e.preventDefault();
       e.stopPropagation();
-      setOpen(false);
-      setState("idle");
-      setError("");
-      setPassword("");
+      resetAndClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- resetAndClose reads latest state when it runs
   }, [open]);
 
-  const submit = async (e) => {
+  const isSignedIn = Boolean(session && session.email);
+  const suggestedName = suggestSearchName(filters, bb);
+  const summary = filterSummary(filters);
+
+  /** Step 1 — the email is all it takes; the search is saved right away. */
+  const save = async (e) => {
     e.preventDefault();
     const emailStr = email.trim();
     if (!emailStr || !emailStr.includes("@")) {
-      setError("Please enter a valid email so we can send your alerts.");
+      setError("Enter your email so we know where to send new homes.");
       return;
     }
-    if (smsOptIn && !phone.trim()) {
-      setError("Add your mobile number to get text alerts, or untick the text option.");
-      return;
-    }
-    setState("saving");
+    setBusy(true);
     setError("");
     try {
       const res = await fetch(`${API_BASE}/api/alerts`, {
@@ -234,51 +227,109 @@ export default function SaveSearchModal({
         body: JSON.stringify({
           ...filters,
           email: emailStr,
-          contact_name: contactName.trim() || undefined,
-          phone: phone.trim() || undefined,
-          sms_opt_in: smsOptIn,
-          password: password || undefined,
-          search_name: searchName.trim() || suggestedName,
-          frequency,
-          send_time: sendTime,
-          send_day: sendDay,
-          intent: intent || "buying",
+          search_name: suggestedName,
+          frequency: "daily",
         }),
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error || "Could not save");
+      setSavedId(data.data?.id || null);
       setSignInNote(data.signInRequired ? data.message || "" : "");
       localStorage.setItem("saa_lead_captured", "1");
-      if (intent) localStorage.setItem("saa_intent", intent);
       // RealScout-style: remember criteria so cards/detail can show match chips
       rememberSavedSearch(filters);
       try {
         window.dispatchEvent(new CustomEvent("saa-search-saved", { detail: filters }));
       } catch { /* noop */ }
-      setState("done");
+      // An existing account that isn't signed in here gets its sign-in link
+      // emailed; the follow-up step needs the session, so skip straight to done.
+      setStep(data.signInRequired ? "done" : "details");
     } catch (err) {
-      setState("error");
       setError(err.message || "Something went wrong — please try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /** Step 2 — all optional; the search is already saved. */
+  const askName = !(isSignedIn && session.name);
+  const askPhone = !(isSignedIn && session.phone);
+  const finishDetails = async (e) => {
+    e.preventDefault();
+    const nameStr = contactName.trim();
+    const phoneStr = phone.trim();
+    if (smsOptIn && !phoneStr) {
+      setError("Add your mobile number to get texts, or untick the text option.");
+      return;
+    }
+    setBusy(true);
+    setError("");
+    try {
+      const sendName = askName && nameStr;
+      const sendPhone = askPhone && phoneStr;
+      if (sendName || sendPhone || smsOptIn) {
+        const res = await fetch(`${API_BASE}/api/alerts/me`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({
+            contact_name: sendName ? nameStr : undefined,
+            phone: sendPhone ? phoneStr : undefined,
+            sms_opt_in: smsOptIn,
+          }),
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || "Could not save your details");
+      }
+      if (savedId && frequency !== "daily") {
+        const res = await fetch(`${API_BASE}/api/alerts/${savedId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({ frequency }),
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || "Could not set how often");
+      }
+      setStep("done");
+    } catch (err) {
+      setError(err.message || "Something went wrong — please try again.");
+    } finally {
+      setBusy(false);
     }
   };
 
   const resetAndClose = () => {
     setOpen(false);
-    setState("idle");
+    setStep("save");
     setError("");
-    setPassword("");
+    setBusy(false);
+    setSavedId(null);
+    setSignInNote("");
     // Keep email/phone if they just signed up so re-open feels sticky
-    if (wasGuest && state !== "done") {
+    if (wasGuest && step === "save") {
       setEmail("");
       setPhone("");
       setContactName("");
-      setSearchName("");
       setSmsOptIn(false);
+      setFrequency("daily");
     }
   };
 
-  const isSignedIn = session && session.email;
-  const suggestedName = suggestSearchName(filters);
+  const inputClass =
+    "w-full min-h-[48px] px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none";
+  const primaryBtn =
+    "w-full min-h-[48px] py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 disabled:opacity-50";
+  const closeBtn = (
+    <button
+      type="button"
+      onClick={resetAndClose}
+      className="shrink-0 min-w-[44px] min-h-[44px] w-11 h-11 rounded-full flex items-center justify-center text-2xl leading-none text-gray-400 hover:text-gray-700 hover:bg-gray-100 active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]"
+      aria-label="Close"
+    >
+      ×
+    </button>
+  );
 
   return (
     <>
@@ -305,7 +356,7 @@ export default function SaveSearchModal({
             className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 max-h-[92vh] overflow-y-auto pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]"
             onClick={(e) => e.stopPropagation()}
           >
-            {state === "done" ? (
+            {step === "done" ? (
               <div className="text-center py-4">
                 <div className="mx-auto w-14 h-14 rounded-full bg-[rgb(var(--brand-accent-rgb)/0.25)] flex items-center justify-center text-2xl mb-3" aria-hidden="true">✓</div>
                 <h3 id="save-search-title" className="text-xl font-bold text-gray-900">
@@ -313,7 +364,7 @@ export default function SaveSearchModal({
                 </h3>
                 <p className="text-gray-600 mt-2 text-sm leading-relaxed">
                   We&apos;ll email you when new homes match{" "}
-                  <span className="font-semibold text-gray-900">{filterSummary(filters)}</span>
+                  <span className="font-semibold text-gray-900">{summary}</span>
                   {" "}— including <strong>price drops</strong> and status changes.
                 </p>
                 {signInNote ? (
@@ -331,14 +382,6 @@ export default function SaveSearchModal({
                   </p>
                 )}
                 {!signInNote && <InstantAlertsCard compact className="mt-4" />}
-                {(intent === "selling" || intent === "both") && (
-                  <a
-                    href="/my-home/"
-                    className="mt-4 inline-flex items-center justify-center w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors text-sm"
-                  >
-                    Track my home&apos;s value →
-                  </a>
-                )}
                 <a
                   href="/my-saved-searches/"
                   className="mt-3 inline-flex items-center justify-center w-full py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-gray-50 transition-colors text-sm"
@@ -358,129 +401,49 @@ export default function SaveSearchModal({
                   Done
                 </button>
               </div>
-            ) : (
+            ) : step === "details" ? (
               <>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h3 id="save-search-title" className="text-xl font-bold text-gray-900">Save this search</h3>
+                    <h3 id="save-search-title" className="text-xl font-bold text-gray-900">Saved. Want them faster?</h3>
                     <p className="text-gray-500 text-sm mt-1">
-                      New homes + price drops for:{" "}
-                      <span className="font-semibold text-gray-900">{filterSummary(filters)}</span>
+                      Alerts for <span className="font-semibold text-gray-900">{summary}</span> go to{" "}
+                      <span className="font-semibold text-gray-900">{email.trim()}</span>. Everything below is optional.
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={resetAndClose}
-                    className="shrink-0 min-w-[44px] min-h-[44px] w-11 h-11 rounded-full flex items-center justify-center text-2xl leading-none text-gray-400 hover:text-gray-700 hover:bg-gray-100 active:scale-95 transition-all touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-accent)]"
-                    aria-label="Close"
-                  >
-                    ×
-                  </button>
+                  {closeBtn}
                 </div>
 
-                {/* Session status banner */}
-                {session === null ? (
-                  <div className="mt-4 rounded-lg bg-gray-50 border border-gray-100 px-3.5 py-2.5 text-xs text-gray-500 animate-pulse">
-                    Checking your account…
-                  </div>
-                ) : isSignedIn ? (
-                  <div className="mt-4 rounded-lg bg-emerald-50 border border-emerald-200 px-3.5 py-2.5 text-xs text-emerald-900 leading-relaxed">
-                    <strong>Signed in as {session.email}</strong>
-                    {session.searches?.length > 0 && (
-                      <span className="text-emerald-700">
-                        {" "}· {session.searches.length} saved search{session.searches.length === 1 ? "" : "es"}
-                      </span>
-                    )}
-                    <br />
-                    This alert will be added to your account.{" "}
-                    <a href="/my-saved-searches/" className="underline font-semibold">Manage alerts</a>
-                  </div>
-                ) : (
-                  <div className="mt-4 rounded-lg bg-gray-50 border border-gray-100 px-3.5 py-2.5 text-xs text-gray-600 leading-relaxed">
-                    <strong className="text-gray-800">One account for hearts + alerts</strong> — we&apos;ll create yours when you save.
-                    Just your email. Add a mobile number if you&apos;d like texts too.{" "}
-                    <strong className="text-gray-800">No spam — unsubscribe in one click.</strong>
-                  </div>
-                )}
-
-                <form onSubmit={submit} className="mt-4 space-y-4">
-                  {/* Intent step — routes buyer vs seller nurture */}
-                  {!isSignedIn && (
+                <form onSubmit={finishDetails} className="mt-4 space-y-4">
+                  {askName && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Are you buying, selling, or both?
-                      </label>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[
-                          { value: "buying", label: "Buying" },
-                          { value: "selling", label: "Selling" },
-                          { value: "both", label: "Both" },
-                        ].map((opt) => (
-                          <button
-                            key={opt.value}
-                            type="button"
-                            onClick={() => setIntent(opt.value)}
-                            className={`px-2 py-2.5 rounded-lg border text-xs font-semibold transition-colors ${
-                              intent === opt.value
-                                ? "bg-black text-white border-black"
-                                : "border-gray-300 text-gray-600 hover:border-black"
-                            }`}
-                          >
-                            {opt.label}
-                          </button>
-                        ))}
-                      </div>
-                      {(intent === "selling" || intent === "both") && (
-                        <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">
-                          After saving, you can track your home&apos;s value on{" "}
-                          <span className="font-semibold text-gray-700">My Home</span> —
-                          monthly updates, no pressure.
-                        </p>
-                      )}
-                    </div>
-                  )}
-                  {/* Hide contact fields when signed in and we already have them */}
-                  {!isSignedIn && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Your name <span className="text-gray-400 font-normal">(so we know who we&apos;re helping)</span>
+                      <label htmlFor="save-search-name" className="block text-sm font-medium text-gray-700 mb-1">
+                        Your name
                       </label>
                       <input
+                        id="save-search-name"
                         type="text"
                         value={contactName}
                         onChange={(e) => setContactName(e.target.value)}
                         placeholder="First and last name"
                         autoComplete="name"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none"
+                        className={inputClass}
                       />
                     </div>
                   )}
-                  {!(isSignedIn && session.email) && (
+                  {askPhone && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                      <input
-                        type="email"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="you@example.com"
-                        autoComplete="email"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none"
-                      />
-                    </div>
-                  )}
-                  {!(isSignedIn && session.phone) && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Mobile phone <span className="text-gray-400 font-normal">(optional)</span>
+                      <label htmlFor="save-search-phone" className="block text-sm font-medium text-gray-700 mb-1">
+                        Mobile phone
                       </label>
                       <input
+                        id="save-search-phone"
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="(970) 555-0123"
                         autoComplete="tel"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none"
+                        className={inputClass}
                       />
                     </div>
                   )}
@@ -497,53 +460,16 @@ export default function SaveSearchModal({
                       Msg &amp; data rates may apply. Reply STOP to opt out, HELP for help.
                     </span>
                   </label>
-                  {/* Signed in with both: still show read-only confirmation */}
-                  {isSignedIn && session.email && (
-                    <div className="rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-700">
-                      Alerts go to <strong>{session.email}</strong>
-                      {phone ? <> · {phone}</> : null}
-                    </div>
-                  )}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Name this search <span className="text-gray-400 font-normal">(optional)</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={searchName}
-                      onChange={(e) => setSearchName(e.target.value)}
-                      placeholder={suggestedName}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none"
-                    />
-                  </div>
-                  {/* Optional password only for guests who want email+password login later */}
-                  {!isSignedIn && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Password <span className="text-gray-400 font-normal">(optional — manage from any device)</span>
-                      </label>
-                      <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="At least 8 characters"
-                        autoComplete="new-password"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none"
-                      />
-                      <p className="text-xs text-gray-400 mt-1">
-                        Skip this — you&apos;ll stay signed in on this device automatically.
-                      </p>
-                    </div>
-                  )}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">How often?</label>
-                    <div className="grid grid-cols-3 gap-2">
+                    <p className="text-sm font-medium text-gray-700 mb-1">How often?</p>
+                    <div className="grid grid-cols-3 gap-2" role="group" aria-label="How often">
                       {Object.entries(FREQ_LABEL).map(([value, label]) => (
                         <button
                           key={value}
                           type="button"
                           onClick={() => setFrequency(value)}
-                          className={`px-2 py-2.5 rounded-lg border text-xs font-semibold transition-colors ${
+                          aria-pressed={frequency === value}
+                          className={`min-h-[44px] px-2 py-2.5 rounded-lg border text-xs font-semibold transition-colors ${
                             frequency === value
                               ? "bg-black text-white border-black"
                               : "border-gray-300 text-gray-600 hover:border-black"
@@ -553,50 +479,75 @@ export default function SaveSearchModal({
                         </button>
                       ))}
                     </div>
-                    {frequency === "weekly" && (
-                      <select
-                        value={sendDay}
-                        onChange={(e) => setSendDay(e.target.value)}
-                        className="mt-2 w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-black outline-none"
-                        aria-label="Day of week"
-                      >
-                        {DAYS.map((d) => <option key={d} value={d}>{d}s</option>)}
-                      </select>
-                    )}
-                    {frequency !== "immediate" && (
-                      <select
-                        value={sendTime}
-                        onChange={(e) => setSendTime(e.target.value)}
-                        className="mt-2 w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-black outline-none"
-                        aria-label="Time of day"
-                      >
-                        {HOURS.map((h) => {
-                          const [hh] = h.split(":");
-                          const hour12 = Number(hh) % 12 === 0 ? 12 : Number(hh) % 12;
-                          const ampm = Number(hh) < 12 ? "AM" : "PM";
-                          return <option key={h} value={h}>{hour12}:00 {ampm} (Mountain)</option>;
-                        })}
-                      </select>
-                    )}
                     <p className="text-xs text-gray-400 mt-1.5">
                       {frequency === "immediate"
-                        ? "Price drops & new listings email you the moment they hit."
+                        ? "New homes and price drops email you the moment they hit."
                         : frequency === "weekly"
-                          ? `We'll email you every ${sendDay} at the time above.`
-                          : "We'll email you every day at the time above."}
+                          ? "One email every Monday morning."
+                          : "One email each morning, only when something's new."}
                     </p>
                   </div>
                   {error && <p className="text-red-600 text-sm" role="alert">{error}</p>}
+                  <button type="submit" disabled={busy} className={primaryBtn}>
+                    {busy ? "Saving…" : "Finish"}
+                  </button>
                   <button
-                    type="submit"
-                    disabled={state === "saving" || session === null}
-                    className="w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 disabled:opacity-50"
+                    type="button"
+                    onClick={() => setStep("done")}
+                    disabled={busy}
+                    className="w-full min-h-[44px] text-sm font-semibold text-gray-600 hover:text-gray-900"
                   >
-                    {state === "saving"
-                      ? "Saving…"
-                      : isSignedIn
-                        ? "Save to my account"
-                        : "Save & get alerts"}
+                    Skip for now
+                  </button>
+                </form>
+              </>
+            ) : (
+              <>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 id="save-search-title" className="text-xl font-bold text-gray-900">Save this search</h3>
+                    <p className="text-gray-500 text-sm mt-1">
+                      New homes + price drops for:{" "}
+                      <span className="font-semibold text-gray-900">{summary}</span>
+                    </p>
+                  </div>
+                  {closeBtn}
+                </div>
+
+                <form onSubmit={save} className="mt-4 space-y-4">
+                  {session === null ? (
+                    <div className="rounded-lg bg-gray-50 border border-gray-100 px-3.5 py-2.5 text-xs text-gray-500 animate-pulse">
+                      Checking your account…
+                    </div>
+                  ) : isSignedIn ? (
+                    <div className="rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-700">
+                      Alerts go to <strong>{session.email}</strong>
+                      {session.searches?.length > 0 && (
+                        <span className="text-gray-500">
+                          {" "}· {session.searches.length} saved search{session.searches.length === 1 ? "" : "es"}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <div>
+                      <label htmlFor="save-search-email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                      <input
+                        id="save-search-email"
+                        type="email"
+                        required
+                        autoFocus
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="you@example.com"
+                        autoComplete="email"
+                        inputMode="email"
+                        className={inputClass}
+                      />
+                    </div>
+                  )}
+                  {error && <p className="text-red-600 text-sm" role="alert">{error}</p>}
+                  <button type="submit" disabled={busy || session === null} className={primaryBtn}>
+                    {busy ? "Saving…" : isSignedIn ? "Save to my account" : "Save & get alerts"}
                   </button>
                   <p className="text-xs text-gray-400 text-center">
                     {isSignedIn

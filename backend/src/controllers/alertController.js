@@ -3,6 +3,7 @@
  *   POST   /api/alerts              — save a search (email + filters) → lead → FUB
  *   GET    /api/alerts/manage?token= — list user's searches
  *   GET    /api/alerts/me           — session cookie → searches + lead score
+ *   PATCH  /api/alerts/me           — name / phone / text opt-in after a one-field save
  *   POST   /api/alerts/view         — record property view (session)
  *   POST   /api/alerts/event        — record activity (chat_opened)
  *   PATCH  /api/alerts/:id?token=   — pause/resume/edit a search
@@ -371,6 +372,68 @@ export const getMe = async (req, res) => {
   } catch (error) {
     console.error('getMe error:', error);
     return res.status(500).json({ success: false, error: 'Could not load your account.' });
+  }
+};
+
+/**
+ * PATCH /api/alerts/me — { contact_name?, phone?, sms_opt_in? }
+ * The save-search modal asks only for an email, then offers name, phone and
+ * texting on the next step; this is where that step lands. Needs the session
+ * cookie the save just set, so a stranger typing someone's email can't fill
+ * in that person's details.
+ */
+export const updateMe = async (req, res) => {
+  try {
+    const token = req.cookies?.[COOKIE_NAME];
+    const user = token ? await findBuyerByToken(token, tenantIdOf(req)) : null;
+    if (!user) return res.status(401).json({ success: false, error: 'Not signed in.' });
+    const { contact_name: contactNameRaw, name: nameRaw, phone, sms_opt_in: smsOptInRaw } = req.body || {};
+    const contactName = String(contactNameRaw ?? nameRaw ?? '').trim().slice(0, 255);
+    const phoneDigits = cleanPhone(phone);
+    if (String(phone || '').trim() && !phoneDigits) {
+      return res.status(400).json({ success: false, error: 'That phone number doesn’t look right. Check it, or leave it blank.' });
+    }
+    const smsOptIn = smsOptInRaw === true || smsOptInRaw === 'true';
+    if (smsOptIn && !phoneDigits && !user.phone) {
+      return res.status(400).json({ success: false, error: 'Add your mobile number to get text alerts.' });
+    }
+    if (!contactName && !phoneDigits && !smsOptIn) {
+      return res.status(400).json({ success: false, error: 'Nothing to update.' });
+    }
+    const pool = getPool();
+    const updated = await pool.query(
+      `UPDATE users SET name = COALESCE(NULLIF($1, ''), name),
+         phone = COALESCE(NULLIF($2, ''), phone),
+         last_active_at = NOW()
+       WHERE id = $3 RETURNING *`,
+      [contactName, phoneDigits || '', user.id]
+    );
+    const userRow = updated.rows[0];
+    if (smsOptIn) {
+      await recordConsent({
+        userId: userRow.id,
+        channel: 'sms',
+        granted: true,
+        wording: smsAlertConsentWording(req.tenant),
+        source: 'save_search',
+        req,
+      }).catch((e) => console.error('consent record failed:', e.message));
+    }
+    // The CRM hears the new name / phone (fire-and-forget, never blocks the user).
+    const latest = await pool.query(
+      'SELECT * FROM saved_searches WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1',
+      [userRow.id]
+    );
+    if (latest.rows[0]) {
+      forwardAlertSignupToFollowUpBoss(userRow, latest.rows[0], { smsOptIn }).catch(() => {});
+    }
+    return res.json({
+      success: true,
+      data: { name: userRow.name || null, phone: userRow.phone || null, sms_opt_in: smsOptIn },
+    });
+  } catch (error) {
+    console.error('updateMe error:', error);
+    return res.status(500).json({ success: false, error: 'Could not save your details. Please try again.' });
   }
 };
 
