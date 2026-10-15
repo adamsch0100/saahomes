@@ -267,7 +267,9 @@ test('duplicates: the same person is updated, never added twice; other brokerage
 
 test('bad keys, unknown sources and empty leads are refused', { skip }, async () => {
   const lead = { name: 'X', email: 'x@example.com' };
-  assert.equal((await call('POST', `/intake/${key.slice(0, -1)}0/webhook`, { body: lead })).status, 401);
+  // Flip the last character to one it isn't, so the key really is wrong.
+  const flipped = key.slice(0, -1) + (key.endsWith('0') ? '1' : '0');
+  assert.equal((await call('POST', `/intake/${flipped}/webhook`, { body: lead })).status, 401);
   assert.equal((await call('POST', `/intake/t${peak.id}_${'a'.repeat(32)}/webhook`, { body: lead })).status, 401);
   assert.equal((await call('POST', `/intake/${summitKey.replace(/^t\d+/, `t${peak.id}`)}/webhook`, { body: lead })).status, 401, 'another brokerage’s secret doesn’t open this one');
   assert.equal((await call('POST', '/intake/nonsense/webhook', { body: lead })).status, 401);
