@@ -6715,6 +6715,7 @@ export const neighborhoods = [
     walkScore: 30,
     metaDescription: 'Firestone Village real estate - newer homes with mountain views near Mineral Road and I-25 in Firestone. SAA Homes.',
     keywords: 'Firestone Village, Firestone Colorado new homes, Firestone subdivisions, mountain view homes Firestone, I-25 Firestone, Mineral Road Firestone, Firestone Village subdivision, St. Vrain Valley schools, Frederick High School Firestone',
+    youtubeId: 'xw-d289BAmo',
     neighborhoodHighlights: [
       { title: 'Mountain views', description: 'Many Firestone Village homes offer stunning views of Longs Peak and the Front Range.' },
       { title: 'Growing community', description: 'Firestone is one of the I-25 corridor\'s fastest-growing towns with new retail and dining.' },
@@ -6749,6 +6750,7 @@ export const neighborhoods = [
     walkScore: 35,
     metaDescription: 'Coal Ridge Firestone real estate - established subdivision near Coal Ridge Middle School with mature trees and I-25 access. SAA Homes.',
     keywords: 'Coal Ridge Firestone, Firestone established subdivisions, Coal Ridge Middle School area, Firestone family homes, Frederick Firestone area homes, I-25 Highway 52 homes, St. Vrain Valley schools',
+    youtubeId: 'VjQcbM2_axU',
     neighborhoodHighlights: [
       { title: 'School proximity', description: 'Located adjacent to Coal Ridge Middle School - easy walk to school for older kids.' },
       { title: 'Established setting', description: 'Mature trees and well-maintained homes in a settled Firestone neighborhood.' },
@@ -6780,6 +6782,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.1', longitude: '-104.94' },
     metaDescription: 'Frederick Colorado real estate - growing I-25 community near Longmont. SAA Homes.',
     keywords: 'Frederick CO homes, Frederick Colorado real estate, I-25 corridor homes',
+    youtubeId: 'k-Fc5dA9ayE',
     neighborhoodHighlights: [
       { title: 'Commuter hub', description: 'Located on I-25 between Longmont and Firestone - 20 min to Boulder, 40 min to Denver.' },
       { title: 'Mountain views', description: 'Many neighborhoods offer stunning Front Range and mountain views.' },
