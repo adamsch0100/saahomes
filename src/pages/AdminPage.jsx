@@ -606,7 +606,11 @@ export default function AdminPage() {
             )}
 
             {!loading && !error && submissions.length === 0 && (
-              <div className="p-8 text-center text-gray-500">No submissions found</div>
+              <div className="p-8 text-center text-gray-500">
+                {filterType === 'all'
+                  ? 'No form leads yet. Every form filled out on your site lands here. Share your site link to get the first one.'
+                  : 'No leads of this type yet. Pick another type, or “All”.'}
+              </div>
             )}
 
             {!loading && !error && submissions.length > 0 && (

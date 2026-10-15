@@ -827,7 +827,7 @@ export default function AgentCockpit({
           <div className="p-10 text-center text-gray-500">
             {q.trim() || stage !== "all" || dueOnly || smart
               ? "No leads match these filters. Try clearing them."
-              : "No leads yet. Your first form fill or saved search lands here."}
+              : "No leads yet. Every form fill, saved search and Nadia chat on your site lands here. Share your site link to get the first one."}
           </div>
         )}
 

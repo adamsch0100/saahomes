@@ -472,7 +472,7 @@ function Sellers({ api }) {
   if (!rows.length) {
     return (
       <p className="rounded-xl border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500">
-        No sellers yet. Use “Selling” on a lead, or clients can start a plan from My Home.
+        No sellers yet. Open a lead and set it to “Selling” to start their plan; homeowners can also start one from My Home.
       </p>
     );
   }
