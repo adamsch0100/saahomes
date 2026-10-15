@@ -208,6 +208,18 @@ test('signup creates its own brokerage, owner, trial and address, apart from eve
   assert.equal(setup.json.data.billing.trial_days_left, 14);
   assert.equal((await call('GET', '/admin/setup', { host: SAA, auth: r.json.data.token })).status, 403);
   assert.equal((await call('GET', '/admin/settings', { host: PEAK, auth: r.json.data.token })).status, 403);
+
+  // The console on the new host signs in with signup's one-time code: once,
+  // only on that site, and the token itself never rides in a URL.
+  const code = r.json.data.handoff;
+  assert.match(code, /^[A-Za-z0-9_-]{30,}$/);
+  assert.equal((await call('POST', '/signup/handoff', { host: PEAK, body: { code } })).status, 400, 'another site cannot use it');
+  const handed = await call('POST', '/signup/handoff', { host, body: { code } });
+  assert.equal(handed.status, 200, handed.text);
+  assert.ok(handed.json.data.token);
+  assert.equal((await call('GET', '/admin/setup', { host, auth: handed.json.data.token })).status, 200);
+  assert.equal((await call('POST', '/signup/handoff', { host, body: { code } })).status, 400, 'used once');
+  assert.equal((await call('POST', '/signup/handoff', { host, body: { code: 'nope' } })).status, 400);
   const pub = await call('GET', '/tenant', { host });
   assert.equal(pub.json.tenant.brand.brandName, 'Summit Peak Homes');
   assert.doesNotMatch(pub.text, SAA_STRINGS);

@@ -15,7 +15,8 @@ import TwoStepPanel from '../components/account/TwoStepPanel.jsx';
 import BrokerageSettings from '../components/admin/BrokerageSettings.jsx';
 import BrokerageReports from '../components/admin/BrokerageReports.jsx';
 import OwnerSetup, { ConsoleNotes, OwnerSettingsExtras } from '../components/admin/OwnerSetup.jsx';
-import { takeHandoffToken } from '../utils/consoleBrokerage.js';
+import { takeHandoffCode } from '../utils/consoleBrokerage.js';
+import { redeemSignupHandoff } from '../utils/plugAndPlayApi.js';
 import { crm } from '../utils/crmApi.js';
 
 const TYPE_LABELS = {
@@ -30,7 +31,9 @@ function formatOpenRate(rate) {
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [token, setToken] = useState(() => takeHandoffToken() || localStorage.getItem('adminToken'));
+  const [token, setToken] = useState(() => localStorage.getItem('adminToken'));
+  // Signup on another host handed over a one-time code: it leaves the address bar before the first paint.
+  const [handoffCode] = useState(takeHandoffCode);
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [submissions, setSubmissions] = useState([]);
   const [stats, setStats] = useState(null);
@@ -53,6 +56,18 @@ export default function AdminPage() {
     window.addEventListener('saa-2fa-setup-required', onSetupRequired);
     return () => window.removeEventListener('saa-2fa-setup-required', onSetupRequired);
   }, []);
+
+  useEffect(() => {
+    if (!handoffCode) return;
+    redeemSignupHandoff(handoffCode)
+      .then((d) => {
+        const t = d?.data?.token;
+        if (!t) return;
+        localStorage.setItem('adminToken', t);
+        setToken(t);
+      })
+      .catch(() => { /* expired or used: the sign-in form is right here */ });
+  }, [handoffCode]);
 
   useEffect(() => {
     if (token) {

@@ -36,6 +36,8 @@ async function plainRequest(path, options = {}) {
 export const getSignupInfo = () => plainRequest('/api/signup/info');
 export const checkSignupSlug = (slug) => plainRequest(`/api/signup/check?slug=${encodeURIComponent(slug)}`);
 export const submitSignup = (body) => plainRequest('/api/signup', { method: 'POST', body: JSON.stringify(body) });
+// The console on the brokerage's own host trades signup's one-time code for a sign-in.
+export const redeemSignupHandoff = (code) => plainRequest('/api/signup/handoff', { method: 'POST', body: JSON.stringify({ code }) });
 
 // ── setup (owner) ──
 export const getOwnerSetup = (token) => apiRequest('/api/admin/setup', { headers: auth(token) });
