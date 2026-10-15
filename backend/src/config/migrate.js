@@ -1,137 +1,213 @@
+import crypto from 'node:crypto';
 import getPool from './database.js';
 import { seedDemoListings } from '../services/demoListings.js';
 
+// Only one process migrates at a time: the first replica to boot takes this
+// lock, the others wait on it and then find every step already recorded.
+// 833711-833714 belong to the sync and scheduler locks.
+const MIGRATION_LOCK_ID = 833715;
+
+// Steps that failed on the last run, as [{ name, message }], for
+// /api/notify-health. Empty after a clean run.
+export const migrationFailures = [];
+
+// Test hook: extra steps run after the built-in ones, as [name, fn, options].
+export const extraMigrationSteps = [];
+
+// A short fingerprint of a step's code as it was when it ran. Kept in the
+// ledger for reading (did this step change since it ran?); never checked.
+const checksumOf = (fn) => crypto.createHash('sha1').update(String(fn)).digest('hex').slice(0, 16);
+
+/**
+ * Every schema change the app has ever needed, in order, as named steps.
+ *
+ * Each step is one block of idempotent statements. The first boot against a
+ * database runs them all and records each in schema_migrations; later boots
+ * skip the recorded ones, so a deploy costs a few queries. Steps are numbered
+ * in the order they first shipped: a new step goes at the end with the next
+ * number and a short slug (053_what_it_adds). A name must never change once
+ * it has shipped, or the step runs again.
+ */
 export const runMigrations = async () => {
   const pool = getPool();
   const client = await pool.connect();
+  const startedAt = Date.now();
+  const applied = [];
+  const failed = [];
+  let skipped = 0;
 
   try {
+    await client.query('SELECT pg_advisory_lock($1)', [MIGRATION_LOCK_ID]);
     await client.query('BEGIN');
 
+    // The ledger: one row per step that ran to completion.
     await client.query(`
-      CREATE TABLE IF NOT EXISTS contact_submissions (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) NOT NULL,
-        phone VARCHAR(50),
-        interest VARCHAR(100),
-        message TEXT,
-        area VARCHAR(100),
-        source_page VARCHAR(255),
-        utm_source VARCHAR(100),
-        utm_medium VARCHAR(100),
-        utm_campaign VARCHAR(100),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      CREATE TABLE IF NOT EXISTS schema_migrations (
+        name TEXT PRIMARY KEY,
+        applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        duration_ms INTEGER,
+        checksum TEXT
       )
     `);
+    const { rows: ledger } = await client.query('SELECT name FROM schema_migrations');
+    const recorded = new Set(ledger.map((r) => r.name));
 
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS market_report_submissions (
-        id SERIAL PRIMARY KEY,
-        first_name VARCHAR(255) NOT NULL,
-        last_name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) NOT NULL,
-        phone VARCHAR(50),
-        area VARCHAR(100),
-        source_page VARCHAR(255),
-        utm_source VARCHAR(100),
-        utm_medium VARCHAR(100),
-        utm_campaign VARCHAR(100),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    // Runs one step inside its own savepoint and records it. A failing step
+    // rolls back to the savepoint, is logged with its name and the Postgres
+    // message, stays unrecorded (so the next boot tries it again) and the run
+    // goes on with the next step. A step with `every: true` runs on every
+    // boot and is never recorded (the sample listings seed).
+    const step = async (name, fn, { every = false } = {}) => {
+      if (!every && recorded.has(name)) {
+        skipped += 1;
+        return;
+      }
+      const started = Date.now();
+      await client.query('SAVEPOINT migration_step');
+      try {
+        await fn(client);
+        if (!every) {
+          await client.query(
+            'INSERT INTO schema_migrations (name, duration_ms, checksum) VALUES ($1, $2, $3)',
+            [name, Date.now() - started, checksumOf(fn)]
+          );
+        }
+        await client.query('RELEASE SAVEPOINT migration_step');
+        if (!every) applied.push(name);
+      } catch (err) {
+        await client.query('ROLLBACK TO SAVEPOINT migration_step');
+        failed.push({ name, message: err.message });
+        console.error(`Migration step ${name} failed and was not recorded: ${err.message}`);
+      }
+    };
 
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS chfa_lead_submissions (
-        id SERIAL PRIMARY KEY,
-        first_name VARCHAR(255) NOT NULL,
-        last_name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) NOT NULL,
-        phone VARCHAR(50),
-        school_employer VARCHAR(255),
-        buying_timeline VARCHAR(100),
-        message TEXT,
-        source_page VARCHAR(255),
-        utm_source VARCHAR(100),
-        utm_medium VARCHAR(100),
-        utm_campaign VARCHAR(100),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    await step('001_lead_form_tables', async () => {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS contact_submissions (
+          id SERIAL PRIMARY KEY,
+          name VARCHAR(255) NOT NULL,
+          email VARCHAR(255) NOT NULL,
+          phone VARCHAR(50),
+          interest VARCHAR(100),
+          message TEXT,
+          area VARCHAR(100),
+          source_page VARCHAR(255),
+          utm_source VARCHAR(100),
+          utm_medium VARCHAR(100),
+          utm_campaign VARCHAR(100),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
 
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS champions_lead_submissions (
-        id SERIAL PRIMARY KEY,
-        first_name VARCHAR(255) NOT NULL,
-        last_name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) NOT NULL,
-        phone VARCHAR(50),
-        responder_type VARCHAR(255),
-        employer_agency VARCHAR(255),
-        buying_timeline VARCHAR(100),
-        message TEXT,
-        source_page VARCHAR(255),
-        utm_source VARCHAR(100),
-        utm_medium VARCHAR(100),
-        utm_campaign VARCHAR(100),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS market_report_submissions (
+          id SERIAL PRIMARY KEY,
+          first_name VARCHAR(255) NOT NULL,
+          last_name VARCHAR(255) NOT NULL,
+          email VARCHAR(255) NOT NULL,
+          phone VARCHAR(50),
+          area VARCHAR(100),
+          source_page VARCHAR(255),
+          utm_source VARCHAR(100),
+          utm_medium VARCHAR(100),
+          utm_campaign VARCHAR(100),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
 
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS chfa_dpa_lead_submissions (
-        id SERIAL PRIMARY KEY,
-        first_name VARCHAR(255) NOT NULL,
-        last_name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) NOT NULL,
-        phone VARCHAR(50),
-        buyer_status VARCHAR(255),
-        target_county VARCHAR(255),
-        buying_timeline VARCHAR(100),
-        message TEXT,
-        source_page VARCHAR(255),
-        utm_source VARCHAR(100),
-        utm_medium VARCHAR(100),
-        utm_campaign VARCHAR(100),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS chfa_lead_submissions (
+          id SERIAL PRIMARY KEY,
+          first_name VARCHAR(255) NOT NULL,
+          last_name VARCHAR(255) NOT NULL,
+          email VARCHAR(255) NOT NULL,
+          phone VARCHAR(50),
+          school_employer VARCHAR(255),
+          buying_timeline VARCHAR(100),
+          message TEXT,
+          source_page VARCHAR(255),
+          utm_source VARCHAR(100),
+          utm_medium VARCHAR(100),
+          utm_campaign VARCHAR(100),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
 
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS ghope_lead_submissions (
-        id SERIAL PRIMARY KEY,
-        first_name VARCHAR(255) NOT NULL,
-        last_name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) NOT NULL,
-        phone VARCHAR(50),
-        employer_name VARCHAR(255),
-        target_zone VARCHAR(255),
-        buying_timeline VARCHAR(100),
-        message TEXT,
-        source_page VARCHAR(255),
-        utm_source VARCHAR(100),
-        utm_medium VARCHAR(100),
-        utm_campaign VARCHAR(100),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS champions_lead_submissions (
+          id SERIAL PRIMARY KEY,
+          first_name VARCHAR(255) NOT NULL,
+          last_name VARCHAR(255) NOT NULL,
+          email VARCHAR(255) NOT NULL,
+          phone VARCHAR(50),
+          responder_type VARCHAR(255),
+          employer_agency VARCHAR(255),
+          buying_timeline VARCHAR(100),
+          message TEXT,
+          source_page VARCHAR(255),
+          utm_source VARCHAR(100),
+          utm_medium VARCHAR(100),
+          utm_campaign VARCHAR(100),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
 
-    await client.query(`
-      ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS source_page VARCHAR(255);
-      ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS utm_source VARCHAR(100);
-      ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS utm_medium VARCHAR(100);
-      ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS utm_campaign VARCHAR(100);
-      ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS source_page VARCHAR(255);
-      ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS utm_source VARCHAR(100);
-      ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS utm_medium VARCHAR(100);
-      ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS utm_campaign VARCHAR(100);
-      ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS source_page VARCHAR(255);
-      ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS utm_source VARCHAR(100);
-      ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS utm_medium VARCHAR(100);
-      ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS utm_campaign VARCHAR(100);
-    `);
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS chfa_dpa_lead_submissions (
+          id SERIAL PRIMARY KEY,
+          first_name VARCHAR(255) NOT NULL,
+          last_name VARCHAR(255) NOT NULL,
+          email VARCHAR(255) NOT NULL,
+          phone VARCHAR(50),
+          buyer_status VARCHAR(255),
+          target_county VARCHAR(255),
+          buying_timeline VARCHAR(100),
+          message TEXT,
+          source_page VARCHAR(255),
+          utm_source VARCHAR(100),
+          utm_medium VARCHAR(100),
+          utm_campaign VARCHAR(100),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
 
-      // ---- Saved-search / follow-up engine (Aug 2026) ----
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS ghope_lead_submissions (
+          id SERIAL PRIMARY KEY,
+          first_name VARCHAR(255) NOT NULL,
+          last_name VARCHAR(255) NOT NULL,
+          email VARCHAR(255) NOT NULL,
+          phone VARCHAR(50),
+          employer_name VARCHAR(255),
+          target_zone VARCHAR(255),
+          buying_timeline VARCHAR(100),
+          message TEXT,
+          source_page VARCHAR(255),
+          utm_source VARCHAR(100),
+          utm_medium VARCHAR(100),
+          utm_campaign VARCHAR(100),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+
+      await client.query(`
+        ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS source_page VARCHAR(255);
+        ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS utm_source VARCHAR(100);
+        ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS utm_medium VARCHAR(100);
+        ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS utm_campaign VARCHAR(100);
+        ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS source_page VARCHAR(255);
+        ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS utm_source VARCHAR(100);
+        ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS utm_medium VARCHAR(100);
+        ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS utm_campaign VARCHAR(100);
+        ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS source_page VARCHAR(255);
+        ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS utm_source VARCHAR(100);
+        ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS utm_medium VARCHAR(100);
+        ALTER TABLE chfa_lead_submissions ADD COLUMN IF NOT EXISTS utm_campaign VARCHAR(100);
+      `);
+    });
+
+    // ---- Saved-search / follow-up engine (Aug 2026) ----
+    await step('002_saved_search_engine', async () => {
       await client.query(`
         CREATE TABLE IF NOT EXISTS users (
           id SERIAL PRIMARY KEY,
@@ -198,7 +274,9 @@ export const runMigrations = async () => {
         ALTER TABLE saved_searches ADD COLUMN IF NOT EXISTS send_time VARCHAR(5) DEFAULT '06:00';
         ALTER TABLE saved_searches ADD COLUMN IF NOT EXISTS send_day VARCHAR(10) DEFAULT 'Monday';
       `);
+    });
 
+    await step('003_users_auth_columns', async () => {
       await client.query(`
         ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(50);
       `);
@@ -207,14 +285,18 @@ export const runMigrations = async () => {
         ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255);
         ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(16) DEFAULT 'client';
       `);
+    });
 
-      // Lead score (Scout Score-style) — computed from real engagement signals
+    // Lead score (Scout Score-style) — computed from real engagement signals
+    await step('004_users_lead_score', async () => {
       await client.query(`
         ALTER TABLE users ADD COLUMN IF NOT EXISTS lead_score INTEGER DEFAULT 0;
         ALTER TABLE users ADD COLUMN IF NOT EXISTS lead_score_updated_at TIMESTAMP;
       `);
+    });
 
-      // Property views for lead scoring + digest personalization
+    // Property views for lead scoring + digest personalization
+    await step('005_property_views', async () => {
       await client.query(`
         CREATE TABLE IF NOT EXISTS property_views (
           id SERIAL PRIMARY KEY,
@@ -227,8 +309,10 @@ export const runMigrations = async () => {
         CREATE INDEX IF NOT EXISTS idx_property_views_user ON property_views(user_id, viewed_at DESC);
         CREATE INDEX IF NOT EXISTS idx_property_views_user_listing ON property_views(user_id, listing_id);
       `);
+    });
 
-      // Lightweight activity events (chat_opened, etc.) for lead scoring
+    // Lightweight activity events (chat_opened, etc.) for lead scoring
+    await step('006_user_events', async () => {
       await client.query(`
         CREATE TABLE IF NOT EXISTS user_events (
           id SERIAL PRIMARY KEY,
@@ -241,7 +325,9 @@ export const runMigrations = async () => {
       await client.query(`
         CREATE INDEX IF NOT EXISTS idx_user_events_user ON user_events(user_id, event_type, created_at DESC);
       `);
+    });
 
+    await step('007_showing_requests', async () => {
       await client.query(`
         CREATE TABLE IF NOT EXISTS showing_requests (
           id SERIAL PRIMARY KEY,
@@ -257,7 +343,9 @@ export const runMigrations = async () => {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
+    });
 
+    await step('008_email_outbox', async () => {
       await client.query(`
         CREATE TABLE IF NOT EXISTS email_outbox (
           id SERIAL PRIMARY KEY,
@@ -268,115 +356,123 @@ export const runMigrations = async () => {
           sent_at TIMESTAMP
         )
       `);
+    });
 
-    await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_contact_submissions_email ON contact_submissions(email);
-      CREATE INDEX IF NOT EXISTS idx_contact_submissions_created_at ON contact_submissions(created_at);
-      CREATE INDEX IF NOT EXISTS idx_market_report_submissions_email ON market_report_submissions(email);
-      CREATE INDEX IF NOT EXISTS idx_market_report_submissions_created_at ON market_report_submissions(created_at);
-      CREATE INDEX IF NOT EXISTS idx_chfa_lead_submissions_email ON chfa_lead_submissions(email);
-      CREATE INDEX IF NOT EXISTS idx_chfa_lead_submissions_created_at ON chfa_lead_submissions(created_at);
-      CREATE INDEX IF NOT EXISTS idx_champions_lead_submissions_email ON champions_lead_submissions(email);
-      CREATE INDEX IF NOT EXISTS idx_champions_lead_submissions_created_at ON champions_lead_submissions(created_at);
-      CREATE INDEX IF NOT EXISTS idx_chfa_dpa_lead_submissions_email ON chfa_dpa_lead_submissions(email);
-      CREATE INDEX IF NOT EXISTS idx_chfa_dpa_lead_submissions_created_at ON chfa_dpa_lead_submissions(created_at);
-      CREATE INDEX IF NOT EXISTS idx_ghope_lead_submissions_email ON ghope_lead_submissions(email);
-      CREATE INDEX IF NOT EXISTS idx_ghope_lead_submissions_created_at ON ghope_lead_submissions(created_at);
-    `);
+    await step('009_lead_form_indexes', async () => {
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_contact_submissions_email ON contact_submissions(email);
+        CREATE INDEX IF NOT EXISTS idx_contact_submissions_created_at ON contact_submissions(created_at);
+        CREATE INDEX IF NOT EXISTS idx_market_report_submissions_email ON market_report_submissions(email);
+        CREATE INDEX IF NOT EXISTS idx_market_report_submissions_created_at ON market_report_submissions(created_at);
+        CREATE INDEX IF NOT EXISTS idx_chfa_lead_submissions_email ON chfa_lead_submissions(email);
+        CREATE INDEX IF NOT EXISTS idx_chfa_lead_submissions_created_at ON chfa_lead_submissions(created_at);
+        CREATE INDEX IF NOT EXISTS idx_champions_lead_submissions_email ON champions_lead_submissions(email);
+        CREATE INDEX IF NOT EXISTS idx_champions_lead_submissions_created_at ON champions_lead_submissions(created_at);
+        CREATE INDEX IF NOT EXISTS idx_chfa_dpa_lead_submissions_email ON chfa_dpa_lead_submissions(email);
+        CREATE INDEX IF NOT EXISTS idx_chfa_dpa_lead_submissions_created_at ON chfa_dpa_lead_submissions(created_at);
+        CREATE INDEX IF NOT EXISTS idx_ghope_lead_submissions_email ON ghope_lead_submissions(email);
+        CREATE INDEX IF NOT EXISTS idx_ghope_lead_submissions_created_at ON ghope_lead_submissions(created_at);
+      `);
+    });
 
     // ── IDX listings (IRES feed) ──────────────────────────────────────────
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS listings (
-        id SERIAL PRIMARY KEY,
-        listing_id VARCHAR(64) NOT NULL UNIQUE,
-        status VARCHAR(32) NOT NULL DEFAULT 'Active',
-        property_type VARCHAR(64),
-        property_subtype VARCHAR(128),
-        home_type VARCHAR(16) DEFAULT 'other',
-        elementary_school VARCHAR(128),
-        middle_school VARCHAR(128),
-        high_school VARCHAR(128),
-        days_on_market INTEGER,
-        price_per_sqft INTEGER,
-        subdivision VARCHAR(255),
-        features JSONB DEFAULT '{}'::jsonb,
-        original_list_price NUMERIC(12,2),
-        price_change_timestamp TIMESTAMPTZ,
-        half_baths NUMERIC(4,1),
-        three_quarter_baths NUMERIC(4,1),
-        above_grade_area NUMERIC(12,1),
-        lot_size_acres NUMERIC(12,2),
-        units_total INTEGER,
-        photos_count INTEGER,
-        school_district VARCHAR(255),
-        street_number VARCHAR(32),
-        street_name VARCHAR(255),
-        unit VARCHAR(32),
-        city VARCHAR(100),
-        state VARCHAR(2),
-        postal_code VARCHAR(16),
-        county VARCHAR(100),
-        list_price NUMERIC(12,2),
-        beds NUMERIC(4,1),
-        baths NUMERIC(4,1),
-        living_area NUMERIC(10,1),
-        lot_size NUMERIC(12,1),
-        year_built INTEGER,
-        garage_spaces NUMERIC(4,1),
-        hoa_fee NUMERIC(10,2),
-        description TEXT,
-        photos JSONB NOT NULL DEFAULT '[]'::jsonb,
-        latitude NUMERIC(10,7),
-        longitude NUMERIC(10,7),
-        listing_url TEXT,
-        mls_source VARCHAR(32) DEFAULT 'IRES',
-        raw JSONB,
-        slug VARCHAR(255),
-        is_active BOOLEAN NOT NULL DEFAULT TRUE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        last_seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    await step('010_listings_table', async () => {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS listings (
+          id SERIAL PRIMARY KEY,
+          listing_id VARCHAR(64) NOT NULL UNIQUE,
+          status VARCHAR(32) NOT NULL DEFAULT 'Active',
+          property_type VARCHAR(64),
+          property_subtype VARCHAR(128),
+          home_type VARCHAR(16) DEFAULT 'other',
+          elementary_school VARCHAR(128),
+          middle_school VARCHAR(128),
+          high_school VARCHAR(128),
+          days_on_market INTEGER,
+          price_per_sqft INTEGER,
+          subdivision VARCHAR(255),
+          features JSONB DEFAULT '{}'::jsonb,
+          original_list_price NUMERIC(12,2),
+          price_change_timestamp TIMESTAMPTZ,
+          half_baths NUMERIC(4,1),
+          three_quarter_baths NUMERIC(4,1),
+          above_grade_area NUMERIC(12,1),
+          lot_size_acres NUMERIC(12,2),
+          units_total INTEGER,
+          photos_count INTEGER,
+          school_district VARCHAR(255),
+          street_number VARCHAR(32),
+          street_name VARCHAR(255),
+          unit VARCHAR(32),
+          city VARCHAR(100),
+          state VARCHAR(2),
+          postal_code VARCHAR(16),
+          county VARCHAR(100),
+          list_price NUMERIC(12,2),
+          beds NUMERIC(4,1),
+          baths NUMERIC(4,1),
+          living_area NUMERIC(10,1),
+          lot_size NUMERIC(12,1),
+          year_built INTEGER,
+          garage_spaces NUMERIC(4,1),
+          hoa_fee NUMERIC(10,2),
+          description TEXT,
+          photos JSONB NOT NULL DEFAULT '[]'::jsonb,
+          latitude NUMERIC(10,7),
+          longitude NUMERIC(10,7),
+          listing_url TEXT,
+          mls_source VARCHAR(32) DEFAULT 'IRES',
+          raw JSONB,
+          slug VARCHAR(255),
+          is_active BOOLEAN NOT NULL DEFAULT TRUE,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          last_seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+    });
 
     // Columns added after the table first shipped. Kept after the CREATE so a
     // fresh database (staging, tests, a new tenant) can be built from nothing.
-    await client.query(`
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS property_subtype VARCHAR(128);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS home_type VARCHAR(16) DEFAULT 'other';
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS elementary_school VARCHAR(128);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS middle_school VARCHAR(128);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS high_school VARCHAR(128);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS days_on_market INTEGER;
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS price_per_sqft INTEGER;
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS subdivision VARCHAR(255);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS features JSONB DEFAULT '{}'::jsonb;
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS original_list_price NUMERIC(12,2);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS price_change_timestamp TIMESTAMPTZ;
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS half_baths NUMERIC(4,1);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS three_quarter_baths NUMERIC(4,1);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS above_grade_area NUMERIC(12,1);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS lot_size_acres NUMERIC(12,2);
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS units_total INTEGER;
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS photos_count INTEGER;
-      ALTER TABLE listings ADD COLUMN IF NOT EXISTS school_district VARCHAR(255);
-    `);
+    await step('011_listings_later_columns', async () => {
+      await client.query(`
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS property_subtype VARCHAR(128);
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS home_type VARCHAR(16) DEFAULT 'other';
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS elementary_school VARCHAR(128);
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS middle_school VARCHAR(128);
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS high_school VARCHAR(128);
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS days_on_market INTEGER;
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS price_per_sqft INTEGER;
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS subdivision VARCHAR(255);
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS features JSONB DEFAULT '{}'::jsonb;
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS original_list_price NUMERIC(12,2);
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS price_change_timestamp TIMESTAMPTZ;
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS half_baths NUMERIC(4,1);
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS three_quarter_baths NUMERIC(4,1);
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS above_grade_area NUMERIC(12,1);
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS lot_size_acres NUMERIC(12,2);
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS units_total INTEGER;
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS photos_count INTEGER;
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS school_district VARCHAR(255);
+      `);
+    });
 
-    await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_listings_status ON listings(status);
-      CREATE INDEX IF NOT EXISTS idx_listings_city ON listings(city);
-      CREATE INDEX IF NOT EXISTS idx_listings_price ON listings(list_price);
-      CREATE INDEX IF NOT EXISTS idx_listings_status_city ON listings(status, city);
-      CREATE INDEX IF NOT EXISTS idx_listings_updated_at ON listings(updated_at);
-      CREATE INDEX IF NOT EXISTS idx_listings_slug ON listings(slug);
-    `);
+    await step('012_listings_indexes', async () => {
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_listings_status ON listings(status);
+        CREATE INDEX IF NOT EXISTS idx_listings_city ON listings(city);
+        CREATE INDEX IF NOT EXISTS idx_listings_price ON listings(list_price);
+        CREATE INDEX IF NOT EXISTS idx_listings_status_city ON listings(status, city);
+        CREATE INDEX IF NOT EXISTS idx_listings_updated_at ON listings(updated_at);
+        CREATE INDEX IF NOT EXISTS idx_listings_slug ON listings(slug);
+      `);
+    });
 
     // ── Assumable loan flag (It 32b) ─────────────────────────────────────
     // IRES has no structured loan field. Public remarks text is the signal
     // (description ILIKE '%assum%'). Guarded + additive so Railway deploys
     // never fail on the existing table.
-    await client.query('SAVEPOINT assumable_col');
-    try {
+    await step('013_listings_assumable', async () => {
       await client.query(`
         ALTER TABLE listings ADD COLUMN IF NOT EXISTS assumable BOOLEAN;
       `);
@@ -390,339 +486,372 @@ export const runMigrations = async () => {
           ON listings (assumable)
           WHERE assumable IS TRUE
       `);
-      await client.query('RELEASE SAVEPOINT assumable_col');
-    } catch (assumableErr) {
-      await client.query('ROLLBACK TO SAVEPOINT assumable_col');
-      console.error('assumable column migration skipped:', assumableErr.message);
-    }
+    });
 
     // ── GreatSchools ratings cache (weekly sync, not listings sync) ─────
     // Ratings come ONLY from live JSON-LD on greatschools.org city pages.
     // Never hardcode/fabricate. Attribution required on every display.
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS school_ratings (
-        id SERIAL PRIMARY KEY,
-        school_name VARCHAR(255) NOT NULL,
-        city VARCHAR(100) NOT NULL,
-        city_slug VARCHAR(100) NOT NULL,
-        rating SMALLINT,
-        review_rating NUMERIC(3,2),
-        review_count INTEGER,
-        url TEXT,
-        level VARCHAR(32),
-        fetched_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        UNIQUE (school_name, city_slug)
-      )
-    `);
-    await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_school_ratings_city ON school_ratings(city_slug);
-      CREATE INDEX IF NOT EXISTS idx_school_ratings_name ON school_ratings(school_name);
-      CREATE INDEX IF NOT EXISTS idx_school_ratings_rating ON school_ratings(rating DESC NULLS LAST);
-    `);
+    await step('014_school_ratings', async () => {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS school_ratings (
+          id SERIAL PRIMARY KEY,
+          school_name VARCHAR(255) NOT NULL,
+          city VARCHAR(100) NOT NULL,
+          city_slug VARCHAR(100) NOT NULL,
+          rating SMALLINT,
+          review_rating NUMERIC(3,2),
+          review_count INTEGER,
+          url TEXT,
+          level VARCHAR(32),
+          fetched_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          UNIQUE (school_name, city_slug)
+        )
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_school_ratings_city ON school_ratings(city_slug);
+        CREATE INDEX IF NOT EXISTS idx_school_ratings_name ON school_ratings(school_name);
+        CREATE INDEX IF NOT EXISTS idx_school_ratings_rating ON school_ratings(rating DESC NULLS LAST);
+      `);
+    });
 
     // ── Seller nurture track (It 11) ─────────────────────────────────────
     // Intent on signup routes buyers/sellers to the right nurture track
-    await client.query(`
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS intent VARCHAR(16);
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS seller_heat BOOLEAN DEFAULT FALSE;
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS seller_heat_at TIMESTAMP;
-    `);
+    await step('015_users_seller_intent', async () => {
+      await client.query(`
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS intent VARCHAR(16);
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS seller_heat BOOLEAN DEFAULT FALSE;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS seller_heat_at TIMESTAMP;
+      `);
+    });
 
     // Home profile — one (or more) owned homes for seller value updates
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS home_profiles (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        address_line VARCHAR(255) NOT NULL,
-        unit VARCHAR(32),
-        city VARCHAR(100),
-        state VARCHAR(2) DEFAULT 'CO',
-        postal_code VARCHAR(16),
-        beds NUMERIC(4,1),
-        baths NUMERIC(4,1),
-        living_area NUMERIC(10,1),
-        year_built INTEGER,
-        zpid VARCHAR(32),
-        our_estimate_low INTEGER,
-        our_estimate_mid INTEGER,
-        our_estimate_high INTEGER,
-        our_estimate_label TEXT,
-        our_estimate_at TIMESTAMP,
-        market_estimate_mid INTEGER,
-        market_estimates JSONB DEFAULT '{}'::jsonb,
-        chart_series JSONB,
-        last_value_view_at TIMESTAMP,
-        value_view_count INTEGER NOT NULL DEFAULT 0,
-        accuracy_signal VARCHAR(32),
-        value_updates_enabled BOOLEAN NOT NULL DEFAULT TRUE,
-        last_digest_at TIMESTAMP,
-        last_digest_value INTEGER,
-        seller_heat BOOLEAN NOT NULL DEFAULT FALSE,
-        meta JSONB DEFAULT '{}'::jsonb,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_home_profiles_user ON home_profiles(user_id);
-      CREATE INDEX IF NOT EXISTS idx_home_profiles_zip ON home_profiles(postal_code);
-      CREATE INDEX IF NOT EXISTS idx_home_profiles_digest
-        ON home_profiles(value_updates_enabled, last_digest_at)
-        WHERE value_updates_enabled = TRUE;
-    `);
+    await step('016_home_profiles', async () => {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS home_profiles (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          address_line VARCHAR(255) NOT NULL,
+          unit VARCHAR(32),
+          city VARCHAR(100),
+          state VARCHAR(2) DEFAULT 'CO',
+          postal_code VARCHAR(16),
+          beds NUMERIC(4,1),
+          baths NUMERIC(4,1),
+          living_area NUMERIC(10,1),
+          year_built INTEGER,
+          zpid VARCHAR(32),
+          our_estimate_low INTEGER,
+          our_estimate_mid INTEGER,
+          our_estimate_high INTEGER,
+          our_estimate_label TEXT,
+          our_estimate_at TIMESTAMP,
+          market_estimate_mid INTEGER,
+          market_estimates JSONB DEFAULT '{}'::jsonb,
+          chart_series JSONB,
+          last_value_view_at TIMESTAMP,
+          value_view_count INTEGER NOT NULL DEFAULT 0,
+          accuracy_signal VARCHAR(32),
+          value_updates_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+          last_digest_at TIMESTAMP,
+          last_digest_value INTEGER,
+          seller_heat BOOLEAN NOT NULL DEFAULT FALSE,
+          meta JSONB DEFAULT '{}'::jsonb,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_home_profiles_user ON home_profiles(user_id);
+        CREATE INDEX IF NOT EXISTS idx_home_profiles_zip ON home_profiles(postal_code);
+        CREATE INDEX IF NOT EXISTS idx_home_profiles_digest
+          ON home_profiles(value_updates_enabled, last_digest_at)
+          WHERE value_updates_enabled = TRUE;
+      `);
+    });
 
     // Licensed AVM/API response cache — NEVER call ReefAPI inline without this
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS zillow_api_cache (
-        id SERIAL PRIMARY KEY,
-        provider VARCHAR(32) NOT NULL,
-        endpoint VARCHAR(64) NOT NULL,
-        params_hash VARCHAR(64) NOT NULL,
-        payload JSONB NOT NULL,
-        credits_used INTEGER NOT NULL DEFAULT 0,
-        fetched_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE (provider, endpoint, params_hash)
-      )
-    `);
-    await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_zillow_api_cache_lookup
-        ON zillow_api_cache(provider, endpoint, params_hash);
-      CREATE INDEX IF NOT EXISTS idx_zillow_api_cache_fetched
-        ON zillow_api_cache(fetched_at);
-    `);
+    await step('017_zillow_api_cache', async () => {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS zillow_api_cache (
+          id SERIAL PRIMARY KEY,
+          provider VARCHAR(32) NOT NULL,
+          endpoint VARCHAR(64) NOT NULL,
+          params_hash VARCHAR(64) NOT NULL,
+          payload JSONB NOT NULL,
+          credits_used INTEGER NOT NULL DEFAULT 0,
+          fetched_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE (provider, endpoint, params_hash)
+        )
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_zillow_api_cache_lookup
+          ON zillow_api_cache(provider, endpoint, params_hash);
+        CREATE INDEX IF NOT EXISTS idx_zillow_api_cache_fetched
+          ON zillow_api_cache(fetched_at);
+      `);
+    });
 
     // Monthly credit counter — hard stop at 90% of free allowance (900/1000)
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS api_credit_usage (
-        id SERIAL PRIMARY KEY,
-        provider VARCHAR(32) NOT NULL,
-        year_month VARCHAR(7) NOT NULL,
-        credits_used INTEGER NOT NULL DEFAULT 0,
-        last_flagged_at TIMESTAMP,
-        notes TEXT,
-        UNIQUE (provider, year_month)
-      )
-    `);
+    await step('018_api_credit_usage', async () => {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS api_credit_usage (
+          id SERIAL PRIMARY KEY,
+          provider VARCHAR(32) NOT NULL,
+          year_month VARCHAR(7) NOT NULL,
+          credits_used INTEGER NOT NULL DEFAULT 0,
+          last_flagged_at TIMESTAMP,
+          notes TEXT,
+          UNIQUE (provider, year_month)
+        )
+      `);
+    });
 
     // Optional address fields on market report submissions (seller track entry)
-    await client.query(`
-      ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS address_line VARCHAR(255);
-      ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS postal_code VARCHAR(16);
-      ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS living_area NUMERIC(10,1);
-      ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS home_profile_id INTEGER;
-    `);
+    await step('019_market_report_address', async () => {
+      await client.query(`
+        ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS address_line VARCHAR(255);
+        ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS postal_code VARCHAR(16);
+        ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS living_area NUMERIC(10,1);
+        ALTER TABLE market_report_submissions ADD COLUMN IF NOT EXISTS home_profile_id INTEGER;
+      `);
+    });
 
     // ── Agent cockpit + FUB write-back (It 12) ───────────────────────────
     // fub_person_id links our users row to Follow Up Boss people.id
     // lifecycle_stage: new → nurturing → showing → active → closed/lost
     // next_touch_at drives the "Due today" follow-up queue
-    await client.query(`
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS fub_person_id INTEGER;
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS lifecycle_stage VARCHAR(32) DEFAULT 'new';
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS lifecycle_stage_manual BOOLEAN DEFAULT FALSE;
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS next_touch_at TIMESTAMP;
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS last_touched_at TIMESTAMP;
-    `);
-    await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_users_fub_person
-        ON users(fub_person_id) WHERE fub_person_id IS NOT NULL;
-      CREATE INDEX IF NOT EXISTS idx_users_next_touch
-        ON users(next_touch_at) WHERE next_touch_at IS NOT NULL;
-      CREATE INDEX IF NOT EXISTS idx_users_lead_score
-        ON users(lead_score DESC NULLS LAST);
-      CREATE INDEX IF NOT EXISTS idx_users_lifecycle
-        ON users(lifecycle_stage);
-    `);
+    await step('020_users_fub_cockpit', async () => {
+      await client.query(`
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS fub_person_id INTEGER;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS lifecycle_stage VARCHAR(32) DEFAULT 'new';
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS lifecycle_stage_manual BOOLEAN DEFAULT FALSE;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS next_touch_at TIMESTAMP;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS last_touched_at TIMESTAMP;
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_users_fub_person
+          ON users(fub_person_id) WHERE fub_person_id IS NOT NULL;
+        CREATE INDEX IF NOT EXISTS idx_users_next_touch
+          ON users(next_touch_at) WHERE next_touch_at IS NOT NULL;
+        CREATE INDEX IF NOT EXISTS idx_users_lead_score
+          ON users(lead_score DESC NULLS LAST);
+        CREATE INDEX IF NOT EXISTS idx_users_lifecycle
+          ON users(lifecycle_stage);
+      `);
+    });
 
     // ── Account-linked saved homes (It 14a) ──────────────────────────────
     // Hearts sync server-side so favorites survive devices / incognito.
     // listing_key = IRES listing_id (stable); denormalized fields for off-market.
     // user_id is INTEGER to match existing users(id) SERIAL PK.
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS saved_homes (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        listing_key TEXT NOT NULL,
-        property_address TEXT,
-        photo_url TEXT,
-        list_price INTEGER,
-        slug TEXT,
-        saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE (user_id, listing_key)
-      )
-    `);
-    await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_saved_homes_user
-        ON saved_homes(user_id, saved_at DESC);
-      CREATE INDEX IF NOT EXISTS idx_saved_homes_listing_key
-        ON saved_homes(listing_key);
-    `);
+    await step('021_saved_homes', async () => {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS saved_homes (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          listing_key TEXT NOT NULL,
+          property_address TEXT,
+          photo_url TEXT,
+          list_price INTEGER,
+          slug TEXT,
+          saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE (user_id, listing_key)
+        )
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_saved_homes_user
+          ON saved_homes(user_id, saved_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_saved_homes_listing_key
+          ON saved_homes(listing_key);
+      `);
+    });
 
     // ── Notification center (It 14.1 / RealScout Phase D) ─────────────────
     // Surfaces nurture events (new matches, price drops, value updates,
     // off-market) to signed-in users so they have a reason to return.
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS notifications (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        type VARCHAR(32) NOT NULL,
-        title TEXT NOT NULL,
-        body TEXT,
-        link TEXT,
-        image_url TEXT,
-        read_at TIMESTAMP,
-        dismissed_at TIMESTAMP,
-        created_at TIMESTAMP DEFAULT NOW()
-      )
-    `);
-    await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_notifications_user_unread
-        ON notifications(user_id, read_at) WHERE read_at IS NULL;
-      CREATE INDEX IF NOT EXISTS idx_notifications_user_created
-        ON notifications(user_id, created_at DESC);
-    `);
+    await step('022_notifications', async () => {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS notifications (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          type VARCHAR(32) NOT NULL,
+          title TEXT NOT NULL,
+          body TEXT,
+          link TEXT,
+          image_url TEXT,
+          read_at TIMESTAMP,
+          dismissed_at TIMESTAMP,
+          created_at TIMESTAMP DEFAULT NOW()
+        )
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_notifications_user_unread
+          ON notifications(user_id, read_at) WHERE read_at IS NULL;
+        CREATE INDEX IF NOT EXISTS idx_notifications_user_created
+          ON notifications(user_id, created_at DESC);
+      `);
+    });
 
     // ── Notification cadence prefs (It 18 / Phase D cadence controls) ────
     // Per-user, per-type frequency. Missing row = code default (not an error).
     // frequency: immediate | daily | weekly | monthly | off
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS notification_prefs (
-        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        type VARCHAR(32) NOT NULL,
-        frequency VARCHAR(16) NOT NULL DEFAULT 'immediate',
-        updated_at TIMESTAMP DEFAULT NOW(),
-        PRIMARY KEY (user_id, type)
-      )
-    `);
-    await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_notification_prefs_user
-        ON notification_prefs(user_id);
-    `);
+    await step('023_notification_prefs', async () => {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS notification_prefs (
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          type VARCHAR(32) NOT NULL,
+          frequency VARCHAR(16) NOT NULL DEFAULT 'immediate',
+          updated_at TIMESTAMP DEFAULT NOW(),
+          PRIMARY KEY (user_id, type)
+        )
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_notification_prefs_user
+          ON notification_prefs(user_id);
+      `);
+    });
 
     // Optional due_at on email_outbox so daily/weekly notification emails
     // can queue until the next send window (null = send ASAP).
-    await client.query(`
-      ALTER TABLE email_outbox ADD COLUMN IF NOT EXISTS due_at TIMESTAMP;
-      ALTER TABLE email_outbox ADD COLUMN IF NOT EXISTS user_id INTEGER;
-      ALTER TABLE email_outbox ADD COLUMN IF NOT EXISTS notification_type VARCHAR(32);
-    `);
-    await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_email_outbox_due
-        ON email_outbox(due_at) WHERE sent_at IS NULL;
-    `);
+    await step('024_email_outbox_due_at', async () => {
+      await client.query(`
+        ALTER TABLE email_outbox ADD COLUMN IF NOT EXISTS due_at TIMESTAMP;
+        ALTER TABLE email_outbox ADD COLUMN IF NOT EXISTS user_id INTEGER;
+        ALTER TABLE email_outbox ADD COLUMN IF NOT EXISTS notification_type VARCHAR(32);
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_email_outbox_due
+          ON email_outbox(due_at) WHERE sent_at IS NULL;
+      `);
+    });
 
     // ── Enrich layer: disposable email block log (P4 / RealScout G4) ─────
     // Fire-and-forget observability when a lead form is rejected for a
     // known throwaway domain. Never blocks capture paths if insert fails.
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS blocked_email_log (
-        id SERIAL PRIMARY KEY,
-        email VARCHAR(255) NOT NULL,
-        domain VARCHAR(255),
-        path VARCHAR(255),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_blocked_email_log_created_at
-        ON blocked_email_log(created_at);
-      CREATE INDEX IF NOT EXISTS idx_blocked_email_log_domain
-        ON blocked_email_log(domain);
-      CREATE INDEX IF NOT EXISTS idx_blocked_email_log_path
-        ON blocked_email_log(path);
-    `);
+    await step('025_blocked_email_log', async () => {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS blocked_email_log (
+          id SERIAL PRIMARY KEY,
+          email VARCHAR(255) NOT NULL,
+          domain VARCHAR(255),
+          path VARCHAR(255),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_blocked_email_log_created_at
+          ON blocked_email_log(created_at);
+        CREATE INDEX IF NOT EXISTS idx_blocked_email_log_domain
+          ON blocked_email_log(domain);
+        CREATE INDEX IF NOT EXISTS idx_blocked_email_log_path
+          ON blocked_email_log(path);
+      `);
+    });
 
     // ── A/B subject lines + open tracking (Phase D / It 19a) ─────────────
     // Nurture digests pick a deterministic subject variant per user; each
     // send logs variant + open_token; public 1×1 pixel increments opens.
-    await client.query(`
-      ALTER TABLE email_log ADD COLUMN IF NOT EXISTS subject_variant VARCHAR(32);
-      ALTER TABLE email_log ADD COLUMN IF NOT EXISTS open_token VARCHAR(64);
-      ALTER TABLE email_log ADD COLUMN IF NOT EXISTS open_count INTEGER NOT NULL DEFAULT 0;
-      ALTER TABLE email_log ADD COLUMN IF NOT EXISTS first_open_at TIMESTAMP;
-      ALTER TABLE email_log ADD COLUMN IF NOT EXISTS last_open_at TIMESTAMP;
-    `);
-    await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_email_log_open_token
-        ON email_log(open_token);
-      CREATE INDEX IF NOT EXISTS idx_email_log_ab_stats
-        ON email_log(type, subject_variant, sent_at);
-    `);
+    await step('026_email_log_open_tracking', async () => {
+      await client.query(`
+        ALTER TABLE email_log ADD COLUMN IF NOT EXISTS subject_variant VARCHAR(32);
+        ALTER TABLE email_log ADD COLUMN IF NOT EXISTS open_token VARCHAR(64);
+        ALTER TABLE email_log ADD COLUMN IF NOT EXISTS open_count INTEGER NOT NULL DEFAULT 0;
+        ALTER TABLE email_log ADD COLUMN IF NOT EXISTS first_open_at TIMESTAMP;
+        ALTER TABLE email_log ADD COLUMN IF NOT EXISTS last_open_at TIMESTAMP;
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_email_log_open_token
+          ON email_log(open_token);
+        CREATE INDEX IF NOT EXISTS idx_email_log_ab_stats
+          ON email_log(type, subject_variant, sent_at);
+      `);
+    });
 
     // ── Multi-agent seats (P-1) — lead ownership within team pool ─────────
     // assigned_agent_id NULL = unassigned / team pool. Agents (role=agent)
     // share all client contacts; this column only tracks who is working it.
-    await client.query(`
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS assigned_agent_id INTEGER REFERENCES users(id) ON DELETE SET NULL;
-    `);
-    await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_users_assigned_agent
-        ON users(assigned_agent_id) WHERE assigned_agent_id IS NOT NULL;
-      CREATE INDEX IF NOT EXISTS idx_users_role
-        ON users(role);
-    `);
+    await step('027_users_assigned_agent', async () => {
+      await client.query(`
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS assigned_agent_id INTEGER REFERENCES users(id) ON DELETE SET NULL;
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_users_assigned_agent
+          ON users(assigned_agent_id) WHERE assigned_agent_id IS NOT NULL;
+        CREATE INDEX IF NOT EXISTS idx_users_role
+          ON users(role);
+      `);
+    });
 
     // ── White-label / tenant brand (P-2) — per-agent brand + email voice ──
     // NULL brand fields → fall back to marketPack (SAA / NoCO defaults).
     // voice_style: warm | professional | short (fixed email templates only).
-    await client.query(`
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_name VARCHAR(120);
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS brokerage_name VARCHAR(120);
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_phone VARCHAR(30);
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS voice_style VARCHAR(16) DEFAULT 'warm';
-    `);
+    await step('028_users_brand', async () => {
+      await client.query(`
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_name VARCHAR(120);
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS brokerage_name VARCHAR(120);
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_phone VARCHAR(30);
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS voice_style VARCHAR(16) DEFAULT 'warm';
+      `);
+    });
 
     // ── Connect CRM + contact import (P-3a) — per-agent FUB key + source ──
     // fub_api_key is NEVER returned in full by any API (mask last 4 only).
     // source on client rows: e.g. 'fub-import' for CRM-imported contacts.
-    await client.query(`
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS fub_api_key TEXT;
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS fub_last_import_at TIMESTAMP;
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS source VARCHAR(64);
-    `);
-    await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_users_source
-        ON users(source) WHERE source IS NOT NULL;
-    `);
+    await step('029_users_fub_key', async () => {
+      await client.query(`
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS fub_api_key TEXT;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS fub_last_import_at TIMESTAMP;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS source VARCHAR(64);
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_users_source
+          ON users(source) WHERE source IS NOT NULL;
+      `);
+    });
 
     // ── Wire website forms (P-3b) — per-agent public capture slug ──────────
     // webform_slug is the public identifier for POST /api/webform/lead.
     // Unique only when set; never expose fub_api_key via this surface.
-    await client.query(`
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS webform_slug TEXT;
-    `);
-    await client.query(`
-      CREATE UNIQUE INDEX IF NOT EXISTS idx_users_webform_slug
-        ON users(webform_slug) WHERE webform_slug IS NOT NULL;
-    `);
+    await step('030_users_webform_slug', async () => {
+      await client.query(`
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS webform_slug TEXT;
+      `);
+      await client.query(`
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_users_webform_slug
+          ON users(webform_slug) WHERE webform_slug IS NOT NULL;
+      `);
+    });
 
     // ── Market content pack (P-4) — per-agent market_key ───────────────────
     // Sparse enum: 'noco' today; NULL/unknown → getMarketPack falls back to
     // NoCO. No index (low cardinality / sparse admin writes only).
-    await client.query(`
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS market_key VARCHAR(32);
-    `);
+    await step('031_users_market_key', async () => {
+      await client.query(`
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS market_key VARCHAR(32);
+      `);
+    });
 
     // ── Custom domains (P-2b) — per-agent branded hostname ─────────────────
     // custom_domain is a normalized hostname (no scheme/path). Verification
     // is REAL DNS TXT only (saa-verify=<token>); domain_verified_at is set
     // solely by a successful lookup. Unique among verified domains so two
     // agents cannot claim the same host. Unverified rows may collide.
-    await client.query(`
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS custom_domain VARCHAR(255);
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS domain_verified_at TIMESTAMPTZ;
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS domain_verify_token VARCHAR(64);
-    `);
-    await client.query(`
-      CREATE UNIQUE INDEX IF NOT EXISTS idx_users_custom_domain_verified
-        ON users (custom_domain)
-        WHERE custom_domain IS NOT NULL AND domain_verified_at IS NOT NULL;
-    `);
+    await step('032_users_custom_domain', async () => {
+      await client.query(`
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS custom_domain VARCHAR(255);
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS domain_verified_at TIMESTAMPTZ;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS domain_verify_token VARCHAR(64);
+      `);
+      await client.query(`
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_users_custom_domain_verified
+          ON users (custom_domain)
+          WHERE custom_domain IS NOT NULL AND domain_verified_at IS NOT NULL;
+      `);
+    });
 
     // ── Sold / closed listings (It 41) ───────────────────────────────────
     // MLS Grid Closed rows only. Never invent sold_price / closed_date.
-    await client.query('SAVEPOINT sold_listings_table');
-    try {
+    await step('033_sold_listings', async () => {
       await client.query(`
         CREATE TABLE IF NOT EXISTS sold_listings (
           listing_id VARCHAR(64) PRIMARY KEY,
@@ -765,19 +894,14 @@ export const runMigrations = async () => {
         CREATE INDEX IF NOT EXISTS idx_sold_listings_city_closed
           ON sold_listings(city, closed_date DESC);
       `);
-      await client.query('RELEASE SAVEPOINT sold_listings_table');
-    } catch (soldErr) {
-      await client.query('ROLLBACK TO SAVEPOINT sold_listings_table');
-      console.error('sold_listings migration skipped:', soldErr.message);
-    }
+    });
 
     // ── Platform foundation (Phase 1) ─────────────────────────────────────
     // Shared by search, Nadia and the CRM: tenants (SAA is tenant 1), a tenant
     // id on every client table, households, one event stream and a consent
     // log. Savepoint so a problem here can never roll back the migrations
     // above on a production deploy.
-    await client.query('SAVEPOINT platform_foundation');
-    try {
+    await step('034_platform_foundation', async () => {
       await client.query(`
         CREATE TABLE IF NOT EXISTS tenants (
           id SERIAL PRIMARY KEY,
@@ -849,15 +973,10 @@ export const runMigrations = async () => {
         );
         CREATE INDEX IF NOT EXISTS idx_contact_consents_user ON contact_consents(user_id, channel, created_at DESC);
       `);
-      await client.query('RELEASE SAVEPOINT platform_foundation');
-    } catch (foundationErr) {
-      await client.query('ROLLBACK TO SAVEPOINT platform_foundation');
-      console.error('platform foundation migration skipped:', foundationErr.message);
-    }
+    });
 
     // ── Installable app + web push ───────────────────────────────────────
-    await client.query('SAVEPOINT web_push');
-    try {
+    await step('035_web_push', async () => {
       await client.query(`
         CREATE TABLE IF NOT EXISTS app_settings (
           key VARCHAR(64) PRIMARY KEY,
@@ -892,17 +1011,12 @@ export const runMigrations = async () => {
         ALTER TABLE saved_searches ADD COLUMN IF NOT EXISTS push_cursor_at TIMESTAMP;
         ALTER TABLE users ADD COLUMN IF NOT EXISTS fub_lead_score_synced INTEGER;
       `);
-      await client.query('RELEASE SAVEPOINT web_push');
-    } catch (pushErr) {
-      await client.query('ROLLBACK TO SAVEPOINT web_push');
-      console.error('web push migration skipped:', pushErr.message);
-    }
+    });
 
     // ── Reactions and taste profile (Phase 2) ───────────────────────────
     // Love / Maybe / Not for me on any home, with a private note. Love and
     // Maybe also keep the home on the saved list; Not for me hides it.
-    await client.query('SAVEPOINT home_reactions');
-    try {
+    await step('036_home_reactions', async () => {
       await client.query(`
         CREATE TABLE IF NOT EXISTS home_reactions (
           id SERIAL PRIMARY KEY,
@@ -917,17 +1031,12 @@ export const runMigrations = async () => {
         );
         CREATE INDEX IF NOT EXISTS idx_home_reactions_pass ON home_reactions(user_id) WHERE reaction = 'pass';
       `);
-      await client.query('RELEASE SAVEPOINT home_reactions');
-    } catch (reactionErr) {
-      await client.query('ROLLBACK TO SAVEPOINT home_reactions');
-      console.error('home reactions migration skipped:', reactionErr.message);
-    }
+    });
 
     // ── Household boards (Phase 2) ───────────────────────────────────────
     // A buyer invites a co-buyer by email; the household shares one board of
     // saved homes with comments. Invite tokens are stored hashed.
-    await client.query('SAVEPOINT household_boards');
-    try {
+    await step('037_household_boards', async () => {
       await client.query(`
         CREATE TABLE IF NOT EXISTS household_invites (
           id SERIAL PRIMARY KEY,
@@ -955,15 +1064,10 @@ export const runMigrations = async () => {
         );
         CREATE INDEX IF NOT EXISTS idx_home_comments_board ON home_comments(household_id, listing_key, created_at);
       `);
-      await client.query('RELEASE SAVEPOINT household_boards');
-    } catch (boardErr) {
-      await client.query('ROLLBACK TO SAVEPOINT household_boards');
-      console.error('household boards migration skipped:', boardErr.message);
-    }
+    });
 
     // ── Tour planner (Phase 2) ───────────────────────────────────────────
-    await client.query('SAVEPOINT tour_requests');
-    try {
+    await step('038_tour_requests', async () => {
       await client.query(`
         CREATE TABLE IF NOT EXISTS tour_requests (
           id SERIAL PRIMARY KEY,
@@ -980,15 +1084,10 @@ export const runMigrations = async () => {
         );
         CREATE INDEX IF NOT EXISTS idx_tour_requests_user ON tour_requests(user_id, created_at DESC);
       `);
-      await client.query('RELEASE SAVEPOINT tour_requests');
-    } catch (tourErr) {
-      await client.query('ROLLBACK TO SAVEPOINT tour_requests');
-      console.error('tour requests migration skipped:', tourErr.message);
-    }
+    });
 
     // ── Agent morning brief ──────────────────────────────────────────────
-    await client.query('SAVEPOINT morning_briefs');
-    try {
+    await step('039_morning_briefs', async () => {
       await client.query(`
         ALTER TABLE users ADD COLUMN IF NOT EXISTS morning_brief BOOLEAN NOT NULL DEFAULT TRUE;
         CREATE TABLE IF NOT EXISTS morning_briefs (
@@ -1000,15 +1099,10 @@ export const runMigrations = async () => {
           UNIQUE (agent_id, brief_date)
         );
       `);
-      await client.query('RELEASE SAVEPOINT morning_briefs');
-    } catch (briefErr) {
-      await client.query('ROLLBACK TO SAVEPOINT morning_briefs');
-      console.error('morning brief migration skipped:', briefErr.message);
-    }
+    });
 
     // ── Lead submit leg log (GA4 / FUB / notify evidence per submit) ──────
-    await client.query('SAVEPOINT lead_submit_log');
-    try {
+    await step('040_lead_submit_log', async () => {
       await client.query(`
         CREATE TABLE IF NOT EXISTS lead_submit_log (
           id SERIAL PRIMARY KEY,
@@ -1041,11 +1135,7 @@ export const runMigrations = async () => {
         CREATE INDEX IF NOT EXISTS idx_lead_submit_log_submission ON lead_submit_log(lead_type, submission_id);
         CREATE INDEX IF NOT EXISTS idx_lead_submit_log_email ON lead_submit_log(LOWER(email));
       `);
-      await client.query('RELEASE SAVEPOINT lead_submit_log');
-    } catch (logErr) {
-      await client.query('ROLLBACK TO SAVEPOINT lead_submit_log');
-      console.error('lead submit log migration skipped:', logErr.message);
-    }
+    });
 
     // ── Walls between brokerages ─────────────────────────────────────────
     // Email is unique per brokerage, not across the platform, so the same
@@ -1053,8 +1143,7 @@ export const runMigrations = async () => {
     // Rows that belong to a person, a saved search or a household take their
     // tenant from that parent in the database itself, so no insert can file a
     // row under the wrong brokerage.
-    await client.query('SAVEPOINT tenant_walls');
-    try {
+    await step('041_tenant_walls', async () => {
       for (const table of [
         'contact_submissions', 'market_report_submissions', 'chfa_lead_submissions',
         'champions_lead_submissions', 'chfa_dpa_lead_submissions', 'ghope_lead_submissions',
@@ -1106,16 +1195,11 @@ export const runMigrations = async () => {
           `);
         }
       }
-      await client.query('RELEASE SAVEPOINT tenant_walls');
-    } catch (wallErr) {
-      await client.query('ROLLBACK TO SAVEPOINT tenant_walls');
-      console.error('tenant walls migration skipped:', wallErr.message);
-    }
+    });
 
     // Staff accounts: password reset and invite links (only a hash of the
     // token is stored), and two-step sign-in with an authenticator app.
-    await client.query('SAVEPOINT staff_auth');
-    try {
+    await step('042_staff_auth', async () => {
       await client.query(`
         CREATE TABLE IF NOT EXISTS password_resets (
           id SERIAL PRIMARY KEY,
@@ -1137,17 +1221,12 @@ export const runMigrations = async () => {
         CREATE TRIGGER password_resets_tenant BEFORE INSERT ON password_resets
           FOR EACH ROW EXECUTE FUNCTION tenant_from_parent('users', 'user_id');
       `);
-      await client.query('RELEASE SAVEPOINT staff_auth');
-    } catch (staffErr) {
-      await client.query('ROLLBACK TO SAVEPOINT staff_auth');
-      console.error('staff auth migration skipped:', staffErr.message);
-    }
+    });
 
     // Plug and play: self-serve signup (owner email confirmation), the
     // once-per-home "viewed 3 times" Follow Up Boss note, and Follow Up Boss
     // webhook deliveries already handled (FUB retries until it gets a 2xx).
-    await client.query('SAVEPOINT plug_and_play');
-    try {
+    await step('043_plug_and_play', async () => {
       await client.query(`
         ALTER TABLE users ADD COLUMN IF NOT EXISTS email_confirmed_at TIMESTAMPTZ;
         CREATE TABLE IF NOT EXISTS fub_view_notes (
@@ -1170,15 +1249,10 @@ export const runMigrations = async () => {
         );
         CREATE INDEX IF NOT EXISTS idx_fub_webhook_events_tenant ON fub_webhook_events(tenant_id, received_at DESC);
       `);
-      await client.query('RELEASE SAVEPOINT plug_and_play');
-    } catch (plugErr) {
-      await client.query('ROLLBACK TO SAVEPOINT plug_and_play');
-      console.error('plug and play migration skipped:', plugErr.message);
-    }
+    });
 
     // Brokerage brand files (logo, app icon, agent photos) and agent profiles.
-    await client.query('SAVEPOINT brand_settings');
-    try {
+    await step('044_brand_settings', async () => {
       await client.query(`
         CREATE TABLE IF NOT EXISTS tenant_assets (
           tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
@@ -1194,17 +1268,12 @@ export const runMigrations = async () => {
         ALTER TABLE users ADD COLUMN IF NOT EXISTS license_number VARCHAR(60);
         ALTER TABLE users ADD COLUMN IF NOT EXISTS notify_prefs JSONB NOT NULL DEFAULT '{}'::jsonb;
       `);
-      await client.query('RELEASE SAVEPOINT brand_settings');
-    } catch (brandErr) {
-      await client.query('ROLLBACK TO SAVEPOINT brand_settings');
-      console.error('brand settings migration skipped:', brandErr.message);
-    }
+    });
 
     // MLS feeds: which listing feeds exist, which ones each brokerage is
     // approved to show, and the feed each listing came from. A brokerage
     // with no approved feed sees sample homes only.
-    await client.query('SAVEPOINT mls_feeds');
-    try {
+    await step('045_mls_feeds', async () => {
       await client.query(`
         CREATE TABLE IF NOT EXISTS mls_feeds (
           key VARCHAR(16) PRIMARY KEY,
@@ -1278,27 +1347,17 @@ export const runMigrations = async () => {
         CREATE INDEX IF NOT EXISTS idx_listings_address_key
           ON listings (listing_address_key(street_number, street_name, unit, city));
       `);
-      await client.query('RELEASE SAVEPOINT mls_feeds');
-    } catch (feedErr) {
-      await client.query('ROLLBACK TO SAVEPOINT mls_feeds');
-      console.error('mls feeds migration skipped:', feedErr.message);
-    }
+    });
 
     // Sample homes for brokerages still waiting on their MLS (feed = 'demo').
-    await client.query('SAVEPOINT demo_listings');
-    try {
+    await step('demo_listings_seed', async () => {
       await seedDemoListings(client);
-      await client.query('RELEASE SAVEPOINT demo_listings');
-    } catch (demoErr) {
-      await client.query('ROLLBACK TO SAVEPOINT demo_listings');
-      console.error('sample listings seed skipped:', demoErr.message);
-    }
+    }, { every: true });
 
     // Light CRM in the cockpit: notes, tasks, texts and emails per lead,
     // reply drafts the agent approves, hot-lead alerts, and the per-brokerage
     // text opt-out list. Each row takes its tenant from the lead.
-    await client.query('SAVEPOINT agent_crm');
-    try {
+    await step('046_agent_crm', async () => {
       await client.query(`
         CREATE TABLE IF NOT EXISTS lead_notes (
           id SERIAL PRIMARY KEY,
@@ -1413,17 +1472,12 @@ export const runMigrations = async () => {
             FOR EACH ROW EXECUTE FUNCTION tenant_from_parent('users', 'lead_id');
         `);
       }
-      await client.query('RELEASE SAVEPOINT agent_crm');
-    } catch (crmErr) {
-      await client.query('ROLLBACK TO SAVEPOINT agent_crm');
-      console.error('agent crm migration skipped:', crmErr.message);
-    }
+    });
 
     // Client life after the search (phase 5): closing facts and stay-in-touch
     // emails, seller-intent scores, and the seller dashboard (plan, showing
     // feedback, offers). Every row carries its brokerage.
-    await client.query('SAVEPOINT p5_client_life');
-    try {
+    await step('047_client_life', async () => {
       await client.query(`
         CREATE TABLE IF NOT EXISTS client_closings (
           id SERIAL PRIMARY KEY,
@@ -1571,16 +1625,11 @@ export const runMigrations = async () => {
             FOR EACH ROW EXECUTE FUNCTION tenant_from_parent('seller_plans', 'plan_id');
         `);
       }
-      await client.query('RELEASE SAVEPOINT p5_client_life');
-    } catch (lifeErr) {
-      await client.query('ROLLBACK TO SAVEPOINT p5_client_life');
-      console.error('client life migration skipped:', lifeErr.message);
-    }
+    });
 
     // The MLS's office and agent roster, so "Listing courtesy of …" can name
     // the office when the listing feed only gives its MLS id.
-    await client.query('SAVEPOINT mls_roster');
-    try {
+    await step('048_mls_roster', async () => {
       await client.query(`
         CREATE TABLE IF NOT EXISTS mls_offices (
           feed VARCHAR(16) NOT NULL,
@@ -1610,17 +1659,12 @@ export const runMigrations = async () => {
           PRIMARY KEY (feed, kind)
         )
       `);
-      await client.query('RELEASE SAVEPOINT mls_roster');
-    } catch (rosterErr) {
-      await client.query('ROLLBACK TO SAVEPOINT mls_roster');
-      console.error('mls roster migration skipped:', rosterErr.message);
-    }
+    });
 
     // Running without Follow Up Boss (phase 6): tags on leads, action plans
     // (drip sequences) and where each lead is in them, the shared team inbox,
     // and a log of leads that came in from outside lead sources.
-    await client.query('SAVEPOINT p6_own_crm');
-    try {
+    await step('049_own_crm', async () => {
       await client.query(`
         ALTER TABLE users ADD COLUMN IF NOT EXISTS tags TEXT[] NOT NULL DEFAULT '{}';
         CREATE INDEX IF NOT EXISTS idx_users_tags ON users USING GIN (tags);
@@ -1740,17 +1784,12 @@ export const runMigrations = async () => {
         );
         CREATE INDEX IF NOT EXISTS idx_lead_intake_log_tenant ON lead_intake_log(tenant_id, created_at DESC);
       `);
-      await client.query('RELEASE SAVEPOINT p6_own_crm');
-    } catch (ownCrmErr) {
-      await client.query('ROLLBACK TO SAVEPOINT p6_own_crm');
-      console.error('own crm migration skipped:', ownCrmErr.message);
-    }
+    });
 
     // Platform-wide settings (one JSONB value per key): the plan prices the
     // platform owner set, and the Stripe product, prices and webhook the app
     // set up for itself (services/plans.js, services/stripeSetup.js).
-    await client.query('SAVEPOINT platform_settings');
-    try {
+    await step('050_platform_settings', async () => {
       await client.query(`
         CREATE TABLE IF NOT EXISTS platform_settings (
           key VARCHAR(64) PRIMARY KEY,
@@ -1758,18 +1797,13 @@ export const runMigrations = async () => {
           updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
       `);
-      await client.query('RELEASE SAVEPOINT platform_settings');
-    } catch (platformSettingsErr) {
-      await client.query('ROLLBACK TO SAVEPOINT platform_settings');
-      console.error('platform settings migration skipped:', platformSettingsErr.message);
-    }
+    });
 
     // The platform's own identity (name, domains, sender, colors), as the
     // platform owner overrides it in the console (services/platform.js). One
     // row. Platform mail queued in email_outbox goes out under the platform's
     // name, not the brokerage's.
-    await client.query('SAVEPOINT platform_identity');
-    try {
+    await step('051_platform_identity', async () => {
       await client.query(`
         CREATE TABLE IF NOT EXISTS platform_identity (
           id SMALLINT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
@@ -1779,17 +1813,12 @@ export const runMigrations = async () => {
         );
         ALTER TABLE email_outbox ADD COLUMN IF NOT EXISTS platform BOOLEAN NOT NULL DEFAULT FALSE;
       `);
-      await client.query('RELEASE SAVEPOINT platform_identity');
-    } catch (platformErr) {
-      await client.query('ROLLBACK TO SAVEPOINT platform_identity');
-      console.error('platform identity migration skipped:', platformErr.message);
-    }
+    });
 
     // Connecting any MLS: one connection per MLS feed (platform, encrypted
     // credentials, sync health), and each brokerage's progress through
     // "Connect your MLS" (applied → approved → connected → live).
-    await client.query('SAVEPOINT mls_connections');
-    try {
+    await step('052_mls_connections', async () => {
       await client.query(`
         ALTER TABLE mls_feeds ADD COLUMN IF NOT EXISTS catalog_id VARCHAR(40);
         ALTER TABLE mls_feeds ADD COLUMN IF NOT EXISTS logo_required BOOLEAN NOT NULL DEFAULT FALSE;
@@ -1842,21 +1871,34 @@ export const runMigrations = async () => {
         CREATE INDEX IF NOT EXISTS idx_listings_feed_listing_key
           ON listings (feed, (raw->>'ListingKey')) WHERE feed NOT IN ('ires', 'demo');
       `);
-      await client.query('RELEASE SAVEPOINT mls_connections');
-    } catch (mlsConnErr) {
-      await client.query('ROLLBACK TO SAVEPOINT mls_connections');
-      console.error('mls connections migration skipped:', mlsConnErr.message);
+    });
+
+    for (const [name, fn, options] of extraMigrationSteps) {
+      await step(name, fn, options);
     }
 
     await client.query('COMMIT');
-    console.log('Database migrations completed');
   } catch (error) {
-    await client.query('ROLLBACK');
+    await client.query('ROLLBACK').catch(() => {});
+    migrationFailures.splice(0, migrationFailures.length, { name: 'transaction', message: error.message });
     console.error('Migration failed:', error);
     throw error;
   } finally {
+    await client.query('SELECT pg_advisory_unlock($1)', [MIGRATION_LOCK_ID]).catch(() => {});
     client.release();
   }
+
+  migrationFailures.splice(0, migrationFailures.length, ...failed);
+  console.log(
+    `Database migrations: ${applied.length} applied, ${skipped} already applied, ` +
+    `${failed.length} failed (${Date.now() - startedAt} ms)`
+  );
+  // The steps that worked are committed and recorded either way; strict mode
+  // only decides whether a failed step stops the boot.
+  if (failed.length && process.env.MIGRATIONS_STRICT === '1') {
+    throw new Error(`Migration steps failed: ${failed.map((f) => f.name).join(', ')}`);
+  }
+  return { applied, skipped, failed };
 };
 
 const isDirectRun = process.argv[1]?.includes('migrate.js');
