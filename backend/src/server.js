@@ -689,8 +689,10 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
 
+let httpServer = null;
+
 const startServer = async () => {
-  app.listen(PORT, HOST, () => {
+  httpServer = app.listen(PORT, HOST, () => {
     console.log(`Server running on ${HOST}:${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
     if (existsSync(distPath)) {
@@ -729,6 +731,29 @@ const startServer = async () => {
   // Stripe from STRIPE_SECRET_KEY alone: plan prices and the webhook, in the background.
   import('./services/stripeSetup.js').then(({ syncStripeOnBoot }) => syncStripeOnBoot()).catch((e) => console.error('Stripe setup skipped:', e.message));
 };
+
+// A rejected promise nobody awaited used to crash the process (Node's
+// default), taking every request in flight with it. Log it and keep serving;
+// a genuine programming error still shows up loud in the logs.
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled rejection:', reason instanceof Error ? reason.stack : reason);
+});
+
+// Railway sends SIGTERM on every deploy. Stop taking new connections, let
+// in-flight requests finish, then exit; a hard exit after 10s if something hangs.
+function shutdown(signal) {
+  console.log(`${signal} received: shutting down`);
+  const exit = (code) => process.exit(code);
+  if (!httpServer) return exit(0);
+  const timer = setTimeout(() => {
+    console.error('Shutdown timed out, exiting');
+    exit(1);
+  }, 10_000);
+  timer.unref();
+  httpServer.close(() => exit(0));
+}
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
 
 // Tests import the app without binding a port or starting the MLS scheduler.
 if (process.env.SAA_SERVER_NO_START !== '1') startServer();
