@@ -324,7 +324,7 @@ export default function AdminPage() {
               <p className="text-sm text-gray-500 mt-1">
                 {crmMode === 'own'
                   ? 'Scores, heat, stages & follow-ups — this cockpit is your CRM.'
-                  : 'Scores, heat, stages & follow-ups — FUB stays CRM source of truth.'}
+                  : 'Scores, heat, stages & follow-ups for every lead.'}
               </p>
             </div>
             <div className="flex flex-wrap gap-2 self-start sm:self-auto">

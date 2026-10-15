@@ -121,7 +121,7 @@ function TaxSetting({ api }) {
     return (
       <p className="text-xs text-gray-500">
         Tax season note: {s.tax_enabled && s.tax_month ? `sent in ${MONTHS[s.tax_month - 1]}` : "off (your brokerage owner can turn it on)"}.
-        {s.rate_source ? "" : " Rate watch: no rate source connected."}
+        {s.rate_source ? "" : " Rate notes go out once a rate source is connected."}
       </p>
     );
   }
@@ -147,7 +147,7 @@ function TaxSetting({ api }) {
           <option key={m} value={i + 1}>{m}</option>
         ))}
       </select>
-      {!s.rate_source && <span className="text-xs text-gray-500">Rate watch is off: no rate source connected.</span>}
+      {!s.rate_source && <span className="text-xs text-gray-500">Rate notes go out once a rate source is connected.</span>}
       {msg && <span className="text-xs text-gray-500">{msg}</span>}
     </div>
   );
