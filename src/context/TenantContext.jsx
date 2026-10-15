@@ -93,6 +93,7 @@ export function useBrokerageBrand() {
       market: tenant.marketName || b.marketName || null,
       agentName: tenant.agentName || b.agentName || null,
       logoUrl: b.logoUrl || null,
+      iconUrl: b.iconUrl || null,
       brandLine: b.brandLine || null,
       licenseLine: b.licenseLine || null,
       tagline: b.tagline || null,

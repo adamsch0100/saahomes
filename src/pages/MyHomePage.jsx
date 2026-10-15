@@ -555,7 +555,8 @@ export default function MyHomePage() {
               {session.email && (
                 <p className="mt-4 text-xs text-gray-500">
                   Signed in as <strong className="text-gray-800">{session.email}</strong>
-                  {session.seller_heat ? (
+                  {/* An internal signal for agents; another brokerage's homeowners never see it. */}
+                  {session.seller_heat && !bb ? (
                     <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full bg-orange-50 border border-orange-200 text-orange-800 font-semibold">
                       Seller heat
                     </span>
@@ -649,9 +650,18 @@ export default function MyHomePage() {
                 <div className="mt-8 bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 shadow-sm">
                   <h2 className="text-xl font-bold text-gray-900">Add your home</h2>
                   <p className="text-sm text-gray-500 mt-2 leading-relaxed">
+                    {bb ? (
+                      <>
+                        We&apos;ll estimate a range from live{bb.market ? ` ${bb.market}` : ""} MLS sales data (free),
+                        then compare with licensed market services when available. {marketPack.honestLabels.estimate}
+                      </>
+                    ) : (
+                      <>
                     We&apos;ll estimate a range from live {marketPack.market.name} MLS sales data
                     ({marketPack.sources.saaMls}, free), then compare with licensed market
                     services when available. {marketPack.honestLabels.estimate}
+                      </>
+                    )}
                   </p>
                   <form onSubmit={saveProfile} className="mt-5 space-y-3">
                     <input
@@ -768,7 +778,7 @@ export default function MyHomePage() {
                         <p className="mt-1 text-[11px] text-gray-500 leading-relaxed">
                           Source:{" "}
                           {our?.source_label ||
-                            marketPack.sources.saaMls}{" "}
+                            (bb ? `${bb.name} (local MLS data)` : marketPack.sources.saaMls)}{" "}
                           · {marketPack.honestLabels.estimate}
                         </p>
                       </>
@@ -844,7 +854,8 @@ export default function MyHomePage() {
                     </div>
                   )}
 
-                  {/* CHFA / DPA trusted resource (from market pack) */}
+                  {/* CHFA / DPA trusted resource (from market pack): SAA's Colorado page, not another brokerage's. */}
+                  {!bb && (
                   <p className="text-xs text-gray-500 leading-relaxed px-0.5">
                     {marketPack.dpa.chfaLine}{" "}
                     <Link
@@ -854,6 +865,7 @@ export default function MyHomePage() {
                       Learn about CHFA DPA
                     </Link>
                   </p>
+                  )}
 
                   {/* One-two ask */}
                   <div className="rounded-2xl border-2 border-[rgb(var(--brand-accent-rgb)/0.4)] p-5">
@@ -928,7 +940,8 @@ export default function MyHomePage() {
                           <Comp
                             key={a.key}
                             {...props}
-                            className={`w-full text-left rounded-xl border px-4 py-3.5 transition-colors hover:border-black ${
+                            // `block`: as a plain inline <a>, the card's border and padding broke around its lines and ran off the left edge on phones.
+                            className={`block w-full text-left rounded-xl border px-4 py-3.5 transition-colors hover:border-black ${
                               a.primary
                                 ? "bg-black text-white border-black"
                                 : "bg-white border-gray-200 text-gray-900"
