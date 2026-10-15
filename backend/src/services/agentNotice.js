@@ -15,6 +15,9 @@ import { sendEmail, emailSiteUrl } from './emailer.js';
 import { agentNoticeEmail } from './stayEmails.js';
 import { sendTextIfAllowed } from './textHook.js';
 
+/** A detail line as plain words (a linked line is { label, text, href }, see stayEmails.js). */
+const plainLine = (l) => (typeof l === 'string' ? l : [l.label, l.text].filter(Boolean).join(': '));
+
 /** Staff who should hear about this client: the assigned agent, else the owners. */
 export async function agentsForClient(client, pool = getPool()) {
   if (client?.assigned_agent_id) {
@@ -39,7 +42,7 @@ export async function agentsForClient(client, pool = getPool()) {
  * @param {object} opts.client users row of the client
  * @param {string} opts.kind tour_request | cma_request | seller_start | seller_question
  * @param {string} opts.title one line, e.g. "Jamie Rivera asked for a tour"
- * @param {string[]} [opts.lines] details
+ * @param {Array<string|{label?: string, text: string, href?: string}>} [opts.lines] details; a line with href is a link
  * @param {boolean} [opts.dueNow] make the client due for a call today
  * @param {Function} [opts.send] email sender (tests)
  */
@@ -72,7 +75,7 @@ export async function notifyAgent({ client, kind, title, lines = [], dueNow = fa
         }
       }
       const text = await sendTextIfAllowed({
-        tenantId: tenant.id, userId: agent.id, kind, body: [title, ...lines.slice(0, 2)].join(' · ').slice(0, 300),
+        tenantId: tenant.id, userId: agent.id, kind, body: [title, ...lines.filter(Boolean).slice(0, 2).map(plainLine)].join(' · ').slice(0, 300),
       }).catch(() => ({ sent: false }));
       if (text?.sent) result.texted += 1;
     }

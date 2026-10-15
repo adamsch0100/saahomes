@@ -34,7 +34,7 @@ import {
 } from '../services/leadScore.js';
 import { rejectIfDisposableEmail } from '../utils/emailQuality.js';
 import { tenantIdOf, currentTenantId } from '../services/tenantContext.js';
-import { findUserByToken as findBuyerByToken, resolveUser } from '../services/buyerSession.js';
+import { findUserByToken as findBuyerByToken, resolveUser, cookieSecure } from '../services/buyerSession.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FREQUENCIES = ['immediate', 'daily', 'weekly'];
@@ -67,7 +67,7 @@ const COOKIE_MAX_AGE = 90 * 24 * 60 * 60 * 1000; // 90 days
 export function setAuthCookie(res, token) {
   res.cookie(COOKIE_NAME, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: cookieSecure(res.req),
     sameSite: 'lax',
     maxAge: COOKIE_MAX_AGE,
     path: '/',

@@ -8,6 +8,19 @@ import { tenantIdOf } from './tenantContext.js';
 
 export const COOKIE_NAME = 'saa_user_token';
 
+/**
+ * A Secure cookie never reaches an http host, so a site tried on plain http
+ * (a brokerage's test domain, a local build) could sign up but never stay
+ * signed in. Secure only when this request really came in over https
+ * (directly, or via the proxy; trust proxy is set in server.js).
+ */
+export function cookieSecure(req) {
+  if (!req) return false;
+  if (req.secure) return true;
+  const proto = String(req.headers?.['x-forwarded-proto'] || '').split(',')[0].trim().toLowerCase();
+  return proto === 'https';
+}
+
 /** Active user with this manage token in this tenant, or null. */
 export async function findUserByToken(token, tenantId, pool = getPool()) {
   if (!token || typeof token !== 'string' || token.length < 16 || token.length > 80) return null;
