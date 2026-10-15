@@ -6,6 +6,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { createAgent, listAgents, patchAgent, resendAgentInvite } from '../../utils/api.js';
 import { marketPack } from '../../data/marketPack.js';
 import AgentDomainControl from './AgentDomainControl.jsx';
+import { useBrokerageBrand } from '../../context/TenantContext.jsx';
 
 const GOLD = 'var(--brand-accent)';
 const VOICE_STYLES = marketPack.agentVoice?.voiceStyles || ['warm', 'professional', 'short'];
@@ -22,6 +23,11 @@ const emptyForm = {
 };
 
 export default function AgentsManager({ token }) {
+  // Another brokerage's console: its own name and phone as the defaults, never SAA's.
+  const bb = useBrokerageBrand();
+  const brandDefaults = bb
+    ? { brand: bb.name, brokerage: bb.legalName || bb.name, phone: bb.phone || '' }
+    : { brand: marketPack.market.brand, brokerage: marketPack.market.brokerage, phone: marketPack.market.phone };
   const [agents, setAgents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -215,7 +221,7 @@ export default function AgentsManager({ token }) {
               value={form.brokerage_name}
               onChange={(e) => setForm({ ...form, brokerage_name: e.target.value })}
               className="mt-1 w-full min-h-[44px] border border-gray-300 rounded-lg px-3 text-sm"
-              placeholder={marketPack.market.brokerage}
+              placeholder={brandDefaults.brokerage}
             />
           </label>
           <label className="block">
@@ -225,7 +231,7 @@ export default function AgentsManager({ token }) {
               value={form.brand_phone}
               onChange={(e) => setForm({ ...form, brand_phone: e.target.value })}
               className="mt-1 w-full min-h-[44px] border border-gray-300 rounded-lg px-3 text-sm"
-              placeholder={marketPack.market.phone}
+              placeholder={brandDefaults.phone || '(555) 555-0100'}
             />
           </label>
           <label className="block">
@@ -308,12 +314,11 @@ export default function AgentsManager({ token }) {
                     <p className="text-xs text-gray-500 mt-1">
                       Brand:{' '}
                       <span className="font-medium text-gray-700">
-                        {a.brand?.brandName || a.brand_name || marketPack.market.brand}
+                        {a.brand?.brandName || a.brand_name || brandDefaults.brand}
                       </span>
                       {' · '}
-                      {a.brand?.brokerage || a.brokerage_name || marketPack.market.brokerage}
-                      {' · '}
-                      {a.brand?.phone || a.brand_phone || a.phone || marketPack.market.phone}
+                      {a.brand?.brokerage || a.brokerage_name || brandDefaults.brokerage}
+                      {[a.brand?.phone || a.brand_phone || a.phone || brandDefaults.phone].filter(Boolean).map((p) => ` · ${p}`)}
                       {' · voice '}
                       <span className="uppercase tracking-wide">{a.voice_style || 'warm'}</span>
                     </p>

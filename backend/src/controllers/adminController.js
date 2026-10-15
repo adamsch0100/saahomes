@@ -6,6 +6,8 @@ import { tenantIdOf } from '../services/tenantContext.js';
 import { finishLogin } from '../services/staffAuth.js';
 import { issueAccountLink } from '../services/accountLinks.js';
 import { listingScope } from '../services/feeds.js';
+import { isHomeTenant, publicBrand } from '../services/brand.js';
+import { fubApiKeyForTenant } from '../services/followUpBossService.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -447,7 +449,8 @@ export const getCockpitLeads = async (req, res) => {
         total: filtered.length,
         due_today: dueTodayCount,
         hot: hotCount,
-        fub_configured: !!(process.env.FOLLOW_UP_BOSS_API_KEY || process.env.FOLLOW_UP_BOSS_WEBHOOK_URL),
+        // This brokerage's own key (SAA's is the server's), never another's.
+        fub_configured: !!(await fubApiKeyForTenant(tenantIdOf(req))),
         crm_mode: req.tenant?.settings?.crm_mode === 'own' ? 'own' : 'fub',
       },
     });
@@ -1057,17 +1060,16 @@ export const syncFubLifecycle = async (req, res) => {
  */
 export const getFubStatus = async (req, res) => {
   try {
-    const { isFollowUpBossConfigured, getFollowUpBossPeopleCount } = await import(
-      '../services/followUpBossService.js'
-    );
-    const configured = isFollowUpBossConfigured();
-    if (!configured) {
+    const { getFollowUpBossPeopleCount } = await import('../services/followUpBossService.js');
+    // This brokerage's key: SAA's lives on the server, any other brokerage's in its settings.
+    const tenantId = tenantIdOf(req);
+    if (!(await fubApiKeyForTenant(tenantId))) {
       return res.json({
         success: true,
-        data: { configured: false, message: 'FOLLOW_UP_BOSS_API_KEY not set — FUB writes skipped cleanly.' },
+        data: { configured: false, message: 'Follow Up Boss is not connected.' },
       });
     }
-    const count = await getFollowUpBossPeopleCount();
+    const count = await getFollowUpBossPeopleCount({ tenantId });
     return res.json({ success: true, data: { configured: true, ...count } });
   } catch (error) {
     logger.error('Error checking FUB status', error);
@@ -1383,7 +1385,7 @@ export const createAgent = async (req, res) => {
       const invited = !passStr && (await inviteStaff(updated.rows[0], tenantId, req.tenant));
       return res.status(200).json({
         success: true,
-        data: publicAgentPayload(updated.rows[0]),
+        data: await seatPayload(req, updated.rows[0]),
         upgraded: true,
         ...(passStr ? {} : { invited }),
       });
@@ -1407,7 +1409,7 @@ export const createAgent = async (req, res) => {
     const invited = !passStr && (await inviteStaff(created.rows[0], tenantId, req.tenant));
     return res.status(201).json({
       success: true,
-      data: publicAgentPayload(created.rows[0]),
+      data: await seatPayload(req, created.rows[0]),
       ...(passStr ? {} : { invited }),
     });
   } catch (error) {
@@ -1417,11 +1419,22 @@ export const createAgent = async (req, res) => {
 };
 
 /**
+ * An agent seat as the console shows it. On SAA the seat's brand falls back
+ * to SAA's market pack as before; another brokerage's seats fall back to that
+ * brokerage's own brand, never SAA's.
+ */
+async function seatPayload(req, row) {
+  const { publicAgentPayload } = await import('../services/tenantBrand.js');
+  const seat = publicAgentPayload(row);
+  if (!seat || isHomeTenant(req.tenant)) return seat;
+  return { ...seat, brand: publicBrand(req.tenant, { agent: row }) };
+}
+
+/**
  * GET /api/admin/agents — list agent (+ admin) seats (includes brand config).
  */
 export const listAgents = async (req, res) => {
   try {
-    const { publicAgentPayload } = await import('../services/tenantBrand.js');
     const pool = getPool();
     const result = await pool.query(
       `SELECT id, email, name, phone, role, status, created_at, last_active_at,
@@ -1439,11 +1452,11 @@ export const listAgents = async (req, res) => {
          email`,
       [tenantIdOf(req)]
     );
-    const data = result.rows.map((row) => ({
-      ...publicAgentPayload(row),
+    const data = await Promise.all(result.rows.map(async (row) => ({
+      ...(await seatPayload(req, row)),
       assigned_lead_count: row.assigned_lead_count,
       invite_pending: row.invite_pending,
-    }));
+    })));
     return res.json({ success: true, data });
   } catch (error) {
     logger.error('listAgents error', error);
@@ -1577,7 +1590,7 @@ export const patchAgent = async (req, res) => {
     );
 
     logger.info('Agent patched', { id, by: req.user?.email, fields: Object.keys(body) });
-    return res.json({ success: true, data: publicAgentPayload(updated.rows[0]) });
+    return res.json({ success: true, data: await seatPayload(req, updated.rows[0]) });
   } catch (error) {
     logger.error('patchAgent error', error);
     return res.status(500).json({ error: 'Failed to update agent' });

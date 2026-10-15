@@ -355,7 +355,7 @@ function NotificationFrequencySettings({ signedIn }) {
                   </span>
                 </div>
                 <p className="text-xs sm:text-sm text-gray-600 leading-relaxed max-w-2xl">
-                  {row.description}
+                  {bb ? row.description.replace("Adam & Mandi share", "your agent shares") : row.description}
                 </p>
               </div>
             ))}

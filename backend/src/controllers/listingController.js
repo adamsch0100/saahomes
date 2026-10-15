@@ -54,6 +54,16 @@ function orderBySql(sort) {
   }
 }
 
+const MAX_PAGE_SIZE = 100;
+const MAX_PAGE = 10000;
+
+// Integer in [lo, hi]; anything unparseable falls back to `fallback`.
+function clampInt(value, lo, hi, fallback) {
+  const n = Math.trunc(Number(value));
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(hi, Math.max(lo, n));
+}
+
 export const searchListings = async (req, res) => {
   try {
     const pool = getPool();
@@ -86,8 +96,10 @@ export const searchListings = async (req, res) => {
     if (sort === 'best' && !best) sort = 'recommended';
 
     const whereSql = where.join(' AND ');
-    const pageNum = Math.max(1, Number(page));
-    const limitNum = Number(limit);
+    // Whole numbers only, and a ceiling on page size: ?limit=100000 or
+    // ?limit=abc used to turn into a full-table SELECT or a SQL error.
+    const pageNum = clampInt(page, 1, MAX_PAGE, 1);
+    const limitNum = clampInt(limit, 1, MAX_PAGE_SIZE, 24);
     const offset = (pageNum - 1) * limitNum;
     const orderSql = orderBySql(best ? 'recommended' : sort);
 

@@ -12,7 +12,7 @@
 import crypto from 'node:crypto';
 import getPool from '../config/database.js';
 import { currentTenantId } from './tenantContext.js';
-import { sessionUser } from './buyerSession.js';
+import { sessionUser, cookieSecure } from './buyerSession.js';
 
 export const DEFAULT_TENANT_ID = 1;
 export const VISITOR_COOKIE = 'saa_vid';
@@ -71,7 +71,7 @@ export function ensureVisitorId(req, res) {
   if (res && !res.headersSent) {
     res.cookie(VISITOR_COOKIE, id, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: cookieSecure(req),
       sameSite: 'lax',
       maxAge: VISITOR_MAX_AGE,
       path: '/',

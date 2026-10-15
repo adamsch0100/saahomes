@@ -12,7 +12,7 @@ import express from 'express';
 import rateLimit from 'express-rate-limit';
 import { authenticateToken, requireRole } from '../middleware/auth.js';
 import { tenantIdOf } from '../services/tenantContext.js';
-import { signup, signupInfo, checkSlug } from '../controllers/signupController.js';
+import { signup, signupInfo, checkSlug, redeemHandoff } from '../controllers/signupController.js';
 import {
   getSetup, patchSetup, confirmEmail, resendConfirm, getEmbeds,
 } from '../controllers/setupController.js';
@@ -36,6 +36,7 @@ export const publicRoutes = express.Router();
 publicRoutes.get('/signup/info', signupInfo);
 publicRoutes.get('/signup/check', limiter(15 * 60 * 1000, 60, 'Too many checks. Please wait a minute.'), checkSlug);
 publicRoutes.post('/signup', limiter(60 * 60 * 1000, Number(process.env.SIGNUP_RATE_LIMIT) || 5, 'Too many signups from here. Please try again in an hour.'), signup);
+publicRoutes.post('/signup/handoff', limiter(15 * 60 * 1000, 30, 'Too many tries. Please wait a few minutes.'), redeemHandoff);
 publicRoutes.post('/embed/view', limiter(15 * 60 * 1000, 300, 'Too many requests.'), recordEmbedView);
 
 // ── owner (/api/admin) ──

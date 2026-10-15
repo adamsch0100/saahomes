@@ -208,10 +208,21 @@ export function rateEmail({ brand, site, firstName, agent, rate, target, asOf, s
 }
 
 /** A short note to the agent (tour asked for, market analysis asked for, …). */
+/**
+ * A detail line is a string, or { label, text, href } when its value should
+ * be a link, e.g. a phone number the agent can tap to call.
+ */
+function noticeLine(l) {
+  if (typeof l === 'string') return esc(l);
+  const label = l.label ? `${esc(l.label)}: ` : '';
+  const text = esc(l.text);
+  return l.href ? `${label}<a href="${esc(l.href)}" style="color:#111">${text}</a>` : `${label}${text}`;
+}
+
 export function agentNoticeEmail({ brand, site, title, lines = [], link, linkLabel = 'Open your cockpit' }) {
   const body = [
     row(`<p style="margin:0 0 10px;font-size:17px;font-weight:700;color:#111">${esc(title)}</p>
-      ${lines.filter(Boolean).map((l) => p(esc(l))).join('')}`, '24px 24px 6px'),
+      ${lines.filter(Boolean).map((l) => p(noticeLine(l))).join('')}`, '24px 24px 6px'),
     row(button(link, linkLabel, brand), '6px 24px 22px'),
   ].join('');
   // No unsubscribe line: these go to the brokerage's own staff.

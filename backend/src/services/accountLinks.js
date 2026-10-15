@@ -72,7 +72,7 @@ function emailHtml({ purpose, name, brokerage, link, hours, platform = null }) {
 export async function issueAccountLink({ user, purpose, tenant, pool = getPool() }) {
   const kind = ['invite', 'confirm'].includes(purpose) ? purpose : 'reset';
   const recent = await pool.query(
-    "SELECT COUNT(*)::int AS n FROM password_resets WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour'",
+    "SELECT COUNT(*)::int AS n FROM password_resets WHERE user_id = $1 AND purpose <> 'handoff' AND created_at > NOW() - INTERVAL '1 hour'",
     [user.id]
   );
   if (recent.rows[0].n >= MAX_LINKS_PER_HOUR) return { sent: false };

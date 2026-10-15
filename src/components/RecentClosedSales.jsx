@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { photoUrl } from "../utils/photoUrl.js";
 import { formatPrice, fmtNum } from "../utils/listingHelpers.js";
 import ListingPhotoFallback from "./ListingPhotoFallback.jsx";
+import { useBrokerageBrand } from "../context/TenantContext.jsx";
 
 const API_BASE = (() => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace(/\/$/, "");
@@ -43,14 +44,14 @@ async function fetchSold({ zip, city, limit = 6 }) {
   };
 }
 
-function CompRow({ row }) {
+function CompRow({ row, area }) {
   const [imgFailed, setImgFailed] = useState(false);
   const showPhoto = row.has_photo && row.listing_id && !imgFailed;
   const closedLabel = formatClosedDate(row.closed_date);
   const stats = statsLine(row);
   const alt = row.address
-    ? `Sold home at ${row.address} in ${row.city || "Northern Colorado"}`
-    : `Sold home in ${row.city || "Northern Colorado"}`;
+    ? `Sold home at ${row.address}${row.city || area ? ` in ${row.city || area}` : ""}`
+    : `Sold home${row.city || area ? ` in ${row.city || area}` : ""}`;
 
   return (
     <li className="flex gap-3 py-3 first:pt-0 last:pb-0">
@@ -97,6 +98,8 @@ function CompRow({ row }) {
  * then city. Does not change the AVM estimate — context only.
  */
 export default function RecentClosedSales({ city, postalCode }) {
+  // Another brokerage's site: no feed name or SAA market in the copy.
+  const bb = useBrokerageBrand();
   const zip = normalizeZip(postalCode);
   const cityName = city ? String(city).trim() : "";
   const [rows, setRows] = useState([]);
@@ -144,7 +147,7 @@ export default function RecentClosedSales({ city, postalCode }) {
         Recent closed sales near you
       </p>
       <h3 className="text-lg font-bold text-gray-900 mt-1">
-        Closed sales in {label} — IRES MLS data
+        Closed sales in {label} — {bb ? "MLS data" : "IRES MLS data"}
       </h3>
       <p className="text-xs text-gray-500 mt-1">Comps for context, not an appraisal.</p>
 
@@ -153,6 +156,17 @@ export default function RecentClosedSales({ city, postalCode }) {
       ) : error || rows.length === 0 ? (
         <div className="mt-4">
           <p className="text-sm text-gray-800">No recent closed sales recorded here yet.</p>
+          {bb ? (
+            bb.phone ? (
+              <p className="text-sm text-gray-600 mt-2">
+                Call{" "}
+                <a href={bb.tel} className="font-semibold text-black hover:underline">{bb.phone}</a>{" "}
+                for a free market report on your home.
+              </p>
+            ) : (
+              <p className="text-sm text-gray-600 mt-2">Ask your agent for a free market report on your home.</p>
+            )
+          ) : (
           <p className="text-sm text-gray-600 mt-2">
             Call{" "}
             <a href="tel:9709991407" className="font-semibold text-black hover:underline">
@@ -160,11 +174,12 @@ export default function RecentClosedSales({ city, postalCode }) {
             </a>{" "}
             for a free market report on your home.
           </p>
+          )}
         </div>
       ) : (
         <ul className="mt-4 divide-y divide-gray-100">
           {rows.map((row) => (
-            <CompRow key={row.listing_id} row={row} />
+            <CompRow key={row.listing_id} row={row} area={bb ? bb.market || "" : "Northern Colorado"} />
           ))}
         </ul>
       )}

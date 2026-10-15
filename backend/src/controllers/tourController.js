@@ -21,7 +21,7 @@ import {
 import { resolveUser } from './savedHomesController.js';
 import { reportLeadToBoard } from '../services/boardLeadCount.js';
 import { tenantIdOf, siteUrlFor } from '../services/tenantContext.js';
-import { brandFor, isHomeTenant } from '../services/brand.js';
+import { brandFor, isHomeTenant, formatPhone, telHref } from '../services/brand.js';
 import { listingScope } from '../services/feeds.js';
 import { notifyAgent } from '../services/agentNotice.js';
 
@@ -192,7 +192,9 @@ export const requestTour = async (req, res) => {
       kind: 'tour_request',
       title: `${user.name || user.email} asked for a tour`,
       lines: [summary, `Times that work: ${windowText}`, note ? `Note: ${note}` : null,
-        coBuyer ? `Coming along: ${[coBuyer.name, coBuyer.email].filter(Boolean).join(', ')}` : null, `Phone: ${phoneDigits}`],
+        coBuyer ? `Coming along: ${[coBuyer.name, coBuyer.email].filter(Boolean).join(', ')}` : null,
+        // Tappable in the email, so the agent can call back from their phone.
+        { label: 'Phone', text: formatPhone(phoneDigits) || phoneDigits, href: telHref(phoneDigits) }],
       dueNow: true,
       pool,
     }).catch(() => {});
