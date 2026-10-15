@@ -75,7 +75,6 @@ function ListingCard({ listing }) {
         >
           <SaveHomeButton listing={listing} />
         </div>
-        <SampleBadge listing={listing} className="absolute top-2 left-2 z-[1]" />
         <span className="absolute bottom-2 left-2 bg-black/75 text-white text-sm font-bold px-3 py-1 rounded-lg">
           {formatPrice(listing.list_price)}
         </span>
@@ -86,6 +85,7 @@ function ListingCard({ listing }) {
         <p className="text-gray-500 text-sm truncate">
           {[listing.city, listing.postal_code].filter(Boolean).join(" ")}
         </p>
+        <SampleBadge listing={listing} short className="mt-1.5 min-h-0 text-[10px] px-1.5 py-0.5 shadow-none" />
         <CourtesyLine listing={listing} className="mt-1" />
       </div>
     </Link>

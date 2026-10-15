@@ -561,10 +561,23 @@ export default function LeadCaptureChat() {
     || searchStep === "contact"
     || searchStep === "saving";
 
+  // Search and listing pages carry their own sticky bottom bar on phones with a
+  // Nadia button in it, so the floating launcher (and teaser) would only sit on
+  // top of the cards there. Below lg they stay hidden; the bar opens the chat.
+  const barOwnsLauncher = /^\/(properties|homes-for-sale)(\/|$)/.test(location.pathname);
+  // On the desktop search page the cards fill the right column, so the launcher
+  // sits bottom-left over the map instead of over a card's price and address.
+  const overMap = /^\/properties(\/|$)/.test(location.pathname);
+
   return (
     // z-[110]: above ListingDetailPanel (z-90) so "Ask Nadia" from the search modal works;
     // nested save/schedule modals sit at z-[120] so lead forms still stack above chat.
-    <div ref={chatRef} className="fixed bottom-28 right-4 sm:bottom-8 sm:right-8 z-[110] flex flex-col items-end">
+    <div
+      ref={chatRef}
+      className={`fixed ${barOwnsLauncher ? "bottom-20" : "bottom-28"} right-4 sm:bottom-8 sm:right-8 z-[110] flex flex-col items-end ${
+        overMap ? "lg:right-auto lg:left-8 lg:items-start" : ""
+      }`}
+    >
       <style>{`
         @keyframes chatSlideUp { from { opacity: 0; transform: translateY(16px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes chatFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -856,7 +869,7 @@ export default function LeadCaptureChat() {
       {/* Teaser bubble — compact, contextual, one per 15 min max */}
       {showNudge && !isOpen && (
         <div
-          className="relative mb-2.5 max-w-[230px] sm:max-w-[290px] bg-white rounded-2xl rounded-br-sm shadow-xl border border-gray-100 p-3.5 pr-8"
+          className={`relative mb-2.5 max-w-[230px] sm:max-w-[290px] bg-white rounded-2xl rounded-br-sm shadow-xl border border-gray-100 p-3.5 pr-8 ${barOwnsLauncher ? "hidden lg:block" : ""} ${overMap ? "lg:rounded-br-2xl lg:rounded-bl-sm" : ""}`}
           style={{ animation: "chatBounceIn 0.25s ease-out" }}
           role="button"
           tabIndex={0}
@@ -878,7 +891,7 @@ export default function LeadCaptureChat() {
       {/* Chat Bubble — assistant avatar, ready to help */}
       <button
         onClick={isOpen ? () => setIsOpen(false) : handleOpen}
-        className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-white transition-all duration-200 hover:scale-105 active:scale-95 overflow-hidden ${
+        className={`w-14 h-14 rounded-full shadow-lg items-center justify-center text-white transition-all duration-200 hover:scale-105 active:scale-95 overflow-hidden ${barOwnsLauncher ? "hidden lg:flex" : "flex"} ${
           isOpen ? "bg-gray-800 rotate-45" : showNudge ? "ring-4 ring-[rgb(var(--brand-accent-rgb)/0.6)]" : "ring-2 ring-[rgb(var(--brand-accent-rgb)/0.4)]"
         }`}
         style={!isOpen && showNudge ? { animation: 'chatPulse 2s ease-in-out infinite' } : {}}
