@@ -314,6 +314,19 @@ export default function EventsCalendarPage() {
           </section>
         ))}
 
+        {/* Longmont spotlight — answers "city of longmont events" in one sentence */}
+        <section className="mt-14 rounded-xl border border-gray-200 bg-white p-8" aria-labelledby="longmont-events">
+          <h2 id="longmont-events" className="text-2xl font-bold font-serif mb-3">Longmont Events 2026</h2>
+          <p className="text-gray-700 leading-relaxed mb-4">
+            Longmont's 2026 events include the Longmont Farmers Market at the Boulder County Fairgrounds
+            (May 9 – Nov 21, 2026) and the two-day Independence Day Festival at Roosevelt Park
+            (Jul 3–4, 2026), both listed on the City of Longmont's official calendar.
+          </p>
+          <Link to="/northern-colorado-areas/longmont/" className="inline-flex font-semibold hover:underline">
+            Longmont homes, neighborhoods &amp; area guide →
+          </Link>
+        </section>
+
         {/* Real estate CTA — the point of the page */}
         <section className="mt-16 rounded-xl overflow-hidden border border-gray-200">
           <div className="grid md:grid-cols-2">

@@ -2601,12 +2601,23 @@ function injectEventsBody(html) {
   }
 
   const guidePath = getEventsGuidePath();
+
+  // Dated city spotlight — answers the Longmont events query in one sentence
+  // and links the Longmont area guide (crawler-visible, mirrors the client page).
+  const longmontHtml =
+    `      <section class="prerendered-events-city">\n` +
+    `        <h2>Longmont Events 2026</h2>\n` +
+    `        <p>Longmont's 2026 events include the Longmont Farmers Market at the Boulder County Fairgrounds (May 9 &ndash; Nov 21, 2026) and the two-day Independence Day Festival at Roosevelt Park (Jul 3&ndash;4, 2026), both listed on the City of Longmont's official calendar.</p>\n` +
+    `        <p><a href="${SITE_URL}/northern-colorado-areas/longmont/">Longmont homes, neighborhoods &amp; area guide</a></p>\n` +
+    `      </section>\n`;
+
   const bodyContent =
     `\n` +
     `    <div class="prerendered-events-content">\n` +
     `      <h1>Northern Colorado Events & Happenings Calendar</h1>\n` +
     `      <p>Browse festivals, farmers markets, rodeos, and community celebrations across 27 Front Range communities — Fort Collins, Loveland, Windsor, Greeley, Timnath, Wellington, Johnstown, Eaton, Milliken, La Salle, Mead, Longmont, Boulder, Berthoud, Firestone, Frederick, Evans, Severance, Niwot, Erie, Brighton, Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue, and Carbon Valley. Filter the interactive calendar by month or city on this page. Data reviewed ${escapeHtml(reviewedLabel)}.</p>\n` +
     `      ${bodyHtml}\n` +
+    `      ${longmontHtml}\n` +
     `      <section class="prerendered-events-cta">\n` +
     `        <h2>Find a Home Near the Events You Love</h2>\n` +
     `        <p>Northern Colorado community events are a big part of why buyers choose this area. Explore homes for sale in any of our 27 communities, or get a free home valuation. Contact Schwartz and Associates at <strong>(970) 999-1407</strong>.</p>\n` +
