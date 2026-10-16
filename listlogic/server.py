@@ -95,6 +95,27 @@ def _require_admin(request: Request) -> dict:
     return user
 
 
+def _admin_stats_token_ok(request: Request) -> bool:
+    """Read-only cron access to GET /api/admin/stats only.
+
+    The board's cron has no admin session cookie. When ``ADMIN_STATS_TOKEN``
+    (or the existing ``CRON_SECRET``) is set, a request that presents it may
+    read the stats and nothing else — no other admin route accepts it. An
+    unset token never opens the endpoint, so the default is unchanged.
+    """
+    token = (os.environ.get("ADMIN_STATS_TOKEN") or os.environ.get("CRON_SECRET") or "").strip()
+    if not token:
+        return False
+    sent = (request.headers.get("X-Admin-Token") or "").strip()
+    if not sent:
+        auth = (request.headers.get("Authorization") or "").strip()
+        if auth.lower().startswith("bearer "):
+            sent = auth[7:].strip()
+    if not sent:
+        sent = (request.query_params.get("token") or "").strip()
+    return bool(sent) and hmac.compare_digest(sent, token)
+
+
 def _client_ip(request: Request) -> str:
     """Best-effort client IP behind Railway's proxy."""
     fwd = request.headers.get("x-forwarded-for") or request.headers.get("X-Forwarded-For") or ""
@@ -1995,7 +2016,9 @@ def admin_presentations(request: Request, q: str = ""):
 def admin_stats(request: Request):
     import auth_service
 
-    _require_admin(request)
+    # A read-only stats token (cron) or an admin session cookie both read here.
+    if not _admin_stats_token_ok(request):
+        _require_admin(request)
     return {"stats": auth_service.admin_stats()}
 
 
