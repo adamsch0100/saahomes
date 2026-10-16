@@ -6817,6 +6817,7 @@ export const neighborhoods = [
     walkScore: 30,
     metaDescription: 'Bluestem Frederick real estate — newer Frederick subdivision with contemporary homes, mountain views, and easy I-25 access. Carbon Valley living from SAA Homes.',
     keywords: 'Bluestem Frederick, Bluestem Green Frederick, Frederick Colorado homes, Carbon Valley subdivisions, Frederick new construction, south Frederick real estate',
+    youtubeId: 'FJwEpa2UQF0',
     neighborhoodHighlights: [
       { title: 'Newer construction', description: 'Contemporary homes built after 2005 with modern floor plans and finishes.' },
       { title: 'Carbon Valley location', description: 'Minutes to Frederick shops, dining, and I-25 for commutes to Boulder, Longmont, or Denver.' },
@@ -6847,6 +6848,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.11', longitude: '-104.95' },
     metaDescription: 'Frederick Foothills - newer homes with mountain views near I-25 in Frederick. SAA Homes.',
     keywords: 'Frederick Foothills, Frederick Colorado new homes, I-25 corridor Frederick, mountain view homes Frederick',
+    youtubeId: 'TyHGN-yAB5k',
     neighborhoodHighlights: [
       { title: 'Mountain views', description: 'Elevated lots provide panoramic Front Range and Longs Peak views.' },
       { title: 'Commuter location', description: 'Located on I-25 - 20 minutes to Boulder, 40 minutes to Denver, 10 minutes to Longmont.' },
@@ -6878,6 +6880,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.105', longitude: '-104.945' },
     metaDescription: 'Frederick Farms - established Frederick neighborhood with generous lots and small-town character. SAA Homes.',
     keywords: 'Frederick Farms, established Frederick homes, Frederick family neighborhood, central Frederick real estate',
+    youtubeId: 'YKKe66MP9NM',
     neighborhoodHighlights: [
       { title: 'Established character', description: 'Mature trees and well-maintained homes create a settled, welcoming family neighborhood.' },
       { title: 'Generous lots', description: 'Larger lot sizes with room for gardens, play areas, and outdoor living.' },
