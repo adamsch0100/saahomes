@@ -244,6 +244,12 @@ export default function BlogPostPage() {
             </div>
           )}
 
+          {post.answerFirst && (
+            <div className="mb-8 p-5 bg-amber-50 border-l-4 border-amber-400 rounded-r-xl">
+              <p className="text-lg text-gray-800 leading-relaxed">{post.answerFirst}</p>
+            </div>
+          )}
+
           <p className="text-xl text-gray-700 leading-relaxed mb-10">{post.excerpt}</p>
 
           {post.relatedLinks && <RelatedLinksBox links={post.relatedLinks} title="Jump to program guides" />}

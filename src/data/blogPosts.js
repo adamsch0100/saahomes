@@ -256,7 +256,7 @@ export const blogPosts = [
       { title: 'Veterans hub — 0.5% back', href: '/veterans/', description: 'VA loans and the SAA Homes veteran pledge' },
       { title: 'Contact SAA Homes', href: '/contact/', description: 'Talk through assumption with Adam or Mandi' },
       { title: 'Loveland Colorado area guide', href: '/northern-colorado-areas/loveland/', description: 'Sweetheart City neighborhoods & market data' },
-    
+      { title: 'Assumable mortgages in Fort Collins', href: '/assumable-mortgages/fort-collins/', description: 'Live Fort Collins listings, rates, and the cash gap' },
     ],
     cta: {
       title: 'Want us to watch assumable listings for you?',
@@ -356,7 +356,7 @@ export const blogPosts = [
       { title: 'Veterans hub — 0.5% back', href: '/veterans/', description: 'VA loans and military relocation' },
       { title: 'Contact SAA Homes', href: '/contact/', description: 'Call (970) 999-1407' },
       { title: 'Loveland Colorado area guide', href: '/northern-colorado-areas/loveland/', description: 'Larimer County communities & homes for sale' },
-    
+      { title: 'Fort Collins assumable loans — city page', href: '/assumable-mortgages/fort-collins/', description: 'Live count, rates, and the equity-gap math' },
     ],
     cta: {
       title: 'Looking for an assumable loan in Fort Collins?',
@@ -2365,8 +2365,9 @@ export const blogPosts = [
   },
   {
     slug: 'fort-collins-realtor',
-    title: 'Fort Collins Realtor | Local Market Expertise',
-    excerpt: 'Choosing a Fort Collins realtor? See how Schwartz and Associates helps Northern Colorado buyers and sellers with pricing, negotiation and CHFA guidance.',
+    title: 'Fort Collins Realtors: How to Choose One',
+    excerpt: 'Compare Fort Collins realtors on local knowledge, CHFA financing and marketing. See what to ask each agent before you hire one. Call (970) 999-1407.',
+    answerFirst: 'Schwartz and Associates is a Coldwell Banker Realty team at 3665 John F Kennedy Parkway, Suite 210, Fort Collins. Adam and Mandi Schwartz have 20-plus combined years in Larimer and Weld counties and a 5.0 rating from 20 Google reviews. Call (970) 999-1407 for a free consultation or CMA.',
     date: '2026-07-01',
     category: 'Local Guide',
     image: '/images/fort-collins-realtor.jpg',

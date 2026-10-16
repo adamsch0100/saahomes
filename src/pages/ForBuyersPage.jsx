@@ -140,6 +140,15 @@ export default function ForBuyersPage() {
               <a href="/northern-colorado-areas/" className="text-black font-semibold hover:underline">Explore All Areas →</a>
             </div>
 
+            <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow border-2 border-[rgb(var(--brand-accent-rgb)/0.3)]">
+              <h3 className="text-2xl font-bold mb-4 font-serif">Assumable VA &amp; FHA Loans</h3>
+              <p className="text-gray-700 mb-4">
+                Take over a seller&apos;s existing VA or FHA rate instead of starting a new loan. See the rate each Fort Collins listing carries and the cash gap to close.
+              </p>
+              <a href="/assumable-mortgages/fort-collins/" className="text-black font-semibold hover:underline">Fort Collins assumable loans →</a>
+              <a href="/assumable-mortgages/" className="block mt-3 text-black font-semibold hover:underline">How assumption works →</a>
+            </div>
+
             <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow border-2 border-[rgb(var(--brand-accent-rgb)/0.4)]">
               <h3 className="text-2xl font-bold mb-4 font-serif">Veterans — VA Loans &amp; 0.5% Back</h3>
               <p className="text-gray-700 mb-4">

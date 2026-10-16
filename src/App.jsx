@@ -8,6 +8,7 @@ import HomePage from "./pages/HomePage.jsx";
 import PropertiesPage from "./pages/PropertiesPage.jsx";
 import ListingDetailPage from "./pages/ListingDetailPage.jsx";
 import { CITY_HOMES } from "./data/cityHomesData.js";
+import { assumableCities } from "./data/assumableCities.js";
 import FloatingContactBar from "./components/FloatingContactBar.jsx";
 import LeadCaptureChat from "./components/LeadCaptureChat.jsx";
 import { GA4_MEASUREMENT_ID, initGaDebugMode } from "./utils/analytics.js";
@@ -22,6 +23,7 @@ const ForSellersPage = lazy(() => import("./pages/ForSellersPage.jsx"));
 const LuxuryRealEstatePage = lazy(() => import("./pages/LuxuryRealEstatePage.jsx"));
 const VeteransPage = lazy(() => import("./pages/VeteransPage.jsx"));
 const AssumableMortgagesPage = lazy(() => import("./pages/AssumableMortgagesPage.jsx"));
+const AssumableCityPage = lazy(() => import("./pages/AssumableCityPage.jsx"));
 const CashHomeBuyersPage = lazy(() => import("./pages/CashHomeBuyersPage.jsx"));
 const SellMyHomeEatonPage = lazy(() => import("./pages/SellMyHomeEatonPage.jsx"));
 const FeaturedAreasPage = lazy(() => import("./pages/FeaturedAreasPage.jsx"));
@@ -210,6 +212,13 @@ export default function App() {
         <Route path="/veterans/" element={<AppLayout><LazyPage><VeteransPage /></LazyPage></AppLayout>} />
         <Route path="/assumable-mortgages" element={<AppLayout><LazyPage><AssumableMortgagesPage /></LazyPage></AppLayout>} />
         <Route path="/assumable-mortgages/" element={<AppLayout><LazyPage><AssumableMortgagesPage /></LazyPage></AppLayout>} />
+        {/* Assumable-mortgages-by-city pattern (board pat-06896-06) */}
+        {assumableCities.map((c) => (
+          <React.Fragment key={c.slug}>
+            <Route path={`/assumable-mortgages/${c.slug}`} element={<AppLayout><LazyPage><AssumableCityPage slug={c.slug} /></LazyPage></AppLayout>} />
+            <Route path={`/assumable-mortgages/${c.slug}/`} element={<AppLayout><LazyPage><AssumableCityPage slug={c.slug} /></LazyPage></AppLayout>} />
+          </React.Fragment>
+        ))}
         <Route path="/cash-home-buyers" element={<AppLayout><LazyPage><CashHomeBuyersPage /></LazyPage></AppLayout>} />
         <Route path="/cash-home-buyers/" element={<AppLayout><LazyPage><CashHomeBuyersPage /></LazyPage></AppLayout>} />
         <Route path="/sell-my-home-eaton" element={<AppLayout><LazyPage><SellMyHomeEatonPage /></LazyPage></AppLayout>} />

@@ -67,6 +67,13 @@ const REQUEST_DELAY_MS = 1000; // 2 workers × 1s spacing = hard 2 RPS cap
 const DOWNLOAD_TIMEOUT_MS = 30000;
 const DOWNLOAD_TIMEOUT_MAX_MS = 90000;
 
+// Cloudflare's R2 REST API answers a transient 500 (error code 10001
+// InternalError) or 503 (10043 ServiceUnavailable) with "Retry the request /
+// with exponential backoff". A single blip must not permanently mark a photo
+// failed, so retry those (and 429) with backoff before giving up.
+const UPLOAD_MAX_RETRIES = 2; // 3 attempts total
+const UPLOAD_BACKOFF_MS = 400; // 400ms, then 800ms
+
 /**
  * True when a download was aborted by our own timeout or by the upstream CDN
  * cutting the connection. The photo proxy already classifies these as expected
@@ -139,6 +146,14 @@ async function downloadPhoto(url, { listingId, idx, retries = 2, timeoutMs = DOW
   if (res.headers?.get?.('x-photo-fallback') === '1') {
     throw new PhotoDegradedError('photo proxy returned placeholder');
   }
+  // Our own photo proxy (or the CDN behind it) answers 502/503/504 when the
+  // upstream photo host is briefly unavailable — a transient gateway failure,
+  // the same class as the timeout and 429 cases above. Defer it and let the
+  // next sweep retry instead of raising an incident-level failure that reads
+  // as an outage (inc-6bb77347). A 500 still surfaces as a real failure.
+  if (res.status === 502 || res.status === 503 || res.status === 504) {
+    throw new PhotoDegradedError(`upstream gateway ${res.status} for ${url.slice(0, 80)}`);
+  }
   if (!res.ok) throw new Error(`HTTP ${res.status} for ${url.slice(0, 80)}`);
   return Buffer.from(await res.arrayBuffer());
 }
@@ -150,27 +165,45 @@ async function processPhoto(buf) {
   return { hero, thumb };
 }
 
-async function upload(key, body, contentType = 'image/webp') {
-  if (R2_API_TOKEN) {
-    // Cloudflare REST API auth (cfut_ token) — no S3 credentials needed.
-    const res = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${R2_ACCOUNT_ID}/r2/buckets/${R2_BUCKET}/objects/${encodeURIComponent(key)}`,
-      {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${R2_API_TOKEN}`,
-          'Content-Type': contentType,
-          'Cache-Control': 'public, max-age=31536000, immutable',
-        },
-        body,
-      }
-    );
-    if (!res.ok) {
-      const err = await res.text().catch(() => '');
-      throw new Error(`R2 REST upload ${res.status}: ${err.slice(0, 120)}`);
+/** Transient R2/Cloudflare replies worth retrying: rate limits and server
+ *  errors (Cloudflare error codes 10001 / 10043, HTTP 500 / 503). A 4xx such
+ *  as 401/403 is a credential/scope problem — retrying never helps. */
+export function isRetryableUploadStatus(status) {
+  return status === 429 || status >= 500;
+}
+
+async function uploadViaRest(key, body, contentType, attempt = 0) {
+  // Cloudflare REST API auth (cfut_ token) — no S3 credentials needed. The
+  // body is a Buffer, so it can be re-sent safely on a retry.
+  const res = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${R2_ACCOUNT_ID}/r2/buckets/${R2_BUCKET}/objects/${encodeURIComponent(key)}`,
+    {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${R2_API_TOKEN}`,
+        'Content-Type': contentType,
+        'Cache-Control': 'public, max-age=31536000, immutable',
+      },
+      body,
     }
-    return;
+  );
+  if (res.ok) return;
+  const err = await res.text().catch(() => '');
+  if (isRetryableUploadStatus(res.status) && attempt < UPLOAD_MAX_RETRIES) {
+    await new Promise((r) => setTimeout(r, UPLOAD_BACKOFF_MS * 2 ** attempt));
+    return uploadViaRest(key, body, contentType, attempt + 1);
   }
+  if (isRetryableUploadStatus(res.status)) {
+    // Retries exhausted on a documented-transient upstream error. Nothing is
+    // stored for this photo; the next sweep re-queues the listing. Warn, don't
+    // raise an incident for Cloudflare's own 5xx.
+    throw new PhotoDegradedError(`R2 REST upload ${res.status}: ${err.slice(0, 120)}`);
+  }
+  throw new Error(`R2 REST upload ${res.status}: ${err.slice(0, 120)}`);
+}
+
+async function upload(key, body, contentType = 'image/webp') {
+  if (R2_API_TOKEN) return uploadViaRest(key, body, contentType);
   const s3Client = getS3();
   if (!s3Client) throw new Error('no R2 auth configured');
   await s3Client.send(new PutObjectCommand({

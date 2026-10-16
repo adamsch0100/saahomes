@@ -2,6 +2,7 @@ import { blogPosts } from './blogPosts.js';
 import { areaSeoPages, getAreaExactTitle } from './areaSeo.js';
 import { neighborhoods } from './neighborhoods.js';
 import { CITY_HOMES, getCityHomesPath } from './cityHomesData.js';
+import { assumableCities } from './assumableCities.js';
 import {
   CITATION_HUB_PATH,
   CITATION_HUB_TITLE,
@@ -121,6 +122,18 @@ const staticPages = [
     ogImage: '/images/Fort-Collins-CO-Area-Guide.jpg',
     ogImageAlt: 'Assumable mortgages in Colorado — VA and FHA loan assumption guide',
   },
+  // Assumable-mortgages-by-city pattern (board pat-06896-06) — children of the hub
+  ...assumableCities.map((city) => ({
+    path: city.path,
+    priority: '0.85',
+    changefreq: 'weekly',
+    title: city.title,
+    description: city.description,
+    ogTitle: city.ogTitle,
+    ogDescription: city.ogDescription,
+    ogImage: city.heroImage,
+    ogImageAlt: `Assumable mortgages in ${city.city}, Colorado`,
+  })),
   {
     path: '/cash-home-buyers/',
     priority: '0.8',

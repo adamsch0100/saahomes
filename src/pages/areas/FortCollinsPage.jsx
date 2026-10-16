@@ -462,6 +462,32 @@ export default function FortCollinsPage() {
           </div>
         </section>
 
+      {/* Assumable VA/FHA loan cross-link from FC area page to the city assumable page (pattern pat-06896-06) */}
+      <section className="mb-12 py-8 px-6 bg-gray-50 rounded-lg border border-gray-200">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold font-serif mb-3">Fort Collins Homes With Assumable VA or FHA Loans</h2>
+          <p className="text-gray-700 mb-6">
+            Some Fort Collins sellers carry below-market VA or FHA loans a qualified buyer can take
+            over. See the current Fort Collins listings whose remarks mention an assumable loan, the
+            rate each one carries, and the cash gap to close.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/assumable-mortgages/fort-collins/"
+              className="inline-flex items-center justify-center px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Fort Collins assumable loans &rarr;
+            </Link>
+            <Link
+              to="/assumable-mortgages/"
+              className="inline-flex items-center justify-center px-8 py-3 border-2 border-black text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-colors"
+            >
+              How assumption works
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Cash-buyer cross-link from FC area page to cash-home-buyers blog (P0 internal link equity) */}
       <section className="mb-12 py-8 px-6 bg-white rounded-lg border border-gray-200">
         <div className="max-w-3xl mx-auto text-center">

@@ -8,6 +8,7 @@ import {
   buildAreaGuidesItemListSchema,
 } from '../src/utils/seoConstants.js';
 import { areaSeoPages, buildAreaPageSchemas } from '../src/data/areaSeo.js';
+import { getAssumableCity } from '../src/data/assumableCities.js';
 import { getReviewSchema } from '../src/data/reviews.js';
 import { CITY_HOMES, getCityHomes, getCityHomesPath } from '../src/data/cityHomesData.js';
 import { neighborhoods } from '../src/data/neighborhoods.js';
@@ -282,6 +283,12 @@ function matchBlogPost(path) {
   const match = path.match(/^\/blog\/([^/]+)\/$/);
   if (!match) return null;
   return blogPosts.find((p) => p.slug === match[1]) || null;
+}
+
+function matchAssumableCityPage(path) {
+  const match = path.match(/^\/assumable-mortgages\/([^/]+)\/$/);
+  if (!match) return null;
+  return getAssumableCity(match[1]) || null;
 }
 
 function matchChfaPage(path) {
@@ -1045,6 +1052,12 @@ function injectBlogBody(html, post) {
   if (readTime) headerHtml += ` &middot; ${readTime}`;
   headerHtml += `</p>\n`;
 
+  // Answer-first block (top of the article, before the sections)
+  let answerFirstHtml = '';
+  if (post.answerFirst) {
+    answerFirstHtml = `      <p class="prerendered-answer-first">${escapeHtml(post.answerFirst)}</p>\n`;
+  }
+
   // Build sections
   let sectionsHtml = '';
   if (post.sections && post.sections.length > 0) {
@@ -1133,6 +1146,7 @@ function injectBlogBody(html, post) {
     `    <article class="prerendered-blog-content">\n` +
     `      <h1>${title}</h1>\n` +
     `${headerHtml}` +
+    `${answerFirstHtml}` +
     `${sectionsHtml}` +
     `${faqHtml}` +
     `${relatedHtml}` +
@@ -1315,6 +1329,81 @@ function injectMortgageRatesBody(html) {
 
   return html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
 }
+// ---------------------------------------------------------------------------
+// Assumable-mortgages-by-city pages (pattern pat-06896-06) — visible body for
+// crawlers that do not run JS. Counts and examples are the verified snapshot in
+// src/data/assumableCities.js (IRES via /api/listings?assumable=true, dated).
+// ---------------------------------------------------------------------------
+function injectAssumableCityBody(html, city) {
+  const searchPath = `/properties/?city=${encodeURIComponent(city.city)}&assumable=true`;
+
+  const examplesHtml = (city.examples || [])
+    .map(
+      (ex) =>
+        `          <li>` +
+        `<strong>${escapeHtml(ex.address)}</strong> (${escapeHtml(city.city)}, CO ${escapeHtml(ex.zip)}) &mdash; ` +
+        `${escapeHtml(ex.price)} &middot; ${escapeHtml(ex.beds)} / ${escapeHtml(ex.baths)} &middot; ${escapeHtml(ex.size)} &middot; built ${escapeHtml(String(ex.year))}. ` +
+        `${escapeHtml(ex.loanType)}${ex.rate ? ` at ${escapeHtml(ex.rate)}` : ''}. ${escapeHtml(ex.note)}` +
+        `</li>`
+    )
+    .join('\n');
+
+  const sectionsHtml = (city.sections || [])
+    .map(
+      (section) =>
+        `      <section>\n` +
+        `        <h2>${escapeHtml(section.heading)}</h2>\n` +
+        (section.paragraphs || []).map((p) => `        <p>${escapeHtml(p)}</p>`).join('\n') +
+        `\n      </section>`
+    )
+    .join('\n');
+
+  const linksHtml = (city.relatedLinks || [])
+    .map(
+      (l) =>
+        `          <li><a href="${escapeAttr(l.href)}">${escapeHtml(l.title)}</a>${l.description ? ` &mdash; ${escapeHtml(l.description)}` : ''}</li>`
+    )
+    .join('\n');
+
+  const faqHtml = (city.faqs || [])
+    .map(
+      (faq) =>
+        `        <div itemscope="" itemprop="mainEntity" itemtype="https://schema.org/Question">\n` +
+        `          <h3 itemprop="name">${escapeHtml(faq.q)}</h3>\n` +
+        `          <div itemscope="" itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">\n` +
+        `            <p itemprop="text">${escapeHtml(faq.a)}</p>\n` +
+        `          </div>\n        </div>`
+    )
+    .join('\n');
+
+  const bodyContent =
+    `\n` +
+    `    <div class="prerendered-assumable-city">\n` +
+    `      <h1>${escapeHtml(city.h1)}</h1>\n` +
+    `      <p>${escapeHtml(city.city)} had ${city.snapshot.fortCollinsActive} active homes for sale whose public IRES MLS remarks mention an assumable VA or FHA loan on ${escapeHtml(city.snapshot.date)}. Current ${escapeHtml(city.city)} remarks carry rates from 2.25% to 5.56%, out of ${city.snapshot.coloradoActive} assumable listings statewide. IRES has no structured assumable-loan field, so a flag is a screening tool and still has to be confirmed with the lender.</p>\n` +
+    `      <section>\n` +
+    `        <h2>Current ${escapeHtml(city.city)} assumable listings</h2>\n` +
+    `        <ul>\n${examplesHtml}\n        </ul>\n` +
+    `        <p><a href="${escapeAttr(searchPath)}">Open the live ${escapeHtml(city.city)} assumable search</a> for the current set.</p>\n` +
+    `      </section>\n` +
+    `${sectionsHtml}\n` +
+    `      <section>\n` +
+    `        <h2>Keep going</h2>\n` +
+    `        <ul>\n${linksHtml}\n        </ul>\n` +
+    `      </section>\n` +
+    `      <section class="prerendered-faq">\n` +
+    `        <h2>${escapeHtml(city.city)} assumable loan questions</h2>\n` +
+    `${faqHtml}\n` +
+    `      </section>\n` +
+    `      <section class="prerendered-cta">\n` +
+    `        <h2>Work With Schwartz and Associates in ${escapeHtml(city.city)}</h2>\n` +
+    `        <p>Ready to look at assumable homes in ${escapeHtml(city.city)}? Contact SAA Homes at <strong>(970) 999-1407</strong> or visit <a href="${SITE_URL}/contact/">our contact page</a> for a free consultation. Updated ${escapeHtml(city.snapshot.date)}.</p>\n` +
+    `      </section>\n` +
+    `    </div>\n  `;
+
+  return html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+}
+
 function injectChfaCountyLimitsBody(html) {
   const rows = CHFA_COUNTY_TABLE_ROWS.map(
     (row) =>
@@ -2280,6 +2369,45 @@ function buildRouteSchemas(route) {
 
   // Cash Home Buyers, Luxury, and Veterans pages are handled via MONEY_PAGE_CONTENT faqs above
 
+  // Assumable-mortgages-by-city pattern (pat-06896-06) — Service + FAQPage +
+  // BreadcrumbList so crawlers see the schema without running JS.
+  const assumableCity = matchAssumableCityPage(path);
+  if (assumableCity) {
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'Service',
+      name: `Assumable Mortgages in ${assumableCity.city}, Colorado`,
+      description: assumableCity.description,
+      url: canonical,
+      serviceType: 'Assumable mortgage (VA/FHA loan assumption) guidance',
+      provider: {
+        '@type': 'RealEstateAgent',
+        name: BUSINESS.name,
+        url: BUSINESS.url,
+        telephone: BUSINESS.telephone,
+      },
+      areaServed: `${assumableCity.city}, CO`,
+    });
+    if (assumableCity.faqs && assumableCity.faqs.length > 0) {
+      schemas.push({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: assumableCity.faqs.map((faq) => ({
+          '@type': 'Question',
+          name: faq.q,
+          acceptedAnswer: { '@type': 'Answer', text: faq.a },
+        })),
+      });
+    }
+    schemas.push(
+      buildBreadcrumbList([
+        { name: 'Home', url: `${SITE_URL}/` },
+        { name: 'Assumable Mortgages', url: `${SITE_URL}/assumable-mortgages/` },
+        { name: `Assumable Mortgages in ${assumableCity.city}`, url: canonical },
+      ])
+    );
+  }
+
   // Citation hub — FAQPage + BreadcrumbList for the sourced statistics page.
   if (path === CITATION_HUB_PATH) {
     schemas.push({
@@ -2600,6 +2728,7 @@ async function main() {
     const blogPost = matchBlogPost(route.path);
     const chfaPage = matchChfaPage(route.path);
     const moneyPage = matchMoneyPage(route.path);
+    const assumableCityPage = matchAssumableCityPage(route.path);
     if (route.path === '/events/' || route.path === '/events') {
       html = injectEventsBody(html);
       console.log('  Body: injected events calendar with monthly groupings + CTA');
@@ -2617,6 +2746,11 @@ async function main() {
       html = injectBlogBody(html, blogPost);
       console.log(
         `  Body: injected blog "${blogPost.slug}" with ${blogPost.sections?.length || 0} sections + ${blogPost.faqs?.length || 0} FAQs + CTA`
+      );
+    } else if (assumableCityPage) {
+      html = injectAssumableCityBody(html, assumableCityPage);
+      console.log(
+        `  Body: injected assumable city "${assumableCityPage.slug}" with ${assumableCityPage.examples?.length || 0} examples + ${assumableCityPage.faqs?.length || 0} FAQs`
       );
     } else if (chfaPage) {
       html = injectChfaBody(html, chfaPage);

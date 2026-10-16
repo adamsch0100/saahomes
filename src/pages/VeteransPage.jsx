@@ -340,6 +340,14 @@ export default function VeteransPage() {
             >
               See how VA loan assumption works →
             </Link>
+            <span className="text-gray-500 mx-2">·</span>
+            <Link
+              to="/assumable-mortgages/fort-collins/"
+              className="inline-flex items-center font-semibold hover:underline"
+              style={{ color: GOLD }}
+            >
+              Assumable VA loans in Fort Collins →
+            </Link>
           </div>
         </div>
       </section>

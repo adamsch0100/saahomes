@@ -218,10 +218,23 @@ export function isUpstreamRateLimitError(error) {
   return status === 429;
 }
 
+/** True when the upstream media CDN answered with a transient gateway status
+ *  (502 Bad Gateway, 503 Service Unavailable, 504 Gateway Timeout). Those mean
+ *  "the host behind the CDN is briefly unavailable — try again", not a fault of
+ *  ours, so degrade to the branded placeholder instead of logging an incident
+ *  and answering 502 (inc-6bb77347). A plain 500 stays a genuine failure: the
+ *  proxy must not hide an upstream that is consistently broken. */
+export function isUpstreamServerError(error) {
+  if (!error) return false;
+  const status = error.status ?? error.cause?.status;
+  return status === 502 || status === 503 || status === 504;
+}
+
 export function isExpectedPhotoDegradation(error) {
   return Boolean(
     error
-    && (error.photoExpired || isUpstreamAbortError(error) || isUpstreamRateLimitError(error)),
+    && (error.photoExpired || isUpstreamAbortError(error)
+      || isUpstreamRateLimitError(error) || isUpstreamServerError(error)),
   );
 }
 
@@ -368,11 +381,12 @@ export const getListingPhoto = async (req, res) => {
     if (error.status === 404) return res.status(404).json({ error: 'Photo unavailable' });
     // Expected degradation — expired signed URL with no refresh available
     // (IRES quota guard tripped, no IRES token, or a sold row), an upstream
-    // abort/timeout, or an upstream rate-limit (HTTP 429). These are transient
-    // upstream conditions, not faults of ours, so log a rate-limited warning
-    // and serve the branded placeholder with HTTP 200 instead of a 502 that
-    // reads as an outage (lsn-a2fc0a, lsn-267b91, lsn-6364af). Real fetch
-    // failures keep the incident-level log + 502.
+    // abort/timeout, an upstream rate-limit (HTTP 429), or an upstream gateway
+    // blip (502/503/504). These are transient upstream conditions, not faults
+    // of ours, so log a rate-limited warning and serve the branded placeholder
+    // with HTTP 200 instead of a 502 that reads as an outage (lsn-a2fc0a,
+    // lsn-267b91, lsn-6364af, inc-6bb77347). Real fetch failures (e.g. a 500)
+    // keep the incident-level log + 502.
     if (isExpectedPhotoDegradation(error)) {
       const now = Date.now();
       if (now - degradeLoggedAt > 60000) {

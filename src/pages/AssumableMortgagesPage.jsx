@@ -402,6 +402,13 @@ export default function AssumableMortgagesPage() {
               </Link>
             ))}
           </div>
+          <p className="text-center mt-8 text-lg text-gray-700">
+            Looking specifically at Fort Collins?{" "}
+            <Link to="/assumable-mortgages/fort-collins/" className="font-semibold underline">
+              See the Fort Collins assumable listings and rates
+            </Link>
+            .
+          </p>
         </div>
       </section>
 

@@ -6,6 +6,7 @@ import {
   isExpectedPhotoDegradation,
   isUpstreamAbortError,
   isUpstreamRateLimitError,
+  isUpstreamServerError,
   isValidPhotoId,
   getListingPhotoDefault,
 } from './photoController.js';
@@ -70,6 +71,30 @@ test('isUpstreamRateLimitError flags an upstream HTTP 429', () => {
 test('an upstream 429 is expected degradation, in the fetch 429 shape the proxy throws', () => {
   const err = Object.assign(new Error('photo fetch 429'), { status: 429 });
   assert.equal(isExpectedPhotoDegradation(err), true);
+});
+
+test('isUpstreamServerError flags transient gateway statuses, not a 500', () => {
+  for (const status of [502, 503, 504]) {
+    assert.equal(isUpstreamServerError(Object.assign(new Error(`photo fetch ${status}`), { status })), true);
+  }
+  assert.equal(isUpstreamServerError(Object.assign(new Error('photo fetch 500'), { status: 500 })), false);
+  assert.equal(isUpstreamServerError(Object.assign(new Error('photo fetch 429'), { status: 429 })), false);
+  const wrapped = new Error('fetch failed');
+  wrapped.cause = { status: 502 };
+  assert.equal(isUpstreamServerError(wrapped), true);
+  assert.equal(isUpstreamServerError(undefined), false);
+});
+
+test('an upstream 502/503/504 degrades to the placeholder, a 500 stays an incident', () => {
+  for (const status of [502, 503, 504]) {
+    const err = Object.assign(new Error(`photo fetch ${status}`), { status });
+    assert.equal(isExpectedPhotoDegradation(err), true, `${status} must be expected degradation`);
+  }
+  assert.equal(
+    isExpectedPhotoDegradation(Object.assign(new Error('photo fetch 500'), { status: 500 })),
+    false,
+    'a 500 stays a real fetch failure',
+  );
 });
 
 test('isValidPhotoId accepts numeric PKs and MLS ListingIds', () => {

@@ -37,7 +37,7 @@ export const BLOG_TITLES = {
   "northern-colorado-events-guide-2026": "Northern Colorado Events & Happenings Guide — 2026",
   "selling-your-home-in-fort-collins": "Sell My Home in Fort Collins: 2026 Seller Guide",
   "selling-your-home-in-windsor-colorado": "Selling Your Home in Windsor, Colorado: A Complete 2026 Guide",
-  "fort-collins-realtor": "Fort Collins Realtor | Local Market Expertise",
+  "fort-collins-realtor": "Fort Collins Realtors: How to Choose One",
   "buying-a-home-in-loveland": "Your Complete Guide to Buying a Home in Loveland, Colorado",
   "buying-a-home-in-greeley": "Your Complete Guide to Buying a Home in Greeley, Colorado",
   "selling-your-home-in-loveland": "Selling Your Home in Loveland, Colorado: A Complete 2026 Guide",
