@@ -38,6 +38,7 @@
 .tag-new { background: #d8f3e0; color: #166534; }
 .tag-fix { background: #fee2e2; color: #991b1b; }
 .tag-improve { background: #e0e7ff; color: #3730a3; }
+.changelog-updated { color: var(--muted); font-size: 0.85rem; margin: 0 0 18px; }
 
 .feedback-band { background: var(--card); border: 1px dashed var(--line); border-radius: var(--radius); padding: 22px 26px; margin: 40px 0; text-align: center; }
 .feedback-band p { color: var(--muted); font-size: 0.95rem; margin: 0 0 14px; }
@@ -87,6 +88,69 @@
 
 <div class="container">
   <section class="section">
+    <p class="changelog-updated">Last updated: October 16, 2026</p>
+
+    <div class="changelog-entry">
+      <div class="date">October 12, 2026</div>
+      <h2><span class="tag tag-new">New</span> Resources hub with copyable citations</h2>
+      <ul>
+        <li>/resources/ is now a real hub that links the housing and listing-price statistics pages, instead of a 404.</li>
+        <li>Every stat carries a Copy citation line that credits the source, so a number can be quoted in a listing presentation with its attribution attached.</li>
+      </ul>
+    </div>
+
+    <div class="changelog-entry">
+      <div class="date">October 12, 2026</div>
+      <h2><span class="tag tag-fix">Fix</span> Weekly report refresh on a cached market pull</h2>
+      <ul>
+        <li>The weekly report no longer crashes when the market data comes from the same-day cache — the listed and sold dates are read as dates again, so the week-over-week stats compute.</li>
+      </ul>
+    </div>
+
+    <div class="changelog-entry">
+      <div class="date">October 9, 2026</div>
+      <h2><span class="tag tag-new">New</span> Sign in with a code, and start from a real address</h2>
+      <ul>
+        <li>Sign in from the login page: the email carries a 6-digit code you type on the same page, and it sends in the background so the request answers right away. Sessions last 60 days and roll forward on every visit, signing out lands you on login with your email filled in, and you can reset your own password.</li>
+        <li>Starting from an address no longer prefills the demo house. A new address clears the previous home's facts, the comp filters follow the subject (size ±25%, beds and baths ±1), and only an active listing's price fills the list price.</li>
+        <li>A verify link opened twice no longer errors when you are signed in.</li>
+      </ul>
+    </div>
+
+    <div class="changelog-entry">
+      <div class="date">September 2, 2026</div>
+      <h2><span class="tag tag-new">New</span> Listing flipbook page</h2>
+      <ul>
+        <li>A new page explains the flipbook as the seller leave-behind that recaps the pricing decision, with the demo and create-account links.</li>
+      </ul>
+    </div>
+
+    <div class="changelog-entry">
+      <div class="date">September 1, 2026</div>
+      <h2><span class="tag tag-improve">Improved</span> Fingerprint vitals, week by week</h2>
+      <ul>
+        <li>Appointment numbers freeze at Generate, and months of inventory and sold stats are rebuilt as of each week, so sellers can walk the prior weeks.</li>
+        <li>Weekly reports pause when the listing goes under contract.</li>
+        <li>The product video is now on the homepage.</li>
+      </ul>
+    </div>
+
+    <div class="changelog-entry">
+      <div class="date">August 29, 2026</div>
+      <h2><span class="tag tag-fix">Fix</span> Marketing links land on the right pages</h2>
+      <ul>
+        <li>Homepage and marketing CTAs now point at the pricing, signup, and login pages, so they no longer bounce to the login wall.</li>
+      </ul>
+    </div>
+
+    <div class="changelog-entry">
+      <div class="date">August 26, 2026</div>
+      <h2><span class="tag tag-new">New</span> Pricing strategy for the listing appointment</h2>
+      <ul>
+        <li>New page on pricing strategy for the listing appointment, aimed at the conversation before the seller signs.</li>
+      </ul>
+    </div>
+
     <div class="changelog-entry">
       <div class="date">August 25, 2026</div>
       <h2><span class="tag tag-new">New</span> After they list: price, condition, location</h2>

@@ -53,6 +53,34 @@
   "dateModified": "2026-08-12"
 }
 </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is price × odds × supply in real estate?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Price × odds × supply is ListLogic's method for pricing a listing in front of a seller. Three inputs go in: the list price being tested, the odds of a clean sale in a realistic window (typically 60–90 days), and the supply — the comparable homes a buyer would genuinely cross-shop against this one at that price." }
+    },
+    {
+      "@type": "Question",
+      "name": "Where do the odds and supply numbers come from?",
+      "acceptedAnswer": { "@type": "Answer", "text": "They come from a custom competitive set built for the home — size, beds, baths, garage, lot, age and condition — matched from a nationwide market search or an uploaded MLS export rather than a zip-code average or a city-wide months-of-inventory figure. Supply counts the homes a buyer would actually cross-shop at that price, and the odds curve is modeled from that field." }
+    },
+    {
+      "@type": "Question",
+      "name": "What does the seller see with price × odds × supply?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The seller sees one movable price curve. Raise the list price and the competing field shifts to nicer, pricier homes while the odds of a clean sale fall. The stretch-price trade-off is visible on screen instead of argued from a static comp packet." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does price × odds × supply require a live MLS feed?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. It needs a defensible competitive set, not a live MLS feed. ListLogic searches any market nationwide, or you upload any MLS export — Matrix, Flexmls, Bright MLS or a RESO-style CSV/TXT file — with no vendor approval and no data contract." }
+    }
+  ]
+}
+</script>
 </head>
 <body>
 <nav class="ll-nav">
@@ -106,6 +134,8 @@
 
     <h2>The trade-off is the story: price × odds × supply</h2>
     <p>What does "what happens if you stretch the price" actually mean? It's a three-part framework — and it's the heart of the soft-market listing presentation.</p>
+    <p>Price × odds × supply is ListLogic's method for pricing a listing in front of a seller. Three inputs go in. The list price is the number on the sign. Odds is the modeled likelihood of a clean sale in a realistic window, typically 60–90 days. Supply is the number of comparable homes a buyer would genuinely cross-shop against this one at that price.</p>
+    <p>The numbers come from a custom competitive set built for this home — size, beds, baths, garage, lot, age and condition, matched from a nationwide market search or an uploaded MLS export rather than a zip-code average. The seller sees one movable curve: raise the list price and the competing field shifts to nicer homes while the odds fall, so the trade-off is visible instead of argued. You can watch it on the <a href="/demo">free demo</a> or in the <a href="/runs/sample-2845/">sample run for 1843 24th Ave Ct in West Greeley</a>.</p>
 
     <h3 style="font-family:'Fraunces',serif;font-size:1.15rem;margin:26px 0 10px;">Odds</h3>
     <p>For each list price, what is the likelihood of selling within a realistic window (say, 60–90 days)? At market price, odds are high. As the price climbs above the competitive set, the odds don't drop gently — they fall off a cliff, because the property moves into a smaller pool of buyers.</p>
