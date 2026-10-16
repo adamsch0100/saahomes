@@ -295,7 +295,18 @@ test('tour texts: confirmation from the cockpit, then a reminder', { skip }, asy
     [peak.id, lena.id]
   );
   const start = new Date(NOON_MT.getTime() + 20 * 3600000); // tomorrow 8am Mountain
-  const r = await call('POST', `/agent/crm/tours/${tour.id}/confirm`, { auth: tok.agent, body: { start: start.toISOString() } });
+  // The cockpit refuses a tour time already in the past, compared against the real
+  // wall clock. This file's simulated noon (NOON_MT) is a fixed date, so once the
+  // calendar passes it the still-fixed "tomorrow" is rejected. Pin the clock to the
+  // same simulated now for the request so the test doesn't rot as the date moves.
+  const wallClock = Date.now;
+  Date.now = () => NOON_MT.getTime();
+  let r;
+  try {
+    r = await call('POST', `/agent/crm/tours/${tour.id}/confirm`, { auth: tok.agent, body: { start: start.toISOString() } });
+  } finally {
+    Date.now = wallClock;
+  }
   assert.equal(r.status, 200, r.text);
   assert.equal(r.json.data.texted, true);
   assert.match(twilio.at(-1).form.Body, /^Peak Realty: You're all set! Your tour of 2 homes is confirmed for Thu, Oct 15, 8:00 AM with Andy\./);
