@@ -240,7 +240,7 @@ export const blogPosts = [
   {
     slug: 'assumable-mortgage-colorado',
     title: 'Assumable Mortgages in Colorado (2026 Guide)',
-    excerpt: 'An assumable VA or FHA loan lets a qualified buyer take over the seller’s rate and remaining term. How it works in Colorado, what the IRES feed actually tells us, and how to search live assumable listings in Northern Colorado.',
+    excerpt: 'An assumable VA or FHA loan lets a buyer take over the seller’s rate and term. How it works in Colorado and where to find live assumable listings.',
     date: '2026-08-13',
     category: 'Buyer Tips',
     image: '/images/buyers-hero.jpg',

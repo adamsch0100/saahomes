@@ -152,7 +152,7 @@ const faqs = [
 const PAGE_URL = "https://saahomes.com/colorado-champions-home-loan-program/";
 const PAGE_TITLE = "Colorado Champions Home Loan Program | CHFA First Responder Home Loans 2026 | SAA Homes";
 const PAGE_DESCRIPTION =
-  "Colorado's new CHFA Champions Home Loan Program expands eligibility for police, firefighters, EMTs, and 911 dispatchers. 110% income limits, up to $25K down payment help, and Northern Colorado guidance from SAA Homes. Expected late 2026.";
+  "Colorado Champions Home Loan expands CHFA eligibility for police, firefighters, EMTs and 911 dispatchers — 110% income limits and up to $25K DPA.";
 
 export default function ChampionsHomeLoanPage() {
   return (

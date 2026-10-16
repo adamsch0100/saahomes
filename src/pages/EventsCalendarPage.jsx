@@ -103,7 +103,7 @@ export default function EventsCalendarPage() {
     <>
       <SEO
         exactTitle="Northern Colorado Events Calendar 2026 | SAA Homes"
-        description="Browse Northern Colorado events by month or city — festivals, farmers markets, rodeos, and community celebrations across Fort Collins, Loveland, Windsor, Greeley, and 27 Front Range communities."
+        description="Northern Colorado events by month or city — festivals, farmers markets, rodeos and community celebrations across Fort Collins, Loveland and Greeley."
         canonical="https://saahomes.com/events/"
         ogTitle="Northern Colorado Events Calendar | SAA Homes"
         ogDescription="Find festivals, farmers markets, and community events across Northern Colorado — filter by month or city."
