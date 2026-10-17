@@ -2975,8 +2975,13 @@ def _apply_active_at(run_dir: Path, lock: dict | None, report: dict, df=None, sn
     if source not in ("agent", "sample"):
         subject = report.get("subject") if isinstance(report.get("subject"), dict) else {}
         found = ""
+        seen = str((snap or {}).get("as_of") or "") if isinstance(snap, dict) else ""
         if df is not None:
-            found = detect_subject_active_at(df, subject)
+            # A live subject row with no list date counts from the first pull we saw it in.
+            first_seen = str(lock.get("subject_first_seen") or seen)
+            found = detect_subject_active_at(df, subject, fallback_day=first_seen)
+            if found and not lock.get("subject_first_seen") and seen:
+                lock["subject_first_seen"] = seen
         if not found and snap is not None:
             found = detect_subject_active_at(snap, subject)
         if found:
@@ -3746,11 +3751,18 @@ def _save_pulse_brief(
     prev = _read_json_file(run_dir / "pulse_snapshot_prev.json")
     subject = report.get("subject") if isinstance(report.get("subject"), dict) else {}
     history = _read_json_file(run_dir / "fingerprint_history.json", [])
-    need_detect = str((lock or {}).get("active_at_source") or "") != "agent" and not (lock or {}).get("active_at")
-    need_pulse = not isinstance((lock or {}).get("market_pulse_now"), dict)
-    need_history_market = _history_missing_market(history)
-    df = _load_run_market(run_dir) if (need_detect or need_pulse or need_history_market) else None
+    # The saved market file is read on every rebuild: it is how the subject's
+    # own status and list price are picked up without waiting for a refresh.
+    df = _load_run_market(run_dir)
     lock = _apply_active_at(run_dir, lock, report, df=df, snap=snap)
+    subject_pull = {}
+    if df is not None:
+        from core import apply_subject_price, subject_pull_status
+
+        seen = str((snap or {}).get("as_of") or "") if isinstance(snap, dict) else ""
+        lock = apply_subject_price(lock, df, subject, as_of=seen or datetime.now().strftime("%Y-%m-%d"))
+        subject_pull = subject_pull_status(df, subject)
+        subject_pull["as_of"] = seen
     pulse = _ensure_market_pulse(run_dir, report, lock, df=df)
     if df is not None:
         history = _backfill_history_market_pulse(run_dir, report, lock, df, history)
@@ -3779,6 +3791,7 @@ def _save_pulse_brief(
         market_pulse=pulse,
     )
     brief["agent_fingerprint_url"] = agent_fp
+    brief["subject_pull"] = subject_pull
     (run_dir / "pulse_brief.json").write_text(
         json.dumps(brief, indent=2, default=str),
         encoding="utf-8",
@@ -4538,6 +4551,45 @@ async def save_fingerprint_active(run_id: str, request: Request):
     report = _read_json_file(run_dir / "presentation.json", {}) or {}
     _save_pulse_brief(run_dir, report, lock)
     return {"ok": True, "lock": lock, **_pulse_payload(run_dir)}
+
+
+@app.post("/api/runs/{run_id}/fingerprint/price")
+async def save_fingerprint_price(run_id: str, request: Request):
+    """Record a list-price change the agent knows about (the pull may lag or miss the subject)."""
+    from core import _fingerprint_date, record_subject_price
+
+    run_id = _safe_run_id(run_id)
+    _reject_sample_mutation(run_id)
+    _require_run_owner(request, run_id)
+    run_dir = OUTPUT_DIR / run_id
+    lock = _read_json_file(run_dir / "pulse.json") or {}
+    if not lock or not lock.get("locked_price"):
+        raise HTTPException(400, "Set the initial list price before recording a change")
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    if not isinstance(body, dict):
+        body = {}
+    if body.get("reset"):
+        lock.pop("current_price", None)
+        lock.pop("price_history", None)
+    else:
+        try:
+            price = float(body.get("price") or 0)
+        except (TypeError, ValueError):
+            price = 0.0
+        if price <= 0:
+            raise HTTPException(400, "Need the new list price")
+        day = _fingerprint_date(str(body.get("as_of") or "")) or datetime.now().strftime("%Y-%m-%d")
+        before = lock.get("current_price")
+        lock = record_subject_price(lock, price, as_of=day, source="agent")
+        if lock.get("current_price") == before and before is not None and abs(float(before) - price) >= 1:
+            raise HTTPException(400, "Price changes under $1,000 are not tracked")
+    (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
+    report = _read_json_file(run_dir / "presentation.json", {}) or {}
+    _save_pulse_brief(run_dir, report, lock)
+    return {"ok": True, "lock": lock, **_pulse_payload(run_dir, report)}
 
 
 @app.post("/api/runs/{run_id}/fingerprint/share")

@@ -240,6 +240,20 @@ body.is-seller .console {{ display:none; }}
 .drawer .meta {{ color:var(--muted); font-size:.88rem; line-height:1.4; }}
 .drawer ul {{ margin:6px 0 0 1.1rem; font-size:.88rem; line-height:1.45; }}
 .note {{ font-size:.78rem; color:var(--muted); margin-top:8px; }}
+.adds-up {{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:0 0 18px; }}
+.adds-up .kicker {{ font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--navy); font-weight:800; }}
+.adds-up h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.2rem; margin:2px 0 10px; }}
+.adds-up .rows {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }}
+@media (max-width:800px) {{ .adds-up .rows {{ grid-template-columns:1fr; }} }}
+.adds-up .pop {{ border:1px solid var(--line); border-radius:12px; padding:12px 14px; }}
+.adds-up .pop .pk {{ display:block; font-size:.62rem; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); font-weight:800; }}
+.adds-up .pop .pn {{ display:block; font-family:Fraunces,Georgia,serif; font-size:1.6rem; font-weight:700; color:var(--navy); line-height:1.1; margin:4px 0 2px; }}
+.adds-up .pop .ph {{ font-size:.8rem; color:var(--muted); line-height:1.4; }}
+.adds-up .math {{ margin:12px 0 0; font-size:.88rem; line-height:1.5; }}
+.adds-up .math b {{ font-family:Fraunces,Georgia,serif; }}
+.adds-up .ok {{ color:#2e7d32; font-weight:700; }}
+.adds-up .warn {{ color:#c0392b; font-weight:700; }}
+.pull-diag {{ background:#f4f6f9; border-radius:10px; padding:10px 12px; font-size:.82rem; line-height:1.45; margin:6px 0 10px; }}
 .price-call {{ background:#fff; border:1px solid var(--line); border-left:4px solid var(--muted); border-radius:12px; padding:12px 14px; margin:12px 0; }}
 .price-call strong {{ display:block; font-size:1rem; margin:4px 0; }}
 .price-call p {{ margin:0; font-size:.88rem; }}
@@ -1198,12 +1212,45 @@ function factsHtml(b, d) {{
   if (b.days_active || b.days_active) chips.push(['Days on market', String(b.days_active || b.days_active)]);
   else if (b.days_locked || b.days_locked) chips.push(['Days since created', String(b.days_locked || b.days_locked)]);
   const dg = d || b.digest || {{}};
+  if (dg.active_count != null) chips.push(['Similar homes active', String(dg.active_count)]);
   if (Number(dg.days_to_contract_since)) chips.push(['Similar homes to contract', dg.days_to_contract_since + ' days (median)']);
   if (Number(dg.dom_active_median)) chips.push(['Similar actives on market', dg.dom_active_median + ' days (median)']);
   if (b.as_of) chips.push(['Market as of', prettyDate(b.as_of)]);
   return '<div class="facts">' + chips.map(function (x) {{
     return '<div class="fact"><span class="fk">' + esc(x[0]) + '</span><span class="fv">' + esc(x[1]) + '</span></div>';
   }}).join('') + '</div>';
+}}
+function addsUpHtml(d) {{
+  // Three populations get confused for each other: the whole search pull, the
+  // similar set today, and the original similar set. Show all three and the
+  // identity that ties the last two together.
+  const dg = d || {{}};
+  const r = dg.reconcile || {{}};
+  if (!r.original && !dg.active_count) return '';
+  const pack = ((DATA.brief || {{}}).market_pulse || {{}});
+  const latest = marketForWeek(latestWeekKey());
+  const pullN = latest.active_count != null ? latest.active_count : (pack.active_count != null ? pack.active_count : null);
+  const when = clockKind() === 'active' ? 'when you listed' : 'when this report was created';
+  const chips = (((DATA.brief || {{}}).comp_set || {{}}).chips || []);
+  const sizeChip = chips.find(function (c) {{ return /sf|sq/i.test(String((c && (c[1] || c.value)) || '')); }});
+  const band = sizeChip ? String(sizeChip[1] || sizeChip.value) : '';
+  const parts = [];
+  if (r.under_contract) parts.push(r.under_contract + ' under contract');
+  if (r.sold) parts.push(r.sold + ' sold');
+  if (r.gone) parts.push(r.gone + ' off the market');
+  const math = r.original
+    ? ('<b>' + r.original + '</b> similar homes were active ' + when + '. Today <b>' + r.still_active + '</b> of them are still active' +
+       (parts.length ? ' (' + parts.join(', ') + ')' : '') + ', and <b>' + r.new_since + '</b> new similar ' + (r.new_since === 1 ? 'home has' : 'homes have') + ' listed since. ' +
+       r.still_active + ' + ' + r.new_since + ' = <b>' + r.expected_active + '</b>' +
+       (r.adds_up ? ' <span class="ok">✓ matches the ' + r.active_now + ' similar actives today.</span>'
+                  : ' <span class="warn">does not match the ' + r.active_now + ' similar actives in the latest pull.</span> A home can drop from the pull without leaving the market; tap Refresh market now to re-pull.'))
+    : '';
+  return '<section class="adds-up"><div class="kicker">How the numbers add up</div><h2>Three counts, three different sets</h2>' +
+    '<div class="rows">' +
+      (pullN != null ? '<div class="pop"><span class="pk">Active in the search pull</span><span class="pn">' + pullN + '</span><span class="ph">Every active home the saved search returns, all sizes. This is the market vitals number.</span></div>' : '') +
+      '<div class="pop"><span class="pk">Similar homes active today</span><span class="pn">' + (dg.active_count != null ? dg.active_count : '—') + '</span><span class="ph">Homes in your size band' + (band ? ' (' + esc(band) + ')' : '') + ', not counting yours. Rank and the board use this set.</span></div>' +
+      (r.original ? '<div class="pop"><span class="pk">Original similar set</span><span class="pn">' + r.original + '</span><span class="ph">Similar homes active ' + when + '. Still active / under contract / sold tracks these.</span></div>' : '') +
+    '</div>' + (math ? '<p class="math">' + math + '</p>' : '') + '</section>';
 }}
 function priceCallHtml(d) {{
   // Agent-only weekly read on the list price; sellers hear it from their agent.
@@ -1265,12 +1312,14 @@ function marketPulseHtml(asOf) {{
   const days = Number((DATA.brief || {{}}).days_active || (DATA.brief || {{}}).days_locked || 0);
   const med = Number(now.median_dom || then.median_dom || 0);
   const rating = pack.home_rating || then.home_rating;
-  const activeLabel = isLatest ? 'Active now' : 'Active that week';
+  const activeLabel = isLatest ? 'Active in the pull' : 'Active that week';
+  const dg = DATA.digest || (DATA.brief || {{}}).digest || {{}};
+  const similarNote = (isLatest && dg.active_count != null) ? ' · similar to yours: ' + dg.active_count : '';
   const cells = [
     ['Months of inventory', pulseNum(now.months_of_inventory, 'inv'), pulseDeltaLine(now.months_of_inventory, then.months_of_inventory, 'inv', thenLab)],
     ['30-day odds', pulseNum(now.odds_of_selling, 'pct'), pulseDeltaLine(now.odds_of_selling, then.odds_of_selling, 'pct', thenLab)],
     ['Sales / month', pulseNum(now.absorption_rate, 'rate'), pulseDeltaLine(now.absorption_rate, then.absorption_rate, 'rate', thenLab)],
-    [activeLabel, String(now.active_count != null ? now.active_count : '—'), 'Including this home: ' + (now.with_yours != null ? now.with_yours : '—') + (then.active_count != null ? ' · was ' + then.active_count + ' ' + thenLab : '')],
+    [activeLabel, String(now.active_count != null ? now.active_count : '—'), 'Every home in the search, all sizes' + similarNote + (then.active_count != null ? ' · was ' + then.active_count + ' ' + thenLab : '')],
     ['Median days', pulseNum(now.median_dom, 'days'), pulseDeltaLine(now.median_dom, then.median_dom, 'days', thenLab)],
     ['Median sold', pulseNum(now.median_sold_price, 'money'), pulseDeltaLine(now.median_sold_price, then.median_sold_price, 'money', thenLab)],
     ['Median $ / sf', pulseNum(now.median_price_per_sqft, 'ppsf'), pulseDeltaLine(now.median_price_per_sqft, then.median_price_per_sqft, 'ppsf', thenLab)],
@@ -1900,6 +1949,7 @@ function render() {{
     filtersHtml() +
     factsHtml(b, d) +
     priceCallHtml(d || b.digest) +
+    addsUpHtml(d || b.digest) +
     marketPulseHtml() +
     fromAgentHtml() +
     boardHtml() +
@@ -1957,6 +2007,12 @@ function renderConsole() {{
     '<label>Initial list price</label>' +
     '<input type="number" id="lockPrice" value="' + (DATA.lock.locked_price || '') + '" step="1000">' +
     '<button type="button" class="btn-gold" id="btnLock">Update list price</button>' +
+    '<label>List price changed</label>' +
+    pullDiagHtml() +
+    '<input type="number" id="newPrice" value="' + ((DATA.lock.current_price && DATA.lock.current_price !== DATA.lock.locked_price) ? DATA.lock.current_price : '') + '" step="1000" placeholder="New list price">' +
+    '<input type="date" id="newPriceAt" value="' + esc(String(((DATA.lock.price_history || []).slice(-1)[0] || {{}}).as_of || '').slice(0,10)) + '">' +
+    '<button type="button" id="btnPrice">Record price change</button>' +
+    ((DATA.lock.price_history || []).length ? '<button type="button" id="btnPriceReset">Clear price changes</button>' : '') +
     '<label>Listed / went active</label>' +
     '<input type="date" id="activeAt" value="' + esc(String(DATA.active_at || '').slice(0,10)) + '">' +
     '<p class="cadence">' + (DATA.active_at
@@ -2016,6 +2072,22 @@ function focusNoteFromMail() {{
   }}
   if (ta) setTimeout(function () {{ ta.focus(); }}, 250);
 }}
+function pullDiagHtml() {{
+  const sp = (DATA.brief || {{}}).subject_pull || {{}};
+  const moves = DATA.lock.price_history || [];
+  const last = moves[moves.length - 1];
+  let line;
+  if (sp.found) {{
+    line = 'Your listing in the market pull' + (sp.as_of ? ' (' + prettyDate(sp.as_of) + ')' : '') + ': <b>' + esc(sp.status || 'seen') + '</b>' +
+      (sp.price ? ' at <b>' + money(sp.price) + '</b>' : '') + (sp.list_date ? ', listed ' + prettyDate(sp.list_date) : '') + '. Price changes seen here are tracked automatically.';
+  }} else if (!('as_of' in sp)) {{
+    line = 'No saved market file for this report yet, so record price changes here.';
+  }} else {{
+    line = 'Your listing is <b>not in the latest market pull</b>' + (sp.as_of ? ' (' + prettyDate(sp.as_of) + ')' : '') + ', so a price change has to be recorded here to count.';
+  }}
+  if (last) line += ' Recorded: ' + money(last.from) + ' → ' + money(last.to) + (last.as_of ? ' on ' + prettyDate(last.as_of) : '') + (last.source === 'agent' ? ' (entered by you)' : ' (from the pull)') + '.';
+  return '<p class="pull-diag">' + line + '</p>';
+}}
 function status(msg) {{ const el = document.getElementById('fpStatus'); if (el) el.textContent = msg || ''; }}
 function bindConsole() {{
   const run = DATA.run_id;
@@ -2024,6 +2096,24 @@ function bindConsole() {{
     const res = await fetch('/api/runs/' + run + '/pulse-lock', {{
       method:'POST', credentials:'same-origin', headers:{{'Content-Type':'application/json'}},
       body: JSON.stringify({{ price: Number(document.getElementById('lockPrice').value) }})
+    }});
+    if (!res.ok) {{ status(await res.text()); return; }}
+    location.reload();
+  }});
+  document.getElementById('btnPrice')?.addEventListener('click', async () => {{
+    status('Recording price change…');
+    const res = await fetch('/api/runs/' + run + '/fingerprint/price', {{
+      method:'POST', credentials:'same-origin', headers:{{'Content-Type':'application/json'}},
+      body: JSON.stringify({{ price: Number(document.getElementById('newPrice').value), as_of: document.getElementById('newPriceAt').value }})
+    }});
+    if (!res.ok) {{ status((await res.json().catch(()=>({{}}))).detail || await res.text()); return; }}
+    location.reload();
+  }});
+  document.getElementById('btnPriceReset')?.addEventListener('click', async () => {{
+    if (!confirm('Clear every recorded price change and go back to the initial list price?')) return;
+    const res = await fetch('/api/runs/' + run + '/fingerprint/price', {{
+      method:'POST', credentials:'same-origin', headers:{{'Content-Type':'application/json'}},
+      body: JSON.stringify({{ reset: true }})
     }});
     if (!res.ok) {{ status(await res.text()); return; }}
     location.reload();

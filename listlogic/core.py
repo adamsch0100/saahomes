@@ -1304,8 +1304,12 @@ def _listing_on_date(row: dict | None) -> str:
     return _fingerprint_date(row.get("list_date")) or _fingerprint_date(row.get("first_seen"))
 
 
-def detect_subject_active_at(source, subject: dict | None) -> str:
-    """List date of the subject home once it is on the market."""
+def detect_subject_active_at(source, subject: dict | None, *, fallback_day: str = "") -> str:
+    """List date of the subject home once it is on the market.
+
+    ``fallback_day`` is used when the subject is live in ``source`` but the
+    row carries no list date (portal rows sometimes omit it).
+    """
     if not isinstance(subject, dict) or not (subject.get("address") or subject.get("mls_number") or subject.get("mls")):
         return ""
     rows: list[dict] = []
@@ -1339,7 +1343,47 @@ def detect_subject_active_at(source, subject: dict | None) -> str:
         day = _listing_on_date(row)
         if day:
             return day
+        if fallback_day and status in FINGERPRINT_LIVE_STATUSES:
+            return _fingerprint_date(fallback_day)
     return ""
+
+
+def subject_pull_status(source, subject: dict | None) -> dict:
+    """What the latest market pull says about the subject itself, for the agent console.
+
+    Returns {found, status, price, list_date, address}; ``found`` False when
+    the subject is not in the pull at all, which is why a price change would
+    have to be recorded by hand.
+    """
+    out = {"found": False, "status": "", "price": 0, "list_date": "", "address": ""}
+    if not isinstance(source, pd.DataFrame) or len(source) == 0 or not isinstance(subject, dict):
+        return out
+    for _, raw in source.iterrows():
+        rec = {
+            "mls": str(raw.get("MLSNumber") or "").strip(),
+            "address": str(raw.get("Address") or "").strip(),
+        }
+        if not listing_is_subject(rec, subject):
+            continue
+        try:
+            price = float(raw.get("Price") or 0)
+        except (TypeError, ValueError):
+            price = 0.0
+        list_date = ""
+        raw_date = raw.get("ListDate")
+        if raw_date is not None and pd.notna(raw_date):
+            try:
+                list_date = pd.to_datetime(raw_date).strftime("%Y-%m-%d")
+            except Exception:
+                list_date = ""
+        return {
+            "found": True,
+            "status": str(raw.get("StatusNorm") or raw.get("Status") or "").strip(),
+            "price": int(round(price)) if price and not pd.isna(price) else 0,
+            "list_date": list_date,
+            "address": rec["address"],
+        }
+    return out
 
 
 def _fingerprint_pool(snapshot: dict | None, ledger: dict | None) -> list[dict]:
@@ -2291,12 +2335,15 @@ def digest_pulse(
     went_pending = 0
     went_sold = 0
     still_from_baseline = 0
+    baseline_gone = 0
+    baseline_n = 0
     ledger_listings = (ledger or {}).get("listings") if isinstance(ledger, dict) else {}
     if isinstance(ledger_listings, dict) and baseline_ids:
         for pid in baseline_ids:
             rec = ledger_listings.get(pid) if isinstance(ledger_listings.get(pid), dict) else {}
             if listing_is_subject(rec, subject):
                 continue
+            baseline_n += 1
             st = str(rec.get("last_status") or rec.get("status") or "")
             sold_day = _status_event_date(rec, FINGERPRINT_SOLD_STATUSES)
             uc_day = _status_event_date(rec, set(FINGERPRINT_UC_STATUSES))
@@ -2307,6 +2354,30 @@ def digest_pulse(
                 went_sold += 1
             elif _in_date_window(uc_day, clock_at, as_of):
                 went_pending += 1
+            elif not still_active:
+                baseline_gone += 1
+    elif baseline_ids:
+        baseline_n = len(baseline_ids)
+
+    # Rank against today's price from today's actives, so a price change the
+    # agent just recorded moves the rank without waiting for a refresh.
+    rank_now = (1 + sum(1 for p in active_prices if p < locked_price)) if locked_price and active_prices else int(snap.get("rank") or 0)
+    rank_of_now = (len(active_prices) + 1) if active_prices else int(snap.get("rank_of") or 0)
+    # Similar actives today should be the originals still active plus what
+    # listed since the clock; the page shows this identity so a reader can
+    # check it, and flags it when the pull disagrees.
+    reconcile = {
+        "original": baseline_n,
+        "still_active": still_from_baseline,
+        "under_contract": went_pending,
+        "sold": went_sold,
+        "gone": baseline_gone,
+        "new_since": int(since.get("listed") or 0),
+        "active_now": active_now,
+        "pending_now": pending_now,
+        "expected_active": still_from_baseline + int(since.get("listed") or 0),
+    }
+    reconcile["adds_up"] = bool(baseline_n == 0 or reconcile["expected_active"] == active_now)
 
     subject_dom = _days_between(clock.get("active_at"), as_of) if clock.get("clock") == "active" else None
     dom_active_median = int(np.median(active_dom)) if active_dom else 0
@@ -2363,9 +2434,10 @@ def digest_pulse(
         "still_from_baseline": still_from_baseline,
         "went_pending": went_pending,
         "went_sold": went_sold,
-        "rank": int(snap.get("rank") or 0),
-        "rank_of": int(snap.get("rank_of") or 0),
+        "rank": rank_now,
+        "rank_of": rank_of_now,
         "rank_then": _baseline_rank(baseline, initial_price, subject=subject),
+        "reconcile": reconcile,
     }
 
 
@@ -2488,10 +2560,13 @@ def detect_subject_list_price(source, subject: dict | None) -> float:
     return 0.0
 
 
-def apply_subject_price(lock: dict | None, df: pd.DataFrame, subject: dict | None, *, as_of: str) -> dict:
-    """Record a seller price adjustment seen in the market pull on the lock."""
+def record_subject_price(lock: dict | None, price: float, *, as_of: str, source: str = "agent") -> dict:
+    """Record a list-price change on the lock; no-op under PRICE_CHANGE_MIN."""
     lock = dict(lock) if isinstance(lock, dict) else {}
-    price = detect_subject_list_price(df, subject)
+    try:
+        price = float(price or 0)
+    except (TypeError, ValueError):
+        price = 0.0
     if price <= 0:
         return lock
     current = fingerprint_list_price(lock)
@@ -2499,10 +2574,32 @@ def apply_subject_price(lock: dict | None, df: pd.DataFrame, subject: dict | Non
         return lock
     history = [h for h in (lock.get("price_history") or []) if isinstance(h, dict)]
     if current:
-        history.append({"as_of": as_of, "from": int(round(current)), "to": int(round(price))})
+        history.append({
+            "as_of": _fingerprint_date(as_of) or as_of,
+            "from": int(round(current)),
+            "to": int(round(price)),
+            "source": source,
+        })
     lock["price_history"] = history[-12:]
     lock["current_price"] = int(round(price))
     return lock
+
+
+def apply_subject_price(lock: dict | None, df: pd.DataFrame, subject: dict | None, *, as_of: str) -> dict:
+    """Record a seller price adjustment seen in the market pull on the lock.
+
+    An agent-recorded price always wins over the pull for the same day, so a
+    stale portal row cannot undo a change the agent just entered.
+    """
+    lock = dict(lock) if isinstance(lock, dict) else {}
+    price = detect_subject_list_price(df, subject)
+    if price <= 0:
+        return lock
+    history = [h for h in (lock.get("price_history") or []) if isinstance(h, dict)]
+    last = history[-1] if history else {}
+    if last.get("source") == "agent" and _fingerprint_date(last.get("as_of")) >= (_fingerprint_date(as_of) or as_of):
+        return lock
+    return record_subject_price(lock, price, as_of=as_of, source="market")
 
 
 PULSE_CARD_CAP = 24
@@ -2615,11 +2712,11 @@ def _pulse_talk_tracks(
             f"Rank slipped from {rank_then} to {rank} of {rank_of} in this size band. Walk whether the list price still wins the first showing."
         )
         seller.append(
-            f"Your list is now {rank} of {rank_of} similar actives (was {rank_then}). More homes sit under you than {since_you}."
+            f"Your list is now {rank} of {rank_of} similar actives, yours included (was {rank_then}). More homes sit under you than {since_you}."
         )
     elif rank and rank_of:
-        agent.append(f"You sit {rank} of {rank_of} similar actives at your list price.")
-        seller.append(f"Among similar homes buyers can still buy, yours is priced {rank} of {rank_of}.")
+        agent.append(f"You sit {rank} of {rank_of} similar actives at your list price (yours included).")
+        seller.append(f"Among the {rank_of} similar homes buyers can still buy, yours included, yours is priced {rank} of {rank_of}.")
     dom_active = int(digest.get("dom_active_median") or 0)
     subject_dom = int(digest.get("subject_dom") or 0)
     to_contract = int(digest.get("days_to_contract_since") or 0)
@@ -2631,6 +2728,23 @@ def _pulse_talk_tracks(
             parts.append(f"the ones still for sale have sat a median {dom_active} days")
         agent.append(f"You are {subject_dom} days on market; " + " and ".join(parts) + ".")
         seller.append(f"Your home has been on the market {subject_dom} days; " + " and ".join(parts) + ".")
+    rec = digest.get("reconcile") if isinstance(digest.get("reconcile"), dict) else {}
+    if rec.get("original"):
+        tail = []
+        if rec.get("under_contract"):
+            tail.append(f"{rec['under_contract']} under contract")
+        if rec.get("sold"):
+            tail.append(f"{rec['sold']} sold")
+        if rec.get("gone"):
+            tail.append(f"{rec['gone']} off the market")
+        tail_s = f" ({', '.join(tail)})" if tail else ""
+        line = (
+            f"Of the {rec['original']} similar homes active {since_you.replace('since ', 'when ')}, "
+            f"{rec['still_active']} are still active{tail_s}; {rec['new_since']} new listed since, "
+            f"so {rec['active_now']} similar homes are active today."
+        )
+        agent.append(line)
+        seller.append(line)
     if listed_week or uc_week or sold_week or price_cuts_week:
         bits = []
         if listed_week:
@@ -2689,7 +2803,7 @@ def _pulse_talk_tracks(
     if not agent and not stale_upload:
         agent.append("Quiet week in the size band — no new cheaper similar lists to walk. Hold the list price.")
         seller.append("A quiet week in your size range. No new similar homes listed under your price.")
-    return {"agent": agent[:5], "seller": seller[:5]}
+    return {"agent": agent[:6], "seller": seller[:6]}
 
 
 def _baseline_ids(baseline: dict | None) -> set[str]:

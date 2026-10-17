@@ -341,5 +341,59 @@ class DaysToContractTests(unittest.TestCase):
         self.assertEqual(out["days_to_contract"], 25)
 
 
+class ReconcileTests(unittest.TestCase):
+    def test_identity_and_live_rank_after_recorded_price_change(self):
+        from core import digest_pulse, record_subject_price
+
+        baseline = {"ids": ["A", "B", "C"], "listings": [
+            {"id": "A", "price": 350000}, {"id": "B", "price": 380000}, {"id": "C", "price": 420000}]}
+        ledger = {"listings": {
+            "A": {"id": "A", "last_status": "Active", "status_history": [{"as_of": "2026-09-22", "status": "Active", "price": 350000}]},
+            "B": {"id": "B", "last_status": "Pending", "status_history": [
+                {"as_of": "2026-09-22", "status": "Active", "price": 380000},
+                {"as_of": "2026-10-01", "status": "Pending", "price": 380000}]},
+            "C": {"id": "C", "last_status": "Active", "gone": True, "status_history": [{"as_of": "2026-09-22", "status": "Active", "price": 420000}]},
+            "N": {"id": "N", "last_status": "Active", "list_date": "2026-10-05", "status_history": [{"as_of": "2026-10-10", "status": "Active", "price": 395000}]},
+        }}
+        snap = {"as_of": "2026-10-16", "rank": 3, "rank_of": 3, "listings": [
+            {"id": "A", "status": "Active", "price": 350000},
+            {"id": "N", "status": "Active", "price": 395000, "list_date": "2026-10-05"},
+        ]}
+        lock = {"locked_price": 410000, "locked_at": "2026-09-22"}
+        d = digest_pulse(snap, lock, None, baseline=baseline, ledger=ledger)
+        r = d["reconcile"]
+        self.assertEqual((r["original"], r["still_active"], r["under_contract"], r["gone"], r["new_since"], r["active_now"]), (3, 1, 1, 1, 1, 2))
+        self.assertTrue(r["adds_up"])
+        self.assertEqual((d["rank"], d["rank_of"]), (3, 3))
+        lock = record_subject_price(lock, 380000, as_of="2026-10-12")
+        d2 = digest_pulse(snap, lock, None, baseline=baseline, ledger=ledger)
+        self.assertEqual((d2["rank"], d2["list_price"], d2["initial_price"]), (2, 380000, 410000))
+        self.assertEqual(lock["price_history"][-1]["source"], "agent")
+
+    def test_agent_recorded_price_beats_stale_pull_same_day(self):
+        from core import apply_subject_price, record_subject_price
+        import pandas as pd
+
+        lock = record_subject_price({"locked_price": 410000}, 400000, as_of="2026-10-16")
+        df = pd.DataFrame([{"MLSNumber": "S", "Address": "1704 6th St", "StatusNorm": "Active", "Price": 410000}])
+        lock = apply_subject_price(lock, df, {"address": "1704 6th Street, Greeley"}, as_of="2026-10-16")
+        self.assertEqual(lock["current_price"], 400000)
+
+    def test_subject_pull_status_and_active_fallback(self):
+        from core import detect_subject_active_at, subject_pull_status
+        import pandas as pd
+
+        df = pd.DataFrame([
+            {"MLSNumber": "S", "Address": "1704 6th St", "StatusNorm": "Active", "Price": 400000, "ListDate": None},
+            {"MLSNumber": "X", "Address": "704 6th St", "StatusNorm": "Active", "Price": 300000, "ListDate": "2026-09-01"},
+        ])
+        subj = {"address": "1704 6th Street, Greeley, Colorado 80631"}
+        sp = subject_pull_status(df, subj)
+        self.assertEqual((sp["found"], sp["status"], sp["price"], sp["list_date"]), (True, "Active", 400000, ""))
+        self.assertEqual(detect_subject_active_at(df, subj), "")
+        self.assertEqual(detect_subject_active_at(df, subj, fallback_day="2026-09-28"), "2026-09-28")
+        self.assertFalse(subject_pull_status(df, {"address": "9 Nowhere Ln"})["found"])
+
+
 if __name__ == "__main__":
     unittest.main()
