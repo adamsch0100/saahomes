@@ -13,6 +13,7 @@ import LatestMarketUpdateBanner from "../../components/LatestMarketUpdateBanner.
 import { getAreaSeo } from "../../data/areaSeo.js";
 import AreaEventsSection from "../../components/AreaEventsSection.jsx";
 import CityStatsBand from "../../components/CityStatsBand.jsx";
+import AreaNAP from "../../components/AreaNAP.jsx";
 
 export default function WindsorPage() {
   const area = getAreaSeo("windsor");
@@ -356,6 +357,31 @@ export default function WindsorPage() {
             >
               Explore Cash Offers
             </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Office NAP + map — visible local-entity signal */}
+      <section className="py-12 px-6 bg-gray-50">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8 items-center">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold font-serif mb-3">Visit our Fort Collins office</h2>
+            <p className="text-gray-700 mb-4">
+              Adam and Mandi Schwartz work from our Fort Collins office and serve buyers and sellers across Windsor, Weld County, and all of Northern Colorado.
+            </p>
+            <AreaNAP />
+          </div>
+          <div className="h-72 md:h-80 rounded-lg overflow-hidden">
+            <iframe
+              title="SAA Homes office location — Fort Collins, Colorado"
+              src="https://www.google.com/maps?q=3665+John+F+Kennedy+Parkway+Suite+210,+Fort+Collins,+CO+80525&output=embed"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen=""
+              loading="lazy"
+              className="w-full h-full"
+            ></iframe>
           </div>
         </div>
       </section>

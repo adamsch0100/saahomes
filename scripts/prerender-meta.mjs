@@ -214,9 +214,7 @@ function buildWebsiteSchema() {
     description:
       'Northern Colorado real estate agents helping buyers and sellers in Fort Collins, Loveland, Windsor, Greeley, and across Colorado.',
     publisher: {
-      '@type': 'RealEstateAgent',
-      name: BUSINESS.name,
-      url: BUSINESS.url,
+      '@id': BUSINESS.url,
     },
     potentialAction: {
       '@type': 'SearchAction',
@@ -863,6 +861,17 @@ function injectAreaBody(html, area) {
     `        <p>Schwartz and Associates, Coldwell Banker Realty — serving home buyers and sellers across all 27+ Northern Colorado communities including Fort Collins, Loveland, Windsor, Greeley, Timnath, Wellington, Johnstown, Eaton, Milliken, La Salle, Mead, Longmont, Boulder, Berthoud, Firestone, Frederick, Evans, Severance, Niwot, Erie, Brighton, Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue, and the Carbon Valley region.</p>\n` +
     `      </section>`;
 
+  // Office NAP + map — visible local-entity signal for crawlers that do not run JS.
+  // Greeley (fix-39443-35) and Windsor (fix-39443-34); the same block is added per city as each fix ships.
+  const officeMapHtml =
+    area.slug === 'greeley' || area.slug === 'windsor'
+      ? `      <section class="prerendered-area-map">\n` +
+        `        <h2>Visit Our Fort Collins Office</h2>\n` +
+        `        <p>Schwartz and Associates — 3665 John F Kennedy Parkway, Suite 210, Fort Collins, CO 80525 · (970) 999-1407</p>\n` +
+        `        <iframe title="SAA Homes office location — Fort Collins, Colorado" src="https://www.google.com/maps?q=3665+John+F+Kennedy+Parkway+Suite+210,+Fort+Collins,+CO+80525&amp;output=embed" width="100%" height="320" style="border:0" loading="lazy"></iframe>\n` +
+        `      </section>`
+      : '';
+
   const bodyContent =
     `\n` +
     `    <div class="prerendered-area-content">\n` +
@@ -881,6 +890,7 @@ function injectAreaBody(html, area) {
     `${guidesHtml}\n` +
     `${nearbyHtml}\n` +
     `${sectionTownsHtml}\n` +
+    `${officeMapHtml}\n` +
     `${ctaHtml}\n` +
     `    </div>\n  `;
 
@@ -2033,6 +2043,22 @@ function injectChfaBody(html, config) {
     .map((p) => `      <p class="prerendered-intro">${escapeHtml(p)}</p>`)
     .join('\n');
 
+  // How much cash — answer-first block + sourced CHFA assistance table (mirrors the page section)
+  const cashHtml =
+    `      <section id="how-much-cash" class="prerendered-chfa-section">\n` +
+    `        <h2>How much cash do you need to buy a house in Northern Colorado?</h2>\n` +
+    `        <p>Your cash need is two numbers: the down payment your loan requires and everything else due at closing. FHA financing starts at 3.5% down, and CHFA pairs its first mortgage with assistance that can cover part of the down payment and closing costs. The two standard CHFA options are a grant up to the lesser of $25,000 or 3% of your first mortgage, or a deferred second mortgage up to the lesser of $25,000 or 4%.</p>\n` +
+    `        <table class="prerendered-table">\n` +
+    `          <thead><tr><th>CHFA assistance</th><th>Maximum</th><th>CHFA's $200,000 example</th><th>Repayment</th></tr></thead>\n` +
+    `          <tbody>\n` +
+    `            <tr><td><strong>Down payment assistance grant</strong></td><td>Up to the lesser of $25,000 or 3% of your first mortgage</td><td>Up to $6,000 on a $200,000 mortgage</td><td>No repayment required</td></tr>\n` +
+    `            <tr><td><strong>Deferred second mortgage</strong></td><td>Up to the lesser of $25,000 or 4% of your first mortgage</td><td>Up to $8,000 on a $200,000 mortgage</td><td>Deferred until you pay off, sell, refinance, or move out</td></tr>\n` +
+    `          </tbody>\n` +
+    `        </table>\n` +
+    `        <p class="prerendered-source">Sources: CHFA, Down Payment Assistance (chfainfo.com/homeownership/down-payment-assistance) for the grant and second mortgage figures, and HUD for the 3.5% FHA minimum down payment. Both fetched October 15, 2026. CHFA figures assume a 30-year, fixed-rate first mortgage, and higher interest rates apply when you use assistance. Your CHFA participating lender confirms the exact amount for your loan.</p>\n` +
+    `        <p><a href="#chfa-dpa-quick-form">See what you may qualify for &rarr;</a></p>\n` +
+    `      </section>\n`;
+
   // CHFA Programs table
   let programsHtml = '';
   if (config.programs && CHFA_PROGRAMS && CHFA_PROGRAMS.length > 0) {
@@ -2164,6 +2190,7 @@ function injectChfaBody(html, config) {
     `      <h1>${title}</h1>\n` +
     `      ${tagline ? `<p class="prerendered-tagline"><strong>${tagline}</strong></p>\n` : ''}` +
     `${introHtml}\n` +
+    `${cashHtml}` +
     `${programsHtml}` +
     `${dpaHtml}` +
     `${reqHtml}` +
