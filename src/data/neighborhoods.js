@@ -6914,6 +6914,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.108', longitude: '-104.948' },
     metaDescription: 'Wyatt Farms Frederick - established Frederick neighborhood near Frederick High School. SAA Homes.',
     keywords: 'Wyatt Farms Frederick, established Frederick neighborhood, Frederick High School area, Frederick family homes',
+    youtubeId: 'y8wmuIlVMSk',
     neighborhoodHighlights: [
       { title: 'Established setting', description: 'Mature trees and well-maintained homes on generous lots in a settled community.' },
       { title: 'Walk to school', description: 'Walking distance to Frederick High School - perfect for families with teenagers.' },
@@ -6945,6 +6946,7 @@ export const neighborhoods = [
     coordinates: { latitude: '40.103', longitude: '-104.943' },
     metaDescription: 'Prairie View Frederick - newer homes with mountain views on the I-25 corridor. SAA Homes.',
     keywords: 'Prairie View Frederick, Frederick new construction, I-25 corridor Frederick, Frederick Colorado homes',
+    youtubeId: 'Imz413sTWYY',
     neighborhoodHighlights: [
       { title: 'Mountain views', description: 'Panoramic Front Range views from this elevated Frederick community.' },
       { title: 'Newer homes', description: 'Modern floor plans with open concepts and energy-efficient features.' },
@@ -6979,6 +6981,7 @@ export const neighborhoods = [
     walkScore: 28,
     metaDescription: 'Frederick Commons real estate - newer construction homes with I-25 access in growing Frederick Colorado. SAA Homes.',
     keywords: 'Frederick Commons, Frederick Colorado new homes, Frederick subdivisions, I-25 Frederick, Mineral Road Frederick, Frederick Commons subdivision, Frederick High School, St. Vrain Valley schools Frederick, Longmont area homes',
+    youtubeId: 'P8YIOjzNoiM',
     neighborhoodHighlights: [
       { title: 'Newer homes', description: 'Modern construction with open floor plans and energy-efficient features in a master-planned setting.' },
       { title: 'Mineral Road corridor', description: 'The Mineral Road retail corridor provides shopping, dining, and services just minutes away.' },
