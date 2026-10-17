@@ -174,5 +174,123 @@ class MarketPulseAsOfTests(unittest.TestCase):
         self.assertIsNotNone(filled[0]["market"].get("active_count"))
 
 
+class WeeklyCountsTests(unittest.TestCase):
+    """Weekly board counts against a portal pull (prior-sale dates, closes, price moves)."""
+
+    @staticmethod
+    def _df(rows):
+        import pandas as pd
+        from market_schema import normalize_market_frame
+
+        return normalize_market_frame(pd.DataFrame(rows), source="realtor")
+
+    @staticmethod
+    def _row(mls, status, price, list_date, sold_date=None, sold_price=None):
+        return {
+            "MLSNumber": mls, "StName": f"{mls} Main St", "Status": status, "Price": price,
+            "ListDate": list_date, "SoldDate": sold_date, "SoldPrice": sold_price,
+            "FinishedSQFT": 1500, "City": "Greeley",
+        }
+
+    def _week(self, ledger, df, day, baseline=None, since="2026-09-22", price=410000):
+        from core import (
+            build_pulse_snapshot,
+            fingerprint_sold_from_df,
+            freeze_fingerprint_baseline,
+            merge_fingerprint_ledger,
+        )
+
+        snap = build_pulse_snapshot(df, price, 1500, as_of=day)
+        baseline = baseline or freeze_fingerprint_baseline(snap)
+        sold = fingerprint_sold_from_df(df, set(baseline["ids"]), since=since, living_area=1500)
+        ledger = merge_fingerprint_ledger(ledger, snap, baseline=baseline, sold_map=sold, as_of=day)
+        return snap, baseline, ledger
+
+    def test_prior_sale_on_active_is_not_a_close(self):
+        from core import digest_pulse
+
+        df = self._df([self._row("A1", "Active", 350000, "2026-08-01", "2019-05-01", 250000)])
+        self.assertTrue(df["SoldDate"].isna().all())
+        snap, base, ledger = self._week(None, df, "2026-09-22")
+        lock = {"locked_price": 410000, "locked_at": "2026-09-22"}
+        d = digest_pulse(snap, lock, None, baseline=base, ledger=ledger)
+        self.assertEqual(d["sold_since"], 0)
+
+    def test_similar_closes_count_by_close_date(self):
+        from core import digest_pulse
+
+        week1 = self._df([self._row("A1", "Active", 350000, "2026-08-01")])
+        snap1, base, ledger = self._week(None, week1, "2026-09-28")
+        week2 = self._df([
+            self._row("A1", "Active", 350000, "2026-08-01"),
+            self._row("S1", "Sold", 380000, "2026-07-01", "2026-10-01", 375000),
+            self._row("S0", "Sold", 380000, "2026-07-01", "2026-09-01", 375000),
+        ])
+        snap2, _, ledger = self._week(ledger, week2, "2026-10-04", baseline=base)
+        lock = {"locked_price": 410000, "locked_at": "2026-09-22"}
+        d = digest_pulse(snap2, lock, snap1, baseline=base, ledger=ledger)
+        self.assertEqual(d["sold_week"], 1)
+        self.assertEqual(d["sold_since"], 1)
+        self.assertEqual(ledger["listings"]["S1"]["status_history"][-1]["as_of"], "2026-10-01")
+        self.assertEqual(d["sold_median_price_since"], 375000)
+
+    def test_sanitize_drops_weekly_phantom_sales(self):
+        from core import sanitize_fingerprint_ledger
+
+        ledger = {"listings": {"A1": {
+            "id": "A1", "status": "Sold", "last_status": "Sold", "price": 350000,
+            "status_history": [
+                {"as_of": "2026-09-22", "status": "Active", "price": 350000},
+                {"as_of": "2026-09-22", "status": "Sold", "price": 350000},
+                {"as_of": "2026-09-28", "status": "Active", "price": 350000},
+                {"as_of": "2026-09-28", "status": "Sold", "price": 350000},
+            ],
+        }}}
+        rec = sanitize_fingerprint_ledger(ledger)["listings"]["A1"]
+        self.assertEqual([h["status"] for h in rec["status_history"]], ["Active", "Active"])
+        self.assertEqual(rec["last_status"], "Active")
+
+    def test_price_cut_counts_in_its_week(self):
+        from core import digest_pulse
+
+        snap1, base, ledger = self._week(None, self._df([self._row("A1", "Active", 360000, "2026-08-01")]), "2026-09-28")
+        snap2, _, ledger = self._week(
+            ledger, self._df([self._row("A1", "Active", 349000, "2026-08-01")]), "2026-10-04", baseline=base
+        )
+        lock = {"locked_price": 410000, "locked_at": "2026-09-22"}
+        d = digest_pulse(snap2, lock, snap1, baseline=base, ledger=ledger)
+        self.assertEqual(d["price_cuts_week"], 1)
+        self.assertEqual(d["avg_cut_week"], 11000)
+
+    def test_rank_then_uses_initial_price_not_frozen_rank(self):
+        from core import digest_pulse
+
+        df = self._df([self._row(f"A{i}", "Active", 340000 + i * 5000, "2026-08-01") for i in range(6)])
+        snap, base, ledger = self._week(None, df, "2026-09-22")
+        base["rank"] = 2  # frozen when a lower price was locked
+        lock = {"locked_price": 410000, "locked_at": "2026-09-22"}
+        d = digest_pulse(snap, lock, None, baseline=base, ledger=ledger)
+        self.assertEqual(d["rank_then"], 7)
+
+    def test_seller_price_adjustment_detected(self):
+        from core import apply_subject_price, digest_pulse
+
+        df = self._df([
+            self._row("A1", "Active", 395000, "2026-08-01"),
+            {**self._row("SUBJ", "Active", 399900, "2026-09-25"), "StName": "1704 6th Street"},
+        ])
+        lock = apply_subject_price(
+            {"locked_price": 410000, "locked_at": "2026-09-22"},
+            df,
+            {"address": "1704 6th Street, Greeley"},
+            as_of="2026-10-10",
+        )
+        self.assertEqual(lock["current_price"], 399900)
+        self.assertEqual(lock["price_history"][-1]["from"], 410000)
+        d = digest_pulse({"as_of": "2026-10-10", "listings": []}, lock)
+        self.assertEqual(d["list_price"], 399900)
+        self.assertEqual(d["initial_price"], 410000)
+
+
 if __name__ == "__main__":
     unittest.main()

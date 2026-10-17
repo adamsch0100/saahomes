@@ -145,6 +145,13 @@ def normalize_market_frame(
         np.nan,
     )
 
+    # A close date only belongs to a closed listing. Portal for-sale rows can carry the
+    # property's previous sale, which would read as a fresh sale downstream.
+    not_sold = out["StatusNorm"] != "Sold"
+    for col in ("SoldDate", "SoldPrice"):
+        if col in out.columns and not_sold.any():
+            out.loc[not_sold, col] = pd.NaT if col == "SoldDate" else np.nan
+
     if "SoldDate" in out.columns and "ListDate" in out.columns:
         try:
             sold_d = out["SoldDate"].dt.normalize()

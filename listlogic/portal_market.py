@@ -240,6 +240,9 @@ def _realtor_item_to_row(item: dict, *, status_force: str | None = None) -> dict
         sold_price = list_price
     price = sold_price if status == "Sold" and sold_price else list_price
     sold_date = item.get("last_sold_date") or item.get("sold_date")
+    if status != "Sold":
+        # On for-sale cards last_sold_date is the property's *previous* sale, not this listing.
+        sold_date = None
     list_date = item.get("list_date") or item.get("listed_date") or item.get("on_market_date")
     # Realtor search/sold cards omit days_on_market; derive from list + sold/today.
     dom = item.get("days_on_market")

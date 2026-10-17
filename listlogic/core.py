@@ -1020,6 +1020,10 @@ def pulse_portal_urls(address: str, city: str = "", state: str = "") -> dict:
 FINGERPRINT_LIVE_STATUSES = frozenset({"Active", "Pending", "Backup", "FirstRight"})
 FINGERPRINT_UC_STATUSES = frozenset({"Pending", "Backup", "FirstRight"})
 FINGERPRINT_SOLD_STATUSES = frozenset({"Sold"})
+# Bump when reconstructed baselines need rebuilding (2: live rows' prior-sale dates no longer drop them).
+FINGERPRINT_BASELINE_VERSION = 2
+# Smallest list-price move that counts as a price adjustment.
+PRICE_CHANGE_MIN = 1000
 
 
 def _fingerprint_date(value) -> str:
@@ -1059,11 +1063,12 @@ def listing_is_subject(row: dict | None, subject: dict | None) -> bool:
     mls_r = str(row.get("mls") or row.get("mls_number") or row.get("MLSNumber") or "").strip()
     if mls_s and mls_r and mls_s == mls_r:
         return True
-    a = _fp_norm_addr(subject.get("address"))
-    b = _fp_norm_addr(row.get("address") or row.get("Address"))
-    if a and b and (a in b or b in a):
-        return True
-    return False
+    a = _fp_norm_addr(subject.get("address")).split()
+    b = _fp_norm_addr(row.get("address") or row.get("Address")).split()
+    # Same house number and street, compared token by token: a substring test
+    # would match 704 6th St inside 1704 6th St.
+    n = min(len(a), len(b), 3)
+    return n >= 2 and a[:n] == b[:n]
 
 
 def detect_subject_market_status(source, subject: dict | None) -> str:
@@ -1226,8 +1231,17 @@ def attach_market_pulse_history(
     return out, changed
 
 
+CLOCK_LABELS = {"active": "since listed", "generate": "since created"}
+
+
+def clock_label(d: dict | None) -> str:
+    """Seller-facing clock wording; ignores labels stored by older code."""
+    kind = str((d or {}).get("clock") or "generate")
+    return CLOCK_LABELS.get(kind, CLOCK_LABELS["generate"])
+
+
 def fingerprint_clock(lock: dict | None) -> dict:
-    """Generate clock until the listing goes active, then since-active is the board."""
+    """Created clock until the listing goes active, then since-active is the board."""
     lock = lock if isinstance(lock, dict) else {}
     locked_at = _fingerprint_date(lock.get("locked_at"))
     active_at = _fingerprint_date(lock.get("active_at"))
@@ -1235,7 +1249,7 @@ def fingerprint_clock(lock: dict | None) -> dict:
         return {
             "clock": "active",
             "clock_at": active_at,
-            "clock_label": "since active",
+            "clock_label": CLOCK_LABELS["active"],
             "locked_at": locked_at,
             "active_at": active_at,
             "active_at_source": str(lock.get("active_at_source") or ""),
@@ -1243,7 +1257,7 @@ def fingerprint_clock(lock: dict | None) -> dict:
     return {
         "clock": "generate",
         "clock_at": locked_at,
-        "clock_label": "since generate",
+        "clock_label": CLOCK_LABELS["generate"],
         "locked_at": locked_at,
         "active_at": "",
         "active_at_source": str(lock.get("active_at_source") or ""),
@@ -1359,8 +1373,18 @@ def _window_event_counts(
     sold = 0
     listed_under = 0
     listed_over = 0
+    price_cuts = 0
+    price_raises = 0
+    cut_total = 0
+    sold_prices: list[int] = []
+    sale_to_list: list[float] = []
+    empty = {
+        "listed": 0, "uc": 0, "sold": 0, "listed_under": 0, "listed_over": 0,
+        "price_cuts": 0, "price_raises": 0, "avg_cut": 0,
+        "sold_median_price": 0, "sale_to_list": 0.0,
+    }
     if not start:
-        return {"listed": 0, "uc": 0, "sold": 0, "listed_under": 0, "listed_over": 0}
+        return empty
     try:
         locked = float(locked_price or 0)
     except (TypeError, ValueError):
@@ -1374,17 +1398,36 @@ def _window_event_counts(
                 price = float(row.get("price") or 0)
             except (TypeError, ValueError):
                 price = 0.0
-            side = str(row.get("side") or "")
-            if not side and locked:
+            # Side against today's list price; a stored side can predate a price change.
+            if locked and price:
                 side = "under" if price < locked else ("over" if price > locked else "at")
+            else:
+                side = str(row.get("side") or "")
             if side == "under":
                 listed_under += 1
             elif side == "over":
                 listed_over += 1
+        for change in _price_changes(row):
+            if not _in_date_window(change["as_of"], start, end, start_inclusive=start_inclusive):
+                continue
+            if change["change"] < 0:
+                price_cuts += 1
+                cut_total += -change["change"]
+            else:
+                price_raises += 1
         sold_day = _status_event_date(row, FINGERPRINT_SOLD_STATUSES)
         uc_day = _status_event_date(row, set(FINGERPRINT_UC_STATUSES))
         if _in_date_window(sold_day, start, end, start_inclusive=start_inclusive):
             sold += 1
+            try:
+                close = int(row.get("sold_price") or 0)
+                ask = int(row.get("price") or 0)
+            except (TypeError, ValueError):
+                close, ask = 0, 0
+            if close:
+                sold_prices.append(close)
+                if ask:
+                    sale_to_list.append(close / ask)
         elif _in_date_window(uc_day, start, end, start_inclusive=start_inclusive):
             uc += 1
     return {
@@ -1393,6 +1436,11 @@ def _window_event_counts(
         "sold": sold,
         "listed_under": listed_under,
         "listed_over": listed_over,
+        "price_cuts": price_cuts,
+        "price_raises": price_raises,
+        "avg_cut": int(round(cut_total / price_cuts)) if price_cuts else 0,
+        "sold_median_price": int(np.median(sold_prices)) if sold_prices else 0,
+        "sale_to_list": round(float(np.mean(sale_to_list)), 4) if sale_to_list else 0.0,
     }
 
 
@@ -1546,8 +1594,12 @@ def build_pulse_snapshot(
     as_of: str | None = None,
     photo_map: dict | None = None,
     gallery_map: dict | None = None,
+    subject: dict | None = None,
 ) -> dict:
-    """Live similar listings (Active + under contract) tagged over/under the initial list."""
+    """Live similar listings (Active + under contract) tagged over/under the list price.
+
+    The subject's own listing is left out so it never counts as a competitor or in rank.
+    """
     as_of = as_of or datetime.now().strftime("%Y-%m-%d")
     locked = float(locked_price or 0)
     empty = {
@@ -1578,6 +1630,10 @@ def build_pulse_snapshot(
             continue
         status = str(row.get("StatusNorm") or "")
         if status not in FINGERPRINT_LIVE_STATUSES:
+            continue
+        if subject and listing_is_subject(
+            {"mls": str(row.get("MLSNumber") or ""), "address": str(row.get("Address") or "")}, subject
+        ):
             continue
         list_date = ""
         raw_date = row.get("ListDate")
@@ -1672,7 +1728,7 @@ def reconstruct_fingerprint_baseline(
         if pd.Timestamp(list_ts).normalize() > as_of_ts:
             continue
         status = str(row.get("StatusNorm") or "")
-        sold_ts = pd.to_datetime(row.get("SoldDate"), errors="coerce")
+        sold_ts = pd.to_datetime(row.get("SoldDate"), errors="coerce") if status == "Sold" else pd.NaT
         if pd.notna(sold_ts):
             sold_ts = sold_ts.tz_localize(None) if getattr(sold_ts, "tzinfo", None) else sold_ts
             if pd.Timestamp(sold_ts).normalize() <= as_of_ts:
@@ -1690,6 +1746,7 @@ def reconstruct_fingerprint_baseline(
     listings = apply_listing_photos(listings, photo_map, gallery_map)
     rank_info = _assign_active_ranks(listings, locked)
     return {
+        "version": FINGERPRINT_BASELINE_VERSION,
         "as_of": as_of_str,
         "locked_price": int(round(locked)),
         "subject_sqft": round(float(living_area or 0)),
@@ -1714,10 +1771,11 @@ def _status_as_of_row(row: pd.Series, as_of_ts: pd.Timestamp, *, latest: bool = 
     list_ts = _pulse_day(row.get("ListDate"))
     if list_ts is None or list_ts > as_of_ts:
         return ""
-    sold_ts = _pulse_day(row.get("SoldDate"))
+    current = str(row.get("StatusNorm") or "")
+    # Only a closed listing's SoldDate is a close; live portal rows can carry a prior sale.
+    sold_ts = _pulse_day(row.get("SoldDate")) if current == "Sold" else None
     if sold_ts is not None and sold_ts <= as_of_ts:
         return "Sold"
-    current = str(row.get("StatusNorm") or "")
     if current in FINGERPRINT_UC_STATUSES:
         pending_ts = _pulse_day(row.get("LastUpdateDate"))
         if pending_ts is not None and list_ts <= pending_ts <= as_of_ts:
@@ -1801,31 +1859,128 @@ def fingerprint_sold_from_df(
     ids: set[str],
     *,
     as_of: str | None = None,
+    since: str | None = None,
+    living_area: float = 0,
 ) -> dict[str, dict]:
-    """Ids that show Sold in the market pull, optionally only if sold by ``as_of``."""
+    """Closed sales from the market pull, keyed by listing id.
+
+    Tracked ``ids`` count whenever they show Sold (by ``as_of`` when given).
+    With ``since``, any similar home (same size band) that closed on or after
+    that day counts too, so weekly sold reflects every close in the set, not
+    only homes that were active at the lock.
+
+    Only rows whose status is Sold qualify: portal for-sale rows can carry the
+    property's previous sale date, which is not a close of this listing.
+    """
     found: dict[str, dict] = {}
-    if df is None or len(df) == 0 or not ids:
+    if df is None or len(df) == 0 or (not ids and not since):
         return found
-    work = df.copy()
+    work = df
+    if "StatusNorm" in work.columns:
+        work = work[work["StatusNorm"].astype(str) == "Sold"]
     as_of_ts = _pulse_day(as_of) if as_of else None
-    for _, row in work.iterrows():
+    since_ts = _pulse_day(since) if since else None
+    band = None
+    if since_ts is not None and living_area and "LivingArea" in work.columns:
+        band = listing_flow_sqft_mask(work["LivingArea"], living_area)
+    for idx, row in work.iterrows():
         pid = _pulse_listing_id(row)
-        if pid not in ids:
-            continue
         sold_ts = _pulse_day(row.get("SoldDate"))
-        status = str(row.get("StatusNorm") or "")
-        if status != "Sold" and sold_ts is None:
-            continue
         if as_of_ts is not None and (sold_ts is None or sold_ts > as_of_ts):
             continue
+        if pid not in ids:
+            if since_ts is None or sold_ts is None or sold_ts < since_ts:
+                continue
+            if band is not None and not bool(band.get(idx, False)):
+                continue
         list_date = ""
         list_ts = _pulse_day(row.get("ListDate"))
         if list_ts is not None:
             list_date = list_ts.strftime("%Y-%m-%d")
         card = _pulse_listing_from_row(row, 0, list_date=list_date)
         card["status"] = "Sold"
+        card["sold_date"] = sold_ts.strftime("%Y-%m-%d") if sold_ts is not None else ""
+        try:
+            sold_price = float(row.get("SoldPrice") or 0)
+        except (TypeError, ValueError):
+            sold_price = 0.0
+        if sold_price > 0 and not pd.isna(sold_price):
+            card["sold_price"] = int(round(sold_price))
         found[pid] = card
     return found
+
+
+def sanitize_fingerprint_ledger(ledger: dict | None) -> dict:
+    """Drop Sold events that were never closes.
+
+    Older refreshes treated a for-sale home's previous sale date as a close, so
+    the same live home picked up a fresh "Sold" every week. A Sold entry without
+    the ``closed`` mark is kept only if the home was never seen live on or after
+    that day.
+    """
+    src = ledger if isinstance(ledger, dict) else {}
+    listings = src.get("listings") if isinstance(src.get("listings"), dict) else {}
+    out: dict[str, dict] = {}
+    for pid, rec in listings.items():
+        if not isinstance(rec, dict):
+            continue
+        hist = [h for h in (rec.get("status_history") or []) if isinstance(h, dict)]
+        live_days = [
+            _fingerprint_date(h.get("as_of"))
+            for h in hist
+            if str(h.get("status") or "") in FINGERPRINT_LIVE_STATUSES
+        ]
+        kept = []
+        for h in hist:
+            day = _fingerprint_date(h.get("as_of"))
+            if (
+                str(h.get("status") or "") == "Sold"
+                and not h.get("closed")
+                and any(d and day and d >= day for d in live_days)
+            ):
+                continue
+            kept.append(h)
+        if len(kept) == len(hist):
+            out[str(pid)] = rec
+            continue
+        fixed = {**rec, "status_history": kept}
+        if kept:
+            last = kept[-1]
+            fixed["last_status"] = str(last.get("status") or "")
+            fixed["status"] = fixed["last_status"]
+            if last.get("price"):
+                fixed["price"] = int(last.get("price") or 0)
+                fixed["last_price"] = fixed["price"]
+        fixed.pop("sold_date", None)
+        fixed.pop("sold_price", None)
+        out[str(pid)] = fixed
+    return {**src, "listings": out}
+
+
+def _price_changes(row: dict | None) -> list[dict]:
+    """List-price moves on a live listing, from its status history."""
+    if not isinstance(row, dict):
+        return []
+    out: list[dict] = []
+    prev_price = 0
+    for h in row.get("status_history") or []:
+        if not isinstance(h, dict) or str(h.get("status") or "") not in FINGERPRINT_LIVE_STATUSES:
+            continue
+        try:
+            price = int(h.get("price") or 0)
+        except (TypeError, ValueError):
+            price = 0
+        if not price:
+            continue
+        if prev_price and abs(price - prev_price) >= PRICE_CHANGE_MIN:
+            out.append({
+                "as_of": _fingerprint_date(h.get("as_of")),
+                "from": prev_price,
+                "to": price,
+                "change": price - prev_price,
+            })
+        prev_price = price
+    return out
 
 
 def merge_fingerprint_ledger(
@@ -1840,7 +1995,7 @@ def merge_fingerprint_ledger(
     snap = snapshot if isinstance(snapshot, dict) else {}
     as_of = as_of or str(snap.get("as_of") or datetime.now().strftime("%Y-%m-%d"))
     locked = float(snap.get("locked_price") or 0)
-    prev = ledger if isinstance(ledger, dict) else {}
+    prev = sanitize_fingerprint_ledger(ledger)
     listings = dict(prev.get("listings") or {})
     baseline_ids = set()
     if isinstance(baseline, dict):
@@ -1885,15 +2040,26 @@ def merge_fingerprint_ledger(
 
     sold_map = sold_map if isinstance(sold_map, dict) else {}
     for pid, sold_row in sold_map.items():
+        if pid in curr_ids:
+            # Live in this pull, so any Sold row for the id is an earlier sale of the property.
+            continue
         existing = listings.get(pid) if isinstance(listings.get(pid), dict) else {}
         card = _pulse_card(sold_row, locked)
         card["status"] = "Sold"
+        sold_day = _fingerprint_date(sold_row.get("sold_date")) or as_of
         status_hist = list(existing.get("status_history") or [])
         if not status_hist or status_hist[-1].get("status") != "Sold":
-            status_hist.append({"as_of": as_of, "status": "Sold", "price": int(card.get("price") or 0)})
+            status_hist.append({
+                "as_of": sold_day,
+                "status": "Sold",
+                "price": int(card.get("price") or 0),
+                "closed": True,
+            })
         listings[pid] = {
             **existing,
             **card,
+            "sold_date": sold_day,
+            "sold_price": int(sold_row.get("sold_price") or 0),
             "baseline": bool(existing.get("baseline") or pid in baseline_ids),
             "first_seen": existing.get("first_seen") or as_of,
             "last_seen": as_of,
@@ -2036,7 +2202,8 @@ def digest_pulse(
     snap = snapshot if isinstance(snapshot, dict) else {}
     lock = locked if isinstance(locked, dict) else {}
     clock = fingerprint_clock(lock)
-    locked_price = float(lock.get("locked_price") or snap.get("locked_price") or 0)
+    initial_price = float(lock.get("locked_price") or snap.get("locked_price") or 0)
+    locked_price = fingerprint_list_price(lock) or initial_price
     clock_at = clock.get("clock_at") or ""
     as_of = _fingerprint_date(snap.get("as_of")) or datetime.now().strftime("%Y-%m-%d")
     prev_as_of = _fingerprint_date((previous or {}).get("as_of")) if isinstance(previous, dict) else ""
@@ -2049,7 +2216,7 @@ def digest_pulse(
             pool, prev_as_of, as_of, start_inclusive=False, subject=subject, locked_price=locked_price
         )
         if prev_as_of
-        else {"listed": 0, "uc": 0, "sold": 0, "listed_under": 0, "listed_over": 0}
+        else _window_event_counts([], "")
     )
 
     new_under = 0
@@ -2071,7 +2238,7 @@ def digest_pulse(
             pending_now += 1
         is_new = _in_date_window(_listing_on_date(row), clock_at, as_of, start_inclusive=True)
         side = row.get("side")
-        if not side:
+        if price and locked_price:
             side = "under" if price < locked_price else ("over" if price > locked_price else "at")
         if is_new:
             if side == "under":
@@ -2123,14 +2290,25 @@ def digest_pulse(
         "listed_over_week": week.get("listed_over") or 0,
         "listed_under_since": since.get("listed_under") or 0,
         "listed_over_since": since.get("listed_over") or 0,
+        "price_cuts_week": week.get("price_cuts") or 0,
+        "price_raises_week": week.get("price_raises") or 0,
+        "avg_cut_week": week.get("avg_cut") or 0,
+        "price_cuts_since": since.get("price_cuts") or 0,
+        "price_raises_since": since.get("price_raises") or 0,
+        "avg_cut_since": since.get("avg_cut") or 0,
+        "sold_median_price_since": since.get("sold_median_price") or 0,
+        "sale_to_list_since": since.get("sale_to_list") or 0.0,
         "still_active_cheaper": still_active_cheaper,
         "as_of": as_of,
         "locked_price": int(round(locked_price)) if locked_price else 0,
+        "initial_price": int(round(initial_price)) if initial_price else 0,
+        "list_price": int(round(locked_price)) if locked_price else 0,
+        "subject_price_changes": _subject_price_changes(lock),
         "locked_at": clock.get("locked_at") or "",
         "active_at": clock.get("active_at") or "",
         "clock": clock.get("clock") or "generate",
         "clock_at": clock_at,
-        "clock_label": clock.get("clock_label") or "since generate",
+        "clock_label": clock_label(clock),
         "count": len(snap.get("listings") or []),
         "active_count": int(snap.get("active_count") or active_now),
         "pending_now": pending_now,
@@ -2140,8 +2318,91 @@ def digest_pulse(
         "went_sold": went_sold,
         "rank": int(snap.get("rank") or 0),
         "rank_of": int(snap.get("rank_of") or 0),
-        "rank_then": int((baseline or {}).get("rank") or 0) if isinstance(baseline, dict) else 0,
+        "rank_then": _baseline_rank(baseline, initial_price, subject=subject),
     }
+
+
+def _baseline_rank(baseline: dict | None, price: float, *, subject: dict | None = None) -> int:
+    """Where ``price`` sat among the clock-start actives.
+
+    Recomputed rather than read from the frozen baseline, whose stored rank
+    used whatever price was locked when it was frozen.
+    """
+    if not isinstance(baseline, dict) or not price:
+        return 0
+    rows = [
+        r for r in (baseline.get("listings") or [])
+        if isinstance(r, dict) and r.get("price") and not listing_is_subject(r, subject)
+    ]
+    if not rows:
+        return int(baseline.get("rank") or 0)
+    return 1 + sum(1 for r in rows if float(r.get("price") or 0) < float(price))
+
+
+def fingerprint_list_price(lock: dict | None) -> float:
+    """Today's list price: the latest seller adjustment, else the initial list."""
+    lock = lock if isinstance(lock, dict) else {}
+    for key in ("current_price", "locked_price"):
+        try:
+            val = float(lock.get(key) or 0)
+        except (TypeError, ValueError):
+            val = 0.0
+        if val > 0:
+            return val
+    return 0.0
+
+
+def _subject_price_changes(lock: dict | None) -> list[dict]:
+    lock = lock if isinstance(lock, dict) else {}
+    out = []
+    for item in lock.get("price_history") or []:
+        if isinstance(item, dict) and item.get("from") and item.get("to"):
+            out.append({
+                "as_of": _fingerprint_date(item.get("as_of")),
+                "from": int(item.get("from") or 0),
+                "to": int(item.get("to") or 0),
+                "change": int(item.get("to") or 0) - int(item.get("from") or 0),
+            })
+    return out
+
+
+def detect_subject_list_price(source, subject: dict | None) -> float:
+    """The subject's own list price in the pull while it is live, else 0."""
+    if not isinstance(source, pd.DataFrame) or len(source) == 0 or not isinstance(subject, dict):
+        return 0.0
+    for _, raw in source.iterrows():
+        rec = {
+            "mls": str(raw.get("MLSNumber") or "").strip(),
+            "address": str(raw.get("Address") or "").strip(),
+        }
+        if not listing_is_subject(rec, subject):
+            continue
+        if str(raw.get("StatusNorm") or "") not in FINGERPRINT_LIVE_STATUSES:
+            continue
+        try:
+            price = float(raw.get("Price") or 0)
+        except (TypeError, ValueError):
+            price = 0.0
+        if price > 0 and not pd.isna(price):
+            return price
+    return 0.0
+
+
+def apply_subject_price(lock: dict | None, df: pd.DataFrame, subject: dict | None, *, as_of: str) -> dict:
+    """Record a seller price adjustment seen in the market pull on the lock."""
+    lock = dict(lock) if isinstance(lock, dict) else {}
+    price = detect_subject_list_price(df, subject)
+    if price <= 0:
+        return lock
+    current = fingerprint_list_price(lock)
+    if current and abs(price - current) < PRICE_CHANGE_MIN:
+        return lock
+    history = [h for h in (lock.get("price_history") or []) if isinstance(h, dict)]
+    if current:
+        history.append({"as_of": as_of, "from": int(round(current)), "to": int(round(price))})
+    lock["price_history"] = history[-12:]
+    lock["current_price"] = int(round(price))
+    return lock
 
 
 PULSE_CARD_CAP = 24
@@ -2161,6 +2422,9 @@ def _pulse_card(row: dict, locked_price: float) -> dict:
     except (TypeError, ValueError):
         locked = 0
     delta = int(round(price - locked)) if price and locked else int(row.get("delta") or 0)
+    side = str(row.get("side") or "")
+    if price and locked:
+        side = "under" if price < locked else ("over" if price > locked else "at")
     address = str(row.get("address") or "").strip()
     city = str(row.get("city") or "").strip()
     urls = pulse_portal_urls(address, city) if not row.get("zillow") else {
@@ -2187,7 +2451,7 @@ def _pulse_card(row: dict, locked_price: float) -> dict:
         "dom": int(row.get("dom") or 0),
         "ppsf": float(row.get("ppsf") or 0),
         "status": str(row.get("status") or ""),
-        "side": str(row.get("side") or ""),
+        "side": side,
         "zillow": urls.get("zillow") or "",
         "realtor": urls.get("realtor") or "",
         "photo_url": photo_url,
@@ -2202,6 +2466,8 @@ def _pulse_card(row: dict, locked_price: float) -> dict:
         "was_status": str(row.get("was_status") or row.get("first_status") or ""),
         "baseline": bool(row.get("baseline")),
         "gone": bool(row.get("gone")),
+        "sold_date": _fingerprint_date(row.get("sold_date")),
+        "sold_price": int(row.get("sold_price") or 0),
         "status_history": row.get("status_history") if isinstance(row.get("status_history"), list) else [],
     }
 
@@ -2223,13 +2489,27 @@ def _pulse_talk_tracks(
     listed_week = int(digest.get("listed_week") or 0)
     uc_week = int(digest.get("uc_week") or 0)
     sold_week = int(digest.get("sold_week") or 0)
-    clock_label = str(digest.get("clock_label") or "since generate")
-    since_you = "since you listed" if digest.get("clock") == "active" else "since we generated this"
+    price_cuts_week = int(digest.get("price_cuts_week") or 0)
+    avg_cut_week = int(digest.get("avg_cut_week") or 0)
+    price_cuts_since = int(digest.get("price_cuts_since") or 0)
+    sold_median = int(digest.get("sold_median_price_since") or 0)
+    sale_to_list = float(digest.get("sale_to_list_since") or 0)
+    subject_moves = [m for m in (digest.get("subject_price_changes") or []) if isinstance(m, dict)]
+    since_label = clock_label(digest)
+    since_you = "since you listed" if digest.get("clock") == "active" else "since we created this report"
     agent: list[str] = []
     seller: list[str] = []
     if stale_upload:
         agent.append("Snapshot unchanged. Upload this week’s MLS export to refresh the Fingerprint.")
         seller.append("This update uses the last market file we have. Ask your agent for this week’s export to refresh.")
+    if subject_moves:
+        last = subject_moves[-1]
+        verb = "reduced" if last["change"] < 0 else "raised"
+        when = f" on {last['as_of']}" if last.get("as_of") else ""
+        agent.append(
+            f"List price {verb} to ${last['to']:,}{when} (from ${last['from']:,}). Counts below compare against the new price."
+        )
+        seller.append(f"Your list price is now ${last['to']:,} (was ${last['from']:,}). This update compares similar homes to the new price.")
     if rank and rank_of and rank_then and rank > rank_then:
         agent.append(
             f"Rank slipped from {rank_then} to {rank} of {rank_of} in this size band. Walk whether the initial list still wins the first showing."
@@ -2238,9 +2518,9 @@ def _pulse_talk_tracks(
             f"Your list is now {rank} of {rank_of} similar actives (was {rank_then}). More homes sit under you than {since_you}."
         )
     elif rank and rank_of:
-        agent.append(f"You sit {rank} of {rank_of} similar actives at the initial list.")
+        agent.append(f"You sit {rank} of {rank_of} similar actives at your list price.")
         seller.append(f"Among similar homes buyers can still buy, yours is priced {rank} of {rank_of}.")
-    if listed_week or uc_week or sold_week:
+    if listed_week or uc_week or sold_week or price_cuts_week:
         bits = []
         if listed_week:
             bits.append(f"{listed_week} listed")
@@ -2248,28 +2528,44 @@ def _pulse_talk_tracks(
             bits.append(f"{uc_week} under contract")
         if sold_week:
             bits.append(f"{sold_week} sold")
+        if price_cuts_week:
+            bits.append(f"{price_cuts_week} price cut{'s' if price_cuts_week != 1 else ''}")
         week_line = " · ".join(bits)
         agent.append(f"This week in the size band: {week_line}.")
         seller.append(f"This week: {week_line} among similar homes.")
     if went_pending >= 1:
         agent.append(
-            f"{went_pending} similar home{'s' if went_pending != 1 else ''} went under contract {clock_label}. Those buyers did not wait."
+            f"{went_pending} similar home{'s' if went_pending != 1 else ''} went under contract {since_label}. Those buyers did not wait."
         )
         seller.append(
             f"{went_pending} similar home{'s' if went_pending != 1 else ''} {since_you} {'are' if went_pending != 1 else 'is'} now under contract."
         )
     if went_sold >= 1:
-        agent.append(f"{went_sold} similar home{'s' if went_sold != 1 else ''} sold {clock_label} — proof of what this band will pay.")
-        seller.append(f"{went_sold} similar home{'s' if went_sold != 1 else ''} sold {since_you}.")
+        paid = ""
+        if sold_median:
+            paid = f" at a median ${sold_median:,}"
+            if sale_to_list:
+                paid += f" ({sale_to_list * 100:.0f}% of their last list price)"
+        agent.append(f"{went_sold} similar home{'s' if went_sold != 1 else ''} closed {since_label}{paid} — proof of what this band will pay.")
+        seller.append(f"{went_sold} similar home{'s' if went_sold != 1 else ''} closed {since_you}{paid}.")
+    if price_cuts_week >= 1:
+        avg = f", about ${avg_cut_week:,} on average" if avg_cut_week else ""
+        agent.append(
+            f"{price_cuts_week} similar home{'s' if price_cuts_week != 1 else ''} cut price this week{avg}. Sellers who overreached are adjusting."
+        )
+        seller.append(f"{price_cuts_week} similar home{'s' if price_cuts_week != 1 else ''} lowered {'their' if price_cuts_week != 1 else 'its'} price this week{avg}.")
+    elif price_cuts_since >= 2:
+        agent.append(f"{price_cuts_since} similar homes have cut price {since_label}.")
+        seller.append(f"{price_cuts_since} similar homes have lowered their price {since_you}.")
     if new_under >= 3:
         agent.append(
-            f"{new_under} similar homes listed under the initial list {clock_label}. Walk those addresses — buyers open cheaper first."
+            f"{new_under} similar homes listed under the initial list {since_label}. Walk those addresses — buyers open cheaper first."
         )
         seller.append(
             f"{new_under} similar homes have listed below your price {since_you}. Those are the homes buyers will open first."
         )
     elif new_under == 1:
-        agent.append(f"One similar home listed under the initial list {clock_label}. Open it with the seller and compare condition.")
+        agent.append(f"One similar home listed under the initial list {since_label}. Open it with the seller and compare condition.")
         seller.append(f"One similar home listed below your price {since_you}. Worth walking through how it compares.")
     if cheaper_before is not None and cheaper > cheaper_before:
         agent.append(f"The queue under you grew from {cheaper_before} to {cheaper} still-active cheaper homes.")
@@ -2282,7 +2578,7 @@ def _pulse_talk_tracks(
     if not agent and not stale_upload:
         agent.append("Quiet week in the size band — no new cheaper similar lists to walk. Hold the initial list.")
         seller.append("A quiet week in your size range. No new similar homes listed under your price.")
-    return {"agent": agent[:4], "seller": seller[:4]}
+    return {"agent": agent[:5], "seller": seller[:5]}
 
 
 def _baseline_ids(baseline: dict | None) -> set[str]:
@@ -2440,7 +2736,7 @@ def build_pulse_brief(
                 old_price = float(prev_row.get("price") or 0)
             except (TypeError, ValueError):
                 old_price = 0
-            if old_price and card["price"] and old_price - card["price"] >= 1000:
+            if old_price and card["price"] and old_price - card["price"] >= PRICE_CHANGE_MIN:
                 cut = dict(card)
                 cut["was_price"] = int(round(old_price))
                 if len(price_cuts) < PULSE_CARD_CAP:
@@ -2504,6 +2800,21 @@ def build_pulse_brief(
             if isinstance(row, dict) and not listing_is_subject(row, sub):
                 baseline_then.append(_pulse_card(row, locked_price))
 
+    price_changes: list[dict] = []
+    for rec in _fingerprint_pool(snap, ledger):
+        if not isinstance(rec, dict) or listing_is_subject(rec, sub):
+            continue
+        moves = [m for m in _price_changes(rec) if _in_date_window(m["as_of"], clock_at, as_of)]
+        if not moves:
+            continue
+        card = _pulse_card(rec, locked_price)
+        card["was_price"] = moves[0]["from"]
+        card["price_change"] = moves[-1]["to"] - moves[0]["from"]
+        card["price_changed_at"] = moves[-1]["as_of"]
+        card["price_moves"] = moves
+        price_changes.append(card)
+    price_changes.sort(key=lambda c: (c.get("price_changed_at") or "", c.get("price_change") or 0), reverse=True)
+
     still_active.sort(key=lambda c: c.get("price") or 0)
     new_under.sort(key=lambda c: c.get("price") or 0)
     new_over.sort(key=lambda c: c.get("price") or 0)
@@ -2560,7 +2871,7 @@ def build_pulse_brief(
         "active_at": _fingerprint_date(active_at),
         "clock": digest.get("clock") or "generate",
         "clock_at": clock_at,
-        "clock_label": digest.get("clock_label") or "since generate",
+        "clock_label": clock_label(digest),
         "days_locked": days_locked,
         "days_active": days_active,
         "days_locked": days_locked,
@@ -2587,7 +2898,10 @@ def build_pulse_brief(
         "pending_now": pending_now,
         "pending_now": pending_now,
         "price_cuts": price_cuts,
-        "price_cuts": price_cuts,
+        "price_changes": price_changes[:PULSE_CARD_CAP],
+        "initial_price": int(digest.get("initial_price") or 0),
+        "list_price": int(digest.get("list_price") or 0),
+        "subject_price_changes": digest.get("subject_price_changes") or [],
         "status_changes": status_changes,
         "gone": gone,
         "baseline": baseline_then[:40],
