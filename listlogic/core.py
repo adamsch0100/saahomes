@@ -1378,10 +1378,11 @@ def _window_event_counts(
     cut_total = 0
     sold_prices: list[int] = []
     sale_to_list: list[float] = []
+    days_to_contract: list[int] = []
     empty = {
         "listed": 0, "uc": 0, "sold": 0, "listed_under": 0, "listed_over": 0,
         "price_cuts": 0, "price_raises": 0, "avg_cut": 0,
-        "sold_median_price": 0, "sale_to_list": 0.0,
+        "sold_median_price": 0, "sale_to_list": 0.0, "days_to_contract": 0,
     }
     if not start:
         return empty
@@ -1417,6 +1418,10 @@ def _window_event_counts(
                 price_raises += 1
         sold_day = _status_event_date(row, FINGERPRINT_SOLD_STATUSES)
         uc_day = _status_event_date(row, set(FINGERPRINT_UC_STATUSES))
+        if _in_date_window(uc_day, start, end, start_inclusive=start_inclusive):
+            dtc = _days_between(row.get("list_date"), uc_day)
+            if dtc is not None:
+                days_to_contract.append(dtc)
         if _in_date_window(sold_day, start, end, start_inclusive=start_inclusive):
             sold += 1
             try:
@@ -1441,7 +1446,21 @@ def _window_event_counts(
         "avg_cut": int(round(cut_total / price_cuts)) if price_cuts else 0,
         "sold_median_price": int(np.median(sold_prices)) if sold_prices else 0,
         "sale_to_list": round(float(np.mean(sale_to_list)), 4) if sale_to_list else 0.0,
+        "days_to_contract": int(np.median(days_to_contract)) if days_to_contract else 0,
     }
+
+
+def _days_between(start, end) -> int | None:
+    """Whole days from ``start`` to ``end``; None when either date is unknown."""
+    a = _fingerprint_date(start)
+    b = _fingerprint_date(end)
+    if not a or not b:
+        return None
+    try:
+        days = (datetime.strptime(b, "%Y-%m-%d") - datetime.strptime(a, "%Y-%m-%d")).days
+    except ValueError:
+        return None
+    return days if days >= 0 else None
 
 
 def _pulse_latlng(row: pd.Series) -> tuple[float | None, float | None]:
@@ -2224,6 +2243,8 @@ def digest_pulse(
     still_active_cheaper = 0
     active_now = 0
     pending_now = 0
+    active_prices: list[float] = []
+    active_dom: list[int] = []
     for row in snap.get("listings") or []:
         if not isinstance(row, dict) or listing_is_subject(row, subject):
             continue
@@ -2234,6 +2255,16 @@ def digest_pulse(
         status = str(row.get("status") or "")
         if status == "Active":
             active_now += 1
+            if price:
+                active_prices.append(price)
+            dom = _days_between(row.get("list_date"), as_of)
+            if dom is None and row.get("dom"):
+                try:
+                    dom = int(row.get("dom"))
+                except (TypeError, ValueError):
+                    dom = None
+            if dom is not None:
+                active_dom.append(dom)
         if status in FINGERPRINT_UC_STATUSES:
             pending_now += 1
         is_new = _in_date_window(_listing_on_date(row), clock_at, as_of, start_inclusive=True)
@@ -2277,6 +2308,18 @@ def digest_pulse(
             elif _in_date_window(uc_day, clock_at, as_of):
                 went_pending += 1
 
+    subject_dom = _days_between(clock.get("active_at"), as_of) if clock.get("clock") == "active" else None
+    dom_active_median = int(np.median(active_dom)) if active_dom else 0
+    days_to_contract = int(since.get("days_to_contract") or 0)
+    price_call = fingerprint_price_call(
+        list_price=locked_price,
+        active_prices=active_prices,
+        subject_dom=subject_dom,
+        days_to_contract=days_to_contract,
+        uc_since=int(since.get("uc") or 0) + int(since.get("sold") or 0),
+        price_cuts_since=int(since.get("price_cuts") or 0),
+    )
+
     return {
         "new_under": new_under,
         "new_over": new_over,
@@ -2298,6 +2341,10 @@ def digest_pulse(
         "avg_cut_since": since.get("avg_cut") or 0,
         "sold_median_price_since": since.get("sold_median_price") or 0,
         "sale_to_list_since": since.get("sale_to_list") or 0.0,
+        "days_to_contract_since": days_to_contract,
+        "dom_active_median": dom_active_median,
+        "subject_dom": subject_dom if subject_dom is not None else 0,
+        "price_call": price_call,
         "still_active_cheaper": still_active_cheaper,
         "as_of": as_of,
         "locked_price": int(round(locked_price)) if locked_price else 0,
@@ -2319,6 +2366,59 @@ def digest_pulse(
         "rank": int(snap.get("rank") or 0),
         "rank_of": int(snap.get("rank_of") or 0),
         "rank_then": _baseline_rank(baseline, initial_price, subject=subject),
+    }
+
+
+def fingerprint_price_call(
+    *,
+    list_price: float,
+    active_prices: list[float],
+    subject_dom: int | None,
+    days_to_contract: int,
+    uc_since: int,
+    price_cuts_since: int,
+) -> dict:
+    """Agent-facing weekly read on the list price: hold, watch, or adjust.
+
+    Rules, in order: a home in the cheapest third of similar actives holds;
+    one past the typical days-to-contract outside that third adjusts; anything
+    else is watched. ``target`` is the highest price that lands in the
+    cheapest third today.
+    """
+    prices = sorted(float(p) for p in active_prices if p)
+    if not list_price or len(prices) < 3:
+        return {}
+    rank = 1 + sum(1 for p in prices if p < list_price)
+    of = len(prices) + 1
+    third = max(1, -(-of // 3))
+    target = 0
+    if rank > third:
+        # Price just under the home that currently holds the last cheapest-third slot.
+        anchor = prices[third - 1] if third - 1 < len(prices) else prices[-1]
+        target = int((anchor - 1000) // 1000 * 1000)
+    over_dom = bool(subject_dom is not None and days_to_contract and subject_dom > days_to_contract)
+    if rank <= third:
+        call = "hold"
+        why = f"You are {rank} of {of} among similar actives, in the cheapest third buyers open first."
+    elif over_dom:
+        call = "adjust"
+        why = (
+            f"You are {rank} of {of} and {subject_dom} days in; similar homes went under contract "
+            f"in about {days_to_contract} days."
+        )
+    else:
+        call = "watch"
+        why = f"You are {rank} of {of} among similar actives."
+        if subject_dom is not None and days_to_contract:
+            why += f" {subject_dom} days in; similar homes go under contract in about {days_to_contract}."
+        elif uc_since == 0 and price_cuts_since:
+            why += f" No similar homes went under contract yet, and {price_cuts_since} cut price."
+    return {
+        "call": call,
+        "why": why,
+        "rank": rank,
+        "rank_of": of,
+        "target": target if call != "hold" else 0,
     }
 
 
@@ -2512,7 +2612,7 @@ def _pulse_talk_tracks(
         seller.append(f"Your list price is now ${last['to']:,} (was ${last['from']:,}). This update compares similar homes to the new price.")
     if rank and rank_of and rank_then and rank > rank_then:
         agent.append(
-            f"Rank slipped from {rank_then} to {rank} of {rank_of} in this size band. Walk whether the initial list still wins the first showing."
+            f"Rank slipped from {rank_then} to {rank} of {rank_of} in this size band. Walk whether the list price still wins the first showing."
         )
         seller.append(
             f"Your list is now {rank} of {rank_of} similar actives (was {rank_then}). More homes sit under you than {since_you}."
@@ -2520,6 +2620,17 @@ def _pulse_talk_tracks(
     elif rank and rank_of:
         agent.append(f"You sit {rank} of {rank_of} similar actives at your list price.")
         seller.append(f"Among similar homes buyers can still buy, yours is priced {rank} of {rank_of}.")
+    dom_active = int(digest.get("dom_active_median") or 0)
+    subject_dom = int(digest.get("subject_dom") or 0)
+    to_contract = int(digest.get("days_to_contract_since") or 0)
+    if subject_dom and (dom_active or to_contract):
+        parts = []
+        if to_contract:
+            parts.append(f"similar homes went under contract in a median {to_contract} days")
+        if dom_active:
+            parts.append(f"the ones still for sale have sat a median {dom_active} days")
+        agent.append(f"You are {subject_dom} days on market; " + " and ".join(parts) + ".")
+        seller.append(f"Your home has been on the market {subject_dom} days; " + " and ".join(parts) + ".")
     if listed_week or uc_week or sold_week or price_cuts_week:
         bits = []
         if listed_week:
@@ -2559,13 +2670,13 @@ def _pulse_talk_tracks(
         seller.append(f"{price_cuts_since} similar homes have lowered their price {since_you}.")
     if new_under >= 3:
         agent.append(
-            f"{new_under} similar homes listed under the initial list {since_label}. Walk those addresses — buyers open cheaper first."
+            f"{new_under} similar homes listed under your list price {since_label}. Walk those addresses — buyers open cheaper first."
         )
         seller.append(
             f"{new_under} similar homes have listed below your price {since_you}. Those are the homes buyers will open first."
         )
     elif new_under == 1:
-        agent.append(f"One similar home listed under the initial list {since_label}. Open it with the seller and compare condition.")
+        agent.append(f"One similar home listed under your list price {since_label}. Open it with the seller and compare condition.")
         seller.append(f"One similar home listed below your price {since_you}. Worth walking through how it compares.")
     if cheaper_before is not None and cheaper > cheaper_before:
         agent.append(f"The queue under you grew from {cheaper_before} to {cheaper} still-active cheaper homes.")
@@ -2573,10 +2684,10 @@ def _pulse_talk_tracks(
             f"More similar homes are now priced under you ({cheaper}, up from {cheaper_before})."
         )
     if new_over > new_under and new_over >= 2:
-        agent.append("Most new similar lists came in above the initial list — your number is still the value ask.")
+        agent.append("Most new similar lists came in above your list price — your number is still the value ask.")
         seller.append("Most new similar homes listed above your price. Your number is still the value play in this set.")
     if not agent and not stale_upload:
-        agent.append("Quiet week in the size band — no new cheaper similar lists to walk. Hold the initial list.")
+        agent.append("Quiet week in the size band — no new cheaper similar lists to walk. Hold the list price.")
         seller.append("A quiet week in your size range. No new similar homes listed under your price.")
     return {"agent": agent[:5], "seller": seller[:5]}
 

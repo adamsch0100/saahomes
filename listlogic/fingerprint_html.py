@@ -240,6 +240,12 @@ body.is-seller .console {{ display:none; }}
 .drawer .meta {{ color:var(--muted); font-size:.88rem; line-height:1.4; }}
 .drawer ul {{ margin:6px 0 0 1.1rem; font-size:.88rem; line-height:1.45; }}
 .note {{ font-size:.78rem; color:var(--muted); margin-top:8px; }}
+.price-call {{ background:#fff; border:1px solid var(--line); border-left:4px solid var(--muted); border-radius:12px; padding:12px 14px; margin:12px 0; }}
+.price-call strong {{ display:block; font-size:1rem; margin:4px 0; }}
+.price-call p {{ margin:0; font-size:.88rem; }}
+.price-call.pc-hold {{ border-left-color:#2e7d32; }}
+.price-call.pc-watch {{ border-left-color:#b7791f; }}
+.price-call.pc-adjust {{ border-left-color:#c0392b; }}
 .upload {{ display:none; }}
 .weeks-wrap {{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin-bottom:18px; }}
 .weeks-wrap h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.15rem; margin-bottom:4px; }}
@@ -1191,10 +1197,22 @@ function factsHtml(b, d) {{
   if (DATA.active_at) chips.push(['Listed', prettyDate(DATA.active_at)]);
   if (b.days_active || b.days_active) chips.push(['Days on market', String(b.days_active || b.days_active)]);
   else if (b.days_locked || b.days_locked) chips.push(['Days since created', String(b.days_locked || b.days_locked)]);
+  const dg = d || b.digest || {{}};
+  if (Number(dg.days_to_contract_since)) chips.push(['Similar homes to contract', dg.days_to_contract_since + ' days (median)']);
+  if (Number(dg.dom_active_median)) chips.push(['Similar actives on market', dg.dom_active_median + ' days (median)']);
   if (b.as_of) chips.push(['Market as of', prettyDate(b.as_of)]);
   return '<div class="facts">' + chips.map(function (x) {{
     return '<div class="fact"><span class="fk">' + esc(x[0]) + '</span><span class="fv">' + esc(x[1]) + '</span></div>';
   }}).join('') + '</div>';
+}}
+function priceCallHtml(d) {{
+  // Agent-only weekly read on the list price; sellers hear it from their agent.
+  const pc = (d || {{}}).price_call || {{}};
+  if (!DATA.agent || !pc.call) return '';
+  const label = {{ hold: 'Hold the price', watch: 'Watch closely', adjust: 'Consider an adjustment' }}[pc.call] || pc.call;
+  const target = Number(pc.target) ? ' At or under ' + money(pc.target) + ' puts you in the cheapest third today.' : '';
+  return '<div class="price-call pc-' + esc(pc.call) + '"><span class="fk">Price call · agent only</span>' +
+    '<strong>' + esc(label) + '</strong><p>' + esc(pc.why || '') + esc(target) + '</p></div>';
 }}
 function pulsePct(v) {{
   const n = Number(v || 0);
@@ -1881,6 +1899,7 @@ function render() {{
       '</div></div></div>' +
     filtersHtml() +
     factsHtml(b, d) +
+    priceCallHtml(d || b.digest) +
     marketPulseHtml() +
     fromAgentHtml() +
     boardHtml() +

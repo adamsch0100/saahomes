@@ -292,5 +292,54 @@ class WeeklyCountsTests(unittest.TestCase):
         self.assertEqual(d["initial_price"], 410000)
 
 
+class PriceCallTests(unittest.TestCase):
+    def _call(self, list_price, **kw):
+        from core import fingerprint_price_call
+
+        args = dict(
+            list_price=list_price,
+            active_prices=[350000, 360000, 370000, 380000, 390000],
+            subject_dom=10,
+            days_to_contract=30,
+            uc_since=2,
+            price_cuts_since=0,
+        )
+        args.update(kw)
+        return fingerprint_price_call(**args)
+
+    def test_cheapest_third_holds(self):
+        c = self._call(355000)
+        self.assertEqual((c["call"], c["rank"], c["rank_of"], c["target"]), ("hold", 2, 6, 0))
+
+    def test_past_typical_days_in_top_band_adjusts_with_target(self):
+        c = self._call(399000, subject_dom=45)
+        self.assertEqual(c["call"], "adjust")
+        # Cheapest third of 6 is 2 slots: be under the 2nd cheapest competitor.
+        self.assertEqual(c["target"], 359000)
+
+    def test_early_in_top_band_watches(self):
+        self.assertEqual(self._call(399000)["call"], "watch")
+
+    def test_too_few_actives_makes_no_call(self):
+        self.assertEqual(self._call(399000, active_prices=[350000]), {})
+
+
+class DaysToContractTests(unittest.TestCase):
+    def test_median_days_from_list_to_contract(self):
+        from core import _window_event_counts
+
+        rows = [
+            {"id": "a", "list_date": "2026-09-01", "status_history": [
+                {"as_of": "2026-09-01", "status": "Active", "price": 1},
+                {"as_of": "2026-09-21", "status": "Pending", "price": 1}]},
+            {"id": "b", "list_date": "2026-09-10", "status_history": [
+                {"as_of": "2026-09-10", "status": "Active", "price": 1},
+                {"as_of": "2026-10-10", "status": "Pending", "price": 1}]},
+        ]
+        out = _window_event_counts(rows, "2026-09-15", "2026-10-16")
+        self.assertEqual(out["uc"], 2)
+        self.assertEqual(out["days_to_contract"], 25)
+
+
 if __name__ == "__main__":
     unittest.main()
