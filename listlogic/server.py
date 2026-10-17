@@ -4314,7 +4314,7 @@ def _send_run_pulse_email(run_dir: Path, *, stale_upload: bool = False) -> bool:
     return bool(sent_any)
 
 
-# Search refreshes per sweep (the sweep runs every 6 hours, about 6 Reef calls each).
+# Search refreshes per sweep (the sweep runs every 6 hours, up to 12 Reef calls each).
 MAX_PULSE_REEF_REFRESHES = int(os.environ.get("PULSE_REEF_REFRESH_CAP", "10") or 10)
 # Refresh before a weekly email when the market data is older than this.
 PULSE_EMAIL_FRESH_DAYS = 1
