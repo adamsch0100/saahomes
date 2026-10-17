@@ -7,6 +7,11 @@ import smtplib
 from email.message import EmailMessage
 from typing import Optional
 
+
+def clock_label(d: dict | None) -> str:
+    """Seller-facing clock wording; mirrors core.clock_label without importing core."""
+    return "since listed" if str((d or {}).get("clock") or "") == "active" else "since created"
+
 logger = logging.getLogger("ListLogic.mail")
 
 
@@ -343,7 +348,7 @@ def send_pulse_brief(
         price_line = f"List {_money(current)} (initial {_money(initial)})"
     as_of = brief.get("as_of") or digest.get("as_of") or ""
     days = brief.get("days_active") or brief.get("days_locked") or 0
-    days_label = "days on market" if brief.get("active_at") or digest.get("active_at") else "days since generate"
+    days_label = "days on market" if brief.get("active_at") or digest.get("active_at") else "days since created"
     market = brief.get("market_label") or ""
     report_url = brief.get("report_url") or brief.get("share_url") or ""
     share_url = brief.get("share_url") or report_url
@@ -373,7 +378,7 @@ def send_pulse_brief(
         f"{int(digest.get('sold_week') or 0)} sold this week · "
         f"{int(digest.get('price_cuts_week') or 0)} price cuts this week"
         f" · {int(digest.get('listed_since') or ((digest.get('new_under') or 0) + (digest.get('new_over') or 0)))} listed "
-        f"{digest.get('clock_label') or 'since generate'}"
+        f"{clock_label(digest)}"
     )
     stale = ""
     if brief.get("stale_upload"):
@@ -421,7 +426,7 @@ def send_pulse_brief(
   {section("New similar — under the list", brief.get("new_under") or [])}
   {section("New similar — over the list", brief.get("new_over") or [])}
   {section("Still active and cheaper", brief.get("cheaper_active") or [])}
-  {section("Price changes " + str(digest.get("clock_label") or "since generate"), brief.get("price_changes") or brief.get("price_cuts") or [])}
+  {section("Price changes " + clock_label(digest), brief.get("price_changes") or brief.get("price_cuts") or [])}
   {section("Status changes", brief.get("status_changes") or [])}
   {section("No longer in this pull", brief.get("gone") or [])}
   <p style="margin-top:24px"><a href="{_esc(page_url)}">{_esc(open_label)}</a>

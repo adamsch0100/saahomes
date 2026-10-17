@@ -727,7 +727,7 @@ function clockKind() {{
   return 'generate';
 }}
 function sinceLabel() {{
-  return clockKind() === 'active' ? 'since active' : 'since generate';
+  return clockKind() === 'active' ? 'since listed' : 'since created';
 }}
 let laneSort = 'price';
 let leverId = '';
@@ -1079,7 +1079,7 @@ function lanesHtml() {{
     return '<div class="lane' + (kind ? ' is-' + kind : '') + '"><h3>' + esc(title) + ' <span class="n">' + items.length + '</span></h3><div class="lane-row">' +
       items.map(laneHome).join('') + '</div></div>';
   }}
-  const when = clockKind() === 'active' ? 'when this home went active' : 'when this Fingerprint was generated';
+  const when = clockKind() === 'active' ? 'when this home went active' : 'when this Fingerprint was created';
   const total = active.length + closed.length;
   return '<div class="lanes" id="day0Lanes"><h2>The original similar set</h2>' +
     '<p class="sub">Homes that were similar actives ' + when + ' — still active, or already pending/sold. Supporting picture of that first list, not this week’s news.</p>' +
@@ -1190,7 +1190,7 @@ function factsHtml(b, d) {{
   }}
   if (DATA.active_at) chips.push(['Listed', prettyDate(DATA.active_at)]);
   if (b.days_active || b.days_active) chips.push(['Days on market', String(b.days_active || b.days_active)]);
-  else if (b.days_locked || b.days_locked) chips.push(['Days since generate', String(b.days_locked || b.days_locked)]);
+  else if (b.days_locked || b.days_locked) chips.push(['Days since created', String(b.days_locked || b.days_locked)]);
   if (b.as_of) chips.push(['Market as of', prettyDate(b.as_of)]);
   return '<div class="facts">' + chips.map(function (x) {{
     return '<div class="fact"><span class="fk">' + esc(x[0]) + '</span><span class="fv">' + esc(x[1]) + '</span></div>';
@@ -1242,7 +1242,7 @@ function marketPulseHtml(asOf) {{
   const key = weekKey(asOf) || latest;
   const now = marketForWeek(key);
   if (!now.active_count && !then.active_count && !now.months_of_inventory && !then.months_of_inventory) return '';
-  const thenLab = clockKind() === 'active' ? 'when listed' : 'at generate';
+  const thenLab = clockKind() === 'active' ? 'when listed' : 'when created';
   const isLatest = !key || key === latest;
   const days = Number((DATA.brief || {{}}).days_active || (DATA.brief || {{}}).days_locked || 0);
   const med = Number(now.median_dom || then.median_dom || 0);
@@ -1735,7 +1735,7 @@ function storyHtml(d) {{
     Number(d.uc_since || 0) + ' under contract, ' + Number(d.sold_since || 0) + ' sold in this size band.';
   const why = clockKind() === 'active'
     ? 'These are homes like yours — same size band, around your list price. Under contract means a buyer chose that home instead of waiting.'
-    : 'Not listed yet. Counts run from generate until you set the listed date; then this board switches to since you listed.';
+    : 'Not listed yet. Counts run from the day this report was created until you set the listed date; then this board switches to since you listed.';
   return '<div class="story"><p class="lead">' + esc(lead) + '</p><p class="long">' + esc(long) + '</p></div>' +
     '<p class="why">' + esc(why) + '</p>';
 }}
@@ -1941,8 +1941,8 @@ function renderConsole() {{
     '<label>Listed / went active</label>' +
     '<input type="date" id="activeAt" value="' + esc(String(DATA.active_at || '').slice(0,10)) + '">' +
     '<p class="cadence">' + (DATA.active_at
-      ? (DATA.active_at_source === 'agent' ? 'You set this date. The board uses since active.' : 'Picked up from the market file when this address went Active. Change it if needed.')
-      : 'Leave blank until it lists. After this date — or when we see this address Active — the board switches from since generate to since active.') + '</p>' +
+      ? (DATA.active_at_source === 'agent' ? 'You set this date. The board counts since listed.' : 'Picked up from the market file when this address went Active. Change it if needed.')
+      : 'Leave blank until it lists. After this date — or when we see this address Active — the board switches from since created to since listed.') + '</p>' +
     '<button type="button" id="btnActive">Save listed date</button>' +
     '<label>Seller name</label><input type="text" id="sellerName" value="' + esc(DATA.seller_name) + '">' +
     '<label>Seller email</label><input type="email" id="sellerEmail" value="' + esc(DATA.seller_email) + '">' +

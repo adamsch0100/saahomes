@@ -1231,8 +1231,17 @@ def attach_market_pulse_history(
     return out, changed
 
 
+CLOCK_LABELS = {"active": "since listed", "generate": "since created"}
+
+
+def clock_label(d: dict | None) -> str:
+    """Seller-facing clock wording; ignores labels stored by older code."""
+    kind = str((d or {}).get("clock") or "generate")
+    return CLOCK_LABELS.get(kind, CLOCK_LABELS["generate"])
+
+
 def fingerprint_clock(lock: dict | None) -> dict:
-    """Generate clock until the listing goes active, then since-active is the board."""
+    """Created clock until the listing goes active, then since-active is the board."""
     lock = lock if isinstance(lock, dict) else {}
     locked_at = _fingerprint_date(lock.get("locked_at"))
     active_at = _fingerprint_date(lock.get("active_at"))
@@ -1240,7 +1249,7 @@ def fingerprint_clock(lock: dict | None) -> dict:
         return {
             "clock": "active",
             "clock_at": active_at,
-            "clock_label": "since active",
+            "clock_label": CLOCK_LABELS["active"],
             "locked_at": locked_at,
             "active_at": active_at,
             "active_at_source": str(lock.get("active_at_source") or ""),
@@ -1248,7 +1257,7 @@ def fingerprint_clock(lock: dict | None) -> dict:
     return {
         "clock": "generate",
         "clock_at": locked_at,
-        "clock_label": "since generate",
+        "clock_label": CLOCK_LABELS["generate"],
         "locked_at": locked_at,
         "active_at": "",
         "active_at_source": str(lock.get("active_at_source") or ""),
@@ -2299,7 +2308,7 @@ def digest_pulse(
         "active_at": clock.get("active_at") or "",
         "clock": clock.get("clock") or "generate",
         "clock_at": clock_at,
-        "clock_label": clock.get("clock_label") or "since generate",
+        "clock_label": clock_label(clock),
         "count": len(snap.get("listings") or []),
         "active_count": int(snap.get("active_count") or active_now),
         "pending_now": pending_now,
@@ -2486,8 +2495,8 @@ def _pulse_talk_tracks(
     sold_median = int(digest.get("sold_median_price_since") or 0)
     sale_to_list = float(digest.get("sale_to_list_since") or 0)
     subject_moves = [m for m in (digest.get("subject_price_changes") or []) if isinstance(m, dict)]
-    clock_label = str(digest.get("clock_label") or "since generate")
-    since_you = "since you listed" if digest.get("clock") == "active" else "since we generated this"
+    since_label = clock_label(digest)
+    since_you = "since you listed" if digest.get("clock") == "active" else "since we created this report"
     agent: list[str] = []
     seller: list[str] = []
     if stale_upload:
@@ -2526,7 +2535,7 @@ def _pulse_talk_tracks(
         seller.append(f"This week: {week_line} among similar homes.")
     if went_pending >= 1:
         agent.append(
-            f"{went_pending} similar home{'s' if went_pending != 1 else ''} went under contract {clock_label}. Those buyers did not wait."
+            f"{went_pending} similar home{'s' if went_pending != 1 else ''} went under contract {since_label}. Those buyers did not wait."
         )
         seller.append(
             f"{went_pending} similar home{'s' if went_pending != 1 else ''} {since_you} {'are' if went_pending != 1 else 'is'} now under contract."
@@ -2537,7 +2546,7 @@ def _pulse_talk_tracks(
             paid = f" at a median ${sold_median:,}"
             if sale_to_list:
                 paid += f" ({sale_to_list * 100:.0f}% of their last list price)"
-        agent.append(f"{went_sold} similar home{'s' if went_sold != 1 else ''} closed {clock_label}{paid} — proof of what this band will pay.")
+        agent.append(f"{went_sold} similar home{'s' if went_sold != 1 else ''} closed {since_label}{paid} — proof of what this band will pay.")
         seller.append(f"{went_sold} similar home{'s' if went_sold != 1 else ''} closed {since_you}{paid}.")
     if price_cuts_week >= 1:
         avg = f", about ${avg_cut_week:,} on average" if avg_cut_week else ""
@@ -2546,17 +2555,17 @@ def _pulse_talk_tracks(
         )
         seller.append(f"{price_cuts_week} similar home{'s' if price_cuts_week != 1 else ''} lowered {'their' if price_cuts_week != 1 else 'its'} price this week{avg}.")
     elif price_cuts_since >= 2:
-        agent.append(f"{price_cuts_since} similar homes have cut price {clock_label}.")
+        agent.append(f"{price_cuts_since} similar homes have cut price {since_label}.")
         seller.append(f"{price_cuts_since} similar homes have lowered their price {since_you}.")
     if new_under >= 3:
         agent.append(
-            f"{new_under} similar homes listed under the initial list {clock_label}. Walk those addresses — buyers open cheaper first."
+            f"{new_under} similar homes listed under the initial list {since_label}. Walk those addresses — buyers open cheaper first."
         )
         seller.append(
             f"{new_under} similar homes have listed below your price {since_you}. Those are the homes buyers will open first."
         )
     elif new_under == 1:
-        agent.append(f"One similar home listed under the initial list {clock_label}. Open it with the seller and compare condition.")
+        agent.append(f"One similar home listed under the initial list {since_label}. Open it with the seller and compare condition.")
         seller.append(f"One similar home listed below your price {since_you}. Worth walking through how it compares.")
     if cheaper_before is not None and cheaper > cheaper_before:
         agent.append(f"The queue under you grew from {cheaper_before} to {cheaper} still-active cheaper homes.")
@@ -2862,7 +2871,7 @@ def build_pulse_brief(
         "active_at": _fingerprint_date(active_at),
         "clock": digest.get("clock") or "generate",
         "clock_at": clock_at,
-        "clock_label": digest.get("clock_label") or "since generate",
+        "clock_label": clock_label(digest),
         "days_locked": days_locked,
         "days_active": days_active,
         "days_locked": days_locked,
