@@ -372,14 +372,35 @@ def send_pulse_brief(
 
     talk_html = "".join(f"<li>{_esc(t)}</li>" for t in tracks)
     talk_label = "What to tell them" if audience == "agent" else "This week in your market"
+    by_search = str(((brief.get("comp_set") or {}).get("defined_by")) or "") == "search"
+    new_word = "new in your market" if by_search else "new similar"
+    under_label = "New in your market — under the list" if by_search else "New similar — under the list"
+    over_label = "New in your market — over the list" if by_search else "New similar — over the list"
     score = (
         f"{int(digest.get('listed_week') or 0)} listed this week · "
         f"{int(digest.get('uc_week') or 0)} under contract this week · "
         f"{int(digest.get('sold_week') or 0)} sold this week · "
         f"{int(digest.get('price_cuts_week') or 0)} price cuts this week"
-        f" · {int(digest.get('listed_since') or ((digest.get('new_under') or 0) + (digest.get('new_over') or 0)))} listed "
+        f" · {int(digest.get('listed_since') or ((digest.get('new_under') or 0) + (digest.get('new_over') or 0)))} {new_word} "
         f"{clock_label(digest)}"
     )
+    rec = digest.get("reconcile") if isinstance(digest.get("reconcile"), dict) else {}
+    adds_up = ""
+    if rec.get("original"):
+        tail = []
+        if rec.get("under_contract"):
+            tail.append(f"{rec['under_contract']} under contract")
+        if rec.get("sold"):
+            tail.append(f"{rec['sold']} sold")
+        if rec.get("gone"):
+            tail.append(f"{rec['gone']} off the market")
+        adds_up = (
+            f"{'Your market' if by_search else 'Similar homes'}: {rec.get('active_now', 0)} active today = {rec.get('still_active', 0)} of the original "
+            f"{rec['original']} still active + {rec.get('new_since', 0)} new since."
+            + (f" Of the original {rec['original']}: {', '.join(tail)}." if tail else "")
+        )
+        if not rec.get("adds_up"):
+            adds_up += " (The latest pull disagrees by a home or two; a refresh re-checks.)"
     call = digest.get("price_call") if audience == "agent" else None
     call_html = ""
     call_text = ""
@@ -435,13 +456,14 @@ def send_pulse_brief(
   <h1 style="font-size:22px;margin:6px 0 8px">{_esc(addr)}</h1>
   <p style="color:#5c6675;margin:0 0 16px">{_esc(price_line)} · { _esc(market) } · as of {_esc(as_of)} · {int(days)} {days_label}</p>
   <p style="font-size:16px;margin:0 0 16px"><strong>{_esc(score)}</strong></p>
+  {("<p style='color:#5c6675;margin:-8px 0 16px'>" + _esc(adds_up) + "</p>") if adds_up else ""}
   {call_html}
   {stale}
   {agent_cta}
   <h3 style="margin:18px 0 8px;font-size:16px">{_esc(talk_label)}</h3>
-  <ul>{talk_html or '<li>Quiet week in the size band.</li>'}</ul>
-  {section("New similar — under the list", brief.get("new_under") or [])}
-  {section("New similar — over the list", brief.get("new_over") or [])}
+  <ul>{talk_html or ('<li>Quiet week in your market.</li>' if by_search else '<li>Quiet week in the size band.</li>')}</ul>
+  {section(under_label, brief.get("new_under") or [])}
+  {section(over_label, brief.get("new_over") or [])}
   {section("Still active and cheaper", brief.get("cheaper_active") or [])}
   {section("Price changes " + clock_label(digest), brief.get("price_changes") or brief.get("price_cuts") or [])}
   {section("Status changes", brief.get("status_changes") or [])}
@@ -455,12 +477,14 @@ def send_pulse_brief(
   </p>
 </div>"""
     text = (
-        f"{who}\n{addr}\n{price_line} · {market} · as of {as_of}\n{score}\n\n"
+        f"{who}\n{addr}\n{price_line} · {market} · as of {as_of}\n{score}\n"
+        + (f"{adds_up}\n" if adds_up else "")
+        + "\n"
         + call_text
         + agent_cta_text
         + "\n".join(f"- {t}" for t in tracks)
-        + section_text("New similar — under", brief.get("new_under") or [])
-        + section_text("New similar — over", brief.get("new_over") or [])
+        + section_text(under_label.replace(" the list", ""), brief.get("new_under") or [])
+        + section_text(over_label.replace(" the list", ""), brief.get("new_over") or [])
         + section_text("Still active and cheaper", brief.get("cheaper_active") or [])
         + section_text("Price changes", brief.get("price_changes") or brief.get("price_cuts") or [])
         + f"\n{open_label}: {page_url}\n"
