@@ -7,56 +7,6 @@ import { getSitemapEntries, SITE_URL } from '../src/data/siteRoutes.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const outputPath = join(__dirname, '../public/sitemap.xml');
 
-// Live listings API (same env fallback as scripts/prerender-meta.mjs).
-const LISTINGS_API_BASE = (
-  process.env.LISTINGS_API_BASE ||
-  process.env.VITE_API_URL ||
-  'https://saahomes.com'
-).replace(/\/$/, '');
-
-// Maximum listing detail URLs to include in the sitemap. Listings are dynamic
-// (IRES MLS refresh daily), so caps protect sitemap size; Google's 50k limit
-// is far away at current inventory, but the cap keeps builds fast.
-const LISTING_URL_LIMIT = 400;
-
-/**
- * Fetch real active / active-under-contract listing slugs from the live API.
- * Mirrors the ItemList fetch in prerender-meta.mjs (data.success + data.data).
- * Returns [] on any failure so the build is never blocked on network.
- */
-async function fetchListingSlugs() {
-  try {
-    const params = new URLSearchParams({
-      limit: String(LISTING_URL_LIMIT),
-      sort: 'newest',
-      status: 'Active',
-    });
-    const url = `${LISTINGS_API_BASE}/api/listings?${params}`;
-    const res = await fetch(url, {
-      headers: { Accept: 'application/json' },
-      signal: AbortSignal.timeout(20000),
-    });
-    if (!res.ok) {
-      console.warn(`  sitemap: listing fetch ${res.status} — skipping listing URLs`);
-      return [];
-    }
-    const body = await res.json();
-    if (!body?.success || !Array.isArray(body.data)) return [];
-    const seen = new Set();
-    const slugs = [];
-    for (const l of body.data) {
-      const slug = typeof l?.slug === 'string' ? l.slug.replace(/\/+$/, '') : '';
-      if (!slug || seen.has(slug)) continue;
-      seen.add(slug);
-      slugs.push(slug);
-    }
-    return slugs;
-  } catch (err) {
-    console.warn(`  sitemap: listing fetch skipped (${err.message})`);
-    return [];
-  }
-}
-
 /**
  * Resolve a truthful per-URL <lastmod> from git history of the source files
  * that generate each page's content. Google distrusts sitemaps where every
@@ -170,14 +120,11 @@ async function main() {
     prevDates = {};
   }
 
-  // GEO/AEO: listing detail pages carry RealEstateListing + availability
-  // schema (answers "is this home still available?"), but they are rendered
-  // client-side and previously had zero discoverable entry points. Emit real
-  // live-MLS slugs so crawlers can discover them. No lastmod: the page data
-  // refreshes from IRES MLS independent of git history, so a fixed date would
-  // be fabrication — changefreq=daily signals freshness intent instead.
-  const listingSlugs = await fetchListingSlugs();
-  const listingPaths = listingSlugs.map((slug) => `/homes-for-sale/${slug}/`);
+  // Listing detail pages live in exactly one sitemap: /sitemap-listings.xml,
+  // generated from the live DB (active-only, NoCO cities). This static build
+  // must not also emit /homes-for-sale/{slug}/ — the sitemap index serves both
+  // files, so a URL in both is a duplicate (crawl-sitemap-duplicate-urls). The
+  // index is in robots.txt; each URL is declared once, in its owning sitemap.
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -219,22 +166,13 @@ ${entries
   </url>`;
   })
   .join('\n')}
-${listingPaths
-  .map(
-    (path) => `  <url>
-    <loc>${SITE_URL}${path}</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>`
-  )
-  .join('\n')}
 </urlset>
 `;
 
   writeFileSync(outputPath, xml, 'utf8');
   console.log(
-    `Generated sitemap with ${entries.length + listingPaths.length} URLs at public/sitemap.xml ` +
-      `(${gitCount} git-truthful lastmod values; ${listingPaths.length} live listing URLs)`
+    `Generated sitemap with ${entries.length} URLs at public/sitemap.xml ` +
+      `(${gitCount} git-truthful lastmod values); listings are served by /sitemap-listings.xml`
   );
 }
 
