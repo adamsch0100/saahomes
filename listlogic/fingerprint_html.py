@@ -244,7 +244,9 @@ body.is-seller .console {{ display:none; }}
 .adds-up .kicker {{ font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--navy); font-weight:800; }}
 .adds-up h2 {{ font-family:Fraunces,Georgia,serif; font-size:1.2rem; margin:2px 0 10px; }}
 .adds-up .rows {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }}
-@media (max-width:800px) {{ .adds-up .rows {{ grid-template-columns:1fr; }} }}
+.adds-up .rows-5 {{ grid-template-columns:repeat(5,minmax(0,1fr)); }}
+@media (max-width:900px) {{ .adds-up .rows-5 {{ grid-template-columns:1fr 1fr; }} }}
+@media (max-width:800px) {{ .adds-up .rows {{ grid-template-columns:1fr; }} .adds-up .rows-5 {{ grid-template-columns:1fr 1fr; }} }}
 .adds-up .pop {{ border:1px solid var(--line); border-radius:12px; padding:12px 14px; }}
 .adds-up .pop .pk {{ display:block; font-size:.62rem; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); font-weight:800; }}
 .adds-up .pop .pn {{ display:block; font-family:Fraunces,Georgia,serif; font-size:1.6rem; font-weight:700; color:var(--navy); line-height:1.1; margin:4px 0 2px; }}
@@ -629,7 +631,7 @@ body.is-seller .console {{ display:none; }}
     <span>Same listing — Live Story is the appointment, Fingerprint is the weekly seller picture.</span>
     <a id="switchStory" href="#">Open Live Story →</a>
   </div>
-  <p class="photo-banner" id="photoBanner">Pulling listing photos for this similar set…</p>
+  <p class="photo-banner" id="photoBanner">Pulling listing photos for this set…</p>
   <main id="main"></main>
   <aside class="console" id="console"></aside>
 </div>
@@ -897,7 +899,7 @@ function sparklineHtml() {{
   }}
   return '<div class="spark"><svg viewBox="0 0 212 48" width="212" height="48" aria-hidden="true">' +
     poly(cheaper, '#0e7a6d') + poly(ranks, '#c9a227') + '</svg>' +
-    '<p class="cap">Teal: still cheaper than you · Gold: your rank among similar actives at your list price.</p></div>';
+    mw('<p class="cap">Teal: still cheaper than you · Gold: your rank among similar actives at your list price.</p></div>');
 }}
 function laneHome(c, extraClass) {{
   const pic = photoUrl(c)
@@ -1088,11 +1090,13 @@ function lanesHtml() {{
   if (!rows.length) return '';
   const active = [];
   const closed = [];
+  const gone = [];
   for (let i = 0; i < rows.length; i++) {{
     const c = rows[i];
     const st = String(c.status || '').toLowerCase();
     if (st === 'sold' || isUc(st)) closed.push(c);
-    else if (st !== 'gone') active.push(c);
+    else if (c.gone || st === 'gone') gone.push(c);
+    else active.push(c);
   }}
   function lane(title, items, kind) {{
     if (!items.length) return '';
@@ -1100,16 +1104,17 @@ function lanesHtml() {{
       items.map(laneHome).join('') + '</div></div>';
   }}
   const when = clockKind() === 'active' ? 'when this home went active' : 'when this Fingerprint was created';
-  const total = active.length + closed.length;
-  return '<div class="lanes" id="day0Lanes"><h2>The original similar set</h2>' +
-    '<p class="sub">Homes that were similar actives ' + when + ' — still active, or already pending/sold. Supporting picture of that first list, not this week’s news.</p>' +
+  const total = active.length + closed.length + gone.length;
+  return '<div class="lanes" id="day0Lanes"><h2>' + (marketBySearch() ? 'The original set' : 'The original similar set') + '</h2>' +
+    '<p class="sub">Homes that were active in this market ' + when + ' — still active, pending/sold, or off the market. Supporting picture of that first list, not this week’s news.</p>' +
     '<div class="set-totals">' +
       '<span><b>' + total + '</b> in this set</span>' +
       '<span><b>' + active.length + '</b> still active</span>' +
       '<span><b>' + closed.length + '</b> went pending or sold</span>' +
+      (gone.length ? '<span><b>' + gone.length + '</b> off the market</span>' : '') +
     '</div>' +
     sortsHtml('lanes') +
-    lane('Still active', active, 'active') + lane('Went pending or sold', closed, 'uc') + '</div>';
+    lane('Still active', active, 'active') + lane('Went pending or sold', closed, 'uc') + lane('Off the market', gone, 'gone') + '</div>';
 }}
 function weekHomesHtml(asOf) {{
   const homes = homesForWeek(asOf);
@@ -1138,7 +1143,7 @@ function weekHomesHtml(asOf) {{
         : '<p class="empty">None this week.</p>') + '</div>';
   }}
   if (!homes.length) {{
-    return '<div class="week-homes" id="weekHomes"><p class="empty">No similar homes listed or went pending/sold this week.</p></div>';
+    return mw('<div class="week-homes" id="weekHomes"><p class="empty">No similar homes listed or went pending/sold this week.</p></div>');
   }}
   return '<div class="week-homes" id="weekHomes">' +
     col('Listed', listed, 'active') +
@@ -1188,12 +1193,27 @@ function prettyDate(s) {{
   if (isNaN(d.getTime())) return raw || '—';
   return d.toLocaleDateString(undefined, {{ month: 'short', day: 'numeric', year: 'numeric' }});
 }}
+const MW = [[/similar actives/g, 'actives in your market'], [/similar homes/g, 'homes in your market'], [/similar home/g, 'home in your market'],
+  [/similar lists/g, 'lists in your market'], [/similar listings/g, 'listings in your market'], [/this similar set/g, 'your market'], [/Same similar set/g, 'Same market'],
+  [/new similar /g, 'new '], [/in this size band/g, 'in your market'], [/in the size band/g, 'in your market'], [/in this band/g, 'in your market'], [/size band/g, 'market']];
+function mw(t) {{
+  if (!marketBySearch()) return t;
+  let out = String(t);
+  for (let i = 0; i < MW.length; i++) out = out.replace(MW[i][0], MW[i][1]);
+  return out;
+}}
+function marketBySearch() {{
+  return String((((DATA.brief || {{}}).comp_set || {{}}).defined_by) || '') === 'search';
+}}
 function filtersHtml() {{
   const chips = (((DATA.brief || {{}}).comp_set || {{}}).chips || []);
   if (!chips.length) return '';
-  return '<div class="filters"><span class="filters-k">Similar set</span>' +
+  const bySearch = marketBySearch();
+  return '<div class="filters"><span class="filters-k">' + (bySearch ? 'Fingerprint market' : 'Similar set') + '</span>' +
     chips.map(function (c) {{ return '<span class="chip">' + esc(c) + '</span>'; }}).join('') +
-    '<p class="filters-n">Beds, baths, garage, and size a buyer would cross-shop against this home.</p></div>';
+    '<p class="filters-n">' + (bySearch
+      ? 'The search this report was built on. Every home it returns is tracked here week by week: active, under contract, sold, or off the market.'
+      : 'Beds, baths, garage, and size a buyer would cross-shop against this home.') + '</p></div>';
 }}
 function factsHtml(b, d) {{
   const chips = [];
@@ -1212,7 +1232,8 @@ function factsHtml(b, d) {{
   if (b.days_active || b.days_active) chips.push(['Days on market', String(b.days_active || b.days_active)]);
   else if (b.days_locked || b.days_locked) chips.push(['Days since created', String(b.days_locked || b.days_locked)]);
   const dg = d || b.digest || {{}};
-  if (dg.active_count != null) chips.push(['Similar homes active', String(dg.active_count)]);
+  if (dg.active_count != null) chips.push([marketBySearch() ? 'Active in this market' : 'Similar homes active', String(dg.active_count)]);
+  if (dg.pending_now != null && marketBySearch()) chips.push(['Under contract now', String(dg.pending_now)]);
   if (Number(dg.days_to_contract_since)) chips.push(['Similar homes to contract', dg.days_to_contract_since + ' days (median)']);
   if (Number(dg.dom_active_median)) chips.push(['Similar actives on market', dg.dom_active_median + ' days (median)']);
   if (b.as_of) chips.push(['Market as of', prettyDate(b.as_of)]);
@@ -1238,13 +1259,25 @@ function addsUpHtml(d) {{
   if (r.under_contract) parts.push(r.under_contract + ' under contract');
   if (r.sold) parts.push(r.sold + ' sold');
   if (r.gone) parts.push(r.gone + ' off the market');
+  const bySearch = marketBySearch();
+  const sinceLab = sinceLabel();
   const math = r.original
-    ? ('<b>' + r.original + '</b> similar homes were active ' + when + '. Today <b>' + r.still_active + '</b> of them are still active' +
-       (parts.length ? ' (' + parts.join(', ') + ')' : '') + ', and <b>' + r.new_since + '</b> new similar ' + (r.new_since === 1 ? 'home has' : 'homes have') + ' listed since. ' +
+    ? ('<b>' + r.original + '</b> ' + (bySearch ? 'homes in this market' : 'similar homes') + ' were active ' + when + '. Today <b>' + r.still_active + '</b> of them are still active' +
+       (parts.length ? ' (' + parts.join(', ') + ')' : '') + ', and <b>' + r.new_since + mw('</b> new similar ') + (r.new_since === 1 ? 'home has' : 'homes have') + ' listed since. ' +
        r.still_active + ' + ' + r.new_since + ' = <b>' + r.expected_active + '</b>' +
-       (r.adds_up ? ' <span class="ok">✓ matches the ' + r.active_now + ' similar actives today.</span>'
-                  : ' <span class="warn">does not match the ' + r.active_now + ' similar actives in the latest pull.</span> A home can drop from the pull without leaving the market; tap Refresh market now to re-pull.'))
+       (r.adds_up ? ' <span class="ok">✓ matches the ' + r.active_now + mw(' similar actives today.</span>')
+                  : ' <span class="warn">does not match the ' + r.active_now + mw(' similar actives in the latest pull.</span> A home can drop from the pull without leaving the market; tap Refresh market now to re-pull.')))
     : '';
+  if (bySearch) {{
+    return '<section class="adds-up"><div class="kicker">How the numbers add up</div><h2>Your market this week</h2>' +
+      '<div class="rows rows-5">' +
+        '<div class="pop"><span class="pk">Active now</span><span class="pn">' + (dg.active_count != null ? dg.active_count : '—') + '</span><span class="ph">For sale today in this market, not counting yours. Rank and the board use this set.</span></div>' +
+        '<div class="pop"><span class="pk">Under contract now</span><span class="pn">' + (r.pending_now != null ? r.pending_now : '—') + '</span><span class="ph">Pending, backup, or first-right today.</span></div>' +
+        '<div class="pop"><span class="pk">Sold ' + esc(sinceLab) + '</span><span class="pn">' + (r.sold_since != null ? r.sold_since : '—') + '</span><span class="ph">Closed in this market, by close date.</span></div>' +
+        '<div class="pop"><span class="pk">Off the market</span><span class="pn">' + (r.gone_total != null ? r.gone_total : '—') + '</span><span class="ph">Withdrawn, expired, or no longer returned by the search.</span></div>' +
+        (r.original ? '<div class="pop"><span class="pk">Active ' + esc(when.replace('when ', 'when ')) + '</span><span class="pn">' + r.original + '</span><span class="ph">The original set. Still active / under contract / sold tracks these homes.</span></div>' : '') +
+      '</div>' + (math ? '<p class="math">' + math + '</p>' : '') + '</section>';
+  }}
   return '<section class="adds-up"><div class="kicker">How the numbers add up</div><h2>Three counts, three different sets</h2>' +
     '<div class="rows">' +
       (pullN != null ? '<div class="pop"><span class="pk">Active in the search pull</span><span class="pn">' + pullN + '</span><span class="ph">Every active home the saved search returns, all sizes. This is the market vitals number.</span></div>' : '') +
@@ -1312,14 +1345,16 @@ function marketPulseHtml(asOf) {{
   const days = Number((DATA.brief || {{}}).days_active || (DATA.brief || {{}}).days_locked || 0);
   const med = Number(now.median_dom || then.median_dom || 0);
   const rating = pack.home_rating || then.home_rating;
-  const activeLabel = isLatest ? 'Active in the pull' : 'Active that week';
+  const bySearch = marketBySearch();
+  const activeLabel = isLatest ? (bySearch ? 'Active now' : 'Active in the pull') : 'Active that week';
   const dg = DATA.digest || (DATA.brief || {{}}).digest || {{}};
-  const similarNote = (isLatest && dg.active_count != null) ? ' · similar to yours: ' + dg.active_count : '';
+  const similarNote = (isLatest && !bySearch && dg.active_count != null) ? ' · similar to yours: ' + dg.active_count : '';
+  const activeHint = bySearch ? 'Every home the saved search returns, not counting yours' : 'Every home in the search, all sizes';
   const cells = [
     ['Months of inventory', pulseNum(now.months_of_inventory, 'inv'), pulseDeltaLine(now.months_of_inventory, then.months_of_inventory, 'inv', thenLab)],
     ['30-day odds', pulseNum(now.odds_of_selling, 'pct'), pulseDeltaLine(now.odds_of_selling, then.odds_of_selling, 'pct', thenLab)],
     ['Sales / month', pulseNum(now.absorption_rate, 'rate'), pulseDeltaLine(now.absorption_rate, then.absorption_rate, 'rate', thenLab)],
-    [activeLabel, String(now.active_count != null ? now.active_count : '—'), 'Every home in the search, all sizes' + similarNote + (then.active_count != null ? ' · was ' + then.active_count + ' ' + thenLab : '')],
+    [activeLabel, String(now.active_count != null ? now.active_count : '—'), activeHint + similarNote + (then.active_count != null ? ' · was ' + then.active_count + ' ' + thenLab : '')],
     ['Median days', pulseNum(now.median_dom, 'days'), pulseDeltaLine(now.median_dom, then.median_dom, 'days', thenLab)],
     ['Median sold', pulseNum(now.median_sold_price, 'money'), pulseDeltaLine(now.median_sold_price, then.median_sold_price, 'money', thenLab)],
     ['Median $ / sf', pulseNum(now.median_price_per_sqft, 'ppsf'), pulseDeltaLine(now.median_price_per_sqft, then.median_price_per_sqft, 'ppsf', thenLab)],
@@ -1376,7 +1411,7 @@ function weeksHtml() {{
   const current = weekKey((DATA.brief || {{}}).as_of) || weekAsOf(hist[hist.length - 1]);
   const d = DATA.digest || (DATA.brief || {{}}).digest || {{}};
   return '<div class="walk" id="walkWeeks"><h2>Walk the weeks</h2>' +
-    '<p class="sub">Same similar set, week by week. Tap a date to walk listed homes, then homes that went pending or sold.</p>' +
+    mw('<p class="sub">Same similar set, week by week. Tap a date to walk listed homes, then homes that went pending or sold.</p>') +
     '<div class="weeks-bar"><div class="weeks">' + hist.map(function (w) {{
       const asOf = weekAsOf(w);
       const on = asOf === current ? ' is-on' : '';
@@ -1528,7 +1563,7 @@ function boardHtml() {{
   return '<section class="board" id="marketBoard">' +
     '<div class="board-top"><div class="kicker">Market board</div>' +
     '<h2>What happened around your list</h2>' +
-    '<p class="sub">New similar listings split under and over your list price of <b>' + money(locked) +
+    mw('<p class="sub">New similar listings split under and over your list price of <b>') + money(locked) +
     '</b>' + initialNote() + '. Under contract groups pending, backup, and first-right. Sold counts closes by close date. Tap a week to walk those homes.</p></div>' +
     '<div class="board-panes">' +
       '<div class="board-pane"><div class="board-pane-h"><span>This week</span><small>' + weekLabel(current) + '</small></div>' + stats(week) + '</div>' +
@@ -1595,7 +1630,7 @@ function mapHtml() {{
   if (!DATA.mapbox_token) return '';
   return '<section class="fp-map" id="fpMap">' +
     '<h2>Where this set sits</h2>' +
-    '<p class="sub">Pins are the same similar homes from the market file. Gold is your list. Tap a pin to open the listing.</p>' +
+    mw('<p class="sub">Pins are the same similar homes from the market file. Gold is your list. Tap a pin to open the listing.</p>') +
     '<div class="fp-map-legend">' +
       '<span><i class="is-you"></i>Your list</span>' +
       '<span><i class="is-active"></i>Active</span>' +
@@ -1791,12 +1826,12 @@ function storyHtml(d) {{
   const ucW = Number(d.uc_week || 0);
   const soldW = Number(d.sold_week || 0);
   const bits = [];
-  if (listedW) bits.push(listedW + ' similar home' + (listedW === 1 ? '' : 's') + ' listed');
+  if (listedW) bits.push(listedW + mw(' similar home') + (listedW === 1 ? '' : 's') + ' listed');
   if (ucW) bits.push(ucW + ' went under contract');
   if (soldW) bits.push(soldW + ' sold');
   const lead = bits.length
     ? ('This week: ' + bits.join(', ') + '.')
-    : 'Quiet this week — no similar lists, under contracts, or sales.';
+    : mw('Quiet this week — no similar lists, under contracts, or sales.');
   const since = sinceLabel();
   const long = since + ': ' + Number(d.listed_since || 0) + ' listed, ' +
     Number(d.uc_since || 0) + ' under contract, ' + Number(d.sold_since || 0) + ' sold in this size band.';
@@ -1825,7 +1860,7 @@ function scoreboardHtml(d) {{
       numCell(ucSince, 'Under contract ' + since) +
       numCell(soldSince, 'Sold ' + since) +
     '</div>' +
-    '<p class="legend"><b>Listed</b> new similar homes · <b>Under contract</b> pending/backup/first-right · <b>Sold</b> closed in this band</p>' +
+    mw('<p class="legend"><b>Listed</b> new similar homes · <b>Under contract</b> pending/backup/first-right · <b>Sold</b> closed in this band</p>') +
     '<div class="score">' +
       [['v', (d.active_count != null && d.baseline_active != null) ? (d.active_count + ' / ' + d.baseline_active) : (d.active_count ?? '—'), 'Active now vs at list'],
        ['v', d.still_active_cheaper, 'Still cheaper than you'],
@@ -1846,8 +1881,8 @@ function stripHtml(pos, d) {{
     return '<button type="button" class="tick' + (p.subject ? ' me' : '') + '" data-id="' + esc(p.id || '') + '" style="left:' + pct + '%" aria-label="' + esc(p.address || 'Listing') + '"></button>' +
       (p.subject ? '<span class="lab" style="left:' + pct + '%">' + money(p.price) + '</span>' : '');
   }}).join('');
-  return '<div class="strip-wrap" id="sitStrip"><h2>Where you sit among similar actives</h2>' +
-    '<p class="sub">Each pin is a similar active. Hover to name it — tap to open the home. Your list is the gold pin.</p>' +
+  return mw('<div class="strip-wrap" id="sitStrip"><h2>Where you sit among similar actives</h2>') +
+    mw('<p class="sub">Each pin is a similar active. Hover to name it — tap to open the home. Your list is the gold pin.</p>') +
     sortsHtml('strip') +
     '<div class="strip" id="priceStrip"><div class="rail"></div>' + ticks + '</div>' +
     '<p class="strip-now" id="stripNow">Hover a pin — tap to open that home.</p></div>';
@@ -1904,7 +1939,7 @@ function bindSorts() {{
         if (html) lanes.outerHTML = html;
       }}
       const thenSec = document.getElementById('thenNow');
-      if (thenSec) thenSec.outerHTML = section('Where they sit now', 'Same similar set — still active, under contract, sold, or gone. Default order is price.', sortedRows(b.baseline || [], laneSort), null, 'thenNow');
+      if (thenSec) thenSec.outerHTML = section('Where they sit now', mw('Same similar set — still active, under contract, sold, or gone. Default order is price.'), sortedRows(b.baseline || [], laneSort), null, 'thenNow');
       const strip = document.getElementById('sitStrip');
       if (strip) strip.outerHTML = stripHtml(b.position || [], DATA.digest || b.digest || {{}});
       document.querySelectorAll('.sorts button').forEach(function (x) {{

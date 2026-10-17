@@ -397,3 +397,114 @@ class ReconcileTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FingerprintMarketTests(unittest.TestCase):
+    """A saved-search report tracks every home the search returns; an export is banded."""
+
+    @staticmethod
+    def _df(rows):
+        import pandas as pd
+
+        return pd.DataFrame(rows)
+
+    def _rows(self):
+        base = {"StatusNorm": "Active", "ListDate": "2026-09-01", "SoldDate": None, "Beds": 3, "Baths": 2}
+        return [
+            dict(base, MLSNumber="1", Address="100 Main St", Price=350000, LivingArea=1500),
+            dict(base, MLSNumber="2", Address="200 Main St", Price=360000, LivingArea=2600),  # outside 80-120%
+            dict(base, MLSNumber="3", Address="300 Main St", Price=370000, LivingArea=900),   # outside 80-120%
+            dict(base, MLSNumber="S", Address="1704 6th Street", Price=410000, LivingArea=1500),
+        ]
+
+    def test_band_is_zero_for_saved_search(self):
+        from core import fingerprint_band_sqft
+
+        lock = {"subject_sqft": 1500}
+        self.assertEqual(fingerprint_band_sqft(lock, {}, portal_criteria={"location": "Greeley, CO"}), 0.0)
+        self.assertEqual(fingerprint_band_sqft(lock, {}, portal_criteria=None), 1500.0)
+        self.assertEqual(fingerprint_band_sqft({}, {"living_area": 1800}, portal_criteria={}), 1800.0)
+
+    def test_search_market_keeps_every_size(self):
+        from core import build_pulse_snapshot, reconstruct_fingerprint_baseline
+
+        subject = {"address": "1704 6th Street, Greeley, CO"}
+        banded = build_pulse_snapshot(self._df(self._rows()), 410000, 1500, as_of="2026-10-16", subject=subject)
+        whole = build_pulse_snapshot(self._df(self._rows()), 410000, 0, as_of="2026-10-16", subject=subject)
+        self.assertEqual(banded["active_count"], 1)
+        self.assertEqual(whole["active_count"], 3)
+        base = reconstruct_fingerprint_baseline(self._df(self._rows()), 410000, 0, as_of="2026-09-22", subject=subject)
+        self.assertEqual(sorted(base["ids"]), ["1", "2", "3"])
+        self.assertEqual(base["version"], __import__("core").FINGERPRINT_BASELINE_VERSION)
+
+    def test_reconstruct_leaves_subject_out(self):
+        from core import reconstruct_fingerprint_baseline
+
+        with_subject = reconstruct_fingerprint_baseline(self._df(self._rows()), 410000, 0, as_of="2026-09-22")
+        self.assertIn("S", with_subject["ids"])
+        without = reconstruct_fingerprint_baseline(
+            self._df(self._rows()), 410000, 0, as_of="2026-09-22", subject={"address": "1704 6th Street, Greeley, CO"}
+        )
+        self.assertNotIn("S", without["ids"])
+
+    def test_criteria_chips_read_like_the_search(self):
+        from core import _comp_set
+
+        comp = _comp_set(
+            {"subject_sqft": 1500},
+            {},
+            portal_criteria={"location": "Greeley, CO", "min_beds": 3, "min_baths": 2, "min_sqft": 1200,
+                             "max_sqft": 2000, "price_min": 300000, "price_max": 450000, "lookback_days": 180},
+        )
+        self.assertEqual(comp["defined_by"], "search")
+        self.assertEqual(
+            comp["chips"],
+            ["Greeley, CO", "3+ bed", "2+ bath", "1,200–2,000 sf", "$300,000–$450,000", "last 180 days"],
+        )
+        banded = _comp_set({"subject_sqft": 1500, "beds": 3}, {"living_area": 1500}, portal_criteria=None, city="Greeley")
+        self.assertEqual(banded["defined_by"], "band")
+
+
+class CarryOverTests(unittest.TestCase):
+    """Migrating an older report keeps the homes and history the saved pull can no longer show."""
+
+    def test_baseline_keeps_homes_that_left_the_pull(self):
+        from core import carry_baseline_listings
+
+        rebuilt = {"listings": [{"id": "A", "status": "Active", "price": 350000}], "ids": ["A"]}
+        existing = {"listings": [{"id": "A", "status": "Active", "price": 350000},
+                                 {"id": "GONE", "status": "Active", "price": 300000}]}
+        out = carry_baseline_listings(rebuilt, existing, 410000)
+        self.assertEqual(sorted(out["ids"]), ["A", "GONE"])
+        self.assertEqual(out["active_count"], 2)
+        self.assertEqual(out["rank"], 3)
+
+    def test_ledger_prefers_what_was_observed(self):
+        from core import carry_ledger_records
+
+        old = {"listings": {
+            "P5": {"id": "P5", "first_seen": "2026-09-22", "last_seen": "2026-10-10", "last_status": "Pending",
+                   "status_history": [{"as_of": "2026-09-22", "status": "Active", "price": 1},
+                                      {"as_of": "2026-10-10", "status": "Pending", "price": 1}]},
+            "GONE": {"id": "GONE", "first_seen": "2026-09-22", "last_seen": "2026-10-04", "gone": True,
+                     "last_status": "Active", "status_history": []},
+        }}
+        new = {"listings": {
+            "P5": {"id": "P5", "first_seen": "2026-09-22", "last_seen": "2026-10-16", "last_status": "Pending", "gone": False,
+                   "status_history": [{"as_of": "2026-09-22", "status": "Pending", "price": 1},
+                                      {"as_of": "2026-10-16", "status": "Pending", "price": 1}]},
+            "B1": {"id": "B1", "first_seen": "2026-09-22", "last_seen": "2026-10-16", "status_history": []},
+        }, "updated": "2026-10-16"}
+        out = carry_ledger_records(new, old)["listings"]
+        self.assertEqual([h["as_of"] for h in out["P5"]["status_history"]], ["2026-09-22", "2026-10-10", "2026-10-16"])
+        self.assertEqual(out["P5"]["status_history"][0]["status"], "Active")
+        self.assertTrue(out["GONE"]["gone"])
+        self.assertIn("B1", out)
+
+    def test_list_price_as_of_follows_recorded_changes(self):
+        from core import list_price_as_of
+
+        lock = {"locked_price": 410000, "price_history": [{"as_of": "2026-10-10", "from": 410000, "to": 399900}]}
+        self.assertEqual(list_price_as_of(lock, "2026-10-04"), 410000)
+        self.assertEqual(list_price_as_of(lock, "2026-10-10"), 399900)
+        self.assertEqual(list_price_as_of(lock, "2026-10-16"), 399900)

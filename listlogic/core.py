@@ -1021,7 +1021,7 @@ FINGERPRINT_LIVE_STATUSES = frozenset({"Active", "Pending", "Backup", "FirstRigh
 FINGERPRINT_UC_STATUSES = frozenset({"Pending", "Backup", "FirstRight"})
 FINGERPRINT_SOLD_STATUSES = frozenset({"Sold"})
 # Bump when reconstructed baselines need rebuilding (2: live rows' prior-sale dates no longer drop them).
-FINGERPRINT_BASELINE_VERSION = 2
+FINGERPRINT_BASELINE_VERSION = 3
 # Smallest list-price move that counts as a price adjustment.
 PRICE_CHANGE_MIN = 1000
 
@@ -1709,6 +1709,7 @@ def build_pulse_snapshot(
     listings = apply_listing_photos(listings, photo_map, gallery_map)
     rank_info = _assign_active_ranks(listings, locked)
     return {
+        "version": FINGERPRINT_BASELINE_VERSION,
         "as_of": as_of,
         "locked_price": int(round(locked)),
         "subject_sqft": round(float(living_area or 0)),
@@ -1726,6 +1727,7 @@ def freeze_fingerprint_baseline(snapshot: dict | None) -> dict:
         if isinstance(r, dict) and str(r.get("status") or "") == "Active"
     ]
     return {
+        "version": FINGERPRINT_BASELINE_VERSION,
         "as_of": snap.get("as_of") or datetime.now().strftime("%Y-%m-%d"),
         "locked_price": int(snap.get("locked_price") or 0),
         "subject_sqft": snap.get("subject_sqft") or 0,
@@ -1745,6 +1747,7 @@ def reconstruct_fingerprint_baseline(
     as_of: str,
     photo_map: dict | None = None,
     gallery_map: dict | None = None,
+    subject: dict | None = None,
 ) -> dict:
     """Rebuild the Active cohort as it would have looked on ``as_of``.
 
@@ -1783,6 +1786,10 @@ def reconstruct_fingerprint_baseline(
         except (TypeError, ValueError):
             continue
         if price <= 0:
+            continue
+        if subject and listing_is_subject(
+            {"mls": str(row.get("MLSNumber") or ""), "address": str(row.get("Address") or "")}, subject
+        ):
             continue
         list_ts = pd.to_datetime(row.get("ListDate"), errors="coerce")
         if pd.isna(list_ts):
@@ -1840,8 +1847,9 @@ def _status_as_of_row(row: pd.Series, as_of_ts: pd.Timestamp, *, latest: bool = 
     if sold_ts is not None and sold_ts <= as_of_ts:
         return "Sold"
     if current in FINGERPRINT_UC_STATUSES:
+        # Portal rows fill LastUpdateDate with the list date, which is not when it went pending.
         pending_ts = _pulse_day(row.get("LastUpdateDate"))
-        if pending_ts is not None and list_ts <= pending_ts <= as_of_ts:
+        if pending_ts is not None and list_ts < pending_ts <= as_of_ts:
             return current
         if latest:
             return current
@@ -1867,6 +1875,7 @@ def build_pulse_snapshot_as_of(
     photo_map: dict | None = None,
     gallery_map: dict | None = None,
     latest: bool = False,
+    subject: dict | None = None,
 ) -> dict:
     """Live similar set as it would have looked on ``as_of`` (Active + under contract)."""
     as_of_ts = _pulse_day(as_of) or pd.Timestamp.now().normalize()
@@ -1896,6 +1905,10 @@ def build_pulse_snapshot_as_of(
             continue
         if price <= 0:
             continue
+        if subject and listing_is_subject(
+            {"mls": str(row.get("MLSNumber") or ""), "address": str(row.get("Address") or "")}, subject
+        ):
+            continue
         status = _status_as_of_row(row, as_of_ts, latest=latest)
         if status not in FINGERPRINT_LIVE_STATUSES:
             continue
@@ -1909,6 +1922,7 @@ def build_pulse_snapshot_as_of(
     listings = apply_listing_photos(listings, photo_map, gallery_map)
     rank_info = _assign_active_ranks(listings, locked)
     return {
+        "version": FINGERPRINT_BASELINE_VERSION,
         "as_of": as_of_str,
         "locked_price": int(round(locked)),
         "subject_sqft": round(float(living_area or 0)),
@@ -1971,6 +1985,89 @@ def fingerprint_sold_from_df(
             card["sold_price"] = int(round(sold_price))
         found[pid] = card
     return found
+
+
+def carry_baseline_listings(rebuilt: dict, existing: dict | None, locked_price: float) -> dict:
+    """Keep homes the earlier baseline had that the saved pull no longer returns.
+
+    A home that left the pull is still part of the original set; the rebuilt
+    set from today's pull cannot see it, so it is carried over from the old one.
+    """
+    out = dict(rebuilt or {})
+    have = {str(r.get("id")) for r in (out.get("listings") or []) if isinstance(r, dict) and r.get("id")}
+    carried = [
+        dict(r)
+        for r in ((existing or {}).get("listings") or [])
+        if isinstance(r, dict) and r.get("id") and str(r.get("id")) not in have
+    ]
+    if not carried:
+        return out
+    listings = list(out.get("listings") or []) + carried
+    rank_info = _assign_active_ranks(listings, float(locked_price or 0))
+    out["listings"] = listings
+    out["ids"] = [str(r.get("id")) for r in listings if r.get("id")]
+    out.update(rank_info)
+    return out
+
+
+def carry_ledger_records(rebuilt: dict | None, existing: dict | None) -> dict:
+    """Fold an earlier ledger's story into a ledger replayed from one saved pull.
+
+    Homes the old ledger saw that the replay never met are kept as they were;
+    homes in both keep the earliest first-seen and the union of status history.
+    """
+    new = dict((sanitize_fingerprint_ledger(rebuilt)).get("listings") or {})
+    old = sanitize_fingerprint_ledger(existing).get("listings") or {}
+    for pid, rec in old.items():
+        if not isinstance(rec, dict):
+            continue
+        cur = new.get(pid)
+        if not isinstance(cur, dict):
+            new[pid] = dict(rec)
+            continue
+        # What the old ledger saw week by week is observed; the replay only guesses
+        # at dates before its last pull, so it adds entries after the old ledger's last look.
+        old_last = str(rec.get("last_seen") or "")
+        hist = [dict(h) for h in (rec.get("status_history") or []) if isinstance(h, dict)]
+        hist += [
+            dict(h) for h in (cur.get("status_history") or [])
+            if isinstance(h, dict) and str(h.get("as_of") or "") > old_last
+        ]
+        if not hist:
+            hist = [dict(h) for h in (cur.get("status_history") or []) if isinstance(h, dict)]
+        firsts = sorted(x for x in (str(rec.get("first_seen") or ""), str(cur.get("first_seen") or "")) if x)
+        first_seen = firsts[0] if firsts else ""
+        old_first = bool(first_seen and first_seen == str(rec.get("first_seen") or ""))
+        new[pid] = {
+            **cur,
+            "status_history": hist[-16:],
+            "first_seen": first_seen or cur.get("first_seen"),
+            "first_price": (rec.get("first_price") if old_first else cur.get("first_price")) or cur.get("first_price"),
+            "first_status": (rec.get("first_status") if old_first else cur.get("first_status")) or cur.get("first_status"),
+            "rank_then": rec.get("rank_then") or cur.get("rank_then") or 0,
+            "baseline": bool(cur.get("baseline") or rec.get("baseline")),
+        }
+    return {"listings": new, "updated": (rebuilt or {}).get("updated") or (existing or {}).get("updated")}
+
+
+def list_price_as_of(lock: dict | None, day: str) -> float:
+    """The subject's list price on ``day``: the initial list, then each recorded change up to that day."""
+    lock = lock if isinstance(lock, dict) else {}
+    try:
+        price = float(lock.get("locked_price") or 0)
+    except (TypeError, ValueError):
+        price = 0.0
+    day = str(day or "")[:10]
+    for move in sorted(
+        (m for m in (lock.get("price_history") or []) if isinstance(m, dict)),
+        key=lambda m: str(m.get("as_of") or ""),
+    ):
+        if day and str(move.get("as_of") or "")[:10] <= day:
+            try:
+                price = float(move.get("to") or price)
+            except (TypeError, ValueError):
+                pass
+    return price
 
 
 def sanitize_fingerprint_ledger(ledger: dict | None) -> dict:
@@ -2338,10 +2435,15 @@ def digest_pulse(
     baseline_gone = 0
     baseline_n = 0
     ledger_listings = (ledger or {}).get("listings") if isinstance(ledger, dict) else {}
+    baseline_cards = {
+        str(r.get("id")): r
+        for r in ((baseline or {}).get("listings") or [])
+        if isinstance(r, dict) and r.get("id")
+    } if isinstance(baseline, dict) else {}
     if isinstance(ledger_listings, dict) and baseline_ids:
         for pid in baseline_ids:
             rec = ledger_listings.get(pid) if isinstance(ledger_listings.get(pid), dict) else {}
-            if listing_is_subject(rec, subject):
+            if listing_is_subject(rec, subject) or listing_is_subject(baseline_cards.get(pid), subject):
                 continue
             baseline_n += 1
             st = str(rec.get("last_status") or rec.get("status") or "")
@@ -2366,7 +2468,15 @@ def digest_pulse(
     # Similar actives today should be the originals still active plus what
     # listed since the clock; the page shows this identity so a reader can
     # check it, and flags it when the pull disagrees.
+    gone_total = 0
+    if isinstance(ledger_listings, dict):
+        for rec in ledger_listings.values():
+            if isinstance(rec, dict) and rec.get("gone") and not listing_is_subject(rec, subject):
+                gone_total += 1
     reconcile = {
+        "sold_since": int(since.get("sold") or 0),
+        "uc_since": int(since.get("uc") or 0),
+        "gone_total": gone_total,
         "original": baseline_n,
         "still_active": still_from_baseline,
         "under_contract": went_pending,
@@ -2669,6 +2779,30 @@ def _pulse_card(row: dict, locked_price: float) -> dict:
     }
 
 
+_MARKET_WORDS = (
+    ("similar actives", "actives in your market"),
+    ("similar homes", "homes in your market"),
+    ("similar home", "home in your market"),
+    ("similar lists", "lists in your market"),
+    ("new similar ", "new "),
+    ("in this size band", "in your market"),
+    ("in the size band", "in your market"),
+    ("in your size range", "in your market"),
+    ("this band will pay", "this market will pay"),
+    ("Quiet week in the size band", "Quiet week in your market"),
+)
+
+
+def market_words(text: str, defined_by: str = "") -> str:
+    """Reword a sentence for a search-defined market, where every home in the search is tracked."""
+    if defined_by != "search" or not text:
+        return text
+    out = str(text)
+    for a, b in _MARKET_WORDS:
+        out = out.replace(a, b)
+    return out
+
+
 def _pulse_talk_tracks(
     digest: dict,
     *,
@@ -2803,7 +2937,11 @@ def _pulse_talk_tracks(
     if not agent and not stale_upload:
         agent.append("Quiet week in the size band — no new cheaper similar lists to walk. Hold the list price.")
         seller.append("A quiet week in your size range. No new similar homes listed under your price.")
-    return {"agent": agent[:6], "seller": seller[:6]}
+    by = str(digest.get("market_defined_by") or "")
+    return {
+        "agent": [market_words(t, by) for t in agent[:6]],
+        "seller": [market_words(t, by) for t in seller[:6]],
+    }
 
 
 def _baseline_ids(baseline: dict | None) -> set[str]:
@@ -2819,11 +2957,106 @@ def _baseline_ids(baseline: dict | None) -> set[str]:
     }
 
 
+def fingerprint_band_sqft(lock: dict | None, subject: dict | None = None, *, portal_criteria: dict | None = None) -> float:
+    """Size band to narrow the weekly set by, or 0 for no narrowing.
+
+    A report built from a saved search already is the market the agent drew
+    around the home, so the Fingerprint tracks every home that search returns.
+    An MLS export is the whole MLS, so it is narrowed to the subject's size band.
+    """
+    if isinstance(portal_criteria, dict) and portal_criteria:
+        return 0.0
+    lock = lock if isinstance(lock, dict) else {}
+    sub = subject if isinstance(subject, dict) else {}
+    try:
+        return float(lock.get("subject_sqft") or sub.get("living_area") or sub.get("sqft") or 0)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _criteria_chips(c: dict) -> list[str]:
+    """The saved search, in the words the agent chose it with."""
+    def _f(key):
+        try:
+            v = float(c.get(key)) if c.get(key) not in (None, "") else None
+        except (TypeError, ValueError):
+            return None
+        return v
+    def _n(v):
+        return f"{v:,.0f}" if v is not None else ""
+    def _bb(v):
+        return f"{v:g}"
+    chips: list[str] = []
+    loc = str(c.get("location") or "").strip()
+    if loc:
+        chips.append(loc)
+    lo, hi = _f("min_beds"), _f("max_beds")
+    if lo and hi:
+        chips.append(f"{_bb(lo)}–{_bb(hi)} bed")
+    elif lo:
+        chips.append(f"{_bb(lo)}+ bed")
+    elif hi:
+        chips.append(f"up to {_bb(hi)} bed")
+    lo, hi = _f("min_baths"), _f("max_baths")
+    if lo and hi:
+        chips.append(f"{_bb(lo)}–{_bb(hi)} bath")
+    elif lo:
+        chips.append(f"{_bb(lo)}+ bath")
+    lo, hi = _f("min_sqft"), _f("max_sqft")
+    if lo and hi:
+        chips.append(f"{_n(lo)}–{_n(hi)} sf")
+    elif lo:
+        chips.append(f"{_n(lo)}+ sf")
+    elif hi:
+        chips.append(f"up to {_n(hi)} sf")
+    lo, hi = _f("price_min"), _f("price_max")
+    if lo and hi:
+        chips.append(f"${_n(lo)}–${_n(hi)}")
+    elif lo:
+        chips.append(f"${_n(lo)}+")
+    elif hi:
+        chips.append(f"up to ${_n(hi)}")
+    g = _f("min_garage")
+    if g:
+        chips.append(f"{g:g}+ car garage")
+    lo, hi = _f("min_year_built"), _f("max_year_built")
+    if lo and hi:
+        chips.append(f"built {lo:.0f}–{hi:.0f}")
+    elif lo:
+        chips.append(f"built {lo:.0f}+")
+    dwelling = str(c.get("dwelling") or c.get("home_type") or "").strip()
+    if dwelling:
+        chips.append(dwelling.replace("_", " ").capitalize())
+    lb = _f("lookback_days")
+    if lb:
+        chips.append(f"last {int(lb)} days")
+    return chips
+
+
 def _comp_set(lock: dict | None, subject: dict | None, *, portal_criteria: dict | None = None, city: str = "") -> dict:
-    """How this similar set was cut — beds, baths, garage, size band, market."""
+    """How this similar set was cut — the saved search, or beds/baths/size band for an export."""
     lock = lock if isinstance(lock, dict) else {}
     sub = subject if isinstance(subject, dict) else {}
     c = portal_criteria if isinstance(portal_criteria, dict) else {}
+    if c:
+        chips = _criteria_chips(c) or ["Saved search"]
+        def _cf(key):
+            try:
+                return float(c.get(key) or 0)
+            except (TypeError, ValueError):
+                return 0.0
+        return {
+            "chips": chips,
+            "defined_by": "search",
+            "beds": _cf("min_beds"),
+            "baths": _cf("min_baths"),
+            "garage": _cf("min_garage"),
+            "sqft_low": int(_cf("min_sqft")),
+            "sqft_high": int(_cf("max_sqft")),
+            "sqft": int(round(float(lock.get("subject_sqft") or sub.get("living_area") or 0) or 0)),
+            "market": str(c.get("location") or lock.get("market_label") or city or "").strip(),
+            "city": str(city or "").strip(),
+        }
     try:
         sqft = float(
             lock.get("subject_sqft")
@@ -2874,6 +3107,7 @@ def _comp_set(lock: dict | None, subject: dict | None, *, portal_criteria: dict 
         chips.append("Similar homes in this market")
     return {
         "chips": chips,
+        "defined_by": "band",
         "beds": beds or 0,
         "baths": baths or 0,
         "garage": garage or 0,
@@ -2917,6 +3151,10 @@ def build_pulse_brief(
     prev = previous if isinstance(previous, dict) else {}
     sub = subject if isinstance(subject, dict) else {}
     digest = digest_pulse(snap, lock, prev, baseline=baseline, ledger=ledger, subject=sub)
+    comp_set = _comp_set(lock, sub, portal_criteria=portal_criteria, city=city)
+    digest["market_defined_by"] = comp_set.get("defined_by") or "band"
+    if isinstance(digest.get("price_call"), dict) and digest["price_call"].get("why"):
+        digest["price_call"]["why"] = market_words(digest["price_call"]["why"], digest["market_defined_by"])
     locked_price = float(digest.get("locked_price") or lock.get("locked_price") or 0)
     locked_at = str(lock.get("locked_at") or digest.get("locked_at") or "")
     active_at = str(digest.get("active_at") or lock.get("active_at") or "")
@@ -3140,7 +3378,7 @@ def build_pulse_brief(
         "paused_at": str(lock.get("paused_at") or ""),
         "paused_reason": str(lock.get("paused_reason") or ""),
         "stop_on_under_contract": lock.get("stop_on_under_contract") is True,
-        "comp_set": _comp_set(lock, sub, portal_criteria=portal_criteria, city=city),
+        "comp_set": comp_set,
         "last_refresh_at": str(lock.get("last_refresh_at") or lock.get("last_looked_at") or ""),
         "market_pulse": market_pulse if isinstance(market_pulse, dict) else {},
     }

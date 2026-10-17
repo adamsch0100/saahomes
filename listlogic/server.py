@@ -2908,6 +2908,52 @@ def _write_pulse_lock(run_dir: Path, report: dict, *, price=None, source: str = 
     return payload
 
 
+def _fingerprint_band_sqft(report: dict | None, lock: dict | None) -> float:
+    """0 for a saved-search report (the search is the market); the subject's size otherwise."""
+    from core import fingerprint_band_sqft
+
+    report = report if isinstance(report, dict) else {}
+    meta = report.get("meta") if isinstance(report.get("meta"), dict) else {}
+    subject = report.get("subject") if isinstance(report.get("subject"), dict) else {}
+    return fingerprint_band_sqft(lock, subject, portal_criteria=meta.get("portal_criteria"))
+
+
+def _ensure_generate_baseline(run_dir: Path, report: dict, lock: dict, df=None) -> dict | None:
+    """Rebuild the created-day baseline when the tracked set's definition changed."""
+    from core import (
+        FINGERPRINT_BASELINE_VERSION,
+        _fingerprint_date,
+        carry_baseline_listings,
+        reconstruct_fingerprint_baseline,
+    )
+
+    path = run_dir / "fingerprint_baseline.json"
+    existing = _read_json_file(path)
+    locked_at = _fingerprint_date((lock or {}).get("locked_at"))
+    if not isinstance(existing, dict) or not locked_at or df is None or len(df) == 0:
+        return existing if isinstance(existing, dict) else None
+    if existing.get("version") == FINGERPRINT_BASELINE_VERSION:
+        return existing
+    try:
+        locked_price = float((lock or {}).get("locked_price") or 0)
+    except (TypeError, ValueError):
+        locked_price = 0
+    baseline = reconstruct_fingerprint_baseline(
+        df,
+        locked_price,
+        _fingerprint_band_sqft(report, lock),
+        as_of=str(existing.get("as_of") or locked_at)[:10],
+        photo_map=_load_photo_map(run_dir),
+        gallery_map=_load_gallery_map(run_dir),
+        subject=report.get("subject") if isinstance(report.get("subject"), dict) else None,
+    )
+    baseline = carry_baseline_listings(baseline, existing, locked_price)
+    if not (baseline.get("listings") or baseline.get("ids")):
+        return existing
+    path.write_text(json.dumps(baseline, indent=2, default=str), encoding="utf-8")
+    return baseline
+
+
 def _clock_baseline(run_dir: Path, lock: dict | None) -> dict | None:
     from core import fingerprint_clock
 
@@ -2921,7 +2967,12 @@ def _clock_baseline(run_dir: Path, lock: dict | None) -> dict | None:
 
 
 def _ensure_active_baseline(run_dir: Path, report: dict, lock: dict, df=None) -> dict | None:
-    from core import FINGERPRINT_BASELINE_VERSION, _fingerprint_date, reconstruct_fingerprint_baseline
+    from core import (
+        FINGERPRINT_BASELINE_VERSION,
+        _fingerprint_date,
+        carry_baseline_listings,
+        reconstruct_fingerprint_baseline,
+    )
 
     active_at = _fingerprint_date((lock or {}).get("active_at"))
     if not active_at:
@@ -2951,20 +3002,152 @@ def _ensure_active_baseline(run_dir: Path, report: dict, lock: dict, df=None) ->
         locked_price = float((lock or {}).get("locked_price") or 0)
     except (TypeError, ValueError):
         locked_price = 0
-    try:
-        subject_sqft = float((lock or {}).get("subject_sqft") or subject.get("living_area") or 0)
-    except (TypeError, ValueError):
-        subject_sqft = 0
     baseline = reconstruct_fingerprint_baseline(
         df,
         locked_price,
-        subject_sqft,
+        _fingerprint_band_sqft(report, lock),
+        subject=subject,
         as_of=active_at,
         photo_map=_load_photo_map(run_dir),
         gallery_map=_load_gallery_map(run_dir),
     )
+    if isinstance(existing, dict) and str(existing.get("as_of") or "")[:10] == active_at:
+        # Same day, new definition of the set: keep homes that have since left the pull.
+        baseline = carry_baseline_listings(baseline, existing, locked_price)
     path.write_text(json.dumps(baseline, indent=2, default=str), encoding="utf-8")
     return baseline
+
+
+def _replay_fingerprint_definition(run_dir: Path, report: dict, lock: dict, df) -> bool:
+    """Rebuild a report's weekly files from its saved pull when the tracked set's definition changed.
+
+    Reports made before the Fingerprint tracked the whole saved search carry a
+    size-banded snapshot, ledger and history. Those are replayed week by week
+    from the saved pull under the new definition, keeping each week's date and
+    the story the old ledger holds for homes the pull no longer returns.
+    """
+    from core import (
+        FINGERPRINT_BASELINE_VERSION,
+        _fingerprint_date,
+        append_fingerprint_history,
+        build_pulse_snapshot_as_of,
+        carry_baseline_listings,
+        carry_ledger_records,
+        digest_pulse,
+        fingerprint_clock,
+        fingerprint_sold_from_df,
+        list_price_as_of,
+        listing_is_subject,
+        merge_fingerprint_ledger,
+        reconstruct_fingerprint_baseline,
+        sanitize_fingerprint_ledger,
+    )
+
+    snap = _read_json_file(run_dir / "pulse_snapshot.json")
+    if not isinstance(snap, dict) or not snap.get("listings"):
+        return False
+    if snap.get("version") == FINGERPRINT_BASELINE_VERSION:
+        return False
+    if df is None or len(df) == 0 or not isinstance(lock, dict):
+        return False
+    locked_at = _fingerprint_date(lock.get("locked_at"))
+    if not locked_at or not lock.get("locked_price"):
+        return False
+    subject = report.get("subject") if isinstance(report.get("subject"), dict) else {}
+    band = _fingerprint_band_sqft(report, lock)
+    photo_map = _load_photo_map(run_dir)
+    gallery_map = _load_gallery_map(run_dir)
+    old_history = [r for r in (_read_json_file(run_dir / "fingerprint_history.json", []) or []) if isinstance(r, dict)]
+    old_market = {str(r.get("as_of") or "")[:10]: r.get("market") for r in old_history if isinstance(r.get("market"), dict)}
+    days = sorted(
+        {str(r.get("as_of") or "")[:10] for r in old_history if r.get("as_of")}
+        | {str(snap.get("as_of") or "")[:10]}
+    )
+    days = [d for d in days if len(d) == 10 and d >= locked_at]
+    if not days:
+        return False
+
+    try:
+        initial_price = float(lock.get("locked_price") or 0)
+    except (TypeError, ValueError):
+        return False
+    baseline = reconstruct_fingerprint_baseline(
+        df, initial_price, band, as_of=locked_at, photo_map=photo_map, gallery_map=gallery_map, subject=subject
+    )
+    baseline = carry_baseline_listings(baseline, _read_json_file(run_dir / "fingerprint_baseline.json"), initial_price)
+    if not baseline.get("listings"):
+        return False
+    (run_dir / "fingerprint_baseline.json").write_text(json.dumps(baseline, indent=2, default=str), encoding="utf-8")
+    # The old active-day baseline has no version, so this rebuilds it and keeps homes that left the pull.
+    clock_base = _ensure_active_baseline(run_dir, report, lock, df) or baseline
+    clock_at = fingerprint_clock(lock).get("clock_at") or locked_at
+
+    seen_ids = {str(x) for x in (baseline.get("ids") or []) if x} | {str(x) for x in (clock_base.get("ids") or []) if x}
+    ledger = None
+    history: list = []
+    prev = None
+    prior = None
+    week = None
+    for i, day in enumerate(days):
+        is_last = i == len(days) - 1
+        week = build_pulse_snapshot_as_of(
+            df,
+            list_price_as_of(lock, day),
+            band,
+            as_of=day,
+            photo_map=photo_map,
+            gallery_map=gallery_map,
+            latest=is_last,
+            subject=subject,
+        )
+        for row in week.get("listings") or []:
+            if isinstance(row, dict) and row.get("id"):
+                seen_ids.add(str(row["id"]))
+        sold_map = fingerprint_sold_from_df(df, seen_ids, as_of=day, since=clock_at, living_area=band)
+        ledger = merge_fingerprint_ledger(ledger, week, baseline=baseline, sold_map=sold_map, as_of=day)
+        digest = digest_pulse(week, lock, prev, baseline=clock_base, ledger=ledger, subject=subject)
+        history = append_fingerprint_history(history, week, digest, market_pulse=old_market.get(day))
+        prior = prev
+        prev = week
+    if week is None:
+        return False
+    old_ledger = _read_fingerprint_ledger(run_dir)
+    ledger = carry_ledger_records(ledger, old_ledger)
+    # Homes the old ledger saw that today's pull no longer returns were active on
+    # the weeks between their first and last look; the replay could not see them.
+    replayed_ids = {str(x) for x in (ledger.get("listings") or {}) if x}
+    carried = [
+        rec for pid, rec in (sanitize_fingerprint_ledger(old_ledger).get("listings") or {}).items()
+        if isinstance(rec, dict) and rec.get("gone") and not listing_is_subject(rec, subject)
+    ]
+    for row in history:
+        day = str(row.get("as_of") or "")[:10]
+        price_day = list_price_as_of(lock, day)
+        extra = 0
+        cheaper = 0
+        for rec in carried:
+            if str(rec.get("first_seen") or "")[:10] <= day <= str(rec.get("last_seen") or "")[:10]:
+                extra += 1
+                try:
+                    if price_day and float(rec.get("last_price") or rec.get("price") or 0) < price_day:
+                        cheaper += 1
+                except (TypeError, ValueError):
+                    pass
+        if extra:
+            row["active_count"] = int(row.get("active_count") or 0) + extra
+            row["rank_of"] = int(row.get("rank_of") or 0) + extra
+            row["rank"] = int(row.get("rank") or 0) + cheaper
+    (run_dir / "pulse_snapshot.json").write_text(json.dumps(week, indent=2, default=str), encoding="utf-8")
+    prev_path = run_dir / "pulse_snapshot_prev.json"
+    if prior is not None:
+        prev_path.write_text(json.dumps(prior, indent=2, default=str), encoding="utf-8")
+    elif prev_path.exists():
+        # One week only: the old banded snapshot is not a fair "last week" for the new set.
+        prev_path.unlink()
+    (run_dir / "fingerprint_ledger.json").write_text(json.dumps(ledger, indent=2, default=str), encoding="utf-8")
+    (run_dir / "fingerprint_history.json").write_text(json.dumps(history, indent=2, default=str), encoding="utf-8")
+    logger.info("Fingerprint %s replayed under the whole-search definition (%d weeks)", run_dir.name, len(days))
+    return True
 
 
 def _apply_active_at(run_dir: Path, lock: dict | None, report: dict, df=None, snap=None) -> dict:
@@ -3087,10 +3270,16 @@ def _write_fingerprint_snapshot(run_dir: Path, report: dict, lock: dict, df, *, 
     )
 
     subject = report.get("subject") if isinstance(report.get("subject"), dict) else {}
+    try:
+        # Earlier weeks were banded by size: replay them under the whole-search definition first.
+        _replay_fingerprint_definition(run_dir, report, lock, df)
+    except Exception:
+        logger.exception("Fingerprint replay failed for %s", run_dir.name)
     lock = apply_subject_price(lock, df, subject, as_of=datetime.now().strftime("%Y-%m-%d"))
     # Over/under and rank compare against today's list price, including seller adjustments.
     locked_price = fingerprint_list_price(lock)
-    subject_sqft = float(lock.get("subject_sqft") or 0)
+    # The tracked set: the whole saved search, or a size band around an export.
+    subject_sqft = _fingerprint_band_sqft(report, lock)
     photo_map = _load_photo_map(run_dir)
     gallery_map = _load_gallery_map(run_dir)
     snap = build_pulse_snapshot(
@@ -3116,6 +3305,10 @@ def _write_fingerprint_snapshot(run_dir: Path, report: dict, lock: dict, df, *, 
     if not isinstance(baseline, dict) or not (baseline.get("listings") or baseline.get("ids")):
         baseline = freeze_fingerprint_baseline(snap)
         baseline_path.write_text(json.dumps(baseline, indent=2, default=str), encoding="utf-8")
+    else:
+        # The tracked set's definition changed (e.g. the whole search, not a size band):
+        # rebuild the created-day set from the saved pull so the ledger compares like with like.
+        baseline = _ensure_generate_baseline(run_dir, report, lock, df) or baseline
     lock = _apply_active_at(run_dir, lock, report, df=df, snap=snap)
     clock_base = _clock_baseline(run_dir, lock) or baseline
     baseline_ids = {str(x) for x in (baseline.get("ids") or []) if x}
@@ -3754,6 +3947,14 @@ def _save_pulse_brief(
     # The saved market file is read on every rebuild: it is how the subject's
     # own status and list price are picked up without waiting for a refresh.
     df = _load_run_market(run_dir)
+    try:
+        if _replay_fingerprint_definition(run_dir, report, lock, df):
+            snap = _read_json_file(run_dir / "pulse_snapshot.json")
+            prev = _read_json_file(run_dir / "pulse_snapshot_prev.json")
+            history = _read_json_file(run_dir / "fingerprint_history.json", [])
+    except Exception:
+        logger.exception("Fingerprint replay failed for %s", run_dir.name)
+    _ensure_generate_baseline(run_dir, report, lock, df)
     lock = _apply_active_at(run_dir, lock, report, df=df, snap=snap)
     subject_pull = {}
     if df is not None:
