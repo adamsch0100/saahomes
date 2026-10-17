@@ -4314,7 +4314,27 @@ def _send_run_pulse_email(run_dir: Path, *, stale_upload: bool = False) -> bool:
     return bool(sent_any)
 
 
-MAX_PULSE_REEF_REFRESHES = 3
+# Search refreshes per sweep (the sweep runs every 6 hours, up to 12 Reef calls each).
+MAX_PULSE_REEF_REFRESHES = int(os.environ.get("PULSE_REEF_REFRESH_CAP", "10") or 10)
+# Refresh before a weekly email when the market data is older than this.
+PULSE_EMAIL_FRESH_DAYS = 1
+
+
+def _pulse_email_due(lock: dict) -> bool:
+    """Email is on and the last weekly send was 6+ days ago."""
+    email_cfg = lock.get("email") if isinstance(lock.get("email"), dict) else {}
+    if not email_cfg.get("on"):
+        return False
+    last_sent = str(email_cfg.get("last_sent_at") or "")
+    if not last_sent:
+        return True
+    try:
+        import pandas as pd
+
+        last_ts = pd.to_datetime(last_sent, errors="coerce")
+        return not (pd.notna(last_ts) and (pd.Timestamp.now() - last_ts).total_seconds() < 144 * 3600)
+    except Exception:
+        return True
 
 
 def _run_pulse_briefs() -> dict:
@@ -4328,9 +4348,13 @@ def _run_pulse_briefs() -> dict:
     reef_refreshes = 0
     if not OUTPUT_DIR.exists():
         return {"checked": 0, "sent": 0, "skipped": 0, "refreshed": 0}
+    # Reports with a weekly email due go first so the Reef cap never leaves them stale.
+    run_dirs = []
     for run_dir in OUTPUT_DIR.iterdir():
-        if not run_dir.is_dir():
-            continue
+        if run_dir.is_dir():
+            due = _pulse_email_due(_read_json_file(run_dir / "pulse.json") or {})
+            run_dirs.append((0 if due else 1, run_dir.name, run_dir))
+    for _, _, run_dir in sorted(run_dirs):
         lock = _read_json_file(run_dir / "pulse.json")
         if not isinstance(lock, dict) or not lock.get("locked_price"):
             continue
@@ -4345,7 +4369,8 @@ def _run_pulse_briefs() -> dict:
         criteria = meta.get("portal_criteria")
         snap = _read_json_file(run_dir / "pulse_snapshot.json")
         stale_upload = False
-        if criteria and _snapshot_age_days(snap) >= 6:
+        age = _snapshot_age_days(snap)
+        if criteria and (age >= 6 or (_pulse_email_due(lock) and age >= PULSE_EMAIL_FRESH_DAYS)):
             from portal_market import reef_configured
 
             if not reef_configured():

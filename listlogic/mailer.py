@@ -380,6 +380,22 @@ def send_pulse_brief(
         f" · {int(digest.get('listed_since') or ((digest.get('new_under') or 0) + (digest.get('new_over') or 0)))} listed "
         f"{clock_label(digest)}"
     )
+    call = digest.get("price_call") if audience == "agent" else None
+    call_html = ""
+    call_text = ""
+    if isinstance(call, dict) and call.get("call"):
+        label = {"hold": "Hold the price", "watch": "Watch closely", "adjust": "Consider an adjustment"}.get(
+            str(call["call"]), str(call["call"])
+        )
+        target = ""
+        if int(call.get("target") or 0):
+            target = f" At or under {_money(call['target'])} puts you in the cheapest third today."
+        call_line = f"{call.get('why') or ''}{target}"
+        call_html = (
+            "<p style='background:#f4f6f9;padding:10px 12px;border-radius:8px;margin:0 0 16px'>"
+            f"<strong>Price call (agent only): {_esc(label)}.</strong> {_esc(call_line)}</p>"
+        )
+        call_text = f"Price call (agent only): {label}. {call_line}\n\n"
     stale = ""
     if brief.get("stale_upload"):
         stale = (
@@ -419,6 +435,7 @@ def send_pulse_brief(
   <h1 style="font-size:22px;margin:6px 0 8px">{_esc(addr)}</h1>
   <p style="color:#5c6675;margin:0 0 16px">{_esc(price_line)} · { _esc(market) } · as of {_esc(as_of)} · {int(days)} {days_label}</p>
   <p style="font-size:16px;margin:0 0 16px"><strong>{_esc(score)}</strong></p>
+  {call_html}
   {stale}
   {agent_cta}
   <h3 style="margin:18px 0 8px;font-size:16px">{_esc(talk_label)}</h3>
@@ -428,7 +445,7 @@ def send_pulse_brief(
   {section("Still active and cheaper", brief.get("cheaper_active") or [])}
   {section("Price changes " + clock_label(digest), brief.get("price_changes") or brief.get("price_cuts") or [])}
   {section("Status changes", brief.get("status_changes") or [])}
-  {section("No longer in this pull", brief.get("gone") or [])}
+  {section("Off the market without a sale (withdrawn, expired, or no longer in the search)", brief.get("gone") or [])}
   <p style="margin-top:24px"><a href="{_esc(page_url)}">{_esc(open_label)}</a>
   {" · <a href='" + _esc(report_url) + "'>Live Story</a>" if report_url and report_url != fingerprint_url else ""}</p>
   <p style="font-size:12px;color:#5c6675;margin-top:28px">
@@ -439,6 +456,7 @@ def send_pulse_brief(
 </div>"""
     text = (
         f"{who}\n{addr}\n{price_line} · {market} · as of {as_of}\n{score}\n\n"
+        + call_text
         + agent_cta_text
         + "\n".join(f"- {t}" for t in tracks)
         + section_text("New similar — under", brief.get("new_under") or [])

@@ -38,11 +38,13 @@ PREVIEW_SOLD_PAGES = 2
 PREVIEW_ACTIVE_PAGES = 1
 GENERATE_SOLD_PAGES = 6
 GENERATE_ACTIVE_PAGES = 3
-REFRESH_SOLD_PAGES = 3
-REFRESH_ACTIVE_PAGES = 2
+# Weekly refresh re-pulls the same area at the same depth as the original
+# Fingerprint, so a home missing from a week's pull really left the market.
+REFRESH_SOLD_PAGES = GENERATE_SOLD_PAGES
+REFRESH_ACTIVE_PAGES = GENERATE_ACTIVE_PAGES
 PREVIEW_CALL_BUDGET = 4          # hard cap on Reef calls for preview
 GENERATE_CALL_BUDGET = 12        # hard cap on Reef calls for generate market pull
-REFRESH_CALL_BUDGET = 6          # pulse refresh — enough for new/cheaper/cuts
+REFRESH_CALL_BUDGET = GENERATE_CALL_BUDGET  # weekly refresh matches the generate pull
 SUBJECT_CALL_BUDGET = 2          # at most 2 Reef calls per subject autofill
 SUBJECT_LOOKUP_TIMEOUT_SEC = 12  # per Reef call; the UI falls back to manual entry instead of hanging
 ZESTIMATE_CALL_BUDGET = 2        # search + optional property_detail; never steals generate budget
@@ -1122,7 +1124,7 @@ def build_portal_from_criteria(criteria: dict, *, mode: str = "generate") -> pd.
 
     mode:
       - preview  → cheap (few pages + short cache + tight call budget)
-      - refresh  → mid pull for weekly pulse (disk-cached 24h)
+      - refresh  → weekly pulse; same area and depth as generate (disk-cached 24h)
       - generate → fuller pull with a hard call budget
     """
     c = parse_portal_criteria(criteria)
