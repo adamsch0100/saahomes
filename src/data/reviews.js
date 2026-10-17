@@ -6,6 +6,8 @@
  * will auto-update src/data/reviews.json and this file will import from it.
  */
 
+import { BUSINESS } from '../utils/seoConstants.js'
+
 export const reviews = [
   {
     name: "Andy Witt",
@@ -63,9 +65,14 @@ export function getReviewSchema() {
   return {
     "@context": "https://schema.org",
     "@type": "RealEstateAgent",
+    "@id": BUSINESS.url,
     name: "Schwartz and Associates",
     url: "https://saahomes.com",
     telephone: "(970) 999-1407",
+    address: {
+      "@type": "PostalAddress",
+      ...BUSINESS.address,
+    },
     aggregateRating: {
       "@type": "AggregateRating",
       ratingValue: reviewStats.averageRating,

@@ -4,6 +4,7 @@ import SEO from "../components/SEO";
 import ChfaLeadForm from "../components/ChfaLeadForm";
 import QualifyCta from "../components/QualifyCta";
 import ChfaResourceHub from "../components/ChfaResourceHub";
+import { BUSINESS } from "../utils/seoConstants.js";
 
 const eligibilityItems = [
   "Public school",
@@ -147,8 +148,14 @@ export default function ChfaSchoolsToHomePage() {
             },
             "provider": {
               "@type": "RealEstateAgent",
-              "name": "Schwartz And Associates",
-              "url": "https://saahomes.com/"
+              "@id": BUSINESS.url,
+              "name": BUSINESS.name,
+              "url": BUSINESS.url,
+              "telephone": BUSINESS.telephone,
+              "address": {
+                "@type": "PostalAddress",
+                ...BUSINESS.address
+              }
             }
           }
         })}

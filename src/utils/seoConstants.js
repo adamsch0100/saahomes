@@ -122,8 +122,13 @@ export const buildPersonSchemas = () =>
     knowsAbout: agent.knowsAbout,
     worksFor: {
       '@type': 'RealEstateAgent',
+      '@id': BUSINESS.url,
       name: agent.worksFor,
       url: BUSINESS.url,
+      address: {
+        '@type': 'PostalAddress',
+        ...BUSINESS.address,
+      },
     },
   }));
 

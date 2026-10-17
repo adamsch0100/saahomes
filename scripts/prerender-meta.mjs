@@ -126,6 +126,27 @@ const HOME_FAQS = [
   },
 ];
 
+// The H1 each page renders on the client. The prerender writes this exact text
+// into the server HTML so JavaScript does not change the H1 after load (the
+// SEOmator js-h1-modified check compares the raw and rendered <h1> text). Keep
+// these in sync with the page components when an H1 changes.
+const AREA_H1_CO_SUFFIX = new Set([
+  'fort-collins', 'loveland', 'windsor', 'mead', 'longmont', 'boulder',
+]);
+function areaPageH1(area) {
+  return AREA_H1_CO_SUFFIX.has(area.slug) ? `${area.city}, CO` : `${area.city}, Colorado`;
+}
+const CHFA_H1 = {
+  'chfa-down-payment-assistance': 'CHFA Down Payment Assistance',
+  'chfa-schools-to-home': 'CHFA Schools To Home',
+  'colorado-champions-home-loan-program': 'Colorado Champions Home Loan Program',
+  'greeley-g-hope-down-payment-assistance': 'G-HOPE Down Payment Assistance',
+};
+const GENERIC_H1 = {
+  '/blog/': 'Real Estate Guides',
+  '/testimonials/': 'Client Reviews',
+};
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const distDir = join(__dirname, '../dist');
 const indexPath = join(distDir, 'index.html');
@@ -875,7 +896,7 @@ function injectAreaBody(html, area) {
   const bodyContent =
     `\n` +
     `    <div class="prerendered-area-content">\n` +
-    `      <h1>${city}, Colorado Real Estate & Neighborhood Guide</h1>\n` +
+    `      <h1>${escapeHtml(areaPageH1(area))}</h1>\n` +
     `      ${tagline ? `<p class="prerendered-tagline"><strong>${tagline}</strong></p>\n` : ''}` +
     `      ${county ? `<p class="prerendered-county">Serving ${county}</p>\n` : ''}` +
     `${introHtml}\n` +
@@ -903,7 +924,6 @@ function injectNeighborhoodBody(html, neighborhood) {
   const cityDisplay = escapeHtml(neighborhood.cityDisplay || '');
   const citySlug = neighborhood.citySlug || '';
   const county = escapeHtml(neighborhood.county || '');
-  const type = escapeHtml(neighborhood.type || 'neighborhood');
   const description = neighborhood.description || '';
   const longDescription = neighborhood.longDescription || '';
   const priceRange = escapeHtml(neighborhood.priceRangeDescription || '');
@@ -1030,7 +1050,7 @@ function injectNeighborhoodBody(html, neighborhood) {
   const bodyContent =
     `\n` +
     `    <div class="prerendered-neighborhood-content">\n` +
-    `      <h1>${name} — ${cityDisplay}, Colorado ${type === 'subdivision' ? 'Subdivision' : 'Neighborhood'} Guide</h1>\n` +
+    `      <h1>${name}</h1>\n` +
     `      ${county ? `<p class="prerendered-county">Serving ${county}</p>\n` : ''}` +
     `${introHtml}\n` +
     `${highlightsHtml}\n` +
@@ -1167,8 +1187,8 @@ function injectBlogBody(html, post) {
   return html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
 }
 
-function injectGenericBody(html, { title }) {
-  const pageTitle = escapeHtml(title || '');
+function injectGenericBody(html, { title, path }) {
+  const pageTitle = escapeHtml(GENERIC_H1[path] || title || '');
   const bodyContent =
     `\n` +
     `    <div class="prerendered-generic-content">\n` +
@@ -1510,6 +1530,7 @@ function injectCityHomesBody(html, city) {
 
 const MONEY_PAGE_CONTENT = {
   '/for-sellers/': {
+    h1: 'Why Sell With Us?',
     sections: [
       {
         heading: 'Free Home Valuation — Know What Your Home Is Worth',
@@ -1587,6 +1608,7 @@ const MONEY_PAGE_CONTENT = {
     ],
   },
   '/for-buyers/': {
+    h1: 'For Buyers',
     sections: [
       {
         heading: 'Buy Your Dream Home in Northern Colorado',
@@ -1656,6 +1678,7 @@ const MONEY_PAGE_CONTENT = {
     ],
   },
   '/contact/': {
+    h1: 'Our doors are always open!',
     sections: [
       {
         heading: 'Get In Touch With Schwartz and Associates',
@@ -1672,6 +1695,7 @@ const MONEY_PAGE_CONTENT = {
     faqs: CONTACT_FAQS,
   },
   '/properties/': {
+    h1: 'Homes for Sale in Northern Colorado',
     sections: [
       {
         heading: 'Homes for Sale Across Northern Colorado',
@@ -1702,6 +1726,7 @@ const MONEY_PAGE_CONTENT = {
     faqs: PROPERTIES_FAQS,
   },
   '/mortgage-calculator/': {
+    h1: 'Mortgage Calculator',
     sections: [
       {
         heading: 'Estimate Your Northern Colorado Mortgage Payment',
@@ -1717,6 +1742,7 @@ const MONEY_PAGE_CONTENT = {
     },
   },
   '/about-us/': {
+    h1: 'About Us',
     sections: [
       {
         heading: 'Meet Adam and Mandi Schwartz',
@@ -1732,6 +1758,7 @@ const MONEY_PAGE_CONTENT = {
     },
   },
   '/': {
+    h1: 'Schwartz And Associates',
     sections: [
       {
         heading: 'Your Northern Colorado Real Estate Experts',
@@ -1754,6 +1781,7 @@ const MONEY_PAGE_CONTENT = {
     faqs: HOME_FAQS,
   },
   '/cash-home-buyers/': {
+    h1: 'Sell Your Northern Colorado Home<br /><span>For Cash — Or Invest With Confidence</span>',
     sections: [
       {
         heading: 'Sell Your Home Fast for Cash in Northern Colorado',
@@ -1777,6 +1805,7 @@ const MONEY_PAGE_CONTENT = {
     faqs: CASH_BUYER_FAQS,
   },
   '/luxury-real-estate/': {
+    h1: 'The $1M+ Market, Mastered.',
     sections: [
       {
         heading: 'The $1M+ Market, Mastered.',
@@ -1800,6 +1829,7 @@ const MONEY_PAGE_CONTENT = {
     faqs: LUXURY_FAQS,
   },
   '/assumable-mortgages/': {
+    h1: "Assumable Mortgages in Colorado — Keep the Seller's Lower Rate",
     sections: [
       {
         heading: 'Assumable Mortgages in Colorado — Keep the Seller\'s Lower Rate',
@@ -1843,6 +1873,7 @@ const MONEY_PAGE_CONTENT = {
     ],
   },
   '/veterans/': {
+    h1: 'Honoring Those Who Served — 0.5% Back to Every Veteran',
     sections: [
       {
         heading: 'Honoring Those Who Served — 0.5% Back to Every Veteran',
@@ -1875,6 +1906,7 @@ const MONEY_PAGE_CONTENT = {
     ],
   },
   '/sell-my-home-eaton/': {
+    h1: 'Sell Your Home in Eaton, Colorado',
     sections: [
       {
         heading: 'Sell Your Eaton Home With Local Weld County Expertise',
@@ -1906,6 +1938,7 @@ const MONEY_PAGE_CONTENT = {
     ],
   },
   '/northern-colorado-areas/': {
+    h1: 'Featured Areas',
     sections: [
       {
         heading: '27 Northern Colorado Communities, One Local Team',
@@ -2022,7 +2055,7 @@ function injectMoneyPageBody(html, route, content) {
   const bodyContent =
     `\n` +
     `    <div class="prerendered-money-content">\n` +
-    `      <h1>${pageTitle}</h1>\n` +
+    `      <h1>${content.h1 || pageTitle}</h1>\n` +
     `${sectionsHtml}` +
     `${faqHtml}` +
     `${testimonialsHtml}` +
@@ -2037,7 +2070,6 @@ function injectMoneyPageBody(html, route, content) {
 // ---------------------------------------------------------------------------
 
 function injectChfaBody(html, config) {
-  const title = escapeHtml(config.title || '');
   const tagline = escapeHtml(config.tagline || '');
   const introHtml = (config.introParagraphs || [])
     .map((p) => `      <p class="prerendered-intro">${escapeHtml(p)}</p>`)
@@ -2187,7 +2219,7 @@ function injectChfaBody(html, config) {
   const bodyContent =
     `\n` +
     `    <div class="prerendered-chfa-content">\n` +
-    `      <h1>${title}</h1>\n` +
+    `      <h1>${escapeHtml(CHFA_H1[config.slug] || config.title || '')}</h1>\n` +
     `      ${tagline ? `<p class="prerendered-tagline"><strong>${tagline}</strong></p>\n` : ''}` +
     `${introHtml}\n` +
     `${cashHtml}` +
@@ -2409,9 +2441,14 @@ function buildRouteSchemas(route) {
       serviceType: 'Assumable mortgage (VA/FHA loan assumption) guidance',
       provider: {
         '@type': 'RealEstateAgent',
+        '@id': BUSINESS.url,
         name: BUSINESS.name,
         url: BUSINESS.url,
         telephone: BUSINESS.telephone,
+        address: {
+          '@type': 'PostalAddress',
+          ...BUSINESS.address,
+        },
       },
       areaServed: `${assumableCity.city}, CO`,
     });
@@ -2641,7 +2678,7 @@ function injectEventsBody(html) {
   const bodyContent =
     `\n` +
     `    <div class="prerendered-events-content">\n` +
-    `      <h1>Northern Colorado Events & Happenings Calendar</h1>\n` +
+    `      <h1>Events &amp; Happenings Calendar</h1>\n` +
     `      <p>Browse festivals, farmers markets, rodeos, and community celebrations across 27 Front Range communities — Fort Collins, Loveland, Windsor, Greeley, Timnath, Wellington, Johnstown, Eaton, Milliken, La Salle, Mead, Longmont, Boulder, Berthoud, Firestone, Frederick, Evans, Severance, Niwot, Erie, Brighton, Estes Park, Red Feather Lakes, Fort Lupton, Lyons, Bellvue, and Carbon Valley. Filter the interactive calendar by month or city on this page. Data reviewed ${escapeHtml(reviewedLabel)}.</p>\n` +
     `      ${bodyHtml}\n` +
     `      ${longmontHtml}\n` +

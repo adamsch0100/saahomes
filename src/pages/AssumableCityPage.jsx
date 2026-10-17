@@ -236,9 +236,14 @@ export default function AssumableCityPage({ slug }) {
             serviceType: "Assumable mortgage (VA/FHA loan assumption) guidance",
             provider: {
               "@type": "RealEstateAgent",
+              "@id": BUSINESS.url,
               name: BUSINESS.name,
               url: BUSINESS.url,
               telephone: BUSINESS.telephone,
+              address: {
+                "@type": "PostalAddress",
+                ...BUSINESS.address,
+              },
             },
             areaServed: `${city.city}, CO`,
             audience: { "@type": "Audience", audienceType: "Home buyers in Fort Collins, Colorado" },

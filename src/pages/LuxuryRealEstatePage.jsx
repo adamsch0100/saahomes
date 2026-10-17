@@ -416,9 +416,14 @@ export default function LuxuryRealEstatePage() {
             url: "https://saahomes.com/luxury-real-estate/",
             provider: {
               "@type": "RealEstateAgent",
+              "@id": BUSINESS.url,
               name: BUSINESS.name,
               url: BUSINESS.url,
               telephone: BUSINESS.telephone,
+              address: {
+                "@type": "PostalAddress",
+                ...BUSINESS.address,
+              },
             },
             areaServed: [
               "Boulder, CO",

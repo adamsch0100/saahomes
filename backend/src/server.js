@@ -1,4 +1,5 @@
 import express from 'express';
+import compression from 'compression';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
@@ -226,6 +227,11 @@ export function renderBrokerageShell(indexHtml, brand, path = '/', opts = {}) {
 
 const app = express();
 app.set('trust proxy', 1);
+// Serve HTML, CSS, JS, JSON and SVG gzip-compressed when the client asks for
+// it (perf-text-compression). `compression` skips already-compressed types
+// (images, fonts) and streams, so the static pages and hashed assets get the
+// smaller body without changing a byte of what the route sends.
+app.use(compression());
 const PORT = process.env.PORT || 3000;
 const HOST = '0.0.0.0';
 const distPath = join(__dirname, '../../dist');
@@ -373,6 +379,12 @@ const canonicalRedirects = {
   // fell through to the SPA shell with a homepage canonical (soft-404).
   // 301 → the canonical RainDance neighborhood page.
   '/northern-colorado-areas/windsor/rain-dance-windsor': '/northern-colorado-areas/windsor/raindance/',
+  // Windsor seller path (fix-61141-39). /windsor/sell fell through to the SPA
+  // shell with a homepage canonical (soft-404) and ate the Windsor work.
+  // 301 → the canonical Windsor area page, which carries the seller CTA and
+  // the market-report ask.
+  '/windsor/sell': '/northern-colorado-areas/windsor/',
+  '/northern-colorado-areas/windsor/sell': '/northern-colorado-areas/windsor/',
 };
 
 // The platform's own marketing domain: its product page, its app pages and

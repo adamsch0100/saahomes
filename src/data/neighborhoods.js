@@ -9,6 +9,8 @@
  * school district boundaries, and MLS data. No fabricated numbers.
  */
 
+import { BUSINESS } from '../utils/seoConstants.js'
+
 export const neighborhoods = [
   // ═══════════════════════════════════════════════════════════════
   // FORT COLLINS
@@ -15202,9 +15204,14 @@ export function buildNeighborhoodSchemas(neighborhood) {
   schemas.push({
     '@context': 'https://schema.org',
     '@type': 'RealEstateAgent',
+    '@id': BUSINESS.url,
     name: 'Schwartz and Associates',
     url: 'https://saahomes.com',
     telephone: '(970) 999-1407',
+    address: {
+      '@type': 'PostalAddress',
+      ...BUSINESS.address,
+    },
     areaServed: {
       '@type': 'City',
       name: neighborhood.cityDisplay,

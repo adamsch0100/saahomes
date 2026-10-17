@@ -249,9 +249,14 @@ export default function AssumableMortgagesPage() {
             url: PAGE_URL,
             provider: {
               "@type": "RealEstateAgent",
+              "@id": BUSINESS.url,
               name: BUSINESS.name,
               url: BUSINESS.url,
               telephone: BUSINESS.telephone,
+              address: {
+                "@type": "PostalAddress",
+                ...BUSINESS.address,
+              },
             },
             areaServed: [
               "Fort Collins, CO",
