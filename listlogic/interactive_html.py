@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+from html import escape as _html_escape
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote as url_quote
@@ -41,6 +42,16 @@ def _clean(obj: Any) -> Any:
     if isinstance(obj, list):
         return [_clean(v) for v in obj]
     return obj
+
+
+def _meta_description(text: str) -> str:
+    """Keep a page description inside the 120-160 character band the audit checks."""
+    text = " ".join(text.split())
+    if len(text) < 120:
+        text = text.rstrip(".") + ". Compare comps, market odds and supply in one interactive report."
+    if len(text) > 160:
+        text = text[:160].rsplit(" ", 1)[0].rstrip(" ,.")
+    return text
 
 
 def render_interactive_html(report: dict) -> str:
@@ -751,12 +762,18 @@ def render_interactive_html(report: dict) -> str:
         "ledes": {"comps": lede_comps, "condition": lede_condition, "close": lede_close},
     }
 
+    meta_description = _meta_description(
+        f"Custom-fit comps and an interactive price-versus-odds view for {hero_title}. "
+        "See the pricing story agents use to win the listing."
+    )
+
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ListLogic · {area}</title>
+<meta name="description" content="{_html_escape(meta_description)}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
