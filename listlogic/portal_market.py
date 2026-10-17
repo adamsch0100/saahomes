@@ -46,7 +46,6 @@ REFRESH_CALL_BUDGET = 6          # pulse refresh — enough for new/cheaper/cuts
 SUBJECT_CALL_BUDGET = 2          # at most 2 Reef calls per subject autofill
 SUBJECT_LOOKUP_TIMEOUT_SEC = 12  # per Reef call; the UI falls back to manual entry instead of hanging
 ZESTIMATE_CALL_BUDGET = 2        # search + optional property_detail; never steals generate budget
-ZESTIMATE_FAILURE_TTL_SEC = 15 * 60  # stop re-hitting a dead upstream for the same address
 PREVIEW_CACHE_TTL_SEC = 15 * 60
 PORTAL_DISK_CACHE_TTL_SEC = 24 * 3600
 SUBJECT_CACHE_TTL_SEC = 7 * 24 * 3600
@@ -196,12 +195,6 @@ def reef_call(engine: str, action: str, params: dict | None = None, timeout: int
             raise ReefApiError(
                 "Market search API key was rejected — check REEF_API_KEY on the server.",
                 code="AUTH",
-                status=exc.code,
-            ) from exc
-        if 500 <= exc.code < 600:
-            raise ReefApiError(
-                f"Market search failed ({engine}/{action}, HTTP {exc.code}). Try again shortly or use Upload.",
-                code="UPSTREAM_UNAVAILABLE",
                 status=exc.code,
             ) from exc
         raise ReefApiError(
@@ -1567,44 +1560,6 @@ def _write_zestimate_cache(address: str, payload: dict) -> None:
         logger.info("Zestimate cache write failed")
 
 
-def _zestimate_failure_path(address: str) -> Path:
-    base = _zestimate_cache_path(address)
-    return base.with_name(base.name + ".fail")
-
-
-def _zestimate_failure_fresh(address: str) -> bool:
-    """True while a recent failed lookup should be left alone (no new Reef spend)."""
-    path = _zestimate_failure_path(address)
-    if not path.exists():
-        return False
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
-        return False
-    if not isinstance(data, dict):
-        return False
-    failed_at = float(data.get("failed_at") or 0)
-    return bool(failed_at) and (time.time() - failed_at) < ZESTIMATE_FAILURE_TTL_SEC
-
-
-def _write_zestimate_failure(address: str, reason: str) -> None:
-    try:
-        _ZESTIMATE_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-        _zestimate_failure_path(address).write_text(
-            json.dumps({"failed_at": time.time(), "reason": str(reason)[:200]}, indent=2),
-            encoding="utf-8",
-        )
-    except OSError:
-        logger.info("Zestimate failure cache write failed")
-
-
-def _clear_zestimate_failure(address: str) -> None:
-    try:
-        _zestimate_failure_path(address).unlink(missing_ok=True)
-    except OSError:
-        pass
-
-
 def lookup_zestimate(address: str) -> dict | None:
     """Best-effort Zillow Zestimate. Soft-fails; never spends generate's market budget."""
     q = (address or "").strip()
@@ -1614,8 +1569,6 @@ def lookup_zestimate(address: str) -> dict | None:
     if cached:
         logger.info("Zestimate cache hit for %s", q[:80])
         return cached
-    if _zestimate_failure_fresh(q):
-        return None
     if not _api_key():
         return None
     prev = get_reef_call_budget()
@@ -1656,11 +1609,9 @@ def lookup_zestimate(address: str) -> dict | None:
             "url": str(url) if url else None,
         }
         _write_zestimate_cache(q, result)
-        _clear_zestimate_failure(q)
         return result
     except Exception as exc:
         logger.info("Zestimate lookup soft-fail for %s: %s", q[:80], exc)
-        _write_zestimate_failure(q, exc)
         return None
     finally:
         set_reef_call_budget(prev)

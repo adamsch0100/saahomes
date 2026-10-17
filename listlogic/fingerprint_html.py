@@ -32,16 +32,6 @@ def _mapbox_token() -> str:
     return ""
 
 
-def _meta_description(text: str) -> str:
-    """Keep a page description inside the 120-160 character band the audit checks."""
-    text = " ".join(text.split())
-    if len(text) < 120:
-        text = text.rstrip(".") + ". Compare comps, market odds and supply in one interactive report."
-    if len(text) > 160:
-        text = text[:160].rsplit(" ", 1)[0].rstrip(" ,.")
-    return text
-
-
 def _notes_for_view(notes, *, agent: bool) -> list:
     rows = notes if isinstance(notes, list) else []
     out = []
@@ -73,11 +63,6 @@ def render_fingerprint_html(view: dict, *, agent: bool = False) -> str:
     digest = brief.get("digest") if isinstance(brief.get("digest"), dict) else (view.get("digest") or {})
     addr = brief.get("subject_address") or "This listing"
     title = f"Market Fingerprint · {_esc(addr)}"
-    meta_description = _meta_description(
-        f"Market Fingerprint for {addr}: what went pending, what listed under or over, "
-        "and how your price stacks up each week."
-    )
-    heading = f"Market Fingerprint for {_esc(addr)}"
     report_sub = {}
     if isinstance(view.get("report"), dict) and isinstance(view["report"].get("subject"), dict):
         report_sub = view["report"]["subject"]
@@ -120,8 +105,6 @@ def render_fingerprint_html(view: dict, *, agent: bool = False) -> str:
     }
     return _PAGE.format(
         title=title,
-        meta_description=_esc(meta_description),
-        heading=heading,
         agent_class="is-agent" if agent else "is-seller",
         data_json=_json_script(data),
     )
@@ -133,7 +116,6 @@ _PAGE = """<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{title}</title>
-<meta name="description" content="{meta_description}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.9.0/mapbox-gl.css" rel="stylesheet">
@@ -166,7 +148,6 @@ body.is-agent .wrap {{ max-width:1320px; display:grid; grid-template-columns:min
 .hero .copy {{ position:relative; z-index:1; padding:28px 24px 20px; width:100%; }}
 .hero .kicker {{ font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; color:#c9a227; font-weight:800; }}
 .hero h1 {{ font-family:Fraunces,Georgia,serif; font-size:clamp(1.45rem,3vw,2.1rem); margin:4px 0 8px; }}
-.server-h1 {{ font-family:Fraunces,Georgia,serif; font-size:clamp(1.45rem,3vw,2.1rem); margin:8px 0 12px; }}
 .hero .meta {{ color:#c8d2e0; font-size:.88rem; }}
 .live {{ display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:700; color:#8ee0c8; }}
 .live i {{ width:7px; height:7px; border-radius:50%; background:#3dd6a5; animation:pulse 1.6s ease-in-out infinite; }}
@@ -631,7 +612,7 @@ body.is-seller .console {{ display:none; }}
     <a id="switchStory" href="#">Open Live Story →</a>
   </div>
   <p class="photo-banner" id="photoBanner">Pulling listing photos for this similar set…</p>
-  <main id="main"><h1 class="server-h1">{heading}</h1></main>
+  <main id="main"></main>
   <aside class="console" id="console"></aside>
 </div>
 <div class="drawer" id="drawer" hidden>

@@ -20,10 +20,8 @@ from pathlib import Path
 from typing import List, Optional
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
-from fastapi.exception_handlers import http_exception_handler
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
-from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from subject import SUBJECT_2845_DEFAULTS, resolve_subject
@@ -149,13 +147,10 @@ def _clear_session_cookie(resp: Response) -> None:
     resp.delete_cookie(auth_service.SESSION_COOKIE, path="/")
 
 
-# IndexNow ownership files. The key is the filename, so each must be anonymously
+# IndexNow ownership file. The key is the filename, so it must be anonymously
 # readable at https://listlogic.homes/<file> for engines that verify keyLocation
 # (see scripts/submit-indexnow.mjs). Kept in step with public/<file>.
-INDEXNOW_KEY_FILENAMES = (
-    "dcb3e94b2a7bfa9d81019c0e5e6268c4.txt",
-    "18d7a225a4923b8d8b4ec43514a8e708.txt",
-)
+INDEXNOW_KEY_FILENAME = "dcb3e94b2a7bfa9d81019c0e5e6268c4.txt"
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
@@ -193,7 +188,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/favicon.ico",
         "/robots.txt",
         "/sitemap.xml",
-        *(f"/{name}" for name in INDEXNOW_KEY_FILENAMES),
+        f"/{INDEXNOW_KEY_FILENAME}",
         "/presentation.html",
         "/deck.html",
     }
@@ -294,11 +289,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         if not user:
             if path.startswith("/api/"):
                 return JSONResponse({"detail": "Sign in required", "reason": "auth"}, status_code=401)
-            # A URL that serves no page is unknown, not gated: answer 404 instead
-            # of bouncing a stranger to the sign-in page (a soft 404).
-            if _static_page_exists(path):
-                return RedirectResponse(url=f"/saas/login.html?next={path}", status_code=302)
-            return _not_found_response()
+            return RedirectResponse(url=f"/saas/login.html?next={path}", status_code=302)
         # App HTML is fine for any signed-in user; entitlement checked on generate
         response = await call_next(request)
         if request.method == "GET" and not path.startswith("/api/"):
@@ -333,132 +324,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 
-FAVICON_LINK = b'<link rel="icon" href="/favicon.ico" type="image/png">'
-
-
-class FaviconMiddleware(BaseHTTPMiddleware):
-    """Put the favicon <link> in every HTML <head>.
-
-    The marketing pages are static files and the run pages are generated, so
-    there is no single template to edit. Adding the tag to the response keeps
-    every page head in step, including pages generated after this change.
-    """
-
-    async def dispatch(self, request: Request, call_next):
-        response = await call_next(request)
-        content_type = (response.headers.get("content-type") or "").lower()
-        if (
-            request.method != "GET"
-            or request.headers.get("range")
-            or "text/html" not in content_type
-            or response.status_code == 304
-        ):
-            return response
-        body = b"".join([chunk async for chunk in response.body_iterator])
-        if b'rel="icon"' not in body and b"rel='icon'" not in body and b"</head>" in body:
-            body = body.replace(b"</head>", FAVICON_LINK + b"</head>", 1)
-        headers = {
-            key: value for key, value in response.headers.items() if key.lower() != "content-length"
-        }
-        return Response(
-            content=body,
-            status_code=response.status_code,
-            headers=headers,
-            media_type=response.media_type,
-            background=response.background,
-        )
-
-
-# --- 404 handling -----------------------------------------------------------
-# Unknown URLs used to fall through to the sign-in redirect (that answered 200,
-# a soft 404) or to FastAPI's bare JSON 404. Both now answer HTTP 404 with one
-# branded page so a lost visitor still sees the site and its main pages.
-STATIC_MOUNT_DIRS = {
-    "/saas": ROOT / "saas",
-    "/blog": ROOT / "blog",
-    "/glossary": ROOT / "glossary",
-    "/resources": ROOT / "resources",
-}
-
-NOT_FOUND_LINKS = (
-    ("/", "Home"),
-    ("/saas/pricing.html", "Pricing"),
-    ("/demo", "Live sample"),
-    ("/saas/faq.html", "FAQ"),
-    ("/blog/", "Guides"),
-    ("/glossary/", "Glossary"),
-    ("/resources/", "Resources"),
-)
-
-
-def _static_page_exists(path: str) -> bool:
-    """True when a path maps to a file (or directory index) under a static mount."""
-    for prefix, directory in STATIC_MOUNT_DIRS.items():
-        if path == prefix or path.startswith(prefix + "/"):
-            rel = path[len(prefix):].strip("/")
-            if not rel:
-                return (directory / "index.html").is_file()
-            if (directory / rel).is_file():
-                return True
-            return (directory / rel / "index.html").is_file()
-    return False
-
-
-def _not_found_html() -> str:
-    links = "".join(
-        '<a href="{href}" style="display:inline-block;padding:9px 16px;border:1px solid '
-        "var(--line);border-radius:999px;background:#fff;text-decoration:none;font-weight:600;"
-        'font-size:.9rem;color:var(--navy);">{label}</a>'.format(href=href, label=label)
-        for href, label in NOT_FOUND_LINKS
-    )
-    return (
-        "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n"
-        '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n'
-        "<title>Page not found · ListLogic</title>\n"
-        '<meta name="robots" content="noindex">\n'
-        '<meta name="theme-color" content="#0c3c6e">\n'
-        '<link rel="icon" href="/favicon.ico" type="image/png">\n'
-        '<link rel="preconnect" href="https://fonts.googleapis.com">\n'
-        '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
-        '<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700'
-        '&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">\n'
-        '<link rel="stylesheet" href="/saas/ll.css">\n'
-        "</head>\n"
-        '<body style="min-height:100vh;display:flex;align-items:center;justify-content:center;'
-        'padding:40px 20px;">\n'
-        '<main class="container narrow" style="text-align:center;">\n'
-        '<a class="ll-brand" href="/" style="justify-content:center;margin-bottom:24px;">'
-        '<img class="ll-brand-logo" src="/saas/listlogic-logo.png" alt="ListLogic" style="height:34px;">'
-        "</a>\n"
-        '<p class="serif" style="font-size:.8rem;letter-spacing:.16em;text-transform:uppercase;'
-        'color:var(--muted);">Error 404</p>\n'
-        '<h1 class="serif" style="font-size:clamp(1.8rem,4vw,2.6rem);margin:8px 0 14px;">'
-        "This page is not here</h1>\n"
-        '<p style="color:var(--muted);max-width:46ch;margin:0 auto 26px;">'
-        "The link may be broken or the page may have moved. Start again from one of these."
-        "</p>\n"
-        '<nav style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;">'
-        + links
-        + "</nav>\n"
-        "</main>\n</body>\n</html>\n"
-    )
-
-
-def _not_found_response() -> HTMLResponse:
-    return HTMLResponse(content=_not_found_html(), status_code=404)
-
-
-@app.exception_handler(StarletteHTTPException)
-async def _ll_http_exception_handler(request: Request, exc: StarletteHTTPException):
-    # Branded 404 for pages; API paths and every other status keep FastAPI's default.
-    if exc.status_code == 404 and not request.url.path.startswith("/api/"):
-        return _not_found_response()
-    return await http_exception_handler(request, exc)
-
-
 app.add_middleware(RateLimitMiddleware)
 app.add_middleware(AuthMiddleware)
-app.add_middleware(FaviconMiddleware)
 
 app.mount("/saas", StaticFiles(directory=str(ROOT / "saas"), html=True), name="saas")
 app.mount("/blog", StaticFiles(directory=str(ROOT / "blog"), html=True), name="blog")
@@ -1017,14 +884,9 @@ def sitemap():
     return FileResponse(ROOT / "sitemap.xml", media_type="application/xml")
 
 
-@app.get(f"/{INDEXNOW_KEY_FILENAMES[0]}")
+@app.get(f"/{INDEXNOW_KEY_FILENAME}")
 def indexnow_key():
-    return FileResponse(ROOT / INDEXNOW_KEY_FILENAMES[0], media_type="text/plain")
-
-
-@app.get(f"/{INDEXNOW_KEY_FILENAMES[1]}")
-def indexnow_key_secondary():
-    return FileResponse(ROOT / INDEXNOW_KEY_FILENAMES[1], media_type="text/plain")
+    return FileResponse(ROOT / INDEXNOW_KEY_FILENAME, media_type="text/plain")
 
 
 @app.get("/health")
@@ -2476,7 +2338,6 @@ def demo_deck(request: Request):
 
 _PRESENTATION_MARKERS = (
     "mapboxgl",
-    '<meta name="description"',
     "map-hover-tip",
     "mapKindVisible",
     "data-map-filters",
