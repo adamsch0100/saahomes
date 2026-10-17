@@ -2921,7 +2921,7 @@ def _clock_baseline(run_dir: Path, lock: dict | None) -> dict | None:
 
 
 def _ensure_active_baseline(run_dir: Path, report: dict, lock: dict, df=None) -> dict | None:
-    from core import _fingerprint_date, reconstruct_fingerprint_baseline
+    from core import FINGERPRINT_BASELINE_VERSION, _fingerprint_date, reconstruct_fingerprint_baseline
 
     active_at = _fingerprint_date((lock or {}).get("active_at"))
     if not active_at:
@@ -2932,6 +2932,7 @@ def _ensure_active_baseline(run_dir: Path, report: dict, lock: dict, df=None) ->
         isinstance(existing, dict)
         and str(existing.get("as_of") or "")[:10] == active_at
         and (existing.get("listings") or existing.get("ids"))
+        and (df is None or existing.get("version") == FINGERPRINT_BASELINE_VERSION)
     ):
         return existing
     generate = _read_json_file(run_dir / "fingerprint_baseline.json")
@@ -3057,17 +3058,33 @@ def _backfill_history_market_pulse(run_dir: Path, report: dict, lock: dict | Non
     return filled
 
 
+def _read_fingerprint_ledger(run_dir: Path) -> dict | None:
+    """Ledger with stale non-close Sold events dropped (see sanitize_fingerprint_ledger)."""
+    from core import sanitize_fingerprint_ledger
+
+    ledger = _read_json_file(run_dir / "fingerprint_ledger.json")
+    if not isinstance(ledger, dict):
+        return None
+    return sanitize_fingerprint_ledger(ledger)
+
+
 def _write_fingerprint_snapshot(run_dir: Path, report: dict, lock: dict, df, *, rotate_prev: bool = False) -> dict:
     from core import (
         append_fingerprint_history,
+        apply_subject_price,
         build_pulse_snapshot,
         digest_pulse,
+        fingerprint_clock,
+        fingerprint_list_price,
         fingerprint_sold_from_df,
         freeze_fingerprint_baseline,
         merge_fingerprint_ledger,
     )
 
-    locked_price = float(lock.get("locked_price") or 0)
+    subject = report.get("subject") if isinstance(report.get("subject"), dict) else {}
+    lock = apply_subject_price(lock, df, subject, as_of=datetime.now().strftime("%Y-%m-%d"))
+    # Over/under and rank compare against today's list price, including seller adjustments.
+    locked_price = fingerprint_list_price(lock)
     subject_sqft = float(lock.get("subject_sqft") or 0)
     photo_map = _load_photo_map(run_dir)
     gallery_map = _load_gallery_map(run_dir)
@@ -3077,6 +3094,7 @@ def _write_fingerprint_snapshot(run_dir: Path, report: dict, lock: dict, df, *, 
         subject_sqft,
         photo_map=photo_map,
         gallery_map=gallery_map,
+        subject=subject,
     )
     prev_path = run_dir / "pulse_snapshot.json"
     if rotate_prev and prev_path.exists():
@@ -3097,9 +3115,14 @@ def _write_fingerprint_snapshot(run_dir: Path, report: dict, lock: dict, df, *, 
     clock_base = _clock_baseline(run_dir, lock) or baseline
     baseline_ids = {str(x) for x in (baseline.get("ids") or []) if x}
     clock_ids = {str(x) for x in ((clock_base or {}).get("ids") or []) if x}
-    sold_map = fingerprint_sold_from_df(df, baseline_ids | clock_ids)
+    sold_map = fingerprint_sold_from_df(
+        df,
+        baseline_ids | clock_ids,
+        since=fingerprint_clock(lock).get("clock_at") or None,
+        living_area=subject_sqft,
+    )
     ledger = merge_fingerprint_ledger(
-        _read_json_file(run_dir / "fingerprint_ledger.json"),
+        _read_fingerprint_ledger(run_dir),
         snap,
         baseline=baseline,
         sold_map=sold_map,
@@ -3363,7 +3386,9 @@ def _seed_sample_fingerprint(run_dir: Path, report: dict) -> None:
         for row in snap.get("listings") or []:
             if isinstance(row, dict) and row.get("id"):
                 seen_ids.add(str(row["id"]))
-        sold_map = fingerprint_sold_from_df(df, seen_ids, as_of=day)
+        sold_map = fingerprint_sold_from_df(
+            df, seen_ids, as_of=day, since=week_days[0], living_area=subject_sqft
+        )
         ledger = merge_fingerprint_ledger(
             ledger,
             snap,
@@ -3733,7 +3758,7 @@ def _save_pulse_brief(
         (run_dir / "pulse.json").write_text(json.dumps(lock, indent=2), encoding="utf-8")
     report_url, share_url, fingerprint_url, agent_fp = _pulse_links(run_dir.name, report)
     baseline = _clock_baseline(run_dir, lock)
-    ledger = _read_json_file(run_dir / "fingerprint_ledger.json")
+    ledger = _read_fingerprint_ledger(run_dir)
     snap, ledger = _hydrate_fingerprint_photos(run_dir, snap, ledger)
     meta = report.get("meta") if isinstance(report.get("meta"), dict) else {}
     brief = build_pulse_brief(
@@ -3804,20 +3829,18 @@ def _rebuild_listing_flow(report: dict, df, locked_price: float, subject_sqft: f
     return flow
 
 
-def _ledger_listings_for_view(run_dir: Path, lock: dict | None) -> list:
-    from core import _pulse_card
+def _ledger_listings_for_view(run_dir: Path, lock: dict | None, subject: dict | None = None) -> list:
+    from core import _pulse_card, fingerprint_list_price, listing_is_subject
 
-    ledger = _read_json_file(run_dir / "fingerprint_ledger.json")
+    ledger = _read_fingerprint_ledger(run_dir)
     listings = (ledger or {}).get("listings") if isinstance(ledger, dict) else {}
     if not isinstance(listings, dict):
         return []
-    try:
-        locked = float((lock or {}).get("locked_price") or 0)
-    except (TypeError, ValueError):
-        locked = 0.0
+    locked = fingerprint_list_price(lock)
     out = []
     for rec in listings.values():
-        if not isinstance(rec, dict):
+        # The seller's own listing is not market motion around it.
+        if not isinstance(rec, dict) or listing_is_subject(rec, subject):
             continue
         card = _pulse_card(rec, locked)
         card["status_history"] = rec.get("status_history") if isinstance(rec.get("status_history"), list) else []
@@ -3843,7 +3866,7 @@ def _pulse_payload(run_dir: Path, report: dict | None = None) -> dict:
             lock,
             prev,
             baseline=_clock_baseline(run_dir, lock),
-            ledger=_read_json_file(run_dir / "fingerprint_ledger.json"),
+            ledger=_read_fingerprint_ledger(run_dir),
             subject=report.get("subject") if isinstance(report.get("subject"), dict) else {},
         )
         if lock
@@ -3862,7 +3885,11 @@ def _pulse_payload(run_dir: Path, report: dict | None = None) -> dict:
         "digest": digest,
         "brief": brief,
         "snapshot": snap,
-        "ledger_listings": _ledger_listings_for_view(run_dir, lock),
+        "ledger_listings": _ledger_listings_for_view(
+            run_dir,
+            lock,
+            report.get("subject") if isinstance(report.get("subject"), dict) else {},
+        ),
         "data_source": data_source,
         "can_search_refresh": bool(meta.get("portal_criteria")),
         "needs_upload": data_source == "mls_export" and not meta.get("portal_criteria"),
@@ -4129,7 +4156,7 @@ async def refresh_run_pulse(run_id: str, request: Request):
             lock,
             prev,
             baseline=_clock_baseline(run_dir, lock),
-            ledger=_read_json_file(run_dir / "fingerprint_ledger.json"),
+            ledger=_read_fingerprint_ledger(run_dir),
             subject=report.get("subject") if isinstance(report.get("subject"), dict) else {},
         ),
         "brief": brief,

@@ -404,11 +404,11 @@ body.is-seller .console {{ display:none; }}
 .board-pane-h {{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:10px; }}
 .board-pane-h span {{ font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; font-weight:800; color:#f0d060; }}
 .board-pane-h small {{ color:#9aabc0; font-size:.72rem; }}
-.board-grid {{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:0; }}
+.board-grid {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); row-gap:12px; }}
 .board-stat {{
   text-align:center; padding:8px 10px; border-right:1px solid rgba(255,255,255,.18);
 }}
-.board-stat:last-child {{ border-right:0; }}
+.board-stat:nth-child(3n) {{ border-right:0; }}
 .board-n {{ font-family:Fraunces,Georgia,serif; font-size:clamp(1.45rem, 2.6vw, 2rem); font-weight:700; line-height:1; }}
 .board-l {{ font-size:.7rem; letter-spacing:.04em; text-transform:uppercase; font-weight:800; color:#e8eef6; margin-top:7px; }}
 .board-h {{ font-size:.68rem; color:#9aabc0; margin-top:3px; line-height:1.35; }}
@@ -446,8 +446,6 @@ body.is-seller .console {{ display:none; }}
 .board-table .is-over {{ color:#8ee0c8; }}
 @media (max-width:800px) {{
   .board-panes, .board-totals {{ grid-template-columns:1fr; }}
-  .board-grid {{ grid-template-columns:repeat(3,minmax(0,1fr)); }}
-  .board-stat:nth-child(3n) {{ border-right:0; }}
 }}
 .strip {{ position:relative; height:72px; }}
 .strip .tick {{ cursor:pointer; }}
@@ -674,7 +672,7 @@ function cardHtml(c, extraTag) {{
 }}
 function byId(id) {{
   const b = DATA.brief || {{}};
-  const pools = [b.still_active, b.new_under, b.new_over, b.baseline, b.went_pending, b.went_sold, b.cheaper_active, b.price_cuts, b.gone, b.pending_now, b.position];
+  const pools = [b.still_active, b.new_under, b.new_over, b.baseline, b.went_pending, b.went_sold, b.cheaper_active, b.price_changes, b.price_cuts, b.gone, b.pending_now, b.position];
   for (const pool of pools) {{
     for (const c of (pool || [])) if (c && c.id === id) return c;
   }}
@@ -699,6 +697,15 @@ function listPrice() {{
   const d = DATA.digest || b.digest || {{}};
   const lock = DATA.lock || {{}};
   return Number(b.locked_price || lock.locked_price || d.locked_price || 0);
+}}
+function initialPrice() {{
+  const b = DATA.brief || {{}};
+  return Number(b.initial_price || (DATA.lock || {{}}).locked_price || 0);
+}}
+function initialNote() {{
+  const init = initialPrice();
+  const now = listPrice();
+  return init && now && init !== now ? ' (initial list ' + money(init) + ')' : '';
 }}
 function weekLabel(asOf) {{
   const raw = weekKey(asOf);
@@ -870,7 +877,7 @@ function sparklineHtml() {{
   }}
   return '<div class="spark"><svg viewBox="0 0 212 48" width="212" height="48" aria-hidden="true">' +
     poly(cheaper, '#0e7a6d') + poly(ranks, '#c9a227') + '</svg>' +
-    '<p class="cap">Teal: still cheaper than you · Gold: your rank among similar actives. Same initial list.</p></div>';
+    '<p class="cap">Teal: still cheaper than you · Gold: your rank among similar actives at your list price.</p></div>';
 }}
 function laneHome(c, extraClass) {{
   const pic = photoUrl(c)
@@ -1044,7 +1051,11 @@ function nowLanesHtml() {{
     'Similar homes asking more. Sitting next to them, yours looks like the better buy.',
     b.new_over
   );
-  const cuts = photoLane('Price cuts', 'Homes that dropped $1,000+ since the last look.', b.price_cuts);
+  const cuts = photoLane(
+    'Price changes',
+    'Similar homes that moved their price ' + sinceLabel() + ', newest first. Struck-through is where they started.',
+    (b.price_changes && b.price_changes.length) ? b.price_changes : b.price_cuts
+  );
   const body = walk + under + over + cuts;
   if (!body) return '';
   return '<div id="nowLanes"><div class="now-kicker"><div class="kicker">Right now</div>' +
@@ -1166,8 +1177,17 @@ function filtersHtml() {{
 }}
 function factsHtml(b, d) {{
   const chips = [];
-  const listPrice = b.locked_price || b.locked_price || ((DATA.lock || {{}}).locked_price);
-  chips.push(['Initial list', money(listPrice)]);
+  const listPrice = b.locked_price || ((DATA.lock || {{}}).locked_price);
+  const init = Number(b.initial_price || 0);
+  const moves = b.subject_price_changes || [];
+  if (init && Number(listPrice) !== init) {{
+    chips.push(['List price', money(listPrice)]);
+    chips.push(['Initial list', money(init)]);
+    const last = moves[moves.length - 1];
+    if (last && last.as_of) chips.push(['Price adjusted', prettyDate(last.as_of)]);
+  }} else {{
+    chips.push(['Initial list', money(listPrice)]);
+  }}
   if (DATA.active_at) chips.push(['Listed', prettyDate(DATA.active_at)]);
   if (b.days_active || b.days_active) chips.push(['Days on market', String(b.days_active || b.days_active)]);
   else if (b.days_locked || b.days_locked) chips.push(['Days since generate', String(b.days_locked || b.days_locked)]);
@@ -1338,8 +1358,9 @@ function weekMotion(asOf) {{
   const key = weekKey(asOf);
   const w = wins.find(function (x) {{ return (x.as_of || x.as_of) === key; }}) || wins[wins.length - 1];
   const locked = listPrice();
-  const out = {{ listed: 0, under: 0, over: 0, uc: 0, sold: 0 }};
+  const out = {{ listed: 0, under: 0, over: 0, uc: 0, sold: 0, cuts: 0 }};
   if (w) {{
+    out.cuts = priceCutsInWeek(w);
     homesForWeek(w.as_of || w.as_of).forEach(function (c) {{
       if (listDate(c) && inWeek(listDate(c), w.start, w.end, w.startExclusive)) {{
         out.listed += 1;
@@ -1359,7 +1380,8 @@ function weekMotion(asOf) {{
       else if (uc) out.uc += 1;
     }});
   }}
-  if (!out.listed && !out.uc && !out.sold) {{
+  if (!out.listed && !out.uc && !out.sold && !out.cuts) {{
+    out.cuts = Number(row.price_cuts_week || 0);
     out.listed = Number(row.listed_week || 0);
     out.under = Number(row.listed_under_week || 0);
     out.over = Number(row.listed_over_week || 0);
@@ -1367,6 +1389,22 @@ function weekMotion(asOf) {{
     out.sold = Number(row.sold_week || 0);
   }}
   return out;
+}}
+function priceCutsInWeek(w) {{
+  // A cut is a lower list price on a live listing than its previous live entry.
+  let n = 0;
+  (DATA.ledger_listings || []).forEach(function (c) {{
+    let prev = 0;
+    statusHistory(c).forEach(function (h) {{
+      const st = String(h.status || '').toLowerCase();
+      if (st === 'sold') return;
+      const p = Number(h.price || 0);
+      if (!p) return;
+      if (prev && prev - p >= 1000 && inWeek(h.as_of, w.start, w.end, w.startExclusive)) n += 1;
+      prev = p;
+    }});
+  }});
+  return n;
 }}
 function boardHtml() {{
   const d = DATA.digest || (DATA.brief || {{}}).digest || {{}};
@@ -1382,7 +1420,8 @@ function boardHtml() {{
     under: Number(d.listed_under_since != null ? d.listed_under_since : (d.new_under || 0)),
     over: Number(d.listed_over_since != null ? d.listed_over_since : (d.new_over || 0)),
     uc: Number(d.uc_since || 0),
-    sold: Number(d.sold_since || 0)
+    sold: Number(d.sold_since || 0),
+    cuts: Number(d.price_cuts_since || 0)
   }};
   function stats(pack) {{
     return '<div class="board-grid">' +
@@ -1391,19 +1430,20 @@ function boardHtml() {{
       '<div class="board-stat is-over"><div class="board-n">' + pack.over + '</div><div class="board-l">Over list</div><div class="board-h">New lists above ' + money(locked) + '</div></div>' +
       '<div class="board-stat"><div class="board-n">' + pack.uc + '</div><div class="board-l">Under contract</div><div class="board-h">Pending / backup / first-right</div></div>' +
       '<div class="board-stat"><div class="board-n">' + pack.sold + '</div><div class="board-l">Sold</div><div class="board-h">Closed in this set</div></div>' +
+      '<div class="board-stat"><div class="board-n">' + (pack.cuts || 0) + '</div><div class="board-l">Price cuts</div><div class="board-h">Lowered their price</div></div>' +
     '</div>';
   }}
   function totalCard(label, pack) {{
     const moved = Number(pack.listed || 0) + Number(pack.uc || 0) + Number(pack.sold || 0);
     return '<div class="board-total"><div class="k">' + esc(label) + '</div>' +
-      '<div class="v">' + moved + ' homes moved</div>' +
+      '<div class="v">' + moved + (moved === 1 ? ' home' : ' homes') + ' moved</div>' +
       '<div class="s">' + pack.listed + ' listed · ' + pack.under + ' under your price · ' + pack.over +
-      ' over your price · ' + pack.uc + ' under contract · ' + pack.sold + ' sold</div></div>';
+      ' over your price · ' + pack.uc + ' under contract · ' + pack.sold + ' sold · ' + (pack.cuts || 0) + ' price cuts</div></div>';
   }}
-  const sums = {{ listed: 0, under: 0, over: 0, uc: 0, sold: 0 }};
+  const sums = {{ listed: 0, under: 0, over: 0, uc: 0, sold: 0, cuts: 0 }};
   hist.forEach(function (w) {{
     const m = weekMotion(weekAsOf(w));
-    sums.listed += m.listed; sums.under += m.under; sums.over += m.over; sums.uc += m.uc; sums.sold += m.sold;
+    sums.listed += m.listed; sums.under += m.under; sums.over += m.over; sums.uc += m.uc; sums.sold += m.sold; sums.cuts += m.cuts;
   }});
   const rows = hist.map(function (w) {{
     const asOf = weekAsOf(w);
@@ -1415,13 +1455,14 @@ function boardHtml() {{
       '<td class="is-under">' + m.under + '</td>' +
       '<td class="is-over">' + m.over + '</td>' +
       '<td>' + m.uc + '</td>' +
-      '<td>' + m.sold + '</td></tr>';
+      '<td>' + m.sold + '</td>' +
+      '<td>' + m.cuts + '</td></tr>';
   }}).join('');
   return '<section class="board" id="marketBoard">' +
     '<div class="board-top"><div class="kicker">Market board</div>' +
     '<h2>What happened around your list</h2>' +
-    '<p class="sub">New similar listings split under and over your initial list of <b>' + money(locked) +
-    '</b>. Under contract groups pending, backup, and first-right. Tap a week to walk those homes.</p></div>' +
+    '<p class="sub">New similar listings split under and over your list price of <b>' + money(locked) +
+    '</b>' + initialNote() + '. Under contract groups pending, backup, and first-right. Sold counts closes by close date. Tap a week to walk those homes.</p></div>' +
     '<div class="board-panes">' +
       '<div class="board-pane"><div class="board-pane-h"><span>This week</span><small>' + weekLabel(current) + '</small></div>' + stats(week) + '</div>' +
       '<div class="board-pane"><div class="board-pane-h"><span>' + esc(sinceKind) + '</span><small>Running total</small></div>' + stats(since) + '</div>' +
@@ -1429,10 +1470,10 @@ function boardHtml() {{
     '<div class="board-totals">' + totalCard('This week', week) + totalCard(sinceKind, since) + '</div>' +
     (hist.length
       ? '<div class="board-table-wrap"><table class="board-table"><thead><tr>' +
-        '<th>Week</th><th>New</th><th>Under list</th><th>Over list</th><th>Under contract</th><th>Sold</th>' +
+        '<th>Week</th><th>New</th><th>Under list</th><th>Over list</th><th>Under contract</th><th>Sold</th><th>Price cuts</th>' +
         '</tr></thead><tbody>' + rows + '</tbody>' +
         '<tfoot><tr><td>Total</td><td>' + sums.listed + '</td><td class="is-under">' + sums.under +
-        '</td><td class="is-over">' + sums.over + '</td><td>' + sums.uc + '</td><td>' + sums.sold + '</td></tr></tfoot></table></div>'
+        '</td><td class="is-over">' + sums.over + '</td><td>' + sums.uc + '</td><td>' + sums.sold + '</td><td>' + sums.cuts + '</td></tr></tfoot></table></div>'
       : '') +
     '</section>';
 }}
@@ -1571,7 +1612,7 @@ function paintPhotos(photos, galleries) {{
     }}
   }}
   const b = DATA.brief || {{}};
-  [b.still_active, b.new_under, b.new_over, b.baseline, b.went_pending, b.went_sold, b.pending_now, b.price_cuts, b.cheaper_active, b.position].forEach(function (pool) {{
+  [b.still_active, b.new_under, b.new_over, b.baseline, b.went_pending, b.went_sold, b.pending_now, b.price_changes, b.price_cuts, b.cheaper_active, b.position].forEach(function (pool) {{
     (pool || []).forEach(apply);
   }});
   document.querySelectorAll('.lane-home[data-id], .lane-home[data-id]').forEach(function (el) {{
